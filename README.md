@@ -6,6 +6,14 @@ This project was generated using [Nx](https://nx.dev).
 
 🔎 **Nx is a set of Extensible Dev Tools for Monorepos.**
 
+It was bootstrapped using the following commands:
+
+```sh
+npx create-nx-workspace@latest classifai
+yarn add -D @nrwl/nest
+npx nx g @nrwl/nest:app api
+```
+
 ## Adding capabilities to your workspace
 
 Nx supports many plugins which add capabilities for developing different types of applications and different tools.
