@@ -1,0 +1,16 @@
+type User implements Node {
+  id: ID!
+
+  """
+  The user name displayed in the UI.
+  """
+  name: String!
+
+  """
+  The user's email address.
+  """
+  email: String!
+
+  # The `password` should never be passed to the client.
+  # Thus, we do not need to include it in our API.
+}
