@@ -12,6 +12,7 @@ It was bootstrapped using the following commands:
 npx create-nx-workspace@latest classifai
 yarn add -D @nrwl/nest
 npx nx g @nrwl/nest:app api
+yarn add @nestjs/graphql graphql-tools graphql apollo-server-express
 ```
 
 ## Adding capabilities to your workspace
