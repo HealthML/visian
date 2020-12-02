@@ -1,4 +1,5 @@
 import { Module } from "@nestjs/common";
+import { ConfigModule } from "@nestjs/config";
 import { GraphQLModule } from "@nestjs/graphql";
 import { GlobalIdScalar } from "nestjs-relay";
 
@@ -10,6 +11,9 @@ import { NodeResolver } from "./node.resolver";
 @Module({
   imports: [
     UsersModule,
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
     GraphQLModule.forRoot({
       autoSchemaFile: true,
       useGlobalPrefix: true,

@@ -13,6 +13,7 @@ npx create-nx-workspace@latest classifai
 yarn add -D @nrwl/nest
 npx nx g @nrwl/nest:app api
 yarn add @nestjs/graphql graphql-tools graphql apollo-server-express
+yarn add @nestjs/config nestjs-relay
 ```
 
 ## Adding capabilities to your workspace
