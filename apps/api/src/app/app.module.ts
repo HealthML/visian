@@ -1,25 +1,20 @@
 import { Module } from "@nestjs/common";
 import { GraphQLModule } from "@nestjs/graphql";
-import { join } from "path";
+import { GlobalIdScalar } from "nestjs-relay";
 
 import { UsersModule } from "../users/users.module";
 import { AppResolver } from "./app.resolver";
 import { AppService } from "./app.service";
+import { NodeResolver } from "./node.resolver";
 
 @Module({
   imports: [
     UsersModule,
     GraphQLModule.forRoot({
-      // TODO: Extract definitions to NX library
-      definitions: {
-        emitTypenameField: true,
-        path: join(process.cwd(), "graphql.schema.ts"),
-      },
-      installSubscriptionHandlers: true,
-      typePaths: ["./**/*.gql"],
+      autoSchemaFile: true,
       useGlobalPrefix: true,
     }),
   ],
-  providers: [AppService, AppResolver],
+  providers: [GlobalIdScalar, AppService, AppResolver, NodeResolver],
 })
 export class AppModule {}

@@ -14,7 +14,7 @@ describe("AppService", () => {
   });
 
   describe("getVersion", () => {
-    it('should return "Welcome to api!"', () => {
+    it("should return the current version", () => {
       expect(service.getVersion()).toEqual("0.0.1");
     });
   });

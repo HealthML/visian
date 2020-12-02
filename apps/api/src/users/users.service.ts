@@ -1,16 +1,19 @@
 import { Injectable } from "@nestjs/common";
 
-import { User } from "../../../../graphql.schema";
+import { UserDTO } from "./user.model";
 
 @Injectable()
 export class UsersService {
-  private readonly users: User[] = [];
+  private readonly users: UserDTO[] = [
+    { id: "1", email: "test@example.com", name: "Demo User" },
+    { id: "2", email: "test2@example.com", name: "Demo User 2" },
+  ];
 
-  findAll(): User[] {
+  findAll() {
     return this.users;
   }
 
-  findOneById(id: string): User | undefined {
+  findOneById(id: string) {
     return this.users.find((user) => user.id === id);
   }
 }
