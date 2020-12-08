@@ -5,7 +5,7 @@ import {
   ResolvedGlobalId,
 } from "nestjs-relay";
 
-import { User } from "../users/user.model";
+import { UserModel } from "../users/user.model";
 import { UsersService } from "../users/users.service";
 
 @Resolver(NodeInterface)
@@ -14,11 +14,14 @@ export class NodeResolver extends NodeFieldResolver {
     super();
   }
 
-  resolveNode(resolvedGlobalId: ResolvedGlobalId) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  async resolveNode(resolvedGlobalId: ResolvedGlobalId): Promise<any> {
     switch (resolvedGlobalId.type) {
       case "User": {
-        const user = this.usersService.findOneById(resolvedGlobalId.toString());
-        return user ? new User(user) : null;
+        const user = await this.usersService.findOneById(
+          resolvedGlobalId.toString(),
+        );
+        return user ? new UserModel(user) : null;
       }
       default:
         return null;

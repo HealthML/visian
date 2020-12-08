@@ -1,17 +1,17 @@
 import { Field } from "@nestjs/graphql";
 import { NodeInterface, NodeType } from "nestjs-relay";
 
-export interface UserDTO {
-  id: string;
-  email: string;
-  name: string;
-}
+import { UserEntity } from "./user.entity";
 
-@NodeType()
-export class User extends NodeInterface {
-  constructor(props: UserDTO) {
+@NodeType("User")
+export class UserModel extends NodeInterface {
+  constructor(props: UserEntity) {
     super();
-    Object.assign(this, props);
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    this.id = props.id as any;
+    this.email = props.email;
+    this.name = props.name;
   }
 
   @Field({ description: "The user's email address." })

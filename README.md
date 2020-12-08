@@ -14,6 +14,7 @@ yarn add -D @nrwl/nest
 npx nx g @nrwl/nest:app api
 yarn add @nestjs/graphql graphql-tools graphql apollo-server-express
 yarn add @nestjs/config nestjs-relay
+yarn add @nestjs/typeorm typeorm pg
 ```
 
 ## Adding capabilities to your workspace
