@@ -8,7 +8,7 @@ export class DeleteUserInput {
 }
 
 @ObjectType()
-export class DeleteUserOutput {
+export class DeleteUserPayload {
   constructor(id: ResolvedGlobalId) {
     this.id = id;
   }

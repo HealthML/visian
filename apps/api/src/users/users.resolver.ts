@@ -2,8 +2,8 @@ import { Logger, UseGuards } from "@nestjs/common";
 import { Args, Query, Resolver } from "@nestjs/graphql";
 import { GlobalIdFieldResolver, InputArg, RelayMutation } from "nestjs-relay";
 
-import { CreateUserInput, CreateUserOutput } from "./dto/create-user.dto";
-import { DeleteUserInput, DeleteUserOutput } from "./dto/delete-user.dto";
+import { CreateUserInput, CreateUserPayload } from "./dto/create-user.dto";
+import { DeleteUserInput, DeleteUserPayload } from "./dto/delete-user.dto";
 import { UserModel } from "./user.model";
 import { FindUsersGuard } from "./users.guards";
 import { UsersService } from "./users.service";
@@ -14,19 +14,17 @@ export class UsersResolver extends GlobalIdFieldResolver(UserModel) {
     super();
   }
 
-  // TODO: Somehow, nestjs-relay mutations seem to always resolve to `null` when returning promises
-  @RelayMutation(() => CreateUserOutput)
+  @RelayMutation(() => CreateUserPayload)
   async createUser(@InputArg(() => CreateUserInput) input: CreateUserInput) {
-    return new CreateUserOutput(
+    return new CreateUserPayload(
       new UserModel(await this.usersService.create(input)),
     );
   }
 
-  // TODO: Somehow, nestjs-relay mutations seem to always resolve to `null` when returning promises
-  @RelayMutation(() => DeleteUserOutput)
+  @RelayMutation(() => DeleteUserPayload)
   async deleteUser(@InputArg(() => DeleteUserInput) input: DeleteUserInput) {
     await this.usersService.remove(input.id.toString());
-    return new DeleteUserOutput(input.id);
+    return new DeleteUserPayload(input.id);
   }
 
   @Query(() => [UserModel], {

@@ -15,7 +15,7 @@ export class CreateUserInput {
 }
 
 @ObjectType()
-export class CreateUserOutput {
+export class CreateUserPayload {
   constructor(user: UserModel) {
     this.user = user;
   }

@@ -7470,10 +7470,9 @@ neo-async@^2.5.0, neo-async@^2.6.1:
   resolved "https://registry.yarnpkg.com/neo-async/-/neo-async-2.6.2.tgz#b4aafb93e3aeb2d8174ca53cf163ab7d7308305f"
   integrity sha512-Yd3UES5mWCSqR+qNT93S3UoYUkqAZ9lLg8a7g9rimsWmYGK8cVToA4/sF3RrshdyV3sAGMXVUmpMYOw+dLpOuw==
 
-nestjs-relay@^4.0.3:
+nestjs-relay@PaulBrachmann/nestjs-relay#dist:
   version "4.0.3"
-  resolved "https://registry.yarnpkg.com/nestjs-relay/-/nestjs-relay-4.0.3.tgz#4c4656e3177a01899d8eed5663582dec64cf0d8b"
-  integrity sha512-6Hdkr0yda9vOwmCftrMvOflbpOtzvzrBQ7UtFzJirkg4SA5on6DdmAcW/Xq9PgwwRbzf5eqddLd/9u2n8mcn4Q==
+  resolved "https://codeload.github.com/PaulBrachmann/nestjs-relay/tar.gz/0f82e4e64dad5b31ba54c155eb36ca0e12c69c79"
   dependencies:
     "@nestjs/common" "^7.2.0"
     "@nestjs/core" "^7.2.0"
