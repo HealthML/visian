@@ -17,6 +17,8 @@
     "affected:lint": "nx affected:lint",
     "affected:dep-graph": "nx affected:dep-graph",
     "affected": "nx affected",
+    "clean:volumes": "docker volume rm classifai_dbdata",
+    "down": "docker-compose down",
     "format": "nx format:write",
     "format:write": "nx format:write",
     "format:check": "nx format:check",
@@ -24,7 +26,7 @@
     "workspace-schematic": "nx workspace-schematic",
     "dep-graph": "nx dep-graph",
     "help": "nx help",
-    "up": "docker-compose -f docker-compose.yml -f docker-compose.dev.yml up"
+    "up": "docker-compose -f docker-compose.yml -f docker-compose.dev.yml up -d"
   },
   "private": true,
   "dependencies": {
