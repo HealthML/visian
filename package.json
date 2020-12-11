@@ -17,13 +17,16 @@
     "affected:lint": "nx affected:lint",
     "affected:dep-graph": "nx affected:dep-graph",
     "affected": "nx affected",
+    "clean:volumes": "docker volume rm classifai_dbdata",
+    "down": "docker-compose down",
     "format": "nx format:write",
     "format:write": "nx format:write",
     "format:check": "nx format:check",
     "update": "nx migrate latest",
     "workspace-schematic": "nx workspace-schematic",
     "dep-graph": "nx dep-graph",
-    "help": "nx help"
+    "help": "nx help",
+    "up": "docker-compose -f docker-compose.yml -f docker-compose.dev.yml up -d"
   },
   "private": true,
   "dependencies": {
@@ -32,13 +35,17 @@
     "@nestjs/core": "^7.0.0",
     "@nestjs/graphql": "^7.8.2",
     "@nestjs/platform-express": "^7.0.0",
+    "@nestjs/typeorm": "^7.1.5",
     "apollo-server-express": "^2.19.0",
     "graphql": "^15.4.0",
+    "graphql-relay": "^0.6.0",
     "graphql-tools": "^7.0.1",
-    "nestjs-relay": "^4.0.3",
+    "nestjs-relay": "PaulBrachmann/nestjs-relay#dist",
+    "pg": "^8.5.1",
     "reflect-metadata": "^0.1.13",
     "rxjs": "~6.5.5",
-    "tslib": "^2.0.0"
+    "tslib": "^2.0.0",
+    "typeorm": "^0.2.29"
   },
   "devDependencies": {
     "@nestjs/schematics": "^7.0.0",
@@ -51,6 +58,7 @@
     "@nrwl/nx-cloud": "latest",
     "@nrwl/tao": "10.4.4",
     "@nrwl/workspace": "10.4.4",
+    "@types/graphql-relay": "^0.6.0",
     "@types/jest": "26.0.8",
     "@types/node": "~8.9.4",
     "@typescript-eslint/eslint-plugin": "4.3.0",
