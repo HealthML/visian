@@ -1,10 +1,12 @@
 import { Field, InputType, ObjectType } from "@nestjs/graphql";
+import { IsEmail } from "class-validator";
 
 import { UserModel } from "../user.model";
 
 @InputType()
 export class CreateUserInput {
   @Field()
+  @IsEmail()
   email!: string;
 
   @Field()
