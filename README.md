@@ -18,10 +18,10 @@ yarn add @nestjs/typeorm typeorm pg
 
 yarn add -D @nrwl/react
 yarn nx g @nrwl/react:lib ui-shared
-yarn add -D @nrwl/storybook
+yarn add -D @nrwl/storybook @nrwl/cypress cypress
 yarn nx g @nrwl/react:storybook-configuration ui-shared --configureCypress --generateStories
 yarn remove @storybook/addon-knobs
-yarn add @storybook/addon-a11y @storybook/addon-actions @storybook/addon-controls @storybook/addon-toolbars @storybook/addon-viewport
+yarn add -D @storybook/addon-a11y @storybook/addon-actions @storybook/addon-controls @storybook/addon-toolbars @storybook/addon-viewport
 yarn add i18next react-i18next i18next-browser-languagedetector i18next-http-backend moment
 ```
 
