@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
 const TsconfigPathsPlugin = require("tsconfig-paths-webpack-plugin");
 const rootWebpackConfig = require("../../../.storybook/webpack.config");
 /**
@@ -28,50 +29,40 @@ module.exports = async ({ config, mode }) => {
     svgRuleIndex
   ].test = /\.(ico|jpg|jpeg|png|gif|eot|otf|webp|ttf|woff|woff2|cur|ani|pdf)(\?.*)?$/;
 
-  config.module.rules.push(
-    {
-      test: /\.(png|jpe?g|gif|webp)$/,
-      loader: require.resolve("url-loader"),
-      options: {
-        limit: 10000, // 10kB
-        name: "[name].[hash:7].[ext]",
-      },
-    },
-    {
-      test: /\.svg$/,
-      oneOf: [
-        // If coming from JS/TS file, then transform into React component using SVGR.
-        {
-          issuer: {
-            test: /\.[jt]sx?$/,
+  config.module.rules.push({
+    test: /\.svg$/,
+    oneOf: [
+      // If coming from JS/TS file, then transform into React component using SVGR.
+      {
+        issuer: {
+          test: /\.[jt]sx?$/,
+        },
+        use: [
+          "@svgr/webpack?-svgo,+titleProp,+ref![path]",
+          {
+            loader: require.resolve("url-loader"),
+            options: {
+              limit: 10000, // 10kB
+              name: "[name].[hash:7].[ext]",
+              esModule: false,
+            },
           },
-          use: [
-            "@svgr/webpack?-svgo,+titleProp,+ref![path]",
-            {
-              loader: require.resolve("url-loader"),
-              options: {
-                limit: 10000, // 10kB
-                name: "[name].[hash:7].[ext]",
-                esModule: false,
-              },
+        ],
+      },
+      // Fallback to plain URL loader.
+      {
+        use: [
+          {
+            loader: require.resolve("url-loader"),
+            options: {
+              limit: 10000, // 10kB
+              name: "[name].[hash:7].[ext]",
             },
-          ],
-        },
-        // Fallback to plain URL loader.
-        {
-          use: [
-            {
-              loader: require.resolve("url-loader"),
-              options: {
-                limit: 10000, // 10kB
-                name: "[name].[hash:7].[ext]",
-              },
-            },
-          ],
-        },
-      ],
-    },
-  );
+          },
+        ],
+      },
+    ],
+  });
 
   return config;
 };

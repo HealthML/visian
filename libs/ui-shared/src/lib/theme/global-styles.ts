@@ -1,0 +1,65 @@
+import { createGlobalStyle } from "styled-components";
+
+import helveticaNeueBold from "./fonts/HelveticaNeue-Bold.ttf";
+import helveticaNeueLight from "./fonts/HelveticaNeue-Light.ttf";
+import { ThemeProps } from "./theme";
+import { color, font, fontSize, fontWeight } from "./utils";
+
+export interface GlobalStylesProps {
+  backgroundColor?: string;
+  color?: string;
+}
+
+export const GlobalStyles = createGlobalStyle<GlobalStylesProps & ThemeProps>`
+  @font-face {
+    font-family: 'Helvetica Neue';
+    src: local('Helvetica Neue Bold'), url(${helveticaNeueBold});
+    font-weight: 700;
+    font-style: normal;
+  }
+  @font-face {
+    font-family: 'Helvetica Neue';
+    src: local('Helvetica Neue Light'), url(${helveticaNeueLight});
+    font-weight: 300;
+    font-style: normal;
+  }
+
+  html {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+  }
+  body {
+    background-color: ${color("background")};
+    color: ${color("text")};
+    font-family: ${font("default")};
+    font-size: ${fontSize("default")};
+    font-weight: ${fontWeight("default")};
+    height: 100%;
+    margin: 0;
+    max-height: 100%;
+    overflow: hidden;
+    padding: 0;
+  }
+  main,
+  p,
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  hr {
+    margin: 0;
+  }
+
+  input {
+    border-radius: 0;
+  }
+
+  #root {
+    height: 100%;
+    max-height: 100%;
+    overflow: hidden;
+  }
+`;

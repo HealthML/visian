@@ -1,11 +1,11 @@
-import React from "react";
 import { render } from "@testing-library/react";
+import React from "react";
 
-import UiShared from "./ui-shared";
+import Box from "./box";
 
-describe("UiShared", () => {
+describe("Box", () => {
   it("should render successfully", () => {
-    const { baseElement } = render(<UiShared />);
+    const { baseElement } = render(<Box />);
     expect(baseElement).toBeTruthy();
   });
 });
