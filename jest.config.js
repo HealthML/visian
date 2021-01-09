@@ -1,3 +1,7 @@
 module.exports = {
-  projects: ["<rootDir>/apps/api", "<rootDir>/libs/api-models"],
+  projects: [
+    "<rootDir>/apps/api",
+    "<rootDir>/libs/api-models",
+    "<rootDir>/libs/ui-shared",
+  ],
 };

@@ -50,6 +50,82 @@
           }
         }
       }
+    },
+    "ui-shared": {
+      "root": "libs/ui-shared",
+      "sourceRoot": "libs/ui-shared/src",
+      "projectType": "library",
+      "architect": {
+        "lint": {
+          "builder": "@nrwl/linter:eslint",
+          "options": {
+            "lintFilePatterns": ["libs/ui-shared/**/*.{ts,tsx,js,jsx}"]
+          }
+        },
+        "test": {
+          "builder": "@nrwl/jest:jest",
+          "options": {
+            "jestConfig": "libs/ui-shared/jest.config.js",
+            "passWithNoTests": true
+          }
+        },
+        "storybook": {
+          "builder": "@nrwl/storybook:storybook",
+          "options": {
+            "uiFramework": "@storybook/react",
+            "port": 4400,
+            "config": {
+              "configFolder": "libs/ui-shared/.storybook"
+            }
+          },
+          "configurations": {
+            "ci": {
+              "quiet": true
+            }
+          }
+        },
+        "build-storybook": {
+          "builder": "@nrwl/storybook:build",
+          "options": {
+            "uiFramework": "@storybook/react",
+            "outputPath": "dist/storybook/ui-shared",
+            "config": {
+              "configFolder": "libs/ui-shared/.storybook"
+            }
+          },
+          "configurations": {
+            "ci": {
+              "quiet": true
+            }
+          }
+        }
+      }
+    },
+    "ui-shared-e2e": {
+      "root": "apps/ui-shared-e2e",
+      "sourceRoot": "apps/ui-shared-e2e/src",
+      "projectType": "application",
+      "architect": {
+        "e2e": {
+          "builder": "@nrwl/cypress:cypress",
+          "options": {
+            "cypressConfig": "apps/ui-shared-e2e/cypress.json",
+            "tsConfig": "apps/ui-shared-e2e/tsconfig.e2e.json",
+            "devServerTarget": "ui-shared:storybook"
+          },
+          "configurations": {
+            "ci": {
+              "devServerTarget": "ui-shared:storybook:ci"
+            }
+          }
+        },
+        "lint": {
+          "builder": "@nrwl/linter:eslint",
+          "options": {
+            "lintFilePatterns": ["apps/ui-shared-e2e/**/*.{js,ts}"]
+          }
+        }
+      }
     }
   },
   "cli": {
