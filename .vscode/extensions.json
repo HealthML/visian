@@ -3,6 +3,7 @@
     "dbaeumer.vscode-eslint",
     "esbenp.prettier-vscode",
     "firsttris.vscode-jest-runner",
+    "jpoissonnier.vscode-styled-components",
     "rbbit.typescript-hero"
   ]
 }
