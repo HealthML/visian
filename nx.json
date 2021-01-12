@@ -28,6 +28,13 @@
   "projects": {
     "api": {
       "tags": []
+    },
+    "ui-shared": {
+      "tags": []
+    },
+    "ui-shared-e2e": {
+      "tags": [],
+      "implicitDependencies": ["ui-shared"]
     }
   }
 }

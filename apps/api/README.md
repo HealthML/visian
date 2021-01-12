@@ -1,4 +1,4 @@
-# Archimax API
+# Classifai API
 
 ## Examples
 

@@ -1,0 +1,70 @@
+import React from "react";
+import { useEffect } from "react";
+
+import {
+  i18n,
+  I18nProvider,
+  initI18n,
+  supportedLanguages,
+  useTranslation,
+} from "../src/lib/i18n";
+import { getTheme, GlobalStyles, ThemeProvider } from "../src/lib/theme";
+
+const resources = {
+  en: {
+    translation: {
+      __test: "Welcome to React and react-i18next!",
+      date: "{{date, YYYY-MM-DD}}",
+    },
+  },
+  de: {
+    translation: {
+      __test: "Willkommen zu React und react-i18next!",
+      date: "{{date, DD.MM.YYYY}}",
+      Folder: "Ordner",
+      File: "Datei",
+      Home: "Zu Hause",
+    },
+  },
+};
+initI18n(resources);
+
+export const globalTypes = {
+  theme: {
+    name: "Theme",
+    description: "Global theme for components",
+    defaultValue: "light",
+    toolbar: {
+      icon: "circlehollow",
+      items: ["light", "dark"],
+    },
+  },
+  language: {
+    name: "Language",
+    description: "The current language",
+    defaultValue: i18n.language,
+    toolbar: {
+      icon: "globe",
+      items: [...supportedLanguages, "cimode"],
+    },
+  },
+};
+
+const WithThemeProvider = (Story, context) => {
+  const { i18n } = useTranslation();
+  useEffect(() => {
+    i18n.changeLanguage(context.globals.language);
+  }, [context.globals.language, i18n]);
+
+  return (
+    <I18nProvider i18n={i18n}>
+      <ThemeProvider theme={getTheme(context.globals.theme)}>
+        <>
+          <GlobalStyles />
+          <Story />
+        </>
+      </ThemeProvider>
+    </I18nProvider>
+  );
+};
+export const decorators = [WithThemeProvider];
