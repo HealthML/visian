@@ -2,10 +2,12 @@ import { Logger, UseGuards } from "@nestjs/common";
 import { Args, Query, Resolver } from "@nestjs/graphql";
 import { GlobalIdFieldResolver, InputArg, RelayMutation } from "nestjs-relay";
 
+import { CurrentJwt } from "../auth/auth.decorators";
+import { GqlAuthGuard } from "../auth/auth.guards";
+import { JwtPayload } from "../auth/utils";
 import { CreateUserInput, CreateUserPayload } from "./dto/create-user.dto";
 import { DeleteUserInput, DeleteUserPayload } from "./dto/delete-user.dto";
 import { UserModel } from "./user.model";
-import { FindUsersGuard } from "./users.guards";
 import { UsersService } from "./users.service";
 
 @Resolver(() => UserModel)
@@ -31,7 +33,6 @@ export class UsersResolver extends GlobalIdFieldResolver(UserModel) {
     description: `Returns all users that match the given query string.\n
 If no query string is given, returns suggestions based on the user that is currently logged in.`,
   })
-  @UseGuards(FindUsersGuard)
   async findUsers(
     @Args("query", { nullable: true })
     query: string,
@@ -46,8 +47,11 @@ If no query string is given, returns suggestions based on the user that is curre
     name: "currentUser",
     nullable: true,
   })
-  async getCurrentUser(): Promise<UserModel | null> {
-    const user = await this.usersService.findOneById("1");
+  @UseGuards(GqlAuthGuard)
+  async getCurrentUser(
+    @CurrentJwt() payload: JwtPayload,
+  ): Promise<UserModel | null> {
+    const user = await this.usersService.findOneById(payload.sub);
     return user ? new UserModel(user) : null;
   }
 }
