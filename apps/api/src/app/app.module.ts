@@ -4,6 +4,7 @@ import { GraphQLModule } from "@nestjs/graphql";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { GlobalIdScalar } from "nestjs-relay";
 
+import { AuthModule } from "../auth/auth.module";
 import { UsersModule } from "../users/users.module";
 import { AppResolver } from "./app.resolver";
 import { AppService } from "./app.service";
@@ -11,6 +12,7 @@ import { NodeResolver } from "./node.resolver";
 
 @Module({
   imports: [
+    AuthModule,
     UsersModule,
     ConfigModule.forRoot({
       isGlobal: true,
