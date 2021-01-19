@@ -1,18 +1,29 @@
 import { MiddlewareConsumer, Module, NestModule } from "@nestjs/common";
 import { ConfigModule, ConfigService } from "@nestjs/config";
+import { InjectRepository, TypeOrmModule } from "@nestjs/typeorm";
+import { TypeormStore } from "connect-typeorm";
 import * as session from "express-session";
+import { Repository } from "typeorm";
 
 import { UsersModule } from "../users/users.module";
 import { AuthResolver } from "./auth.resolver";
 import { AuthService } from "./auth.service";
+import { SessionEntity } from "./session.entity";
 
 @Module({
-  imports: [UsersModule, ConfigModule],
+  imports: [
+    UsersModule,
+    TypeOrmModule.forFeature([SessionEntity]),
+    ConfigModule,
+  ],
   providers: [AuthService, AuthResolver],
 })
 export class AuthModule implements NestModule {
-  constructor(private configService: ConfigService) {}
-
+  constructor(
+    private configService: ConfigService,
+    @InjectRepository(SessionEntity)
+    private sessionRepository: Repository<SessionEntity>,
+  ) {}
   configure(consumer: MiddlewareConsumer) {
     consumer
       .apply(
@@ -24,6 +35,9 @@ export class AuthModule implements NestModule {
             sameSite: true,
             secure: this.configService.get("HTTPS", "true") !== "false",
           },
+          store: new TypeormStore({ cleanupLimit: 2 }).connect(
+            this.sessionRepository,
+          ),
         }),
       )
       .forRoutes("*");
