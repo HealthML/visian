@@ -1,27 +1,31 @@
-import { Module } from "@nestjs/common";
+import { MiddlewareConsumer, Module, NestModule } from "@nestjs/common";
 import { ConfigModule, ConfigService } from "@nestjs/config";
-import { JwtModule } from "@nestjs/jwt";
-import { PassportModule } from "@nestjs/passport";
+import * as session from "express-session";
 
 import { UsersModule } from "../users/users.module";
 import { AuthResolver } from "./auth.resolver";
 import { AuthService } from "./auth.service";
-import { JwtStrategy } from "./jwt.strategy";
-import { mockJwtSecret } from "./utils";
 
 @Module({
-  imports: [
-    UsersModule,
-    JwtModule.registerAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: async (configService: ConfigService) => ({
-        secret: configService.get("JWT_SECRET", mockJwtSecret),
-        signOptions: { expiresIn: "1h" },
-      }),
-    }),
-    PassportModule,
-  ],
-  providers: [AuthService, AuthResolver, JwtStrategy],
+  imports: [UsersModule, ConfigModule],
+  providers: [AuthService, AuthResolver],
 })
-export class AuthModule {}
+export class AuthModule implements NestModule {
+  constructor(private configService: ConfigService) {}
+
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply(
+        session({
+          secret: this.configService.get("COOKIE_SECRET", "tbpa#TSs$Fk9?!Sg"),
+          resave: false,
+          saveUninitialized: false,
+          cookie: {
+            sameSite: true,
+            secure: this.configService.get("HTTPS", "true") !== "false",
+          },
+        }),
+      )
+      .forRoutes("*");
+  }
+}

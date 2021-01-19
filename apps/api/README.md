@@ -3,6 +3,9 @@
 ## Examples
 
 ```gql
+# If you are testing in the GraphQL playground, click on the gear icon and change:
+# `"request.credentials": "omit",` to "request.credentials": "same-origin",
+
 mutation {
   createUser(
     input: { email: "test@example.com", name: "Test User", password: "secret" }
@@ -18,16 +21,19 @@ mutation {
     user {
       id
     }
-    token
   }
 }
-
-# Now, set HTTP headers to: { "Authorization": "Bearer <token>" }
 
 query {
   currentUser {
     id
     name
+  }
+}
+
+mutation {
+  logOut(input: {}) {
+    success
   }
 }
 ```
