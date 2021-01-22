@@ -8,18 +8,25 @@ const BaseButton: React.FC<ButtonProps> = ({
   onClick,
   children,
   ...rest
-}) => {
-  return (
-    <Sheet {...rest} onClick={onClick}>
-      {children}
-    </Sheet>
-  );
-};
+}) => (
+  <Sheet {...rest} onClick={onClick}>
+    {children}
+  </Sheet>
+);
 
 export const Button = styled(BaseButton)`
   cursor: pointer;
-  display: inline-block;
-  padding: 10px;
+  display: inline-flex;
+  padding: 10px; // Todo: get this from theme
+  height: 30px; // Todo: get this from theme
+`
+
+export const SquareButton = styled(Button)`
+  width: 30px; // Todo: get this from theme
+`
+
+export const CircularButton = styled(SquareButton)`
+  border-radius: 50%;
 `
 
 export default Button;
