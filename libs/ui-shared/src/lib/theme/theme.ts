@@ -10,6 +10,8 @@ const colorModes = {
     lightGray: "rgba(0,0,0,0.25)",
     veryLightGray: "rgba(0,0,0,0.1)",
     veryveryLightGray: "rgba(0,0,0,0.03)",
+    sheet: "rgba(226,226,226,0.6)",
+    sheetBorder: "rgba(0, 0, 0, 0.16)",
   },
   dark: {
     text: "#fff",
@@ -19,6 +21,8 @@ const colorModes = {
     gray: "rgba(255,255,255,0.5)",
     lightGray: "rgba(255,255,255,0.5)",
     veryLightGray: "rgba(255,255,255,0.1)",
+    sheet: "rgba(255,255,255,0.1)",
+    sheetBorder: "rgba(255, 255, 255, 0.16)",
   },
 };
 
@@ -58,7 +62,9 @@ export const theme = {
     bigDesktopUp: "@media (min-width: 1800px)",
     print: "@media print",
   },
-  radii: {},
+  radii: {
+    default: "10px",
+  },
   shadows: {},
   sizes: {
     icon: "24px",
