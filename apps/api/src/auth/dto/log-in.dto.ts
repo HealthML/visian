@@ -13,13 +13,9 @@ export class LogInInput {
 
 @ObjectType()
 export class LogInPayload {
-  constructor(token: string, user: UserModel) {
-    this.token = token;
+  constructor(user: UserModel) {
     this.user = user;
   }
-
-  @Field()
-  token: string;
 
   @Field()
   user: UserModel;

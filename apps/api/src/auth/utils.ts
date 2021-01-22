@@ -1,10 +1,9 @@
 import { argon2id, hash, verify } from "argon2";
 
-export interface JwtPayload {
+export interface SessionPayload {
+  /** The subject (user) id. */
   sub: string;
 }
-
-export const mockJwtSecret = "tbpa#TSs$Fk9?!Sg";
 
 export const hashPassword = (password: string) =>
   hash(password, { type: argon2id });

@@ -2,9 +2,9 @@ import { Logger, UseGuards } from "@nestjs/common";
 import { Args, Query, Resolver } from "@nestjs/graphql";
 import { GlobalIdFieldResolver, InputArg, RelayMutation } from "nestjs-relay";
 
-import { CurrentJwt } from "../auth/auth.decorators";
+import { Session } from "../auth/auth.decorators";
 import { GqlAuthGuard } from "../auth/auth.guards";
-import { JwtPayload } from "../auth/utils";
+import type { SessionPayload } from "../auth/utils";
 import { CreateUserInput, CreateUserPayload } from "./dto/create-user.dto";
 import { DeleteUserInput, DeleteUserPayload } from "./dto/delete-user.dto";
 import { UserModel } from "./user.model";
@@ -49,9 +49,9 @@ If no query string is given, returns suggestions based on the user that is curre
   })
   @UseGuards(GqlAuthGuard)
   async getCurrentUser(
-    @CurrentJwt() payload: JwtPayload,
+    @Session() session: SessionPayload,
   ): Promise<UserModel | null> {
-    const user = await this.usersService.findOneById(payload.sub);
+    const user = await this.usersService.findOneById(session.sub);
     return user ? new UserModel(user) : null;
   }
 }
