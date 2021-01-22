@@ -7,7 +7,7 @@ import { ButtonProps } from "./button.props";
 export default {
   component: Button,
   title: "Button",
-}
+};
 
 export const primary = (args: ButtonProps) => {
   return (
@@ -41,4 +41,3 @@ export const circular = (args: ButtonProps) => {
 circular.args = {
   onClick: () => console.log("Button pressed"),
 };
-
