@@ -10,6 +10,8 @@ It was bootstrapped using the following commands:
 
 ```sh
 npx create-nx-workspace@latest classifai
+yarn add -D husky lint-staged
+
 yarn add -D @nrwl/nest
 npx nx g @nrwl/nest:app api
 yarn add @nestjs/graphql graphql-tools graphql apollo-server-express
