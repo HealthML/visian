@@ -3,7 +3,7 @@ import styled from "styled-components";
 
 import { BoxProps } from "./box.props";
 
-export const Box: React.FC<BoxProps> = (props) => <div {...props} />;
+export const Box: React.FC<BoxProps> = styled.div``;
 
 export const FlexColumn: React.FC<BoxProps> = styled(Box)`
   display: flex;

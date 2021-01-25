@@ -1,3 +1,5 @@
 import React from "react";
 
-export type BoxProps = React.HTMLAttributes<HTMLDivElement>;
+import { AsProps } from "../types";
+
+export type BoxProps = React.HTMLAttributes<HTMLDivElement> & AsProps;
