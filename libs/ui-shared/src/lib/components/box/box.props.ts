@@ -1,10 +1,5 @@
 import React from "react";
 
-export interface BoxProps extends React.HTMLAttributes<HTMLDivElement> {
-  /**
-   * If provided, switches out the rendered HTML tag.
-   *
-   * @see https://styled-components.com/docs/api#as-polymorphic-prop
-   */
-  as?: never;
-}
+import { AsProps } from "../types";
+
+export type BoxProps = React.HTMLAttributes<HTMLDivElement> & AsProps;

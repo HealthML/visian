@@ -1,16 +1,13 @@
 import React from "react";
 
+import { I18nData } from "../types";
+
 export interface TextInputProps extends React.HTMLAttributes<HTMLInputElement> {
   /**
    * Additional data, passed to the translation function when `placeholderTx`
    * is being used.
    */
-  placeholderData?: {
-    context?: string;
-    count?: number;
-    date?: Date;
-    [key: string]: unknown;
-  };
+  placeholderData?: I18nData;
 
   /** The raw placeholder text (is preceeded by `placeholderTx`). */
   placeholder?: string;

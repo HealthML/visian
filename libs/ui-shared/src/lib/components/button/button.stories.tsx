@@ -14,19 +14,19 @@ export const primary = (args: ButtonProps) => {
   return <Button {...args} />;
 };
 primary.args = {
-  children: [<Text>This is a button!</Text>],
+  text: "Click Me",
 };
 
 export const square = (args: ButtonProps) => {
   return <SquareButton {...args} />;
 };
 square.args = {
-  children: [<Text>S</Text>],
+  text: "S",
 };
 
 export const circular = (args: ButtonProps) => {
   return <CircularButton {...args} />;
 };
 circular.args = {
-  children: [<Text>C</Text>],
+  text: "C",
 };

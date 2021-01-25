@@ -30,6 +30,7 @@ const TextInput: React.FC<TextInputProps> = ({
   placeholderData,
   placeholder: placeholderText,
   placeholderTx,
+  onChange,
   onEdit,
   ...rest
 }) => {
@@ -38,17 +39,18 @@ const TextInput: React.FC<TextInputProps> = ({
     ? t(placeholderTx, placeholderData)
     : placeholderText;
 
-  const onChange = useCallback(
+  const handleChange = useCallback(
     (event: FormEvent<HTMLInputElement>) => {
+      if (onChange) onChange(event);
       if (onEdit) {
         onEdit((event.target as HTMLInputElement).value);
       }
     },
-    [onEdit],
+    [onChange, onEdit],
   );
 
   return (
-    <StyledInput {...rest} onChange={onChange} placeholder={placeholder} />
+    <StyledInput {...rest} onChange={handleChange} placeholder={placeholder} />
   );
 };
 
