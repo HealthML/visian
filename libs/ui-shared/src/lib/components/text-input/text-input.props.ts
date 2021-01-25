@@ -13,9 +13,9 @@ export interface TextInputProps extends React.HTMLAttributes<HTMLInputElement> {
   };
 
   /** The raw placeholder text (is preceeded by `placeholderTx`). */
-  placeholderText?: string;
+  placeholder?: string;
 
-  /** The key for i18n translation (preceeds `placeholderText`). */
+  /** The key for i18n translation (preceeds `placeholder`). */
   placeholderTx?: string;
 
   /** Callback for value changes. */

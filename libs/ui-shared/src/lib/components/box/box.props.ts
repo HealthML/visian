@@ -7,5 +7,4 @@ export interface BoxProps extends React.HTMLAttributes<HTMLDivElement> {
    * @see https://styled-components.com/docs/api#as-polymorphic-prop
    */
   as?: never;
-
 }

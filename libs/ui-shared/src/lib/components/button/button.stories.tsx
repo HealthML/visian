@@ -11,28 +11,22 @@ export default {
 };
 
 export const primary = (args: ButtonProps) => {
-  return (
-    <Button {...args} />
-  );
+  return <Button {...args} />;
 };
 primary.args = {
   children: [<Text>This is a button!</Text>],
-}
+};
 
 export const square = (args: ButtonProps) => {
-  return (
-    <SquareButton {...args} />
-  );
+  return <SquareButton {...args} />;
 };
 square.args = {
   children: [<Text>S</Text>],
-}
+};
 
 export const circular = (args: ButtonProps) => {
-  return (
-    <CircularButton {...args} />
-  );
+  return <CircularButton {...args} />;
 };
 circular.args = {
   children: [<Text>C</Text>],
-}
+};

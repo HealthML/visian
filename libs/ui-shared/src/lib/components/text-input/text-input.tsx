@@ -2,8 +2,8 @@ import React, { FormEvent, useCallback } from "react";
 import styled from "styled-components";
 
 import { useTranslation } from "../../i18n";
-import { color, radius, space } from "../../theme";
-import { TextInputProps } from "./textInput.props";
+import { color, font, fontSize, radius, space } from "../../theme";
+import { TextInputProps } from "./text-input.props";
 
 const StyledInput = styled.input`
   border: none;
@@ -13,11 +13,22 @@ const StyledInput = styled.input`
   border-radius: ${radius("default")};
   color: ${color("text")};
   display: inline-flex;
+  font-family: ${font("default")};
+  font-size: ${fontSize("default")};
+
+  &::placeholder {
+    color: ${color("placeholder")};
+  }
+
+  &:focus {
+    border-color: ${color("text")};
+    outline: none;
+  }
 `;
 
 const TextInput: React.FC<TextInputProps> = ({
   placeholderData,
-  placeholderText,
+  placeholder: placeholderText,
   placeholderTx,
   onEdit,
   ...rest
@@ -29,7 +40,7 @@ const TextInput: React.FC<TextInputProps> = ({
 
   const onChange = useCallback(
     (event: FormEvent<HTMLInputElement>) => {
-      if(onEdit) {
+      if (onEdit) {
         onEdit((event.target as HTMLInputElement).value);
       }
     },
@@ -37,11 +48,7 @@ const TextInput: React.FC<TextInputProps> = ({
   );
 
   return (
-    <StyledInput
-      {...rest}
-      onChange={onChange}
-      placeholder={placeholder}
-    />
+    <StyledInput {...rest} onChange={onChange} placeholder={placeholder} />
   );
 };
 

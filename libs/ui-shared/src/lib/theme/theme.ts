@@ -9,9 +9,10 @@ const colorModes = {
     gray: "rgba(0,0,0,0.5)",
     lightGray: "rgba(0,0,0,0.25)",
     veryLightGray: "rgba(0,0,0,0.1)",
-    veryveryLightGray: "rgba(0,0,0,0.03)",
+    veryVeryLightGray: "rgba(0,0,0,0.03)",
     sheet: "rgba(226,226,226,0.6)",
     sheetBorder: "rgba(0, 0, 0, 0.16)",
+    placeholder: "rgba(0, 0, 0, 0.2)",
   },
   dark: {
     text: "#fff",
@@ -23,6 +24,7 @@ const colorModes = {
     veryLightGray: "rgba(255,255,255,0.1)",
     sheet: "rgba(255,255,255,0.1)",
     sheetBorder: "rgba(255, 255, 255, 0.16)",
+    placeholder: "rgba(255, 255, 255, 0.2)",
   },
 };
 
@@ -71,13 +73,13 @@ export const theme = {
     iconLarge: "30px",
     maxContentWidth: "940px",
     recordImage: "220px",
-    buttonHeight: "42px",
+    buttonHeight: "46px",
   },
   space: {
     iconMargin: "12px",
     listIndentation: "16px",
-    buttonPadding: "10px",
-    inputPadding: "10px",
+    buttonPadding: "12px 40px",
+    inputPadding: "12px 22px",
   },
   zIndices: {},
 };

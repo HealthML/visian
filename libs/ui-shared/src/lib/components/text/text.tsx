@@ -11,7 +11,6 @@ const StyledSpan = styled.span<TextProps>`
   font-size: ${fontSize("default")};
 `;
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
 export const Text: React.FC<TextProps> = ({
   as,
   children,
@@ -23,12 +22,11 @@ export const Text: React.FC<TextProps> = ({
   const { t } = useTranslation();
 
   return (
-    <StyledSpan {...rest} as={as as any}>
+    <StyledSpan {...rest} as={as as never}>
       {tx ? t(tx, data) : text || children}
     </StyledSpan>
   );
 };
-/* eslint-enable */
 
 export const Subtitle: React.FC<Omit<
   TextProps,

@@ -14,7 +14,7 @@ export const sheetMixin = (props: ThemeProps) => css`
 
 // Placeholder for actual implementation.
 export const Sheet: React.FC<SheetProps> = styled(
-  ({ as, ...rest }: SheetProps) => <FlexColumn {...rest} as={as as never} />
+  ({ as, ...rest }: SheetProps) => <FlexColumn {...rest} as={as as never} />,
 )`
   ${sheetMixin}
 

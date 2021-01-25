@@ -3,10 +3,10 @@ import styled from "styled-components";
 
 import { ButtonProps } from ".";
 import { Sheet } from "..";
-import { size, space } from "../../theme";
+import { color, size, space } from "../../theme";
 
 const BaseButton: React.FC<ButtonProps> = ({ children, ...rest }) => (
-  <Sheet {...rest} as="button" >
+  <Sheet {...rest} as="button">
     {children}
   </Sheet>
 );
@@ -16,6 +16,11 @@ export const Button = styled(BaseButton)`
   display: inline-flex;
   padding: ${space("buttonPadding")};
   height: ${size("buttonHeight")};
+
+  &:focus {
+    border-color: ${color("text")};
+    outline: none;
+  }
 `;
 
 export const SquareButton = styled(Button)`
