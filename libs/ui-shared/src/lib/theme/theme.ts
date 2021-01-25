@@ -71,7 +71,7 @@ export const theme = {
     iconLarge: "30px",
     maxContentWidth: "940px",
     recordImage: "220px",
-    buttonHeight: "30px",
+    buttonHeight: "42px",
   },
   space: {
     iconMargin: "12px",

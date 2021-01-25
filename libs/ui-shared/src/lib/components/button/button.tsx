@@ -6,7 +6,7 @@ import { Sheet } from "..";
 import { size, space } from "../../theme";
 
 const BaseButton: React.FC<ButtonProps> = ({ children, ...rest }) => (
-  <Sheet {...rest}>
+  <Sheet {...rest} as="button" >
     {children}
   </Sheet>
 );

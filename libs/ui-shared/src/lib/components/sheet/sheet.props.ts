@@ -1,3 +1,10 @@
 import React from "react";
 
-export type SheetProps = React.HTMLAttributes<HTMLDivElement>;
+export interface SheetProps extends React.HTMLAttributes<HTMLDivElement> {
+  /**
+   * If provided, switches out the rendered HTML tag.
+   *
+   * @see https://styled-components.com/docs/api#as-polymorphic-prop
+   */
+  as?: string;
+}
