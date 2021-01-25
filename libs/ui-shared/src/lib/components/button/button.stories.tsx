@@ -7,37 +7,32 @@ import { ButtonProps } from "./button.props";
 export default {
   component: Button,
   title: "Button",
+  argTypes: { onClick: { action: "Button clicked!" } },
 };
 
 export const primary = (args: ButtonProps) => {
   return (
-    <Button {...args}>
-      <Text>This is a button!</Text>
-    </Button>
+    <Button {...args} />
   );
 };
 primary.args = {
-  onClick: () => console.log("Button pressed"),
-};
+  children: [<Text>This is a button!</Text>],
+}
 
 export const square = (args: ButtonProps) => {
   return (
-    <SquareButton {...args}>
-      <Text>S</Text>
-    </SquareButton>
+    <SquareButton {...args} />
   );
 };
 square.args = {
-  onClick: () => console.log("Button pressed"),
-};
+  children: [<Text>S</Text>],
+}
 
 export const circular = (args: ButtonProps) => {
   return (
-    <CircularButton {...args}>
-      <Text>C</Text>
-    </CircularButton>
+    <CircularButton {...args} />
   );
 };
 circular.args = {
-  onClick: () => console.log("Button pressed"),
-};
+  children: [<Text>C</Text>],
+}

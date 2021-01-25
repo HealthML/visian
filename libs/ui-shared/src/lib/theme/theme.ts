@@ -71,10 +71,12 @@ export const theme = {
     iconLarge: "30px",
     maxContentWidth: "940px",
     recordImage: "220px",
+    buttonHeight: "30px",
   },
   space: {
     iconMargin: "12px",
     listIndentation: "16px",
+    buttonPadding: "10px",
   },
   zIndices: {},
 };

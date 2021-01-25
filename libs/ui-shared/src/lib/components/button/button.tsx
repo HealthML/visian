@@ -1,11 +1,12 @@
 import React from "react";
 import styled from "styled-components";
 
-import { Sheet } from "../sheet";
-import { ButtonProps } from "./button.props";
+import { ButtonProps } from ".";
+import { Sheet } from "..";
+import { size, space } from "../../theme";
 
-const BaseButton: React.FC<ButtonProps> = ({ onClick, children, ...rest }) => (
-  <Sheet {...rest} onClick={onClick}>
+const BaseButton: React.FC<ButtonProps> = ({ children, ...rest }) => (
+  <Sheet {...rest}>
     {children}
   </Sheet>
 );
@@ -13,12 +14,12 @@ const BaseButton: React.FC<ButtonProps> = ({ onClick, children, ...rest }) => (
 export const Button = styled(BaseButton)`
   cursor: pointer;
   display: inline-flex;
-  padding: 10px; // Todo: get this from theme
-  height: 30px; // Todo: get this from theme
+  padding: ${space("buttonPadding")};
+  height: ${size("buttonHeight")};
 `;
 
 export const SquareButton = styled(Button)`
-  width: 30px; // Todo: get this from theme
+  width: ${size("buttonHeight")};
 `;
 
 export const CircularButton = styled(SquareButton)`
