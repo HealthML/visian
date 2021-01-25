@@ -77,6 +77,7 @@ export const theme = {
     iconMargin: "12px",
     listIndentation: "16px",
     buttonPadding: "10px",
+    inputPadding: "10px",
   },
   zIndices: {},
 };
