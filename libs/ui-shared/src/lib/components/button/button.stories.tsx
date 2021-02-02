@@ -1,6 +1,5 @@
 import React from "react";
 
-import { Text } from "../text";
 import Button, { CircularButton, SquareButton } from "./button";
 import { ButtonProps } from "./button.props";
 
