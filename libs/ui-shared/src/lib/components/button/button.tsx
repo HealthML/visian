@@ -1,9 +1,8 @@
 import React from "react";
 import styled from "styled-components";
-
 import { ButtonProps } from ".";
-import { Sheet } from "..";
 import { color, fontWeight, size, space } from "../../theme";
+import { Sheet } from "../sheet";
 import { Text } from "../text";
 
 const StyledText = styled(Text)`

@@ -28,5 +28,8 @@ export const size = lookup("sizes");
 export const space = lookup("space");
 export const zIndex = lookup("zIndices");
 
-export const parseNumberFromMetric = (value: string) =>
-  parseFloat(value.match(/\d+(\.\d+)?/)[0]);
+export const parseNumberFromMetric = (value: string) => {
+  const match = value.match(/\d+(\.\d+)?/);
+  if (!match) throw new Error("Not a metric value");
+  return parseFloat(match[0]);
+};
