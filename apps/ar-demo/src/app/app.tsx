@@ -2,6 +2,7 @@ import {
   ColorMode,
   getTheme,
   GlobalStyles,
+  Screen,
   Text,
   ThemeProvider,
 } from "@classifai/ui-shared";
@@ -17,7 +18,9 @@ export function App() {
       <GlobalStyles />
       <Switch>
         <Route path="/">
-          <Text text="Replace me!" />
+          <Screen title="Visian AR Demo">
+            <Text text="Replace me!" />
+          </Screen>
         </Route>
       </Switch>
     </ThemeProvider>
