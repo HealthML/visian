@@ -154,6 +154,8 @@ export default class Renderer implements IDisposable {
 
       this.spriteHandler.updateRenderOrder();
       this.renderer.setAnimationLoop(this.animate);
+
+      this.updateUI();
     });
   }
 

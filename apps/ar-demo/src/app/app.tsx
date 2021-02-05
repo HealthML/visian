@@ -8,6 +8,7 @@ import {
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Route, Switch } from "react-router-dom";
 
+import UIOverlay from "../components/uiOverlay/uiOverlay";
 import WebGLCanvas from "../components/webGLCanvas/webGLCanvas";
 import { Renderer } from "../lib";
 
@@ -50,6 +51,7 @@ export function App() {
         <Route path="/">
           <Screen title="Visian AR Demo">
             <WebGLCanvas ref={canvasRef} />
+            {renderer && <UIOverlay renderer={renderer} />}
           </Screen>
         </Route>
       </Switch>
