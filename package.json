@@ -68,6 +68,7 @@
     "reflect-metadata": "^0.1.13",
     "rxjs": "~6.5.5",
     "styled-components": "5.2.1",
+    "three": "^0.125.2",
     "tslib": "^2.0.0",
     "typeorm": "^0.2.29"
   },
