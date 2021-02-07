@@ -174,17 +174,9 @@ export default class SpriteHandler {
   public updateRenderOrder = () => {
     this.spriteGroup.updateMatrixWorld();
 
-    if (this.renderer.arActive) {
-      // When AR is active, the camera position gets overwritten by a custom
-      // world matrix, so we have to get the position from that matrix
-      this.workingVector.setFromMatrixPosition(
-        this.renderer.camera.matrixWorld,
-      );
-    } else {
-      this.workingVector.copy(this.renderer.camera.position);
-    }
-
-    const cameraPosition = this.spriteGroup.worldToLocal(this.workingVector);
+    const cameraPosition = this.spriteGroup.worldToLocal(
+      this.renderer.camera.position.clone(),
+    );
 
     const cameraOctant = getCameraOctant(cameraPosition);
 
