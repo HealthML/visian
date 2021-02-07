@@ -66,6 +66,9 @@ export default class Renderer implements IDisposable {
   private canvasContainer: HTMLDivElement;
   private domOverlay: HTMLElement;
 
+  private oldCameraPosition?: THREE.Vector3;
+  private oldCameraRotation?: THREE.Euler;
+
   constructor(private canvas: HTMLCanvasElement, private updateUI: () => void) {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     this.domOverlay = document.getElementById("ar-overlay")!;
@@ -85,7 +88,7 @@ export default class Renderer implements IDisposable {
       6,
     );
 
-    document.addEventListener("click", this.handleClick);
+    document.addEventListener("pointerup", this.handleClick);
     document.addEventListener("mousemove", this.handleMouseMove);
     canvas.addEventListener("wheel", this.handleWheel);
     canvas.addEventListener("touchstart", this.fakeClickOnTouchStart);
@@ -206,6 +209,9 @@ export default class Renderer implements IDisposable {
   public enterAR = () => {
     if (!("xr" in navigator)) return;
 
+    this.oldCameraPosition = this.camera.position.clone();
+    this.oldCameraRotation = this.camera.rotation.clone();
+
     this.domOverlay.style.display = "";
 
     const sessionInit = {
@@ -232,23 +238,7 @@ export default class Renderer implements IDisposable {
         this.updateUI();
 
         const controller = this.renderer.xr.getController(0);
-        controller.addEventListener("select", () => {
-          this.meshGroup.visible = true;
-
-          if (this.reticleHandler.active) {
-            if (this.reticleHandler.reticleActive) {
-              this.meshGroup.position.setFromMatrixPosition(
-                this.reticleHandler.reticleMatrix,
-              );
-              this.meshGroup.translateX(-SCAN.scanSize.x / 2);
-              this.meshGroup.translateY(-SCAN.scanSize.y / 2);
-
-              this.reticleHandler.activate(false);
-            }
-          } else {
-            this.reticleHandler.activate();
-          }
-        });
+        controller.addEventListener("select", this.onARSelect);
         this.scene.add(controller);
       })
       .catch((e) => {
@@ -272,7 +262,19 @@ export default class Renderer implements IDisposable {
         // The XR session hides everything else. So we have to show it again.
         document.getElementById("root")?.setAttribute("style", "");
 
+        const controller = this.renderer.xr.getController(0);
+        controller.removeEventListener("select", this.onARSelect);
+
         this.reticleHandler.hide();
+
+        if (this.oldCameraPosition) {
+          this.camera.position.copy(this.oldCameraPosition);
+          this.oldCameraPosition = undefined;
+        }
+        if (this.oldCameraRotation) {
+          this.camera.rotation.copy(this.oldCameraRotation);
+          this.oldCameraRotation = undefined;
+        }
 
         this.meshGroup.visible = true;
 
@@ -295,6 +297,24 @@ export default class Renderer implements IDisposable {
       .catch((e) => {
         console.error(e);
       });
+  };
+
+  private onARSelect = () => {
+    this.meshGroup.visible = true;
+
+    if (this.reticleHandler.active) {
+      if (this.reticleHandler.reticleActive) {
+        this.meshGroup.position.setFromMatrixPosition(
+          this.reticleHandler.reticleMatrix,
+        );
+        this.meshGroup.translateX(-SCAN.scanSize.x / 2);
+        this.meshGroup.translateY(-SCAN.scanSize.y / 2);
+
+        this.reticleHandler.activate(false);
+      }
+    } else {
+      this.reticleHandler.activate();
+    }
   };
 
   public togglePointerLock = () => {
@@ -452,6 +472,7 @@ export default class Renderer implements IDisposable {
   };
 
   private resize = () => {
+    if (this.arActive) return;
     this.camera.aspect = window.innerWidth / window.innerHeight;
     this.camera.updateProjectionMatrix();
 

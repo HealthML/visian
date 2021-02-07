@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="25px" height="25px" viewBox="0 0 25 25" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 62 (91390) - https://sketch.com -->
+    <title>Erase</title>
+    <desc>Created with Sketch.</desc>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Workspace---Scan-List" transform="translate(-238.000000, -286.000000)" fill="#FFFFFF" fill-rule="nonzero">
+            <path d="M253.812989,286.007324 C253.182301,286.007324 252.551534,286.243388 252.077149,286.717774 L238.720215,300.07959 C237.771445,301.02836 237.771445,302.602499 238.720215,303.55127 L245.451172,310.282226 C246.399942,311.230996 247.974082,311.230996 248.922851,310.282226 L262.279785,296.92041 C263.228555,295.97164 263.228555,294.397501 262.279785,293.448731 L255.548828,286.717774 C255.074443,286.243388 254.443675,286.007324 253.812989,286.007324 Z M247.150391,295.182129 L253.817871,301.84961 L247.187012,308.48291 L240.519531,301.812989 L247.150391,295.182129 Z" id="Erase"></path>
+        </g>
+    </g>
+</svg>
