@@ -19,14 +19,18 @@ export const createMeshes = (geometries: THREE.BufferGeometry[]) => {
 export const getMaterials = (meshes: THREE.Mesh[]) =>
   meshes.map((mesh) => mesh.material as THREE.MeshPhongMaterial);
 
-export const createMeshGroup = (scanSize: Voxel) => {
+export const createScanContainer = () => {
   const meshGroup = new THREE.Group();
   meshGroup.rotateX(Math.PI / -2);
   meshGroup.rotateZ(Math.PI);
-  meshGroup.translateX(-scanSize.x / 2);
-  meshGroup.translateY(-scanSize.y / 2);
-  meshGroup.translateZ(-scanSize.z / 2);
   meshGroup.updateMatrix();
   meshGroup.updateMatrixWorld();
   return meshGroup;
+};
+
+export const createScanOffsetGroup = (scanSize: Voxel) => {
+  const scanOffsetGroup = new THREE.Group();
+  scanOffsetGroup.translateX(-scanSize.x / 2);
+  scanOffsetGroup.translateY(-scanSize.y / 2);
+  return scanOffsetGroup;
 };

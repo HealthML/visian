@@ -14,8 +14,9 @@ import {
   createCameraLight,
   createLights,
   createMeshes,
-  createMeshGroup,
   createPickingMeshes,
+  createScanContainer,
+  createScanOffsetGroup,
   getMaterials,
 } from "./creators";
 import {
@@ -33,8 +34,9 @@ export default class Renderer implements IDisposable {
   public camera: THREE.PerspectiveCamera;
   private scene = new THREE.Scene();
 
-  public meshGroup: THREE.Group;
-  public meshAnimationGroup: THREE.Group;
+  private scanContainer: THREE.Group;
+  private meshGroup: THREE.Group;
+  public scanOffsetGroup: THREE.Group;
 
   private pickingScene = new THREE.Scene();
   private pickingTexture = new THREE.WebGLRenderTarget(1, 1);
@@ -99,12 +101,17 @@ export default class Renderer implements IDisposable {
     const cameraLight = createCameraLight(this.camera);
     this.scene.add(cameraLight, cameraLight.target);
 
-    this.meshGroup = createMeshGroup(SCAN.scanSize);
-    this.meshAnimationGroup = new THREE.Group();
-    this.meshGroup.add(this.meshAnimationGroup);
+    this.scanContainer = createScanContainer();
+
+    this.scanOffsetGroup = createScanOffsetGroup(SCAN.scanSize);
+    this.scanContainer.add(this.scanOffsetGroup);
+    this.scanOffsetGroup.updateMatrixWorld();
+
+    this.meshGroup = new THREE.Group();
+    this.scanOffsetGroup.add(this.meshGroup);
 
     this.spriteHandler = new SpriteHandler(this);
-    this.meshAnimationGroup.add(this.spriteHandler.spriteGroup);
+    this.scanOffsetGroup.add(this.spriteHandler.spriteGroup);
 
     this.navigator = new NavigationHandler(
       this,
@@ -115,7 +122,7 @@ export default class Renderer implements IDisposable {
     );
 
     this.camera.position.copy(
-      this.meshGroup.localToWorld(
+      this.scanOffsetGroup.localToWorld(
         new THREE.Vector3(
           -0.25 * SCAN.scanSize.x,
           1.25 * SCAN.scanSize.y,
@@ -123,7 +130,7 @@ export default class Renderer implements IDisposable {
         ),
       ),
     );
-    const target = this.meshGroup.localToWorld(
+    const target = this.scanOffsetGroup.localToWorld(
       this.spriteHandler.spriteGroup.position.clone(),
     );
     this.camera.lookAt(target);
@@ -136,15 +143,19 @@ export default class Renderer implements IDisposable {
       this.meshes = createMeshes(geometries);
       this.materials = getMaterials(this.meshes);
 
-      this.meshAnimationGroup.add(...this.meshes);
+      this.meshGroup.add(...this.meshes);
 
-      this.scene.add(this.meshGroup);
-      this.meshGroup.updateMatrixWorld(true);
+      this.scene.add(this.scanContainer);
+      this.scanContainer.updateMatrixWorld(true);
 
       this.pickingMeshes = createPickingMeshes(geometries);
-      const pickingGroup = createMeshGroup(SCAN.scanSize);
-      pickingGroup.add(...this.pickingMeshes);
-      this.pickingScene.add(pickingGroup);
+      const pickingScanContainer = createScanContainer();
+
+      const pickingOffsetGroup = createScanOffsetGroup(SCAN.scanSize);
+      pickingScanContainer.add(pickingOffsetGroup);
+
+      pickingOffsetGroup.add(...this.pickingMeshes);
+      this.pickingScene.add(pickingScanContainer);
 
       this.annotator = new AnnotationHandler(
         this,
@@ -180,15 +191,10 @@ export default class Renderer implements IDisposable {
       this.spriteHandler.updateRenderOrder();
 
       // up/down animation
-      this.meshAnimationGroup.position.z =
-        (Math.sin(timestamp / 1000) + 1) / 80;
+      this.scanOffsetGroup.position.z = (Math.sin(timestamp / 1000) + 1) / 80;
 
       // rotation animation
-      this.meshAnimationGroup.translateX(SCAN.scanSize.x / 2);
-      this.meshAnimationGroup.translateY(SCAN.scanSize.y / 2);
-      this.meshAnimationGroup.rotateZ(delta / 5000);
-      this.meshAnimationGroup.translateX(-SCAN.scanSize.x / 2);
-      this.meshAnimationGroup.translateY(-SCAN.scanSize.y / 2);
+      this.scanContainer.rotateZ(delta / 5000);
 
       if (frame) {
         this.reticleHandler.update(frame);
@@ -237,7 +243,7 @@ export default class Renderer implements IDisposable {
 
         this.reticleHandler.activate();
 
-        this.meshGroup.visible = false;
+        this.scanContainer.visible = false;
 
         this.updateUI();
 
@@ -280,18 +286,14 @@ export default class Renderer implements IDisposable {
           this.oldCameraRotation = undefined;
         }
 
-        this.meshGroup.visible = true;
+        this.scanContainer.visible = true;
+        this.scanContainer.position.set(0, 0, 0);
 
         // Reset the animation state of the scan.
-        this.meshGroup.position.set(0, 0, 0);
-        this.meshGroup.translateX(-SCAN.scanSize.x / 2);
-        this.meshGroup.translateY(-SCAN.scanSize.y / 2);
-        this.meshGroup.translateZ(-SCAN.scanSize.z / 2);
+        this.scanContainer.rotation.z = Math.PI;
+        this.scanOffsetGroup.position.z = 0;
 
-        this.meshAnimationGroup.position.set(0, 0, 0);
-        this.meshAnimationGroup.rotation.set(0, 0, 0);
-
-        this.meshGroup.updateMatrixWorld(true);
+        this.scanContainer.updateMatrixWorld(true);
         this.spriteHandler.updateRenderOrder();
 
         this.render();
@@ -304,15 +306,13 @@ export default class Renderer implements IDisposable {
   };
 
   private onARSelect = () => {
-    this.meshGroup.visible = true;
+    this.scanContainer.visible = true;
 
     if (this.reticleHandler.active) {
       if (this.reticleHandler.reticleActive) {
-        this.meshGroup.position.setFromMatrixPosition(
+        this.scanContainer.position.setFromMatrixPosition(
           this.reticleHandler.reticleMatrix,
         );
-        this.meshGroup.translateX(-SCAN.scanSize.x / 2);
-        this.meshGroup.translateY(-SCAN.scanSize.y / 2);
 
         this.reticleHandler.activate(false);
       }

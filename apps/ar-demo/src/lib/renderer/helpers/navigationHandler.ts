@@ -37,7 +37,7 @@ export default class NavigationHandler implements IDisposable {
       this.camera,
       canvasContainer,
     );
-    const target = this.renderer.meshGroup.localToWorld(
+    const target = this.renderer.scanOffsetGroup.localToWorld(
       this.spriteHandler.spriteGroup.position.clone(),
     );
     this.orbitControls = createOrbitControls(
