@@ -13,6 +13,7 @@ const Container = styled(Sheet)`
   align-items: center;
   width: 30px;
   height: 30px;
+  pointer-events: auto;
 `;
 
 const ARButton: React.FC<ARButtonProps> = (props) => {

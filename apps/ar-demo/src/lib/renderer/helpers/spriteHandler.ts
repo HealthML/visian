@@ -28,8 +28,6 @@ export default class SpriteHandler {
     z: Math.floor(SCAN.voxelCount.z / 2),
   };
 
-  private workingVector = new THREE.Vector3();
-
   constructor(private renderer: Renderer) {
     const loader = new THREE.TextureLoader();
     const scanTexture = loader.load(atlas, () => {

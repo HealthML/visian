@@ -17,6 +17,7 @@ const FullScreenDiv = styled(FlexRow)`
   align-items: flex-start;
   padding: 10px;
   z-index: 1;
+  pointer-events: none;
 `;
 
 const UIOverlay: React.FC<UIOverlayProps> = (props) => {

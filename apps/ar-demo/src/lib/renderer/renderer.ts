@@ -91,7 +91,6 @@ export default class Renderer implements IDisposable {
     document.addEventListener("pointerup", this.handleClick);
     document.addEventListener("mousemove", this.handleMouseMove);
     canvas.addEventListener("wheel", this.handleWheel);
-    canvas.addEventListener("touchstart", this.fakeClickOnTouchStart);
     window.addEventListener("resize", this.resize);
     this.resize();
 
@@ -164,6 +163,11 @@ export default class Renderer implements IDisposable {
 
   public dispose = () => {
     window.removeEventListener("resize", this.resize);
+    document.removeEventListener("pointerup", this.handleClick);
+    document.removeEventListener("mousemove", this.handleMouseMove);
+    this.canvas.removeEventListener("wheel", this.handleWheel);
+    this.navigator.dispose();
+    this.keyEventHandler.dispose();
   };
 
   private animate = (timestamp: number, frame?: THREE.XRFrame) => {
@@ -479,14 +483,6 @@ export default class Renderer implements IDisposable {
     this.renderer.setSize(window.innerWidth, window.innerHeight);
 
     this.forceRender();
-  };
-
-  private fakeClickOnTouchStart = (event: TouchEvent) => {
-    if (event.touches.length !== 1) {
-      return;
-    }
-    const touch = event.touches[0];
-    this.handleClick(touch);
   };
 
   private handleClick = (event: ClickPosition) => {

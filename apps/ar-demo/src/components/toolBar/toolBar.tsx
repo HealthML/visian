@@ -19,6 +19,7 @@ const ToolBarContainer = styled(Sheet)`
   flex-direction: column;
   margin-bottom: 10px;
   padding: 5px;
+  pointer-events: auto;
 `;
 
 interface ToolContainerProps {

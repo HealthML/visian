@@ -11,6 +11,7 @@ const Container = styled(Sheet)`
   margin-left: 10px;
   padding: 5px;
   justify-content: stretch;
+  pointer-events: auto;
 `;
 
 const IconContainer = styled.div`
@@ -20,6 +21,7 @@ const IconContainer = styled.div`
   justify-content: center;
   margin: 5px;
   width: 20px;
+  cursor: pointer;
 
   * {
     fill: gray;
@@ -36,7 +38,6 @@ const Separator = styled.div`
   border-left: solid 1px gray;
   width: 1px;
   height: 20px;
-  /* margin-top: 5px; */
 `;
 
 const UndoRedo: React.FC<UndoRedoProps> = (props) => {
