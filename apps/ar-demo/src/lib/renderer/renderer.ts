@@ -170,6 +170,9 @@ export default class Renderer implements IDisposable {
 
       this.updateUI();
     });
+
+    // For this deme we want the meshes to be hidden at first.
+    this.setMeshVisibility(false);
   }
 
   public dispose = () => {
@@ -334,6 +337,11 @@ export default class Renderer implements IDisposable {
     }
   };
 
+  public setMeshVisibility = (visible: boolean) => {
+    this.meshGroup.visible = visible;
+    this.render();
+  };
+
   public setActiveTool = (tool: Tool) => {
     this.activeTool = tool;
   };
@@ -486,7 +494,7 @@ export default class Renderer implements IDisposable {
   };
 
   private handleClick = (event: ClickPosition) => {
-    if (this.arActive) return;
+    if (this.arActive || !this.meshGroup.visible) return;
 
     const intersections = getIntersectionsFromClickPosition(
       event,
