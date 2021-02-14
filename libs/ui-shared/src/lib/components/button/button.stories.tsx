@@ -6,7 +6,7 @@ import { ButtonProps } from "./button.props";
 export default {
   component: Button,
   title: "Button",
-  argTypes: { onClick: { action: "Button clicked!" } },
+  argTypes: { onClick: { action: "onClick" } },
 };
 
 export const primary = (args: ButtonProps) => {
