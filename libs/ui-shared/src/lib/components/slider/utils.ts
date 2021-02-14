@@ -1,11 +1,11 @@
-import { useCallback, useRef } from "react";
+import { useCallback, useRef, PointerEvent as ReactPointerEvent } from "react";
 
 export interface Pointer {
   clientX: number;
   clientY: number;
 }
 
-const conformToStepSize = (value: number, stepSize?: number) =>
+const roundToStepSize = (value: number, stepSize?: number) =>
   stepSize ? Math.round(value / stepSize) * stepSize : value;
 
 export const valueToSliderPos = (
@@ -17,11 +17,12 @@ export const valueToSliderPos = (
 ) => {
   const relativeValue = Math.max(
     0,
-    Math.min(1, (conformToStepSize(value, stepSize) - min) / (max - min)),
+    Math.min(1, (roundToStepSize(value, stepSize) - min) / (max - min)),
   );
   return `${(inverted ? 1 - relativeValue : relativeValue) * 100}%`;
 };
 
+/** Extracts */
 export const pointerToSliderValue = (
   pointer: Pointer,
   slider: HTMLElement,
@@ -42,7 +43,7 @@ export const pointerToSliderValue = (
         : (pointer.clientX - boundingBox.x) / boundingBox.width,
     ),
   );
-  return conformToStepSize(
+  return roundToStepSize(
     (inverted ? 1 - relativePos : relativePos) * (max - min) + min,
     stepSize,
   );
@@ -59,14 +60,14 @@ export const pointerToSliderValue = (
  * It should be applied to a React element using the spread syntax.
  */
 export const useDrag = (
-  startHandler?: (event: PointerEvent) => void,
-  moveHandler?: (event: PointerEvent) => void,
-  endHandler?: (event: PointerEvent) => void,
+  startHandler?: (event: PointerEvent | ReactPointerEvent) => void,
+  moveHandler?: (event: PointerEvent | ReactPointerEvent) => void,
+  endHandler?: (event: PointerEvent | ReactPointerEvent) => void,
 ) => {
   const pointerIdRef = useRef<number | undefined>();
 
   const boundMoveHandler = useCallback(
-    (event: PointerEvent) => {
+    (event: PointerEvent | ReactPointerEvent) => {
       if (event.pointerId !== pointerIdRef.current) return;
 
       event.preventDefault();
@@ -76,7 +77,7 @@ export const useDrag = (
   );
 
   const boundEndHandler = useCallback(
-    (event: PointerEvent) => {
+    (event: PointerEvent | ReactPointerEvent) => {
       if (event.pointerId !== pointerIdRef.current) return;
       pointerIdRef.current = undefined;
 
@@ -88,8 +89,9 @@ export const useDrag = (
     },
     [boundMoveHandler, endHandler],
   );
+
   const boundStartHandler = useCallback(
-    (event: PointerEvent) => {
+    (event: PointerEvent | ReactPointerEvent) => {
       pointerIdRef.current = event.pointerId;
       event.preventDefault();
       document.addEventListener("pointermove", boundMoveHandler, {
