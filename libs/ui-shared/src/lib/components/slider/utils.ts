@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useRef } from "react";
 
 export interface Pointer {
   clientX: number;
@@ -48,29 +48,6 @@ export const pointerToSliderValue = (
   );
 };
 
-interface EventLike {
-  preventDefault: () => void;
-}
-
-type EventHandler = (e: EventLike) => void;
-
-/**
- * A simple hook that calls event handler
- * and ensures preventDefault is called.
- *
- * @param handler The event handler called on tap events.
- * @param args Additional arguments to be passed to the event handler.
- * @returns The bound event handler.
- */
-export const usePreventDefault = (handler?: EventHandler) =>
-  useCallback(
-    (event: EventLike) => {
-      event.preventDefault();
-      if (handler) handler(event);
-    },
-    [handler],
-  );
-
 /**
  * A simple hook to include a cross-platform drag handler.
  * Note: Currently, it only works with pointer events.
@@ -86,31 +63,43 @@ export const useDrag = (
   moveHandler?: (event: PointerEvent) => void,
   endHandler?: (event: PointerEvent) => void,
 ) => {
-  const boundMoveHandler = usePreventDefault(moveHandler as EventHandler);
-  const boundEndHandler = usePreventDefault(
-    useCallback(
-      (event: PointerEvent) => {
-        document.removeEventListener("pointermove", boundMoveHandler);
-        document.removeEventListener("pointerup", boundEndHandler);
-        document.removeEventListener("pointerleave", boundEndHandler);
-        if (endHandler) endHandler(event);
-      },
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      [boundMoveHandler, endHandler],
-    ) as EventHandler,
+  const pointerIdRef = useRef<number | undefined>();
+
+  const boundMoveHandler = useCallback(
+    (event: PointerEvent) => {
+      if (event.pointerId !== pointerIdRef.current) return;
+
+      event.preventDefault();
+      if (moveHandler) return moveHandler(event);
+    },
+    [moveHandler],
   );
-  const boundStartHandler = usePreventDefault(
-    useCallback(
-      (event: PointerEvent) => {
-        document.addEventListener("pointermove", boundMoveHandler, {
-          passive: false,
-        });
-        document.addEventListener("pointerup", boundEndHandler);
-        document.addEventListener("pointerleave", boundEndHandler);
-        if (startHandler) startHandler(event);
-      },
-      [boundEndHandler, boundMoveHandler, startHandler],
-    ) as EventHandler,
+
+  const boundEndHandler = useCallback(
+    (event: PointerEvent) => {
+      if (event.pointerId !== pointerIdRef.current) return;
+      pointerIdRef.current = undefined;
+
+      event.preventDefault();
+      document.removeEventListener("pointermove", boundMoveHandler);
+      document.removeEventListener("pointerup", boundEndHandler);
+      document.removeEventListener("pointerleave", boundEndHandler);
+      if (endHandler) return endHandler(event);
+    },
+    [boundMoveHandler, endHandler],
+  );
+  const boundStartHandler = useCallback(
+    (event: PointerEvent) => {
+      pointerIdRef.current = event.pointerId;
+      event.preventDefault();
+      document.addEventListener("pointermove", boundMoveHandler, {
+        passive: false,
+      });
+      document.addEventListener("pointerup", boundEndHandler);
+      document.addEventListener("pointerleave", boundEndHandler);
+      if (startHandler) return startHandler(event);
+    },
+    [boundEndHandler, boundMoveHandler, startHandler],
   );
 
   return {
