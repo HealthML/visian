@@ -2,7 +2,14 @@ import React, { useCallback, useRef, useState } from "react";
 import styled from "styled-components";
 
 import { SliderProps } from ".";
-import { color, lineHeight, size } from "../../theme";
+import {
+  color,
+  lineHeight,
+  parseNumberFromMetric,
+  parseUnitFromMetric,
+  scaleMetric,
+  size,
+} from "../../theme";
 import { pointerToSliderValue, useDrag, valueToSliderPos } from "./utils";
 
 interface VerticalProps {
@@ -35,22 +42,33 @@ interface ThumbProps extends VerticalProps {
 const Thumb = styled.div<ThumbProps>`
   background-color: ${color("gray")};
   border: none;
-  border-radius: ${size("sliderThumbWidth")} / 2;
+  border-radius: ${(props) =>
+    scaleMetric(size("sliderThumbWidth")(props), 0.5)};
   height: ${(props) =>
     props.vertical ? size("sliderThumbWidth") : size("sliderThumbHeight")};
   margin: ${(props) =>
-      props.vertical ? `(-(${size("sliderThumbWidth")} / 2))` : "0"}
+      props.vertical ? scaleMetric(size("sliderThumbWidth")(props), -0.5) : "0"}
     0 0
     ${(props) =>
-      props.vertical ? "0" : `(-(${size("sliderThumbWidth")} / 2))`};
+      props.vertical
+        ? "0"
+        : scaleMetric(size("sliderThumbWidth")(props), -0.5)};
   position: absolute;
   top: ${(props) =>
     props.vertical
       ? props.position
-      : `(${size("sliderHeight")} - ${size("sliderThumbHeight")}) / 2`};
+      : `${
+          (parseNumberFromMetric(size("sliderHeight")(props)) -
+            parseNumberFromMetric(size("sliderThumbHeight")(props))) /
+          2
+        }${parseUnitFromMetric(size("sliderThumbHeight")(props))}`};
   left: ${(props) =>
     props.vertical
-      ? `(${size("sliderHeight")} - ${size("sliderThumbHeight")}) / 2`
+      ? `${
+          (parseNumberFromMetric(size("sliderHeight")(props)) -
+            parseNumberFromMetric(size("sliderThumbHeight")(props))) /
+          2
+        }${parseUnitFromMetric(size("sliderThumbHeight")(props))}`
       : props.position};
   transition: background-color 0.3s;
   width: ${(props) =>

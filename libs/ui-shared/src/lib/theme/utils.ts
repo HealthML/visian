@@ -28,5 +28,19 @@ export const size = lookup("sizes");
 export const space = lookup("space");
 export const zIndex = lookup("zIndices");
 
-export const parseNumberFromMetric = (value: string) =>
-  parseFloat(value.match(/\d+(\.\d+)?/)[0]);
+export const parseNumberFromMetric = (value: string) => {
+  const match = value.match(/\d+(\.\d+)?/);
+  if (!match) return 0;
+  return parseFloat(match[0]);
+};
+
+export const parseUnitFromMetric = (value: string) => {
+  const match = value.match(/([a-z]+)/);
+  if (!match) return "";
+  return match[0];
+};
+
+export const scaleMetric = (metricValue: string, scaleFactor: number) =>
+  `${parseNumberFromMetric(metricValue) * scaleFactor}${parseUnitFromMetric(
+    metricValue,
+  )}`;

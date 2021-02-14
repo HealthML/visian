@@ -22,8 +22,8 @@ primary.args = {
   inverted: false,
 };
 
-export const step = (args: SliderProps) => Template(args);
-step.args = {
+export const stepped = (args: SliderProps) => Template(args);
+stepped.args = {
   step: 1,
   min: 0,
   max: 10,
