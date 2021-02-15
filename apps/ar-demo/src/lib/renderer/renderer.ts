@@ -71,6 +71,10 @@ export default class Renderer implements IDisposable {
   private oldCameraPosition?: THREE.Vector3;
   private oldCameraRotation?: THREE.Euler;
 
+  private scanAnimation = false;
+  private scanBaseRotation = Math.PI;
+  private acceptARSelect = true;
+
   constructor(private canvas: HTMLCanvasElement, private updateUI: () => void) {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     this.domOverlay = document.getElementById("ar-overlay")!;
@@ -193,11 +197,13 @@ export default class Renderer implements IDisposable {
     if (this.arActive) {
       this.spriteHandler.updateRenderOrder();
 
-      // up/down animation
-      this.scanOffsetGroup.position.z = (Math.sin(timestamp / 1000) + 1) / 80;
+      if (this.scanAnimation) {
+        // up/down animation
+        this.scanOffsetGroup.position.z = (Math.sin(timestamp / 1000) + 1) / 80;
 
-      // rotation animation
-      this.scanContainer.rotateZ(delta / 5000);
+        // rotation animation
+        this.scanContainer.rotateZ(delta / 5000);
+      }
 
       if (frame) {
         this.reticleHandler.update(frame);
@@ -293,7 +299,7 @@ export default class Renderer implements IDisposable {
         this.scanContainer.position.set(0, 0, 0);
 
         // Reset the animation state of the scan.
-        this.scanContainer.rotation.z = Math.PI;
+        this.setScanRotation(0);
         this.scanOffsetGroup.position.z = 0;
 
         this.scanContainer.updateMatrixWorld(true);
@@ -309,6 +315,8 @@ export default class Renderer implements IDisposable {
   };
 
   private onARSelect = () => {
+    if (!this.acceptARSelect) return;
+
     this.scanContainer.visible = true;
 
     if (this.reticleHandler.active) {
@@ -335,6 +343,31 @@ export default class Renderer implements IDisposable {
       document.removeEventListener("wheel", this.handleWheel);
       this.canvas.addEventListener("wheel", this.handleWheel);
     }
+  };
+
+  public setScanRotation = (rotation: number) => {
+    this.scanContainer.rotation.z = this.scanBaseRotation + rotation;
+    this.render();
+  };
+
+  public get scanRotation() {
+    return this.scanContainer.rotation.z - this.scanBaseRotation;
+  }
+
+  public toggleARSelect = () => {
+    // If this is the call closing the UI the corresponding select event
+    // still has to be discarded. Thus a timeout is used in that case.
+    if (this.acceptARSelect) {
+      this.acceptARSelect = false;
+    } else {
+      setTimeout(() => {
+        this.acceptARSelect = true;
+      }, 100);
+    }
+  };
+
+  public toggleScanAnimation = () => {
+    this.scanAnimation = !this.scanAnimation;
   };
 
   public setMeshVisibility = (visible: boolean) => {
