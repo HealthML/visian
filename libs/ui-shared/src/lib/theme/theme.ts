@@ -55,7 +55,9 @@ export const theme = {
     default: "300",
   },
   letterSpacings: {},
-  lineHeights: {},
+  lineHeights: {
+    sliderTrack: "2px",
+  },
   mediaQueries: {
     phoneOnly: "@media (max-width: 599px)",
     tabletPortraitUp: "@media (min-width: 600px)",
@@ -74,6 +76,9 @@ export const theme = {
     maxContentWidth: "940px",
     recordImage: "220px",
     buttonHeight: "46px",
+    sliderHeight: "30px",
+    sliderThumbWidth: "4px",
+    sliderThumbHeight: "25px",
   },
   space: {
     iconMargin: "12px",

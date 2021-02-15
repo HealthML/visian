@@ -28,8 +28,40 @@ export const size = lookup("sizes");
 export const space = lookup("space");
 export const zIndex = lookup("zIndices");
 
+/**
+ * Returns the numeric value of a given metric one.
+ *
+ * @example
+ * // Returns 8
+ * parseNumberFromMetric("8px");
+ */
 export const parseNumberFromMetric = (value: string) => {
   const match = value.match(/\d+(\.\d+)?/);
-  if (!match) throw new Error("Not a metric value");
+  if (!match) return 0;
   return parseFloat(match[0]);
 };
+
+/**
+ * Returns the unit of a given metric value.
+ *
+ * @example
+ * // Returns "px"
+ * parseUnitFromMetric("8px");
+ */
+export const parseUnitFromMetric = (value: string) => {
+  const match = value.match(/([a-z]+)/);
+  if (!match) return "";
+  return match[0];
+};
+
+/**
+ * Returns the metric value scaled by a given factor.
+ *
+ * @param value The metric value.
+ * @param factor The factor to scale by.
+ * @example
+ * // Returns "16px"
+ * scaleMetric("8px", 2);
+ */
+export const scaleMetric = (value: string, factor: number) =>
+  `${parseNumberFromMetric(value) * factor}${parseUnitFromMetric(value)}`;
