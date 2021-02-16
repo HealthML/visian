@@ -176,7 +176,7 @@ export default class Renderer implements IDisposable {
       this.updateUI();
     });
 
-    // For this deme we want the meshes to be hidden at first.
+    // For this demo we want the meshes to be hidden at first.
     this.setMeshVisibility(false);
   }
 
