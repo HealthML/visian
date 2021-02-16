@@ -343,6 +343,8 @@ export default class Renderer implements IDisposable {
       document.removeEventListener("wheel", this.handleWheel);
       this.canvas.addEventListener("wheel", this.handleWheel);
     }
+
+    this.updateUI();
   };
 
   public setScanRotation = (rotation: number) => {

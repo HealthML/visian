@@ -5,6 +5,7 @@ import styled from "styled-components";
 import { UIOverlayProps } from ".";
 import ARButton from "../arButton/arButton";
 import AROverlay from "../arOverlay/arOverlay";
+import Crosshair from "../crosshair/crosshair";
 import MagicAIButton from "../magicAIButton/magicAIButton";
 import ToolBar from "../toolBar/toolBar";
 import UndoRedo from "../undoRedo/undoRedo";
@@ -49,6 +50,7 @@ const UIOverlay: React.FC<UIOverlayProps> = (props) => {
         </>
       )}
       <MagicAIButton renderer={renderer} />
+      {renderer.pointerLocked && <Crosshair />}
     </FullScreenDiv>
   );
 };
