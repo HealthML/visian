@@ -23,7 +23,7 @@ import {
   AnnotationHandler,
   KeyEventHandler,
   NavigationHandler,
-  ReticleHandler,
+  Reticle,
   SpriteHandler,
 } from "./helpers";
 
@@ -48,7 +48,7 @@ export default class Renderer implements IDisposable {
   public navigator!: NavigationHandler;
   public spriteHandler!: SpriteHandler;
   private annotator!: AnnotationHandler;
-  private reticleHandler: ReticleHandler;
+  private reticle: Reticle;
 
   private renderDirty = true;
   public arActive = false;
@@ -140,7 +140,8 @@ export default class Renderer implements IDisposable {
     this.camera.lookAt(target);
     cameraLight.target.position.copy(target);
 
-    this.reticleHandler = new ReticleHandler(this.renderer, this.scene);
+    this.reticle = new Reticle(this.renderer);
+    this.scene.add(this.reticle);
 
     // eslint-disable-next-line @typescript-eslint/no-floating-promises
     Promise.all(SCAN.getConnectedStructureGeometries()).then((geometries) => {
@@ -206,7 +207,7 @@ export default class Renderer implements IDisposable {
       }
 
       if (frame) {
-        this.reticleHandler.update(frame);
+        this.reticle.update(frame);
       }
     }
 
@@ -250,7 +251,7 @@ export default class Renderer implements IDisposable {
         this.renderer.xr.setReferenceSpaceType("local");
         this.renderer.xr.setSession(session);
 
-        this.reticleHandler.activate();
+        this.reticle.activate();
 
         this.scanContainer.visible = false;
 
@@ -284,7 +285,7 @@ export default class Renderer implements IDisposable {
         const controller = this.renderer.xr.getController(0);
         controller.removeEventListener("select", this.onARSelect);
 
-        this.reticleHandler.hide();
+        this.reticle.hide();
 
         if (this.oldCameraPosition) {
           this.camera.position.copy(this.oldCameraPosition);
@@ -319,16 +320,14 @@ export default class Renderer implements IDisposable {
 
     this.scanContainer.visible = true;
 
-    if (this.reticleHandler.active) {
-      if (this.reticleHandler.reticleActive) {
-        this.scanContainer.position.setFromMatrixPosition(
-          this.reticleHandler.reticleMatrix,
-        );
+    if (this.reticle.active) {
+      if (this.reticle.visible) {
+        this.scanContainer.position.setFromMatrixPosition(this.reticle.matrix);
 
-        this.reticleHandler.activate(false);
+        this.reticle.activate(false);
       }
     } else {
-      this.reticleHandler.activate();
+      this.reticle.activate();
     }
   };
 

@@ -1,28 +1,21 @@
 import * as THREE from "three";
 
-import createReticle from "../creators/reticle";
-
-export default class ReticleHandler {
-  private reticle: THREE.Mesh;
-
+export default class Reticle extends THREE.Mesh {
   private hitTestSourceRequested = false;
   private hitTestSource: THREE.XRHitTestSource | null = null;
 
   public active = false;
 
-  constructor(private renderer: THREE.WebGLRenderer, scene: THREE.Scene) {
-    this.reticle = createReticle();
-    this.reticle.visible = false;
-
-    scene.add(this.reticle);
-  }
-
-  public get reticleMatrix() {
-    return this.reticle.matrix;
-  }
-
-  public get reticleActive() {
-    return this.reticle.visible;
+  constructor(private renderer: THREE.WebGLRenderer) {
+    super(
+      new THREE.RingBufferGeometry(0.05, 0.06, 100).rotateX(-Math.PI / 2),
+      new THREE.MeshBasicMaterial({
+        transparent: true,
+        opacity: 0.3,
+      }),
+    );
+    this.matrixAutoUpdate = false;
+    this.visible = false;
   }
 
   public activate = (active = true) => {
@@ -31,7 +24,7 @@ export default class ReticleHandler {
 
   public hide = () => {
     this.activate(false);
-    this.reticle.visible = false;
+    this.visible = false;
   };
 
   public update = (frame: THREE.XRFrame) => {
@@ -73,13 +66,13 @@ export default class ReticleHandler {
         const pose = hit.getPose(referenceSpace);
 
         if (pose) {
-          this.reticle.visible = true;
-          this.reticle.matrix.fromArray(pose.transform.matrix);
+          this.visible = true;
+          this.matrix.fromArray(pose.transform.matrix);
         } else {
-          this.reticle.visible = false;
+          this.visible = false;
         }
       } else {
-        this.reticle.visible = false;
+        this.visible = false;
       }
     }
   };
