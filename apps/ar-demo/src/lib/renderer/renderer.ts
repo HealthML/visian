@@ -32,7 +32,7 @@ export default class Renderer implements IDisposable {
 
   private renderer: THREE.WebGLRenderer;
   public camera: THREE.PerspectiveCamera;
-  private scene = new THREE.Scene();
+  public scene = new THREE.Scene();
 
   private scanContainer: THREE.Group;
   private meshGroup: THREE.Group;

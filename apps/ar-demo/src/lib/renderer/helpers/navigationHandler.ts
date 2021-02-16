@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { PointerLockControls } from "three/examples/jsm/controls/PointerLockControls";
+import { TransformControls } from "three/examples/jsm/controls/TransformControls";
 
 import { Renderer } from "..";
 import * as SCAN from "../../staticScan";
@@ -23,6 +24,22 @@ export default class NavigationHandler implements IDisposable {
 
   private pointerControls: PointerLockControls;
   private orbitControls: OrbitControls;
+  private transformControls: TransformControls;
+
+  private transformObject: THREE.Object3D;
+
+  private workingVector = new THREE.Vector3();
+  private voxelDimensions = new THREE.Vector3(
+    SCAN.voxelDimensions.x,
+    SCAN.voxelDimensions.y,
+    SCAN.voxelDimensions.z,
+  );
+  private minSelectedVoxel = new THREE.Vector3();
+  private maxSelectedVoxel = new THREE.Vector3(
+    SCAN.voxelCount.x - 1,
+    SCAN.voxelCount.y - 1,
+    SCAN.voxelCount.z - 1,
+  );
 
   constructor(
     private renderer: Renderer,
@@ -57,6 +74,29 @@ export default class NavigationHandler implements IDisposable {
     // We don't want to disable zoom completely to keep it on touch devices.
     this.canvas.addEventListener("wheel", this.stopPropergation);
 
+    this.transformObject = new THREE.Object3D();
+    this.transformObject.position.copy(this.spriteHandler.spriteGroup.position);
+    this.renderer.scanOffsetGroup.add(this.transformObject);
+
+    this.transformControls = new TransformControls(this.camera, canvas);
+    this.transformControls.attach(this.transformObject);
+    this.transformControls.setSpace("local");
+
+    renderer.scene.add(this.transformControls);
+
+    this.transformControls.addEventListener(
+      "mouseDown",
+      this.disableOrbitControls,
+    );
+    this.transformControls.addEventListener(
+      "mouseUp",
+      this.enableOrbitControls,
+    );
+    this.transformControls.addEventListener(
+      "objectChange",
+      this.handleTransformMove,
+    );
+
     this.spriteHandler.updateRenderOrder();
   }
 
@@ -72,11 +112,32 @@ export default class NavigationHandler implements IDisposable {
     this.orbitControls.dispose();
     this.canvas.removeEventListener("wheel", this.stopPropergation);
 
+    this.transformControls.removeEventListener(
+      "mouseDown",
+      this.disableOrbitControls,
+    );
+    this.transformControls.removeEventListener(
+      "mouseUp",
+      this.enableOrbitControls,
+    );
+    this.transformControls.removeEventListener(
+      "objectChange",
+      this.handleTransformMove,
+    );
+
     if (this.renderer.pointerLocked) this.togglePointerLock();
   };
 
   private stopPropergation = (event: Event) => {
     event.stopPropagation();
+  };
+
+  private disableOrbitControls = () => {
+    this.orbitControls.enabled = false;
+  };
+
+  private enableOrbitControls = () => {
+    this.orbitControls.enabled = true;
   };
 
   private getCameraTarget = () => {
@@ -224,6 +285,9 @@ export default class NavigationHandler implements IDisposable {
       }
 
       this.spriteHandler.setSelectedVoxel(newSelectedVoxel);
+      this.transformObject.position.copy(
+        this.spriteHandler.spriteGroup.position,
+      );
     }
   };
 
@@ -265,6 +329,32 @@ export default class NavigationHandler implements IDisposable {
       }
 
       this.spriteHandler.setSelectedVoxel(newSelectedVoxel);
+      this.transformObject.position.copy(
+        this.spriteHandler.spriteGroup.position,
+      );
     }
+  };
+
+  private handleTransformMove = () => {
+    this.workingVector.copy(this.transformObject.position);
+
+    this.workingVector.x =
+      Math.round(this.workingVector.x / this.voxelDimensions.x) *
+      this.voxelDimensions.x;
+    this.workingVector.y =
+      Math.round(this.workingVector.y / this.voxelDimensions.y) *
+      this.voxelDimensions.y;
+    this.workingVector.z =
+      Math.round(this.workingVector.z / this.voxelDimensions.z) *
+      this.voxelDimensions.z;
+
+    this.workingVector.divide(this.voxelDimensions);
+    this.workingVector.max(this.minSelectedVoxel);
+    this.workingVector.min(this.maxSelectedVoxel);
+
+    // x is inverted...
+    this.workingVector.x = SCAN.voxelCount.x - this.workingVector.x - 1;
+
+    this.spriteHandler.setSelectedVoxel(this.workingVector);
   };
 }
