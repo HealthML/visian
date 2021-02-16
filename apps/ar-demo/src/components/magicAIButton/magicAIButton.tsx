@@ -1,19 +1,19 @@
-import { Sheet, Text } from "@classifai/ui-shared";
+import { Button } from "@classifai/ui-shared";
 import React, { useCallback, useState } from "react";
 import styled from "styled-components";
 
 import { MagicAIButtonProps } from ".";
 
-const Container = styled(Sheet)`
+const StyledButton = styled(Button)`
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 250px;
+  width: 300px;
   height: 50px;
   pointer-events: auto;
   position: absolute;
   bottom: 20px;
-  left: calc(50% - 125px);
+  left: calc(50% - 150px);
   cursor: pointer;
 `;
 
@@ -22,7 +22,7 @@ const MagicAIButton: React.FC<MagicAIButtonProps> = (props) => {
 
   const [clicked, setClicked] = useState<boolean>(false);
 
-  const [text, setText] = useState<string>("Use AI to generate segmentations.");
+  const [text, setText] = useState<string>("Generate AI segmentations.");
 
   const callback = useCallback(() => {
     setClicked(true);
@@ -34,9 +34,11 @@ const MagicAIButton: React.FC<MagicAIButtonProps> = (props) => {
   }, [setClicked, renderer, setText]);
 
   return (
-    <Container {...rest} onPointerDown={clicked ? undefined : callback}>
-      <Text text={text} />
-    </Container>
+    <StyledButton
+      {...rest}
+      text={text}
+      onPointerDown={clicked ? undefined : callback}
+    />
   );
 };
 
