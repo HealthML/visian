@@ -1,5 +1,5 @@
 import { Sheet } from "@classifai/ui-shared";
-import React from "react";
+import React, { useCallback } from "react";
 import styled from "styled-components";
 
 import { UndoRedoProps } from ".";
@@ -43,14 +43,22 @@ const Separator = styled.div`
 const UndoRedo: React.FC<UndoRedoProps> = (props) => {
   const { renderer, ...rest } = props;
 
+  const undo = useCallback(() => {
+    renderer.annotation?.undo();
+  }, [renderer]);
+
+  const redo = useCallback(() => {
+    renderer.annotation?.redo();
+  }, [renderer]);
+
   return (
     <Container {...rest}>
       <IconContainer>
-        <UndoIcon onPointerDown={renderer.undo} />
+        <UndoIcon onPointerDown={undo} />
       </IconContainer>
       <Separator />
       <IconContainer>
-        <RedoIcon onPointerDown={renderer.redo} />
+        <RedoIcon onPointerDown={redo} />
       </IconContainer>
     </Container>
   );

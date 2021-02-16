@@ -49,15 +49,15 @@ export default class KeyEventHandler implements IDisposable {
       },
       {
         keys: ["control", "shift", "z"],
-        callback: renderer.redo,
+        callback: renderer.annotation.redo,
       },
       {
         keys: ["control", "y"],
-        callback: renderer.redo,
+        callback: renderer.annotation.redo,
       },
       {
         keys: ["control", "z"],
-        callback: renderer.undo,
+        callback: renderer.annotation.undo,
       },
       {
         keys: ["i"],

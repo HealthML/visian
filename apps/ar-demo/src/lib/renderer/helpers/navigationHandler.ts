@@ -162,7 +162,7 @@ export default class NavigationHandler implements IDisposable {
   public updateOrbitTarget = () => {
     const screenCenter = { x: 0, y: 0 };
     const objects = [
-      ...this.renderer.meshes,
+      ...this.renderer.annotation.structures,
       ...this.spriteHandler.spriteParts,
     ];
     const intersections = getIntersections(

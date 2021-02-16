@@ -13,14 +13,11 @@ import { getIntersectionsFromClickPosition } from "../utils";
 import {
   createCameraLight,
   createLights,
-  createMeshes,
-  createPickingMeshes,
   createScanContainer,
   createScanOffsetGroup,
-  getMaterials,
 } from "./creators";
 import {
-  AnnotationHandler,
+  Annotation,
   KeyEventHandler,
   NavigationHandler,
   Reticle,
@@ -35,19 +32,14 @@ export default class Renderer implements IDisposable {
   public scene = new THREE.Scene();
 
   private scanContainer: THREE.Group;
-  private meshGroup: THREE.Group;
   public scanOffsetGroup: THREE.Group;
 
   private pickingScene = new THREE.Scene();
   private pickingTexture = new THREE.WebGLRenderTarget(1, 1);
-  private pickingMeshes!: THREE.Mesh[];
-
-  public meshes!: THREE.Mesh[];
-  private materials!: THREE.MeshPhongMaterial[];
 
   public navigator!: NavigationHandler;
   public spriteHandler!: SpriteHandler;
-  private annotator!: AnnotationHandler;
+  public annotation!: Annotation;
   private reticle: Reticle;
 
   private renderDirty = true;
@@ -111,9 +103,6 @@ export default class Renderer implements IDisposable {
     this.scanContainer.add(this.scanOffsetGroup);
     this.scanOffsetGroup.updateMatrixWorld();
 
-    this.meshGroup = new THREE.Group();
-    this.scanOffsetGroup.add(this.meshGroup);
-
     this.spriteHandler = new SpriteHandler(this);
     this.scanOffsetGroup.add(this.spriteHandler.spriteGroup);
 
@@ -145,28 +134,19 @@ export default class Renderer implements IDisposable {
 
     // eslint-disable-next-line @typescript-eslint/no-floating-promises
     Promise.all(SCAN.getConnectedStructureGeometries()).then((geometries) => {
-      this.meshes = createMeshes(geometries);
-      this.materials = getMaterials(this.meshes);
-
-      this.meshGroup.add(...this.meshes);
+      this.annotation = new Annotation(this, geometries);
+      this.scanOffsetGroup.add(this.annotation.meshGroup);
 
       this.scene.add(this.scanContainer);
       this.scanContainer.updateMatrixWorld(true);
 
-      this.pickingMeshes = createPickingMeshes(geometries);
       const pickingScanContainer = createScanContainer();
 
       const pickingOffsetGroup = createScanOffsetGroup(SCAN.scanSize);
       pickingScanContainer.add(pickingOffsetGroup);
 
-      pickingOffsetGroup.add(...this.pickingMeshes);
+      pickingOffsetGroup.add(...this.annotation.pickingMeshes);
       this.pickingScene.add(pickingScanContainer);
-
-      this.annotator = new AnnotationHandler(
-        this,
-        this.meshes,
-        this.pickingMeshes,
-      );
 
       this.keyEventHandler = new KeyEventHandler(this);
 
@@ -174,10 +154,10 @@ export default class Renderer implements IDisposable {
       this.renderer.setAnimationLoop(this.animate);
 
       this.updateUI();
-    });
 
-    // For this demo we want the meshes to be hidden at first.
-    this.setMeshVisibility(false);
+      // For this demo we want the meshes to be hidden at first.
+      this.setMeshVisibility(false);
+    });
   }
 
   public dispose = () => {
@@ -371,21 +351,14 @@ export default class Renderer implements IDisposable {
     this.scanAnimation = !this.scanAnimation;
   };
 
+  // This function is only necessary for faking the AI.
   public setMeshVisibility = (visible: boolean) => {
-    this.meshGroup.visible = visible;
+    this.annotation.meshGroup.visible = visible;
     this.render();
   };
 
   public setActiveTool = (tool: Tool) => {
     this.activeTool = tool;
-  };
-
-  public undo = () => {
-    this.annotator.undo();
-  };
-
-  public redo = () => {
-    this.annotator.redo();
   };
 
   private selects = (index: number) => this.structureSelection.includes(index);
@@ -401,7 +374,7 @@ export default class Renderer implements IDisposable {
       ? hoveredStructureColor
       : defaultStructureColor;
 
-    this.materials[index].color = new THREE.Color(color);
+    this.annotation.getMaterial(index).color = new THREE.Color(color);
   };
 
   private updateHover = () => {
@@ -492,14 +465,14 @@ export default class Renderer implements IDisposable {
   };
 
   public deleteSelection = () => {
-    this.annotator.deleteConnectedStructures(this.structureSelection);
+    this.annotation.deleteStructures(this.structureSelection);
     this.structureSelection = [];
 
     this.render();
   };
 
   public invertSelection = () => {
-    for (let index = 0; index < this.meshes.length; index++) {
+    for (let index = 0; index < this.annotation.structureCount; index++) {
       this.select(index);
     }
 
@@ -528,11 +501,11 @@ export default class Renderer implements IDisposable {
   };
 
   private handleClick = (event: ClickPosition) => {
-    if (this.arActive || !this.meshGroup.visible) return;
+    if (this.arActive || !this.annotation.meshGroup.visible) return;
 
     const intersections = getIntersectionsFromClickPosition(
       event,
-      this.meshes,
+      this.annotation.structures,
       this.canvas,
       this.camera,
       this.pointerLocked,
@@ -545,7 +518,7 @@ export default class Renderer implements IDisposable {
 
       switch (this.activeTool) {
         case Tool.Eraser:
-          this.annotator.deleteConnectedStructures([index]);
+          this.annotation.deleteStructures([index]);
           if (this.selects(index)) this.select(index);
           break;
         case Tool.Selection:

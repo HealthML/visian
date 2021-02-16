@@ -5,20 +5,6 @@ import { convertPositionToWebGLPosition } from "./conversion";
 
 const raycaster = new THREE.Raycaster();
 
-export const applyVertexColor = (
-  geometry: THREE.BufferGeometry,
-  color: THREE.Color,
-) => {
-  const { position } = geometry.attributes;
-  const colors = [];
-
-  for (let i = 0; i < position.count; i++) {
-    colors.push(color.r, color.g, color.b);
-  }
-
-  geometry.setAttribute("color", new THREE.Float32BufferAttribute(colors, 3));
-};
-
 export const getIntersections = (
   webGLPosition: Pixel,
   objects: THREE.Object3D[],
