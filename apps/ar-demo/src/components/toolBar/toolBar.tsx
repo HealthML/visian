@@ -6,6 +6,7 @@ import { ToolBarProps } from ".";
 import { Tool } from "../../lib/types";
 import {
   ClearIcon,
+  CrosshairPointer,
   DeleteIcon,
   EraserIcon,
   InvertSelectionIcon,
@@ -76,6 +77,13 @@ const ToolBar: React.FC<ToolBarProps> = (props) => {
     }
   }, [setActiveTool, renderer]);
 
+  const [transformEnabled, setTransformEnabled] = useState(false);
+  const toggleTransform = useCallback(() => {
+    setTransformEnabled(!transformEnabled);
+    renderer.navigator.toggleTransformControls();
+    renderer.render();
+  }, [renderer, transformEnabled, setTransformEnabled]);
+
   const [showSettings, setShowSettings] = useState(false);
 
   const toggleSettings = useCallback(() => {
@@ -98,6 +106,10 @@ const ToolBar: React.FC<ToolBarProps> = (props) => {
             </ToolContainer>
           );
         })}
+        <ToolContainer>
+          {/* Todo: Add better icon. */}
+          <CrosshairPointer onPointerDown={toggleTransform} />
+        </ToolContainer>
         <ToolContainer>
           <SettingsIcon onPointerDown={toggleSettings} />
         </ToolContainer>

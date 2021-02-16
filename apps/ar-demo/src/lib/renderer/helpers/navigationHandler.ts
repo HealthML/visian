@@ -97,6 +97,8 @@ export default class NavigationHandler implements IDisposable {
       this.handleTransformMove,
     );
 
+    this.toggleTransformControls();
+
     this.spriteHandler.updateRenderOrder();
   }
 
@@ -124,6 +126,7 @@ export default class NavigationHandler implements IDisposable {
       "objectChange",
       this.handleTransformMove,
     );
+    this.transformControls.dispose();
 
     if (this.renderer.pointerLocked) this.togglePointerLock();
   };
@@ -333,6 +336,11 @@ export default class NavigationHandler implements IDisposable {
         this.spriteHandler.spriteGroup.position,
       );
     }
+  };
+
+  public toggleTransformControls = () => {
+    this.transformControls.enabled = !this.transformControls.enabled;
+    this.transformControls.visible = !this.transformControls.visible;
   };
 
   private handleTransformMove = () => {
