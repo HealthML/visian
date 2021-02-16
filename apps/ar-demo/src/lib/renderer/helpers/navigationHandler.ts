@@ -19,7 +19,7 @@ export default class NavigationHandler implements IDisposable {
 
   private lastMouseEvent?: MouseEvent;
 
-  private speed = 0.004;
+  public speed = 0.004;
 
   private pointerControls: PointerLockControls;
   private orbitControls: OrbitControls;

@@ -1,0 +1,95 @@
+import { Sheet, Slider, Text } from "@classifai/ui-shared";
+import React, { useCallback, useState } from "react";
+import styled from "styled-components";
+
+import { SettingsProps } from ".";
+
+const Container = styled(Sheet)`
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  left: 52px;
+  top: 52px;
+  width: 250px;
+  padding: 10px;
+  pointer-events: auto;
+  align-items: flex-start;
+`;
+
+const StyledSlider = styled(Slider)`
+  margin-bottom: 10px;
+`;
+
+const Settings: React.FC<SettingsProps> = (props) => {
+  const { renderer, ...rest } = props;
+
+  const [opacity, setOpacity] = useState(renderer.spriteHandler.opacity);
+  const opacityCallback = useCallback(
+    (value: number) => {
+      setOpacity(value);
+      renderer.spriteHandler.setOpacity(value);
+    },
+    [renderer, setOpacity],
+  );
+
+  const [contrast, setContrast] = useState(
+    Math.log(renderer.spriteHandler.contrast),
+  );
+  const contrastCallback = useCallback(
+    (value: number) => {
+      setContrast(value);
+      renderer.spriteHandler.setContrast(Math.exp(value));
+    },
+    [renderer, setContrast],
+  );
+
+  const [brightness, setBrightness] = useState(
+    Math.log(renderer.spriteHandler.brightness),
+  );
+  const brightnessCallback = useCallback(
+    (value: number) => {
+      setBrightness(value);
+      renderer.spriteHandler.setBrightness(Math.exp(value));
+    },
+    [renderer, setBrightness],
+  );
+
+  const [speed, setSpeed] = useState(renderer.navigator.speed);
+  const speedCallback = useCallback(
+    (value: number) => {
+      setSpeed(value);
+      renderer.navigator.setSpeed(value);
+    },
+    [renderer, setSpeed],
+  );
+
+  return (
+    <Container {...rest}>
+      <Text text="Opacity" />
+      <StyledSlider
+        value={opacity}
+        onChange={opacityCallback}
+        min={0}
+        max={1}
+      />
+      <Text text="Contrast" />
+      <StyledSlider
+        value={contrast}
+        onChange={contrastCallback}
+        min={-1}
+        max={1}
+      />
+      <Text text="Brightness" />
+      <StyledSlider
+        value={brightness}
+        onChange={brightnessCallback}
+        min={-1}
+        max={1}
+      />
+      <Text text="Speed (Fly Controls)" />
+      <Slider value={speed} onChange={speedCallback} min={0.001} max={0.015} />
+    </Container>
+  );
+};
+
+export default Settings;

@@ -113,6 +113,10 @@ export default class SpriteHandler {
     this.renderer.render();
   };
 
+  public get opacity(): number {
+    return this.materials[0].uniforms.opacity.value;
+  }
+
   public setContrast = (contrast: number) => {
     this.materials.forEach((material) => {
       // eslint-disable-next-line no-param-reassign
@@ -122,6 +126,10 @@ export default class SpriteHandler {
     this.renderer.render();
   };
 
+  public get contrast(): number {
+    return this.materials[0].uniforms.contrast.value;
+  }
+
   public setBrightness = (brightness: number) => {
     this.materials.forEach((material) => {
       // eslint-disable-next-line no-param-reassign
@@ -130,6 +138,10 @@ export default class SpriteHandler {
 
     this.renderer.render();
   };
+
+  public get brightness(): number {
+    return this.materials[0].uniforms.brightness.value;
+  }
 
   public setSpriteVisibility = (visible: boolean) => {
     this.spriteGroup.visible = visible;

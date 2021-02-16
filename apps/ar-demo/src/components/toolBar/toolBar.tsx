@@ -1,5 +1,5 @@
 import { FlexColumn, Sheet } from "@classifai/ui-shared";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import styled from "styled-components";
 
 import { ToolBarProps } from ".";
@@ -10,7 +10,9 @@ import {
   EraserIcon,
   InvertSelectionIcon,
   SelectIcon,
+  SettingsIcon,
 } from "../icons";
+import Settings from "../settings/settings";
 
 const Container = FlexColumn;
 
@@ -20,6 +22,7 @@ const ToolBarContainer = styled(Sheet)`
   margin-bottom: 10px;
   padding: 5px;
   pointer-events: auto;
+  position: relative;
 `;
 
 interface ToolContainerProps {
@@ -73,6 +76,12 @@ const ToolBar: React.FC<ToolBarProps> = (props) => {
     }
   }, [setActiveTool, renderer]);
 
+  const [showSettings, setShowSettings] = useState(false);
+
+  const toggleSettings = useCallback(() => {
+    setShowSettings(!showSettings);
+  }, [showSettings, setShowSettings]);
+
   return (
     <Container {...rest}>
       <ToolBarContainer>
@@ -89,6 +98,10 @@ const ToolBar: React.FC<ToolBarProps> = (props) => {
             </ToolContainer>
           );
         })}
+        <ToolContainer>
+          <SettingsIcon onPointerDown={toggleSettings} />
+        </ToolContainer>
+        {showSettings && <Settings renderer={renderer} />}
       </ToolBarContainer>
       {activeTool === Tool.Selection && (
         <ToolBarContainer>

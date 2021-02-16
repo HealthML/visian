@@ -6,3 +6,4 @@ export { ReactComponent as InvertSelectionIcon } from "./invertSelection.svg";
 export { ReactComponent as UndoIcon } from "./undo.svg";
 export { ReactComponent as RedoIcon } from "./redo.svg";
 export { ReactComponent as CrosshairPointer } from "./crosshairPointer.svg";
+export { ReactComponent as SettingsIcon } from "./settings.svg";
