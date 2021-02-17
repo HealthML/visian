@@ -23,6 +23,7 @@ import {
   Reticle,
   SpriteHandler,
 } from "./helpers";
+import ScanNavigator from "./helpers/scanNavigator";
 
 export default class Renderer implements IDisposable {
   private keyEventHandler!: KeyEventHandler;
@@ -38,6 +39,7 @@ export default class Renderer implements IDisposable {
   private pickingTexture = new THREE.WebGLRenderTarget(1, 1);
 
   public cameraNavigator!: CameraNavigator;
+  public scanNavigator!: ScanNavigator;
   public spriteHandler!: SpriteHandler;
   public annotation!: Annotation;
   private reticle: Reticle;
@@ -106,6 +108,12 @@ export default class Renderer implements IDisposable {
       this.spriteHandler,
       cameraLight,
       this.canvasContainer,
+    );
+    this.scanNavigator = new ScanNavigator(
+      this,
+      this.canvas,
+      this.spriteHandler,
+      this.cameraNavigator,
     );
 
     this.camera.position.copy(
