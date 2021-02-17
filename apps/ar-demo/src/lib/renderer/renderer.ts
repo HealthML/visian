@@ -21,9 +21,9 @@ import {
   CameraNavigator,
   KeyEventHandler,
   Reticle,
+  ScanNavigator,
   SpriteHandler,
 } from "./helpers";
-import ScanNavigator from "./helpers/scanNavigator";
 
 export default class Renderer implements IDisposable {
   private keyEventHandler!: KeyEventHandler;
