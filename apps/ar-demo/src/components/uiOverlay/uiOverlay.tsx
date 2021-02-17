@@ -50,7 +50,7 @@ const UIOverlay: React.FC<UIOverlayProps> = (props) => {
         </>
       )}
       <MagicAIButton renderer={renderer} />
-      {renderer.pointerLocked && <Crosshair />}
+      {renderer.navigator.isPointerLocked && <Crosshair />}
     </FullScreenDiv>
   );
 };

@@ -49,11 +49,16 @@ export default class NavigationHandler implements IDisposable {
     canvasContainer: HTMLDivElement,
   ) {
     this.camera = renderer.camera;
+    document.addEventListener("mousemove", this.saveMouseEvent);
 
     this.pointerControls = new PointerLockControls(
       this.camera,
       canvasContainer,
     );
+    this.pointerControls.addEventListener("change", this.onCameraMove);
+    this.pointerControls.addEventListener("lock", this.onPointerLocked);
+    this.pointerControls.addEventListener("unlock", this.onPointerUnlocked);
+
     const target = this.renderer.scanOffsetGroup.localToWorld(
       this.spriteHandler.spriteGroup.position.clone(),
     );
@@ -63,16 +68,11 @@ export default class NavigationHandler implements IDisposable {
       target,
     );
 
-    document.addEventListener("mousemove", this.saveMouseEvent);
-    this.pointerControls.addEventListener("change", this.onCameraMove);
     this.orbitControls.addEventListener("change", this.onCameraMove);
     this.orbitControls.addEventListener(
       "change",
       this.spriteHandler.updateRenderOrder,
     );
-    // Block wheel events from reaching the orbit controls.
-    // We don't want to disable zoom completely to keep it on touch devices.
-    this.canvas.addEventListener("wheel", this.stopPropergation);
 
     this.transformObject = new THREE.Object3D();
     this.transformObject.position.copy(this.spriteHandler.spriteGroup.position);
@@ -97,6 +97,8 @@ export default class NavigationHandler implements IDisposable {
       this.handleTransformMove,
     );
 
+    this.canvas.addEventListener("wheel", this.handleWheel);
+
     this.toggleTransformControls();
 
     this.spriteHandler.updateRenderOrder();
@@ -104,15 +106,19 @@ export default class NavigationHandler implements IDisposable {
 
   public dispose = () => {
     document.removeEventListener("mousemove", this.saveMouseEvent);
+
+    if (this.isPointerLocked) this.togglePointerLock();
     this.pointerControls.removeEventListener("change", this.onCameraMove);
+    this.pointerControls.removeEventListener("lock", this.onPointerLocked);
+    this.pointerControls.removeEventListener("unlock", this.onPointerUnlocked);
     this.pointerControls.dispose();
+
     this.orbitControls.removeEventListener("change", this.onCameraMove);
     this.orbitControls.removeEventListener(
       "change",
       this.spriteHandler.updateRenderOrder,
     );
     this.orbitControls.dispose();
-    this.canvas.removeEventListener("wheel", this.stopPropergation);
 
     this.transformControls.removeEventListener(
       "mouseDown",
@@ -128,12 +134,12 @@ export default class NavigationHandler implements IDisposable {
     );
     this.transformControls.dispose();
 
-    if (this.renderer.pointerLocked) this.togglePointerLock();
+    this.canvas.removeEventListener("wheel", this.handleWheel);
   };
 
-  private stopPropergation = (event: Event) => {
-    event.stopPropagation();
-  };
+  public get isPointerLocked() {
+    return this.pointerControls.isLocked;
+  }
 
   private disableOrbitControls = () => {
     this.orbitControls.enabled = false;
@@ -141,6 +147,7 @@ export default class NavigationHandler implements IDisposable {
 
   private enableOrbitControls = () => {
     this.orbitControls.enabled = true;
+    this.updateOrbitTarget();
   };
 
   private getCameraTarget = () => {
@@ -187,10 +194,6 @@ export default class NavigationHandler implements IDisposable {
     this.lastMouseEvent = event;
   };
 
-  private get isPointerLocked() {
-    return this.pointerControls.isLocked;
-  }
-
   public moveForward = () => {
     this.camera.getWorldDirection(this.direction);
     this.camera.position.addScaledVector(this.direction, this.speed);
@@ -235,18 +238,50 @@ export default class NavigationHandler implements IDisposable {
 
   public togglePointerLock = () => {
     try {
-      if (this.renderer.pointerLocked) {
+      if (this.isPointerLocked) {
         this.pointerControls.unlock();
-        this.orbitControls.enabled = true;
-        this.updateOrbitTarget();
       } else {
         this.pointerControls.lock();
-        this.orbitControls.enabled = false;
       }
-      this.renderer.togglePointerLock();
-      this.renderer.render();
     } catch {
       // no-op
+    }
+  };
+
+  private onPointerLocked = () => {
+    this.disableOrbitControls();
+    this.canvas.removeEventListener("wheel", this.handleWheel);
+    document.addEventListener("wheel", this.handleWheel);
+
+    // The lock event is fired before the isLocked property of the controls is
+    // changed. We wait a few ms for isLocked to be updated before updating the UI.
+    setTimeout(() => {
+      this.renderer.updateUI();
+    }, 5);
+  };
+
+  private onPointerUnlocked = () => {
+    this.enableOrbitControls();
+    document.removeEventListener("wheel", this.handleWheel);
+    this.canvas.addEventListener("wheel", this.handleWheel);
+
+    // The lock event is fired before the isLocked property of the controls is
+    // changed. We wait a few ms for isLocked to be updated before updating the UI.
+    setTimeout(() => {
+      this.renderer.updateUI();
+    }, 5);
+  };
+
+  private handleWheel = (event: WheelEvent) => {
+    event.preventDefault();
+    // Block wheel events from reaching the orbit controls.
+    // We don't want to disable zoom completely to keep it on touch devices.
+    event.stopPropagation();
+
+    if (event.deltaY > 0) {
+      this.increaseSpritePosition();
+    } else if (event.deltaY < 0) {
+      this.decreaseSpritePosition();
     }
   };
 
@@ -258,7 +293,7 @@ export default class NavigationHandler implements IDisposable {
       this.spriteHandler.spriteParts,
       this.canvas,
       this.renderer.camera,
-      this.renderer.pointerLocked,
+      this.isPointerLocked,
     );
 
     if (intersections.length) {
@@ -302,7 +337,7 @@ export default class NavigationHandler implements IDisposable {
       this.spriteHandler.spriteParts,
       this.canvas,
       this.renderer.camera,
-      this.renderer.pointerLocked,
+      this.isPointerLocked,
     );
 
     if (intersections.length) {

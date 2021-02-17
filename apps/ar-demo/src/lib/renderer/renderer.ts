@@ -46,13 +46,10 @@ export default class Renderer implements IDisposable {
   public arActive = false;
   private lastTimestamp = 0;
 
-  public pointerLocked = false;
   private hoveredStructureIndex?: number;
   private structureSelection: number[] = [];
 
   public activeTool = Tool.Selection;
-
-  private crosshair: HTMLElement | null;
 
   private lastMouseEvent?: MouseEvent;
 
@@ -67,13 +64,11 @@ export default class Renderer implements IDisposable {
   private scanBaseRotation = Math.PI;
   private acceptARSelect = true;
 
-  constructor(private canvas: HTMLCanvasElement, private updateUI: () => void) {
+  constructor(private canvas: HTMLCanvasElement, public updateUI: () => void) {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     this.domOverlay = document.getElementById("ar-overlay")!;
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     this.canvasContainer = canvas.parentElement! as HTMLDivElement;
-
-    this.crosshair = document.getElementById("crosshairPointer");
 
     this.renderer = new THREE.WebGLRenderer({ alpha: true, canvas });
     this.renderer.setPixelRatio(window.devicePixelRatio);
@@ -88,7 +83,6 @@ export default class Renderer implements IDisposable {
 
     document.addEventListener("pointerup", this.handleClick);
     document.addEventListener("mousemove", this.handleMouseMove);
-    canvas.addEventListener("wheel", this.handleWheel);
     window.addEventListener("resize", this.resize);
     this.resize();
 
@@ -164,7 +158,6 @@ export default class Renderer implements IDisposable {
     window.removeEventListener("resize", this.resize);
     document.removeEventListener("pointerup", this.handleClick);
     document.removeEventListener("mousemove", this.handleMouseMove);
-    this.canvas.removeEventListener("wheel", this.handleWheel);
     this.navigator.dispose();
     this.keyEventHandler.dispose();
   };
@@ -311,21 +304,6 @@ export default class Renderer implements IDisposable {
     }
   };
 
-  public togglePointerLock = () => {
-    this.pointerLocked = !this.pointerLocked;
-    if (this.pointerLocked) {
-      if (this.crosshair) this.crosshair.style.display = "flex";
-      this.canvas.removeEventListener("wheel", this.handleWheel);
-      document.addEventListener("wheel", this.handleWheel);
-    } else {
-      if (this.crosshair) this.crosshair.style.display = "none";
-      document.removeEventListener("wheel", this.handleWheel);
-      this.canvas.addEventListener("wheel", this.handleWheel);
-    }
-
-    this.updateUI();
-  };
-
   public setScanRotation = (rotation: number) => {
     this.scanContainer.rotation.z = this.scanBaseRotation + rotation;
     this.render();
@@ -381,7 +359,7 @@ export default class Renderer implements IDisposable {
     if (!this.lastMouseEvent || this.arActive) return;
 
     let pointer: Pixel;
-    if (this.pointerLocked) {
+    if (this.navigator.isPointerLocked) {
       pointer = {
         x: Math.floor(this.canvas.width / 2),
         y: Math.floor(this.canvas.height / 2),
@@ -508,7 +486,7 @@ export default class Renderer implements IDisposable {
       this.annotation.structures,
       this.canvas,
       this.camera,
-      this.pointerLocked,
+      this.navigator.isPointerLocked,
     );
 
     const intersection = intersections.find((i) => i.object.visible);
@@ -535,15 +513,5 @@ export default class Renderer implements IDisposable {
   private handleMouseMove = (event: MouseEvent) => {
     this.lastMouseEvent = event;
     this.render();
-  };
-
-  private handleWheel = (event: WheelEvent) => {
-    event.preventDefault();
-
-    if (event.deltaY > 0) {
-      this.navigator.increaseSpritePosition();
-    } else if (event.deltaY < 0) {
-      this.navigator.decreaseSpritePosition();
-    }
   };
 }
