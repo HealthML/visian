@@ -13,7 +13,7 @@ import {
 import createOrbitControls from "../creators/orbitControls";
 import SpriteHandler from "./spriteHandler";
 
-export default class NavigationHandler implements IDisposable {
+export default class CameraNavigator implements IDisposable {
   private camera: THREE.PerspectiveCamera;
 
   private direction = new THREE.Vector3();

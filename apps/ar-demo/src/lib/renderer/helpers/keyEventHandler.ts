@@ -14,38 +14,38 @@ export default class KeyEventHandler implements IDisposable {
     this.continuousCallbacks = [
       {
         keys: ["w"],
-        callback: renderer.navigator.moveForward,
+        callback: renderer.cameraNavigator.moveForward,
       },
       {
         keys: ["a"],
-        callback: renderer.navigator.moveLeft,
+        callback: renderer.cameraNavigator.moveLeft,
       },
       {
         keys: ["s"],
-        callback: renderer.navigator.moveBack,
+        callback: renderer.cameraNavigator.moveBack,
       },
       {
         keys: ["d"],
-        callback: renderer.navigator.moveRight,
+        callback: renderer.cameraNavigator.moveRight,
       },
       {
         keys: ["shift"],
         callback: () => {
           if (!this.pressedKeys.control && !this.pressedKeys.y) {
-            renderer.navigator.moveDown();
+            renderer.cameraNavigator.moveDown();
           }
         },
       },
       {
         keys: [" "],
-        callback: renderer.navigator.moveUp,
+        callback: renderer.cameraNavigator.moveUp,
       },
     ];
 
     this.shortcuts = [
       {
         keys: ["t"],
-        callback: renderer.navigator.togglePointerLock,
+        callback: renderer.cameraNavigator.togglePointerLock,
       },
       {
         keys: ["control", "shift", "z"],

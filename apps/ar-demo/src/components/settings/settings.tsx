@@ -54,11 +54,11 @@ const Settings: React.FC<SettingsProps> = (props) => {
     [renderer, setBrightness],
   );
 
-  const [speed, setSpeed] = useState(renderer.navigator.speed);
+  const [speed, setSpeed] = useState(renderer.cameraNavigator.speed);
   const speedCallback = useCallback(
     (value: number) => {
       setSpeed(value);
-      renderer.navigator.setSpeed(value);
+      renderer.cameraNavigator.setSpeed(value);
     },
     [renderer, setSpeed],
   );

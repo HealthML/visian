@@ -80,7 +80,7 @@ const ToolBar: React.FC<ToolBarProps> = (props) => {
   const [transformEnabled, setTransformEnabled] = useState(false);
   const toggleTransform = useCallback(() => {
     setTransformEnabled(!transformEnabled);
-    renderer.navigator.toggleTransformControls();
+    renderer.cameraNavigator.toggleTransformControls();
     renderer.render();
   }, [renderer, transformEnabled, setTransformEnabled]);
 

@@ -18,8 +18,8 @@ import {
 } from "./creators";
 import {
   Annotation,
+  CameraNavigator,
   KeyEventHandler,
-  NavigationHandler,
   Reticle,
   SpriteHandler,
 } from "./helpers";
@@ -37,7 +37,7 @@ export default class Renderer implements IDisposable {
   private pickingScene = new THREE.Scene();
   private pickingTexture = new THREE.WebGLRenderTarget(1, 1);
 
-  public navigator!: NavigationHandler;
+  public cameraNavigator!: CameraNavigator;
   public spriteHandler!: SpriteHandler;
   public annotation!: Annotation;
   private reticle: Reticle;
@@ -100,7 +100,7 @@ export default class Renderer implements IDisposable {
     this.spriteHandler = new SpriteHandler(this);
     this.scanOffsetGroup.add(this.spriteHandler.spriteGroup);
 
-    this.navigator = new NavigationHandler(
+    this.cameraNavigator = new CameraNavigator(
       this,
       this.canvas,
       this.spriteHandler,
@@ -158,7 +158,7 @@ export default class Renderer implements IDisposable {
     window.removeEventListener("resize", this.resize);
     document.removeEventListener("pointerup", this.handleClick);
     document.removeEventListener("mousemove", this.handleMouseMove);
-    this.navigator.dispose();
+    this.cameraNavigator.dispose();
     this.keyEventHandler.dispose();
   };
 
@@ -359,7 +359,7 @@ export default class Renderer implements IDisposable {
     if (!this.lastMouseEvent || this.arActive) return;
 
     let pointer: Pixel;
-    if (this.navigator.isPointerLocked) {
+    if (this.cameraNavigator.isPointerLocked) {
       pointer = {
         x: Math.floor(this.canvas.width / 2),
         y: Math.floor(this.canvas.height / 2),
@@ -486,7 +486,7 @@ export default class Renderer implements IDisposable {
       this.annotation.structures,
       this.canvas,
       this.camera,
-      this.navigator.isPointerLocked,
+      this.cameraNavigator.isPointerLocked,
     );
 
     const intersection = intersections.find((i) => i.object.visible);
