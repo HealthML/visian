@@ -8,8 +8,8 @@ const Container = styled(Sheet)`
   position: absolute;
   display: flex;
   flex-direction: column;
-  left: 52px;
-  top: 52px;
+  left: ${52 + 12}px;
+  top: ${52 + 12}px;
   width: 250px;
   padding: 10px;
   pointer-events: auto;

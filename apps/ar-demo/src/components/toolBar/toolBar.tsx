@@ -13,7 +13,6 @@ import {
   SelectIcon,
   SettingsIcon,
 } from "../icons";
-import Settings from "../settings/settings";
 
 const Container = FlexColumn;
 
@@ -54,7 +53,7 @@ const tools = [Tool.Selection, Tool.Eraser];
 const ToolIcons = [SelectIcon, EraserIcon];
 
 const ToolBar: React.FC<ToolBarProps> = (props) => {
-  const { renderer, ...rest } = props;
+  const { renderer, showSettings, toggleSettings, ...rest } = props;
 
   const [activeTool, setActiveTool] = useState<Tool>(Tool.Selection);
 
@@ -84,12 +83,6 @@ const ToolBar: React.FC<ToolBarProps> = (props) => {
     renderer.render();
   }, [renderer, transformEnabled, setTransformEnabled]);
 
-  const [showSettings, setShowSettings] = useState(false);
-
-  const toggleSettings = useCallback(() => {
-    setShowSettings(!showSettings);
-  }, [showSettings, setShowSettings]);
-
   return (
     <Container {...rest}>
       <ToolBarContainer>
@@ -113,7 +106,6 @@ const ToolBar: React.FC<ToolBarProps> = (props) => {
         <ToolContainer active={showSettings}>
           <SettingsIcon onPointerDown={toggleSettings} />
         </ToolContainer>
-        {showSettings && <Settings renderer={renderer} />}
       </ToolBarContainer>
       {activeTool === Tool.Selection && (
         <ToolBarContainer>

@@ -1,5 +1,5 @@
 import { FlexRow } from "@classifai/ui-shared";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import styled from "styled-components";
 
 import { UIOverlayProps } from ".";
@@ -7,6 +7,7 @@ import ARButton from "../arButton/arButton";
 import AROverlay from "../arOverlay/arOverlay";
 import Crosshair from "../crosshair/crosshair";
 import MagicAIButton from "../magicAIButton/magicAIButton";
+import Settings from "../settings/settings";
 import ToolBar from "../toolBar/toolBar";
 import UndoRedo from "../undoRedo/undoRedo";
 
@@ -39,9 +40,19 @@ const UIOverlay: React.FC<UIOverlayProps> = (props) => {
     }
   }, [setARAvailable]);
 
+  const [showSettings, setShowSettings] = useState(false);
+  const toggleSettings = useCallback(() => {
+    setShowSettings(!showSettings);
+  }, [showSettings, setShowSettings]);
+
   return (
     <FullScreenDiv {...rest}>
-      <ToolBar renderer={renderer} />
+      <ToolBar
+        renderer={renderer}
+        showSettings={showSettings}
+        toggleSettings={toggleSettings}
+      />
+      {showSettings && <Settings renderer={renderer} />}
       <UndoRedo renderer={renderer} />
       {aRAvailable && (
         <>
