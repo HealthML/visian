@@ -45,7 +45,24 @@ interface ThumbProps extends VerticalProps {
   position: string;
 }
 
-const Thumb = styled.div<ThumbProps>`
+const Thumb = styled.div.attrs<ThumbProps>((props) => ({
+  style: {
+    top: props.isVertical
+      ? props.position
+      : `${
+          (parseNumberFromMetric(size("sliderHeight")(props)) -
+            parseNumberFromMetric(size("sliderThumbHeight")(props))) /
+          2
+        }${parseUnitFromMetric(size("sliderThumbHeight")(props))}`,
+    left: props.isVertical
+      ? `${
+          (parseNumberFromMetric(size("sliderHeight")(props)) -
+            parseNumberFromMetric(size("sliderThumbHeight")(props))) /
+          2
+        }${parseUnitFromMetric(size("sliderThumbHeight")(props))}`
+      : props.position,
+  },
+}))<ThumbProps>`
   background-color: ${color("gray")};
   border: none;
   border-radius: ${(props) =>
@@ -62,22 +79,6 @@ const Thumb = styled.div<ThumbProps>`
         ? "0"
         : scaleMetric(size("sliderThumbWidth")(props), -0.5)};
   position: absolute;
-  top: ${(props) =>
-    props.isVertical
-      ? props.position
-      : `${
-          (parseNumberFromMetric(size("sliderHeight")(props)) -
-            parseNumberFromMetric(size("sliderThumbHeight")(props))) /
-          2
-        }${parseUnitFromMetric(size("sliderThumbHeight")(props))}`};
-  left: ${(props) =>
-    props.isVertical
-      ? `${
-          (parseNumberFromMetric(size("sliderHeight")(props)) -
-            parseNumberFromMetric(size("sliderThumbHeight")(props))) /
-          2
-        }${parseUnitFromMetric(size("sliderThumbHeight")(props))}`
-      : props.position};
   transition: background-color 0.3s;
   width: ${(props) =>
     props.isVertical ? size("sliderThumbHeight") : size("sliderThumbWidth")};
