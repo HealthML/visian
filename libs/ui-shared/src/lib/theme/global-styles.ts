@@ -1,7 +1,7 @@
 import { createGlobalStyle } from "styled-components";
 
-import helveticaNeueBold from "./fonts/HelveticaNeue-Bold.ttf";
-import helveticaNeueLight from "./fonts/HelveticaNeue-Light.ttf";
+import boldFont from "./fonts/DIN2014-DemiBold.ttf";
+import lightFont from "./fonts/DIN2014-Light.ttf";
 import { ThemeProps } from "./theme";
 import { color, font, fontSize, fontWeight } from "./utils";
 
@@ -12,14 +12,14 @@ export interface GlobalStylesProps {
 
 export const GlobalStyles = createGlobalStyle<GlobalStylesProps & ThemeProps>`
   @font-face {
-    font-family: 'Helvetica Neue';
-    src: local('Helvetica Neue Bold'), url(${helveticaNeueBold});
+    font-family: 'DIN2014';
+    src: local('DIN2014 DemiBold'), url(${boldFont});
     font-weight: 700;
     font-style: normal;
   }
   @font-face {
-    font-family: 'Helvetica Neue';
-    src: local('Helvetica Neue Light'), url(${helveticaNeueLight});
+    font-family: 'DIN2014';
+    src: local('DIN2014 Light'), url(${lightFont});
     font-weight: 300;
     font-style: normal;
   }

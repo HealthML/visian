@@ -7,12 +7,12 @@ import { ARButtonProps } from ".";
 const StyledButton = styled(Button)`
   display: flex;
   flex-direction: row;
-  margin-left: 10px;
+  margin-left: 12px;
   padding: 5px;
   justify-content: center;
   align-items: center;
-  width: 44px;
-  height: 44px;
+  width: 46px;
+  height: 46px;
   pointer-events: auto;
 `;
 

@@ -17,12 +17,14 @@ import {
 const Container = FlexColumn;
 
 const ToolBarContainer = styled(Sheet)`
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
   margin-bottom: 10px;
-  padding: 5px;
+  padding: 10px 5px;
   pointer-events: auto;
   position: relative;
+  width: 46px;
 `;
 
 interface ToolContainerProps {
@@ -32,10 +34,10 @@ interface ToolContainerProps {
 const ToolContainer = styled.div<ToolContainerProps>`
   align-items: center;
   display: flex;
-  height: 20px;
+  height: 22px;
   justify-content: center;
-  margin: 5px;
-  width: 20px;
+  margin: 10px 6px;
+  width: 22px;
   cursor: pointer;
 
   * {

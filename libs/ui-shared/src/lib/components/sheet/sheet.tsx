@@ -7,9 +7,9 @@ import noise from "./noise.png";
 import { SheetProps } from "./sheet.props";
 
 export const sheetMixin = (props: ThemeProps) => css`
-  backdrop-filter: blur(75px);
+  backdrop-filter: blur(50px);
   background: url(${noise}) left top repeat, ${color("sheet")};
-  border: 2px solid ${color("sheetBorder")};
+  border: 1px solid ${color("sheetBorder")};
 `;
 
 // Placeholder for actual implementation.

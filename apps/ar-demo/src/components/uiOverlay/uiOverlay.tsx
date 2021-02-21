@@ -1,4 +1,4 @@
-import { FlexRow } from "@classifai/ui-shared";
+import { FlexColumn, FlexRow } from "@classifai/ui-shared";
 import React, { useCallback, useEffect, useState } from "react";
 import styled from "styled-components";
 
@@ -21,6 +21,10 @@ const FullScreenDiv = styled(FlexRow)`
   padding: 10px;
   z-index: 1;
   pointer-events: none;
+`;
+
+const UIColumn = styled(FlexColumn)`
+  margin-left: 12px;
 `;
 
 const UIOverlay: React.FC<UIOverlayProps> = (props) => {
@@ -52,14 +56,18 @@ const UIOverlay: React.FC<UIOverlayProps> = (props) => {
         showSettings={showSettings}
         toggleSettings={toggleSettings}
       />
-      {showSettings && <Settings renderer={renderer} />}
-      <UndoRedo renderer={renderer} />
-      {aRAvailable && (
-        <>
-          <ARButton renderer={renderer} />
-          <AROverlay renderer={renderer} />
-        </>
-      )}
+      <UIColumn>
+        <FlexRow>
+          <UndoRedo renderer={renderer} />
+          {aRAvailable && (
+            <>
+              <ARButton renderer={renderer} />
+              <AROverlay renderer={renderer} />
+            </>
+          )}
+        </FlexRow>
+        {showSettings && <Settings renderer={renderer} />}
+      </UIColumn>
       <MagicAIButton renderer={renderer} />
       {renderer.cameraNavigator.isPointerLocked && <Crosshair />}
     </FullScreenDiv>

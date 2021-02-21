@@ -5,15 +5,20 @@ import styled from "styled-components";
 import { SettingsProps } from ".";
 
 const Container = styled(Sheet)`
-  position: absolute;
   display: flex;
   flex-direction: column;
-  left: ${52 + 12}px;
-  top: ${52 + 12}px;
+  margin-top: 12px;
   width: 250px;
-  padding: 10px;
+  padding: 15px 16px;
   pointer-events: auto;
   align-items: flex-start;
+`;
+
+const StyledText = styled(Text)`
+  font-size: 16px;
+  font-weight: bold;
+  color: gray;
+  margin-bottom: 6px;
 `;
 
 const StyledSlider = styled(Slider)`
@@ -65,28 +70,28 @@ const Settings: React.FC<SettingsProps> = (props) => {
 
   return (
     <Container {...rest}>
-      <Text text="Opacity" />
+      <StyledText text="Opacity" />
       <StyledSlider
         value={opacity}
         onChange={opacityCallback}
         min={0}
         max={1}
       />
-      <Text text="Contrast" />
+      <StyledText text="Contrast" />
       <StyledSlider
         value={contrast}
         onChange={contrastCallback}
         min={-1}
         max={1}
       />
-      <Text text="Brightness" />
+      <StyledText text="Brightness" />
       <StyledSlider
         value={brightness}
         onChange={brightnessCallback}
         min={-1}
         max={1}
       />
-      <Text text="Speed (Fly Controls)" />
+      <StyledText text="Speed (Fly Controls)" />
       <Slider value={speed} onChange={speedCallback} min={0.001} max={0.015} />
     </Container>
   );

@@ -22,14 +22,14 @@ const MagicAIButton: React.FC<MagicAIButtonProps> = (props) => {
 
   const [clicked, setClicked] = useState<boolean>(false);
 
-  const [text, setText] = useState<string>("Generate AI segmentations.");
+  const [text, setText] = useState<string>("Generate AI segmentations");
 
   const callback = useCallback(() => {
     setClicked(true);
     setText("Processing...");
     setTimeout(() => {
       renderer.setMeshVisibility(true);
-      setText("AI results are shown.");
+      setText("AI results are shown");
     }, 1000);
   }, [setClicked, renderer, setText]);
 

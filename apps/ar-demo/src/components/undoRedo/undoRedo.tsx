@@ -6,11 +6,12 @@ import { UndoRedoProps } from ".";
 import { RedoIcon, UndoIcon } from "../icons";
 
 const Container = styled(Sheet)`
+  align-self: flex-start;
+  box-sizing: border-box;
   display: flex;
   flex-direction: row;
-  margin-left: 10px;
-  padding: 5px;
-  justify-content: stretch;
+  height: 46px;
+  padding: 5px 7px;
   pointer-events: auto;
 `;
 
@@ -36,8 +37,10 @@ const IconContainer = styled.div`
 
 const Separator = styled.div`
   border-left: solid 1px gray;
+  height: 24px;
+  margin: 0 5px;
+  opacity: 0.8;
   width: 1px;
-  height: 20px;
 `;
 
 const UndoRedo: React.FC<UndoRedoProps> = (props) => {
