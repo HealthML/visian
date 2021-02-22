@@ -1,4 +1,4 @@
-import { Sheet, Slider, Text } from "@classifai/ui-shared";
+import { color, Sheet, Slider, Text } from "@classifai/ui-shared";
 import React, { useCallback, useState } from "react";
 import styled from "styled-components";
 
@@ -17,7 +17,7 @@ const Container = styled(Sheet)`
 const StyledText = styled(Text)`
   font-size: 16px;
   font-weight: bold;
-  color: gray;
+  color: ${color("gray")};
   margin-bottom: 6px;
 `;
 

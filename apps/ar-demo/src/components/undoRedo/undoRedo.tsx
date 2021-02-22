@@ -1,4 +1,4 @@
-import { Sheet } from "@classifai/ui-shared";
+import { color, Sheet } from "@classifai/ui-shared";
 import React, { useCallback } from "react";
 import styled from "styled-components";
 
@@ -25,18 +25,18 @@ const IconContainer = styled.div`
   cursor: pointer;
 
   * {
-    fill: gray;
+    fill: ${color("gray")};
   }
 
   &:active {
     * {
-      fill: darkgray;
+      fill: ${color("text")};
     }
   }
 `;
 
 const Separator = styled.div`
-  border-left: solid 1px gray;
+  border-left: solid 1px ${color("gray")};
   height: 24px;
   margin: 0 5px;
   opacity: 0.8;

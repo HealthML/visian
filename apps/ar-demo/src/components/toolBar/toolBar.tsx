@@ -1,4 +1,4 @@
-import { FlexColumn, Sheet } from "@classifai/ui-shared";
+import { color, FlexColumn, Sheet } from "@classifai/ui-shared";
 import React, { useCallback, useEffect, useState } from "react";
 import styled from "styled-components";
 
@@ -41,12 +41,12 @@ const ToolContainer = styled.div<ToolContainerProps>`
   cursor: pointer;
 
   * {
-    fill: ${(props) => (props.active ? "black" : "gray")};
+    fill: ${(props) => (props.active ? color("text") : color("gray"))};
   }
 
   &:active {
     * {
-      fill: darkgray;
+      fill: ${color("text")};
     }
   }
 `;
