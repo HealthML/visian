@@ -21,6 +21,7 @@ const FullScreenDiv = styled(FlexRow)`
   padding: 10px;
   z-index: 1;
   pointer-events: none;
+  user-select: none;
 `;
 
 const UIColumn = styled(FlexColumn)`
