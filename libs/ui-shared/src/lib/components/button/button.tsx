@@ -28,6 +28,7 @@ export const Button = styled(BaseButton)`
   display: inline-flex;
   padding: ${space("buttonPadding")};
   height: ${size("buttonHeight")};
+  user-select: none;
 
   &:focus {
     border-color: ${color("text")};
