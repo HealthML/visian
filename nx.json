@@ -42,6 +42,9 @@
     "ar-demo-e2e": {
       "tags": [],
       "implicitDependencies": ["ar-demo"]
+    },
+    "util": {
+      "tags": []
     }
   }
 }
