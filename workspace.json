@@ -147,7 +147,7 @@
             ],
             "styles": [],
             "scripts": [],
-            "webpackConfig": "apps/ar-demo/webpack.config"
+            "webpackConfig": "webpack.config"
           },
           "configurations": {
             "production": {
@@ -247,7 +247,7 @@
             ],
             "styles": [],
             "scripts": [],
-            "webpackConfig": "apps/ativ-seminar/webpack.config"
+            "webpackConfig": "webpack.config"
           },
           "configurations": {
             "production": {
@@ -322,6 +322,27 @@
           "builder": "@nrwl/linter:eslint",
           "options": {
             "lintFilePatterns": ["apps/ativ-seminar-e2e/**/*.{js,ts}"]
+          }
+        }
+      }
+    },
+    "util": {
+      "root": "libs/util",
+      "sourceRoot": "libs/util/src",
+      "projectType": "library",
+      "schematics": {},
+      "architect": {
+        "lint": {
+          "builder": "@nrwl/linter:eslint",
+          "options": {
+            "lintFilePatterns": ["libs/util/**/*.ts"]
+          }
+        },
+        "test": {
+          "builder": "@nrwl/jest:jest",
+          "options": {
+            "jestConfig": "libs/util/jest.config.js",
+            "passWithNoTests": true
           }
         }
       }

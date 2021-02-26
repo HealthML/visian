@@ -49,6 +49,9 @@
     "ativ-seminar-e2e": {
       "tags": [],
       "implicitDependencies": ["ativ-seminar"]
+    },
+    "util": {
+      "tags": []
     }
   }
 }
