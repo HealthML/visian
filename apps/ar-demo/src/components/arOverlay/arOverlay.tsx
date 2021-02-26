@@ -1,4 +1,4 @@
-import { Button, Sheet, Slider, SquareButton } from "@classifai/ui-shared";
+import { Button, Sheet, Slider, SquareButton } from "@visian/ui-shared";
 import React, { useCallback, useState } from "react";
 import ReactDOM from "react-dom";
 import styled from "styled-components";

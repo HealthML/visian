@@ -1,5 +1,5 @@
 {
-  "name": "classifai",
+  "name": "visian",
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
@@ -17,7 +17,7 @@
     "affected:lint": "nx affected:lint",
     "affected:dep-graph": "nx affected:dep-graph",
     "affected": "nx affected",
-    "clean:volumes": "docker volume rm classifai_dbdata",
+    "clean:volumes": "docker volume rm visian_dbdata",
     "down": "docker-compose down",
     "format": "nx format:write",
     "format:write": "nx format:write",

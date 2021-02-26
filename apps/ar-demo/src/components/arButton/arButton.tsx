@@ -1,4 +1,4 @@
-import { Button } from "@classifai/ui-shared";
+import { Button } from "@visian/ui-shared";
 import React from "react";
 import styled from "styled-components";
 

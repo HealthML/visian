@@ -1,4 +1,4 @@
-import { color, Sheet } from "@classifai/ui-shared";
+import { color, Sheet } from "@visian/ui-shared";
 import React, { useCallback } from "react";
 import styled from "styled-components";
 

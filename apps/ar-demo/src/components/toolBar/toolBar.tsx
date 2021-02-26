@@ -1,4 +1,4 @@
-import { color, FlexColumn, Sheet } from "@classifai/ui-shared";
+import { color, FlexColumn, Sheet } from "@visian/ui-shared";
 import React, { useCallback, useEffect, useState } from "react";
 import styled from "styled-components";
 

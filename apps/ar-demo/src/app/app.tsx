@@ -4,7 +4,7 @@ import {
   GlobalStyles,
   Screen,
   ThemeProvider,
-} from "@classifai/ui-shared";
+} from "@visian/ui-shared";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Route, Switch } from "react-router-dom";
 

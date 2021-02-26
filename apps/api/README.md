@@ -1,4 +1,4 @@
-# Classifai API
+# Visian API
 
 ## Examples
 

@@ -26,7 +26,7 @@ import { NodeResolver } from "./node.resolver";
         port: configService.get<number>("DB_PORT", 5432),
         username: configService.get("DB_USER", "postgres"),
         password: configService.get("DB_PASSWORD", "postgres"),
-        database: configService.get("DB_SCHEMA", "classifai"),
+        database: configService.get("DB_SCHEMA", "visian"),
         autoLoadEntities: true,
         synchronize: true,
       }),

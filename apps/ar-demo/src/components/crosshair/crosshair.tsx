@@ -1,4 +1,4 @@
-import { Box } from "@classifai/ui-shared";
+import { Box } from "@visian/ui-shared";
 import React from "react";
 import styled from "styled-components";
 
