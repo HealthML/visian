@@ -1,5 +1,4 @@
 import ITKPixelTypes from "itk/PixelTypes";
-import readImageFile from "itk/readIMageFile";
 
 /**
  * The itk/PixelTypes enum.
@@ -72,7 +71,7 @@ export interface ITKImageType {
  *
  * @see https://insightsoftwareconsortium.github.io/itk-js/api/Image.html
  */
-export interface ITKImage<T extends TypedArray = Uint8Array> {
+export interface ITKImage<T extends TypedArray = TypedArray> {
   /** The ImageType for this image. */
   imageType: ITKImageType;
 
@@ -107,21 +106,3 @@ export interface ITKImage<T extends TypedArray = Uint8Array> {
   /** A TypedArray containing the pixel buffer data. */
   data: T;
 }
-
-export const readMedicalImage = (file: File): Promise<ITKImage> =>
-  readImageFile(null, file).then(
-    ({ image, webWorker }: { image: ITKImage; webWorker: Worker }) => {
-      webWorker.terminate();
-      return image;
-    },
-  );
-
-export const loadMedicalImageFromURL = async (url: string) => {
-  const response = await fetch(url);
-  const buffer = await response.arrayBuffer();
-
-  const urlElements = url.split("/");
-  return readMedicalImage(
-    new File([buffer], urlElements[urlElements.length - 1]),
-  );
-};

@@ -58,6 +58,7 @@
     "i18next-browser-languagedetector": "^6.0.1",
     "i18next-http-backend": "^1.0.21",
     "itk": "^14.0.2",
+    "jszip": "^3.6.0",
     "moment": "^2.29.1",
     "nestjs-relay": "PaulBrachmann/nestjs-relay#dist",
     "pg": "^8.5.1",
