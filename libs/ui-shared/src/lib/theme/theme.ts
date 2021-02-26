@@ -10,8 +10,8 @@ const colorModes = {
     lightGray: "rgba(0,0,0,0.25)",
     veryLightGray: "rgba(0,0,0,0.1)",
     veryVeryLightGray: "rgba(0,0,0,0.03)",
-    sheet: "rgba(226,226,226,0.6)",
-    sheetBorder: "rgba(0, 0, 0, 0.16)",
+    sheet: "rgba(200,200,200,0.4)",
+    sheetBorder: "rgba(50, 50, 50, 0.3)",
     placeholder: "rgba(0, 0, 0, 0.2)",
   },
   dark: {
@@ -23,7 +23,7 @@ const colorModes = {
     lightGray: "rgba(255,255,255,0.5)",
     veryLightGray: "rgba(255,255,255,0.1)",
     sheet: "rgba(255,255,255,0.1)",
-    sheetBorder: "rgba(255, 255, 255, 0.16)",
+    sheetBorder: "rgba(255, 255, 255, 0.3)",
     placeholder: "rgba(255, 255, 255, 0.2)",
   },
 };
@@ -40,7 +40,7 @@ export const theme = {
   // breakpoints: ["478px", "767px", "991px", "1280px", "1440px", "1920px"],
   colors: colorModes.light,
   fonts: {
-    default: "Helvetica Neue",
+    default: "DIN2014",
   },
   fontSizes: {
     tag: "8pt",
@@ -56,7 +56,7 @@ export const theme = {
   },
   letterSpacings: {},
   lineHeights: {
-    sliderTrack: "2px",
+    sliderTrack: "1px",
   },
   mediaQueries: {
     phoneOnly: "@media (max-width: 599px)",
@@ -77,8 +77,8 @@ export const theme = {
     recordImage: "220px",
     buttonHeight: "46px",
     sliderHeight: "30px",
-    sliderThumbWidth: "4px",
-    sliderThumbHeight: "25px",
+    sliderThumbWidth: "2px",
+    sliderThumbHeight: "22px",
   },
   space: {
     iconMargin: "12px",
