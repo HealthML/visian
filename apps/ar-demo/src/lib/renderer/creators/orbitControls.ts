@@ -6,6 +6,7 @@ const createOrbitControls = (
   canvas: HTMLCanvasElement,
   target: THREE.Vector3,
 ) => {
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const controls = new OrbitControls(camera, canvas.parentElement!);
   controls.enableKeys = false;
 
