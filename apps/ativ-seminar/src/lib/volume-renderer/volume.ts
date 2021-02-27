@@ -1,6 +1,6 @@
 import * as THREE from "three";
 
-import VolumeMaterial from "./volumeMaterial";
+import VolumeMaterial from "./volume-material";
 
 class Volume extends THREE.Mesh {
   constructor() {

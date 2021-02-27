@@ -7,9 +7,9 @@ import {
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Route, Switch } from "react-router-dom";
 
-import DragAndDropWrapper from "../components/dragAndDropWrapper/dragAndDropWrapper";
-import WebGLCanvas from "../components/webGLCanvas/webGLCanvas";
-import VolumeRenderer from "../lib/volumeRenderer/volumeRenderer";
+import { DropZone } from "../components/drop-zone";
+import { WebGLCanvas } from "../components/webgl-canvas";
+import { VolumeRenderer } from "../lib/volume-renderer";
 
 let renderer: VolumeRenderer | undefined;
 
@@ -48,9 +48,9 @@ export function App() {
       <GlobalStyles />
       <Switch>
         <Route path="/">
-          <DragAndDropWrapper processFiles={onFileDrop}>
+          <DropZone onFileDrop={onFileDrop}>
             <WebGLCanvas ref={canvasRef} />
-          </DragAndDropWrapper>
+          </DropZone>
         </Route>
       </Switch>
     </ThemeProvider>

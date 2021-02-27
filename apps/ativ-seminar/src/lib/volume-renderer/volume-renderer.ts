@@ -4,7 +4,7 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { IDisposable } from "../types";
 import Volume from "./volume";
 
-class VolumeRenderer implements IDisposable {
+export class VolumeRenderer implements IDisposable {
   private renderer: THREE.WebGLRenderer;
   public camera: THREE.PerspectiveCamera;
   public scene = new THREE.Scene();

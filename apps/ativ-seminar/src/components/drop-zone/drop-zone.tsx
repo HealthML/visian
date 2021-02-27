@@ -1,7 +1,7 @@
 import React, { useCallback, useState } from "react";
 import styled from "styled-components";
 
-import { DragAndDropWrapperProps } from "./dragAndDropWrapper.props";
+import { DropZoneProps } from "./drop-zone.props";
 
 const StyledDiv = styled.div`
   position: absolute;
@@ -11,7 +11,7 @@ const StyledDiv = styled.div`
   bottom: 0;
 `;
 
-const DragAndDropWrapper: React.FC<DragAndDropWrapperProps> = (props) => {
+export const DropZone: React.FC<DropZoneProps> = (props) => {
   const {
     children,
     className,
@@ -19,26 +19,26 @@ const DragAndDropWrapper: React.FC<DragAndDropWrapperProps> = (props) => {
     onDragLeave,
     onDragOver,
     onDrop,
+    onFileDrop,
     style,
-    processFiles,
     ...rest
   } = props;
 
   // Use this if we want to add styling for the drag event.
-  const [isDraggable, setIsDraggable] = useState(false);
+  const [isDraggedOver, setIsDraggedOver] = useState(false);
 
   const dragOver = useCallback(
     (event: React.DragEvent<HTMLDivElement>) => {
       event.preventDefault();
       if (onDragOver) onDragOver(event);
-      setIsDraggable(true);
+      setIsDraggedOver(true);
     },
     [onDragOver],
   );
 
   const endDrag = useCallback(
     (event: React.DragEvent<HTMLDivElement>) => {
-      setIsDraggable(false);
+      setIsDraggedOver(false);
       if (event.type === "dragend") {
         if (onDragEnd) onDragEnd(event);
       } else if (onDragLeave) onDragLeave(event);
@@ -49,11 +49,11 @@ const DragAndDropWrapper: React.FC<DragAndDropWrapperProps> = (props) => {
   const drop = useCallback(
     (event: React.DragEvent<HTMLDivElement>) => {
       event.preventDefault();
-      setIsDraggable(false);
+      setIsDraggedOver(false);
       if (onDrop) onDrop(event);
-      if (processFiles) processFiles(event.dataTransfer.files);
+      if (onFileDrop) onFileDrop(event.dataTransfer.files);
     },
-    [onDrop, processFiles],
+    [onDrop, onFileDrop],
   );
 
   return (
@@ -69,4 +69,4 @@ const DragAndDropWrapper: React.FC<DragAndDropWrapperProps> = (props) => {
   );
 };
 
-export default DragAndDropWrapper;
+export default DropZone;
