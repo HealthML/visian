@@ -11,7 +11,7 @@ class VolumeRenderer implements IDisposable {
 
   private orbitControls: OrbitControls;
 
-  private lazyRenderTriggerd = true;
+  private lazyRenderTriggered = true;
 
   constructor(private canvas: HTMLCanvasElement) {
     this.renderer = new THREE.WebGLRenderer({ alpha: true, canvas });
@@ -54,15 +54,15 @@ class VolumeRenderer implements IDisposable {
   };
 
   private animate = () => {
-    if (this.lazyRenderTriggerd) this.eagerRender();
+    if (this.lazyRenderTriggered) this.eagerRender();
   };
 
   public lazyRender = () => {
-    this.lazyRenderTriggerd = true;
+    this.lazyRenderTriggered = true;
   };
 
   private eagerRender = () => {
-    this.lazyRenderTriggerd = false;
+    this.lazyRenderTriggered = false;
 
     this.renderer.render(this.scene, this.camera);
   };
