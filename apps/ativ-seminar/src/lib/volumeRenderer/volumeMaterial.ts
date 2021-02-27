@@ -9,6 +9,9 @@ class VolumeMaterial extends THREE.ShaderMaterial {
       vertexShader: volumeVertexShader,
       fragmentShader: volumeFragmentShader,
     });
+
+    // Always render the back faces.
+    this.side = THREE.BackSide;
   }
 }
 

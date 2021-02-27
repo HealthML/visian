@@ -21,7 +21,7 @@ class VolumeRenderer implements IDisposable {
       60,
       window.innerWidth / window.innerHeight,
       0.0001,
-      6,
+      10,
     );
 
     this.camera.position.set(3, 3, 3);
