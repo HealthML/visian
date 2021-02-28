@@ -1,5 +1,5 @@
-import readImageFile from "itk/readIMageFile";
 import readImageDICOMFileSeries from "itk/readImageDICOMFileSeries";
+import readImageFile from "itk/readImageFile";
 
 import { Zip } from "../zip";
 import { ITKImage } from "./types";
