@@ -16,6 +16,8 @@ export class VolumeRenderer implements IDisposable {
 
   private lazyRenderTriggered = true;
 
+  private isImageLoaded = false;
+
   constructor(private canvas: HTMLCanvasElement) {
     this.renderer = new THREE.WebGLRenderer({ alpha: true, canvas });
     this.renderer.setPixelRatio(window.devicePixelRatio);
@@ -31,7 +33,7 @@ export class VolumeRenderer implements IDisposable {
     this.camera.lookAt(0, 0, 0);
 
     this.orbitControls = new OrbitControls(this.camera, this.canvas);
-    this.orbitControls.addEventListener("change", this.lazyRender);
+    this.orbitControls.addEventListener("change", this.onCameraMove);
 
     this.volume = new Volume();
     this.scene.add(this.volume);
@@ -39,12 +41,13 @@ export class VolumeRenderer implements IDisposable {
     window.addEventListener("resize", this.resize);
     this.resize();
 
+    this.onCameraMove();
     this.renderer.setAnimationLoop(this.animate);
   }
 
   public dispose = () => {
     window.removeEventListener("resize", this.resize);
-    this.orbitControls.removeEventListener("change", this.lazyRender);
+    this.orbitControls.removeEventListener("change", this.onCameraMove);
     this.orbitControls.dispose();
   };
 
@@ -66,14 +69,25 @@ export class VolumeRenderer implements IDisposable {
   };
 
   private eagerRender = () => {
+    if (!this.isImageLoaded) return;
     this.lazyRenderTriggered = false;
 
     this.renderer.render(this.scene, this.camera);
   };
 
+  private onCameraMove = () => {
+    this.volume.updateCameraPosition(this.camera);
+    this.lazyRender();
+  };
+
   public setImage = (image: ITKImage) => {
     this.volume.setImage(image);
-    this.lazyRender();
+    this.isImageLoaded = true;
+
+    // TODO: Can we maybe find a solution that does not require
+    // double-rendering for the initial frame?
+    this.eagerRender();
+    this.onCameraMove();
   };
 }
 

@@ -14,7 +14,7 @@ class Volume extends THREE.Mesh {
     this.rotateX(-Math.PI / 2);
   }
 
-  setImage(image: ITKImage) {
+  public setImage(image: ITKImage) {
     // TODO: Implement 16+ bit support
     const originalAtlas = generateTextureAtlas(image);
     const maxValue = (originalAtlas as Uint8Array).reduce(
@@ -47,6 +47,10 @@ class Volume extends THREE.Mesh {
         .multiply(new THREE.Vector3().fromArray(image.spacing))
         .multiplyScalar(0.01),
     );
+  }
+
+  public updateCameraPosition(camera: THREE.Camera) {
+    (this.material as VolumeMaterial).updateCameraPosition(this, camera);
   }
 }
 

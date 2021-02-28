@@ -3,7 +3,11 @@ import * as THREE from "three";
 import volumeFragmentShader from "./shader/volume.frag.glsl";
 import volumeVertexShader from "./shader/volume.vert.glsl";
 
+import type Volume from "./volume";
+
 class VolumeMaterial extends THREE.ShaderMaterial {
+  private workingMatrix4 = new THREE.Matrix4();
+
   constructor() {
     super({
       vertexShader: volumeVertexShader,
@@ -14,6 +18,7 @@ class VolumeMaterial extends THREE.ShaderMaterial {
           value: [1, 1, 1],
         },
         uAtlasGrid: { value: [1, 1] },
+        uCameraPosition: { value: new THREE.Vector3() },
       },
     });
 
@@ -29,6 +34,18 @@ class VolumeMaterial extends THREE.ShaderMaterial {
   }
   public set atlasGrid(atlasGrid: THREE.Vector2) {
     this.uniforms.uAtlasGrid.value = atlasGrid;
+  }
+
+  /**
+   * Updates the `uCameraPosition` uniform.
+   *
+   * @see https://davidpeicho.github.io/blog/cloud-raymarching-walkthrough-part1/
+   */
+  public updateCameraPosition(volumeObject: Volume, camera: THREE.Camera) {
+    camera.getWorldPosition(this.uniforms.uCameraPosition.value);
+    this.uniforms.uCameraPosition.value.applyMatrix4(
+      this.workingMatrix4.copy(volumeObject.matrixWorld).invert(),
+    );
   }
 }
 
