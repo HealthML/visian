@@ -16,7 +16,7 @@ import { VolumeRenderer } from "../lib/volume-renderer";
 let renderer: VolumeRenderer | undefined;
 
 export function App() {
-  const [mode] = useState<ColorMode>("light");
+  const [mode] = useState<ColorMode>("dark");
   const theme = getTheme(mode);
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -41,11 +41,11 @@ export function App() {
     };
   }, [forceUpdate]);
 
-  // Load caches image
+  // Load cached image
   useEffect(() => {
     (async () => {
-      const image = await localForage.getItem<ITKImage>("image");
-      if (image) renderer?.setImage(image);
+      const file = await localForage.getItem<File>("image");
+      if (file) renderer?.setImage(await readMedicalImage(file));
     })();
   }, []);
 
@@ -58,7 +58,7 @@ export function App() {
         if (image.imageType.dimension !== 3) {
           throw new Error("Only 3D volumetric images are supported.");
         }
-        await localForage.setItem("image", image);
+        await localForage.setItem("image", fileList[0]);
         if (image) renderer?.setImage(image);
       } catch (err) {
         console.error("The dropped file could not be opened:", err);
