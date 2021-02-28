@@ -1,3 +1,4 @@
+import { ITKImage } from "@visian/util";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 
@@ -8,6 +9,8 @@ export class VolumeRenderer implements IDisposable {
   private renderer: THREE.WebGLRenderer;
   public camera: THREE.PerspectiveCamera;
   public scene = new THREE.Scene();
+
+  private volume: Volume;
 
   private orbitControls: OrbitControls;
 
@@ -30,7 +33,8 @@ export class VolumeRenderer implements IDisposable {
     this.orbitControls = new OrbitControls(this.camera, this.canvas);
     this.orbitControls.addEventListener("change", this.lazyRender);
 
-    this.scene.add(new Volume());
+    this.volume = new Volume();
+    this.scene.add(this.volume);
 
     window.addEventListener("resize", this.resize);
     this.resize();
@@ -65,6 +69,11 @@ export class VolumeRenderer implements IDisposable {
     this.lazyRenderTriggered = false;
 
     this.renderer.render(this.scene, this.camera);
+  };
+
+  public setImage = (image: ITKImage) => {
+    this.volume.setImage(image);
+    this.lazyRender();
   };
 }
 
