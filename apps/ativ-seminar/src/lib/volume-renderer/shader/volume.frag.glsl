@@ -22,6 +22,42 @@ vec4 getImageValue(vec3 volumeCoords) {
   return texture2D(uVolume, uv);
 }
 
+vec3 getVolumeCoords(vec3 voxelCoords) {
+  vec3 clampedVoxel = max(vec3(0.0), min(uVoxelCount - vec3(1.0), voxelCoords));
+  vec3 centeredVoxel = clampedVoxel + vec3(0.5);
+  return centeredVoxel / uVoxelCount;
+}
+
+vec4 getInterpolatedImageValue(vec3 volumeCoords) {
+  vec3 voxelCoords = uVoxelCount * volumeCoords;
+  vec3 minVoxel = floor(voxelCoords);
+  vec3 maxVoxel = ceil(voxelCoords);
+  vec3 interpolationValues = fract(voxelCoords);
+
+  // min slice
+  vec3 minX = getVolumeCoords(vec3(maxVoxel.x, minVoxel.yz));
+  vec3 minY = getVolumeCoords(vec3(minVoxel.x, maxVoxel.y, minVoxel.z));
+  vec3 minXY = getVolumeCoords(vec3(maxVoxel.xy, minVoxel.z));
+
+  // max slice
+  vec3 maxX = getVolumeCoords(vec3(minVoxel.x, maxVoxel.yz));
+  vec3 maxY = getVolumeCoords(vec3(maxVoxel.x, minVoxel.y, maxVoxel.z));
+  vec3 maxXY = getVolumeCoords(vec3(minVoxel.xy, maxVoxel.z));
+
+  minVoxel = getVolumeCoords(minVoxel);
+  maxVoxel = getVolumeCoords(maxVoxel);
+
+  vec4 minXMix0 = mix(getImageValue(minVoxel), getImageValue(minX), interpolationValues.x);
+  vec4 minXMix1 = mix(getImageValue(minY), getImageValue(minXY), interpolationValues.x);
+  vec4 minMix = mix(minXMix0, minXMix1, interpolationValues.y);
+
+  vec4 maxXMix0 = mix(getImageValue(maxVoxel), getImageValue(maxX), 1.0 - interpolationValues.x);
+  vec4 maxXMix1 = mix(getImageValue(maxY), getImageValue(maxXY), 1.0 - interpolationValues.x);
+  vec4 maxMix = mix(maxXMix0, maxXMix1, 1.0 - interpolationValues.y);
+
+  return mix(minMix, maxMix, interpolationValues.z);
+}
+
 /**
  * Computes the intersection between a ray and the unit box
  * centered on (0, 0, 0).
@@ -79,7 +115,7 @@ void main() {
 
   for (int i = 0; i < MAX_STEPS; ++i) {
     // Get the voxel at the current ray position.
-    float s = getImageValue(rayOrigin).r;
+    float s = getInterpolatedImageValue(rayOrigin).r;
 
     // The more we already accumulated, the less color we apply.
     acc.rgb += (1.0 - acc.a) * s * s;
