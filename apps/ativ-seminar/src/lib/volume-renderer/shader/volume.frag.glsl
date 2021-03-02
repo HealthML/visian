@@ -74,9 +74,6 @@ void main() {
   float delta = min(inc.x, min(inc.y, inc.z)) / float(MAX_STEPS);
   vec3 scaledRayDirection = normalizedRayDirection * delta;
 
-  // Hardcoded for now: diffuse color of our image
-  vec3 baseColor = vec3(0.1);
-
   // Accumulation through the volume is stored in this variable.
   vec4 acc = vec4(0.0);
 
@@ -85,7 +82,7 @@ void main() {
     float s = getImageValue(rayOrigin).r;
 
     // The more we already accumulated, the less color we apply.
-    acc.rgb += (1.0 - acc.a) * s * baseColor;
+    acc.rgb += (1.0 - acc.a) * s * s;
     // The more we already accumulated, the less opacity we apply.
     acc.a += (1.0 - acc.a) * s;
 
@@ -104,5 +101,5 @@ void main() {
     }
   }
 
-  gl_FragColor = vec4(getImageValue(rayOrigin));
+  gl_FragColor = vec4(acc);
 }
