@@ -35,6 +35,11 @@ class Volume extends THREE.Mesh {
       atlasGrid.x * voxelCount.x,
       atlasGrid.y * voxelCount.y,
       THREE.LuminanceFormat,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      THREE.LinearFilter,
     );
     const material = this.material as VolumeMaterial;
     material.texture = scanTexture;
