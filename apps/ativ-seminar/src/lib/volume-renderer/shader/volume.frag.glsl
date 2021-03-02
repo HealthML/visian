@@ -11,14 +11,21 @@ uniform vec2 uAtlasGrid;
 const int MAX_STEPS = 200;
 
 vec4 getImageValue(vec3 volumeCoords) {
-  vec2 sliceSize = vec2(1.0) / vec2(uAtlasGrid.x, uAtlasGrid.y);
-  vec2 delta = vec2(
-    mod(floor(volumeCoords.z * uVoxelCount.z), uAtlasGrid.x), 
-    floor(volumeCoords.z * uVoxelCount.z / uAtlasGrid.x)
+  vec2 sliceSize = vec2(1.0) / uAtlasGrid;
+  float zSlice = floor(volumeCoords.z * uVoxelCount.z);
+  vec2 sliceDelta = vec2(
+    mod(zSlice, uAtlasGrid.x), 
+    floor(zSlice / uAtlasGrid.x)
   );
-  vec2 uvDelta = sliceSize * delta;
-  // TODO: Why do we need the `fract` here to correct for empty slices?
-  vec2 uv = fract(volumeCoords.xy / uAtlasGrid + uvDelta);
+
+  // TODO: Why does this case even happpen?
+  if(sliceDelta.x == uAtlasGrid.x) {
+    sliceDelta.x = 0.0;
+    sliceDelta.y += 1.0;
+  } 
+
+  vec2 uvDelta = sliceSize * sliceDelta;
+  vec2 uv = (volumeCoords.xy / uAtlasGrid + uvDelta);
   return texture2D(uVolume, uv);
 }
 
