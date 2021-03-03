@@ -18,6 +18,7 @@ class VolumeMaterial extends THREE.ShaderMaterial {
           value: [1, 1, 1],
         },
         uAtlasGrid: { value: [1, 1] },
+        uStepSize: { value: 1 },
         uCameraPosition: { value: new THREE.Vector3() },
       },
     });
@@ -34,6 +35,9 @@ class VolumeMaterial extends THREE.ShaderMaterial {
   }
   public set atlasGrid(atlasGrid: THREE.Vector2) {
     this.uniforms.uAtlasGrid.value = atlasGrid;
+  }
+  public set stepSize(stepSize: number) {
+    this.uniforms.uStepSize.value = stepSize;
   }
 
   /**

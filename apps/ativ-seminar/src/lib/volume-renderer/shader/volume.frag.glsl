@@ -6,9 +6,10 @@ varying vec3 vRayOrigin;
 uniform sampler2D uVolume;
 uniform vec3 uVoxelCount;
 uniform vec2 uAtlasGrid;
+uniform float uStepSize;
 
 // TODO: Choose this non-arbitrarily
-const int MAX_STEPS = 200;
+const int MAX_STEPS = 400;
 
 vec4 getImageValue(vec3 volumeCoords) {
   vec2 sliceSize = vec2(1.0) / uAtlasGrid;
@@ -98,16 +99,10 @@ void main() {
   float far = 0.0;
   computeNearFar(normalizedRayDirection, near, far);
 
-  float dist = near;
-
-  // Moves the ray origin to the closest intersection.
-  // We don't want to spend time sampling nothing out of the volume!
-  vec3 rayOrigin = vRayOrigin + near * normalizedRayDirection;
-
-  // TODO: Does it make sense to shade each voxel discretely?
-  vec3 inc = 1.0 / abs(normalizedRayDirection);
-  float delta = min(inc.x, min(inc.y, inc.z)) / float(MAX_STEPS);
-  vec3 scaledRayDirection = normalizedRayDirection * delta;
+  // Entry aligned sampling.
+  float dist = near + uStepSize / 2.0;
+  vec3 rayOrigin = vRayOrigin + dist * normalizedRayDirection;
+  vec3 scaledRayDirection = normalizedRayDirection * uStepSize;
 
   // Accumulation through the volume is stored in this variable.
   vec4 acc = vec4(0.0);
@@ -127,7 +122,7 @@ void main() {
     }
 
     rayOrigin += scaledRayDirection;
-    dist += delta;
+    dist += uStepSize;
 
     if (dist > far) {
       break;

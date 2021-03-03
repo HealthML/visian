@@ -1,7 +1,7 @@
 import { ITKImage } from "@visian/util";
 import * as THREE from "three";
 
-import { generateTextureAtlas, getAtlasGrid } from "./utils";
+import { generateTextureAtlas, getAtlasGrid, getStepSize } from "./utils";
 import VolumeMaterial from "./volume-material";
 
 class Volume extends THREE.Mesh {
@@ -45,6 +45,7 @@ class Volume extends THREE.Mesh {
     material.texture = scanTexture;
     material.voxelCount = voxelCount;
     material.atlasGrid = atlasGrid;
+    material.stepSize = getStepSize(image);
 
     this.scale.copy(
       new THREE.Vector3()
