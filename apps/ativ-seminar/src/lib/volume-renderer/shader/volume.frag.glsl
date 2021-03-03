@@ -55,6 +55,8 @@ vec4 getInterpolatedImageValue(vec3 volumeCoords) {
  * @see https://davidpeicho.github.io/blog/cloud-raymarching-walkthrough-part1/
  */
 void computeNearFar(vec3 normalizedRayDirection, inout float near, inout float far) {
+  // TODO: Handle the case of the origin being inside the volume correctly.
+
   // Ray is assumed to be in local coordinates, ie:
   // ray = inverse(objectMatrix * invCameraMatrix) * ray
   // Equation of ray: O + D * t
