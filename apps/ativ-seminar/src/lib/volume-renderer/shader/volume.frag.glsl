@@ -88,6 +88,8 @@ void main() {
   float far = 0.0;
   computeNearFar(normalizedRayDirection, near, far);
 
+  float dist = near;
+
   // Moves the ray origin to the closest intersection.
   // We don't want to spend time sampling nothing out of the volume!
   vec3 rayOrigin = vRayOrigin + near * normalizedRayDirection;
@@ -115,11 +117,9 @@ void main() {
     }
 
     rayOrigin += scaledRayDirection;
+    dist += delta;
 
-    if (
-      min(rayOrigin.x, min(rayOrigin.y, rayOrigin.z)) < 0.0 || 
-      max(rayOrigin.x, max(rayOrigin.y, rayOrigin.z)) > 1.0
-    ) {
+    if (dist > far) {
       break;
     }
   }
