@@ -3,6 +3,7 @@ import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 
 import { IDisposable } from "../types";
+import { TextureAtlas } from "./utils";
 import Volume from "./volume";
 
 export class VolumeRenderer implements IDisposable {
@@ -81,8 +82,33 @@ export class VolumeRenderer implements IDisposable {
   };
 
   public setImage = (image: ITKImage) => {
-    this.volume.setImage(image);
+    this.volume.setAtlas(TextureAtlas.fromITKImage(image), this.renderer);
     this.isImageLoaded = true;
+
+    // const debugScene = new THREE.Scene();
+    // const debugCamera = new THREE.OrthographicCamera(
+    //   -0.5,
+    //   0.5,
+    //   0.5,
+    //   -0.5,
+    //   1,
+    //   100,
+    // );
+    // debugCamera.position.z = 10;
+
+    // const gradientComputer = new GradientComputer(
+    //   TextureAtlas.fromITKImage(image),
+    //   this.renderer,
+    // );
+
+    // const quadGeometry = new THREE.PlaneGeometry(1, 1);
+    // const material = new THREE.MeshBasicMaterial({
+    //   map: gradientComputer.getFirstDerivative(),
+    // });
+    // const quad = new THREE.Mesh(quadGeometry, material);
+
+    // debugScene.add(quad);
+    // this.renderer.render(debugScene, debugCamera);
 
     // TODO: Can we maybe find a solution that does not require
     // double-rendering for the initial frame?

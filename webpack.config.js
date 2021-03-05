@@ -21,7 +21,7 @@ module.exports = (config) => {
     },
     {
       test: /\.glsl$/i,
-      use: "raw-loader",
+      use: "webpack-glsl-loader",
     },
   );
 

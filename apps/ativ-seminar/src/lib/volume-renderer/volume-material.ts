@@ -2,9 +2,11 @@ import * as THREE from "three";
 
 import volumeFragmentShader from "./shader/volume.frag.glsl";
 import volumeVertexShader from "./shader/volume.vert.glsl";
+import { getStepSize, GradientComputer, TextureAtlas } from "./utils";
 
 import type Volume from "./volume";
 
+/** A volume domain material. */
 class VolumeMaterial extends THREE.ShaderMaterial {
   private workingMatrix4 = new THREE.Matrix4();
 
@@ -14,6 +16,7 @@ class VolumeMaterial extends THREE.ShaderMaterial {
       fragmentShader: volumeFragmentShader,
       uniforms: {
         uVolume: { value: null },
+        uFirstDerivative: { value: null },
         uVoxelCount: {
           value: [1, 1, 1],
         },
@@ -27,17 +30,15 @@ class VolumeMaterial extends THREE.ShaderMaterial {
     this.side = THREE.BackSide;
   }
 
-  public set texture(texture: THREE.DataTexture) {
-    this.uniforms.uVolume.value = texture;
-  }
-  public set voxelCount(voxelCount: THREE.Vector3) {
-    this.uniforms.uVoxelCount.value = voxelCount;
-  }
-  public set atlasGrid(atlasGrid: THREE.Vector2) {
-    this.uniforms.uAtlasGrid.value = atlasGrid;
-  }
-  public set stepSize(stepSize: number) {
-    this.uniforms.uStepSize.value = stepSize;
+  /** Updates the rendered atlas. */
+  public setAtlas(atlas: TextureAtlas, renderer: THREE.WebGLRenderer) {
+    this.uniforms.uVolume.value = atlas.getTexture();
+    this.uniforms.uVoxelCount.value = atlas.voxelCount;
+    this.uniforms.uAtlasGrid.value = atlas.atlasGrid;
+    this.uniforms.uStepSize.value = getStepSize(atlas);
+
+    const gradientComputer = new GradientComputer(atlas, renderer);
+    this.uniforms.uFirstDerivative.value = gradientComputer.getFirstDerivative();
   }
 
   /**

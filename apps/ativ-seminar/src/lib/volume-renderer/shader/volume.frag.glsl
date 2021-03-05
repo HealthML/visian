@@ -4,6 +4,7 @@ varying vec3 vRayDirection;
 varying vec3 vRayOrigin;
 
 uniform sampler2D uVolume;
+uniform sampler2D uFirstDerivative;
 uniform vec3 uVoxelCount;
 uniform vec2 uAtlasGrid;
 uniform float uStepSize;
@@ -11,26 +12,38 @@ uniform float uStepSize;
 // TODO: Choose this non-arbitrarily
 const int MAX_STEPS = 400;
 
-vec4 getImageValue(vec3 volumeCoords) {
+/**
+ * Returns the texture value at the given volume coordinates.
+ *
+ * @param sourceTexture The texture to read from.
+ * @param volumeCoords The volume coordinates (ranged [0, 1]).
+ */
+vec4 getTextureValue(sampler2D sourceTexture, vec3 volumeCoords) {
   vec2 sliceSize = vec2(1.0) / uAtlasGrid;
   float zSlice = floor(volumeCoords.z * uVoxelCount.z);
-  vec2 sliceDelta = vec2(
+  vec2 sliceOffset = vec2(
     mod(zSlice, uAtlasGrid.x), 
     floor(zSlice / uAtlasGrid.x)
   );
 
   // TODO: Why does this case even happpen?
-  if(sliceDelta.x == uAtlasGrid.x) {
-    sliceDelta.x = 0.0;
-    sliceDelta.y += 1.0;
-  } 
+  if (sliceOffset.x == uAtlasGrid.x) {
+    sliceOffset.x = 0.0;
+    sliceOffset.y += 1.0;
+  }
 
-  vec2 uvDelta = sliceSize * sliceDelta;
-  vec2 uv = (volumeCoords.xy / uAtlasGrid + uvDelta);
-  return texture2D(uVolume, uv);
+  vec2 uvOffset = sliceSize * sliceOffset;
+  vec2 uv = (volumeCoords.xy / uAtlasGrid + uvOffset);
+  return texture2D(sourceTexture, uv);
 }
 
-vec4 getInterpolatedImageValue(vec3 volumeCoords) {
+/**
+ * Returns the z-interpolated texture value at the given volume coordinates.
+ *
+ * @param sourceTexture The texture to read from.
+ * @param volumeCoords The volume coordinates (ranged [0, 1]).
+ */
+vec4 getInterpolatedTextureValue(sampler2D sourceTexture, vec3 volumeCoords) {
   float voxelZ = volumeCoords.z * uVoxelCount.z;
   float interpolation = fract(voxelZ);
 
@@ -40,10 +53,17 @@ vec4 getInterpolatedImageValue(vec3 volumeCoords) {
   vec3 lowerVoxel = vec3(volumeCoords.xy, z0);
   vec3 upperVoxel = vec3(volumeCoords.xy, z1);
 
-  vec4 lowerValue = getImageValue(lowerVoxel);
-  vec4 upperValue = getImageValue(upperVoxel);
+  vec4 lowerValue = getTextureValue(sourceTexture, lowerVoxel);
+  vec4 upperValue = getTextureValue(sourceTexture, upperVoxel);
 
   return mix(lowerValue, upperValue, interpolation);
+}
+
+/** The transfer function. */
+vec4 transferFunction(vec3 volumeCoords) {
+  vec3 firstDerivative = getInterpolatedTextureValue(uFirstDerivative, volumeCoords).xyz;
+  float density = getInterpolatedTextureValue(uVolume, volumeCoords).r;
+  return vec4(firstDerivative, density);
 }
 
 /**
@@ -56,7 +76,7 @@ vec4 getInterpolatedImageValue(vec3 volumeCoords) {
  * @see https://davidpeicho.github.io/blog/cloud-raymarching-walkthrough-part1/
  */
 void computeNearFar(vec3 normalizedRayDirection, inout float near, inout float far) {
-  if(
+  if (
     vRayOrigin.x < 1.0 && vRayOrigin.y < 1.0 && vRayOrigin.z < 1.0 && 
     vRayOrigin.x > 0.0 && vRayOrigin.y > 0.0 && vRayOrigin.z > 0.0
   ) {
@@ -109,12 +129,13 @@ void main() {
 
   for (int i = 0; i < MAX_STEPS; ++i) {
     // Get the voxel at the current ray position.
-    float s = getInterpolatedImageValue(rayOrigin).r;
+    vec4 currentVoxel = transferFunction(rayOrigin);
+    // s = mix(0.0, s / 20.0, step(5.0, s));
 
     // The more we already accumulated, the less color we apply.
-    acc.rgb += (1.0 - acc.a) * s * s;
+    acc.rgb += (1.0 - acc.a) * currentVoxel.rgb * currentVoxel.a;
     // The more we already accumulated, the less opacity we apply.
-    acc.a += (1.0 - acc.a) * s;
+    acc.a += (1.0 - acc.a) * currentVoxel.a;
 
     // Early termination: after this threshold, accumulating becomes insignificant.
     if (acc.a > 0.95) {
