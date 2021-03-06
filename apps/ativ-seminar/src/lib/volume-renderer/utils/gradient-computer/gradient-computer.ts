@@ -1,14 +1,13 @@
 import * as THREE from "three";
 
+import ScreenAlignedQuad from "../screen-aligned-quad";
 import { TextureAtlas } from "../texture-atlas";
 import gradientFragmentShader from "./shader/gradient.frag.glsl";
 import gradientVertexShader from "./shader/gradient.vert.glsl";
 
 export class GradientComputer {
-  private camera: THREE.OrthographicCamera;
-  private scene = new THREE.Scene();
-  private quad: THREE.Mesh;
   private gradientMaterial: THREE.ShaderMaterial;
+  private screenAlignedQuad: ScreenAlignedQuad;
 
   private firstDerivativeRendererTarget?: THREE.WebGLRenderTarget;
   private secondDerivativeRendererTarget?: THREE.WebGLRenderTarget;
@@ -17,9 +16,6 @@ export class GradientComputer {
     private textureAtlas: TextureAtlas,
     private renderer: THREE.WebGLRenderer,
   ) {
-    this.camera = new THREE.OrthographicCamera(-0.5, 0.5, 0.5, -0.5, 1, 100);
-    this.camera.position.z = 10;
-
     this.gradientMaterial = new THREE.ShaderMaterial({
       fragmentShader: gradientFragmentShader,
       vertexShader: gradientVertexShader,
@@ -30,10 +26,7 @@ export class GradientComputer {
         uAtlasGrid: { value: textureAtlas.atlasGrid },
       },
     });
-
-    const quadGeometry = new THREE.PlaneGeometry(1, 1);
-    this.quad = new THREE.Mesh(quadGeometry, this.gradientMaterial);
-    this.scene.add(this.quad);
+    this.screenAlignedQuad = new ScreenAlignedQuad(this.gradientMaterial);
   }
 
   /** Returns the gradient of the texture atlas. */
@@ -52,7 +45,7 @@ export class GradientComputer {
         THREE.NearestFilter;
       this.gradientMaterial.uniforms.uTextureAtlas.value.needsUpdate = true;
 
-      this.renderer.render(this.scene, this.camera);
+      this.screenAlignedQuad.renderWith(this.renderer);
 
       this.gradientMaterial.uniforms.uTextureAtlas.value.magFilter = magFilter;
       this.gradientMaterial.uniforms.uTextureAtlas.value.needsUpdate = true;
@@ -81,7 +74,7 @@ export class GradientComputer {
 
       this.renderer.setRenderTarget(this.secondDerivativeRendererTarget);
 
-      this.renderer.render(this.scene, this.camera);
+      this.screenAlignedQuad.renderWith(this.renderer);
 
       // Reset the render target
       this.renderer.setRenderTarget(null);
