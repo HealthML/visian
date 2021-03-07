@@ -73,10 +73,10 @@ VolumeData getInterpolatedVolumeData(vec3 volumeCoords) {
 
 /** The transfer function. */
 vec4 transferFunction(VolumeData data) {
-  // return vec4(vec3(0.5 * data.density), mix(0.0, 0.02, step(0.5, length(data.firstDerivative))));
-  return vec4(vec3(0.5), mix(0.0, 0.015, step(0.6, length(data.firstDerivative))));
+  // return vec4(vec3(0.7 * data.density), mix(0.0, 0.02, step(0.1, length(data.firstDerivative))));
+  return vec4(vec3(0.5), mix(0.0, 0.015, step(0.1, length(data.firstDerivative))));
   
-  // return vec4(data.firstDerivative, data.density);
+  // return vec4(data.firstDerivative * 3.0, data.density);
 }
 
 vec4 getVolumeColor(vec3 volumeCoords) {

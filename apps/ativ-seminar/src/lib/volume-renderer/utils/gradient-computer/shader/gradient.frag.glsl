@@ -56,5 +56,12 @@ void main() {
 
   vec3 gradient = (up - down) / (mix(vec3(1.0), vec3(2.0), step(0.5, mod(voxelCoords, uVoxelCount - vec3(1.0)))) * uVoxelSpacing);
 
-  gl_FragColor = vec4(abs(gradient) * 10.0, 1.0);
+  // Disregarding the voxels at the edges of the volume, the absolute value of the 
+  // components of gradient are at most 1/(2*min(voxelSpacing)).
+  // As we want to use the whole range [0, 1] for the result we scale by this value.
+  //
+  // TODO: Think about scaling by a bigger value, because the gradient tends to be rather small.
+  float gradientScaleFactor = 2.0 * min(uVoxelSpacing.x, min(uVoxelSpacing.y, uVoxelSpacing.z));
+
+  gl_FragColor = vec4(abs(gradient) * gradientScaleFactor, 1.0);
 }
