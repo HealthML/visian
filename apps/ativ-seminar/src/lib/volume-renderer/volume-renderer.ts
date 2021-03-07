@@ -1,6 +1,7 @@
 import { ITKImage } from "@visian/util";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
+import Stats from "three/examples/jsm/libs/stats.module";
 
 import { IDisposable } from "../types";
 import { ScreenAlignedQuad, TextureAtlas } from "./utils";
@@ -17,6 +18,8 @@ export class VolumeRenderer implements IDisposable {
   private volume: Volume;
 
   private orbitControls: OrbitControls;
+
+  private stats: Stats;
 
   private lazyRenderTriggered = true;
 
@@ -50,6 +53,11 @@ export class VolumeRenderer implements IDisposable {
 
     window.addEventListener("resize", this.resize);
     this.resize();
+
+    // TypeScript doesn't recognize that Stats has a constructor...
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    this.stats = new (Stats as any)();
+    canvas.parentElement?.appendChild(this.stats.dom);
 
     this.onCameraMove();
     this.renderer.setAnimationLoop(this.animate);
@@ -93,6 +101,7 @@ export class VolumeRenderer implements IDisposable {
 
   private animate = () => {
     if (this.lazyRenderTriggered) this.eagerRender();
+    this.stats.update();
   };
 
   public lazyRender = () => {
