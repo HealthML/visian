@@ -63,7 +63,12 @@ vec4 getInterpolatedTextureValue(sampler2D sourceTexture, vec3 volumeCoords) {
 vec4 transferFunction(vec3 volumeCoords) {
   vec3 firstDerivative = getInterpolatedTextureValue(uFirstDerivative, volumeCoords).xyz;
   float density = getInterpolatedTextureValue(uVolume, volumeCoords).r;
-  return vec4(firstDerivative, density);
+
+  // return vec4(vec3(0.5 * density), mix(0.0, 0.02, step(0.5, length(firstDerivative))));
+  return vec4(vec3(0.5), mix(0.0, 0.015, step(0.6, length(firstDerivative))));
+  
+  // return vec4(firstDerivative, density);
+
 }
 
 /**
