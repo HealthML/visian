@@ -133,6 +133,13 @@ export class VolumeRenderer implements IDisposable {
     this.eagerRender();
     this.onCameraMove();
   };
+
+  public setFocusVolume = (focus?: ITKImage) => {
+    this.volume.setFocusAtlas(
+      focus ? TextureAtlas.fromITKImage(focus) : undefined,
+    );
+    this.lazyRender();
+  };
 }
 
 export default VolumeRenderer;

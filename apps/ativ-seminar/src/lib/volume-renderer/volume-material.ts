@@ -17,6 +17,8 @@ class VolumeMaterial extends THREE.ShaderMaterial {
       uniforms: {
         uVolume: { value: null },
         uFirstDerivative: { value: null },
+        uFocus: { value: null },
+        uUseFocus: { value: false },
         uVoxelCount: {
           value: [1, 1, 1],
         },
@@ -39,6 +41,18 @@ class VolumeMaterial extends THREE.ShaderMaterial {
 
     const gradientComputer = new GradientComputer(atlas, renderer);
     this.uniforms.uFirstDerivative.value = gradientComputer.getFirstDerivative();
+
+    this.uniforms.uUseFocus.value = false;
+  }
+
+  public setFocusAtlas(atlas?: TextureAtlas) {
+    if (atlas) {
+      this.uniforms.uFocus.value = atlas.getTexture();
+      this.uniforms.uUseFocus.value = true;
+    } else {
+      this.uniforms.uFocus.value = null;
+      this.uniforms.uUseFocus.value = false;
+    }
   }
 
   /**

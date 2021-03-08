@@ -46,6 +46,9 @@ export function App() {
     (async () => {
       const file = await localForage.getItem<File>("image");
       if (file) renderer?.setImage(await readMedicalImage(file));
+
+      const focus = await localForage.getItem<File>("focusVolume");
+      if (focus) renderer?.setFocusVolume(await readMedicalImage(focus));
     })();
   }, []);
 
@@ -60,6 +63,27 @@ export function App() {
         }
         await localForage.setItem("image", fileList[0]);
         if (image) renderer?.setImage(image);
+
+        if (fileList.length > 1) {
+          const focus = await readMedicalImage(fileList[1]);
+          if (focus.imageType.dimension !== 3) {
+            throw new Error("Only 3D volumetric images are supported.");
+          }
+          if (
+            focus.size[0] !== image.size[0] ||
+            focus.size[1] !== image.size[1] ||
+            focus.size[2] !== image.size[2]
+          ) {
+            throw new Error(
+              "Focus volume does not match the original scan's size.",
+            );
+          }
+          await localForage.setItem("focusVolume", fileList[1]);
+          if (focus) renderer?.setFocusVolume(focus);
+        } else {
+          renderer?.setFocusVolume();
+          await localForage.removeItem("focusVolume");
+        }
       } catch (err) {
         console.error("The dropped file could not be opened:", err);
       }

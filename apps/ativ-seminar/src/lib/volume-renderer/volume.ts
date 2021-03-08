@@ -26,6 +26,10 @@ class Volume extends THREE.Mesh {
     );
   }
 
+  public setFocusAtlas(atlas?: TextureAtlas) {
+    (this.material as VolumeMaterial).setFocusAtlas(atlas);
+  }
+
   public updateCameraPosition(camera: THREE.Camera) {
     (this.material as VolumeMaterial).updateCameraPosition(this, camera);
   }

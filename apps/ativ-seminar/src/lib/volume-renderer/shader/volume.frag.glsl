@@ -5,6 +5,8 @@ varying vec3 vRayOrigin;
 
 uniform sampler2D uVolume;
 uniform sampler2D uFirstDerivative;
+uniform sampler2D uFocus;
+uniform bool uUseFocus;
 uniform vec3 uVoxelCount;
 uniform vec2 uAtlasGrid;
 uniform float uStepSize;
@@ -12,6 +14,7 @@ uniform float uStepSize;
 struct VolumeData {
   float density;
   vec3 firstDerivative;
+  float focus;
 };
 
 // TODO: Choose this non-arbitrarily
@@ -42,6 +45,7 @@ VolumeData getVolumeData(vec3 volumeCoords) {
   VolumeData data;
   data.density = texture2D(uVolume, uv).r;
   data.firstDerivative = texture2D(uFirstDerivative, uv).xyz;
+  data.focus = texture2D(uFocus, uv).r;
 
   return data;
 }
@@ -67,16 +71,23 @@ VolumeData getInterpolatedVolumeData(vec3 volumeCoords) {
   VolumeData interpolatedData;
   interpolatedData.density = mix(lowerData.density, upperData.density, interpolation);
   interpolatedData.firstDerivative = mix(lowerData.firstDerivative, upperData.firstDerivative, interpolation);
+  interpolatedData.focus = mix(lowerData.focus, upperData.focus, interpolation);
 
   return interpolatedData;
 }
 
 /** The transfer function. */
 vec4 transferFunction(VolumeData data) {
-  // return vec4(vec3(0.7 * data.density), mix(0.0, 0.02, step(0.1, length(data.firstDerivative))));
-  return vec4(vec3(0.5), mix(0.0, 0.015, step(0.1, length(data.firstDerivative))));
-  
   // return vec4(data.firstDerivative * 3.0, data.density);
+
+  // return vec4(vec3(0.7 * data.density), mix(0.0, 0.02, step(0.1, length(data.firstDerivative))));
+  // return vec4(data.firstDerivative * 3.0, mix(0.0, 0.015, step(0.1, length(data.firstDerivative))));
+
+
+  return vec4(data.focus + (1.0 - data.focus) * data.firstDerivative * 5.0, data.focus * 0.8 + (1.0 - data.focus) * mix(0.0, 0.015, step(0.1, length(data.firstDerivative))) * 0.2);
+  /* return !uUseFocus ?
+      vec4(vec3(0.5), mix(0.0, 0.015, step(0.1, length(data.firstDerivative))))
+    : vec4(vec3(1), data.focus * 0.02 + (1.0 - data.focus) * mix(0.0, 0.015, step(0.1, length(data.firstDerivative))) * 0.2); */
 }
 
 vec4 getVolumeColor(vec3 volumeCoords) {
