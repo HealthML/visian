@@ -4,7 +4,7 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import Stats from "three/examples/jsm/libs/stats.module";
 
 import { IDisposable } from "../types";
-import { ScreenAlignedQuad, TextureAtlas } from "./utils";
+import { FlyControls, ScreenAlignedQuad, TextureAtlas } from "./utils";
 import Volume from "./volume";
 
 export class VolumeRenderer implements IDisposable {
@@ -18,6 +18,7 @@ export class VolumeRenderer implements IDisposable {
   private volume: Volume;
 
   private orbitControls: OrbitControls;
+  private flyControls: FlyControls;
 
   private stats: Stats;
 
@@ -41,6 +42,13 @@ export class VolumeRenderer implements IDisposable {
 
     this.orbitControls = new OrbitControls(this.camera, this.canvas);
     this.orbitControls.addEventListener("change", this.onCameraMove);
+
+    this.flyControls = new FlyControls(this.camera, this.canvas);
+    this.flyControls.addEventListener("change", this.onCameraMove);
+    this.flyControls.addEventListener("lock", this.onFlyControlsLock);
+    this.flyControls.addEventListener("unlock", this.onFlyControlsUnlock);
+
+    document.addEventListener("keydown", this.onKeyDown);
 
     this.volume = new Volume();
     this.scene.add(this.volume);
@@ -67,6 +75,11 @@ export class VolumeRenderer implements IDisposable {
     window.removeEventListener("resize", this.resize);
     this.orbitControls.removeEventListener("change", this.onCameraMove);
     this.orbitControls.dispose();
+    this.flyControls.removeEventListener("change", this.onCameraMove);
+    this.flyControls.removeEventListener("lock", this.onFlyControlsLock);
+    this.flyControls.removeEventListener("unlock", this.onFlyControlsUnlock);
+    this.flyControls.dispose();
+    document.removeEventListener("keydown", this.onKeyDown);
   };
 
   private resize = () => {
@@ -102,6 +115,7 @@ export class VolumeRenderer implements IDisposable {
   private animate = () => {
     if (this.lazyRenderTriggered) this.eagerRender();
     this.stats.update();
+    this.flyControls.tick();
   };
 
   public lazyRender = () => {
@@ -139,6 +153,34 @@ export class VolumeRenderer implements IDisposable {
       focus ? TextureAtlas.fromITKImage(focus) : undefined,
     );
     this.lazyRender();
+  };
+
+  private onFlyControlsLock = () => {
+    this.orbitControls.enabled = false;
+  };
+
+  private onFlyControlsUnlock = () => {
+    this.orbitControls.enabled = true;
+
+    this.camera.getWorldDirection(this.orbitControls.target);
+    // TODO: Choose a new target distance depending on what the
+    // user is looking at.
+    // this.orbitControls.target.multiplyScalar(distance);
+    this.orbitControls.target.add(this.camera.position);
+  };
+
+  private toggleControls = () => {
+    if (this.flyControls.isLocked) {
+      this.flyControls.unlock();
+    } else {
+      this.flyControls.lock();
+    }
+  };
+
+  private onKeyDown = (event: KeyboardEvent) => {
+    if (event.key.toLowerCase() === "t") {
+      this.toggleControls();
+    }
   };
 }
 
