@@ -82,12 +82,15 @@ vec4 transferFunction(VolumeData data) {
 
   // return vec4(vec3(0.7 * data.density), mix(0.0, 0.02, step(0.1, length(data.firstDerivative))));
   // return vec4(data.firstDerivative * 3.0, mix(0.0, 0.015, step(0.1, length(data.firstDerivative))));
+  // return vec4(vec3(0.5), mix(0.0, 0.015, step(0.12, length(data.firstDerivative))));
 
 
   return vec4(data.focus + (1.0 - data.focus) * data.firstDerivative * 5.0, data.focus * 0.8 + (1.0 - data.focus) * mix(0.0, 0.015, step(0.1, length(data.firstDerivative))) * 0.2);
-  /* return !uUseFocus ?
-      vec4(vec3(0.5), mix(0.0, 0.015, step(0.1, length(data.firstDerivative))))
-    : vec4(vec3(1), data.focus * 0.02 + (1.0 - data.focus) * mix(0.0, 0.015, step(0.1, length(data.firstDerivative))) * 0.2); */
+  // return !uUseFocus ?
+  //     vec4(vec3(0.5), mix(0.0, 0.015, step(0.1, length(data.firstDerivative))))
+  //   : vec4(vec3(1), data.focus * 0.02 + (1.0 - data.focus) * mix(0.0, 0.015, step(0.1, length(data.firstDerivative))) * 0.2);
+
+  // return mix(vec4(vec3(0.5), mix(0.0, 0.015, step(0.12, length(data.firstDerivative)))), vec4(1.0, 0.0, 0.0, 1.0), data.focus);
 }
 
 vec4 getVolumeColor(vec3 volumeCoords) {
