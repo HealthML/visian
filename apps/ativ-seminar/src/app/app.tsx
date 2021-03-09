@@ -148,6 +148,7 @@ export function App() {
   }, [setIsDraggedOver]);
 
   const endDragOver = useCallback(() => {
+    // TODO: Fix flickering when dragging from one drop zone to the other
     setIsDraggedOver(false);
   }, [setIsDraggedOver]);
 
