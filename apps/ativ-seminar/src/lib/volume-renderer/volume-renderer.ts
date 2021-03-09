@@ -169,7 +169,7 @@ export class VolumeRenderer implements IDisposable {
     this.orbitControls.target.add(this.camera.position);
   };
 
-  private toggleControls = () => {
+  private toggleFly = () => {
     if (this.flyControls.isLocked) {
       this.flyControls.unlock();
     } else {
@@ -178,8 +178,8 @@ export class VolumeRenderer implements IDisposable {
   };
 
   private onKeyDown = (event: KeyboardEvent) => {
-    if (event.key.toLowerCase() === "t") {
-      this.toggleControls();
+    if (event.key === "F") {
+      this.toggleFly();
     }
   };
 }
