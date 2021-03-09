@@ -1,26 +1,35 @@
+import { radius, sheetMixin, Subtitle, Text } from "@visian/ui-shared";
 import React, { useCallback, useState } from "react";
-import styled from "styled-components";
+import styled, { css } from "styled-components";
 
 import { DropZoneProps } from "./drop-zone.props";
 
-const StyledDiv = styled.div`
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+const StyledDiv = styled.div<{
+  alwaysShown?: boolean;
+  isDraggedOver?: boolean;
+}>`
+  ${(props) => (props.isDraggedOver || props.alwaysShown) && sheetMixin}
+  ${(props) =>
+    props.isDraggedOver &&
+    css`
+      border: 2px dashed;
+    `}
+  border-radius: ${radius("default")};
+  align-items: center;
+  display: flex;
+  justify-content: center;
 `;
 
 export const DropZone: React.FC<DropZoneProps> = (props) => {
   const {
+    alwaysShown,
     children,
-    className,
+    label,
     onDragEnd,
     onDragLeave,
     onDragOver,
     onDrop,
     onFileDrop,
-    style,
     ...rest
   } = props;
 
@@ -63,8 +72,11 @@ export const DropZone: React.FC<DropZoneProps> = (props) => {
       onDragOver={dragOver}
       onDragLeave={endDrag}
       onDragEnd={endDrag}
+      alwaysShown={alwaysShown}
+      isDraggedOver={isDraggedOver}
     >
       {children}
+      {label && (isDraggedOver || alwaysShown) && <Subtitle text={label} />}
     </StyledDiv>
   );
 };

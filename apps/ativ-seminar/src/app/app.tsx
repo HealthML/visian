@@ -2,18 +2,37 @@ import {
   ColorMode,
   getTheme,
   GlobalStyles,
+  Screen,
   ThemeProvider,
 } from "@visian/ui-shared";
-import { ITKImage, readMedicalImage } from "@visian/util";
+import { readMedicalImage } from "@visian/util";
 import localForage from "localforage";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Route, Switch } from "react-router-dom";
+import styled from "styled-components";
 
 import { DropZone } from "../components/drop-zone";
 import { WebGLCanvas } from "../components/webgl-canvas";
 import { VolumeRenderer } from "../lib/volume-renderer";
 
 let renderer: VolumeRenderer | undefined;
+
+const StyledDropZone = styled(DropZone)`
+  flex: 1;
+  margin: 12px 0 12px 12px;
+`;
+
+const DropSheet = styled.div`
+  align-items: stretch;
+  display: flex;
+  flex-direction: row;
+  padding-right: 12px;
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+`;
 
 export function App() {
   const [mode] = useState<ColorMode>("dark");
@@ -52,8 +71,14 @@ export function App() {
     })();
   }, []);
 
+  const [isDraggedOver, setIsDraggedOver] = useState(false);
+
+  const defaultDropZoneLabel = "Drag scan here";
+  const [dropZoneLabel, setDropZoneLabel] = useState(defaultDropZoneLabel);
+
   /** Tries to load a new image from the first dropped file. */
   const onFileDrop = useCallback((fileList: FileList) => {
+    setDropZoneLabel("Loading...");
     if (!fileList.length) return;
     (async () => {
       try {
@@ -87,17 +112,36 @@ export function App() {
       } catch (err) {
         console.error("The dropped file could not be opened:", err);
       }
+      setIsDraggedOver(false);
+      setDropZoneLabel(defaultDropZoneLabel);
     })();
   }, []);
+
+  const dragOver = useCallback(() => {
+    setIsDraggedOver(true);
+  }, [setIsDraggedOver]);
+
+  const endDragOver = useCallback(() => {
+    setIsDraggedOver(false);
+  }, [setIsDraggedOver]);
 
   return (
     <ThemeProvider theme={theme}>
       <GlobalStyles />
       <Switch>
         <Route path="/">
-          <DropZone onFileDrop={onFileDrop}>
+          <Screen onDragOver={dragOver}>
             <WebGLCanvas ref={canvasRef} />
-          </DropZone>
+            {isDraggedOver && (
+              <DropSheet onDragEnd={endDragOver} onDragLeave={endDragOver}>
+                <StyledDropZone
+                  alwaysShown
+                  label={dropZoneLabel}
+                  onFileDrop={onFileDrop}
+                />
+              </DropSheet>
+            )}
+          </Screen>
         </Route>
       </Switch>
     </ThemeProvider>
