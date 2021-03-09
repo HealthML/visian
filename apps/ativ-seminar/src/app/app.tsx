@@ -60,25 +60,33 @@ export function App() {
     };
   }, [forceUpdate]);
 
+  const imageSizeRef = useRef<number[] | undefined>();
+
   // Load cached image
   useEffect(() => {
     (async () => {
-      const file = await localForage.getItem<File>("image");
-      if (file) renderer?.setImage(await readMedicalImage(file));
+      const [file, focus] = await Promise.all([
+        localForage.getItem<File>("image"),
+        localForage.getItem<File>("focusVolume"),
+      ]);
+      if (file) {
+        const image = await readMedicalImage(file);
+        renderer?.setImage(image);
+        imageSizeRef.current = image.size;
+      }
 
-      const focus = await localForage.getItem<File>("focusVolume");
       if (focus) renderer?.setFocusVolume(await readMedicalImage(focus));
     })();
   }, []);
 
   const [isDraggedOver, setIsDraggedOver] = useState(false);
 
-  const defaultDropZoneLabel = "Drag scan here";
-  const [dropZoneLabel, setDropZoneLabel] = useState(defaultDropZoneLabel);
+  const defaultImageDropLabel = "Drop your image here";
+  const [imageDropLabel, setImageDropLabel] = useState(defaultImageDropLabel);
 
   /** Tries to load a new image from the first dropped file. */
-  const onFileDrop = useCallback((fileList: FileList) => {
-    setDropZoneLabel("Loading...");
+  const dropImage = useCallback((fileList: FileList) => {
+    setImageDropLabel("Loading...");
     if (!fileList.length) return;
     (async () => {
       try {
@@ -86,34 +94,52 @@ export function App() {
         if (image.imageType.dimension !== 3) {
           throw new Error("Only 3D volumetric images are supported.");
         }
-        await localForage.setItem("image", fileList[0]);
-        if (image) renderer?.setImage(image);
-
-        if (fileList.length > 1) {
-          const focus = await readMedicalImage(fileList[1]);
-          if (focus.imageType.dimension !== 3) {
-            throw new Error("Only 3D volumetric images are supported.");
-          }
-          if (
-            focus.size[0] !== image.size[0] ||
-            focus.size[1] !== image.size[1] ||
-            focus.size[2] !== image.size[2]
-          ) {
-            throw new Error(
-              "Focus volume does not match the original scan's size.",
-            );
-          }
-          await localForage.setItem("focusVolume", fileList[1]);
-          if (focus) renderer?.setFocusVolume(focus);
-        } else {
-          renderer?.setFocusVolume();
-          await localForage.removeItem("focusVolume");
-        }
+        await Promise.all([
+          localForage.setItem("image", fileList[0]),
+          localForage.removeItem("focusVolume"),
+        ]);
+        renderer?.setImage(image);
+        imageSizeRef.current = image.size;
+        renderer?.setFocusVolume();
       } catch (err) {
         console.error("The dropped file could not be opened:", err);
       }
       setIsDraggedOver(false);
-      setDropZoneLabel(defaultDropZoneLabel);
+      setImageDropLabel(defaultImageDropLabel);
+    })();
+  }, []);
+
+  const defaultFocusDropLabel = "Drop a focus volume here";
+  const [focusDropLabel, setFocusDropLabel] = useState(defaultFocusDropLabel);
+
+  /** Tries to load a new image from the first dropped file. */
+  const dropFocusVolume = useCallback((fileList: FileList) => {
+    setFocusDropLabel("Loading...");
+    if (!fileList.length) return;
+    (async () => {
+      try {
+        if (!imageSizeRef.current) throw new Error("No image loaded.");
+
+        const focus = await readMedicalImage(fileList[0]);
+        if (focus.imageType.dimension !== 3) {
+          throw new Error("Only 3D volumetric images are supported.");
+        }
+        if (
+          focus.size[0] !== imageSizeRef.current[0] ||
+          focus.size[1] !== imageSizeRef.current[1] ||
+          focus.size[2] !== imageSizeRef.current[2]
+        ) {
+          throw new Error(
+            "Focus volume does not match the original scan's size.",
+          );
+        }
+        await localForage.setItem("focusVolume", fileList[1]);
+        renderer?.setFocusVolume(focus);
+      } catch (err) {
+        console.error("The dropped file could not be opened:", err);
+      }
+      setIsDraggedOver(false);
+      setFocusDropLabel(defaultFocusDropLabel);
     })();
   }, []);
 
@@ -136,8 +162,13 @@ export function App() {
               <DropSheet onDragEnd={endDragOver} onDragLeave={endDragOver}>
                 <StyledDropZone
                   alwaysShown
-                  label={dropZoneLabel}
-                  onFileDrop={onFileDrop}
+                  label={imageDropLabel}
+                  onFileDrop={dropImage}
+                />
+                <StyledDropZone
+                  alwaysShown
+                  label={focusDropLabel}
+                  onFileDrop={dropFocusVolume}
                 />
               </DropSheet>
             )}
