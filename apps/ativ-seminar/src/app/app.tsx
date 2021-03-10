@@ -19,14 +19,14 @@ let renderer: VolumeRenderer | undefined;
 
 const StyledDropZone = styled(DropZone)`
   flex: 1;
-  margin: 12px 0 12px 12px;
+  margin: 10% 0 10% 10%;
 `;
 
 const DropSheet = styled.div`
   align-items: stretch;
   display: flex;
   flex-direction: row;
-  padding-right: 12px;
+  padding-right: 10%;
   position: absolute;
   left: 0;
   top: 0;
@@ -143,13 +143,18 @@ export function App() {
     })();
   }, []);
 
+  const dragTimerRef = useRef<NodeJS.Timer>();
   const dragOver = useCallback(() => {
     setIsDraggedOver(true);
+    if (dragTimerRef.current) {
+      clearTimeout(dragTimerRef.current);
+    }
   }, [setIsDraggedOver]);
 
   const endDragOver = useCallback(() => {
-    // TODO: Fix flickering when dragging from one drop zone to the other
-    setIsDraggedOver(false);
+    dragTimerRef.current = setTimeout(() => {
+      setIsDraggedOver(false);
+    }, 25);
   }, [setIsDraggedOver]);
 
   return (
@@ -157,10 +162,14 @@ export function App() {
       <GlobalStyles />
       <Switch>
         <Route path="/">
-          <Screen onDragOver={dragOver}>
+          <Screen
+            onDragOver={dragOver}
+            onDragEnd={endDragOver}
+            onDragLeave={endDragOver}
+          >
             <WebGLCanvas ref={canvasRef} />
             {isDraggedOver && (
-              <DropSheet onDragEnd={endDragOver} onDragLeave={endDragOver}>
+              <DropSheet>
                 <StyledDropZone
                   alwaysShown
                   label={imageDropLabel}

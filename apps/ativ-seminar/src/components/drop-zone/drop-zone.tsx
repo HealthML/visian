@@ -1,4 +1,4 @@
-import { radius, sheetMixin, Subtitle, Text } from "@visian/ui-shared";
+import { color, radius, sheetMixin, Subtitle, Text } from "@visian/ui-shared";
 import React, { useCallback, useState } from "react";
 import styled, { css } from "styled-components";
 
@@ -12,7 +12,7 @@ const StyledDiv = styled.div<{
   ${(props) =>
     props.isDraggedOver &&
     css`
-      border: 2px dashed;
+      border: 2px solid ${color("text")};
     `}
   border-radius: ${radius("default")};
   align-items: center;
