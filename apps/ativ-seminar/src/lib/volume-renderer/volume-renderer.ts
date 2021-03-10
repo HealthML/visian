@@ -6,6 +6,7 @@ import Stats from "three/examples/jsm/libs/stats.module";
 import { IDisposable } from "../types";
 import { FlyControls, ScreenAlignedQuad, TextureAtlas } from "./utils";
 import Volume from "./volume";
+import VolumeMaterial from "./volume-material";
 
 export class VolumeRenderer implements IDisposable {
   private renderer: THREE.WebGLRenderer;
@@ -19,6 +20,7 @@ export class VolumeRenderer implements IDisposable {
 
   private orbitControls: OrbitControls;
   private flyControls: FlyControls;
+  private raycaster = new THREE.Raycaster();
 
   private stats: Stats;
 
@@ -162,10 +164,17 @@ export class VolumeRenderer implements IDisposable {
   private onFlyControlsUnlock = () => {
     this.orbitControls.enabled = true;
 
+    this.raycaster.setFromCamera({ x: 0.5, y: 0.5 }, this.camera);
+    (this.volume.material as VolumeMaterial).side = THREE.DoubleSide;
+    const intersections = this.raycaster.intersectObject(this.volume);
+    (this.volume.material as VolumeMaterial).side = THREE.BackSide;
+
     this.camera.getWorldDirection(this.orbitControls.target);
-    // TODO: Choose a new target distance depending on what the
-    // user is looking at.
-    // this.orbitControls.target.multiplyScalar(distance);
+    this.orbitControls.target.multiplyScalar(
+      intersections.length === 2
+        ? (intersections[0].distance + intersections[1].distance) / 2
+        : 1,
+    );
     this.orbitControls.target.add(this.camera.position);
   };
 
