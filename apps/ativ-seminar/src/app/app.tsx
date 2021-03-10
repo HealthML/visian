@@ -14,6 +14,9 @@ import styled from "styled-components";
 import { DropZone } from "../components/drop-zone";
 import { WebGLCanvas } from "../components/webgl-canvas";
 import { VolumeRenderer } from "../lib/volume-renderer";
+import { TextureAtlas } from "../lib/volume-renderer/utils";
+
+import type * as THREE from "three";
 
 let renderer: VolumeRenderer | undefined;
 
@@ -60,22 +63,21 @@ export function App() {
     };
   }, [forceUpdate]);
 
-  const imageSizeRef = useRef<number[] | undefined>();
+  const voxelCountRef = useRef<THREE.Vector3 | undefined>();
 
   // Load cached image
   useEffect(() => {
     (async () => {
-      const [file, focus] = await Promise.all([
-        localForage.getItem<File>("image"),
-        localForage.getItem<File>("focusVolume"),
+      const [image, focus] = await Promise.all([
+        TextureAtlas.fromStorage("image"),
+        TextureAtlas.fromStorage("focus"),
       ]);
-      if (file) {
-        const image = await readMedicalImage(file);
+      if (image) {
         renderer?.setImage(image);
-        imageSizeRef.current = image.size;
+        voxelCountRef.current = image.voxelCount;
       }
 
-      if (focus) renderer?.setFocusVolume(await readMedicalImage(focus));
+      if (focus) renderer?.setFocus(focus);
     })();
   }, []);
 
@@ -94,13 +96,14 @@ export function App() {
         if (image.imageType.dimension !== 3) {
           throw new Error("Only 3D volumetric images are supported.");
         }
+        const atlas = TextureAtlas.fromITKImage(image);
         await Promise.all([
-          localForage.setItem("image", fileList[0]),
-          localForage.removeItem("focusVolume"),
+          atlas.store("image"),
+          TextureAtlas.removeFromStorage("focus"),
         ]);
-        renderer?.setImage(image);
-        imageSizeRef.current = image.size;
-        renderer?.setFocusVolume();
+        renderer?.setImage(atlas);
+        voxelCountRef.current = atlas.voxelCount;
+        renderer?.setFocus();
       } catch (err) {
         console.error("The dropped file could not be opened:", err);
       }
@@ -118,23 +121,20 @@ export function App() {
     if (!fileList.length) return;
     (async () => {
       try {
-        if (!imageSizeRef.current) throw new Error("No image loaded.");
+        if (!voxelCountRef.current) throw new Error("No image loaded.");
 
         const focus = await readMedicalImage(fileList[0]);
         if (focus.imageType.dimension !== 3) {
           throw new Error("Only 3D volumetric images are supported.");
         }
-        if (
-          focus.size[0] !== imageSizeRef.current[0] ||
-          focus.size[1] !== imageSizeRef.current[1] ||
-          focus.size[2] !== imageSizeRef.current[2]
-        ) {
+        const atlas = TextureAtlas.fromITKImage(focus);
+        if (!atlas.voxelCount.equals(voxelCountRef.current)) {
           throw new Error(
             "Focus volume does not match the original scan's size.",
           );
         }
-        await localForage.setItem("focusVolume", fileList[0]);
-        renderer?.setFocusVolume(focus);
+        await atlas.store("focus");
+        renderer?.setFocus(atlas);
       } catch (err) {
         console.error("The dropped file could not be opened:", err);
       }

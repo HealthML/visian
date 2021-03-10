@@ -1,4 +1,3 @@
-import { ITKImage } from "@visian/util";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import Stats from "three/examples/jsm/libs/stats.module";
@@ -141,8 +140,9 @@ export class VolumeRenderer implements IDisposable {
     this.lazyRender();
   };
 
-  public setImage = (image: ITKImage) => {
-    this.volume.setAtlas(TextureAtlas.fromITKImage(image), this.renderer);
+  /** Sets the base image to be rendered. */
+  public setImage = (image: TextureAtlas) => {
+    this.volume.setAtlas(image, this.renderer);
     this.isImageLoaded = true;
 
     // TODO: Can we maybe find a solution that does not require
@@ -151,10 +151,9 @@ export class VolumeRenderer implements IDisposable {
     this.onCameraMove();
   };
 
-  public setFocusVolume = (focus?: ITKImage) => {
-    this.volume.setFocusAtlas(
-      focus ? TextureAtlas.fromITKImage(focus, THREE.NearestFilter) : undefined,
-    );
+  /** Sets a focus volume. */
+  public setFocus = (focus?: TextureAtlas) => {
+    this.volume.setFocusAtlas(focus);
     this.lazyRender();
   };
 
