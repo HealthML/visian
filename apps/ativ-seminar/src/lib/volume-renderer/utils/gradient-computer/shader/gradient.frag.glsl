@@ -86,6 +86,8 @@ void main() {
   }
 
   vec3 gradient = (up - down) / (mix(vec3(1.0), vec3(2.0), step(0.5, mod(voxelCoords, uVoxelCount - vec3(1.0)))) * uVoxelSpacing);
+  
+  float encodedSigns = 0.5 * step(0.0, gradient.x) + 0.25 * step(0.0, gradient.y) + 0.125 * step(0.0, gradient.z);
 
   // Disregarding the voxels at the edges of the volume, the absolute value of the 
   // components of gradient are at most sqrt(inputDimensions)/(2*min(voxelSpacing)).
@@ -94,5 +96,5 @@ void main() {
   // TODO: Think about scaling by a bigger value, because the gradient tends to be rather small.
   float gradientScaleFactor = 2.0 * min(uVoxelSpacing.x, min(uVoxelSpacing.y, uVoxelSpacing.z)) / sqrt(uInputDimensions);
 
-  gl_FragColor = vec4(abs(gradient) * gradientScaleFactor, 1.0);
+  gl_FragColor = vec4(abs(gradient) * gradientScaleFactor, encodedSigns);
 }
