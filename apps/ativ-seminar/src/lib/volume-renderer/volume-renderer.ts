@@ -150,7 +150,7 @@ export class VolumeRenderer implements IDisposable {
 
   public setFocusVolume = (focus?: ITKImage) => {
     this.volume.setFocusAtlas(
-      focus ? TextureAtlas.fromITKImage(focus) : undefined,
+      focus ? TextureAtlas.fromITKImage(focus, THREE.NearestFilter) : undefined,
     );
     this.lazyRender();
   };

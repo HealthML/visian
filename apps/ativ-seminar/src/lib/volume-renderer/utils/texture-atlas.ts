@@ -16,7 +16,7 @@ export const getAtlasGrid = (voxelCount: THREE.Vector3) => {
 /** A 2D texture atlas for a volumetric image. */
 export class TextureAtlas {
   /** Returns a texture atlas based on the given medical image. */
-  public static fromITKImage(image: ITKImage) {
+  public static fromITKImage(image: ITKImage, magFilter?: THREE.TextureFilter) {
     if (image.size.length !== 3) {
       throw new Error("Only 3D volumetric images are supported");
     }
@@ -24,6 +24,7 @@ export class TextureAtlas {
       image.data,
       new THREE.Vector3().fromArray(image.size),
       new THREE.Vector3().fromArray(image.spacing),
+      magFilter,
     );
   }
 
@@ -45,6 +46,7 @@ export class TextureAtlas {
     public readonly voxelSpacing: THREE.Vector3 = new THREE.Vector3().setScalar(
       1,
     ),
+    private magFilter: THREE.TextureFilter = THREE.LinearFilter,
   ) {
     this.atlasGrid = getAtlasGrid(voxelCount);
     this.atlasSize = new THREE.Vector2(voxelCount.x, voxelCount.y).multiply(
@@ -120,7 +122,7 @@ export class TextureAtlas {
         undefined,
         undefined,
         undefined,
-        THREE.LinearFilter,
+        this.magFilter,
       );
     }
 

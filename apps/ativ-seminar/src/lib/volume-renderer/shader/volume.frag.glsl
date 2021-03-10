@@ -71,7 +71,9 @@ VolumeData getInterpolatedVolumeData(vec3 volumeCoords) {
   VolumeData interpolatedData;
   interpolatedData.density = mix(lowerData.density, upperData.density, interpolation);
   interpolatedData.firstDerivative = mix(lowerData.firstDerivative, upperData.firstDerivative, interpolation);
-  interpolatedData.focus = mix(lowerData.focus, upperData.focus, interpolation);
+
+  // The focus texture should not be interpolated.
+  interpolatedData.focus = mix(lowerData.focus, upperData.focus, step(0.5, interpolation));
 
   return interpolatedData;
 }
