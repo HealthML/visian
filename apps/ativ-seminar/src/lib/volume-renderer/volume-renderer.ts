@@ -82,6 +82,7 @@ export class VolumeRenderer implements IDisposable {
     this.flyControls.removeEventListener("unlock", this.onFlyControlsUnlock);
     this.flyControls.dispose();
     document.removeEventListener("keydown", this.onKeyDown);
+    document.removeEventListener("click", this.toggleFly);
   };
 
   private resize = () => {
@@ -159,10 +160,12 @@ export class VolumeRenderer implements IDisposable {
 
   private onFlyControlsLock = () => {
     this.orbitControls.enabled = false;
+    document.addEventListener("click", this.toggleFly);
   };
 
   private onFlyControlsUnlock = () => {
     this.orbitControls.enabled = true;
+    document.removeEventListener("click", this.toggleFly);
 
     this.raycaster.setFromCamera({ x: 0.5, y: 0.5 }, this.camera);
     (this.volume.material as VolumeMaterial).side = THREE.DoubleSide;
