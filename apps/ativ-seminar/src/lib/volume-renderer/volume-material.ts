@@ -17,6 +17,7 @@ class VolumeMaterial extends THREE.ShaderMaterial {
       uniforms: {
         uVolume: { value: null },
         uFirstDerivative: { value: null },
+        uSecondDerivative: { value: null },
         uFocus: { value: null },
         uUseFocus: { value: false },
         uVoxelCount: {
@@ -41,6 +42,7 @@ class VolumeMaterial extends THREE.ShaderMaterial {
 
     const gradientComputer = new GradientComputer(atlas, renderer);
     this.uniforms.uFirstDerivative.value = gradientComputer.getFirstDerivative();
+    this.uniforms.uSecondDerivative.value = gradientComputer.getSecondDerivative();
 
     this.uniforms.uUseFocus.value = false;
   }

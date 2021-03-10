@@ -4,6 +4,7 @@ uniform sampler2D uTextureAtlas;
 uniform vec3 uVoxelSpacing;
 uniform vec3 uVoxelCount;
 uniform vec2 uAtlasGrid;
+uniform float uInputDimensions;
 
 /**
  * Returns the image value at the given volume coordinates.
@@ -42,26 +43,58 @@ void main() {
 
   vec3 voxelCoords = vec3(offsetInSlice * uVoxelCount.xy, zSlice);
 
-  vec3 up = vec3(0.0);
-  vec3 down = vec3(0.0);
+  vec4 upX = getImageValue(vec3(min(uVoxelCount.x - 1.0, voxelCoords.x + 1.0), voxelCoords.yz));
+  vec4 downX = getImageValue(vec3(max(0.0, voxelCoords.x - 1.0), voxelCoords.yz));
 
-  up.x = getImageValue(vec3(min(uVoxelCount.x - 1.0, voxelCoords.x + 1.0), voxelCoords.yz)).x;
-  down.x = getImageValue(vec3(max(0.0, voxelCoords.x - 1.0), voxelCoords.yz)).x;
+  vec4 upY = getImageValue(vec3(voxelCoords.x, min(uVoxelCount.y - 1.0, voxelCoords.y + 1.0), voxelCoords.z));
+  vec4 downY = getImageValue(vec3(voxelCoords.x, max(0.0, voxelCoords.y - 1.0), voxelCoords.z));
 
-  up.y = getImageValue(vec3(voxelCoords.x, min(uVoxelCount.y - 1.0, voxelCoords.y + 1.0), voxelCoords.z)).x;
-  down.y = getImageValue(vec3(voxelCoords.x, max(0.0, voxelCoords.y - 1.0), voxelCoords.z)).x;
+  vec4 upZ = getImageValue(vec3(voxelCoords.xy, min(uVoxelCount.z - 1.0, voxelCoords.z + 1.0)));
+  vec4 downZ = getImageValue(vec3(voxelCoords.xy, max(0.0, voxelCoords.z - 1.0)));
+  
+  vec3 up;
+  vec3 down;
 
-  up.z = getImageValue(vec3(voxelCoords.xy, min(uVoxelCount.z - 1.0, voxelCoords.z + 1.0))).x;
-  down.z = getImageValue(vec3(voxelCoords.xy, max(0.0, voxelCoords.z - 1.0))).x;
+  if (uInputDimensions == 4.0) {
+    up.x = length(upX);
+    up.y = length(upY);
+    up.z = length(upZ);
+    down.x = length(downX);
+    down.y = length(downY);
+    down.z = length(downZ);
+  } else if (uInputDimensions == 3.0) {
+    up.x = length(upX.xyz);
+    up.y = length(upY.xyz);
+    up.z = length(upZ.xyz);
+    down.x = length(downX.xyz);
+    down.y = length(downY.xyz);
+    down.z = length(downZ.xyz);
+  } else if (uInputDimensions == 2.0) {
+    up.x = length(upX.xy);
+    up.y = length(upY.xy);
+    up.z = length(upZ.xy);
+    down.x = length(downX.xy);
+    down.y = length(downY.xy);
+    down.z = length(downZ.xy);
+  } else {
+    up.x = length(upX.x);
+    up.y = length(upY.x);
+    up.z = length(upZ.x);
+    down.x = length(downX.x);
+    down.y = length(downY.x);
+    down.z = length(downZ.x);
+  }
 
   vec3 gradient = (up - down) / (mix(vec3(1.0), vec3(2.0), step(0.5, mod(voxelCoords, uVoxelCount - vec3(1.0)))) * uVoxelSpacing);
+  
+  float encodedSigns = 0.5 * step(0.0, gradient.x) + 0.25 * step(0.0, gradient.y) + 0.125 * step(0.0, gradient.z);
 
   // Disregarding the voxels at the edges of the volume, the absolute value of the 
-  // components of gradient are at most 1/(2*min(voxelSpacing)).
+  // components of gradient are at most sqrt(inputDimensions)/(2*min(voxelSpacing)).
   // As we want to use the whole range [0, 1] for the result we scale by this value.
   //
   // TODO: Think about scaling by a bigger value, because the gradient tends to be rather small.
-  float gradientScaleFactor = 2.0 * min(uVoxelSpacing.x, min(uVoxelSpacing.y, uVoxelSpacing.z));
+  float gradientScaleFactor = 2.0 * min(uVoxelSpacing.x, min(uVoxelSpacing.y, uVoxelSpacing.z)) / sqrt(uInputDimensions);
 
-  gl_FragColor = vec4(abs(gradient) * gradientScaleFactor, 1.0);
+  gl_FragColor = vec4(abs(gradient) * gradientScaleFactor, encodedSigns);
 }

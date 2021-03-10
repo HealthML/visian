@@ -24,6 +24,7 @@ export class GradientComputer {
         uVoxelSpacing: { value: textureAtlas.voxelSpacing },
         uVoxelCount: { value: textureAtlas.voxelCount },
         uAtlasGrid: { value: textureAtlas.atlasGrid },
+        uInputDimensions: { value: 1 },
       },
     });
     this.screenAlignedQuad = new ScreenAlignedQuad(this.gradientMaterial);
@@ -36,6 +37,10 @@ export class GradientComputer {
         this.textureAtlas.atlasSize.x,
         this.textureAtlas.atlasSize.y,
       );
+
+      // TODO: Set uInputDimensions depending on image.
+      this.gradientMaterial.uniforms.uInputDimensions.value = 1;
+      this.gradientMaterial.needsUpdate = true;
 
       this.renderer.setRenderTarget(this.firstDerivativeRendererTarget);
 
@@ -70,6 +75,7 @@ export class GradientComputer {
       );
 
       this.gradientMaterial.uniforms.uTextureAtlas.value = this.getFirstDerivative();
+      this.gradientMaterial.uniforms.uInputDimensions.value = 3;
       this.gradientMaterial.needsUpdate = true;
 
       this.renderer.setRenderTarget(this.secondDerivativeRendererTarget);

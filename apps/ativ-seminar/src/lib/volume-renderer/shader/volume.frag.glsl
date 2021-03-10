@@ -5,6 +5,7 @@ varying vec3 vRayOrigin;
 
 uniform sampler2D uVolume;
 uniform sampler2D uFirstDerivative;
+uniform sampler2D uSecondDerivative;
 uniform sampler2D uFocus;
 uniform bool uUseFocus;
 uniform vec3 uVoxelCount;
@@ -14,11 +15,21 @@ uniform float uStepSize;
 struct VolumeData {
   float density;
   vec3 firstDerivative;
+  vec3 secondDerivative;
   float focus;
 };
 
 // TODO: Choose this non-arbitrarily
 const int MAX_STEPS = 600;
+
+vec3 decodeGradient(vec4 encodedGradient) {
+  vec3 signs;
+  signs.x = mix(-1.0, 1.0, step(0.5, encodedGradient.a));
+  signs.y = mix(-1.0, 1.0, step(0.25, mod(encodedGradient.a, 0.5)));
+  signs.z = mix(-1.0, 1.0, step(0.125, mod(mod(encodedGradient.a, 0.5), 0.25)));
+
+  return encodedGradient.xyz * signs;
+}
 
 /**
  * Returns the volume data on one slice at the given volume coordinates.
@@ -44,7 +55,8 @@ VolumeData getVolumeData(vec3 volumeCoords) {
 
   VolumeData data;
   data.density = texture2D(uVolume, uv).r;
-  data.firstDerivative = texture2D(uFirstDerivative, uv).xyz;
+  data.firstDerivative = decodeGradient(texture2D(uFirstDerivative, uv));
+  data.secondDerivative = decodeGradient(texture2D(uSecondDerivative, uv));
   data.focus = texture2D(uFocus, uv).r;
 
   return data;
@@ -71,6 +83,7 @@ VolumeData getInterpolatedVolumeData(vec3 volumeCoords) {
   VolumeData interpolatedData;
   interpolatedData.density = mix(lowerData.density, upperData.density, interpolation);
   interpolatedData.firstDerivative = mix(lowerData.firstDerivative, upperData.firstDerivative, interpolation);
+  interpolatedData.secondDerivative = mix(lowerData.secondDerivative, upperData.secondDerivative, interpolation);
 
   // The focus texture should not be interpolated.
   interpolatedData.focus = mix(lowerData.focus, upperData.focus, step(0.5, interpolation));
