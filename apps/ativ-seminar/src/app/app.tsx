@@ -133,7 +133,7 @@ export function App() {
             "Focus volume does not match the original scan's size.",
           );
         }
-        await localForage.setItem("focusVolume", fileList[1]);
+        await localForage.setItem("focusVolume", fileList[0]);
         renderer?.setFocusVolume(focus);
       } catch (err) {
         console.error("The dropped file could not be opened:", err);
