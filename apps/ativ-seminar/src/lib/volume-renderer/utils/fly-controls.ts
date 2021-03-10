@@ -34,11 +34,11 @@ export class FlyControls extends PointerLockControls {
         callback: this.moveRight,
       },
       {
-        keys: ["shift"],
+        keys: ["q"],
         callback: this.moveDown,
       },
       {
-        keys: [" "],
+        keys: ["e"],
         callback: this.moveUp,
       },
     ];
