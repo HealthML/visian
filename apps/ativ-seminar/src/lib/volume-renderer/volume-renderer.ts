@@ -8,7 +8,7 @@ import Volume from "./volume";
 import VolumeMaterial from "./volume-material";
 
 export class VolumeRenderer implements IDisposable {
-  private renderer: THREE.WebGLRenderer;
+  public renderer: THREE.WebGLRenderer;
   public camera: THREE.PerspectiveCamera;
   public scene = new THREE.Scene();
 
@@ -29,6 +29,7 @@ export class VolumeRenderer implements IDisposable {
 
   constructor(private canvas: HTMLCanvasElement) {
     this.renderer = new THREE.WebGLRenderer({ alpha: true, canvas });
+    this.renderer.xr.enabled = true;
     this.renderer.setPixelRatio(window.devicePixelRatio);
 
     this.camera = new THREE.PerspectiveCamera(
@@ -53,6 +54,9 @@ export class VolumeRenderer implements IDisposable {
 
     this.volume = new Volume();
     this.scene.add(this.volume);
+    this.volume.onBeforeRender = () => {
+      if (this.renderer.xr.isPresenting) this.onCameraMove();
+    };
 
     this.intermediateRenderTarget = new THREE.WebGLRenderTarget(1, 1);
     // this.intermediateRenderTarget.texture.magFilter = THREE.NearestFilter;
@@ -115,7 +119,9 @@ export class VolumeRenderer implements IDisposable {
   };
 
   private animate = () => {
-    if (this.lazyRenderTriggered) this.eagerRender();
+    if (this.lazyRenderTriggered || this.renderer.xr.isPresenting) {
+      this.eagerRender();
+    }
     this.stats.update();
     this.flyControls.tick();
   };
@@ -128,11 +134,16 @@ export class VolumeRenderer implements IDisposable {
     if (!this.isImageLoaded) return;
     this.lazyRenderTriggered = false;
 
-    this.renderer.setRenderTarget(this.intermediateRenderTarget);
-    this.renderer.render(this.scene, this.camera);
+    if (this.renderer.xr.isPresenting) {
+      this.renderer.setRenderTarget(null);
+      this.renderer.render(this.scene, this.camera);
+    } else {
+      this.renderer.setRenderTarget(this.intermediateRenderTarget);
+      this.renderer.render(this.scene, this.camera);
 
-    this.renderer.setRenderTarget(null);
-    this.screenAlignedQuad.renderWith(this.renderer);
+      this.renderer.setRenderTarget(null);
+      this.screenAlignedQuad.renderWith(this.renderer);
+    }
   };
 
   private onCameraMove = () => {

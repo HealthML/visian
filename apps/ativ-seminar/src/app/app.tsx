@@ -6,10 +6,11 @@ import {
   ThemeProvider,
 } from "@visian/ui-shared";
 import { readMedicalImage } from "@visian/util";
-import localForage from "localforage";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Route, Switch } from "react-router-dom";
 import styled from "styled-components";
+import { VRButton } from "three/examples/jsm/webxr/VRButton";
+import WebXRPolyfill from "webxr-polyfill";
 
 import { DropZone } from "../components/drop-zone";
 import { WebGLCanvas } from "../components/webgl-canvas";
@@ -17,6 +18,7 @@ import { VolumeRenderer } from "../lib/volume-renderer";
 import { TextureAtlas } from "../lib/volume-renderer/utils";
 
 import type * as THREE from "three";
+new WebXRPolyfill();
 
 let renderer: VolumeRenderer | undefined;
 
@@ -57,6 +59,7 @@ export function App() {
       renderer = new VolumeRenderer(canvasRef.current);
 
       forceUpdate();
+      document.body.appendChild(VRButton.createButton(renderer.renderer));
     }
     return () => {
       renderer?.dispose();
