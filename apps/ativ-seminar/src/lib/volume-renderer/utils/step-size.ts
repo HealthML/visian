@@ -4,5 +4,6 @@ export const getStepSize = (atlas: TextureAtlas) => {
   const volumeSpaceVoxelSize = atlas.voxelCount
     .toArray()
     .map((size) => 1 / size);
-  return Math.min(...volumeSpaceVoxelSize) / 1.5;
+  // TODO: Tweak adaptively based on performance
+  return Math.min(...volumeSpaceVoxelSize) / 2;
 };

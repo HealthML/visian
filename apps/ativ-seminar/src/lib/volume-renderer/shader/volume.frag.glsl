@@ -183,10 +183,11 @@ void main() {
     // The more we already accumulated, the less opacity we apply.
     acc.a += (1.0 - acc.a) * currentVoxel.a;
 
+    // TODO: Tweak adaptively based on performance
     // Early termination: after this threshold, accumulating becomes insignificant.
-    if (acc.a > 0.95) {
-      break;
-    }
+    // if (acc.a > 0.95) {
+    //   break;
+    // }
 
     rayOrigin += scaledRayDirection;
     dist += uStepSize;

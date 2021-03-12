@@ -187,8 +187,6 @@ export class VolumeRenderer implements IDisposable {
     const intersections = this.raycaster.intersectObject(this.volume);
     (this.volume.material as VolumeMaterial).side = THREE.BackSide;
 
-    console.log(intersections);
-
     this.camera.getWorldDirection(this.orbitControls.target);
     this.orbitControls.target.multiplyScalar(
       intersections.length === 2
