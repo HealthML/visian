@@ -1,15 +1,8 @@
+import { coverMixin } from "@visian/ui-shared";
 import React from "react";
-import styled, { css } from "styled-components";
+import styled from "styled-components";
 
 import { WebGLCanvasProps } from "./webgl-canvas.props";
-
-const coverMixin = css`
-  position: absolute;
-  top: 0;
-  left: 0;
-  bottom: 0;
-  right: 0;
-`;
 
 const StyledCanvas = styled.canvas`
   ${coverMixin}
