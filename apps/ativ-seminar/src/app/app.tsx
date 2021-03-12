@@ -10,10 +10,10 @@ import { readMedicalImage } from "@visian/util";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Route, Switch } from "react-router-dom";
 import styled from "styled-components";
-import { VRButton } from "three/examples/jsm/webxr/VRButton";
 import WebXRPolyfill from "webxr-polyfill";
 
 import { DropZone } from "../components/drop-zone";
+import { UIOverlay } from "../components/ui-overlay";
 import { WebGLCanvas } from "../components/webgl-canvas";
 import { VolumeRenderer } from "../lib/volume-renderer";
 import { TextureAtlas } from "../lib/volume-renderer/utils";
@@ -47,7 +47,6 @@ export function App() {
     if (canvasRef.current) {
       newRenderer = new VolumeRenderer(canvasRef.current);
       setRenderer(newRenderer);
-      document.body.appendChild(VRButton.createButton(newRenderer.renderer));
     }
     return () => {
       newRenderer?.dispose();
@@ -168,6 +167,7 @@ export function App() {
             onDragLeave={endDragOver}
           >
             <WebGLCanvas ref={canvasRef} />
+            {renderer && <UIOverlay renderer={renderer} />}
             {isDraggedOver && (
               <DropSheet>
                 <StyledDropZone

@@ -76,6 +76,8 @@ export class VolumeRenderer implements IDisposable {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     this.stats = new (Stats as any)();
     canvas.parentElement?.appendChild(this.stats.dom);
+    this.stats.dom.style.right = "0";
+    this.stats.dom.style.left = "auto";
 
     this.onCameraMove();
     this.renderer.setAnimationLoop(this.animate);
@@ -175,12 +177,12 @@ export class VolumeRenderer implements IDisposable {
 
   private onFlyControlsLock = () => {
     this.orbitControls.enabled = false;
-    document.addEventListener("click", this.toggleFly);
+    document.addEventListener("pointerdown", this.toggleFly);
   };
 
   private onFlyControlsUnlock = () => {
     this.orbitControls.enabled = true;
-    document.removeEventListener("click", this.toggleFly);
+    document.removeEventListener("pointerdown", this.toggleFly);
 
     this.raycaster.setFromCamera({ x: 0.5, y: 0.5 }, this.camera);
     (this.volume.material as VolumeMaterial).side = THREE.DoubleSide;
@@ -196,7 +198,7 @@ export class VolumeRenderer implements IDisposable {
     this.orbitControls.target.add(this.camera.position);
   };
 
-  private toggleFly = () => {
+  public toggleFly = () => {
     if (this.flyControls.isLocked) {
       this.flyControls.unlock();
     } else {
@@ -209,6 +211,45 @@ export class VolumeRenderer implements IDisposable {
       this.toggleFly();
     }
   };
+
+  // XR Management
+  public async isXRAvailable() {
+    if (!("xr" in navigator)) return false;
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    return (navigator as THREE.Navigator).xr!.isSessionSupported(
+      "immersive-vr",
+    );
+  }
+  public isInXR() {
+    return this.renderer.xr.isPresenting;
+  }
+
+  protected onXRSessionEnded = () => {
+    const session = this.renderer.xr.getSession();
+    if (!session) return;
+    session.removeEventListener("end", this.onXRSessionEnded);
+  };
+  protected onXRSessionStarted = (session: THREE.XRSession) => {
+    session.addEventListener("end", this.onXRSessionEnded);
+    return this.renderer.xr.setSession(session);
+  };
+
+  public async enterXR() {
+    if (this.renderer.xr.getSession()) return;
+    const sessionInit = { optionalFeatures: ["local-floor"] };
+    const session = await (navigator as THREE.Navigator).xr?.requestSession(
+      "immersive-vr",
+      sessionInit,
+    );
+    if (!session) return;
+    this.onXRSessionStarted(session);
+  }
+
+  public async exitXR() {
+    const session = this.renderer.xr.getSession();
+    if (!session) return;
+    return session.end();
+  }
 }
 
 export default VolumeRenderer;
