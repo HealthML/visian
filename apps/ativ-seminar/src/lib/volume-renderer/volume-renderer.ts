@@ -39,10 +39,8 @@ export class VolumeRenderer implements IDisposable {
       10,
     );
 
-    this.camera.position.set(3, 3, 3);
-    this.camera.lookAt(0, 0, 0);
-
     this.orbitControls = new OrbitControls(this.camera, this.canvas);
+    this.orbitControls.target.set(0, 1.2, 0);
     this.orbitControls.addEventListener("change", this.onCameraMove);
 
     this.flyControls = new FlyControls(this.camera, this.canvas);
@@ -50,12 +48,19 @@ export class VolumeRenderer implements IDisposable {
     this.flyControls.addEventListener("lock", this.onFlyControlsLock);
     this.flyControls.addEventListener("unlock", this.onFlyControlsUnlock);
 
+    this.camera.position.set(0.3, 1.5, 0.3);
+    this.camera.lookAt(new THREE.Vector3(0, 1.2, 0));
+
     document.addEventListener("keydown", this.onKeyDown);
 
     this.volume = new Volume();
+    // Position the volume in a reasonable height for XR.
+    this.volume.position.set(0, 1.2, 0);
     this.scene.add(this.volume);
-    this.volume.onBeforeRender = () => {
-      if (this.renderer.xr.isPresenting) this.onCameraMove();
+    this.volume.onBeforeRender = (_renderer, _scene, camera) => {
+      if (this.renderer.xr.isPresenting) {
+        this.volume.updateCameraPosition(camera);
+      }
     };
 
     this.intermediateRenderTarget = new THREE.WebGLRenderTarget(1, 1);
@@ -181,6 +186,8 @@ export class VolumeRenderer implements IDisposable {
     (this.volume.material as VolumeMaterial).side = THREE.DoubleSide;
     const intersections = this.raycaster.intersectObject(this.volume);
     (this.volume.material as VolumeMaterial).side = THREE.BackSide;
+
+    console.log(intersections);
 
     this.camera.getWorldDirection(this.orbitControls.target);
     this.orbitControls.target.multiplyScalar(

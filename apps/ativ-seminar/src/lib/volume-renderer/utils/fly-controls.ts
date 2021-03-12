@@ -12,7 +12,7 @@ export class FlyControls extends PointerLockControls {
   constructor(
     private camera: THREE.Camera,
     domElement: HTMLElement,
-    public speed = 0.05,
+    public speed = 0.005,
   ) {
     super(camera, domElement);
 

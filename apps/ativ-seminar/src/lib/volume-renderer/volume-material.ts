@@ -63,7 +63,9 @@ class VolumeMaterial extends THREE.ShaderMaterial {
    * @see https://davidpeicho.github.io/blog/cloud-raymarching-walkthrough-part1/
    */
   public updateCameraPosition(volumeObject: Volume, camera: THREE.Camera) {
-    camera.getWorldPosition(this.uniforms.uCameraPosition.value);
+    this.uniforms.uCameraPosition.value.setFromMatrixPosition(
+      camera.matrixWorld,
+    );
     this.uniforms.uCameraPosition.value.applyMatrix4(
       this.workingMatrix4.copy(volumeObject.matrixWorld).invert(),
     );
