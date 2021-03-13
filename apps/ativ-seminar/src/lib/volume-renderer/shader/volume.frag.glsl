@@ -3,6 +3,7 @@ varying vec3 vPosition;
 varying vec3 vRayDirection;
 varying vec3 vRayOrigin;
 
+uniform vec3 uCameraPosition;
 uniform sampler2D uVolume;
 uniform sampler2D uFirstDerivative;
 uniform sampler2D uSecondDerivative;
@@ -106,10 +107,37 @@ vec4 transferFunction(VolumeData data) {
   //   : vec4(vec3(1), mix(mix(0.0, 0.015, step(0.1, length(data.firstDerivative))) * 0.2, 0.02, data.focus));
 
   return mix(vec4(vec3(0.5), mix(0.0, 0.015, step(0.12, length(data.firstDerivative)))), vec4(1.0, 0.0, 0.0, 1.0), data.focus);
+
+  // return vec4(data.density * step(0.05, data.density));
+  // return mix(vec4(0.0), vec4(1.0, 0.0, 0.0, 1.0), step(0.1, data.focus));
+}
+
+// These should be uniforms.
+float ambient = 0.3;
+vec3 lightPosition = vec3(2.0); // In volume coordinates.
+float intensity = 1.0;
+float shinyness = 15.0;
+
+vec4 phong(vec4 volumeColor, VolumeData volumeData, vec3 volumeCoords) {
+  vec3 specularColor = vec3(0.4) + 0.8 * volumeColor.rgb;
+  
+  // TODO: Rethink this. Probably has to depend on the transfer function...
+  vec3 normal = normalize(-volumeData.firstDerivative);
+
+  vec3 lightDirection = normalize(lightPosition - volumeCoords);
+  vec3 reflectionDirection = reflect(-lightDirection, normal);
+  vec3 viewDirection = normalize(uCameraPosition - volumeCoords);
+
+  float diffuse = max(0.0, dot(lightDirection, normal));
+  float specular = pow(max(dot(reflectionDirection, viewDirection), 0.0), shinyness);
+
+  return vec4((ambient + intensity * diffuse) * volumeColor.rgb + specularColor * specular, volumeColor.a);
 }
 
 vec4 getVolumeColor(vec3 volumeCoords) {
-  return transferFunction(getInterpolatedVolumeData(volumeCoords));
+  VolumeData volumeData = getInterpolatedVolumeData(volumeCoords);
+  vec4 volumeColor = transferFunction(volumeData);
+  return phong(volumeColor, volumeData, volumeCoords);
 }
 
 /**
