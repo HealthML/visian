@@ -29,6 +29,7 @@ export class VolumeRenderer implements IDisposable {
   private isImageLoaded = false;
 
   protected backgroundValueBox = observable.box(0);
+  protected imageOpacityBox = observable.box(1);
 
   constructor(private canvas: HTMLCanvasElement) {
     this.renderer = new THREE.WebGLRenderer({ alpha: true, canvas });
@@ -56,7 +57,7 @@ export class VolumeRenderer implements IDisposable {
 
     document.addEventListener("keydown", this.onKeyDown);
 
-    this.volume = new Volume();
+    this.volume = new Volume(this);
     // Position the volume in a reasonable height for XR.
     this.volume.position.set(0, 1.2, 0);
     this.scene.add(this.volume);
@@ -87,6 +88,7 @@ export class VolumeRenderer implements IDisposable {
   }
 
   public dispose = () => {
+    this.volume.dispose();
     window.removeEventListener("resize", this.resize);
     this.orbitControls.removeEventListener("change", this.onCameraMove);
     this.orbitControls.dispose();
@@ -163,7 +165,7 @@ export class VolumeRenderer implements IDisposable {
 
   /** Sets the base image to be rendered. */
   public setImage = (image: TextureAtlas) => {
-    this.volume.setAtlas(image, this.renderer);
+    this.volume.setAtlas(image);
     this.isImageLoaded = true;
 
     // TODO: Can we maybe find a solution that does not require
@@ -215,11 +217,19 @@ export class VolumeRenderer implements IDisposable {
     }
   };
 
+  // User-defined rendering parameters
   public get backgroundValue() {
     return this.backgroundValueBox.get();
   }
   public setBackgroundValue = action((value: number) => {
-    this.backgroundValueBox.set(value);
+    this.backgroundValueBox.set(Math.max(0, Math.min(1, value)));
+  });
+
+  public get imageOpacity() {
+    return this.imageOpacityBox.get();
+  }
+  public setImageOpacity = action((value: number) => {
+    this.imageOpacityBox.set(Math.max(0, Math.min(1, value)));
     this.lazyRender();
   });
 

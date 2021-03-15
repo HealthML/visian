@@ -39,9 +39,12 @@ const Settings: React.FC<SettingsProps> = observer((props) => {
         value={renderer.backgroundValue}
       />
       <StyledText text="Opacity" />
-      <StyledSlider min={0} max={1} />
-      <StyledText text="Contrast" />
-      <StyledSlider min={-1} max={1} />
+      <StyledSlider
+        min={0}
+        max={1}
+        onChange={renderer.setImageOpacity}
+        value={renderer.imageOpacity}
+      />
     </Container>
   );
 });

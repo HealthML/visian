@@ -1,12 +1,15 @@
 import * as THREE from "three";
 
+import { IDisposable } from "../types";
 import { TextureAtlas } from "./utils";
 import VolumeMaterial from "./volume-material";
 
+import type VolumeRenderer from "./volume-renderer";
+
 /** A volume domain. */
-class Volume extends THREE.Mesh {
-  constructor() {
-    super(new THREE.BoxGeometry(1, 1, 1), new VolumeMaterial());
+class Volume extends THREE.Mesh implements IDisposable {
+  constructor(protected renderer: VolumeRenderer) {
+    super(new THREE.BoxGeometry(1, 1, 1), new VolumeMaterial(renderer));
 
     // The coordinate system in medical images usually has the object
     // laying on the side. We want it to be upright.
@@ -14,8 +17,8 @@ class Volume extends THREE.Mesh {
   }
 
   /** Updates the rendered image. */
-  public setAtlas(atlas: TextureAtlas, renderer: THREE.WebGLRenderer) {
-    (this.material as VolumeMaterial).setAtlas(atlas, renderer);
+  public setAtlas(atlas: TextureAtlas) {
+    (this.material as VolumeMaterial).setAtlas(atlas);
 
     this.scale.copy(
       atlas.voxelCount
@@ -31,6 +34,10 @@ class Volume extends THREE.Mesh {
 
   public updateCameraPosition(camera: THREE.Camera) {
     (this.material as VolumeMaterial).updateCameraPosition(this, camera);
+  }
+
+  public dispose() {
+    (this.material as VolumeMaterial).dispose();
   }
 }
 

@@ -13,6 +13,8 @@ uniform vec3 uVoxelCount;
 uniform vec2 uAtlasGrid;
 uniform float uStepSize;
 
+uniform float uOpacity;
+
 struct VolumeData {
   float density;
   vec3 firstDerivative;
@@ -182,7 +184,7 @@ vec4 phong(vec4 volumeColor, VolumeData volumeData, vec3 volumeCoords) {
 vec4 getVolumeColor(vec3 volumeCoords) {
   VolumeData volumeData = getInterpolatedVolumeData(volumeCoords);
   vec4 volumeColor = transferFunction(volumeData, volumeCoords);
-  return volumeColor;
+  return vec4(volumeColor.rgb, volumeColor.a * uOpacity);
   // return phong(volumeColor, volumeData, volumeCoords);
 }
 
