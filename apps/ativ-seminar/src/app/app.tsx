@@ -1,5 +1,4 @@
 import {
-  ColorMode,
   coverMixin,
   getTheme,
   GlobalStyles,
@@ -7,6 +6,7 @@ import {
   ThemeProvider,
 } from "@visian/ui-shared";
 import { readMedicalImage } from "@visian/util";
+import { observer } from "mobx-react-lite";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Route, Switch } from "react-router-dom";
 import styled from "styled-components";
@@ -36,9 +36,6 @@ const DropSheet = styled.div`
 `;
 
 export function App() {
-  const [mode] = useState<ColorMode>("dark");
-  const theme = getTheme(mode);
-
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const [renderer, setRenderer] = useState<VolumeRenderer | undefined>();
@@ -156,6 +153,9 @@ export function App() {
     }, 25);
   }, [setIsDraggedOver]);
 
+  const theme = getTheme(
+    renderer && renderer.backgroundValue > 0.5 ? "light" : "dark",
+  );
   return (
     <ThemeProvider theme={theme}>
       <GlobalStyles />
@@ -166,7 +166,7 @@ export function App() {
             onDragEnd={endDragOver}
             onDragLeave={endDragOver}
           >
-            <WebGLCanvas ref={canvasRef} />
+            <WebGLCanvas ref={canvasRef} renderer={renderer} />
             {renderer && <UIOverlay renderer={renderer} />}
             {isDraggedOver && (
               <DropSheet>
@@ -189,4 +189,4 @@ export function App() {
   );
 }
 
-export default App;
+export default observer(App);

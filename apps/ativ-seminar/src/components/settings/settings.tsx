@@ -1,6 +1,7 @@
 import { color, Sheet, Slider, Text } from "@visian/ui-shared";
 import React from "react";
 import styled from "styled-components";
+import { observer } from "mobx-react-lite";
 
 import { SettingsProps } from "./settings.props";
 
@@ -25,17 +26,24 @@ const StyledSlider = styled(Slider)`
   margin-bottom: 10px;
 `;
 
-const Settings: React.FC<SettingsProps> = (props) => {
+const Settings: React.FC<SettingsProps> = observer((props) => {
   const { renderer, ...rest } = props;
 
   return (
     <Container {...rest}>
+      <StyledText text="Background" />
+      <StyledSlider
+        min={0}
+        max={1}
+        onChange={renderer.setBackgroundValue}
+        value={renderer.backgroundValue}
+      />
       <StyledText text="Opacity" />
       <StyledSlider min={0} max={1} />
       <StyledText text="Contrast" />
       <StyledSlider min={-1} max={1} />
     </Container>
   );
-};
+});
 
 export default Settings;

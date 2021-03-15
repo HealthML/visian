@@ -102,31 +102,31 @@ float sdCone(vec3 p, float angle) {
     return d * ((q.x*c.y-q.y*c.x<0.0)?-1.0:1.0);
 }
 
-// TODO: Why does y have to be flipped?
-vec3 normalizedCamera = normalize(vec3(uCameraPosition.x, -uCameraPosition.y, uCameraPosition.z));
-vec3 normalizedConeAxis = vec3(0.0, 1.0, 0.0);
-
-/**
- * Taken from https://gist.github.com/kevinmoran/b45980723e53edeb8a5a43c49f134724
- */
-vec3 axis = cross( normalizedCamera, normalizedConeAxis );
-
-float cosA = dot( normalizedCamera, normalizedConeAxis );
-float k = 1.0 / (1.0 + cosA);
-
-mat3 rotation = mat3( 
-  (axis.x * axis.x * k) + cosA,
-  (axis.y * axis.x * k) - axis.z, 
-  (axis.z * axis.x * k) + axis.y,
-  (axis.x * axis.y * k) + axis.z,  
-  (axis.y * axis.y * k) + cosA,      
-  (axis.z * axis.y * k) - axis.x,
-  (axis.x * axis.z * k) - axis.y,  
-  (axis.y * axis.z * k) + axis.x,  
-  (axis.z * axis.z * k) + cosA 
-);
-
 vec3 transformToCutawaySpace(vec3 volumeCoords) {
+  // TODO: Why does y have to be flipped?
+  vec3 normalizedCamera = normalize(vec3(uCameraPosition.x, -uCameraPosition.y, uCameraPosition.z));
+  vec3 normalizedConeAxis = vec3(0.0, 1.0, 0.0);
+
+  /**
+  * Taken from https://gist.github.com/kevinmoran/b45980723e53edeb8a5a43c49f134724
+  */
+  vec3 axis = cross( normalizedCamera, normalizedConeAxis );
+
+  float cosA = dot( normalizedCamera, normalizedConeAxis );
+  float k = 1.0 / (1.0 + cosA);
+
+  mat3 rotation = mat3( 
+    (axis.x * axis.x * k) + cosA,
+    (axis.y * axis.x * k) - axis.z, 
+    (axis.z * axis.x * k) + axis.y,
+    (axis.x * axis.y * k) + axis.z,  
+    (axis.y * axis.y * k) + cosA,      
+    (axis.z * axis.y * k) - axis.x,
+    (axis.x * axis.z * k) - axis.y,  
+    (axis.y * axis.z * k) + axis.x,  
+    (axis.z * axis.z * k) + cosA 
+  );
+
   // The cutaway origin should be at the center of the volume.
   // Thus, we subtract vec3(0.5).
   return rotation * (volumeCoords - vec3(0.5));

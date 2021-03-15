@@ -1,3 +1,4 @@
+import { action, observable } from "mobx";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import Stats from "three/examples/jsm/libs/stats.module";
@@ -26,6 +27,8 @@ export class VolumeRenderer implements IDisposable {
   private lazyRenderTriggered = true;
 
   private isImageLoaded = false;
+
+  protected backgroundValueBox = observable.box(0);
 
   constructor(private canvas: HTMLCanvasElement) {
     this.renderer = new THREE.WebGLRenderer({ alpha: true, canvas });
@@ -211,6 +214,14 @@ export class VolumeRenderer implements IDisposable {
       this.toggleFly();
     }
   };
+
+  public get backgroundValue() {
+    return this.backgroundValueBox.get();
+  }
+  public setBackgroundValue = action((value: number) => {
+    this.backgroundValueBox.set(value);
+    this.lazyRender();
+  });
 
   // XR Management
   public async isXRAvailable() {

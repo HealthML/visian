@@ -2,7 +2,6 @@ import React, {
   PointerEvent as ReactPointerEvent,
   useCallback,
   useRef,
-  useState,
 } from "react";
 import styled from "styled-components";
 

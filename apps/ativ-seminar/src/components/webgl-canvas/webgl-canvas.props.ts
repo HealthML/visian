@@ -1,3 +1,8 @@
 import React from "react";
 
-export type WebGLCanvasProps = React.HTMLAttributes<HTMLCanvasElement>;
+import type { VolumeRenderer } from "../../lib/volume-renderer";
+
+export interface WebGLCanvasProps
+  extends React.HTMLAttributes<HTMLCanvasElement> {
+  renderer?: VolumeRenderer;
+}
