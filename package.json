@@ -5,6 +5,7 @@
   "scripts": {
     "nx": "nx",
     "start": "nx serve",
+    "expose": "lt --port 4200 --local-host localhost",
     "build": "nx build",
     "test": "nx test",
     "lint": "nx workspace-lint && nx lint",
@@ -59,6 +60,9 @@
     "i18next-http-backend": "^1.0.21",
     "itk": "^14.0.2",
     "jszip": "^3.6.0",
+    "localforage": "^1.9.0",
+    "mobx": "^6.1.7",
+    "mobx-react-lite": "^3.2.0",
     "moment": "^2.29.1",
     "nestjs-relay": "PaulBrachmann/nestjs-relay#dist",
     "pg": "^8.5.1",
@@ -70,9 +74,10 @@
     "reflect-metadata": "^0.1.13",
     "rxjs": "~6.5.5",
     "styled-components": "5.2.1",
-    "three": "^0.125.2",
+    "three": "^0.126.0",
     "tslib": "^2.0.0",
-    "typeorm": "^0.2.29"
+    "typeorm": "^0.2.29",
+    "webxr-polyfill": "^2.0.3"
   },
   "devDependencies": {
     "@babel/core": "7.9.6",
@@ -110,6 +115,7 @@
     "@types/react-is": "16.7.1",
     "@types/react-router-dom": "5.1.6",
     "@types/styled-components": "5.1.4",
+    "@types/three": "^0.126.0",
     "@types/webpack": "4.41.21",
     "@typescript-eslint/eslint-plugin": "4.3.0",
     "@typescript-eslint/parser": "4.3.0",
@@ -129,11 +135,13 @@
     "husky": "^4.3.8",
     "jest": "26.2.2",
     "lint-staged": "^10.5.3",
+    "localtunnel": "^2.0.1",
     "prettier": "2.1.2",
     "ts-jest": "26.4.0",
     "ts-node": "~7.0.0",
     "tslint": "~6.0.0",
     "typescript": "~4.0.3",
-    "url-loader": "^3.0.0"
+    "url-loader": "^3.0.0",
+    "webpack-glsl-loader": "^1.0.1"
   }
 }

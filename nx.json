@@ -43,6 +43,13 @@
       "tags": [],
       "implicitDependencies": ["ar-demo"]
     },
+    "ativ-seminar": {
+      "tags": []
+    },
+    "ativ-seminar-e2e": {
+      "tags": [],
+      "implicitDependencies": ["ativ-seminar"]
+    },
     "util": {
       "tags": []
     },

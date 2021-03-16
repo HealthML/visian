@@ -20,6 +20,7 @@ export const Screen: React.FC<ScreenProps> = styled(
   max-width: 100%;
   min-height: 100%;
   min-width: 100%;
+  position: relative;
   width: 100%;
 `;
 
