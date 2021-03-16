@@ -1,9 +1,11 @@
 import {
+  AbsoluteCover,
   coverMixin,
   getTheme,
   GlobalStyles,
   Screen,
   ThemeProvider,
+  WebGLCanvas,
 } from "@visian/ui-shared";
 import { readMedicalImage } from "@visian/util";
 import { observer } from "mobx-react-lite";
@@ -14,7 +16,6 @@ import WebXRPolyfill from "webxr-polyfill";
 
 import { DropZone } from "../components/drop-zone";
 import { UIOverlay } from "../components/ui-overlay";
-import { WebGLCanvas } from "../components/webgl-canvas";
 import { VolumeRenderer } from "../lib/volume-renderer";
 import { TextureAtlas } from "../lib/volume-renderer/utils";
 
@@ -166,7 +167,12 @@ export function App() {
             onDragEnd={endDragOver}
             onDragLeave={endDragOver}
           >
-            <WebGLCanvas ref={canvasRef} renderer={renderer} />
+            <AbsoluteCover>
+              <WebGLCanvas
+                ref={canvasRef}
+                backgroundColor={renderer?.backgroundColor}
+              />
+            </AbsoluteCover>
             {renderer && <UIOverlay renderer={renderer} />}
             {isDraggedOver && (
               <DropSheet>

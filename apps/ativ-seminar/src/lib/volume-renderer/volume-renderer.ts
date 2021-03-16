@@ -1,4 +1,4 @@
-import { action, observable } from "mobx";
+import { action, computed, observable } from "mobx";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import Stats from "three/examples/jsm/libs/stats.module";
@@ -220,6 +220,12 @@ export class VolumeRenderer implements IDisposable {
   // User-defined rendering parameters
   public get backgroundValue() {
     return this.backgroundValueBox.get();
+  }
+  @computed
+  public get backgroundColor() {
+    return `rgb(${this.backgroundValue * 255},${this.backgroundValue * 255},${
+      this.backgroundValue * 255
+    })`;
   }
   public setBackgroundValue = action((value: number) => {
     this.backgroundValueBox.set(Math.max(0, Math.min(1, value)));
