@@ -1,10 +1,88 @@
 # Visian
 
+> Concepts for the future of image analysis systems.
+
+## Get Started
+
+1. Install [node.js](https://nodejs.org/en/) and the [yarn](https://yarnpkg.com/en/docs/install) package manager.
+2. _Optional: To run application components in a containerized environment (e.g. to test deployment or if you don't want to install local dependencies), you should also install [Docker](https://www.docker.com/)._
+3. After cloning the repository, run `yarn` in its root to set up the git hooks.
+
+## Project Structure
+
+This is a monorepo containing multiple libraries (_libs_) and applications (_apps_).
+
+### File Structure
+
+- `.github/workflows/`: GitHub Actions CI workflows
+- `.storybook/`: [Storybook](https://storybook.js.org/) config
+- `.vscode/`: [VSCode](https://code.visualstudio.com/) config
+- `apps/`: Source of the applications in this monorepo
+  - `api/`: The Visian GraphQL API (default app)
+  - `*-demo/`: Various stand-alone demos for testing out new concepts
+- `dist/`: Build artifacts (excluded from version control)
+- `libs/`: Source of the libraries in this monorepo
+  - `ui-shared/`: Shared UI code (e.g., the main component library)
+  - `util/`: Shared general-purpose utilities
+
+## Available Scripts
+
+### `yarn start [<app-name>]`
+
+Launches a development server that runs the specified application in development mode.
+
+After running this command, navigate to [http://localhost:4200](http://localhost:4200) to view the app in your browser.<br />
+The app will automatically reload if you change any of the source files.
+
+Omitting an app name starts the default app.
+
+### `yarn format`
+
+Runs automated code formatting on all applicable file types.
+
+### `yarn lint`
+
+Lints all applicable files and prints the output.
+
+### `yarn test [<app-name>]`
+
+Runs unit tests via [Jest](https://jestjs.io).<br />
+Run `yarn affected:test` to execute the unit tests affected by a change.
+
+Tests are automatically discovered from all `*.spec.{ts,tsx}` files.
+
+Omitting an app name tests the default app.
+
+### `yarn e2e`
+
+Runs end-to-end tests via [Cypress](https://www.cypress.io).<br />
+Run `yarn affected:e2e` to execute the end-to-end tests tests affected by a change.
+
+Omitting an app name tests the default app.
+
+### `yarn storybook`
+
+Launches [Storybook](https://storybook.js.org/).
+
+Stories are automatically added from all `*.stories.{ts,tsx}` files.
+
+### `yarn build [<app-name>] [--prod] [--skip-nx-cache]`
+
+Builds the specified application.<br />
+The build artifacts will be stored in the `dist/` directory.
+
+Use the `--prod` flag for a production build.<br />
+The `--skip-nx-cache` forces a build even if one is cached in the [Nx Cloud](https://nx.app/).
+
+Omitting an app name builds the default app.
+
+### `yarn dep-graph`
+
+Generates a diagram of the dependencies between the libraries and applications in this monorepo.
+
+## Project Setup
+
 This project was generated using [Nx](https://nx.dev).
-
-<p align="center"><img src="https://raw.githubusercontent.com/nrwl/nx/master/images/nx-logo.png" width="450"></p>
-
-🔎 **Nx is a set of Extensible Dev Tools for Monorepos.**
 
 It was bootstrapped using the following commands:
 
@@ -39,7 +117,7 @@ Below are our core plugins:
 
 - [React](https://reactjs.org)
   - `npm install --save-dev @nrwl/react`
-- Web (no framework frontends)
+- Web (no-framework front ends)
   - `npm install --save-dev @nrwl/web`
 - [Angular](https://angular.io)
   - `npm install --save-dev @nrwl/angular`
@@ -68,46 +146,6 @@ Run `nx g @nrwl/react:lib my-lib` to generate a library.
 
 Libraries are sharable across libraries and applications. They can be imported from `@visian/mylib`.
 
-## Development server
-
-Run `nx serve my-app` for a dev server. Navigate to http://localhost:4200/. The app will automatically reload if you change any of the source files.
-
-## Code scaffolding
-
-Run `nx g @nrwl/react:component my-component --project=my-app` to generate a new component.
-
-## Build
-
-Run `nx build my-app` to build the project. The build artifacts will be stored in the `dist/` directory. Use the `--prod` flag for a production build.
-
-## Running unit tests
-
-Run `nx test my-app` to execute the unit tests via [Jest](https://jestjs.io).
-
-Run `nx affected:test` to execute the unit tests affected by a change.
-
-## Running end-to-end tests
-
-Run `ng e2e my-app` to execute the end-to-end tests via [Cypress](https://www.cypress.io).
-
-Run `nx affected:e2e` to execute the end-to-end tests affected by a change.
-
-## Understand your workspace
-
-Run `nx dep-graph` to see a diagram of the dependencies of your projects.
-
 ## Further help
 
 Visit the [Nx Documentation](https://nx.dev) to learn more.
-
-## ☁ Nx Cloud
-
-### Computation Memoization in the Cloud
-
-<p align="center"><img src="https://raw.githubusercontent.com/nrwl/nx/master/images/nx-cloud-card.png"></p>
-
-Nx Cloud pairs with Nx in order to enable you to build and test code more rapidly, by up to 10 times. Even teams that are new to Nx can connect to Nx Cloud and start saving time instantly.
-
-Teams using Nx gain the advantage of building full-stack applications with their preferred framework alongside Nx’s advanced code generation and project dependency graph, plus a unified experience for both frontend and backend developers.
-
-Visit [Nx Cloud](https://nx.app/) to learn more.

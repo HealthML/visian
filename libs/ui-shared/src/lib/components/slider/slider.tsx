@@ -8,11 +8,11 @@ import styled from "styled-components";
 import { SliderProps } from ".";
 import {
   color,
+  computeStyleValue,
   lineHeight,
-  parseNumberFromMetric,
-  parseUnitFromMetric,
   scaleMetric,
   size,
+  ThemeProps,
 } from "../../theme";
 import { pointerToSliderValue, useDrag, valueToSliderPos } from "./utils";
 
@@ -48,17 +48,15 @@ const Thumb = styled.div.attrs<ThumbProps>((props) => ({
   style: {
     top: props.isVertical
       ? props.position
-      : `${
-          (parseNumberFromMetric(size("sliderHeight")(props)) -
-            parseNumberFromMetric(size("sliderThumbHeight")(props))) /
-          2
-        }${parseUnitFromMetric(size("sliderThumbHeight")(props))}`,
+      : computeStyleValue<ThemeProps>(
+          [size("sliderHeight"), size("sliderThumbHeight")],
+          (sliderHeight, thumbHeight) => (sliderHeight - thumbHeight) / 2,
+        )(props),
     left: props.isVertical
-      ? `${
-          (parseNumberFromMetric(size("sliderHeight")(props)) -
-            parseNumberFromMetric(size("sliderThumbHeight")(props))) /
-          2
-        }${parseUnitFromMetric(size("sliderThumbHeight")(props))}`
+      ? computeStyleValue<ThemeProps>(
+          [size("sliderHeight"), size("sliderThumbHeight")],
+          (sliderHeight, thumbHeight) => (sliderHeight - thumbHeight) / 2,
+        )(props)
       : props.position,
   },
 }))<ThumbProps>`
