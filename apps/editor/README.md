@@ -24,6 +24,7 @@ The app is structured in the following way:
   - `environments/`: Holds configuration that depends on the environment
     - `environment.ts`: Configuration for development. It will be replaced by `environment.prod.ts` for production builds
     - `environment.prod.ts`: Configuration for production
+  - `models/`: [MobX](https://mobx.js.org) models
   - `screens/`: All application screens accessible via their own route/as part of the navigation hierarchy
   - `services/`: Application-specific services, e.g., storage backends
 

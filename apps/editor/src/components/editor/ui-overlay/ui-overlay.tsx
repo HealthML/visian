@@ -1,4 +1,4 @@
-import { AbsoluteCover } from "@visian/ui-shared";
+import { AbsoluteCover, Text } from "@visian/ui-shared";
 import React from "react";
 import styled from "styled-components";
 
@@ -13,7 +13,9 @@ const Container = styled(AbsoluteCover)`
 `;
 
 export const UIOverlay: React.FC<UIOverlayProps> = (props) => (
-  <Container {...props} />
+  <Container {...props}>
+    <Text tx="replace-me" />
+  </Container>
 );
 
 export default UIOverlay;

@@ -3,40 +3,43 @@ import {
   getTheme,
   GlobalStyles,
   initI18n,
-  Text,
   ThemeProvider,
 } from "@visian/ui-shared";
-import React, { useEffect, useState } from "react";
+import { observer } from "mobx-react-lite";
+import React, { useEffect, useRef, useState } from "react";
 import { Route, Switch } from "react-router-dom";
 
 import { EditorScreen } from "../screens";
+import { setupRootStore, StoreProvider } from "./root-store";
 
-export function App() {
-  const [mode] = useState<ColorMode>("light");
-  const theme = getTheme(mode);
-
+import type { RootStore } from "../models";
+function App() {
   // TODO: Push loading down to components that need i18n
   const [isReady, setIsReady] = useState(false);
+  const rootStoreRef = useRef<RootStore | null>(null);
   useEffect(() => {
-    initI18n().then(() => {
+    Promise.all([setupRootStore(), initI18n()]).then(([rootStore]) => {
+      rootStoreRef.current = rootStore;
       setIsReady(true);
     });
   }, []);
 
   return (
-    <ThemeProvider theme={theme}>
-      <GlobalStyles />
-      {isReady && (
-        <Switch>
-          <Route path="/">
-            <EditorScreen>
-              <Text tx="replace-me" />
-            </EditorScreen>
-          </Route>
-        </Switch>
-      )}
+    <ThemeProvider
+      theme={getTheme(rootStoreRef.current?.editor.theme || "dark")}
+    >
+      <StoreProvider value={rootStoreRef.current}>
+        <GlobalStyles />
+        {isReady && (
+          <Switch>
+            <Route path="/">
+              <EditorScreen />
+            </Route>
+          </Switch>
+        )}
+      </StoreProvider>
     </ThemeProvider>
   );
 }
 
-export default App;
+export default observer(App);
