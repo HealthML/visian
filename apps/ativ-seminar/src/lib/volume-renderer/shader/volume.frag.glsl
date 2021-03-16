@@ -14,7 +14,7 @@ uniform vec2 uAtlasGrid;
 uniform float uStepSize;
 
 uniform float uOpacity;
-uniform uint uTransferFunction;
+uniform int uTransferFunction;
 
 struct VolumeData {
   float density;
@@ -143,7 +143,7 @@ vec4 transferFunction(VolumeData data, vec3 volumeCoords) {
   // return vec4(data.firstDerivative * 3.0, mix(0.0, 0.015, step(0.1, length(data.firstDerivative))));
   // return vec4(vec3(0.5), mix(0.0, 0.015, step(0.12, length(data.firstDerivative))));
 
-  if (uTransferFunction == 1u) {
+  if (uTransferFunction == 1) {
     // return mix(vec4(data.firstDerivative * 5.0, mix(0.0, 0.015, step(0.1, length(data.firstDerivative))) * 0.2), vec4(vec3(1.0), 0.8), data.focus);
     return uUseFocus ?
         vec4(vec3(1), mix(mix(0.0, 0.015, step(0.1, length(data.firstDerivative))) * 0.2, 0.8, data.focus))
@@ -152,7 +152,7 @@ vec4 transferFunction(VolumeData data, vec3 volumeCoords) {
     // return mix(vec4(vec3(0.5), mix(0.0, 0.015, step(0.12, length(data.firstDerivative)))), vec4(1.0, 0.0, 0.0, 1.0), data.focus);
   }
 
-  if (uTransferFunction == 2u) {
+  if (uTransferFunction == 2) {
     // TODO: Extract the angle into a uniform.
     float cone = sdCone(transformToCutawaySpace(volumeCoords), 1.0);
     float contextFactor = step(0.0, cone);
