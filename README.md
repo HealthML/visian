@@ -6,13 +6,22 @@
 
 1. Install [node.js](https://nodejs.org/en/) and the [yarn](https://yarnpkg.com/en/docs/install) package manager.
 2. _Optional: To run application components in a containerized environment (e.g. to test deployment or if you don't want to install local dependencies), you should also install [Docker](https://www.docker.com/)._
-3. After cloning the repository, run `yarn` in its root to set up the git hooks.
+3. After cloning the repository, run `yarn` in its root to install all dependencies and set up the git hooks.
+
+_Note: See "Available Scripts" below for more information._
 
 ## Project Structure
 
 This is a monorepo containing multiple libraries (_libs_) and applications (_apps_).
 
+For information about a specific lib or app, please refer to its own README file.
+
 ### File Structure
+
+All files should be named in `lower-case-with-dashes.ts`. There is no exception in casing for files holding a component.<br />
+TypeScript files (usually `.ts`) using React's JSX syntax should get a `.tsx` file extension.
+
+The contents of this monorepo are structured in the following way:
 
 - `.github/workflows/`: GitHub Actions CI workflows
 - `.storybook/`: [Storybook](https://storybook.js.org/) config
