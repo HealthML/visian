@@ -1,5 +1,6 @@
 import React from "react";
 import { useEffect } from "react";
+import styled from "styled-components";
 
 import {
   i18n,
@@ -50,6 +51,18 @@ export const globalTypes = {
   },
 };
 
+export const parameters = {
+  layout: "fullscreen",
+};
+
+const StyledContainer = styled.div`
+  align-items: center;
+  display: flex;
+  height: 100%;
+  justify-content: center;
+  width: 100%;
+`;
+
 const WithThemeProvider = (Story, context) => {
   const { i18n } = useTranslation();
   useEffect(() => {
@@ -59,10 +72,10 @@ const WithThemeProvider = (Story, context) => {
   return (
     <I18nProvider i18n={i18n}>
       <ThemeProvider theme={getTheme(context.globals.theme)}>
-        <>
+        <StyledContainer>
           <GlobalStyles />
           <Story />
-        </>
+        </StyledContainer>
       </ThemeProvider>
     </I18nProvider>
   );
