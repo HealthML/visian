@@ -9,6 +9,8 @@ import {
 import React, { useEffect, useState } from "react";
 import { Route, Switch } from "react-router-dom";
 
+import { EditorScreen } from "../screens";
+
 export function App() {
   const [mode] = useState<ColorMode>("light");
   const theme = getTheme(mode);
@@ -27,7 +29,9 @@ export function App() {
       {isReady && (
         <Switch>
           <Route path="/">
-            <Text tx="replace-me" />
+            <EditorScreen>
+              <Text tx="replace-me" />
+            </EditorScreen>
           </Route>
         </Switch>
       )}
