@@ -45,6 +45,13 @@
     },
     "util": {
       "tags": []
+    },
+    "editor": {
+      "tags": []
+    },
+    "editor-e2e": {
+      "tags": [],
+      "implicitDependencies": ["editor"]
     }
   }
 }

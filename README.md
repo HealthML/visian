@@ -18,7 +18,8 @@ This is a monorepo containing multiple libraries (_libs_) and applications (_app
 - `.storybook/`: [Storybook](https://storybook.js.org/) config
 - `.vscode/`: [VSCode](https://code.visualstudio.com/) config
 - `apps/`: Source of the applications in this monorepo
-  - `api/`: The Visian GraphQL API (default app)
+  - `api/`: The Visian GraphQL API
+  - `editor/`: The stand-alone editor (default app)
   - `*-demo/`: Various stand-alone demos for testing out new concepts
 - `dist/`: Build artifacts (excluded from version control)
 - `libs/`: Source of the libraries in this monorepo
@@ -105,6 +106,8 @@ yarn nx g @nrwl/react:storybook-configuration ui-shared --configureCypress --gen
 yarn remove @storybook/addon-knobs
 yarn add -D @storybook/addon-a11y @storybook/addon-actions @storybook/addon-controls @storybook/addon-toolbars @storybook/addon-viewport
 yarn add i18next react-i18next i18next-browser-languagedetector i18next-http-backend moment
+
+yarn nx g @nrwl/react:app editor # using styled-components & react-router
 ```
 
 ## Adding capabilities to your workspace

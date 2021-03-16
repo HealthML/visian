@@ -5,5 +5,6 @@ module.exports = {
     "<rootDir>/libs/ui-shared",
     "<rootDir>/apps/ar-demo",
     "<rootDir>/libs/util",
+    "<rootDir>/apps/editor",
   ],
 };
