@@ -31,7 +31,8 @@ export default class Reticle extends THREE.Mesh {
     if (!this.active) return;
 
     if (!this.hitTestSourceRequested) {
-      const session = this.renderer.xr.getSession();
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      const session = this.renderer.xr.getSession()!;
       session
         .requestReferenceSpace("viewer")
         .then((referenceSpace) => {
@@ -57,7 +58,8 @@ export default class Reticle extends THREE.Mesh {
     }
 
     if (this.hitTestSource) {
-      const referenceSpace = this.renderer.xr.getReferenceSpace();
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      const referenceSpace = this.renderer.xr.getReferenceSpace()!;
       const hitTestResults = frame.getHitTestResults(this.hitTestSource);
 
       if (hitTestResults.length) {
