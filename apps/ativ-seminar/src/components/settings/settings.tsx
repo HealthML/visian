@@ -1,8 +1,9 @@
 import { color, Sheet, Slider, Text } from "@visian/ui-shared";
-import React from "react";
-import styled from "styled-components";
 import { observer } from "mobx-react-lite";
+import React, { useCallback } from "react";
+import styled from "styled-components";
 
+import { TransferFunction } from "../../lib/volume-renderer";
 import { SettingsProps } from "./settings.props";
 
 const Container = styled(Sheet)`
@@ -26,8 +27,31 @@ const StyledSlider = styled(Slider)`
   margin-bottom: 10px;
 `;
 
+const StyledSelect = styled.select`
+  background: ${color("veryLightGray")};
+  border: none;
+  border-radius: 2px;
+  color: ${color("text")};
+  height: 28px;
+  margin-bottom: 10px;
+  outline: none;
+  padding-left: 4px;
+  width: 100%;
+`;
+
+const StyledOption = styled.option`
+  background-color: ${color("background")};
+`;
+
 const Settings: React.FC<SettingsProps> = observer((props) => {
   const { renderer, ...rest } = props;
+
+  const setTransferFunction = useCallback(
+    (event: React.ChangeEvent<HTMLSelectElement>) => {
+      renderer.setTransferFunction(parseInt(event.target.value));
+    },
+    [renderer],
+  );
 
   return (
     <Container {...rest}>
@@ -38,6 +62,17 @@ const Settings: React.FC<SettingsProps> = observer((props) => {
         onChange={renderer.setBackgroundValue}
         value={renderer.backgroundValue}
       />
+      <StyledText text="Transfer Function" />
+      <StyledSelect
+        onChange={setTransferFunction}
+        value={renderer.transferFunction}
+      >
+        <StyledOption value={TransferFunction.Density}>Density</StyledOption>
+        <StyledOption value={TransferFunction.FCEdges}>F+C: Edges</StyledOption>
+        <StyledOption value={TransferFunction.FCCutaway}>
+          F+C: Cutaway
+        </StyledOption>
+      </StyledSelect>
       <StyledText text="Opacity" />
       <StyledSlider
         min={0}

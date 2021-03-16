@@ -1,4 +1,4 @@
-import { action, computed, observable } from "mobx";
+import { action, computed, makeObservable, observable } from "mobx";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import Stats from "three/examples/jsm/libs/stats.module";
@@ -7,6 +7,12 @@ import { IDisposable } from "../types";
 import { FlyControls, ScreenAlignedQuad, TextureAtlas } from "./utils";
 import Volume from "./volume";
 import VolumeMaterial from "./volume-material";
+
+export enum TransferFunction {
+  Density = 0,
+  FCEdges = 1,
+  FCCutaway = 2,
+}
 
 export class VolumeRenderer implements IDisposable {
   public renderer: THREE.WebGLRenderer;
@@ -28,10 +34,20 @@ export class VolumeRenderer implements IDisposable {
 
   private isImageLoaded = false;
 
-  protected backgroundValueBox = observable.box(0);
-  protected imageOpacityBox = observable.box(1);
+  public backgroundValue = 0;
+  public transferFunction = TransferFunction.FCEdges;
+  public imageOpacity = 1;
 
   constructor(private canvas: HTMLCanvasElement) {
+    makeObservable(this, {
+      backgroundValue: observable,
+      transferFunction: observable,
+      imageOpacity: observable,
+      setBackgroundValue: action,
+      setTransferFunction: action,
+      setImageOpacity: action,
+    });
+
     this.renderer = new THREE.WebGLRenderer({ alpha: true, canvas });
     this.renderer.xr.enabled = true;
     this.renderer.setPixelRatio(window.devicePixelRatio);
@@ -218,26 +234,25 @@ export class VolumeRenderer implements IDisposable {
   };
 
   // User-defined rendering parameters
-  public get backgroundValue() {
-    return this.backgroundValueBox.get();
-  }
   @computed
   public get backgroundColor() {
     return `rgb(${this.backgroundValue * 255},${this.backgroundValue * 255},${
       this.backgroundValue * 255
     })`;
   }
-  public setBackgroundValue = action((value: number) => {
-    this.backgroundValueBox.set(Math.max(0, Math.min(1, value)));
-  });
+  public setBackgroundValue = (value: number) => {
+    this.backgroundValue = Math.max(0, Math.min(1, value));
+  };
 
-  public get imageOpacity() {
-    return this.imageOpacityBox.get();
-  }
-  public setImageOpacity = action((value: number) => {
-    this.imageOpacityBox.set(Math.max(0, Math.min(1, value)));
+  public setTransferFunction = (value: TransferFunction) => {
+    this.transferFunction = value;
     this.lazyRender();
-  });
+  };
+
+  public setImageOpacity = (value: number) => {
+    this.imageOpacity = Math.max(0, Math.min(1, value));
+    this.lazyRender();
+  };
 
   // XR Management
   public async isXRAvailable() {

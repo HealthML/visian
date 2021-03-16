@@ -33,6 +33,7 @@ class VolumeMaterial extends THREE.ShaderMaterial implements IDisposable {
         uCameraPosition: { value: new THREE.Vector3() },
 
         uOpacity: { value: 1 },
+        uTransferFunction: { value: 0 },
       },
     });
 
@@ -42,6 +43,7 @@ class VolumeMaterial extends THREE.ShaderMaterial implements IDisposable {
     this.reactionDisposers.push(
       autorun(() => {
         this.uniforms.uOpacity.value = renderer.imageOpacity;
+        this.uniforms.uTransferFunction.value = renderer.transferFunction;
       }),
     );
   }
