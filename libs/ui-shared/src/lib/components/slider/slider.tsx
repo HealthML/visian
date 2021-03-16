@@ -5,7 +5,7 @@ import React, {
 } from "react";
 import styled from "styled-components";
 
-import { SliderProps } from ".";
+import { SliderProps } from "./slider.props";
 import {
   color,
   computeStyleValue,
