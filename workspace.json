@@ -265,7 +265,7 @@
             "assets": ["apps/editor/src/favicon.ico", "apps/editor/src/assets"],
             "styles": [],
             "scripts": [],
-            "webpackConfig": "@nrwl/react/plugins/webpack"
+            "webpackConfig": "webpack.config"
           },
           "configurations": {
             "production": {
