@@ -6,19 +6,29 @@
 
 1. Install [node.js](https://nodejs.org/en/) and the [yarn](https://yarnpkg.com/en/docs/install) package manager.
 2. _Optional: To run application components in a containerized environment (e.g. to test deployment or if you don't want to install local dependencies), you should also install [Docker](https://www.docker.com/)._
-3. After cloning the repository, run `yarn` in its root to set up the git hooks.
+3. After cloning the repository, run `yarn` in its root to install all dependencies and set up the git hooks.
+
+_Note: See "Available Scripts" below for more information._
 
 ## Project Structure
 
 This is a monorepo containing multiple libraries (_libs_) and applications (_apps_).
 
+For information about a specific lib or app, please refer to its own README file.
+
 ### File Structure
+
+All files should be named in `lower-case-with-dashes.ts`. There is no exception in casing for files holding a component.<br />
+TypeScript files (usually `.ts`) using React's JSX syntax should get a `.tsx` file extension.
+
+The contents of this monorepo are structured in the following way:
 
 - `.github/workflows/`: GitHub Actions CI workflows
 - `.storybook/`: [Storybook](https://storybook.js.org/) config
 - `.vscode/`: [VSCode](https://code.visualstudio.com/) config
 - `apps/`: Source of the applications in this monorepo
-  - `api/`: The Visian GraphQL API (default app)
+  - `api/`: The Visian GraphQL API
+  - `editor/`: The stand-alone editor (default app)
   - `*-demo/`: Various stand-alone demos for testing out new concepts
 - `dist/`: Build artifacts (excluded from version control)
 - `libs/`: Source of the libraries in this monorepo
@@ -105,6 +115,8 @@ yarn nx g @nrwl/react:storybook-configuration ui-shared --configureCypress --gen
 yarn remove @storybook/addon-knobs
 yarn add -D @storybook/addon-a11y @storybook/addon-actions @storybook/addon-controls @storybook/addon-toolbars @storybook/addon-viewport
 yarn add i18next react-i18next i18next-browser-languagedetector i18next-http-backend moment
+
+yarn nx g @nrwl/react:app editor # using styled-components & react-router
 ```
 
 ## Adding capabilities to your workspace

@@ -2,13 +2,7 @@ import React from "react";
 import { useEffect } from "react";
 import styled from "styled-components";
 
-import {
-  i18n,
-  I18nProvider,
-  initI18n,
-  supportedLanguages,
-  useTranslation,
-} from "../src/lib/i18n";
+import { i18n, I18nProvider, initI18n, useTranslation } from "../src/lib/i18n";
 import { getTheme, GlobalStyles, ThemeProvider } from "../src/lib/theme";
 
 const resources = {
@@ -22,9 +16,6 @@ const resources = {
     translation: {
       __test: "Willkommen zu React und react-i18next!",
       date: "{{date, DD.MM.YYYY}}",
-      Folder: "Ordner",
-      File: "Datei",
-      Home: "Zu Hause",
     },
   },
 };
@@ -46,7 +37,7 @@ export const globalTypes = {
     defaultValue: i18n.language,
     toolbar: {
       icon: "globe",
-      items: [...supportedLanguages, "cimode"],
+      items: ["en", "de", "cimode"],
     },
   },
 };

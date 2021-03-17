@@ -6,5 +6,6 @@ module.exports = {
     "<rootDir>/apps/ar-demo",
     "<rootDir>/apps/ativ-seminar",
     "<rootDir>/libs/util",
+    "<rootDir>/apps/editor",
   ],
 };
