@@ -4,15 +4,10 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import Stats from "three/examples/jsm/libs/stats.module";
 
 import { IDisposable } from "../types";
+import { TransferFunction } from "./types";
 import { FlyControls, ScreenAlignedQuad, TextureAtlas } from "./utils";
 import Volume from "./volume";
 import VolumeMaterial from "./volume-material";
-
-export enum TransferFunction {
-  Density = 0,
-  FCEdges = 1,
-  FCCutaway = 2,
-}
 
 export class VolumeRenderer implements IDisposable {
   public renderer: THREE.WebGLRenderer;

@@ -15,14 +15,17 @@ class VolumeMaterial extends THREE.ShaderMaterial implements IDisposable {
 
   protected reactionDisposers: IReactionDisposer[] = [];
 
+  private gradientComputer?: GradientComputer;
+
   constructor(protected renderer: VolumeRenderer) {
     super({
       vertexShader: volumeVertexShader,
       fragmentShader: volumeFragmentShader,
       uniforms: {
         uVolume: { value: null },
-        uFirstDerivative: { value: null },
-        uSecondDerivative: { value: null },
+        uInputFirstDerivative: { value: null },
+        uInputSecondDerivative: { value: null },
+        uOutputFirstDerivative: { value: null },
         uFocus: { value: null },
         uUseFocus: { value: false },
         uVoxelCount: {
@@ -42,8 +45,11 @@ class VolumeMaterial extends THREE.ShaderMaterial implements IDisposable {
 
     this.reactionDisposers.push(
       autorun(() => {
-        this.uniforms.uOpacity.value = renderer.imageOpacity;
         this.uniforms.uTransferFunction.value = renderer.transferFunction;
+        this.gradientComputer?.setTransferFunction(renderer.transferFunction);
+      }),
+      autorun(() => {
+        this.uniforms.uOpacity.value = renderer.imageOpacity;
       }),
     );
   }
@@ -55,12 +61,10 @@ class VolumeMaterial extends THREE.ShaderMaterial implements IDisposable {
     this.uniforms.uAtlasGrid.value = atlas.atlasGrid;
     this.uniforms.uStepSize.value = getStepSize(atlas);
 
-    const gradientComputer = new GradientComputer(
-      atlas,
-      this.renderer.renderer,
-    );
-    this.uniforms.uFirstDerivative.value = gradientComputer.getFirstDerivative();
-    this.uniforms.uSecondDerivative.value = gradientComputer.getSecondDerivative();
+    this.gradientComputer = new GradientComputer(atlas, this.renderer.renderer);
+    this.uniforms.uInputFirstDerivative.value = this.gradientComputer.getFirstDerivative();
+    this.uniforms.uInputSecondDerivative.value = this.gradientComputer.getSecondDerivative();
+    this.uniforms.uOutputFirstDerivative.value = this.gradientComputer.getOutputDerivative();
 
     this.uniforms.uUseFocus.value = false;
   }
@@ -73,6 +77,8 @@ class VolumeMaterial extends THREE.ShaderMaterial implements IDisposable {
       this.uniforms.uFocus.value = null;
       this.uniforms.uUseFocus.value = false;
     }
+
+    this.gradientComputer?.setFocus(atlas);
   }
 
   /**
@@ -86,6 +92,10 @@ class VolumeMaterial extends THREE.ShaderMaterial implements IDisposable {
     );
     this.uniforms.uCameraPosition.value.applyMatrix4(
       this.workingMatrix4.copy(volumeObject.matrixWorld).invert(),
+    );
+
+    this.gradientComputer?.setCameraPosition(
+      this.uniforms.uCameraPosition.value,
     );
   }
 
