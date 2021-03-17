@@ -23,7 +23,7 @@ const UIColumn = styled(FlexColumn)`
 export const UIOverlay: React.FC<UIOverlayProps> = (props) => {
   const { renderer, ...rest } = props;
 
-  const [showSettings, setShowSettings] = useState(true);
+  const [showSettings, setShowSettings] = useState(false);
   const toggleSettings = useCallback(() => {
     setShowSettings(!showSettings);
   }, [showSettings, setShowSettings]);

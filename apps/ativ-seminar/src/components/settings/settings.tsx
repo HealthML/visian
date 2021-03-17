@@ -53,6 +53,13 @@ const Settings: React.FC<SettingsProps> = observer((props) => {
     [renderer],
   );
 
+  const setOpacity = useCallback(
+    (value: number) => {
+      renderer.setImageOpacity(value * value);
+    },
+    [renderer],
+  );
+
   return (
     <Container {...rest}>
       <StyledText text="Background" />
@@ -77,8 +84,8 @@ const Settings: React.FC<SettingsProps> = observer((props) => {
       <StyledSlider
         min={0}
         max={1}
-        onChange={renderer.setImageOpacity}
-        value={renderer.imageOpacity}
+        onChange={setOpacity}
+        value={Math.sqrt(renderer.imageOpacity)}
       />
     </Container>
   );
