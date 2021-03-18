@@ -14,10 +14,18 @@ uniform sampler2D uFocus;
 uniform bool uUseFocus;
 uniform int uTransferFunction;
 uniform vec3 uCameraPosition;
+uniform float uConeAngle;
+
+#define CONE_EDGE 0.01
 
 @import ../../../shader/volume-data;
 @import ../../../shader/transfer-functions;
 @import ./decode-gradient;
+
+vec4 encodeGradient(vec3 gradient) {
+  float encodedSigns = 0.5 * step(0.0, gradient.x) + 0.25 * step(0.0, gradient.y) + 0.125 * step(0.0, gradient.z);
+  return vec4(abs(gradient), encodedSigns);
+}
 
 /**
  * Returns the image value at the given volume coordinates.
@@ -79,6 +87,16 @@ void main() {
 
   vec3 voxelCoords = vec3(offsetInSlice * uVoxelCount.xy, zSlice);
 
+  if(uTransferFunction == 2) {
+    vec3 coneSpaceCoordinates = transformToCutawaySpace((voxelCoords + 0.5) / uVoxelCount);
+    float coneDist = sdCone(coneSpaceCoordinates, uConeAngle);
+    if (coneDist > -CONE_EDGE && coneDist < CONE_EDGE) {
+      // TODO: Compute the normal of the cone surface here.
+      gl_FragColor = vec4(0.0);
+      return;
+    }
+  }
+
   vec4 upX = getImageValue(vec3(min(uVoxelCount.x - 1.0, voxelCoords.x + 1.0), voxelCoords.yz));
   vec4 downX = getImageValue(vec3(max(0.0, voxelCoords.x - 1.0), voxelCoords.yz));
 
@@ -127,7 +145,7 @@ void main() {
     gradient *= -1.0;
   }
   
-  float encodedSigns = 0.5 * step(0.0, gradient.x) + 0.25 * step(0.0, gradient.y) + 0.125 * step(0.0, gradient.z);
+  vec4 encodedGradient = encodeGradient(gradient);
 
   // Disregarding the voxels at the edges of the volume, the absolute value of the 
   // components of gradient are at most sqrt(inputDimensions)/(2*min(voxelSpacing)).
@@ -136,5 +154,5 @@ void main() {
   // TODO: Think about scaling by a bigger value, because the gradient tends to be rather small.
   float gradientScaleFactor = 2.0 * min(uVoxelSpacing.x, min(uVoxelSpacing.y, uVoxelSpacing.z)) / sqrt(float(uInputDimensions));
 
-  gl_FragColor = vec4(abs(gradient) * gradientScaleFactor, encodedSigns);
+  gl_FragColor = vec4(encodedGradient.xyz * gradientScaleFactor, encodedGradient.w);
 }

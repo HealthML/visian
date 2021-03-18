@@ -38,6 +38,7 @@ export class GradientMaterial extends THREE.ShaderMaterial {
         uUseFocus: { value: false },
         uCameraPosition: { value: new THREE.Vector3() },
         uTransferFunction: { value: 0 },
+        uConeAngle: { value: 1 },
       },
     });
   }
@@ -68,6 +69,10 @@ export class GradientMaterial extends THREE.ShaderMaterial {
 
   public setTransferFunction(transferFunction: TransferFunction) {
     this.uniforms.uTransferFunction.value = transferFunction;
+  }
+
+  public setCutAwayConeAngle(radians: number) {
+    this.uniforms.uConeAngle.value = radians;
   }
 }
 

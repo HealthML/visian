@@ -37,6 +37,7 @@ class VolumeMaterial extends THREE.ShaderMaterial implements IDisposable {
 
         uOpacity: { value: 1 },
         uTransferFunction: { value: 0 },
+        uConeAngle: { value: 1 },
       },
     });
 
@@ -50,6 +51,10 @@ class VolumeMaterial extends THREE.ShaderMaterial implements IDisposable {
       }),
       autorun(() => {
         this.uniforms.uOpacity.value = renderer.imageOpacity;
+      }),
+      autorun(() => {
+        this.uniforms.uConeAngle.value = renderer.cutAwayConeAngle;
+        this.gradientComputer?.setCutAwayConeAngle(renderer.cutAwayConeAngle);
       }),
     );
   }
@@ -65,6 +70,8 @@ class VolumeMaterial extends THREE.ShaderMaterial implements IDisposable {
     this.uniforms.uInputFirstDerivative.value = this.gradientComputer.getFirstDerivative();
     this.uniforms.uInputSecondDerivative.value = this.gradientComputer.getSecondDerivative();
     this.uniforms.uOutputFirstDerivative.value = this.gradientComputer.getOutputDerivative();
+    this.gradientComputer.setTransferFunction(this.renderer.transferFunction);
+    this.gradientComputer.setCutAwayConeAngle(this.renderer.cutAwayConeAngle);
 
     this.uniforms.uUseFocus.value = false;
   }

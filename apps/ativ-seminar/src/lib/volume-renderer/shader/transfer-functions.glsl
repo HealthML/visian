@@ -57,7 +57,7 @@ vec4 transferFunction(VolumeData data, vec3 volumeCoords) {
 
   if (uTransferFunction == 2) {
     // TODO: Extract the angle into a uniform.
-    float cone = sdCone(transformToCutawaySpace(volumeCoords), 1.0);
+    float cone = sdCone(transformToCutawaySpace(volumeCoords), uConeAngle);
     float contextFactor = step(0.0, cone);
     float filteredDensity = data.density * step(0.05, data.density);
     return mix(vec4(filteredDensity) * contextFactor, vec4(1.0, 0.0, 0.0, 1.0), step(0.1, data.focus));

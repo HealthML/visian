@@ -65,6 +65,12 @@ export class GradientComputer {
     this.updateOutputDerivative();
   }
 
+  public setCutAwayConeAngle(radians: number) {
+    this.gradientMaterial.setCutAwayConeAngle(radians);
+
+    this.updateOutputDerivative();
+  }
+
   /** Returns the gradient of the texture atlas. */
   public getFirstDerivative() {
     if (!this.firstDerivativeCached) {

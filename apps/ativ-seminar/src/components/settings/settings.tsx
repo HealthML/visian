@@ -87,6 +87,17 @@ const Settings: React.FC<SettingsProps> = observer((props) => {
         onChange={setOpacity}
         value={Math.sqrt(renderer.imageOpacity)}
       />
+      {renderer.transferFunction === TransferFunction.FCCutaway && (
+        <>
+          <StyledText text="Angle" />
+          <StyledSlider
+            min={0}
+            max={Math.PI}
+            onChange={renderer.setCutAwayConeAngle}
+            value={renderer.cutAwayConeAngle}
+          />
+        </>
+      )}
     </Container>
   );
 });

@@ -16,6 +16,7 @@ uniform float uStepSize;
 
 uniform float uOpacity;
 uniform int uTransferFunction;
+uniform float uConeAngle;
 
 @import ./volume-data;
 @import ../utils/gradient-computer/shader/decode-gradient;
