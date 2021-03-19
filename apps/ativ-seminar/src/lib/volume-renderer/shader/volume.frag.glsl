@@ -22,9 +22,6 @@ uniform float uConeAngle;
 @import ../utils/gradient-computer/shader/decode-gradient;
 @import ./transfer-functions;
 
-// TODO: Choose this non-arbitrarily
-const int MAX_STEPS = 600;
-
 /**
  * Returns the volume data on one slice at the given volume coordinates.
  *

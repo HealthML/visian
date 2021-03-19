@@ -44,6 +44,10 @@ class VolumeMaterial extends THREE.ShaderMaterial implements IDisposable {
     // Always render the back faces.
     this.side = THREE.BackSide;
 
+    const url = new URL(window.location.href);
+    const maxStepsParam = url.searchParams.get("maxSteps");
+    this.defines.MAX_STEPS = maxStepsParam ? parseInt(maxStepsParam) : 600;
+
     this.reactionDisposers.push(
       autorun(() => {
         this.uniforms.uTransferFunction.value = renderer.transferFunction;
