@@ -13,7 +13,7 @@ describe("theme utilities", () => {
     expect(parseNumberFromMetric("0")).toBe(0);
   });
 
-  it("should parse a unit from a metrc string", () => {
+  it("should parse a unit from a metric string", () => {
     expect(parseUnitFromMetric("8px")).toBe("px");
     expect(parseUnitFromMetric("-12.3 m")).toBe("m");
 
