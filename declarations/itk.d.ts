@@ -56,7 +56,7 @@ declare module "itk/Image" {
 
     /**
      * An Array with length dimension that contains the number of pixels along
-     * dimension.
+     * each dimension.
      */
     public size: number[];
 

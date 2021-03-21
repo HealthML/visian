@@ -1,19 +1,31 @@
-import { ITKImage, readMedicalImage } from "@visian/util";
 import { action, computed, makeObservable, observable } from "mobx";
 import tc from "tinycolor2";
 
-export class Editor {
+import { ISerializable } from "../types";
+import { Image, ImageSnapshot } from "./image";
+
+export interface EditorSnapshot {
+  backgroundColor: string;
+  image?: ImageSnapshot;
+  annotation?: ImageSnapshot;
+}
+
+export class Editor implements ISerializable<EditorSnapshot> {
   public backgroundColor = "#000";
-  public image?: ITKImage;
-  public annotation?: ITKImage;
+
+  public image?: Image;
+  public annotation?: Image;
 
   constructor() {
     makeObservable(this, {
       backgroundColor: observable,
       image: observable,
+      annotation: observable,
       theme: computed,
       setBackgroundColor: action,
       setImage: action,
+      setAnnotation: action,
+      rehydrate: action,
     });
   }
 
@@ -27,18 +39,32 @@ export class Editor {
     this.backgroundColor = backgroundColor;
   }
 
-  public setImage(image: ITKImage) {
+  public setImage(image: Image) {
     this.annotation = undefined;
     this.image = image;
   }
   public async importImage(imageFile: File) {
-    this.setImage(await readMedicalImage(imageFile));
+    this.setImage(await Image.fromFile(imageFile));
   }
 
-  public setAnnotation(image: ITKImage) {
+  public setAnnotation(image: Image) {
     this.annotation = image;
   }
   public async importAnnotation(imageFile: File) {
-    this.setAnnotation(await readMedicalImage(imageFile));
+    this.setAnnotation(await Image.fromFile(imageFile));
+  }
+
+  public toJSON() {
+    return {
+      backgroundColor: this.backgroundColor,
+      image: this.image?.toJSON(),
+      annotation: this.annotation?.toJSON(),
+    };
+  }
+
+  public async rehydrate(snapshot: EditorSnapshot) {
+    this.backgroundColor = snapshot.backgroundColor;
+    this.image = snapshot.image && new Image(snapshot.image);
+    this.annotation = snapshot.annotation && new Image(snapshot.annotation);
   }
 }
