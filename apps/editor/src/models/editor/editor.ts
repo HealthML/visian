@@ -45,6 +45,7 @@ export class Editor implements ISerializable<EditorSnapshot> {
     this.context?.persistImmediately();
   }
   public async importImage(imageFile: File) {
+    this.context?.setIsDirty();
     this.setImage(await Image.fromFile(imageFile));
   }
 
@@ -53,6 +54,7 @@ export class Editor implements ISerializable<EditorSnapshot> {
     this.context?.persistImmediately();
   }
   public async importAnnotation(imageFile: File) {
+    this.context?.setIsDirty();
     this.setAnnotation(await Image.fromFile(imageFile));
   }
 

@@ -8,6 +8,7 @@ export interface ISerializable<T> {
 
 export interface StoreContext {
   persistImmediately(): void;
+  setIsDirty(): void;
 }
 
 export interface Snapshot {

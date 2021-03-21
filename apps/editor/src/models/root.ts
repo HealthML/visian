@@ -24,7 +24,10 @@ export class RootStore implements ISerializable<RootSnapshot> {
   public editor: Editor;
 
   constructor(protected config: RootStoreConfig = {}) {
-    this.editor = new Editor({ persistImmediately: this.persistImmediately });
+    this.editor = new Editor({
+      persistImmediately: this.persistImmediately,
+      setIsDirty: () => this.setIsDirty(true),
+    });
 
     makeObservable(this, {
       isDirty: observable,
