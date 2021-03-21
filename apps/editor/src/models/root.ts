@@ -3,7 +3,7 @@ import { action, makeObservable, observable } from "mobx";
 import { deepObserve } from "mobx-utils/lib/deepObserve";
 
 import { Editor, EditorSnapshot } from "./editor";
-import { ISerializable, Snapshot } from "./types";
+import { ISerializable } from "./types";
 
 export interface RootSnapshot {
   editor: EditorSnapshot;
@@ -11,7 +11,7 @@ export interface RootSnapshot {
 
 export interface RootStoreConfig {
   previousSnapshot?: RootSnapshot;
-  storageBackend?: IStorageBackend<Snapshot>;
+  storageBackend?: IStorageBackend;
 }
 
 export class RootStore implements ISerializable<RootSnapshot> {
@@ -38,7 +38,7 @@ export class RootStore implements ISerializable<RootSnapshot> {
     deepObserve(this.editor, () => {
       this.setIsDirty(true);
       this.config.storageBackend
-        ?.persist("/editor", this.editor.toJSON())
+        ?.persist("/editor", () => this.editor.toJSON())
         .then(() => {
           this.setIsDirty(false);
         });
@@ -70,9 +70,7 @@ export class RootStore implements ISerializable<RootSnapshot> {
       "/editor",
     );
     if (editorSnapshot) {
-      await this.editor.applySnapshot(
-        (editorSnapshot as unknown) as EditorSnapshot,
-      );
+      await this.editor.applySnapshot(editorSnapshot as EditorSnapshot);
     }
   }
 }

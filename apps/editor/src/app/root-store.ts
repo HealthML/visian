@@ -1,10 +1,10 @@
 import { LocalForageBackend } from "@visian/ui-shared";
 import React from "react";
 
-import { RootStore, Snapshot } from "../models";
+import { RootStore } from "../models";
 import { storePersistInterval } from "./constants";
 
-export const storageBackend = new LocalForageBackend<Snapshot>(
+export const storageBackend = new LocalForageBackend(
   storePersistInterval,
   "STORE",
 );

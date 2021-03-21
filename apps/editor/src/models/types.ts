@@ -9,7 +9,3 @@ export interface ISerializable<T> {
 export interface StoreContext {
   persistImmediately(): void;
 }
-
-export interface Snapshot {
-  [key: string]: unknown;
-}

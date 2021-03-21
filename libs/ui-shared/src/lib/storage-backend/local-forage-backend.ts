@@ -8,10 +8,15 @@ const generatePrefix = () => `B${prefixCounter++}`;
 
 const instances: { [key: string]: LocalForage } = {};
 
-export class LocalForageBackend<T> implements IStorageBackend<T> {
+export const resolveData = async <T>(data: T | (() => T | Promise<T>)) =>
+  typeof data === "function" ? (data as () => T | Promise<T>)() : data;
+
+export class LocalForageBackend<T = unknown> implements IStorageBackend<T> {
   protected instance: LocalForage;
   protected persistors: {
-    [key: string]: AsyncDebouncedFunc<(data: T) => Promise<void>>;
+    [key: string]: AsyncDebouncedFunc<
+      (data: T | (() => T | Promise<T>)) => Promise<void>
+    >;
   } = {};
 
   /**
@@ -41,16 +46,19 @@ export class LocalForageBackend<T> implements IStorageBackend<T> {
     return this.instance.removeItem(key);
   }
 
-  public async persistImmediately(key: string, data: T) {
+  public async persist(key: string, data: T | (() => T | Promise<T>)) {
+    if (this.waitTime) return this.getPersistor(key)(data);
+    await this.instance.setItem(key, await resolveData<T>(data));
+  }
+
+  public async persistImmediately(
+    key: string,
+    data: T | (() => T | Promise<T>),
+  ) {
     const persistor = this.persistors[key];
     if (persistor) persistor.cancel();
 
-    await this.instance.setItem(key, data);
-  }
-
-  public async persist(key: string, data: T) {
-    if (this.waitTime) return this.getPersistor(key)(data);
-    await this.instance.setItem(key, data);
+    await this.instance.setItem(key, await resolveData<T>(data));
   }
 
   public retrieve(key: string): Promise<T | null | undefined> {
@@ -62,7 +70,8 @@ export class LocalForageBackend<T> implements IStorageBackend<T> {
 
     if (!persistor) {
       persistor = asyncThrottle(
-        (data: T) => this.instance.setItem(key, data),
+        async (data: T | (() => T | Promise<T>)) =>
+          this.instance.setItem(key, await resolveData<T>(data)),
         this.waitTime,
       );
       this.persistors[key] = persistor;
