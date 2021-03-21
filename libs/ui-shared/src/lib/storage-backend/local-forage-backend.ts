@@ -1,4 +1,4 @@
-import { asyncThrottle } from "@visian/util";
+import { asyncThrottle, AsyncDebouncedFunc } from "@visian/util";
 import localForage from "localforage";
 
 import { IStorageBackend } from "./types";
@@ -11,7 +11,7 @@ const instances: { [key: string]: LocalForage } = {};
 export class LocalForageBackend<T> implements IStorageBackend<T> {
   protected instance: LocalForage;
   protected persistors: {
-    [key: string]: (data: T) => Promise<void>;
+    [key: string]: AsyncDebouncedFunc<(data: T) => Promise<void>>;
   } = {};
 
   /**
@@ -22,8 +22,8 @@ export class LocalForageBackend<T> implements IStorageBackend<T> {
    * `LocalForageBackend`s and the order of their initialization is non-deterministic.
    */
   constructor(
-    protected waitTime = 1000,
-    protected instanceName = generatePrefix(),
+    public readonly waitTime = 1000,
+    protected readonly instanceName = generatePrefix(),
   ) {
     let instance = instances[instanceName];
     if (!instance) {
@@ -33,30 +33,41 @@ export class LocalForageBackend<T> implements IStorageBackend<T> {
     this.instance = instance;
   }
 
+  public clear() {
+    return this.instance.clear();
+  }
+
   public delete(key: string) {
     return this.instance.removeItem(key);
   }
 
-  public persist(key: string, data: T) {
-    let persistor = this.persistors[key];
+  public async persistImmediately(key: string, data: T) {
+    const persistor = this.persistors[key];
+    if (persistor) persistor.cancel();
 
-    if (!persistor) {
-      persistor = this.getPersistor(key);
-      this.persistors[key] = persistor;
-    }
+    await this.instance.setItem(key, data);
+  }
 
-    return persistor(data);
+  public async persist(key: string, data: T) {
+    if (this.waitTime) return this.getPersistor(key)(data);
+    await this.instance.setItem(key, data);
   }
 
   public retrieve(key: string): Promise<T | null | undefined> {
     return this.instance.getItem(key);
   }
 
-  protected getPersistor(key: string, waitTime = this.waitTime) {
-    return waitTime
-      ? asyncThrottle((data: T) => this.instance.setItem(key, data), waitTime)
-      : async (data: T) => {
-          await this.instance.setItem(key, data);
-        };
+  protected getPersistor(key: string) {
+    let persistor = this.persistors[key];
+
+    if (!persistor) {
+      persistor = asyncThrottle(
+        (data: T) => this.instance.setItem(key, data),
+        this.waitTime,
+      );
+      this.persistors[key] = persistor;
+    }
+
+    return persistor;
   }
 }

@@ -1,25 +1,17 @@
 import { LocalForageBackend } from "@visian/ui-shared";
-import { deepObserve } from "mobx-utils";
 import React from "react";
 
-import { RootSnapshot, RootStore } from "../models";
+import { RootStore, Snapshot } from "../models";
 import { storePersistInterval } from "./constants";
 
-export const storageBackend = new LocalForageBackend<RootSnapshot>(
+export const storageBackend = new LocalForageBackend<Snapshot>(
   storePersistInterval,
   "STORE",
 );
 
 export const setupRootStore = async () => {
-  const previousSnapshot = await storageBackend.retrieve("/");
-
-  const store = new RootStore();
-  if (previousSnapshot) store.rehydrate(previousSnapshot);
-
-  deepObserve(store, () => {
-    console.log(store.toJSON());
-    storageBackend.persist("/", store.toJSON());
-  });
+  const store = new RootStore({ storageBackend });
+  await store.rehydrate();
 
   return store;
 };

@@ -1,7 +1,7 @@
 import { action, computed, makeObservable, observable } from "mobx";
 import tc from "tinycolor2";
 
-import { ISerializable } from "../types";
+import { ISerializable, StoreContext } from "../types";
 import { Image, ImageSnapshot } from "./image";
 
 export interface EditorSnapshot {
@@ -16,7 +16,7 @@ export class Editor implements ISerializable<EditorSnapshot> {
   public image?: Image;
   public annotation?: Image;
 
-  constructor() {
+  constructor(protected context?: StoreContext) {
     makeObservable(this, {
       backgroundColor: observable,
       image: observable,
@@ -25,7 +25,7 @@ export class Editor implements ISerializable<EditorSnapshot> {
       setBackgroundColor: action,
       setImage: action,
       setAnnotation: action,
-      rehydrate: action,
+      applySnapshot: action,
     });
   }
 
@@ -42,6 +42,7 @@ export class Editor implements ISerializable<EditorSnapshot> {
   public setImage(image: Image) {
     this.annotation = undefined;
     this.image = image;
+    this.context?.persistImmediately();
   }
   public async importImage(imageFile: File) {
     this.setImage(await Image.fromFile(imageFile));
@@ -49,6 +50,7 @@ export class Editor implements ISerializable<EditorSnapshot> {
 
   public setAnnotation(image: Image) {
     this.annotation = image;
+    this.context?.persistImmediately();
   }
   public async importAnnotation(imageFile: File) {
     this.setAnnotation(await Image.fromFile(imageFile));
@@ -62,7 +64,7 @@ export class Editor implements ISerializable<EditorSnapshot> {
     };
   }
 
-  public async rehydrate(snapshot: EditorSnapshot) {
+  public async applySnapshot(snapshot: EditorSnapshot) {
     this.backgroundColor = snapshot.backgroundColor;
     this.image = snapshot.image && new Image(snapshot.image);
     this.annotation = snapshot.annotation && new Image(snapshot.annotation);

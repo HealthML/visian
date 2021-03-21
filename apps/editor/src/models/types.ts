@@ -2,6 +2,14 @@ export interface ISerializable<T> {
   /** Returns a snapshot.*/
   toJSON(): T;
 
-  /** Applies a snapshot. */
-  rehydrate(snapshot: T): Promise<void>;
+  /** Restores the state captures in a snapshot. */
+  applySnapshot(snapshot: T): Promise<void>;
+}
+
+export interface StoreContext {
+  persistImmediately(): void;
+}
+
+export interface Snapshot {
+  [key: string]: unknown;
 }

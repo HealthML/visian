@@ -110,7 +110,7 @@ export class Image<T extends TypedArray = TypedArray>
       orientation: observable.ref,
       // TODO: Make matrix properly observable
       data: observable.ref,
-      rehydrate: action,
+      applySnapshot: action,
     });
   }
 
@@ -125,7 +125,7 @@ export class Image<T extends TypedArray = TypedArray>
     };
   }
 
-  public async rehydrate(snapshot: ImageSnapshot<T>) {
+  public async applySnapshot(snapshot: ImageSnapshot<T>) {
     (Object.keys(snapshot) as (keyof ImageSnapshot<T>)[]).forEach((key) => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       this[key] = snapshot[key] as any;
