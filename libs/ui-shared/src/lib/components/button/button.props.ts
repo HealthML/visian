@@ -1,5 +1,5 @@
-import React from "react";
+import type React from "react";
 
-import { I18nProps } from "../types";
+import type { I18nProps } from "../types";
 
 export type ButtonProps = React.HTMLAttributes<HTMLDivElement> & I18nProps;

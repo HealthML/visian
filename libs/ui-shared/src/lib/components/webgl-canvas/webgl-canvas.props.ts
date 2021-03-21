@@ -1,8 +1,8 @@
-import React, { RefAttributes } from "react";
+import type React from "react";
 
 export interface WebGLCanvasProps
   extends React.HTMLAttributes<HTMLCanvasElement>,
-    RefAttributes<HTMLCanvasElement> {
+    React.RefAttributes<HTMLCanvasElement> {
   /** The canvas' background color. */
   backgroundColor?: string;
 }

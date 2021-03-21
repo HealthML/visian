@@ -1,4 +1,5 @@
 import { ThemeProps as StyledThemeProps } from "styled-components";
+import { makeObservable, observable } from "mobx";
 
 const colorModes = {
   light: {
@@ -13,10 +14,11 @@ const colorModes = {
     sheet: "rgba(200,200,200,0.4)",
     sheetBorder: "rgba(50, 50, 50, 0.3)",
     placeholder: "rgba(0, 0, 0, 0.2)",
+    modalUnderlay: "rgba(255, 255, 255, 0.8)",
   },
   dark: {
     text: "#fff",
-    background: "#000",
+    background: "#0C0E1B",
     primary: "#0cf",
     secondary: "#f0e",
     gray: "rgba(255,255,255,0.5)",
@@ -25,6 +27,7 @@ const colorModes = {
     sheet: "rgba(255,255,255,0.1)",
     sheetBorder: "rgba(255, 255, 255, 0.3)",
     placeholder: "rgba(255, 255, 255, 0.2)",
+    modalUnderlay: "rgba(12, 14, 27, 0.8)",
   },
 };
 
@@ -91,10 +94,14 @@ export const theme = {
 
 export type ColorMode = keyof typeof colorModes;
 
-export const getTheme = (mode: ColorMode = "light") => ({
-  ...theme,
-  colors: colorModes[mode] || theme.colors,
-});
+export const getTheme = (mode: ColorMode = "light") =>
+  makeObservable(
+    {
+      ...theme,
+      colors: colorModes[mode] || theme.colors,
+    },
+    { colors: observable },
+  );
 
 export type Theme = ReturnType<typeof getTheme>;
 export type ThemeProps = StyledThemeProps<Theme>;

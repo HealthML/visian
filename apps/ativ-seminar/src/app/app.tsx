@@ -1,9 +1,11 @@
 import {
   coverMixin,
+  DropZone,
   getTheme,
   GlobalStyles,
   Screen,
   ThemeProvider,
+  useIsDraggedOver,
 } from "@visian/ui-shared";
 import { readMedicalImage } from "@visian/util";
 import { observer } from "mobx-react-lite";
@@ -12,7 +14,6 @@ import { Route, Switch } from "react-router-dom";
 import styled from "styled-components";
 import WebXRPolyfill from "webxr-polyfill";
 
-import { DropZone } from "../components/drop-zone";
 import { UIOverlay } from "../components/ui-overlay";
 import { WebGLCanvas } from "../components/webgl-canvas";
 import { VolumeRenderer } from "../lib/volume-renderer";
@@ -69,7 +70,7 @@ export function App() {
     })();
   }, [renderer]);
 
-  const [isDraggedOver, setIsDraggedOver] = useState(false);
+  const [isDraggedOver, { onDrop, ...dragListeners }] = useIsDraggedOver();
 
   const defaultImageDropLabel = "Drop your image here";
   const [imageDropLabel, setImageDropLabel] = useState(defaultImageDropLabel);
@@ -97,11 +98,11 @@ export function App() {
         } catch (err) {
           console.error("The dropped file could not be opened:", err);
         }
-        setIsDraggedOver(false);
+        onDrop();
         setImageDropLabel(defaultImageDropLabel);
       })();
     },
-    [renderer],
+    [onDrop, renderer],
   );
 
   const defaultFocusDropLabel = "Drop a focus volume here";
@@ -132,26 +133,12 @@ export function App() {
         } catch (err) {
           console.error("The dropped file could not be opened:", err);
         }
-        setIsDraggedOver(false);
+        onDrop();
         setFocusDropLabel(defaultFocusDropLabel);
       })();
     },
-    [renderer],
+    [onDrop, renderer],
   );
-
-  const dragTimerRef = useRef<NodeJS.Timer>();
-  const dragOver = useCallback(() => {
-    setIsDraggedOver(true);
-    if (dragTimerRef.current) {
-      clearTimeout(dragTimerRef.current);
-    }
-  }, [setIsDraggedOver]);
-
-  const endDragOver = useCallback(() => {
-    dragTimerRef.current = setTimeout(() => {
-      setIsDraggedOver(false);
-    }, 25);
-  }, [setIsDraggedOver]);
 
   const theme = getTheme(
     renderer && renderer.backgroundValue > 0.5 ? "light" : "dark",
@@ -161,22 +148,18 @@ export function App() {
       <GlobalStyles />
       <Switch>
         <Route path="/">
-          <Screen
-            onDragOver={dragOver}
-            onDragEnd={endDragOver}
-            onDragLeave={endDragOver}
-          >
+          <Screen {...dragListeners}>
             <WebGLCanvas ref={canvasRef} renderer={renderer} />
             {renderer && <UIOverlay renderer={renderer} />}
             {isDraggedOver && (
               <DropSheet>
                 <StyledDropZone
-                  alwaysShown
+                  isAlwaysVisible
                   label={imageDropLabel}
                   onFileDrop={dropImage}
                 />
                 <StyledDropZone
-                  alwaysShown
+                  isAlwaysVisible
                   label={focusDropLabel}
                   onFileDrop={dropFocusVolume}
                 />

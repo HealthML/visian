@@ -1,4 +1,4 @@
-import React from "react";
+import type React from "react";
 
 export interface SliderProps
   extends Omit<React.HTMLAttributes<HTMLDivElement>, "onChange"> {
