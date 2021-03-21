@@ -46,8 +46,9 @@ export const UIOverlay = observer<UIOverlayProps>(
           setIsLoadingImage(true);
           try {
             await store?.editor.importImage(files[0]);
-          } catch {
+          } catch (e) {
             // TODO: Display error
+            console.error(e);
           }
           onDropCompleted();
           setIsLoadingImage(false);
@@ -63,8 +64,9 @@ export const UIOverlay = observer<UIOverlayProps>(
           setIsLoadingAnnotation(true);
           try {
             await store?.editor.importAnnotation(files[0]);
-          } catch {
+          } catch (e) {
             // TODO: Display error
+            console.error(e);
           }
           onDropCompleted();
           setIsLoadingAnnotation(false);

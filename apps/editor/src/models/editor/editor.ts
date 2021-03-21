@@ -1,3 +1,4 @@
+import isEqual from "lodash.isequal";
 import { action, computed, makeObservable, observable } from "mobx";
 import tc from "tinycolor2";
 
@@ -45,16 +46,18 @@ export class Editor implements ISerializable<EditorSnapshot> {
     this.context?.persistImmediately();
   }
   public async importImage(imageFile: File) {
-    this.context?.setIsDirty();
     this.setImage(await Image.fromFile(imageFile));
   }
 
   public setAnnotation(image: Image) {
+    if (!this.image) throw new Error("No image loaded.");
+    if (!isEqual(image.voxelCount, this.image.voxelCount)) {
+      throw new Error("Annotation does not match the original image's size.");
+    }
     this.annotation = image;
     this.context?.persistImmediately();
   }
   public async importAnnotation(imageFile: File) {
-    this.context?.setIsDirty();
     this.setAnnotation(await Image.fromFile(imageFile));
   }
 
