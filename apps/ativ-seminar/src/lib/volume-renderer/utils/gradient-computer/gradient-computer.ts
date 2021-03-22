@@ -1,7 +1,7 @@
+import { TextureAtlas } from "@visian/util";
 import * as THREE from "three";
 
 import ScreenAlignedQuad from "../screen-aligned-quad";
-import { TextureAtlas } from "../texture-atlas";
 import gradientFragmentShader from "./shader/gradient.frag.glsl";
 import gradientVertexShader from "./shader/gradient.vert.glsl";
 
