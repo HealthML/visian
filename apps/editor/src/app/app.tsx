@@ -31,11 +31,13 @@ function App() {
       <StoreProvider value={rootStoreRef.current}>
         <GlobalStyles />
         {isReady && (
-          <Switch>
-            <Route path="/">
-              <EditorScreen />
-            </Route>
-          </Switch>
+          <React.StrictMode>
+            <Switch>
+              <Route path="/">
+                <EditorScreen />
+              </Route>
+            </Switch>
+          </React.StrictMode>
         )}
       </StoreProvider>
     </ThemeProvider>

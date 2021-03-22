@@ -8,6 +8,7 @@ module.exports = {
       { cwd: __dirname, configFile: "./babel-jest.config.json" },
     ],
   },
+  transformIgnorePatterns: ["node_modules/(?!itk/.*|mobx-utils)"],
   moduleFileExtensions: ["ts", "tsx", "js", "jsx"],
   coverageDirectory: "../../coverage/apps/editor",
 };

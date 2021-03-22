@@ -1,5 +1,5 @@
 import { color, FlexColumn, Sheet, Text } from "@visian/ui-shared";
-import React, { PointerEvent, useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import styled from "styled-components";
 
 import { ToolBarProps } from ".";
