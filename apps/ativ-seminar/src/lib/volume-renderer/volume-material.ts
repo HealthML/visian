@@ -1,10 +1,11 @@
+import { TextureAtlas } from "@visian/util";
 import { autorun, IReactionDisposer } from "mobx";
 import * as THREE from "three";
 
 import { IDisposable } from "../types";
 import volumeFragmentShader from "./shader/volume.frag.glsl";
 import volumeVertexShader from "./shader/volume.vert.glsl";
-import { getStepSize, GradientComputer, TextureAtlas } from "./utils";
+import { getStepSize, GradientComputer } from "./utils";
 
 import type Volume from "./volume";
 import type VolumeRenderer from "./volume-renderer";

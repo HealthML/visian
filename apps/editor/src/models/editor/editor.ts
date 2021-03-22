@@ -17,16 +17,23 @@ export class Editor implements ISerializable<EditorSnapshot> {
   public image?: Image;
   public annotation?: Image;
 
+  public brightness = 1;
+  public contrast = 1;
+
   constructor(protected context?: StoreContext) {
     makeObservable(this, {
       backgroundColor: observable,
       image: observable,
       annotation: observable,
+      brightness: observable,
+      contrast: observable,
       theme: computed,
       setBackgroundColor: action,
       setImage: action,
       setAnnotation: action,
       applySnapshot: action,
+      setBrightness: action,
+      setContrast: action,
     });
   }
 
@@ -59,6 +66,14 @@ export class Editor implements ISerializable<EditorSnapshot> {
   }
   public async importAnnotation(imageFile: File) {
     this.setAnnotation(await Image.fromFile(imageFile));
+  }
+
+  public setBrightness(value: number) {
+    this.brightness = value;
+  }
+
+  public setContrast(value: number) {
+    this.contrast = value;
   }
 
   public toJSON() {
