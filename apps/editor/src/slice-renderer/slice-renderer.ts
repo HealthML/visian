@@ -6,6 +6,7 @@ import * as THREE from "three";
 import { Editor } from "../models";
 import { Slice } from "./slice";
 import { IDisposable, ViewType, viewTypes } from "./types";
+import { setMainCameraPlanes } from "./utils";
 
 export class SliceRenderer implements IDisposable {
   private renderer: THREE.WebGLRenderer;
@@ -22,7 +23,7 @@ export class SliceRenderer implements IDisposable {
 
   private disposers: IDisposer[] = [];
 
-  constructor(private canvas: HTMLCanvasElement, editor: Editor) {
+  constructor(private canvas: HTMLCanvasElement, private editor: Editor) {
     this.renderer = new THREE.WebGLRenderer({ alpha: true, canvas });
 
     const aspect = canvas.clientWidth / canvas.clientHeight;
@@ -60,10 +61,7 @@ export class SliceRenderer implements IDisposable {
   private resize = () => {
     this.renderer.setSize(window.innerWidth, window.innerHeight);
 
-    const aspect = this.canvas.clientWidth / this.canvas.clientHeight;
-    this.camera.left = -aspect;
-    this.camera.right = aspect;
-    this.camera.updateProjectionMatrix();
+    setMainCameraPlanes(this.editor, this.canvas, this.camera);
 
     this.eagerRender();
   };
