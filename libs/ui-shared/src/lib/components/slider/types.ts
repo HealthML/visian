@@ -5,7 +5,15 @@ export interface PointerCoordinates {
 
 export type roundMethod = "floor" | "ceil" | "round";
 
+export type scaleType = "linear" | "quadratic";
+
 export interface SliderConfig {
+  /**
+   * An optional (non-linear) function applied to remap the sliders value range.
+   * Defaults to `"linear"`.
+   */
+  scaleType?: scaleType;
+
   /**
    * The minimum slider value.
    * Defaults to `0`.

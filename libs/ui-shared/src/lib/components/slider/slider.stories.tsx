@@ -18,6 +18,12 @@ export default {
         options: ["floor", "ceil", "round"],
       },
     },
+    scaleType: {
+      control: {
+        type: "select",
+        options: ["linear", "quadratic"],
+      },
+    },
   },
 };
 

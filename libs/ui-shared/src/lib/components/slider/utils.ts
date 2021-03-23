@@ -1,6 +1,34 @@
 import { PointerEvent as ReactPointerEvent, useCallback, useRef } from "react";
 
-import type { PointerCoordinates, roundMethod, SliderConfig } from "./types";
+import type {
+  PointerCoordinates,
+  roundMethod,
+  scaleType,
+  SliderConfig,
+} from "./types";
+
+/**
+ * Applies a function to the given value to produce a (non-uniform) slider scale.
+ *
+ * @param value A [0, 1]-ranged value.
+ * @param shouldInvert If `true`, inverts the applied function.
+ */
+export const applyScale = (
+  value: number,
+  scaleType?: scaleType,
+  shouldInvert?: boolean,
+) => {
+  switch (scaleType) {
+    case "quadratic":
+      if (shouldInvert) {
+        return value < 0 ? -Math.sqrt(-value) : Math.sqrt(value);
+      }
+      return value < 0 ? -value * value : value * value;
+
+    default:
+      return value;
+  }
+};
 
 export const roundToStepSize = (
   value: number,
@@ -41,7 +69,11 @@ export const valueToSliderPos = (
     ),
   );
   return `${
-    (sliderConfig.isInverted ? 1 - relativeValue : relativeValue) * 100
+    applyScale(
+      sliderConfig.isInverted ? 1 - relativeValue : relativeValue,
+      sliderConfig.scaleType,
+      true,
+    ) * 100
   }%`;
 };
 
@@ -65,7 +97,11 @@ export const pointerToSliderValue = (
     ),
   );
   return roundToStepSize(
-    (sliderConfig.isInverted ? 1 - relativePos : relativePos) * (max - min) +
+    applyScale(
+      sliderConfig.isInverted ? 1 - relativePos : relativePos,
+      sliderConfig.scaleType,
+    ) *
+      (max - min) +
       min,
     sliderConfig.stepSize,
     sliderConfig.roundMethod,
