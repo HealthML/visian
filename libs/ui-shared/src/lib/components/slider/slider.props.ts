@@ -16,7 +16,6 @@ export interface SliderProps
 
   /**
    * If `true`, shows a label with the current slider value.
-   * Defaults to `true`.
    */
   shouldShowLabel?: boolean;
 

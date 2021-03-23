@@ -124,7 +124,7 @@ export const Slider: React.FC<SliderProps> = (props) => {
     onChange,
     roundMethod,
     scaleType,
-    shouldShowLabel = true,
+    shouldShowLabel,
     stepSize,
     value,
     ...rest
