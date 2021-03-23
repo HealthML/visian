@@ -5,7 +5,13 @@ import React, {
 } from "react";
 import styled from "styled-components";
 
-import { scaleMetric, size } from "../../theme";
+import {
+  color,
+  computeStyleValue,
+  scaleMetric,
+  size,
+  ThemeProps,
+} from "../../theme";
 import {
   pointerToSliderValue,
   SliderContainer,
@@ -17,6 +23,7 @@ import {
 } from "../slider";
 
 import type { IntervalSliderProps } from "./interval-slider.props";
+
 export const SliderThumbTouchBox = styled.div.attrs<ThumbProps>((props) => {
   const thumbPositionMain = `${props.position * 100}%`;
 
@@ -35,6 +42,45 @@ export const SliderThumbTouchBox = styled.div.attrs<ThumbProps>((props) => {
   position: absolute;
   width: ${size("sliderHeight")};
   z-index: 20;
+`;
+
+export interface SliderRangeSelectionProps {
+  lowPos: number;
+  highPos: number;
+  isVertical?: boolean;
+}
+
+export const SliderRangeSelection = styled.div.attrs<SliderRangeSelectionProps>(
+  (props) => ({
+    style: props.isVertical
+      ? {
+          top: `${props.lowPos * 100}%`,
+          bottom: `${(1 - props.highPos) * 100}%`,
+        }
+      : {
+          left: `${props.lowPos * 100}%`,
+          right: `${(1 - props.highPos) * 100}%`,
+        },
+  }),
+)<SliderRangeSelectionProps>`
+  background-color: ${color("gray")};
+  ${(props) => {
+    const across = computeStyleValue<ThemeProps>(
+      [size("sliderHeight")],
+      (sliderHeight) => sliderHeight / 2 - 1.5,
+    )(props);
+    return props.isVertical
+      ? {
+          left: across,
+          right: across,
+        }
+      : {
+          top: across,
+          bottom: across,
+        };
+  }}
+  position: absolute;
+  z-index: 10;
 `;
 
 /** A custom interval slider component built to work well with touch input. */
@@ -124,6 +170,12 @@ export const IntervalSlider: React.FC<IntervalSliderProps> = (props) => {
   return (
     <SliderContainer {...rest} isVertical={isVertical} ref={sliderRef}>
       <SliderTrack isVertical={isVertical} />
+
+      <SliderRangeSelection
+        lowPos={isInverted ? highThumbPos : lowThumbPos}
+        highPos={isInverted ? lowThumbPos : highThumbPos}
+        isVertical={isVertical}
+      />
 
       <SliderThumb isVertical={isVertical} position={lowThumbPos} />
       <SliderThumbTouchBox
