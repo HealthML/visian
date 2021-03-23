@@ -1,51 +1,74 @@
-import { useCallback, useRef, PointerEvent as ReactPointerEvent } from "react";
+import { PointerEvent as ReactPointerEvent, useCallback, useRef } from "react";
 
-export interface Pointer {
-  clientX: number;
-  clientY: number;
-}
+import type { PointerCoordinates, roundMethod, SliderConfig } from "./types";
 
-const roundToStepSize = (value: number, stepSize?: number) =>
-  stepSize ? Math.round(value / stepSize) * stepSize : value;
-
-export const valueToSliderPos = (
+export const roundToStepSize = (
   value: number,
-  min = 0,
-  max = 99,
-  inverted = false,
   stepSize?: number,
+  roundMethod?: roundMethod,
 ) => {
-  const relativeValue = Math.max(
-    0,
-    Math.min(1, (roundToStepSize(value, stepSize) - min) / (max - min)),
-  );
-  return `${(inverted ? 1 - relativeValue : relativeValue) * 100}%`;
+  if (!stepSize) return value;
+
+  switch (roundMethod) {
+    case "floor":
+      return Math.floor(value / stepSize) * stepSize;
+
+    case "ceil":
+      return Math.ceil(value / stepSize) * stepSize;
+
+    default:
+      return Math.round(value / stepSize) * stepSize;
+  }
 };
 
-/** Extracts */
-export const pointerToSliderValue = (
-  pointer: Pointer,
-  slider: HTMLElement,
-  min = 0,
-  max = 99,
-  vertical = false,
-  inverted = false,
-  stepSize?: number,
+/**
+ * Returns the relative position of the slider's thumb along the main axis
+ * based on it's current value.
+ */
+export const valueToSliderPos = (
+  value: number,
+  sliderConfig: Omit<SliderConfig, "isVertical">,
 ) => {
+  const { min = 0, max = 1 } = sliderConfig;
+
+  const relativeValue = Math.max(
+    0,
+    Math.min(
+      1,
+      (roundToStepSize(value, sliderConfig.stepSize, sliderConfig.roundMethod) -
+        min) /
+        (max - min),
+    ),
+  );
+  return `${
+    (sliderConfig.isInverted ? 1 - relativeValue : relativeValue) * 100
+  }%`;
+};
+
+/** Returns the slider's value from a pointer event to it. */
+export const pointerToSliderValue = (
+  pointer: PointerCoordinates,
+  slider: HTMLElement,
+  sliderConfig: SliderConfig,
+) => {
+  const { min = 0, max = 1 } = sliderConfig;
+
   const boundingBox = slider.getBoundingClientRect();
 
   const relativePos = Math.max(
     0,
     Math.min(
       1,
-      vertical
+      sliderConfig.isVertical
         ? (pointer.clientY - boundingBox.y) / boundingBox.height
         : (pointer.clientX - boundingBox.x) / boundingBox.width,
     ),
   );
   return roundToStepSize(
-    (inverted ? 1 - relativePos : relativePos) * (max - min) + min,
-    stepSize,
+    (sliderConfig.isInverted ? 1 - relativePos : relativePos) * (max - min) +
+      min,
+    sliderConfig.stepSize,
+    sliderConfig.roundMethod,
   );
 };
 

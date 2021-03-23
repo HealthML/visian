@@ -89,8 +89,9 @@ export const Slider: React.FC<SliderProps> = (props) => {
     isInverted,
     isVertical,
     min = 0,
-    max = 99,
+    max = 1,
     onChange,
+    roundMethod,
     stepSize,
     value,
     ...rest
@@ -101,30 +102,29 @@ export const Slider: React.FC<SliderProps> = (props) => {
     (event: PointerEvent | ReactPointerEvent) => {
       if (!onChange || !sliderRef.current) return;
       onChange(
-        pointerToSliderValue(
-          event,
-          sliderRef.current,
+        pointerToSliderValue(event, sliderRef.current, {
           min,
           max,
-          isVertical,
-          isInverted,
           stepSize,
-        ),
+          roundMethod,
+          isInverted,
+          isVertical,
+        }),
       );
     },
-    [isInverted, max, min, onChange, stepSize, isVertical],
+    [isInverted, max, min, onChange, roundMethod, stepSize, isVertical],
   );
 
   const dragListeners = useDrag(updateValue, updateValue);
 
   const actualValue = value === undefined ? defaultValue || 0 : value;
-  const thumbPos = valueToSliderPos(
-    actualValue,
+  const thumbPos = valueToSliderPos(actualValue, {
     min,
     max,
-    isInverted,
     stepSize,
-  );
+    roundMethod,
+    isInverted,
+  });
 
   return (
     <Container
