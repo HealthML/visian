@@ -33,6 +33,8 @@ export class VolumeRenderer implements IDisposable {
   public transferFunction = TransferFunction.FCEdges;
   public imageOpacity = 1;
   public contextOpacity = 0.4;
+  public rangeLimits: [number, number] = [0.1, 1];
+  public altRangeLimits: [number, number] = [0, 1];
   public cutAwayConeAngle = 1;
 
   constructor(private canvas: HTMLCanvasElement) {
@@ -41,11 +43,13 @@ export class VolumeRenderer implements IDisposable {
       transferFunction: observable,
       imageOpacity: observable,
       contextOpacity: observable,
+      rangeLimits: observable,
       cutAwayConeAngle: observable,
       setBackgroundValue: action,
       setTransferFunction: action,
       setImageOpacity: action,
       setContextOpacity: action,
+      setRangeLimits: action,
       setCutAwayConeAngle: action,
     });
 
@@ -247,6 +251,16 @@ export class VolumeRenderer implements IDisposable {
 
   public setTransferFunction = (value: TransferFunction) => {
     this.transferFunction = value;
+
+    // TODO: We separate the limits for this properly
+    if (
+      value === TransferFunction.Density ||
+      value === TransferFunction.FCEdges
+    ) {
+      const limits = this.altRangeLimits;
+      this.altRangeLimits = this.rangeLimits;
+      this.rangeLimits = limits;
+    }
     this.lazyRender();
   };
 
@@ -257,6 +271,14 @@ export class VolumeRenderer implements IDisposable {
 
   public setContextOpacity = (value: number) => {
     this.contextOpacity = Math.max(0, Math.min(1, value));
+    this.lazyRender();
+  };
+
+  public setRangeLimits = (value: [number, number]) => {
+    this.rangeLimits = [
+      Math.max(0, Math.min(1, value[0])),
+      Math.max(0, Math.min(1, value[1])),
+    ];
     this.lazyRender();
   };
 

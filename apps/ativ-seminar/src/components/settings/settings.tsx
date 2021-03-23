@@ -1,4 +1,4 @@
-import { color, Sheet, Slider, Text } from "@visian/ui-shared";
+import { color, IntervalSlider, Sheet, Slider, Text } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
 import React, { useCallback } from "react";
 import styled from "styled-components";
@@ -24,6 +24,10 @@ const StyledText = styled(Text)`
 `;
 
 const StyledSlider = styled(Slider)`
+  margin-bottom: 10px;
+`;
+
+const StyledIntervalSlider = styled(IntervalSlider)`
   margin-bottom: 10px;
 `;
 
@@ -94,6 +98,18 @@ const Settings: React.FC<SettingsProps> = observer((props) => {
           F+C: Cutaway
         </StyledOption>
       </StyledSelect>
+      {(renderer.transferFunction === TransferFunction.Density ||
+        renderer.transferFunction === TransferFunction.FCEdges) && (
+        <>
+          <StyledText text="Value Range" />
+          <StyledIntervalSlider
+            min={0}
+            max={1}
+            onChange={renderer.setRangeLimits}
+            value={renderer.rangeLimits}
+          />
+        </>
+      )}
       {renderer.transferFunction === TransferFunction.FCCutaway && (
         <>
           <StyledText text="Cutaway Angle" />
@@ -105,7 +121,6 @@ const Settings: React.FC<SettingsProps> = observer((props) => {
           />
         </>
       )}
-
       {(renderer.transferFunction === TransferFunction.FCEdges ||
         renderer.transferFunction === TransferFunction.FCCutaway) && (
         <>

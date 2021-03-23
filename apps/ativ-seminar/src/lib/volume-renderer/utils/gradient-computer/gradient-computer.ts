@@ -77,6 +77,12 @@ export class GradientComputer {
     this.updateOutputDerivative();
   }
 
+  public setRangeLimits(value: [number, number]) {
+    this.gradientMaterial.setRangeLimits(value);
+
+    this.updateOutputDerivative();
+  }
+
   /** Returns the gradient of the texture atlas. */
   public getFirstDerivative() {
     if (!this.firstDerivativeCached) {

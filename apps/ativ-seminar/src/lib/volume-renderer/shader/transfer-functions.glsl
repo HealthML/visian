@@ -1,4 +1,6 @@
 uniform float uContextOpacity;
+uniform float uLimitLow;
+uniform float uLimitHigh;
 
 /**
  * Taken from https://www.iquilezles.org/www/articles/distfunctions/distfunctions.htm
@@ -51,8 +53,8 @@ vec4 transferFunction(VolumeData data, vec3 volumeCoords) {
   if (uTransferFunction == 1) {
     // return mix(vec4(data.firstDerivative * 5.0, mix(0.0, 0.015, step(0.1, length(data.firstDerivative))) * 0.2), vec4(vec3(1.0), 0.8), data.focus);
     return uUseFocus ?
-        vec4(vec3(1), mix(mix(0.0, 0.015, step(0.1, length(data.firstDerivative))) * uContextOpacity, 0.8, data.focus))
-      : vec4(vec3(1), mix(0.0, 0.015, step(0.1, length(data.firstDerivative))));
+        vec4(vec3(1.0), mix(mix(0.0, 0.015, step(uLimitLow, length(data.firstDerivative)) * (1.0 - step(uLimitHigh, length(data.firstDerivative)))) * uContextOpacity, 1.0, data.focus))
+      : vec4(vec3(1.0), mix(0.0, 0.015, step(uLimitLow, length(data.firstDerivative)) * (1.0 - step(uLimitHigh, length(data.firstDerivative)))));
 
     // return mix(vec4(vec3(0.5), mix(0.0, 0.015, step(0.12, length(data.firstDerivative)))), vec4(1.0, 0.0, 0.0, 1.0), data.focus);
   }
@@ -66,8 +68,8 @@ vec4 transferFunction(VolumeData data, vec3 volumeCoords) {
   }
 
   return uUseFocus ?
-        vec4(data.density * data.focus)
-      : vec4(data.density);
+        vec4(((data.density - uLimitLow) / (uLimitHigh - uLimitLow)) * data.focus * step(uLimitLow, data.density) * (1.0 - step(uLimitHigh, data.density)))
+      : vec4(((data.density - uLimitLow) / (uLimitHigh - uLimitLow)) * step(uLimitLow, data.density) * (1.0 - step(uLimitHigh, data.density)));
 
   // return vec4(data.density * step(0.05, data.density));
   // return mix(vec4(0.0), vec4(1.0, 0.0, 0.0, 1.0), step(0.1, data.focus));

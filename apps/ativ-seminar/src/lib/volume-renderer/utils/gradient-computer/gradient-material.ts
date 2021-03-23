@@ -40,6 +40,8 @@ export class GradientMaterial extends THREE.ShaderMaterial {
         uTransferFunction: { value: 0 },
         uConeAngle: { value: 1 },
         uContextOpacity: { value: 1 },
+        uLimitLow: { value: 0 },
+        uLimitHigh: { value: 1 },
       },
     });
   }
@@ -78,6 +80,11 @@ export class GradientMaterial extends THREE.ShaderMaterial {
 
   public setContextOpacity(value: number) {
     this.uniforms.uContextOpacity.value = value;
+  }
+
+  public setRangeLimits(value: [number, number]) {
+    this.uniforms.uLimitLow.value = value[0];
+    this.uniforms.uLimitHigh.value = value[1];
   }
 }
 

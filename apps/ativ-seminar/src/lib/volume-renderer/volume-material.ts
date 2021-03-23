@@ -37,6 +37,8 @@ class VolumeMaterial extends THREE.ShaderMaterial implements IDisposable {
 
         uOpacity: { value: 1 },
         uContextOpacity: { value: 1 },
+        uLimitLow: { value: 0 },
+        uLimitHigh: { value: 1 },
         uTransferFunction: { value: 0 },
         uConeAngle: { value: 1 },
       },
@@ -60,6 +62,11 @@ class VolumeMaterial extends THREE.ShaderMaterial implements IDisposable {
       autorun(() => {
         this.uniforms.uContextOpacity.value = renderer.contextOpacity;
         this.gradientComputer?.setContextOpacity(renderer.contextOpacity);
+      }),
+      autorun(() => {
+        this.uniforms.uLimitLow.value = renderer.rangeLimits[0];
+        this.uniforms.uLimitHigh.value = renderer.rangeLimits[1];
+        this.gradientComputer?.setRangeLimits(renderer.rangeLimits);
       }),
       autorun(() => {
         this.uniforms.uConeAngle.value = renderer.cutAwayConeAngle;
