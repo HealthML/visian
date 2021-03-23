@@ -32,6 +32,7 @@ export class VolumeRenderer implements IDisposable {
   public backgroundValue = 0;
   public transferFunction = TransferFunction.FCEdges;
   public imageOpacity = 1;
+  public contextOpacity = 0.4;
   public cutAwayConeAngle = 1;
 
   constructor(private canvas: HTMLCanvasElement) {
@@ -39,10 +40,12 @@ export class VolumeRenderer implements IDisposable {
       backgroundValue: observable,
       transferFunction: observable,
       imageOpacity: observable,
+      contextOpacity: observable,
       cutAwayConeAngle: observable,
       setBackgroundValue: action,
       setTransferFunction: action,
       setImageOpacity: action,
+      setContextOpacity: action,
       setCutAwayConeAngle: action,
     });
 
@@ -249,6 +252,11 @@ export class VolumeRenderer implements IDisposable {
 
   public setImageOpacity = (value: number) => {
     this.imageOpacity = Math.max(0, Math.min(1, value));
+    this.lazyRender();
+  };
+
+  public setContextOpacity = (value: number) => {
+    this.contextOpacity = Math.max(0, Math.min(1, value));
     this.lazyRender();
   };
 

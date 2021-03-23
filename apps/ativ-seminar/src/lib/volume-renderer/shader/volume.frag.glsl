@@ -14,6 +14,7 @@ uniform vec3 uVoxelCount;
 uniform vec2 uAtlasGrid;
 uniform float uStepSize;
 
+// User-defined transfer function options
 uniform float uOpacity;
 uniform int uTransferFunction;
 uniform float uConeAngle;

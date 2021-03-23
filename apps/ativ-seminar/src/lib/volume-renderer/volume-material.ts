@@ -36,6 +36,7 @@ class VolumeMaterial extends THREE.ShaderMaterial implements IDisposable {
         uCameraPosition: { value: new THREE.Vector3() },
 
         uOpacity: { value: 1 },
+        uContextOpacity: { value: 1 },
         uTransferFunction: { value: 0 },
         uConeAngle: { value: 1 },
       },
@@ -55,6 +56,9 @@ class VolumeMaterial extends THREE.ShaderMaterial implements IDisposable {
       }),
       autorun(() => {
         this.uniforms.uOpacity.value = renderer.imageOpacity;
+      }),
+      autorun(() => {
+        this.uniforms.uContextOpacity.value = renderer.contextOpacity;
       }),
       autorun(() => {
         this.uniforms.uConeAngle.value = renderer.cutAwayConeAngle;

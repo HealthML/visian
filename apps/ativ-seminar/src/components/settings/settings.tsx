@@ -60,6 +60,13 @@ const Settings: React.FC<SettingsProps> = observer((props) => {
     [renderer],
   );
 
+  const setContextOpacity = useCallback(
+    (value: number) => {
+      renderer.setContextOpacity(value * value);
+    },
+    [renderer],
+  );
+
   return (
     <Container {...rest}>
       <StyledText text="Background" />
@@ -68,6 +75,13 @@ const Settings: React.FC<SettingsProps> = observer((props) => {
         max={1}
         onChange={renderer.setBackgroundValue}
         value={renderer.backgroundValue}
+      />
+      <StyledText text="Opacity" />
+      <StyledSlider
+        min={0}
+        max={1}
+        onChange={setOpacity}
+        value={Math.sqrt(renderer.imageOpacity)}
       />
       <StyledText text="Transfer Function" />
       <StyledSelect
@@ -80,21 +94,27 @@ const Settings: React.FC<SettingsProps> = observer((props) => {
           F+C: Cutaway
         </StyledOption>
       </StyledSelect>
-      <StyledText text="Opacity" />
-      <StyledSlider
-        min={0}
-        max={1}
-        onChange={setOpacity}
-        value={Math.sqrt(renderer.imageOpacity)}
-      />
       {renderer.transferFunction === TransferFunction.FCCutaway && (
         <>
-          <StyledText text="Angle" />
+          <StyledText text="Cutaway Angle" />
           <StyledSlider
             min={0}
             max={Math.PI}
             onChange={renderer.setCutAwayConeAngle}
             value={renderer.cutAwayConeAngle}
+          />
+        </>
+      )}
+
+      {(renderer.transferFunction === TransferFunction.FCEdges ||
+        renderer.transferFunction === TransferFunction.FCCutaway) && (
+        <>
+          <StyledText text="Context Opacity" />
+          <StyledSlider
+            min={0}
+            max={1}
+            onChange={setContextOpacity}
+            value={Math.sqrt(renderer.contextOpacity)}
           />
         </>
       )}
