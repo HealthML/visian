@@ -18,7 +18,10 @@ export class Slice extends THREE.Mesh implements IDisposable {
     private viewType: ViewType,
     private render: () => void,
   ) {
-    super(new THREE.PlaneGeometry(), new SliceMaterial(editor, viewType));
+    super(
+      new THREE.PlaneGeometry(),
+      new SliceMaterial(editor, viewType, render),
+    );
 
     this.userData = {
       viewType,

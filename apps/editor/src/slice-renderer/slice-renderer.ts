@@ -93,10 +93,14 @@ export class SliceRenderer implements IDisposable {
 
   // TODO: Move this to event handling.
   private handleWheel = (event: WheelEvent) => {
-    if (event.deltaY > 0) {
-      this.editor.zoomOut();
-    } else if (event.deltaY < 0) {
-      this.editor.zoomIn();
+    if (event.ctrlKey) {
+      if (event.deltaY > 0) {
+        this.editor.zoomOut();
+      } else if (event.deltaY < 0) {
+        this.editor.zoomIn();
+      }
+    } else {
+      this.editor.stepSelectedSlice(-Math.sign(event.deltaY));
     }
   };
 

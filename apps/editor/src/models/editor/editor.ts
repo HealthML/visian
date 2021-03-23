@@ -6,6 +6,7 @@ import { ViewType } from "../../slice-renderer";
 import { maxZoom, minZoom } from "../../theme";
 import { ISerializable, StoreContext } from "../types";
 import { getZoomStep, Pixel } from "../utils";
+import { Voxel } from "../utils/voxel";
 import { Image, ImageSnapshot } from "./image";
 
 export interface EditorSnapshot {
@@ -26,7 +27,9 @@ export class Editor implements ISerializable<EditorSnapshot> {
   public mainView = ViewType.Transverse;
 
   public zoomLevel = 1;
-  public offset: Pixel = new Pixel();
+  public offset = new Pixel();
+
+  public selectedVoxel = new Voxel();
 
   constructor(protected context?: StoreContext) {
     makeObservable(this, {
@@ -38,6 +41,7 @@ export class Editor implements ISerializable<EditorSnapshot> {
       mainView: observable,
       zoomLevel: observable,
       offset: observable,
+      selectedVoxel: observable,
       theme: computed,
       setBackgroundColor: action,
       setImage: action,
@@ -50,6 +54,9 @@ export class Editor implements ISerializable<EditorSnapshot> {
       zoomIn: action,
       zoomOut: action,
       setOffset: action,
+      setSelectedVoxel: action,
+      setSelectedSlice: action,
+      stepSelectedSlice: action,
     });
   }
 
@@ -67,6 +74,8 @@ export class Editor implements ISerializable<EditorSnapshot> {
     this.annotation = undefined;
     this.image = image;
     this.context?.persistImmediately();
+
+    this.setSelectedVoxel();
   }
   public async importImage(imageFile: File) {
     this.setImage(await Image.fromFile(imageFile));
@@ -118,6 +127,35 @@ export class Editor implements ISerializable<EditorSnapshot> {
     this.offset.set(x, y);
   }
 
+  public setSelectedVoxel(
+    x = this.image ? Math.round(this.image?.voxelCount[0] / 2) : 0,
+    y = this.image ? Math.round(this.image?.voxelCount[1] / 2) : 0,
+    z = this.image ? Math.round(this.image?.voxelCount[2] / 2) : 0,
+  ) {
+    this.selectedVoxel.set(x, y, z);
+  }
+
+  public setSelectedSlice(value: number, viewType = this.mainView) {
+    if (!this.image) return;
+
+    this.selectedVoxel.setFromView(
+      viewType,
+      Math.min(
+        Math.max(Math.round(value), 0),
+        // TODO: Adapt once voxelCount is a Voxel.
+        this.image.voxelCount[(viewType + 2) % 3] - 1,
+      ),
+    );
+  }
+
+  public getSelectedSlice(viewType = this.mainView) {
+    return this.selectedVoxel.getFromView(viewType);
+  }
+
+  public stepSelectedSlice(stepSize = 1, viewType = this.mainView) {
+    this.setSelectedSlice(this.getSelectedSlice(viewType) + stepSize, viewType);
+  }
+
   public toJSON() {
     return {
       backgroundColor: this.backgroundColor,
@@ -130,5 +168,7 @@ export class Editor implements ISerializable<EditorSnapshot> {
     this.backgroundColor = snapshot.backgroundColor;
     this.image = snapshot.image && new Image(snapshot.image);
     this.annotation = snapshot.annotation && new Image(snapshot.annotation);
+
+    this.setSelectedVoxel();
   }
 }

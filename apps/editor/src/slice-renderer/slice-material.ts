@@ -12,7 +12,7 @@ import { IDisposable, ViewType } from "./types";
 export class SliceMaterial extends THREE.ShaderMaterial implements IDisposable {
   private disposers: IDisposer[] = [];
 
-  constructor(editor: Editor, viewType: ViewType) {
+  constructor(editor: Editor, viewType: ViewType, render: () => void) {
     super({
       defines: {
         SCAN: "",
@@ -47,9 +47,15 @@ export class SliceMaterial extends THREE.ShaderMaterial implements IDisposable {
     this.disposers.push(
       autorun(() => {
         this.uniforms.uContrast.value = editor.contrast;
+        render();
       }),
       autorun(() => {
         this.uniforms.uBrightness.value = editor.brightness;
+        render();
+      }),
+      autorun(() => {
+        this.uniforms.uActiveSlices.value = editor.selectedVoxel.array;
+        render();
       }),
     );
   }
@@ -64,9 +70,5 @@ export class SliceMaterial extends THREE.ShaderMaterial implements IDisposable {
     this.uniforms.uDataTexture.value = atlas.getTexture();
     this.uniforms.uVoxelCount.value = atlas.voxelCount;
     this.uniforms.uAtlasGrid.value = atlas.atlasGrid;
-    this.uniforms.uActiveSlices.value = atlas.voxelCount
-      .clone()
-      .multiplyScalar(0.5)
-      .round();
   }
 }

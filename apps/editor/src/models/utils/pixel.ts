@@ -17,16 +17,16 @@ export class Pixel {
     });
   }
 
-  set(x = 0, y = 0) {
+  public set(x = 0, y = 0) {
     this.x = x;
     this.y = y;
   }
 
-  setX(x = 0) {
+  public setX(x = 0) {
     this.x = x;
   }
 
-  setY(y = 0) {
+  public setY(y = 0) {
     this.y = y;
   }
 }
