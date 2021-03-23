@@ -1,11 +1,12 @@
 import { TextureAtlas } from "@visian/util";
-import { autorun } from "mobx";
+import { reaction } from "mobx";
 import { IDisposer } from "mobx-utils/lib/utils";
 import * as THREE from "three";
 
 import { Editor } from "../models";
+import { Image } from "../models/editor/image";
 import { Slice } from "./slice";
-import { IDisposable, ViewType, viewTypes } from "./types";
+import { IDisposable, viewTypes } from "./types";
 import { setMainCameraPlanes } from "./utils";
 
 export class SliceRenderer implements IDisposable {
@@ -14,8 +15,6 @@ export class SliceRenderer implements IDisposable {
   private scene = new THREE.Scene();
 
   private slices: Slice[];
-
-  private activeView = ViewType.Transverse;
 
   private lazyRenderTriggered = true;
 
@@ -29,25 +28,32 @@ export class SliceRenderer implements IDisposable {
     const aspect = canvas.clientWidth / canvas.clientHeight;
     this.camera = new THREE.OrthographicCamera(-aspect, aspect, 1, -1, 0, 20);
 
-    this.slices = viewTypes.map((viewType) => new Slice(editor, viewType));
-    this.scene.add(this.slices[this.activeView]);
+    this.slices = viewTypes.map(
+      (viewType) => new Slice(editor, viewType, this.lazyRender),
+    );
+    this.scene.add(this.slices[editor.mainView]);
 
     window.addEventListener("resize", this.resize);
     this.resize();
 
+    canvas.addEventListener("wheel", this.handleWheel);
+
     this.disposers.push(
-      autorun(() => {
-        const image = editor.image;
-        if (image) {
-          this.setImage(
-            new TextureAtlas(
-              new THREE.Vector3().fromArray(image.voxelCount),
-              new THREE.Vector3().fromArray(image.voxelSpacing),
-              THREE.NearestFilter,
-            ).setData(image.data),
-          );
-        }
-      }),
+      reaction(
+        () => editor.image,
+        (image?: Image) => {
+          if (image) {
+            this.setImage(
+              new TextureAtlas(
+                new THREE.Vector3().fromArray(image.voxelCount),
+                new THREE.Vector3().fromArray(image.voxelSpacing),
+                THREE.NearestFilter,
+              ).setData(image.data),
+            );
+          }
+        },
+        { fireImmediately: true },
+      ),
     );
 
     this.renderer.setAnimationLoop(this.animate);
@@ -56,6 +62,8 @@ export class SliceRenderer implements IDisposable {
   public dispose() {
     this.disposers.forEach((disposer) => disposer());
     this.slices.forEach((slice) => slice.dispose());
+    window.removeEventListener("resize", this.resize);
+    this.canvas.removeEventListener("wheel", this.handleWheel);
   }
 
   private resize = () => {
@@ -81,6 +89,15 @@ export class SliceRenderer implements IDisposable {
     this.lazyRenderTriggered = false;
 
     this.renderer.render(this.scene, this.camera);
+  };
+
+  // TODO: Move this to event handling.
+  private handleWheel = (event: WheelEvent) => {
+    if (event.deltaY > 0) {
+      this.editor.zoomOut();
+    } else if (event.deltaY < 0) {
+      this.editor.zoomIn();
+    }
   };
 
   public setImage(atlas: TextureAtlas) {

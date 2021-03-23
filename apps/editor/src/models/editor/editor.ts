@@ -2,7 +2,10 @@ import isEqual from "lodash.isequal";
 import { action, computed, makeObservable, observable } from "mobx";
 import tc from "tinycolor2";
 
+import { ViewType } from "../../slice-renderer";
+import { maxZoom, minZoom } from "../../theme";
 import { ISerializable, StoreContext } from "../types";
+import { getZoomStep, Pixel } from "../utils";
 import { Image, ImageSnapshot } from "./image";
 
 export interface EditorSnapshot {
@@ -20,6 +23,11 @@ export class Editor implements ISerializable<EditorSnapshot> {
   public brightness = 1;
   public contrast = 1;
 
+  public mainView = ViewType.Transverse;
+
+  public zoomLevel = 1;
+  public offset: Pixel = new Pixel();
+
   constructor(protected context?: StoreContext) {
     makeObservable(this, {
       backgroundColor: observable,
@@ -27,6 +35,9 @@ export class Editor implements ISerializable<EditorSnapshot> {
       annotation: observable,
       brightness: observable,
       contrast: observable,
+      mainView: observable,
+      zoomLevel: observable,
+      offset: observable,
       theme: computed,
       setBackgroundColor: action,
       setImage: action,
@@ -34,6 +45,11 @@ export class Editor implements ISerializable<EditorSnapshot> {
       applySnapshot: action,
       setBrightness: action,
       setContrast: action,
+      setMainView: action,
+      setZoomLevel: action,
+      zoomIn: action,
+      zoomOut: action,
+      setOffset: action,
     });
   }
 
@@ -68,12 +84,38 @@ export class Editor implements ISerializable<EditorSnapshot> {
     this.setAnnotation(await Image.fromFile(imageFile));
   }
 
-  public setBrightness(value: number) {
+  public setBrightness(value = 1) {
     this.brightness = value;
   }
 
-  public setContrast(value: number) {
+  public setContrast(value = 1) {
     this.contrast = value;
+  }
+
+  public setMainView(value: ViewType) {
+    this.mainView = value;
+  }
+
+  public setZoomLevel(value = 1) {
+    this.zoomLevel = value;
+  }
+
+  public zoomIn() {
+    this.zoomLevel = Math.min(
+      maxZoom,
+      this.zoomLevel + getZoomStep(this.zoomLevel),
+    );
+  }
+
+  public zoomOut() {
+    this.zoomLevel = Math.max(
+      minZoom,
+      this.zoomLevel - getZoomStep(this.zoomLevel),
+    );
+  }
+
+  public setOffset(x = 0, y = 0) {
+    this.offset.set(x, y);
   }
 
   public toJSON() {
