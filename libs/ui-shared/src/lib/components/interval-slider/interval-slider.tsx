@@ -74,14 +74,8 @@ export const IntervalSlider: React.FC<IntervalSliderProps> = (props) => {
 
       onChange(
         id === "low"
-          ? [
-              Math.min(newValue, currentValueRef.current[1]),
-              currentValueRef.current[1],
-            ]
-          : [
-              currentValueRef.current[0],
-              Math.max(currentValueRef.current[0], newValue),
-            ],
+          ? [newValue, Math.max(newValue, currentValueRef.current[1])]
+          : [Math.min(currentValueRef.current[0], newValue), newValue],
       );
     },
     [
