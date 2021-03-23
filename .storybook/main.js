@@ -1,10 +1,4 @@
 module.exports = {
   stories: [],
-  addons: [
-    "@storybook/addon-a11y",
-    "@storybook/addon-actions",
-    "@storybook/addon-controls",
-    "@storybook/addon-toolbars",
-    "@storybook/addon-viewport",
-  ],
+  addons: ["@storybook/addon-essentials", "@storybook/addon-a11y"],
 };

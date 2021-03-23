@@ -5,34 +5,45 @@ import React, {
 } from "react";
 import styled from "styled-components";
 
-import { SliderProps } from "./slider.props";
 import {
   color,
   computeStyleValue,
+  fontSize,
   lineHeight,
   scaleMetric,
   size,
   ThemeProps,
 } from "../../theme";
+import { Text } from "../text";
+import { SliderProps } from "./slider.props";
+import { SliderStylingSettings, SliderVerticalitySettings } from "./types";
 import { pointerToSliderValue, useDrag, valueToSliderPos } from "./utils";
 
-interface VerticalProps {
-  isVertical?: boolean;
+export interface ThumbProps extends SliderVerticalitySettings {
+  /**
+   * A [0, 1]-ranged value indicating the thumb's relative position along the
+   * slider's main axis.
+   */
+  position: number;
 }
 
-const Container = styled.div<VerticalProps>`
+export const SliderContainer = styled.div<SliderVerticalitySettings>`
   align-items: center;
   cursor: pointer;
   display: flex;
   height: ${(props) => (props.isVertical ? "100%" : size("sliderHeight"))};
   position: relative;
+  margin: ${(props) => {
+    const margin = scaleMetric(size("sliderThumbWidth")(props), 0.5);
+    return props.isVertical ? `${margin} 0` : `0 ${margin}`;
+  }};
   touch-action: none;
   user-select: none;
   width: ${(props) => (props.isVertical ? size("sliderHeight") : "100%")};
   flex-direction: ${(props) => (props.isVertical ? "column" : "row")};
 `;
 
-const Track = styled.div<VerticalProps>`
+export const SliderTrack = styled.div<SliderVerticalitySettings>`
   background-color: ${color("lightGray")};
   flex: 1;
   height: ${(props) =>
@@ -40,41 +51,30 @@ const Track = styled.div<VerticalProps>`
   width: ${(props) => (props.isVertical ? lineHeight("sliderTrack") : "unset")};
 `;
 
-interface ThumbProps extends VerticalProps {
-  position: string;
-}
+export const SliderThumb = styled.div.attrs<ThumbProps>((props) => {
+  const thumbPositionMain = `${props.position * 100}%`;
+  const thumbPositionAcross = computeStyleValue<ThemeProps>(
+    [size("sliderHeight"), size("sliderThumbHeight")],
+    (sliderHeight, thumbHeight) => (sliderHeight - thumbHeight) / 2,
+  )(props);
 
-const Thumb = styled.div.attrs<ThumbProps>((props) => ({
-  style: {
-    top: props.isVertical
-      ? props.position
-      : computeStyleValue<ThemeProps>(
-          [size("sliderHeight"), size("sliderThumbHeight")],
-          (sliderHeight, thumbHeight) => (sliderHeight - thumbHeight) / 2,
-        )(props),
-    left: props.isVertical
-      ? computeStyleValue<ThemeProps>(
-          [size("sliderHeight"), size("sliderThumbHeight")],
-          (sliderHeight, thumbHeight) => (sliderHeight - thumbHeight) / 2,
-        )(props)
-      : props.position,
-  },
-}))<ThumbProps>`
+  return {
+    style: {
+      top: props.isVertical ? thumbPositionMain : thumbPositionAcross,
+      left: props.isVertical ? thumbPositionAcross : thumbPositionMain,
+    },
+  };
+})<ThumbProps>`
   background-color: ${color("gray")};
   border: none;
   border-radius: ${(props) =>
     scaleMetric(size("sliderThumbWidth")(props), 0.5)};
   height: ${(props) =>
     props.isVertical ? size("sliderThumbWidth") : size("sliderThumbHeight")};
-  margin: ${(props) =>
-      props.isVertical
-        ? scaleMetric(size("sliderThumbWidth")(props), -0.5)
-        : "0"}
-    0 0
-    ${(props) =>
-      props.isVertical
-        ? "0"
-        : scaleMetric(size("sliderThumbWidth")(props), -0.5)};
+  margin: ${(props) => {
+    const margin = scaleMetric(size("sliderThumbWidth")(props), -0.5);
+    return props.isVertical ? `${margin} 0 0 0` : `0 0 0 ${margin}`;
+  }};
   position: absolute;
   transition: background-color 0.3s;
   width: ${(props) =>
@@ -82,15 +82,49 @@ const Thumb = styled.div.attrs<ThumbProps>((props) => ({
   z-index: 10;
 `;
 
+export const SliderLabel = styled(Text).attrs<ThumbProps>((props) => {
+  const thumbPositionMain = `${props.position * 100}%`;
+  const thumbPositionAcross = computeStyleValue<ThemeProps>(
+    [size("sliderHeight")],
+    (sliderHeight) => -sliderHeight,
+  )(props);
+
+  return {
+    style: {
+      top: props.isVertical ? thumbPositionMain : thumbPositionAcross,
+      left: props.isVertical ? thumbPositionAcross : thumbPositionMain,
+    },
+  };
+})<ThumbProps & SliderStylingSettings>`
+  display: block;
+  line-height: ${fontSize("default")};
+  margin: ${(props) =>
+    props.isVertical
+      ? `${scaleMetric(fontSize("default")(props), -0.5)} 0 0 0`
+      : "0 0 0 -50%"};
+  opacity: 0.6;
+  position: absolute;
+  text-align: ${(props) => (props.isVertical ? "right" : "center")};
+  width: ${(props) => !props.isVertical && "100%"};
+  z-index: 10;
+`;
+
+const defaultFormatLabel = (value: number) =>
+  `${Math.round(value * 100) / 100}`;
+
 /** A custom slider component built to work well with touch input. */
 export const Slider: React.FC<SliderProps> = (props) => {
   const {
     defaultValue,
+    formatLabel = defaultFormatLabel,
     isInverted,
     isVertical,
     min = 0,
-    max = 99,
+    max = 1,
     onChange,
+    roundMethod,
+    scaleType,
+    shouldShowLabel = true,
     stepSize,
     value,
     ...rest
@@ -101,41 +135,58 @@ export const Slider: React.FC<SliderProps> = (props) => {
     (event: PointerEvent | ReactPointerEvent) => {
       if (!onChange || !sliderRef.current) return;
       onChange(
-        pointerToSliderValue(
-          event,
-          sliderRef.current,
+        pointerToSliderValue(event, sliderRef.current, {
+          scaleType,
           min,
           max,
-          isVertical,
-          isInverted,
           stepSize,
-        ),
+          roundMethod,
+          isInverted,
+          isVertical,
+        }),
       );
     },
-    [isInverted, max, min, onChange, stepSize, isVertical],
+    [
+      isInverted,
+      max,
+      min,
+      onChange,
+      roundMethod,
+      stepSize,
+      isVertical,
+      scaleType,
+    ],
   );
 
   const dragListeners = useDrag(updateValue, updateValue);
 
   const actualValue = value === undefined ? defaultValue || 0 : value;
-  const thumbPos = valueToSliderPos(
-    actualValue,
+  const thumbPos = valueToSliderPos(actualValue, {
+    scaleType,
     min,
     max,
-    isInverted,
     stepSize,
-  );
+    roundMethod,
+    isInverted,
+  });
 
   return (
-    <Container
+    <SliderContainer
       {...rest}
       {...(onChange ? dragListeners : {})}
       isVertical={isVertical}
       ref={sliderRef}
     >
-      <Track isVertical={isVertical} />
-      <Thumb isVertical={isVertical} position={thumbPos} />
-    </Container>
+      <SliderTrack isVertical={isVertical} />
+      <SliderThumb isVertical={isVertical} position={thumbPos} />
+      {shouldShowLabel && (
+        <SliderLabel
+          isVertical={isVertical}
+          position={thumbPos}
+          text={formatLabel(actualValue)}
+        />
+      )}
+    </SliderContainer>
   );
 };
 

@@ -1,30 +1,35 @@
-import { color, radius, sheetMixin, Subtitle, Text } from "@visian/ui-shared";
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import styled, { css } from "styled-components";
+import { useTranslation } from "../../i18n";
 
+import { color, radius } from "../../theme";
+import { sheetMixin } from "../sheet";
+import { Subtitle } from "../text";
 import { DropZoneProps } from "./drop-zone.props";
 
 const StyledDiv = styled.div<{
-  alwaysShown?: boolean;
+  isAlwaysVisible?: boolean;
   isDraggedOver?: boolean;
 }>`
-  ${(props) => (props.isDraggedOver || props.alwaysShown) && sheetMixin}
+  ${(props) => (props.isAlwaysVisible || props.isDraggedOver) && sheetMixin}
   ${(props) =>
     props.isDraggedOver &&
     css`
-      border: 2px solid ${color("text")};
+      border-color: ${color("text")};
     `}
-  border-radius: ${radius("default")};
   align-items: center;
+  border-radius: ${radius("default")};
   display: flex;
   justify-content: center;
+  pointer-events: auto;
 `;
 
 export const DropZone: React.FC<DropZoneProps> = (props) => {
   const {
-    alwaysShown,
     children,
+    isAlwaysVisible,
     label,
+    labelTx,
     onDragEnd,
     onDragLeave,
     onDragOver,
@@ -39,6 +44,7 @@ export const DropZone: React.FC<DropZoneProps> = (props) => {
   const dragOver = useCallback(
     (event: React.DragEvent<HTMLDivElement>) => {
       event.preventDefault();
+      event.dataTransfer.dropEffect = "copy";
       if (onDragOver) onDragOver(event);
       setIsDraggedOver(true);
     },
@@ -65,6 +71,7 @@ export const DropZone: React.FC<DropZoneProps> = (props) => {
     [onDrop, onFileDrop],
   );
 
+  const { t } = useTranslation();
   return (
     <StyledDiv
       {...rest}
@@ -72,11 +79,14 @@ export const DropZone: React.FC<DropZoneProps> = (props) => {
       onDragOver={dragOver}
       onDragLeave={endDrag}
       onDragEnd={endDrag}
-      alwaysShown={alwaysShown}
+      isAlwaysVisible={isAlwaysVisible}
       isDraggedOver={isDraggedOver}
     >
-      {children}
-      {label && (isDraggedOver || alwaysShown) && <Subtitle text={label} />}
+      {(labelTx || label) && (isAlwaysVisible || isDraggedOver) ? (
+        <Subtitle text={label} tx={labelTx} />
+      ) : (
+        children
+      )}
     </StyledDiv>
   );
 };

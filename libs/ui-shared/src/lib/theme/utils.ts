@@ -1,4 +1,3 @@
-import string from "*.ttf";
 import { Theme, ThemeProps } from "./theme";
 
 /** Extracts a value from the theme passed to the component. */

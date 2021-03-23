@@ -25,8 +25,9 @@ export const Button = styled(BaseButton)`
   box-sizing: border-box;
   cursor: pointer;
   display: inline-flex;
-  padding: ${space("buttonPadding")};
   height: ${size("buttonHeight")};
+  padding: ${space("buttonPadding")};
+  pointer-events: auto;
   user-select: none;
 
   &:focus {

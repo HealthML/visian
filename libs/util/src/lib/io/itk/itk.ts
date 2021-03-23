@@ -2,14 +2,10 @@ import readImageDICOMFileSeries from "itk/readImageDICOMFileSeries";
 import readImageFile from "itk/readImageFile";
 
 import { Zip } from "../zip";
-import { ITKImage } from "./types";
 
 /** Returns a parsed medical image from the given single file. */
 export const readSingleMedicalImage = async (file: File) => {
-  const { image, webWorker } = (await readImageFile(null, file)) as {
-    image?: ITKImage;
-    webWorker: Worker;
-  };
+  const { image, webWorker } = await readImageFile(null, file);
   webWorker.terminate();
 
   return image;
@@ -25,12 +21,9 @@ export const readDICOMSeries = async (file: File) => {
     return;
   }
 
-  const { image, webWorkerPool } = (await readImageDICOMFileSeries(
+  const { image, webWorkerPool } = await readImageDICOMFileSeries(
     await zip.getAllFiles(),
-  )) as {
-    image?: ITKImage;
-    webWorkerPool: { terminateWorkers(): void };
-  };
+  );
   webWorkerPool.terminateWorkers();
 
   return image;

@@ -25,6 +25,8 @@ export class Zip {
 
   /** Decompresses and returns all files contained in the zip file. */
   public async getAllFiles() {
-    return Promise.all(this.files.map((fileName) => this.getFile(fileName)));
+    return Promise.all(
+      this.files.map((fileName) => this.getFile(fileName) as Promise<File>),
+    );
   }
 }

@@ -1,8 +1,4 @@
-import React, {
-  PointerEvent as ReactPointerEvent,
-  useCallback,
-  useState,
-} from "react";
+import React, { useCallback, useState } from "react";
 
 import Slider from "./slider";
 import { SliderProps } from "./slider.props";
@@ -10,7 +6,21 @@ import { SliderProps } from "./slider.props";
 export default {
   cmponent: Slider,
   title: "Slider",
-  argTypes: { onChange: { action: "onChange" } },
+  argTypes: {
+    onChange: { action: "onChange" },
+    roundMethod: {
+      control: {
+        type: "select",
+        options: ["floor", "ceil", "round"],
+      },
+    },
+    scaleType: {
+      control: {
+        type: "select",
+        options: ["linear", "quadratic"],
+      },
+    },
+  },
 };
 
 const Template = ({ onChange, ...args }: SliderProps) => {
@@ -28,19 +38,21 @@ const Template = ({ onChange, ...args }: SliderProps) => {
 
 export const primary = (args: SliderProps) => Template(args);
 primary.args = {
+  defaultValue: 5,
   min: 0,
-  max: 100,
-  defaultValue: 50,
-  isVertical: false,
+  max: 10,
+  stepSize: 0,
   isInverted: false,
+  isVertical: false,
 };
 
 export const stepped = (args: SliderProps) => Template(args);
 stepped.args = {
-  stepSize: 1,
+  defaultValue: 1,
   min: 0,
   max: 10,
-  defaultValue: 1,
-  isVertical: false,
+  stepSize: 1,
+  roundMethod: "round",
   isInverted: false,
+  isVertical: false,
 };
