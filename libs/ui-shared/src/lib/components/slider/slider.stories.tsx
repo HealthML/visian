@@ -1,8 +1,4 @@
-import React, {
-  PointerEvent as ReactPointerEvent,
-  useCallback,
-  useState,
-} from "react";
+import React, { useCallback, useState } from "react";
 
 import Slider from "./slider";
 import { SliderProps } from "./slider.props";

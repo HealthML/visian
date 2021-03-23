@@ -123,11 +123,12 @@ export const pointerToSliderValue = (
  * @returns An object containing the applicable start event listener(s).
  * It should be applied to a React element using the spread syntax.
  */
-export const useDrag = (
-  startHandler?: (event: PointerEvent | ReactPointerEvent) => void,
-  moveHandler?: (event: PointerEvent | ReactPointerEvent) => void,
-  endHandler?: (event: PointerEvent | ReactPointerEvent) => void,
+export const useDrag = <ID = string>(
+  startHandler?: (event: PointerEvent | ReactPointerEvent, id?: ID) => void,
+  moveHandler?: (event: PointerEvent | ReactPointerEvent, id?: ID) => void,
+  endHandler?: (event: PointerEvent | ReactPointerEvent, id?: ID) => void,
 ) => {
+  const idRef = useRef<ID | undefined>();
   const pointerIdRef = useRef<number | undefined>();
 
   const boundMoveHandler = useCallback(
@@ -135,7 +136,7 @@ export const useDrag = (
       if (event.pointerId !== pointerIdRef.current) return;
 
       event.preventDefault();
-      if (moveHandler) return moveHandler(event);
+      if (moveHandler) return moveHandler(event, idRef.current);
     },
     [moveHandler],
   );
@@ -143,19 +144,22 @@ export const useDrag = (
   const boundEndHandler = useCallback(
     (event: PointerEvent | ReactPointerEvent) => {
       if (event.pointerId !== pointerIdRef.current) return;
+      const id = idRef.current;
+      idRef.current = undefined;
       pointerIdRef.current = undefined;
 
       event.preventDefault();
       document.removeEventListener("pointermove", boundMoveHandler);
       document.removeEventListener("pointerup", boundEndHandler);
       document.removeEventListener("pointerleave", boundEndHandler);
-      if (endHandler) return endHandler(event);
+      if (endHandler) return endHandler(event, id);
     },
     [boundMoveHandler, endHandler],
   );
 
   const boundStartHandler = useCallback(
-    (event: PointerEvent | ReactPointerEvent) => {
+    (event: PointerEvent | ReactPointerEvent, id?: ID) => {
+      idRef.current = id;
       pointerIdRef.current = event.pointerId;
       event.preventDefault();
       document.addEventListener("pointermove", boundMoveHandler, {
@@ -163,7 +167,7 @@ export const useDrag = (
       });
       document.addEventListener("pointerup", boundEndHandler);
       document.addEventListener("pointerleave", boundEndHandler);
-      if (startHandler) return startHandler(event);
+      if (startHandler) return startHandler(event, id);
     },
     [boundEndHandler, boundMoveHandler, startHandler],
   );
