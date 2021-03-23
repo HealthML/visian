@@ -4,8 +4,8 @@ import type {
   PointerCoordinates,
   roundMethod,
   scaleType,
-  SliderConfig,
   SliderValueSettings,
+  SliderVerticalitySettings,
 } from "./types";
 
 /**
@@ -53,6 +53,8 @@ export const roundToStepSize = (
 /**
  * Returns the relative position of the slider's thumb along the main axis
  * based on it's current value.
+ *
+ * @return A [0, 1]-ranged value indicating the relative position.
  */
 export const valueToSliderPos = (
   value: number,
@@ -60,29 +62,31 @@ export const valueToSliderPos = (
 ) => {
   const { min = 0, max = 1 } = sliderConfig;
 
-  const relativeValue = Math.max(
-    0,
-    Math.min(
-      1,
-      (roundToStepSize(value, sliderConfig.stepSize, sliderConfig.roundMethod) -
-        min) /
-        (max - min),
+  const relativeValue = applyScale(
+    Math.max(
+      0,
+      Math.min(
+        1,
+        (roundToStepSize(
+          value,
+          sliderConfig.stepSize,
+          sliderConfig.roundMethod,
+        ) -
+          min) /
+          (max - min),
+      ),
     ),
+    sliderConfig.scaleType,
+    true,
   );
-  return `${
-    applyScale(
-      sliderConfig.isInverted ? 1 - relativeValue : relativeValue,
-      sliderConfig.scaleType,
-      true,
-    ) * 100
-  }%`;
+  return sliderConfig.isInverted ? 1 - relativeValue : relativeValue;
 };
 
 /** Returns the slider's value from a pointer event to it. */
 export const pointerToSliderValue = (
   pointer: PointerCoordinates,
   slider: HTMLElement,
-  sliderConfig: SliderConfig,
+  sliderConfig: SliderValueSettings & SliderVerticalitySettings,
 ) => {
   const { min = 0, max = 1 } = sliderConfig;
 

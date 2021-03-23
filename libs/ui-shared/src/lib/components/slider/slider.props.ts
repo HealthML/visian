@@ -13,4 +13,10 @@ export interface SliderProps
    * @param value The current slider value.
    */
   onChange?: (value: number) => void;
+
+  /**
+   * If `true`, shows a label with the current slider value on hover.
+   * Defaults to `true`.
+   */
+  shouldShowLabel?: boolean;
 }

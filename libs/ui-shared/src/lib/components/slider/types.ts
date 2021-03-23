@@ -10,6 +10,7 @@ export type scaleType = "linear" | "quadratic";
 export interface SliderValueSettings {
   /**
    * An optional (non-linear) function applied to remap the sliders value range.
+   * The function is applied before inverting the slider value range (when `isInverted` is `true`).
    * Defaults to `"linear"`.
    */
   scaleType?: scaleType;
@@ -43,10 +44,20 @@ export interface SliderValueSettings {
   isInverted?: boolean;
 }
 
-export interface SliderConfig extends SliderValueSettings {
+export interface SliderVerticalitySettings {
   /**
    * If `true`, rotates the slider into a vertical layout.
    * If the slider is not inverted, the slider top is mapped to the `min` value.
    */
   isVertical?: boolean;
 }
+
+export interface SliderStylingSettings extends SliderVerticalitySettings {
+  /**
+   * If `true`, flips labels and markers to the other side of the slider,
+   * across the main axis.
+   */
+  shouldFlipLabel?: boolean;
+}
+
+export type SliderConfig = SliderValueSettings & SliderStylingSettings;

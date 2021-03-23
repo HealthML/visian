@@ -5,7 +5,6 @@ import React, {
 } from "react";
 import styled from "styled-components";
 
-import { SliderProps } from "./slider.props";
 import {
   color,
   computeStyleValue,
@@ -14,13 +13,20 @@ import {
   size,
   ThemeProps,
 } from "../../theme";
+import { Text } from "../text";
+import { SliderProps } from "./slider.props";
+import { SliderStylingSettings, SliderVerticalitySettings } from "./types";
 import { pointerToSliderValue, useDrag, valueToSliderPos } from "./utils";
 
-interface VerticalProps {
-  isVertical?: boolean;
+export interface ThumbProps extends SliderVerticalitySettings {
+  /**
+   * A [0, 1]-ranged value indicating the thumb's relative position along the
+   * slider's main axis.
+   */
+  position: number;
 }
 
-const Container = styled.div<VerticalProps>`
+export const SliderContainer = styled.div<SliderVerticalitySettings>`
   align-items: center;
   cursor: pointer;
   display: flex;
@@ -36,7 +42,7 @@ const Container = styled.div<VerticalProps>`
   flex-direction: ${(props) => (props.isVertical ? "column" : "row")};
 `;
 
-const Track = styled.div<VerticalProps>`
+export const SliderTrack = styled.div<SliderVerticalitySettings>`
   background-color: ${color("lightGray")};
   flex: 1;
   height: ${(props) =>
@@ -44,11 +50,8 @@ const Track = styled.div<VerticalProps>`
   width: ${(props) => (props.isVertical ? lineHeight("sliderTrack") : "unset")};
 `;
 
-interface ThumbProps extends VerticalProps {
-  position: string;
-}
-
-const Thumb = styled.div.attrs<ThumbProps>((props) => {
+export const SliderThumb = styled.div.attrs<ThumbProps>((props) => {
+  const thumbPositionMain = `${props.position * 100}%`;
   const thumbPositionAcross = computeStyleValue<ThemeProps>(
     [size("sliderHeight"), size("sliderThumbHeight")],
     (sliderHeight, thumbHeight) => (sliderHeight - thumbHeight) / 2,
@@ -56,8 +59,8 @@ const Thumb = styled.div.attrs<ThumbProps>((props) => {
 
   return {
     style: {
-      top: props.isVertical ? props.position : thumbPositionAcross,
-      left: props.isVertical ? thumbPositionAcross : props.position,
+      top: props.isVertical ? thumbPositionMain : thumbPositionAcross,
+      left: props.isVertical ? thumbPositionAcross : thumbPositionMain,
     },
   };
 })<ThumbProps>`
@@ -88,6 +91,7 @@ export const Slider: React.FC<SliderProps> = (props) => {
     max = 1,
     onChange,
     roundMethod,
+    scaleType,
     stepSize,
     value,
     ...rest
@@ -99,6 +103,7 @@ export const Slider: React.FC<SliderProps> = (props) => {
       if (!onChange || !sliderRef.current) return;
       onChange(
         pointerToSliderValue(event, sliderRef.current, {
+          scaleType,
           min,
           max,
           stepSize,
@@ -108,13 +113,23 @@ export const Slider: React.FC<SliderProps> = (props) => {
         }),
       );
     },
-    [isInverted, max, min, onChange, roundMethod, stepSize, isVertical],
+    [
+      isInverted,
+      max,
+      min,
+      onChange,
+      roundMethod,
+      stepSize,
+      isVertical,
+      scaleType,
+    ],
   );
 
   const dragListeners = useDrag(updateValue, updateValue);
 
   const actualValue = value === undefined ? defaultValue || 0 : value;
   const thumbPos = valueToSliderPos(actualValue, {
+    scaleType,
     min,
     max,
     stepSize,
@@ -123,15 +138,15 @@ export const Slider: React.FC<SliderProps> = (props) => {
   });
 
   return (
-    <Container
+    <SliderContainer
       {...rest}
       {...(onChange ? dragListeners : {})}
       isVertical={isVertical}
       ref={sliderRef}
     >
-      <Track isVertical={isVertical} />
-      <Thumb isVertical={isVertical} position={thumbPos} />
-    </Container>
+      <SliderTrack isVertical={isVertical} />
+      <SliderThumb isVertical={isVertical} position={thumbPos} />
+    </SliderContainer>
   );
 };
 
