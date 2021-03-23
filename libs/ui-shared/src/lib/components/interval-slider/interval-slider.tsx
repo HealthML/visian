@@ -37,8 +37,8 @@ export const SliderThumbTouchBox = styled.div.attrs<ThumbProps>((props) => {
   z-index: 20;
 `;
 
-/** A custom slider component built to work well with touch input. */
-export const Slider: React.FC<IntervalSliderProps> = (props) => {
+/** A custom interval slider component built to work well with touch input. */
+export const IntervalSlider: React.FC<IntervalSliderProps> = (props) => {
   const {
     defaultValue,
     isInverted,
@@ -148,4 +148,4 @@ export const Slider: React.FC<IntervalSliderProps> = (props) => {
   );
 };
 
-export default Slider;
+export default IntervalSlider;
