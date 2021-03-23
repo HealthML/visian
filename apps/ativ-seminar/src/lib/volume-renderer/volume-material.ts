@@ -59,6 +59,7 @@ class VolumeMaterial extends THREE.ShaderMaterial implements IDisposable {
       }),
       autorun(() => {
         this.uniforms.uContextOpacity.value = renderer.contextOpacity;
+        this.gradientComputer?.setContextOpacity(renderer.contextOpacity);
       }),
       autorun(() => {
         this.uniforms.uConeAngle.value = renderer.cutAwayConeAngle;
