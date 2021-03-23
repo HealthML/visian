@@ -15,8 +15,14 @@ export interface SliderProps
   onChange?: (value: number) => void;
 
   /**
-   * If `true`, shows a label with the current slider value on hover.
+   * If `true`, shows a label with the current slider value.
    * Defaults to `true`.
    */
   shouldShowLabel?: boolean;
+
+  /**
+   * An optional function that formats the label text (if `shouldShowLabel` is `true`).
+   * Defaults to a transformation to a value rounded to 2 decimal places.
+   */
+  formatLabel?: (value: number) => string;
 }

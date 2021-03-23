@@ -8,6 +8,7 @@ import styled from "styled-components";
 import {
   color,
   computeStyleValue,
+  fontSize,
   lineHeight,
   scaleMetric,
   size,
@@ -81,10 +82,41 @@ export const SliderThumb = styled.div.attrs<ThumbProps>((props) => {
   z-index: 10;
 `;
 
+export const SliderLabel = styled(Text).attrs<ThumbProps>((props) => {
+  const thumbPositionMain = `${props.position * 100}%`;
+  const thumbPositionAcross = computeStyleValue<ThemeProps>(
+    [size("sliderHeight")],
+    (sliderHeight) => -sliderHeight,
+  )(props);
+
+  return {
+    style: {
+      top: props.isVertical ? thumbPositionMain : thumbPositionAcross,
+      left: props.isVertical ? thumbPositionAcross : thumbPositionMain,
+    },
+  };
+})<ThumbProps & SliderStylingSettings>`
+  display: block;
+  line-height: ${fontSize("default")};
+  margin: ${(props) =>
+    props.isVertical
+      ? `${scaleMetric(fontSize("default")(props), -0.5)} 0 0 0`
+      : "0 0 0 -50%"};
+  opacity: 0.6;
+  position: absolute;
+  text-align: ${(props) => (props.isVertical ? "right" : "center")};
+  width: ${(props) => !props.isVertical && "100%"};
+  z-index: 10;
+`;
+
+const defaultFormatLabel = (value: number) =>
+  `${Math.round(value * 100) / 100}`;
+
 /** A custom slider component built to work well with touch input. */
 export const Slider: React.FC<SliderProps> = (props) => {
   const {
     defaultValue,
+    formatLabel = defaultFormatLabel,
     isInverted,
     isVertical,
     min = 0,
@@ -92,6 +124,7 @@ export const Slider: React.FC<SliderProps> = (props) => {
     onChange,
     roundMethod,
     scaleType,
+    shouldShowLabel = true,
     stepSize,
     value,
     ...rest
@@ -146,6 +179,13 @@ export const Slider: React.FC<SliderProps> = (props) => {
     >
       <SliderTrack isVertical={isVertical} />
       <SliderThumb isVertical={isVertical} position={thumbPos} />
+      {shouldShowLabel && (
+        <SliderLabel
+          isVertical={isVertical}
+          position={thumbPos}
+          text={formatLabel(actualValue)}
+        />
+      )}
     </SliderContainer>
   );
 };

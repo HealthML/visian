@@ -52,12 +52,6 @@ export interface SliderVerticalitySettings {
   isVertical?: boolean;
 }
 
-export interface SliderStylingSettings extends SliderVerticalitySettings {
-  /**
-   * If `true`, flips labels and markers to the other side of the slider,
-   * across the main axis.
-   */
-  shouldFlipLabel?: boolean;
-}
+export type SliderStylingSettings = SliderVerticalitySettings;
 
 export type SliderConfig = SliderValueSettings & SliderStylingSettings;
