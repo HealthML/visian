@@ -71,6 +71,12 @@ export class GradientComputer {
     this.updateOutputDerivative();
   }
 
+  public setContextOpacity(value: number) {
+    this.gradientMaterial.setContextOpacity(value);
+
+    this.updateOutputDerivative();
+  }
+
   /** Returns the gradient of the texture atlas. */
   public getFirstDerivative() {
     if (!this.firstDerivativeCached) {

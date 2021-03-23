@@ -39,6 +39,7 @@ export class GradientMaterial extends THREE.ShaderMaterial {
         uCameraPosition: { value: new THREE.Vector3() },
         uTransferFunction: { value: 0 },
         uConeAngle: { value: 1 },
+        uContextOpacity: { value: 1 },
       },
     });
   }
@@ -73,6 +74,10 @@ export class GradientMaterial extends THREE.ShaderMaterial {
 
   public setCutAwayConeAngle(radians: number) {
     this.uniforms.uConeAngle.value = radians;
+  }
+
+  public setContextOpacity(value: number) {
+    this.uniforms.uContextOpacity.value = value;
   }
 }
 
