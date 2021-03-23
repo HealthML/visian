@@ -26,6 +26,10 @@ const Container = styled.div<VerticalProps>`
   display: flex;
   height: ${(props) => (props.isVertical ? "100%" : size("sliderHeight"))};
   position: relative;
+  margin: ${(props) => {
+    const margin = scaleMetric(size("sliderThumbWidth")(props), 0.5);
+    return props.isVertical ? `${margin} 0` : `0 ${margin}`;
+  }};
   touch-action: none;
   user-select: none;
   width: ${(props) => (props.isVertical ? size("sliderHeight") : "100%")};
@@ -44,37 +48,29 @@ interface ThumbProps extends VerticalProps {
   position: string;
 }
 
-const Thumb = styled.div.attrs<ThumbProps>((props) => ({
-  style: {
-    top: props.isVertical
-      ? props.position
-      : computeStyleValue<ThemeProps>(
-          [size("sliderHeight"), size("sliderThumbHeight")],
-          (sliderHeight, thumbHeight) => (sliderHeight - thumbHeight) / 2,
-        )(props),
-    left: props.isVertical
-      ? computeStyleValue<ThemeProps>(
-          [size("sliderHeight"), size("sliderThumbHeight")],
-          (sliderHeight, thumbHeight) => (sliderHeight - thumbHeight) / 2,
-        )(props)
-      : props.position,
-  },
-}))<ThumbProps>`
+const Thumb = styled.div.attrs<ThumbProps>((props) => {
+  const thumbPositionAcross = computeStyleValue<ThemeProps>(
+    [size("sliderHeight"), size("sliderThumbHeight")],
+    (sliderHeight, thumbHeight) => (sliderHeight - thumbHeight) / 2,
+  )(props);
+
+  return {
+    style: {
+      top: props.isVertical ? props.position : thumbPositionAcross,
+      left: props.isVertical ? thumbPositionAcross : props.position,
+    },
+  };
+})<ThumbProps>`
   background-color: ${color("gray")};
   border: none;
   border-radius: ${(props) =>
     scaleMetric(size("sliderThumbWidth")(props), 0.5)};
   height: ${(props) =>
     props.isVertical ? size("sliderThumbWidth") : size("sliderThumbHeight")};
-  margin: ${(props) =>
-      props.isVertical
-        ? scaleMetric(size("sliderThumbWidth")(props), -0.5)
-        : "0"}
-    0 0
-    ${(props) =>
-      props.isVertical
-        ? "0"
-        : scaleMetric(size("sliderThumbWidth")(props), -0.5)};
+  margin: ${(props) => {
+    const margin = scaleMetric(size("sliderThumbWidth")(props), -0.5);
+    return props.isVertical ? `${margin} 0 0 0` : `0 0 0 ${margin}`;
+  }};
   position: absolute;
   transition: background-color 0.3s;
   width: ${(props) =>

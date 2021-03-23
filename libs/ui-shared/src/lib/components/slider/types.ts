@@ -7,7 +7,7 @@ export type roundMethod = "floor" | "ceil" | "round";
 
 export type scaleType = "linear" | "quadratic";
 
-export interface SliderConfig {
+export interface SliderValueSettings {
   /**
    * An optional (non-linear) function applied to remap the sliders value range.
    * Defaults to `"linear"`.
@@ -41,7 +41,9 @@ export interface SliderConfig {
 
   /** If `true`, inverts the slider value range. */
   isInverted?: boolean;
+}
 
+export interface SliderConfig extends SliderValueSettings {
   /**
    * If `true`, rotates the slider into a vertical layout.
    * If the slider is not inverted, the slider top is mapped to the `min` value.

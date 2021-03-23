@@ -5,6 +5,7 @@ import type {
   roundMethod,
   scaleType,
   SliderConfig,
+  SliderValueSettings,
 } from "./types";
 
 /**
@@ -55,7 +56,7 @@ export const roundToStepSize = (
  */
 export const valueToSliderPos = (
   value: number,
-  sliderConfig: Omit<SliderConfig, "isVertical">,
+  sliderConfig: SliderValueSettings,
 ) => {
   const { min = 0, max = 1 } = sliderConfig;
 
