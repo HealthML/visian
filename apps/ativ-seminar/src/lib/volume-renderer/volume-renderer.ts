@@ -4,8 +4,12 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import Stats from "three/examples/jsm/libs/stats.module";
 
 import { IDisposable } from "../types";
-import { TransferFunction } from "./types";
 import { FlyControls, ScreenAlignedQuad, TextureAtlas } from "./utils";
+import {
+  TransferFunction,
+  transferFunctions,
+  TransferFunctionType,
+} from "./utils/transfer-function";
 import Volume from "./volume";
 import VolumeMaterial from "./volume-material";
 
@@ -30,7 +34,7 @@ export class VolumeRenderer implements IDisposable {
   private isImageLoaded = false;
 
   public backgroundValue = 0;
-  public transferFunction = TransferFunction.FCEdges;
+  public transferFunction = transferFunctions[TransferFunctionType.FCEdges];
   public imageOpacity = 1;
   public contextOpacity = 0.4;
   public rangeLimits: [number, number] = [0.1, 1];
@@ -254,8 +258,8 @@ export class VolumeRenderer implements IDisposable {
 
     // TODO: We separate the limits for this properly
     if (
-      value === TransferFunction.Density ||
-      value === TransferFunction.FCEdges
+      value.type === TransferFunctionType.Density ||
+      value.type === TransferFunctionType.FCEdges
     ) {
       const limits = this.altRangeLimits;
       this.altRangeLimits = this.rangeLimits;

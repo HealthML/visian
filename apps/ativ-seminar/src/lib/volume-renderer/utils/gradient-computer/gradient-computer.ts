@@ -1,8 +1,9 @@
 import * as THREE from "three";
 
-import { TransferFunction } from "../../types";
+import VolumeRenderer from "../../volume-renderer";
 import ScreenAlignedQuad from "../screen-aligned-quad";
 import { TextureAtlas } from "../texture-atlas";
+import { TransferFunction } from "../transfer-function";
 import { GradientMaterial, GradientMode } from "./gradient-material";
 
 export class GradientComputer {
@@ -19,6 +20,7 @@ export class GradientComputer {
   constructor(
     private textureAtlas: TextureAtlas,
     private renderer: THREE.WebGLRenderer,
+    private volumeRenderer: VolumeRenderer,
   ) {
     this.firstDerivativeRenderTarget = new THREE.WebGLRenderTarget(
       this.textureAtlas.atlasSize.x,
@@ -51,10 +53,7 @@ export class GradientComputer {
   public setCameraPosition(position: THREE.Vector3) {
     this.gradientMaterial.setCameraPosition(position);
 
-    if (
-      this.gradientMaterial.uniforms.uTransferFunction.value ===
-      TransferFunction.FCCutaway
-    ) {
+    if (this.volumeRenderer.transferFunction.updateNormalsOnCameraMove) {
       this.updateOutputDerivative();
     }
   }

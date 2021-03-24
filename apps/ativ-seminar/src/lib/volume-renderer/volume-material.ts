@@ -68,7 +68,8 @@ class VolumeMaterial extends THREE.ShaderMaterial implements IDisposable {
 
     this.reactionDisposers.push(
       autorun(() => {
-        this.uniforms.uTransferFunction.value = volumeRenderer.transferFunction;
+        this.uniforms.uTransferFunction.value =
+          volumeRenderer.transferFunction.type;
         this.gradientComputer?.setTransferFunction(
           volumeRenderer.transferFunction,
         );
@@ -104,6 +105,7 @@ class VolumeMaterial extends THREE.ShaderMaterial implements IDisposable {
     this.gradientComputer = new GradientComputer(
       atlas,
       this.volumeRenderer.renderer,
+      this.volumeRenderer,
     );
     this.uniforms.uInputFirstDerivative.value = this.gradientComputer.getFirstDerivative();
     this.uniforms.uInputSecondDerivative.value = this.gradientComputer.getSecondDerivative();

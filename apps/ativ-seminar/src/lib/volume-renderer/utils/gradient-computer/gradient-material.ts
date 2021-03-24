@@ -71,7 +71,7 @@ export class GradientMaterial extends THREE.ShaderMaterial {
   }
 
   public setTransferFunction(transferFunction: TransferFunction) {
-    this.uniforms.uTransferFunction.value = transferFunction;
+    this.uniforms.uTransferFunction.value = transferFunction.type;
   }
 
   public setCutAwayConeAngle(radians: number) {

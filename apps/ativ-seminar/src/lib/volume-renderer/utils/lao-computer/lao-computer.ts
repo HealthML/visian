@@ -21,7 +21,7 @@ export class LAOComputer implements IDisposable {
 
   constructor(
     private renderer: THREE.WebGLRenderer,
-    volumeRenderer: VolumeRenderer,
+    private volumeRenderer: VolumeRenderer,
   ) {
     this.renderTarget = new THREE.WebGLRenderTarget(1, 1);
 
@@ -32,7 +32,7 @@ export class LAOComputer implements IDisposable {
     this.reactionDisposers.push(
       autorun(() => {
         this.laoMaterial.uniforms.uTransferFunction.value =
-          volumeRenderer.transferFunction;
+          volumeRenderer.transferFunction.type;
 
         this.update();
       }),
@@ -105,7 +105,9 @@ export class LAOComputer implements IDisposable {
   public setCameraPosition(position: THREE.Vector3) {
     this.laoMaterial.setCameraPosition(position);
 
-    this.update();
+    if (this.volumeRenderer.transferFunction.updateLAOOnCameraMove) {
+      this.update();
+    }
   }
 }
 

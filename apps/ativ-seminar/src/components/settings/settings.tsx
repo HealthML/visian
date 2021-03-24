@@ -3,7 +3,10 @@ import { observer } from "mobx-react-lite";
 import React, { useCallback } from "react";
 import styled from "styled-components";
 
-import { TransferFunction } from "../../lib/volume-renderer";
+import {
+  transferFunctions,
+  TransferFunctionType,
+} from "../../lib/volume-renderer";
 import { SettingsProps } from "./settings.props";
 
 const Container = styled(Sheet)`
@@ -52,7 +55,9 @@ const Settings: React.FC<SettingsProps> = observer((props) => {
 
   const setTransferFunction = useCallback(
     (event: React.ChangeEvent<HTMLSelectElement>) => {
-      renderer.setTransferFunction(parseInt(event.target.value));
+      renderer.setTransferFunction(
+        transferFunctions[parseInt(event.target.value)],
+      );
     },
     [renderer],
   );
@@ -90,16 +95,20 @@ const Settings: React.FC<SettingsProps> = observer((props) => {
       <StyledText text="Transfer Function" />
       <StyledSelect
         onChange={setTransferFunction}
-        value={renderer.transferFunction}
+        value={renderer.transferFunction.type}
       >
-        <StyledOption value={TransferFunction.Density}>Density</StyledOption>
-        <StyledOption value={TransferFunction.FCEdges}>F+C: Edges</StyledOption>
-        <StyledOption value={TransferFunction.FCCutaway}>
+        <StyledOption value={TransferFunctionType.Density}>
+          Density
+        </StyledOption>
+        <StyledOption value={TransferFunctionType.FCEdges}>
+          F+C: Edges
+        </StyledOption>
+        <StyledOption value={TransferFunctionType.FCCutaway}>
           F+C: Cutaway
         </StyledOption>
       </StyledSelect>
-      {(renderer.transferFunction === TransferFunction.Density ||
-        renderer.transferFunction === TransferFunction.FCEdges) && (
+      {(renderer.transferFunction.type === TransferFunctionType.Density ||
+        renderer.transferFunction.type === TransferFunctionType.FCEdges) && (
         <>
           <StyledText text="Value Range" />
           <StyledIntervalSlider
@@ -110,7 +119,7 @@ const Settings: React.FC<SettingsProps> = observer((props) => {
           />
         </>
       )}
-      {renderer.transferFunction === TransferFunction.FCCutaway && (
+      {renderer.transferFunction.type === TransferFunctionType.FCCutaway && (
         <>
           <StyledText text="Cutaway Angle" />
           <StyledSlider
@@ -121,8 +130,8 @@ const Settings: React.FC<SettingsProps> = observer((props) => {
           />
         </>
       )}
-      {(renderer.transferFunction === TransferFunction.FCEdges ||
-        renderer.transferFunction === TransferFunction.FCCutaway) && (
+      {(renderer.transferFunction.type === TransferFunctionType.FCEdges ||
+        renderer.transferFunction.type === TransferFunctionType.FCCutaway) && (
         <>
           <StyledText text="Context Opacity" />
           <StyledSlider
