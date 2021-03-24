@@ -1,6 +1,9 @@
 import {
+  FloatTypes,
+  IntTypes,
   ITKImage,
   ITKMatrix,
+  VoxelTypes,
   readMedicalImage,
   TypedArray,
 } from "@visian/util";
@@ -9,15 +12,21 @@ import { action, makeObservable, observable, toJS } from "mobx";
 import { ISerializable } from "../types";
 
 export interface ImageSnapshot<T extends TypedArray = TypedArray> {
-  name: string;
+  name?: string;
+
+  dimensionality?: number;
 
   voxelCount: number[];
-  voxelSpacing: number[];
+  voxelSpacing?: number[];
 
-  origin: number[];
-  orientation: ITKMatrix;
+  voxelType?: VoxelTypes;
+  voxelComponents?: number;
+  voxelComponentType?: FloatTypes | IntTypes;
 
-  data: T;
+  origin?: number[];
+  orientation?: ITKMatrix;
+
+  data?: T;
 }
 
 export class Image<T extends TypedArray = TypedArray>
@@ -27,8 +36,12 @@ export class Image<T extends TypedArray = TypedArray>
   ) {
     return new Image({
       name: image.name,
+      dimensionality: image.imageType.dimension,
       voxelCount: image.size,
       voxelSpacing: image.spacing,
+      voxelType: image.imageType.pixelType,
+      voxelComponents: image.imageType.components,
+      voxelComponentType: image.imageType.componentType,
       origin: image.origin,
       orientation: image.direction,
       data: image.data,
@@ -40,75 +53,88 @@ export class Image<T extends TypedArray = TypedArray>
   }
 
   /**
-   * An optional name that describes this image.
+   * An name that describes this image.
    *
    * Defaults to `"Image"`.
    */
-  public name: string;
+  public name!: string;
+
+  /** The number of dimensions the image has, typically 2 or 3. */
+  public dimensionality!: number;
 
   /**
-   * An Array with length dimension that contains the number of voxels along
-   * each dimension.
+   * An Array with length `dimensionality` that contains the number of voxels
+   * along each dimension.
    */
-  public voxelCount: number[];
+  public voxelCount!: number[];
 
   /**
-   * An Array with length dimension that describes the spacing between pixel
-   * in physical units.
+   * An Array with length `dimensionality` that describes the spacing between
+   * pixel in physical units.
    *
    * Defaults to a vector of all ones.
    */
-  public voxelSpacing: number[];
+  public voxelSpacing!: number[];
 
   /**
-   * An Array with length dimension that describes the location of the center
-   * of the lower left pixel in physical units.
+   * The VoxelType. For example, `VoxelTypes.Scalar` or `VoxelTypes.RGBA`.
+   *
+   * Defaults to `VoxelTypes.Scalar`.
+   */
+  public voxelType!: VoxelTypes;
+
+  /**
+   * The number of components in a voxel. For a Scalar `voxelType`,
+   * this will be 1.
+   *
+   * Defaults to `1`.
+   */
+  public voxelComponents!: number;
+
+  /**
+   * The type of the components in a voxel. This is one of the `IntTypes` or
+   * `FloatTypes`.
+   *
+   * Defaults to `IntTypes.UInt8`
+   */
+  public voxelComponentType!: FloatTypes | IntTypes;
+
+  /**
+   * An Array with length `dimensionality` that describes the location of the
+   * center of the lower left pixel in physical units.
    *
    * Defaults to the zero vector.
    */
-  public origin: number[];
+  public origin!: number[];
 
   /**
-   * A dimension by dimension Matrix that describes the orientation of the
-   * image at its origin. The orientation of each axis are the orthonormal
-   * columns.
+   * A `dimensionality` by `dimensionality` Matrix that describes the
+   * orientation of the image at its origin. The orientation of each
+   * axis are the orthonormal columns.
    *
    * Defaults to the identity matrix.
    */
-  public orientation: ITKMatrix;
+  public orientation!: ITKMatrix;
 
   /** A TypedArray containing the voxel buffer data. */
-  public data: T;
+  public data!: T;
 
   constructor(
-    image: Partial<ImageSnapshot<T>> &
-      Pick<ImageSnapshot<T>, "voxelCount" | "data">,
+    image: ImageSnapshot<T> & Pick<ImageSnapshot<T>, "voxelCount" | "data">,
   ) {
-    this.name = image.name || "Image";
-
-    this.voxelCount = image.voxelCount;
-    this.voxelSpacing = image.voxelSpacing || this.voxelCount.map(() => 1);
-
-    this.origin = image.origin || this.voxelCount.map(() => 0);
-    if (image.orientation) {
-      this.orientation = image.orientation;
-    } else {
-      this.orientation = new ITKMatrix(
-        this.voxelCount.length,
-        this.voxelCount.length,
-      );
-      this.orientation.setIdentity();
-    }
-
-    this.data = image.data;
+    this.applySnapshot(image);
 
     makeObservable(this, {
       name: observable,
+      dimensionality: observable,
       voxelCount: observable,
       voxelSpacing: observable,
+      voxelType: observable,
+      voxelComponents: observable,
+      voxelComponentType: observable,
       origin: observable,
-      orientation: observable.ref,
       // TODO: Make matrix properly observable
+      orientation: observable.ref,
       data: observable.ref,
       applySnapshot: action,
     });
@@ -126,9 +152,33 @@ export class Image<T extends TypedArray = TypedArray>
   }
 
   public async applySnapshot(snapshot: ImageSnapshot<T>) {
-    (Object.keys(snapshot) as (keyof ImageSnapshot<T>)[]).forEach((key) => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      this[key] = snapshot[key] as any;
-    });
+    this.name = snapshot.name || "Image";
+
+    this.dimensionality = snapshot.dimensionality || snapshot.voxelCount.length;
+
+    this.voxelCount = snapshot.voxelCount;
+    this.voxelSpacing = snapshot.voxelSpacing || this.voxelCount.map(() => 1);
+
+    this.voxelType =
+      snapshot.voxelType === undefined ? VoxelTypes.Scalar : snapshot.voxelType;
+    this.voxelComponents = snapshot.voxelComponents || 1;
+    this.voxelComponentType = snapshot.voxelComponentType || IntTypes.UInt8;
+
+    this.origin = snapshot.origin || this.voxelCount.map(() => 0);
+    if (snapshot.orientation) {
+      this.orientation = snapshot.orientation;
+    } else {
+      this.orientation = new ITKMatrix(
+        this.voxelCount.length,
+        this.voxelCount.length,
+      );
+      this.orientation.setIdentity();
+    }
+
+    this.data =
+      snapshot.data ||
+      (new Uint8Array(
+        this.voxelCount.reduce((sum, current) => sum + current, 0),
+      ) as T);
   }
 }
