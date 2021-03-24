@@ -1,17 +1,10 @@
 varying vec2 vUv;
 
-uniform sampler2D uVolume;
-uniform sampler2D uInputFirstDerivative;
-uniform sampler2D uInputSecondDerivative;
-uniform sampler2D uFocus;
-uniform bool uUseFocus;
-uniform vec3 uVoxelCount;
-uniform vec2 uAtlasGrid;
-uniform float uStepSize;
-uniform vec3 uCameraPosition;
-uniform float uOpacity;
-uniform int uTransferFunction;
-uniform float uConeAngle;
+@import ../uniforms/u-opacity;
+@import ../uniforms/u-common;
+@import ../uniforms/u-atlas-info;
+@import ../uniforms/u-image-info;
+@import ../uniforms/u-transfer-functions;
 
 #define MAX_STEPS 16
 

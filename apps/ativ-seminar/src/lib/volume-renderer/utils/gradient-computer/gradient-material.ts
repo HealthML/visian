@@ -4,6 +4,12 @@ import { TextureAtlas } from "..";
 import { TransferFunction } from "../..";
 import gradientFragmentShader from "../../shader/gradient/gradient.frag.glsl";
 import gradientVertexShader from "../../shader/gradient/gradient.vert.glsl";
+import {
+  atlasInfoUniforms,
+  commonUniforms,
+  imageInfoUniforms,
+  transferFunctionsUniforms,
+} from "../../uniforms";
 
 export enum GradientMode {
   Output = 0,
@@ -20,30 +26,24 @@ export class GradientMaterial extends THREE.ShaderMaterial {
     super({
       fragmentShader: gradientFragmentShader,
       vertexShader: gradientVertexShader,
-      uniforms: {
-        uVolume: { value: textureAtlas.getTexture() },
-        uVoxelSpacing: { value: textureAtlas.voxelSpacing },
-        uVoxelCount: { value: textureAtlas.voxelCount },
-        uAtlasGrid: { value: textureAtlas.atlasGrid },
-        uInputDimensions: { value: 1 },
-        uGradientMode: { value: GradientMode.Output },
-
-        uInputFirstDerivative: {
-          value: firstDerivativeTexture,
+      uniforms: THREE.UniformsUtils.merge([
+        {
+          uInputDimensions: { value: 1 },
+          uGradientMode: { value: GradientMode.Output },
         },
-        uInputSecondDerivative: {
-          value: secondDerivativeTexture,
-        },
-        uFocus: { value: null },
-        uUseFocus: { value: false },
-        uCameraPosition: { value: new THREE.Vector3() },
-        uTransferFunction: { value: 0 },
-        uConeAngle: { value: 1 },
-        uContextOpacity: { value: 1 },
-        uLimitLow: { value: 0 },
-        uLimitHigh: { value: 1 },
-      },
+        commonUniforms,
+        atlasInfoUniforms,
+        imageInfoUniforms,
+        transferFunctionsUniforms,
+      ]),
     });
+
+    this.uniforms.uVolume.value = textureAtlas.getTexture();
+    this.uniforms.uVoxelSpacing.value = textureAtlas.voxelSpacing;
+    this.uniforms.uVoxelCount.value = textureAtlas.voxelCount;
+    this.uniforms.uAtlasGrid.value = textureAtlas.atlasGrid;
+    this.uniforms.uInputFirstDerivative.value = firstDerivativeTexture;
+    this.uniforms.uInputSecondDerivative.value = secondDerivativeTexture;
   }
 
   public setGradientMode(mode: GradientMode) {

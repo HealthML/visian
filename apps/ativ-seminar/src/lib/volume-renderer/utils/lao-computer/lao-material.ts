@@ -2,6 +2,13 @@ import * as THREE from "three";
 
 import fragmentShader from "../../shader/lao/lao.frag.glsl";
 import vertexShader from "../../shader/lao/lao.vert.glsl";
+import {
+  atlasInfoUniforms,
+  commonUniforms,
+  imageInfoUniforms,
+  opacityUniforms,
+  transferFunctionsUniforms,
+} from "../../uniforms";
 import { GradientComputer } from "../gradient-computer";
 import { getStepSize } from "../step-size";
 import TextureAtlas from "../texture-atlas";
@@ -11,25 +18,13 @@ export class LAOMaterial extends THREE.ShaderMaterial {
     super({
       vertexShader,
       fragmentShader,
-      uniforms: {
-        uVolume: { value: null },
-        uInputFirstDerivative: { value: null },
-        uInputSecondDerivative: { value: null },
-        uFocus: { value: null },
-        uUseFocus: { value: false },
-        uVoxelCount: {
-          value: [1, 1, 1],
-        },
-        uAtlasGrid: { value: [1, 1] },
-        uStepSize: { value: 1 },
-        uCameraPosition: { value: new THREE.Vector3() },
-        uOpacity: { value: 1 },
-        uContextOpacity: { value: 1 },
-        uLimitLow: { value: 0 },
-        uLimitHigh: { value: 1 },
-        uTransferFunction: { value: 0 },
-        uConeAngle: { value: 1 },
-      },
+      uniforms: THREE.UniformsUtils.merge([
+        opacityUniforms,
+        commonUniforms,
+        atlasInfoUniforms,
+        imageInfoUniforms,
+        transferFunctionsUniforms,
+      ]),
     });
   }
 

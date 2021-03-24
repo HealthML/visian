@@ -1,7 +1,3 @@
-uniform float uContextOpacity;
-uniform float uLimitLow;
-uniform float uLimitHigh;
-
 /**
  * Taken from https://www.iquilezles.org/www/articles/distfunctions/distfunctions.htm
  */

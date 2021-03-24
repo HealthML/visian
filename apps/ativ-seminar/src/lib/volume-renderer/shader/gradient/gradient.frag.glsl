@@ -1,20 +1,12 @@
 varying vec2 vUv;
 
-uniform sampler2D uVolume;
-uniform vec3 uVoxelSpacing;
-uniform vec3 uVoxelCount;
-uniform vec2 uAtlasGrid;
 uniform int uInputDimensions;
-
 uniform int uGradientMode;
 
-uniform sampler2D uInputFirstDerivative;
-uniform sampler2D uInputSecondDerivative;
-uniform sampler2D uFocus;
-uniform bool uUseFocus;
-uniform int uTransferFunction;
-uniform vec3 uCameraPosition;
-uniform float uConeAngle;
+@import ../uniforms/u-common;
+@import ../uniforms/u-atlas-info;
+@import ../uniforms/u-image-info;
+@import ../uniforms/u-transfer-functions;
 
 #define CONE_EDGE 0.01
 

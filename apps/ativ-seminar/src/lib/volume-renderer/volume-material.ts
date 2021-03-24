@@ -5,6 +5,13 @@ import { IDisposable } from "../types";
 import volumeFragmentShader from "./shader/volume/volume.frag.glsl";
 import volumeVertexShader from "./shader/volume/volume.vert.glsl";
 import {
+  atlasInfoUniforms,
+  commonUniforms,
+  imageInfoUniforms,
+  opacityUniforms,
+  transferFunctionsUniforms,
+} from "./uniforms";
+import {
   getStepSize,
   GradientComputer,
   LAOComputer,
@@ -31,29 +38,17 @@ class VolumeMaterial extends THREE.ShaderMaterial implements IDisposable {
     super({
       vertexShader: volumeVertexShader,
       fragmentShader: volumeFragmentShader,
-      uniforms: {
-        uVolume: { value: null },
-        uInputFirstDerivative: { value: null },
-        uInputSecondDerivative: { value: null },
-        uOutputFirstDerivative: { value: null },
-        uFocus: { value: null },
-        uUseFocus: { value: false },
-        uVoxelCount: {
-          value: [1, 1, 1],
+      uniforms: THREE.UniformsUtils.merge([
+        {
+          uOutputFirstDerivative: { value: null },
+          uLAO: { value: null },
         },
-        uAtlasGrid: { value: [1, 1] },
-        uStepSize: { value: 1 },
-        uCameraPosition: { value: new THREE.Vector3() },
-
-        uOpacity: { value: 1 },
-        uContextOpacity: { value: 1 },
-        uLimitLow: { value: 0 },
-        uLimitHigh: { value: 1 },
-        uTransferFunction: { value: 0 },
-        uConeAngle: { value: 1 },
-
-        uLAO: { value: null },
-      },
+        opacityUniforms,
+        commonUniforms,
+        atlasInfoUniforms,
+        imageInfoUniforms,
+        transferFunctionsUniforms,
+      ]),
     });
 
     // Always render the back faces.
