@@ -29,7 +29,7 @@ export interface ImageSnapshot<T extends TypedArray = TypedArray> {
   data?: T;
 }
 
-export class Image<T extends TypedArray = Uint8Array>
+export class Image<T extends TypedArray = TypedArray>
   implements ISerializable<ImageSnapshot<T>> {
   public static fromITKImage<T extends TypedArray = TypedArray>(
     image: ITKImage<T>,
