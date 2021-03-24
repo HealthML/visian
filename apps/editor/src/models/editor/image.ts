@@ -126,11 +126,15 @@ export class Image<T extends TypedArray = Uint8Array>
 
     makeObservable(this, {
       name: observable,
+      dimensionality: observable,
       voxelCount: observable,
       voxelSpacing: observable,
+      voxelType: observable,
+      voxelComponents: observable,
+      voxelComponentType: observable,
       origin: observable,
-      orientation: observable.ref,
       // TODO: Make matrix properly observable
+      orientation: observable.ref,
       data: observable.ref,
       applySnapshot: action,
     });
