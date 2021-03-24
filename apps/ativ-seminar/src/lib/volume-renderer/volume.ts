@@ -8,8 +8,11 @@ import type VolumeRenderer from "./volume-renderer";
 
 /** A volume domain. */
 class Volume extends THREE.Mesh implements IDisposable {
-  constructor(protected renderer: VolumeRenderer) {
-    super(new THREE.BoxGeometry(1, 1, 1), new VolumeMaterial(renderer));
+  constructor(volumeRenderer: VolumeRenderer, renderer: THREE.WebGLRenderer) {
+    super(
+      new THREE.BoxGeometry(1, 1, 1),
+      new VolumeMaterial(volumeRenderer, renderer),
+    );
 
     // The coordinate system in medical images usually has the object
     // laying on the side. We want it to be upright.

@@ -113,8 +113,6 @@ export class GradientComputer {
 
   /**
    * Returns the gradient of the gradient of the texture atlas.
-   *
-   * @todo How to combine all gradient dimensions?
    */
   public getSecondDerivative() {
     if (!this.secondDerivativeCached) {

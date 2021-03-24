@@ -78,7 +78,7 @@ export class VolumeRenderer implements IDisposable {
 
     document.addEventListener("keydown", this.onKeyDown);
 
-    this.volume = new Volume(this);
+    this.volume = new Volume(this, this.renderer);
     // Position the volume in a reasonable height for XR.
     this.volume.position.set(0, 1.2, 0);
     this.scene.add(this.volume);

@@ -4,7 +4,12 @@ import * as THREE from "three";
 import { IDisposable } from "../types";
 import volumeFragmentShader from "./shader/volume/volume.frag.glsl";
 import volumeVertexShader from "./shader/volume/volume.vert.glsl";
-import { getStepSize, GradientComputer, TextureAtlas } from "./utils";
+import {
+  getStepSize,
+  GradientComputer,
+  LAOComputer,
+  TextureAtlas,
+} from "./utils";
 
 import type Volume from "./volume";
 import type VolumeRenderer from "./volume-renderer";
@@ -15,9 +20,14 @@ class VolumeMaterial extends THREE.ShaderMaterial implements IDisposable {
 
   protected reactionDisposers: IReactionDisposer[] = [];
 
+  private laoComputer: LAOComputer;
+
   private gradientComputer?: GradientComputer;
 
-  constructor(protected renderer: VolumeRenderer) {
+  constructor(
+    protected volumeRenderer: VolumeRenderer,
+    renderer: THREE.WebGLRenderer,
+  ) {
     super({
       vertexShader: volumeVertexShader,
       fragmentShader: volumeFragmentShader,
@@ -41,6 +51,8 @@ class VolumeMaterial extends THREE.ShaderMaterial implements IDisposable {
         uLimitHigh: { value: 1 },
         uTransferFunction: { value: 0 },
         uConeAngle: { value: 1 },
+
+        uLAO: { value: null },
       },
     });
 
@@ -51,26 +63,33 @@ class VolumeMaterial extends THREE.ShaderMaterial implements IDisposable {
     const maxStepsParam = url.searchParams.get("maxSteps");
     this.defines.MAX_STEPS = maxStepsParam ? parseInt(maxStepsParam) : 600;
 
+    this.laoComputer = new LAOComputer(renderer, volumeRenderer);
+    this.uniforms.uLAO.value = this.laoComputer.getLAOTexture();
+
     this.reactionDisposers.push(
       autorun(() => {
-        this.uniforms.uTransferFunction.value = renderer.transferFunction;
-        this.gradientComputer?.setTransferFunction(renderer.transferFunction);
+        this.uniforms.uTransferFunction.value = volumeRenderer.transferFunction;
+        this.gradientComputer?.setTransferFunction(
+          volumeRenderer.transferFunction,
+        );
       }),
       autorun(() => {
-        this.uniforms.uOpacity.value = renderer.imageOpacity;
+        this.uniforms.uOpacity.value = volumeRenderer.imageOpacity;
       }),
       autorun(() => {
-        this.uniforms.uContextOpacity.value = renderer.contextOpacity;
-        this.gradientComputer?.setContextOpacity(renderer.contextOpacity);
+        this.uniforms.uContextOpacity.value = volumeRenderer.contextOpacity;
+        this.gradientComputer?.setContextOpacity(volumeRenderer.contextOpacity);
       }),
       autorun(() => {
-        this.uniforms.uLimitLow.value = renderer.rangeLimits[0];
-        this.uniforms.uLimitHigh.value = renderer.rangeLimits[1];
-        this.gradientComputer?.setRangeLimits(renderer.rangeLimits);
+        this.uniforms.uLimitLow.value = volumeRenderer.rangeLimits[0];
+        this.uniforms.uLimitHigh.value = volumeRenderer.rangeLimits[1];
+        this.gradientComputer?.setRangeLimits(volumeRenderer.rangeLimits);
       }),
       autorun(() => {
-        this.uniforms.uConeAngle.value = renderer.cutAwayConeAngle;
-        this.gradientComputer?.setCutAwayConeAngle(renderer.cutAwayConeAngle);
+        this.uniforms.uConeAngle.value = volumeRenderer.cutAwayConeAngle;
+        this.gradientComputer?.setCutAwayConeAngle(
+          volumeRenderer.cutAwayConeAngle,
+        );
       }),
     );
   }
@@ -82,12 +101,21 @@ class VolumeMaterial extends THREE.ShaderMaterial implements IDisposable {
     this.uniforms.uAtlasGrid.value = atlas.atlasGrid;
     this.uniforms.uStepSize.value = getStepSize(atlas);
 
-    this.gradientComputer = new GradientComputer(atlas, this.renderer.renderer);
+    this.gradientComputer = new GradientComputer(
+      atlas,
+      this.volumeRenderer.renderer,
+    );
     this.uniforms.uInputFirstDerivative.value = this.gradientComputer.getFirstDerivative();
     this.uniforms.uInputSecondDerivative.value = this.gradientComputer.getSecondDerivative();
     this.uniforms.uOutputFirstDerivative.value = this.gradientComputer.getOutputDerivative();
-    this.gradientComputer.setTransferFunction(this.renderer.transferFunction);
-    this.gradientComputer.setCutAwayConeAngle(this.renderer.cutAwayConeAngle);
+    this.gradientComputer.setTransferFunction(
+      this.volumeRenderer.transferFunction,
+    );
+    this.gradientComputer.setCutAwayConeAngle(
+      this.volumeRenderer.cutAwayConeAngle,
+    );
+
+    this.laoComputer.setAtlas(atlas, this.gradientComputer);
 
     this.uniforms.uUseFocus.value = false;
   }
@@ -102,6 +130,7 @@ class VolumeMaterial extends THREE.ShaderMaterial implements IDisposable {
     }
 
     this.gradientComputer?.setFocus(atlas);
+    this.laoComputer.setFocusAtlas(atlas);
   }
 
   /**
@@ -120,6 +149,7 @@ class VolumeMaterial extends THREE.ShaderMaterial implements IDisposable {
     this.gradientComputer?.setCameraPosition(
       this.uniforms.uCameraPosition.value,
     );
+    this.laoComputer.setCameraPosition(this.uniforms.uCameraPosition.value);
   }
 
   public dispose() {

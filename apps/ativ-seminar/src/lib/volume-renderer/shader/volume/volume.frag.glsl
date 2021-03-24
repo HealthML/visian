@@ -19,9 +19,15 @@ uniform float uOpacity;
 uniform int uTransferFunction;
 uniform float uConeAngle;
 
+uniform sampler2D uLAO;
+
 @import ../utils/volume-data;
 @import ../gradient/decode-gradient;
+
+#define NORMAL
+#define LAO
 @import ../utils/get-interpolated-volume-data;
+
 @import ../utils/phong;
 @import ../utils/compute-near-far;
 @import ./transfer-functions;
@@ -30,8 +36,10 @@ vec4 getVolumeColor(vec3 volumeCoords) {
   VolumeData volumeData = getInterpolatedVolumeData(volumeCoords);
   vec4 volumeColor = transferFunction(volumeData, volumeCoords);
   // return vec4(volumeColor.rgb, volumeColor.a * uOpacity);
-  vec4 phongColor = phong(volumeColor, volumeData, volumeCoords);
-  return vec4(phongColor.rgb, phongColor.a * uOpacity);
+  // vec4 phongColor = phong(volumeColor, volumeData, volumeCoords);
+  // return vec4(phongColor.rgb, phongColor.a * uOpacity);
+
+  return vec4(volumeColor.rgb * volumeData.lao, volumeColor.a * uOpacity);
 }
 
 @import ../utils/march-ray;

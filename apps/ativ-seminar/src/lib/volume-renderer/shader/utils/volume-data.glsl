@@ -4,4 +4,5 @@ struct VolumeData {
   vec3 secondDerivative;
   vec3 normal;
   float focus;
+  float lao;
 };
