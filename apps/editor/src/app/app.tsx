@@ -12,6 +12,7 @@ import { EditorScreen } from "../screens";
 import { setupRootStore, StoreProvider } from "./root-store";
 
 import type { RootStore } from "../models";
+import { setUpEventHandling } from "../event-handling";
 function App() {
   // TODO: Push loading down to components that need i18n
   const [isReady, setIsReady] = useState(false);
@@ -19,6 +20,7 @@ function App() {
   useEffect(() => {
     Promise.all([setupRootStore(), initI18n()]).then(([rootStore]) => {
       rootStoreRef.current = rootStore;
+      setUpEventHandling(rootStore);
       setIsReady(true);
     });
   }, []);
