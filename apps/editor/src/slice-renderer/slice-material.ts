@@ -4,7 +4,6 @@ import { IDisposer } from "mobx-utils/lib/utils";
 import * as THREE from "three";
 
 import { Editor } from "../models";
-import { backgroundColor, blueTint } from "../theme";
 import fragmentShader from "./shader/slice.frag.glsl";
 import vertexShader from "./shader/slice.vert.glsl";
 import { IDisposable, ViewType } from "./types";
@@ -24,11 +23,14 @@ export class SliceMaterial extends THREE.ShaderMaterial implements IDisposable {
         uActiveSlices: { value: [0, 0, 0] },
         uVoxelCount: { value: [1, 1, 1] },
         uAtlasGrid: { value: [1, 1] },
-        uBackgroundColor: { value: backgroundColor },
+        // TODO: This should go as soon as we map density to alpha
+        uBackground: { value: [0, 0, 0] },
+        // TODO: This should probably go as soon as we map density to alpha
         uScanBackground: { value: 0 },
         uContrast: { value: editor.contrast },
         uBrightness: { value: editor.brightness },
-        uBlueTint: { value: blueTint },
+        // TODO: This should go as soon as we map density to alpha
+        uBlueTint: { value: false },
       },
     });
 

@@ -1,12 +1,11 @@
 import {
-  ColorMode,
   getTheme,
   GlobalStyles,
   initI18n,
   ThemeProvider,
 } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Route, Switch } from "react-router-dom";
 
 import { EditorScreen } from "../screens";
@@ -24,10 +23,11 @@ function App() {
     });
   }, []);
 
+  const themeName = rootStoreRef.current?.editor.theme || "dark";
+  const theme = useMemo(() => getTheme(themeName), [themeName]);
+
   return (
-    <ThemeProvider
-      theme={getTheme(rootStoreRef.current?.editor.theme || "dark")}
-    >
+    <ThemeProvider theme={theme}>
       <StoreProvider value={rootStoreRef.current}>
         <GlobalStyles />
         {isReady && (

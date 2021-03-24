@@ -1,9 +1,10 @@
+import { getTheme } from "@visian/ui-shared";
 import isEqual from "lodash.isequal";
 import { action, computed, makeObservable, observable } from "mobx";
 import tc from "tinycolor2";
 
 import { ViewType } from "../../slice-renderer";
-import { maxZoom, minZoom } from "../../theme";
+import { maxZoom, minZoom } from "../../constants";
 import { ISerializable, StoreContext } from "../types";
 import { getZoomStep, Pixel } from "../utils";
 import { Voxel } from "../utils/voxel";
@@ -16,7 +17,7 @@ export interface EditorSnapshot {
 }
 
 export class Editor implements ISerializable<EditorSnapshot> {
-  public backgroundColor = "#000";
+  public backgroundColor = getTheme("dark").colors.background;
 
   public image?: Image;
   public annotation?: Image;
