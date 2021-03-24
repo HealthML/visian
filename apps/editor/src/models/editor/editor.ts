@@ -25,7 +25,8 @@ export class Editor implements ISerializable<EditorSnapshot> {
   public brightness = 1;
   public contrast = 1;
 
-  public mainView = ViewType.Transverse;
+  public mainViewType = ViewType.Transverse;
+  public shouldShowSideViews = true;
 
   public zoomLevel = 1;
   public offset = new Pixel();
@@ -39,11 +40,14 @@ export class Editor implements ISerializable<EditorSnapshot> {
       annotation: observable,
       brightness: observable,
       contrast: observable,
-      mainView: observable,
+      mainViewType: observable,
+      shouldShowSideViews: observable,
       zoomLevel: observable,
       offset: observable,
       selectedVoxel: observable,
+
       theme: computed,
+
       setBackgroundColor: action,
       setImage: action,
       setAnnotation: action,
@@ -103,7 +107,7 @@ export class Editor implements ISerializable<EditorSnapshot> {
   }
 
   public setMainView(value: ViewType) {
-    this.mainView = value;
+    this.mainViewType = value;
   }
 
   public setZoomLevel(value = 1) {
@@ -136,7 +140,7 @@ export class Editor implements ISerializable<EditorSnapshot> {
     this.selectedVoxel.set(x, y, z);
   }
 
-  public setSelectedSlice(value: number, viewType = this.mainView) {
+  public setSelectedSlice(value: number, viewType = this.mainViewType) {
     if (!this.image) return;
 
     this.selectedVoxel.setFromView(
@@ -149,11 +153,11 @@ export class Editor implements ISerializable<EditorSnapshot> {
     );
   }
 
-  public getSelectedSlice(viewType = this.mainView) {
+  public getSelectedSlice(viewType = this.mainViewType) {
     return this.selectedVoxel.getFromView(viewType);
   }
 
-  public stepSelectedSlice(stepSize = 1, viewType = this.mainView) {
+  public stepSelectedSlice(stepSize = 1, viewType = this.mainViewType) {
     this.setSelectedSlice(this.getSelectedSlice(viewType) + stepSize, viewType);
   }
 

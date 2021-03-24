@@ -42,7 +42,7 @@ export class Slice extends THREE.Mesh implements IDisposable {
   }
 
   private updateScale = () => {
-    if (this.viewType !== this.editor.mainView) return;
+    if (this.viewType !== this.editor.mainViewType) return;
 
     this.scale.set(
       this.baseSize.x * this.editor.zoomLevel,

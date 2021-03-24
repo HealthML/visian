@@ -16,7 +16,7 @@ export const EditorScreen: React.FC = observer(() => {
 
   const store = useStore();
 
-  const [renderer, setRenderer] = useState<SliceRenderer | undefined>();
+  const [, setRenderer] = useState<SliceRenderer | undefined>();
   useEffect(() => {
     let newRenderer: SliceRenderer | undefined;
     if (canvasRef.current && store) {

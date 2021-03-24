@@ -15,13 +15,15 @@ export interface RootStoreConfig {
 }
 
 export class RootStore implements ISerializable<RootSnapshot> {
+  public editor: Editor;
+
   /**
    * Indicates if there are changes that have not yet been written by the
    * given storage backend.
    */
   public isDirty = false;
 
-  public editor: Editor;
+  public refs: { [key: string]: React.RefObject<HTMLElement> } = {};
 
   constructor(protected config: RootStoreConfig = {}) {
     this.editor = new Editor({
@@ -29,11 +31,13 @@ export class RootStore implements ISerializable<RootSnapshot> {
     });
 
     makeObservable(this, {
-      isDirty: observable,
       editor: observable,
+      isDirty: observable,
+      refs: observable,
       applySnapshot: action,
       rehydrate: action,
       setIsDirty: action,
+      setRef: action,
     });
     deepObserve(this.editor, () => {
       this.setIsDirty(true);
@@ -47,6 +51,14 @@ export class RootStore implements ISerializable<RootSnapshot> {
 
   public setIsDirty(isDirty = true) {
     this.isDirty = isDirty;
+  }
+
+  public setRef<T extends HTMLElement>(key: string, ref?: React.RefObject<T>) {
+    if (ref) {
+      this.refs[key] = ref;
+    } else {
+      delete this.refs[key];
+    }
   }
 
   public persistImmediately = async () => {

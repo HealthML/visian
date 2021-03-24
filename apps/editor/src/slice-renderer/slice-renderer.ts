@@ -31,7 +31,7 @@ export class SliceRenderer implements IDisposable {
     this.slices = viewTypes.map(
       (viewType) => new Slice(editor, viewType, this.lazyRender),
     );
-    this.scene.add(this.slices[editor.mainView]);
+    this.scene.add(this.slices[editor.mainViewType]);
 
     window.addEventListener("resize", this.resize);
     this.resize();
