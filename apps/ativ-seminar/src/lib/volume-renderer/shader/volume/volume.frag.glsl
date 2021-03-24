@@ -19,8 +19,8 @@ uniform float uOpacity;
 uniform int uTransferFunction;
 uniform float uConeAngle;
 
-@import ./volume-data;
-@import ../utils/gradient-computer/shader/decode-gradient;
+@import ../utils/volume-data;
+@import ../gradient/decode-gradient;
 @import ./transfer-functions;
 
 /**
@@ -165,49 +165,17 @@ void computeNearFar(vec3 normalizedRayDirection, inout float near, inout float f
   far = smallestMax;
 }
 
+@import ../utils/march-ray;
+
 /**
  * @see https://davidpeicho.github.io/blog/cloud-raymarching-walkthrough-part1/
  */
 void main() {
   vec3 normalizedRayDirection = normalize(vRayDirection);
 
-  // Solves a ray - Unit Box equation to determine the value of the closest and
-  // furthest intersections
   float near;
   float far;
   computeNearFar(normalizedRayDirection, near, far);
 
-  // Entry aligned sampling.
-  float dist = near + uStepSize / 2.0;
-  vec3 rayOrigin = vRayOrigin + dist * normalizedRayDirection;
-  vec3 scaledRayDirection = normalizedRayDirection * uStepSize;
-
-  // Accumulation through the volume is stored in this variable.
-  vec4 acc = vec4(0.0);
-
-  for (int i = 0; i < MAX_STEPS; ++i) {
-    // Get the voxel at the current ray position.
-    vec4 currentVoxel = getVolumeColor(rayOrigin);
-    // s = mix(0.0, s / 20.0, step(5.0, s));
-
-    // The more we already accumulated, the less color we apply.
-    acc.rgb += (1.0 - acc.a) * currentVoxel.rgb * currentVoxel.a;
-    // The more we already accumulated, the less opacity we apply.
-    acc.a += (1.0 - acc.a) * currentVoxel.a;
-
-    // TODO: Tweak adaptively based on performance
-    // Early termination: after this threshold, accumulating becomes insignificant.
-    // if (acc.a > 0.95) {
-    //   break;
-    // }
-
-    rayOrigin += scaledRayDirection;
-    dist += uStepSize;
-
-    if (dist > far) {
-      break;
-    }
-  }
-
-  gl_FragColor = acc;
+  gl_FragColor = marchRay(vRayOrigin, normalizedRayDirection, near, far, uStepSize);
 }

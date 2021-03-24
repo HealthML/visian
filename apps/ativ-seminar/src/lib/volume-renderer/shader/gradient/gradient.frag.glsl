@@ -18,8 +18,8 @@ uniform float uConeAngle;
 
 #define CONE_EDGE 0.01
 
-@import ../../../shader/volume-data;
-@import ../../../shader/transfer-functions;
+@import ../utils/volume-data;
+@import ../volume/transfer-functions;
 @import ./decode-gradient;
 
 vec4 encodeGradient(vec3 gradient) {

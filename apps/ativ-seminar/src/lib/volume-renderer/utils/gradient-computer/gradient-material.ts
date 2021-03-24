@@ -2,8 +2,8 @@ import * as THREE from "three";
 
 import { TextureAtlas } from "..";
 import { TransferFunction } from "../..";
-import gradientFragmentShader from "./shader/gradient.frag.glsl";
-import gradientVertexShader from "./shader/gradient.vert.glsl";
+import gradientFragmentShader from "../../shader/gradient/gradient.frag.glsl";
+import gradientVertexShader from "../../shader/gradient/gradient.vert.glsl";
 
 export enum GradientMode {
   Output = 0,

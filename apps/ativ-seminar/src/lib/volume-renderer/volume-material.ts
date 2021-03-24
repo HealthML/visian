@@ -2,8 +2,8 @@ import { autorun, IReactionDisposer } from "mobx";
 import * as THREE from "three";
 
 import { IDisposable } from "../types";
-import volumeFragmentShader from "./shader/volume.frag.glsl";
-import volumeVertexShader from "./shader/volume.vert.glsl";
+import volumeFragmentShader from "./shader/volume/volume.frag.glsl";
+import volumeVertexShader from "./shader/volume/volume.vert.glsl";
 import { getStepSize, GradientComputer, TextureAtlas } from "./utils";
 
 import type Volume from "./volume";
