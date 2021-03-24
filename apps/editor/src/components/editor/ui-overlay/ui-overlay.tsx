@@ -24,6 +24,13 @@ const Container = styled(AbsoluteCover)`
   user-select: none;
 `;
 
+const StartTextContainer = styled(AbsoluteCover)`
+  align-items: center;
+  display: flex;
+  justify-content: center;
+  opacity: 0.4;
+`;
+
 const StyledDropZone = styled(DropZone)`
   flex: 1;
   margin: 10% 0 10% 10%;
@@ -81,7 +88,11 @@ export const UIOverlay = observer<UIOverlayProps>(
 
     return (
       <Container {...rest}>
-        <Text tx="replace-me" />
+        {!store?.editor.image && (
+          <StartTextContainer>
+            <Text tx="start" />
+          </StartTextContainer>
+        )}
         <Spacer />
         <SideViews />
 

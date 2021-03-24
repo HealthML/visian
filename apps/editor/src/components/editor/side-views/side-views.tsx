@@ -69,7 +69,9 @@ export const SideViews = observer(() => {
 
   return (
     <SideViewContainer
-      shouldShowSideViews={store?.editor.shouldShowSideViews}
+      shouldShowSideViews={
+        store?.editor.image && store.editor.shouldShowSideViews
+      }
       style={{ width: sideViewSize }}
       ref={divRef}
     >
