@@ -3,7 +3,6 @@ import * as THREE from "three";
 
 import { IDisposable } from "../../../types";
 import VolumeRenderer from "../../volume-renderer";
-import { GradientComputer } from "../gradient-computer";
 import ScreenAlignedQuad from "../screen-aligned-quad";
 import TextureAtlas from "../texture-atlas";
 import LAOMaterial from "./lao-material";
@@ -22,10 +21,15 @@ export class LAOComputer implements IDisposable {
   constructor(
     private renderer: THREE.WebGLRenderer,
     private volumeRenderer: VolumeRenderer,
+    firstDerivativeTexture: THREE.Texture,
+    secondDerivativeTexture: THREE.Texture,
   ) {
     this.renderTarget = new THREE.WebGLRenderTarget(1, 1);
 
-    this.laoMaterial = new LAOMaterial();
+    this.laoMaterial = new LAOMaterial(
+      firstDerivativeTexture,
+      secondDerivativeTexture,
+    );
 
     this.screenAlignedQuad = new ScreenAlignedQuad(this.laoMaterial);
 
@@ -88,10 +92,10 @@ export class LAOComputer implements IDisposable {
     this.laoComputed = true;
   };
 
-  public setAtlas(atlas: TextureAtlas, gradientComputer: GradientComputer) {
+  public setAtlas(atlas: TextureAtlas) {
     this.renderTarget.setSize(atlas.atlasSize.x, atlas.atlasSize.y);
 
-    this.laoMaterial.setAtlas(atlas, gradientComputer);
+    this.laoMaterial.setAtlas(atlas);
 
     this.update();
   }

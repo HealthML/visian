@@ -1,7 +1,5 @@
 import * as THREE from "three";
 
-import { TextureAtlas } from "..";
-import { TransferFunction } from "../..";
 import gradientFragmentShader from "../../shader/gradient/gradient.frag.glsl";
 import gradientVertexShader from "../../shader/gradient/gradient.vert.glsl";
 import {
@@ -10,6 +8,8 @@ import {
   imageInfoUniforms,
   transferFunctionsUniforms,
 } from "../../uniforms";
+import { getStepSize } from "../step-size";
+import { TextureAtlas } from "../texture-atlas";
 
 export enum GradientMode {
   Output = 0,
@@ -19,7 +19,6 @@ export enum GradientMode {
 
 export class GradientMaterial extends THREE.ShaderMaterial {
   constructor(
-    textureAtlas: TextureAtlas,
     private firstDerivativeTexture: THREE.Texture,
     private secondDerivativeTexture: THREE.Texture,
   ) {
@@ -38,12 +37,27 @@ export class GradientMaterial extends THREE.ShaderMaterial {
       ]),
     });
 
-    this.uniforms.uVolume.value = textureAtlas.getTexture();
-    this.uniforms.uVoxelSpacing.value = textureAtlas.voxelSpacing;
-    this.uniforms.uVoxelCount.value = textureAtlas.voxelCount;
-    this.uniforms.uAtlasGrid.value = textureAtlas.atlasGrid;
     this.uniforms.uInputFirstDerivative.value = firstDerivativeTexture;
     this.uniforms.uInputSecondDerivative.value = secondDerivativeTexture;
+  }
+
+  public setAtlas(atlas: TextureAtlas) {
+    this.uniforms.uVolume.value = atlas.getTexture();
+    this.uniforms.uVoxelCount.value = atlas.voxelCount;
+    this.uniforms.uAtlasGrid.value = atlas.atlasGrid;
+    this.uniforms.uStepSize.value = getStepSize(atlas);
+
+    this.uniforms.uUseFocus.value = false;
+  }
+
+  public setFocusAtlas(atlas?: TextureAtlas) {
+    if (atlas) {
+      this.uniforms.uFocus.value = atlas.getTexture();
+      this.uniforms.uUseFocus.value = true;
+    } else {
+      this.uniforms.uFocus.value = null;
+      this.uniforms.uUseFocus.value = false;
+    }
   }
 
   public setGradientMode(mode: GradientMode) {
@@ -56,35 +70,8 @@ export class GradientMaterial extends THREE.ShaderMaterial {
       mode === GradientMode.Second ? null : this.secondDerivativeTexture;
   }
 
-  public setFocus(atlas?: TextureAtlas) {
-    if (atlas) {
-      this.uniforms.uFocus.value = atlas.getTexture();
-      this.uniforms.uUseFocus.value = true;
-    } else {
-      this.uniforms.uFocus.value = null;
-      this.uniforms.uUseFocus.value = false;
-    }
-  }
-
   public setCameraPosition(position: THREE.Vector3) {
     this.uniforms.uCameraPosition.value.copy(position);
-  }
-
-  public setTransferFunction(transferFunction: TransferFunction) {
-    this.uniforms.uTransferFunction.value = transferFunction.type;
-  }
-
-  public setCutAwayConeAngle(radians: number) {
-    this.uniforms.uConeAngle.value = radians;
-  }
-
-  public setContextOpacity(value: number) {
-    this.uniforms.uContextOpacity.value = value;
-  }
-
-  public setRangeLimits(value: [number, number]) {
-    this.uniforms.uLimitLow.value = value[0];
-    this.uniforms.uLimitHigh.value = value[1];
   }
 }
 

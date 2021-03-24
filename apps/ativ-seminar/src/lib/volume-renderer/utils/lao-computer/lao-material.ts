@@ -9,12 +9,14 @@ import {
   opacityUniforms,
   transferFunctionsUniforms,
 } from "../../uniforms";
-import { GradientComputer } from "../gradient-computer";
 import { getStepSize } from "../step-size";
 import TextureAtlas from "../texture-atlas";
 
 export class LAOMaterial extends THREE.ShaderMaterial {
-  constructor() {
+  constructor(
+    firstDerivativeTexture: THREE.Texture,
+    secondDerivativeTexture: THREE.Texture,
+  ) {
     super({
       vertexShader,
       fragmentShader,
@@ -26,17 +28,16 @@ export class LAOMaterial extends THREE.ShaderMaterial {
         transferFunctionsUniforms,
       ]),
     });
+
+    this.uniforms.uInputFirstDerivative.value = firstDerivativeTexture;
+    this.uniforms.uInputSecondDerivative.value = secondDerivativeTexture;
   }
 
-  public setAtlas(atlas: TextureAtlas, gradientComputer: GradientComputer) {
+  public setAtlas(atlas: TextureAtlas) {
     this.uniforms.uVolume.value = atlas.getTexture();
     this.uniforms.uVoxelCount.value = atlas.voxelCount;
     this.uniforms.uAtlasGrid.value = atlas.atlasGrid;
     this.uniforms.uStepSize.value = getStepSize(atlas);
-
-    this.uniforms.uInputFirstDerivative.value = gradientComputer.getFirstDerivative();
-    this.uniforms.uInputSecondDerivative.value = gradientComputer.getSecondDerivative();
-
     this.uniforms.uUseFocus.value = false;
   }
 
