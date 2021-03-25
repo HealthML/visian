@@ -3,10 +3,11 @@ import { autorun } from "mobx";
 import { IDisposer } from "mobx-utils/lib/utils";
 import * as THREE from "three";
 
-import { Editor } from "../models";
-import fragmentShader from "./shader/slice.frag.glsl";
-import vertexShader from "./shader/slice.vert.glsl";
+import fragmentShader from "./shaders/slice.frag.glsl";
+import vertexShader from "./shaders/slice.vert.glsl";
 import { IDisposable, ViewType } from "./types";
+
+import type { Editor } from "../../models";
 
 export class SliceMaterial extends THREE.ShaderMaterial implements IDisposable {
   private disposers: IDisposer[] = [];

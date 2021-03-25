@@ -3,11 +3,12 @@ import { reaction } from "mobx";
 import { IDisposer } from "mobx-utils/lib/utils";
 import * as THREE from "three";
 
-import { Editor } from "../models";
-import { Image } from "../models/editor/image";
 import { Slice } from "./slice";
 import { IDisposable, viewTypes } from "./types";
 import { setMainCameraPlanes } from "./utils";
+
+import type { Editor } from "../../models";
+import type { Image } from "../../models/editor/image";
 
 export class SliceRenderer implements IDisposable {
   private renderer: THREE.WebGLRenderer;

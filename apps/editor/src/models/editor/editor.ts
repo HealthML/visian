@@ -4,7 +4,7 @@ import { action, computed, makeObservable, observable } from "mobx";
 import tc from "tinycolor2";
 
 import { maxZoom, minZoom } from "../../constants";
-import { ViewType } from "../../slice-renderer";
+import { ViewType } from "../../rendering";
 import { ISerializable, StoreContext } from "../types";
 import { getZoomStep, Pixel } from "../utils";
 import { Voxel } from "../utils/voxel";

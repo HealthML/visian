@@ -9,7 +9,7 @@ import React, { useEffect, useRef, useState } from "react";
 
 import { useStore } from "../app/root-store";
 import { UIOverlay } from "../components/editor";
-import { SliceRenderer } from "../slice-renderer";
+import { SliceRenderer } from "../rendering";
 
 export const EditorScreen: React.FC = observer(() => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);

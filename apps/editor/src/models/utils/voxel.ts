@@ -1,6 +1,6 @@
 import { action, computed, makeObservable, observable } from "mobx";
 
-import { getOrthogonalAxis, ViewType } from "../../slice-renderer";
+import { getOrthogonalAxis, ViewType } from "../../rendering";
 
 export class Voxel {
   public x: number;

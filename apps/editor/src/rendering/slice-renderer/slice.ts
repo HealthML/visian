@@ -3,10 +3,11 @@ import { autorun } from "mobx";
 import { IDisposer } from "mobx-utils/lib/utils";
 import * as THREE from "three";
 
-import { Editor } from "../models";
 import { SliceMaterial } from "./slice-material";
 import { IDisposable, ViewType } from "./types";
 import { getGeometrySize, scanSliceZ } from "./utils";
+
+import type { Editor } from "../../models";
 
 export class Slice extends THREE.Mesh implements IDisposable {
   private baseSize = new THREE.Vector2();
