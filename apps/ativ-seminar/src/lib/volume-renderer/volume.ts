@@ -19,6 +19,10 @@ class Volume extends THREE.Mesh implements IDisposable {
     this.rotateX(-Math.PI / 2);
   }
 
+  public tick() {
+    (this.material as VolumeMaterial).tick();
+  }
+
   /** Updates the rendered image. */
   public setAtlas(atlas: TextureAtlas) {
     (this.material as VolumeMaterial).setAtlas(atlas);

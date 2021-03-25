@@ -35,15 +35,13 @@ export class TransferFunction implements ITransferFunctionProps {
   public updateNormalsOnCameraMove: boolean;
   public updateLAOOnCameraMove: boolean;
 
-  constructor(
-    public type: TransferFunctionType,
-    props: ITransferFunctionProps,
-  ) {
+  constructor(public type: TransferFunctionType) {
+    const props = transferFunctionProps[type];
     this.updateNormalsOnCameraMove = props.updateNormalsOnCameraMove;
     this.updateLAOOnCameraMove = props.updateLAOOnCameraMove;
   }
 }
 
 export const transferFunctions = transferFunctionTypes.map(
-  (type) => new TransferFunction(type, transferFunctionProps[type]),
+  (type) => new TransferFunction(type),
 );

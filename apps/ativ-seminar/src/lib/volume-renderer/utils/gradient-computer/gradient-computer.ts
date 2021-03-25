@@ -11,9 +11,13 @@ export class GradientComputer implements IDisposable {
   private gradientMaterial: GradientMaterial;
   private screenAlignedQuad: ScreenAlignedQuad;
 
-  public firstDerivativeRenderTarget: THREE.WebGLRenderTarget;
-  public secondDerivativeRenderTarget: THREE.WebGLRenderTarget;
+  private firstDerivativeRenderTarget: THREE.WebGLRenderTarget;
+  private secondDerivativeRenderTarget: THREE.WebGLRenderTarget;
   private outputDerivativeRenderTarget: THREE.WebGLRenderTarget;
+
+  private firstDerivativeDirty = true;
+  private secondDerivativeDirty = true;
+  private outputDerivativeDirty = true;
 
   private reactionDisposers: IReactionDisposer[] = [];
 
@@ -69,6 +73,21 @@ export class GradientComputer implements IDisposable {
     this.reactionDisposers.forEach((disposer) => disposer());
   }
 
+  public tick() {
+    if (this.firstDerivativeDirty) {
+      this.renderFirstDerivative();
+    }
+    if (this.secondDerivativeDirty) {
+      this.renderSecondDerivative();
+    }
+    if (
+      this.volumeRenderer.lightingMode.needsNormals &&
+      this.outputDerivativeDirty
+    ) {
+      this.renderOutputDerivative();
+    }
+  }
+
   public setAtlas(atlas: TextureAtlas) {
     this.firstDerivativeRenderTarget.setSize(
       atlas.atlasSize.x,
@@ -119,6 +138,10 @@ export class GradientComputer implements IDisposable {
   }
 
   private updateFirstDerivative() {
+    this.firstDerivativeDirty = true;
+  }
+
+  private renderFirstDerivative() {
     if (!this.textureAtlas) return;
 
     // TODO: Set uInputDimensions depending on image.
@@ -139,9 +162,17 @@ export class GradientComputer implements IDisposable {
     volumeTexture.needsUpdate = true;
 
     this.renderer.setRenderTarget(previousRenderTarget);
+
+    this.firstDerivativeDirty = false;
+
+    this.volumeRenderer.lazyRender();
   }
 
   private updateSecondDerivative() {
+    this.secondDerivativeDirty = true;
+  }
+
+  private renderSecondDerivative() {
     this.gradientMaterial.uniforms.uInputDimensions.value = 3;
     this.gradientMaterial.setGradientMode(GradientMode.Second);
 
@@ -151,9 +182,17 @@ export class GradientComputer implements IDisposable {
     this.screenAlignedQuad.renderWith(this.renderer);
 
     this.renderer.setRenderTarget(previousRenderTarget);
+
+    this.secondDerivativeDirty = false;
+
+    this.volumeRenderer.lazyRender();
   }
 
   private updateOutputDerivative() {
+    this.outputDerivativeDirty = true;
+  }
+
+  private renderOutputDerivative() {
     if (!this.textureAtlas) return;
 
     this.gradientMaterial.uniforms.uInputDimensions.value = 1;
@@ -173,6 +212,10 @@ export class GradientComputer implements IDisposable {
     volumeTexture.needsUpdate = true;
 
     this.renderer.setRenderTarget(previousRenderTarget);
+
+    this.outputDerivativeDirty = false;
+
+    this.volumeRenderer.lazyRender();
   }
 }
 

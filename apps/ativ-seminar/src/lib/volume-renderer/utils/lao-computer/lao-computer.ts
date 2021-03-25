@@ -14,7 +14,7 @@ export class LAOComputer implements IDisposable {
 
   private screenAlignedQuad: ScreenAlignedQuad;
 
-  private laoComputed = false;
+  private dirty = true;
 
   private reactionDisposers: IReactionDisposer[] = [];
 
@@ -74,14 +74,20 @@ export class LAOComputer implements IDisposable {
   }
 
   public getLAOTexture() {
-    if (!this.laoComputed) {
+    if (this.dirty) {
       this.update();
     }
 
     return this.renderTarget.texture;
   }
 
-  public update = () => {
+  public tick() {
+    if (this.volumeRenderer.lightingMode.needsLAO && this.dirty) {
+      this.render();
+    }
+  }
+
+  private render() {
     const previousRenderTarget = this.renderer.getRenderTarget();
     this.renderer.setRenderTarget(this.renderTarget);
 
@@ -89,7 +95,13 @@ export class LAOComputer implements IDisposable {
 
     this.renderer.setRenderTarget(previousRenderTarget);
 
-    this.laoComputed = true;
+    this.dirty = false;
+
+    this.volumeRenderer.lazyRender();
+  }
+
+  private update = () => {
+    this.dirty = true;
   };
 
   public setAtlas(atlas: TextureAtlas) {

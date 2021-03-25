@@ -11,6 +11,7 @@ import {
   opacityUniforms,
   transferFunctionsUniforms,
 } from "./uniforms";
+import { lightingUniforms } from "./uniforms/lighting";
 import {
   getStepSize,
   GradientComputer,
@@ -47,6 +48,7 @@ class VolumeMaterial extends THREE.ShaderMaterial implements IDisposable {
         atlasInfoUniforms,
         imageInfoUniforms,
         transferFunctionsUniforms,
+        lightingUniforms,
       ]),
     });
 
@@ -88,7 +90,15 @@ class VolumeMaterial extends THREE.ShaderMaterial implements IDisposable {
       autorun(() => {
         this.uniforms.uConeAngle.value = volumeRenderer.cutAwayConeAngle;
       }),
+      autorun(() => {
+        this.uniforms.uLightingMode.value = volumeRenderer.lightingMode.type;
+      }),
     );
+  }
+
+  public tick() {
+    this.gradientComputer.tick();
+    this.laoComputer.tick();
   }
 
   /** Updates the rendered atlas. */
@@ -130,7 +140,7 @@ class VolumeMaterial extends THREE.ShaderMaterial implements IDisposable {
       this.workingMatrix4.copy(volumeObject.matrixWorld).invert(),
     );
 
-    this.gradientComputer?.setCameraPosition(
+    this.gradientComputer.setCameraPosition(
       this.uniforms.uCameraPosition.value,
     );
     this.laoComputer.setCameraPosition(this.uniforms.uCameraPosition.value);

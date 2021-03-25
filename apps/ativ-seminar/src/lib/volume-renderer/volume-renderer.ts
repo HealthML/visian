@@ -4,7 +4,14 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import Stats from "three/examples/jsm/libs/stats.module";
 
 import { IDisposable } from "../types";
-import { FlyControls, ScreenAlignedQuad, TextureAtlas } from "./utils";
+import {
+  FlyControls,
+  LightingMode,
+  lightingModes,
+  LightingModeType,
+  ScreenAlignedQuad,
+  TextureAtlas,
+} from "./utils";
 import {
   TransferFunction,
   transferFunctions,
@@ -35,6 +42,7 @@ export class VolumeRenderer implements IDisposable {
 
   public backgroundValue = 0;
   public transferFunction = transferFunctions[TransferFunctionType.FCEdges];
+  public lightingMode = lightingModes[LightingModeType.LAO];
   public imageOpacity = 1;
   public contextOpacity = 0.4;
   public rangeLimits: [number, number] = [0.1, 1];
@@ -45,12 +53,14 @@ export class VolumeRenderer implements IDisposable {
     makeObservable(this, {
       backgroundValue: observable,
       transferFunction: observable,
+      lightingMode: observable,
       imageOpacity: observable,
       contextOpacity: observable,
       rangeLimits: observable,
       cutAwayConeAngle: observable,
       setBackgroundValue: action,
       setTransferFunction: action,
+      setLightingMode: action,
       setImageOpacity: action,
       setContextOpacity: action,
       setRangeLimits: action,
@@ -156,9 +166,12 @@ export class VolumeRenderer implements IDisposable {
   };
 
   private animate = () => {
+    this.volume.tick();
+
     if (this.lazyRenderTriggered || this.renderer.xr.isPresenting) {
       this.eagerRender();
     }
+
     this.stats.update();
     this.flyControls.tick();
   };
@@ -265,6 +278,12 @@ export class VolumeRenderer implements IDisposable {
       this.altRangeLimits = this.rangeLimits;
       this.rangeLimits = limits;
     }
+    this.lazyRender();
+  };
+
+  public setLightingMode = (value: LightingMode) => {
+    this.lightingMode = value;
+
     this.lazyRender();
   };
 

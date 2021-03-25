@@ -11,6 +11,7 @@ uniform sampler2D uLAO;
 @import ../uniforms/u-atlas-info;
 @import ../uniforms/u-image-info;
 @import ../uniforms/u-transfer-functions;
+@import ../uniforms/u-lighting;
 
 @import ../utils/volume-data;
 @import ../gradient/decode-gradient;
@@ -26,11 +27,14 @@ uniform sampler2D uLAO;
 vec4 getVolumeColor(vec3 volumeCoords) {
   VolumeData volumeData = getInterpolatedVolumeData(volumeCoords);
   vec4 volumeColor = transferFunction(volumeData, volumeCoords);
-  // return vec4(volumeColor.rgb, volumeColor.a * uOpacity);
-  // vec4 phongColor = phong(volumeColor, volumeData, volumeCoords);
-  // return vec4(phongColor.rgb, phongColor.a * uOpacity);
 
-  return vec4(volumeColor.rgb * volumeData.lao, volumeColor.a * uOpacity);
+  if(uLightingMode == 1) {
+    volumeColor = phong(volumeColor, volumeData, volumeCoords);
+  } else if(uLightingMode == 2) {
+    volumeColor = vec4(volumeColor.rgb * volumeData.lao, volumeColor.a);
+  }
+
+  return vec4(volumeColor.rgb, volumeColor.a * uOpacity);
 }
 
 @import ../utils/march-ray;
