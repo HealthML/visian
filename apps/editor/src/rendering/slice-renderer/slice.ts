@@ -11,6 +11,8 @@ import type { Editor } from "../../models";
 export class Slice extends THREE.Mesh implements IDisposable {
   private baseSize = new THREE.Vector2();
 
+  private workingVector = new THREE.Vector2();
+
   private disposers: IDisposer[] = [];
 
   constructor(
@@ -42,23 +44,28 @@ export class Slice extends THREE.Mesh implements IDisposable {
   }
 
   private updateScale = () => {
-    if (this.viewType !== this.editor.viewSettings.mainViewType) return;
+    this.workingVector.copy(this.baseSize);
 
-    this.scale.set(
-      this.baseSize.x * this.editor.viewSettings.zoomLevel,
-      this.baseSize.y * this.editor.viewSettings.zoomLevel,
-      1,
-    );
+    if (this.viewType === this.editor.viewSettings.mainViewType) {
+      this.workingVector.multiplyScalar(this.editor.viewSettings.zoomLevel);
+    }
+
+    this.scale.set(this.workingVector.x, this.workingVector.y, 1);
 
     this.render();
   };
 
   private updateOffset = () => {
-    this.position.set(
-      this.editor.viewSettings.offset.x,
-      this.editor.viewSettings.offset.y,
-      scanSliceZ,
-    );
+    this.workingVector.multiplyScalar(0);
+
+    if (this.viewType === this.editor.viewSettings.mainViewType) {
+      this.workingVector.set(
+        this.editor.viewSettings.offset.x,
+        this.editor.viewSettings.offset.y,
+      );
+    }
+
+    this.position.set(this.workingVector.x, this.workingVector.y, scanSliceZ);
 
     this.render();
   };

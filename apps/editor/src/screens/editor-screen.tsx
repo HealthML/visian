@@ -20,7 +20,12 @@ export const EditorScreen: React.FC = observer(() => {
   useEffect(() => {
     let newRenderer: SliceRenderer | undefined;
     if (canvasRef.current && store) {
-      newRenderer = new SliceRenderer(canvasRef.current, store.editor);
+      newRenderer = new SliceRenderer(
+        canvasRef.current,
+        store.refs.upperSideView.current as HTMLCanvasElement,
+        store.refs.lowerSideView.current as HTMLCanvasElement,
+        store.editor,
+      );
       setRenderer(newRenderer);
     }
     return () => {

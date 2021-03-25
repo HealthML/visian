@@ -1,18 +1,19 @@
 import { IDisposer, TextureAtlas } from "@visian/util";
+import ResizeSensor from "css-element-queries/src/ResizeSensor";
 import { reaction } from "mobx";
 import * as THREE from "three";
 
 import { Slice } from "./slice";
 import { IDisposable, viewTypes } from "./types";
-import { setMainCameraPlanes } from "./utils";
+import { getOrder, resizeRenderer, setMainCameraPlanes } from "./utils";
 
 import type { Editor } from "../../models";
 import type { Image } from "../../models/editor/image";
-
 export class SliceRenderer implements IDisposable {
-  private renderer: THREE.WebGLRenderer;
-  private camera: THREE.OrthographicCamera;
-  private scene = new THREE.Scene();
+  private renderers: THREE.WebGLRenderer[];
+  private mainCamera: THREE.OrthographicCamera;
+  private sideCamera: THREE.OrthographicCamera;
+  private scenes = viewTypes.map(() => new THREE.Scene());
 
   private slices: Slice[];
 
@@ -20,23 +21,55 @@ export class SliceRenderer implements IDisposable {
 
   private isImageLoaded = false;
 
+  private resizeSensors: ResizeSensor[] = [];
+
   private disposers: IDisposer[] = [];
 
-  constructor(private canvas: HTMLCanvasElement, private editor: Editor) {
-    this.renderer = new THREE.WebGLRenderer({ alpha: true, canvas });
+  constructor(
+    private mainCanvas: HTMLCanvasElement,
+    private upperSideCanvas: HTMLCanvasElement,
+    private lowerSideCanvas: HTMLCanvasElement,
+    private editor: Editor,
+  ) {
+    this.renderers = this.canvases.map(
+      (canvas) =>
+        new THREE.WebGLRenderer({
+          alpha: true,
+          canvas,
+        }),
+    );
 
-    const aspect = canvas.clientWidth / canvas.clientHeight;
-    this.camera = new THREE.OrthographicCamera(-aspect, aspect, 1, -1, 0, 20);
+    const aspect = mainCanvas.clientWidth / mainCanvas.clientHeight;
+    this.mainCamera = new THREE.OrthographicCamera(
+      -aspect,
+      aspect,
+      1,
+      -1,
+      0,
+      20,
+    );
+    this.sideCamera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 20);
 
     this.slices = viewTypes.map(
       (viewType) => new Slice(editor, viewType, this.lazyRender),
     );
-    this.scene.add(this.slices[editor.viewSettings.mainViewType]);
+    this.slices.forEach((slice, viewType) => this.scenes[viewType].add(slice));
 
     window.addEventListener("resize", this.resize);
     this.resize();
 
-    canvas.addEventListener("wheel", this.handleWheel);
+    mainCanvas.addEventListener("wheel", this.handleWheel);
+
+    this.resizeSensors.push(
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      new ResizeSensor(this.upperSideCanvas.parentElement!, () =>
+        resizeRenderer(this.renderers[1], this.eagerRender),
+      ),
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      new ResizeSensor(this.lowerSideCanvas.parentElement!, () =>
+        resizeRenderer(this.renderers[2], this.eagerRender),
+      ),
+    );
 
     this.disposers.push(
       reaction(
@@ -56,20 +89,21 @@ export class SliceRenderer implements IDisposable {
       ),
     );
 
-    this.renderer.setAnimationLoop(this.animate);
+    this.renderers[0].setAnimationLoop(this.animate);
   }
 
   public dispose() {
     this.disposers.forEach((disposer) => disposer());
     this.slices.forEach((slice) => slice.dispose());
     window.removeEventListener("resize", this.resize);
-    this.canvas.removeEventListener("wheel", this.handleWheel);
+    this.resizeSensors.forEach((sensor) => sensor.detach());
+    this.mainCanvas.removeEventListener("wheel", this.handleWheel);
   }
 
   private resize = () => {
-    this.renderer.setSize(window.innerWidth, window.innerHeight);
+    this.renderers[0].setSize(window.innerWidth, window.innerHeight);
 
-    setMainCameraPlanes(this.editor, this.canvas, this.camera);
+    setMainCameraPlanes(this.editor, this.mainCanvas, this.mainCamera);
 
     this.eagerRender();
   };
@@ -84,11 +118,26 @@ export class SliceRenderer implements IDisposable {
     this.lazyRenderTriggered = true;
   };
 
+  private get canvases() {
+    return [this.mainCanvas, this.upperSideCanvas, this.lowerSideCanvas];
+  }
+
+  private get activeRenderers() {
+    return this.editor.viewSettings.shouldShowSideViews
+      ? this.renderers
+      : [this.renderers[0]];
+  }
+
   private eagerRender = () => {
     if (!this.isImageLoaded) return;
     this.lazyRenderTriggered = false;
 
-    this.renderer.render(this.scene, this.camera);
+    const order = getOrder(this.editor.viewSettings.mainViewType);
+    this.activeRenderers.forEach((renderer, index) => {
+      const viewType = order[index];
+      const camera = index ? this.sideCamera : this.mainCamera;
+      renderer.render(this.scenes[viewType], camera);
+    });
   };
 
   // TODO: Move this to event handling.
