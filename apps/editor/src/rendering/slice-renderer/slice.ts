@@ -1,6 +1,5 @@
-import { TextureAtlas } from "@visian/util";
+import { IDisposer, TextureAtlas } from "@visian/util";
 import { autorun } from "mobx";
-import { IDisposer } from "mobx-utils/lib/utils";
 import * as THREE from "three";
 
 import { SliceMaterial } from "./slice-material";
@@ -43,11 +42,11 @@ export class Slice extends THREE.Mesh implements IDisposable {
   }
 
   private updateScale = () => {
-    if (this.viewType !== this.editor.mainViewType) return;
+    if (this.viewType !== this.editor.viewSettings.mainViewType) return;
 
     this.scale.set(
-      this.baseSize.x * this.editor.zoomLevel,
-      this.baseSize.y * this.editor.zoomLevel,
+      this.baseSize.x * this.editor.viewSettings.zoomLevel,
+      this.baseSize.y * this.editor.viewSettings.zoomLevel,
       1,
     );
 
@@ -55,7 +54,11 @@ export class Slice extends THREE.Mesh implements IDisposable {
   };
 
   private updateOffset = () => {
-    this.position.set(this.editor.offset.x, this.editor.offset.y, scanSliceZ);
+    this.position.set(
+      this.editor.viewSettings.offset.x,
+      this.editor.viewSettings.offset.y,
+      scanSliceZ,
+    );
 
     this.render();
   };

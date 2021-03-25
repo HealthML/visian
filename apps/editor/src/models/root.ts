@@ -1,6 +1,6 @@
 import { IStorageBackend } from "@visian/ui-shared";
 import { action, makeObservable, observable } from "mobx";
-import { deepObserve } from "mobx-utils/lib/deepObserve";
+import { deepObserve } from "@visian/util";
 
 import { Editor, EditorSnapshot } from "./editor";
 import { ISerializable } from "./types";
@@ -39,14 +39,18 @@ export class RootStore implements ISerializable<RootSnapshot> {
       setIsDirty: action,
       setRef: action,
     });
-    deepObserve(this.editor, () => {
-      this.setIsDirty(true);
-      this.config.storageBackend
-        ?.persist("/editor", () => this.editor.toJSON())
-        .then(() => {
-          this.setIsDirty(false);
-        });
-    });
+    deepObserve(
+      this.editor,
+      () => {
+        this.setIsDirty(true);
+        this.config.storageBackend
+          ?.persist("/editor", () => this.editor.toJSON())
+          .then(() => {
+            this.setIsDirty(false);
+          });
+      },
+      { exclude: Editor.excludeFromSnapshotTracking },
+    );
   }
 
   public setIsDirty(isDirty = true) {

@@ -1,6 +1,5 @@
-import { TextureAtlas } from "@visian/util";
+import { IDisposer, TextureAtlas } from "@visian/util";
 import { reaction } from "mobx";
-import { IDisposer } from "mobx-utils/lib/utils";
 import * as THREE from "three";
 
 import { Slice } from "./slice";
@@ -32,7 +31,7 @@ export class SliceRenderer implements IDisposable {
     this.slices = viewTypes.map(
       (viewType) => new Slice(editor, viewType, this.lazyRender),
     );
-    this.scene.add(this.slices[editor.mainViewType]);
+    this.scene.add(this.slices[editor.viewSettings.mainViewType]);
 
     window.addEventListener("resize", this.resize);
     this.resize();
@@ -96,12 +95,12 @@ export class SliceRenderer implements IDisposable {
   private handleWheel = (event: WheelEvent) => {
     if (event.ctrlKey) {
       if (event.deltaY > 0) {
-        this.editor.zoomOut();
+        this.editor.viewSettings.zoomOut();
       } else if (event.deltaY < 0) {
-        this.editor.zoomIn();
+        this.editor.viewSettings.zoomIn();
       }
     } else {
-      this.editor.stepSelectedSlice(-Math.sign(event.deltaY));
+      this.editor.viewSettings.stepSelectedSlice(-Math.sign(event.deltaY));
     }
   };
 

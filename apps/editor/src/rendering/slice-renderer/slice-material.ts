@@ -1,6 +1,5 @@
-import { TextureAtlas } from "@visian/util";
+import { IDisposer, TextureAtlas } from "@visian/util";
 import { autorun } from "mobx";
-import { IDisposer } from "mobx-utils/lib/utils";
 import * as THREE from "three";
 
 import fragmentShader from "./shaders/slice.frag.glsl";
@@ -24,8 +23,8 @@ export class SliceMaterial extends THREE.ShaderMaterial implements IDisposable {
         uActiveSlices: { value: [0, 0, 0] },
         uVoxelCount: { value: [1, 1, 1] },
         uAtlasGrid: { value: [1, 1] },
-        uContrast: { value: editor.contrast },
-        uBrightness: { value: editor.brightness },
+        uContrast: { value: editor.viewSettings.contrast },
+        uBrightness: { value: editor.viewSettings.brightness },
         uForegroundColor: { value: new THREE.Color("white") },
       },
       transparent: true,
@@ -45,15 +44,16 @@ export class SliceMaterial extends THREE.ShaderMaterial implements IDisposable {
 
     this.disposers.push(
       autorun(() => {
-        this.uniforms.uContrast.value = editor.contrast;
+        this.uniforms.uContrast.value = editor.viewSettings.contrast;
         render();
       }),
       autorun(() => {
-        this.uniforms.uBrightness.value = editor.brightness;
+        this.uniforms.uBrightness.value = editor.viewSettings.brightness;
         render();
       }),
       autorun(() => {
-        this.uniforms.uActiveSlices.value = editor.selectedVoxel.array;
+        this.uniforms.uActiveSlices.value =
+          editor.viewSettings.selectedVoxel.array;
         render();
       }),
       autorun(() => {

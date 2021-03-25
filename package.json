@@ -68,7 +68,6 @@
     "lodash.throttle": "^4.1.1",
     "mobx": "^6.1.7",
     "mobx-react-lite": "^3.2.0",
-    "mobx-utils": "^6.0.3",
     "moment": "^2.29.1",
     "nestjs-relay": "PaulBrachmann/nestjs-relay#dist",
     "pg": "^8.5.1",
