@@ -43,6 +43,7 @@ export class VolumeRenderer implements IDisposable {
   public backgroundValue = 0;
   public transferFunction = transferFunctions[TransferFunctionType.FCEdges];
   public lightingMode = lightingModes[LightingModeType.LAO];
+  public laoIntensity = 1;
   public imageOpacity = 1;
   public contextOpacity = 0.4;
   public rangeLimits: [number, number] = [0.1, 1];
@@ -54,6 +55,7 @@ export class VolumeRenderer implements IDisposable {
       backgroundValue: observable,
       transferFunction: observable,
       lightingMode: observable,
+      laoIntensity: observable,
       imageOpacity: observable,
       contextOpacity: observable,
       rangeLimits: observable,
@@ -61,6 +63,7 @@ export class VolumeRenderer implements IDisposable {
       setBackgroundValue: action,
       setTransferFunction: action,
       setLightingMode: action,
+      setLaoIntensity: action,
       setImageOpacity: action,
       setContextOpacity: action,
       setRangeLimits: action,
@@ -285,6 +288,10 @@ export class VolumeRenderer implements IDisposable {
     this.lightingMode = value;
 
     this.lazyRender();
+  };
+
+  public setLaoIntensity = (value: number) => {
+    this.laoIntensity = Math.max(0, value);
   };
 
   public setImageOpacity = (value: number) => {

@@ -31,7 +31,7 @@ vec4 getVolumeColor(vec3 volumeCoords) {
   if(uLightingMode == 1) {
     volumeColor = phong(volumeColor, volumeData, volumeCoords);
   } else if(uLightingMode == 2) {
-    volumeColor = vec4(volumeColor.rgb * volumeData.lao, volumeColor.a);
+    volumeColor = vec4(volumeColor.rgb * volumeData.lao * uLaoIntensity, volumeColor.a);
   }
 
   return vec4(volumeColor.rgb, volumeColor.a * uOpacity);

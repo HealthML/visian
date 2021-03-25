@@ -93,6 +93,9 @@ class VolumeMaterial extends THREE.ShaderMaterial implements IDisposable {
       autorun(() => {
         this.uniforms.uLightingMode.value = volumeRenderer.lightingMode.type;
       }),
+      autorun(() => {
+        this.uniforms.uLaoIntensity.value = volumeRenderer.laoIntensity;
+      }),
     );
   }
 
