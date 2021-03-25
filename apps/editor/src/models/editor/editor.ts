@@ -3,8 +3,8 @@ import isEqual from "lodash.isequal";
 import { action, computed, makeObservable, observable } from "mobx";
 import tc from "tinycolor2";
 
-import { ViewType } from "../../slice-renderer";
 import { maxZoom, minZoom } from "../../constants";
+import { ViewType } from "../../slice-renderer";
 import { ISerializable, StoreContext } from "../types";
 import { getZoomStep, Pixel } from "../utils";
 import { Voxel } from "../utils/voxel";
@@ -33,6 +33,8 @@ export class Editor implements ISerializable<EditorSnapshot> {
 
   public selectedVoxel = new Voxel();
 
+  public foregroundColor = "#ffffff";
+
   constructor(protected context?: StoreContext) {
     makeObservable(this, {
       backgroundColor: observable,
@@ -45,6 +47,7 @@ export class Editor implements ISerializable<EditorSnapshot> {
       zoomLevel: observable,
       offset: observable,
       selectedVoxel: observable,
+      foregroundColor: observable,
 
       theme: computed,
 
@@ -62,6 +65,7 @@ export class Editor implements ISerializable<EditorSnapshot> {
       setSelectedVoxel: action,
       setSelectedSlice: action,
       stepSelectedSlice: action,
+      setForegroundColor: action,
     });
   }
 
@@ -73,6 +77,10 @@ export class Editor implements ISerializable<EditorSnapshot> {
 
   public setBackgroundColor(backgroundColor: string) {
     this.backgroundColor = backgroundColor;
+  }
+
+  public setForegroundColor(foregroundColor: string) {
+    this.foregroundColor = foregroundColor;
   }
 
   public setImage(image: Image) {

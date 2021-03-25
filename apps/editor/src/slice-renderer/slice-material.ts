@@ -23,15 +23,11 @@ export class SliceMaterial extends THREE.ShaderMaterial implements IDisposable {
         uActiveSlices: { value: [0, 0, 0] },
         uVoxelCount: { value: [1, 1, 1] },
         uAtlasGrid: { value: [1, 1] },
-        // TODO: This should go as soon as we map density to alpha
-        uBackground: { value: [0, 0, 0] },
-        // TODO: This should probably go as soon as we map density to alpha
-        uScanBackground: { value: 0 },
         uContrast: { value: editor.contrast },
         uBrightness: { value: editor.brightness },
-        // TODO: This should go as soon as we map density to alpha
-        uBlueTint: { value: false },
+        uForegroundColor: { value: new THREE.Color("white") },
       },
+      transparent: true,
     });
 
     switch (viewType) {
@@ -58,6 +54,11 @@ export class SliceMaterial extends THREE.ShaderMaterial implements IDisposable {
       autorun(() => {
         this.uniforms.uActiveSlices.value = editor.selectedVoxel.array;
         render();
+      }),
+      autorun(() => {
+        (this.uniforms.uForegroundColor.value as THREE.Color).set(
+          editor.foregroundColor,
+        );
       }),
     );
   }

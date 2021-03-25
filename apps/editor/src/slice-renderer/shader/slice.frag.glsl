@@ -6,10 +6,9 @@ uniform vec3 uVoxelCount;
 uniform vec2 uAtlasGrid;
 
 #ifdef SCAN
-  uniform float uScanBackground;
+  uniform vec3 uForegroundColor;
   uniform float uContrast;
   uniform float uBrightness;
-  uniform bool uBlueTint;
 #endif // SCAN
 
 #ifdef ANNOTATION
@@ -56,14 +55,9 @@ void main() {
   vec4 texelValue = texture2D(uDataTexture, uv);
 
   #ifdef SCAN
-    if(texelValue.x <= uScanBackground)
-      discard;
-    
     float contrastedColor = uBrightness * pow(texelValue.x, uContrast);
 
-    vec3 tintedColor = mix(vec3(0.0, 0.0, uBlueTint ? 0.06 : 0.0), vec3(1.0), contrastedColor);
-
-    gl_FragColor = vec4(tintedColor, 1.0);
+    gl_FragColor = vec4(uForegroundColor, contrastedColor);
   #endif // SCAN
   
   #ifdef ANNOTATION
