@@ -93,6 +93,7 @@ export class SliceRenderer implements IDisposable {
 
   // TODO: Move this to event handling.
   private handleWheel = (event: WheelEvent) => {
+    event.preventDefault();
     if (event.ctrlKey) {
       if (event.deltaY > 0) {
         this.editor.viewSettings.zoomOut();
