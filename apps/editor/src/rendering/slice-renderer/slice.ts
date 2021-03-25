@@ -4,14 +4,21 @@ import * as THREE from "three";
 
 import { SliceMaterial } from "./slice-material";
 import { IDisposable, ViewType } from "./types";
-import { getGeometrySize, scanSliceZ } from "./utils";
+import { Corsshair, crosshairZ, getGeometrySize, imageMeshZ } from "./utils";
 
 import type { Editor } from "../../models";
 
-export class Slice extends THREE.Mesh implements IDisposable {
+export class Slice extends THREE.Group implements IDisposable {
   private baseSize = new THREE.Vector2();
 
   private workingVector = new THREE.Vector2();
+
+  private geometry = new THREE.PlaneGeometry();
+
+  private imageMaterial: SliceMaterial;
+  private imageMesh: THREE.Mesh;
+
+  private crosshair: Corsshair;
 
   private disposers: IDisposer[] = [];
 
@@ -20,24 +27,31 @@ export class Slice extends THREE.Mesh implements IDisposable {
     private viewType: ViewType,
     private render: () => void,
   ) {
-    super(
-      new THREE.PlaneGeometry(),
-      new SliceMaterial(editor, viewType, render),
-    );
+    super();
 
-    this.userData = {
+    this.imageMaterial = new SliceMaterial(editor, viewType, render);
+    this.imageMesh = new THREE.Mesh(this.geometry, this.imageMaterial);
+    this.imageMesh.position.z = imageMeshZ;
+    this.imageMesh.userData = {
       viewType,
     };
+    this.add(this.imageMesh);
+
+    this.crosshair = new Corsshair(this.viewType, this.editor);
+    this.crosshair.position.z = crosshairZ;
+    this.add(this.crosshair);
 
     this.disposers.push(autorun(this.updateScale), autorun(this.updateOffset));
   }
 
   public dispose() {
-    (this.material as SliceMaterial).dispose();
+    this.imageMaterial.dispose();
+    this.crosshair.dispose();
+    this.disposers.forEach((disposer) => disposer());
   }
 
   public setAtlas(atlas: TextureAtlas) {
-    (this.material as SliceMaterial).setAtlas(atlas);
+    this.imageMaterial.setAtlas(atlas);
 
     this.baseSize.copy(getGeometrySize(atlas.voxelCount, this.viewType));
     this.updateScale();
@@ -65,7 +79,7 @@ export class Slice extends THREE.Mesh implements IDisposable {
       );
     }
 
-    this.position.set(this.workingVector.x, this.workingVector.y, scanSliceZ);
+    this.position.set(this.workingVector.x, this.workingVector.y, 0);
 
     this.render();
   };
