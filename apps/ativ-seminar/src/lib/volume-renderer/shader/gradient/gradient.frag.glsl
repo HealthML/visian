@@ -56,7 +56,10 @@ vec4 getImageValue(vec3 voxelCoords) {
   data.density = imageValue.r;
   data.firstDerivative = decodeGradient(texture2D(uInputFirstDerivative, uv));
   data.secondDerivative = decodeGradient(texture2D(uInputSecondDerivative, uv));
-  data.focus = texture2D(uFocus, uv).r;
+  
+  if(uUseFocus) {
+    data.focus = texture2D(uFocus, uv).r;
+  }
 
   vec3 volumeCoords = (voxelCoords + 0.5) / uVoxelCount;
 

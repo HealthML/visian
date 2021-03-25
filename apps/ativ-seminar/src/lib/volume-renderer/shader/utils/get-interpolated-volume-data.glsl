@@ -27,15 +27,21 @@ VolumeData getVolumeData(vec3 volumeCoords) {
   data.secondDerivative = decodeGradient(texture2D(uInputSecondDerivative, uv));
 
   #ifdef NORMAL
-    // Here we don't normalize yet, because we need to interpolate before normalizing.
-    data.normal = decodeGradient(texture2D(uOutputFirstDerivative, uv));
+    if(uLightingMode == 1) {
+      // Here we don't normalize yet, because we need to interpolate before normalizing.
+      data.normal = decodeGradient(texture2D(uOutputFirstDerivative, uv));
+    }
   #endif // NORMAL
 
   #ifdef LAO
-    data.lao = texture2D(uLAO, uv).x;
+    if(uLightingMode == 2) {
+      data.lao = texture2D(uLAO, uv).x;
+    }
   #endif // LAO
   
-  data.focus = texture2D(uFocus, uv).r;
+  if(uUseFocus) {
+    data.focus = texture2D(uFocus, uv).r;
+  }
 
   return data;
 }
@@ -65,16 +71,22 @@ VolumeData getInterpolatedVolumeData(vec3 volumeCoords) {
   interpolatedData.secondDerivative = mix(lowerData.secondDerivative, upperData.secondDerivative, interpolation);
 
   #ifdef NORMAL
-    // Here we normalize after interpolating.
-    interpolatedData.normal = normalize(mix(lowerData.normal, upperData.normal, interpolation));
+    if(uLightingMode == 1) {
+      // Here we normalize after interpolating.
+      interpolatedData.normal = normalize(mix(lowerData.normal, upperData.normal, interpolation));
+    }
   #endif // NORMAL
 
   #ifdef LAO
-    interpolatedData.lao = mix(lowerData.lao, upperData.lao, interpolation);
+    if(uLightingMode == 2) {
+      interpolatedData.lao = mix(lowerData.lao, upperData.lao, interpolation);
+    }
   #endif // LAO
 
-  // The focus texture should not be interpolated.
-  interpolatedData.focus = mix(lowerData.focus, upperData.focus, step(0.5, interpolation));
+  if(uUseFocus) {
+    // The focus texture should not be interpolated.
+    interpolatedData.focus = mix(lowerData.focus, upperData.focus, step(0.5, interpolation));
+  }
 
   return interpolatedData;
 }
