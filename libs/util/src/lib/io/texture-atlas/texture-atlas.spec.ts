@@ -8,6 +8,8 @@ describe("TextureAtlas", () => {
 
     const textureAtlas = new TextureAtlas(
       new THREE.Vector3().setScalar(128),
+      new THREE.Vector3().setScalar(1),
+      new THREE.Matrix3().fromArray([-1, 0, 0, 0, -1, 0, 0, 0, 1]),
     ).setData(data.slice());
 
     expect(textureAtlas.setAtlas(textureAtlas.getAtlas()).getData()).toEqual(

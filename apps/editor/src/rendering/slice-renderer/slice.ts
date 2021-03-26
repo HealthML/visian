@@ -17,7 +17,7 @@ import {
 } from "./utils";
 
 import type { Editor } from "../../models";
-import { Vector } from "../../models/utils";
+import { Vector } from "../../models/utils/vector";
 
 export class Slice extends THREE.Group implements IDisposable {
   private baseSize = new THREE.Vector2();

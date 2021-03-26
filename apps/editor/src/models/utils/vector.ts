@@ -1,8 +1,16 @@
 import { action, makeObservable, observable, toJS } from "mobx";
 
-import { getOrthogonalAxis, ViewType } from "../../rendering";
+import { getOrthogonalAxis } from "../../rendering/slice-renderer/utils";
 
 import type * as THREE from "three";
+import type { ViewType } from "../../rendering/slice-renderer/types";
+
+export class OutOfBoundsError extends Error {
+  constructor(index: number) {
+    super(`Index ${index} is out of bounds.`);
+    this.name = "OutOfBoundsError";
+  }
+}
 
 export interface GenericVector extends THREE.Vector {
   size: number;
@@ -22,9 +30,11 @@ export class Vector implements GenericVector {
     /** The number of elements in this vector. */
     public readonly size = 3,
   ) {
-    this.data = observable(new Array(size).fill(0));
+    this.data = new Array(size).fill(0);
 
-    makeObservable(this, {
+    makeObservable<this, "data">(this, {
+      data: observable,
+
       setComponent: action,
       set: action,
       setScalar: action,
@@ -45,57 +55,63 @@ export class Vector implements GenericVector {
     });
   }
 
-  public get x() {
-    return this.data[0];
-  }
-  public set x(x: number) {
-    this.data[0] = x;
-  }
-
-  public get y() {
-    return this.data[1];
-  }
-  public set y(y: number) {
-    this.data[1] = y;
-  }
-
-  public get z() {
-    return this.data[2];
-  }
-  public set z(z: number) {
-    this.data[2] = z;
-  }
-  /** Alias for `z`. */
-  public get width() {
-    return this.data[2];
-  }
-  /** Alias for `z`. */
-  public set width(width: number) {
-    this.data[2] = width;
-  }
-
-  public get w() {
-    return this.data[3];
-  }
-  public set w(w: number) {
-    this.data[3] = w;
-  }
-  /** Alias for `w`. */
-  public get height() {
-    return this.data[3];
-  }
-  /** Alias for `w`. */
-  public set height(height: number) {
-    this.data[3] = height;
-  }
-
   public setComponent(index: number, value: number) {
+    if (process.env.NODE_ENV !== "production" && this.size <= index) {
+      throw new OutOfBoundsError(index);
+    }
     this.data[index] = value;
     return this;
   }
 
   public getComponent(index: number) {
+    if (process.env.NODE_ENV !== "production" && this.size <= index) {
+      throw new OutOfBoundsError(index);
+    }
     return this.data[index];
+  }
+
+  public get x() {
+    return this.getComponent(0);
+  }
+  public set x(x: number) {
+    this.setComponent(0, x);
+  }
+
+  public get y() {
+    return this.getComponent(1);
+  }
+  public set y(y: number) {
+    this.setComponent(1, y);
+  }
+
+  public get z() {
+    return this.getComponent(2);
+  }
+  public set z(z: number) {
+    this.setComponent(2, z);
+  }
+  /** Alias for `z`. */
+  public get width() {
+    return this.getComponent(2);
+  }
+  /** Alias for `z`. */
+  public set width(width: number) {
+    this.setComponent(2, width);
+  }
+
+  public get w() {
+    return this.getComponent(3);
+  }
+  public set w(w: number) {
+    this.setComponent(3, w);
+  }
+  /** Alias for `w`. */
+  public get height() {
+    return this.getComponent(3);
+  }
+  /** Alias for `w`. */
+  public set height(height: number) {
+    this.setComponent(3, height);
   }
 
   public set(...args: number[]) {
@@ -279,7 +295,7 @@ export class Vector implements GenericVector {
   }
 
   public toArray() {
-    return this.data;
+    return toJS(this.data);
   }
 
   public toJSON() {

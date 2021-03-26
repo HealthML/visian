@@ -1,5 +1,4 @@
 import { action, makeObservable, observable } from "mobx";
-import * as THREE from "three";
 
 import { maxZoom, minZoom } from "../../constants";
 import { getPlaneAxes, ViewType } from "../../rendering";
@@ -27,7 +26,7 @@ export class EditorViewSettings
   public annotationColor = "#ff0000";
   public annotationOpacity = 0.5;
 
-  public selectedVoxel = new Vector(2);
+  public selectedVoxel = new Vector(3);
 
   constructor(protected editor: Editor, protected context?: StoreContext) {
     makeObservable(this, {
