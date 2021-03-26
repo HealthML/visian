@@ -10,7 +10,7 @@ import {
 import { IDisposable, ViewType } from "./types";
 import {
   annotationMeshZ,
-  Corsshair,
+  Crosshair,
   crosshairZ,
   getGeometrySize,
   imageMeshZ,
@@ -36,7 +36,7 @@ export class Slice extends THREE.Group implements IDisposable {
   private annotationMaterial: SliceMaterial;
   private annotationMesh: THREE.Mesh;
 
-  private crosshair: Corsshair;
+  private crosshair: Crosshair;
 
   private disposers: IDisposer[] = [];
 
@@ -69,7 +69,7 @@ export class Slice extends THREE.Group implements IDisposable {
     this.annotationMesh.position.z = annotationMeshZ;
     this.crosshairShiftGroup.add(this.annotationMesh);
 
-    this.crosshair = new Corsshair(this.viewType, this.editor);
+    this.crosshair = new Crosshair(this.viewType, this.editor);
     this.crosshair.position.z = crosshairZ;
     this.crosshairShiftGroup.add(this.crosshair);
 

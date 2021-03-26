@@ -6,7 +6,7 @@ import { crosshair as lineMaterialProps } from "../../../theme";
 import { IDisposable, ViewType } from "../types";
 import { getPlaneAxes } from "./conversion";
 
-export class Corsshair extends THREE.Group implements IDisposable {
+export class Crosshair extends THREE.Group implements IDisposable {
   private size = new THREE.Vector2();
 
   private horizontalLine: THREE.Line;
@@ -84,4 +84,4 @@ export class Corsshair extends THREE.Group implements IDisposable {
   };
 }
 
-export default Corsshair;
+export default Crosshair;
