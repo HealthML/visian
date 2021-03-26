@@ -2,6 +2,7 @@ import * as THREE from "three";
 
 import { Editor } from "../../../models";
 import { Image } from "../../../models/editor/image";
+import { ViewType } from "../types";
 import { getMaxSpriteSize } from "./slice-size";
 
 export const getSpriteAspectRatio = (image: Image) => {
@@ -99,4 +100,39 @@ export const setMainCameraPlanes = (
   mainCamera.bottom = spriteEdgePlanes.bottom;
 
   mainCamera.updateProjectionMatrix();
+};
+
+export const getOrder = (mainView: ViewType) => {
+  const order = [mainView];
+
+  switch (mainView) {
+    case ViewType.Transverse:
+      order[1] = ViewType.Sagittal;
+      order[2] = ViewType.Coronal;
+      break;
+    case ViewType.Sagittal:
+      order[1] = ViewType.Transverse;
+      order[2] = ViewType.Coronal;
+      break;
+    case ViewType.Coronal:
+      order[1] = ViewType.Transverse;
+      order[2] = ViewType.Sagittal;
+      break;
+  }
+
+  return order;
+};
+
+export const resizeRenderer = (
+  renderer: THREE.WebGLRenderer,
+  eagerRender?: () => void,
+) => {
+  if (!renderer.domElement.parentElement) return;
+
+  renderer.setSize(
+    renderer.domElement.parentElement.clientWidth,
+    renderer.domElement.parentElement.clientHeight,
+  );
+
+  if (eagerRender) eagerRender();
 };
