@@ -17,6 +17,7 @@ const SideView = styled(Sheet)`
   border-radius: 10px;
   margin-top: 40px;
   padding-bottom: 100%;
+  pointer-events: auto;
   position: relative;
   user-select: none;
   width: 100%;

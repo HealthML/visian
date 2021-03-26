@@ -1,20 +1,43 @@
+import {
+  globalListenerTypes,
+  IDispatch,
+  registerDispatch,
+  transformGesturePreset,
+} from "@visian/ui-shared";
+import { IDisposer } from "@visian/util";
+
 import { setUpHotKeys } from "./hotkeys";
 
 import type { RootStore } from "../models";
-import {
-  globalListenerTypes,
-  pointerPreset,
-  registerDispatch,
-} from "./pointers";
-
-export const setUpEventHandling = (store: RootStore) => {
+export const setUpEventHandling = (
+  store: RootStore,
+): [IDispatch, IDisposer] => {
   setUpHotKeys(store);
-  const dispatch = pointerPreset((pointer, data) => {
-    // console.log(data.eventType, pointer);
+
+  const dispatch = transformGesturePreset(({ id, eventType, gesture }) => {
+    if (!store.editor.sliceRenderer) return;
+
+    if (id !== "mainCanvas") return;
+    if (eventType === "start" || eventType === "rebase") {
+      const transformOrigin = store.editor.sliceRenderer.getMainViewScreenPosition(
+        store.editor.viewSettings.offset,
+      );
+      gesture.setStartTransform({
+        translateX: transformOrigin.x,
+        translateY: transformOrigin.y,
+        scale: store.editor.viewSettings.zoomLevel,
+      });
+    }
+
+    const transform = gesture.getTransformed();
+    store.editor.viewSettings.setZoomLevel(transform.scale);
+    store.editor.viewSettings.setOffset(
+      store.editor.sliceRenderer.getMainViewWebGLPosition({
+        x: transform.translateX,
+        y: transform.translateY,
+      }),
+    );
   });
 
-  /* document.addEventListener("pointerdown", (event) => dispatch(event, "0"), {
-    passive: false,
-  }); */
-  registerDispatch(dispatch, globalListenerTypes);
+  return [dispatch, registerDispatch(dispatch, globalListenerTypes)];
 };

@@ -77,7 +77,7 @@ export interface PointerDetail {
  */
 export class Pointer<ID = string> {
   constructor(
-    /** Associates the pointer with a ui element. */
+    /** The id of the associated domain object. */
     public id: ID,
     /** Pointer detail, stores the current pointer position. */
     public detail: PointerDetail,
@@ -143,3 +143,9 @@ export type EventMiddleware<
   D extends EventData = EventData,
   T = { [key: string]: unknown }
 > = (data: D, context: T) => void;
+
+export type IDispatch<ID = string> = (
+  event: EventLike,
+  id?: ID,
+  ...args: unknown[]
+) => void;

@@ -4,6 +4,7 @@ import { deepObserve } from "@visian/util";
 
 import { Editor, EditorSnapshot } from "./editor";
 import { ISerializable } from "./types";
+import { IDispatch } from "../event-handling/pointers";
 
 export interface RootSnapshot {
   editor: EditorSnapshot;
@@ -24,6 +25,7 @@ export class RootStore implements ISerializable<RootSnapshot> {
   public isDirty = false;
 
   public refs: { [key: string]: React.RefObject<HTMLElement> } = {};
+  public pointerDispatch?: IDispatch;
 
   constructor(protected config: RootStoreConfig = {}) {
     this.editor = new Editor({

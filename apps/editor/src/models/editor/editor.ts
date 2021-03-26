@@ -7,6 +7,8 @@ import { ISerializable, StoreContext } from "../types";
 import { Image, ImageSnapshot } from "./image";
 import { EditorViewSettings } from "./view-settings";
 
+import type { SliceRenderer } from "../../rendering";
+
 export interface EditorSnapshot {
   backgroundColor: string;
   image?: ImageSnapshot;
@@ -18,7 +20,10 @@ export class Editor implements ISerializable<EditorSnapshot> {
     ...EditorViewSettings.excludeFromSnapshotTracking.map(
       (path) => `/viewSettings${path}`,
     ),
+    "/sliceRenderer",
   ];
+
+  public sliceRenderer?: SliceRenderer;
 
   // Layers
   public foregroundColor = "#ffffff";
@@ -32,6 +37,7 @@ export class Editor implements ISerializable<EditorSnapshot> {
     this.viewSettings = new EditorViewSettings(this, context);
 
     makeObservable(this, {
+      sliceRenderer: observable,
       foregroundColor: observable,
       image: observable,
       annotation: observable,
@@ -39,6 +45,7 @@ export class Editor implements ISerializable<EditorSnapshot> {
 
       theme: computed,
 
+      setSliceRenderer: action,
       setForegroundColor: action,
       setImage: action,
       setAnnotation: action,
@@ -51,6 +58,10 @@ export class Editor implements ISerializable<EditorSnapshot> {
     return tc(this.backgroundColor).getBrightness() / 255 > 0.5
       ? "light"
       : "dark";
+  }
+
+  public setSliceRenderer(sliceRenderer?: SliceRenderer) {
+    this.sliceRenderer = sliceRenderer;
   }
 
   public setForegroundColor(foregroundColor: string) {

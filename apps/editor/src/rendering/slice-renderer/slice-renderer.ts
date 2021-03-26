@@ -5,7 +5,12 @@ import * as THREE from "three";
 
 import { Slice } from "./slice";
 import { IDisposable, viewTypes } from "./types";
-import { getOrder, resizeRenderer, setMainCameraPlanes } from "./utils";
+import {
+  getOrder,
+  getWebGLSize,
+  resizeRenderer,
+  setMainCameraPlanes,
+} from "./utils";
 
 import type { Editor } from "../../models";
 import type { Image } from "../../models/editor/image";
@@ -117,6 +122,42 @@ export class SliceRenderer implements IDisposable {
   public lazyRender = () => {
     this.lazyRenderTriggered = true;
   };
+
+  public getMainViewWebGLSize() {
+    return getWebGLSize(this.mainCamera);
+  }
+
+  /** Converts a WebGL position to a screen space one. */
+  public getMainViewScreenPosition(webGLPosition: { x: number; y: number }) {
+    const boundingBox = this.mainCanvas.getBoundingClientRect();
+    const webGLSize = this.getMainViewWebGLSize();
+    return {
+      x:
+        ((webGLPosition.x - this.mainCamera.left) / webGLSize.x) *
+          boundingBox.width +
+        boundingBox.left,
+      y:
+        ((webGLPosition.y - this.mainCamera.top) / -webGLSize.y) *
+          boundingBox.height +
+        boundingBox.top,
+    };
+  }
+
+  /** Converts a screen space position to a WebGL one. */
+  public getMainViewWebGLPosition(screenPosition: { x: number; y: number }) {
+    const boundingBox = this.mainCanvas.getBoundingClientRect();
+    const webGLSize = this.getMainViewWebGLSize();
+    return {
+      x:
+        ((screenPosition.x - boundingBox.left) / boundingBox.width) *
+          webGLSize.x +
+        this.mainCamera.left,
+      y:
+        ((screenPosition.y - boundingBox.top) / boundingBox.height) *
+          -webGLSize.y +
+        this.mainCamera.top,
+    };
+  }
 
   private get canvases() {
     return [this.mainCanvas, this.upperSideCanvas, this.lowerSideCanvas];

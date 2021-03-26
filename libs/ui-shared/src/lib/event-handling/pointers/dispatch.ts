@@ -4,6 +4,7 @@ import {
   EventLike,
   EventMap,
   EventMiddleware,
+  IDispatch,
   PointerEventData,
   PointerState,
 } from "./types";
@@ -21,7 +22,7 @@ export const dispatch = <ID = string>(
     | false
     | undefined
   )[],
-) => {
+): IDispatch<ID> => {
   const context: PointerState<ID> = { pointers: {} };
 
   return (event: EventLike, id?: ID, ...args: unknown[]) => {
@@ -53,7 +54,7 @@ export const globalListenerTypes: (keyof EventMap)[] = [
  * @param element The element (defaults to `document`).
  */
 export const registerDispatch = <ID = string>(
-  dispatchFunction: (event: EventLike, id?: ID, ...args: unknown[]) => void,
+  dispatchFunction: IDispatch<ID>,
   eventTypes: (keyof EventMap)[],
   element: EventTarget = document,
 ): IDisposer => {

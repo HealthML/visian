@@ -15,9 +15,9 @@ export const buildPointerDetail = (event: PointerEvent) => ({
   clientY: event.clientY,
   event,
   pressure: event.buttons ? event.pressure || 1 : 0,
-  tiltX: event.tiltX,
-  tiltY: event.tiltY,
-  twist: event.twist,
+  tiltX: event.tiltX || 0,
+  tiltY: event.tiltY || 0,
+  twist: event.twist || 0,
 });
 
 const buildPointer = <ID = string>(
@@ -104,7 +104,7 @@ export const pointerAdapter = <
   }
 };
 
-/** Pointer mapper, generates actions from pointers. */
+/** Pointer mapper, runs the mapping function for every pointer. */
 export const forPointers = <ID = string>(
   mappingFunction: (pointer: Pointer<ID>, data: PointerEventData<ID>) => void,
 ) => (data: PointerEventData<ID>) => {

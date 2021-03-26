@@ -18,11 +18,19 @@ function App() {
   const [isReady, setIsReady] = useState(false);
   const rootStoreRef = useRef<RootStore | null>(null);
   useEffect(() => {
-    Promise.all([setupRootStore(), initI18n()]).then(([rootStore]) => {
-      rootStoreRef.current = rootStore;
-      setUpEventHandling(rootStore);
-      setIsReady(true);
-    });
+    const result = Promise.all([setupRootStore(), initI18n()]).then(
+      ([rootStore]) => {
+        rootStoreRef.current = rootStore;
+        const [dispatch, dispose] = setUpEventHandling(rootStore);
+        rootStore.pointerDispatch = dispatch;
+
+        setIsReady(true);
+        return dispose;
+      },
+    );
+    return () => {
+      result.then((dispose) => dispose());
+    };
   }, []);
 
   const themeName = rootStoreRef.current?.editor.theme || "dark";

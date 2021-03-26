@@ -1,5 +1,14 @@
 import { ViewType } from "../types";
 
+import type * as THREE from "three";
+
+export const getWebGLSize = (camera: THREE.OrthographicCamera) => {
+  return {
+    x: camera.right - camera.left,
+    y: camera.top - camera.bottom,
+  };
+};
+
 /**
  * Returns the name of the coordinate orthogonal to the given view type.
  *

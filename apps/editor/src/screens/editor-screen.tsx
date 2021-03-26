@@ -1,11 +1,12 @@
 import {
   AbsoluteCover,
+  EventLike,
   Screen,
   useIsDraggedOver,
   WebGLCanvas,
 } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef } from "react";
 
 import { useStore } from "../app/root-store";
 import { UIOverlay } from "../components/editor";
@@ -16,22 +17,30 @@ export const EditorScreen: React.FC = observer(() => {
 
   const store = useStore();
 
-  const [, setRenderer] = useState<SliceRenderer | undefined>();
   useEffect(() => {
-    let newRenderer: SliceRenderer | undefined;
     if (canvasRef.current && store) {
-      newRenderer = new SliceRenderer(
-        canvasRef.current,
-        store.refs.upperSideView.current as HTMLCanvasElement,
-        store.refs.lowerSideView.current as HTMLCanvasElement,
-        store.editor,
+      store.editor.setSliceRenderer(
+        new SliceRenderer(
+          canvasRef.current,
+          store.refs.upperSideView.current as HTMLCanvasElement,
+          store.refs.lowerSideView.current as HTMLCanvasElement,
+          store.editor,
+        ),
       );
-      setRenderer(newRenderer);
     }
     return () => {
-      newRenderer?.dispose();
+      store?.editor.sliceRenderer?.dispose();
     };
   }, [store]);
+
+  const pointerDispatch = store?.pointerDispatch;
+  const onPointerDown = useCallback(
+    (event: EventLike) => {
+      if (!pointerDispatch) return;
+      pointerDispatch(event, "mainCanvas");
+    },
+    [pointerDispatch],
+  );
 
   const [isDraggedOver, { onDrop, ...dragListeners }] = useIsDraggedOver();
   return (
@@ -39,6 +48,7 @@ export const EditorScreen: React.FC = observer(() => {
       <AbsoluteCover>
         <WebGLCanvas
           backgroundColor={store?.editor.backgroundColor}
+          onPointerDown={onPointerDown}
           ref={canvasRef}
         />
       </AbsoluteCover>
