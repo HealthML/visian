@@ -126,6 +126,12 @@ export class SliceRenderer implements IDisposable {
           );
         },
       ),
+      reaction(
+        () => editor.viewSettings.shouldShowSideViews,
+        (show: boolean) => {
+          if (show) this.lazyRender();
+        },
+      ),
     );
 
     this.renderers[0].setAnimationLoop(this.animate);
