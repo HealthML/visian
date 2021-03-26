@@ -1,10 +1,9 @@
-import { IStorageBackend } from "@visian/ui-shared";
-import { action, makeObservable, observable } from "mobx";
+import { IDispatch, IStorageBackend } from "@visian/ui-shared";
 import { deepObserve } from "@visian/util";
+import { action, makeObservable, observable } from "mobx";
 
 import { Editor, EditorSnapshot } from "./editor";
 import { ISerializable } from "./types";
-import { IDispatch } from "../event-handling/pointers";
 
 export interface RootSnapshot {
   editor: EditorSnapshot;
