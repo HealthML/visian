@@ -40,6 +40,7 @@ export class EditorViewSettings
       setBrightness: action,
       setContrast: action,
       setMainView: action,
+      toggleSideViews: action,
       setZoomLevel: action,
       zoomIn: action,
       zoomOut: action,
@@ -59,6 +60,10 @@ export class EditorViewSettings
 
   public setMainView(value: ViewType) {
     this.mainViewType = value;
+  }
+
+  public toggleSideViews(value = !this.shouldShowSideViews) {
+    this.shouldShowSideViews = value;
   }
 
   public setZoomLevel(value = 1) {
