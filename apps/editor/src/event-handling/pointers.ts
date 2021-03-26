@@ -13,7 +13,7 @@ export const setUpPointerHandling = (
   store: RootStore,
 ): [IDispatch, IDisposer] => {
   const dispatch = transformGesturePreset({
-    forPointers: ({ context, detail }) => {
+    forPointers: ({ context, detail, id }) => {
       context.useForGesture = Boolean(
         context.device === "touch" ||
           context.button === PointerButton.MMB ||
@@ -22,6 +22,7 @@ export const setUpPointerHandling = (
       );
 
       if (!context.useForGesture) {
+        // TODO: Side view handlers
         store.editor.viewSettings.moveCrosshair({
           x: detail.clientX,
           y: detail.clientY,

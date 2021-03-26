@@ -17,6 +17,7 @@ import {
 } from "./utils";
 
 import type { Editor } from "../../models";
+import { Vector } from "../../models/utils";
 
 export class Slice extends THREE.Group implements IDisposable {
   private baseSize = new THREE.Vector2();
@@ -86,7 +87,12 @@ export class Slice extends THREE.Group implements IDisposable {
     this.imageMaterial.setAtlas(atlas);
 
     this.baseSize.copy(
-      getGeometrySize(atlas.voxelCount, atlas.voxelSpacing, this.viewType),
+      // TODO: Rework once the texture atlas has been refactored
+      getGeometrySize(
+        Vector.fromArray(atlas.voxelCount.toArray()),
+        Vector.fromArray(atlas.voxelSpacing.toArray()),
+        this.viewType,
+      ),
     );
     this.updateScale();
   }

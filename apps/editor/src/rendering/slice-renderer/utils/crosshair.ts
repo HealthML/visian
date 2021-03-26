@@ -17,8 +17,6 @@ export class Crosshair extends THREE.Group implements IDisposable {
   private widthAxis: "x" | "y" | "z";
   private heightAxis: "x" | "y" | "z";
 
-  private workingVector = new THREE.Vector3();
-
   private disposers: IReactionDisposer[] = [];
 
   constructor(viewType: ViewType, private editor: Editor) {
@@ -65,16 +63,10 @@ export class Crosshair extends THREE.Group implements IDisposable {
     const x =
       1 -
       (this.editor.viewSettings.selectedVoxel[this.widthAxis] + 0.5) /
-        // TODO: Adapt once voxelCount is a Voxel or Vector.
-        this.workingVector.fromArray(this.editor.image.voxelCount)[
-          this.widthAxis
-        ];
+        this.editor.image.voxelCount[this.widthAxis];
     const y =
       (this.editor.viewSettings.selectedVoxel[this.heightAxis] + 0.5) /
-      // TODO: Adapt once voxelCount is a Voxel or Vector.
-      this.workingVector.fromArray(this.editor.image.voxelCount)[
-        this.heightAxis
-      ];
+      this.editor.image.voxelCount[this.heightAxis];
 
     this.verticalLine.visible = x >= 0 && x <= 1;
     this.verticalLine.position.x = x - 0.5;

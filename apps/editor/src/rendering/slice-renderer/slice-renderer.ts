@@ -92,8 +92,9 @@ export class SliceRenderer implements IDisposable {
           if (!image) return;
           this.setImage(
             new TextureAtlas(
-              new THREE.Vector3().fromArray(image.voxelCount),
-              new THREE.Vector3().fromArray(image.voxelSpacing),
+              // TODO: Rework once the texture atlas has been refactored
+              new THREE.Vector3().fromArray(image.voxelCount.toArray()),
+              new THREE.Vector3().fromArray(image.voxelSpacing.toArray()),
               new THREE.Matrix3().fromArray(image.orientation.data),
               THREE.NearestFilter,
             ).setData(image.data),
@@ -106,8 +107,11 @@ export class SliceRenderer implements IDisposable {
         (annotation?: Image) => {
           const atlas = annotation
             ? new TextureAtlas(
-                new THREE.Vector3().fromArray(annotation.voxelCount),
-                new THREE.Vector3().fromArray(annotation.voxelSpacing),
+                // TODO: Rework once the texture atlas has been refactored
+                new THREE.Vector3().fromArray(annotation.voxelCount.toArray()),
+                new THREE.Vector3().fromArray(
+                  annotation.voxelSpacing.toArray(),
+                ),
                 new THREE.Matrix3().fromArray(annotation.orientation.data),
                 THREE.NearestFilter,
               ).setData(annotation.data)

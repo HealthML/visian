@@ -1,11 +1,9 @@
 import * as THREE from "three";
 
+import { Vector } from "../../../models/utils";
 import { ViewType } from "../types";
 
-export const getSpriteSizes = (
-  voxelCount: THREE.Vector3,
-  voxelSpacing: THREE.Vector3,
-) => {
+export const getSpriteSizes = (voxelCount: Vector, voxelSpacing: Vector) => {
   const spriteWidths: number[] = [];
   spriteWidths[ViewType.Transverse] = voxelCount.x * voxelSpacing.x;
   spriteWidths[ViewType.Sagittal] = voxelCount.y * voxelSpacing.y;
@@ -19,10 +17,7 @@ export const getSpriteSizes = (
   return [spriteWidths, spriteHeights];
 };
 
-export const getMaxSpriteSize = (
-  voxelCount: THREE.Vector3,
-  voxelSpacing: THREE.Vector3,
-) => {
+export const getMaxSpriteSize = (voxelCount: Vector, voxelSpacing: Vector) => {
   const [spriteWidths, spriteHeights] = getSpriteSizes(
     voxelCount,
     voxelSpacing,
@@ -34,10 +29,7 @@ export const getMaxSpriteSize = (
   };
 };
 
-export const getGeometrySizes = (
-  voxelCount: THREE.Vector3,
-  voxelSpacing: THREE.Vector3,
-) => {
+export const getGeometrySizes = (voxelCount: Vector, voxelSpacing: Vector) => {
   const maxSpriteSize = getMaxSpriteSize(voxelCount, voxelSpacing);
   const maxDimension = Math.max(maxSpriteSize.x, maxSpriteSize.y);
 
@@ -61,8 +53,8 @@ export const getGeometrySizes = (
 };
 
 export const getGeometrySize = (
-  voxelCount: THREE.Vector3,
-  voxelSpacing: THREE.Vector3,
+  voxelCount: Vector,
+  voxelSpacing: Vector,
   viewType: ViewType,
 ) => {
   const [geometryWidths, geometryHeights] = getGeometrySizes(

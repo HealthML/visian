@@ -50,8 +50,7 @@ export abstract class SliceMaterial
 
     this.disposers.push(
       autorun(() => {
-        this.uniforms.uActiveSlices.value =
-          editor.viewSettings.selectedVoxel.array;
+        this.uniforms.uActiveSlices.value = editor.viewSettings.selectedVoxel.toArray();
         render();
       }),
     );

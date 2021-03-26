@@ -4,8 +4,7 @@ import * as THREE from "three";
 import { maxZoom, minZoom } from "../../constants";
 import { getPlaneAxes, ViewType } from "../../rendering";
 import { ISerializable, StoreContext } from "../types";
-import { getZoomStep, Pixel } from "../utils";
-import { Voxel } from "../utils/voxel";
+import { getZoomStep, Vector } from "../utils";
 
 import type { Editor } from "./editor";
 
@@ -23,12 +22,12 @@ export class EditorViewSettings
   public shouldShowSideViews = true;
 
   public zoomLevel = 1;
-  public offset = new Pixel();
+  public offset = new Vector(2);
 
   public annotationColor = "#ff0000";
   public annotationOpacity = 0.5;
 
-  public selectedVoxel = new Voxel();
+  public selectedVoxel = new Vector(2);
 
   constructor(protected editor: Editor, protected context?: StoreContext) {
     makeObservable(this, {
@@ -106,15 +105,9 @@ export class EditorViewSettings
   }
 
   public setSelectedVoxel(
-    x = this.editor.image
-      ? Math.round(this.editor.image?.voxelCount[0] / 2)
-      : 0,
-    y = this.editor.image
-      ? Math.round(this.editor.image?.voxelCount[1] / 2)
-      : 0,
-    z = this.editor.image
-      ? Math.round(this.editor.image?.voxelCount[2] / 2)
-      : 0,
+    x = this.editor.image ? Math.round(this.editor.image?.voxelCount.x / 2) : 0,
+    y = this.editor.image ? Math.round(this.editor.image?.voxelCount.y / 2) : 0,
+    z = this.editor.image ? Math.round(this.editor.image?.voxelCount.z / 2) : 0,
   ) {
     this.selectedVoxel.set(x, y, z);
   }
@@ -126,8 +119,7 @@ export class EditorViewSettings
       viewType,
       Math.min(
         Math.max(Math.round(value), 0),
-        // TODO: Adapt once voxelCount is a Voxel.
-        this.editor.image.voxelCount[(viewType + 2) % 3] - 1,
+        this.editor.image.voxelCount.getComponent((viewType + 2) % 3) - 1,
       ),
     );
   }
@@ -152,18 +144,11 @@ export class EditorViewSettings
     const { viewType } = intersection.object.userData;
     const [widthAxis, heightAxis] = getPlaneAxes(viewType);
 
-    // TODO: Adapt once voxelCount is a Voxel or Vector3.
-    const voxelCount = new THREE.Vector3().fromArray(
-      this.editor.image.voxelCount,
+    this.selectedVoxel[widthAxis] = Math.floor(
+      (1 - intersection.uv.x) * this.editor.image.voxelCount[widthAxis],
     );
-
-    this.selectedVoxel.setComponent(
-      widthAxis,
-      Math.floor((1 - intersection.uv.x) * voxelCount[widthAxis]),
-    );
-    this.selectedVoxel.setComponent(
-      heightAxis,
-      Math.floor(intersection.uv.y * voxelCount[heightAxis]),
+    this.selectedVoxel[heightAxis] = Math.floor(
+      intersection.uv.y * this.editor.image.voxelCount[heightAxis],
     );
   }
 

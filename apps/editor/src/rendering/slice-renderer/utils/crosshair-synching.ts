@@ -31,15 +31,13 @@ export const getCrosshairOffset = (viewType: ViewType, editor: Editor) => {
   const crosshairOffset = new THREE.Vector2();
   if (!editor.image) return crosshairOffset;
 
-  // TODO: Adapt once image.voxelCount is a Voxel or Vector.
-  const voxelCount = new THREE.Vector3().fromArray(editor.image.voxelCount);
   crosshairOffset.set(
     0.5 -
       (editor.viewSettings.selectedVoxel[widthAxis] + 0.5) /
-        voxelCount[widthAxis],
+        editor.image.voxelCount[widthAxis],
     -0.5 +
       (editor.viewSettings.selectedVoxel[heightAxis] + 0.5) /
-        voxelCount[heightAxis],
+        editor.image.voxelCount[heightAxis],
   );
 
   return crosshairOffset;
