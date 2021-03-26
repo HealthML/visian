@@ -24,6 +24,9 @@ export class EditorViewSettings
   public zoomLevel = 1;
   public offset = new Pixel();
 
+  public annotationColor = "#ff0000";
+  public annotationOpacity = 0.5;
+
   public selectedVoxel = new Voxel();
 
   constructor(protected editor: Editor, protected context?: StoreContext) {
@@ -34,16 +37,21 @@ export class EditorViewSettings
       shouldShowSideViews: observable,
       zoomLevel: observable,
       offset: observable,
+      annotationColor: observable,
+      annotationOpacity: observable,
       selectedVoxel: observable,
 
       applySnapshot: action,
       setBrightness: action,
       setContrast: action,
       setMainView: action,
+      toggleSideViews: action,
       setZoomLevel: action,
       zoomIn: action,
       zoomOut: action,
       setOffset: action,
+      setAnnotationColor: action,
+      setAnnotationOpacity: action,
       setSelectedVoxel: action,
       setSelectedSlice: action,
       stepSelectedSlice: action,
@@ -59,6 +67,10 @@ export class EditorViewSettings
 
   public setMainView(value: ViewType) {
     this.mainViewType = value;
+  }
+
+  public toggleSideViews(value = !this.shouldShowSideViews) {
+    this.shouldShowSideViews = value;
   }
 
   public setZoomLevel(value = 1) {
@@ -81,6 +93,14 @@ export class EditorViewSettings
 
   public setOffset({ x = 0, y = 0 }) {
     this.offset.set(x, y);
+  }
+
+  public setAnnotationColor(value: string) {
+    this.annotationColor = value;
+  }
+
+  public setAnnotationOpacity(value = 0.5) {
+    this.annotationOpacity = value;
   }
 
   public setSelectedVoxel(

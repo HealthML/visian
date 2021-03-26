@@ -80,15 +80,28 @@ export class SliceRenderer implements IDisposable {
       reaction(
         () => editor.image,
         (image?: Image) => {
-          if (image) {
-            this.setImage(
-              new TextureAtlas(
-                new THREE.Vector3().fromArray(image.voxelCount),
-                new THREE.Vector3().fromArray(image.voxelSpacing),
+          if (!image) return;
+          this.setImage(
+            new TextureAtlas(
+              new THREE.Vector3().fromArray(image.voxelCount),
+              new THREE.Vector3().fromArray(image.voxelSpacing),
+              THREE.NearestFilter,
+            ).setData(image.data),
+          );
+        },
+        { fireImmediately: true },
+      ),
+      reaction(
+        () => editor.annotation,
+        (annotation?: Image) => {
+          const atlas = annotation
+            ? new TextureAtlas(
+                new THREE.Vector3().fromArray(annotation.voxelCount),
+                new THREE.Vector3().fromArray(annotation.voxelSpacing),
                 THREE.NearestFilter,
-              ).setData(image.data),
-            );
-          }
+              ).setData(annotation.data)
+            : undefined;
+          this.setAnnotation(atlas);
         },
         { fireImmediately: true },
       ),
@@ -195,9 +208,15 @@ export class SliceRenderer implements IDisposable {
     }
   };
 
-  public setImage(atlas: TextureAtlas) {
-    this.slices.forEach((slice) => slice.setAtlas(atlas));
+  private setImage(atlas: TextureAtlas) {
+    this.slices.forEach((slice) => slice.setImage(atlas));
     this.isImageLoaded = true;
+
+    this.lazyRender();
+  }
+
+  private setAnnotation(atlas?: TextureAtlas) {
+    this.slices.forEach((slice) => slice.setAnnotation(atlas));
 
     this.lazyRender();
   }
