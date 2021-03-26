@@ -85,7 +85,9 @@ export class Slice extends THREE.Group implements IDisposable {
   public setImage(atlas: TextureAtlas) {
     this.imageMaterial.setAtlas(atlas);
 
-    this.baseSize.copy(getGeometrySize(atlas.voxelCount, this.viewType));
+    this.baseSize.copy(
+      getGeometrySize(atlas.voxelCount, atlas.voxelSpacing, this.viewType),
+    );
     this.updateScale();
   }
 

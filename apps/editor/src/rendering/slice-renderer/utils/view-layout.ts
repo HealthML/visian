@@ -7,7 +7,10 @@ import { getMaxSpriteSize } from "./slice-size";
 
 export const getSpriteAspectRatio = (image: Image) => {
   const maxSpriteSize = getMaxSpriteSize(
+    // TODO: Adapt once image.voxelCount is a Voxel or Vector.
     new THREE.Vector3().fromArray(image.voxelCount),
+    // TODO: Adapt once image.voxelSpacing is a Voxel or Vector.
+    new THREE.Vector3().fromArray(image.voxelSpacing),
   );
   return maxSpriteSize.x / maxSpriteSize.y;
 };
