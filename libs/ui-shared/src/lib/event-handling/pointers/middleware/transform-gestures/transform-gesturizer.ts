@@ -79,7 +79,6 @@ export const gesturizeTransformations = <
   T extends TransformGestureState<ID> &
     PointerState<ID> = TransformGestureState<ID> & PointerState<ID>
 >(
-  splitRebaseEvents = true,
   pointerPredicate?: (
     pointer: Pointer<ID>,
     data: TransformGestureEventData<ID>,
