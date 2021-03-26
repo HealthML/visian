@@ -8,25 +8,31 @@ import { IDisposable, ViewType } from "./types";
 
 import type { Editor } from "../../models";
 
-export class SliceMaterial extends THREE.ShaderMaterial implements IDisposable {
-  private disposers: IDisposer[] = [];
+export abstract class SliceMaterial
+  extends THREE.ShaderMaterial
+  implements IDisposable {
+  protected disposers: IDisposer[] = [];
 
-  constructor(editor: Editor, viewType: ViewType, render: () => void) {
+  constructor(
+    editor: Editor,
+    viewType: ViewType,
+    render: () => void,
+    defines = {},
+    uniforms = {},
+  ) {
     super({
-      defines: {
-        SCAN: "",
-      },
+      defines,
       vertexShader,
       fragmentShader,
-      uniforms: {
-        uDataTexture: { value: null },
-        uActiveSlices: { value: [0, 0, 0] },
-        uVoxelCount: { value: [1, 1, 1] },
-        uAtlasGrid: { value: [1, 1] },
-        uContrast: { value: editor.viewSettings.contrast },
-        uBrightness: { value: editor.viewSettings.brightness },
-        uForegroundColor: { value: new THREE.Color("white") },
-      },
+      uniforms: THREE.UniformsUtils.merge([
+        {
+          uDataTexture: { value: null },
+          uActiveSlices: { value: [0, 0, 0] },
+          uVoxelCount: { value: [1, 1, 1] },
+          uAtlasGrid: { value: [1, 1] },
+        },
+        uniforms,
+      ]),
       transparent: true,
     });
 
@@ -44,22 +50,9 @@ export class SliceMaterial extends THREE.ShaderMaterial implements IDisposable {
 
     this.disposers.push(
       autorun(() => {
-        this.uniforms.uContrast.value = editor.viewSettings.contrast;
-        render();
-      }),
-      autorun(() => {
-        this.uniforms.uBrightness.value = editor.viewSettings.brightness;
-        render();
-      }),
-      autorun(() => {
         this.uniforms.uActiveSlices.value =
           editor.viewSettings.selectedVoxel.array;
         render();
-      }),
-      autorun(() => {
-        (this.uniforms.uForegroundColor.value as THREE.Color).set(
-          editor.foregroundColor,
-        );
       }),
     );
   }
@@ -74,5 +67,66 @@ export class SliceMaterial extends THREE.ShaderMaterial implements IDisposable {
     this.uniforms.uDataTexture.value = atlas.getTexture();
     this.uniforms.uVoxelCount.value = atlas.voxelCount;
     this.uniforms.uAtlasGrid.value = atlas.atlasGrid;
+  }
+}
+
+export default SliceMaterial;
+
+export class ImageSliceMaterial extends SliceMaterial {
+  constructor(editor: Editor, viewType: ViewType, render: () => void) {
+    super(
+      editor,
+      viewType,
+      render,
+      { IMAGE: "" },
+      {
+        uContrast: { value: editor.viewSettings.contrast },
+        uBrightness: { value: editor.viewSettings.brightness },
+        uForegroundColor: { value: new THREE.Color("white") },
+      },
+    );
+
+    this.disposers.push(
+      autorun(() => {
+        this.uniforms.uContrast.value = editor.viewSettings.contrast;
+        render();
+      }),
+      autorun(() => {
+        this.uniforms.uBrightness.value = editor.viewSettings.brightness;
+        render();
+      }),
+      autorun(() => {
+        (this.uniforms.uForegroundColor.value as THREE.Color).set(
+          editor.foregroundColor,
+        );
+      }),
+    );
+  }
+}
+
+export class AnnotationSliceMaterial extends SliceMaterial {
+  constructor(editor: Editor, viewType: ViewType, render: () => void) {
+    super(
+      editor,
+      viewType,
+      render,
+      { ANNOTATION: "" },
+      {
+        uAnnotationColor: { value: new THREE.Color("red") },
+        uAnnotationOpacity: { value: 0.5 },
+      },
+    );
+
+    this.disposers.push(
+      autorun(() => {
+        (this.uniforms.uAnnotationColor.value as THREE.Color).set(
+          editor.viewSettings.annotationColor,
+        );
+      }),
+      autorun(() => {
+        this.uniforms.uAnnotationOpacity.value =
+          editor.viewSettings.annotationOpacity;
+      }),
+    );
   }
 }

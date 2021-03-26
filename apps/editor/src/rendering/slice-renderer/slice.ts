@@ -2,9 +2,19 @@ import { IDisposer, TextureAtlas } from "@visian/util";
 import { autorun } from "mobx";
 import * as THREE from "three";
 
-import { SliceMaterial } from "./slice-material";
+import {
+  AnnotationSliceMaterial,
+  ImageSliceMaterial,
+  SliceMaterial,
+} from "./slice-material";
 import { IDisposable, ViewType } from "./types";
-import { Corsshair, crosshairZ, getGeometrySize, imageMeshZ } from "./utils";
+import {
+  annotationMeshZ,
+  Corsshair,
+  crosshairZ,
+  getGeometrySize,
+  imageMeshZ,
+} from "./utils";
 
 import type { Editor } from "../../models";
 
@@ -18,6 +28,9 @@ export class Slice extends THREE.Group implements IDisposable {
   private imageMaterial: SliceMaterial;
   private imageMesh: THREE.Mesh;
 
+  private annotationMaterial: SliceMaterial;
+  private annotationMesh: THREE.Mesh;
+
   private crosshair: Corsshair;
 
   private disposers: IDisposer[] = [];
@@ -29,13 +42,25 @@ export class Slice extends THREE.Group implements IDisposable {
   ) {
     super();
 
-    this.imageMaterial = new SliceMaterial(editor, viewType, render);
+    this.imageMaterial = new ImageSliceMaterial(editor, viewType, render);
     this.imageMesh = new THREE.Mesh(this.geometry, this.imageMaterial);
     this.imageMesh.position.z = imageMeshZ;
     this.imageMesh.userData = {
       viewType,
     };
     this.add(this.imageMesh);
+
+    this.annotationMaterial = new AnnotationSliceMaterial(
+      editor,
+      viewType,
+      render,
+    );
+    this.annotationMesh = new THREE.Mesh(
+      this.geometry,
+      this.annotationMaterial,
+    );
+    this.annotationMesh.position.z = annotationMeshZ;
+    this.add(this.annotationMesh);
 
     this.crosshair = new Corsshair(this.viewType, this.editor);
     this.crosshair.position.z = crosshairZ;
@@ -50,10 +75,21 @@ export class Slice extends THREE.Group implements IDisposable {
     this.disposers.forEach((disposer) => disposer());
   }
 
-  public setAtlas(atlas: TextureAtlas) {
+  public setImage(atlas: TextureAtlas) {
     this.imageMaterial.setAtlas(atlas);
 
     this.baseSize.copy(getGeometrySize(atlas.voxelCount, this.viewType));
+    this.updateScale();
+  }
+
+  public setAnnotation(atlas?: TextureAtlas) {
+    if (atlas) {
+      this.annotationMaterial.setAtlas(atlas);
+      this.annotationMesh.visible = true;
+    } else {
+      this.annotationMesh.visible = false;
+    }
+
     this.updateScale();
   }
 
