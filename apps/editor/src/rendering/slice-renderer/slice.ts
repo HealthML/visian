@@ -31,7 +31,7 @@ export class Slice extends THREE.Group implements IDisposable {
   private geometry = new THREE.PlaneGeometry();
 
   private imageMaterial: SliceMaterial;
-  private imageMesh: THREE.Mesh;
+  public imageMesh: THREE.Mesh;
 
   private annotationMaterial: SliceMaterial;
   private annotationMesh: THREE.Mesh;

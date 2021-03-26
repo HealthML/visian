@@ -8,6 +8,7 @@ import { IDisposable, viewTypes } from "./types";
 import {
   getOrder,
   getWebGLSize,
+  Raycaster,
   resizeRenderer,
   setMainCameraPlanes,
   synchCrosshairs,
@@ -22,6 +23,8 @@ export class SliceRenderer implements IDisposable {
   private scenes = viewTypes.map(() => new THREE.Scene());
 
   private slices: Slice[];
+
+  public raycaster: Raycaster;
 
   private lazyRenderTriggered = true;
 
@@ -60,6 +63,13 @@ export class SliceRenderer implements IDisposable {
       (viewType) => new Slice(editor, viewType, this.lazyRender),
     );
     this.slices.forEach((slice, viewType) => this.scenes[viewType].add(slice));
+
+    this.raycaster = new Raycaster(
+      this.canvases,
+      [this.mainCamera, this.sideCamera],
+      this.slices.map((slice) => slice.imageMesh),
+      this.editor,
+    );
 
     window.addEventListener("resize", this.resize);
     this.resize();

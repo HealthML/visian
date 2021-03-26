@@ -21,6 +21,7 @@ export class Voxel {
       setX: action,
       setY: action,
       setZ: action,
+      setComponent: action,
       setFromView: action,
     });
   }
@@ -45,6 +46,10 @@ export class Voxel {
 
   public setZ(z = 0) {
     this.z = z;
+  }
+
+  public setComponent(component: "x" | "y" | "z", value = 0) {
+    this[component] = value;
   }
 
   public getFromView(viewType: ViewType) {

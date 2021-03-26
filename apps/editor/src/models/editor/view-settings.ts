@@ -1,7 +1,8 @@
 import { action, makeObservable, observable } from "mobx";
+import * as THREE from "three";
 
 import { maxZoom, minZoom } from "../../constants";
-import { ViewType } from "../../rendering";
+import { getPlaneAxes, ViewType } from "../../rendering";
 import { ISerializable, StoreContext } from "../types";
 import { getZoomStep, Pixel } from "../utils";
 import { Voxel } from "../utils/voxel";
@@ -55,6 +56,7 @@ export class EditorViewSettings
       setSelectedVoxel: action,
       setSelectedSlice: action,
       stepSelectedSlice: action,
+      moveCrosshair: action,
     });
   }
   public setBrightness(value = 1) {
@@ -136,6 +138,33 @@ export class EditorViewSettings
 
   public stepSelectedSlice(stepSize = 1, viewType = this.mainViewType) {
     this.setSelectedSlice(this.getSelectedSlice(viewType) + stepSize, viewType);
+  }
+
+  public moveCrosshair(screenPosition: { x: number; y: number }) {
+    const sliceRenderer = this.editor.sliceRenderer;
+    if (!sliceRenderer || !this.editor.image) return;
+
+    const intersection = sliceRenderer.raycaster.getIntersectionsFromPointer(
+      screenPosition,
+    )[0];
+    if (!intersection || !intersection.uv) return;
+
+    const { viewType } = intersection.object.userData;
+    const [widthAxis, heightAxis] = getPlaneAxes(viewType);
+
+    // TODO: Adapt once voxelCount is a Voxel or Vector3.
+    const voxelCount = new THREE.Vector3().fromArray(
+      this.editor.image.voxelCount,
+    );
+
+    this.selectedVoxel.setComponent(
+      widthAxis,
+      Math.floor((1 - intersection.uv.x) * voxelCount[widthAxis]),
+    );
+    this.selectedVoxel.setComponent(
+      heightAxis,
+      Math.floor(intersection.uv.y * voxelCount[heightAxis]),
+    );
   }
 
   public reset() {

@@ -22,8 +22,10 @@ export const setUpPointerHandling = (
       );
 
       if (!context.useForGesture) {
-        // TODO: Set crosshair
-        // console.log(detail.clientX, clientY);
+        store.editor.viewSettings.moveCrosshair({
+          x: detail.clientX,
+          y: detail.clientY,
+        });
       }
     },
     pointerPredicate: (pointer) => pointer.context.useForGesture as boolean,
