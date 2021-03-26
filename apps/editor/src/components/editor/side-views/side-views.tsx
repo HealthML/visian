@@ -1,7 +1,7 @@
-import { coverMixin, Sheet } from "@visian/ui-shared";
+import { coverMixin, EventLike, Sheet } from "@visian/ui-shared";
 import ResizeSensor from "css-element-queries/src/ResizeSensor";
 import { observer } from "mobx-react-lite";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
@@ -25,6 +25,7 @@ const SideView = styled(Sheet)`
 
 const SideViewCanvas = styled.canvas`
   ${coverMixin}
+  cursor: crosshair;
 `;
 
 export const SideViews = observer(() => {
@@ -42,6 +43,22 @@ export const SideViews = observer(() => {
       store?.setRef("lowerSideView");
     };
   }, [store, upperSideViewRef, lowerSideViewRef]);
+
+  const pointerDispatch = store?.pointerDispatch;
+  const onPointerDownUpper = useCallback(
+    (event: EventLike) => {
+      if (!pointerDispatch) return;
+      pointerDispatch(event, "upperSideView");
+    },
+    [pointerDispatch],
+  );
+  const onPointerDownLower = useCallback(
+    (event: EventLike) => {
+      if (!pointerDispatch) return;
+      pointerDispatch(event, "lowerSideView");
+    },
+    [pointerDispatch],
+  );
 
   // Force the side view container to re-render on layout changes:
   const [size, setSize] = useState<string | undefined>(undefined);
@@ -77,10 +94,20 @@ export const SideViews = observer(() => {
       ref={divRef}
     >
       <SideView>
-        <SideViewCanvas width={400} height={400} ref={upperSideViewRef} />
+        <SideViewCanvas
+          width={400}
+          height={400}
+          onPointerDown={onPointerDownUpper}
+          ref={upperSideViewRef}
+        />
       </SideView>
       <SideView>
-        <SideViewCanvas width={400} height={400} ref={lowerSideViewRef} />
+        <SideViewCanvas
+          width={400}
+          height={400}
+          onPointerDown={onPointerDownLower}
+          ref={lowerSideViewRef}
+        />
       </SideView>
     </SideViewContainer>
   );

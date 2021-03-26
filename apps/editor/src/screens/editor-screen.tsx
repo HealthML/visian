@@ -38,7 +38,7 @@ export const EditorScreen: React.FC = observer(() => {
   const onPointerDown = useCallback(
     (event: EventLike) => {
       if (!pointerDispatch) return;
-      pointerDispatch(event, "mainCanvas");
+      pointerDispatch(event, "mainView");
     },
     [pointerDispatch],
   );

@@ -15,14 +15,15 @@ export const setUpPointerHandling = (
   const dispatch = transformGesturePreset({
     forPointers: ({ context, detail, id }) => {
       context.useForGesture = Boolean(
-        context.device === "touch" ||
-          context.button === PointerButton.MMB ||
-          context.button === PointerButton.RMB ||
-          context.ctrlKey,
+        id === "mainView" &&
+          (context.device === "touch" ||
+            context.button === PointerButton.MMB ||
+            context.button === PointerButton.RMB ||
+            context.ctrlKey),
       );
 
       if (!context.useForGesture) {
-        // TODO: Side view handlers
+        // TODO: Use id to detect view
         store.editor.viewSettings.moveCrosshair({
           x: detail.clientX,
           y: detail.clientY,
@@ -33,7 +34,7 @@ export const setUpPointerHandling = (
     forGestures: ({ id, eventType, gesture }) => {
       if (!store.editor.sliceRenderer) return;
 
-      if (id !== "mainCanvas") return;
+      if (id !== "mainView") return;
       if (eventType === "start" || eventType === "rebase") {
         const transformOrigin = store.editor.sliceRenderer.getMainViewScreenPosition(
           store.editor.viewSettings.offset,
