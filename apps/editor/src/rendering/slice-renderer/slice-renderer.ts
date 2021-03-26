@@ -63,8 +63,6 @@ export class SliceRenderer implements IDisposable {
     window.addEventListener("resize", this.resize);
     this.resize();
 
-    mainCanvas.addEventListener("wheel", this.handleWheel);
-
     this.resizeSensors.push(
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       new ResizeSensor(this.upperSideCanvas.parentElement!, () =>
@@ -115,7 +113,6 @@ export class SliceRenderer implements IDisposable {
     this.slices.forEach((slice) => slice.dispose());
     window.removeEventListener("resize", this.resize);
     this.resizeSensors.forEach((sensor) => sensor.detach());
-    this.mainCanvas.removeEventListener("wheel", this.handleWheel);
   }
 
   private resize = () => {
@@ -192,20 +189,6 @@ export class SliceRenderer implements IDisposable {
       const camera = index ? this.sideCamera : this.mainCamera;
       renderer.render(this.scenes[viewType], camera);
     });
-  };
-
-  // TODO: Move this to event handling.
-  private handleWheel = (event: WheelEvent) => {
-    event.preventDefault();
-    if (event.ctrlKey) {
-      if (event.deltaY > 0) {
-        this.editor.viewSettings.zoomOut();
-      } else if (event.deltaY < 0) {
-        this.editor.viewSettings.zoomIn();
-      }
-    } else {
-      this.editor.viewSettings.stepSelectedSlice(-Math.sign(event.deltaY));
-    }
   };
 
   private setImage(atlas: TextureAtlas) {

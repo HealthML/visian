@@ -1,9 +1,11 @@
+import { IDisposer } from "@visian/util";
 import hotkeys from "hotkeys-js";
 
 import { ViewType } from "../rendering";
 
 import type { RootStore } from "../models";
-export const setUpHotKeys = (store: RootStore) => {
+
+export const setUpHotKeys = (store: RootStore): IDisposer => {
   hotkeys.filter = () => true;
   hotkeys("ctrl+s", (event) => {
     event.preventDefault();
@@ -21,4 +23,6 @@ export const setUpHotKeys = (store: RootStore) => {
   hotkeys("v", () => {
     store.editor.viewSettings.toggleSideViews();
   });
+
+  return () => hotkeys.unbind();
 };
