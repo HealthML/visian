@@ -24,15 +24,21 @@ export const pointerPreset = <ID = string>(
 
 export const transformGesturePreset = <
   ID extends string | number | symbol = string
->(
-  forGesturesFunction?: (
+>(config: {
+  forPointers?: (pointer: Pointer<ID>, data: PointerEventData<ID>) => void;
+  pointerPredicate?: (
+    pointer: Pointer<ID>,
+    data: TransformGestureEventData<ID>,
+  ) => boolean;
+  forGestures?: (
     gesture: TransformGestureWrapper<ID>,
     data: TransformGestureEventData<ID>,
-  ) => void,
-) =>
+  ) => void;
+}) =>
   dispatch([
     classify<ID>(),
     pointerAdapter<ID>(),
-    gesturizeTransformations<ID>(),
-    forGesturesFunction && forGestures<ID>(forGesturesFunction),
+    config.forPointers && forPointers<ID>(config.forPointers),
+    gesturizeTransformations<ID>(config.pointerPredicate),
+    config.forGestures && forGestures<ID>(config.forGestures),
   ]);

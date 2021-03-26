@@ -1,6 +1,7 @@
 import {
   AbsoluteCover,
   EventLike,
+  preventDefault,
   Screen,
   useIsDraggedOver,
   WebGLCanvas,
@@ -48,6 +49,7 @@ export const EditorScreen: React.FC = observer(() => {
       <AbsoluteCover>
         <WebGLCanvas
           backgroundColor={store?.editor.backgroundColor}
+          onContextMenu={preventDefault}
           onPointerDown={onPointerDown}
           ref={canvasRef}
         />

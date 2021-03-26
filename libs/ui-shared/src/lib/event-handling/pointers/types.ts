@@ -49,6 +49,8 @@ export interface PointerContext {
   ctrlKey?: boolean;
   metaKey?: boolean;
   shiftKey?: boolean;
+
+  [key: string]: unknown;
 }
 
 export interface PointerDetail {
