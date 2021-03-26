@@ -94,6 +94,7 @@ export class SliceRenderer implements IDisposable {
             new TextureAtlas(
               new THREE.Vector3().fromArray(image.voxelCount),
               new THREE.Vector3().fromArray(image.voxelSpacing),
+              new THREE.Matrix3().fromArray(image.orientation.data),
               THREE.NearestFilter,
             ).setData(image.data),
           );
@@ -107,6 +108,7 @@ export class SliceRenderer implements IDisposable {
             ? new TextureAtlas(
                 new THREE.Vector3().fromArray(annotation.voxelCount),
                 new THREE.Vector3().fromArray(annotation.voxelSpacing),
+                new THREE.Matrix3().fromArray(annotation.orientation.data),
                 THREE.NearestFilter,
               ).setData(annotation.data)
             : undefined;

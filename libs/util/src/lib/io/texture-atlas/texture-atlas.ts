@@ -11,12 +11,19 @@ export class NoImageError extends Error {
 
 export interface StoredTextureAtlas<T extends TypedArray = TypedArray> {
   atlas: T;
+  direction: number[];
   magFilter?: THREE.TextureFilter;
   voxelCount: number[];
   voxelSpacing?: number[];
 }
 
 export const localForagePrefix = `atlas/`;
+
+/**
+ * The texture atlas generation expects the x- and y-axis to be inverted
+ * and the z-axis to be non-inverted.
+ */
+export const defaultDirection = new THREE.Vector3(-1, -1, 1);
 
 /**
  * Returns the optimal number of slices in x/y direction in the texture atlas.
@@ -43,6 +50,7 @@ export class TextureAtlas<T extends TypedArray = TypedArray> {
     return new TextureAtlas<T>(
       new THREE.Vector3().fromArray(image.size),
       new THREE.Vector3().fromArray(image.spacing),
+      new THREE.Matrix3().fromArray(image.direction.data),
       magFilter,
     ).setData(image.data);
   }
@@ -60,6 +68,7 @@ export class TextureAtlas<T extends TypedArray = TypedArray> {
       new THREE.Vector3().fromArray(storedAtlas.voxelCount),
       storedAtlas.voxelSpacing &&
         new THREE.Vector3().fromArray(storedAtlas.voxelSpacing),
+      new THREE.Matrix3().fromArray(storedAtlas.direction),
       storedAtlas.magFilter,
     ).setAtlas(storedAtlas.atlas);
   }
@@ -91,6 +100,7 @@ export class TextureAtlas<T extends TypedArray = TypedArray> {
     public readonly voxelSpacing: THREE.Vector3 = new THREE.Vector3().setScalar(
       1,
     ),
+    private direction: THREE.Matrix3,
     private magFilter: THREE.TextureFilter = THREE.LinearFilter,
   ) {
     this.atlasGrid = getAtlasGrid(voxelCount);
@@ -117,28 +127,39 @@ export class TextureAtlas<T extends TypedArray = TypedArray> {
 
       const sliceSize = this.voxelCount.x * this.voxelCount.y;
 
+      const direction = new THREE.Vector3()
+        .setScalar(1)
+        .applyMatrix3(this.direction)
+        .round()
+        .multiply(defaultDirection);
+
+      const inverted = {
+        x: direction.x < 0,
+        y: direction.y < 0,
+        z: direction.z < 0,
+      };
+
       // TODO: Test if ordered read can improve performance here
-      for (
-        let sliceNumber = 0;
-        sliceNumber < this.voxelCount.z;
-        sliceNumber++
-      ) {
+      for (let z = 0; z < this.voxelCount.z; z++) {
+        const sliceZ = inverted.z ? this.voxelCount.z - (z + 1) : z;
         const sliceData = this.data.subarray(
-          sliceNumber * sliceSize,
-          (sliceNumber + 1) * sliceSize,
+          sliceZ * sliceSize,
+          (sliceZ + 1) * sliceSize,
         );
         const sliceOffset = new THREE.Vector2(
-          (sliceNumber % this.atlasGrid.x) * this.voxelCount.x,
-          Math.floor(sliceNumber / this.atlasGrid.x) * this.voxelCount.y,
+          (sliceZ % this.atlasGrid.x) * this.voxelCount.x,
+          Math.floor(sliceZ / this.atlasGrid.x) * this.voxelCount.y,
         );
 
-        for (let sliceY = 0; sliceY < this.voxelCount.y; sliceY++) {
-          for (let sliceX = 0; sliceX < this.voxelCount.x; sliceX++) {
+        for (let y = 0; y < this.voxelCount.y; y++) {
+          const sliceY = inverted.y ? this.voxelCount.y - (y + 1) : y;
+          for (let x = 0; x < this.voxelCount.x; x++) {
+            const sliceX = inverted.x ? this.voxelCount.x - (x + 1) : x;
             this.atlas[
               (sliceOffset.y + sliceY) * this.atlasSize.x +
                 sliceOffset.x +
                 sliceX
-            ] = sliceData[sliceY * this.voxelCount.x + sliceX];
+            ] = sliceData[y * this.voxelCount.x + x];
           }
         }
       }
@@ -246,6 +267,7 @@ export class TextureAtlas<T extends TypedArray = TypedArray> {
   public store(key: string) {
     return localForage.setItem(`${localForagePrefix}${key}`, {
       atlas: this.getAtlas(),
+      direction: this.direction.toArray(),
       magFilter: this.magFilter,
       voxelCount: this.voxelCount.toArray(),
       voxelSpacing: this.voxelSpacing.toArray(),
