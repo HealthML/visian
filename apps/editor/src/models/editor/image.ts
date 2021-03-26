@@ -175,10 +175,18 @@ export class Image<T extends TypedArray = TypedArray>
       this.orientation.setIdentity();
     }
 
-    this.data =
-      snapshot.data ||
-      (new Uint8Array(
+    if (snapshot.data) {
+      // Clone the data to convert it from a SharedArrayBuffer to an arraybuffer.
+      // This is necessary to store the data in IndexedDB when using Chrome.
+      const clonedData = new (snapshot.data.constructor as new (
+        size: number,
+      ) => T)(snapshot.data.length);
+      clonedData.set(snapshot.data);
+      this.data = clonedData;
+    } else {
+      this.data = new Uint8Array(
         this.voxelCount.reduce((sum, current) => sum + current, 0),
-      ) as T);
+      ) as T;
+    }
   }
 }
