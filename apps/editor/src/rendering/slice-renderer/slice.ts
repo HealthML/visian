@@ -23,6 +23,11 @@ export class Slice extends THREE.Group implements IDisposable {
 
   private workingVector = new THREE.Vector2();
 
+  // Wrapper around every part of the slice.
+  // Used to synch the crosshair position when the main view changes.
+  private crosshairShiftGroup = new THREE.Group();
+  public crosshairSynchOffset = new THREE.Vector2();
+
   private geometry = new THREE.PlaneGeometry();
 
   private imageMaterial: SliceMaterial;
@@ -42,13 +47,15 @@ export class Slice extends THREE.Group implements IDisposable {
   ) {
     super();
 
+    this.add(this.crosshairShiftGroup);
+
     this.imageMaterial = new ImageSliceMaterial(editor, viewType, render);
     this.imageMesh = new THREE.Mesh(this.geometry, this.imageMaterial);
     this.imageMesh.position.z = imageMeshZ;
     this.imageMesh.userData = {
       viewType,
     };
-    this.add(this.imageMesh);
+    this.crosshairShiftGroup.add(this.imageMesh);
 
     this.annotationMaterial = new AnnotationSliceMaterial(
       editor,
@@ -60,11 +67,11 @@ export class Slice extends THREE.Group implements IDisposable {
       this.annotationMaterial,
     );
     this.annotationMesh.position.z = annotationMeshZ;
-    this.add(this.annotationMesh);
+    this.crosshairShiftGroup.add(this.annotationMesh);
 
     this.crosshair = new Corsshair(this.viewType, this.editor);
     this.crosshair.position.z = crosshairZ;
-    this.add(this.crosshair);
+    this.crosshairShiftGroup.add(this.crosshair);
 
     this.disposers.push(autorun(this.updateScale), autorun(this.updateOffset));
   }
@@ -91,6 +98,11 @@ export class Slice extends THREE.Group implements IDisposable {
     }
 
     this.updateScale();
+  }
+
+  public setCrosshairSynchOffset(offset = new THREE.Vector2()) {
+    this.crosshairSynchOffset.copy(offset);
+    this.crosshairShiftGroup.position.set(-offset.x, -offset.y, 0);
   }
 
   private updateScale = () => {

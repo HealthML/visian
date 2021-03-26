@@ -1,0 +1,46 @@
+import * as THREE from "three";
+
+import { Editor } from "../../../models";
+import { Slice } from "../slice";
+import { ViewType } from "../types";
+import { getPlaneAxes } from "./conversion";
+
+/**
+ * Sets the crosshair synch offset of the new main view slice
+ * to synch the crosshair position.
+ */
+export const synchCrosshairs = (
+  newMainView: ViewType,
+  oldMainView: ViewType,
+  newMainSlice: Slice,
+  oldMainSlice: Slice,
+  editor: Editor,
+) => {
+  const newCrosshairOffset = getCrosshairOffset(newMainView, editor);
+
+  newCrosshairOffset.add(oldMainSlice.crosshairSynchOffset);
+  newCrosshairOffset.sub(getCrosshairOffset(oldMainView, editor));
+
+  newMainSlice.setCrosshairSynchOffset(newCrosshairOffset);
+
+  oldMainSlice.setCrosshairSynchOffset();
+};
+
+export const getCrosshairOffset = (viewType: ViewType, editor: Editor) => {
+  const [widthAxis, heightAxis] = getPlaneAxes(viewType);
+  const crosshairOffset = new THREE.Vector2();
+  if (!editor.image) return crosshairOffset;
+
+  // TODO: Adapt once image.voxelCount is a Voxel or Vector.
+  const voxelCount = new THREE.Vector3().fromArray(editor.image.voxelCount);
+  crosshairOffset.set(
+    0.5 -
+      (editor.viewSettings.selectedVoxel[widthAxis] + 0.5) /
+        voxelCount[widthAxis],
+    -0.5 +
+      (editor.viewSettings.selectedVoxel[heightAxis] + 0.5) /
+        voxelCount[heightAxis],
+  );
+
+  return crosshairOffset;
+};

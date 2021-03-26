@@ -10,6 +10,7 @@ import {
   getWebGLSize,
   resizeRenderer,
   setMainCameraPlanes,
+  synchCrosshairs,
 } from "./utils";
 
 import type { Editor } from "../../models";
@@ -102,6 +103,18 @@ export class SliceRenderer implements IDisposable {
           this.setAnnotation(atlas);
         },
         { fireImmediately: true },
+      ),
+      reaction(
+        () => editor.viewSettings.mainViewType,
+        (newMainView, oldMainView) => {
+          synchCrosshairs(
+            newMainView,
+            oldMainView,
+            this.slices[newMainView],
+            this.slices[oldMainView],
+            editor,
+          );
+        },
       ),
     );
 
