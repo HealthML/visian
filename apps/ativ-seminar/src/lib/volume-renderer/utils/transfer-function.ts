@@ -14,31 +14,37 @@ export const transferFunctionTypes = [
 export interface ITransferFunctionProps {
   updateNormalsOnCameraMove: boolean;
   updateLAOOnCameraMove: boolean;
+  defaultLAOIntensity: number;
 }
 
 export const transferFunctionProps: ITransferFunctionProps[] = [
   {
     updateNormalsOnCameraMove: false,
     updateLAOOnCameraMove: false,
+    defaultLAOIntensity: 2.5,
   },
   {
     updateNormalsOnCameraMove: false,
     updateLAOOnCameraMove: false,
+    defaultLAOIntensity: 1,
   },
   {
     updateNormalsOnCameraMove: true,
     updateLAOOnCameraMove: true,
+    defaultLAOIntensity: 2.5,
   },
 ];
 
 export class TransferFunction implements ITransferFunctionProps {
-  public updateNormalsOnCameraMove: boolean;
-  public updateLAOOnCameraMove: boolean;
+  public readonly updateNormalsOnCameraMove: boolean;
+  public readonly updateLAOOnCameraMove: boolean;
+  public readonly defaultLAOIntensity: number;
 
-  constructor(public type: TransferFunctionType) {
+  constructor(public readonly type: TransferFunctionType) {
     const props = transferFunctionProps[type];
     this.updateNormalsOnCameraMove = props.updateNormalsOnCameraMove;
     this.updateLAOOnCameraMove = props.updateLAOOnCameraMove;
+    this.defaultLAOIntensity = props.defaultLAOIntensity;
   }
 }
 

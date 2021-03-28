@@ -40,6 +40,9 @@ export class VolumeRenderer implements IDisposable {
 
   private isImageLoaded = false;
 
+  private lightingTimeout?: NodeJS.Timer;
+  private suppressedLightingMode?: LightingMode;
+
   public backgroundValue = 0;
   public transferFunction = transferFunctions[TransferFunctionType.FCEdges];
   public lightingMode = lightingModes[LightingModeType.LAO];
@@ -200,12 +203,44 @@ export class VolumeRenderer implements IDisposable {
   };
 
   private onCameraMove = () => {
+    if (
+      !this.renderer.xr.isPresenting &&
+      ((this.lightingMode.type === LightingModeType.LAO &&
+        this.transferFunction.updateLAOOnCameraMove) ||
+        (this.lightingMode.type === LightingModeType.Phong &&
+          this.transferFunction.updateNormalsOnCameraMove) ||
+        this.lightingTimeout)
+    ) {
+      this.onTransferFunctionChange();
+    }
+
     this.volume.updateCameraPosition(this.camera);
+    this.lazyRender();
+  };
+
+  private onTransferFunctionChange = () => {
+    if (!this.suppressedLightingMode) {
+      this.suppressedLightingMode = this.lightingMode;
+      this.setLightingMode(lightingModes[LightingModeType.None]);
+    }
+
+    if (this.lightingTimeout) {
+      clearTimeout(this.lightingTimeout);
+    }
+    this.lightingTimeout = setTimeout(() => {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      this.setLightingMode(this.suppressedLightingMode!);
+      this.suppressedLightingMode = undefined;
+      this.lightingTimeout = undefined;
+    }, 150);
+
     this.lazyRender();
   };
 
   /** Sets the base image to be rendered. */
   public setImage = (image: TextureAtlas) => {
+    this.onTransferFunctionChange();
+
     this.volume.setAtlas(image);
     this.isImageLoaded = true;
 
@@ -217,6 +252,8 @@ export class VolumeRenderer implements IDisposable {
 
   /** Sets a focus volume. */
   public setFocus = (focus?: TextureAtlas) => {
+    this.onTransferFunctionChange();
+
     this.volume.setFocusAtlas(focus);
     this.lazyRender();
   };
@@ -270,6 +307,8 @@ export class VolumeRenderer implements IDisposable {
   };
 
   public setTransferFunction = (value: TransferFunction) => {
+    this.onTransferFunctionChange();
+
     this.transferFunction = value;
 
     // TODO: We separate the limits for this properly
@@ -281,11 +320,18 @@ export class VolumeRenderer implements IDisposable {
       this.altRangeLimits = this.rangeLimits;
       this.rangeLimits = limits;
     }
+
+    this.laoIntensity = value.defaultLAOIntensity;
+
     this.lazyRender();
   };
 
   public setLightingMode = (value: LightingMode) => {
     this.lightingMode = value;
+
+    if (value.type === LightingModeType.LAO) {
+      this.laoIntensity = this.transferFunction.defaultLAOIntensity;
+    }
 
     this.lazyRender();
   };
@@ -300,11 +346,15 @@ export class VolumeRenderer implements IDisposable {
   };
 
   public setContextOpacity = (value: number) => {
+    this.onTransferFunctionChange();
+
     this.contextOpacity = Math.max(0, Math.min(1, value));
     this.lazyRender();
   };
 
   public setRangeLimits = (value: [number, number]) => {
+    this.onTransferFunctionChange();
+
     this.rangeLimits = [
       Math.max(0, Math.min(1, value[0])),
       Math.max(0, Math.min(1, value[1])),
@@ -313,6 +363,8 @@ export class VolumeRenderer implements IDisposable {
   };
 
   public setCutAwayConeAngle = (radians: number) => {
+    this.onTransferFunctionChange();
+
     this.cutAwayConeAngle = radians;
     this.lazyRender();
   };
