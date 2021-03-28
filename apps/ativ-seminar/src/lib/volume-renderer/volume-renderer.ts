@@ -9,6 +9,7 @@ import {
   LightingMode,
   lightingModes,
   LightingModeType,
+  ResolutionComputer,
   ScreenAlignedQuad,
   TextureAtlas,
 } from "./utils";
@@ -42,6 +43,8 @@ export class VolumeRenderer implements IDisposable {
 
   private lightingTimeout?: NodeJS.Timer;
   private suppressedLightingMode?: LightingMode;
+
+  private resolutionComputer: ResolutionComputer;
 
   public backgroundValue = 0;
   public transferFunction = transferFunctions[TransferFunctionType.FCEdges];
@@ -114,6 +117,21 @@ export class VolumeRenderer implements IDisposable {
       this.intermediateRenderTarget.texture,
     );
 
+    const url = new URL(window.location.href);
+    const resolutionStepsParam = url.searchParams.get("resolutionSteps");
+    const resolutionSteps = resolutionStepsParam
+      ? Math.min(5, Math.max(1, parseInt(resolutionStepsParam)))
+      : 1;
+    this.resolutionComputer = new ResolutionComputer(
+      this.renderer,
+      this.scene,
+      this.camera,
+      new THREE.Vector2(this.canvas.width, this.canvas.height),
+      this.eagerRender,
+      resolutionSteps,
+      this.intermediateRenderTarget,
+    );
+
     window.addEventListener("resize", this.resize);
     this.resize();
 
@@ -144,23 +162,9 @@ export class VolumeRenderer implements IDisposable {
   private resize = () => {
     const aspect = window.innerWidth / window.innerHeight;
 
-    const url = new URL(window.location.href);
-    const sizeLimitParam = url.searchParams.get("sizeLimit");
-    const sizeLimit = sizeLimitParam
-      ? parseInt(sizeLimitParam)
-      : Math.max(window.innerHeight, window.innerWidth);
-
-    let renderTargetWidth, renderTargetHeight;
-    if (aspect >= 1) {
-      renderTargetWidth = Math.min(sizeLimit, window.innerWidth);
-      renderTargetHeight = Math.round(renderTargetWidth / aspect);
-    } else {
-      renderTargetHeight = Math.min(sizeLimit, window.innerHeight);
-      renderTargetWidth = Math.round(renderTargetHeight * aspect);
-    }
-    this.intermediateRenderTarget.setSize(
-      renderTargetWidth,
-      renderTargetHeight,
+    this.resolutionComputer.setTargetSize(
+      window.innerWidth,
+      window.innerHeight,
     );
 
     this.camera.aspect = aspect;
@@ -168,13 +172,20 @@ export class VolumeRenderer implements IDisposable {
 
     this.renderer.setSize(window.innerWidth, window.innerHeight);
 
-    this.eagerRender();
+    this.lazyRender();
   };
 
   private animate = () => {
     this.volume.tick();
 
-    if (this.lazyRenderTriggered || this.renderer.xr.isPresenting) {
+    if (this.lazyRenderTriggered) {
+      this.resolutionComputer.restart();
+      this.lazyRenderTriggered = false;
+    }
+
+    this.resolutionComputer.tick();
+
+    if (this.renderer.xr.isPresenting) {
       this.eagerRender();
     }
 
@@ -188,16 +199,11 @@ export class VolumeRenderer implements IDisposable {
 
   private eagerRender = () => {
     if (!this.isImageLoaded) return;
-    this.lazyRenderTriggered = false;
 
+    this.renderer.setRenderTarget(null);
     if (this.renderer.xr.isPresenting) {
-      this.renderer.setRenderTarget(null);
       this.renderer.render(this.scene, this.camera);
     } else {
-      this.renderer.setRenderTarget(this.intermediateRenderTarget);
-      this.renderer.render(this.scene, this.camera);
-
-      this.renderer.setRenderTarget(null);
       this.screenAlignedQuad.renderWith(this.renderer);
     }
   };
@@ -214,6 +220,7 @@ export class VolumeRenderer implements IDisposable {
       this.onTransferFunctionChange();
     }
 
+    this.volume.updateMatrixWorld();
     this.volume.updateCameraPosition(this.camera);
     this.lazyRender();
   };
@@ -244,9 +251,6 @@ export class VolumeRenderer implements IDisposable {
     this.volume.setAtlas(image);
     this.isImageLoaded = true;
 
-    // TODO: Can we maybe find a solution that does not require
-    // double-rendering for the initial frame?
-    this.eagerRender();
     this.onCameraMove();
   };
 
