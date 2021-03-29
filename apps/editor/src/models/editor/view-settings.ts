@@ -72,8 +72,7 @@ export class EditorViewSettings
   public toggleSideViews(value = !this.shouldShowSideViews) {
     this.shouldShowSideViews =
       value &&
-      // eslint-disable-next-line no-new-wrappers
-      new Boolean(this.editor.image) &&
+      Boolean(this.editor.image) &&
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       this.editor.image!.dimensionality > 2;
   }

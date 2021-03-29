@@ -36,7 +36,10 @@ export class Crosshair extends THREE.Group implements IDisposable {
 
     this.add(this.horizontalLine, this.verticalLine);
 
-    this.disposers.push(autorun(this.updateTarget));
+    this.disposers.push(
+      autorun(this.updateTarget),
+      autorun(this.updateVisibility),
+    );
   }
 
   public dispose() {
@@ -73,6 +76,10 @@ export class Crosshair extends THREE.Group implements IDisposable {
 
     this.horizontalLine.visible = y >= 0 && y <= 1;
     this.horizontalLine.position.y = y - 0.5;
+  };
+
+  private updateVisibility = () => {
+    this.visible = this.editor.viewSettings.shouldShowSideViews;
   };
 }
 

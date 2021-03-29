@@ -23,13 +23,16 @@ export const setUpPointerHandling = (
       );
 
       if (!context.useForGesture) {
-        store.editor.viewSettings.moveCrosshair(
-          {
-            x: detail.clientX,
-            y: detail.clientY,
-          },
-          id,
-        );
+        // Crosshairs are only active if side views are shown.
+        if (store.editor.viewSettings.shouldShowSideViews) {
+          store.editor.viewSettings.moveCrosshair(
+            {
+              x: detail.clientX,
+              y: detail.clientY,
+            },
+            id,
+          );
+        }
       }
     },
     pointerPredicate: (pointer) => pointer.context.useForGesture as boolean,
