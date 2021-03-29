@@ -9,6 +9,7 @@ uniform vec2 uAtlasGrid;
   uniform vec3 uForegroundColor;
   uniform float uContrast;
   uniform float uBrightness;
+  uniform int uComponents;
 #endif // IMAGE
 
 #ifdef ANNOTATION
@@ -38,6 +39,18 @@ void main() {
   vec4 texelValue = texture2D(uDataTexture, uv);
 
   #ifdef IMAGE
+    // TODO: How do we display two components?
+
+    // TODO: Brightness and contrast adjustments for 3/4 components.
+    if(uComponents == 3) {
+      gl_FragColor = vec4(texelValue.rgb, 1.0);
+      return;
+    }
+    if(uComponents == 4) {
+      gl_FragColor = texelValue;
+      return;
+    }
+
     float contrastedColor = uBrightness * pow(texelValue.x, uContrast);
 
     gl_FragColor = vec4(uForegroundColor, contrastedColor);

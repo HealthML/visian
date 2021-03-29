@@ -70,7 +70,12 @@ export class EditorViewSettings
   }
 
   public toggleSideViews(value = !this.shouldShowSideViews) {
-    this.shouldShowSideViews = value;
+    this.shouldShowSideViews =
+      value &&
+      // eslint-disable-next-line no-new-wrappers
+      new Boolean(this.editor.image) &&
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      this.editor.image!.dimensionality > 2;
   }
 
   public setZoomLevel(value = 1) {
@@ -157,6 +162,7 @@ export class EditorViewSettings
 
   public reset() {
     this.setSelectedVoxel();
+    this.toggleSideViews(true);
   }
 
   public toJSON() {

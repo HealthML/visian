@@ -38,8 +38,10 @@ export class Image<T extends TypedArray = TypedArray>
     return new Image({
       name: image.name,
       dimensionality: image.imageType.dimension,
-      voxelCount: image.size,
-      voxelSpacing: image.spacing,
+      voxelCount:
+        image.imageType.dimension === 2 ? [...image.size, 1] : image.size,
+      voxelSpacing:
+        image.imageType.dimension === 2 ? [...image.spacing, 1] : image.spacing,
       voxelType: image.imageType.pixelType,
       voxelComponents: image.imageType.components,
       voxelComponentType: image.imageType.componentType,
@@ -149,6 +151,8 @@ export class Image<T extends TypedArray = TypedArray>
       origin: this.origin.toJSON(),
       orientation: this.orientation,
       data: this.data,
+      dimensionality: this.dimensionality,
+      voxelComponents: this.voxelComponents,
     };
   }
 

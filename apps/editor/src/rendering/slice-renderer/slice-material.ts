@@ -30,6 +30,7 @@ export abstract class SliceMaterial
           uActiveSlices: { value: [0, 0, 0] },
           uVoxelCount: { value: [1, 1, 1] },
           uAtlasGrid: { value: [1, 1] },
+          uComponents: { value: 1 },
         },
         uniforms,
       ]),
@@ -66,6 +67,7 @@ export abstract class SliceMaterial
     this.uniforms.uDataTexture.value = atlas.getTexture();
     this.uniforms.uVoxelCount.value = atlas.voxelCount;
     this.uniforms.uAtlasGrid.value = atlas.atlasGrid;
+    this.uniforms.uComponents.value = atlas.components;
   }
 }
 

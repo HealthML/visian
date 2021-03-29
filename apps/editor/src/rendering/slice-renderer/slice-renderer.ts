@@ -96,6 +96,8 @@ export class SliceRenderer implements IDisposable {
               new THREE.Vector3().fromArray(image.voxelCount.toArray()),
               new THREE.Vector3().fromArray(image.voxelSpacing.toArray()),
               new THREE.Matrix3().fromArray(image.orientation.data),
+              image.voxelComponents,
+              image.dimensionality,
               THREE.NearestFilter,
             ).setData(image.data),
           );
@@ -113,6 +115,8 @@ export class SliceRenderer implements IDisposable {
                   annotation.voxelSpacing.toArray(),
                 ),
                 new THREE.Matrix3().fromArray(annotation.orientation.data),
+                annotation.voxelComponents,
+                annotation.dimensionality,
                 THREE.NearestFilter,
               ).setData(annotation.data)
             : undefined;
