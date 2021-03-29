@@ -15,38 +15,44 @@ export class Raycaster {
   ) {}
 
   /** Returns all intersections with a ray fired at the given screen space position. */
-  public getIntersectionsFromPointer(screenPosition: { x: number; y: number }) {
-    const clickedCanvas = [...this.canvases].reverse().find((canvas) => {
-      const boundingBox = canvas.getBoundingClientRect();
-      return (
-        screenPosition.x >= boundingBox.left &&
-        screenPosition.x <= boundingBox.right &&
-        screenPosition.y >= boundingBox.top &&
-        screenPosition.y <= boundingBox.bottom
-      );
-    });
-    if (!clickedCanvas) return [];
+  public getIntersectionsFromPointer(
+    screenPosition: { x: number; y: number },
+    canvasId = "mainView",
+  ) {
+    let clickedCanvasIndex: number;
+    switch (canvasId) {
+      case "upperSideView":
+        clickedCanvasIndex = 1;
+        break;
+      case "lowerSideView":
+        clickedCanvasIndex = 2;
+        break;
+      default:
+        clickedCanvasIndex = 0;
+        break;
+    }
 
-    const canvasRect = clickedCanvas.getBoundingClientRect();
+    const canvasRect = this.canvases[
+      clickedCanvasIndex
+    ].getBoundingClientRect();
     const canvasPosition = {
       x: screenPosition.x - canvasRect.left,
       y: screenPosition.y - canvasRect.top,
     };
 
-    return this.getIntersections(canvasPosition, clickedCanvas);
+    return this.getIntersections(canvasPosition, clickedCanvasIndex);
   }
 
   /** Returns all intersections with a ray fired at the given position in the canvas. */
   private getIntersections(
     position: { x: number; y: number },
-    canvas: HTMLCanvasElement,
+    canvasIndex: number,
   ) {
     const webGLPosition = convertPositionToWebGLPosition(
       position,
-      canvas.getBoundingClientRect(),
+      this.canvases[canvasIndex].getBoundingClientRect(),
     );
 
-    const canvasIndex = this.canvases.indexOf(canvas);
     const viewType = getOrder(this.editor.viewSettings.mainViewType)[
       canvasIndex
     ];

@@ -131,12 +131,16 @@ export class EditorViewSettings
     this.setSelectedSlice(this.getSelectedSlice(viewType) + stepSize, viewType);
   }
 
-  public moveCrosshair(screenPosition: { x: number; y: number }) {
+  public moveCrosshair(
+    screenPosition: { x: number; y: number },
+    canvasId: string,
+  ) {
     const sliceRenderer = this.editor.sliceRenderer;
     if (!sliceRenderer || !this.editor.image) return;
 
     const intersection = sliceRenderer.raycaster.getIntersectionsFromPointer(
       screenPosition,
+      canvasId,
     )[0];
     if (!intersection || !intersection.uv) return;
 

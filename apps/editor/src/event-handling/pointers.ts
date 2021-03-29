@@ -23,11 +23,13 @@ export const setUpPointerHandling = (
       );
 
       if (!context.useForGesture) {
-        // TODO: Use id to detect view
-        store.editor.viewSettings.moveCrosshair({
-          x: detail.clientX,
-          y: detail.clientY,
-        });
+        store.editor.viewSettings.moveCrosshair(
+          {
+            x: detail.clientX,
+            y: detail.clientY,
+          },
+          id,
+        );
       }
     },
     pointerPredicate: (pointer) => pointer.context.useForGesture as boolean,
