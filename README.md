@@ -33,7 +33,7 @@ The contents of this monorepo are structured in the following way:
 - `dist/`: Build artifacts (excluded from version control)
 - `libs/`: Source of the libraries in this monorepo
   - `ui-shared/`: Shared UI code (e.g., the main component library)
-  - `util/`: Shared general-purpose utilities
+  - `utils/`: Shared general-purpose utilities
 
 ## Available Scripts
 

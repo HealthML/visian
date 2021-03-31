@@ -6,7 +6,7 @@ import {
   VoxelTypes,
   readMedicalImage,
   TypedArray,
-} from "@visian/util";
+} from "@visian/utils";
 import { action, makeObservable, observable, toJS } from "mobx";
 
 import { ISerializable } from "../types";
