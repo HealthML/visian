@@ -46,13 +46,24 @@ The app will automatically reload if you change any of the source files.
 
 Omitting an app name starts the default app.
 
-### `yarn format`
+### `yarn format [<app-name>]`
 
 Runs automated code formatting on all applicable file types.
 
-### `yarn lint`
+Omitting an app name formats the default app.
+
+### `yarn lint [<app-name>]`
 
 Lints all applicable files and prints the output.
+
+Omitting an app name lints the default app.
+
+### `yarn compile [<app-name>]`
+
+Dry-runs the TypeScript compiler.<br />
+This is especially useful to check whether any types or references broke after a big refactoring.
+
+Omitting an app name compiles the default app.
 
 ### `yarn test [<app-name>]`
 
@@ -63,7 +74,7 @@ Tests are automatically discovered from all `*.spec.{ts,tsx}` files.
 
 Omitting an app name tests the default app.
 
-### `yarn e2e`
+### `yarn e2e [<app-name>]`
 
 Runs end-to-end tests via [Cypress](https://www.cypress.io).<br />
 Run `yarn affected:e2e` to execute the end-to-end tests tests affected by a change.
