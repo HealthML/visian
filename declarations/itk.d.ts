@@ -1,3 +1,16 @@
+declare module "itk/FloatTypes" {
+  /**
+   * The itk/FloatTypes enum.
+   * @see https://github.com/InsightSoftwareConsortium/itk-js/tree/master/src/FloatTypes.js
+   */
+  enum FloatTypes {
+    Float32 = "float",
+    Float64 = "double",
+    SpacePrecisionType = "double",
+  }
+  export = FloatTypes;
+}
+
 declare module "itk/Image" {
   import ImageType from "itk/ImageType";
   import Matrix from "itk/Matrix";
@@ -68,6 +81,10 @@ declare module "itk/Image" {
 }
 
 declare module "itk/ImageType" {
+  import FloatTypes from "itk/FloatTypes";
+  import IntTypes from "itk/IntTypes";
+  import PixelTypes from "itk/PixelTypes";
+
   /**
    * The itk/ImageType describes the type of an Image.
    *
@@ -81,16 +98,38 @@ declare module "itk/ImageType" {
      * The type of the components in a pixel. This is one of the IntTypes or
      * FloatTypes.
      */
-    public componentType: string;
+    public componentType: FloatTypes | IntTypes;
 
     /** The PixelType. For example, PixelTypes.Scalar or PixelTypes.Vector. */
-    public pixelType: number;
+    public pixelType: PixelTypes;
 
     /** The number of components in a pixel. For a Scalar pixelType, this will be 1. */
     public components: number;
   }
 
   export = ImageType;
+}
+
+declare module "itk/IntTypes" {
+  /**
+   * The itk/IntTypes enum.
+   * @see https://github.com/InsightSoftwareConsortium/itk-js/tree/master/src/IntTypes.js
+   */
+  enum IntTypes {
+    Int8 = "int8_t",
+    UInt8 = "uint8_t",
+    Int16 = "int16_t",
+    UInt16 = "uint16_t",
+    Int32 = "int32_t",
+    UInt32 = "uint32_t",
+    Int64 = "int64_t",
+    UInt64 = "uint64_t",
+    SizeValueType = "uint64_t",
+    IdentifierType = "uint64_t",
+    IndexValueType = "int64_t",
+    OffsetValueType = "int64_t",
+  }
+  export = IntTypes;
 }
 
 declare module "itk/Matrix" {
@@ -116,25 +155,24 @@ declare module "itk/PixelTypes" {
    * The itk/PixelTypes enum.
    * @see https://github.com/InsightSoftwareConsortium/itk-js/tree/master/src/PixelTypes.js
    */
-  const PixelTypes: Record<
-    | "Unknown"
-    | "Scalar"
-    | "RGB"
-    | "RGBA"
-    | "Offset"
-    | "Vector"
-    | "Point"
-    | "CovariantVector"
-    | "SymmetricSecondRankTensor"
-    | "DiffusionTensor3D"
-    | "Complex"
-    | "FixedArray"
-    | "Array"
-    | "Matrix"
-    | "VariableLengthVector"
-    | "VariableSizeMatrix",
-    number
-  >;
+  enum PixelTypes {
+    Unknown = 0,
+    Scalar = 1,
+    RGB = 2,
+    RGBA = 3,
+    Offset = 4,
+    Vector = 5,
+    Point = 6,
+    CovariantVector = 7,
+    SymmetricSecondRankTensor = 8,
+    DiffusionTensor3D = 9,
+    Complex = 10,
+    FixedArray = 11,
+    Array = 12,
+    Matrix = 13,
+    VariableLengthVector = 14,
+    VariableSizeMatrix = 15,
+  }
   export default PixelTypes;
 }
 

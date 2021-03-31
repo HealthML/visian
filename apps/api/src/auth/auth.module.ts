@@ -2,7 +2,7 @@ import { MiddlewareConsumer, Module, NestModule } from "@nestjs/common";
 import { ConfigModule, ConfigService } from "@nestjs/config";
 import { InjectRepository, TypeOrmModule } from "@nestjs/typeorm";
 import { TypeormStore } from "connect-typeorm";
-import * as session from "express-session";
+import session from "express-session";
 import { Repository } from "typeorm";
 
 import { UsersModule } from "../users/users.module";
