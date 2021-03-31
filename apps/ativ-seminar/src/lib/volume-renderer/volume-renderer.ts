@@ -1,4 +1,4 @@
-import { TextureAtlas } from "@visian/util";
+import { TextureAtlas } from "@visian/utils";
 import { action, observable } from "mobx";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";

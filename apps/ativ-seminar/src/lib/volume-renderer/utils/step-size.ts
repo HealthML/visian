@@ -1,4 +1,4 @@
-import { TextureAtlas } from "@visian/util";
+import { TextureAtlas } from "@visian/utils";
 
 export const getStepSize = (atlas: TextureAtlas) => {
   const volumeSpaceVoxelSize = atlas.voxelCount

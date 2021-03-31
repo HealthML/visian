@@ -1,4 +1,4 @@
-import { IDisposer } from "@visian/util";
+import { IDisposer } from "@visian/utils";
 
 import {
   EventLike,

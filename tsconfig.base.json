@@ -18,7 +18,7 @@
     "baseUrl": ".",
     "paths": {
       "@visian/ui-shared": ["libs/ui-shared/src/index.ts"],
-      "@visian/util": ["libs/util/src/index.ts"]
+      "@visian/utils": ["libs/util/src/index.ts"]
     },
     "strict": true
   },

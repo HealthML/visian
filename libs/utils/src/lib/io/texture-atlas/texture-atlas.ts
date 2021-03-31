@@ -1,4 +1,4 @@
-import { ITKImage, TypedArray } from "@visian/util";
+import { ITKImage, TypedArray } from "@visian/utils";
 import localForage from "localforage";
 import * as THREE from "three";
 

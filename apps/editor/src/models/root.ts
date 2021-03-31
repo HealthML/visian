@@ -1,5 +1,5 @@
 import { IDispatch, IStorageBackend } from "@visian/ui-shared";
-import { deepObserve } from "@visian/util";
+import { deepObserve } from "@visian/utils";
 import { action, makeObservable, observable } from "mobx";
 
 import { Editor, EditorSnapshot } from "./editor";

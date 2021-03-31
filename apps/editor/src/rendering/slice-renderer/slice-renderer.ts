@@ -1,4 +1,4 @@
-import { IDisposer, TextureAtlas } from "@visian/util";
+import { IDisposer, TextureAtlas } from "@visian/utils";
 import ResizeSensor from "css-element-queries/src/ResizeSensor";
 import { reaction } from "mobx";
 import * as THREE from "three";

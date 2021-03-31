@@ -1,5 +1,5 @@
 import { IDispatch } from "@visian/ui-shared";
-import { IDisposer } from "@visian/util";
+import { IDisposer } from "@visian/utils";
 
 import { setUpHotKeys } from "./hotkeys";
 import { setUpPointerHandling } from "./pointers";

@@ -7,7 +7,7 @@ import {
   ThemeProvider,
   useIsDraggedOver,
 } from "@visian/ui-shared";
-import { readMedicalImage, TextureAtlas } from "@visian/util";
+import { readMedicalImage, TextureAtlas } from "@visian/utils";
 import { observer } from "mobx-react-lite";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Route, Switch } from "react-router-dom";

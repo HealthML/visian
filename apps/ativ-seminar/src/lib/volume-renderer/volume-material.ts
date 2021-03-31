@@ -1,4 +1,4 @@
-import { TextureAtlas } from "@visian/util";
+import { TextureAtlas } from "@visian/utils";
 import { autorun, IReactionDisposer } from "mobx";
 import * as THREE from "three";
 

@@ -1,4 +1,4 @@
-import { TextureAtlas } from "@visian/util";
+import { TextureAtlas } from "@visian/utils";
 import * as THREE from "three";
 
 import ScreenAlignedQuad from "../screen-aligned-quad";
