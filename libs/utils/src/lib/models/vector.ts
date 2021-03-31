@@ -1,9 +1,8 @@
 import { action, makeObservable, observable, toJS } from "mobx";
 
-import { getOrthogonalAxis } from "../../rendering/slice-renderer/utils";
+import { getOrthogonalAxis, ViewType } from "./view-types";
 
 import type * as THREE from "three";
-import type { ViewType } from "../../rendering/slice-renderer/types";
 
 export class OutOfBoundsError extends Error {
   constructor(index: number) {

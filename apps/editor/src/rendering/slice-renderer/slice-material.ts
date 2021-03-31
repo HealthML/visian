@@ -1,10 +1,9 @@
-import { IDisposer, TextureAtlas } from "@visian/utils";
+import { IDisposable, IDisposer, TextureAtlas, ViewType } from "@visian/utils";
 import { autorun } from "mobx";
 import * as THREE from "three";
 
 import fragmentShader from "./shaders/slice.frag.glsl";
 import vertexShader from "./shaders/slice.vert.glsl";
-import { IDisposable, ViewType } from "./types";
 
 import type { Editor } from "../../models";
 

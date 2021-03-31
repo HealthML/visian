@@ -1,10 +1,9 @@
+import { getPlaneAxes, IDisposable, ViewType } from "@visian/utils";
 import { autorun, IReactionDisposer } from "mobx";
 import * as THREE from "three";
 
 import { Editor } from "../../../models";
 import { crosshair as lineMaterialProps } from "../../../theme";
-import { IDisposable, ViewType } from "../types";
-import { getPlaneAxes } from "./conversion";
 
 export class Crosshair extends THREE.Group implements IDisposable {
   private size = new THREE.Vector2();

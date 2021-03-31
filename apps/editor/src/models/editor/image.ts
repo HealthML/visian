@@ -5,12 +5,12 @@ import {
   ITKMatrix,
   readMedicalImage,
   TypedArray,
+  Vector,
   VoxelTypes,
 } from "@visian/utils";
 import { action, makeObservable, observable } from "mobx";
 
 import { ISerializable } from "../types";
-import { Vector } from "../utils";
 
 export interface ImageSnapshot<T extends TypedArray = TypedArray> {
   name?: string;

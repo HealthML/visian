@@ -1,9 +1,8 @@
+import { getPlaneAxes, Vector, ViewType } from "@visian/utils";
 import { action, makeObservable, observable } from "mobx";
 
-import { maxZoom, minZoom } from "../../constants";
-import { getPlaneAxes, ViewType } from "../../rendering";
+import { maxZoom, minZoom, zoomStep } from "../../constants";
 import { ISerializable, StoreContext } from "../types";
-import { getZoomStep, Vector } from "../utils";
 
 import type { Editor } from "./editor";
 
@@ -80,19 +79,16 @@ export class EditorViewSettings
   public setZoomLevel(value = 1) {
     this.zoomLevel = value;
   }
+  public get zoomStep() {
+    return zoomStep * Math.sqrt(this.zoomLevel);
+  }
 
   public zoomIn() {
-    this.zoomLevel = Math.min(
-      maxZoom,
-      this.zoomLevel + getZoomStep(this.zoomLevel),
-    );
+    this.zoomLevel = Math.min(maxZoom, this.zoomLevel + this.zoomStep);
   }
 
   public zoomOut() {
-    this.zoomLevel = Math.max(
-      minZoom,
-      this.zoomLevel - getZoomStep(this.zoomLevel),
-    );
+    this.zoomLevel = Math.max(minZoom, this.zoomLevel - this.zoomStep);
   }
 
   public setOffset({ x = 0, y = 0 }) {

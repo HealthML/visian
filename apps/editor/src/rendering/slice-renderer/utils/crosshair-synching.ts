@@ -1,9 +1,8 @@
+import { getPlaneAxes, ViewType } from "@visian/utils";
 import * as THREE from "three";
 
 import { Editor } from "../../../models";
 import { Slice } from "../slice";
-import { ViewType } from "../types";
-import { getPlaneAxes } from "./conversion";
 
 /**
  * Sets the crosshair synch offset of the new main view slice

@@ -1,4 +1,10 @@
-import { IDisposer, TextureAtlas } from "@visian/utils";
+import {
+  IDisposable,
+  IDisposer,
+  TextureAtlas,
+  Vector,
+  ViewType,
+} from "@visian/utils";
 import { autorun } from "mobx";
 import * as THREE from "three";
 
@@ -7,7 +13,6 @@ import {
   ImageSliceMaterial,
   SliceMaterial,
 } from "./slice-material";
-import { IDisposable, ViewType } from "./types";
 import {
   annotationMeshZ,
   Crosshair,
@@ -17,7 +22,6 @@ import {
 } from "./utils";
 
 import type { Editor } from "../../models";
-import { Vector } from "../../models/utils/vector";
 
 export class Slice extends THREE.Group implements IDisposable {
   private baseSize = new THREE.Vector2();

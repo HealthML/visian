@@ -1,7 +1,5 @@
-import { IDisposer } from "@visian/utils";
+import { IDisposer, ViewType } from "@visian/utils";
 import hotkeys from "hotkeys-js";
-
-import { ViewType } from "../rendering";
 
 import type { RootStore } from "../models";
 

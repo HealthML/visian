@@ -1,7 +1,5 @@
+import { Vector, ViewType } from "@visian/utils";
 import * as THREE from "three";
-
-import { Vector } from "../../../models/utils";
-import { ViewType } from "../types";
 
 export const getSpriteSizes = (voxelCount: Vector, voxelSpacing: Vector) => {
   const spriteWidths: number[] = [];

@@ -1,10 +1,9 @@
-import { IDisposer, TextureAtlas } from "@visian/utils";
+import { IDisposable, IDisposer, TextureAtlas, viewTypes } from "@visian/utils";
 import ResizeSensor from "css-element-queries/src/ResizeSensor";
 import { reaction } from "mobx";
 import * as THREE from "three";
 
 import { Slice } from "./slice";
-import { IDisposable, viewTypes } from "./types";
 import {
   getOrder,
   getWebGLSize,
