@@ -28,7 +28,8 @@
                 }
               ]
             }
-          }
+          },
+          "outputs": ["{options.outputPath}"]
         },
         "compile": {
           "builder": "@nrwl/workspace:run-commands",
@@ -57,7 +58,8 @@
           "options": {
             "jestConfig": "apps/api/jest.config.js",
             "passWithNoTests": true
-          }
+          },
+          "outputs": ["coverage/apps/api"]
         }
       }
     },
@@ -87,7 +89,8 @@
           "options": {
             "jestConfig": "libs/ui-shared/jest.config.js",
             "passWithNoTests": true
-          }
+          },
+          "outputs": ["coverage/libs/ui-shared"]
         },
         "storybook": {
           "builder": "@nrwl/storybook:storybook",
@@ -117,7 +120,8 @@
             "ci": {
               "quiet": true
             }
-          }
+          },
+          "outputs": ["{options.outputPath}"]
         }
       }
     },
@@ -227,7 +231,8 @@
           "options": {
             "jestConfig": "apps/ar-demo/jest.config.js",
             "passWithNoTests": true
-          }
+          },
+          "outputs": ["coverage/apps/ar-demo"]
         }
       }
     },
@@ -336,7 +341,8 @@
           "options": {
             "jestConfig": "apps/ativ-seminar/jest.config.js",
             "passWithNoTests": true
-          }
+          },
+          "outputs": ["coverage/apps/ativ-seminar"]
         }
       }
     },
@@ -393,7 +399,8 @@
           "options": {
             "jestConfig": "libs/util/jest.config.js",
             "passWithNoTests": true
-          }
+          },
+          "outputs": ["coverage/libs/util"]
         }
       }
     },
@@ -473,7 +480,8 @@
           "options": {
             "jestConfig": "apps/editor/jest.config.js",
             "passWithNoTests": true
-          }
+          },
+          "outputs": ["coverage/apps/editor"]
         }
       }
     },
