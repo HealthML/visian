@@ -21,16 +21,22 @@ export interface GenericVector extends THREE.Vector {
 /** An observable vector of generic, fixed size. */
 export class Vector implements GenericVector {
   public static fromArray(array: number[]): Vector {
-    return new Vector(array.length).fromArray(array);
+    return new Vector(array);
   }
+
+  /** The number of components in this vector. */
+  public readonly size: number;
 
   protected data: number[];
 
-  constructor(
-    /** The number of elements in this vector. */
-    public readonly size = 3,
-  ) {
-    this.data = new Array(size).fill(0);
+  constructor(sizeOrArray: number | number[] = 3) {
+    if (Array.isArray(sizeOrArray)) {
+      this.data = sizeOrArray;
+      this.size = sizeOrArray.length;
+    } else {
+      this.data = new Array(sizeOrArray).fill(0);
+      this.size = sizeOrArray;
+    }
 
     makeObservable<this, "data">(this, {
       data: observable,
@@ -131,37 +137,32 @@ export class Vector implements GenericVector {
 
   public copy(vector: GenericVector) {
     const size = Math.min(this.size, vector.size);
-    const vectorData = vector.toArray();
     for (let i = 0; i < size; i++) {
-      this.data[i] = vectorData[i];
+      this.data[i] = vector.getComponent(i);
     }
     return this;
   }
 
   public add(vector: GenericVector) {
     const size = Math.min(this.size, vector.size);
-    const vectorData = vector.toArray();
     for (let i = 0; i < size; i++) {
-      this.data[i] += vectorData[i];
+      this.data[i] += vector.getComponent(i);
     }
     return this;
   }
 
   public addVectors(vectorA: GenericVector, vectorB: GenericVector) {
     const size = Math.min(this.size, vectorA.size, vectorB.size);
-    const vectorAData = vectorA.toArray();
-    const vectorBData = vectorB.toArray();
     for (let i = 0; i < size; i++) {
-      this.data[i] = vectorAData[i] + vectorBData[i];
+      this.data[i] = vectorA.getComponent(i) + vectorB.getComponent(i);
     }
     return this;
   }
 
   public addScaledVector(vector: GenericVector, scale: number) {
     const size = Math.min(this.size, vector.size);
-    const vectorData = vector.toArray();
     for (let i = 0; i < size; i++) {
-      this.data[i] += vectorData[i] * scale;
+      this.data[i] += vector.getComponent(i) * scale;
     }
     return this;
   }
@@ -175,19 +176,16 @@ export class Vector implements GenericVector {
 
   public sub(vector: GenericVector) {
     const size = Math.min(this.size, vector.size);
-    const vectorData = vector.toArray();
     for (let i = 0; i < size; i++) {
-      this.data[i] -= vectorData[i];
+      this.data[i] -= vector.getComponent(i);
     }
     return this;
   }
 
   public subVectors(vectorA: GenericVector, vectorB: GenericVector) {
     const size = Math.min(this.size, vectorA.size, vectorB.size);
-    const vectorAData = vectorA.toArray();
-    const vectorBData = vectorB.toArray();
     for (let i = 0; i < size; i++) {
-      this.data[i] = vectorAData[i] - vectorBData[i];
+      this.data[i] = vectorA.getComponent(i) - vectorB.getComponent(i);
     }
     return this;
   }
@@ -216,9 +214,8 @@ export class Vector implements GenericVector {
   public dot(vector: GenericVector) {
     let result = 0;
     const size = Math.min(this.size, vector.size);
-    const vectorData = vector.toArray();
     for (let i = 0; i < size; i++) {
-      result += this.data[i] * vectorData[i];
+      result += this.data[i] * vector.getComponent(i);
     }
     return result;
   }
@@ -252,9 +249,10 @@ export class Vector implements GenericVector {
   public distanceToSquared(vector: GenericVector) {
     let result = 0;
     const size = Math.min(this.size, vector.size);
-    const vectorData = vector.toArray();
     for (let i = 0; i < size; i++) {
-      result += (this.data[i] - vectorData[i]) * (this.data[i] - vectorData[i]);
+      result +=
+        (this.data[i] - vector.getComponent(i)) *
+        (this.data[i] - vector.getComponent(i));
     }
     return result;
   }
@@ -269,17 +267,18 @@ export class Vector implements GenericVector {
 
   public lerp(vector: GenericVector, alpha: number) {
     const size = Math.min(this.size, vector.size);
-    const vectorData = vector.toArray();
     for (let i = 0; i < size; i++) {
-      this.data[i] = alpha * vectorData[i] + (1 - alpha) * this.data[i];
+      this.data[i] =
+        alpha * vector.getComponent(i) + (1 - alpha) * this.data[i];
     }
     return this;
   }
 
   public equals(vector: GenericVector) {
     if (vector.size !== this.size) return false;
-    const vectorData = vector.toArray();
-    return !~this.data.findIndex((value, index) => vectorData[index] !== value);
+    return !~this.data.findIndex(
+      (value, index) => vector.getComponent(index) !== value,
+    );
   }
 
   public clone(): Vector {
