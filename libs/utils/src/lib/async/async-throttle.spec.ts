@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { asyncThrottle } from "./async-throttle";
+import { AsyncDebouncedFunc, asyncThrottle } from "./async-throttle";
 
 jest.mock("lodash.throttle", () => {
   let wrappedFn: ((...args: any[]) => any) | undefined;
@@ -29,9 +29,7 @@ const { clear, release } = jest.requireMock("lodash.throttle");
 
 describe("asyncThrottle", () => {
   const fn = jest.fn((param: any) => param);
-  let throttledFn: (
-    ...args: Parameters<typeof fn>
-  ) => Promise<ReturnType<typeof fn>>;
+  let throttledFn: AsyncDebouncedFunc<typeof fn>;
 
   beforeEach(() => {
     clear();

@@ -28,7 +28,8 @@
                 }
               ]
             }
-          }
+          },
+          "outputs": ["{options.outputPath}"]
         },
         "compile": {
           "builder": "@nrwl/workspace:run-commands",
@@ -57,7 +58,8 @@
           "options": {
             "jestConfig": "apps/api/jest.config.js",
             "passWithNoTests": true
-          }
+          },
+          "outputs": ["coverage/apps/api"]
         }
       }
     },
@@ -87,7 +89,8 @@
           "options": {
             "jestConfig": "libs/ui-shared/jest.config.js",
             "passWithNoTests": true
-          }
+          },
+          "outputs": ["coverage/libs/ui-shared"]
         },
         "storybook": {
           "builder": "@nrwl/storybook:storybook",
@@ -117,7 +120,8 @@
             "ci": {
               "quiet": true
             }
-          }
+          },
+          "outputs": ["{options.outputPath}"]
         }
       }
     },
@@ -227,7 +231,8 @@
           "options": {
             "jestConfig": "apps/ar-demo/jest.config.js",
             "passWithNoTests": true
-          }
+          },
+          "outputs": ["coverage/apps/ar-demo"]
         }
       }
     },
@@ -336,7 +341,8 @@
           "options": {
             "jestConfig": "apps/ativ-seminar/jest.config.js",
             "passWithNoTests": true
-          }
+          },
+          "outputs": ["coverage/apps/ativ-seminar"]
         }
       }
     },
@@ -362,37 +368,6 @@
           "builder": "@nrwl/linter:eslint",
           "options": {
             "lintFilePatterns": ["apps/ativ-seminar-e2e/**/*.{js,ts}"]
-          }
-        }
-      }
-    },
-    "util": {
-      "root": "libs/util",
-      "sourceRoot": "libs/util/src",
-      "projectType": "library",
-      "schematics": {},
-      "architect": {
-        "compile": {
-          "builder": "@nrwl/workspace:run-commands",
-          "options": {
-            "commands": [
-              {
-                "command": "yarn tsc --noEmit --pretty -p libs/util/tsconfig.lib.json"
-              }
-            ]
-          }
-        },
-        "lint": {
-          "builder": "@nrwl/linter:eslint",
-          "options": {
-            "lintFilePatterns": ["libs/util/**/*.ts"]
-          }
-        },
-        "test": {
-          "builder": "@nrwl/jest:jest",
-          "options": {
-            "jestConfig": "libs/util/jest.config.js",
-            "passWithNoTests": true
           }
         }
       }
@@ -473,7 +448,8 @@
           "options": {
             "jestConfig": "apps/editor/jest.config.js",
             "passWithNoTests": true
-          }
+          },
+          "outputs": ["coverage/apps/editor"]
         }
       }
     },
@@ -499,6 +475,37 @@
           "builder": "@nrwl/linter:eslint",
           "options": {
             "lintFilePatterns": ["apps/editor-e2e/**/*.{js,ts}"]
+          }
+        }
+      }
+    },
+    "utils": {
+      "root": "libs/utils",
+      "sourceRoot": "libs/utils/src",
+      "projectType": "library",
+      "architect": {
+        "compile": {
+          "builder": "@nrwl/workspace:run-commands",
+          "options": {
+            "commands": [
+              {
+                "command": "yarn tsc --noEmit --pretty -p libs/utils/tsconfig.lib.json"
+              }
+            ]
+          }
+        },
+        "lint": {
+          "builder": "@nrwl/linter:eslint",
+          "options": {
+            "lintFilePatterns": ["libs/utils/**/*.ts"]
+          }
+        },
+        "test": {
+          "builder": "@nrwl/jest:jest",
+          "outputs": ["coverage/libs/utils"],
+          "options": {
+            "jestConfig": "libs/utils/jest.config.js",
+            "passWithNoTests": true
           }
         }
       }
