@@ -108,9 +108,9 @@ export class EditorViewSettings
   }
 
   public setSelectedVoxel(
-    x = this.editor.image ? Math.round(this.editor.image?.voxelCount.x / 2) : 0,
-    y = this.editor.image ? Math.round(this.editor.image?.voxelCount.y / 2) : 0,
-    z = this.editor.image ? Math.round(this.editor.image?.voxelCount.z / 2) : 0,
+    x = this.editor.image ? Math.floor(this.editor.image?.voxelCount.x / 2) : 0,
+    y = this.editor.image ? Math.floor(this.editor.image?.voxelCount.y / 2) : 0,
+    z = this.editor.image ? Math.floor(this.editor.image?.voxelCount.z / 2) : 0,
   ) {
     this.selectedVoxel.set(x, y, z);
   }
