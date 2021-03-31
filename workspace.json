@@ -109,6 +109,7 @@
         },
         "build-storybook": {
           "builder": "@nrwl/storybook:build",
+          "outputs": ["{options.outputPath}"],
           "options": {
             "uiFramework": "@storybook/react",
             "outputPath": "dist/storybook/ui-shared",
@@ -120,8 +121,7 @@
             "ci": {
               "quiet": true
             }
-          },
-          "outputs": ["{options.outputPath}"]
+          }
         }
       }
     },
