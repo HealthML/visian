@@ -1,8 +1,8 @@
-import { getPlaneAxes, Vector, ViewType } from "@visian/utils";
+import { getPlaneAxes, ISerializable, Vector, ViewType } from "@visian/utils";
 import { action, makeObservable, observable } from "mobx";
 
 import { maxZoom, minZoom, zoomStep } from "../../constants";
-import { ISerializable, StoreContext } from "../types";
+import { StoreContext } from "../types";
 
 import type { Editor } from "./editor";
 

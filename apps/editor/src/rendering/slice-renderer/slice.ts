@@ -1,10 +1,4 @@
-import {
-  IDisposable,
-  IDisposer,
-  TextureAtlas,
-  Vector,
-  ViewType,
-} from "@visian/utils";
+import { IDisposable, IDisposer, Image, Vector, ViewType } from "@visian/utils";
 import { autorun } from "mobx";
 import * as THREE from "three";
 
@@ -87,23 +81,23 @@ export class Slice extends THREE.Group implements IDisposable {
     this.disposers.forEach((disposer) => disposer());
   }
 
-  public setImage(atlas: TextureAtlas) {
-    this.imageMaterial.setAtlas(atlas);
+  public setImage(image: Image) {
+    this.imageMaterial.setImage(image);
 
     this.baseSize.copy(
       // TODO: Rework once the texture atlas has been refactored
       getGeometrySize(
-        Vector.fromArray(atlas.voxelCount.toArray()),
-        Vector.fromArray(atlas.voxelSpacing.toArray()),
+        Vector.fromArray(image.voxelCount.toArray()),
+        Vector.fromArray(image.voxelSpacing.toArray()),
         this.viewType,
       ),
     );
     this.updateScale();
   }
 
-  public setAnnotation(atlas?: TextureAtlas) {
-    if (atlas) {
-      this.annotationMaterial.setAtlas(atlas);
+  public setAnnotation(image?: Image) {
+    if (image) {
+      this.annotationMaterial.setImage(image);
       this.annotationMesh.visible = true;
     } else {
       this.annotationMesh.visible = false;

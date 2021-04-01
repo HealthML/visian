@@ -1,4 +1,4 @@
-import { IDisposable, IDisposer, TextureAtlas, ViewType } from "@visian/utils";
+import { IDisposable, IDisposer, Image, ViewType } from "@visian/utils";
 import { autorun } from "mobx";
 import * as THREE from "three";
 
@@ -62,11 +62,11 @@ export abstract class SliceMaterial
   }
 
   /** Updates the rendered atlas. */
-  public setAtlas(atlas: TextureAtlas) {
-    this.uniforms.uDataTexture.value = atlas.getTexture();
-    this.uniforms.uVoxelCount.value = atlas.voxelCount;
-    this.uniforms.uAtlasGrid.value = atlas.atlasGrid;
-    this.uniforms.uComponents.value = atlas.components;
+  public setImage(image: Image) {
+    this.uniforms.uDataTexture.value = image.getTexture();
+    this.uniforms.uVoxelCount.value = image.voxelCount;
+    this.uniforms.uAtlasGrid.value = image.getAtlasGrid();
+    this.uniforms.uComponents.value = image.voxelComponents;
   }
 }
 

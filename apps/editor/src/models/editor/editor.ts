@@ -1,14 +1,13 @@
 import { getTheme } from "@visian/ui-shared";
+import { Image, ImageSnapshot, ISerializable } from "@visian/utils";
 import isEqual from "lodash.isequal";
 import { action, computed, makeObservable, observable } from "mobx";
 import tc from "tinycolor2";
 
-import { ISerializable, StoreContext } from "../types";
-import { Image, ImageSnapshot } from "./image";
+import { StoreContext } from "../types";
 import { EditorViewSettings } from "./view-settings";
 
 import type { SliceRenderer } from "../../rendering";
-
 export interface EditorSnapshot {
   backgroundColor: string;
   image?: ImageSnapshot;
