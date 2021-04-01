@@ -21,6 +21,7 @@ export const Screen: React.FC<ScreenProps> = styled(
   min-height: 100%;
   min-width: 100%;
   position: relative;
+  touch-action: none;
   width: 100%;
 `;
 

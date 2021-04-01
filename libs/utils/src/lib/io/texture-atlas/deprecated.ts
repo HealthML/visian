@@ -1,3 +1,8 @@
+/**
+ * @file The TextureAtlas class is still in here to avoid breaking the build
+ * of `ativ-seminar` until `feature/ativ-seminar` is merged. It should be
+ * removed immediately after.
+ */
 import { ITKImage, TypedArray } from "@visian/utils";
 import localForage from "localforage";
 import * as THREE from "three";
@@ -11,19 +16,28 @@ export class NoImageError extends Error {
 
 export interface StoredTextureAtlas<T extends TypedArray = TypedArray> {
   atlas: T;
+  direction: number[];
   magFilter?: THREE.TextureFilter;
   voxelCount: number[];
   voxelSpacing?: number[];
+  components: number;
+  dimensionality: number;
 }
 
-export const localForagePrefix = `atlas/`;
+const localForagePrefix = `atlas/`;
+
+/**
+ * The texture atlas generation expects the x- and y-axis to be inverted
+ * and the z-axis to be non-inverted.
+ */
+const defaultDirection = new THREE.Vector3(-1, -1, 1);
 
 /**
  * Returns the optimal number of slices in x/y direction in the texture atlas.
  *
  * @param voxelCount The number of voxels in each direction.
  */
-export const getAtlasGrid = (voxelCount: THREE.Vector3) => {
+const getAtlasGrid = (voxelCount: THREE.Vector3) => {
   const atlasGridX = Math.ceil(
     Math.sqrt((voxelCount.z * voxelCount.y) / voxelCount.x),
   );
@@ -43,6 +57,9 @@ export class TextureAtlas<T extends TypedArray = TypedArray> {
     return new TextureAtlas<T>(
       new THREE.Vector3().fromArray(image.size),
       new THREE.Vector3().fromArray(image.spacing),
+      new THREE.Matrix3().fromArray(image.direction.data),
+      image.imageType.components,
+      image.imageType.dimension,
       magFilter,
     ).setData(image.data);
   }
@@ -60,6 +77,9 @@ export class TextureAtlas<T extends TypedArray = TypedArray> {
       new THREE.Vector3().fromArray(storedAtlas.voxelCount),
       storedAtlas.voxelSpacing &&
         new THREE.Vector3().fromArray(storedAtlas.voxelSpacing),
+      new THREE.Matrix3().fromArray(storedAtlas.direction),
+      storedAtlas.components,
+      storedAtlas.dimensionality,
       storedAtlas.magFilter,
     ).setAtlas(storedAtlas.atlas);
   }
@@ -91,6 +111,9 @@ export class TextureAtlas<T extends TypedArray = TypedArray> {
     public readonly voxelSpacing: THREE.Vector3 = new THREE.Vector3().setScalar(
       1,
     ),
+    private direction: THREE.Matrix3,
+    public readonly components: number,
+    private dimensionality: number,
     private magFilter: THREE.TextureFilter = THREE.LinearFilter,
   ) {
     this.atlasGrid = getAtlasGrid(voxelCount);
@@ -112,33 +135,53 @@ export class TextureAtlas<T extends TypedArray = TypedArray> {
       }
 
       this.atlas = new (this.data.constructor as new (size: number) => T)(
-        this.atlasSize.x * this.atlasSize.y,
+        this.atlasSize.x * this.atlasSize.y * this.components,
       );
 
-      const sliceSize = this.voxelCount.x * this.voxelCount.y;
+      const direction =
+        this.dimensionality < 3
+          ? defaultDirection
+          : new THREE.Vector3()
+              .setScalar(1)
+              .applyMatrix3(this.direction)
+              .round()
+              .multiply(defaultDirection);
+
+      const inverted = {
+        x: direction.x < 0,
+        y: direction.y < 0,
+        z: direction.z < 0,
+      };
+
+      const sliceSize = this.voxelCount.x * this.voxelCount.y * this.components;
 
       // TODO: Test if ordered read can improve performance here
-      for (
-        let sliceNumber = 0;
-        sliceNumber < this.voxelCount.z;
-        sliceNumber++
-      ) {
+      for (let z = 0; z < this.voxelCount.z; z++) {
+        const sliceZ = inverted.z ? this.voxelCount.z - (z + 1) : z;
         const sliceData = this.data.subarray(
-          sliceNumber * sliceSize,
-          (sliceNumber + 1) * sliceSize,
+          sliceZ * sliceSize,
+          (sliceZ + 1) * sliceSize,
         );
         const sliceOffset = new THREE.Vector2(
-          (sliceNumber % this.atlasGrid.x) * this.voxelCount.x,
-          Math.floor(sliceNumber / this.atlasGrid.x) * this.voxelCount.y,
+          (sliceZ % this.atlasGrid.x) * this.voxelCount.x * this.components,
+          Math.floor(sliceZ / this.atlasGrid.x) *
+            this.voxelCount.y *
+            this.components,
         );
 
-        for (let sliceY = 0; sliceY < this.voxelCount.y; sliceY++) {
-          for (let sliceX = 0; sliceX < this.voxelCount.x; sliceX++) {
-            this.atlas[
-              (sliceOffset.y + sliceY) * this.atlasSize.x +
-                sliceOffset.x +
-                sliceX
-            ] = sliceData[sliceY * this.voxelCount.x + sliceX];
+        for (let y = 0; y < this.voxelCount.y; y++) {
+          const sliceY = inverted.y ? this.voxelCount.y - (y + 1) : y;
+          for (let x = 0; x < this.voxelCount.x; x++) {
+            const sliceX = inverted.x ? this.voxelCount.x - (x + 1) : x;
+            for (let c = 0; c < this.components; c++) {
+              this.atlas[
+                this.components *
+                  ((sliceOffset.y + sliceY) * this.atlasSize.x +
+                    sliceOffset.x +
+                    sliceX) +
+                  c
+              ] = sliceData[this.components * (y * this.voxelCount.x + x) + c];
+            }
           }
         }
       }
@@ -152,6 +195,7 @@ export class TextureAtlas<T extends TypedArray = TypedArray> {
    * Lazily generates it if necessary.
    */
   public getData() {
+    // TODO: Adapt to this.components, this.dimensionality, and this.direction.
     if (!this.data) {
       if (!this.atlas) {
         throw new NoImageError(
@@ -207,11 +251,20 @@ export class TextureAtlas<T extends TypedArray = TypedArray> {
         ),
       );
 
+      const textureFormat: THREE.PixelFormat =
+        this.components === 1
+          ? THREE.LuminanceFormat
+          : this.components === 2
+          ? THREE.RGFormat
+          : this.components === 3
+          ? THREE.RGBFormat
+          : THREE.RGBAFormat;
+
       this.texture = new THREE.DataTexture(
         scaledAtlas,
         this.atlasGrid.x * this.voxelCount.x,
         this.atlasGrid.y * this.voxelCount.y,
-        THREE.LuminanceFormat,
+        textureFormat,
         undefined,
         undefined,
         undefined,
@@ -246,9 +299,12 @@ export class TextureAtlas<T extends TypedArray = TypedArray> {
   public store(key: string) {
     return localForage.setItem(`${localForagePrefix}${key}`, {
       atlas: this.getAtlas(),
+      direction: this.direction.toArray(),
       magFilter: this.magFilter,
       voxelCount: this.voxelCount.toArray(),
       voxelSpacing: this.voxelSpacing.toArray(),
+      components: this.components,
+      dimensionality: this.dimensionality,
     } as StoredTextureAtlas<T>);
   }
 }

@@ -1,10 +1,13 @@
+import { getTheme } from "@visian/ui-shared";
+import { Image, ImageSnapshot, ISerializable } from "@visian/utils";
 import isEqual from "lodash.isequal";
 import { action, computed, makeObservable, observable } from "mobx";
 import tc from "tinycolor2";
 
-import { ISerializable, StoreContext } from "../types";
-import { Image, ImageSnapshot } from "./image";
+import { StoreContext } from "../types";
+import { EditorViewSettings } from "./view-settings";
 
+import type { SliceRenderer } from "../../rendering";
 export interface EditorSnapshot {
   backgroundColor: string;
   image?: ImageSnapshot;
@@ -12,20 +15,40 @@ export interface EditorSnapshot {
 }
 
 export class Editor implements ISerializable<EditorSnapshot> {
-  public backgroundColor = "#000";
+  public static readonly excludeFromSnapshotTracking = [
+    ...EditorViewSettings.excludeFromSnapshotTracking.map(
+      (path) => `/viewSettings${path}`,
+    ),
+    "/sliceRenderer",
+  ];
 
-  public image?: Image;
+  public sliceRenderer?: SliceRenderer;
+
+  // Layers
+  public foregroundColor = "#ffffff";
   public annotation?: Image;
+  public image?: Image;
+  public backgroundColor = getTheme("dark").colors.background;
+
+  public viewSettings: EditorViewSettings;
 
   constructor(protected context?: StoreContext) {
+    this.viewSettings = new EditorViewSettings(this, context);
+
     makeObservable(this, {
-      backgroundColor: observable,
+      sliceRenderer: observable,
+      foregroundColor: observable,
       image: observable,
       annotation: observable,
+      backgroundColor: observable,
+
       theme: computed,
-      setBackgroundColor: action,
+
+      setSliceRenderer: action,
+      setForegroundColor: action,
       setImage: action,
       setAnnotation: action,
+      setBackgroundColor: action,
       applySnapshot: action,
     });
   }
@@ -36,14 +59,20 @@ export class Editor implements ISerializable<EditorSnapshot> {
       : "dark";
   }
 
-  public setBackgroundColor(backgroundColor: string) {
-    this.backgroundColor = backgroundColor;
+  public setSliceRenderer(sliceRenderer?: SliceRenderer) {
+    this.sliceRenderer = sliceRenderer;
+  }
+
+  public setForegroundColor(foregroundColor: string) {
+    this.foregroundColor = foregroundColor;
   }
 
   public setImage(image: Image) {
     this.annotation = undefined;
     this.image = image;
     this.context?.persistImmediately();
+
+    this.viewSettings.reset();
   }
   public async importImage(imageFile: File) {
     this.setImage(await Image.fromFile(imageFile));
@@ -61,6 +90,10 @@ export class Editor implements ISerializable<EditorSnapshot> {
     this.setAnnotation(await Image.fromFile(imageFile));
   }
 
+  public setBackgroundColor(backgroundColor: string) {
+    this.backgroundColor = backgroundColor;
+  }
+
   public toJSON() {
     return {
       backgroundColor: this.backgroundColor,
@@ -73,5 +106,7 @@ export class Editor implements ISerializable<EditorSnapshot> {
     this.backgroundColor = snapshot.backgroundColor;
     this.image = snapshot.image && new Image(snapshot.image);
     this.annotation = snapshot.annotation && new Image(snapshot.annotation);
+
+    this.viewSettings.reset();
   }
 }

@@ -3,6 +3,8 @@ import {
   color,
   coverMixin,
   DropZone,
+  FlexRow,
+  Spacer,
   Text,
 } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
@@ -10,14 +12,23 @@ import React, { useCallback, useState } from "react";
 import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
+import { SideViews } from "../side-views";
 import { UIOverlayProps } from "./ui-overlay.props";
 
 const Container = styled(AbsoluteCover)`
-  align-items: flex-start;
+  align-items: stretch;
+  display: flex;
   padding: 12px;
   z-index: 1;
   pointer-events: none;
   user-select: none;
+`;
+
+const StartTextContainer = styled(AbsoluteCover)`
+  align-items: center;
+  display: flex;
+  justify-content: center;
+  opacity: 0.4;
 `;
 
 const StyledDropZone = styled(DropZone)`
@@ -77,7 +88,13 @@ export const UIOverlay = observer<UIOverlayProps>(
 
     return (
       <Container {...rest}>
-        <Text tx="replace-me" />
+        {!store?.editor.image && (
+          <StartTextContainer>
+            <Text tx="start" />
+          </StartTextContainer>
+        )}
+        <Spacer />
+        <SideViews />
 
         {isDraggedOver && (
           <DropSheet>

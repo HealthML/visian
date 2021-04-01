@@ -3,13 +3,21 @@ import {
   IntTypes,
   ITKImage,
   ITKMatrix,
-  VoxelTypes,
   readMedicalImage,
   TypedArray,
+  Vector,
+  VoxelTypes,
 } from "@visian/utils";
-import { action, makeObservable, observable, toJS } from "mobx";
+import { action, makeObservable, observable } from "mobx";
+import * as THREE from "three";
 
-import { ISerializable } from "../types";
+import {
+  convertDataArrayToAtlas,
+  getAtlasGrid,
+  getTextureFromAtlas,
+} from "../../io/texture-atlas";
+
+import type { ISerializable } from "../types";
 
 export interface ImageSnapshot<T extends TypedArray = TypedArray> {
   name?: string;
@@ -29,6 +37,7 @@ export interface ImageSnapshot<T extends TypedArray = TypedArray> {
   data?: T;
 }
 
+/** A generic, observable multi-dimensional image class. */
 export class Image<T extends TypedArray = TypedArray>
   implements ISerializable<ImageSnapshot<T>> {
   public static fromITKImage<T extends TypedArray = TypedArray>(
@@ -37,8 +46,10 @@ export class Image<T extends TypedArray = TypedArray>
     return new Image({
       name: image.name,
       dimensionality: image.imageType.dimension,
-      voxelCount: image.size,
-      voxelSpacing: image.spacing,
+      voxelCount:
+        image.imageType.dimension === 2 ? [...image.size, 1] : image.size,
+      voxelSpacing:
+        image.imageType.dimension === 2 ? [...image.spacing, 1] : image.spacing,
       voxelType: image.imageType.pixelType,
       voxelComponents: image.imageType.components,
       voxelComponentType: image.imageType.componentType,
@@ -66,7 +77,7 @@ export class Image<T extends TypedArray = TypedArray>
    * An Array with length `dimensionality` that contains the number of voxels
    * along each dimension.
    */
-  public voxelCount!: number[];
+  public voxelCount!: Vector;
 
   /**
    * An Array with length `dimensionality` that describes the spacing between
@@ -74,7 +85,7 @@ export class Image<T extends TypedArray = TypedArray>
    *
    * Defaults to a vector of all ones.
    */
-  public voxelSpacing!: number[];
+  public voxelSpacing!: Vector;
 
   /**
    * The VoxelType. For example, `VoxelTypes.Scalar` or `VoxelTypes.RGBA`.
@@ -105,7 +116,7 @@ export class Image<T extends TypedArray = TypedArray>
    *
    * Defaults to the zero vector.
    */
-  public origin!: number[];
+  public origin!: Vector;
 
   /**
    * A `dimensionality` by `dimensionality` Matrix that describes the
@@ -116,8 +127,13 @@ export class Image<T extends TypedArray = TypedArray>
    */
   public orientation!: ITKMatrix;
 
-  /** A TypedArray containing the voxel buffer data. */
+  /** A TypedArray containing the voxel buffer data in I/O format. */
   public data!: T;
+
+  /** A Uint8Array containing the voxel buffer data in texture atlas format. */
+  protected atlas?: Uint8Array;
+
+  protected texture?: THREE.DataTexture;
 
   constructor(
     image: ImageSnapshot<T> & Pick<ImageSnapshot<T>, "voxelCount" | "data">,
@@ -140,14 +156,48 @@ export class Image<T extends TypedArray = TypedArray>
     });
   }
 
+  public getAtlas() {
+    if (!this.atlas) {
+      // Explicit access here avoids MobX observability tracking to increase performance
+      this.atlas = convertDataArrayToAtlas({
+        data: this.data,
+        dimensionality: this.dimensionality,
+        orientation: this.orientation,
+        voxelComponents: this.voxelComponents,
+        voxelCount: this.voxelCount.clone(false),
+      });
+    }
+    return this.atlas;
+  }
+
+  public getAtlasGrid() {
+    return getAtlasGrid(this.voxelCount);
+  }
+
+  public getTexture() {
+    if (!this.texture) {
+      // Explicit access here avoids MobX observability tracking to increase performance
+      this.texture = getTextureFromAtlas(
+        {
+          voxelComponents: this.voxelComponents,
+          voxelCount: this.voxelCount.clone(false),
+        },
+        this.getAtlas(),
+      );
+    }
+    return this.texture;
+  }
+
   public toJSON() {
     return {
       name: this.name,
-      voxelCount: toJS(this.voxelCount),
-      voxelSpacing: toJS(this.voxelSpacing),
-      origin: toJS(this.origin),
+      voxelCount: this.voxelCount.toJSON(),
+      voxelSpacing: this.voxelSpacing.toJSON(),
+      origin: this.origin.toJSON(),
       orientation: this.orientation,
       data: this.data,
+      dimensionality: this.dimensionality,
+      voxelComponents: this.voxelComponents,
     };
   }
 
@@ -156,29 +206,40 @@ export class Image<T extends TypedArray = TypedArray>
 
     this.dimensionality = snapshot.dimensionality || snapshot.voxelCount.length;
 
-    this.voxelCount = snapshot.voxelCount;
-    this.voxelSpacing = snapshot.voxelSpacing || this.voxelCount.map(() => 1);
+    this.voxelCount = Vector.fromArray(snapshot.voxelCount);
+    this.voxelSpacing = snapshot.voxelSpacing
+      ? Vector.fromArray(snapshot.voxelSpacing)
+      : new Vector(this.dimensionality).setScalar(1);
 
     this.voxelType =
       snapshot.voxelType === undefined ? VoxelTypes.Scalar : snapshot.voxelType;
     this.voxelComponents = snapshot.voxelComponents || 1;
     this.voxelComponentType = snapshot.voxelComponentType || IntTypes.UInt8;
 
-    this.origin = snapshot.origin || this.voxelCount.map(() => 0);
+    this.origin = snapshot.origin
+      ? Vector.fromArray(snapshot.origin)
+      : new Vector(this.dimensionality).setScalar(0);
+
     if (snapshot.orientation) {
       this.orientation = snapshot.orientation;
     } else {
       this.orientation = new ITKMatrix(
-        this.voxelCount.length,
-        this.voxelCount.length,
+        this.voxelCount.size,
+        this.voxelCount.size,
       );
       this.orientation.setIdentity();
     }
 
-    this.data =
-      snapshot.data ||
-      (new Uint8Array(
-        this.voxelCount.reduce((sum, current) => sum + current, 0),
-      ) as T);
+    if (snapshot.data) {
+      // Clone the data to convert it from a SharedArrayBuffer to an arraybuffer.
+      // This is necessary to store the data in IndexedDB when using Chrome.
+      const clonedData = new (snapshot.data.constructor as new (
+        size: number,
+      ) => T)(snapshot.data.length);
+      clonedData.set(snapshot.data);
+      this.data = clonedData;
+    } else {
+      this.data = new Uint8Array(this.voxelCount.product()) as T;
+    }
   }
 }

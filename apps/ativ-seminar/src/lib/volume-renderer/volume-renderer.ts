@@ -1,10 +1,11 @@
+import { TextureAtlas } from "@visian/utils";
 import { action, observable } from "mobx";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import Stats from "three/examples/jsm/libs/stats.module";
 
 import { IDisposable } from "../types";
-import { FlyControls, ScreenAlignedQuad, TextureAtlas } from "./utils";
+import { FlyControls, ScreenAlignedQuad } from "./utils";
 import Volume from "./volume";
 import VolumeMaterial from "./volume-material";
 

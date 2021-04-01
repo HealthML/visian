@@ -21,10 +21,13 @@ The app is structured in the following way:
   - `app/`: The app's entry point
   - `assets/`: Assets copied over to `assets/` in distribution. Contains, e.g., the JSON translation files for i18n
   - `components/`: Application-specific React components that do not hook into the application store
+  - `constants/`: Application-wide constants
   - `environments/`: Holds configuration that depends on the environment
     - `environment.ts`: Configuration for development. It will be replaced by `environment.prod.ts` for production builds
     - `environment.prod.ts`: Configuration for production
+  - `event-handling/`: Configuration of UI-event handling such as hotkeys and multi-touch interactions
   - `models/`: [MobX](https://mobx.js.org) models
+  - `rendering/`: WebGL renders, shaders, and related code
   - `screens/`: All application screens accessible via their own route/as part of the navigation hierarchy
   - `services/`: Application-specific services, e.g., storage backends
 
