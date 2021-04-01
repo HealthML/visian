@@ -1,6 +1,6 @@
 import { action, makeObservable, observable, toJS } from "mobx";
 
-import { getOrthogonalAxis, ViewType } from "./view-types";
+import { getOrthogonalAxis, ViewType } from "../view-types";
 
 import type * as THREE from "three";
 
@@ -28,7 +28,10 @@ export class Vector implements GenericVector {
 
   protected data: number[];
 
-  constructor(sizeOrArray: number | number[] = 3) {
+  constructor(
+    sizeOrArray: number | number[] = 3,
+    public readonly isObservable = true,
+  ) {
     if (Array.isArray(sizeOrArray)) {
       this.data = sizeOrArray;
       this.size = sizeOrArray.length;
@@ -37,27 +40,29 @@ export class Vector implements GenericVector {
       this.size = sizeOrArray;
     }
 
-    makeObservable<this, "data">(this, {
-      data: observable,
+    if (isObservable) {
+      makeObservable<this, "data">(this, {
+        data: observable,
 
-      setComponent: action,
-      set: action,
-      setScalar: action,
-      copy: action,
-      add: action,
-      addVectors: action,
-      addScaledVector: action,
-      addScalar: action,
-      sub: action,
-      subVectors: action,
-      multiplyScalar: action,
-      divideScalar: action,
-      negate: action,
-      normalize: action,
-      setLength: action,
-      lerp: action,
-      setFromView: action,
-    });
+        setComponent: action,
+        set: action,
+        setScalar: action,
+        copy: action,
+        add: action,
+        addVectors: action,
+        addScaledVector: action,
+        addScalar: action,
+        sub: action,
+        subVectors: action,
+        multiplyScalar: action,
+        divideScalar: action,
+        negate: action,
+        normalize: action,
+        setLength: action,
+        lerp: action,
+        setFromView: action,
+      });
+    }
   }
 
   public setComponent(index: number, value: number) {
@@ -189,6 +194,14 @@ export class Vector implements GenericVector {
     return this;
   }
 
+  public multiply(vector: GenericVector) {
+    const size = Math.min(this.size, vector.size);
+    for (let i = 0; i < size; i++) {
+      this.data[i] *= vector.getComponent(i);
+    }
+    return this;
+  }
+
   public multiplyScalar(scalar: number) {
     for (let i = 0; i < this.size; i++) {
       this.data[i] *= scalar;
@@ -280,8 +293,8 @@ export class Vector implements GenericVector {
     );
   }
 
-  public clone(): Vector {
-    return new Vector(this.size).copy(this);
+  public clone(isObservable = true): Vector {
+    return new Vector(this.toArray(), isObservable);
   }
 
   public fromArray(array: number[]) {

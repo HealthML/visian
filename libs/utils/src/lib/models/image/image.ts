@@ -9,8 +9,15 @@ import {
   VoxelTypes,
 } from "@visian/utils";
 import { action, makeObservable, observable } from "mobx";
+import * as THREE from "three";
 
-import { ISerializable } from "../types";
+import {
+  convertDataArrayToAtlas,
+  getAtlasGrid,
+  getTextureFromAtlas,
+} from "../../io/texture-atlas";
+
+import type { ISerializable } from "../types";
 
 export interface ImageSnapshot<T extends TypedArray = TypedArray> {
   name?: string;
@@ -30,6 +37,7 @@ export interface ImageSnapshot<T extends TypedArray = TypedArray> {
   data?: T;
 }
 
+/** A generic, observable multi-dimensional image class. */
 export class Image<T extends TypedArray = TypedArray>
   implements ISerializable<ImageSnapshot<T>> {
   public static fromITKImage<T extends TypedArray = TypedArray>(
@@ -119,8 +127,13 @@ export class Image<T extends TypedArray = TypedArray>
    */
   public orientation!: ITKMatrix;
 
-  /** A TypedArray containing the voxel buffer data. */
+  /** A TypedArray containing the voxel buffer data in I/O format. */
   public data!: T;
+
+  /** A TypedArray containing the voxel buffer data in texture atlas format. */
+  protected atlas?: T;
+
+  protected texture?: THREE.DataTexture;
 
   constructor(
     image: ImageSnapshot<T> & Pick<ImageSnapshot<T>, "voxelCount" | "data">,
@@ -141,6 +154,38 @@ export class Image<T extends TypedArray = TypedArray>
       data: observable.ref,
       applySnapshot: action,
     });
+  }
+
+  public getAtlas() {
+    if (!this.atlas) {
+      // Explicit access here avoids MobX observability tracking to increase performance
+      this.atlas = convertDataArrayToAtlas({
+        data: this.data,
+        dimensionality: this.dimensionality,
+        orientation: this.orientation,
+        voxelComponents: this.voxelComponents,
+        voxelCount: this.voxelCount.clone(false),
+      });
+    }
+    return this.atlas;
+  }
+
+  public getAtlasGrid() {
+    return getAtlasGrid(this.voxelCount);
+  }
+
+  public getTexture() {
+    if (!this.texture) {
+      // Explicit access here avoids MobX observability tracking to increase performance
+      this.texture = getTextureFromAtlas(
+        {
+          voxelComponents: this.voxelComponents,
+          voxelCount: this.voxelCount.clone(false),
+        },
+        this.getAtlas(),
+      );
+    }
+    return this.texture;
   }
 
   public toJSON() {
