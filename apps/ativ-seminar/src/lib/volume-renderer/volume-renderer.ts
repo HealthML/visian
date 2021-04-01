@@ -1,3 +1,4 @@
+import { TextureAtlas } from "@visian/utils";
 import { action, computed, makeObservable, observable } from "mobx";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
@@ -11,7 +12,6 @@ import {
   LightingModeType,
   ResolutionComputer,
   ScreenAlignedQuad,
-  TextureAtlas,
 } from "./utils";
 import {
   TransferFunction,

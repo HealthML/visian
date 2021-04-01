@@ -1,10 +1,10 @@
+import { TextureAtlas } from "@visian/utils";
 import { autorun, IReactionDisposer } from "mobx";
 import * as THREE from "three";
 
 import { IDisposable } from "../../../types";
 import VolumeRenderer from "../../volume-renderer";
 import ScreenAlignedQuad from "../screen-aligned-quad";
-import { TextureAtlas } from "../texture-atlas";
 import { GradientMaterial, GradientMode } from "./gradient-material";
 
 export class GradientComputer implements IDisposable {

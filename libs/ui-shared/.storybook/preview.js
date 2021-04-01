@@ -44,6 +44,9 @@ export const globalTypes = {
 
 export const parameters = {
   layout: "fullscreen",
+  backgrounds: {
+    disable: true,
+  },
 };
 
 const StyledContainer = styled.div`

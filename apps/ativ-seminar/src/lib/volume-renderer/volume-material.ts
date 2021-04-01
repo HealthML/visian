@@ -1,3 +1,4 @@
+import { TextureAtlas } from "@visian/utils";
 import { autorun, IReactionDisposer } from "mobx";
 import * as THREE from "three";
 
@@ -12,12 +13,7 @@ import {
   transferFunctionsUniforms,
 } from "./uniforms";
 import { lightingUniforms } from "./uniforms/lighting";
-import {
-  getStepSize,
-  GradientComputer,
-  LAOComputer,
-  TextureAtlas,
-} from "./utils";
+import { getStepSize, GradientComputer, LAOComputer } from "./utils";
 
 import type Volume from "./volume";
 import type VolumeRenderer from "./volume-renderer";

@@ -6,6 +6,7 @@
     "declaration": false,
     "moduleResolution": "node",
     "emitDecoratorMetadata": true,
+    "esModuleInterop": true,
     "experimentalDecorators": true,
     "forceConsistentCasingInFileNames": true,
     "importHelpers": true,
@@ -18,7 +19,7 @@
     "baseUrl": ".",
     "paths": {
       "@visian/ui-shared": ["libs/ui-shared/src/index.ts"],
-      "@visian/util": ["libs/util/src/index.ts"]
+      "@visian/utils": ["libs/utils/src/index.ts"]
     },
     "strict": true
   },
