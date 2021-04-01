@@ -6,10 +6,10 @@ import {
   GlobalStyles,
   Screen,
   ThemeProvider,
-  WebGLCanvas,
   useIsDraggedOver,
+  WebGLCanvas,
 } from "@visian/ui-shared";
-import { readMedicalImage, TextureAtlas } from "@visian/utils";
+import { readMedicalImage } from "@visian/utils";
 import { observer } from "mobx-react-lite";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Route, Switch } from "react-router-dom";
@@ -17,6 +17,7 @@ import styled from "styled-components";
 import WebXRPolyfill from "webxr-polyfill";
 
 import { UIOverlay } from "../components/ui-overlay";
+import { TextureAtlas } from "../lib/texture-atlas";
 import { VolumeRenderer } from "../lib/volume-renderer";
 
 import type * as THREE from "three";

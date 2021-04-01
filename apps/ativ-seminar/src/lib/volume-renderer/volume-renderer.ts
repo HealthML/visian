@@ -1,9 +1,9 @@
-import { TextureAtlas } from "@visian/utils";
 import { action, computed, makeObservable, observable } from "mobx";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import Stats from "three/examples/jsm/libs/stats.module";
 
+import { TextureAtlas } from "../texture-atlas";
 import { IDisposable } from "../types";
 import {
   FlyControls,

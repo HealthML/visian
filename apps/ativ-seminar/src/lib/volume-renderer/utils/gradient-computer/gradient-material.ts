@@ -1,5 +1,6 @@
 import * as THREE from "three";
 
+import { TextureAtlas } from "../../../texture-atlas";
 import gradientFragmentShader from "../../shader/gradient/gradient.frag.glsl";
 import gradientVertexShader from "../../shader/gradient/gradient.vert.glsl";
 import {
@@ -9,7 +10,6 @@ import {
   transferFunctionsUniforms,
 } from "../../uniforms";
 import { getStepSize } from "../step-size";
-import { TextureAtlas } from "../texture-atlas";
 
 export enum GradientMode {
   Output = 0,

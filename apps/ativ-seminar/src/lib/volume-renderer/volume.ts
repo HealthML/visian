@@ -1,6 +1,6 @@
-import { TextureAtlas } from "@visian/utils";
 import * as THREE from "three";
 
+import { TextureAtlas } from "../texture-atlas";
 import { IDisposable } from "../types";
 import VolumeMaterial from "./volume-material";
 

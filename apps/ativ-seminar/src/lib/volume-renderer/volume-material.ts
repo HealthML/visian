@@ -1,7 +1,7 @@
-import { TextureAtlas } from "@visian/utils";
 import { autorun, IReactionDisposer } from "mobx";
 import * as THREE from "three";
 
+import { TextureAtlas } from "../texture-atlas";
 import { IDisposable } from "../types";
 import volumeFragmentShader from "./shader/volume/volume.frag.glsl";
 import volumeVertexShader from "./shader/volume/volume.vert.glsl";

@@ -1,7 +1,7 @@
-import { TextureAtlas } from "@visian/utils";
 import { autorun, IReactionDisposer } from "mobx";
 import * as THREE from "three";
 
+import { TextureAtlas } from "../../../texture-atlas";
 import { IDisposable } from "../../../types";
 import VolumeRenderer from "../../volume-renderer";
 import ScreenAlignedQuad from "../screen-aligned-quad";

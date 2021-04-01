@@ -1,5 +1,6 @@
 import * as THREE from "three";
 
+import { TextureAtlas } from "../../../texture-atlas";
 import fragmentShader from "../../shader/lao/lao.frag.glsl";
 import vertexShader from "../../shader/lao/lao.vert.glsl";
 import {
@@ -10,7 +11,6 @@ import {
   transferFunctionsUniforms,
 } from "../../uniforms";
 import { getStepSize } from "../step-size";
-import TextureAtlas from "../texture-atlas";
 
 export class LAOMaterial extends THREE.ShaderMaterial {
   constructor(
