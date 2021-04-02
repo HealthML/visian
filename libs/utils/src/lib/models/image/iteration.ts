@@ -10,7 +10,10 @@ import { getAtlasIndexFor } from "./conversion";
  * @param viewType The view's type, dictating the orientation of the search plane.
  * @param slice The index of the slice to search.
  * @param predicate The predicate.
+ * @param components The amount of components per voxel in the atlas.
  * @param voxelCount The number of voxels in each direction.
+ * @param axisInversion The axis inversion of the image of the atlas.
+ * @param atlasSize The size of the texture atlas in pixels.
  * @param atlasGrid The number of slices in the texture atlas in x/y direction.
  * @returns The voxel coordinates and value for which the predicate first returned true.
  */
