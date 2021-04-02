@@ -10,15 +10,34 @@ import { Vector } from "@visian/utils";
  */
 export const getAtlasIndexFor = (
   voxel: Vector,
+  components: number,
   voxelCount: Vector,
+  inverted: { x: boolean; y: boolean; z: boolean },
+  atlasSize: Vector,
   atlasGrid: Vector,
 ) => {
-  const textureAtlasWidth = atlasGrid.x * voxelCount.x;
-  const sliceColumn = voxel.z % atlasGrid.x;
-  const sliceRow = Math.floor(voxel.z / atlasGrid.x);
-  const zOffset =
-    sliceRow * voxelCount.y * textureAtlasWidth + sliceColumn * voxelCount.x;
-  const yOffset = voxel.y * textureAtlasWidth;
-  const xOffset = voxelCount.x - 1 - voxel.x;
-  return xOffset + yOffset + zOffset;
+  const actualVoxel = new Vector(
+    [
+      inverted.x ? voxelCount.x - (voxel.x + 1) : voxel.x,
+      inverted.y ? voxelCount.y - (voxel.y + 1) : voxel.y,
+      inverted.z ? voxelCount.z - (voxel.z + 1) : voxel.z,
+    ],
+    false,
+  );
+
+  const sliceOffset = new Vector(
+    [
+      (actualVoxel.z % atlasGrid.x) * voxelCount.x,
+      Math.floor(actualVoxel.z / atlasGrid.x) * voxelCount.y,
+    ],
+    false,
+  );
+
+  return (
+    components *
+      ((sliceOffset.y + actualVoxel.y) * atlasSize.x +
+        sliceOffset.x +
+        actualVoxel.x) +
+    (voxel.size > 3 ? voxel.w : 0)
+  );
 };

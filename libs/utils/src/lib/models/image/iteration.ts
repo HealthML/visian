@@ -22,7 +22,10 @@ export const findVoxelInSlice = (
     voxel: { x: number; y: number; z: number },
     value: number,
   ) => boolean | undefined | void,
+  components: number,
   voxelCount: Vector,
+  axisInversion: { x: boolean; y: boolean; z: boolean },
+  atlasSize: Vector,
   atlasGrid: Vector,
 ) => {
   if (!atlas) return;
@@ -42,7 +45,17 @@ export const findVoxelInSlice = (
         false,
       );
 
-      const value = atlas[getAtlasIndexFor(voxel, voxelCount, atlasGrid)];
+      const value =
+        atlas[
+          getAtlasIndexFor(
+            voxel,
+            components,
+            voxelCount,
+            axisInversion,
+            atlasSize,
+            atlasGrid,
+          )
+        ];
 
       if (predicate(voxel, value)) {
         return { voxel, value };

@@ -1,26 +1,34 @@
+import { action, makeObservable, observable } from "mobx";
+import * as THREE from "three";
+
 import {
-  findVoxelInSlice,
   FloatTypes,
   IntTypes,
   ITKImage,
   ITKMatrix,
   readMedicalImage,
   TypedArray,
-  Vector,
   VoxelTypes,
-} from "@visian/utils";
-import { action, makeObservable, observable } from "mobx";
-import * as THREE from "three";
-
+} from "../../io";
 import {
   convertDataArrayToAtlas,
   getAtlasGrid,
+  getAtlasSize,
   getTextureFromAtlas,
 } from "../../io/texture-atlas";
+import { Vector } from "../vector";
 import { getPlaneAxes, ViewType } from "../view-types";
 import { getAtlasIndexFor } from "./conversion";
+import { findVoxelInSlice } from "./iteration";
 
 import type { ISerializable } from "../types";
+
+/**
+ * The texture atlas generation expects the x- and y-axis to be inverted
+ * and the z-axis to be non-inverted.
+ */
+export const defaultDirection = new Vector([-1, -1, 1], false);
+
 export interface ImageSnapshot<T extends TypedArray = TypedArray> {
   name?: string;
 
@@ -128,6 +136,7 @@ export class Image<T extends TypedArray = TypedArray>
    * Defaults to the identity matrix.
    */
   public orientation!: ITKMatrix;
+  private _axisInversion?: { x: boolean; y: boolean; z: boolean };
 
   /** A TypedArray containing the voxel buffer data in I/O format. */
   public data!: T;
@@ -170,6 +179,7 @@ export class Image<T extends TypedArray = TypedArray>
         orientation: this.orientation,
         voxelComponents: this.voxelComponents,
         voxelCount: this.voxelCount.clone(false),
+        axisInversion: this.axisInversion,
       });
     }
     return this.atlas;
@@ -177,6 +187,10 @@ export class Image<T extends TypedArray = TypedArray>
 
   public getAtlasGrid() {
     return getAtlasGrid(this.voxelCount);
+  }
+
+  public getAtlasSize() {
+    return getAtlasSize(this.voxelCount, this.getAtlasGrid());
   }
 
   public getTexture() {
@@ -192,6 +206,35 @@ export class Image<T extends TypedArray = TypedArray>
       );
     }
     return this.texture;
+  }
+
+  public get axisInversion() {
+    if (!this._axisInversion) {
+      // TODO: Refactor as soon as our Vector class implements `applyMatrix3`
+      const direction =
+        this.dimensionality < 3
+          ? defaultDirection
+          : Vector.fromArray(
+              new THREE.Vector3()
+                .setScalar(1)
+                .applyMatrix3(
+                  new THREE.Matrix3().fromArray(this.orientation.data),
+                )
+                .round()
+                .multiply(
+                  new THREE.Vector3().fromArray(defaultDirection.toArray()),
+                )
+                .toArray(),
+            );
+
+      this._axisInversion = {
+        x: direction.x < 0,
+        y: direction.y < 0,
+        z: direction.z < 0,
+      };
+    }
+
+    return this._axisInversion;
   }
 
   public getSlice(sliceNumber: number, viewType: ViewType) {
@@ -210,7 +253,10 @@ export class Image<T extends TypedArray = TypedArray>
         sliceData[index] = value;
         index++;
       },
+      this.voxelComponents,
       this.voxelCount.clone(false),
+      this.axisInversion,
+      this.getAtlasSize(),
       this.getAtlasGrid(),
     );
 
@@ -218,7 +264,14 @@ export class Image<T extends TypedArray = TypedArray>
   }
 
   public getVoxelData(voxel: Vector) {
-    const index = getAtlasIndexFor(voxel, this.voxelCount, this.getAtlasGrid());
+    const index = getAtlasIndexFor(
+      voxel,
+      this.voxelComponents,
+      this.voxelCount,
+      this.axisInversion,
+      this.getAtlasSize(),
+      this.getAtlasGrid(),
+    );
     return this.getAtlas()[index];
   }
 
@@ -295,7 +348,14 @@ export class Image<T extends TypedArray = TypedArray>
   }
 
   public setAtlasVoxel(voxel: Vector, value: number) {
-    const index = getAtlasIndexFor(voxel, this.voxelCount, this.getAtlasGrid());
+    const index = getAtlasIndexFor(
+      voxel,
+      this.voxelComponents,
+      this.voxelCount,
+      this.axisInversion,
+      this.getAtlasSize(),
+      this.getAtlasGrid(),
+    );
     this.getAtlas()[index] = value;
 
     if (this.texture) {

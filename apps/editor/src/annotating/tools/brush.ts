@@ -1,4 +1,9 @@
-import { ViewType } from "@visian/utils";
+import {
+  getOrthogonalAxis,
+  getPlaneAxes,
+  Vector,
+  ViewType,
+} from "@visian/utils";
 
 import { Editor } from "../../models";
 import Annotator from "../annotator";
@@ -78,49 +83,28 @@ export class Brush extends Annotator implements DragTool {
       circlePixels = this.circleBorderCache?.circle;
     }
 
-    const targetXOffset = radius === 0.5 && target.left ? 1 : 0;
-    const targetYOffset = radius === 0.5 && target.bottom ? 1 : 0;
+    const pixelOffsetX = radius === 0.5 && target.left ? 1 : 0;
+    const pixelOffsetY = radius === 0.5 && target.bottom ? 1 : 0;
+
+    const orthogonalAxis = getOrthogonalAxis(
+      this.editor.viewSettings.mainViewType,
+    );
+    const [widthAxis, heightAxis] = getPlaneAxes(
+      this.editor.viewSettings.mainViewType,
+    );
 
     const annotations: AnnotationVoxel[] = [];
-    switch (this.editor.viewSettings.mainViewType) {
-      case ViewType.Transverse:
-        circlePixels?.forEach((pixel) => {
-          annotations.push(
-            new AnnotationVoxel(
-              pixel.x + target.x - targetXOffset,
-              pixel.y + target.y - targetYOffset,
-              target.z,
-              this.value,
-            ),
-          );
-        });
-        break;
-      case ViewType.Sagittal:
-        circlePixels?.forEach((pixel) => {
-          annotations.push(
-            new AnnotationVoxel(
-              target.x,
-              // due to x-axis inversion
-              pixel.x + target.y + targetXOffset + (radius === 0.5 ? -1 : 0),
-              pixel.y + target.z - targetYOffset,
-              this.value,
-            ),
-          );
-        });
-        break;
-      case ViewType.Coronal:
-        circlePixels?.forEach((pixel) => {
-          annotations.push(
-            new AnnotationVoxel(
-              pixel.x + target.x - targetXOffset,
-              target.y,
-              pixel.y + target.z - targetYOffset,
-              this.value,
-            ),
-          );
-        });
-        break;
-    }
+
+    const coordinates = new Vector(3, false);
+    circlePixels?.forEach((pixel) => {
+      coordinates[orthogonalAxis] = target[orthogonalAxis];
+      coordinates[widthAxis] = pixel.x + target[widthAxis] + pixelOffsetX;
+      coordinates[heightAxis] = pixel.y + target[heightAxis] + pixelOffsetY;
+      annotations.push(
+        AnnotationVoxel.fromVoxelAndValue(coordinates, this.value),
+      );
+    });
+
     return annotations;
   }
 

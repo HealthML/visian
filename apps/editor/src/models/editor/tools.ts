@@ -1,9 +1,9 @@
 import { AbstractEventType } from "@visian/ui-shared";
-import { ISerializable, ViewType } from "@visian/utils";
+import { getOrthogonalAxis, getPlaneAxes, ISerializable } from "@visian/utils";
 import { action, makeObservable, observable } from "mobx";
 import * as THREE from "three";
 
-import { Brush } from "../../annotating";
+import { Brush, DragPoint } from "../../annotating";
 import { getPositionWithinPixel, SliceRenderer } from "../../rendering";
 import { StoreContext } from "../types";
 import { Tool } from "./types";
@@ -15,9 +15,9 @@ export interface EditorToolsSnapshot {}
 export class EditorTools implements ISerializable<EditorToolsSnapshot> {
   public static readonly excludeFromSnapshotTracking = ["/editor"];
 
-  public activeTool = Tool.Crosshair;
+  public activeTool = Tool.Brush;
 
-  public brushSizePixels = 0;
+  public brushSizePixels = 1;
 
   private sliceRenderer?: SliceRenderer;
 
@@ -117,48 +117,46 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
   private getDragPoint(uv: THREE.Vector2) {
     if (!this.editor.annotation) return undefined;
 
-    const scanWidth =
-      this.editor.viewSettings.mainViewType === ViewType.Sagittal
-        ? this.editor.annotation.voxelCount.y
-        : this.editor.annotation.voxelCount.x;
-    const scanHeight =
-      this.editor.viewSettings.mainViewType === ViewType.Transverse
-        ? this.editor.annotation.voxelCount.y
-        : this.editor.annotation.voxelCount.z;
+    const annotation = this.editor.annotation;
 
-    const [left, bottom] = getPositionWithinPixel(uv, scanWidth, scanHeight);
+    const dragPoint: DragPoint = {
+      x: 0,
+      y: 0,
+      z: 0,
+      left: true,
+      bottom: false,
+    };
 
-    switch (this.editor.viewSettings.mainViewType) {
-      case ViewType.Transverse:
-        return {
-          x: Math.floor(uv.x * this.editor.annotation.voxelCount.x),
-          y: Math.floor(uv.y * this.editor.annotation.voxelCount.y),
-          z: this.editor.viewSettings.selectedVoxel.z,
-          left,
-          bottom,
-        };
-      case ViewType.Sagittal:
-        return {
-          x:
-            this.editor.annotation.voxelCount.x -
-            1 -
-            this.editor.viewSettings.selectedVoxel.x,
-          y:
-            this.editor.annotation.voxelCount.y -
-            1 -
-            Math.floor(uv.x * this.editor.annotation.voxelCount.y),
-          z: Math.floor(uv.y * this.editor.annotation.voxelCount.z),
-          left,
-          bottom,
-        };
-      case ViewType.Coronal:
-        return {
-          x: Math.floor(uv.x * this.editor.annotation.voxelCount.x),
-          y: this.editor.viewSettings.selectedVoxel.y,
-          z: Math.floor(uv.y * this.editor.annotation.voxelCount.z),
-          left,
-          bottom,
-        };
-    }
+    const [widthAxis, heightAxis] = getPlaneAxes(
+      this.editor.viewSettings.mainViewType,
+    );
+    const orthogonalAxis = getOrthogonalAxis(
+      this.editor.viewSettings.mainViewType,
+    );
+
+    dragPoint[orthogonalAxis] = annotation.axisInversion[orthogonalAxis]
+      ? annotation.voxelCount[orthogonalAxis] -
+        1 -
+        this.editor.viewSettings.selectedVoxel[orthogonalAxis]
+      : this.editor.viewSettings.selectedVoxel[orthogonalAxis];
+    dragPoint[widthAxis] = Math.floor(
+      (annotation.axisInversion[widthAxis] ? 1 - uv.x : uv.x) *
+        annotation.voxelCount[widthAxis],
+    );
+    dragPoint[heightAxis] = Math.floor(
+      (annotation.axisInversion[heightAxis] ? 1 - uv.y : uv.y) *
+        annotation.voxelCount[heightAxis],
+    );
+
+    const scanWidth = annotation.voxelCount[widthAxis];
+    const scanHeight = annotation.voxelCount[heightAxis];
+
+    [dragPoint.left, dragPoint.bottom] = getPositionWithinPixel(
+      uv,
+      scanWidth,
+      scanHeight,
+    );
+
+    return dragPoint;
   }
 }

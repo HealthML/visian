@@ -34,6 +34,7 @@ export abstract class SliceMaterial
         uniforms,
       ]),
       transparent: true,
+      side: THREE.DoubleSide,
     });
 
     switch (viewType) {

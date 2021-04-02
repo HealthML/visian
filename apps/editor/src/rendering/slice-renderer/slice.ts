@@ -45,6 +45,7 @@ export class Slice extends THREE.Group implements IDisposable {
     private render: () => void,
   ) {
     super();
+    this.geometry.scale(-1, 1, 1);
 
     this.add(this.crosshairShiftGroup);
 

@@ -148,7 +148,7 @@ export class EditorViewSettings
     const [widthAxis, heightAxis] = getPlaneAxes(viewType);
 
     this.selectedVoxel[widthAxis] = Math.floor(
-      (1 - intersection.uv.x) * this.editor.image.voxelCount[widthAxis],
+      intersection.uv.x * this.editor.image.voxelCount[widthAxis],
     );
     this.selectedVoxel[heightAxis] = Math.floor(
       intersection.uv.y * this.editor.image.voxelCount[heightAxis],

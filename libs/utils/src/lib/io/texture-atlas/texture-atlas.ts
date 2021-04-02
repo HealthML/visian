@@ -7,14 +7,13 @@ import type { TypedArray } from "../itk";
 
 export type TextureAtlasMetadata<T extends TypedArray = TypedArray> = Pick<
   Image<T>,
-  "data" | "dimensionality" | "orientation" | "voxelComponents" | "voxelCount"
+  | "data"
+  | "dimensionality"
+  | "orientation"
+  | "voxelComponents"
+  | "voxelCount"
+  | "axisInversion"
 >;
-
-/**
- * The texture atlas generation expects the x- and y-axis to be inverted
- * and the z-axis to be non-inverted.
- */
-export const defaultDirection = new Vector([-1, -1, 1], false);
 
 /**
  * Returns the optimal number of slices in x/y direction in the texture atlas.
@@ -45,46 +44,22 @@ export const convertDataArrayToAtlas = <T extends TypedArray = TypedArray>(
       atlasSize.x * atlasSize.y * image.voxelComponents,
     );
 
-  // TODO: Refactor as soon as our Vector class implements `applyMatrix3`
-  const direction =
-    image.dimensionality < 3
-      ? defaultDirection
-      : Vector.fromArray(
-          new THREE.Vector3()
-            .setScalar(1)
-            .applyMatrix3(new THREE.Matrix3().fromArray(image.orientation.data))
-            .round()
-            .multiply(new THREE.Vector3().fromArray(defaultDirection.toArray()))
-            .toArray(),
-        );
-
-  const inverted = {
-    x: direction.x < 0,
-    y: direction.y < 0,
-    z: direction.z < 0,
-  };
-
   const sliceSize =
     image.voxelCount.x * image.voxelCount.y * image.voxelComponents;
 
   // TODO: Test if ordered read can improve performance here
   for (let z = 0; z < image.voxelCount.z; z++) {
-    const sliceZ = inverted.z ? image.voxelCount.z - (z + 1) : z;
-    const sliceData = image.data.subarray(
-      sliceZ * sliceSize,
-      (sliceZ + 1) * sliceSize,
-    );
+    const sliceZ = image.axisInversion.z ? image.voxelCount.z - (z + 1) : z;
+    const sliceData = image.data.subarray(z * sliceSize, (z + 1) * sliceSize);
     const sliceOffset = new THREE.Vector2(
-      (sliceZ % atlasGrid.x) * image.voxelCount.x * image.voxelComponents,
-      Math.floor(sliceZ / atlasGrid.x) *
-        image.voxelCount.y *
-        image.voxelComponents,
+      (sliceZ % atlasGrid.x) * image.voxelCount.x,
+      Math.floor(sliceZ / atlasGrid.x) * image.voxelCount.y,
     );
 
     for (let y = 0; y < image.voxelCount.y; y++) {
-      const sliceY = inverted.y ? image.voxelCount.y - (y + 1) : y;
+      const sliceY = image.axisInversion.y ? image.voxelCount.y - (y + 1) : y;
       for (let x = 0; x < image.voxelCount.x; x++) {
-        const sliceX = inverted.x ? image.voxelCount.x - (x + 1) : x;
+        const sliceX = image.axisInversion.x ? image.voxelCount.x - (x + 1) : x;
         for (let c = 0; c < image.voxelComponents; c++) {
           atlas[
             image.voxelComponents *
