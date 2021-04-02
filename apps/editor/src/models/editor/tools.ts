@@ -17,7 +17,7 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
 
   public activeTool = Tool.Brush;
 
-  public brushSizePixels = 1;
+  public brushSizePixels = 0.5;
 
   private sliceRenderer?: SliceRenderer;
 
@@ -123,7 +123,7 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
       x: 0,
       y: 0,
       z: 0,
-      left: true,
+      right: true,
       bottom: false,
     };
 
@@ -151,7 +151,7 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
     const scanWidth = annotation.voxelCount[widthAxis];
     const scanHeight = annotation.voxelCount[heightAxis];
 
-    [dragPoint.left, dragPoint.bottom] = getPositionWithinPixel(
+    [dragPoint.right, dragPoint.bottom] = getPositionWithinPixel(
       uv,
       scanWidth,
       scanHeight,

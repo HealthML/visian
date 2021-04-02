@@ -1,9 +1,4 @@
-import {
-  getOrthogonalAxis,
-  getPlaneAxes,
-  Vector,
-  ViewType,
-} from "@visian/utils";
+import { getOrthogonalAxis, getPlaneAxes, Vector } from "@visian/utils";
 
 import { Editor } from "../../models";
 import Annotator from "../annotator";
@@ -68,6 +63,9 @@ export class Brush extends Annotator implements DragTool {
    * a two pixel thick border. Default is true.
    */
   private getCirclePixels(target: DragPoint, fill = true) {
+    if (!this.editor.annotation) return [];
+    const annotation = this.editor.annotation;
+
     let circlePixels;
     const radius = this.editor.tools.brushSizePixels;
 
@@ -83,15 +81,23 @@ export class Brush extends Annotator implements DragTool {
       circlePixels = this.circleBorderCache?.circle;
     }
 
-    const pixelOffsetX = radius === 0.5 && target.left ? 1 : 0;
-    const pixelOffsetY = radius === 0.5 && target.bottom ? 1 : 0;
-
     const orthogonalAxis = getOrthogonalAxis(
       this.editor.viewSettings.mainViewType,
     );
     const [widthAxis, heightAxis] = getPlaneAxes(
       this.editor.viewSettings.mainViewType,
     );
+
+    const pixelOffsetX =
+      radius === 0.5 &&
+      (annotation.axisInversion[widthAxis] ? !target.right : target.right)
+        ? -1
+        : 0;
+    const pixelOffsetY =
+      radius === 0.5 &&
+      (annotation.axisInversion[heightAxis] ? !target.bottom : target.bottom)
+        ? -1
+        : 0;
 
     const annotations: AnnotationVoxel[] = [];
 
@@ -134,64 +140,32 @@ export class Brush extends Annotator implements DragTool {
    * @param end The end point of the line.
    */
   private drawStroke(start: DragPoint, end: DragPoint) {
-    let x1;
-    let y1;
-    let x2;
-    let y2;
-    switch (this.editor.viewSettings.mainViewType) {
-      case ViewType.Transverse:
-        x1 = start.x;
-        y1 = start.y;
-        x2 = end.x;
-        y2 = end.y;
-        break;
-      case ViewType.Sagittal:
-        x1 = start.y;
-        y1 = start.z;
-        x2 = end.y;
-        y2 = end.z;
-        break;
-      case ViewType.Coronal:
-        x1 = start.x;
-        y1 = start.z;
-        x2 = end.x;
-        y2 = end.z;
-        break;
-    }
+    const orthogonalAxis = getOrthogonalAxis(
+      this.editor.viewSettings.mainViewType,
+    );
+    const [widthAxis, heightAxis] = getPlaneAxes(
+      this.editor.viewSettings.mainViewType,
+    );
+    const x1 = start[widthAxis];
+    const y1 = start[heightAxis];
+    const x2 = end[widthAxis];
+    const y2 = end[heightAxis];
 
     const linePixels = calculateLine(x1, y1, x2, y2);
     const annotations: AnnotationVoxel[] = [];
     linePixels.forEach(({ x, y }) => {
-      let circleTarget;
-      switch (this.editor.viewSettings.mainViewType) {
-        case ViewType.Transverse:
-          circleTarget = {
-            x,
-            y,
-            z: start.z,
-            left: end.left,
-            bottom: end.bottom,
-          };
-          break;
-        case ViewType.Sagittal:
-          circleTarget = {
-            x: start.x,
-            y: x,
-            z: y,
-            left: end.left,
-            bottom: end.bottom,
-          };
-          break;
-        case ViewType.Coronal:
-          circleTarget = {
-            x,
-            y: start.y,
-            z: y,
-            left: end.left,
-            bottom: end.bottom,
-          };
-          break;
-      }
+      const circleTarget = {
+        x: 0,
+        y: 0,
+        z: 0,
+        right: end.right,
+        bottom: end.bottom,
+      };
+
+      circleTarget[orthogonalAxis] = start[orthogonalAxis];
+      circleTarget[widthAxis] = x;
+      circleTarget[heightAxis] = y;
+
       annotations.push(...this.getCirclePixels(circleTarget, false));
     });
     this.annotate(annotations);

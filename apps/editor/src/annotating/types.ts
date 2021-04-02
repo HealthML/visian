@@ -24,8 +24,8 @@ export interface DragPoint {
   x: number;
   y: number;
   z: number;
-  /** Whether the cursor is on the left side of the pixel. */
-  left: boolean;
+  /** Whether the cursor is on the right side of the pixel. */
+  right: boolean;
   /** Whether the cursor is on the bottom half of the pixel. */
   bottom: boolean;
 }
