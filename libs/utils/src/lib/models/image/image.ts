@@ -1,4 +1,5 @@
 import {
+  findVoxelInSlice,
   FloatTypes,
   IntTypes,
   ITKImage,
@@ -16,9 +17,10 @@ import {
   getAtlasGrid,
   getTextureFromAtlas,
 } from "../../io/texture-atlas";
+import { getPlaneAxes, ViewType } from "../view-types";
+import { getAtlasIndexFor } from "./conversion";
 
 import type { ISerializable } from "../types";
-
 export interface ImageSnapshot<T extends TypedArray = TypedArray> {
   name?: string;
 
@@ -153,6 +155,9 @@ export class Image<T extends TypedArray = TypedArray>
       orientation: observable.ref,
       data: observable.ref,
       applySnapshot: action,
+      setAtlas: action,
+      updateData: action,
+      setAtlasVoxel: action,
     });
   }
 
@@ -183,9 +188,38 @@ export class Image<T extends TypedArray = TypedArray>
           voxelCount: this.voxelCount.clone(false),
         },
         this.getAtlas(),
+        THREE.NearestFilter,
       );
     }
     return this.texture;
+  }
+
+  public getSlice(sliceNumber: number, viewType: ViewType) {
+    const [horizontal, vertical] = getPlaneAxes(viewType);
+    const sliceData = new Uint8Array(
+      this.voxelCount[horizontal] * this.voxelCount[vertical],
+    );
+
+    let index = 0;
+    // TODO: performance !!!
+    findVoxelInSlice(
+      this.getAtlas(),
+      viewType,
+      sliceNumber,
+      (_, value) => {
+        sliceData[index] = value;
+        index++;
+      },
+      this.voxelCount.clone(false),
+      this.getAtlasGrid(),
+    );
+
+    return sliceData;
+  }
+
+  public getVoxelData(voxel: Vector) {
+    const index = getAtlasIndexFor(voxel, this.voxelCount, this.getAtlasGrid());
+    return this.getAtlas()[index];
   }
 
   public toJSON() {
@@ -240,6 +274,32 @@ export class Image<T extends TypedArray = TypedArray>
       this.data = clonedData;
     } else {
       this.data = new Uint8Array(this.voxelCount.product()) as T;
+    }
+  }
+
+  public setAtlas(atlas: Uint8Array) {
+    if (!this.atlas) {
+      this.atlas = new Uint8Array(atlas);
+    } else {
+      this.atlas.set(atlas);
+    }
+
+    if (this.texture) {
+      this.texture.needsUpdate = true;
+    }
+  }
+
+  public updateData() {
+    // update this.data from this.atlas
+    console.log("updateData is not implemented yet");
+  }
+
+  public setAtlasVoxel(voxel: Vector, value: number) {
+    const index = getAtlasIndexFor(voxel, this.voxelCount, this.getAtlasGrid());
+    this.getAtlas()[index] = value;
+
+    if (this.texture) {
+      this.texture.needsUpdate = true;
     }
   }
 }

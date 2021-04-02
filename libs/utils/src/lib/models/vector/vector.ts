@@ -23,6 +23,22 @@ export class Vector implements GenericVector {
     return new Vector(array);
   }
 
+  public static fromObject(
+    object: { x: number; y?: number; z?: number; w?: number },
+    isObservable = true,
+  ) {
+    const array = [object.x];
+    ["y", "z", "w"].forEach((axis) => {
+      const value = object[axis as "y" | "z" | "w"];
+      if (value !== undefined) {
+        array.push(value);
+      } else {
+        return new this(array, isObservable);
+      }
+    });
+    return new this(array, isObservable);
+  }
+
   /** The number of components in this vector. */
   public readonly size: number;
 

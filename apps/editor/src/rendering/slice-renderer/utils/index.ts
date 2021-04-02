@@ -5,3 +5,4 @@ export * from "./view-layout";
 export * from "./crosshair";
 export * from "./crosshair-synching";
 export * from "./raycaster";
+export * from "./brush-positioning";

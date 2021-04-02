@@ -5,6 +5,7 @@ import { action, computed, makeObservable, observable } from "mobx";
 import tc from "tinycolor2";
 
 import { StoreContext } from "../types";
+import { EditorTools } from "./tools";
 import { EditorViewSettings } from "./view-settings";
 
 import type { SliceRenderer } from "../../rendering";
@@ -19,6 +20,7 @@ export class Editor implements ISerializable<EditorSnapshot> {
     ...EditorViewSettings.excludeFromSnapshotTracking.map(
       (path) => `/viewSettings${path}`,
     ),
+    ...EditorTools.excludeFromSnapshotTracking.map((path) => `/tools${path}`),
     "/sliceRenderer",
   ];
 
@@ -31,9 +33,11 @@ export class Editor implements ISerializable<EditorSnapshot> {
   public backgroundColor = getTheme("dark").colors.background;
 
   public viewSettings: EditorViewSettings;
+  public tools: EditorTools;
 
   constructor(protected context?: StoreContext) {
     this.viewSettings = new EditorViewSettings(this, context);
+    this.tools = new EditorTools(this, context);
 
     makeObservable(this, {
       sliceRenderer: observable,
@@ -61,6 +65,8 @@ export class Editor implements ISerializable<EditorSnapshot> {
 
   public setSliceRenderer(sliceRenderer?: SliceRenderer) {
     this.sliceRenderer = sliceRenderer;
+
+    this.tools.setSliceRenderer(sliceRenderer);
   }
 
   public setForegroundColor(foregroundColor: string) {
