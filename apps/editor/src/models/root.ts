@@ -89,7 +89,7 @@ export class RootStore implements ISerializable<RootSnapshot> {
   public async rehydrate() {
     const tab = await new Tab().register();
 
-    this.shouldPersist = tab.isMainTab || false;
+    this.shouldPersist = Boolean(tab.isMainTab);
     if (!tab.isMainTab) return;
     const editorSnapshot = await this.config.storageBackend?.retrieve(
       "/editor",
