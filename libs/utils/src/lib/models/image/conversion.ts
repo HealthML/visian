@@ -42,6 +42,15 @@ export const getAtlasIndexFor = (
  */
 export const defaultDirection = new Vector([-1, -1, 1], false);
 
+/**
+ * Converts an image array with unexpected orientatin to the expected orientation.
+ * @param data The original TypedArray of the image data.
+ * @param orientation A matrix containing the orientation of the image.
+ * @param dimensionality The dimensionality of the image.
+ * @param size An array containing the size of the image.
+ * @param components The amount of components per voxel.
+ * @returns a TypedArray containing the image data in the expected orientation.
+ */
 export const unifyOrientation = (
   data: TypedArray,
   orientation: ITKMatrix,
