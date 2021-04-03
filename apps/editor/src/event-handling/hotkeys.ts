@@ -21,6 +21,19 @@ export const setUpHotKeys = (store: RootStore): IDisposer => {
   hotkeys("v", () => {
     store.editor.viewSettings.toggleSideViews();
   });
+  hotkeys("d", () => {
+    // d for delete (maybe?)
+    store.editor.tools.clearSlice();
+  });
+  hotkeys("ctrl+z", () => {
+    store.editor.undoRedo.undo();
+  });
+  hotkeys("ctrl+shift+z", () => {
+    store.editor.undoRedo.redo();
+  });
+  hotkeys("ctrl+y", () => {
+    store.editor.undoRedo.redo();
+  });
 
   return () => hotkeys.unbind();
 };

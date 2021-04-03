@@ -328,4 +328,30 @@ export class Image<T extends TypedArray = TypedArray>
       this.texture.needsUpdate = true;
     }
   }
+
+  public setSlice(viewType: ViewType, slice: number, sliceData?: Uint8Array) {
+    const atlas = this.getAtlas();
+
+    const [horizontalAxis, verticalAxis] = getPlaneAxes(viewType);
+    const sliceWidth = this.voxelCount[horizontalAxis];
+
+    findVoxelInSlice(
+      atlas,
+      viewType,
+      slice,
+      (voxel, _, index) => {
+        const sliceIndex =
+          voxel[verticalAxis] * sliceWidth + voxel[horizontalAxis];
+        atlas[index] = sliceData ? sliceData[sliceIndex] : 0;
+      },
+      this.voxelComponents,
+      this.voxelCount.clone(false),
+      this.getAtlasSize(),
+      this.getAtlasGrid(),
+    );
+
+    if (this.texture) {
+      this.texture.needsUpdate = true;
+    }
+  }
 }

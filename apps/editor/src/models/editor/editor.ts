@@ -6,6 +6,7 @@ import tc from "tinycolor2";
 
 import { StoreContext } from "../types";
 import { EditorTools } from "./tools";
+import { EditorUndoRedo } from "./undo-redo";
 import { EditorViewSettings } from "./view-settings";
 
 import type { SliceRenderer } from "../../rendering";
@@ -21,6 +22,9 @@ export class Editor implements ISerializable<EditorSnapshot> {
       (path) => `/viewSettings${path}`,
     ),
     ...EditorTools.excludeFromSnapshotTracking.map((path) => `/tools${path}`),
+    ...EditorUndoRedo.excludeFromSnapshotTracking.map(
+      (path) => `/undoRedo${path}`,
+    ),
     "/sliceRenderer",
   ];
 
@@ -34,10 +38,12 @@ export class Editor implements ISerializable<EditorSnapshot> {
 
   public viewSettings: EditorViewSettings;
   public tools: EditorTools;
+  public undoRedo: EditorUndoRedo;
 
   constructor(protected context?: StoreContext) {
     this.viewSettings = new EditorViewSettings(this, context);
     this.tools = new EditorTools(this, context);
+    this.undoRedo = new EditorUndoRedo(this, context);
 
     makeObservable(this, {
       sliceRenderer: observable,
@@ -79,6 +85,7 @@ export class Editor implements ISerializable<EditorSnapshot> {
     this.context?.persistImmediately();
 
     this.viewSettings.reset();
+    this.undoRedo.clear();
   }
   public async importImage(imageFile: File) {
     this.setImage(await Image.fromFile(imageFile));
@@ -91,6 +98,7 @@ export class Editor implements ISerializable<EditorSnapshot> {
     }
     this.annotation = image;
     this.context?.persistImmediately();
+    this.undoRedo.clear();
   }
   public async importAnnotation(imageFile: File) {
     this.setAnnotation(await Image.fromFile(imageFile));

@@ -4,7 +4,7 @@ import { action, computed, makeObservable, observable } from "mobx";
 import * as THREE from "three";
 
 import { Brush, DragPoint } from ".";
-import { Editor } from "..";
+import { Editor, SliceUndoRedoCommand } from "..";
 import { StoreContext } from "../..";
 import { getPositionWithinPixel, SliceRenderer } from "../../../rendering";
 import { Tool } from "../types";
@@ -87,6 +87,22 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
       this.brushMap = undefined;
       this.altBrushMap = undefined;
     }
+  }
+
+  public clearSlice(
+    image = this.editor.annotation,
+    viewType = this.editor.viewSettings.mainViewType,
+    slice = this.editor.viewSettings.getSelectedSlice(),
+  ) {
+    if (!image) return;
+
+    const oldSliceData = image.getSlice(slice, viewType);
+    image.setSlice(viewType, slice);
+    this.sliceRenderer?.lazyRender();
+
+    this.editor.undoRedo.addUndoCommand(
+      new SliceUndoRedoCommand(image, viewType, slice, oldSliceData),
+    );
   }
 
   public handleEvent(

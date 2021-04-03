@@ -1,6 +1,7 @@
 import { getOrthogonalAxis, Vector } from "@visian/utils";
 
 import { Editor } from "../editor";
+import { SliceUndoRedoCommand } from "../undo-redo";
 import { replaceMerge } from "./merging";
 import { AnnotationVoxel } from "./types";
 
@@ -16,11 +17,24 @@ export class Annotator {
     private undoable: boolean,
   ) {}
 
-  protected finishStroke(annotation = this.editor.annotation) {
+  protected finishStroke(
+    annotation = this.editor.annotation,
+    viewType = this.editor.viewSettings.mainViewType,
+  ) {
     if (this.undoable) {
       this.strokeActive = false;
 
-      // TODO: undo redo
+      if (annotation && this.sliceNumber !== undefined) {
+        this.editor.undoRedo.addUndoCommand(
+          new SliceUndoRedoCommand(
+            annotation,
+            viewType,
+            this.sliceNumber,
+            this.oldSliceData,
+            annotation.getSlice(this.sliceNumber, viewType),
+          ),
+        );
+      }
 
       this.oldSliceData = undefined;
       this.sliceNumber = undefined;
