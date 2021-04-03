@@ -1,6 +1,6 @@
 import { AbstractEventType } from "@visian/ui-shared";
 import { getOrthogonalAxis, getPlaneAxes, ISerializable } from "@visian/utils";
-import { action, makeObservable, observable } from "mobx";
+import { action, computed, makeObservable, observable } from "mobx";
 import * as THREE from "three";
 
 import { Brush, DragPoint } from "../../annotating";
@@ -37,10 +37,16 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
       activeTool: observable,
       brushSizePixels: observable,
 
+      isBrushToolSelected: computed,
+
       applySnapshot: action,
       setActiveTool: action,
       setBrushSizePixels: action,
     });
+  }
+
+  public get isBrushToolSelected() {
+    return [Tool.Brush, Tool.Eraser].includes(this.activeTool);
   }
 
   public setActiveTool(tool = Tool.Brush) {
@@ -95,6 +101,8 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
     )[0];
     if (!intersection || !intersection.uv) return;
 
+    this.alignBrushCursor(intersection.uv);
+
     const dragPoint = this.getDragPoint(intersection.uv);
 
     if (!dragPoint) return;
@@ -112,6 +120,36 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
         tool?.endAt(dragPoint);
         break;
     }
+  }
+
+  // TODO: Call this for hover events.
+  private alignBrushCursor(uv: THREE.Vector2) {
+    if (!this.sliceRenderer || !this.editor.annotation) return;
+    const annotation = this.editor.annotation;
+
+    const [widthAxis, heightAxis] = getPlaneAxes(
+      this.editor.viewSettings.mainViewType,
+    );
+    const scanWidth = annotation.voxelCount[widthAxis];
+    const scanHeight = annotation.voxelCount[heightAxis];
+
+    let right = false;
+    let bottom = false;
+    if (this.brushSizePixels === 0.5) {
+      [right, bottom] = getPositionWithinPixel(uv, scanWidth, scanHeight);
+    }
+
+    const xOffset = this.brushSizePixels === 0.5 ? (right ? 1 : 2) : 0.5;
+    const yOffset = this.brushSizePixels === 0.5 ? (bottom ? -1 : 0) : 0.5;
+
+    const brushCursor = this.sliceRenderer.getBrushCursor(
+      this.editor.viewSettings.mainViewType,
+    );
+
+    brushCursor.setUVTarget(
+      (Math.floor(uv.x * scanWidth) + xOffset) / scanWidth,
+      (Math.floor(uv.y * scanHeight) + yOffset) / scanHeight,
+    );
   }
 
   private getDragPoint(uv: THREE.Vector2) {

@@ -9,6 +9,8 @@ import {
 } from "./slice-material";
 import {
   annotationMeshZ,
+  BrushCursor,
+  brushCursorZ,
   Crosshair,
   crosshairZ,
   getGeometrySize,
@@ -36,6 +38,8 @@ export class Slice extends THREE.Group implements IDisposable {
   private annotationMesh: THREE.Mesh;
 
   private crosshair: Crosshair;
+
+  public brushCursor: BrushCursor;
 
   private disposers: IDisposer[] = [];
 
@@ -73,12 +77,17 @@ export class Slice extends THREE.Group implements IDisposable {
     this.crosshair.position.z = crosshairZ;
     this.crosshairShiftGroup.add(this.crosshair);
 
+    this.brushCursor = new BrushCursor(editor, viewType, render);
+    this.brushCursor.position.z = brushCursorZ;
+    this.crosshairShiftGroup.add(this.brushCursor);
+
     this.disposers.push(autorun(this.updateScale), autorun(this.updateOffset));
   }
 
   public dispose() {
     this.imageMaterial.dispose();
     this.crosshair.dispose();
+    this.brushCursor.dispose();
     this.disposers.forEach((disposer) => disposer());
   }
 

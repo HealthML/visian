@@ -1,4 +1,10 @@
-import { IDisposable, IDisposer, Image, viewTypes } from "@visian/utils";
+import {
+  IDisposable,
+  IDisposer,
+  Image,
+  ViewType,
+  viewTypes,
+} from "@visian/utils";
 import ResizeSensor from "css-element-queries/src/ResizeSensor";
 import { reaction } from "mobx";
 import * as THREE from "three";
@@ -122,6 +128,10 @@ export class SliceRenderer implements IDisposable {
     this.slices.forEach((slice) => slice.dispose());
     window.removeEventListener("resize", this.resize);
     this.resizeSensors.forEach((sensor) => sensor.detach());
+  }
+
+  public getBrushCursor(viewType: ViewType) {
+    return this.slices[viewType].brushCursor;
   }
 
   private resize = () => {

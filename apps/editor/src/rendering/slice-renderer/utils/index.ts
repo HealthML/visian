@@ -6,3 +6,4 @@ export * from "./crosshair";
 export * from "./crosshair-synching";
 export * from "./raycaster";
 export * from "./brush-positioning";
+export * from "./brush-cursor";

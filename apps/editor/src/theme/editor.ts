@@ -4,3 +4,9 @@ export const crosshair = {
   opacity: 0.5,
   transparent: true,
 };
+
+export const brushCursor = {
+  color: 0xbbbbbb,
+  linewidth: 1,
+  opacity: 1,
+};
