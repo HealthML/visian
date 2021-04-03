@@ -134,18 +134,12 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
       this.editor.viewSettings.mainViewType,
     );
 
-    dragPoint[orthogonalAxis] = annotation.axisInversion[orthogonalAxis]
-      ? annotation.voxelCount[orthogonalAxis] -
-        1 -
-        this.editor.viewSettings.selectedVoxel[orthogonalAxis]
-      : this.editor.viewSettings.selectedVoxel[orthogonalAxis];
-    dragPoint[widthAxis] = Math.floor(
-      (annotation.axisInversion[widthAxis] ? 1 - uv.x : uv.x) *
-        annotation.voxelCount[widthAxis],
-    );
+    dragPoint[orthogonalAxis] = this.editor.viewSettings.selectedVoxel[
+      orthogonalAxis
+    ];
+    dragPoint[widthAxis] = Math.floor(uv.x * annotation.voxelCount[widthAxis]);
     dragPoint[heightAxis] = Math.floor(
-      (annotation.axisInversion[heightAxis] ? 1 - uv.y : uv.y) *
-        annotation.voxelCount[heightAxis],
+      uv.y * annotation.voxelCount[heightAxis],
     );
 
     const scanWidth = annotation.voxelCount[widthAxis];

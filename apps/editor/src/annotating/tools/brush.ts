@@ -63,9 +63,6 @@ export class Brush extends Annotator implements DragTool {
    * a two pixel thick border. Default is true.
    */
   private getCirclePixels(target: DragPoint, fill = true) {
-    if (!this.editor.annotation) return [];
-    const annotation = this.editor.annotation;
-
     let circlePixels;
     const radius = this.editor.tools.brushSizePixels;
 
@@ -88,16 +85,8 @@ export class Brush extends Annotator implements DragTool {
       this.editor.viewSettings.mainViewType,
     );
 
-    const pixelOffsetX =
-      radius === 0.5 &&
-      (annotation.axisInversion[widthAxis] ? !target.right : target.right)
-        ? -1
-        : 0;
-    const pixelOffsetY =
-      radius === 0.5 &&
-      (annotation.axisInversion[heightAxis] ? !target.bottom : target.bottom)
-        ? -1
-        : 0;
+    const pixelOffsetX = radius === 0.5 && target.right ? -1 : 0;
+    const pixelOffsetY = radius === 0.5 && target.bottom ? -1 : 0;
 
     const annotations: AnnotationVoxel[] = [];
 

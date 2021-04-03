@@ -18,16 +18,10 @@ import {
 } from "../../io/texture-atlas";
 import { Vector } from "../vector";
 import { getPlaneAxes, ViewType } from "../view-types";
-import { getAtlasIndexFor } from "./conversion";
+import { getAtlasIndexFor, unifyOrientation } from "./conversion";
 import { findVoxelInSlice } from "./iteration";
 
 import type { ISerializable } from "../types";
-
-/**
- * The texture atlas generation expects the x- and y-axis to be inverted
- * and the z-axis to be non-inverted.
- */
-export const defaultDirection = new Vector([-1, -1, 1], false);
 
 export interface ImageSnapshot<T extends TypedArray = TypedArray> {
   name?: string;
@@ -65,7 +59,13 @@ export class Image<T extends TypedArray = TypedArray>
       voxelComponentType: image.imageType.componentType,
       origin: image.origin,
       orientation: image.direction,
-      data: image.data,
+      data: unifyOrientation(
+        image.data,
+        image.direction,
+        image.imageType.dimension,
+        image.size,
+        image.imageType.components,
+      ),
     });
   }
 
@@ -136,7 +136,6 @@ export class Image<T extends TypedArray = TypedArray>
    * Defaults to the identity matrix.
    */
   public orientation!: ITKMatrix;
-  private _axisInversion?: { x: boolean; y: boolean; z: boolean };
 
   /** A TypedArray containing the voxel buffer data in I/O format. */
   public data!: T;
@@ -179,7 +178,6 @@ export class Image<T extends TypedArray = TypedArray>
         orientation: this.orientation,
         voxelComponents: this.voxelComponents,
         voxelCount: this.voxelCount.clone(false),
-        axisInversion: this.axisInversion,
       });
     }
     return this.atlas;
@@ -208,35 +206,6 @@ export class Image<T extends TypedArray = TypedArray>
     return this.texture;
   }
 
-  public get axisInversion() {
-    if (!this._axisInversion) {
-      // TODO: Refactor as soon as our Vector class implements `applyMatrix3`
-      const direction =
-        this.dimensionality < 3
-          ? defaultDirection
-          : Vector.fromArray(
-              new THREE.Vector3()
-                .setScalar(1)
-                .applyMatrix3(
-                  new THREE.Matrix3().fromArray(this.orientation.data),
-                )
-                .round()
-                .multiply(
-                  new THREE.Vector3().fromArray(defaultDirection.toArray()),
-                )
-                .toArray(),
-            );
-
-      this._axisInversion = {
-        x: direction.x < 0,
-        y: direction.y < 0,
-        z: direction.z < 0,
-      };
-    }
-
-    return this._axisInversion;
-  }
-
   public getSlice(sliceNumber: number, viewType: ViewType) {
     const [horizontal, vertical] = getPlaneAxes(viewType);
     const sliceData = new Uint8Array(
@@ -255,7 +224,6 @@ export class Image<T extends TypedArray = TypedArray>
       },
       this.voxelComponents,
       this.voxelCount.clone(false),
-      this.axisInversion,
       this.getAtlasSize(),
       this.getAtlasGrid(),
     );
@@ -268,7 +236,6 @@ export class Image<T extends TypedArray = TypedArray>
       voxel,
       this.voxelComponents,
       this.voxelCount,
-      this.axisInversion,
       this.getAtlasSize(),
       this.getAtlasGrid(),
     );
@@ -352,7 +319,6 @@ export class Image<T extends TypedArray = TypedArray>
       voxel,
       this.voxelComponents,
       this.voxelCount,
-      this.axisInversion,
       this.getAtlasSize(),
       this.getAtlasGrid(),
     );

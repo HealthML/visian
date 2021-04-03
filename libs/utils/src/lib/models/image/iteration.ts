@@ -12,7 +12,6 @@ import { getAtlasIndexFor } from "./conversion";
  * @param predicate The predicate.
  * @param components The amount of components per voxel in the atlas.
  * @param voxelCount The number of voxels in each direction.
- * @param axisInversion The axis inversion of the image of the atlas.
  * @param atlasSize The size of the texture atlas in pixels.
  * @param atlasGrid The number of slices in the texture atlas in x/y direction.
  * @returns The voxel coordinates and value for which the predicate first returned true.
@@ -27,7 +26,6 @@ export const findVoxelInSlice = (
   ) => boolean | undefined | void,
   components: number,
   voxelCount: Vector,
-  axisInversion: { x: boolean; y: boolean; z: boolean },
   atlasSize: Vector,
   atlasGrid: Vector,
 ) => {
@@ -50,14 +48,7 @@ export const findVoxelInSlice = (
 
       const value =
         atlas[
-          getAtlasIndexFor(
-            voxel,
-            components,
-            voxelCount,
-            axisInversion,
-            atlasSize,
-            atlasGrid,
-          )
+          getAtlasIndexFor(voxel, components, voxelCount, atlasSize, atlasGrid)
         ];
 
       if (predicate(voxel, value)) {

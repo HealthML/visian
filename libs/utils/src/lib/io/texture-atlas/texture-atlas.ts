@@ -7,12 +7,7 @@ import type { TypedArray } from "../itk";
 
 export type TextureAtlasMetadata<T extends TypedArray = TypedArray> = Pick<
   Image<T>,
-  | "data"
-  | "dimensionality"
-  | "orientation"
-  | "voxelComponents"
-  | "voxelCount"
-  | "axisInversion"
+  "data" | "dimensionality" | "orientation" | "voxelComponents" | "voxelCount"
 >;
 
 /**
@@ -49,23 +44,18 @@ export const convertDataArrayToAtlas = <T extends TypedArray = TypedArray>(
 
   // TODO: Test if ordered read can improve performance here
   for (let z = 0; z < image.voxelCount.z; z++) {
-    const sliceZ = image.axisInversion.z ? image.voxelCount.z - (z + 1) : z;
     const sliceData = image.data.subarray(z * sliceSize, (z + 1) * sliceSize);
     const sliceOffset = new THREE.Vector2(
-      (sliceZ % atlasGrid.x) * image.voxelCount.x,
-      Math.floor(sliceZ / atlasGrid.x) * image.voxelCount.y,
+      (z % atlasGrid.x) * image.voxelCount.x,
+      Math.floor(z / atlasGrid.x) * image.voxelCount.y,
     );
 
     for (let y = 0; y < image.voxelCount.y; y++) {
-      const sliceY = image.axisInversion.y ? image.voxelCount.y - (y + 1) : y;
       for (let x = 0; x < image.voxelCount.x; x++) {
-        const sliceX = image.axisInversion.x ? image.voxelCount.x - (x + 1) : x;
         for (let c = 0; c < image.voxelComponents; c++) {
           atlas[
             image.voxelComponents *
-              ((sliceOffset.y + sliceY) * atlasSize.x +
-                sliceOffset.x +
-                sliceX) +
+              ((sliceOffset.y + y) * atlasSize.x + sliceOffset.x + x) +
               c
           ] =
             sliceData[image.voxelComponents * (y * image.voxelCount.x + x) + c];
