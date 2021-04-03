@@ -1,6 +1,6 @@
 import { getOrthogonalAxis, Vector } from "@visian/utils";
 
-import { Editor } from "../models";
+import { Editor } from "../editor";
 import { replaceMerge } from "./merging";
 import { AnnotationVoxel } from "./types";
 

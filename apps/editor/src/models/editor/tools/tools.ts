@@ -3,12 +3,12 @@ import { getOrthogonalAxis, getPlaneAxes, ISerializable } from "@visian/utils";
 import { action, computed, makeObservable, observable } from "mobx";
 import * as THREE from "three";
 
-import { Brush, DragPoint } from "../../annotating";
-import { getPositionWithinPixel, SliceRenderer } from "../../rendering";
-import { StoreContext } from "../types";
-import { Tool } from "./types";
+import { Brush, DragPoint } from ".";
+import { Editor } from "..";
+import { StoreContext } from "../..";
+import { getPositionWithinPixel, SliceRenderer } from "../../../rendering";
+import { Tool } from "../types";
 
-import type { Editor } from "./editor";
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface EditorToolsSnapshot {}
 

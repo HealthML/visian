@@ -1,9 +1,14 @@
-import { getOrthogonalAxis, getPlaneAxes, Vector } from "@visian/utils";
+import {
+  calculateCircle,
+  calculateLine,
+  getOrthogonalAxis,
+  getPlaneAxes,
+  Vector,
+} from "@visian/utils";
 
-import { Editor } from "../../models";
-import Annotator from "../annotator";
-import { AnnotationVoxel, DragPoint, DragTool } from "../types";
-import { calculateCircle, calculateLine } from "./rasterization";
+import { Editor } from "../editor";
+import { Annotator } from "./annotator";
+import { AnnotationVoxel, DragPoint, DragTool } from "./types";
 
 export class Brush extends Annotator implements DragTool {
   private dragPoints?: DragPoint[];
