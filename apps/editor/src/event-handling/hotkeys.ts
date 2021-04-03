@@ -25,6 +25,10 @@ export const setUpHotKeys = (store: RootStore): IDisposer => {
     // d for delete (maybe?)
     store.editor.tools.clearSlice();
   });
+  hotkeys("ctrl+a", () => {
+    // a for all (maybe?)
+    store.editor.tools.clearImage();
+  });
   hotkeys("ctrl+z", () => {
     store.editor.undoRedo.undo();
   });

@@ -8,6 +8,7 @@ import { Editor, SliceUndoRedoCommand } from "..";
 import { StoreContext } from "../..";
 import { getPositionWithinPixel, SliceRenderer } from "../../../rendering";
 import { Tool } from "../types";
+import { AtlasUndoRedoCommand } from "../undo-redo/atlas-undo-redo-command";
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface EditorToolsSnapshot {}
@@ -102,6 +103,20 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
 
     this.editor.undoRedo.addUndoCommand(
       new SliceUndoRedoCommand(image, viewType, slice, oldSliceData),
+    );
+  }
+
+  public clearImage(image = this.editor.annotation) {
+    if (!image) return;
+
+    const oldAtlas = new Uint8Array(image.getAtlas());
+
+    const emptyAtlas = new Uint8Array(oldAtlas.length);
+    image.setAtlas(emptyAtlas);
+    this.sliceRenderer?.lazyRender();
+
+    this.editor.undoRedo.addUndoCommand(
+      new AtlasUndoRedoCommand(image, oldAtlas, emptyAtlas),
     );
   }
 
