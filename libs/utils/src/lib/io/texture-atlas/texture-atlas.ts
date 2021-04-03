@@ -51,14 +51,17 @@ export const convertDataArrayToAtlas = <T extends TypedArray = TypedArray>(
     );
 
     for (let y = 0; y < image.voxelCount.y; y++) {
+      const atlasYOffset =
+        (y + sliceOffset.y) * atlasSize.x * image.voxelComponents;
+      const dataYOffset = y * image.voxelCount.x * image.voxelComponents;
+
       for (let x = 0; x < image.voxelCount.x; x++) {
+        const atlasXOffset = (x + sliceOffset.x) * image.voxelComponents;
+        const dataXOffset = x * image.voxelComponents;
+
         for (let c = 0; c < image.voxelComponents; c++) {
-          atlas[
-            image.voxelComponents *
-              ((sliceOffset.y + y) * atlasSize.x + sliceOffset.x + x) +
-              c
-          ] =
-            sliceData[image.voxelComponents * (y * image.voxelCount.x + x) + c];
+          atlas[atlasYOffset + atlasXOffset + c] =
+            sliceData[dataYOffset + dataXOffset + c];
         }
       }
     }
