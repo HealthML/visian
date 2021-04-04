@@ -65,7 +65,10 @@ export class EditorViewSettings
   }
 
   public setMainView(value: ViewType) {
-    this.mainViewType = value;
+    this.mainViewType =
+      this.editor.image && this.editor.image.dimensionality > 2
+        ? value
+        : ViewType.Transverse;
   }
 
   public toggleSideViews(value = !this.shouldShowSideViews) {
@@ -158,6 +161,9 @@ export class EditorViewSettings
   public reset() {
     this.setSelectedVoxel();
     this.toggleSideViews(true);
+    if (this.editor.image && this.editor.image.dimensionality < 3) {
+      this.setMainView(ViewType.Transverse);
+    }
   }
 
   public toJSON() {
