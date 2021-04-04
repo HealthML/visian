@@ -26,7 +26,7 @@ export class Brush extends Annotator implements DragTool {
   constructor(
     editor: Editor,
     render: () => void,
-    private value = 255,
+    protected value = 255,
     undoable = true,
   ) {
     super(editor, render, undoable);

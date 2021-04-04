@@ -3,7 +3,7 @@ import { getOrthogonalAxis, getPlaneAxes, ISerializable } from "@visian/utils";
 import { action, computed, makeObservable, observable } from "mobx";
 import * as THREE from "three";
 
-import { Brush, DragPoint } from ".";
+import { Brush, DragPoint, SmartBrush } from ".";
 import { Editor, SliceUndoRedoCommand } from "..";
 import { StoreContext } from "../..";
 import { getPositionWithinPixel, SliceRenderer } from "../../../rendering";
@@ -16,14 +16,19 @@ export interface EditorToolsSnapshot {}
 export class EditorTools implements ISerializable<EditorToolsSnapshot> {
   public static readonly excludeFromSnapshotTracking = ["/editor"];
 
-  public activeTool = Tool.Brush;
+  public activeTool = Tool.SmartBrush;
 
   public brushSizePixels = 0.5;
+
+  public smartBrushNeighborThreshold = 6;
+  public smartBrushSeedThreshold = 10;
 
   private sliceRenderer?: SliceRenderer;
 
   private brush?: Brush;
   private eraser?: Brush;
+  private smartBrush?: SmartBrush;
+  private smartEraser?: SmartBrush;
 
   /** A map of the tool types to their corresponding brushes. */
   private brushMap?: Partial<Record<Tool, Brush>>;
@@ -37,17 +42,26 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
     makeObservable(this, {
       activeTool: observable,
       brushSizePixels: observable,
+      smartBrushNeighborThreshold: observable,
+      smartBrushSeedThreshold: observable,
 
       isBrushToolSelected: computed,
 
       applySnapshot: action,
       setActiveTool: action,
       setBrushSizePixels: action,
+      setSmartBrushSeedTreshold: action,
+      setSmartBrushNeighborThreshold: action,
     });
   }
 
   public get isBrushToolSelected() {
-    return [Tool.Brush, Tool.Eraser].includes(this.activeTool);
+    return [
+      Tool.Brush,
+      Tool.Eraser,
+      Tool.SmartBrush,
+      Tool.SmartEraser,
+    ].includes(this.activeTool);
   }
 
   public setActiveTool(tool = Tool.Brush) {
@@ -56,6 +70,14 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
 
   public setBrushSizePixels(value = 5) {
     this.brushSizePixels = value;
+  }
+
+  public setSmartBrushSeedTreshold(value = 6) {
+    this.smartBrushSeedThreshold = value;
+  }
+
+  public setSmartBrushNeighborThreshold(value = 10) {
+    this.smartBrushNeighborThreshold = value;
   }
 
   public toJSON() {
@@ -72,18 +94,30 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
     if (sliceRenderer) {
       this.brush = new Brush(this.editor, sliceRenderer.lazyRender);
       this.eraser = new Brush(this.editor, sliceRenderer.lazyRender, 0);
+      this.smartBrush = new SmartBrush(this.editor, sliceRenderer.lazyRender);
+      this.smartEraser = new SmartBrush(
+        this.editor,
+        sliceRenderer.lazyRender,
+        0,
+      );
 
       this.brushMap = {
         [Tool.Brush]: this.brush,
         [Tool.Eraser]: this.eraser,
+        [Tool.SmartBrush]: this.smartBrush,
+        [Tool.SmartEraser]: this.smartEraser,
       };
       this.altBrushMap = {
         [Tool.Brush]: this.eraser,
         [Tool.Eraser]: this.brush,
+        [Tool.SmartBrush]: this.smartEraser,
+        [Tool.SmartEraser]: this.smartBrush,
       };
     } else {
       this.brush = undefined;
       this.eraser = undefined;
+      this.smartBrush = undefined;
+      this.smartEraser = undefined;
 
       this.brushMap = undefined;
       this.altBrushMap = undefined;
