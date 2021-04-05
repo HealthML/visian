@@ -65,6 +65,12 @@ export class GradientComputer implements IDisposable {
 
         this.updateOutputDerivative();
       }),
+      autorun(() => {
+        this.gradientMaterial.uniforms.uCustomTFTexture.value =
+          volumeRenderer.customTFTexture;
+
+        this.updateOutputDerivative();
+      }),
     );
   }
 

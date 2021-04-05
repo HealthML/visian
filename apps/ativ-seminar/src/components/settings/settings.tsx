@@ -28,6 +28,13 @@ const StyledText = styled(Text)`
   margin-bottom: 6px;
 `;
 
+const StyledDescription = styled(StyledText)`
+  font-size: 14px;
+  font-weight: 300;
+  color: ${color("gray")};
+  margin-bottom: 6px;
+`;
+
 const StyledSlider = styled(Slider)`
   margin-bottom: 10px;
 `;
@@ -178,6 +185,7 @@ const Settings: React.FC<SettingsProps> = observer((props) => {
         <>
           <StyledText text="Transfer Image" />
           <StyledFileInput type="file" onChange={setCustomTFImage} />
+          <StyledDescription text="Import an n x 1 image that maps from the image density to an RGBA output." />
         </>
       )}
     </Container>

@@ -92,6 +92,9 @@ class VolumeMaterial extends THREE.ShaderMaterial implements IDisposable {
       autorun(() => {
         this.uniforms.uLaoIntensity.value = volumeRenderer.laoIntensity;
       }),
+      autorun(() => {
+        this.uniforms.uCustomTFTexture.value = volumeRenderer.customTFTexture;
+      }),
     );
   }
 

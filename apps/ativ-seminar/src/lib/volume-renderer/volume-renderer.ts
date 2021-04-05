@@ -67,7 +67,7 @@ export class VolumeRenderer implements IDisposable {
       contextOpacity: observable,
       rangeLimits: observable,
       cutAwayConeAngle: observable,
-      customTFTexture: observable,
+      customTFTexture: observable.ref,
       setBackgroundValue: action,
       setTransferFunction: action,
       setLightingMode: action,
@@ -386,6 +386,7 @@ export class VolumeRenderer implements IDisposable {
 
   protected setCustomTFTexture(texture: THREE.Texture) {
     this.customTFTexture = texture;
+    this.lazyRender();
   }
   public setCustomTFImage = (file: File) => {
     const reader = new FileReader();

@@ -46,6 +46,7 @@ vec4 transferFunction(VolumeData data, vec3 volumeCoords) {
   // return vec4(data.firstDerivative * 3.0, mix(0.0, 0.015, step(0.1, length(data.firstDerivative))));
   // return vec4(vec3(0.5), mix(0.0, 0.015, step(0.12, length(data.firstDerivative))));
 
+  // F+C Edges
   if (uTransferFunction == 1) {
     // return mix(vec4(data.firstDerivative * 5.0, mix(0.0, 0.015, step(0.1, length(data.firstDerivative))) * 0.2), vec4(vec3(1.0), 0.8), data.focus);
     return uUseFocus ?
@@ -55,6 +56,7 @@ vec4 transferFunction(VolumeData data, vec3 volumeCoords) {
     // return mix(vec4(vec3(0.5), mix(0.0, 0.015, step(0.12, length(data.firstDerivative)))), vec4(1.0, 0.0, 0.0, 1.0), data.focus);
   }
 
+  // F+C Cutaway
   if (uTransferFunction == 2) {
     // TODO: Extract the angle into a uniform.
     float cone = sdCone(transformToCutawaySpace(volumeCoords), uConeAngle);
@@ -63,9 +65,18 @@ vec4 transferFunction(VolumeData data, vec3 volumeCoords) {
     return mix(vec4(vec3(filteredDensity), filteredDensity * uContextOpacity) * contextFactor, vec4(1.0, 0.0, 0.0, 1.0), step(0.1, data.focus));
   }
 
+  // Custom
+  if (uTransferFunction == 3) {
+    vec4 textureValue = texture2D(uCustomTFTexture, vec2(data.density, 0));
+    return uUseFocus ?
+        vec4(textureValue.rgb, textureValue.a * data.focus)
+      : textureValue;
+  }
+
+  // Density
   return uUseFocus ?
-        vec4(((data.density - uLimitLow) / (uLimitHigh - uLimitLow)) * data.focus * step(uLimitLow, data.density) * (1.0 - step(uLimitHigh, data.density)))
-      : vec4(((data.density - uLimitLow) / (uLimitHigh - uLimitLow)) * step(uLimitLow, data.density) * (1.0 - step(uLimitHigh, data.density)));
+      vec4(((data.density - uLimitLow) / (uLimitHigh - uLimitLow)) * data.focus * step(uLimitLow, data.density) * (1.0 - step(uLimitHigh, data.density)))
+    : vec4(((data.density - uLimitLow) / (uLimitHigh - uLimitLow)) * step(uLimitLow, data.density) * (1.0 - step(uLimitHigh, data.density)));
 
   // return vec4(data.density * step(0.05, data.density));
   // return mix(vec4(0.0), vec4(1.0, 0.0, 0.0, 1.0), step(0.1, data.focus));

@@ -5,4 +5,5 @@ export const transferFunctionsUniforms = {
   uConeAngle: { value: 1 },
   uTransferFunction: { value: 0 },
   uUseFocus: { value: false },
+  uCustomTFTexture: { value: null },
 };
