@@ -2,12 +2,14 @@ export enum TransferFunctionType {
   Density = 0,
   FCEdges = 1,
   FCCutaway = 2,
+  Custom = 3,
 }
 
 export const transferFunctionTypes = [
   TransferFunctionType.Density,
   TransferFunctionType.FCEdges,
   TransferFunctionType.FCCutaway,
+  TransferFunctionType.Custom,
 ];
 
 // TODO: Add properties for which sliders to display etc.
@@ -31,6 +33,11 @@ export const transferFunctionProps: ITransferFunctionProps[] = [
   {
     updateNormalsOnCameraMove: true,
     updateLAOOnCameraMove: true,
+    defaultLAOIntensity: 2.5,
+  },
+  {
+    updateNormalsOnCameraMove: false,
+    updateLAOOnCameraMove: false,
     defaultLAOIntensity: 2.5,
   },
 ];

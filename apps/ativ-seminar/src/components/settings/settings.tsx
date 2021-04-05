@@ -34,6 +34,10 @@ const StyledIntervalSlider = styled(IntervalSlider)`
   margin-bottom: 10px;
 `;
 
+const StyledFileInput = styled.input`
+  margin-bottom: 10px;
+`;
+
 const StyledSelect = styled.select`
   background: ${color("veryLightGray")};
   border: none;
@@ -76,6 +80,15 @@ const Settings: React.FC<SettingsProps> = observer((props) => {
     [renderer],
   );
 
+  const setCustomTFImage = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      const files = event.target.files;
+      if (!files?.length) return;
+      renderer.setCustomTFImage(files[0]);
+    },
+    [renderer],
+  );
+
   return (
     <Container {...rest}>
       <StyledText text="Background" />
@@ -106,6 +119,7 @@ const Settings: React.FC<SettingsProps> = observer((props) => {
         <StyledOption value={TransferFunctionType.FCCutaway}>
           F+C: Cutaway
         </StyledOption>
+        <StyledOption value={TransferFunctionType.Custom}>Custom</StyledOption>
       </StyledSelect>
       {(renderer.transferFunction.type === TransferFunctionType.Density ||
         renderer.transferFunction.type === TransferFunctionType.FCEdges) && (
@@ -140,6 +154,12 @@ const Settings: React.FC<SettingsProps> = observer((props) => {
             onChange={setContextOpacity}
             value={Math.sqrt(renderer.contextOpacity)}
           />
+        </>
+      )}
+      {renderer.transferFunction.type === TransferFunctionType.Custom && (
+        <>
+          <StyledText text="Transfer Image" />
+          <StyledFileInput type="file" onChange={setCustomTFImage} />
         </>
       )}
     </Container>

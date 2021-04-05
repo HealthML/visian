@@ -55,9 +55,10 @@ export class VolumeRenderer implements IDisposable {
   public rangeLimits: [number, number] = [0.1, 1];
   public altRangeLimits: [number, number] = [0, 1];
   public cutAwayConeAngle = 1;
+  public customTFTexture?: THREE.Texture;
 
   constructor(private canvas: HTMLCanvasElement) {
-    makeObservable(this, {
+    makeObservable<this, "setCustomTFTexture">(this, {
       backgroundValue: observable,
       transferFunction: observable,
       lightingMode: observable,
@@ -66,6 +67,7 @@ export class VolumeRenderer implements IDisposable {
       contextOpacity: observable,
       rangeLimits: observable,
       cutAwayConeAngle: observable,
+      customTFTexture: observable,
       setBackgroundValue: action,
       setTransferFunction: action,
       setLightingMode: action,
@@ -74,6 +76,7 @@ export class VolumeRenderer implements IDisposable {
       setContextOpacity: action,
       setRangeLimits: action,
       setCutAwayConeAngle: action,
+      setCustomTFTexture: action,
     });
 
     this.renderer = new THREE.WebGLRenderer({ alpha: true, canvas });
@@ -379,6 +382,24 @@ export class VolumeRenderer implements IDisposable {
 
     this.cutAwayConeAngle = radians;
     this.lazyRender();
+  };
+
+  protected setCustomTFTexture(texture: THREE.Texture) {
+    this.customTFTexture = texture;
+  }
+  public setCustomTFImage = (file: File) => {
+    const reader = new FileReader();
+    reader.addEventListener(
+      "load",
+      () => {
+        new THREE.TextureLoader().load(reader.result as string, (texture) => {
+          this.setCustomTFTexture(texture);
+        });
+      },
+      false,
+    );
+
+    reader.readAsDataURL(file);
   };
 
   // XR Management
