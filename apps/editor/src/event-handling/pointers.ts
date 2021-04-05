@@ -13,6 +13,14 @@ export const setUpPointerHandling = (
   store: RootStore,
 ): [IDispatch, IDisposer] => {
   const dispatch = transformGesturePreset({
+    forUnidentifiedPointers: ({ detail }) => {
+      if (detail.buttons) return;
+
+      store.editor.tools.handleEvent({
+        x: detail.clientX,
+        y: detail.clientY,
+      });
+    },
     forPointers: ({ context, detail, id }, { eventType }) => {
       const activeTool = store.editor.tools.activeTool;
 
@@ -40,11 +48,11 @@ export const setUpPointerHandling = (
           }
         } else if (id === "mainView" && eventType) {
           store.editor.tools.handleEvent(
-            eventType,
             {
               x: detail.clientX,
               y: detail.clientY,
             },
+            eventType,
             context.button === PointerButton.RMB,
           );
         }

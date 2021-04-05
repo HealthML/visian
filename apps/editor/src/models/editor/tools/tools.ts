@@ -90,8 +90,8 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
   }
 
   public handleEvent(
-    eventType: AbstractEventType,
     screenPosition: { x: number; y: number },
+    eventType?: AbstractEventType,
     alt = false,
   ) {
     if (!this.sliceRenderer || !this.brushMap || !this.altBrushMap) return;
@@ -102,13 +102,12 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
     if (!intersection || !intersection.uv) return;
 
     this.alignBrushCursor(intersection.uv);
+    if (!eventType) return;
 
     const dragPoint = this.getDragPoint(intersection.uv);
-
     if (!dragPoint) return;
 
     const tool = (alt ? this.altBrushMap : this.brushMap)[this.activeTool];
-
     switch (eventType) {
       case "start":
         tool?.startAt(dragPoint);
@@ -122,7 +121,6 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
     }
   }
 
-  // TODO: Call this for hover events.
   private alignBrushCursor(uv: THREE.Vector2) {
     if (!this.sliceRenderer || !this.editor.annotation) return;
     const annotation = this.editor.annotation;
