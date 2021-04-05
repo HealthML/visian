@@ -12,9 +12,11 @@ import { useStore } from "../../../app/root-store";
 import { Tool } from "../../../models";
 
 const SyledCanvas = styled(WebGLCanvas)<
-  WebGLCanvasProps & { activeTool?: Tool }
+  WebGLCanvasProps & { activeTool?: Tool; isCursorOverDrawableArea?: boolean }
 >`
   cursor: ${(props) => {
+    if (!props.isCursorOverDrawableArea) return "crosshair";
+
     switch (props.activeTool) {
       case Tool.Hand:
         // TODO: `cursor: "grabbing"` while dragged
@@ -47,6 +49,7 @@ export const MainView = observer<{}, HTMLCanvasElement>(
       <SyledCanvas
         activeTool={store?.editor.tools.activeTool}
         backgroundColor={store?.editor.backgroundColor}
+        isCursorOverDrawableArea={store?.editor.tools.isCursorOverDrawableArea}
         onContextMenu={preventDefault}
         onPointerDown={onPointerDown}
         ref={ref}

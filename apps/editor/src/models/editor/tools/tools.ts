@@ -16,6 +16,7 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
   public static readonly excludeFromSnapshotTracking = ["/editor"];
 
   public activeTool = Tool.Brush;
+  public isCursorOverDrawableArea = false;
 
   public brushSizePixels = 0.5;
 
@@ -35,12 +36,14 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
   constructor(protected editor: Editor, protected context?: StoreContext) {
     makeObservable(this, {
       activeTool: observable,
+      isCursorOverDrawableArea: observable,
       brushSizePixels: observable,
 
       isBrushToolSelected: computed,
 
       applySnapshot: action,
       setActiveTool: action,
+      setCursorOverDrawableArea: action,
       setBrushSizePixels: action,
     });
   }
@@ -51,6 +54,10 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
 
   public setActiveTool(tool = Tool.Brush) {
     this.activeTool = tool;
+  }
+
+  public setCursorOverDrawableArea(value = true) {
+    this.isCursorOverDrawableArea = value;
   }
 
   public setBrushSizePixels(value = 5) {
@@ -99,7 +106,12 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
     const intersection = this.sliceRenderer.raycaster.getIntersectionsFromPointer(
       screenPosition,
     )[0];
-    if (!intersection || !intersection.uv) return;
+    if (!intersection || !intersection.uv) {
+      this.setCursorOverDrawableArea(false);
+      return;
+    }
+
+    this.setCursorOverDrawableArea();
 
     this.alignBrushCursor(intersection.uv);
     if (!eventType) return;
