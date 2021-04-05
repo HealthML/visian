@@ -4,6 +4,8 @@ import React, { useCallback } from "react";
 import styled from "styled-components";
 
 import {
+  lightingModes,
+  LightingModeType,
   transferFunctions,
   TransferFunctionType,
 } from "../../lib/volume-renderer";
@@ -57,6 +59,13 @@ const StyledOption = styled.option`
 const Settings: React.FC<SettingsProps> = observer((props) => {
   const { renderer, ...rest } = props;
 
+  const setLightingMode = useCallback(
+    (event: React.ChangeEvent<HTMLSelectElement>) => {
+      renderer.setLightingMode(lightingModes[parseInt(event.target.value)]);
+    },
+    [renderer],
+  );
+
   const setTransferFunction = useCallback(
     (event: React.ChangeEvent<HTMLSelectElement>) => {
       renderer.setTransferFunction(
@@ -105,6 +114,15 @@ const Settings: React.FC<SettingsProps> = observer((props) => {
         onChange={setOpacity}
         value={Math.sqrt(renderer.imageOpacity)}
       />
+      <StyledText text="Lighting Mode" />
+      <StyledSelect
+        onChange={setLightingMode}
+        value={renderer.lightingMode.type}
+      >
+        <StyledOption value={LightingModeType.None}>None</StyledOption>
+        <StyledOption value={LightingModeType.Phong}>Phong</StyledOption>
+        <StyledOption value={LightingModeType.LAO}>LAO</StyledOption>
+      </StyledSelect>
       <StyledText text="Transfer Function" />
       <StyledSelect
         onChange={setTransferFunction}
