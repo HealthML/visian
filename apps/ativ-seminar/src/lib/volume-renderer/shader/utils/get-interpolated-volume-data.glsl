@@ -23,13 +23,13 @@ VolumeData getVolumeData(vec3 volumeCoords) {
   VolumeData data;
 
   data.density = texture2D(uVolume, uv).r;
-  data.firstDerivative = decodeGradient(texture2D(uInputFirstDerivative, uv));
-  data.secondDerivative = decodeGradient(texture2D(uInputSecondDerivative, uv));
+  data.firstDerivative = decodeVec3(texture2D(uInputFirstDerivative, uv));
+  data.secondDerivative = decodeVec3(texture2D(uInputSecondDerivative, uv));
 
   #ifdef NORMAL
     if(uLightingMode == 1) {
       // Here we don't normalize yet, because we need to interpolate before normalizing.
-      data.normal = decodeGradient(texture2D(uOutputFirstDerivative, uv));
+      data.normal = decodeVec3(texture2D(uOutputFirstDerivative, uv));
     }
   #endif // NORMAL
 

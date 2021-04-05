@@ -14,7 +14,7 @@ uniform sampler2D uLAO;
 @import ../uniforms/u-lighting;
 
 @import ../utils/volume-data;
-@import ../gradient/decode-gradient;
+@import ../utils/decode-vec3;
 
 #define NORMAL
 #define LAO

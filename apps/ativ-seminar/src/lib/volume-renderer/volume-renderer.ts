@@ -208,6 +208,14 @@ export class VolumeRenderer implements IDisposable {
     }
   };
 
+  public updateCurrentResolution() {
+    this.resolutionComputer.updateCurrentResolution();
+  }
+
+  public get isShowingFullResolution() {
+    return this.resolutionComputer.fullResolutionFlushed;
+  }
+
   private onCameraMove = () => {
     if (
       !this.renderer.xr.isPresenting &&

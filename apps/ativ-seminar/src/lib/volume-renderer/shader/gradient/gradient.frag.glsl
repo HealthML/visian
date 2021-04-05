@@ -12,7 +12,7 @@ uniform int uGradientMode;
 
 @import ../utils/volume-data;
 @import ../volume/transfer-functions;
-@import ./decode-gradient;
+@import ../utils/decode-vec3;
 
 vec4 encodeGradient(vec3 gradient) {
   float encodedSigns = 0.5 * step(0.0, gradient.x) + 0.25 * step(0.0, gradient.y) + 0.125 * step(0.0, gradient.z);
@@ -54,8 +54,8 @@ vec4 getImageValue(vec3 voxelCoords) {
   VolumeData data;
 
   data.density = imageValue.r;
-  data.firstDerivative = decodeGradient(texture2D(uInputFirstDerivative, uv));
-  data.secondDerivative = decodeGradient(texture2D(uInputSecondDerivative, uv));
+  data.firstDerivative = decodeVec3(texture2D(uInputFirstDerivative, uv));
+  data.secondDerivative = decodeVec3(texture2D(uInputSecondDerivative, uv));
   
   if(uUseFocus) {
     data.focus = texture2D(uFocus, uv).r;

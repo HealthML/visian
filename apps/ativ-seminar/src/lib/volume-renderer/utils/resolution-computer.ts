@@ -7,7 +7,7 @@ export class ResolutionComputer implements IDisposable {
 
   private intermediateRenderTarget: THREE.WebGLRenderTarget;
 
-  private fullResolutionFlushed = false;
+  public fullResolutionFlushed = false;
 
   private currentResolutionStep = 0;
   private subScreenSpaceId = 0;
@@ -60,6 +60,12 @@ export class ResolutionComputer implements IDisposable {
     this.subScreenSpaceId = 0;
 
     this.resizeOutput();
+  }
+
+  public updateCurrentResolution() {
+    this.subScreenSpaceId = 0;
+
+    this.fullResolutionFlushed = false;
   }
 
   public tick() {

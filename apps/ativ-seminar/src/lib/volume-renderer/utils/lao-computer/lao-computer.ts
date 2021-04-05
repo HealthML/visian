@@ -7,14 +7,23 @@ import VolumeRenderer from "../../volume-renderer";
 import ScreenAlignedQuad from "../screen-aligned-quad";
 import LAOMaterial from "./lao-material";
 
+/**
+ * 8 disables the progressive LAO (performance improvements coming soon).
+ * To test it try 32 or 128.
+ */
+export const totalLAORays = 8;
+
 export class LAOComputer implements IDisposable {
-  private renderTarget: THREE.WebGLRenderTarget;
+  private outputRenderTarget: THREE.WebGLRenderTarget;
+  private intermediateRenderTarget: THREE.WebGLRenderTarget;
 
   private laoMaterial: LAOMaterial;
 
-  private screenAlignedQuad: ScreenAlignedQuad;
+  private computationQuad: ScreenAlignedQuad;
+  private copyQuad: ScreenAlignedQuad;
 
   private dirty = true;
+  private needsCopy = false;
 
   private reactionDisposers: IReactionDisposer[] = [];
 
@@ -24,14 +33,19 @@ export class LAOComputer implements IDisposable {
     firstDerivativeTexture: THREE.Texture,
     secondDerivativeTexture: THREE.Texture,
   ) {
-    this.renderTarget = new THREE.WebGLRenderTarget(1, 1);
+    this.outputRenderTarget = new THREE.WebGLRenderTarget(1, 1);
+    this.intermediateRenderTarget = new THREE.WebGLRenderTarget(1, 1);
 
     this.laoMaterial = new LAOMaterial(
       firstDerivativeTexture,
       secondDerivativeTexture,
+      this.getLAOTexture(),
     );
 
-    this.screenAlignedQuad = new ScreenAlignedQuad(this.laoMaterial);
+    this.computationQuad = new ScreenAlignedQuad(this.laoMaterial);
+    this.copyQuad = ScreenAlignedQuad.forTexture(
+      this.intermediateRenderTarget.texture,
+    );
 
     this.reactionDisposers.push(
       autorun(() => {
@@ -74,30 +88,68 @@ export class LAOComputer implements IDisposable {
   }
 
   public getLAOTexture() {
-    if (this.dirty) {
-      this.update();
-    }
-
-    return this.renderTarget.texture;
+    return this.outputRenderTarget.texture;
   }
 
   public tick() {
-    if (this.volumeRenderer.lightingMode.needsLAO && this.dirty) {
-      this.render();
+    if (this.volumeRenderer.lightingMode.needsLAO) {
+      if (this.dirty) {
+        this.renderInitialLAO();
+      } else if (this.volumeRenderer.isShowingFullResolution) {
+        if (this.needsCopy) {
+          this.copyToOutput();
+        } else if (this.laoMaterial.previousDirections < totalLAORays) {
+          this.renderNextLAOFrame();
+        }
+      }
     }
   }
 
-  private render() {
-    const previousRenderTarget = this.renderer.getRenderTarget();
-    this.renderer.setRenderTarget(this.renderTarget);
+  private renderInitialLAO() {
+    this.laoMaterial.setPreviousDirections(0);
 
-    this.screenAlignedQuad.renderWith(this.renderer);
+    const previousRenderTarget = this.renderer.getRenderTarget();
+    this.renderer.setRenderTarget(this.outputRenderTarget);
+
+    this.computationQuad.renderWith(this.renderer);
 
     this.renderer.setRenderTarget(previousRenderTarget);
+
+    this.laoMaterial.setPreviousDirections(8);
 
     this.dirty = false;
 
     this.volumeRenderer.lazyRender();
+  }
+
+  private renderNextLAOFrame() {
+    const previousRenderTarget = this.renderer.getRenderTarget();
+    this.renderer.setRenderTarget(this.intermediateRenderTarget);
+
+    this.computationQuad.renderWith(this.renderer);
+
+    this.renderer.setRenderTarget(previousRenderTarget);
+
+    this.laoMaterial.setPreviousDirections(
+      this.laoMaterial.previousDirections + 8,
+    );
+
+    this.needsCopy = true;
+  }
+
+  private copyToOutput() {
+    if (!this.needsCopy) return;
+
+    const previousRenderTarget = this.renderer.getRenderTarget();
+    this.renderer.setRenderTarget(this.outputRenderTarget);
+
+    this.copyQuad.renderWith(this.renderer);
+
+    this.renderer.setRenderTarget(previousRenderTarget);
+
+    this.needsCopy = false;
+
+    this.volumeRenderer.updateCurrentResolution();
   }
 
   private update = () => {
@@ -105,7 +157,8 @@ export class LAOComputer implements IDisposable {
   };
 
   public setAtlas(atlas: TextureAtlas) {
-    this.renderTarget.setSize(atlas.atlasSize.x, atlas.atlasSize.y);
+    this.outputRenderTarget.setSize(atlas.atlasSize.x, atlas.atlasSize.y);
+    this.intermediateRenderTarget.setSize(atlas.atlasSize.x, atlas.atlasSize.y);
 
     this.laoMaterial.setAtlas(atlas);
 

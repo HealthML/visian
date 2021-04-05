@@ -11,11 +11,14 @@ import {
   transferFunctionsUniforms,
 } from "../../uniforms";
 import { getStepSize } from "../step-size";
+import { totalLAORays } from "./lao-computer";
+import { getLAODirectionTexture } from "./lao-directions";
 
 export class LAOMaterial extends THREE.ShaderMaterial {
   constructor(
     firstDerivativeTexture: THREE.Texture,
     secondDerivativeTexture: THREE.Texture,
+    private previousFrameTexture: THREE.Texture,
   ) {
     super({
       vertexShader,
@@ -26,6 +29,12 @@ export class LAOMaterial extends THREE.ShaderMaterial {
         atlasInfoUniforms,
         imageInfoUniforms,
         transferFunctionsUniforms,
+        {
+          uPreviousFrame: { value: null },
+          uDirections: { value: getLAODirectionTexture(totalLAORays) },
+          uPreviousDirections: { value: 0 },
+          uTotalDirections: { value: totalLAORays },
+        },
       ]),
     });
 
@@ -53,6 +62,20 @@ export class LAOMaterial extends THREE.ShaderMaterial {
 
   public setCameraPosition(position: THREE.Vector3) {
     this.uniforms.uCameraPosition.value.copy(position);
+  }
+
+  public setPreviousDirections(amount: number) {
+    if (amount) {
+      this.uniforms.uPreviousFrame.value = this.previousFrameTexture;
+    } else {
+      this.uniforms.uPreviousFrame.value = null;
+    }
+
+    this.uniforms.uPreviousDirections.value = amount;
+  }
+
+  public get previousDirections() {
+    return this.uniforms.uPreviousDirections.value;
   }
 }
 
