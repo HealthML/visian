@@ -271,7 +271,7 @@ const Settings: React.FC<SettingsProps> = observer((props) => {
         <>
           <StyledText text="Focus Volume Color" />
           <StyledTextInput
-            defaultValue="rgba(255,255,255,1)"
+            defaultValue={renderer?.focusColor || "rgba(255,255,255,1)"}
             onChange={setFocusColor}
           />
           <StyledText text="Context Opacity" />

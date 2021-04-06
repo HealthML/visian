@@ -52,7 +52,7 @@ export class VolumeRenderer implements IDisposable {
 
   public backgroundValue = 0;
   public shouldUseFocusVolume = false;
-  public focusColor = "#ffffff";
+  public focusColor = "rgba(255, 255, 255, 1)";
   public transferFunction = transferFunctions[TransferFunctionType.FCEdges];
   public lightingMode = lightingModes[LightingModeType.LAO];
   public laoIntensity = 1;
