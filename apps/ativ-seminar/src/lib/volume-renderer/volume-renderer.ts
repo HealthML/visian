@@ -39,7 +39,7 @@ export class VolumeRenderer implements IDisposable {
 
   private lazyRenderTriggered = true;
 
-  private isImageLoaded = false;
+  public isImageLoaded = false;
 
   private lightingTimeout?: NodeJS.Timer;
   private suppressedLightingMode?: LightingMode;
@@ -53,13 +53,15 @@ export class VolumeRenderer implements IDisposable {
   public laoIntensity = 1;
   public imageOpacity = 1;
   public contextOpacity = 0.4;
-  public rangeLimits: [number, number] = [0.1, 1];
-  public altRangeLimits: [number, number] = [0, 1];
+  public densityRangeLimits: [number, number] = [0, 1];
+  public edgeRangeLimits: [number, number] = [0.1, 1];
+  public rangeLimits: [number, number] = this.edgeRangeLimits;
   public cutAwayConeAngle = 1;
   public customTFTexture?: THREE.Texture;
 
   constructor(private canvas: HTMLCanvasElement) {
     makeObservable<this, "setCustomTFTexture">(this, {
+      isImageLoaded: observable,
       backgroundValue: observable,
       shouldUseFocusVolume: observable,
       transferFunction: observable,
@@ -334,19 +336,20 @@ export class VolumeRenderer implements IDisposable {
   public setTransferFunction = (value: TransferFunction) => {
     this.onTransferFunctionChange();
 
-    this.transferFunction = value;
-
-    // TODO: We separate the limits for this properly
-    if (
-      value.type === TransferFunctionType.Density ||
-      value.type === TransferFunctionType.FCEdges
-    ) {
-      const limits = this.altRangeLimits;
-      this.altRangeLimits = this.rangeLimits;
-      this.rangeLimits = limits;
+    if (this.transferFunction.type === TransferFunctionType.Density) {
+      this.densityRangeLimits = this.rangeLimits;
+    } else if (this.transferFunction.type === TransferFunctionType.FCEdges) {
+      this.edgeRangeLimits = this.rangeLimits;
     }
 
+    this.transferFunction = value;
     this.laoIntensity = value.defaultLAOIntensity;
+
+    if (this.transferFunction.type === TransferFunctionType.Density) {
+      this.rangeLimits = this.densityRangeLimits;
+    } else if (this.transferFunction.type === TransferFunctionType.FCEdges) {
+      this.rangeLimits = this.edgeRangeLimits;
+    }
 
     this.lazyRender();
   };
