@@ -136,7 +136,8 @@ export class EditorViewSettings
     canvasId: string,
   ) {
     const sliceRenderer = this.editor.sliceRenderer;
-    if (!sliceRenderer || !this.editor.image) return;
+    if (!sliceRenderer || !this.editor.image || !this.shouldShowSideViews)
+      return;
 
     const intersection = sliceRenderer.raycaster.getIntersectionsFromPointer(
       screenPosition,
