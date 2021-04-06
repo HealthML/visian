@@ -204,6 +204,7 @@ const Settings: React.FC<SettingsProps> = observer((props) => {
           type="checkbox"
           checked={renderer?.shouldUseFocusVolume}
           onChange={setShouldUseFocusVolume}
+          disabled={!renderer?.isFocusLoaded}
         />
         <StyledCheckboxText text="Use focus volume?" />
       </StyledCheckboxRow>

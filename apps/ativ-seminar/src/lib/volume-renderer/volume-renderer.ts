@@ -63,9 +63,10 @@ export class VolumeRenderer implements IDisposable {
   public rangeLimits: [number, number] = this.edgeRangeLimits;
   public cutAwayConeAngle = 1;
   public customTFTexture?: THREE.Texture;
+  public isFocusLoaded = false;
 
   constructor(private canvas: HTMLCanvasElement) {
-    makeObservable<this, "setCustomTFTexture">(this, {
+    makeObservable<this, "setCustomTFTexture" | "setFocusLoaded">(this, {
       isImageLoaded: observable,
       densityHistogram: observable.ref,
       gradientHistogram: observable.ref,
@@ -80,6 +81,7 @@ export class VolumeRenderer implements IDisposable {
       rangeLimits: observable,
       cutAwayConeAngle: observable,
       customTFTexture: observable.ref,
+      isFocusLoaded: observable,
       setImage: action,
       setGradientHistogram: action,
       setBackgroundValue: action,
@@ -93,6 +95,7 @@ export class VolumeRenderer implements IDisposable {
       setRangeLimits: action,
       setCutAwayConeAngle: action,
       setCustomTFTexture: action,
+      setFocusLoaded: action,
     });
 
     this.renderer = new THREE.WebGLRenderer({ alpha: true, canvas });
@@ -289,6 +292,7 @@ export class VolumeRenderer implements IDisposable {
 
     this.volume.setFocusAtlas(focus);
     this.setShouldUseFocusVolume(Boolean(focus));
+    this.setFocusLoaded(Boolean(focus));
     this.lazyRender();
   };
 
@@ -440,6 +444,10 @@ export class VolumeRenderer implements IDisposable {
 
     reader.readAsDataURL(file);
   };
+
+  protected setFocusLoaded(value: boolean) {
+    this.isFocusLoaded = value;
+  }
 
   // XR Management
   public async isXRAvailable() {
