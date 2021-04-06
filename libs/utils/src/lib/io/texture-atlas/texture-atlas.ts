@@ -11,12 +11,6 @@ export type TextureAtlasMetadata<T extends TypedArray = TypedArray> = Pick<
 >;
 
 /**
- * The texture atlas generation expects the x- and y-axis to be inverted
- * and the z-axis to be non-inverted.
- */
-export const defaultDirection = new Vector([-1, -1, 1], false);
-
-/**
  * Returns the optimal number of slices in x/y direction in the texture atlas.
  *
  * @param voxelCount The number of voxels in each direction.
@@ -45,55 +39,29 @@ export const convertDataArrayToAtlas = <T extends TypedArray = TypedArray>(
       atlasSize.x * atlasSize.y * image.voxelComponents,
     );
 
-  // TODO: Refactor as soon as our Vector class implements `applyMatrix3`
-  const direction =
-    image.dimensionality < 3
-      ? defaultDirection
-      : Vector.fromArray(
-          new THREE.Vector3()
-            .setScalar(1)
-            .applyMatrix3(new THREE.Matrix3().fromArray(image.orientation.data))
-            .round()
-            .multiply(new THREE.Vector3().fromArray(defaultDirection.toArray()))
-            .toArray(),
-        );
-
-  const inverted = {
-    x: direction.x < 0,
-    y: direction.y < 0,
-    z: direction.z < 0,
-  };
-
   const sliceSize =
     image.voxelCount.x * image.voxelCount.y * image.voxelComponents;
 
   // TODO: Test if ordered read can improve performance here
   for (let z = 0; z < image.voxelCount.z; z++) {
-    const sliceZ = inverted.z ? image.voxelCount.z - (z + 1) : z;
-    const sliceData = image.data.subarray(
-      sliceZ * sliceSize,
-      (sliceZ + 1) * sliceSize,
-    );
+    const sliceData = image.data.subarray(z * sliceSize, (z + 1) * sliceSize);
     const sliceOffset = new THREE.Vector2(
-      (sliceZ % atlasGrid.x) * image.voxelCount.x * image.voxelComponents,
-      Math.floor(sliceZ / atlasGrid.x) *
-        image.voxelCount.y *
-        image.voxelComponents,
+      (z % atlasGrid.x) * image.voxelCount.x,
+      Math.floor(z / atlasGrid.x) * image.voxelCount.y,
     );
 
     for (let y = 0; y < image.voxelCount.y; y++) {
-      const sliceY = inverted.y ? image.voxelCount.y - (y + 1) : y;
+      const atlasYOffset =
+        (y + sliceOffset.y) * atlasSize.x * image.voxelComponents;
+      const dataYOffset = y * image.voxelCount.x * image.voxelComponents;
+
       for (let x = 0; x < image.voxelCount.x; x++) {
-        const sliceX = inverted.x ? image.voxelCount.x - (x + 1) : x;
+        const atlasXOffset = (x + sliceOffset.x) * image.voxelComponents;
+        const dataXOffset = x * image.voxelComponents;
+
         for (let c = 0; c < image.voxelComponents; c++) {
-          atlas[
-            image.voxelComponents *
-              ((sliceOffset.y + sliceY) * atlasSize.x +
-                sliceOffset.x +
-                sliceX) +
-              c
-          ] =
-            sliceData[image.voxelComponents * (y * image.voxelCount.x + x) + c];
+          atlas[atlasYOffset + atlasXOffset + c] =
+            sliceData[dataYOffset + dataXOffset + c];
         }
       }
     }
@@ -137,5 +105,36 @@ export const getTextureFromAtlas = <T extends TypedArray = TypedArray>(
     undefined,
     undefined,
     magFilter,
+  );
+};
+
+/**
+ * Returns the texture atlas index for the given voxel coordinates.
+ *
+ * @param voxel The coordinates of the voxel. The w component specifies the component.
+ * @param components The amount of components per voxel in the atlas.
+ * @param voxelCount The number of voxels in each direction.
+ * @param atlasSize The size of the texture atlas in pixels.
+ * @param atlasGrid The number of slices in the texture atlas in x/y direction.
+ * @returns The index of the given voxel in an atlas with the given properties.
+ */
+export const getAtlasIndexFor = (
+  voxel: Vector,
+  image: Pick<Image, "voxelComponents" | "voxelCount">,
+  atlasGrid = getAtlasGrid(image.voxelCount),
+  atlasSize = getAtlasSize(image.voxelCount, atlasGrid),
+) => {
+  const sliceOffset = new Vector(
+    [
+      (voxel.z % atlasGrid.x) * image.voxelCount.x,
+      Math.floor(voxel.z / atlasGrid.x) * image.voxelCount.y,
+    ],
+    false,
+  );
+
+  return (
+    image.voxelComponents *
+      ((sliceOffset.y + voxel.y) * atlasSize.x + sliceOffset.x + voxel.x) +
+    (voxel.size > 3 ? voxel.w : 0)
   );
 };

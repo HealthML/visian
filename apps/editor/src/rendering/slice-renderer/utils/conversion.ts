@@ -1,3 +1,5 @@
+import { Pixel } from "@visian/utils";
+
 import type * as THREE from "three";
 
 export const getWebGLSize = (camera: THREE.OrthographicCamera) => {
@@ -16,7 +18,7 @@ export const getWebGLSize = (camera: THREE.OrthographicCamera) => {
  * @param boxDimensions Size of the bounding box.
  */
 export const convertPositionToWebGLPosition = (
-  position: { x: number; y: number },
+  position: Pixel,
   boxDimensions: { width: number; height: number },
 ) => {
   return {

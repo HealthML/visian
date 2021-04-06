@@ -20,7 +20,23 @@ export interface GenericVector extends THREE.Vector {
 /** An observable vector of generic, fixed size. */
 export class Vector implements GenericVector {
   public static fromArray(array: number[]): Vector {
-    return new Vector(array);
+    return new this(array);
+  }
+
+  public static fromObject(
+    object: { x: number; y?: number; z?: number; w?: number },
+    isObservable = true,
+  ) {
+    const array = [object.x];
+    ["y", "z", "w"].forEach((axis) => {
+      const value = object[axis as "y" | "z" | "w"];
+      if (value !== undefined) {
+        array.push(value);
+      } else {
+        return new this(array, isObservable);
+      }
+    });
+    return new this(array, isObservable);
   }
 
   /** The number of components in this vector. */

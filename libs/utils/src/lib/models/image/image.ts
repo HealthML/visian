@@ -1,3 +1,6 @@
+import { action, makeObservable, observable } from "mobx";
+import * as THREE from "three";
+
 import {
   FloatTypes,
   IntTypes,
@@ -5,17 +8,19 @@ import {
   ITKMatrix,
   readMedicalImage,
   TypedArray,
-  Vector,
   VoxelTypes,
-} from "@visian/utils";
-import { action, makeObservable, observable } from "mobx";
-import * as THREE from "three";
-
+} from "../../io";
 import {
   convertDataArrayToAtlas,
   getAtlasGrid,
+  getAtlasIndexFor,
+  getAtlasSize,
   getTextureFromAtlas,
 } from "../../io/texture-atlas";
+import { Vector } from "../vector";
+import { getPlaneAxes, ViewType } from "../view-types";
+import { unifyOrientation } from "./conversion";
+import { findVoxelInSlice } from "./iteration";
 
 import type { ISerializable } from "../types";
 
@@ -55,7 +60,13 @@ export class Image<T extends TypedArray = TypedArray>
       voxelComponentType: image.imageType.componentType,
       origin: image.origin,
       orientation: image.direction,
-      data: image.data,
+      data: unifyOrientation(
+        image.data,
+        image.direction,
+        image.imageType.dimension,
+        image.size,
+        image.imageType.components,
+      ),
     });
   }
 
@@ -153,12 +164,15 @@ export class Image<T extends TypedArray = TypedArray>
       orientation: observable.ref,
       data: observable.ref,
       applySnapshot: action,
+      setAtlas: action,
+      updateData: action,
+      setAtlasVoxel: action,
     });
   }
 
   public getAtlas() {
     if (!this.atlas) {
-      // Explicit access here avoids MobX observability tracking to increase performance
+      // Explicit access here avoids MobX observability tracking to decrease performance
       this.atlas = convertDataArrayToAtlas({
         data: this.data,
         dimensionality: this.dimensionality,
@@ -174,18 +188,54 @@ export class Image<T extends TypedArray = TypedArray>
     return getAtlasGrid(this.voxelCount);
   }
 
+  public getAtlasSize() {
+    return getAtlasSize(this.voxelCount, this.getAtlasGrid());
+  }
+
   public getTexture() {
     if (!this.texture) {
-      // Explicit access here avoids MobX observability tracking to increase performance
+      // Explicit access here avoids MobX observability tracking to decrease performance
       this.texture = getTextureFromAtlas(
         {
           voxelComponents: this.voxelComponents,
           voxelCount: this.voxelCount.clone(false),
         },
         this.getAtlas(),
+        THREE.NearestFilter,
       );
     }
     return this.texture;
+  }
+
+  public getSlice(sliceNumber: number, viewType: ViewType) {
+    const [horizontal, vertical] = getPlaneAxes(viewType);
+    const sliceData = new Uint8Array(
+      this.voxelCount[horizontal] * this.voxelCount[vertical],
+    );
+
+    let index = 0;
+    // TODO: performance !!!
+    findVoxelInSlice(
+      // Explicit access here avoids MobX observability tracking to decrease performance
+      {
+        getAtlas: () => this.getAtlas(),
+        voxelComponents: this.voxelComponents,
+        voxelCount: this.voxelCount.clone(false),
+      },
+      viewType,
+      sliceNumber,
+      (_, value) => {
+        sliceData[index] = value;
+        index++;
+      },
+    );
+
+    return sliceData;
+  }
+
+  public getVoxelData(voxel: Vector) {
+    const index = getAtlasIndexFor(voxel, this);
+    return this.getAtlas()[index];
   }
 
   public toJSON() {
@@ -240,6 +290,32 @@ export class Image<T extends TypedArray = TypedArray>
       this.data = clonedData;
     } else {
       this.data = new Uint8Array(this.voxelCount.product()) as T;
+    }
+  }
+
+  public setAtlas(atlas: Uint8Array) {
+    if (!this.atlas) {
+      this.atlas = new Uint8Array(atlas);
+    } else {
+      this.atlas.set(atlas);
+    }
+
+    if (this.texture) {
+      this.texture.needsUpdate = true;
+    }
+  }
+
+  public updateData() {
+    // update this.data from this.atlas
+    console.log("updateData is not implemented yet");
+  }
+
+  public setAtlasVoxel(voxel: Vector, value: number) {
+    const index = getAtlasIndexFor(voxel, this);
+    this.getAtlas()[index] = value;
+
+    if (this.texture) {
+      this.texture.needsUpdate = true;
     }
   }
 }
