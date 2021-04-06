@@ -1,5 +1,6 @@
 import {
   color,
+  coverMixin,
   FlexRow,
   IntervalSlider,
   Sheet,
@@ -94,6 +95,23 @@ const StyledOption = styled.option`
 const Separator = styled.hr`
   margin-bottom: 10px;
   width: 100%;
+`;
+
+const HistogramWrapper = styled.div`
+  position: relative;
+  width: 100%;
+`;
+
+const Histogram = styled.div`
+  ${coverMixin}
+  align-items: flex-end;
+  display: flex;
+  opacity: 0.2;
+`;
+
+const HistogramBar = styled.div`
+  background-color: ${color("text")};
+  flex: 1;
 `;
 
 const Settings: React.FC<SettingsProps> = observer((props) => {
@@ -204,7 +222,25 @@ const Settings: React.FC<SettingsProps> = observer((props) => {
       </StyledSelect>
       {(renderer.transferFunction.type === TransferFunctionType.Density ||
         renderer.transferFunction.type === TransferFunctionType.FCEdges) && (
-        <>
+        <HistogramWrapper>
+          {renderer?.histogram && (
+            <Histogram>
+              {renderer?.histogram[0].map((value, index) => (
+                <HistogramBar
+                  key={index}
+                  style={{
+                    height: `${
+                      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                      ((value - renderer.histogram![1]) /
+                        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                        (renderer.histogram![2] - renderer.histogram![1])) *
+                      100
+                    }%`,
+                  }}
+                />
+              ))}
+            </Histogram>
+          )}
           <StyledText text="Value Range" />
           <StyledIntervalSlider
             min={0}
@@ -212,7 +248,7 @@ const Settings: React.FC<SettingsProps> = observer((props) => {
             onChange={renderer.setRangeLimits}
             value={renderer.rangeLimits}
           />
-        </>
+        </HistogramWrapper>
       )}
       {renderer.transferFunction.type === TransferFunctionType.FCCutaway && (
         <>

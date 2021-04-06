@@ -8,6 +8,7 @@ import { TextureAtlas } from "../texture-atlas";
 import { IDisposable } from "../types";
 import {
   FlyControls,
+  generateHistogram,
   LightingMode,
   lightingModes,
   LightingModeType,
@@ -41,6 +42,7 @@ export class VolumeRenderer implements IDisposable {
   private lazyRenderTriggered = true;
 
   public isImageLoaded = false;
+  public histogram?: [number[], number, number];
 
   private lightingTimeout?: NodeJS.Timer;
   private suppressedLightingMode?: LightingMode;
@@ -270,6 +272,7 @@ export class VolumeRenderer implements IDisposable {
 
     this.volume.setAtlas(image);
     this.isImageLoaded = true;
+    this.histogram = generateHistogram(image.getAtlas());
     this.setShouldUseFocusVolume(false);
 
     this.onCameraMove();
