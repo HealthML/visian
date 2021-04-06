@@ -30,12 +30,12 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
   private eraser?: Brush;
 
   /** A map of the tool types to their corresponding brushes. */
-  private brushMap?: Partial<Record<Tool, Brush>>;
+  private brushMap: Partial<Record<Tool, Brush>>;
   /**
    * A map of the tool types to their corresponding alternative brushes.
    * This is used for e.g. right-click or back of pen interaction.
    */
-  protected altBrushMap?: Partial<Record<Tool, Brush>>;
+  protected altBrushMap: Partial<Record<Tool, Brush>>;
 
   constructor(protected editor: Editor, protected context?: StoreContext) {
     this.brush = new Brush(this.editor);
@@ -93,8 +93,10 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
     eventType?: AbstractEventType,
     alt = false,
   ) {
-    if (!this.editor.sliceRenderer || !this.brushMap || !this.altBrushMap)
+    if (!this.editor.sliceRenderer) {
+      this.setCursorOverDrawableArea(false);
       return;
+    }
 
     const intersection = this.editor.sliceRenderer.raycaster.getIntersectionsFromPointer(
       screenPosition,
@@ -127,14 +129,14 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
   }
 
   private alignBrushCursor(uv: THREE.Vector2) {
-    if (!this.editor.sliceRenderer || !this.editor.annotation) return;
-    const annotation = this.editor.annotation;
+    if (!this.editor.sliceRenderer || !this.editor.image) return;
+    const { voxelCount } = this.editor.image;
 
     const [widthAxis, heightAxis] = getPlaneAxes(
       this.editor.viewSettings.mainViewType,
     );
-    const scanWidth = annotation.voxelCount[widthAxis];
-    const scanHeight = annotation.voxelCount[heightAxis];
+    const scanWidth = voxelCount[widthAxis];
+    const scanHeight = voxelCount[heightAxis];
 
     let right = false;
     let bottom = false;
