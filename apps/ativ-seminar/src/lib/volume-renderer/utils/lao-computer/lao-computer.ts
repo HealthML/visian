@@ -7,25 +7,32 @@ import VolumeRenderer from "../../volume-renderer";
 import ScreenAlignedQuad from "../screen-aligned-quad";
 import LAOMaterial from "./lao-material";
 
-/**
- * 8 disables the progressive LAO (performance improvements coming soon).
- * To test it try 32 or 128.
- */
-export const totalLAORays = 8;
+// TODO: Tweak based on performance.
+export const totalLAORays = 32; // Set to 8 to turn progressive LAO off.
+// TODO: Tweak based on performance.
+export const quadSize = 1024;
 
 export class LAOComputer implements IDisposable {
   private outputRenderTarget: THREE.WebGLRenderTarget;
-  private intermediateRenderTarget: THREE.WebGLRenderTarget;
+  public intermediateRenderTarget: THREE.WebGLRenderTarget;
 
   private laoMaterial: LAOMaterial;
 
   private computationQuad: ScreenAlignedQuad;
-  private copyQuad: ScreenAlignedQuad;
 
   private dirty = true;
   private needsCopy = false;
 
   private reactionDisposers: IReactionDisposer[] = [];
+
+  private directFrames = true;
+  private quadGrid = new THREE.Vector2();
+  private quadCount = 0;
+  private currentQuadId = 0;
+
+  private copyScene = new THREE.Scene();
+  private copyQuad: THREE.Mesh;
+  private copyCamera = new THREE.OrthographicCamera(0, 1, 1, 0, 0, 10);
 
   constructor(
     private renderer: THREE.WebGLRenderer,
@@ -43,9 +50,14 @@ export class LAOComputer implements IDisposable {
     );
 
     this.computationQuad = new ScreenAlignedQuad(this.laoMaterial);
-    this.copyQuad = ScreenAlignedQuad.forTexture(
-      this.intermediateRenderTarget.texture,
-    );
+
+    const geometry = new THREE.PlaneGeometry();
+    geometry.translate(0.5, -0.5, 0);
+    const material = new THREE.MeshBasicMaterial({
+      map: this.intermediateRenderTarget.texture,
+    });
+    this.copyQuad = new THREE.Mesh(geometry, material);
+    this.copyScene.add(this.copyQuad);
 
     this.reactionDisposers.push(
       autorun(() => {
@@ -119,6 +131,8 @@ export class LAOComputer implements IDisposable {
 
     this.dirty = false;
 
+    this.currentQuadId = 0;
+
     this.volumeRenderer.lazyRender();
   }
 
@@ -126,13 +140,27 @@ export class LAOComputer implements IDisposable {
     const previousRenderTarget = this.renderer.getRenderTarget();
     this.renderer.setRenderTarget(this.intermediateRenderTarget);
 
-    this.computationQuad.renderWith(this.renderer);
+    this.computationQuad.renderWith(
+      this.renderer,
+      this.directFrames
+        ? undefined
+        : {
+            fullWidth: this.outputRenderTarget.width,
+            fullHeight: this.outputRenderTarget.height,
+            x: quadSize * (this.currentQuadId % this.quadGrid.x),
+            y: quadSize * Math.floor(this.currentQuadId / this.quadGrid.y),
+            width: quadSize,
+            height: quadSize,
+          },
+    );
 
     this.renderer.setRenderTarget(previousRenderTarget);
 
-    this.laoMaterial.setPreviousDirections(
-      this.laoMaterial.previousDirections + 8,
-    );
+    if (this.directFrames || this.currentQuadId >= this.quadCount - 1) {
+      this.laoMaterial.setPreviousDirections(
+        this.laoMaterial.previousDirections + 8,
+      );
+    }
 
     this.needsCopy = true;
   }
@@ -143,13 +171,45 @@ export class LAOComputer implements IDisposable {
     const previousRenderTarget = this.renderer.getRenderTarget();
     this.renderer.setRenderTarget(this.outputRenderTarget);
 
-    this.copyQuad.renderWith(this.renderer);
+    const previousAutoClear = this.renderer.autoClear;
+    this.renderer.autoClear = this.directFrames;
 
+    if (this.directFrames) {
+      this.copyQuad.position.set(0, 1, 0);
+      this.copyQuad.scale.set(1, 1, 1);
+    } else {
+      this.copyQuad.position.set(
+        (quadSize / this.outputRenderTarget.width) *
+          (this.currentQuadId % this.quadGrid.x),
+        1 -
+          (quadSize / this.outputRenderTarget.height) *
+            Math.floor(this.currentQuadId / this.quadGrid.y),
+        0,
+      );
+
+      this.copyQuad.scale.set(
+        quadSize / this.outputRenderTarget.width,
+        quadSize / this.outputRenderTarget.height,
+        1,
+      );
+    }
+
+    this.renderer.render(this.copyScene, this.copyCamera);
+
+    this.renderer.autoClear = previousAutoClear;
     this.renderer.setRenderTarget(previousRenderTarget);
+
+    this.currentQuadId++;
 
     this.needsCopy = false;
 
-    this.volumeRenderer.updateCurrentResolution();
+    if (this.directFrames) {
+      this.volumeRenderer.updateCurrentResolution();
+    } else if (this.currentQuadId >= this.quadCount) {
+      this.volumeRenderer.updateCurrentResolution();
+
+      this.currentQuadId = 0;
+    }
   }
 
   private update = () => {
@@ -158,7 +218,22 @@ export class LAOComputer implements IDisposable {
 
   public setAtlas(atlas: TextureAtlas) {
     this.outputRenderTarget.setSize(atlas.atlasSize.x, atlas.atlasSize.y);
-    this.intermediateRenderTarget.setSize(atlas.atlasSize.x, atlas.atlasSize.y);
+
+    if (Math.min(atlas.atlasSize.x, atlas.atlasSize.y) < quadSize) {
+      this.intermediateRenderTarget.setSize(
+        atlas.atlasSize.x,
+        atlas.atlasSize.y,
+      );
+
+      this.directFrames = true;
+    } else {
+      this.intermediateRenderTarget.setSize(quadSize, quadSize);
+
+      this.quadGrid.copy(atlas.atlasSize).divideScalar(quadSize).ceil();
+      this.quadCount = this.quadGrid.x * this.quadGrid.y;
+
+      this.directFrames = false;
+    }
 
     this.laoMaterial.setAtlas(atlas);
 

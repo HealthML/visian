@@ -253,7 +253,7 @@ export class VolumeRenderer implements IDisposable {
       this.setLightingMode(this.suppressedLightingMode!);
       this.suppressedLightingMode = undefined;
       this.lightingTimeout = undefined;
-    }, 150);
+    }, 200);
 
     this.lazyRender();
   };

@@ -21,8 +21,33 @@ export class ScreenAlignedQuad extends THREE.Mesh {
   }
 
   /** Render this quad with the given @param renderer. */
-  public renderWith(renderer: THREE.WebGLRenderer) {
+  public renderWith(
+    renderer: THREE.WebGLRenderer,
+    cameraOffset?: {
+      fullWidth: number;
+      fullHeight: number;
+      x: number;
+      y: number;
+      width: number;
+      height: number;
+    },
+  ) {
+    if (cameraOffset) {
+      this.camera.setViewOffset(
+        cameraOffset.fullWidth,
+        cameraOffset.fullHeight,
+        cameraOffset.x,
+        cameraOffset.y,
+        cameraOffset.width,
+        cameraOffset.height,
+      );
+    }
+
     renderer.render(this.scene, this.camera);
+
+    if (cameraOffset) {
+      this.camera.clearViewOffset();
+    }
   }
 }
 
