@@ -1,16 +1,9 @@
-import {
-  AbsoluteCover,
-  EventLike,
-  preventDefault,
-  Screen,
-  useIsDraggedOver,
-  WebGLCanvas,
-} from "@visian/ui-shared";
+import { AbsoluteCover, Screen, useIsDraggedOver } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
-import React, { useCallback, useEffect, useRef } from "react";
+import React, { useEffect, useRef } from "react";
 
 import { useStore } from "../app/root-store";
-import { UIOverlay } from "../components/editor";
+import { MainView, UIOverlay } from "../components/editor";
 import { SliceRenderer } from "../rendering";
 
 export const EditorScreen: React.FC = observer(() => {
@@ -34,25 +27,11 @@ export const EditorScreen: React.FC = observer(() => {
     };
   }, [store]);
 
-  const pointerDispatch = store?.pointerDispatch;
-  const onPointerDown = useCallback(
-    (event: EventLike) => {
-      if (!pointerDispatch) return;
-      pointerDispatch(event, "mainView");
-    },
-    [pointerDispatch],
-  );
-
   const [isDraggedOver, { onDrop, ...dragListeners }] = useIsDraggedOver();
   return (
     <Screen {...dragListeners} title="Visian Editor">
       <AbsoluteCover>
-        <WebGLCanvas
-          backgroundColor={store?.editor.backgroundColor}
-          onContextMenu={preventDefault}
-          onPointerDown={onPointerDown}
-          ref={canvasRef}
-        />
+        <MainView ref={canvasRef} />
       </AbsoluteCover>
       <UIOverlay isDraggedOver={isDraggedOver} onDropCompleted={onDrop} />
     </Screen>

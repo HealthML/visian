@@ -18,6 +18,8 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
 
   public activeTool = Tool.SmartBrush;
 
+  public isCursorOverDrawableArea = false;
+
   public brushSizePixels = 0.5;
 
   public smartBrushNeighborThreshold = 6;
@@ -41,6 +43,7 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
   constructor(protected editor: Editor, protected context?: StoreContext) {
     makeObservable(this, {
       activeTool: observable,
+      isCursorOverDrawableArea: observable,
       brushSizePixels: observable,
       smartBrushNeighborThreshold: observable,
       smartBrushSeedThreshold: observable,
@@ -49,6 +52,7 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
 
       applySnapshot: action,
       setActiveTool: action,
+      setCursorOverDrawableArea: action,
       setBrushSizePixels: action,
       setSmartBrushSeedTreshold: action,
       setSmartBrushNeighborThreshold: action,
@@ -66,6 +70,10 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
 
   public setActiveTool(tool = Tool.Brush) {
     this.activeTool = tool;
+  }
+
+  public setCursorOverDrawableArea(value = true) {
+    this.isCursorOverDrawableArea = value;
   }
 
   public setBrushSizePixels(value = 5) {
@@ -155,8 +163,8 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
   }
 
   public handleEvent(
-    eventType: AbstractEventType,
     screenPosition: { x: number; y: number },
+    eventType?: AbstractEventType,
     alt = false,
   ) {
     if (!this.sliceRenderer || !this.brushMap || !this.altBrushMap) return;
@@ -164,16 +172,20 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
     const intersection = this.sliceRenderer.raycaster.getIntersectionsFromPointer(
       screenPosition,
     )[0];
-    if (!intersection || !intersection.uv) return;
+    if (!intersection || !intersection.uv) {
+      this.setCursorOverDrawableArea(false);
+      return;
+    }
+
+    this.setCursorOverDrawableArea();
 
     this.alignBrushCursor(intersection.uv);
+    if (!eventType) return;
 
     const dragPoint = this.getDragPoint(intersection.uv);
-
     if (!dragPoint) return;
 
     const tool = (alt ? this.altBrushMap : this.brushMap)[this.activeTool];
-
     switch (eventType) {
       case "start":
         tool?.startAt(dragPoint);
@@ -187,7 +199,6 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
     }
   }
 
-  // TODO: Call this for hover events.
   private alignBrushCursor(uv: THREE.Vector2) {
     if (!this.sliceRenderer || !this.editor.annotation) return;
     const annotation = this.editor.annotation;

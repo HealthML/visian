@@ -65,7 +65,10 @@ export class BrushCursor extends THREE.Group implements IDisposable {
   private updateVisibility = () => {
     this.visible =
       this.editor.viewSettings.mainViewType === this.viewType &&
-      this.editor.tools.isBrushToolSelected;
+      this.editor.tools.isBrushToolSelected &&
+      this.editor.tools.isCursorOverDrawableArea;
+
+    this.render();
   };
 
   private updateScale = () => {
