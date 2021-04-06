@@ -120,21 +120,20 @@ export const getTextureFromAtlas = <T extends TypedArray = TypedArray>(
  */
 export const getAtlasIndexFor = (
   voxel: Vector,
-  components: number,
-  voxelCount: Vector,
-  atlasSize: Vector,
-  atlasGrid: Vector,
+  image: Pick<Image, "voxelComponents" | "voxelCount">,
+  atlasGrid = getAtlasGrid(image.voxelCount),
+  atlasSize = getAtlasSize(image.voxelCount, atlasGrid),
 ) => {
   const sliceOffset = new Vector(
     [
-      (voxel.z % atlasGrid.x) * voxelCount.x,
-      Math.floor(voxel.z / atlasGrid.x) * voxelCount.y,
+      (voxel.z % atlasGrid.x) * image.voxelCount.x,
+      Math.floor(voxel.z / atlasGrid.x) * image.voxelCount.y,
     ],
     false,
   );
 
   return (
-    components *
+    image.voxelComponents *
       ((sliceOffset.y + voxel.y) * atlasSize.x + sliceOffset.x + voxel.x) +
     (voxel.size > 3 ? voxel.w : 0)
   );
