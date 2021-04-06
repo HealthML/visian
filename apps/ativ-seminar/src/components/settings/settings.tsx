@@ -1,4 +1,11 @@
-import { color, IntervalSlider, Sheet, Slider, Text } from "@visian/ui-shared";
+import {
+  color,
+  FlexRow,
+  IntervalSlider,
+  Sheet,
+  Slider,
+  Text,
+} from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
 import React, { useCallback } from "react";
 import styled from "styled-components";
@@ -47,6 +54,17 @@ const StyledFileInput = styled.input`
   margin-bottom: 10px;
 `;
 
+const StyledCheckboxRow = styled(FlexRow)`
+  align-items: center;
+  height: 28px;
+  margin-bottom: 10px;
+`;
+
+const StyledCheckboxText = styled(StyledText)`
+  margin-bottom: 0;
+  margin-left: 10px;
+`;
+
 const StyledSelect = styled.select`
   background: ${color("veryLightGray")};
   border: none;
@@ -63,8 +81,20 @@ const StyledOption = styled.option`
   background-color: ${color("background")};
 `;
 
+const Separator = styled.hr`
+  margin-bottom: 10px;
+  width: 100%;
+`;
+
 const Settings: React.FC<SettingsProps> = observer((props) => {
   const { renderer, ...rest } = props;
+
+  const setShouldUseFocusVolume = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      renderer.setShouldUseFocusVolume(event.target.checked);
+    },
+    [renderer],
+  );
 
   const setLightingMode = useCallback(
     (event: React.ChangeEvent<HTMLSelectElement>) => {
@@ -130,6 +160,15 @@ const Settings: React.FC<SettingsProps> = observer((props) => {
         <StyledOption value={LightingModeType.Phong}>Phong</StyledOption>
         <StyledOption value={LightingModeType.LAO}>LAO</StyledOption>
       </StyledSelect>
+      <StyledCheckboxRow>
+        <input
+          type="checkbox"
+          checked={renderer?.shouldUseFocusVolume}
+          onChange={setShouldUseFocusVolume}
+        />
+        <StyledCheckboxText text="Use focus volume?" />
+      </StyledCheckboxRow>
+      <Separator />
       <StyledText text="Transfer Function" />
       <StyledSelect
         onChange={setTransferFunction}

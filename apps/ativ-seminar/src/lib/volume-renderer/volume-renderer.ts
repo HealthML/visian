@@ -47,6 +47,7 @@ export class VolumeRenderer implements IDisposable {
   private resolutionComputer: ResolutionComputer;
 
   public backgroundValue = 0;
+  public shouldUseFocusVolume = false;
   public transferFunction = transferFunctions[TransferFunctionType.FCEdges];
   public lightingMode = lightingModes[LightingModeType.LAO];
   public laoIntensity = 1;
@@ -60,6 +61,7 @@ export class VolumeRenderer implements IDisposable {
   constructor(private canvas: HTMLCanvasElement) {
     makeObservable<this, "setCustomTFTexture">(this, {
       backgroundValue: observable,
+      shouldUseFocusVolume: observable,
       transferFunction: observable,
       lightingMode: observable,
       laoIntensity: observable,
@@ -69,6 +71,7 @@ export class VolumeRenderer implements IDisposable {
       cutAwayConeAngle: observable,
       customTFTexture: observable.ref,
       setBackgroundValue: action,
+      setShouldUseFocusVolume: action,
       setTransferFunction: action,
       setLightingMode: action,
       setLaoIntensity: action,
@@ -261,6 +264,7 @@ export class VolumeRenderer implements IDisposable {
 
     this.volume.setAtlas(image);
     this.isImageLoaded = true;
+    this.setShouldUseFocusVolume(false);
 
     this.onCameraMove();
   };
@@ -270,6 +274,7 @@ export class VolumeRenderer implements IDisposable {
     this.onTransferFunctionChange();
 
     this.volume.setFocusAtlas(focus);
+    this.setShouldUseFocusVolume(Boolean(focus));
     this.lazyRender();
   };
 
@@ -319,6 +324,11 @@ export class VolumeRenderer implements IDisposable {
   }
   public setBackgroundValue = (value: number) => {
     this.backgroundValue = Math.max(0, Math.min(1, value));
+  };
+
+  public setShouldUseFocusVolume = (shouldUseFocusVolume: boolean) => {
+    this.shouldUseFocusVolume = shouldUseFocusVolume;
+    this.lazyRender();
   };
 
   public setTransferFunction = (value: TransferFunction) => {

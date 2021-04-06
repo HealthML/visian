@@ -70,6 +70,9 @@ class VolumeMaterial extends THREE.ShaderMaterial implements IDisposable {
 
     this.reactionDisposers.push(
       autorun(() => {
+        this.uniforms.uUseFocus.value = volumeRenderer.shouldUseFocusVolume;
+      }),
+      autorun(() => {
         this.uniforms.uTransferFunction.value =
           volumeRenderer.transferFunction.type;
       }),
@@ -112,17 +115,13 @@ class VolumeMaterial extends THREE.ShaderMaterial implements IDisposable {
 
     this.gradientComputer.setAtlas(atlas);
     this.laoComputer.setAtlas(atlas);
-
-    this.uniforms.uUseFocus.value = false;
   }
 
   public setFocusAtlas(atlas?: TextureAtlas) {
     if (atlas) {
       this.uniforms.uFocus.value = atlas.getTexture();
-      this.uniforms.uUseFocus.value = true;
     } else {
       this.uniforms.uFocus.value = null;
-      this.uniforms.uUseFocus.value = false;
     }
 
     this.gradientComputer.setFocusAtlas(atlas);
