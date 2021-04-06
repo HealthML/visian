@@ -22,7 +22,11 @@ export const findVoxelInSlice = (
   image: Pick<Image, "getAtlas" | "voxelComponents" | "voxelCount">,
   viewType: ViewType,
   slice: number,
-  predicate: (voxel: Voxel, value: number) => boolean | undefined | void,
+  predicate: (
+    voxel: Voxel,
+    value: number,
+    index: number,
+  ) => boolean | undefined | void,
   atlasGrid = getAtlasGrid(image.voxelCount),
   atlasSize = getAtlasSize(image.voxelCount, atlasGrid),
 ) => {

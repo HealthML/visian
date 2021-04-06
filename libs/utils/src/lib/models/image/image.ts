@@ -326,7 +326,11 @@ export class Image<T extends TypedArray = TypedArray>
     const sliceWidth = this.voxelCount[horizontalAxis];
 
     findVoxelInSlice(
-      atlas,
+      {
+        getAtlas: () => this.getAtlas(),
+        voxelComponents: this.voxelComponents,
+        voxelCount: this.voxelCount.clone(false),
+      },
       viewType,
       slice,
       (voxel, _, index) => {
@@ -334,10 +338,6 @@ export class Image<T extends TypedArray = TypedArray>
           voxel[verticalAxis] * sliceWidth + voxel[horizontalAxis];
         atlas[index] = sliceData ? sliceData[sliceIndex] : 0;
       },
-      this.voxelComponents,
-      this.voxelCount.clone(false),
-      this.getAtlasSize(),
-      this.getAtlasGrid(),
     );
 
     if (this.texture) {
