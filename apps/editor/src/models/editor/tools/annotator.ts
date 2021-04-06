@@ -4,6 +4,11 @@ import { Editor } from "../editor";
 import { replaceMerge } from "./merging";
 import { AnnotationVoxel } from "./types";
 
+/**
+ * The Annotator handles editing an annotation (or image).
+ *
+ * If necessary it creates undo redo commands for the edits.
+ */
 export class Annotator {
   private strokeActive = false;
 
