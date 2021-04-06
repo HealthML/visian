@@ -10,6 +10,7 @@ export class SmartBrush extends Brush {
    * use a sting representation of them.
    */
   private currentStroke: Set<string> = new Set<string>();
+
   /**
    * Used to track which voxels were drawn by the user in the stroke.
    * Used as seeds for region growing.
@@ -27,7 +28,7 @@ export class SmartBrush extends Brush {
     super.annotate(annotations);
     annotations.forEach((annotationVoxel) => {
       const voxel = Vector.fromObject(annotationVoxel, false);
-      this.currentStroke.add(this.getVectorString(voxel));
+      this.currentStroke.add(voxel.toString());
       this.drawnVoxels.push(voxel);
     });
   }
@@ -42,10 +43,6 @@ export class SmartBrush extends Brush {
     this.drawnVoxels = [];
 
     super.finishStroke(annotation, viewType);
-  }
-
-  private getVectorString(vector: Vector) {
-    return `${vector.x}, ${vector.y}, ${vector.z}`;
   }
 
   private doRegionGrowing(image = this.editor.image) {
@@ -75,7 +72,7 @@ export class SmartBrush extends Brush {
       const scanAtCoordinate = image.getVoxelData(voxel);
 
       this.neighborsOf(voxel, image).forEach((neighbor) => {
-        if (!this.currentStroke.has(this.getVectorString(neighbor))) {
+        if (!this.currentStroke.has(neighbor.toString())) {
           const scanAtNeighbor = image.getVoxelData(neighbor);
           if (
             Math.abs(scanAtCoordinate - scanAtNeighbor) < neighborThreshold &&
@@ -83,7 +80,7 @@ export class SmartBrush extends Brush {
             scanAtNeighbor <= this.maxValue
           ) {
             voxelsToDraw.push(neighbor);
-            this.currentStroke.add(this.getVectorString(neighbor));
+            this.currentStroke.add(neighbor.toString());
             stack.push(neighbor);
           }
         }

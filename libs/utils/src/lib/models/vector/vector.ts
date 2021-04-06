@@ -325,6 +325,10 @@ export class Vector implements GenericVector {
     return toJS(this.data);
   }
 
+  public toString() {
+    return `${this.data.join(",")}`;
+  }
+
   public toJSON() {
     return toJS(this.data);
   }

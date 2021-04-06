@@ -14,7 +14,7 @@ import { Editor } from "../editor";
 import { Tool } from "../types";
 import { AtlasUndoRedoCommand, SliceUndoRedoCommand } from "../undo-redo";
 import { Brush } from "./brush";
-import { SmartBrush } from "./smartBrush";
+import { SmartBrush } from "./smart-brush";
 import { DragPoint } from "./types";
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
