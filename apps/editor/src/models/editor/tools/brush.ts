@@ -24,7 +24,7 @@ export class Brush extends Annotator implements DragTool {
     circle: Pixel[];
   };
 
-  constructor(editor: Editor, private value = 255, undoable = true) {
+  constructor(editor: Editor, protected value = 255, undoable = true) {
     super(editor, undoable);
   }
 

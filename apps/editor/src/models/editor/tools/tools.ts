@@ -14,6 +14,7 @@ import { Editor } from "../editor";
 import { Tool } from "../types";
 import { AtlasUndoRedoCommand, SliceUndoRedoCommand } from "../undo-redo";
 import { Brush } from "./brush";
+import { SmartBrush } from "./smart-brush";
 import { DragPoint } from "./types";
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -22,13 +23,19 @@ export interface EditorToolsSnapshot {}
 export class EditorTools implements ISerializable<EditorToolsSnapshot> {
   public static readonly excludeFromSnapshotTracking = ["/editor"];
 
-  public activeTool = Tool.Brush;
+  public activeTool = Tool.SmartBrush;
+
   public isCursorOverDrawableArea = false;
 
   public brushSizePixels = 0.5;
 
+  public smartBrushNeighborThreshold = 6;
+  public smartBrushSeedThreshold = 10;
+
   private brush?: Brush;
   private eraser?: Brush;
+  private smartBrush?: SmartBrush;
+  private smartEraser?: SmartBrush;
 
   /** A map of the tool types to their corresponding brushes. */
   private brushMap: Partial<Record<Tool, Brush>>;
@@ -41,20 +48,28 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
   constructor(protected editor: Editor, protected context?: StoreContext) {
     this.brush = new Brush(this.editor);
     this.eraser = new Brush(this.editor, 0);
+    this.smartBrush = new SmartBrush(this.editor);
+    this.smartEraser = new SmartBrush(this.editor, 0);
 
     this.brushMap = {
       [Tool.Brush]: this.brush,
       [Tool.Eraser]: this.eraser,
+      [Tool.SmartBrush]: this.smartBrush,
+      [Tool.SmartEraser]: this.smartEraser,
     };
     this.altBrushMap = {
       [Tool.Brush]: this.eraser,
       [Tool.Eraser]: this.brush,
+      [Tool.SmartBrush]: this.smartEraser,
+      [Tool.SmartEraser]: this.smartBrush,
     };
 
     makeObservable(this, {
       activeTool: observable,
       isCursorOverDrawableArea: observable,
       brushSizePixels: observable,
+      smartBrushNeighborThreshold: observable,
+      smartBrushSeedThreshold: observable,
 
       isBrushToolSelected: computed,
 
@@ -62,11 +77,18 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
       setActiveTool: action,
       setCursorOverDrawableArea: action,
       setBrushSizePixels: action,
+      setSmartBrushSeedTreshold: action,
+      setSmartBrushNeighborThreshold: action,
     });
   }
 
   public get isBrushToolSelected() {
-    return [Tool.Brush, Tool.Eraser].includes(this.activeTool);
+    return [
+      Tool.Brush,
+      Tool.Eraser,
+      Tool.SmartBrush,
+      Tool.SmartEraser,
+    ].includes(this.activeTool);
   }
 
   public setActiveTool(tool = Tool.Brush) {
@@ -79,6 +101,14 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
 
   public setBrushSizePixels(value = 5) {
     this.brushSizePixels = value;
+  }
+
+  public setSmartBrushSeedTreshold(value = 6) {
+    this.smartBrushSeedThreshold = value;
+  }
+
+  public setSmartBrushNeighborThreshold(value = 10) {
+    this.smartBrushNeighborThreshold = value;
   }
 
   public toJSON() {
