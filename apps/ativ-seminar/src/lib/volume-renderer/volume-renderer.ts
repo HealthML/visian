@@ -143,7 +143,7 @@ export class VolumeRenderer implements IDisposable {
     const resolutionStepsParam = url.searchParams.get("resolutionSteps");
     const resolutionSteps = resolutionStepsParam
       ? Math.min(5, Math.max(1, parseInt(resolutionStepsParam)))
-      : 1;
+      : 3;
     this.resolutionComputer = new ResolutionComputer(
       this.renderer,
       this.scene,
