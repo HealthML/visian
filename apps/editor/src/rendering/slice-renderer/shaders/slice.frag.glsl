@@ -20,13 +20,13 @@ uniform vec2 uAtlasGrid;
 void main() {
   vec3 volumeCoords;
   #ifdef TRANSVERSE
-    volumeCoords = vec3(1.0 - vUv.x, vUv.y, (uActiveSlices.z + 0.5) / uVoxelCount.z);
+    volumeCoords = vec3(vUv.x, vUv.y, (uActiveSlices.z + 0.5) / uVoxelCount.z);
   #endif // TRANSVERSE
   #ifdef SAGITTAL
-    volumeCoords = vec3((uActiveSlices.x + 0.5) / uVoxelCount.x, 1.0 - vUv.x, vUv.y);
+    volumeCoords = vec3((uActiveSlices.x + 0.5) / uVoxelCount.x, vUv.x, vUv.y);
   #endif // SAGITTAL
   #ifdef CORONAL
-    volumeCoords = vec3(1.0 - vUv.x, (uActiveSlices.y + 0.5) / uVoxelCount.y, vUv.y);
+    volumeCoords = vec3(vUv.x, (uActiveSlices.y + 0.5) / uVoxelCount.y, vUv.y);
   #endif // CORONAL
 
   vec2 sliceSize = vec2(1.0) / uAtlasGrid;

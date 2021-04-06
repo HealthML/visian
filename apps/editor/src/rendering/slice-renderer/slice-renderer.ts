@@ -1,4 +1,11 @@
-import { IDisposable, IDisposer, TextureAtlas, viewTypes } from "@visian/utils";
+import {
+  IDisposable,
+  IDisposer,
+  Image,
+  Pixel,
+  ViewType,
+  viewTypes,
+} from "@visian/utils";
 import ResizeSensor from "css-element-queries/src/ResizeSensor";
 import { reaction } from "mobx";
 import * as THREE from "three";
@@ -14,7 +21,6 @@ import {
 } from "./utils";
 
 import type { Editor } from "../../models";
-import type { Image } from "../../models/editor/image";
 export class SliceRenderer implements IDisposable {
   private renderers: THREE.WebGLRenderer[];
   private mainCamera: THREE.OrthographicCamera;
@@ -58,9 +64,7 @@ export class SliceRenderer implements IDisposable {
     );
     this.sideCamera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 20);
 
-    this.slices = viewTypes.map(
-      (viewType) => new Slice(editor, viewType, this.lazyRender),
-    );
+    this.slices = viewTypes.map((viewType) => new Slice(editor, viewType));
     this.slices.forEach((slice, viewType) => this.scenes[viewType].add(slice));
 
     this.raycaster = new Raycaster(
@@ -89,37 +93,14 @@ export class SliceRenderer implements IDisposable {
         () => editor.image,
         (image?: Image) => {
           if (!image) return;
-          this.setImage(
-            new TextureAtlas(
-              // TODO: Rework once the texture atlas has been refactored
-              new THREE.Vector3().fromArray(image.voxelCount.toArray()),
-              new THREE.Vector3().fromArray(image.voxelSpacing.toArray()),
-              new THREE.Matrix3().fromArray(image.orientation.data),
-              image.voxelComponents,
-              image.dimensionality,
-              THREE.NearestFilter,
-            ).setData(image.data),
-          );
+          this.setImage(image);
         },
         { fireImmediately: true },
       ),
       reaction(
         () => editor.annotation,
-        (annotation?: Image) => {
-          const atlas = annotation
-            ? new TextureAtlas(
-                // TODO: Rework once the texture atlas has been refactored
-                new THREE.Vector3().fromArray(annotation.voxelCount.toArray()),
-                new THREE.Vector3().fromArray(
-                  annotation.voxelSpacing.toArray(),
-                ),
-                new THREE.Matrix3().fromArray(annotation.orientation.data),
-                annotation.voxelComponents,
-                annotation.dimensionality,
-                THREE.NearestFilter,
-              ).setData(annotation.data)
-            : undefined;
-          this.setAnnotation(atlas);
+        (image?: Image) => {
+          this.setAnnotation(image);
         },
         { fireImmediately: true },
       ),
@@ -148,6 +129,10 @@ export class SliceRenderer implements IDisposable {
     this.resizeSensors.forEach((sensor) => sensor.detach());
   }
 
+  public getBrushCursor(viewType: ViewType) {
+    return this.slices[viewType].brushCursor;
+  }
+
   private resize = () => {
     this.renderers[0].setSize(window.innerWidth, window.innerHeight);
 
@@ -171,7 +156,7 @@ export class SliceRenderer implements IDisposable {
   }
 
   /** Converts a WebGL position to a screen space one. */
-  public getMainViewScreenPosition(webGLPosition: { x: number; y: number }) {
+  public getMainViewScreenPosition(webGLPosition: Pixel) {
     const boundingBox = this.mainCanvas.getBoundingClientRect();
     const webGLSize = this.getMainViewWebGLSize();
     return {
@@ -187,7 +172,7 @@ export class SliceRenderer implements IDisposable {
   }
 
   /** Converts a screen space position to a WebGL one. */
-  public getMainViewWebGLPosition(screenPosition: { x: number; y: number }) {
+  public getMainViewWebGLPosition(screenPosition: Pixel) {
     const boundingBox = this.mainCanvas.getBoundingClientRect();
     const webGLSize = this.getMainViewWebGLSize();
     return {
@@ -224,15 +209,15 @@ export class SliceRenderer implements IDisposable {
     });
   };
 
-  private setImage(atlas: TextureAtlas) {
-    this.slices.forEach((slice) => slice.setImage(atlas));
+  private setImage(image: Image) {
+    this.slices.forEach((slice) => slice.setImage(image));
     this.isImageLoaded = true;
 
     this.lazyRender();
   }
 
-  private setAnnotation(atlas?: TextureAtlas) {
-    this.slices.forEach((slice) => slice.setAnnotation(atlas));
+  private setAnnotation(image?: Image) {
+    this.slices.forEach((slice) => slice.setAnnotation(image));
 
     this.lazyRender();
   }

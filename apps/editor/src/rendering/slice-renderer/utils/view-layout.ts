@@ -1,8 +1,7 @@
-import { ViewType } from "@visian/utils";
+import { Image, ViewType } from "@visian/utils";
 import * as THREE from "three";
 
 import { Editor } from "../../../models";
-import { Image } from "../../../models/editor/image";
 import { getMaxSpriteSize } from "./slice-size";
 
 export const getSpriteAspectRatio = (image: Image) => {

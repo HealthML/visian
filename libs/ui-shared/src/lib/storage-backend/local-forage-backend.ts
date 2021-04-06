@@ -39,10 +39,14 @@ export class LocalForageBackend<T = unknown> implements IStorageBackend<T> {
   }
 
   public clear() {
+    Object.values(this.persistors).forEach((persistor) => {
+      persistor.cancel();
+    });
     return this.instance.clear();
   }
 
   public delete(key: string) {
+    this.persistors[key]?.cancel();
     return this.instance.removeItem(key);
   }
 
@@ -55,8 +59,7 @@ export class LocalForageBackend<T = unknown> implements IStorageBackend<T> {
     key: string,
     data: T | (() => T | Promise<T>),
   ) {
-    const persistor = this.persistors[key];
-    if (persistor) persistor.cancel();
+    this.persistors[key]?.cancel();
 
     await this.instance.setItem(key, await resolveData<T>(data));
   }

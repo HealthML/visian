@@ -1,9 +1,8 @@
-import { IDispatch, IStorageBackend } from "@visian/ui-shared";
-import { deepObserve } from "@visian/utils";
+import { IDispatch, IStorageBackend, Tab } from "@visian/ui-shared";
+import { deepObserve, ISerializable } from "@visian/utils";
 import { action, makeObservable, observable } from "mobx";
 
 import { Editor, EditorSnapshot } from "./editor";
-import { ISerializable } from "./types";
 
 export interface RootSnapshot {
   editor: EditorSnapshot;
@@ -22,6 +21,8 @@ export class RootStore implements ISerializable<RootSnapshot> {
    * given storage backend.
    */
   public isDirty = false;
+
+  public shouldPersist = false;
 
   public refs: { [key: string]: React.RefObject<HTMLElement> } = {};
   public pointerDispatch?: IDispatch;
@@ -44,6 +45,8 @@ export class RootStore implements ISerializable<RootSnapshot> {
       this.editor,
       () => {
         this.setIsDirty(true);
+
+        if (!this.shouldPersist) return;
         this.config.storageBackend
           ?.persist("/editor", () => this.editor.toJSON())
           .then(() => {
@@ -67,6 +70,7 @@ export class RootStore implements ISerializable<RootSnapshot> {
   }
 
   public persistImmediately = async () => {
+    if (!this.shouldPersist) return;
     await this.config.storageBackend?.persistImmediately(
       "/editor",
       this.editor.toJSON(),
@@ -83,6 +87,10 @@ export class RootStore implements ISerializable<RootSnapshot> {
   }
 
   public async rehydrate() {
+    const tab = await new Tab().register();
+
+    this.shouldPersist = Boolean(tab.isMainTab);
+    if (!tab.isMainTab) return;
     const editorSnapshot = await this.config.storageBackend?.retrieve(
       "/editor",
     );

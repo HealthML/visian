@@ -1,3 +1,4 @@
+import { Pixel } from "@visian/utils";
 import * as THREE from "three";
 
 import { Editor } from "../../../models";
@@ -16,7 +17,7 @@ export class Raycaster {
 
   /** Returns all intersections with a ray fired at the given screen space position. */
   public getIntersectionsFromPointer(
-    screenPosition: { x: number; y: number },
+    screenPosition: Pixel,
     canvasId = "mainView",
   ) {
     let clickedCanvasIndex: number;
@@ -44,10 +45,7 @@ export class Raycaster {
   }
 
   /** Returns all intersections with a ray fired at the given position in the canvas. */
-  private getIntersections(
-    position: { x: number; y: number },
-    canvasIndex: number,
-  ) {
+  private getIntersections(position: Pixel, canvasIndex: number) {
     const webGLPosition = convertPositionToWebGLPosition(
       position,
       this.canvases[canvasIndex].getBoundingClientRect(),

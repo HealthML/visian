@@ -1,10 +1,4 @@
-import {
-  IDisposable,
-  IDisposer,
-  TextureAtlas,
-  Vector,
-  ViewType,
-} from "@visian/utils";
+import { IDisposable, IDisposer, Image, Vector, ViewType } from "@visian/utils";
 import { autorun } from "mobx";
 import * as THREE from "three";
 
@@ -15,6 +9,8 @@ import {
 } from "./slice-material";
 import {
   annotationMeshZ,
+  BrushCursor,
+  brushCursorZ,
   Crosshair,
   crosshairZ,
   getGeometrySize,
@@ -43,18 +39,17 @@ export class Slice extends THREE.Group implements IDisposable {
 
   private crosshair: Crosshair;
 
+  public brushCursor: BrushCursor;
+
   private disposers: IDisposer[] = [];
 
-  constructor(
-    private editor: Editor,
-    private viewType: ViewType,
-    private render: () => void,
-  ) {
+  constructor(private editor: Editor, private viewType: ViewType) {
     super();
+    this.geometry.scale(-1, 1, 1);
 
     this.add(this.crosshairShiftGroup);
 
-    this.imageMaterial = new ImageSliceMaterial(editor, viewType, render);
+    this.imageMaterial = new ImageSliceMaterial(editor, viewType);
     this.imageMesh = new THREE.Mesh(this.geometry, this.imageMaterial);
     this.imageMesh.position.z = imageMeshZ;
     this.imageMesh.userData = {
@@ -62,11 +57,7 @@ export class Slice extends THREE.Group implements IDisposable {
     };
     this.crosshairShiftGroup.add(this.imageMesh);
 
-    this.annotationMaterial = new AnnotationSliceMaterial(
-      editor,
-      viewType,
-      render,
-    );
+    this.annotationMaterial = new AnnotationSliceMaterial(editor, viewType);
     this.annotationMesh = new THREE.Mesh(
       this.geometry,
       this.annotationMaterial,
@@ -78,32 +69,37 @@ export class Slice extends THREE.Group implements IDisposable {
     this.crosshair.position.z = crosshairZ;
     this.crosshairShiftGroup.add(this.crosshair);
 
+    this.brushCursor = new BrushCursor(editor, viewType);
+    this.brushCursor.position.z = brushCursorZ;
+    this.crosshairShiftGroup.add(this.brushCursor);
+
     this.disposers.push(autorun(this.updateScale), autorun(this.updateOffset));
   }
 
   public dispose() {
     this.imageMaterial.dispose();
     this.crosshair.dispose();
+    this.brushCursor.dispose();
     this.disposers.forEach((disposer) => disposer());
   }
 
-  public setImage(atlas: TextureAtlas) {
-    this.imageMaterial.setAtlas(atlas);
+  public setImage(image: Image) {
+    this.imageMaterial.setImage(image);
 
     this.baseSize.copy(
       // TODO: Rework once the texture atlas has been refactored
       getGeometrySize(
-        Vector.fromArray(atlas.voxelCount.toArray()),
-        Vector.fromArray(atlas.voxelSpacing.toArray()),
+        Vector.fromArray(image.voxelCount.toArray()),
+        Vector.fromArray(image.voxelSpacing.toArray()),
         this.viewType,
       ),
     );
     this.updateScale();
   }
 
-  public setAnnotation(atlas?: TextureAtlas) {
-    if (atlas) {
-      this.annotationMaterial.setAtlas(atlas);
+  public setAnnotation(image?: Image) {
+    if (image) {
+      this.annotationMaterial.setImage(image);
       this.annotationMesh.visible = true;
     } else {
       this.annotationMesh.visible = false;
@@ -126,7 +122,7 @@ export class Slice extends THREE.Group implements IDisposable {
 
     this.scale.set(this.workingVector.x, this.workingVector.y, 1);
 
-    this.render();
+    this.editor.sliceRenderer?.lazyRender();
   };
 
   private updateOffset = () => {
@@ -141,6 +137,6 @@ export class Slice extends THREE.Group implements IDisposable {
 
     this.position.set(this.workingVector.x, this.workingVector.y, 0);
 
-    this.render();
+    this.editor.sliceRenderer?.lazyRender();
   };
 }
