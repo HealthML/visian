@@ -3,6 +3,7 @@ import {
   classify,
   forGestures,
   forPointers,
+  forUnidentifiedPointers,
   gesturizeTransformations,
   pointerAdapter,
   TransformGestureEventData,
@@ -25,6 +26,10 @@ export const pointerPreset = <ID = string>(
 export const transformGesturePreset = <
   ID extends string | number | symbol = string
 >(config: {
+  forUnidentifiedPointers?: (
+    pointer: Pointer<undefined>,
+    data: PointerEventData<ID>,
+  ) => void;
   forPointers?: (pointer: Pointer<ID>, data: PointerEventData<ID>) => void;
   pointerPredicate?: (
     pointer: Pointer<ID>,
@@ -37,7 +42,9 @@ export const transformGesturePreset = <
 }) =>
   dispatch([
     classify<ID>(),
-    pointerAdapter<ID>(),
+    pointerAdapter<ID>(Boolean(config.forUnidentifiedPointers)),
+    config.forUnidentifiedPointers &&
+      forUnidentifiedPointers<ID>(config.forUnidentifiedPointers),
     config.forPointers && forPointers<ID>(config.forPointers),
     gesturizeTransformations<ID>(config.pointerPredicate),
     config.forGestures && forGestures<ID>(config.forGestures),

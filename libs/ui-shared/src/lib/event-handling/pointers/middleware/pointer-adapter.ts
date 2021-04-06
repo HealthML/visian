@@ -114,3 +114,17 @@ export const forPointers = <ID = string>(
     mappingFunction(pointer, data);
   });
 };
+
+/** Pointer mapper, runs the mapping function for every unidentified pointer. */
+export const forUnidentifiedPointers = <ID = string>(
+  mappingFunction: (
+    pointer: Pointer<undefined>,
+    data: PointerEventData<ID>,
+  ) => void,
+) => (data: PointerEventData<ID>) => {
+  if (!data.unidentifiedPointers) return;
+
+  data.unidentifiedPointers.forEach((pointer) => {
+    mappingFunction(pointer, data);
+  });
+};
