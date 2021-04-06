@@ -5,45 +5,13 @@ import { ITKMatrix } from "../../io";
 import { Vector } from "../vector";
 
 /**
- * Returns the texture atlas index for the given voxel coordinates.
- *
- * @param voxel The coordinates of the voxel. The w component specifies the component.
- * @param components The amount of components per voxel in the atlas.
- * @param voxelCount The number of voxels in each direction.
- * @param atlasSize The size of the texture atlas in pixels.
- * @param atlasGrid The number of slices in the texture atlas in x/y direction.
- * @returns The index of the given voxel in an atlas with the given properties.
- */
-export const getAtlasIndexFor = (
-  voxel: Vector,
-  components: number,
-  voxelCount: Vector,
-  atlasSize: Vector,
-  atlasGrid: Vector,
-) => {
-  const sliceOffset = new Vector(
-    [
-      (voxel.z % atlasGrid.x) * voxelCount.x,
-      Math.floor(voxel.z / atlasGrid.x) * voxelCount.y,
-    ],
-    false,
-  );
-
-  return (
-    components *
-      ((sliceOffset.y + voxel.y) * atlasSize.x + sliceOffset.x + voxel.x) +
-    (voxel.size > 3 ? voxel.w : 0)
-  );
-};
-
-/**
  * The texture atlas generation expects the x- and y-axis to be inverted
  * and the z-axis to be non-inverted.
  */
 export const defaultDirection = new Vector([-1, -1, 1], false);
 
 /**
- * Converts an image array with unexpected orientatin to the expected orientation.
+ * Converts an image array with unexpected orientation to the expected orientation.
  * @param data The original TypedArray of the image data.
  * @param orientation A matrix containing the orientation of the image.
  * @param dimensionality The dimensionality of the image.

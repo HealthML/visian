@@ -1,8 +1,7 @@
+import { Voxel } from "@visian/utils";
+
 export class AnnotationVoxel {
-  public static fromVoxelAndValue(
-    voxel: { x: number; y: number; z: number },
-    value: number,
-  ) {
+  public static fromVoxelAndValue(voxel: Voxel, value: number) {
     return new this(voxel.x, voxel.y, voxel.z, value);
   }
 
@@ -20,10 +19,7 @@ export interface DragTool {
   endAt: (dragPoint: DragPoint) => void;
 }
 
-export interface DragPoint {
-  x: number;
-  y: number;
-  z: number;
+export interface DragPoint extends Voxel {
   /** Whether the cursor is on the right side of the pixel. */
   right: boolean;
   /** Whether the cursor is on the bottom half of the pixel. */

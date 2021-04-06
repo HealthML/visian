@@ -1,6 +1,8 @@
+import { getAtlasGrid, getAtlasIndexFor, getAtlasSize } from "../../io";
+import { Voxel } from "../../types";
 import { Vector } from "../vector";
 import { getOrthogonalAxis, getPlaneAxes, ViewType } from "../view-types";
-import { getAtlasIndexFor } from "./conversion";
+import { Image } from "./image";
 
 /**
  * Iterates over a particular slice in the plane of the given view type
@@ -17,20 +19,19 @@ import { getAtlasIndexFor } from "./conversion";
  * @returns The voxel coordinates and value for which the predicate first returned true.
  */
 export const findVoxelInSlice = (
-  atlas: Uint8Array | undefined,
+  image: Pick<Image, "getAtlas" | "voxelComponents" | "voxelCount">,
   viewType: ViewType,
   slice: number,
   predicate: (
-    voxel: { x: number; y: number; z: number },
+    voxel: Voxel,
     value: number,
     index: number,
   ) => boolean | undefined | void,
-  components: number,
-  voxelCount: Vector,
-  atlasSize: Vector,
-  atlasGrid: Vector,
+  atlasGrid = getAtlasGrid(image.voxelCount),
+  atlasSize = getAtlasSize(image.voxelCount, atlasGrid),
 ) => {
-  if (!atlas) return;
+  const atlas = image.getAtlas();
+  const { voxelCount } = image;
 
   const fixedCoordinate = getOrthogonalAxis(viewType);
   const [horizontalAxis, verticalAxis] = getPlaneAxes(viewType);
@@ -47,13 +48,7 @@ export const findVoxelInSlice = (
         false,
       );
 
-      const index = getAtlasIndexFor(
-        voxel,
-        components,
-        voxelCount,
-        atlasSize,
-        atlasGrid,
-      );
+      const index = getAtlasIndexFor(voxel, image, atlasGrid, atlasSize);
       const value = atlas[index];
 
       if (predicate(voxel, value, index)) {

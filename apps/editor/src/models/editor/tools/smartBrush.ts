@@ -19,13 +19,8 @@ export class SmartBrush extends Brush {
   private minValue = Infinity;
   private maxValue = -Infinity;
 
-  constructor(
-    editor: Editor,
-    render: () => void,
-    value = 255,
-    undoable = true,
-  ) {
-    super(editor, render, value, undoable);
+  constructor(editor: Editor, value = 255, undoable = true) {
+    super(editor, value, undoable);
   }
 
   protected annotate(annotations: AnnotationVoxel[]) {

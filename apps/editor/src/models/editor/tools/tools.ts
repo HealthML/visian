@@ -1,14 +1,21 @@
 import { AbstractEventType } from "@visian/ui-shared";
-import { getOrthogonalAxis, getPlaneAxes, ISerializable } from "@visian/utils";
+import {
+  getOrthogonalAxis,
+  getPlaneAxes,
+  ISerializable,
+  Pixel,
+} from "@visian/utils";
 import { action, computed, makeObservable, observable } from "mobx";
 import * as THREE from "three";
 
-import { Brush, DragPoint, SmartBrush } from ".";
-import { Editor, SliceUndoRedoCommand } from "..";
-import { StoreContext } from "../..";
-import { getPositionWithinPixel, SliceRenderer } from "../../../rendering";
+import { getPositionWithinPixel } from "../../../rendering";
+import { StoreContext } from "../../types";
+import { Editor } from "../editor";
 import { Tool } from "../types";
-import { AtlasUndoRedoCommand } from "../undo-redo/atlas-undo-redo-command";
+import { AtlasUndoRedoCommand, SliceUndoRedoCommand } from "../undo-redo";
+import { Brush } from "./brush";
+import { SmartBrush } from "./smartBrush";
+import { DragPoint } from "./types";
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface EditorToolsSnapshot {}
@@ -25,22 +32,38 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
   public smartBrushNeighborThreshold = 6;
   public smartBrushSeedThreshold = 10;
 
-  private sliceRenderer?: SliceRenderer;
-
   private brush?: Brush;
   private eraser?: Brush;
   private smartBrush?: SmartBrush;
   private smartEraser?: SmartBrush;
 
   /** A map of the tool types to their corresponding brushes. */
-  private brushMap?: Partial<Record<Tool, Brush>>;
+  private brushMap: Partial<Record<Tool, Brush>>;
   /**
    * A map of the tool types to their corresponding alternative brushes.
    * This is used for e.g. right-click or back of pen interaction.
    */
-  protected altBrushMap?: Partial<Record<Tool, Brush>>;
+  protected altBrushMap: Partial<Record<Tool, Brush>>;
 
   constructor(protected editor: Editor, protected context?: StoreContext) {
+    this.brush = new Brush(this.editor);
+    this.eraser = new Brush(this.editor, 0);
+    this.smartBrush = new SmartBrush(this.editor);
+    this.smartEraser = new SmartBrush(this.editor, 0);
+
+    this.brushMap = {
+      [Tool.Brush]: this.brush,
+      [Tool.Eraser]: this.eraser,
+      [Tool.SmartBrush]: this.smartBrush,
+      [Tool.SmartEraser]: this.smartEraser,
+    };
+    this.altBrushMap = {
+      [Tool.Brush]: this.eraser,
+      [Tool.Eraser]: this.brush,
+      [Tool.SmartBrush]: this.smartEraser,
+      [Tool.SmartEraser]: this.smartBrush,
+    };
+
     makeObservable(this, {
       activeTool: observable,
       isCursorOverDrawableArea: observable,
@@ -96,42 +119,6 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
     // Intentionally left blank
   }
 
-  public setSliceRenderer(sliceRenderer?: SliceRenderer) {
-    this.sliceRenderer = sliceRenderer;
-
-    if (sliceRenderer) {
-      this.brush = new Brush(this.editor, sliceRenderer.lazyRender);
-      this.eraser = new Brush(this.editor, sliceRenderer.lazyRender, 0);
-      this.smartBrush = new SmartBrush(this.editor, sliceRenderer.lazyRender);
-      this.smartEraser = new SmartBrush(
-        this.editor,
-        sliceRenderer.lazyRender,
-        0,
-      );
-
-      this.brushMap = {
-        [Tool.Brush]: this.brush,
-        [Tool.Eraser]: this.eraser,
-        [Tool.SmartBrush]: this.smartBrush,
-        [Tool.SmartEraser]: this.smartEraser,
-      };
-      this.altBrushMap = {
-        [Tool.Brush]: this.eraser,
-        [Tool.Eraser]: this.brush,
-        [Tool.SmartBrush]: this.smartEraser,
-        [Tool.SmartEraser]: this.smartBrush,
-      };
-    } else {
-      this.brush = undefined;
-      this.eraser = undefined;
-      this.smartBrush = undefined;
-      this.smartEraser = undefined;
-
-      this.brushMap = undefined;
-      this.altBrushMap = undefined;
-    }
-  }
-
   public clearSlice(
     image = this.editor.annotation,
     viewType = this.editor.viewSettings.mainViewType,
@@ -141,9 +128,9 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
 
     const oldSliceData = image.getSlice(slice, viewType);
     image.setSlice(viewType, slice);
-    this.sliceRenderer?.lazyRender();
+    this.editor.sliceRenderer?.lazyRender();
 
-    this.editor.undoRedo.addUndoCommand(
+    this.editor.undoRedo.addCommand(
       new SliceUndoRedoCommand(image, viewType, slice, oldSliceData),
     );
   }
@@ -155,21 +142,24 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
 
     const emptyAtlas = new Uint8Array(oldAtlas.length);
     image.setAtlas(emptyAtlas);
-    this.sliceRenderer?.lazyRender();
+    this.editor.sliceRenderer?.lazyRender();
 
-    this.editor.undoRedo.addUndoCommand(
+    this.editor.undoRedo.addCommand(
       new AtlasUndoRedoCommand(image, oldAtlas, emptyAtlas),
     );
   }
 
   public handleEvent(
-    screenPosition: { x: number; y: number },
+    screenPosition: Pixel,
     eventType?: AbstractEventType,
     alt = false,
   ) {
-    if (!this.sliceRenderer || !this.brushMap || !this.altBrushMap) return;
+    if (!this.editor.sliceRenderer) {
+      this.setCursorOverDrawableArea(false);
+      return;
+    }
 
-    const intersection = this.sliceRenderer.raycaster.getIntersectionsFromPointer(
+    const intersection = this.editor.sliceRenderer.raycaster.getIntersectionsFromPointer(
       screenPosition,
     )[0];
     if (!intersection || !intersection.uv) {
@@ -200,14 +190,14 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
   }
 
   private alignBrushCursor(uv: THREE.Vector2) {
-    if (!this.sliceRenderer || !this.editor.annotation) return;
-    const annotation = this.editor.annotation;
+    if (!this.editor.sliceRenderer || !this.editor.image) return;
+    const { voxelCount } = this.editor.image;
 
     const [widthAxis, heightAxis] = getPlaneAxes(
       this.editor.viewSettings.mainViewType,
     );
-    const scanWidth = annotation.voxelCount[widthAxis];
-    const scanHeight = annotation.voxelCount[heightAxis];
+    const scanWidth = voxelCount[widthAxis];
+    const scanHeight = voxelCount[heightAxis];
 
     let right = false;
     let bottom = false;
@@ -218,7 +208,7 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
     const xOffset = this.brushSizePixels === 0.5 ? (right ? 1 : 2) : 0.5;
     const yOffset = this.brushSizePixels === 0.5 ? (bottom ? -1 : 0) : 0.5;
 
-    const brushCursor = this.sliceRenderer.getBrushCursor(
+    const brushCursor = this.editor.sliceRenderer.getBrushCursor(
       this.editor.viewSettings.mainViewType,
     );
 

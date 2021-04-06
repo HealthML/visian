@@ -1,4 +1,10 @@
-import { getPlaneAxes, ISerializable, Vector, ViewType } from "@visian/utils";
+import {
+  getPlaneAxes,
+  ISerializable,
+  Pixel,
+  Vector,
+  ViewType,
+} from "@visian/utils";
 import { action, makeObservable, observable } from "mobx";
 
 import { maxZoom, minZoom, zoomStep } from "../../constants";
@@ -65,7 +71,10 @@ export class EditorViewSettings
   }
 
   public setMainView(value: ViewType) {
-    this.mainViewType = value;
+    this.mainViewType =
+      this.editor.image && this.editor.image.dimensionality > 2
+        ? value
+        : ViewType.Transverse;
   }
 
   public toggleSideViews(value = !this.shouldShowSideViews) {
@@ -131,12 +140,10 @@ export class EditorViewSettings
     this.setSelectedSlice(this.getSelectedSlice(viewType) + stepSize, viewType);
   }
 
-  public moveCrosshair(
-    screenPosition: { x: number; y: number },
-    canvasId: string,
-  ) {
+  public moveCrosshair(screenPosition: Pixel, canvasId: string) {
     const sliceRenderer = this.editor.sliceRenderer;
-    if (!sliceRenderer || !this.editor.image) return;
+    if (!sliceRenderer || !this.editor.image || !this.shouldShowSideViews)
+      return;
 
     const intersection = sliceRenderer.raycaster.getIntersectionsFromPointer(
       screenPosition,
@@ -158,6 +165,9 @@ export class EditorViewSettings
   public reset() {
     this.setSelectedVoxel();
     this.toggleSideViews(true);
+    if (this.editor.image && this.editor.image.dimensionality < 3) {
+      this.setMainView(ViewType.Transverse);
+    }
   }
 
   public toJSON() {

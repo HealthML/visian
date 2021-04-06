@@ -36,11 +36,7 @@ export class BrushCursor extends THREE.Group implements IDisposable {
 
   protected disposers: IDisposer[] = [];
 
-  constructor(
-    private editor: Editor,
-    protected viewType: ViewType,
-    protected render: () => void,
-  ) {
+  constructor(private editor: Editor, protected viewType: ViewType) {
     super();
 
     this.disposers.push(
@@ -59,7 +55,7 @@ export class BrushCursor extends THREE.Group implements IDisposable {
   public setUVTarget(u: number, v: number) {
     this.position.x = -u + 0.5;
     this.position.y = v - 0.5;
-    this.render();
+    this.editor.sliceRenderer?.lazyRender();
   }
 
   private updateVisibility = () => {
@@ -68,7 +64,7 @@ export class BrushCursor extends THREE.Group implements IDisposable {
       this.editor.tools.isBrushToolSelected &&
       this.editor.tools.isCursorOverDrawableArea;
 
-    this.render();
+    this.editor.sliceRenderer?.lazyRender();
   };
 
   private updateScale = () => {
@@ -80,7 +76,7 @@ export class BrushCursor extends THREE.Group implements IDisposable {
     this.scale.x = 1 / image.voxelCount[widthAxis];
     this.scale.y = 1 / image.voxelCount[heightAxis];
 
-    this.render();
+    this.editor.sliceRenderer?.lazyRender();
   };
 
   private updateRadius = () => {
@@ -116,7 +112,7 @@ export class BrushCursor extends THREE.Group implements IDisposable {
 
     this.add(...this.lines);
 
-    this.render();
+    this.editor.sliceRenderer?.lazyRender();
   };
 
   private addLines(start: THREE.Vector3, end: THREE.Vector3) {
