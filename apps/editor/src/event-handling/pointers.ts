@@ -46,7 +46,7 @@ export const setUpPointerHandling = (
               id,
             );
           }
-        } else if (id === "mainView" && eventType) {
+        } else if (id === "mainView") {
           store.editor.tools.handleEvent(
             {
               x: detail.clientX,

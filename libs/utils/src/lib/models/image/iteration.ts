@@ -1,6 +1,7 @@
+import { getAtlasGrid, getAtlasIndexFor, getAtlasSize } from "../../io";
+import { Voxel } from "../../types";
 import { Vector } from "../vector";
 import { getOrthogonalAxis, getPlaneAxes, ViewType } from "../view-types";
-import { getAtlasIndexFor } from "./conversion";
 
 /**
  * Iterates over a particular slice in the plane of the given view type
@@ -20,14 +21,11 @@ export const findVoxelInSlice = (
   atlas: Uint8Array | undefined,
   viewType: ViewType,
   slice: number,
-  predicate: (
-    voxel: { x: number; y: number; z: number },
-    value: number,
-  ) => boolean | undefined | void,
+  predicate: (voxel: Voxel, value: number) => boolean | undefined | void,
   components: number,
   voxelCount: Vector,
-  atlasSize: Vector,
-  atlasGrid: Vector,
+  atlasSize = getAtlasSize(voxelCount),
+  atlasGrid = getAtlasGrid(voxelCount),
 ) => {
   if (!atlas) return;
 

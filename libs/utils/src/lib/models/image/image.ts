@@ -13,12 +13,13 @@ import {
 import {
   convertDataArrayToAtlas,
   getAtlasGrid,
+  getAtlasIndexFor,
   getAtlasSize,
   getTextureFromAtlas,
 } from "../../io/texture-atlas";
 import { Vector } from "../vector";
 import { getPlaneAxes, ViewType } from "../view-types";
-import { getAtlasIndexFor, unifyOrientation } from "./conversion";
+import { unifyOrientation } from "./conversion";
 import { findVoxelInSlice } from "./iteration";
 
 import type { ISerializable } from "../types";
@@ -224,8 +225,6 @@ export class Image<T extends TypedArray = TypedArray>
       },
       this.voxelComponents,
       this.voxelCount.clone(false),
-      this.getAtlasSize(),
-      this.getAtlasGrid(),
     );
 
     return sliceData;

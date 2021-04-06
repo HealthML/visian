@@ -107,3 +107,35 @@ export const getTextureFromAtlas = <T extends TypedArray = TypedArray>(
     magFilter,
   );
 };
+
+/**
+ * Returns the texture atlas index for the given voxel coordinates.
+ *
+ * @param voxel The coordinates of the voxel. The w component specifies the component.
+ * @param components The amount of components per voxel in the atlas.
+ * @param voxelCount The number of voxels in each direction.
+ * @param atlasSize The size of the texture atlas in pixels.
+ * @param atlasGrid The number of slices in the texture atlas in x/y direction.
+ * @returns The index of the given voxel in an atlas with the given properties.
+ */
+export const getAtlasIndexFor = (
+  voxel: Vector,
+  components: number,
+  voxelCount: Vector,
+  atlasSize: Vector,
+  atlasGrid: Vector,
+) => {
+  const sliceOffset = new Vector(
+    [
+      (voxel.z % atlasGrid.x) * voxelCount.x,
+      Math.floor(voxel.z / atlasGrid.x) * voxelCount.y,
+    ],
+    false,
+  );
+
+  return (
+    components *
+      ((sliceOffset.y + voxel.y) * atlasSize.x + sliceOffset.x + voxel.x) +
+    (voxel.size > 3 ? voxel.w : 0)
+  );
+};

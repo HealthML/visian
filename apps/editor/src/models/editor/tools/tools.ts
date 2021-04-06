@@ -1,13 +1,19 @@
 import { AbstractEventType } from "@visian/ui-shared";
-import { getOrthogonalAxis, getPlaneAxes, ISerializable } from "@visian/utils";
+import {
+  getOrthogonalAxis,
+  getPlaneAxes,
+  ISerializable,
+  Pixel,
+} from "@visian/utils";
 import { action, computed, makeObservable, observable } from "mobx";
 import * as THREE from "three";
 
-import { Brush, DragPoint } from ".";
-import { Editor } from "..";
-import { StoreContext } from "../..";
-import { getPositionWithinPixel, SliceRenderer } from "../../../rendering";
+import { getPositionWithinPixel } from "../../../rendering";
+import { StoreContext } from "../../types";
+import { Editor } from "../editor";
 import { Tool } from "../types";
+import { Brush } from "./brush";
+import { DragPoint } from "./types";
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface EditorToolsSnapshot {}
@@ -19,8 +25,6 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
   public isCursorOverDrawableArea = false;
 
   public brushSizePixels = 0.5;
-
-  private sliceRenderer?: SliceRenderer;
 
   private brush?: Brush;
   private eraser?: Brush;
@@ -34,6 +38,18 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
   protected altBrushMap?: Partial<Record<Tool, Brush>>;
 
   constructor(protected editor: Editor, protected context?: StoreContext) {
+    this.brush = new Brush(this.editor);
+    this.eraser = new Brush(this.editor, 0);
+
+    this.brushMap = {
+      [Tool.Brush]: this.brush,
+      [Tool.Eraser]: this.eraser,
+    };
+    this.altBrushMap = {
+      [Tool.Brush]: this.eraser,
+      [Tool.Eraser]: this.brush,
+    };
+
     makeObservable(this, {
       activeTool: observable,
       isCursorOverDrawableArea: observable,
@@ -72,38 +88,15 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
     // Intentionally left blank
   }
 
-  public setSliceRenderer(sliceRenderer?: SliceRenderer) {
-    this.sliceRenderer = sliceRenderer;
-
-    if (sliceRenderer) {
-      this.brush = new Brush(this.editor, sliceRenderer.lazyRender);
-      this.eraser = new Brush(this.editor, sliceRenderer.lazyRender, 0);
-
-      this.brushMap = {
-        [Tool.Brush]: this.brush,
-        [Tool.Eraser]: this.eraser,
-      };
-      this.altBrushMap = {
-        [Tool.Brush]: this.eraser,
-        [Tool.Eraser]: this.brush,
-      };
-    } else {
-      this.brush = undefined;
-      this.eraser = undefined;
-
-      this.brushMap = undefined;
-      this.altBrushMap = undefined;
-    }
-  }
-
   public handleEvent(
-    screenPosition: { x: number; y: number },
+    screenPosition: Pixel,
     eventType?: AbstractEventType,
     alt = false,
   ) {
-    if (!this.sliceRenderer || !this.brushMap || !this.altBrushMap) return;
+    if (!this.editor.sliceRenderer || !this.brushMap || !this.altBrushMap)
+      return;
 
-    const intersection = this.sliceRenderer.raycaster.getIntersectionsFromPointer(
+    const intersection = this.editor.sliceRenderer.raycaster.getIntersectionsFromPointer(
       screenPosition,
     )[0];
     if (!intersection || !intersection.uv) {
@@ -134,7 +127,7 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
   }
 
   private alignBrushCursor(uv: THREE.Vector2) {
-    if (!this.sliceRenderer || !this.editor.annotation) return;
+    if (!this.editor.sliceRenderer || !this.editor.annotation) return;
     const annotation = this.editor.annotation;
 
     const [widthAxis, heightAxis] = getPlaneAxes(
@@ -152,7 +145,7 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
     const xOffset = this.brushSizePixels === 0.5 ? (right ? 1 : 2) : 0.5;
     const yOffset = this.brushSizePixels === 0.5 ? (bottom ? -1 : 0) : 0.5;
 
-    const brushCursor = this.sliceRenderer.getBrushCursor(
+    const brushCursor = this.editor.sliceRenderer.getBrushCursor(
       this.editor.viewSettings.mainViewType,
     );
 

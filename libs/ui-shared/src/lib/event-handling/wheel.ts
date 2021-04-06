@@ -1,3 +1,5 @@
+import { Pixel } from "@visian/utils";
+
 export enum WheelInteractionType {
   "Up" = 0,
   "None" = 1,
@@ -16,7 +18,7 @@ export const getZoomToCursorDelta1D = (
 
 export const offsetOriginByZoomToCursorDelta = (
   event: { clientX: number; clientY: number },
-  transformOrigin: { x: number; y: number },
+  transformOrigin: Pixel,
   scaleFactor: number,
 ) => ({
   x:

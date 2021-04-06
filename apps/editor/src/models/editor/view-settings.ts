@@ -1,4 +1,10 @@
-import { getPlaneAxes, ISerializable, Vector, ViewType } from "@visian/utils";
+import {
+  getPlaneAxes,
+  ISerializable,
+  Pixel,
+  Vector,
+  ViewType,
+} from "@visian/utils";
 import { action, makeObservable, observable } from "mobx";
 
 import { maxZoom, minZoom, zoomStep } from "../../constants";
@@ -131,10 +137,7 @@ export class EditorViewSettings
     this.setSelectedSlice(this.getSelectedSlice(viewType) + stepSize, viewType);
   }
 
-  public moveCrosshair(
-    screenPosition: { x: number; y: number },
-    canvasId: string,
-  ) {
+  public moveCrosshair(screenPosition: Pixel, canvasId: string) {
     const sliceRenderer = this.editor.sliceRenderer;
     if (!sliceRenderer || !this.editor.image || !this.shouldShowSideViews)
       return;

@@ -2,6 +2,7 @@ import {
   IDisposable,
   IDisposer,
   Image,
+  Pixel,
   ViewType,
   viewTypes,
 } from "@visian/utils";
@@ -63,9 +64,7 @@ export class SliceRenderer implements IDisposable {
     );
     this.sideCamera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 20);
 
-    this.slices = viewTypes.map(
-      (viewType) => new Slice(editor, viewType, this.lazyRender),
-    );
+    this.slices = viewTypes.map((viewType) => new Slice(editor, viewType));
     this.slices.forEach((slice, viewType) => this.scenes[viewType].add(slice));
 
     this.raycaster = new Raycaster(
@@ -157,7 +156,7 @@ export class SliceRenderer implements IDisposable {
   }
 
   /** Converts a WebGL position to a screen space one. */
-  public getMainViewScreenPosition(webGLPosition: { x: number; y: number }) {
+  public getMainViewScreenPosition(webGLPosition: Pixel) {
     const boundingBox = this.mainCanvas.getBoundingClientRect();
     const webGLSize = this.getMainViewWebGLSize();
     return {
@@ -173,7 +172,7 @@ export class SliceRenderer implements IDisposable {
   }
 
   /** Converts a screen space position to a WebGL one. */
-  public getMainViewWebGLPosition(screenPosition: { x: number; y: number }) {
+  public getMainViewWebGLPosition(screenPosition: Pixel) {
     const boundingBox = this.mainCanvas.getBoundingClientRect();
     const webGLSize = this.getMainViewWebGLSize();
     return {
