@@ -5,6 +5,7 @@ import tc from "tinycolor2";
 import { TextureAtlas } from "../../../texture-atlas";
 import { IDisposable } from "../../../types";
 import VolumeRenderer from "../../volume-renderer";
+import { generateHistogram } from "../histogram";
 import ScreenAlignedQuad from "../screen-aligned-quad";
 import { GradientMaterial, GradientMode } from "./gradient-material";
 
@@ -186,6 +187,22 @@ export class GradientComputer implements IDisposable {
     this.renderer.setRenderTarget(previousRenderTarget);
 
     this.firstDerivativeDirty = false;
+    const buffer = new Uint8Array(
+      this.firstDerivativeRenderTarget.width *
+        this.firstDerivativeRenderTarget.height *
+        4,
+    );
+    this.volumeRenderer.renderer.readRenderTargetPixels(
+      this.firstDerivativeRenderTarget,
+      0,
+      0,
+      this.firstDerivativeRenderTarget.width,
+      this.firstDerivativeRenderTarget.height,
+      buffer,
+    );
+    this.volumeRenderer.setGradientHistogram(
+      generateHistogram(buffer.map((value) => Math.abs(value))),
+    );
 
     this.volumeRenderer.lazyRender();
   }

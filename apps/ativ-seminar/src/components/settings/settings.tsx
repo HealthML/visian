@@ -170,6 +170,10 @@ const Settings: React.FC<SettingsProps> = observer((props) => {
     [renderer],
   );
 
+  const histogram =
+    renderer.transferFunction.type === TransferFunctionType.FCEdges
+      ? renderer?.gradientHistogram
+      : renderer?.densityHistogram;
   return (
     <Container {...rest}>
       <StyledText text="Background" />
@@ -223,17 +227,17 @@ const Settings: React.FC<SettingsProps> = observer((props) => {
       {(renderer.transferFunction.type === TransferFunctionType.Density ||
         renderer.transferFunction.type === TransferFunctionType.FCEdges) && (
         <HistogramWrapper>
-          {renderer?.histogram && (
+          {histogram && (
             <Histogram>
-              {renderer?.histogram[0].map((value, index) => (
+              {histogram[0].map((value, index) => (
                 <HistogramBar
                   key={index}
                   style={{
                     height: `${
                       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                      ((value - renderer.histogram![1]) /
+                      ((value - histogram![1]) /
                         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                        (renderer.histogram![2] - renderer.histogram![1])) *
+                        (histogram![2] - histogram![1])) *
                       100
                     }%`,
                   }}

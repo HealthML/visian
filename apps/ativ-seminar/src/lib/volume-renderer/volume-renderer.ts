@@ -42,7 +42,8 @@ export class VolumeRenderer implements IDisposable {
   private lazyRenderTriggered = true;
 
   public isImageLoaded = false;
-  public histogram?: [number[], number, number];
+  public densityHistogram?: [number[], number, number];
+  public gradientHistogram?: [number[], number, number];
 
   private lightingTimeout?: NodeJS.Timer;
   private suppressedLightingMode?: LightingMode;
@@ -66,6 +67,8 @@ export class VolumeRenderer implements IDisposable {
   constructor(private canvas: HTMLCanvasElement) {
     makeObservable<this, "setCustomTFTexture">(this, {
       isImageLoaded: observable,
+      densityHistogram: observable.ref,
+      gradientHistogram: observable.ref,
       backgroundValue: observable,
       shouldUseFocusVolume: observable,
       focusColor: observable,
@@ -77,6 +80,8 @@ export class VolumeRenderer implements IDisposable {
       rangeLimits: observable,
       cutAwayConeAngle: observable,
       customTFTexture: observable.ref,
+      setImage: action,
+      setGradientHistogram: action,
       setBackgroundValue: action,
       setShouldUseFocusVolume: action,
       setFocusColor: action,
@@ -272,7 +277,7 @@ export class VolumeRenderer implements IDisposable {
 
     this.volume.setAtlas(image);
     this.isImageLoaded = true;
-    this.histogram = generateHistogram(image.getAtlas());
+    this.densityHistogram = generateHistogram(image.getAtlas());
     this.setShouldUseFocusVolume(false);
 
     this.onCameraMove();
@@ -325,6 +330,10 @@ export class VolumeRenderer implements IDisposable {
   };
 
   // User-defined rendering parameters
+  public setGradientHistogram(histogram: [number[], number, number]) {
+    this.gradientHistogram = histogram;
+  }
+
   @computed
   public get backgroundColor() {
     return `rgb(${this.backgroundValue * 255},${this.backgroundValue * 255},${
