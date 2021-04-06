@@ -71,8 +71,6 @@ export class Editor implements ISerializable<EditorSnapshot> {
 
   public setSliceRenderer(sliceRenderer?: SliceRenderer) {
     this.sliceRenderer = sliceRenderer;
-
-    this.tools.setSliceRenderer(sliceRenderer);
   }
 
   public setForegroundColor(foregroundColor: string) {

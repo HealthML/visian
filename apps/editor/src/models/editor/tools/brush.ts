@@ -3,6 +3,7 @@ import {
   calculateLine,
   getOrthogonalAxis,
   getPlaneAxes,
+  Pixel,
   Vector,
 } from "@visian/utils";
 
@@ -15,21 +16,16 @@ export class Brush extends Annotator implements DragTool {
 
   private filledCircleCache?: {
     radius: number;
-    circle: { x: number; y: number }[];
+    circle: Pixel[];
   };
 
   private circleBorderCache?: {
     radius: number;
-    circle: { x: number; y: number }[];
+    circle: Pixel[];
   };
 
-  constructor(
-    editor: Editor,
-    render: () => void,
-    private value = 255,
-    undoable = true,
-  ) {
-    super(editor, render, undoable);
+  constructor(editor: Editor, private value = 255, undoable = true) {
+    super(editor, undoable);
   }
 
   public startAt = (dragPoint: DragPoint) => {

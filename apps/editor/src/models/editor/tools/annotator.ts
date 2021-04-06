@@ -5,17 +5,18 @@ import { SliceUndoRedoCommand } from "../undo-redo";
 import { replaceMerge } from "./merging";
 import { AnnotationVoxel } from "./types";
 
+/**
+ * The Annotator handles editing an annotation (or image).
+ *
+ * If necessary it creates undo redo commands for the edits.
+ */
 export class Annotator {
   private strokeActive = false;
 
   private sliceNumber?: number;
   private oldSliceData?: Uint8Array;
 
-  constructor(
-    protected editor: Editor,
-    protected render: () => void,
-    private undoable: boolean,
-  ) {}
+  constructor(protected editor: Editor, private undoable: boolean) {}
 
   protected finishStroke(
     annotation = this.editor.annotation,
@@ -47,21 +48,21 @@ export class Annotator {
     annotations: AnnotationVoxel[],
     viewType = this.editor.viewSettings.mainViewType,
     merge = replaceMerge,
-    annotation = this.editor.annotation,
+    image = this.editor.annotation,
   ) {
-    if (!annotation || !annotations.length) return;
+    if (!image || !annotations.length) return;
 
     if (this.undoable && !this.strokeActive) {
       this.strokeActive = true;
       this.sliceNumber = annotations[0][getOrthogonalAxis(viewType)];
-      this.oldSliceData = annotation.getSlice(this.sliceNumber, viewType);
+      this.oldSliceData = image.getSlice(this.sliceNumber, viewType);
     }
 
     annotations.forEach((annotationVoxel) =>
       this.annotateVoxel(annotationVoxel, merge),
     );
 
-    this.render();
+    this.editor.sliceRenderer?.lazyRender();
   }
 
   private annotateVoxel(

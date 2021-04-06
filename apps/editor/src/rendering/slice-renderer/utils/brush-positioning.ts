@@ -1,5 +1,7 @@
+import { Pixel } from "@visian/utils";
+
 export const getPositionWithinPixel = (
-  uv: { x: number; y: number },
+  uv: Pixel,
   scanWidth: number,
   scanHeight: number,
 ) => {

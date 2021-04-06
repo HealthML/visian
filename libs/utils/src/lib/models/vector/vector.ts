@@ -20,7 +20,7 @@ export interface GenericVector extends THREE.Vector {
 /** An observable vector of generic, fixed size. */
 export class Vector implements GenericVector {
   public static fromArray(array: number[]): Vector {
-    return new Vector(array);
+    return new this(array);
   }
 
   public static fromObject(

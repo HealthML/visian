@@ -12,13 +12,7 @@ export abstract class SliceMaterial
   implements IDisposable {
   protected disposers: IDisposer[] = [];
 
-  constructor(
-    editor: Editor,
-    viewType: ViewType,
-    render: () => void,
-    defines = {},
-    uniforms = {},
-  ) {
+  constructor(editor: Editor, viewType: ViewType, defines = {}, uniforms = {}) {
     super({
       defines,
       vertexShader,
@@ -52,7 +46,7 @@ export abstract class SliceMaterial
     this.disposers.push(
       autorun(() => {
         this.uniforms.uActiveSlices.value = editor.viewSettings.selectedVoxel.toArray();
-        render();
+        editor.sliceRenderer?.lazyRender();
       }),
     );
   }
@@ -74,11 +68,10 @@ export abstract class SliceMaterial
 export default SliceMaterial;
 
 export class ImageSliceMaterial extends SliceMaterial {
-  constructor(editor: Editor, viewType: ViewType, render: () => void) {
+  constructor(editor: Editor, viewType: ViewType) {
     super(
       editor,
       viewType,
-      render,
       { IMAGE: "" },
       {
         uContrast: { value: editor.viewSettings.contrast },
@@ -90,11 +83,11 @@ export class ImageSliceMaterial extends SliceMaterial {
     this.disposers.push(
       autorun(() => {
         this.uniforms.uContrast.value = editor.viewSettings.contrast;
-        render();
+        editor.sliceRenderer?.lazyRender();
       }),
       autorun(() => {
         this.uniforms.uBrightness.value = editor.viewSettings.brightness;
-        render();
+        editor.sliceRenderer?.lazyRender();
       }),
       autorun(() => {
         (this.uniforms.uForegroundColor.value as THREE.Color).set(
@@ -106,11 +99,10 @@ export class ImageSliceMaterial extends SliceMaterial {
 }
 
 export class AnnotationSliceMaterial extends SliceMaterial {
-  constructor(editor: Editor, viewType: ViewType, render: () => void) {
+  constructor(editor: Editor, viewType: ViewType) {
     super(
       editor,
       viewType,
-      render,
       { ANNOTATION: "" },
       {
         uAnnotationColor: { value: new THREE.Color("red") },
@@ -123,10 +115,12 @@ export class AnnotationSliceMaterial extends SliceMaterial {
         (this.uniforms.uAnnotationColor.value as THREE.Color).set(
           editor.viewSettings.annotationColor,
         );
+        editor.sliceRenderer?.lazyRender();
       }),
       autorun(() => {
         this.uniforms.uAnnotationOpacity.value =
           editor.viewSettings.annotationOpacity;
+        editor.sliceRenderer?.lazyRender();
       }),
     );
   }
