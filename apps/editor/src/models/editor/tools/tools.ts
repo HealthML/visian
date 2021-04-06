@@ -100,7 +100,7 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
     image.setSlice(viewType, slice);
     this.editor.sliceRenderer?.lazyRender();
 
-    this.editor.undoRedo.addUndoCommand(
+    this.editor.undoRedo.addCommand(
       new SliceUndoRedoCommand(image, viewType, slice, oldSliceData),
     );
   }
@@ -114,7 +114,7 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
     image.setAtlas(emptyAtlas);
     this.editor.sliceRenderer?.lazyRender();
 
-    this.editor.undoRedo.addUndoCommand(
+    this.editor.undoRedo.addCommand(
       new AtlasUndoRedoCommand(image, oldAtlas, emptyAtlas),
     );
   }

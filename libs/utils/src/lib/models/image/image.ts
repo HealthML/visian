@@ -238,6 +238,58 @@ export class Image<T extends TypedArray = TypedArray>
     return this.getAtlas()[index];
   }
 
+  public setAtlas(atlas: Uint8Array) {
+    if (!this.atlas) {
+      this.atlas = new Uint8Array(atlas);
+    } else {
+      this.atlas.set(atlas);
+    }
+
+    if (this.texture) {
+      this.texture.needsUpdate = true;
+    }
+  }
+
+  public updateData() {
+    // update this.data from this.atlas
+    console.log("updateData is not implemented yet");
+  }
+
+  public setAtlasVoxel(voxel: Vector, value: number) {
+    const index = getAtlasIndexFor(voxel, this);
+    this.getAtlas()[index] = value;
+
+    if (this.texture) {
+      this.texture.needsUpdate = true;
+    }
+  }
+
+  public setSlice(viewType: ViewType, slice: number, sliceData?: Uint8Array) {
+    const atlas = this.getAtlas();
+
+    const [horizontalAxis, verticalAxis] = getPlaneAxes(viewType);
+    const sliceWidth = this.voxelCount[horizontalAxis];
+
+    findVoxelInSlice(
+      {
+        getAtlas: () => this.getAtlas(),
+        voxelComponents: this.voxelComponents,
+        voxelCount: this.voxelCount.clone(false),
+      },
+      viewType,
+      slice,
+      (voxel, _, index) => {
+        const sliceIndex =
+          voxel[verticalAxis] * sliceWidth + voxel[horizontalAxis];
+        atlas[index] = sliceData ? sliceData[sliceIndex] : 0;
+      },
+    );
+
+    if (this.texture) {
+      this.texture.needsUpdate = true;
+    }
+  }
+
   public toJSON() {
     return {
       name: this.name,
@@ -290,58 +342,6 @@ export class Image<T extends TypedArray = TypedArray>
       this.data = clonedData;
     } else {
       this.data = new Uint8Array(this.voxelCount.product()) as T;
-    }
-  }
-
-  public setAtlas(atlas: Uint8Array) {
-    if (!this.atlas) {
-      this.atlas = new Uint8Array(atlas);
-    } else {
-      this.atlas.set(atlas);
-    }
-
-    if (this.texture) {
-      this.texture.needsUpdate = true;
-    }
-  }
-
-  public updateData() {
-    // update this.data from this.atlas
-    console.log("updateData is not implemented yet");
-  }
-
-  public setAtlasVoxel(voxel: Vector, value: number) {
-    const index = getAtlasIndexFor(voxel, this);
-    this.getAtlas()[index] = value;
-
-    if (this.texture) {
-      this.texture.needsUpdate = true;
-    }
-  }
-
-  public setSlice(viewType: ViewType, slice: number, sliceData?: Uint8Array) {
-    const atlas = this.getAtlas();
-
-    const [horizontalAxis, verticalAxis] = getPlaneAxes(viewType);
-    const sliceWidth = this.voxelCount[horizontalAxis];
-
-    findVoxelInSlice(
-      {
-        getAtlas: () => this.getAtlas(),
-        voxelComponents: this.voxelComponents,
-        voxelCount: this.voxelCount.clone(false),
-      },
-      viewType,
-      slice,
-      (voxel, _, index) => {
-        const sliceIndex =
-          voxel[verticalAxis] * sliceWidth + voxel[horizontalAxis];
-        atlas[index] = sliceData ? sliceData[sliceIndex] : 0;
-      },
-    );
-
-    if (this.texture) {
-      this.texture.needsUpdate = true;
     }
   }
 }

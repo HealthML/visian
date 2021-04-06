@@ -26,7 +26,7 @@ export class Annotator {
       this.strokeActive = false;
 
       if (annotation && this.sliceNumber !== undefined) {
-        this.editor.undoRedo.addUndoCommand(
+        this.editor.undoRedo.addCommand(
           new SliceUndoRedoCommand(
             annotation,
             viewType,

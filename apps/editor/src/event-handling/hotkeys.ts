@@ -30,10 +30,7 @@ export const setUpHotKeys = (store: RootStore): IDisposer => {
   hotkeys("ctrl+z", () => {
     store.editor.undoRedo.undo();
   });
-  hotkeys("ctrl+shift+z", () => {
-    store.editor.undoRedo.redo();
-  });
-  hotkeys("ctrl+y", () => {
+  hotkeys("ctrl+shift+z,ctrl+y", () => {
     store.editor.undoRedo.redo();
   });
 

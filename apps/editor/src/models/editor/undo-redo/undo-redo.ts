@@ -1,6 +1,7 @@
 import { ISerializable, LimitedStack } from "@visian/utils";
 import { action, makeObservable, observable } from "mobx";
 
+import { maxUndoRedoSteps } from "../../../constants";
 import { StoreContext } from "../../types";
 import { Editor } from "../editor";
 import { UndoRedoCommand } from "./types";
@@ -11,22 +12,25 @@ export interface EditorUndoRedoSnapshot {}
 export class EditorUndoRedo implements ISerializable<EditorUndoRedoSnapshot> {
   public static readonly excludeFromSnapshotTracking = ["/editor"];
 
-  public isUndoAvailable = false;
-  public isRedoAvailable = false;
-
-  private undoRedoStack = new LimitedStack<UndoRedoCommand>(20);
+  private undoRedoStack = new LimitedStack<UndoRedoCommand>(maxUndoRedoSteps);
 
   constructor(protected editor: Editor, protected context?: StoreContext) {
-    makeObservable(this, {
-      isUndoAvailable: observable,
-      isRedoAvailable: observable,
+    makeObservable<this, "undoRedoStack">(this, {
+      undoRedoStack: observable,
 
       applySnapshot: action,
       undo: action,
       redo: action,
-      addUndoCommand: action,
+      addCommand: action,
       clear: action,
     });
+  }
+
+  public get isUndoAvailable() {
+    return this.undoRedoStack.canNavigateBackward();
+  }
+  public get isRedoAvailable() {
+    return this.undoRedoStack.canNavigateForward();
   }
 
   public undo() {
@@ -35,11 +39,8 @@ export class EditorUndoRedo implements ISerializable<EditorUndoRedoSnapshot> {
     const undoCommand = this.undoRedoStack.getCurrent();
     if (undoCommand?.undo()) {
       this.undoRedoStack.navigateBackward();
-      this.isRedoAvailable = true;
       this.editor.sliceRenderer?.lazyRender();
     }
-
-    this.isUndoAvailable = this.undoRedoStack.canNavigateBackward();
   }
 
   public redo() {
@@ -47,23 +48,15 @@ export class EditorUndoRedo implements ISerializable<EditorUndoRedoSnapshot> {
 
     const redoCommand = this.undoRedoStack.navigateForward();
     if (redoCommand?.redo()) {
-      this.isUndoAvailable = true;
       this.editor.sliceRenderer?.lazyRender();
     }
-
-    this.isRedoAvailable = this.undoRedoStack.canNavigateForward();
   }
 
-  public addUndoCommand(undoCommand: UndoRedoCommand) {
+  public addCommand(undoCommand: UndoRedoCommand) {
     this.undoRedoStack.push(undoCommand);
-
-    this.isUndoAvailable = true;
-    this.isRedoAvailable = false;
   }
 
   public clear() {
-    this.isRedoAvailable = false;
-    this.isUndoAvailable = false;
     this.undoRedoStack.clear();
   }
 
