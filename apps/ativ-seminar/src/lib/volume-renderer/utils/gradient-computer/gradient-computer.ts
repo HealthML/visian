@@ -200,8 +200,16 @@ export class GradientComputer implements IDisposable {
       this.firstDerivativeRenderTarget.height,
       buffer,
     );
+
+    const gradientMagnitudes = [];
+    const workingVector = new THREE.Vector3();
+    for (let i = 0; i < buffer.length; i += 4) {
+      workingVector.set(buffer[i], buffer[i + 1], buffer[i + 2]);
+      gradientMagnitudes.push(workingVector.length());
+    }
+
     this.volumeRenderer.setGradientHistogram(
-      generateHistogram(buffer.map((value) => Math.abs(value))),
+      generateHistogram(gradientMagnitudes),
     );
 
     this.volumeRenderer.lazyRender();
