@@ -1,4 +1,5 @@
 export const transferFunctionsUniforms = {
+  uFocusColor: { value: [1, 1, 1, 1] },
   uContextOpacity: { value: 1 },
   uLimitLow: { value: 0 },
   uLimitHigh: { value: 1 },

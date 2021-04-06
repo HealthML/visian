@@ -2,6 +2,7 @@ import { action, computed, makeObservable, observable } from "mobx";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import Stats from "three/examples/jsm/libs/stats.module";
+import tc from "tinycolor2";
 
 import { TextureAtlas } from "../texture-atlas";
 import { IDisposable } from "../types";
@@ -48,6 +49,7 @@ export class VolumeRenderer implements IDisposable {
 
   public backgroundValue = 0;
   public shouldUseFocusVolume = false;
+  public focusColor = "#ffffff";
   public transferFunction = transferFunctions[TransferFunctionType.FCEdges];
   public lightingMode = lightingModes[LightingModeType.LAO];
   public laoIntensity = 1;
@@ -64,6 +66,7 @@ export class VolumeRenderer implements IDisposable {
       isImageLoaded: observable,
       backgroundValue: observable,
       shouldUseFocusVolume: observable,
+      focusColor: observable,
       transferFunction: observable,
       lightingMode: observable,
       laoIntensity: observable,
@@ -74,6 +77,7 @@ export class VolumeRenderer implements IDisposable {
       customTFTexture: observable.ref,
       setBackgroundValue: action,
       setShouldUseFocusVolume: action,
+      setFocusColor: action,
       setTransferFunction: action,
       setLightingMode: action,
       setLaoIntensity: action,
@@ -331,6 +335,15 @@ export class VolumeRenderer implements IDisposable {
   public setShouldUseFocusVolume = (shouldUseFocusVolume: boolean) => {
     this.shouldUseFocusVolume = shouldUseFocusVolume;
     this.lazyRender();
+  };
+
+  public setFocusColor = (value: string) => {
+    try {
+      this.focusColor = tc(value).toRgbString();
+      this.lazyRender();
+    } catch {
+      // Intentionally left blank
+    }
   };
 
   public setTransferFunction = (value: TransferFunction) => {

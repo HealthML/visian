@@ -1,5 +1,6 @@
 import { autorun, IReactionDisposer } from "mobx";
 import * as THREE from "three";
+import tc from "tinycolor2";
 
 import { TextureAtlas } from "../../../texture-atlas";
 import { IDisposable } from "../../../types";
@@ -39,6 +40,21 @@ export class GradientComputer implements IDisposable {
     this.screenAlignedQuad = new ScreenAlignedQuad(this.gradientMaterial);
 
     this.reactionDisposers.push(
+      autorun(() => {
+        this.gradientMaterial.uniforms.uUseFocus.value =
+          volumeRenderer.shouldUseFocusVolume;
+
+        this.updateOutputDerivative();
+      }),
+      autorun(() => {
+        const color = tc(volumeRenderer.focusColor).toRgb();
+        this.gradientMaterial.uniforms.uFocusColor.value = [
+          color.r / 255,
+          color.g / 255,
+          color.b / 255,
+          color.a,
+        ];
+      }),
       autorun(() => {
         this.gradientMaterial.uniforms.uTransferFunction.value =
           volumeRenderer.transferFunction.type;

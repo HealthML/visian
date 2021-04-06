@@ -50,6 +50,16 @@ const StyledIntervalSlider = styled(IntervalSlider)`
   margin-bottom: 10px;
 `;
 
+const StyledTextInput = styled.input`
+  background: ${color("veryLightGray")};
+  border: none;
+  border-radius: 2px;
+  color: ${color("text")};
+  height: 28px;
+  margin-bottom: 10px;
+  width: 100%;
+`;
+
 const StyledFileInput = styled.input`
   margin-bottom: 10px;
 `;
@@ -88,6 +98,13 @@ const Separator = styled.hr`
 
 const Settings: React.FC<SettingsProps> = observer((props) => {
   const { renderer, ...rest } = props;
+
+  const setFocusColor = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      renderer.setFocusColor(event.target.value);
+    },
+    [renderer],
+  );
 
   const setShouldUseFocusVolume = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -211,6 +228,11 @@ const Settings: React.FC<SettingsProps> = observer((props) => {
       {(renderer.transferFunction.type === TransferFunctionType.FCEdges ||
         renderer.transferFunction.type === TransferFunctionType.FCCutaway) && (
         <>
+          <StyledText text="Focus Volume Color" />
+          <StyledTextInput
+            defaultValue="rgba(255,255,255,1)"
+            onChange={setFocusColor}
+          />
           <StyledText text="Context Opacity" />
           <StyledSlider
             min={0}

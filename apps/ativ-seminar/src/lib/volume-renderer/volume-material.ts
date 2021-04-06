@@ -1,5 +1,6 @@
 import { autorun, IReactionDisposer } from "mobx";
 import * as THREE from "three";
+import tc from "tinycolor2";
 
 import { TextureAtlas } from "../texture-atlas";
 import { IDisposable } from "../types";
@@ -17,7 +18,6 @@ import { getStepSize, GradientComputer, LAOComputer } from "./utils";
 
 import type Volume from "./volume";
 import type VolumeRenderer from "./volume-renderer";
-
 /** A volume domain material. */
 class VolumeMaterial extends THREE.ShaderMaterial implements IDisposable {
   private workingMatrix4 = new THREE.Matrix4();
@@ -71,6 +71,15 @@ class VolumeMaterial extends THREE.ShaderMaterial implements IDisposable {
     this.reactionDisposers.push(
       autorun(() => {
         this.uniforms.uUseFocus.value = volumeRenderer.shouldUseFocusVolume;
+      }),
+      autorun(() => {
+        const color = tc(volumeRenderer.focusColor).toRgb();
+        this.uniforms.uFocusColor.value = [
+          color.r / 255,
+          color.g / 255,
+          color.b / 255,
+          color.a,
+        ];
       }),
       autorun(() => {
         this.uniforms.uTransferFunction.value =

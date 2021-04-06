@@ -1,3 +1,4 @@
+uniform vec4 uFocusColor;
 uniform float uContextOpacity;
 uniform float uLimitLow;
 uniform float uLimitHigh;

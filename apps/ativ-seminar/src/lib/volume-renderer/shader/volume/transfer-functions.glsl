@@ -50,7 +50,7 @@ vec4 transferFunction(VolumeData data, vec3 volumeCoords) {
   if (uTransferFunction == 1) {
     // return mix(vec4(data.firstDerivative * 5.0, mix(0.0, 0.015, step(0.1, length(data.firstDerivative))) * 0.2), vec4(vec3(1.0), 0.8), data.focus);
     return uUseFocus ?
-        vec4(vec3(1.0), mix(mix(0.0, 0.015, step(uLimitLow, length(data.firstDerivative)) * (1.0 - step(uLimitHigh, length(data.firstDerivative)))) * uContextOpacity, 1.0, data.focus))
+        mix(vec4(vec3(1.0), mix(0.0, 0.015, step(uLimitLow, length(data.firstDerivative)) * (1.0 - step(uLimitHigh, length(data.firstDerivative)))) * uContextOpacity), uFocusColor, data.focus)
       : vec4(vec3(1.0), mix(0.0, 0.015, step(uLimitLow, length(data.firstDerivative)) * (1.0 - step(uLimitHigh, length(data.firstDerivative)))));
 
     // return mix(vec4(vec3(0.5), mix(0.0, 0.015, step(0.12, length(data.firstDerivative)))), vec4(1.0, 0.0, 0.0, 1.0), data.focus);
@@ -62,7 +62,7 @@ vec4 transferFunction(VolumeData data, vec3 volumeCoords) {
     float contextFactor = step(0.0, cone);
     float filteredDensity = data.density * step(0.05, data.density);
     return uUseFocus ?
-        mix(vec4(vec3(filteredDensity), filteredDensity * uContextOpacity) * contextFactor, vec4(1.0, 0.0, 0.0, 1.0), step(0.1, data.focus))
+        mix(vec4(vec3(filteredDensity), filteredDensity * uContextOpacity) * contextFactor, uFocusColor, step(0.1, data.focus))
       : vec4(vec3(filteredDensity), filteredDensity * uContextOpacity) * contextFactor;
   }
 
