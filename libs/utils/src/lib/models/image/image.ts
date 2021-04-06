@@ -130,8 +130,8 @@ export class Image<T extends TypedArray = TypedArray>
   /** A TypedArray containing the voxel buffer data in I/O format. */
   public data!: T;
 
-  /** A TypedArray containing the voxel buffer data in texture atlas format. */
-  protected atlas?: T;
+  /** A Uint8Array containing the voxel buffer data in texture atlas format. */
+  protected atlas?: Uint8Array;
 
   protected texture?: THREE.DataTexture;
 

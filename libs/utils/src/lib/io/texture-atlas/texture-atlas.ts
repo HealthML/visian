@@ -99,7 +99,17 @@ export const convertDataArrayToAtlas = <T extends TypedArray = TypedArray>(
     }
   }
 
-  return atlas;
+  // TODO: Implement 16+ bit support
+  const maxValue = (atlas as Uint8Array).reduce(
+    (a: number, b: number) => Math.max(a, b),
+    0,
+  );
+
+  return new Uint8Array(
+    atlas.map((value: number) =>
+      Math.round((Math.max(0, value) / maxValue) * 255),
+    ),
+  );
 };
 
 export const getTextureFromAtlas = <T extends TypedArray = TypedArray>(
@@ -107,17 +117,6 @@ export const getTextureFromAtlas = <T extends TypedArray = TypedArray>(
   atlas: T,
   magFilter: THREE.TextureFilter = THREE.LinearFilter,
 ) => {
-  // TODO: Implement 16+ bit support
-  const maxValue = (atlas as Uint8Array).reduce(
-    (a: number, b: number) => Math.max(a, b),
-    0,
-  );
-  const scaledAtlas = new Uint8Array(
-    atlas.map((value: number) =>
-      Math.round((Math.max(0, value) / maxValue) * 255),
-    ),
-  );
-
   const textureFormat: THREE.PixelFormat =
     image.voxelComponents === 1
       ? THREE.LuminanceFormat
@@ -129,7 +128,7 @@ export const getTextureFromAtlas = <T extends TypedArray = TypedArray>(
 
   const atlasGrid = getAtlasGrid(image.voxelCount);
   return new THREE.DataTexture(
-    scaledAtlas,
+    atlas,
     atlasGrid.x * image.voxelCount.x,
     atlasGrid.y * image.voxelCount.y,
     textureFormat,
