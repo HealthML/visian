@@ -12,6 +12,7 @@ import { getPositionWithinPixel } from "../../../rendering";
 import { StoreContext } from "../../types";
 import { Editor } from "../editor";
 import { Tool } from "../types";
+import { AtlasUndoRedoCommand, SliceUndoRedoCommand } from "../undo-redo";
 import { Brush } from "./brush";
 import { DragPoint } from "./types";
 
@@ -86,6 +87,36 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
 
   public async applySnapshot(snapshot: EditorToolsSnapshot) {
     // Intentionally left blank
+  }
+
+  public clearSlice(
+    image = this.editor.annotation,
+    viewType = this.editor.viewSettings.mainViewType,
+    slice = this.editor.viewSettings.getSelectedSlice(),
+  ) {
+    if (!image) return;
+
+    const oldSliceData = image.getSlice(slice, viewType);
+    image.setSlice(viewType, slice);
+    this.editor.sliceRenderer?.lazyRender();
+
+    this.editor.undoRedo.addCommand(
+      new SliceUndoRedoCommand(image, viewType, slice, oldSliceData),
+    );
+  }
+
+  public clearImage(image = this.editor.annotation) {
+    if (!image) return;
+
+    const oldAtlas = new Uint8Array(image.getAtlas());
+
+    const emptyAtlas = new Uint8Array(oldAtlas.length);
+    image.setAtlas(emptyAtlas);
+    this.editor.sliceRenderer?.lazyRender();
+
+    this.editor.undoRedo.addCommand(
+      new AtlasUndoRedoCommand(image, oldAtlas, emptyAtlas),
+    );
   }
 
   public handleEvent(
