@@ -1,7 +1,6 @@
-import React, { useCallback, useRef } from "react";
+import React from "react";
 import styled from "styled-components";
 
-import { fontSize } from "../../theme";
 import { Sheet } from "../sheet";
 import { Text } from "../text";
 import { TooltipProps } from "./tooltip.props";

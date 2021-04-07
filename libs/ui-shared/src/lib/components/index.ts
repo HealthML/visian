@@ -6,6 +6,7 @@ export * from "./utils";
 export * from "./box";
 export * from "./button";
 export * from "./drop-zone";
+export * from "./modal";
 export * from "./screen";
 export * from "./sheet";
 export * from "./slider";
