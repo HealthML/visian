@@ -148,9 +148,12 @@ export const useDrag = <ID = string>(
       delete idRef.current[event.pointerId];
 
       event.preventDefault();
-      document.removeEventListener("pointermove", boundMoveHandler);
-      document.removeEventListener("pointerup", boundEndHandler);
-      document.removeEventListener("pointerleave", boundEndHandler);
+
+      if (!Object.keys(idRef.current).length) {
+        document.removeEventListener("pointermove", boundMoveHandler);
+        document.removeEventListener("pointerup", boundEndHandler);
+        document.removeEventListener("pointerleave", boundEndHandler);
+      }
       if (endHandler) return endHandler(event, id);
     },
     [boundMoveHandler, endHandler],
@@ -160,11 +163,14 @@ export const useDrag = <ID = string>(
     (event: PointerEvent | ReactPointerEvent, id?: ID) => {
       idRef.current[event.pointerId] = id;
       event.preventDefault();
-      document.addEventListener("pointermove", boundMoveHandler, {
-        passive: false,
-      });
-      document.addEventListener("pointerup", boundEndHandler);
-      document.addEventListener("pointerleave", boundEndHandler);
+
+      if (Object.keys(idRef.current).length === 1) {
+        document.addEventListener("pointermove", boundMoveHandler, {
+          passive: false,
+        });
+        document.addEventListener("pointerup", boundEndHandler);
+        document.addEventListener("pointerleave", boundEndHandler);
+      }
       if (startHandler) return startHandler(event, id);
     },
     [boundEndHandler, boundMoveHandler, startHandler],
