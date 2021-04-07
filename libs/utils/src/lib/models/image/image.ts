@@ -176,7 +176,6 @@ export class Image<T extends TypedArray = TypedArray>
       this.atlas = convertDataArrayToAtlas({
         data: this.data,
         dimensionality: this.dimensionality,
-        orientation: this.orientation,
         voxelComponents: this.voxelComponents,
         voxelCount: this.voxelCount.clone(false),
       });
