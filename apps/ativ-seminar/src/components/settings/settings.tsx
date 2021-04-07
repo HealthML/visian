@@ -35,14 +35,16 @@ const Settings: React.FC<SettingsProps> = observer((props) => {
       <StyledSlider
         min={0}
         max={1}
-        onChange={renderer.setBackgroundValue}
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        onChange={renderer.setBackgroundValue as any}
         value={renderer.backgroundValue}
       />
       <StyledText text="Opacity" />
       <StyledSlider
         min={0}
         max={1}
-        onChange={renderer.setImageOpacity}
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        onChange={renderer.setImageOpacity as any}
         value={renderer.imageOpacity}
       />
     </Container>

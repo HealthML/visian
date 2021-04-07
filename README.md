@@ -124,7 +124,7 @@ yarn nx g @nrwl/react:lib ui-shared
 yarn add -D @nrwl/storybook @nrwl/cypress cypress
 yarn nx g @nrwl/react:storybook-configuration ui-shared --configureCypress --generateStories
 yarn remove @storybook/addon-knobs
-yarn add -D @storybook/addon-a11y @storybook/addon-actions @storybook/addon-controls @storybook/addon-toolbars @storybook/addon-viewport
+yarn add -D @storybook/addon-essentials @storybook/addon-a11y
 yarn add i18next react-i18next i18next-browser-languagedetector i18next-http-backend moment
 
 yarn nx g @nrwl/react:app editor # using styled-components & react-router

@@ -73,26 +73,35 @@ const Settings: React.FC<SettingsProps> = (props) => {
       <StyledText text="Opacity" />
       <StyledSlider
         value={opacity}
-        onChange={opacityCallback}
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        onChange={opacityCallback as any}
         min={0}
         max={1}
       />
       <StyledText text="Contrast" />
       <StyledSlider
         value={contrast}
-        onChange={contrastCallback}
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        onChange={contrastCallback as any}
         min={-1}
         max={1}
       />
       <StyledText text="Brightness" />
       <StyledSlider
         value={brightness}
-        onChange={brightnessCallback}
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        onChange={brightnessCallback as any}
         min={-1}
         max={1}
       />
       <StyledText text="Speed (Fly Controls)" />
-      <Slider value={speed} onChange={speedCallback} min={0.001} max={0.015} />
+      <Slider
+        value={speed}
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        onChange={speedCallback as any}
+        min={0.001}
+        max={0.015}
+      />
     </Container>
   );
 };

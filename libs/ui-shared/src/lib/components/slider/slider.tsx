@@ -3,139 +3,220 @@ import React, {
   useCallback,
   useRef,
 } from "react";
-import styled from "styled-components";
 
 import { SliderProps } from "./slider.props";
 import {
-  color,
-  computeStyleValue,
-  lineHeight,
-  scaleMetric,
-  size,
-  ThemeProps,
-} from "../../theme";
+  SliderContainer,
+  SliderLabel,
+  SliderRangeSelection,
+  SliderThumb,
+  SliderTrack,
+} from "./styled-components";
 import { pointerToSliderValue, useDrag, valueToSliderPos } from "./utils";
 
-interface VerticalProps {
-  isVertical?: boolean;
-}
-
-const Container = styled.div<VerticalProps>`
-  align-items: center;
-  cursor: pointer;
-  display: flex;
-  height: ${(props) => (props.isVertical ? "100%" : size("sliderHeight"))};
-  position: relative;
-  touch-action: none;
-  user-select: none;
-  width: ${(props) => (props.isVertical ? size("sliderHeight") : "100%")};
-  flex-direction: ${(props) => (props.isVertical ? "column" : "row")};
-`;
-
-const Track = styled.div<VerticalProps>`
-  background-color: ${color("lightGray")};
-  flex: 1;
-  height: ${(props) =>
-    props.isVertical ? "unset" : lineHeight("sliderTrack")};
-  width: ${(props) => (props.isVertical ? lineHeight("sliderTrack") : "unset")};
-`;
-
-interface ThumbProps extends VerticalProps {
-  position: string;
-}
-
-const Thumb = styled.div.attrs<ThumbProps>((props) => ({
-  style: {
-    top: props.isVertical
-      ? props.position
-      : computeStyleValue<ThemeProps>(
-          [size("sliderHeight"), size("sliderThumbHeight")],
-          (sliderHeight, thumbHeight) => (sliderHeight - thumbHeight) / 2,
-        )(props),
-    left: props.isVertical
-      ? computeStyleValue<ThemeProps>(
-          [size("sliderHeight"), size("sliderThumbHeight")],
-          (sliderHeight, thumbHeight) => (sliderHeight - thumbHeight) / 2,
-        )(props)
-      : props.position,
-  },
-}))<ThumbProps>`
-  background-color: ${color("gray")};
-  border: none;
-  border-radius: ${(props) =>
-    scaleMetric(size("sliderThumbWidth")(props), 0.5)};
-  height: ${(props) =>
-    props.isVertical ? size("sliderThumbWidth") : size("sliderThumbHeight")};
-  margin: ${(props) =>
-      props.isVertical
-        ? scaleMetric(size("sliderThumbWidth")(props), -0.5)
-        : "0"}
-    0 0
-    ${(props) =>
-      props.isVertical
-        ? "0"
-        : scaleMetric(size("sliderThumbWidth")(props), -0.5)};
-  position: absolute;
-  transition: background-color 0.3s;
-  width: ${(props) =>
-    props.isVertical ? size("sliderThumbHeight") : size("sliderThumbWidth")};
-  z-index: 10;
-`;
+const defaultFormatLabel = (value: number) =>
+  `${Math.round(value * 100) / 100}`;
 
 /** A custom slider component built to work well with touch input. */
 export const Slider: React.FC<SliderProps> = (props) => {
   const {
+    children,
     defaultValue,
+    formatLabel = defaultFormatLabel,
     isInverted,
     isVertical,
     min = 0,
-    max = 99,
+    max = 1,
     onChange,
+    enforceSerialThumbs: preventCrossing,
+    roundMethod,
+    scaleType,
+    shouldShowLabel,
+    shouldShowRange,
     stepSize,
     value,
     ...rest
   } = props;
 
   const sliderRef = useRef<HTMLDivElement | null>(null);
+
+  const actualValue = value === undefined ? defaultValue || min : value;
+  const valueArray: number[] = Array.isArray(actualValue)
+    ? actualValue
+    : [actualValue];
+  const valueRef = useRef<number | number[]>(actualValue);
+  valueRef.current = actualValue;
+
   const updateValue = useCallback(
-    (event: PointerEvent | ReactPointerEvent) => {
+    (event: PointerEvent | ReactPointerEvent, id?: number) => {
       if (!onChange || !sliderRef.current) return;
-      onChange(
-        pointerToSliderValue(
-          event,
-          sliderRef.current,
-          min,
-          max,
-          isVertical,
-          isInverted,
-          stepSize,
-        ),
-      );
+
+      const actualId = id || 0;
+      const newThumbValue = pointerToSliderValue(event, sliderRef.current, {
+        scaleType,
+        min,
+        max,
+        stepSize,
+        roundMethod,
+        isInverted,
+        isVertical,
+      });
+      if (!Array.isArray(valueRef.current)) {
+        onChange(newThumbValue, actualId, newThumbValue);
+        return;
+      }
+
+      const newValueArray = valueRef.current.slice();
+      switch (preventCrossing) {
+        case "block": {
+          let blockedThumbValue = newThumbValue;
+
+          const lowerId = Math.max(0, actualId - 1);
+          if (lowerId !== actualId) {
+            blockedThumbValue = Math.max(
+              newValueArray[lowerId],
+              blockedThumbValue,
+            );
+          }
+
+          const upperId = Math.min(actualId + 1, newValueArray.length - 1);
+          if (upperId !== actualId) {
+            blockedThumbValue = Math.min(
+              blockedThumbValue,
+              newValueArray[upperId],
+            );
+          }
+
+          newValueArray[actualId] = blockedThumbValue;
+          onChange(newValueArray, actualId, blockedThumbValue);
+          return;
+        }
+
+        case "push": {
+          newValueArray[actualId] = newThumbValue;
+          for (let index = actualId - 1; index >= 0; index--) {
+            newValueArray[index] = Math.min(
+              newValueArray[index],
+              newThumbValue,
+            );
+          }
+
+          const { length } = newValueArray;
+          for (let index = actualId + 1; index < length; index++) {
+            newValueArray[index] = Math.max(
+              newThumbValue,
+              newValueArray[index],
+            );
+          }
+          onChange(newValueArray, actualId, newThumbValue);
+          return;
+        }
+
+        default:
+          newValueArray[actualId] = newThumbValue;
+          onChange(newValueArray, actualId, newThumbValue);
+          return;
+      }
     },
-    [isInverted, max, min, onChange, stepSize, isVertical],
+    [
+      isInverted,
+      max,
+      min,
+      onChange,
+      preventCrossing,
+      roundMethod,
+      stepSize,
+      isVertical,
+      scaleType,
+    ],
   );
 
-  const dragListeners = useDrag(updateValue, updateValue);
+  const { onPointerDown } = useDrag(updateValue, updateValue);
+  const startDrag = useCallback(
+    (event: PointerEvent | ReactPointerEvent) => {
+      if (!onChange || !sliderRef.current) return;
+      if (!Array.isArray(valueRef.current)) {
+        onPointerDown(event, 0);
+        return;
+      }
 
-  const actualValue = value === undefined ? defaultValue || 0 : value;
-  const thumbPos = valueToSliderPos(
-    actualValue,
-    min,
-    max,
-    isInverted,
-    stepSize,
+      const newThumbValue = pointerToSliderValue(event, sliderRef.current, {
+        scaleType,
+        min,
+        max,
+        stepSize,
+        roundMethod,
+        isInverted,
+        isVertical,
+      });
+
+      let minDistance = Infinity;
+      let closestThumb = 0;
+      valueRef.current.forEach((thumbValue, index) => {
+        const distance = Math.abs(thumbValue - newThumbValue);
+        if (distance < minDistance) {
+          minDistance = distance;
+          closestThumb = index;
+        }
+      });
+      onPointerDown(event, closestThumb);
+    },
+    [
+      onPointerDown,
+      isInverted,
+      max,
+      min,
+      onChange,
+      roundMethod,
+      stepSize,
+      isVertical,
+      scaleType,
+    ],
+  );
+
+  const thumbPositions = valueArray.map((thumbValue) =>
+    valueToSliderPos(thumbValue, {
+      scaleType,
+      min,
+      max,
+      stepSize,
+      roundMethod,
+      isInverted,
+    }),
   );
 
   return (
-    <Container
+    <SliderContainer
       {...rest}
-      {...(onChange ? dragListeners : {})}
+      onPointerDown={startDrag}
       isVertical={isVertical}
       ref={sliderRef}
     >
-      <Track isVertical={isVertical} />
-      <Thumb isVertical={isVertical} position={thumbPos} />
-    </Container>
+      <SliderTrack isVertical={isVertical} />
+      {shouldShowRange && valueArray.length >= 2 && (
+        <SliderRangeSelection
+          isInverted={isInverted}
+          isVertical={isVertical}
+          positions={thumbPositions}
+        />
+      )}
+      {valueArray.map((thumbValue, index) => {
+        const thumbPos = thumbPositions[index];
+        return (
+          <>
+            <SliderThumb isVertical={isVertical} position={thumbPos} />
+            {shouldShowLabel && (
+              <SliderLabel
+                isVertical={isVertical}
+                position={thumbPos}
+                text={formatLabel(thumbValue)}
+              />
+            )}
+          </>
+        );
+      })}
+      {children}
+    </SliderContainer>
   );
 };
 
