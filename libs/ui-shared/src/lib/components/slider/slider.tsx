@@ -19,6 +19,7 @@ import { SliderProps, ThumbProps } from "./slider.props";
 import { SliderStylingSettings, SliderVerticalitySettings } from "./types";
 import { pointerToSliderValue, useDrag, valueToSliderPos } from "./utils";
 
+// Styled Components
 export const SliderContainer = styled.div<SliderVerticalitySettings>`
   align-items: center;
   cursor: pointer;
@@ -174,6 +175,26 @@ export const Slider: React.FC<SliderProps> = (props) => {
 
           newValueArray[actualId] = blockedThumbValue;
           onChange(newValueArray, actualId, blockedThumbValue);
+          return;
+        }
+
+        case "push": {
+          newValueArray[actualId] = newThumbValue;
+          for (let index = actualId - 1; index >= 0; index--) {
+            newValueArray[index] = Math.min(
+              newValueArray[index],
+              newThumbValue,
+            );
+          }
+
+          const { length } = newValueArray;
+          for (let index = actualId + 1; index < length; index++) {
+            newValueArray[index] = Math.max(
+              newThumbValue,
+              newValueArray[index],
+            );
+          }
+          onChange(newValueArray, actualId, newThumbValue);
           return;
         }
 

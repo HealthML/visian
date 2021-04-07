@@ -7,7 +7,7 @@ export type roundMethod = "floor" | "ceil" | "round";
 
 export type scaleType = "linear" | "quadratic";
 
-export type serializationMethod = "none" | "block";
+export type serializationMethod = "none" | "block" | "push";
 
 export interface SliderValueSettings {
   /**

@@ -22,6 +22,7 @@ export interface SliderProps<T extends number | number[] = number | number[]>
   defaultValue?: T;
   value?: T;
 
+  /** Configures if and how slider thumbs should be forced to keep their order. */
   enforceSerialThumbs?: serializationMethod;
 
   /**

@@ -23,7 +23,7 @@ export default {
     enforceSerialThumbs: {
       control: {
         type: "select",
-        options: ["none", "block"],
+        options: ["none", "block", "push"],
       },
     },
   },
