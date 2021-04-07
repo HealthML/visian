@@ -1,5 +1,9 @@
 import type React from "react";
-import type { SliderConfig, SliderVerticalitySettings } from "./types";
+import type {
+  serializationMethod,
+  SliderConfig,
+  SliderVerticalitySettings,
+} from "./types";
 
 export interface ThumbProps extends SliderVerticalitySettings {
   /**
@@ -18,10 +22,14 @@ export interface SliderProps<T extends number | number[] = number | number[]>
   defaultValue?: T;
   value?: T;
 
+  enforceSerialThumbs?: serializationMethod;
+
   /**
    * A function that is called on every slider value change.
    *
    * @param value The current slider value.
+   * @param thumbId The index of the changed thumb (`0` if `value` is not an array).
+   * @param thumbValue The numeric value of the changed thumb.
    */
   onChange?: (value: T, thumbId: number, thumbValue: number) => void;
 

@@ -20,6 +20,12 @@ export default {
         options: ["linear", "quadratic"],
       },
     },
+    enforceSerialThumbs: {
+      control: {
+        type: "select",
+        options: ["none", "block"],
+      },
+    },
   },
 };
 

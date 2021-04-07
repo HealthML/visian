@@ -7,6 +7,8 @@ export type roundMethod = "floor" | "ceil" | "round";
 
 export type scaleType = "linear" | "quadratic";
 
+export type serializationMethod = "none" | "block";
+
 export interface SliderValueSettings {
   /**
    * An optional (non-linear) function applied to remap the sliders value range.

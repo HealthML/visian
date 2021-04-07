@@ -114,6 +114,7 @@ export const Slider: React.FC<SliderProps> = (props) => {
     min = 0,
     max = 1,
     onChange,
+    enforceSerialThumbs: preventCrossing,
     roundMethod,
     scaleType,
     shouldShowLabel,
@@ -134,6 +135,8 @@ export const Slider: React.FC<SliderProps> = (props) => {
   const updateValue = useCallback(
     (event: PointerEvent | ReactPointerEvent, id?: number) => {
       if (!onChange || !sliderRef.current) return;
+
+      const actualId = id || 0;
       const newThumbValue = pointerToSliderValue(event, sliderRef.current, {
         scaleType,
         min,
@@ -144,19 +147,48 @@ export const Slider: React.FC<SliderProps> = (props) => {
         isVertical,
       });
       if (!Array.isArray(valueRef.current)) {
-        onChange(newThumbValue, id || 0, newThumbValue);
+        onChange(newThumbValue, actualId, newThumbValue);
         return;
       }
 
       const newValueArray = valueRef.current.slice();
-      newValueArray[id || 0] = newThumbValue;
-      onChange(newValueArray, id || 0, newThumbValue);
+      switch (preventCrossing) {
+        case "block": {
+          let blockedThumbValue = newThumbValue;
+
+          const lowerId = Math.max(0, actualId - 1);
+          if (lowerId !== actualId) {
+            blockedThumbValue = Math.max(
+              newValueArray[lowerId],
+              blockedThumbValue,
+            );
+          }
+
+          const upperId = Math.min(actualId + 1, newValueArray.length - 1);
+          if (upperId !== actualId) {
+            blockedThumbValue = Math.min(
+              blockedThumbValue,
+              newValueArray[upperId],
+            );
+          }
+
+          newValueArray[actualId] = blockedThumbValue;
+          onChange(newValueArray, actualId, blockedThumbValue);
+          return;
+        }
+
+        default:
+          newValueArray[actualId] = newThumbValue;
+          onChange(newValueArray, actualId, newThumbValue);
+          return;
+      }
     },
     [
       isInverted,
       max,
       min,
       onChange,
+      preventCrossing,
       roundMethod,
       stepSize,
       isVertical,
