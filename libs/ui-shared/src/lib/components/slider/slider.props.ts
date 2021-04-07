@@ -1,18 +1,29 @@
 import type React from "react";
-import type { SliderConfig } from "./types";
+import type { SliderConfig, SliderVerticalitySettings } from "./types";
 
-export interface SliderProps
-  extends Omit<React.HTMLAttributes<HTMLDivElement>, "onChange">,
+export interface ThumbProps extends SliderVerticalitySettings {
+  /**
+   * A [0, 1]-ranged value indicating the thumb's relative position along the
+   * slider's main axis.
+   */
+  position: number;
+}
+
+export interface SliderProps<T extends number | number[] = number | number[]>
+  extends Omit<
+      React.HTMLAttributes<HTMLDivElement>,
+      "onChange" | "defaultValue"
+    >,
     SliderConfig {
-  defaultValue?: number;
-  value?: number;
+  defaultValue?: T;
+  value?: T;
 
   /**
    * A function that is called on every slider value change.
    *
    * @param value The current slider value.
    */
-  onChange?: (value: number) => void;
+  onChange?: (value: T, thumbId: number, thumbValue: number) => void;
 
   /**
    * If `true`, shows a label with the current slider value.

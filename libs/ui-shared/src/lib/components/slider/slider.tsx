@@ -15,17 +15,9 @@ import {
   ThemeProps,
 } from "../../theme";
 import { Text } from "../text";
-import { SliderProps } from "./slider.props";
+import { SliderProps, ThumbProps } from "./slider.props";
 import { SliderStylingSettings, SliderVerticalitySettings } from "./types";
 import { pointerToSliderValue, useDrag, valueToSliderPos } from "./utils";
-
-export interface ThumbProps extends SliderVerticalitySettings {
-  /**
-   * A [0, 1]-ranged value indicating the thumb's relative position along the
-   * slider's main axis.
-   */
-  position: number;
-}
 
 export const SliderContainer = styled.div<SliderVerticalitySettings>`
   align-items: center;
@@ -131,20 +123,34 @@ export const Slider: React.FC<SliderProps> = (props) => {
   } = props;
 
   const sliderRef = useRef<HTMLDivElement | null>(null);
+
+  const actualValue = value === undefined ? defaultValue || min : value;
+  const values: number[] = Array.isArray(actualValue)
+    ? actualValue
+    : [actualValue];
+  const valueRef = useRef<number | number[]>(actualValue);
+  valueRef.current = actualValue;
+
   const updateValue = useCallback(
-    (event: PointerEvent | ReactPointerEvent) => {
+    (event: PointerEvent | ReactPointerEvent, id?: number) => {
       if (!onChange || !sliderRef.current) return;
-      onChange(
-        pointerToSliderValue(event, sliderRef.current, {
-          scaleType,
-          min,
-          max,
-          stepSize,
-          roundMethod,
-          isInverted,
-          isVertical,
-        }),
-      );
+      const newThumbValue = pointerToSliderValue(event, sliderRef.current, {
+        scaleType,
+        min,
+        max,
+        stepSize,
+        roundMethod,
+        isInverted,
+        isVertical,
+      });
+      if (!Array.isArray(valueRef.current)) {
+        onChange(newThumbValue, id || 0, newThumbValue);
+        return;
+      }
+
+      const newValueArray = valueRef.current.slice();
+      newValueArray[id || 0] = newThumbValue;
+      onChange(newValueArray, id || 0, newThumbValue);
     },
     [
       isInverted,
@@ -158,34 +164,80 @@ export const Slider: React.FC<SliderProps> = (props) => {
     ],
   );
 
-  const dragListeners = useDrag(updateValue, updateValue);
+  const { onPointerDown } = useDrag(updateValue, updateValue);
+  const startDrag = useCallback(
+    (event: PointerEvent | ReactPointerEvent) => {
+      if (!onChange || !sliderRef.current) return;
+      if (!Array.isArray(valueRef.current)) {
+        onPointerDown(event, 0);
+        return;
+      }
 
-  const actualValue = value === undefined ? defaultValue || 0 : value;
-  const thumbPos = valueToSliderPos(actualValue, {
-    scaleType,
-    min,
-    max,
-    stepSize,
-    roundMethod,
-    isInverted,
-  });
+      const newThumbValue = pointerToSliderValue(event, sliderRef.current, {
+        scaleType,
+        min,
+        max,
+        stepSize,
+        roundMethod,
+        isInverted,
+        isVertical,
+      });
+
+      let minValue = Infinity;
+      let minThumb = 0;
+      valueRef.current.forEach((thumbValue, index) => {
+        const distance = Math.abs(thumbValue - newThumbValue);
+        if (distance < minValue) {
+          minValue = distance;
+          minThumb = index;
+        }
+      });
+      onPointerDown(event, minThumb);
+    },
+    [
+      onPointerDown,
+      isInverted,
+      max,
+      min,
+      onChange,
+      roundMethod,
+      stepSize,
+      isVertical,
+      scaleType,
+    ],
+  );
 
   return (
     <SliderContainer
       {...rest}
-      {...(onChange ? dragListeners : {})}
+      onPointerDown={startDrag}
       isVertical={isVertical}
       ref={sliderRef}
     >
       <SliderTrack isVertical={isVertical} />
-      <SliderThumb isVertical={isVertical} position={thumbPos} />
-      {shouldShowLabel && (
-        <SliderLabel
-          isVertical={isVertical}
-          position={thumbPos}
-          text={formatLabel(actualValue)}
-        />
-      )}
+      {values.map((thumbValue) => {
+        const thumbPos = valueToSliderPos(thumbValue, {
+          scaleType,
+          min,
+          max,
+          stepSize,
+          roundMethod,
+          isInverted,
+        });
+
+        return (
+          <>
+            <SliderThumb isVertical={isVertical} position={thumbPos} />
+            {shouldShowLabel && (
+              <SliderLabel
+                isVertical={isVertical}
+                position={thumbPos}
+                text={formatLabel(thumbValue)}
+              />
+            )}
+          </>
+        );
+      })}
     </SliderContainer>
   );
 };
