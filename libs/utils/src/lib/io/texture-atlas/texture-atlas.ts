@@ -7,7 +7,7 @@ import type { TypedArray } from "../itk";
 
 export type TextureAtlasMetadata<T extends TypedArray = TypedArray> = Pick<
   Image<T>,
-  "data" | "dimensionality" | "orientation" | "voxelComponents" | "voxelCount"
+  "data" | "dimensionality" | "voxelComponents" | "voxelCount"
 >;
 
 /**
@@ -137,4 +137,44 @@ export const getAtlasIndexFor = (
       ((sliceOffset.y + voxel.y) * atlasSize.x + sliceOffset.x + voxel.x) +
     (voxel.size > 3 ? voxel.w : 0)
   );
+};
+
+export const convertAtlasToDataArray = <T extends TypedArray = TypedArray>(
+  image: TextureAtlasMetadata<T>,
+  atlas: Uint8Array,
+  inPlaceDataArray?: T,
+) => {
+  const atlasGrid = getAtlasGrid(image.voxelCount);
+  const atlasSize = getAtlasSize(image.voxelCount, atlasGrid);
+
+  const dataArray =
+    inPlaceDataArray ||
+    new (image.data.constructor as new (size: number) => T)(image.data.length);
+
+  const sliceSize =
+    image.voxelCount.x * image.voxelCount.y * image.voxelComponents;
+
+  for (let z = 0; z < image.voxelCount.z; z++) {
+    const dataZOffset = z * sliceSize;
+    const atlasSliceOffset = new THREE.Vector2(
+      (z % atlasGrid.x) * image.voxelCount.x,
+      Math.floor(z / atlasGrid.x) * image.voxelCount.y,
+    );
+
+    for (let y = 0; y < image.voxelCount.y; y++) {
+      const atlasYOffset =
+        (y + atlasSliceOffset.y) * atlasSize.x * image.voxelComponents;
+      const dataYOffset = y * image.voxelCount.x * image.voxelComponents;
+
+      for (let x = 0; x < image.voxelCount.x; x++) {
+        const atlasXOffset = (x + atlasSliceOffset.x) * image.voxelComponents;
+        const dataXOffset = x * image.voxelComponents;
+
+        for (let c = 0; c < image.voxelComponents; c++) {
+          dataArray[dataZOffset + dataYOffset + dataXOffset + c] =
+            atlas[atlasYOffset + atlasXOffset + c];
+        }
+      }
+    }
+  }
 };
