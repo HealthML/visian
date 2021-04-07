@@ -34,9 +34,7 @@ export interface SliderProps<T extends number | number[] = number | number[]>
    */
   onChange?: (value: T, thumbId: number, thumbValue: number) => void;
 
-  /**
-   * If `true`, shows a label with the current slider value.
-   */
+  /** If `true`, shows a label with the current slider value. */
   shouldShowLabel?: boolean;
 
   /**
@@ -44,4 +42,16 @@ export interface SliderProps<T extends number | number[] = number | number[]>
    * Defaults to a transformation to a value rounded to 2 decimal places.
    */
   formatLabel?: (value: number) => string;
+
+  /**
+   * If `true`, shows a range selection between the first and last thumb on
+   * the slider.
+   */
+  shouldShowRange?: boolean;
+}
+
+export interface SliderRangeSelectionProps
+  extends Pick<SliderProps, "isInverted" | "isVertical"> {
+  /** The slider-relative thumb positions as [0, 1]-ranges values. */
+  positions: number[];
 }

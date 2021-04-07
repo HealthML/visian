@@ -15,7 +15,11 @@ import {
   ThemeProps,
 } from "../../theme";
 import { Text } from "../text";
-import { SliderProps, ThumbProps } from "./slider.props";
+import {
+  SliderProps,
+  SliderRangeSelectionProps,
+  ThumbProps,
+} from "./slider.props";
 import { SliderStylingSettings, SliderVerticalitySettings } from "./types";
 import { pointerToSliderValue, useDrag, valueToSliderPos } from "./utils";
 
@@ -102,12 +106,68 @@ export const SliderLabel = styled(Text).attrs<ThumbProps>((props) => {
   z-index: 10;
 `;
 
+export const SliderRangeSelection = styled.div.attrs<SliderRangeSelectionProps>(
+  (props) => {
+    return {
+      style: props.isVertical
+        ? {
+            top: `${
+              props.positions[
+                props.isInverted ? props.positions.length - 1 : 0
+              ] * 100
+            }%`,
+            bottom: `${
+              (1 -
+                props.positions[
+                  props.isInverted ? 0 : props.positions.length - 1
+                ]) *
+              100
+            }%`,
+          }
+        : {
+            left: `${
+              props.positions[
+                props.isInverted ? props.positions.length - 1 : 0
+              ] * 100
+            }%`,
+            right: `${
+              (1 -
+                props.positions[
+                  props.isInverted ? 0 : props.positions.length - 1
+                ]) *
+              100
+            }%`,
+          },
+    };
+  },
+)<SliderRangeSelectionProps>`
+  background-color: ${color("gray")};
+  ${(props) => {
+    const across = computeStyleValue<ThemeProps>(
+      [size("sliderHeight")],
+      (sliderHeight) => sliderHeight / 2 - 1.5,
+    )(props);
+    return props.isVertical
+      ? {
+          left: across,
+          right: across,
+        }
+      : {
+          top: across,
+          bottom: across,
+        };
+  }}
+  position: absolute;
+  z-index: 10;
+`;
+
 const defaultFormatLabel = (value: number) =>
   `${Math.round(value * 100) / 100}`;
 
 /** A custom slider component built to work well with touch input. */
 export const Slider: React.FC<SliderProps> = (props) => {
   const {
+    children,
     defaultValue,
     formatLabel = defaultFormatLabel,
     isInverted,
@@ -119,6 +179,7 @@ export const Slider: React.FC<SliderProps> = (props) => {
     roundMethod,
     scaleType,
     shouldShowLabel,
+    shouldShowRange,
     stepSize,
     value,
     ...rest
@@ -127,7 +188,7 @@ export const Slider: React.FC<SliderProps> = (props) => {
   const sliderRef = useRef<HTMLDivElement | null>(null);
 
   const actualValue = value === undefined ? defaultValue || min : value;
-  const values: number[] = Array.isArray(actualValue)
+  const valueArray: number[] = Array.isArray(actualValue)
     ? actualValue
     : [actualValue];
   const valueRef = useRef<number | number[]>(actualValue);
@@ -260,6 +321,17 @@ export const Slider: React.FC<SliderProps> = (props) => {
     ],
   );
 
+  const thumbPositions = valueArray.map((thumbValue) =>
+    valueToSliderPos(thumbValue, {
+      scaleType,
+      min,
+      max,
+      stepSize,
+      roundMethod,
+      isInverted,
+    }),
+  );
+
   return (
     <SliderContainer
       {...rest}
@@ -268,16 +340,15 @@ export const Slider: React.FC<SliderProps> = (props) => {
       ref={sliderRef}
     >
       <SliderTrack isVertical={isVertical} />
-      {values.map((thumbValue) => {
-        const thumbPos = valueToSliderPos(thumbValue, {
-          scaleType,
-          min,
-          max,
-          stepSize,
-          roundMethod,
-          isInverted,
-        });
-
+      {shouldShowRange && valueArray.length >= 2 && (
+        <SliderRangeSelection
+          isInverted={isInverted}
+          isVertical={isVertical}
+          positions={thumbPositions}
+        />
+      )}
+      {valueArray.map((thumbValue, index) => {
+        const thumbPos = thumbPositions[index];
         return (
           <>
             <SliderThumb isVertical={isVertical} position={thumbPos} />
@@ -291,6 +362,7 @@ export const Slider: React.FC<SliderProps> = (props) => {
           </>
         );
       })}
+      {children}
     </SliderContainer>
   );
 };
