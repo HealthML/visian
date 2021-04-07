@@ -78,8 +78,10 @@ export class Editor implements ISerializable<EditorSnapshot> {
   }
 
   public setImage(image: Image) {
-    this.annotation = undefined;
     this.image = image;
+    this.annotation = new Image({
+      voxelCount: this.image.voxelCount.toArray(),
+    });
     this.context?.persistImmediately();
 
     this.viewSettings.reset();
