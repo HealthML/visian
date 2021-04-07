@@ -55,6 +55,7 @@ export const theme = {
   },
   fontWeights: {
     bold: "700",
+    regular: "400",
     default: "300",
   },
   letterSpacings: {},

@@ -6,7 +6,7 @@ import { Sheet } from "../sheet";
 import { Text } from "../text";
 
 const StyledText = styled(Text)`
-  font-weight: ${fontWeight("bold")};
+  font-weight: ${fontWeight("regular")};
 `;
 
 const BaseButton: React.FC<ButtonProps> = ({
@@ -30,6 +30,10 @@ export const Button = styled(BaseButton)`
   pointer-events: auto;
   user-select: none;
 
+  &:active {
+    border-color: ${color("text")};
+    outline: none;
+  }
   &:focus {
     border-color: ${color("text")};
     outline: none;

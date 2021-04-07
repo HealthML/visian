@@ -9,7 +9,7 @@ const StyledInput = styled.input`
   border: none;
   padding: ${space("inputPadding")};
   background-color: unset;
-  border: 2px solid ${color("sheetBorder")};
+  border: 1px solid ${color("sheetBorder")};
   border-radius: ${radius("default")};
   color: ${color("text")};
   display: inline-flex;
