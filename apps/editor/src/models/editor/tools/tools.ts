@@ -260,4 +260,8 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
 
     return dragPoint;
   }
+
+  public finishStroke() {
+    this.context?.persist();
+  }
 }
