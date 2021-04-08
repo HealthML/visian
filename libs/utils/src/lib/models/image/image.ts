@@ -365,7 +365,11 @@ export class Image<T extends TypedArray = TypedArray>
     image.spacing = this.voxelSpacing.toArray();
     image.direction = this.orientation;
     image.size = this.voxelCount.toArray();
+
+    // Clone the data array to protect it from modifications
+    // & enable hand-off to web workers
     image.data = this.getData();
+    image.data = new (image.data.constructor as new (data: T) => T)(image.data);
 
     return image;
   }
