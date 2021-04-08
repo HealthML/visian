@@ -182,10 +182,12 @@ export class EditorViewSettings
   }
 
   public async applySnapshot(snapshot: EditorViewSettingsSnapshot) {
-    this.mainViewType = snapshot.mainViewType || ViewType.Transverse;
+    this.setMainView(snapshot.mainViewType || ViewType.Transverse);
     if (snapshot.selectedVoxel) {
       this.selectedVoxel = Vector.fromArray(snapshot.selectedVoxel);
+    } else {
+      this.setSelectedVoxel();
     }
-    this.shouldShowSideViews = Boolean(snapshot.shouldShowSideViews);
+    this.toggleSideViews(Boolean(snapshot.shouldShowSideViews));
   }
 }
