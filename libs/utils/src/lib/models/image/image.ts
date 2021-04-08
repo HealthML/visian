@@ -196,7 +196,7 @@ export class Image<T extends TypedArray = TypedArray>
       );
       this.isDataDirty = false;
     }
-    return this.atlas;
+    return this.data;
   }
 
   public getAtlas() {
