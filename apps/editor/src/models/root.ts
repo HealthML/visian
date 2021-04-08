@@ -44,9 +44,8 @@ export class RootStore implements ISerializable<RootSnapshot> {
     deepObserve(
       this.editor,
       () => {
-        this.setIsDirty(true);
-
         if (!this.shouldPersist) return;
+        this.setIsDirty(true);
         this.config.storageBackend
           ?.persist("/editor", () => this.editor.toJSON())
           .then(() => {
@@ -89,7 +88,6 @@ export class RootStore implements ISerializable<RootSnapshot> {
   public async rehydrate() {
     const tab = await new Tab().register();
 
-    this.shouldPersist = Boolean(tab.isMainTab);
     if (!tab.isMainTab) return;
     const editorSnapshot = await this.config.storageBackend?.retrieve(
       "/editor",
@@ -97,5 +95,7 @@ export class RootStore implements ISerializable<RootSnapshot> {
     if (editorSnapshot) {
       await this.editor.applySnapshot(editorSnapshot as EditorSnapshot);
     }
+
+    this.shouldPersist = Boolean(tab.isMainTab);
   }
 }

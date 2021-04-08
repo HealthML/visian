@@ -12,8 +12,11 @@ import { StoreContext } from "../types";
 
 import type { Editor } from "./editor";
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface EditorViewSettingsSnapshot {}
+export interface EditorViewSettingsSnapshot {
+  mainViewType?: ViewType;
+  selectedVoxel?: number[];
+  shouldShowSideViews?: boolean;
+}
 
 export class EditorViewSettings
   implements ISerializable<EditorViewSettingsSnapshot> {
@@ -171,10 +174,18 @@ export class EditorViewSettings
   }
 
   public toJSON() {
-    return {};
+    return {
+      mainViewType: this.mainViewType,
+      selectedVoxel: this.selectedVoxel.toJSON(),
+      shouldShowSideViews: this.shouldShowSideViews,
+    };
   }
 
   public async applySnapshot(snapshot: EditorViewSettingsSnapshot) {
-    // Intentionally left blank
+    this.mainViewType = snapshot.mainViewType || ViewType.Transverse;
+    if (snapshot.selectedVoxel) {
+      this.selectedVoxel = Vector.fromArray(snapshot.selectedVoxel);
+    }
+    this.shouldShowSideViews = Boolean(snapshot.shouldShowSideViews);
   }
 }
