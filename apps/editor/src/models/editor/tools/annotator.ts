@@ -41,7 +41,7 @@ export class Annotator {
       this.sliceNumber = undefined;
     }
 
-    annotation?.updateData();
+    // TODO: Only update image data on finished stroke?
   }
 
   protected annotate(
