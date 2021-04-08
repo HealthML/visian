@@ -173,9 +173,7 @@ export class Image<T extends TypedArray = TypedArray>
   public getAtlas() {
     if (!this.atlas) {
       // Explicit access here avoids MobX observability tracking to decrease performance
-      this.atlas = convertDataArrayToAtlas({
-        data: this.data,
-        dimensionality: this.dimensionality,
+      this.atlas = convertDataArrayToAtlas(this.data, {
         voxelComponents: this.voxelComponents,
         voxelCount: this.voxelCount.clone(false),
       });

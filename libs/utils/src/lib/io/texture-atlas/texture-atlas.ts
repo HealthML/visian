@@ -7,7 +7,7 @@ import type { TypedArray } from "../itk";
 
 export type TextureAtlasMetadata<T extends TypedArray = TypedArray> = Pick<
   Image<T>,
-  "data" | "dimensionality" | "voxelComponents" | "voxelCount"
+  "voxelComponents" | "voxelCount"
 >;
 
 /**
@@ -28,6 +28,7 @@ export const getAtlasSize = (
 ) => new Vector([voxelCount.x, voxelCount.y], false).multiply(atlasGrid);
 
 export const convertDataArrayToAtlas = <T extends TypedArray = TypedArray>(
+  data: T,
   image: TextureAtlasMetadata<T>,
   inPlaceAtlas?: T,
 ) => {
@@ -35,7 +36,7 @@ export const convertDataArrayToAtlas = <T extends TypedArray = TypedArray>(
   const atlasSize = getAtlasSize(image.voxelCount, atlasGrid);
   const atlas =
     inPlaceAtlas ||
-    new (image.data.constructor as new (size: number) => T)(
+    new (data.constructor as new (size: number) => T)(
       atlasSize.x * atlasSize.y * image.voxelComponents,
     );
 
@@ -44,7 +45,7 @@ export const convertDataArrayToAtlas = <T extends TypedArray = TypedArray>(
 
   // TODO: Test if ordered read can improve performance here
   for (let z = 0; z < image.voxelCount.z; z++) {
-    const sliceData = image.data.subarray(z * sliceSize, (z + 1) * sliceSize);
+    const dataZOffset = z * sliceSize;
     const sliceOffset = new THREE.Vector2(
       (z % atlasGrid.x) * image.voxelCount.x,
       Math.floor(z / atlasGrid.x) * image.voxelCount.y,
@@ -61,7 +62,7 @@ export const convertDataArrayToAtlas = <T extends TypedArray = TypedArray>(
 
         for (let c = 0; c < image.voxelComponents; c++) {
           atlas[atlasYOffset + atlasXOffset + c] =
-            sliceData[dataYOffset + dataXOffset + c];
+            data[dataZOffset + dataYOffset + dataXOffset + c];
         }
       }
     }
@@ -140,8 +141,8 @@ export const getAtlasIndexFor = (
 };
 
 export const convertAtlasToDataArray = <T extends TypedArray = TypedArray>(
-  image: TextureAtlasMetadata<T>,
   atlas: Uint8Array,
+  image: TextureAtlasMetadata<T>,
   inPlaceDataArray?: T,
 ) => {
   const atlasGrid = getAtlasGrid(image.voxelCount);
@@ -149,7 +150,9 @@ export const convertAtlasToDataArray = <T extends TypedArray = TypedArray>(
 
   const dataArray =
     inPlaceDataArray ||
-    new (image.data.constructor as new (size: number) => T)(image.data.length);
+    new (atlas.constructor as new (size: number) => T)(
+      image.voxelCount.product() * image.voxelComponents,
+    );
 
   const sliceSize =
     image.voxelCount.x * image.voxelCount.y * image.voxelComponents;
@@ -177,4 +180,6 @@ export const convertAtlasToDataArray = <T extends TypedArray = TypedArray>(
       }
     }
   }
+
+  return dataArray;
 };
