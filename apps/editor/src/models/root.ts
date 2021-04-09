@@ -29,6 +29,7 @@ export class RootStore implements ISerializable<RootSnapshot> {
 
   constructor(protected config: RootStoreConfig = {}) {
     this.editor = new Editor({
+      persist: this.persist,
       persistImmediately: this.persistImmediately,
     });
 
@@ -41,20 +42,9 @@ export class RootStore implements ISerializable<RootSnapshot> {
       setIsDirty: action,
       setRef: action,
     });
-    deepObserve(
-      this.editor,
-      () => {
-        this.setIsDirty(true);
-
-        if (!this.shouldPersist) return;
-        this.config.storageBackend
-          ?.persist("/editor", () => this.editor.toJSON())
-          .then(() => {
-            this.setIsDirty(false);
-          });
-      },
-      { exclude: Editor.excludeFromSnapshotTracking },
-    );
+    deepObserve(this.editor, this.persist, {
+      exclude: Editor.excludeFromSnapshotTracking,
+    });
   }
 
   public setIsDirty(isDirty = true) {
@@ -68,6 +58,15 @@ export class RootStore implements ISerializable<RootSnapshot> {
       delete this.refs[key];
     }
   }
+
+  public persist = async () => {
+    if (!this.shouldPersist) return;
+    this.setIsDirty(true);
+    await this.config.storageBackend?.persist("/editor", () => {
+      return this.editor.toJSON();
+    });
+    this.setIsDirty(false);
+  };
 
   public persistImmediately = async () => {
     if (!this.shouldPersist) return;
@@ -89,7 +88,6 @@ export class RootStore implements ISerializable<RootSnapshot> {
   public async rehydrate() {
     const tab = await new Tab().register();
 
-    this.shouldPersist = Boolean(tab.isMainTab);
     if (!tab.isMainTab) return;
     const editorSnapshot = await this.config.storageBackend?.retrieve(
       "/editor",
@@ -97,5 +95,7 @@ export class RootStore implements ISerializable<RootSnapshot> {
     if (editorSnapshot) {
       await this.editor.applySnapshot(editorSnapshot as EditorSnapshot);
     }
+
+    this.shouldPersist = Boolean(tab.isMainTab);
   }
 }

@@ -39,7 +39,7 @@ export interface DeepObserveConfig {
 }
 
 /** Returns a composed path for the given entry. */
-const buildPath = (entry: Entry | undefined) => {
+const buildPath = (entry: Omit<Entry, "dispose"> | undefined) => {
   if (!entry) return "/";
 
   const res: string[] = [];
@@ -129,7 +129,20 @@ export const deepObserve = <T>(
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const entry = entrySet.get(change.object)!;
     processChange(change, entry);
-    listener(change, buildPath(entry), target);
+
+    const path = buildPath({
+      parent: entry,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      path: (change as any).name || "" + (change as any).index,
+    });
+    if (
+      (config.include &&
+        !~config.include.findIndex((included) => path.startsWith(included))) ||
+      (config.exclude && ~config.exclude.indexOf(path))
+    ) {
+      return;
+    }
+    listener(change, path, target);
   };
 
   const observeRecursively = (
@@ -137,6 +150,22 @@ export const deepObserve = <T>(
     parent: Entry | undefined,
     path: string,
   ) => {
+    let childPath: string | undefined;
+    if (config.include || config.exclude) {
+      childPath = buildPath({ parent, path });
+    }
+    if (
+      (config.include &&
+        !~config.include.findIndex((included) =>
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          childPath!.startsWith(included),
+        )) ||
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      (config.exclude && ~config.exclude.indexOf(childPath!))
+    ) {
+      return;
+    }
+
     if (isRecursivelyObservable(thing)) {
       const entry = entrySet.get(thing);
       if (entry) {
@@ -160,22 +189,6 @@ export const deepObserve = <T>(
         };
         entrySet.set(thing, entry);
         entries(thing).forEach(([key, value]) => {
-          let childPath: string | undefined;
-          if (config.include || config.exclude) {
-            childPath = `${buildPath(entry)}/${key}`;
-          }
-          if (
-            (config.include &&
-              !~config.include.findIndex((included) =>
-                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                childPath!.startsWith(included),
-              )) ||
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            (config.exclude && ~config.exclude.indexOf(childPath!))
-          ) {
-            return;
-          }
-
           observeRecursively(value, entry, key);
         });
       }

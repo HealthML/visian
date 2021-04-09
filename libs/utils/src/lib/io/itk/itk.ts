@@ -1,7 +1,10 @@
 import readImageDICOMFileSeries from "itk/readImageDICOMFileSeries";
 import readImageFile from "itk/readImageFile";
+import writeImageArrayBuffer from "itk/writeImageArrayBuffer";
 
 import { Zip } from "../zip";
+
+import type { ITKImage } from "./types";
 
 /** Returns a parsed medical image from the given single file. */
 export const readSingleMedicalImage = async (file: File) => {
@@ -9,6 +12,27 @@ export const readSingleMedicalImage = async (file: File) => {
   webWorker.terminate();
 
   return image;
+};
+
+/**
+ * Returns a parsed medical image from the given file (including zipped DICOM series).
+ * Throws an error if the given file cannot be parsed.
+ */
+/** Returns a parsed medical image from the given single file. */
+export const writeSingleMedicalImage = async (
+  image: ITKImage,
+  fileName: string = image.name || "image.nii",
+  useCompression = true,
+) => {
+  const { arrayBuffer, webWorker } = await writeImageArrayBuffer(
+    null,
+    useCompression,
+    image,
+    fileName,
+  );
+  webWorker.terminate();
+
+  return arrayBuffer ? new File([arrayBuffer], fileName) : undefined;
 };
 
 /** Returns a parsed medical image from the given zipped DICOM series. */
