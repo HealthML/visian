@@ -131,11 +131,17 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
   }
 
   public setBrushSizePixels(value = 5) {
+    const clampedValue = Math.max(0, value);
+
+    if (this.isBrushSizeLocked) {
+      this.setLockedBrushSizePixels(clampedValue);
+    }
+
     const pixelWidth = this.editor.viewSettings.pixelSize?.x;
 
     if (!pixelWidth) return;
 
-    this.brushWidthScreen = (value + 0.5) * pixelWidth;
+    this.brushWidthScreen = (clampedValue + 0.5) * pixelWidth;
   }
 
   public setSmartBrushSeedTreshold(value = 6) {
@@ -152,6 +158,18 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
     }
 
     this.lockedBrushSizePixels = value;
+  }
+
+  public incrementBrushSize() {
+    // Allow brush size 0.5.
+    const increment = this.brushSizePixels < 1 ? 0.5 : 1;
+    this.setBrushSizePixels(this.brushSizePixels + increment);
+  }
+
+  public decrementBrushSize() {
+    // Allow brush size 0.5.
+    const decrement = this.brushSizePixels <= 1 ? 0.5 : 1;
+    this.setBrushSizePixels(this.brushSizePixels - decrement);
   }
 
   public toJSON() {
