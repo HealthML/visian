@@ -11,9 +11,9 @@ export default {
 export const primary = () => {
   return (
     <List>
-      <ListItem label="Annotation" icon="eye" isActive />
-      <ListItem label="Base Image" icon="eye" />
-      <ListItem label="Background" icon="eye" />
+      <ListItem label="Annotation" icon="eyeCrossed" />
+      <ListItem label="Base Image" icon="eye" iconDisabled />
+      <ListItem label="Background" icon="eye" iconDisabled lastItem />
     </List>
   );
 };

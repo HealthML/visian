@@ -1,17 +1,7 @@
 import type React from "react";
+import type * as icons from "./icons";
 
-export type IconType =
-  | "arrowDown"
-  | "arrowUp"
-  | "erase"
-  | "export"
-  | "layers"
-  | "magicBrush"
-  | "menu"
-  | "moveTool"
-  | "pixelBrush"
-  | "settings"
-  | "trash";
+export type IconType = keyof typeof icons;
 
 export interface IconProps extends React.SVGProps<SVGSVGElement> {
   icon: IconType;

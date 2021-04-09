@@ -2,9 +2,13 @@ import React from "react";
 
 import { IconType } from "../icon";
 
-export interface ListProps extends React.HTMLAttributes<HTMLDivElement> {
-  isActive?: boolean;
+export type ListProps = React.HTMLAttributes<HTMLDivElement>;
+
+export interface ListItemProps extends React.HTMLAttributes<HTMLDivElement> {
   labelTx?: string;
   label?: string;
+
   icon?: IconType;
+  iconDisabled?: boolean;
+  lastItem?: boolean;
 }
