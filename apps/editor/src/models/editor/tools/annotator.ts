@@ -41,7 +41,7 @@ export class Annotator {
       this.sliceNumber = undefined;
     }
 
-    annotation?.updateData();
+    this.editor.tools.finishStroke();
   }
 
   protected annotate(

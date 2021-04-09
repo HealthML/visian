@@ -21,7 +21,10 @@ import { DragPoint } from "./types";
 export interface EditorToolsSnapshot {}
 
 export class EditorTools implements ISerializable<EditorToolsSnapshot> {
-  public static readonly excludeFromSnapshotTracking = ["/editor"];
+  public static readonly excludeFromSnapshotTracking = [
+    "/editor",
+    "/isCursorOverDrawableArea",
+  ];
 
   public activeTool = Tool.SmartBrush;
 
@@ -256,5 +259,9 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
     );
 
     return dragPoint;
+  }
+
+  public finishStroke() {
+    this.context?.persist();
   }
 }
