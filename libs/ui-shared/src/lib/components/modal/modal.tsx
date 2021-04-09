@@ -18,6 +18,7 @@ const ModalTitle = styled(Title)`
   font-size: 16px;
   line-height: 16px;
   font-weight: ${fontWeight("regular")};
+  margin-bottom: 12px;
 `;
 
 export const Divider = styled.div`
@@ -25,7 +26,6 @@ export const Divider = styled.div`
   height: 1px;
   border-radius: 1px;
   background-color: ${color("sheetBorder")};
-  margin-top: 12px;
 `;
 
 export const Modal: React.FC<ModalProps> = ({
@@ -34,7 +34,7 @@ export const Modal: React.FC<ModalProps> = ({
   children,
   ...rest
 }) => (
-  <ModalContainer>
+  <ModalContainer {...rest}>
     {(labelTx || label) && (
       <>
         <ModalTitle tx={labelTx} text={label} />

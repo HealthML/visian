@@ -3,7 +3,8 @@ import { makeObservable, observable } from "mobx";
 
 const colorModes = {
   light: {
-    text: "#000",
+    text: "rgba(0,0,0,0.8)",
+    lightText: "rgba(0,0,0,0.5)",
     background: "#fff",
     primary: "#00f",
     secondary: "#00a",
@@ -15,19 +16,24 @@ const colorModes = {
     sheetBorder: "rgba(50, 50, 50, 0.3)",
     placeholder: "rgba(0, 0, 0, 0.2)",
     modalUnderlay: "rgba(255, 255, 255, 0.8)",
+    redSheet: "rgba(202,51,69,0.3)",
+    redBorder: "rgba(202,51,69,0.5)",
   },
   dark: {
-    text: "#fff",
+    text: "rgba(255,255,255,0.8)",
+    lightText: "rgba(255,255,255,0.4)",
     background: "#0C0E1B",
     primary: "#0cf",
     secondary: "#f0e",
     gray: "rgba(255,255,255,0.5)",
-    lightGray: "rgba(255,255,255,0.5)",
+    lightGray: "rgba(255,255,255,0.3)",
     veryLightGray: "rgba(255,255,255,0.1)",
     sheet: "rgba(255,255,255,0.1)",
     sheetBorder: "rgba(255, 255, 255, 0.3)",
     placeholder: "rgba(255, 255, 255, 0.2)",
     modalUnderlay: "rgba(12, 14, 27, 0.8)",
+    redSheet: "rgba(202,51,69,0.3)",
+    redBorder: "rgba(202,51,69,0.5)",
   },
 };
 
@@ -79,7 +85,7 @@ export const theme = {
     iconLarge: "30px",
     maxContentWidth: "940px",
     recordImage: "220px",
-    buttonHeight: "46px",
+    buttonHeight: "40px",
     sliderHeight: "30px",
     sliderThumbWidth: "2px",
     sliderThumbHeight: "22px",

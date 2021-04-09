@@ -7,6 +7,8 @@ import { Text } from "../text";
 
 const StyledText = styled(Text)`
   font-weight: ${fontWeight("regular")};
+  line-height: 16px;
+  font-size: 16px;
 `;
 
 const BaseButton: React.FC<ButtonProps> = ({
