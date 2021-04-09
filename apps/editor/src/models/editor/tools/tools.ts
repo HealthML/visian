@@ -31,6 +31,7 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
   public isCursorOverDrawableArea = false;
 
   private brushWidthScreen = 0.02;
+  private lockedBrushSizePixels?: number;
 
   public smartBrushNeighborThreshold = 6;
   public smartBrushSeedThreshold = 10;
@@ -67,15 +68,17 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
       [Tool.SmartEraser]: this.smartBrush,
     };
 
-    makeObservable<this, "brushWidthScreen">(this, {
+    makeObservable<this, "brushWidthScreen" | "lockedBrushSizePixels">(this, {
       activeTool: observable,
       isCursorOverDrawableArea: observable,
       smartBrushNeighborThreshold: observable,
       smartBrushSeedThreshold: observable,
       brushWidthScreen: observable,
+      lockedBrushSizePixels: observable,
 
-      brushSizePixels: computed,
       isBrushToolSelected: computed,
+      isBrushSizeLocked: computed,
+      brushSizePixels: computed,
 
       applySnapshot: action,
       setActiveTool: action,
@@ -83,6 +86,7 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
       setBrushSizePixels: action,
       setSmartBrushSeedTreshold: action,
       setSmartBrushNeighborThreshold: action,
+      setLockedBrushSizePixels: action,
     });
   }
 
@@ -95,7 +99,15 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
     ].includes(this.activeTool);
   }
 
+  public get isBrushSizeLocked() {
+    return this.lockedBrushSizePixels !== undefined;
+  }
+
   public get brushSizePixels() {
+    if (this.lockedBrushSizePixels !== undefined) {
+      return this.lockedBrushSizePixels;
+    }
+
     const pixelWidth = this.editor.viewSettings.pixelSize?.x;
 
     // Size is rounded to the closest 0.5 step, to allow pixelSize 0.5 for the 2x2 brush.
@@ -132,6 +144,14 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
 
   public setSmartBrushNeighborThreshold(value = 10) {
     this.smartBrushNeighborThreshold = value;
+  }
+
+  public setLockedBrushSizePixels(value?: number) {
+    if (value === undefined && this.lockedBrushSizePixels) {
+      this.setBrushSizePixels(this.lockedBrushSizePixels);
+    }
+
+    this.lockedBrushSizePixels = value;
   }
 
   public toJSON() {
