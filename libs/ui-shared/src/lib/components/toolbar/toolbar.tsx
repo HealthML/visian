@@ -9,7 +9,7 @@ const ToolbarContainer = styled(Sheet)`
   justify-content: flex-start;
   align-items: center;
   flex-direction: column;
-  padding: 0;
+  padding: 6px 0;
 
   width: 40px;
 `;

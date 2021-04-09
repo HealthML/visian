@@ -11,16 +11,19 @@ const SideViewContainer = styled.div<{ shouldShowSideViews?: boolean }>`
   display: ${(props) => (props.shouldShowSideViews ? "flex" : "none")};
   flex-direction: column;
   position: relative;
+  margin-right: 20px;
 `;
 
 const SideView = styled(Sheet)`
   border-radius: 10px;
-  margin-top: 40px;
+  margin-top: 0px;
   padding-bottom: 100%;
   pointer-events: auto;
   position: relative;
   user-select: none;
   width: 100%;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.3);
 `;
 
 const SideViewCanvas = styled.canvas`

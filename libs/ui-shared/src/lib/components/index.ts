@@ -15,3 +15,5 @@ export * from "./text";
 export * from "./text-input";
 export * from "./tooltip";
 export * from "./webgl-canvas";
+export * from "./icon";
+export * from "./toolbar";

@@ -8,6 +8,10 @@ import {
   Slider,
   Spacer,
   Text,
+  Icon,
+  SquareButton,
+  Toolbar,
+  Tool,
 } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
 import React, { useCallback, useState } from "react";
@@ -20,7 +24,7 @@ import { UIOverlayProps } from "./ui-overlay.props";
 const Container = styled(AbsoluteCover)`
   align-items: stretch;
   display: flex;
-  padding: 12px;
+  padding: 20px;
   z-index: 1;
   pointer-events: none;
   user-select: none;
@@ -46,6 +50,45 @@ const DropSheet = styled.div`
   display: flex;
   flex-direction: row;
   padding-right: 10%;
+`;
+
+const ColumnLeft = styled.div`
+  display: flex;
+  flex-direction: column;
+  width: 50%;
+  justify-content: flex-start;
+`;
+
+const ColumnRight = styled.div`
+  display: flex;
+  flex-direction: row;
+  width: 50%;
+  justify-content: flex-end;
+`;
+
+const RightBar = styled.div`
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+`;
+
+const TopConsole = styled.div`
+  display: flex;
+  width: 20%;
+  overflow: auto;
+  margin: auto;
+  position: absolute;
+  top: 20px;
+  left: 0;
+  bottom: 1;
+  right: 0;
+  justify-content: center;
+`;
+
+const SliceSlider = styled(Sheet)`
+  width: 40px;
+  padding: 4px 0;
+  flex: 1 0;
 `;
 
 export const UIOverlay = observer<UIOverlayProps>(
@@ -102,18 +145,47 @@ export const UIOverlay = observer<UIOverlayProps>(
             <Text tx="start" />
           </StartTextContainer>
         )}
-        <Spacer />
-        <SideViews />
-        <Sheet>
-          <Slider
-            isVertical
-            isInverted
-            min={0}
-            max={store?.editor.viewSettings.getMaxSlice() || 0}
-            value={store?.editor.viewSettings.getSelectedSlice()}
-            onChange={setSelectedSlice}
-          />
-        </Sheet>
+        <TopConsole>
+          <Text tx="T1.nii" />
+        </TopConsole>
+        <ColumnLeft>
+          <SquareButton style={{ marginBottom: 16 }}>
+            <Icon icon="menu" />
+          </SquareButton>
+          <Toolbar style={{ marginBottom: 16 }}>
+            <Tool icon="moveTool" />
+            <Tool icon="pixelBrush" />
+            <Tool icon="magicBrush" />
+            <Tool icon="erase" />
+            <Tool icon="trash" />
+          </Toolbar>
+          <SquareButton style={{ marginBottom: 16 }}>
+            <Icon icon="layers" />
+          </SquareButton>
+        </ColumnLeft>
+        <ColumnRight>
+          <SideViews />
+          <RightBar>
+            <SquareButton style={{ marginBottom: 16 }}>
+              <Icon icon="export" />
+            </SquareButton>
+            <SquareButton style={{ marginBottom: 16 }}>
+              <Icon icon="settings" />
+            </SquareButton>
+            <SliceSlider>
+              <Icon icon="arrowUp" />
+              <Slider
+                isVertical
+                isInverted
+                min={0}
+                max={store?.editor.viewSettings.getMaxSlice() || 0}
+                value={store?.editor.viewSettings.getSelectedSlice()}
+                onChange={setSelectedSlice}
+              />
+              <Icon icon="arrowDown" />
+            </SliceSlider>
+          </RightBar>
+        </ColumnRight>
 
         {isDraggedOver && (
           <DropSheet>
