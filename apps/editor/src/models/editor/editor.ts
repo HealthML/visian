@@ -85,6 +85,7 @@ export class Editor implements ISerializable<EditorSnapshot> {
   public setImage(image: Image) {
     this.image = image;
     this.annotation = new Image({
+      name: `${this.image.name.split(".")[0]}_annotation`,
       origin: this.image.origin.toArray(),
       orientation: this.image.orientation,
       voxelCount: this.image.voxelCount.toArray(),

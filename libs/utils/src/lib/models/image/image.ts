@@ -5,6 +5,7 @@ import {
   FloatTypes,
   IntTypes,
   ITKImage,
+  ITKImageType,
   ITKMatrix,
   readMedicalImage,
   TypedArray,
@@ -73,7 +74,9 @@ export class Image<T extends TypedArray = TypedArray>
   }
 
   public static async fromFile(file: File) {
-    return Image.fromITKImage(await readMedicalImage(file));
+    const image = Image.fromITKImage(await readMedicalImage(file));
+    image.name = file.name;
+    return image;
   }
 
   /**
@@ -345,6 +348,36 @@ export class Image<T extends TypedArray = TypedArray>
     if (this.texture) {
       this.texture.needsUpdate = true;
     }
+  }
+
+  public toITKImage() {
+    const image = new ITKImage<T>(
+      new ITKImageType(
+        this.dimensionality,
+        this.voxelComponentType,
+        this.voxelType,
+        this.voxelComponents,
+      ),
+    );
+
+    image.name = this.name;
+    image.origin = this.origin.toArray();
+    image.spacing = this.voxelSpacing.toArray();
+    image.direction = this.orientation;
+    image.size = this.voxelCount.toArray();
+
+    // Clone the data array to protect it from modifications
+    // & enable hand-off to web workers
+    image.data = this.getData();
+    image.data = unifyOrientation(
+      new (image.data.constructor as new (data: T) => T)(image.data),
+      image.direction,
+      image.imageType.dimension,
+      image.size,
+      image.imageType.components,
+    ) as T;
+
+    return image;
   }
 
   public toJSON() {
