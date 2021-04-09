@@ -71,5 +71,5 @@ multi.args = {
   stepSize: 0,
   isInverted: false,
   isVertical: false,
-  shouldShowRange: true,
+  showRange: true,
 };
