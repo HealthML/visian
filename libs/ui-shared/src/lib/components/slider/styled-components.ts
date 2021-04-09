@@ -68,33 +68,6 @@ export const SliderThumb = styled.div.attrs<ThumbProps>((props) => {
   z-index: 10;
 `;
 
-export const SliderLabel = styled(Text).attrs<ThumbProps>((props) => {
-  const thumbPositionMain = `${props.position * 100}%`;
-  const thumbPositionAcross = computeStyleValue<ThemeProps>(
-    [size("sliderHeight")],
-    (sliderHeight) => -sliderHeight,
-  )(props);
-
-  return {
-    style: {
-      top: props.isVertical ? thumbPositionMain : thumbPositionAcross,
-      left: props.isVertical ? thumbPositionAcross : thumbPositionMain,
-    },
-  };
-})<ThumbProps & SliderStylingSettings>`
-  display: block;
-  line-height: ${fontSize("default")};
-  margin: ${(props) =>
-    props.isVertical
-      ? `${scaleMetric(fontSize("default")(props), -0.5)} 0 0 0`
-      : "0 0 0 -50%"};
-  opacity: 0.6;
-  position: absolute;
-  text-align: ${(props) => (props.isVertical ? "right" : "center")};
-  width: ${(props) => !props.isVertical && "100%"};
-  z-index: 10;
-`;
-
 export const SliderRangeSelection = styled.div.attrs<SliderRangeSelectionProps>(
   (props) => {
     return {
