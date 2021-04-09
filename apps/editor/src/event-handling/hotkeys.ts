@@ -48,7 +48,7 @@ export const setUpHotKeys = (store: RootStore): IDisposer => {
 
     writeSingleMedicalImage(
       image.toITKImage(),
-      `${image.name.split(".")[0]}_edited.nii.gz`,
+      `${image.name.split(".")[0]}.nii.gz`,
     ).then((file) => {
       if (!file) return;
 
