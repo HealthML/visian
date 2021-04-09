@@ -1,8 +1,4 @@
-import React, {
-  PointerEvent as ReactPointerEvent,
-  useCallback,
-  useState,
-} from "react";
+import React, { useCallback, useState } from "react";
 
 import Slider from "./slider";
 import { SliderProps } from "./slider.props";
@@ -10,15 +6,35 @@ import { SliderProps } from "./slider.props";
 export default {
   cmponent: Slider,
   title: "Slider",
-  argTypes: { onChange: { action: "onChange" } },
+  argTypes: {
+    onChange: { action: "onChange" },
+    roundMethod: {
+      control: {
+        type: "select",
+        options: ["floor", "ceil", "round"],
+      },
+    },
+    scaleType: {
+      control: {
+        type: "select",
+        options: ["linear", "quadratic"],
+      },
+    },
+    enforceSerialThumbs: {
+      control: {
+        type: "select",
+        options: ["none", "block", "push"],
+      },
+    },
+  },
 };
 
 const Template = ({ onChange, ...args }: SliderProps) => {
-  const [value, setValue] = useState<number>(args.defaultValue || 0);
+  const [value, setValue] = useState<number | number[]>(args.defaultValue || 0);
   const changeHandler = useCallback(
-    (value: number) => {
-      setValue(value);
-      if (onChange) onChange(value);
+    (newValue: number | number[], id: number, thumbValue: number) => {
+      setValue(newValue);
+      if (onChange) onChange(newValue, id, thumbValue);
     },
     [onChange],
   );
@@ -28,19 +44,32 @@ const Template = ({ onChange, ...args }: SliderProps) => {
 
 export const primary = (args: SliderProps) => Template(args);
 primary.args = {
+  defaultValue: 5,
   min: 0,
-  max: 100,
-  defaultValue: 50,
-  isVertical: false,
+  max: 10,
+  stepSize: 0,
   isInverted: false,
+  isVertical: false,
 };
 
 export const stepped = (args: SliderProps) => Template(args);
 stepped.args = {
-  stepSize: 1,
+  defaultValue: 1,
   min: 0,
   max: 10,
-  defaultValue: 1,
-  isVertical: false,
+  stepSize: 1,
+  roundMethod: "round",
   isInverted: false,
+  isVertical: false,
+};
+
+export const multi = (args: SliderProps) => Template(args);
+multi.args = {
+  defaultValue: [2, 8],
+  min: 0,
+  max: 10,
+  stepSize: 0,
+  isInverted: false,
+  isVertical: false,
+  shouldShowRange: true,
 };

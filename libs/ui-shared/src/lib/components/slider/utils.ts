@@ -1,51 +1,115 @@
-import { useCallback, useRef, PointerEvent as ReactPointerEvent } from "react";
+import { PointerEvent as ReactPointerEvent, useCallback, useRef } from "react";
 
-export interface Pointer {
-  clientX: number;
-  clientY: number;
-}
+import type {
+  PointerCoordinates,
+  roundMethod,
+  scaleType,
+  SliderValueSettings,
+  SliderVerticalitySettings,
+} from "./types";
 
-const roundToStepSize = (value: number, stepSize?: number) =>
-  stepSize ? Math.round(value / stepSize) * stepSize : value;
-
-export const valueToSliderPos = (
+/**
+ * Applies a function to the given value to produce a (non-uniform) slider scale.
+ *
+ * @param value A [0, 1]-ranged value.
+ * @param shouldInvert If `true`, inverts the applied function.
+ */
+export const applyScale = (
   value: number,
-  min = 0,
-  max = 99,
-  inverted = false,
-  stepSize?: number,
+  scaleType?: scaleType,
+  shouldInvert?: boolean,
 ) => {
-  const relativeValue = Math.max(
-    0,
-    Math.min(1, (roundToStepSize(value, stepSize) - min) / (max - min)),
-  );
-  return `${(inverted ? 1 - relativeValue : relativeValue) * 100}%`;
+  switch (scaleType) {
+    case "quadratic":
+      if (shouldInvert) {
+        return value < 0 ? -Math.sqrt(-value) : Math.sqrt(value);
+      }
+      return value < 0 ? -value * value : value * value;
+
+    default:
+      return value;
+  }
 };
 
-/** Extracts */
-export const pointerToSliderValue = (
-  pointer: Pointer,
-  slider: HTMLElement,
-  min = 0,
-  max = 99,
-  vertical = false,
-  inverted = false,
+export const roundToStepSize = (
+  value: number,
   stepSize?: number,
+  roundMethod?: roundMethod,
 ) => {
+  if (!stepSize) return value;
+
+  switch (roundMethod) {
+    case "floor":
+      return Math.floor(value / stepSize) * stepSize;
+
+    case "ceil":
+      return Math.ceil(value / stepSize) * stepSize;
+
+    default:
+      return Math.round(value / stepSize) * stepSize;
+  }
+};
+
+/**
+ * Returns the relative position of the slider's thumb along the main axis
+ * based on it's current value.
+ *
+ * @return A [0, 1]-ranged value indicating the relative position.
+ */
+export const valueToSliderPos = (
+  value: number,
+  sliderConfig: SliderValueSettings,
+) => {
+  const { min = 0, max = 1 } = sliderConfig;
+
+  const relativeValue = applyScale(
+    Math.max(
+      0,
+      Math.min(
+        1,
+        (roundToStepSize(
+          value,
+          sliderConfig.stepSize,
+          sliderConfig.roundMethod,
+        ) -
+          min) /
+          (max - min),
+      ),
+    ),
+    sliderConfig.scaleType,
+    true,
+  );
+  return sliderConfig.isInverted ? 1 - relativeValue : relativeValue;
+};
+
+/** Returns the slider's value from a pointer event to it. */
+export const pointerToSliderValue = (
+  pointer: PointerCoordinates,
+  slider: HTMLElement,
+  sliderConfig: SliderValueSettings & SliderVerticalitySettings,
+) => {
+  const { min = 0, max = 1 } = sliderConfig;
+
   const boundingBox = slider.getBoundingClientRect();
 
   const relativePos = Math.max(
     0,
     Math.min(
       1,
-      vertical
+      sliderConfig.isVertical
         ? (pointer.clientY - boundingBox.y) / boundingBox.height
         : (pointer.clientX - boundingBox.x) / boundingBox.width,
     ),
   );
   return roundToStepSize(
-    (inverted ? 1 - relativePos : relativePos) * (max - min) + min,
-    stepSize,
+    applyScale(
+      sliderConfig.isInverted ? 1 - relativePos : relativePos,
+      sliderConfig.scaleType,
+    ) *
+      (max - min) +
+      min,
+    sliderConfig.stepSize,
+    sliderConfig.roundMethod,
   );
 };
 
@@ -59,47 +123,55 @@ export const pointerToSliderValue = (
  * @returns An object containing the applicable start event listener(s).
  * It should be applied to a React element using the spread syntax.
  */
-export const useDrag = (
-  startHandler?: (event: PointerEvent | ReactPointerEvent) => void,
-  moveHandler?: (event: PointerEvent | ReactPointerEvent) => void,
-  endHandler?: (event: PointerEvent | ReactPointerEvent) => void,
+export const useDrag = <ID = string>(
+  startHandler?: (event: PointerEvent | ReactPointerEvent, id?: ID) => void,
+  moveHandler?: (event: PointerEvent | ReactPointerEvent, id?: ID) => void,
+  endHandler?: (event: PointerEvent | ReactPointerEvent, id?: ID) => void,
 ) => {
-  const pointerIdRef = useRef<number | undefined>();
+  const idRef = useRef<Record<number, ID | undefined>>({});
 
   const boundMoveHandler = useCallback(
     (event: PointerEvent | ReactPointerEvent) => {
-      if (event.pointerId !== pointerIdRef.current) return;
+      if (idRef.current[event.pointerId] === undefined) return;
 
       event.preventDefault();
-      if (moveHandler) return moveHandler(event);
+      if (moveHandler)
+        return moveHandler(event, idRef.current[event.pointerId]);
     },
     [moveHandler],
   );
 
   const boundEndHandler = useCallback(
     (event: PointerEvent | ReactPointerEvent) => {
-      if (event.pointerId !== pointerIdRef.current) return;
-      pointerIdRef.current = undefined;
+      if (idRef.current[event.pointerId] === undefined) return;
+      const id = idRef.current[event.pointerId];
+      delete idRef.current[event.pointerId];
 
       event.preventDefault();
-      document.removeEventListener("pointermove", boundMoveHandler);
-      document.removeEventListener("pointerup", boundEndHandler);
-      document.removeEventListener("pointerleave", boundEndHandler);
-      if (endHandler) return endHandler(event);
+
+      if (!Object.keys(idRef.current).length) {
+        document.removeEventListener("pointermove", boundMoveHandler);
+        document.removeEventListener("pointerup", boundEndHandler);
+        document.removeEventListener("pointerleave", boundEndHandler);
+      }
+      if (endHandler) return endHandler(event, id);
     },
     [boundMoveHandler, endHandler],
   );
 
   const boundStartHandler = useCallback(
-    (event: PointerEvent | ReactPointerEvent) => {
-      pointerIdRef.current = event.pointerId;
+    (event: PointerEvent | ReactPointerEvent, id?: ID) => {
+      idRef.current[event.pointerId] = id;
       event.preventDefault();
-      document.addEventListener("pointermove", boundMoveHandler, {
-        passive: false,
-      });
-      document.addEventListener("pointerup", boundEndHandler);
-      document.addEventListener("pointerleave", boundEndHandler);
-      if (startHandler) return startHandler(event);
+
+      if (Object.keys(idRef.current).length === 1) {
+        document.addEventListener("pointermove", boundMoveHandler, {
+          passive: false,
+        });
+        document.addEventListener("pointerup", boundEndHandler);
+        document.addEventListener("pointerleave", boundEndHandler);
+      }
+      if (startHandler) return startHandler(event, id);
     },
     [boundEndHandler, boundMoveHandler, startHandler],
   );
