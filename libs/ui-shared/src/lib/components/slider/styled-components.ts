@@ -16,6 +16,7 @@ export const SliderContainer = styled.div<SliderVerticalitySettings>`
   cursor: pointer;
   display: flex;
   height: ${(props) => (props.isVertical ? "100%" : size("sliderHeight"))};
+  pointer-events: auto;
   position: relative;
   margin: ${(props) => {
     const margin = scaleMetric(size("sliderThumbWidth")(props), 0.5);

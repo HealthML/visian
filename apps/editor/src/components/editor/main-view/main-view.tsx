@@ -49,7 +49,9 @@ export const MainView = observer<{}, HTMLCanvasElement>(
       <SyledCanvas
         activeTool={store?.editor.tools.activeTool}
         backgroundColor={store?.editor.backgroundColor}
-        isCursorOverDrawableArea={store?.editor.tools.isCursorOverDrawableArea}
+        isCursorOverDrawableArea={
+          store?.editor.image && store?.editor.tools.isCursorOverDrawableArea
+        }
         onContextMenu={preventDefault}
         onPointerDown={onPointerDown}
         ref={ref}

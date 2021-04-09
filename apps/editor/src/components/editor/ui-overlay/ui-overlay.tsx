@@ -4,6 +4,8 @@ import {
   coverMixin,
   DropZone,
   FlexRow,
+  Sheet,
+  Slider,
   Spacer,
   Text,
 } from "@visian/ui-shared";
@@ -86,6 +88,13 @@ export const UIOverlay = observer<UIOverlayProps>(
       [onDropCompleted, store],
     );
 
+    const setSelectedSlice = useCallback(
+      (value: number | number[]) => {
+        store?.editor.viewSettings.setSelectedSlice(value as number);
+      },
+      [store],
+    );
+
     return (
       <Container {...rest}>
         {!store?.editor.image && (
@@ -95,6 +104,16 @@ export const UIOverlay = observer<UIOverlayProps>(
         )}
         <Spacer />
         <SideViews />
+        <Sheet>
+          <Slider
+            isVertical
+            isInverted
+            min={0}
+            max={store?.editor.viewSettings.getMaxSlice() || 0}
+            value={store?.editor.viewSettings.getSelectedSlice()}
+            onChange={setSelectedSlice}
+          />
+        </Sheet>
 
         {isDraggedOver && (
           <DropSheet>

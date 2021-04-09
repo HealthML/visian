@@ -139,6 +139,10 @@ export class EditorViewSettings
     return this.selectedVoxel.getFromView(viewType);
   }
 
+  public getMaxSlice(viewType = this.mainViewType) {
+    return this.editor.image?.voxelCount.getFromView(viewType);
+  }
+
   public stepSelectedSlice(stepSize = 1, viewType = this.mainViewType) {
     this.setSelectedSlice(this.getSelectedSlice(viewType) + stepSize, viewType);
   }

@@ -201,7 +201,13 @@ export const Slider: React.FC<SliderProps> = (props) => {
       )}
       {valueArray.map((_thumbValue, index) => {
         const thumbPos = thumbPositions[index];
-        return <SliderThumb isVertical={isVertical} position={thumbPos} />;
+        return (
+          <SliderThumb
+            key={index}
+            isVertical={isVertical}
+            position={thumbPos}
+          />
+        );
       })}
       {children}
     </SliderContainer>
