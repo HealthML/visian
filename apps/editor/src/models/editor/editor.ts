@@ -7,13 +7,18 @@ import tc from "tinycolor2";
 import { StoreContext } from "../types";
 import { EditorTools } from "./tools";
 import { EditorUndoRedo } from "./undo-redo";
-import { EditorViewSettings } from "./view-settings";
+import {
+  EditorViewSettings,
+  EditorViewSettingsSnapshot,
+} from "./view-settings";
 
 import type { SliceRenderer } from "../../rendering";
 export interface EditorSnapshot {
   backgroundColor: string;
   image?: ImageSnapshot;
   annotation?: ImageSnapshot;
+
+  viewSettings?: EditorViewSettingsSnapshot;
 }
 
 export class Editor implements ISerializable<EditorSnapshot> {
@@ -80,6 +85,7 @@ export class Editor implements ISerializable<EditorSnapshot> {
   public setImage(image: Image) {
     this.image = image;
     this.annotation = new Image({
+      name: `${this.image.name.split(".")[0]}_annotation`,
       origin: this.image.origin.toArray(),
       orientation: this.image.orientation,
       voxelCount: this.image.voxelCount.toArray(),
@@ -101,6 +107,7 @@ export class Editor implements ISerializable<EditorSnapshot> {
     }
     this.annotation = image;
     this.context?.persistImmediately();
+
     this.undoRedo.clear();
   }
   public async importAnnotation(imageFile: File) {
@@ -116,6 +123,8 @@ export class Editor implements ISerializable<EditorSnapshot> {
       backgroundColor: this.backgroundColor,
       image: this.image?.toJSON(),
       annotation: this.annotation?.toJSON(),
+
+      viewSettings: this.viewSettings.toJSON(),
     };
   }
 
@@ -124,6 +133,8 @@ export class Editor implements ISerializable<EditorSnapshot> {
     this.image = snapshot.image && new Image(snapshot.image);
     this.annotation = snapshot.annotation && new Image(snapshot.annotation);
 
-    this.viewSettings.reset();
+    if (snapshot.viewSettings) {
+      this.viewSettings.applySnapshot(snapshot.viewSettings);
+    }
   }
 }

@@ -32,9 +32,6 @@ declare module "itk/Image" {
    * @see https://insightsoftwareconsortium.github.io/itk-js/api/Image.html
    */
   class Image<T extends TypedArray = TypedArray> {
-    /** The ImageType for this image. */
-    public imageType: ImageType;
-
     /**
      * An optional name that describes this image.
      *
@@ -75,6 +72,11 @@ declare module "itk/Image" {
 
     /** A TypedArray containing the pixel buffer data. */
     public data: T;
+
+    constructor(
+      /** The ImageType for this image. */
+      public imageType: ImageType,
+    ) {}
   }
 
   export = Image;
@@ -91,20 +93,22 @@ declare module "itk/ImageType" {
    * @see https://insightsoftwareconsortium.github.io/itk-js/api/ImageType.html
    */
   class ImageType {
-    /** An integer that describes the dimension for the image, typically 2 or 3. */
-    public dimension: number;
+    constructor(
+      /** An integer that describes the dimension for the image, typically 2 or 3. */
+      public dimension: number,
 
-    /**
-     * The type of the components in a pixel. This is one of the IntTypes or
-     * FloatTypes.
-     */
-    public componentType: FloatTypes | IntTypes;
+      /**
+       * The type of the components in a pixel. This is one of the IntTypes or
+       * FloatTypes.
+       */
+      public componentType: FloatTypes | IntTypes,
 
-    /** The PixelType. For example, PixelTypes.Scalar or PixelTypes.Vector. */
-    public pixelType: PixelTypes;
+      /** The PixelType. For example, PixelTypes.Scalar or PixelTypes.Vector. */
+      public pixelType: PixelTypes,
 
-    /** The number of components in a pixel. For a Scalar pixelType, this will be 1. */
-    public components: number;
+      /** The number of components in a pixel. For a Scalar pixelType, this will be 1. */
+      public components: number,
+    ) {}
   }
 
   export = ImageType;
@@ -201,4 +205,17 @@ declare module "itk/readImageFile" {
     file: File,
   ) => Promise<{ image?: Image; webWorker: Worker }>;
   export default readImageFile;
+}
+
+declare module "itk/writeImageArrayBuffer" {
+  import Image from "itk/Image";
+
+  const writeImageArrayBuffer: (
+    webWorker: Worker | null,
+    useCompression: boolean,
+    image: ITKImage,
+    fileName: string,
+    mimeType?: string,
+  ) => Promise<{ arrayBuffer?: ArrayBuffer; webWorker: Worker }>;
+  export default writeImageArrayBuffer;
 }
