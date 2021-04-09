@@ -369,7 +369,13 @@ export class Image<T extends TypedArray = TypedArray>
     // Clone the data array to protect it from modifications
     // & enable hand-off to web workers
     image.data = this.getData();
-    image.data = new (image.data.constructor as new (data: T) => T)(image.data);
+    image.data = unifyOrientation(
+      new (image.data.constructor as new (data: T) => T)(image.data),
+      image.direction,
+      image.imageType.dimension,
+      image.size,
+      image.imageType.components,
+    ) as T;
 
     return image;
   }
