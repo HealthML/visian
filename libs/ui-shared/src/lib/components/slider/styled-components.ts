@@ -3,15 +3,13 @@ import styled from "styled-components";
 import {
   color,
   computeStyleValue,
-  fontSize,
   lineHeight,
   scaleMetric,
   size,
   ThemeProps,
 } from "../../theme";
-import { Text } from "../text";
 import { SliderRangeSelectionProps, ThumbProps } from "./slider.props";
-import { SliderStylingSettings, SliderVerticalitySettings } from "./types";
+import { SliderVerticalitySettings } from "./types";
 
 export const SliderContainer = styled.div<SliderVerticalitySettings>`
   align-items: center;
