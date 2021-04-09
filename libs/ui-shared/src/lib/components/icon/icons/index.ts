@@ -1,0 +1,13 @@
+export { ReactComponent as arrowDown } from "./arrow-down.svg";
+export { ReactComponent as arrowUp } from "./arrow-up.svg";
+export { ReactComponent as erase } from "./erase.svg";
+export { ReactComponent as export } from "./export.svg";
+export { ReactComponent as eyeCrossed } from "./eye-crossed.svg";
+export { ReactComponent as eye } from "./eye.svg";
+export { ReactComponent as layers } from "./layers.svg";
+export { ReactComponent as magicBrush } from "./magic-brush.svg";
+export { ReactComponent as menu } from "./menu.svg";
+export { ReactComponent as moveTool } from "./move-tool.svg";
+export { ReactComponent as pixelBrush } from "./pixel-brush.svg";
+export { ReactComponent as settings } from "./settings.svg";
+export { ReactComponent as trash } from "./trash.svg";
