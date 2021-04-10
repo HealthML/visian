@@ -4,5 +4,13 @@
   "drop-image": "Legen Sie Ihren Scan hier ab",
   "drop-annotation": "Legen Sie Ihre Annotation hier ab",
 
-  "start": "Starten Sie, in dem Sie einen Scan hier ablegen."
+  "start": "Starten Sie, in dem Sie einen Scan hier ablegen.",
+
+  "menu": "Menü",
+  "theme": "Farbschema",
+  "dark": "Dunkel",
+  "light": "Hell",
+  "language": "Sprache",
+  "ideas-feedback": "Ideen oder Feedback?",
+  "clear-data": "Daten Löschen"
 }

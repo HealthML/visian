@@ -7,6 +7,7 @@ import {
   Modal,
   Switch,
   useModalPosition,
+  useTranslation,
 } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
 import React, { useCallback, useState } from "react";
@@ -15,6 +16,7 @@ import styled from "styled-components";
 import { useStore } from "../../../app/root-store";
 import { feedbackMailAddress } from "../../../constants";
 
+// Styled Components
 const FeedbackButton = styled(Button)`
   width: 100%;
   background: ${color("blueSheet")};
@@ -35,6 +37,17 @@ const ResetButton = styled(Button)`
     border-color: rgba(202, 51, 69, 1);
   }
 `;
+
+// Menu Items
+const themeSwitchItems = [
+  { value: "dark", labelTx: "dark" },
+  { value: "light", labelTx: "light" },
+];
+
+const languageSwitchItems = [
+  { label: "English", value: "en" },
+  { label: "Deutsch", value: "de" },
+];
 
 export const Menu: React.FC = observer(() => {
   const store = useStore();
@@ -59,11 +72,20 @@ export const Menu: React.FC = observer(() => {
     },
     [store],
   );
+
   const sendFeedback = useCallback(() => {
     const mail = document.createElement("a");
     mail.href = `mailto:${feedbackMailAddress}`;
     mail.click();
   }, []);
+
+  const { i18n } = useTranslation();
+  const setLanguage = useCallback(
+    (language: string) => {
+      i18n.changeLanguage(language);
+    },
+    [i18n],
+  );
 
   return (
     <>
@@ -77,28 +99,24 @@ export const Menu: React.FC = observer(() => {
         style={modalPosition}
         isOpen={isModalOpen}
         onOutsidePress={closeModal}
-        label="Menu"
+        labelTx="menu"
       >
         <Switch
-          label="Theme"
-          items={[
-            { value: "dark", label: "Dark" },
-            { value: "light", label: "Light" },
-          ]}
+          labelTx="theme"
+          items={themeSwitchItems}
           onChange={setTheme}
           value={store?.theme || "dark"}
         />
         <Switch
-          label="Language"
-          items={[{ value: "English" }, { value: "German" }]}
+          labelTx="language"
+          items={languageSwitchItems}
+          value={i18n.language.split("-")[0]}
+          onChange={setLanguage}
         />
         <Divider />
-        <FeedbackButton
-          text="Ideas or Feedback?"
-          onPointerDown={sendFeedback}
-        />
+        <FeedbackButton tx="ideas-feedback" onPointerDown={sendFeedback} />
         <Divider />
-        <ResetButton text="Clear Data" onPointerDown={store?.destroy} />
+        <ResetButton tx="clear-data" onPointerDown={store?.destroy} />
       </Modal>
     </>
   );

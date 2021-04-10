@@ -4,5 +4,13 @@
   "drop-image": "Drop your scan here",
   "drop-annotation": "Drop your annotation here",
 
-  "start": "Start by dragging in a scan."
+  "start": "Start by dragging in a scan.",
+
+  "menu": "Menu",
+  "theme": "Theme",
+  "dark": "Dark",
+  "light": "Light",
+  "language": "Language",
+  "ideas-feedback": "Ideas or Feedback?",
+  "clear-data": "Clear Data"
 }
