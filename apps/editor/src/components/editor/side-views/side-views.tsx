@@ -16,7 +16,6 @@ const SideViewContainer = styled.div<{ shouldShowSideViews?: boolean }>`
 
 const SideView = styled(Sheet)`
   border-radius: 10px;
-  margin-top: 0px;
   padding-bottom: 100%;
   pointer-events: auto;
   position: relative;
@@ -70,6 +69,9 @@ export const SideViews = observer(() => {
       setSize(`${size.width}x${size.height}`);
     });
 
+    const rect = document.body.getBoundingClientRect();
+    setSize(`${rect.width}x${rect.height}`);
+
     return () => {
       resizeSensor.detach();
     };
@@ -81,7 +83,7 @@ export const SideViews = observer(() => {
     if (divRef.current) {
       setSideViewSize(
         Math.min(
-          (divRef.current.getBoundingClientRect().height - 40) / 2 - 40,
+          (divRef.current.getBoundingClientRect().height - 20) / 2,
           window.innerWidth * 0.3,
         ),
       );
@@ -96,7 +98,7 @@ export const SideViews = observer(() => {
       style={{ width: sideViewSize }}
       ref={divRef}
     >
-      <SideView>
+      <SideView style={{ marginBottom: 20 }}>
         <SideViewCanvas
           width={400}
           height={400}
