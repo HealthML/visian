@@ -46,7 +46,14 @@ export const Switch: React.FC<SwitchProps> = ({
   ...rest
 }) => {
   const { length } = items;
-  const actualValue = value || defaultValue || (length ? items[0].value : "");
+  const actualValue =
+    value === undefined
+      ? defaultValue === undefined
+        ? length
+          ? items[0].value
+          : ""
+        : defaultValue
+      : value;
   const activeIndex = Math.max(
     0,
     items.findIndex((item) => item.value === actualValue),

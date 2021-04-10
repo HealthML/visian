@@ -1,10 +1,12 @@
-export interface SwitchItemType {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export interface SwitchItemType<T = any> {
   labelTx?: string;
   label?: string;
 
-  value: string;
+  value: T;
 }
 
-export interface SwitchItemProps extends SwitchItemType {
-  onChange?: (value: string) => void;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export interface SwitchItemProps<T = any> extends SwitchItemType<T> {
+  onChange?: (value: T) => void;
 }

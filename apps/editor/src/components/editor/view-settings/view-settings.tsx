@@ -5,15 +5,28 @@ import {
   Switch,
   useModalPosition,
 } from "@visian/ui-shared";
+import { ViewType } from "@visian/utils";
 import { observer } from "mobx-react-lite";
 import React, { useCallback, useState } from "react";
 import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
 
+// Styled Components
 const SpacedSliderField = styled(SliderField)`
   margin-bottom: 16px;
 `;
+
+// Menu Items
+const sideViewsSwitchItems = [
+  { labelTx: "on", value: true },
+  { labelTx: "off", value: false },
+];
+const mainViewTypeSwitchItems = [
+  { label: "T", value: ViewType.Transverse },
+  { label: "S", value: ViewType.Sagittal },
+  { label: "C", value: ViewType.Coronal },
+];
 
 export const ViewSettings: React.FC = observer(() => {
   const store = useStore();
@@ -28,6 +41,20 @@ export const ViewSettings: React.FC = observer(() => {
   const [buttonRef, setButtonRef] = useState<HTMLButtonElement | null>(null);
   const modalPosition = useModalPosition(buttonRef, "left");
 
+  // Menu Actions
+  const setContrast = useCallback(
+    (value: number | number[]) => {
+      store?.editor.viewSettings.setContrast(value as number);
+    },
+    [store],
+  );
+  const setBrightness = useCallback(
+    (value: number | number[]) => {
+      store?.editor.viewSettings.setBrightness(value as number);
+    },
+    [store],
+  );
+
   return (
     <>
       <FloatingUIButton
@@ -36,18 +63,35 @@ export const ViewSettings: React.FC = observer(() => {
         onPointerDown={toggleModal}
         isActive={isModalOpen}
       />
-      <Modal style={modalPosition} isOpen={isModalOpen} label="View Settings">
+      <Modal style={modalPosition} isOpen={isModalOpen} labelTx="view-settings">
         <Switch
-          label="Side Views"
-          items={[{ value: "On" }, { value: "Off" }]}
+          labelTx="side-views"
+          items={sideViewsSwitchItems}
+          value={Boolean(store?.editor.viewSettings.shouldShowSideViews)}
+          onChange={store?.editor.viewSettings.toggleSideViews}
         />
         <Switch
-          label="Type"
-          items={[{ value: "T" }, { value: "S" }, { value: "C" }]}
+          labelTx="main-view-type"
+          items={mainViewTypeSwitchItems}
+          value={store?.editor.viewSettings.mainViewType}
+          onChange={store?.editor.viewSettings.setMainViewType}
         />
-        <SpacedSliderField label="Contrast" min={0} />
-        <SpacedSliderField label="Brightness" />
-        <SliderField label="Clamping" />
+        <SpacedSliderField
+          labelTx="contrast"
+          showValueLabel={true}
+          min={0}
+          max={2}
+          value={store?.editor.viewSettings.contrast}
+          onChange={setContrast}
+        />
+        <SpacedSliderField
+          labelTx="brightness"
+          showValueLabel={true}
+          min={0}
+          max={2}
+          value={store?.editor.viewSettings.brightness}
+          onChange={setBrightness}
+        />
       </Modal>
     </>
   );

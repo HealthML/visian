@@ -2,7 +2,8 @@ import React from "react";
 
 import { SwitchItemType } from "./switch-item.props";
 
-export interface SwitchProps
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export interface SwitchProps<T = any>
   extends Omit<
     React.HTMLAttributes<HTMLDivElement>,
     "defaultValue" | "onChange"
@@ -13,6 +14,6 @@ export interface SwitchProps
   items: SwitchItemType[];
 
   defaultValue?: string;
-  value?: string;
-  onChange?: (value: string) => void;
+  value?: T;
+  onChange?: (value: T) => void;
 }

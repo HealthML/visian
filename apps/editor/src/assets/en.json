@@ -15,5 +15,13 @@
   "clear-data": "Clear Data",
 
   "layers": "Layers",
-  "no-layers": "No layers loaded."
+  "no-layers": "No layers loaded.",
+
+  "view-settings": "View Settings",
+  "side-views": "Side Views",
+  "on": "On",
+  "off": "Off",
+  "main-view-type": "Main View Type",
+  "contrast": "Contrast",
+  "brightness": "Brightness"
 }
