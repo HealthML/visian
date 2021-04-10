@@ -1,7 +1,18 @@
-import { coverMixin, EventLike, Sheet, color } from "@visian/ui-shared";
-import ResizeSensor from "css-element-queries/src/ResizeSensor";
+import {
+  color,
+  coverMixin,
+  EventLike,
+  Sheet,
+  useUpdateOnResize,
+} from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
@@ -31,11 +42,13 @@ const SideViewCanvas = styled.canvas`
 `;
 
 export const SideViews = observer(() => {
-  const divRef = useRef<HTMLDivElement>(null);
+  const store = useStore();
+  const shouldShowSideViews =
+    store?.editor.image && store.editor.viewSettings.shouldShowSideViews;
+
+  // Refs Management
   const upperSideViewRef = useRef<HTMLCanvasElement>(null);
   const lowerSideViewRef = useRef<HTMLCanvasElement>(null);
-
-  const store = useStore();
   useEffect(() => {
     store?.setRef("upperSideView", upperSideViewRef);
     store?.setRef("lowerSideView", lowerSideViewRef);
@@ -46,57 +59,41 @@ export const SideViews = observer(() => {
     };
   }, [store, upperSideViewRef, lowerSideViewRef]);
 
+  // Pointer Event Handling
   const pointerDispatch = store?.pointerDispatch;
   const onPointerDownUpper = useCallback(
     (event: EventLike) => {
-      if (!pointerDispatch) return;
-      pointerDispatch(event, "upperSideView");
+      if (pointerDispatch) pointerDispatch(event, "upperSideView");
     },
     [pointerDispatch],
   );
   const onPointerDownLower = useCallback(
     (event: EventLike) => {
-      if (!pointerDispatch) return;
-      pointerDispatch(event, "lowerSideView");
+      if (pointerDispatch) pointerDispatch(event, "lowerSideView");
     },
     [pointerDispatch],
   );
 
-  // Force the side view container to re-render on layout changes:
-  const [size, setSize] = useState<string | undefined>(undefined);
-  useEffect(() => {
-    const resizeSensor = new ResizeSensor(document.body, (size) => {
-      setSize(`${size.width}x${size.height}`);
-    });
-
-    const rect = document.body.getBoundingClientRect();
-    setSize(`${rect.width}x${rect.height}`);
-
-    return () => {
-      resizeSensor.detach();
-    };
-  }, []);
-
-  const [sideViewSize, setSideViewSize] = useState(window.innerWidth * 0.3);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => {
-    if (divRef.current) {
-      setSideViewSize(
-        Math.min(
-          (divRef.current.getBoundingClientRect().height - 20) / 2,
-          window.innerWidth * 0.3,
-        ),
-      );
-    }
-  }, [size]);
+  // Side View Sizing
+  const size = useUpdateOnResize();
+  const [containerRef, setContainerRef] = useState<HTMLDivElement | null>(null);
+  const [sideViewSize, setSideViewSize] = useState(window.innerWidth * 0.4);
+  useLayoutEffect(() => {
+    if (!containerRef) return;
+    setSideViewSize(
+      Math.min(
+        (containerRef.getBoundingClientRect().height - 20) / 2,
+        window.innerWidth * 0.4,
+      ),
+    );
+    console.log("up");
+  }, [containerRef, shouldShowSideViews, size]);
 
   return (
     <SideViewContainer
-      shouldShowSideViews={
-        store?.editor.image && store.editor.viewSettings.shouldShowSideViews
-      }
+      shouldShowSideViews={shouldShowSideViews}
       style={{ width: sideViewSize }}
-      ref={divRef}
+      ref={setContainerRef}
     >
       <SideView style={{ marginBottom: 16 }}>
         <SideViewCanvas

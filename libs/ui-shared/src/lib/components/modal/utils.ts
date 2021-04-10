@@ -1,12 +1,12 @@
 import React, { useMemo } from "react";
 
-import { useResizeUpdating } from "../utils";
+import { useUpdateOnResize } from "../utils";
 
 export const useModalPosition = <T extends HTMLElement>(
   element: T | undefined | null,
   position: "left" | "right" = "right",
 ): React.CSSProperties => {
-  useResizeUpdating();
+  useUpdateOnResize();
   const rect = element?.getBoundingClientRect();
 
   return useMemo(

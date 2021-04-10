@@ -13,9 +13,9 @@ export const useIsDraggedOver = () => {
   }, [setIsDraggedOver]);
 
   const onDragEnd = useCallback(() => {
-    dragTimerRef.current = setTimeout(() => {
+    dragTimerRef.current = (setTimeout(() => {
       setIsDraggedOver(false);
-    }, 25);
+    }, 25) as unknown) as NodeJS.Timer;
   }, [setIsDraggedOver]);
 
   const onDrop = useCallback(() => {
@@ -58,8 +58,8 @@ export const useOutsidePress = <T extends HTMLElement>(
   }, [activateHandler, callback, ref]);
 };
 
-export const useResizeUpdating = () => {
-  const [, setSize] = useState<string | undefined>(undefined);
+export const useUpdateOnResize = () => {
+  const [size, setSize] = useState<string | undefined>(undefined);
   useEffect(() => {
     const resizeSensor = new ResizeSensor(document.body, (size) => {
       setSize(`${size.width}x${size.height}`);
@@ -69,4 +69,6 @@ export const useResizeUpdating = () => {
       resizeSensor.detach();
     };
   }, []);
+
+  return size;
 };
