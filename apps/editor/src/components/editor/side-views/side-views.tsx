@@ -86,7 +86,6 @@ export const SideViews = observer(() => {
         window.innerWidth * 0.4,
       ),
     );
-    console.log("up");
   }, [containerRef, shouldShowSideViews, size]);
 
   return (
