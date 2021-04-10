@@ -23,34 +23,42 @@ const StyledButton = styled(InvisibleButton)<
   opacity: ${(props) => (props.isActive ? 1 : 0.3)};
 `;
 
-export const Tool: React.FC<ToolProps> = ({
-  children,
-  icon,
-  value,
-  activeTool,
-  isActive,
-  onPress,
-  onPointerDown,
-  ...rest
-}) => {
-  const handlePress = useCallback(
-    (event: React.PointerEvent<HTMLButtonElement>) => {
-      if (onPointerDown) onPointerDown(event);
-      if (onPress) onPress(value);
+export const Tool = React.forwardRef<HTMLButtonElement, ToolProps>(
+  (
+    {
+      children,
+      icon,
+      value,
+      activeTool,
+      isActive,
+      onPress,
+      onPointerDown,
+      ...rest
     },
-    [onPointerDown, onPress, value],
-  );
+    ref,
+  ) => {
+    const handlePress = useCallback(
+      (event: React.PointerEvent<HTMLButtonElement>) => {
+        if (onPointerDown) onPointerDown(event);
+        if (onPress) onPress(value);
+      },
+      [onPointerDown, onPress, value],
+    );
 
-  return (
-    <StyledButton
-      {...rest}
-      isActive={isActive || (activeTool !== undefined && value === activeTool)}
-      onPointerDown={handlePress}
-    >
-      {icon ? <Icon icon={icon} /> : children}
-    </StyledButton>
-  );
-};
+    return (
+      <StyledButton
+        {...rest}
+        isActive={
+          isActive || (activeTool !== undefined && value === activeTool)
+        }
+        onPointerDown={handlePress}
+        ref={ref}
+      >
+        {icon ? <Icon icon={icon} /> : children}
+      </StyledButton>
+    );
+  },
+);
 
 export const Toolbar: React.FC<ToolbarProps> = ({ children, ...rest }) => (
   <ToolbarContainer {...rest}>{children}</ToolbarContainer>

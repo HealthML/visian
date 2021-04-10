@@ -1,4 +1,5 @@
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import ResizeSensor from "css-element-queries/src/ResizeSensor";
 
 export const useIsDraggedOver = () => {
   const [isDraggedOver, setIsDraggedOver] = useState(false);
@@ -36,4 +37,36 @@ export const useIsDraggedOver = () => {
       onDrop: typeof onDragEnd;
     },
   ];
+};
+
+export const useOutsidePress = <T extends HTMLElement>(
+  ref: React.RefObject<T>,
+  callback?: () => void,
+  activateHandler?: boolean,
+) => {
+  useEffect(() => {
+    const handleOutsidePress = (event: PointerEvent) => {
+      if (ref.current && !ref.current.contains(event.target as Node)) {
+        if (callback && activateHandler !== false) callback();
+      }
+    };
+
+    document.addEventListener("pointerdown", handleOutsidePress);
+    return () => {
+      document.removeEventListener("pointerdown", handleOutsidePress);
+    };
+  }, [activateHandler, callback, ref]);
+};
+
+export const useResizeUpdating = () => {
+  const [, setSize] = useState<string | undefined>(undefined);
+  useEffect(() => {
+    const resizeSensor = new ResizeSensor(document.body, (size) => {
+      setSize(`${size.width}x${size.height}`);
+    });
+
+    return () => {
+      resizeSensor.detach();
+    };
+  }, []);
 };

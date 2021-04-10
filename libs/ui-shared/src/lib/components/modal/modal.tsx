@@ -1,9 +1,10 @@
-import React from "react";
+import React, { useRef } from "react";
 import styled from "styled-components";
 
 import { color, fontWeight } from "../../theme";
 import { Sheet } from "../sheet";
 import { Title } from "../text";
+import { useOutsidePress } from "../utils";
 import { ModalProps } from "./modal.props";
 
 const ModalContainer = styled(Sheet)`
@@ -31,16 +32,23 @@ export const Divider = styled.div`
 export const Modal: React.FC<ModalProps> = ({
   labelTx,
   label,
+  isOpen,
   children,
+  onOutsidePress,
   ...rest
-}) => (
-  <ModalContainer {...rest}>
-    {(labelTx || label) && (
-      <>
-        <ModalTitle tx={labelTx} text={label} />
-        <Divider />
-      </>
-    )}
-    {children}
-  </ModalContainer>
-);
+}) => {
+  const ref = useRef<HTMLDivElement>(null);
+  useOutsidePress(ref, onOutsidePress, isOpen);
+
+  return isOpen === false ? null : (
+    <ModalContainer {...rest} ref={ref}>
+      {(labelTx || label) && (
+        <>
+          <ModalTitle tx={labelTx} text={label} />
+          <Divider />
+        </>
+      )}
+      {children}
+    </ModalContainer>
+  );
+};

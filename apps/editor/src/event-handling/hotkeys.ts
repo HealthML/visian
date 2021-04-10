@@ -1,4 +1,4 @@
-import { IDisposer, ViewType, writeSingleMedicalImage } from "@visian/utils";
+import { IDisposer, ViewType } from "@visian/utils";
 import hotkeys from "hotkeys-js";
 
 import type { RootStore } from "../models";

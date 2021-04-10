@@ -5,12 +5,14 @@ import {
   DropZone,
   Icon,
   InvisibleButton,
+  Modal,
   Sheet,
   Slider,
   SquareButton,
   Text,
   Tool,
   Toolbar,
+  useModalPosition,
 } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
 import React, { useCallback, useState } from "react";
@@ -156,6 +158,30 @@ export const UIOverlay = observer<UIOverlayProps>(
       store?.editor.tools.clearSlice();
     }, [store]);
 
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const toggleMenu = useCallback(() => {
+      setIsMenuOpen(!isMenuOpen);
+    }, [isMenuOpen]);
+    const [menuRef, setMenuRef] = useState<HTMLButtonElement | null>(null);
+    const menuPosition = useModalPosition(menuRef);
+
+    const [isLayersOpen, setIsLayersOpen] = useState(false);
+    const toggleLayers = useCallback(() => {
+      setIsLayersOpen(!isLayersOpen);
+    }, [isLayersOpen]);
+    const [layersRef, setLayersRef] = useState<HTMLButtonElement | null>(null);
+    const layersPosition = useModalPosition(layersRef);
+
+    const [isViewSettingsOpen, setIsViewSettingsOpen] = useState(false);
+    const toggleViewSettings = useCallback(() => {
+      setIsViewSettingsOpen(!isViewSettingsOpen);
+    }, [isViewSettingsOpen]);
+    const [
+      viewSettingsRef,
+      setViewSettingsRef,
+    ] = useState<HTMLButtonElement | null>(null);
+    const viewSettingsPosition = useModalPosition(viewSettingsRef, "left");
+
     return (
       <Container {...rest}>
         {!store?.editor.image && (
@@ -167,9 +193,15 @@ export const UIOverlay = observer<UIOverlayProps>(
           <Text text={store?.editor.image?.name} />
         </TopConsole>
         <ColumnLeft>
-          <SquareButton style={{ marginBottom: 16 }}>
+          <SquareButton
+            style={{ marginBottom: 16 }}
+            ref={setMenuRef}
+            onPointerDown={toggleMenu}
+          >
             <Icon icon="menu" />
           </SquareButton>
+          <Modal style={menuPosition} isOpen={isMenuOpen} />
+
           <Toolbar style={{ marginBottom: 16 }}>
             <Tool
               icon="moveTool"
@@ -197,9 +229,15 @@ export const UIOverlay = observer<UIOverlayProps>(
             />
             <Tool icon="trash" onPointerDown={clearSlice} />
           </Toolbar>
-          <SquareButton style={{ marginBottom: 16 }}>
+
+          <SquareButton
+            style={{ marginBottom: 16 }}
+            ref={setLayersRef}
+            onPointerDown={toggleLayers}
+          >
             <Icon icon="layers" />
           </SquareButton>
+          <Modal style={layersPosition} isOpen={isLayersOpen} />
         </ColumnLeft>
         <ColumnRight>
           <SideViews />
@@ -210,9 +248,16 @@ export const UIOverlay = observer<UIOverlayProps>(
             >
               <Icon icon="export" />
             </SquareButton>
-            <SquareButton style={{ marginBottom: 16 }}>
+
+            <SquareButton
+              style={{ marginBottom: 16 }}
+              ref={setViewSettingsRef}
+              onPointerDown={toggleViewSettings}
+            >
               <Icon icon="settings" />
             </SquareButton>
+            <Modal style={viewSettingsPosition} isOpen={isViewSettingsOpen} />
+
             <SliceSlider>
               <InvisibleButton onPointerDown={increaseSelectedSlice}>
                 <Icon icon="arrowUp" />

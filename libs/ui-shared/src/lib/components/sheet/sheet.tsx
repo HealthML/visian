@@ -2,7 +2,6 @@ import React from "react";
 import styled, { css } from "styled-components";
 
 import { color, radius } from "../../theme";
-import { FlexColumn } from "../box";
 import noise from "./noise.png";
 import { SheetProps } from "./sheet.props";
 
@@ -13,8 +12,13 @@ export const sheetMixin = () => css`
 `;
 
 // Placeholder for actual implementation.
-export const Sheet: React.FC<SheetProps> = styled(FlexColumn)`
+export const Sheet: React.ForwardRefExoticComponent<
+  SheetProps & React.RefAttributes<HTMLDivElement>
+> = styled.div`
   ${sheetMixin}
+
+  display: flex;
+  flex-direction: column;
 
   align-items: center;
   border-radius: ${radius("default")};

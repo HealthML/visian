@@ -60,7 +60,6 @@ export const pointerAdapter = <
 
     if (id !== undefined) {
       data.event.preventDefault();
-      data.event.stopPropagation();
 
       // Create pointer
       const pointer = buildPointer(id, data.event as PointerEvent);

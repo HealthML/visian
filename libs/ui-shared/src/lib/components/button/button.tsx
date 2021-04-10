@@ -20,16 +20,12 @@ const StyledButton = styled.button`
   justify-content: center;
 `;
 
-const BaseButton: React.FC<ButtonProps> = ({
-  children,
-  data,
-  text,
-  tx,
-  ...rest
-}) => (
-  <StyledButton {...rest}>
-    {tx || text ? <StyledText data={data} text={text} tx={tx} /> : children}
-  </StyledButton>
+const BaseButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
+  ({ children, data, text, tx, ...rest }, ref) => (
+    <StyledButton {...rest} ref={ref}>
+      {tx || text ? <StyledText data={data} text={text} tx={tx} /> : children}
+    </StyledButton>
+  ),
 );
 
 export const Button = styled(BaseButton)`
