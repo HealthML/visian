@@ -1,4 +1,4 @@
-import { IDispatch, IStorageBackend, Tab } from "@visian/ui-shared";
+import { ColorMode, IDispatch, IStorageBackend, Tab } from "@visian/ui-shared";
 import { deepObserve, ISerializable } from "@visian/utils";
 import { action, makeObservable, observable } from "mobx";
 
@@ -16,6 +16,9 @@ export interface RootStoreConfig {
 export class RootStore implements ISerializable<RootSnapshot> {
   public editor: Editor;
 
+  /** The current theme. */
+  public theme: ColorMode = "dark";
+
   /**
    * Indicates if there are changes that have not yet been written by the
    * given storage backend.
@@ -31,12 +34,15 @@ export class RootStore implements ISerializable<RootSnapshot> {
     this.editor = new Editor({
       persist: this.persist,
       persistImmediately: this.persistImmediately,
+      getTheme: () => this.theme,
     });
 
     makeObservable(this, {
       editor: observable,
+      theme: observable,
       isDirty: observable,
       refs: observable,
+      setTheme: action,
       applySnapshot: action,
       rehydrate: action,
       setIsDirty: action,
@@ -45,6 +51,11 @@ export class RootStore implements ISerializable<RootSnapshot> {
     deepObserve(this.editor, this.persist, {
       exclude: Editor.excludeFromSnapshotTracking,
     });
+  }
+
+  public setTheme(theme: ColorMode, persist = true) {
+    this.theme = theme;
+    if (persist && this.shouldPersist) localStorage.setItem("theme", theme);
   }
 
   public setIsDirty(isDirty = true) {
@@ -88,6 +99,9 @@ export class RootStore implements ISerializable<RootSnapshot> {
   public async rehydrate() {
     const tab = await new Tab().register();
 
+    const theme = localStorage.getItem("theme");
+    if (theme) this.setTheme(theme as ColorMode, false);
+
     if (!tab.isMainTab) return;
     const editorSnapshot = await this.config.storageBackend?.retrieve(
       "/editor",
@@ -98,4 +112,15 @@ export class RootStore implements ISerializable<RootSnapshot> {
 
     this.shouldPersist = Boolean(tab.isMainTab);
   }
+
+  public destroy = async () => {
+    if (!this.shouldPersist) return;
+    if (!window.confirm("Erase all application data?")) return;
+
+    this.shouldPersist = false;
+    localStorage.clear();
+    await this.config.storageBackend?.clear();
+
+    window.location.reload();
+  };
 }

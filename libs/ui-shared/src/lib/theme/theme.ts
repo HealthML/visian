@@ -18,6 +18,10 @@ const colorModes = {
     modalUnderlay: "rgba(255, 255, 255, 0.8)",
     redSheet: "rgba(202,51,69,0.3)",
     redBorder: "rgba(202,51,69,0.5)",
+    blueSheet: "rgba(0,133,255,0.4)",
+    blueBorder: "rgba(0,133,255,0.6)",
+    sideViewSheet: "rgba(0, 0, 0, 0.05)",
+    sideViewBorder: "rgba(0, 0, 0, 0.3)",
   },
   dark: {
     text: "rgba(255,255,255,0.8)",
@@ -34,6 +38,10 @@ const colorModes = {
     modalUnderlay: "rgba(12, 14, 27, 0.8)",
     redSheet: "rgba(202,51,69,0.3)",
     redBorder: "rgba(202,51,69,0.5)",
+    blueSheet: "rgba(0,133,255,0.4)",
+    blueBorder: "rgba(0,133,255,0.6)",
+    sideViewSheet: "rgba(255, 255, 255, 0.05)",
+    sideViewBorder: "rgba(255, 255, 255, 0.3)",
   },
 };
 
@@ -93,7 +101,7 @@ export const theme = {
   space: {
     iconMargin: "12px",
     listIndentation: "16px",
-    buttonPadding: "12px 40px",
+    buttonPadding: "12px 20px",
     inputPadding: "12px 22px",
   },
   zIndices: {},

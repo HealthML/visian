@@ -12,7 +12,7 @@ export const setUpWheelHandling = (store: RootStore): IDisposer => {
     event.preventDefault();
     if (!store.editor.sliceRenderer) return;
 
-    if (event.ctrlKey) {
+    if (event.ctrlKey || event.metaKey) {
       const startZoom = store.editor.viewSettings.zoomLevel;
 
       const interactionType = getWheelInteractionType(event);

@@ -1,51 +1,55 @@
 import React from "react";
-import styled from "styled-components";
+import styled, { css } from "styled-components";
 
-import { ButtonProps } from ".";
 import { color, fontWeight, radius, size, space } from "../../theme";
+import { Icon } from "../icon";
 import { sheetMixin } from "../sheet";
 import { Text } from "../text";
+import { ButtonProps } from "./button.props";
 
-const StyledText = styled(Text)`
+const StyledText = styled(Text)<Pick<ButtonProps, "isActive">>`
   font-weight: ${fontWeight("regular")};
   line-height: 16px;
   font-size: 16px;
+
+  opacity: ${(props) => (props.isActive !== false ? 1 : 0.3)};
 `;
 
 const StyledButton = styled.button`
-  ${sheetMixin}
-
   display: flex;
   align-items: center;
   justify-content: center;
+
+  &:active > * {
+    opacity: 1;
+  }
 `;
 
 const BaseButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ children, data, text, tx, ...rest }, ref) => (
+  ({ children, data, icon, isActive, text, tx, ...rest }, ref) => (
     <StyledButton {...rest} ref={ref}>
-      {tx || text ? <StyledText data={data} text={text} tx={tx} /> : children}
+      {icon && <Icon icon={icon} isActive={isActive} />}
+      {tx || text ? (
+        <StyledText data={data} isActive={isActive} text={text} tx={tx} />
+      ) : (
+        children
+      )}
     </StyledButton>
   ),
 );
 
-export const Button = styled(BaseButton)`
+export const Button = styled(BaseButton)<ButtonProps>`
+  ${sheetMixin}
+
   border-radius: ${radius("default")};
   box-sizing: border-box;
   cursor: pointer;
   display: inline-flex;
   height: ${size("buttonHeight")};
+  outline: none;
   padding: ${space("buttonPadding")};
   pointer-events: auto;
   user-select: none;
-
-  &:active {
-    border-color: ${color("text")};
-    outline: none;
-  }
-  &:focus {
-    border-color: ${color("text")};
-    outline: none;
-  }
 `;
 
 export const SquareButton = styled(Button)`

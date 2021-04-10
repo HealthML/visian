@@ -27,6 +27,7 @@ export const Divider = styled.div`
   height: 1px;
   border-radius: 1px;
   background-color: ${color("sheetBorder")};
+  margin-bottom: 16px;
 `;
 
 export const Modal: React.FC<ModalProps> = ({

@@ -33,7 +33,7 @@ function App() {
     };
   }, []);
 
-  const themeName = rootStoreRef.current?.editor.theme || "dark";
+  const themeName = rootStoreRef.current?.theme || "dark";
   const theme = useMemo(() => getTheme(themeName), [themeName]);
 
   return (

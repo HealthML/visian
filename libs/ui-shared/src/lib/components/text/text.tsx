@@ -32,14 +32,14 @@ export const Subtitle: React.FC<
   Omit<TextProps, "isBold">
 > = styled(({ as, ...rest }: TextProps) => <Text {...rest} as={as || "h3"} />)`
   font-size: ${fontSize("subtitle")};
-  font-weight: ${fontWeight("bold")};
+  font-weight: ${fontWeight("regular")};
 `;
 
 export const Title: React.FC<
   Omit<TextProps, "isBold">
 > = styled(({ as, ...rest }: TextProps) => <Text {...rest} as={as || "h2"} />)`
   font-size: ${fontSize("title")};
-  font-weight: ${fontWeight("bold")};
+  font-weight: ${fontWeight("regular")};
 `;
 
 export const InputLabel = styled(Text)`

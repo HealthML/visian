@@ -18,19 +18,19 @@ const SyledCanvas = styled(WebGLCanvas)<
   }
 >`
   cursor: ${(props) => {
-    if (!props.isCursorOverDrawableArea) return "crosshair";
-
     switch (props.activeTool) {
       case ToolType.Hand:
         // TODO: `cursor: "grabbing"` while dragged
         return "grab";
 
       case ToolType.Crosshair:
-      case undefined:
         return "crosshair";
 
+      case undefined:
+        return "auto";
+
       default:
-        return "none";
+        return props.isCursorOverDrawableArea ? "none" : "auto";
     }
   }};
 `;
@@ -51,7 +51,7 @@ export const MainView = observer<{}, HTMLCanvasElement>(
     return (
       <SyledCanvas
         activeTool={store?.editor.tools.activeTool}
-        backgroundColor={store?.editor.backgroundColor}
+        backgroundColor={store?.editor.getBackgroundColor()}
         isCursorOverDrawableArea={
           store?.editor.image && store?.editor.tools.isCursorOverDrawableArea
         }

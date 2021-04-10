@@ -1,4 +1,4 @@
-import { coverMixin, EventLike, Sheet } from "@visian/ui-shared";
+import { coverMixin, EventLike, Sheet, color } from "@visian/ui-shared";
 import ResizeSensor from "css-element-queries/src/ResizeSensor";
 import { observer } from "mobx-react-lite";
 import React, { useCallback, useEffect, useRef, useState } from "react";
@@ -11,7 +11,7 @@ const SideViewContainer = styled.div<{ shouldShowSideViews?: boolean }>`
   display: ${(props) => (props.shouldShowSideViews ? "flex" : "none")};
   flex-direction: column;
   position: relative;
-  margin-right: 20px;
+  margin-right: 22px;
 `;
 
 const SideView = styled(Sheet)`
@@ -21,8 +21,8 @@ const SideView = styled(Sheet)`
   position: relative;
   user-select: none;
   width: 100%;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: ${color("sideViewSheet")};
+  border: 1px solid ${color("sideViewBorder")}; ;
 `;
 
 const SideViewCanvas = styled.canvas`
@@ -98,7 +98,7 @@ export const SideViews = observer(() => {
       style={{ width: sideViewSize }}
       ref={divRef}
     >
-      <SideView style={{ marginBottom: 20 }}>
+      <SideView style={{ marginBottom: 16 }}>
         <SideViewCanvas
           width={400}
           height={400}

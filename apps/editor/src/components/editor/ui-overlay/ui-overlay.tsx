@@ -1,14 +1,21 @@
 import {
   AbsoluteCover,
+  Button,
   color,
+  ColorMode,
   coverMixin,
+  Divider,
   DropZone,
   Icon,
   InvisibleButton,
+  List,
+  ListItem,
   Modal,
   Sheet,
   Slider,
+  SliderField,
   SquareButton,
+  Switch,
   Text,
   Tool,
   Toolbar,
@@ -19,10 +26,10 @@ import React, { useCallback, useState } from "react";
 import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
+import { feedbackMailAddress } from "../../../constants";
+import { ToolType } from "../../../models";
 import { SideViews } from "../side-views";
 import { UIOverlayProps } from "./ui-overlay.props";
-
-import { ToolType } from "../../../models";
 
 const Container = styled(AbsoluteCover)`
   align-items: stretch;
@@ -94,6 +101,27 @@ const SliceSlider = styled(Sheet)`
   flex: 1 0;
 `;
 
+const FeedbackButton = styled(Button)`
+  width: 100%;
+  background: ${color("blueSheet")};
+  border-color: ${color("blueBorder")};
+  margin-bottom: 16px;
+
+  &:active {
+    border-color: rgba(0, 133, 255, 1);
+  }
+`;
+
+const ResetButton = styled(Button)`
+  width: 100%;
+  background: ${color("redSheet")};
+  border-color: ${color("redBorder")};
+
+  &:active {
+    border-color: rgba(202, 51, 69, 1);
+  }
+`;
+
 export const UIOverlay = observer<UIOverlayProps>(
   ({ isDraggedOver, onDropCompleted, ...rest }) => {
     const store = useStore();
@@ -159,9 +187,12 @@ export const UIOverlay = observer<UIOverlayProps>(
     }, [store]);
 
     const [isMenuOpen, setIsMenuOpen] = useState(false);
-    const toggleMenu = useCallback(() => {
-      setIsMenuOpen(!isMenuOpen);
-    }, [isMenuOpen]);
+    const openMenu = useCallback(() => {
+      setIsMenuOpen(true);
+    }, []);
+    const closeMenu = useCallback(() => {
+      setIsMenuOpen(false);
+    }, []);
     const [menuRef, setMenuRef] = useState<HTMLButtonElement | null>(null);
     const menuPosition = useModalPosition(menuRef);
 
@@ -182,6 +213,18 @@ export const UIOverlay = observer<UIOverlayProps>(
     ] = useState<HTMLButtonElement | null>(null);
     const viewSettingsPosition = useModalPosition(viewSettingsRef, "left");
 
+    const setTheme = useCallback(
+      (value: string) => {
+        store?.setTheme(value as ColorMode);
+      },
+      [store],
+    );
+    const sendFeedback = useCallback(() => {
+      const mail = document.createElement("a");
+      mail.href = `mailto:${feedbackMailAddress}`;
+      mail.click();
+    }, []);
+
     return (
       <Container {...rest}>
         {!store?.editor.image && (
@@ -190,17 +233,43 @@ export const UIOverlay = observer<UIOverlayProps>(
           </StartTextContainer>
         )}
         <TopConsole>
-          <Text text={store?.editor.image?.name} />
+          <Text text={store?.editor.image?.name} style={{ opacity: 0.5 }} />
         </TopConsole>
         <ColumnLeft>
           <SquareButton
+            icon="menu"
             style={{ marginBottom: 16 }}
             ref={setMenuRef}
-            onPointerDown={toggleMenu}
+            onPointerDown={isMenuOpen ? undefined : openMenu}
+            isActive={isMenuOpen}
+          />
+          <Modal
+            style={menuPosition}
+            isOpen={isMenuOpen}
+            onOutsidePress={closeMenu}
+            label="Menu"
           >
-            <Icon icon="menu" />
-          </SquareButton>
-          <Modal style={menuPosition} isOpen={isMenuOpen} />
+            <Switch
+              label="Theme"
+              items={[
+                { value: "dark", label: "Dark" },
+                { value: "light", label: "Light" },
+              ]}
+              onChange={setTheme}
+              value={store?.theme || "dark"}
+            />
+            <Switch
+              label="Language"
+              items={[{ value: "English" }, { value: "German" }]}
+            />
+            <Divider />
+            <FeedbackButton
+              text="Ideas or Feedback?"
+              onPointerDown={sendFeedback}
+            />
+            <Divider />
+            <ResetButton text="Reset" onPointerDown={store?.destroy} />
+          </Modal>
 
           <Toolbar style={{ marginBottom: 16 }}>
             <Tool
@@ -231,36 +300,61 @@ export const UIOverlay = observer<UIOverlayProps>(
           </Toolbar>
 
           <SquareButton
+            icon="layers"
             style={{ marginBottom: 16 }}
             ref={setLayersRef}
             onPointerDown={toggleLayers}
+            isActive={isLayersOpen}
+          />
+          <Modal
+            style={{ ...layersPosition, paddingBottom: 0 }}
+            isOpen={isLayersOpen}
+            label="Layers"
           >
-            <Icon icon="layers" />
-          </SquareButton>
-          <Modal style={layersPosition} isOpen={isLayersOpen} />
+            <List style={{ marginTop: -16 }}>
+              <ListItem label="Annotation" icon="eye" />
+              <ListItem label="Base Image" icon="eye" isLast />
+            </List>
+          </Modal>
         </ColumnLeft>
         <ColumnRight>
           <SideViews />
           <RightBar>
             <SquareButton
+              icon="export"
               style={{ marginBottom: 16 }}
               onPointerDown={store?.editor.quickExport}
-            >
-              <Icon icon="export" />
-            </SquareButton>
+              isActive={false}
+            />
 
             <SquareButton
+              icon="settings"
               style={{ marginBottom: 16 }}
               ref={setViewSettingsRef}
               onPointerDown={toggleViewSettings}
+              isActive={isViewSettingsOpen}
+            />
+            <Modal
+              style={viewSettingsPosition}
+              isOpen={isViewSettingsOpen}
+              label="View Settings"
             >
-              <Icon icon="settings" />
-            </SquareButton>
-            <Modal style={viewSettingsPosition} isOpen={isViewSettingsOpen} />
+              <Switch
+                label="Side Views"
+                items={[{ value: "On" }, { value: "Off" }]}
+              />
+              <Switch
+                label="Type"
+                items={[{ value: "T" }, { value: "S" }, { value: "C" }]}
+              />
+              <SliderField label="Contrast" style={{ marginBottom: 16 }} />
+              <SliderField label="Brightness" style={{ marginBottom: 16 }} />
+              <SliderField label="Clamping" />
+            </Modal>
 
             <SliceSlider>
               <InvisibleButton onPointerDown={increaseSelectedSlice}>
-                <Icon icon="arrowUp" />
+                <Icon icon="arrowUp" isActive={false} />
               </InvisibleButton>
               <Slider
                 isVertical
@@ -271,7 +365,7 @@ export const UIOverlay = observer<UIOverlayProps>(
                 onChange={setSelectedSlice}
               />
               <InvisibleButton onPointerDown={decreaseSelectedSlice}>
-                <Icon icon="arrowDown" />
+                <Icon icon="arrowDown" isActive={false} />
               </InvisibleButton>
             </SliceSlider>
           </RightBar>

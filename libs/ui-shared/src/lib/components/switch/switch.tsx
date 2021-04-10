@@ -13,8 +13,9 @@ const SwitchContainer = styled.div`
   box-shadow: 0px 0px 0px 1px ${color("sheetBorder")};
   flex-direction: row;
   height: 24px;
-  margin: 0 1px;
+  margin: 0px 1px 18px 1px;
   position: relative;
+  pointer-events: auto;
   user-select: none;
 
   display: flex;

@@ -23,6 +23,10 @@ const ListItemInner = styled.div`
   height: 40px;
 `;
 
+const ListDivider = styled(Divider)`
+  margin-bottom: 0;
+`;
+
 export const ListItemLabel = styled(Text)`
   font-size: 14px;
   line-height: 14px;
@@ -69,7 +73,7 @@ export const ListItem: React.FC<ListItemProps> = ({
           </>
         )}
       </ListItemInner>
-      {!isLast && <Divider />}
+      {!isLast && <ListDivider />}
     </ListItemContainer>
   );
 };
