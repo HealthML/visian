@@ -9,20 +9,23 @@ import React, { useCallback } from "react";
 import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
-import { Tool } from "../../../models";
+import { ToolType } from "../../../models";
 
 const SyledCanvas = styled(WebGLCanvas)<
-  WebGLCanvasProps & { activeTool?: Tool; isCursorOverDrawableArea?: boolean }
+  WebGLCanvasProps & {
+    activeTool?: ToolType;
+    isCursorOverDrawableArea?: boolean;
+  }
 >`
   cursor: ${(props) => {
     if (!props.isCursorOverDrawableArea) return "crosshair";
 
     switch (props.activeTool) {
-      case Tool.Hand:
+      case ToolType.Hand:
         // TODO: `cursor: "grabbing"` while dragged
         return "grab";
 
-      case Tool.Crosshair:
+      case ToolType.Crosshair:
       case undefined:
         return "crosshair";
 

@@ -1,8 +1,14 @@
 import { getTheme } from "@visian/ui-shared";
-import { Image, ImageSnapshot, ISerializable } from "@visian/utils";
+import {
+  Image,
+  ImageSnapshot,
+  ISerializable,
+  writeSingleMedicalImage,
+} from "@visian/utils";
 import isEqual from "lodash.isequal";
 import { action, computed, makeObservable, observable } from "mobx";
 import tc from "tinycolor2";
+import FileSaver from "file-saver";
 
 import { StoreContext } from "../types";
 import { EditorTools } from "./tools";
@@ -117,6 +123,19 @@ export class Editor implements ISerializable<EditorSnapshot> {
   public setBackgroundColor(backgroundColor: string) {
     this.backgroundColor = backgroundColor;
   }
+
+  public quickExport = async () => {
+    const image = this.annotation;
+    if (!image) return;
+
+    const file = await writeSingleMedicalImage(
+      image.toITKImage(),
+      `${image.name.split(".")[0]}.nii.gz`,
+    );
+
+    if (!file) return;
+    FileSaver.saveAs(file, file.name);
+  };
 
   public toJSON() {
     return {

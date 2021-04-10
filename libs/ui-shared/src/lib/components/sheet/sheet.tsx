@@ -13,9 +13,7 @@ export const sheetMixin = () => css`
 `;
 
 // Placeholder for actual implementation.
-export const Sheet: React.FC<SheetProps> = styled(
-  ({ as, ...rest }: SheetProps) => <FlexColumn {...rest} as={as as never} />,
-)`
+export const Sheet: React.FC<SheetProps> = styled(FlexColumn)`
   ${sheetMixin}
 
   align-items: center;

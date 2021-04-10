@@ -1,4 +1,4 @@
-export enum Tool {
+export enum ToolType {
   Hand = 0,
   Crosshair = 1,
   Brush = 2,

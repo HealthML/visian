@@ -3,13 +3,14 @@ import {
   color,
   coverMixin,
   DropZone,
+  Icon,
+  InvisibleButton,
   Sheet,
   Slider,
-  Text,
-  Icon,
   SquareButton,
-  Toolbar,
+  Text,
   Tool,
+  Toolbar,
 } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
 import React, { useCallback, useState } from "react";
@@ -18,6 +19,8 @@ import styled from "styled-components";
 import { useStore } from "../../../app/root-store";
 import { SideViews } from "../side-views";
 import { UIOverlayProps } from "./ui-overlay.props";
+
+import { ToolType } from "../../../models";
 
 const Container = styled(AbsoluteCover)`
   align-items: stretch;
@@ -135,6 +138,23 @@ export const UIOverlay = observer<UIOverlayProps>(
       },
       [store],
     );
+    const increaseSelectedSlice = useCallback(() => {
+      store?.editor.viewSettings.stepSelectedSlice(1);
+    }, [store]);
+    const decreaseSelectedSlice = useCallback(() => {
+      store?.editor.viewSettings.stepSelectedSlice(-1);
+    }, [store]);
+
+    const activeTool = store?.editor.tools.activeTool;
+    const setActiveTool = useCallback(
+      (value?: string | number) => {
+        store?.editor.tools.setActiveTool(value as ToolType);
+      },
+      [store],
+    );
+    const clearSlice = useCallback(() => {
+      store?.editor.tools.clearSlice();
+    }, [store]);
 
     return (
       <Container {...rest}>
@@ -144,18 +164,38 @@ export const UIOverlay = observer<UIOverlayProps>(
           </StartTextContainer>
         )}
         <TopConsole>
-          <Text tx="T1.nii" />
+          <Text text={store?.editor.image?.name} />
         </TopConsole>
         <ColumnLeft>
           <SquareButton style={{ marginBottom: 16 }}>
             <Icon icon="menu" />
           </SquareButton>
           <Toolbar style={{ marginBottom: 16 }}>
-            <Tool icon="moveTool" />
-            <Tool icon="pixelBrush" />
-            <Tool icon="magicBrush" />
-            <Tool icon="erase" />
-            <Tool icon="trash" />
+            <Tool
+              icon="moveTool"
+              activeTool={activeTool}
+              value={ToolType.Hand}
+              onPress={setActiveTool}
+            />
+            <Tool
+              icon="pixelBrush"
+              activeTool={activeTool}
+              value={ToolType.Brush}
+              onPress={setActiveTool}
+            />
+            <Tool
+              icon="magicBrush"
+              activeTool={activeTool}
+              value={ToolType.SmartBrush}
+              onPress={setActiveTool}
+            />
+            <Tool
+              icon="erase"
+              activeTool={activeTool}
+              value={ToolType.Eraser}
+              onPress={setActiveTool}
+            />
+            <Tool icon="trash" onPointerDown={clearSlice} />
           </Toolbar>
           <SquareButton style={{ marginBottom: 16 }}>
             <Icon icon="layers" />
@@ -164,14 +204,19 @@ export const UIOverlay = observer<UIOverlayProps>(
         <ColumnRight>
           <SideViews />
           <RightBar>
-            <SquareButton style={{ marginBottom: 16 }}>
+            <SquareButton
+              style={{ marginBottom: 16 }}
+              onPointerDown={store?.editor.quickExport}
+            >
               <Icon icon="export" />
             </SquareButton>
             <SquareButton style={{ marginBottom: 16 }}>
               <Icon icon="settings" />
             </SquareButton>
             <SliceSlider>
-              <Icon icon="arrowUp" />
+              <InvisibleButton onPointerDown={increaseSelectedSlice}>
+                <Icon icon="arrowUp" />
+              </InvisibleButton>
               <Slider
                 isVertical
                 isInverted
@@ -180,7 +225,9 @@ export const UIOverlay = observer<UIOverlayProps>(
                 value={store?.editor.viewSettings.getSelectedSlice()}
                 onChange={setSelectedSlice}
               />
-              <Icon icon="arrowDown" />
+              <InvisibleButton onPointerDown={decreaseSelectedSlice}>
+                <Icon icon="arrowDown" />
+              </InvisibleButton>
             </SliceSlider>
           </RightBar>
         </ColumnRight>

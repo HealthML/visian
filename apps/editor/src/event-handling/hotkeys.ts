@@ -1,6 +1,5 @@
 import { IDisposer, ViewType, writeSingleMedicalImage } from "@visian/utils";
 import hotkeys from "hotkeys-js";
-import FileSaver from "file-saver";
 
 import type { RootStore } from "../models";
 
@@ -42,18 +41,7 @@ export const setUpHotKeys = (store: RootStore): IDisposer => {
   });
   hotkeys("ctrl+e", (event) => {
     event.preventDefault();
-
-    const image = store.editor.annotation;
-    if (!image) return;
-
-    writeSingleMedicalImage(
-      image.toITKImage(),
-      `${image.name.split(".")[0]}.nii.gz`,
-    ).then((file) => {
-      if (!file) return;
-
-      FileSaver.saveAs(file, file.name);
-    });
+    store.editor.quickExport();
   });
 
   return () => hotkeys.unbind();

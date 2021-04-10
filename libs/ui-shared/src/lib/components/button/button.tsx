@@ -1,14 +1,23 @@
 import React from "react";
 import styled from "styled-components";
+
 import { ButtonProps } from ".";
-import { color, fontWeight, size, space } from "../../theme";
-import { Sheet } from "../sheet";
+import { color, fontWeight, radius, size, space } from "../../theme";
+import { sheetMixin } from "../sheet";
 import { Text } from "../text";
 
 const StyledText = styled(Text)`
   font-weight: ${fontWeight("regular")};
   line-height: 16px;
   font-size: 16px;
+`;
+
+const StyledButton = styled.button`
+  ${sheetMixin}
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
 `;
 
 const BaseButton: React.FC<ButtonProps> = ({
@@ -18,12 +27,13 @@ const BaseButton: React.FC<ButtonProps> = ({
   tx,
   ...rest
 }) => (
-  <Sheet {...rest} as="button">
+  <StyledButton {...rest}>
     {tx || text ? <StyledText data={data} text={text} tx={tx} /> : children}
-  </Sheet>
+  </StyledButton>
 );
 
 export const Button = styled(BaseButton)`
+  border-radius: ${radius("default")};
   box-sizing: border-box;
   cursor: pointer;
   display: inline-flex;
@@ -47,8 +57,20 @@ export const SquareButton = styled(Button)`
   width: ${size("buttonHeight")};
 `;
 
-export const CircularButton = styled(SquareButton)`
+export const CircularButton = styled(Button)`
   border-radius: 50%;
+`;
+
+export const InvisibleButton = styled(BaseButton)`
+  background: none;
+  border: none;
+  outline: none;
+  padding: 0;
+
+  box-sizing: border-box;
+  cursor: pointer;
+  pointer-events: auto;
+  user-select: none;
 `;
 
 export default Button;

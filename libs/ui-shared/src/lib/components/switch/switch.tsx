@@ -44,12 +44,12 @@ export const Switch: React.FC<SwitchProps> = ({
   onChange,
   ...rest
 }) => {
-  const actualValue = value || defaultValue || items[0].value;
+  const { length } = items;
+  const actualValue = value || defaultValue || (length ? items[0].value : "");
   const activeIndex = Math.max(
     0,
     items.findIndex((item) => item.value === actualValue),
   );
-  const { length } = items;
 
   return (
     <InputContainer {...rest}>

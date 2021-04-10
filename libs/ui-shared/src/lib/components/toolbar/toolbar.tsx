@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useCallback } from "react";
 import styled from "styled-components";
 
+import { ButtonProps, InvisibleButton } from "../button";
 import { Icon } from "../icon";
 import { Sheet } from "../sheet";
 import { ToolbarProps, ToolProps } from "./toolbar.props";
@@ -14,19 +15,38 @@ const ToolbarContainer = styled(Sheet)`
   width: 40px;
 `;
 
-const StyledButton = styled.button<Omit<ToolProps, "icon">>`
-  background: none;
-  border: none;
+const StyledButton = styled(InvisibleButton)<
+  Omit<ButtonProps & ToolProps, "icon">
+>`
   width: 40px;
   height: 40px;
-  outline: none;
   opacity: ${(props) => (props.isActive ? 1 : 0.3)};
-  padding: 0;
 `;
 
-export const Tool: React.FC<ToolProps> = ({ children, icon, ...rest }) => {
+export const Tool: React.FC<ToolProps> = ({
+  children,
+  icon,
+  value,
+  activeTool,
+  isActive,
+  onPress,
+  onPointerDown,
+  ...rest
+}) => {
+  const handlePress = useCallback(
+    (event: React.PointerEvent<HTMLButtonElement>) => {
+      if (onPointerDown) onPointerDown(event);
+      if (onPress) onPress(value);
+    },
+    [onPointerDown, onPress, value],
+  );
+
   return (
-    <StyledButton {...rest}>
+    <StyledButton
+      {...rest}
+      isActive={isActive || (activeTool !== undefined && value === activeTool)}
+      onPointerDown={handlePress}
+    >
       {icon ? <Icon icon={icon} /> : children}
     </StyledButton>
   );
