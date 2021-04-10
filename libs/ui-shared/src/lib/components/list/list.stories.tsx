@@ -1,6 +1,5 @@
-import React, { useCallback, useState } from "react";
+import React from "react";
 
-import { Icon } from "../icon";
 import { List, ListItem } from "./list";
 
 export default {
@@ -12,8 +11,8 @@ export const primary = () => {
   return (
     <List>
       <ListItem label="Annotation" icon="eyeCrossed" />
-      <ListItem label="Base Image" icon="eye" iconDisabled />
-      <ListItem label="Background" icon="eye" iconDisabled lastItem />
+      <ListItem label="Base Image" icon="eye" disableIcon />
+      <ListItem label="Background" icon="eye" disableIcon isLast />
     </List>
   );
 };

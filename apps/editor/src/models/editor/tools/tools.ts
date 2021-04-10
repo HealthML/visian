@@ -118,7 +118,7 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
     return {};
   }
 
-  public async applySnapshot(snapshot: EditorToolsSnapshot) {
+  public async applySnapshot(_snapshot: EditorToolsSnapshot) {
     // Intentionally left blank
   }
 

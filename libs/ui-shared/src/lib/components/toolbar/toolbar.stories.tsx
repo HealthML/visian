@@ -1,6 +1,5 @@
-import React, { useCallback, useState } from "react";
+import React from "react";
 
-import { Icon } from "../icon";
 import { Toolbar, Tool } from "./toolbar";
 
 export default {

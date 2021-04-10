@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import React from "react";
 
 import { Tooltip } from "./tooltip";
 import { TooltipProps } from "./tooltip.props";

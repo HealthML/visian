@@ -5,7 +5,7 @@ import { Switch } from "./switch";
 
 describe("Switch", () => {
   it("should render successfully", () => {
-    const { baseElement } = render(<Switch />);
+    const { baseElement } = render(<Switch items={[]} />);
     expect(baseElement).toBeTruthy();
   });
 });

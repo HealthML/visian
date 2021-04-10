@@ -1,4 +1,4 @@
-import React, { useCallback, useRef } from "react";
+import React from "react";
 import styled from "styled-components";
 
 import { color } from "../../theme";
@@ -49,26 +49,31 @@ export const Switch: React.FC<SwitchProps> = ({
     0,
     items.findIndex((item) => item.value === actualValue),
   );
+  const { length } = items;
 
   return (
     <InputContainer {...rest}>
       {(labelTx || label) && <InputLabel tx={labelTx} text={label} />}
       <SwitchContainer>
-        <ActiveSwitchItem
-          style={{
-            width: `${100 / items.length}%`,
-            left: `${(100 / items.length) * activeIndex}%`,
-          }}
-        />
-        {items.map((item) => (
-          <SwitchItem
-            key={item.value}
-            onChange={onChange}
-            labelTx={item.labelTx}
-            label={item.label}
-            value={item.value}
-          />
-        ))}
+        {length && (
+          <>
+            <ActiveSwitchItem
+              style={{
+                width: `${100 / length}%`,
+                left: `${(100 / length) * activeIndex}%`,
+              }}
+            />
+            {items.map((item) => (
+              <SwitchItem
+                key={item.value}
+                onChange={onChange}
+                labelTx={item.labelTx}
+                label={item.label}
+                value={item.value}
+              />
+            ))}
+          </>
+        )}
       </SwitchContainer>
     </InputContainer>
   );

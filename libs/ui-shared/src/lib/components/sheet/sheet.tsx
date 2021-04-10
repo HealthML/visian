@@ -1,12 +1,12 @@
 import React from "react";
 import styled, { css } from "styled-components";
 
-import { color, radius, ThemeProps } from "../../theme";
+import { color, radius } from "../../theme";
 import { FlexColumn } from "../box";
 import noise from "./noise.png";
 import { SheetProps } from "./sheet.props";
 
-export const sheetMixin = (props: ThemeProps) => css`
+export const sheetMixin = () => css`
   backdrop-filter: blur(50px);
   background: url(${noise}) left top repeat, ${color("sheet")};
   border: 1px solid ${color("sheetBorder")};

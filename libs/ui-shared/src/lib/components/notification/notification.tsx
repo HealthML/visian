@@ -1,4 +1,4 @@
-import React, { useCallback, useRef } from "react";
+import React from "react";
 import styled from "styled-components";
 
 import { color, fontWeight } from "../../theme";
@@ -39,7 +39,7 @@ export const Notification: React.FC<NotificationProps> = ({
   description,
   ...rest
 }) => (
-  <NotificationContainer>
+  <NotificationContainer {...rest}>
     <NotificationTitle tx={titleTx} text={title} />
     <NotificationDescription tx={descriptionTx} text={description} />
   </NotificationContainer>

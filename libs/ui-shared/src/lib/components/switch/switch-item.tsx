@@ -1,4 +1,4 @@
-import React, { useCallback, useRef } from "react";
+import React, { useCallback } from "react";
 import styled from "styled-components";
 
 import { Text } from "../text";
@@ -26,14 +26,14 @@ export const SwitchItem: React.FC<SwitchItemProps> = ({
   label,
   value,
   onChange,
-  ...props
+  ...rest
 }) => {
   const changeHandler = useCallback(() => {
     if (onChange) onChange(value);
   }, [value, onChange]);
 
   return (
-    <SwitchItemContainer onPointerDown={changeHandler}>
+    <SwitchItemContainer {...rest} onPointerDown={changeHandler}>
       <SwitchItemLabel tx={labelTx} text={label || value} />
     </SwitchItemContainer>
   );

@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import React from "react";
 
 import { Notification } from "./notification";
 import { NotificationProps } from "./notification.props";

@@ -22,7 +22,7 @@ export const Tooltip: React.FC<TooltipProps> = ({
   ...rest
 }) => {
   return (
-    <TooltipContainer>
+    <TooltipContainer {...rest}>
       <TooltipLabel tx={labelTx} text={label} />
     </TooltipContainer>
   );

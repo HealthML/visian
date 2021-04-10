@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback } from "react";
 import styled from "styled-components";
 
 import { Spacer } from "../box";
@@ -42,24 +42,34 @@ export const ListItem: React.FC<ListItemProps> = ({
   labelTx,
   label,
   icon,
-  iconDisabled,
-  lastItem,
+  value,
+  onIconPress,
+  disableIcon,
+  isLast,
   children,
   ...rest
 }) => {
+  const handleIconPress = useCallback(() => {
+    if (onIconPress) onIconPress(value);
+  }, [onIconPress, value]);
+
   return (
-    <ListItemContainer>
+    <ListItemContainer {...rest}>
       <ListItemInner>
         {(labelTx || label) && <ListItemLabel tx={labelTx} text={label} />}
         {children}
         {icon && (
           <>
             <Spacer />
-            <ListIcon icon={icon} disabled={iconDisabled} />
+            <ListIcon
+              icon={icon}
+              disabled={disableIcon}
+              onPointerDown={handleIconPress}
+            />
           </>
         )}
       </ListItemInner>
-      {!lastItem && <Divider />}
+      {!isLast && <Divider />}
     </ListItemContainer>
   );
 };
