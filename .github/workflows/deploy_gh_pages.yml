@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - master
+      - feature/deploy-gh-pages
 
 jobs:
   deploy:
