@@ -37,15 +37,15 @@ export const Layers: React.FC = observer(() => {
         onPointerDown={toggleModal}
         isActive={isModalOpen}
       />
-      <Modal style={modalPosition} isOpen={isModalOpen} label="Layers">
+      <Modal style={modalPosition} isOpen={isModalOpen} labelTx="layers">
         <LayerList>
           {store?.editor.annotation && (
-            <ListItem label="Annotation" icon="eye" />
+            <ListItem label={store?.editor.annotation.name} />
           )}
           {store?.editor.image ? (
-            <ListItem label="Base Image" icon="eye" isLast />
+            <ListItem label={store?.editor.image.name} isLast />
           ) : (
-            <SubtleText text="No layers loaded." />
+            <SubtleText tx="no-layers" />
           )}
         </LayerList>
       </Modal>

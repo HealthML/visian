@@ -12,5 +12,8 @@
   "light": "Light",
   "language": "Language",
   "ideas-feedback": "Ideas or Feedback?",
-  "clear-data": "Clear Data"
+  "clear-data": "Clear Data",
+
+  "layers": "Layers",
+  "no-layers": "No layers loaded."
 }

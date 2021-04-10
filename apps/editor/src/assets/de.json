@@ -12,5 +12,8 @@
   "light": "Hell",
   "language": "Sprache",
   "ideas-feedback": "Ideen oder Feedback?",
-  "clear-data": "Daten Löschen"
+  "clear-data": "Daten Löschen",
+
+  "layers": "Ebenen",
+  "no-layers": "Keine Ebenen geladen."
 }
