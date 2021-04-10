@@ -6,7 +6,9 @@ import { IconProps } from "./icon.props";
 
 import * as icons from "./icons";
 
-const StyledSVG = styled.svg<Pick<IconProps, "isActive">>`
+const StyledSVG = styled.svg.withConfig({
+  shouldForwardProp: (prop) => prop.toString() !== "isActive",
+})<Pick<IconProps, "isActive">>`
   width: 40px;
   height: 40px;
   fill: ${color("text")};

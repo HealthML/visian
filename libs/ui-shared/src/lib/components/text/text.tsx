@@ -48,4 +48,10 @@ export const InputLabel = styled(Text)`
   line-height: 10px;
 `;
 
+export const SubtleText = styled(Text)`
+  font-size: ${fontSize("small")};
+  line-height: 10px;
+  opacity: 0.3;
+`;
+
 export default Text;

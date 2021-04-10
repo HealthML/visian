@@ -1,7 +1,7 @@
 import React from "react";
-import styled, { css } from "styled-components";
+import styled from "styled-components";
 
-import { color, fontWeight, radius, size, space } from "../../theme";
+import { fontWeight, radius, size, space } from "../../theme";
 import { Icon } from "../icon";
 import { sheetMixin } from "../sheet";
 import { Text } from "../text";
@@ -38,7 +38,7 @@ const BaseButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ),
 );
 
-export const Button = styled(BaseButton)<ButtonProps>`
+export const Button = styled(BaseButton)`
   ${sheetMixin}
 
   border-radius: ${radius("default")};
@@ -55,6 +55,10 @@ export const Button = styled(BaseButton)<ButtonProps>`
 export const SquareButton = styled(Button)`
   padding: 0;
   width: ${size("buttonHeight")};
+`;
+
+export const FloatingUIButton = styled(SquareButton)`
+  margin-bottom: 16px;
 `;
 
 export const CircularButton = styled(Button)`
