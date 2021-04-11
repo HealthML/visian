@@ -43,7 +43,7 @@ const SideViewCanvas = styled.canvas`
 
 export const SideViews = observer(() => {
   const store = useStore();
-  const shouldShowSideViews =
+  const showSideViews =
     store?.editor.image && store.editor.viewSettings.shouldShowSideViews;
 
   // Refs Management
@@ -75,7 +75,7 @@ export const SideViews = observer(() => {
   );
 
   // Side View Sizing
-  const size = useUpdateOnResize();
+  const size = useUpdateOnResize(showSideViews);
   const [containerRef, setContainerRef] = useState<HTMLDivElement | null>(null);
   const [sideViewSize, setSideViewSize] = useState(window.innerWidth * 0.4);
   useLayoutEffect(() => {
@@ -86,11 +86,11 @@ export const SideViews = observer(() => {
         window.innerWidth * 0.4,
       ),
     );
-  }, [containerRef, shouldShowSideViews, size]);
+  }, [containerRef, showSideViews, size]);
 
   return (
     <SideViewContainer
-      shouldShowSideViews={shouldShowSideViews}
+      shouldShowSideViews={showSideViews}
       style={{ width: sideViewSize }}
       ref={setContainerRef}
     >

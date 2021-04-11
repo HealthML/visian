@@ -54,7 +54,9 @@ export const Menu: React.FC = observer(() => {
 
   // Menu Toggling
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const openModal = useCallback(() => {
+  const openModal = useCallback((event: React.PointerEvent) => {
+    event.preventDefault();
+    event.stopPropagation();
     setIsModalOpen(true);
   }, []);
   const closeModal = useCallback(() => {
@@ -63,7 +65,7 @@ export const Menu: React.FC = observer(() => {
 
   // Menu Positioning
   const [buttonRef, setButtonRef] = useState<HTMLButtonElement | null>(null);
-  const modalPosition = useModalPosition(buttonRef, "right");
+  const modalPosition = useModalPosition(buttonRef, "right", isModalOpen);
 
   // Menu Actions
   const setTheme = useCallback(
@@ -91,6 +93,8 @@ export const Menu: React.FC = observer(() => {
     <>
       <FloatingUIButton
         icon="menu"
+        tooltipTx="menu"
+        showTooltip={!isModalOpen}
         ref={setButtonRef}
         onPointerDown={isModalOpen ? undefined : openModal}
         isActive={isModalOpen}

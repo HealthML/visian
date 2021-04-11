@@ -28,12 +28,14 @@ export const Layers: React.FC = observer(() => {
 
   // Menu Positioning
   const [buttonRef, setButtonRef] = useState<HTMLButtonElement | null>(null);
-  const modalPosition = useModalPosition(buttonRef, "right");
+  const modalPosition = useModalPosition(buttonRef, "right", isModalOpen);
 
   return (
     <>
       <FloatingUIButton
         icon="layers"
+        tooltipTx="layers"
+        showTooltip={!isModalOpen}
         ref={setButtonRef}
         onPointerDown={toggleModal}
         isActive={isModalOpen}

@@ -86,6 +86,8 @@ export const UIOverlay = observer<UIOverlayProps>(
           <RightBar>
             <FloatingUIButton
               icon="export"
+              tooltipTx="export"
+              tooltipPosition="left"
               onPointerDown={store?.editor.quickExport}
               isActive={false}
             />

@@ -1,4 +1,4 @@
-import { color, coverMixin, DropZone } from "@visian/ui-shared";
+import { color, coverMixin, DropZone, zIndex } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
 import React, { useCallback, useState } from "react";
 import styled from "styled-components";
@@ -19,6 +19,7 @@ const StyledOverlay = styled.div`
   display: flex;
   flex-direction: row;
   padding-right: 10%;
+  z-index: ${zIndex("overlay")};
 `;
 
 export const DropSheet: React.FC<DropSheetProps> = observer(

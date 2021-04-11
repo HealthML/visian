@@ -1,10 +1,11 @@
-import React from "react";
+import React, { useCallback, useImperativeHandle, useState } from "react";
 import styled from "styled-components";
 
 import { fontWeight, radius, size, space } from "../../theme";
 import { Icon } from "../icon";
 import { sheetMixin } from "../sheet";
 import { Text } from "../text";
+import { Tooltip, useTooltipPosition } from "../tooltip";
 import { ButtonProps } from "./button.props";
 
 const StyledText = styled(Text)<Pick<ButtonProps, "isActive">>`
@@ -26,16 +27,77 @@ const StyledButton = styled.button`
 `;
 
 const BaseButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ children, data, icon, isActive, text, tx, ...rest }, ref) => (
-    <StyledButton {...rest} ref={ref}>
-      {icon && <Icon icon={icon} isActive={isActive} />}
-      {tx || text ? (
-        <StyledText data={data} isActive={isActive} text={text} tx={tx} />
-      ) : (
-        children
-      )}
-    </StyledButton>
-  ),
+  (
+    {
+      children,
+      data,
+      icon,
+      tooltip,
+      tooltipTx,
+      tooltipPosition,
+      showTooltip: externalShowTooltip = true,
+      isActive,
+      text,
+      tx,
+      onPointerEnter,
+      onPointerLeave,
+      ...rest
+    },
+    ref,
+  ) => {
+    // Tooltip Toggling
+    const [showTooltip, setShowTooltip] = useState(false);
+    const enterButton = useCallback(
+      (event: React.PointerEvent<HTMLButtonElement>) => {
+        if (onPointerEnter) onPointerEnter(event);
+        setShowTooltip(true);
+      },
+      [onPointerEnter],
+    );
+    const leaveButton = useCallback(
+      (event: React.PointerEvent<HTMLButtonElement>) => {
+        if (onPointerLeave) onPointerLeave(event);
+        setShowTooltip(false);
+      },
+      [onPointerLeave],
+    );
+
+    // Tooltip Positioning
+    const [buttonRef, setButtonRef] = useState<HTMLButtonElement | null>(null);
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    useImperativeHandle(ref, () => buttonRef!, [buttonRef]);
+    const tooltipStyle = useTooltipPosition(
+      buttonRef,
+      tooltipPosition,
+      showTooltip,
+    );
+
+    return (
+      <>
+        <StyledButton
+          {...rest}
+          onPointerEnter={enterButton}
+          onPointerLeave={leaveButton}
+          ref={setButtonRef}
+        >
+          {icon && <Icon icon={icon} isActive={isActive} />}
+          {tx || text ? (
+            <StyledText data={data} isActive={isActive} text={text} tx={tx} />
+          ) : (
+            children
+          )}
+        </StyledButton>
+        {(tooltipTx || tooltip) && (
+          <Tooltip
+            style={tooltipStyle}
+            text={tooltip}
+            tx={tooltipTx}
+            isShown={showTooltip && externalShowTooltip}
+          />
+        )}
+      </>
+    );
+  },
 );
 
 export const Button = styled(BaseButton)`

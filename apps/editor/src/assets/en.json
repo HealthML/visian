@@ -14,6 +14,12 @@
   "ideas-feedback": "Ideas or Feedback?",
   "clear-data": "Clear Data",
 
+  "move-tool": "Move Tool",
+  "pixel-brush": "Brush",
+  "smart-brush": "Smart Brush",
+  "pixel-eraser": "Eraser",
+  "clear-slice": "Clear Slice",
+
   "layers": "Layers",
   "no-layers": "No layers loaded.",
 
@@ -23,5 +29,7 @@
   "off": "Off",
   "main-view-type": "Main View Type",
   "contrast": "Contrast",
-  "brightness": "Brightness"
+  "brightness": "Brightness",
+
+  "export": "Export"
 }

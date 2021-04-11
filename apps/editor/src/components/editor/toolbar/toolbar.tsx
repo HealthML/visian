@@ -28,29 +28,33 @@ export const Toolbar: React.FC = observer(() => {
     <StyledToolbar style={{ marginBottom: 16 }}>
       <Tool
         icon="moveTool"
+        tooltipTx="move-tool"
         activeTool={activeTool}
         value={ToolType.Hand}
         onPress={setActiveTool}
       />
       <Tool
         icon="pixelBrush"
+        tooltipTx="pixel-brush"
         activeTool={activeTool}
         value={ToolType.Brush}
         onPress={setActiveTool}
       />
       <Tool
         icon="magicBrush"
+        tooltipTx="smart-brush"
         activeTool={activeTool}
         value={ToolType.SmartBrush}
         onPress={setActiveTool}
       />
       <Tool
         icon="erase"
+        tooltipTx="pixel-eraser"
         activeTool={activeTool}
         value={ToolType.Eraser}
         onPress={setActiveTool}
       />
-      <Tool icon="trash" onPointerDown={clearSlice} />
+      <Tool icon="trash" tooltipTx="clear-slice" onPointerDown={clearSlice} />
     </StyledToolbar>
   );
 });

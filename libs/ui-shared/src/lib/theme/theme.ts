@@ -104,7 +104,10 @@ export const theme = {
     buttonPadding: "12px 20px",
     inputPadding: "12px 22px",
   },
-  zIndices: {},
+  zIndices: {
+    modal: 50,
+    overlay: 100,
+  },
 };
 
 export type ColorMode = keyof typeof colorModes;
