@@ -28,9 +28,11 @@ export const setUpHotKeys = (store: RootStore): IDisposer => {
   });
 
   // Brush size
-  hotkeys("p", () => {
-    // TODO: "+" doesn't currently work with hotkeys-js (https://github.com/jaywcjlove/hotkeys/issues/270)
-    store.editor.tools.incrementBrushSize();
+  hotkeys("*", (event) => {
+    // "+" doesn't currently work with hotkeys-js (https://github.com/jaywcjlove/hotkeys/issues/270)
+    if (event.key === "+") {
+      store.editor.tools.incrementBrushSize();
+    }
   });
   hotkeys("-", () => {
     store.editor.tools.decrementBrushSize();
