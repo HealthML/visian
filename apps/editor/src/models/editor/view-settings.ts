@@ -97,6 +97,18 @@ export class EditorViewSettings
     return zoomStep * Math.sqrt(this.zoomLevel);
   }
 
+  public get pixelSize() {
+    const image = this.editor.image;
+    if (!image) return undefined;
+
+    const [width, height] = getPlaneAxes(this.mainViewType);
+
+    return new Vector(2).set(
+      this.zoomLevel / image.voxelCount[width],
+      this.zoomLevel / image.voxelCount[height],
+    );
+  }
+
   public zoomIn() {
     this.zoomLevel = Math.min(maxZoom, this.zoomLevel + this.zoomStep);
   }

@@ -33,9 +33,12 @@ export const DropSheet: React.FC<DropSheetProps> = observer(
           setIsLoadingImage(true);
           try {
             await store?.editor.importImage(files[0]);
-          } catch (e) {
-            // TODO: Display error
-            console.error(e);
+            store?.setError();
+          } catch (error) {
+            store?.setError({
+              titleTx: "import-error",
+              descriptionTx: error.message,
+            });
           }
           onDropCompleted();
           setIsLoadingImage(false);
@@ -51,9 +54,12 @@ export const DropSheet: React.FC<DropSheetProps> = observer(
           setIsLoadingAnnotation(true);
           try {
             await store?.editor.importAnnotation(files[0]);
-          } catch (e) {
-            // TODO: Display error
-            console.error(e);
+            store?.setError();
+          } catch (error) {
+            store?.setError({
+              titleTx: "import-error",
+              descriptionTx: error.message,
+            });
           }
           onDropCompleted();
           setIsLoadingAnnotation(false);

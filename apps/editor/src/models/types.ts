@@ -15,3 +15,10 @@ export interface StoreContext {
 
   getTheme(): ColorMode;
 }
+
+export interface ErrorNotification {
+  title?: string;
+  titleTx?: string;
+  description?: string;
+  descriptionTx?: string;
+}

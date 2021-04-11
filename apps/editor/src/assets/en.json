@@ -14,7 +14,8 @@
   "ideas-feedback": "Ideas or Feedback?",
   "clear-data": "Clear Data",
 
-  "move-tool": "Move Tool",
+  "navigation-tool": "Move Tool",
+  "crosshair-tool": "Crosshair Tool",
   "pixel-brush": "Brush",
   "smart-brush": "Smart Brush",
   "pixel-eraser": "Eraser",
@@ -31,5 +32,10 @@
   "contrast": "Contrast",
   "brightness": "Brightness",
 
-  "export": "Export"
+  "export": "Export",
+
+  "import-error": "Import Error",
+  "annotation-mismatch-error": "This annotation does not match the original image's size.",
+  "no-image-error": "You have to load a base image before importing an annotation.",
+  "image-loading-error": "Looks like this file is not supported."
 }

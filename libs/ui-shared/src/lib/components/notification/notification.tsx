@@ -1,11 +1,11 @@
 import React from "react";
 import styled from "styled-components";
 
-import { color, fontWeight } from "../../theme";
+import { color, fontWeight, zIndex } from "../../theme";
 import { Sheet } from "../sheet";
+import noise from "../sheet/noise.png";
 import { Title } from "../text";
 import { NotificationProps } from "./notification.props";
-import noise from "../sheet/noise.png";
 
 const NotificationContainer = styled(Sheet)`
   justify-content: flex-start;
@@ -15,6 +15,8 @@ const NotificationContainer = styled(Sheet)`
 
   background: url(${noise}) left top repeat, ${color("redSheet")};
   border: 1px solid ${color("redBorder")};
+
+  z-index: ${zIndex("notification")};
 `;
 
 const NotificationTitle = styled(Title)`

@@ -12,6 +12,7 @@ const ModalContainer = styled(Sheet)`
   align-items: flex-start;
   flex-direction: column;
   padding: 14px;
+  pointer-events: auto;
 
   width: 200px;
   z-index: ${zIndex("modal")};

@@ -1,4 +1,9 @@
-import { AbsoluteCover, FloatingUIButton, Text } from "@visian/ui-shared";
+import {
+  AbsoluteCover,
+  FloatingUIButton,
+  Notification,
+  Text,
+} from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
 import React from "react";
 import styled from "styled-components";
@@ -62,6 +67,14 @@ const TopConsole = styled.div`
   justify-content: center;
 `;
 
+const ErrorNotification = styled(Notification)`
+  position: absolute;
+  min-width: 15%;
+  left: 50%;
+  bottom: 12%;
+  transform: translateX(-50%);
+`;
+
 export const UIOverlay = observer<UIOverlayProps>(
   ({ isDraggedOver, onDropCompleted, ...rest }) => {
     const store = useStore();
@@ -97,6 +110,14 @@ export const UIOverlay = observer<UIOverlayProps>(
         </ColumnRight>
 
         {isDraggedOver && <DropSheet onDropCompleted={onDropCompleted} />}
+        {store?.error && (
+          <ErrorNotification
+            title={store?.error.title}
+            titleTx={store?.error.titleTx}
+            description={store?.error.description}
+            descriptionTx={store?.error.descriptionTx}
+          />
+        )}
       </Container>
     );
   },

@@ -31,7 +31,7 @@ export const setUpPointerHandling = (
             (activeTool === ToolType.Crosshair &&
               context.button === PointerButton.RMB) ||
             context.ctrlKey ||
-            activeTool === ToolType.Hand),
+            activeTool === ToolType.Navigate),
       );
 
       if (!context.useForGesture) {
