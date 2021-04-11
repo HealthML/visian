@@ -32,7 +32,9 @@ export const initI18n = (testResources?: {
         .use(LanguageDetector)
         .use(initReactI18next)
         .init({
-          backend: { loadPath: "/assets/{{lng}}.json" },
+          backend: {
+            loadPath: `${process.env.NX_DEPLOY_URL || "/"}assets/{{lng}}.json`,
+          },
           fallbackLng: "en",
           load: "languageOnly",
 
