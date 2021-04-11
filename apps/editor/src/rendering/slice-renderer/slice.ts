@@ -15,6 +15,7 @@ import {
   crosshairZ,
   getGeometrySize,
   imageMeshZ,
+  PreviewBrushCursor,
 } from "./utils";
 
 import type { Editor } from "../../models";
@@ -40,6 +41,8 @@ export class Slice extends THREE.Group implements IDisposable {
   private crosshair: Crosshair;
 
   public brushCursor: BrushCursor;
+
+  public previewBrushCursor: PreviewBrushCursor;
 
   private disposers: IDisposer[] = [];
 
@@ -72,6 +75,10 @@ export class Slice extends THREE.Group implements IDisposable {
     this.brushCursor = new BrushCursor(editor, viewType);
     this.brushCursor.position.z = brushCursorZ;
     this.crosshairShiftGroup.add(this.brushCursor);
+
+    this.previewBrushCursor = new PreviewBrushCursor(editor, viewType);
+    this.previewBrushCursor.position.z = brushCursorZ;
+    this.crosshairShiftGroup.add(this.previewBrushCursor);
 
     this.disposers.push(autorun(this.updateScale), autorun(this.updateOffset));
   }

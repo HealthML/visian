@@ -36,13 +36,15 @@ export class BrushCursor extends THREE.Group implements IDisposable {
 
   protected disposers: IDisposer[] = [];
 
-  constructor(private editor: Editor, protected viewType: ViewType) {
+  constructor(protected editor: Editor, protected viewType: ViewType) {
     super();
 
     this.disposers.push(
       autorun(this.updateRadius),
       autorun(this.updateScale),
-      autorun(this.updateVisibility),
+      autorun(() => {
+        this.updateVisibility();
+      }),
     );
   }
 
@@ -58,14 +60,14 @@ export class BrushCursor extends THREE.Group implements IDisposable {
     this.editor.sliceRenderer?.lazyRender();
   }
 
-  private updateVisibility = () => {
+  protected updateVisibility() {
     this.visible =
       this.editor.viewSettings.mainViewType === this.viewType &&
       this.editor.tools.isBrushToolSelected &&
       this.editor.tools.isCursorOverDrawableArea;
 
     this.editor.sliceRenderer?.lazyRender();
-  };
+  }
 
   private updateScale = () => {
     const image = this.editor.image;
