@@ -66,6 +66,9 @@ export const useUpdateOnResize = (isActive = true) => {
     const resizeSensor = new ResizeSensor(document.body, (size) => {
       setSize(`${size.width}x${size.height}`);
     });
+    const rect = document.body.getBoundingClientRect();
+    setSize(`${rect.width}x${rect.height}`);
+
     return () => {
       resizeSensor.detach();
     };
