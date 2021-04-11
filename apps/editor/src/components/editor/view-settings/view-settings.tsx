@@ -39,7 +39,7 @@ export const ViewSettings: React.FC = observer(() => {
 
   // Menu Positioning
   const [buttonRef, setButtonRef] = useState<HTMLButtonElement | null>(null);
-  const modalPosition = useModalPosition(buttonRef, "left");
+  const modalPosition = useModalPosition(buttonRef, "left", isModalOpen);
 
   // Menu Actions
   const setContrast = useCallback(

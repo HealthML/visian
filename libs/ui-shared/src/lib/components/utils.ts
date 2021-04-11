@@ -58,17 +58,18 @@ export const useOutsidePress = <T extends HTMLElement>(
   }, [activateHandler, callback, ref]);
 };
 
-export const useUpdateOnResize = () => {
+export const useUpdateOnResize = (isActive = true) => {
   const [size, setSize] = useState<string | undefined>(undefined);
   useEffect(() => {
+    if (!isActive) return;
+
     const resizeSensor = new ResizeSensor(document.body, (size) => {
       setSize(`${size.width}x${size.height}`);
     });
-
     return () => {
       resizeSensor.detach();
     };
-  }, []);
+  }, [isActive]);
 
   return size;
 };

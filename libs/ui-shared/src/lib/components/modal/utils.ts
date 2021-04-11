@@ -2,12 +2,17 @@ import React, { useMemo } from "react";
 
 import { useUpdateOnResize } from "../utils";
 
+/**
+ * Returns a style object that absolutely positions a modal next to its
+ * toggling button.
+ */
 export const useModalPosition = <T extends HTMLElement>(
-  element: T | undefined | null,
+  buttonElement: T | undefined | null,
   position: "left" | "right" = "right",
+  updateOnResize = true,
 ): React.CSSProperties => {
-  useUpdateOnResize();
-  const rect = element?.getBoundingClientRect();
+  useUpdateOnResize(updateOnResize);
+  const rect = buttonElement?.getBoundingClientRect();
 
   return useMemo(
     () => {

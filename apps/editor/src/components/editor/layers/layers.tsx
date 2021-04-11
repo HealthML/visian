@@ -28,7 +28,7 @@ export const Layers: React.FC = observer(() => {
 
   // Menu Positioning
   const [buttonRef, setButtonRef] = useState<HTMLButtonElement | null>(null);
-  const modalPosition = useModalPosition(buttonRef, "right");
+  const modalPosition = useModalPosition(buttonRef, "right", isModalOpen);
 
   return (
     <>
