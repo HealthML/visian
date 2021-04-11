@@ -5,5 +5,6 @@ export const storePersistInterval = 1000;
 export const minZoom = 1;
 export const maxZoom = 100;
 export const zoomStep = 0.15;
+export const skipSlices = 10;
 
 export const maxUndoRedoSteps = 20;
