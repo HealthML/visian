@@ -9,7 +9,7 @@ export const getSpriteAspectRatio = (image: Image) => {
   return maxSpriteSize.x / maxSpriteSize.y;
 };
 
-export const getMainViewPaddings = (editor: Editor) => {
+export const getMainViewPaddings = (_editor: Editor) => {
   // TODO: Adapt based on the active overlays.
   return [0, 0, 0, 0];
 };

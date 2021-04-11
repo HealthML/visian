@@ -1,8 +1,13 @@
 import { getTheme } from "@visian/ui-shared";
-import { Image, ImageSnapshot, ISerializable } from "@visian/utils";
+import {
+  Image,
+  ImageSnapshot,
+  ISerializable,
+  writeSingleMedicalImage,
+} from "@visian/utils";
 import isEqual from "lodash.isequal";
-import { action, computed, makeObservable, observable } from "mobx";
-import tc from "tinycolor2";
+import { action, makeObservable, observable } from "mobx";
+import FileSaver from "file-saver";
 
 import { StoreContext } from "../types";
 import { EditorTools } from "./tools";
@@ -14,7 +19,7 @@ import {
 
 import type { SliceRenderer } from "../../rendering";
 export interface EditorSnapshot {
-  backgroundColor: string;
+  backgroundColor?: string;
   image?: ImageSnapshot;
   annotation?: ImageSnapshot;
 
@@ -39,25 +44,23 @@ export class Editor implements ISerializable<EditorSnapshot> {
   public foregroundColor = "#ffffff";
   public annotation?: Image;
   public image?: Image;
-  public backgroundColor = getTheme("dark").colors.background;
+  protected backgroundColor?: string;
 
   public viewSettings: EditorViewSettings;
   public tools: EditorTools;
   public undoRedo: EditorUndoRedo;
 
-  constructor(protected context?: StoreContext) {
+  constructor(protected context: StoreContext) {
     this.viewSettings = new EditorViewSettings(this, context);
     this.tools = new EditorTools(this, context);
     this.undoRedo = new EditorUndoRedo(this, context);
 
-    makeObservable(this, {
+    makeObservable<this, "backgroundColor">(this, {
       sliceRenderer: observable,
       foregroundColor: observable,
       image: observable,
       annotation: observable,
       backgroundColor: observable,
-
-      theme: computed,
 
       setSliceRenderer: action,
       setForegroundColor: action,
@@ -68,10 +71,11 @@ export class Editor implements ISerializable<EditorSnapshot> {
     });
   }
 
-  public get theme(): "dark" | "light" {
-    return tc(this.backgroundColor).getBrightness() / 255 > 0.5
-      ? "light"
-      : "dark";
+  public getBackgroundColor() {
+    return (
+      this.backgroundColor ||
+      getTheme(this.context.getTheme()).colors.background
+    );
   }
 
   public setSliceRenderer(sliceRenderer?: SliceRenderer) {
@@ -101,9 +105,9 @@ export class Editor implements ISerializable<EditorSnapshot> {
   }
 
   public setAnnotation(image: Image) {
-    if (!this.image) throw new Error("No image loaded.");
+    if (!this.image) throw new Error("no-image-error");
     if (!isEqual(image.voxelCount, this.image.voxelCount)) {
-      throw new Error("Annotation does not match the original image's size.");
+      throw new Error("annotation-mismatch-error");
     }
     this.annotation = image;
     this.context?.persistImmediately();
@@ -117,6 +121,19 @@ export class Editor implements ISerializable<EditorSnapshot> {
   public setBackgroundColor(backgroundColor: string) {
     this.backgroundColor = backgroundColor;
   }
+
+  public quickExport = async () => {
+    const image = this.annotation;
+    if (!image) return;
+
+    const file = await writeSingleMedicalImage(
+      image.toITKImage(),
+      `${image.name.split(".")[0]}.nii.gz`,
+    );
+
+    if (!file) return;
+    FileSaver.saveAs(file, file.name);
+  };
 
   public toJSON() {
     return {

@@ -1,7 +1,7 @@
 import React, { useCallback, useState } from "react";
 
-import Slider from "./slider";
-import { SliderProps } from "./slider.props";
+import { Slider, SliderField } from "./slider";
+import { SliderProps, SliderFieldProps } from "./slider.props";
 
 export default {
   cmponent: Slider,
@@ -71,5 +71,17 @@ multi.args = {
   stepSize: 0,
   isInverted: false,
   isVertical: false,
-  shouldShowRange: true,
+  showRange: true,
+};
+
+export const field = (args: SliderFieldProps) => <SliderField {...args} />;
+field.args = {
+  defaultValue: 5,
+  min: 0,
+  max: 10,
+  stepSize: 0,
+  isInverted: false,
+  isVertical: false,
+  label: "Slider",
+  showValueLabel: true,
 };

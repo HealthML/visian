@@ -28,20 +28,30 @@ export const Text: React.FC<TextProps> = ({
   );
 };
 
-export const Subtitle: React.FC<Omit<
-  TextProps,
-  "isBold"
->> = styled(({ as, ...rest }: TextProps) => <Text {...rest} as={as || "h3"} />)`
+export const Subtitle: React.FC<
+  Omit<TextProps, "isBold">
+> = styled(({ as, ...rest }: TextProps) => <Text {...rest} as={as || "h3"} />)`
   font-size: ${fontSize("subtitle")};
-  font-weight: ${fontWeight("bold")};
+  font-weight: ${fontWeight("regular")};
 `;
 
-export const Title: React.FC<Omit<
-  TextProps,
-  "isBold"
->> = styled(({ as, ...rest }: TextProps) => <Text {...rest} as={as || "h2"} />)`
+export const Title: React.FC<
+  Omit<TextProps, "isBold">
+> = styled(({ as, ...rest }: TextProps) => <Text {...rest} as={as || "h2"} />)`
   font-size: ${fontSize("title")};
-  font-weight: ${fontWeight("bold")};
+  font-weight: ${fontWeight("regular")};
+`;
+
+export const InputLabel = styled(Text)`
+  padding-bottom: 8px;
+  font-size: ${fontSize("small")};
+  line-height: 10px;
+`;
+
+export const SubtleText = styled(Text)`
+  font-size: ${fontSize("small")};
+  line-height: 10px;
+  opacity: 0.3;
 `;
 
 export default Text;

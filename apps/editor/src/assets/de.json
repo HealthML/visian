@@ -4,5 +4,36 @@
   "drop-image": "Legen Sie Ihren Scan hier ab",
   "drop-annotation": "Legen Sie Ihre Annotation hier ab",
 
-  "start": "Starten Sie, in dem Sie einen Scan hier ablegen."
+  "start": "Starten Sie, in dem Sie einen Scan hier ablegen.",
+
+  "menu": "Menü",
+  "theme": "Farbschema",
+  "dark": "Dunkel",
+  "light": "Hell",
+  "language": "Sprache",
+  "ideas-feedback": "Ideen oder Feedback?",
+  "clear-data": "Daten Löschen",
+
+  "navigation-tool": "Navigationswerkzeug",
+  "crosshair-tool": "Fadenkreuzwerkzeug",
+  "pixel-brush": "Pinsel",
+  "smart-brush": "Smarter Pinsel",
+  "pixel-eraser": "Radierer",
+  "clear-slice": "Schicht leeren",
+
+  "layers": "Ebenen",
+  "no-layers": "Keine Ebenen geladen.",
+
+  "view-settings": "Ansichtseinstellungen",
+  "side-views": "Seitenansichten",
+  "on": "An",
+  "off": "Aus",
+  "main-view-type": "Hauptansichtstyp",
+  "contrast": "Kontrast",
+  "brightness": "Helligkeit",
+
+  "import-error": "Importfehler",
+  "annotation-mismatch-error": "Diese Annotation passt nicht auf den Scan.",
+  "no-image-error": "Sie müssen einen Scan laden, bevor Sie eine Annotation importieren.",
+  "image-loading-error": "Diese Datei scheint nicht unterstützt zu sein."
 }

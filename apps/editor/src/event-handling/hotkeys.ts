@@ -1,6 +1,6 @@
-import { IDisposer, ViewType, writeSingleMedicalImage } from "@visian/utils";
-import FileSaver from "file-saver";
+import { IDisposer, ViewType } from "@visian/utils";
 import hotkeys from "hotkeys-js";
+
 import { skipSlices } from "../constants";
 
 import type { RootStore } from "../models";
@@ -39,13 +39,13 @@ export const setUpHotKeys = (store: RootStore): IDisposer => {
 
   // View Types
   hotkeys("t", () => {
-    store.editor.viewSettings.setMainView(ViewType.Transverse);
+    store.editor.viewSettings.setMainViewType(ViewType.Transverse);
   });
   hotkeys("s", () => {
-    store.editor.viewSettings.setMainView(ViewType.Sagittal);
+    store.editor.viewSettings.setMainViewType(ViewType.Sagittal);
   });
   hotkeys("c", () => {
-    store.editor.viewSettings.setMainView(ViewType.Coronal);
+    store.editor.viewSettings.setMainViewType(ViewType.Coronal);
   });
   hotkeys("v", () => {
     store.editor.viewSettings.toggleSideViews();
@@ -93,18 +93,7 @@ export const setUpHotKeys = (store: RootStore): IDisposer => {
   });
   hotkeys("ctrl+e", (event) => {
     event.preventDefault();
-
-    const image = store.editor.annotation;
-    if (!image) return;
-
-    writeSingleMedicalImage(
-      image.toITKImage(),
-      `${image.name.split(".")[0]}.nii.gz`,
-    ).then((file) => {
-      if (!file) return;
-
-      FileSaver.saveAs(file, file.name);
-    });
+    store.editor.quickExport();
   });
 
   return () => hotkeys.unbind();

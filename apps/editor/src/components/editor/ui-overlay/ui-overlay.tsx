@@ -1,24 +1,27 @@
 import {
   AbsoluteCover,
-  color,
-  coverMixin,
-  DropZone,
-  FlexRow,
-  Spacer,
+  FloatingUIButton,
+  Notification,
   Text,
 } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
-import React, { useCallback, useState } from "react";
+import React from "react";
 import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
+import { DropSheet } from "../drop-sheet";
+import { Layers } from "../layers";
+import { Menu } from "../menu";
 import { SideViews } from "../side-views";
+import { SliceSlider } from "../slice-slider";
+import { Toolbar } from "../toolbar";
+import { ViewSettings } from "../view-settings";
 import { UIOverlayProps } from "./ui-overlay.props";
 
 const Container = styled(AbsoluteCover)`
   align-items: stretch;
   display: flex;
-  padding: 12px;
+  padding: 20px;
   z-index: 1;
   pointer-events: none;
   user-select: none;
@@ -31,60 +34,50 @@ const StartTextContainer = styled(AbsoluteCover)`
   opacity: 0.4;
 `;
 
-const StyledDropZone = styled(DropZone)`
-  flex: 1;
-  margin: 10% 0 10% 10%;
+const ColumnLeft = styled.div`
+  display: flex;
+  flex-direction: column;
+  width: 50%;
+  justify-content: flex-start;
 `;
 
-const DropSheet = styled.div`
-  ${coverMixin}
-
-  align-items: stretch;
-  background-color: ${color("modalUnderlay")};
+const ColumnRight = styled.div`
   display: flex;
   flex-direction: row;
-  padding-right: 10%;
+  width: 50%;
+  justify-content: flex-end;
+`;
+
+const RightBar = styled.div`
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+`;
+
+const TopConsole = styled.div`
+  display: flex;
+  width: 20%;
+  overflow: auto;
+  margin: auto;
+  position: absolute;
+  top: 20px;
+  left: 0;
+  bottom: 1;
+  right: 0;
+  justify-content: center;
+`;
+
+const ErrorNotification = styled(Notification)`
+  position: absolute;
+  min-width: 15%;
+  left: 50%;
+  bottom: 12%;
+  transform: translateX(-50%);
 `;
 
 export const UIOverlay = observer<UIOverlayProps>(
   ({ isDraggedOver, onDropCompleted, ...rest }) => {
     const store = useStore();
-
-    const [isLoadingImage, setIsLoadingImage] = useState(false);
-    const importImage = useCallback(
-      (files: FileList) => {
-        (async () => {
-          setIsLoadingImage(true);
-          try {
-            await store?.editor.importImage(files[0]);
-          } catch (e) {
-            // TODO: Display error
-            console.error(e);
-          }
-          onDropCompleted();
-          setIsLoadingImage(false);
-        })();
-      },
-      [onDropCompleted, store],
-    );
-
-    const [isLoadingAnnotation, setIsLoadingAnnotation] = useState(false);
-    const importAnnotation = useCallback(
-      (files: FileList) => {
-        (async () => {
-          setIsLoadingAnnotation(true);
-          try {
-            await store?.editor.importAnnotation(files[0]);
-          } catch (e) {
-            // TODO: Display error
-            console.error(e);
-          }
-          onDropCompleted();
-          setIsLoadingAnnotation(false);
-        })();
-      },
-      [onDropCompleted, store],
-    );
 
     return (
       <Container {...rest}>
@@ -93,22 +86,37 @@ export const UIOverlay = observer<UIOverlayProps>(
             <Text tx="start" />
           </StartTextContainer>
         )}
-        <Spacer />
-        <SideViews />
+        <TopConsole>
+          <Text text={store?.editor.image?.name} style={{ opacity: 0.5 }} />
+        </TopConsole>
+        <ColumnLeft>
+          <Menu />
+          <Toolbar />
+          <Layers />
+        </ColumnLeft>
+        <ColumnRight>
+          <SideViews />
+          <RightBar>
+            <FloatingUIButton
+              icon="export"
+              tooltipTx="export"
+              tooltipPosition="left"
+              onPointerDown={store?.editor.quickExport}
+              isActive={false}
+            />
+            <ViewSettings />
+            <SliceSlider />
+          </RightBar>
+        </ColumnRight>
 
-        {isDraggedOver && (
-          <DropSheet>
-            <StyledDropZone
-              isAlwaysVisible
-              labelTx={isLoadingImage ? "loading" : "drop-image"}
-              onFileDrop={importImage}
-            />
-            <StyledDropZone
-              isAlwaysVisible
-              labelTx={isLoadingAnnotation ? "loading" : "drop-annotation"}
-              onFileDrop={importAnnotation}
-            />
-          </DropSheet>
+        {isDraggedOver && <DropSheet onDropCompleted={onDropCompleted} />}
+        {store?.error && (
+          <ErrorNotification
+            title={store?.error.title}
+            titleTx={store?.error.titleTx}
+            description={store?.error.description}
+            descriptionTx={store?.error.descriptionTx}
+          />
         )}
       </Container>
     );

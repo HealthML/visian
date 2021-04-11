@@ -1,6 +1,5 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useState } from "react";
 import styled, { css } from "styled-components";
-import { useTranslation } from "../../i18n";
 
 import { color, radius } from "../../theme";
 import { sheetMixin } from "../sheet";
@@ -71,7 +70,6 @@ export const DropZone: React.FC<DropZoneProps> = (props) => {
     [onDrop, onFileDrop],
   );
 
-  const { t } = useTranslation();
   return (
     <StyledDiv
       {...rest}
