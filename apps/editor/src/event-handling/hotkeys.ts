@@ -1,6 +1,6 @@
 import { IDisposer, ViewType, writeSingleMedicalImage } from "@visian/utils";
-import hotkeys from "hotkeys-js";
 import FileSaver from "file-saver";
+import hotkeys from "hotkeys-js";
 
 import type { RootStore } from "../models";
 
@@ -25,6 +25,17 @@ export const setUpHotKeys = (store: RootStore): IDisposer => {
   hotkeys("ctrl+del", (event) => {
     event.preventDefault();
     store.editor.tools.clearImage();
+  });
+
+  // Brush size
+  hotkeys("*", (event) => {
+    // "+" doesn't currently work with hotkeys-js (https://github.com/jaywcjlove/hotkeys/issues/270)
+    if (event.key === "+") {
+      store.editor.tools.incrementBrushSize();
+    }
+  });
+  hotkeys("-", () => {
+    store.editor.tools.decrementBrushSize();
   });
 
   // Undo/Redo
