@@ -35,6 +35,17 @@ export const setUpWheelHandling = (store: RootStore): IDisposer => {
           offsetOriginByZoomToCursorDelta(event, transformOrigin, scaleFactor),
         ),
       );
+    } else if (event.altKey) {
+      const interactionType = getWheelInteractionType(event);
+      switch (interactionType) {
+        case WheelInteractionType.Up:
+          store.editor.tools.decrementBrushSize();
+          break;
+
+        case WheelInteractionType.Down:
+          store.editor.tools.incrementBrushSize();
+          break;
+      }
     } else {
       store.editor.viewSettings.stepSelectedSlice(-Math.sign(event.deltaY));
     }

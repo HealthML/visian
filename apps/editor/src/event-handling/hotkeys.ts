@@ -1,10 +1,43 @@
 import { IDisposer, ViewType } from "@visian/utils";
 import hotkeys from "hotkeys-js";
 
+import { skipSlices } from "../constants";
+
 import type { RootStore } from "../models";
 
 export const setUpHotKeys = (store: RootStore): IDisposer => {
   hotkeys.filter = () => true;
+
+  // Tools
+  hotkeys("del", (event) => {
+    event.preventDefault();
+    store.editor.tools.clearSlice();
+  });
+  hotkeys("ctrl+del", (event) => {
+    event.preventDefault();
+    store.editor.tools.clearImage();
+  });
+
+  // Brush Size
+  hotkeys("*", (event) => {
+    // "+" doesn't currently work with hotkeys-js (https://github.com/jaywcjlove/hotkeys/issues/270)
+    if (event.key === "+" && !event.ctrlKey) {
+      store.editor.tools.incrementBrushSize();
+    }
+  });
+  hotkeys("-", () => {
+    store.editor.tools.decrementBrushSize();
+  });
+
+  // Undo/Redo
+  hotkeys("ctrl+z", () => {
+    store.editor.undoRedo.undo();
+  });
+  hotkeys("ctrl+shift+z,ctrl+y", () => {
+    store.editor.undoRedo.redo();
+  });
+
+  // View Types
   hotkeys("t", () => {
     store.editor.viewSettings.setMainViewType(ViewType.Transverse);
   });
@@ -17,21 +50,40 @@ export const setUpHotKeys = (store: RootStore): IDisposer => {
   hotkeys("v", () => {
     store.editor.viewSettings.toggleSideViews();
   });
-  hotkeys("del", (event) => {
+
+  // Slice Navigation
+  hotkeys("up", (event) => {
     event.preventDefault();
-    store.editor.tools.clearSlice();
+    store.editor.viewSettings.stepSelectedSlice(1);
   });
-  hotkeys("ctrl+del", (event) => {
+  hotkeys("shift+up", (event) => {
     event.preventDefault();
-    store.editor.tools.clearImage();
+    store.editor.viewSettings.stepSelectedSlice(skipSlices);
+  });
+  hotkeys("down", (event) => {
+    event.preventDefault();
+    store.editor.viewSettings.stepSelectedSlice(-1);
+  });
+  hotkeys("shift+down", (event) => {
+    event.preventDefault();
+    store.editor.viewSettings.stepSelectedSlice(-skipSlices);
   });
 
-  // Undo/Redo
-  hotkeys("ctrl+z", () => {
-    store.editor.undoRedo.undo();
+  // Zoom
+  hotkeys("*", (event) => {
+    // "+" doesn't currently work with hotkeys-js (https://github.com/jaywcjlove/hotkeys/issues/270)
+    if (event.key === "+" && event.ctrlKey) {
+      event.preventDefault();
+      store.editor.viewSettings.zoomIn();
+    }
   });
-  hotkeys("ctrl+shift+z,ctrl+y", () => {
-    store.editor.undoRedo.redo();
+  hotkeys("ctrl+-", (event) => {
+    event.preventDefault();
+    store.editor.viewSettings.zoomOut();
+  });
+  hotkeys("ctrl+0", (event) => {
+    event.preventDefault();
+    store.editor.viewSettings.setZoomLevel(1);
   });
 
   // Save & Export

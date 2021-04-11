@@ -30,7 +30,8 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
 
   public isCursorOverDrawableArea = false;
 
-  public brushSizePixels = 0.5;
+  private brushWidthScreen = 0.02;
+  private lockedBrushSizePixels?: number;
 
   public smartBrushNeighborThreshold = 6;
   public smartBrushSeedThreshold = 10;
@@ -67,14 +68,17 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
       [ToolType.SmartEraser]: this.smartBrush,
     };
 
-    makeObservable(this, {
+    makeObservable<this, "brushWidthScreen" | "lockedBrushSizePixels">(this, {
       activeTool: observable,
       isCursorOverDrawableArea: observable,
-      brushSizePixels: observable,
       smartBrushNeighborThreshold: observable,
       smartBrushSeedThreshold: observable,
+      brushWidthScreen: observable,
+      lockedBrushSizePixels: observable,
 
       isBrushToolSelected: computed,
+      isBrushSizeLocked: computed,
+      brushSizePixels: computed,
 
       applySnapshot: action,
       setActiveTool: action,
@@ -82,6 +86,7 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
       setBrushSizePixels: action,
       setSmartBrushSeedTreshold: action,
       setSmartBrushNeighborThreshold: action,
+      setLockedBrushSizePixels: action,
     });
   }
 
@@ -94,6 +99,29 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
     ].includes(this.activeTool);
   }
 
+  public get isBrushSizeLocked() {
+    return this.lockedBrushSizePixels !== undefined;
+  }
+
+  public get brushSizePixels() {
+    if (this.lockedBrushSizePixels !== undefined) {
+      return this.lockedBrushSizePixels;
+    }
+
+    const pixelWidth = this.editor.viewSettings.pixelSize?.x;
+
+    // Size is rounded to the closest 0.5 step, to allow pixelSize 0.5 for the 2x2 brush.
+    const size = pixelWidth
+      ? Math.round((this.brushWidthScreen / pixelWidth - 0.5) * 2) / 2
+      : 0;
+
+    return Math.max(
+      0,
+      // This should only be an integer or 0.5.
+      size > 1 ? Math.round(size) : size,
+    );
+  }
+
   public setActiveTool(tool = ToolType.Brush) {
     this.activeTool = tool;
   }
@@ -103,7 +131,17 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
   }
 
   public setBrushSizePixels(value = 5) {
-    this.brushSizePixels = value;
+    const clampedValue = Math.max(0, value);
+
+    if (this.isBrushSizeLocked) {
+      this.setLockedBrushSizePixels(clampedValue);
+    }
+
+    const pixelWidth = this.editor.viewSettings.pixelSize?.x;
+
+    if (!pixelWidth) return;
+
+    this.brushWidthScreen = (clampedValue + 0.5) * pixelWidth;
   }
 
   public setSmartBrushSeedTreshold(value = 6) {
@@ -112,6 +150,26 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
 
   public setSmartBrushNeighborThreshold(value = 10) {
     this.smartBrushNeighborThreshold = value;
+  }
+
+  public setLockedBrushSizePixels(value?: number) {
+    if (value === undefined && this.lockedBrushSizePixels) {
+      this.setBrushSizePixels(this.lockedBrushSizePixels);
+    }
+
+    this.lockedBrushSizePixels = value;
+  }
+
+  public incrementBrushSize() {
+    // Allow brush size 0.5.
+    const increment = this.brushSizePixels < 1 ? 0.5 : 1;
+    this.setBrushSizePixels(this.brushSizePixels + increment);
+  }
+
+  public decrementBrushSize() {
+    // Allow brush size 0.5.
+    const decrement = this.brushSizePixels <= 1 ? 0.5 : 1;
+    this.setBrushSizePixels(this.brushSizePixels - decrement);
   }
 
   public toJSON() {
