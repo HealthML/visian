@@ -19,7 +19,7 @@ const SyledCanvas = styled(WebGLCanvas)<
 >`
   cursor: ${(props) => {
     switch (props.activeTool) {
-      case ToolType.Hand:
+      case ToolType.Navigate:
         // TODO: `cursor: "grabbing"` while dragged
         return "grab";
 

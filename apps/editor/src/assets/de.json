@@ -14,7 +14,8 @@
   "ideas-feedback": "Ideen oder Feedback?",
   "clear-data": "Daten Löschen",
 
-  "move-tool": "Navigationswerkzeug",
+  "navigation-tool": "Navigationswerkzeug",
+  "crosshair-tool": "Fadenkreuzwerkzeug",
   "pixel-brush": "Pinsel",
   "smart-brush": "Smarter Pinsel",
   "pixel-eraser": "Radierer",

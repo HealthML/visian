@@ -28,9 +28,16 @@ export const Toolbar: React.FC = observer(() => {
     <StyledToolbar style={{ marginBottom: 16 }}>
       <Tool
         icon="moveTool"
-        tooltipTx="move-tool"
+        tooltipTx="navigation-tool"
         activeTool={activeTool}
-        value={ToolType.Hand}
+        value={ToolType.Navigate}
+        onPress={setActiveTool}
+      />
+      <Tool
+        icon="crosshair"
+        tooltipTx="crosshair-tool"
+        activeTool={activeTool}
+        value={ToolType.Crosshair}
         onPress={setActiveTool}
       />
       <Tool
