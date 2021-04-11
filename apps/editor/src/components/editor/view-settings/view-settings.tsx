@@ -59,6 +59,9 @@ export const ViewSettings: React.FC = observer(() => {
     <>
       <FloatingUIButton
         icon="settings"
+        tooltipTx="view-settings"
+        tooltipPosition="left"
+        showTooltip={!isModalOpen}
         ref={setButtonRef}
         onPointerDown={toggleModal}
         isActive={isModalOpen}
@@ -78,7 +81,7 @@ export const ViewSettings: React.FC = observer(() => {
         />
         <SpacedSliderField
           labelTx="contrast"
-          showValueLabel={true}
+          showValueLabel
           min={0}
           max={2}
           value={store?.editor.viewSettings.contrast}
@@ -86,7 +89,7 @@ export const ViewSettings: React.FC = observer(() => {
         />
         <SpacedSliderField
           labelTx="brightness"
-          showValueLabel={true}
+          showValueLabel
           min={0}
           max={2}
           value={store?.editor.viewSettings.brightness}

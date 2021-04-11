@@ -1,7 +1,7 @@
 import React, { useRef } from "react";
 import styled from "styled-components";
 
-import { color, fontWeight } from "../../theme";
+import { color, fontWeight, zIndex } from "../../theme";
 import { Sheet } from "../sheet";
 import { Title } from "../text";
 import { useOutsidePress } from "../utils";
@@ -14,6 +14,7 @@ const ModalContainer = styled(Sheet)`
   padding: 14px;
 
   width: 200px;
+  z-index: ${zIndex("modal")};
 `;
 const ModalTitle = styled(Title)`
   font-size: 16px;

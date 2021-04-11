@@ -6,6 +6,7 @@ import { Text } from "../text";
 import { TooltipProps } from "./tooltip.props";
 
 const TooltipContainer = styled(Sheet)`
+  box-sizing: border-box;
   height: 16px;
   border-radius: 10px;
   padding: 0 14px;
@@ -14,16 +15,21 @@ const TooltipContainer = styled(Sheet)`
 const TooltipLabel = styled(Text)`
   font-size: 9px;
   line-height: 9px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 `;
 
 export const Tooltip: React.FC<TooltipProps> = ({
-  labelTx,
-  label,
+  tx,
+  data,
+  text,
+  isShown,
   ...rest
 }) => {
-  return (
+  return isShown === false ? null : (
     <TooltipContainer {...rest}>
-      <TooltipLabel tx={labelTx} text={label} />
+      <TooltipLabel tx={tx} data={data} text={text} />
     </TooltipContainer>
   );
 };

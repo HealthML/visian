@@ -41,13 +41,13 @@ export const useIsDraggedOver = () => {
 
 export const useOutsidePress = <T extends HTMLElement>(
   ref: React.RefObject<T>,
-  callback?: () => void,
+  callback?: (event: PointerEvent) => void,
   activateHandler?: boolean,
 ) => {
   useEffect(() => {
     const handleOutsidePress = (event: PointerEvent) => {
       if (ref.current && !ref.current.contains(event.target as Node)) {
-        if (callback && activateHandler !== false) callback();
+        if (callback && activateHandler !== false) callback(event);
       }
     };
 

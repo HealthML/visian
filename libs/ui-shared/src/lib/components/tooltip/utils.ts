@@ -2,22 +2,24 @@ import React, { useLayoutEffect, useState } from "react";
 
 import { useUpdateOnResize } from "../utils";
 
-const modalDistance = 10;
+export type TooltipPosition = "left" | "right" | "bottom";
+
+const tooltipDistance = 10;
 
 /**
- * Returns a style object that absolutely positions a modal next to its
- * toggling button.
+ * Returns a style object that absolutely positions a tooltip next to the
+ * element it refers to.
  */
-export const useModalPosition = <T extends HTMLElement>(
-  buttonElement: T | undefined | null,
-  position: "left" | "right" = "right",
+export const useTooltipPosition = <T extends HTMLElement>(
+  element: T | undefined | null,
+  position: TooltipPosition = "right",
   updateOnResize = true,
   positionRelativeToOffsetParent = true,
 ): React.CSSProperties => {
   useUpdateOnResize(updateOnResize);
-  const rect = buttonElement?.getBoundingClientRect();
+  const rect = element?.getBoundingClientRect();
   const offsetRect = positionRelativeToOffsetParent
-    ? buttonElement?.offsetParent?.getBoundingClientRect()
+    ? element?.offsetParent?.getBoundingClientRect()
     : undefined;
 
   const [style, setStyle] = useState<React.CSSProperties>({});
@@ -32,19 +34,30 @@ export const useModalPosition = <T extends HTMLElement>(
         case "left":
           setStyle({
             position: "absolute",
-            top: rect.top - (offsetRect?.top || 0),
+            top: rect.top + rect.height / 2 - (offsetRect?.top || 0),
             right:
               (offsetRect?.right ||
                 document.body.getBoundingClientRect().width) -
-              (rect.left - modalDistance),
+              (rect.left - tooltipDistance),
+            transform: "translateY(-50%)",
+          });
+          break;
+
+        case "bottom":
+          setStyle({
+            position: "absolute",
+            top: rect.bottom + tooltipDistance - (offsetRect?.top || 0),
+            left: rect.left + rect.width / 2 - (offsetRect?.left || 0),
+            transform: "translateX(-50%)",
           });
           break;
 
         default:
           setStyle({
             position: "absolute",
-            top: rect.top - (offsetRect?.top || 0),
-            left: rect.right + modalDistance - (offsetRect?.left || 0),
+            top: rect.top + rect.height / 2 - (offsetRect?.top || 0),
+            left: rect.right + tooltipDistance - (offsetRect?.left || 0),
+            transform: "translateY(-50%)",
           });
       }
     },

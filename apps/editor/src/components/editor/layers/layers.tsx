@@ -34,6 +34,8 @@ export const Layers: React.FC = observer(() => {
     <>
       <FloatingUIButton
         icon="layers"
+        tooltipTx="layers"
+        showTooltip={!isModalOpen}
         ref={setButtonRef}
         onPointerDown={toggleModal}
         isActive={isModalOpen}
