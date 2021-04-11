@@ -32,5 +32,10 @@
   "contrast": "Contrast",
   "brightness": "Brightness",
 
-  "export": "Export"
+  "export": "Export",
+
+  "import-error": "Import Error",
+  "annotation-mismatch-error": "This annotation does not match the original image's size.",
+  "no-image-error": "You have to load a base image before importing an annotation.",
+  "image-loading-error": "Looks like this file is not supported."
 }

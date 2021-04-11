@@ -9,4 +9,6 @@ export const skipSlices = 10;
 
 export const maxUndoRedoSteps = 20;
 
+export const errorDisplayDuration = 12000;
+
 export const feedbackMailAddress = "visian@lists.myhpi.de";

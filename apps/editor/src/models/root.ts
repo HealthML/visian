@@ -2,7 +2,9 @@ import { ColorMode, IDispatch, IStorageBackend, Tab } from "@visian/ui-shared";
 import { deepObserve, ISerializable } from "@visian/utils";
 import { action, makeObservable, observable } from "mobx";
 
+import { errorDisplayDuration } from "../constants";
 import { Editor, EditorSnapshot } from "./editor";
+import { ErrorNotification } from "./types";
 
 export interface RootSnapshot {
   editor: EditorSnapshot;
@@ -18,6 +20,9 @@ export class RootStore implements ISerializable<RootSnapshot> {
 
   /** The current theme. */
   public theme: ColorMode = "dark";
+
+  protected errorTimeout?: NodeJS.Timer;
+  public error?: ErrorNotification;
 
   /**
    * Indicates if there are changes that have not yet been written by the
@@ -40,9 +45,12 @@ export class RootStore implements ISerializable<RootSnapshot> {
     makeObservable(this, {
       editor: observable,
       theme: observable,
+      error: observable,
       isDirty: observable,
       refs: observable,
+
       setTheme: action,
+      setError: action,
       applySnapshot: action,
       rehydrate: action,
       setIsDirty: action,
@@ -56,6 +64,20 @@ export class RootStore implements ISerializable<RootSnapshot> {
   public setTheme(theme: ColorMode, persist = true) {
     this.theme = theme;
     if (persist && this.shouldPersist) localStorage.setItem("theme", theme);
+  }
+
+  public setError(error?: ErrorNotification) {
+    this.error = error;
+
+    if (this.errorTimeout !== undefined) {
+      clearTimeout(this.errorTimeout);
+      this.errorTimeout = undefined;
+    }
+    if (error) {
+      this.errorTimeout = (setTimeout(() => {
+        this.setError();
+      }, errorDisplayDuration) as unknown) as NodeJS.Timer;
+    }
   }
 
   public setIsDirty(isDirty = true) {

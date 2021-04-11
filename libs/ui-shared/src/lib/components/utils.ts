@@ -7,8 +7,9 @@ export const useIsDraggedOver = () => {
 
   const onDragOver = useCallback(() => {
     setIsDraggedOver(true);
-    if (dragTimerRef.current) {
+    if (dragTimerRef.current !== undefined) {
       clearTimeout(dragTimerRef.current);
+      dragTimerRef.current = undefined;
     }
   }, [setIsDraggedOver]);
 
@@ -20,8 +21,9 @@ export const useIsDraggedOver = () => {
 
   const onDrop = useCallback(() => {
     setIsDraggedOver(false);
-    if (dragTimerRef.current) {
+    if (dragTimerRef.current !== undefined) {
       clearTimeout(dragTimerRef.current);
+      dragTimerRef.current = undefined;
     }
   }, [setIsDraggedOver]);
 

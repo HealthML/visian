@@ -30,5 +30,10 @@
   "off": "Aus",
   "main-view-type": "Hauptansichtstyp",
   "contrast": "Kontrast",
-  "brightness": "Helligkeit"
+  "brightness": "Helligkeit",
+
+  "import-error": "Importfehler",
+  "annotation-mismatch-error": "Diese Annotation passt nicht auf den Scan.",
+  "no-image-error": "Sie müssen einen Scan laden, bevor Sie eine Annotation importieren.",
+  "image-loading-error": "Diese Datei scheint nicht unterstützt zu sein."
 }

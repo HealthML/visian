@@ -105,9 +105,9 @@ export class Editor implements ISerializable<EditorSnapshot> {
   }
 
   public setAnnotation(image: Image) {
-    if (!this.image) throw new Error("No image loaded.");
+    if (!this.image) throw new Error("no-image-error");
     if (!isEqual(image.voxelCount, this.image.voxelCount)) {
-      throw new Error("Annotation does not match the original image's size.");
+      throw new Error("annotation-mismatch-error");
     }
     this.annotation = image;
     this.context?.persistImmediately();

@@ -58,10 +58,14 @@ export const readDICOMSeries = async (file: File) => {
  * Throws an error if the given file cannot be parsed.
  */
 export const readMedicalImage = async (file: File) => {
-  const image = await (file.name.endsWith(".zip")
-    ? readDICOMSeries(file)
-    : readSingleMedicalImage(file));
+  try {
+    const image = await (file.name.endsWith(".zip")
+      ? readDICOMSeries(file)
+      : readSingleMedicalImage(file));
 
-  if (!image) throw new Error("Could not load the given image");
-  return image;
+    if (!image) throw new Error("image-loading-error");
+    return image;
+  } catch {
+    throw new Error("image-loading-error");
+  }
 };
