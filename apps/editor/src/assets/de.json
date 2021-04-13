@@ -14,12 +14,12 @@
   "ideas-feedback": "Ideen oder Feedback?",
   "clear-data": "Daten Löschen",
 
-  "navigation-tool": "Navigationswerkzeug",
-  "crosshair-tool": "Fadenkreuzwerkzeug",
-  "pixel-brush": "Pinsel",
-  "smart-brush": "Smarter Pinsel",
-  "pixel-eraser": "Radierer",
-  "clear-slice": "Schicht leeren",
+  "navigation-tool": "Navigationswerkzeug (H)",
+  "crosshair-tool": "Fadenkreuzwerkzeug (C)",
+  "pixel-brush": "Pinsel (B)",
+  "smart-brush": "Smarter Pinsel (S)",
+  "pixel-eraser": "Radierer (E)",
+  "clear-slice": "Schicht leeren (Entf)",
 
   "layers": "Ebenen",
   "no-layers": "Keine Ebenen geladen.",
@@ -31,6 +31,8 @@
   "main-view-type": "Hauptansichtstyp",
   "contrast": "Kontrast",
   "brightness": "Helligkeit",
+
+  "export": "Export (Strg + E)",
 
   "import-error": "Importfehler",
   "annotation-mismatch-error": "Diese Annotation passt nicht auf den Scan.",
