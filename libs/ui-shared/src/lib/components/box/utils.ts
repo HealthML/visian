@@ -8,7 +8,7 @@ import { Theme } from "../../theme";
  * to render to using a ReactDOM portal.
  */
 export const useModalRoot = () => {
-  const { modalRootId } = useTheme() as Theme;
+  const modalRootId = (useTheme() as Theme)?.modalRootId;
   const modalRoot = document.getElementById(modalRootId);
 
   const modalRootRef = useRef<HTMLElement>();
