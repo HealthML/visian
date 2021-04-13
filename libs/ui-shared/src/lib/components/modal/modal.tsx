@@ -1,7 +1,9 @@
 import React, { useRef } from "react";
+import ReactDOM from "react-dom";
 import styled from "styled-components";
 
 import { color, fontWeight, zIndex } from "../../theme";
+import { useModalRoot } from "../box";
 import { Sheet } from "../sheet";
 import { Title } from "../text";
 import { useOutsidePress } from "../utils";
@@ -43,15 +45,22 @@ export const Modal: React.FC<ModalProps> = ({
   const ref = useRef<HTMLDivElement>(null);
   useOutsidePress(ref, onOutsidePress, isOpen);
 
-  return isOpen === false ? null : (
-    <ModalContainer {...rest} ref={ref}>
-      {(labelTx || label) && (
-        <>
-          <ModalTitle tx={labelTx} text={label} />
-          <Divider />
-        </>
-      )}
-      {children}
-    </ModalContainer>
-  );
+  const modalRootRef = useModalRoot();
+
+  const node =
+    isOpen === false ? null : (
+      <ModalContainer {...rest} ref={ref}>
+        {(labelTx || label) && (
+          <>
+            <ModalTitle tx={labelTx} text={label} />
+            <Divider />
+          </>
+        )}
+        {children}
+      </ModalContainer>
+    );
+
+  return modalRootRef.current
+    ? ReactDOM.createPortal(node, modalRootRef.current)
+    : node;
 };
