@@ -72,13 +72,7 @@ export const Switch: React.FC<SwitchProps> = ({
               }}
             />
             {items.map((item) => (
-              <SwitchItem
-                key={item.value}
-                onChange={onChange}
-                labelTx={item.labelTx}
-                label={item.label}
-                value={item.value}
-              />
+              <SwitchItem key={item.value} onChange={onChange} {...item} />
             ))}
           </>
         )}

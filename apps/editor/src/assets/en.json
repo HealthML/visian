@@ -25,6 +25,9 @@
   "no-layers": "No layers loaded.",
 
   "view-settings": "View Settings",
+  "transverse": "Transverse (1)",
+  "sagittal": "Sagittal (2)",
+  "coronal": "Coronal (3)",
   "side-views": "Side Views",
   "on": "On",
   "off": "Off",

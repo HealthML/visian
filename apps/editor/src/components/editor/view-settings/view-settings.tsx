@@ -23,9 +23,9 @@ const sideViewsSwitchItems = [
   { labelTx: "off", value: false },
 ];
 const mainViewTypeSwitchItems = [
-  { label: "T", value: ViewType.Transverse },
-  { label: "S", value: ViewType.Sagittal },
-  { label: "C", value: ViewType.Coronal },
+  { label: "T", value: ViewType.Transverse, tooltipTx: "transverse" },
+  { label: "S", value: ViewType.Sagittal, tooltipTx: "sagittal" },
+  { label: "C", value: ViewType.Coronal, tooltipTx: "coronal" },
 ];
 
 export const ViewSettings: React.FC = observer(() => {
