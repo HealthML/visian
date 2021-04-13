@@ -12,7 +12,7 @@ export const useModalPosition = <T extends HTMLElement>(
   buttonElement: T | undefined | null,
   position: "left" | "right" = "right",
   updateOnResize = true,
-  positionRelativeToOffsetParent = true,
+  positionRelativeToOffsetParent = false,
 ): React.CSSProperties => {
   useUpdateOnResize(updateOnResize);
   const rect = buttonElement?.getBoundingClientRect();

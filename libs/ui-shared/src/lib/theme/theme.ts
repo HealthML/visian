@@ -51,6 +51,15 @@ const colorModes = {
  * @see https://styled-system.com/theme-specification
  */
 export const theme = {
+  /**
+   * The id of the applications root element for absolutely positioned overlays
+   * such as modals or tooltips.
+   *
+   * This should not change while the application is running.
+   * Unset it here if you are not using a dedicated modal root.
+   */
+  modalRootId: "modal-root",
+
   borders: {},
   borderStyles: {},
   borderWidths: {},
