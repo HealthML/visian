@@ -64,6 +64,7 @@ export const setUpPointerHandling = (
 
       if (id !== "mainView") return;
       if (eventType === "start" || eventType === "rebase") {
+        store.editor.tools.setIsNavigationDragged(true);
         const transformOrigin = store.editor.sliceRenderer.getMainViewScreenPosition(
           store.editor.viewSettings.offset,
         );
@@ -72,6 +73,8 @@ export const setUpPointerHandling = (
           translateY: transformOrigin.y,
           scale: store.editor.viewSettings.zoomLevel,
         });
+      } else if (eventType === "end") {
+        store.editor.tools.setIsNavigationDragged(false);
       }
 
       const transform = gesture.getTransformed();
