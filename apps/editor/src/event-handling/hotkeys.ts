@@ -60,6 +60,11 @@ export const setUpHotKeys = (store: RootStore): IDisposer => {
     store.editor.undoRedo.redo();
   });
 
+  // Layer Controls
+  hotkeys("m", () => {
+    store.editor.setIsAnnotationVisible(!store.editor.isAnnotationVisible);
+  });
+
   // View Types
   hotkeys("1", () => {
     store.editor.viewSettings.setMainViewType(ViewType.Transverse);
