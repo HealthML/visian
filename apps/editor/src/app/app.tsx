@@ -2,17 +2,18 @@ import {
   getTheme,
   GlobalStyles,
   initI18n,
+  ModalRoot,
   ThemeProvider,
 } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Route, Switch } from "react-router-dom";
 
+import { setUpEventHandling } from "../event-handling";
 import { EditorScreen } from "../screens";
 import { setupRootStore, StoreProvider } from "./root-store";
 
 import type { RootStore } from "../models";
-import { setUpEventHandling } from "../event-handling";
 function App() {
   // TODO: Push loading down to components that need i18n
   const [isReady, setIsReady] = useState(false);
@@ -42,6 +43,7 @@ function App() {
         <GlobalStyles />
         {isReady && (
           <React.StrictMode>
+            <ModalRoot />
             <Switch>
               <Route path="/">
                 <EditorScreen />

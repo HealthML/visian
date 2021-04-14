@@ -1,10 +1,11 @@
 import React, { useCallback } from "react";
 import styled from "styled-components";
+import { InvisibleButton } from "../button";
 
 import { Text } from "../text";
 import { SwitchItemProps } from "./switch-item.props";
 
-const SwitchItemContainer = styled.div`
+const SwitchItemContainer = styled(InvisibleButton)`
   cursor: pointer;
   flex: 1;
   height: 100%;
@@ -25,6 +26,7 @@ export const SwitchItem: React.FC<SwitchItemProps> = ({
   labelTx,
   label,
   value,
+  tooltipPosition = "bottom",
   onChange,
   ...rest
 }) => {
@@ -33,7 +35,11 @@ export const SwitchItem: React.FC<SwitchItemProps> = ({
   }, [value, onChange]);
 
   return (
-    <SwitchItemContainer {...rest} onPointerDown={changeHandler}>
+    <SwitchItemContainer
+      {...rest}
+      tooltipPosition={tooltipPosition}
+      onPointerDown={changeHandler}
+    >
       <SwitchItemLabel tx={labelTx} text={label || value} />
     </SwitchItemContainer>
   );

@@ -14,7 +14,7 @@ export const useTooltipPosition = <T extends HTMLElement>(
   element: T | undefined | null,
   position: TooltipPosition = "right",
   updateOnResize = true,
-  positionRelativeToOffsetParent = true,
+  positionRelativeToOffsetParent = false,
 ): React.CSSProperties => {
   useUpdateOnResize(updateOnResize);
   const rect = element?.getBoundingClientRect();
