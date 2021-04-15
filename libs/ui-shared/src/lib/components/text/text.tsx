@@ -43,7 +43,7 @@ export const Title: React.FC<
 `;
 
 export const InputLabel = styled(Text)`
-  padding-bottom: 8px;
+  margin-bottom: 8px;
   font-size: ${fontSize("small")};
   line-height: 10px;
 `;

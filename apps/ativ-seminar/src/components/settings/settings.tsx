@@ -3,9 +3,10 @@ import {
   coverMixin,
   Divider,
   FlexRow,
+  InputLabel,
   Modal,
-  Slider,
-  Text,
+  SliderField,
+  Switch,
 } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
 import React, { useCallback } from "react";
@@ -23,22 +24,12 @@ const Container = styled(Modal)`
   width: 250px;
 `;
 
-const StyledText = styled(Text)`
-  font-size: 16px;
-  font-weight: bold;
-  color: ${color("gray")};
-  margin-bottom: 6px;
-`;
-
-const StyledDescription = styled(StyledText)`
+const StyledDescription = styled(InputLabel)`
   font-size: 14px;
   font-weight: 300;
   color: ${color("gray")};
+  line-height: 1.2em;
   margin-bottom: 6px;
-`;
-
-const StyledSlider = styled(Slider)`
-  margin-bottom: 10px;
 `;
 
 const StyledTextInput = styled.input`
@@ -61,29 +52,19 @@ const StyledCheckboxRow = styled(FlexRow)`
   margin-bottom: 10px;
 `;
 
-const StyledCheckboxText = styled(StyledText)`
+const StyledCheckboxText = styled(InputLabel)`
   margin-bottom: 0;
   margin-left: 10px;
 `;
 
-const StyledSelect = styled.select`
-  background: ${color("veryLightGray")};
-  border: none;
-  border-radius: 2px;
-  color: ${color("text")};
-  height: 28px;
-  margin-bottom: 10px;
-  outline: none;
-  padding-left: 4px;
-  width: 100%;
+const SpacedSliderField = styled(SliderField)`
+  margin-bottom: 16px;
 `;
 
-const StyledOption = styled.option`
-  background-color: ${color("background")};
-`;
 const HistogramWrapper = styled.div`
   position: relative;
   width: 100%;
+  margin-bottom: 16px;
 `;
 
 const Histogram = styled.div`
@@ -116,17 +97,15 @@ export const Settings: React.FC<SettingsProps> = observer((props) => {
   );
 
   const setLightingMode = useCallback(
-    (event: React.ChangeEvent<HTMLSelectElement>) => {
-      renderer.setLightingMode(lightingModes[parseInt(event.target.value)]);
+    (value: LightingModeType) => {
+      renderer.setLightingMode(lightingModes[value]);
     },
     [renderer],
   );
 
   const setTransferFunction = useCallback(
-    (event: React.ChangeEvent<HTMLSelectElement>) => {
-      renderer.setTransferFunction(
-        transferFunctions[parseInt(event.target.value)],
-      );
+    (value: TransferFunctionType) => {
+      renderer.setTransferFunction(transferFunctions[value]);
     },
     [renderer],
   );
@@ -146,16 +125,18 @@ export const Settings: React.FC<SettingsProps> = observer((props) => {
       : renderer?.densityHistogram;
   return (
     <Container {...rest} label="View Settings">
-      <StyledText text="Background" />
-      <StyledSlider
+      <SpacedSliderField
+        label="Background"
+        showValueLabel
         min={0}
         max={1}
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         onChange={renderer.setBackgroundValue as any}
         value={renderer.backgroundValue}
       />
-      <StyledText text="Opacity" />
-      <StyledSlider
+      <SpacedSliderField
+        label="Opacity"
+        showValueLabel
         min={0}
         max={1}
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -163,15 +144,30 @@ export const Settings: React.FC<SettingsProps> = observer((props) => {
         value={renderer.imageOpacity}
         scaleType="quadratic"
       />
-      <StyledText text="Lighting Mode" />
-      <StyledSelect
+      <Switch
+        label="Shading Mode"
+        items={[
+          {
+            value: LightingModeType.None,
+            label: "None",
+            tooltip: "No Shading",
+          },
+          {
+            value: LightingModeType.Phong,
+            label: "Phong",
+            tooltip: "Phong Shading",
+          },
+          {
+            value: LightingModeType.LAO,
+            label: "LAO",
+            tooltip: "Local Ambient Occlusion",
+          },
+        ]}
         onChange={setLightingMode}
-        value={renderer.lightingMode.type}
-      >
-        <StyledOption value={LightingModeType.None}>None</StyledOption>
-        <StyledOption value={LightingModeType.Phong}>Phong</StyledOption>
-        <StyledOption value={LightingModeType.LAO}>LAO</StyledOption>
-      </StyledSelect>
+        value={
+          renderer.suppressedLightingMode?.type || renderer.lightingMode.type
+        }
+      />
       <StyledCheckboxRow>
         <input
           type="checkbox"
@@ -182,22 +178,17 @@ export const Settings: React.FC<SettingsProps> = observer((props) => {
         <StyledCheckboxText text="Use focus volume?" />
       </StyledCheckboxRow>
       <Divider />
-      <StyledText text="Transfer Function" />
-      <StyledSelect
+      <Switch
+        label="Transfer Function"
+        items={[
+          { value: TransferFunctionType.Density, label: "Density" },
+          { value: TransferFunctionType.FCEdges, label: "Edges" },
+          { value: TransferFunctionType.FCCutaway, label: "Cutaway" },
+          { value: TransferFunctionType.Custom, label: "Custom" },
+        ]}
         onChange={setTransferFunction}
         value={renderer.transferFunction.type}
-      >
-        <StyledOption value={TransferFunctionType.Density}>
-          Density
-        </StyledOption>
-        <StyledOption value={TransferFunctionType.FCEdges}>
-          F+C: Edges
-        </StyledOption>
-        <StyledOption value={TransferFunctionType.FCCutaway}>
-          F+C: Cutaway
-        </StyledOption>
-        <StyledOption value={TransferFunctionType.Custom}>Custom</StyledOption>
-      </StyledSelect>
+      />
       {(renderer.transferFunction.type === TransferFunctionType.Density ||
         renderer.transferFunction.type === TransferFunctionType.FCEdges) && (
         <HistogramWrapper>
@@ -219,8 +210,9 @@ export const Settings: React.FC<SettingsProps> = observer((props) => {
               ))}
             </Histogram>
           )}
-          <StyledText text="Value Range" />
-          <StyledSlider
+          <SliderField
+            label="Value Range"
+            showValueLabel
             min={0}
             max={1}
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -230,27 +222,27 @@ export const Settings: React.FC<SettingsProps> = observer((props) => {
         </HistogramWrapper>
       )}
       {renderer.transferFunction.type === TransferFunctionType.FCCutaway && (
-        <>
-          <StyledText text="Cutaway Angle" />
-          <StyledSlider
-            min={0}
-            max={Math.PI}
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            onChange={renderer.setCutAwayConeAngle as any}
-            value={renderer.cutAwayConeAngle}
-          />
-        </>
+        <SpacedSliderField
+          label="Cutaway Angle"
+          showValueLabel
+          min={0}
+          max={Math.PI}
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          onChange={renderer.setCutAwayConeAngle as any}
+          value={renderer.cutAwayConeAngle}
+        />
       )}
       {(renderer.transferFunction.type === TransferFunctionType.FCEdges ||
         renderer.transferFunction.type === TransferFunctionType.FCCutaway) && (
         <>
-          <StyledText text="Focus Volume Color" />
+          <InputLabel text="Focus Volume Color" />
           <StyledTextInput
             defaultValue={renderer?.focusColor || "rgba(255,255,255,1)"}
             onChange={setFocusColor}
           />
-          <StyledText text="Context Opacity" />
-          <StyledSlider
+          <SpacedSliderField
+            label="Context Opacity"
+            showValueLabel
             min={0}
             max={1}
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -262,7 +254,7 @@ export const Settings: React.FC<SettingsProps> = observer((props) => {
       )}
       {renderer.transferFunction.type === TransferFunctionType.Custom && (
         <>
-          <StyledText text="Transfer Image" />
+          <InputLabel text="Transfer Image" />
           <StyledFileInput type="file" onChange={setCustomTFImage} />
           <StyledDescription text="Import an n x 1 image that maps from the image density to an RGBA output." />
         </>

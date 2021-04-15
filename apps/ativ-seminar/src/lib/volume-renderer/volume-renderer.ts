@@ -46,7 +46,7 @@ export class VolumeRenderer implements IDisposable {
   public gradientHistogram?: [number[], number, number];
 
   private lightingTimeout?: NodeJS.Timer;
-  private suppressedLightingMode?: LightingMode;
+  public suppressedLightingMode?: LightingMode;
 
   private resolutionComputer: ResolutionComputer;
 
@@ -75,6 +75,7 @@ export class VolumeRenderer implements IDisposable {
       focusColor: observable,
       transferFunction: observable,
       lightingMode: observable,
+      suppressedLightingMode: observable,
       laoIntensity: observable,
       imageOpacity: observable,
       contextOpacity: observable,
