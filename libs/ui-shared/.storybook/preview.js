@@ -54,6 +54,7 @@ const StyledContainer = styled.div`
   display: flex;
   height: 100%;
   justify-content: center;
+  touch-action: none;
   width: 100%;
 `;
 

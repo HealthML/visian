@@ -74,7 +74,8 @@ const AROverlay: React.FC<AROverlayProps> = (props) => {
               defaultValue={0}
               max={2 * Math.PI}
               min={-2 * Math.PI}
-              onChange={rotationCallback}
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              onChange={rotationCallback as any}
               value={rotation}
             />
           </RotationSliderContainer>

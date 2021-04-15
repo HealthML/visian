@@ -9,25 +9,28 @@ import React, { useCallback } from "react";
 import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
-import { Tool } from "../../../models";
+import { ToolType } from "../../../models";
 
 const SyledCanvas = styled(WebGLCanvas)<
-  WebGLCanvasProps & { activeTool?: Tool; isCursorOverDrawableArea?: boolean }
+  WebGLCanvasProps & {
+    activeTool?: ToolType;
+    isCursorOverDrawableArea?: boolean;
+  }
 >`
   cursor: ${(props) => {
-    if (!props.isCursorOverDrawableArea) return "crosshair";
-
     switch (props.activeTool) {
-      case Tool.Hand:
+      case ToolType.Navigate:
         // TODO: `cursor: "grabbing"` while dragged
         return "grab";
 
-      case Tool.Crosshair:
-      case undefined:
+      case ToolType.Crosshair:
         return "crosshair";
 
+      case undefined:
+        return "auto";
+
       default:
-        return "none";
+        return props.isCursorOverDrawableArea ? "none" : "auto";
     }
   }};
 `;
@@ -48,8 +51,10 @@ export const MainView = observer<{}, HTMLCanvasElement>(
     return (
       <SyledCanvas
         activeTool={store?.editor.tools.activeTool}
-        backgroundColor={store?.editor.backgroundColor}
-        isCursorOverDrawableArea={store?.editor.tools.isCursorOverDrawableArea}
+        backgroundColor={store?.editor.getBackgroundColor()}
+        isCursorOverDrawableArea={
+          store?.editor.image && store?.editor.tools.isCursorOverDrawableArea
+        }
         onContextMenu={preventDefault}
         onPointerDown={onPointerDown}
         ref={ref}

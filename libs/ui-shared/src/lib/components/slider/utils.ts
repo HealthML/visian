@@ -128,30 +128,32 @@ export const useDrag = <ID = string>(
   moveHandler?: (event: PointerEvent | ReactPointerEvent, id?: ID) => void,
   endHandler?: (event: PointerEvent | ReactPointerEvent, id?: ID) => void,
 ) => {
-  const idRef = useRef<ID | undefined>();
-  const pointerIdRef = useRef<number | undefined>();
+  const idRef = useRef<Record<number, ID | undefined>>({});
 
   const boundMoveHandler = useCallback(
     (event: PointerEvent | ReactPointerEvent) => {
-      if (event.pointerId !== pointerIdRef.current) return;
+      if (idRef.current[event.pointerId] === undefined) return;
 
       event.preventDefault();
-      if (moveHandler) return moveHandler(event, idRef.current);
+      if (moveHandler)
+        return moveHandler(event, idRef.current[event.pointerId]);
     },
     [moveHandler],
   );
 
   const boundEndHandler = useCallback(
     (event: PointerEvent | ReactPointerEvent) => {
-      if (event.pointerId !== pointerIdRef.current) return;
-      const id = idRef.current;
-      idRef.current = undefined;
-      pointerIdRef.current = undefined;
+      if (idRef.current[event.pointerId] === undefined) return;
+      const id = idRef.current[event.pointerId];
+      delete idRef.current[event.pointerId];
 
       event.preventDefault();
-      document.removeEventListener("pointermove", boundMoveHandler);
-      document.removeEventListener("pointerup", boundEndHandler);
-      document.removeEventListener("pointerleave", boundEndHandler);
+
+      if (!Object.keys(idRef.current).length) {
+        document.removeEventListener("pointermove", boundMoveHandler);
+        document.removeEventListener("pointerup", boundEndHandler);
+        document.removeEventListener("pointerleave", boundEndHandler);
+      }
       if (endHandler) return endHandler(event, id);
     },
     [boundMoveHandler, endHandler],
@@ -159,14 +161,16 @@ export const useDrag = <ID = string>(
 
   const boundStartHandler = useCallback(
     (event: PointerEvent | ReactPointerEvent, id?: ID) => {
-      idRef.current = id;
-      pointerIdRef.current = event.pointerId;
+      idRef.current[event.pointerId] = id;
       event.preventDefault();
-      document.addEventListener("pointermove", boundMoveHandler, {
-        passive: false,
-      });
-      document.addEventListener("pointerup", boundEndHandler);
-      document.addEventListener("pointerleave", boundEndHandler);
+
+      if (Object.keys(idRef.current).length === 1) {
+        document.addEventListener("pointermove", boundMoveHandler, {
+          passive: false,
+        });
+        document.addEventListener("pointerup", boundEndHandler);
+        document.addEventListener("pointerleave", boundEndHandler);
+      }
       if (startHandler) return startHandler(event, id);
     },
     [boundEndHandler, boundMoveHandler, startHandler],

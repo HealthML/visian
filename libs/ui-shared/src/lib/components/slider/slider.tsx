@@ -3,150 +3,165 @@ import React, {
   useCallback,
   useRef,
 } from "react";
-import styled from "styled-components";
 
+import { FlexRow, InputContainer, Spacer } from "../box";
+import { InputLabel } from "../text";
+import { SliderFieldProps, SliderProps } from "./slider.props";
 import {
-  color,
-  computeStyleValue,
-  fontSize,
-  lineHeight,
-  scaleMetric,
-  size,
-  ThemeProps,
-} from "../../theme";
-import { Text } from "../text";
-import { SliderProps } from "./slider.props";
-import { SliderStylingSettings, SliderVerticalitySettings } from "./types";
+  SliderContainer,
+  SliderRangeSelection,
+  SliderThumb,
+  SliderTrack,
+} from "./styled-components";
 import { pointerToSliderValue, useDrag, valueToSliderPos } from "./utils";
 
-export interface ThumbProps extends SliderVerticalitySettings {
-  /**
-   * A [0, 1]-ranged value indicating the thumb's relative position along the
-   * slider's main axis.
-   */
-  position: number;
-}
-
-export const SliderContainer = styled.div<SliderVerticalitySettings>`
-  align-items: center;
-  cursor: pointer;
-  display: flex;
-  height: ${(props) => (props.isVertical ? "100%" : size("sliderHeight"))};
-  position: relative;
-  margin: ${(props) => {
-    const margin = scaleMetric(size("sliderThumbWidth")(props), 0.5);
-    return props.isVertical ? `${margin} 0` : `0 ${margin}`;
-  }};
-  touch-action: none;
-  user-select: none;
-  width: ${(props) => (props.isVertical ? size("sliderHeight") : "100%")};
-  flex-direction: ${(props) => (props.isVertical ? "column" : "row")};
-`;
-
-export const SliderTrack = styled.div<SliderVerticalitySettings>`
-  background-color: ${color("lightGray")};
-  flex: 1;
-  height: ${(props) =>
-    props.isVertical ? "unset" : lineHeight("sliderTrack")};
-  width: ${(props) => (props.isVertical ? lineHeight("sliderTrack") : "unset")};
-`;
-
-export const SliderThumb = styled.div.attrs<ThumbProps>((props) => {
-  const thumbPositionMain = `${props.position * 100}%`;
-  const thumbPositionAcross = computeStyleValue<ThemeProps>(
-    [size("sliderHeight"), size("sliderThumbHeight")],
-    (sliderHeight, thumbHeight) => (sliderHeight - thumbHeight) / 2,
-  )(props);
-
-  return {
-    style: {
-      top: props.isVertical ? thumbPositionMain : thumbPositionAcross,
-      left: props.isVertical ? thumbPositionAcross : thumbPositionMain,
-    },
-  };
-})<ThumbProps>`
-  background-color: ${color("gray")};
-  border: none;
-  border-radius: ${(props) =>
-    scaleMetric(size("sliderThumbWidth")(props), 0.5)};
-  height: ${(props) =>
-    props.isVertical ? size("sliderThumbWidth") : size("sliderThumbHeight")};
-  margin: ${(props) => {
-    const margin = scaleMetric(size("sliderThumbWidth")(props), -0.5);
-    return props.isVertical ? `${margin} 0 0 0` : `0 0 0 ${margin}`;
-  }};
-  position: absolute;
-  transition: background-color 0.3s;
-  width: ${(props) =>
-    props.isVertical ? size("sliderThumbHeight") : size("sliderThumbWidth")};
-  z-index: 10;
-`;
-
-export const SliderLabel = styled(Text).attrs<ThumbProps>((props) => {
-  const thumbPositionMain = `${props.position * 100}%`;
-  const thumbPositionAcross = computeStyleValue<ThemeProps>(
-    [size("sliderHeight")],
-    (sliderHeight) => -sliderHeight,
-  )(props);
-
-  return {
-    style: {
-      top: props.isVertical ? thumbPositionMain : thumbPositionAcross,
-      left: props.isVertical ? thumbPositionAcross : thumbPositionMain,
-    },
-  };
-})<ThumbProps & SliderStylingSettings>`
-  display: block;
-  line-height: ${fontSize("default")};
-  margin: ${(props) =>
-    props.isVertical
-      ? `${scaleMetric(fontSize("default")(props), -0.5)} 0 0 0`
-      : "0 0 0 -50%"};
-  opacity: 0.6;
-  position: absolute;
-  text-align: ${(props) => (props.isVertical ? "right" : "center")};
-  width: ${(props) => !props.isVertical && "100%"};
-  z-index: 10;
-`;
-
-const defaultFormatLabel = (value: number) =>
-  `${Math.round(value * 100) / 100}`;
+const defaultFormatLabel = (values: number[]) =>
+  values.map((value) => value.toFixed(2)).join("-");
 
 /** A custom slider component built to work well with touch input. */
 export const Slider: React.FC<SliderProps> = (props) => {
   const {
+    children,
     defaultValue,
-    formatLabel = defaultFormatLabel,
     isInverted,
     isVertical,
     min = 0,
     max = 1,
     onChange,
+    enforceSerialThumbs: preventCrossing,
     roundMethod,
     scaleType,
-    shouldShowLabel,
+    showRange,
     stepSize,
     value,
     ...rest
   } = props;
 
   const sliderRef = useRef<HTMLDivElement | null>(null);
+
+  const actualValue = value === undefined ? defaultValue || min : value;
+  const valueArray: number[] = Array.isArray(actualValue)
+    ? actualValue
+    : [actualValue];
+  const valueRef = useRef<number | number[]>(actualValue);
+  valueRef.current = actualValue;
+
   const updateValue = useCallback(
-    (event: PointerEvent | ReactPointerEvent) => {
+    (event: PointerEvent | ReactPointerEvent, id?: number) => {
       if (!onChange || !sliderRef.current) return;
-      onChange(
-        pointerToSliderValue(event, sliderRef.current, {
-          scaleType,
-          min,
-          max,
-          stepSize,
-          roundMethod,
-          isInverted,
-          isVertical,
-        }),
-      );
+
+      const actualId = id || 0;
+      const newThumbValue = pointerToSliderValue(event, sliderRef.current, {
+        scaleType,
+        min,
+        max,
+        stepSize,
+        roundMethod,
+        isInverted,
+        isVertical,
+      });
+      if (!Array.isArray(valueRef.current)) {
+        onChange(newThumbValue, actualId, newThumbValue);
+        return;
+      }
+
+      const newValueArray = valueRef.current.slice();
+      switch (preventCrossing) {
+        case "block": {
+          let blockedThumbValue = newThumbValue;
+
+          const lowerId = Math.max(0, actualId - 1);
+          if (lowerId !== actualId) {
+            blockedThumbValue = Math.max(
+              newValueArray[lowerId],
+              blockedThumbValue,
+            );
+          }
+
+          const upperId = Math.min(actualId + 1, newValueArray.length - 1);
+          if (upperId !== actualId) {
+            blockedThumbValue = Math.min(
+              blockedThumbValue,
+              newValueArray[upperId],
+            );
+          }
+
+          newValueArray[actualId] = blockedThumbValue;
+          onChange(newValueArray, actualId, blockedThumbValue);
+          return;
+        }
+
+        case "push": {
+          newValueArray[actualId] = newThumbValue;
+          for (let index = actualId - 1; index >= 0; index--) {
+            newValueArray[index] = Math.min(
+              newValueArray[index],
+              newThumbValue,
+            );
+          }
+
+          const { length } = newValueArray;
+          for (let index = actualId + 1; index < length; index++) {
+            newValueArray[index] = Math.max(
+              newThumbValue,
+              newValueArray[index],
+            );
+          }
+          onChange(newValueArray, actualId, newThumbValue);
+          return;
+        }
+
+        default:
+          newValueArray[actualId] = newThumbValue;
+          onChange(newValueArray, actualId, newThumbValue);
+          return;
+      }
     },
     [
+      isInverted,
+      max,
+      min,
+      onChange,
+      preventCrossing,
+      roundMethod,
+      stepSize,
+      isVertical,
+      scaleType,
+    ],
+  );
+
+  const { onPointerDown } = useDrag(updateValue, updateValue);
+  const startDrag = useCallback(
+    (event: PointerEvent | ReactPointerEvent) => {
+      if (!onChange || !sliderRef.current) return;
+      if (!Array.isArray(valueRef.current)) {
+        onPointerDown(event, 0);
+        return;
+      }
+
+      const newThumbValue = pointerToSliderValue(event, sliderRef.current, {
+        scaleType,
+        min,
+        max,
+        stepSize,
+        roundMethod,
+        isInverted,
+        isVertical,
+      });
+
+      let minDistance = Infinity;
+      let closestThumb = 0;
+      valueRef.current.forEach((thumbValue, index) => {
+        const distance = Math.abs(thumbValue - newThumbValue);
+        if (distance < minDistance) {
+          minDistance = distance;
+          closestThumb = index;
+        }
+      });
+      onPointerDown(event, closestThumb);
+    },
+    [
+      onPointerDown,
       isInverted,
       max,
       min,
@@ -158,36 +173,75 @@ export const Slider: React.FC<SliderProps> = (props) => {
     ],
   );
 
-  const dragListeners = useDrag(updateValue, updateValue);
-
-  const actualValue = value === undefined ? defaultValue || 0 : value;
-  const thumbPos = valueToSliderPos(actualValue, {
-    scaleType,
-    min,
-    max,
-    stepSize,
-    roundMethod,
-    isInverted,
-  });
+  const thumbPositions = valueArray.map((thumbValue) =>
+    valueToSliderPos(thumbValue, {
+      scaleType,
+      min,
+      max,
+      stepSize,
+      roundMethod,
+      isInverted,
+    }),
+  );
 
   return (
     <SliderContainer
       {...rest}
-      {...(onChange ? dragListeners : {})}
+      onPointerDown={startDrag}
       isVertical={isVertical}
       ref={sliderRef}
     >
       <SliderTrack isVertical={isVertical} />
-      <SliderThumb isVertical={isVertical} position={thumbPos} />
-      {shouldShowLabel && (
-        <SliderLabel
+      {showRange && valueArray.length >= 2 && (
+        <SliderRangeSelection
+          isInverted={isInverted}
           isVertical={isVertical}
-          position={thumbPos}
-          text={formatLabel(actualValue)}
+          positions={thumbPositions}
         />
       )}
+      {valueArray.map((_thumbValue, index) => {
+        const thumbPos = thumbPositions[index];
+        return (
+          <SliderThumb
+            key={index}
+            isVertical={isVertical}
+            position={thumbPos}
+          />
+        );
+      })}
+      {children}
     </SliderContainer>
   );
 };
 
-export default Slider;
+export const SliderField: React.FC<SliderFieldProps> = ({
+  labelTx,
+  label,
+  showValueLabel,
+  formatValueLabel = defaultFormatLabel,
+  value,
+  defaultValue,
+  min = 0,
+  ...rest
+}) => {
+  const actualValue = value === undefined ? defaultValue || min : value;
+
+  return (
+    <InputContainer>
+      {(labelTx || label || showValueLabel) && (
+        <FlexRow>
+          {(labelTx || label) && <InputLabel text={label} tx={labelTx} />}
+          <Spacer />
+          {showValueLabel && (
+            <InputLabel
+              text={formatValueLabel(
+                Array.isArray(actualValue) ? actualValue : [actualValue],
+              )}
+            />
+          )}
+        </FlexRow>
+      )}
+      <Slider {...rest} value={value} defaultValue={defaultValue} min={min} />
+    </InputContainer>
+  );
+};

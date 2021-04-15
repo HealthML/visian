@@ -1,7 +1,7 @@
 import React, { useCallback, useState } from "react";
 
-import Slider from "./slider";
-import { SliderProps } from "./slider.props";
+import { Slider, SliderField } from "./slider";
+import { SliderProps, SliderFieldProps } from "./slider.props";
 
 export default {
   cmponent: Slider,
@@ -20,15 +20,21 @@ export default {
         options: ["linear", "quadratic"],
       },
     },
+    enforceSerialThumbs: {
+      control: {
+        type: "select",
+        options: ["none", "block", "push"],
+      },
+    },
   },
 };
 
 const Template = ({ onChange, ...args }: SliderProps) => {
-  const [value, setValue] = useState<number>(args.defaultValue || 0);
+  const [value, setValue] = useState<number | number[]>(args.defaultValue || 0);
   const changeHandler = useCallback(
-    (value: number) => {
-      setValue(value);
-      if (onChange) onChange(value);
+    (newValue: number | number[], id: number, thumbValue: number) => {
+      setValue(newValue);
+      if (onChange) onChange(newValue, id, thumbValue);
     },
     [onChange],
   );
@@ -55,4 +61,27 @@ stepped.args = {
   roundMethod: "round",
   isInverted: false,
   isVertical: false,
+};
+
+export const multi = (args: SliderProps) => Template(args);
+multi.args = {
+  defaultValue: [2, 8],
+  min: 0,
+  max: 10,
+  stepSize: 0,
+  isInverted: false,
+  isVertical: false,
+  showRange: true,
+};
+
+export const field = (args: SliderFieldProps) => <SliderField {...args} />;
+field.args = {
+  defaultValue: 5,
+  min: 0,
+  max: 10,
+  stepSize: 0,
+  isInverted: false,
+  isVertical: false,
+  label: "Slider",
+  showValueLabel: true,
 };

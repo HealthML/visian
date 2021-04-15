@@ -12,8 +12,13 @@ import { StoreContext } from "../types";
 
 import type { Editor } from "./editor";
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface EditorViewSettingsSnapshot {}
+export interface EditorViewSettingsSnapshot {
+  mainViewType?: ViewType;
+  selectedVoxel?: number[];
+  shouldShowSideViews?: boolean;
+  contrast?: number;
+  brightness?: number;
+}
 
 export class EditorViewSettings
   implements ISerializable<EditorViewSettingsSnapshot> {
@@ -48,7 +53,7 @@ export class EditorViewSettings
       applySnapshot: action,
       setBrightness: action,
       setContrast: action,
-      setMainView: action,
+      setMainViewType: action,
       toggleSideViews: action,
       setZoomLevel: action,
       zoomIn: action,
@@ -70,26 +75,38 @@ export class EditorViewSettings
     this.contrast = value;
   }
 
-  public setMainView(value: ViewType) {
+  public setMainViewType = (value: ViewType) => {
     this.mainViewType =
       this.editor.image && this.editor.image.dimensionality > 2
         ? value
         : ViewType.Transverse;
-  }
+  };
 
-  public toggleSideViews(value = !this.shouldShowSideViews) {
+  public toggleSideViews = (value = !this.shouldShowSideViews) => {
     this.shouldShowSideViews =
       value &&
       Boolean(this.editor.image) &&
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       this.editor.image!.dimensionality > 2;
-  }
+  };
 
   public setZoomLevel(value = 1) {
     this.zoomLevel = value;
   }
   public get zoomStep() {
     return zoomStep * Math.sqrt(this.zoomLevel);
+  }
+
+  public get pixelSize() {
+    const image = this.editor.image;
+    if (!image) return undefined;
+
+    const [width, height] = getPlaneAxes(this.mainViewType);
+
+    return new Vector(2).set(
+      this.zoomLevel / image.voxelCount[width],
+      this.zoomLevel / image.voxelCount[height],
+    );
   }
 
   public zoomIn() {
@@ -136,6 +153,10 @@ export class EditorViewSettings
     return this.selectedVoxel.getFromView(viewType);
   }
 
+  public getMaxSlice(viewType = this.mainViewType) {
+    return this.editor.image?.voxelCount.getFromView(viewType);
+  }
+
   public stepSelectedSlice(stepSize = 1, viewType = this.mainViewType) {
     this.setSelectedSlice(this.getSelectedSlice(viewType) + stepSize, viewType);
   }
@@ -166,15 +187,33 @@ export class EditorViewSettings
     this.setSelectedVoxel();
     this.toggleSideViews(true);
     if (this.editor.image && this.editor.image.dimensionality < 3) {
-      this.setMainView(ViewType.Transverse);
+      this.setMainViewType(ViewType.Transverse);
     }
+    this.setContrast();
+    this.setBrightness();
   }
 
   public toJSON() {
-    return {};
+    return {
+      mainViewType: this.mainViewType,
+      selectedVoxel: this.selectedVoxel.toJSON(),
+      shouldShowSideViews: this.shouldShowSideViews,
+
+      contrast: this.contrast,
+      brightness: this.brightness,
+    };
   }
 
   public async applySnapshot(snapshot: EditorViewSettingsSnapshot) {
-    // Intentionally left blank
+    this.setMainViewType(snapshot.mainViewType || ViewType.Transverse);
+    if (snapshot.selectedVoxel) {
+      this.selectedVoxel = Vector.fromArray(snapshot.selectedVoxel);
+    } else {
+      this.setSelectedVoxel();
+    }
+    this.toggleSideViews(Boolean(snapshot.shouldShowSideViews));
+
+    this.setContrast(snapshot.contrast);
+    this.setBrightness(snapshot.brightness);
   }
 }

@@ -1,6 +1,7 @@
 import { createGlobalStyle } from "styled-components";
 
 import boldFont from "./fonts/DIN2014-DemiBold.ttf";
+import regularFont from "./fonts/DIN2014-Regular.ttf";
 import lightFont from "./fonts/DIN2014-Light.ttf";
 import { ThemeProps } from "./theme";
 import { color, font, fontSize, fontWeight } from "./utils";
@@ -19,10 +20,17 @@ export const GlobalStyles = createGlobalStyle<GlobalStylesProps & ThemeProps>`
   }
   @font-face {
     font-family: 'DIN2014';
+    src: local('DIN2014 Regular'), url(${regularFont});
+    font-weight: 400;
+    font-style: normal;
+  }
+  @font-face {
+    font-family: 'DIN2014';
     src: local('DIN2014 Light'), url(${lightFont});
     font-weight: 300;
     font-style: normal;
   }
+
 
   html {
     height: 100%;

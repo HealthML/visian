@@ -4,5 +4,41 @@
   "drop-image": "Drop your scan here",
   "drop-annotation": "Drop your annotation here",
 
-  "start": "Start by dragging in a scan."
+  "start": "Start by dragging in a scan.",
+
+  "menu": "Menu",
+  "theme": "Theme",
+  "dark": "Dark",
+  "light": "Light",
+  "language": "Language",
+  "ideas-feedback": "Ideas or Feedback?",
+  "clear-data": "Clear Data",
+
+  "navigation-tool": "Navigation Tool (H)",
+  "crosshair-tool": "Crosshair Tool (C)",
+  "pixel-brush": "Brush (B)",
+  "smart-brush": "Smart Brush (S)",
+  "pixel-eraser": "Eraser (E)",
+  "clear-slice": "Clear Slice (Del)",
+
+  "layers": "Layers",
+  "no-layers": "No layers loaded.",
+
+  "view-settings": "View Settings",
+  "transverse": "Transverse (1)",
+  "sagittal": "Sagittal (2)",
+  "coronal": "Coronal (3)",
+  "side-views": "Side Views",
+  "on": "On",
+  "off": "Off",
+  "main-view-type": "Main View Type",
+  "contrast": "Contrast",
+  "brightness": "Brightness",
+
+  "export": "Export (Ctrl + E)",
+
+  "import-error": "Import Error",
+  "annotation-mismatch-error": "This annotation does not match the original image's size.",
+  "no-image-error": "You have to load a base image before importing an annotation.",
+  "image-loading-error": "Looks like this file is not supported."
 }

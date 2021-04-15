@@ -2,7 +2,6 @@ import {
   color,
   coverMixin,
   FlexRow,
-  IntervalSlider,
   Sheet,
   Slider,
   Text,
@@ -44,10 +43,6 @@ const StyledDescription = styled(StyledText)`
 `;
 
 const StyledSlider = styled(Slider)`
-  margin-bottom: 10px;
-`;
-
-const StyledIntervalSlider = styled(IntervalSlider)`
   margin-bottom: 10px;
 `;
 
@@ -147,20 +142,6 @@ const Settings: React.FC<SettingsProps> = observer((props) => {
     [renderer],
   );
 
-  const setOpacity = useCallback(
-    (value: number) => {
-      renderer.setImageOpacity(value * value);
-    },
-    [renderer],
-  );
-
-  const setContextOpacity = useCallback(
-    (value: number) => {
-      renderer.setContextOpacity(value * value);
-    },
-    [renderer],
-  );
-
   const setCustomTFImage = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
       const files = event.target.files;
@@ -180,15 +161,18 @@ const Settings: React.FC<SettingsProps> = observer((props) => {
       <StyledSlider
         min={0}
         max={1}
-        onChange={renderer.setBackgroundValue}
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        onChange={renderer.setBackgroundValue as any}
         value={renderer.backgroundValue}
       />
       <StyledText text="Opacity" />
       <StyledSlider
         min={0}
         max={1}
-        onChange={setOpacity}
-        value={Math.sqrt(renderer.imageOpacity)}
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        onChange={renderer.setImageOpacity as any}
+        value={renderer.imageOpacity}
+        scaleType="quadratic"
       />
       <StyledText text="Lighting Mode" />
       <StyledSelect
@@ -247,10 +231,11 @@ const Settings: React.FC<SettingsProps> = observer((props) => {
             </Histogram>
           )}
           <StyledText text="Value Range" />
-          <StyledIntervalSlider
+          <StyledSlider
             min={0}
             max={1}
-            onChange={renderer.setRangeLimits}
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            onChange={renderer.setRangeLimits as any}
             value={renderer.rangeLimits}
           />
         </HistogramWrapper>
@@ -261,7 +246,8 @@ const Settings: React.FC<SettingsProps> = observer((props) => {
           <StyledSlider
             min={0}
             max={Math.PI}
-            onChange={renderer.setCutAwayConeAngle}
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            onChange={renderer.setCutAwayConeAngle as any}
             value={renderer.cutAwayConeAngle}
           />
         </>
@@ -278,8 +264,10 @@ const Settings: React.FC<SettingsProps> = observer((props) => {
           <StyledSlider
             min={0}
             max={1}
-            onChange={setContextOpacity}
-            value={Math.sqrt(renderer.contextOpacity)}
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            onChange={renderer.setContextOpacity as any}
+            value={renderer.contextOpacity}
+            scaleType="quadratic"
           />
         </>
       )}

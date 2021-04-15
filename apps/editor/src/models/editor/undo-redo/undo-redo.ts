@@ -64,7 +64,7 @@ export class EditorUndoRedo implements ISerializable<EditorUndoRedoSnapshot> {
     return {};
   }
 
-  public async applySnapshot(snapshot: EditorUndoRedoSnapshot) {
+  public async applySnapshot(_snapshot: EditorUndoRedoSnapshot) {
     // Intentionally left blank
   }
 }

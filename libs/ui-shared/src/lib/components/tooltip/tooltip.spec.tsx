@@ -1,11 +1,11 @@
 import { render } from "@testing-library/react";
 import React from "react";
 
-import IntervalSlider from "./interval-slider";
+import { Tooltip } from "./tooltip";
 
-describe("IntervalSlider", () => {
+describe("Tooltip", () => {
   it("should render successfully", () => {
-    const { baseElement } = render(<IntervalSlider />);
+    const { baseElement } = render(<Tooltip />);
     expect(baseElement).toBeTruthy();
   });
 });

@@ -5,12 +5,14 @@ import {
   FloatTypes,
   IntTypes,
   ITKImage,
+  ITKImageType,
   ITKMatrix,
   readMedicalImage,
   TypedArray,
   VoxelTypes,
 } from "../../io";
 import {
+  convertAtlasToDataArray,
   convertDataArrayToAtlas,
   getAtlasGrid,
   getAtlasIndexFor,
@@ -40,6 +42,7 @@ export interface ImageSnapshot<T extends TypedArray = TypedArray> {
   orientation?: ITKMatrix;
 
   data?: T;
+  atlas?: Uint8Array;
 }
 
 /** A generic, observable multi-dimensional image class. */
@@ -71,7 +74,9 @@ export class Image<T extends TypedArray = TypedArray>
   }
 
   public static async fromFile(file: File) {
-    return Image.fromITKImage(await readMedicalImage(file));
+    const image = Image.fromITKImage(await readMedicalImage(file));
+    image.name = file.name;
+    return image;
   }
 
   /**
@@ -139,10 +144,12 @@ export class Image<T extends TypedArray = TypedArray>
   public orientation!: ITKMatrix;
 
   /** A TypedArray containing the voxel buffer data in I/O format. */
-  public data!: T;
+  private data!: T;
+  protected isDataDirty?: boolean;
 
   /** A Uint8Array containing the voxel buffer data in texture atlas format. */
-  protected atlas?: Uint8Array;
+  private atlas?: Uint8Array;
+  protected isAtlasDirty?: boolean;
 
   protected texture?: THREE.DataTexture;
 
@@ -151,35 +158,65 @@ export class Image<T extends TypedArray = TypedArray>
   ) {
     this.applySnapshot(image);
 
-    makeObservable(this, {
-      name: observable,
-      dimensionality: observable,
-      voxelCount: observable,
-      voxelSpacing: observable,
-      voxelType: observable,
-      voxelComponents: observable,
-      voxelComponentType: observable,
-      origin: observable,
-      // TODO: Make matrix properly observable
-      orientation: observable.ref,
-      data: observable.ref,
-      applySnapshot: action,
-      setAtlas: action,
-      updateData: action,
-      setAtlasVoxel: action,
-    });
+    makeObservable<this, "data" | "atlas" | "isDataDirty" | "isAtlasDirty">(
+      this,
+      {
+        name: observable,
+        dimensionality: observable,
+        voxelCount: observable,
+        voxelSpacing: observable,
+        voxelType: observable,
+        voxelComponents: observable,
+        voxelComponentType: observable,
+        origin: observable,
+        // TODO: Make matrix properly observable
+        orientation: observable.ref,
+        data: observable.ref,
+        isDataDirty: observable,
+        atlas: observable.ref,
+        isAtlasDirty: observable,
+        applySnapshot: action,
+        setData: action,
+        setAtlas: action,
+        setAtlasVoxel: action,
+        setSlice: action,
+      },
+    );
+  }
+
+  public getData() {
+    if (!this.data || this.isDataDirty) {
+      if (!this.atlas) throw new Error("No atlas provided");
+
+      // Explicit access here avoids MobX observability tracking to decrease performance
+      this.data = convertAtlasToDataArray(
+        this.atlas,
+        {
+          voxelComponents: this.voxelComponents,
+          voxelCount: this.voxelCount.clone(false),
+        },
+        this.data,
+      );
+      this.isDataDirty = false;
+    }
+    return this.data;
   }
 
   public getAtlas() {
-    if (!this.atlas) {
+    if (!this.atlas || this.isAtlasDirty) {
+      if (!this.data) throw new Error("No data provided");
+
       // Explicit access here avoids MobX observability tracking to decrease performance
-      this.atlas = convertDataArrayToAtlas({
-        data: this.data,
-        dimensionality: this.dimensionality,
-        orientation: this.orientation,
-        voxelComponents: this.voxelComponents,
-        voxelCount: this.voxelCount.clone(false),
-      });
+      this.atlas = convertDataArrayToAtlas(
+        this.data,
+        {
+          voxelComponents: this.voxelComponents,
+          voxelCount: this.voxelCount.clone(false),
+        },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        this.atlas as any,
+      );
+      this.isAtlasDirty = false;
     }
     return this.atlas;
   }
@@ -238,10 +275,36 @@ export class Image<T extends TypedArray = TypedArray>
     return this.getAtlas()[index];
   }
 
+  public setData(data: T) {
+    this.isDataDirty = false;
+    this.isAtlasDirty = true;
+
+    if (data === this.data) return;
+
+    if (!this.data) {
+      // Clone the data to convert it from a SharedArrayBuffer to an arraybuffer.
+      // This is necessary to store the data in IndexedDB when using Chrome.
+      this.data = new (data.constructor as new (data: T) => T)(data);
+    } else {
+      if (data.length !== this.data.length) {
+        throw new Error("Data length has changed");
+      }
+      this.data.set(data);
+    }
+  }
+
   public setAtlas(atlas: Uint8Array) {
+    this.isDataDirty = true;
+    this.isAtlasDirty = false;
+
+    if (atlas === this.atlas) return;
+
     if (!this.atlas) {
       this.atlas = new Uint8Array(atlas);
     } else {
+      if (atlas.length !== this.atlas.length) {
+        throw new Error("Atlas length has changed");
+      }
       this.atlas.set(atlas);
     }
 
@@ -250,15 +313,11 @@ export class Image<T extends TypedArray = TypedArray>
     }
   }
 
-  public updateData() {
-    // update this.data from this.atlas
-    console.log("updateData is not implemented yet");
-  }
-
   public setAtlasVoxel(voxel: Vector, value: number) {
     const index = getAtlasIndexFor(voxel, this);
     this.getAtlas()[index] = value;
 
+    this.isDataDirty = true;
     if (this.texture) {
       this.texture.needsUpdate = true;
     }
@@ -285,19 +344,57 @@ export class Image<T extends TypedArray = TypedArray>
       },
     );
 
+    this.isDataDirty = true;
     if (this.texture) {
       this.texture.needsUpdate = true;
     }
   }
 
+  public toITKImage() {
+    const image = new ITKImage<T>(
+      new ITKImageType(
+        this.dimensionality,
+        this.voxelComponentType,
+        this.voxelType,
+        this.voxelComponents,
+      ),
+    );
+
+    image.name = this.name;
+    image.origin = this.origin.toArray();
+    image.spacing = this.voxelSpacing.toArray();
+    image.direction = this.orientation;
+    image.size = this.voxelCount.toArray();
+
+    // Clone the data array to protect it from modifications
+    // & enable hand-off to web workers
+    image.data = this.getData();
+    image.data = unifyOrientation(
+      new (image.data.constructor as new (data: T) => T)(image.data),
+      image.direction,
+      image.imageType.dimension,
+      image.size,
+      image.imageType.components,
+    ) as T;
+
+    return image;
+  }
+
   public toJSON() {
+    if (
+      (!this.data || this.isDataDirty) &&
+      (!this.atlas || this.isAtlasDirty)
+    ) {
+      throw new Error("Saving image without any data");
+    }
     return {
       name: this.name,
       voxelCount: this.voxelCount.toJSON(),
       voxelSpacing: this.voxelSpacing.toJSON(),
       origin: this.origin.toJSON(),
       orientation: this.orientation,
-      data: this.data,
+      data: this.isDataDirty || !this.isAtlasDirty ? undefined : this.data,
+      atlas: this.isAtlasDirty ? undefined : this.atlas,
       dimensionality: this.dimensionality,
       voxelComponents: this.voxelComponents,
     };
@@ -333,15 +430,11 @@ export class Image<T extends TypedArray = TypedArray>
     }
 
     if (snapshot.data) {
-      // Clone the data to convert it from a SharedArrayBuffer to an arraybuffer.
-      // This is necessary to store the data in IndexedDB when using Chrome.
-      const clonedData = new (snapshot.data.constructor as new (
-        size: number,
-      ) => T)(snapshot.data.length);
-      clonedData.set(snapshot.data);
-      this.data = clonedData;
+      this.setData(snapshot.data);
+    } else if (snapshot.atlas) {
+      this.setAtlas(snapshot.atlas);
     } else {
-      this.data = new Uint8Array(this.voxelCount.product()) as T;
+      this.setData(new Uint8Array(this.voxelCount.product()) as T);
     }
   }
 }

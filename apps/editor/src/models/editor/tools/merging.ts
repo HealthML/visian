@@ -7,7 +7,7 @@ export type MergingFunction = (
 
 export const replaceMerge: MergingFunction = (
   newVoxel: AnnotationVoxel,
-  oldVoxel: AnnotationVoxel,
+  _oldVoxel: AnnotationVoxel,
 ) => {
   return AnnotationVoxel.fromVoxelAndValue(newVoxel, newVoxel.value);
 };
