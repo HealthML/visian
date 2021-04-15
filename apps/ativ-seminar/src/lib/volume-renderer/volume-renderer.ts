@@ -66,7 +66,10 @@ export class VolumeRenderer implements IDisposable {
   public isFocusLoaded = false;
 
   constructor(private canvas: HTMLCanvasElement) {
-    makeObservable<this, "setCustomTFTexture" | "setFocusLoaded">(this, {
+    makeObservable<
+      this,
+      "setCustomTFTexture" | "setFocusLoaded" | "setSuppressedLightingMode"
+    >(this, {
       isImageLoaded: observable,
       densityHistogram: observable.ref,
       gradientHistogram: observable.ref,
@@ -97,6 +100,7 @@ export class VolumeRenderer implements IDisposable {
       setCutAwayConeAngle: action,
       setCustomTFTexture: action,
       setFocusLoaded: action,
+      setSuppressedLightingMode: action,
     });
 
     this.renderer = new THREE.WebGLRenderer({ alpha: true, canvas });
@@ -258,7 +262,7 @@ export class VolumeRenderer implements IDisposable {
 
   private onTransferFunctionChange = () => {
     if (!this.suppressedLightingMode) {
-      this.suppressedLightingMode = this.lightingMode;
+      this.setSuppressedLightingMode(this.lightingMode);
       this.setLightingMode(lightingModes[LightingModeType.None]);
     }
 
@@ -268,7 +272,7 @@ export class VolumeRenderer implements IDisposable {
     this.lightingTimeout = setTimeout(() => {
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       this.setLightingMode(this.suppressedLightingMode!);
-      this.suppressedLightingMode = undefined;
+      this.setSuppressedLightingMode(undefined);
       this.lightingTimeout = undefined;
     }, 200);
 
@@ -392,6 +396,10 @@ export class VolumeRenderer implements IDisposable {
     }
 
     this.lazyRender();
+  };
+
+  private setSuppressedLightingMode = (value?: LightingMode) => {
+    this.suppressedLightingMode = value;
   };
 
   public setLaoIntensity = (value: number) => {
