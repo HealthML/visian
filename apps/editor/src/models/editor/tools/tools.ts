@@ -234,8 +234,9 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
     if (
       !eventType ||
       (!this.editor.isAnnotationVisible && this.isBrushToolSelected)
-    )
+    ) {
       return;
+    }
 
     const dragPoint = this.getDragPoint(intersection.uv);
     if (!dragPoint) return;
