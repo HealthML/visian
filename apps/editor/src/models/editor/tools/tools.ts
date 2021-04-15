@@ -29,6 +29,7 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
   public activeTool = ToolType.SmartBrush;
 
   public isCursorOverDrawableArea = false;
+  public isNavigationDragged = false;
 
   private brushWidthScreen = 0.02;
   private lockedBrushSizePixels?: number;
@@ -71,6 +72,7 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
     makeObservable<this, "brushWidthScreen" | "lockedBrushSizePixels">(this, {
       activeTool: observable,
       isCursorOverDrawableArea: observable,
+      isNavigationDragged: observable,
       smartBrushNeighborThreshold: observable,
       smartBrushSeedThreshold: observable,
       brushWidthScreen: observable,
@@ -83,6 +85,7 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
       applySnapshot: action,
       setActiveTool: action,
       setCursorOverDrawableArea: action,
+      setIsNavigationDragged: action,
       setBrushSizePixels: action,
       setSmartBrushSeedTreshold: action,
       setSmartBrushNeighborThreshold: action,
@@ -128,6 +131,10 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
 
   public setCursorOverDrawableArea(value = true) {
     this.isCursorOverDrawableArea = value;
+  }
+
+  public setIsNavigationDragged(value = true) {
+    this.isNavigationDragged = value;
   }
 
   public setBrushSizePixels(value = 5) {
