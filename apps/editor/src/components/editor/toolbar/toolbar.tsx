@@ -25,7 +25,7 @@ export const Toolbar: React.FC = observer(() => {
   }, [store]);
 
   return (
-    <StyledToolbar style={{ marginBottom: 16 }}>
+    <StyledToolbar>
       <Tool
         icon="moveTool"
         tooltipTx="navigation-tool"
@@ -61,7 +61,7 @@ export const Toolbar: React.FC = observer(() => {
         value={ToolType.Eraser}
         onPress={setActiveTool}
       />
-      <Tool icon="trash" tooltipTx="clear-slice" onPointerDown={clearSlice} />
+      <Tool icon="trash" tooltipTx="clear-slice" onPress={clearSlice} />
     </StyledToolbar>
   );
 });

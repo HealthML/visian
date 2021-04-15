@@ -4,6 +4,7 @@ import {
   DropZone,
   getTheme,
   GlobalStyles,
+  ModalRoot,
   Screen,
   ThemeProvider,
   useIsDraggedOver,
@@ -147,6 +148,7 @@ export function App() {
   return (
     <ThemeProvider theme={theme}>
       <GlobalStyles />
+      <ModalRoot />
       <Switch>
         <Route path="/">
           <Screen {...dragListeners}>

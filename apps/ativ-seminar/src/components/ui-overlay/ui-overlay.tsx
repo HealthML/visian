@@ -1,16 +1,9 @@
-import {
-  AbsoluteCover,
-  coverMixin,
-  FlexColumn,
-  FlexRow,
-  Text,
-} from "@visian/ui-shared";
+import { AbsoluteCover, coverMixin, FlexRow, Text } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
-import React, { useCallback, useState } from "react";
+import React from "react";
 import styled from "styled-components";
 
-import Settings from "../settings/settings";
-import { ToolBar } from "../tool-bar";
+import { Toolbar } from "../toolbar";
 import { UIOverlayProps } from "./ui-overlay.props";
 
 const FullScreenDiv = styled(FlexRow)`
@@ -23,10 +16,6 @@ const FullScreenDiv = styled(FlexRow)`
   user-select: none;
 `;
 
-const UIColumn = styled(FlexColumn)`
-  margin-left: 12px;
-`;
-
 const StartTextContainer = styled(AbsoluteCover)`
   align-items: center;
   display: flex;
@@ -37,19 +26,9 @@ const StartTextContainer = styled(AbsoluteCover)`
 export const UIOverlay: React.FC<UIOverlayProps> = observer((props) => {
   const { renderer, ...rest } = props;
 
-  const [showSettings, setShowSettings] = useState(false);
-  const toggleSettings = useCallback(() => {
-    setShowSettings(!showSettings);
-  }, [showSettings, setShowSettings]);
-
   return (
     <FullScreenDiv {...rest}>
-      <ToolBar
-        renderer={renderer}
-        showSettings={showSettings}
-        toggleSettings={toggleSettings}
-      />
-      <UIColumn>{showSettings && <Settings renderer={renderer} />}</UIColumn>
+      <Toolbar renderer={renderer} />
       {!renderer?.isImageLoaded && (
         <StartTextContainer>
           <Text text="Start by dragging in a scan." />

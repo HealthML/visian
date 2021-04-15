@@ -1,8 +1,9 @@
 import {
   color,
   coverMixin,
+  Divider,
   FlexRow,
-  Sheet,
+  Modal,
   Slider,
   Text,
 } from "@visian/ui-shared";
@@ -18,14 +19,8 @@ import {
 } from "../../lib/volume-renderer";
 import { SettingsProps } from "./settings.props";
 
-const Container = styled(Sheet)`
-  display: flex;
-  flex-direction: column;
-  margin-top: 12px;
+const Container = styled(Modal)`
   width: 250px;
-  padding: 15px 16px;
-  pointer-events: auto;
-  align-items: flex-start;
 `;
 
 const StyledText = styled(Text)`
@@ -86,12 +81,6 @@ const StyledSelect = styled.select`
 const StyledOption = styled.option`
   background-color: ${color("background")};
 `;
-
-const Separator = styled.hr`
-  margin-bottom: 10px;
-  width: 100%;
-`;
-
 const HistogramWrapper = styled.div`
   position: relative;
   width: 100%;
@@ -109,7 +98,7 @@ const HistogramBar = styled.div`
   flex: 1;
 `;
 
-const Settings: React.FC<SettingsProps> = observer((props) => {
+export const Settings: React.FC<SettingsProps> = observer((props) => {
   const { renderer, ...rest } = props;
 
   const setFocusColor = useCallback(
@@ -156,7 +145,7 @@ const Settings: React.FC<SettingsProps> = observer((props) => {
       ? renderer?.gradientHistogram
       : renderer?.densityHistogram;
   return (
-    <Container {...rest}>
+    <Container {...rest} label="View Settings">
       <StyledText text="Background" />
       <StyledSlider
         min={0}
@@ -192,7 +181,7 @@ const Settings: React.FC<SettingsProps> = observer((props) => {
         />
         <StyledCheckboxText text="Use focus volume?" />
       </StyledCheckboxRow>
-      <Separator />
+      <Divider />
       <StyledText text="Transfer Function" />
       <StyledSelect
         onChange={setTransferFunction}
