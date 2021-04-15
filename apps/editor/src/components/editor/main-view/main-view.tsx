@@ -54,7 +54,9 @@ export const MainView = observer<{}, HTMLCanvasElement>(
         activeTool={store?.editor.tools.activeTool}
         backgroundColor={store?.editor.getBackgroundColor()}
         isCursorOverDrawableArea={
-          store?.editor.image && store?.editor.tools.isCursorOverDrawableArea
+          store?.editor.image &&
+          store?.editor.tools.isCursorOverDrawableArea &&
+          store?.editor.isAnnotationVisible
         }
         isNavigationDragged={store?.editor.tools.isNavigationDragged}
         onContextMenu={preventDefault}

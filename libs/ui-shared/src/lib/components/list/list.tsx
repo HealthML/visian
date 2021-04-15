@@ -1,5 +1,5 @@
 import React, { useCallback } from "react";
-import styled from "styled-components";
+import styled, { css } from "styled-components";
 
 import { Spacer } from "../box";
 import { Icon } from "../icon";
@@ -32,10 +32,21 @@ export const ListItemLabel = styled(Text)`
   line-height: 14px;
 `;
 
-export const ListIcon = styled(Icon)<{ disabled?: boolean }>`
+export const ListIcon = styled(Icon).withConfig({
+  shouldForwardProp: (prop) =>
+    prop.toString() !== "isDisabled" && prop.toString() !== "hasPressHandler",
+})<{
+  isDisabled?: boolean;
+  hasPressHandler: boolean;
+}>`
   width: 20px;
   height: 20px;
-  opacity: ${(props) => (props.disabled ? 0.3 : 1)};
+  opacity: ${(props) => (props.isDisabled ? 0.3 : 1)};
+  ${(props) =>
+    props.hasPressHandler &&
+    css`
+      cursor: pointer;
+    `}
 `;
 
 export const List: React.FC<ListProps> = ({ children, ...rest }) => (
@@ -67,8 +78,9 @@ export const ListItem: React.FC<ListItemProps> = ({
             <Spacer />
             <ListIcon
               icon={icon}
-              disabled={disableIcon}
+              isDisabled={disableIcon}
               onPointerDown={handleIconPress}
+              hasPressHandler={Boolean(onIconPress)}
             />
           </>
         )}
