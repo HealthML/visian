@@ -1,13 +1,16 @@
 import {
+  AbsoluteCover,
   coverMixin,
   DropZone,
   getTheme,
   GlobalStyles,
+  ModalRoot,
   Screen,
   ThemeProvider,
   useIsDraggedOver,
+  WebGLCanvas,
 } from "@visian/ui-shared";
-import { readMedicalImage, TextureAtlas } from "@visian/utils";
+import { readMedicalImage } from "@visian/utils";
 import { observer } from "mobx-react-lite";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Route, Switch } from "react-router-dom";
@@ -15,7 +18,7 @@ import styled from "styled-components";
 import WebXRPolyfill from "webxr-polyfill";
 
 import { UIOverlay } from "../components/ui-overlay";
-import { WebGLCanvas } from "../components/webgl-canvas";
+import { TextureAtlas } from "../lib/texture-atlas";
 import { VolumeRenderer } from "../lib/volume-renderer";
 
 import type * as THREE from "three";
@@ -145,10 +148,16 @@ export function App() {
   return (
     <ThemeProvider theme={theme}>
       <GlobalStyles />
+      <ModalRoot />
       <Switch>
         <Route path="/">
           <Screen {...dragListeners}>
-            <WebGLCanvas ref={canvasRef} renderer={renderer} />
+            <AbsoluteCover>
+              <WebGLCanvas
+                ref={canvasRef}
+                backgroundColor={renderer?.backgroundColor}
+              />
+            </AbsoluteCover>
             {renderer && <UIOverlay renderer={renderer} />}
             {isDraggedOver && (
               <DropSheet>

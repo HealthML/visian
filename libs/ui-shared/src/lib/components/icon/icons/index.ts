@@ -1,6 +1,7 @@
 export { ReactComponent as arrowDown } from "./arrow-down.svg";
 export { ReactComponent as arrowUp } from "./arrow-up.svg";
 export { ReactComponent as crosshair } from "./crosshair.svg";
+export { ReactComponent as crosshairPointer } from "./crosshair-pointer.svg";
 export { ReactComponent as erase } from "./erase.svg";
 export { ReactComponent as export } from "./export.svg";
 export { ReactComponent as eyeCrossed } from "./eye-crossed.svg";

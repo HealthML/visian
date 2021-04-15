@@ -1,8 +1,3 @@
-/**
- * @file The TextureAtlas class is still in here to avoid breaking the build
- * of `ativ-seminar` until `feature/ativ-seminar` is merged. It should be
- * removed immediately after.
- */
 import { ITKImage, TypedArray } from "@visian/utils";
 import localForage from "localforage";
 import * as THREE from "three";
@@ -24,20 +19,20 @@ export interface StoredTextureAtlas<T extends TypedArray = TypedArray> {
   dimensionality: number;
 }
 
-const localForagePrefix = `atlas/`;
+export const localForagePrefix = `atlas/`;
 
 /**
  * The texture atlas generation expects the x- and y-axis to be inverted
  * and the z-axis to be non-inverted.
  */
-const defaultDirection = new THREE.Vector3(-1, -1, 1);
+export const defaultDirection = new THREE.Vector3(-1, -1, 1);
 
 /**
  * Returns the optimal number of slices in x/y direction in the texture atlas.
  *
  * @param voxelCount The number of voxels in each direction.
  */
-const getAtlasGrid = (voxelCount: THREE.Vector3) => {
+export const getAtlasGrid = (voxelCount: THREE.Vector3) => {
   const atlasGridX = Math.ceil(
     Math.sqrt((voxelCount.z * voxelCount.y) / voxelCount.x),
   );

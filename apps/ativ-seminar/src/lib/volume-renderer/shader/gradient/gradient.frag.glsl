@@ -1,15 +1,28 @@
 varying vec2 vUv;
 
-uniform sampler2D uTextureAtlas;
-uniform vec3 uVoxelSpacing;
-uniform vec3 uVoxelCount;
-uniform vec2 uAtlasGrid;
-uniform float uInputDimensions;
+uniform int uInputDimensions;
+uniform int uGradientMode;
+
+@import ../uniforms/u-common;
+@import ../uniforms/u-atlas-info;
+@import ../uniforms/u-image-info;
+@import ../uniforms/u-transfer-functions;
+
+#define CONE_EDGE 0.01
+
+@import ../utils/volume-data;
+@import ../volume/transfer-functions;
+@import ../utils/decode-vec3;
+
+vec4 encodeGradient(vec3 gradient) {
+  float encodedSigns = 0.5 * step(0.0, gradient.x) + 0.25 * step(0.0, gradient.y) + 0.125 * step(0.0, gradient.z);
+  return vec4(abs(gradient), encodedSigns);
+}
 
 /**
  * Returns the image value at the given volume coordinates.
  *
- * @param voxelCoords The voxel coordinates (ranged [0, uVoxelCount.*]).
+ * @param voxelCoords The voxel coordinates (ranged [0, uVoxelCount.* - 1.0]).
  */
 vec4 getImageValue(vec3 voxelCoords) {
   vec2 sliceSize = vec2(1.0) / uAtlasGrid;
@@ -26,7 +39,33 @@ vec4 getImageValue(vec3 voxelCoords) {
 
   vec2 uvOffset = sliceSize * sliceOffset;
   vec2 uv = ((voxelCoords.xy + vec2(0.5)) / uVoxelCount.xy / uAtlasGrid + uvOffset);
-  return texture2D(uTextureAtlas, uv);
+
+  vec4 imageValue;
+  if (uGradientMode == 2) {
+    imageValue = texture2D(uInputFirstDerivative, uv);
+  } else {
+    imageValue = texture2D(uVolume, uv);
+  }
+  
+  if (uGradientMode != 0) {
+    return imageValue;
+  }
+
+  VolumeData data;
+
+  data.density = imageValue.r;
+  data.firstDerivative = decodeVec3(texture2D(uInputFirstDerivative, uv));
+  data.secondDerivative = decodeVec3(texture2D(uInputSecondDerivative, uv));
+  
+  if(uUseFocus) {
+    data.focus = texture2D(uFocus, uv).r;
+  }
+
+  vec3 volumeCoords = (voxelCoords + 0.5) / uVoxelCount;
+
+  vec4 outputValue = transferFunction(data, volumeCoords);
+
+  return vec4(outputValue.a);
 }
 
 void main() {
@@ -43,6 +82,16 @@ void main() {
 
   vec3 voxelCoords = vec3(offsetInSlice * uVoxelCount.xy, zSlice);
 
+  if(uTransferFunction == 2) {
+    vec3 coneSpaceCoordinates = transformToCutawaySpace((voxelCoords + 0.5) / uVoxelCount);
+    float coneDist = sdCone(coneSpaceCoordinates, uConeAngle);
+    if (coneDist > -CONE_EDGE && coneDist < CONE_EDGE) {
+      // TODO: Compute the normal of the cone surface here.
+      gl_FragColor = vec4(0.0);
+      return;
+    }
+  }
+
   vec4 upX = getImageValue(vec3(min(uVoxelCount.x - 1.0, voxelCoords.x + 1.0), voxelCoords.yz));
   vec4 downX = getImageValue(vec3(max(0.0, voxelCoords.x - 1.0), voxelCoords.yz));
 
@@ -55,21 +104,21 @@ void main() {
   vec3 up;
   vec3 down;
 
-  if (uInputDimensions == 4.0) {
+  if (uInputDimensions == 4) {
     up.x = length(upX);
     up.y = length(upY);
     up.z = length(upZ);
     down.x = length(downX);
     down.y = length(downY);
     down.z = length(downZ);
-  } else if (uInputDimensions == 3.0) {
+  } else if (uInputDimensions == 3) {
     up.x = length(upX.xyz);
     up.y = length(upY.xyz);
     up.z = length(upZ.xyz);
     down.x = length(downX.xyz);
     down.y = length(downY.xyz);
     down.z = length(downZ.xyz);
-  } else if (uInputDimensions == 2.0) {
+  } else if (uInputDimensions == 2) {
     up.x = length(upX.xy);
     up.y = length(upY.xy);
     up.z = length(upZ.xy);
@@ -77,24 +126,28 @@ void main() {
     down.y = length(downY.xy);
     down.z = length(downZ.xy);
   } else {
-    up.x = length(upX.x);
-    up.y = length(upY.x);
-    up.z = length(upZ.x);
-    down.x = length(downX.x);
-    down.y = length(downY.x);
-    down.z = length(downZ.x);
+    up.x = upX.x;
+    up.y = upY.x;
+    up.z = upZ.x;
+    down.x = downX.x;
+    down.y = downY.x;
+    down.z = downZ.x;
   }
 
   vec3 gradient = (up - down) / (mix(vec3(1.0), vec3(2.0), step(0.5, mod(voxelCoords, uVoxelCount - vec3(1.0)))) * uVoxelSpacing);
+
+  if (uGradientMode == 0) {
+    gradient *= -1.0;
+  }
   
-  float encodedSigns = 0.5 * step(0.0, gradient.x) + 0.25 * step(0.0, gradient.y) + 0.125 * step(0.0, gradient.z);
+  vec4 encodedGradient = encodeGradient(gradient);
 
   // Disregarding the voxels at the edges of the volume, the absolute value of the 
   // components of gradient are at most sqrt(inputDimensions)/(2*min(voxelSpacing)).
   // As we want to use the whole range [0, 1] for the result we scale by this value.
   //
   // TODO: Think about scaling by a bigger value, because the gradient tends to be rather small.
-  float gradientScaleFactor = 2.0 * min(uVoxelSpacing.x, min(uVoxelSpacing.y, uVoxelSpacing.z)) / sqrt(uInputDimensions);
+  float gradientScaleFactor = 2.0 * min(uVoxelSpacing.x, min(uVoxelSpacing.y, uVoxelSpacing.z)) / sqrt(float(uInputDimensions));
 
-  gl_FragColor = vec4(abs(gradient) * gradientScaleFactor, encodedSigns);
+  gl_FragColor = vec4(encodedGradient.xyz * gradientScaleFactor, encodedGradient.w);
 }
