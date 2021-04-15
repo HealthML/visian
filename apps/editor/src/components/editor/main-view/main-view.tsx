@@ -15,13 +15,14 @@ const SyledCanvas = styled(WebGLCanvas)<
   WebGLCanvasProps & {
     activeTool?: ToolType;
     isCursorOverDrawableArea?: boolean;
+    isNavigationDragged?: boolean;
   }
 >`
   cursor: ${(props) => {
     switch (props.activeTool) {
       case ToolType.Navigate:
-        // TODO: `cursor: "grabbing"` while dragged
-        return "grab";
+        if (props.isNavigationDragged) document.body.style.cursor = "grabbing";
+        return props.isNavigationDragged ? "grabbing" : "grab";
 
       case ToolType.Crosshair:
         return "crosshair";
@@ -53,8 +54,11 @@ export const MainView = observer<{}, HTMLCanvasElement>(
         activeTool={store?.editor.tools.activeTool}
         backgroundColor={store?.editor.getBackgroundColor()}
         isCursorOverDrawableArea={
-          store?.editor.image && store?.editor.tools.isCursorOverDrawableArea
+          store?.editor.image &&
+          store?.editor.tools.isCursorOverDrawableArea &&
+          store?.editor.isAnnotationVisible
         }
+        isNavigationDragged={store?.editor.tools.isNavigationDragged}
         onContextMenu={preventDefault}
         onPointerDown={onPointerDown}
         ref={ref}

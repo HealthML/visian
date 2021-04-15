@@ -43,7 +43,9 @@ export class Editor implements ISerializable<EditorSnapshot> {
   // Layers
   public foregroundColor = "#ffffff";
   public annotation?: Image;
+  public isAnnotationVisible = true;
   public image?: Image;
+  public isImageVisible = true;
   protected backgroundColor?: string;
 
   public viewSettings: EditorViewSettings;
@@ -58,14 +60,18 @@ export class Editor implements ISerializable<EditorSnapshot> {
     makeObservable<this, "backgroundColor">(this, {
       sliceRenderer: observable,
       foregroundColor: observable,
-      image: observable,
       annotation: observable,
+      isAnnotationVisible: observable,
+      image: observable,
+      isImageVisible: observable,
       backgroundColor: observable,
 
       setSliceRenderer: action,
       setForegroundColor: action,
       setImage: action,
       setAnnotation: action,
+      setIsImageVisible: action,
+      setIsAnnotationVisible: action,
       setBackgroundColor: action,
       applySnapshot: action,
     });
@@ -120,6 +126,13 @@ export class Editor implements ISerializable<EditorSnapshot> {
 
   public setBackgroundColor(backgroundColor: string) {
     this.backgroundColor = backgroundColor;
+  }
+
+  public setIsImageVisible(value: boolean) {
+    this.isImageVisible = value;
+  }
+  public setIsAnnotationVisible(value: boolean) {
+    this.isAnnotationVisible = value;
   }
 
   public quickExport = async () => {
