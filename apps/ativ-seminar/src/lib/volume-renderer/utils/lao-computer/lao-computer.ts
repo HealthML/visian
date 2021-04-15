@@ -133,6 +133,8 @@ export class LAOComputer implements IDisposable {
 
     this.currentQuadId = 0;
 
+    this.needsCopy = false;
+
     this.volumeRenderer.lazyRender();
   }
 
