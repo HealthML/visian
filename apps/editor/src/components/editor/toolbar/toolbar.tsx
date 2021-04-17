@@ -39,6 +39,9 @@ export const Toolbar: React.FC = observer(() => {
         activeTool={activeTool}
         value={ToolType.Crosshair}
         onPress={setActiveTool}
+        isDisabled={
+          store?.editor.image && store.editor.image.dimensionality < 3
+        }
       />
       <Tool
         icon="pixelBrush"

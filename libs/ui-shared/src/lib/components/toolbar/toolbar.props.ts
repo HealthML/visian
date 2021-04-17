@@ -4,6 +4,7 @@ import type { IconType } from "../icon";
 
 export interface ToolProps extends ButtonProps {
   isActive?: boolean;
+  isDisabled?: boolean;
 
   /** The key of the tool's icon (if any). */
   icon?: IconType;
@@ -17,7 +18,10 @@ export interface ToolProps extends ButtonProps {
    */
   activeTool?: string | number;
 
-  /** An optional listener that is called when the tool is pressed. */
+  /**
+   * An optional listener that is called when the tool is pressed.
+   * Will not be called if `isDisabled` is set.
+   */
   onPress?: (value?: string | number) => void;
 }
 

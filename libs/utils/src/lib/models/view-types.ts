@@ -41,3 +41,19 @@ export const getPlaneAxes = (viewType: ViewType) => {
       return ["x", "z"] as ["x", "z"];
   }
 };
+
+/**
+ * Returns the first letter the given view type's name.
+ *
+ * @param viewType The view's type.
+ */
+export const getViewTypeInitials = (viewType: ViewType) => {
+  switch (viewType) {
+    case ViewType.Transverse:
+      return "T";
+    case ViewType.Sagittal:
+      return "S";
+    case ViewType.Coronal:
+      return "C";
+  }
+};

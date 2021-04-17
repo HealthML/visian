@@ -56,8 +56,7 @@ const RightBar = styled.div`
 
 const TopConsole = styled.div`
   display: flex;
-  width: 20%;
-  overflow: auto;
+  overflow: hidden;
   margin: auto;
   position: absolute;
   top: 20px;

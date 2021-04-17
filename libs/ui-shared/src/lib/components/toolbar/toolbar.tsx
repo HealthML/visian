@@ -31,6 +31,7 @@ export const Tool = React.forwardRef<HTMLButtonElement, ToolProps>(
       value,
       activeTool,
       isActive,
+      isDisabled,
       onPress,
       onPointerDown,
       ...rest
@@ -40,9 +41,10 @@ export const Tool = React.forwardRef<HTMLButtonElement, ToolProps>(
     const handlePress = useCallback(
       (event: React.PointerEvent<HTMLButtonElement>) => {
         if (onPointerDown) onPointerDown(event);
+        if (isDisabled) return;
         if (onPress) onPress(value);
       },
-      [onPointerDown, onPress, value],
+      [isDisabled, onPointerDown, onPress, value],
     );
 
     return (
@@ -52,6 +54,7 @@ export const Tool = React.forwardRef<HTMLButtonElement, ToolProps>(
         isActive={
           isActive || (activeTool !== undefined && value === activeTool)
         }
+        isDisabled={isDisabled}
         onPointerDown={handlePress}
         ref={ref}
       />
