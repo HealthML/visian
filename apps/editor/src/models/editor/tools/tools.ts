@@ -26,7 +26,7 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
     "/isCursorOverDrawableArea",
   ];
 
-  public activeTool = ToolType.SmartBrush;
+  public activeTool = ToolType.Brush;
 
   public isCursorOverDrawableArea = false;
   public isNavigationDragged = false;
