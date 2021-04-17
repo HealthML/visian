@@ -13,6 +13,7 @@ const ModalContainer = styled(Sheet)`
   justify-content: flex-start;
   align-items: flex-start;
   flex-direction: column;
+  overflow: hidden;
   padding: 14px;
   pointer-events: auto;
 

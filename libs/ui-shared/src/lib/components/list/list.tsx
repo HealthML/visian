@@ -1,7 +1,6 @@
 import React, { useCallback } from "react";
 import styled, { css } from "styled-components";
 
-import { Spacer } from "../box";
 import { Icon } from "../icon";
 import { Divider } from "../modal/modal";
 import { Text } from "../text";
@@ -9,6 +8,7 @@ import { ListItemProps, ListProps } from "./list.props";
 
 const ListContainer = styled.div`
   min-width: 200px;
+  width: 100%;
 `;
 
 const ListItemContainer = styled.div`
@@ -28,8 +28,11 @@ const ListDivider = styled(Divider)`
 `;
 
 export const ListItemLabel = styled(Text)`
+  display: block;
+  flex: 1;
   font-size: 14px;
-  line-height: 14px;
+  text-overflow: ellipsis;
+  overflow: hidden;
 `;
 
 export const ListIcon = styled(Icon).withConfig({
@@ -41,6 +44,7 @@ export const ListIcon = styled(Icon).withConfig({
 }>`
   width: 20px;
   height: 20px;
+  margin-left: 10px;
   opacity: ${(props) => (props.isDisabled ? 0.3 : 1)};
   ${(props) =>
     props.hasPressHandler &&
@@ -74,15 +78,12 @@ export const ListItem: React.FC<ListItemProps> = ({
         {(labelTx || label) && <ListItemLabel tx={labelTx} text={label} />}
         {children}
         {icon && (
-          <>
-            <Spacer />
-            <ListIcon
-              icon={icon}
-              isDisabled={disableIcon}
-              onPointerDown={handleIconPress}
-              hasPressHandler={Boolean(onIconPress)}
-            />
-          </>
+          <ListIcon
+            icon={icon}
+            isDisabled={disableIcon}
+            onPointerDown={handleIconPress}
+            hasPressHandler={Boolean(onIconPress)}
+          />
         )}
       </ListItemInner>
       {!isLast && <ListDivider />}
