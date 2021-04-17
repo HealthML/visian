@@ -20,7 +20,7 @@ export interface ToolProps extends ButtonProps {
 
   /**
    * An optional listener that is called when the tool is pressed.
-   * Will not be called is `isDisabled` is set.
+   * Will not be called if `isDisabled` is set.
    */
   onPress?: (value?: string | number) => void;
 }
