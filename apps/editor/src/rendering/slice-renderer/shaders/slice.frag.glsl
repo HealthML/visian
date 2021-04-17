@@ -41,7 +41,6 @@ void main() {
   #ifdef IMAGE
     // TODO: How do we display two components?
 
-    // TODO: Brightness and contrast adjustments for 3/4 components.
     if(uComponents == 3) {
       gl_FragColor = vec4(
         vec3(uBrightness)
