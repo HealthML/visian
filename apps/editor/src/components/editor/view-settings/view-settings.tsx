@@ -67,7 +67,7 @@ export const ViewSettings: React.FC = observer(() => {
         isActive={isModalOpen}
       />
       <Modal style={modalPosition} isOpen={isModalOpen} labelTx="view-settings">
-        {(!store?.editor.image || store?.editor.image.dimensionality > 3) && (
+        {(!store?.editor.image || store?.editor.image.dimensionality > 2) && (
           <>
             <Switch
               labelTx="side-views"
