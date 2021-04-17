@@ -15,4 +15,5 @@ export interface ButtonProps
   showTooltip?: boolean;
 
   isActive?: boolean;
+  isDisabled?: boolean;
 }

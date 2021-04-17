@@ -125,7 +125,17 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
     );
   }
 
-  public setActiveTool(tool = ToolType.Brush) {
+  public setActiveTool(tool = this.activeTool) {
+    if (
+      tool === ToolType.Crosshair &&
+      this.editor.image &&
+      this.editor.image.dimensionality < 3
+    ) {
+      if (this.activeTool === ToolType.Crosshair) {
+        this.activeTool = ToolType.Brush;
+      }
+      return;
+    }
     this.activeTool = tool;
   }
 

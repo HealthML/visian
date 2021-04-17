@@ -103,6 +103,7 @@ export class Editor implements ISerializable<EditorSnapshot> {
     });
     this.context?.persistImmediately();
 
+    this.tools.setActiveTool();
     this.viewSettings.reset();
     this.undoRedo.clear();
   }

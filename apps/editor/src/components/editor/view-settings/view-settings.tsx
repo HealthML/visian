@@ -67,18 +67,22 @@ export const ViewSettings: React.FC = observer(() => {
         isActive={isModalOpen}
       />
       <Modal style={modalPosition} isOpen={isModalOpen} labelTx="view-settings">
-        <Switch
-          labelTx="side-views"
-          items={sideViewsSwitchItems}
-          value={Boolean(store?.editor.viewSettings.shouldShowSideViews)}
-          onChange={store?.editor.viewSettings.toggleSideViews}
-        />
-        <Switch
-          labelTx="main-view-type"
-          items={mainViewTypeSwitchItems}
-          value={store?.editor.viewSettings.mainViewType}
-          onChange={store?.editor.viewSettings.setMainViewType}
-        />
+        {(!store?.editor.image || store?.editor.image.dimensionality > 3) && (
+          <>
+            <Switch
+              labelTx="side-views"
+              items={sideViewsSwitchItems}
+              value={Boolean(store?.editor.viewSettings.shouldShowSideViews)}
+              onChange={store?.editor.viewSettings.toggleSideViews}
+            />
+            <Switch
+              labelTx="main-view-type"
+              items={mainViewTypeSwitchItems}
+              value={store?.editor.viewSettings.mainViewType}
+              onChange={store?.editor.viewSettings.setMainViewType}
+            />
+          </>
+        )}
         <SpacedSliderField
           labelTx="contrast"
           showValueLabel

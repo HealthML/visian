@@ -1,5 +1,5 @@
 import React, { useCallback, useImperativeHandle, useState } from "react";
-import styled from "styled-components";
+import styled, { css } from "styled-components";
 
 import { fontWeight, radius, size, space } from "../../theme";
 import { Icon } from "../icon";
@@ -16,14 +16,21 @@ const StyledText = styled(Text)<Pick<ButtonProps, "isActive">>`
   opacity: ${(props) => (props.isActive !== false ? 1 : 0.3)};
 `;
 
-const StyledButton = styled.button`
+const StyledButton = styled.button<Pick<ButtonProps, "isDisabled">>`
   display: flex;
   align-items: center;
   justify-content: center;
 
-  &:active > * {
-    opacity: 1;
-  }
+  ${(props) =>
+    props.isDisabled
+      ? css`
+          opacity: 0.3;
+        `
+      : css`
+          &:active > * {
+            opacity: 1;
+          }
+        `}
 `;
 
 const BaseButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
@@ -37,6 +44,7 @@ const BaseButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
       tooltipPosition,
       showTooltip: externalShowTooltip = true,
       isActive,
+      isDisabled,
       text,
       tx,
       onPointerEnter,
@@ -76,6 +84,7 @@ const BaseButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
       <>
         <StyledButton
           {...rest}
+          isDisabled={isDisabled}
           onPointerEnter={enterButton}
           onPointerLeave={leaveButton}
           ref={setButtonRef}
