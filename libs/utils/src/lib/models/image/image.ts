@@ -20,7 +20,7 @@ import {
   getTextureFromAtlas,
 } from "../../io/texture-atlas";
 import { Vector } from "../vector";
-import { getPlaneAxes, ViewType } from "../view-types";
+import { getPlaneAxes, getViewTypeInitials, ViewType } from "../view-types";
 import { unifyOrientation } from "./conversion";
 import { findVoxelInSlice } from "./iteration";
 
@@ -270,6 +270,27 @@ export class Image<T extends TypedArray = TypedArray>
     return sliceData;
   }
 
+  public getSliceImage(
+    sliceNumber: number,
+    viewType: ViewType,
+  ): Image<T | Uint8Array> {
+    if (this.dimensionality < 3) return this.clone();
+
+    const [horizontal, vertical] = getPlaneAxes(viewType);
+    return new Image({
+      name: `${this.name.split(".")[0]}_${getViewTypeInitials(
+        viewType,
+      ).toLowerCase()}${sliceNumber}`,
+      // TODO: Origin & orientation
+      voxelCount: [this.voxelCount[horizontal], this.voxelCount[vertical]],
+      voxelSpacing: [
+        this.voxelSpacing[horizontal],
+        this.voxelSpacing[vertical],
+      ],
+      data: this.getSlice(sliceNumber, viewType),
+    });
+  }
+
   public getVoxelData(voxel: Vector) {
     const index = getAtlasIndexFor(voxel, this);
     return this.getAtlas()[index];
@@ -436,5 +457,9 @@ export class Image<T extends TypedArray = TypedArray>
     } else {
       this.setData(new Uint8Array(this.voxelCount.product()) as T);
     }
+  }
+
+  public clone() {
+    return new Image(this.toJSON());
   }
 }

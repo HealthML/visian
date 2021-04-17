@@ -123,6 +123,10 @@ export const setUpHotKeys = (store: RootStore): IDisposer => {
     event.preventDefault();
     store.editor.quickExport();
   });
+  hotkeys("ctrl+shift+e", (event) => {
+    event.preventDefault();
+    store.editor.quickExportSlice();
+  });
 
   return () => hotkeys.unbind();
 };

@@ -96,6 +96,7 @@ export class Editor implements ISerializable<EditorSnapshot> {
     this.image = image;
     this.annotation = new Image({
       name: `${this.image.name.split(".")[0]}_annotation`,
+      dimensionality: this.image.dimensionality,
       origin: this.image.origin.toArray(),
       orientation: this.image.orientation,
       voxelCount: this.image.voxelCount.toArray(),
@@ -139,10 +140,28 @@ export class Editor implements ISerializable<EditorSnapshot> {
   public quickExport = async () => {
     const image = this.annotation;
     if (!image) return;
+    if (image.dimensionality < 3) return this.quickExportSlice();
 
     const file = await writeSingleMedicalImage(
       image.toITKImage(),
       `${image.name.split(".")[0]}.nii.gz`,
+    );
+
+    if (!file) return;
+    FileSaver.saveAs(file, file.name);
+  };
+
+  public quickExportSlice = async () => {
+    const image = this.annotation;
+    if (!image) return;
+
+    const sliceImage = image.getSliceImage(
+      this.viewSettings.getSelectedSlice(),
+      this.viewSettings.mainViewType,
+    );
+    const file = await writeSingleMedicalImage(
+      sliceImage.toITKImage(),
+      `${sliceImage.name.split(".")[0]}.png`,
     );
 
     if (!file) return;
