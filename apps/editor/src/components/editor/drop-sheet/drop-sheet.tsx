@@ -40,8 +40,8 @@ export const DropSheet: React.FC<DropSheetProps> = observer(
               descriptionTx: error.message,
             });
           }
-          onDropCompleted();
           setIsLoadingImage(false);
+          onDropCompleted();
         })();
       },
       [onDropCompleted, store],
@@ -61,8 +61,8 @@ export const DropSheet: React.FC<DropSheetProps> = observer(
               descriptionTx: error.message,
             });
           }
-          onDropCompleted();
           setIsLoadingAnnotation(false);
+          onDropCompleted();
         })();
       },
       [onDropCompleted, store],
