@@ -201,6 +201,11 @@ export class SliceRenderer implements IDisposable {
     if (!this.isImageLoaded) return;
     this.lazyRenderTriggered = false;
 
+    this.renderers.forEach((renderer, index) => {
+      this.editor.image?.onBeforeRender(renderer, index);
+      this.editor.annotation?.onBeforeRender(renderer, index);
+    });
+
     const order = getOrder(this.editor.viewSettings.mainViewType);
     this.activeRenderers.forEach((renderer, index) => {
       const viewType = order[index];

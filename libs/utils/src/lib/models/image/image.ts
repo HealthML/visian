@@ -19,13 +19,16 @@ import {
   getAtlasSize,
   getTextureFromAtlas,
 } from "../../io/texture-atlas";
+import { ScreenAlignedQuad } from "../../rendering";
+import { VoxelWithValue } from "../../types";
 import { Vector } from "../vector";
 import { getPlaneAxes, getViewTypeInitials, ViewType } from "../view-types";
 import { unifyOrientation } from "./conversion";
 import { findVoxelInSlice } from "./iteration";
+import voxelFragmentShader from "./shaders/voxel.frag.glsl";
+import voxelVertexShader from "./shaders/voxel.vert.glsl";
 
 import type { ISerializable } from "../types";
-
 export interface ImageSnapshot<T extends TypedArray = TypedArray> {
   name?: string;
 
@@ -151,12 +154,41 @@ export class Image<T extends TypedArray = TypedArray>
   private atlas?: Uint8Array;
   protected isAtlasDirty?: boolean;
 
-  protected texture?: THREE.DataTexture;
+  private internalTexture?: THREE.DataTexture;
+  private voxelsToRender: VoxelWithValue[] = [];
+  private voxelsRendered = [true];
+  private voxelGeometry = new THREE.BufferGeometry();
+  private isVoxelGeometryDirty = false;
+  private voxelMaterial = new THREE.ShaderMaterial({
+    vertexShader: voxelVertexShader,
+    fragmentShader: voxelFragmentShader,
+    uniforms: {
+      uVoxelCount: { value: new THREE.Vector3() },
+      uAtlasGrid: { value: new THREE.Vector2() },
+    },
+  });
+  private voxels = new THREE.Scene().add(
+    new THREE.Points(this.voxelGeometry, this.voxelMaterial),
+  );
+  private voxelCamera = new THREE.OrthographicCamera(0, 1, 1, -1, 0, 10);
+
+  private renderTargets: THREE.WebGLRenderTarget[] = [];
+  private isTextureDirty = [true];
+  private screenAlignedQuad?: ScreenAlignedQuad;
 
   constructor(
     image: ImageSnapshot<T> & Pick<ImageSnapshot<T>, "voxelCount" | "data">,
   ) {
     this.applySnapshot(image);
+
+    const size = this.getAtlasSize();
+    this.voxelCamera.right = size.x;
+    this.voxelCamera.top = size.y - 1;
+    this.voxelCamera.updateProjectionMatrix();
+
+    const grid = this.getAtlasGrid();
+    this.voxelMaterial.uniforms.uAtlasGrid.value.copy(grid);
+    this.voxelMaterial.uniforms.uVoxelCount.value.copy(this.voxelCount);
 
     makeObservable<this, "data" | "atlas" | "isDataDirty" | "isAtlasDirty">(
       this,
@@ -229,19 +261,15 @@ export class Image<T extends TypedArray = TypedArray>
     return getAtlasSize(this.voxelCount, this.getAtlasGrid());
   }
 
-  public getTexture() {
-    if (!this.texture) {
-      // Explicit access here avoids MobX observability tracking to decrease performance
-      this.texture = getTextureFromAtlas(
-        {
-          voxelComponents: this.voxelComponents,
-          voxelCount: this.voxelCount.clone(false),
-        },
-        this.getAtlas(),
-        THREE.NearestFilter,
-      );
+  public getTexture(index = 0) {
+    if (!this.renderTargets[index]) {
+      const size = this.getAtlasSize();
+      this.renderTargets[index] = new THREE.WebGLRenderTarget(size.x, size.y);
+      this.renderTargets[index].texture.magFilter = THREE.NearestFilter;
+      this.isTextureDirty[index] = true;
+      this.voxelsRendered[index] = true;
     }
-    return this.texture;
+    return this.renderTargets[index].texture;
   }
 
   public getSlice(sliceNumber: number, viewType: ViewType) {
@@ -268,6 +296,87 @@ export class Image<T extends TypedArray = TypedArray>
     );
 
     return sliceData;
+  }
+
+  public onBeforeRender(renderer: THREE.WebGLRenderer, index = 0) {
+    if (!this.internalTexture) {
+      this.internalTexture = getTextureFromAtlas(
+        {
+          voxelComponents: this.voxelComponents,
+          voxelCount: this.voxelCount.clone(false),
+        },
+        this.getAtlas(),
+        THREE.NearestFilter,
+      );
+
+      this.screenAlignedQuad = ScreenAlignedQuad.forTexture(
+        this.internalTexture,
+      );
+    }
+
+    if (
+      this.isTextureDirty[index] &&
+      this.screenAlignedQuad &&
+      this.renderTargets[index]
+    ) {
+      const previousRenderTarget = renderer.getRenderTarget();
+      renderer.setRenderTarget(this.renderTargets[index]);
+
+      const previousAutoClear = renderer.autoClear;
+      renderer.autoClear = true;
+
+      this.screenAlignedQuad.renderWith(renderer);
+
+      renderer.autoClear = previousAutoClear;
+      renderer.setRenderTarget(previousRenderTarget);
+
+      this.isTextureDirty[index] = false;
+    }
+
+    if (this.voxelsToRender.length && !this.voxelsRendered[index]) {
+      if (this.isVoxelGeometryDirty) {
+        this.updateVoxelGeometry();
+      }
+
+      const previousRenderTarget = renderer.getRenderTarget();
+      renderer.setRenderTarget(this.renderTargets[index]);
+
+      const previousAutoClear = renderer.autoClear;
+      renderer.autoClear = false;
+
+      renderer.render(this.voxels, this.voxelCamera);
+
+      renderer.autoClear = previousAutoClear;
+      renderer.setRenderTarget(previousRenderTarget);
+
+      this.voxelsRendered[index] = true;
+      if (this.voxelsRendered.every((value) => value)) {
+        this.voxelsToRender = [];
+        this.isVoxelGeometryDirty = true;
+      }
+    }
+  }
+
+  private updateVoxelGeometry() {
+    const vertices: number[] = [];
+    this.voxelsToRender.forEach((voxel) => {
+      vertices.push(voxel.x, voxel.y, voxel.z);
+    });
+    this.voxelGeometry.setAttribute(
+      "position",
+      new THREE.Float32BufferAttribute(vertices, 3),
+    );
+
+    const colors: number[] = [];
+    this.voxelsToRender.forEach((voxel) => {
+      colors.push(voxel.value, voxel.value, voxel.value);
+    });
+    this.voxelGeometry.setAttribute(
+      "color",
+      new THREE.Uint8BufferAttribute(colors, 3),
+    );
+
+    this.isVoxelGeometryDirty = false;
   }
 
   public getSliceImage(
@@ -329,18 +438,30 @@ export class Image<T extends TypedArray = TypedArray>
       this.atlas.set(atlas);
     }
 
-    if (this.texture) {
-      this.texture.needsUpdate = true;
+    if (this.internalTexture) {
+      this.internalTexture.needsUpdate = true;
+      this.isTextureDirty.fill(true);
     }
   }
 
-  public setAtlasVoxel(voxel: Vector, value: number) {
+  public setAtlasVoxel(voxel: Vector, value: number, updateViaRender = true) {
     const index = getAtlasIndexFor(voxel, this);
     this.getAtlas()[index] = value;
 
+    if (updateViaRender) {
+      const { x, y, z } = voxel;
+      this.voxelsToRender.push({ x, y, z, value });
+      this.voxelsRendered.fill(false);
+      this.isVoxelGeometryDirty = true;
+    }
+
     this.isDataDirty = true;
-    if (this.texture) {
-      this.texture.needsUpdate = true;
+    if (this.internalTexture) {
+      this.internalTexture.needsUpdate = true;
+      for (let i = 0; i < this.isTextureDirty.length; i++) {
+        this.isTextureDirty[i] = this.isTextureDirty[i] || !updateViaRender;
+      }
+      // this.isTextureDirty.fill(true);
     }
   }
 
@@ -366,8 +487,9 @@ export class Image<T extends TypedArray = TypedArray>
     );
 
     this.isDataDirty = true;
-    if (this.texture) {
-      this.texture.needsUpdate = true;
+    if (this.internalTexture) {
+      this.internalTexture.needsUpdate = true;
+      this.isTextureDirty.fill(true);
     }
   }
 
