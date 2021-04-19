@@ -463,7 +463,6 @@ export class Image<T extends TypedArray = TypedArray>
       for (let i = 0; i < this.isTextureDirty.length; i++) {
         this.isTextureDirty[i] = this.isTextureDirty[i] || !updateViaRender;
       }
-      // this.isTextureDirty.fill(true);
     }
   }
 
