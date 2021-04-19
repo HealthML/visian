@@ -190,6 +190,8 @@ export class Image<T extends TypedArray = TypedArray>
     this.voxelMaterial.uniforms.uAtlasGrid.value.copy(grid);
     this.voxelMaterial.uniforms.uVoxelCount.value.copy(this.voxelCount);
 
+    this.voxels.children[0].frustumCulled = false;
+
     makeObservable<this, "data" | "atlas" | "isDataDirty" | "isAtlasDirty">(
       this,
       {
