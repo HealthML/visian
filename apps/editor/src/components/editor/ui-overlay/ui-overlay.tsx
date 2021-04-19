@@ -1,5 +1,6 @@
 import {
   AbsoluteCover,
+  color,
   FloatingUIButton,
   Notification,
   Text,
@@ -55,6 +56,7 @@ const RightBar = styled.div`
 `;
 
 const TopConsole = styled.div`
+  align-items: center;
   display: flex;
   overflow: hidden;
   margin: auto;
@@ -64,6 +66,26 @@ const TopConsole = styled.div`
   bottom: 1;
   right: 0;
   justify-content: center;
+`;
+
+const FileTitle = styled(Text)`
+  opacity: 0.5;
+`;
+
+const UnsavedChangesIndicator = styled.div<{ isDirty?: boolean }>`
+  background-color: ${(props) =>
+    props.isDirty ? color("red") : color("green")};
+  border-radius: 50%;
+  height: 14px;
+  margin-left: 14px;
+  opacity: 0.4;
+  pointer-events: auto;
+  transition: background-color 0.3s, opacity 0.3s;
+  width: 14px;
+
+  &:hover {
+    opacity: 1;
+  }
 `;
 
 const ErrorNotification = styled(Notification)`
@@ -86,7 +108,8 @@ export const UIOverlay = observer<UIOverlayProps>(
           </StartTextContainer>
         )}
         <TopConsole>
-          <Text text={store?.editor.image?.name} style={{ opacity: 0.5 }} />
+          <FileTitle text={store?.editor.image?.name} />
+          <UnsavedChangesIndicator isDirty={store?.isDirty} />
         </TopConsole>
         <ColumnLeft>
           <Menu />
