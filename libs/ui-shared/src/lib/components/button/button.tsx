@@ -24,9 +24,11 @@ const StyledButton = styled.button<Pick<ButtonProps, "isDisabled">>`
   ${(props) =>
     props.isDisabled
       ? css`
+          cursor: not-allowed;
           opacity: 0.3;
         `
       : css`
+          cursor: pointer;
           &:active > * {
             opacity: 1;
           }
@@ -114,7 +116,6 @@ export const Button = styled(BaseButton)`
 
   border-radius: ${radius("default")};
   box-sizing: border-box;
-  cursor: pointer;
   display: inline-flex;
   height: ${size("buttonHeight")};
   outline: none;

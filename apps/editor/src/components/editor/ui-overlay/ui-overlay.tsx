@@ -106,10 +106,8 @@ const ErrorNotification = styled(Notification)`
   transform: translateX(-50%);
 `;
 
-const UndoRedoButton = styled(SquareButton)<{ canUndoRedo?: boolean }>`
-  cursor: ${(props) => (props.canUndoRedo ? "pointer" : "not-allowed")};
+const UndoRedoButton = styled(SquareButton)`
   margin-right: 8px;
-  opacity: ${(props) => (props.canUndoRedo ? 1 : 0.3)};
 `;
 
 export const UIOverlay = observer<UIOverlayProps>(
@@ -138,13 +136,13 @@ export const UIOverlay = observer<UIOverlayProps>(
             <UndoRedoButton
               icon="undo"
               isActive={false}
-              canUndoRedo={store?.editor.undoRedo.isUndoAvailable}
+              isDisabled={!store?.editor.undoRedo.isUndoAvailable}
               onPointerDown={store?.editor.undoRedo.undo}
             />
             <UndoRedoButton
               icon="redo"
               isActive={false}
-              canUndoRedo={store?.editor.undoRedo.isRedoAvailable}
+              isDisabled={!store?.editor.undoRedo.isRedoAvailable}
               onPointerDown={store?.editor.undoRedo.redo}
             />
           </MenuRow>
