@@ -5,6 +5,7 @@ import {
   InvisibleButton,
   Notification,
   Text,
+  SquareButton,
 } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
 import React from "react";
@@ -48,6 +49,12 @@ const ColumnRight = styled.div`
   flex-direction: row;
   width: 50%;
   justify-content: flex-end;
+`;
+
+const MenuRow = styled.div`
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
 `;
 
 const RightBar = styled.div`
@@ -99,6 +106,10 @@ const ErrorNotification = styled(Notification)`
   transform: translateX(-50%);
 `;
 
+const UndoRedoButton = styled(SquareButton)`
+  margin-right: 8px;
+`;
+
 export const UIOverlay = observer<UIOverlayProps>(
   ({ isDraggedOver, onDropCompleted, ...rest }) => {
     const store = useStore();
@@ -120,7 +131,11 @@ export const UIOverlay = observer<UIOverlayProps>(
           />
         </TopConsole>
         <ColumnLeft>
-          <Menu />
+          <MenuRow>
+            <Menu />
+            <UndoRedoButton icon="undo" isActive={false} />
+            <UndoRedoButton icon="redo" isActive={false} />
+          </MenuRow>
           <Toolbar />
           <Layers />
         </ColumnLeft>

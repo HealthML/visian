@@ -28,6 +28,10 @@ const FeedbackButton = styled(Button)`
   }
 `;
 
+const MenuButton = styled(FloatingUIButton)`
+  margin-right: 16px;
+`;
+
 const ResetButton = styled(Button)`
   width: 100%;
   background: ${color("redSheet")};
@@ -91,7 +95,7 @@ export const Menu: React.FC = observer(() => {
 
   return (
     <>
-      <FloatingUIButton
+      <MenuButton
         icon="menu"
         tooltipTx="menu"
         showTooltip={!isModalOpen}
