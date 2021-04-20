@@ -5,6 +5,8 @@
   "drop-annotation": "Legen Sie Ihre Annotation hier ab",
 
   "start": "Starten Sie, in dem Sie einen Scan hier ablegen.",
+  "unsaved-changes": "Ungespeicherte Änderungen.",
+  "saved-in-browser": "Alle Änderungen im Browser gespeichert.",
 
   "menu": "Menü",
   "theme": "Farbschema",

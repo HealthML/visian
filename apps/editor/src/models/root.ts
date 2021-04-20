@@ -39,6 +39,7 @@ export class RootStore implements ISerializable<RootSnapshot> {
     this.editor = new Editor({
       persist: this.persist,
       persistImmediately: this.persistImmediately,
+      setDirty: this.setIsDirty,
       getTheme: () => this.theme,
     });
 
@@ -80,9 +81,9 @@ export class RootStore implements ISerializable<RootSnapshot> {
     }
   }
 
-  public setIsDirty(isDirty = true) {
+  public setIsDirty = (isDirty = true) => {
     this.isDirty = isDirty;
-  }
+  };
 
   public setRef<T extends HTMLElement>(key: string, ref?: React.RefObject<T>) {
     if (ref) {

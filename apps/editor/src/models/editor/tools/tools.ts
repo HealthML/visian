@@ -261,9 +261,11 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
     const tool = (alt ? this.altBrushMap : this.brushMap)[this.activeTool];
     switch (eventType) {
       case "start":
+        this.context?.setDirty();
         tool?.startAt(dragPoint);
         break;
       case "move":
+        this.context?.setDirty();
         tool?.moveTo(dragPoint);
         break;
       case "end":

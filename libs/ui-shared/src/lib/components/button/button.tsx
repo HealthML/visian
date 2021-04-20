@@ -77,7 +77,7 @@ const BaseButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
     const tooltipStyle = useTooltipPosition(
       buttonRef,
       tooltipPosition,
-      Boolean(showTooltip && (tooltipTx || tooltip)),
+      Boolean(showTooltip && externalShowTooltip && (tooltipTx || tooltip)),
     );
 
     return (

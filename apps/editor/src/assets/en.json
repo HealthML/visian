@@ -5,6 +5,8 @@
   "drop-annotation": "Drop your annotation here",
 
   "start": "Start by dragging in a scan.",
+  "unsaved-changes": "Unsaved changes.",
+  "saved-in-browser": "All changes saved in browser.",
 
   "menu": "Menu",
   "theme": "Theme",

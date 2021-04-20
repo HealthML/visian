@@ -13,6 +13,8 @@ export interface StoreContext {
    */
   persistImmediately(): Promise<void>;
 
+  setDirty(): void;
+
   getTheme(): ColorMode;
 }
 
