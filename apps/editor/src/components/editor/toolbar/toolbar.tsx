@@ -51,16 +51,22 @@ export const Toolbar: React.FC = observer(() => {
       ) {
         event.preventDefault();
         event.stopPropagation();
-        setIsModalOpen(!isModalOpen);
+        setIsModalOpen(
+          store?.editor.tools.activeTool !== value || !isModalOpen,
+        );
       }
 
       store?.editor.tools.setActiveTool(value as ToolType);
     },
     [isModalOpen, store],
   );
-  const clearSlice = useCallback(() => {
-    store?.editor.tools.clearSlice();
-  }, [store]);
+  const clearSlice = useCallback(
+    (_value: undefined, event: React.PointerEvent) => {
+      if (event.button !== PointerButton.LMB) return;
+      store?.editor.tools.clearSlice();
+    },
+    [store],
+  );
 
   return (
     <StyledToolbar>
@@ -70,16 +76,18 @@ export const Toolbar: React.FC = observer(() => {
         activeTool={activeTool}
         value={ToolType.Navigate}
         onPress={setActiveTool}
+        onContextMenu={preventDefault}
       />
       <Tool
         icon="crosshair"
         tooltipTx="crosshair-tool"
         activeTool={activeTool}
         value={ToolType.Crosshair}
-        onPress={setActiveTool}
         isDisabled={
           store?.editor.image && store.editor.image.dimensionality < 3
         }
+        onPress={setActiveTool}
+        onContextMenu={preventDefault}
       />
       <Tool
         icon="pixelBrush"
@@ -111,7 +119,12 @@ export const Toolbar: React.FC = observer(() => {
         onPress={setActiveTool}
         onContextMenu={preventDefault}
       />
-      <Tool icon="trash" tooltipTx="clear-slice" onPress={clearSlice} />
+      <Tool
+        icon="trash"
+        tooltipTx="clear-slice"
+        onPress={clearSlice}
+        onContextMenu={preventDefault}
+      />
       <Modal
         style={modalPosition}
         isOpen={
