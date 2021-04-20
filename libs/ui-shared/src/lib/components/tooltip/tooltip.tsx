@@ -12,8 +12,8 @@ const TooltipContainer = styled(Sheet).withConfig({
   shouldForwardProp: (prop) => prop.toString() !== "isActive",
 })<Pick<TooltipProps, "baseZIndex">>`
   box-sizing: border-box;
-  height: 16px;
-  border-radius: 10px;
+  height: 24px;
+  border-radius: 12px;
   padding: 0 14px;
   z-index: ${(props) =>
     (props.baseZIndex === undefined
@@ -22,8 +22,8 @@ const TooltipContainer = styled(Sheet).withConfig({
 `;
 
 const TooltipLabel = styled(Text)`
-  font-size: 9px;
-  line-height: 9px;
+  font-size: 12px;
+  line-height: 12px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
