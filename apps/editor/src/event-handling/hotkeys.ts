@@ -32,11 +32,11 @@ export const setUpHotKeys = (store: RootStore): IDisposer => {
   });
 
   // Tools
-  hotkeys("del", (event) => {
+  hotkeys("del,backspace", (event) => {
     event.preventDefault();
     store.editor.tools.clearSlice();
   });
-  hotkeys("ctrl+del", (event) => {
+  hotkeys("ctrl+del,ctrl+backspace", (event) => {
     event.preventDefault();
     store.editor.tools.clearImage();
   });
