@@ -265,6 +265,7 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
         tool?.startAt(dragPoint);
         break;
       case "move":
+        this.context?.setDirty();
         tool?.moveTo(dragPoint);
         break;
       case "end":
