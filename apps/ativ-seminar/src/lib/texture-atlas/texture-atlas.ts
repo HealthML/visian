@@ -110,6 +110,7 @@ export class TextureAtlas<T extends TypedArray = TypedArray> {
     public readonly components: number,
     private dimensionality: number,
     private magFilter: THREE.TextureFilter = THREE.LinearFilter,
+    private minFilter: THREE.TextureFilter = THREE.LinearFilter,
   ) {
     this.atlasGrid = getAtlasGrid(voxelCount);
     this.atlasSize = new THREE.Vector2(voxelCount.x, voxelCount.y).multiply(
@@ -265,6 +266,7 @@ export class TextureAtlas<T extends TypedArray = TypedArray> {
         undefined,
         undefined,
         this.magFilter,
+        this.minFilter,
       );
     }
 
