@@ -71,18 +71,19 @@ const TopConsole = styled.div`
 
 const FileTitle = styled(Text)`
   opacity: 0.5;
+  line-height: 16px;
 `;
 
 const UnsavedChangesIndicator = styled(InvisibleButton)<{ isDirty?: boolean }>`
   background-color: ${(props) =>
     props.isDirty ? color("red") : color("green")};
   border-radius: 50%;
-  height: 14px;
+  height: 12px;
   margin-left: 14px;
   opacity: 0.4;
   pointer-events: auto;
   transition: background-color 0.3s, opacity 0.3s;
-  width: 14px;
+  width: 12px;
 
   &:hover {
     opacity: 1;
