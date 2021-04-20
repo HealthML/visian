@@ -89,7 +89,7 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
       setBrushSizePixels: action,
       setSmartBrushSeedThreshold: action,
       setSmartBrushNeighborThreshold: action,
-      setLockedBrushSizePixels: action,
+      lockBrushSize: action,
     });
   }
 
@@ -151,7 +151,7 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
     const clampedValue = Math.max(0, value);
 
     if (this.isBrushSizeLocked) {
-      this.setLockedBrushSizePixels(clampedValue);
+      this.lockedBrushSizePixels = clampedValue;
     }
 
     const pixelWidth = this.editor.viewSettings.pixelSize?.x;
@@ -169,13 +169,15 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
     this.smartBrushNeighborThreshold = value;
   };
 
-  public setLockedBrushSizePixels(value?: number) {
-    if (value === undefined && this.lockedBrushSizePixels) {
-      this.setBrushSizePixels(this.lockedBrushSizePixels);
+  public lockBrushSize = (shouldLock = true) => {
+    if (shouldLock) {
+      this.lockedBrushSizePixels = this.brushSizePixels;
+    } else {
+      const previousValue = this.lockedBrushSizePixels;
+      this.lockedBrushSizePixels = undefined;
+      this.setBrushSizePixels(previousValue);
     }
-
-    this.lockedBrushSizePixels = value;
-  }
+  };
 
   public incrementBrushSize() {
     // Allow brush size 0.5.

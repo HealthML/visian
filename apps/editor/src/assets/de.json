@@ -24,7 +24,8 @@
   "clear-slice": "Schicht leeren (Entf)",
 
   "brush-size": "Pinselgröße",
-  "seed-threshold": "Ursprungsschwellwert",
+  "lock-brush-size": "Pinselgröße fixieren",
+  "seed-threshold": "Startschwellwert",
   "neighbor-threshold": "Nachbarschwellwert",
 
   "layers": "Ebenen",

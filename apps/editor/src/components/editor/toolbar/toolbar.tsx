@@ -3,6 +3,7 @@ import {
   PointerButton,
   preventDefault,
   SliderField,
+  Switch,
   Tool,
   Toolbar as GenericToolbar,
   useModalPosition,
@@ -14,9 +15,16 @@ import styled from "styled-components";
 import { useStore } from "../../../app/root-store";
 import { ToolType } from "../../../models";
 
+// Styled Components
 const StyledToolbar = styled(GenericToolbar)`
   margin-bottom: 16px;
 `;
+
+// Menu Items
+const adaptiveBrushSizeSwitchItems = [
+  { labelTx: "on", value: true },
+  { labelTx: "off", value: false },
+];
 
 export const Toolbar: React.FC = observer(() => {
   const store = useStore();
@@ -42,12 +50,13 @@ export const Toolbar: React.FC = observer(() => {
         store?.editor.tools.activeTool === value
       ) {
         event.preventDefault();
-        setIsModalOpen(true);
+        event.stopPropagation();
+        setIsModalOpen(!isModalOpen);
       }
 
       store?.editor.tools.setActiveTool(value as ToolType);
     },
-    [store],
+    [isModalOpen, store],
   );
   const clearSlice = useCallback(() => {
     store?.editor.tools.clearSlice();
@@ -115,12 +124,18 @@ export const Toolbar: React.FC = observer(() => {
         <SliderField
           labelTx="brush-size"
           showValueLabel
-          min={1}
+          min={0}
           max={250}
           scaleType="quadratic"
           value={store?.editor.tools.brushSizePixels}
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           onChange={store?.editor.tools.setBrushSizePixels as any}
+        />
+        <Switch
+          labelTx="lock-brush-size"
+          items={adaptiveBrushSizeSwitchItems}
+          value={Boolean(store?.editor.tools.isBrushSizeLocked)}
+          onChange={store?.editor.tools.lockBrushSize}
         />
         {activeTool === ToolType.SmartBrush && (
           <>
