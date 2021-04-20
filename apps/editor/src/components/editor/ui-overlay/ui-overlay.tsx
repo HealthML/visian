@@ -106,8 +106,9 @@ const ErrorNotification = styled(Notification)`
   transform: translateX(-50%);
 `;
 
-const UndoRedoButton = styled(SquareButton)`
+const UndoRedoButton = styled(SquareButton)<{ canUndoRedo?: boolean }>`
   margin-right: 8px;
+  opacity: ${(props) => (props.canUndoRedo ? 1 : 0.3)};
 `;
 
 export const UIOverlay = observer<UIOverlayProps>(
@@ -133,8 +134,18 @@ export const UIOverlay = observer<UIOverlayProps>(
         <ColumnLeft>
           <MenuRow>
             <Menu />
-            <UndoRedoButton icon="undo" isActive={false} />
-            <UndoRedoButton icon="redo" isActive={false} />
+            <UndoRedoButton
+              icon="undo"
+              isActive={false}
+              canUndoRedo={store?.editor.undoRedo.isUndoAvailable}
+              onPointerDown={store?.editor.undoRedo.undo}
+            />
+            <UndoRedoButton
+              icon="redo"
+              isActive={false}
+              canUndoRedo={store?.editor.undoRedo.isRedoAvailable}
+              onPointerDown={store?.editor.undoRedo.redo}
+            />
           </MenuRow>
           <Toolbar />
           <Layers />

@@ -33,7 +33,7 @@ export class EditorUndoRedo implements ISerializable<EditorUndoRedoSnapshot> {
     return this.undoRedoStack.canNavigateForward();
   }
 
-  public undo() {
+  public undo = () => {
     if (!this.isUndoAvailable) return;
 
     const undoCommand = this.undoRedoStack.getCurrent();
@@ -41,16 +41,16 @@ export class EditorUndoRedo implements ISerializable<EditorUndoRedoSnapshot> {
       this.undoRedoStack.navigateBackward();
       this.editor.sliceRenderer?.lazyRender();
     }
-  }
+  };
 
-  public redo() {
+  public redo = () => {
     if (!this.isRedoAvailable) return;
 
     const redoCommand = this.undoRedoStack.navigateForward();
     if (redoCommand?.redo()) {
       this.editor.sliceRenderer?.lazyRender();
     }
-  }
+  };
 
   public addCommand(undoCommand: UndoRedoCommand) {
     this.undoRedoStack.push(undoCommand);
