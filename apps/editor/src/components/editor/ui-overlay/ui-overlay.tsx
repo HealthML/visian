@@ -78,6 +78,7 @@ const UnsavedChangesIndicator = styled(InvisibleButton)<{ isDirty?: boolean }>`
   background-color: ${(props) =>
     props.isDirty ? color("red") : color("green")};
   border-radius: 50%;
+  cursor: ${(props) => (props.isDirty ? "pointer" : "default")};
   height: 12px;
   margin-left: 14px;
   opacity: 0.4;
