@@ -23,6 +23,7 @@
   "pixel-eraser": "Radierer (E)",
   "clear-slice": "Schicht leeren (Entf)",
 
+  "brush-settings": "Pinseleinstellungen",
   "brush-size": "Pinselgröße",
   "lock-brush-size": "Pinselgröße fixieren",
   "seed-threshold": "Startschwellwert",

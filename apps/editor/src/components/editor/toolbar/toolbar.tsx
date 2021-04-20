@@ -20,6 +20,14 @@ const StyledToolbar = styled(GenericToolbar)`
   margin-bottom: 16px;
 `;
 
+const SpacedSliderField = styled(SliderField)`
+  margin-bottom: 14px;
+`;
+
+const BrushModal = styled(Modal)`
+  padding-bottom: 0px;
+`;
+
 // Menu Items
 const adaptiveBrushSizeSwitchItems = [
   { labelTx: "on", value: true },
@@ -112,7 +120,7 @@ export const Toolbar: React.FC = observer(() => {
         onContextMenu={preventDefault}
       />
       <Tool icon="trash" tooltipTx="clear-slice" onPress={clearSlice} />
-      <Modal
+      <BrushModal
         style={modalPosition}
         isOpen={
           isModalOpen &&
@@ -120,8 +128,15 @@ export const Toolbar: React.FC = observer(() => {
           activeTool !== ToolType.Crosshair
         }
         onOutsidePress={closeModal}
+        labelTx="brush-settings"
       >
-        <SliderField
+        <Switch
+          labelTx="lock-brush-size"
+          items={adaptiveBrushSizeSwitchItems}
+          value={Boolean(store?.editor.tools.isBrushSizeLocked)}
+          onChange={store?.editor.tools.lockBrushSize}
+        />
+        <SpacedSliderField
           labelTx="brush-size"
           showValueLabel
           min={0}
@@ -131,15 +146,9 @@ export const Toolbar: React.FC = observer(() => {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           onChange={store?.editor.tools.setBrushSizePixels as any}
         />
-        <Switch
-          labelTx="lock-brush-size"
-          items={adaptiveBrushSizeSwitchItems}
-          value={Boolean(store?.editor.tools.isBrushSizeLocked)}
-          onChange={store?.editor.tools.lockBrushSize}
-        />
         {activeTool === ToolType.SmartBrush && (
           <>
-            <SliderField
+            <SpacedSliderField
               labelTx="seed-threshold"
               showValueLabel
               min={1}
@@ -148,7 +157,7 @@ export const Toolbar: React.FC = observer(() => {
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
               onChange={store?.editor.tools.setSmartBrushSeedThreshold as any}
             />
-            <SliderField
+            <SpacedSliderField
               labelTx="neighbor-threshold"
               showValueLabel
               min={1}
@@ -161,7 +170,7 @@ export const Toolbar: React.FC = observer(() => {
             />
           </>
         )}
-      </Modal>
+      </BrushModal>
     </StyledToolbar>
   );
 });

@@ -23,6 +23,7 @@
   "pixel-eraser": "Eraser (E)",
   "clear-slice": "Clear Slice (Del)",
 
+  "brush-settings": "Brush Settings",
   "brush-size": "Brush Size",
   "lock-brush-size": "Lock Brush Size",
   "seed-threshold": "Seed Threshold",

@@ -91,7 +91,7 @@ export const ViewSettings: React.FC = observer(() => {
           value={store?.editor.viewSettings.contrast}
           onChange={setContrast}
         />
-        <SpacedSliderField
+        <SliderField
           labelTx="brightness"
           showValueLabel
           min={0}
