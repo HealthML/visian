@@ -22,7 +22,10 @@ export interface ToolProps extends ButtonProps {
    * An optional listener that is called when the tool is pressed.
    * Will not be called if `isDisabled` is set.
    */
-  onPress?: (value?: string | number) => void;
+  onPress?: (
+    value: string | number | undefined,
+    event: React.PointerEvent<HTMLButtonElement>,
+  ) => void;
 }
 
 export type ToolbarProps = React.HTMLAttributes<HTMLDivElement>;

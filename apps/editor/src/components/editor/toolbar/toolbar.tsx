@@ -1,6 +1,14 @@
-import { Tool, Toolbar as GenericToolbar } from "@visian/ui-shared";
+import {
+  Modal,
+  PointerButton,
+  preventDefault,
+  SliderField,
+  Tool,
+  Toolbar as GenericToolbar,
+  useModalPosition,
+} from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
-import React, { useCallback } from "react";
+import React, { useCallback, useState } from "react";
 import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
@@ -13,9 +21,30 @@ const StyledToolbar = styled(GenericToolbar)`
 export const Toolbar: React.FC = observer(() => {
   const store = useStore();
 
+  // Menu Toggling
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const closeModal = useCallback(() => {
+    setIsModalOpen(false);
+  }, []);
+
+  // Menu Positioning
+  const [buttonRef, setButtonRef] = useState<HTMLButtonElement | null>(null);
+  const modalPosition = useModalPosition(buttonRef, "right", isModalOpen);
+
   const activeTool = store?.editor.tools.activeTool;
   const setActiveTool = useCallback(
-    (value?: string | number) => {
+    (
+      value: string | number | undefined,
+      event: React.PointerEvent<HTMLButtonElement>,
+    ) => {
+      if (
+        event.button === PointerButton.RMB ||
+        store?.editor.tools.activeTool === value
+      ) {
+        event.preventDefault();
+        setIsModalOpen(true);
+      }
+
       store?.editor.tools.setActiveTool(value as ToolType);
     },
     [store],
@@ -46,25 +75,78 @@ export const Toolbar: React.FC = observer(() => {
       <Tool
         icon="pixelBrush"
         tooltipTx="pixel-brush"
+        showTooltip={!isModalOpen || activeTool !== ToolType.Brush}
         activeTool={activeTool}
         value={ToolType.Brush}
+        ref={activeTool === ToolType.Brush ? setButtonRef : undefined}
         onPress={setActiveTool}
+        onContextMenu={preventDefault}
       />
       <Tool
         icon="magicBrush"
         tooltipTx="smart-brush"
+        showTooltip={!isModalOpen || activeTool !== ToolType.SmartBrush}
         activeTool={activeTool}
         value={ToolType.SmartBrush}
+        ref={activeTool === ToolType.SmartBrush ? setButtonRef : undefined}
         onPress={setActiveTool}
+        onContextMenu={preventDefault}
       />
       <Tool
         icon="erase"
         tooltipTx="pixel-eraser"
+        showTooltip={!isModalOpen || activeTool !== ToolType.Eraser}
         activeTool={activeTool}
         value={ToolType.Eraser}
+        ref={activeTool === ToolType.Eraser ? setButtonRef : undefined}
         onPress={setActiveTool}
+        onContextMenu={preventDefault}
       />
       <Tool icon="trash" tooltipTx="clear-slice" onPress={clearSlice} />
+      <Modal
+        style={modalPosition}
+        isOpen={
+          isModalOpen &&
+          activeTool !== ToolType.Navigate &&
+          activeTool !== ToolType.Crosshair
+        }
+        onOutsidePress={closeModal}
+      >
+        <SliderField
+          labelTx="brush-size"
+          showValueLabel
+          min={1}
+          max={250}
+          scaleType="quadratic"
+          value={store?.editor.tools.brushSizePixels}
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          onChange={store?.editor.tools.setBrushSizePixels as any}
+        />
+        {activeTool === ToolType.SmartBrush && (
+          <>
+            <SliderField
+              labelTx="seed-threshold"
+              showValueLabel
+              min={1}
+              max={20}
+              value={store?.editor.tools.smartBrushSeedThreshold}
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              onChange={store?.editor.tools.setSmartBrushSeedThreshold as any}
+            />
+            <SliderField
+              labelTx="neighbor-threshold"
+              showValueLabel
+              min={1}
+              max={20}
+              value={store?.editor.tools.smartBrushNeighborThreshold}
+              onChange={
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                store?.editor.tools.setSmartBrushNeighborThreshold as any
+              }
+            />
+          </>
+        )}
+      </Modal>
     </StyledToolbar>
   );
 });

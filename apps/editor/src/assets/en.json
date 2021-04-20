@@ -23,6 +23,10 @@
   "pixel-eraser": "Eraser (E)",
   "clear-slice": "Clear Slice (Del)",
 
+  "brush-size": "Brush Size",
+  "seed-threshold": "Seed Threshold",
+  "neighbor-threshold": "Neighbor Threshold",
+
   "layers": "Layers",
   "no-layers": "No layers loaded.",
 

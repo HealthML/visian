@@ -87,7 +87,7 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
       setCursorOverDrawableArea: action,
       setIsNavigationDragged: action,
       setBrushSizePixels: action,
-      setSmartBrushSeedTreshold: action,
+      setSmartBrushSeedThreshold: action,
       setSmartBrushNeighborThreshold: action,
       setLockedBrushSizePixels: action,
     });
@@ -147,7 +147,7 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
     this.isNavigationDragged = value;
   }
 
-  public setBrushSizePixels(value = 5) {
+  public setBrushSizePixels = (value = 5) => {
     const clampedValue = Math.max(0, value);
 
     if (this.isBrushSizeLocked) {
@@ -159,15 +159,15 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
     if (!pixelWidth) return;
 
     this.brushWidthScreen = (clampedValue + 0.5) * pixelWidth;
-  }
+  };
 
-  public setSmartBrushSeedTreshold(value = 6) {
+  public setSmartBrushSeedThreshold = (value = 6) => {
     this.smartBrushSeedThreshold = value;
-  }
+  };
 
-  public setSmartBrushNeighborThreshold(value = 10) {
+  public setSmartBrushNeighborThreshold = (value = 10) => {
     this.smartBrushNeighborThreshold = value;
-  }
+  };
 
   public setLockedBrushSizePixels(value?: number) {
     if (value === undefined && this.lockedBrushSizePixels) {

@@ -23,6 +23,10 @@
   "pixel-eraser": "Radierer (E)",
   "clear-slice": "Schicht leeren (Entf)",
 
+  "brush-size": "Pinselgröße",
+  "seed-threshold": "Ursprungsschwellwert",
+  "neighbor-threshold": "Nachbarschwellwert",
+
   "layers": "Ebenen",
   "no-layers": "Keine Ebenen geladen.",
 
