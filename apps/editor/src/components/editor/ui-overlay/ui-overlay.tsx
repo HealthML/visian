@@ -107,6 +107,7 @@ const ErrorNotification = styled(Notification)`
 `;
 
 const UndoRedoButton = styled(SquareButton)<{ canUndoRedo?: boolean }>`
+  cursor: ${(props) => (props.canUndoRedo ? "pointer" : "not-allowed")};
   margin-right: 8px;
   opacity: ${(props) => (props.canUndoRedo ? 1 : 0.3)};
 `;
