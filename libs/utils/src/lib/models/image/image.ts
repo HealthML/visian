@@ -268,6 +268,7 @@ export class Image<T extends TypedArray = TypedArray>
       const size = this.getAtlasSize();
       this.renderTargets[index] = new THREE.WebGLRenderTarget(size.x, size.y);
       this.renderTargets[index].texture.magFilter = THREE.NearestFilter;
+      this.renderTargets[index].texture.minFilter = THREE.NearestFilter;
       this.isTextureDirty[index] = true;
       this.voxelsRendered[index] = true;
     }
