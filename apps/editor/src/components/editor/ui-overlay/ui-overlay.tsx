@@ -2,6 +2,7 @@ import {
   AbsoluteCover,
   color,
   FloatingUIButton,
+  InvisibleButton,
   Notification,
   Text,
 } from "@visian/ui-shared";
@@ -72,7 +73,7 @@ const FileTitle = styled(Text)`
   opacity: 0.5;
 `;
 
-const UnsavedChangesIndicator = styled.div<{ isDirty?: boolean }>`
+const UnsavedChangesIndicator = styled(InvisibleButton)<{ isDirty?: boolean }>`
   background-color: ${(props) =>
     props.isDirty ? color("red") : color("green")};
   border-radius: 50%;
@@ -109,7 +110,12 @@ export const UIOverlay = observer<UIOverlayProps>(
         )}
         <TopConsole>
           <FileTitle text={store?.editor.image?.name} />
-          <UnsavedChangesIndicator isDirty={store?.isDirty} />
+          <UnsavedChangesIndicator
+            isDirty={store?.isDirty}
+            tooltipTx={store?.isDirty ? "unsaved-changes" : "saved-in-browser"}
+            tooltipPosition="bottom"
+            onPointerDown={store?.persistImmediately}
+          />
         </TopConsole>
         <ColumnLeft>
           <Menu />
