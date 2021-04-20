@@ -141,7 +141,11 @@ export const Toolbar: React.FC = observer(() => {
           activeTool !== ToolType.Crosshair
         }
         onOutsidePress={closeModal}
-        labelTx="brush-settings"
+        labelTx={
+          activeTool === ToolType.SmartBrush
+            ? "smart-brush-settings"
+            : "brush-settings"
+        }
       >
         <Switch
           labelTx="lock-brush-size"
