@@ -151,7 +151,8 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
     const clampedValue = Math.max(0, value);
 
     if (this.isBrushSizeLocked) {
-      this.lockedBrushSizePixels = clampedValue;
+      this.lockedBrushSizePixels =
+        clampedValue < 1 && clampedValue > 0 ? 0.5 : Math.round(clampedValue);
     }
 
     const pixelWidth = this.editor.viewSettings.pixelSize?.x;

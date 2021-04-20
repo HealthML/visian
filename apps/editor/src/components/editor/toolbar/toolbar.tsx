@@ -69,7 +69,7 @@ export const Toolbar: React.FC = observer(() => {
     [isModalOpen, store],
   );
   const clearSlice = useCallback(
-    (_value: undefined, event: React.PointerEvent) => {
+    (_value: string | number | undefined, event: React.PointerEvent) => {
       if (event.button !== PointerButton.LMB) return;
       store?.editor.tools.clearSlice();
     },
