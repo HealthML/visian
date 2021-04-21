@@ -24,9 +24,16 @@ import { VoxelWithValue } from "../../types";
 import { Vector } from "../vector";
 import { getPlaneAxes, getViewTypeInitials, ViewType } from "../view-types";
 import { unifyOrientation } from "./conversion";
+import {
+  copyToRenderTarget,
+  ImageRenderTarget,
+  renderVoxels,
+  updateVoxelGeometry,
+  VoxelCamera,
+  VoxelMaterial,
+  VoxelScene,
+} from "./edit-rendering";
 import { findVoxelInSlice } from "./iteration";
-import voxelFragmentShader from "./shaders/voxel.frag.glsl";
-import voxelVertexShader from "./shaders/voxel.vert.glsl";
 
 import type { ISerializable } from "../types";
 export interface ImageSnapshot<T extends TypedArray = TypedArray> {
@@ -154,26 +161,25 @@ export class Image<T extends TypedArray = TypedArray>
   private atlas?: Uint8Array;
   protected isAtlasDirty?: boolean;
 
+  /** Used to update the atlas from the CPU. */
   private internalTexture?: THREE.DataTexture;
+  /** Contains the voxels which have to be rendered into the atlas. */
   private voxelsToRender: VoxelWithValue[] = [];
+  /** Whether or not @member voxelsToRender have been rendered into the atlas for the different WebGL contexts. */
   private voxelsRendered = [true];
+  /** Used to render the voxels into the texture atlas. */
   private voxelGeometry = new THREE.BufferGeometry();
+  private voxelMaterial = new VoxelMaterial();
+  private voxels = new VoxelScene(this.voxelGeometry, this.voxelMaterial);
+  private voxelCamera = new VoxelCamera();
+  /** Whether or not @member voxelGeometry needs to be updated before rendering. */
   private isVoxelGeometryDirty = false;
-  private voxelMaterial = new THREE.ShaderMaterial({
-    vertexShader: voxelVertexShader,
-    fragmentShader: voxelFragmentShader,
-    uniforms: {
-      uVoxelCount: { value: new THREE.Vector3() },
-      uAtlasGrid: { value: new THREE.Vector2() },
-    },
-  });
-  private voxels = new THREE.Scene().add(
-    new THREE.Points(this.voxelGeometry, this.voxelMaterial),
-  );
-  private voxelCamera = new THREE.OrthographicCamera(0, 1, 1, -1, 0, 10);
 
-  private renderTargets: THREE.WebGLRenderTarget[] = [];
+  /** The render targets for the texture atlases for the different WebGL contexts. */
+  private renderTargets: ImageRenderTarget[] = [];
+  /** Whether or not the corresponding render target needs to be updated from the @member internalTexture . */
   private isTextureDirty = [true];
+  /** Used to update the render targets from the @member internalTexture . */
   private screenAlignedQuad?: ScreenAlignedQuad;
 
   constructor(
@@ -181,16 +187,9 @@ export class Image<T extends TypedArray = TypedArray>
   ) {
     this.applySnapshot(image);
 
-    const size = this.getAtlasSize();
-    this.voxelCamera.right = size.x;
-    this.voxelCamera.top = size.y - 1;
-    this.voxelCamera.updateProjectionMatrix();
-
-    const grid = this.getAtlasGrid();
-    this.voxelMaterial.uniforms.uAtlasGrid.value.copy(grid);
-    this.voxelMaterial.uniforms.uVoxelCount.value.copy(this.voxelCount);
-
-    this.voxels.children[0].frustumCulled = false;
+    this.voxelCamera.setAtlasSize(this.getAtlasSize());
+    this.voxelMaterial.setAtlasGrid(this.getAtlasGrid());
+    this.voxelMaterial.setVoxelCount(this.voxelCount);
 
     makeObservable<this, "data" | "atlas" | "isDataDirty" | "isAtlasDirty">(
       this,
@@ -265,10 +264,7 @@ export class Image<T extends TypedArray = TypedArray>
 
   public getTexture(index = 0) {
     if (!this.renderTargets[index]) {
-      const size = this.getAtlasSize();
-      this.renderTargets[index] = new THREE.WebGLRenderTarget(size.x, size.y);
-      this.renderTargets[index].texture.magFilter = THREE.NearestFilter;
-      this.renderTargets[index].texture.minFilter = THREE.NearestFilter;
+      this.renderTargets[index] = new ImageRenderTarget(this.getAtlasSize());
       this.isTextureDirty[index] = true;
       this.voxelsRendered[index] = true;
     }
@@ -322,35 +318,27 @@ export class Image<T extends TypedArray = TypedArray>
       this.screenAlignedQuad &&
       this.renderTargets[index]
     ) {
-      const previousRenderTarget = renderer.getRenderTarget();
-      renderer.setRenderTarget(this.renderTargets[index]);
-
-      const previousAutoClear = renderer.autoClear;
-      renderer.autoClear = true;
-
-      this.screenAlignedQuad.renderWith(renderer);
-
-      renderer.autoClear = previousAutoClear;
-      renderer.setRenderTarget(previousRenderTarget);
+      copyToRenderTarget(
+        this.screenAlignedQuad,
+        this.renderTargets[index],
+        renderer,
+      );
 
       this.isTextureDirty[index] = false;
     }
 
     if (this.voxelsToRender.length && !this.voxelsRendered[index]) {
       if (this.isVoxelGeometryDirty) {
-        this.updateVoxelGeometry();
+        updateVoxelGeometry(this.voxelsToRender, this.voxelGeometry);
+        this.isVoxelGeometryDirty = false;
       }
 
-      const previousRenderTarget = renderer.getRenderTarget();
-      renderer.setRenderTarget(this.renderTargets[index]);
-
-      const previousAutoClear = renderer.autoClear;
-      renderer.autoClear = false;
-
-      renderer.render(this.voxels, this.voxelCamera);
-
-      renderer.autoClear = previousAutoClear;
-      renderer.setRenderTarget(previousRenderTarget);
+      renderVoxels(
+        this.voxels,
+        this.voxelCamera,
+        this.renderTargets[index],
+        renderer,
+      );
 
       this.voxelsRendered[index] = true;
       if (this.voxelsRendered.every((value) => value)) {
@@ -358,28 +346,6 @@ export class Image<T extends TypedArray = TypedArray>
         this.isVoxelGeometryDirty = true;
       }
     }
-  }
-
-  private updateVoxelGeometry() {
-    const vertices: number[] = [];
-    this.voxelsToRender.forEach((voxel) => {
-      vertices.push(voxel.x, voxel.y, voxel.z);
-    });
-    this.voxelGeometry.setAttribute(
-      "position",
-      new THREE.Float32BufferAttribute(vertices, 3),
-    );
-
-    const colors: number[] = [];
-    this.voxelsToRender.forEach((voxel) => {
-      colors.push(voxel.value, voxel.value, voxel.value);
-    });
-    this.voxelGeometry.setAttribute(
-      "color",
-      new THREE.Uint8BufferAttribute(colors, 3),
-    );
-
-    this.isVoxelGeometryDirty = false;
   }
 
   public getSliceImage(
