@@ -29,6 +29,7 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
   public activeTool = ToolType.Brush;
 
   public isCursorOverDrawableArea = false;
+  public isCursorOverFloatingUI = false;
   public isNavigationDragged = false;
   public isDrawing = false;
 
@@ -76,6 +77,7 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
     >(this, {
       activeTool: observable,
       isCursorOverDrawableArea: observable,
+      isCursorOverFloatingUI: observable,
       isNavigationDragged: observable,
       isDrawing: observable,
       smartBrushNeighborThreshold: observable,
@@ -89,7 +91,8 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
 
       applySnapshot: action,
       setActiveTool: action,
-      setCursorOverDrawableArea: action,
+      setIsCursorOverDrawableArea: action,
+      setIsCursorOverFloatingUI: action,
       setIsNavigationDragged: action,
       setIsDrawing: action,
       setBrushSizePixels: action,
@@ -97,6 +100,16 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
       setSmartBrushNeighborThreshold: action,
       lockBrushSize: action,
     });
+  }
+
+  public get canDraw() {
+    return (
+      this.isBrushToolSelected &&
+      this.isCursorOverDrawableArea &&
+      !this.isCursorOverFloatingUI &&
+      this.editor.annotation &&
+      this.editor.isAnnotationVisible
+    );
   }
 
   public get isBrushToolSelected() {
@@ -145,8 +158,12 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
     this.activeTool = tool;
   }
 
-  public setCursorOverDrawableArea(value = true) {
+  public setIsCursorOverDrawableArea(value = true) {
     this.isCursorOverDrawableArea = value;
+  }
+
+  public setIsCursorOverFloatingUI(value = true) {
+    this.isCursorOverFloatingUI = value;
   }
 
   public setIsNavigationDragged(value = true) {
@@ -249,7 +266,7 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
     alt = false,
   ) {
     if (!this.editor.sliceRenderer) {
-      this.setCursorOverDrawableArea(false);
+      this.setIsCursorOverDrawableArea(false);
       return;
     }
 
@@ -257,11 +274,11 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
       screenPosition,
     )[0];
     if (!intersection || !intersection.uv) {
-      this.setCursorOverDrawableArea(false);
+      this.setIsCursorOverDrawableArea(false);
       return;
     }
 
-    this.setCursorOverDrawableArea();
+    this.setIsCursorOverDrawableArea();
 
     this.alignBrushCursor(intersection.uv);
     if (

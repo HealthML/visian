@@ -14,7 +14,7 @@ import { ToolType } from "../../../models";
 const SyledCanvas = styled(WebGLCanvas)<
   WebGLCanvasProps & {
     activeTool?: ToolType;
-    isCursorOverDrawableArea?: boolean;
+    isDrawable?: boolean;
     isNavigationDragged?: boolean;
   }
 >`
@@ -31,7 +31,7 @@ const SyledCanvas = styled(WebGLCanvas)<
         return "auto";
 
       default:
-        return props.isCursorOverDrawableArea ? "none" : "auto";
+        return props.isDrawable ? "none" : "auto";
     }
   }};
 `;
@@ -53,11 +53,7 @@ export const MainView = observer<{}, HTMLCanvasElement>(
       <SyledCanvas
         activeTool={store?.editor.tools.activeTool}
         backgroundColor={store?.editor.getBackgroundColor()}
-        isCursorOverDrawableArea={
-          store?.editor.image &&
-          store?.editor.tools.isCursorOverDrawableArea &&
-          store?.editor.isAnnotationVisible
-        }
+        isDrawable={store?.editor.tools.canDraw}
         isNavigationDragged={store?.editor.tools.isNavigationDragged}
         onContextMenu={preventDefault}
         onPointerDown={onPointerDown}
