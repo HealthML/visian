@@ -103,12 +103,12 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
   }
 
   public get canDraw() {
-    return (
+    return Boolean(
       this.isBrushToolSelected &&
-      this.isCursorOverDrawableArea &&
-      !this.isCursorOverFloatingUI &&
-      this.editor.annotation &&
-      this.editor.isAnnotationVisible
+        this.isCursorOverDrawableArea &&
+        !this.isCursorOverFloatingUI &&
+        this.editor.annotation &&
+        this.editor.isAnnotationVisible,
     );
   }
 
