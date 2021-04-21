@@ -19,20 +19,10 @@ import {
   getAtlasSize,
   getTextureFromAtlas,
 } from "../../io/texture-atlas";
-import { ScreenAlignedQuad } from "../../rendering";
-import { VoxelWithValue } from "../../types";
 import { Vector } from "../vector";
 import { getPlaneAxes, getViewTypeInitials, ViewType } from "../view-types";
 import { unifyOrientation } from "./conversion";
-import {
-  copyToRenderTarget,
-  ImageRenderTarget,
-  renderVoxels,
-  updateVoxelGeometry,
-  VoxelCamera,
-  VoxelMaterial,
-  VoxelScene,
-} from "./edit-rendering";
+import { EditRenderer } from "./edit-rendering/edit-renderer";
 import { findVoxelInSlice } from "./iteration";
 
 import type { ISerializable } from "../types";
@@ -162,34 +152,31 @@ export class Image<T extends TypedArray = TypedArray>
   protected isAtlasDirty?: boolean;
 
   /** Used to update the atlas from the CPU. */
-  private internalTexture?: THREE.DataTexture;
-  /** Contains the voxels which have to be rendered into the atlas. */
-  private voxelsToRender: VoxelWithValue[] = [];
-  /** Whether or not @member voxelsToRender have been rendered into the atlas for the different WebGL contexts. */
-  private voxelsRendered = [true];
-  /** Used to render the voxels into the texture atlas. */
-  private voxelGeometry = new THREE.BufferGeometry();
-  private voxelMaterial = new VoxelMaterial();
-  private voxels = new VoxelScene(this.voxelGeometry, this.voxelMaterial);
-  private voxelCamera = new VoxelCamera();
-  /** Whether or not @member voxelGeometry needs to be updated before rendering. */
-  private isVoxelGeometryDirty = false;
+  private internalTexture: THREE.DataTexture;
 
-  /** The render targets for the texture atlases for the different WebGL contexts. */
-  private renderTargets: ImageRenderTarget[] = [];
-  /** Whether or not the corresponding render target needs to be updated from the @member internalTexture . */
-  private isTextureDirty = [true];
-  /** Used to update the render targets from the @member internalTexture . */
-  private screenAlignedQuad?: ScreenAlignedQuad;
+  /** Renders edits into the atlas and holds the atlas textures. */
+  private editRenderer: EditRenderer;
 
   constructor(
     image: ImageSnapshot<T> & Pick<ImageSnapshot<T>, "voxelCount" | "data">,
   ) {
     this.applySnapshot(image);
 
-    this.voxelCamera.setAtlasSize(this.getAtlasSize());
-    this.voxelMaterial.setAtlasGrid(this.getAtlasGrid());
-    this.voxelMaterial.setVoxelCount(this.voxelCount);
+    this.internalTexture = getTextureFromAtlas(
+      {
+        voxelComponents: this.voxelComponents,
+        voxelCount: this.voxelCount.clone(false),
+      },
+      this.getAtlas(),
+      THREE.NearestFilter,
+    );
+
+    this.editRenderer = new EditRenderer(
+      this.internalTexture,
+      this.getAtlasSize(),
+      this.getAtlasGrid(),
+      this.voxelCount,
+    );
 
     makeObservable<this, "data" | "atlas" | "isDataDirty" | "isAtlasDirty">(
       this,
@@ -263,12 +250,7 @@ export class Image<T extends TypedArray = TypedArray>
   }
 
   public getTexture(index = 0) {
-    if (!this.renderTargets[index]) {
-      this.renderTargets[index] = new ImageRenderTarget(this.getAtlasSize());
-      this.isTextureDirty[index] = true;
-      this.voxelsRendered[index] = true;
-    }
-    return this.renderTargets[index].texture;
+    return this.editRenderer.getTexture(index);
   }
 
   public getSlice(sliceNumber: number, viewType: ViewType) {
@@ -298,54 +280,7 @@ export class Image<T extends TypedArray = TypedArray>
   }
 
   public onBeforeRender(renderer: THREE.WebGLRenderer, index = 0) {
-    if (!this.internalTexture) {
-      this.internalTexture = getTextureFromAtlas(
-        {
-          voxelComponents: this.voxelComponents,
-          voxelCount: this.voxelCount.clone(false),
-        },
-        this.getAtlas(),
-        THREE.NearestFilter,
-      );
-
-      this.screenAlignedQuad = ScreenAlignedQuad.forTexture(
-        this.internalTexture,
-      );
-    }
-
-    if (
-      this.isTextureDirty[index] &&
-      this.screenAlignedQuad &&
-      this.renderTargets[index]
-    ) {
-      copyToRenderTarget(
-        this.screenAlignedQuad,
-        this.renderTargets[index],
-        renderer,
-      );
-
-      this.isTextureDirty[index] = false;
-    }
-
-    if (this.voxelsToRender.length && !this.voxelsRendered[index]) {
-      if (this.isVoxelGeometryDirty) {
-        updateVoxelGeometry(this.voxelsToRender, this.voxelGeometry);
-        this.isVoxelGeometryDirty = false;
-      }
-
-      renderVoxels(
-        this.voxels,
-        this.voxelCamera,
-        this.renderTargets[index],
-        renderer,
-      );
-
-      this.voxelsRendered[index] = true;
-      if (this.voxelsRendered.every((value) => value)) {
-        this.voxelsToRender = [];
-        this.isVoxelGeometryDirty = true;
-      }
-    }
+    this.editRenderer.update(renderer, index);
   }
 
   public getSliceImage(
@@ -409,28 +344,19 @@ export class Image<T extends TypedArray = TypedArray>
 
     if (this.internalTexture) {
       this.internalTexture.needsUpdate = true;
-      this.isTextureDirty.fill(true);
+      this.editRenderer.triggerCopy();
     }
   }
 
-  public setAtlasVoxel(voxel: Vector, value: number, updateViaRender = true) {
+  public setAtlasVoxel(voxel: Vector, value: number) {
     const index = getAtlasIndexFor(voxel, this);
     this.getAtlas()[index] = value;
 
-    if (updateViaRender) {
-      const { x, y, z } = voxel;
-      this.voxelsToRender.push({ x, y, z, value });
-      this.voxelsRendered.fill(false);
-      this.isVoxelGeometryDirty = true;
-    }
+    const { x, y, z } = voxel;
+    this.editRenderer.addVoxelToRender({ x, y, z, value });
 
     this.isDataDirty = true;
-    if (this.internalTexture) {
-      this.internalTexture.needsUpdate = true;
-      for (let i = 0; i < this.isTextureDirty.length; i++) {
-        this.isTextureDirty[i] = this.isTextureDirty[i] || !updateViaRender;
-      }
-    }
+    this.internalTexture.needsUpdate = true;
   }
 
   public setSlice(viewType: ViewType, slice: number, sliceData?: Uint8Array) {
@@ -455,10 +381,8 @@ export class Image<T extends TypedArray = TypedArray>
     );
 
     this.isDataDirty = true;
-    if (this.internalTexture) {
-      this.internalTexture.needsUpdate = true;
-      this.isTextureDirty.fill(true);
-    }
+    this.internalTexture.needsUpdate = true;
+    this.editRenderer.triggerCopy();
   }
 
   public toITKImage() {
