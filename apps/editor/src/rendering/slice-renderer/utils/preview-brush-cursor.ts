@@ -8,6 +8,8 @@ import { BrushCursor } from "./brush-cursor";
 export class PreviewBrushCursor extends BrushCursor {
   private timeout?: NodeJS.Timeout;
 
+  private active = false;
+
   constructor(editor: Editor, viewType: ViewType) {
     super(editor, viewType);
     this.disposers.push(
@@ -17,13 +19,20 @@ export class PreviewBrushCursor extends BrushCursor {
           if (mainView !== this.viewType) this.hide();
         },
       ),
+      reaction(
+        () => editor.tools.isCursorOverDrawableArea && this.active,
+        () => {
+          this.updateVisibility();
+        },
+      ),
     );
 
     this.visible = false;
   }
 
   public show() {
-    this.visible = true;
+    this.active = true;
+    this.updateVisibility();
 
     if (this.timeout) {
       clearTimeout(this.timeout);
@@ -31,25 +40,29 @@ export class PreviewBrushCursor extends BrushCursor {
     }
 
     this.timeout = setTimeout(() => {
-      this.visible = false;
-      this.editor.sliceRenderer?.lazyRender();
+      this.active = false;
+      this.updateVisibility();
     }, brushSizePreviewTime);
-
-    this.editor.sliceRenderer?.lazyRender();
   }
 
   private hide() {
-    this.visible = false;
+    this.active = false;
+    this.updateVisibility();
 
     if (this.timeout) {
       clearTimeout(this.timeout);
       this.timeout = undefined;
     }
-
-    this.editor.sliceRenderer?.lazyRender();
   }
 
   protected updateVisibility() {
-    // Visibility is controlled manually, thus the autorun is empty.
+    this.visible = this.active && !this.editor.tools.isCursorOverDrawableArea;
+
+    // Prevent appearing again after hiding because main brush cursor was visible.
+    if (this.editor.tools.isCursorOverDrawableArea && this.active) {
+      this.hide();
+    }
+
+    this.editor.sliceRenderer?.lazyRender();
   }
 }
