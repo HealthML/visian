@@ -11,11 +11,8 @@ import { ModalProps } from "./modal.props";
 import { InvisibleButton } from "../button";
 
 const StyledButton = styled(InvisibleButton)`
-  margin: -1px 0px 0px 0px;
   width: 17px;
   height: 17px;
-  position: absolute;
-  align-self: flex-end;
 `;
 
 const ModalContainer = styled(Sheet)`
@@ -32,15 +29,18 @@ const ModalContainer = styled(Sheet)`
   position: relative;
 `;
 const ModalTitle = styled(Title)`
+  display: block;
+  flex: 1;
   font-size: 16px;
-  line-height: 16px;
   font-weight: ${fontWeight("regular")};
-  margin-bottom: 12px;
+  line-height: 16px;
 `;
 
 const TitleRow = styled.div`
+  align-items: center;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  margin-bottom: 12px;
   width: 100%;
 `;
 
@@ -58,6 +58,7 @@ export const Modal: React.FC<ModalProps> = ({
   isOpen,
   children,
   onOutsidePress,
+  onReset,
   ...rest
 }) => {
   const ref = useRef<HTMLDivElement>(null);
@@ -72,7 +73,13 @@ export const Modal: React.FC<ModalProps> = ({
           <>
             <TitleRow>
               <ModalTitle tx={labelTx} text={label} />
-              <StyledButton icon="reset" isActive={false} />
+              {onReset && (
+                <StyledButton
+                  icon="reset"
+                  isActive={false}
+                  onPointerDown={onReset}
+                />
+              )}
             </TitleRow>
             <Divider />
           </>

@@ -183,7 +183,7 @@ export class EditorViewSettings
     );
   }
 
-  public reset() {
+  public reset = () => {
     this.setSelectedVoxel();
     this.toggleSideViews(true);
     if (this.editor.image && this.editor.image.dimensionality < 3) {
@@ -191,7 +191,7 @@ export class EditorViewSettings
     }
     this.setContrast();
     this.setBrightness();
-  }
+  };
 
   public toJSON() {
     return {
