@@ -157,7 +157,7 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
     this.isDrawing = value;
   }
 
-  public setBrushSizePixels = (value = 5) => {
+  public setBrushSizePixels = (value = 5, showPreview = false) => {
     const clampedValue = Math.max(0, value);
 
     if (this.isBrushSizeLocked) {
@@ -170,6 +170,9 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
     if (!pixelWidth) return;
 
     this.brushWidthScreen = (clampedValue + 0.5) * pixelWidth;
+
+    if (!showPreview) return;
+    this.editor.sliceRenderer?.showBrushCursorPreview();
   };
 
   public setSmartBrushSeedThreshold = (value = 6) => {
@@ -289,13 +292,15 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
     }
   }
 
-  private alignBrushCursor(uv: THREE.Vector2) {
+  public alignBrushCursor(
+    uv: THREE.Vector2,
+    viewType = this.editor.viewSettings.mainViewType,
+    preview = false,
+  ) {
     if (!this.editor.sliceRenderer || !this.editor.image) return;
     const { voxelCount } = this.editor.image;
 
-    const [widthAxis, heightAxis] = getPlaneAxes(
-      this.editor.viewSettings.mainViewType,
-    );
+    const [widthAxis, heightAxis] = getPlaneAxes(viewType);
     const scanWidth = voxelCount[widthAxis];
     const scanHeight = voxelCount[heightAxis];
 
@@ -309,7 +314,8 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
     const yOffset = this.brushSizePixels === 0.5 ? (bottom ? -1 : 0) : 0.5;
 
     const brushCursor = this.editor.sliceRenderer.getBrushCursor(
-      this.editor.viewSettings.mainViewType,
+      viewType,
+      preview,
     );
 
     brushCursor.setUVTarget(
