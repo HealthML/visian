@@ -80,7 +80,18 @@ export class Slice extends THREE.Group implements IDisposable {
     this.previewBrushCursor.position.z = brushCursorZ;
     this.crosshairShiftGroup.add(this.previewBrushCursor);
 
-    this.disposers.push(autorun(this.updateScale), autorun(this.updateOffset));
+    this.disposers.push(
+      autorun(this.updateScale),
+      autorun(this.updateOffset),
+      autorun(() => {
+        this.annotationMesh.visible = this.editor.isAnnotationVisible;
+        this.editor.sliceRenderer?.lazyRender();
+      }),
+      autorun(() => {
+        this.imageMesh.visible = this.editor.isImageVisible;
+        this.editor.sliceRenderer?.lazyRender();
+      }),
+    );
   }
 
   public dispose() {

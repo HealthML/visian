@@ -1,39 +1,126 @@
-import React from "react";
-import styled from "styled-components";
-import { ButtonProps } from ".";
-import { color, fontWeight, size, space } from "../../theme";
-import { Sheet } from "../sheet";
-import { Text } from "../text";
+import React, { useCallback, useImperativeHandle, useState } from "react";
+import styled, { css } from "styled-components";
 
-const StyledText = styled(Text)`
-  font-weight: ${fontWeight("bold")};
+import { fontWeight, radius, size, space } from "../../theme";
+import { Icon } from "../icon";
+import { sheetMixin } from "../sheet";
+import { Text } from "../text";
+import { Tooltip, useTooltipPosition } from "../tooltip";
+import { ButtonProps } from "./button.props";
+
+const StyledText = styled(Text)<Pick<ButtonProps, "isActive">>`
+  font-weight: ${fontWeight("regular")};
+  line-height: 16px;
+  font-size: 16px;
+
+  opacity: ${(props) => (props.isActive !== false ? 1 : 0.3)};
 `;
 
-const BaseButton: React.FC<ButtonProps> = ({
-  children,
-  data,
-  text,
-  tx,
-  ...rest
-}) => (
-  <Sheet {...rest} as="button">
-    {tx || text ? <StyledText data={data} text={text} tx={tx} /> : children}
-  </Sheet>
+const StyledButton = styled.button<Pick<ButtonProps, "isDisabled">>`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  ${(props) =>
+    props.isDisabled
+      ? css`
+          opacity: 0.3;
+        `
+      : css`
+          &:active > * {
+            opacity: 1;
+          }
+        `}
+`;
+
+const BaseButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
+  (
+    {
+      children,
+      data,
+      icon,
+      tooltip,
+      tooltipTx,
+      tooltipPosition,
+      showTooltip: externalShowTooltip = true,
+      isActive,
+      isDisabled,
+      text,
+      tx,
+      onPointerEnter,
+      onPointerLeave,
+      ...rest
+    },
+    ref,
+  ) => {
+    // Tooltip Toggling
+    const [showTooltip, setShowTooltip] = useState(false);
+    const enterButton = useCallback(
+      (event: React.PointerEvent<HTMLButtonElement>) => {
+        if (onPointerEnter) onPointerEnter(event);
+        setShowTooltip(true);
+      },
+      [onPointerEnter],
+    );
+    const leaveButton = useCallback(
+      (event: React.PointerEvent<HTMLButtonElement>) => {
+        if (onPointerLeave) onPointerLeave(event);
+        setShowTooltip(false);
+      },
+      [onPointerLeave],
+    );
+
+    // Tooltip Positioning
+    const [buttonRef, setButtonRef] = useState<HTMLButtonElement | null>(null);
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    useImperativeHandle(ref, () => buttonRef!, [buttonRef]);
+    const tooltipStyle = useTooltipPosition(
+      buttonRef,
+      tooltipPosition,
+      Boolean(showTooltip && externalShowTooltip && (tooltipTx || tooltip)),
+    );
+
+    return (
+      <>
+        <StyledButton
+          {...rest}
+          isDisabled={isDisabled}
+          onPointerEnter={enterButton}
+          onPointerLeave={leaveButton}
+          ref={setButtonRef}
+        >
+          {icon && <Icon icon={icon} isActive={isActive} />}
+          {tx || text ? (
+            <StyledText data={data} isActive={isActive} text={text} tx={tx} />
+          ) : (
+            children
+          )}
+        </StyledButton>
+        {(tooltipTx || tooltip) && (
+          <Tooltip
+            style={tooltipStyle}
+            text={tooltip}
+            tx={tooltipTx}
+            isShown={showTooltip && externalShowTooltip}
+          />
+        )}
+      </>
+    );
+  },
 );
 
 export const Button = styled(BaseButton)`
+  ${sheetMixin}
+
+  border-radius: ${radius("default")};
   box-sizing: border-box;
   cursor: pointer;
   display: inline-flex;
   height: ${size("buttonHeight")};
+  outline: none;
   padding: ${space("buttonPadding")};
   pointer-events: auto;
   user-select: none;
-
-  &:focus {
-    border-color: ${color("text")};
-    outline: none;
-  }
 `;
 
 export const SquareButton = styled(Button)`
@@ -41,8 +128,24 @@ export const SquareButton = styled(Button)`
   width: ${size("buttonHeight")};
 `;
 
-export const CircularButton = styled(SquareButton)`
+export const FloatingUIButton = styled(SquareButton)`
+  margin-bottom: 16px;
+`;
+
+export const CircularButton = styled(Button)`
   border-radius: 50%;
+`;
+
+export const InvisibleButton = styled(BaseButton)`
+  background: none;
+  border: none;
+  outline: none;
+  padding: 0;
+
+  box-sizing: border-box;
+  cursor: pointer;
+  pointer-events: auto;
+  user-select: none;
 `;
 
 export default Button;

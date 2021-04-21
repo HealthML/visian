@@ -11,7 +11,7 @@ import * as THREE from "three";
 import { getPositionWithinPixel } from "../../../rendering";
 import { StoreContext } from "../../types";
 import { Editor } from "../editor";
-import { Tool } from "../types";
+import { ToolType } from "../types";
 import { AtlasUndoRedoCommand, SliceUndoRedoCommand } from "../undo-redo";
 import { Brush } from "./brush";
 import { SmartBrush } from "./smart-brush";
@@ -26,9 +26,10 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
     "/isCursorOverDrawableArea",
   ];
 
-  public activeTool = Tool.SmartBrush;
+  public activeTool = ToolType.Brush;
 
   public isCursorOverDrawableArea = false;
+  public isNavigationDragged = false;
 
   private brushWidthScreen = 0.02;
   private lockedBrushSizePixels?: number;
@@ -42,12 +43,12 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
   private smartEraser?: SmartBrush;
 
   /** A map of the tool types to their corresponding brushes. */
-  private brushMap: Partial<Record<Tool, Brush>>;
+  private brushMap: Partial<Record<ToolType, Brush>>;
   /**
    * A map of the tool types to their corresponding alternative brushes.
    * This is used for e.g. right-click or back of pen interaction.
    */
-  protected altBrushMap: Partial<Record<Tool, Brush>>;
+  protected altBrushMap: Partial<Record<ToolType, Brush>>;
 
   constructor(protected editor: Editor, protected context?: StoreContext) {
     this.brush = new Brush(this.editor);
@@ -56,21 +57,22 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
     this.smartEraser = new SmartBrush(this.editor, 0);
 
     this.brushMap = {
-      [Tool.Brush]: this.brush,
-      [Tool.Eraser]: this.eraser,
-      [Tool.SmartBrush]: this.smartBrush,
-      [Tool.SmartEraser]: this.smartEraser,
+      [ToolType.Brush]: this.brush,
+      [ToolType.Eraser]: this.eraser,
+      [ToolType.SmartBrush]: this.smartBrush,
+      [ToolType.SmartEraser]: this.smartEraser,
     };
     this.altBrushMap = {
-      [Tool.Brush]: this.eraser,
-      [Tool.Eraser]: this.brush,
-      [Tool.SmartBrush]: this.smartEraser,
-      [Tool.SmartEraser]: this.smartBrush,
+      [ToolType.Brush]: this.eraser,
+      [ToolType.Eraser]: this.brush,
+      [ToolType.SmartBrush]: this.smartEraser,
+      [ToolType.SmartEraser]: this.smartBrush,
     };
 
     makeObservable<this, "brushWidthScreen" | "lockedBrushSizePixels">(this, {
       activeTool: observable,
       isCursorOverDrawableArea: observable,
+      isNavigationDragged: observable,
       smartBrushNeighborThreshold: observable,
       smartBrushSeedThreshold: observable,
       brushWidthScreen: observable,
@@ -83,19 +85,20 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
       applySnapshot: action,
       setActiveTool: action,
       setCursorOverDrawableArea: action,
+      setIsNavigationDragged: action,
       setBrushSizePixels: action,
-      setSmartBrushSeedTreshold: action,
+      setSmartBrushSeedThreshold: action,
       setSmartBrushNeighborThreshold: action,
-      setLockedBrushSizePixels: action,
+      lockBrushSize: action,
     });
   }
 
   public get isBrushToolSelected() {
     return [
-      Tool.Brush,
-      Tool.Eraser,
-      Tool.SmartBrush,
-      Tool.SmartEraser,
+      ToolType.Brush,
+      ToolType.Eraser,
+      ToolType.SmartBrush,
+      ToolType.SmartEraser,
     ].includes(this.activeTool);
   }
 
@@ -122,7 +125,17 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
     );
   }
 
-  public setActiveTool(tool = Tool.Brush) {
+  public setActiveTool(tool = this.activeTool) {
+    if (
+      tool === ToolType.Crosshair &&
+      this.editor.image &&
+      this.editor.image.dimensionality < 3
+    ) {
+      if (this.activeTool === ToolType.Crosshair) {
+        this.activeTool = ToolType.Brush;
+      }
+      return;
+    }
     this.activeTool = tool;
   }
 
@@ -130,11 +143,16 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
     this.isCursorOverDrawableArea = value;
   }
 
-  public setBrushSizePixels(value = 5, showPreview = false) {
+  public setIsNavigationDragged(value = true) {
+    this.isNavigationDragged = value;
+  }
+
+  public setBrushSizePixels = (value = 5, showPreview = false) => {
     const clampedValue = Math.max(0, value);
 
     if (this.isBrushSizeLocked) {
-      this.setLockedBrushSizePixels(clampedValue);
+      this.lockedBrushSizePixels =
+        clampedValue < 1 && clampedValue > 0 ? 0.5 : Math.round(clampedValue);
     }
 
     const pixelWidth = this.editor.viewSettings.pixelSize?.x;
@@ -149,23 +167,25 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
     if (!sliceRenderer) return;
 
     sliceRenderer.showBrushCursorPreview();
-  }
+  };
 
-  public setSmartBrushSeedTreshold(value = 6) {
+  public setSmartBrushSeedThreshold = (value = 6) => {
     this.smartBrushSeedThreshold = value;
-  }
+  };
 
-  public setSmartBrushNeighborThreshold(value = 10) {
+  public setSmartBrushNeighborThreshold = (value = 10) => {
     this.smartBrushNeighborThreshold = value;
-  }
+  };
 
-  public setLockedBrushSizePixels(value?: number) {
-    if (value === undefined && this.lockedBrushSizePixels) {
-      this.setBrushSizePixels(this.lockedBrushSizePixels);
+  public lockBrushSize = (shouldLock = true) => {
+    if (shouldLock) {
+      this.lockedBrushSizePixels = this.brushSizePixels;
+    } else {
+      const previousValue = this.lockedBrushSizePixels;
+      this.lockedBrushSizePixels = undefined;
+      this.setBrushSizePixels(previousValue);
     }
-
-    this.lockedBrushSizePixels = value;
-  }
+  };
 
   public incrementBrushSize() {
     // Allow brush size 0.5.
@@ -183,15 +203,15 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
     return {};
   }
 
-  public async applySnapshot(snapshot: EditorToolsSnapshot) {
+  public async applySnapshot(_snapshot: EditorToolsSnapshot) {
     // Intentionally left blank
   }
 
-  public clearSlice(
+  public clearSlice = (
     image = this.editor.annotation,
     viewType = this.editor.viewSettings.mainViewType,
     slice = this.editor.viewSettings.getSelectedSlice(),
-  ) {
+  ) => {
     if (!image) return;
 
     const oldSliceData = image.getSlice(slice, viewType);
@@ -201,7 +221,7 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
     this.editor.undoRedo.addCommand(
       new SliceUndoRedoCommand(image, viewType, slice, oldSliceData),
     );
-  }
+  };
 
   public clearImage(image = this.editor.annotation) {
     if (!image) return;
@@ -238,7 +258,12 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
     this.setCursorOverDrawableArea();
 
     this.alignBrushCursor(intersection.uv);
-    if (!eventType) return;
+    if (
+      !eventType ||
+      (!this.editor.isAnnotationVisible && this.isBrushToolSelected)
+    ) {
+      return;
+    }
 
     const dragPoint = this.getDragPoint(intersection.uv);
     if (!dragPoint) return;
@@ -246,9 +271,11 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
     const tool = (alt ? this.altBrushMap : this.brushMap)[this.activeTool];
     switch (eventType) {
       case "start":
+        this.context?.setDirty();
         tool?.startAt(dragPoint);
         break;
       case "move":
+        this.context?.setDirty();
         tool?.moveTo(dragPoint);
         break;
       case "end":

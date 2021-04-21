@@ -64,7 +64,8 @@ export class BrushCursor extends THREE.Group implements IDisposable {
     this.visible =
       this.editor.viewSettings.mainViewType === this.viewType &&
       this.editor.tools.isBrushToolSelected &&
-      this.editor.tools.isCursorOverDrawableArea;
+      this.editor.tools.isCursorOverDrawableArea &&
+      this.editor.isAnnotationVisible;
 
     this.editor.sliceRenderer?.lazyRender();
   }

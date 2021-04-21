@@ -1,92 +1,268 @@
-import { TextureAtlas } from "@visian/utils";
+import { autorun, IReactionDisposer } from "mobx";
 import * as THREE from "three";
+import tc from "tinycolor2";
 
+import { TextureAtlas } from "../../../texture-atlas";
+import { IDisposable } from "../../../types";
+import VolumeRenderer from "../../volume-renderer";
+import { generateHistogram } from "../histogram";
 import ScreenAlignedQuad from "../screen-aligned-quad";
-import gradientFragmentShader from "./shader/gradient.frag.glsl";
-import gradientVertexShader from "./shader/gradient.vert.glsl";
+import { GradientMaterial, GradientMode } from "./gradient-material";
 
-export class GradientComputer {
-  private gradientMaterial: THREE.ShaderMaterial;
+export class GradientComputer implements IDisposable {
+  private gradientMaterial: GradientMaterial;
   private screenAlignedQuad: ScreenAlignedQuad;
 
-  private firstDerivativeRendererTarget?: THREE.WebGLRenderTarget;
-  private secondDerivativeRendererTarget?: THREE.WebGLRenderTarget;
+  private firstDerivativeRenderTarget: THREE.WebGLRenderTarget;
+  private secondDerivativeRenderTarget: THREE.WebGLRenderTarget;
+  private outputDerivativeRenderTarget: THREE.WebGLRenderTarget;
+
+  private firstDerivativeDirty = true;
+  private secondDerivativeDirty = true;
+  private outputDerivativeDirty = true;
+
+  private reactionDisposers: IReactionDisposer[] = [];
+
+  private textureAtlas?: TextureAtlas;
 
   constructor(
-    private textureAtlas: TextureAtlas,
     private renderer: THREE.WebGLRenderer,
+    private volumeRenderer: VolumeRenderer,
   ) {
-    this.gradientMaterial = new THREE.ShaderMaterial({
-      fragmentShader: gradientFragmentShader,
-      vertexShader: gradientVertexShader,
-      uniforms: {
-        uTextureAtlas: { value: textureAtlas.getTexture() },
-        uVoxelSpacing: { value: textureAtlas.voxelSpacing },
-        uVoxelCount: { value: textureAtlas.voxelCount },
-        uAtlasGrid: { value: textureAtlas.atlasGrid },
-        uInputDimensions: { value: 1 },
-      },
-    });
+    this.firstDerivativeRenderTarget = new THREE.WebGLRenderTarget(1, 1);
+    this.secondDerivativeRenderTarget = new THREE.WebGLRenderTarget(1, 1);
+    this.outputDerivativeRenderTarget = new THREE.WebGLRenderTarget(1, 1);
+
+    this.gradientMaterial = new GradientMaterial(
+      this.firstDerivativeRenderTarget.texture,
+      this.secondDerivativeRenderTarget.texture,
+    );
+
     this.screenAlignedQuad = new ScreenAlignedQuad(this.gradientMaterial);
+
+    this.reactionDisposers.push(
+      autorun(() => {
+        this.gradientMaterial.uniforms.uUseFocus.value =
+          volumeRenderer.shouldUseFocusVolume;
+
+        this.updateOutputDerivative();
+      }),
+      autorun(() => {
+        const color = tc(volumeRenderer.focusColor).toRgb();
+        this.gradientMaterial.uniforms.uFocusColor.value = [
+          color.r / 255,
+          color.g / 255,
+          color.b / 255,
+          color.a,
+        ];
+      }),
+      autorun(() => {
+        this.gradientMaterial.uniforms.uTransferFunction.value =
+          volumeRenderer.transferFunction.type;
+
+        this.updateOutputDerivative();
+      }),
+      autorun(() => {
+        this.gradientMaterial.uniforms.uContextOpacity.value =
+          volumeRenderer.contextOpacity;
+
+        this.updateOutputDerivative();
+      }),
+      autorun(() => {
+        this.gradientMaterial.uniforms.uLimitLow.value =
+          volumeRenderer.rangeLimits[0];
+        this.gradientMaterial.uniforms.uLimitHigh.value =
+          volumeRenderer.rangeLimits[1];
+
+        this.updateOutputDerivative();
+      }),
+      autorun(() => {
+        this.gradientMaterial.uniforms.uConeAngle.value =
+          volumeRenderer.cutAwayConeAngle;
+
+        this.updateOutputDerivative();
+      }),
+      autorun(() => {
+        this.gradientMaterial.uniforms.uCustomTFTexture.value =
+          volumeRenderer.customTFTexture;
+
+        this.updateOutputDerivative();
+      }),
+    );
   }
 
-  /** Returns the gradient of the texture atlas. */
+  public dispose() {
+    this.gradientMaterial.dispose();
+    this.reactionDisposers.forEach((disposer) => disposer());
+  }
+
+  public tick() {
+    if (this.firstDerivativeDirty) {
+      this.renderFirstDerivative();
+    }
+    if (this.secondDerivativeDirty) {
+      this.renderSecondDerivative();
+    }
+    if (
+      this.volumeRenderer.lightingMode.needsNormals &&
+      this.outputDerivativeDirty
+    ) {
+      this.renderOutputDerivative();
+    }
+  }
+
+  public setAtlas(atlas: TextureAtlas) {
+    this.firstDerivativeRenderTarget.setSize(
+      atlas.atlasSize.x,
+      atlas.atlasSize.y,
+    );
+    this.secondDerivativeRenderTarget.setSize(
+      atlas.atlasSize.x,
+      atlas.atlasSize.y,
+    );
+    this.outputDerivativeRenderTarget.setSize(
+      atlas.atlasSize.x,
+      atlas.atlasSize.y,
+    );
+
+    this.textureAtlas = atlas;
+
+    this.gradientMaterial.setAtlas(atlas);
+
+    this.updateFirstDerivative();
+    this.updateSecondDerivative();
+    this.updateOutputDerivative();
+  }
+
+  public setFocusAtlas(atlas?: TextureAtlas) {
+    this.gradientMaterial.setFocusAtlas(atlas);
+
+    this.updateOutputDerivative();
+  }
+
+  public setCameraPosition(position: THREE.Vector3) {
+    this.gradientMaterial.setCameraPosition(position);
+
+    if (this.volumeRenderer.transferFunction.updateNormalsOnCameraMove) {
+      this.updateOutputDerivative();
+    }
+  }
+
   public getFirstDerivative() {
-    if (!this.firstDerivativeRendererTarget) {
-      this.firstDerivativeRendererTarget = new THREE.WebGLRenderTarget(
-        this.textureAtlas.atlasSize.x,
-        this.textureAtlas.atlasSize.y,
-      );
-
-      // TODO: Set uInputDimensions depending on image.
-      this.gradientMaterial.uniforms.uInputDimensions.value = 1;
-      this.gradientMaterial.needsUpdate = true;
-
-      this.renderer.setRenderTarget(this.firstDerivativeRendererTarget);
-
-      const magFilter = this.gradientMaterial.uniforms.uTextureAtlas.value
-        .magFilter;
-      this.gradientMaterial.uniforms.uTextureAtlas.value.magFilter =
-        THREE.NearestFilter;
-      this.gradientMaterial.uniforms.uTextureAtlas.value.needsUpdate = true;
-
-      this.screenAlignedQuad.renderWith(this.renderer);
-
-      this.gradientMaterial.uniforms.uTextureAtlas.value.magFilter = magFilter;
-      this.gradientMaterial.uniforms.uTextureAtlas.value.needsUpdate = true;
-
-      // Reset the render target
-      this.renderer.setRenderTarget(null);
-    }
-
-    return this.firstDerivativeRendererTarget.texture;
+    return this.firstDerivativeRenderTarget.texture;
   }
 
-  /**
-   * Returns the gradient of the gradient of the texture atlas.
-   *
-   * @todo How to combine all gradient dimensions?
-   */
   public getSecondDerivative() {
-    if (!this.secondDerivativeRendererTarget) {
-      this.secondDerivativeRendererTarget = new THREE.WebGLRenderTarget(
-        this.textureAtlas.atlasSize.x,
-        this.textureAtlas.atlasSize.y,
-      );
+    return this.secondDerivativeRenderTarget.texture;
+  }
 
-      this.gradientMaterial.uniforms.uTextureAtlas.value = this.getFirstDerivative();
-      this.gradientMaterial.uniforms.uInputDimensions.value = 3;
-      this.gradientMaterial.needsUpdate = true;
+  public getOutputDerivative() {
+    return this.outputDerivativeRenderTarget.texture;
+  }
 
-      this.renderer.setRenderTarget(this.secondDerivativeRendererTarget);
+  private updateFirstDerivative() {
+    this.firstDerivativeDirty = true;
+  }
 
-      this.screenAlignedQuad.renderWith(this.renderer);
+  private renderFirstDerivative() {
+    if (!this.textureAtlas) return;
 
-      // Reset the render target
-      this.renderer.setRenderTarget(null);
+    // TODO: Set uInputDimensions depending on image.
+    this.gradientMaterial.uniforms.uInputDimensions.value = 1;
+    this.gradientMaterial.setGradientMode(GradientMode.First);
+
+    const previousRenderTarget = this.renderer.getRenderTarget();
+    this.renderer.setRenderTarget(this.firstDerivativeRenderTarget);
+
+    const volumeTexture = this.textureAtlas.getTexture();
+    const magFilter = volumeTexture.magFilter;
+    volumeTexture.magFilter = THREE.NearestFilter;
+    volumeTexture.needsUpdate = true;
+
+    this.screenAlignedQuad.renderWith(this.renderer);
+
+    volumeTexture.magFilter = magFilter;
+    volumeTexture.needsUpdate = true;
+
+    this.renderer.setRenderTarget(previousRenderTarget);
+
+    this.firstDerivativeDirty = false;
+    const buffer = new Uint8Array(
+      this.firstDerivativeRenderTarget.width *
+        this.firstDerivativeRenderTarget.height *
+        4,
+    );
+    this.volumeRenderer.renderer.readRenderTargetPixels(
+      this.firstDerivativeRenderTarget,
+      0,
+      0,
+      this.firstDerivativeRenderTarget.width,
+      this.firstDerivativeRenderTarget.height,
+      buffer,
+    );
+
+    const gradientMagnitudes = [];
+    const workingVector = new THREE.Vector3();
+    for (let i = 0; i < buffer.length; i += 4) {
+      workingVector.set(buffer[i], buffer[i + 1], buffer[i + 2]);
+      gradientMagnitudes.push(workingVector.length());
     }
 
-    return this.secondDerivativeRendererTarget.texture;
+    this.volumeRenderer.setGradientHistogram(
+      generateHistogram(gradientMagnitudes),
+    );
+
+    this.volumeRenderer.lazyRender();
+  }
+
+  private updateSecondDerivative() {
+    this.secondDerivativeDirty = true;
+  }
+
+  private renderSecondDerivative() {
+    this.gradientMaterial.uniforms.uInputDimensions.value = 3;
+    this.gradientMaterial.setGradientMode(GradientMode.Second);
+
+    const previousRenderTarget = this.renderer.getRenderTarget();
+    this.renderer.setRenderTarget(this.secondDerivativeRenderTarget);
+
+    this.screenAlignedQuad.renderWith(this.renderer);
+
+    this.renderer.setRenderTarget(previousRenderTarget);
+
+    this.secondDerivativeDirty = false;
+
+    this.volumeRenderer.lazyRender();
+  }
+
+  private updateOutputDerivative() {
+    this.outputDerivativeDirty = true;
+  }
+
+  private renderOutputDerivative() {
+    if (!this.textureAtlas) return;
+
+    this.gradientMaterial.uniforms.uInputDimensions.value = 1;
+    this.gradientMaterial.setGradientMode(GradientMode.Output);
+
+    const previousRenderTarget = this.renderer.getRenderTarget();
+    this.renderer.setRenderTarget(this.outputDerivativeRenderTarget);
+
+    const volumeTexture = this.textureAtlas.getTexture();
+    const magFilter = volumeTexture.magFilter;
+    volumeTexture.magFilter = THREE.NearestFilter;
+    volumeTexture.needsUpdate = true;
+
+    this.screenAlignedQuad.renderWith(this.renderer);
+
+    volumeTexture.magFilter = magFilter;
+    volumeTexture.needsUpdate = true;
+
+    this.renderer.setRenderTarget(previousRenderTarget);
+
+    this.outputDerivativeDirty = false;
+
+    this.volumeRenderer.lazyRender();
   }
 }
 

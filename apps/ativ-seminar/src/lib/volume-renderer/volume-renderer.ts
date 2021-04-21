@@ -1,11 +1,25 @@
-import { TextureAtlas } from "@visian/utils";
-import { action, observable } from "mobx";
+import { action, computed, makeObservable, observable } from "mobx";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import Stats from "three/examples/jsm/libs/stats.module";
+import tc from "tinycolor2";
 
+import { TextureAtlas } from "../texture-atlas";
 import { IDisposable } from "../types";
-import { FlyControls, ScreenAlignedQuad } from "./utils";
+import {
+  FlyControls,
+  generateHistogram,
+  LightingMode,
+  lightingModes,
+  LightingModeType,
+  ResolutionComputer,
+  ScreenAlignedQuad,
+} from "./utils";
+import {
+  TransferFunction,
+  transferFunctions,
+  TransferFunctionType,
+} from "./utils/transfer-function";
 import Volume from "./volume";
 import VolumeMaterial from "./volume-material";
 
@@ -27,12 +41,68 @@ export class VolumeRenderer implements IDisposable {
 
   private lazyRenderTriggered = true;
 
-  private isImageLoaded = false;
+  public isImageLoaded = false;
+  public densityHistogram?: [number[], number, number];
+  public gradientHistogram?: [number[], number, number];
 
-  protected backgroundValueBox = observable.box(0);
-  protected imageOpacityBox = observable.box(1);
+  private lightingTimeout?: NodeJS.Timer;
+  public suppressedLightingMode?: LightingMode;
+
+  private resolutionComputer: ResolutionComputer;
+
+  public backgroundValue = 0;
+  public shouldUseFocusVolume = false;
+  public focusColor = "rgba(255, 255, 255, 1)";
+  public transferFunction = transferFunctions[TransferFunctionType.Density];
+  public lightingMode = lightingModes[LightingModeType.LAO];
+  public laoIntensity = 1;
+  public imageOpacity = 1;
+  public contextOpacity = 0.4;
+  public densityRangeLimits: [number, number] = [0, 1];
+  public edgeRangeLimits: [number, number] = [0.1, 1];
+  public rangeLimits: [number, number] = this.edgeRangeLimits;
+  public cutAwayConeAngle = 1;
+  public customTFTexture?: THREE.Texture;
+  public isFocusLoaded = false;
 
   constructor(private canvas: HTMLCanvasElement) {
+    makeObservable<
+      this,
+      "setCustomTFTexture" | "setFocusLoaded" | "setSuppressedLightingMode"
+    >(this, {
+      isImageLoaded: observable,
+      densityHistogram: observable.ref,
+      gradientHistogram: observable.ref,
+      backgroundValue: observable,
+      shouldUseFocusVolume: observable,
+      focusColor: observable,
+      transferFunction: observable,
+      lightingMode: observable,
+      suppressedLightingMode: observable,
+      laoIntensity: observable,
+      imageOpacity: observable,
+      contextOpacity: observable,
+      rangeLimits: observable,
+      cutAwayConeAngle: observable,
+      customTFTexture: observable.ref,
+      isFocusLoaded: observable,
+      setImage: action,
+      setGradientHistogram: action,
+      setBackgroundValue: action,
+      setShouldUseFocusVolume: action,
+      setFocusColor: action,
+      setTransferFunction: action,
+      setLightingMode: action,
+      setLaoIntensity: action,
+      setImageOpacity: action,
+      setContextOpacity: action,
+      setRangeLimits: action,
+      setCutAwayConeAngle: action,
+      setCustomTFTexture: action,
+      setFocusLoaded: action,
+      setSuppressedLightingMode: action,
+    });
+
     this.renderer = new THREE.WebGLRenderer({ alpha: true, canvas });
     this.renderer.xr.enabled = true;
     this.renderer.setPixelRatio(window.devicePixelRatio);
@@ -58,7 +128,7 @@ export class VolumeRenderer implements IDisposable {
 
     document.addEventListener("keydown", this.onKeyDown);
 
-    this.volume = new Volume(this);
+    this.volume = new Volume(this, this.renderer);
     // Position the volume in a reasonable height for XR.
     this.volume.position.set(0, 1.2, 0);
     this.scene.add(this.volume);
@@ -72,6 +142,21 @@ export class VolumeRenderer implements IDisposable {
     // this.intermediateRenderTarget.texture.magFilter = THREE.NearestFilter;
     this.screenAlignedQuad = ScreenAlignedQuad.forTexture(
       this.intermediateRenderTarget.texture,
+    );
+
+    const url = new URL(window.location.href);
+    const resolutionStepsParam = url.searchParams.get("resolutionSteps");
+    const resolutionSteps = resolutionStepsParam
+      ? Math.min(5, Math.max(1, parseInt(resolutionStepsParam)))
+      : 3;
+    this.resolutionComputer = new ResolutionComputer(
+      this.renderer,
+      this.scene,
+      this.camera,
+      new THREE.Vector2(this.canvas.width, this.canvas.height),
+      this.eagerRender,
+      resolutionSteps,
+      this.intermediateRenderTarget,
     );
 
     window.addEventListener("resize", this.resize);
@@ -104,23 +189,9 @@ export class VolumeRenderer implements IDisposable {
   private resize = () => {
     const aspect = window.innerWidth / window.innerHeight;
 
-    const url = new URL(window.location.href);
-    const sizeLimitParam = url.searchParams.get("sizeLimit");
-    const sizeLimit = sizeLimitParam
-      ? parseInt(sizeLimitParam)
-      : Math.max(window.innerHeight, window.innerWidth);
-
-    let renderTargetWidth, renderTargetHeight;
-    if (aspect >= 1) {
-      renderTargetWidth = Math.min(sizeLimit, window.innerWidth);
-      renderTargetHeight = Math.round(renderTargetWidth / aspect);
-    } else {
-      renderTargetHeight = Math.min(sizeLimit, window.innerHeight);
-      renderTargetWidth = Math.round(renderTargetHeight * aspect);
-    }
-    this.intermediateRenderTarget.setSize(
-      renderTargetWidth,
-      renderTargetHeight,
+    this.resolutionComputer.setTargetSize(
+      window.innerWidth,
+      window.innerHeight,
     );
 
     this.camera.aspect = aspect;
@@ -128,13 +199,23 @@ export class VolumeRenderer implements IDisposable {
 
     this.renderer.setSize(window.innerWidth, window.innerHeight);
 
-    this.eagerRender();
+    this.lazyRender();
   };
 
   private animate = () => {
-    if (this.lazyRenderTriggered || this.renderer.xr.isPresenting) {
+    this.volume.tick();
+
+    if (this.lazyRenderTriggered) {
+      this.resolutionComputer.restart();
+      this.lazyRenderTriggered = false;
+    }
+
+    this.resolutionComputer.tick();
+
+    if (this.renderer.xr.isPresenting) {
       this.eagerRender();
     }
+
     this.stats.update();
     this.flyControls.tick();
   };
@@ -145,39 +226,78 @@ export class VolumeRenderer implements IDisposable {
 
   private eagerRender = () => {
     if (!this.isImageLoaded) return;
-    this.lazyRenderTriggered = false;
 
+    this.renderer.setRenderTarget(null);
     if (this.renderer.xr.isPresenting) {
-      this.renderer.setRenderTarget(null);
       this.renderer.render(this.scene, this.camera);
     } else {
-      this.renderer.setRenderTarget(this.intermediateRenderTarget);
-      this.renderer.render(this.scene, this.camera);
-
-      this.renderer.setRenderTarget(null);
       this.screenAlignedQuad.renderWith(this.renderer);
     }
   };
 
+  public updateCurrentResolution() {
+    this.resolutionComputer.updateCurrentResolution();
+  }
+
+  public get isShowingFullResolution() {
+    return this.resolutionComputer.fullResolutionFlushed;
+  }
+
   private onCameraMove = () => {
+    if (
+      !this.renderer.xr.isPresenting &&
+      ((this.lightingMode.type === LightingModeType.LAO &&
+        this.transferFunction.updateLAOOnCameraMove) ||
+        (this.lightingMode.type === LightingModeType.Phong &&
+          this.transferFunction.updateNormalsOnCameraMove) ||
+        this.lightingTimeout)
+    ) {
+      this.onTransferFunctionChange();
+    }
+
+    this.volume.updateMatrixWorld();
     this.volume.updateCameraPosition(this.camera);
+    this.lazyRender();
+  };
+
+  private onTransferFunctionChange = () => {
+    if (!this.suppressedLightingMode) {
+      this.setSuppressedLightingMode(this.lightingMode);
+      this.setLightingMode(lightingModes[LightingModeType.None]);
+    }
+
+    if (this.lightingTimeout) {
+      clearTimeout(this.lightingTimeout);
+    }
+    this.lightingTimeout = setTimeout(() => {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      this.setLightingMode(this.suppressedLightingMode!);
+      this.setSuppressedLightingMode(undefined);
+      this.lightingTimeout = undefined;
+    }, 200);
+
     this.lazyRender();
   };
 
   /** Sets the base image to be rendered. */
   public setImage = (image: TextureAtlas) => {
+    this.onTransferFunctionChange();
+
     this.volume.setAtlas(image);
     this.isImageLoaded = true;
+    this.densityHistogram = generateHistogram(image.getAtlas());
+    this.setShouldUseFocusVolume(false);
 
-    // TODO: Can we maybe find a solution that does not require
-    // double-rendering for the initial frame?
-    this.eagerRender();
     this.onCameraMove();
   };
 
   /** Sets a focus volume. */
   public setFocus = (focus?: TextureAtlas) => {
+    this.onTransferFunctionChange();
+
     this.volume.setFocusAtlas(focus);
+    this.setShouldUseFocusVolume(Boolean(focus));
+    this.setFocusLoaded(Boolean(focus));
     this.lazyRender();
   };
 
@@ -219,20 +339,124 @@ export class VolumeRenderer implements IDisposable {
   };
 
   // User-defined rendering parameters
-  public get backgroundValue() {
-    return this.backgroundValueBox.get();
+  public setGradientHistogram(histogram: [number[], number, number]) {
+    this.gradientHistogram = histogram;
   }
-  public setBackgroundValue = action((value: number) => {
-    this.backgroundValueBox.set(Math.max(0, Math.min(1, value)));
-  });
 
-  public get imageOpacity() {
-    return this.imageOpacityBox.get();
+  @computed
+  public get backgroundColor() {
+    return `rgb(${this.backgroundValue * 255},${this.backgroundValue * 255},${
+      this.backgroundValue * 255
+    })`;
   }
-  public setImageOpacity = action((value: number) => {
-    this.imageOpacityBox.set(Math.max(0, Math.min(1, value)));
+  public setBackgroundValue = (value: number) => {
+    this.backgroundValue = Math.max(0, Math.min(1, value));
+  };
+
+  public setShouldUseFocusVolume = (shouldUseFocusVolume: boolean) => {
+    this.shouldUseFocusVolume = shouldUseFocusVolume;
     this.lazyRender();
-  });
+  };
+
+  public setFocusColor = (value: string) => {
+    try {
+      this.focusColor = tc(value).toRgbString();
+      this.lazyRender();
+    } catch {
+      // Intentionally left blank
+    }
+  };
+
+  public setTransferFunction = (value: TransferFunction) => {
+    this.onTransferFunctionChange();
+
+    if (this.transferFunction.type === TransferFunctionType.Density) {
+      this.densityRangeLimits = this.rangeLimits;
+    } else if (this.transferFunction.type === TransferFunctionType.FCEdges) {
+      this.edgeRangeLimits = this.rangeLimits;
+    }
+
+    this.transferFunction = value;
+    this.laoIntensity = value.defaultLAOIntensity;
+
+    if (this.transferFunction.type === TransferFunctionType.Density) {
+      this.rangeLimits = this.densityRangeLimits;
+    } else if (this.transferFunction.type === TransferFunctionType.FCEdges) {
+      this.rangeLimits = this.edgeRangeLimits;
+    }
+
+    this.lazyRender();
+  };
+
+  public setLightingMode = (value: LightingMode) => {
+    this.lightingMode = value;
+
+    if (value.type === LightingModeType.LAO) {
+      this.laoIntensity = this.transferFunction.defaultLAOIntensity;
+    }
+
+    this.lazyRender();
+  };
+
+  private setSuppressedLightingMode = (value?: LightingMode) => {
+    this.suppressedLightingMode = value;
+  };
+
+  public setLaoIntensity = (value: number) => {
+    this.laoIntensity = Math.max(0, value);
+  };
+
+  public setImageOpacity = (value: number) => {
+    this.imageOpacity = Math.max(0, Math.min(1, value));
+    this.lazyRender();
+  };
+
+  public setContextOpacity = (value: number) => {
+    this.onTransferFunctionChange();
+
+    this.contextOpacity = Math.max(0, Math.min(1, value));
+    this.lazyRender();
+  };
+
+  public setRangeLimits = (value: [number, number]) => {
+    this.onTransferFunctionChange();
+
+    this.rangeLimits = [
+      Math.max(0, Math.min(1, value[0])),
+      Math.max(0, Math.min(1, value[1])),
+    ];
+    this.lazyRender();
+  };
+
+  public setCutAwayConeAngle = (radians: number) => {
+    this.onTransferFunctionChange();
+
+    this.cutAwayConeAngle = radians;
+    this.lazyRender();
+  };
+
+  protected setCustomTFTexture(texture: THREE.Texture) {
+    this.customTFTexture = texture;
+    this.lazyRender();
+  }
+  public setCustomTFImage = (file: File) => {
+    const reader = new FileReader();
+    reader.addEventListener(
+      "load",
+      () => {
+        new THREE.TextureLoader().load(reader.result as string, (texture) => {
+          this.setCustomTFTexture(texture);
+        });
+      },
+      false,
+    );
+
+    reader.readAsDataURL(file);
+  };
+
+  protected setFocusLoaded(value: boolean) {
+    this.isFocusLoaded = value;
+  }
 
   // XR Management
   public async isXRAvailable() {

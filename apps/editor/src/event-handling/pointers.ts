@@ -7,7 +7,7 @@ import {
 } from "@visian/ui-shared";
 import { IDisposer } from "@visian/utils";
 
-import { RootStore, Tool } from "../models";
+import { RootStore, ToolType } from "../models";
 
 export const setUpPointerHandling = (
   store: RootStore,
@@ -28,14 +28,14 @@ export const setUpPointerHandling = (
         id === "mainView" &&
           (context.device === "touch" ||
             context.button === PointerButton.MMB ||
-            (activeTool === Tool.Crosshair &&
+            (activeTool === ToolType.Crosshair &&
               context.button === PointerButton.RMB) ||
             context.ctrlKey ||
-            activeTool === Tool.Hand),
+            activeTool === ToolType.Navigate),
       );
 
       if (!context.useForGesture) {
-        if (activeTool === Tool.Crosshair || id !== "mainView") {
+        if (activeTool === ToolType.Crosshair || id !== "mainView") {
           // Crosshairs are only active if side views are shown.
           if (store.editor.viewSettings.shouldShowSideViews) {
             store.editor.viewSettings.moveCrosshair(
@@ -64,6 +64,7 @@ export const setUpPointerHandling = (
 
       if (id !== "mainView") return;
       if (eventType === "start" || eventType === "rebase") {
+        store.editor.tools.setIsNavigationDragged(true);
         const transformOrigin = store.editor.sliceRenderer.getMainViewScreenPosition(
           store.editor.viewSettings.offset,
         );
@@ -72,6 +73,8 @@ export const setUpPointerHandling = (
           translateY: transformOrigin.y,
           scale: store.editor.viewSettings.zoomLevel,
         });
+      } else if (eventType === "end") {
+        store.editor.tools.setIsNavigationDragged(false);
       }
 
       const transform = gesture.getTransformed();

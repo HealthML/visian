@@ -27,9 +27,7 @@ export const atlasGrid: Pixel = {
   y: 12,
 };
 
-export const getConnectedStructureGeometries: () => Promise<
-  THREE.BufferGeometry
->[] = () => {
+export const getConnectedStructureGeometries: () => Promise<THREE.BufferGeometry>[] = () => {
   const geometryLoader = new THREE.BufferGeometryLoader();
 
   return Array.from({ length: preGeneratedGeometries.length }, (_, i) => i).map(

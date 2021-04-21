@@ -41,13 +41,20 @@ void main() {
   #ifdef IMAGE
     // TODO: How do we display two components?
 
-    // TODO: Brightness and contrast adjustments for 3/4 components.
     if(uComponents == 3) {
-      gl_FragColor = vec4(texelValue.rgb, 1.0);
+      gl_FragColor = vec4(
+        vec3(uBrightness)
+          * vec3(pow(texelValue.r, uContrast), pow(texelValue.g, uContrast), pow(texelValue.b, uContrast)),
+        1.0
+      );
       return;
     }
     if(uComponents == 4) {
-      gl_FragColor = texelValue;
+      gl_FragColor = vec4(
+        vec3(uBrightness)
+          * vec3(pow(texelValue.r, uContrast), pow(texelValue.g, uContrast), pow(texelValue.b, uContrast)),
+        texelValue.a
+      );
       return;
     }
 

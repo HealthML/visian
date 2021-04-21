@@ -3,7 +3,8 @@ import { makeObservable, observable } from "mobx";
 
 const colorModes = {
   light: {
-    text: "#000",
+    text: "rgba(0,0,0,0.8)",
+    lightText: "rgba(0,0,0,0.5)",
     background: "#fff",
     primary: "#00f",
     secondary: "#00a",
@@ -15,19 +16,36 @@ const colorModes = {
     sheetBorder: "rgba(50, 50, 50, 0.3)",
     placeholder: "rgba(0, 0, 0, 0.2)",
     modalUnderlay: "rgba(255, 255, 255, 0.8)",
+    green: "#049C6D",
+    red: "#CA3345",
+    redSheet: "rgba(202,51,69,0.3)",
+    redBorder: "rgba(202,51,69,0.5)",
+    blueSheet: "rgba(0,133,255,0.4)",
+    blueBorder: "rgba(0,133,255,0.6)",
+    sideViewSheet: "rgba(0, 0, 0, 0.05)",
+    sideViewBorder: "rgba(0, 0, 0, 0.3)",
   },
   dark: {
-    text: "#fff",
+    text: "rgba(255,255,255,0.8)",
+    lightText: "rgba(255,255,255,0.4)",
     background: "#0C0E1B",
     primary: "#0cf",
     secondary: "#f0e",
     gray: "rgba(255,255,255,0.5)",
-    lightGray: "rgba(255,255,255,0.5)",
+    lightGray: "rgba(255,255,255,0.3)",
     veryLightGray: "rgba(255,255,255,0.1)",
     sheet: "rgba(255,255,255,0.1)",
     sheetBorder: "rgba(255, 255, 255, 0.3)",
     placeholder: "rgba(255, 255, 255, 0.2)",
     modalUnderlay: "rgba(12, 14, 27, 0.8)",
+    green: "#049C6D",
+    red: "#CA3345",
+    redSheet: "rgba(202,51,69,0.3)",
+    redBorder: "rgba(202,51,69,0.5)",
+    blueSheet: "rgba(0,133,255,0.4)",
+    blueBorder: "rgba(0,133,255,0.6)",
+    sideViewSheet: "rgba(255, 255, 255, 0.05)",
+    sideViewBorder: "rgba(255, 255, 255, 0.3)",
   },
 };
 
@@ -37,6 +55,15 @@ const colorModes = {
  * @see https://styled-system.com/theme-specification
  */
 export const theme = {
+  /**
+   * The id of the applications root element for absolutely positioned overlays
+   * such as modals or tooltips.
+   *
+   * This should not change while the application is running.
+   * Unset it here if you are not using a dedicated modal root.
+   */
+  modalRootId: "modal-root",
+
   borders: {},
   borderStyles: {},
   borderWidths: {},
@@ -55,6 +82,7 @@ export const theme = {
   },
   fontWeights: {
     bold: "700",
+    regular: "400",
     default: "300",
   },
   letterSpacings: {},
@@ -78,7 +106,7 @@ export const theme = {
     iconLarge: "30px",
     maxContentWidth: "940px",
     recordImage: "220px",
-    buttonHeight: "46px",
+    buttonHeight: "40px",
     sliderHeight: "30px",
     sliderThumbWidth: "2px",
     sliderThumbHeight: "22px",
@@ -86,10 +114,14 @@ export const theme = {
   space: {
     iconMargin: "12px",
     listIndentation: "16px",
-    buttonPadding: "12px 40px",
+    buttonPadding: "12px 20px",
     inputPadding: "12px 22px",
   },
-  zIndices: {},
+  zIndices: {
+    modal: 50,
+    overlay: 100,
+    notification: 150,
+  },
 };
 
 export type ColorMode = keyof typeof colorModes;

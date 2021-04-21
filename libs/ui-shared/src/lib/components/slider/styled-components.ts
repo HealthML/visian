@@ -3,21 +3,20 @@ import styled from "styled-components";
 import {
   color,
   computeStyleValue,
-  fontSize,
   lineHeight,
   scaleMetric,
   size,
   ThemeProps,
 } from "../../theme";
-import { Text } from "../text";
 import { SliderRangeSelectionProps, ThumbProps } from "./slider.props";
-import { SliderStylingSettings, SliderVerticalitySettings } from "./types";
+import { SliderVerticalitySettings } from "./types";
 
 export const SliderContainer = styled.div<SliderVerticalitySettings>`
   align-items: center;
   cursor: pointer;
   display: flex;
   height: ${(props) => (props.isVertical ? "100%" : size("sliderHeight"))};
+  pointer-events: auto;
   position: relative;
   margin: ${(props) => {
     const margin = scaleMetric(size("sliderThumbWidth")(props), 0.5);
@@ -65,33 +64,6 @@ export const SliderThumb = styled.div.attrs<ThumbProps>((props) => {
   transition: background-color 0.3s;
   width: ${(props) =>
     props.isVertical ? size("sliderThumbHeight") : size("sliderThumbWidth")};
-  z-index: 10;
-`;
-
-export const SliderLabel = styled(Text).attrs<ThumbProps>((props) => {
-  const thumbPositionMain = `${props.position * 100}%`;
-  const thumbPositionAcross = computeStyleValue<ThemeProps>(
-    [size("sliderHeight")],
-    (sliderHeight) => -sliderHeight,
-  )(props);
-
-  return {
-    style: {
-      top: props.isVertical ? thumbPositionMain : thumbPositionAcross,
-      left: props.isVertical ? thumbPositionAcross : thumbPositionMain,
-    },
-  };
-})<ThumbProps & SliderStylingSettings>`
-  display: block;
-  line-height: ${fontSize("default")};
-  margin: ${(props) =>
-    props.isVertical
-      ? `${scaleMetric(fontSize("default")(props), -0.5)} 0 0 0`
-      : "0 0 0 -50%"};
-  opacity: 0.6;
-  position: absolute;
-  text-align: ${(props) => (props.isVertical ? "right" : "center")};
-  width: ${(props) => !props.isVertical && "100%"};
   z-index: 10;
 `;
 

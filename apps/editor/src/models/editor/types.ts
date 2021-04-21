@@ -1,5 +1,5 @@
-export enum Tool {
-  Hand = 0,
+export enum ToolType {
+  Navigate = 0,
   Crosshair = 1,
   Brush = 2,
   Eraser = 3,

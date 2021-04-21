@@ -1,19 +1,42 @@
-import { IDisposer, ViewType, writeSingleMedicalImage } from "@visian/utils";
-import FileSaver from "file-saver";
+import { IDisposer, ViewType } from "@visian/utils";
 import hotkeys from "hotkeys-js";
+
 import { skipSlices } from "../constants";
 
-import type { RootStore } from "../models";
+import { RootStore, ToolType } from "../models";
 
 export const setUpHotKeys = (store: RootStore): IDisposer => {
   hotkeys.filter = () => true;
 
+  // Tool Selection
+  // based on the [Photoshop keys for selecting tools](https://helpx.adobe.com/photoshop-elements/using/keys-selecting-tools.html)
+  hotkeys("h", (event) => {
+    event.preventDefault();
+    store.editor.tools.setActiveTool(ToolType.Navigate);
+  });
+  hotkeys("c", (event) => {
+    event.preventDefault();
+    store.editor.tools.setActiveTool(ToolType.Crosshair);
+  });
+  hotkeys("b", (event) => {
+    event.preventDefault();
+    store.editor.tools.setActiveTool(ToolType.Brush);
+  });
+  hotkeys("s", (event) => {
+    event.preventDefault();
+    store.editor.tools.setActiveTool(ToolType.SmartBrush);
+  });
+  hotkeys("e", (event) => {
+    event.preventDefault();
+    store.editor.tools.setActiveTool(ToolType.Eraser);
+  });
+
   // Tools
-  hotkeys("del", (event) => {
+  hotkeys("del,backspace", (event) => {
     event.preventDefault();
     store.editor.tools.clearSlice();
   });
-  hotkeys("ctrl+del", (event) => {
+  hotkeys("ctrl+del,ctrl+backspace", (event) => {
     event.preventDefault();
     store.editor.tools.clearImage();
   });
@@ -37,17 +60,22 @@ export const setUpHotKeys = (store: RootStore): IDisposer => {
     store.editor.undoRedo.redo();
   });
 
+  // Layer Controls
+  hotkeys("m", () => {
+    store.editor.setIsAnnotationVisible(!store.editor.isAnnotationVisible);
+  });
+
   // View Types
-  hotkeys("t", () => {
-    store.editor.viewSettings.setMainView(ViewType.Transverse);
+  hotkeys("1", () => {
+    store.editor.viewSettings.setMainViewType(ViewType.Transverse);
   });
-  hotkeys("s", () => {
-    store.editor.viewSettings.setMainView(ViewType.Sagittal);
+  hotkeys("2", () => {
+    store.editor.viewSettings.setMainViewType(ViewType.Sagittal);
   });
-  hotkeys("c", () => {
-    store.editor.viewSettings.setMainView(ViewType.Coronal);
+  hotkeys("3", () => {
+    store.editor.viewSettings.setMainViewType(ViewType.Coronal);
   });
-  hotkeys("v", () => {
+  hotkeys("0", () => {
     store.editor.viewSettings.toggleSideViews();
   });
 
@@ -93,18 +121,11 @@ export const setUpHotKeys = (store: RootStore): IDisposer => {
   });
   hotkeys("ctrl+e", (event) => {
     event.preventDefault();
-
-    const image = store.editor.annotation;
-    if (!image) return;
-
-    writeSingleMedicalImage(
-      image.toITKImage(),
-      `${image.name.split(".")[0]}.nii.gz`,
-    ).then((file) => {
-      if (!file) return;
-
-      FileSaver.saveAs(file, file.name);
-    });
+    store.editor.quickExport();
+  });
+  hotkeys("ctrl+shift+e", (event) => {
+    event.preventDefault();
+    store.editor.quickExportSlice();
   });
 
   return () => hotkeys.unbind();

@@ -1,3 +1,5 @@
+import type { ColorMode } from "@visian/ui-shared";
+
 export interface StoreContext {
   /**
    * Requests changes to be persisted.
@@ -10,4 +12,15 @@ export interface StoreContext {
    * All changes will be flushed to local storage asap.
    */
   persistImmediately(): Promise<void>;
+
+  setDirty(): void;
+
+  getTheme(): ColorMode;
+}
+
+export interface ErrorNotification {
+  title?: string;
+  titleTx?: string;
+  description?: string;
+  descriptionTx?: string;
 }

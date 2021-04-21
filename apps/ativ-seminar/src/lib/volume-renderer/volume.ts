@@ -1,6 +1,6 @@
-import { TextureAtlas } from "@visian/utils";
 import * as THREE from "three";
 
+import { TextureAtlas } from "../texture-atlas";
 import { IDisposable } from "../types";
 import VolumeMaterial from "./volume-material";
 
@@ -8,12 +8,19 @@ import type VolumeRenderer from "./volume-renderer";
 
 /** A volume domain. */
 class Volume extends THREE.Mesh implements IDisposable {
-  constructor(protected renderer: VolumeRenderer) {
-    super(new THREE.BoxGeometry(1, 1, 1), new VolumeMaterial(renderer));
+  constructor(volumeRenderer: VolumeRenderer, renderer: THREE.WebGLRenderer) {
+    super(
+      new THREE.BoxGeometry(1, 1, 1),
+      new VolumeMaterial(volumeRenderer, renderer),
+    );
 
     // The coordinate system in medical images usually has the object
     // laying on the side. We want it to be upright.
     this.rotateX(-Math.PI / 2);
+  }
+
+  public tick() {
+    (this.material as VolumeMaterial).tick();
   }
 
   /** Updates the rendered image. */

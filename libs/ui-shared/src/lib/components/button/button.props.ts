@@ -1,5 +1,19 @@
 import type React from "react";
-
+import type { IconType } from "../icon";
+import type { TooltipPosition } from "../tooltip";
 import type { I18nProps } from "../types";
 
-export type ButtonProps = React.HTMLAttributes<HTMLDivElement> & I18nProps;
+export interface ButtonProps
+  extends React.HTMLAttributes<HTMLButtonElement>,
+    I18nProps {
+  /** The key of the button's icon (if any). */
+  icon?: IconType;
+
+  tooltip?: string;
+  tooltipTx?: string;
+  tooltipPosition?: TooltipPosition;
+  showTooltip?: boolean;
+
+  isActive?: boolean;
+  isDisabled?: boolean;
+}

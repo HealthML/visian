@@ -4,25 +4,25 @@ import React, {
   useRef,
 } from "react";
 
-import { SliderProps } from "./slider.props";
+import { FlexRow, InputContainer, Spacer } from "../box";
+import { SliderLabel } from "../text";
+import { SliderFieldProps, SliderProps } from "./slider.props";
 import {
   SliderContainer,
-  SliderLabel,
   SliderRangeSelection,
   SliderThumb,
   SliderTrack,
 } from "./styled-components";
 import { pointerToSliderValue, useDrag, valueToSliderPos } from "./utils";
 
-const defaultFormatLabel = (value: number) =>
-  `${Math.round(value * 100) / 100}`;
+const defaultFormatLabel = (values: number[]) =>
+  values.map((value) => value.toFixed(2)).join("-");
 
 /** A custom slider component built to work well with touch input. */
 export const Slider: React.FC<SliderProps> = (props) => {
   const {
     children,
     defaultValue,
-    formatLabel = defaultFormatLabel,
     isInverted,
     isVertical,
     min = 0,
@@ -31,8 +31,7 @@ export const Slider: React.FC<SliderProps> = (props) => {
     enforceSerialThumbs: preventCrossing,
     roundMethod,
     scaleType,
-    shouldShowLabel,
-    shouldShowRange,
+    showRange,
     stepSize,
     value,
     ...rest
@@ -193,26 +192,21 @@ export const Slider: React.FC<SliderProps> = (props) => {
       ref={sliderRef}
     >
       <SliderTrack isVertical={isVertical} />
-      {shouldShowRange && valueArray.length >= 2 && (
+      {showRange && valueArray.length >= 2 && (
         <SliderRangeSelection
           isInverted={isInverted}
           isVertical={isVertical}
           positions={thumbPositions}
         />
       )}
-      {valueArray.map((thumbValue, index) => {
+      {valueArray.map((_thumbValue, index) => {
         const thumbPos = thumbPositions[index];
         return (
-          <>
-            <SliderThumb isVertical={isVertical} position={thumbPos} />
-            {shouldShowLabel && (
-              <SliderLabel
-                isVertical={isVertical}
-                position={thumbPos}
-                text={formatLabel(thumbValue)}
-              />
-            )}
-          </>
+          <SliderThumb
+            key={index}
+            isVertical={isVertical}
+            position={thumbPos}
+          />
         );
       })}
       {children}
@@ -220,4 +214,34 @@ export const Slider: React.FC<SliderProps> = (props) => {
   );
 };
 
-export default Slider;
+export const SliderField: React.FC<SliderFieldProps> = ({
+  labelTx,
+  label,
+  showValueLabel,
+  formatValueLabel = defaultFormatLabel,
+  value,
+  defaultValue,
+  min = 0,
+  ...rest
+}) => {
+  const actualValue = value === undefined ? defaultValue || min : value;
+
+  return (
+    <InputContainer>
+      {(labelTx || label || showValueLabel) && (
+        <FlexRow>
+          {(labelTx || label) && <SliderLabel text={label} tx={labelTx} />}
+          <Spacer />
+          {showValueLabel && (
+            <SliderLabel
+              text={formatValueLabel(
+                Array.isArray(actualValue) ? actualValue : [actualValue],
+              )}
+            />
+          )}
+        </FlexRow>
+      )}
+      <Slider {...rest} value={value} defaultValue={defaultValue} min={min} />
+    </InputContainer>
+  );
+};
