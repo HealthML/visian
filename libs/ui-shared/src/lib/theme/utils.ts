@@ -4,8 +4,10 @@ import { Theme, ThemeProps } from "./theme";
 /** Extracts a value from the theme passed to the component. */
 export const lookup = <K extends keyof Theme>(themeKey: K) => (
   valueKey: keyof Theme[K],
-) => (props: ThemeProps) => {
-  const values = props.theme[themeKey];
+) => ({ theme }: ThemeProps) => {
+  if (!theme) return valueKey;
+
+  const values = theme[themeKey];
   if (!values) return valueKey;
 
   const value = values[valueKey];
