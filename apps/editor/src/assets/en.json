@@ -23,6 +23,13 @@
   "pixel-eraser": "Eraser (E)",
   "clear-slice": "Clear Slice (Del)",
 
+  "brush-settings": "Brush Settings",
+  "smart-brush-settings": "Smart Brush Settings",
+  "brush-size": "Brush Size",
+  "lock-brush-size": "Lock Brush Size",
+  "seed-threshold": "Seed Threshold",
+  "neighbor-threshold": "Neighbor Threshold",
+
   "layers": "Layers",
   "no-layers": "No layers loaded.",
 

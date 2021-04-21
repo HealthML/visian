@@ -43,7 +43,13 @@ export const Title: React.FC<
 `;
 
 export const InputLabel = styled(Text)`
-  margin-bottom: 8px;
+  margin-bottom: 10px;
+  font-size: ${fontSize("small")};
+  line-height: 10px;
+`;
+
+export const SliderLabel = styled(Text)`
+  margin-bottom: 6px;
   font-size: ${fontSize("small")};
   line-height: 10px;
 `;

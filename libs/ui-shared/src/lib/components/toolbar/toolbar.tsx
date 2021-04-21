@@ -42,7 +42,7 @@ export const Tool = React.forwardRef<HTMLButtonElement, ToolProps>(
       (event: React.PointerEvent<HTMLButtonElement>) => {
         if (onPointerDown) onPointerDown(event);
         if (isDisabled) return;
-        if (onPress) onPress(value);
+        if (onPress) onPress(value, event);
       },
       [isDisabled, onPointerDown, onPress, value],
     );

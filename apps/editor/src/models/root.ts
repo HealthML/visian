@@ -39,7 +39,7 @@ export class RootStore implements ISerializable<RootSnapshot> {
     this.editor = new Editor({
       persist: this.persist,
       persistImmediately: this.persistImmediately,
-      setDirty: this.setIsDirty,
+      setDirty: action(this.setIsDirty),
       getTheme: () => this.theme,
     });
 
