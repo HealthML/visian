@@ -70,7 +70,7 @@ export const ViewSettings: React.FC = observer(() => {
         style={modalPosition}
         isOpen={isModalOpen}
         labelTx="view-settings"
-        onReset={store?.editor.viewSettings.reset}
+        onReset={store?.editor.viewSettings.resetSettings}
       >
         {(!store?.editor.image || store?.editor.image.dimensionality > 2) && (
           <>

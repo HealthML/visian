@@ -185,10 +185,17 @@ export class EditorViewSettings
 
   public reset = () => {
     this.setSelectedVoxel();
-    this.toggleSideViews(true);
+    this.toggleSideViews(this.shouldShowSideViews);
     if (this.editor.image && this.editor.image.dimensionality < 3) {
       this.setMainViewType(ViewType.Transverse);
     }
+    this.setContrast();
+    this.setBrightness();
+  };
+
+  public resetSettings = () => {
+    this.toggleSideViews(true);
+    this.setMainViewType(ViewType.Transverse);
     this.setContrast();
     this.setBrightness();
   };
