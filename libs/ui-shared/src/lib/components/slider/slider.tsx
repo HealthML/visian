@@ -5,7 +5,7 @@ import React, {
 } from "react";
 
 import { FlexRow, InputContainer, Spacer } from "../box";
-import { InputLabel } from "../text";
+import { SliderLabel } from "../text";
 import { SliderFieldProps, SliderProps } from "./slider.props";
 import {
   SliderContainer,
@@ -230,10 +230,10 @@ export const SliderField: React.FC<SliderFieldProps> = ({
     <InputContainer>
       {(labelTx || label || showValueLabel) && (
         <FlexRow>
-          {(labelTx || label) && <InputLabel text={label} tx={labelTx} />}
+          {(labelTx || label) && <SliderLabel text={label} tx={labelTx} />}
           <Spacer />
           {showValueLabel && (
-            <InputLabel
+            <SliderLabel
               text={formatValueLabel(
                 Array.isArray(actualValue) ? actualValue : [actualValue],
               )}
