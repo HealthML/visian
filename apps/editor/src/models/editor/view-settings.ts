@@ -117,7 +117,7 @@ export class EditorViewSettings
     this.zoomLevel = Math.max(minZoom, this.zoomLevel - this.zoomStep);
   }
 
-  public setOffset({ x = 0, y = 0 }) {
+  public setOffset({ x = 0, y = 0 } = {}) {
     this.offset.set(x, y);
   }
 
