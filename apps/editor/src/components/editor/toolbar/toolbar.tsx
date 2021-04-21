@@ -76,8 +76,8 @@ export const Toolbar: React.FC = observer(() => {
     [store],
   );
   const setBrushSize = useCallback(
-    (value: number) => {
-      store?.editor.tools.setBrushSizePixels(value, true);
+    (value: number | number[]) => {
+      store?.editor.tools.setBrushSizePixels(value as number, true);
     },
     [store],
   );
@@ -166,8 +166,7 @@ export const Toolbar: React.FC = observer(() => {
           max={250}
           scaleType="quadratic"
           value={store?.editor.tools.brushSizePixels}
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          onChange={setBrushSize as any}
+          onChange={setBrushSize}
         />
         {activeTool === ToolType.SmartBrush && (
           <>

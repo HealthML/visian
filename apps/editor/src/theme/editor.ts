@@ -10,6 +10,3 @@ export const brushCursor = {
   linewidth: 1,
   opacity: 1,
 };
-
-/** The amount of time the brush cursor preview is shown (in ms). */
-export const brushSizePreviewTime = 1000;

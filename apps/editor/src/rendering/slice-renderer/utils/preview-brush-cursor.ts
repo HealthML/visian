@@ -1,8 +1,8 @@
 import { ViewType } from "@visian/utils";
 import { reaction } from "mobx";
 
+import { brushSizePreviewTime } from "../../../constants";
 import { Editor } from "../../../models";
-import { brushSizePreviewTime } from "../../../theme";
 import { BrushCursor } from "./brush-cursor";
 
 export class PreviewBrushCursor extends BrushCursor {
@@ -34,11 +34,9 @@ export class PreviewBrushCursor extends BrushCursor {
     this.active = true;
     this.updateVisibility();
 
-    if (this.timeout) {
+    if (this.timeout !== undefined) {
       clearTimeout(this.timeout);
-      this.timeout = undefined;
     }
-
     this.timeout = setTimeout(() => {
       this.active = false;
       this.updateVisibility();
@@ -49,7 +47,7 @@ export class PreviewBrushCursor extends BrushCursor {
     this.active = false;
     this.updateVisibility();
 
-    if (this.timeout) {
+    if (this.timeout !== undefined) {
       clearTimeout(this.timeout);
       this.timeout = undefined;
     }

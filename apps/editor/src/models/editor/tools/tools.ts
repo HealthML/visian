@@ -162,11 +162,7 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
     this.brushWidthScreen = (clampedValue + 0.5) * pixelWidth;
 
     if (!showPreview) return;
-
-    const sliceRenderer = this.editor.sliceRenderer;
-    if (!sliceRenderer) return;
-
-    sliceRenderer.showBrushCursorPreview();
+    this.editor.sliceRenderer?.showBrushCursorPreview();
   };
 
   public setSmartBrushSeedThreshold = (value = 6) => {
@@ -286,8 +282,8 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
 
   public alignBrushCursor(
     uv: THREE.Vector2,
-    preview = false,
     viewType = this.editor.viewSettings.mainViewType,
+    preview = false,
   ) {
     if (!this.editor.sliceRenderer || !this.editor.image) return;
     const { voxelCount } = this.editor.image;

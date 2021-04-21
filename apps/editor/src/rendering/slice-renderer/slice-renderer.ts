@@ -201,7 +201,7 @@ export class SliceRenderer implements IDisposable {
 
     const centeredUV = new THREE.Vector2().setScalar(0.5).sub(uvOffset);
 
-    this.editor.tools.alignBrushCursor(centeredUV, true);
+    this.editor.tools.alignBrushCursor(centeredUV, viewType, true);
 
     slice.previewBrushCursor.show();
   }
