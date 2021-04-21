@@ -76,6 +76,8 @@ export class EditorViewSettings
   }
 
   public setMainViewType = (value: ViewType) => {
+    if (this.editor.tools.isDrawing) return;
+
     this.mainViewType =
       this.editor.image && this.editor.image.dimensionality > 2
         ? value
@@ -133,12 +135,16 @@ export class EditorViewSettings
     x = this.editor.image ? Math.floor(this.editor.image?.voxelCount.x / 2) : 0,
     y = this.editor.image ? Math.floor(this.editor.image?.voxelCount.y / 2) : 0,
     z = this.editor.image ? Math.floor(this.editor.image?.voxelCount.z / 2) : 0,
+    forceUpdate?: boolean,
   ) {
+    if (this.editor.tools.isDrawing && !forceUpdate) return;
     this.selectedVoxel.set(x, y, z);
   }
 
   public setSelectedSlice(value: number, viewType = this.mainViewType) {
-    if (!this.editor.image) return;
+    if (!this.editor.image || this.editor.tools.isDrawing) {
+      return;
+    }
 
     this.selectedVoxel.setFromView(
       viewType,
@@ -162,6 +168,8 @@ export class EditorViewSettings
   }
 
   public moveCrosshair(screenPosition: Pixel, canvasId: string) {
+    if (this.editor.tools.isDrawing) return;
+
     const sliceRenderer = this.editor.sliceRenderer;
     if (!sliceRenderer || !this.editor.image || !this.shouldShowSideViews)
       return;
