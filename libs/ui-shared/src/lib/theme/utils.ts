@@ -17,6 +17,7 @@ export const border = lookup("borders");
 export const borderStyle = lookup("borderStyles");
 export const borderWidths = lookup("borderWidths");
 export const color = lookup("colors");
+export const duration = lookup("durations");
 export const font = lookup("fonts");
 export const fontSize = lookup("fontSizes");
 export const fontWeight = lookup("fontWeights");

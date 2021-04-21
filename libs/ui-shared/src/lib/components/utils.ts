@@ -14,6 +14,9 @@ export const useIsDraggedOver = () => {
   }, [setIsDraggedOver]);
 
   const onDragEnd = useCallback(() => {
+    if (dragTimerRef.current !== undefined) {
+      clearTimeout(dragTimerRef.current);
+    }
     dragTimerRef.current = (setTimeout(() => {
       setIsDraggedOver(false);
     }, 25) as unknown) as NodeJS.Timer;
@@ -77,4 +80,36 @@ export const useUpdateOnResize = (isActive = true) => {
   }, [isActive]);
 
   return size;
+};
+
+export const useDelay = (
+  callback: () => void,
+  delay: number,
+): [() => void, () => void] => {
+  const timerRef = useRef<NodeJS.Timer>();
+
+  const cancel = useCallback(() => {
+    if (timerRef.current !== undefined) {
+      clearTimeout(timerRef.current);
+      timerRef.current = undefined;
+    }
+  }, []);
+
+  const schedule = useCallback(() => {
+    if (timerRef.current !== undefined) {
+      clearTimeout(timerRef.current);
+    }
+    timerRef.current = (setTimeout(callback, delay) as unknown) as NodeJS.Timer;
+  }, [callback, delay]);
+
+  useEffect(() => {
+    return () => {
+      if (timerRef.current !== undefined) {
+        clearTimeout(timerRef.current);
+        timerRef.current = undefined;
+      }
+    };
+  }, []);
+
+  return [schedule, cancel];
 };
