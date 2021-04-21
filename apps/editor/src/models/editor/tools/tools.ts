@@ -30,6 +30,7 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
 
   public isCursorOverDrawableArea = false;
   public isNavigationDragged = false;
+  public isDrawing = false;
 
   private brushWidthScreen = 0.02;
   private lockedBrushSizePixels?: number;
@@ -69,10 +70,14 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
       [ToolType.SmartEraser]: this.smartBrush,
     };
 
-    makeObservable<this, "brushWidthScreen" | "lockedBrushSizePixels">(this, {
+    makeObservable<
+      this,
+      "brushWidthScreen" | "lockedBrushSizePixels" | "setIsDrawing"
+    >(this, {
       activeTool: observable,
       isCursorOverDrawableArea: observable,
       isNavigationDragged: observable,
+      isDrawing: observable,
       smartBrushNeighborThreshold: observable,
       smartBrushSeedThreshold: observable,
       brushWidthScreen: observable,
@@ -86,6 +91,7 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
       setActiveTool: action,
       setCursorOverDrawableArea: action,
       setIsNavigationDragged: action,
+      setIsDrawing: action,
       setBrushSizePixels: action,
       setSmartBrushSeedThreshold: action,
       setSmartBrushNeighborThreshold: action,
@@ -145,6 +151,10 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
 
   public setIsNavigationDragged(value = true) {
     this.isNavigationDragged = value;
+  }
+
+  public setIsDrawing(value = true) {
+    this.isDrawing = value;
   }
 
   public setBrushSizePixels = (value = 5, showPreview = false) => {
@@ -267,6 +277,7 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
     const tool = (alt ? this.altBrushMap : this.brushMap)[this.activeTool];
     switch (eventType) {
       case "start":
+        this.setIsDrawing(true);
         this.context?.setDirty();
         tool?.startAt(dragPoint);
         break;
@@ -275,6 +286,7 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
         tool?.moveTo(dragPoint);
         break;
       case "end":
+        this.setIsDrawing(false);
         tool?.endAt(dragPoint);
         break;
     }
