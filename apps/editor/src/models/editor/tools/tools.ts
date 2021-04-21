@@ -90,6 +90,8 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
       setSmartBrushSeedThreshold: action,
       setSmartBrushNeighborThreshold: action,
       lockBrushSize: action,
+      resetBrushSize: action,
+      resetSmartBrush: action,
     });
   }
 
@@ -191,6 +193,17 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
     const decrement = this.brushSizePixels <= 1 ? 0.5 : 1;
     this.setBrushSizePixels(this.brushSizePixels - decrement);
   }
+
+  public resetBrushSize = () => {
+    this.lockBrushSize(false);
+    this.brushWidthScreen = 0.02;
+  };
+
+  public resetSmartBrush = () => {
+    this.resetBrushSize();
+    this.smartBrushNeighborThreshold = 6;
+    this.smartBrushSeedThreshold = 10;
+  };
 
   public toJSON() {
     return {};
