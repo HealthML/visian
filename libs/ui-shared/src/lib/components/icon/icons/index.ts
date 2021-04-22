@@ -12,6 +12,7 @@ export { ReactComponent as menu } from "./menu.svg";
 export { ReactComponent as moveTool } from "./move-tool.svg";
 export { ReactComponent as pixelBrush } from "./pixel-brush.svg";
 export { ReactComponent as redo } from "./redo.svg";
+export { ReactComponent as reset } from "./reset.svg";
 export { ReactComponent as settings } from "./settings.svg";
 export { ReactComponent as trash } from "./trash.svg";
 export { ReactComponent as undo } from "./undo.svg";
