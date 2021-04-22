@@ -15,7 +15,7 @@ import type { Editor } from "./editor";
 export interface EditorViewSettingsSnapshot {
   mainViewType?: ViewType;
   selectedVoxel?: number[];
-  shouldShowSideViews?: boolean;
+  showSideViews?: boolean;
   contrast?: number;
   brightness?: number;
 }
@@ -211,7 +211,7 @@ export class EditorViewSettings
     return {
       mainViewType: this.mainViewType,
       selectedVoxel: this.selectedVoxel.toJSON(),
-      shouldShowSideViews: this.showSideViews,
+      showSideViews: this.showSideViews,
 
       contrast: this.contrast,
       brightness: this.brightness,
@@ -225,7 +225,7 @@ export class EditorViewSettings
     } else {
       this.setSelectedVoxel();
     }
-    this.toggleSideViews(Boolean(snapshot.shouldShowSideViews));
+    this.toggleSideViews(Boolean(snapshot.showSideViews));
 
     this.setContrast(snapshot.contrast);
     this.setBrightness(snapshot.brightness);

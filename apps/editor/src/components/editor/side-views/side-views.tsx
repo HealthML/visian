@@ -17,9 +17,9 @@ import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
 
-const SideViewContainer = styled.div<{ shouldShowSideViews?: boolean }>`
+const SideViewContainer = styled.div<{ showSideViews?: boolean }>`
   box-sizing: border-box;
-  display: ${(props) => (props.shouldShowSideViews ? "flex" : "none")};
+  display: ${(props) => (props.showSideViews ? "flex" : "none")};
   flex-direction: column;
   position: relative;
   margin-right: 22px;
@@ -96,10 +96,7 @@ export const SideViews = observer(() => {
   }, [containerRef, showSideViews, size]);
 
   return (
-    <SideViewContainer
-      shouldShowSideViews={showSideViews}
-      ref={setContainerRef}
-    >
+    <SideViewContainer showSideViews={showSideViews} ref={setContainerRef}>
       <SideViewWrapper style={{ width: sideViewSize }}>
         <SideView style={{ marginBottom: 16 }}>
           <SideViewCanvas
