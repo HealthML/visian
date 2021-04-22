@@ -52,7 +52,6 @@ export const MainView = observer<{}, HTMLCanvasElement>(
     return (
       <SyledCanvas
         activeTool={store?.editor.tools.activeTool}
-        backgroundColor={store?.editor.getBackgroundColor()}
         isDrawable={store?.editor.tools.canDraw}
         isNavigationDragged={store?.editor.tools.isNavigationDragged}
         onContextMenu={preventDefault}
