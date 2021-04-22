@@ -5,6 +5,7 @@ import {
   InvisibleButton,
   Notification,
   Text,
+  SquareButton,
 } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
 import React, { useCallback } from "react";
@@ -42,10 +43,23 @@ const ColumnLeft = styled.div`
   justify-content: flex-start;
 `;
 
+const ColumnCenter = styled.div`
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  justify-content: flex-start;
+`;
+
 const ColumnRight = styled.div`
   display: flex;
   flex-direction: row;
   justify-content: flex-end;
+`;
+
+const MenuRow = styled.div`
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
 `;
 
 const RightBar = styled.div`
@@ -56,9 +70,8 @@ const RightBar = styled.div`
 
 const TopConsole = styled.div`
   align-items: center;
-  align-self: flex-start;
+  align-self: stretch;
   display: flex;
-  flex: 1;
   justify-content: center;
   margin: 0 12px;
   overflow: hidden;
@@ -101,6 +114,10 @@ const ErrorNotification = styled(Notification)`
   transform: translateX(-50%);
 `;
 
+const UndoRedoButton = styled(SquareButton)`
+  margin-right: 8px;
+`;
+
 export const UIOverlay = observer<UIOverlayProps>(
   ({ isDraggedOver, onDropCompleted, ...rest }) => {
     const store = useStore();
@@ -124,23 +141,39 @@ export const UIOverlay = observer<UIOverlayProps>(
           </StartTextContainer>
         )}
         <ColumnLeft>
-          <Menu />
+          <MenuRow>
+            <Menu />
+            <UndoRedoButton
+              icon="undo"
+              isActive={false}
+              isDisabled={!store?.editor.undoRedo.isUndoAvailable}
+              onPointerDown={store?.editor.undoRedo.undo}
+            />
+            <UndoRedoButton
+              icon="redo"
+              isActive={false}
+              isDisabled={!store?.editor.undoRedo.isRedoAvailable}
+              onPointerDown={store?.editor.undoRedo.redo}
+            />
+          </MenuRow>
           <Toolbar />
           <Layers />
         </ColumnLeft>
-        {store?.editor.image && (
-          <TopConsole>
-            <FileTitle text={store?.editor.image.name} />
-            <UnsavedChangesIndicator
-              isDirty={store?.isDirty}
-              tooltipTx={
-                store?.isDirty ? "unsaved-changes" : "saved-in-browser"
-              }
-              tooltipPosition="bottom"
-              onPointerDown={store?.persistImmediately}
-            />
-          </TopConsole>
-        )}
+        <ColumnCenter>
+          {store?.editor.image && (
+            <TopConsole>
+              <FileTitle text={store?.editor.image.name} />
+              <UnsavedChangesIndicator
+                isDirty={store?.isDirty}
+                tooltipTx={
+                  store?.isDirty ? "unsaved-changes" : "saved-in-browser"
+                }
+                tooltipPosition="bottom"
+                onPointerDown={store?.persistImmediately}
+              />
+            </TopConsole>
+          )}
+        </ColumnCenter>
         <ColumnRight>
           <SideViews />
           <RightBar>

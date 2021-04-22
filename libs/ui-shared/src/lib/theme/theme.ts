@@ -69,6 +69,7 @@ export const theme = {
   borderWidths: {},
   // breakpoints: ["478px", "767px", "991px", "1280px", "1440px", "1920px"],
   colors: colorModes.light,
+  durations: { tooltipDelay: 400 },
   fonts: {
     default: "DIN2014",
   },

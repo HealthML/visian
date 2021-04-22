@@ -119,7 +119,7 @@ export class EditorViewSettings
     this.zoomLevel = Math.max(minZoom, this.zoomLevel - this.zoomStep);
   }
 
-  public setOffset({ x = 0, y = 0 }) {
+  public setOffset({ x = 0, y = 0 } = {}) {
     this.offset.set(x, y);
   }
 
@@ -191,15 +191,22 @@ export class EditorViewSettings
     );
   }
 
-  public reset() {
+  public reset = () => {
     this.setSelectedVoxel();
-    this.toggleSideViews(true);
+    this.toggleSideViews(this.shouldShowSideViews);
     if (this.editor.image && this.editor.image.dimensionality < 3) {
       this.setMainViewType(ViewType.Transverse);
     }
     this.setContrast();
     this.setBrightness();
-  }
+  };
+
+  public resetSettings = () => {
+    this.toggleSideViews(true);
+    this.setMainViewType(ViewType.Transverse);
+    this.setContrast();
+    this.setBrightness();
+  };
 
   public toJSON() {
     return {

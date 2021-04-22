@@ -66,7 +66,12 @@ export const ViewSettings: React.FC = observer(() => {
         onPointerDown={toggleModal}
         isActive={isModalOpen}
       />
-      <Modal style={modalPosition} isOpen={isModalOpen} labelTx="view-settings">
+      <Modal
+        style={modalPosition}
+        isOpen={isModalOpen}
+        labelTx="view-settings"
+        onReset={store?.editor.viewSettings.resetSettings}
+      >
         {(!store?.editor.image || store?.editor.image.dimensionality > 2) && (
           <>
             <Switch

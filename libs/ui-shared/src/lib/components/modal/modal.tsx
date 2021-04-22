@@ -8,6 +8,12 @@ import { Sheet } from "../sheet";
 import { Title } from "../text";
 import { useOutsidePress } from "../utils";
 import { ModalProps } from "./modal.props";
+import { InvisibleButton } from "../button";
+
+const StyledButton = styled(InvisibleButton)`
+  width: 16px;
+  height: 16px;
+`;
 
 const ModalContainer = styled(Sheet)`
   justify-content: flex-start;
@@ -19,12 +25,23 @@ const ModalContainer = styled(Sheet)`
 
   width: 200px;
   z-index: ${zIndex("modal")};
+
+  position: relative;
 `;
 const ModalTitle = styled(Title)`
+  display: block;
+  flex: 1;
   font-size: 16px;
-  line-height: 16px;
   font-weight: ${fontWeight("regular")};
+  line-height: 16px;
+`;
+
+const TitleRow = styled.div`
+  align-items: center;
+  display: flex;
+  flex-direction: row;
   margin-bottom: 12px;
+  width: 100%;
 `;
 
 export const Divider = styled.div`
@@ -41,6 +58,7 @@ export const Modal: React.FC<ModalProps> = ({
   isOpen,
   children,
   onOutsidePress,
+  onReset,
   ...rest
 }) => {
   const ref = useRef<HTMLDivElement>(null);
@@ -53,7 +71,16 @@ export const Modal: React.FC<ModalProps> = ({
       <ModalContainer {...rest} ref={ref}>
         {(labelTx || label) && (
           <>
-            <ModalTitle tx={labelTx} text={label} />
+            <TitleRow>
+              <ModalTitle tx={labelTx} text={label} />
+              {onReset && (
+                <StyledButton
+                  icon="reset"
+                  isActive={false}
+                  onPointerDown={onReset}
+                />
+              )}
+            </TitleRow>
             <Divider />
           </>
         )}

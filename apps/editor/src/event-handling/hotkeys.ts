@@ -96,6 +96,10 @@ export const setUpHotKeys = (store: RootStore): IDisposer => {
     event.preventDefault();
     store.editor.viewSettings.stepSelectedSlice(-skipSlices);
   });
+  hotkeys("alt+0", (event) => {
+    event.preventDefault();
+    store.editor.viewSettings.setSelectedVoxel();
+  });
 
   // Zoom
   hotkeys("*", (event) => {
@@ -111,7 +115,8 @@ export const setUpHotKeys = (store: RootStore): IDisposer => {
   });
   hotkeys("ctrl+0", (event) => {
     event.preventDefault();
-    store.editor.viewSettings.setZoomLevel(1);
+    store.editor.viewSettings.setZoomLevel();
+    store.editor.viewSettings.setOffset();
   });
 
   // Save & Export
