@@ -24,6 +24,9 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
   public static readonly excludeFromSnapshotTracking = [
     "/editor",
     "/isCursorOverDrawableArea",
+    "/isCursorOverFloatingUI",
+    "/isNavigationDragged",
+    "/isDrawing",
   ];
 
   public activeTool = ToolType.Brush;
