@@ -1,13 +1,25 @@
 import React from "react";
 import styled, { css } from "styled-components";
+import tc from "tinycolor2";
 
-import { color, radius } from "../../theme";
+import { isFirefox } from "../../platform-detection";
+import { color, computeStyleValue, radius } from "../../theme";
 import noise from "./noise.png";
 import { SheetProps } from "./sheet.props";
 
-export const sheetMixin = () => css`
+export const sheetNoise = `url(${noise}) left top repeat`;
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const sheetMixin = () => css<any>`
   backdrop-filter: blur(50px);
-  background: url(${noise}) left top repeat, ${color("sheet")};
+  background: ${sheetNoise},
+    // Firefox does not support a blurred background yet
+    ${isFirefox()
+        ? computeStyleValue(
+            [color("sideViewSheet"), color("background")],
+            (sheet, background) => tc.mix(sheet, background, 80).toRgbString(),
+          )
+        : color("sheet")};
   border: 1px solid ${color("sheetBorder")};
 `;
 
