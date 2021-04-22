@@ -4,7 +4,7 @@ import { makeObservable, observable } from "mobx";
 const colorModes = {
   light: {
     text: "rgba(0,0,0,0.8)",
-    lightText: "rgba(0,0,0,0.5)",
+    lightText: "rgba(0,0,0,0.4)",
     background: "#fff",
     primary: "#00f",
     secondary: "#00a",

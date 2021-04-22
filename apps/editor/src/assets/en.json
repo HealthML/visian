@@ -45,6 +45,7 @@
   "brightness": "Brightness",
 
   "export": "Export (Ctrl + E)",
+  "export-button": "Export",
 
   "import-error": "Import Error",
   "annotation-mismatch-error": "This annotation does not match the original image's size.",

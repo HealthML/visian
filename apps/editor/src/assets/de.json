@@ -45,6 +45,7 @@
   "brightness": "Helligkeit",
 
   "export": "Export (Strg + E)",
+  "export-button": "Export",
 
   "import-error": "Importfehler",
   "annotation-mismatch-error": "Diese Annotation passt nicht auf den Scan.",

@@ -13,6 +13,7 @@ import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
 import { DropSheet } from "../drop-sheet";
+import { ExportPopUp } from "../export-popup";
 import { Layers } from "../layers";
 import { Menu } from "../menu";
 import { SideViews } from "../side-views";
@@ -178,6 +179,7 @@ export const UIOverlay = observer<UIOverlayProps>(
           </RightBar>
         </ColumnRight>
 
+        <ExportPopUp />
         {isDraggedOver && <DropSheet onDropCompleted={onDropCompleted} />}
         {store?.error && (
           <ErrorNotification
