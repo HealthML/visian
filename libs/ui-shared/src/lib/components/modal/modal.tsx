@@ -11,8 +11,8 @@ import { ModalProps } from "./modal.props";
 import { InvisibleButton } from "../button";
 
 const StyledButton = styled(InvisibleButton)`
-  width: 17px;
-  height: 17px;
+  width: 16px;
+  height: 16px;
 `;
 
 const ModalContainer = styled(Sheet)`
