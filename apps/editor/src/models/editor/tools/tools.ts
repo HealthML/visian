@@ -110,6 +110,14 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
     ].includes(this.activeTool);
   }
 
+  public get isCrosshairAvailable() {
+    return (
+      this.editor.image &&
+      this.editor.image.dimensionality > 2 &&
+      this.editor.viewSettings.showSideViews
+    );
+  }
+
   public get isBrushSizeLocked() {
     return this.lockedBrushSizePixels !== undefined;
   }

@@ -28,7 +28,7 @@ export class EditorViewSettings
   public contrast = 1;
 
   public mainViewType = ViewType.Transverse;
-  public shouldShowSideViews = true;
+  public showSideViews = true;
 
   public zoomLevel = 1;
   public offset = new Vector(2);
@@ -43,7 +43,7 @@ export class EditorViewSettings
       brightness: observable,
       contrast: observable,
       mainViewType: observable,
-      shouldShowSideViews: observable,
+      showSideViews: observable,
       zoomLevel: observable,
       offset: observable,
       annotationColor: observable,
@@ -84,8 +84,8 @@ export class EditorViewSettings
         : ViewType.Transverse;
   };
 
-  public toggleSideViews = (value = !this.shouldShowSideViews) => {
-    this.shouldShowSideViews =
+  public toggleSideViews = (value = !this.showSideViews) => {
+    this.showSideViews =
       value &&
       Boolean(this.editor.image) &&
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -171,8 +171,7 @@ export class EditorViewSettings
     if (this.editor.tools.isDrawing) return;
 
     const sliceRenderer = this.editor.sliceRenderer;
-    if (!sliceRenderer || !this.editor.image || !this.shouldShowSideViews)
-      return;
+    if (!sliceRenderer || !this.editor.image || !this.showSideViews) return;
 
     const intersection = sliceRenderer.raycaster.getIntersectionsFromPointer(
       screenPosition,
@@ -193,7 +192,7 @@ export class EditorViewSettings
 
   public reset = () => {
     this.setSelectedVoxel();
-    this.toggleSideViews(this.shouldShowSideViews);
+    this.toggleSideViews(this.showSideViews);
     if (this.editor.image && this.editor.image.dimensionality < 3) {
       this.setMainViewType(ViewType.Transverse);
     }
@@ -212,7 +211,7 @@ export class EditorViewSettings
     return {
       mainViewType: this.mainViewType,
       selectedVoxel: this.selectedVoxel.toJSON(),
-      shouldShowSideViews: this.shouldShowSideViews,
+      shouldShowSideViews: this.showSideViews,
 
       contrast: this.contrast,
       brightness: this.brightness,
