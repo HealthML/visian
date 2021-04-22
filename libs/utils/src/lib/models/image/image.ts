@@ -1,8 +1,12 @@
 import { action, makeObservable, observable } from "mobx";
-import * as THREE from "three";
 
 import {
+  convertAtlasToDataArray,
+  convertDataArrayToAtlas,
   FloatTypes,
+  getAtlasGrid,
+  getAtlasIndexFor,
+  getAtlasSize,
   IntTypes,
   ITKImage,
   ITKImageType,
@@ -11,21 +15,12 @@ import {
   TypedArray,
   VoxelTypes,
 } from "../../io";
-import {
-  convertAtlasToDataArray,
-  convertDataArrayToAtlas,
-  getAtlasGrid,
-  getAtlasIndexFor,
-  getAtlasSize,
-  getTextureFromAtlas,
-} from "../../io/texture-atlas";
 import { Vector } from "../vector";
 import { getPlaneAxes, getViewTypeInitials, ViewType } from "../view-types";
 import { unifyOrientation } from "./conversion";
 import { findVoxelInSlice } from "./iteration";
 
 import type { ISerializable } from "../types";
-
 export interface ImageSnapshot<T extends TypedArray = TypedArray> {
   name?: string;
 
@@ -151,8 +146,6 @@ export class Image<T extends TypedArray = TypedArray>
   private atlas?: Uint8Array;
   protected isAtlasDirty?: boolean;
 
-  protected texture?: THREE.DataTexture;
-
   constructor(
     image: ImageSnapshot<T> & Pick<ImageSnapshot<T>, "voxelCount" | "data">,
   ) {
@@ -227,21 +220,6 @@ export class Image<T extends TypedArray = TypedArray>
 
   public getAtlasSize() {
     return getAtlasSize(this.voxelCount, this.getAtlasGrid());
-  }
-
-  public getTexture() {
-    if (!this.texture) {
-      // Explicit access here avoids MobX observability tracking to decrease performance
-      this.texture = getTextureFromAtlas(
-        {
-          voxelComponents: this.voxelComponents,
-          voxelCount: this.voxelCount.clone(false),
-        },
-        this.getAtlas(),
-        THREE.NearestFilter,
-      );
-    }
-    return this.texture;
   }
 
   public getSlice(sliceNumber: number, viewType: ViewType) {
@@ -328,20 +306,12 @@ export class Image<T extends TypedArray = TypedArray>
       }
       this.atlas.set(atlas);
     }
-
-    if (this.texture) {
-      this.texture.needsUpdate = true;
-    }
   }
 
   public setAtlasVoxel(voxel: Vector, value: number) {
     const index = getAtlasIndexFor(voxel, this);
     this.getAtlas()[index] = value;
-
     this.isDataDirty = true;
-    if (this.texture) {
-      this.texture.needsUpdate = true;
-    }
   }
 
   public setSlice(viewType: ViewType, slice: number, sliceData?: Uint8Array) {
@@ -366,9 +336,6 @@ export class Image<T extends TypedArray = TypedArray>
     );
 
     this.isDataDirty = true;
-    if (this.texture) {
-      this.texture.needsUpdate = true;
-    }
   }
 
   public toITKImage() {

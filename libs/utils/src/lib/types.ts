@@ -12,3 +12,7 @@ export interface Pixel {
 export interface Voxel extends Pixel {
   z: number;
 }
+
+export interface VoxelWithValue extends Voxel {
+  value: number;
+}

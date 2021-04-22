@@ -1,7 +1,6 @@
 import {
   IDisposable,
   IDisposer,
-  Image,
   Pixel,
   ViewType,
   viewTypes,
@@ -20,7 +19,7 @@ import {
   synchCrosshairs,
 } from "./utils";
 
-import type { Editor } from "../../models";
+import type { Editor, RenderedImage } from "../../models";
 export class SliceRenderer implements IDisposable {
   private renderers: THREE.WebGLRenderer[];
   private mainCamera: THREE.OrthographicCamera;
@@ -91,7 +90,7 @@ export class SliceRenderer implements IDisposable {
     this.disposers.push(
       reaction(
         () => editor.image,
-        (image?: Image) => {
+        (image?: RenderedImage) => {
           if (!image) return;
           this.setImage(image);
         },
@@ -99,7 +98,7 @@ export class SliceRenderer implements IDisposable {
       ),
       reaction(
         () => editor.annotation,
-        (image?: Image) => {
+        (image?: RenderedImage) => {
           this.setAnnotation(image);
         },
         { fireImmediately: true },
@@ -220,6 +219,11 @@ export class SliceRenderer implements IDisposable {
     if (!this.isImageLoaded) return;
     this.lazyRenderTriggered = false;
 
+    this.renderers.forEach((renderer, index) => {
+      this.editor.image?.onBeforeRender(renderer, index);
+      this.editor.annotation?.onBeforeRender(renderer, index);
+    });
+
     const order = getOrder(this.editor.viewSettings.mainViewType);
     this.activeRenderers.forEach((renderer, index) => {
       const viewType = order[index];
@@ -228,14 +232,14 @@ export class SliceRenderer implements IDisposable {
     });
   };
 
-  private setImage(image: Image) {
+  private setImage(image: RenderedImage) {
     this.slices.forEach((slice) => slice.setImage(image));
     this.isImageLoaded = true;
 
     this.lazyRender();
   }
 
-  private setAnnotation(image?: Image) {
+  private setAnnotation(image?: RenderedImage) {
     this.slices.forEach((slice) => slice.setAnnotation(image));
 
     this.lazyRender();
