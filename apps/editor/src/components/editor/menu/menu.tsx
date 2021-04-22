@@ -117,8 +117,12 @@ export const Menu: React.FC = observer(() => {
           value={i18n.language.split("-")[0]}
           onChange={setLanguage}
         />
-        <Divider />
-        <FeedbackButton tx="ideas-feedback" onPointerDown={sendFeedback} />
+        {feedbackMailAddress && (
+          <>
+            <Divider />
+            <FeedbackButton tx="ideas-feedback" onPointerDown={sendFeedback} />
+          </>
+        )}
         <Divider />
         <ResetButton tx="clear-data" onPointerDown={store?.destroy} />
       </Modal>
