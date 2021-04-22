@@ -30,6 +30,7 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
 
   public isCursorOverDrawableArea = false;
   public isNavigationDragged = false;
+  public isDrawing = false;
 
   private brushWidthScreen = 0.02;
   private lockedBrushSizePixels?: number;
@@ -69,10 +70,14 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
       [ToolType.SmartEraser]: this.smartBrush,
     };
 
-    makeObservable<this, "brushWidthScreen" | "lockedBrushSizePixels">(this, {
+    makeObservable<
+      this,
+      "brushWidthScreen" | "lockedBrushSizePixels" | "setIsDrawing"
+    >(this, {
       activeTool: observable,
       isCursorOverDrawableArea: observable,
       isNavigationDragged: observable,
+      isDrawing: observable,
       smartBrushNeighborThreshold: observable,
       smartBrushSeedThreshold: observable,
       brushWidthScreen: observable,
@@ -86,6 +91,7 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
       setActiveTool: action,
       setCursorOverDrawableArea: action,
       setIsNavigationDragged: action,
+      setIsDrawing: action,
       setBrushSizePixels: action,
       setSmartBrushSeedThreshold: action,
       setSmartBrushNeighborThreshold: action,
@@ -149,7 +155,11 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
     this.isNavigationDragged = value;
   }
 
-  public setBrushSizePixels = (value = 5) => {
+  public setIsDrawing(value = true) {
+    this.isDrawing = value;
+  }
+
+  public setBrushSizePixels = (value = 5, showPreview = false) => {
     const clampedValue = Math.max(0, value);
 
     if (this.isBrushSizeLocked) {
@@ -162,6 +172,9 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
     if (!pixelWidth) return;
 
     this.brushWidthScreen = (clampedValue + 0.5) * pixelWidth;
+
+    if (!showPreview) return;
+    this.editor.sliceRenderer?.showBrushCursorPreview();
   };
 
   public setSmartBrushSeedThreshold = (value = 6) => {
@@ -277,6 +290,7 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
     const tool = (alt ? this.altBrushMap : this.brushMap)[this.activeTool];
     switch (eventType) {
       case "start":
+        this.setIsDrawing(true);
         this.context?.setDirty();
         tool?.startAt(dragPoint);
         break;
@@ -285,18 +299,21 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
         tool?.moveTo(dragPoint);
         break;
       case "end":
+        this.setIsDrawing(false);
         tool?.endAt(dragPoint);
         break;
     }
   }
 
-  private alignBrushCursor(uv: THREE.Vector2) {
+  public alignBrushCursor(
+    uv: THREE.Vector2,
+    viewType = this.editor.viewSettings.mainViewType,
+    preview = false,
+  ) {
     if (!this.editor.sliceRenderer || !this.editor.image) return;
     const { voxelCount } = this.editor.image;
 
-    const [widthAxis, heightAxis] = getPlaneAxes(
-      this.editor.viewSettings.mainViewType,
-    );
+    const [widthAxis, heightAxis] = getPlaneAxes(viewType);
     const scanWidth = voxelCount[widthAxis];
     const scanHeight = voxelCount[heightAxis];
 
@@ -310,7 +327,8 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
     const yOffset = this.brushSizePixels === 0.5 ? (bottom ? -1 : 0) : 0.5;
 
     const brushCursor = this.editor.sliceRenderer.getBrushCursor(
-      this.editor.viewSettings.mainViewType,
+      viewType,
+      preview,
     );
 
     brushCursor.setUVTarget(

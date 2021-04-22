@@ -5,6 +5,7 @@ import {
   InvisibleButton,
   Notification,
   Text,
+  SquareButton,
 } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
 import React from "react";
@@ -39,15 +40,19 @@ const StartTextContainer = styled(AbsoluteCover)`
 const ColumnLeft = styled.div`
   display: flex;
   flex-direction: column;
-  width: 50%;
   justify-content: flex-start;
 `;
 
 const ColumnRight = styled.div`
   display: flex;
   flex-direction: row;
-  width: 50%;
   justify-content: flex-end;
+`;
+
+const MenuRow = styled.div`
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
 `;
 
 const RightBar = styled.div`
@@ -58,20 +63,23 @@ const RightBar = styled.div`
 
 const TopConsole = styled.div`
   align-items: center;
+  align-self: flex-start;
   display: flex;
-  overflow: hidden;
-  margin: auto;
-  position: absolute;
-  top: 20px;
-  left: 0;
-  bottom: 1;
-  right: 0;
+  flex: 1;
   justify-content: center;
+  margin: 0 12px;
+  overflow: hidden;
+  padding-bottom: 8px;
+  top: 20px;
 `;
 
 const FileTitle = styled(Text)`
-  opacity: 0.5;
   line-height: 16px;
+  opacity: 0.5;
+  overflow: hidden;
+  margin-bottom: -8px;
+  padding-bottom: 8px;
+  text-overflow: ellipsis;
 `;
 
 const UnsavedChangesIndicator = styled(InvisibleButton)<{ isDirty?: boolean }>`
@@ -81,6 +89,7 @@ const UnsavedChangesIndicator = styled(InvisibleButton)<{ isDirty?: boolean }>`
   cursor: ${(props) => (props.isDirty ? "pointer" : "default")};
   height: 12px;
   margin-left: 14px;
+  min-width: 12px;
   opacity: 0.4;
   pointer-events: auto;
   transition: background-color 0.3s, opacity 0.3s;
@@ -99,6 +108,10 @@ const ErrorNotification = styled(Notification)`
   transform: translateX(-50%);
 `;
 
+const UndoRedoButton = styled(SquareButton)`
+  margin-right: 8px;
+`;
+
 export const UIOverlay = observer<UIOverlayProps>(
   ({ isDraggedOver, onDropCompleted, ...rest }) => {
     const store = useStore();
@@ -110,20 +123,38 @@ export const UIOverlay = observer<UIOverlayProps>(
             <Text tx="start" />
           </StartTextContainer>
         )}
-        <TopConsole>
-          <FileTitle text={store?.editor.image?.name} />
-          <UnsavedChangesIndicator
-            isDirty={store?.isDirty}
-            tooltipTx={store?.isDirty ? "unsaved-changes" : "saved-in-browser"}
-            tooltipPosition="bottom"
-            onPointerDown={store?.persistImmediately}
-          />
-        </TopConsole>
         <ColumnLeft>
-          <Menu />
+          <MenuRow>
+            <Menu />
+            <UndoRedoButton
+              icon="undo"
+              isActive={false}
+              isDisabled={!store?.editor.undoRedo.isUndoAvailable}
+              onPointerDown={store?.editor.undoRedo.undo}
+            />
+            <UndoRedoButton
+              icon="redo"
+              isActive={false}
+              isDisabled={!store?.editor.undoRedo.isRedoAvailable}
+              onPointerDown={store?.editor.undoRedo.redo}
+            />
+          </MenuRow>
           <Toolbar />
           <Layers />
         </ColumnLeft>
+        {store?.editor.image && (
+          <TopConsole>
+            <FileTitle text={store?.editor.image.name} />
+            <UnsavedChangesIndicator
+              isDirty={store?.isDirty}
+              tooltipTx={
+                store?.isDirty ? "unsaved-changes" : "saved-in-browser"
+              }
+              tooltipPosition="bottom"
+              onPointerDown={store?.persistImmediately}
+            />
+          </TopConsole>
+        )}
         <ColumnRight>
           <SideViews />
           <RightBar>

@@ -129,8 +129,10 @@ export class SliceRenderer implements IDisposable {
     this.resizeSensors.forEach((sensor) => sensor.detach());
   }
 
-  public getBrushCursor(viewType: ViewType) {
-    return this.slices[viewType].brushCursor;
+  public getBrushCursor(viewType: ViewType, preview = false) {
+    return preview
+      ? this.slices[viewType].previewBrushCursor
+      : this.slices[viewType].brushCursor;
   }
 
   private resize = () => {
@@ -185,6 +187,23 @@ export class SliceRenderer implements IDisposable {
           -webGLSize.y +
         this.mainCamera.top,
     };
+  }
+
+  public showBrushCursorPreview(
+    viewType = this.editor.viewSettings.mainViewType,
+  ) {
+    const slice = this.slices[viewType];
+
+    const uvOffset = new THREE.Vector2(slice.position.x, slice.position.y)
+      .divide(new THREE.Vector2(slice.scale.x, slice.scale.y))
+      .sub(slice.crosshairSynchOffset);
+    uvOffset.x *= -1;
+
+    const centeredUV = new THREE.Vector2().setScalar(0.5).sub(uvOffset);
+
+    this.editor.tools.alignBrushCursor(centeredUV, viewType, true);
+
+    slice.previewBrushCursor.show();
   }
 
   private get canvases() {

@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import ResizeSensor from "css-element-queries/src/ResizeSensor";
 
 export const useIsDraggedOver = () => {
   const [isDraggedOver, setIsDraggedOver] = useState(false);
@@ -65,14 +64,13 @@ export const useUpdateOnResize = (isActive = true) => {
   useEffect(() => {
     if (!isActive) return;
 
-    const resizeSensor = new ResizeSensor(document.body, (size) => {
-      setSize(`${size.width}x${size.height}`);
-    });
-    const rect = document.body.getBoundingClientRect();
-    setSize(`${rect.width}x${rect.height}`);
+    const handleResize = () => {
+      setSize(`${window.innerWidth}x${window.innerHeight}`);
+    };
+    window.addEventListener("resize", handleResize);
 
     return () => {
-      resizeSensor.detach();
+      window.removeEventListener("resize", handleResize);
     };
   }, [isActive]);
 

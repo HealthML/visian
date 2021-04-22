@@ -25,6 +25,13 @@ const SideViewContainer = styled.div<{ shouldShowSideViews?: boolean }>`
   margin-right: 22px;
 `;
 
+const SideViewWrapper = styled.div`
+  bottom: 0;
+  position: absolute;
+  right: 0;
+  top: 0;
+`;
+
 const SideView = styled(Sheet)`
   border-radius: 10px;
   padding-bottom: 100%;
@@ -91,25 +98,26 @@ export const SideViews = observer(() => {
   return (
     <SideViewContainer
       shouldShowSideViews={showSideViews}
-      style={{ width: sideViewSize }}
       ref={setContainerRef}
     >
-      <SideView style={{ marginBottom: 16 }}>
-        <SideViewCanvas
-          width={400}
-          height={400}
-          onPointerDown={onPointerDownUpper}
-          ref={upperSideViewRef}
-        />
-      </SideView>
-      <SideView>
-        <SideViewCanvas
-          width={400}
-          height={400}
-          onPointerDown={onPointerDownLower}
-          ref={lowerSideViewRef}
-        />
-      </SideView>
+      <SideViewWrapper style={{ width: sideViewSize }}>
+        <SideView style={{ marginBottom: 16 }}>
+          <SideViewCanvas
+            width={400}
+            height={400}
+            onPointerDown={onPointerDownUpper}
+            ref={upperSideViewRef}
+          />
+        </SideView>
+        <SideView>
+          <SideViewCanvas
+            width={400}
+            height={400}
+            onPointerDown={onPointerDownLower}
+            ref={lowerSideViewRef}
+          />
+        </SideView>
+      </SideViewWrapper>
     </SideViewContainer>
   );
 });
