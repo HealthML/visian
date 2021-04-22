@@ -25,7 +25,7 @@ const StyledButton = styled.button<Pick<ButtonProps, "isDisabled">>`
     props.isDisabled
       ? css`
           cursor: not-allowed;
-          opacity: 0.3;
+          opacity: 0.45;
         `
       : css`
           cursor: pointer;
