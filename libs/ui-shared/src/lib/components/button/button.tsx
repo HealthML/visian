@@ -1,11 +1,12 @@
 import React, { useCallback, useImperativeHandle, useState } from "react";
-import styled, { css } from "styled-components";
+import styled, { css, useTheme } from "styled-components";
 
-import { fontWeight, radius, size, space } from "../../theme";
+import { duration, fontWeight, radius, size, space, Theme } from "../../theme";
 import { Icon } from "../icon";
 import { sheetMixin } from "../sheet";
 import { Text } from "../text";
 import { Tooltip, useTooltipPosition } from "../tooltip";
+import { useDelay } from "../utils";
 import { ButtonProps } from "./button.props";
 
 const StyledText = styled(Text)<Pick<ButtonProps, "isActive">>`
@@ -55,21 +56,30 @@ const BaseButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
     },
     ref,
   ) => {
+    const theme = useTheme() as Theme;
+
     // Tooltip Toggling
     const [showTooltip, setShowTooltip] = useState(false);
+    const [scheduleTooltip, cancelTooltip] = useDelay(
+      useCallback(() => {
+        setShowTooltip(true);
+      }, []),
+      duration("tooltipDelay")({ theme }) as number,
+    );
     const enterButton = useCallback(
       (event: React.PointerEvent<HTMLButtonElement>) => {
         if (onPointerEnter) onPointerEnter(event);
-        setShowTooltip(true);
+        scheduleTooltip();
       },
-      [onPointerEnter],
+      [onPointerEnter, scheduleTooltip],
     );
     const leaveButton = useCallback(
       (event: React.PointerEvent<HTMLButtonElement>) => {
         if (onPointerLeave) onPointerLeave(event);
+        cancelTooltip();
         setShowTooltip(false);
       },
-      [onPointerLeave],
+      [cancelTooltip, onPointerLeave],
     );
 
     // Tooltip Positioning
