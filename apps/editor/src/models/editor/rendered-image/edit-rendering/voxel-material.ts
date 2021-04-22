@@ -1,6 +1,6 @@
+import { Vector } from "@visian/utils";
 import * as THREE from "three";
 
-import { Vector } from "../../vector";
 import voxelFragmentShader from "./shaders/voxel.frag.glsl";
 import voxelVertexShader from "./shaders/voxel.vert.glsl";
 

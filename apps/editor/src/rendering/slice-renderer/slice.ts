@@ -1,4 +1,4 @@
-import { IDisposable, IDisposer, Image, Vector, ViewType } from "@visian/utils";
+import { IDisposable, IDisposer, Vector, ViewType } from "@visian/utils";
 import { autorun } from "mobx";
 import * as THREE from "three";
 
@@ -17,8 +17,7 @@ import {
   imageMeshZ,
 } from "./utils";
 
-import type { Editor } from "../../models";
-
+import type { Editor, RenderedImage } from "../../models";
 export class Slice extends THREE.Group implements IDisposable {
   private baseSize = new THREE.Vector2();
 
@@ -94,7 +93,7 @@ export class Slice extends THREE.Group implements IDisposable {
     this.disposers.forEach((disposer) => disposer());
   }
 
-  public setImage(image: Image) {
+  public setImage(image: RenderedImage) {
     this.imageMaterial.setImage(image);
 
     this.baseSize.copy(
@@ -108,7 +107,7 @@ export class Slice extends THREE.Group implements IDisposable {
     this.updateScale();
   }
 
-  public setAnnotation(image?: Image) {
+  public setAnnotation(image?: RenderedImage) {
     if (image) {
       this.annotationMaterial.setImage(image);
       this.annotationMesh.visible = true;

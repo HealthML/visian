@@ -1,7 +1,5 @@
+import { ScreenAlignedQuad, VoxelWithValue } from "@visian/utils";
 import * as THREE from "three";
-
-import { ScreenAlignedQuad } from "../../../rendering";
-import { VoxelWithValue } from "../../../types";
 
 export const copyToRenderTarget = (
   source: ScreenAlignedQuad,

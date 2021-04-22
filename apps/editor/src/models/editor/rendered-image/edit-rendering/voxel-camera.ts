@@ -1,6 +1,5 @@
+import { Vector } from "@visian/utils";
 import * as THREE from "three";
-
-import { Vector } from "../../vector";
 
 export class VoxelCamera extends THREE.OrthographicCamera {
   constructor() {

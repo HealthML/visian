@@ -1,8 +1,12 @@
 import { action, makeObservable, observable } from "mobx";
-import * as THREE from "three";
 
 import {
+  convertAtlasToDataArray,
+  convertDataArrayToAtlas,
   FloatTypes,
+  getAtlasGrid,
+  getAtlasIndexFor,
+  getAtlasSize,
   IntTypes,
   ITKImage,
   ITKImageType,
@@ -11,18 +15,9 @@ import {
   TypedArray,
   VoxelTypes,
 } from "../../io";
-import {
-  convertAtlasToDataArray,
-  convertDataArrayToAtlas,
-  getAtlasGrid,
-  getAtlasIndexFor,
-  getAtlasSize,
-  getTextureFromAtlas,
-} from "../../io/texture-atlas";
 import { Vector } from "../vector";
 import { getPlaneAxes, getViewTypeInitials, ViewType } from "../view-types";
 import { unifyOrientation } from "./conversion";
-import { EditRenderer } from "./edit-rendering/edit-renderer";
 import { findVoxelInSlice } from "./iteration";
 
 import type { ISerializable } from "../types";
@@ -151,32 +146,10 @@ export class Image<T extends TypedArray = TypedArray>
   private atlas?: Uint8Array;
   protected isAtlasDirty?: boolean;
 
-  /** Used to update the atlas from the CPU. */
-  private internalTexture: THREE.DataTexture;
-
-  /** Renders edits into the atlas and holds the atlas textures. */
-  private editRenderer: EditRenderer;
-
   constructor(
     image: ImageSnapshot<T> & Pick<ImageSnapshot<T>, "voxelCount" | "data">,
   ) {
     this.applySnapshot(image);
-
-    this.internalTexture = getTextureFromAtlas(
-      {
-        voxelComponents: this.voxelComponents,
-        voxelCount: this.voxelCount.clone(false),
-      },
-      this.getAtlas(),
-      THREE.NearestFilter,
-    );
-
-    this.editRenderer = new EditRenderer(
-      this.internalTexture,
-      this.getAtlasSize(),
-      this.getAtlasGrid(),
-      this.voxelCount,
-    );
 
     makeObservable<this, "data" | "atlas" | "isDataDirty" | "isAtlasDirty">(
       this,
@@ -249,10 +222,6 @@ export class Image<T extends TypedArray = TypedArray>
     return getAtlasSize(this.voxelCount, this.getAtlasGrid());
   }
 
-  public getTexture(index = 0) {
-    return this.editRenderer.getTexture(index);
-  }
-
   public getSlice(sliceNumber: number, viewType: ViewType) {
     const [horizontal, vertical] = getPlaneAxes(viewType);
     const sliceData = new Uint8Array(
@@ -277,10 +246,6 @@ export class Image<T extends TypedArray = TypedArray>
     );
 
     return sliceData;
-  }
-
-  public onBeforeRender(renderer: THREE.WebGLRenderer, index = 0) {
-    this.editRenderer.update(renderer, index);
   }
 
   public getSliceImage(
@@ -341,22 +306,12 @@ export class Image<T extends TypedArray = TypedArray>
       }
       this.atlas.set(atlas);
     }
-
-    if (this.internalTexture) {
-      this.internalTexture.needsUpdate = true;
-      this.editRenderer.triggerCopy();
-    }
   }
 
   public setAtlasVoxel(voxel: Vector, value: number) {
     const index = getAtlasIndexFor(voxel, this);
     this.getAtlas()[index] = value;
-
-    const { x, y, z } = voxel;
-    this.editRenderer.addVoxelToRender({ x, y, z, value });
-
     this.isDataDirty = true;
-    this.internalTexture.needsUpdate = true;
   }
 
   public setSlice(viewType: ViewType, slice: number, sliceData?: Uint8Array) {
@@ -381,8 +336,6 @@ export class Image<T extends TypedArray = TypedArray>
     );
 
     this.isDataDirty = true;
-    this.internalTexture.needsUpdate = true;
-    this.editRenderer.triggerCopy();
   }
 
   public toITKImage() {

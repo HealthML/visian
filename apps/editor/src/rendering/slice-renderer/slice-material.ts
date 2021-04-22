@@ -1,4 +1,4 @@
-import { IDisposable, IDisposer, Image, ViewType } from "@visian/utils";
+import { IDisposable, IDisposer, ViewType } from "@visian/utils";
 import { autorun } from "mobx";
 import * as THREE from "three";
 
@@ -6,13 +6,13 @@ import fragmentShader from "./shaders/slice.frag.glsl";
 import vertexShader from "./shaders/slice.vert.glsl";
 import { getOrder } from "./utils";
 
-import type { Editor } from "../../models";
+import type { Editor, RenderedImage } from "../../models";
 export abstract class SliceMaterial
   extends THREE.ShaderMaterial
   implements IDisposable {
   protected disposers: IDisposer[] = [];
 
-  private image?: Image;
+  private image?: RenderedImage;
 
   constructor(
     private editor: Editor,
@@ -65,7 +65,7 @@ export abstract class SliceMaterial
   }
 
   /** Updates the rendered atlas. */
-  public setImage(image: Image) {
+  public setImage(image: RenderedImage) {
     this.uniforms.uVoxelCount.value = image.voxelCount;
     this.uniforms.uAtlasGrid.value = image.getAtlasGrid();
     this.uniforms.uComponents.value = image.voxelComponents;

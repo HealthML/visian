@@ -1,15 +1,15 @@
 import { getTheme } from "@visian/ui-shared";
 import {
-  Image,
   ImageSnapshot,
   ISerializable,
   writeSingleMedicalImage,
 } from "@visian/utils";
+import FileSaver from "file-saver";
 import isEqual from "lodash.isequal";
 import { action, makeObservable, observable } from "mobx";
-import FileSaver from "file-saver";
 
 import { StoreContext } from "../types";
+import { RenderedImage } from "./rendered-image";
 import { EditorTools } from "./tools";
 import { EditorUndoRedo } from "./undo-redo";
 import {
@@ -42,9 +42,9 @@ export class Editor implements ISerializable<EditorSnapshot> {
 
   // Layers
   public foregroundColor = "#ffffff";
-  public annotation?: Image;
+  public annotation?: RenderedImage;
   public isAnnotationVisible = true;
-  public image?: Image;
+  public image?: RenderedImage;
   public isImageVisible = true;
   protected backgroundColor?: string;
 
@@ -92,9 +92,9 @@ export class Editor implements ISerializable<EditorSnapshot> {
     this.foregroundColor = foregroundColor;
   }
 
-  public setImage(image: Image) {
+  public setImage(image: RenderedImage) {
     this.image = image;
-    this.annotation = new Image({
+    this.annotation = new RenderedImage({
       name: `${this.image.name.split(".")[0]}_annotation`,
       dimensionality: this.image.dimensionality,
       origin: this.image.origin.toArray(),
@@ -109,10 +109,10 @@ export class Editor implements ISerializable<EditorSnapshot> {
     this.undoRedo.clear();
   }
   public async importImage(imageFile: File) {
-    this.setImage(await Image.fromFile(imageFile));
+    this.setImage(await RenderedImage.fromFile(imageFile));
   }
 
-  public setAnnotation(image: Image) {
+  public setAnnotation(image: RenderedImage) {
     if (!this.image) throw new Error("no-image-error");
     if (!isEqual(image.voxelCount, this.image.voxelCount)) {
       throw new Error("annotation-mismatch-error");
@@ -123,7 +123,7 @@ export class Editor implements ISerializable<EditorSnapshot> {
     this.undoRedo.clear();
   }
   public async importAnnotation(imageFile: File) {
-    this.setAnnotation(await Image.fromFile(imageFile));
+    this.setAnnotation(await RenderedImage.fromFile(imageFile));
   }
 
   public setBackgroundColor(backgroundColor: string) {
@@ -180,8 +180,9 @@ export class Editor implements ISerializable<EditorSnapshot> {
 
   public async applySnapshot(snapshot: EditorSnapshot) {
     this.backgroundColor = snapshot.backgroundColor;
-    this.image = snapshot.image && new Image(snapshot.image);
-    this.annotation = snapshot.annotation && new Image(snapshot.annotation);
+    this.image = snapshot.image && new RenderedImage(snapshot.image);
+    this.annotation =
+      snapshot.annotation && new RenderedImage(snapshot.annotation);
 
     if (snapshot.viewSettings) {
       this.viewSettings.applySnapshot(snapshot.viewSettings);

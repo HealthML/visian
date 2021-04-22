@@ -1,6 +1,5 @@
+import { Vector } from "@visian/utils";
 import * as THREE from "three";
-
-import { Vector } from "../../vector";
 
 export class ImageRenderTarget extends THREE.WebGLRenderTarget {
   constructor(size: Vector) {
