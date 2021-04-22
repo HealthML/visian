@@ -116,7 +116,7 @@ export class SliceRenderer implements IDisposable {
           );
         },
       ),
-      reaction(() => editor.viewSettings.shouldShowSideViews, this.lazyRender),
+      reaction(() => editor.viewSettings.showSideViews, this.lazyRender),
     );
 
     this.renderers[0].setAnimationLoop(this.animate);
@@ -211,7 +211,7 @@ export class SliceRenderer implements IDisposable {
   }
 
   private get activeRenderers() {
-    return this.editor.viewSettings.shouldShowSideViews
+    return this.editor.viewSettings.showSideViews
       ? this.renderers
       : [this.renderers[0]];
   }

@@ -37,15 +37,14 @@ export const setUpPointerHandling = (
       if (!context.useForGesture) {
         if (activeTool === ToolType.Crosshair || id !== "mainView") {
           // Crosshairs are only active if side views are shown.
-          if (store.editor.viewSettings.shouldShowSideViews) {
-            store.editor.viewSettings.moveCrosshair(
-              {
-                x: detail.clientX,
-                y: detail.clientY,
-              },
-              id,
-            );
-          }
+          if (!store.editor.viewSettings.showSideViews) return;
+          store.editor.viewSettings.moveCrosshair(
+            {
+              x: detail.clientX,
+              y: detail.clientY,
+            },
+            id,
+          );
         } else if (id === "mainView") {
           store.editor.tools.handleEvent(
             {
