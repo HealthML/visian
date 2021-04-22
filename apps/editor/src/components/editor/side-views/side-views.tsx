@@ -1,8 +1,11 @@
 import {
   color,
+  computeStyleValue,
   coverMixin,
   EventLike,
+  isFirefox,
   Sheet,
+  sheetNoise,
   useUpdateOnResize,
 } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
@@ -14,6 +17,7 @@ import React, {
   useState,
 } from "react";
 import styled from "styled-components";
+import tc from "tinycolor2";
 
 import { useStore } from "../../../app/root-store";
 
@@ -39,7 +43,14 @@ const SideView = styled(Sheet)`
   position: relative;
   user-select: none;
   width: 100%;
-  background: ${color("sideViewSheet")};
+  background: ${sheetNoise},
+    // Firefox does not support a blurred background yet
+    ${isFirefox()
+        ? computeStyleValue(
+            [color("sideViewSheet"), color("background")],
+            (sheet, background) => tc.mix(sheet, background, 80).toRgbString(),
+          )
+        : color("sideViewSheet")};
   border: 1px solid ${color("sideViewBorder")}; ;
 `;
 
