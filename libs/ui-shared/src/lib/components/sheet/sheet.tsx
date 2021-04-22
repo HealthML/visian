@@ -3,13 +3,14 @@ import styled, { css } from "styled-components";
 import tc from "tinycolor2";
 
 import { isFirefox } from "../../platform-detection";
-import { color, computeStyleValue, radius, Theme } from "../../theme";
+import { color, computeStyleValue, radius } from "../../theme";
 import noise from "./noise.png";
 import { SheetProps } from "./sheet.props";
 
 export const sheetNoise = `url(${noise}) left top repeat`;
 
-export const sheetMixin = () => css<Theme>`
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const sheetMixin = () => css<any>`
   backdrop-filter: blur(50px);
   background: ${sheetNoise},
     // Firefox does not support a blurred background yet
