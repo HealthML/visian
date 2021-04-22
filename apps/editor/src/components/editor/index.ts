@@ -5,4 +5,5 @@ export * from "./menu";
 export * from "./side-views";
 export * from "./slice-slider";
 export * from "./ui-overlay";
+export * from "./undo-redo-buttons";
 export * from "./view-settings";

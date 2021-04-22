@@ -5,7 +5,6 @@ import {
   InvisibleButton,
   Notification,
   Text,
-  SquareButton,
 } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
 import React, { useCallback } from "react";
@@ -18,6 +17,7 @@ import { Menu } from "../menu";
 import { SideViews } from "../side-views";
 import { SliceSlider } from "../slice-slider";
 import { Toolbar } from "../toolbar";
+import { UndoRedoButtons } from "../undo-redo-buttons";
 import { ViewSettings } from "../view-settings";
 import { UIOverlayProps } from "./ui-overlay.props";
 
@@ -114,19 +114,6 @@ const ErrorNotification = styled(Notification)`
   transform: translateX(-50%);
 `;
 
-const UndoRedoContainer = styled.div`
-  position: relative;
-`;
-const UndoRedoWrapper = styled.div`
-  display: flex;
-  left: 0;
-  position: absolute;
-  top: 0;
-`;
-const UndoRedoButton = styled(SquareButton)`
-  margin-right: 8px;
-`;
-
 export const UIOverlay = observer<UIOverlayProps>(
   ({ isDraggedOver, onDropCompleted, ...rest }) => {
     const store = useStore();
@@ -152,22 +139,7 @@ export const UIOverlay = observer<UIOverlayProps>(
         <ColumnLeft>
           <MenuRow>
             <Menu />
-            <UndoRedoContainer>
-              <UndoRedoWrapper>
-                <UndoRedoButton
-                  icon="undo"
-                  isActive={false}
-                  isDisabled={!store?.editor.undoRedo.isUndoAvailable}
-                  onPointerDown={store?.editor.undoRedo.undo}
-                />
-                <UndoRedoButton
-                  icon="redo"
-                  isActive={false}
-                  isDisabled={!store?.editor.undoRedo.isRedoAvailable}
-                  onPointerDown={store?.editor.undoRedo.redo}
-                />
-              </UndoRedoWrapper>
-            </UndoRedoContainer>
+            <UndoRedoButtons />
           </MenuRow>
           <Toolbar />
           <Layers />
