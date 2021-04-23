@@ -4,15 +4,17 @@ import React, {
   useRef,
 } from "react";
 
-import { FlexRow, InputContainer, Spacer } from "../box";
+import { InputContainer, Spacer } from "../box";
 import { SliderFieldProps, SliderProps } from "./slider.props";
 import {
   SliderContainer,
   SliderLabel,
+  SliderLabelRow,
   SliderRangeSelection,
   SliderThumb,
   SliderTrack,
-  SliderValueLabel,
+  SliderValueInput,
+  SliderValueInputWrapper,
 } from "./styled-components";
 import { pointerToSliderValue, useDrag, valueToSliderPos } from "./utils";
 
@@ -243,7 +245,7 @@ export const SliderField: React.FC<SliderFieldProps> = ({
   return (
     <InputContainer>
       {(labelTx || label || showValueLabel) && (
-        <FlexRow>
+        <SliderLabelRow>
           {(labelTx || label) && <SliderLabel text={label} tx={labelTx} />}
           <Spacer />
           {showValueLabel &&
@@ -254,15 +256,15 @@ export const SliderField: React.FC<SliderFieldProps> = ({
                 )}
               />
             ) : (
-              <Spacer>
-                <SliderValueLabel
+              <SliderValueInputWrapper>
+                <SliderValueInput
                   type="number"
                   value={formatValueLabel([actualValue])}
                   onConfirm={handleTextInputConfirm}
                 />
-              </Spacer>
+              </SliderValueInputWrapper>
             ))}
-        </FlexRow>
+        </SliderLabelRow>
       )}
       <Slider
         {...rest}
