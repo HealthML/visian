@@ -28,3 +28,7 @@ export interface AsProps {
    */
   as?: string;
 }
+
+export interface RefProps<T extends HTMLElement> {
+  ref?: ((instance: T | null) => void) | React.RefObject<T> | null | undefined;
+}

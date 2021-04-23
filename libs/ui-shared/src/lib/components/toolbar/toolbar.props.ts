@@ -1,7 +1,8 @@
+import { RefProps } from "../types";
+
 import type React from "react";
 import type { ButtonProps } from "../button";
 import type { IconType } from "../icon";
-
 export interface ToolProps extends ButtonProps {
   isActive?: boolean;
   isDisabled?: boolean;
@@ -28,4 +29,5 @@ export interface ToolProps extends ButtonProps {
   ) => void;
 }
 
-export type ToolbarProps = React.HTMLAttributes<HTMLDivElement>;
+export type ToolbarProps = React.HTMLAttributes<HTMLDivElement> &
+  RefProps<HTMLDivElement>;

@@ -9,9 +9,42 @@ export const getSpriteAspectRatio = (image: Image) => {
   return maxSpriteSize.x / maxSpriteSize.y;
 };
 
-export const getMainViewPaddings = (_editor: Editor) => {
-  // TODO: Adapt based on the active overlays.
-  return [0, 0, 0, 0];
+/**
+ * @returns a quadruple of paddings for the sprite in the main view:
+ * [topPadding, rightPadding, bottomPadding, leftPadding]
+ */
+export const getMainViewPaddings = (editor: Editor) => {
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  const floatingUIRect = editor.refs.uiOverlay.current!.getBoundingClientRect();
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  const undoRedoButtonsRect = editor.refs.undoRedoButtons.current!.getBoundingClientRect();
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  const toolbarRect = editor.refs.toolbar.current!.getBoundingClientRect();
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  const sliceSliderRect = editor.refs.sliceSlider.current!.getBoundingClientRect();
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  const sideViewsRect = editor.refs.sideViews.current!.getBoundingClientRect();
+
+  const topMargin = undoRedoButtonsRect.top - floatingUIRect.top;
+  const undoRedoPadding = undoRedoButtonsRect.height + 2 * topMargin;
+
+  const leftMargin = toolbarRect.left - floatingUIRect.left;
+  const toolBarPadding = toolbarRect.width + 2 * leftMargin;
+
+  const rightMargin = floatingUIRect.right - sliceSliderRect.right;
+  const sliceSliderPadding = sliceSliderRect.width + 2 * rightMargin;
+
+  const sideViewsDistance = floatingUIRect.right - sideViewsRect.right;
+  const sideViewsPadding = editor.viewSettings.showSideViews
+    ? sideViewsRect.width + sideViewsDistance + rightMargin
+    : 0;
+
+  return [
+    undoRedoPadding,
+    Math.max(sliceSliderPadding, sideViewsPadding),
+    0,
+    toolBarPadding,
+  ];
 };
 
 export const setMainCameraPlanes = (
@@ -69,32 +102,26 @@ export const setMainCameraPlanes = (
   }
 
   // TODO: Add the paddings here.
-  // Old code for this:
-  // mainCamera.left =
-  //   spriteEdgePlanes.left -
-  //   ((2 * spriteEdgePlanes.right * mainCanvas.width) / sizeBetweenOverlays.x -
-  //     2 * spriteEdgePlanes.right) *
-  //     (leftPadding / (rightPadding + leftPadding));
-  // mainCamera.right =
-  //   spriteEdgePlanes.right +
-  //   ((2 * spriteEdgePlanes.right * mainCanvas.width) / sizeBetweenOverlays.x -
-  //     2 * spriteEdgePlanes.right) *
-  //     (rightPadding / (rightPadding + leftPadding));
-  // mainCamera.bottom =
-  //   spriteEdgePlanes.bottom -
-  //   ((2 * spriteEdgePlanes.top * mainCanvas.height) / sizeBetweenOverlays.y -
-  //     2 * spriteEdgePlanes.top) *
-  //     (bottomPadding / (topPadding + bottomPadding));
-  // mainCamera.top =
-  //   spriteEdgePlanes.top +
-  //   ((2 * spriteEdgePlanes.top * mainCanvas.height) / sizeBetweenOverlays.y -
-  //     2 * spriteEdgePlanes.top) *
-  //     (topPadding / (topPadding + bottomPadding));
-
-  mainCamera.left = spriteEdgePlanes.left;
-  mainCamera.right = spriteEdgePlanes.right;
-  mainCamera.top = spriteEdgePlanes.top;
-  mainCamera.bottom = spriteEdgePlanes.bottom;
+  mainCamera.left =
+    spriteEdgePlanes.left -
+    ((2 * spriteEdgePlanes.right * mainCanvas.width) / sizeBetweenOverlays.x -
+      2 * spriteEdgePlanes.right) *
+      (leftPadding / (rightPadding + leftPadding));
+  mainCamera.right =
+    spriteEdgePlanes.right +
+    ((2 * spriteEdgePlanes.right * mainCanvas.width) / sizeBetweenOverlays.x -
+      2 * spriteEdgePlanes.right) *
+      (rightPadding / (rightPadding + leftPadding));
+  mainCamera.bottom =
+    spriteEdgePlanes.bottom -
+    ((2 * spriteEdgePlanes.top * mainCanvas.height) / sizeBetweenOverlays.y -
+      2 * spriteEdgePlanes.top) *
+      (bottomPadding / (topPadding + bottomPadding));
+  mainCamera.top =
+    spriteEdgePlanes.top +
+    ((2 * spriteEdgePlanes.top * mainCanvas.height) / sizeBetweenOverlays.y -
+      2 * spriteEdgePlanes.top) *
+      (topPadding / (topPadding + bottomPadding));
 
   mainCamera.updateProjectionMatrix();
 };

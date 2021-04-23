@@ -113,9 +113,22 @@ export class SliceRenderer implements IDisposable {
             this.slices[oldMainView],
             editor,
           );
+
+          setMainCameraPlanes(this.editor, this.mainCanvas, this.mainCamera);
+          this.lazyRender();
         },
       ),
-      reaction(() => editor.viewSettings.showSideViews, this.lazyRender),
+      reaction(
+        () => editor.viewSettings.showSideViews,
+        () => {
+          // Wrapped in a setTimeout, because the side views need to actually
+          // appear before updating the camera planes.
+          setTimeout(() => {
+            setMainCameraPlanes(this.editor, this.mainCanvas, this.mainCamera);
+            this.lazyRender();
+          });
+        },
+      ),
     );
 
     this.renderers[0].setAnimationLoop(this.animate);

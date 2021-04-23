@@ -62,6 +62,10 @@ export const Tool = React.forwardRef<HTMLButtonElement, ToolProps>(
   },
 );
 
-export const Toolbar: React.FC<ToolbarProps> = ({ children, ...rest }) => (
-  <ToolbarContainer {...rest}>{children}</ToolbarContainer>
+export const Toolbar = React.forwardRef<HTMLDivElement, ToolbarProps>(
+  ({ children, ...rest }, ref) => (
+    <ToolbarContainer ref={ref} {...rest}>
+      {children}
+    </ToolbarContainer>
+  ),
 );

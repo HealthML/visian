@@ -16,6 +16,8 @@ export interface StoreContext {
   setDirty(): void;
 
   getTheme(): ColorMode;
+
+  getRefs(): { [key: string]: React.RefObject<HTMLElement> };
 }
 
 export interface ErrorNotification {

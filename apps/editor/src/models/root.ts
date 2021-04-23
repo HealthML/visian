@@ -41,6 +41,7 @@ export class RootStore implements ISerializable<RootSnapshot> {
       persistImmediately: this.persistImmediately,
       setDirty: action(this.setIsDirty),
       getTheme: () => this.theme,
+      getRefs: () => this.refs,
     });
 
     makeObservable(this, {

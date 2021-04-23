@@ -9,7 +9,7 @@ import {
   useModalPosition,
 } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
@@ -36,6 +36,16 @@ const adaptiveBrushSizeSwitchItems = [
 
 export const Toolbar: React.FC = observer(() => {
   const store = useStore();
+
+  // Ref Management
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    store?.setRef("toolbar", ref);
+
+    return () => {
+      store?.setRef("toolbar");
+    };
+  }, [store, ref]);
 
   // Menu Toggling
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -83,7 +93,7 @@ export const Toolbar: React.FC = observer(() => {
   );
 
   return (
-    <StyledToolbar>
+    <StyledToolbar ref={ref}>
       <Tool
         icon="moveTool"
         tooltipTx="navigation-tool"
