@@ -1,11 +1,11 @@
 import { render } from "@testing-library/react";
 import React from "react";
 
-import TextInput from "./text-input";
+import { TextField } from "./text-field";
 
-describe("TextInput", () => {
+describe("TextField", () => {
   it("should render successfully", () => {
-    const { baseElement } = render(<TextInput />);
+    const { baseElement } = render(<TextField />);
     expect(baseElement).toBeTruthy();
   });
 });

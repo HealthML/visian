@@ -2,7 +2,7 @@ import type React from "react";
 
 import type { I18nData } from "../types";
 
-export interface TextInputProps extends React.HTMLAttributes<HTMLInputElement> {
+export interface TextFieldProps extends React.HTMLAttributes<HTMLInputElement> {
   /**
    * Additional data, passed to the translation function when `placeholderTx`
    * is being used.

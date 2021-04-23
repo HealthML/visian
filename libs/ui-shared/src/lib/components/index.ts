@@ -13,7 +13,7 @@ export * from "./sheet";
 export * from "./slider";
 export * from "./switch";
 export * from "./text";
-export * from "./text-input";
+export * from "./text-field";
 export * from "./tooltip";
 export * from "./webgl-canvas";
 export * from "./icon";

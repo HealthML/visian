@@ -3,7 +3,7 @@ import styled from "styled-components";
 
 import { useTranslation } from "../../i18n";
 import { color, font, fontSize, radius, space } from "../../theme";
-import { TextInputProps } from "./text-input.props";
+import { TextFieldProps } from "./text-field.props";
 
 const StyledInput = styled.input`
   border: none;
@@ -26,7 +26,7 @@ const StyledInput = styled.input`
   }
 `;
 
-const TextInput: React.FC<TextInputProps> = ({
+export const TextField: React.FC<TextFieldProps> = ({
   placeholderData,
   placeholder: placeholderText,
   placeholderTx,
@@ -53,5 +53,3 @@ const TextInput: React.FC<TextInputProps> = ({
     <StyledInput {...rest} onChange={handleChange} placeholder={placeholder} />
   );
 };
-
-export default TextInput;
