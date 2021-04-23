@@ -9,16 +9,12 @@ export default {
   argTypes: { onEdit: { action: "New Value" } },
 };
 
-export const primary = (args: TextFieldProps) => {
-  return <TextField {...args} />;
-};
+export const primary = (args: TextFieldProps) => <TextField {...args} />;
 primary.args = {
   placeholder: "Placeholder",
 };
 
-export const password = (args: TextFieldProps) => {
-  return <TextField {...args} />;
-};
+export const password = (args: TextFieldProps) => <TextField {...args} />;
 password.args = {
   placeholder: "Password",
   type: "password",
