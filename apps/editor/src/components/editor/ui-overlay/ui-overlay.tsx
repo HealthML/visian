@@ -82,9 +82,13 @@ export const UIOverlay = observer<UIOverlayProps>(
     const enterFloatingUI = useCallback(() => {
       store?.editor.tools.setIsCursorOverFloatingUI(true);
     }, [store]);
-    const leaveFloatingUI = useCallback(() => {
-      store?.editor.tools.setIsCursorOverFloatingUI(false);
-    }, [store]);
+    const leaveFloatingUI = useCallback(
+      (event: React.PointerEvent) => {
+        if (event.pointerType === "touch") return;
+        store?.editor.tools.setIsCursorOverFloatingUI(false);
+      },
+      [store],
+    );
 
     return (
       <Container
