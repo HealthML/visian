@@ -55,7 +55,7 @@ export interface SliderFieldProps extends Omit<SliderProps, "isVertical"> {
   showValueLabel?: boolean;
 
   /**
-   * An optional function that formats the label text (if `shouldShowLabel` is `true`).
+   * An optional function that formats the label text (if `showValueLabel` is `true`).
    * Defaults to a transformation to a value rounded to 2 decimal places.
    */
   formatValueLabel?: (value: number[]) => string;

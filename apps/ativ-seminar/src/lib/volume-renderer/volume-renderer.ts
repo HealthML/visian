@@ -1,3 +1,4 @@
+import { ScreenAlignedQuad } from "@visian/utils";
 import { action, computed, makeObservable, observable } from "mobx";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
@@ -13,7 +14,6 @@ import {
   lightingModes,
   LightingModeType,
   ResolutionComputer,
-  ScreenAlignedQuad,
 } from "./utils";
 import {
   TransferFunction,

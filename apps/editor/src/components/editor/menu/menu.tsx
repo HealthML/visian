@@ -5,6 +5,7 @@ import {
   Divider,
   FloatingUIButton,
   Modal,
+  sheetNoise,
   Switch,
   useModalPosition,
   useTranslation,
@@ -19,7 +20,7 @@ import { feedbackMailAddress } from "../../../constants";
 // Styled Components
 const FeedbackButton = styled(Button)`
   width: 100%;
-  background: ${color("blueSheet")};
+  background: ${sheetNoise}, ${color("blueSheet")};
   border-color: ${color("blueBorder")};
   margin-bottom: 16px;
 
@@ -34,7 +35,7 @@ const MenuButton = styled(FloatingUIButton)`
 
 const ResetButton = styled(Button)`
   width: 100%;
-  background: ${color("redSheet")};
+  background: ${sheetNoise}, ${color("redSheet")};
   border-color: ${color("redBorder")};
 
   &:active {

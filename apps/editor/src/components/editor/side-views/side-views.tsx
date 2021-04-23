@@ -1,8 +1,11 @@
 import {
   color,
+  computeStyleValue,
   coverMixin,
   EventLike,
+  isFirefox,
   Sheet,
+  sheetNoise,
   useUpdateOnResize,
 } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
@@ -14,12 +17,13 @@ import React, {
   useState,
 } from "react";
 import styled from "styled-components";
+import tc from "tinycolor2";
 
 import { useStore } from "../../../app/root-store";
 
-const SideViewContainer = styled.div<{ shouldShowSideViews?: boolean }>`
+const SideViewContainer = styled.div<{ showSideViews?: boolean }>`
   box-sizing: border-box;
-  display: ${(props) => (props.shouldShowSideViews ? "flex" : "none")};
+  display: ${(props) => (props.showSideViews ? "flex" : "none")};
   flex-direction: column;
   position: relative;
   margin-right: 22px;
@@ -39,7 +43,14 @@ const SideView = styled(Sheet)`
   position: relative;
   user-select: none;
   width: 100%;
-  background: ${color("sideViewSheet")};
+  background: ${sheetNoise},
+    // Firefox does not support a blurred background yet
+    ${isFirefox()
+        ? computeStyleValue(
+            [color("sideViewSheet"), color("background")],
+            (sheet, background) => tc.mix(sheet, background, 80).toRgbString(),
+          )
+        : color("sideViewSheet")};
   border: 1px solid ${color("sideViewBorder")}; ;
 `;
 
@@ -51,7 +62,7 @@ const SideViewCanvas = styled.canvas`
 export const SideViews = observer(() => {
   const store = useStore();
   const showSideViews =
-    store?.editor.image && store.editor.viewSettings.shouldShowSideViews;
+    store?.editor.image && store.editor.viewSettings.showSideViews;
 
   // Refs Management
   const upperSideViewRef = useRef<HTMLCanvasElement>(null);
@@ -96,10 +107,7 @@ export const SideViews = observer(() => {
   }, [containerRef, showSideViews, size]);
 
   return (
-    <SideViewContainer
-      shouldShowSideViews={showSideViews}
-      ref={setContainerRef}
-    >
+    <SideViewContainer showSideViews={showSideViews} ref={setContainerRef}>
       <SideViewWrapper style={{ width: sideViewSize }}>
         <SideView style={{ marginBottom: 16 }}>
           <SideViewCanvas

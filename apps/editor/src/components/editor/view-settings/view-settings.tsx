@@ -77,7 +77,7 @@ export const ViewSettings: React.FC = observer(() => {
             <Switch
               labelTx="side-views"
               items={sideViewsSwitchItems}
-              value={Boolean(store?.editor.viewSettings.shouldShowSideViews)}
+              value={Boolean(store?.editor.viewSettings.showSideViews)}
               onChange={store?.editor.viewSettings.toggleSideViews}
             />
             <Switch

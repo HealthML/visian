@@ -1,6 +1,9 @@
 import {
+  DeviceType,
   globalListenerTypes,
   IDispatch,
+  isFirefox,
+  isWindows,
   PointerButton,
   registerDispatch,
   transformGesturePreset,
@@ -12,9 +15,37 @@ import { RootStore, ToolType } from "../models";
 export const setUpPointerHandling = (
   store: RootStore,
 ): [IDispatch, IDisposer] => {
+  /** The tool used by the mouse or pen. */
+  let precisionTool: ToolType | undefined;
+
+  let previousDevice: DeviceType | undefined;
+
+  const handleDeviceSwitch = (device: DeviceType) => {
+    if (previousDevice === device) return;
+
+    // Sadly, pen input is detected as `touch` pointer events in Firefox on
+    // Windows. See https://bugzilla.mozilla.org/show_bug.cgi?id=1487509#c5
+    if (isFirefox() && isWindows()) return;
+
+    if (device === "touch") {
+      precisionTool = store.editor.tools.activeTool;
+      store.editor.tools.setActiveTool(ToolType.Navigate);
+    } else if (
+      previousDevice === "touch" &&
+      store.editor.tools.activeTool === ToolType.Navigate
+    ) {
+      // We intentionally replace the navigation tool by the brush tool here
+      // using the `||`
+      store.editor.tools.setActiveTool(precisionTool || ToolType.Brush);
+    }
+
+    previousDevice = device;
+  };
+
   const dispatch = transformGesturePreset({
-    forUnidentifiedPointers: ({ detail }) => {
+    forUnidentifiedPointers: ({ context, detail }) => {
       if (detail.buttons) return;
+      handleDeviceSwitch(context.device);
 
       store.editor.tools.handleEvent({
         x: detail.clientX,
@@ -22,12 +53,12 @@ export const setUpPointerHandling = (
       });
     },
     forPointers: ({ context, detail, id }, { eventType }) => {
+      handleDeviceSwitch(context.device);
       const activeTool = store.editor.tools.activeTool;
 
       context.useForGesture = Boolean(
         id === "mainView" &&
-          (context.device === "touch" ||
-            context.button === PointerButton.MMB ||
+          (context.button === PointerButton.MMB ||
             (activeTool === ToolType.Crosshair &&
               context.button === PointerButton.RMB) ||
             context.ctrlKey ||
@@ -37,15 +68,14 @@ export const setUpPointerHandling = (
       if (!context.useForGesture) {
         if (activeTool === ToolType.Crosshair || id !== "mainView") {
           // Crosshairs are only active if side views are shown.
-          if (store.editor.viewSettings.shouldShowSideViews) {
-            store.editor.viewSettings.moveCrosshair(
-              {
-                x: detail.clientX,
-                y: detail.clientY,
-              },
-              id,
-            );
-          }
+          if (!store.editor.viewSettings.showSideViews) return;
+          store.editor.viewSettings.moveCrosshair(
+            {
+              x: detail.clientX,
+              y: detail.clientY,
+            },
+            id,
+          );
         } else if (id === "mainView") {
           store.editor.tools.handleEvent(
             {
@@ -53,7 +83,8 @@ export const setUpPointerHandling = (
               y: detail.clientY,
             },
             eventType,
-            context.button === PointerButton.RMB,
+            context.button === PointerButton.RMB ||
+              context.button === PointerButton.Eraser,
           );
         }
       }

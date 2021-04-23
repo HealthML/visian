@@ -1,18 +1,25 @@
-import { IDisposable, IDisposer, Image, ViewType } from "@visian/utils";
+import { IDisposable, IDisposer, ViewType } from "@visian/utils";
 import { autorun } from "mobx";
 import * as THREE from "three";
 
 import fragmentShader from "./shaders/slice.frag.glsl";
 import vertexShader from "./shaders/slice.vert.glsl";
+import { getOrder } from "./utils";
 
-import type { Editor } from "../../models";
-
+import type { Editor, RenderedImage } from "../../models";
 export abstract class SliceMaterial
   extends THREE.ShaderMaterial
   implements IDisposable {
   protected disposers: IDisposer[] = [];
 
-  constructor(editor: Editor, viewType: ViewType, defines = {}, uniforms = {}) {
+  private image?: RenderedImage;
+
+  constructor(
+    private editor: Editor,
+    private viewType: ViewType,
+    defines = {},
+    uniforms = {},
+  ) {
     super({
       defines,
       vertexShader,
@@ -48,6 +55,7 @@ export abstract class SliceMaterial
         this.uniforms.uActiveSlices.value = editor.viewSettings.selectedVoxel.toArray();
         editor.sliceRenderer?.lazyRender();
       }),
+      autorun(this.updateTexture),
     );
   }
 
@@ -57,12 +65,20 @@ export abstract class SliceMaterial
   }
 
   /** Updates the rendered atlas. */
-  public setImage(image: Image) {
-    this.uniforms.uDataTexture.value = image.getTexture();
+  public setImage(image: RenderedImage) {
     this.uniforms.uVoxelCount.value = image.voxelCount;
     this.uniforms.uAtlasGrid.value = image.getAtlasGrid();
     this.uniforms.uComponents.value = image.voxelComponents;
+    this.image = image;
+    this.updateTexture();
   }
+
+  private updateTexture = () => {
+    const canvasIndex = getOrder(this.editor.viewSettings.mainViewType).indexOf(
+      this.viewType,
+    );
+    this.uniforms.uDataTexture.value = this.image?.getTexture(canvasIndex);
+  };
 }
 
 export default SliceMaterial;

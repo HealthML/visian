@@ -20,7 +20,7 @@ export class PreviewBrushCursor extends BrushCursor {
         },
       ),
       reaction(
-        () => editor.tools.isCursorOverDrawableArea && this.active,
+        () => editor.tools.canDraw && this.active,
         () => {
           this.updateVisibility();
         },
@@ -54,10 +54,10 @@ export class PreviewBrushCursor extends BrushCursor {
   }
 
   protected updateVisibility() {
-    this.visible = this.active && !this.editor.tools.isCursorOverDrawableArea;
+    this.visible = this.active && !this.editor.tools.canDraw;
 
     // Prevent appearing again after hiding because main brush cursor was visible.
-    if (this.editor.tools.isCursorOverDrawableArea && this.active) {
+    if (this.editor.tools.canDraw && this.active) {
       this.hide();
     }
 
