@@ -3,12 +3,12 @@ import * as THREE from "three";
 
 export class VoxelCamera extends THREE.OrthographicCamera {
   constructor() {
-    super(0, 1, 1, -1, 0, 10);
+    super(-0.5, 1, 1, -0.5, 0, 10);
   }
 
   public setAtlasSize(size: Vector) {
-    this.right = size.x;
-    this.top = size.y - 1;
+    this.right = size.x - 0.5;
+    this.top = size.y - 0.5;
     this.updateProjectionMatrix();
   }
 }
