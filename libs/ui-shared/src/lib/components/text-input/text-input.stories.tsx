@@ -31,8 +31,8 @@ primary.args = {
   placeholder: "Placeholder",
 };
 
-export const password = (args: TextInputProps) => Template(args);
-password.args = {
+export const number = (args: TextInputProps) => Template(args);
+number.args = {
   placeholder: "Number",
   type: "number",
 };

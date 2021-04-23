@@ -128,7 +128,6 @@ export const SliderRangeSelection = styled.div.attrs<SliderRangeSelectionProps>(
 export const SliderLabelRow = styled.div`
   display: flex;
   margin-bottom: 6px;
-  height: 10px;
 `;
 
 export const SliderLabel = styled(Text)`
@@ -144,5 +143,6 @@ export const SliderValueInputWrapper = styled.div`
 export const SliderValueInput = styled(TextInput)`
   font-size: ${fontSize("small")};
   height: 10px;
+  line-height: 10px;
   text-align: right;
 `;
