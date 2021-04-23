@@ -15,7 +15,7 @@ const PopUpContainer = styled(Sheet)`
   pointer-events: auto;
 
   min-width: 600px;
-  z-index: ${zIndex("modal")};
+  z-index: ${zIndex("overlay")};
 
   position: relative;
 `;
@@ -27,7 +27,7 @@ const PopUpTitle = styled(Title)`
   line-height: 28px;
 `;
 
-const ExportFileName = styled(Title)`
+const SecondaryPopUpTitle = styled(Title)`
   display: block;
   font-size: 28px;
   font-weight: ${fontWeight("regular")};
@@ -46,7 +46,8 @@ const TitleRow = styled.div`
 export const PopUp: React.FC<PopUpProps> = ({
   labelTx,
   label,
-  filename,
+  secondaryLabel,
+  secondaryLabelTx,
   children,
   ...rest
 }) => (
@@ -54,7 +55,7 @@ export const PopUp: React.FC<PopUpProps> = ({
     {(labelTx || label) && (
       <TitleRow>
         <PopUpTitle tx={labelTx} text={label} />
-        <ExportFileName text={filename} />
+        <SecondaryPopUpTitle tx={secondaryLabelTx} text={secondaryLabel} />
       </TitleRow>
     )}
     {children}

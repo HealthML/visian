@@ -19,6 +19,7 @@ const StyledOverlay = styled.div`
   display: flex;
   flex-direction: row;
   padding-right: 10%;
+  pointer-events: auto;
   z-index: ${zIndex("overlay")};
 `;
 

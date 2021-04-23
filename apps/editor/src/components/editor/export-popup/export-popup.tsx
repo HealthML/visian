@@ -14,11 +14,12 @@ const StyledOverlay = styled.div`
   ${coverMixin}
 
   align-items: center;
+  background-color: ${color("modalUnderlay")};
+  backdrop-filter: blur(3px);
   display: flex;
   justify-content: center;
-  background-color: ${color("modalUnderlay")};
+  pointer-events: auto;
   z-index: ${zIndex("overlay")};
-  backdrop-filter: blur(3px);
 `;
 
 const InlineLabel = styled(Text)`
@@ -48,7 +49,7 @@ const ExportPopUpContainer = styled(PopUp)`
 
 export const ExportPopUp: React.FC = () => (
   <StyledOverlay>
-    <ExportPopUpContainer label="Export" filename="T1.nii">
+    <ExportPopUpContainer label="Export" secondaryLabel="T1.nii">
       <InlineRow>
         <InlineLabel text="Export:" />
         <ExportSwitch items={[{ value: "Annotation" }, { value: "Scan" }]} />
