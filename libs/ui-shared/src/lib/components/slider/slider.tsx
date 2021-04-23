@@ -5,13 +5,14 @@ import React, {
 } from "react";
 
 import { FlexRow, InputContainer, Spacer } from "../box";
-import { SliderLabel } from "../text";
 import { SliderFieldProps, SliderProps } from "./slider.props";
 import {
   SliderContainer,
+  SliderLabel,
   SliderRangeSelection,
   SliderThumb,
   SliderTrack,
+  SliderValueLabel,
 } from "./styled-components";
 import { pointerToSliderValue, useDrag, valueToSliderPos } from "./utils";
 
@@ -217,14 +218,27 @@ export const Slider: React.FC<SliderProps> = (props) => {
 export const SliderField: React.FC<SliderFieldProps> = ({
   labelTx,
   label,
-  showValueLabel,
+  showValueLabel = true,
+  unlockValueLabelRange,
   formatValueLabel = defaultFormatLabel,
   value,
   defaultValue,
   min = 0,
+  max = 1,
+  onChange,
   ...rest
 }) => {
   const actualValue = value === undefined ? defaultValue || min : value;
+
+  const handleTextInputConfirm = useCallback(
+    (newValue: number) => {
+      const clampedValue = unlockValueLabelRange
+        ? newValue
+        : Math.max(min, Math.min(max, newValue));
+      if (onChange) onChange(clampedValue, 0, clampedValue);
+    },
+    [max, min, onChange, unlockValueLabelRange],
+  );
 
   return (
     <InputContainer>
@@ -232,16 +246,32 @@ export const SliderField: React.FC<SliderFieldProps> = ({
         <FlexRow>
           {(labelTx || label) && <SliderLabel text={label} tx={labelTx} />}
           <Spacer />
-          {showValueLabel && (
-            <SliderLabel
-              text={formatValueLabel(
-                Array.isArray(actualValue) ? actualValue : [actualValue],
-              )}
-            />
-          )}
+          {showValueLabel &&
+            (Array.isArray(actualValue) ? (
+              <SliderLabel
+                text={formatValueLabel(
+                  Array.isArray(actualValue) ? actualValue : [actualValue],
+                )}
+              />
+            ) : (
+              <Spacer>
+                <SliderValueLabel
+                  type="number"
+                  value={formatValueLabel([actualValue])}
+                  onConfirm={handleTextInputConfirm}
+                />
+              </Spacer>
+            ))}
         </FlexRow>
       )}
-      <Slider {...rest} value={value} defaultValue={defaultValue} min={min} />
+      <Slider
+        {...rest}
+        value={value}
+        defaultValue={defaultValue}
+        min={min}
+        max={max}
+        onChange={onChange}
+      />
     </InputContainer>
   );
 };

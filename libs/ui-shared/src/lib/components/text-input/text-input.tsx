@@ -11,11 +11,16 @@ import { color, font, fontSize } from "../../theme";
 import { TextInputProps } from "./text-input.props";
 
 const StyledInput = styled.input`
+  background: none;
   border: none;
   color: ${color("text")};
   font-family: ${font("default")};
   font-size: ${fontSize("default")};
+  margin: 0;
   outline: none;
+  padding: 0;
+  pointer-events: auto;
+  width: 100%;
 
   &[type="number"] {
     -moz-appearance: textfield;
@@ -77,9 +82,11 @@ export const TextInput = React.forwardRef<HTMLInputElement, TextInputProps>(
     const confirmEdit = useCallback(() => {
       if (!isActive) return;
       if (onConfirm) {
-        onConfirm(
-          type === "number" ? parseFloat(valueRef.current) : valueRef.current,
-        );
+        const newValue =
+          type === "number" ? parseFloat(valueRef.current) : valueRef.current;
+        if (!(type === "number" && isNaN(newValue))) {
+          onConfirm(newValue);
+        }
       }
 
       setIsActive(false);

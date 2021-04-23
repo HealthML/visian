@@ -90,7 +90,7 @@ export const ViewSettings: React.FC = observer(() => {
         )}
         <SpacedSliderField
           labelTx="contrast"
-          showValueLabel
+          unlockValueLabelRange
           min={0}
           max={2}
           value={store?.editor.viewSettings.contrast}
@@ -98,7 +98,7 @@ export const ViewSettings: React.FC = observer(() => {
         />
         <SliderField
           labelTx="brightness"
-          showValueLabel
+          unlockValueLabelRange
           min={0}
           max={2}
           value={store?.editor.viewSettings.brightness}

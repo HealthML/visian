@@ -48,12 +48,6 @@ export const InputLabel = styled(Text)`
   line-height: 10px;
 `;
 
-export const SliderLabel = styled(Text)`
-  margin-bottom: 6px;
-  font-size: ${fontSize("small")};
-  line-height: 10px;
-`;
-
 export const SubtleText = styled(Text)`
   font-size: ${fontSize("small")};
   line-height: 10px;
