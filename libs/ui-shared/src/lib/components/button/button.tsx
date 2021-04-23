@@ -21,6 +21,7 @@ const StyledButton = styled.button<Pick<ButtonProps, "isDisabled">>`
   display: flex;
   align-items: center;
   justify-content: center;
+  -webkit-tap-highlight-color: transparent;
 
   ${(props) =>
     props.isDisabled
