@@ -17,6 +17,10 @@ const LayerList = styled(List)`
   margin-top: -16px;
 `;
 
+const LayerModal = styled(Modal)`
+  padding-bottom: 0px;
+`;
+
 export const Layers: React.FC = observer(() => {
   const store = useStore();
 
@@ -47,7 +51,7 @@ export const Layers: React.FC = observer(() => {
         onPointerDown={toggleModal}
         isActive={isModalOpen}
       />
-      <Modal style={modalPosition} isOpen={isModalOpen} labelTx="layers">
+      <LayerModal style={modalPosition} isOpen={isModalOpen} labelTx="layers">
         <LayerList>
           {store?.editor.annotation && (
             <ListItem
@@ -69,7 +73,7 @@ export const Layers: React.FC = observer(() => {
             <SubtleText tx="no-layers" />
           )}
         </LayerList>
-      </Modal>
+      </LayerModal>
     </>
   );
 });

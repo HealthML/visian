@@ -33,6 +33,7 @@ export const ListItemLabel = styled(Text)`
   font-size: 14px;
   text-overflow: ellipsis;
   overflow: hidden;
+  user-select: none;
 `;
 
 export const ListIcon = styled(Icon).withConfig({
@@ -51,6 +52,15 @@ export const ListIcon = styled(Icon).withConfig({
     css`
       cursor: pointer;
     `}
+`;
+
+export const ListFirstIcon = styled.div`
+  width: 20px;
+  height: 20px;
+  border-radius: 10px;
+  margin-right: 10px;
+  background-color: #d0c068;
+  cursor: pointer;
 `;
 
 export const List: React.FC<ListProps> = ({ children, ...rest }) => (
@@ -75,6 +85,7 @@ export const ListItem: React.FC<ListItemProps> = ({
   return (
     <ListItemContainer {...rest}>
       <ListItemInner>
+        <ListFirstIcon />
         {(labelTx || label) && <ListItemLabel tx={labelTx} text={label} />}
         {children}
         {icon && (
