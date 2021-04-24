@@ -1,4 +1,4 @@
-import { IDisposable, IDisposer, Vector, ViewType } from "@visian/utils";
+import { IDisposable, IDisposer, ViewType } from "@visian/utils";
 import { autorun } from "mobx";
 import * as THREE from "three";
 
