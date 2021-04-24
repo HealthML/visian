@@ -186,6 +186,12 @@ export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
     }
   }
 
+  public setAtlasVoxels(voxels: VoxelWithValue[]) {
+    this.voxelsToRender.push(...voxels);
+    this.voxelsRendered.fill(false);
+    this.isVoxelGeometryDirty = true;
+  }
+
   public setAtlasVoxel(voxel: Vector, value: number) {
     if (this.renderers[0]) {
       const { x, y, z } = voxel;

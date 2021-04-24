@@ -1,8 +1,13 @@
-import { getOrthogonalAxis, getPlaneAxes, Image, Vector } from "@visian/utils";
+import {
+  getOrthogonalAxis,
+  getPlaneAxes,
+  Image,
+  Vector,
+  VoxelWithValue,
+} from "@visian/utils";
 
 import { Editor } from "../editor";
 import { Brush } from "./brush";
-import { AnnotationVoxel } from "./types";
 
 export class SmartBrush extends Brush {
   /**
@@ -24,10 +29,10 @@ export class SmartBrush extends Brush {
     super(editor, value, undoable);
   }
 
-  protected annotate(annotations: AnnotationVoxel[]) {
-    super.annotate(annotations);
-    annotations.forEach((annotationVoxel) => {
-      const voxel = Vector.fromObject(annotationVoxel, false);
+  protected writeVoxels(voxels: VoxelWithValue[]) {
+    super.writeVoxels(voxels);
+    voxels.forEach((voxelWithValue) => {
+      const voxel = Vector.fromObject(voxelWithValue, false);
       this.currentStroke.add(voxel.toString());
       this.drawnVoxels.push(voxel);
     });
@@ -87,13 +92,12 @@ export class SmartBrush extends Brush {
       });
     }
 
-    const grownAnnotations: AnnotationVoxel[] = [];
+    const grownVoxels: VoxelWithValue[] = [];
     voxelsToDraw.forEach((voxel) => {
-      grownAnnotations.push(
-        AnnotationVoxel.fromVoxelAndValue(voxel, this.value),
-      );
+      const { x, y, z } = voxel;
+      grownVoxels.push({ x, y, z, value: this.value });
     });
-    super.annotate(grownAnnotations);
+    super.writeVoxels(grownVoxels);
   }
 
   private neighborsOf(voxel: Vector, image: Image) {
