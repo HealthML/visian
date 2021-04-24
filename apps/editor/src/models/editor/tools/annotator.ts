@@ -2,7 +2,6 @@ import { getOrthogonalAxis, Vector } from "@visian/utils";
 
 import { Editor } from "../editor";
 import { SliceUndoRedoCommand } from "../undo-redo";
-import { replaceMerge } from "./merging";
 import { AnnotationVoxel } from "./types";
 
 /**
@@ -22,10 +21,10 @@ export class Annotator {
     annotation = this.editor.annotation,
     viewType = this.editor.viewSettings.mainViewType,
   ) {
-    if (this.undoable) {
-      this.strokeActive = false;
+    if (annotation) {
+      annotation.finishStroke();
 
-      if (annotation && this.sliceNumber !== undefined) {
+      if (this.undoable && this.sliceNumber !== undefined) {
         this.editor.undoRedo.addCommand(
           new SliceUndoRedoCommand(
             annotation,
@@ -36,7 +35,10 @@ export class Annotator {
           ),
         );
       }
+    }
 
+    if (this.undoable) {
+      this.strokeActive = false;
       this.oldSliceData = undefined;
       this.sliceNumber = undefined;
     }
@@ -47,7 +49,6 @@ export class Annotator {
   protected annotate(
     annotations: AnnotationVoxel[],
     viewType = this.editor.viewSettings.mainViewType,
-    merge = replaceMerge,
     image = this.editor.annotation,
   ) {
     if (!image || !annotations.length) return;
@@ -59,7 +60,7 @@ export class Annotator {
     }
 
     annotations.forEach((annotationVoxel) =>
-      this.annotateVoxel(annotationVoxel, merge),
+      this.annotateVoxel(annotationVoxel),
     );
 
     this.editor.sliceRenderer?.lazyRender();
@@ -67,7 +68,6 @@ export class Annotator {
 
   private annotateVoxel(
     annotationVoxel: AnnotationVoxel,
-    merge = replaceMerge,
     annotation = this.editor.annotation,
   ) {
     if (
@@ -84,14 +84,7 @@ export class Annotator {
 
     const coordinates = Vector.fromObject(annotationVoxel, false);
 
-    const oldAnnotationVoxel = AnnotationVoxel.fromVoxelAndValue(
-      annotationVoxel,
-      annotation.getVoxelData(coordinates),
-    );
-
-    const newAnnotationVoxel = merge(annotationVoxel, oldAnnotationVoxel);
-
-    annotation.setAtlasVoxel(coordinates, newAnnotationVoxel.value);
+    annotation.setAtlasVoxel(coordinates, annotationVoxel.value);
   }
 }
 

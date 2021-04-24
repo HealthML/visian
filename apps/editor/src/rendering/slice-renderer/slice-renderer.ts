@@ -219,9 +219,9 @@ export class SliceRenderer implements IDisposable {
     if (!this.isImageLoaded) return;
     this.lazyRenderTriggered = false;
 
-    this.renderers.forEach((renderer, index) => {
-      this.editor.image?.onBeforeRender(renderer, index);
-      this.editor.annotation?.onBeforeRender(renderer, index);
+    this.renderers.forEach((_, index) => {
+      this.editor.image?.onBeforeRender(index);
+      this.editor.annotation?.onBeforeRender(index);
     });
 
     const order = getOrder(this.editor.viewSettings.mainViewType);
@@ -236,11 +236,15 @@ export class SliceRenderer implements IDisposable {
     this.slices.forEach((slice) => slice.setImage(image));
     this.isImageLoaded = true;
 
+    image.setRenderers(this.renderers);
+
     this.lazyRender();
   }
 
   private setAnnotation(image?: RenderedImage) {
     this.slices.forEach((slice) => slice.setAnnotation(image));
+
+    image?.setRenderers(this.renderers);
 
     this.lazyRender();
   }

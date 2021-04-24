@@ -57,6 +57,8 @@ export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
     return renderedImage;
   }
 
+  private renderers: THREE.WebGLRenderer[] = [];
+
   /** Used to update the atlas from the CPU. */
   private internalTexture: THREE.DataTexture;
 
@@ -75,7 +77,7 @@ export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
   /** The render targets for the texture atlases for the different WebGL contexts. */
   private renderTargets: ImageRenderTarget[] = [];
   /** Whether or not the corresponding render target needs to be updated from the CPU data. */
-  public isTextureDirty = [true];
+  private hasCPUUpdates = [true];
   /** Used to update the render targets from the CPU data. */
   private screenAlignedQuad: ScreenAlignedQuad;
 
@@ -99,24 +101,31 @@ export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
     this.voxelMaterial.setVoxelCount(this.voxelCount);
   }
 
+  public setRenderers(renderers: THREE.WebGLRenderer[]) {
+    this.renderers = renderers;
+  }
+
   public getTexture(index = 0) {
     if (!this.renderTargets[index]) {
       this.renderTargets[index] = new ImageRenderTarget(this.getAtlasSize());
-      this.isTextureDirty[index] = true;
+      this.hasCPUUpdates[index] = true;
       this.voxelsRendered[index] = true;
     }
     return this.renderTargets[index].texture;
   }
 
-  public onBeforeRender(renderer: THREE.WebGLRenderer, index = 0) {
-    if (this.isTextureDirty[index] && this.renderTargets[index]) {
+  public onBeforeRender(index = 0) {
+    const renderer = this.renderers[index];
+    if (!renderer) return;
+
+    if (this.hasCPUUpdates[index] && this.renderTargets[index]) {
       copyToRenderTarget(
         this.screenAlignedQuad,
         this.renderTargets[index],
         renderer,
       );
 
-      this.isTextureDirty[index] = false;
+      this.hasCPUUpdates[index] = false;
     }
 
     if (this.voxelsToRender.length && !this.voxelsRendered[index]) {
@@ -140,34 +149,58 @@ export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
     }
   }
 
-  private triggerCopy() {
-    this.isTextureDirty.fill(true);
+  private triggerGPUPush() {
+    this.internalTexture.needsUpdate = true;
+    this.hasCPUUpdates.fill(true);
+  }
+
+  public finishStroke() {
+    const renderer = this.renderers[0];
+    if (!renderer) return;
+
+    const atlasSize = this.getAtlasSize();
+    const buffer = new Uint8Array(atlasSize.product() * 4);
+
+    renderer.readRenderTargetPixels(
+      this.renderTargets[0],
+      0,
+      0,
+      atlasSize.x,
+      atlasSize.y,
+      buffer,
+    );
+
+    const atlas = new Uint8Array(atlasSize.product());
+    for (let i = 0; i < atlas.length; i++) {
+      atlas[i] = buffer[4 * i];
+    }
+
+    super.setAtlas(atlas);
   }
 
   public setAtlas(atlas: Uint8Array) {
     super.setAtlas(atlas);
 
     if (this.internalTexture) {
-      this.internalTexture.needsUpdate = true;
-      this.triggerCopy();
+      this.triggerGPUPush();
     }
   }
 
   public setAtlasVoxel(voxel: Vector, value: number) {
-    super.setAtlasVoxel(voxel, value);
-
-    const { x, y, z } = voxel;
-    this.voxelsToRender.push({ x, y, z, value });
-    this.voxelsRendered.fill(false);
-    this.isVoxelGeometryDirty = true;
-
-    this.internalTexture.needsUpdate = true;
+    if (this.renderers[0]) {
+      const { x, y, z } = voxel;
+      this.voxelsToRender.push({ x, y, z, value });
+      this.voxelsRendered.fill(false);
+      this.isVoxelGeometryDirty = true;
+    } else {
+      super.setAtlasVoxel(voxel, value);
+      this.triggerGPUPush();
+    }
   }
 
   public setSlice(viewType: ViewType, slice: number, sliceData?: Uint8Array) {
     super.setSlice(viewType, slice, sliceData);
 
-    this.internalTexture.needsUpdate = true;
-    this.triggerCopy();
+    this.triggerGPUPush();
   }
 }
