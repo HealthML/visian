@@ -91,11 +91,6 @@ export const setUpPointerHandling = (
             context.button === PointerButton.RMB ||
               context.button === PointerButton.Eraser,
           );
-
-          // Hide the cursor after a touch stroke
-          if (eventType === "end" && context.device === "touch") {
-            store?.editor.tools.setIsCursorOverDrawableArea(false);
-          }
         }
       }
     },

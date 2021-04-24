@@ -40,8 +40,9 @@ const SyledCanvas = styled(WebGLCanvas)<
 export const MainView = observer<{}, HTMLCanvasElement>(
   (_props, ref) => {
     const store = useStore();
+
     const pointerDispatch = store?.pointerDispatch;
-    const onPointerDown = useCallback(
+    const handlePointerDown = useCallback(
       (event: EventLike) => {
         if (!pointerDispatch) return;
         pointerDispatch(event, "mainView");
@@ -49,13 +50,18 @@ export const MainView = observer<{}, HTMLCanvasElement>(
       [pointerDispatch],
     );
 
+    const handlePointerOut = useCallback(() => {
+      store?.editor.tools.setIsCursorOverDrawableArea(false);
+    }, [store]);
+
     return (
       <SyledCanvas
         activeTool={store?.editor.tools.activeTool}
         isDrawable={store?.editor.tools.canDraw}
         isNavigationDragged={store?.editor.tools.isNavigationDragged}
         onContextMenu={preventDefault}
-        onPointerDown={onPointerDown}
+        onPointerDown={handlePointerDown}
+        onPointerOut={handlePointerOut}
         ref={ref}
       />
     );
