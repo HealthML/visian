@@ -37,11 +37,11 @@ export const renderVoxels = (
 };
 
 export const updateVoxelGeometry = (
-  voxelsToRender: VoxelWithValue[],
+  voxelsToRender: (VoxelWithValue | VoxelWithValue[])[],
   voxelGeometry: THREE.BufferGeometry,
 ) => {
   const vertices: number[] = [];
-  voxelsToRender.forEach((voxel) => {
+  voxelsToRender.flat().forEach((voxel) => {
     vertices.push(voxel.x, voxel.y, voxel.z);
   });
   voxelGeometry.setAttribute(
@@ -50,7 +50,7 @@ export const updateVoxelGeometry = (
   );
 
   const colors: number[] = [];
-  voxelsToRender.forEach((voxel) => {
+  voxelsToRender.flat().forEach((voxel) => {
     colors.push(voxel.value, voxel.value, voxel.value);
   });
   voxelGeometry.setAttribute(

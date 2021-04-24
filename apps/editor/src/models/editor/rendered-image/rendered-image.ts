@@ -63,7 +63,7 @@ export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
   private internalTexture: THREE.DataTexture;
 
   /** Contains the voxels which have to be rendered into the atlas. */
-  private voxelsToRender: VoxelWithValue[] = [];
+  private voxelsToRender: (VoxelWithValue | VoxelWithValue[])[] = [];
   /** Whether or not @member voxelsToRender have been rendered into the atlas for the different WebGL contexts. */
   private voxelsRendered = [true];
   /** Used to render the voxels into the texture atlas. */
@@ -187,7 +187,7 @@ export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
   }
 
   public setAtlasVoxels(voxels: VoxelWithValue[]) {
-    this.voxelsToRender.push(...voxels);
+    this.voxelsToRender.push(voxels);
     this.voxelsRendered.fill(false);
     this.isVoxelGeometryDirty = true;
   }
