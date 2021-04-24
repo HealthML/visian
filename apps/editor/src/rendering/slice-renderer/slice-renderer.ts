@@ -106,13 +106,17 @@ export class SliceRenderer implements IDisposable {
       reaction(
         () => editor.viewSettings.mainViewType,
         (newMainView, oldMainView) => {
-          synchCrosshairs(
-            newMainView,
-            oldMainView,
-            this.slices[newMainView],
-            this.slices[oldMainView],
-            editor,
-          );
+          if (this.editor.viewSettings.showSideViews) {
+            synchCrosshairs(
+              newMainView,
+              oldMainView,
+              this.slices[newMainView],
+              this.slices[oldMainView],
+              editor,
+            );
+          } else {
+            this.slices[newMainView].setCrosshairSynchOffset();
+          }
 
           setMainCameraPlanes(this.editor, this.mainCanvas, this.mainCamera);
           this.lazyRender();

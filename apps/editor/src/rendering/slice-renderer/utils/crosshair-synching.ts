@@ -17,8 +17,16 @@ export const synchCrosshairs = (
 ) => {
   const newCrosshairOffset = getCrosshairOffset(newMainView, editor);
 
-  newCrosshairOffset.add(oldMainSlice.crosshairSynchOffset);
-  newCrosshairOffset.sub(getCrosshairOffset(oldMainView, editor));
+  const relativeSize = oldMainSlice.baseSize
+    .clone()
+    .divide(newMainSlice.baseSize);
+
+  newCrosshairOffset.add(
+    oldMainSlice.crosshairSynchOffset.multiply(relativeSize),
+  );
+  newCrosshairOffset.sub(
+    getCrosshairOffset(oldMainView, editor).multiply(relativeSize),
+  );
 
   newMainSlice.setCrosshairSynchOffset(newCrosshairOffset);
 
