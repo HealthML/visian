@@ -64,7 +64,7 @@ export const SideViews = observer(() => {
   const showSideViews =
     store?.editor.image && store.editor.viewSettings.showSideViews;
 
-  // Refs Management
+  // Ref Management
   const wrapperRef = useRef<HTMLDivElement>(null);
   const upperSideViewRef = useRef<HTMLCanvasElement>(null);
   const lowerSideViewRef = useRef<HTMLCanvasElement>(null);

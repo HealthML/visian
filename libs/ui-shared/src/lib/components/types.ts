@@ -26,9 +26,5 @@ export interface AsProps {
    *
    * @see https://styled-components.com/docs/api#as-polymorphic-prop
    */
-  as?: string;
-}
-
-export interface RefProps<T extends HTMLElement> {
-  ref?: ((instance: T | null) => void) | React.RefObject<T> | null | undefined;
+  as?: string | React.ComponentType<unknown>;
 }
