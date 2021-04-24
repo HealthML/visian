@@ -14,30 +14,40 @@ export const getSpriteAspectRatio = (image: Image) => {
  * [topPadding, rightPadding, bottomPadding, leftPadding]
  */
 export const getMainViewPaddings = (editor: Editor) => {
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  const floatingUIRect = editor.refs.uiOverlay.current!.getBoundingClientRect();
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  const undoRedoButtonsRect = editor.refs.undoRedoButtons.current!.getBoundingClientRect();
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  const toolbarRect = editor.refs.toolbar.current!.getBoundingClientRect();
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  const sliceSliderRect = editor.refs.sliceSlider.current!.getBoundingClientRect();
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  const sideViewsRect = editor.refs.sideViews.current!.getBoundingClientRect();
+  const floatingUIRect = editor.refs.uiOverlay.current?.getBoundingClientRect();
+  const undoRedoButtonsRect = editor.refs.undoRedoButtons.current?.getBoundingClientRect();
+  const toolbarRect = editor.refs.toolbar.current?.getBoundingClientRect();
+  const sliceSliderRect = editor.refs.sliceSlider.current?.getBoundingClientRect();
+  const sideViewsRect = editor.refs.sideViews.current?.getBoundingClientRect();
 
-  const topMargin = undoRedoButtonsRect.top - floatingUIRect.top;
-  const undoRedoPadding = undoRedoButtonsRect.height + 2 * topMargin;
-
-  const leftMargin = toolbarRect.left - floatingUIRect.left;
-  const toolBarPadding = toolbarRect.width + 2 * leftMargin;
-
-  const rightMargin = floatingUIRect.right - sliceSliderRect.right;
-  const sliceSliderPadding = sliceSliderRect.width + 2 * rightMargin;
-
-  const sideViewsDistance = floatingUIRect.right - sideViewsRect.right;
-  const sideViewsPadding = editor.viewSettings.showSideViews
-    ? sideViewsRect.width + sideViewsDistance + rightMargin
+  const topMargin =
+    undoRedoButtonsRect && floatingUIRect
+      ? undoRedoButtonsRect.top - floatingUIRect.top
+      : 0;
+  const undoRedoPadding = undoRedoButtonsRect
+    ? undoRedoButtonsRect.height + 2 * topMargin
     : 0;
+
+  const leftMargin =
+    toolbarRect && floatingUIRect ? toolbarRect.left - floatingUIRect.left : 0;
+  const toolBarPadding = toolbarRect ? toolbarRect.width + 2 * leftMargin : 0;
+
+  const rightMargin =
+    floatingUIRect && sliceSliderRect
+      ? floatingUIRect.right - sliceSliderRect.right
+      : 0;
+  const sliceSliderPadding = sliceSliderRect
+    ? sliceSliderRect.width + 2 * rightMargin
+    : 0;
+
+  const sideViewsDistance =
+    floatingUIRect && sideViewsRect
+      ? floatingUIRect.right - sideViewsRect.right
+      : 0;
+  const sideViewsPadding =
+    editor.viewSettings.showSideViews && sideViewsRect
+      ? sideViewsRect.width + sideViewsDistance + rightMargin
+      : 0;
 
   return [
     undoRedoPadding,
@@ -101,7 +111,6 @@ export const setMainCameraPlanes = (
     spriteEdgePlanes.top = 1 / availableAspectRatio;
   }
 
-  // TODO: Add the paddings here.
   mainCamera.left =
     spriteEdgePlanes.left -
     ((2 * spriteEdgePlanes.right * mainCanvas.width) / sizeBetweenOverlays.x -
