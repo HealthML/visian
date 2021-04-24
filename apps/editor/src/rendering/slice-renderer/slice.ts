@@ -20,7 +20,7 @@ import {
 
 import type { Editor, RenderedImage } from "../../models";
 export class Slice extends THREE.Group implements IDisposable {
-  private baseSize = new THREE.Vector2();
+  public readonly baseSize = new THREE.Vector2();
 
   private workingVector = new THREE.Vector2();
 
