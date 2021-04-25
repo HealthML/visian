@@ -117,6 +117,7 @@ export const theme = {
     listIndentation: "16px",
     buttonPadding: "12px 20px",
     inputPadding: "12px 22px",
+    sliderLabelDistance: "10px",
   },
   zIndices: {
     modal: 50,
