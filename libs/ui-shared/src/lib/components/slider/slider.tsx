@@ -2,10 +2,14 @@ import React, {
   PointerEvent as ReactPointerEvent,
   useCallback,
   useRef,
+  useState,
 } from "react";
+import { useTheme } from "styled-components";
 
+import { parseNumberFromMetric, Theme } from "../../theme";
 import { FlexRow, InputContainer, Spacer } from "../box";
 import { SliderLabel } from "../text";
+import { Tooltip } from "../tooltip";
 import { SliderFieldProps, SliderProps } from "./slider.props";
 import {
   SliderContainer,
@@ -32,6 +36,7 @@ export const Slider: React.FC<SliderProps> = (props) => {
     roundMethod,
     scaleType,
     showRange,
+    showFloatingValueLabel = false,
     stepSize,
     value,
     ...rest
@@ -184,6 +189,10 @@ export const Slider: React.FC<SliderProps> = (props) => {
     }),
   );
 
+  // Tooltip Positioning
+  const [thumbRef, setThumbRef] = useState<HTMLDivElement | null>(null);
+  const theme = useTheme() as Theme;
+
   return (
     <SliderContainer
       {...rest}
@@ -206,9 +215,18 @@ export const Slider: React.FC<SliderProps> = (props) => {
             key={index}
             isVertical={isVertical}
             position={thumbPos}
+            ref={index ? undefined : setThumbRef}
           />
         );
       })}
+      {showFloatingValueLabel && (
+        <Tooltip
+          text={defaultFormatLabel([valueArray[0]])}
+          parentElement={thumbRef}
+          position="left"
+          distance={parseNumberFromMetric(theme.sizes.sliderHeight) / 2 + 10}
+        />
+      )}
       {children}
     </SliderContainer>
   );

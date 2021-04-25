@@ -1,6 +1,6 @@
 import { InvisibleButton, Sheet, Slider } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
-import React, { useCallback } from "react";
+import React, { useCallback, useState } from "react";
 import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
@@ -27,9 +27,20 @@ export const SliceSlider: React.FC = observer(() => {
     store?.editor.viewSettings.stepSelectedSlice(-1);
   }, [store]);
 
+  const [showValue, setShowValue] = useState(false);
+  const handlePointerEnter = useCallback(() => {
+    setShowValue(true);
+  }, []);
+  const handlePointerLeave = useCallback(() => {
+    setShowValue(false);
+  }, []);
+
   const dimensionality = store?.editor.image?.dimensionality;
   return dimensionality && dimensionality > 2 ? (
-    <StyledSheet>
+    <StyledSheet
+      onPointerEnter={handlePointerEnter}
+      onPointerLeave={handlePointerLeave}
+    >
       <InvisibleButton
         icon="arrowUp"
         isActive={false}
@@ -42,6 +53,7 @@ export const SliceSlider: React.FC = observer(() => {
         max={store?.editor.viewSettings.getMaxSlice() || 0}
         value={store?.editor.viewSettings.getSelectedSlice()}
         onChange={setSelectedSlice}
+        showFloatingValueLabel={showValue}
       />
       <InvisibleButton
         icon="arrowDown"

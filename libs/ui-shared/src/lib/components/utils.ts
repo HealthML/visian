@@ -1,4 +1,21 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
+
+/**
+ * Returns a function that, when called, triggers a re-render of the current
+ * component.
+ */
+export const useForceUpdate = () => {
+  const [, setHelperValue] = useState({});
+  return useCallback(() => {
+    setHelperValue({});
+  }, []);
+};
 
 export const useIsDraggedOver = () => {
   const [isDraggedOver, setIsDraggedOver] = useState(false);
@@ -110,4 +127,96 @@ export const useDelay = (
   }, []);
 
   return [schedule, cancel];
+};
+
+export interface RelativePositionConfig<P extends string> {
+  /** The parent element. */
+  parentElement?: HTMLElement | null;
+
+  /**
+   * If set to `true`, the position is actively updated.
+   * Defaults to `true`.
+   */
+  isActive?: boolean;
+
+  /**
+   * If set to `true`, the position will be returned relative to its offset
+   * parent.
+   */
+  positionRelativeToOffsetParent?: boolean;
+
+  /** The position relative to its parent. */
+  position?: P;
+
+  /**
+   * The positioned element's distance to its parent.
+   * Defaults to a value based on the current theme.
+   */
+  distance?: number;
+
+  /** Style overrides. */
+  style?: React.CSSProperties;
+}
+
+export interface RelativePositionStyleConfig<P extends string>
+  extends Pick<RelativePositionConfig<P>, "distance" | "position"> {
+  /** The parent element's bounding client rect. */
+  rect: DOMRect;
+
+  /** The offset parent's bounding client rect (if any). */
+  offsetRect?: DOMRect;
+}
+
+/**
+ * Returns a style object that absolutely positions an element next to the
+ * parent element it refers to.
+ */
+export const useRelativePosition = <P extends string>(
+  computeStyle: (config: RelativePositionStyleConfig<P>) => React.CSSProperties,
+  {
+    parentElement,
+    isActive = true,
+    positionRelativeToOffsetParent,
+    position,
+    distance,
+    style: styleOverride,
+  }: RelativePositionConfig<P>,
+): React.CSSProperties => {
+  useUpdateOnResize(isActive);
+
+  const [style, setStyle] = useState<React.CSSProperties>({});
+  const rectRef = useRef<Partial<DOMRect>>({});
+  const offsetRectRef = useRef<Partial<DOMRect> | undefined>();
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useLayoutEffect(() => {
+    if (!isActive) return;
+
+    const rect = parentElement?.getBoundingClientRect();
+    if (!rect) return;
+
+    const offsetRect = positionRelativeToOffsetParent
+      ? parentElement?.offsetParent?.getBoundingClientRect()
+      : undefined;
+
+    // Prevent unnecessary updates
+    if (
+      rectRef.current.top === rect.top &&
+      rectRef.current.left === rect.left &&
+      rectRef.current.bottom === rect.bottom &&
+      rectRef.current.right === rect.right &&
+      offsetRectRef.current?.top === offsetRect?.top &&
+      offsetRectRef.current?.left === offsetRect?.left &&
+      offsetRectRef.current?.bottom === offsetRect?.bottom &&
+      offsetRectRef.current?.right === offsetRect?.right
+    ) {
+      return;
+    }
+    rectRef.current = rect;
+    offsetRectRef.current = offsetRect;
+
+    setStyle(computeStyle({ position, distance, rect, offsetRect }));
+  });
+
+  return styleOverride ? { ...style, ...styleOverride } : style;
 };

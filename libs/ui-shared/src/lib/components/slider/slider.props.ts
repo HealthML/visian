@@ -39,6 +39,8 @@ export interface SliderProps<T extends number | number[] = number | number[]>
    * the slider.
    */
   showRange?: boolean;
+
+  showFloatingValueLabel?: boolean;
 }
 
 export interface SliderRangeSelectionProps
