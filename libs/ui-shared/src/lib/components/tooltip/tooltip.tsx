@@ -7,6 +7,7 @@ import { useModalRoot } from "../box";
 import { Sheet } from "../sheet";
 import { Text } from "../text";
 import { TooltipProps } from "./tooltip.props";
+import { useTooltipPosition } from "./utils";
 
 const TooltipContainer = styled(Sheet).withConfig({
   shouldForwardProp: (prop) => prop.toString() !== "isActive",
@@ -34,13 +35,26 @@ export const Tooltip: React.FC<TooltipProps> = ({
   data,
   text,
   isShown,
+  parentElement,
+  position,
+  distance,
+  style,
   ...rest
 }) => {
   const modalRootRef = useModalRoot();
 
+  const tooltipStyle = useTooltipPosition({
+    parentElement,
+    isActive: isShown,
+    positionRelativeToOffsetParent: !modalRootRef.current,
+    position,
+    distance,
+    style,
+  });
+
   const node =
     isShown === false ? null : (
-      <TooltipContainer {...rest}>
+      <TooltipContainer {...rest} style={tooltipStyle}>
         <TooltipLabel tx={tx} data={data} text={text} />
       </TooltipContainer>
     );

@@ -1,64 +1,47 @@
-import React, { useLayoutEffect, useState } from "react";
+import React from "react";
 
-import { useUpdateOnResize } from "../utils";
+import {
+  RelativePositionConfig,
+  RelativePositionStyleConfig,
+  useRelativePosition,
+} from "../utils";
 
-const modalDistance = 10;
+export type ModalPosition = "left" | "right";
+export type ModalPositionConfig = RelativePositionConfig<ModalPosition>;
+
+const defaultModalDistance = 10;
+
+const computeStyle = ({
+  position = "right",
+  distance = defaultModalDistance,
+  rect,
+  offsetRect,
+}: RelativePositionStyleConfig<ModalPosition>): React.CSSProperties => {
+  switch (position) {
+    case "left":
+      return {
+        position: "absolute",
+        top: rect.top - (offsetRect?.top || 0),
+        right:
+          (offsetRect?.right || document.body.getBoundingClientRect().width) -
+          (rect.left - distance),
+      };
+
+    default:
+      return {
+        position: "absolute",
+        top: rect.top - (offsetRect?.top || 0),
+        left: rect.right + distance - (offsetRect?.left || 0),
+      };
+  }
+};
 
 /**
- * Returns a style object that absolutely positions a modal next to its
- * toggling button.
+ * Returns a style object that absolutely positions a tooltip next to the
+ * element it refers to.
  */
-export const useModalPosition = <T extends HTMLElement>(
-  buttonElement: T | undefined | null,
-  position: "left" | "right" = "right",
-  updateOnResize = true,
-  positionRelativeToOffsetParent = false,
+export const useModalPosition = (
+  config: ModalPositionConfig,
 ): React.CSSProperties => {
-  useUpdateOnResize(updateOnResize);
-  const rect = buttonElement?.getBoundingClientRect();
-  const offsetRect = positionRelativeToOffsetParent
-    ? buttonElement?.offsetParent?.getBoundingClientRect()
-    : undefined;
-
-  const [style, setStyle] = useState<React.CSSProperties>({});
-  useLayoutEffect(
-    () => {
-      if (!rect) {
-        setStyle({});
-        return;
-      }
-
-      switch (position) {
-        case "left":
-          setStyle({
-            position: "absolute",
-            top: rect.top - (offsetRect?.top || 0),
-            right:
-              (offsetRect?.right ||
-                document.body.getBoundingClientRect().width) -
-              (rect.left - modalDistance),
-          });
-          break;
-
-        default:
-          setStyle({
-            position: "absolute",
-            top: rect.top - (offsetRect?.top || 0),
-            left: rect.right + modalDistance - (offsetRect?.left || 0),
-          });
-      }
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [
-      position,
-      rect?.left,
-      rect?.right,
-      rect?.top,
-      offsetRect?.left,
-      offsetRect?.right,
-      offsetRect?.top,
-    ],
-  );
-
-  return style;
+  return useRelativePosition(computeStyle, config);
 };

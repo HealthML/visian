@@ -4,7 +4,6 @@ import {
   ListItem,
   Modal,
   SubtleText,
-  useModalPosition,
 } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
 import React, { useCallback, useState } from "react";
@@ -32,7 +31,6 @@ export const Layers: React.FC = observer(() => {
 
   // Menu Positioning
   const [buttonRef, setButtonRef] = useState<HTMLButtonElement | null>(null);
-  const modalPosition = useModalPosition(buttonRef, "right", isModalOpen);
 
   const toggleAnnotationVisibility = useCallback(() => {
     store?.editor.setIsAnnotationVisible(!store?.editor.isAnnotationVisible);
@@ -51,7 +49,12 @@ export const Layers: React.FC = observer(() => {
         onPointerDown={toggleModal}
         isActive={isModalOpen}
       />
-      <LayerModal style={modalPosition} isOpen={isModalOpen} labelTx="layers">
+      <LayerModal
+        isOpen={isModalOpen}
+        labelTx="layers"
+        parentElement={buttonRef}
+        position="right"
+      >
         <LayerList>
           {store?.editor.annotation && (
             <ListItem
