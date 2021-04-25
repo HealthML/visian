@@ -2,7 +2,7 @@ import { IDisposable, IDisposer, ViewType } from "@visian/utils";
 import { autorun } from "mobx";
 import * as THREE from "three";
 
-import fragmentShader from "../shaders/slice.frag.glsl";
+import { sliceFragmentShader } from "../shaders";
 import vertexShader from "../shaders/slice.vert.glsl";
 import { getOrder } from "./utils";
 
@@ -23,7 +23,7 @@ export abstract class SliceMaterial
     super({
       defines,
       vertexShader,
-      fragmentShader,
+      fragmentShader: sliceFragmentShader,
       uniforms: THREE.UniformsUtils.merge([
         {
           uDataTexture: { value: null },
