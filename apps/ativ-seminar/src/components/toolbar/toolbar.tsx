@@ -1,8 +1,4 @@
-import {
-  Tool,
-  Toolbar as GenericToolbar,
-  useModalPosition,
-} from "@visian/ui-shared";
+import { Tool, Toolbar as GenericToolbar } from "@visian/ui-shared";
 import React, { useCallback, useEffect, useState } from "react";
 import styled from "styled-components";
 
@@ -35,7 +31,6 @@ export const Toolbar: React.FC<ToolbarProps> = (props) => {
   // Settings Positioning
   // Menu Positioning
   const [buttonRef, setButtonRef] = useState<HTMLButtonElement | null>(null);
-  const settingsPosition = useModalPosition(buttonRef, "right", showSettings);
 
   const [isInXR, setIsInXR] = useState<boolean>(false);
   const toggleXR = useCallback(() => {
@@ -65,9 +60,9 @@ export const Toolbar: React.FC<ToolbarProps> = (props) => {
         onPress={toggleSettings}
       />
       <Settings
-        style={settingsPosition}
         isOpen={showSettings}
         renderer={renderer}
+        parentElement={buttonRef}
       />
       {isXRAvailable && (
         <Tool

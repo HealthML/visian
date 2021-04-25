@@ -4,11 +4,12 @@ import styled from "styled-components";
 
 import { color, fontWeight, zIndex } from "../../theme";
 import { useModalRoot } from "../box";
+import { InvisibleButton } from "../button";
 import { Sheet } from "../sheet";
 import { Title } from "../text";
 import { useOutsidePress } from "../utils";
 import { ModalProps } from "./modal.props";
-import { InvisibleButton } from "../button";
+import { useModalPosition } from "./utils";
 
 const StyledButton = styled(InvisibleButton)`
   width: 16px;
@@ -57,6 +58,10 @@ export const Modal: React.FC<ModalProps> = ({
   label,
   isOpen,
   children,
+  parentElement,
+  position,
+  distance,
+  style,
   onOutsidePress,
   onReset,
   ...rest
@@ -66,9 +71,18 @@ export const Modal: React.FC<ModalProps> = ({
 
   const modalRootRef = useModalRoot();
 
+  const modalStyle = useModalPosition({
+    parentElement,
+    isActive: isOpen,
+    positionRelativeToOffsetParent: !modalRootRef.current,
+    position,
+    distance,
+    style,
+  });
+
   const node =
     isOpen === false ? null : (
-      <ModalContainer {...rest} ref={ref}>
+      <ModalContainer {...rest} style={modalStyle} ref={ref}>
         {(labelTx || label) && (
           <>
             <TitleRow>
