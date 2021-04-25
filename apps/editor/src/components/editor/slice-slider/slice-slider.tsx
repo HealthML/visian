@@ -22,7 +22,7 @@ const StyledSheet = styled(Sheet)`
 export const SliceSlider: React.FC = observer(() => {
   const store = useStore();
 
-  // Handle slice changes
+  // Handle Slice Changes
   const setSelectedSlice = useCallback(
     (value: number | number[]) => {
       store?.editor.viewSettings.setSelectedSlice(value as number);
@@ -62,32 +62,31 @@ export const SliceSlider: React.FC = observer(() => {
     }, []),
     duration("autoHideDelay")({ theme }) as number,
   );
-  const previousSliceRef = useRef<number>();
+
+  const currentSlice = store?.editor.viewSettings.getSelectedSlice();
+  const previousSliceRef = useRef(currentSlice);
   useEffect(() => {
     if (previousSliceRef.current !== undefined) {
       setHasChanged(true);
       scheduleHide();
     }
-    previousSliceRef.current = store?.editor.viewSettings.getSelectedSlice();
-  }, [store?.editor.viewSettings.getSelectedSlice()]);
+    previousSliceRef.current = currentSlice;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentSlice]);
 
   // Value Label Formatting
+  const maxSlice = store?.editor.viewSettings.getMaxSlice();
   const formatValueLabel = useCallback(
     (values: number[]) => {
-      if (!store?.editor.viewSettings.getMaxSlice())
-        return `${Math.trunc(values[0])}`;
+      if (!maxSlice) return `${Math.trunc(values[0])}`;
 
       // Pad slice number with leading zeros
-      const maxPlaces =
-        Math.floor(
-          Math.log10(Math.ceil(store.editor.viewSettings.getMaxSlice()!)),
-        ) + 1;
-
+      const maxPlaces = Math.floor(Math.log10(Math.ceil(maxSlice))) + 1;
       return `${new Array(maxPlaces).fill("0").join("")}${Math.trunc(
         values[0],
       )}`.slice(-maxPlaces);
     },
-    [store?.editor.viewSettings.getMaxSlice()],
+    [maxSlice],
   );
 
   const dimensionality = store?.editor.image?.dimensionality;
