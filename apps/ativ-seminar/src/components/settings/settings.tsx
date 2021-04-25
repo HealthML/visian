@@ -80,7 +80,7 @@ const HistogramBar = styled.div`
 `;
 
 export const Settings: React.FC<SettingsProps> = observer((props) => {
-  const { renderer, ...rest } = props;
+  const { renderer, parentElement, ...rest } = props;
 
   const setFocusColor = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -124,7 +124,12 @@ export const Settings: React.FC<SettingsProps> = observer((props) => {
       ? renderer?.gradientHistogram
       : renderer?.densityHistogram;
   return (
-    <Container {...rest} label="View Settings">
+    <Container
+      {...rest}
+      label="View Settings"
+      parentElement={parentElement}
+      position="right"
+    >
       <SpacedSliderField
         label="Background"
         showValueLabel

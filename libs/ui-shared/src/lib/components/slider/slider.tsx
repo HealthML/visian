@@ -1,9 +1,4 @@
-import React, {
-  PointerEvent as ReactPointerEvent,
-  useCallback,
-  useRef,
-  useState,
-} from "react";
+import React, { useCallback, useRef, useState } from "react";
 import { useTheme } from "styled-components";
 
 import { parseNumberFromMetric, Theme } from "../../theme";
@@ -32,11 +27,14 @@ export const Slider: React.FC<SliderProps> = (props) => {
     min = 0,
     max = 1,
     onChange,
+    onStart,
+    onEnd,
     enforceSerialThumbs: preventCrossing,
     roundMethod,
     scaleType,
     showRange,
     showFloatingValueLabel = false,
+    formatValueLabel = defaultFormatLabel,
     stepSize,
     value,
     ...rest
@@ -52,10 +50,14 @@ export const Slider: React.FC<SliderProps> = (props) => {
   valueRef.current = actualValue;
 
   const updateValue = useCallback(
-    (event: PointerEvent | ReactPointerEvent, id?: number) => {
-      if (!onChange || !sliderRef.current) return;
+    (event: PointerEvent | React.PointerEvent, id: number) => {
+      if ((!onChange && !onStart) || !sliderRef.current) return;
 
-      const actualId = id || 0;
+      if (event.type === "pointerdown") {
+        if (onStart) onStart(event, id);
+      }
+
+      if (!onChange) return;
       const newThumbValue = pointerToSliderValue(event, sliderRef.current, {
         scaleType,
         min,
@@ -66,7 +68,7 @@ export const Slider: React.FC<SliderProps> = (props) => {
         isVertical,
       });
       if (!Array.isArray(valueRef.current)) {
-        onChange(newThumbValue, actualId, newThumbValue);
+        onChange(newThumbValue, id, newThumbValue);
         return;
       }
 
@@ -75,30 +77,30 @@ export const Slider: React.FC<SliderProps> = (props) => {
         case "block": {
           let blockedThumbValue = newThumbValue;
 
-          const lowerId = Math.max(0, actualId - 1);
-          if (lowerId !== actualId) {
+          const lowerId = Math.max(0, id - 1);
+          if (lowerId !== id) {
             blockedThumbValue = Math.max(
               newValueArray[lowerId],
               blockedThumbValue,
             );
           }
 
-          const upperId = Math.min(actualId + 1, newValueArray.length - 1);
-          if (upperId !== actualId) {
+          const upperId = Math.min(id + 1, newValueArray.length - 1);
+          if (upperId !== id) {
             blockedThumbValue = Math.min(
               blockedThumbValue,
               newValueArray[upperId],
             );
           }
 
-          newValueArray[actualId] = blockedThumbValue;
-          onChange(newValueArray, actualId, blockedThumbValue);
+          newValueArray[id] = blockedThumbValue;
+          onChange(newValueArray, id, blockedThumbValue);
           return;
         }
 
         case "push": {
-          newValueArray[actualId] = newThumbValue;
-          for (let index = actualId - 1; index >= 0; index--) {
+          newValueArray[id] = newThumbValue;
+          for (let index = id - 1; index >= 0; index--) {
             newValueArray[index] = Math.min(
               newValueArray[index],
               newThumbValue,
@@ -106,19 +108,19 @@ export const Slider: React.FC<SliderProps> = (props) => {
           }
 
           const { length } = newValueArray;
-          for (let index = actualId + 1; index < length; index++) {
+          for (let index = id + 1; index < length; index++) {
             newValueArray[index] = Math.max(
               newThumbValue,
               newValueArray[index],
             );
           }
-          onChange(newValueArray, actualId, newThumbValue);
+          onChange(newValueArray, id, newThumbValue);
           return;
         }
 
         default:
-          newValueArray[actualId] = newThumbValue;
-          onChange(newValueArray, actualId, newThumbValue);
+          newValueArray[id] = newThumbValue;
+          onChange(newValueArray, id, newThumbValue);
           return;
       }
     },
@@ -127,6 +129,7 @@ export const Slider: React.FC<SliderProps> = (props) => {
       max,
       min,
       onChange,
+      onStart,
       preventCrossing,
       roundMethod,
       stepSize,
@@ -135,9 +138,9 @@ export const Slider: React.FC<SliderProps> = (props) => {
     ],
   );
 
-  const { onPointerDown } = useDrag(updateValue, updateValue);
+  const { onPointerDown } = useDrag(updateValue, updateValue, onEnd);
   const startDrag = useCallback(
-    (event: PointerEvent | ReactPointerEvent) => {
+    (event: PointerEvent | React.PointerEvent) => {
       if (!onChange || !sliderRef.current) return;
       if (!Array.isArray(valueRef.current)) {
         onPointerDown(event, 0);
@@ -221,7 +224,7 @@ export const Slider: React.FC<SliderProps> = (props) => {
       })}
       {showFloatingValueLabel && (
         <Tooltip
-          text={defaultFormatLabel([valueArray[0]])}
+          text={formatValueLabel([valueArray[0]])}
           parentElement={thumbRef}
           position="left"
           distance={parseNumberFromMetric(theme.sizes.sliderHeight) / 2 + 10}
