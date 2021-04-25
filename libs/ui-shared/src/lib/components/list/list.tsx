@@ -82,7 +82,9 @@ export const ListItem: React.FC<ListItemProps> = ({
   labelTx,
   label,
   icon,
+  iconRef,
   trailingIcon,
+  trailingIconRef,
   value,
   onIconPress,
   onTrailingIconPress,
@@ -92,12 +94,18 @@ export const ListItem: React.FC<ListItemProps> = ({
   children,
   ...rest
 }) => {
-  const handleIconPress = useCallback(() => {
-    if (onIconPress) onIconPress(value);
-  }, [onIconPress, value]);
-  const handleTrailingIconPress = useCallback(() => {
-    if (onTrailingIconPress) onTrailingIconPress(value);
-  }, [onTrailingIconPress, value]);
+  const handleIconPress = useCallback(
+    (event: React.PointerEvent) => {
+      if (onIconPress) onIconPress(value, event);
+    },
+    [onIconPress, value],
+  );
+  const handleTrailingIconPress = useCallback(
+    (event: React.PointerEvent) => {
+      if (onTrailingIconPress) onTrailingIconPress(value, event);
+    },
+    [onTrailingIconPress, value],
+  );
 
   return (
     <ListItemContainer {...rest}>
@@ -107,6 +115,7 @@ export const ListItem: React.FC<ListItemProps> = ({
             <ListIcon
               icon={icon}
               isDisabled={disableIcon}
+              ref={iconRef as React.Ref<SVGSVGElement>}
               onPointerDown={handleIconPress}
               hasPressHandler={Boolean(onIconPress)}
             />
@@ -115,6 +124,7 @@ export const ListItem: React.FC<ListItemProps> = ({
               as={Color}
               color={icon.color}
               isDisabled={disableIcon}
+              ref={iconRef as React.Ref<HTMLDivElement>}
               onPointerDown={handleIconPress}
               hasPressHandler={Boolean(onIconPress)}
             />
@@ -126,6 +136,7 @@ export const ListItem: React.FC<ListItemProps> = ({
             icon={trailingIcon}
             isDisabled={disableTrailingIcon}
             isTrailing
+            ref={trailingIconRef}
             onPointerDown={handleTrailingIconPress}
             hasPressHandler={Boolean(onTrailingIconPress)}
           />

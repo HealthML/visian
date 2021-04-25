@@ -1,4 +1,11 @@
-import { Color, List, ListItem, Modal, Theme } from "@visian/ui-shared";
+import {
+  Color,
+  List,
+  ListItem,
+  Modal,
+  ModalProps,
+  Theme,
+} from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
 import React, { useCallback } from "react";
 import styled, { useTheme } from "styled-components";
@@ -22,7 +29,7 @@ const StyledColor = styled(Color)`
   margin: 6px 0 6px 12px;
 `;
 
-export const ColorPanel: React.FC = observer(() => {
+export const ColorPanel = observer((props: ModalProps) => {
   const theme = useTheme() as Theme;
 
   const store = useStore();
@@ -38,7 +45,7 @@ export const ColorPanel: React.FC = observer(() => {
   );
 
   return (
-    <Modal labelTx="color-panel">
+    <Modal {...props} labelTx="color-panel">
       <LayerList>
         {currentColor && (
           <ListItem icon={{ color: currentColor[1] }} label={currentColor[0]} />

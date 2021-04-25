@@ -9,7 +9,6 @@ import React, { useCallback, useEffect, useRef } from "react";
 import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
-import { ColorPanel } from "../color-panel";
 import { DropSheet } from "../drop-sheet";
 import { Layers } from "../layers";
 import { Menu } from "../menu";
@@ -120,7 +119,6 @@ export const UIOverlay = observer<UIOverlayProps>(
           </MenuRow>
           <Toolbar />
           <Layers />
-          <ColorPanel />
         </ColumnLeft>
         <ColumnCenter>
           <TopConsole />
