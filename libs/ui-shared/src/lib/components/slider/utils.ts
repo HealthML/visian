@@ -124,11 +124,11 @@ export const pointerToSliderValue = (
  * It should be applied to a React element using the spread syntax.
  */
 export const useDrag = <ID = string>(
-  startHandler?: (event: PointerEvent | ReactPointerEvent, id?: ID) => void,
-  moveHandler?: (event: PointerEvent | ReactPointerEvent, id?: ID) => void,
-  endHandler?: (event: PointerEvent | ReactPointerEvent, id?: ID) => void,
+  startHandler?: (event: PointerEvent | ReactPointerEvent, id: ID) => void,
+  moveHandler?: (event: PointerEvent | ReactPointerEvent, id: ID) => void,
+  endHandler?: (event: PointerEvent | ReactPointerEvent, id: ID) => void,
 ) => {
-  const idRef = useRef<Record<number, ID | undefined>>({});
+  const idRef = useRef<Record<number, ID>>({});
 
   const boundMoveHandler = useCallback(
     (event: PointerEvent | ReactPointerEvent) => {
@@ -160,7 +160,7 @@ export const useDrag = <ID = string>(
   );
 
   const boundStartHandler = useCallback(
-    (event: PointerEvent | ReactPointerEvent, id?: ID) => {
+    (event: PointerEvent | ReactPointerEvent, id: ID) => {
       idRef.current[event.pointerId] = id;
       event.preventDefault();
 

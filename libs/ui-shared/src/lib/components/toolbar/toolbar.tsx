@@ -1,6 +1,7 @@
 import React, { useCallback } from "react";
-import styled from "styled-components";
+import styled, { StyledComponentProps } from "styled-components";
 
+import { Theme } from "../../theme";
 import { ButtonProps, InvisibleButton } from "../button";
 import { Sheet } from "../sheet";
 import { ToolbarProps, ToolProps } from "./toolbar.props";
@@ -62,6 +63,11 @@ export const Tool = React.forwardRef<HTMLButtonElement, ToolProps>(
   },
 );
 
-export const Toolbar: React.FC<ToolbarProps> = ({ children, ...rest }) => (
-  <ToolbarContainer {...rest}>{children}</ToolbarContainer>
-);
+export const Toolbar = React.forwardRef<
+  HTMLDivElement,
+  StyledComponentProps<"div", Theme, ToolbarProps, never>
+>(({ children, ...rest }, ref) => (
+  <ToolbarContainer ref={ref} {...rest}>
+    {children}
+  </ToolbarContainer>
+));

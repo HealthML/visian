@@ -1,24 +1,19 @@
 import React from "react";
-import styled from "styled-components";
+import styled, { StyledComponentProps } from "styled-components";
 
 import { useTranslation } from "../../i18n";
-import { color, font, fontSize, fontWeight } from "../../theme";
+import { color, font, fontSize, fontWeight, Theme } from "../../theme";
 import { TextProps } from "./text.props";
 
-const StyledSpan = styled.span<TextProps>`
+const StyledSpan = styled.span`
   color: ${color("text")};
   font-family: ${font("default")};
   font-size: ${fontSize("default")};
 `;
 
-export const Text: React.FC<TextProps> = ({
-  as,
-  children,
-  data,
-  text,
-  tx,
-  ...rest
-}) => {
+export const Text: React.FC<
+  StyledComponentProps<"span", Theme, TextProps, never>
+> = ({ as, children, data, text, tx, ...rest }) => {
   const { t } = useTranslation();
 
   return (
@@ -28,16 +23,16 @@ export const Text: React.FC<TextProps> = ({
   );
 };
 
-export const Subtitle: React.FC<
-  Omit<TextProps, "isBold">
-> = styled(({ as, ...rest }: TextProps) => <Text {...rest} as={as || "h3"} />)`
+export const Subtitle = styled(({ as, ...rest }: TextProps) => (
+  <Text {...rest} as={as || "h3"} />
+))`
   font-size: ${fontSize("subtitle")};
   font-weight: ${fontWeight("regular")};
 `;
 
-export const Title: React.FC<
-  Omit<TextProps, "isBold">
-> = styled(({ as, ...rest }: TextProps) => <Text {...rest} as={as || "h2"} />)`
+export const Title = styled(({ as, ...rest }: TextProps) => (
+  <Text {...rest} as={as || "h2"} />
+))`
   font-size: ${fontSize("title")};
   font-weight: ${fontWeight("regular")};
 `;

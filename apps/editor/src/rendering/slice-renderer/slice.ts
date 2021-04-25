@@ -1,4 +1,4 @@
-import { IDisposable, IDisposer, Vector, ViewType } from "@visian/utils";
+import { IDisposable, IDisposer, ViewType } from "@visian/utils";
 import { autorun } from "mobx";
 import * as THREE from "three";
 
@@ -20,7 +20,7 @@ import {
 
 import type { Editor, RenderedImage } from "../../models";
 export class Slice extends THREE.Group implements IDisposable {
-  private baseSize = new THREE.Vector2();
+  public readonly baseSize = new THREE.Vector2();
 
   private workingVector = new THREE.Vector2();
 
@@ -104,12 +104,7 @@ export class Slice extends THREE.Group implements IDisposable {
     this.imageMaterial.setImage(image);
 
     this.baseSize.copy(
-      // TODO: Rework once the texture atlas has been refactored
-      getGeometrySize(
-        Vector.fromArray(image.voxelCount.toArray()),
-        Vector.fromArray(image.voxelSpacing.toArray()),
-        this.viewType,
-      ),
+      getGeometrySize(image.voxelCount, image.voxelSpacing, this.viewType),
     );
     this.updateScale();
   }

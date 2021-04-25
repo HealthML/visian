@@ -6,10 +6,9 @@ import {
   Switch,
   Tool,
   Toolbar as GenericToolbar,
-  useModalPosition,
 } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
@@ -37,6 +36,16 @@ const adaptiveBrushSizeSwitchItems = [
 export const Toolbar: React.FC = observer(() => {
   const store = useStore();
 
+  // Ref Management
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    store?.setRef("toolbar", ref);
+
+    return () => {
+      store?.setRef("toolbar");
+    };
+  }, [store, ref]);
+
   // Menu Toggling
   const [isModalOpen, setIsModalOpen] = useState(false);
   const closeModal = useCallback(() => {
@@ -45,7 +54,6 @@ export const Toolbar: React.FC = observer(() => {
 
   // Menu Positioning
   const [buttonRef, setButtonRef] = useState<HTMLButtonElement | null>(null);
-  const modalPosition = useModalPosition(buttonRef, "right", isModalOpen);
 
   const activeTool = store?.editor.tools.activeTool;
   const setActiveTool = useCallback(
@@ -83,7 +91,7 @@ export const Toolbar: React.FC = observer(() => {
   );
 
   return (
-    <StyledToolbar>
+    <StyledToolbar ref={ref}>
       <Tool
         icon="moveTool"
         tooltipTx="navigation-tool"
@@ -138,7 +146,6 @@ export const Toolbar: React.FC = observer(() => {
         onContextMenu={preventDefault}
       />
       <BrushModal
-        style={modalPosition}
         isOpen={
           isModalOpen &&
           activeTool !== ToolType.Navigate &&
@@ -149,6 +156,8 @@ export const Toolbar: React.FC = observer(() => {
             ? "smart-brush-settings"
             : "brush-settings"
         }
+        parentElement={buttonRef}
+        position="right"
         onOutsidePress={closeModal}
         onReset={
           activeTool === ToolType.SmartBrush

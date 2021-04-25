@@ -1,6 +1,9 @@
-import React from "react";
+import type React from "react";
+import type { ModalPositionConfig } from "./utils";
 
-export interface ModalProps extends React.HTMLAttributes<HTMLDivElement> {
+export interface ModalProps
+  extends React.HTMLAttributes<HTMLDivElement>,
+    Pick<ModalPositionConfig, "parentElement" | "position" | "distance"> {
   labelTx?: string;
   label?: string;
 

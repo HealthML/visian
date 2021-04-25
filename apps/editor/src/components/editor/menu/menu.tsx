@@ -7,7 +7,6 @@ import {
   Modal,
   sheetNoise,
   Switch,
-  useModalPosition,
   useTranslation,
 } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
@@ -70,7 +69,6 @@ export const Menu: React.FC = observer(() => {
 
   // Menu Positioning
   const [buttonRef, setButtonRef] = useState<HTMLButtonElement | null>(null);
-  const modalPosition = useModalPosition(buttonRef, "right", isModalOpen);
 
   // Menu Actions
   const setTheme = useCallback(
@@ -105,10 +103,11 @@ export const Menu: React.FC = observer(() => {
         isActive={isModalOpen}
       />
       <Modal
-        style={modalPosition}
         isOpen={isModalOpen}
-        onOutsidePress={closeModal}
         labelTx="menu"
+        parentElement={buttonRef}
+        position="right"
+        onOutsidePress={closeModal}
       >
         <Switch
           labelTx="theme"

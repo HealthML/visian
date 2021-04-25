@@ -1,0 +1,66 @@
+import {
+  Color,
+  List,
+  ListItem,
+  Modal,
+  ModalProps,
+  Theme,
+} from "@visian/ui-shared";
+import { observer } from "mobx-react-lite";
+import React, { useCallback } from "react";
+import styled, { useTheme } from "styled-components";
+
+import { useStore } from "../../../app/root-store";
+
+const LayerList = styled(List)`
+  margin-top: -16px;
+  margin-bottom: 10px;
+`;
+
+const ColorList = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  margin-left: -12px;
+`;
+
+const StyledColor = styled(Color)`
+  cursor: pointer;
+  margin: 6px 0 6px 12px;
+`;
+
+export const ColorPanel = observer((props: ModalProps) => {
+  const theme = useTheme() as Theme;
+
+  const store = useStore();
+  const setColor = useCallback(
+    (value: string) => {
+      store?.editor.viewSettings.setAnnotationColor(value);
+    },
+    [store],
+  );
+
+  const currentColor = Object.entries(theme.colors.data).find(
+    ([, color]) => color === store?.editor.viewSettings.annotationColor,
+  );
+
+  return (
+    <Modal {...props} labelTx="color-panel">
+      <LayerList>
+        {currentColor && (
+          <ListItem icon={{ color: currentColor[1] }} label={currentColor[0]} />
+        )}
+      </LayerList>
+      <ColorList>
+        {Object.entries(theme.colors.data).map(([name, color]) => (
+          <StyledColor
+            key={name}
+            color={color}
+            isSelected={currentColor && currentColor[1] === color}
+            onPointerDown={() => setColor(color)}
+          />
+        ))}
+      </ColorList>
+    </Modal>
+  );
+});

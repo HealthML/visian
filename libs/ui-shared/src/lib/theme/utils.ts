@@ -2,9 +2,11 @@ import { css } from "styled-components";
 import { Theme, ThemeProps } from "./theme";
 
 /** Extracts a value from the theme passed to the component. */
-export const lookup = <K extends keyof Theme>(themeKey: K) => (
-  valueKey: keyof Theme[K],
-) => ({ theme }: ThemeProps) => {
+export const lookup = <TK extends keyof Theme>(themeKey: TK) => <
+  VK extends keyof Theme[TK]
+>(
+  valueKey: VK,
+) => ({ theme }: ThemeProps): Theme[TK][VK] | VK => {
   if (!theme) return valueKey;
 
   const values = theme[themeKey];
