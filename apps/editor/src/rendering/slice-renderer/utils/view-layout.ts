@@ -41,7 +41,8 @@ export const getMainViewPaddings = (editor: Editor) => {
     : 0;
 
   const sideViewsDistance =
-    floatingUIRect && sideViewsRect
+    // sideViewsRect.right can be 0, when the side views aren't rendered.
+    floatingUIRect && sideViewsRect && sideViewsRect.right > 0
       ? floatingUIRect.right - sideViewsRect.right
       : 0;
   const sideViewsPadding =

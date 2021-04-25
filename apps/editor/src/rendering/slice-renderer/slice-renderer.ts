@@ -93,6 +93,10 @@ export class SliceRenderer implements IDisposable {
         (image?: RenderedImage) => {
           if (!image) return;
           this.setImage(image);
+
+          // Wrapped in a setTimeout, because if no image was previously loaded
+          // the side views need to actually appear before updating the camera planes.
+          setTimeout(this.updateCamera);
         },
         { fireImmediately: true },
       ),
@@ -118,8 +122,7 @@ export class SliceRenderer implements IDisposable {
             this.slices[newMainView].setCrosshairSynchOffset();
           }
 
-          setMainCameraPlanes(this.editor, this.mainCanvas, this.mainCamera);
-          this.lazyRender();
+          this.updateCamera();
         },
       ),
       reaction(
@@ -127,10 +130,7 @@ export class SliceRenderer implements IDisposable {
         () => {
           // Wrapped in a setTimeout, because the side views need to actually
           // appear before updating the camera planes.
-          setTimeout(() => {
-            setMainCameraPlanes(this.editor, this.mainCanvas, this.mainCamera);
-            this.lazyRender();
-          });
+          setTimeout(this.updateCamera);
         },
       ),
     );
@@ -157,6 +157,11 @@ export class SliceRenderer implements IDisposable {
     setMainCameraPlanes(this.editor, this.mainCanvas, this.mainCamera);
 
     this.eagerRender();
+  };
+
+  private updateCamera = () => {
+    setMainCameraPlanes(this.editor, this.mainCanvas, this.mainCamera);
+    this.lazyRender();
   };
 
   private animate = () => {
