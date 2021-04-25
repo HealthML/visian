@@ -37,14 +37,20 @@ export const ColorPanel: React.FC = observer(() => {
     [store],
   );
 
+  const currentColor = Object.entries(theme.colors.data).find(
+    ([, color]) => color === store?.editor.viewSettings.annotationColor,
+  );
+
   return (
     <Modal labelTx="color-panel">
       <LayerList>
-        <ListItem label="Salient Safran" />
+        {currentColor && (
+          <ListItem icon={{ color: currentColor[1] }} label={currentColor[0]} />
+        )}
       </LayerList>
       <ColorList>
         {Object.entries(theme.colors.data).map(([name, color]) =>
-          store?.editor.viewSettings.annotationColor === color ? (
+          currentColor && currentColor[1] === color ? (
             <ColorSelected key={name} color={color} />
           ) : (
             <StyledColor
