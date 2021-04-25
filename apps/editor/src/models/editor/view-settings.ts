@@ -1,3 +1,4 @@
+import { getTheme } from "@visian/ui-shared";
 import {
   getPlaneAxes,
   ISerializable,
@@ -16,6 +17,8 @@ export interface EditorViewSettingsSnapshot {
   mainViewType?: ViewType;
   selectedVoxel?: number[];
   showSideViews?: boolean;
+
+  annotationColor?: string;
   contrast?: number;
   brightness?: number;
 }
@@ -33,12 +36,14 @@ export class EditorViewSettings
   public zoomLevel = 1;
   public offset = new Vector(2);
 
-  public annotationColor = "#ff0000";
+  public annotationColor!: string;
   public annotationOpacity = 0.5;
 
   public selectedVoxel = new Vector(3);
 
   constructor(protected editor: Editor, protected context?: StoreContext) {
+    this.setAnnotationColor();
+
     makeObservable(this, {
       brightness: observable,
       contrast: observable,
@@ -123,7 +128,10 @@ export class EditorViewSettings
     this.offset.set(x, y);
   }
 
-  public setAnnotationColor(value: string) {
+  public setAnnotationColor(
+    value = getTheme(this.context?.getTheme()).colors.data["Salient Safran"] ||
+      "#ff0000",
+  ) {
     this.annotationColor = value;
   }
 
@@ -213,6 +221,7 @@ export class EditorViewSettings
       selectedVoxel: this.selectedVoxel.toJSON(),
       showSideViews: this.showSideViews,
 
+      annotationColor: this.annotationColor,
       contrast: this.contrast,
       brightness: this.brightness,
     };
@@ -227,6 +236,7 @@ export class EditorViewSettings
     }
     this.toggleSideViews(Boolean(snapshot.showSideViews));
 
+    this.setAnnotationColor(snapshot.annotationColor);
     this.setContrast(snapshot.contrast);
     this.setBrightness(snapshot.brightness);
   }

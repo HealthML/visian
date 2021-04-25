@@ -22,10 +22,6 @@ const StyledColor = styled(Color)`
   margin: 6px 0 6px 12px;
 `;
 
-const ColorSelected = styled(StyledColor)`
-  border: 2px solid #fff;
-`;
-
 export const ColorPanel: React.FC = observer(() => {
   const theme = useTheme() as Theme;
 
@@ -49,17 +45,14 @@ export const ColorPanel: React.FC = observer(() => {
         )}
       </LayerList>
       <ColorList>
-        {Object.entries(theme.colors.data).map(([name, color]) =>
-          currentColor && currentColor[1] === color ? (
-            <ColorSelected key={name} color={color} />
-          ) : (
-            <StyledColor
-              key={name}
-              color={color}
-              onPointerDown={() => setColor(color)}
-            />
-          ),
-        )}
+        {Object.entries(theme.colors.data).map(([name, color]) => (
+          <StyledColor
+            key={name}
+            color={color}
+            isSelected={currentColor && currentColor[1] === color}
+            onPointerDown={() => setColor(color)}
+          />
+        ))}
       </ColorList>
     </Modal>
   );
