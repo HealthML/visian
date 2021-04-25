@@ -9,7 +9,6 @@ import React, { useCallback, useEffect, useRef } from "react";
 import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
-import { BackgroundColorSettings } from "../background-color-settings";
 import { ColorPanel } from "../color-panel";
 import { DropSheet } from "../drop-sheet";
 import { Layers } from "../layers";
@@ -122,7 +121,6 @@ export const UIOverlay = observer<UIOverlayProps>(
           <Toolbar />
           <Layers />
           <ColorPanel />
-          <BackgroundColorSettings />
         </ColumnLeft>
         <ColumnCenter>
           <TopConsole />

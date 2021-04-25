@@ -1,6 +1,9 @@
-import { Modal, List, ListItem } from "@visian/ui-shared";
-import React from "react";
-import styled from "styled-components";
+import { Color, List, ListItem, Modal, Theme } from "@visian/ui-shared";
+import { observer } from "mobx-react-lite";
+import React, { useCallback } from "react";
+import styled, { useTheme } from "styled-components";
+
+import { useStore } from "../../../app/root-store";
 
 const LayerList = styled(List)`
   margin-top: -16px;
@@ -8,61 +11,50 @@ const LayerList = styled(List)`
 `;
 
 const ColorList = styled.div`
-  width: 100%;
   display: flex;
-  margin: 5px 0;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  margin-left: -12px;
 `;
 
-const Color = styled.div`
-  width: 20px;
-  height: 20px;
-  border-radius: 10px;
-  margin-right: 10px;
-  background-color: #d0c068;
+const StyledColor = styled(Color)`
   cursor: pointer;
+  margin: 6px 0 6px 12px;
 `;
 
-const ColorLast = styled(Color)`
-  margin-right: 0px;
+const ColorSelected = styled(StyledColor)`
+  border: 2px solid #fff;
 `;
 
-const ColorSelected = styled(Color)`
-  border: 1px solid #fff;
-  width: 18px;
-  height: 18px;
-`;
+export const ColorPanel: React.FC = observer(() => {
+  const theme = useTheme() as Theme;
 
-export const ColorPanel: React.FC = () => (
-  <Modal labelTx="color-panel">
-    <LayerList>
-      <ListItem label="Salient Safran" />
-    </LayerList>
-    <ColorList>
-      <Color />
-      <Color />
-      <ColorSelected />
-      <Color />
-      <Color />
-      <Color />
-      <ColorLast />
-    </ColorList>
-    <ColorList>
-      <Color />
-      <Color />
-      <Color />
-      <Color />
-      <Color />
-      <Color />
-      <ColorLast />
-    </ColorList>
-    <ColorList>
-      <Color />
-      <Color />
-      <Color />
-      <Color />
-      <Color />
-      <Color />
-      <ColorLast />
-    </ColorList>
-  </Modal>
-);
+  const store = useStore();
+  const setColor = useCallback(
+    (value: string) => {
+      store?.editor.viewSettings.setAnnotationColor(value);
+    },
+    [store],
+  );
+
+  return (
+    <Modal labelTx="color-panel">
+      <LayerList>
+        <ListItem label="Salient Safran" />
+      </LayerList>
+      <ColorList>
+        {Object.entries(theme.colors.data).map(([name, color]) =>
+          store?.editor.viewSettings.annotationColor === color ? (
+            <ColorSelected key={name} color={color} />
+          ) : (
+            <StyledColor
+              key={name}
+              color={color}
+              onPointerDown={() => setColor(color)}
+            />
+          ),
+        )}
+      </ColorList>
+    </Modal>
+  );
+});

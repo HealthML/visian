@@ -55,18 +55,22 @@ export const Layers: React.FC = observer(() => {
         <LayerList>
           {store?.editor.annotation && (
             <ListItem
+              icon={{ color: store?.editor.viewSettings.annotationColor }}
               label={store?.editor.annotation.name}
-              icon={store?.editor.isAnnotationVisible ? "eye" : "eyeCrossed"}
-              disableIcon={store?.editor.isAnnotationVisible}
-              onIconPress={toggleAnnotationVisibility}
+              trailingIcon={
+                store?.editor.isAnnotationVisible ? "eye" : "eyeCrossed"
+              }
+              disableTrailingIcon={store?.editor.isAnnotationVisible}
+              onTrailingIconPress={toggleAnnotationVisibility}
             />
           )}
           {store?.editor.image ? (
             <ListItem
+              icon={{ color: store?.editor.foregroundColor }}
               label={store?.editor.image.name}
-              icon={store?.editor.isImageVisible ? "eye" : "eyeCrossed"}
-              disableIcon={store?.editor.isImageVisible}
-              onIconPress={toggleImageVisibility}
+              trailingIcon={store?.editor.isImageVisible ? "eye" : "eyeCrossed"}
+              disableTrailingIcon={store?.editor.isImageVisible}
+              onTrailingIconPress={toggleImageVisibility}
               isLast
             />
           ) : (
