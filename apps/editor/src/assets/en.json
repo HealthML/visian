@@ -32,6 +32,8 @@
 
   "layers": "Layers",
   "no-layers": "No layers loaded.",
+  "color-panel": "Choose Color",
+  "background-color": "Background Color",
 
   "view-settings": "View Settings",
   "transverse": "Transverse (1)",

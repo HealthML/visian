@@ -10,9 +10,14 @@ export default {
 export const primary = () => {
   return (
     <List>
-      <ListItem label="Annotation" icon="eyeCrossed" />
-      <ListItem label="Base Image" icon="eye" disableIcon />
-      <ListItem label="Background" icon="eye" disableIcon isLast />
+      <ListItem label="Annotation" trailingIcon="eyeCrossed" />
+      <ListItem label="Base Image" trailingIcon="eye" disableTrailingIcon />
+      <ListItem
+        label="Background"
+        trailingIcon="eye"
+        disableTrailingIcon
+        isLast
+      />
     </List>
   );
 };

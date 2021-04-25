@@ -1,5 +1,6 @@
 import React, { useCallback } from "react";
 import styled, { css } from "styled-components";
+import { Color } from "../color";
 
 import { Icon } from "../icon";
 import { Divider } from "../modal/modal";
@@ -33,24 +34,44 @@ export const ListItemLabel = styled(Text)`
   font-size: 14px;
   text-overflow: ellipsis;
   overflow: hidden;
+  user-select: none;
 `;
 
 export const ListIcon = styled(Icon).withConfig({
   shouldForwardProp: (prop) =>
-    prop.toString() !== "isDisabled" && prop.toString() !== "hasPressHandler",
+    prop.toString() !== "isDisabled" &&
+    prop.toString() !== "isTrailing" &&
+    prop.toString() !== "hasPressHandler",
 })<{
   isDisabled?: boolean;
+  isTrailing?: boolean;
   hasPressHandler: boolean;
 }>`
   width: 20px;
   height: 20px;
-  margin-left: 10px;
+  ${(props) =>
+    props.isTrailing
+      ? css`
+          margin-left: 10px;
+        `
+      : css`
+          margin-right: 10px;
+        `}
   opacity: ${(props) => (props.isDisabled ? 0.3 : 1)};
   ${(props) =>
     props.hasPressHandler &&
     css`
       cursor: pointer;
     `}
+`;
+
+export const ListFirstIcon = styled.div`
+  width: 20px;
+  height: 20px;
+  border-radius: 10px;
+  margin-right: 10px;
+  background-color: #d0c068;
+  cursor: pointer;
 `;
 
 export const List: React.FC<ListProps> = ({ children, ...rest }) => (
@@ -61,28 +82,63 @@ export const ListItem: React.FC<ListItemProps> = ({
   labelTx,
   label,
   icon,
+  iconRef,
+  trailingIcon,
+  trailingIconRef,
   value,
   onIconPress,
+  onTrailingIconPress,
   disableIcon,
+  disableTrailingIcon,
   isLast,
   children,
   ...rest
 }) => {
-  const handleIconPress = useCallback(() => {
-    if (onIconPress) onIconPress(value);
-  }, [onIconPress, value]);
+  const handleIconPress = useCallback(
+    (event: React.PointerEvent) => {
+      if (onIconPress) onIconPress(value, event);
+    },
+    [onIconPress, value],
+  );
+  const handleTrailingIconPress = useCallback(
+    (event: React.PointerEvent) => {
+      if (onTrailingIconPress) onTrailingIconPress(value, event);
+    },
+    [onTrailingIconPress, value],
+  );
 
   return (
     <ListItemContainer {...rest}>
       <ListItemInner>
+        {icon &&
+          (typeof icon === "string" ? (
+            <ListIcon
+              icon={icon}
+              isDisabled={disableIcon}
+              ref={iconRef as React.Ref<SVGSVGElement>}
+              onPointerDown={handleIconPress}
+              hasPressHandler={Boolean(onIconPress)}
+            />
+          ) : (
+            <ListIcon
+              as={Color}
+              color={icon.color}
+              isDisabled={disableIcon}
+              ref={iconRef as React.Ref<HTMLDivElement>}
+              onPointerDown={handleIconPress}
+              hasPressHandler={Boolean(onIconPress)}
+            />
+          ))}
         {(labelTx || label) && <ListItemLabel tx={labelTx} text={label} />}
         {children}
-        {icon && (
+        {trailingIcon && (
           <ListIcon
-            icon={icon}
-            isDisabled={disableIcon}
-            onPointerDown={handleIconPress}
-            hasPressHandler={Boolean(onIconPress)}
+            icon={trailingIcon}
+            isDisabled={disableTrailingIcon}
+            isTrailing
+            ref={trailingIconRef}
+            onPointerDown={handleTrailingIconPress}
+            hasPressHandler={Boolean(onTrailingIconPress)}
           />
         )}
       </ListItemInner>

@@ -131,7 +131,7 @@ export const useDelay = (
 
 export interface RelativePositionConfig<P extends string> {
   /** The parent element. */
-  parentElement?: HTMLElement | null;
+  parentElement?: HTMLElement | SVGSVGElement | null;
 
   /**
    * If set to `true`, the position is actively updated.
@@ -196,7 +196,7 @@ export const useRelativePosition = <P extends string>(
     if (!rect) return;
 
     const offsetRect = positionRelativeToOffsetParent
-      ? parentElement?.offsetParent?.getBoundingClientRect()
+      ? (parentElement as HTMLElement)?.offsetParent?.getBoundingClientRect()
       : undefined;
 
     // Prevent unnecessary updates

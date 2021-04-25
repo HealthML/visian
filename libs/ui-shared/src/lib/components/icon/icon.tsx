@@ -12,9 +12,11 @@ const StyledSVG = styled.svg.withConfig({
   opacity: ${(props) => (props.isActive !== false ? 1 : 0.3)};
 `;
 
-export const Icon: React.FC<IconProps> = ({ children, icon, ...rest }) => (
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  <StyledSVG as={icons[icon] as any} {...rest}>
-    {children}
-  </StyledSVG>
+export const Icon = React.forwardRef<SVGSVGElement, IconProps>(
+  ({ children, icon, ...rest }, ref) => (
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    <StyledSVG as={icons[icon] as any} {...rest} ref={ref}>
+      {children}
+    </StyledSVG>
+  ),
 );
