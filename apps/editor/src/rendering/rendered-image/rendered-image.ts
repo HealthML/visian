@@ -17,9 +17,9 @@ import {
   copyToRenderTarget,
   ImageRenderTarget,
   renderVoxels,
-  SliceReader,
   Voxels,
-} from "../../../rendering";
+} from "./edit-rendering";
+import { SliceReader } from "./read-rendering";
 
 export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
   public static fromITKImage<T extends TypedArray = TypedArray>(

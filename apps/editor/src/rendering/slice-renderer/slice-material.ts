@@ -2,11 +2,12 @@ import { IDisposable, IDisposer, ViewType } from "@visian/utils";
 import { autorun } from "mobx";
 import * as THREE from "three";
 
+import { RenderedImage } from "../rendered-image";
 import { sliceFragmentShader } from "../shaders";
 import vertexShader from "../shaders/slice.vert.glsl";
 import { getOrder } from "./utils";
 
-import type { Editor, RenderedImage } from "../../models";
+import type { Editor } from "../../models";
 export abstract class SliceMaterial
   extends THREE.ShaderMaterial
   implements IDisposable {

@@ -9,6 +9,7 @@ import ResizeSensor from "css-element-queries/src/ResizeSensor";
 import { reaction } from "mobx";
 import * as THREE from "three";
 
+import { RenderedImage } from "../rendered-image";
 import { Slice } from "./slice";
 import {
   getOrder,
@@ -19,7 +20,7 @@ import {
   synchCrosshairs,
 } from "./utils";
 
-import type { Editor, RenderedImage } from "../../models";
+import type { Editor } from "../../models";
 export class SliceRenderer implements IDisposable {
   private renderers: THREE.WebGLRenderer[];
   private mainCamera: THREE.OrthographicCamera;

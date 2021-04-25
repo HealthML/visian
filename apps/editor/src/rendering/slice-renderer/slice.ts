@@ -2,6 +2,7 @@ import { IDisposable, IDisposer, ViewType } from "@visian/utils";
 import { autorun } from "mobx";
 import * as THREE from "three";
 
+import { RenderedImage } from "../rendered-image";
 import {
   AnnotationSliceMaterial,
   ImageSliceMaterial,
@@ -18,7 +19,7 @@ import {
   PreviewBrushCursor,
 } from "./utils";
 
-import type { Editor, RenderedImage } from "../../models";
+import type { Editor } from "../../models";
 export class Slice extends THREE.Group implements IDisposable {
   public readonly baseSize = new THREE.Vector2();
 
