@@ -1,4 +1,3 @@
-import React from "react";
 import styled, { css } from "styled-components";
 import tc from "tinycolor2";
 
@@ -24,9 +23,7 @@ export const sheetMixin = () => css<any>`
 `;
 
 // Placeholder for actual implementation.
-export const Sheet: React.ForwardRefExoticComponent<
-  SheetProps & React.RefAttributes<HTMLDivElement>
-> = styled.div`
+export const Sheet = styled.div<SheetProps>`
   ${sheetMixin}
 
   display: flex;

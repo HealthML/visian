@@ -28,4 +28,6 @@ export interface ToolProps extends ButtonProps {
   ) => void;
 }
 
-export type ToolbarProps = React.HTMLAttributes<HTMLDivElement>;
+export interface ToolbarProps {
+  children?: React.ReactNode;
+}

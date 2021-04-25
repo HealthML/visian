@@ -22,6 +22,16 @@ const StyledSheet = styled(Sheet)`
 export const SliceSlider: React.FC = observer(() => {
   const store = useStore();
 
+  // Ref Management
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    store?.setRef("sliceSlider", ref);
+
+    return () => {
+      store?.setRef("sliceSlider");
+    };
+  }, [store, ref]);
+
   // Handle Slice Changes
   const setSelectedSlice = useCallback(
     (value: number | number[]) => {
@@ -92,6 +102,7 @@ export const SliceSlider: React.FC = observer(() => {
   const dimensionality = store?.editor.image?.dimensionality;
   return dimensionality && dimensionality > 2 ? (
     <StyledSheet
+      ref={ref}
       onPointerEnter={handlePointerEnter}
       onPointerLeave={handlePointerLeave}
     >

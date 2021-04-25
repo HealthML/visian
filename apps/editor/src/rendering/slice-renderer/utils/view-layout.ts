@@ -9,9 +9,53 @@ export const getSpriteAspectRatio = (image: Image) => {
   return maxSpriteSize.x / maxSpriteSize.y;
 };
 
-export const getMainViewPaddings = (_editor: Editor) => {
-  // TODO: Adapt based on the active overlays.
-  return [0, 0, 0, 0];
+/**
+ * @returns a quadruple of paddings for the sprite in the main view:
+ * [topPadding, rightPadding, bottomPadding, leftPadding]
+ */
+export const getMainViewPaddings = (editor: Editor) => {
+  const floatingUIRect = editor.refs.uiOverlay.current?.getBoundingClientRect();
+  const undoRedoButtonsRect = editor.refs.undoRedoButtons.current?.getBoundingClientRect();
+  const toolbarRect = editor.refs.toolbar.current?.getBoundingClientRect();
+  const sliceSliderRect = editor.refs.sliceSlider.current?.getBoundingClientRect();
+  const sideViewsRect = editor.refs.sideViews.current?.getBoundingClientRect();
+
+  const topMargin =
+    undoRedoButtonsRect && floatingUIRect
+      ? undoRedoButtonsRect.top - floatingUIRect.top
+      : 0;
+  const undoRedoPadding = undoRedoButtonsRect
+    ? undoRedoButtonsRect.height + 2 * topMargin
+    : 0;
+
+  const leftMargin =
+    toolbarRect && floatingUIRect ? toolbarRect.left - floatingUIRect.left : 0;
+  const toolBarPadding = toolbarRect ? toolbarRect.width + 2 * leftMargin : 0;
+
+  const rightMargin =
+    floatingUIRect && sliceSliderRect
+      ? floatingUIRect.right - sliceSliderRect.right
+      : 0;
+  const sliceSliderPadding = sliceSliderRect
+    ? sliceSliderRect.width + 2 * rightMargin
+    : 0;
+
+  const sideViewsDistance =
+    // sideViewsRect.right can be 0, when the side views aren't rendered.
+    floatingUIRect && sideViewsRect && sideViewsRect.right > 0
+      ? floatingUIRect.right - sideViewsRect.right
+      : 0;
+  const sideViewsPadding =
+    editor.viewSettings.showSideViews && sideViewsRect
+      ? sideViewsRect.width + sideViewsDistance + rightMargin
+      : 0;
+
+  return [
+    undoRedoPadding,
+    Math.max(sliceSliderPadding, sideViewsPadding),
+    0,
+    toolBarPadding,
+  ];
 };
 
 export const setMainCameraPlanes = (
@@ -68,33 +112,26 @@ export const setMainCameraPlanes = (
     spriteEdgePlanes.top = 1 / availableAspectRatio;
   }
 
-  // TODO: Add the paddings here.
-  // Old code for this:
-  // mainCamera.left =
-  //   spriteEdgePlanes.left -
-  //   ((2 * spriteEdgePlanes.right * mainCanvas.width) / sizeBetweenOverlays.x -
-  //     2 * spriteEdgePlanes.right) *
-  //     (leftPadding / (rightPadding + leftPadding));
-  // mainCamera.right =
-  //   spriteEdgePlanes.right +
-  //   ((2 * spriteEdgePlanes.right * mainCanvas.width) / sizeBetweenOverlays.x -
-  //     2 * spriteEdgePlanes.right) *
-  //     (rightPadding / (rightPadding + leftPadding));
-  // mainCamera.bottom =
-  //   spriteEdgePlanes.bottom -
-  //   ((2 * spriteEdgePlanes.top * mainCanvas.height) / sizeBetweenOverlays.y -
-  //     2 * spriteEdgePlanes.top) *
-  //     (bottomPadding / (topPadding + bottomPadding));
-  // mainCamera.top =
-  //   spriteEdgePlanes.top +
-  //   ((2 * spriteEdgePlanes.top * mainCanvas.height) / sizeBetweenOverlays.y -
-  //     2 * spriteEdgePlanes.top) *
-  //     (topPadding / (topPadding + bottomPadding));
-
-  mainCamera.left = spriteEdgePlanes.left;
-  mainCamera.right = spriteEdgePlanes.right;
-  mainCamera.top = spriteEdgePlanes.top;
-  mainCamera.bottom = spriteEdgePlanes.bottom;
+  mainCamera.left =
+    spriteEdgePlanes.left -
+    ((2 * spriteEdgePlanes.right * mainCanvas.width) / sizeBetweenOverlays.x -
+      2 * spriteEdgePlanes.right) *
+      (leftPadding / (rightPadding + leftPadding));
+  mainCamera.right =
+    spriteEdgePlanes.right +
+    ((2 * spriteEdgePlanes.right * mainCanvas.width) / sizeBetweenOverlays.x -
+      2 * spriteEdgePlanes.right) *
+      (rightPadding / (rightPadding + leftPadding));
+  mainCamera.bottom =
+    spriteEdgePlanes.bottom -
+    ((2 * spriteEdgePlanes.top * mainCanvas.height) / sizeBetweenOverlays.y -
+      2 * spriteEdgePlanes.top) *
+      (bottomPadding / (topPadding + bottomPadding));
+  mainCamera.top =
+    spriteEdgePlanes.top +
+    ((2 * spriteEdgePlanes.top * mainCanvas.height) / sizeBetweenOverlays.y -
+      2 * spriteEdgePlanes.top) *
+      (topPadding / (topPadding + bottomPadding));
 
   mainCamera.updateProjectionMatrix();
 };

@@ -1,6 +1,6 @@
 import { SquareButton } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
@@ -21,9 +21,19 @@ const StyledButton = styled(SquareButton)`
 export const UndoRedoButtons = observer(() => {
   const store = useStore();
 
+  // Ref Management
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    store?.setRef("undoRedoButtons", wrapperRef);
+
+    return () => {
+      store?.setRef("undoRedoButtons");
+    };
+  }, [store, wrapperRef]);
+
   return (
     <Container>
-      <Wrapper>
+      <Wrapper ref={wrapperRef}>
         <StyledButton
           icon="undo"
           isActive={false}
