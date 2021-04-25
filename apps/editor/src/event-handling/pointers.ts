@@ -43,8 +43,12 @@ export const setUpPointerHandling = (
   };
 
   const dispatch = transformGesturePreset({
-    forUnidentifiedPointers: ({ context, detail }) => {
+    forUnidentifiedPointers: ({ context, detail }, { eventType }) => {
       if (detail.buttons) return;
+      if (eventType === "end") {
+        previousDevice = context.device;
+        return;
+      }
       handleDeviceSwitch(context.device);
 
       store.editor.tools.handleEvent({
@@ -55,6 +59,7 @@ export const setUpPointerHandling = (
     forPointers: ({ context, detail, id }, { eventType }) => {
       handleDeviceSwitch(context.device);
       const activeTool = store.editor.tools.activeTool;
+      store?.editor.tools.setIsCursorOverFloatingUI(false);
 
       context.useForGesture = Boolean(
         id === "mainView" &&

@@ -64,18 +64,21 @@ export const SideViews = observer(() => {
   const showSideViews =
     store?.editor.image && store.editor.viewSettings.showSideViews;
 
-  // Refs Management
+  // Ref Management
+  const wrapperRef = useRef<HTMLDivElement>(null);
   const upperSideViewRef = useRef<HTMLCanvasElement>(null);
   const lowerSideViewRef = useRef<HTMLCanvasElement>(null);
   useEffect(() => {
+    store?.setRef("sideViews", wrapperRef);
     store?.setRef("upperSideView", upperSideViewRef);
     store?.setRef("lowerSideView", lowerSideViewRef);
 
     return () => {
+      store?.setRef("sideViews");
       store?.setRef("upperSideView");
       store?.setRef("lowerSideView");
     };
-  }, [store, upperSideViewRef, lowerSideViewRef]);
+  }, [store, upperSideViewRef, lowerSideViewRef, wrapperRef]);
 
   // Pointer Event Handling
   const pointerDispatch = store?.pointerDispatch;
@@ -108,7 +111,7 @@ export const SideViews = observer(() => {
 
   return (
     <SideViewContainer showSideViews={showSideViews} ref={setContainerRef}>
-      <SideViewWrapper style={{ width: sideViewSize }}>
+      <SideViewWrapper style={{ width: sideViewSize }} ref={wrapperRef}>
         <SideView style={{ marginBottom: 16 }}>
           <SideViewCanvas
             width={400}

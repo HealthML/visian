@@ -79,7 +79,6 @@ const isRecursivelyObservable = (thing: unknown) =>
 export const deepObserve = <T>(
   target: T,
   listener: (change: IChange, path: string, root: T) => void,
-  // TODO: Infer paths to track based on this snapshot
   config: DeepObserveConfig = {},
 ) => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

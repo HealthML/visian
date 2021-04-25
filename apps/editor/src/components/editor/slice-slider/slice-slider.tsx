@@ -1,6 +1,6 @@
 import { InvisibleButton, Sheet, Slider } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
-import React, { useCallback } from "react";
+import React, { useCallback, useEffect, useRef } from "react";
 import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
@@ -13,6 +13,16 @@ const StyledSheet = styled(Sheet)`
 
 export const SliceSlider: React.FC = observer(() => {
   const store = useStore();
+
+  // Ref Management
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    store?.setRef("sliceSlider", ref);
+
+    return () => {
+      store?.setRef("sliceSlider");
+    };
+  }, [store, ref]);
 
   const setSelectedSlice = useCallback(
     (value: number | number[]) => {
@@ -29,7 +39,7 @@ export const SliceSlider: React.FC = observer(() => {
 
   const dimensionality = store?.editor.image?.dimensionality;
   return dimensionality && dimensionality > 2 ? (
-    <StyledSheet>
+    <StyledSheet ref={ref}>
       <InvisibleButton
         icon="arrowUp"
         isActive={false}

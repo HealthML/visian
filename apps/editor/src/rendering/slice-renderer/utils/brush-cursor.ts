@@ -5,39 +5,27 @@ import * as THREE from "three";
 import { Editor } from "../../../models";
 import { brushCursor as theme } from "../../../theme";
 
-export const get2x2BrushCursorLines = (
-  lineMaterial: THREE.LineBasicMaterial,
-) => {
-  const pointPairs = [
-    [new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, 2, 0)],
-    [new THREE.Vector3(0, 0, 0), new THREE.Vector3(2, 0, 0)],
-    [new THREE.Vector3(0, 2, 0), new THREE.Vector3(2, 2, 0)],
-    [new THREE.Vector3(2, 0, 0), new THREE.Vector3(2, 2, 0)],
+export const get2x2BrushCursorPoints = () => {
+  return [
+    new THREE.Vector3(0, 0, 0),
+    new THREE.Vector3(0, 2, 0),
+    new THREE.Vector3(0, 0, 0),
+    new THREE.Vector3(2, 0, 0),
+    new THREE.Vector3(0, 2, 0),
+    new THREE.Vector3(2, 2, 0),
+    new THREE.Vector3(2, 0, 0),
+    new THREE.Vector3(2, 2, 0),
   ];
-
-  const lines: THREE.Line[] = [];
-
-  pointPairs.forEach((pointPair) => {
-    lines.push(
-      new THREE.Line(
-        new THREE.BufferGeometry().setFromPoints(pointPair),
-        lineMaterial,
-      ),
-    );
-  });
-
-  return lines;
 };
 
-export class BrushCursor extends THREE.Group implements IDisposable {
-  private lines: THREE.Line[] = [];
-
-  private material = new THREE.LineBasicMaterial(theme);
+export class BrushCursor extends THREE.LineSegments implements IDisposable {
+  private points: THREE.Vector3[] = [];
+  private workingMatrix = new THREE.Matrix4();
 
   protected disposers: IDisposer[] = [];
 
   constructor(protected editor: Editor, protected viewType: ViewType) {
-    super();
+    super(new THREE.BufferGeometry(), new THREE.LineBasicMaterial(theme));
 
     this.disposers.push(
       autorun(this.updateRadius),
@@ -50,8 +38,8 @@ export class BrushCursor extends THREE.Group implements IDisposable {
 
   public dispose() {
     this.disposers.forEach((disposer) => disposer());
-    this.lines.forEach((line) => line.geometry.dispose());
-    this.material.dispose();
+    this.geometry.dispose();
+    (this.material as THREE.LineBasicMaterial).dispose();
   }
 
   public setUVTarget(u: number, v: number) {
@@ -81,11 +69,10 @@ export class BrushCursor extends THREE.Group implements IDisposable {
   };
 
   private updateRadius = () => {
-    this.remove(...this.lines);
-    this.lines = [];
+    this.points = [];
 
     if (this.editor.tools.brushSizePixels === 0.5) {
-      this.lines.push(...get2x2BrushCursorLines(this.material));
+      this.points = get2x2BrushCursorPoints();
     } else {
       let d = 1 - this.editor.tools.brushSizePixels;
       let x = 0;
@@ -111,26 +98,27 @@ export class BrushCursor extends THREE.Group implements IDisposable {
       }
     }
 
-    this.add(...this.lines);
+    this.geometry.dispose();
+    this.geometry = new THREE.BufferGeometry().setFromPoints(this.points);
 
     this.editor.sliceRenderer?.lazyRender();
   };
 
   private addLines(start: THREE.Vector3, end: THREE.Vector3) {
-    const geometry = new THREE.BufferGeometry().setFromPoints([start, end]);
-
-    this.lines.push(new THREE.Line(geometry, this.material));
-    for (let i = 1; i < 8; i++) {
-      const geometryClone = geometry.clone();
+    for (let i = 0; i < 8; i++) {
+      const clones = [start.clone(), end.clone()];
 
       if (i % 2) {
-        geometryClone.scale(-1, 1, 1);
-        geometryClone.rotateZ(((i - 1) * Math.PI) / 4);
+        this.workingMatrix.makeScale(-1, 1, 1);
+        clones.forEach((clone) => clone.applyMatrix4(this.workingMatrix));
+        this.workingMatrix.makeRotationZ(((i - 1) * Math.PI) / 4);
+        clones.forEach((clone) => clone.applyMatrix4(this.workingMatrix));
       } else {
-        geometryClone.rotateZ((i * Math.PI) / 4);
+        this.workingMatrix.makeRotationZ((i * Math.PI) / 4);
+        clones.forEach((clone) => clone.applyMatrix4(this.workingMatrix));
       }
 
-      this.lines.push(new THREE.Line(geometryClone, this.material));
+      this.points.push(...clones);
     }
   }
 }

@@ -1,23 +1,22 @@
-import React from "react";
 import styled from "styled-components";
 import { zIndex } from "../../theme";
 
 import { coverMixin } from "../mixins";
 import { BoxProps } from "./box.props";
 
-export const Box: React.FC<BoxProps> = styled.div``;
+export const Box = styled.div<BoxProps>``;
 
-export const FlexColumn: React.FC<BoxProps> = styled.div`
+export const FlexColumn = styled.div<BoxProps>`
   display: flex;
   flex-direction: column;
 `;
 
-export const FlexRow: React.FC<BoxProps> = styled.div`
+export const FlexRow = styled.div<BoxProps>`
   display: flex;
   flex-direction: row;
 `;
 
-export const Spacer: React.FC<BoxProps> = styled.div`
+export const Spacer = styled.div<BoxProps>`
   flex: 1;
 `;
 
@@ -25,11 +24,11 @@ export const Spacer: React.FC<BoxProps> = styled.div`
  * A container that is absolutely positioned to cover the whole area of its
  * next relatively positioned parent.
  */
-export const AbsoluteCover: React.FC<BoxProps> = styled.div`
+export const AbsoluteCover = styled.div<BoxProps>`
   ${coverMixin};
 `;
 
-export const InputContainer = styled.div`
+export const InputContainer = styled.div<BoxProps>`
   display: flex;
   flex-direction: column;
   width: 100%;
@@ -38,7 +37,7 @@ export const InputContainer = styled.div`
 /** The modal root. There should only be one per application. */
 export const ModalRoot = styled.div.attrs(({ theme }) => ({
   id: theme.modalRootId,
-}))`
+}))<BoxProps>`
   ${coverMixin};
   pointer-events: none;
   z-index: ${zIndex("modal")};
