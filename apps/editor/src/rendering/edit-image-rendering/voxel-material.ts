@@ -1,8 +1,8 @@
 import { Vector } from "@visian/utils";
 import * as THREE from "three";
 
-import voxelFragmentShader from "./shaders/voxel.frag.glsl";
-import voxelVertexShader from "./shaders/voxel.vert.glsl";
+import voxelFragmentShader from "../shaders/voxel.frag.glsl";
+import voxelVertexShader from "../shaders/voxel.vert.glsl";
 
 export class VoxelMaterial extends THREE.ShaderMaterial {
   constructor() {

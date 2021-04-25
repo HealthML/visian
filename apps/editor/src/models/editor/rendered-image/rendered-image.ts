@@ -21,7 +21,7 @@ import {
   VoxelCamera,
   VoxelMaterial,
   VoxelScene,
-} from "./edit-rendering";
+} from "../../../rendering/edit-image-rendering";
 
 export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
   public static fromITKImage<T extends TypedArray = TypedArray>(

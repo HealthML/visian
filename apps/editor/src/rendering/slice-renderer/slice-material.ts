@@ -2,8 +2,8 @@ import { IDisposable, IDisposer, ViewType } from "@visian/utils";
 import { autorun } from "mobx";
 import * as THREE from "three";
 
-import fragmentShader from "./shaders/slice.frag.glsl";
-import vertexShader from "./shaders/slice.vert.glsl";
+import fragmentShader from "../shaders/slice.frag.glsl";
+import vertexShader from "../shaders/slice.vert.glsl";
 import { getOrder } from "./utils";
 
 import type { Editor, RenderedImage } from "../../models";

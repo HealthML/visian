@@ -143,7 +143,7 @@ export class Slice extends THREE.Group implements IDisposable {
   };
 
   private updateOffset = () => {
-    this.workingVector.multiplyScalar(0);
+    this.workingVector.setScalar(0);
 
     if (this.viewType === this.editor.viewSettings.mainViewType) {
       this.workingVector.set(
