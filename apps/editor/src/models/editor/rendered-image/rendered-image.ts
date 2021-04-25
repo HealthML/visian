@@ -17,11 +17,9 @@ import {
   copyToRenderTarget,
   ImageRenderTarget,
   renderVoxels,
-  updateVoxelGeometry,
-  VoxelCamera,
-  VoxelMaterial,
-  VoxelScene,
-} from "../../../rendering/edit-image-rendering";
+  SliceReader,
+  Voxels,
+} from "../../../rendering";
 
 export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
   public static fromITKImage<T extends TypedArray = TypedArray>(
@@ -66,20 +64,19 @@ export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
   private voxelsToRender: (VoxelWithValue | VoxelWithValue[])[] = [];
   /** Whether or not @member voxelsToRender have been rendered into the atlas for the different WebGL contexts. */
   private voxelsRendered = [true];
-  /** Used to render the voxels into the texture atlas. */
-  private voxelGeometry = new THREE.BufferGeometry();
-  private voxelMaterial = new VoxelMaterial();
-  private voxels = new VoxelScene(this.voxelGeometry, this.voxelMaterial);
-  private voxelCamera = new VoxelCamera();
+  /** Used to render voxels into the texture atlas. */
+  private voxels: Voxels;
   /** Whether or not @member voxelGeometry needs to be updated before rendering. */
   private isVoxelGeometryDirty = false;
 
   /** The render targets for the texture atlases for the different WebGL contexts. */
-  private renderTargets: ImageRenderTarget[] = [];
+  private renderTargets = [new ImageRenderTarget(this.getAtlasSize())];
   /** Whether or not the corresponding render target needs to be updated from the CPU data. */
   private hasCPUUpdates = [true];
   /** Used to update the render targets from the CPU data. */
   private screenAlignedQuad: ScreenAlignedQuad;
+
+  private sliceReader: SliceReader;
 
   constructor(
     image: ImageSnapshot<T> & Pick<ImageSnapshot<T>, "voxelCount" | "data">,
@@ -96,9 +93,19 @@ export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
     );
 
     this.screenAlignedQuad = ScreenAlignedQuad.forTexture(this.internalTexture);
-    this.voxelCamera.setAtlasSize(this.getAtlasSize());
-    this.voxelMaterial.setAtlasGrid(this.getAtlasGrid());
-    this.voxelMaterial.setVoxelCount(this.voxelCount);
+
+    this.voxels = new Voxels(
+      this.getAtlasSize(),
+      this.getAtlasGrid(),
+      this.voxelCount,
+    );
+
+    this.sliceReader = new SliceReader(
+      this.renderTargets[0].texture,
+      this.getAtlasGrid(),
+      this.voxelCount.clone(false),
+      this.voxelComponents,
+    );
   }
 
   public setRenderers(renderers: THREE.WebGLRenderer[]) {
@@ -130,16 +137,11 @@ export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
 
     if (this.voxelsToRender.length && !this.voxelsRendered[index]) {
       if (this.isVoxelGeometryDirty) {
-        updateVoxelGeometry(this.voxelsToRender, this.voxelGeometry);
+        this.voxels.updateGeometry(this.voxelsToRender);
         this.isVoxelGeometryDirty = false;
       }
 
-      renderVoxels(
-        this.voxels,
-        this.voxelCamera,
-        this.renderTargets[index],
-        renderer,
-      );
+      renderVoxels(this.voxels, this.renderTargets[index], renderer);
 
       this.voxelsRendered[index] = true;
       if (this.voxelsRendered.every((value) => value)) {
@@ -154,7 +156,8 @@ export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
     this.hasCPUUpdates.fill(true);
   }
 
-  public finishStroke() {
+  // TODO: Use this to update this.atlas when necessary.
+  private pullAtlasFromGPU() {
     const renderer = this.renderers[0];
     if (!renderer) return;
 
@@ -208,5 +211,18 @@ export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
     super.setSlice(viewType, slice, sliceData);
 
     this.triggerGPUPush();
+  }
+
+  public getSlice(sliceNumber: number, viewType: ViewType) {
+    if (this.renderers[0]) {
+      return this.sliceReader.readSlice(
+        sliceNumber,
+        viewType,
+        this.renderers[0],
+      );
+    }
+
+    // Attention: super.getSlice does not work for more than one component at the moment!
+    return super.getSlice(sliceNumber, viewType);
   }
 }

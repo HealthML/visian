@@ -21,8 +21,6 @@ export class VoxelWriter {
     viewType = this.editor.viewSettings.mainViewType,
   ) {
     if (image) {
-      image.finishStroke();
-
       if (this.undoable && this.sliceNumber !== undefined) {
         this.editor.undoRedo.addCommand(
           new SliceUndoRedoCommand(

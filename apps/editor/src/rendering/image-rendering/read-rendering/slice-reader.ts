@@ -1,0 +1,83 @@
+import {
+  getPlaneAxes,
+  ScreenAlignedQuad,
+  Vector,
+  ViewType,
+} from "@visian/utils";
+import * as THREE from "three";
+
+import { ReadSliceMaterial } from "./read-slice-material";
+
+export class SliceReader {
+  private material: ReadSliceMaterial;
+  private screenAlignedQuad: ScreenAlignedQuad;
+
+  private lastViewType = ViewType.Transverse;
+  private renderTarget: THREE.WebGLRenderTarget;
+
+  constructor(
+    atlasTexture: THREE.Texture,
+    atlasGrid: Vector,
+    private voxelCount: Vector,
+    private components: number,
+  ) {
+    this.material = new ReadSliceMaterial(atlasTexture, atlasGrid, voxelCount);
+    this.screenAlignedQuad = new ScreenAlignedQuad(this.material);
+
+    this.renderTarget = new THREE.WebGLRenderTarget(voxelCount.x, voxelCount.y);
+  }
+
+  public readSlice(
+    sliceNumber: number,
+    viewType: ViewType,
+    renderer: THREE.WebGLRenderer,
+  ) {
+    this.material.setSliceNumber(sliceNumber);
+
+    const [widthAxis, heightAxis] = getPlaneAxes(viewType);
+    const width = this.voxelCount[widthAxis];
+    const height = this.voxelCount[heightAxis];
+
+    if (this.lastViewType !== viewType) {
+      this.material.setViewType(viewType);
+      this.lastViewType = viewType;
+
+      this.renderTarget.setSize(width, height);
+    }
+
+    // Render slice to render target.
+    const previousRenderTarget = renderer.getRenderTarget();
+    renderer.setRenderTarget(this.renderTarget);
+
+    const previousAutoClear = renderer.autoClear;
+    renderer.autoClear = true;
+
+    this.screenAlignedQuad.renderWith(renderer);
+
+    renderer.autoClear = previousAutoClear;
+    renderer.setRenderTarget(previousRenderTarget);
+
+    // Read slice from render target.
+    const buffer = new Uint8Array(width * height * 4);
+    renderer.readRenderTargetPixels(
+      this.renderTarget,
+      0,
+      0,
+      width,
+      height,
+      buffer,
+    );
+
+    if (this.components === 4) return buffer;
+
+    // Read components.
+    const slice = new Uint8Array(width * height * this.components);
+    for (let i = 0; i < width * height; i++) {
+      for (let c = 0; c < this.components; c++) {
+        slice[this.components * i + c] = buffer[4 * i + c];
+      }
+    }
+
+    return slice;
+  }
+}

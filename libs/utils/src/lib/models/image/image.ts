@@ -230,6 +230,7 @@ export class Image<T extends TypedArray = TypedArray>
 
     let index = 0;
     // TODO: performance !!!
+    // TODO: Adapt for more than 1 component.
     findVoxelInSlice(
       // Explicit access here avoids MobX observability tracking to decrease performance
       {
