@@ -228,7 +228,9 @@ export const Slider: React.FC<SliderProps> = (props) => {
           parentElement={thumbRef}
           position="left"
           distance={
-            parseNumberFromMetric(theme.sizes.sliderHeight) / 2 +
+            (parseNumberFromMetric(theme.sizes.sliderHeight) -
+              parseNumberFromMetric(theme.sizes.sliderThumbHeight)) /
+              2 +
             parseNumberFromMetric(theme.space.sliderLabelDistance)
           }
         />
