@@ -93,6 +93,10 @@ export class SliceRenderer implements IDisposable {
         (image?: RenderedImage) => {
           if (!image) return;
           this.setImage(image);
+
+          // Wrapped in a setTimeout, because if no image was previously loaded
+          // the side views need to actually appear before updating the camera planes.
+          setTimeout(this.updateCamera);
         },
         { fireImmediately: true },
       ),
@@ -117,9 +121,18 @@ export class SliceRenderer implements IDisposable {
           } else {
             this.slices[newMainView].setCrosshairSynchOffset();
           }
+
+          this.updateCamera();
         },
       ),
-      reaction(() => editor.viewSettings.showSideViews, this.lazyRender),
+      reaction(
+        () => editor.viewSettings.showSideViews,
+        () => {
+          // Wrapped in a setTimeout, because the side views need to actually
+          // appear before updating the camera planes.
+          setTimeout(this.updateCamera);
+        },
+      ),
     );
 
     this.renderers[0].setAnimationLoop(this.animate);
@@ -144,6 +157,11 @@ export class SliceRenderer implements IDisposable {
     setMainCameraPlanes(this.editor, this.mainCanvas, this.mainCamera);
 
     this.eagerRender();
+  };
+
+  private updateCamera = () => {
+    setMainCameraPlanes(this.editor, this.mainCanvas, this.mainCamera);
+    this.lazyRender();
   };
 
   private animate = () => {

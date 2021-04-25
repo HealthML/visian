@@ -26,5 +26,5 @@ export interface AsProps {
    *
    * @see https://styled-components.com/docs/api#as-polymorphic-prop
    */
-  as?: string;
+  as?: string | React.ComponentType<unknown>;
 }
