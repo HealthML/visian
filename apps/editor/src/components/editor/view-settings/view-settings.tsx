@@ -3,7 +3,6 @@ import {
   Modal,
   SliderField,
   Switch,
-  useModalPosition,
 } from "@visian/ui-shared";
 import { ViewType } from "@visian/utils";
 import { observer } from "mobx-react-lite";
@@ -39,7 +38,6 @@ export const ViewSettings: React.FC = observer(() => {
 
   // Menu Positioning
   const [buttonRef, setButtonRef] = useState<HTMLButtonElement | null>(null);
-  const modalPosition = useModalPosition(buttonRef, "left", isModalOpen);
 
   // Menu Actions
   const setContrast = useCallback(
@@ -67,9 +65,10 @@ export const ViewSettings: React.FC = observer(() => {
         isActive={isModalOpen}
       />
       <Modal
-        style={modalPosition}
         isOpen={isModalOpen}
         labelTx="view-settings"
+        parentElement={buttonRef}
+        position="left"
         onReset={store?.editor.viewSettings.resetSettings}
       >
         {(!store?.editor.image || store?.editor.image.dimensionality > 2) && (

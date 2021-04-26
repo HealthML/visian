@@ -34,11 +34,22 @@ export interface SliderProps<T extends number | number[] = number | number[]>
    */
   onChange?: (value: T, thumbId: number, thumbValue: number) => void;
 
+  onStart?: (event: PointerEvent | React.PointerEvent, thumbId: number) => void;
+  onEnd?: (event: PointerEvent | React.PointerEvent, thumbId: number) => void;
+
   /**
    * If `true`, shows a range selection between the first and last thumb on
    * the slider.
    */
   showRange?: boolean;
+
+  showFloatingValueLabel?: boolean;
+
+  /**
+   * An optional function that formats the value label text.
+   * Defaults to a transformation to a value rounded to 2 decimal places.
+   */
+  formatValueLabel?: (value: number[]) => string;
 }
 
 export interface SliderRangeSelectionProps
@@ -64,10 +75,4 @@ export interface SliderFieldProps extends Omit<SliderProps, "isVertical"> {
    * value range.
    */
   unlockValueLabelRange?: boolean;
-
-  /**
-   * An optional function that formats the label text (if `showValueLabel` is `true`).
-   * Defaults to a transformation to a value rounded to 2 decimal places.
-   */
-  formatValueLabel?: (value: number[]) => string;
 }

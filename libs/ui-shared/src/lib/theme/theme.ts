@@ -1,6 +1,27 @@
 import { ThemeProps as StyledThemeProps } from "styled-components";
 import { makeObservable, observable } from "mobx";
 
+const dataColors = {
+  "Salient Safran": "#D0C068",
+  Conifer: "#8AD64F",
+  "Lavender Magenta": "#EA92E1",
+  Jaffa: "#EA7E30",
+  "Green Haze": "#049C6D",
+  "Azure Radiance": "#0085FF",
+  "Brick Red": "#CA3345",
+  Turquoise: "#2CD9D9",
+  "Chestnut Rose": "#D06868",
+  "True V": "#8368D0",
+  "Cerulean Blue": "#3159C2",
+  Whiskey: "#D0A768",
+  Mercury: "#E7E7E7",
+  "Purple Heart": "#5A3FC6",
+  Downy: "#68D09E",
+  "Brilliant Rose": "#EC42C6",
+  Lima: "#58DC2A",
+  "Honey Flower": "#62156F",
+};
+
 const colorModes = {
   light: {
     text: "rgba(0,0,0,0.8)",
@@ -24,6 +45,8 @@ const colorModes = {
     blueBorder: "rgba(0,133,255,0.6)",
     sideViewSheet: "rgba(0, 0, 0, 0.05)",
     sideViewBorder: "rgba(0, 0, 0, 0.3)",
+
+    data: dataColors,
   },
   dark: {
     text: "rgba(255,255,255,0.8)",
@@ -46,6 +69,8 @@ const colorModes = {
     blueBorder: "rgba(0,133,255,0.6)",
     sideViewSheet: "rgba(255, 255, 255, 0.05)",
     sideViewBorder: "rgba(255, 255, 255, 0.3)",
+
+    data: dataColors,
   },
 };
 
@@ -69,7 +94,7 @@ export const theme = {
   borderWidths: {},
   // breakpoints: ["478px", "767px", "991px", "1280px", "1440px", "1920px"],
   colors: colorModes.light,
-  durations: { tooltipDelay: 400 },
+  durations: { tooltipDelay: 400, autoHideDelay: 800 },
   fonts: {
     default: "DIN2014",
   },
@@ -117,6 +142,7 @@ export const theme = {
     listIndentation: "16px",
     buttonPadding: "12px 20px",
     inputPadding: "12px 22px",
+    sliderLabelDistance: "16px",
   },
   zIndices: {
     modal: 50,

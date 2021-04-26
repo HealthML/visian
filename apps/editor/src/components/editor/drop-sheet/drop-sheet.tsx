@@ -19,6 +19,7 @@ const StyledOverlay = styled.div`
   display: flex;
   flex-direction: row;
   padding-right: 10%;
+  pointer-events: auto;
   z-index: ${zIndex("overlay")};
 `;
 
@@ -41,6 +42,7 @@ export const DropSheet: React.FC<DropSheetProps> = observer(
             });
           }
           setIsLoadingImage(false);
+          store?.editor.tools.setIsCursorOverFloatingUI(false);
           onDropCompleted();
         })();
       },
@@ -62,6 +64,7 @@ export const DropSheet: React.FC<DropSheetProps> = observer(
             });
           }
           setIsLoadingAnnotation(false);
+          store?.editor.tools.setIsCursorOverFloatingUI(false);
           onDropCompleted();
         })();
       },

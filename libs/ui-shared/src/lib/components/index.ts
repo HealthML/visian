@@ -5,6 +5,7 @@ export * from "./utils";
 // Components
 export * from "./box";
 export * from "./button";
+export * from "./color";
 export * from "./drop-zone";
 export * from "./modal";
 export * from "./notification";

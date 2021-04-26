@@ -77,6 +77,10 @@ export class Editor implements ISerializable<EditorSnapshot> {
     });
   }
 
+  public get refs() {
+    return this.context.getRefs();
+  }
+
   public getBackgroundColor() {
     return (
       this.backgroundColor ||

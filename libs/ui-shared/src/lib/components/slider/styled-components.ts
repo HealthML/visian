@@ -29,6 +29,7 @@ export const SliderContainer = styled.div<SliderVerticalitySettings>`
   user-select: none;
   width: ${(props) => (props.isVertical ? size("sliderHeight") : "100%")};
   flex-direction: ${(props) => (props.isVertical ? "column" : "row")};
+  -webkit-tap-highlight-color: transparent;
 `;
 
 export const SliderTrack = styled.div<SliderVerticalitySettings>`

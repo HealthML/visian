@@ -5,7 +5,7 @@ import { duration, fontWeight, radius, size, space, Theme } from "../../theme";
 import { Icon } from "../icon";
 import { sheetMixin } from "../sheet";
 import { Text } from "../text";
-import { Tooltip, useTooltipPosition } from "../tooltip";
+import { Tooltip } from "../tooltip";
 import { useDelay } from "../utils";
 import { ButtonProps } from "./button.props";
 
@@ -21,6 +21,7 @@ const StyledButton = styled.button<Pick<ButtonProps, "isDisabled">>`
   display: flex;
   align-items: center;
   justify-content: center;
+  -webkit-tap-highlight-color: transparent;
 
   ${(props) =>
     props.isDisabled
@@ -86,11 +87,6 @@ const BaseButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
     const [buttonRef, setButtonRef] = useState<HTMLButtonElement | null>(null);
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     useImperativeHandle(ref, () => buttonRef!, [buttonRef]);
-    const tooltipStyle = useTooltipPosition(
-      buttonRef,
-      tooltipPosition,
-      Boolean(showTooltip && externalShowTooltip && (tooltipTx || tooltip)),
-    );
 
     return (
       <>
@@ -110,10 +106,11 @@ const BaseButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
         </StyledButton>
         {(tooltipTx || tooltip) && (
           <Tooltip
-            style={tooltipStyle}
             text={tooltip}
             tx={tooltipTx}
             isShown={showTooltip && externalShowTooltip}
+            parentElement={buttonRef}
+            position={tooltipPosition}
           />
         )}
       </>

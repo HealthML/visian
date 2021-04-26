@@ -33,7 +33,6 @@ export interface AsyncDebouncedFunc<T extends (...args: any[]) => any> {
 
 // TODO: Use generic type here to capture the throttled function's type
 export const asyncThrottle = (...args: Parameters<typeof throttle>) => {
-  //
   const [fn, ...rest] = args;
 
   let pendingRequests: [

@@ -4,18 +4,27 @@ import {
   ListItem,
   Modal,
   SubtleText,
-  useModalPosition,
 } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
 import React, { useCallback, useState } from "react";
 import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
+import { ColorPanel } from "../color-panel";
 
 // Styled Components
 const LayerList = styled(List)`
   margin-top: -16px;
 `;
+
+const LayerModal = styled(Modal)`
+  padding-bottom: 0px;
+`;
+
+// Utilities
+const noop = () => {
+  // Intentionally left blank
+};
 
 export const Layers: React.FC = observer(() => {
   const store = useStore();
@@ -28,7 +37,6 @@ export const Layers: React.FC = observer(() => {
 
   // Menu Positioning
   const [buttonRef, setButtonRef] = useState<HTMLButtonElement | null>(null);
-  const modalPosition = useModalPosition(buttonRef, "right", isModalOpen);
 
   const toggleAnnotationVisibility = useCallback(() => {
     store?.editor.setIsAnnotationVisible(!store?.editor.isAnnotationVisible);
@@ -36,6 +44,25 @@ export const Layers: React.FC = observer(() => {
   const toggleImageVisibility = useCallback(() => {
     store?.editor.setIsImageVisible(!store?.editor.isImageVisible);
   }, [store?.editor]);
+
+  // Color Modal Toggling
+  const [isColorModalOpen, setIsColorModalOpen] = useState(false);
+  const openColorModal = useCallback(
+    (_value: string | undefined, event: React.PointerEvent) => {
+      event.preventDefault();
+      event.stopPropagation();
+      setIsColorModalOpen(true);
+    },
+    [],
+  );
+  const closeColorModal = useCallback(() => {
+    setIsColorModalOpen(false);
+  }, []);
+
+  // Color Modal Positioning
+  const [colorRef, setColorRef] = useState<
+    HTMLDivElement | SVGSVGElement | null
+  >(null);
 
   return (
     <>
@@ -47,29 +74,46 @@ export const Layers: React.FC = observer(() => {
         onPointerDown={toggleModal}
         isActive={isModalOpen}
       />
-      <Modal style={modalPosition} isOpen={isModalOpen} labelTx="layers">
+      <LayerModal
+        isOpen={isModalOpen}
+        labelTx="layers"
+        parentElement={buttonRef}
+        position="right"
+      >
         <LayerList>
           {store?.editor.annotation && (
             <ListItem
+              icon={{ color: store?.editor.viewSettings.annotationColor }}
+              iconRef={setColorRef}
+              onIconPress={isColorModalOpen ? noop : openColorModal}
               label={store?.editor.annotation.name}
-              icon={store?.editor.isAnnotationVisible ? "eye" : "eyeCrossed"}
-              disableIcon={store?.editor.isAnnotationVisible}
-              onIconPress={toggleAnnotationVisibility}
+              trailingIcon={
+                store?.editor.isAnnotationVisible ? "eye" : "eyeCrossed"
+              }
+              disableTrailingIcon={store?.editor.isAnnotationVisible}
+              onTrailingIconPress={toggleAnnotationVisibility}
             />
           )}
           {store?.editor.image ? (
             <ListItem
+              icon={{ color: store?.editor.foregroundColor }}
               label={store?.editor.image.name}
-              icon={store?.editor.isImageVisible ? "eye" : "eyeCrossed"}
-              disableIcon={store?.editor.isImageVisible}
-              onIconPress={toggleImageVisibility}
+              trailingIcon={store?.editor.isImageVisible ? "eye" : "eyeCrossed"}
+              disableTrailingIcon={store?.editor.isImageVisible}
+              onTrailingIconPress={toggleImageVisibility}
               isLast
             />
           ) : (
             <SubtleText tx="no-layers" />
           )}
         </LayerList>
-      </Modal>
+      </LayerModal>
+      <ColorPanel
+        isOpen={isColorModalOpen}
+        parentElement={colorRef}
+        position="right"
+        onOutsidePress={closeColorModal}
+      />
     </>
   );
 });

@@ -32,6 +32,8 @@
 
   "layers": "Ebenen",
   "no-layers": "Keine Ebenen geladen.",
+  "color-panel": "Farbe wählen",
+  "background-color": "Hintergrundfarbe",
 
   "view-settings": "Ansichtseinstellungen",
   "transverse": "Transverse (1)",

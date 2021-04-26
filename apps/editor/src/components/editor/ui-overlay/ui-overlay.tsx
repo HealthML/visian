@@ -5,7 +5,7 @@ import {
   Text,
 } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
-import React, { useCallback } from "react";
+import React, { useCallback, useEffect, useRef } from "react";
 import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
@@ -79,18 +79,33 @@ export const UIOverlay = observer<UIOverlayProps>(
   ({ isDraggedOver, onDropCompleted, ...rest }) => {
     const store = useStore();
 
+    // Ref Management
+    const containerRef = useRef<HTMLDivElement>(null);
+    useEffect(() => {
+      store?.setRef("uiOverlay", containerRef);
+
+      return () => {
+        store?.setRef("uiOverlay");
+      };
+    }, [store, containerRef]);
+
     const enterFloatingUI = useCallback(() => {
       store?.editor.tools.setIsCursorOverFloatingUI(true);
     }, [store]);
-    const leaveFloatingUI = useCallback(() => {
-      store?.editor.tools.setIsCursorOverFloatingUI(false);
-    }, [store]);
+    const leaveFloatingUI = useCallback(
+      (event: React.PointerEvent) => {
+        if (event.pointerType === "touch") return;
+        store?.editor.tools.setIsCursorOverFloatingUI(false);
+      },
+      [store],
+    );
 
     return (
       <Container
         {...rest}
         onPointerEnter={enterFloatingUI}
         onPointerLeave={leaveFloatingUI}
+        ref={containerRef}
       >
         {!store?.editor.image && (
           <StartTextContainer>
