@@ -36,12 +36,16 @@ export const UndoRedoButtons = observer(() => {
       <Wrapper ref={wrapperRef}>
         <StyledButton
           icon="undo"
+          tooltipTx="undo"
+          tooltipPosition="right"
           isActive={false}
           isDisabled={!store?.editor.undoRedo.isUndoAvailable}
           onPointerDown={store?.editor.undoRedo.undo}
         />
         <StyledButton
           icon="redo"
+          tooltipTx="redo"
+          tooltipPosition="right"
           isActive={false}
           isDisabled={!store?.editor.undoRedo.isRedoAvailable}
           onPointerDown={store?.editor.undoRedo.redo}

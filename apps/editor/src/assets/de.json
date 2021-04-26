@@ -16,6 +16,9 @@
   "ideas-feedback": "Ideen oder Feedback?",
   "clear-data": "Daten Löschen",
 
+  "undo": "Rückgängig",
+  "redo": "Wiederholen",
+
   "navigation-tool": "Navigationswerkzeug (H)",
   "crosshair-tool": "Fadenkreuzwerkzeug (C)",
   "pixel-brush": "Pinsel (B)",
