@@ -14,7 +14,7 @@ import { useStore } from "../../../app/root-store";
 
 // Styled Components
 const StyledSheet = styled(Sheet)`
-  width: 40px;
+  width: 38px;
   padding: 4px 0;
   flex: 1 0;
 `;
@@ -100,7 +100,9 @@ export const SliceSlider: React.FC = observer(() => {
   );
 
   const dimensionality = store?.editor.image?.dimensionality;
-  return dimensionality && dimensionality > 2 ? (
+  return dimensionality &&
+    dimensionality > 2 &&
+    store?.editor.viewSettings.getMaxSlice() ? (
     <StyledSheet
       ref={ref}
       onPointerEnter={handlePointerEnter}
@@ -115,7 +117,7 @@ export const SliceSlider: React.FC = observer(() => {
         isVertical
         isInverted
         min={0}
-        max={store?.editor.viewSettings.getMaxSlice() || 0}
+        max={store?.editor.viewSettings.getMaxSlice()}
         value={store?.editor.viewSettings.getSelectedSlice()}
         onChange={setSelectedSlice}
         onStart={handleDragStart}
