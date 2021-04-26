@@ -150,6 +150,8 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
   }
 
   public setActiveTool(tool = this.activeTool) {
+    if (this.isDrawing) return;
+
     if (
       tool === ToolType.Crosshair &&
       this.editor.image &&
@@ -180,6 +182,8 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
   }
 
   public setBrushSizePixels = (value = 5, showPreview = false) => {
+    if (this.isDrawing) return;
+
     const clampedValue = Math.max(0, value);
 
     if (this.isBrushSizeLocked) {
