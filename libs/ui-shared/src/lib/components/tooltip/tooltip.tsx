@@ -26,8 +26,6 @@ const TooltipLabel = styled(Text)`
   font-size: 11px;
   line-height: 11px;
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 `;
 
 export const Tooltip: React.FC<TooltipProps> = ({
