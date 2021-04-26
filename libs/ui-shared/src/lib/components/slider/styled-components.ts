@@ -3,11 +3,14 @@ import styled from "styled-components";
 import {
   color,
   computeStyleValue,
+  fontSize,
   lineHeight,
   scaleMetric,
   size,
   ThemeProps,
 } from "../../theme";
+import { Text } from "../text";
+import { TextInput } from "../text-input";
 import { SliderRangeSelectionProps, ThumbProps } from "./slider.props";
 import { SliderVerticalitySettings } from "./types";
 
@@ -121,4 +124,31 @@ export const SliderRangeSelection = styled.div.attrs<SliderRangeSelectionProps>(
   }}
   position: absolute;
   z-index: 10;
+`;
+
+export const SliderLabelRow = styled.div`
+  display: flex;
+  flex-direction: row;
+  margin-bottom: 6px;
+  align-items: center;
+`;
+
+export const SliderLabel = styled(Text)`
+  font-size: ${fontSize("small")};
+  line-height: 10px;
+  height: 12px;
+  padding-top: 2px;
+`;
+
+export const SliderValueInputWrapper = styled.div`
+  display: inline-flex;
+  flex: 1;
+`;
+
+export const SliderValueInput = styled(TextInput)`
+  font-size: ${fontSize("small")};
+  height: 12px;
+  line-height: 10px;
+  text-align: right;
+  margin-top: -2px;
 `;

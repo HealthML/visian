@@ -173,7 +173,6 @@ export const Toolbar: React.FC = observer(() => {
         />
         <SpacedSliderField
           labelTx="brush-size"
-          showValueLabel
           min={0}
           max={250}
           scaleType="quadratic"
@@ -184,7 +183,6 @@ export const Toolbar: React.FC = observer(() => {
           <>
             <SpacedSliderField
               labelTx="seed-threshold"
-              showValueLabel
               min={1}
               max={20}
               value={store?.editor.tools.smartBrushSeedThreshold}
@@ -193,7 +191,6 @@ export const Toolbar: React.FC = observer(() => {
             />
             <SpacedSliderField
               labelTx="neighbor-threshold"
-              showValueLabel
               min={1}
               max={20}
               value={store?.editor.tools.smartBrushNeighborThreshold}

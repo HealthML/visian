@@ -62,6 +62,17 @@ export interface SliderFieldProps extends Omit<SliderProps, "isVertical"> {
   labelTx?: string;
   label?: string;
 
-  /** If `true`, shows a label with the current slider value. */
+  /**
+   * If `true`, shows a label with the current slider value.
+   * For single-valued sliders, this label will be editable.
+   *
+   * Defaults to `true`.
+   */
   showValueLabel?: boolean;
+
+  /**
+   * If `true`, values written to the value label can exceed the slider's
+   * value range.
+   */
+  unlockValueLabelRange?: boolean;
 }

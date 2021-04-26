@@ -14,6 +14,7 @@ export * from "./sheet";
 export * from "./slider";
 export * from "./switch";
 export * from "./text";
+export * from "./text-field";
 export * from "./text-input";
 export * from "./tooltip";
 export * from "./webgl-canvas";
