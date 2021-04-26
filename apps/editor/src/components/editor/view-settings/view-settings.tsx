@@ -1,9 +1,9 @@
 import {
-  Box,
   FloatingUIButton,
   Modal,
   SliderField,
   Switch,
+  useMultiRef,
 } from "@visian/ui-shared";
 import { ViewType } from "@visian/utils";
 import { observer } from "mobx-react-lite";
@@ -32,23 +32,23 @@ export const ViewSettings: React.FC = observer(() => {
   const store = useStore();
 
   // Ref Management
-  const wrapperRef = useRef<HTMLDivElement>(null);
+  const [buttonRef, setButtonRef] = useState<HTMLButtonElement | null>(null);
+  const outerRef = useRef<HTMLButtonElement>(null);
+  const updateButtonRef = useMultiRef(setButtonRef, outerRef);
+
   useEffect(() => {
-    store?.setRef("viewSettings", wrapperRef);
+    store?.setRef("viewSettings", outerRef);
 
     return () => {
       store?.setRef("viewSettings");
     };
-  }, [store, wrapperRef]);
+  }, [store, outerRef]);
 
   // Menu Toggling
   const [isModalOpen, setIsModalOpen] = useState(false);
   const toggleModal = useCallback(() => {
     setIsModalOpen(!isModalOpen);
   }, [isModalOpen]);
-
-  // Menu Positioning
-  const [buttonRef, setButtonRef] = useState<HTMLButtonElement | null>(null);
 
   // Menu Actions
   const setContrast = useCallback(
@@ -66,17 +66,15 @@ export const ViewSettings: React.FC = observer(() => {
 
   return (
     <>
-      <Box ref={wrapperRef}>
-        <FloatingUIButton
-          icon="settings"
-          tooltipTx="view-settings"
-          tooltipPosition="left"
-          showTooltip={!isModalOpen}
-          ref={setButtonRef}
-          onPointerDown={toggleModal}
-          isActive={isModalOpen}
-        />
-      </Box>
+      <FloatingUIButton
+        icon="settings"
+        tooltipTx="view-settings"
+        tooltipPosition="left"
+        showTooltip={!isModalOpen}
+        ref={updateButtonRef}
+        onPointerDown={toggleModal}
+        isActive={isModalOpen}
+      />
       <Modal
         isOpen={isModalOpen}
         labelTx="view-settings"
