@@ -96,7 +96,7 @@ export const Layers: React.FC = observer(() => {
           )}
           {store?.editor.image ? (
             <ListItem
-              icon={{ color: store?.editor.foregroundColor }}
+              icon="image"
               label={store?.editor.image.name}
               trailingIcon={store?.editor.isImageVisible ? "eye" : "eyeCrossed"}
               disableTrailingIcon={store?.editor.isImageVisible}

@@ -6,6 +6,7 @@ export { ReactComponent as erase } from "./erase.svg";
 export { ReactComponent as export } from "./export.svg";
 export { ReactComponent as eyeCrossed } from "./eye-crossed.svg";
 export { ReactComponent as eye } from "./eye.svg";
+export { ReactComponent as image } from "./image.svg";
 export { ReactComponent as layers } from "./layers.svg";
 export { ReactComponent as magicBrush } from "./magic-brush.svg";
 export { ReactComponent as menu } from "./menu.svg";
