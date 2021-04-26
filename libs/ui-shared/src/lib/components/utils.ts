@@ -17,6 +17,19 @@ export const useForceUpdate = () => {
   }, []);
 };
 
+/** Returns a function ref that updates all passed refs when called. */
+export const useMultiRef = <T>(...refs: React.ForwardedRef<T>[]) =>
+  useCallback((element: T | null) => {
+    refs.forEach((ref) => {
+      if (typeof ref === "function") {
+        ref(element);
+      } else if (ref) {
+        ref.current = element;
+      }
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, refs);
+
 export const useIsDraggedOver = () => {
   const [isDraggedOver, setIsDraggedOver] = useState(false);
   const dragTimerRef = useRef<NodeJS.Timer>();
