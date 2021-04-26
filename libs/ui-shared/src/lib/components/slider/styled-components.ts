@@ -127,12 +127,16 @@ export const SliderRangeSelection = styled.div.attrs<SliderRangeSelectionProps>(
 
 export const SliderLabelRow = styled.div`
   display: flex;
+  flex-direction: row;
   margin-bottom: 6px;
+  align-items: center;
 `;
 
 export const SliderLabel = styled(Text)`
   font-size: ${fontSize("small")};
   line-height: 10px;
+  height: 12px;
+  padding-top: 2px;
 `;
 
 export const SliderValueInputWrapper = styled.div`
@@ -142,7 +146,8 @@ export const SliderValueInputWrapper = styled.div`
 
 export const SliderValueInput = styled(TextInput)`
   font-size: ${fontSize("small")};
-  height: 10px;
+  height: 12px;
   line-height: 10px;
   text-align: right;
+  margin-top: -2px;
 `;
