@@ -98,6 +98,8 @@ export class EditorViewSettings
   };
 
   public setZoomLevel(value = 1) {
+    if (this.editor.tools.isDrawing) return;
+
     this.zoomLevel = value;
   }
   public get zoomStep() {
@@ -117,14 +119,20 @@ export class EditorViewSettings
   }
 
   public zoomIn() {
+    if (this.editor.tools.isDrawing) return;
+
     this.zoomLevel = Math.min(maxZoom, this.zoomLevel + this.zoomStep);
   }
 
   public zoomOut() {
+    if (this.editor.tools.isDrawing) return;
+
     this.zoomLevel = Math.max(minZoom, this.zoomLevel - this.zoomStep);
   }
 
   public setOffset({ x = 0, y = 0 } = {}) {
+    if (this.editor.tools.isDrawing) return;
+
     this.offset.set(x, y);
   }
 
