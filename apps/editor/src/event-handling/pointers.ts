@@ -1,14 +1,19 @@
 import {
   DeviceType,
+  EventLike,
   globalListenerTypes,
   IDispatch,
   isFirefox,
   isWindows,
+  Pointer,
   PointerButton,
+  PointerEventData,
   registerDispatch,
   transformGesturePreset,
+  TransformGestureWrapper,
 } from "@visian/ui-shared";
 import { IDisposer } from "@visian/utils";
+import throttle from "lodash.throttle";
 
 import { RootStore, ToolType } from "../models";
 
@@ -42,27 +47,80 @@ export const setUpPointerHandling = (
     previousDevice = device;
   };
 
-  const dispatch = transformGesturePreset({
-    forUnidentifiedPointers: ({ context, detail }, { eventType }) => {
-      if (detail.buttons) return;
-      if (eventType === "end") {
-        previousDevice = context.device;
+  const handlePointer = throttle(
+    (
+      { context, detail, id }: Pointer<string | undefined>,
+      { eventType }: PointerEventData<string, EventLike<string>>,
+      isHovering?: boolean,
+    ) => {
+      if (isHovering) {
+        store.editor.tools.handleEvent({
+          x: detail.clientX,
+          y: detail.clientY,
+        });
         return;
       }
-      handleDeviceSwitch(context.device);
 
-      store.editor.tools.handleEvent({
-        x: detail.clientX,
-        y: detail.clientY,
-      });
+      const activeTool = store.editor.tools.activeTool;
+      if (activeTool === ToolType.Crosshair || id !== "mainView") {
+        // Crosshairs are only active if side views are shown.
+        if (!store.editor.viewSettings.showSideViews) return;
+        store.editor.viewSettings.moveCrosshair(
+          {
+            x: detail.clientX,
+            y: detail.clientY,
+          },
+          id as string,
+        );
+      } else if (id === "mainView") {
+        store.editor.tools.handleEvent(
+          {
+            x: detail.clientX,
+            y: detail.clientY,
+          },
+          eventType,
+          context.button === PointerButton.RMB ||
+            context.button === PointerButton.Eraser,
+        );
+      }
     },
-    forPointers: ({ context, detail, id }, { eventType }) => {
+    1000 / 60,
+    { leading: true, trailing: true },
+  );
+
+  const handleTransformGesture = ({
+    gesture,
+  }: TransformGestureWrapper<string>) => {
+    if (!store.editor.sliceRenderer) return;
+    const transform = gesture.getTransformed();
+    store.editor.viewSettings.setZoomLevel(transform.scale);
+    store.editor.viewSettings.setOffset(
+      store.editor.sliceRenderer.getMainViewWebGLPosition({
+        x: transform.translateX,
+        y: transform.translateY,
+      }),
+    );
+  };
+
+  const dispatch = transformGesturePreset({
+    forUnidentifiedPointers: (pointer, data) => {
+      if (pointer.detail.buttons) return;
+      if (data.eventType === "end") {
+        previousDevice = pointer.context.device;
+        return;
+      }
+      handleDeviceSwitch(pointer.context.device);
+
+      handlePointer(pointer, data, true);
+    },
+    forPointers: (pointer, data) => {
+      const { context } = pointer;
       handleDeviceSwitch(context.device);
       const activeTool = store.editor.tools.activeTool;
       store?.editor.tools.setIsCursorOverFloatingUI(false);
 
       context.useForGesture = Boolean(
-        id === "mainView" &&
+        pointer.id === "mainView" &&
           (context.button === PointerButton.MMB ||
             (activeTool === ToolType.Crosshair &&
               context.button === PointerButton.RMB) ||
@@ -70,41 +128,21 @@ export const setUpPointerHandling = (
             activeTool === ToolType.Navigate),
       );
 
-      if (!context.useForGesture) {
-        if (activeTool === ToolType.Crosshair || id !== "mainView") {
-          // Crosshairs are only active if side views are shown.
-          if (!store.editor.viewSettings.showSideViews) return;
-          store.editor.viewSettings.moveCrosshair(
-            {
-              x: detail.clientX,
-              y: detail.clientY,
-            },
-            id,
-          );
-        } else if (id === "mainView") {
-          store.editor.tools.handleEvent(
-            {
-              x: detail.clientX,
-              y: detail.clientY,
-            },
-            eventType,
-            context.button === PointerButton.RMB ||
-              context.button === PointerButton.Eraser,
-          );
-        }
-      }
+      if (context.useForGesture) return;
+      handlePointer(pointer, data, false);
     },
     pointerPredicate: (pointer) => pointer.context.useForGesture as boolean,
-    forGestures: ({ id, eventType, gesture }) => {
+    forGestures: (transformGesture: TransformGestureWrapper<string>) => {
       if (!store.editor.sliceRenderer) return;
+      if (transformGesture.id !== "mainView") return;
 
-      if (id !== "mainView") return;
+      const { eventType } = transformGesture;
       if (eventType === "start" || eventType === "rebase") {
         store.editor.tools.setIsNavigationDragged(true);
         const transformOrigin = store.editor.sliceRenderer.getMainViewScreenPosition(
           store.editor.viewSettings.offset,
         );
-        gesture.setStartTransform({
+        transformGesture.gesture.setStartTransform({
           translateX: transformOrigin.x,
           translateY: transformOrigin.y,
           scale: store.editor.viewSettings.zoomLevel,
@@ -113,14 +151,7 @@ export const setUpPointerHandling = (
         store.editor.tools.setIsNavigationDragged(false);
       }
 
-      const transform = gesture.getTransformed();
-      store.editor.viewSettings.setZoomLevel(transform.scale);
-      store.editor.viewSettings.setOffset(
-        store.editor.sliceRenderer.getMainViewWebGLPosition({
-          x: transform.translateX,
-          y: transform.translateY,
-        }),
-      );
+      handleTransformGesture(transformGesture);
     },
   });
 
