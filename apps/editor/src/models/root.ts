@@ -1,6 +1,12 @@
-import { ColorMode, IDispatch, IStorageBackend, Tab } from "@visian/ui-shared";
+import {
+  ColorMode,
+  getTheme,
+  IDispatch,
+  IStorageBackend,
+  Tab,
+} from "@visian/ui-shared";
 import { deepObserve, ISerializable } from "@visian/utils";
-import { action, makeObservable, observable } from "mobx";
+import { action, computed, makeObservable, observable } from "mobx";
 
 import { errorDisplayDuration } from "../constants";
 import { Editor, EditorSnapshot } from "./editor";
@@ -19,7 +25,7 @@ export class RootStore implements ISerializable<RootSnapshot> {
   public editor: Editor;
 
   /** The current theme. */
-  public theme: ColorMode = "dark";
+  public colorMode: ColorMode = "dark";
 
   protected errorTimeout?: NodeJS.Timer;
   public error?: ErrorNotification;
@@ -46,12 +52,14 @@ export class RootStore implements ISerializable<RootSnapshot> {
 
     makeObservable(this, {
       editor: observable,
-      theme: observable,
+      colorMode: observable,
       error: observable,
       isDirty: observable,
       refs: observable,
 
-      setTheme: action,
+      theme: computed,
+
+      setColorMode: action,
       setError: action,
       applySnapshot: action,
       rehydrate: action,
@@ -63,9 +71,12 @@ export class RootStore implements ISerializable<RootSnapshot> {
     });
   }
 
-  public setTheme(theme: ColorMode, persist = true) {
-    this.theme = theme;
+  public setColorMode(theme: ColorMode, persist = true) {
+    this.colorMode = theme;
     if (persist && this.shouldPersist) localStorage.setItem("theme", theme);
+  }
+  public get theme() {
+    return getTheme(this.colorMode);
   }
 
   public setError(error?: ErrorNotification) {
@@ -124,7 +135,7 @@ export class RootStore implements ISerializable<RootSnapshot> {
     const tab = await new Tab().register();
 
     const theme = localStorage.getItem("theme");
-    if (theme) this.setTheme(theme as ColorMode, false);
+    if (theme) this.setColorMode(theme as ColorMode, false);
 
     if (!tab.isMainTab) return;
     const editorSnapshot = await this.config.storageBackend?.retrieve(

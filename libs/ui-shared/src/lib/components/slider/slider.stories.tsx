@@ -88,7 +88,7 @@ withMarkers.args = {
     80,
     [0, 20],
     [80, 60],
-    { color: "blueSheet", from: 25, to: 40 },
+    { color: "Salient Safran", from: 25, to: 40 },
   ],
 };
 

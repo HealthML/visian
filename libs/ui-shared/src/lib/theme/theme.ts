@@ -21,6 +21,9 @@ const dataColors = {
   Lima: "#58DC2A",
   "Honey Flower": "#62156F",
 };
+export const dataColorKeys = Object.keys(
+  dataColors,
+) as (keyof typeof dataColors)[];
 
 const colorModes = {
   light: {
@@ -46,7 +49,7 @@ const colorModes = {
     sideViewSheet: "rgba(0, 0, 0, 0.05)",
     sideViewBorder: "rgba(0, 0, 0, 0.3)",
 
-    data: dataColors,
+    ...dataColors,
   },
   dark: {
     text: "rgba(255,255,255,0.8)",
@@ -70,7 +73,7 @@ const colorModes = {
     sideViewSheet: "rgba(255, 255, 255, 0.05)",
     sideViewBorder: "rgba(255, 255, 255, 0.3)",
 
-    data: dataColors,
+    ...dataColors,
   },
 };
 

@@ -73,7 +73,7 @@ export const Menu: React.FC = observer(() => {
   // Menu Actions
   const setTheme = useCallback(
     (value: string) => {
-      store?.setTheme(value as ColorMode);
+      store?.setColorMode(value as ColorMode);
     },
     [store],
   );
@@ -113,7 +113,7 @@ export const Menu: React.FC = observer(() => {
           labelTx="theme"
           items={themeSwitchItems}
           onChange={setTheme}
-          value={store?.theme || "dark"}
+          value={store?.colorMode || "dark"}
         />
         <Switch
           labelTx="language"

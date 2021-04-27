@@ -1,5 +1,6 @@
 import {
   Color,
+  dataColorKeys,
   List,
   ListItem,
   Modal,
@@ -40,23 +41,20 @@ export const ColorPanel = observer((props: ModalProps) => {
     [store],
   );
 
-  const currentColor = Object.entries(theme.colors.data).find(
-    ([, color]) => color === store?.editor.viewSettings.annotationColor,
-  );
-
+  const currentColor = store?.editor.viewSettings.annotationColor;
   return (
     <Modal {...props} labelTx="color-panel">
       <LayerList>
         {currentColor && (
-          <ListItem icon={{ color: currentColor[1] }} label={currentColor[0]} />
+          <ListItem icon={{ color: currentColor }} label={currentColor} />
         )}
       </LayerList>
       <ColorList>
-        {Object.entries(theme.colors.data).map(([name, color]) => (
+        {dataColorKeys.map((color) => (
           <StyledColor
-            key={name}
+            key={color}
             color={color}
-            isSelected={currentColor && currentColor[1] === color}
+            isSelected={color === currentColor}
             onPointerDown={() => setColor(color)}
           />
         ))}

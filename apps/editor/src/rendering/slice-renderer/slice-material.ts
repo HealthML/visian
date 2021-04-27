@@ -1,3 +1,4 @@
+import { color } from "@visian/ui-shared";
 import { IDisposable, IDisposer, ViewType } from "@visian/utils";
 import { autorun } from "mobx";
 import * as THREE from "three";
@@ -7,6 +8,7 @@ import vertexShader from "./shaders/slice.vert.glsl";
 import { getOrder } from "./utils";
 
 import type { Editor, RenderedImage } from "../../models";
+
 export abstract class SliceMaterial
   extends THREE.ShaderMaterial
   implements IDisposable {
@@ -107,7 +109,8 @@ export class ImageSliceMaterial extends SliceMaterial {
       }),
       autorun(() => {
         (this.uniforms.uForegroundColor.value as THREE.Color).set(
-          editor.foregroundColor,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          color(editor.foregroundColor as any)({ theme: editor.theme }),
         );
       }),
     );
@@ -129,7 +132,10 @@ export class AnnotationSliceMaterial extends SliceMaterial {
     this.disposers.push(
       autorun(() => {
         (this.uniforms.uAnnotationColor.value as THREE.Color).set(
-          editor.viewSettings.annotationColor,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          color(editor.viewSettings.annotationColor as any)({
+            theme: editor.theme,
+          }),
         );
         editor.sliceRenderer?.lazyRender();
       }),

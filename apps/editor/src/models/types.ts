@@ -1,4 +1,4 @@
-import type { ColorMode } from "@visian/ui-shared";
+import type { Theme } from "@visian/ui-shared";
 
 export interface StoreContext {
   /**
@@ -15,7 +15,7 @@ export interface StoreContext {
 
   setDirty(): void;
 
-  getTheme(): ColorMode;
+  getTheme(): Theme;
 
   getRefs(): { [key: string]: React.RefObject<HTMLElement> };
 }
