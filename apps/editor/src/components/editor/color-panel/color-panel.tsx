@@ -5,11 +5,10 @@ import {
   ListItem,
   Modal,
   ModalProps,
-  Theme,
 } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
 import React, { useCallback } from "react";
-import styled, { useTheme } from "styled-components";
+import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
 
@@ -31,8 +30,6 @@ const StyledColor = styled(Color)`
 `;
 
 export const ColorPanel = observer((props: ModalProps) => {
-  const theme = useTheme() as Theme;
-
   const store = useStore();
   const setColor = useCallback(
     (value: string) => {
