@@ -85,6 +85,7 @@ export class EditorMarkers {
     viewType: ViewType = this.editor.viewSettings.mainViewType,
   ) {
     if (!image) return this.reset();
+    if (this.annotatedSlices[viewType].length <= slice) return;
     this.annotatedSlices[viewType][slice] = !image.isSliceEmpty(
       slice,
       viewType,
