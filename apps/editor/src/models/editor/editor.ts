@@ -17,6 +17,7 @@ import {
 } from "./view-settings";
 
 import type { SliceRenderer } from "../../rendering";
+import { EditorMarkers } from "./markers";
 export interface EditorSnapshot {
   backgroundColor?: string;
   image?: ImageSnapshot;
@@ -27,6 +28,7 @@ export interface EditorSnapshot {
 
 export class Editor implements ISerializable<EditorSnapshot> {
   public static readonly excludeFromSnapshotTracking = [
+    "/markers",
     ...EditorViewSettings.excludeFromSnapshotTracking.map(
       (path) => `/viewSettings${path}`,
     ),
@@ -37,6 +39,7 @@ export class Editor implements ISerializable<EditorSnapshot> {
     "/sliceRenderer",
   ];
 
+  public markers: EditorMarkers;
   public sliceRenderer?: SliceRenderer;
 
   // Layers
@@ -74,6 +77,8 @@ export class Editor implements ISerializable<EditorSnapshot> {
       setBackgroundColor: action,
       applySnapshot: action,
     });
+
+    this.markers = new EditorMarkers(this, this.context);
   }
 
   public get refs() {
@@ -186,6 +191,7 @@ export class Editor implements ISerializable<EditorSnapshot> {
     this.image = snapshot.image && new RenderedImage(snapshot.image);
     this.annotation =
       snapshot.annotation && new RenderedImage(snapshot.annotation);
+    this.markers.inferAnnotatedSlices();
 
     if (snapshot.viewSettings) {
       this.viewSettings.applySnapshot(snapshot.viewSettings);

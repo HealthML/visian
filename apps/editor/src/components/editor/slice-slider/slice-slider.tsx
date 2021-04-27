@@ -119,6 +119,10 @@ export const SliceSlider: React.FC = observer(() => {
         min={0}
         max={store?.editor.viewSettings.getMaxSlice()}
         value={store?.editor.viewSettings.getSelectedSlice()}
+        markers={store?.editor.markers.markers.map((marker) => ({
+          color: store?.editor.viewSettings.annotationColor,
+          value: marker,
+        }))}
         onChange={setSelectedSlice}
         onStart={handleDragStart}
         onEnd={handleDragEnd}
