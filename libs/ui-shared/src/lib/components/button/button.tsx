@@ -139,7 +139,7 @@ export const FloatingUIButton = styled(SquareButton)`
   margin-bottom: 16px;
 `;
 
-export const CircularButton = styled(Button)`
+export const CircularButton = styled(SquareButton)`
   border-radius: 50%;
 `;
 
