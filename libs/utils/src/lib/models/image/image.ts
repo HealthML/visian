@@ -18,7 +18,7 @@ import {
 import { Vector } from "../vector";
 import { getPlaneAxes, getViewTypeInitials, ViewType } from "../view-types";
 import { unifyOrientation } from "./conversion";
-import { findVoxelInAtlas, findVoxelInSlice } from "./iteration";
+import { findVoxelInSlice } from "./iteration";
 
 import type { ISerializable } from "../types";
 export interface ImageSnapshot<T extends TypedArray = TypedArray> {
@@ -234,43 +234,6 @@ export class Image<T extends TypedArray = TypedArray>
       sliceNumber,
       (_voxel, value) => Boolean(value),
     );
-  }
-
-  /**
-   * Returns an array of boolean arrays that indicate for each slice and
-   * `ViewType` if the slice is not empty.
-   */
-  public getNonEmptySlices(): boolean[][] {
-    const transverse = new Array<boolean>(
-      this.voxelCount.getFromView(ViewType.Transverse),
-    );
-    const sagittal = new Array<boolean>(
-      this.voxelCount.getFromView(ViewType.Sagittal),
-    );
-    const coronal = new Array<boolean>(
-      this.voxelCount.getFromView(ViewType.Coronal),
-    );
-
-    findVoxelInAtlas(
-      // Explicit access here avoids MobX observability tracking to decrease performance
-      {
-        getAtlas: () => this.getAtlas(),
-        voxelComponents: this.voxelComponents,
-        voxelCount: this.voxelCount.clone(false),
-      },
-      (voxel, value) => {
-        if (!value) return;
-        transverse[voxel.getFromView(ViewType.Transverse)] = true;
-        sagittal[voxel.getFromView(ViewType.Sagittal)] = true;
-        coronal[voxel.getFromView(ViewType.Coronal)] = true;
-      },
-    );
-
-    const returnedArray: boolean[][] = [];
-    returnedArray[ViewType.Transverse] = transverse;
-    returnedArray[ViewType.Sagittal] = sagittal;
-    returnedArray[ViewType.Coronal] = coronal;
-    return returnedArray;
   }
 
   public getSlice(sliceNumber: number, viewType: ViewType) {

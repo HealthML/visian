@@ -3,11 +3,12 @@ import {
   getAtlasIndexFor,
   getAtlasSize,
   getScanVoxelFor,
-} from "../../io";
+} from "../../io/texture-atlas";
 import { Voxel } from "../../types";
 import { Vector } from "../vector";
 import { getOrthogonalAxis, getPlaneAxes, ViewType } from "../view-types";
-import { Image } from "./image";
+
+import type { Image } from "./image";
 
 /**
  * Iterates over a particular slice in the plane of the given view type
@@ -90,4 +91,35 @@ export const findVoxelInAtlas = (
       return { voxel, value, index };
     }
   }
+};
+
+/**
+ * Returns an array of boolean arrays that indicate for each slice and
+ * `ViewType` if the slice is not empty.
+ */
+export const getNonEmptySlices = (
+  image: Pick<Image, "getAtlas" | "voxelCount" | "voxelComponents">,
+) => {
+  const transverse = new Array<boolean>(
+    image.voxelCount.getFromView(ViewType.Transverse),
+  );
+  const sagittal = new Array<boolean>(
+    image.voxelCount.getFromView(ViewType.Sagittal),
+  );
+  const coronal = new Array<boolean>(
+    image.voxelCount.getFromView(ViewType.Coronal),
+  );
+
+  findVoxelInAtlas(image, (voxel, value) => {
+    if (!value) return;
+    transverse[voxel.getFromView(ViewType.Transverse)] = true;
+    sagittal[voxel.getFromView(ViewType.Sagittal)] = true;
+    coronal[voxel.getFromView(ViewType.Coronal)] = true;
+  });
+
+  const returnedArray: boolean[][] = [];
+  returnedArray[ViewType.Transverse] = transverse;
+  returnedArray[ViewType.Sagittal] = sagittal;
+  returnedArray[ViewType.Coronal] = coronal;
+  return returnedArray;
 };

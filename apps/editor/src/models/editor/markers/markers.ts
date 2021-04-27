@@ -1,8 +1,21 @@
 import { Image, ViewType } from "@visian/utils";
 import { action, computed, makeObservable, observable, reaction } from "mobx";
+import { RpcProvider } from "worker-rpc";
+
+import { getNonEmptySlicesArgs, getNonEmptySlicesReturn } from "./types";
+import { condenseValues } from "./utils";
+
+// eslint-disable-next-line import/no-webpack-loader-syntax
+import Worker from "worker-loader!./markers.worker";
+
 import type { StoreContext } from "../../types";
 import type { Editor } from "../editor";
-import { condenseValues } from "./utils";
+const worker = new Worker(),
+  rpcProvider = new RpcProvider(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (message, transfer) => worker.postMessage(message, transfer as any),
+  );
+worker.onmessage = (event) => rpcProvider.dispatch(event.data);
 
 export class EditorMarkers {
   public annotatedSlices: boolean[][] = [];
@@ -50,7 +63,20 @@ export class EditorMarkers {
     image: Image | undefined = this.editor.annotation,
   ) {
     if (!image) return this.reset();
-    this.annotatedSlices = image.getNonEmptySlices();
+    rpcProvider
+      .rpc<getNonEmptySlicesArgs, getNonEmptySlicesReturn>(
+        "getNonEmptySlices",
+        {
+          atlas: image.getAtlas(),
+          voxelCount: image.voxelCount.toArray(),
+          voxelComponents: image.voxelComponents,
+        },
+      )
+      .then(
+        action((result: boolean[][]) => {
+          this.annotatedSlices = result;
+        }),
+      );
   }
 
   public inferAnnotatedSlice(
