@@ -204,6 +204,12 @@ export const Slider: React.FC<SliderProps> = (props) => {
     });
   const thumbPositions = valueArray.map(getSliderRelativePosition);
 
+  const expandedMarkers = markers?.map((marker) =>
+    typeof marker === "number" || Array.isArray(marker)
+      ? { value: marker }
+      : marker,
+  );
+
   // Tooltip Positioning
   const [thumbRef, setThumbRef] = useState<HTMLDivElement | null>(null);
   const theme = useTheme() as Theme;
@@ -216,60 +222,36 @@ export const Slider: React.FC<SliderProps> = (props) => {
       ref={sliderRef}
     >
       <SliderTrack isVertical={isVertical} />
-      {markers &&
-        markers.map((marker) =>
-          typeof marker === "number" ? (
-            <SliderMarker
-              key={marker}
-              position={getSliderRelativePosition(marker)}
-              isVertical={isVertical}
-              isActive={Boolean(
-                ~valueArray.findIndex((value) => value === marker),
-              )}
-            />
-          ) : Array.isArray(marker) ? (
-            <SliderRangeMarker
-              key={`${marker[0]}-${marker[1]}`}
-              from={getSliderRelativePosition(marker[0])}
-              to={getSliderRelativePosition(marker[1])}
-              isVertical={isVertical}
-              isActive={Boolean(
-                ~valueArray.findIndex(
-                  (value) =>
-                    value >= Math.min(...marker) &&
-                    value <= Math.max(...marker),
-                ),
-              )}
-            />
-          ) : isRangeMarker(marker) ? (
-            <SliderRangeMarker
-              key={`${marker.color}:${marker.value[0]}-${marker.value[1]}`}
-              from={getSliderRelativePosition(marker.value[0])}
-              to={getSliderRelativePosition(marker.value[1])}
-              isVertical={isVertical}
-              color={marker.color}
-              isActive={Boolean(
-                ~valueArray.findIndex(
-                  (value) =>
-                    value >= Math.min(...marker.value) &&
-                    value <= Math.max(...marker.value),
-                ),
-              )}
-            />
-          ) : (
-            <SliderMarker
-              key={`${marker.color}:${marker.value}`}
-              position={getSliderRelativePosition(
-                (marker.value as unknown) as number,
-              )}
-              isVertical={isVertical}
-              color={marker.color}
-              isActive={Boolean(
-                ~valueArray.findIndex((value) => value === marker.value),
-              )}
-            />
-          ),
-        )}
+      {expandedMarkers?.map((marker) =>
+        isRangeMarker(marker) ? (
+          <SliderRangeMarker
+            key={`${marker.color}:${marker.value[0]}-${marker.value[1]}`}
+            from={getSliderRelativePosition(marker.value[0])}
+            to={getSliderRelativePosition(marker.value[1])}
+            isVertical={isVertical}
+            color={marker.color}
+            isActive={Boolean(
+              ~valueArray.findIndex(
+                (value) =>
+                  value >= Math.min(...marker.value) &&
+                  value <= Math.max(...marker.value),
+              ),
+            )}
+          />
+        ) : (
+          <SliderMarker
+            key={`${marker.color}:${marker.value}`}
+            position={getSliderRelativePosition(
+              (marker.value as unknown) as number,
+            )}
+            isVertical={isVertical}
+            color={marker.color}
+            isActive={Boolean(
+              ~valueArray.findIndex((value) => value === marker.value),
+            )}
+          />
+        ),
+      )}
       {showRange && valueArray.length >= 2 && (
         <SliderRangeSelection
           isInverted={isInverted}
