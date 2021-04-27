@@ -4,6 +4,7 @@ import { useTheme } from "styled-components";
 import { parseNumberFromMetric, Theme } from "../../theme";
 import { InputContainer, Spacer } from "../box";
 import { Tooltip } from "../tooltip";
+import { SliderMarker, SliderRangeMarker } from "./markers";
 import { SliderFieldProps, SliderProps } from "./slider.props";
 import {
   SliderContainer,
@@ -17,8 +18,17 @@ import {
 } from "./styled-components";
 import { pointerToSliderValue, useDrag, valueToSliderPos } from "./utils";
 
+// Utilities
 const defaultFormatLabel = (values: number[]) =>
   values.map((value) => value.toFixed(2)).join("-");
+
+const isRangeMarker = (
+  marker:
+    | { at: number; color?: string }
+    | { from: number; to: number; color?: string },
+): marker is { from: number; to: number; color?: string } =>
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  !(marker as any).at;
 
 /** A custom slider component built to work well with touch input. */
 export const Slider: React.FC<SliderProps> = (props) => {
@@ -29,17 +39,18 @@ export const Slider: React.FC<SliderProps> = (props) => {
     isVertical,
     min = 0,
     max = 1,
-    onChange,
-    onStart,
-    onEnd,
     enforceSerialThumbs: preventCrossing,
+    stepSize,
     roundMethod,
     scaleType,
     showRange,
     showFloatingValueLabel = false,
     formatValueLabel = defaultFormatLabel,
-    stepSize,
+    markers,
     value,
+    onChange,
+    onStart,
+    onEnd,
     ...rest
   } = props;
 
@@ -184,16 +195,16 @@ export const Slider: React.FC<SliderProps> = (props) => {
     ],
   );
 
-  const thumbPositions = valueArray.map((thumbValue) =>
-    valueToSliderPos(thumbValue, {
+  const getSliderRelativePosition = (value: number) =>
+    valueToSliderPos(value, {
       scaleType,
       min,
       max,
       stepSize,
       roundMethod,
       isInverted,
-    }),
-  );
+    });
+  const thumbPositions = valueArray.map(getSliderRelativePosition);
 
   // Tooltip Positioning
   const [thumbRef, setThumbRef] = useState<HTMLDivElement | null>(null);
@@ -207,6 +218,56 @@ export const Slider: React.FC<SliderProps> = (props) => {
       ref={sliderRef}
     >
       <SliderTrack isVertical={isVertical} />
+      {markers &&
+        markers.map((marker) =>
+          typeof marker === "number" ? (
+            <SliderMarker
+              key={marker}
+              position={getSliderRelativePosition(marker)}
+              isVertical={isVertical}
+              isActive={Boolean(
+                ~valueArray.findIndex((value) => value === marker),
+              )}
+            />
+          ) : Array.isArray(marker) ? (
+            <SliderRangeMarker
+              key={`${marker[0]}-${marker[1]}`}
+              from={getSliderRelativePosition(marker[0])}
+              to={getSliderRelativePosition(marker[1])}
+              isVertical={isVertical}
+              isActive={Boolean(
+                ~valueArray.findIndex(
+                  (value) =>
+                    value >= Math.min(...marker) &&
+                    value <= Math.max(...marker),
+                ),
+              )}
+            />
+          ) : !isRangeMarker(marker) ? (
+            <SliderMarker
+              key={`${marker.color}:${marker.at}`}
+              position={getSliderRelativePosition(marker.at)}
+              isVertical={isVertical}
+              color={marker.color}
+              isActive={Boolean(
+                ~valueArray.findIndex((value) => value === marker.at),
+              )}
+            />
+          ) : (
+            <SliderRangeMarker
+              key={`${marker.color}:${marker.from}-${marker.to}`}
+              from={getSliderRelativePosition(marker.from)}
+              to={getSliderRelativePosition(marker.to)}
+              isVertical={isVertical}
+              color={marker.color}
+              isActive={Boolean(
+                ~valueArray.findIndex(
+                  (value) => value >= marker.from && value <= marker.to,
+                ),
+              )}
+            />
+          ),
+        )}
       {showRange && valueArray.length >= 2 && (
         <SliderRangeSelection
           isInverted={isInverted}

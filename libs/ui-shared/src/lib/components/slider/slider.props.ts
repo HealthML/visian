@@ -13,6 +13,19 @@ export interface ThumbProps extends SliderVerticalitySettings {
   position: number;
 }
 
+export interface MarkerProps extends ThumbProps {
+  color?: string;
+  isActive?: boolean;
+}
+
+export interface RangeMarkerProps extends SliderVerticalitySettings {
+  from: number;
+  to: number;
+
+  color?: string;
+  isActive?: boolean;
+}
+
 export interface SliderProps<T extends number | number[] = number | number[]>
   extends Omit<
       React.HTMLAttributes<HTMLDivElement>,
@@ -50,6 +63,13 @@ export interface SliderProps<T extends number | number[] = number | number[]>
    * Defaults to a transformation to a value rounded to 2 decimal places.
    */
   formatValueLabel?: (value: number[]) => string;
+
+  markers?: (
+    | number
+    | [number, number]
+    | { at: number; color?: string }
+    | { from: number; to: number; color?: string }
+  )[];
 }
 
 export interface SliderRangeSelectionProps

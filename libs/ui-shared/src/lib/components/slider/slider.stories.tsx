@@ -74,6 +74,24 @@ multi.args = {
   showRange: true,
 };
 
+export const withMarkers = (args: SliderProps) => Template(args);
+withMarkers.args = {
+  defaultValue: 50,
+  min: 1,
+  max: 100,
+  stepSize: 1,
+  isInverted: false,
+  isVertical: false,
+  markers: [
+    3,
+    { color: "#f00", at: 50 },
+    80,
+    [0, 20],
+    [80, 60],
+    { color: "blueSheet", from: 25, to: 40 },
+  ],
+};
+
 export const field = (args: SliderFieldProps) => <SliderField {...args} />;
 field.args = {
   defaultValue: 5,

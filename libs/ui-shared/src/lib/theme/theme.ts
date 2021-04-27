@@ -136,6 +136,9 @@ export const theme = {
     sliderHeight: "30px",
     sliderThumbWidth: "2px",
     sliderThumbHeight: "22px",
+    sliderMarkerWidth: "2px",
+    sliderMarkerHeight: "10px",
+    sliderMarkerRangeHeight: "4px",
   },
   space: {
     iconMargin: "12px",
@@ -143,6 +146,7 @@ export const theme = {
     buttonPadding: "12px 20px",
     inputPadding: "12px 22px",
     sliderLabelDistance: "16px",
+    sliderMarkerMargin: "0px",
   },
   zIndices: {
     modal: 50,
