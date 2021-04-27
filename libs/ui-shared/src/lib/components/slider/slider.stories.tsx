@@ -84,11 +84,11 @@ withMarkers.args = {
   isVertical: false,
   markers: [
     3,
-    { color: "#f00", at: 50 },
+    { color: "#f00", value: 50 },
     80,
     [0, 20],
     [80, 60],
-    { color: "Salient Safran", from: 25, to: 40 },
+    { color: "Salient Safran", value: [25, 40] },
   ],
 };
 

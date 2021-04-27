@@ -24,11 +24,13 @@ const defaultFormatLabel = (values: number[]) =>
 
 const isRangeMarker = (
   marker:
-    | { at: number; color?: string }
-    | { from: number; to: number; color?: string },
-): marker is { from: number; to: number; color?: string } =>
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  !(marker as any).at;
+    | {
+        color?: string;
+        value: number;
+      }
+    | { color?: string; value: [number, number] },
+): marker is { color?: string; value: [number, number] } =>
+  Array.isArray(marker.value);
 
 /** A custom slider component built to work well with touch input. */
 export const Slider: React.FC<SliderProps> = (props) => {
@@ -245,24 +247,26 @@ export const Slider: React.FC<SliderProps> = (props) => {
             />
           ) : !isRangeMarker(marker) ? (
             <SliderMarker
-              key={`${marker.color}:${marker.at}`}
-              position={getSliderRelativePosition(marker.at)}
+              key={`${marker.color}:${marker.value}`}
+              position={getSliderRelativePosition(marker.value)}
               isVertical={isVertical}
               color={marker.color}
               isActive={Boolean(
-                ~valueArray.findIndex((value) => value === marker.at),
+                ~valueArray.findIndex((value) => value === marker.value),
               )}
             />
           ) : (
             <SliderRangeMarker
-              key={`${marker.color}:${marker.from}-${marker.to}`}
-              from={getSliderRelativePosition(marker.from)}
-              to={getSliderRelativePosition(marker.to)}
+              key={`${marker.color}:${marker.value[0]}-${marker.value[1]}`}
+              from={getSliderRelativePosition(marker.value[0])}
+              to={getSliderRelativePosition(marker.value[1])}
               isVertical={isVertical}
               color={marker.color}
               isActive={Boolean(
                 ~valueArray.findIndex(
-                  (value) => value >= marker.from && value <= marker.to,
+                  (value) =>
+                    value >= Math.min(...marker.value) &&
+                    value <= Math.max(...marker.value),
                 ),
               )}
             />

@@ -67,8 +67,8 @@ export interface SliderProps<T extends number | number[] = number | number[]>
   markers?: (
     | number
     | [number, number]
-    | { at: number; color?: string }
-    | { from: number; to: number; color?: string }
+    | { color?: string; value: number }
+    | { color?: string; value: [number, number] }
   )[];
 }
 
