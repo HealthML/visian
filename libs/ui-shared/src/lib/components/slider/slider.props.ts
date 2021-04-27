@@ -5,6 +5,11 @@ import type {
   SliderVerticalitySettings,
 } from "./types";
 
+export type MarkerConfig =
+  | number
+  | [number, number]
+  | { color?: string; value: number | [number, number] };
+
 export interface ThumbProps extends SliderVerticalitySettings {
   /**
    * A [0, 1]-ranged value indicating the thumb's relative position along the
@@ -64,12 +69,7 @@ export interface SliderProps<T extends number | number[] = number | number[]>
    */
   formatValueLabel?: (value: number[]) => string;
 
-  markers?: (
-    | number
-    | [number, number]
-    | { color?: string; value: number }
-    | { color?: string; value: [number, number] }
-  )[];
+  markers?: MarkerConfig[];
 }
 
 export interface SliderRangeSelectionProps

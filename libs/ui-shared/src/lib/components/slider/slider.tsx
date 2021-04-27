@@ -22,14 +22,10 @@ import { pointerToSliderValue, useDrag, valueToSliderPos } from "./utils";
 const defaultFormatLabel = (values: number[]) =>
   values.map((value) => value.toFixed(2)).join("-");
 
-const isRangeMarker = (
-  marker:
-    | {
-        color?: string;
-        value: number;
-      }
-    | { color?: string; value: [number, number] },
-): marker is { color?: string; value: [number, number] } =>
+const isRangeMarker = (marker: {
+  color?: string;
+  value: number | [number, number];
+}): marker is { color?: string; value: [number, number] } =>
   Array.isArray(marker.value);
 
 /** A custom slider component built to work well with touch input. */
@@ -245,17 +241,7 @@ export const Slider: React.FC<SliderProps> = (props) => {
                 ),
               )}
             />
-          ) : !isRangeMarker(marker) ? (
-            <SliderMarker
-              key={`${marker.color}:${marker.value}`}
-              position={getSliderRelativePosition(marker.value)}
-              isVertical={isVertical}
-              color={marker.color}
-              isActive={Boolean(
-                ~valueArray.findIndex((value) => value === marker.value),
-              )}
-            />
-          ) : (
+          ) : isRangeMarker(marker) ? (
             <SliderRangeMarker
               key={`${marker.color}:${marker.value[0]}-${marker.value[1]}`}
               from={getSliderRelativePosition(marker.value[0])}
@@ -268,6 +254,18 @@ export const Slider: React.FC<SliderProps> = (props) => {
                     value >= Math.min(...marker.value) &&
                     value <= Math.max(...marker.value),
                 ),
+              )}
+            />
+          ) : (
+            <SliderMarker
+              key={`${marker.color}:${marker.value}`}
+              position={getSliderRelativePosition(
+                (marker.value as unknown) as number,
+              )}
+              isVertical={isVertical}
+              color={marker.color}
+              isActive={Boolean(
+                ~valueArray.findIndex((value) => value === marker.value),
               )}
             />
           ),
