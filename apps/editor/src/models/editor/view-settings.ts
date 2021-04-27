@@ -1,4 +1,3 @@
-import { getTheme } from "@visian/ui-shared";
 import {
   getPlaneAxes,
   ISerializable,
@@ -137,8 +136,7 @@ export class EditorViewSettings
   }
 
   public setAnnotationColor(
-    value = getTheme(this.context?.getTheme()).colors.data["Salient Safran"] ||
-      "#ff0000",
+    value = this.context?.getTheme().colors["Salient Safran"] || "#ff0000",
   ) {
     this.annotationColor = value;
   }

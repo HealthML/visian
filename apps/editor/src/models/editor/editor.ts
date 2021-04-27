@@ -1,4 +1,3 @@
-import { getTheme } from "@visian/ui-shared";
 import {
   ImageSnapshot,
   ISerializable,
@@ -80,12 +79,12 @@ export class Editor implements ISerializable<EditorSnapshot> {
   public get refs() {
     return this.context.getRefs();
   }
+  public get theme() {
+    return this.context.getTheme();
+  }
 
   public getBackgroundColor() {
-    return (
-      this.backgroundColor ||
-      getTheme(this.context.getTheme()).colors.background
-    );
+    return this.backgroundColor || this.context.getTheme().colors.background;
   }
 
   public setSliceRenderer(sliceRenderer?: SliceRenderer) {

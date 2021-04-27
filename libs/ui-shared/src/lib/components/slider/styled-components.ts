@@ -123,7 +123,7 @@ export const SliderRangeSelection = styled.div.attrs<SliderRangeSelectionProps>(
         };
   }}
   position: absolute;
-  z-index: 10;
+  z-index: 5;
 `;
 
 export const SliderLabelRow = styled.div`

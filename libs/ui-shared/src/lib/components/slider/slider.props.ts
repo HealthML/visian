@@ -5,12 +5,30 @@ import type {
   SliderVerticalitySettings,
 } from "./types";
 
+export type MarkerConfig =
+  | number
+  | [number, number]
+  | { color?: string; value: number | [number, number] };
+
 export interface ThumbProps extends SliderVerticalitySettings {
   /**
    * A [0, 1]-ranged value indicating the thumb's relative position along the
    * slider's main axis.
    */
   position: number;
+}
+
+export interface MarkerProps extends ThumbProps {
+  color?: string;
+  isActive?: boolean;
+}
+
+export interface RangeMarkerProps extends SliderVerticalitySettings {
+  from: number;
+  to: number;
+
+  color?: string;
+  isActive?: boolean;
 }
 
 export interface SliderProps<T extends number | number[] = number | number[]>
@@ -50,6 +68,8 @@ export interface SliderProps<T extends number | number[] = number | number[]>
    * Defaults to a transformation to a value rounded to 2 decimal places.
    */
   formatValueLabel?: (value: number[]) => string;
+
+  markers?: MarkerConfig[];
 }
 
 export interface SliderRangeSelectionProps
