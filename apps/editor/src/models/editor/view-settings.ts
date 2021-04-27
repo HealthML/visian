@@ -166,7 +166,7 @@ export class EditorViewSettings
       viewType,
       Math.min(
         Math.max(Math.round(value), 0),
-        this.editor.image.voxelCount.getComponent((viewType + 2) % 3) - 1,
+        this.editor.image.voxelCount.getFromView(viewType) - 1,
       ),
     );
   }
@@ -176,7 +176,8 @@ export class EditorViewSettings
   }
 
   public getMaxSlice(viewType = this.mainViewType) {
-    return this.editor.image?.voxelCount.getFromView(viewType);
+    const sliceCount = this.editor.image?.voxelCount.getFromView(viewType);
+    return sliceCount ? sliceCount - 1 : 0;
   }
 
   public stepSelectedSlice(stepSize = 1, viewType = this.mainViewType) {
