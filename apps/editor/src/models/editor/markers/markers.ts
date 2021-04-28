@@ -123,6 +123,7 @@ export class EditorMarkers {
     if (this.isDisabled) return;
     if (!image) return this.reset();
 
+    // TODO: If multiple updates are queued, only the latest one should be executed
     rpcProvider
       .rpc<getNonEmptySlicesArgs, getNonEmptySlicesReturn>(
         "getNonEmptySlices",
@@ -144,6 +145,7 @@ export class EditorMarkers {
     if (
       this.isDisabled ||
       this.annotatedSlices[viewType].length <= sliceNumber ||
+      // TODO: This can lead to race conditions and should be reworked in the future
       (isDeleteOperation &&
         !this.getAnnotatedSlice(image, sliceNumber, viewType)) ||
       (isDeleteOperation === false &&
@@ -153,6 +155,8 @@ export class EditorMarkers {
     }
     if (!image) return this.reset();
 
+    // TODO: If multiple updates are queued for the same slice, only the latest
+    // one should be executed
     rpcProvider
       .rpc<isSliceEmptyArgs, isSliceEmptyReturn>("isSliceEmpty", {
         atlas: image.getAtlas(),
