@@ -28,6 +28,10 @@ const FeedbackButton = styled(Button)`
   }
 `;
 
+const ShortcutButton = styled(Button)`
+  width: 100%;
+`;
+
 const MenuButton = styled(FloatingUIButton)`
   margin-right: 16px;
 `;
@@ -36,6 +40,7 @@ const ResetButton = styled(Button)`
   width: 100%;
   background: ${sheetNoise}, ${color("redSheet")};
   border-color: ${color("redBorder")};
+  margin-bottom: 16px;
 
   &:active {
     border-color: rgba(202, 51, 69, 1);
@@ -127,8 +132,8 @@ export const Menu: React.FC = observer(() => {
             <FeedbackButton tx="ideas-feedback" onPointerDown={sendFeedback} />
           </>
         )}
-        <Divider />
         <ResetButton tx="clear-data" onPointerDown={store?.destroy} />
+        <ShortcutButton text="Shortcuts" />
       </Modal>
     </>
   );

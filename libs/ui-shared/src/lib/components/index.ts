@@ -22,3 +22,4 @@ export * from "./webgl-canvas";
 export * from "./icon";
 export * from "./toolbar";
 export * from "./list";
+export * from "./key-icon";
