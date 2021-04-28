@@ -19,20 +19,23 @@ export class Annotator {
   constructor(protected editor: Editor, private undoable: boolean) {}
 
   protected finishStroke(
+    isDeleteOperation: boolean | undefined,
     annotation = this.editor.annotation,
     viewType = this.editor.viewSettings.mainViewType,
   ) {
+    const slice = this.sliceNumber;
+
     if (this.undoable) {
       this.strokeActive = false;
 
-      if (annotation && this.sliceNumber !== undefined) {
+      if (annotation && slice !== undefined) {
         this.editor.undoRedo.addCommand(
           new SliceUndoRedoCommand(
             annotation,
             viewType,
-            this.sliceNumber,
+            slice,
             this.oldSliceData,
-            annotation.getSlice(this.sliceNumber, viewType),
+            annotation.getSlice(slice, viewType),
           ),
         );
       }
@@ -41,7 +44,12 @@ export class Annotator {
       this.sliceNumber = undefined;
     }
 
-    this.editor.tools.finishStroke();
+    this.editor.tools.finishStroke(
+      annotation,
+      slice,
+      viewType,
+      isDeleteOperation,
+    );
   }
 
   protected annotate(

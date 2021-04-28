@@ -113,8 +113,7 @@ export const getTextureFromAtlas = <T extends TypedArray = TypedArray>(
  * Returns the texture atlas index for the given voxel coordinates.
  *
  * @param voxel The coordinates of the voxel. The w component specifies the component.
- * @param components The amount of components per voxel in the atlas.
- * @param voxelCount The number of voxels in each direction.
+ * @param image The image.
  * @param atlasSize The size of the texture atlas in pixels.
  * @param atlasGrid The number of slices in the texture atlas in x/y direction.
  * @returns The index of the given voxel in an atlas with the given properties.
@@ -137,6 +136,36 @@ export const getAtlasIndexFor = (
     image.voxelComponents *
       ((sliceOffset.y + voxel.y) * atlasSize.x + sliceOffset.x + voxel.x) +
     (voxel.size > 3 ? voxel.w : 0)
+  );
+};
+
+/**
+ * Returns the texture atlas index for the given voxel coordinates.
+ *
+ * @param atlasIndex The texture atlas index of the voxel.
+ * @param image The image.
+ * @param atlasSize The size of the texture atlas in pixels.
+ * @param atlasGrid The number of slices in the texture atlas in x/y direction.
+ * @returns The index of the given voxel in an atlas with the given properties.
+ */
+export const getScanVoxelFor = (
+  atlasIndex: number,
+  image: Pick<Image, "voxelComponents" | "voxelCount">,
+  atlasGrid = getAtlasGrid(image.voxelCount),
+  atlasSize = getAtlasSize(image.voxelCount, atlasGrid),
+  isObservable = false,
+) => {
+  const atlasX = atlasIndex % atlasSize.x;
+  const atlasY = Math.floor(atlasIndex / atlasSize.x);
+  const sliceColumn = Math.floor(atlasX / image.voxelCount.x);
+  const sliceRow = Math.floor(atlasY / image.voxelCount.y);
+  return new Vector(
+    [
+      atlasX % image.voxelCount.x,
+      atlasY % image.voxelCount.y,
+      sliceColumn + sliceRow * atlasGrid.x,
+    ],
+    isObservable,
   );
 };
 

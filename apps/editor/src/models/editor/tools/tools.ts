@@ -4,6 +4,7 @@ import {
   getPlaneAxes,
   ISerializable,
   Pixel,
+  ViewType,
 } from "@visian/utils";
 import { action, computed, makeObservable, observable } from "mobx";
 import * as THREE from "three";
@@ -11,6 +12,7 @@ import * as THREE from "three";
 import { getPositionWithinPixel } from "../../../rendering";
 import { StoreContext } from "../../types";
 import { Editor } from "../editor";
+import { RenderedImage } from "../rendered-image";
 import { ToolType } from "../types";
 import { AtlasUndoRedoCommand, SliceUndoRedoCommand } from "../undo-redo";
 import { Brush } from "./brush";
@@ -264,6 +266,9 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
     this.editor.undoRedo.addCommand(
       new SliceUndoRedoCommand(image, viewType, slice, oldSliceData),
     );
+
+    // TODO: This can lead to race conditions and should be reworked in the future
+    this.editor.markers.setAnnotatedSlice(false, image, slice, viewType);
   };
 
   public clearImage(image = this.editor.annotation) {
@@ -278,6 +283,7 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
     this.editor.undoRedo.addCommand(
       new AtlasUndoRedoCommand(image, oldAtlas, emptyAtlas),
     );
+    this.editor.markers.reset();
   }
 
   public handleEvent(
@@ -401,7 +407,20 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
     return dragPoint;
   }
 
-  public finishStroke() {
+  public finishStroke(
+    annotation: RenderedImage | undefined,
+    slice: number | undefined,
+    viewType: ViewType,
+    isDeleteOperation?: boolean,
+  ) {
+    if (slice !== undefined) {
+      this.editor.markers.inferAnnotatedSlice(
+        annotation,
+        slice,
+        viewType,
+        isDeleteOperation,
+      );
+    }
     this.context?.persist();
   }
 }
