@@ -222,20 +222,6 @@ export class Image<T extends TypedArray = TypedArray>
     return getAtlasSize(this.voxelCount, this.getAtlasGrid());
   }
 
-  public isSliceEmpty(sliceNumber: number, viewType: ViewType) {
-    return !findVoxelInSlice(
-      // Explicit access here avoids MobX observability tracking to decrease performance
-      {
-        getAtlas: () => this.getAtlas(),
-        voxelComponents: this.voxelComponents,
-        voxelCount: this.voxelCount.clone(false),
-      },
-      viewType,
-      sliceNumber,
-      (_voxel, value) => Boolean(value),
-    );
-  }
-
   public getSlice(sliceNumber: number, viewType: ViewType) {
     const [horizontal, vertical] = getPlaneAxes(viewType);
     const sliceData = new Uint8Array(

@@ -19,6 +19,7 @@ export class Annotator {
   constructor(protected editor: Editor, private undoable: boolean) {}
 
   protected finishStroke(
+    isDeleteOperation: boolean | undefined,
     annotation = this.editor.annotation,
     viewType = this.editor.viewSettings.mainViewType,
   ) {
@@ -43,7 +44,12 @@ export class Annotator {
       this.sliceNumber = undefined;
     }
 
-    this.editor.tools.finishStroke(annotation, slice, viewType);
+    this.editor.tools.finishStroke(
+      annotation,
+      slice,
+      viewType,
+      isDeleteOperation,
+    );
   }
 
   protected annotate(

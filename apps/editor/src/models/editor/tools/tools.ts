@@ -266,7 +266,9 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
     this.editor.undoRedo.addCommand(
       new SliceUndoRedoCommand(image, viewType, slice, oldSliceData),
     );
-    this.editor.markers.inferAnnotatedSlice(image, slice, viewType);
+
+    // TODO: This can lead to race conditions and should be reworked in the future
+    this.editor.markers.setAnnotatedSlice(false, image, slice, viewType);
   };
 
   public clearImage(image = this.editor.annotation) {
@@ -409,9 +411,15 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
     annotation: RenderedImage | undefined,
     slice: number | undefined,
     viewType: ViewType,
+    isDeleteOperation?: boolean,
   ) {
     if (slice !== undefined) {
-      this.editor.markers.inferAnnotatedSlice(annotation, slice, viewType);
+      this.editor.markers.inferAnnotatedSlice(
+        annotation,
+        slice,
+        viewType,
+        isDeleteOperation,
+      );
     }
     this.context?.persist();
   }
