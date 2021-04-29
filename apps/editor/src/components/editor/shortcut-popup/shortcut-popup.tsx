@@ -1,88 +1,22 @@
-import { PopUp, Text, fontWeight, Icon, KeyIcon } from "@visian/ui-shared";
+import { Icon, KeyIcon } from "@visian/ui-shared";
 import React from "react";
-import styled from "styled-components";
+
 import { ShortcutPopUpProps } from "./shortcut-popup.props";
-
-const ShortcutColumn = styled.div`
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-`;
-
-const ShortcutColumnContainer = styled.div`
-  display: flex;
-  flex-direction: row;
-  width: 100%;
-  overflow: auto;
-`;
-
-const ShortcutGroup = styled.div`
-  margin-bottom: 20px;
-  width: 100%;
-`;
-
-const GroupTitle = styled(Text)`
-  font-size: 22px;
-  font-weight: ${fontWeight("regular")};
-`;
-
-const GroupTitleContainer = styled.div`
-  margin-bottom: 14px;
-  width: 100%;
-`;
-
-const ShortcutLabel = styled(Text)`
-  font-size: 14px;
-  margin-left: 12px;
-`;
-
-const ShortcutDescription = styled(Text)`
-  font-size: 17px;
-  font-weight: ${fontWeight("default")};
-`;
-
-const ShortcutRow = styled.div`
-  display: flex;
-  flex-direction: row;
-  width: 100%;
-  margin-bottom: 16px;
-  align-items: center;
-`;
-
-const ShortcutContainer = styled.div`
-  display: flex;
-  flex-direction: row;
-  width: 30%;
-  align-items: center;
-`;
-
-const ShortcutDescriptionContainer = styled.div`
-  display: flex;
-  flex-direction: row;
-  width: 70%;
-  align-items: center;
-`;
-
-const ShortcutPopUpContainer = styled(PopUp)`
-  align-items: center;
-  width: 80%;
-  max-width: 1200px;
-  display: flex;
-  flex-direction: column;
-  height: 80%;
-  max-height: 800px;
-`;
-
-const PlusIcon = styled(Icon).attrs(() => ({ icon: "plusIcon" }))`
-  margin: 0 8px;
-  height: 7px;
-  width: 7px;
-`;
-
-const MouseIcon = styled(Icon)`
-  height: 26px;
-  width: 20px;
-`;
+import {
+  GroupTitle,
+  GroupTitleContainer,
+  MouseIcon,
+  PlusIcon,
+  ShortcutColumn,
+  ShortcutColumnContainer,
+  ShortcutContainer,
+  ShortcutDescription,
+  ShortcutDescriptionContainer,
+  ShortcutGroup,
+  ShortcutLabel,
+  ShortcutPopUpContainer,
+  ShortcutRow,
+} from "./styled-components";
 
 export const ShortcutPopUp: React.FC<ShortcutPopUpProps> = ({
   isOpen,
@@ -128,19 +62,9 @@ export const ShortcutPopUp: React.FC<ShortcutPopUpProps> = ({
           </ShortcutRow>
           <ShortcutRow>
             <ShortcutContainer>
-              <KeyIcon text="Cmd ⌘" />
-              <PlusIcon />
-              <MouseIcon icon="middleMouse" />
-            </ShortcutContainer>
-            <ShortcutDescriptionContainer>
-              <ShortcutDescription text="Navigate (hand tool)" />
-            </ShortcutDescriptionContainer>
-          </ShortcutRow>
-          <ShortcutRow>
-            <ShortcutContainer>
               <KeyIcon text="Ctrl" />
               <PlusIcon />
-              <MouseIcon icon="middleMouse" />
+              <MouseIcon icon="leftMouse" />
             </ShortcutContainer>
             <ShortcutDescriptionContainer>
               <ShortcutDescription text="Navigate (hand tool)" />
