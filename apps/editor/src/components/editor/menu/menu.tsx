@@ -7,11 +7,12 @@ import {
   Modal,
   sheetNoise,
   Switch,
+  Theme,
   useTranslation,
 } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
 import React, { useCallback, useState } from "react";
-import styled from "styled-components";
+import styled, { useTheme } from "styled-components";
 
 import { useStore } from "../../../app/root-store";
 import { feedbackMailAddress } from "../../../constants";
@@ -106,6 +107,7 @@ export const Menu: React.FC<MenuProps> = observer(({ onOpenShortcutPopUp }) => {
     [onOpenShortcutPopUp],
   );
 
+  const theme = useTheme() as Theme;
   return (
     <>
       <MenuButton
@@ -121,6 +123,7 @@ export const Menu: React.FC<MenuProps> = observer(({ onOpenShortcutPopUp }) => {
         labelTx="menu"
         parentElement={buttonRef}
         position="right"
+        baseZIndex={theme.zIndices.modal + 1}
         onOutsidePress={closeModal}
       >
         <Switch

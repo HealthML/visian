@@ -23,7 +23,7 @@ export const ShortcutPopUp: React.FC<ShortcutPopUpProps> = ({
   onClose,
 }) => (
   <ShortcutPopUpContainer
-    title="Shortcuts"
+    titleTx="shortcuts"
     isOpen={isOpen}
     onOutsidePress={onClose}
   >

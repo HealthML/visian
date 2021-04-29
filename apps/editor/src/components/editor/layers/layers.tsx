@@ -104,7 +104,9 @@ export const Layers: React.FC = observer(() => {
               isLast
             />
           ) : (
-            <SubtleText tx="no-layers" />
+            <ListItem isLast>
+              <SubtleText tx="no-layers" />
+            </ListItem>
           )}
         </LayerList>
       </LayerModal>

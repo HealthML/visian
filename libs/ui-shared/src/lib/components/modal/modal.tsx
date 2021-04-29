@@ -16,7 +16,7 @@ const StyledButton = styled(InvisibleButton)`
   height: 16px;
 `;
 
-const ModalContainer = styled(Sheet)`
+const ModalContainer = styled(Sheet)<Pick<ModalProps, "baseZIndex">>`
   justify-content: flex-start;
   align-items: flex-start;
   flex-direction: column;
@@ -25,7 +25,10 @@ const ModalContainer = styled(Sheet)`
   pointer-events: auto;
 
   width: 200px;
-  z-index: ${zIndex("modal")};
+  z-index: ${(props) =>
+    (props.baseZIndex === undefined
+      ? (zIndex("modal")(props) as number)
+      : props.baseZIndex) + 1};
 
   position: relative;
 `;
