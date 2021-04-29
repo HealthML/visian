@@ -20,6 +20,7 @@ const StyledOverlay = styled.div`
   background-color: ${color("modalUnderlay")};
   z-index: ${zIndex("overlay")};
   backdrop-filter: blur(3px);
+  pointer-events: auto;
 `;
 
 const ShortcutColumn = styled.div`
@@ -32,7 +33,7 @@ const ShortcutColumnContainer = styled.div`
   display: flex;
   flex-direction: row;
   width: 100%;
-  overflow: scroll;
+  overflow: auto;
 `;
 
 const ShortcutGroup = styled.div`
@@ -103,8 +104,12 @@ const MouseIcon = styled(Icon)`
   width: 20px;
 `;
 
+const stopPropagation = (event: React.SyntheticEvent) => {
+  event.stopPropagation();
+};
+
 export const ShortcutPopUp: React.FC = () => (
-  <StyledOverlay>
+  <StyledOverlay onWheel={stopPropagation}>
     <ShortcutPopUpContainer label="Shortcuts">
       <ShortcutColumnContainer>
         <ShortcutColumn>
