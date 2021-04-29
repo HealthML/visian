@@ -26,14 +26,12 @@ const PopUpContainer = styled(Sheet)`
   justify-content: flex-start;
   align-items: flex-start;
   flex-direction: column;
-  overflow: hidden;
   padding: 30px 40px;
   pointer-events: auto;
 
-  min-width: 600px;
   z-index: ${zIndex("modal")};
 
-  position: relative;
+  position: absolute;
 `;
 const PopUpTitle = styled(Title)`
   display: block;

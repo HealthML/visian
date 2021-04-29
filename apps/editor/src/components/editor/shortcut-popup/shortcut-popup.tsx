@@ -371,7 +371,7 @@ export const ShortcutPopUp: React.FC<ShortcutPopUpProps> = ({
           </ShortcutRow>
           <ShortcutRow>
             <ShortcutContainer>
-              <KeyIcon text="4" />
+              <KeyIcon text="0" />
             </ShortcutContainer>
             <ShortcutDescriptionContainer>
               <ShortcutDescription text="Toggle side views" />
