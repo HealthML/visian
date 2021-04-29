@@ -20,7 +20,6 @@ export const useModalRoot = () => {
       modalRoot.appendChild(modalRootRef.current);
       forceUpdate();
 
-      // TODO: Why does this run all the time?
       return () => {
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         modalRoot.removeChild(modalRootRef.current!);

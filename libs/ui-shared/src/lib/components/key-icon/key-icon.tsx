@@ -23,8 +23,13 @@ const KeyIconLabel = styled(Text)`
   font-weight: ${fontWeight("regular")};
 `;
 
-export const KeyIcon: React.FC<KeyIconProps> = ({ labelTx, label }) => (
-  <KeyIconContainer>
-    <KeyIconLabel tx={labelTx} text={label} />
+export const KeyIcon: React.FC<KeyIconProps> = ({
+  tx,
+  text,
+  data,
+  ...rest
+}) => (
+  <KeyIconContainer {...rest}>
+    <KeyIconLabel tx={tx} text={text} data={data} />
   </KeyIconContainer>
 );

@@ -5,7 +5,7 @@ import {
   Text,
 } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
-import React, { useCallback, useEffect, useRef } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
@@ -101,6 +101,15 @@ export const UIOverlay = observer<UIOverlayProps>(
       [store],
     );
 
+    // Shortcut Pop Up Toggling
+    const [isShortcutPopUpOpen, setIsShortcutPopUpOpen] = useState(false);
+    const openShortcutPopUp = useCallback(() => {
+      setIsShortcutPopUpOpen(true);
+    }, []);
+    const closeShortcutPopUp = useCallback(() => {
+      setIsShortcutPopUpOpen(false);
+    }, []);
+
     return (
       <Container
         {...rest}
@@ -115,7 +124,7 @@ export const UIOverlay = observer<UIOverlayProps>(
         )}
         <ColumnLeft>
           <MenuRow>
-            <Menu />
+            <Menu onOpenShortcutPopUp={openShortcutPopUp} />
             <UndoRedoButtons />
           </MenuRow>
           <Toolbar />
@@ -139,7 +148,10 @@ export const UIOverlay = observer<UIOverlayProps>(
           </RightBar>
         </ColumnRight>
 
-        <ShortcutPopUp />
+        <ShortcutPopUp
+          isOpen={isShortcutPopUpOpen}
+          onClose={closeShortcutPopUp}
+        />
         {isDraggedOver && <DropSheet onDropCompleted={onDropCompleted} />}
         {store?.error && (
           <ErrorNotification

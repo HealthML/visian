@@ -1,6 +1,6 @@
 <svg width="17" height="22" viewBox="0 0 17 22" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M8.5 0C13.1962 -4.10539e-07 17 3.59143 17 8.02553V13.9729C17 18.4071 13.1962 21.9985 8.5 21.9985C3.80375 21.9985 0 18.4071 0 13.9729V8.02554C0 3.59143 3.80375 4.10597e-07 8.5 0Z" fill="white" fill-opacity="0.2"/>
-<rect x="9" y="11" width="1" height="7" rx="0.5" transform="rotate(-180 9 11)" fill="white"/>
-<rect x="5.70508" y="9.17188" width="1" height="3.99862" rx="0.5" transform="rotate(-45 5.70508 9.17188)" fill="white"/>
-<rect x="10.6543" y="8.46094" width="1" height="4.00077" rx="0.5" transform="rotate(45 10.6543 8.46094)" fill="white"/>
+<path d="M8.5 0C13.1962 -4.10539e-07 17 3.59143 17 8.02553V13.9729C17 18.4071 13.1962 21.9985 8.5 21.9985C3.80375 21.9985 0 18.4071 0 13.9729V8.02554C0 3.59143 3.80375 4.10597e-07 8.5 0Z" fill-opacity="0.2"/>
+<rect x="9" y="11" width="1" height="7" rx="0.5" transform="rotate(-180 9 11)" />
+<rect x="5.70508" y="9.17188" width="1" height="3.99862" rx="0.5" transform="rotate(-45 5.70508 9.17188)" />
+<rect x="10.6543" y="8.46094" width="1" height="4.00077" rx="0.5" transform="rotate(45 10.6543 8.46094)" />
 </svg>
