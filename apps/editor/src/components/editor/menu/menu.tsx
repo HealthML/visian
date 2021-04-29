@@ -15,8 +15,13 @@ import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
 import { feedbackMailAddress } from "../../../constants";
+import { MenuProps } from "./menu.props";
 
 // Styled Components
+const MenuButton = styled(FloatingUIButton)`
+  margin-right: 16px;
+`;
+
 const FeedbackButton = styled(Button)`
   width: 100%;
   background: ${sheetNoise}, ${color("blueSheet")};
@@ -28,18 +33,19 @@ const FeedbackButton = styled(Button)`
   }
 `;
 
-const MenuButton = styled(FloatingUIButton)`
-  margin-right: 16px;
-`;
-
 const ResetButton = styled(Button)`
   width: 100%;
   background: ${sheetNoise}, ${color("redSheet")};
   border-color: ${color("redBorder")};
+  margin-bottom: 16px;
 
   &:active {
     border-color: rgba(202, 51, 69, 1);
   }
+`;
+
+const ShortcutButton = styled(Button)`
+  width: 100%;
 `;
 
 // Menu Items
@@ -53,7 +59,7 @@ const languageSwitchItems = [
   { label: "Deutsch", value: "de" },
 ];
 
-export const Menu: React.FC = observer(() => {
+export const Menu: React.FC<MenuProps> = observer(({ onOpenShortcutPopUp }) => {
   const store = useStore();
 
   // Menu Toggling
@@ -92,6 +98,14 @@ export const Menu: React.FC = observer(() => {
     [i18n],
   );
 
+  const openShortcutPopUp = useCallback(
+    (event: React.SyntheticEvent) => {
+      event.stopPropagation();
+      if (onOpenShortcutPopUp) onOpenShortcutPopUp();
+    },
+    [onOpenShortcutPopUp],
+  );
+
   return (
     <>
       <MenuButton
@@ -127,8 +141,8 @@ export const Menu: React.FC = observer(() => {
             <FeedbackButton tx="ideas-feedback" onPointerDown={sendFeedback} />
           </>
         )}
-        <Divider />
         <ResetButton tx="clear-data" onPointerDown={store?.destroy} />
+        <ShortcutButton text="Shortcuts" onPointerDown={openShortcutPopUp} />
       </Modal>
     </>
   );
