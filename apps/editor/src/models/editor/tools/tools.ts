@@ -154,11 +154,7 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
   public setActiveTool(tool = this.activeTool) {
     if (this.isDrawing) return;
 
-    if (
-      tool === ToolType.Crosshair &&
-      this.editor.image &&
-      this.editor.image.dimensionality < 3
-    ) {
+    if (tool === ToolType.Crosshair && !this.editor.isIn3DMode) {
       if (this.activeTool === ToolType.Crosshair) {
         this.activeTool = ToolType.Brush;
       }

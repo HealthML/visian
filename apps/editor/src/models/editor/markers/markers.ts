@@ -64,11 +64,7 @@ export class EditorMarkers {
   };
 
   public get isDisabled() {
-    return (
-      !this.editor.annotation ||
-      this.editor.annotation.dimensionality < 3 ||
-      !this.editor.viewSettings.getMaxSlice()
-    );
+    return !this.editor.annotation || !this.editor.isIn3DMode;
   }
 
   public get markers(): (number | [number, number])[] {

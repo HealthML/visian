@@ -105,7 +105,9 @@ export const Toolbar: React.FC = observer(() => {
         tooltipTx="crosshair-tool"
         activeTool={activeTool}
         value={ToolType.Crosshair}
-        isDisabled={!store?.editor.viewSettings.showSideViews}
+        isDisabled={
+          !store?.editor.isIn3DMode || !store.editor.viewSettings.showSideViews
+        }
         onPress={setActiveTool}
         onContextMenu={preventDefault}
       />

@@ -99,10 +99,7 @@ export const SliceSlider: React.FC = observer(() => {
     [maxSlice],
   );
 
-  const dimensionality = store?.editor.image?.dimensionality;
-  return dimensionality &&
-    dimensionality > 2 &&
-    store?.editor.viewSettings.getMaxSlice() ? (
+  return store?.editor.isIn3DMode ? (
     <StyledSheet
       ref={ref}
       onPointerEnter={handlePointerEnter}

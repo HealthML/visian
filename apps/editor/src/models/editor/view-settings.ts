@@ -82,18 +82,11 @@ export class EditorViewSettings
   public setMainViewType = (value: ViewType) => {
     if (this.editor.tools.isDrawing) return;
 
-    this.mainViewType =
-      this.editor.image && this.editor.image.dimensionality > 2
-        ? value
-        : ViewType.Transverse;
+    this.mainViewType = this.editor.isIn3DMode ? value : ViewType.Transverse;
   };
 
   public toggleSideViews = (value = !this.showSideViews) => {
-    this.showSideViews =
-      value &&
-      Boolean(this.editor.image) &&
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      this.editor.image!.dimensionality > 2;
+    this.showSideViews = value;
   };
 
   public setZoomLevel(value = 1) {
@@ -207,10 +200,7 @@ export class EditorViewSettings
 
   public reset = () => {
     this.setSelectedVoxel();
-    this.toggleSideViews(this.showSideViews);
-    if (this.editor.image && this.editor.image.dimensionality < 3) {
-      this.setMainViewType(ViewType.Transverse);
-    }
+    if (!this.editor.isIn3DMode) this.setMainViewType(ViewType.Transverse);
     this.setContrast();
     this.setBrightness();
   };

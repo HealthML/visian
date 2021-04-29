@@ -134,6 +134,15 @@ export class Editor implements ISerializable<EditorSnapshot> {
     this.setAnnotation(await RenderedImage.fromFile(imageFile));
   }
 
+  public get isIn3DMode() {
+    if (!this.image) return false;
+    return (
+      this.image.voxelCount
+        .toArray()
+        .reduce((previous, current) => previous + (current > 1 ? 1 : 0), 0) > 2
+    );
+  }
+
   public setBackgroundColor(backgroundColor: string) {
     this.backgroundColor = backgroundColor;
   }

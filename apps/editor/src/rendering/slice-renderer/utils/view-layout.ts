@@ -42,8 +42,7 @@ export const getMainViewPaddings = (editor: Editor) => {
     : 0;
 
   const sliceSliderPadding =
-    editor.image &&
-    editor.image.dimensionality > 2 &&
+    editor.isIn3DMode &&
     sliceSliderRect &&
     // sliceSliderRect.right can be 0, when the slice slider isn't rendered.
     sliceSliderRect.right > 0

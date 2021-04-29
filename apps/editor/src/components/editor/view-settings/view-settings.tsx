@@ -82,7 +82,7 @@ export const ViewSettings: React.FC = observer(() => {
         position="left"
         onReset={store?.editor.viewSettings.resetSettings}
       >
-        {(!store?.editor.image || store?.editor.image.dimensionality > 2) && (
+        {store?.editor.isIn3DMode && (
           <>
             <Switch
               labelTx="side-views"
