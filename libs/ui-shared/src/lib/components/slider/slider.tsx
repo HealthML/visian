@@ -2,20 +2,31 @@ import React, { useCallback, useRef, useState } from "react";
 import { useTheme } from "styled-components";
 
 import { parseNumberFromMetric, Theme } from "../../theme";
-import { FlexRow, InputContainer, Spacer } from "../box";
-import { SliderLabel } from "../text";
+import { InputContainer, Spacer } from "../box";
 import { Tooltip } from "../tooltip";
+import { SliderMarker, SliderRangeMarker } from "./markers";
 import { SliderFieldProps, SliderProps } from "./slider.props";
 import {
   SliderContainer,
+  SliderLabel,
+  SliderLabelRow,
   SliderRangeSelection,
   SliderThumb,
   SliderTrack,
+  SliderValueInput,
+  SliderValueInputWrapper,
 } from "./styled-components";
 import { pointerToSliderValue, useDrag, valueToSliderPos } from "./utils";
 
+// Utilities
 const defaultFormatLabel = (values: number[]) =>
   values.map((value) => value.toFixed(2)).join("-");
+
+const isRangeMarker = (marker: {
+  color?: string;
+  value: number | [number, number];
+}): marker is { color?: string; value: [number, number] } =>
+  Array.isArray(marker.value);
 
 /** A custom slider component built to work well with touch input. */
 export const Slider: React.FC<SliderProps> = (props) => {
@@ -26,17 +37,18 @@ export const Slider: React.FC<SliderProps> = (props) => {
     isVertical,
     min = 0,
     max = 1,
-    onChange,
-    onStart,
-    onEnd,
     enforceSerialThumbs: preventCrossing,
+    stepSize,
     roundMethod,
     scaleType,
     showRange,
     showFloatingValueLabel = false,
     formatValueLabel = defaultFormatLabel,
-    stepSize,
+    markers,
     value,
+    onChange,
+    onStart,
+    onEnd,
     ...rest
   } = props;
 
@@ -181,15 +193,21 @@ export const Slider: React.FC<SliderProps> = (props) => {
     ],
   );
 
-  const thumbPositions = valueArray.map((thumbValue) =>
-    valueToSliderPos(thumbValue, {
+  const getSliderRelativePosition = (value: number) =>
+    valueToSliderPos(value, {
       scaleType,
       min,
       max,
       stepSize,
       roundMethod,
       isInverted,
-    }),
+    });
+  const thumbPositions = valueArray.map(getSliderRelativePosition);
+
+  const expandedMarkers = markers?.map((marker) =>
+    typeof marker === "number" || Array.isArray(marker)
+      ? { value: marker }
+      : marker,
   );
 
   // Tooltip Positioning
@@ -204,6 +222,36 @@ export const Slider: React.FC<SliderProps> = (props) => {
       ref={sliderRef}
     >
       <SliderTrack isVertical={isVertical} />
+      {expandedMarkers?.map((marker) =>
+        isRangeMarker(marker) ? (
+          <SliderRangeMarker
+            key={`${marker.color}:${marker.value[0]}-${marker.value[1]}`}
+            from={getSliderRelativePosition(marker.value[0])}
+            to={getSliderRelativePosition(marker.value[1])}
+            isVertical={isVertical}
+            color={marker.color}
+            isActive={Boolean(
+              ~valueArray.findIndex(
+                (value) =>
+                  value >= Math.min(...marker.value) &&
+                  value <= Math.max(...marker.value),
+              ),
+            )}
+          />
+        ) : (
+          <SliderMarker
+            key={`${marker.color}:${marker.value}`}
+            position={getSliderRelativePosition(
+              (marker.value as unknown) as number,
+            )}
+            isVertical={isVertical}
+            color={marker.color}
+            isActive={Boolean(
+              ~valueArray.findIndex((value) => value === marker.value),
+            )}
+          />
+        ),
+      )}
       {showRange && valueArray.length >= 2 && (
         <SliderRangeSelection
           isInverted={isInverted}
@@ -243,31 +291,60 @@ export const Slider: React.FC<SliderProps> = (props) => {
 export const SliderField: React.FC<SliderFieldProps> = ({
   labelTx,
   label,
-  showValueLabel,
+  showValueLabel = true,
+  unlockValueLabelRange,
   formatValueLabel = defaultFormatLabel,
   value,
   defaultValue,
   min = 0,
+  max = 1,
+  onChange,
   ...rest
 }) => {
   const actualValue = value === undefined ? defaultValue || min : value;
 
+  const handleTextInputConfirm = useCallback(
+    (newValue: number) => {
+      const clampedValue = unlockValueLabelRange
+        ? newValue
+        : Math.max(min, Math.min(max, newValue));
+      if (onChange) onChange(clampedValue, 0, clampedValue);
+    },
+    [max, min, onChange, unlockValueLabelRange],
+  );
+
   return (
     <InputContainer>
       {(labelTx || label || showValueLabel) && (
-        <FlexRow>
+        <SliderLabelRow>
           {(labelTx || label) && <SliderLabel text={label} tx={labelTx} />}
           <Spacer />
-          {showValueLabel && (
-            <SliderLabel
-              text={formatValueLabel(
-                Array.isArray(actualValue) ? actualValue : [actualValue],
-              )}
-            />
-          )}
-        </FlexRow>
+          {showValueLabel &&
+            (Array.isArray(actualValue) ? (
+              <SliderLabel
+                text={formatValueLabel(
+                  Array.isArray(actualValue) ? actualValue : [actualValue],
+                )}
+              />
+            ) : (
+              <SliderValueInputWrapper>
+                <SliderValueInput
+                  type="number"
+                  value={formatValueLabel([actualValue])}
+                  onConfirm={handleTextInputConfirm}
+                />
+              </SliderValueInputWrapper>
+            ))}
+        </SliderLabelRow>
       )}
-      <Slider {...rest} value={value} defaultValue={defaultValue} min={min} />
+      <Slider
+        {...rest}
+        value={value}
+        defaultValue={defaultValue}
+        min={min}
+        max={max}
+        onChange={onChange}
+      />
     </InputContainer>
   );
 };

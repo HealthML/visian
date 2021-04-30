@@ -16,6 +16,11 @@
   "ideas-feedback": "Ideas or Feedback?",
   "clear-data": "Clear Data",
 
+  "shortcuts": "Shortcuts",
+
+  "undo": "Undo",
+  "redo": "Redo",
+
   "navigation-tool": "Navigation Tool (H)",
   "crosshair-tool": "Crosshair Tool (C)",
   "pixel-brush": "Brush (B)",
@@ -47,6 +52,7 @@
   "brightness": "Brightness",
 
   "export": "Export (Ctrl + E)",
+  "export-button": "Export",
 
   "import-error": "Import Error",
   "annotation-mismatch-error": "This annotation does not match the original image's size.",

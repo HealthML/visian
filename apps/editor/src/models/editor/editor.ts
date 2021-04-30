@@ -1,4 +1,3 @@
-import { getTheme } from "@visian/ui-shared";
 import {
   ImageSnapshot,
   ISerializable,
@@ -10,6 +9,7 @@ import { action, makeObservable, observable } from "mobx";
 
 import { RenderedImage, SliceRenderer } from "../../rendering";
 import { StoreContext } from "../types";
+import { EditorMarkers } from "./markers";
 import { EditorTools } from "./tools";
 import { EditorUndoRedo } from "./undo-redo";
 import {
@@ -27,6 +27,7 @@ export interface EditorSnapshot {
 
 export class Editor implements ISerializable<EditorSnapshot> {
   public static readonly excludeFromSnapshotTracking = [
+    "/markers",
     ...EditorViewSettings.excludeFromSnapshotTracking.map(
       (path) => `/viewSettings${path}`,
     ),
@@ -37,6 +38,7 @@ export class Editor implements ISerializable<EditorSnapshot> {
     "/sliceRenderer",
   ];
 
+  public markers: EditorMarkers;
   public sliceRenderer?: SliceRenderer;
 
   // Layers
@@ -74,17 +76,19 @@ export class Editor implements ISerializable<EditorSnapshot> {
       setBackgroundColor: action,
       applySnapshot: action,
     });
+
+    this.markers = new EditorMarkers(this, this.context);
   }
 
   public get refs() {
     return this.context.getRefs();
   }
+  public get theme() {
+    return this.context.getTheme();
+  }
 
   public getBackgroundColor() {
-    return (
-      this.backgroundColor ||
-      getTheme(this.context.getTheme()).colors.background
-    );
+    return this.backgroundColor || this.context.getTheme().colors.background;
   }
 
   public setSliceRenderer(sliceRenderer?: SliceRenderer) {
@@ -127,6 +131,15 @@ export class Editor implements ISerializable<EditorSnapshot> {
   }
   public async importAnnotation(imageFile: File) {
     this.setAnnotation(await RenderedImage.fromFile(imageFile));
+  }
+
+  public get isIn3DMode() {
+    if (!this.image) return false;
+    return (
+      this.image.voxelCount
+        .toArray()
+        .reduce((previous, current) => previous + (current > 1 ? 1 : 0), 0) > 2
+    );
   }
 
   public setBackgroundColor(backgroundColor: string) {
@@ -186,6 +199,7 @@ export class Editor implements ISerializable<EditorSnapshot> {
     this.image = snapshot.image && new RenderedImage(snapshot.image);
     this.annotation =
       snapshot.annotation && new RenderedImage(snapshot.annotation);
+    this.markers.inferAnnotatedSlices();
 
     if (snapshot.viewSettings) {
       this.viewSettings.applySnapshot(snapshot.viewSettings);

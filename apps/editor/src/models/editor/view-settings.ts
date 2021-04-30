@@ -1,4 +1,3 @@
-import { getTheme } from "@visian/ui-shared";
 import {
   getPlaneAxes,
   ISerializable,
@@ -83,21 +82,16 @@ export class EditorViewSettings
   public setMainViewType = (value: ViewType) => {
     if (this.editor.tools.isDrawing) return;
 
-    this.mainViewType =
-      this.editor.image && this.editor.image.dimensionality > 2
-        ? value
-        : ViewType.Transverse;
+    this.mainViewType = this.editor.isIn3DMode ? value : ViewType.Transverse;
   };
 
   public toggleSideViews = (value = !this.showSideViews) => {
-    this.showSideViews =
-      value &&
-      Boolean(this.editor.image) &&
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      this.editor.image!.dimensionality > 2;
+    this.showSideViews = value;
   };
 
   public setZoomLevel(value = 1) {
+    if (this.editor.tools.isDrawing) return;
+
     this.zoomLevel = value;
   }
   public get zoomStep() {
@@ -117,20 +111,25 @@ export class EditorViewSettings
   }
 
   public zoomIn() {
+    if (this.editor.tools.isDrawing) return;
+
     this.zoomLevel = Math.min(maxZoom, this.zoomLevel + this.zoomStep);
   }
 
   public zoomOut() {
+    if (this.editor.tools.isDrawing) return;
+
     this.zoomLevel = Math.max(minZoom, this.zoomLevel - this.zoomStep);
   }
 
   public setOffset({ x = 0, y = 0 } = {}) {
+    if (this.editor.tools.isDrawing) return;
+
     this.offset.set(x, y);
   }
 
   public setAnnotationColor(
-    value = getTheme(this.context?.getTheme()).colors.data["Salient Safran"] ||
-      "#ff0000",
+    value = this.context?.getTheme().colors["Salient Safran"] || "#ff0000",
   ) {
     this.annotationColor = value;
   }
@@ -158,7 +157,7 @@ export class EditorViewSettings
       viewType,
       Math.min(
         Math.max(Math.round(value), 0),
-        this.editor.image.voxelCount.getComponent((viewType + 2) % 3) - 1,
+        this.editor.image.voxelCount.getFromView(viewType) - 1,
       ),
     );
   }
@@ -168,7 +167,8 @@ export class EditorViewSettings
   }
 
   public getMaxSlice(viewType = this.mainViewType) {
-    return this.editor.image?.voxelCount.getFromView(viewType);
+    const sliceCount = this.editor.image?.voxelCount.getFromView(viewType);
+    return sliceCount ? sliceCount - 1 : 0;
   }
 
   public stepSelectedSlice(stepSize = 1, viewType = this.mainViewType) {
@@ -200,10 +200,7 @@ export class EditorViewSettings
 
   public reset = () => {
     this.setSelectedVoxel();
-    this.toggleSideViews(this.showSideViews);
-    if (this.editor.image && this.editor.image.dimensionality < 3) {
-      this.setMainViewType(ViewType.Transverse);
-    }
+    if (!this.editor.isIn3DMode) this.setMainViewType(ViewType.Transverse);
     this.setContrast();
     this.setBrightness();
   };

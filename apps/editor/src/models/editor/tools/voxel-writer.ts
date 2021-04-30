@@ -17,18 +17,21 @@ export class VoxelWriter {
   constructor(protected editor: Editor, private undoable: boolean) {}
 
   protected finishStroke(
+    isDeleteOperation: boolean | undefined,
     image = this.editor.annotation,
     viewType = this.editor.viewSettings.mainViewType,
   ) {
+    const slice = this.sliceNumber;
+
     if (image) {
-      if (this.undoable && this.sliceNumber !== undefined) {
+      if (this.undoable && slice !== undefined) {
         this.editor.undoRedo.addCommand(
           new SliceUndoRedoCommand(
             image,
             viewType,
-            this.sliceNumber,
+            slice,
             this.oldSliceData,
-            image.getSlice(this.sliceNumber, viewType),
+            image.getSlice(slice, viewType),
           ),
         );
       }
@@ -40,7 +43,7 @@ export class VoxelWriter {
       this.sliceNumber = undefined;
     }
 
-    this.editor.tools.finishStroke();
+    this.editor.tools.finishStroke(image, slice, viewType, isDeleteOperation);
   }
 
   protected writeVoxels(

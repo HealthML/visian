@@ -96,7 +96,7 @@ export const Layers: React.FC = observer(() => {
           )}
           {store?.editor.image ? (
             <ListItem
-              icon={{ color: store?.editor.foregroundColor }}
+              icon="image"
               label={store?.editor.image.name}
               trailingIcon={store?.editor.isImageVisible ? "eye" : "eyeCrossed"}
               disableTrailingIcon={store?.editor.isImageVisible}
@@ -104,7 +104,9 @@ export const Layers: React.FC = observer(() => {
               isLast
             />
           ) : (
-            <SubtleText tx="no-layers" />
+            <ListItem isLast>
+              <SubtleText tx="no-layers" />
+            </ListItem>
           )}
         </LayerList>
       </LayerModal>

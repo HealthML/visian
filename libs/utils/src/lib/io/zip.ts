@@ -1,12 +1,10 @@
 import JSZip from "jszip";
 
-const jszip = new JSZip();
-
 /** A Zip file. */
 export class Zip {
   /** Creates a new Zip file object from a given `.zip` file. */
   public static async fromFile(file: File) {
-    return new Zip(await jszip.loadAsync(file));
+    return new Zip(await new JSZip().loadAsync(file));
   }
 
   /** A list of all files contained in the zip file. */
@@ -20,7 +18,7 @@ export class Zip {
   public async getFile(fileName: string) {
     const blob = await this.zip.file(fileName)?.async("blob");
     if (!blob) return;
-    return new File([blob], fileName);
+    return new File([blob], fileName.split("/").slice(-1)[0]);
   }
 
   /** Decompresses and returns all files contained in the zip file. */

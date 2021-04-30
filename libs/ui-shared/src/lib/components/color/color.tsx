@@ -1,4 +1,4 @@
-import { color } from "@visian/ui-shared";
+import { color, Theme } from "@visian/ui-shared";
 import styled, { css } from "styled-components";
 
 import { ColorProps } from "./color.props";
@@ -8,7 +8,7 @@ export const Color = styled.div<ColorProps>`
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  background-color: ${(props) => props.color};
+  background-color: ${(props) => color(props.color as keyof Theme["colors"])};
 
   ${(props) =>
     props.isSelected &&

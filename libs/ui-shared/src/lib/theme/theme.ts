@@ -21,11 +21,14 @@ const dataColors = {
   Lima: "#58DC2A",
   "Honey Flower": "#62156F",
 };
+export const dataColorKeys = Object.keys(
+  dataColors,
+) as (keyof typeof dataColors)[];
 
 const colorModes = {
   light: {
     text: "rgba(0,0,0,0.8)",
-    lightText: "rgba(0,0,0,0.5)",
+    lightText: "rgba(0,0,0,0.4)",
     background: "#fff",
     primary: "#00f",
     secondary: "#00a",
@@ -46,7 +49,7 @@ const colorModes = {
     sideViewSheet: "rgba(0, 0, 0, 0.05)",
     sideViewBorder: "rgba(0, 0, 0, 0.3)",
 
-    data: dataColors,
+    ...dataColors,
   },
   dark: {
     text: "rgba(255,255,255,0.8)",
@@ -70,7 +73,7 @@ const colorModes = {
     sideViewSheet: "rgba(255, 255, 255, 0.05)",
     sideViewBorder: "rgba(255, 255, 255, 0.3)",
 
-    data: dataColors,
+    ...dataColors,
   },
 };
 
@@ -136,6 +139,9 @@ export const theme = {
     sliderHeight: "30px",
     sliderThumbWidth: "2px",
     sliderThumbHeight: "22px",
+    sliderMarkerWidth: "2px",
+    sliderMarkerHeight: "10px",
+    sliderMarkerRangeHeight: "4px",
   },
   space: {
     iconMargin: "12px",
@@ -143,6 +149,7 @@ export const theme = {
     buttonPadding: "12px 20px",
     inputPadding: "12px 22px",
     sliderLabelDistance: "16px",
+    sliderMarkerMargin: "0px",
   },
   zIndices: {
     modal: 50,

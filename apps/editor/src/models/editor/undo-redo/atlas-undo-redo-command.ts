@@ -6,7 +6,7 @@ export class AtlasUndoRedoCommand implements UndoRedoCommand {
   private done = true;
 
   constructor(
-    private image: Image,
+    public image: Image,
     private oldAtlas: Uint8Array,
     private newAtlas: Uint8Array,
   ) {}

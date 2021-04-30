@@ -7,6 +7,9 @@ export interface ModalProps
   labelTx?: string;
   label?: string;
 
+  /** The z-index of the surface below. */
+  baseZIndex?: number;
+
   /** If set to `false`, hides the modal. */
   isOpen?: boolean;
 

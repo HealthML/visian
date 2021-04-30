@@ -9,9 +9,7 @@ import { Text } from "../text";
 import { TooltipProps } from "./tooltip.props";
 import { useTooltipPosition } from "./utils";
 
-const TooltipContainer = styled(Sheet).withConfig({
-  shouldForwardProp: (prop) => prop.toString() !== "isActive",
-})<Pick<TooltipProps, "baseZIndex">>`
+const TooltipContainer = styled(Sheet)<Pick<TooltipProps, "baseZIndex">>`
   box-sizing: border-box;
   height: 20px;
   border-radius: 10px;
@@ -26,8 +24,6 @@ const TooltipLabel = styled(Text)`
   font-size: 11px;
   line-height: 11px;
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 `;
 
 export const Tooltip: React.FC<TooltipProps> = ({

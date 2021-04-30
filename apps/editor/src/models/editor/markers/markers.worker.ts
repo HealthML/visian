@@ -1,0 +1,50 @@
+import { findVoxelInSlice, getNonEmptySlices, Vector } from "@visian/utils";
+import { RpcProvider } from "worker-rpc";
+
+import type {
+  getNonEmptySlicesArgs,
+  getNonEmptySlicesReturn,
+  isSliceEmptyArgs,
+  isSliceEmptyReturn,
+} from "./types";
+
+const rpcProvider = new RpcProvider((message, transfer) =>
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  postMessage(message, transfer as any),
+);
+onmessage = (event) => rpcProvider.dispatch(event.data);
+
+rpcProvider.registerRpcHandler(
+  "getNonEmptySlices",
+  ({
+    atlas,
+    voxelComponents,
+    voxelCount,
+  }: getNonEmptySlicesArgs): getNonEmptySlicesReturn =>
+    getNonEmptySlices({
+      getAtlas: () => atlas,
+      voxelComponents,
+      voxelCount: new Vector(voxelCount, false),
+    }),
+);
+
+rpcProvider.registerRpcHandler(
+  "isSliceEmpty",
+  ({
+    atlas,
+    voxelComponents,
+    voxelCount,
+    sliceNumber,
+    viewType,
+  }: isSliceEmptyArgs): isSliceEmptyReturn =>
+    !findVoxelInSlice(
+      {
+        getAtlas: () => atlas,
+        voxelComponents,
+        voxelCount: new Vector(voxelCount, false),
+      },
+      viewType,
+      sliceNumber,
+      (_voxel, value) => Boolean(value),
+    ),
+);

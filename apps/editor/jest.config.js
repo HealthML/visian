@@ -10,5 +10,8 @@ module.exports = {
   },
   transformIgnorePatterns: ["node_modules/(?!itk/.*|mobx-utils)"],
   moduleFileExtensions: ["ts", "tsx", "js", "jsx"],
+  moduleNameMapper: {
+    "^worker-loader!.+$": "<rootDir>/__mocks__/worker-mock.ts",
+  },
   coverageDirectory: "../../coverage/apps/editor",
 };

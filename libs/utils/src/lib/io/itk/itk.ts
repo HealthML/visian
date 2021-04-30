@@ -35,8 +35,16 @@ export const writeSingleMedicalImage = async (
   return arrayBuffer ? new File([arrayBuffer], fileName) : undefined;
 };
 
+/** Returns a parsed medical image from the given DICOM series. */
+export const readDICOMSeries = async (files: File[]) => {
+  const { image, webWorkerPool } = await readImageDICOMFileSeries(files);
+  webWorkerPool.terminateWorkers();
+
+  return image;
+};
+
 /** Returns a parsed medical image from the given zipped DICOM series. */
-export const readDICOMSeries = async (file: File) => {
+export const readZippedMedicalImage = async (file: File) => {
   const zip = await Zip.fromFile(file);
   if (
     !zip.files ||
@@ -45,12 +53,7 @@ export const readDICOMSeries = async (file: File) => {
     return;
   }
 
-  const { image, webWorkerPool } = await readImageDICOMFileSeries(
-    await zip.getAllFiles(),
-  );
-  webWorkerPool.terminateWorkers();
-
-  return image;
+  return readDICOMSeries(await zip.getAllFiles());
 };
 
 /**
@@ -60,7 +63,7 @@ export const readDICOMSeries = async (file: File) => {
 export const readMedicalImage = async (file: File) => {
   try {
     const image = await (file.name.endsWith(".zip")
-      ? readDICOMSeries(file)
+      ? readZippedMedicalImage(file)
       : readSingleMedicalImage(file));
 
     if (!image) throw new Error("image-loading-error");

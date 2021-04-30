@@ -3,10 +3,11 @@ import {
   Modal,
   SliderField,
   Switch,
+  useMultiRef,
 } from "@visian/ui-shared";
 import { ViewType } from "@visian/utils";
 import { observer } from "mobx-react-lite";
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
@@ -30,14 +31,24 @@ const mainViewTypeSwitchItems = [
 export const ViewSettings: React.FC = observer(() => {
   const store = useStore();
 
+  // Ref Management
+  const [buttonRef, setButtonRef] = useState<HTMLButtonElement | null>(null);
+  const outerRef = useRef<HTMLButtonElement>(null);
+  const updateButtonRef = useMultiRef(setButtonRef, outerRef);
+
+  useEffect(() => {
+    store?.setRef("viewSettings", outerRef);
+
+    return () => {
+      store?.setRef("viewSettings");
+    };
+  }, [store, outerRef]);
+
   // Menu Toggling
   const [isModalOpen, setIsModalOpen] = useState(false);
   const toggleModal = useCallback(() => {
     setIsModalOpen(!isModalOpen);
   }, [isModalOpen]);
-
-  // Menu Positioning
-  const [buttonRef, setButtonRef] = useState<HTMLButtonElement | null>(null);
 
   // Menu Actions
   const setContrast = useCallback(
@@ -60,7 +71,7 @@ export const ViewSettings: React.FC = observer(() => {
         tooltipTx="view-settings"
         tooltipPosition="left"
         showTooltip={!isModalOpen}
-        ref={setButtonRef}
+        ref={updateButtonRef}
         onPointerDown={toggleModal}
         isActive={isModalOpen}
       />
@@ -71,7 +82,7 @@ export const ViewSettings: React.FC = observer(() => {
         position="left"
         onReset={store?.editor.viewSettings.resetSettings}
       >
-        {(!store?.editor.image || store?.editor.image.dimensionality > 2) && (
+        {store?.editor.isIn3DMode && (
           <>
             <Switch
               labelTx="side-views"
@@ -89,7 +100,7 @@ export const ViewSettings: React.FC = observer(() => {
         )}
         <SpacedSliderField
           labelTx="contrast"
-          showValueLabel
+          unlockValueLabelRange
           min={0}
           max={2}
           value={store?.editor.viewSettings.contrast}
@@ -97,7 +108,7 @@ export const ViewSettings: React.FC = observer(() => {
         />
         <SliderField
           labelTx="brightness"
-          showValueLabel
+          unlockValueLabelRange
           min={0}
           max={2}
           value={store?.editor.viewSettings.brightness}

@@ -78,7 +78,8 @@ export class Crosshair extends THREE.Group implements IDisposable {
   };
 
   private updateVisibility = () => {
-    this.visible = this.editor.viewSettings.showSideViews;
+    this.visible =
+      this.editor.isIn3DMode && this.editor.viewSettings.showSideViews;
   };
 }
 

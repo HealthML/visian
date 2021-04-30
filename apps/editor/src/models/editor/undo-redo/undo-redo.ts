@@ -41,6 +41,19 @@ export class EditorUndoRedo implements ISerializable<EditorUndoRedoSnapshot> {
       this.undoRedoStack.navigateBackward();
       this.editor.sliceRenderer?.lazyRender();
     }
+
+    if (
+      undoCommand?.slice !== undefined &&
+      undoCommand?.viewType !== undefined
+    ) {
+      this.editor.markers.inferAnnotatedSlice(
+        undoCommand.image,
+        undoCommand.slice,
+        undoCommand.viewType,
+      );
+    } else {
+      this.editor.markers.inferAnnotatedSlices();
+    }
   };
 
   public redo = () => {
@@ -49,6 +62,19 @@ export class EditorUndoRedo implements ISerializable<EditorUndoRedoSnapshot> {
     const redoCommand = this.undoRedoStack.navigateForward();
     if (redoCommand?.redo()) {
       this.editor.sliceRenderer?.lazyRender();
+    }
+
+    if (
+      redoCommand?.slice !== undefined &&
+      redoCommand?.viewType !== undefined
+    ) {
+      this.editor.markers.inferAnnotatedSlice(
+        redoCommand.image,
+        redoCommand.slice,
+        redoCommand.viewType,
+      );
+    } else {
+      this.editor.markers.inferAnnotatedSlices();
     }
   };
 

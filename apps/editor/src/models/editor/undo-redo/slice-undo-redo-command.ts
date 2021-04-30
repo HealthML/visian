@@ -6,9 +6,9 @@ export class SliceUndoRedoCommand implements UndoRedoCommand {
   private done = true;
 
   constructor(
-    private image: Image,
-    private viewType: ViewType,
-    private slice: number,
+    public image: Image,
+    public viewType: ViewType,
+    public slice: number,
     private oldSliceData?: Uint8Array,
     private newSliceData?: Uint8Array,
   ) {}

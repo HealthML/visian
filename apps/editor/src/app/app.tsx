@@ -34,8 +34,8 @@ function App() {
     };
   }, []);
 
-  const themeName = rootStoreRef.current?.theme || "dark";
-  const theme = useMemo(() => getTheme(themeName), [themeName]);
+  const storeTheme = rootStoreRef.current?.theme;
+  const theme = useMemo(() => storeTheme || getTheme("dark"), [storeTheme]);
 
   return (
     <ThemeProvider theme={theme}>

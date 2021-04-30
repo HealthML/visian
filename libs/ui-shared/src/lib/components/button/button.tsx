@@ -1,4 +1,4 @@
-import React, { useCallback, useImperativeHandle, useState } from "react";
+import React, { useCallback, useState } from "react";
 import styled, { css, useTheme } from "styled-components";
 
 import { duration, fontWeight, radius, size, space, Theme } from "../../theme";
@@ -6,7 +6,7 @@ import { Icon } from "../icon";
 import { sheetMixin } from "../sheet";
 import { Text } from "../text";
 import { Tooltip } from "../tooltip";
-import { useDelay } from "../utils";
+import { useDelay, useMultiRef } from "../utils";
 import { ButtonProps } from "./button.props";
 
 const StyledText = styled(Text)<Pick<ButtonProps, "isActive">>`
@@ -85,8 +85,7 @@ const BaseButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
 
     // Tooltip Positioning
     const [buttonRef, setButtonRef] = useState<HTMLButtonElement | null>(null);
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    useImperativeHandle(ref, () => buttonRef!, [buttonRef]);
+    const updateButtonRef = useMultiRef(setButtonRef, ref);
 
     return (
       <>
@@ -95,7 +94,7 @@ const BaseButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
           isDisabled={isDisabled}
           onPointerEnter={enterButton}
           onPointerLeave={leaveButton}
-          ref={setButtonRef}
+          ref={updateButtonRef}
         >
           {icon && <Icon icon={icon} isActive={isActive} />}
           {tx || text ? (
@@ -140,7 +139,7 @@ export const FloatingUIButton = styled(SquareButton)`
   margin-bottom: 16px;
 `;
 
-export const CircularButton = styled(Button)`
+export const CircularButton = styled(SquareButton)`
   border-radius: 50%;
 `;
 

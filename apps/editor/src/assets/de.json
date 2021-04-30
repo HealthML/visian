@@ -16,6 +16,11 @@
   "ideas-feedback": "Ideen oder Feedback?",
   "clear-data": "Daten Löschen",
 
+  "shortcuts": "Shortcuts",
+
+  "undo": "Rückgängig",
+  "redo": "Wiederholen",
+
   "navigation-tool": "Navigationswerkzeug (H)",
   "crosshair-tool": "Fadenkreuzwerkzeug (C)",
   "pixel-brush": "Pinsel (B)",
@@ -47,6 +52,7 @@
   "brightness": "Helligkeit",
 
   "export": "Export (Strg + E)",
+  "export-button": "Export",
 
   "import-error": "Importfehler",
   "annotation-mismatch-error": "Diese Annotation passt nicht auf den Scan.",

@@ -39,6 +39,7 @@ export class SmartBrush extends Brush {
   }
 
   protected finishStroke(
+    isDeleteOperation: boolean | undefined,
     annotation = this.editor.annotation,
     viewType = this.editor.viewSettings.mainViewType,
   ) {
@@ -47,7 +48,7 @@ export class SmartBrush extends Brush {
     this.currentStroke.clear();
     this.drawnVoxels = [];
 
-    super.finishStroke(annotation, viewType);
+    super.finishStroke(isDeleteOperation, annotation, viewType);
   }
 
   private doRegionGrowing(image = this.editor.image) {

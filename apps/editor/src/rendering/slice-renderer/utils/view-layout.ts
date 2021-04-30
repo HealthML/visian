@@ -17,6 +17,7 @@ export const getMainViewPaddings = (editor: Editor) => {
   const floatingUIRect = editor.refs.uiOverlay.current?.getBoundingClientRect();
   const undoRedoButtonsRect = editor.refs.undoRedoButtons.current?.getBoundingClientRect();
   const toolbarRect = editor.refs.toolbar.current?.getBoundingClientRect();
+  const viewSettingsRect = editor.refs.viewSettings.current?.getBoundingClientRect();
   const sliceSliderRect = editor.refs.sliceSlider.current?.getBoundingClientRect();
   const sideViewsRect = editor.refs.sideViews.current?.getBoundingClientRect();
 
@@ -33,12 +34,20 @@ export const getMainViewPaddings = (editor: Editor) => {
   const toolBarPadding = toolbarRect ? toolbarRect.width + 2 * leftMargin : 0;
 
   const rightMargin =
-    floatingUIRect && sliceSliderRect
-      ? floatingUIRect.right - sliceSliderRect.right
+    floatingUIRect && viewSettingsRect
+      ? floatingUIRect.right - viewSettingsRect.right
       : 0;
-  const sliceSliderPadding = sliceSliderRect
-    ? sliceSliderRect.width + 2 * rightMargin
+  const viewSettingsPadding = viewSettingsRect
+    ? viewSettingsRect.width + 2 * rightMargin
     : 0;
+
+  const sliceSliderPadding =
+    editor.isIn3DMode &&
+    sliceSliderRect &&
+    // sliceSliderRect.right can be 0, when the slice slider isn't rendered.
+    sliceSliderRect.right > 0
+      ? sliceSliderRect.width + 2 * rightMargin
+      : 0;
 
   const sideViewsDistance =
     // sideViewsRect.right can be 0, when the side views aren't rendered.
@@ -52,7 +61,10 @@ export const getMainViewPaddings = (editor: Editor) => {
 
   return [
     undoRedoPadding,
-    Math.max(sliceSliderPadding, sideViewsPadding),
+    Math.max(
+      Math.max(sliceSliderPadding, viewSettingsPadding),
+      sideViewsPadding,
+    ),
     0,
     toolBarPadding,
   ];
