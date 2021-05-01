@@ -18,9 +18,6 @@ export class SliceWriter {
   private sliceLines: SliceLines;
   private sliceQuad: SliceQuad;
 
-  private linesScene = new THREE.Scene();
-  private quadScene = new THREE.Scene();
-
   constructor(
     voxelCount: Vector,
     components: number,
@@ -46,9 +43,6 @@ export class SliceWriter {
       this.sliceTextures[atlasViewType],
       getAtlasGrid(voxelCount),
     );
-
-    this.linesScene.add(this.sliceLines);
-    this.quadScene.add(this.sliceQuad);
   }
 
   public writeSlice(
@@ -74,11 +68,11 @@ export class SliceWriter {
     let camera: THREE.Camera;
     if (viewType === this.atlasViewType) {
       this.sliceQuad.positionForSlice(sliceNumber);
-      scene = this.quadScene;
+      scene = this.sliceQuad;
       camera = this.sliceQuad.camera;
     } else {
       this.sliceLines.setSlice(viewType, sliceNumber);
-      scene = this.linesScene;
+      scene = this.sliceLines;
       camera = this.sliceLines.camera;
     }
 

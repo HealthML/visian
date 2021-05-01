@@ -9,7 +9,9 @@ import * as THREE from "three";
 
 import { SliceLinesMaterial } from "./slice-lines-material";
 
-export class SliceLines extends THREE.LineSegments {
+export class SliceLines extends THREE.Scene {
+  private lines: THREE.LineSegments;
+
   private geometries = [
     new THREE.BufferGeometry(),
     new THREE.BufferGeometry(),
@@ -26,9 +28,14 @@ export class SliceLines extends THREE.LineSegments {
     atlasGrid = getAtlasGrid(voxelCount),
     atlasSize = getAtlasSize(voxelCount),
   ) {
-    super(undefined, new SliceLinesMaterial(atlasGrid, voxelCount, null));
+    super();
 
-    this.frustumCulled = false;
+    this.lines = new THREE.LineSegments(
+      undefined,
+      new SliceLinesMaterial(atlasGrid, voxelCount, null),
+    );
+    this.lines.frustumCulled = false;
+    this.add(this.lines);
 
     const sagittalPoints: THREE.Vector3[] = [];
     for (let slice = 0; slice < voxelCount.z; slice++) {
@@ -56,12 +63,12 @@ export class SliceLines extends THREE.LineSegments {
 
   public setSlice(viewType: ViewType, slice: number) {
     if (this.viewType !== viewType) {
-      (this.material as SliceLinesMaterial).setViewType(
+      (this.lines.material as SliceLinesMaterial).setViewType(
         viewType,
         this.textures[viewType],
       );
 
-      this.geometry = this.geometries[viewType];
+      this.lines.geometry = this.geometries[viewType];
 
       this.viewType = viewType;
     }

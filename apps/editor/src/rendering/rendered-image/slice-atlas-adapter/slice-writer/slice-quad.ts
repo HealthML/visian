@@ -3,16 +3,21 @@ import * as THREE from "three";
 
 import { SliceQuadMaterial } from "./slice-quad-material";
 
-export class SliceQuad extends THREE.Mesh {
+export class SliceQuad extends THREE.Scene {
   public readonly camera: THREE.Camera;
+
+  private quad: THREE.Mesh;
 
   private currentSliceNumber = 0;
 
   constructor(texture: THREE.Texture, private atlasGrid: Vector) {
-    super(
+    super();
+
+    this.quad = new THREE.Mesh(
       new THREE.PlaneBufferGeometry().translate(0.5, 0.5, 0),
       new SliceQuadMaterial(texture),
     );
+    this.add(this.quad);
 
     // In camera space, every slice in a 1 by 1 quad.
     this.camera = new THREE.OrthographicCamera(
@@ -30,7 +35,7 @@ export class SliceQuad extends THREE.Mesh {
 
     const x = slice % this.atlasGrid.x;
     const y = Math.floor(slice / this.atlasGrid.x);
-    this.position.set(x, y, 0);
+    this.quad.position.set(x, y, 0);
 
     this.currentSliceNumber = slice;
   }
