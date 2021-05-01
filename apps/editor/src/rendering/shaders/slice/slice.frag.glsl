@@ -29,7 +29,7 @@ void main() {
     volumeCoords = vec3(vUv.x, (uActiveSlices.y + 0.5) / uVoxelCount.y, vUv.y);
   #endif // CORONAL
 
-  @import ./utils/volume-coords-to-uv;
+  @import ../utils/volume-coords-to-uv;
   
   vec4 texelValue = texture2D(uDataTexture, uv);
 

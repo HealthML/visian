@@ -24,18 +24,17 @@ export class Voxels extends THREE.Scene {
 
   public updateGeometry(voxels: (VoxelWithValue | VoxelWithValue[])[]) {
     const vertices: number[] = [];
+    const colors: number[] = [];
+
     voxels.flat().forEach((voxel) => {
       vertices.push(voxel.x, voxel.y, voxel.z);
+      colors.push(voxel.value, voxel.value, voxel.value);
     });
+
     this.geometry.setAttribute(
       "position",
       new THREE.Float32BufferAttribute(vertices, 3),
     );
-
-    const colors: number[] = [];
-    voxels.flat().forEach((voxel) => {
-      colors.push(voxel.value, voxel.value, voxel.value);
-    });
     this.geometry.setAttribute(
       "color",
       new THREE.Uint8BufferAttribute(colors, 3),

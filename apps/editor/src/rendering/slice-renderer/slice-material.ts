@@ -4,8 +4,7 @@ import { autorun } from "mobx";
 import * as THREE from "three";
 
 import { RenderedImage } from "../rendered-image";
-import { sliceFragmentShader } from "../shaders";
-import vertexShader from "../shaders/slice.vert.glsl";
+import { sliceFragmentShader, sliceVertexShader } from "../shaders";
 import { getOrder } from "./utils";
 
 import type { Editor } from "../../models";
@@ -24,7 +23,7 @@ export abstract class SliceMaterial
   ) {
     super({
       defines,
-      vertexShader,
+      vertexShader: sliceVertexShader,
       fragmentShader: sliceFragmentShader,
       uniforms: THREE.UniformsUtils.merge([
         {
@@ -66,7 +65,7 @@ export abstract class SliceMaterial
     this.disposers.forEach((disposer) => disposer());
   }
 
-  /** Updates the rendered atlas. */
+  /** Updates the rendered image. */
   public setImage(image: RenderedImage) {
     this.uniforms.uVoxelCount.value = image.voxelCount;
     this.uniforms.uAtlasGrid.value = image.getAtlasGrid();

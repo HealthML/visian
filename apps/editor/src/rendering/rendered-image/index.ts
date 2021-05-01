@@ -1,3 +1,3 @@
 export * from "./edit-rendering";
-export * from "./read-rendering";
+export * from "./slice-atlas-adapter";
 export * from "./rendered-image";

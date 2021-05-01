@@ -17,7 +17,7 @@ void main() {
     volumeCoords = vec3(vUv.x, (uSliceNumber + 0.5) / uVoxelCount.y, vUv.y);
   }
   
-  @import ./utils/volume-coords-to-uv;
+  @import ../utils/volume-coords-to-uv;
 
   gl_FragColor = texture2D(uDataTexture, uv);
 }

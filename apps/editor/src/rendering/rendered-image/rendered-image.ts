@@ -19,7 +19,7 @@ import {
   renderVoxels,
   Voxels,
 } from "./edit-rendering";
-import { SliceReader } from "./read-rendering";
+import { SliceAtlasAdapter } from "./slice-atlas-adapter";
 
 export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
   public static fromITKImage<T extends TypedArray = TypedArray>(
@@ -76,7 +76,7 @@ export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
   /** Used to update the render targets from the CPU data. */
   private screenAlignedQuad: ScreenAlignedQuad;
 
-  private sliceReader: SliceReader;
+  private sliceAtlasAdapter: SliceAtlasAdapter;
 
   constructor(
     image: ImageSnapshot<T> & Pick<ImageSnapshot<T>, "voxelCount" | "data">,
@@ -100,7 +100,7 @@ export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
       this.voxelCount,
     );
 
-    this.sliceReader = new SliceReader(
+    this.sliceAtlasAdapter = new SliceAtlasAdapter(
       this.renderTargets[0].texture,
       this.getAtlasGrid(),
       this.voxelCount.clone(false),
@@ -208,14 +208,24 @@ export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
   }
 
   public setSlice(viewType: ViewType, slice: number, sliceData?: Uint8Array) {
-    super.setSlice(viewType, slice, sliceData);
+    if (this.renderers[0]) {
+      this.sliceAtlasAdapter.writeSlice(
+        slice,
+        viewType,
+        sliceData,
+        this.renderTargets,
+        this.renderers,
+      );
+      return;
+    }
 
+    super.setSlice(viewType, slice, sliceData);
     this.triggerGPUPush();
   }
 
   public getSlice(sliceNumber: number, viewType: ViewType) {
     if (this.renderers[0]) {
-      return this.sliceReader.readSlice(
+      return this.sliceAtlasAdapter.readSlice(
         sliceNumber,
         viewType,
         this.renderers[0],
