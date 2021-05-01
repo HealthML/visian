@@ -183,7 +183,7 @@ export class Image<T extends TypedArray = TypedArray>
 
       // Explicit access here avoids MobX observability tracking to decrease performance
       this.data = convertAtlasToDataArray(
-        this.atlas,
+        this.getAtlas(),
         {
           voxelComponents: this.voxelComponents,
           voxelCount: this.voxelCount.clone(false),
