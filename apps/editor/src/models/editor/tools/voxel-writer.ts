@@ -21,29 +21,33 @@ export class VoxelWriter {
     image = this.editor.annotation,
     viewType = this.editor.viewSettings.mainViewType,
   ) {
-    const slice = this.sliceNumber;
+    // The RenderedImage needs to receive one more update before the modified
+    // slice can be read with all updates. Thus, this is delayed a few ms.
+    setTimeout(() => {
+      const slice = this.sliceNumber;
 
-    if (image) {
-      if (this.undoable && slice !== undefined) {
-        this.editor.undoRedo.addCommand(
-          new SliceUndoRedoCommand(
-            image,
-            viewType,
-            slice,
-            this.oldSliceData,
-            image.getSlice(slice, viewType),
-          ),
-        );
+      if (image) {
+        if (this.undoable && slice !== undefined) {
+          this.editor.undoRedo.addCommand(
+            new SliceUndoRedoCommand(
+              image,
+              viewType,
+              slice,
+              this.oldSliceData,
+              image.getSlice(slice, viewType),
+            ),
+          );
+        }
       }
-    }
 
-    if (this.undoable) {
-      this.strokeActive = false;
-      this.oldSliceData = undefined;
-      this.sliceNumber = undefined;
-    }
+      if (this.undoable) {
+        this.strokeActive = false;
+        this.oldSliceData = undefined;
+        this.sliceNumber = undefined;
+      }
 
-    this.editor.tools.finishStroke(image, slice, viewType, isDeleteOperation);
+      this.editor.tools.finishStroke(image, slice, viewType, isDeleteOperation);
+    }, 20);
   }
 
   protected writeVoxels(
