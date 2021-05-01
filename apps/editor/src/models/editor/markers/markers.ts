@@ -155,11 +155,7 @@ export class EditorMarkers {
     // one should be executed
     rpcProvider
       .rpc<isSliceEmptyArgs, isSliceEmptyReturn>("isSliceEmpty", {
-        atlas: image.getAtlas(),
-        voxelCount: image.voxelCount.toArray(),
-        voxelComponents: image.voxelComponents,
-        sliceNumber,
-        viewType,
+        sliceData: image.getSlice(sliceNumber, viewType),
       })
       .then((result) =>
         this.setAnnotatedSlice(!result, image, sliceNumber, viewType),
