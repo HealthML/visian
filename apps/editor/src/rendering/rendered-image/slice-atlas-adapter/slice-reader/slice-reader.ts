@@ -15,6 +15,12 @@ export class SliceReader {
   private lastViewType = ViewType.Transverse;
   private renderTarget: THREE.WebGLRenderTarget;
 
+  private sliceCache?: {
+    sliceNumber: number;
+    viewType: ViewType;
+    sliceData: Uint8Array;
+  };
+
   constructor(
     atlasTexture: THREE.Texture,
     atlasGrid: Vector,
@@ -27,11 +33,23 @@ export class SliceReader {
     this.renderTarget = new THREE.WebGLRenderTarget(voxelCount.x, voxelCount.y);
   }
 
+  public invalidateCache() {
+    this.sliceCache = undefined;
+  }
+
   public readSlice(
     sliceNumber: number,
     viewType: ViewType,
     renderer: THREE.WebGLRenderer,
   ) {
+    if (
+      this.sliceCache &&
+      this.sliceCache.sliceNumber === sliceNumber &&
+      this.sliceCache.viewType === viewType
+    ) {
+      return this.sliceCache.sliceData;
+    }
+
     this.material.setSliceNumber(sliceNumber);
 
     const [widthAxis, heightAxis] = getPlaneAxes(viewType);
@@ -68,7 +86,15 @@ export class SliceReader {
       buffer,
     );
 
-    if (this.components === 4) return buffer;
+    if (this.components === 4) {
+      this.sliceCache = {
+        sliceNumber,
+        viewType,
+        sliceData: buffer,
+      };
+
+      return buffer;
+    }
 
     // Read components.
     const slice = new Uint8Array(width * height * this.components);
@@ -77,6 +103,12 @@ export class SliceReader {
         slice[this.components * i + c] = buffer[4 * i + c];
       }
     }
+
+    this.sliceCache = {
+      sliceNumber,
+      viewType,
+      sliceData: slice,
+    };
 
     return slice;
   }

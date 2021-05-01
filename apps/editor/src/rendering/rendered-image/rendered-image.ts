@@ -135,6 +135,8 @@ export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
         renderer,
       );
 
+      this.sliceAtlasAdapter.invalidateCache();
+
       this.hasCPUUpdates[index] = false;
     }
 
@@ -145,7 +147,7 @@ export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
       }
 
       renderVoxels(this.voxels, this.renderTargets[index], renderer);
-      this.hasGPUUpdates = true;
+      this.onGPUUpates();
 
       this.voxelsRendered[index] = true;
       if (this.voxelsRendered.every((value) => value)) {
@@ -153,6 +155,11 @@ export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
         this.isVoxelGeometryDirty = true;
       }
     }
+  }
+
+  private onGPUUpates() {
+    this.hasGPUUpdates = true;
+    this.sliceAtlasAdapter.invalidateCache();
   }
 
   private triggerGPUPush() {
@@ -183,6 +190,7 @@ export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
     }
 
     super.setAtlas(atlas);
+    this.hasGPUUpdates = false;
   }
 
   public setAtlas(atlas: Uint8Array) {
@@ -222,7 +230,7 @@ export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
         this.renderers,
       );
 
-      this.hasGPUUpdates = true;
+      this.onGPUUpates();
 
       return;
     }

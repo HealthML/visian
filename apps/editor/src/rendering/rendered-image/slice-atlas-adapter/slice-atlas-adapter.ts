@@ -23,6 +23,10 @@ export class SliceAtlasAdapter {
     this.sliceWriter = new SliceWriter(voxelCount, components, atlasViewType);
   }
 
+  public invalidateCache() {
+    this.sliceReader.invalidateCache();
+  }
+
   public readSlice(
     sliceNumber: number,
     viewType: ViewType,
