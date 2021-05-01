@@ -76,6 +76,9 @@ export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
   /** Used to update the render targets from the CPU data. */
   private screenAlignedQuad: ScreenAlignedQuad;
 
+  /** Whether or not the atlas needs to be pulled from the GPU. */
+  private hasGPUUpdates = false;
+
   private sliceAtlasAdapter: SliceAtlasAdapter;
 
   constructor(
@@ -142,6 +145,7 @@ export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
       }
 
       renderVoxels(this.voxels, this.renderTargets[index], renderer);
+      this.hasGPUUpdates = true;
 
       this.voxelsRendered[index] = true;
       if (this.voxelsRendered.every((value) => value)) {
@@ -183,6 +187,7 @@ export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
 
   public setAtlas(atlas: Uint8Array) {
     super.setAtlas(atlas);
+    this.hasGPUUpdates = false;
 
     if (this.internalTexture) {
       this.triggerGPUPush();
@@ -216,6 +221,9 @@ export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
         this.renderTargets,
         this.renderers,
       );
+
+      this.hasGPUUpdates = true;
+
       return;
     }
 
@@ -234,5 +242,21 @@ export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
 
     // Attention: super.getSlice does not work for more than one component at the moment!
     return super.getSlice(sliceNumber, viewType);
+  }
+
+  public getAtlas() {
+    if (this.hasGPUUpdates) {
+      this.pullAtlasFromGPU();
+    }
+
+    return super.getAtlas();
+  }
+
+  public toJSON() {
+    if (this.hasGPUUpdates) {
+      this.pullAtlasFromGPU();
+    }
+
+    return super.toJSON();
   }
 }
