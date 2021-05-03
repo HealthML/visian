@@ -1,5 +1,8 @@
+import { IDisposer } from "@visian/utils";
+import { reaction } from "mobx";
 import * as THREE from "three";
 
+import { VolumeRendererState } from "../../../../models";
 import { TextureAtlas } from "../../../texture-atlas";
 import fragmentShader from "../../shader/lao/lao.frag.glsl";
 import vertexShader from "../../shader/lao/lao.vert.glsl";
@@ -15,10 +18,13 @@ import { totalLAORays } from "./lao-computer";
 import { getLAODirectionTexture } from "./lao-directions";
 
 export class LAOMaterial extends THREE.ShaderMaterial {
+  private disposers: IDisposer[] = [];
+
   constructor(
     firstDerivativeTexture: THREE.Texture,
     secondDerivativeTexture: THREE.Texture,
     private previousFrameTexture: THREE.Texture,
+    state: VolumeRendererState,
   ) {
     super({
       vertexShader,
@@ -40,24 +46,38 @@ export class LAOMaterial extends THREE.ShaderMaterial {
 
     this.uniforms.uInputFirstDerivative.value = firstDerivativeTexture;
     this.uniforms.uInputSecondDerivative.value = secondDerivativeTexture;
+
+    this.disposers.push(
+      reaction(
+        () => state.image,
+        (atlas?: TextureAtlas) => {
+          if (!atlas) return;
+
+          this.uniforms.uVolume.value = atlas.getTexture();
+          this.uniforms.uVoxelCount.value = atlas.voxelCount;
+          this.uniforms.uAtlasGrid.value = atlas.atlasGrid;
+          this.uniforms.uStepSize.value = getStepSize(atlas);
+          this.uniforms.uUseFocus.value = false;
+        },
+      ),
+      reaction(
+        () => state.focus,
+        (atlas?: TextureAtlas) => {
+          if (atlas) {
+            this.uniforms.uFocus.value = atlas.getTexture();
+            this.uniforms.uUseFocus.value = true;
+          } else {
+            this.uniforms.uFocus.value = null;
+            this.uniforms.uUseFocus.value = false;
+          }
+        },
+      ),
+    );
   }
 
-  public setAtlas(atlas: TextureAtlas) {
-    this.uniforms.uVolume.value = atlas.getTexture();
-    this.uniforms.uVoxelCount.value = atlas.voxelCount;
-    this.uniforms.uAtlasGrid.value = atlas.atlasGrid;
-    this.uniforms.uStepSize.value = getStepSize(atlas);
-    this.uniforms.uUseFocus.value = false;
-  }
-
-  public setFocusAtlas(atlas?: TextureAtlas) {
-    if (atlas) {
-      this.uniforms.uFocus.value = atlas.getTexture();
-      this.uniforms.uUseFocus.value = true;
-    } else {
-      this.uniforms.uFocus.value = null;
-      this.uniforms.uUseFocus.value = false;
-    }
+  public dispose() {
+    super.dispose();
+    this.disposers.forEach((disposer) => disposer());
   }
 
   public setCameraPosition(position: THREE.Vector3) {

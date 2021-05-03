@@ -1,5 +1,5 @@
 import { ScreenAlignedQuad } from "@visian/utils";
-import { autorun, IReactionDisposer } from "mobx";
+import { autorun, IReactionDisposer, reaction } from "mobx";
 import * as THREE from "three";
 
 import { TextureAtlas } from "../../../texture-atlas";
@@ -47,6 +47,7 @@ export class LAOComputer implements IDisposable {
       firstDerivativeTexture,
       secondDerivativeTexture,
       this.getLAOTexture(),
+      volumeRenderer.state,
     );
 
     this.computationQuad = new ScreenAlignedQuad(this.laoMaterial);
@@ -92,6 +93,33 @@ export class LAOComputer implements IDisposable {
 
         this.update();
       }),
+      reaction(
+        () => volumeRenderer.state.image,
+        (atlas?: TextureAtlas) => {
+          if (!atlas) return;
+
+          this.outputRenderTarget.setSize(atlas.atlasSize.x, atlas.atlasSize.y);
+
+          if (Math.min(atlas.atlasSize.x, atlas.atlasSize.y) < quadSize) {
+            this.intermediateRenderTarget.setSize(
+              atlas.atlasSize.x,
+              atlas.atlasSize.y,
+            );
+
+            this.directFrames = true;
+          } else {
+            this.intermediateRenderTarget.setSize(quadSize, quadSize);
+
+            this.quadGrid.copy(atlas.atlasSize).divideScalar(quadSize).ceil();
+            this.quadCount = this.quadGrid.x * this.quadGrid.y;
+
+            this.directFrames = false;
+          }
+
+          this.update();
+        },
+      ),
+      reaction(() => volumeRenderer.state.focus, this.update),
     );
   }
 
@@ -218,36 +246,6 @@ export class LAOComputer implements IDisposable {
   private update = () => {
     this.dirty = true;
   };
-
-  public setAtlas(atlas: TextureAtlas) {
-    this.outputRenderTarget.setSize(atlas.atlasSize.x, atlas.atlasSize.y);
-
-    if (Math.min(atlas.atlasSize.x, atlas.atlasSize.y) < quadSize) {
-      this.intermediateRenderTarget.setSize(
-        atlas.atlasSize.x,
-        atlas.atlasSize.y,
-      );
-
-      this.directFrames = true;
-    } else {
-      this.intermediateRenderTarget.setSize(quadSize, quadSize);
-
-      this.quadGrid.copy(atlas.atlasSize).divideScalar(quadSize).ceil();
-      this.quadCount = this.quadGrid.x * this.quadGrid.y;
-
-      this.directFrames = false;
-    }
-
-    this.laoMaterial.setAtlas(atlas);
-
-    this.update();
-  }
-
-  public setFocusAtlas(atlas?: TextureAtlas) {
-    this.laoMaterial.setFocusAtlas(atlas);
-
-    this.update();
-  }
 
   public setCameraPosition(position: THREE.Vector3) {
     this.laoMaterial.setCameraPosition(position);
