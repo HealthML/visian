@@ -149,12 +149,11 @@ export class LAOComputer implements IDisposable {
   private renderInitialLAO() {
     this.laoMaterial.setPreviousDirections(0);
 
-    const previousRenderTarget = this.renderer.getRenderTarget();
     this.renderer.setRenderTarget(this.outputRenderTarget);
 
     this.computationQuad.renderWith(this.renderer);
 
-    this.renderer.setRenderTarget(previousRenderTarget);
+    this.renderer.setRenderTarget(null);
 
     this.laoMaterial.setPreviousDirections(8);
 
@@ -168,7 +167,6 @@ export class LAOComputer implements IDisposable {
   }
 
   private renderNextLAOFrame() {
-    const previousRenderTarget = this.renderer.getRenderTarget();
     this.renderer.setRenderTarget(this.intermediateRenderTarget);
 
     this.computationQuad.renderWith(
@@ -185,7 +183,7 @@ export class LAOComputer implements IDisposable {
           },
     );
 
-    this.renderer.setRenderTarget(previousRenderTarget);
+    this.renderer.setRenderTarget(null);
 
     if (this.directFrames || this.currentQuadId >= this.quadCount - 1) {
       this.laoMaterial.setPreviousDirections(
@@ -199,10 +197,8 @@ export class LAOComputer implements IDisposable {
   private copyToOutput() {
     if (!this.needsCopy) return;
 
-    const previousRenderTarget = this.renderer.getRenderTarget();
     this.renderer.setRenderTarget(this.outputRenderTarget);
 
-    const previousAutoClear = this.renderer.autoClear;
     this.renderer.autoClear = this.directFrames;
 
     if (this.directFrames) {
@@ -227,8 +223,8 @@ export class LAOComputer implements IDisposable {
 
     this.renderer.render(this.copyScene, this.copyCamera);
 
-    this.renderer.autoClear = previousAutoClear;
-    this.renderer.setRenderTarget(previousRenderTarget);
+    this.renderer.autoClear = true;
+    this.renderer.setRenderTarget(null);
 
     this.currentQuadId++;
 

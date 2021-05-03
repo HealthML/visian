@@ -169,7 +169,6 @@ export class GradientComputer implements IDisposable {
     this.gradientMaterial.uniforms.uInputDimensions.value = 1;
     this.gradientMaterial.setGradientMode(GradientMode.First);
 
-    const previousRenderTarget = this.renderer.getRenderTarget();
     this.renderer.setRenderTarget(this.firstDerivativeRenderTarget);
 
     const volumeTexture = this.textureAtlas.getTexture();
@@ -182,7 +181,7 @@ export class GradientComputer implements IDisposable {
     volumeTexture.magFilter = magFilter;
     volumeTexture.needsUpdate = true;
 
-    this.renderer.setRenderTarget(previousRenderTarget);
+    this.renderer.setRenderTarget(null);
 
     this.firstDerivativeDirty = false;
     const buffer = new Uint8Array(
@@ -221,12 +220,11 @@ export class GradientComputer implements IDisposable {
     this.gradientMaterial.uniforms.uInputDimensions.value = 3;
     this.gradientMaterial.setGradientMode(GradientMode.Second);
 
-    const previousRenderTarget = this.renderer.getRenderTarget();
     this.renderer.setRenderTarget(this.secondDerivativeRenderTarget);
 
     this.screenAlignedQuad.renderWith(this.renderer);
 
-    this.renderer.setRenderTarget(previousRenderTarget);
+    this.renderer.setRenderTarget(null);
 
     this.secondDerivativeDirty = false;
 
@@ -243,7 +241,6 @@ export class GradientComputer implements IDisposable {
     this.gradientMaterial.uniforms.uInputDimensions.value = 1;
     this.gradientMaterial.setGradientMode(GradientMode.Output);
 
-    const previousRenderTarget = this.renderer.getRenderTarget();
     this.renderer.setRenderTarget(this.outputDerivativeRenderTarget);
 
     const volumeTexture = this.textureAtlas.getTexture();
@@ -256,7 +253,7 @@ export class GradientComputer implements IDisposable {
     volumeTexture.magFilter = magFilter;
     volumeTexture.needsUpdate = true;
 
-    this.renderer.setRenderTarget(previousRenderTarget);
+    this.renderer.setRenderTarget(null);
 
     this.outputDerivativeDirty = false;
 

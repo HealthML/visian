@@ -71,7 +71,6 @@ export class ResolutionComputer implements IDisposable {
   public tick() {
     if (this.fullResolutionFlushed) return;
 
-    const previousRenderTarget = this.renderer.getRenderTarget();
     this.renderer.setRenderTarget(this.intermediateRenderTarget);
 
     const resolutionGridSize = Math.pow(2, this.currentResolutionStep);
@@ -96,7 +95,6 @@ export class ResolutionComputer implements IDisposable {
 
     this.renderer.setRenderTarget(this.outputRenderTarget);
 
-    const previousAutoClear = this.renderer.autoClear;
     this.renderer.autoClear = false;
 
     // Position resolution quad.
@@ -114,8 +112,8 @@ export class ResolutionComputer implements IDisposable {
 
     this.renderer.render(this.resolutionScene, this.resolutionCamera);
 
-    this.renderer.autoClear = previousAutoClear;
-    this.renderer.setRenderTarget(previousRenderTarget);
+    this.renderer.autoClear = true;
+    this.renderer.setRenderTarget(null);
 
     this.subScreenSpaceId++;
 
