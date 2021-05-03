@@ -6,7 +6,13 @@ import Stats from "three/examples/jsm/libs/stats.module";
 
 import { VolumeRendererState } from "../../models";
 import { IDisposable } from "../types";
-import { FlyControls, LightingModeType, ResolutionComputer } from "./utils";
+import {
+  FlyControls,
+  GradientComputer,
+  LAOComputer,
+  LightingModeType,
+  ResolutionComputer,
+} from "./utils";
 import Volume from "./volume";
 import VolumeMaterial from "./volume-material";
 
@@ -31,6 +37,11 @@ export class VolumeRenderer implements IDisposable {
   private lazyRenderTriggered = true;
 
   private resolutionComputer: ResolutionComputer;
+  private gradientComputer: GradientComputer;
+  private laoComputer: LAOComputer;
+
+  private workingVector = new THREE.Vector3();
+  private workingMatrix = new THREE.Matrix4();
 
   private disposers: IDisposer[] = [];
 
@@ -63,13 +74,27 @@ export class VolumeRenderer implements IDisposable {
 
     document.addEventListener("keydown", this.onKeyDown);
 
-    this.volume = new Volume(this, this.renderer);
+    this.gradientComputer = new GradientComputer(this.renderer, this);
+    this.laoComputer = new LAOComputer(
+      this.renderer,
+      this,
+      this.gradientComputer.getFirstDerivative(),
+      this.gradientComputer.getSecondDerivative(),
+    );
+
+    this.volume = new Volume(
+      this,
+      this.gradientComputer.getFirstDerivative(),
+      this.gradientComputer.getSecondDerivative(),
+      this.gradientComputer.getOutputDerivative(),
+      this.laoComputer.getLAOTexture(),
+    );
     // Position the volume in a reasonable height for XR.
     this.volume.position.set(0, 1.2, 0);
     this.scene.add(this.volume);
     this.volume.onBeforeRender = (_renderer, _scene, camera) => {
       if (this.renderer.xr.isPresenting) {
-        this.volume.updateCameraPosition(camera);
+        this.updateCameraPosition(camera);
       }
     };
 
@@ -132,6 +157,8 @@ export class VolumeRenderer implements IDisposable {
     this.flyControls.dispose();
     document.removeEventListener("keydown", this.onKeyDown);
     document.removeEventListener("click", this.toggleFly);
+    this.gradientComputer.dispose();
+    this.laoComputer.dispose();
     this.disposers.forEach((disposer) => disposer());
   };
 
@@ -152,7 +179,8 @@ export class VolumeRenderer implements IDisposable {
   };
 
   private animate = () => {
-    this.volume.tick();
+    this.gradientComputer.tick();
+    this.laoComputer.tick();
 
     if (this.lazyRenderTriggered) {
       this.resolutionComputer.restart();
@@ -204,10 +232,25 @@ export class VolumeRenderer implements IDisposable {
       this.state.onTransferFunctionChange();
     }
 
-    this.volume.updateMatrixWorld();
-    this.volume.updateCameraPosition(this.camera);
+    this.updateCameraPosition();
     this.lazyRender();
   };
+
+  /**
+   * @see https://davidpeicho.github.io/blog/cloud-raymarching-walkthrough-part1/
+   */
+  private updateCameraPosition(camera: THREE.Camera = this.camera) {
+    this.volume.updateMatrixWorld();
+
+    this.workingVector.setFromMatrixPosition(camera.matrixWorld);
+    this.workingVector.applyMatrix4(
+      this.workingMatrix.copy(this.volume.matrixWorld).invert(),
+    );
+
+    this.volume.setCameraPosition(this.workingVector);
+    this.gradientComputer.setCameraPosition(this.workingVector);
+    this.laoComputer.setCameraPosition(this.workingVector);
+  }
 
   private onFlyControlsLock = () => {
     this.orbitControls.enabled = false;

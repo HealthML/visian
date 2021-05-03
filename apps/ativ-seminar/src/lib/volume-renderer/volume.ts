@@ -10,10 +10,22 @@ import type VolumeRenderer from "./volume-renderer";
 /** A volume domain. */
 class Volume extends THREE.Mesh implements IDisposable {
   private disposers: IDisposer[] = [];
-  constructor(volumeRenderer: VolumeRenderer, renderer: THREE.WebGLRenderer) {
+  constructor(
+    volumeRenderer: VolumeRenderer,
+    firstDerivative: THREE.Texture,
+    secondDerivative: THREE.Texture,
+    outputDerivative: THREE.Texture,
+    lao: THREE.Texture,
+  ) {
     super(
       new THREE.BoxGeometry(1, 1, 1),
-      new VolumeMaterial(volumeRenderer, renderer),
+      new VolumeMaterial(
+        volumeRenderer,
+        firstDerivative,
+        secondDerivative,
+        outputDerivative,
+        lao,
+      ),
     );
 
     // The coordinate system in medical images usually has the object
@@ -34,12 +46,8 @@ class Volume extends THREE.Mesh implements IDisposable {
     );
   }
 
-  public tick() {
-    (this.material as VolumeMaterial).tick();
-  }
-
-  public updateCameraPosition(camera: THREE.Camera) {
-    (this.material as VolumeMaterial).updateCameraPosition(this, camera);
+  public setCameraPosition(position: THREE.Vector3) {
+    (this.material as VolumeMaterial).setCameraPosition(position);
   }
 
   public dispose() {
