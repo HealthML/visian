@@ -1,5 +1,8 @@
+import { IDisposer } from "@visian/utils";
+import { reaction } from "mobx";
 import * as THREE from "three";
 
+import { VolumeRendererState } from "../../../../models";
 import { TextureAtlas } from "../../../texture-atlas";
 import gradientFragmentShader from "../../shader/gradient/gradient.frag.glsl";
 import gradientVertexShader from "../../shader/gradient/gradient.vert.glsl";
@@ -18,9 +21,12 @@ export enum GradientMode {
 }
 
 export class GradientMaterial extends THREE.ShaderMaterial {
+  private disposers: IDisposer[] = [];
+
   constructor(
     private firstDerivativeTexture: THREE.Texture,
     private secondDerivativeTexture: THREE.Texture,
+    state: VolumeRendererState,
   ) {
     super({
       fragmentShader: gradientFragmentShader,
@@ -39,25 +45,39 @@ export class GradientMaterial extends THREE.ShaderMaterial {
 
     this.uniforms.uInputFirstDerivative.value = firstDerivativeTexture;
     this.uniforms.uInputSecondDerivative.value = secondDerivativeTexture;
+
+    this.disposers.push(
+      reaction(
+        () => state.image,
+        (atlas?: TextureAtlas) => {
+          if (!atlas) return;
+
+          this.uniforms.uVolume.value = atlas.getTexture();
+          this.uniforms.uVoxelCount.value = atlas.voxelCount;
+          this.uniforms.uAtlasGrid.value = atlas.atlasGrid;
+          this.uniforms.uStepSize.value = getStepSize(atlas);
+
+          this.uniforms.uUseFocus.value = false;
+        },
+      ),
+      reaction(
+        () => state.focus,
+        (atlas?: TextureAtlas) => {
+          if (atlas) {
+            this.uniforms.uFocus.value = atlas.getTexture();
+            this.uniforms.uUseFocus.value = true;
+          } else {
+            this.uniforms.uFocus.value = null;
+            this.uniforms.uUseFocus.value = false;
+          }
+        },
+      ),
+    );
   }
 
-  public setAtlas(atlas: TextureAtlas) {
-    this.uniforms.uVolume.value = atlas.getTexture();
-    this.uniforms.uVoxelCount.value = atlas.voxelCount;
-    this.uniforms.uAtlasGrid.value = atlas.atlasGrid;
-    this.uniforms.uStepSize.value = getStepSize(atlas);
-
-    this.uniforms.uUseFocus.value = false;
-  }
-
-  public setFocusAtlas(atlas?: TextureAtlas) {
-    if (atlas) {
-      this.uniforms.uFocus.value = atlas.getTexture();
-      this.uniforms.uUseFocus.value = true;
-    } else {
-      this.uniforms.uFocus.value = null;
-      this.uniforms.uUseFocus.value = false;
-    }
+  public dispose() {
+    super.dispose();
+    this.disposers.forEach((disposer) => disposer());
   }
 
   public setGradientMode(mode: GradientMode) {

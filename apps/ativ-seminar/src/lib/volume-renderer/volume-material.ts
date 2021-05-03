@@ -121,7 +121,6 @@ class VolumeMaterial extends THREE.ShaderMaterial implements IDisposable {
           this.uniforms.uAtlasGrid.value = atlas.atlasGrid;
           this.uniforms.uStepSize.value = getStepSize(atlas);
 
-          this.gradientComputer.setAtlas(atlas);
           this.laoComputer.setAtlas(atlas);
         },
       ),
@@ -134,7 +133,6 @@ class VolumeMaterial extends THREE.ShaderMaterial implements IDisposable {
             this.uniforms.uFocus.value = null;
           }
 
-          this.gradientComputer.setFocusAtlas(atlas);
           this.laoComputer.setFocusAtlas(atlas);
         },
       ),

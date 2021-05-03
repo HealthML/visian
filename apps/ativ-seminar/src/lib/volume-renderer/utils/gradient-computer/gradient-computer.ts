@@ -1,5 +1,5 @@
 import { ScreenAlignedQuad } from "@visian/utils";
-import { autorun, IReactionDisposer } from "mobx";
+import { autorun, IReactionDisposer, reaction } from "mobx";
 import * as THREE from "three";
 import tc from "tinycolor2";
 
@@ -36,11 +36,38 @@ export class GradientComputer implements IDisposable {
     this.gradientMaterial = new GradientMaterial(
       this.firstDerivativeRenderTarget.texture,
       this.secondDerivativeRenderTarget.texture,
+      volumeRenderer.state,
     );
 
     this.screenAlignedQuad = new ScreenAlignedQuad(this.gradientMaterial);
 
     this.reactionDisposers.push(
+      reaction(
+        () => volumeRenderer.state.image,
+        (atlas?: TextureAtlas) => {
+          if (!atlas) return;
+
+          this.firstDerivativeRenderTarget.setSize(
+            atlas.atlasSize.x,
+            atlas.atlasSize.y,
+          );
+          this.secondDerivativeRenderTarget.setSize(
+            atlas.atlasSize.x,
+            atlas.atlasSize.y,
+          );
+          this.outputDerivativeRenderTarget.setSize(
+            atlas.atlasSize.x,
+            atlas.atlasSize.y,
+          );
+
+          this.textureAtlas = atlas;
+
+          this.updateFirstDerivative();
+          this.updateSecondDerivative();
+          this.updateOutputDerivative();
+        },
+      ),
+      reaction(() => volumeRenderer.state.focus, this.updateOutputDerivative),
       autorun(() => {
         this.gradientMaterial.uniforms.uUseFocus.value =
           volumeRenderer.state.shouldUseFocusVolume;
@@ -111,35 +138,6 @@ export class GradientComputer implements IDisposable {
     }
   }
 
-  public setAtlas(atlas: TextureAtlas) {
-    this.firstDerivativeRenderTarget.setSize(
-      atlas.atlasSize.x,
-      atlas.atlasSize.y,
-    );
-    this.secondDerivativeRenderTarget.setSize(
-      atlas.atlasSize.x,
-      atlas.atlasSize.y,
-    );
-    this.outputDerivativeRenderTarget.setSize(
-      atlas.atlasSize.x,
-      atlas.atlasSize.y,
-    );
-
-    this.textureAtlas = atlas;
-
-    this.gradientMaterial.setAtlas(atlas);
-
-    this.updateFirstDerivative();
-    this.updateSecondDerivative();
-    this.updateOutputDerivative();
-  }
-
-  public setFocusAtlas(atlas?: TextureAtlas) {
-    this.gradientMaterial.setFocusAtlas(atlas);
-
-    this.updateOutputDerivative();
-  }
-
   public setCameraPosition(position: THREE.Vector3) {
     this.gradientMaterial.setCameraPosition(position);
 
@@ -192,7 +190,7 @@ export class GradientComputer implements IDisposable {
         this.firstDerivativeRenderTarget.height *
         4,
     );
-    this.volumeRenderer.renderer.readRenderTargetPixels(
+    this.renderer.readRenderTargetPixels(
       this.firstDerivativeRenderTarget,
       0,
       0,
@@ -235,9 +233,9 @@ export class GradientComputer implements IDisposable {
     this.volumeRenderer.lazyRender();
   }
 
-  private updateOutputDerivative() {
+  private updateOutputDerivative = () => {
     this.outputDerivativeDirty = true;
-  }
+  };
 
   private renderOutputDerivative() {
     if (!this.textureAtlas) return;
