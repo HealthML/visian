@@ -80,49 +80,49 @@ const HistogramBar = styled.div`
 `;
 
 export const Settings: React.FC<SettingsProps> = observer((props) => {
-  const { renderer, parentElement, ...rest } = props;
+  const { state, parentElement, ...rest } = props;
 
   const setFocusColor = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
-      renderer.setFocusColor(event.target.value);
+      state.setFocusColor(event.target.value);
     },
-    [renderer],
+    [state],
   );
 
   const setShouldUseFocusVolume = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
-      renderer.setShouldUseFocusVolume(event.target.checked);
+      state.setShouldUseFocusVolume(event.target.checked);
     },
-    [renderer],
+    [state],
   );
 
   const setLightingMode = useCallback(
     (value: LightingModeType) => {
-      renderer.setLightingMode(lightingModes[value]);
+      state.setLightingMode(lightingModes[value]);
     },
-    [renderer],
+    [state],
   );
 
   const setTransferFunction = useCallback(
     (value: TransferFunctionType) => {
-      renderer.setTransferFunction(transferFunctions[value]);
+      state.setTransferFunction(transferFunctions[value]);
     },
-    [renderer],
+    [state],
   );
 
   const setCustomTFImage = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
       const files = event.target.files;
       if (!files?.length) return;
-      renderer.setCustomTFImage(files[0]);
+      state.setCustomTFImage(files[0]);
     },
-    [renderer],
+    [state],
   );
 
   const histogram =
-    renderer.transferFunction.type === TransferFunctionType.FCEdges
-      ? renderer?.gradientHistogram
-      : renderer?.densityHistogram;
+    state.transferFunction.type === TransferFunctionType.FCEdges
+      ? state.gradientHistogram
+      : state.densityHistogram;
   return (
     <Container
       {...rest}
@@ -136,8 +136,8 @@ export const Settings: React.FC<SettingsProps> = observer((props) => {
         min={0}
         max={1}
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        onChange={renderer.setBackgroundValue as any}
-        value={renderer.backgroundValue}
+        onChange={state.setBackgroundValue as any}
+        value={state.backgroundValue}
       />
       <SpacedSliderField
         label="Opacity"
@@ -145,8 +145,8 @@ export const Settings: React.FC<SettingsProps> = observer((props) => {
         min={0}
         max={1}
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        onChange={renderer.setImageOpacity as any}
-        value={renderer.imageOpacity}
+        onChange={state.setImageOpacity as any}
+        value={state.imageOpacity}
         scaleType="quadratic"
       />
       <Switch
@@ -169,16 +169,14 @@ export const Settings: React.FC<SettingsProps> = observer((props) => {
           },
         ]}
         onChange={setLightingMode}
-        value={
-          renderer.suppressedLightingMode?.type || renderer.lightingMode.type
-        }
+        value={state.suppressedLightingMode?.type || state.lightingMode.type}
       />
       <StyledCheckboxRow>
         <input
           type="checkbox"
-          checked={renderer?.shouldUseFocusVolume}
+          checked={state.shouldUseFocusVolume}
           onChange={setShouldUseFocusVolume}
-          disabled={!renderer?.isFocusLoaded}
+          disabled={!state.isFocusLoaded}
         />
         <StyledCheckboxText text="Use focus volume?" />
       </StyledCheckboxRow>
@@ -192,10 +190,10 @@ export const Settings: React.FC<SettingsProps> = observer((props) => {
           { value: TransferFunctionType.Custom, label: "Custom" },
         ]}
         onChange={setTransferFunction}
-        value={renderer.transferFunction.type}
+        value={state.transferFunction.type}
       />
-      {(renderer.transferFunction.type === TransferFunctionType.Density ||
-        renderer.transferFunction.type === TransferFunctionType.FCEdges) && (
+      {(state.transferFunction.type === TransferFunctionType.Density ||
+        state.transferFunction.type === TransferFunctionType.FCEdges) && (
         <HistogramWrapper>
           {histogram && (
             <Histogram>
@@ -221,28 +219,28 @@ export const Settings: React.FC<SettingsProps> = observer((props) => {
             min={0}
             max={1}
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            onChange={renderer.setRangeLimits as any}
-            value={renderer.rangeLimits}
+            onChange={state.setRangeLimits as any}
+            value={state.rangeLimits}
           />
         </HistogramWrapper>
       )}
-      {renderer.transferFunction.type === TransferFunctionType.FCCutaway && (
+      {state.transferFunction.type === TransferFunctionType.FCCutaway && (
         <SpacedSliderField
           label="Cutaway Angle"
           showValueLabel
           min={0}
           max={Math.PI}
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          onChange={renderer.setCutAwayConeAngle as any}
-          value={renderer.cutAwayConeAngle}
+          onChange={state.setCutAwayConeAngle as any}
+          value={state.cutAwayConeAngle}
         />
       )}
-      {(renderer.transferFunction.type === TransferFunctionType.FCEdges ||
-        renderer.transferFunction.type === TransferFunctionType.FCCutaway) && (
+      {(state.transferFunction.type === TransferFunctionType.FCEdges ||
+        state.transferFunction.type === TransferFunctionType.FCCutaway) && (
         <>
           <InputLabel text="Focus Volume Color" />
           <StyledTextInput
-            defaultValue={renderer?.focusColor || "rgba(255,255,255,1)"}
+            defaultValue={state.focusColor || "rgba(255,255,255,1)"}
             onChange={setFocusColor}
           />
           <SpacedSliderField
@@ -251,13 +249,13 @@ export const Settings: React.FC<SettingsProps> = observer((props) => {
             min={0}
             max={1}
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            onChange={renderer.setContextOpacity as any}
-            value={renderer.contextOpacity}
+            onChange={state.setContextOpacity as any}
+            value={state.contextOpacity}
             scaleType="quadratic"
           />
         </>
       )}
-      {renderer.transferFunction.type === TransferFunctionType.Custom && (
+      {state.transferFunction.type === TransferFunctionType.Custom && (
         <>
           <InputLabel text="Transfer Image" />
           <StyledFileInput type="file" onChange={setCustomTFImage} />

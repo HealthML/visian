@@ -1,4 +1,4 @@
-import { autorun, IReactionDisposer } from "mobx";
+import { autorun, IReactionDisposer, reaction } from "mobx";
 import * as THREE from "three";
 import tc from "tinycolor2";
 
@@ -70,10 +70,11 @@ class VolumeMaterial extends THREE.ShaderMaterial implements IDisposable {
 
     this.reactionDisposers.push(
       autorun(() => {
-        this.uniforms.uUseFocus.value = volumeRenderer.shouldUseFocusVolume;
+        this.uniforms.uUseFocus.value =
+          volumeRenderer.state.shouldUseFocusVolume;
       }),
       autorun(() => {
-        const color = tc(volumeRenderer.focusColor).toRgb();
+        const color = tc(volumeRenderer.state.focusColor).toRgb();
         this.uniforms.uFocusColor.value = [
           color.r / 255,
           color.g / 255,
@@ -83,58 +84,66 @@ class VolumeMaterial extends THREE.ShaderMaterial implements IDisposable {
       }),
       autorun(() => {
         this.uniforms.uTransferFunction.value =
-          volumeRenderer.transferFunction.type;
+          volumeRenderer.state.transferFunction.type;
       }),
       autorun(() => {
-        this.uniforms.uOpacity.value = volumeRenderer.imageOpacity;
+        this.uniforms.uOpacity.value = volumeRenderer.state.imageOpacity;
       }),
       autorun(() => {
-        this.uniforms.uContextOpacity.value = volumeRenderer.contextOpacity;
+        this.uniforms.uContextOpacity.value =
+          volumeRenderer.state.contextOpacity;
       }),
       autorun(() => {
-        this.uniforms.uLimitLow.value = volumeRenderer.rangeLimits[0];
-        this.uniforms.uLimitHigh.value = volumeRenderer.rangeLimits[1];
+        this.uniforms.uLimitLow.value = volumeRenderer.state.rangeLimits[0];
+        this.uniforms.uLimitHigh.value = volumeRenderer.state.rangeLimits[1];
       }),
       autorun(() => {
-        this.uniforms.uConeAngle.value = volumeRenderer.cutAwayConeAngle;
+        this.uniforms.uConeAngle.value = volumeRenderer.state.cutAwayConeAngle;
       }),
       autorun(() => {
-        this.uniforms.uLightingMode.value = volumeRenderer.lightingMode.type;
+        this.uniforms.uLightingMode.value =
+          volumeRenderer.state.lightingMode.type;
       }),
       autorun(() => {
-        this.uniforms.uLaoIntensity.value = volumeRenderer.laoIntensity;
+        this.uniforms.uLaoIntensity.value = volumeRenderer.state.laoIntensity;
       }),
       autorun(() => {
-        this.uniforms.uCustomTFTexture.value = volumeRenderer.customTFTexture;
+        this.uniforms.uCustomTFTexture.value =
+          volumeRenderer.state.customTFTexture;
       }),
+      reaction(
+        () => volumeRenderer.state.image,
+        (atlas?: TextureAtlas) => {
+          if (!atlas) return;
+
+          this.uniforms.uVolume.value = atlas.getTexture();
+          this.uniforms.uVoxelCount.value = atlas.voxelCount;
+          this.uniforms.uAtlasGrid.value = atlas.atlasGrid;
+          this.uniforms.uStepSize.value = getStepSize(atlas);
+
+          this.gradientComputer.setAtlas(atlas);
+          this.laoComputer.setAtlas(atlas);
+        },
+      ),
+      reaction(
+        () => volumeRenderer.state.focus,
+        (atlas?: TextureAtlas) => {
+          if (atlas) {
+            this.uniforms.uFocus.value = atlas.getTexture();
+          } else {
+            this.uniforms.uFocus.value = null;
+          }
+
+          this.gradientComputer.setFocusAtlas(atlas);
+          this.laoComputer.setFocusAtlas(atlas);
+        },
+      ),
     );
   }
 
   public tick() {
     this.gradientComputer.tick();
     this.laoComputer.tick();
-  }
-
-  /** Updates the rendered atlas. */
-  public setAtlas(atlas: TextureAtlas) {
-    this.uniforms.uVolume.value = atlas.getTexture();
-    this.uniforms.uVoxelCount.value = atlas.voxelCount;
-    this.uniforms.uAtlasGrid.value = atlas.atlasGrid;
-    this.uniforms.uStepSize.value = getStepSize(atlas);
-
-    this.gradientComputer.setAtlas(atlas);
-    this.laoComputer.setAtlas(atlas);
-  }
-
-  public setFocusAtlas(atlas?: TextureAtlas) {
-    if (atlas) {
-      this.uniforms.uFocus.value = atlas.getTexture();
-    } else {
-      this.uniforms.uFocus.value = null;
-    }
-
-    this.gradientComputer.setFocusAtlas(atlas);
-    this.laoComputer.setFocusAtlas(atlas);
   }
 
   /**

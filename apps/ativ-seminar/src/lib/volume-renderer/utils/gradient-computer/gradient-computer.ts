@@ -43,12 +43,12 @@ export class GradientComputer implements IDisposable {
     this.reactionDisposers.push(
       autorun(() => {
         this.gradientMaterial.uniforms.uUseFocus.value =
-          volumeRenderer.shouldUseFocusVolume;
+          volumeRenderer.state.shouldUseFocusVolume;
 
         this.updateOutputDerivative();
       }),
       autorun(() => {
-        const color = tc(volumeRenderer.focusColor).toRgb();
+        const color = tc(volumeRenderer.state.focusColor).toRgb();
         this.gradientMaterial.uniforms.uFocusColor.value = [
           color.r / 255,
           color.g / 255,
@@ -58,33 +58,33 @@ export class GradientComputer implements IDisposable {
       }),
       autorun(() => {
         this.gradientMaterial.uniforms.uTransferFunction.value =
-          volumeRenderer.transferFunction.type;
+          volumeRenderer.state.transferFunction.type;
 
         this.updateOutputDerivative();
       }),
       autorun(() => {
         this.gradientMaterial.uniforms.uContextOpacity.value =
-          volumeRenderer.contextOpacity;
+          volumeRenderer.state.contextOpacity;
 
         this.updateOutputDerivative();
       }),
       autorun(() => {
         this.gradientMaterial.uniforms.uLimitLow.value =
-          volumeRenderer.rangeLimits[0];
+          volumeRenderer.state.rangeLimits[0];
         this.gradientMaterial.uniforms.uLimitHigh.value =
-          volumeRenderer.rangeLimits[1];
+          volumeRenderer.state.rangeLimits[1];
 
         this.updateOutputDerivative();
       }),
       autorun(() => {
         this.gradientMaterial.uniforms.uConeAngle.value =
-          volumeRenderer.cutAwayConeAngle;
+          volumeRenderer.state.cutAwayConeAngle;
 
         this.updateOutputDerivative();
       }),
       autorun(() => {
         this.gradientMaterial.uniforms.uCustomTFTexture.value =
-          volumeRenderer.customTFTexture;
+          volumeRenderer.state.customTFTexture;
 
         this.updateOutputDerivative();
       }),
@@ -104,7 +104,7 @@ export class GradientComputer implements IDisposable {
       this.renderSecondDerivative();
     }
     if (
-      this.volumeRenderer.lightingMode.needsNormals &&
+      this.volumeRenderer.state.lightingMode.needsNormals &&
       this.outputDerivativeDirty
     ) {
       this.renderOutputDerivative();
@@ -143,7 +143,7 @@ export class GradientComputer implements IDisposable {
   public setCameraPosition(position: THREE.Vector3) {
     this.gradientMaterial.setCameraPosition(position);
 
-    if (this.volumeRenderer.transferFunction.updateNormalsOnCameraMove) {
+    if (this.volumeRenderer.state.transferFunction.updateNormalsOnCameraMove) {
       this.updateOutputDerivative();
     }
   }
@@ -208,7 +208,7 @@ export class GradientComputer implements IDisposable {
       gradientMagnitudes.push(workingVector.length());
     }
 
-    this.volumeRenderer.setGradientHistogram(
+    this.volumeRenderer.state.setGradientHistogram(
       generateHistogram(gradientMagnitudes),
     );
 

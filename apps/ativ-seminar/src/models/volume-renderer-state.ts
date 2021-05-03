@@ -1,0 +1,220 @@
+import { action, computed, makeObservable, observable } from "mobx";
+import * as THREE from "three";
+import tc from "tinycolor2";
+
+import { TextureAtlas } from "../lib/texture-atlas";
+import {
+  generateHistogram,
+  LightingMode,
+  lightingModes,
+  LightingModeType,
+  TransferFunction,
+  transferFunctions,
+  TransferFunctionType,
+} from "../lib/volume-renderer";
+
+export class VolumeRendererState {
+  public isImageLoaded = false;
+  public image?: TextureAtlas;
+  public focus?: TextureAtlas;
+  public densityHistogram?: [number[], number, number];
+  public gradientHistogram?: [number[], number, number];
+  public backgroundValue = 0;
+  public shouldUseFocusVolume = false;
+  public focusColor = "rgba(255, 255, 255, 1)";
+  public transferFunction = transferFunctions[TransferFunctionType.Density];
+  public lightingMode = lightingModes[LightingModeType.LAO];
+  public suppressedLightingMode?: LightingMode;
+  public laoIntensity = 1;
+  public imageOpacity = 1;
+  public contextOpacity = 0.4;
+  public densityRangeLimits: [number, number] = [0, 1];
+  public edgeRangeLimits: [number, number] = [0.1, 1];
+  public rangeLimits: [number, number] = this.edgeRangeLimits;
+  public cutAwayConeAngle = 1;
+  public customTFTexture?: THREE.Texture;
+  public isFocusLoaded = false;
+
+  public lightingTimeout?: NodeJS.Timer;
+
+  constructor() {
+    makeObservable<this, "setCustomTFTexture" | "setFocusLoaded">(this, {
+      isImageLoaded: observable,
+      image: observable,
+      focus: observable,
+      densityHistogram: observable.ref,
+      gradientHistogram: observable.ref,
+      backgroundValue: observable,
+      shouldUseFocusVolume: observable,
+      focusColor: observable,
+      transferFunction: observable,
+      lightingMode: observable,
+      suppressedLightingMode: observable,
+      laoIntensity: observable,
+      imageOpacity: observable,
+      contextOpacity: observable,
+      rangeLimits: observable,
+      cutAwayConeAngle: observable,
+      customTFTexture: observable.ref,
+      isFocusLoaded: observable,
+      setImage: action,
+      setFocus: action,
+      setGradientHistogram: action,
+      setBackgroundValue: action,
+      setShouldUseFocusVolume: action,
+      setFocusColor: action,
+      setTransferFunction: action,
+      setLightingMode: action,
+      setLaoIntensity: action,
+      setImageOpacity: action,
+      setContextOpacity: action,
+      setRangeLimits: action,
+      setCutAwayConeAngle: action,
+      setCustomTFTexture: action,
+      setFocusLoaded: action,
+      setSuppressedLightingMode: action,
+    });
+  }
+
+  @computed
+  public get backgroundColor() {
+    return `rgb(${this.backgroundValue * 255},${this.backgroundValue * 255},${
+      this.backgroundValue * 255
+    })`;
+  }
+
+  /** Sets the base image to be rendered. */
+  public setImage = (image: TextureAtlas) => {
+    this.isImageLoaded = true;
+    this.image = image;
+    this.densityHistogram = generateHistogram(image.getAtlas());
+    this.setShouldUseFocusVolume(false);
+    this.onTransferFunctionChange();
+  };
+
+  public setFocus = (focus?: TextureAtlas) => {
+    this.onTransferFunctionChange();
+    this.focus = focus;
+
+    this.setShouldUseFocusVolume(Boolean(focus));
+    this.setFocusLoaded(Boolean(focus));
+  };
+
+  protected setFocusLoaded(value: boolean) {
+    this.isFocusLoaded = value;
+  }
+
+  public setGradientHistogram(histogram: [number[], number, number]) {
+    this.gradientHistogram = histogram;
+  }
+
+  public setBackgroundValue = (value: number) => {
+    this.backgroundValue = Math.max(0, Math.min(1, value));
+  };
+
+  public setShouldUseFocusVolume = (shouldUseFocusVolume: boolean) => {
+    this.shouldUseFocusVolume = shouldUseFocusVolume;
+  };
+
+  public setFocusColor = (value: string) => {
+    try {
+      this.focusColor = tc(value).toRgbString();
+    } catch {
+      // Intentionally left blank
+    }
+  };
+
+  public setTransferFunction = (value: TransferFunction) => {
+    if (this.transferFunction.type === TransferFunctionType.Density) {
+      this.densityRangeLimits = this.rangeLimits;
+    } else if (this.transferFunction.type === TransferFunctionType.FCEdges) {
+      this.edgeRangeLimits = this.rangeLimits;
+    }
+
+    this.transferFunction = value;
+    this.laoIntensity = value.defaultLAOIntensity;
+
+    if (this.transferFunction.type === TransferFunctionType.Density) {
+      this.rangeLimits = this.densityRangeLimits;
+    } else if (this.transferFunction.type === TransferFunctionType.FCEdges) {
+      this.rangeLimits = this.edgeRangeLimits;
+    }
+  };
+
+  public setLightingMode = (value: LightingMode) => {
+    this.lightingMode = value;
+
+    if (value.type === LightingModeType.LAO) {
+      this.laoIntensity = this.transferFunction.defaultLAOIntensity;
+    }
+  };
+
+  public setSuppressedLightingMode = (value?: LightingMode) => {
+    this.suppressedLightingMode = value;
+  };
+
+  public setLaoIntensity = (value: number) => {
+    this.laoIntensity = Math.max(0, value);
+  };
+
+  public setImageOpacity = (value: number) => {
+    this.imageOpacity = Math.max(0, Math.min(1, value));
+  };
+
+  public setContextOpacity = (value: number) => {
+    this.onTransferFunctionChange();
+
+    this.contextOpacity = Math.max(0, Math.min(1, value));
+  };
+
+  public onTransferFunctionChange = () => {
+    if (!this.suppressedLightingMode) {
+      this.setSuppressedLightingMode(this.lightingMode);
+      this.setLightingMode(lightingModes[LightingModeType.None]);
+    }
+
+    if (this.lightingTimeout) {
+      clearTimeout(this.lightingTimeout);
+    }
+    this.lightingTimeout = setTimeout(() => {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      this.setLightingMode(this.suppressedLightingMode!);
+      this.setSuppressedLightingMode(undefined);
+      this.lightingTimeout = undefined;
+    }, 200);
+  };
+
+  public setRangeLimits = (value: [number, number]) => {
+    this.onTransferFunctionChange();
+
+    this.rangeLimits = [
+      Math.max(0, Math.min(1, value[0])),
+      Math.max(0, Math.min(1, value[1])),
+    ];
+  };
+
+  public setCutAwayConeAngle = (radians: number) => {
+    this.onTransferFunctionChange();
+
+    this.cutAwayConeAngle = radians;
+  };
+
+  protected setCustomTFTexture(texture: THREE.Texture) {
+    this.customTFTexture = texture;
+  }
+
+  public setCustomTFImage = (file: File) => {
+    const reader = new FileReader();
+    reader.addEventListener(
+      "load",
+      () => {
+        new THREE.TextureLoader().load(reader.result as string, (texture) => {
+          this.setCustomTFTexture(texture);
+        });
+      },
+      false,
+    );
+
+    reader.readAsDataURL(file);
+  };
+}

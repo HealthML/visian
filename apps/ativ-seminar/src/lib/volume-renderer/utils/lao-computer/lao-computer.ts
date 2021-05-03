@@ -62,32 +62,33 @@ export class LAOComputer implements IDisposable {
     this.reactionDisposers.push(
       autorun(() => {
         this.laoMaterial.uniforms.uTransferFunction.value =
-          volumeRenderer.transferFunction.type;
+          volumeRenderer.state.transferFunction.type;
 
         this.update();
       }),
       autorun(() => {
-        this.laoMaterial.uniforms.uOpacity.value = volumeRenderer.imageOpacity;
+        this.laoMaterial.uniforms.uOpacity.value =
+          volumeRenderer.state.imageOpacity;
 
         this.update();
       }),
       autorun(() => {
         this.laoMaterial.uniforms.uContextOpacity.value =
-          volumeRenderer.contextOpacity;
+          volumeRenderer.state.contextOpacity;
 
         this.update();
       }),
       autorun(() => {
         this.laoMaterial.uniforms.uLimitLow.value =
-          volumeRenderer.rangeLimits[0];
+          volumeRenderer.state.rangeLimits[0];
         this.laoMaterial.uniforms.uLimitHigh.value =
-          volumeRenderer.rangeLimits[1];
+          volumeRenderer.state.rangeLimits[1];
 
         this.update();
       }),
       autorun(() => {
         this.laoMaterial.uniforms.uConeAngle.value =
-          volumeRenderer.cutAwayConeAngle;
+          volumeRenderer.state.cutAwayConeAngle;
 
         this.update();
       }),
@@ -104,7 +105,7 @@ export class LAOComputer implements IDisposable {
   }
 
   public tick() {
-    if (this.volumeRenderer.lightingMode.needsLAO) {
+    if (this.volumeRenderer.state.lightingMode.needsLAO) {
       if (this.dirty) {
         this.renderInitialLAO();
       } else if (this.volumeRenderer.isShowingFullResolution) {
@@ -251,7 +252,7 @@ export class LAOComputer implements IDisposable {
   public setCameraPosition(position: THREE.Vector3) {
     this.laoMaterial.setCameraPosition(position);
 
-    if (this.volumeRenderer.transferFunction.updateLAOOnCameraMove) {
+    if (this.volumeRenderer.state.transferFunction.updateLAOOnCameraMove) {
       this.update();
     }
   }

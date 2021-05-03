@@ -29,7 +29,7 @@ export const UIOverlay: React.FC<UIOverlayProps> = observer((props) => {
   return (
     <FullScreenDiv {...rest}>
       <Toolbar renderer={renderer} />
-      {!renderer?.isImageLoaded && (
+      {!renderer.state.isImageLoaded && (
         <StartTextContainer>
           <Text text="Start by dragging in a scan." />
         </StartTextContainer>
