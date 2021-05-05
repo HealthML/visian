@@ -10,7 +10,7 @@ import {
   useIsDraggedOver,
   WebGLCanvas,
 } from "@visian/ui-shared";
-import { readMedicalImage } from "@visian/utils";
+import { readFileFromURL, readMedicalImage } from "@visian/utils";
 import { observer } from "mobx-react-lite";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Route, Switch } from "react-router-dom";
@@ -55,20 +55,18 @@ export function App() {
 
   const voxelCountRef = useRef<THREE.Vector3 | undefined>();
 
-  // Load cached image
+  // Load remote image
   useEffect(() => {
     if (!renderer) return;
     (async () => {
       const [image, focus] = await Promise.all([
-        TextureAtlas.fromStorage("image"),
-        TextureAtlas.fromStorage("focus"),
+        readFileFromURL("/assets/T1.nii.gz").then(readMedicalImage),
+        readFileFromURL("/assets/T1_ventricle_seg.nii.gz").then(
+          readMedicalImage,
+        ),
       ]);
-      if (image) {
-        renderer?.setImage(image);
-        voxelCountRef.current = image.voxelCount;
-      }
-
-      if (focus) renderer?.setFocus(focus);
+      renderer?.setImage(TextureAtlas.fromITKImage(image));
+      renderer?.setFocus(TextureAtlas.fromITKImage(focus));
     })();
   }, [renderer]);
 
