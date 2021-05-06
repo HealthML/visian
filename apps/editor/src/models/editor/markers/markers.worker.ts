@@ -48,3 +48,8 @@ rpcProvider.registerRpcHandler(
       (_voxel, value) => Boolean(value),
     ),
 );
+
+// This noop is required for serialization
+rpcProvider.registerRpcHandler("noop", () => {
+  // Intentionally left blank
+});
