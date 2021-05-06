@@ -175,6 +175,7 @@ export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
 
   private onGPUPush() {
     this.hasGPUUpdates = true;
+    this.isDataDirty = true;
     this.sliceAtlasAdapter.invalidateCache();
   }
 
