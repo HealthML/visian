@@ -1,5 +1,3 @@
-import type { ViewType } from "@visian/utils";
-
 export interface getNonEmptySlicesArgs {
   atlas: Uint8Array;
   voxelComponents: number;
@@ -8,10 +6,6 @@ export interface getNonEmptySlicesArgs {
 export type getNonEmptySlicesReturn = boolean[][];
 
 export interface isSliceEmptyArgs {
-  atlas: Uint8Array;
-  voxelComponents: number;
-  voxelCount: number[];
-  sliceNumber: number;
-  viewType: ViewType;
+  sliceData: Uint8Array;
 }
 export type isSliceEmptyReturn = boolean;

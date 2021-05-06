@@ -7,8 +7,9 @@ import FileSaver from "file-saver";
 import isEqual from "lodash.isequal";
 import { action, makeObservable, observable } from "mobx";
 
+import { RenderedImage, SliceRenderer } from "../../rendering";
 import { StoreContext } from "../types";
-import { RenderedImage } from "./rendered-image";
+import { EditorMarkers } from "./markers";
 import { EditorTools } from "./tools";
 import { EditorUndoRedo } from "./undo-redo";
 import {
@@ -16,8 +17,6 @@ import {
   EditorViewSettingsSnapshot,
 } from "./view-settings";
 
-import type { SliceRenderer } from "../../rendering";
-import { EditorMarkers } from "./markers";
 export interface EditorSnapshot {
   backgroundColor?: string;
   image?: ImageSnapshot;

@@ -5,13 +5,14 @@ import {
   getPlaneAxes,
   Pixel,
   Vector,
+  VoxelWithValue,
 } from "@visian/utils";
 
 import { Editor } from "../editor";
-import { Annotator } from "./annotator";
-import { AnnotationVoxel, DragPoint, DragTool } from "./types";
+import { DragPoint, DragTool } from "./types";
+import { VoxelWriter } from "./voxel-writer";
 
-export class Brush extends Annotator implements DragTool {
+export class Brush extends VoxelWriter implements DragTool {
   private dragPoints?: DragPoint[];
 
   private filledCircleCache?: {
@@ -50,8 +51,8 @@ export class Brush extends Annotator implements DragTool {
   };
 
   public drawCircleAround(target: DragPoint, fill = true) {
-    const circle = this.getCirclePixels(target, fill);
-    this.annotate(circle);
+    const voxels = this.getCircleVoxels(target, fill);
+    this.writeVoxels(voxels);
   }
 
   /**
@@ -63,7 +64,11 @@ export class Brush extends Annotator implements DragTool {
    * @param fill Determines if the circle should be filled or only
    * a two pixel thick border. Default is true.
    */
-  private getCirclePixels(target: DragPoint, fill = true) {
+  private getCircleVoxels(
+    target: DragPoint,
+    fill = true,
+    viewType = this.editor.viewSettings.mainViewType,
+  ) {
     let circlePixels;
     const radius = this.editor.tools.brushSizePixels;
 
@@ -79,29 +84,25 @@ export class Brush extends Annotator implements DragTool {
       circlePixels = this.circleBorderCache?.circle;
     }
 
-    const orthogonalAxis = getOrthogonalAxis(
-      this.editor.viewSettings.mainViewType,
-    );
-    const [widthAxis, heightAxis] = getPlaneAxes(
-      this.editor.viewSettings.mainViewType,
-    );
+    const orthogonalAxis = getOrthogonalAxis(viewType);
+    const [widthAxis, heightAxis] = getPlaneAxes(viewType);
 
     const pixelOffsetX = radius === 0.5 && target.right ? -1 : 0;
     const pixelOffsetY = radius === 0.5 && target.bottom ? -1 : 0;
 
-    const annotations: AnnotationVoxel[] = [];
+    const voxels: VoxelWithValue[] = [];
 
     const coordinates = new Vector(3, false);
     circlePixels?.forEach((pixel) => {
       coordinates[orthogonalAxis] = target[orthogonalAxis];
       coordinates[widthAxis] = pixel.x + target[widthAxis] + pixelOffsetX;
       coordinates[heightAxis] = pixel.y + target[heightAxis] + pixelOffsetY;
-      annotations.push(
-        AnnotationVoxel.fromVoxelAndValue(coordinates, this.value),
-      );
+
+      const { x, y, z } = coordinates;
+      voxels.push({ x, y, z, value: this.value });
     });
 
-    return annotations;
+    return voxels;
   }
 
   private createCircleCache(fill: boolean) {
@@ -142,7 +143,7 @@ export class Brush extends Annotator implements DragTool {
     const y2 = end[heightAxis];
 
     const linePixels = calculateLine(x1, y1, x2, y2);
-    const annotations: AnnotationVoxel[] = [];
+    const voxels: VoxelWithValue[] = [];
     linePixels.forEach(({ x, y }) => {
       const circleTarget = {
         x: 0,
@@ -156,8 +157,8 @@ export class Brush extends Annotator implements DragTool {
       circleTarget[widthAxis] = x;
       circleTarget[heightAxis] = y;
 
-      annotations.push(...this.getCirclePixels(circleTarget, false));
+      voxels.push(...this.getCircleVoxels(circleTarget, false));
     });
-    this.annotate(annotations);
+    this.writeVoxels(voxels);
   }
 }

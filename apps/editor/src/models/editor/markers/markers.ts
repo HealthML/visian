@@ -161,14 +161,11 @@ export class EditorMarkers {
 
     // TODO: If multiple updates are queued for the same slice, only the latest
     // one should be executed
+
     const result = await rpcProvider.rpc<isSliceEmptyArgs, isSliceEmptyReturn>(
       "isSliceEmpty",
       {
-        atlas: image.getAtlas(),
-        voxelCount: image.voxelCount.toArray(),
-        voxelComponents: image.voxelComponents,
-        sliceNumber,
-        viewType,
+        sliceData: image.getSlice(sliceNumber, viewType),
       },
     );
 

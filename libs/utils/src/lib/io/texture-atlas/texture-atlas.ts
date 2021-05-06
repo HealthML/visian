@@ -1,10 +1,10 @@
 import * as THREE from "three";
 
 import { Vector } from "../../models/vector";
+import { textureFormatForComponents } from "./utils";
 
 import type { Image } from "../../models/image";
 import type { TypedArray } from "../itk";
-
 export type TextureAtlasMetadata<T extends TypedArray = TypedArray> = Pick<
   Image<T>,
   "voxelComponents" | "voxelCount"
@@ -86,21 +86,12 @@ export const getTextureFromAtlas = <T extends TypedArray = TypedArray>(
   atlas: T,
   magFilter: THREE.TextureFilter = THREE.LinearFilter,
 ) => {
-  const textureFormat: THREE.PixelFormat =
-    image.voxelComponents === 1
-      ? THREE.LuminanceFormat
-      : image.voxelComponents === 2
-      ? THREE.RGFormat
-      : image.voxelComponents === 3
-      ? THREE.RGBFormat
-      : THREE.RGBAFormat;
-
   const atlasGrid = getAtlasGrid(image.voxelCount);
   return new THREE.DataTexture(
     atlas,
     atlasGrid.x * image.voxelCount.x,
     atlasGrid.y * image.voxelCount.y,
-    textureFormat,
+    textureFormatForComponents(image.voxelComponents),
     undefined,
     undefined,
     undefined,

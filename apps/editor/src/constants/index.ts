@@ -1,5 +1,5 @@
 /** The minimum wait time in ms b/w writing the store to local storage. */
-export const storePersistInterval = 1000;
+export const storePersistInterval = 30000;
 
 // UI Interactions
 export const minZoom = 0.8;

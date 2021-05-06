@@ -9,10 +9,9 @@ import {
 import { action, computed, makeObservable, observable } from "mobx";
 import * as THREE from "three";
 
-import { getPositionWithinPixel } from "../../../rendering";
+import { getPositionWithinPixel, RenderedImage } from "../../../rendering";
 import { StoreContext } from "../../types";
 import { Editor } from "../editor";
-import { RenderedImage } from "../rendered-image";
 import { ToolType } from "../types";
 import { AtlasUndoRedoCommand, SliceUndoRedoCommand } from "../undo-redo";
 import { Brush } from "./brush";

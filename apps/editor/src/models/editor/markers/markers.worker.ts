@@ -1,4 +1,4 @@
-import { findVoxelInSlice, getNonEmptySlices, Vector } from "@visian/utils";
+import { getNonEmptySlices, Vector } from "@visian/utils";
 import { RpcProvider } from "worker-rpc";
 
 import type {
@@ -30,23 +30,8 @@ rpcProvider.registerRpcHandler(
 
 rpcProvider.registerRpcHandler(
   "isSliceEmpty",
-  ({
-    atlas,
-    voxelComponents,
-    voxelCount,
-    sliceNumber,
-    viewType,
-  }: isSliceEmptyArgs): isSliceEmptyReturn =>
-    !findVoxelInSlice(
-      {
-        getAtlas: () => atlas,
-        voxelComponents,
-        voxelCount: new Vector(voxelCount, false),
-      },
-      viewType,
-      sliceNumber,
-      (_voxel, value) => Boolean(value),
-    ),
+  ({ sliceData }: isSliceEmptyArgs): isSliceEmptyReturn =>
+    sliceData.every((value) => value === 0),
 );
 
 // This noop is required for serialization

@@ -1,18 +1,5 @@
 import { Voxel } from "@visian/utils";
 
-export class AnnotationVoxel {
-  public static fromVoxelAndValue(voxel: Voxel, value: number) {
-    return new this(voxel.x, voxel.y, voxel.z, value);
-  }
-
-  constructor(
-    public x: number,
-    public y: number,
-    public z: number,
-    public value: number,
-  ) {}
-}
-
 export interface DragTool {
   startAt: (dragPoint: DragPoint) => void;
   moveTo: (dragPoint: DragPoint) => void;
