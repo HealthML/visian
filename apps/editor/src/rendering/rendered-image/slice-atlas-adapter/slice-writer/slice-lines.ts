@@ -9,6 +9,11 @@ import * as THREE from "three";
 
 import { SliceLinesMaterial } from "./slice-lines-material";
 
+/**
+ * A representation of a slice of a 3D image that can be rendered into
+ * a texture atlas even if the view type does not correspond to the
+ * atlas view type.
+ */
 export class SliceLines extends THREE.Scene {
   private lines: THREE.LineSegments;
 

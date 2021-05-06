@@ -3,6 +3,11 @@ import * as THREE from "three";
 
 import { SliceQuadMaterial } from "./slice-quad-material";
 
+/**
+ * A represenation of a slice of a 3D image that can be rendered into a
+ * texture atlas. The view type of the slice has to match the texture
+ * atlas view type.
+ */
 export class SliceQuad extends THREE.Scene {
   public readonly camera: THREE.Camera;
 

@@ -4,6 +4,10 @@ import * as THREE from "three";
 import { VoxelCamera } from "./voxel-camera";
 import VoxelMaterial from "./voxel-material";
 
+/**
+ * A represenation of voxels of a 3D image, that can be rendered into a
+ * texture atlas.
+ */
 export class Voxels extends THREE.Scene {
   private geometry = new THREE.BufferGeometry();
   private material: VoxelMaterial;

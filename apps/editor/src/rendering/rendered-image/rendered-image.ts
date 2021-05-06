@@ -117,13 +117,15 @@ export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
     this.renderers = renderers;
   }
 
-  public getTexture(index = 0) {
-    if (!this.renderTargets[index]) {
-      this.renderTargets[index] = new ImageRenderTarget(this.getAtlasSize());
-      this.hasCPUUpdates[index] = true;
-      this.voxelsRendered[index] = true;
+  public getTexture(rendererIndex = 0) {
+    if (!this.renderTargets[rendererIndex]) {
+      this.renderTargets[rendererIndex] = new ImageRenderTarget(
+        this.getAtlasSize(),
+      );
+      this.hasCPUUpdates[rendererIndex] = true;
+      this.voxelsRendered[rendererIndex] = true;
     }
-    return this.renderTargets[index].texture;
+    return this.renderTargets[rendererIndex].texture;
   }
 
   public waitForRender() {
@@ -132,32 +134,35 @@ export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
     });
   }
 
-  public onBeforeRender(index = 0) {
-    const renderer = this.renderers[index];
+  public onBeforeRender(rendererIndex = 0) {
+    const renderer = this.renderers[rendererIndex];
     if (!renderer) return;
 
-    if (this.hasCPUUpdates[index] && this.renderTargets[index]) {
+    if (
+      this.hasCPUUpdates[rendererIndex] &&
+      this.renderTargets[rendererIndex]
+    ) {
       copyToRenderTarget(
         this.screenAlignedQuad,
-        this.renderTargets[index],
+        this.renderTargets[rendererIndex],
         renderer,
       );
 
       this.sliceAtlasAdapter.invalidateCache();
 
-      this.hasCPUUpdates[index] = false;
+      this.hasCPUUpdates[rendererIndex] = false;
     }
 
-    if (this.voxelsToRender.length && !this.voxelsRendered[index]) {
+    if (this.voxelsToRender.length && !this.voxelsRendered[rendererIndex]) {
       if (this.isVoxelGeometryDirty) {
         this.voxels.updateGeometry(this.voxelsToRender);
         this.isVoxelGeometryDirty = false;
       }
 
-      renderVoxels(this.voxels, this.renderTargets[index], renderer);
-      this.onGPUUpates();
+      renderVoxels(this.voxels, this.renderTargets[rendererIndex], renderer);
+      this.onGPUPush();
 
-      this.voxelsRendered[index] = true;
+      this.voxelsRendered[rendererIndex] = true;
       if (this.voxelsRendered.every((value) => value)) {
         this.voxelsToRender = [];
         this.isVoxelGeometryDirty = true;
@@ -168,25 +173,23 @@ export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
     }
   }
 
-  private onGPUUpates() {
+  private onGPUPush() {
     this.hasGPUUpdates = true;
     this.sliceAtlasAdapter.invalidateCache();
   }
 
-  private triggerGPUPush() {
+  private scheduleGPUPush() {
     this.internalTexture.needsUpdate = true;
     this.hasCPUUpdates.fill(true);
   }
 
-  // TODO: Use this to update this.atlas when necessary.
   private pullAtlasFromGPU() {
-    const renderer = this.renderers[0];
-    if (!renderer) return;
+    if (!this.renderers.length) return;
 
     const atlasSize = this.getAtlasSize();
     const buffer = new Uint8Array(atlasSize.product() * 4);
 
-    renderer.readRenderTargetPixels(
+    this.renderers[0].readRenderTargetPixels(
       this.renderTargets[0],
       0,
       0,
@@ -204,12 +207,13 @@ export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
     this.hasGPUUpdates = false;
   }
 
+  /** Can override unsaved changes to the atlas that are only stored on the GPU. */
   public setAtlas(atlas: Uint8Array) {
     super.setAtlas(atlas);
     this.hasGPUUpdates = false;
 
     if (this.internalTexture) {
-      this.triggerGPUPush();
+      this.scheduleGPUPush();
     }
   }
 
@@ -220,19 +224,21 @@ export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
   }
 
   public setAtlasVoxel(voxel: Vector, value: number) {
-    if (this.renderers[0]) {
+    if (this.renderers.length) {
       const { x, y, z } = voxel;
       this.voxelsToRender.push({ x, y, z, value });
       this.voxelsRendered.fill(false);
       this.isVoxelGeometryDirty = true;
-    } else {
-      super.setAtlasVoxel(voxel, value);
-      this.triggerGPUPush();
+
+      return;
     }
+
+    super.setAtlasVoxel(voxel, value);
+    this.scheduleGPUPush();
   }
 
   public setSlice(viewType: ViewType, slice: number, sliceData?: Uint8Array) {
-    if (this.renderers[0]) {
+    if (this.renderers.length) {
       this.sliceAtlasAdapter.writeSlice(
         slice,
         viewType,
@@ -241,17 +247,17 @@ export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
         this.renderers,
       );
 
-      this.onGPUUpates();
+      this.onGPUPush();
 
       return;
     }
 
     super.setSlice(viewType, slice, sliceData);
-    this.triggerGPUPush();
+    this.scheduleGPUPush();
   }
 
   public getSlice(sliceNumber: number, viewType: ViewType) {
-    if (this.renderers[0]) {
+    if (this.renderers.length) {
       return this.sliceAtlasAdapter.readSlice(
         sliceNumber,
         viewType,

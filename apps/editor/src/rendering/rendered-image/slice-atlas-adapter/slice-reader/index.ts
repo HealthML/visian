@@ -1,2 +1,2 @@
-export * from "./read-slice-material";
+export * from "./slice-reader-material";
 export * from "./slice-reader";

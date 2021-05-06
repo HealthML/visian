@@ -3,7 +3,7 @@ import * as THREE from "three";
 
 import { rawSliceFragmentShader, sliceVertexShader } from "../../../shaders";
 
-export class ReadSliceMaterial extends THREE.ShaderMaterial {
+export class SliceReaderMaterial extends THREE.ShaderMaterial {
   constructor(
     dataTexture: THREE.Texture,
     atlasGrid: Vector,

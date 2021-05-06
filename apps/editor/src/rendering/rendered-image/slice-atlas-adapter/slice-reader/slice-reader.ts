@@ -6,10 +6,10 @@ import {
 } from "@visian/utils";
 import * as THREE from "three";
 
-import { ReadSliceMaterial } from "./read-slice-material";
+import { SliceReaderMaterial } from "./slice-reader-material";
 
 export class SliceReader {
-  private material: ReadSliceMaterial;
+  private material: SliceReaderMaterial;
   private screenAlignedQuad: ScreenAlignedQuad;
 
   private lastViewType = ViewType.Transverse;
@@ -27,7 +27,11 @@ export class SliceReader {
     private voxelCount: Vector,
     private components: number,
   ) {
-    this.material = new ReadSliceMaterial(atlasTexture, atlasGrid, voxelCount);
+    this.material = new SliceReaderMaterial(
+      atlasTexture,
+      atlasGrid,
+      voxelCount,
+    );
     this.screenAlignedQuad = new ScreenAlignedQuad(this.material);
 
     this.renderTarget = new THREE.WebGLRenderTarget(voxelCount.x, voxelCount.y);
@@ -64,16 +68,9 @@ export class SliceReader {
     }
 
     // Render slice to render target.
-    const previousRenderTarget = renderer.getRenderTarget();
     renderer.setRenderTarget(this.renderTarget);
-
-    const previousAutoClear = renderer.autoClear;
-    renderer.autoClear = true;
-
     this.screenAlignedQuad.renderWith(renderer);
-
-    renderer.autoClear = previousAutoClear;
-    renderer.setRenderTarget(previousRenderTarget);
+    renderer.setRenderTarget(null);
 
     // Read slice from render target.
     const buffer = new Uint8Array(width * height * 4);
