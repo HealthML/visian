@@ -178,7 +178,7 @@ export class EditorMarkers {
   public async clear() {
     // The noop here is used to serialize worker calls to avoid race conditions
     // TODO: A more elegant solution would be to cancel any outstanding worker
-    // updates once reset is called
+    // updates once clear is called
     await rpcProvider.rpc("noop");
 
     this.clearAnnotatedSlices();
