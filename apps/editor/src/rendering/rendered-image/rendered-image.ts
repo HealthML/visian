@@ -160,7 +160,7 @@ export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
       }
 
       renderVoxels(this.voxels, this.renderTargets[rendererIndex], renderer);
-      this.onGPUPush();
+      this.onModificationsOnGPU();
 
       this.voxelsRendered[rendererIndex] = true;
       if (this.voxelsRendered.every((value) => value)) {
@@ -173,7 +173,7 @@ export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
     }
   }
 
-  private onGPUPush() {
+  private onModificationsOnGPU() {
     this.hasGPUUpdates = true;
     this.isDataDirty = true;
     this.sliceAtlasAdapter.invalidateCache();
@@ -248,7 +248,7 @@ export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
         this.renderers,
       );
 
-      this.onGPUPush();
+      this.onModificationsOnGPU();
 
       return;
     }
