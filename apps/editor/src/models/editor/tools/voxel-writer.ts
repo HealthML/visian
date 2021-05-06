@@ -16,38 +16,38 @@ export class VoxelWriter {
 
   constructor(protected editor: Editor, private undoable: boolean) {}
 
-  protected async finishStroke(
+  protected finishStroke(
     isDeleteOperation: boolean | undefined,
     image = this.editor.annotation,
     viewType = this.editor.viewSettings.mainViewType,
   ) {
     // The RenderedImage needs to receive one more update before the modified
     // slice can be read with all updates.
-    await image?.waitForRender();
+    image?.waitForRender().then(() => {
+      const slice = this.sliceNumber;
 
-    const slice = this.sliceNumber;
-
-    if (image) {
-      if (this.undoable && slice !== undefined) {
-        this.editor.undoRedo.addCommand(
-          new SliceUndoRedoCommand(
-            image,
-            viewType,
-            slice,
-            this.oldSliceData,
-            image.getSlice(slice, viewType),
-          ),
-        );
+      if (image) {
+        if (this.undoable && slice !== undefined) {
+          this.editor.undoRedo.addCommand(
+            new SliceUndoRedoCommand(
+              image,
+              viewType,
+              slice,
+              this.oldSliceData,
+              image.getSlice(slice, viewType),
+            ),
+          );
+        }
       }
-    }
 
-    if (this.undoable) {
-      this.strokeActive = false;
-      this.oldSliceData = undefined;
-      this.sliceNumber = undefined;
-    }
+      if (this.undoable) {
+        this.strokeActive = false;
+        this.oldSliceData = undefined;
+        this.sliceNumber = undefined;
+      }
 
-    this.editor.tools.finishStroke(image, slice, viewType, isDeleteOperation);
+      this.editor.tools.finishStroke(image, slice, viewType, isDeleteOperation);
+    });
   }
 
   protected writeVoxels(
