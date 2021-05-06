@@ -33,3 +33,8 @@ rpcProvider.registerRpcHandler(
   ({ sliceData }: isSliceEmptyArgs): isSliceEmptyReturn =>
     sliceData.every((value) => value === 0),
 );
+
+// This noop is required for serialization
+rpcProvider.registerRpcHandler("noop", () => {
+  // Intentionally left blank
+});

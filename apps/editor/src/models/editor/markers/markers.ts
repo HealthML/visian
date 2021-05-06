@@ -27,18 +27,20 @@ const emptyMarkerArray: (number | [number, number])[] = [];
 
 /** Handles the editor's slice slider markers. */
 export class EditorMarkers {
-  public annotatedSlices: boolean[][] = [];
+  public annotatedSlices: boolean[][] = [[], [], []];
 
   constructor(protected editor: Editor, protected context: StoreContext) {
-    this.reset();
-
-    makeObservable<this, "setAnnotatedSlices">(this, {
+    makeObservable<
+      this,
+      "setAnnotatedSlices" | "setAnnotatedSlice" | "clearAnnotatedSlices"
+    >(this, {
       annotatedSlices: observable,
 
       markers: computed,
 
-      setAnnotatedSlices: action,
       setAnnotatedSlice: action,
+      setAnnotatedSlices: action,
+      clearAnnotatedSlices: action,
       inferAnnotatedSlices: action,
       inferAnnotatedSlice: action,
       reset: action,
@@ -58,10 +60,6 @@ export class EditorMarkers {
       },
     );
   }
-
-  protected setAnnotatedSlices = (value: boolean[][]) => {
-    this.annotatedSlices = value;
-  };
 
   public get isDisabled() {
     return !this.editor.annotation || !this.editor.isIn3DMode;
@@ -96,7 +94,7 @@ export class EditorMarkers {
     return this.annotatedSlices[viewType][sliceNumber];
   }
 
-  public setAnnotatedSlice = (
+  protected setAnnotatedSlice = (
     isAnnotated: boolean,
     image: Image | undefined = this.editor.annotation,
     sliceNumber: number,
@@ -113,35 +111,46 @@ export class EditorMarkers {
     this.annotatedSlices[viewType][sliceNumber] = isAnnotated;
   };
 
-  public inferAnnotatedSlices(
+  protected setAnnotatedSlices = (value: boolean[][]) => {
+    this.annotatedSlices = value;
+  };
+
+  protected clearAnnotatedSlices = () => {
+    this.annotatedSlices.forEach((array) => array.fill(false));
+  };
+
+  public async inferAnnotatedSlices(
     image: Image | undefined = this.editor.annotation,
   ) {
     if (this.isDisabled) return;
     if (!image) return this.reset();
 
     // TODO: If multiple updates are queued, only the latest one should be executed
-    rpcProvider
-      .rpc<getNonEmptySlicesArgs, getNonEmptySlicesReturn>(
-        "getNonEmptySlices",
-        {
-          atlas: image.getAtlas(),
-          voxelCount: image.voxelCount.toArray(),
-          voxelComponents: image.voxelComponents,
-        },
-      )
-      .then(this.setAnnotatedSlices);
+    const result = await rpcProvider.rpc<
+      getNonEmptySlicesArgs,
+      getNonEmptySlicesReturn
+    >("getNonEmptySlices", {
+      atlas: image.getAtlas(),
+      voxelCount: image.voxelCount.toArray(),
+      voxelComponents: image.voxelComponents,
+    });
+
+    this.setAnnotatedSlices(result);
   }
 
-  public inferAnnotatedSlice(
+  public async inferAnnotatedSlice(
     image: Image | undefined,
     sliceNumber: number,
     viewType: ViewType = this.editor.viewSettings.mainViewType,
     isDeleteOperation?: boolean,
   ) {
+    if (this.isDisabled) return;
+    if (!image) return this.reset();
+
+    // The noop here is used to serialize worker calls to avoid race conditions
+    await rpcProvider.rpc("noop");
     if (
-      this.isDisabled ||
       this.annotatedSlices[viewType].length <= sliceNumber ||
-      // TODO: This can lead to race conditions and should be reworked in the future
       (isDeleteOperation &&
         !this.getAnnotatedSlice(image, sliceNumber, viewType)) ||
       (isDeleteOperation === false &&
@@ -149,22 +158,35 @@ export class EditorMarkers {
     ) {
       return;
     }
-    if (!image) return this.reset();
 
     // TODO: If multiple updates are queued for the same slice, only the latest
     // one should be executed
-    rpcProvider
-      .rpc<isSliceEmptyArgs, isSliceEmptyReturn>("isSliceEmpty", {
+
+    const result = await rpcProvider.rpc<isSliceEmptyArgs, isSliceEmptyReturn>(
+      "isSliceEmpty",
+      {
         sliceData: image.getSlice(sliceNumber, viewType),
-      })
-      .then((result) =>
-        this.setAnnotatedSlice(!result, image, sliceNumber, viewType),
-      );
+      },
+    );
+
+    this.setAnnotatedSlice(!result, image, sliceNumber, viewType);
   }
 
-  public reset() {
-    // TODO: This can lead to race conditions and should be reworked in the future.
-    // One solution would be to cancel any outstanding worker updates once reset is called
-    this.annotatedSlices = [[], [], []];
+  public async clear() {
+    // The noop here is used to serialize worker calls to avoid race conditions
+    // TODO: A more elegant solution would be to cancel any outstanding worker
+    // updates once clear is called
+    await rpcProvider.rpc("noop");
+
+    this.clearAnnotatedSlices();
+  }
+
+  public async reset() {
+    // The noop here is used to serialize worker calls to avoid race conditions
+    // TODO: A more elegant solution would be to cancel any outstanding worker
+    // updates once reset is called
+    await rpcProvider.rpc("noop");
+
+    this.setAnnotatedSlices([[], [], []]);
   }
 }
