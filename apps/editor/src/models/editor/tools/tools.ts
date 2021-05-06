@@ -263,8 +263,7 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
       new SliceUndoRedoCommand(image, viewType, slice, oldSliceData),
     );
 
-    // TODO: This can lead to race conditions and should be reworked in the future
-    this.editor.markers.setAnnotatedSlice(false, image, slice, viewType);
+    this.editor.markers.inferAnnotatedSlice(image, slice, viewType, true);
   };
 
   public clearImage(image = this.editor.annotation) {
@@ -279,7 +278,7 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
     this.editor.undoRedo.addCommand(
       new AtlasUndoRedoCommand(image, oldAtlas, emptyAtlas),
     );
-    this.editor.markers.reset();
+    this.editor.markers.clear();
   }
 
   public handleEvent(
