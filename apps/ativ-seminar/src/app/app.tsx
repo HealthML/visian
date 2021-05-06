@@ -17,7 +17,6 @@ import { Route, Switch } from "react-router-dom";
 import styled from "styled-components";
 import WebXRPolyfill from "webxr-polyfill";
 
-import { UIOverlay } from "../components/ui-overlay";
 import { TextureAtlas } from "../lib/texture-atlas";
 import { VolumeRenderer } from "../lib/volume-renderer";
 
@@ -60,10 +59,8 @@ export function App() {
     if (!renderer) return;
     (async () => {
       const [image, focus] = await Promise.all([
-        readFileFromURL("/assets/T1.nii.gz").then(readMedicalImage),
-        readFileFromURL("/assets/T1_ventricle_seg.nii.gz").then(
-          readMedicalImage,
-        ),
+        readFileFromURL("/assets/T1.nii").then(readMedicalImage),
+        readFileFromURL("/assets/T1seg.nii").then(readMedicalImage),
       ]);
       renderer?.setImage(TextureAtlas.fromITKImage(image));
       renderer?.setFocus(TextureAtlas.fromITKImage(focus));
@@ -156,7 +153,7 @@ export function App() {
                 backgroundColor={renderer?.backgroundColor}
               />
             </AbsoluteCover>
-            {renderer && <UIOverlay renderer={renderer} />}
+            {/* {renderer && <UIOverlay renderer={renderer} />}
             {isDraggedOver && (
               <DropSheet>
                 <StyledDropZone
@@ -170,7 +167,7 @@ export function App() {
                   onFileDrop={dropFocusVolume}
                 />
               </DropSheet>
-            )}
+            )} */}
           </Screen>
         </Route>
       </Switch>

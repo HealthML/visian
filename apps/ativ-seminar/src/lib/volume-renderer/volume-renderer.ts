@@ -52,14 +52,14 @@ export class VolumeRenderer implements IDisposable {
 
   public backgroundValue = 0;
   public shouldUseFocusVolume = false;
-  public focusColor = "rgba(255, 255, 255, 1)";
-  public transferFunction = transferFunctions[TransferFunctionType.Density];
+  public focusColor = "rgba(255, 255, 255, 0.5)";
+  public transferFunction = transferFunctions[TransferFunctionType.FCEdges];
   public lightingMode = lightingModes[LightingModeType.LAO];
   public laoIntensity = 1;
   public imageOpacity = 1;
-  public contextOpacity = 0.4;
+  public contextOpacity = 0.15;
   public densityRangeLimits: [number, number] = [0, 1];
-  public edgeRangeLimits: [number, number] = [0.1, 1];
+  public edgeRangeLimits: [number, number] = [0.15, 1];
   public rangeLimits: [number, number] = this.edgeRangeLimits;
   public cutAwayConeAngle = 1;
   public customTFTexture?: THREE.Texture;
@@ -123,8 +123,8 @@ export class VolumeRenderer implements IDisposable {
     this.flyControls.addEventListener("lock", this.onFlyControlsLock);
     this.flyControls.addEventListener("unlock", this.onFlyControlsUnlock);
 
-    this.camera.position.set(0.3, 1.5, 0.3);
-    this.camera.lookAt(new THREE.Vector3(0, 1.2, 0));
+    this.camera.position.set(0, 1.3, -0.25);
+    this.camera.lookAt(new THREE.Vector3(0, 1.17, 0));
 
     document.addEventListener("keydown", this.onKeyDown);
 
@@ -165,9 +165,13 @@ export class VolumeRenderer implements IDisposable {
     // TypeScript doesn't recognize that Stats has a constructor...
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     this.stats = new (Stats as any)();
-    canvas.parentElement?.appendChild(this.stats.dom);
-    this.stats.dom.style.right = "0";
-    this.stats.dom.style.left = "auto";
+    // canvas.parentElement?.appendChild(this.stats.dom);
+    // this.stats.dom.style.right = "0";
+    // this.stats.dom.style.left = "auto";
+
+    this.volume.rotation.z -= (2 * Math.PI) / (30 * 30);
+    this.volume.updateMatrixWorld();
+    this.volume.updateCameraPosition(this.camera);
 
     this.onCameraMove();
     this.renderer.setAnimationLoop(this.animate);
@@ -205,19 +209,25 @@ export class VolumeRenderer implements IDisposable {
   private animate = () => {
     this.volume.tick();
 
-    if (this.lazyRenderTriggered) {
-      this.resolutionComputer.restart();
-      this.lazyRenderTriggered = false;
-    }
+    // if (this.lazyRenderTriggered) {
+    // this.resolutionComputer.tick();
 
-    this.resolutionComputer.tick();
+    //   this.lazyRenderTriggered = false;
+    // }
 
-    if (this.renderer.xr.isPresenting) {
-      this.eagerRender();
-    }
+    // if (this.renderer.xr.isPresenting) {
+    //   this.eagerRender();
+    // }
 
-    this.stats.update();
-    this.flyControls.tick();
+    this.renderer.render(this.scene, this.camera);
+
+    this.volume.rotation.z += (2 * Math.PI) / (30 * 30);
+    console.log(this.volume.rotation.z, this.volume.rotation.z / (2 * Math.PI));
+    this.volume.updateMatrixWorld();
+    this.volume.updateCameraPosition(this.camera);
+
+    // this.stats.update();
+    // this.flyControls.tick();
   };
 
   public lazyRender = () => {
@@ -261,20 +271,20 @@ export class VolumeRenderer implements IDisposable {
   };
 
   private onTransferFunctionChange = () => {
-    if (!this.suppressedLightingMode) {
-      this.setSuppressedLightingMode(this.lightingMode);
-      this.setLightingMode(lightingModes[LightingModeType.None]);
-    }
+    // if (!this.suppressedLightingMode) {
+    //   this.setSuppressedLightingMode(this.lightingMode);
+    //   this.setLightingMode(lightingModes[LightingModeType.None]);
+    // }
 
-    if (this.lightingTimeout) {
-      clearTimeout(this.lightingTimeout);
-    }
-    this.lightingTimeout = setTimeout(() => {
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      this.setLightingMode(this.suppressedLightingMode!);
-      this.setSuppressedLightingMode(undefined);
-      this.lightingTimeout = undefined;
-    }, 200);
+    // if (this.lightingTimeout) {
+    //   clearTimeout(this.lightingTimeout);
+    // }
+    // this.lightingTimeout = setTimeout(() => {
+    //   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    //   this.setLightingMode(this.suppressedLightingMode!);
+    //   this.setSuppressedLightingMode(undefined);
+    //   this.lightingTimeout = undefined;
+    // }, 200);
 
     this.lazyRender();
   };
