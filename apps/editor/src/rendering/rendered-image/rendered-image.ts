@@ -73,6 +73,8 @@ export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
   private renderTargets = [new ImageRenderTarget(this.getAtlasSize())];
   /** Whether or not the corresponding render target needs to be updated from the CPU data. */
   private hasCPUUpdates = [true];
+  /** Callbacks to be invoked when the next render succeeds. */
+  private renderCallbacks: (() => void)[] = [];
   /** Used to update the render targets from the CPU data. */
   private screenAlignedQuad: ScreenAlignedQuad;
 
@@ -124,6 +126,12 @@ export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
     return this.renderTargets[index].texture;
   }
 
+  public waitForRender() {
+    return new Promise<void>((resolve) => {
+      this.renderCallbacks.push(resolve);
+    });
+  }
+
   public onBeforeRender(index = 0) {
     const renderer = this.renderers[index];
     if (!renderer) return;
@@ -153,6 +161,9 @@ export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
       if (this.voxelsRendered.every((value) => value)) {
         this.voxelsToRender = [];
         this.isVoxelGeometryDirty = true;
+
+        this.renderCallbacks.forEach((callback) => callback());
+        this.renderCallbacks = [];
       }
     }
   }
