@@ -1,5 +1,5 @@
 import { ScreenAlignedQuad } from "@visian/utils";
-import { autorun, IReactionDisposer, reaction } from "mobx";
+import { IReactionDisposer, reaction } from "mobx";
 import * as THREE from "three";
 
 import { TextureAtlas } from "../../../texture-atlas";
@@ -61,38 +61,11 @@ export class LAOComputer implements IDisposable {
     this.copyScene.add(this.copyQuad);
 
     this.reactionDisposers.push(
-      autorun(() => {
-        this.laoMaterial.uniforms.uTransferFunction.value =
-          volumeRenderer.state.transferFunction.type;
-
-        this.update();
-      }),
-      autorun(() => {
-        this.laoMaterial.uniforms.uOpacity.value =
-          volumeRenderer.state.imageOpacity;
-
-        this.update();
-      }),
-      autorun(() => {
-        this.laoMaterial.uniforms.uContextOpacity.value =
-          volumeRenderer.state.contextOpacity;
-
-        this.update();
-      }),
-      autorun(() => {
-        this.laoMaterial.uniforms.uLimitLow.value =
-          volumeRenderer.state.rangeLimits[0];
-        this.laoMaterial.uniforms.uLimitHigh.value =
-          volumeRenderer.state.rangeLimits[1];
-
-        this.update();
-      }),
-      autorun(() => {
-        this.laoMaterial.uniforms.uConeAngle.value =
-          volumeRenderer.state.cutAwayConeAngle;
-
-        this.update();
-      }),
+      reaction(() => volumeRenderer.state.transferFunction.type, this.update),
+      reaction(() => volumeRenderer.state.imageOpacity, this.update),
+      reaction(() => volumeRenderer.state.contextOpacity, this.update),
+      reaction(() => volumeRenderer.state.rangeLimits, this.update),
+      reaction(() => volumeRenderer.state.cutAwayConeAngle, this.update),
       reaction(
         () => volumeRenderer.state.image,
         (atlas?: TextureAtlas) => {

@@ -1,5 +1,5 @@
 import { IDisposer } from "@visian/utils";
-import { reaction } from "mobx";
+import { autorun, reaction } from "mobx";
 import * as THREE from "three";
 
 import { VolumeRendererState } from "../../../../models";
@@ -72,6 +72,22 @@ export class LAOMaterial extends THREE.ShaderMaterial {
           }
         },
       ),
+      autorun(() => {
+        this.uniforms.uTransferFunction.value = state.transferFunction.type;
+      }),
+      autorun(() => {
+        this.uniforms.uOpacity.value = state.imageOpacity;
+      }),
+      autorun(() => {
+        this.uniforms.uContextOpacity.value = state.contextOpacity;
+      }),
+      autorun(() => {
+        this.uniforms.uLimitLow.value = state.rangeLimits[0];
+        this.uniforms.uLimitHigh.value = state.rangeLimits[1];
+      }),
+      autorun(() => {
+        this.uniforms.uConeAngle.value = state.cutAwayConeAngle;
+      }),
     );
   }
 
