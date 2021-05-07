@@ -1,7 +1,7 @@
 import { IDisposable, ScreenAlignedQuad } from "@visian/utils";
 import * as THREE from "three";
 
-import { RenderParams } from "./types";
+import { RenderParams, RenderSubject } from "./types";
 
 export class ProgressiveRenderer implements IDisposable {
   private renderParams: RenderParams;
@@ -17,14 +17,14 @@ export class ProgressiveRenderer implements IDisposable {
   protected workingVector = new THREE.Vector2();
 
   constructor(
-    subject: THREE.Material | RenderParams,
+    subject: RenderSubject,
     protected renderer: THREE.WebGLRenderer,
-    public readonly size: THREE.Vector2,
-    public readonly grid = new THREE.Vector2(1, 1),
+    public readonly size = new THREE.Vector2(1, 1),
     protected target: THREE.WebGLRenderTarget = new THREE.WebGLRenderTarget(
       size.x,
       size.y,
     ),
+    public readonly grid = new THREE.Vector2(1, 1),
     protected onFrameFinished?: () => void,
   ) {
     this.renderParams =

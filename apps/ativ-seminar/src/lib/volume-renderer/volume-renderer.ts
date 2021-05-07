@@ -77,9 +77,10 @@ export class VolumeRenderer implements IDisposable {
     this.gradientComputer = new GradientComputer(this.renderer, this);
     this.laoComputer = new LAOComputer(
       this.renderer,
-      this,
+      this.state,
       this.gradientComputer.getFirstDerivative(),
       this.gradientComputer.getSecondDerivative(),
+      this.updateCurrentResolution,
     );
 
     this.volume = new Volume(
@@ -87,7 +88,7 @@ export class VolumeRenderer implements IDisposable {
       this.gradientComputer.getFirstDerivative(),
       this.gradientComputer.getSecondDerivative(),
       this.gradientComputer.getOutputDerivative(),
-      this.laoComputer.getLAOTexture(),
+      this.laoComputer.output,
     );
     // Position the volume in a reasonable height for XR.
     this.volume.position.set(0, 1.2, 0);
@@ -139,6 +140,7 @@ export class VolumeRenderer implements IDisposable {
       reaction(() => this.state.rangeLimits, this.lazyRender),
       reaction(() => this.state.cutAwayConeAngle, this.lazyRender),
       reaction(() => this.state.customTFTexture, this.lazyRender),
+      reaction(() => this.state.transferFunction, this.lazyRender),
     );
 
     this.onCameraMove();
@@ -176,7 +178,15 @@ export class VolumeRenderer implements IDisposable {
 
   private animate = () => {
     this.gradientComputer.tick();
-    this.laoComputer.tick();
+
+    if (
+      this.state.lightingMode.needsLAO &&
+      ((this.resolutionComputer.fullResolutionFlushed &&
+        !this.laoComputer.finalLAOFlushed) ||
+        this.laoComputer.dirty)
+    ) {
+      this.laoComputer.tick();
+    }
 
     if (this.lazyRenderTriggered) {
       this.resolutionComputer.restart();
@@ -210,9 +220,9 @@ export class VolumeRenderer implements IDisposable {
     }
   };
 
-  public updateCurrentResolution() {
-    this.resolutionComputer.restartFrame();
-  }
+  public updateCurrentResolution = () => {
+    this.resolutionComputer?.restartFrame();
+  };
 
   public get isShowingFullResolution() {
     return this.resolutionComputer.fullResolutionFlushed;

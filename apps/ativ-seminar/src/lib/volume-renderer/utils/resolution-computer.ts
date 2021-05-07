@@ -17,7 +17,7 @@ export class ResolutionComputer extends ProgressiveRenderer {
     private resolutionSteps = 2,
     target?: THREE.WebGLRenderTarget,
   ) {
-    super(subject, renderer, size.clone(), undefined, target);
+    super(subject, renderer, size.clone(), target);
 
     this.targetSize = size;
 
