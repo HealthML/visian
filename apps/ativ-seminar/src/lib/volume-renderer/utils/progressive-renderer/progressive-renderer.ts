@@ -3,6 +3,11 @@ import * as THREE from "three";
 
 import { RenderParams, RenderSubject } from "./types";
 
+/**
+ * Renders a render subject in steps.
+ *
+ * Call @function tick whenever a step may be rendered.
+ */
 export class ProgressiveRenderer implements IDisposable {
   private renderParams: RenderParams;
 
@@ -16,6 +21,14 @@ export class ProgressiveRenderer implements IDisposable {
 
   protected workingVector = new THREE.Vector2();
 
+  /**
+   * @param subject The subject to be rendered.
+   * @param renderer The internal renderer.
+   * @param size The size of the output.
+   * @param target The render target to be rendered to.
+   * @param grid The grid of progressive render steps.
+   * @param onFrameFinished A callback when the progressive frame is finished.
+   */
   constructor(
     subject: RenderSubject,
     protected renderer: THREE.WebGLRenderer,
@@ -52,6 +65,9 @@ export class ProgressiveRenderer implements IDisposable {
     );
   }
 
+  /**
+   * Should be called, when this progressive renderer is no longer needed.
+   */
   public dispose() {
     this.intermediatRenderTarget.dispose();
     this.target.dispose();
@@ -62,6 +78,9 @@ export class ProgressiveRenderer implements IDisposable {
     }
   }
 
+  /**
+   * A texture containing the output of this progressive renderer.
+   */
   public get output() {
     return this.target.texture;
   }
@@ -76,12 +95,20 @@ export class ProgressiveRenderer implements IDisposable {
     this.resizeIntermediate();
   }
 
+  /**
+   * Allows this progressive renderer to render one step.
+   * @param target The render target to be rendered to.
+   */
   public tick(target = this.target) {
     if (!this.isFrameFinished) {
       this.render(target);
     }
   }
 
+  /**
+   * Renders one part of the progressive frame to an intermediate render
+   * target and then copies it to the correct part of the output.
+   */
   private render(target = this.target) {
     const { camera, scene } = this.renderParams;
 
