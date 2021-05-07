@@ -110,9 +110,8 @@ export class VolumeRenderer implements IDisposable {
       ? Math.min(5, Math.max(1, parseInt(resolutionStepsParam)))
       : 3;
     this.resolutionComputer = new ResolutionComputer(
+      { scene: this.scene, camera: this.camera },
       this.renderer,
-      this.scene,
-      this.camera,
       new THREE.Vector2(this.canvas.width, this.canvas.height),
       this.eagerRender,
       resolutionSteps,
@@ -165,10 +164,7 @@ export class VolumeRenderer implements IDisposable {
   private resize = () => {
     const aspect = window.innerWidth / window.innerHeight;
 
-    this.resolutionComputer.setTargetSize(
-      window.innerWidth,
-      window.innerHeight,
-    );
+    this.resolutionComputer.setSize(window.innerWidth, window.innerHeight);
 
     this.camera.aspect = aspect;
     this.camera.updateProjectionMatrix();
@@ -187,7 +183,9 @@ export class VolumeRenderer implements IDisposable {
       this.lazyRenderTriggered = false;
     }
 
-    this.resolutionComputer.tick();
+    if (!this.resolutionComputer.fullResolutionFlushed) {
+      this.resolutionComputer.tick();
+    }
 
     if (this.renderer.xr.isPresenting) {
       this.eagerRender();
@@ -213,7 +211,7 @@ export class VolumeRenderer implements IDisposable {
   };
 
   public updateCurrentResolution() {
-    this.resolutionComputer.updateCurrentResolution();
+    this.resolutionComputer.restartFrame();
   }
 
   public get isShowingFullResolution() {
