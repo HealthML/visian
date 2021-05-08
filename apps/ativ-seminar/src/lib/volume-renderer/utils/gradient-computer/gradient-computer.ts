@@ -36,14 +36,14 @@ export class GradientComputer implements IDisposable {
     this.gradientMaterial = new GradientMaterial(
       this.firstDerivativeRenderTarget.texture,
       this.secondDerivativeRenderTarget.texture,
-      volumeRenderer.state,
+      volumeRenderer.model,
     );
 
     this.screenAlignedQuad = new ScreenAlignedQuad(this.gradientMaterial);
 
     this.reactionDisposers.push(
       reaction(
-        () => volumeRenderer.state.image,
+        () => volumeRenderer.model.image,
         (atlas?: TextureAtlas) => {
           if (!atlas) return;
 
@@ -67,15 +67,15 @@ export class GradientComputer implements IDisposable {
           this.updateOutputDerivative();
         },
       ),
-      reaction(() => volumeRenderer.state.focus, this.updateOutputDerivative),
+      reaction(() => volumeRenderer.model.focus, this.updateOutputDerivative),
       autorun(() => {
         this.gradientMaterial.uniforms.uUseFocus.value =
-          volumeRenderer.state.shouldUseFocusVolume;
+          volumeRenderer.model.shouldUseFocusVolume;
 
         this.updateOutputDerivative();
       }),
       autorun(() => {
-        const color = tc(volumeRenderer.state.focusColor).toRgb();
+        const color = tc(volumeRenderer.model.focusColor).toRgb();
         this.gradientMaterial.uniforms.uFocusColor.value = [
           color.r / 255,
           color.g / 255,
@@ -85,33 +85,33 @@ export class GradientComputer implements IDisposable {
       }),
       autorun(() => {
         this.gradientMaterial.uniforms.uTransferFunction.value =
-          volumeRenderer.state.transferFunction.type;
+          volumeRenderer.model.transferFunction.type;
 
         this.updateOutputDerivative();
       }),
       autorun(() => {
         this.gradientMaterial.uniforms.uContextOpacity.value =
-          volumeRenderer.state.contextOpacity;
+          volumeRenderer.model.contextOpacity;
 
         this.updateOutputDerivative();
       }),
       autorun(() => {
         this.gradientMaterial.uniforms.uLimitLow.value =
-          volumeRenderer.state.rangeLimits[0];
+          volumeRenderer.model.rangeLimits[0];
         this.gradientMaterial.uniforms.uLimitHigh.value =
-          volumeRenderer.state.rangeLimits[1];
+          volumeRenderer.model.rangeLimits[1];
 
         this.updateOutputDerivative();
       }),
       autorun(() => {
         this.gradientMaterial.uniforms.uConeAngle.value =
-          volumeRenderer.state.cutAwayConeAngle;
+          volumeRenderer.model.cutAwayConeAngle;
 
         this.updateOutputDerivative();
       }),
       autorun(() => {
         this.gradientMaterial.uniforms.uCustomTFTexture.value =
-          volumeRenderer.state.customTFTexture;
+          volumeRenderer.model.customTFTexture;
 
         this.updateOutputDerivative();
       }),
@@ -131,7 +131,7 @@ export class GradientComputer implements IDisposable {
       this.renderSecondDerivative();
     }
     if (
-      this.volumeRenderer.state.lightingMode.needsNormals &&
+      this.volumeRenderer.model.lightingMode.needsNormals &&
       this.outputDerivativeDirty
     ) {
       this.renderOutputDerivative();
@@ -141,7 +141,7 @@ export class GradientComputer implements IDisposable {
   public setCameraPosition(position: THREE.Vector3) {
     this.gradientMaterial.setCameraPosition(position);
 
-    if (this.volumeRenderer.state.transferFunction.updateNormalsOnCameraMove) {
+    if (this.volumeRenderer.model.transferFunction.updateNormalsOnCameraMove) {
       this.updateOutputDerivative();
     }
   }
@@ -205,7 +205,7 @@ export class GradientComputer implements IDisposable {
       gradientMagnitudes.push(workingVector.length());
     }
 
-    this.volumeRenderer.state.setGradientHistogram(
+    this.volumeRenderer.model.setGradientHistogram(
       generateHistogram(gradientMagnitudes),
     );
 

@@ -1,1 +1,1 @@
-export * from "./volume-renderer-state";
+export * from "./volume-renderer-model";

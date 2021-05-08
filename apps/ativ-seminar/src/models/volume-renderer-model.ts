@@ -13,7 +13,7 @@ import {
   TransferFunctionType,
 } from "../lib/volume-renderer";
 
-export class VolumeRendererState {
+export class VolumeRendererModel {
   public isImageLoaded = false;
   public image?: TextureAtlas;
   public focus?: TextureAtlas;

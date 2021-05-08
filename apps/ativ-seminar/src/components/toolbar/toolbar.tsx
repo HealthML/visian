@@ -61,7 +61,7 @@ export const Toolbar: React.FC<ToolbarProps> = (props) => {
       />
       <Settings
         isOpen={showSettings}
-        state={renderer.state}
+        volumeRendererModel={renderer.model}
         parentElement={buttonRef}
       />
       {isXRAvailable && (

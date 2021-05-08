@@ -34,7 +34,7 @@ class Volume extends THREE.Mesh implements IDisposable {
 
     this.disposers.push(
       autorun(() => {
-        const atlas = volumeRenderer.state.image;
+        const atlas = volumeRenderer.model.image;
         if (!atlas) return;
         this.scale.copy(
           atlas.voxelCount

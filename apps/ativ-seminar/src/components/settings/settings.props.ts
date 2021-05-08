@@ -1,8 +1,8 @@
 import type { ModalProps } from "@visian/ui-shared";
-import type { VolumeRendererState } from "../../models";
+import type { VolumeRendererModel } from "../../models";
 
 export interface SettingsProps extends ModalProps {
-  state: VolumeRendererState;
+  volumeRendererModel: VolumeRendererModel;
 
   parentElement?: HTMLElement | null;
 }

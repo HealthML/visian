@@ -1,7 +1,7 @@
 import { IReactionDisposer, reaction } from "mobx";
 import * as THREE from "three";
 
-import { VolumeRendererState } from "../../../../models";
+import { VolumeRendererModel } from "../../../../models";
 import { TextureAtlas } from "../../../texture-atlas";
 import { ProgressiveRenderer } from "../progressive-renderer";
 import LAOMaterial from "./lao-material";
@@ -20,7 +20,7 @@ export class LAOComputer extends ProgressiveRenderer {
 
   constructor(
     renderer: THREE.WebGLRenderer,
-    private state: VolumeRendererState,
+    private volumeRendererModel: VolumeRendererModel,
     firstDerivativeTexture: THREE.Texture,
     secondDerivativeTexture: THREE.Texture,
     private flush: () => void,
@@ -29,19 +29,19 @@ export class LAOComputer extends ProgressiveRenderer {
       firstDerivativeTexture,
       secondDerivativeTexture,
       target.texture,
-      state,
+      volumeRendererModel,
     ),
   ) {
     super(laoMaterial, renderer, undefined, target);
 
     this.reactionDisposers.push(
-      reaction(() => state.transferFunction.type, this.update),
-      reaction(() => state.imageOpacity, this.update),
-      reaction(() => state.contextOpacity, this.update),
-      reaction(() => state.rangeLimits, this.update),
-      reaction(() => state.cutAwayConeAngle, this.update),
+      reaction(() => volumeRendererModel.transferFunction.type, this.update),
+      reaction(() => volumeRendererModel.imageOpacity, this.update),
+      reaction(() => volumeRendererModel.contextOpacity, this.update),
+      reaction(() => volumeRendererModel.rangeLimits, this.update),
+      reaction(() => volumeRendererModel.cutAwayConeAngle, this.update),
       reaction(
-        () => state.image,
+        () => volumeRendererModel.image,
         (atlas?: TextureAtlas) => {
           if (!atlas) return;
 
@@ -55,7 +55,7 @@ export class LAOComputer extends ProgressiveRenderer {
           this.update();
         },
       ),
-      reaction(() => state.focus, this.update),
+      reaction(() => volumeRendererModel.focus, this.update),
     );
   }
 
@@ -116,7 +116,7 @@ export class LAOComputer extends ProgressiveRenderer {
   public setCameraPosition(position: THREE.Vector3) {
     this.laoMaterial.setCameraPosition(position);
 
-    if (this.state.transferFunction.updateLAOOnCameraMove) {
+    if (this.volumeRendererModel.transferFunction.updateLAOOnCameraMove) {
       this.update();
     }
   }

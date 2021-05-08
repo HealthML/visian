@@ -80,7 +80,7 @@ const HistogramBar = styled.div`
 `;
 
 export const Settings: React.FC<SettingsProps> = observer((props) => {
-  const { state, parentElement, ...rest } = props;
+  const { volumeRendererModel: state, parentElement, ...rest } = props;
 
   const setFocusColor = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {

@@ -4,7 +4,7 @@ import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import Stats from "three/examples/jsm/libs/stats.module";
 
-import { VolumeRendererState } from "../../models";
+import { VolumeRendererModel } from "../../models";
 import { IDisposable } from "../types";
 import {
   FlyControls,
@@ -17,7 +17,7 @@ import Volume from "./volume";
 import VolumeMaterial from "./volume-material";
 
 export class VolumeRenderer implements IDisposable {
-  public state: VolumeRendererState;
+  public model: VolumeRendererModel;
 
   public renderer: THREE.WebGLRenderer;
   public camera: THREE.PerspectiveCamera;
@@ -47,7 +47,7 @@ export class VolumeRenderer implements IDisposable {
 
   constructor(private canvas: HTMLCanvasElement) {
     // In the future the state should be part of the general state tree.
-    this.state = new VolumeRendererState();
+    this.model = new VolumeRendererModel();
 
     this.renderer = new THREE.WebGLRenderer({ alpha: true, canvas });
     this.renderer.xr.enabled = true;
@@ -77,7 +77,7 @@ export class VolumeRenderer implements IDisposable {
     this.gradientComputer = new GradientComputer(this.renderer, this);
     this.laoComputer = new LAOComputer(
       this.renderer,
-      this.state,
+      this.model,
       this.gradientComputer.getFirstDerivative(),
       this.gradientComputer.getSecondDerivative(),
       this.updateCurrentResolution,
@@ -130,17 +130,17 @@ export class VolumeRenderer implements IDisposable {
     this.stats.dom.style.left = "auto";
 
     this.disposers.push(
-      reaction(() => this.state.image, this.onCameraMove),
-      reaction(() => this.state.focus, this.lazyRender),
-      reaction(() => this.state.shouldUseFocusVolume, this.lazyRender),
-      reaction(() => this.state.focusColor, this.lazyRender),
-      reaction(() => this.state.lightingMode, this.lazyRender),
-      reaction(() => this.state.imageOpacity, this.lazyRender),
-      reaction(() => this.state.contextOpacity, this.lazyRender),
-      reaction(() => this.state.rangeLimits, this.lazyRender),
-      reaction(() => this.state.cutAwayConeAngle, this.lazyRender),
-      reaction(() => this.state.customTFTexture, this.lazyRender),
-      reaction(() => this.state.transferFunction, this.lazyRender),
+      reaction(() => this.model.image, this.onCameraMove),
+      reaction(() => this.model.focus, this.lazyRender),
+      reaction(() => this.model.shouldUseFocusVolume, this.lazyRender),
+      reaction(() => this.model.focusColor, this.lazyRender),
+      reaction(() => this.model.lightingMode, this.lazyRender),
+      reaction(() => this.model.imageOpacity, this.lazyRender),
+      reaction(() => this.model.contextOpacity, this.lazyRender),
+      reaction(() => this.model.rangeLimits, this.lazyRender),
+      reaction(() => this.model.cutAwayConeAngle, this.lazyRender),
+      reaction(() => this.model.customTFTexture, this.lazyRender),
+      reaction(() => this.model.transferFunction, this.lazyRender),
     );
 
     this.onCameraMove();
@@ -180,7 +180,7 @@ export class VolumeRenderer implements IDisposable {
     this.gradientComputer.tick();
 
     if (
-      this.state.lightingMode.needsLAO &&
+      this.model.lightingMode.needsLAO &&
       ((this.resolutionComputer.fullResolutionFlushed &&
         !this.laoComputer.finalLAOFlushed) ||
         this.laoComputer.dirty)
@@ -210,7 +210,7 @@ export class VolumeRenderer implements IDisposable {
   };
 
   private eagerRender = () => {
-    if (!this.state.isImageLoaded) return;
+    if (!this.model.isImageLoaded) return;
 
     this.renderer.setRenderTarget(null);
     if (this.renderer.xr.isPresenting) {
@@ -231,13 +231,13 @@ export class VolumeRenderer implements IDisposable {
   private onCameraMove = () => {
     if (
       !this.renderer.xr.isPresenting &&
-      ((this.state.lightingMode.type === LightingModeType.LAO &&
-        this.state.transferFunction.updateLAOOnCameraMove) ||
-        (this.state.lightingMode.type === LightingModeType.Phong &&
-          this.state.transferFunction.updateNormalsOnCameraMove) ||
-        this.state.lightingTimeout)
+      ((this.model.lightingMode.type === LightingModeType.LAO &&
+        this.model.transferFunction.updateLAOOnCameraMove) ||
+        (this.model.lightingMode.type === LightingModeType.Phong &&
+          this.model.transferFunction.updateNormalsOnCameraMove) ||
+        this.model.lightingTimeout)
     ) {
-      this.state.onTransferFunctionChange();
+      this.model.onTransferFunctionChange();
     }
 
     this.updateCameraPosition();

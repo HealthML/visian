@@ -64,11 +64,11 @@ export function App() {
         TextureAtlas.fromStorage("focus"),
       ]);
       if (image) {
-        renderer?.state.setImage(image);
+        renderer?.model.setImage(image);
         voxelCountRef.current = image.voxelCount;
       }
 
-      if (focus) renderer?.state.setFocus(focus);
+      if (focus) renderer?.model.setFocus(focus);
     })();
   }, [renderer]);
 
@@ -94,9 +94,9 @@ export function App() {
             atlas.store("image"),
             TextureAtlas.removeFromStorage("focus"),
           ]);
-          renderer?.state.setImage(atlas);
+          renderer?.model.setImage(atlas);
           voxelCountRef.current = atlas.voxelCount;
-          renderer?.state.setFocus();
+          renderer?.model.setFocus();
         } catch (err) {
           console.error("The dropped file could not be opened:", err);
         }
@@ -131,7 +131,7 @@ export function App() {
             );
           }
           await atlas.store("focus");
-          renderer?.state.setFocus(atlas);
+          renderer?.model.setFocus(atlas);
         } catch (err) {
           console.error("The dropped file could not be opened:", err);
         }
@@ -143,7 +143,7 @@ export function App() {
   );
 
   const theme = getTheme(
-    renderer && renderer.state.backgroundValue > 0.5 ? "light" : "dark",
+    renderer && renderer.model.backgroundValue > 0.5 ? "light" : "dark",
   );
   return (
     <ThemeProvider theme={theme}>
@@ -155,7 +155,7 @@ export function App() {
             <AbsoluteCover>
               <WebGLCanvas
                 ref={canvasRef}
-                backgroundColor={renderer?.state.backgroundColor}
+                backgroundColor={renderer?.model.backgroundColor}
               />
             </AbsoluteCover>
             {renderer && <UIOverlay renderer={renderer} />}

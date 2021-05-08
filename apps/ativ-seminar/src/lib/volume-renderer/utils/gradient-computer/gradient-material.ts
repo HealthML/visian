@@ -2,7 +2,7 @@ import { IDisposer } from "@visian/utils";
 import { reaction } from "mobx";
 import * as THREE from "three";
 
-import { VolumeRendererState } from "../../../../models";
+import { VolumeRendererModel } from "../../../../models";
 import { TextureAtlas } from "../../../texture-atlas";
 import gradientFragmentShader from "../../shader/gradient/gradient.frag.glsl";
 import gradientVertexShader from "../../shader/gradient/gradient.vert.glsl";
@@ -26,7 +26,7 @@ export class GradientMaterial extends THREE.ShaderMaterial {
   constructor(
     private firstDerivativeTexture: THREE.Texture,
     private secondDerivativeTexture: THREE.Texture,
-    state: VolumeRendererState,
+    volumeRendererModel: VolumeRendererModel,
   ) {
     super({
       fragmentShader: gradientFragmentShader,
@@ -48,7 +48,7 @@ export class GradientMaterial extends THREE.ShaderMaterial {
 
     this.disposers.push(
       reaction(
-        () => state.image,
+        () => volumeRendererModel.image,
         (atlas?: TextureAtlas) => {
           if (!atlas) return;
 
@@ -61,7 +61,7 @@ export class GradientMaterial extends THREE.ShaderMaterial {
         },
       ),
       reaction(
-        () => state.focus,
+        () => volumeRendererModel.focus,
         (atlas?: TextureAtlas) => {
           if (atlas) {
             this.uniforms.uFocus.value = atlas.getTexture();

@@ -60,10 +60,10 @@ class VolumeMaterial extends THREE.ShaderMaterial implements IDisposable {
     this.reactionDisposers.push(
       autorun(() => {
         this.uniforms.uUseFocus.value =
-          volumeRenderer.state.shouldUseFocusVolume;
+          volumeRenderer.model.shouldUseFocusVolume;
       }),
       autorun(() => {
-        const color = tc(volumeRenderer.state.focusColor).toRgb();
+        const color = tc(volumeRenderer.model.focusColor).toRgb();
         this.uniforms.uFocusColor.value = [
           color.r / 255,
           color.g / 255,
@@ -73,35 +73,35 @@ class VolumeMaterial extends THREE.ShaderMaterial implements IDisposable {
       }),
       autorun(() => {
         this.uniforms.uTransferFunction.value =
-          volumeRenderer.state.transferFunction.type;
+          volumeRenderer.model.transferFunction.type;
       }),
       autorun(() => {
-        this.uniforms.uOpacity.value = volumeRenderer.state.imageOpacity;
+        this.uniforms.uOpacity.value = volumeRenderer.model.imageOpacity;
       }),
       autorun(() => {
         this.uniforms.uContextOpacity.value =
-          volumeRenderer.state.contextOpacity;
+          volumeRenderer.model.contextOpacity;
       }),
       autorun(() => {
-        this.uniforms.uLimitLow.value = volumeRenderer.state.rangeLimits[0];
-        this.uniforms.uLimitHigh.value = volumeRenderer.state.rangeLimits[1];
+        this.uniforms.uLimitLow.value = volumeRenderer.model.rangeLimits[0];
+        this.uniforms.uLimitHigh.value = volumeRenderer.model.rangeLimits[1];
       }),
       autorun(() => {
-        this.uniforms.uConeAngle.value = volumeRenderer.state.cutAwayConeAngle;
+        this.uniforms.uConeAngle.value = volumeRenderer.model.cutAwayConeAngle;
       }),
       autorun(() => {
         this.uniforms.uLightingMode.value =
-          volumeRenderer.state.lightingMode.type;
+          volumeRenderer.model.lightingMode.type;
       }),
       autorun(() => {
-        this.uniforms.uLaoIntensity.value = volumeRenderer.state.laoIntensity;
+        this.uniforms.uLaoIntensity.value = volumeRenderer.model.laoIntensity;
       }),
       autorun(() => {
         this.uniforms.uCustomTFTexture.value =
-          volumeRenderer.state.customTFTexture;
+          volumeRenderer.model.customTFTexture;
       }),
       reaction(
-        () => volumeRenderer.state.image,
+        () => volumeRenderer.model.image,
         (atlas?: TextureAtlas) => {
           if (!atlas) return;
 
@@ -112,7 +112,7 @@ class VolumeMaterial extends THREE.ShaderMaterial implements IDisposable {
         },
       ),
       reaction(
-        () => volumeRenderer.state.focus,
+        () => volumeRenderer.model.focus,
         (atlas?: TextureAtlas) => {
           if (atlas) {
             this.uniforms.uFocus.value = atlas.getTexture();

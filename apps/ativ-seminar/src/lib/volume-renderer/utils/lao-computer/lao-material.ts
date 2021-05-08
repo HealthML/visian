@@ -2,7 +2,7 @@ import { IDisposer } from "@visian/utils";
 import { autorun, reaction } from "mobx";
 import * as THREE from "three";
 
-import { VolumeRendererState } from "../../../../models";
+import { VolumeRendererModel } from "../../../../models";
 import { TextureAtlas } from "../../../texture-atlas";
 import fragmentShader from "../../shader/lao/lao.frag.glsl";
 import vertexShader from "../../shader/lao/lao.vert.glsl";
@@ -24,7 +24,7 @@ export class LAOMaterial extends THREE.ShaderMaterial {
     firstDerivativeTexture: THREE.Texture,
     secondDerivativeTexture: THREE.Texture,
     private previousFrameTexture: THREE.Texture,
-    state: VolumeRendererState,
+    volumeRendererModel: VolumeRendererModel,
   ) {
     super({
       vertexShader,
@@ -49,7 +49,7 @@ export class LAOMaterial extends THREE.ShaderMaterial {
 
     this.disposers.push(
       reaction(
-        () => state.image,
+        () => volumeRendererModel.image,
         (atlas?: TextureAtlas) => {
           if (!atlas) return;
 
@@ -61,7 +61,7 @@ export class LAOMaterial extends THREE.ShaderMaterial {
         },
       ),
       reaction(
-        () => state.focus,
+        () => volumeRendererModel.focus,
         (atlas?: TextureAtlas) => {
           if (atlas) {
             this.uniforms.uFocus.value = atlas.getTexture();
@@ -73,20 +73,22 @@ export class LAOMaterial extends THREE.ShaderMaterial {
         },
       ),
       autorun(() => {
-        this.uniforms.uTransferFunction.value = state.transferFunction.type;
+        this.uniforms.uTransferFunction.value =
+          volumeRendererModel.transferFunction.type;
       }),
       autorun(() => {
-        this.uniforms.uOpacity.value = state.imageOpacity;
+        this.uniforms.uOpacity.value = volumeRendererModel.imageOpacity;
       }),
       autorun(() => {
-        this.uniforms.uContextOpacity.value = state.contextOpacity;
+        this.uniforms.uContextOpacity.value =
+          volumeRendererModel.contextOpacity;
       }),
       autorun(() => {
-        this.uniforms.uLimitLow.value = state.rangeLimits[0];
-        this.uniforms.uLimitHigh.value = state.rangeLimits[1];
+        this.uniforms.uLimitLow.value = volumeRendererModel.rangeLimits[0];
+        this.uniforms.uLimitHigh.value = volumeRendererModel.rangeLimits[1];
       }),
       autorun(() => {
-        this.uniforms.uConeAngle.value = state.cutAwayConeAngle;
+        this.uniforms.uConeAngle.value = volumeRendererModel.cutAwayConeAngle;
       }),
     );
   }
