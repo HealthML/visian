@@ -1,4 +1,4 @@
-import { autorun, IReactionDisposer } from "mobx";
+import { autorun, IReactionDisposer, reaction } from "mobx";
 import * as THREE from "three";
 import tc from "tinycolor2";
 
@@ -14,22 +14,19 @@ import {
   transferFunctionsUniforms,
 } from "./uniforms";
 import { lightingUniforms } from "./uniforms/lighting";
-import { getStepSize, GradientComputer, LAOComputer } from "./utils";
+import { getStepSize } from "./utils";
 
-import type Volume from "./volume";
 import type VolumeRenderer from "./volume-renderer";
 /** A volume domain material. */
 class VolumeMaterial extends THREE.ShaderMaterial implements IDisposable {
-  private workingMatrix4 = new THREE.Matrix4();
-
   protected reactionDisposers: IReactionDisposer[] = [];
-
-  private gradientComputer: GradientComputer;
-  private laoComputer: LAOComputer;
 
   constructor(
     protected volumeRenderer: VolumeRenderer,
-    renderer: THREE.WebGLRenderer,
+    firstDerivative: THREE.Texture,
+    secondDerivative: THREE.Texture,
+    outputDerivative: THREE.Texture,
+    lao: THREE.Texture,
   ) {
     super({
       vertexShader: volumeVertexShader,
@@ -55,25 +52,17 @@ class VolumeMaterial extends THREE.ShaderMaterial implements IDisposable {
     const maxStepsParam = url.searchParams.get("maxSteps");
     this.defines.MAX_STEPS = maxStepsParam ? parseInt(maxStepsParam) : 600;
 
-    this.gradientComputer = new GradientComputer(renderer, volumeRenderer);
-    this.uniforms.uInputFirstDerivative.value = this.gradientComputer.getFirstDerivative();
-    this.uniforms.uInputSecondDerivative.value = this.gradientComputer.getSecondDerivative();
-    this.uniforms.uOutputFirstDerivative.value = this.gradientComputer.getOutputDerivative();
-
-    this.laoComputer = new LAOComputer(
-      renderer,
-      volumeRenderer,
-      this.gradientComputer.getFirstDerivative(),
-      this.gradientComputer.getSecondDerivative(),
-    );
-    this.uniforms.uLAO.value = this.laoComputer.getLAOTexture();
+    this.uniforms.uInputFirstDerivative.value = firstDerivative;
+    this.uniforms.uInputSecondDerivative.value = secondDerivative;
+    this.uniforms.uOutputFirstDerivative.value = outputDerivative;
+    this.uniforms.uLAO.value = lao;
 
     this.reactionDisposers.push(
       autorun(() => {
-        this.uniforms.uUseFocus.value = volumeRenderer.shouldUseFocusVolume;
+        this.uniforms.uUseFocus.value = volumeRenderer.model.useFocusVolume;
       }),
       autorun(() => {
-        const color = tc(volumeRenderer.focusColor).toRgb();
+        const color = tc(volumeRenderer.model.focusColor).toRgb();
         this.uniforms.uFocusColor.value = [
           color.r / 255,
           color.g / 255,
@@ -83,85 +72,65 @@ class VolumeMaterial extends THREE.ShaderMaterial implements IDisposable {
       }),
       autorun(() => {
         this.uniforms.uTransferFunction.value =
-          volumeRenderer.transferFunction.type;
+          volumeRenderer.model.transferFunction.type;
       }),
       autorun(() => {
-        this.uniforms.uOpacity.value = volumeRenderer.imageOpacity;
+        this.uniforms.uOpacity.value = volumeRenderer.model.imageOpacity;
       }),
       autorun(() => {
-        this.uniforms.uContextOpacity.value = volumeRenderer.contextOpacity;
+        this.uniforms.uContextOpacity.value =
+          volumeRenderer.model.contextOpacity;
       }),
       autorun(() => {
-        this.uniforms.uLimitLow.value = volumeRenderer.rangeLimits[0];
-        this.uniforms.uLimitHigh.value = volumeRenderer.rangeLimits[1];
+        this.uniforms.uLimitLow.value = volumeRenderer.model.rangeLimits[0];
+        this.uniforms.uLimitHigh.value = volumeRenderer.model.rangeLimits[1];
       }),
       autorun(() => {
-        this.uniforms.uConeAngle.value = volumeRenderer.cutAwayConeAngle;
+        this.uniforms.uConeAngle.value = volumeRenderer.model.cutAwayConeAngle;
       }),
       autorun(() => {
-        this.uniforms.uLightingMode.value = volumeRenderer.lightingMode.type;
+        this.uniforms.uLightingMode.value =
+          volumeRenderer.model.lightingMode.type;
       }),
       autorun(() => {
-        this.uniforms.uLaoIntensity.value = volumeRenderer.laoIntensity;
+        this.uniforms.uLaoIntensity.value = volumeRenderer.model.laoIntensity;
       }),
       autorun(() => {
-        this.uniforms.uCustomTFTexture.value = volumeRenderer.customTFTexture;
+        this.uniforms.uCustomTFTexture.value =
+          volumeRenderer.model.customTFTexture;
       }),
+      reaction(
+        () => volumeRenderer.model.image,
+        (atlas?: TextureAtlas) => {
+          if (!atlas) return;
+
+          this.uniforms.uVolume.value = atlas.getTexture();
+          this.uniforms.uVoxelCount.value = atlas.voxelCount;
+          this.uniforms.uAtlasGrid.value = atlas.atlasGrid;
+          this.uniforms.uStepSize.value = getStepSize(atlas);
+        },
+      ),
+      reaction(
+        () => volumeRenderer.model.focus,
+        (atlas?: TextureAtlas) => {
+          if (atlas) {
+            this.uniforms.uFocus.value = atlas.getTexture();
+          } else {
+            this.uniforms.uFocus.value = null;
+          }
+        },
+      ),
     );
   }
 
-  public tick() {
-    this.gradientComputer.tick();
-    this.laoComputer.tick();
-  }
-
-  /** Updates the rendered atlas. */
-  public setAtlas(atlas: TextureAtlas) {
-    this.uniforms.uVolume.value = atlas.getTexture();
-    this.uniforms.uVoxelCount.value = atlas.voxelCount;
-    this.uniforms.uAtlasGrid.value = atlas.atlasGrid;
-    this.uniforms.uStepSize.value = getStepSize(atlas);
-
-    this.gradientComputer.setAtlas(atlas);
-    this.laoComputer.setAtlas(atlas);
-  }
-
-  public setFocusAtlas(atlas?: TextureAtlas) {
-    if (atlas) {
-      this.uniforms.uFocus.value = atlas.getTexture();
-    } else {
-      this.uniforms.uFocus.value = null;
-    }
-
-    this.gradientComputer.setFocusAtlas(atlas);
-    this.laoComputer.setFocusAtlas(atlas);
-  }
-
-  /**
-   * Updates the `uCameraPosition` uniform.
-   *
-   * @see https://davidpeicho.github.io/blog/cloud-raymarching-walkthrough-part1/
-   */
-  public updateCameraPosition(volumeObject: Volume, camera: THREE.Camera) {
-    this.uniforms.uCameraPosition.value.setFromMatrixPosition(
-      camera.matrixWorld,
-    );
-    this.uniforms.uCameraPosition.value.applyMatrix4(
-      this.workingMatrix4.copy(volumeObject.matrixWorld).invert(),
-    );
-
-    this.gradientComputer.setCameraPosition(
-      this.uniforms.uCameraPosition.value,
-    );
-    this.laoComputer.setCameraPosition(this.uniforms.uCameraPosition.value);
+  public setCameraPosition(position: THREE.Vector3) {
+    this.uniforms.uCameraPosition.value = position;
   }
 
   public dispose() {
     this.reactionDisposers.forEach((disposer) => {
       disposer();
     });
-    this.gradientComputer.dispose();
-    this.laoComputer.dispose();
   }
 }
 

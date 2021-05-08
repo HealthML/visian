@@ -1,5 +1,5 @@
 import { ScreenAlignedQuad } from "@visian/utils";
-import { autorun, IReactionDisposer } from "mobx";
+import { autorun, IReactionDisposer, reaction } from "mobx";
 import * as THREE from "three";
 import tc from "tinycolor2";
 
@@ -36,19 +36,46 @@ export class GradientComputer implements IDisposable {
     this.gradientMaterial = new GradientMaterial(
       this.firstDerivativeRenderTarget.texture,
       this.secondDerivativeRenderTarget.texture,
+      volumeRenderer.model,
     );
 
     this.screenAlignedQuad = new ScreenAlignedQuad(this.gradientMaterial);
 
     this.reactionDisposers.push(
+      reaction(
+        () => volumeRenderer.model.image,
+        (atlas?: TextureAtlas) => {
+          if (!atlas) return;
+
+          this.firstDerivativeRenderTarget.setSize(
+            atlas.atlasSize.x,
+            atlas.atlasSize.y,
+          );
+          this.secondDerivativeRenderTarget.setSize(
+            atlas.atlasSize.x,
+            atlas.atlasSize.y,
+          );
+          this.outputDerivativeRenderTarget.setSize(
+            atlas.atlasSize.x,
+            atlas.atlasSize.y,
+          );
+
+          this.textureAtlas = atlas;
+
+          this.updateFirstDerivative();
+          this.updateSecondDerivative();
+          this.updateOutputDerivative();
+        },
+      ),
+      reaction(() => volumeRenderer.model.focus, this.updateOutputDerivative),
       autorun(() => {
         this.gradientMaterial.uniforms.uUseFocus.value =
-          volumeRenderer.shouldUseFocusVolume;
+          volumeRenderer.model.useFocusVolume;
 
         this.updateOutputDerivative();
       }),
       autorun(() => {
-        const color = tc(volumeRenderer.focusColor).toRgb();
+        const color = tc(volumeRenderer.model.focusColor).toRgb();
         this.gradientMaterial.uniforms.uFocusColor.value = [
           color.r / 255,
           color.g / 255,
@@ -58,33 +85,33 @@ export class GradientComputer implements IDisposable {
       }),
       autorun(() => {
         this.gradientMaterial.uniforms.uTransferFunction.value =
-          volumeRenderer.transferFunction.type;
+          volumeRenderer.model.transferFunction.type;
 
         this.updateOutputDerivative();
       }),
       autorun(() => {
         this.gradientMaterial.uniforms.uContextOpacity.value =
-          volumeRenderer.contextOpacity;
+          volumeRenderer.model.contextOpacity;
 
         this.updateOutputDerivative();
       }),
       autorun(() => {
         this.gradientMaterial.uniforms.uLimitLow.value =
-          volumeRenderer.rangeLimits[0];
+          volumeRenderer.model.rangeLimits[0];
         this.gradientMaterial.uniforms.uLimitHigh.value =
-          volumeRenderer.rangeLimits[1];
+          volumeRenderer.model.rangeLimits[1];
 
         this.updateOutputDerivative();
       }),
       autorun(() => {
         this.gradientMaterial.uniforms.uConeAngle.value =
-          volumeRenderer.cutAwayConeAngle;
+          volumeRenderer.model.cutAwayConeAngle;
 
         this.updateOutputDerivative();
       }),
       autorun(() => {
         this.gradientMaterial.uniforms.uCustomTFTexture.value =
-          volumeRenderer.customTFTexture;
+          volumeRenderer.model.customTFTexture;
 
         this.updateOutputDerivative();
       }),
@@ -104,46 +131,17 @@ export class GradientComputer implements IDisposable {
       this.renderSecondDerivative();
     }
     if (
-      this.volumeRenderer.lightingMode.needsNormals &&
+      this.volumeRenderer.model.lightingMode.needsNormals &&
       this.outputDerivativeDirty
     ) {
       this.renderOutputDerivative();
     }
   }
 
-  public setAtlas(atlas: TextureAtlas) {
-    this.firstDerivativeRenderTarget.setSize(
-      atlas.atlasSize.x,
-      atlas.atlasSize.y,
-    );
-    this.secondDerivativeRenderTarget.setSize(
-      atlas.atlasSize.x,
-      atlas.atlasSize.y,
-    );
-    this.outputDerivativeRenderTarget.setSize(
-      atlas.atlasSize.x,
-      atlas.atlasSize.y,
-    );
-
-    this.textureAtlas = atlas;
-
-    this.gradientMaterial.setAtlas(atlas);
-
-    this.updateFirstDerivative();
-    this.updateSecondDerivative();
-    this.updateOutputDerivative();
-  }
-
-  public setFocusAtlas(atlas?: TextureAtlas) {
-    this.gradientMaterial.setFocusAtlas(atlas);
-
-    this.updateOutputDerivative();
-  }
-
   public setCameraPosition(position: THREE.Vector3) {
     this.gradientMaterial.setCameraPosition(position);
 
-    if (this.volumeRenderer.transferFunction.updateNormalsOnCameraMove) {
+    if (this.volumeRenderer.model.transferFunction.updateNormalsOnCameraMove) {
       this.updateOutputDerivative();
     }
   }
@@ -171,7 +169,6 @@ export class GradientComputer implements IDisposable {
     this.gradientMaterial.uniforms.uInputDimensions.value = 1;
     this.gradientMaterial.setGradientMode(GradientMode.First);
 
-    const previousRenderTarget = this.renderer.getRenderTarget();
     this.renderer.setRenderTarget(this.firstDerivativeRenderTarget);
 
     const volumeTexture = this.textureAtlas.getTexture();
@@ -184,7 +181,7 @@ export class GradientComputer implements IDisposable {
     volumeTexture.magFilter = magFilter;
     volumeTexture.needsUpdate = true;
 
-    this.renderer.setRenderTarget(previousRenderTarget);
+    this.renderer.setRenderTarget(null);
 
     this.firstDerivativeDirty = false;
     const buffer = new Uint8Array(
@@ -192,7 +189,7 @@ export class GradientComputer implements IDisposable {
         this.firstDerivativeRenderTarget.height *
         4,
     );
-    this.volumeRenderer.renderer.readRenderTargetPixels(
+    this.renderer.readRenderTargetPixels(
       this.firstDerivativeRenderTarget,
       0,
       0,
@@ -208,7 +205,7 @@ export class GradientComputer implements IDisposable {
       gradientMagnitudes.push(workingVector.length());
     }
 
-    this.volumeRenderer.setGradientHistogram(
+    this.volumeRenderer.model.setGradientHistogram(
       generateHistogram(gradientMagnitudes),
     );
 
@@ -223,21 +220,20 @@ export class GradientComputer implements IDisposable {
     this.gradientMaterial.uniforms.uInputDimensions.value = 3;
     this.gradientMaterial.setGradientMode(GradientMode.Second);
 
-    const previousRenderTarget = this.renderer.getRenderTarget();
     this.renderer.setRenderTarget(this.secondDerivativeRenderTarget);
 
     this.screenAlignedQuad.renderWith(this.renderer);
 
-    this.renderer.setRenderTarget(previousRenderTarget);
+    this.renderer.setRenderTarget(null);
 
     this.secondDerivativeDirty = false;
 
     this.volumeRenderer.lazyRender();
   }
 
-  private updateOutputDerivative() {
+  private updateOutputDerivative = () => {
     this.outputDerivativeDirty = true;
-  }
+  };
 
   private renderOutputDerivative() {
     if (!this.textureAtlas) return;
@@ -245,7 +241,6 @@ export class GradientComputer implements IDisposable {
     this.gradientMaterial.uniforms.uInputDimensions.value = 1;
     this.gradientMaterial.setGradientMode(GradientMode.Output);
 
-    const previousRenderTarget = this.renderer.getRenderTarget();
     this.renderer.setRenderTarget(this.outputDerivativeRenderTarget);
 
     const volumeTexture = this.textureAtlas.getTexture();
@@ -258,7 +253,7 @@ export class GradientComputer implements IDisposable {
     volumeTexture.magFilter = magFilter;
     volumeTexture.needsUpdate = true;
 
-    this.renderer.setRenderTarget(previousRenderTarget);
+    this.renderer.setRenderTarget(null);
 
     this.outputDerivativeDirty = false;
 

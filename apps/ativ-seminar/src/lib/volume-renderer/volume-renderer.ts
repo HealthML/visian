@@ -1,29 +1,24 @@
-import { ScreenAlignedQuad } from "@visian/utils";
-import { action, computed, makeObservable, observable } from "mobx";
+import { IDisposer, ScreenAlignedQuad } from "@visian/utils";
+import { reaction } from "mobx";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import Stats from "three/examples/jsm/libs/stats.module";
-import tc from "tinycolor2";
 
-import { TextureAtlas } from "../texture-atlas";
+import { VolumeRendererModel } from "../../models";
 import { IDisposable } from "../types";
 import {
   FlyControls,
-  generateHistogram,
-  LightingMode,
-  lightingModes,
+  GradientComputer,
+  LAOComputer,
   LightingModeType,
   ResolutionComputer,
 } from "./utils";
-import {
-  TransferFunction,
-  transferFunctions,
-  TransferFunctionType,
-} from "./utils/transfer-function";
 import Volume from "./volume";
 import VolumeMaterial from "./volume-material";
 
 export class VolumeRenderer implements IDisposable {
+  public model: VolumeRendererModel;
+
   public renderer: THREE.WebGLRenderer;
   public camera: THREE.PerspectiveCamera;
   public scene = new THREE.Scene();
@@ -41,67 +36,18 @@ export class VolumeRenderer implements IDisposable {
 
   private lazyRenderTriggered = true;
 
-  public isImageLoaded = false;
-  public densityHistogram?: [number[], number, number];
-  public gradientHistogram?: [number[], number, number];
-
-  private lightingTimeout?: NodeJS.Timer;
-  public suppressedLightingMode?: LightingMode;
-
   private resolutionComputer: ResolutionComputer;
+  private gradientComputer: GradientComputer;
+  private laoComputer: LAOComputer;
 
-  public backgroundValue = 0;
-  public shouldUseFocusVolume = false;
-  public focusColor = "rgba(255, 255, 255, 1)";
-  public transferFunction = transferFunctions[TransferFunctionType.Density];
-  public lightingMode = lightingModes[LightingModeType.LAO];
-  public laoIntensity = 1;
-  public imageOpacity = 1;
-  public contextOpacity = 0.4;
-  public densityRangeLimits: [number, number] = [0, 1];
-  public edgeRangeLimits: [number, number] = [0.1, 1];
-  public rangeLimits: [number, number] = this.edgeRangeLimits;
-  public cutAwayConeAngle = 1;
-  public customTFTexture?: THREE.Texture;
-  public isFocusLoaded = false;
+  private workingVector = new THREE.Vector3();
+  private workingMatrix = new THREE.Matrix4();
+
+  private disposers: IDisposer[] = [];
 
   constructor(private canvas: HTMLCanvasElement) {
-    makeObservable<
-      this,
-      "setCustomTFTexture" | "setFocusLoaded" | "setSuppressedLightingMode"
-    >(this, {
-      isImageLoaded: observable,
-      densityHistogram: observable.ref,
-      gradientHistogram: observable.ref,
-      backgroundValue: observable,
-      shouldUseFocusVolume: observable,
-      focusColor: observable,
-      transferFunction: observable,
-      lightingMode: observable,
-      suppressedLightingMode: observable,
-      laoIntensity: observable,
-      imageOpacity: observable,
-      contextOpacity: observable,
-      rangeLimits: observable,
-      cutAwayConeAngle: observable,
-      customTFTexture: observable.ref,
-      isFocusLoaded: observable,
-      setImage: action,
-      setGradientHistogram: action,
-      setBackgroundValue: action,
-      setShouldUseFocusVolume: action,
-      setFocusColor: action,
-      setTransferFunction: action,
-      setLightingMode: action,
-      setLaoIntensity: action,
-      setImageOpacity: action,
-      setContextOpacity: action,
-      setRangeLimits: action,
-      setCutAwayConeAngle: action,
-      setCustomTFTexture: action,
-      setFocusLoaded: action,
-      setSuppressedLightingMode: action,
-    });
+    // In the future the state should be part of the general state tree.
+    this.model = new VolumeRendererModel();
 
     this.renderer = new THREE.WebGLRenderer({ alpha: true, canvas });
     this.renderer.xr.enabled = true;
@@ -128,13 +74,28 @@ export class VolumeRenderer implements IDisposable {
 
     document.addEventListener("keydown", this.onKeyDown);
 
-    this.volume = new Volume(this, this.renderer);
+    this.gradientComputer = new GradientComputer(this.renderer, this);
+    this.laoComputer = new LAOComputer(
+      this.renderer,
+      this.model,
+      this.gradientComputer.getFirstDerivative(),
+      this.gradientComputer.getSecondDerivative(),
+      this.updateCurrentResolution,
+    );
+
+    this.volume = new Volume(
+      this,
+      this.gradientComputer.getFirstDerivative(),
+      this.gradientComputer.getSecondDerivative(),
+      this.gradientComputer.getOutputDerivative(),
+      this.laoComputer.output,
+    );
     // Position the volume in a reasonable height for XR.
     this.volume.position.set(0, 1.2, 0);
     this.scene.add(this.volume);
     this.volume.onBeforeRender = (_renderer, _scene, camera) => {
       if (this.renderer.xr.isPresenting) {
-        this.volume.updateCameraPosition(camera);
+        this.updateCameraPosition(camera);
       }
     };
 
@@ -150,9 +111,8 @@ export class VolumeRenderer implements IDisposable {
       ? Math.min(5, Math.max(1, parseInt(resolutionStepsParam)))
       : 3;
     this.resolutionComputer = new ResolutionComputer(
+      { scene: this.scene, camera: this.camera },
       this.renderer,
-      this.scene,
-      this.camera,
       new THREE.Vector2(this.canvas.width, this.canvas.height),
       this.eagerRender,
       resolutionSteps,
@@ -169,6 +129,20 @@ export class VolumeRenderer implements IDisposable {
     this.stats.dom.style.right = "0";
     this.stats.dom.style.left = "auto";
 
+    this.disposers.push(
+      reaction(() => this.model.image, this.onCameraMove),
+      reaction(() => this.model.focus, this.lazyRender),
+      reaction(() => this.model.useFocusVolume, this.lazyRender),
+      reaction(() => this.model.focusColor, this.lazyRender),
+      reaction(() => this.model.lightingMode, this.lazyRender),
+      reaction(() => this.model.imageOpacity, this.lazyRender),
+      reaction(() => this.model.contextOpacity, this.lazyRender),
+      reaction(() => this.model.rangeLimits, this.lazyRender),
+      reaction(() => this.model.cutAwayConeAngle, this.lazyRender),
+      reaction(() => this.model.customTFTexture, this.lazyRender),
+      reaction(() => this.model.transferFunction, this.lazyRender),
+    );
+
     this.onCameraMove();
     this.renderer.setAnimationLoop(this.animate);
   }
@@ -184,15 +158,19 @@ export class VolumeRenderer implements IDisposable {
     this.flyControls.dispose();
     document.removeEventListener("keydown", this.onKeyDown);
     document.removeEventListener("click", this.toggleFly);
+    this.gradientComputer.dispose();
+    this.laoComputer.dispose();
+    this.screenAlignedQuad.dispose();
+    this.resolutionComputer.dispose();
+    this.renderer.dispose();
+    this.intermediateRenderTarget.dispose();
+    this.disposers.forEach((disposer) => disposer());
   };
 
   private resize = () => {
     const aspect = window.innerWidth / window.innerHeight;
 
-    this.resolutionComputer.setTargetSize(
-      window.innerWidth,
-      window.innerHeight,
-    );
+    this.resolutionComputer.setSize(window.innerWidth, window.innerHeight);
 
     this.camera.aspect = aspect;
     this.camera.updateProjectionMatrix();
@@ -203,14 +181,25 @@ export class VolumeRenderer implements IDisposable {
   };
 
   private animate = () => {
-    this.volume.tick();
+    this.gradientComputer.tick();
+
+    if (
+      this.model.lightingMode.needsLAO &&
+      ((this.resolutionComputer.fullResolutionFlushed &&
+        !this.laoComputer.isFinalLAOFlushed) ||
+        this.laoComputer.isDirty)
+    ) {
+      this.laoComputer.tick();
+    }
 
     if (this.lazyRenderTriggered) {
       this.resolutionComputer.restart();
       this.lazyRenderTriggered = false;
     }
 
-    this.resolutionComputer.tick();
+    if (!this.resolutionComputer.fullResolutionFlushed) {
+      this.resolutionComputer.tick();
+    }
 
     if (this.renderer.xr.isPresenting) {
       this.eagerRender();
@@ -225,7 +214,7 @@ export class VolumeRenderer implements IDisposable {
   };
 
   private eagerRender = () => {
-    if (!this.isImageLoaded) return;
+    if (!this.model.image) return;
 
     this.renderer.setRenderTarget(null);
     if (this.renderer.xr.isPresenting) {
@@ -235,9 +224,9 @@ export class VolumeRenderer implements IDisposable {
     }
   };
 
-  public updateCurrentResolution() {
-    this.resolutionComputer.updateCurrentResolution();
-  }
+  public updateCurrentResolution = () => {
+    this.resolutionComputer?.restartFrame();
+  };
 
   public get isShowingFullResolution() {
     return this.resolutionComputer.fullResolutionFlushed;
@@ -246,60 +235,34 @@ export class VolumeRenderer implements IDisposable {
   private onCameraMove = () => {
     if (
       !this.renderer.xr.isPresenting &&
-      ((this.lightingMode.type === LightingModeType.LAO &&
-        this.transferFunction.updateLAOOnCameraMove) ||
-        (this.lightingMode.type === LightingModeType.Phong &&
-          this.transferFunction.updateNormalsOnCameraMove) ||
-        this.lightingTimeout)
+      ((this.model.lightingMode.type === LightingModeType.LAO &&
+        this.model.transferFunction.updateLAOOnCameraMove) ||
+        (this.model.lightingMode.type === LightingModeType.Phong &&
+          this.model.transferFunction.updateNormalsOnCameraMove) ||
+        this.model.lightingTimeout)
     ) {
-      this.onTransferFunctionChange();
+      this.model.onTransferFunctionChange();
     }
 
+    this.updateCameraPosition();
+    this.lazyRender();
+  };
+
+  /**
+   * @see https://davidpeicho.github.io/blog/cloud-raymarching-walkthrough-part1/
+   */
+  private updateCameraPosition(camera: THREE.Camera = this.camera) {
     this.volume.updateMatrixWorld();
-    this.volume.updateCameraPosition(this.camera);
-    this.lazyRender();
-  };
 
-  private onTransferFunctionChange = () => {
-    if (!this.suppressedLightingMode) {
-      this.setSuppressedLightingMode(this.lightingMode);
-      this.setLightingMode(lightingModes[LightingModeType.None]);
-    }
+    this.workingVector.setFromMatrixPosition(camera.matrixWorld);
+    this.workingVector.applyMatrix4(
+      this.workingMatrix.copy(this.volume.matrixWorld).invert(),
+    );
 
-    if (this.lightingTimeout) {
-      clearTimeout(this.lightingTimeout);
-    }
-    this.lightingTimeout = setTimeout(() => {
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      this.setLightingMode(this.suppressedLightingMode!);
-      this.setSuppressedLightingMode(undefined);
-      this.lightingTimeout = undefined;
-    }, 200);
-
-    this.lazyRender();
-  };
-
-  /** Sets the base image to be rendered. */
-  public setImage = (image: TextureAtlas) => {
-    this.onTransferFunctionChange();
-
-    this.volume.setAtlas(image);
-    this.isImageLoaded = true;
-    this.densityHistogram = generateHistogram(image.getAtlas());
-    this.setShouldUseFocusVolume(false);
-
-    this.onCameraMove();
-  };
-
-  /** Sets a focus volume. */
-  public setFocus = (focus?: TextureAtlas) => {
-    this.onTransferFunctionChange();
-
-    this.volume.setFocusAtlas(focus);
-    this.setShouldUseFocusVolume(Boolean(focus));
-    this.setFocusLoaded(Boolean(focus));
-    this.lazyRender();
-  };
+    this.volume.setCameraPosition(this.workingVector);
+    this.gradientComputer.setCameraPosition(this.workingVector);
+    this.laoComputer.setCameraPosition(this.workingVector);
+  }
 
   private onFlyControlsLock = () => {
     this.orbitControls.enabled = false;
@@ -337,126 +300,6 @@ export class VolumeRenderer implements IDisposable {
       this.toggleFly();
     }
   };
-
-  // User-defined rendering parameters
-  public setGradientHistogram(histogram: [number[], number, number]) {
-    this.gradientHistogram = histogram;
-  }
-
-  @computed
-  public get backgroundColor() {
-    return `rgb(${this.backgroundValue * 255},${this.backgroundValue * 255},${
-      this.backgroundValue * 255
-    })`;
-  }
-  public setBackgroundValue = (value: number) => {
-    this.backgroundValue = Math.max(0, Math.min(1, value));
-  };
-
-  public setShouldUseFocusVolume = (shouldUseFocusVolume: boolean) => {
-    this.shouldUseFocusVolume = shouldUseFocusVolume;
-    this.lazyRender();
-  };
-
-  public setFocusColor = (value: string) => {
-    try {
-      this.focusColor = tc(value).toRgbString();
-      this.lazyRender();
-    } catch {
-      // Intentionally left blank
-    }
-  };
-
-  public setTransferFunction = (value: TransferFunction) => {
-    this.onTransferFunctionChange();
-
-    if (this.transferFunction.type === TransferFunctionType.Density) {
-      this.densityRangeLimits = this.rangeLimits;
-    } else if (this.transferFunction.type === TransferFunctionType.FCEdges) {
-      this.edgeRangeLimits = this.rangeLimits;
-    }
-
-    this.transferFunction = value;
-    this.laoIntensity = value.defaultLAOIntensity;
-
-    if (this.transferFunction.type === TransferFunctionType.Density) {
-      this.rangeLimits = this.densityRangeLimits;
-    } else if (this.transferFunction.type === TransferFunctionType.FCEdges) {
-      this.rangeLimits = this.edgeRangeLimits;
-    }
-
-    this.lazyRender();
-  };
-
-  public setLightingMode = (value: LightingMode) => {
-    this.lightingMode = value;
-
-    if (value.type === LightingModeType.LAO) {
-      this.laoIntensity = this.transferFunction.defaultLAOIntensity;
-    }
-
-    this.lazyRender();
-  };
-
-  private setSuppressedLightingMode = (value?: LightingMode) => {
-    this.suppressedLightingMode = value;
-  };
-
-  public setLaoIntensity = (value: number) => {
-    this.laoIntensity = Math.max(0, value);
-  };
-
-  public setImageOpacity = (value: number) => {
-    this.imageOpacity = Math.max(0, Math.min(1, value));
-    this.lazyRender();
-  };
-
-  public setContextOpacity = (value: number) => {
-    this.onTransferFunctionChange();
-
-    this.contextOpacity = Math.max(0, Math.min(1, value));
-    this.lazyRender();
-  };
-
-  public setRangeLimits = (value: [number, number]) => {
-    this.onTransferFunctionChange();
-
-    this.rangeLimits = [
-      Math.max(0, Math.min(1, value[0])),
-      Math.max(0, Math.min(1, value[1])),
-    ];
-    this.lazyRender();
-  };
-
-  public setCutAwayConeAngle = (radians: number) => {
-    this.onTransferFunctionChange();
-
-    this.cutAwayConeAngle = radians;
-    this.lazyRender();
-  };
-
-  protected setCustomTFTexture(texture: THREE.Texture) {
-    this.customTFTexture = texture;
-    this.lazyRender();
-  }
-  public setCustomTFImage = (file: File) => {
-    const reader = new FileReader();
-    reader.addEventListener(
-      "load",
-      () => {
-        new THREE.TextureLoader().load(reader.result as string, (texture) => {
-          this.setCustomTFTexture(texture);
-        });
-      },
-      false,
-    );
-
-    reader.readAsDataURL(file);
-  };
-
-  protected setFocusLoaded(value: boolean) {
-    this.isFocusLoaded = value;
-  }
 
   // XR Management
   public async isXRAvailable() {

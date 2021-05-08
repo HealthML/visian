@@ -1,6 +1,7 @@
+import { IDisposer } from "@visian/utils";
+import { autorun } from "mobx";
 import * as THREE from "three";
 
-import { TextureAtlas } from "../texture-atlas";
 import { IDisposable } from "../types";
 import VolumeMaterial from "./volume-material";
 
@@ -8,43 +9,50 @@ import type VolumeRenderer from "./volume-renderer";
 
 /** A volume domain. */
 class Volume extends THREE.Mesh implements IDisposable {
-  constructor(volumeRenderer: VolumeRenderer, renderer: THREE.WebGLRenderer) {
+  private disposers: IDisposer[] = [];
+  constructor(
+    volumeRenderer: VolumeRenderer,
+    firstDerivative: THREE.Texture,
+    secondDerivative: THREE.Texture,
+    outputDerivative: THREE.Texture,
+    lao: THREE.Texture,
+  ) {
     super(
       new THREE.BoxGeometry(1, 1, 1),
-      new VolumeMaterial(volumeRenderer, renderer),
+      new VolumeMaterial(
+        volumeRenderer,
+        firstDerivative,
+        secondDerivative,
+        outputDerivative,
+        lao,
+      ),
     );
 
     // The coordinate system in medical images usually has the object
     // laying on the side. We want it to be upright.
     this.rotateX(-Math.PI / 2);
-  }
 
-  public tick() {
-    (this.material as VolumeMaterial).tick();
-  }
-
-  /** Updates the rendered image. */
-  public setAtlas(atlas: TextureAtlas) {
-    (this.material as VolumeMaterial).setAtlas(atlas);
-
-    this.scale.copy(
-      atlas.voxelCount
-        .clone()
-        .multiply(atlas.voxelSpacing)
-        .multiplyScalar(0.001),
+    this.disposers.push(
+      autorun(() => {
+        const atlas = volumeRenderer.model.image;
+        if (!atlas) return;
+        this.scale.copy(
+          atlas.voxelCount
+            .clone()
+            .multiply(atlas.voxelSpacing)
+            .multiplyScalar(0.001),
+        );
+      }),
     );
   }
 
-  public setFocusAtlas(atlas?: TextureAtlas) {
-    (this.material as VolumeMaterial).setFocusAtlas(atlas);
-  }
-
-  public updateCameraPosition(camera: THREE.Camera) {
-    (this.material as VolumeMaterial).updateCameraPosition(this, camera);
+  public setCameraPosition(position: THREE.Vector3) {
+    (this.material as VolumeMaterial).setCameraPosition(position);
   }
 
   public dispose() {
     (this.material as VolumeMaterial).dispose();
+    this.disposers.forEach((disposer) => disposer());
   }
 }
 
