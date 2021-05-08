@@ -132,7 +132,7 @@ export class VolumeRenderer implements IDisposable {
     this.disposers.push(
       reaction(() => this.model.image, this.onCameraMove),
       reaction(() => this.model.focus, this.lazyRender),
-      reaction(() => this.model.shouldUseFocusVolume, this.lazyRender),
+      reaction(() => this.model.useFocusVolume, this.lazyRender),
       reaction(() => this.model.focusColor, this.lazyRender),
       reaction(() => this.model.lightingMode, this.lazyRender),
       reaction(() => this.model.imageOpacity, this.lazyRender),
@@ -160,6 +160,10 @@ export class VolumeRenderer implements IDisposable {
     document.removeEventListener("click", this.toggleFly);
     this.gradientComputer.dispose();
     this.laoComputer.dispose();
+    this.screenAlignedQuad.dispose();
+    this.resolutionComputer.dispose();
+    this.renderer.dispose();
+    this.intermediateRenderTarget.dispose();
     this.disposers.forEach((disposer) => disposer());
   };
 
@@ -182,8 +186,8 @@ export class VolumeRenderer implements IDisposable {
     if (
       this.model.lightingMode.needsLAO &&
       ((this.resolutionComputer.fullResolutionFlushed &&
-        !this.laoComputer.finalLAOFlushed) ||
-        this.laoComputer.dirty)
+        !this.laoComputer.isFinalLAOFlushed) ||
+        this.laoComputer.isDirty)
     ) {
       this.laoComputer.tick();
     }
@@ -210,7 +214,7 @@ export class VolumeRenderer implements IDisposable {
   };
 
   private eagerRender = () => {
-    if (!this.model.isImageLoaded) return;
+    if (!this.model.image) return;
 
     this.renderer.setRenderTarget(null);
     if (this.renderer.xr.isPresenting) {

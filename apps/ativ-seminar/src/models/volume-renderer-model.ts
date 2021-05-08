@@ -14,13 +14,12 @@ import {
 } from "../lib/volume-renderer";
 
 export class VolumeRendererModel {
-  public isImageLoaded = false;
   public image?: TextureAtlas;
   public focus?: TextureAtlas;
   public densityHistogram?: [number[], number, number];
   public gradientHistogram?: [number[], number, number];
   public backgroundValue = 0;
-  public shouldUseFocusVolume = false;
+  public useFocusVolume = false;
   public focusColor = "rgba(255, 255, 255, 1)";
   public transferFunction = transferFunctions[TransferFunctionType.Density];
   public lightingMode = lightingModes[LightingModeType.LAO];
@@ -33,19 +32,17 @@ export class VolumeRendererModel {
   public rangeLimits: [number, number] = this.edgeRangeLimits;
   public cutAwayConeAngle = 1;
   public customTFTexture?: THREE.Texture;
-  public isFocusLoaded = false;
 
   public lightingTimeout?: NodeJS.Timer;
 
   constructor() {
-    makeObservable<this, "setCustomTFTexture" | "setFocusLoaded">(this, {
-      isImageLoaded: observable,
+    makeObservable<this, "setCustomTFTexture">(this, {
       image: observable,
       focus: observable,
       densityHistogram: observable.ref,
       gradientHistogram: observable.ref,
       backgroundValue: observable,
-      shouldUseFocusVolume: observable,
+      useFocusVolume: observable,
       focusColor: observable,
       transferFunction: observable,
       lightingMode: observable,
@@ -56,12 +53,11 @@ export class VolumeRendererModel {
       rangeLimits: observable,
       cutAwayConeAngle: observable,
       customTFTexture: observable.ref,
-      isFocusLoaded: observable,
       setImage: action,
       setFocus: action,
       setGradientHistogram: action,
       setBackgroundValue: action,
-      setShouldUseFocusVolume: action,
+      setUseFocusVolume: action,
       setFocusColor: action,
       setTransferFunction: action,
       setLightingMode: action,
@@ -71,7 +67,6 @@ export class VolumeRendererModel {
       setRangeLimits: action,
       setCutAwayConeAngle: action,
       setCustomTFTexture: action,
-      setFocusLoaded: action,
       setSuppressedLightingMode: action,
     });
   }
@@ -85,10 +80,9 @@ export class VolumeRendererModel {
 
   /** Sets the base image to be rendered. */
   public setImage = (image: TextureAtlas) => {
-    this.isImageLoaded = true;
     this.image = image;
     this.densityHistogram = generateHistogram(image.getAtlas());
-    this.setShouldUseFocusVolume(false);
+    this.setUseFocusVolume(false);
     this.onTransferFunctionChange();
   };
 
@@ -96,13 +90,8 @@ export class VolumeRendererModel {
     this.onTransferFunctionChange();
     this.focus = focus;
 
-    this.setShouldUseFocusVolume(Boolean(focus));
-    this.setFocusLoaded(Boolean(focus));
+    this.setUseFocusVolume(Boolean(focus));
   };
-
-  protected setFocusLoaded(value: boolean) {
-    this.isFocusLoaded = value;
-  }
 
   public setGradientHistogram(histogram: [number[], number, number]) {
     this.gradientHistogram = histogram;
@@ -112,8 +101,8 @@ export class VolumeRendererModel {
     this.backgroundValue = Math.max(0, Math.min(1, value));
   };
 
-  public setShouldUseFocusVolume = (shouldUseFocusVolume: boolean) => {
-    this.shouldUseFocusVolume = shouldUseFocusVolume;
+  public setUseFocusVolume = (useFocusVolume: boolean) => {
+    this.useFocusVolume = useFocusVolume;
   };
 
   public setFocusColor = (value: string) => {

@@ -1,8 +1,8 @@
 import * as THREE from "three";
 
-import { ProgressiveRenderer, RenderParams } from "./progressive-renderer";
+import { TiledRenderer, RenderParams } from "./tiled-renderer";
 
-export class ResolutionComputer extends ProgressiveRenderer {
+export class ResolutionComputer extends TiledRenderer {
   private _fullResolutionFlushed = false;
 
   private currentResolutionStep = 0;

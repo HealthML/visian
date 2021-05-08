@@ -59,8 +59,7 @@ class VolumeMaterial extends THREE.ShaderMaterial implements IDisposable {
 
     this.reactionDisposers.push(
       autorun(() => {
-        this.uniforms.uUseFocus.value =
-          volumeRenderer.model.shouldUseFocusVolume;
+        this.uniforms.uUseFocus.value = volumeRenderer.model.useFocusVolume;
       }),
       autorun(() => {
         const color = tc(volumeRenderer.model.focusColor).toRgb();

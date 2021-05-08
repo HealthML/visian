@@ -3,7 +3,7 @@ import * as THREE from "three";
 
 import { VolumeRendererModel } from "../../../../models";
 import { TextureAtlas } from "../../../texture-atlas";
-import { ProgressiveRenderer } from "../progressive-renderer";
+import { TiledRenderer } from "../tiled-renderer";
 import LAOMaterial from "./lao-material";
 
 // TODO: Tweak based on performance.
@@ -11,10 +11,10 @@ export const totalLAORays = 32; // Set to 8 to turn progressive LAO off.
 // TODO: Tweak based on performance.
 export const quadSize = 1024;
 
-export class LAOComputer extends ProgressiveRenderer {
-  private _dirty = true;
+export class LAOComputer extends TiledRenderer {
+  private _isDirty = true;
 
-  private _finalLAOFlushed = false;
+  private _isFinalLAOFlushed = false;
 
   private reactionDisposers: IReactionDisposer[] = [];
 
@@ -35,11 +35,14 @@ export class LAOComputer extends ProgressiveRenderer {
     super(laoMaterial, renderer, undefined, target);
 
     this.reactionDisposers.push(
-      reaction(() => volumeRendererModel.transferFunction.type, this.update),
-      reaction(() => volumeRendererModel.imageOpacity, this.update),
-      reaction(() => volumeRendererModel.contextOpacity, this.update),
-      reaction(() => volumeRendererModel.rangeLimits, this.update),
-      reaction(() => volumeRendererModel.cutAwayConeAngle, this.update),
+      reaction(() => volumeRendererModel.useFocusVolume, this.setDirty),
+      reaction(() => volumeRendererModel.focusColor, this.setDirty),
+      reaction(() => volumeRendererModel.imageOpacity, this.setDirty),
+      reaction(() => volumeRendererModel.contextOpacity, this.setDirty),
+      reaction(() => volumeRendererModel.rangeLimits, this.setDirty),
+      reaction(() => volumeRendererModel.cutAwayConeAngle, this.setDirty),
+      reaction(() => volumeRendererModel.customTFTexture, this.setDirty),
+      reaction(() => volumeRendererModel.transferFunction.type, this.setDirty),
       reaction(
         () => volumeRendererModel.image,
         (atlas?: TextureAtlas) => {
@@ -52,10 +55,10 @@ export class LAOComputer extends ProgressiveRenderer {
             Math.ceil(atlas.atlasSize.y / quadSize),
           );
 
-          this.update();
+          this.setDirty();
         },
       ),
-      reaction(() => volumeRendererModel.focus, this.update),
+      reaction(() => volumeRendererModel.focus, this.setDirty),
     );
   }
 
@@ -65,16 +68,17 @@ export class LAOComputer extends ProgressiveRenderer {
     this.laoMaterial.dispose();
   }
 
-  public get dirty() {
-    return this._dirty;
+  public get isDirty() {
+    return this._isDirty;
   }
 
-  public get finalLAOFlushed() {
-    return this._finalLAOFlushed;
+  /** Whther or not the final progressive LAO frame has been flushed. */
+  public get isFinalLAOFlushed() {
+    return this._isFinalLAOFlushed;
   }
 
   public tick() {
-    if (this._dirty) {
+    if (this._isDirty) {
       this.renderInitialFrame();
 
       return;
@@ -92,7 +96,7 @@ export class LAOComputer extends ProgressiveRenderer {
     if (this.laoMaterial.previousDirections < totalLAORays) {
       this.restartFrame();
     } else {
-      this._finalLAOFlushed = true;
+      this._isFinalLAOFlushed = true;
     }
   };
 
@@ -105,19 +109,19 @@ export class LAOComputer extends ProgressiveRenderer {
     super.tick();
     this.setRenderGrid(previousGrid.x, previousGrid.y);
 
-    this._dirty = false;
+    this._isDirty = false;
   }
 
-  private update = () => {
-    this._dirty = true;
-    this._finalLAOFlushed = false;
+  private setDirty = () => {
+    this._isDirty = true;
+    this._isFinalLAOFlushed = false;
   };
 
   public setCameraPosition(position: THREE.Vector3) {
     this.laoMaterial.setCameraPosition(position);
 
     if (this.volumeRendererModel.transferFunction.updateLAOOnCameraMove) {
-      this.update();
+      this.setDirty();
     }
   }
 }

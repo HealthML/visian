@@ -22,7 +22,7 @@ export class ScreenAlignedQuad extends THREE.Mesh implements IDisposable {
     return new this(new THREE.MeshBasicMaterial({ map: texture }));
   }
 
-  constructor(material: THREE.Material) {
+  constructor(material: THREE.Material | THREE.Material[]) {
     super(ScreenAlignedQuad.quadGeometry, material);
 
     this.scene.add(this);
@@ -30,7 +30,11 @@ export class ScreenAlignedQuad extends THREE.Mesh implements IDisposable {
   }
 
   public dispose() {
-    (this.material as THREE.Material).dispose();
+    if (Array.isArray(this.material)) {
+      this.material.forEach((material) => material.dispose());
+    } else {
+      this.material.dispose();
+    }
   }
 
   /** Render this quad with the given @param renderer. */

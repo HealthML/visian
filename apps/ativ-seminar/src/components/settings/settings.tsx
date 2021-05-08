@@ -80,49 +80,49 @@ const HistogramBar = styled.div`
 `;
 
 export const Settings: React.FC<SettingsProps> = observer((props) => {
-  const { volumeRendererModel: state, parentElement, ...rest } = props;
+  const { volumeRendererModel, parentElement, ...rest } = props;
 
   const setFocusColor = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
-      state.setFocusColor(event.target.value);
+      volumeRendererModel.setFocusColor(event.target.value);
     },
-    [state],
+    [volumeRendererModel],
   );
 
-  const setShouldUseFocusVolume = useCallback(
+  const setUseFocusVolume = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
-      state.setShouldUseFocusVolume(event.target.checked);
+      volumeRendererModel.setUseFocusVolume(event.target.checked);
     },
-    [state],
+    [volumeRendererModel],
   );
 
   const setLightingMode = useCallback(
     (value: LightingModeType) => {
-      state.setLightingMode(lightingModes[value]);
+      volumeRendererModel.setLightingMode(lightingModes[value]);
     },
-    [state],
+    [volumeRendererModel],
   );
 
   const setTransferFunction = useCallback(
     (value: TransferFunctionType) => {
-      state.setTransferFunction(transferFunctions[value]);
+      volumeRendererModel.setTransferFunction(transferFunctions[value]);
     },
-    [state],
+    [volumeRendererModel],
   );
 
   const setCustomTFImage = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
       const files = event.target.files;
       if (!files?.length) return;
-      state.setCustomTFImage(files[0]);
+      volumeRendererModel.setCustomTFImage(files[0]);
     },
-    [state],
+    [volumeRendererModel],
   );
 
   const histogram =
-    state.transferFunction.type === TransferFunctionType.FCEdges
-      ? state.gradientHistogram
-      : state.densityHistogram;
+    volumeRendererModel.transferFunction.type === TransferFunctionType.FCEdges
+      ? volumeRendererModel.gradientHistogram
+      : volumeRendererModel.densityHistogram;
   return (
     <Container
       {...rest}
@@ -136,8 +136,8 @@ export const Settings: React.FC<SettingsProps> = observer((props) => {
         min={0}
         max={1}
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        onChange={state.setBackgroundValue as any}
-        value={state.backgroundValue}
+        onChange={volumeRendererModel.setBackgroundValue as any}
+        value={volumeRendererModel.backgroundValue}
       />
       <SpacedSliderField
         label="Opacity"
@@ -145,8 +145,8 @@ export const Settings: React.FC<SettingsProps> = observer((props) => {
         min={0}
         max={1}
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        onChange={state.setImageOpacity as any}
-        value={state.imageOpacity}
+        onChange={volumeRendererModel.setImageOpacity as any}
+        value={volumeRendererModel.imageOpacity}
         scaleType="quadratic"
       />
       <Switch
@@ -169,14 +169,17 @@ export const Settings: React.FC<SettingsProps> = observer((props) => {
           },
         ]}
         onChange={setLightingMode}
-        value={state.suppressedLightingMode?.type || state.lightingMode.type}
+        value={
+          volumeRendererModel.suppressedLightingMode?.type ||
+          volumeRendererModel.lightingMode.type
+        }
       />
       <StyledCheckboxRow>
         <input
           type="checkbox"
-          checked={state.shouldUseFocusVolume}
-          onChange={setShouldUseFocusVolume}
-          disabled={!state.isFocusLoaded}
+          checked={volumeRendererModel.useFocusVolume}
+          onChange={setUseFocusVolume}
+          disabled={!volumeRendererModel.focus}
         />
         <StyledCheckboxText text="Use focus volume?" />
       </StyledCheckboxRow>
@@ -190,10 +193,12 @@ export const Settings: React.FC<SettingsProps> = observer((props) => {
           { value: TransferFunctionType.Custom, label: "Custom" },
         ]}
         onChange={setTransferFunction}
-        value={state.transferFunction.type}
+        value={volumeRendererModel.transferFunction.type}
       />
-      {(state.transferFunction.type === TransferFunctionType.Density ||
-        state.transferFunction.type === TransferFunctionType.FCEdges) && (
+      {(volumeRendererModel.transferFunction.type ===
+        TransferFunctionType.Density ||
+        volumeRendererModel.transferFunction.type ===
+          TransferFunctionType.FCEdges) && (
         <HistogramWrapper>
           {histogram && (
             <Histogram>
@@ -219,28 +224,33 @@ export const Settings: React.FC<SettingsProps> = observer((props) => {
             min={0}
             max={1}
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            onChange={state.setRangeLimits as any}
-            value={state.rangeLimits}
+            onChange={volumeRendererModel.setRangeLimits as any}
+            value={volumeRendererModel.rangeLimits}
           />
         </HistogramWrapper>
       )}
-      {state.transferFunction.type === TransferFunctionType.FCCutaway && (
+      {volumeRendererModel.transferFunction.type ===
+        TransferFunctionType.FCCutaway && (
         <SpacedSliderField
           label="Cutaway Angle"
           showValueLabel
           min={0}
           max={Math.PI}
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          onChange={state.setCutAwayConeAngle as any}
-          value={state.cutAwayConeAngle}
+          onChange={volumeRendererModel.setCutAwayConeAngle as any}
+          value={volumeRendererModel.cutAwayConeAngle}
         />
       )}
-      {(state.transferFunction.type === TransferFunctionType.FCEdges ||
-        state.transferFunction.type === TransferFunctionType.FCCutaway) && (
+      {(volumeRendererModel.transferFunction.type ===
+        TransferFunctionType.FCEdges ||
+        volumeRendererModel.transferFunction.type ===
+          TransferFunctionType.FCCutaway) && (
         <>
           <InputLabel text="Focus Volume Color" />
           <StyledTextInput
-            defaultValue={state.focusColor || "rgba(255,255,255,1)"}
+            defaultValue={
+              volumeRendererModel.focusColor || "rgba(255,255,255,1)"
+            }
             onChange={setFocusColor}
           />
           <SpacedSliderField
@@ -249,13 +259,14 @@ export const Settings: React.FC<SettingsProps> = observer((props) => {
             min={0}
             max={1}
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            onChange={state.setContextOpacity as any}
-            value={state.contextOpacity}
+            onChange={volumeRendererModel.setContextOpacity as any}
+            value={volumeRendererModel.contextOpacity}
             scaleType="quadratic"
           />
         </>
       )}
-      {state.transferFunction.type === TransferFunctionType.Custom && (
+      {volumeRendererModel.transferFunction.type ===
+        TransferFunctionType.Custom && (
         <>
           <InputLabel text="Transfer Image" />
           <StyledFileInput type="file" onChange={setCustomTFImage} />

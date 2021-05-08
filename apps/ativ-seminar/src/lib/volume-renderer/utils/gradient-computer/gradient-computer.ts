@@ -70,7 +70,7 @@ export class GradientComputer implements IDisposable {
       reaction(() => volumeRenderer.model.focus, this.updateOutputDerivative),
       autorun(() => {
         this.gradientMaterial.uniforms.uUseFocus.value =
-          volumeRenderer.model.shouldUseFocusVolume;
+          volumeRenderer.model.useFocusVolume;
 
         this.updateOutputDerivative();
       }),

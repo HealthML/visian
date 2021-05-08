@@ -4,11 +4,11 @@ import * as THREE from "three";
 import { RenderParams, RenderSubject } from "./types";
 
 /**
- * Renders a render subject in steps.
+ * Renders a render subject in steps (tiles).
  *
- * Call @function tick whenever a step may be rendered.
+ * Call @function tick whenever a tile may be rendered.
  */
-export class ProgressiveRenderer implements IDisposable {
+export class TiledRenderer implements IDisposable {
   private renderParams: RenderParams;
 
   private intermediatRenderTarget = new THREE.WebGLRenderTarget(1, 1);
@@ -26,8 +26,10 @@ export class ProgressiveRenderer implements IDisposable {
    * @param renderer The internal renderer.
    * @param size The size of the output.
    * @param target The render target to be rendered to.
-   * @param grid The grid of progressive render steps.
-   * @param onFrameFinished A callback when the progressive frame is finished.
+   * @param grid The grid of tiles. (1, 1) results in direct rendering (default).
+   * (2, 2) results in 4 tiles. More tiles mean more steps, but each step will
+   * be faster if there are more tiles.
+   * @param onFrameFinished A callback when the full frame is finished.
    */
   constructor(
     subject: RenderSubject,
@@ -66,7 +68,7 @@ export class ProgressiveRenderer implements IDisposable {
   }
 
   /**
-   * Should be called, when this progressive renderer is no longer needed.
+   * Should be called, when this tiled renderer is no longer needed.
    */
   public dispose() {
     this.intermediatRenderTarget.dispose();
@@ -79,7 +81,7 @@ export class ProgressiveRenderer implements IDisposable {
   }
 
   /**
-   * A texture containing the output of this progressive renderer.
+   * A texture containing the output of this tiled renderer.
    */
   public get output() {
     return this.target.texture;
@@ -96,7 +98,7 @@ export class ProgressiveRenderer implements IDisposable {
   }
 
   /**
-   * Allows this progressive renderer to render one step.
+   * Allows this tiled renderer to render one tile.
    * @param target The render target to be rendered to.
    */
   public tick(target = this.target) {
@@ -106,7 +108,7 @@ export class ProgressiveRenderer implements IDisposable {
   }
 
   /**
-   * Renders one part of the progressive frame to an intermediate render
+   * Renders one tile of the frame to an intermediate render
    * target and then copies it to the correct part of the output.
    */
   private render(target = this.target) {

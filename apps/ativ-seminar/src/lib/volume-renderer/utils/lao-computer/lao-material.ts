@@ -1,6 +1,7 @@
 import { IDisposer } from "@visian/utils";
 import { autorun, reaction } from "mobx";
 import * as THREE from "three";
+import tc from "tinycolor2";
 
 import { VolumeRendererModel } from "../../../../models";
 import { TextureAtlas } from "../../../texture-atlas";
@@ -57,7 +58,6 @@ export class LAOMaterial extends THREE.ShaderMaterial {
           this.uniforms.uVoxelCount.value = atlas.voxelCount;
           this.uniforms.uAtlasGrid.value = atlas.atlasGrid;
           this.uniforms.uStepSize.value = getStepSize(atlas);
-          this.uniforms.uUseFocus.value = false;
         },
       ),
       reaction(
@@ -65,10 +65,8 @@ export class LAOMaterial extends THREE.ShaderMaterial {
         (atlas?: TextureAtlas) => {
           if (atlas) {
             this.uniforms.uFocus.value = atlas.getTexture();
-            this.uniforms.uUseFocus.value = true;
           } else {
             this.uniforms.uFocus.value = null;
-            this.uniforms.uUseFocus.value = false;
           }
         },
       ),
@@ -89,6 +87,22 @@ export class LAOMaterial extends THREE.ShaderMaterial {
       }),
       autorun(() => {
         this.uniforms.uConeAngle.value = volumeRendererModel.cutAwayConeAngle;
+      }),
+      autorun(() => {
+        this.uniforms.uUseFocus.value = volumeRendererModel.useFocusVolume;
+      }),
+      autorun(() => {
+        const color = tc(volumeRendererModel.focusColor).toRgb();
+        this.uniforms.uFocusColor.value = [
+          color.r / 255,
+          color.g / 255,
+          color.b / 255,
+          color.a,
+        ];
+      }),
+      autorun(() => {
+        this.uniforms.uCustomTFTexture.value =
+          volumeRendererModel.customTFTexture;
       }),
     );
   }
