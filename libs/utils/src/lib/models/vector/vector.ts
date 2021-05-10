@@ -1,8 +1,7 @@
 import { action, makeObservable, observable, toJS } from "mobx";
+import type * as THREE from "three";
 
 import { getOrthogonalAxis, ViewType } from "../view-types";
-
-import type * as THREE from "three";
 
 export class OutOfBoundsError extends Error {
   constructor(index: number) {
@@ -260,7 +259,7 @@ export class Vector implements GenericVector {
     return Math.sqrt(this.lengthSq());
   }
 
-  /** Returns the sum of all components.*/
+  /** Returns the sum of all components. */
   public sum() {
     return this.data.reduce((sum, value) => sum + value);
   }

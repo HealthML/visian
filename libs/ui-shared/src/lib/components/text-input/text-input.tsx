@@ -84,7 +84,7 @@ export const TextInput = React.forwardRef<HTMLInputElement, TextInputProps>(
       if (onConfirm) {
         const newValue =
           type === "number" ? parseFloat(valueRef.current) : valueRef.current;
-        if (!(type === "number" && isNaN(newValue))) {
+        if (!(type === "number" && Number.isNaN(newValue))) {
           onConfirm(newValue);
         }
       }

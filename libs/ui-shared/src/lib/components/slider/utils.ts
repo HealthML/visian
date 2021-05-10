@@ -2,8 +2,8 @@ import { PointerEvent as ReactPointerEvent, useCallback, useRef } from "react";
 
 import type {
   PointerCoordinates,
-  roundMethod,
-  scaleType,
+  RoundMethod,
+  ScaleType,
   SliderValueSettings,
   SliderVerticalitySettings,
 } from "./types";
@@ -16,7 +16,7 @@ import type {
  */
 export const applyScale = (
   value: number,
-  scaleType?: scaleType,
+  scaleType?: ScaleType,
   shouldInvert?: boolean,
 ) => {
   switch (scaleType) {
@@ -34,7 +34,7 @@ export const applyScale = (
 export const roundToStepSize = (
   value: number,
   stepSize?: number,
-  roundMethod?: roundMethod,
+  roundMethod?: RoundMethod,
 ) => {
   if (!stepSize) return value;
 

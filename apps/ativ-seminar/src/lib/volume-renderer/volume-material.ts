@@ -82,8 +82,10 @@ class VolumeMaterial extends THREE.ShaderMaterial implements IDisposable {
           volumeRenderer.model.contextOpacity;
       }),
       autorun(() => {
-        this.uniforms.uLimitLow.value = volumeRenderer.model.rangeLimits[0];
-        this.uniforms.uLimitHigh.value = volumeRenderer.model.rangeLimits[1];
+        [
+          this.uniforms.uLimitLow.value,
+          this.uniforms.uLimitHigh.value,
+        ] = volumeRenderer.model.rangeLimits;
       }),
       autorun(() => {
         this.uniforms.uConeAngle.value = volumeRenderer.model.cutAwayConeAngle;

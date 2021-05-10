@@ -20,24 +20,24 @@ const StyledButton = styled(Button)`
 const MagicAIButton: React.FC<MagicAIButtonProps> = (props) => {
   const { renderer, ...rest } = props;
 
-  const [clicked, setClicked] = useState<boolean>(false);
+  const [hasBeenClicked, setHasBeenClicked] = useState<boolean>(false);
 
   const [text, setText] = useState<string>("Generate AI segmentations");
 
   const callback = useCallback(() => {
-    setClicked(true);
+    setHasBeenClicked(true);
     setText("Processing...");
     setTimeout(() => {
       renderer.setMeshVisibility(true);
       setText("AI results are shown");
     }, 1000);
-  }, [setClicked, renderer, setText]);
+  }, [setHasBeenClicked, renderer, setText]);
 
   return (
     <StyledButton
       {...rest}
       text={text}
-      onPointerDown={clicked ? undefined : callback}
+      onPointerDown={hasBeenClicked ? undefined : callback}
     />
   );
 };

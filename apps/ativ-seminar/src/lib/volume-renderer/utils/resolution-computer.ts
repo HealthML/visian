@@ -61,7 +61,7 @@ export class ResolutionComputer extends TiledRenderer {
   };
 
   private configureRendering() {
-    this.setRenderGrid(Math.pow(2, this.currentResolutionStep));
+    this.setRenderGrid(2 ** this.currentResolutionStep);
 
     this.workingVector
       .copy(this.targetSize)
@@ -72,6 +72,6 @@ export class ResolutionComputer extends TiledRenderer {
   }
 
   private get currentResolutionReduction() {
-    return Math.pow(2, this.resolutionSteps - this.currentResolutionStep - 1);
+    return 2 ** (this.resolutionSteps - this.currentResolutionStep - 1);
   }
 }

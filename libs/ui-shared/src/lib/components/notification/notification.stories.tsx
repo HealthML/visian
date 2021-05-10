@@ -8,9 +8,9 @@ export default {
   title: "Notification",
 };
 
-export const primary = ({ ...args }: NotificationProps) => {
-  return <Notification {...args} />;
-};
+export const primary = ({ ...args }: NotificationProps) => (
+  <Notification {...args} />
+);
 primary.args = {
   title: "Oops! That’s the wrong file...",
   description: "We can’t import .mp4 yet - choose another!",

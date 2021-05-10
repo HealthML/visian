@@ -5,6 +5,7 @@ import { textureFormatForComponents } from "./utils";
 
 import type { Image } from "../../models/image";
 import type { TypedArray } from "../itk";
+
 export type TextureAtlasMetadata<T extends TypedArray = TypedArray> = Pick<
   Image<T>,
   "voxelComponents" | "voxelCount"

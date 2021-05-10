@@ -47,8 +47,8 @@ export const getIntersectionsFromClickPosition = (
   canvas: HTMLCanvasElement,
   camera: THREE.PerspectiveCamera,
   pointerLocked: boolean,
-) => {
-  return pointerLocked
+) =>
+  pointerLocked
     ? getIntersections({ x: 0, y: 0 }, objects, camera)
     : getIntersectionsFromPointer(
         {
@@ -59,4 +59,3 @@ export const getIntersectionsFromClickPosition = (
         canvas,
         camera,
       );
-};

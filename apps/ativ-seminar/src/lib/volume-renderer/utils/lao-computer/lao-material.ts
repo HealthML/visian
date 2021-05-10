@@ -82,8 +82,10 @@ export class LAOMaterial extends THREE.ShaderMaterial {
           volumeRendererModel.contextOpacity;
       }),
       autorun(() => {
-        this.uniforms.uLimitLow.value = volumeRendererModel.rangeLimits[0];
-        this.uniforms.uLimitHigh.value = volumeRendererModel.rangeLimits[1];
+        [
+          this.uniforms.uLimitLow.value,
+          this.uniforms.uLimitHigh.value,
+        ] = volumeRendererModel.rangeLimits;
       }),
       autorun(() => {
         this.uniforms.uConeAngle.value = volumeRendererModel.cutAwayConeAngle;

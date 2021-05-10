@@ -4,15 +4,15 @@ import { ResolvedGlobalId } from "nestjs-relay";
 @InputType()
 export class DeleteUserInput {
   @Field()
-  id!: ResolvedGlobalId;
+  public id!: ResolvedGlobalId;
 }
 
 @ObjectType()
 export class DeleteUserPayload {
+  @Field()
+  public id: ResolvedGlobalId;
+
   constructor(id: ResolvedGlobalId) {
     this.id = id;
   }
-
-  @Field()
-  id: ResolvedGlobalId;
 }

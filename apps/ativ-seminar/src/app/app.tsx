@@ -15,13 +15,14 @@ import { observer } from "mobx-react-lite";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Route, Switch } from "react-router-dom";
 import styled from "styled-components";
+import type * as THREE from "three";
 import WebXRPolyfill from "webxr-polyfill";
 
 import { UIOverlay } from "../components/ui-overlay";
 import { TextureAtlas } from "../lib/texture-atlas";
 import { VolumeRenderer } from "../lib/volume-renderer";
 
-import type * as THREE from "three";
+// eslint-disable-next-line no-new
 new WebXRPolyfill();
 
 const StyledDropZone = styled(DropZone)`
@@ -98,6 +99,7 @@ export function App() {
           voxelCountRef.current = atlas.voxelCount;
           renderer?.model.setFocus();
         } catch (err) {
+          // eslint-disable-next-line no-console
           console.error("The dropped file could not be opened:", err);
         }
         onDrop();
@@ -133,6 +135,7 @@ export function App() {
           await atlas.store("focus");
           renderer?.model.setFocus(atlas);
         } catch (err) {
+          // eslint-disable-next-line no-console
           console.error("The dropped file could not be opened:", err);
         }
         onDrop();

@@ -96,10 +96,10 @@ export class GradientComputer implements IDisposable {
         this.updateOutputDerivative();
       }),
       autorun(() => {
-        this.gradientMaterial.uniforms.uLimitLow.value =
-          volumeRenderer.model.rangeLimits[0];
-        this.gradientMaterial.uniforms.uLimitHigh.value =
-          volumeRenderer.model.rangeLimits[1];
+        [
+          this.gradientMaterial.uniforms.uLimitLow.value,
+          this.gradientMaterial.uniforms.uLimitHigh.value,
+        ] = volumeRenderer.model.rangeLimits;
 
         this.updateOutputDerivative();
       }),
@@ -172,7 +172,7 @@ export class GradientComputer implements IDisposable {
     this.renderer.setRenderTarget(this.firstDerivativeRenderTarget);
 
     const volumeTexture = this.textureAtlas.getTexture();
-    const magFilter = volumeTexture.magFilter;
+    const { magFilter } = volumeTexture;
     volumeTexture.magFilter = THREE.NearestFilter;
     volumeTexture.needsUpdate = true;
 
@@ -244,7 +244,7 @@ export class GradientComputer implements IDisposable {
     this.renderer.setRenderTarget(this.outputDerivativeRenderTarget);
 
     const volumeTexture = this.textureAtlas.getTexture();
-    const magFilter = volumeTexture.magFilter;
+    const { magFilter } = volumeTexture;
     volumeTexture.magFilter = THREE.NearestFilter;
     volumeTexture.needsUpdate = true;
 

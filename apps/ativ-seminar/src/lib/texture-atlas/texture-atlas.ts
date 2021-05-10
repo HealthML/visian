@@ -42,14 +42,14 @@ export const getAtlasGrid = (voxelCount: THREE.Vector3) => {
 /** A 2D texture atlas for a volumetric image. */
 export class TextureAtlas<T extends TypedArray = TypedArray> {
   /** Returns a texture atlas based on the given medical image. */
-  public static fromITKImage<T extends TypedArray = TypedArray>(
-    image: ITKImage<T>,
+  public static fromITKImage<T2 extends TypedArray = TypedArray>(
+    image: ITKImage<T2>,
     magFilter?: THREE.TextureFilter,
   ) {
     if (image.size.length !== 3) {
       throw new Error("Only 3D volumetric images are supported");
     }
-    return new TextureAtlas<T>(
+    return new TextureAtlas<T2>(
       new THREE.Vector3().fromArray(image.size),
       new THREE.Vector3().fromArray(image.spacing),
       new THREE.Matrix3().fromArray(image.direction.data),
@@ -60,15 +60,15 @@ export class TextureAtlas<T extends TypedArray = TypedArray> {
   }
 
   /** Returns a texture atlas previously written to local storage. */
-  public static async fromStorage<T extends TypedArray = TypedArray>(
+  public static async fromStorage<T2 extends TypedArray = TypedArray>(
     key: string,
   ) {
-    const storedAtlas = await localForage.getItem<StoredTextureAtlas<T>>(
+    const storedAtlas = await localForage.getItem<StoredTextureAtlas<T2>>(
       `${localForagePrefix}${key}`,
     );
     if (!storedAtlas) return undefined;
 
-    return new TextureAtlas<T>(
+    return new TextureAtlas<T2>(
       new THREE.Vector3().fromArray(storedAtlas.voxelCount),
       storedAtlas.voxelSpacing &&
         new THREE.Vector3().fromArray(storedAtlas.voxelSpacing),
@@ -79,7 +79,7 @@ export class TextureAtlas<T extends TypedArray = TypedArray> {
     ).setAtlas(storedAtlas.atlas);
   }
 
-  /** Deletes a previously stored texture atlas from local storage.*/
+  /** Deletes a previously stored texture atlas from local storage. */
   public static removeFromStorage(key: string) {
     return localForage.removeItem(`${localForagePrefix}${key}`);
   }

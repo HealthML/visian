@@ -8,6 +8,7 @@ import { sliceFragmentShader, sliceVertexShader } from "../shaders";
 import { getOrder } from "./utils";
 
 import type { Editor } from "../../models";
+
 export abstract class SliceMaterial
   extends THREE.ShaderMaterial
   implements IDisposable {

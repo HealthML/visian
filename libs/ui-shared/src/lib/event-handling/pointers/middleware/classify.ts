@@ -5,12 +5,12 @@ import {
   PointerEventData,
 } from "../types";
 
-export type classifyEventMap = Partial<
+export type ClassifyEventMap = Partial<
   Record<keyof EventMap, [DeviceType, AbstractEventType]>
 >;
 
 /** Default mouse/touch event map */
-const defaultEventMap: classifyEventMap = {
+const defaultEventMap: ClassifyEventMap = {
   mousedown: ["mouse", "start"],
   mouseenter: ["mouse", "start"],
   mouseleave: ["mouse", "end"],
@@ -38,7 +38,7 @@ export { defaultEventMap as eventMap };
  * @param eventMap An object mapping from `event.type` to `[deviceName, eventClass]`
  */
 export const classify = <ID = string>(
-  eventMap: classifyEventMap = defaultEventMap,
+  eventMap: ClassifyEventMap = defaultEventMap,
 ) => (data: PointerEventData<ID>) => {
   const type = eventMap[data.event.type as keyof EventMap];
 

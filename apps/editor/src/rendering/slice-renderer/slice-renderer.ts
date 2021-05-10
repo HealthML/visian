@@ -21,6 +21,7 @@ import {
 } from "./utils";
 
 import type { Editor } from "../../models";
+
 export class SliceRenderer implements IDisposable {
   private renderers: THREE.WebGLRenderer[];
   private mainCamera: THREE.OrthographicCamera;

@@ -11,9 +11,7 @@ describe("isPromise", () => {
 });
 
 describe("handleMaybePromise", () => {
-  const id = jest.fn(<T>(value: T) => {
-    return value;
-  });
+  const id = jest.fn(<T>(value: T) => value);
 
   beforeEach(() => {
     jest.clearAllMocks();

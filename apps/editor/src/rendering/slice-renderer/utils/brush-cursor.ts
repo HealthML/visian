@@ -5,18 +5,16 @@ import * as THREE from "three";
 import { Editor } from "../../../models";
 import { brushCursor as theme } from "../../../theme";
 
-export const get2x2BrushCursorPoints = () => {
-  return [
-    new THREE.Vector3(0, 0, 0),
-    new THREE.Vector3(0, 2, 0),
-    new THREE.Vector3(0, 0, 0),
-    new THREE.Vector3(2, 0, 0),
-    new THREE.Vector3(0, 2, 0),
-    new THREE.Vector3(2, 2, 0),
-    new THREE.Vector3(2, 0, 0),
-    new THREE.Vector3(2, 2, 0),
-  ];
-};
+export const get2x2BrushCursorPoints = () => [
+  new THREE.Vector3(0, 0, 0),
+  new THREE.Vector3(0, 2, 0),
+  new THREE.Vector3(0, 0, 0),
+  new THREE.Vector3(2, 0, 0),
+  new THREE.Vector3(0, 2, 0),
+  new THREE.Vector3(2, 2, 0),
+  new THREE.Vector3(2, 0, 0),
+  new THREE.Vector3(2, 2, 0),
+];
 
 export class BrushCursor extends THREE.LineSegments implements IDisposable {
   private points: THREE.Vector3[] = [];
@@ -57,7 +55,7 @@ export class BrushCursor extends THREE.LineSegments implements IDisposable {
   }
 
   private updateScale = () => {
-    const image = this.editor.image;
+    const { image } = this.editor;
     if (!image) return;
 
     const [widthAxis, heightAxis] = getPlaneAxes(this.viewType);

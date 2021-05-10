@@ -7,12 +7,10 @@ export default {
   title: "Toolbar",
 };
 
-export const primary = () => {
-  return (
-    <Toolbar>
-      <Tool icon="pixelBrush" isActive />
-      <Tool icon="pixelBrush" />
-      <Tool icon="pixelBrush" />
-    </Toolbar>
-  );
-};
+export const primary = () => (
+  <Toolbar>
+    <Tool icon="pixelBrush" isActive />
+    <Tool icon="pixelBrush" />
+    <Tool icon="pixelBrush" />
+  </Toolbar>
+);

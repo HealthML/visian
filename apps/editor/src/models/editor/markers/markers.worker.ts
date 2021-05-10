@@ -2,10 +2,10 @@ import { getNonEmptySlices, Vector } from "@visian/utils";
 import { RpcProvider } from "worker-rpc";
 
 import type {
-  getNonEmptySlicesArgs,
-  getNonEmptySlicesReturn,
-  isSliceEmptyArgs,
-  isSliceEmptyReturn,
+  GetNonEmptySlicesArgs,
+  GetNonEmptySlicesReturn,
+  IsSliceEmptyArgs,
+  IsSliceEmptyReturn,
 } from "./types";
 
 const rpcProvider = new RpcProvider((message, transfer) =>
@@ -20,7 +20,7 @@ rpcProvider.registerRpcHandler(
     atlas,
     voxelComponents,
     voxelCount,
-  }: getNonEmptySlicesArgs): getNonEmptySlicesReturn =>
+  }: GetNonEmptySlicesArgs): GetNonEmptySlicesReturn =>
     getNonEmptySlices({
       getAtlas: () => atlas,
       voxelComponents,
@@ -30,7 +30,7 @@ rpcProvider.registerRpcHandler(
 
 rpcProvider.registerRpcHandler(
   "isSliceEmpty",
-  ({ sliceData }: isSliceEmptyArgs): isSliceEmptyReturn =>
+  ({ sliceData }: IsSliceEmptyArgs): IsSliceEmptyReturn =>
     sliceData.every((value) => value === 0),
 );
 

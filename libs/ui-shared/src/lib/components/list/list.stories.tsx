@@ -7,17 +7,15 @@ export default {
   title: "List",
 };
 
-export const primary = () => {
-  return (
-    <List>
-      <ListItem label="Annotation" trailingIcon="eyeCrossed" />
-      <ListItem label="Base Image" trailingIcon="eye" disableTrailingIcon />
-      <ListItem
-        label="Background"
-        trailingIcon="eye"
-        disableTrailingIcon
-        isLast
-      />
-    </List>
-  );
-};
+export const primary = () => (
+  <List>
+    <ListItem label="Annotation" trailingIcon="eyeCrossed" />
+    <ListItem label="Base Image" trailingIcon="eye" disableTrailingIcon />
+    <ListItem
+      label="Background"
+      trailingIcon="eye"
+      disableTrailingIcon
+      isLast
+    />
+  </List>
+);

@@ -11,9 +11,9 @@ export default {
 const Template = ({ onChange, ...args }: SwitchProps) => {
   const [value, setValue] = useState<string>();
   const changeHandler = useCallback(
-    (value: string) => {
-      setValue(value);
-      if (onChange) onChange(value);
+    (newValue: string) => {
+      setValue(newValue);
+      if (onChange) onChange(newValue);
     },
     [onChange],
   );

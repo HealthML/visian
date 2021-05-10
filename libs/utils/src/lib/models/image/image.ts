@@ -21,6 +21,7 @@ import { unifyOrientation } from "./conversion";
 import { findVoxelInSlice } from "./iteration";
 
 import type { ISerializable } from "../types";
+
 export interface ImageSnapshot<T extends TypedArray = TypedArray> {
   name?: string;
 
@@ -43,8 +44,8 @@ export interface ImageSnapshot<T extends TypedArray = TypedArray> {
 /** A generic, observable multi-dimensional image class. */
 export class Image<T extends TypedArray = TypedArray>
   implements ISerializable<ImageSnapshot<T>> {
-  public static fromITKImage<T extends TypedArray = TypedArray>(
-    image: ITKImage<T>,
+  public static fromITKImage<T2 extends TypedArray = TypedArray>(
+    image: ITKImage<T2>,
   ) {
     return new Image({
       name: image.name,

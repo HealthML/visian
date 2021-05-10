@@ -52,6 +52,4 @@ const computeStyle = ({
  */
 export const useTooltipPosition = (
   config: TooltipPositionConfig,
-): React.CSSProperties => {
-  return useRelativePosition(computeStyle, config);
-};
+): React.CSSProperties => useRelativePosition(computeStyle, config);

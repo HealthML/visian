@@ -31,19 +31,20 @@ const UIColumn = styled(FlexColumn)`
 const UIOverlay: React.FC<UIOverlayProps> = (props) => {
   const { renderer, ...rest } = props;
 
-  const [aRAvailable, setARAvailable] = useState<boolean>(false);
+  const [isARAvailable, setIsARAvailable] = useState<boolean>(false);
 
   useEffect(() => {
     if ("xr" in navigator) {
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       (navigator as THREE.Navigator)
         .xr!.isSessionSupported("immersive-ar")
-        .then(setARAvailable)
+        .then(setIsARAvailable)
         .catch((e) => {
+          // eslint-disable-next-line no-console
           console.error(e);
         });
     }
-  }, [setARAvailable]);
+  }, [setIsARAvailable]);
 
   const [showSettings, setShowSettings] = useState(false);
   const toggleSettings = useCallback(() => {
@@ -60,7 +61,7 @@ const UIOverlay: React.FC<UIOverlayProps> = (props) => {
       <UIColumn>
         <FlexRow>
           <UndoRedo renderer={renderer} />
-          {aRAvailable && (
+          {isARAvailable && (
             <>
               <ARButton renderer={renderer} />
               <AROverlay renderer={renderer} />

@@ -108,9 +108,9 @@ export class RootStore implements ISerializable<RootSnapshot> {
   public persist = async () => {
     if (!this.shouldPersist) return;
     this.setIsDirty(true);
-    await this.config.storageBackend?.persist("/editor", () => {
-      return this.editor.toJSON();
-    });
+    await this.config.storageBackend?.persist("/editor", () =>
+      this.editor.toJSON(),
+    );
     this.setIsDirty(false);
   };
 
@@ -137,19 +137,20 @@ export class RootStore implements ISerializable<RootSnapshot> {
     const theme = localStorage.getItem("theme");
     if (theme) this.setColorMode(theme as ColorMode, false);
 
+    this.shouldPersist = Boolean(tab.isMainTab);
     if (!tab.isMainTab) return;
+
     const editorSnapshot = await this.config.storageBackend?.retrieve(
       "/editor",
     );
     if (editorSnapshot) {
       await this.editor.applySnapshot(editorSnapshot as EditorSnapshot);
     }
-
-    this.shouldPersist = Boolean(tab.isMainTab);
   }
 
   public destroy = async () => {
     if (!this.shouldPersist) return;
+    // eslint-disable-next-line no-alert
     if (!window.confirm("Erase all application data?")) return;
 
     this.shouldPersist = false;

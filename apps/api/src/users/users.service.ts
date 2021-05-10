@@ -13,7 +13,7 @@ export class UsersService {
     private usersRepository: Repository<UserEntity>,
   ) {}
 
-  async create(createUserDTO: CreateUserInput): Promise<UserEntity> {
+  public async create(createUserDTO: CreateUserInput): Promise<UserEntity> {
     const user = new UserEntity();
     user.email = createUserDTO.email;
     user.name = createUserDTO.name;
@@ -22,19 +22,19 @@ export class UsersService {
     return this.usersRepository.save(user);
   }
 
-  findAll() {
+  public findAll() {
     return this.usersRepository.find();
   }
 
-  findOneByEmail(email: string) {
+  public findOneByEmail(email: string) {
     return this.usersRepository.findOne({ email });
   }
 
-  findOneById(id: string) {
+  public findOneById(id: string) {
     return this.usersRepository.findOne(id);
   }
 
-  async remove(id: string): Promise<void> {
+  public async remove(id: string): Promise<void> {
     await this.usersRepository.delete(id);
   }
 }

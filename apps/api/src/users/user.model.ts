@@ -5,6 +5,15 @@ import { UserEntity } from "./user.entity";
 
 @NodeType("User")
 export class UserModel extends NodeInterface {
+  @Field({ description: "The user's email address." })
+  public email: string;
+
+  @Field({ description: "The user name displayed in the UI." })
+  public name: string;
+
+  // The `password` should never be passed to the client.
+  // Thus, we do not need to include it in our API.
+
   constructor(props: UserEntity) {
     super();
 
@@ -13,13 +22,4 @@ export class UserModel extends NodeInterface {
     this.email = props.email;
     this.name = props.name;
   }
-
-  @Field({ description: "The user's email address." })
-  email: string;
-
-  @Field({ description: "The user name displayed in the UI." })
-  name: string;
-
-  // The `password` should never be passed to the client.
-  // Thus, we do not need to include it in our API.
 }

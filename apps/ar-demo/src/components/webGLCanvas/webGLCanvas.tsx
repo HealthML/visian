@@ -25,13 +25,11 @@ const StyledDiv = styled.div`
 `;
 
 const WebGLCanvas = React.forwardRef<HTMLCanvasElement, WebGLCanvasProps>(
-  (props, ref) => {
-    return (
-      <StyledDiv>
-        <StyledCanvas {...props} width={1} height={1} ref={ref} />
-      </StyledDiv>
-    );
-  },
+  (props, ref) => (
+    <StyledDiv>
+      <StyledCanvas {...props} width={1} height={1} ref={ref} />
+    </StyledDiv>
+  ),
 );
 
 export default WebGLCanvas;

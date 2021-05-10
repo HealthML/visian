@@ -62,6 +62,6 @@ export const asyncThrottle = (...args: Parameters<typeof throttle>) => {
   returnedFunction.cancel = () => throttledFn.cancel();
   returnedFunction.flush = () => throttledFn.flush();
   return returnedFunction as AsyncDebouncedFunc<
-    (...args: Parameters<typeof fn>) => ReturnType<typeof fn> | undefined
+    (...args3: Parameters<typeof fn>) => ReturnType<typeof fn> | undefined
   >;
 };

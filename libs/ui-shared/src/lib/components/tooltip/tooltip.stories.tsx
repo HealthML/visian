@@ -8,9 +8,7 @@ export default {
   title: "Tooltip",
 };
 
-export const primary = ({ ...args }: TooltipProps) => {
-  return <Tooltip {...args} />;
-};
+export const primary = ({ ...args }: TooltipProps) => <Tooltip {...args} />;
 primary.args = {
   label: "Move Tool",
 };

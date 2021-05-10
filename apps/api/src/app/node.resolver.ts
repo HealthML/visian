@@ -15,7 +15,7 @@ export class NodeResolver extends NodeFieldResolver {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  async resolveNode(resolvedGlobalId: ResolvedGlobalId): Promise<any> {
+  public async resolveNode(resolvedGlobalId: ResolvedGlobalId): Promise<any> {
     switch (resolvedGlobalId.type) {
       case "User": {
         const user = await this.usersService.findOneById(

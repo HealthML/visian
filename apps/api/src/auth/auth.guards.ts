@@ -8,7 +8,7 @@ import { GqlExecutionContext } from "@nestjs/graphql";
 
 @Injectable()
 export class GqlAuthGuard implements CanActivate {
-  canActivate(context: ExecutionContext) {
+  public canActivate(context: ExecutionContext) {
     const ctx = GqlExecutionContext.create(context);
     if (ctx.getContext().req.session.sub) return true;
     throw new UnauthorizedException();

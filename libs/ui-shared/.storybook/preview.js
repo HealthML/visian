@@ -1,5 +1,5 @@
-import React from "react";
-import { useEffect } from "react";
+/* eslint-disable react/jsx-filename-extension */
+import React, { useEffect } from "react";
 import styled from "styled-components";
 
 import { i18n, I18nProvider, initI18n, useTranslation } from "../src/lib/i18n";
@@ -58,15 +58,15 @@ const StyledContainer = styled.div`
   width: 100%;
 `;
 
-const WithThemeProvider = (Story, context) => {
-  const { i18n } = useTranslation();
+const WithThemeProvider = (Story, { globals }) => {
+  const { i18n: instance } = useTranslation();
   useEffect(() => {
-    i18n.changeLanguage(context.globals.language);
-  }, [context.globals.language, i18n]);
+    instance.changeLanguage(globals.language);
+  }, [globals.language, instance]);
 
   return (
-    <I18nProvider i18n={i18n}>
-      <ThemeProvider theme={getTheme(context.globals.theme)}>
+    <I18nProvider i18n={instance}>
+      <ThemeProvider theme={getTheme(globals.theme)}>
         <StyledContainer>
           <GlobalStyles />
           <Story />

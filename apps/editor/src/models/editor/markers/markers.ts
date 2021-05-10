@@ -2,25 +2,24 @@ import { Image, ViewType } from "@visian/utils";
 import { action, computed, makeObservable, observable, reaction } from "mobx";
 import { RpcProvider } from "worker-rpc";
 
+// eslint-disable-next-line import/no-unresolved,import/no-webpack-loader-syntax
+import Worker from "worker-loader!./markers.worker";
 import {
-  getNonEmptySlicesArgs,
-  getNonEmptySlicesReturn,
-  isSliceEmptyArgs,
-  isSliceEmptyReturn,
+  GetNonEmptySlicesArgs,
+  GetNonEmptySlicesReturn,
+  IsSliceEmptyArgs,
+  IsSliceEmptyReturn,
 } from "./types";
 import { condenseValues } from "./utils";
-
-// eslint-disable-next-line import/no-webpack-loader-syntax
-import Worker from "worker-loader!./markers.worker";
 
 import type { StoreContext } from "../../types";
 import type { Editor } from "../editor";
 
-const worker = new Worker(),
-  rpcProvider = new RpcProvider(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (message, transfer) => worker.postMessage(message, transfer as any),
-  );
+const worker = new Worker();
+const rpcProvider = new RpcProvider(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  (message, transfer) => worker.postMessage(message, transfer as any),
+);
 worker.onmessage = (event) => rpcProvider.dispatch(event.data);
 
 const emptyMarkerArray: (number | [number, number])[] = [];
@@ -127,8 +126,8 @@ export class EditorMarkers {
 
     // TODO: If multiple updates are queued, only the latest one should be executed
     const result = await rpcProvider.rpc<
-      getNonEmptySlicesArgs,
-      getNonEmptySlicesReturn
+      GetNonEmptySlicesArgs,
+      GetNonEmptySlicesReturn
     >("getNonEmptySlices", {
       atlas: image.getAtlas(),
       voxelCount: image.voxelCount.toArray(),
@@ -162,14 +161,14 @@ export class EditorMarkers {
     // TODO: If multiple updates are queued for the same slice, only the latest
     // one should be executed
 
-    const result = await rpcProvider.rpc<isSliceEmptyArgs, isSliceEmptyReturn>(
+    const isEmpty = await rpcProvider.rpc<IsSliceEmptyArgs, IsSliceEmptyReturn>(
       "isSliceEmpty",
       {
         sliceData: image.getSlice(sliceNumber, viewType),
       },
     );
 
-    this.setAnnotatedSlice(!result, image, sliceNumber, viewType);
+    this.setAnnotatedSlice(!isEmpty, image, sliceNumber, viewType);
   }
 
   public async clear() {

@@ -61,7 +61,7 @@ export const useIsDraggedOver = () => {
 
   return [
     isDraggedOver,
-    { onDragOver, onDragEnd, onDragLeave: onDragEnd, onDrop: onDrop },
+    { onDragOver, onDragEnd, onDragLeave: onDragEnd, onDrop },
   ] as [
     boolean,
     {
@@ -130,14 +130,15 @@ export const useDelay = (
     timerRef.current = (setTimeout(callback, delay) as unknown) as NodeJS.Timer;
   }, [callback, delay]);
 
-  useEffect(() => {
-    return () => {
+  useEffect(
+    () => () => {
       if (timerRef.current !== undefined) {
         clearTimeout(timerRef.current);
         timerRef.current = undefined;
       }
-    };
-  }, []);
+    },
+    [],
+  );
 
   return [schedule, cancel];
 };

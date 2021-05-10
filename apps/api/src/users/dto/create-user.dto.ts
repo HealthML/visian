@@ -7,21 +7,21 @@ import { UserModel } from "../user.model";
 export class CreateUserInput {
   @Field()
   @IsEmail()
-  email!: string;
+  public email!: string;
 
   @Field()
-  name!: string;
+  public name!: string;
 
   @Field()
-  password!: string;
+  public password!: string;
 }
 
 @ObjectType()
 export class CreateUserPayload {
+  @Field()
+  public user: UserModel;
+
   constructor(user: UserModel) {
     this.user = user;
   }
-
-  @Field()
-  user: UserModel;
 }

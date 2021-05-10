@@ -112,7 +112,7 @@ export const Settings: React.FC<SettingsProps> = observer((props) => {
 
   const setCustomTFImage = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
-      const files = event.target.files;
+      const { files } = event.target;
       if (!files?.length) return;
       volumeRendererModel.setCustomTFImage(files[0]);
     },
@@ -270,6 +270,7 @@ export const Settings: React.FC<SettingsProps> = observer((props) => {
         <>
           <InputLabel text="Transfer Image" />
           <StyledFileInput type="file" onChange={setCustomTFImage} />
+          {/* eslint-disable-next-line max-len */}
           <StyledDescription text="Import an n x 1 image that maps from the image density to an RGBA output." />
         </>
       )}
