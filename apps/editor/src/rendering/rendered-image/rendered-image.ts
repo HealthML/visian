@@ -22,8 +22,8 @@ import {
 import { SliceAtlasAdapter } from "./slice-atlas-adapter";
 
 export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
-  public static fromITKImage<T extends TypedArray = TypedArray>(
-    image: ITKImage<T>,
+  public static fromITKImage<T2 extends TypedArray = TypedArray>(
+    image: ITKImage<T2>,
   ) {
     return new RenderedImage({
       name: image.name,
@@ -62,7 +62,10 @@ export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
 
   /** Contains the voxels which have to be rendered into the atlas. */
   private voxelsToRender: (VoxelWithValue | VoxelWithValue[])[] = [];
-  /** Whether or not @member voxelsToRender have been rendered into the atlas for the different WebGL contexts. */
+  /**
+   * Whether or not @member voxelsToRender have been rendered into the atlas
+   * for the different WebGL contexts.
+   */
   private voxelsRendered = [true];
   /** Used to render voxels into the texture atlas. */
   private voxels: Voxels;

@@ -8,9 +8,7 @@ export default {
   title: "Modal",
 };
 
-export const primary = ({ ...args }: ModalProps) => {
-  return <Modal {...args} />;
-};
+export const primary = ({ ...args }: ModalProps) => <Modal {...args} />;
 primary.args = {
   label: "Menu",
 };

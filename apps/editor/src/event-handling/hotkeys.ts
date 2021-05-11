@@ -7,7 +7,6 @@ import { RootStore, ToolType } from "../models";
 
 export const setUpHotKeys = (store: RootStore): IDisposer => {
   // Tool Selection
-  // based on the [Photoshop keys for selecting tools](https://helpx.adobe.com/photoshop-elements/using/keys-selecting-tools.html)
   hotkeys("h", (event) => {
     event.preventDefault();
     store.editor.tools.setActiveTool(ToolType.Navigate);

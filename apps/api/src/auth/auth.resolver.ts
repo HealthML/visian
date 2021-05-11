@@ -16,7 +16,7 @@ export class AuthResolver {
   constructor(private readonly authService: AuthService) {}
 
   @RelayMutation(() => LogInPayload)
-  async logIn(
+  public async logIn(
     @Session() session: SessionPayload,
     @InputArg(() => LogInInput) input: LogInInput,
   ) {
@@ -31,7 +31,7 @@ export class AuthResolver {
 
   @UseGuards(GqlAuthGuard)
   @RelayMutation(() => LogOutPayload)
-  async logOut(
+  public async logOut(
     @Session() session: SessionType,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     @InputArg(() => LogOutInput) _input: LogOutInput,

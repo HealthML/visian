@@ -31,8 +31,8 @@ export const getConnectedStructureGeometries: () => Promise<THREE.BufferGeometry
   const geometryLoader = new THREE.BufferGeometryLoader();
 
   return Array.from({ length: preGeneratedGeometries.length }, (_, i) => i).map(
-    (geometryIndex) => {
-      return new Promise<THREE.BufferGeometry>((resolve) => {
+    (geometryIndex) =>
+      new Promise<THREE.BufferGeometry>((resolve) => {
         geometryLoader.load(
           preGeneratedGeometries[geometryIndex],
           (geometry) => {
@@ -43,7 +43,6 @@ export const getConnectedStructureGeometries: () => Promise<THREE.BufferGeometry
             resolve(new THREE.BufferGeometry());
           },
         );
-      });
-    },
+      }),
   );
 };

@@ -42,11 +42,11 @@ const RotationSliderContainer = styled(Sheet)`
 const AROverlay: React.FC<AROverlayProps> = (props) => {
   const { renderer, ...rest } = props;
 
-  const [ui, setUI] = useState(false);
-  const uiCallback = useCallback(() => {
+  const [showUI, setShowUI] = useState(false);
+  const toggleUI = useCallback(() => {
     renderer.toggleARSelect();
-    setUI(!ui);
-  }, [setUI, ui, renderer]);
+    setShowUI(!showUI);
+  }, [setShowUI, showUI, renderer]);
 
   const [rotation, setRotation] = useState<number>(renderer.scanRotation);
   const rotationCallback = useCallback(
@@ -62,8 +62,8 @@ const AROverlay: React.FC<AROverlayProps> = (props) => {
       <ExitContainer {...rest} onPointerUp={renderer.exitAR}>
         <ClearIcon />
       </ExitContainer>
-      <UIButton text="UI" onClick={uiCallback} />
-      {ui && (
+      <UIButton text="UI" onClick={toggleUI} />
+      {showUI && (
         <>
           <AnimationButton
             text="Animation"

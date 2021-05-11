@@ -8,9 +8,7 @@ export default {
   title: "PopUp",
 };
 
-export const primary = ({ ...args }: PopUpProps) => {
-  return <PopUp {...args} />;
-};
+export const primary = ({ ...args }: PopUpProps) => <PopUp {...args} />;
 primary.args = {
   label: "Export",
   filename: "T1.nii",

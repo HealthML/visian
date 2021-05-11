@@ -1,11 +1,11 @@
-export interface getNonEmptySlicesArgs {
+export interface GetNonEmptySlicesArgs {
   atlas: Uint8Array;
   voxelComponents: number;
   voxelCount: number[];
 }
-export type getNonEmptySlicesReturn = boolean[][];
+export type GetNonEmptySlicesReturn = boolean[][];
 
-export interface isSliceEmptyArgs {
+export interface IsSliceEmptyArgs {
   sliceData: Uint8Array;
 }
-export type isSliceEmptyReturn = boolean;
+export type IsSliceEmptyReturn = boolean;

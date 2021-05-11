@@ -11,12 +11,10 @@ import { ViewType } from "../types";
 export const convertPositionToWebGLPosition = (
   position: { x: number; y: number },
   boxDimensions: { width: number; height: number },
-) => {
-  return {
-    x: (2 * position.x) / boxDimensions.width - 1,
-    y: (-2 * position.y) / boxDimensions.height + 1,
-  };
-};
+) => ({
+  x: (2 * position.x) / boxDimensions.width - 1,
+  y: (-2 * position.y) / boxDimensions.height + 1,
+});
 
 // eslint-disable-next-line consistent-return
 export const getPlaneAxes = (viewType: ViewType) => {

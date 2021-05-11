@@ -4,9 +4,9 @@ import Backend from "i18next-http-backend";
 import moment from "moment";
 import { initReactI18next } from "react-i18next";
 
-const format = (value: unknown, format: string) => {
-  if (format === "uppercase") return (value as string).toUpperCase();
-  if (value instanceof Date) return moment(value).format(format);
+const format = (value: unknown, formatMode: string) => {
+  if (formatMode === "uppercase") return (value as string).toUpperCase();
+  if (value instanceof Date) return moment(value).format(formatMode);
   return value;
 };
 

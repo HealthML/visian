@@ -72,39 +72,35 @@ export const SliderThumb = styled.div.attrs<ThumbProps>((props) => {
 `;
 
 export const SliderRangeSelection = styled.div.attrs<SliderRangeSelectionProps>(
-  (props) => {
-    return {
-      style: props.isVertical
-        ? {
-            top: `${
+  (props) => ({
+    style: props.isVertical
+      ? {
+          top: `${
+            props.positions[props.isInverted ? props.positions.length - 1 : 0] *
+            100
+          }%`,
+          bottom: `${
+            (1 -
               props.positions[
-                props.isInverted ? props.positions.length - 1 : 0
-              ] * 100
-            }%`,
-            bottom: `${
-              (1 -
-                props.positions[
-                  props.isInverted ? 0 : props.positions.length - 1
-                ]) *
-              100
-            }%`,
-          }
-        : {
-            left: `${
+                props.isInverted ? 0 : props.positions.length - 1
+              ]) *
+            100
+          }%`,
+        }
+      : {
+          left: `${
+            props.positions[props.isInverted ? props.positions.length - 1 : 0] *
+            100
+          }%`,
+          right: `${
+            (1 -
               props.positions[
-                props.isInverted ? props.positions.length - 1 : 0
-              ] * 100
-            }%`,
-            right: `${
-              (1 -
-                props.positions[
-                  props.isInverted ? 0 : props.positions.length - 1
-                ]) *
-              100
-            }%`,
-          },
-    };
-  },
+                props.isInverted ? 0 : props.positions.length - 1
+              ]) *
+            100
+          }%`,
+        },
+  }),
 )<SliderRangeSelectionProps>`
   background-color: ${color("gray")};
   ${(props) => {

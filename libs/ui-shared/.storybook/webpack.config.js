@@ -1,21 +1,24 @@
-/* eslint-disable @typescript-eslint/no-var-requires */
+/* eslint-disable @typescript-eslint/no-var-requires, import/no-extraneous-dependencies */
 const TsconfigPathsPlugin = require("tsconfig-paths-webpack-plugin");
 const rootWebpackConfig = require("../../../.storybook/webpack.config");
+
 /**
- * Export a function. Accept the base config as the only param.
+ * Exports a configuration function. Accept the base config as the only param.
  *
  * @param {Parameters<typeof rootWebpackConfig>[0]} options
  */
-module.exports = async ({ config, mode }) => {
-  config = await rootWebpackConfig({ config, mode });
+module.exports = async ({ config: parentConfig, mode }) => {
+  const config = await rootWebpackConfig({ config: parentConfig, mode });
 
   const tsPaths = new TsconfigPathsPlugin({
     configFile: "./tsconfig.base.json",
   });
 
-  config.resolve.plugins
-    ? config.resolve.plugins.push(tsPaths)
-    : (config.resolve.plugins = [tsPaths]);
+  if (config.resolve.plugins) {
+    config.resolve.plugins.push(tsPaths);
+  } else {
+    config.resolve.plugins = [tsPaths];
+  }
 
   // Found this here: https://github.com/nrwl/nx/issues/2859
   // And copied the part of the solution that made it work

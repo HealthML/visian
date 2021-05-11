@@ -1,3 +1,4 @@
+import type React from "react";
 import type { Theme } from "@visian/ui-shared";
 
 export interface StoreContext {

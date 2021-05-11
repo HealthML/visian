@@ -2,12 +2,10 @@ import { Pixel } from "@visian/utils";
 
 import type * as THREE from "three";
 
-export const getWebGLSize = (camera: THREE.OrthographicCamera) => {
-  return {
-    x: camera.right - camera.left,
-    y: camera.top - camera.bottom,
-  };
-};
+export const getWebGLSize = (camera: THREE.OrthographicCamera) => ({
+  x: camera.right - camera.left,
+  y: camera.top - camera.bottom,
+});
 
 /**
  * Returns a normalized position in the WebGL screen coordinate system.
@@ -20,9 +18,7 @@ export const getWebGLSize = (camera: THREE.OrthographicCamera) => {
 export const convertPositionToWebGLPosition = (
   position: Pixel,
   boxDimensions: { width: number; height: number },
-) => {
-  return {
-    x: (2 * position.x) / boxDimensions.width - 1,
-    y: (-2 * position.y) / boxDimensions.height + 1,
-  };
-};
+) => ({
+  x: (2 * position.x) / boxDimensions.width - 1,
+  y: (-2 * position.y) / boxDimensions.height + 1,
+});

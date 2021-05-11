@@ -17,14 +17,18 @@ export class UsersResolver extends GlobalIdFieldResolver(UserModel) {
   }
 
   @RelayMutation(() => CreateUserPayload)
-  async createUser(@InputArg(() => CreateUserInput) input: CreateUserInput) {
+  public async createUser(
+    @InputArg(() => CreateUserInput) input: CreateUserInput,
+  ) {
     return new CreateUserPayload(
       new UserModel(await this.usersService.create(input)),
     );
   }
 
   @RelayMutation(() => DeleteUserPayload)
-  async deleteUser(@InputArg(() => DeleteUserInput) input: DeleteUserInput) {
+  public async deleteUser(
+    @InputArg(() => DeleteUserInput) input: DeleteUserInput,
+  ) {
     await this.usersService.remove(input.id.toString());
     return new DeleteUserPayload(input.id);
   }
@@ -33,7 +37,7 @@ export class UsersResolver extends GlobalIdFieldResolver(UserModel) {
     description: `Returns all users that match the given query string.\n
 If no query string is given, returns suggestions based on the user that is currently logged in.`,
   })
-  async findUsers(
+  public async findUsers(
     @Args("query", { nullable: true })
     query: string,
   ): Promise<UserModel[]> {
@@ -48,7 +52,7 @@ If no query string is given, returns suggestions based on the user that is curre
     nullable: true,
   })
   @UseGuards(GqlAuthGuard)
-  async getCurrentUser(
+  public async getCurrentUser(
     @Session() session: SessionPayload,
   ): Promise<UserModel | null> {
     const user = await this.usersService.findOneById(session.sub);

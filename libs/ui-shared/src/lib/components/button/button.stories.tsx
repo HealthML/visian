@@ -9,23 +9,17 @@ export default {
   argTypes: { onClick: { action: "onClick" } },
 };
 
-export const primary = (args: ButtonProps) => {
-  return <Button {...args} />;
-};
+export const primary = (args: ButtonProps) => <Button {...args} />;
 primary.args = {
   text: "Click Me",
 };
 
-export const square = (args: ButtonProps) => {
-  return <SquareButton {...args} />;
-};
+export const square = (args: ButtonProps) => <SquareButton {...args} />;
 square.args = {
   text: "S",
 };
 
-export const circular = (args: ButtonProps) => {
-  return <CircularButton {...args} />;
-};
+export const circular = (args: ButtonProps) => <CircularButton {...args} />;
 circular.args = {
   text: "C",
 };

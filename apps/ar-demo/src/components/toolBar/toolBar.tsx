@@ -78,12 +78,12 @@ const ToolBar: React.FC<ToolBarProps> = (props) => {
     }
   }, [setActiveTool, renderer]);
 
-  const [transformEnabled, setTransformEnabled] = useState(false);
+  const [isTransformEnabled, setIsTransformEnabled] = useState(false);
   const toggleTransform = useCallback(() => {
-    setTransformEnabled(!transformEnabled);
+    setIsTransformEnabled(!isTransformEnabled);
     renderer.scanNavigator.toggleTransformControls();
     renderer.render();
-  }, [renderer, transformEnabled, setTransformEnabled]);
+  }, [renderer, isTransformEnabled, setIsTransformEnabled]);
 
   return (
     <Container {...rest}>
@@ -101,7 +101,7 @@ const ToolBar: React.FC<ToolBarProps> = (props) => {
             </ToolContainer>
           );
         })}
-        <ToolContainer active={transformEnabled}>
+        <ToolContainer active={isTransformEnabled}>
           {/* Todo: Add better icon. */}
           <CrosshairPointer onPointerDown={toggleTransform} />
         </ToolContainer>

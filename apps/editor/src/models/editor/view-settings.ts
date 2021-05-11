@@ -99,7 +99,7 @@ export class EditorViewSettings
   }
 
   public get pixelSize() {
-    const image = this.editor.image;
+    const { image } = this.editor;
     if (!image) return undefined;
 
     const [width, height] = getPlaneAxes(this.mainViewType);
@@ -178,7 +178,7 @@ export class EditorViewSettings
   public moveCrosshair(screenPosition: Pixel, canvasId: string) {
     if (this.editor.tools.isDrawing) return;
 
-    const sliceRenderer = this.editor.sliceRenderer;
+    const { sliceRenderer } = this.editor;
     if (!sliceRenderer || !this.editor.image || !this.showSideViews) return;
 
     const intersection = sliceRenderer.raycaster.getIntersectionsFromPointer(

@@ -22,12 +22,10 @@ const StyledIcon = styled(CrosshairPointer)`
   stroke-width: 4pt;
 `;
 
-const Crosshair: React.FC<CrosshairProps> = (props) => {
-  return (
-    <Container {...props}>
-      <StyledIcon />
-    </Container>
-  );
-};
+const Crosshair: React.FC<CrosshairProps> = (props) => (
+  <Container {...props}>
+    <StyledIcon />
+  </Container>
+);
 
 export default Crosshair;

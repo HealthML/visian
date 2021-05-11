@@ -7,7 +7,7 @@ export const getPositionWithinPixel = (
 ) => {
   const x = uv.x * scanWidth;
   const y = uv.y * scanHeight;
-  const right = x - Math.trunc(x) < 0.5;
-  const bottom = y - Math.trunc(y) < 0.5;
-  return [right, bottom];
+  const isRight = x - Math.trunc(x) < 0.5;
+  const isBottom = y - Math.trunc(y) < 0.5;
+  return [isRight, isBottom];
 };

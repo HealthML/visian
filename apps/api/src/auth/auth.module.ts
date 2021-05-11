@@ -24,7 +24,7 @@ export class AuthModule implements NestModule {
     @InjectRepository(SessionEntity)
     private sessionRepository: Repository<SessionEntity>,
   ) {}
-  configure(consumer: MiddlewareConsumer) {
+  public configure(consumer: MiddlewareConsumer) {
     consumer
       .apply(
         session({

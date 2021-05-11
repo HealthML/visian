@@ -14,6 +14,7 @@ import { EditorScreen } from "../screens";
 import { setupRootStore, StoreProvider } from "./root-store";
 
 import type { RootStore } from "../models";
+
 function App() {
   // TODO: Push loading down to components that need i18n
   const [isReady, setIsReady] = useState(false);

@@ -3,9 +3,9 @@ import { GqlExecutionContext } from "@nestjs/graphql";
 
 @Injectable()
 export class FindUsersGuard implements CanActivate {
-  canActivate(context: ExecutionContext): boolean {
+  public canActivate(context: ExecutionContext): boolean {
     const ctx = GqlExecutionContext.create(context);
-    const query = ctx.getArgs()["query"];
+    const { query } = ctx.getArgs();
     return query !== "";
   }
 }

@@ -1,6 +1,6 @@
 import type React from "react";
 import type {
-  serializationMethod,
+  SerializationMethod,
   SliderConfig,
   SliderVerticalitySettings,
 } from "./types";
@@ -41,7 +41,7 @@ export interface SliderProps<T extends number | number[] = number | number[]>
   value?: T;
 
   /** Configures if and how slider thumbs should be forced to keep their order. */
-  enforceSerialThumbs?: serializationMethod;
+  enforceSerialThumbs?: SerializationMethod;
 
   /**
    * A function that is called on every slider value change.

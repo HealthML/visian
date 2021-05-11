@@ -3,11 +3,11 @@ export interface PointerCoordinates {
   clientY: number;
 }
 
-export type roundMethod = "floor" | "ceil" | "round";
+export type RoundMethod = "floor" | "ceil" | "round";
 
-export type scaleType = "linear" | "quadratic";
+export type ScaleType = "linear" | "quadratic";
 
-export type serializationMethod = "none" | "block" | "push";
+export type SerializationMethod = "none" | "block" | "push";
 
 export interface SliderValueSettings {
   /**
@@ -15,7 +15,7 @@ export interface SliderValueSettings {
    * The function is applied before inverting the slider value range (when `isInverted` is `true`).
    * Defaults to `"linear"`.
    */
-  scaleType?: scaleType;
+  scaleType?: ScaleType;
 
   /**
    * The minimum slider value.
@@ -40,7 +40,7 @@ export interface SliderValueSettings {
    * The method use to round slider values to the specified step size.
    * Defaults to `"round"`.
    */
-  roundMethod?: roundMethod;
+  roundMethod?: RoundMethod;
 
   /** If `true`, inverts the slider value range. */
   isInverted?: boolean;

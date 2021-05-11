@@ -133,7 +133,6 @@ export const Slider: React.FC<SliderProps> = (props) => {
         default:
           newValueArray[id] = newThumbValue;
           onChange(newValueArray, id, newThumbValue);
-          return;
       }
     },
     [
@@ -193,8 +192,8 @@ export const Slider: React.FC<SliderProps> = (props) => {
     ],
   );
 
-  const getSliderRelativePosition = (value: number) =>
-    valueToSliderPos(value, {
+  const getSliderRelativePosition = (thumbValue: number) =>
+    valueToSliderPos(thumbValue, {
       scaleType,
       min,
       max,
@@ -232,9 +231,9 @@ export const Slider: React.FC<SliderProps> = (props) => {
             color={marker.color}
             isActive={Boolean(
               ~valueArray.findIndex(
-                (value) =>
-                  value >= Math.min(...marker.value) &&
-                  value <= Math.max(...marker.value),
+                (thumbValue) =>
+                  thumbValue >= Math.min(...marker.value) &&
+                  thumbValue <= Math.max(...marker.value),
               ),
             )}
           />
@@ -247,7 +246,9 @@ export const Slider: React.FC<SliderProps> = (props) => {
             isVertical={isVertical}
             color={marker.color}
             isActive={Boolean(
-              ~valueArray.findIndex((value) => value === marker.value),
+              ~valueArray.findIndex(
+                (thumbValue) => thumbValue === marker.value,
+              ),
             )}
           />
         ),

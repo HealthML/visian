@@ -84,7 +84,7 @@ export const parseUnitFromMetric = (value: string) => {
 export const scaleMetric = (value: string, factor: number) =>
   `${parseNumberFromMetric(value) * factor}${parseUnitFromMetric(value)}`;
 
-export type computationInput<P> =
+export type ComputationInput<P> =
   | string
   | number
   | ((props: P) => string | number);
@@ -108,9 +108,9 @@ export const computeStyleValue = <
   P = { [key: string]: unknown },
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   T extends string | number = any,
-  I extends computationInput<P> | computationInput<P>[] =
-    | computationInput<P>
-    | computationInput<P>[]
+  I extends ComputationInput<P> | ComputationInput<P>[] =
+    | ComputationInput<P>
+    | ComputationInput<P>[]
 >(
   inputs: I,
   computeValue: (...values: T[]) => string | number,
@@ -118,7 +118,7 @@ export const computeStyleValue = <
   // const resolvedValues = Array.isArray(values) ? values : [values];
   const rawInputs = (Array.isArray(inputs)
     ? inputs
-    : [inputs]) as computationInput<P>[];
+    : [inputs]) as ComputationInput<P>[];
 
   // Resolve function inputs
   const resolvedInputs = rawInputs.map((input) => {
@@ -132,7 +132,7 @@ export const computeStyleValue = <
   const convertedInputs = resolvedInputs.map((input) => {
     if (typeof input === "string") {
       const numericInput = parseNumberFromMetric(input);
-      if (!isNaN(numericInput)) return numericInput;
+      if (!Number.isNaN(numericInput)) return numericInput;
     }
     return input;
   });

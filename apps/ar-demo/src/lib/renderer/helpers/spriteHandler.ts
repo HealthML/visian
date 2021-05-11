@@ -60,16 +60,18 @@ export default class SpriteHandler {
       opacity: { value: 0.5 },
     };
 
-    this.materials = viewTypes.map((viewType) => {
-      return new THREE.ShaderMaterial({
-        fragmentShader: fragmentShader(viewType),
-        transparent: true,
-        vertexShader,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment
-        uniforms: this.uniforms as any,
-        side: THREE.DoubleSide,
-      });
-    });
+    this.materials = viewTypes.map(
+      (viewType) =>
+        new THREE.ShaderMaterial({
+          fragmentShader: fragmentShader(viewType),
+          transparent: true,
+          vertexShader,
+          // eslint-disable-next-line max-len
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment
+          uniforms: this.uniforms as any,
+          side: THREE.DoubleSide,
+        }),
+    );
 
     this.sprites = viewTypes.map((viewType) => {
       const axes = getPlaneAxes(viewType);

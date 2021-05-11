@@ -341,14 +341,14 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
     const scanWidth = voxelCount[widthAxis];
     const scanHeight = voxelCount[heightAxis];
 
-    let right = false;
-    let bottom = false;
+    let isRight = false;
+    let isBottom = false;
     if (this.brushSizePixels === 0.5) {
-      [right, bottom] = getPositionWithinPixel(uv, scanWidth, scanHeight);
+      [isRight, isBottom] = getPositionWithinPixel(uv, scanWidth, scanHeight);
     }
 
-    const xOffset = this.brushSizePixels === 0.5 ? (right ? 1 : 2) : 0.5;
-    const yOffset = this.brushSizePixels === 0.5 ? (bottom ? -1 : 0) : 0.5;
+    const xOffset = this.brushSizePixels === 0.5 ? (isRight ? 1 : 2) : 0.5;
+    const yOffset = this.brushSizePixels === 0.5 ? (isBottom ? -1 : 0) : 0.5;
 
     const brushCursor = this.editor.sliceRenderer.getBrushCursor(
       viewType,
@@ -364,7 +364,7 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
   private getDragPoint(uv: THREE.Vector2) {
     if (!this.editor.annotation) return undefined;
 
-    const annotation = this.editor.annotation;
+    const { annotation } = this.editor;
 
     const dragPoint: DragPoint = {
       x: 0,

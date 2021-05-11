@@ -42,10 +42,12 @@ export default class Reticle extends THREE.Mesh {
               this.hitTestSource = source;
             })
             .catch((e) => {
+              // eslint-disable-next-line no-console
               console.error(e);
             });
         })
         .catch((e) => {
+          // eslint-disable-next-line no-console
           console.error(e);
         });
 

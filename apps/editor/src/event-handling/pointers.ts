@@ -58,7 +58,7 @@ export const setUpPointerHandling = (
     },
     forPointers: ({ context, detail, id }, { eventType }) => {
       handleDeviceSwitch(context.device);
-      const activeTool = store.editor.tools.activeTool;
+      const { activeTool } = store.editor.tools;
       store?.editor.tools.setIsCursorOverFloatingUI(false);
 
       context.useForGesture = Boolean(

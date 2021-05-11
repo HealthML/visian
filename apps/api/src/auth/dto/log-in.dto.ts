@@ -5,18 +5,18 @@ import { UserModel } from "../../users/user.model";
 @InputType()
 export class LogInInput {
   @Field()
-  email!: string;
+  public email!: string;
 
   @Field()
-  password!: string;
+  public password!: string;
 }
 
 @ObjectType()
 export class LogInPayload {
+  @Field()
+  public user: UserModel;
+
   constructor(user: UserModel) {
     this.user = user;
   }
-
-  @Field()
-  user: UserModel;
 }

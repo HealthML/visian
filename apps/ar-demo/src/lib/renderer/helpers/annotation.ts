@@ -27,9 +27,8 @@ export default class Annotation {
     this.meshGroup.add(...this.structures);
   }
 
-  public getMaterial = (index: number) => {
-    return this.structures[index].material as THREE.MeshPhongMaterial;
-  };
+  public getMaterial = (index: number) =>
+    this.structures[index].material as THREE.MeshPhongMaterial;
 
   public get pickingMeshes() {
     return this.structures.map((structure) => structure.pickingMesh);

@@ -8,6 +8,10 @@ import { IDisposable } from "../types";
 export class ScreenAlignedQuad extends THREE.Mesh implements IDisposable {
   private static quadGeometry = new THREE.PlaneGeometry(1, 1);
 
+  public static forTexture(texture: THREE.Texture) {
+    return new this(new THREE.MeshBasicMaterial({ map: texture }));
+  }
+
   public readonly scene = new THREE.Scene();
   public readonly camera = new THREE.OrthographicCamera(
     -0.5,
@@ -17,10 +21,6 @@ export class ScreenAlignedQuad extends THREE.Mesh implements IDisposable {
     1,
     100,
   );
-
-  public static forTexture(texture: THREE.Texture) {
-    return new this(new THREE.MeshBasicMaterial({ map: texture }));
-  }
 
   constructor(material: THREE.Material | THREE.Material[]) {
     super(ScreenAlignedQuad.quadGeometry, material);

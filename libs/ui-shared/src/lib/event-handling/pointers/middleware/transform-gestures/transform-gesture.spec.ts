@@ -1,7 +1,7 @@
 import { TransformGesture } from "./transform-gesture";
 import { TransformData } from "./transform-data";
 
-describe.only("TransformGesture", () => {
+describe("TransformGesture", () => {
   it("should create a new gesture", () => {
     expect(new TransformGesture().context).toEqual({});
 

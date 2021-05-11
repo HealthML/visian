@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-use-before-define */
 /**
  * @file
  * @see https://github.com/mobxjs/mobx-utils/blob/master/src/deepObserve.ts
@@ -41,11 +42,12 @@ export interface DeepObserveConfig {
 /** Returns a composed path for the given entry. */
 const buildPath = (entry: Omit<Entry, "dispose"> | undefined) => {
   if (!entry) return "/";
+  let currentEntry = entry;
 
   const res: string[] = [];
-  while (entry.parent) {
-    res.push(entry.path);
-    entry = entry.parent;
+  while (currentEntry.parent) {
+    res.push(currentEntry.path);
+    currentEntry = currentEntry.parent;
   }
   res.push("");
 
@@ -96,7 +98,7 @@ export const deepObserve = <T>(
           change.newValue,
           parent,
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          (change as any).name || "" + (change as any).index,
+          `${(change as any).name || ""}${(change as any).index}`,
         );
         break;
       case "remove": // object
@@ -107,7 +109,7 @@ export const deepObserve = <T>(
       case "splice":
         change.removed.map(unobserveRecursively);
         change.added.forEach((value, idx) =>
-          observeRecursively(value, parent, "" + (change.index + idx)),
+          observeRecursively(value, parent, `${change.index + idx}`),
         );
         // update paths
         for (
@@ -117,7 +119,7 @@ export const deepObserve = <T>(
         ) {
           if (isRecursivelyObservable(change.object[i])) {
             const entry = entrySet.get(change.object[i]);
-            if (entry) entry.path = "" + i;
+            if (entry) entry.path = `${i}`;
           }
         }
         break;
@@ -132,7 +134,7 @@ export const deepObserve = <T>(
     const path = buildPath({
       parent: entry,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      path: (change as any).name || "" + (change as any).index,
+      path: `${(change as any).name || ""}${(change as any).index}`,
     });
     if (
       (config.include &&
@@ -169,9 +171,10 @@ export const deepObserve = <T>(
       const entry = entrySet.get(thing);
       if (entry) {
         if (entry.parent !== parent || entry.path !== path)
-          // MWE: this constraint is artificial, and this tool could be made to work with cycles,
-          // but it increases administration complexity, has tricky edge cases and the meaning of 'path'
-          // would become less clear. So doesn't seem to be needed for now
+          // MWE: this constraint is artificial, and this tool could be made
+          // to work with cycles, but it increases administration complexity,
+          // has tricky edge cases and the meaning of 'path' would become less
+          // clear. So doesn't seem to be needed for now
           throw new Error(
             `The same observable object cannot appear twice in the same tree,` +
               ` trying to assign it to '${buildPath(parent)}/${path}',` +
@@ -180,15 +183,15 @@ export const deepObserve = <T>(
               }'`,
           );
       } else {
-        const entry = {
+        const nextEntry = {
           parent,
           path,
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           dispose: observe(thing as any, genericListener),
         };
-        entrySet.set(thing, entry);
+        entrySet.set(thing, nextEntry);
         entries(thing).forEach(([key, value]) => {
-          observeRecursively(value, entry, key);
+          observeRecursively(value, nextEntry, key);
         });
       }
     }

@@ -243,6 +243,7 @@ export default class Renderer implements IDisposable {
         this.scene.add(controller);
       })
       .catch((e) => {
+        // eslint-disable-next-line no-console
         console.error(e);
       });
   };
@@ -292,6 +293,7 @@ export default class Renderer implements IDisposable {
         this.updateUI();
       })
       .catch((e) => {
+        // eslint-disable-next-line no-console
         console.error(e);
       });
   };

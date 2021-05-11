@@ -8,5 +8,5 @@ export interface SessionPayload {
 export const hashPassword = (password: string) =>
   hash(password, { type: argon2id });
 
-export const verifyPassword = (hash: string, password: string) =>
-  verify(hash, password, { type: argon2id });
+export const verifyPassword = (hashedPassword: string, password: string) =>
+  verify(hashedPassword, password, { type: argon2id });

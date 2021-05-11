@@ -2,7 +2,7 @@ import { Injectable } from "@nestjs/common";
 
 @Injectable()
 export class AppService {
-  getVersion() {
+  public getVersion() {
     return "0.0.1";
   }
 }

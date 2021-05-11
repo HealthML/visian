@@ -29,7 +29,8 @@ export const calculateCircle = (radius: number, fill: boolean) => {
 
   // Calculate the (x, y)-coordinates of the top-right octant of the circle.
   while (x <= y) {
-    // Loop through the column below the border or the two pixel thick border depending on @param fill.
+    // Loop through the column below the border or the two pixel thick border
+    // depending on @param fill.
     for (let i = fill ? x : y - Math.min(radius, 1); i <= y; i++) {
       // Draw the pixel in all 8 symmetric octants of the circle.
       circlePixels.push(

@@ -42,6 +42,4 @@ const computeStyle = ({
  */
 export const useModalPosition = (
   config: ModalPositionConfig,
-): React.CSSProperties => {
-  return useRelativePosition(computeStyle, config);
-};
+): React.CSSProperties => useRelativePosition(computeStyle, config);
