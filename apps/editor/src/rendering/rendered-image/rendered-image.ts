@@ -145,15 +145,7 @@ export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
       this.hasCPUUpdates[rendererIndex] &&
       this.renderTargets[rendererIndex]
     ) {
-      copyToRenderTarget(
-        this.screenAlignedQuad,
-        this.renderTargets[rendererIndex],
-        renderer,
-      );
-
-      this.sliceAtlasAdapter.invalidateCache();
-
-      this.hasCPUUpdates[rendererIndex] = false;
+      this.copyToRenderTarget(rendererIndex);
     }
 
     if (this.voxelsToRender.length && !this.voxelsRendered[rendererIndex]) {
@@ -174,6 +166,21 @@ export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
         this.renderCallbacks = [];
       }
     }
+  }
+
+  private copyToRenderTarget(rendererIndex: number) {
+    const renderer = this.renderers[rendererIndex];
+    if (!renderer) return;
+
+    copyToRenderTarget(
+      this.screenAlignedQuad,
+      this.renderTargets[rendererIndex],
+      renderer,
+    );
+
+    this.sliceAtlasAdapter.invalidateCache();
+
+    this.hasCPUUpdates[rendererIndex] = false;
   }
 
   private onModificationsOnGPU() {
@@ -241,7 +248,11 @@ export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
     this.scheduleGPUPush();
   }
 
-  public setSlice(viewType: ViewType, slice: number, sliceData?: Uint8Array) {
+  public setSlice(
+    viewType: ViewType,
+    slice: number,
+    sliceData?: Uint8Array | THREE.Texture[],
+  ) {
     if (this.renderers.length) {
       this.sliceAtlasAdapter.writeSlice(
         slice,
@@ -256,8 +267,10 @@ export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
       return;
     }
 
-    super.setSlice(viewType, slice, sliceData);
-    this.scheduleGPUPush();
+    if (sliceData === undefined || sliceData instanceof Uint8Array) {
+      super.setSlice(viewType, slice, sliceData);
+      this.scheduleGPUPush();
+    }
   }
 
   public getSlice(sliceNumber: number, viewType: ViewType) {
@@ -271,6 +284,28 @@ export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
 
     // Attention: super.getSlice does not work for more than one component at the moment!
     return super.getSlice(sliceNumber, viewType);
+  }
+
+  public readSliceToTarget(
+    sliceNumber: number,
+    viewType: ViewType,
+    rendererIndex: number,
+    target: THREE.WebGLRenderTarget,
+  ) {
+    const renderer = this.renderers[rendererIndex];
+    if (!renderer) return;
+
+    if (this.hasCPUUpdates[rendererIndex]) {
+      this.copyToRenderTarget(rendererIndex);
+    }
+
+    this.sliceAtlasAdapter.readSliceToTarget(
+      sliceNumber,
+      viewType,
+      renderer,
+      target,
+      this.getTexture(rendererIndex),
+    );
   }
 
   public getAtlas() {

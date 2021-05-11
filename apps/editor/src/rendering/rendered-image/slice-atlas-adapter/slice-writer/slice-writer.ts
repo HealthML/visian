@@ -10,6 +10,7 @@ import * as THREE from "three";
 
 import { SliceLines } from "./slice-lines";
 import { SliceQuad } from "./slice-quad";
+import { SliceScene } from "./types";
 
 export class SliceWriter {
   private sliceTextures: THREE.DataTexture[];
@@ -48,23 +49,26 @@ export class SliceWriter {
   public writeSlice(
     sliceNumber: number,
     viewType: ViewType,
-    sliceData: Uint8Array | undefined,
+    sliceData: Uint8Array | THREE.Texture[] | undefined,
     renderTargets: THREE.WebGLRenderTarget[],
     renderers: THREE.WebGLRenderer[],
   ) {
     const textureData = this.textureDatas[viewType];
     if (sliceData) {
-      if (sliceData.length !== textureData.length) {
-        throw new Error("Provided data is not of the correct length.");
+      if (sliceData instanceof Uint8Array) {
+        if (sliceData.length !== textureData.length) {
+          throw new Error("Provided data is not of the correct length.");
+        }
+
+        textureData.set(sliceData);
       }
-      textureData.set(sliceData);
     } else {
       textureData.fill(0);
     }
 
     this.sliceTextures[viewType].needsUpdate = true;
 
-    let scene: THREE.Scene;
+    let scene: SliceScene;
     let camera: THREE.Camera;
     if (viewType === this.atlasViewType) {
       this.sliceQuad.positionForSlice(sliceNumber);
@@ -77,6 +81,10 @@ export class SliceWriter {
     }
 
     renderTargets.forEach((renderTarget, index) => {
+      if (sliceData !== undefined && !(sliceData instanceof Uint8Array)) {
+        scene.setOverrideTexture(sliceData[index]);
+      }
+
       const renderer = renderers[index];
 
       renderer.setRenderTarget(renderTarget);
@@ -86,6 +94,10 @@ export class SliceWriter {
 
       renderer.autoClear = true;
       renderer.setRenderTarget(null);
+
+      if (sliceData !== undefined && !(sliceData instanceof Uint8Array)) {
+        scene.setOverrideTexture();
+      }
     });
   }
 }

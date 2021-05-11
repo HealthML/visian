@@ -1,3 +1,5 @@
+export { default as circleFragmentShader } from "./circle/circle.frag.glsl";
+export { default as circleVertexShader } from "./circle/circle.vert.glsl";
 export { default as linesFragmentShader } from "./lines-into-atlas/lines-into-atlas.frag.glsl";
 export { default as linesVertexShader } from "./lines-into-atlas/lines-into-atlas.vert.glsl";
 export { default as rawSliceFragmentShader } from "./slice/raw-slice.frag.glsl";

@@ -7,8 +7,8 @@ import {
   Vector,
   VoxelWithValue,
 } from "@visian/utils";
+import { Editor } from "../../models";
 
-import { Editor } from "../editor";
 import { DragPoint, DragTool } from "./types";
 import { VoxelWriter } from "./voxel-writer";
 

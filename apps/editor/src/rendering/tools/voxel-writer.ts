@@ -1,7 +1,5 @@
 import { getOrthogonalAxis, VoxelWithValue } from "@visian/utils";
-
-import { Editor } from "../editor";
-import { SliceUndoRedoCommand } from "../undo-redo";
+import { Editor, SliceUndoRedoCommand } from "../../models";
 
 /**
  * The VoxelWriter handles editing an annotation (or image).

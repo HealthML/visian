@@ -7,10 +7,9 @@ import FileSaver from "file-saver";
 import isEqual from "lodash.isequal";
 import { action, makeObservable, observable } from "mobx";
 
-import { RenderedImage, SliceRenderer } from "../../rendering";
+import { EditorTools, RenderedImage, SliceRenderer } from "../../rendering";
 import { StoreContext } from "../types";
 import { EditorMarkers } from "./markers";
-import { EditorTools } from "./tools";
 import { EditorUndoRedo } from "./undo-redo";
 import {
   EditorViewSettings,
@@ -53,9 +52,10 @@ export class Editor implements ISerializable<EditorSnapshot> {
   public tools: EditorTools;
   public undoRedo: EditorUndoRedo;
 
+  public renderers?: THREE.WebGLRenderer[];
+
   constructor(protected context: StoreContext) {
     this.viewSettings = new EditorViewSettings(this, context);
-    this.tools = new EditorTools(this, context);
     this.undoRedo = new EditorUndoRedo(this, context);
 
     makeObservable<this, "backgroundColor">(this, {
@@ -66,6 +66,7 @@ export class Editor implements ISerializable<EditorSnapshot> {
       image: observable,
       isImageVisible: observable,
       backgroundColor: observable,
+      renderers: observable.ref,
 
       setSliceRenderer: action,
       setForegroundColor: action,
@@ -77,6 +78,7 @@ export class Editor implements ISerializable<EditorSnapshot> {
       applySnapshot: action,
     });
 
+    this.tools = new EditorTools(this, context);
     this.markers = new EditorMarkers(this, this.context);
   }
 
@@ -93,6 +95,8 @@ export class Editor implements ISerializable<EditorSnapshot> {
 
   public setSliceRenderer(sliceRenderer?: SliceRenderer) {
     this.sliceRenderer = sliceRenderer;
+
+    this.renderers = this.sliceRenderer?.renderers;
   }
 
   public setForegroundColor(foregroundColor: string) {

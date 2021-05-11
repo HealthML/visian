@@ -35,10 +35,26 @@ export class SliceAtlasAdapter {
     return this.sliceReader.readSlice(sliceNumber, viewType, renderer);
   }
 
+  public readSliceToTarget(
+    sliceNumber: number,
+    viewType: ViewType,
+    renderer: THREE.WebGLRenderer,
+    target: THREE.WebGLRenderTarget,
+    atlasTexture: THREE.Texture,
+  ) {
+    this.sliceReader.readSliceToTarget(
+      sliceNumber,
+      viewType,
+      renderer,
+      target,
+      atlasTexture,
+    );
+  }
+
   public writeSlice(
     sliceNumber: number,
     viewType: ViewType,
-    sliceData: Uint8Array | undefined,
+    sliceData: Uint8Array | THREE.Texture[] | undefined,
     renderTargets: THREE.WebGLRenderTarget[],
     renderers: THREE.WebGLRenderer[],
   ) {
