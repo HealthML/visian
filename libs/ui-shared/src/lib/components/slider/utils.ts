@@ -1,9 +1,10 @@
 import { PointerEvent as ReactPointerEvent, useCallback, useRef } from "react";
 
+import { ScaleType } from "../../types";
+
 import type {
   PointerCoordinates,
   RoundMethod,
-  ScaleType,
   SliderValueSettings,
   SliderVerticalitySettings,
 } from "./types";
