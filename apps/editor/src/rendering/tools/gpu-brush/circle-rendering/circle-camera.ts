@@ -1,7 +1,7 @@
 import { getPlaneAxes, IDisposable, IDisposer } from "@visian/utils";
 import { autorun } from "mobx";
 import * as THREE from "three";
-import { Editor } from "../../../models";
+import { Editor } from "../../../../models";
 
 export class CircleCamera
   extends THREE.OrthographicCamera

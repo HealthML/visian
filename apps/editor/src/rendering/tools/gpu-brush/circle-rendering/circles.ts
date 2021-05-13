@@ -1,9 +1,9 @@
 import { IDisposable } from "@visian/utils";
 import * as THREE from "three";
-import { Editor } from "../../../models";
+import { Editor } from "../../../../models";
 import { CircleCamera } from "./circle-camera";
 import { CircleMaterial } from "./circle-material";
-import { Circle } from "../types";
+import { Circle } from "../../types";
 
 export class Circles extends THREE.Scene implements IDisposable {
   private geometry = new THREE.PlaneBufferGeometry();

@@ -7,9 +7,9 @@ import {
   Vector,
   VoxelWithValue,
 } from "@visian/utils";
-import { Editor } from "../../models";
+import { Editor } from "../../../models";
 
-import { DragPoint, DragTool } from "./types";
+import { DragPoint, DragTool } from "../types";
 import { VoxelWriter } from "./voxel-writer";
 
 export class Brush extends VoxelWriter implements DragTool {

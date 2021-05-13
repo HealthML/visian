@@ -17,10 +17,9 @@ import {
 } from "../../models";
 import { RenderedImage } from "../rendered-image";
 import { getPositionWithinPixel } from "../slice-renderer";
-import { CircleBrush } from "./circle-brush";
-import { CircleRenderer } from "./circle-rendering";
+import { CircleBrush, CircleRenderer } from "./gpu-brush";
+import { SmartBrush } from "./cpu-brush";
 
-import { SmartBrush } from "./smart-brush";
 import { DragPoint, DragTool } from "./types";
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

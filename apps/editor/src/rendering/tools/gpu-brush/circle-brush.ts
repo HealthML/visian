@@ -1,8 +1,8 @@
 import { calculateLine, getOrthogonalAxis, getPlaneAxes } from "@visian/utils";
-import { Editor } from "../../models";
-import { CircleRenderer } from "./circle-rendering/circle-renderer";
-import { DragPoint, DragTool } from "./types";
-import { dragPointsEqual } from "./utils";
+import { Editor } from "../../../models";
+import { CircleRenderer } from "./circle-rendering";
+import { DragPoint, DragTool } from "../types";
+import { dragPointsEqual } from "../utils";
 
 export class CircleBrush implements DragTool {
   private lastDragPoint?: DragPoint;

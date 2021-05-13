@@ -2,8 +2,8 @@ import { getOrthogonalAxis, getPlaneAxes, IDisposer } from "@visian/utils";
 import { reaction } from "mobx";
 import * as THREE from "three";
 
-import { Editor } from "../../../models";
-import { Circle } from "../types";
+import { Editor } from "../../../../models";
+import { Circle } from "../../types";
 import { Circles } from "./circles";
 
 export class CircleRenderer {

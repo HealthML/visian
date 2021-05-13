@@ -5,7 +5,7 @@ import {
   Vector,
   VoxelWithValue,
 } from "@visian/utils";
-import { Editor } from "../../models";
+import { Editor } from "../../../models";
 
 import { Brush } from "./brush";
 
