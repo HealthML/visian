@@ -42,6 +42,8 @@ export class EditorUndoRedo implements ISerializable<EditorUndoRedoSnapshot> {
       this.editor.sliceRenderer?.lazyRender();
     }
 
+    this.editor.tools.onSliceChanged();
+
     if (
       undoCommand?.slice !== undefined &&
       undoCommand?.viewType !== undefined
@@ -63,6 +65,8 @@ export class EditorUndoRedo implements ISerializable<EditorUndoRedoSnapshot> {
     if (redoCommand?.redo()) {
       this.editor.sliceRenderer?.lazyRender();
     }
+
+    this.editor.tools.onSliceChanged();
 
     if (
       redoCommand?.slice !== undefined &&

@@ -279,7 +279,7 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
       new SliceUndoRedoCommand(image, viewType, slice, oldSliceData),
     );
 
-    this.circleRenderer.readCurrentSlice();
+    this.onSliceChanged();
 
     this.editor.markers.inferAnnotatedSlice(image, slice, viewType, true);
   };
@@ -297,9 +297,13 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
       new AtlasUndoRedoCommand(image, oldAtlas, emptyAtlas),
     );
 
-    this.circleRenderer.readCurrentSlice();
+    this.onSliceChanged();
 
     this.editor.markers.clear();
+  }
+
+  public onSliceChanged() {
+    this.circleRenderer.readCurrentSlice();
   }
 
   public handleEvent(

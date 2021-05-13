@@ -3,19 +3,21 @@ import { Editor } from "../../../models";
 import { CircleRenderer } from "./circle-rendering";
 import { DragPoint, DragTool } from "../types";
 import { dragPointsEqual } from "../utils";
+import { UndoableTool } from "./undoable-tool";
 
-export class CircleBrush implements DragTool {
+export class CircleBrush extends UndoableTool implements DragTool {
   private lastDragPoint?: DragPoint;
 
   constructor(
-    private editor: Editor,
-    private circleRenderer: CircleRenderer,
+    editor: Editor,
+    circleRenderer: CircleRenderer,
     private value = 255,
-    private undoable = true,
-  ) {}
+  ) {
+    super(editor, circleRenderer);
+  }
 
   public startAt(dragPoint: DragPoint) {
-    // TODO: get undo redo info.
+    this.startStroke();
 
     this.drawCircleAround(dragPoint);
 
@@ -37,7 +39,7 @@ export class CircleBrush implements DragTool {
   public endAt(dragPoint: DragPoint) {
     this.moveTo(dragPoint);
 
-    // TODO: Finish stroke
+    this.endStroke(!this.value);
   }
 
   private drawCircleAround(dragPoint: DragPoint) {
