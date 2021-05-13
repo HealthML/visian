@@ -82,7 +82,7 @@ export class CircleRenderer {
     const { renderers, annotation } = this.editor;
     if (!renderers || !annotation) return;
 
-    this.circles.setFromCircleCenters(this.circlesToRender);
+    this.circles.setCircles(this.circlesToRender);
     this.circlesToRender = [];
 
     renderers.forEach((renderer, index) => {

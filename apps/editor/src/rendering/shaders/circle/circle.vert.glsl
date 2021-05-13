@@ -1,12 +1,11 @@
-attribute vec3 color;
-attribute float radius;
+attribute float instanceColor;
 
-varying vec3 vColor;
+varying vec2 vUv;
+varying float vColor;
 
 void main() {
-  vColor = color;
+  vUv = uv;
+  vColor = instanceColor;
 
-  gl_PointSize = 1.0 + 2.0 * radius;
-
-  gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+  gl_Position = projectionMatrix * instanceMatrix * vec4(position, 1.0);
 }
