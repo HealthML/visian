@@ -166,6 +166,11 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
   public setActiveTool(tool = this.activeTool) {
     if (this.isDrawing) return;
 
+    // Temporary fix so that brush & eraser don't overwrite smart brush edits.
+    if ([ToolType.Brush, ToolType.Eraser].includes(tool)) {
+      this.circleRenderer.readCurrentSlice();
+    }
+
     if (tool === ToolType.Crosshair && !this.editor.isIn3DMode) {
       if (this.activeTool === ToolType.Crosshair) {
         this.activeTool = ToolType.Brush;
@@ -292,6 +297,9 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
     this.editor.undoRedo.addCommand(
       new AtlasUndoRedoCommand(image, oldAtlas, emptyAtlas),
     );
+
+    this.circleRenderer.readCurrentSlice();
+
     this.editor.markers.clear();
   }
 
