@@ -8,7 +8,7 @@ import { Circle } from "../types";
 export class Circles extends THREE.Scene implements IDisposable {
   private geometry = new THREE.PlaneBufferGeometry();
   private material: CircleMaterial;
-  private mesh: THREE.InstancedMesh;
+  private mesh!: THREE.InstancedMesh;
 
   /** The maximum amount of circles that can be rendered with the current instanced mesh. */
   private maxCircles = 16;
@@ -23,13 +23,7 @@ export class Circles extends THREE.Scene implements IDisposable {
 
     this.material = new CircleMaterial();
 
-    this.mesh = new THREE.InstancedMesh(
-      this.geometry,
-      this.material,
-      this.maxCircles,
-    );
-    // Updated every frame.
-    this.mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+    this.createNewMesh();
     this.add(this.mesh);
 
     this.camera = new CircleCamera(editor);
@@ -55,24 +49,37 @@ export class Circles extends THREE.Scene implements IDisposable {
 
     this.remove(this.mesh);
     this.mesh.dispose();
+    this.createNewMesh();
+    this.add(this.mesh);
+  }
+
+  private createNewMesh() {
     this.mesh = new THREE.InstancedMesh(
       this.geometry,
       this.material,
       this.maxCircles,
     );
+    // Updated every frame.
     this.mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
-    this.add(this.mesh);
+    this.geometry.setAttribute(
+      "instanceColor",
+      new THREE.Uint8BufferAttribute(4 * this.maxCircles, 1),
+    );
   }
 
   public setCircles(circles: Circle[]) {
     this.ensureCirclesFit(circles.length);
     this.mesh.count = circles.length;
 
-    const colors: number[] = [];
+    const instanceColorAttribute = this.geometry.attributes.instanceColor;
 
     circles.forEach((circle, index) => {
       // Add the color once per vertex of the plane.
-      colors.push(circle.value, circle.value, circle.value, circle.value);
+      const i = 4 * index;
+      instanceColorAttribute.setX(i, circle.value);
+      instanceColorAttribute.setX(i + 1, circle.value);
+      instanceColorAttribute.setX(i + 2, circle.value);
+      instanceColorAttribute.setX(i + 3, circle.value);
 
       this.dummy.position.set(circle.x, circle.y, 0);
 
@@ -85,10 +92,6 @@ export class Circles extends THREE.Scene implements IDisposable {
     });
 
     this.mesh.instanceMatrix.needsUpdate = true;
-
-    this.geometry.setAttribute(
-      "instanceColor",
-      new THREE.Uint8BufferAttribute(colors, 1),
-    );
+    instanceColorAttribute.needsUpdate = true;
   }
 }
