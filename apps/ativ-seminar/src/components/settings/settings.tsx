@@ -110,6 +110,13 @@ export const Settings: React.FC<SettingsProps> = observer((props) => {
     [volumeRendererModel],
   );
 
+  const setLinkConeToCamera = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      volumeRendererModel.setIsConeLinkedToCamera(event.target.checked);
+    },
+    [volumeRendererModel],
+  );
+
   const setCustomTFImage = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
       const { files } = event.target;
@@ -231,15 +238,25 @@ export const Settings: React.FC<SettingsProps> = observer((props) => {
       )}
       {volumeRendererModel.transferFunction.type ===
         TransferFunctionType.FCCutaway && (
-        <SpacedSliderField
-          label="Cutaway Angle"
-          showValueLabel
-          min={0}
-          max={Math.PI}
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          onChange={volumeRendererModel.setCutAwayConeAngle as any}
-          value={volumeRendererModel.cutAwayConeAngle}
-        />
+        <>
+          <SpacedSliderField
+            label="Cutaway Angle"
+            showValueLabel
+            min={0}
+            max={Math.PI}
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            onChange={volumeRendererModel.setCutAwayConeAngle as any}
+            value={volumeRendererModel.cutAwayConeAngle}
+          />
+          <StyledCheckboxRow>
+            <input
+              type="checkbox"
+              checked={volumeRendererModel.isConeLinkedToCamera}
+              onChange={setLinkConeToCamera}
+            />
+            <StyledCheckboxText text="Link cone to viewing angle?" />
+          </StyledCheckboxRow>
+        </>
       )}
       {(volumeRendererModel.transferFunction.type ===
         TransferFunctionType.FCEdges ||

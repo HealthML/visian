@@ -75,6 +75,9 @@ export class GradientComputer implements IDisposable {
         this.updateOutputDerivative();
       }),
       autorun(() => {
+        this.gradientMaterial.uniforms.uConeDirection.value = volumeRenderer.model.cutAwayConeDirection.toArray();
+      }),
+      autorun(() => {
         const color = tc(volumeRenderer.model.focusColor).toRgb();
         this.gradientMaterial.uniforms.uFocusColor.value = [
           color.r / 255,
