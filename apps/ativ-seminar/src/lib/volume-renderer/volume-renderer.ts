@@ -340,6 +340,9 @@ export class VolumeRenderer implements IDisposable {
 
   public async enterXR() {
     if (this.renderer.xr.getSession()) return;
+
+    this.model.setIsConeLinkedToCamera(false);
+
     const sessionInit = { optionalFeatures: ["local-floor"] };
     const session = await (navigator as THREE.Navigator).xr?.requestSession(
       "immersive-vr",
