@@ -8,12 +8,8 @@ import { UndoableTool } from "./undoable-tool";
 export class CircleBrush extends UndoableTool implements DragTool {
   private lastDragPoint?: DragPoint;
 
-  constructor(
-    editor: Editor,
-    circleRenderer: ToolRenderer,
-    private value = 255,
-  ) {
-    super(editor, circleRenderer);
+  constructor(editor: Editor, toolRenderer: ToolRenderer, private value = 255) {
+    super(editor, toolRenderer);
   }
 
   public startAt(dragPoint: DragPoint) {
@@ -58,7 +54,7 @@ export class CircleBrush extends UndoableTool implements DragTool {
       const pixelOffsetX = dragPoint.right ? -1 : 0;
       const pixelOffsetY = dragPoint.bottom ? -1 : 0;
 
-      this.circleRenderer.renderCircles(
+      this.toolRenderer.renderCircles(
         ...quadCircle.map((pixel) => ({
           x: x + pixel.x + pixelOffsetX,
           y: y + pixel.y + pixelOffsetY,
@@ -70,7 +66,7 @@ export class CircleBrush extends UndoableTool implements DragTool {
       return;
     }
 
-    this.circleRenderer.renderCircles({
+    this.toolRenderer.renderCircles({
       x,
       y,
       value: this.value,

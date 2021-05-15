@@ -5,10 +5,7 @@ export class UndoableTool {
   private oldSliceData?: Uint8Array;
   private sliceNumber?: number;
 
-  constructor(
-    protected editor: Editor,
-    protected circleRenderer: ToolRenderer,
-  ) {}
+  constructor(protected editor: Editor, protected toolRenderer: ToolRenderer) {}
 
   protected startStroke(
     image = this.editor.annotation,
@@ -24,22 +21,24 @@ export class UndoableTool {
     image = this.editor.annotation,
     viewType = this.editor.viewSettings.mainViewType,
   ) {
-    const slice = this.sliceNumber;
-    if (image && slice !== undefined) {
-      this.editor.undoRedo.addCommand(
-        new SliceUndoRedoCommand(
-          image,
-          viewType,
-          slice,
-          this.oldSliceData,
-          image.getSlice(slice, viewType),
-        ),
-      );
-    }
+    this.toolRenderer.waitForRender().then(() => {
+      const slice = this.sliceNumber;
+      if (image && slice !== undefined) {
+        this.editor.undoRedo.addCommand(
+          new SliceUndoRedoCommand(
+            image,
+            viewType,
+            slice,
+            this.oldSliceData,
+            image.getSlice(slice, viewType),
+          ),
+        );
+      }
 
-    this.sliceNumber = undefined;
-    this.oldSliceData = undefined;
+      this.sliceNumber = undefined;
+      this.oldSliceData = undefined;
 
-    this.editor.tools.finishStroke(image, slice, viewType, isDeleteOperation);
+      this.editor.tools.finishStroke(image, slice, viewType, isDeleteOperation);
+    });
   }
 }

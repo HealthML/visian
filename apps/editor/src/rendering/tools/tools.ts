@@ -17,7 +17,7 @@ import {
 } from "../../models";
 import { RenderedImage } from "../rendered-image";
 import { getPositionWithinPixel } from "../slice-renderer";
-import { CircleBrush, ToolRenderer } from "./gpu-tools";
+import { CircleBrush, OutlineTool, ToolRenderer } from "./gpu-tools";
 import { SmartBrush } from "./cpu-brush";
 
 import { DragPoint, DragTool } from "./types";
@@ -34,7 +34,7 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
     "/isDrawing",
   ];
 
-  public activeTool = ToolType.Brush;
+  public activeTool = ToolType.Outline;
 
   public isCursorOverDrawableArea = false;
   public isCursorOverFloatingUI = false;
@@ -47,20 +47,22 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
   public smartBrushNeighborThreshold = 6;
   public smartBrushSeedThreshold = 10;
 
-  private circleRenderer: ToolRenderer;
+  private toolRenderer: ToolRenderer;
 
   private brush?: CircleBrush;
   private eraser?: CircleBrush;
   private smartBrush?: SmartBrush;
   private smartEraser?: SmartBrush;
+  private outlineTool?: OutlineTool;
+  private outlineEraser?: OutlineTool;
 
   /** A map of the tool types to their corresponding brushes. */
-  private brushMap: Partial<Record<ToolType, DragTool>>;
+  private toolMap: Partial<Record<ToolType, DragTool>>;
   /**
    * A map of the tool types to their corresponding alternative brushes.
    * This is used for e.g. right-click or back of pen interaction.
    */
-  protected altBrushMap: Partial<Record<ToolType, DragTool>>;
+  protected altToolMap: Partial<Record<ToolType, DragTool>>;
 
   constructor(protected editor: Editor, protected context?: StoreContext) {
     makeObservable<
@@ -77,7 +79,6 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
       brushWidthScreen: observable,
       lockedBrushSizePixels: observable,
 
-      isBrushToolSelected: computed,
       isBrushSizeLocked: computed,
       brushSizePixels: computed,
 
@@ -95,24 +96,30 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
       resetSmartBrush: action,
     });
 
-    this.circleRenderer = new ToolRenderer(editor);
+    this.toolRenderer = new ToolRenderer(editor);
 
-    this.brush = new CircleBrush(editor, this.circleRenderer);
-    this.eraser = new CircleBrush(editor, this.circleRenderer, 0);
+    this.brush = new CircleBrush(editor, this.toolRenderer);
+    this.eraser = new CircleBrush(editor, this.toolRenderer, 0);
     this.smartBrush = new SmartBrush(editor);
     this.smartEraser = new SmartBrush(editor, 0);
+    this.outlineTool = new OutlineTool(editor, this.toolRenderer);
+    this.outlineEraser = new OutlineTool(editor, this.toolRenderer, 0);
 
-    this.brushMap = {
+    this.toolMap = {
       [ToolType.Brush]: this.brush,
       [ToolType.Eraser]: this.eraser,
       [ToolType.SmartBrush]: this.smartBrush,
       [ToolType.SmartEraser]: this.smartEraser,
+      [ToolType.Outline]: this.outlineTool,
+      [ToolType.OutlineEraser]: this.outlineEraser,
     };
-    this.altBrushMap = {
+    this.altToolMap = {
       [ToolType.Brush]: this.eraser,
       [ToolType.Eraser]: this.brush,
       [ToolType.SmartBrush]: this.smartEraser,
       [ToolType.SmartEraser]: this.smartBrush,
+      [ToolType.Outline]: this.outlineEraser,
+      [ToolType.OutlineEraser]: this.outlineTool,
     };
   }
 
@@ -126,13 +133,21 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
     );
   }
 
-  public get isBrushToolSelected() {
+  private get isBrushToolSelected() {
     return [
       ToolType.Brush,
       ToolType.Eraser,
       ToolType.SmartBrush,
       ToolType.SmartEraser,
     ].includes(this.activeTool);
+  }
+
+  private get isOutlineToolSelected() {
+    return [ToolType.Outline, ToolType.OutlineEraser].includes(this.activeTool);
+  }
+
+  private get isDrawingToolSelected() {
+    return this.isBrushToolSelected || this.isOutlineToolSelected;
   }
 
   public get isBrushSizeLocked() {
@@ -159,7 +174,7 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
   }
 
   public render() {
-    this.circleRenderer.render();
+    this.toolRenderer.render();
   }
 
   public setActiveTool(tool = this.activeTool) {
@@ -167,7 +182,7 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
 
     // Temporary fix so that brush & eraser don't overwrite smart brush edits.
     if ([ToolType.Brush, ToolType.Eraser].includes(tool)) {
-      this.circleRenderer.readCurrentSlice();
+      this.toolRenderer.readCurrentSlice();
     }
 
     if (tool === ToolType.Crosshair && !this.editor.isIn3DMode) {
@@ -303,7 +318,7 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
   }
 
   public onSliceChanged() {
-    this.circleRenderer.readCurrentSlice();
+    this.toolRenderer.readCurrentSlice();
   }
 
   public handleEvent(
@@ -329,7 +344,7 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
     this.alignBrushCursor(intersection.uv);
     if (
       !eventType ||
-      (!this.editor.isAnnotationVisible && this.isBrushToolSelected)
+      (!this.editor.isAnnotationVisible && this.isDrawingToolSelected)
     ) {
       return;
     }
@@ -337,7 +352,7 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
     const dragPoint = this.getDragPoint(intersection.uv);
     if (!dragPoint) return;
 
-    const tool = (alt ? this.altBrushMap : this.brushMap)[this.activeTool];
+    const tool = (alt ? this.altToolMap : this.toolMap)[this.activeTool];
     switch (eventType) {
       case "start":
         this.setIsDrawing(true);
