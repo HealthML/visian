@@ -27,6 +27,10 @@ export const setUpHotKeys = (store: RootStore): IDisposer => {
     event.preventDefault();
     store.editor.tools.setActiveTool(ToolType.Eraser);
   });
+  hotkeys("o", (event) => {
+    event.preventDefault();
+    store.editor.tools.setActiveTool(ToolType.Outline);
+  });
 
   // Tools
   hotkeys("del,backspace", (event) => {

@@ -68,7 +68,8 @@ export const Toolbar: React.FC = observer(() => {
         event.preventDefault();
         event.stopPropagation();
         setIsModalOpen(
-          store?.editor.tools.activeTool !== value || !isModalOpen,
+          value !== ToolType.Outline &&
+            (store?.editor.tools.activeTool !== value || !isModalOpen),
         );
       }
 
@@ -138,6 +139,16 @@ export const Toolbar: React.FC = observer(() => {
         activeTool={activeTool}
         value={ToolType.Eraser}
         ref={activeTool === ToolType.Eraser ? setButtonRef : undefined}
+        onPress={setActiveTool}
+        onContextMenu={preventDefault}
+      />
+      <Tool
+        icon="outline"
+        tooltipTx="outline-tool"
+        showTooltip={!isModalOpen || activeTool !== ToolType.Outline}
+        activeTool={activeTool}
+        value={ToolType.Outline}
+        ref={activeTool === ToolType.Outline ? setButtonRef : undefined}
         onPress={setActiveTool}
         onContextMenu={preventDefault}
       />
