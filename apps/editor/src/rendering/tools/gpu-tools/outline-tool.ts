@@ -26,6 +26,7 @@ export class OutlineTool extends UndoableTool implements DragTool {
 
     const coords = this.getCoords(dragPoint);
     this.outline.moveTo(coords.x, coords.y);
+
     this.lastPoint = dragPoint;
   }
 
@@ -34,6 +35,9 @@ export class OutlineTool extends UndoableTool implements DragTool {
 
     const coords = this.getCoords(dragPoint);
     this.outline.lineTo(coords.x, coords.y);
+
+    this.updateOutlinePreview();
+
     this.lastPoint = dragPoint;
   }
 
@@ -44,6 +48,7 @@ export class OutlineTool extends UndoableTool implements DragTool {
 
     // Reset the outline for the next stroke.
     this.outline = new THREE.Shape();
+    this.updateOutlinePreview();
 
     this.lastPoint = undefined;
 
@@ -53,6 +58,11 @@ export class OutlineTool extends UndoableTool implements DragTool {
   private getCoords(dragPoint: DragPoint) {
     const [xAxis, yAxis] = getPlaneAxes(this.editor.viewSettings.mainViewType);
     return { x: dragPoint[xAxis], y: dragPoint[yAxis] };
+  }
+
+  private updateOutlinePreview() {
+    const points = this.outline.getPoints();
+    this.editor.sliceRenderer?.getOutline().setPoints(points);
   }
 
   private drawShape() {

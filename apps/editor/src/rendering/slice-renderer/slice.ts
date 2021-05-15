@@ -16,6 +16,7 @@ import {
   crosshairZ,
   getGeometrySize,
   imageMeshZ,
+  Outline,
   PreviewBrushCursor,
 } from "./utils";
 
@@ -42,6 +43,7 @@ export class Slice extends THREE.Group implements IDisposable {
   private crosshair: Crosshair;
 
   public brushCursor: BrushCursor;
+  public outline: Outline;
 
   public previewBrushCursor: PreviewBrushCursor;
 
@@ -77,6 +79,10 @@ export class Slice extends THREE.Group implements IDisposable {
     this.brushCursor.position.z = brushCursorZ;
     this.crosshairShiftGroup.add(this.brushCursor);
 
+    this.outline = new Outline(editor, viewType);
+    this.outline.position.z = brushCursorZ;
+    this.crosshairShiftGroup.add(this.outline);
+
     this.previewBrushCursor = new PreviewBrushCursor(editor, viewType);
     this.previewBrushCursor.position.z = brushCursorZ;
     this.crosshairShiftGroup.add(this.previewBrushCursor);
@@ -99,6 +105,7 @@ export class Slice extends THREE.Group implements IDisposable {
     this.imageMaterial.dispose();
     this.crosshair.dispose();
     this.brushCursor.dispose();
+    this.outline.dispose();
     this.disposers.forEach((disposer) => disposer());
   }
 

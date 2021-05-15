@@ -5,7 +5,7 @@ export const crosshair = {
   transparent: true,
 };
 
-export const brushCursor = {
+export const toolOverlays = {
   color: 0xbbbbbb,
   linewidth: 1,
   opacity: 1,
