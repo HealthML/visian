@@ -25,6 +25,8 @@ const SyledCanvas = styled(WebGLCanvas)<
         return props.isNavigationDragged ? "grabbing" : "grab";
 
       case ToolType.Crosshair:
+      case ToolType.Outline:
+      case ToolType.OutlineEraser:
         return "crosshair";
 
       case undefined:
