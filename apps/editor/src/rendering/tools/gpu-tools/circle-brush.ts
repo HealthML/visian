@@ -1,6 +1,6 @@
 import { calculateLine, getOrthogonalAxis, getPlaneAxes } from "@visian/utils";
 import { Editor } from "../../../models";
-import { CircleRenderer } from "./circle-rendering";
+import { ToolRenderer } from "./tool-rendering";
 import { DragPoint, DragTool } from "../types";
 import { dragPointsEqual } from "../utils";
 import { UndoableTool } from "./undoable-tool";
@@ -10,7 +10,7 @@ export class CircleBrush extends UndoableTool implements DragTool {
 
   constructor(
     editor: Editor,
-    circleRenderer: CircleRenderer,
+    circleRenderer: ToolRenderer,
     private value = 255,
   ) {
     super(editor, circleRenderer);

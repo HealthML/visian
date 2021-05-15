@@ -3,7 +3,7 @@ import { autorun } from "mobx";
 import * as THREE from "three";
 import { Editor } from "../../../../models";
 
-export class CircleCamera
+export class ToolCamera
   extends THREE.OrthographicCamera
   implements IDisposable {
   private disposers: IDisposer[] = [];

@@ -1,5 +1,5 @@
 import { Editor, SliceUndoRedoCommand } from "../../../models";
-import { CircleRenderer } from "./circle-rendering";
+import { ToolRenderer } from "./tool-rendering";
 
 export class UndoableTool {
   private oldSliceData?: Uint8Array;
@@ -7,7 +7,7 @@ export class UndoableTool {
 
   constructor(
     protected editor: Editor,
-    protected circleRenderer: CircleRenderer,
+    protected circleRenderer: ToolRenderer,
   ) {}
 
   protected startStroke(

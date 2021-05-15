@@ -1,7 +1,5 @@
 import { IDisposable } from "@visian/utils";
 import * as THREE from "three";
-import { Editor } from "../../../../models";
-import { CircleCamera } from "./circle-camera";
 import { CircleMaterial } from "./circle-material";
 import { Circle } from "../../types";
 
@@ -16,23 +14,18 @@ export class Circles extends THREE.Scene implements IDisposable {
   /** Used for convenient matrix generation. */
   private dummy = new THREE.Object3D();
 
-  public camera: CircleCamera;
-
-  constructor(editor: Editor) {
+  constructor() {
     super();
 
     this.material = new CircleMaterial();
 
     this.createNewMesh();
     this.add(this.mesh);
-
-    this.camera = new CircleCamera(editor);
   }
 
   public dispose() {
     this.geometry.dispose();
     this.material.dispose();
-    this.camera.dispose();
     this.mesh.dispose();
   }
 

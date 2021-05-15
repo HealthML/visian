@@ -1,3 +1,3 @@
 export * from "./circle-brush";
-export * from "./circle-rendering";
+export * from "./tool-rendering";
 export * from "./undoable-tool";

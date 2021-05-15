@@ -5,9 +5,12 @@ import * as THREE from "three";
 import { Editor } from "../../../../models";
 import { Circle } from "../../types";
 import { Circles } from "./circles";
+import { ToolCamera } from "./tool-camera";
 
-export class CircleRenderer {
+export class ToolRenderer {
   private circlesToRender: Circle[] = [];
+
+  private camera: ToolCamera;
 
   private circles: Circles;
   private renderTargets: THREE.WebGLRenderTarget[] = [];
@@ -15,7 +18,8 @@ export class CircleRenderer {
   private disposers: IDisposer[] = [];
 
   constructor(private editor: Editor) {
-    this.circles = new Circles(editor);
+    this.camera = new ToolCamera(editor);
+    this.circles = new Circles();
 
     this.disposers.push(
       reaction(
@@ -89,7 +93,7 @@ export class CircleRenderer {
       renderer.setRenderTarget(this.renderTargets[index]);
       renderer.autoClear = false;
 
-      renderer.render(this.circles, this.circles.camera);
+      renderer.render(this.circles, this.camera);
 
       renderer.autoClear = true;
       renderer.setRenderTarget(null);

@@ -17,7 +17,7 @@ import {
 } from "../../models";
 import { RenderedImage } from "../rendered-image";
 import { getPositionWithinPixel } from "../slice-renderer";
-import { CircleBrush, CircleRenderer } from "./gpu-brush";
+import { CircleBrush, ToolRenderer } from "./gpu-tools";
 import { SmartBrush } from "./cpu-brush";
 
 import { DragPoint, DragTool } from "./types";
@@ -47,7 +47,7 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
   public smartBrushNeighborThreshold = 6;
   public smartBrushSeedThreshold = 10;
 
-  private circleRenderer: CircleRenderer;
+  private circleRenderer: ToolRenderer;
 
   private brush?: CircleBrush;
   private eraser?: CircleBrush;
@@ -95,7 +95,7 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
       resetSmartBrush: action,
     });
 
-    this.circleRenderer = new CircleRenderer(editor);
+    this.circleRenderer = new ToolRenderer(editor);
 
     this.brush = new CircleBrush(editor, this.circleRenderer);
     this.eraser = new CircleBrush(editor, this.circleRenderer, 0);
