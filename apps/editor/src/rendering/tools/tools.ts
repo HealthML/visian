@@ -349,7 +349,10 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
       return;
     }
 
-    const dragPoint = this.getDragPoint(intersection.uv);
+    const dragPoint = this.getDragPoint(
+      intersection.uv,
+      !this.isOutlineToolSelected,
+    );
     if (!dragPoint) return;
 
     const tool = (alt ? this.altToolMap : this.toolMap)[this.activeTool];
@@ -402,7 +405,7 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
     );
   }
 
-  private getDragPoint(uv: THREE.Vector2) {
+  private getDragPoint(uv: THREE.Vector2, floored = true) {
     if (!this.editor.annotation) return undefined;
 
     const { annotation } = this.editor;
@@ -425,10 +428,13 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
     dragPoint[orthogonalAxis] = this.editor.viewSettings.selectedVoxel[
       orthogonalAxis
     ];
-    dragPoint[widthAxis] = Math.floor(uv.x * annotation.voxelCount[widthAxis]);
-    dragPoint[heightAxis] = Math.floor(
-      uv.y * annotation.voxelCount[heightAxis],
-    );
+    dragPoint[widthAxis] = uv.x * annotation.voxelCount[widthAxis];
+    dragPoint[heightAxis] = uv.y * annotation.voxelCount[heightAxis];
+
+    if (floored) {
+      dragPoint[widthAxis] = Math.floor(dragPoint[widthAxis]);
+      dragPoint[heightAxis] = Math.floor(dragPoint[heightAxis]);
+    }
 
     const scanWidth = annotation.voxelCount[widthAxis];
     const scanHeight = annotation.voxelCount[heightAxis];
