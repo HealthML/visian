@@ -72,11 +72,13 @@ export class BrushCursor extends THREE.LineSegments implements IDisposable {
     if (this.editor.tools.brushSizePixels === 0.5) {
       this.points = get2x2BrushCursorPoints();
     } else {
-      let d = 1 - this.editor.tools.brushSizePixels;
-      let x = 0;
-      let y = this.editor.tools.brushSizePixels;
+      const radius = this.editor.tools.brushSizePixels + 0.5;
 
-      const leftPoint = new THREE.Vector3(x, y + 0.5, 0);
+      let d = 1 - radius;
+      let x = 0;
+      let y = radius;
+
+      const leftPoint = new THREE.Vector3(x, y, 0);
       const rightPoint = new THREE.Vector3();
 
       while (x <= y) {
@@ -84,12 +86,12 @@ export class BrushCursor extends THREE.LineSegments implements IDisposable {
           d += 2 * x + 3;
         } else {
           d += 2 * (x - y) + 5;
-          rightPoint.set(x + 0.5, y + 0.5, 0);
+          rightPoint.set(x + 0.5, y, 0);
           this.addLines(leftPoint, rightPoint);
 
           y--;
 
-          leftPoint.set(x + 0.5, y + 0.5, 0);
+          leftPoint.set(x + 0.5, y, 0);
           this.addLines(rightPoint, leftPoint);
         }
         x++;

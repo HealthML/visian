@@ -20,12 +20,14 @@ export const calculateCircle = (radius: number, fill: boolean) => {
   }
   const circlePixels = [];
 
+  const actualRadius = radius + 0.5;
+
   // Decision variable for picking the next pixel.
-  let d = 1 - radius;
+  let d = 1 - actualRadius;
   // The midpoint circle algorithm works around x=0 and y=0.
   // We add the target offset to every pixel we draw.
   let x = 0;
-  let y = radius;
+  let y = actualRadius;
 
   // Calculate the (x, y)-coordinates of the top-right octant of the circle.
   while (x <= y) {
