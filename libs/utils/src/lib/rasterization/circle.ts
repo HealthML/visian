@@ -20,14 +20,13 @@ export const calculateCircle = (radius: number, fill: boolean) => {
   }
   const circlePixels = [];
 
-  const actualRadius = radius + 0.5;
-
   // Decision variable for picking the next pixel.
-  let d = 1 - actualRadius;
+  // + 0.5 because we want the circle to be centered on a pixel.
+  let d = 1 - (radius + 0.5);
   // The midpoint circle algorithm works around x=0 and y=0.
   // We add the target offset to every pixel we draw.
   let x = 0;
-  let y = actualRadius;
+  let y = radius;
 
   // Calculate the (x, y)-coordinates of the top-right octant of the circle.
   while (x <= y) {
@@ -52,7 +51,8 @@ export const calculateCircle = (radius: number, fill: boolean) => {
     if (d <= 0) {
       d += 2 * x + 3;
     } else {
-      d += 2 * (x - y) + 5;
+      // + 0.5 because we want the circle to be centered on a pixel.
+      d += 2 * (x - (y + 0.5)) + 5;
       y--;
     }
     x++;
