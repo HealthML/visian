@@ -102,11 +102,12 @@ export class Editor implements ISerializable<EditorSnapshot> {
   public setImage(image: RenderedImage) {
     this.image = image;
     this.annotation = this.getNewAnnotationLayer();
-    this.context?.persistImmediately();
 
     this.tools.setActiveTool();
     this.viewSettings.reset();
     this.undoRedo.clear();
+
+    this.context?.persistImmediately();
   }
   public async importImage(imageFile: File) {
     this.setImage(await RenderedImage.fromFile(imageFile));
@@ -131,9 +132,10 @@ export class Editor implements ISerializable<EditorSnapshot> {
       throw new Error("annotation-mismatch-error");
     }
     this.annotation = image;
-    this.context?.persistImmediately();
 
     this.undoRedo.clear();
+
+    this.context?.persistImmediately();
   }
   public async importAnnotation(imageFile: File) {
     this.setAnnotation(await RenderedImage.fromFile(imageFile));
