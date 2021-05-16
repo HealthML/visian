@@ -1,14 +1,13 @@
 import { TypedArray } from "itk/Image";
-import * as THREE from "three";
+import { Vector3, Matrix3 } from "three";
 
 import { ITKMatrix } from "../../io";
-import { Vector } from "../vector";
 
 /**
  * The texture atlas generation expects the x- and y-axis to be inverted
  * and the z-axis to be non-inverted.
  */
-export const defaultDirection = new Vector([-1, -1, 1], false);
+export const defaultDirection = new Vector3(-1, -1, 1);
 
 /**
  * Converts an image array with unexpected orientation to the expected orientation.
@@ -26,17 +25,43 @@ export const unifyOrientation = (
   size: number[],
   components: number,
 ) => {
-  const direction =
-    dimensionality < 3
-      ? defaultDirection
-      : Vector.fromArray(
-          new THREE.Vector3()
-            .setScalar(1)
-            .applyMatrix3(new THREE.Matrix3().fromArray(orientation.data))
-            .round()
-            .multiply(new THREE.Vector3().fromArray(defaultDirection.toArray()))
-            .toArray(),
-        );
+  const axesIndices = new Vector3(0, 1, 2);
+  let axisMapping: Vector3;
+  let direction: Vector3;
+
+  if (dimensionality < 3) {
+    axisMapping = axesIndices;
+    direction = defaultDirection;
+  } else {
+    const orientationVectors: [Vector3, Vector3, Vector3] = [
+      new Vector3(),
+      new Vector3(),
+      new Vector3(),
+    ];
+
+    new Matrix3()
+      .fromArray(orientation.data)
+      .extractBasis(...orientationVectors);
+
+    orientationVectors.forEach((vec) => vec.round());
+
+    // create new axis mapping from the given orientation
+    axisMapping = new Vector3();
+    orientationVectors.forEach((vec, idx) => {
+      axisMapping.setComponent(
+        idx,
+        Math.abs(orientationVectors[idx].dot(axesIndices)),
+      );
+    });
+
+    // calculate actual axes inversion, based on the expected direction for the texture atlas
+    direction = new Vector3();
+    const dotVec = new Vector3(1, 1, 1);
+    orientationVectors.forEach((vec, idx) => {
+      direction.setComponent(idx, orientationVectors[idx].dot(dotVec));
+    });
+    direction.multiply(defaultDirection);
+  }
 
   const axisInversion = {
     x: direction.x < 0,
@@ -44,41 +69,67 @@ export const unifyOrientation = (
     z: direction.z < 0,
   };
 
-  if (!axisInversion.x && !axisInversion.y && !axisInversion.z) return data;
-
   const sliceCount = dimensionality === 2 ? 1 : size[2];
+  const newSize = [size[0], size[1], sliceCount];
+
+  const rowSize = size[0] * components;
+  const sliceSize = size[0] * size[1] * components;
+  const axisMultipliers = [components, rowSize, sliceSize];
 
   const unifiedData = new (data.constructor as new (
     size: number,
   ) => typeof data)(size[0] * size[1] * sliceCount * components);
 
-  for (let z = 0; z < sliceCount; z++) {
-    const originalZ = axisInversion.z ? sliceCount - (z + 1) : z;
+  let newIndex = 0;
 
-    const sliceSize = size[0] * size[1] * components;
-    const zOffset = z * sliceSize;
-    const originalZOffset = originalZ * sliceSize;
+  for (
+    let thirdAxisIdx = 0;
+    thirdAxisIdx < newSize[axisMapping.z];
+    thirdAxisIdx++
+  ) {
+    const originalThirdAxisIdx = axisInversion.z
+      ? newSize[axisMapping.z] - (thirdAxisIdx + 1)
+      : thirdAxisIdx;
 
-    for (let y = 0; y < size[1]; y++) {
-      const originalY = axisInversion.y ? size[1] - (y + 1) : y;
+    const originalThirdAxisOffset =
+      originalThirdAxisIdx * axisMultipliers[axisMapping.z];
 
-      const rowSize = size[0] * components;
-      const yOffset = y * rowSize;
-      const originalYOffset = originalY * rowSize;
+    for (
+      let secondAxisIndex = 0;
+      secondAxisIndex < newSize[axisMapping.y];
+      secondAxisIndex++
+    ) {
+      const originalSecondAxisIdx = axisInversion.y
+        ? newSize[axisMapping.y] - (secondAxisIndex + 1)
+        : secondAxisIndex;
 
-      for (let x = 0; x < size[0]; x++) {
-        const originalX = axisInversion.x ? size[0] - (x + 1) : x;
+      const originalSecondAxisOffset =
+        originalSecondAxisIdx * axisMultipliers[axisMapping.y];
 
-        const xOffset = x * components;
-        const originalXOffset = originalX * components;
+      for (
+        let firstAxisIdx = 0;
+        firstAxisIdx < newSize[axisMapping.x];
+        firstAxisIdx++
+      ) {
+        const originalFirstAxisIdx = axisInversion.x
+          ? newSize[axisMapping.x] - (firstAxisIdx + 1)
+          : firstAxisIdx;
+
+        const originalFirstAxisOffset =
+          originalFirstAxisIdx * axisMultipliers[axisMapping.x];
 
         for (let c = 0; c < components; c++) {
-          unifiedData[zOffset + yOffset + xOffset + c] =
-            data[originalZOffset + originalYOffset + originalXOffset + c];
+          unifiedData[newIndex] =
+            data[
+              originalFirstAxisOffset +
+                originalSecondAxisOffset +
+                originalThirdAxisOffset +
+                c
+            ];
+          newIndex++;
         }
       }
     }
   }
-
   return unifiedData;
 };
