@@ -17,7 +17,7 @@ import {
 } from "../../io";
 import { Vector } from "../vector";
 import { getPlaneAxes, getViewTypeInitials, ViewType } from "../view-types";
-import { unifyOrientation } from "./conversion";
+import { swapAxesForMetadata, unifyOrientation } from "./conversion";
 import { findVoxelInSlice } from "./iteration";
 
 import type { ISerializable } from "../types";
@@ -51,9 +51,13 @@ export class Image<T extends TypedArray = TypedArray>
       name: image.name,
       dimensionality: image.imageType.dimension,
       voxelCount:
-        image.imageType.dimension === 2 ? [...image.size, 1] : image.size,
+        image.imageType.dimension === 2
+          ? [...image.size, 1]
+          : swapAxesForMetadata(image.size, image.direction),
       voxelSpacing:
-        image.imageType.dimension === 2 ? [...image.spacing, 1] : image.spacing,
+        image.imageType.dimension === 2
+          ? [...image.spacing, 1]
+          : swapAxesForMetadata(image.spacing, image.direction),
       voxelType: image.imageType.pixelType,
       voxelComponents: image.imageType.components,
       voxelComponentType: image.imageType.componentType,

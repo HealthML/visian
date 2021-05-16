@@ -3,6 +3,44 @@ import { Vector3, Matrix3 } from "three";
 
 import { ITKMatrix } from "../../io";
 
+const getAxisMapping = (orientation: ITKMatrix) => {
+  const axesIndices = new Vector3(0, 1, 2);
+
+  const orientationVectors: [Vector3, Vector3, Vector3] = [
+    new Vector3(),
+    new Vector3(),
+    new Vector3(),
+  ];
+
+  new Matrix3().fromArray(orientation.data).extractBasis(...orientationVectors);
+
+  orientationVectors.forEach((vec) => vec.round());
+
+  // create new axis mapping from the given orientation
+  const axisMapping = new Vector3();
+  orientationVectors.forEach((vec, idx) => {
+    axisMapping.setComponent(
+      idx,
+      Math.abs(orientationVectors[idx].dot(axesIndices)),
+    );
+  });
+
+  return axisMapping;
+};
+
+export const swapAxesForMetadata = (
+  toSwap: number[],
+  orientation: ITKMatrix,
+) => {
+  const axisMapping = getAxisMapping(orientation);
+  const swappedMetadata = [
+    toSwap[axisMapping.x],
+    toSwap[axisMapping.y],
+    toSwap[axisMapping.z],
+  ];
+  return swappedMetadata;
+};
+
 /**
  * The texture atlas generation expects the x- and y-axis to be inverted
  * and the z-axis to be non-inverted.

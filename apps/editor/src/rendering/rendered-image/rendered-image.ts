@@ -5,6 +5,7 @@ import {
   ITKImage,
   readMedicalImage,
   ScreenAlignedQuad,
+  swapAxesForMetadata,
   TypedArray,
   unifyOrientation,
   Vector,
@@ -29,9 +30,13 @@ export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
       name: image.name,
       dimensionality: image.imageType.dimension,
       voxelCount:
-        image.imageType.dimension === 2 ? [...image.size, 1] : image.size,
+        image.imageType.dimension === 2
+          ? [...image.size, 1]
+          : swapAxesForMetadata(image.size, image.direction),
       voxelSpacing:
-        image.imageType.dimension === 2 ? [...image.spacing, 1] : image.spacing,
+        image.imageType.dimension === 2
+          ? [...image.spacing, 1]
+          : swapAxesForMetadata(image.spacing, image.direction),
       voxelType: image.imageType.pixelType,
       voxelComponents: image.imageType.components,
       voxelComponentType: image.imageType.componentType,
