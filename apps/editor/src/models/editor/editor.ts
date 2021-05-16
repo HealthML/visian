@@ -101,7 +101,22 @@ export class Editor implements ISerializable<EditorSnapshot> {
 
   public setImage(image: RenderedImage) {
     this.image = image;
-    this.annotation = new RenderedImage({
+    this.annotation = this.getNewAnnotationLayer();
+
+    this.tools.setActiveTool();
+    this.viewSettings.reset();
+    this.undoRedo.clear();
+
+    this.context?.persistImmediately();
+  }
+  public async importImage(imageFile: File) {
+    this.setImage(await RenderedImage.fromFile(imageFile));
+  }
+
+  public getNewAnnotationLayer() {
+    if (!this.image) return;
+
+    return new RenderedImage({
       name: `${this.image.name.split(".")[0]}_annotation`,
       dimensionality: this.image.dimensionality,
       origin: this.image.origin.toArray(),
@@ -109,14 +124,6 @@ export class Editor implements ISerializable<EditorSnapshot> {
       voxelCount: this.image.voxelCount.toArray(),
       voxelSpacing: this.image.voxelSpacing.toArray(),
     });
-    this.context?.persistImmediately();
-
-    this.tools.setActiveTool();
-    this.viewSettings.reset();
-    this.undoRedo.clear();
-  }
-  public async importImage(imageFile: File) {
-    this.setImage(await RenderedImage.fromFile(imageFile));
   }
 
   public setAnnotation(image: RenderedImage) {
@@ -125,9 +132,10 @@ export class Editor implements ISerializable<EditorSnapshot> {
       throw new Error("annotation-mismatch-error");
     }
     this.annotation = image;
-    this.context?.persistImmediately();
 
     this.undoRedo.clear();
+
+    this.context?.persistImmediately();
   }
   public async importAnnotation(imageFile: File) {
     this.setAnnotation(await RenderedImage.fromFile(imageFile));
@@ -197,8 +205,9 @@ export class Editor implements ISerializable<EditorSnapshot> {
   public async applySnapshot(snapshot: EditorSnapshot) {
     this.backgroundColor = snapshot.backgroundColor;
     this.image = snapshot.image && new RenderedImage(snapshot.image);
-    this.annotation =
-      snapshot.annotation && new RenderedImage(snapshot.annotation);
+    this.annotation = snapshot.annotation
+      ? new RenderedImage(snapshot.annotation)
+      : this.getNewAnnotationLayer();
     this.markers.inferAnnotatedSlices();
 
     if (snapshot.viewSettings) {
