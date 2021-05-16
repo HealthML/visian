@@ -132,15 +132,13 @@ export class RootStore implements ISerializable<RootSnapshot> {
   }
 
   public async rehydrate() {
+    this.shouldPersist = false;
     const tab = await new Tab().register();
 
     const theme = localStorage.getItem("theme");
     if (theme) this.setColorMode(theme as ColorMode, false);
 
-    if (!tab.isMainTab) {
-      this.shouldPersist = false;
-      return;
-    }
+    if (tab.isMainTab) return;
 
     const editorSnapshot = await this.config.storageBackend?.retrieve(
       "/editor",
