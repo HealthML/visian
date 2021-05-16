@@ -101,14 +101,7 @@ export class Editor implements ISerializable<EditorSnapshot> {
 
   public setImage(image: RenderedImage) {
     this.image = image;
-    this.annotation = new RenderedImage({
-      name: `${this.image.name.split(".")[0]}_annotation`,
-      dimensionality: this.image.dimensionality,
-      origin: this.image.origin.toArray(),
-      orientation: this.image.orientation,
-      voxelCount: this.image.voxelCount.toArray(),
-      voxelSpacing: this.image.voxelSpacing.toArray(),
-    });
+    this.annotation = this.getNewAnnotationLayer();
     this.context?.persistImmediately();
 
     this.tools.setActiveTool();
@@ -117,6 +110,19 @@ export class Editor implements ISerializable<EditorSnapshot> {
   }
   public async importImage(imageFile: File) {
     this.setImage(await RenderedImage.fromFile(imageFile));
+  }
+
+  public getNewAnnotationLayer() {
+    if (!this.image) return;
+
+    return new RenderedImage({
+      name: `${this.image.name.split(".")[0]}_annotation`,
+      dimensionality: this.image.dimensionality,
+      origin: this.image.origin.toArray(),
+      orientation: this.image.orientation,
+      voxelCount: this.image.voxelCount.toArray(),
+      voxelSpacing: this.image.voxelSpacing.toArray(),
+    });
   }
 
   public setAnnotation(image: RenderedImage) {
@@ -197,8 +203,9 @@ export class Editor implements ISerializable<EditorSnapshot> {
   public async applySnapshot(snapshot: EditorSnapshot) {
     this.backgroundColor = snapshot.backgroundColor;
     this.image = snapshot.image && new RenderedImage(snapshot.image);
-    this.annotation =
-      snapshot.annotation && new RenderedImage(snapshot.annotation);
+    this.annotation = snapshot.annotation
+      ? new RenderedImage(snapshot.annotation)
+      : this.getNewAnnotationLayer();
     this.markers.inferAnnotatedSlices();
 
     if (snapshot.viewSettings) {
