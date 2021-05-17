@@ -1,4 +1,5 @@
 import {
+  calculateNewOrientation,
   getTextureFromAtlas,
   Image,
   ImageSnapshot,
@@ -41,7 +42,10 @@ export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
       voxelComponents: image.imageType.components,
       voxelComponentType: image.imageType.componentType,
       origin: image.origin,
-      orientation: image.direction,
+      orientation:
+        image.imageType.dimension === 2
+          ? image.direction
+          : calculateNewOrientation(image.direction),
       data: unifyOrientation(
         image.data,
         image.direction,

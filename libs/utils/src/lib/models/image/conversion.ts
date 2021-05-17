@@ -3,9 +3,9 @@ import { Vector3, Matrix3 } from "three";
 
 import { ITKMatrix } from "../../io";
 
-const getAxisMapping = (orientation: ITKMatrix) => {
-  const axesIndices = new Vector3(0, 1, 2);
+const axesIndices = new Vector3(0, 1, 2);
 
+const getOrientationVecs = (orientation: ITKMatrix) => {
   const orientationVectors: [Vector3, Vector3, Vector3] = [
     new Vector3(),
     new Vector3(),
@@ -16,13 +16,14 @@ const getAxisMapping = (orientation: ITKMatrix) => {
 
   orientationVectors.forEach((vec) => vec.round());
 
+  return orientationVectors;
+};
+
+const getAxisMapping = (orientationVecs: [Vector3, Vector3, Vector3]) => {
   // create new axis mapping from the given orientation
   const axisMapping = new Vector3();
-  orientationVectors.forEach((vec, idx) => {
-    axisMapping.setComponent(
-      idx,
-      Math.abs(orientationVectors[idx].dot(axesIndices)),
-    );
+  orientationVecs.forEach((vec, idx) => {
+    axisMapping.setComponent(idx, Math.abs(vec.dot(axesIndices)));
   });
 
   return axisMapping;
@@ -32,13 +33,21 @@ export const swapAxesForMetadata = (
   toSwap: number[],
   orientation: ITKMatrix,
 ) => {
-  const axisMapping = getAxisMapping(orientation);
+  const orientationVecs = getOrientationVecs(orientation);
+  const axisMapping = getAxisMapping(orientationVecs);
   const swappedMetadata = [
     toSwap[axisMapping.x],
     toSwap[axisMapping.y],
     toSwap[axisMapping.z],
   ];
   return swappedMetadata;
+};
+
+export const calculateNewOrientation = (orientation: ITKMatrix) => {
+  const newOrientation = new Matrix3().fromArray(orientation.data).transpose();
+  const itkMatrix = new ITKMatrix(3, 3);
+  itkMatrix.data = newOrientation.toArray();
+  return itkMatrix;
 };
 
 /**
@@ -62,8 +71,8 @@ export const unifyOrientation = (
   dimensionality: number,
   size: number[],
   components: number,
+  fromITK = true,
 ) => {
-  const axesIndices = new Vector3(0, 1, 2);
   let axisMapping: Vector3;
   let direction: Vector3;
 
@@ -71,34 +80,29 @@ export const unifyOrientation = (
     axisMapping = axesIndices;
     direction = defaultDirection;
   } else {
-    const orientationVectors: [Vector3, Vector3, Vector3] = [
-      new Vector3(),
-      new Vector3(),
-      new Vector3(),
-    ];
+    const orientationVectors = getOrientationVecs(orientation);
 
-    new Matrix3()
-      .fromArray(orientation.data)
-      .extractBasis(...orientationVectors);
-
-    orientationVectors.forEach((vec) => vec.round());
-
-    // create new axis mapping from the given orientation
-    axisMapping = new Vector3();
-    orientationVectors.forEach((vec, idx) => {
-      axisMapping.setComponent(
-        idx,
-        Math.abs(orientationVectors[idx].dot(axesIndices)),
-      );
-    });
+    axisMapping = getAxisMapping(orientationVectors);
 
     // calculate actual axes inversion, based on the expected direction for the texture atlas
     direction = new Vector3();
-    const dotVec = new Vector3(1, 1, 1);
-    orientationVectors.forEach((vec, idx) => {
-      direction.setComponent(idx, orientationVectors[idx].dot(dotVec));
-    });
-    direction.multiply(defaultDirection);
+    if (fromITK) {
+      const dotVec = new Vector3(1, 1, 1);
+      orientationVectors.forEach((vec, idx) => {
+        direction.setComponent(idx, vec.dot(dotVec));
+      });
+      direction.multiply(defaultDirection);
+    } else {
+      const originalDirection = new Vector3();
+      orientationVectors.forEach((vec) => originalDirection.add(vec));
+      originalDirection.multiply(defaultDirection);
+
+      direction.set(
+        originalDirection.getComponent(axisMapping.x),
+        originalDirection.getComponent(axisMapping.y),
+        originalDirection.getComponent(axisMapping.z),
+      );
+    }
   }
 
   const axisInversion = {

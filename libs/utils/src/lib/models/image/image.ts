@@ -17,7 +17,11 @@ import {
 } from "../../io";
 import { Vector } from "../vector";
 import { getPlaneAxes, getViewTypeInitials, ViewType } from "../view-types";
-import { swapAxesForMetadata, unifyOrientation } from "./conversion";
+import {
+  calculateNewOrientation,
+  swapAxesForMetadata,
+  unifyOrientation,
+} from "./conversion";
 import { findVoxelInSlice } from "./iteration";
 
 import type { ISerializable } from "../types";
@@ -62,7 +66,10 @@ export class Image<T extends TypedArray = TypedArray>
       voxelComponents: image.imageType.components,
       voxelComponentType: image.imageType.componentType,
       origin: image.origin,
-      orientation: image.direction,
+      orientation:
+        image.imageType.dimension === 2
+          ? image.direction
+          : calculateNewOrientation(image.direction),
       data: unifyOrientation(
         image.data,
         image.direction,
@@ -356,19 +363,29 @@ export class Image<T extends TypedArray = TypedArray>
 
     image.name = this.name;
     image.origin = this.origin.toArray();
-    image.spacing = this.voxelSpacing.toArray();
-    image.direction = this.orientation;
-    image.size = this.voxelCount.toArray();
+    image.spacing =
+      this.dimensionality === 2
+        ? this.voxelSpacing.toArray()
+        : swapAxesForMetadata(this.voxelSpacing.toArray(), this.orientation);
+    image.direction =
+      this.dimensionality === 2
+        ? this.orientation
+        : calculateNewOrientation(this.orientation);
+    image.size =
+      this.dimensionality === 2
+        ? this.voxelCount.toArray()
+        : swapAxesForMetadata(this.voxelCount.toArray(), this.orientation);
 
     // Clone the data array to protect it from modifications
     // & enable hand-off to web workers
     image.data = this.getData();
     image.data = unifyOrientation(
       new (image.data.constructor as new (data: T) => T)(image.data),
-      image.direction,
-      image.imageType.dimension,
-      image.size,
-      image.imageType.components,
+      this.orientation,
+      this.dimensionality,
+      this.voxelCount.toArray(),
+      this.voxelComponents,
+      false,
     ) as T;
 
     return image;
