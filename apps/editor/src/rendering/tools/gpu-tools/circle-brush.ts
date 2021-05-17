@@ -48,7 +48,7 @@ export class CircleBrush extends UndoableTool implements DragTool {
     const y = dragPoint[yAxis];
 
     if (this.editor.tools.brushSizePixels === 0.5) {
-      const quadCircle = [
+      const circleQuad = [
         { x: 0, y: 0 },
         { x: 0, y: 1 },
         { x: 1, y: 0 },
@@ -59,7 +59,7 @@ export class CircleBrush extends UndoableTool implements DragTool {
       const pixelOffsetY = dragPoint.bottom ? -1 : 0;
 
       this.circleRenderer.renderCircles(
-        ...quadCircle.map((pixel) => ({
+        ...circleQuad.map((pixel) => ({
           x: x + pixel.x + pixelOffsetX,
           y: y + pixel.y + pixelOffsetY,
           value: this.value,

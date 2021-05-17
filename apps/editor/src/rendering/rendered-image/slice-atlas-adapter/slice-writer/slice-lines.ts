@@ -15,7 +15,7 @@ import { SliceScene } from "./types";
  * a texture atlas even if the view type does not correspond to the
  * atlas view type.
  */
-export class SliceLines extends SliceScene {
+export class SliceLines extends THREE.Scene implements SliceScene {
   private lines: THREE.LineSegments;
 
   private geometries = [
