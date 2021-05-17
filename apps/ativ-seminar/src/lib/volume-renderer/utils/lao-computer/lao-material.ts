@@ -71,6 +71,9 @@ export class LAOMaterial extends THREE.ShaderMaterial {
         },
       ),
       autorun(() => {
+        this.uniforms.uConeDirection.value = volumeRendererModel.cutAwayConeDirection.toArray();
+      }),
+      autorun(() => {
         this.uniforms.uTransferFunction.value =
           volumeRendererModel.transferFunction.type;
       }),

@@ -120,7 +120,10 @@ export class LAOComputer extends TiledRenderer {
   public setCameraPosition(position: THREE.Vector3) {
     this.laoMaterial.setCameraPosition(position);
 
-    if (this.volumeRendererModel.transferFunction.updateLAOOnCameraMove) {
+    if (
+      this.volumeRendererModel.transferFunction.updateLAOOnCameraMove &&
+      this.volumeRendererModel.isConeLinkedToCamera
+    ) {
       this.setDirty();
     }
   }
