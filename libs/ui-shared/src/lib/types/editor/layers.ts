@@ -1,5 +1,24 @@
 import type { Image, ViewType, Voxel, VoxelWithValue } from "@visian/utils";
-import type { Matrix } from "three";
+import type { Matrix4 } from "three";
+
+/**
+ * The supported layer blending modes
+ * @see https://helpx.adobe.com/photoshop/using/blending-modes.html
+ */
+export type BlendMode =
+  | "COLOR"
+  | "DARKEN"
+  | "DIFFERENCE"
+  | "DIVIDE"
+  | "HUE"
+  | "LIGHTEN"
+  | "LUMINOSITY"
+  | "MULTIPLY"
+  | "NORMAL"
+  | "OVERLAY"
+  | "SATURATION"
+  | "SCREEN"
+  | "SUBTRACT";
 
 /** A generic layer. */
 export interface ILayer {
@@ -14,8 +33,11 @@ export interface ILayer {
    */
   title: string;
 
-  /** The blend mode used to combine this layer on top of the ones below. */
-  blendMode?: string;
+  /**
+   * The blend mode used to combine this layer on top of the ones below.
+   * Defaults to `"NORMAL"`.
+   */
+  blendMode?: BlendMode;
   /**
    * The color used to render layers without intrinsic color information.
    * This is also used to color the layer icon in the layer menu.
@@ -27,7 +49,7 @@ export interface ILayer {
   opacity: number;
 
   /** The layer's transform matrix used to position it during rendering. */
-  transformation?: Matrix;
+  transformation?: Matrix4;
 }
 
 /**

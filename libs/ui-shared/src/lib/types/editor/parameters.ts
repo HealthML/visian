@@ -1,3 +1,4 @@
+import type { TooltipPosition } from "../../components";
 import type { ScaleType } from "./types";
 
 /** A generic setting that corresponds to a (procedurally rendered) UI control. */
@@ -23,6 +24,10 @@ export interface IParameter<T = unknown> {
    * If set, overrides the `label`.
    */
   labelTx?: string;
+
+  tooltip?: string;
+  tooltipTx?: string;
+  tooltipPosition?: TooltipPosition;
 
   /** The parameter's current value. */
   value: T;
@@ -63,4 +68,26 @@ export interface INumberParameter extends IParameter<number> {
 /** A boolean parameter, typically displayed as a checkbox or switch. */
 export interface IBooleanParameter extends IParameter<boolean> {
   kind: "bool";
+}
+
+/** A text parameter, typically displayed as a text field. */
+export interface IStringParameter extends IParameter<string> {
+  kind: "string";
+}
+
+/** A class selection parameter, typically displayed as a select field or switch. */
+export interface IEnumParameter<T> extends IParameter<T> {
+  kind: "enum";
+
+  /** The options to choose from. */
+  options: {
+    label?: string;
+    labelTx?: string;
+
+    tooltip?: string;
+    tooltipTx?: string;
+    tooltipPosition?: TooltipPosition;
+
+    value: T;
+  }[];
 }

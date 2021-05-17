@@ -8,6 +8,7 @@ export interface DragPoint extends Voxel {
   /** Whether the cursor is on the bottom half of the pixel. */
   bottom: boolean;
 }
+
 export interface ITool {
   /**
    * The tool's name.
