@@ -1,11 +1,11 @@
+import type { ScaleType } from "../../types";
+
 export interface PointerCoordinates {
   clientX: number;
   clientY: number;
 }
 
 export type RoundMethod = "floor" | "ceil" | "round";
-
-export type ScaleType = "linear" | "quadratic";
 
 export type SerializationMethod = "none" | "block" | "push";
 
