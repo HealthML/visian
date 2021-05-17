@@ -59,6 +59,9 @@ class VolumeMaterial extends THREE.ShaderMaterial implements IDisposable {
 
     this.reactionDisposers.push(
       autorun(() => {
+        this.uniforms.uConeDirection.value = volumeRenderer.model.cutAwayConeDirection.toArray();
+      }),
+      autorun(() => {
         this.uniforms.uUseFocus.value = volumeRenderer.model.useFocusVolume;
       }),
       autorun(() => {

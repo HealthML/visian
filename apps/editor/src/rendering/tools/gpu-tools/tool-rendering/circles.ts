@@ -30,7 +30,7 @@ export class Circles extends THREE.Scene implements IDisposable {
   }
 
   /**
-   * Ensures this.mesh can fit @param count many circles.
+   * Ensures `this.mesh` can fit `count` many circles.
    * Creates a new instanced mesh if necesssary.
    */
   private ensureCirclesFit(count: number) {

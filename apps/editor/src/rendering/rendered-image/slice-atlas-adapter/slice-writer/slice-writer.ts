@@ -81,7 +81,7 @@ export class SliceWriter {
     }
 
     renderTargets.forEach((renderTarget, index) => {
-      if (sliceData !== undefined && !(sliceData instanceof Uint8Array)) {
+      if (sliceData && !(sliceData instanceof Uint8Array)) {
         scene.setOverrideTexture(sliceData[index]);
       }
 
@@ -95,7 +95,7 @@ export class SliceWriter {
       renderer.autoClear = true;
       renderer.setRenderTarget(null);
 
-      if (sliceData !== undefined && !(sliceData instanceof Uint8Array)) {
+      if (sliceData && !(sliceData instanceof Uint8Array)) {
         scene.setOverrideTexture();
       }
     });

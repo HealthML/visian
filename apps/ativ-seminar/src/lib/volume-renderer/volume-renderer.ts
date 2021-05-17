@@ -141,6 +141,14 @@ export class VolumeRenderer implements IDisposable {
       reaction(() => this.model.cutAwayConeAngle, this.lazyRender),
       reaction(() => this.model.customTFTexture, this.lazyRender),
       reaction(() => this.model.transferFunction, this.lazyRender),
+      reaction(
+        () => this.model.isConeLinkedToCamera,
+        (value) => {
+          if (value) {
+            this.onCameraMove();
+          }
+        },
+      ),
     );
 
     this.onCameraMove();
@@ -236,9 +244,11 @@ export class VolumeRenderer implements IDisposable {
     if (
       !this.renderer.xr.isPresenting &&
       ((this.model.lightingMode.type === LightingModeType.LAO &&
-        this.model.transferFunction.updateLAOOnCameraMove) ||
+        this.model.transferFunction.updateLAOOnCameraMove &&
+        this.model.isConeLinkedToCamera) ||
         (this.model.lightingMode.type === LightingModeType.Phong &&
-          this.model.transferFunction.updateNormalsOnCameraMove) ||
+          this.model.transferFunction.updateNormalsOnCameraMove &&
+          this.model.isConeLinkedToCamera) ||
         this.model.lightingTimeout)
     ) {
       this.model.onTransferFunctionChange();
@@ -262,6 +272,11 @@ export class VolumeRenderer implements IDisposable {
     this.volume.setCameraPosition(this.workingVector);
     this.gradientComputer.setCameraPosition(this.workingVector);
     this.laoComputer.setCameraPosition(this.workingVector);
+
+    if (this.model.isConeLinkedToCamera) {
+      const { x, y, z } = this.workingVector;
+      this.model.setCutAwayConeDirection(x, y, z);
+    }
   }
 
   private onFlyControlsLock = () => {
@@ -325,6 +340,9 @@ export class VolumeRenderer implements IDisposable {
 
   public async enterXR() {
     if (this.renderer.xr.getSession()) return;
+
+    this.model.setIsConeLinkedToCamera(false);
+
     const sessionInit = { optionalFeatures: ["local-floor"] };
     const session = await (navigator as THREE.Navigator).xr?.requestSession(
       "immersive-vr",

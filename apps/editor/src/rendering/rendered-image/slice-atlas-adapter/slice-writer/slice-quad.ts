@@ -9,7 +9,7 @@ import { SliceScene } from "./types";
  * texture atlas. The view type of the slice has to match the texture
  * atlas view type.
  */
-export class SliceQuad extends SliceScene {
+export class SliceQuad extends THREE.Scene implements SliceScene {
   public readonly camera: THREE.Camera;
 
   private quad: THREE.Mesh;

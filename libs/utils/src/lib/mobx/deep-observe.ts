@@ -98,7 +98,7 @@ export const deepObserve = <T>(
           change.newValue,
           parent,
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          `${(change as any).name || ""}${(change as any).index}`,
+          `${(change as any).name || ""}${(change as any).index ?? ""}`,
         );
         break;
       case "remove": // object
@@ -108,8 +108,8 @@ export const deepObserve = <T>(
       // Array changes
       case "splice":
         change.removed.map(unobserveRecursively);
-        change.added.forEach((value, idx) =>
-          observeRecursively(value, parent, `${change.index + idx}`),
+        change.added.forEach((value, index) =>
+          observeRecursively(value, parent, `${change.index + index}`),
         );
         // update paths
         for (
@@ -134,7 +134,7 @@ export const deepObserve = <T>(
     const path = buildPath({
       parent: entry,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      path: `${(change as any).name || ""}${(change as any).index}`,
+      path: `${(change as any).name || ""}${(change as any).index ?? ""}`,
     });
     if (
       (config.include &&

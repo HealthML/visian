@@ -10,15 +10,15 @@ float sdCone(vec3 p, float angle) {
 
 vec3 transformToCutawaySpace(vec3 volumeCoords) {
   // TODO: Why does y have to be flipped?
-  vec3 normalizedCamera = normalize(vec3(uCameraPosition.x, -uCameraPosition.y, uCameraPosition.z));
+  vec3 normalizedConeDirecion = normalize(vec3(uConeDirection.x, -uConeDirection.y, uConeDirection.z));
   vec3 normalizedConeAxis = vec3(0.0, 1.0, 0.0);
 
   /**
   * Taken from https://gist.github.com/kevinmoran/b45980723e53edeb8a5a43c49f134724
   */
-  vec3 axis = cross( normalizedCamera, normalizedConeAxis );
+  vec3 axis = cross( normalizedConeDirecion, normalizedConeAxis );
 
-  float cosA = dot( normalizedCamera, normalizedConeAxis );
+  float cosA = dot( normalizedConeDirecion, normalizedConeAxis );
   float k = 1.0 / (1.0 + cosA);
 
   mat3 rotation = mat3( 

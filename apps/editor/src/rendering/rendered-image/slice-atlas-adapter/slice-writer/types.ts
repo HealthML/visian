@@ -1,5 +1,5 @@
 import * as THREE from "three";
 
-export abstract class SliceScene extends THREE.Scene {
-  abstract setOverrideTexture(texture?: THREE.Texture): void;
+export interface SliceScene extends THREE.Scene {
+  setOverrideTexture(texture?: THREE.Texture): void;
 }

@@ -132,12 +132,12 @@ export class RootStore implements ISerializable<RootSnapshot> {
   }
 
   public async rehydrate() {
+    this.shouldPersist = false;
     const tab = await new Tab().register();
 
     const theme = localStorage.getItem("theme");
     if (theme) this.setColorMode(theme as ColorMode, false);
 
-    this.shouldPersist = Boolean(tab.isMainTab);
     if (!tab.isMainTab) return;
 
     const editorSnapshot = await this.config.storageBackend?.retrieve(
@@ -146,6 +146,7 @@ export class RootStore implements ISerializable<RootSnapshot> {
     if (editorSnapshot) {
       await this.editor.applySnapshot(editorSnapshot as EditorSnapshot);
     }
+    this.shouldPersist = true;
   }
 
   public destroy = async () => {

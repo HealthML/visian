@@ -34,7 +34,7 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
     "/isDrawing",
   ];
 
-  public activeTool = ToolType.Outline;
+  public activeTool = ToolType.Brush;
 
   public isCursorOverDrawableArea = false;
   public isCursorOverFloatingUI = false;

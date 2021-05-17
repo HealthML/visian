@@ -1,3 +1,4 @@
+import { Vector } from "@visian/utils";
 import { action, computed, makeObservable, observable } from "mobx";
 import * as THREE from "three";
 import tc from "tinycolor2";
@@ -21,7 +22,7 @@ export class VolumeRendererModel {
   public backgroundValue = 0;
   public useFocusVolume = false;
   public focusColor = "rgba(255, 255, 255, 1)";
-  public transferFunction = transferFunctions[TransferFunctionType.Density];
+  public transferFunction = transferFunctions[TransferFunctionType.FCCutaway];
   public lightingMode = lightingModes[LightingModeType.LAO];
   public suppressedLightingMode?: LightingMode;
   public laoIntensity = 1;
@@ -31,6 +32,8 @@ export class VolumeRendererModel {
   public edgeRangeLimits: [number, number] = [0.1, 1];
   public rangeLimits: [number, number] = this.edgeRangeLimits;
   public cutAwayConeAngle = 1;
+  public cutAwayConeDirection = new Vector([1, 0, 0]);
+  public isConeLinkedToCamera = true;
   public customTFTexture?: THREE.Texture;
 
   public lightingTimeout?: NodeJS.Timer;
@@ -52,7 +55,10 @@ export class VolumeRendererModel {
       contextOpacity: observable,
       rangeLimits: observable,
       cutAwayConeAngle: observable,
+      cutAwayConeDirection: observable,
+      isConeLinkedToCamera: observable,
       customTFTexture: observable.ref,
+
       setImage: action,
       setFocus: action,
       setGradientHistogram: action,
@@ -66,6 +72,8 @@ export class VolumeRendererModel {
       setContextOpacity: action,
       setRangeLimits: action,
       setCutAwayConeAngle: action,
+      setCutAwayConeDirection: action,
+      setIsConeLinkedToCamera: action,
       setCustomTFTexture: action,
       setSuppressedLightingMode: action,
     });
@@ -186,6 +194,18 @@ export class VolumeRendererModel {
     this.onTransferFunctionChange();
 
     this.cutAwayConeAngle = radians;
+  };
+
+  public setCutAwayConeDirection = (x: number, y: number, z: number) => {
+    if (!this.isConeLinkedToCamera) this.onTransferFunctionChange();
+
+    this.cutAwayConeDirection.set(x, y, z);
+  };
+
+  public setIsConeLinkedToCamera = (value = true) => {
+    if (value) this.onTransferFunctionChange();
+
+    this.isConeLinkedToCamera = value;
   };
 
   protected setCustomTFTexture(texture: THREE.Texture) {
