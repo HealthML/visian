@@ -25,6 +25,9 @@ export interface ILayer {
   /** The type of layer. */
   kind: string;
 
+  /** `true` for layers that hold annotation information. */
+  isAnnotation: boolean;
+
   /** The layer's UUID. */
   id: string;
   /**
