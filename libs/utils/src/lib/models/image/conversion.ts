@@ -1,10 +1,10 @@
 import { TypedArray } from "itk/Image";
-import { Vector3, Matrix3 } from "three";
+import * as THREE from "three";
 
 import { ITKMatrix } from "../../io";
 
 /** Vector of the indices of x, y, z axis for calculations. */
-const axesIndices = new Vector3(0, 1, 2);
+const axesIndices = new THREE.Vector3(0, 1, 2);
 
 /**
  * Extracts the orientation for each axis as a single vector.
@@ -12,13 +12,15 @@ const axesIndices = new Vector3(0, 1, 2);
  * @returns An array of Vector3 representing the orientations of x, y, z respectively.
  */
 const getOrientationVecs = (orientation: ITKMatrix) => {
-  const orientationVectors: [Vector3, Vector3, Vector3] = [
-    new Vector3(),
-    new Vector3(),
-    new Vector3(),
+  const orientationVectors: [THREE.Vector3, THREE.Vector3, THREE.Vector3] = [
+    new THREE.Vector3(),
+    new THREE.Vector3(),
+    new THREE.Vector3(),
   ];
 
-  new Matrix3().fromArray(orientation.data).extractBasis(...orientationVectors);
+  new THREE.Matrix3()
+    .fromArray(orientation.data)
+    .extractBasis(...orientationVectors);
 
   orientationVectors.forEach((vec) => vec.round());
 
@@ -30,8 +32,10 @@ const getOrientationVecs = (orientation: ITKMatrix) => {
  * @param orientationVecs An array of Vector3 representing the orientations of x, y, z respectively.
  * @returns A Vector3 whose components map the respective axis to the actual axis index.
  */
-const getAxisMapping = (orientationVecs: [Vector3, Vector3, Vector3]) => {
-  const axisMapping = new Vector3();
+const getAxisMapping = (
+  orientationVecs: [THREE.Vector3, THREE.Vector3, THREE.Vector3],
+) => {
+  const axisMapping = new THREE.Vector3();
   orientationVecs.forEach((vec, idx) => {
     axisMapping.setComponent(idx, Math.abs(vec.dot(axesIndices)));
   });
@@ -68,7 +72,9 @@ export const swapAxesForMetadata = (
  * @returns A matrix containing the orientation the image will have after {@link unifyOrientation}.
  */
 export const calculateNewOrientation = (orientation: ITKMatrix) => {
-  const newOrientation = new Matrix3().fromArray(orientation.data).transpose();
+  const newOrientation = new THREE.Matrix3()
+    .fromArray(orientation.data)
+    .transpose();
   const itkMatrix = new ITKMatrix(3, 3);
   itkMatrix.data = newOrientation.toArray();
   return itkMatrix;
@@ -78,7 +84,7 @@ export const calculateNewOrientation = (orientation: ITKMatrix) => {
  * The texture atlas generation expects the x- and y-axis to be inverted
  * and the z-axis to be non-inverted.
  */
-export const defaultDirection = new Vector3(-1, -1, 1);
+export const defaultDirection = new THREE.Vector3(-1, -1, 1);
 
 /**
  * Converts an image array with unexpected orientation to the expected orientation.
@@ -99,8 +105,8 @@ export const unifyOrientation = (
   components: number,
   toInternal = true,
 ) => {
-  let axisMapping: Vector3;
-  let direction: Vector3;
+  let axisMapping: THREE.Vector3;
+  let direction: THREE.Vector3;
 
   if (dimensionality < 3) {
     axisMapping = axesIndices;
@@ -111,15 +117,15 @@ export const unifyOrientation = (
     axisMapping = getAxisMapping(orientationVectors);
 
     // Calculate actual axes inversion, based on the expected direction for the texture atlas.
-    direction = new Vector3();
+    direction = new THREE.Vector3();
     if (toInternal) {
-      const dotVec = new Vector3(1, 1, 1);
+      const dotVec = new THREE.Vector3(1, 1, 1);
       orientationVectors.forEach((vec, idx) => {
         direction.setComponent(idx, vec.dot(dotVec));
       });
       direction.multiply(defaultDirection);
     } else {
-      const originalDirection = new Vector3();
+      const originalDirection = new THREE.Vector3();
       orientationVectors.forEach((vec) => originalDirection.add(vec));
       originalDirection.multiply(defaultDirection);
 
