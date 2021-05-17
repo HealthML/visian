@@ -2,7 +2,7 @@ import type React from "react";
 
 export interface DropZoneProps extends React.HTMLAttributes<HTMLDivElement> {
   /** An event handler that is called after a successful file drop. */
-  onFileDrop?: (files: FileList) => void;
+  onFileDrop?: (files: FileList, event: React.DragEvent) => void;
 
   /** An optional label to display that indicates the drop action (preceeds `children`). */
   label?: string;

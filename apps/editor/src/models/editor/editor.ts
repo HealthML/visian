@@ -113,7 +113,7 @@ export class Editor implements ISerializable<EditorSnapshot> {
 
     this.context?.persistImmediately();
   }
-  public async importImage(imageFile: File) {
+  public async importImage(imageFile: File | File[]) {
     this.setImage(await RenderedImage.fromFile(imageFile));
   }
 

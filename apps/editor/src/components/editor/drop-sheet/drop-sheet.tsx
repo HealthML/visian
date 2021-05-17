@@ -29,11 +29,45 @@ export const DropSheet: React.FC<DropSheetProps> = observer(
 
     const [isLoadingImage, setIsLoadingImage] = useState(false);
     const importImage = useCallback(
-      (files: FileList) => {
+      (files: FileList, event: React.DragEvent) => {
         (async () => {
           setIsLoadingImage(true);
           try {
-            await store?.editor.importImage(files[0]);
+            const item = event.dataTransfer.items[0];
+            const entry = item?.webkitGetAsEntry();
+            const dirFiles: File[] = [];
+            if (entry && entry.isDirectory) {
+              const dirReader = entry.createReader();
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              const entries = await new Promise<any[]>((resolve) => {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                dirReader.readEntries((result: any[]) => {
+                  resolve(result);
+                });
+              });
+
+              const promises: Promise<void>[] = [];
+              const { length } = entries;
+              for (let i = 0; i < length; i++) {
+                if (entries[i].isFile) {
+                  promises.push(
+                    new Promise((resolve) => {
+                      entries[i].file((file: File) => {
+                        dirFiles.push(file);
+                        resolve();
+                      });
+                    }),
+                  );
+                }
+              }
+              await Promise.all(promises);
+            }
+
+            if (dirFiles.length) {
+              await store?.editor.importImage(dirFiles);
+            } else {
+              await store?.editor.importImage(files[0]);
+            }
             store?.setError();
           } catch (error) {
             store?.setError({
