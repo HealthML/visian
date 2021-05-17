@@ -56,11 +56,11 @@ export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
     });
   }
 
-  public static async fromFile(file: File) {
+  public static async fromFile(file: File | File[]) {
     const renderedImage = RenderedImage.fromITKImage(
       await readMedicalImage(file),
     );
-    renderedImage.name = file.name;
+    renderedImage.name = Array.isArray(file) ? file[0]?.name || "" : file.name;
     return renderedImage;
   }
 

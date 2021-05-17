@@ -65,7 +65,7 @@ export const DropZone: React.FC<DropZoneProps> = (props) => {
       event.preventDefault();
       setIsDraggedOver(false);
       if (onDrop) onDrop(event);
-      if (onFileDrop) onFileDrop(event.dataTransfer.files);
+      if (onFileDrop) onFileDrop(event.dataTransfer.files, event);
     },
     [onDrop, onFileDrop],
   );

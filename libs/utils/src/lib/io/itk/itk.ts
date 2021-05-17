@@ -60,11 +60,13 @@ export const readZippedMedicalImage = async (file: File) => {
  * Returns a parsed medical image from the given file (including zipped DICOM series).
  * Throws an error if the given file cannot be parsed.
  */
-export const readMedicalImage = async (file: File) => {
+export const readMedicalImage = async (file: File | File[]) => {
   try {
-    const image = await (file.name.endsWith(".zip")
-      ? readZippedMedicalImage(file)
-      : readSingleMedicalImage(file));
+    const image = Array.isArray(file)
+      ? await readDICOMSeries(file)
+      : await (file.name.endsWith(".zip")
+          ? readZippedMedicalImage(file)
+          : readSingleMedicalImage(file));
 
     if (!image) throw new Error("image-loading-error");
     return image;
