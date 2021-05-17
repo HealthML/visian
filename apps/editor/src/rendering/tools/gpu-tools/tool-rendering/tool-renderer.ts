@@ -9,11 +9,15 @@ import { ToolCamera } from "./tool-camera";
 
 export class ToolRenderer {
   private circlesToRender: Circle[] = [];
+  private shapesToRender: THREE.Mesh[] = [];
 
   private camera: ToolCamera;
+  private shapeScene = new THREE.Scene();
 
   private circles: Circles;
   private renderTargets: THREE.WebGLRenderTarget[] = [];
+
+  private renderCallbacks: (() => void)[] = [];
 
   private disposers: IDisposer[] = [];
 
@@ -81,19 +85,36 @@ export class ToolRenderer {
   };
 
   public render() {
-    if (!this.circlesToRender.length) return;
+    const circles = this.circlesToRender.length;
+    const shapes = this.shapesToRender.length;
+
+    if (!circles && !shapes) return;
 
     const { renderers, annotation } = this.editor;
     if (!renderers || !annotation) return;
 
-    this.circles.setCircles(this.circlesToRender);
-    this.circlesToRender = [];
+    if (circles) {
+      this.circles.setCircles(this.circlesToRender);
+      this.circlesToRender = [];
+    }
+
+    if (shapes) {
+      this.shapeScene.remove(...this.shapeScene.children);
+      this.shapeScene.add(...this.shapesToRender);
+      this.shapesToRender = [];
+    }
 
     renderers.forEach((renderer, index) => {
       renderer.setRenderTarget(this.renderTargets[index]);
       renderer.autoClear = false;
 
-      renderer.render(this.circles, this.camera);
+      if (circles) {
+        renderer.render(this.circles, this.camera);
+      }
+
+      if (shapes) {
+        renderer.render(this.shapeScene, this.camera);
+      }
 
       renderer.autoClear = true;
       renderer.setRenderTarget(null);
@@ -106,10 +127,29 @@ export class ToolRenderer {
       this.editor.viewSettings.selectedVoxel[orthogonalAxis],
       this.textures,
     );
+
+    this.renderCallbacks.forEach((callback) => callback());
+    this.renderCallbacks = [];
   }
 
   public renderCircles(...circles: Circle[]) {
     this.circlesToRender.push(...circles);
+  }
+
+  public renderShape(geometry: THREE.ShapeGeometry, material?: THREE.Material) {
+    this.shapesToRender.push(
+      new THREE.Mesh(geometry, material || new THREE.MeshBasicMaterial()),
+    );
+  }
+
+  public waitForRender() {
+    if (!this.circlesToRender.length && !this.shapesToRender.length) {
+      return Promise.resolve();
+    }
+
+    return new Promise<void>((resolve) => {
+      this.renderCallbacks.push(resolve);
+    });
   }
 
   private get textures() {

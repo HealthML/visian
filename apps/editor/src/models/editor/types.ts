@@ -5,4 +5,6 @@ export enum ToolType {
   Eraser = 3,
   SmartBrush = 4,
   SmartEraser = 5,
+  Outline = 6,
+  OutlineEraser = 7,
 }

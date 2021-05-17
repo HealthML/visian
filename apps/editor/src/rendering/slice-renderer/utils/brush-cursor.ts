@@ -3,7 +3,7 @@ import { autorun } from "mobx";
 import * as THREE from "three";
 
 import { Editor } from "../../../models";
-import { brushCursor as theme } from "../../../theme";
+import { toolOverlays as theme } from "../../../theme";
 
 export const get2x2BrushCursorPoints = () => [
   new THREE.Vector3(0, 0, 0),

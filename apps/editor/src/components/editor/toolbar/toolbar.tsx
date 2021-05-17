@@ -132,6 +132,16 @@ export const Toolbar: React.FC = observer(() => {
         onContextMenu={preventDefault}
       />
       <Tool
+        icon="outline"
+        tooltipTx="outline-tool"
+        showTooltip={!isModalOpen || activeTool !== ToolType.Outline}
+        activeTool={activeTool}
+        value={ToolType.Outline}
+        ref={activeTool === ToolType.Outline ? setButtonRef : undefined}
+        onPress={setActiveTool}
+        onContextMenu={preventDefault}
+      />
+      <Tool
         icon="erase"
         tooltipTx="pixel-eraser"
         showTooltip={!isModalOpen || activeTool !== ToolType.Eraser}
@@ -151,7 +161,8 @@ export const Toolbar: React.FC = observer(() => {
         isOpen={
           isModalOpen &&
           activeTool !== ToolType.Navigate &&
-          activeTool !== ToolType.Crosshair
+          activeTool !== ToolType.Crosshair &&
+          activeTool !== ToolType.Outline
         }
         labelTx={
           activeTool === ToolType.SmartBrush

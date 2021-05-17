@@ -16,6 +16,7 @@ export { ReactComponent as magicBrush } from "./magic-brush.svg";
 export { ReactComponent as menu } from "./menu.svg";
 export { ReactComponent as middleMouse } from "./middle-mouse.svg";
 export { ReactComponent as moveTool } from "./move-tool.svg";
+export { ReactComponent as outline } from "./outline.svg";
 export { ReactComponent as pixelBrush } from "./pixel-brush.svg";
 export { ReactComponent as plusIcon } from "./plus-icon.svg";
 export { ReactComponent as redo } from "./redo.svg";

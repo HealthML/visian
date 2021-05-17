@@ -157,6 +157,10 @@ export class SliceRenderer implements IDisposable {
       : this.slices[viewType].brushCursor;
   }
 
+  public getOutline(viewType = this.editor.viewSettings.mainViewType) {
+    return this.slices[viewType].outline;
+  }
+
   private resize = () => {
     this._renderers[0].setSize(window.innerWidth, window.innerHeight);
 
