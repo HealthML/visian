@@ -8,15 +8,19 @@ import {
 } from "@visian/utils";
 import { action, computed, makeObservable, observable } from "mobx";
 import * as THREE from "three";
+import {
+  ToolType,
+  Editor,
+  StoreContext,
+  SliceUndoRedoCommand,
+  AtlasUndoRedoCommand,
+} from "../../models";
+import { RenderedImage } from "../rendered-image";
+import { getPositionWithinPixel } from "../slice-renderer";
+import { CircleBrush, ToolRenderer } from "./gpu-tools";
+import { SmartBrush } from "./cpu-brush";
 
-import { getPositionWithinPixel, RenderedImage } from "../../../rendering";
-import { StoreContext } from "../../types";
-import { Editor } from "../editor";
-import { ToolType } from "../types";
-import { AtlasUndoRedoCommand, SliceUndoRedoCommand } from "../undo-redo";
-import { Brush } from "./brush";
-import { SmartBrush } from "./smart-brush";
-import { DragPoint } from "./types";
+import { DragPoint, DragTool } from "./types";
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface EditorToolsSnapshot {}
@@ -43,38 +47,22 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
   public smartBrushNeighborThreshold = 6;
   public smartBrushSeedThreshold = 10;
 
-  private brush?: Brush;
-  private eraser?: Brush;
+  private circleRenderer: ToolRenderer;
+
+  private brush?: CircleBrush;
+  private eraser?: CircleBrush;
   private smartBrush?: SmartBrush;
   private smartEraser?: SmartBrush;
 
   /** A map of the tool types to their corresponding brushes. */
-  private brushMap: Partial<Record<ToolType, Brush>>;
+  private brushMap: Partial<Record<ToolType, DragTool>>;
   /**
    * A map of the tool types to their corresponding alternative brushes.
    * This is used for e.g. right-click or back of pen interaction.
    */
-  protected altBrushMap: Partial<Record<ToolType, Brush>>;
+  protected altBrushMap: Partial<Record<ToolType, DragTool>>;
 
   constructor(protected editor: Editor, protected context?: StoreContext) {
-    this.brush = new Brush(this.editor);
-    this.eraser = new Brush(this.editor, 0);
-    this.smartBrush = new SmartBrush(this.editor);
-    this.smartEraser = new SmartBrush(this.editor, 0);
-
-    this.brushMap = {
-      [ToolType.Brush]: this.brush,
-      [ToolType.Eraser]: this.eraser,
-      [ToolType.SmartBrush]: this.smartBrush,
-      [ToolType.SmartEraser]: this.smartEraser,
-    };
-    this.altBrushMap = {
-      [ToolType.Brush]: this.eraser,
-      [ToolType.Eraser]: this.brush,
-      [ToolType.SmartBrush]: this.smartEraser,
-      [ToolType.SmartEraser]: this.smartBrush,
-    };
-
     makeObservable<
       this,
       "brushWidthScreen" | "lockedBrushSizePixels" | "setIsDrawing"
@@ -106,6 +94,26 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
       resetBrushSize: action,
       resetSmartBrush: action,
     });
+
+    this.circleRenderer = new ToolRenderer(editor);
+
+    this.brush = new CircleBrush(editor, this.circleRenderer);
+    this.eraser = new CircleBrush(editor, this.circleRenderer, 0);
+    this.smartBrush = new SmartBrush(editor);
+    this.smartEraser = new SmartBrush(editor, 0);
+
+    this.brushMap = {
+      [ToolType.Brush]: this.brush,
+      [ToolType.Eraser]: this.eraser,
+      [ToolType.SmartBrush]: this.smartBrush,
+      [ToolType.SmartEraser]: this.smartEraser,
+    };
+    this.altBrushMap = {
+      [ToolType.Brush]: this.eraser,
+      [ToolType.Eraser]: this.brush,
+      [ToolType.SmartBrush]: this.smartEraser,
+      [ToolType.SmartEraser]: this.smartBrush,
+    };
   }
 
   public get canDraw() {
@@ -150,8 +158,17 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
     );
   }
 
+  public render() {
+    this.circleRenderer.render();
+  }
+
   public setActiveTool(tool = this.activeTool) {
     if (this.isDrawing) return;
+
+    // Temporary fix so that brush & eraser don't overwrite smart brush edits.
+    if ([ToolType.Brush, ToolType.Eraser].includes(tool)) {
+      this.circleRenderer.readCurrentSlice();
+    }
 
     if (tool === ToolType.Crosshair && !this.editor.isIn3DMode) {
       if (this.activeTool === ToolType.Crosshair) {
@@ -262,6 +279,8 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
       new SliceUndoRedoCommand(image, viewType, slice, oldSliceData),
     );
 
+    this.onSliceChanged();
+
     this.editor.markers.inferAnnotatedSlice(image, slice, viewType, true);
   };
 
@@ -277,7 +296,14 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
     this.editor.undoRedo.addCommand(
       new AtlasUndoRedoCommand(image, oldAtlas, emptyAtlas),
     );
+
+    this.onSliceChanged();
+
     this.editor.markers.clear();
+  }
+
+  public onSliceChanged() {
+    this.circleRenderer.readCurrentSlice();
   }
 
   public handleEvent(

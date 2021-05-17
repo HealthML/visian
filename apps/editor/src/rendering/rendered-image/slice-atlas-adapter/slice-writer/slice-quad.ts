@@ -2,20 +2,21 @@ import { Vector } from "@visian/utils";
 import * as THREE from "three";
 
 import { SliceQuadMaterial } from "./slice-quad-material";
+import { SliceScene } from "./types";
 
 /**
  * A represenation of a slice of a 3D image that can be rendered into a
  * texture atlas. The view type of the slice has to match the texture
  * atlas view type.
  */
-export class SliceQuad extends THREE.Scene {
+export class SliceQuad extends THREE.Scene implements SliceScene {
   public readonly camera: THREE.Camera;
 
   private quad: THREE.Mesh;
 
   private currentSliceNumber = 0;
 
-  constructor(texture: THREE.Texture, private atlasGrid: Vector) {
+  constructor(private texture: THREE.Texture, private atlasGrid: Vector) {
     super();
 
     this.quad = new THREE.Mesh(
@@ -43,5 +44,11 @@ export class SliceQuad extends THREE.Scene {
     this.quad.position.set(x, y, 0);
 
     this.currentSliceNumber = slice;
+  }
+
+  public setOverrideTexture(texture?: THREE.Texture) {
+    (this.quad.material as SliceQuadMaterial).setTexture(
+      texture || this.texture,
+    );
   }
 }

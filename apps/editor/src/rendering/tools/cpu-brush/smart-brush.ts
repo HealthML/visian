@@ -5,8 +5,8 @@ import {
   Vector,
   VoxelWithValue,
 } from "@visian/utils";
+import { Editor } from "../../../models";
 
-import { Editor } from "../editor";
 import { Brush } from "./brush";
 
 export class SmartBrush extends Brush {

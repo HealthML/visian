@@ -8,13 +8,14 @@ import {
 import * as THREE from "three";
 
 import { SliceLinesMaterial } from "./slice-lines-material";
+import { SliceScene } from "./types";
 
 /**
  * A representation of a slice of a 3D image that can be rendered into
  * a texture atlas even if the view type does not correspond to the
  * atlas view type.
  */
-export class SliceLines extends THREE.Scene {
+export class SliceLines extends THREE.Scene implements SliceScene {
   private lines: THREE.LineSegments;
 
   private geometries = [
@@ -68,8 +69,8 @@ export class SliceLines extends THREE.Scene {
 
   public setSlice(viewType: ViewType, slice: number) {
     if (this.viewType !== viewType) {
-      (this.lines.material as SliceLinesMaterial).setViewType(
-        viewType,
+      (this.lines.material as SliceLinesMaterial).setViewType(viewType);
+      (this.lines.material as SliceLinesMaterial).setTexture(
         this.textures[viewType],
       );
 
@@ -81,5 +82,11 @@ export class SliceLines extends THREE.Scene {
     this.position.setScalar(0);
     const axis = getOrthogonalAxis(viewType);
     this.position[axis] = slice;
+  }
+
+  public setOverrideTexture(texture?: THREE.Texture) {
+    (this.lines.material as SliceLinesMaterial).setTexture(
+      texture || this.textures[this.viewType],
+    );
   }
 }

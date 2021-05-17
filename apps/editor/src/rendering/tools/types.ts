@@ -1,4 +1,4 @@
-import { Voxel } from "@visian/utils";
+import { Pixel, Voxel } from "@visian/utils";
 
 export interface DragTool {
   startAt: (dragPoint: DragPoint) => void;
@@ -11,4 +11,9 @@ export interface DragPoint extends Voxel {
   right: boolean;
   /** Whether the cursor is on the bottom half of the pixel. */
   bottom: boolean;
+}
+
+export interface Circle extends Pixel {
+  radius: number;
+  value: number;
 }

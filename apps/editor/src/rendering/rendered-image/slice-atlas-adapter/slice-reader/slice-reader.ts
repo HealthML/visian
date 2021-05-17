@@ -22,7 +22,7 @@ export class SliceReader {
   };
 
   constructor(
-    atlasTexture: THREE.Texture,
+    private atlasTexture: THREE.Texture,
     atlasGrid: Vector,
     private voxelCount: Vector,
     private components: number,
@@ -41,6 +41,22 @@ export class SliceReader {
     this.sliceCache = undefined;
   }
 
+  public readSliceToTarget(
+    sliceNumber: number,
+    viewType: ViewType,
+    renderer: THREE.WebGLRenderer,
+    target = this.renderTarget,
+    atlasTexture = this.atlasTexture,
+  ) {
+    this.material.setSliceNumber(sliceNumber);
+    this.material.setViewType(viewType);
+    this.material.setDataTexture(atlasTexture);
+
+    renderer.setRenderTarget(target);
+    this.screenAlignedQuad.renderWith(renderer);
+    renderer.setRenderTarget(null);
+  }
+
   public readSlice(
     sliceNumber: number,
     viewType: ViewType,
@@ -54,23 +70,16 @@ export class SliceReader {
       return this.sliceCache.sliceData;
     }
 
-    this.material.setSliceNumber(sliceNumber);
-
     const [widthAxis, heightAxis] = getPlaneAxes(viewType);
     const width = this.voxelCount[widthAxis];
     const height = this.voxelCount[heightAxis];
 
     if (this.lastViewType !== viewType) {
-      this.material.setViewType(viewType);
-      this.lastViewType = viewType;
-
       this.renderTarget.setSize(width, height);
+      this.lastViewType = viewType;
     }
 
-    // Render slice to render target.
-    renderer.setRenderTarget(this.renderTarget);
-    this.screenAlignedQuad.renderWith(renderer);
-    renderer.setRenderTarget(null);
+    this.readSliceToTarget(sliceNumber, viewType, renderer);
 
     // Read slice from render target.
     const buffer = new Uint8Array(width * height * 4);

@@ -29,4 +29,8 @@ export class SliceReaderMaterial extends THREE.ShaderMaterial {
   public setViewType(viewType: ViewType) {
     this.uniforms.uViewType.value = viewType;
   }
+
+  public setDataTexture(texture: THREE.Texture) {
+    this.uniforms.uDataTexture.value = texture;
+  }
 }

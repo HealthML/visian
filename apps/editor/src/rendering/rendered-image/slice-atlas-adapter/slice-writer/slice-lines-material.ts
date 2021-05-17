@@ -21,8 +21,11 @@ export class SliceLinesMaterial extends THREE.ShaderMaterial {
     });
   }
 
-  public setViewType(viewType: ViewType, texture: THREE.Texture | null) {
+  public setViewType(viewType: ViewType) {
     this.uniforms.uViewType.value = viewType;
+  }
+
+  public setTexture(texture: THREE.Texture | null) {
     this.uniforms.uDataTexture.value = texture;
   }
 }

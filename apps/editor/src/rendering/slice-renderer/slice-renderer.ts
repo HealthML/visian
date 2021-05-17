@@ -23,7 +23,7 @@ import {
 import type { Editor } from "../../models";
 
 export class SliceRenderer implements IDisposable {
-  private renderers: THREE.WebGLRenderer[];
+  private _renderers: THREE.WebGLRenderer[];
   private mainCamera: THREE.OrthographicCamera;
   private sideCamera: THREE.OrthographicCamera;
   private scenes = viewTypes.map(() => new THREE.Scene());
@@ -46,7 +46,7 @@ export class SliceRenderer implements IDisposable {
     private lowerSideCanvas: HTMLCanvasElement,
     private editor: Editor,
   ) {
-    this.renderers = this.canvases.map(
+    this._renderers = this.canvases.map(
       (canvas) =>
         new THREE.WebGLRenderer({
           alpha: true,
@@ -81,11 +81,11 @@ export class SliceRenderer implements IDisposable {
     this.resizeSensors.push(
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       new ResizeSensor(this.upperSideCanvas.parentElement!, () =>
-        resizeRenderer(this.renderers[1], this.eagerRender),
+        resizeRenderer(this._renderers[1], this.eagerRender),
       ),
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       new ResizeSensor(this.lowerSideCanvas.parentElement!, () =>
-        resizeRenderer(this.renderers[2], this.eagerRender),
+        resizeRenderer(this._renderers[2], this.eagerRender),
       ),
     );
 
@@ -137,7 +137,7 @@ export class SliceRenderer implements IDisposable {
       ),
     );
 
-    this.renderers[0].setAnimationLoop(this.animate);
+    this._renderers[0].setAnimationLoop(this.animate);
   }
 
   public dispose() {
@@ -147,6 +147,10 @@ export class SliceRenderer implements IDisposable {
     this.resizeSensors.forEach((sensor) => sensor.detach());
   }
 
+  public get renderers() {
+    return this._renderers;
+  }
+
   public getBrushCursor(viewType: ViewType, preview = false) {
     return preview
       ? this.slices[viewType].previewBrushCursor
@@ -154,7 +158,7 @@ export class SliceRenderer implements IDisposable {
   }
 
   private resize = () => {
-    this.renderers[0].setSize(window.innerWidth, window.innerHeight);
+    this._renderers[0].setSize(window.innerWidth, window.innerHeight);
 
     setMainCameraPlanes(this.editor, this.mainCanvas, this.mainCamera);
 
@@ -235,15 +239,17 @@ export class SliceRenderer implements IDisposable {
 
   private get activeRenderers() {
     return this.editor.viewSettings.showSideViews
-      ? this.renderers
-      : [this.renderers[0]];
+      ? this._renderers
+      : [this._renderers[0]];
   }
 
   private eagerRender = () => {
     if (!this.isImageLoaded) return;
     this.lazyRenderTriggered = false;
 
-    this.renderers.forEach((_, index) => {
+    this.editor.tools.render();
+
+    this._renderers.forEach((_, index) => {
       this.editor.image?.onBeforeRender(index);
       this.editor.annotation?.onBeforeRender(index);
     });
@@ -260,7 +266,7 @@ export class SliceRenderer implements IDisposable {
     this.slices.forEach((slice) => slice.setImage(image));
     this.isImageLoaded = true;
 
-    image.setRenderers(this.renderers);
+    image.setRenderers(this._renderers);
 
     this.lazyRender();
   }
@@ -268,7 +274,7 @@ export class SliceRenderer implements IDisposable {
   private setAnnotation(image?: RenderedImage) {
     this.slices.forEach((slice) => slice.setAnnotation(image));
 
-    image?.setRenderers(this.renderers);
+    image?.setRenderers(this._renderers);
 
     this.lazyRender();
   }
