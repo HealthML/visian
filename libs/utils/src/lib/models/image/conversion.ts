@@ -3,8 +3,13 @@ import { Vector3, Matrix3 } from "three";
 
 import { ITKMatrix } from "../../io";
 
+/** Vector of the indices of x, y, z axis for calculations. */
 const axesIndices = new Vector3(0, 1, 2);
 
+/** Extracts the orientation for each axis as a single vector.
+ * @param orientation A matrix containing the orientation of the image.
+ * @returns An array of Vector3 representing the orientations of x, y, z respectively.
+ */
 const getOrientationVecs = (orientation: ITKMatrix) => {
   const orientationVectors: [Vector3, Vector3, Vector3] = [
     new Vector3(),
@@ -19,8 +24,11 @@ const getOrientationVecs = (orientation: ITKMatrix) => {
   return orientationVectors;
 };
 
+/** Infers the actual axis mapping from the given orientation.
+ * @param orientationVecs An array of Vector3 representing the orientations of x, y, z respectively.
+ * @returns A Vector3 whose components map the respective axis to the actual axis index.
+ */
 const getAxisMapping = (orientationVecs: [Vector3, Vector3, Vector3]) => {
-  // create new axis mapping from the given orientation
   const axisMapping = new Vector3();
   orientationVecs.forEach((vec, idx) => {
     axisMapping.setComponent(idx, Math.abs(vec.dot(axesIndices)));
@@ -29,6 +37,12 @@ const getAxisMapping = (orientationVecs: [Vector3, Vector3, Vector3]) => {
   return axisMapping;
 };
 
+/** Swaps the components of the given metadata for the axes according to the actual orientation.
+ * @param toSwap The metadata for which to adapt the order according to the orientation.
+ *                Is expected to have three components.
+ * @param orientation A matrix containing the orientation of the image.
+ * @returns The metadata with its components swapped according to the axes orientation.
+ */
 export const swapAxesForMetadata = (
   toSwap: number[],
   orientation: ITKMatrix,
@@ -43,6 +57,12 @@ export const swapAxesForMetadata = (
   return swappedMetadata;
 };
 
+/** Converts the given orientation to the orientation the image has after orientation correction
+ * for its data through {@link unifyOrientation}
+ * @param orientation A matrix containing the original orientation of the image.
+ *                    The image is expected to have three dimensions.
+ * @returns A matrix containing the orientation the image will have after {@link unifyOrientation}.
+ */
 export const calculateNewOrientation = (orientation: ITKMatrix) => {
   const newOrientation = new Matrix3().fromArray(orientation.data).transpose();
   const itkMatrix = new ITKMatrix(3, 3);
@@ -63,6 +83,8 @@ export const defaultDirection = new Vector3(-1, -1, 1);
  * @param dimensionality The dimensionality of the image.
  * @param size An array containing the size of the image.
  * @param components The amount of components per voxel.
+ * @param toInternal A boolean indicating whether the orientation conversion happens to the internal
+ *                Visian format needed in the texture atlas. Defaults to true.
  * @returns a TypedArray containing the image data in the expected orientation.
  */
 export const unifyOrientation = (
@@ -71,7 +93,7 @@ export const unifyOrientation = (
   dimensionality: number,
   size: number[],
   components: number,
-  fromITK = true,
+  toInternal = true,
 ) => {
   let axisMapping: Vector3;
   let direction: Vector3;
@@ -86,7 +108,7 @@ export const unifyOrientation = (
 
     // calculate actual axes inversion, based on the expected direction for the texture atlas
     direction = new Vector3();
-    if (fromITK) {
+    if (toInternal) {
       const dotVec = new Vector3(1, 1, 1);
       orientationVectors.forEach((vec, idx) => {
         direction.setComponent(idx, vec.dot(dotVec));
@@ -124,6 +146,7 @@ export const unifyOrientation = (
 
   let newIndex = 0;
 
+  // read data according to axes orientation
   for (
     let thirdAxisIdx = 0;
     thirdAxisIdx < newSize[axisMapping.z];
