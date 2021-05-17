@@ -11,7 +11,7 @@ import {
 import {
   annotationMeshZ,
   BrushCursor,
-  brushCursorZ,
+  toolOverlayZ,
   Crosshair,
   crosshairZ,
   getGeometrySize,
@@ -76,15 +76,15 @@ export class Slice extends THREE.Group implements IDisposable {
     this.crosshairShiftGroup.add(this.crosshair);
 
     this.brushCursor = new BrushCursor(editor, viewType);
-    this.brushCursor.position.z = brushCursorZ;
+    this.brushCursor.position.z = toolOverlayZ;
     this.crosshairShiftGroup.add(this.brushCursor);
 
     this.outline = new Outline(editor, viewType);
-    this.outline.position.z = brushCursorZ;
+    this.outline.position.z = toolOverlayZ;
     this.crosshairShiftGroup.add(this.outline);
 
     this.previewBrushCursor = new PreviewBrushCursor(editor, viewType);
-    this.previewBrushCursor.position.z = brushCursorZ;
+    this.previewBrushCursor.position.z = toolOverlayZ;
     this.crosshairShiftGroup.add(this.previewBrushCursor);
 
     this.disposers.push(
