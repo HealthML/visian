@@ -331,11 +331,17 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
       return;
     }
 
+    const tool = (alt ? this.altToolMap : this.toolMap)[this.activeTool];
+
     const intersection = this.editor.sliceRenderer.raycaster.getIntersectionsFromPointer(
       screenPosition,
     )[0];
     if (!intersection || !intersection.uv) {
       this.setIsCursorOverDrawableArea(false);
+      if (eventType === "end") {
+        this.setIsDrawing(false);
+        tool?.endAt(null);
+      }
       return;
     }
 
@@ -355,7 +361,6 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
     );
     if (!dragPoint) return;
 
-    const tool = (alt ? this.altToolMap : this.toolMap)[this.activeTool];
     switch (eventType) {
       case "start":
         this.setIsDrawing(true);

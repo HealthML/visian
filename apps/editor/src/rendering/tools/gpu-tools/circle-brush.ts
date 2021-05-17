@@ -32,8 +32,8 @@ export class CircleBrush extends UndoableTool implements DragTool {
     this.lastDragPoint = dragPoint;
   }
 
-  public endAt(dragPoint: DragPoint) {
-    this.moveTo(dragPoint);
+  public endAt(dragPoint: DragPoint | null) {
+    if (dragPoint) this.moveTo(dragPoint);
 
     this.endStroke(!this.value);
   }
