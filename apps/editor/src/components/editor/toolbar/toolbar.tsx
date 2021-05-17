@@ -68,8 +68,7 @@ export const Toolbar: React.FC = observer(() => {
         event.preventDefault();
         event.stopPropagation();
         setIsModalOpen(
-          value !== ToolType.Outline &&
-            (store?.editor.tools.activeTool !== value || !isModalOpen),
+          store?.editor.tools.activeTool !== value || !isModalOpen,
         );
       }
 
@@ -133,22 +132,22 @@ export const Toolbar: React.FC = observer(() => {
         onContextMenu={preventDefault}
       />
       <Tool
-        icon="erase"
-        tooltipTx="pixel-eraser"
-        showTooltip={!isModalOpen || activeTool !== ToolType.Eraser}
-        activeTool={activeTool}
-        value={ToolType.Eraser}
-        ref={activeTool === ToolType.Eraser ? setButtonRef : undefined}
-        onPress={setActiveTool}
-        onContextMenu={preventDefault}
-      />
-      <Tool
         icon="outline"
         tooltipTx="outline-tool"
         showTooltip={!isModalOpen || activeTool !== ToolType.Outline}
         activeTool={activeTool}
         value={ToolType.Outline}
         ref={activeTool === ToolType.Outline ? setButtonRef : undefined}
+        onPress={setActiveTool}
+        onContextMenu={preventDefault}
+      />
+      <Tool
+        icon="erase"
+        tooltipTx="pixel-eraser"
+        showTooltip={!isModalOpen || activeTool !== ToolType.Eraser}
+        activeTool={activeTool}
+        value={ToolType.Eraser}
+        ref={activeTool === ToolType.Eraser ? setButtonRef : undefined}
         onPress={setActiveTool}
         onContextMenu={preventDefault}
       />
@@ -162,7 +161,8 @@ export const Toolbar: React.FC = observer(() => {
         isOpen={
           isModalOpen &&
           activeTool !== ToolType.Navigate &&
-          activeTool !== ToolType.Crosshair
+          activeTool !== ToolType.Crosshair &&
+          activeTool !== ToolType.Outline
         }
         labelTx={
           activeTool === ToolType.SmartBrush
