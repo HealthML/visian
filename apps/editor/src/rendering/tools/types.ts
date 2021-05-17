@@ -3,7 +3,7 @@ import { Pixel, Voxel } from "@visian/utils";
 export interface DragTool {
   startAt: (dragPoint: DragPoint) => void;
   moveTo: (dragPoint: DragPoint) => void;
-  endAt: (dragPoint: DragPoint) => void;
+  endAt: (dragPoint: DragPoint | null) => void;
 }
 
 export interface DragPoint extends Voxel {

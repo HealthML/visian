@@ -41,8 +41,8 @@ export class OutlineTool extends UndoableTool implements DragTool {
     this.lastPoint = dragPoint;
   }
 
-  public endAt(dragPoint: DragPoint) {
-    this.moveTo(dragPoint);
+  public endAt(dragPoint: DragPoint | null) {
+    if (dragPoint) this.moveTo(dragPoint);
 
     this.drawShape();
 
@@ -63,6 +63,7 @@ export class OutlineTool extends UndoableTool implements DragTool {
   private updateOutlinePreview() {
     const points = this.outline.getPoints();
     this.editor.sliceRenderer?.getOutline().setPoints(points);
+    this.editor.sliceRenderer?.lazyRender();
   }
 
   private drawShape() {

@@ -44,8 +44,8 @@ export class Brush extends VoxelWriter implements DragTool {
     }
   };
 
-  public endAt = (dragPoint: DragPoint) => {
-    this.moveTo(dragPoint);
+  public endAt = (dragPoint: DragPoint | null) => {
+    if (dragPoint) this.moveTo(dragPoint);
     this.finishStroke(!this.value);
     this.dragPoints = undefined;
   };
