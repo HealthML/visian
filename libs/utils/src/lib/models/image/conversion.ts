@@ -11,7 +11,7 @@ const axesIndices = new THREE.Vector3(0, 1, 2);
  * @param orientation A matrix containing the orientation of the image.
  * @returns An array of Vector3 representing the orientations of x, y, z respectively.
  */
-const getOrientationVecs = (orientation: ITKMatrix) => {
+const getOrientationVectors = (orientation: ITKMatrix) => {
   const orientationVectors: [THREE.Vector3, THREE.Vector3, THREE.Vector3] = [
     new THREE.Vector3(),
     new THREE.Vector3(),
@@ -22,22 +22,22 @@ const getOrientationVecs = (orientation: ITKMatrix) => {
     .fromArray(orientation.data)
     .extractBasis(...orientationVectors);
 
-  orientationVectors.forEach((vec) => vec.round());
+  orientationVectors.forEach((vector) => vector.round());
 
   return orientationVectors;
 };
 
 /**
  * Infers the actual axis mapping from the given orientation.
- * @param orientationVecs An array of Vector3 representing the orientations of x, y, z respectively.
+ * @param orientationVectors A Vector3 array representing the orientations of x, y, z respectively.
  * @returns A Vector3 whose components map the respective axis to the actual axis index.
  */
 const getAxisMapping = (
-  orientationVecs: [THREE.Vector3, THREE.Vector3, THREE.Vector3],
+  orientationVectors: [THREE.Vector3, THREE.Vector3, THREE.Vector3],
 ) => {
   const axisMapping = new THREE.Vector3();
-  orientationVecs.forEach((vec, idx) => {
-    axisMapping.setComponent(idx, Math.abs(vec.dot(axesIndices)));
+  orientationVectors.forEach((vector, index) => {
+    axisMapping.setComponent(index, Math.abs(vector.dot(axesIndices)));
   });
 
   return axisMapping;
@@ -54,7 +54,7 @@ export const swapAxesForMetadata = (
   toSwap: number[],
   orientation: ITKMatrix,
 ) => {
-  const orientationVecs = getOrientationVecs(orientation);
+  const orientationVecs = getOrientationVectors(orientation);
   const axisMapping = getAxisMapping(orientationVecs);
   const swappedMetadata = [
     toSwap[axisMapping.x],
@@ -112,21 +112,21 @@ export const unifyOrientation = (
     axisMapping = axesIndices;
     direction = defaultDirection;
   } else {
-    const orientationVectors = getOrientationVecs(orientation);
+    const orientationVectors = getOrientationVectors(orientation);
 
     axisMapping = getAxisMapping(orientationVectors);
 
     // Calculate actual axes inversion, based on the expected direction for the texture atlas.
     direction = new THREE.Vector3();
     if (toInternal) {
-      const dotVec = new THREE.Vector3(1, 1, 1);
-      orientationVectors.forEach((vec, idx) => {
-        direction.setComponent(idx, vec.dot(dotVec));
+      const dotVector = new THREE.Vector3(1, 1, 1);
+      orientationVectors.forEach((vector, index) => {
+        direction.setComponent(index, vector.dot(dotVector));
       });
       direction.multiply(defaultDirection);
     } else {
       const originalDirection = new THREE.Vector3();
-      orientationVectors.forEach((vec) => originalDirection.add(vec));
+      orientationVectors.forEach((vector) => originalDirection.add(vector));
       originalDirection.multiply(defaultDirection);
 
       direction.set(
@@ -158,40 +158,40 @@ export const unifyOrientation = (
 
   // Read data according to axes orientation.
   for (
-    let thirdAxisIdx = 0;
-    thirdAxisIdx < newSize[axisMapping.z];
-    thirdAxisIdx++
+    let thirdAxisIndex = 0;
+    thirdAxisIndex < newSize[axisMapping.z];
+    thirdAxisIndex++
   ) {
-    const originalThirdAxisIdx = axisInversion.z
-      ? newSize[axisMapping.z] - (thirdAxisIdx + 1)
-      : thirdAxisIdx;
+    const originalThirdAxisIndex = axisInversion.z
+      ? newSize[axisMapping.z] - (thirdAxisIndex + 1)
+      : thirdAxisIndex;
 
     const originalThirdAxisOffset =
-      originalThirdAxisIdx * axisMultipliers[axisMapping.z];
+      originalThirdAxisIndex * axisMultipliers[axisMapping.z];
 
     for (
       let secondAxisIndex = 0;
       secondAxisIndex < newSize[axisMapping.y];
       secondAxisIndex++
     ) {
-      const originalSecondAxisIdx = axisInversion.y
+      const originalSecondAxisIndex = axisInversion.y
         ? newSize[axisMapping.y] - (secondAxisIndex + 1)
         : secondAxisIndex;
 
       const originalSecondAxisOffset =
-        originalSecondAxisIdx * axisMultipliers[axisMapping.y];
+        originalSecondAxisIndex * axisMultipliers[axisMapping.y];
 
       for (
-        let firstAxisIdx = 0;
-        firstAxisIdx < newSize[axisMapping.x];
-        firstAxisIdx++
+        let firstAxisIndex = 0;
+        firstAxisIndex < newSize[axisMapping.x];
+        firstAxisIndex++
       ) {
-        const originalFirstAxisIdx = axisInversion.x
-          ? newSize[axisMapping.x] - (firstAxisIdx + 1)
-          : firstAxisIdx;
+        const originalFirstAxisIndex = axisInversion.x
+          ? newSize[axisMapping.x] - (firstAxisIndex + 1)
+          : firstAxisIndex;
 
         const originalFirstAxisOffset =
-          originalFirstAxisIdx * axisMultipliers[axisMapping.x];
+          originalFirstAxisIndex * axisMultipliers[axisMapping.x];
 
         for (let c = 0; c < components; c++) {
           unifiedData[newIndex] =
