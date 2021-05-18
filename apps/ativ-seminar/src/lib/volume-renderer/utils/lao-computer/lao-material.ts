@@ -29,10 +29,6 @@ export class LAOMaterial extends THREE.ShaderMaterial {
     this.uniforms.uInputSecondDerivative.value = secondDerivativeTexture;
   }
 
-  public setCameraPosition(position: THREE.Vector3) {
-    this.uniforms.uCameraPosition.value.copy(position);
-  }
-
   public setPreviousDirections(amount: number) {
     if (amount) {
       this.uniforms.uPreviousFrame.value = this.previousFrameTexture;

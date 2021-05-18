@@ -32,6 +32,9 @@ export class SharedUniforms implements IDisposable {
 
     this.disposers.push(
       autorun(() => {
+        this.uniforms.uCameraPosition.value = volumeRendererModel.cameraPosition.toArray();
+      }),
+      autorun(() => {
         this.uniforms.uConeDirection.value = volumeRendererModel.cutAwayConeDirection.toArray();
       }),
       autorun(() => {

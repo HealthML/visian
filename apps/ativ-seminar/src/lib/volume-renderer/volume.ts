@@ -49,10 +49,6 @@ class Volume extends THREE.Mesh implements IDisposable {
     );
   }
 
-  public setCameraPosition(position: THREE.Vector3) {
-    (this.material as VolumeMaterial).setCameraPosition(position);
-  }
-
   public dispose() {
     (this.material as VolumeMaterial).dispose();
     this.disposers.forEach((disposer) => disposer());

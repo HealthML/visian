@@ -38,10 +38,6 @@ class VolumeMaterial extends THREE.ShaderMaterial implements IDisposable {
     this.uniforms.uOutputFirstDerivative.value = outputDerivative;
     this.uniforms.uLAO.value = lao;
   }
-
-  public setCameraPosition(position: THREE.Vector3) {
-    this.uniforms.uCameraPosition.value = position;
-  }
 }
 
 export default VolumeMaterial;

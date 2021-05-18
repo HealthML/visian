@@ -150,7 +150,10 @@ export class VolumeRenderer implements IDisposable {
       reaction(() => this.model.contextOpacity, this.lazyRender),
       reaction(() => this.model.rangeLimits, this.lazyRender),
       reaction(() => this.model.cutAwayConeAngle, this.lazyRender),
-      reaction(() => this.model.cutAwayConeDirection, this.lazyRender),
+      reaction(
+        () => this.model.cutAwayConeDirection.toArray(),
+        this.lazyRender,
+      ),
       reaction(() => this.model.customTFTexture, this.lazyRender),
       reaction(() => this.model.transferFunction, this.lazyRender),
       reaction(
@@ -282,14 +285,8 @@ export class VolumeRenderer implements IDisposable {
       this.workingMatrix.copy(this.volume.matrixWorld).invert(),
     );
 
-    this.volume.setCameraPosition(this.workingVector);
-    this.gradientComputer.setCameraPosition(this.workingVector);
-    this.laoComputer.setCameraPosition(this.workingVector);
-
-    if (this.model.isConeLinkedToCamera) {
-      const { x, y, z } = this.workingVector;
-      this.model.setCutAwayConeDirection(x, y, z);
-    }
+    const { x, y, z } = this.workingVector;
+    this.model.setCameraPosition(x, y, z);
   }
 
   private onFlyControlsLock = () => {

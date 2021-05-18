@@ -1,7 +1,5 @@
-import * as THREE from "three";
-
 export const commonUniforms = {
-  uCameraPosition: { value: new THREE.Vector3() },
+  uCameraPosition: { value: [0, 0, 0] },
   uVolume: { value: null },
   uInputFirstDerivative: { value: null },
   uInputSecondDerivative: { value: null },

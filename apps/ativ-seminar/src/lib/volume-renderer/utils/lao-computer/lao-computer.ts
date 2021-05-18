@@ -21,7 +21,7 @@ export class LAOComputer extends TiledRenderer {
 
   constructor(
     renderer: THREE.WebGLRenderer,
-    private volumeRendererModel: VolumeRendererModel,
+    volumeRendererModel: VolumeRendererModel,
     sharedUniforms: SharedUniforms,
     firstDerivativeTexture: THREE.Texture,
     secondDerivativeTexture: THREE.Texture,
@@ -43,7 +43,14 @@ export class LAOComputer extends TiledRenderer {
       reaction(() => volumeRendererModel.contextOpacity, this.setDirty),
       reaction(() => volumeRendererModel.rangeLimits, this.setDirty),
       reaction(() => volumeRendererModel.cutAwayConeAngle, this.setDirty),
-      reaction(() => volumeRendererModel.cutAwayConeDirection, this.setDirty),
+      reaction(
+        () => volumeRendererModel.cutAwayConeDirection.toArray(),
+        () => {
+          if (volumeRendererModel.transferFunction.updateLAOOnCameraMove) {
+            this.setDirty();
+          }
+        },
+      ),
       reaction(() => volumeRendererModel.customTFTexture, this.setDirty),
       reaction(() => volumeRendererModel.transferFunction.type, this.setDirty),
       reaction(
@@ -119,17 +126,6 @@ export class LAOComputer extends TiledRenderer {
     this._isDirty = true;
     this._isFinalLAOFlushed = false;
   };
-
-  public setCameraPosition(position: THREE.Vector3) {
-    this.laoMaterial.setCameraPosition(position);
-
-    if (
-      this.volumeRendererModel.transferFunction.updateLAOOnCameraMove &&
-      this.volumeRendererModel.isConeLinkedToCamera
-    ) {
-      this.setDirty();
-    }
-  }
 }
 
 export default LAOComputer;

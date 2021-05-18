@@ -39,10 +39,6 @@ export class GradientMaterial extends THREE.ShaderMaterial {
     this.uniforms.uInputSecondDerivative.value =
       mode === GradientMode.Second ? null : this.secondDerivativeTexture;
   }
-
-  public setCameraPosition(position: THREE.Vector3) {
-    this.uniforms.uCameraPosition.value.copy(position);
-  }
 }
 
 export default GradientMaterial;

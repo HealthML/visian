@@ -68,6 +68,16 @@ export class GradientComputer implements IDisposable {
           this.updateOutputDerivative();
         },
       ),
+      reaction(
+        () => volumeRenderer.model.cameraPosition,
+        () => {
+          if (
+            this.volumeRenderer.model.transferFunction.updateNormalsOnCameraMove
+          ) {
+            this.updateOutputDerivative();
+          }
+        },
+      ),
       reaction(() => volumeRenderer.model.focus, this.updateOutputDerivative),
       reaction(
         () => volumeRenderer.model.useFocusVolume,
@@ -94,7 +104,7 @@ export class GradientComputer implements IDisposable {
         this.updateOutputDerivative,
       ),
       reaction(
-        () => volumeRenderer.model.cutAwayConeDirection,
+        () => volumeRenderer.model.cutAwayConeDirection.toArray(),
         this.updateOutputDerivative,
       ),
       reaction(
@@ -125,14 +135,6 @@ export class GradientComputer implements IDisposable {
       this.outputDerivativeDirty
     ) {
       this.renderOutputDerivative();
-    }
-  }
-
-  public setCameraPosition(position: THREE.Vector3) {
-    this.gradientMaterial.setCameraPosition(position);
-
-    if (this.volumeRenderer.model.transferFunction.updateNormalsOnCameraMove) {
-      this.updateOutputDerivative();
     }
   }
 
