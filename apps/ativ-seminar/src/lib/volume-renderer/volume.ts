@@ -3,6 +3,7 @@ import { autorun } from "mobx";
 import * as THREE from "three";
 
 import { IDisposable } from "../types";
+import { SharedUniforms } from "./utils";
 import VolumeMaterial from "./volume-material";
 
 import type VolumeRenderer from "./volume-renderer";
@@ -12,6 +13,7 @@ class Volume extends THREE.Mesh implements IDisposable {
   private disposers: IDisposer[] = [];
   constructor(
     volumeRenderer: VolumeRenderer,
+    sharedUniforms: SharedUniforms,
     firstDerivative: THREE.Texture,
     secondDerivative: THREE.Texture,
     outputDerivative: THREE.Texture,
@@ -21,6 +23,7 @@ class Volume extends THREE.Mesh implements IDisposable {
       new THREE.BoxGeometry(1, 1, 1),
       new VolumeMaterial(
         volumeRenderer,
+        sharedUniforms,
         firstDerivative,
         secondDerivative,
         outputDerivative,

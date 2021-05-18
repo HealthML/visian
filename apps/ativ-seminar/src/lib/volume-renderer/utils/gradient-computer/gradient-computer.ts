@@ -1,12 +1,12 @@
 import { ScreenAlignedQuad } from "@visian/utils";
-import { autorun, IReactionDisposer, reaction } from "mobx";
+import { IReactionDisposer, reaction } from "mobx";
 import * as THREE from "three";
-import tc from "tinycolor2";
 
 import { TextureAtlas } from "../../../texture-atlas";
 import { IDisposable } from "../../../types";
 import VolumeRenderer from "../../volume-renderer";
 import { generateHistogram } from "../histogram";
+import { SharedUniforms } from "../shared-uniforms";
 import { GradientMaterial, GradientMode } from "./gradient-material";
 
 export class GradientComputer implements IDisposable {
@@ -28,6 +28,7 @@ export class GradientComputer implements IDisposable {
   constructor(
     private renderer: THREE.WebGLRenderer,
     private volumeRenderer: VolumeRenderer,
+    sharedUniforms: SharedUniforms,
   ) {
     this.firstDerivativeRenderTarget = new THREE.WebGLRenderTarget(1, 1);
     this.secondDerivativeRenderTarget = new THREE.WebGLRenderTarget(1, 1);
@@ -36,7 +37,7 @@ export class GradientComputer implements IDisposable {
     this.gradientMaterial = new GradientMaterial(
       this.firstDerivativeRenderTarget.texture,
       this.secondDerivativeRenderTarget.texture,
-      volumeRenderer.model,
+      sharedUniforms,
     );
 
     this.screenAlignedQuad = new ScreenAlignedQuad(this.gradientMaterial);
@@ -68,56 +69,42 @@ export class GradientComputer implements IDisposable {
         },
       ),
       reaction(() => volumeRenderer.model.focus, this.updateOutputDerivative),
-      autorun(() => {
-        this.gradientMaterial.uniforms.uUseFocus.value =
-          volumeRenderer.model.useFocusVolume;
-
-        this.updateOutputDerivative();
-      }),
-      autorun(() => {
-        this.gradientMaterial.uniforms.uConeDirection.value = volumeRenderer.model.cutAwayConeDirection.toArray();
-      }),
-      autorun(() => {
-        const color = tc(volumeRenderer.model.focusColor).toRgb();
-        this.gradientMaterial.uniforms.uFocusColor.value = [
-          color.r / 255,
-          color.g / 255,
-          color.b / 255,
-          color.a,
-        ];
-      }),
-      autorun(() => {
-        this.gradientMaterial.uniforms.uTransferFunction.value =
-          volumeRenderer.model.transferFunction.type;
-
-        this.updateOutputDerivative();
-      }),
-      autorun(() => {
-        this.gradientMaterial.uniforms.uContextOpacity.value =
-          volumeRenderer.model.contextOpacity;
-
-        this.updateOutputDerivative();
-      }),
-      autorun(() => {
-        [
-          this.gradientMaterial.uniforms.uLimitLow.value,
-          this.gradientMaterial.uniforms.uLimitHigh.value,
-        ] = volumeRenderer.model.rangeLimits;
-
-        this.updateOutputDerivative();
-      }),
-      autorun(() => {
-        this.gradientMaterial.uniforms.uConeAngle.value =
-          volumeRenderer.model.cutAwayConeAngle;
-
-        this.updateOutputDerivative();
-      }),
-      autorun(() => {
-        this.gradientMaterial.uniforms.uCustomTFTexture.value =
-          volumeRenderer.model.customTFTexture;
-
-        this.updateOutputDerivative();
-      }),
+      reaction(
+        () => volumeRenderer.model.useFocusVolume,
+        this.updateOutputDerivative,
+      ),
+      reaction(
+        () => volumeRenderer.model.focusColor,
+        this.updateOutputDerivative,
+      ),
+      reaction(
+        () => volumeRenderer.model.imageOpacity,
+        this.updateOutputDerivative,
+      ),
+      reaction(
+        () => volumeRenderer.model.contextOpacity,
+        this.updateOutputDerivative,
+      ),
+      reaction(
+        () => volumeRenderer.model.rangeLimits,
+        this.updateOutputDerivative,
+      ),
+      reaction(
+        () => volumeRenderer.model.cutAwayConeAngle,
+        this.updateOutputDerivative,
+      ),
+      reaction(
+        () => volumeRenderer.model.cutAwayConeDirection,
+        this.updateOutputDerivative,
+      ),
+      reaction(
+        () => volumeRenderer.model.customTFTexture,
+        this.updateOutputDerivative,
+      ),
+      reaction(
+        () => volumeRenderer.model.transferFunction.type,
+        this.updateOutputDerivative,
+      ),
     );
   }
 

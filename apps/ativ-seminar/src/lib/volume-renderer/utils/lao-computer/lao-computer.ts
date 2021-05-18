@@ -3,6 +3,7 @@ import * as THREE from "three";
 
 import { VolumeRendererModel } from "../../../../models";
 import { TextureAtlas } from "../../../texture-atlas";
+import { SharedUniforms } from "../shared-uniforms";
 import { TiledRenderer } from "../tiled-renderer";
 import LAOMaterial from "./lao-material";
 
@@ -21,6 +22,7 @@ export class LAOComputer extends TiledRenderer {
   constructor(
     renderer: THREE.WebGLRenderer,
     private volumeRendererModel: VolumeRendererModel,
+    sharedUniforms: SharedUniforms,
     firstDerivativeTexture: THREE.Texture,
     secondDerivativeTexture: THREE.Texture,
     private flush: () => void,
@@ -29,7 +31,7 @@ export class LAOComputer extends TiledRenderer {
       firstDerivativeTexture,
       secondDerivativeTexture,
       target.texture,
-      volumeRendererModel,
+      sharedUniforms,
     ),
   ) {
     super(laoMaterial, renderer, undefined, target);
@@ -41,6 +43,7 @@ export class LAOComputer extends TiledRenderer {
       reaction(() => volumeRendererModel.contextOpacity, this.setDirty),
       reaction(() => volumeRendererModel.rangeLimits, this.setDirty),
       reaction(() => volumeRendererModel.cutAwayConeAngle, this.setDirty),
+      reaction(() => volumeRendererModel.cutAwayConeDirection, this.setDirty),
       reaction(() => volumeRendererModel.customTFTexture, this.setDirty),
       reaction(() => volumeRendererModel.transferFunction.type, this.setDirty),
       reaction(
