@@ -365,6 +365,8 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
         tool?.endAt(dragPoint);
         break;
     }
+
+    this.editor.sliceRenderer.lazyRender();
   }
 
   public alignBrushCursor(
