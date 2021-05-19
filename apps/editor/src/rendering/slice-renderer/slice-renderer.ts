@@ -220,6 +220,24 @@ export class SliceRenderer implements IDisposable {
     };
   }
 
+  /**
+   * Converts a screen position to virtual uv coordinates of the main view slice.
+   * Virtual means, that uv coordinates can be outside the [0, 1] range aswell.
+   */
+  public getVirtualMainViewUV(screenPosition: Pixel) {
+    const webGLPosition = this.getMainViewWebGLPosition(screenPosition);
+    const sliceRelativePosition = this.slices[
+      this.editor.viewSettings.mainViewType
+    ]
+      .worldToLocal(new THREE.Vector3(webGLPosition.x, webGLPosition.y, 0))
+      .addScalar(0.5);
+
+    return {
+      x: 1 - sliceRelativePosition.x,
+      y: sliceRelativePosition.y,
+    };
+  }
+
   public showBrushCursorPreview(
     viewType = this.editor.viewSettings.mainViewType,
   ) {
