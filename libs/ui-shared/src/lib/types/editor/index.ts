@@ -1,5 +1,6 @@
 export * from "./document";
 export * from "./editor";
+export * from "./history";
 export * from "./layers";
 export * from "./parameters";
 export * from "./tools";

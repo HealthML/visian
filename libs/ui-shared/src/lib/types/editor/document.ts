@@ -24,4 +24,7 @@ export interface IDocument {
   viewport3D: IViewport3D;
 
   tools: ITools;
+
+  /** Reads a layer based on its id. */
+  getLayer(id: string): ILayer | undefined;
 }

@@ -14,7 +14,7 @@ import { EditorUndoRedo } from "./undo-redo";
 import {
   EditorViewSettings,
   EditorViewSettingsSnapshot,
-} from "./view-settings";
+} from "./_view-settings";
 
 export interface EditorSnapshot {
   backgroundColor?: string;
