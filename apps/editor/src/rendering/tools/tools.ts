@@ -7,7 +7,6 @@ import {
   ViewType,
 } from "@visian/utils";
 import { action, computed, makeObservable, observable } from "mobx";
-import * as THREE from "three";
 import {
   ToolType,
   Editor,
@@ -331,23 +330,15 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
       return;
     }
 
-    const tool = (alt ? this.altToolMap : this.toolMap)[this.activeTool];
+    const uv = this.editor.sliceRenderer.getVirtualMainViewUV(screenPosition);
 
-    const intersection = this.editor.sliceRenderer.raycaster.getIntersectionsFromPointer(
-      screenPosition,
-    )[0];
-    if (!intersection || !intersection.uv) {
+    if (uv.x > 1 || uv.x < 0 || uv.y > 1 || uv.y < 0) {
       this.setIsCursorOverDrawableArea(false);
-      if (eventType === "end") {
-        this.setIsDrawing(false);
-        tool?.endAt(null);
-      }
-      return;
+    } else {
+      this.setIsCursorOverDrawableArea();
+      this.alignBrushCursor(uv);
     }
 
-    this.setIsCursorOverDrawableArea();
-
-    this.alignBrushCursor(intersection.uv);
     if (
       !eventType ||
       (!this.editor.isAnnotationVisible && this.isDrawingToolSelected)
@@ -355,12 +346,10 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
       return;
     }
 
-    const dragPoint = this.getDragPoint(
-      intersection.uv,
-      !this.isOutlineToolSelected,
-    );
+    const dragPoint = this.getDragPoint(uv, !this.isOutlineToolSelected);
     if (!dragPoint) return;
 
+    const tool = (alt ? this.altToolMap : this.toolMap)[this.activeTool];
     switch (eventType) {
       case "start":
         this.setIsDrawing(true);
@@ -376,10 +365,12 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
         tool?.endAt(dragPoint);
         break;
     }
+
+    this.editor.sliceRenderer.lazyRender();
   }
 
   public alignBrushCursor(
-    uv: THREE.Vector2,
+    uv: Pixel,
     viewType = this.editor.viewSettings.mainViewType,
     preview = false,
   ) {
@@ -410,7 +401,7 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
     );
   }
 
-  private getDragPoint(uv: THREE.Vector2, floored = true) {
+  private getDragPoint(uv: Pixel, floored = true) {
     if (!this.editor.annotation) return undefined;
 
     const { annotation } = this.editor;
