@@ -29,7 +29,7 @@ export class Slice extends THREE.Group implements IDisposable {
 
   // Wrapper around every part of the slice.
   // Used to synch the crosshair position when the main view changes.
-  public crosshairShiftGroup = new THREE.Group();
+  private crosshairShiftGroup = new THREE.Group();
   public crosshairSynchOffset = new THREE.Vector2();
 
   private geometry = new THREE.PlaneGeometry();
@@ -132,6 +132,21 @@ export class Slice extends THREE.Group implements IDisposable {
   public setCrosshairSynchOffset(offset = new THREE.Vector2()) {
     this.crosshairSynchOffset.copy(offset);
     this.crosshairShiftGroup.position.set(-offset.x, -offset.y, 0);
+  }
+
+  /**
+   * Converts a position to virtual uv coordinates of this slice.
+   * Virtual means, that uv coordinates can be outside the [0, 1] range aswell.
+   */
+  public getVirtualUVs(position: THREE.Vector3) {
+    const localPosition = this.crosshairShiftGroup
+      .worldToLocal(position)
+      .addScalar(0.5);
+
+    return {
+      x: 1 - localPosition.x,
+      y: localPosition.y,
+    };
   }
 
   private updateScale = () => {
