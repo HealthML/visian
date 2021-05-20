@@ -78,41 +78,19 @@ export class GradientComputer implements IDisposable {
           }
         },
       ),
-      reaction(() => volumeRenderer.model.focus, this.updateOutputDerivative),
       reaction(
-        () => volumeRenderer.model.useFocusVolume,
-        this.updateOutputDerivative,
-      ),
-      reaction(
-        () => volumeRenderer.model.focusColor,
-        this.updateOutputDerivative,
-      ),
-      reaction(
-        () => volumeRenderer.model.imageOpacity,
-        this.updateOutputDerivative,
-      ),
-      reaction(
-        () => volumeRenderer.model.contextOpacity,
-        this.updateOutputDerivative,
-      ),
-      reaction(
-        () => volumeRenderer.model.rangeLimits,
-        this.updateOutputDerivative,
-      ),
-      reaction(
-        () => volumeRenderer.model.cutAwayConeAngle,
-        this.updateOutputDerivative,
-      ),
-      reaction(
-        () => volumeRenderer.model.cutAwayConeDirection.toArray(),
-        this.updateOutputDerivative,
-      ),
-      reaction(
-        () => volumeRenderer.model.customTFTexture,
-        this.updateOutputDerivative,
-      ),
-      reaction(
-        () => volumeRenderer.model.transferFunction.type,
+        () => [
+          volumeRenderer.model.focus,
+          volumeRenderer.model.useFocusVolume,
+          volumeRenderer.model.focusColor,
+          volumeRenderer.model.imageOpacity,
+          volumeRenderer.model.contextOpacity,
+          volumeRenderer.model.rangeLimits,
+          volumeRenderer.model.cutAwayConeAngle,
+          volumeRenderer.model.cutAwayConeDirection.toArray(),
+          volumeRenderer.model.customTFTexture,
+          volumeRenderer.model.transferFunction.type,
+        ],
         this.updateOutputDerivative,
       ),
     );

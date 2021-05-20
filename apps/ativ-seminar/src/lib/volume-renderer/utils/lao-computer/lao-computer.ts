@@ -37,12 +37,6 @@ export class LAOComputer extends TiledRenderer {
     super(laoMaterial, renderer, undefined, target);
 
     this.reactionDisposers.push(
-      reaction(() => volumeRendererModel.useFocusVolume, this.setDirty),
-      reaction(() => volumeRendererModel.focusColor, this.setDirty),
-      reaction(() => volumeRendererModel.imageOpacity, this.setDirty),
-      reaction(() => volumeRendererModel.contextOpacity, this.setDirty),
-      reaction(() => volumeRendererModel.rangeLimits, this.setDirty),
-      reaction(() => volumeRendererModel.cutAwayConeAngle, this.setDirty),
       reaction(
         () => volumeRendererModel.cutAwayConeDirection.toArray(),
         () => {
@@ -51,8 +45,6 @@ export class LAOComputer extends TiledRenderer {
           }
         },
       ),
-      reaction(() => volumeRendererModel.customTFTexture, this.setDirty),
-      reaction(() => volumeRendererModel.transferFunction.type, this.setDirty),
       reaction(
         () => volumeRendererModel.image,
         (atlas?: TextureAtlas) => {
@@ -68,7 +60,20 @@ export class LAOComputer extends TiledRenderer {
           this.setDirty();
         },
       ),
-      reaction(() => volumeRendererModel.focus, this.setDirty),
+      reaction(
+        () => [
+          volumeRendererModel.useFocusVolume,
+          volumeRendererModel.focusColor,
+          volumeRendererModel.imageOpacity,
+          volumeRendererModel.contextOpacity,
+          volumeRendererModel.rangeLimits,
+          volumeRendererModel.cutAwayConeAngle,
+          volumeRendererModel.customTFTexture,
+          volumeRendererModel.transferFunction.type,
+          volumeRendererModel.focus,
+        ],
+        this.setDirty,
+      ),
     );
   }
 

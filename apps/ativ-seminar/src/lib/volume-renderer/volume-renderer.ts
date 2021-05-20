@@ -141,21 +141,6 @@ export class VolumeRenderer implements IDisposable {
     this.stats.dom.style.left = "auto";
 
     this.disposers.push(
-      reaction(() => this.model.image, this.onCameraMove),
-      reaction(() => this.model.focus, this.lazyRender),
-      reaction(() => this.model.useFocusVolume, this.lazyRender),
-      reaction(() => this.model.focusColor, this.lazyRender),
-      reaction(() => this.model.lightingMode, this.lazyRender),
-      reaction(() => this.model.imageOpacity, this.lazyRender),
-      reaction(() => this.model.contextOpacity, this.lazyRender),
-      reaction(() => this.model.rangeLimits, this.lazyRender),
-      reaction(() => this.model.cutAwayConeAngle, this.lazyRender),
-      reaction(
-        () => this.model.cutAwayConeDirection.toArray(),
-        this.lazyRender,
-      ),
-      reaction(() => this.model.customTFTexture, this.lazyRender),
-      reaction(() => this.model.transferFunction, this.lazyRender),
       reaction(
         () => this.model.isConeLinkedToCamera,
         (value) => {
@@ -163,6 +148,23 @@ export class VolumeRenderer implements IDisposable {
             this.onCameraMove();
           }
         },
+      ),
+      reaction(() => this.model.image, this.onCameraMove),
+      reaction(
+        () => [
+          this.model.focus,
+          this.model.useFocusVolume,
+          this.model.focusColor,
+          this.model.lightingMode,
+          this.model.imageOpacity,
+          this.model.contextOpacity,
+          this.model.rangeLimits,
+          this.model.cutAwayConeAngle,
+          this.model.customTFTexture,
+          this.model.transferFunction,
+          this.model.cutAwayConeDirection.toArray(),
+        ],
+        this.lazyRender,
       ),
     );
 
