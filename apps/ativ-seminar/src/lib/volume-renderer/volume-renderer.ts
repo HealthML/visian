@@ -12,12 +12,15 @@ import {
   LAOComputer,
   LightingModeType,
   ResolutionComputer,
+  SharedUniforms,
 } from "./utils";
 import Volume from "./volume";
 import VolumeMaterial from "./volume-material";
 
 export class VolumeRenderer implements IDisposable {
   public model: VolumeRendererModel;
+
+  private sharedUniforms: SharedUniforms;
 
   public renderer: THREE.WebGLRenderer;
   public camera: THREE.PerspectiveCamera;
@@ -49,6 +52,8 @@ export class VolumeRenderer implements IDisposable {
     // In the future the state should be part of the general state tree.
     this.model = new VolumeRendererModel();
 
+    this.sharedUniforms = new SharedUniforms(this.model);
+
     this.renderer = new THREE.WebGLRenderer({ alpha: true, canvas });
     this.renderer.xr.enabled = true;
     this.renderer.setPixelRatio(window.devicePixelRatio);
@@ -74,10 +79,15 @@ export class VolumeRenderer implements IDisposable {
 
     document.addEventListener("keydown", this.onKeyDown);
 
-    this.gradientComputer = new GradientComputer(this.renderer, this);
+    this.gradientComputer = new GradientComputer(
+      this.renderer,
+      this,
+      this.sharedUniforms,
+    );
     this.laoComputer = new LAOComputer(
       this.renderer,
       this.model,
+      this.sharedUniforms,
       this.gradientComputer.getFirstDerivative(),
       this.gradientComputer.getSecondDerivative(),
       this.updateCurrentResolution,
@@ -85,6 +95,7 @@ export class VolumeRenderer implements IDisposable {
 
     this.volume = new Volume(
       this,
+      this.sharedUniforms,
       this.gradientComputer.getFirstDerivative(),
       this.gradientComputer.getSecondDerivative(),
       this.gradientComputer.getOutputDerivative(),
@@ -130,17 +141,6 @@ export class VolumeRenderer implements IDisposable {
     this.stats.dom.style.left = "auto";
 
     this.disposers.push(
-      reaction(() => this.model.image, this.onCameraMove),
-      reaction(() => this.model.focus, this.lazyRender),
-      reaction(() => this.model.useFocusVolume, this.lazyRender),
-      reaction(() => this.model.focusColor, this.lazyRender),
-      reaction(() => this.model.lightingMode, this.lazyRender),
-      reaction(() => this.model.imageOpacity, this.lazyRender),
-      reaction(() => this.model.contextOpacity, this.lazyRender),
-      reaction(() => this.model.rangeLimits, this.lazyRender),
-      reaction(() => this.model.cutAwayConeAngle, this.lazyRender),
-      reaction(() => this.model.customTFTexture, this.lazyRender),
-      reaction(() => this.model.transferFunction, this.lazyRender),
       reaction(
         () => this.model.isConeLinkedToCamera,
         (value) => {
@@ -148,6 +148,23 @@ export class VolumeRenderer implements IDisposable {
             this.onCameraMove();
           }
         },
+      ),
+      reaction(() => this.model.image, this.onCameraMove),
+      reaction(
+        () => [
+          this.model.focus,
+          this.model.useFocusVolume,
+          this.model.focusColor,
+          this.model.lightingMode,
+          this.model.imageOpacity,
+          this.model.contextOpacity,
+          this.model.rangeLimits,
+          this.model.cutAwayConeAngle,
+          this.model.customTFTexture,
+          this.model.transferFunction,
+          this.model.cutAwayConeDirection.toArray(),
+        ],
+        this.lazyRender,
       ),
     );
 
@@ -172,6 +189,7 @@ export class VolumeRenderer implements IDisposable {
     this.resolutionComputer.dispose();
     this.renderer.dispose();
     this.intermediateRenderTarget.dispose();
+    this.sharedUniforms.dispose();
     this.disposers.forEach((disposer) => disposer());
   };
 
@@ -269,14 +287,8 @@ export class VolumeRenderer implements IDisposable {
       this.workingMatrix.copy(this.volume.matrixWorld).invert(),
     );
 
-    this.volume.setCameraPosition(this.workingVector);
-    this.gradientComputer.setCameraPosition(this.workingVector);
-    this.laoComputer.setCameraPosition(this.workingVector);
-
-    if (this.model.isConeLinkedToCamera) {
-      const { x, y, z } = this.workingVector;
-      this.model.setCutAwayConeDirection(x, y, z);
-    }
+    const { x, y, z } = this.workingVector;
+    this.model.setCameraPosition(x, y, z);
   }
 
   private onFlyControlsLock = () => {

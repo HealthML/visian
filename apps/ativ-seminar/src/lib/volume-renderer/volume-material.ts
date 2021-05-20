@@ -1,28 +1,16 @@
-import { autorun, IReactionDisposer, reaction } from "mobx";
 import * as THREE from "three";
-import tc from "tinycolor2";
 
-import { TextureAtlas } from "../texture-atlas";
 import { IDisposable } from "../types";
 import volumeFragmentShader from "./shader/volume/volume.frag.glsl";
 import volumeVertexShader from "./shader/volume/volume.vert.glsl";
-import {
-  atlasInfoUniforms,
-  commonUniforms,
-  imageInfoUniforms,
-  opacityUniforms,
-  transferFunctionsUniforms,
-} from "./uniforms";
-import { lightingUniforms } from "./uniforms/lighting";
-import { getStepSize } from "./utils";
+import { SharedUniforms } from "./utils";
 
 import type VolumeRenderer from "./volume-renderer";
 /** A volume domain material. */
 class VolumeMaterial extends THREE.ShaderMaterial implements IDisposable {
-  protected reactionDisposers: IReactionDisposer[] = [];
-
   constructor(
     protected volumeRenderer: VolumeRenderer,
+    sharedUniforms: SharedUniforms,
     firstDerivative: THREE.Texture,
     secondDerivative: THREE.Texture,
     outputDerivative: THREE.Texture,
@@ -31,18 +19,11 @@ class VolumeMaterial extends THREE.ShaderMaterial implements IDisposable {
     super({
       vertexShader: volumeVertexShader,
       fragmentShader: volumeFragmentShader,
-      uniforms: THREE.UniformsUtils.merge([
-        {
-          uOutputFirstDerivative: { value: null },
-          uLAO: { value: null },
-        },
-        opacityUniforms,
-        commonUniforms,
-        atlasInfoUniforms,
-        imageInfoUniforms,
-        transferFunctionsUniforms,
-        lightingUniforms,
-      ]),
+      uniforms: {
+        ...sharedUniforms.uniforms,
+        uOutputFirstDerivative: { value: null },
+        uLAO: { value: null },
+      },
     });
 
     // Always render the back faces.
@@ -56,86 +37,6 @@ class VolumeMaterial extends THREE.ShaderMaterial implements IDisposable {
     this.uniforms.uInputSecondDerivative.value = secondDerivative;
     this.uniforms.uOutputFirstDerivative.value = outputDerivative;
     this.uniforms.uLAO.value = lao;
-
-    this.reactionDisposers.push(
-      autorun(() => {
-        this.uniforms.uConeDirection.value = volumeRenderer.model.cutAwayConeDirection.toArray();
-      }),
-      autorun(() => {
-        this.uniforms.uUseFocus.value = volumeRenderer.model.useFocusVolume;
-      }),
-      autorun(() => {
-        const color = tc(volumeRenderer.model.focusColor).toRgb();
-        this.uniforms.uFocusColor.value = [
-          color.r / 255,
-          color.g / 255,
-          color.b / 255,
-          color.a,
-        ];
-      }),
-      autorun(() => {
-        this.uniforms.uTransferFunction.value =
-          volumeRenderer.model.transferFunction.type;
-      }),
-      autorun(() => {
-        this.uniforms.uOpacity.value = volumeRenderer.model.imageOpacity;
-      }),
-      autorun(() => {
-        this.uniforms.uContextOpacity.value =
-          volumeRenderer.model.contextOpacity;
-      }),
-      autorun(() => {
-        [
-          this.uniforms.uLimitLow.value,
-          this.uniforms.uLimitHigh.value,
-        ] = volumeRenderer.model.rangeLimits;
-      }),
-      autorun(() => {
-        this.uniforms.uConeAngle.value = volumeRenderer.model.cutAwayConeAngle;
-      }),
-      autorun(() => {
-        this.uniforms.uLightingMode.value =
-          volumeRenderer.model.lightingMode.type;
-      }),
-      autorun(() => {
-        this.uniforms.uLaoIntensity.value = volumeRenderer.model.laoIntensity;
-      }),
-      autorun(() => {
-        this.uniforms.uCustomTFTexture.value =
-          volumeRenderer.model.customTFTexture;
-      }),
-      reaction(
-        () => volumeRenderer.model.image,
-        (atlas?: TextureAtlas) => {
-          if (!atlas) return;
-
-          this.uniforms.uVolume.value = atlas.getTexture();
-          this.uniforms.uVoxelCount.value = atlas.voxelCount;
-          this.uniforms.uAtlasGrid.value = atlas.atlasGrid;
-          this.uniforms.uStepSize.value = getStepSize(atlas);
-        },
-      ),
-      reaction(
-        () => volumeRenderer.model.focus,
-        (atlas?: TextureAtlas) => {
-          if (atlas) {
-            this.uniforms.uFocus.value = atlas.getTexture();
-          } else {
-            this.uniforms.uFocus.value = null;
-          }
-        },
-      ),
-    );
-  }
-
-  public setCameraPosition(position: THREE.Vector3) {
-    this.uniforms.uCameraPosition.value = position;
-  }
-
-  public dispose() {
-    this.reactionDisposers.forEach((disposer) => {
-      disposer();
-    });
   }
 }
 

@@ -1,12 +1,12 @@
 import { ScreenAlignedQuad } from "@visian/utils";
-import { autorun, IReactionDisposer, reaction } from "mobx";
+import { IReactionDisposer, reaction } from "mobx";
 import * as THREE from "three";
-import tc from "tinycolor2";
 
 import { TextureAtlas } from "../../../texture-atlas";
 import { IDisposable } from "../../../types";
 import VolumeRenderer from "../../volume-renderer";
 import { generateHistogram } from "../histogram";
+import { SharedUniforms } from "../shared-uniforms";
 import { GradientMaterial, GradientMode } from "./gradient-material";
 
 export class GradientComputer implements IDisposable {
@@ -28,6 +28,7 @@ export class GradientComputer implements IDisposable {
   constructor(
     private renderer: THREE.WebGLRenderer,
     private volumeRenderer: VolumeRenderer,
+    sharedUniforms: SharedUniforms,
   ) {
     this.firstDerivativeRenderTarget = new THREE.WebGLRenderTarget(1, 1);
     this.secondDerivativeRenderTarget = new THREE.WebGLRenderTarget(1, 1);
@@ -36,7 +37,7 @@ export class GradientComputer implements IDisposable {
     this.gradientMaterial = new GradientMaterial(
       this.firstDerivativeRenderTarget.texture,
       this.secondDerivativeRenderTarget.texture,
-      volumeRenderer.model,
+      sharedUniforms,
     );
 
     this.screenAlignedQuad = new ScreenAlignedQuad(this.gradientMaterial);
@@ -67,57 +68,31 @@ export class GradientComputer implements IDisposable {
           this.updateOutputDerivative();
         },
       ),
-      reaction(() => volumeRenderer.model.focus, this.updateOutputDerivative),
-      autorun(() => {
-        this.gradientMaterial.uniforms.uUseFocus.value =
-          volumeRenderer.model.useFocusVolume;
-
-        this.updateOutputDerivative();
-      }),
-      autorun(() => {
-        this.gradientMaterial.uniforms.uConeDirection.value = volumeRenderer.model.cutAwayConeDirection.toArray();
-      }),
-      autorun(() => {
-        const color = tc(volumeRenderer.model.focusColor).toRgb();
-        this.gradientMaterial.uniforms.uFocusColor.value = [
-          color.r / 255,
-          color.g / 255,
-          color.b / 255,
-          color.a,
-        ];
-      }),
-      autorun(() => {
-        this.gradientMaterial.uniforms.uTransferFunction.value =
-          volumeRenderer.model.transferFunction.type;
-
-        this.updateOutputDerivative();
-      }),
-      autorun(() => {
-        this.gradientMaterial.uniforms.uContextOpacity.value =
-          volumeRenderer.model.contextOpacity;
-
-        this.updateOutputDerivative();
-      }),
-      autorun(() => {
-        [
-          this.gradientMaterial.uniforms.uLimitLow.value,
-          this.gradientMaterial.uniforms.uLimitHigh.value,
-        ] = volumeRenderer.model.rangeLimits;
-
-        this.updateOutputDerivative();
-      }),
-      autorun(() => {
-        this.gradientMaterial.uniforms.uConeAngle.value =
-          volumeRenderer.model.cutAwayConeAngle;
-
-        this.updateOutputDerivative();
-      }),
-      autorun(() => {
-        this.gradientMaterial.uniforms.uCustomTFTexture.value =
-          volumeRenderer.model.customTFTexture;
-
-        this.updateOutputDerivative();
-      }),
+      reaction(
+        () => volumeRenderer.model.cameraPosition,
+        () => {
+          if (
+            this.volumeRenderer.model.transferFunction.updateNormalsOnCameraMove
+          ) {
+            this.updateOutputDerivative();
+          }
+        },
+      ),
+      reaction(
+        () => [
+          volumeRenderer.model.focus,
+          volumeRenderer.model.useFocusVolume,
+          volumeRenderer.model.focusColor,
+          volumeRenderer.model.imageOpacity,
+          volumeRenderer.model.contextOpacity,
+          volumeRenderer.model.rangeLimits,
+          volumeRenderer.model.cutAwayConeAngle,
+          volumeRenderer.model.cutAwayConeDirection.toArray(),
+          volumeRenderer.model.customTFTexture,
+          volumeRenderer.model.transferFunction.type,
+        ],
+        this.updateOutputDerivative,
+      ),
     );
   }
 
@@ -138,14 +113,6 @@ export class GradientComputer implements IDisposable {
       this.outputDerivativeDirty
     ) {
       this.renderOutputDerivative();
-    }
-  }
-
-  public setCameraPosition(position: THREE.Vector3) {
-    this.gradientMaterial.setCameraPosition(position);
-
-    if (this.volumeRenderer.model.transferFunction.updateNormalsOnCameraMove) {
-      this.updateOutputDerivative();
     }
   }
 

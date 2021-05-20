@@ -3,6 +3,7 @@ import * as THREE from "three";
 
 import { VolumeRendererModel } from "../../../../models";
 import { TextureAtlas } from "../../../texture-atlas";
+import { SharedUniforms } from "../shared-uniforms";
 import { TiledRenderer } from "../tiled-renderer";
 import LAOMaterial from "./lao-material";
 
@@ -20,7 +21,8 @@ export class LAOComputer extends TiledRenderer {
 
   constructor(
     renderer: THREE.WebGLRenderer,
-    private volumeRendererModel: VolumeRendererModel,
+    volumeRendererModel: VolumeRendererModel,
+    sharedUniforms: SharedUniforms,
     firstDerivativeTexture: THREE.Texture,
     secondDerivativeTexture: THREE.Texture,
     private flush: () => void,
@@ -29,20 +31,20 @@ export class LAOComputer extends TiledRenderer {
       firstDerivativeTexture,
       secondDerivativeTexture,
       target.texture,
-      volumeRendererModel,
+      sharedUniforms,
     ),
   ) {
     super(laoMaterial, renderer, undefined, target);
 
     this.reactionDisposers.push(
-      reaction(() => volumeRendererModel.useFocusVolume, this.setDirty),
-      reaction(() => volumeRendererModel.focusColor, this.setDirty),
-      reaction(() => volumeRendererModel.imageOpacity, this.setDirty),
-      reaction(() => volumeRendererModel.contextOpacity, this.setDirty),
-      reaction(() => volumeRendererModel.rangeLimits, this.setDirty),
-      reaction(() => volumeRendererModel.cutAwayConeAngle, this.setDirty),
-      reaction(() => volumeRendererModel.customTFTexture, this.setDirty),
-      reaction(() => volumeRendererModel.transferFunction.type, this.setDirty),
+      reaction(
+        () => volumeRendererModel.cutAwayConeDirection.toArray(),
+        () => {
+          if (volumeRendererModel.transferFunction.updateLAOOnCameraMove) {
+            this.setDirty();
+          }
+        },
+      ),
       reaction(
         () => volumeRendererModel.image,
         (atlas?: TextureAtlas) => {
@@ -58,7 +60,20 @@ export class LAOComputer extends TiledRenderer {
           this.setDirty();
         },
       ),
-      reaction(() => volumeRendererModel.focus, this.setDirty),
+      reaction(
+        () => [
+          volumeRendererModel.useFocusVolume,
+          volumeRendererModel.focusColor,
+          volumeRendererModel.imageOpacity,
+          volumeRendererModel.contextOpacity,
+          volumeRendererModel.rangeLimits,
+          volumeRendererModel.cutAwayConeAngle,
+          volumeRendererModel.customTFTexture,
+          volumeRendererModel.transferFunction.type,
+          volumeRendererModel.focus,
+        ],
+        this.setDirty,
+      ),
     );
   }
 
@@ -116,17 +131,6 @@ export class LAOComputer extends TiledRenderer {
     this._isDirty = true;
     this._isFinalLAOFlushed = false;
   };
-
-  public setCameraPosition(position: THREE.Vector3) {
-    this.laoMaterial.setCameraPosition(position);
-
-    if (
-      this.volumeRendererModel.transferFunction.updateLAOOnCameraMove &&
-      this.volumeRendererModel.isConeLinkedToCamera
-    ) {
-      this.setDirty();
-    }
-  }
 }
 
 export default LAOComputer;
