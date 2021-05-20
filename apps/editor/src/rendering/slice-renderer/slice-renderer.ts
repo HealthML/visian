@@ -21,6 +21,7 @@ import {
 } from "./utils";
 
 import type { Editor } from "../../models";
+import { IRenderLoopSubscriber } from "./types";
 
 export class SliceRenderer implements IDisposable {
   private _renderers: THREE.WebGLRenderer[];
@@ -37,6 +38,8 @@ export class SliceRenderer implements IDisposable {
   private isImageLoaded = false;
 
   private resizeSensors: ResizeSensor[] = [];
+
+  private renderLoopSubscribers: IRenderLoopSubscriber[] = [];
 
   private disposers: IDisposer[] = [];
 
@@ -92,7 +95,11 @@ export class SliceRenderer implements IDisposable {
     this.disposers.push(
       reaction(
         () => editor.image,
-        (image?: RenderedImage) => {
+        (image?: RenderedImage, oldImage?: RenderedImage) => {
+          if (oldImage) {
+            this.unsubscribeFromRenderLoop(oldImage);
+          }
+
           if (!image) return;
           this.setImage(image);
 
@@ -104,7 +111,11 @@ export class SliceRenderer implements IDisposable {
       ),
       reaction(
         () => editor.annotation,
-        (image?: RenderedImage) => {
+        (image?: RenderedImage, oldImage?: RenderedImage) => {
+          if (oldImage) {
+            this.unsubscribeFromRenderLoop(oldImage);
+          }
+
           this.setAnnotation(image);
         },
         { fireImmediately: true },
@@ -159,6 +170,16 @@ export class SliceRenderer implements IDisposable {
 
   public getOutline(viewType = this.editor.viewSettings.mainViewType) {
     return this.slices[viewType].outline;
+  }
+
+  public subscribeToRenderLoop(subscriber: IRenderLoopSubscriber) {
+    this.renderLoopSubscribers.push(subscriber);
+  }
+
+  public unsubscribeFromRenderLoop(unsubscriber: IRenderLoopSubscriber) {
+    this.renderLoopSubscribers = this.renderLoopSubscribers.filter(
+      (subscriber) => subscriber !== unsubscriber,
+    );
   }
 
   private resize = () => {
@@ -269,12 +290,7 @@ export class SliceRenderer implements IDisposable {
     if (!this.isImageLoaded) return;
     this.lazyRenderTriggered = false;
 
-    this.editor.tools.render();
-
-    this._renderers.forEach((_, index) => {
-      this.editor.image?.onBeforeRender(index);
-      this.editor.annotation?.onBeforeRender(index);
-    });
+    this.renderLoopSubscribers.forEach((subscriber) => subscriber.render());
 
     const order = getOrder(this.editor.viewSettings.mainViewType);
     this.activeRenderers.forEach((renderer, index) => {
@@ -290,6 +306,8 @@ export class SliceRenderer implements IDisposable {
 
     image.setRenderers(this._renderers);
 
+    this.subscribeToRenderLoop(image);
+
     this.lazyRender();
   }
 
@@ -297,6 +315,8 @@ export class SliceRenderer implements IDisposable {
     this.slices.forEach((slice) => slice.setAnnotation(image));
 
     image?.setRenderers(this._renderers);
+
+    if (image) this.subscribeToRenderLoop(image);
 
     this.lazyRender();
   }

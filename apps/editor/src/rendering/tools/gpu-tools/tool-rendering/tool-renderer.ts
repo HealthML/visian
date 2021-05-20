@@ -3,11 +3,12 @@ import { reaction } from "mobx";
 import * as THREE from "three";
 
 import { Editor } from "../../../../models";
+import { IRenderLoopSubscriber, SliceRenderer } from "../../../slice-renderer";
 import { Circle } from "../../types";
 import { Circles } from "./circles";
 import { ToolCamera } from "./tool-camera";
 
-export class ToolRenderer {
+export class ToolRenderer implements IRenderLoopSubscriber {
   private circlesToRender: Circle[] = [];
   private shapesToRender: THREE.Mesh[] = [];
 
@@ -36,7 +37,7 @@ export class ToolRenderer {
         }),
         (params) => {
           this.resizeRenderTargets();
-          this.readCurrentSlice(params);
+          this.currentSliceChanged(params);
         },
         { fireImmediately: true },
       ),
@@ -48,22 +49,34 @@ export class ToolRenderer {
               () => new THREE.WebGLRenderTarget(1, 1),
             );
             this.resizeRenderTargets();
-            this.readCurrentSlice();
+            this.currentSliceChanged();
           } else {
             this.renderTargets = [];
           }
         },
         { fireImmediately: true },
       ),
+      reaction(
+        () => editor.sliceRenderer,
+        (sliceRenderer?: SliceRenderer, oldSliceRenderer?: SliceRenderer) => {
+          oldSliceRenderer?.unsubscribeFromRenderLoop(this);
+          sliceRenderer?.subscribeToRenderLoop(this);
+        },
+      ),
     );
   }
 
   public dispose() {
     this.circles.dispose();
+    this.editor.sliceRenderer?.unsubscribeFromRenderLoop(this);
     this.disposers.forEach((disposer) => disposer());
   }
 
-  public readCurrentSlice = (
+  /**
+   * Needs to be called whenever the current slice of the active annotation is
+   * changed by some other source than this tool renderer.
+   */
+  public currentSliceChanged = (
     { mainViewType, selectedSlice, annotation } = {
       mainViewType: this.editor.viewSettings.mainViewType,
       selectedSlice: this.editor.viewSettings.selectedVoxel.getFromView(
@@ -134,12 +147,16 @@ export class ToolRenderer {
 
   public renderCircles(...circles: Circle[]) {
     this.circlesToRender.push(...circles);
+
+    this.editor.sliceRenderer?.lazyRender();
   }
 
   public renderShape(geometry: THREE.ShapeGeometry, material?: THREE.Material) {
     this.shapesToRender.push(
       new THREE.Mesh(geometry, material || new THREE.MeshBasicMaterial()),
     );
+
+    this.editor.sliceRenderer?.lazyRender();
   }
 
   public waitForRender() {

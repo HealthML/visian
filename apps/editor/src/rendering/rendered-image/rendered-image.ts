@@ -14,6 +14,7 @@ import {
   VoxelWithValue,
 } from "@visian/utils";
 import * as THREE from "three";
+import { IRenderLoopSubscriber } from "../slice-renderer";
 
 import {
   copyToRenderTarget,
@@ -23,7 +24,9 @@ import {
 } from "./edit-rendering";
 import { SliceAtlasAdapter } from "./slice-atlas-adapter";
 
-export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
+export class RenderedImage<T extends TypedArray = TypedArray>
+  extends Image<T>
+  implements IRenderLoopSubscriber {
   public static fromITKImage<T2 extends TypedArray = TypedArray>(
     image: ITKImage<T2>,
   ) {
@@ -146,35 +149,36 @@ export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
     });
   }
 
-  public onBeforeRender(rendererIndex = 0) {
-    const renderer = this.renderers[rendererIndex];
-    if (!renderer) return;
+  public render() {
+    if (!this.renderers.length) return;
 
-    if (
-      this.hasCPUUpdates[rendererIndex] &&
-      this.renderTargets[rendererIndex]
-    ) {
-      this.copyToRenderTarget(rendererIndex);
-    }
-
-    if (this.voxelsToRender.length && !this.voxelsRendered[rendererIndex]) {
-      if (this.isVoxelGeometryDirty) {
-        this.voxels.updateGeometry(this.voxelsToRender);
-        this.isVoxelGeometryDirty = false;
+    this.renderers.forEach((renderer, rendererIndex) => {
+      if (
+        this.hasCPUUpdates[rendererIndex] &&
+        this.renderTargets[rendererIndex]
+      ) {
+        this.copyToRenderTarget(rendererIndex);
       }
 
-      renderVoxels(this.voxels, this.renderTargets[rendererIndex], renderer);
-      this.onModificationsOnGPU();
+      if (this.voxelsToRender.length && !this.voxelsRendered[rendererIndex]) {
+        if (this.isVoxelGeometryDirty) {
+          this.voxels.updateGeometry(this.voxelsToRender);
+          this.isVoxelGeometryDirty = false;
+        }
 
-      this.voxelsRendered[rendererIndex] = true;
-      if (this.voxelsRendered.every((value) => value)) {
-        this.voxelsToRender = [];
-        this.isVoxelGeometryDirty = true;
+        renderVoxels(this.voxels, this.renderTargets[rendererIndex], renderer);
+        this.onModificationsOnGPU();
 
-        this.renderCallbacks.forEach((callback) => callback());
-        this.renderCallbacks = [];
+        this.voxelsRendered[rendererIndex] = true;
+        if (this.voxelsRendered.every((value) => value)) {
+          this.voxelsToRender = [];
+          this.isVoxelGeometryDirty = true;
+
+          this.renderCallbacks.forEach((callback) => callback());
+          this.renderCallbacks = [];
+        }
       }
-    }
+    });
   }
 
   private copyToRenderTarget(rendererIndex: number) {

@@ -172,16 +172,12 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
     );
   }
 
-  public render() {
-    this.toolRenderer.render();
-  }
-
   public setActiveTool(tool = this.activeTool) {
     if (this.isDrawing) return;
 
     // Temporary fix so that brush & eraser don't overwrite smart brush edits.
     if ([ToolType.Brush, ToolType.Eraser].includes(tool)) {
-      this.toolRenderer.readCurrentSlice();
+      this.toolRenderer.currentSliceChanged();
     }
 
     if (tool === ToolType.Crosshair && !this.editor.isIn3DMode) {
@@ -317,7 +313,7 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
   }
 
   public onSliceChanged() {
-    this.toolRenderer.readCurrentSlice();
+    this.toolRenderer.currentSliceChanged();
   }
 
   public handleEvent(
@@ -365,8 +361,6 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
         tool?.endAt(dragPoint);
         break;
     }
-
-    this.editor.sliceRenderer.lazyRender();
   }
 
   public alignBrushCursor(
