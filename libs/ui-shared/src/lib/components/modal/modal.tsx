@@ -93,6 +93,8 @@ export const Modal: React.FC<ModalProps> = ({
               {onReset && (
                 <StyledButton
                   icon="reset"
+                  tooltipTx="reset"
+                  tooltipPosition="left"
                   isActive={false}
                   onPointerDown={onReset}
                 />
