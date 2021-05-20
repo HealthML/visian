@@ -41,11 +41,6 @@ export interface IViewport2D {
    * `1` is the default zoom (typically zoom to fit).
    */
   zoomLevel: number;
-  /**
-   * The current additive amount by which the the zoom level is increment.
-   * This is typically dependent on the current `zoomLevel`.
-   */
-  zoomStep: number;
   /** The 2D navigation offset by which the visible image is moved. */
   offset: Pixel;
 
@@ -62,9 +57,9 @@ export interface IViewport2D {
    * The slice value should be written into the `ViewSettings`' `selectedVoxel`
    * attribute.
    *
-   * @param slice The slice number.
    * @param viewType The `ViewType` to write the slice to.
    * Defaults to the current `mainViewType`.
+   * @param slice The slice number.
    */
   setSelectedSlice(viewType: ViewType | undefined, slice: number): void;
   /**
@@ -72,10 +67,10 @@ export interface IViewport2D {
    * The new position should be written into the `ViewSettings`'
    * `selectedVoxel` attribute.
    *
-   * @param slicePosition The pixel position the the slice as seen from the
-   * passed `viewType`.
    * @param viewType The `ViewType` to set the crosshair position for.
    * Defaults to the current `mainViewType`.
+   * @param slicePosition The pixel position the the slice as seen from the
+   * passed `viewType`.
    */
   moveCrosshair(viewType: ViewType | undefined, slicePosition: Pixel): void;
 

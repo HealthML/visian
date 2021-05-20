@@ -57,7 +57,11 @@ export class Viewport2D
     });
   }
 
-  public get zoomStep() {
+  /**
+   * The current additive amount by which the the zoom level is increment.
+   * This is typically dependent on the current `zoomLevel`.
+   */
+  protected get zoomStep() {
     return zoomStep * Math.sqrt(this.zoomLevel);
   }
 

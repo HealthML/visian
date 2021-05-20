@@ -68,16 +68,7 @@ export interface IEnumParameter<T> extends IParameter<T> {
   kind: "enum";
 
   /** The options to choose from. */
-  options: {
-    label?: string;
-    labelTx?: string;
-
-    tooltip?: string;
-    tooltipTx?: string;
-    tooltipPosition?: TooltipPosition;
-
-    value: T;
-  }[];
+  options: IEnumParameterOption<T>[];
 }
 
 /** A numeric parameter, typically displayed as a slider. */
