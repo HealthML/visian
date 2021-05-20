@@ -29,7 +29,7 @@ export class Slice extends THREE.Group implements IDisposable {
 
   // Wrapper around every part of the slice.
   // Used to synch the crosshair position when the main view changes.
-  private crosshairShiftGroup = new THREE.Group();
+  public crosshairShiftGroup = new THREE.Group();
   public crosshairSynchOffset = new THREE.Vector2();
 
   private geometry = new THREE.PlaneGeometry();

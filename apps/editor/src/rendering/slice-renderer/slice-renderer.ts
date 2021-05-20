@@ -228,7 +228,7 @@ export class SliceRenderer implements IDisposable {
     const webGLPosition = this.getMainViewWebGLPosition(screenPosition);
     const sliceRelativePosition = this.slices[
       this.editor.viewSettings.mainViewType
-    ]
+    ].crosshairShiftGroup
       .worldToLocal(new THREE.Vector3(webGLPosition.x, webGLPosition.y, 0))
       .addScalar(0.5);
 
