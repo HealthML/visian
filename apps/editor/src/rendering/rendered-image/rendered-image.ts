@@ -90,6 +90,8 @@ export class RenderedImage<T extends TypedArray = TypedArray>
   private hasCPUUpdates = [true];
   /** Callbacks to be invoked when the next render succeeds. */
   private renderCallbacks: (() => void)[] = [];
+  /** Callbacks to be invoked when `renderes` are set. */
+  private rendererCallbacks: (() => void)[] = [];
   /** Used to update the render targets from the CPU data. */
   private screenAlignedQuad: ScreenAlignedQuad;
 
@@ -130,6 +132,11 @@ export class RenderedImage<T extends TypedArray = TypedArray>
 
   public setRenderers(renderers: THREE.WebGLRenderer[]) {
     this.renderers = renderers;
+
+    if (this.renderers.length) {
+      this.rendererCallbacks.forEach((callback) => callback());
+      this.rendererCallbacks = [];
+    }
   }
 
   public getTexture(rendererIndex = 0) {
@@ -146,6 +153,16 @@ export class RenderedImage<T extends TypedArray = TypedArray>
   public waitForRender() {
     return new Promise<void>((resolve) => {
       this.renderCallbacks.push(resolve);
+    });
+  }
+
+  public waitForRenderers() {
+    if (this.renderers.length) {
+      return Promise.resolve();
+    }
+
+    return new Promise<void>((resolve) => {
+      this.rendererCallbacks.push(resolve);
     });
   }
 

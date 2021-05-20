@@ -87,13 +87,15 @@ export class ToolRenderer implements IRenderLoopSubscriber {
   ) => {
     if (!annotation) return;
 
-    this.renderTargets.forEach((renderTarget, index) => {
-      annotation.readSliceToTarget(
-        selectedSlice,
-        mainViewType,
-        index,
-        renderTarget,
-      );
+    annotation.waitForRenderers().then(() => {
+      this.renderTargets.forEach((renderTarget, index) => {
+        annotation.readSliceToTarget(
+          selectedSlice,
+          mainViewType,
+          index,
+          renderTarget,
+        );
+      });
     });
   };
 
