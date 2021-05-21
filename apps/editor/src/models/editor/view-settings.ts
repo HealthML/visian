@@ -62,7 +62,7 @@ export class ViewSettings
     if (!value) {
       // TODO: Do not rely on `layer[0]`
       const voxelCount = (this.document.layers[0] as IImageLayer | undefined)
-        ?.voxelCount;
+        ?.image.voxelCount;
 
       if (voxelCount) {
         this.selectedVoxel

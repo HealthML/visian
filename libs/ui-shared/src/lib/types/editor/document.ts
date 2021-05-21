@@ -10,6 +10,12 @@ import type { IViewport2D, IViewport3D, IViewSettings } from "./view-settings";
 export interface IDocument {
   /** The document's UUID. */
   id: string;
+  /**
+   * The document's (user-defined) display name.
+   * If none is set manually, the name of the lowest layer (if any) will be
+   * used.
+   */
+  title: string;
 
   /** The layer that is currently selected for editing. */
   activeLayer?: Reference<ILayer>;

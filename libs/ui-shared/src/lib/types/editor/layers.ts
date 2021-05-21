@@ -24,15 +24,15 @@ export type BlendMode =
 export interface ILayer {
   /** The type of layer. */
   kind: string;
-
   /** `true` for layers that hold annotation information. */
   isAnnotation: boolean;
 
   /** The layer's UUID. */
   id: string;
   /**
-   * The layer's title.
-   * A user-defined display name.
+   * The layer's (user-defined) display name.
+   * If none is set manually, the name of the layer's content (if any) will be
+   * used, e.g., the ImageLayer's image name.
    */
   title: string;
 
@@ -44,6 +44,7 @@ export interface ILayer {
   /**
    * The color used to render layers without intrinsic color information.
    * This is also used to color the layer icon in the layer menu.
+   * If none is set, a default is chosen by the theme.
    */
   color?: string;
   /** Indicates if the layer should be rendered. */
@@ -59,22 +60,24 @@ export interface ILayer {
  * A layer that holds dense pixel/voxel data.
  * It is typically used for, e.g., MRI scans and segmentation annotations.
  */
-export interface IImageLayer extends ILayer, Image {
+export interface IImageLayer extends ILayer {
   kind: "image";
 
-  /**
-   * Local contrast adjustment of the layer.
-   * `1` is the original contrast.
-   */
-  contrast: number;
+  image: Image;
+
   /**
    * Local brightness adjustment of the layer.
    * `1` is the original brightness.
    */
   brightness: number;
+  /**
+   * Local contrast adjustment of the layer.
+   * `1` is the original contrast.
+   */
+  contrast: number;
 
   getVoxel(voxel: Voxel): number;
-  setVoxel(voxel: Voxel, value: number): number;
+  setVoxel(voxel: Voxel, value: number): void;
   setVoxels(voxels: VoxelWithValue[]): void;
 
   getSlice(viewType: ViewType, slice: number): Uint8Array;
@@ -89,5 +92,5 @@ export interface ILayerGroup extends ILayer {
   kind: "group";
 
   /** All layers in the group. */
-  subLayers: ILayer[];
+  layers: ILayer[];
 }

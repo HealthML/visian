@@ -97,7 +97,7 @@ export class Viewport2D
     // TODO: Do not rely on `layer[0]`
     const sliceCount = (this.document.layers[0] as
       | IImageLayer
-      | undefined)?.voxelCount?.getFromView(viewType);
+      | undefined)?.image?.voxelCount.getFromView(viewType);
     return sliceCount ? sliceCount - 1 : 0;
   }
 

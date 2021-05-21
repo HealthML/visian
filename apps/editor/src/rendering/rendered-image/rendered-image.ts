@@ -1,21 +1,20 @@
 import {
-  calculateNewOrientation,
   getTextureFromAtlas,
   Image,
   ImageSnapshot,
   ITKImage,
+  itkImageToImageSnapshot,
   readMedicalImage,
   ScreenAlignedQuad,
-  swapAxesForMetadata,
   TypedArray,
-  unifyOrientation,
   Vector,
   ViewType,
+  Voxel,
   VoxelWithValue,
 } from "@visian/utils";
 import * as THREE from "three";
-import { IRenderLoopSubscriber } from "../slice-renderer";
 
+import { IRenderLoopSubscriber } from "../slice-renderer";
 import {
   copyToRenderTarget,
   ImageRenderTarget,
@@ -30,33 +29,7 @@ export class RenderedImage<T extends TypedArray = TypedArray>
   public static fromITKImage<T2 extends TypedArray = TypedArray>(
     image: ITKImage<T2>,
   ) {
-    return new RenderedImage({
-      name: image.name,
-      dimensionality: image.imageType.dimension,
-      voxelCount:
-        image.imageType.dimension === 2
-          ? [...image.size, 1]
-          : swapAxesForMetadata(image.size, image.direction),
-      voxelSpacing:
-        image.imageType.dimension === 2
-          ? [...image.spacing, 1]
-          : swapAxesForMetadata(image.spacing, image.direction),
-      voxelType: image.imageType.pixelType,
-      voxelComponents: image.imageType.components,
-      voxelComponentType: image.imageType.componentType,
-      origin: image.origin,
-      orientation:
-        image.imageType.dimension === 2
-          ? image.direction
-          : calculateNewOrientation(image.direction),
-      data: unifyOrientation(
-        image.data,
-        image.direction,
-        image.imageType.dimension,
-        image.size,
-        image.imageType.components,
-      ),
-    });
+    return new RenderedImage(itkImageToImageSnapshot(image));
   }
 
   public static async fromFile(file: File | File[]) {
@@ -264,7 +237,7 @@ export class RenderedImage<T extends TypedArray = TypedArray>
     this.isVoxelGeometryDirty = true;
   }
 
-  public setAtlasVoxel(voxel: Vector, value: number) {
+  public setAtlasVoxel(voxel: Voxel | Vector, value: number) {
     if (this.renderers.length) {
       const { x, y, z } = voxel;
       this.voxelsToRender.push({ x, y, z, value });

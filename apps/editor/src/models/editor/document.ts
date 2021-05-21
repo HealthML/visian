@@ -11,6 +11,7 @@ import { Viewport3D, Viewport3DSnapshot } from "./viewport-3d";
 
 export interface DocumentSnapshot {
   id: string;
+  titleOverride?: string;
 
   activeLayerId?: string;
   // TODO: layers: LayerSnapshot[];
@@ -28,6 +29,7 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
   public static readonly excludeFromSnapshotTracking = [];
 
   public id: string;
+  protected titleOverride?: string;
 
   protected activeLayerId?: string;
   public layers: ILayer[] = [];
@@ -42,6 +44,7 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
 
   constructor(snapshot?: DocumentSnapshot) {
     this.id = snapshot?.id || uuidv4();
+    this.titleOverride = snapshot?.titleOverride;
     this.activeLayerId = snapshot?.activeLayerId;
     // TODO: Create new layers for all layers in the snapshot
     this.history = new History(snapshot?.history, this);
@@ -51,8 +54,9 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
 
     this.tools = new Tools(snapshot?.tools, this);
 
-    makeObservable<this, "activeLayerId">(this, {
+    makeObservable<this, "titleOverride" | "activeLayerId">(this, {
       id: observable,
+      titleOverride: observable,
       activeLayerId: observable,
       layers: observable,
       history: observable,
@@ -60,14 +64,27 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
       viewport2D: observable,
       viewport3D: observable,
 
+      title: computed,
       activeLayer: computed,
 
+      setTitle: action,
       setActiveLayer: action,
       addLayer: action,
       deleteLayer: action,
       applySnapshot: action,
     });
   }
+
+  public get title(): string {
+    if (this.titleOverride) return this.titleOverride;
+    const { length } = this.layers;
+    if (!length) return "Untitled Document";
+    return this.layers[length - 1].title;
+  }
+
+  public setTitle = (value?: string): void => {
+    this.titleOverride = value;
+  };
 
   // Layer Management
   public get activeLayer(): ILayer | undefined {
@@ -102,6 +119,7 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
   public toJSON(): DocumentSnapshot {
     return {
       id: this.id,
+      titleOverride: this.titleOverride,
       activeLayerId: this.activeLayerId,
       history: this.history.toJSON(),
       viewSettings: this.viewSettings.toJSON(),

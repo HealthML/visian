@@ -1,3 +1,4 @@
+import { Voxel } from "@visian/utils";
 import * as THREE from "three";
 
 import { Vector } from "../../models/vector";
@@ -111,7 +112,7 @@ export const getTextureFromAtlas = <T extends TypedArray = TypedArray>(
  * @returns The index of the given voxel in an atlas with the given properties.
  */
 export const getAtlasIndexFor = (
-  voxel: Vector,
+  voxel: Voxel | Vector,
   image: Pick<Image, "voxelComponents" | "voxelCount">,
   atlasGrid = getAtlasGrid(image.voxelCount),
   atlasSize = getAtlasSize(image.voxelCount, atlasGrid),
@@ -127,7 +128,9 @@ export const getAtlasIndexFor = (
   return (
     image.voxelComponents *
       ((sliceOffset.y + voxel.y) * atlasSize.x + sliceOffset.x + voxel.x) +
-    (voxel.size > 3 ? voxel.w : 0)
+    ((voxel as Vector).size && (voxel as Vector).size > 3
+      ? (voxel as Vector).w
+      : 0)
   );
 };
 
