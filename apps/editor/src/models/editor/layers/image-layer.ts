@@ -1,3 +1,4 @@
+import { RenderedImage } from "@visian/rendering";
 import { IDocument, IImageLayer } from "@visian/ui-shared";
 import {
   Image,
@@ -15,7 +16,6 @@ import {
 import FileSaver from "file-saver";
 import { action, computed, makeObservable, observable } from "mobx";
 
-import { RenderedImage } from "../../../rendering/rendered-image";
 import { Layer, LayerSnapshot } from "./layer";
 
 export interface ImageLayerSnapshot extends LayerSnapshot {

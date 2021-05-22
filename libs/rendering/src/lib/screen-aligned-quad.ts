@@ -1,6 +1,5 @@
+import { IDisposable } from "@visian/utils";
 import * as THREE from "three";
-
-import { IDisposable } from "../types";
 
 /**
  * This class is made for rendering a screen aligned quad.

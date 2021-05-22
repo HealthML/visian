@@ -1,9 +1,13 @@
-import { IDocument, IImageLayer } from "@visian/ui-shared";
+import {
+  IDocument,
+  IImageLayer,
+  ISliceRenderer,
+  IRenderLoopSubscriber,
+} from "@visian/ui-shared";
 import { getOrthogonalAxis, getPlaneAxes, IDisposer } from "@visian/utils";
 import { reaction } from "mobx";
 import * as THREE from "three";
 import { RenderedImage } from "../rendered-image";
-import { IRenderLoopSubscriber, SliceRenderer } from "../slice-renderer";
 
 import { Circles } from "./circles";
 import { ToolCamera } from "./tool-camera";
@@ -60,7 +64,7 @@ export class ToolRenderer implements IRenderLoopSubscriber {
       ),
       reaction(
         () => document.sliceRenderer,
-        (sliceRenderer?: SliceRenderer, oldSliceRenderer?: SliceRenderer) => {
+        (sliceRenderer?: ISliceRenderer, oldSliceRenderer?: ISliceRenderer) => {
           oldSliceRenderer?.unsubscribeFromRenderLoop(this);
           sliceRenderer?.subscribeToRenderLoop(this);
         },

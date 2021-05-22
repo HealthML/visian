@@ -1,8 +1,8 @@
 // DEPRECATED
 
+import { RenderedImage } from "@visian/rendering";
 import { IDocument, IImageLayer } from "@visian/ui-shared";
 import { getOrthogonalAxis, VoxelWithValue } from "@visian/utils";
-import { RenderedImage } from "../../../../rendering";
 import { SliceCommand } from "../../history";
 import { Tool, ToolConfig } from "../tool";
 

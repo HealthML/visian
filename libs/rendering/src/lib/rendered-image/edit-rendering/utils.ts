@@ -1,5 +1,5 @@
-import { ScreenAlignedQuad } from "@visian/utils";
 import * as THREE from "three";
+import { ScreenAlignedQuad } from "../../screen-aligned-quad";
 
 import { Voxels } from "./voxels";
 

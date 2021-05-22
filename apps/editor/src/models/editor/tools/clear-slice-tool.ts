@@ -1,5 +1,5 @@
+import { ToolRenderer } from "@visian/rendering";
 import { IDocument, IImageLayer, ITool } from "@visian/ui-shared";
-import { ToolRenderer } from "../../../rendering";
 import { SliceCommand } from "../history";
 import { SelfDeactivatingTool } from "./self-deactivating-tool";
 

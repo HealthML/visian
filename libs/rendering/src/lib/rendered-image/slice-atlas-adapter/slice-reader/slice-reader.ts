@@ -1,11 +1,7 @@
-import {
-  getPlaneAxes,
-  ScreenAlignedQuad,
-  Vector,
-  ViewType,
-} from "@visian/utils";
+import { getPlaneAxes, Vector, ViewType } from "@visian/utils";
 import * as THREE from "three";
 
+import { ScreenAlignedQuad } from "../../../screen-aligned-quad";
 import { SliceReaderMaterial } from "./slice-reader-material";
 
 export class SliceReader {

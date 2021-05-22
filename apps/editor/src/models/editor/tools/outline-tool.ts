@@ -1,7 +1,7 @@
+import { ToolRenderer } from "@visian/rendering";
 import { DragPoint, IDocument } from "@visian/ui-shared";
 import { getPlaneAxes } from "@visian/utils";
 import * as THREE from "three";
-import { ToolRenderer } from "../../../rendering";
 import { UndoableTool } from "./undoable-tool";
 import { dragPointsEqual } from "./utils";
 

@@ -1,5 +1,10 @@
 // DEPRECATED
 
+import {
+  ToolRenderer,
+  getPositionWithinPixel,
+  RenderedImage,
+} from "@visian/rendering";
 import { AbstractEventType, DragPoint } from "@visian/ui-shared";
 import {
   getOrthogonalAxis,
@@ -9,11 +14,6 @@ import {
   ViewType,
 } from "@visian/utils";
 import { action, computed, makeObservable, observable } from "mobx";
-import {
-  getPositionWithinPixel,
-  RenderedImage,
-  ToolRenderer,
-} from "../../../rendering";
 import { StoreContext } from "../../types";
 import { ToolType } from "../types";
 import { AtlasUndoRedoCommand, SliceUndoRedoCommand } from "../undo-redo";

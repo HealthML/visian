@@ -5,7 +5,12 @@ import {
   Pixel,
   viewTypes,
 } from "@visian/utils";
-import { IDocument, IImageLayer } from "@visian/ui-shared";
+import {
+  IDocument,
+  IImageLayer,
+  IRenderLoopSubscriber,
+  ISliceRenderer,
+} from "@visian/ui-shared";
 import ResizeSensor from "css-element-queries/src/ResizeSensor";
 import { reaction } from "mobx";
 import * as THREE from "three";
@@ -21,9 +26,7 @@ import {
   synchCrosshairs,
 } from "./utils";
 
-import { IRenderLoopSubscriber } from "./types";
-
-export class SliceRenderer implements IDisposable {
+export class SliceRenderer implements IDisposable, ISliceRenderer {
   private _renderers: THREE.WebGLRenderer[];
   private mainCamera: THREE.OrthographicCamera;
   private sideCamera: THREE.OrthographicCamera;

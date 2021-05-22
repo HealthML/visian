@@ -1,4 +1,5 @@
-import { IDisposer, ScreenAlignedQuad } from "@visian/utils";
+import { ScreenAlignedQuad } from "@visian/rendering";
+import { IDisposer } from "@visian/utils";
 import { reaction } from "mobx";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";

@@ -127,6 +127,9 @@ yarn remove @storybook/addon-knobs
 yarn add -D @storybook/addon-essentials @storybook/addon-a11y
 yarn add i18next react-i18next i18next-browser-languagedetector i18next-http-backend moment
 
+yarn nx g @nrwl/workspace:lib utils
+yarn nx g @nrwl/workspace:lib rendering
+
 yarn nx g @nrwl/react:app editor # using styled-components & react-router
 ```
 

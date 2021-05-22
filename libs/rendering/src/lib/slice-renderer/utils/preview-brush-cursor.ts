@@ -2,8 +2,10 @@ import { IDocument } from "@visian/ui-shared";
 import { ViewType } from "@visian/utils";
 import { reaction } from "mobx";
 
-import { brushSizePreviewTime } from "../../../constants";
 import { BrushCursor } from "./brush-cursor";
+
+/** The amount of time the brush cursor preview is shown (in ms). */
+export const brushSizePreviewTime = 1000;
 
 export class PreviewBrushCursor extends BrushCursor {
   private timeout?: NodeJS.Timeout;

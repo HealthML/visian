@@ -1,11 +1,11 @@
-import { IDocument, IImageLayer } from "@visian/ui-shared";
+import { IDocument, IImageLayer, IOutline } from "@visian/ui-shared";
 import { getPlaneAxes, IDisposable, IDisposer, ViewType } from "@visian/utils";
 import { autorun } from "mobx";
 import * as THREE from "three";
 
-import { toolOverlays as theme } from "../../../theme";
+import { toolOverlays as theme } from "../theme";
 
-export class Outline extends THREE.Line implements IDisposable {
+export class Outline extends THREE.Line implements IDisposable, IOutline {
   private disposers: IDisposer[] = [];
 
   constructor(private document: IDocument, private viewType: ViewType) {

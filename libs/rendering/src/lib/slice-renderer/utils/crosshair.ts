@@ -3,7 +3,7 @@ import { getPlaneAxes, IDisposable, ViewType } from "@visian/utils";
 import { autorun, IReactionDisposer } from "mobx";
 import * as THREE from "three";
 
-import { crosshair as lineMaterialProps } from "../../../theme";
+import { crosshair as lineMaterialProps } from "../theme";
 
 export class Crosshair extends THREE.Group implements IDisposable {
   private size = new THREE.Vector2();

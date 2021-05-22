@@ -1,4 +1,10 @@
-import { IDocument, IEditor, ILayer, ValueType } from "@visian/ui-shared";
+import {
+  IDocument,
+  IEditor,
+  ILayer,
+  ISliceRenderer,
+  ValueType,
+} from "@visian/ui-shared";
 import { ISerializable } from "@visian/utils";
 import { action, computed, makeObservable, observable } from "mobx";
 import { v4 as uuidv4 } from "uuid";
@@ -12,7 +18,6 @@ import { Viewport2D, Viewport2DSnapshot } from "./viewport-2d";
 import { Viewport3D, Viewport3DSnapshot } from "./viewport-3d";
 
 import * as layers from "./layers";
-import { SliceRenderer } from "../../rendering";
 
 export const layerMap: {
   [kind: string]: ValueType<typeof layers>;
@@ -56,7 +61,7 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
 
   public tools: Tools;
 
-  public sliceRenderer?: SliceRenderer;
+  public sliceRenderer?: ISliceRenderer;
   public renderers?: THREE.WebGLRenderer[];
 
   constructor(snapshot: DocumentSnapshot | undefined, public editor: IEditor) {
@@ -155,7 +160,7 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
     );
   };
 
-  public setSliceRenderer(sliceRenderer?: SliceRenderer) {
+  public setSliceRenderer(sliceRenderer?: ISliceRenderer) {
     this.sliceRenderer = sliceRenderer;
   }
 

@@ -1,3 +1,4 @@
+import { IRenderLoopSubscriber } from "@visian/ui-shared";
 import {
   getTextureFromAtlas,
   Image,
@@ -5,7 +6,6 @@ import {
   ITKImage,
   itkImageToImageSnapshot,
   readMedicalImage,
-  ScreenAlignedQuad,
   TypedArray,
   Vector,
   ViewType,
@@ -13,8 +13,8 @@ import {
   VoxelWithValue,
 } from "@visian/utils";
 import * as THREE from "three";
+import { ScreenAlignedQuad } from "../screen-aligned-quad";
 
-import { IRenderLoopSubscriber } from "../slice-renderer";
 import {
   copyToRenderTarget,
   ImageRenderTarget,

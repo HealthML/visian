@@ -5,6 +5,7 @@ import type { ILayer } from "./layers";
 import type { ITools } from "./tools";
 import type { Reference } from "./types";
 import type { IViewport2D, IViewport3D, IViewSettings } from "./view-settings";
+import { ISliceRenderer } from "../rendering";
 
 // `label` is a display name for an attribute
 
@@ -36,9 +37,7 @@ export interface IDocument {
 
   tools: ITools;
 
-  // TODO: Extract rendering code in its own lib.
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  sliceRenderer?: any;
+  sliceRenderer?: ISliceRenderer;
   renderers?: THREE.WebGLRenderer[];
 
   /** Reads a layer based on its id. */
@@ -50,7 +49,5 @@ export interface IDocument {
   /** Deletes a layer from the document. */
   deleteLayer(idOrLayer: string | ILayer): void;
 
-  // TODO: Extract rendering code in its own lib.
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  setSliceRenderer(sliceRenderer: any): void;
+  setSliceRenderer(sliceRenderer: ISliceRenderer): void;
 }
