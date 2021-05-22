@@ -28,24 +28,27 @@ export interface ITool {
   labelTx?: string;
 
   /**
-   * Indicates if the tool is a brush, i.e., if it the user can use it to
-   * paint (modify the values of a number of contiguous voxels).
+   * Indicates if the tool is a drawing tool, i.e., if it the user can use it
+   * to paint (modify the values of a number of contiguous voxels).
    */
-  isBrush: boolean;
+  isDrawingTool: boolean;
 
   /**
    * The tool that is used as the alternative mode of this tool.
    * Typically, this is activated using the `alt` key or right mouse button.
    */
-  alternativeTool?: Reference<ITool>;
+  altTool?: Reference<ITool>;
 
   /** An array of all view modes this tool can be used in. */
   supportedViewModes: ViewMode[];
-  /** An array of all layer types this tool  can be used on. */
-  supportedLayerTypes: string[];
+  /** An array of all layer kinds this tool can be used on. */
+  supportedLayerKinds: string[];
 
   /** This tool's parameters. */
   params: { [name: string]: IParameter };
+
+  /** Called when the tool becomes active. */
+  activate(): void;
 
   /** Called when the user starts a drag interaction with this tool selected. */
   startAt(dragPoint: DragPoint): void;
@@ -54,8 +57,8 @@ export interface ITool {
   /** Called when the user ends a drag interaction with this tool selected. */
   endAt(dragPoint: DragPoint): void;
 
-  /** Called when the tool becomes active. */
-  activate(): void;
+  /** Called when the tool becomes inactive. */
+  deactivate(): void;
 }
 
 /** A class of similar tools, typically grouped in the UI. */
@@ -68,6 +71,8 @@ export interface IToolGroup {
   activeTool: Reference<ITool>;
   /** All tools that belong to this group. */
   tools: Reference<ITool>[];
+
+  setActiveTool(nameOrTool: string | ITool): void;
 }
 
 /** The editor's tools and their settings for the document. */
@@ -94,4 +99,6 @@ export interface ITools {
 
   /** Indicates if the current tool is in use this moment. */
   isToolInUse: boolean;
+
+  setActiveTool(nameOrTool?: string | ITool): void;
 }

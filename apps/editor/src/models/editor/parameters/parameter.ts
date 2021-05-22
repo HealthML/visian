@@ -3,6 +3,7 @@ import { ISerializable } from "@visian/utils";
 import { action, makeObservable, observable } from "mobx";
 
 export interface ParameterSnapshot<T = unknown> {
+  name: string;
   value: T;
 
   // As all other properties are typically not edited by the user and thus
@@ -59,6 +60,7 @@ export class Parameter<T = unknown>
   // Serialization
   public toJSON(): ParameterSnapshot<T> {
     return {
+      name: this.name,
       value: this.value,
     };
   }
@@ -66,6 +68,10 @@ export class Parameter<T = unknown>
   // Here we make an exception to the snapshot being a `Partial` as we do not
   // expect to encounter stored parameters without an associated value
   public applySnapshot(snapshot: ParameterSnapshot<T>): Promise<void> {
+    if (snapshot.name && snapshot.name !== this.name) {
+      throw new Error("Parameter names do not match");
+    }
+
     this.value = snapshot.value;
     return Promise.resolve();
   }

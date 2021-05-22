@@ -142,8 +142,9 @@ export class Layer implements ILayer, ISerializable<LayerSnapshot> {
   }
 
   public applySnapshot(snapshot?: Partial<LayerSnapshot>): Promise<void> {
-    if (snapshot?.id && snapshot?.id !== this.id)
+    if (snapshot?.id && snapshot?.id !== this.id) {
       throw new Error("Layer ids do not match");
+    }
 
     this.setIsAnnotation(snapshot?.isAnnotation);
     this.setTitle(snapshot?.titleOverride);

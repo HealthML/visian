@@ -1,9 +1,14 @@
-import { IDocument, ITool, IToolGroup, ITools } from "@visian/ui-shared";
+import { IDocument, ITool, ITools } from "@visian/ui-shared";
 import { ISerializable } from "@visian/utils";
 import { action, computed, makeObservable, observable } from "mobx";
+import { Tool, ToolSnapshot } from "./tool";
+
+import { ToolGroup, ToolGroupSnapshot } from "./tool-group";
 
 export interface ToolsSnapshot {
   activeToolName?: string;
+  tools: ToolSnapshot[];
+  toolGroups: ToolGroupSnapshot[];
 
   brushSize: number;
   useAdaptiveBrushSize: boolean;
@@ -13,8 +18,8 @@ export class Tools implements ITools, ISerializable<ToolsSnapshot> {
   public readonly excludeFromSnapshotTracking = ["document"];
 
   protected activeToolName?: string;
-  public tools: { [name: string]: ITool } = {};
-  public toolGroups: IToolGroup[] = [];
+  public tools: { [name: string]: Tool } = {};
+  public toolGroups: ToolGroup[] = [];
 
   public brushSize!: number;
   public useAdaptiveBrushSize!: boolean;
@@ -76,6 +81,8 @@ export class Tools implements ITools, ISerializable<ToolsSnapshot> {
   public toJSON(): ToolsSnapshot {
     return {
       activeToolName: this.activeToolName,
+      tools: Object.values(this.tools).map((tool) => tool.toJSON()),
+      toolGroups: this.toolGroups.map((toolGroup) => toolGroup.toJSON()),
       brushSize: this.brushSize,
       useAdaptiveBrushSize: this.useAdaptiveBrushSize,
     };
@@ -83,6 +90,14 @@ export class Tools implements ITools, ISerializable<ToolsSnapshot> {
 
   public applySnapshot(snapshot: Partial<ToolsSnapshot>): Promise<void> {
     this.setActiveTool(snapshot.activeToolName);
+    snapshot.tools?.forEach((toolSnapshot) => {
+      const tool = this.tools[toolSnapshot.name];
+      if (tool) tool.applySnapshot(toolSnapshot);
+    });
+    this.toolGroups.forEach((toolGroup, index) => {
+      const toolGroupSnapshot = snapshot.toolGroups?.[index];
+      if (toolGroupSnapshot) toolGroup.applySnapshot(toolGroupSnapshot);
+    });
 
     this.setBrushSize(snapshot.brushSize);
     this.setUseAdaptiveBrushSize(snapshot.useAdaptiveBrushSize);
