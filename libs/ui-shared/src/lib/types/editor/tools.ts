@@ -56,9 +56,6 @@ export interface ITool {
   moveTo(dragPoint: DragPoint): void;
   /** Called when the user ends a drag interaction with this tool selected. */
   endAt(dragPoint: DragPoint): void;
-
-  /** Called when the tool becomes inactive. */
-  deactivate(): void;
 }
 
 /** A class of similar tools, typically grouped in the UI. */

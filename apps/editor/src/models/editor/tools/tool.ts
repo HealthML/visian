@@ -72,10 +72,6 @@ export class Tool implements ITool, ISerializable<ToolSnapshot> {
     // Intentionally left blank
   }
 
-  public deactivate(): void {
-    // Intentionally left blank
-  }
-
   // Serialization
   public toJSON(): ToolSnapshot {
     return {

@@ -28,8 +28,6 @@ export class Tools implements ITools, ISerializable<ToolsSnapshot> {
     snapshot: Partial<ToolsSnapshot> | undefined,
     protected document: IDocument,
   ) {
-    if (snapshot) this.applySnapshot(snapshot);
-
     makeObservable<this, "activeToolName">(this, {
       activeToolName: observable,
       tools: observable,
@@ -44,6 +42,9 @@ export class Tools implements ITools, ISerializable<ToolsSnapshot> {
       setUseAdaptiveBrushSize: action,
       applySnapshot: action,
     });
+
+    // TODO: The tools & tool groups should be populated here
+    if (snapshot) this.applySnapshot(snapshot);
   }
 
   public get activeTool(): ITool | undefined {

@@ -34,7 +34,7 @@ export interface ILayer {
    * If none is set manually, the name of the layer's content (if any) will be
    * used, e.g., the ImageLayer's image name.
    */
-  title: string;
+  title?: string;
   /**
    * The parent layer of this layer.
    * Typically, this is the group the layer is contained in.

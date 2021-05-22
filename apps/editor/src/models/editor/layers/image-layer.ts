@@ -80,6 +80,10 @@ export class ImageLayer
     });
   }
 
+  public get title(): string | undefined {
+    return super.title || this.image.name;
+  }
+
   public setImage(value: RenderedImage): void {
     this.image = value;
   }

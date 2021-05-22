@@ -80,8 +80,8 @@ export class Layer implements ILayer, ISerializable<LayerSnapshot> {
     this.isAnnotation = Boolean(value);
   };
 
-  public get title(): string {
-    return this.titleOverride || "Untitled Layer";
+  public get title(): string | undefined {
+    return this.titleOverride;
   }
 
   public setTitle = (value?: string): void => {

@@ -15,7 +15,7 @@ export interface IDocument {
    * If none is set manually, the name of the lowest layer (if any) will be
    * used.
    */
-  title: string;
+  title?: string;
 
   /** The layer that is currently selected for editing. */
   activeLayer?: Reference<ILayer>;

@@ -100,13 +100,10 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
     return this.layerIds.map((id) => this.layerMap[id]);
   }
 
-  public get title(): string {
+  public get title(): string | undefined {
     if (this.titleOverride) return this.titleOverride;
     const { length } = this.layerIds;
-    return (
-      (length && this.getLayer(this.layerIds[length - 1])?.title) ||
-      "Untitled Document"
-    );
+    return length ? this.getLayer(this.layerIds[length - 1])?.title : undefined;
   }
 
   public setTitle = (value?: string): void => {
