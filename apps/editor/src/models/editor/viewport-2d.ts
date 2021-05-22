@@ -19,7 +19,7 @@ export interface Viewport2DSnapshot {
 
 export class Viewport2D
   implements IViewport2D, ISerializable<Viewport2DSnapshot> {
-  public static readonly excludeFromSnapshotTracking = ["/document"];
+  public readonly excludeFromSnapshotTracking = ["document"];
 
   public mainViewType!: ViewType;
   public showSideViews!: boolean;

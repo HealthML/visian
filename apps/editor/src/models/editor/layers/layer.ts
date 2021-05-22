@@ -21,8 +21,9 @@ export interface LayerSnapshot {
 }
 
 export class Layer implements ILayer, ISerializable<LayerSnapshot> {
-  public static readonly excludeFromSnapshotTracking = ["/document"];
+  public readonly excludeFromSnapshotTracking = ["document"];
 
+  // eslint-disable-next-line @typescript-eslint/member-ordering
   public static readonly kind: string = "none";
   public readonly kind: string = "none";
   public isAnnotation!: boolean;

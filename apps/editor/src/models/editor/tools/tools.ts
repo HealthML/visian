@@ -10,7 +10,7 @@ export interface ToolsSnapshot {
 }
 
 export class Tools implements ITools, ISerializable<ToolsSnapshot> {
-  public static readonly excludeFromSnapshotTracking = ["/document"];
+  public readonly excludeFromSnapshotTracking = ["document"];
 
   protected activeToolName?: string;
   public tools: { [name: string]: ITool } = {};

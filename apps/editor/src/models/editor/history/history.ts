@@ -28,7 +28,7 @@ export interface HistorySnapshot {
 
 export class History
   implements Partial<IHistory>, ISerializable<HistorySnapshot> {
-  public static readonly excludeFromSnapshotTracking = ["/document"];
+  public readonly excludeFromSnapshotTracking = ["document"];
 
   protected undoRedoStack = new LimitedStack<IUndoRedoCommand>(
     maxUndoRedoSteps,

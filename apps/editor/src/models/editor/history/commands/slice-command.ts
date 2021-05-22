@@ -18,6 +18,9 @@ export interface SliceCommandSnapshot extends IUndoRedoCommandSnapshot {
 
 export class SliceCommand
   implements IUndoRedoCommand, ISerializable<SliceCommandSnapshot> {
+  public readonly excludeFromSnapshotTracking = ["document"];
+
+  // eslint-disable-next-line @typescript-eslint/member-ordering
   public static readonly kind = "slice";
   public readonly kind = "slice";
 

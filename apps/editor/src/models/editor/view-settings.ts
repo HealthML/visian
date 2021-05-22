@@ -20,7 +20,7 @@ export interface ViewSettingsSnapshot {
 
 export class ViewSettings
   implements IViewSettings, ISerializable<ViewSettingsSnapshot> {
-  public static readonly excludeFromSnapshotTracking = ["/document"];
+  public readonly excludeFromSnapshotTracking = ["document"];
 
   public viewMode!: ViewMode;
 

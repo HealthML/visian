@@ -37,8 +37,6 @@ export interface DocumentSnapshot {
 }
 
 export class Document implements IDocument, ISerializable<DocumentSnapshot> {
-  public static readonly excludeFromSnapshotTracking = [];
-
   public id: string;
   protected titleOverride?: string;
 

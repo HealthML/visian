@@ -16,6 +16,9 @@ export interface AtlasCommandSnapshot extends IUndoRedoCommandSnapshot {
 
 export class AtlasCommand
   implements IUndoRedoCommand, ISerializable<AtlasCommandSnapshot> {
+  public readonly excludeFromSnapshotTracking = ["document"];
+
+  // eslint-disable-next-line @typescript-eslint/member-ordering
   public static readonly kind = "atlas";
   public readonly kind = "atlas";
 

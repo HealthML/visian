@@ -68,6 +68,7 @@ export class RootStore implements ISerializable<RootSnapshot> {
     });
     deepObserve(this.editor, this.persist, {
       exclude: Editor.excludeFromSnapshotTracking,
+      exclusionAttribute: "excludeFromSnapshotTracking",
     });
   }
 
