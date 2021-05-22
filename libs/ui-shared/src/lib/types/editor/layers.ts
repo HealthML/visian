@@ -85,6 +85,9 @@ export interface IImageLayer extends ILayer {
    */
   contrast: number;
 
+  /** Indicates if this image is volumetric. */
+  isVolume: boolean;
+
   getVoxel(voxel: Voxel): number;
   setVoxel(voxel: Voxel, value: number): void;
   setVoxels(voxels: VoxelWithValue[]): void;

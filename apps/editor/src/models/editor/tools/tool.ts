@@ -59,7 +59,7 @@ export class Tool implements ITool, ISerializable<ToolSnapshot> {
     });
   }
 
-  public activate(): void {
+  public activate(_previousTool?: ITool): void {
     // Intentionally left blank
   }
 

@@ -1,3 +1,5 @@
+// DEPRECATED
+
 export enum ToolType {
   Navigate = 0,
   Crosshair = 1,

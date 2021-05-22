@@ -1,10 +1,11 @@
 import {
+  getPlaneAxes,
   IDisposable,
   IDisposer,
   Pixel,
-  ViewType,
   viewTypes,
 } from "@visian/utils";
+import { IDocument, IImageLayer } from "@visian/ui-shared";
 import ResizeSensor from "css-element-queries/src/ResizeSensor";
 import { reaction } from "mobx";
 import * as THREE from "three";
@@ -13,14 +14,13 @@ import { RenderedImage } from "../rendered-image";
 import { Slice } from "./slice";
 import {
   getOrder,
+  getPositionWithinPixel,
   getWebGLSize,
-  Raycaster,
   resizeRenderer,
   setMainCameraPlanes,
   synchCrosshairs,
 } from "./utils";
 
-import type { Editor } from "../../models";
 import { IRenderLoopSubscriber } from "./types";
 
 export class SliceRenderer implements IDisposable {
@@ -30,8 +30,6 @@ export class SliceRenderer implements IDisposable {
   private scenes = viewTypes.map(() => new THREE.Scene());
 
   private slices: Slice[];
-
-  public raycaster: Raycaster;
 
   private lazyRenderTriggered = true;
 
@@ -47,7 +45,7 @@ export class SliceRenderer implements IDisposable {
     private mainCanvas: HTMLCanvasElement,
     private upperSideCanvas: HTMLCanvasElement,
     private lowerSideCanvas: HTMLCanvasElement,
-    private editor: Editor,
+    private document: IDocument,
   ) {
     this._renderers = this.canvases.map(
       (canvas) =>
@@ -68,15 +66,8 @@ export class SliceRenderer implements IDisposable {
     );
     this.sideCamera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 20);
 
-    this.slices = viewTypes.map((viewType) => new Slice(editor, viewType));
+    this.slices = viewTypes.map((viewType) => new Slice(document, viewType));
     this.slices.forEach((slice, viewType) => this.scenes[viewType].add(slice));
-
-    this.raycaster = new Raycaster(
-      this.canvases,
-      [this.mainCamera, this.sideCamera],
-      this.slices.map((slice) => slice.imageMesh),
-      this.editor,
-    );
 
     window.addEventListener("resize", this.resize);
     this.resize();
@@ -94,7 +85,7 @@ export class SliceRenderer implements IDisposable {
 
     this.disposers.push(
       reaction(
-        () => editor.image,
+        () => (document.layers[1] as IImageLayer).image as RenderedImage,
         (image?: RenderedImage, oldImage?: RenderedImage) => {
           if (oldImage) {
             this.unsubscribeFromRenderLoop(oldImage);
@@ -110,7 +101,7 @@ export class SliceRenderer implements IDisposable {
         { fireImmediately: true },
       ),
       reaction(
-        () => editor.annotation,
+        () => (document.layers[0] as IImageLayer).image as RenderedImage,
         (image?: RenderedImage, oldImage?: RenderedImage) => {
           if (oldImage) {
             this.unsubscribeFromRenderLoop(oldImage);
@@ -121,15 +112,15 @@ export class SliceRenderer implements IDisposable {
         { fireImmediately: true },
       ),
       reaction(
-        () => editor.viewSettings.mainViewType,
+        () => document.viewport2D.mainViewType,
         (newMainView, oldMainView) => {
-          if (this.editor.viewSettings.showSideViews) {
+          if (document.viewport2D.showSideViews) {
             synchCrosshairs(
               newMainView,
               oldMainView,
               this.slices[newMainView],
               this.slices[oldMainView],
-              editor,
+              document,
             );
           } else {
             this.slices[newMainView].setCrosshairSynchOffset();
@@ -139,7 +130,7 @@ export class SliceRenderer implements IDisposable {
         },
       ),
       reaction(
-        () => editor.viewSettings.showSideViews,
+        () => document.viewport2D.showSideViews,
         () => {
           // Wrapped in a setTimeout, because the side views need to actually
           // appear before updating the camera planes.
@@ -162,13 +153,7 @@ export class SliceRenderer implements IDisposable {
     return this._renderers;
   }
 
-  public getBrushCursor(viewType: ViewType, preview = false) {
-    return preview
-      ? this.slices[viewType].previewBrushCursor
-      : this.slices[viewType].brushCursor;
-  }
-
-  public getOutline(viewType = this.editor.viewSettings.mainViewType) {
+  public getOutline(viewType = this.document.viewport2D.mainViewType) {
     return this.slices[viewType].outline;
   }
 
@@ -185,13 +170,13 @@ export class SliceRenderer implements IDisposable {
   private resize = () => {
     this._renderers[0].setSize(window.innerWidth, window.innerHeight);
 
-    setMainCameraPlanes(this.editor, this.mainCanvas, this.mainCamera);
+    setMainCameraPlanes(this.document, this.mainCanvas, this.mainCamera);
 
     this.eagerRender();
   };
 
   private updateCamera = () => {
-    setMainCameraPlanes(this.editor, this.mainCanvas, this.mainCamera);
+    setMainCameraPlanes(this.document, this.mainCanvas, this.mainCamera);
     this.lazyRender();
   };
 
@@ -248,7 +233,7 @@ export class SliceRenderer implements IDisposable {
   public getVirtualMainViewUV(screenPosition: Pixel) {
     const webGLPosition = this.getMainViewWebGLPosition(screenPosition);
     const sliceRelativePosition = this.slices[
-      this.editor.viewSettings.mainViewType
+      this.document.viewport2D.mainViewType
     ]
       .worldToLocal(new THREE.Vector3(webGLPosition.x, webGLPosition.y, 0))
       .addScalar(0.5);
@@ -260,7 +245,7 @@ export class SliceRenderer implements IDisposable {
   }
 
   public showBrushCursorPreview(
-    viewType = this.editor.viewSettings.mainViewType,
+    viewType = this.document.viewport2D.mainViewType,
   ) {
     const slice = this.slices[viewType];
 
@@ -271,9 +256,44 @@ export class SliceRenderer implements IDisposable {
 
     const centeredUV = new THREE.Vector2().setScalar(0.5).sub(uvOffset);
 
-    this.editor.tools.alignBrushCursor(centeredUV, viewType, true);
+    this.alignBrushCursor(centeredUV, viewType, true);
 
     slice.previewBrushCursor.show();
+  }
+
+  public alignBrushCursor(
+    uv: Pixel,
+    viewType = this.document.viewport2D.mainViewType,
+    preview = false,
+  ) {
+    const { image } = this.document.layers[1] as IImageLayer;
+    if (image) return;
+
+    const { voxelCount } = image;
+
+    const [widthAxis, heightAxis] = getPlaneAxes(viewType);
+    const scanWidth = voxelCount[widthAxis];
+    const scanHeight = voxelCount[heightAxis];
+
+    const { brushSize } = this.document.tools;
+
+    let isRight = false;
+    let isBottom = false;
+    if (brushSize === 0.5) {
+      [isRight, isBottom] = getPositionWithinPixel(uv, scanWidth, scanHeight);
+    }
+
+    const xOffset = brushSize === 0.5 ? (isRight ? 1 : 2) : 0.5;
+    const yOffset = brushSize === 0.5 ? (isBottom ? -1 : 0) : 0.5;
+
+    const brushCursor = preview
+      ? this.slices[viewType].previewBrushCursor
+      : this.slices[viewType].brushCursor;
+
+    brushCursor.setUVTarget(
+      (Math.floor(uv.x * scanWidth) + xOffset) / scanWidth,
+      (Math.floor(uv.y * scanHeight) + yOffset) / scanHeight,
+    );
   }
 
   private get canvases() {
@@ -281,7 +301,7 @@ export class SliceRenderer implements IDisposable {
   }
 
   private get activeRenderers() {
-    return this.editor.viewSettings.showSideViews
+    return this.document.viewport2D.showSideViews
       ? this._renderers
       : [this._renderers[0]];
   }
@@ -292,7 +312,7 @@ export class SliceRenderer implements IDisposable {
 
     this.renderLoopSubscribers.forEach((subscriber) => subscriber.render());
 
-    const order = getOrder(this.editor.viewSettings.mainViewType);
+    const order = getOrder(this.document.viewport2D.mainViewType);
     this.activeRenderers.forEach((renderer, index) => {
       const viewType = order[index];
       const camera = index ? this.sideCamera : this.mainCamera;

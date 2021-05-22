@@ -1,3 +1,6 @@
+// DEPRECATED
+
+import { DragPoint, IDocument } from "@visian/ui-shared";
 import {
   calculateCircle,
   calculateLine,
@@ -7,12 +10,11 @@ import {
   Vector,
   VoxelWithValue,
 } from "@visian/utils";
-import { Editor } from "../../../models";
+import { ToolConfig } from "../tool";
 
-import { DragPoint, DragTool } from "../types";
 import { VoxelWriter } from "./voxel-writer";
 
-export class Brush extends VoxelWriter implements DragTool {
+export class Brush extends VoxelWriter {
   private dragPoints?: DragPoint[];
 
   private filledCircleCache?: {
@@ -25,8 +27,13 @@ export class Brush extends VoxelWriter implements DragTool {
     circle: Pixel[];
   };
 
-  constructor(editor: Editor, protected value = 255, undoable = true) {
-    super(editor, undoable);
+  constructor(
+    config: ToolConfig,
+    document: IDocument,
+    protected value = 255,
+    undoable = true,
+  ) {
+    super(config, document, undoable);
   }
 
   public startAt = (dragPoint: DragPoint) => {
@@ -67,10 +74,10 @@ export class Brush extends VoxelWriter implements DragTool {
   private getCircleVoxels(
     target: DragPoint,
     fill = true,
-    viewType = this.editor.viewSettings.mainViewType,
+    viewType = this.document.viewport2D.mainViewType,
   ) {
     let circlePixels;
-    const radius = this.editor.tools.brushSizePixels;
+    const radius = this.document.tools.brushSize;
 
     if (fill) {
       if (!this.filledCircleCache || this.filledCircleCache.radius !== radius) {
@@ -106,16 +113,16 @@ export class Brush extends VoxelWriter implements DragTool {
   }
 
   private createCircleCache(fill: boolean) {
-    const circle = calculateCircle(this.editor.tools.brushSizePixels, fill);
+    const circle = calculateCircle(this.document.tools.brushSize, fill);
     if (fill) {
       this.filledCircleCache = {
         circle,
-        radius: this.editor.tools.brushSizePixels,
+        radius: this.document.tools.brushSize,
       };
     } else {
       this.circleBorderCache = {
         circle,
-        radius: this.editor.tools.brushSizePixels,
+        radius: this.document.tools.brushSize,
       };
     }
   }
@@ -132,10 +139,10 @@ export class Brush extends VoxelWriter implements DragTool {
    */
   private drawStroke(start: DragPoint, end: DragPoint) {
     const orthogonalAxis = getOrthogonalAxis(
-      this.editor.viewSettings.mainViewType,
+      this.document.viewport2D.mainViewType,
     );
     const [widthAxis, heightAxis] = getPlaneAxes(
-      this.editor.viewSettings.mainViewType,
+      this.document.viewport2D.mainViewType,
     );
     const x1 = start[widthAxis];
     const y1 = start[heightAxis];

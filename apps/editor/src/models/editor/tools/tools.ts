@@ -1,6 +1,13 @@
 import { IDocument, IImageLayer, ITool, ITools } from "@visian/ui-shared";
 import { getPlaneAxes, ISerializable } from "@visian/utils";
 import { action, computed, makeObservable, observable } from "mobx";
+import { ToolRenderer } from "../../../rendering";
+import { CircleBrush } from "./circle-brush";
+import { ClearImageTool } from "./clear-image-tool";
+import { ClearSliceTool } from "./clear-slice-tool";
+import { SmartBrush } from "./cpu-brush";
+import { CrosshairTool } from "./crosshair-tool";
+import { OutlineTool } from "./outline-tool";
 import { Tool, ToolSnapshot } from "./tool";
 
 import { ToolGroup, ToolGroupSnapshot } from "./tool-group";
@@ -29,6 +36,8 @@ export class Tools implements ITools, ISerializable<ToolsSnapshot> {
   protected isCursorOverFloatingUI = false;
   protected isNavigationDragged = false;
   protected isDrawing = false;
+
+  private toolRenderer: ToolRenderer;
 
   constructor(
     snapshot: Partial<ToolsSnapshot> | undefined,
@@ -72,7 +81,47 @@ export class Tools implements ITools, ISerializable<ToolsSnapshot> {
       applySnapshot: action,
     });
 
-    // TODO: The tools & tool groups should be populated here
+    this.toolRenderer = new ToolRenderer(document);
+
+    this.tools["move-tool"] = new Tool(
+      {
+        name: "move-tool",
+        labelTx: "move-tool",
+        supportedLayerKinds: [],
+        supportedViewModes: ["2D", "3D"],
+      },
+      this.document,
+    );
+    this.tools["crosshair-tool"] = new CrosshairTool(document);
+    this.tools.brush = new CircleBrush(document, this.toolRenderer);
+    this.tools.eraser = new CircleBrush(document, this.toolRenderer, 0);
+    this.tools["smart-brush"] = new SmartBrush(document);
+    this.tools["smart-eraser"] = new SmartBrush(document, 0);
+    this.tools["outline-tool"] = new OutlineTool(document, this.toolRenderer);
+    this.tools["outline-eraser"] = new OutlineTool(
+      document,
+      this.toolRenderer,
+      0,
+    );
+    this.tools["clear-slice"] = new ClearSliceTool(document, this.toolRenderer);
+    this.tools["clear-image"] = new ClearImageTool(document, this.toolRenderer);
+
+    this.toolGroups.push(
+      new ToolGroup({ toolNames: ["move-tool"] }, document),
+      new ToolGroup({ toolNames: ["crosshair-tool"] }, document),
+      new ToolGroup({ toolNames: ["brush"] }, document),
+      new ToolGroup({ toolNames: ["smart-brush", "smart-eraser"] }, document),
+      new ToolGroup(
+        { toolNames: ["outline-tool", "outline-eraser"] },
+        document,
+      ),
+      new ToolGroup(
+        { toolNames: ["eraser", "smart-eraser", "outline-eraser"] },
+        document,
+      ),
+      new ToolGroup({ toolNames: ["clear-slice", "clear-image"] }, document),
+    );
+
     if (snapshot) this.applySnapshot(snapshot);
   }
 
@@ -162,6 +211,18 @@ export class Tools implements ITools, ISerializable<ToolsSnapshot> {
     } else {
       this.lockedBrushSize = this.brushSize;
     }
+  }
+
+  public incrementBrushSize() {
+    // Allow brush size 0.5.
+    const increment = this.brushSize < 1 ? 0.5 : 1;
+    this.setBrushSize(this.brushSize + increment);
+  }
+
+  public decrementBrushSize() {
+    // Allow brush size 0.5.
+    const decrement = this.brushSize <= 1 ? 0.5 : 1;
+    this.setBrushSize(this.brushSize - decrement);
   }
 
   public setIsCursorOverDrawableArea(value = true) {

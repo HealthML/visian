@@ -1,7 +1,8 @@
-import { IDocument, ILayer, ValueType } from "@visian/ui-shared";
+import { IDocument, IEditor, ILayer, ValueType } from "@visian/ui-shared";
 import { ISerializable } from "@visian/utils";
 import { action, computed, makeObservable, observable } from "mobx";
 import { v4 as uuidv4 } from "uuid";
+import * as THREE from "three";
 
 import { History, HistorySnapshot } from "./history";
 import { Layer, LayerSnapshot } from "./layers";
@@ -38,6 +39,8 @@ export interface DocumentSnapshot {
 }
 
 export class Document implements IDocument, ISerializable<DocumentSnapshot> {
+  public readonly excludeFromSnapshotTracking = ["editor"];
+
   public id: string;
   protected titleOverride?: string;
 
@@ -54,8 +57,9 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
   public tools: Tools;
 
   public sliceRenderer?: SliceRenderer;
+  public renderers?: THREE.WebGLRenderer[];
 
-  constructor(snapshot?: DocumentSnapshot) {
+  constructor(snapshot: DocumentSnapshot | undefined, public editor: IEditor) {
     this.id = snapshot?.id || uuidv4();
     this.titleOverride = snapshot?.titleOverride;
     this.activeLayerId = snapshot?.activeLayerId;
@@ -72,13 +76,12 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
     this.viewport2D = new Viewport2D(snapshot?.viewport2D, this);
     this.viewport3D = new Viewport3D(snapshot?.viewport3D, this);
 
-    this.tools = new Tools(snapshot?.tools, this);
-
     makeObservable<
       this,
       "titleOverride" | "activeLayerId" | "layerMap" | "layerIds"
     >(this, {
       id: observable,
+      editor: observable,
       titleOverride: observable,
       activeLayerId: observable,
       layerMap: observable,
@@ -89,6 +92,7 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
       viewport3D: observable,
       tools: observable,
       sliceRenderer: observable,
+      renderers: observable,
 
       title: computed,
       activeLayer: computed,
@@ -100,6 +104,8 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
       setSliceRenderer: action,
       applySnapshot: action,
     });
+
+    this.tools = new Tools(snapshot?.tools, this);
   }
 
   public get layers(): ILayer[] {

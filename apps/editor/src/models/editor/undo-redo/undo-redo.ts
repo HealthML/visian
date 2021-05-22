@@ -1,3 +1,5 @@
+// DEPRECATED
+
 import { ISerializable, LimitedStack } from "@visian/utils";
 import { action, makeObservable, observable } from "mobx";
 

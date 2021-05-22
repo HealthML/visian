@@ -1,15 +1,27 @@
+import { DragPoint, IDocument } from "@visian/ui-shared";
 import { calculateLine, getOrthogonalAxis, getPlaneAxes } from "@visian/utils";
-import { Editor } from "../../../models";
-import { ToolRenderer } from "./tool-rendering";
-import { DragPoint, DragTool } from "../types";
-import { dragPointsEqual } from "../utils";
+import { ToolRenderer } from "../../../rendering";
 import { UndoableTool } from "./undoable-tool";
+import { dragPointsEqual } from "./utils";
 
-export class CircleBrush extends UndoableTool implements DragTool {
+export class CircleBrush extends UndoableTool {
   private lastDragPoint?: DragPoint;
 
-  constructor(editor: Editor, toolRenderer: ToolRenderer, private value = 255) {
-    super(editor, toolRenderer);
+  constructor(
+    document: IDocument,
+    toolRenderer: ToolRenderer,
+    private value = 255,
+  ) {
+    super(
+      {
+        name: value ? "brush" : "eraser",
+        altToolName: value ? "eraser" : "brush",
+        supportedViewModes: ["2D"],
+        supportedLayerKinds: ["image"],
+      },
+      document,
+      toolRenderer,
+    );
   }
 
   public startAt(dragPoint: DragPoint) {
@@ -39,11 +51,11 @@ export class CircleBrush extends UndoableTool implements DragTool {
   }
 
   private drawCircleAround(dragPoint: DragPoint) {
-    const [xAxis, yAxis] = getPlaneAxes(this.editor.viewSettings.mainViewType);
+    const [xAxis, yAxis] = getPlaneAxes(this.document.viewport2D.mainViewType);
     const x = dragPoint[xAxis];
     const y = dragPoint[yAxis];
 
-    if (this.editor.tools.brushSizePixels === 0.5) {
+    if (this.document.tools.brushSize === 0.5) {
       const circleQuad = [
         { x: 0, y: 0 },
         { x: 0, y: 1 },
@@ -70,16 +82,16 @@ export class CircleBrush extends UndoableTool implements DragTool {
       x,
       y,
       value: this.value,
-      radius: this.editor.tools.brushSizePixels,
+      radius: this.document.tools.brushSize,
     });
   }
 
   private drawStroke(start: DragPoint, end: DragPoint) {
     const orthogonalAxis = getOrthogonalAxis(
-      this.editor.viewSettings.mainViewType,
+      this.document.viewport2D.mainViewType,
     );
     const [widthAxis, heightAxis] = getPlaneAxes(
-      this.editor.viewSettings.mainViewType,
+      this.document.viewport2D.mainViewType,
     );
     const x1 = start[widthAxis];
     const y1 = start[heightAxis];

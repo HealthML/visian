@@ -1,4 +1,6 @@
-import { AbstractEventType } from "@visian/ui-shared";
+// DEPRECATED
+
+import { AbstractEventType, DragPoint } from "@visian/ui-shared";
 import {
   getOrthogonalAxis,
   getPlaneAxes,
@@ -8,18 +10,16 @@ import {
 } from "@visian/utils";
 import { action, computed, makeObservable, observable } from "mobx";
 import {
-  ToolType,
-  Editor,
-  StoreContext,
-  SliceUndoRedoCommand,
-  AtlasUndoRedoCommand,
-} from "../../models";
-import { RenderedImage } from "../rendered-image";
-import { getPositionWithinPixel } from "../slice-renderer";
-import { CircleBrush, OutlineTool, ToolRenderer } from "./gpu-tools";
+  getPositionWithinPixel,
+  RenderedImage,
+  ToolRenderer,
+} from "../../../rendering";
+import { StoreContext } from "../../types";
+import { ToolType } from "../types";
+import { AtlasUndoRedoCommand, SliceUndoRedoCommand } from "../undo-redo";
+import { CircleBrush } from "./circle-brush";
 import { SmartBrush } from "./cpu-brush";
-
-import { DragPoint, DragTool } from "./types";
+import { OutlineTool } from "./outline-tool";
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface EditorToolsSnapshot {}
@@ -56,14 +56,17 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
   private outlineEraser?: OutlineTool;
 
   /** A map of the tool types to their corresponding brushes. */
-  private toolMap: Partial<Record<ToolType, DragTool>>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private toolMap: Partial<Record<ToolType, any>>;
   /**
    * A map of the tool types to their corresponding alternative brushes.
    * This is used for e.g. right-click or back of pen interaction.
    */
-  protected altToolMap: Partial<Record<ToolType, DragTool>>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  protected altToolMap: Partial<Record<ToolType, any>>;
 
-  constructor(protected editor: Editor, protected context?: StoreContext) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  constructor(protected editor: any, protected context?: StoreContext) {
     makeObservable<
       this,
       "brushWidthScreen" | "lockedBrushSizePixels" | "setIsDrawing"
@@ -364,35 +367,30 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
   }
 
   public alignBrushCursor(
-    uv: Pixel,
-    viewType = this.editor.viewSettings.mainViewType,
-    preview = false,
+    _uv: Pixel,
+    _viewType = this.editor.viewSettings.mainViewType,
+    _preview = false,
   ) {
-    if (!this.editor.sliceRenderer || !this.editor.image) return;
-    const { voxelCount } = this.editor.image;
-
-    const [widthAxis, heightAxis] = getPlaneAxes(viewType);
-    const scanWidth = voxelCount[widthAxis];
-    const scanHeight = voxelCount[heightAxis];
-
-    let isRight = false;
-    let isBottom = false;
-    if (this.brushSizePixels === 0.5) {
-      [isRight, isBottom] = getPositionWithinPixel(uv, scanWidth, scanHeight);
-    }
-
-    const xOffset = this.brushSizePixels === 0.5 ? (isRight ? 1 : 2) : 0.5;
-    const yOffset = this.brushSizePixels === 0.5 ? (isBottom ? -1 : 0) : 0.5;
-
-    const brushCursor = this.editor.sliceRenderer.getBrushCursor(
-      viewType,
-      preview,
-    );
-
-    brushCursor.setUVTarget(
-      (Math.floor(uv.x * scanWidth) + xOffset) / scanWidth,
-      (Math.floor(uv.y * scanHeight) + yOffset) / scanHeight,
-    );
+    // if (!this.editor.sliceRenderer || !this.editor.image) return;
+    // const { voxelCount } = this.editor.image;
+    // const [widthAxis, heightAxis] = getPlaneAxes(viewType);
+    // const scanWidth = voxelCount[widthAxis];
+    // const scanHeight = voxelCount[heightAxis];
+    // let isRight = false;
+    // let isBottom = false;
+    // if (this.brushSizePixels === 0.5) {
+    //   [isRight, isBottom] = getPositionWithinPixel(uv, scanWidth, scanHeight);
+    // }
+    // const xOffset = this.brushSizePixels === 0.5 ? (isRight ? 1 : 2) : 0.5;
+    // const yOffset = this.brushSizePixels === 0.5 ? (isBottom ? -1 : 0) : 0.5;
+    // const brushCursor = this.editor.sliceRenderer.getBrushCursor(
+    //   viewType,
+    //   preview,
+    // );
+    // brushCursor.setUVTarget(
+    //   (Math.floor(uv.x * scanWidth) + xOffset) / scanWidth,
+    //   (Math.floor(uv.y * scanHeight) + yOffset) / scanHeight,
+    // );
   }
 
   private getDragPoint(uv: Pixel, floored = true) {

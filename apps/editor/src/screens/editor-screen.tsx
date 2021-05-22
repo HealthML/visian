@@ -18,7 +18,9 @@ export const EditorScreen: React.FC = observer(() => {
           canvasRef.current,
           store.refs.upperSideView.current as HTMLCanvasElement,
           store.refs.lowerSideView.current as HTMLCanvasElement,
-          store.editor,
+          // TODO: Integrate new model
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          store.editor as any,
         ),
       );
     }

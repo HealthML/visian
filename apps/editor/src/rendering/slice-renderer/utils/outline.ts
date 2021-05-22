@@ -1,13 +1,14 @@
+import { IDocument, IImageLayer } from "@visian/ui-shared";
 import { getPlaneAxes, IDisposable, IDisposer, ViewType } from "@visian/utils";
 import { autorun } from "mobx";
 import * as THREE from "three";
-import { Editor } from "../../../models";
+
 import { toolOverlays as theme } from "../../../theme";
 
 export class Outline extends THREE.Line implements IDisposable {
   private disposers: IDisposer[] = [];
 
-  constructor(private editor: Editor, private viewType: ViewType) {
+  constructor(private document: IDocument, private viewType: ViewType) {
     super(new THREE.BufferGeometry(), new THREE.LineBasicMaterial(theme));
 
     this.position.x = 0.5;
@@ -26,7 +27,7 @@ export class Outline extends THREE.Line implements IDisposable {
   }
 
   private updateScale = () => {
-    const image = this.editor.annotation;
+    const { image } = this.document.layers[0] as IImageLayer;
     if (!image) return;
 
     const [widthAxis, heightAxis] = getPlaneAxes(this.viewType);
@@ -34,6 +35,6 @@ export class Outline extends THREE.Line implements IDisposable {
     this.scale.x = -1 / image.voxelCount[widthAxis];
     this.scale.y = 1 / image.voxelCount[heightAxis];
 
-    this.editor.sliceRenderer?.lazyRender();
+    this.document.sliceRenderer?.lazyRender();
   };
 }

@@ -1,8 +1,8 @@
+import { IDocument, IImageLayer } from "@visian/ui-shared";
 import { getPlaneAxes, IDisposable, ViewType } from "@visian/utils";
 import { autorun, IReactionDisposer } from "mobx";
 import * as THREE from "three";
 
-import { Editor } from "../../../models";
 import { crosshair as lineMaterialProps } from "../../../theme";
 
 export class Crosshair extends THREE.Group implements IDisposable {
@@ -18,7 +18,7 @@ export class Crosshair extends THREE.Group implements IDisposable {
 
   private disposers: IReactionDisposer[] = [];
 
-  constructor(viewType: ViewType, private editor: Editor) {
+  constructor(viewType: ViewType, private document: IDocument) {
     super();
 
     [this.widthAxis, this.heightAxis] = getPlaneAxes(viewType);
@@ -60,15 +60,16 @@ export class Crosshair extends THREE.Group implements IDisposable {
   }
 
   private updateTarget = () => {
-    if (!this.editor.image) return;
+    const { image } = this.document.layers[1] as IImageLayer;
+    if (!image) return;
 
     const x =
       1 -
-      (this.editor.viewSettings.selectedVoxel[this.widthAxis] + 0.5) /
-        this.editor.image.voxelCount[this.widthAxis];
+      (this.document.viewSettings.selectedVoxel[this.widthAxis] + 0.5) /
+        image.voxelCount[this.widthAxis];
     const y =
-      (this.editor.viewSettings.selectedVoxel[this.heightAxis] + 0.5) /
-      this.editor.image.voxelCount[this.heightAxis];
+      (this.document.viewSettings.selectedVoxel[this.heightAxis] + 0.5) /
+      image.voxelCount[this.heightAxis];
 
     this.verticalLine.visible = x >= 0 && x <= 1;
     this.verticalLine.position.x = x - 0.5;
@@ -79,7 +80,8 @@ export class Crosshair extends THREE.Group implements IDisposable {
 
   private updateVisibility = () => {
     this.visible =
-      this.editor.isIn3DMode && this.editor.viewSettings.showSideViews;
+      (this.document.layers[1] as IImageLayer).isVolume &&
+      this.document.viewport2D.showSideViews;
   };
 }
 

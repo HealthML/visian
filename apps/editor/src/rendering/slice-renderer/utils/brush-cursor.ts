@@ -1,8 +1,8 @@
+import { IDocument, IImageLayer } from "@visian/ui-shared";
 import { getPlaneAxes, IDisposable, IDisposer, ViewType } from "@visian/utils";
 import { autorun } from "mobx";
 import * as THREE from "three";
 
-import { Editor } from "../../../models";
 import { toolOverlays as theme } from "../../../theme";
 
 export const get2x2BrushCursorPoints = () => [
@@ -22,7 +22,7 @@ export class BrushCursor extends THREE.LineSegments implements IDisposable {
 
   protected disposers: IDisposer[] = [];
 
-  constructor(protected editor: Editor, protected viewType: ViewType) {
+  constructor(protected document: IDocument, protected viewType: ViewType) {
     super(new THREE.BufferGeometry(), new THREE.LineBasicMaterial(theme));
 
     this.disposers.push(
@@ -43,19 +43,19 @@ export class BrushCursor extends THREE.LineSegments implements IDisposable {
   public setUVTarget(u: number, v: number) {
     this.position.x = -u + 0.5;
     this.position.y = v - 0.5;
-    this.editor.sliceRenderer?.lazyRender();
+    this.document.sliceRenderer?.lazyRender();
   }
 
   protected updateVisibility() {
     this.visible =
-      this.editor.viewSettings.mainViewType === this.viewType &&
-      this.editor.tools.canDraw;
+      this.document.viewport2D.mainViewType === this.viewType &&
+      this.document.tools.canDraw;
 
-    this.editor.sliceRenderer?.lazyRender();
+    this.document.sliceRenderer?.lazyRender();
   }
 
   private updateScale = () => {
-    const { image } = this.editor;
+    const { image } = this.document.layers[1] as IImageLayer;
     if (!image) return;
 
     const [widthAxis, heightAxis] = getPlaneAxes(this.viewType);
@@ -63,16 +63,16 @@ export class BrushCursor extends THREE.LineSegments implements IDisposable {
     this.scale.x = 1 / image.voxelCount[widthAxis];
     this.scale.y = 1 / image.voxelCount[heightAxis];
 
-    this.editor.sliceRenderer?.lazyRender();
+    this.document.sliceRenderer?.lazyRender();
   };
 
   private updateRadius = () => {
     this.points = [];
 
-    if (this.editor.tools.brushSizePixels === 0.5) {
+    if (this.document.tools.brushSize === 0.5) {
       this.points = get2x2BrushCursorPoints();
     } else {
-      const radius = this.editor.tools.brushSizePixels + 0.5;
+      const radius = this.document.tools.brushSize + 0.5;
 
       let d = 1 - radius;
       let x = 0;
@@ -101,7 +101,7 @@ export class BrushCursor extends THREE.LineSegments implements IDisposable {
     this.geometry.dispose();
     this.geometry = new THREE.BufferGeometry().setFromPoints(this.points);
 
-    this.editor.sliceRenderer?.lazyRender();
+    this.document.sliceRenderer?.lazyRender();
   };
 
   private addLines(start: THREE.Vector3, end: THREE.Vector3) {

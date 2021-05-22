@@ -1,7 +1,7 @@
+import { IDocument, IEditor, IImageLayer } from "@visian/ui-shared";
 import { Image, ViewType } from "@visian/utils";
 import * as THREE from "three";
 
-import { Editor } from "../../../models";
 import { getMaxSpriteSize } from "./slice-size";
 
 export const getSpriteAspectRatio = (image: Image) => {
@@ -13,7 +13,7 @@ export const getSpriteAspectRatio = (image: Image) => {
  * @returns a quadruple of paddings for the sprite in the main view:
  * [topPadding, rightPadding, bottomPadding, leftPadding]
  */
-export const getMainViewPaddings = (editor: Editor) => {
+export const getMainViewPaddings = (editor: IEditor) => {
   const floatingUIRect = editor.refs.uiOverlay.current?.getBoundingClientRect();
   const undoRedoButtonsRect = editor.refs.undoRedoButtons.current?.getBoundingClientRect();
   const toolbarRect = editor.refs.toolbar.current?.getBoundingClientRect();
@@ -42,7 +42,7 @@ export const getMainViewPaddings = (editor: Editor) => {
     : 0;
 
   const sliceSliderPadding =
-    editor.isIn3DMode &&
+    (editor.activeDocument?.layers[1] as IImageLayer).isVolume &&
     sliceSliderRect &&
     // sliceSliderRect.right can be 0, when the slice slider isn't rendered.
     sliceSliderRect.right > 0
@@ -55,7 +55,7 @@ export const getMainViewPaddings = (editor: Editor) => {
       ? floatingUIRect.right - sideViewsRect.right
       : 0;
   const sideViewsPadding =
-    editor.viewSettings.showSideViews && sideViewsRect
+    editor.activeDocument?.viewport2D.showSideViews && sideViewsRect
       ? sideViewsRect.width + sideViewsDistance + rightMargin
       : 0;
 
@@ -71,7 +71,7 @@ export const getMainViewPaddings = (editor: Editor) => {
 };
 
 export const setMainCameraPlanes = (
-  editor: Editor,
+  document: IDocument,
   mainCanvas: HTMLCanvasElement,
   mainCamera: THREE.OrthographicCamera,
 ) => {
@@ -80,7 +80,7 @@ export const setMainCameraPlanes = (
     rightPadding,
     bottomPadding,
     leftPadding,
-  ] = getMainViewPaddings(editor);
+  ] = getMainViewPaddings(document.editor);
 
   const sizeBetweenOverlays = {
     x: mainCanvas.width - (leftPadding + rightPadding),
@@ -88,9 +88,8 @@ export const setMainCameraPlanes = (
   };
 
   const availableAspectRatio = sizeBetweenOverlays.x / sizeBetweenOverlays.y;
-  const spriteAspectRatio = editor.image
-    ? getSpriteAspectRatio(editor.image)
-    : 1;
+  const { image } = document.layers[1] as IImageLayer;
+  const spriteAspectRatio = image ? getSpriteAspectRatio(image) : 1;
 
   const spriteEdgePlanes = { left: 0, right: 0, bottom: 0, top: 0 };
   if (spriteAspectRatio <= availableAspectRatio) {

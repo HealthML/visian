@@ -13,7 +13,7 @@ import {
   writeSingleMedicalImage,
 } from "@visian/utils";
 import FileSaver from "file-saver";
-import { action, makeObservable, observable } from "mobx";
+import { action, computed, makeObservable, observable } from "mobx";
 
 import { RenderedImage } from "../../../rendering/rendered-image";
 import { Layer, LayerSnapshot } from "./layer";
@@ -74,6 +74,8 @@ export class ImageLayer
       brightness: observable,
       contrast: observable,
 
+      isVolume: computed,
+
       setImage: action,
       setBrightness: action,
       setContrast: action,
@@ -82,6 +84,14 @@ export class ImageLayer
 
   public get title(): string | undefined {
     return super.title || this.image.name;
+  }
+
+  public get isVolume() {
+    return (
+      this.image.voxelCount
+        .toArray()
+        .reduce((previous, current) => previous + (current > 1 ? 1 : 0), 0) > 2
+    );
   }
 
   public setImage(value: RenderedImage): void {

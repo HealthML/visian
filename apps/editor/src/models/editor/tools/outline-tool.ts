@@ -1,20 +1,32 @@
+import { DragPoint, IDocument } from "@visian/ui-shared";
 import { getPlaneAxes } from "@visian/utils";
 import * as THREE from "three";
-import { Editor } from "../../../models";
-import { DragPoint, DragTool } from "../types";
-import { dragPointsEqual } from "../utils";
-import { ToolRenderer } from "./tool-rendering";
+import { ToolRenderer } from "../../../rendering";
 import { UndoableTool } from "./undoable-tool";
+import { dragPointsEqual } from "./utils";
 
-export class OutlineTool extends UndoableTool implements DragTool {
+export class OutlineTool extends UndoableTool {
   private lastPoint?: DragPoint;
 
   private outline = new THREE.Shape();
   private geometry?: THREE.ShapeGeometry;
   private material: THREE.MeshBasicMaterial;
 
-  constructor(editor: Editor, toolRenderer: ToolRenderer, private value = 255) {
-    super(editor, toolRenderer);
+  constructor(
+    document: IDocument,
+    toolRenderer: ToolRenderer,
+    private value = 255,
+  ) {
+    super(
+      {
+        name: value ? "outline-tool" : "outline-eraser",
+        altToolName: value ? "outline-eraser" : "outline-tool",
+        supportedViewModes: ["2D"],
+        supportedLayerKinds: ["image"],
+      },
+      document,
+      toolRenderer,
+    );
 
     this.material = new THREE.MeshBasicMaterial({
       color: new THREE.Color(this.value, this.value, this.value),
@@ -56,14 +68,14 @@ export class OutlineTool extends UndoableTool implements DragTool {
   }
 
   private getCoords(dragPoint: DragPoint) {
-    const [xAxis, yAxis] = getPlaneAxes(this.editor.viewSettings.mainViewType);
+    const [xAxis, yAxis] = getPlaneAxes(this.document.viewport2D.mainViewType);
     return { x: dragPoint[xAxis], y: dragPoint[yAxis] };
   }
 
   private updateOutlinePreview() {
     const points = this.outline.getPoints();
-    this.editor.sliceRenderer?.getOutline().setPoints(points);
-    this.editor.sliceRenderer?.lazyRender();
+    this.document.sliceRenderer?.getOutline().setPoints(points);
+    this.document.sliceRenderer?.lazyRender();
   }
 
   private drawShape() {

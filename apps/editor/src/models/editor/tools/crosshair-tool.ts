@@ -5,7 +5,7 @@ export class CrosshairTool extends Tool {
   constructor(document: IDocument) {
     super(
       {
-        name: "crosshair",
+        name: "crosshair-tool",
         labelTx: "crosshair-tool",
         supportedViewModes: ["2D"],
         supportedLayerKinds: ["image"],

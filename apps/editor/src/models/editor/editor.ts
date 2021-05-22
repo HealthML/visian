@@ -1,3 +1,5 @@
+// DEPRECATED
+
 import {
   ImageSnapshot,
   ISerializable,
@@ -7,9 +9,10 @@ import FileSaver from "file-saver";
 import isEqual from "lodash.isequal";
 import { action, makeObservable, observable } from "mobx";
 
-import { EditorTools, RenderedImage, SliceRenderer } from "../../rendering";
+import { RenderedImage, SliceRenderer } from "../../rendering";
 import { StoreContext } from "../types";
 import { EditorMarkers } from "./markers";
+import { EditorTools } from "./tools";
 import { EditorUndoRedo } from "./undo-redo";
 import {
   EditorViewSettings,

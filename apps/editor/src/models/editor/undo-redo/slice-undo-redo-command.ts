@@ -1,3 +1,5 @@
+// DEPRECATED
+
 import { Image, ViewType } from "@visian/utils";
 
 import { UndoRedoCommand } from "./types";

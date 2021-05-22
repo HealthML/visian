@@ -6,6 +6,5 @@ export * from "./crosshair-synching";
 export * from "./layering";
 export * from "./outline";
 export * from "./preview-brush-cursor";
-export * from "./raycaster";
 export * from "./slice-size";
 export * from "./view-layout";

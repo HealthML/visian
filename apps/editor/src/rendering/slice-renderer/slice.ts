@@ -1,3 +1,4 @@
+import { IDocument } from "@visian/ui-shared";
 import { IDisposable, IDisposer, ViewType } from "@visian/utils";
 import { autorun } from "mobx";
 import * as THREE from "three";
@@ -19,8 +20,6 @@ import {
   Outline,
   PreviewBrushCursor,
 } from "./utils";
-
-import type { Editor } from "../../models";
 
 export class Slice extends THREE.Group implements IDisposable {
   public readonly baseSize = new THREE.Vector2();
@@ -49,13 +48,13 @@ export class Slice extends THREE.Group implements IDisposable {
 
   private disposers: IDisposer[] = [];
 
-  constructor(private editor: Editor, private viewType: ViewType) {
+  constructor(private document: IDocument, private viewType: ViewType) {
     super();
     this.geometry.scale(-1, 1, 1);
 
     this.add(this.crosshairShiftGroup);
 
-    this.imageMaterial = new ImageSliceMaterial(editor, viewType);
+    this.imageMaterial = new ImageSliceMaterial(document, viewType);
     this.imageMesh = new THREE.Mesh(this.geometry, this.imageMaterial);
     this.imageMesh.position.z = imageMeshZ;
     this.imageMesh.userData = {
@@ -63,7 +62,7 @@ export class Slice extends THREE.Group implements IDisposable {
     };
     this.crosshairShiftGroup.add(this.imageMesh);
 
-    this.annotationMaterial = new AnnotationSliceMaterial(editor, viewType);
+    this.annotationMaterial = new AnnotationSliceMaterial(document, viewType);
     this.annotationMesh = new THREE.Mesh(
       this.geometry,
       this.annotationMaterial,
@@ -71,19 +70,19 @@ export class Slice extends THREE.Group implements IDisposable {
     this.annotationMesh.position.z = annotationMeshZ;
     this.crosshairShiftGroup.add(this.annotationMesh);
 
-    this.crosshair = new Crosshair(this.viewType, this.editor);
+    this.crosshair = new Crosshair(this.viewType, document);
     this.crosshair.position.z = crosshairZ;
     this.crosshairShiftGroup.add(this.crosshair);
 
-    this.brushCursor = new BrushCursor(editor, viewType);
+    this.brushCursor = new BrushCursor(document, viewType);
     this.brushCursor.position.z = toolOverlayZ;
     this.crosshairShiftGroup.add(this.brushCursor);
 
-    this.outline = new Outline(editor, viewType);
+    this.outline = new Outline(document, viewType);
     this.outline.position.z = toolOverlayZ;
     this.crosshairShiftGroup.add(this.outline);
 
-    this.previewBrushCursor = new PreviewBrushCursor(editor, viewType);
+    this.previewBrushCursor = new PreviewBrushCursor(document, viewType);
     this.previewBrushCursor.position.z = toolOverlayZ;
     this.crosshairShiftGroup.add(this.previewBrushCursor);
 
@@ -91,12 +90,12 @@ export class Slice extends THREE.Group implements IDisposable {
       autorun(this.updateScale),
       autorun(this.updateOffset),
       autorun(() => {
-        this.annotationMesh.visible = this.editor.isAnnotationVisible;
-        this.editor.sliceRenderer?.lazyRender();
+        this.annotationMesh.visible = this.document.layers[0].isVisible;
+        this.document.sliceRenderer?.lazyRender();
       }),
       autorun(() => {
-        this.imageMesh.visible = this.editor.isImageVisible;
-        this.editor.sliceRenderer?.lazyRender();
+        this.imageMesh.visible = this.document.layers[1].isVisible;
+        this.document.sliceRenderer?.lazyRender();
       }),
     );
   }
@@ -137,27 +136,27 @@ export class Slice extends THREE.Group implements IDisposable {
   private updateScale = () => {
     this.workingVector.copy(this.baseSize);
 
-    if (this.viewType === this.editor.viewSettings.mainViewType) {
-      this.workingVector.multiplyScalar(this.editor.viewSettings.zoomLevel);
+    if (this.viewType === this.document.viewport2D.mainViewType) {
+      this.workingVector.multiplyScalar(this.document.viewport2D.zoomLevel);
     }
 
     this.scale.set(this.workingVector.x, this.workingVector.y, 1);
 
-    this.editor.sliceRenderer?.lazyRender();
+    this.document.sliceRenderer?.lazyRender();
   };
 
   private updateOffset = () => {
     this.workingVector.setScalar(0);
 
-    if (this.viewType === this.editor.viewSettings.mainViewType) {
+    if (this.viewType === this.document.viewport2D.mainViewType) {
       this.workingVector.set(
-        this.editor.viewSettings.offset.x,
-        this.editor.viewSettings.offset.y,
+        this.document.viewport2D.offset.x,
+        this.document.viewport2D.offset.y,
       );
     }
 
     this.position.set(this.workingVector.x, this.workingVector.y, 0);
 
-    this.editor.sliceRenderer?.lazyRender();
+    this.document.sliceRenderer?.lazyRender();
   };
 }

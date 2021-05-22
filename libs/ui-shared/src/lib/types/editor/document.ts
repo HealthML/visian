@@ -1,3 +1,5 @@
+import type * as THREE from "three";
+import type { IEditor } from "./editor";
 import type { IHistory } from "./history";
 import type { ILayer } from "./layers";
 import type { ITools } from "./tools";
@@ -17,6 +19,9 @@ export interface IDocument {
    */
   title?: string;
 
+  /** The editor this document is part of. */
+  editor: IEditor;
+
   /** The layer that is currently selected for editing. */
   activeLayer?: Reference<ILayer>;
   /** The document's layer stack. */
@@ -34,6 +39,7 @@ export interface IDocument {
   // TODO: Extract rendering code in its own lib.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   sliceRenderer?: any;
+  renderers?: THREE.WebGLRenderer[];
 
   /** Reads a layer based on its id. */
   getLayer(id: string): ILayer | undefined;

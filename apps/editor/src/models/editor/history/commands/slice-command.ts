@@ -13,7 +13,7 @@ export interface SliceCommandSnapshot extends IUndoRedoCommandSnapshot {
   viewType: ViewType;
   slice: number;
   oldSliceData: Uint8Array;
-  newSliceData: Uint8Array;
+  newSliceData?: Uint8Array;
 }
 
 export class SliceCommand
@@ -28,7 +28,7 @@ export class SliceCommand
   public readonly viewType: ViewType;
   public readonly slice: number;
   protected readonly oldSliceData: Uint8Array;
-  protected readonly newSliceData: Uint8Array;
+  protected readonly newSliceData?: Uint8Array;
 
   constructor(
     snapshot: Omit<SliceCommandSnapshot, "kind">,

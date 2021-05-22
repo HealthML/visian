@@ -1,3 +1,5 @@
+// DEPRECATED
+
 import {
   getPlaneAxes,
   ISerializable,
@@ -175,27 +177,23 @@ export class EditorViewSettings
     this.setSelectedSlice(this.getSelectedSlice(viewType) + stepSize, viewType);
   }
 
-  public moveCrosshair(screenPosition: Pixel, canvasId: string) {
-    if (this.editor.tools.isDrawing) return;
-
-    const { sliceRenderer } = this.editor;
-    if (!sliceRenderer || !this.editor.image || !this.showSideViews) return;
-
-    const intersection = sliceRenderer.raycaster.getIntersectionsFromPointer(
-      screenPosition,
-      canvasId,
-    )[0];
-    if (!intersection || !intersection.uv) return;
-
-    const { viewType } = intersection.object.userData;
-    const [widthAxis, heightAxis] = getPlaneAxes(viewType);
-
-    this.selectedVoxel[widthAxis] = Math.floor(
-      intersection.uv.x * this.editor.image.voxelCount[widthAxis],
-    );
-    this.selectedVoxel[heightAxis] = Math.floor(
-      intersection.uv.y * this.editor.image.voxelCount[heightAxis],
-    );
+  public moveCrosshair(_screenPosition: Pixel, _canvasId: string) {
+    // if (this.editor.tools.isDrawing) return;
+    // const { sliceRenderer } = this.editor;
+    // if (!sliceRenderer || !this.editor.image || !this.showSideViews) return;
+    // const intersection = sliceRenderer.raycaster.getIntersectionsFromPointer(
+    //   screenPosition,
+    //   canvasId,
+    // )[0];
+    // if (!intersection || !intersection.uv) return;
+    // const { viewType } = intersection.object.userData;
+    // const [widthAxis, heightAxis] = getPlaneAxes(viewType);
+    // this.selectedVoxel[widthAxis] = Math.floor(
+    //   intersection.uv.x * this.editor.image.voxelCount[widthAxis],
+    // );
+    // this.selectedVoxel[heightAxis] = Math.floor(
+    //   intersection.uv.y * this.editor.image.voxelCount[heightAxis],
+    // );
   }
 
   public reset = () => {

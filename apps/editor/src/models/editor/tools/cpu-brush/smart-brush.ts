@@ -1,3 +1,6 @@
+// DEPRECATED
+
+import { IDocument, IImageLayer } from "@visian/ui-shared";
 import {
   getOrthogonalAxis,
   getPlaneAxes,
@@ -5,7 +8,7 @@ import {
   Vector,
   VoxelWithValue,
 } from "@visian/utils";
-import { Editor } from "../../../models";
+import { NumberParameter, Parameter } from "../../parameters";
 
 import { Brush } from "./brush";
 
@@ -25,8 +28,38 @@ export class SmartBrush extends Brush {
   private minValue = Infinity;
   private maxValue = -Infinity;
 
-  constructor(editor: Editor, value = 255, undoable = true) {
-    super(editor, value, undoable);
+  constructor(document: IDocument, value = 255, undoable = true) {
+    super(
+      {
+        name: value ? "smart-brush" : "smart-eraser",
+        altToolName: value ? "smart-eraser" : "smart-brush",
+        supportedViewModes: ["2D"],
+        supportedLayerKinds: ["image"],
+        params: [
+          new NumberParameter({
+            name: "seed-threshold",
+            labelTx: "seed-threshold",
+            scaleType: "linear",
+            min: 0,
+            max: 20,
+            stepSize: 1,
+            value: 10,
+          }) as Parameter<unknown>,
+          new NumberParameter({
+            name: "neighbor-threshold",
+            labelTx: "neighbor-threshold",
+            scaleType: "linear",
+            min: 0,
+            max: 20,
+            stepSize: 1,
+            value: 6,
+          }) as Parameter<unknown>,
+        ],
+      },
+      document,
+      value,
+      undoable,
+    );
   }
 
   protected writeVoxels(voxels: VoxelWithValue[]) {
@@ -40,18 +73,20 @@ export class SmartBrush extends Brush {
 
   protected finishStroke(
     isDeleteOperation: boolean | undefined,
-    annotation = this.editor.annotation,
-    viewType = this.editor.viewSettings.mainViewType,
+    imageLayer = this.document.layers[0] as IImageLayer,
+    viewType = this.document.viewport2D.mainViewType,
   ) {
     this.doRegionGrowing();
 
     this.currentStroke.clear();
     this.drawnVoxels = [];
 
-    super.finishStroke(isDeleteOperation, annotation, viewType);
+    super.finishStroke(isDeleteOperation, imageLayer, viewType);
   }
 
-  private doRegionGrowing(image = this.editor.image) {
+  private doRegionGrowing(
+    image = (this.document.layers[1] as IImageLayer).image,
+  ) {
     if (!image) return;
 
     this.minValue = Infinity;
@@ -62,8 +97,8 @@ export class SmartBrush extends Brush {
       if (scanValue > this.maxValue) this.maxValue = scanValue;
     });
 
-    const seedThreshold = this.editor.tools.smartBrushSeedThreshold;
-    const neighborThreshold = this.editor.tools.smartBrushNeighborThreshold;
+    const seedThreshold = this.params["seed-threshold"].value as number;
+    const neighborThreshold = this.params["neighbor-threshold"].value as number;
 
     this.minValue -= seedThreshold;
     this.maxValue += seedThreshold;
@@ -102,8 +137,8 @@ export class SmartBrush extends Brush {
   }
 
   private neighborsOf(voxel: Vector, image: Image) {
-    const [x, y] = getPlaneAxes(this.editor.viewSettings.mainViewType);
-    const z = getOrthogonalAxis(this.editor.viewSettings.mainViewType);
+    const [x, y] = getPlaneAxes(this.document.viewport2D.mainViewType);
+    const z = getOrthogonalAxis(this.document.viewport2D.mainViewType);
 
     const neighbors = [
       Vector.fromObject(

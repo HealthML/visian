@@ -110,6 +110,8 @@ export interface ITools {
   setActiveTool(nameOrTool?: string | ITool): void;
 
   setBrushSize(value?: number, showPreview?: boolean): void;
+  incrementBrushSize(): void;
+  decrementBrushSize(): void;
 
   setIsCursorOverDrawableArea(value: boolean): void;
   setIsCursorOverFloatingUI(value: boolean): void;

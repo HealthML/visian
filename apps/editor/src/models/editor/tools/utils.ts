@@ -1,4 +1,4 @@
-import { DragPoint } from "./types";
+import { DragPoint } from "@visian/ui-shared";
 
 export const dragPointsEqual = (dp1: DragPoint, dp2: DragPoint) =>
   dp1.x === dp2.x &&

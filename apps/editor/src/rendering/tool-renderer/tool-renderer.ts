@@ -1,12 +1,13 @@
+import { IDocument, IImageLayer } from "@visian/ui-shared";
 import { getOrthogonalAxis, getPlaneAxes, IDisposer } from "@visian/utils";
 import { reaction } from "mobx";
 import * as THREE from "three";
+import { RenderedImage } from "../rendered-image";
+import { IRenderLoopSubscriber, SliceRenderer } from "../slice-renderer";
 
-import { Editor } from "../../../../models";
-import { IRenderLoopSubscriber, SliceRenderer } from "../../../slice-renderer";
-import { Circle } from "../../types";
 import { Circles } from "./circles";
 import { ToolCamera } from "./tool-camera";
+import { Circle } from "./types";
 
 export class ToolRenderer implements IRenderLoopSubscriber {
   private circlesToRender: Circle[] = [];
@@ -22,18 +23,19 @@ export class ToolRenderer implements IRenderLoopSubscriber {
 
   private disposers: IDisposer[] = [];
 
-  constructor(private editor: Editor) {
-    this.camera = new ToolCamera(editor);
+  constructor(private document: IDocument) {
+    this.camera = new ToolCamera(document);
     this.circles = new Circles();
 
     this.disposers.push(
       reaction(
         () => ({
-          mainViewType: editor.viewSettings.mainViewType,
-          selectedSlice: editor.viewSettings.selectedVoxel.getFromView(
-            editor.viewSettings.mainViewType,
+          mainViewType: document.viewport2D.mainViewType,
+          selectedSlice: document.viewSettings.selectedVoxel.getFromView(
+            document.viewport2D.mainViewType,
           ),
-          annotation: editor.annotation,
+          annotation: (document.layers[0] as IImageLayer)
+            .image as RenderedImage,
         }),
         (params) => {
           this.resizeRenderTargets();
@@ -42,7 +44,7 @@ export class ToolRenderer implements IRenderLoopSubscriber {
         { fireImmediately: true },
       ),
       reaction(
-        () => editor.renderers,
+        () => document.renderers,
         (renderers) => {
           if (renderers) {
             this.renderTargets = renderers.map(
@@ -57,7 +59,7 @@ export class ToolRenderer implements IRenderLoopSubscriber {
         { fireImmediately: true },
       ),
       reaction(
-        () => editor.sliceRenderer,
+        () => document.sliceRenderer,
         (sliceRenderer?: SliceRenderer, oldSliceRenderer?: SliceRenderer) => {
           oldSliceRenderer?.unsubscribeFromRenderLoop(this);
           sliceRenderer?.subscribeToRenderLoop(this);
@@ -68,7 +70,7 @@ export class ToolRenderer implements IRenderLoopSubscriber {
 
   public dispose() {
     this.circles.dispose();
-    this.editor.sliceRenderer?.unsubscribeFromRenderLoop(this);
+    this.document.sliceRenderer?.unsubscribeFromRenderLoop(this);
     this.disposers.forEach((disposer) => disposer());
   }
 
@@ -78,11 +80,12 @@ export class ToolRenderer implements IRenderLoopSubscriber {
    */
   public currentSliceChanged = (
     { mainViewType, selectedSlice, annotation } = {
-      mainViewType: this.editor.viewSettings.mainViewType,
-      selectedSlice: this.editor.viewSettings.selectedVoxel.getFromView(
-        this.editor.viewSettings.mainViewType,
+      mainViewType: this.document.viewport2D.mainViewType,
+      selectedSlice: this.document.viewSettings.selectedVoxel.getFromView(
+        this.document.viewport2D.mainViewType,
       ),
-      annotation: this.editor.annotation,
+      annotation: (this.document.layers[0] as IImageLayer)
+        .image as RenderedImage,
     },
   ) => {
     if (!annotation) return;
@@ -105,8 +108,10 @@ export class ToolRenderer implements IRenderLoopSubscriber {
 
     if (!circles && !shapes) return;
 
-    const { renderers, annotation } = this.editor;
-    if (!renderers || !annotation) return;
+    const { renderers } = this.document;
+    const annotation = (this.document.layers[0] as IImageLayer)
+      .image as RenderedImage;
+    if (!renderers) return;
 
     if (circles) {
       this.circles.setCircles(this.circlesToRender);
@@ -135,11 +140,11 @@ export class ToolRenderer implements IRenderLoopSubscriber {
       renderer.setRenderTarget(null);
     });
 
-    const viewType = this.editor.viewSettings.mainViewType;
+    const viewType = this.document.viewport2D.mainViewType;
     const orthogonalAxis = getOrthogonalAxis(viewType);
     annotation.setSlice(
       viewType,
-      this.editor.viewSettings.selectedVoxel[orthogonalAxis],
+      this.document.viewSettings.selectedVoxel[orthogonalAxis],
       this.textures,
     );
 
@@ -150,7 +155,7 @@ export class ToolRenderer implements IRenderLoopSubscriber {
   public renderCircles(...circles: Circle[]) {
     this.circlesToRender.push(...circles);
 
-    this.editor.sliceRenderer?.lazyRender();
+    this.document.sliceRenderer?.lazyRender();
   }
 
   public renderShape(geometry: THREE.ShapeGeometry, material?: THREE.Material) {
@@ -158,7 +163,7 @@ export class ToolRenderer implements IRenderLoopSubscriber {
       new THREE.Mesh(geometry, material || new THREE.MeshBasicMaterial()),
     );
 
-    this.editor.sliceRenderer?.lazyRender();
+    this.document.sliceRenderer?.lazyRender();
   }
 
   public waitForRender() {
@@ -176,12 +181,11 @@ export class ToolRenderer implements IRenderLoopSubscriber {
   }
 
   private resizeRenderTargets = () => {
-    const { annotation } = this.editor;
-    const voxelCount = annotation?.voxelCount;
+    const { voxelCount } = (this.document.layers[0] as IImageLayer).image;
     if (!voxelCount) return;
 
     const [widthAxis, heightAxis] = getPlaneAxes(
-      this.editor.viewSettings.mainViewType,
+      this.document.viewport2D.mainViewType,
     );
 
     const width = voxelCount[widthAxis];
