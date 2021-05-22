@@ -3,6 +3,7 @@ import {
   IHistory,
   IUndoRedoCommand,
   IUndoRedoCommandSnapshot,
+  ValueType,
 } from "@visian/ui-shared";
 import {
   ISerializable,
@@ -13,9 +14,6 @@ import { action, makeObservable, observable } from "mobx";
 
 import { maxUndoRedoSteps } from "../../../constants";
 import * as commands from "./commands";
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-type ValueType<T> = T extends Record<infer _K, infer V> ? V : T;
 
 export const commandMap: {
   [kind: string]: ValueType<typeof commands>;

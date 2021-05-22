@@ -1,4 +1,4 @@
-import { IDocument, ILayer } from "@visian/ui-shared";
+import { IDocument, ILayer, ValueType } from "@visian/ui-shared";
 import { ISerializable } from "@visian/utils";
 import { action, computed, makeObservable, observable } from "mobx";
 import { v4 as uuidv4 } from "uuid";
@@ -9,6 +9,15 @@ import { Tools, ToolsSnapshot } from "./tools";
 import { ViewSettings, ViewSettingsSnapshot } from "./view-settings";
 import { Viewport2D, Viewport2DSnapshot } from "./viewport-2d";
 import { Viewport3D, Viewport3DSnapshot } from "./viewport-3d";
+
+import * as layers from "./layers";
+
+export const layerMap: {
+  [kind: string]: ValueType<typeof layers>;
+} = {};
+Object.values(layers).forEach((command) => {
+  layerMap[command.kind] = command;
+});
 
 export interface DocumentSnapshot {
   id: string;
@@ -51,7 +60,10 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
     this.activeLayerId = snapshot?.activeLayerId;
     this.layerMap = {};
     snapshot?.layerMap.forEach((layer) => {
-      this.layerMap[layer.id] = new Layer(layer, this);
+      const LayerKind = layerMap[layer.kind];
+      if (!LayerKind) return;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      this.layerMap[layer.id] = new LayerKind(layer as any, this);
     });
     this.layerIds = snapshot?.layerIds || [];
     this.history = new History(snapshot?.history, this);
