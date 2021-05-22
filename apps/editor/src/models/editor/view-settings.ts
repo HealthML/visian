@@ -41,7 +41,7 @@ export class ViewSettings
       this.reset();
     }
 
-    makeObservable<this, "setSelectedVoxel">(this, {
+    makeObservable<this>(this, {
       viewMode: observable,
       selectedVoxel: observable,
       brightness: observable,
@@ -58,8 +58,8 @@ export class ViewSettings
     });
   }
 
-  protected setSelectedVoxel(value?: Vector): void {
-    if (!value) {
+  public setSelectedVoxel(x?: number, y?: number, z?: number): void {
+    if (!x || !y || !z) {
       // TODO: Do not rely on `layer[0]`
       const voxelCount = (this.document.layers[0] as IImageLayer | undefined)
         ?.image.voxelCount;
@@ -75,7 +75,7 @@ export class ViewSettings
       return;
     }
 
-    this.selectedVoxel = value;
+    this.selectedVoxel.set(x, y, z);
   }
 
   public setViewMode = (value?: ViewMode): void => {
@@ -119,11 +119,11 @@ export class ViewSettings
   public applySnapshot(snapshot: Partial<ViewSettingsSnapshot>): Promise<void> {
     this.setViewMode(snapshot.viewMode);
 
-    this.setSelectedVoxel(
-      snapshot.selectedVoxel
-        ? Vector.fromArray(snapshot.selectedVoxel)
-        : undefined,
-    );
+    if (snapshot.selectedVoxel) {
+      this.setSelectedVoxel(...snapshot.selectedVoxel);
+    } else {
+      this.setSelectedVoxel();
+    }
 
     this.setBrightness(snapshot.brightness);
     this.setContrast(snapshot.contrast);

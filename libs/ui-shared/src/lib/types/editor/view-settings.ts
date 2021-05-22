@@ -27,6 +27,8 @@ export interface IViewSettings {
 
   /** The background color as as CSS color string. */
   backgroundColor: string;
+
+  setSelectedVoxel(x?: number, y?: number, z?: number): void;
 }
 
 /** View settings for the 2D viewport. */

@@ -1,4 +1,4 @@
-import { IDocument, ITool, ViewMode } from "@visian/ui-shared";
+import { DragPoint, IDocument, ITool, ViewMode } from "@visian/ui-shared";
 import { ISerializable } from "@visian/utils";
 
 import { Parameter, ParameterSnapshot } from "../parameters";
@@ -63,15 +63,15 @@ export class Tool implements ITool, ISerializable<ToolSnapshot> {
     // Intentionally left blank
   }
 
-  public startAt(): void {
+  public startAt(_dragPoint: DragPoint): void {
     // Intentionally left blank
   }
 
-  public moveTo(): void {
+  public moveTo(_dragPoint: DragPoint): void {
     // Intentionally left blank
   }
 
-  public endAt(): void {
+  public endAt(_dragPoint: DragPoint): void {
     // Intentionally left blank
   }
 
