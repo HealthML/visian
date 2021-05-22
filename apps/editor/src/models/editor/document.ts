@@ -4,6 +4,7 @@ import { action, computed, makeObservable, observable } from "mobx";
 import { v4 as uuidv4 } from "uuid";
 
 import { History, HistorySnapshot } from "./history";
+import { Layer, LayerSnapshot } from "./layers";
 import { Tools, ToolsSnapshot } from "./tools";
 import { ViewSettings, ViewSettingsSnapshot } from "./view-settings";
 import { Viewport2D, Viewport2DSnapshot } from "./viewport-2d";
@@ -14,7 +15,8 @@ export interface DocumentSnapshot {
   titleOverride?: string;
 
   activeLayerId?: string;
-  // TODO: layers: LayerSnapshot[];
+  layerMap: LayerSnapshot[];
+  layerIds: string[];
 
   history: HistorySnapshot;
 
@@ -32,7 +34,8 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
   protected titleOverride?: string;
 
   protected activeLayerId?: string;
-  public layers: ILayer[] = [];
+  protected layerMap: { [key: string]: Layer };
+  protected layerIds: string[];
 
   public history: History;
 
@@ -46,7 +49,11 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
     this.id = snapshot?.id || uuidv4();
     this.titleOverride = snapshot?.titleOverride;
     this.activeLayerId = snapshot?.activeLayerId;
-    // TODO: Create new layers for all layers in the snapshot
+    this.layerMap = {};
+    snapshot?.layerMap.forEach((layer) => {
+      this.layerMap[layer.id] = new Layer(layer, this);
+    });
+    this.layerIds = snapshot?.layerIds || [];
     this.history = new History(snapshot?.history, this);
     this.viewSettings = new ViewSettings(snapshot?.viewSettings, this);
     this.viewport2D = new Viewport2D(snapshot?.viewport2D, this);
@@ -54,11 +61,15 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
 
     this.tools = new Tools(snapshot?.tools, this);
 
-    makeObservable<this, "titleOverride" | "activeLayerId">(this, {
+    makeObservable<
+      this,
+      "titleOverride" | "activeLayerId" | "layerMap" | "layerIds"
+    >(this, {
       id: observable,
       titleOverride: observable,
       activeLayerId: observable,
-      layers: observable,
+      layerMap: observable,
+      layerIds: observable,
       history: observable,
       viewSettings: observable,
       viewport2D: observable,
@@ -75,11 +86,17 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
     });
   }
 
+  public get layers(): ILayer[] {
+    return this.layerIds.map((id) => this.layerMap[id]);
+  }
+
   public get title(): string {
     if (this.titleOverride) return this.titleOverride;
-    const { length } = this.layers;
-    if (!length) return "Untitled Document";
-    return this.layers[length - 1].title;
+    const { length } = this.layerIds;
+    return (
+      (length && this.getLayer(this.layerIds[length - 1])?.title) ||
+      "Untitled Document"
+    );
   }
 
   public setTitle = (value?: string): void => {
@@ -88,11 +105,13 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
 
   // Layer Management
   public get activeLayer(): ILayer | undefined {
-    return this.layers.find((layer) => layer.id === this.activeLayerId);
+    return Object.values(this.layerMap).find(
+      (layer) => layer.id === this.activeLayerId,
+    );
   }
 
   public getLayer(id: string): ILayer | undefined {
-    return this.layers.find((layer) => layer.id === id);
+    return this.layerMap[id];
   }
 
   public setActiveLayer = (idOrLayer?: string | ILayer): void => {
@@ -103,15 +122,17 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
       : undefined;
   };
 
-  public addLayer = (layer: ILayer): void => {
-    this.layers.push(layer);
+  public addLayer = (layer: Layer): void => {
+    this.layerMap[layer.id] = layer;
+    this.layerIds.push(layer.id);
   };
 
   public deleteLayer = (idOrLayer: string | ILayer): void => {
-    this.layers = this.layers.filter((layer) =>
-      typeof idOrLayer === "string"
-        ? layer.id === idOrLayer
-        : layer === idOrLayer,
+    delete this.layerMap[
+      typeof idOrLayer === "string" ? idOrLayer : idOrLayer.id
+    ];
+    this.layerIds = this.layerIds.filter((id) =>
+      typeof idOrLayer === "string" ? id !== idOrLayer : id !== idOrLayer.id,
     );
   };
 
@@ -121,6 +142,8 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
       id: this.id,
       titleOverride: this.titleOverride,
       activeLayerId: this.activeLayerId,
+      layerMap: Object.values(this.layerMap).map((layer) => layer.toJSON()),
+      layerIds: this.layerIds,
       history: this.history.toJSON(),
       viewSettings: this.viewSettings.toJSON(),
       viewport2D: this.viewport2D.toJSON(),

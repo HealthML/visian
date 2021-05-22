@@ -33,4 +33,10 @@ export interface IDocument {
 
   /** Reads a layer based on its id. */
   getLayer(id: string): ILayer | undefined;
+
+  /** Adds a layer to the document. */
+  addLayer(layer: ILayer): void;
+
+  /** Deletes a layer from the document. */
+  deleteLayer(idOrLayer: string | ILayer): void;
 }

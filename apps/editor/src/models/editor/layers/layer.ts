@@ -10,6 +10,7 @@ export interface LayerSnapshot {
 
   id: string;
   titleOverride?: string;
+  parentId?: string;
 
   blendMode: BlendMode;
   color?: string;
@@ -28,6 +29,7 @@ export class Layer implements ILayer, ISerializable<LayerSnapshot> {
 
   public id!: string;
   protected titleOverride?: string;
+  protected parentId?: string;
 
   public blendMode!: BlendMode;
   public color?: string;
@@ -43,46 +45,59 @@ export class Layer implements ILayer, ISerializable<LayerSnapshot> {
     this.applySnapshot(snapshot);
     if (!this.id) this.id = uuidv4();
 
-    makeObservable<this, "titleOverride" | "opacityOverride">(this, {
-      isAnnotation: observable,
-      id: observable,
-      titleOverride: observable,
-      blendMode: observable,
-      color: observable,
-      isVisible: observable,
-      opacityOverride: observable,
-      transformation: observable.ref,
+    makeObservable<this, "titleOverride" | "parentId" | "opacityOverride">(
+      this,
+      {
+        isAnnotation: observable,
+        id: observable,
+        titleOverride: observable,
+        parentId: observable,
+        blendMode: observable,
+        color: observable,
+        isVisible: observable,
+        opacityOverride: observable,
+        transformation: observable.ref,
 
-      opacity: computed,
-      title: computed,
+        opacity: computed,
+        parent: computed,
+        title: computed,
 
-      setIsAnnotation: action,
-      setTitle: action,
-      setBlendMode: action,
-      setColor: action,
-      setIsVisible: action,
-      setOpacity: action,
-      setTransformation: action,
-      applySnapshot: action,
-    });
-  }
-
-  public get title(): string {
-    return this.titleOverride || "Untitled Layer";
-  }
-
-  public get opacity(): number {
-    // TODO: The annotation opacity should probably be extracted to the theme
-    return this.opacityOverride ?? this.isAnnotation ? 0.5 : 1;
+        setParent: action,
+        setIsAnnotation: action,
+        setTitle: action,
+        setBlendMode: action,
+        setColor: action,
+        setIsVisible: action,
+        setOpacity: action,
+        setTransformation: action,
+        applySnapshot: action,
+      },
+    );
   }
 
   public setIsAnnotation = (value?: boolean): void => {
     this.isAnnotation = Boolean(value);
   };
 
+  public get title(): string {
+    return this.titleOverride || "Untitled Layer";
+  }
+
   public setTitle = (value?: string): void => {
     this.titleOverride = value;
   };
+
+  public get parent(): ILayer | undefined {
+    return this.parentId ? this.document.getLayer(this.parentId) : undefined;
+  }
+
+  public setParent(idOrLayer?: string | ILayer): void {
+    this.parentId = idOrLayer
+      ? typeof idOrLayer === "string"
+        ? idOrLayer
+        : idOrLayer.id
+      : undefined;
+  }
 
   public setBlendMode = (value?: BlendMode): void => {
     this.blendMode = value || "NORMAL";
@@ -95,6 +110,11 @@ export class Layer implements ILayer, ISerializable<LayerSnapshot> {
   public setIsVisible = (value?: boolean): void => {
     this.isVisible = value ?? true;
   };
+
+  public get opacity(): number {
+    // TODO: The annotation opacity should probably be extracted to the theme
+    return this.opacityOverride ?? this.isAnnotation ? 0.5 : 1;
+  }
 
   public setOpacity = (value?: number): void => {
     this.opacityOverride = value;
@@ -111,6 +131,7 @@ export class Layer implements ILayer, ISerializable<LayerSnapshot> {
       isAnnotation: this.isAnnotation,
       id: this.id,
       titleOverride: this.titleOverride,
+      parentId: this.parentId,
       blendMode: this.blendMode,
       color: this.color,
       isVisible: this.isVisible,
@@ -125,6 +146,7 @@ export class Layer implements ILayer, ISerializable<LayerSnapshot> {
 
     this.setIsAnnotation(snapshot?.isAnnotation);
     this.setTitle(snapshot?.titleOverride);
+    this.setParent(snapshot?.parentId);
     this.setBlendMode(snapshot?.blendMode);
     this.setColor(snapshot?.color);
     this.setIsVisible(snapshot?.isVisible);
