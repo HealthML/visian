@@ -180,7 +180,7 @@ export class EditorTools implements ISerializable<EditorToolsSnapshot> {
     if (this.isDrawing) return;
 
     // Temporary fix so that brush & eraser don't overwrite smart brush edits.
-    if ([ToolType.Brush, ToolType.Eraser].includes(tool)) {
+    if ([ToolType.Brush, ToolType.Eraser, ToolType.Outline].includes(tool)) {
       this.toolRenderer.readCurrentSlice();
     }
 
