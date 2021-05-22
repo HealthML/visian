@@ -20,6 +20,8 @@ export class VolumeRendererModel {
   public densityHistogram?: [number[], number, number];
   public gradientHistogram?: [number[], number, number];
   public backgroundValue = 0;
+  /** The camera position in volume coordinates. */
+  public cameraPosition = new Vector(3);
   public useFocusVolume = false;
   public focusColor = "rgba(255, 255, 255, 1)";
   public transferFunction = transferFunctions[TransferFunctionType.FCCutaway];
@@ -45,6 +47,7 @@ export class VolumeRendererModel {
       densityHistogram: observable.ref,
       gradientHistogram: observable.ref,
       backgroundValue: observable,
+      cameraPosition: observable,
       useFocusVolume: observable,
       focusColor: observable,
       transferFunction: observable,
@@ -63,6 +66,7 @@ export class VolumeRendererModel {
       setFocus: action,
       setGradientHistogram: action,
       setBackgroundValue: action,
+      setCameraPosition: action,
       setUseFocusVolume: action,
       setFocusColor: action,
       setTransferFunction: action,
@@ -107,6 +111,14 @@ export class VolumeRendererModel {
 
   public setBackgroundValue = (value: number) => {
     this.backgroundValue = Math.max(0, Math.min(1, value));
+  };
+
+  public setCameraPosition = (x: number, y: number, z: number) => {
+    this.cameraPosition.set(x, y, z);
+
+    if (this.isConeLinkedToCamera) {
+      this.setCutAwayConeDirection(x, y, z);
+    }
   };
 
   public setUseFocusVolume = (useFocusVolume: boolean) => {

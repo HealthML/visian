@@ -133,6 +133,21 @@ export class Slice extends THREE.Group implements IDisposable {
     this.crosshairShiftGroup.position.set(-offset.x, -offset.y, 0);
   }
 
+  /**
+   * Converts a position to virtual uv coordinates of this slice.
+   * Virtual means, that uv coordinates can be outside the [0, 1] range aswell.
+   */
+  public getVirtualUVs(position: THREE.Vector3) {
+    const localPosition = this.crosshairShiftGroup
+      .worldToLocal(position)
+      .addScalar(0.5);
+
+    return {
+      x: 1 - localPosition.x,
+      y: localPosition.y,
+    };
+  }
+
   private updateScale = () => {
     this.workingVector.copy(this.baseSize);
 

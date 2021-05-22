@@ -235,16 +235,9 @@ export class SliceRenderer implements IDisposable, ISliceRenderer {
    */
   public getVirtualMainViewUV(screenPosition: Pixel) {
     const webGLPosition = this.getMainViewWebGLPosition(screenPosition);
-    const sliceRelativePosition = this.slices[
-      this.document.viewport2D.mainViewType
-    ]
-      .worldToLocal(new THREE.Vector3(webGLPosition.x, webGLPosition.y, 0))
-      .addScalar(0.5);
-
-    return {
-      x: 1 - sliceRelativePosition.x,
-      y: sliceRelativePosition.y,
-    };
+    return this.slices[this.document.viewport2D.mainViewType].getVirtualUVs(
+      new THREE.Vector3(webGLPosition.x, webGLPosition.y, 0),
+    );
   }
 
   public showBrushCursorPreview(
