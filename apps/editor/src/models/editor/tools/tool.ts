@@ -18,6 +18,7 @@ export interface ToolConfig {
   labelTx?: string;
 
   isDrawingTool?: boolean;
+  isBrush?: boolean;
 
   altToolName?: string;
 
@@ -34,6 +35,7 @@ export class Tool implements ITool, ISerializable<ToolSnapshot> {
   public labelTx?: string;
 
   public isDrawingTool: boolean;
+  public isBrush: boolean;
 
   public altToolName?: string;
 
@@ -47,6 +49,7 @@ export class Tool implements ITool, ISerializable<ToolSnapshot> {
     this.label = config.label;
     this.labelTx = config.labelTx;
     this.isDrawingTool = Boolean(config.isDrawingTool);
+    this.isBrush = Boolean(config.isBrush);
     this.altToolName = config.altToolName;
     this.supportedViewModes = config.supportedViewModes;
     this.supportedLayerKinds = config.supportedLayerKinds;

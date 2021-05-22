@@ -11,6 +11,7 @@ import { Viewport2D, Viewport2DSnapshot } from "./viewport-2d";
 import { Viewport3D, Viewport3DSnapshot } from "./viewport-3d";
 
 import * as layers from "./layers";
+import { SliceRenderer } from "../../rendering";
 
 export const layerMap: {
   [kind: string]: ValueType<typeof layers>;
@@ -52,6 +53,8 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
 
   public tools: Tools;
 
+  public sliceRenderer?: SliceRenderer;
+
   constructor(snapshot?: DocumentSnapshot) {
     this.id = snapshot?.id || uuidv4();
     this.titleOverride = snapshot?.titleOverride;
@@ -84,6 +87,8 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
       viewSettings: observable,
       viewport2D: observable,
       viewport3D: observable,
+      tools: observable,
+      sliceRenderer: observable,
 
       title: computed,
       activeLayer: computed,
@@ -92,6 +97,7 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
       setActiveLayer: action,
       addLayer: action,
       deleteLayer: action,
+      setSliceRenderer: action,
       applySnapshot: action,
     });
   }
@@ -142,6 +148,10 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
       typeof idOrLayer === "string" ? id !== idOrLayer : id !== idOrLayer.id,
     );
   };
+
+  public setSliceRenderer(sliceRenderer?: SliceRenderer) {
+    this.sliceRenderer = sliceRenderer;
+  }
 
   // Serialization
   public toJSON(): DocumentSnapshot {

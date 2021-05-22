@@ -31,6 +31,10 @@ export interface IDocument {
 
   tools: ITools;
 
+  // TODO: Extract rendering code in its own lib.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  sliceRenderer?: any;
+
   /** Reads a layer based on its id. */
   getLayer(id: string): ILayer | undefined;
 
@@ -39,4 +43,8 @@ export interface IDocument {
 
   /** Deletes a layer from the document. */
   deleteLayer(idOrLayer: string | ILayer): void;
+
+  // TODO: Extract rendering code in its own lib.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  setSliceRenderer(sliceRenderer: any): void;
 }

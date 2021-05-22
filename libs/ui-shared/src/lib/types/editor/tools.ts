@@ -34,6 +34,12 @@ export interface ITool {
   isDrawingTool: boolean;
 
   /**
+   * Indicates if the tool is a brush, i.e., if a brush cursor should be rendered
+   * when it can be used.
+   */
+  isBrush: boolean;
+
+  /**
    * The tool that is used as the alternative mode of this tool.
    * Typically, this is activated using the `alt` key or right mouse button.
    */
@@ -102,4 +108,11 @@ export interface ITools {
   isToolInUse: boolean;
 
   setActiveTool(nameOrTool?: string | ITool): void;
+
+  setBrushSize(value?: number, showPreview?: boolean): void;
+
+  setIsCursorOverDrawableArea(value: boolean): void;
+  setIsCursorOverFloatingUI(value: boolean): void;
+  setIsNavigationDragged(value: boolean): void;
+  setIsDrawing(value: boolean): void;
 }
