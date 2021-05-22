@@ -62,11 +62,13 @@ export class Tools implements ITools, ISerializable<ToolsSnapshot> {
   }
 
   public setActiveTool(nameOrTool?: string | ITool): void {
+    const previouslyActiveTool = this.activeTool;
     this.activeToolName = nameOrTool
       ? typeof nameOrTool === "string"
         ? nameOrTool
         : nameOrTool.name
       : undefined;
+    this.activeTool?.activate(previouslyActiveTool);
   }
 
   public setBrushSize(value?: number): void {

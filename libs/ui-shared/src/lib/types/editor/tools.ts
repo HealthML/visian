@@ -47,8 +47,12 @@ export interface ITool {
   /** This tool's parameters. */
   params: { [name: string]: IParameter };
 
-  /** Called when the tool becomes active. */
-  activate(): void;
+  /**
+   * Called when the tool becomes active.
+   *
+   * @param previousTool The previously active tool (if any).
+   */
+  activate(previousTool?: ITool): void;
 
   /** Called when the user starts a drag interaction with this tool selected. */
   startAt(dragPoint: DragPoint): void;

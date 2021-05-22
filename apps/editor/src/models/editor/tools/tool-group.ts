@@ -48,6 +48,7 @@ export class ToolGroup implements IToolGroup, ISerializable<ToolGroupSnapshot> {
         ? nameOrTool
         : nameOrTool.name
       : this.toolNames[0];
+    this.document.tools.setActiveTool(nameOrTool);
   }
 
   // Serialization
