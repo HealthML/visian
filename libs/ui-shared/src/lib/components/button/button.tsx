@@ -42,6 +42,7 @@ const BaseButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
     {
       children,
       data,
+      delayTooltip = true,
       icon,
       tooltip,
       tooltipTx,
@@ -70,9 +71,13 @@ const BaseButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
     const enterButton = useCallback(
       (event: React.PointerEvent<HTMLButtonElement>) => {
         if (onPointerEnter) onPointerEnter(event);
-        scheduleTooltip();
+        if (delayTooltip) {
+          scheduleTooltip();
+        } else {
+          setShowTooltip(true);
+        }
       },
-      [onPointerEnter, scheduleTooltip],
+      [delayTooltip, onPointerEnter, scheduleTooltip],
     );
     const leaveButton = useCallback(
       (event: React.PointerEvent<HTMLButtonElement>) => {

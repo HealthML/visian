@@ -90,6 +90,19 @@ export const Toolbar: React.FC = observer(() => {
     [store],
   );
 
+  const tooltipTimerRef = useRef<NodeJS.Timer>();
+  const [shouldDelayTooltips, setShouldDelayTooltips] = useState(true);
+
+  const setNoTooltipDelayTimer = () => {
+    setShouldDelayTooltips(false);
+    if (tooltipTimerRef.current !== undefined) {
+      clearTimeout(tooltipTimerRef.current);
+    }
+    tooltipTimerRef.current = (setTimeout(() => {
+      setShouldDelayTooltips(true);
+    }, 1000) as unknown) as NodeJS.Timer;
+  };
+
   return (
     <StyledToolbar ref={ref}>
       <Tool
@@ -99,6 +112,8 @@ export const Toolbar: React.FC = observer(() => {
         value={ToolType.Navigate}
         onPress={setActiveTool}
         onContextMenu={preventDefault}
+        delayTooltip={shouldDelayTooltips}
+        onPointerLeave={setNoTooltipDelayTimer}
       />
       <Tool
         icon="crosshair"
@@ -110,6 +125,8 @@ export const Toolbar: React.FC = observer(() => {
         }
         onPress={setActiveTool}
         onContextMenu={preventDefault}
+        delayTooltip={shouldDelayTooltips}
+        onPointerLeave={setNoTooltipDelayTimer}
       />
       <Tool
         icon="pixelBrush"
@@ -120,6 +137,8 @@ export const Toolbar: React.FC = observer(() => {
         ref={activeTool === ToolType.Brush ? setButtonRef : undefined}
         onPress={setActiveTool}
         onContextMenu={preventDefault}
+        delayTooltip={shouldDelayTooltips}
+        onPointerLeave={setNoTooltipDelayTimer}
       />
       <Tool
         icon="magicBrush"
@@ -130,6 +149,8 @@ export const Toolbar: React.FC = observer(() => {
         ref={activeTool === ToolType.SmartBrush ? setButtonRef : undefined}
         onPress={setActiveTool}
         onContextMenu={preventDefault}
+        delayTooltip={shouldDelayTooltips}
+        onPointerLeave={setNoTooltipDelayTimer}
       />
       <Tool
         icon="outline"
@@ -140,6 +161,8 @@ export const Toolbar: React.FC = observer(() => {
         ref={activeTool === ToolType.Outline ? setButtonRef : undefined}
         onPress={setActiveTool}
         onContextMenu={preventDefault}
+        delayTooltip={shouldDelayTooltips}
+        onPointerLeave={setNoTooltipDelayTimer}
       />
       <Tool
         icon="erase"
@@ -150,12 +173,16 @@ export const Toolbar: React.FC = observer(() => {
         ref={activeTool === ToolType.Eraser ? setButtonRef : undefined}
         onPress={setActiveTool}
         onContextMenu={preventDefault}
+        delayTooltip={shouldDelayTooltips}
+        onPointerLeave={setNoTooltipDelayTimer}
       />
       <Tool
         icon="trash"
         tooltipTx="clear-slice"
         onPress={clearSlice}
         onContextMenu={preventDefault}
+        delayTooltip={shouldDelayTooltips}
+        onPointerLeave={setNoTooltipDelayTimer}
       />
       <BrushModal
         isOpen={
