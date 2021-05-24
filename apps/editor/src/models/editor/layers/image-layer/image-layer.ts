@@ -1,5 +1,5 @@
 import { RenderedImage } from "@visian/rendering";
-import { IDocument, IImageLayer } from "@visian/ui-shared";
+import { IDocument, IImageLayer, MarkerConfig } from "@visian/ui-shared";
 import {
   Image,
   ImageSnapshot,
@@ -16,7 +16,15 @@ import {
 import FileSaver from "file-saver";
 import { action, computed, makeObservable, observable } from "mobx";
 
-import { Layer, LayerSnapshot } from "./layer";
+import { condenseValues } from "../../markers";
+import { Layer, LayerSnapshot } from "../layer";
+import { markerRPCProvider } from "./markers";
+import {
+  GetEmptySlicesArgs,
+  GetEmptySlicesReturn,
+  IsSliceEmptyArgs,
+  IsSliceEmptyReturn,
+} from "./types";
 
 export interface ImageLayerSnapshot extends LayerSnapshot {
   image: ImageSnapshot;
@@ -63,30 +71,44 @@ export class ImageLayer
   public brightness!: number;
   public contrast!: number;
 
+  /**
+   * An array of n-hot arrays indicating empty slices in the direction of every
+   * view type.
+   */
+  protected emptySlices!: boolean[][];
+
   constructor(
     snapshot: Partial<ImageLayerSnapshot> & Pick<ImageLayerSnapshot, "image">,
     protected document: IDocument,
   ) {
     super(snapshot, document);
 
-    makeObservable(this, {
-      image: observable,
-      brightness: observable,
-      contrast: observable,
+    this.setEmptySlices();
 
-      isVolume: computed,
+    makeObservable<this, "emptySlices" | "setEmptySlices" | "setIsSliceEmpty">(
+      this,
+      {
+        image: observable,
+        brightness: observable,
+        contrast: observable,
+        emptySlices: observable,
 
-      setImage: action,
-      setBrightness: action,
-      setContrast: action,
-    });
+        isVolumetric: computed,
+
+        setImage: action,
+        setBrightness: action,
+        setContrast: action,
+        setEmptySlices: action,
+        setIsSliceEmpty: action,
+      },
+    );
   }
 
   public get title(): string | undefined {
     return super.title || this.image.name;
   }
 
-  public get isVolume() {
+  public get isVolumetric() {
     return (
       this.image.voxelCount
         .toArray()
@@ -105,6 +127,101 @@ export class ImageLayer
   public setContrast = (value?: number): void => {
     this.contrast = value ?? 1;
   };
+
+  // Slice Markers
+  public getSliceMarkers(viewType: ViewType): MarkerConfig[] {
+    const nonEmptySlices: number[] = [];
+    this.emptySlices[viewType].forEach((isEmpty, slice) => {
+      if (!isEmpty) nonEmptySlices.push(slice);
+    });
+
+    return condenseValues(nonEmptySlices);
+  }
+
+  protected setEmptySlices(emptySlices?: boolean[][]): void {
+    this.emptySlices = emptySlices || [[], [], []];
+  }
+
+  protected isSliceEmpty(viewType: ViewType, slice: number): boolean {
+    return (
+      this.emptySlices[viewType].length <= slice ||
+      this.emptySlices[viewType][slice]
+    );
+  }
+
+  protected setIsSliceEmpty(
+    viewType: ViewType,
+    slice: number,
+    isEmpty: boolean,
+  ): void {
+    if (this.emptySlices[viewType].length <= slice) return;
+    this.emptySlices[viewType][slice] = isEmpty;
+  }
+
+  public async recomputeSliceMarkers(
+    viewType?: ViewType,
+    slice?: number,
+    isDeleteOperation?: boolean,
+  ): Promise<void> {
+    if (!this.isVolumetric) return;
+
+    if (viewType !== undefined && slice !== undefined) {
+      // Recompute the given slice
+      // The noop here is used to serialize worker calls to avoid race conditions
+      await markerRPCProvider.rpc("noop");
+      if (
+        this.emptySlices[viewType].length <= slice ||
+        (isDeleteOperation && this.isSliceEmpty(viewType, slice)) ||
+        (isDeleteOperation === false && !this.isSliceEmpty(viewType, slice))
+      ) {
+        return;
+      }
+
+      // TODO: If multiple updates are queued for the same slice, only the latest
+      // one should be executed
+      const isEmpty = await markerRPCProvider.rpc<
+        IsSliceEmptyArgs,
+        IsSliceEmptyReturn
+      >("isSliceEmpty", {
+        sliceData: this.getSlice(viewType, slice),
+      });
+
+      this.setIsSliceEmpty(viewType, slice, isEmpty);
+    } else {
+      // Recompute all slices
+      // TODO: If multiple updates are queued, only the latest one should be executed
+      const emptySlices = await markerRPCProvider.rpc<
+        GetEmptySlicesArgs,
+        GetEmptySlicesReturn
+      >("getNonEmptySlices", {
+        atlas: this.image.getAtlas(),
+        voxelCount: this.image.voxelCount.toArray(),
+        voxelComponents: this.image.voxelComponents,
+      });
+
+      this.setEmptySlices(emptySlices);
+    }
+  }
+
+  public async clearSliceMarkers(
+    viewType?: ViewType,
+    slice?: number,
+  ): Promise<void> {
+    if (!this.isVolumetric) return;
+
+    // The noop here is used to serialize worker calls to avoid race conditions
+    // TODO: A more elegant solution would be to cancel any outstanding worker
+    // updates once clear is called
+    await markerRPCProvider.rpc("noop");
+
+    if (viewType !== undefined && slice !== undefined) {
+      // Clear the given slice
+      this.setIsSliceEmpty(viewType, slice, true);
+    } else {
+      // Clear all slices
+      this.setEmptySlices();
+    }
+  }
 
   // Special Accessors
   // TODO: Review regarding correct image component handling

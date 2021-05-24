@@ -42,7 +42,7 @@ export const getMainViewPaddings = (editor: IEditor) => {
     : 0;
 
   const sliceSliderPadding =
-    (editor.activeDocument?.layers[1] as IImageLayer).isVolume &&
+    (editor.activeDocument?.layers[1] as IImageLayer).isVolumetric &&
     sliceSliderRect &&
     // sliceSliderRect.right can be 0, when the slice slider isn't rendered.
     sliceSliderRect.right > 0

@@ -94,7 +94,29 @@ export interface IImageLayer extends ILayer {
   contrast: number;
 
   /** Indicates if this image is volumetric. */
-  isVolume: boolean;
+  isVolumetric: boolean;
+
+  /**
+   * Triggers the slice markers of this layer to be recomputed.
+   *
+   * If a view type and slice number are given, only the marker state for this
+   * slice will be updated. To additionally filter out unnecessary updates for
+   * this slice, `isDeleteOperation` can be passed. It prohibits updating the
+   * marker for an empty slice when `true` and that of a non-empty slice when
+   * `false`.
+   */
+  recomputeSliceMarkers(
+    viewType?: ViewType,
+    slice?: number,
+    isDeleteOperation?: boolean,
+  ): Promise<void>;
+  /**
+   * Deletes all slice markers of this layer.
+   *
+   * If a view type and slice number are given, only the marker state for this
+   * slice will be cleared.
+   */
+  clearSliceMarkers(viewType?: ViewType, slice?: number): Promise<void>;
 
   getVoxel(voxel: Voxel): number;
   setVoxel(voxel: Voxel, value: number): void;

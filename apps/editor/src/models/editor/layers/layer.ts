@@ -1,5 +1,5 @@
 import { BlendMode, IDocument, ILayer, MarkerConfig } from "@visian/ui-shared";
-import { ISerializable } from "@visian/utils";
+import { ISerializable, ViewType } from "@visian/utils";
 import { action, computed, makeObservable, observable } from "mobx";
 import { Matrix4 } from "three";
 import { v4 as uuidv4 } from "uuid";
@@ -92,7 +92,7 @@ export class Layer implements ILayer, ISerializable<LayerSnapshot> {
     return this.parentId ? this.document.getLayer(this.parentId) : undefined;
   }
 
-  public getSliceMarkers(): MarkerConfig[] {
+  public getSliceMarkers(_viewType: ViewType): MarkerConfig[] {
     return [];
   }
 
