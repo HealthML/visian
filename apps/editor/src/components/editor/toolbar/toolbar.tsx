@@ -1,16 +1,18 @@
 import {
+  duration,
   Modal,
   PointerButton,
   preventDefault,
   SliderField,
   Switch,
+  Theme,
   Tool,
   Toolbar as GenericToolbar,
   useDelay,
 } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import styled from "styled-components";
+import styled, { useTheme } from "styled-components";
 
 import { useStore } from "../../../app/root-store";
 import { ToolType } from "../../../models";
@@ -36,6 +38,7 @@ const adaptiveBrushSizeSwitchItems = [
 
 export const Toolbar: React.FC = observer(() => {
   const store = useStore();
+  const theme = useTheme() as Theme;
 
   // Ref Management
   const ref = useRef<HTMLDivElement>(null);
@@ -97,7 +100,7 @@ export const Toolbar: React.FC = observer(() => {
     useCallback(() => {
       setShouldDelayTooltips(true);
     }, []),
-    1000,
+    duration("noTooltipDelayInterval")({ theme }) as number,
   );
 
   const setNoTooltipDelayTimer = useCallback(() => {
