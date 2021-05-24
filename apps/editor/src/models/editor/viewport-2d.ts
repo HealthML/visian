@@ -1,4 +1,9 @@
-import { IDocument, IImageLayer, IViewport2D } from "@visian/ui-shared";
+import {
+  IDocument,
+  IImageLayer,
+  IViewport2D,
+  MarkerConfig,
+} from "@visian/ui-shared";
 import {
   getPlaneAxes,
   ISerializable,
@@ -6,7 +11,7 @@ import {
   Vector,
   ViewType,
 } from "@visian/utils";
-import { action, makeObservable, observable } from "mobx";
+import { action, computed, makeObservable, observable } from "mobx";
 import { maxZoom, minZoom, zoomStep } from "../../constants";
 
 export interface Viewport2DSnapshot {
@@ -43,6 +48,8 @@ export class Viewport2D
       zoomLevel: observable,
       offset: observable,
 
+      markers: computed,
+
       setMainViewType: action,
       setShowSideViews: action,
       setZoomLevel: action,
@@ -55,6 +62,10 @@ export class Viewport2D
       zoomOut: action,
       applySnapshot: action,
     });
+  }
+
+  public get markers(): MarkerConfig[] {
+    return this.document.markers.getSliceMarkers(this.mainViewType);
   }
 
   /**

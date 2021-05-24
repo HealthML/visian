@@ -18,6 +18,7 @@ import { Viewport2D, Viewport2DSnapshot } from "./viewport-2d";
 import { Viewport3D, Viewport3DSnapshot } from "./viewport-3d";
 
 import * as layers from "./layers";
+import { Markers } from "./markers";
 
 export const layerMap: {
   [kind: string]: ValueType<typeof layers>;
@@ -60,6 +61,8 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
   public viewport3D: Viewport3D;
 
   public tools: Tools;
+
+  public markers: Markers = new Markers(this);
 
   public sliceRenderer?: ISliceRenderer;
   public renderers?: THREE.WebGLRenderer[];

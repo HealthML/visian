@@ -1,5 +1,6 @@
 import type { Image, ViewType, Voxel, VoxelWithValue } from "@visian/utils";
 import type { Matrix4 } from "three";
+import { MarkerConfig } from "./markers";
 
 /**
  * The supported layer blending modes
@@ -49,7 +50,8 @@ export interface ILayer {
    */
   blendMode?: BlendMode;
   /**
-   * The color used to render layers without intrinsic color information.
+   * The color used to render layers without intrinsic color information,
+   * provided as a theme key or CSS color string.
    * This is also used to color the layer icon in the layer menu.
    * If none is set, a default is chosen by the theme.
    */
@@ -62,6 +64,12 @@ export interface ILayer {
   /** The layer's transform matrix used to position it during rendering. */
   transformation?: Matrix4;
 
+  /**
+   * Returns all slice markers, aggregated for the layer and given view type.
+   */
+  getSliceMarkers(viewType: ViewType): MarkerConfig[];
+
+  /** Sets this layer's parent layer, typically the group it is contained in. */
   setParent(idOrLayer?: string | ILayer): void;
 }
 

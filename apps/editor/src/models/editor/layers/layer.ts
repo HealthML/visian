@@ -1,4 +1,4 @@
-import { BlendMode, IDocument, ILayer } from "@visian/ui-shared";
+import { BlendMode, IDocument, ILayer, MarkerConfig } from "@visian/ui-shared";
 import { ISerializable } from "@visian/utils";
 import { action, computed, makeObservable, observable } from "mobx";
 import { Matrix4 } from "three";
@@ -90,6 +90,10 @@ export class Layer implements ILayer, ISerializable<LayerSnapshot> {
 
   public get parent(): ILayer | undefined {
     return this.parentId ? this.document.getLayer(this.parentId) : undefined;
+  }
+
+  public getSliceMarkers(): MarkerConfig[] {
+    return [];
   }
 
   public setParent(idOrLayer?: string | ILayer): void {

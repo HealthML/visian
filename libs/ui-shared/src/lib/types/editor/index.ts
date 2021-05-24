@@ -2,6 +2,7 @@ export * from "./document";
 export * from "./editor";
 export * from "./history";
 export * from "./layers";
+export * from "./markers";
 export * from "./parameters";
 export * from "./tools";
 export * from "./types";

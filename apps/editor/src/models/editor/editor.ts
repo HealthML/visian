@@ -11,7 +11,7 @@ import isEqual from "lodash.isequal";
 import { action, makeObservable, observable } from "mobx";
 
 import { StoreContext } from "../types";
-import { EditorMarkers } from "./markers";
+import { EditorMarkers } from "./_markers";
 import { EditorTools } from "./tools";
 import { EditorUndoRedo } from "./undo-redo";
 import {

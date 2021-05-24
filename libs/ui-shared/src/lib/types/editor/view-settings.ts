@@ -1,5 +1,6 @@
 import type { Pixel, Vector, ViewType, Voxel } from "@visian/utils";
 import type { Matrix4 } from "three";
+import { MarkerConfig } from "./markers";
 
 import type { ViewMode } from "./types";
 
@@ -45,6 +46,11 @@ export interface IViewport2D {
   zoomLevel: number;
   /** The 2D navigation offset by which the visible image is moved. */
   offset: Pixel;
+
+  /**
+   * All slice markers, aggregated for the document and current main view type.
+   */
+  markers: MarkerConfig[];
 
   /**
    * Returns the selected slice for the given `ViewType`.

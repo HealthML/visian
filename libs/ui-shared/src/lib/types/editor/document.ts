@@ -1,13 +1,13 @@
 import type * as THREE from "three";
+
+import type { ISliceRenderer } from "../rendering";
 import type { IEditor } from "./editor";
 import type { IHistory } from "./history";
 import type { ILayer } from "./layers";
 import type { ITools } from "./tools";
 import type { Reference } from "./types";
 import type { IViewport2D, IViewport3D, IViewSettings } from "./view-settings";
-import { ISliceRenderer } from "../rendering";
-
-// `label` is a display name for an attribute
+import type { IMarkers } from "./markers";
 
 /** A VISIAN document, consisting of up to multiple editable layers. */
 export interface IDocument {
@@ -36,6 +36,8 @@ export interface IDocument {
   viewport3D: IViewport3D;
 
   tools: ITools;
+
+  markers: IMarkers;
 
   sliceRenderer?: ISliceRenderer;
   renderers?: THREE.WebGLRenderer[];
