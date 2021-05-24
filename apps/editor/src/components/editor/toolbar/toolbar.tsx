@@ -6,6 +6,7 @@ import {
   Switch,
   Tool,
   Toolbar as GenericToolbar,
+  useDelay,
 } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
 import React, { useCallback, useEffect, useRef, useState } from "react";
@@ -90,18 +91,19 @@ export const Toolbar: React.FC = observer(() => {
     [store],
   );
 
-  const tooltipTimerRef = useRef<NodeJS.Timer>();
   const [shouldDelayTooltips, setShouldDelayTooltips] = useState(true);
 
-  const setNoTooltipDelayTimer = () => {
-    setShouldDelayTooltips(false);
-    if (tooltipTimerRef.current !== undefined) {
-      clearTimeout(tooltipTimerRef.current);
-    }
-    tooltipTimerRef.current = (setTimeout(() => {
+  const [scheduleTooltipsDelay] = useDelay(
+    useCallback(() => {
       setShouldDelayTooltips(true);
-    }, 1000) as unknown) as NodeJS.Timer;
-  };
+    }, []),
+    1000,
+  );
+
+  const setNoTooltipDelayTimer = useCallback(() => {
+    setShouldDelayTooltips(false);
+    scheduleTooltipsDelay();
+  }, [scheduleTooltipsDelay]);
 
   return (
     <StyledToolbar ref={ref}>
