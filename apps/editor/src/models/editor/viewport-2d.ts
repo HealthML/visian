@@ -42,7 +42,7 @@ export class Viewport2D
       this.reset();
     }
 
-    makeObservable<this, "setOffset">(this, {
+    makeObservable(this, {
       mainViewType: observable,
       showSideViews: observable,
       zoomLevel: observable,
@@ -88,7 +88,7 @@ export class Viewport2D
     this.zoomLevel = value ?? 1;
   };
 
-  protected setOffset(value?: Vector): void {
+  public setOffset(value?: Vector): void {
     this.offset = value || this.offset.setScalar(0);
   }
 

@@ -27,6 +27,7 @@ export interface IDocument {
   activeLayer?: Reference<ILayer>;
   /** The document's layer stack. */
   layers: ILayer[];
+  has3DLayers: boolean;
 
   /** The document's history.' */
   history: IHistory;
@@ -39,8 +40,8 @@ export interface IDocument {
 
   markers: IMarkers;
 
-  sliceRenderer?: ISliceRenderer;
-  renderers?: THREE.WebGLRenderer[];
+  sliceRenderer?: Reference<ISliceRenderer>;
+  renderers?: Reference<THREE.WebGLRenderer[]>;
 
   /** Reads a layer based on its id. */
   getLayer(id: string): ILayer | undefined;
@@ -50,6 +51,4 @@ export interface IDocument {
 
   /** Deletes a layer from the document. */
   deleteLayer(idOrLayer: string | ILayer): void;
-
-  setSliceRenderer(sliceRenderer: ISliceRenderer): void;
 }

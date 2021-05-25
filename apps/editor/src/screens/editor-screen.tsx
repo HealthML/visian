@@ -18,9 +18,9 @@ export const EditorScreen: React.FC = observer(() => {
           canvasRef.current,
           store.refs.upperSideView.current as HTMLCanvasElement,
           store.refs.lowerSideView.current as HTMLCanvasElement,
-          // TODO: Integrate new model
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          store.editor as any,
+          // TODO: Allow undefined document values in the slice renderer
+          // TODO: Handle changing active documents in the slice renderer
+          store.editor.activeDocument!,
         ),
       );
     }

@@ -93,7 +93,7 @@ export class ImageLayer
         contrast: observable,
         emptySlices: observable,
 
-        isVolumetric: computed,
+        is3DLayer: computed,
 
         setImage: action,
         setBrightness: action,
@@ -108,7 +108,7 @@ export class ImageLayer
     return super.title || this.image.name;
   }
 
-  public get isVolumetric() {
+  public get is3DLayer() {
     return (
       this.image.voxelCount
         .toArray()
@@ -163,7 +163,7 @@ export class ImageLayer
     slice?: number,
     isDeleteOperation?: boolean,
   ): Promise<void> {
-    if (!this.isVolumetric) return;
+    if (!this.is3DLayer) return;
 
     if (viewType !== undefined && slice !== undefined) {
       // Recompute the given slice
@@ -207,7 +207,7 @@ export class ImageLayer
     viewType?: ViewType,
     slice?: number,
   ): Promise<void> {
-    if (!this.isVolumetric) return;
+    if (!this.is3DLayer) return;
 
     // The noop here is used to serialize worker calls to avoid race conditions
     // TODO: A more elegant solution would be to cancel any outstanding worker

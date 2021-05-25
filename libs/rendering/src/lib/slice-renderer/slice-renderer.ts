@@ -198,7 +198,7 @@ export class SliceRenderer implements IDisposable, ISliceRenderer {
   }
 
   /** Converts a WebGL position to a screen space one. */
-  public getMainViewScreenPosition(webGLPosition: Pixel) {
+  public getMainViewScreenPosition(webGLPosition: Pixel): Pixel {
     const boundingBox = this.mainCanvas.getBoundingClientRect();
     const webGLSize = this.getMainViewWebGLSize();
     return {
@@ -214,7 +214,7 @@ export class SliceRenderer implements IDisposable, ISliceRenderer {
   }
 
   /** Converts a screen space position to a WebGL one. */
-  public getMainViewWebGLPosition(screenPosition: Pixel) {
+  public getMainViewWebGLPosition(screenPosition: Pixel): Pixel {
     const boundingBox = this.mainCanvas.getBoundingClientRect();
     const webGLSize = this.getMainViewWebGLSize();
     return {

@@ -80,7 +80,7 @@ export class Crosshair extends THREE.Group implements IDisposable {
 
   private updateVisibility = () => {
     this.visible =
-      (this.document.layers[1] as IImageLayer).isVolumetric &&
+      (this.document.layers[1] as IImageLayer).is3DLayer &&
       this.document.viewport2D.showSideViews;
   };
 }

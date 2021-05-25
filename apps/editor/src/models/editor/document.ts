@@ -64,9 +64,6 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
 
   public markers: Markers = new Markers(this);
 
-  public sliceRenderer?: ISliceRenderer;
-  public renderers?: THREE.WebGLRenderer[];
-
   constructor(snapshot: DocumentSnapshot | undefined, public editor: IEditor) {
     this.id = snapshot?.id || uuidv4();
     this.titleOverride = snapshot?.titleOverride;
@@ -99,8 +96,6 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
       viewport2D: observable,
       viewport3D: observable,
       tools: observable,
-      sliceRenderer: observable,
-      renderers: observable,
 
       title: computed,
       activeLayer: computed,
@@ -109,15 +104,10 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
       setActiveLayer: action,
       addLayer: action,
       deleteLayer: action,
-      setSliceRenderer: action,
       applySnapshot: action,
     });
 
     this.tools = new Tools(snapshot?.tools, this);
-  }
-
-  public get layers(): ILayer[] {
-    return this.layerIds.map((id) => this.layerMap[id]);
   }
 
   public get title(): string | undefined {
@@ -131,6 +121,10 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
   };
 
   // Layer Management
+  public get layers(): ILayer[] {
+    return this.layerIds.map((id) => this.layerMap[id]);
+  }
+
   public get activeLayer(): ILayer | undefined {
     return Object.values(this.layerMap).find(
       (layer) => layer.id === this.activeLayerId,
@@ -163,8 +157,17 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
     );
   };
 
-  public setSliceRenderer(sliceRenderer?: ISliceRenderer) {
-    this.sliceRenderer = sliceRenderer;
+  public get has3DLayers(): boolean {
+    return Object.values(this.layerMap).some((layer) => layer.is3DLayer);
+  }
+
+  // Proxies
+  public get sliceRenderer(): ISliceRenderer | undefined {
+    return this.editor.sliceRenderer;
+  }
+
+  public get renderers(): THREE.WebGLRenderer[] | undefined {
+    return this.editor.renderers;
   }
 
   // Serialization

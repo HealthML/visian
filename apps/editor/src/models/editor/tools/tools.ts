@@ -83,10 +83,10 @@ export class Tools implements ITools, ISerializable<ToolsSnapshot> {
 
     this.toolRenderer = new ToolRenderer(document);
 
-    this.tools["move-tool"] = new Tool(
+    this.tools["navigation-tool"] = new Tool(
       {
-        name: "move-tool",
-        labelTx: "move-tool",
+        name: "navigation-tool",
+        labelTx: "navigation-tool",
         supportedLayerKinds: [],
         supportedViewModes: ["2D", "3D"],
       },
@@ -107,7 +107,7 @@ export class Tools implements ITools, ISerializable<ToolsSnapshot> {
     this.tools["clear-image"] = new ClearImageTool(document, this.toolRenderer);
 
     this.toolGroups.push(
-      new ToolGroup({ toolNames: ["move-tool"] }, document),
+      new ToolGroup({ toolNames: ["navigation-tool"] }, document),
       new ToolGroup({ toolNames: ["crosshair-tool"] }, document),
       new ToolGroup({ toolNames: ["brush"] }, document),
       new ToolGroup({ toolNames: ["smart-brush", "smart-eraser"] }, document),

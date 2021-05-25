@@ -80,6 +80,10 @@ export class Layer implements ILayer, ISerializable<LayerSnapshot> {
     this.isAnnotation = Boolean(value);
   };
 
+  public get is3DLayer(): boolean {
+    return false;
+  }
+
   public get title(): string | undefined {
     return this.titleOverride;
   }

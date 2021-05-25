@@ -27,6 +27,11 @@ export interface ILayer {
   kind: string;
   /** `true` for layers that hold annotation information. */
   isAnnotation: boolean;
+  /**
+   * Indicates if this layer hold information in at least 3 spatial
+   * dimensions.
+   */
+  is3DLayer: boolean;
 
   /** The layer's UUID. */
   id: string;
@@ -69,6 +74,9 @@ export interface ILayer {
    */
   getSliceMarkers(viewType: ViewType): MarkerConfig[];
 
+  setColor(value?: string): void;
+  setIsVisible(value?: boolean): void;
+
   /** Sets this layer's parent layer, typically the group it is contained in. */
   setParent(idOrLayer?: string | ILayer): void;
 }
@@ -92,9 +100,6 @@ export interface IImageLayer extends ILayer {
    * `1` is the original contrast.
    */
   contrast: number;
-
-  /** Indicates if this image is volumetric. */
-  isVolumetric: boolean;
 
   /**
    * Triggers the slice markers of this layer to be recomputed.

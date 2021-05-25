@@ -53,13 +53,13 @@ export const ViewSettings: React.FC = observer(() => {
   // Menu Actions
   const setContrast = useCallback(
     (value: number | number[]) => {
-      store?.editor.viewSettings.setContrast(value as number);
+      store?.editor.activeDocument?.viewSettings.setContrast(value as number);
     },
     [store],
   );
   const setBrightness = useCallback(
     (value: number | number[]) => {
-      store?.editor.viewSettings.setBrightness(value as number);
+      store?.editor.activeDocument?.viewSettings.setBrightness(value as number);
     },
     [store],
   );
@@ -80,21 +80,27 @@ export const ViewSettings: React.FC = observer(() => {
         labelTx="view-settings"
         parentElement={buttonRef}
         position="left"
-        onReset={store?.editor.viewSettings.resetSettings}
+        onReset={store?.editor.activeDocument?.viewSettings.reset}
       >
-        {store?.editor.isIn3DMode && (
+        {store?.editor.activeDocument?.has3DLayers && (
           <>
             <Switch
               labelTx="side-views"
               items={sideViewsSwitchItems}
-              value={Boolean(store?.editor.viewSettings.showSideViews)}
-              onChange={store?.editor.viewSettings.toggleSideViews}
+              value={Boolean(
+                store?.editor.activeDocument?.viewport2D.showSideViews,
+              )}
+              onChange={
+                store?.editor.activeDocument?.viewport2D.toggleSideViews
+              }
             />
             <Switch
               labelTx="main-view-type"
               items={mainViewTypeSwitchItems}
-              value={store?.editor.viewSettings.mainViewType}
-              onChange={store?.editor.viewSettings.setMainViewType}
+              value={store?.editor.activeDocument?.viewport2D.mainViewType}
+              onChange={
+                store?.editor.activeDocument?.viewport2D.setMainViewType
+              }
             />
           </>
         )}
@@ -103,7 +109,7 @@ export const ViewSettings: React.FC = observer(() => {
           unlockValueLabelRange
           min={0}
           max={2}
-          value={store?.editor.viewSettings.contrast}
+          value={store?.editor.activeDocument?.viewSettings.contrast}
           onChange={setContrast}
         />
         <SliderField
@@ -111,7 +117,7 @@ export const ViewSettings: React.FC = observer(() => {
           unlockValueLabelRange
           min={0}
           max={2}
-          value={store?.editor.viewSettings.brightness}
+          value={store?.editor.activeDocument?.viewSettings.brightness}
           onChange={setBrightness}
         />
       </Modal>

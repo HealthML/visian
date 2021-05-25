@@ -55,7 +55,7 @@ export const Toolbar: React.FC = observer(() => {
   // Menu Positioning
   const [buttonRef, setButtonRef] = useState<HTMLButtonElement | null>(null);
 
-  const activeTool = store?.editor.tools.activeTool;
+  const activeTool = store?.editor.activeDocument?.tools.activeTool;
   const setActiveTool = useCallback(
     (
       value: string | number | undefined,
@@ -106,7 +106,8 @@ export const Toolbar: React.FC = observer(() => {
         activeTool={activeTool}
         value={ToolType.Crosshair}
         isDisabled={
-          !store?.editor.isIn3DMode || !store.editor.viewSettings.showSideViews
+          !store?.editor.activeDocument?.has3DLayers ||
+          !store.editor.activeDocument?.viewport2D.showSideViews
         }
         onPress={setActiveTool}
         onContextMenu={preventDefault}
@@ -178,6 +179,7 @@ export const Toolbar: React.FC = observer(() => {
             : store?.editor.tools.resetBrushSize
         }
       >
+        {/* TODO: Generate procedurally from params */}
         <Switch
           labelTx="lock-brush-size"
           items={adaptiveBrushSizeSwitchItems}

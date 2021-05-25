@@ -33,12 +33,12 @@ export const ColorPanel = observer((props: ModalProps) => {
   const store = useStore();
   const setColor = useCallback(
     (value: string) => {
-      store?.editor.viewSettings.setAnnotationColor(value);
+      store?.editor.activeDocument?.activeLayer?.setColor(value);
     },
     [store],
   );
 
-  const currentColor = store?.editor.viewSettings.annotationColor;
+  const currentColor = store?.editor.activeDocument?.activeLayer?.color;
   return (
     <Modal {...props} labelTx="color-panel">
       <LayerList>

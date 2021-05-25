@@ -62,7 +62,8 @@ const SideViewCanvas = styled.canvas`
 export const SideViews = observer(() => {
   const store = useStore();
   const showSideViews =
-    store?.editor.isIn3DMode && store.editor.viewSettings.showSideViews;
+    store?.editor.activeDocument?.has3DLayers &&
+    store.editor.activeDocument?.viewport2D.showSideViews;
 
   // Ref Management
   const wrapperRef = useRef<HTMLDivElement>(null);
