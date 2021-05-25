@@ -41,7 +41,9 @@ export const setUpPointerHandling = (
     ) {
       // We intentionally replace the navigation tool by the brush tool here
       // using the `||`
-      store.editor.activeDocument.tools.setActiveTool(precisionTool || "brush");
+      store.editor.activeDocument.tools.setActiveTool(
+        precisionTool || "pixel-brush",
+      );
     }
 
     previousDevice = device;

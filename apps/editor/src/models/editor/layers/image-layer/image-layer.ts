@@ -135,7 +135,10 @@ export class ImageLayer
       if (!isEmpty) nonEmptySlices.push(slice);
     });
 
-    return condenseValues(nonEmptySlices);
+    return condenseValues(nonEmptySlices).map((value) => ({
+      color: this.color || "text",
+      value,
+    }));
   }
 
   protected setEmptySlices(emptySlices?: boolean[][]): void {

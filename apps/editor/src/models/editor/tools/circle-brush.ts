@@ -4,7 +4,9 @@ import { calculateLine, getOrthogonalAxis, getPlaneAxes } from "@visian/utils";
 import { UndoableTool } from "./undoable-tool";
 import { dragPointsEqual } from "./utils";
 
-export class CircleBrush<N extends "brush" | "eraser"> extends UndoableTool<N> {
+export class CircleBrush<
+  N extends "pixel-brush" | "pixel-eraser"
+> extends UndoableTool<N> {
   private lastDragPoint?: DragPoint;
 
   constructor(
@@ -14,8 +16,8 @@ export class CircleBrush<N extends "brush" | "eraser"> extends UndoableTool<N> {
   ) {
     super(
       {
-        name: (value ? "brush" : "eraser") as N,
-        altToolName: value ? "eraser" : "brush",
+        name: (value ? "pixel-brush" : "pixel-eraser") as N,
+        altToolName: value ? "pixel-eraser" : "pixel-brush",
         supportedViewModes: ["2D"],
         supportedLayerKinds: ["image"],
       },

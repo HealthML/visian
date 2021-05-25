@@ -17,7 +17,7 @@ export const setUpHotKeys = (store: RootStore): IDisposer => {
   });
   hotkeys("b", (event) => {
     event.preventDefault();
-    store.editor.activeDocument?.tools.setActiveTool("brush");
+    store.editor.activeDocument?.tools.setActiveTool("pixel-brush");
   });
   hotkeys("s", (event) => {
     event.preventDefault();
@@ -25,7 +25,7 @@ export const setUpHotKeys = (store: RootStore): IDisposer => {
   });
   hotkeys("e", (event) => {
     event.preventDefault();
-    store.editor.activeDocument?.tools.setActiveTool("eraser");
+    store.editor.activeDocument?.tools.setActiveTool("pixel-eraser");
   });
   hotkeys("o", (event) => {
     event.preventDefault();

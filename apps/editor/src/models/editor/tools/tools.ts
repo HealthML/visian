@@ -15,8 +15,8 @@ import { ToolGroup, ToolGroupSnapshot } from "./tool-group";
 export type ToolName =
   | "navigation-tool"
   | "crosshair-tool"
-  | "brush"
-  | "eraser"
+  | "pixel-brush"
+  | "pixel-eraser"
   | "smart-brush"
   | "smart-eraser"
   | "outline-tool"
@@ -107,8 +107,8 @@ export class Tools
         this.document,
       ),
       "crosshair-tool": new CrosshairTool(document),
-      brush: new CircleBrush(document, this.toolRenderer),
-      eraser: new CircleBrush(document, this.toolRenderer, 1),
+      "pixel-brush": new CircleBrush(document, this.toolRenderer),
+      "pixel-eraser": new CircleBrush(document, this.toolRenderer, 1),
       "smart-brush": new SmartBrush(document),
       "smart-eraser": new SmartBrush(document, 0),
       "outline-tool": new OutlineTool(document, this.toolRenderer),
@@ -120,14 +120,14 @@ export class Tools
     this.toolGroups.push(
       new ToolGroup({ toolNames: ["navigation-tool"] }, document),
       new ToolGroup({ toolNames: ["crosshair-tool"] }, document),
-      new ToolGroup({ toolNames: ["brush"] }, document),
+      new ToolGroup({ toolNames: ["pixel-brush"] }, document),
       new ToolGroup({ toolNames: ["smart-brush", "smart-eraser"] }, document),
       new ToolGroup(
         { toolNames: ["outline-tool", "outline-eraser"] },
         document,
       ),
       new ToolGroup(
-        { toolNames: ["eraser", "smart-eraser", "outline-eraser"] },
+        { toolNames: ["pixel-eraser", "smart-eraser", "outline-eraser"] },
         document,
       ),
       new ToolGroup({ toolNames: ["clear-slice", "clear-image"] }, document),

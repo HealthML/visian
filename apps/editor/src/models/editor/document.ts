@@ -5,20 +5,20 @@ import {
   ISliceRenderer,
   ValueType,
 } from "@visian/ui-shared";
-import { ISerializable } from "@visian/utils";
+import { ISerializable, readMedicalImage } from "@visian/utils";
+import isEqual from "lodash.isequal";
 import { action, computed, makeObservable, observable } from "mobx";
-import { v4 as uuidv4 } from "uuid";
 import * as THREE from "three";
+import { v4 as uuidv4 } from "uuid";
 
 import { History, HistorySnapshot } from "./history";
-import { Layer, LayerSnapshot } from "./layers";
+import { ImageLayer, Layer, LayerSnapshot } from "./layers";
+import * as layers from "./layers";
+import { Markers } from "./markers";
 import { ToolName, Tools, ToolsSnapshot } from "./tools";
 import { ViewSettings, ViewSettingsSnapshot } from "./view-settings";
 import { Viewport2D, Viewport2DSnapshot } from "./viewport-2d";
 import { Viewport3D, Viewport3DSnapshot } from "./viewport-3d";
-
-import * as layers from "./layers";
-import { Markers } from "./markers";
 
 export const layerMap: {
   [kind: string]: ValueType<typeof layers>;
@@ -145,7 +145,7 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
 
   public addLayer = (layer: Layer): void => {
     this.layerMap[layer.id] = layer;
-    this.layerIds.push(layer.id);
+    this.layerIds.unshift(layer.id);
   };
 
   public deleteLayer = (idOrLayer: string | ILayer): void => {
@@ -159,6 +159,41 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
 
   public get has3DLayers(): boolean {
     return Object.values(this.layerMap).some((layer) => layer.is3DLayer);
+  }
+
+  // DEPRECATED
+  public async importImage(file: File | File[], name?: string) {
+    this.layerMap = {};
+    this.layerIds = [];
+
+    const image = await readMedicalImage(file);
+    image.name =
+      name || (Array.isArray(file) ? file[0]?.name || "" : file.name);
+    const imageLayer = ImageLayer.fromITKImage(image, this);
+
+    this.addLayer(imageLayer);
+    this.addLayer(ImageLayer.fromNewAnnotationForImage(imageLayer.image, this));
+  }
+
+  public async importAnnotation(file: File | File[], name?: string) {
+    if (!this.layerIds.length) throw new Error("no-image-error");
+
+    const image = await readMedicalImage(file);
+    image.name =
+      name || (Array.isArray(file) ? file[0]?.name || "" : file.name);
+    const imageLayer = ImageLayer.fromITKImage(image, this);
+    if (
+      !isEqual(
+        (this.layerMap[this.layerIds[0]] as ImageLayer)?.image?.voxelCount,
+        imageLayer.image.voxelCount,
+      )
+    ) {
+      throw new Error("annotation-mismatch-error");
+    }
+
+    // Replace old annotation (if any)
+    if (this.layerIds.length > 1) this.deleteLayer(this.layerIds[0]);
+    this.addLayer(imageLayer);
   }
 
   // Proxies

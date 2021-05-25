@@ -1,4 +1,5 @@
 import {
+  IconType,
   Modal,
   PointerButton,
   preventDefault,
@@ -12,7 +13,21 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
-import { ToolName } from "../../../models";
+import { NumberParameter, ToolName } from "../../../models";
+
+// TODO: Potentially move this to the tool definitions as well?
+const iconMap: Record<ToolName, IconType> = {
+  "navigation-tool": "navigationTool",
+  "crosshair-tool": "crosshair",
+  "pixel-brush": "pixelBrush",
+  "pixel-eraser": "eraser",
+  "smart-brush": "magicBrush",
+  "smart-eraser": "eraser",
+  "outline-tool": "outline",
+  "outline-eraser": "outline",
+  "clear-slice": "trash",
+  "clear-image": "trash",
+};
 
 // Styled Components
 const StyledToolbar = styled(GenericToolbar)`
@@ -55,7 +70,8 @@ export const Toolbar: React.FC = observer(() => {
   // Menu Positioning
   const [buttonRef, setButtonRef] = useState<HTMLButtonElement | null>(null);
 
-  const activeTool = store?.editor.activeDocument?.tools.activeTool?.name;
+  const activeTool = store?.editor.activeDocument?.tools.activeTool;
+  const activeToolName = activeTool?.name;
   const setActiveTool = useCallback(
     (
       value: string | number | undefined,
@@ -77,13 +93,6 @@ export const Toolbar: React.FC = observer(() => {
     },
     [isModalOpen, store],
   );
-  const clearSlice = useCallback(
-    (_value: string | number | undefined, event: React.PointerEvent) => {
-      if (event.button !== PointerButton.LMB) return;
-      store?.editor.activeDocument?.tools.setActiveTool("clear-slice");
-    },
-    [store],
-  );
   const setBrushSize = useCallback(
     (value: number | number[]) => {
       store?.editor.activeDocument?.tools.setBrushSize(value as number, true);
@@ -93,130 +102,73 @@ export const Toolbar: React.FC = observer(() => {
 
   return (
     <StyledToolbar ref={ref}>
-      <Tool
-        icon="moveTool"
-        tooltipTx="navigation-tool"
-        activeTool={activeTool}
-        value="navigation-tool"
-        onPress={setActiveTool}
-        onContextMenu={preventDefault}
-      />
-      <Tool
-        icon="crosshair"
-        tooltipTx="crosshair-tool"
-        activeTool={activeTool}
-        value="crosshair-tool"
-        isDisabled={
-          !store?.editor.activeDocument?.has3DLayers ||
-          !store.editor.activeDocument?.viewport2D.showSideViews
-        }
-        onPress={setActiveTool}
-        onContextMenu={preventDefault}
-      />
-      <Tool
-        icon="pixelBrush"
-        tooltipTx="pixel-brush"
-        showTooltip={!isModalOpen || activeTool !== "brush"}
-        activeTool={activeTool}
-        value="brush"
-        ref={activeTool === "brush" ? setButtonRef : undefined}
-        onPress={setActiveTool}
-        onContextMenu={preventDefault}
-      />
-      <Tool
-        icon="magicBrush"
-        tooltipTx="smart-brush"
-        showTooltip={!isModalOpen || activeTool !== "smart-brush"}
-        activeTool={activeTool}
-        value="smart-brush"
-        ref={activeTool === "smart-brush" ? setButtonRef : undefined}
-        onPress={setActiveTool}
-        onContextMenu={preventDefault}
-      />
-      <Tool
-        icon="outline"
-        tooltipTx="outline-tool"
-        showTooltip={!isModalOpen || activeTool !== "outline-tool"}
-        activeTool={activeTool}
-        value="outline-tool"
-        ref={activeTool === "outline-tool" ? setButtonRef : undefined}
-        onPress={setActiveTool}
-        onContextMenu={preventDefault}
-      />
-      <Tool
-        icon="erase"
-        tooltipTx="pixel-eraser"
-        showTooltip={!isModalOpen || activeTool !== "eraser"}
-        activeTool={activeTool}
-        value="eraser"
-        ref={activeTool === "eraser" ? setButtonRef : undefined}
-        onPress={setActiveTool}
-        onContextMenu={preventDefault}
-      />
-      <Tool
-        icon="trash"
-        tooltipTx="clear-slice"
-        onPress={clearSlice}
-        onContextMenu={preventDefault}
-      />
+      {store?.editor.activeDocument?.tools.toolGroups.map(
+        ({ activeTool: tool }) => (
+          <Tool
+            icon={iconMap[tool.name]}
+            tooltipTx={tool.labelTx}
+            tooltip={tool.label}
+            activeTool={activeToolName}
+            value={tool.name}
+            showTooltip={!isModalOpen || activeToolName !== tool.name}
+            ref={activeToolName === tool.name ? setButtonRef : undefined}
+            onPress={setActiveTool}
+            onContextMenu={preventDefault}
+          />
+        ),
+      )}
       <BrushModal
-        isOpen={
+        isOpen={Boolean(
           isModalOpen &&
-          activeTool !== ToolType.Navigate &&
-          activeTool !== ToolType.Crosshair &&
-          activeTool !== ToolType.Outline
-        }
-        labelTx={
-          activeTool === ToolType.SmartBrush
-            ? "smart-brush-settings"
-            : "brush-settings"
-        }
+            activeTool &&
+            (activeTool.isBrush || Object.keys(activeTool.params).length),
+        )}
+        labelTx={activeTool?.labelTx}
+        label={activeTool?.label}
         parentElement={buttonRef}
         position="right"
         onOutsidePress={closeModal}
-        onReset={
-          activeTool === ToolType.SmartBrush
-            ? store?.editor.tools.resetSmartBrush
-            : store?.editor.tools.resetBrushSize
-        }
+        // TODO: Reset
       >
-        {/* TODO: Generate procedurally from params */}
-        <Switch
-          labelTx="lock-brush-size"
-          items={adaptiveBrushSizeSwitchItems}
-          value={Boolean(store?.editor.tools.isBrushSizeLocked)}
-          onChange={store?.editor.tools.lockBrushSize}
-        />
-        <SpacedSliderField
-          labelTx="brush-size"
-          min={0}
-          max={250}
-          scaleType="quadratic"
-          value={store?.editor.tools.brushSizePixels}
-          onChange={setBrushSize}
-        />
-        {activeTool === ToolType.SmartBrush && (
+        {activeTool?.isBrush && (
           <>
-            <SpacedSliderField
-              labelTx="seed-threshold"
-              min={1}
-              max={20}
-              value={store?.editor.tools.smartBrushSeedThreshold}
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              onChange={store?.editor.tools.setSmartBrushSeedThreshold as any}
+            <Switch
+              labelTx="lock-brush-size"
+              items={adaptiveBrushSizeSwitchItems}
+              value={Boolean(
+                store?.editor.activeDocument?.tools.useAdaptiveBrushSize,
+              )}
+              onChange={
+                store?.editor.activeDocument?.tools.setUseAdaptiveBrushSize
+              }
             />
             <SpacedSliderField
-              labelTx="neighbor-threshold"
-              min={1}
-              max={20}
-              value={store?.editor.tools.smartBrushNeighborThreshold}
-              onChange={
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                store?.editor.tools.setSmartBrushNeighborThreshold as any
-              }
+              labelTx="brush-size"
+              min={0}
+              max={250}
+              scaleType="quadratic"
+              value={store?.editor.activeDocument?.tools.brushSize}
+              onChange={setBrushSize}
             />
           </>
         )}
+
+        {activeTool &&
+          // TODO: Extract param rendering
+          Object.values(activeTool.params).map((param) =>
+            param.kind === "number" ? (
+              <SpacedSliderField
+                labelTx={param.labelTx}
+                label={param.label}
+                min={(param as NumberParameter).min}
+                max={(param as NumberParameter).max}
+                value={(param as NumberParameter).value}
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                onChange={(param as NumberParameter).setValue as any}
+              />
+            ) : // TODO: Render UI for other param kinds
+            null,
+          )}
       </BrushModal>
     </StyledToolbar>
   );

@@ -36,7 +36,9 @@ export const DropSheet: React.FC<DropSheetProps> = observer(
             const item = event.dataTransfer.items[0];
             const entry = item?.webkitGetAsEntry();
             const dirFiles: File[] = [];
+            let dirName: string | undefined;
             if (entry && entry.isDirectory) {
+              dirName = entry.name;
               const dirReader = entry.createReader();
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
               const entries = await new Promise<any[]>((resolve) => {
@@ -64,7 +66,10 @@ export const DropSheet: React.FC<DropSheetProps> = observer(
             }
 
             if (dirFiles.length) {
-              await store?.editor.activeDocument?.importImage(dirFiles);
+              await store?.editor.activeDocument?.importImage(
+                dirFiles,
+                dirName,
+              );
             } else {
               await store?.editor.activeDocument?.importImage(files[0]);
             }
