@@ -193,14 +193,18 @@ export class SliceRenderer implements IDisposable, ISliceRenderer {
     this.lazyRenderTriggered = true;
   };
 
-  public getMainViewWebGLSize() {
-    return getWebGLSize(this.mainCamera);
+  public getWebGLSize(viewType = this.document.viewport2D.mainViewType) {
+    return getWebGLSize(
+      viewType === this.document.viewport2D.mainViewType
+        ? this.mainCamera
+        : this.sideCamera,
+    );
   }
 
   /** Converts a WebGL position to a screen space one. */
   public getMainViewScreenPosition(webGLPosition: Pixel): Pixel {
     const boundingBox = this.mainCanvas.getBoundingClientRect();
-    const webGLSize = this.getMainViewWebGLSize();
+    const webGLSize = this.getWebGLSize();
     return {
       x:
         ((webGLPosition.x - this.mainCamera.left) / webGLSize.x) *
@@ -214,9 +218,17 @@ export class SliceRenderer implements IDisposable, ISliceRenderer {
   }
 
   /** Converts a screen space position to a WebGL one. */
-  public getMainViewWebGLPosition(screenPosition: Pixel): Pixel {
-    const boundingBox = this.mainCanvas.getBoundingClientRect();
-    const webGLSize = this.getMainViewWebGLSize();
+  public getWebGLPosition(
+    screenPosition: Pixel,
+    viewType = this.document.viewport2D.mainViewType,
+  ): Pixel {
+    const canvasIndex = getOrder(this.document.viewport2D.mainViewType).indexOf(
+      viewType,
+    );
+    const canvas = this.canvases[canvasIndex];
+
+    const boundingBox = canvas.getBoundingClientRect();
+    const webGLSize = this.getWebGLSize(viewType);
     return {
       x:
         ((screenPosition.x - boundingBox.left) / boundingBox.width) *
@@ -230,12 +242,16 @@ export class SliceRenderer implements IDisposable, ISliceRenderer {
   }
 
   /**
-   * Converts a screen position to virtual uv coordinates of the main view slice.
+   * Converts a screen position to virtual uv coordinates of the slice
+   * corresponding to the provided view type.
    * Virtual means, that uv coordinates can be outside the [0, 1] range aswell.
    */
-  public getVirtualMainViewUV(screenPosition: Pixel) {
-    const webGLPosition = this.getMainViewWebGLPosition(screenPosition);
-    return this.slices[this.document.viewport2D.mainViewType].getVirtualUVs(
+  public getVirtualUVs(
+    screenPosition: Pixel,
+    viewType = this.document.viewport2D.mainViewType,
+  ) {
+    const webGLPosition = this.getWebGLPosition(screenPosition, viewType);
+    return this.slices[viewType].getVirtualUVs(
       new THREE.Vector3(webGLPosition.x, webGLPosition.y, 0),
     );
   }

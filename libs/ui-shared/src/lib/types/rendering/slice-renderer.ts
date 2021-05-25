@@ -12,9 +12,11 @@ export interface ISliceRenderer extends IDisposable {
   showBrushCursorPreview(viewType?: ViewType): void;
   subscribeToRenderLoop(subscriber: IRenderLoopSubscriber): void;
   unsubscribeFromRenderLoop(subscriber: IRenderLoopSubscriber): void;
+  getVirtualUVs(screenPosition: Pixel, viewType?: ViewType): Pixel;
+  alignBrushCursor(uv: Pixel, viewType?: ViewType, preview?: boolean): void;
 
   /** Converts a WebGL position to a screen space one. */
   getMainViewScreenPosition(webGLPosition: Pixel): Pixel;
   /** Converts a screen space position to a WebGL one. */
-  getMainViewWebGLPosition(screenPosition: Pixel): Pixel;
+  getWebGLPosition(screenPosition: Pixel, viewType?: ViewType): Pixel;
 }

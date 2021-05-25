@@ -1,16 +1,20 @@
+import { getOrder } from "@visian/rendering";
 import {
   DeviceType,
   globalListenerTypes,
   IDispatch,
+  IImageLayer,
   isFirefox,
   isWindows,
+  ITool,
   PointerButton,
   registerDispatch,
   transformGesturePreset,
 } from "@visian/ui-shared";
 import { IDisposer, Vector } from "@visian/utils";
 
-import { RootStore, ToolName } from "../models";
+import { RootStore, ToolName, OutlineTool } from "../models";
+import { alignBrushCursor, getDragPoint } from "./utils";
 
 export const setUpPointerHandling = (
   store: RootStore,
@@ -52,12 +56,22 @@ export const setUpPointerHandling = (
       }
       handleDeviceSwitch(context.device);
 
-      if (!store.editor.activeDocument) return;
-      // TODO
-      store.editor.activeDocument.tools.handleEvent({
-        x: detail.clientX,
-        y: detail.clientY,
-      });
+      if (
+        !store.editor.activeDocument ||
+        !store.editor.activeDocument.tools.activeTool?.isBrush
+      ) {
+        return;
+      }
+
+      alignBrushCursor(
+        store.editor.activeDocument.tools,
+        {
+          x: detail.clientX,
+          y: detail.clientY,
+        },
+        store.editor.activeDocument.viewport2D.mainViewType,
+        store.editor.sliceRenderer,
+      );
     },
     forPointers: ({ context, detail, id }, { eventType }) => {
       handleDeviceSwitch(context.device);
@@ -75,31 +89,74 @@ export const setUpPointerHandling = (
             activeTool?.name === "navigation-tool"),
       );
 
-      if (!context.useForGesture) {
-        if (activeTool?.name === "crosshair-tool" || id !== "mainView") {
-          // Crosshairs are only active if side views are shown.
-          if (!store.editor.activeDocument.viewport2D.showSideViews) return;
-          // TODO
-          store.editor.activeDocument?.viewport2D.moveCrosshair(
-            {
-              x: detail.clientX,
-              y: detail.clientY,
-            },
-            id,
-          );
-        } else if (id === "mainView") {
-          // TODO
-          store.editor.activeDocument.tools.handleEvent(
-            {
-              x: detail.clientX,
-              y: detail.clientY,
-            },
-            eventType,
-            context.button === PointerButton.RMB ||
-              context.button === PointerButton.Eraser,
-          );
-        }
+      if (context.useForGesture) return;
+
+      const order = getOrder(
+        store.editor.activeDocument.viewport2D.mainViewType,
+      );
+      const viewType =
+        id === "mainView"
+          ? order[0]
+          : id === "upperSideView"
+          ? order[1]
+          : order[2];
+
+      const uv = alignBrushCursor(
+        store.editor.activeDocument.tools,
+        {
+          x: detail.clientX,
+          y: detail.clientY,
+        },
+        viewType,
+        store.editor.sliceRenderer,
+      );
+
+      if (
+        !uv ||
+        !store.editor.activeDocument.activeLayer?.isVisible ||
+        !store.editor.activeDocument.tools.activeTool
+      ) {
+        return;
       }
+
+      let tool: ITool<ToolName> | undefined =
+        id === "mainView"
+          ? store.editor.activeDocument.tools.activeTool
+          : store.editor.activeDocument.tools.tools["crosshair-tool"];
+
+      if (
+        context.button === PointerButton.RMB ||
+        context.button === PointerButton.Eraser
+      ) {
+        tool = tool.altTool;
+      }
+
+      if (!tool?.isDrawingTool) return;
+
+      const dragPoint = getDragPoint(
+        (store.editor.activeDocument.layers[1] as IImageLayer).image,
+        store.editor.activeDocument.viewSettings,
+        viewType,
+        uv,
+        // Only the outline tool needs high resolution drag points
+        !(store.editor.activeDocument.tools.activeTool instanceof OutlineTool),
+      );
+
+      switch (eventType) {
+        case "start":
+          store.editor.activeDocument.tools.setIsDrawing(true);
+          tool?.startAt(dragPoint);
+          break;
+        case "move":
+          tool?.moveTo(dragPoint);
+          break;
+        case "end":
+          store.editor.activeDocument.tools.setIsDrawing(false);
+          tool?.endAt(dragPoint);
+          break;
+      }
+
+      store.setIsDirty();
     },
     pointerPredicate: (pointer) => pointer.context.useForGesture as boolean,
     forGestures: ({ id, eventType, gesture }) => {
@@ -126,7 +183,7 @@ export const setUpPointerHandling = (
       store.editor.activeDocument.viewport2D.setZoomLevel(transform.scale);
       store.editor.activeDocument.viewport2D.setOffset(
         Vector.fromObject(
-          store.editor.sliceRenderer.getMainViewWebGLPosition({
+          store.editor.sliceRenderer.getWebGLPosition({
             x: transform.translateX,
             y: transform.translateY,
           }),

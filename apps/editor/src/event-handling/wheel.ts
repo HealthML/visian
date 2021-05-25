@@ -35,7 +35,7 @@ export const setUpWheelHandling = (store: RootStore): IDisposer => {
       );
       store.editor.activeDocument.viewport2D.setOffset(
         Vector.fromObject(
-          store.editor.sliceRenderer.getMainViewWebGLPosition(
+          store.editor.sliceRenderer.getWebGLPosition(
             offsetOriginByZoomToCursorDelta(
               event,
               transformOrigin,

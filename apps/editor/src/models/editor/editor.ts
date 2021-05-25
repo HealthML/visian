@@ -39,6 +39,8 @@ export class Editor implements IEditor, ISerializable<EditorSnapshot> {
 
   public setSliceRenderer(sliceRenderer?: ISliceRenderer): void {
     this.sliceRenderer = sliceRenderer;
+
+    this.renderers = this.sliceRenderer?.renderers;
   }
 
   // Proxies
