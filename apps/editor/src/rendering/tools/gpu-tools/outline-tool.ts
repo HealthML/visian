@@ -24,6 +24,9 @@ export class OutlineTool extends UndoableTool implements DragTool {
   public startAt(dragPoint: DragPoint) {
     this.startStroke();
 
+    // Ensure the shape is reset in case we missed an end event.
+    this.outline = new THREE.Shape();
+
     const coords = this.getCoords(dragPoint);
     this.outline.moveTo(coords.x, coords.y);
 
