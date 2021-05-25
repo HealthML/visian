@@ -3,12 +3,12 @@ import { IDocument, IImageLayer } from "@visian/ui-shared";
 import { SliceCommand } from "../history";
 import { Tool, ToolConfig } from "./tool";
 
-export class UndoableTool extends Tool {
+export class UndoableTool<N extends string> extends Tool<N> {
   private oldSliceData?: Uint8Array;
   private sliceNumber?: number;
 
   constructor(
-    config: ToolConfig,
+    config: ToolConfig<N>,
     document: IDocument,
     protected toolRenderer: ToolRenderer,
   ) {

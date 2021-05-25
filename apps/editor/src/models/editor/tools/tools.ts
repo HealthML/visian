@@ -12,21 +12,34 @@ import { Tool, ToolSnapshot } from "./tool";
 
 import { ToolGroup, ToolGroupSnapshot } from "./tool-group";
 
-export interface ToolsSnapshot {
-  activeToolName?: string;
-  tools: ToolSnapshot[];
-  toolGroups: ToolGroupSnapshot[];
+export type ToolName =
+  | "navigation-tool"
+  | "crosshair-tool"
+  | "brush"
+  | "eraser"
+  | "smart-brush"
+  | "smart-eraser"
+  | "outline-tool"
+  | "outline-eraser"
+  | "clear-slice"
+  | "clear-image";
+
+export interface ToolsSnapshot<N extends string> {
+  activeToolName?: N;
+  tools: ToolSnapshot<N>[];
+  toolGroups: ToolGroupSnapshot<N>[];
 
   brushSize: number;
   useAdaptiveBrushSize: boolean;
 }
 
-export class Tools implements ITools, ISerializable<ToolsSnapshot> {
+export class Tools
+  implements ITools<ToolName>, ISerializable<ToolsSnapshot<ToolName>> {
   public readonly excludeFromSnapshotTracking = ["document"];
 
-  protected activeToolName?: string;
-  public tools: { [name: string]: Tool } = {};
-  public toolGroups: ToolGroup[] = [];
+  protected activeToolName?: ToolName;
+  public tools: Record<ToolName, Tool<ToolName>>;
+  public toolGroups: ToolGroup<ToolName>[] = [];
 
   private screenSpaceBrushSize = 0.02;
   public useAdaptiveBrushSize!: boolean;
@@ -40,7 +53,7 @@ export class Tools implements ITools, ISerializable<ToolsSnapshot> {
   private toolRenderer: ToolRenderer;
 
   constructor(
-    snapshot: Partial<ToolsSnapshot> | undefined,
+    snapshot: Partial<ToolsSnapshot<ToolName>> | undefined,
     protected document: IDocument,
   ) {
     makeObservable<
@@ -83,28 +96,26 @@ export class Tools implements ITools, ISerializable<ToolsSnapshot> {
 
     this.toolRenderer = new ToolRenderer(document);
 
-    this.tools["navigation-tool"] = new Tool(
-      {
-        name: "navigation-tool",
-        labelTx: "navigation-tool",
-        supportedLayerKinds: [],
-        supportedViewModes: ["2D", "3D"],
-      },
-      this.document,
-    );
-    this.tools["crosshair-tool"] = new CrosshairTool(document);
-    this.tools.brush = new CircleBrush(document, this.toolRenderer);
-    this.tools.eraser = new CircleBrush(document, this.toolRenderer, 0);
-    this.tools["smart-brush"] = new SmartBrush(document);
-    this.tools["smart-eraser"] = new SmartBrush(document, 0);
-    this.tools["outline-tool"] = new OutlineTool(document, this.toolRenderer);
-    this.tools["outline-eraser"] = new OutlineTool(
-      document,
-      this.toolRenderer,
-      0,
-    );
-    this.tools["clear-slice"] = new ClearSliceTool(document, this.toolRenderer);
-    this.tools["clear-image"] = new ClearImageTool(document, this.toolRenderer);
+    this.tools = {
+      "navigation-tool": new Tool(
+        {
+          name: "navigation-tool",
+          labelTx: "navigation-tool",
+          supportedLayerKinds: [],
+          supportedViewModes: ["2D", "3D"],
+        },
+        this.document,
+      ),
+      "crosshair-tool": new CrosshairTool(document),
+      brush: new CircleBrush(document, this.toolRenderer),
+      eraser: new CircleBrush(document, this.toolRenderer, 1),
+      "smart-brush": new SmartBrush(document),
+      "smart-eraser": new SmartBrush(document, 0),
+      "outline-tool": new OutlineTool(document, this.toolRenderer),
+      "outline-eraser": new OutlineTool(document, this.toolRenderer, 0),
+      "clear-slice": new ClearSliceTool(document, this.toolRenderer),
+      "clear-image": new ClearImageTool(document, this.toolRenderer),
+    };
 
     this.toolGroups.push(
       new ToolGroup({ toolNames: ["navigation-tool"] }, document),
@@ -125,7 +136,7 @@ export class Tools implements ITools, ISerializable<ToolsSnapshot> {
     if (snapshot) this.applySnapshot(snapshot);
   }
 
-  public get activeTool(): ITool | undefined {
+  public get activeTool(): ITool<ToolName> | undefined {
     return this.activeToolName ? this.tools[this.activeToolName] : undefined;
   }
 
@@ -170,12 +181,12 @@ export class Tools implements ITools, ISerializable<ToolsSnapshot> {
 
   public get isToolInUse(): boolean {
     return (
-      (this.activeToolName === "move" && this.isNavigationDragged) ||
+      (this.activeToolName === "navigation-tool" && this.isNavigationDragged) ||
       this.isDrawing
     );
   }
 
-  public setActiveTool(nameOrTool?: string | ITool): void {
+  public setActiveTool(nameOrTool?: ToolName | ITool<ToolName>): void {
     const previouslyActiveTool = this.activeTool;
     this.activeToolName = nameOrTool
       ? typeof nameOrTool === "string"
@@ -242,7 +253,7 @@ export class Tools implements ITools, ISerializable<ToolsSnapshot> {
   }
 
   // Serialization
-  public toJSON(): ToolsSnapshot {
+  public toJSON(): ToolsSnapshot<ToolName> {
     return {
       activeToolName: this.activeToolName,
       tools: Object.values(this.tools).map((tool) => tool.toJSON()),
@@ -252,7 +263,9 @@ export class Tools implements ITools, ISerializable<ToolsSnapshot> {
     };
   }
 
-  public applySnapshot(snapshot: Partial<ToolsSnapshot>): Promise<void> {
+  public applySnapshot(
+    snapshot: Partial<ToolsSnapshot<ToolName>>,
+  ): Promise<void> {
     this.setActiveTool(snapshot.activeToolName);
     snapshot.tools?.forEach((toolSnapshot) => {
       const tool = this.tools[toolSnapshot.name];

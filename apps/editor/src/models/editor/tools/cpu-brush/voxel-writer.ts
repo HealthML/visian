@@ -11,14 +11,14 @@ import { Tool, ToolConfig } from "../tool";
  *
  * If necessary it creates undo redo commands for the edits.
  */
-export class VoxelWriter extends Tool {
+export class VoxelWriter<N extends string> extends Tool<N> {
   private strokeActive = false;
 
   private sliceNumber?: number;
   private oldSliceData?: Uint8Array;
 
   constructor(
-    config: ToolConfig,
+    config: ToolConfig<N>,
     document: IDocument,
     private undoable: boolean,
   ) {

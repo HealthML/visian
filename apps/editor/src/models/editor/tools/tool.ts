@@ -3,16 +3,16 @@ import { ISerializable } from "@visian/utils";
 
 import { Parameter, ParameterSnapshot } from "../parameters";
 
-export interface ToolSnapshot {
-  name: string;
+export interface ToolSnapshot<N extends string> {
+  name: N;
   params: ParameterSnapshot[];
 
   // As all other properties are typically not edited by the user and thus
   // expected to be handled by the application, we do not persist them
 }
 
-export interface ToolConfig {
-  name: string;
+export interface ToolConfig<N extends string> {
+  name: N;
 
   label?: string;
   labelTx?: string;
@@ -28,8 +28,9 @@ export interface ToolConfig {
   params?: Parameter[];
 }
 
-export class Tool implements ITool, ISerializable<ToolSnapshot> {
-  public readonly name: string;
+export class Tool<N extends string>
+  implements ITool<N>, ISerializable<ToolSnapshot<N>> {
+  public readonly name: N;
 
   public label?: string;
   public labelTx?: string;
@@ -44,7 +45,7 @@ export class Tool implements ITool, ISerializable<ToolSnapshot> {
 
   public params: { [name: string]: Parameter };
 
-  constructor(config: ToolConfig, protected document: IDocument) {
+  constructor(config: ToolConfig<N>, protected document: IDocument) {
     this.name = config.name;
     this.label = config.label;
     this.labelTx = config.labelTx;
@@ -59,7 +60,7 @@ export class Tool implements ITool, ISerializable<ToolSnapshot> {
     });
   }
 
-  public activate(_previousTool?: ITool): void {
+  public activate(_previousTool?: ITool<N>): void {
     // Intentionally left blank
   }
 
@@ -76,14 +77,14 @@ export class Tool implements ITool, ISerializable<ToolSnapshot> {
   }
 
   // Serialization
-  public toJSON(): ToolSnapshot {
+  public toJSON(): ToolSnapshot<N> {
     return {
       name: this.name,
       params: Object.values(this.params).map((param) => param.toJSON()),
     };
   }
 
-  public applySnapshot(snapshot: Partial<ToolSnapshot>): Promise<void> {
+  public applySnapshot(snapshot: Partial<ToolSnapshot<N>>): Promise<void> {
     if (snapshot.name && snapshot.name !== this.name) {
       throw new Error("Tool names do not match");
     }

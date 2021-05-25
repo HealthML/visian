@@ -10,13 +10,13 @@ import {
 } from "@visian/ui-shared";
 import { IDisposer, Vector } from "@visian/utils";
 
-import { RootStore } from "../models";
+import { RootStore, ToolName } from "../models";
 
 export const setUpPointerHandling = (
   store: RootStore,
 ): [IDispatch, IDisposer] => {
   /** The tool used by the mouse or pen. */
-  let precisionTool: string | undefined;
+  let precisionTool: ToolName | undefined;
 
   let previousDevice: DeviceType | undefined;
 

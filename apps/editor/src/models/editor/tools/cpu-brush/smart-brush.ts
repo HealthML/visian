@@ -12,7 +12,11 @@ import { NumberParameter, Parameter } from "../../parameters";
 
 import { Brush } from "./brush";
 
-export class SmartBrush extends Brush {
+export class SmartBrush<
+  N extends "smart-brush" | "smart-eraser"
+> extends Brush<N> {
+  public readonly excludeFromSnapshotTracking = ["document"];
+
   /**
    * Because we can't compare equality of Vector objects directly we
    * use a sting representation of them.
@@ -31,7 +35,7 @@ export class SmartBrush extends Brush {
   constructor(document: IDocument, value = 255, undoable = true) {
     super(
       {
-        name: value ? "smart-brush" : "smart-eraser",
+        name: (value ? "smart-brush" : "smart-eraser") as N,
         altToolName: value ? "smart-eraser" : "smart-brush",
         supportedViewModes: ["2D"],
         supportedLayerKinds: ["image"],

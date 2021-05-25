@@ -14,7 +14,7 @@ import { ToolConfig } from "../tool";
 
 import { VoxelWriter } from "./voxel-writer";
 
-export class Brush extends VoxelWriter {
+export class Brush<N extends string> extends VoxelWriter<N> {
   private dragPoints?: DragPoint[];
 
   private filledCircleCache?: {
@@ -28,7 +28,7 @@ export class Brush extends VoxelWriter {
   };
 
   constructor(
-    config: ToolConfig,
+    config: ToolConfig<N>,
     document: IDocument,
     protected value = 255,
     undoable = true,

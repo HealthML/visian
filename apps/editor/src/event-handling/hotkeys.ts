@@ -36,12 +36,12 @@ export const setUpHotKeys = (store: RootStore): IDisposer => {
   hotkeys("del,backspace", (event) => {
     event.preventDefault();
     // TODO
-    store.editor.activeDocument?.tools.clearSlice();
+    store.editor.activeDocument?.tools.setActiveTool("clear-image");
   });
   hotkeys("ctrl+del,ctrl+backspace", (event) => {
     event.preventDefault();
     // TODO
-    store.editor.activeDocument?.tools.clearImage();
+    store.editor.activeDocument?.tools.setActiveTool("clear-image");
   });
 
   // Brush Size

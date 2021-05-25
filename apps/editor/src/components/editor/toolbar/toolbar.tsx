@@ -12,7 +12,7 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
-import { ToolType } from "../../../models";
+import { ToolName } from "../../../models";
 
 // Styled Components
 const StyledToolbar = styled(GenericToolbar)`
@@ -55,7 +55,7 @@ export const Toolbar: React.FC = observer(() => {
   // Menu Positioning
   const [buttonRef, setButtonRef] = useState<HTMLButtonElement | null>(null);
 
-  const activeTool = store?.editor.activeDocument?.tools.activeTool;
+  const activeTool = store?.editor.activeDocument?.tools.activeTool?.name;
   const setActiveTool = useCallback(
     (
       value: string | number | undefined,
@@ -63,29 +63,30 @@ export const Toolbar: React.FC = observer(() => {
     ) => {
       if (
         event.button === PointerButton.RMB ||
-        store?.editor.tools.activeTool === value
+        store?.editor.activeDocument?.tools.activeTool === value
       ) {
         event.preventDefault();
         event.stopPropagation();
         setIsModalOpen(
-          store?.editor.tools.activeTool !== value || !isModalOpen,
+          store?.editor.activeDocument?.tools.activeTool !== value ||
+            !isModalOpen,
         );
       }
 
-      store?.editor.tools.setActiveTool(value as ToolType);
+      store?.editor.activeDocument?.tools.setActiveTool(value as ToolName);
     },
     [isModalOpen, store],
   );
   const clearSlice = useCallback(
     (_value: string | number | undefined, event: React.PointerEvent) => {
       if (event.button !== PointerButton.LMB) return;
-      store?.editor.tools.clearSlice();
+      store?.editor.activeDocument?.tools.setActiveTool("clear-slice");
     },
     [store],
   );
   const setBrushSize = useCallback(
     (value: number | number[]) => {
-      store?.editor.tools.setBrushSizePixels(value as number, true);
+      store?.editor.activeDocument?.tools.setBrushSize(value as number, true);
     },
     [store],
   );
@@ -96,7 +97,7 @@ export const Toolbar: React.FC = observer(() => {
         icon="moveTool"
         tooltipTx="navigation-tool"
         activeTool={activeTool}
-        value={ToolType.Navigate}
+        value="navigation-tool"
         onPress={setActiveTool}
         onContextMenu={preventDefault}
       />
@@ -104,7 +105,7 @@ export const Toolbar: React.FC = observer(() => {
         icon="crosshair"
         tooltipTx="crosshair-tool"
         activeTool={activeTool}
-        value={ToolType.Crosshair}
+        value="crosshair-tool"
         isDisabled={
           !store?.editor.activeDocument?.has3DLayers ||
           !store.editor.activeDocument?.viewport2D.showSideViews
@@ -115,40 +116,40 @@ export const Toolbar: React.FC = observer(() => {
       <Tool
         icon="pixelBrush"
         tooltipTx="pixel-brush"
-        showTooltip={!isModalOpen || activeTool !== ToolType.Brush}
+        showTooltip={!isModalOpen || activeTool !== "brush"}
         activeTool={activeTool}
-        value={ToolType.Brush}
-        ref={activeTool === ToolType.Brush ? setButtonRef : undefined}
+        value="brush"
+        ref={activeTool === "brush" ? setButtonRef : undefined}
         onPress={setActiveTool}
         onContextMenu={preventDefault}
       />
       <Tool
         icon="magicBrush"
         tooltipTx="smart-brush"
-        showTooltip={!isModalOpen || activeTool !== ToolType.SmartBrush}
+        showTooltip={!isModalOpen || activeTool !== "smart-brush"}
         activeTool={activeTool}
-        value={ToolType.SmartBrush}
-        ref={activeTool === ToolType.SmartBrush ? setButtonRef : undefined}
+        value="smart-brush"
+        ref={activeTool === "smart-brush" ? setButtonRef : undefined}
         onPress={setActiveTool}
         onContextMenu={preventDefault}
       />
       <Tool
         icon="outline"
         tooltipTx="outline-tool"
-        showTooltip={!isModalOpen || activeTool !== ToolType.Outline}
+        showTooltip={!isModalOpen || activeTool !== "outline-tool"}
         activeTool={activeTool}
-        value={ToolType.Outline}
-        ref={activeTool === ToolType.Outline ? setButtonRef : undefined}
+        value="outline-tool"
+        ref={activeTool === "outline-tool" ? setButtonRef : undefined}
         onPress={setActiveTool}
         onContextMenu={preventDefault}
       />
       <Tool
         icon="erase"
         tooltipTx="pixel-eraser"
-        showTooltip={!isModalOpen || activeTool !== ToolType.Eraser}
+        showTooltip={!isModalOpen || activeTool !== "eraser"}
         activeTool={activeTool}
-        value={ToolType.Eraser}
-        ref={activeTool === ToolType.Eraser ? setButtonRef : undefined}
+        value="eraser"
+        ref={activeTool === "eraser" ? setButtonRef : undefined}
         onPress={setActiveTool}
         onContextMenu={preventDefault}
       />

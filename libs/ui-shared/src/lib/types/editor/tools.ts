@@ -9,12 +9,12 @@ export interface DragPoint extends Voxel {
   bottom: boolean;
 }
 
-export interface ITool {
+export interface ITool<N extends string> {
   /**
    * The tool's name.
    * A (locally) unique identifier.
    */
-  name: string;
+  name: N;
 
   /**
    * The tool's label.
@@ -43,7 +43,7 @@ export interface ITool {
    * The tool that is used as the alternative mode of this tool.
    * Typically, this is activated using the `alt` key or right mouse button.
    */
-  altTool?: Reference<ITool>;
+  altTool?: Reference<ITool<N>>;
 
   /** An array of all view modes this tool can be used in. */
   supportedViewModes: ViewMode[];
@@ -58,7 +58,7 @@ export interface ITool {
    *
    * @param previousTool The previously active tool (if any).
    */
-  activate(previousTool?: ITool): void;
+  activate(previousTool?: ITool<N>): void;
 
   /** Called when the user starts a drag interaction with this tool selected. */
   startAt(dragPoint: DragPoint): void;
@@ -69,29 +69,27 @@ export interface ITool {
 }
 
 /** A class of similar tools, typically grouped in the UI. */
-export interface IToolGroup {
+export interface IToolGroup<N extends string> {
   /**
    * The currently selected tool out of this group.
    * Typically, this is the one that is used to represent the group in, e.g.,
    * the toolbar.
    */
-  activeTool: Reference<ITool>;
+  activeTool: Reference<ITool<N>>;
   /** All tools that belong to this group. */
-  tools: Reference<ITool>[];
+  tools: Reference<ITool<N>>[];
 
-  setActiveTool(nameOrTool: string | ITool): void;
+  setActiveTool(nameOrTool: N | ITool<N>): void;
 }
 
 /** The editor's tools and their settings for the document. */
-export interface ITools {
+export interface ITools<N extends string> {
   /** The currently selected tool. */
-  activeTool?: Reference<ITool>;
+  activeTool?: Reference<ITool<N>>;
   /** All available tools and their settings. */
-  tools: {
-    [name: string]: ITool;
-  };
+  tools: Record<N, ITool<N>>;
   /** The tool groups, typically use to populate the toolbar during rendering. */
-  toolGroups: IToolGroup[];
+  toolGroups: IToolGroup<N>[];
 
   /** The current brush size in pixels/voxels. */
   brushSize: number;
@@ -107,7 +105,7 @@ export interface ITools {
   /** Indicates if the current tool is in use this moment. */
   isToolInUse: boolean;
 
-  setActiveTool(nameOrTool?: string | ITool): void;
+  setActiveTool(nameOrTool?: N | ITool<N>): void;
 
   setBrushSize(value?: number, showPreview?: boolean): void;
   incrementBrushSize(): void;

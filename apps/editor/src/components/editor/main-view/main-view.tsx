@@ -9,24 +9,24 @@ import React, { useCallback } from "react";
 import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
-import { ToolType } from "../../../models";
+import { ToolName } from "../../../models";
 
 const SyledCanvas = styled(WebGLCanvas)<
   WebGLCanvasProps & {
-    activeTool?: ToolType;
+    activeTool?: ToolName;
     isDrawable?: boolean;
     isToolInUse?: boolean;
   }
 >`
   cursor: ${(props) => {
     switch (props.activeTool) {
-      case ToolType.Navigate:
+      case "navigation-tool":
         if (props.isToolInUse) document.body.style.cursor = "grabbing";
         return props.isToolInUse ? "grabbing" : "grab";
 
-      case ToolType.Crosshair:
-      case ToolType.Outline:
-      case ToolType.OutlineEraser:
+      case "crosshair-tool":
+      case "outline-tool":
+      case "outline-eraser":
         return "crosshair";
 
       case undefined:
@@ -58,7 +58,7 @@ export const MainView = observer<{}, HTMLCanvasElement>(
 
     return (
       <SyledCanvas
-        activeTool={store?.editor.activeDocument?.tools.activeTool}
+        activeTool={store?.editor.activeDocument?.tools.activeTool?.name}
         isDrawable={store?.editor.activeDocument?.tools.canDraw}
         isToolInUse={store?.editor.activeDocument?.tools.isToolInUse}
         onContextMenu={preventDefault}

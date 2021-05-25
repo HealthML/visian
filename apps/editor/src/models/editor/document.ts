@@ -12,7 +12,7 @@ import * as THREE from "three";
 
 import { History, HistorySnapshot } from "./history";
 import { Layer, LayerSnapshot } from "./layers";
-import { Tools, ToolsSnapshot } from "./tools";
+import { ToolName, Tools, ToolsSnapshot } from "./tools";
 import { ViewSettings, ViewSettingsSnapshot } from "./view-settings";
 import { Viewport2D, Viewport2DSnapshot } from "./viewport-2d";
 import { Viewport3D, Viewport3DSnapshot } from "./viewport-3d";
@@ -41,7 +41,7 @@ export interface DocumentSnapshot {
   viewport2D: Viewport2DSnapshot;
   viewport3D: Viewport3DSnapshot;
 
-  tools: ToolsSnapshot;
+  tools: ToolsSnapshot<ToolName>;
 }
 
 export class Document implements IDocument, ISerializable<DocumentSnapshot> {

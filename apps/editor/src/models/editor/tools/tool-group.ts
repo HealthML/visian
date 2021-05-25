@@ -2,24 +2,26 @@ import { IDocument, ITool, IToolGroup } from "@visian/ui-shared";
 import { ISerializable } from "@visian/utils";
 import { action, computed, makeObservable, observable } from "mobx";
 
-export interface ToolGroupSnapshot {
-  activeToolName: string;
+export interface ToolGroupSnapshot<N extends string> {
+  activeToolName: N;
 
   // As all other properties are typically not edited by the user and thus
   // expected to be handled by the application, we do not persist them
 }
 
-export interface ToolGroupConfig extends Partial<ToolGroupSnapshot> {
-  toolNames: string[];
+export interface ToolGroupConfig<N extends string>
+  extends Partial<ToolGroupSnapshot<N>> {
+  toolNames: N[];
 }
 
-export class ToolGroup implements IToolGroup, ISerializable<ToolGroupSnapshot> {
+export class ToolGroup<N extends string>
+  implements IToolGroup<N>, ISerializable<ToolGroupSnapshot<N>> {
   public readonly excludeFromSnapshotTracking = ["document"];
 
-  protected activeToolName!: string;
-  protected toolNames: string[];
+  protected activeToolName!: N;
+  protected toolNames: N[];
 
-  constructor(config: ToolGroupConfig, protected document: IDocument) {
+  constructor(config: ToolGroupConfig<N>, protected document: IDocument) {
     this.toolNames = config.toolNames;
     this.setActiveTool(config.activeToolName);
 
@@ -34,15 +36,15 @@ export class ToolGroup implements IToolGroup, ISerializable<ToolGroupSnapshot> {
     });
   }
 
-  public get activeTool(): ITool {
+  public get activeTool(): ITool<N> {
     return this.document.tools.tools[this.activeToolName];
   }
 
-  public get tools(): ITool[] {
+  public get tools(): ITool<N>[] {
     return this.toolNames.map((name) => this.document.tools.tools[name]);
   }
 
-  public setActiveTool(nameOrTool?: string | ITool): void {
+  public setActiveTool(nameOrTool?: N | ITool<N>): void {
     this.activeToolName = nameOrTool
       ? typeof nameOrTool === "string"
         ? nameOrTool
@@ -52,13 +54,13 @@ export class ToolGroup implements IToolGroup, ISerializable<ToolGroupSnapshot> {
   }
 
   // Serialization
-  public toJSON(): ToolGroupSnapshot {
+  public toJSON(): ToolGroupSnapshot<N> {
     return {
       activeToolName: this.activeToolName,
     };
   }
 
-  public applySnapshot(snapshot: Partial<ToolGroupSnapshot>): Promise<void> {
+  public applySnapshot(snapshot: Partial<ToolGroupSnapshot<N>>): Promise<void> {
     if (
       snapshot.activeToolName &&
       !this.toolNames.includes(snapshot.activeToolName)

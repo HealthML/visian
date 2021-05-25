@@ -3,11 +3,13 @@ import { IDocument, IImageLayer, ITool } from "@visian/ui-shared";
 import { SliceCommand } from "../history";
 import { SelfDeactivatingTool } from "./self-deactivating-tool";
 
-export class ClearSliceTool extends SelfDeactivatingTool {
+export class ClearSliceTool<
+  N extends "clear-slice"
+> extends SelfDeactivatingTool<N> {
   constructor(document: IDocument, protected toolRenderer: ToolRenderer) {
     super(
       {
-        name: "clear-slice",
+        name: "clear-slice" as N,
         labelTx: "clear-slice",
         supportedViewModes: ["2D"],
         supportedLayerKinds: ["image"],
@@ -16,7 +18,7 @@ export class ClearSliceTool extends SelfDeactivatingTool {
     );
   }
 
-  public activate(previousTool?: ITool) {
+  public activate(previousTool?: ITool<N>) {
     const imageLayer = this.document.layers[0] as IImageLayer;
     const { image } = imageLayer;
     const viewType = this.document.viewport2D.mainViewType;

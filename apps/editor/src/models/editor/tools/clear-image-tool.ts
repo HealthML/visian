@@ -3,11 +3,13 @@ import { IDocument, IImageLayer, ITool } from "@visian/ui-shared";
 import { AtlasCommand } from "../history";
 import { SelfDeactivatingTool } from "./self-deactivating-tool";
 
-export class ClearImageTool extends SelfDeactivatingTool {
+export class ClearImageTool<
+  N extends "clear-image"
+> extends SelfDeactivatingTool<N> {
   constructor(document: IDocument, protected toolRenderer: ToolRenderer) {
     super(
       {
-        name: "clear-image",
+        name: "clear-image" as N,
         labelTx: "clear-image",
         supportedViewModes: ["2D", "3D"],
         supportedLayerKinds: ["image"],
@@ -16,7 +18,7 @@ export class ClearImageTool extends SelfDeactivatingTool {
     );
   }
 
-  public activate(previousTool?: ITool) {
+  public activate(previousTool?: ITool<N>) {
     const imageLayer = this.document.layers[0] as IImageLayer;
     const { image } = imageLayer;
 

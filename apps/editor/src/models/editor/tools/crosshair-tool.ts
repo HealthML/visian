@@ -1,11 +1,11 @@
 import { DragPoint, IDocument } from "@visian/ui-shared";
 import { Tool } from "./tool";
 
-export class CrosshairTool extends Tool {
+export class CrosshairTool<N extends "crosshair-tool"> extends Tool<N> {
   constructor(document: IDocument) {
     super(
       {
-        name: "crosshair-tool",
+        name: "crosshair-tool" as N,
         labelTx: "crosshair-tool",
         supportedViewModes: ["2D"],
         supportedLayerKinds: ["image"],

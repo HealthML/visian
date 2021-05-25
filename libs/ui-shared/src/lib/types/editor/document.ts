@@ -36,7 +36,8 @@ export interface IDocument {
   viewport2D: IViewport2D;
   viewport3D: IViewport3D;
 
-  tools: ITools;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  tools: ITools<any>;
 
   markers: IMarkers;
 

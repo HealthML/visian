@@ -64,9 +64,9 @@ export const DropSheet: React.FC<DropSheetProps> = observer(
             }
 
             if (dirFiles.length) {
-              await store?.editor.importImage(dirFiles);
+              await store?.editor.activeDocument?.importImage(dirFiles);
             } else {
-              await store?.editor.importImage(files[0]);
+              await store?.editor.activeDocument?.importImage(files[0]);
             }
             store?.setError();
           } catch (error) {
@@ -89,7 +89,7 @@ export const DropSheet: React.FC<DropSheetProps> = observer(
         (async () => {
           setIsLoadingAnnotation(true);
           try {
-            await store?.editor.importAnnotation(files[0]);
+            await store?.editor.activeDocument?.importAnnotation(files[0]);
             store?.setError();
           } catch (error) {
             store?.setError({

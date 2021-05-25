@@ -5,7 +5,9 @@ import * as THREE from "three";
 import { UndoableTool } from "./undoable-tool";
 import { dragPointsEqual } from "./utils";
 
-export class OutlineTool extends UndoableTool {
+export class OutlineTool<
+  N extends "outline-tool" | "outline-eraser"
+> extends UndoableTool<N> {
   private lastPoint?: DragPoint;
 
   private outline = new THREE.Shape();
@@ -19,7 +21,7 @@ export class OutlineTool extends UndoableTool {
   ) {
     super(
       {
-        name: value ? "outline-tool" : "outline-eraser",
+        name: (value ? "outline-tool" : "outline-eraser") as N,
         altToolName: value ? "outline-eraser" : "outline-tool",
         supportedViewModes: ["2D"],
         supportedLayerKinds: ["image"],
