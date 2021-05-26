@@ -29,7 +29,7 @@ export class Outline extends THREE.Line implements IDisposable, IOutline {
   private updateScale = () => {
     if (
       !this.editor.activeDocument ||
-      this.editor.activeDocument.layers.length < 2
+      !this.editor.activeDocument.layers.length
     ) {
       return;
     }

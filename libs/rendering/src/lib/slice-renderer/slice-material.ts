@@ -151,7 +151,7 @@ export class AnnotationSliceMaterial extends SliceMaterial {
         editor.sliceRenderer?.lazyRender();
       }),
       autorun(() => {
-        if (!editor.activeDocument || editor.activeDocument.layers.length < 2) {
+        if (!editor.activeDocument || !editor.activeDocument.layers.length) {
           return;
         }
 
