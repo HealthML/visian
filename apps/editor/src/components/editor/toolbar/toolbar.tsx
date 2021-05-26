@@ -147,7 +147,7 @@ export const Toolbar: React.FC = observer(() => {
         {activeTool?.isBrush && (
           <>
             <Switch
-              labelTx="lock-brush-size"
+              labelTx="adaptive-brush-size"
               items={adaptiveBrushSizeSwitchItems}
               value={Boolean(
                 store?.editor.activeDocument?.tools.useAdaptiveBrushSize,

@@ -30,7 +30,7 @@ export interface ToolsSnapshot<N extends string> {
   toolGroups: ToolGroupSnapshot<N>[];
 
   brushSize: number;
-  useAdaptiveBrushSize: boolean;
+  lockedBrushSize?: number;
 }
 
 export class Tools
@@ -48,7 +48,6 @@ export class Tools
   public toolGroups: ToolGroup<ToolName>[] = [];
 
   private screenSpaceBrushSize = 0.02;
-  public useAdaptiveBrushSize!: boolean;
   private lockedBrushSize?: number;
 
   protected isCursorOverDrawableArea = false;
@@ -78,7 +77,6 @@ export class Tools
       tools: observable,
       toolGroups: observable,
       screenSpaceBrushSize: observable,
-      useAdaptiveBrushSize: observable,
       lockedBrushSize: observable,
       isCursorOverDrawableArea: observable,
       isCursorOverFloatingUI: observable,
@@ -90,6 +88,7 @@ export class Tools
       brushSize: computed,
       canDraw: computed,
       isToolInUse: computed,
+      useAdaptiveBrushSize: computed,
 
       setActiveTool: action,
       setBrushSize: action,
@@ -196,6 +195,10 @@ export class Tools
     );
   }
 
+  public get useAdaptiveBrushSize(): boolean {
+    return this.lockedBrushSize === undefined;
+  }
+
   public setActiveTool(nameOrTool?: ToolName | ITool<ToolName>): void {
     const previouslyActiveTool = this.activeTool;
     this.activeToolName = nameOrTool
@@ -287,7 +290,7 @@ export class Tools
       tools: Object.values(this.tools).map((tool) => tool.toJSON()),
       toolGroups: this.toolGroups.map((toolGroup) => toolGroup.toJSON()),
       brushSize: this.brushSize,
-      useAdaptiveBrushSize: this.useAdaptiveBrushSize,
+      lockedBrushSize: this.lockedBrushSize,
     };
   }
 
@@ -305,7 +308,7 @@ export class Tools
     });
 
     this.setBrushSize(snapshot?.brushSize);
-    this.setUseAdaptiveBrushSize(snapshot?.useAdaptiveBrushSize);
+    this.lockedBrushSize = snapshot?.lockedBrushSize;
 
     return Promise.resolve();
   }

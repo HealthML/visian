@@ -34,7 +34,7 @@
   "brush-settings": "Brush Settings",
   "smart-brush-settings": "Smart Brush Settings",
   "brush-size": "Brush Size",
-  "lock-brush-size": "Lock Brush Size",
+  "adaptive-brush-size": "Adaptive Brush Size",
   "seed-threshold": "Seed Threshold",
   "neighbor-threshold": "Neighbor Threshold",
 

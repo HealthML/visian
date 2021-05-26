@@ -34,7 +34,7 @@
   "brush-settings": "Pinseleinstellungen",
   "smart-brush-settings": "Smarter Pinseleinstellungen",
   "brush-size": "Pinselgröße",
-  "lock-brush-size": "Pinselgröße fixieren",
+  "adaptive-brush-size": "Adaptive Pinselgröße",
   "seed-threshold": "Startschwellwert",
   "neighbor-threshold": "Nachbarschwellwert",
 
