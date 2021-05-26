@@ -104,6 +104,8 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
       setActiveLayer: action,
       addLayer: action,
       deleteLayer: action,
+      importImage: action,
+      importAnnotation: action,
       applySnapshot: action,
     });
 
@@ -149,12 +151,12 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
   };
 
   public deleteLayer = (idOrLayer: string | ILayer): void => {
-    delete this.layerMap[
-      typeof idOrLayer === "string" ? idOrLayer : idOrLayer.id
-    ];
     this.layerIds = this.layerIds.filter((id) =>
       typeof idOrLayer === "string" ? id !== idOrLayer : id !== idOrLayer.id,
     );
+    delete this.layerMap[
+      typeof idOrLayer === "string" ? idOrLayer : idOrLayer.id
+    ];
   };
 
   public get has3DLayers(): boolean {
@@ -163,8 +165,8 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
 
   // DEPRECATED
   public async importImage(file: File | File[], name?: string) {
-    this.layerMap = {};
     this.layerIds = [];
+    this.layerMap = {};
 
     const image = await readMedicalImage(file);
     image.name =
@@ -172,7 +174,13 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
     const imageLayer = ImageLayer.fromITKImage(image, this);
 
     this.addLayer(imageLayer);
-    this.addLayer(ImageLayer.fromNewAnnotationForImage(imageLayer.image, this));
+
+    const annotationLayer = ImageLayer.fromNewAnnotationForImage(
+      imageLayer.image,
+      this,
+    );
+    this.addLayer(annotationLayer);
+    this.setActiveLayer(annotationLayer);
   }
 
   public async importAnnotation(file: File | File[], name?: string) {
@@ -181,12 +189,12 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
     const image = await readMedicalImage(file);
     image.name =
       name || (Array.isArray(file) ? file[0]?.name || "" : file.name);
-    const imageLayer = ImageLayer.fromITKImage(image, this);
-    imageLayer.setIsAnnotation(true);
+    const annotationLayer = ImageLayer.fromITKImage(image, this);
+    annotationLayer.setIsAnnotation(true);
     if (
       !isEqual(
         (this.layerMap[this.layerIds[0]] as ImageLayer)?.image?.voxelCount,
-        imageLayer.image.voxelCount,
+        annotationLayer.image.voxelCount,
       )
     ) {
       throw new Error("annotation-mismatch-error");
@@ -194,7 +202,8 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
 
     // Replace old annotation (if any)
     if (this.layerIds.length > 1) this.deleteLayer(this.layerIds[0]);
-    this.addLayer(imageLayer);
+    this.addLayer(annotationLayer);
+    this.setActiveLayer(annotationLayer);
   }
 
   // Proxies

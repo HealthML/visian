@@ -119,7 +119,7 @@ export class Viewport2D
   public setSelectedSlice(viewType = this.mainViewType, slice: number): void {
     this.document.viewSettings.selectedVoxel.setFromView(
       viewType,
-      Math.min(Math.max(Math.round(slice)), this.getMaxSlice(viewType)),
+      Math.min(Math.max(0, Math.round(slice)), this.getMaxSlice(viewType)),
     );
   }
 
