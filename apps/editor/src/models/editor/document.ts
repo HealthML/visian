@@ -7,7 +7,7 @@ import {
 } from "@visian/ui-shared";
 import { ISerializable, readMedicalImage } from "@visian/utils";
 import isEqual from "lodash.isequal";
-import { action, computed, makeObservable, observable } from "mobx";
+import { action, computed, makeObservable, observable, toJS } from "mobx";
 import * as THREE from "three";
 import { v4 as uuidv4 } from "uuid";
 
@@ -213,7 +213,7 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
       titleOverride: this.titleOverride,
       activeLayerId: this.activeLayerId,
       layerMap: Object.values(this.layerMap).map((layer) => layer.toJSON()),
-      layerIds: this.layerIds,
+      layerIds: toJS(this.layerIds),
       history: this.history.toJSON(),
       viewSettings: this.viewSettings.toJSON(),
       viewport2D: this.viewport2D.toJSON(),

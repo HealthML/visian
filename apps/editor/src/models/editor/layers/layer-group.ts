@@ -1,6 +1,6 @@
 import { IDocument, ILayer, ILayerGroup } from "@visian/ui-shared";
 import { ISerializable } from "@visian/utils";
-import { action, makeObservable, observable } from "mobx";
+import { action, makeObservable, observable, toJS } from "mobx";
 
 import { Layer, LayerSnapshot } from "./layer";
 
@@ -64,7 +64,7 @@ export class LayerGroup
   public toJSON(): LayerGroupSnapshot {
     return {
       ...super.toJSON(),
-      layerIds: this.layerIds,
+      layerIds: toJS(this.layerIds),
     };
   }
 

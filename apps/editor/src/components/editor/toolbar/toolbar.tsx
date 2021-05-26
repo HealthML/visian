@@ -159,6 +159,7 @@ export const Toolbar: React.FC = observer(() => {
           Object.values(activeTool.params).map((param) =>
             param.kind === "number" ? (
               <SpacedSliderField
+                key={param.name}
                 labelTx={param.labelTx}
                 label={param.label}
                 min={(param as NumberParameter).min}
