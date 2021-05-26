@@ -100,6 +100,15 @@ export const Toolbar: React.FC = observer(() => {
     [store],
   );
 
+  // The crosshair cannot be used for 2D scans
+  // TODO: This logic should probably be moved into the model
+  if (
+    activeToolName === "crosshair-tool" &&
+    !store?.editor.activeDocument?.has3DLayers
+  ) {
+    store?.editor.activeDocument?.tools.setActiveTool();
+  }
+
   return (
     <StyledToolbar ref={ref}>
       {store?.editor.activeDocument?.tools.toolGroups.map(
@@ -107,6 +116,10 @@ export const Toolbar: React.FC = observer(() => {
           <Tool
             key={index}
             icon={iconMap[tool.name]}
+            isDisabled={
+              tool.name === "crosshair-tool" &&
+              !store?.editor.activeDocument?.has3DLayers
+            }
             tooltipTx={tool.labelTx}
             tooltip={tool.label}
             activeTool={activeToolName}
