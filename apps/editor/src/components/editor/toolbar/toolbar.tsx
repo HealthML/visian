@@ -79,12 +79,12 @@ export const Toolbar: React.FC = observer(() => {
     ) => {
       if (
         event.button === PointerButton.RMB ||
-        store?.editor.activeDocument?.tools.activeTool === value
+        store?.editor.activeDocument?.tools.activeTool?.name === value
       ) {
         event.preventDefault();
         event.stopPropagation();
         setIsModalOpen(
-          store?.editor.activeDocument?.tools.activeTool !== value ||
+          store?.editor.activeDocument?.tools.activeTool?.name !== value ||
             !isModalOpen,
         );
       }
