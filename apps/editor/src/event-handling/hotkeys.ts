@@ -13,6 +13,7 @@ export const setUpHotKeys = (store: RootStore): IDisposer => {
   });
   hotkeys("c", (event) => {
     event.preventDefault();
+    if (!store.editor.activeDocument?.has3DLayers) return;
     store.editor.activeDocument?.tools.setActiveTool("crosshair-tool");
   });
   hotkeys("b", (event) => {

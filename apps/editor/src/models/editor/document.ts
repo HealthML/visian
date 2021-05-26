@@ -186,6 +186,9 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
     );
     this.addLayer(imageLayer, annotationLayer);
     this.setActiveLayer(annotationLayer);
+
+    this.viewSettings.reset();
+    this.history.clear();
   }
 
   public async importAnnotation(file: File | File[], name?: string) {
