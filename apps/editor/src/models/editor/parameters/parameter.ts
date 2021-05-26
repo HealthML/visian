@@ -10,7 +10,7 @@ export interface ParameterSnapshot<T = unknown> {
   // expected to be handled by the application, we do not persist them
 }
 
-export interface ParameterConfig<T = unknown> extends ParameterSnapshot<T> {
+export interface ParameterConfig<T = unknown> {
   name: string;
 
   label?: string;
@@ -19,6 +19,8 @@ export interface ParameterConfig<T = unknown> extends ParameterSnapshot<T> {
   tooltip?: string;
   tooltipTx?: string;
   tooltipPosition?: TooltipPosition;
+
+  defaultValue: T;
 }
 
 export class Parameter<T = unknown>
@@ -36,6 +38,7 @@ export class Parameter<T = unknown>
   public readonly tooltipPosition?: TooltipPosition;
 
   public value!: T;
+  public defaultValue!: T;
 
   constructor(config: ParameterConfig<T>) {
     this.name = config.name;
@@ -44,11 +47,13 @@ export class Parameter<T = unknown>
     this.tooltip = config.tooltip;
     this.tooltipTx = config.tooltipTx;
     this.tooltipPosition = config.tooltipPosition;
-    this.value = config.value;
+    this.value = config.defaultValue;
+    this.defaultValue = config.defaultValue;
 
     makeObservable(this, {
       value: observable,
       setValue: action,
+      reset: action,
       applySnapshot: action,
     });
   }
@@ -56,6 +61,10 @@ export class Parameter<T = unknown>
   public setValue = (value: T): void => {
     this.value = value;
   };
+
+  public reset(): void {
+    this.value = this.defaultValue;
+  }
 
   // Serialization
   public toJSON(): ParameterSnapshot<T> {

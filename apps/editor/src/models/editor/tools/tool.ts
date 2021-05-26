@@ -1,5 +1,6 @@
 import { DragPoint, IDocument, ITool, ViewMode } from "@visian/ui-shared";
 import { ISerializable } from "@visian/utils";
+import { makeObservable, observable } from "mobx";
 
 import { Parameter, ParameterSnapshot } from "../parameters";
 
@@ -30,6 +31,8 @@ export interface ToolConfig<N extends string> {
 
 export class Tool<N extends string>
   implements ITool<N>, ISerializable<ToolSnapshot<N>> {
+  public readonly excludeFromSnapshotTracking = ["document"];
+
   public readonly name: N;
 
   public label?: string;
@@ -48,7 +51,7 @@ export class Tool<N extends string>
   constructor(config: ToolConfig<N>, protected document: IDocument) {
     this.name = config.name;
     this.label = config.label;
-    this.labelTx = config.labelTx;
+    this.labelTx = config.labelTx || config.name;
     this.isDrawingTool = Boolean(config.isDrawingTool);
     this.isBrush = Boolean(config.isBrush);
     this.altToolName = config.altToolName;
@@ -58,6 +61,8 @@ export class Tool<N extends string>
     config.params?.forEach((param) => {
       this.params[param.name] = param;
     });
+
+    makeObservable(this, { params: observable });
   }
 
   public get altTool() {

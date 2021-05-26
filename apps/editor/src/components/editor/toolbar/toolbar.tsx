@@ -129,7 +129,7 @@ export const Toolbar: React.FC = observer(() => {
         parentElement={buttonRef}
         position="right"
         onOutsidePress={closeModal}
-        // TODO: Reset
+        onReset={store?.editor.activeDocument?.tools.resetActiveToolSetings}
       >
         {activeTool?.isBrush && (
           <>

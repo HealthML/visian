@@ -29,10 +29,13 @@ export interface IParameter<T = unknown> {
   tooltipTx?: string;
   tooltipPosition?: TooltipPosition;
 
+  /** The default value this parameter is reset to. */
+  defaultValue: T;
   /** The parameter's current value. */
   value: T;
   /** Sets the parameter's current value. */
   setValue(value: T): void;
+  reset(): void;
 }
 
 /** A boolean parameter, typically displayed as a checkbox or switch. */

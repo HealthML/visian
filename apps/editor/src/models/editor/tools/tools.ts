@@ -72,6 +72,7 @@ export class Tools
       | "isCursorOverFloatingUI"
       | "isNavigationDragged"
       | "isDrawing"
+      | "resetBrushSettings"
     >(this, {
       activeToolName: observable,
       tools: observable,
@@ -97,6 +98,8 @@ export class Tools
       setIsCursorOverFloatingUI: action,
       setIsNavigationDragged: action,
       setIsDrawing: action,
+      resetBrushSettings: action,
+      resetActiveToolSetings: action,
       applySnapshot: action,
     });
 
@@ -262,6 +265,20 @@ export class Tools
   public currentSliceChanged() {
     this.toolRenderer.currentSliceChanged();
   }
+
+  protected resetBrushSettings(): void {
+    this.setUseAdaptiveBrushSize();
+    this.setBrushSize();
+  }
+
+  public resetActiveToolSetings = (): void => {
+    const { activeTool } = this;
+    if (!activeTool) return;
+    if (activeTool.isBrush) this.resetBrushSettings();
+    Object.values(activeTool.params).forEach((param) => {
+      param.reset();
+    });
+  };
 
   // Serialization
   public toJSON(): ToolsSnapshot<ToolName> {

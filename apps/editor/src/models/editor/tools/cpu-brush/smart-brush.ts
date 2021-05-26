@@ -49,7 +49,7 @@ export class SmartBrush<
             min: 0,
             max: 20,
             stepSize: 1,
-            value: 10,
+            defaultValue: 10,
           }) as Parameter<unknown>,
           new NumberParameter({
             name: "neighbor-threshold",
@@ -58,7 +58,7 @@ export class SmartBrush<
             min: 0,
             max: 20,
             stepSize: 1,
-            value: 6,
+            defaultValue: 6,
           }) as Parameter<unknown>,
         ],
       },
