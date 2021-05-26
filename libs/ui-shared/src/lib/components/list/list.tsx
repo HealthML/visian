@@ -22,6 +22,7 @@ const ListItemInner = styled.div`
   flex-direction: row;
   align-items: center;
   height: 40px;
+  overflow: hidden;
 `;
 
 const ListDivider = styled(Divider)`
@@ -34,6 +35,7 @@ export const ListItemLabel = styled(Text)`
   font-size: 14px;
   text-overflow: ellipsis;
   overflow: hidden;
+  white-space: nowrap;
   user-select: none;
 `;
 
