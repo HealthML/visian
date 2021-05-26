@@ -50,6 +50,7 @@ const colorModes = {
     sideViewBorder: "rgba(0, 0, 0, 0.3)",
 
     ...dataColors,
+    Mercury: "#000000",
   },
   dark: {
     text: "rgba(255,255,255,0.8)",

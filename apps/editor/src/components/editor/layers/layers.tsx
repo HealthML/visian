@@ -5,9 +5,10 @@ import {
   ListItem,
   Modal,
   SubtleText,
+  useDelay,
 } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useRef, useState } from "react";
 import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
@@ -32,17 +33,21 @@ const LayerListItem = observer<{
 
   // Color Modal Toggling
   const [areLayerSettingsOpen, setAreLayerSettingsOpen] = useState(false);
-  const openLayerSettings = useCallback(
-    (_value: string | undefined, event: React.PointerEvent) => {
-      event.preventDefault();
-      event.stopPropagation();
-      setAreLayerSettingsOpen(true);
-    },
-    [],
-  );
-  const closeLayerSettings = useCallback(() => {
-    setAreLayerSettingsOpen(false);
+  const isOpeningRef = useRef(false);
+  const resetOpeningRef = useCallback(() => {
+    isOpeningRef.current = false;
   }, []);
+  const [schedule, cancel] = useDelay(resetOpeningRef, 25);
+  const openLayerSettings = useCallback(() => {
+    setAreLayerSettingsOpen(true);
+    isOpeningRef.current = true;
+    schedule();
+  }, [schedule]);
+  const closeLayerSettings = useCallback(() => {
+    if (!isOpeningRef.current) setAreLayerSettingsOpen(false);
+    isOpeningRef.current = false;
+    cancel();
+  }, [cancel]);
 
   // Color Modal Positioning
   const [colorRef, setColorRef] = useState<
