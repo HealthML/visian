@@ -20,6 +20,7 @@ export const EditorScreen: React.FC = observer(() => {
           store.refs.lowerSideView.current as HTMLCanvasElement,
           // TODO: Allow undefined document values in the slice renderer
           // TODO: Handle changing active documents in the slice renderer
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           store.editor.activeDocument!,
         ),
       );

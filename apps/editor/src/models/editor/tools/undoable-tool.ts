@@ -53,13 +53,8 @@ export class UndoableTool<N extends string> extends Tool<N> {
       this.sliceNumber = undefined;
       this.oldSliceData = undefined;
 
-      // TODO: inferAnnotatedSlice and persist
-      // this.document.tools.finishStroke(
-      //   image,
-      //   slice,
-      //   viewType,
-      //   isDeleteOperation,
-      // );
+      imageLayer.recomputeSliceMarkers(viewType, slice, isDeleteOperation);
+      // TODO: Trigger persist
     });
   }
 }

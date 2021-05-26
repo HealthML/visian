@@ -58,13 +58,8 @@ export class VoxelWriter<N extends string> extends Tool<N> {
         this.sliceNumber = undefined;
       }
 
-      // TODO: inferAnnotatedSLice and persist
-      // this.document.tools.finishStroke(
-      //   image,
-      //   slice,
-      //   viewType,
-      //   isDeleteOperation,
-      // );
+      imageLayer.recomputeSliceMarkers(viewType, slice, isDeleteOperation);
+      // TODO: Trigger persist
     });
   }
 

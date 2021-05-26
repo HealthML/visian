@@ -42,7 +42,7 @@ export class ClearSliceTool<
 
     this.toolRenderer.currentSliceChanged();
 
-    // TODO: Infer markers
+    imageLayer.clearSliceMarkers(viewType, slice);
 
     super.activate(previousTool);
   }

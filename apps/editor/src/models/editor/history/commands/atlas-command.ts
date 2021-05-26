@@ -36,21 +36,23 @@ export class AtlasCommand
   }
 
   public undo(): void {
-    (this.document.getLayer(this.layerId) as
+    const imageLayer = this.document.getLayer(this.layerId) as
       | IImageLayer
-      | undefined)?.setAtlas?.(this.oldAtlas);
+      | undefined;
+    imageLayer?.setAtlas?.(this.oldAtlas);
 
     // TODO: Trigger slice change listener
-    // TODO: Infer markers
+    imageLayer?.recomputeSliceMarkers();
   }
 
   public redo(): void {
-    (this.document.getLayer(this.layerId) as
+    const imageLayer = this.document.getLayer(this.layerId) as
       | IImageLayer
-      | undefined)?.setAtlas?.(this.newAtlas);
+      | undefined;
+    imageLayer?.setAtlas?.(this.newAtlas);
 
     // TODO: Trigger slice change listener
-    // TODO: Infer markers
+    imageLayer?.recomputeSliceMarkers();
   }
 
   // Serialization

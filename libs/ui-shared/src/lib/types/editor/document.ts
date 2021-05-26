@@ -25,7 +25,11 @@ export interface IDocument {
 
   /** The layer that is currently selected for editing. */
   activeLayer?: Reference<ILayer>;
-  /** The document's layer stack. */
+  /**
+   * The document's layer stack.
+   * This contains all top-level layers (not contained in some group), sorted
+   * top-to-bottom.
+   */
   layers: ILayer[];
   has3DLayers: boolean;
 

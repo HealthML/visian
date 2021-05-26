@@ -42,21 +42,23 @@ export class SliceCommand
   }
 
   public undo(): void {
-    (this.document.getLayer(this.layerId) as
+    const imageLayer = this.document.getLayer(this.layerId) as
       | IImageLayer
-      | undefined)?.setSlice?.(this.viewType, this.slice, this.oldSliceData);
+      | undefined;
+    imageLayer?.setSlice?.(this.viewType, this.slice, this.oldSliceData);
 
     // TODO: Trigger slice change listener
-    // TODO: Infer markers for this slice
+    imageLayer?.recomputeSliceMarkers(this.viewType, this.slice);
   }
 
   public redo(): void {
-    (this.document.getLayer(this.layerId) as
+    const imageLayer = this.document.getLayer(this.layerId) as
       | IImageLayer
-      | undefined)?.setSlice?.(this.viewType, this.slice, this.newSliceData);
+      | undefined;
+    imageLayer?.setSlice?.(this.viewType, this.slice, this.newSliceData);
 
     // TODO: Trigger slice change listener
-    // TODO: Infer markers for this slice
+    imageLayer?.recomputeSliceMarkers(this.viewType, this.slice);
   }
 
   // Serialization

@@ -41,7 +41,7 @@ export class ClearImageTool<
 
     this.toolRenderer.currentSliceChanged();
 
-    // TODO: Clear markers
+    imageLayer.clearSliceMarkers();
 
     super.activate(previousTool);
   }

@@ -35,12 +35,10 @@ export const setUpHotKeys = (store: RootStore): IDisposer => {
   // Tools
   hotkeys("del,backspace", (event) => {
     event.preventDefault();
-    // TODO
     store.editor.activeDocument?.tools.setActiveTool("clear-image");
   });
   hotkeys("ctrl+del,ctrl+backspace", (event) => {
     event.preventDefault();
-    // TODO
     store.editor.activeDocument?.tools.setActiveTool("clear-image");
   });
 
