@@ -43,8 +43,8 @@ export class Layer implements ILayer, ISerializable<LayerSnapshot> {
     snapshot: Partial<LayerSnapshot> | undefined,
     protected document: IDocument,
   ) {
+    this.id = snapshot?.id || uuidv4();
     this.applySnapshot(snapshot);
-    if (!this.id) this.id = uuidv4();
 
     makeObservable<this, "titleOverride" | "parentId" | "opacityOverride">(
       this,
