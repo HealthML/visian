@@ -77,6 +77,11 @@ export class Viewport2D
   }
 
   public setMainViewType = (value?: ViewType): void => {
+    if (!this.document.has3DLayers) {
+      this.mainViewType = ViewType.Transverse;
+      return;
+    }
+
     this.mainViewType = value || ViewType.Transverse;
   };
 
