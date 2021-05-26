@@ -115,9 +115,11 @@ export class ImageSliceMaterial extends SliceMaterial {
         }
         (this.uniforms.uForegroundColor.value as THREE.Color).set(
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          color((editor.activeDocument.layers[1].color as any) || "text")({
-            theme: editor.theme,
-          }),
+          color((editor.activeDocument.layers[1].color as any) || "foreground")(
+            {
+              theme: editor.theme,
+            },
+          ),
         );
         editor.sliceRenderer?.lazyRender();
       }),
@@ -144,8 +146,10 @@ export class AnnotationSliceMaterial extends SliceMaterial {
         }
 
         (this.uniforms.uAnnotationColor.value as THREE.Color).set(
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          color((editor.activeDocument?.layers[0].color as any) || "text")({
+          color(
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            (editor.activeDocument?.layers[0].color as any) || "foreground",
+          )({
             theme: editor.theme,
           }),
         );
