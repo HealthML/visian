@@ -5,6 +5,7 @@ export type IconType = keyof typeof icons;
 
 export interface IconProps extends React.SVGProps<SVGSVGElement> {
   icon: IconType;
+  color?: string;
 
   isActive?: boolean;
 }

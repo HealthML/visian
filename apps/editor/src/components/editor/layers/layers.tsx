@@ -57,7 +57,11 @@ const LayerListItem = observer<{
   return (
     <>
       <ListItem
-        icon={{ color: layer.color || "text" }}
+        icon={{
+          color: layer.color || "text",
+          icon:
+            layer.kind === "image" && !layer.isAnnotation ? "image" : undefined,
+        }}
         iconRef={setColorRef}
         onIconPress={areLayerSettingsOpen ? noop : openLayerSettings}
         labelTx={layer.title ? undefined : "untitled-layer"}

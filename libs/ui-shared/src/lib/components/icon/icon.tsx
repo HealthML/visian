@@ -6,9 +6,12 @@ import { IconProps } from "./icon.props";
 import * as icons from "./icons";
 
 const StyledSVG = styled.svg.withConfig({
-  shouldForwardProp: (prop) => prop.toString() !== "isActive",
+  shouldForwardProp: (prop) =>
+    prop.toString() !== "isActive" && prop.toString() !== "color",
 })<Pick<IconProps, "isActive">>`
-  fill: ${color("text")};
+  fill: ${(
+    props, // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ) => color((props.color as any) || "text")};
   opacity: ${(props) => (props.isActive !== false ? 1 : 0.3)};
 `;
 
