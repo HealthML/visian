@@ -1,4 +1,4 @@
-import { color, IDocument } from "@visian/ui-shared";
+import { color, IEditor } from "@visian/ui-shared";
 import { IDisposable, IDisposer, ViewType } from "@visian/utils";
 import { autorun } from "mobx";
 import * as THREE from "three";
@@ -15,7 +15,7 @@ export abstract class SliceMaterial
   private image?: RenderedImage;
 
   constructor(
-    private document: IDocument,
+    private editor: IEditor,
     private viewType: ViewType,
     defines = {},
     uniforms = {},
@@ -52,8 +52,8 @@ export abstract class SliceMaterial
 
     this.disposers.push(
       autorun(() => {
-        this.uniforms.uActiveSlices.value = document.viewSettings.selectedVoxel.toArray();
-        document.sliceRenderer?.lazyRender();
+        this.uniforms.uActiveSlices.value = editor.activeDocument?.viewSettings.selectedVoxel.toArray();
+        editor.sliceRenderer?.lazyRender();
       }),
       autorun(this.updateTexture),
     );
@@ -74,9 +74,11 @@ export abstract class SliceMaterial
   }
 
   private updateTexture = () => {
-    const canvasIndex = getOrder(this.document.viewport2D.mainViewType).indexOf(
-      this.viewType,
-    );
+    if (!this.editor.activeDocument) return;
+
+    const canvasIndex = getOrder(
+      this.editor.activeDocument.viewport2D.mainViewType,
+    ).indexOf(this.viewType);
     this.uniforms.uDataTexture.value = this.image?.getTexture(canvasIndex);
   };
 }
@@ -84,32 +86,34 @@ export abstract class SliceMaterial
 export default SliceMaterial;
 
 export class ImageSliceMaterial extends SliceMaterial {
-  constructor(document: IDocument, viewType: ViewType) {
+  constructor(editor: IEditor, viewType: ViewType) {
     super(
-      document,
+      editor,
       viewType,
       { IMAGE: "" },
       {
-        uContrast: { value: document.viewSettings.contrast },
-        uBrightness: { value: document.viewSettings.brightness },
+        uContrast: { value: editor.activeDocument?.viewSettings.contrast },
+        uBrightness: { value: editor.activeDocument?.viewSettings.brightness },
         uForegroundColor: { value: new THREE.Color("white") },
       },
     );
 
     this.disposers.push(
       autorun(() => {
-        this.uniforms.uContrast.value = document.viewSettings.contrast;
-        document.sliceRenderer?.lazyRender();
+        this.uniforms.uContrast.value =
+          editor.activeDocument?.viewSettings.contrast;
+        editor.sliceRenderer?.lazyRender();
       }),
       autorun(() => {
-        this.uniforms.uBrightness.value = document.viewSettings.brightness;
-        document.sliceRenderer?.lazyRender();
+        this.uniforms.uBrightness.value =
+          editor.activeDocument?.viewSettings.brightness;
+        editor.sliceRenderer?.lazyRender();
       }),
       autorun(() => {
         (this.uniforms.uForegroundColor.value as THREE.Color).set(
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          color(document.layers[1].color as any)({
-            theme: document.editor.theme,
+          color(editor.activeDocument?.layers[1].color as any)({
+            theme: editor.theme,
           }),
         );
       }),
@@ -118,9 +122,9 @@ export class ImageSliceMaterial extends SliceMaterial {
 }
 
 export class AnnotationSliceMaterial extends SliceMaterial {
-  constructor(document: IDocument, viewType: ViewType) {
+  constructor(editor: IEditor, viewType: ViewType) {
     super(
-      document,
+      editor,
       viewType,
       { ANNOTATION: "" },
       {
@@ -133,15 +137,16 @@ export class AnnotationSliceMaterial extends SliceMaterial {
       autorun(() => {
         (this.uniforms.uAnnotationColor.value as THREE.Color).set(
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          color(document.layers[0].color as any)({
-            theme: document.editor.theme,
+          color(editor.activeDocument?.layers[0].color as any)({
+            theme: editor.theme,
           }),
         );
-        document.sliceRenderer?.lazyRender();
+        editor.sliceRenderer?.lazyRender();
       }),
       autorun(() => {
-        this.uniforms.uAnnotationOpacity.value = document.layers[0].opacity;
-        document.sliceRenderer?.lazyRender();
+        this.uniforms.uAnnotationOpacity.value =
+          editor.activeDocument?.layers[0].opacity;
+        editor.sliceRenderer?.lazyRender();
       }),
     );
   }

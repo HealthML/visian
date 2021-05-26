@@ -1,4 +1,4 @@
-import { IDocument } from "@visian/ui-shared";
+import { IEditor } from "@visian/ui-shared";
 import { ViewType } from "@visian/utils";
 import { reaction } from "mobx";
 
@@ -12,17 +12,17 @@ export class PreviewBrushCursor extends BrushCursor {
 
   private active = false;
 
-  constructor(document: IDocument, viewType: ViewType) {
-    super(document, viewType);
+  constructor(editor: IEditor, viewType: ViewType) {
+    super(editor, viewType);
     this.disposers.push(
       reaction(
-        () => document.viewport2D.mainViewType,
-        (mainView: ViewType) => {
+        () => editor.activeDocument?.viewport2D.mainViewType,
+        (mainView?: ViewType) => {
           if (mainView !== this.viewType) this.hide();
         },
       ),
       reaction(
-        () => document.tools.canDraw && this.active,
+        () => editor.activeDocument?.tools.canDraw && this.active,
         () => {
           this.updateVisibility();
         },
@@ -56,13 +56,13 @@ export class PreviewBrushCursor extends BrushCursor {
   }
 
   protected updateVisibility() {
-    this.visible = this.active && !this.document.tools.canDraw;
+    this.visible = this.active && !this.editor.activeDocument?.tools.canDraw;
 
     // Prevent appearing again after hiding because main brush cursor was visible.
-    if (this.document.tools.canDraw && this.active) {
+    if (this.editor.activeDocument?.tools.canDraw && this.active) {
       this.hide();
     }
 
-    this.document.sliceRenderer?.lazyRender();
+    this.editor.sliceRenderer?.lazyRender();
   }
 }

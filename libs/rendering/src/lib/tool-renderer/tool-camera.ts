@@ -13,6 +13,8 @@ export class ToolCamera
 
     this.disposers.push(
       autorun(() => {
+        if (!document.layers.length) return;
+
         const { image } = document.layers[0] as IImageLayer;
         if (!image) return;
 

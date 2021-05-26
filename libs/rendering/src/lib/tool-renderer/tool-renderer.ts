@@ -38,12 +38,16 @@ export class ToolRenderer implements IRenderLoopSubscriber {
           selectedSlice: document.viewSettings.selectedVoxel.getFromView(
             document.viewport2D.mainViewType,
           ),
-          annotation: (document.layers[0] as IImageLayer)
-            .image as RenderedImage,
+          annotation: document.layers.length
+            ? ((document.layers[0] as IImageLayer).image as RenderedImage)
+            : undefined,
         }),
         (params) => {
+          if (!params.annotation) return;
+
           this.resizeRenderTargets();
-          this.currentSliceChanged(params);
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          this.currentSliceChanged(params as any);
         },
         { fireImmediately: true },
       ),
