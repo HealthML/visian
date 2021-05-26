@@ -82,10 +82,8 @@ export class ImageLayer
     snapshot: Partial<ImageLayerSnapshot> & Pick<ImageLayerSnapshot, "image">,
     protected document: IDocument,
   ) {
-    super(snapshot, document);
+    super(snapshot, document, true);
     this.applySnapshot(snapshot);
-
-    this.setEmptySlices();
 
     makeObservable<this, "emptySlices" | "setEmptySlices" | "setIsSliceEmpty">(
       this,
@@ -132,12 +130,15 @@ export class ImageLayer
 
   // Slice Markers
   public getSliceMarkers(viewType: ViewType): MarkerConfig[] {
+    if (!this.is3DLayer || !this.isAnnotation) return [];
+
     const nonEmptySlices: number[] = [];
     this.emptySlices[viewType].forEach((isEmpty, slice) => {
       if (!isEmpty) nonEmptySlices.push(slice);
     });
 
     return condenseValues(nonEmptySlices).map((value) => ({
+      context: this.id,
       color: this.color || "text",
       value,
     }));
@@ -168,7 +169,7 @@ export class ImageLayer
     slice?: number,
     isDeleteOperation?: boolean,
   ): Promise<void> {
-    if (!this.is3DLayer) return;
+    if (!this.is3DLayer || !this.isAnnotation) return;
 
     if (viewType !== undefined && slice !== undefined) {
       // Recompute the given slice
@@ -198,7 +199,7 @@ export class ImageLayer
       const emptySlices = await markerRPCProvider.rpc<
         GetEmptySlicesArgs,
         GetEmptySlicesReturn
-      >("getNonEmptySlices", {
+      >("getEmptySlices", {
         atlas: this.image.getAtlas(),
         voxelCount: this.image.voxelCount.toArray(),
         voxelComponents: this.image.voxelComponents,
@@ -212,7 +213,7 @@ export class ImageLayer
     viewType?: ViewType,
     slice?: number,
   ): Promise<void> {
-    if (!this.is3DLayer) return;
+    if (!this.is3DLayer || !this.isAnnotation) return;
 
     // The noop here is used to serialize worker calls to avoid race conditions
     // TODO: A more elegant solution would be to cancel any outstanding worker
@@ -243,7 +244,7 @@ export class ImageLayer
   }
 
   public getSlice(viewType: ViewType, slice: number): Uint8Array {
-    return this.image.getSlice(viewType, slice);
+    return this.image.getSlice(slice, viewType);
   }
 
   public setSlice(
@@ -311,6 +312,7 @@ export class ImageLayer
     this.setBrightness(snapshot.brightness);
     this.setContrast(snapshot.contrast);
 
-    return Promise.resolve();
+    this.setEmptySlices();
+    return this.recomputeSliceMarkers();
   }
 }

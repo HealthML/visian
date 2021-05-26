@@ -276,6 +276,8 @@ export class RenderedImage<T extends TypedArray = TypedArray>
     }
   }
 
+  // TODO: Please update the parameter order here in accordance with the new
+  // interfaces
   public getSlice(sliceNumber: number, viewType: ViewType) {
     if (this.renderers.length) {
       return this.sliceAtlasAdapter.readSlice(

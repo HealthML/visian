@@ -3,7 +3,7 @@ import { ViewType } from "@visian/utils";
 export type MarkerConfig =
   | number
   | [number, number]
-  | { color?: string; value: number | [number, number] };
+  | { context?: string; color?: string; value: number | [number, number] };
 
 export interface IMarkers {
   /**
