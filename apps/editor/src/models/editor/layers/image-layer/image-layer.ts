@@ -83,6 +83,7 @@ export class ImageLayer
     protected document: IDocument,
   ) {
     super(snapshot, document);
+    this.applySnapshot(snapshot);
 
     this.setEmptySlices();
 
@@ -121,13 +122,13 @@ export class ImageLayer
     this.image = value;
   }
 
-  public setBrightness = (value?: number): void => {
+  public setBrightness(value?: number): void {
     this.brightness = value ?? 1;
-  };
+  }
 
-  public setContrast = (value?: number): void => {
+  public setContrast(value?: number): void {
     this.contrast = value ?? 1;
-  };
+  }
 
   // Slice Markers
   public getSliceMarkers(viewType: ViewType): MarkerConfig[] {

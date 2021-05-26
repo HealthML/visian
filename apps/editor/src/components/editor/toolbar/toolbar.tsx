@@ -103,8 +103,9 @@ export const Toolbar: React.FC = observer(() => {
   return (
     <StyledToolbar ref={ref}>
       {store?.editor.activeDocument?.tools.toolGroups.map(
-        ({ activeTool: tool }) => (
+        ({ activeTool: tool }, index) => (
           <Tool
+            key={index}
             icon={iconMap[tool.name]}
             tooltipTx={tool.labelTx}
             tooltip={tool.label}

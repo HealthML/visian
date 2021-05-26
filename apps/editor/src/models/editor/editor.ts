@@ -10,7 +10,11 @@ export interface EditorSnapshot {
 }
 
 export class Editor implements IEditor, ISerializable<EditorSnapshot> {
-  public readonly excludeFromSnapshotTracking = ["context"];
+  public readonly excludeFromSnapshotTracking = [
+    "context",
+    "sliceRenderer",
+    "renderers",
+  ];
 
   public activeDocument?: Document;
 

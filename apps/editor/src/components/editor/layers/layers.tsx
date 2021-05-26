@@ -107,6 +107,7 @@ export const Layers: React.FC = observer(() => {
               // TODO: Rework colorRef to set ref according to clicked swatch.
               // Possibly, render one color panel per layer list item
               <LayerListItem
+                key={layer.id}
                 layer={layer}
                 isColorModalOpen={isColorModalOpen}
                 colorRef={setColorRef}

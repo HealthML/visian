@@ -35,7 +35,13 @@ export interface ToolsSnapshot<N extends string> {
 
 export class Tools
   implements ITools<ToolName>, ISerializable<ToolsSnapshot<ToolName>> {
-  public readonly excludeFromSnapshotTracking = ["document"];
+  public readonly excludeFromSnapshotTracking = [
+    "document",
+    "isCursorOverDrawableArea",
+    "isCursorOverFloatingUI",
+    "isNavigationDragged",
+    "isDrawing",
+  ];
 
   protected activeToolName?: ToolName;
   public tools: Record<ToolName, Tool<ToolName>>;
@@ -108,7 +114,7 @@ export class Tools
       ),
       "crosshair-tool": new CrosshairTool(document),
       "pixel-brush": new CircleBrush(document, this.toolRenderer),
-      "pixel-eraser": new CircleBrush(document, this.toolRenderer, 1),
+      "pixel-eraser": new CircleBrush(document, this.toolRenderer, 0),
       "smart-brush": new SmartBrush(document),
       "smart-eraser": new SmartBrush(document, 0),
       "outline-tool": new OutlineTool(document, this.toolRenderer),
