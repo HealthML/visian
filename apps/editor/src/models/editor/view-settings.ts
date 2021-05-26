@@ -59,11 +59,11 @@ export class ViewSettings
   }
 
   public setSelectedVoxel(x?: number, y?: number, z?: number): void {
-    if (!x || !y || !z) {
-      // TODO: Do not rely on `layer[0]`
-      const voxelCount = (this.document.layers[0] as IImageLayer | undefined)
-        ?.image.voxelCount;
+    // TODO: Do not rely on `layer[0]`
+    const voxelCount = (this.document.layers[0] as IImageLayer | undefined)
+      ?.image.voxelCount;
 
+    if (!x || !y || !z) {
       if (voxelCount) {
         this.selectedVoxel
           .copy(voxelCount)
@@ -75,6 +75,15 @@ export class ViewSettings
       return;
     }
 
+    if (voxelCount) {
+      this.selectedVoxel.set(
+        Math.max(Math.min(x, voxelCount.x - 1), 0),
+        Math.max(Math.min(y, voxelCount.y - 1), 0),
+        Math.max(Math.min(z, voxelCount.z - 1), 0),
+      );
+
+      return;
+    }
     this.selectedVoxel.set(x, y, z);
   }
 

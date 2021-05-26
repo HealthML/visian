@@ -15,6 +15,7 @@ import { Tools } from "../models";
  * @param tools The tools.
  * @param screenPosition The screen position.
  * @param viewType The view type.
+ * @param isMainView Indicates if the pointer event comes from the main view canvas.
  * @param sliceRenderer The slice renderer rendering the brush cursor.
  * @returns The virtual uv coordinates of the brush cursor on the corresponding slice
  * or null if the slice renderer is undefined.
@@ -23,6 +24,7 @@ export const alignBrushCursor = (
   tools: Tools,
   screenPosition: Pixel,
   viewType: ViewType,
+  isMainView = true,
   sliceRenderer?: ISliceRenderer,
 ) => {
   if (!sliceRenderer) {
@@ -34,7 +36,7 @@ export const alignBrushCursor = (
 
   if (uv.x > 1 || uv.x < 0 || uv.y > 1 || uv.y < 0) {
     tools.setIsCursorOverDrawableArea(false);
-  } else {
+  } else if (isMainView) {
     tools.setIsCursorOverDrawableArea();
     sliceRenderer.alignBrushCursor(uv);
   }

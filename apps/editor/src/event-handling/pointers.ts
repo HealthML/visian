@@ -72,6 +72,7 @@ export const setUpPointerHandling = (
           y: detail.clientY,
         },
         store.editor.activeDocument.viewport2D.mainViewType,
+        true,
         store.editor.sliceRenderer,
       );
     },
@@ -110,6 +111,7 @@ export const setUpPointerHandling = (
           y: detail.clientY,
         },
         viewType,
+        id === "mainView",
         store.editor.sliceRenderer,
       );
 

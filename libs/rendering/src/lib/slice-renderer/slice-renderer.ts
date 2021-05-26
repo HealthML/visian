@@ -260,15 +260,18 @@ export class SliceRenderer implements IDisposable, ISliceRenderer {
 
     const boundingBox = canvas.getBoundingClientRect();
     const webGLSize = this.getWebGLSize(viewType);
+
+    const camera = canvasIndex ? this.sideCamera : this.mainCamera;
+
     return {
       x:
         ((screenPosition.x - boundingBox.left) / boundingBox.width) *
           webGLSize.x +
-        this.mainCamera.left,
+        camera.left,
       y:
         ((screenPosition.y - boundingBox.top) / boundingBox.height) *
           -webGLSize.y +
-        this.mainCamera.top,
+        camera.top,
     };
   }
 
