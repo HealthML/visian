@@ -23,9 +23,9 @@ const LayerList = styled(List)`
   margin-top: -16px;
 `;
 
-const LayerListItem: React.FC<{
+const LayerListItem = observer<{
   layer: ILayer;
-}> = ({ layer }) => {
+}>(({ layer }) => {
   const toggleAnnotationVisibility = useCallback(() => {
     layer.setIsVisible(!layer.isVisible);
   }, [layer]);
@@ -70,7 +70,7 @@ const LayerListItem: React.FC<{
       />
     </>
   );
-};
+});
 
 const LayerModal = styled(Modal)`
   padding-bottom: 0px;
