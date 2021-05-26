@@ -5,6 +5,7 @@
   "drop-image": "Drop your scan here",
   "drop-annotation": "Drop your annotation here",
 
+  "untitled-document": "Untitled Document",
   "start": "Start by dragging in a scan.",
   "unsaved-changes": "Unsaved changes.",
   "saved-in-browser": "All changes saved in browser.",
@@ -39,6 +40,7 @@
 
   "layers": "Layers",
   "no-layers": "No layers loaded.",
+  "untitled-layer": "Untitled layer",
   "color-panel": "Choose Color",
   "background-color": "Background Color",
 

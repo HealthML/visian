@@ -47,7 +47,10 @@ export const TopConsole = observer(() => {
   const store = useStore();
   return store?.editor.activeDocument ? (
     <TopConsoleContainer>
-      <FileTitle text={store?.editor.activeDocument.title} />
+      <FileTitle
+        tx={store.editor.activeDocument.title ? undefined : "untitled-document"}
+        text={store.editor.activeDocument.title}
+      />
       <UnsavedChangesIndicator
         isDirty={store?.isDirty}
         tooltipTx={store?.isDirty ? "unsaved-changes" : "saved-in-browser"}

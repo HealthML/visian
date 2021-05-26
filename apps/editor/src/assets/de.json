@@ -5,6 +5,7 @@
   "drop-image": "Legen Sie Ihren Scan hier ab",
   "drop-annotation": "Legen Sie Ihre Annotation hier ab",
 
+  "untitled-document": "Unbenanntes Dokument",
   "start": "Starten Sie, in dem Sie einen Scan hier ablegen.",
   "unsaved-changes": "Ungespeicherte Änderungen.",
   "saved-in-browser": "Alle Änderungen im Browser gespeichert.",
@@ -39,6 +40,7 @@
 
   "layers": "Ebenen",
   "no-layers": "Keine Ebenen geladen.",
+  "untitled-layer": "Unbenannte Ebene",
   "color-panel": "Farbe wählen",
   "background-color": "Hintergrundfarbe",
 

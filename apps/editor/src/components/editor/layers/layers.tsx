@@ -11,7 +11,7 @@ import React, { useCallback, useState } from "react";
 import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
-import { ColorPanel } from "../color-panel";
+import { LayerSettings } from "../layer-settings";
 
 // Utilities
 const noop = () => {
@@ -25,27 +25,50 @@ const LayerList = styled(List)`
 
 const LayerListItem: React.FC<{
   layer: ILayer;
-  isColorModalOpen?: boolean;
-  colorRef?: (element: HTMLDivElement | SVGSVGElement | null) => void;
-  onOpenColorModal?: (
-    value: string | undefined,
-    event: React.PointerEvent,
-  ) => void;
-}> = ({ layer, isColorModalOpen, colorRef, onOpenColorModal }) => {
+}> = ({ layer }) => {
   const toggleAnnotationVisibility = useCallback(() => {
     layer.setIsVisible(!layer.isVisible);
   }, [layer]);
 
+  // Color Modal Toggling
+  const [areLayerSettingsOpen, setAreLayerSettingsOpen] = useState(false);
+  const openLayerSettings = useCallback(
+    (_value: string | undefined, event: React.PointerEvent) => {
+      event.preventDefault();
+      event.stopPropagation();
+      setAreLayerSettingsOpen(true);
+    },
+    [],
+  );
+  const closeLayerSettings = useCallback(() => {
+    setAreLayerSettingsOpen(false);
+  }, []);
+
+  // Color Modal Positioning
+  const [colorRef, setColorRef] = useState<
+    HTMLDivElement | SVGSVGElement | null
+  >(null);
+
   return (
-    <ListItem
-      icon={{ color: layer.color || "text" }}
-      iconRef={colorRef}
-      onIconPress={isColorModalOpen ? noop : onOpenColorModal}
-      label={layer.title}
-      trailingIcon={layer.isVisible ? "eye" : "eyeCrossed"}
-      disableTrailingIcon={layer.isVisible}
-      onTrailingIconPress={toggleAnnotationVisibility}
-    />
+    <>
+      <ListItem
+        icon={{ color: layer.color || "text" }}
+        iconRef={setColorRef}
+        onIconPress={areLayerSettingsOpen ? noop : openLayerSettings}
+        labelTx={layer.title ? undefined : "untitled-layer"}
+        label={layer.title}
+        trailingIcon={layer.isVisible ? "eye" : "eyeCrossed"}
+        disableTrailingIcon={layer.isVisible}
+        onTrailingIconPress={toggleAnnotationVisibility}
+      />
+      <LayerSettings
+        layer={layer}
+        isOpen={areLayerSettingsOpen}
+        parentElement={colorRef}
+        position="right"
+        onOutsidePress={closeLayerSettings}
+      />
+    </>
   );
 };
 
@@ -64,25 +87,6 @@ export const Layers: React.FC = observer(() => {
 
   // Menu Positioning
   const [buttonRef, setButtonRef] = useState<HTMLButtonElement | null>(null);
-
-  // Color Modal Toggling
-  const [isColorModalOpen, setIsColorModalOpen] = useState(false);
-  const openColorModal = useCallback(
-    (_value: string | undefined, event: React.PointerEvent) => {
-      event.preventDefault();
-      event.stopPropagation();
-      setIsColorModalOpen(true);
-    },
-    [],
-  );
-  const closeColorModal = useCallback(() => {
-    setIsColorModalOpen(false);
-  }, []);
-
-  // Color Modal Positioning
-  const [colorRef, setColorRef] = useState<
-    HTMLDivElement | SVGSVGElement | null
-  >(null);
 
   const layers = store?.editor.activeDocument?.layers;
   return (
@@ -104,15 +108,7 @@ export const Layers: React.FC = observer(() => {
         <LayerList>
           {layers?.length ? (
             layers.map((layer) => (
-              // TODO: Rework colorRef to set ref according to clicked swatch.
-              // Possibly, render one color panel per layer list item
-              <LayerListItem
-                key={layer.id}
-                layer={layer}
-                isColorModalOpen={isColorModalOpen}
-                colorRef={setColorRef}
-                onOpenColorModal={openColorModal}
-              />
+              <LayerListItem key={layer.id} layer={layer} />
             ))
           ) : (
             <ListItem isLast>
@@ -121,12 +117,6 @@ export const Layers: React.FC = observer(() => {
           )}
         </LayerList>
       </LayerModal>
-      <ColorPanel
-        isOpen={isColorModalOpen}
-        parentElement={colorRef}
-        position="right"
-        onOutsidePress={closeColorModal}
-      />
     </>
   );
 });
