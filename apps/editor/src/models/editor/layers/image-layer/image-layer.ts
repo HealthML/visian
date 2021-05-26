@@ -49,6 +49,7 @@ export class ImageLayer
   ) {
     return new this(
       {
+        isAnnotation: true,
         image: {
           name: `${image.name.split(".")[0]}_annotation`,
           dimensionality: image.dimensionality,

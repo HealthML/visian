@@ -182,6 +182,7 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
     image.name =
       name || (Array.isArray(file) ? file[0]?.name || "" : file.name);
     const imageLayer = ImageLayer.fromITKImage(image, this);
+    imageLayer.setIsAnnotation(true);
     if (
       !isEqual(
         (this.layerMap[this.layerIds[0]] as ImageLayer)?.image?.voxelCount,
