@@ -20,6 +20,8 @@ export class CircleBrush<
         altToolName: value ? "pixel-eraser" : "pixel-brush",
         supportedViewModes: ["2D"],
         supportedLayerKinds: ["image"],
+        isDrawingTool: true,
+        isBrush: true,
       },
       document,
       toolRenderer,

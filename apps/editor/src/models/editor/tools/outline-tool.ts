@@ -25,6 +25,7 @@ export class OutlineTool<
         altToolName: value ? "outline-eraser" : "outline-tool",
         supportedViewModes: ["2D"],
         supportedLayerKinds: ["image"],
+        isDrawingTool: true,
       },
       document,
       toolRenderer,

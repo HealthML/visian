@@ -115,7 +115,7 @@ export const setUpPointerHandling = (
 
       if (
         !uv ||
-        !store.editor.activeDocument.activeLayer?.isVisible ||
+        !store.editor.activeDocument.layers.length ||
         !store.editor.activeDocument.tools.activeTool
       ) {
         return;
@@ -133,7 +133,13 @@ export const setUpPointerHandling = (
         tool = tool.altTool;
       }
 
-      if (!tool?.isDrawingTool) return;
+      if (
+        !tool ||
+        (tool.isDrawingTool &&
+          (!store.editor.activeDocument.layers[0].isVisible ||
+            !store.editor.activeDocument.layers[0].isAnnotation))
+      )
+        return;
 
       const dragPoint = getDragPoint(
         (store.editor.activeDocument.layers[1] as IImageLayer).image,
@@ -141,20 +147,20 @@ export const setUpPointerHandling = (
         viewType,
         uv,
         // Only the outline tool needs high resolution drag points
-        !(store.editor.activeDocument.tools.activeTool instanceof OutlineTool),
+        !(tool instanceof OutlineTool),
       );
 
       switch (eventType) {
         case "start":
           store.editor.activeDocument.tools.setIsDrawing(true);
-          tool?.startAt(dragPoint);
+          tool.startAt(dragPoint);
           break;
         case "move":
-          tool?.moveTo(dragPoint);
+          tool.moveTo(dragPoint);
           break;
         case "end":
           store.editor.activeDocument.tools.setIsDrawing(false);
-          tool?.endAt(dragPoint);
+          tool.endAt(dragPoint);
           break;
       }
 

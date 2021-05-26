@@ -39,6 +39,8 @@ export class SmartBrush<
         altToolName: value ? "smart-eraser" : "smart-brush",
         supportedViewModes: ["2D"],
         supportedLayerKinds: ["image"],
+        isDrawingTool: true,
+        isBrush: true,
         params: [
           new NumberParameter({
             name: "seed-threshold",
