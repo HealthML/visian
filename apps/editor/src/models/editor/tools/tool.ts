@@ -20,7 +20,7 @@ export interface ToolConfig<N extends string> {
   isDrawingTool?: boolean;
   isBrush?: boolean;
 
-  altToolName?: string;
+  altToolName?: N;
 
   supportedViewModes: ViewMode[];
   supportedLayerKinds: string[];
@@ -58,6 +58,12 @@ export class Tool<N extends string>
     config.params?.forEach((param) => {
       this.params[param.name] = param;
     });
+  }
+
+  public get altTool() {
+    return this.altToolName
+      ? this.document.tools.tools[this.altToolName]
+      : undefined;
   }
 
   public activate(_previousTool?: ITool<N>): void {

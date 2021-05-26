@@ -22,7 +22,7 @@ export class OutlineTool<
     super(
       {
         name: (value ? "outline-tool" : "outline-eraser") as N,
-        altToolName: value ? "outline-eraser" : "outline-tool",
+        altToolName: (value ? "outline-eraser" : "outline-tool") as N,
         supportedViewModes: ["2D"],
         supportedLayerKinds: ["image"],
         isDrawingTool: true,

@@ -17,7 +17,7 @@ export class CircleBrush<
     super(
       {
         name: (value ? "pixel-brush" : "pixel-eraser") as N,
-        altToolName: value ? "pixel-eraser" : "pixel-brush",
+        altToolName: (value ? "pixel-eraser" : "pixel-brush") as N,
         supportedViewModes: ["2D"],
         supportedLayerKinds: ["image"],
         isDrawingTool: true,

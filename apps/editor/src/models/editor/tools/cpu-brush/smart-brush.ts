@@ -36,7 +36,7 @@ export class SmartBrush<
     super(
       {
         name: (value ? "smart-brush" : "smart-eraser") as N,
-        altToolName: value ? "smart-eraser" : "smart-brush",
+        altToolName: (value ? "smart-eraser" : "smart-brush") as N,
         supportedViewModes: ["2D"],
         supportedLayerKinds: ["image"],
         isDrawingTool: true,
