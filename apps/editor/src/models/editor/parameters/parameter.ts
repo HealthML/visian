@@ -46,7 +46,7 @@ export class Parameter<T = unknown>
     this.tooltipPosition = config.tooltipPosition;
     this.value = config.value;
 
-    makeObservable({
+    makeObservable(this, {
       value: observable,
       setValue: action,
       applySnapshot: action,
