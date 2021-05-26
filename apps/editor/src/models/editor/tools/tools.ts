@@ -142,7 +142,7 @@ export class Tools
       new ToolGroup({ toolNames: ["clear-slice", "clear-image"] }, document),
     );
 
-    if (snapshot) this.applySnapshot(snapshot);
+    this.applySnapshot(snapshot);
   }
 
   public get activeTool(): ITool<ToolName> | undefined {
@@ -292,20 +292,20 @@ export class Tools
   }
 
   public applySnapshot(
-    snapshot: Partial<ToolsSnapshot<ToolName>>,
+    snapshot?: Partial<ToolsSnapshot<ToolName>>,
   ): Promise<void> {
-    this.setActiveTool(snapshot.activeToolName);
-    snapshot.tools?.forEach((toolSnapshot) => {
+    this.setActiveTool(snapshot?.activeToolName);
+    snapshot?.tools?.forEach((toolSnapshot) => {
       const tool = this.tools[toolSnapshot.name];
       if (tool) tool.applySnapshot(toolSnapshot);
     });
     this.toolGroups.forEach((toolGroup, index) => {
-      const toolGroupSnapshot = snapshot.toolGroups?.[index];
+      const toolGroupSnapshot = snapshot?.toolGroups?.[index];
       if (toolGroupSnapshot) toolGroup.applySnapshot(toolGroupSnapshot);
     });
 
-    this.setBrushSize(snapshot.brushSize);
-    this.setUseAdaptiveBrushSize(snapshot.useAdaptiveBrushSize);
+    this.setBrushSize(snapshot?.brushSize);
+    this.setUseAdaptiveBrushSize(snapshot?.useAdaptiveBrushSize);
 
     return Promise.resolve();
   }
