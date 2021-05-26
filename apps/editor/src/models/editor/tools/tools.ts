@@ -202,7 +202,7 @@ export class Tools
       ? typeof nameOrTool === "string"
         ? nameOrTool
         : nameOrTool.name
-      : undefined;
+      : "pixel-brush";
     this.activeTool?.activate(previouslyActiveTool);
   }
 

@@ -49,6 +49,7 @@ const ColumnCenter = styled.div`
   flex: 1;
   flex-direction: column;
   justify-content: flex-start;
+  min-width: 0;
 `;
 
 const ColumnRight = styled.div`
