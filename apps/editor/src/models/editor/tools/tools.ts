@@ -221,7 +221,7 @@ export class Tools
     this.document.sliceRenderer?.showBrushCursorPreview();
   }
 
-  public setUseAdaptiveBrushSize(value?: boolean): void {
+  public setUseAdaptiveBrushSize = (value?: boolean): void => {
     if (value) {
       const previousValue = this.lockedBrushSize;
       this.lockedBrushSize = undefined;
@@ -229,7 +229,7 @@ export class Tools
     } else {
       this.lockedBrushSize = this.brushSize;
     }
-  }
+  };
 
   public incrementBrushSize() {
     // Allow brush size 0.5.

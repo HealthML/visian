@@ -16,6 +16,7 @@ import {
 import FileSaver from "file-saver";
 import { action, computed, makeObservable, observable } from "mobx";
 
+import { defaultAnnotationColor } from "../../../../constants";
 import { condenseValues } from "../../markers";
 import { Layer, LayerSnapshot } from "../layer";
 import { markerRPCProvider } from "./markers";
@@ -50,6 +51,7 @@ export class ImageLayer
     return new this(
       {
         isAnnotation: true,
+        color: defaultAnnotationColor,
         image: {
           name: `${image.name.split(".")[0]}_annotation`,
           dimensionality: image.dimensionality,
@@ -139,7 +141,7 @@ export class ImageLayer
 
     return condenseValues(nonEmptySlices).map((value) => ({
       context: this.id,
-      color: this.color || "text",
+      color: this.color,
       value,
     }));
   }

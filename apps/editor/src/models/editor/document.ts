@@ -11,6 +11,7 @@ import { action, computed, makeObservable, observable, toJS } from "mobx";
 import * as THREE from "three";
 import { v4 as uuidv4 } from "uuid";
 
+import { defaultAnnotationColor } from "../../constants";
 import { History, HistorySnapshot } from "./history";
 import { ImageLayer, Layer, LayerSnapshot } from "./layers";
 import * as layers from "./layers";
@@ -163,7 +164,7 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
     return Object.values(this.layerMap).some((layer) => layer.is3DLayer);
   }
 
-  // DEPRECATED
+  // I/O (DEPRECATED)
   public async importImage(file: File | File[], name?: string) {
     this.layerIds = [];
     this.layerMap = {};
@@ -191,6 +192,7 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
       name || (Array.isArray(file) ? file[0]?.name || "" : file.name);
     const annotationLayer = ImageLayer.fromITKImage(image, this);
     annotationLayer.setIsAnnotation(true);
+    annotationLayer.setColor(defaultAnnotationColor);
     if (
       !isEqual(
         (this.layerMap[this.layerIds[0]] as ImageLayer)?.image?.voxelCount,
