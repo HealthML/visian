@@ -180,8 +180,9 @@ export class Tools
       this.activeTool?.isBrush &&
         this.isCursorOverDrawableArea &&
         !this.isCursorOverFloatingUI &&
-        this.document.activeLayer?.isAnnotation &&
-        this.document.activeLayer.isVisible,
+        this.document.layers.length &&
+        this.document.layers[0].isAnnotation &&
+        this.document.layers[0].isVisible,
     );
   }
 
