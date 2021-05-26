@@ -54,8 +54,8 @@ export class AtlasCommand
   }
 
   private onUndoOrRedo(imageLayer?: IImageLayer) {
-    this.document.tools.currentSliceChanged();
-    this.document.editor.sliceRenderer?.lazyRender();
+    this.document.tools.handleCurrentSliceChanged();
+    this.document.sliceRenderer?.lazyRender();
     imageLayer?.recomputeSliceMarkers();
   }
 

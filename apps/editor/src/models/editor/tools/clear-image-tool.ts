@@ -39,7 +39,7 @@ export class ClearImageTool<
       ),
     );
 
-    this.toolRenderer.currentSliceChanged();
+    this.toolRenderer.handleCurrentSliceChanged();
 
     imageLayer.clearSliceMarkers();
 

@@ -116,5 +116,5 @@ export interface ITools<N extends string> {
   setIsNavigationDragged(value: boolean): void;
   setIsDrawing(value: boolean): void;
 
-  currentSliceChanged(): void;
+  handleCurrentSliceChanged(): void;
 }

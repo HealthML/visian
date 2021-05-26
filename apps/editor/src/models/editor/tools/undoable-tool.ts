@@ -54,7 +54,7 @@ export class UndoableTool<N extends string> extends Tool<N> {
       this.oldSliceData = undefined;
 
       imageLayer.recomputeSliceMarkers(viewType, slice, isDeleteOperation);
-      // TODO: Trigger persist
+      this.document.requestSave();
     });
   }
 }

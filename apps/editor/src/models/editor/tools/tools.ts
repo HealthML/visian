@@ -262,8 +262,8 @@ export class Tools
     this.isDrawing = value;
   }
 
-  public currentSliceChanged() {
-    this.toolRenderer.currentSliceChanged();
+  public handleCurrentSliceChanged() {
+    this.toolRenderer.handleCurrentSliceChanged();
   }
 
   protected resetBrushSettings(): void {

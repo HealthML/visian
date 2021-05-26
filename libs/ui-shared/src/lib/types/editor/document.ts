@@ -1,7 +1,6 @@
 import type * as THREE from "three";
 
 import type { ISliceRenderer } from "../rendering";
-import type { IEditor } from "./editor";
 import type { IHistory } from "./history";
 import type { ILayer } from "./layers";
 import type { ITools } from "./tools";
@@ -19,9 +18,6 @@ export interface IDocument {
    * used.
    */
   title?: string;
-
-  /** The editor this document is part of. */
-  editor: IEditor;
 
   /** The layer that is currently selected for editing. */
   activeLayer?: Reference<ILayer>;
@@ -56,4 +52,13 @@ export interface IDocument {
 
   /** Deletes a layer from the document. */
   deleteLayer(idOrLayer: string | ILayer): void;
+
+  /** Persists the document immediately. */
+  save(): Promise<void>;
+
+  /**
+   * Requests the document to be saved at some point.
+   * This may be delayed until the next auto-save.
+   */
+  requestSave(): Promise<void>;
 }

@@ -66,8 +66,8 @@ export class Editor implements IEditor, ISerializable<EditorSnapshot> {
   public applySnapshot(snapshot?: Partial<EditorSnapshot>): Promise<void> {
     this.setActiveDocument(
       snapshot?.activeDocument
-        ? new Document(snapshot.activeDocument, this)
-        : new Document(undefined, this),
+        ? new Document(snapshot.activeDocument, this, this.context)
+        : new Document(undefined, this, this.context),
     );
     return Promise.resolve();
   }

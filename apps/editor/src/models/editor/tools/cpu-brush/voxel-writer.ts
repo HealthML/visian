@@ -58,9 +58,9 @@ export class VoxelWriter<N extends string> extends Tool<N> {
         this.sliceNumber = undefined;
       }
 
-      this.document.tools.currentSliceChanged();
+      this.document.tools.handleCurrentSliceChanged();
       imageLayer.recomputeSliceMarkers(viewType, slice, isDeleteOperation);
-      // TODO: Trigger persist
+      this.document.requestSave();
     });
   }
 

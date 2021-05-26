@@ -189,11 +189,7 @@ export class SliceRenderer implements IDisposable, ISliceRenderer {
 
     if (!this.editor.activeDocument) return;
 
-    setMainCameraPlanes(
-      this.editor.activeDocument,
-      this.mainCanvas,
-      this.mainCamera,
-    );
+    setMainCameraPlanes(this.editor, this.mainCanvas, this.mainCamera);
 
     this.eagerRender();
   };
@@ -201,11 +197,7 @@ export class SliceRenderer implements IDisposable, ISliceRenderer {
   private updateCamera = () => {
     if (!this.editor.activeDocument) return;
 
-    setMainCameraPlanes(
-      this.editor.activeDocument,
-      this.mainCanvas,
-      this.mainCamera,
-    );
+    setMainCameraPlanes(this.editor, this.mainCanvas, this.mainCamera);
     this.lazyRender();
   };
 

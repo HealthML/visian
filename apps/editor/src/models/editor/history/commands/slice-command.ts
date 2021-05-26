@@ -60,8 +60,8 @@ export class SliceCommand
   }
 
   private onUndoOrRedo(imageLayer?: IImageLayer) {
-    this.document.tools.currentSliceChanged();
-    this.document.editor.sliceRenderer?.lazyRender();
+    this.document.tools.handleCurrentSliceChanged();
+    this.document.sliceRenderer?.lazyRender();
     imageLayer?.recomputeSliceMarkers(this.viewType, this.slice);
   }
 

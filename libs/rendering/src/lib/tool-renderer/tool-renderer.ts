@@ -46,7 +46,7 @@ export class ToolRenderer implements IRenderLoopSubscriber {
           if (!params.annotation) return;
 
           this.resizeRenderTargets();
-          this.currentSliceChanged(params);
+          this.handleCurrentSliceChanged(params);
         },
         { fireImmediately: true },
       ),
@@ -58,7 +58,7 @@ export class ToolRenderer implements IRenderLoopSubscriber {
               () => new THREE.WebGLRenderTarget(1, 1),
             );
             this.resizeRenderTargets();
-            this.currentSliceChanged();
+            this.handleCurrentSliceChanged();
           } else {
             this.renderTargets = [];
           }
@@ -85,7 +85,7 @@ export class ToolRenderer implements IRenderLoopSubscriber {
    * Needs to be called whenever the current slice of the active annotation is
    * changed by some other source than this tool renderer.
    */
-  public currentSliceChanged = (
+  public handleCurrentSliceChanged = (
     { mainViewType, selectedSlice, annotation } = {
       mainViewType: this.document.viewport2D.mainViewType,
       selectedSlice: this.document.viewSettings.selectedVoxel.getFromView(

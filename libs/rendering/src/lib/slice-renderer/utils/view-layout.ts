@@ -1,4 +1,4 @@
-import { IDocument, IEditor, IImageLayer } from "@visian/ui-shared";
+import { IEditor, IImageLayer } from "@visian/ui-shared";
 import { Image, ViewType } from "@visian/utils";
 import * as THREE from "three";
 
@@ -73,16 +73,19 @@ export const getMainViewPaddings = (editor: IEditor) => {
 };
 
 export const setMainCameraPlanes = (
-  document: IDocument,
+  editor: IEditor,
   mainCanvas: HTMLCanvasElement,
   mainCamera: THREE.OrthographicCamera,
 ) => {
+  const document = editor.activeDocument;
+  if (!document) return;
+
   const [
     topPadding,
     rightPadding,
     bottomPadding,
     leftPadding,
-  ] = getMainViewPaddings(document.editor);
+  ] = getMainViewPaddings(editor);
 
   const sizeBetweenOverlays = {
     x: mainCanvas.width - (leftPadding + rightPadding),

@@ -133,7 +133,7 @@ export const setUpHotKeys = (store: RootStore): IDisposer => {
   // Save & Export
   hotkeys("ctrl+s", (event) => {
     event.preventDefault();
-    store.persistImmediately();
+    store.editor.activeDocument?.save();
   });
   hotkeys("ctrl+e", (event) => {
     event.preventDefault();

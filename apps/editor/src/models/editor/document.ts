@@ -20,6 +20,7 @@ import { ToolName, Tools, ToolsSnapshot } from "./tools";
 import { ViewSettings, ViewSettingsSnapshot } from "./view-settings";
 import { Viewport2D, Viewport2DSnapshot } from "./viewport-2d";
 import { Viewport3D, Viewport3DSnapshot } from "./viewport-3d";
+import { StoreContext } from "../types";
 
 export const layerMap: {
   [kind: string]: ValueType<typeof layers>;
@@ -65,7 +66,11 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
 
   public markers: Markers = new Markers(this);
 
-  constructor(snapshot: DocumentSnapshot | undefined, public editor: IEditor) {
+  constructor(
+    snapshot: DocumentSnapshot | undefined,
+    protected editor: IEditor,
+    protected context?: StoreContext,
+  ) {
     this.id = snapshot?.id || uuidv4();
     this.titleOverride = snapshot?.titleOverride;
     this.activeLayerId = snapshot?.activeLayerId;
@@ -87,7 +92,6 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
       "titleOverride" | "activeLayerId" | "layerMap" | "layerIds"
     >(this, {
       id: observable,
-      editor: observable,
       titleOverride: observable,
       activeLayerId: observable,
       layerMap: observable,
@@ -206,6 +210,15 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
     if (this.layerIds.length > 1) this.deleteLayer(this.layerIds[0]);
     this.addLayer(annotationLayer);
     this.setActiveLayer(annotationLayer);
+  }
+
+  // I/O
+  public async save(): Promise<void> {
+    return this.context?.persistImmediately();
+  }
+
+  public async requestSave(): Promise<void> {
+    return this.context?.persist();
   }
 
   // Proxies
