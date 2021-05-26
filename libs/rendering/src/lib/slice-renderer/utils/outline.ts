@@ -27,8 +27,14 @@ export class Outline extends THREE.Line implements IDisposable, IOutline {
   }
 
   private updateScale = () => {
+    if (
+      !this.editor.activeDocument ||
+      this.editor.activeDocument.layers.length < 2
+    ) {
+      return;
+    }
+
     const { image } = this.editor.activeDocument?.layers[0] as IImageLayer;
-    if (!image) return;
 
     const [widthAxis, heightAxis] = getPlaneAxes(this.viewType);
 

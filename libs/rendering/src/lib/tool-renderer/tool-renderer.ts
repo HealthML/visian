@@ -46,8 +46,7 @@ export class ToolRenderer implements IRenderLoopSubscriber {
           if (!params.annotation) return;
 
           this.resizeRenderTargets();
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          this.currentSliceChanged(params as any);
+          this.currentSliceChanged(params);
         },
         { fireImmediately: true },
       ),
@@ -92,8 +91,9 @@ export class ToolRenderer implements IRenderLoopSubscriber {
       selectedSlice: this.document.viewSettings.selectedVoxel.getFromView(
         this.document.viewport2D.mainViewType,
       ),
-      annotation: (this.document.layers[0] as IImageLayer)
-        .image as RenderedImage,
+      annotation: this.document.layers.length
+        ? ((this.document.layers[0] as IImageLayer).image as RenderedImage)
+        : undefined,
     },
   ) => {
     if (!annotation) return;
@@ -189,6 +189,8 @@ export class ToolRenderer implements IRenderLoopSubscriber {
   }
 
   private resizeRenderTargets = () => {
+    if (!this.document.layers.length) return;
+
     const { voxelCount } = (this.document.layers[0] as IImageLayer).image;
     if (!voxelCount) return;
 

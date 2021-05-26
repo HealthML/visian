@@ -90,16 +90,20 @@ export class Slice extends THREE.Group implements IDisposable {
       autorun(this.updateScale),
       autorun(this.updateOffset),
       autorun(() => {
-        this.annotationMesh.visible = Boolean(
-          this.editor.activeDocument?.layers[0].isVisible,
-        );
-        this.editor.sliceRenderer?.lazyRender();
+        if (!editor.activeDocument || !editor.activeDocument.layers.length) {
+          return;
+        }
+
+        this.annotationMesh.visible = editor.activeDocument.layers[0].isVisible;
+        editor.sliceRenderer?.lazyRender();
       }),
       autorun(() => {
-        this.imageMesh.visible = Boolean(
-          this.editor.activeDocument?.layers[1].isVisible,
-        );
-        this.editor.sliceRenderer?.lazyRender();
+        if (!editor.activeDocument || editor.activeDocument.layers.length < 2) {
+          return;
+        }
+
+        this.imageMesh.visible = editor.activeDocument.layers[1].isVisible;
+        editor.sliceRenderer?.lazyRender();
       }),
     );
   }

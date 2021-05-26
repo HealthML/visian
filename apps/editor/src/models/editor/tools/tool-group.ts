@@ -50,7 +50,7 @@ export class ToolGroup<N extends string>
         ? nameOrTool
         : nameOrTool.name
       : this.toolNames[0];
-    this.document.tools.setActiveTool(nameOrTool);
+    this.document.tools?.setActiveTool(nameOrTool);
   }
 
   // Serialization

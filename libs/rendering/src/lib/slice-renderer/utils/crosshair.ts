@@ -60,8 +60,14 @@ export class Crosshair extends THREE.Group implements IDisposable {
   }
 
   private updateTarget = () => {
-    const { image } = this.editor.activeDocument?.layers[1] as IImageLayer;
-    if (!image || !this.editor.activeDocument) return;
+    if (
+      !this.editor.activeDocument ||
+      this.editor.activeDocument.layers.length < 2
+    ) {
+      return;
+    }
+
+    const { image } = this.editor.activeDocument.layers[1] as IImageLayer;
 
     const x =
       1 -
@@ -81,10 +87,16 @@ export class Crosshair extends THREE.Group implements IDisposable {
   };
 
   private updateVisibility = () => {
-    this.visible = Boolean(
-      (this.editor.activeDocument?.layers[1] as IImageLayer).is3DLayer &&
-        this.editor.activeDocument?.viewport2D.showSideViews,
-    );
+    if (
+      !this.editor.activeDocument ||
+      this.editor.activeDocument.layers.length < 2
+    ) {
+      return;
+    }
+
+    this.visible =
+      (this.editor.activeDocument.layers[1] as IImageLayer).is3DLayer &&
+      this.editor.activeDocument.viewport2D.showSideViews;
   };
 }
 

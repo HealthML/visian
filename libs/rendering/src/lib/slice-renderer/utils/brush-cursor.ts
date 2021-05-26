@@ -55,8 +55,14 @@ export class BrushCursor extends THREE.LineSegments implements IDisposable {
   }
 
   private updateScale = () => {
-    const { image } = this.editor.activeDocument?.layers[1] as IImageLayer;
-    if (!image) return;
+    if (
+      !this.editor.activeDocument ||
+      this.editor.activeDocument.layers.length < 2
+    ) {
+      return;
+    }
+
+    const { image } = this.editor.activeDocument.layers[1] as IImageLayer;
 
     const [widthAxis, heightAxis] = getPlaneAxes(this.viewType);
 

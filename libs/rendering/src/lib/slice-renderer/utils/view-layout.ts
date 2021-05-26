@@ -42,7 +42,9 @@ export const getMainViewPaddings = (editor: IEditor) => {
     : 0;
 
   const sliceSliderPadding =
-    (editor.activeDocument?.layers[1] as IImageLayer).is3DLayer &&
+    editor.activeDocument &&
+    editor.activeDocument.layers.length &&
+    (editor.activeDocument.layers[1] as IImageLayer).is3DLayer &&
     sliceSliderRect &&
     // sliceSliderRect.right can be 0, when the slice slider isn't rendered.
     sliceSliderRect.right > 0
@@ -88,7 +90,10 @@ export const setMainCameraPlanes = (
   };
 
   const availableAspectRatio = sizeBetweenOverlays.x / sizeBetweenOverlays.y;
-  const { image } = document.layers[1] as IImageLayer;
+  const image =
+    document.layers.length < 2
+      ? undefined
+      : (document.layers[1] as IImageLayer).image;
   const spriteAspectRatio = image ? getSpriteAspectRatio(image) : 1;
 
   const spriteEdgePlanes = { left: 0, right: 0, bottom: 0, top: 0 };

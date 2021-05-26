@@ -110,9 +110,12 @@ export class ImageSliceMaterial extends SliceMaterial {
         editor.sliceRenderer?.lazyRender();
       }),
       autorun(() => {
+        if (!editor.activeDocument || editor.activeDocument.layers.length < 2) {
+          return;
+        }
         (this.uniforms.uForegroundColor.value as THREE.Color).set(
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          color(editor.activeDocument?.layers[1].color as any)({
+          color(editor.activeDocument.layers[1].color as any)({
             theme: editor.theme,
           }),
         );
@@ -135,6 +138,10 @@ export class AnnotationSliceMaterial extends SliceMaterial {
 
     this.disposers.push(
       autorun(() => {
+        if (!editor.activeDocument || editor.activeDocument.layers.length < 1) {
+          return;
+        }
+
         (this.uniforms.uAnnotationColor.value as THREE.Color).set(
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           color(editor.activeDocument?.layers[0].color as any)({
@@ -144,6 +151,10 @@ export class AnnotationSliceMaterial extends SliceMaterial {
         editor.sliceRenderer?.lazyRender();
       }),
       autorun(() => {
+        if (!editor.activeDocument || editor.activeDocument.layers.length < 2) {
+          return;
+        }
+
         this.uniforms.uAnnotationOpacity.value =
           editor.activeDocument?.layers[0].opacity;
         editor.sliceRenderer?.lazyRender();

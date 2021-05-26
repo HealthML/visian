@@ -90,8 +90,10 @@ export class SliceRenderer implements IDisposable, ISliceRenderer {
     this.disposers.push(
       reaction(
         () =>
-          (editor.activeDocument?.layers[1] as IImageLayer)
-            .image as RenderedImage,
+          editor.activeDocument && editor.activeDocument.layers.length > 1
+            ? ((editor.activeDocument.layers[1] as IImageLayer)
+                .image as RenderedImage)
+            : undefined,
         (image?: RenderedImage, oldImage?: RenderedImage) => {
           if (oldImage) {
             this.unsubscribeFromRenderLoop(oldImage);
@@ -108,8 +110,10 @@ export class SliceRenderer implements IDisposable, ISliceRenderer {
       ),
       reaction(
         () =>
-          (editor.activeDocument?.layers[0] as IImageLayer)
-            .image as RenderedImage,
+          editor.activeDocument && editor.activeDocument.layers.length
+            ? ((editor.activeDocument?.layers[0] as IImageLayer)
+                .image as RenderedImage)
+            : undefined,
         (image?: RenderedImage, oldImage?: RenderedImage) => {
           if (oldImage) {
             this.unsubscribeFromRenderLoop(oldImage);
@@ -308,7 +312,11 @@ export class SliceRenderer implements IDisposable, ISliceRenderer {
       ViewType.Transverse,
     preview = false,
   ) {
-    if (!this.editor.activeDocument) return;
+    if (
+      !this.editor.activeDocument ||
+      this.editor.activeDocument.layers.length < 2
+    )
+      return;
 
     const { image } = this.editor.activeDocument.layers[1] as IImageLayer;
     if (image) return;
