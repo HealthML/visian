@@ -259,6 +259,10 @@ export class Tools
     this.isDrawing = value;
   }
 
+  public currentSliceChanged() {
+    this.toolRenderer.currentSliceChanged();
+  }
+
   // Serialization
   public toJSON(): ToolsSnapshot<ToolName> {
     return {

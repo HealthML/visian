@@ -72,11 +72,10 @@ export class History
   public redo = (): void => {
     if (!this.canRedo) return;
 
-    // As we can redo, we can be sure that there is at least the current item
+    // As we can redo, we can be sure that we can navigate forward
     // in the stack.
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    this.undoRedoStack.getCurrent()!.redo();
-    this.undoRedoStack.navigateForward();
+    this.undoRedoStack.navigateForward()!.redo();
   };
 
   public addCommand(command: IUndoRedoCommand): void {

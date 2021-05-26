@@ -41,8 +41,7 @@ export class AtlasCommand
       | undefined;
     imageLayer?.setAtlas?.(this.oldAtlas);
 
-    // TODO: Trigger slice change listener
-    imageLayer?.recomputeSliceMarkers();
+    this.onUndoOrRedo(imageLayer);
   }
 
   public redo(): void {
@@ -51,7 +50,12 @@ export class AtlasCommand
       | undefined;
     imageLayer?.setAtlas?.(this.newAtlas);
 
-    // TODO: Trigger slice change listener
+    this.onUndoOrRedo(imageLayer);
+  }
+
+  private onUndoOrRedo(imageLayer?: IImageLayer) {
+    this.document.tools.currentSliceChanged();
+    this.document.editor.sliceRenderer?.lazyRender();
     imageLayer?.recomputeSliceMarkers();
   }
 

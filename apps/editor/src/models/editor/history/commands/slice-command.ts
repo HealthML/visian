@@ -47,8 +47,7 @@ export class SliceCommand
       | undefined;
     imageLayer?.setSlice?.(this.viewType, this.slice, this.oldSliceData);
 
-    // TODO: Trigger slice change listener
-    imageLayer?.recomputeSliceMarkers(this.viewType, this.slice);
+    this.onUndoOrRedo(imageLayer);
   }
 
   public redo(): void {
@@ -57,7 +56,12 @@ export class SliceCommand
       | undefined;
     imageLayer?.setSlice?.(this.viewType, this.slice, this.newSliceData);
 
-    // TODO: Trigger slice change listener
+    this.onUndoOrRedo(imageLayer);
+  }
+
+  private onUndoOrRedo(imageLayer?: IImageLayer) {
+    this.document.tools.currentSliceChanged();
+    this.document.editor.sliceRenderer?.lazyRender();
     imageLayer?.recomputeSliceMarkers(this.viewType, this.slice);
   }
 
