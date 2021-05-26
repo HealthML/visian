@@ -150,9 +150,11 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
       : undefined;
   };
 
-  public addLayer = (layer: Layer): void => {
-    this.layerMap[layer.id] = layer;
-    this.layerIds.unshift(layer.id);
+  public addLayer = (...newLayers: Layer[]): void => {
+    newLayers.forEach((layer) => {
+      this.layerMap[layer.id] = layer;
+      this.layerIds.unshift(layer.id);
+    });
   };
 
   public deleteLayer = (idOrLayer: string | ILayer): void => {
@@ -178,13 +180,11 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
       name || (Array.isArray(file) ? file[0]?.name || "" : file.name);
     const imageLayer = ImageLayer.fromITKImage(image, this);
 
-    this.addLayer(imageLayer);
-
     const annotationLayer = ImageLayer.fromNewAnnotationForImage(
       imageLayer.image,
       this,
     );
-    this.addLayer(annotationLayer);
+    this.addLayer(imageLayer, annotationLayer);
     this.setActiveLayer(annotationLayer);
   }
 
