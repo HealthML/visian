@@ -1,7 +1,8 @@
 import type { Vector, ViewType } from "@visian/utils";
 import type { Matrix } from "three";
+import { IParameter } from "./parameters";
 
-import type { ViewMode } from "./types";
+import type { Reference, ViewMode } from "./types";
 
 /** View settings affecting the whole document. */
 export interface IViewSettings {
@@ -45,8 +46,42 @@ export interface IViewport2D {
   offset: Vector;
 }
 
+export type ShadingMode = "none" | "phong" | "lao";
+
+export interface TransferFunction {
+  /**
+   * The transfer function's name.
+   * A (locally) unique identifier.
+   */
+  name: string;
+
+  /**
+   * The transfer function's label.
+   * A user-facing display name.
+   */
+  label?: string;
+  /**
+   * The label's translation key.
+   * If set, overrides the `label`.
+   */
+  labelTx?: string;
+
+  /** This tool's parameters. */
+  params: { [name: string]: IParameter };
+}
+
 /** View settings for the 3D viewport. */
 export interface IViewport3D {
+  /** Indicates if the user is currently in AR or VR. */
+  isInXR: boolean;
+
   /** The 3D camera's world matrix. */
   cameraMatrix: Matrix;
+
+  /** The volumetric rendering opacity, scales the density of every voxel. */
+  opacity: number;
+  shadingMode: ShadingMode;
+
+  activeTransferFunction: Reference<TransferFunction>;
+  transferFunctions: { [key: string]: TransferFunction };
 }
