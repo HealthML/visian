@@ -158,6 +158,7 @@ export class RootStore implements ISerializable<RootSnapshot> {
     localStorage.clear();
     await this.config.storageBackend?.clear();
 
+    this.setIsDirty(false);
     window.location.reload();
   };
 }
