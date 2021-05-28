@@ -91,12 +91,12 @@ export interface IViewport2D {
 
 export type ShadingMode = "none" | "phong" | "lao";
 
-export interface TransferFunction {
+export interface ITransferFunction<N extends string> {
   /**
    * The transfer function's name.
    * A (locally) unique identifier.
    */
-  name: string;
+  name: N;
 
   /**
    * The transfer function's label.
@@ -114,7 +114,7 @@ export interface TransferFunction {
 }
 
 /** View settings for the 3D viewport. */
-export interface IViewport3D {
+export interface IViewport3D<N extends string> {
   /** Indicates if the user is currently in AR or VR. */
   isInXR: boolean;
 
@@ -125,6 +125,14 @@ export interface IViewport3D {
   opacity: number;
   shadingMode: ShadingMode;
 
-  activeTransferFunction: Reference<TransferFunction>;
-  transferFunctions: { [key: string]: TransferFunction };
+  activeTransferFunction?: Reference<ITransferFunction<N>>;
+  transferFunctions: Record<N, ITransferFunction<N>>;
+
+  setCameraMatrix(value?: Matrix4): void;
+  setActiveTransferFunction(
+    nameOrTransferFunction?: N | ITransferFunction<N>,
+  ): void;
+  setIsInXR(value?: boolean): void;
+  setOpacity(value?: number): void;
+  setShadingMode(value?: ShadingMode): void;
 }

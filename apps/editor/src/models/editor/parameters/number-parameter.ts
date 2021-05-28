@@ -10,6 +10,7 @@ export interface NumberParameterConfig extends ParameterConfig<number> {
   extendBeyondMinMax?: boolean;
 }
 
+// TODO: Histogram.
 export class NumberParameter
   extends Parameter<number>
   implements INumberParameter {

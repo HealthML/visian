@@ -17,9 +17,15 @@ import { ImageLayer, Layer, LayerSnapshot } from "./layers";
 import * as layers from "./layers";
 import { Markers } from "./markers";
 import { ToolName, Tools, ToolsSnapshot } from "./tools";
-import { ViewSettings, ViewSettingsSnapshot } from "./view-settings";
-import { Viewport2D, Viewport2DSnapshot } from "./viewport-2d";
-import { Viewport3D, Viewport3DSnapshot } from "./viewport-3d";
+import {
+  TransferFunctionName,
+  Viewport2D,
+  Viewport2DSnapshot,
+  Viewport3D,
+  Viewport3DSnapshot,
+  ViewSettings,
+  ViewSettingsSnapshot,
+} from "./view-settings";
 import { StoreContext } from "../types";
 
 export const layerMap: {
@@ -41,7 +47,7 @@ export interface DocumentSnapshot {
 
   viewSettings: ViewSettingsSnapshot;
   viewport2D: Viewport2DSnapshot;
-  viewport3D: Viewport3DSnapshot;
+  viewport3D: Viewport3DSnapshot<TransferFunctionName>;
 
   tools: ToolsSnapshot<ToolName>;
 }
