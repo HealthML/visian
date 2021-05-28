@@ -128,11 +128,11 @@ export interface IViewport3D<N extends string> {
   activeTransferFunction?: Reference<ITransferFunction<N>>;
   transferFunctions: Record<N, ITransferFunction<N>>;
 
+  setIsInXR(value?: boolean): void;
   setCameraMatrix(value?: Matrix4): void;
+  setOpacity(value?: number): void;
+  setShadingMode(value?: ShadingMode): void;
   setActiveTransferFunction(
     nameOrTransferFunction?: N | ITransferFunction<N>,
   ): void;
-  setIsInXR(value?: boolean): void;
-  setOpacity(value?: number): void;
-  setShadingMode(value?: ShadingMode): void;
 }

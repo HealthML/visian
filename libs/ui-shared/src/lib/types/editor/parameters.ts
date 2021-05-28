@@ -135,7 +135,7 @@ export interface IColorParameter extends IParameter<string> {
  * A layer parameter, typically displayed as a layer selection drop-down.
  * The layer is stored by its id.
  */
-export interface ILayerParameter extends IParameter<string> {
+export interface ILayerParameter extends IParameter<string | undefined> {
   kind: "layer";
 
   /**

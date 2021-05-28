@@ -23,6 +23,7 @@ export type TransferFunctionName =
 
 export interface Viewport3DSnapshot<N extends string> {
   cameraMatrix: number[];
+
   opacity: number;
   shadingMode: ShadingMode;
 
@@ -128,11 +129,11 @@ export class Viewport3D
   }
 
   public reset = (): void => {
-    this.setCameraMatrix();
-    this.setActiveTransferFunction();
     this.setIsInXR();
+    this.setCameraMatrix();
     this.setOpacity();
     this.setShadingMode();
+    this.setActiveTransferFunction();
   };
 
   // Serialization
@@ -151,15 +152,19 @@ export class Viewport3D
   public applySnapshot(
     snapshot: Partial<Viewport3DSnapshot<TransferFunctionName>>,
   ): Promise<void> {
-    this.setActiveTransferFunction(snapshot?.activeTransferFunctionName);
+    this.setIsInXR();
     this.setCameraMatrix(
       snapshot.cameraMatrix
         ? new Matrix4().fromArray(snapshot.cameraMatrix)
         : undefined,
     );
-    this.setIsInXR();
     this.setOpacity(snapshot?.opacity);
     this.setShadingMode(snapshot?.shadingMode);
+    this.setActiveTransferFunction(snapshot?.activeTransferFunctionName);
+    snapshot?.transferFunctions?.forEach((toolSnapshot) => {
+      const transferFunction = this.transferFunctions[toolSnapshot.name];
+      if (transferFunction) transferFunction.applySnapshot(toolSnapshot);
+    });
 
     return Promise.resolve();
   }
