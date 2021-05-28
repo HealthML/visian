@@ -1,4 +1,5 @@
 import type { TooltipPosition } from "../../components";
+import { ILayer } from "./layers";
 import type { ScaleType } from "./types";
 
 /** A generic setting that corresponds to a (procedurally rendered) UI control. */
@@ -116,4 +117,11 @@ export interface IColorParameter extends IParameter<string> {
  */
 export interface ILayerParameter extends IParameter<string> {
   kind: "layer";
+
+  /**
+   * An optional filter specifiying what kind of layers can be selected.
+   * Could, i.e., be used to only allow annotations to be selected.
+   * Defaults to allowing all layers.
+   */
+  filter?: (layer: ILayer) => boolean;
 }
