@@ -1,4 +1,13 @@
-export interface IUndoRedoCommand {
+import type { ISerializable } from "@visian/utils";
+
+export interface IUndoRedoCommandSnapshot {
+  kind: string;
+}
+
+export interface IUndoRedoCommand
+  extends ISerializable<IUndoRedoCommandSnapshot> {
+  kind: string;
+
   /** Rolls back to the state before the command. */
   undo(): void;
   /** Produces the state after the command. */

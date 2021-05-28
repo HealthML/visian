@@ -25,7 +25,7 @@ const defaultFormatLabel = (values: number[]) =>
 const isRangeMarker = (marker: {
   color?: string;
   value: number | [number, number];
-}): marker is { color?: string; value: [number, number] } =>
+}): marker is { context?: string; color?: string; value: [number, number] } =>
   Array.isArray(marker.value);
 
 /** A custom slider component built to work well with touch input. */
@@ -224,7 +224,7 @@ export const Slider: React.FC<SliderProps> = (props) => {
       {expandedMarkers?.map((marker) =>
         isRangeMarker(marker) ? (
           <SliderRangeMarker
-            key={`${marker.color}:${marker.value[0]}-${marker.value[1]}`}
+            key={`${marker.context}::${marker.color}:${marker.value[0]}-${marker.value[1]}`}
             from={getSliderRelativePosition(marker.value[0])}
             to={getSliderRelativePosition(marker.value[1])}
             isVertical={isVertical}
@@ -239,7 +239,7 @@ export const Slider: React.FC<SliderProps> = (props) => {
           />
         ) : (
           <SliderMarker
-            key={`${marker.color}:${marker.value}`}
+            key={`${marker.context}::${marker.color}:${marker.value}`}
             position={getSliderRelativePosition(
               (marker.value as unknown) as number,
             )}

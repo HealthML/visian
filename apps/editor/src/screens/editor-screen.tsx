@@ -1,10 +1,10 @@
 import { AbsoluteCover, Screen, useIsDraggedOver } from "@visian/ui-shared";
+import { SliceRenderer } from "@visian/rendering";
 import { observer } from "mobx-react-lite";
 import React, { useEffect, useRef } from "react";
 
 import { useStore } from "../app/root-store";
 import { MainView, UIOverlay } from "../components/editor";
-import { SliceRenderer } from "../rendering";
 
 export const EditorScreen: React.FC = observer(() => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);

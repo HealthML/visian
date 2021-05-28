@@ -75,6 +75,7 @@ export class Vector implements GenericVector {
         normalize: action,
         setLength: action,
         lerp: action,
+        map: action,
         setFromView: action,
       });
     }
@@ -301,6 +302,11 @@ export class Vector implements GenericVector {
     return this;
   }
 
+  public map(mapper: (value: number, index: number) => number) {
+    this.data = this.data.map(mapper);
+    return this;
+  }
+
   public equals(vector: GenericVector) {
     if (vector.size !== this.size) return false;
     return !~this.data.findIndex(
@@ -332,6 +338,7 @@ export class Vector implements GenericVector {
     return toJS(this.data);
   }
 
+  // Special extensions
   public getFromView(viewType: ViewType) {
     return this[getOrthogonalAxis(viewType)];
   }

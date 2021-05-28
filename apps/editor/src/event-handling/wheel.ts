@@ -3,51 +3,63 @@ import {
   offsetOriginByZoomToCursorDelta,
   WheelInteractionType,
 } from "@visian/ui-shared";
-import { IDisposer } from "@visian/utils";
+import { IDisposer, Vector } from "@visian/utils";
 
 import type { RootStore } from "../models";
 
 export const setUpWheelHandling = (store: RootStore): IDisposer => {
   const wheelHandler = (event: WheelEvent) => {
     event.preventDefault();
-    if (!store.editor.sliceRenderer) return;
+    if (!(store.editor.sliceRenderer && store.editor.activeDocument)) {
+      return;
+    }
 
     if (event.ctrlKey || event.metaKey) {
-      const startZoom = store.editor.viewSettings.zoomLevel;
+      const startZoom = store.editor.activeDocument.viewport2D.zoomLevel;
 
       const interactionType = getWheelInteractionType(event);
       switch (interactionType) {
         case WheelInteractionType.Up:
-          store.editor.viewSettings.zoomIn();
+          store.editor.activeDocument.viewport2D.zoomIn();
           break;
 
         case WheelInteractionType.Down:
-          store.editor.viewSettings.zoomOut();
+          store.editor.activeDocument.viewport2D.zoomOut();
           break;
       }
 
-      const scaleFactor = store.editor.viewSettings.zoomLevel / startZoom;
+      const scaleFactor =
+        store.editor.activeDocument.viewport2D.zoomLevel / startZoom;
       const transformOrigin = store.editor.sliceRenderer.getMainViewScreenPosition(
-        store.editor.viewSettings.offset,
+        store.editor.activeDocument.viewport2D.offset,
       );
-      store.editor.viewSettings.setOffset(
-        store.editor.sliceRenderer.getMainViewWebGLPosition(
-          offsetOriginByZoomToCursorDelta(event, transformOrigin, scaleFactor),
+      store.editor.activeDocument.viewport2D.setOffset(
+        Vector.fromObject(
+          store.editor.sliceRenderer.getWebGLPosition(
+            offsetOriginByZoomToCursorDelta(
+              event,
+              transformOrigin,
+              scaleFactor,
+            ),
+          ),
         ),
       );
     } else if (event.altKey) {
       const interactionType = getWheelInteractionType(event);
       switch (interactionType) {
         case WheelInteractionType.Up:
-          store.editor.tools.decrementBrushSize();
+          store.editor.activeDocument.tools.decrementBrushSize();
           break;
 
         case WheelInteractionType.Down:
-          store.editor.tools.incrementBrushSize();
+          store.editor.activeDocument.tools.incrementBrushSize();
           break;
       }
     } else {
-      store.editor.viewSettings.stepSelectedSlice(-Math.sign(event.deltaY));
+      store.editor.activeDocument.viewport2D.stepSelectedSlice(
+        undefined,
+        -Math.sign(event.deltaY),
+      );
     }
   };
 

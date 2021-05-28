@@ -11,7 +11,14 @@ export const storageBackend = new LocalForageBackend(
 
 export const setupRootStore = async () => {
   const store = new RootStore({ storageBackend });
-  await store.rehydrate();
+  try {
+    await store.rehydrate();
+  } catch (err) {
+    // TODO: Resolve old data models after breaking changes more gracefully
+    // eslint-disable-next-line no-alert
+    window.alert("Data model outdated. Reset required.");
+    await store.destroy();
+  }
 
   window.addEventListener("beforeunload", (event) => {
     if (store.isDirty) {

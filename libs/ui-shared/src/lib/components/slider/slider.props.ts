@@ -1,14 +1,10 @@
 import type React from "react";
+import { MarkerConfig } from "../../types";
 import type {
   SerializationMethod,
   SliderConfig,
   SliderVerticalitySettings,
 } from "./types";
-
-export type MarkerConfig =
-  | number
-  | [number, number]
-  | { color?: string; value: number | [number, number] };
 
 export interface ThumbProps extends SliderVerticalitySettings {
   /**

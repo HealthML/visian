@@ -11,8 +11,8 @@ export const maxUndoRedoSteps = 20;
 
 export const errorDisplayDuration = 12000;
 
-/** The amount of time the brush cursor preview is shown (in ms). */
-export const brushSizePreviewTime = 1000;
+export const defaultAnnotationOpacity = 0.5;
+export const defaultAnnotationColor = "Conifer";
 
 // Obfuscated using HEX representation to prevent spam
 export const feedbackMailAddress =

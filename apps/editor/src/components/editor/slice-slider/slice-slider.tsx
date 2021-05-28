@@ -35,15 +35,18 @@ export const SliceSlider: React.FC = observer(() => {
   // Handle Slice Changes
   const setSelectedSlice = useCallback(
     (value: number | number[]) => {
-      store?.editor.viewSettings.setSelectedSlice(value as number);
+      store?.editor.activeDocument?.viewport2D.setSelectedSlice(
+        undefined,
+        value as number,
+      );
     },
     [store],
   );
   const increaseSelectedSlice = useCallback(() => {
-    store?.editor.viewSettings.stepSelectedSlice(1);
+    store?.editor.activeDocument?.viewport2D.stepSelectedSlice(undefined, 1);
   }, [store]);
   const decreaseSelectedSlice = useCallback(() => {
-    store?.editor.viewSettings.stepSelectedSlice(-1);
+    store?.editor.activeDocument?.viewport2D.stepSelectedSlice(undefined, -1);
   }, [store]);
 
   // Control Value Label Visibility
@@ -73,7 +76,7 @@ export const SliceSlider: React.FC = observer(() => {
     duration("autoHideDelay")({ theme }) as number,
   );
 
-  const currentSlice = store?.editor.viewSettings.getSelectedSlice();
+  const currentSlice = store?.editor.activeDocument?.viewport2D.getSelectedSlice();
   const previousSliceRef = useRef(currentSlice);
   useEffect(() => {
     if (previousSliceRef.current !== undefined) {
@@ -85,7 +88,7 @@ export const SliceSlider: React.FC = observer(() => {
   }, [currentSlice]);
 
   // Value Label Formatting
-  const maxSlice = store?.editor.viewSettings.getMaxSlice();
+  const maxSlice = store?.editor.activeDocument?.viewport2D.getMaxSlice();
   const formatValueLabel = useCallback(
     (values: number[]) => {
       if (!maxSlice) return `${Math.trunc(values[0] + 1)}`;
@@ -99,7 +102,7 @@ export const SliceSlider: React.FC = observer(() => {
     [maxSlice],
   );
 
-  return store?.editor.isIn3DMode ? (
+  return store?.editor.activeDocument?.has3DLayers ? (
     <StyledSheet
       ref={ref}
       onPointerEnter={handlePointerEnter}
@@ -114,12 +117,9 @@ export const SliceSlider: React.FC = observer(() => {
         isVertical
         isInverted
         min={0}
-        max={store?.editor.viewSettings.getMaxSlice()}
-        value={store?.editor.viewSettings.getSelectedSlice()}
-        markers={store?.editor.markers.markers.map((marker) => ({
-          color: store?.editor.viewSettings.annotationColor,
-          value: marker,
-        }))}
+        max={store.editor.activeDocument.viewport2D.getMaxSlice()}
+        value={store.editor.activeDocument.viewport2D.getSelectedSlice()}
+        markers={store.editor.activeDocument.viewport2D.markers}
         onChange={setSelectedSlice}
         onStart={handleDragStart}
         onEnd={handleDragEnd}

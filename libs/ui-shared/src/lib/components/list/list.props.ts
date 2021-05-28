@@ -15,7 +15,7 @@ export interface ListItemProps extends React.HTMLAttributes<HTMLDivElement> {
    * Alternatively, an object with a color can be passed to render a palette
    * element.
    */
-  icon?: IconType | { color: string };
+  icon?: IconType | { color: string; icon?: IconType };
   iconRef?: React.ForwardedRef<HTMLDivElement | SVGSVGElement>;
 
   /** If set to `true`, displays the item's icon in an disabled state. */
