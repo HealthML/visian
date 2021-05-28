@@ -38,16 +38,14 @@ void main() {
 
     if(uComponents == 3) {
       gl_FragColor = vec4(
-        vec3(uBrightness)
-          * vec3(pow(texelValue.r, uContrast), pow(texelValue.g, uContrast), pow(texelValue.b, uContrast)),
+        uBrightness * pow(texelValue.rgb, vec3(uContrast)),
         1.0
       );
       return;
     }
     if(uComponents == 4) {
       gl_FragColor = vec4(
-        vec3(uBrightness)
-          * vec3(pow(texelValue.r, uContrast), pow(texelValue.g, uContrast), pow(texelValue.b, uContrast)),
+        uBrightness * pow(texelValue.rgb, vec3(uContrast)),
         texelValue.a
       );
       return;
