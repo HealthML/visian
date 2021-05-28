@@ -66,7 +66,7 @@ export interface TransferFunction {
    */
   labelTx?: string;
 
-  /** This tool's parameters. */
+  /** This transfer function's parameters. */
   params: { [name: string]: IParameter };
 }
 
