@@ -94,7 +94,7 @@ export const defaultDirection = new THREE.Vector3(-1, -1, 1);
  * @param size An array containing the size of the image.
  * @param components The amount of components per voxel.
  * @param toInternal A boolean indicating whether the orientation conversion happens to the internal
- * Visian format needed in the texture atlas. Defaults to true.
+ * VISIAN format needed in the texture atlas. Defaults to true.
  * @returns a TypedArray containing the image data in the expected orientation.
  */
 export const unifyOrientation = (

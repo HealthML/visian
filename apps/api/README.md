@@ -1,4 +1,4 @@
-# Visian API
+# VISIAN API
 
 ## Examples
 
