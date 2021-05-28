@@ -29,7 +29,7 @@ export const EditorScreen: React.FC = observer(() => {
 
   const [isDraggedOver, { onDrop, ...dragListeners }] = useIsDraggedOver();
   return (
-    <Screen {...dragListeners} title="Visian Editor">
+    <Screen {...dragListeners} title="VISIAN Editor">
       <AbsoluteCover>
         <MainView ref={canvasRef} />
       </AbsoluteCover>
