@@ -63,6 +63,16 @@ export interface INumberParameter extends IParameter<number> {
    * the defined [min, max]-range.
    */
   extendBeyondMinMax?: boolean;
+
+  /** An optional method that computes frequency data to display along the slider. */
+  getHistogram?: () => number[] | undefined;
+}
+
+/** A numeric range parameter, typically displayed as a slider with two thumbs. */
+export interface INumberRangeParameter
+  extends Omit<INumberParameter, "kind" | "value" | "setValue">,
+    IParameter<[number, number]> {
+  kind: "number-range";
 }
 
 /** A boolean parameter, typically displayed as a checkbox or switch. */
@@ -90,4 +100,20 @@ export interface IEnumParameter<T> extends IParameter<T> {
 
     value: T;
   }[];
+}
+
+/**
+ * A color parameter, typically displayed as a color picker.
+ * The color is stored as a CSS color string.
+ */
+export interface IColorParameter extends IParameter<string> {
+  kind: "color";
+}
+
+/**
+ * A layer parameter, typically displayed as a layer selection drop-down.
+ * The layer is stored by its id.
+ */
+export interface ILayerParameter extends IParameter<string> {
+  kind: "layer";
 }
