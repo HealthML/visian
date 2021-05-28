@@ -161,9 +161,12 @@ export class Viewport3D
     this.setOpacity(snapshot?.opacity);
     this.setShadingMode(snapshot?.shadingMode);
     this.setActiveTransferFunction(snapshot?.activeTransferFunctionName);
-    snapshot?.transferFunctions?.forEach((toolSnapshot) => {
-      const transferFunction = this.transferFunctions[toolSnapshot.name];
-      if (transferFunction) transferFunction.applySnapshot(toolSnapshot);
+    snapshot?.transferFunctions?.forEach((transferFunctionSnapshot) => {
+      const transferFunction = this.transferFunctions[
+        transferFunctionSnapshot.name
+      ];
+      if (transferFunction)
+        transferFunction.applySnapshot(transferFunctionSnapshot);
     });
 
     return Promise.resolve();
