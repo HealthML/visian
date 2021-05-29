@@ -1,5 +1,5 @@
 import { IDocument } from "@visian/ui-shared";
-import { Vector } from "@visian/utils";
+import { ISerializable, Vector } from "@visian/utils";
 import { action, makeObservable, observable } from "mobx";
 import {
   BooleanParameter,
@@ -8,10 +8,19 @@ import {
   NumberParameter,
   Parameter,
 } from "../../parameters";
-import { TransferFunction } from "./transfer-function";
+import {
+  TransferFunction,
+  TransferFunctionSnapshot,
+} from "./transfer-function";
 
-// TODO: Persist cone direction.
-export class ConeTransferFunction extends TransferFunction<"fc-cone"> {
+export interface ConeTransferFunctionSnapshot
+  extends TransferFunctionSnapshot<"fc-cone"> {
+  coneDirection: number[];
+}
+
+export class ConeTransferFunction
+  extends TransferFunction<"fc-cone">
+  implements ISerializable<ConeTransferFunctionSnapshot> {
   public coneDirection = new Vector([1, 0, 0]);
 
   constructor(document: IDocument) {
@@ -85,5 +94,23 @@ export class ConeTransferFunction extends TransferFunction<"fc-cone"> {
 
   public setConeDirection(x: number, y: number, z: number) {
     this.coneDirection.set(x, y, z);
+  }
+
+  public toJSON(): ConeTransferFunctionSnapshot {
+    return {
+      ...super.toJSON(),
+      coneDirection: this.coneDirection.toArray(),
+    };
+  }
+
+  public applySnapshot(
+    snapshot: Partial<ConeTransferFunctionSnapshot>,
+  ): Promise<void> {
+    super.applySnapshot(snapshot);
+
+    if (snapshot.coneDirection)
+      this.coneDirection.fromArray(snapshot.coneDirection);
+
+    return Promise.resolve();
   }
 }
