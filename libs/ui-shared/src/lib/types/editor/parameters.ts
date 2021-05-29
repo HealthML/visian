@@ -139,9 +139,9 @@ export interface ILayerParameter extends IParameter<string | undefined> {
   kind: "layer";
 
   /**
-   * An optional filter specifiying what kind of layers can be selected.
+   * A filter specifiying what kind of layers can be selected.
    * Could, i.e., be used to only allow annotations to be selected.
    * Defaults to allowing all layers.
    */
-  filter?: (layer: ILayer) => boolean;
+  filter: (layer: ILayer) => boolean;
 }

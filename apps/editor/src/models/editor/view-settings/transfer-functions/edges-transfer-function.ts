@@ -2,6 +2,7 @@ import { IDocument } from "@visian/ui-shared";
 import {
   BooleanParameter,
   ColorParameter,
+  LayerParameter,
   NumberParameter,
   NumberRangeParameter,
   Parameter,
@@ -15,7 +16,28 @@ export class EdgesTransferFunction extends TransferFunction<"fc-edges"> {
         name: "fc-edges",
         labelTx: "tf-fc-edges",
         params: [
-          // TODO: Layer parameters.
+          new LayerParameter(
+            {
+              name: "annotation",
+              labelTx: "annotation-layer",
+              defaultValue: undefined,
+              filter: (layer) =>
+                layer.isAnnotation &&
+                layer.id !== (this.params.image as LayerParameter).value,
+            },
+            document,
+          ) as Parameter<unknown>,
+          new LayerParameter(
+            {
+              name: "image",
+              labelTx: "image-layer",
+              defaultValue: undefined,
+              // We allow other annotations as the image, but not the selected annotation.
+              filter: (layer) =>
+                layer.id !== (this.params.annotation as LayerParameter).value,
+            },
+            document,
+          ) as Parameter<unknown>,
           new BooleanParameter({
             name: "useFocus",
             labelTx: "use-focus",

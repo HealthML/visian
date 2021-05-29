@@ -4,6 +4,7 @@ import { action, makeObservable, observable } from "mobx";
 import {
   BooleanParameter,
   ColorParameter,
+  LayerParameter,
   NumberParameter,
   Parameter,
 } from "../../parameters";
@@ -19,7 +20,28 @@ export class ConeTransferFunction extends TransferFunction<"fc-cone"> {
         name: "fc-cone",
         labelTx: "tf-fc-cone",
         params: [
-          // TODO: Layer parameters.
+          new LayerParameter(
+            {
+              name: "annotation",
+              labelTx: "annotation-layer",
+              defaultValue: undefined,
+              filter: (layer) =>
+                layer.isAnnotation &&
+                layer.id !== (this.params.image as LayerParameter).value,
+            },
+            document,
+          ) as Parameter<unknown>,
+          new LayerParameter(
+            {
+              name: "image",
+              labelTx: "image-layer",
+              defaultValue: undefined,
+              // We allow other annotations as the image, but not the selected annotation.
+              filter: (layer) =>
+                layer.id !== (this.params.annotation as LayerParameter).value,
+            },
+            document,
+          ) as Parameter<unknown>,
           new BooleanParameter({
             name: "useFocus",
             labelTx: "use-focus",

@@ -1,6 +1,7 @@
 import { IDocument } from "@visian/ui-shared";
 import {
   BooleanParameter,
+  LayerParameter,
   NumberRangeParameter,
   Parameter,
 } from "../../parameters";
@@ -13,7 +14,24 @@ export class DensityTransferFunction extends TransferFunction<"density"> {
         name: "density",
         labelTx: "tf-density",
         params: [
-          // TODO: Layer parameters.
+          new LayerParameter(
+            {
+              name: "annotation",
+              labelTx: "annotation-layer",
+              defaultValue: undefined,
+              filter: (layer) => layer.isAnnotation,
+            },
+            document,
+          ) as Parameter<unknown>,
+          new LayerParameter(
+            {
+              name: "image",
+              labelTx: "image-layer",
+              defaultValue: undefined,
+              filter: (layer) => !layer.isAnnotation,
+            },
+            document,
+          ) as Parameter<unknown>,
           new BooleanParameter({
             name: "useFocus",
             labelTx: "use-focus",
