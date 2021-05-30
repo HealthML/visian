@@ -145,3 +145,8 @@ export interface ILayerParameter extends IParameter<string | undefined> {
    */
   filter: (layer: ILayer) => boolean;
 }
+
+/** A file parameter, typically displayed as a file picker. */
+export interface IFileParameter extends IParameter<File | undefined> {
+  kind: "file";
+}

@@ -7,9 +7,9 @@ import {
 import { ISerializable } from "@visian/utils";
 import { action, computed, makeObservable, observable } from "mobx";
 import { Matrix4 } from "three";
-import { LayerParameter, Parameter } from "../parameters";
 import {
   ConeTransferFunction,
+  CustomTransferFunction,
   DensityTransferFunction,
   EdgesTransferFunction,
   TransferFunction,
@@ -83,24 +83,7 @@ export class Viewport3D
       density: new DensityTransferFunction(document),
       "fc-edges": new EdgesTransferFunction(document),
       "fc-cone": new ConeTransferFunction(document),
-      // TODO: Handle custom texture upload.
-      custom: new TransferFunction<"custom">(
-        {
-          name: "custom",
-          labelTx: "tf-custom",
-          params: [
-            new LayerParameter(
-              {
-                name: "image",
-                labelTx: "image-layer",
-                defaultValue: undefined,
-              },
-              document,
-            ) as Parameter<unknown>,
-          ],
-        },
-        document,
-      ),
+      custom: new CustomTransferFunction(document),
     };
   }
 
