@@ -71,6 +71,7 @@ export class ToolRenderer implements IRenderLoopSubscriber {
           oldSliceRenderer?.unsubscribeFromRenderLoop(this);
           sliceRenderer?.subscribeToRenderLoop(this);
         },
+        { fireImmediately: true },
       ),
     );
   }
