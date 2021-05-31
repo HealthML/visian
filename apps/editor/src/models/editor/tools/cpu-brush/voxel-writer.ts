@@ -45,7 +45,7 @@ export class VoxelWriter<N extends string> extends Tool<N> {
               viewType,
               slice,
               oldSliceData: this.oldSliceData,
-              newSliceData: image.getSlice(slice, viewType),
+              newSliceData: image.getSlice(viewType, slice),
             },
             this.document,
           ),
@@ -74,7 +74,7 @@ export class VoxelWriter<N extends string> extends Tool<N> {
     if (this.undoable && !this.strokeActive) {
       this.strokeActive = true;
       this.sliceNumber = voxels[0][getOrthogonalAxis(viewType)];
-      this.oldSliceData = image.getSlice(this.sliceNumber, viewType);
+      this.oldSliceData = image.getSlice(viewType, this.sliceNumber);
     }
 
     image.setAtlasVoxels(voxels);

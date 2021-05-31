@@ -10,6 +10,7 @@ export class ClearImageTool<
     super(
       {
         name: "clear-image" as N,
+        icon: "trash",
         labelTx: "clear-image",
         supportedViewModes: ["2D", "3D"],
         supportedLayerKinds: ["image"],

@@ -108,6 +108,7 @@ export class Tools
       "navigation-tool": new Tool(
         {
           name: "navigation-tool",
+          icon: "navigationTool",
           labelTx: "navigation-tool",
           supportedLayerKinds: [],
           supportedViewModes: ["2D", "3D"],

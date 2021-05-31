@@ -1,5 +1,4 @@
 import {
-  IconType,
   Modal,
   PointerButton,
   preventDefault,
@@ -14,20 +13,6 @@ import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
 import { NumberParameter, ToolName } from "../../../models";
-
-// TODO: Potentially move this to the tool definitions as well?
-const iconMap: Record<ToolName, IconType> = {
-  "navigation-tool": "navigationTool",
-  "crosshair-tool": "crosshair",
-  "pixel-brush": "pixelBrush",
-  "pixel-eraser": "eraser",
-  "smart-brush": "magicBrush",
-  "smart-eraser": "eraser",
-  "outline-tool": "outline",
-  "outline-eraser": "outline",
-  "clear-slice": "trash",
-  "clear-image": "trash",
-};
 
 // Styled Components
 const StyledToolbar = styled(GenericToolbar)`
@@ -115,7 +100,7 @@ export const Toolbar: React.FC = observer(() => {
         ({ activeTool: tool }, index) => (
           <Tool
             key={index}
-            icon={iconMap[tool.name]}
+            icon={tool.icon}
             isDisabled={
               tool.name === "crosshair-tool" &&
               !store?.editor.activeDocument?.has3DLayers

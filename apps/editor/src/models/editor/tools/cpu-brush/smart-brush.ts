@@ -37,6 +37,7 @@ export class SmartBrush<
       {
         name: (value ? "smart-brush" : "smart-eraser") as N,
         altToolName: (value ? "smart-eraser" : "smart-brush") as N,
+        icon: value ? "magicBrush" : "eraser",
         supportedViewModes: ["2D"],
         supportedLayerKinds: ["image"],
         isDrawingTool: true,

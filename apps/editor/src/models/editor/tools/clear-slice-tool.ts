@@ -10,6 +10,7 @@ export class ClearSliceTool<
     super(
       {
         name: "clear-slice" as N,
+        icon: "trash",
         labelTx: "clear-slice",
         supportedViewModes: ["2D"],
         supportedLayerKinds: ["image"],
@@ -24,7 +25,7 @@ export class ClearSliceTool<
     const viewType = this.document.viewport2D.mainViewType;
     const slice = this.document.viewport2D.getSelectedSlice();
 
-    const oldSliceData = image.getSlice(slice, viewType);
+    const oldSliceData = image.getSlice(viewType, slice);
     image.setSlice(viewType, slice);
     this.document.sliceRenderer?.lazyRender();
 

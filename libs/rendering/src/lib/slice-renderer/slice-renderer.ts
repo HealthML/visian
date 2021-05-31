@@ -21,7 +21,7 @@ import { Slice } from "./slice";
 import {
   getOrder,
   getPositionWithinPixel,
-  getWebGLSize,
+  getWebGLSizeFromCamera,
   resizeRenderer,
   setMainCameraPlanes,
   synchCrosshairs,
@@ -214,7 +214,7 @@ export class SliceRenderer implements IDisposable, ISliceRenderer {
   public getWebGLSize(
     viewType = this.editor.activeDocument?.viewport2D.mainViewType,
   ) {
-    return getWebGLSize(
+    return getWebGLSizeFromCamera(
       viewType === this.editor.activeDocument?.viewport2D.mainViewType
         ? this.mainCamera
         : this.sideCamera,

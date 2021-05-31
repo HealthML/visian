@@ -69,7 +69,7 @@ export class Viewport2D
   }
 
   /**
-   * The current additive amount by which the the zoom level is increment.
+   * The current additive amount by which the the zoom level is incremented.
    * This is typically dependent on the current `zoomLevel`.
    */
   protected get zoomStep() {

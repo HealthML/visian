@@ -276,9 +276,7 @@ export class RenderedImage<T extends TypedArray = TypedArray>
     }
   }
 
-  // TODO: Please update the parameter order here in accordance with the new
-  // interfaces
-  public getSlice(sliceNumber: number, viewType: ViewType) {
+  public getSlice(viewType: ViewType, sliceNumber: number) {
     if (this.renderers.length) {
       return this.sliceAtlasAdapter.readSlice(
         sliceNumber,
@@ -288,7 +286,7 @@ export class RenderedImage<T extends TypedArray = TypedArray>
     }
 
     // Attention: super.getSlice does not work for more than one component at the moment!
-    return super.getSlice(sliceNumber, viewType);
+    return super.getSlice(viewType, sliceNumber);
   }
 
   public readSliceToTarget(

@@ -44,6 +44,17 @@ export const alignBrushCursor = (
   return uv;
 };
 
+/**
+ * Converts uv cordinates of a slice and the currently selected voxel into
+ * 3D coordinates in the scan. Also includes information about the position
+ * within a pixel.
+ * @param image The image.
+ * @param viewSettings The view settings.
+ * @param viewType The current view type.
+ * @param uv The uv coordinates.
+ * @param floored Indicates if the result should be interger precision. Default is true.
+ * @returns A `DragPoint` with the 3D coordinates.
+ */
 export const getDragPoint = (
   image: Image,
   viewSettings: IViewSettings,

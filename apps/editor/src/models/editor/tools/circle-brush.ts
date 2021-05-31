@@ -18,6 +18,7 @@ export class CircleBrush<
       {
         name: (value ? "pixel-brush" : "pixel-eraser") as N,
         altToolName: (value ? "pixel-eraser" : "pixel-brush") as N,
+        icon: value ? "pixelBrush" : "eraser",
         supportedViewModes: ["2D"],
         supportedLayerKinds: ["image"],
         isDrawingTool: true,

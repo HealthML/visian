@@ -25,8 +25,6 @@ export class Editor implements IEditor, ISerializable<EditorSnapshot> {
     snapshot: EditorSnapshot | undefined,
     protected context: StoreContext,
   ) {
-    this.applySnapshot(snapshot);
-
     makeObservable(this, {
       activeDocument: observable,
       sliceRenderer: observable,
@@ -35,6 +33,8 @@ export class Editor implements IEditor, ISerializable<EditorSnapshot> {
       setActiveDocument: action,
       setSliceRenderer: action,
     });
+
+    this.applySnapshot(snapshot);
   }
 
   public setActiveDocument(value?: Document): void {

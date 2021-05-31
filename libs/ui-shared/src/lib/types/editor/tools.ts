@@ -1,4 +1,5 @@
 import type { Voxel } from "@visian/utils";
+import type { IconType } from "../../components";
 import type { IParameter } from "./parameters";
 import type { Reference, ViewMode } from "./types";
 
@@ -16,6 +17,8 @@ export interface ITool<N extends string> {
    */
   name: N;
 
+  /** The icon key to use for this tool. */
+  icon: IconType;
   /**
    * The tool's label.
    * A user-facing display name.

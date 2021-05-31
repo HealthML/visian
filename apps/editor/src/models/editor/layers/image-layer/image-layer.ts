@@ -246,7 +246,7 @@ export class ImageLayer
   }
 
   public getSlice(viewType: ViewType, slice: number): Uint8Array {
-    return this.image.getSlice(slice, viewType);
+    return this.image.getSlice(viewType, slice);
   }
 
   public setSlice(
@@ -280,8 +280,8 @@ export class ImageLayer
 
   public quickExportSlice = async () => {
     const sliceImage = this.image.getSliceImage(
-      this.document.viewport2D.getSelectedSlice(),
       this.document.viewport2D.mainViewType,
+      this.document.viewport2D.getSelectedSlice(),
     );
     const file = await writeSingleMedicalImage(
       sliceImage.toITKImage(),
