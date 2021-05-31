@@ -11,7 +11,13 @@ export interface IEditor {
 
   /** The slice renderer. */
   sliceRenderer?: ISliceRenderer;
-  renderers?: THREE.WebGLRenderer[];
+  /**
+   * The 3 webGL renderers used for the 3 canvases.
+   * [0]: The main canvas's renderer.
+   * [1]: The upper side view canvas's renderer.
+   * [2]: The lower side view canvas's renderer.
+   */
+  renderers: [THREE.WebGLRenderer, THREE.WebGLRenderer, THREE.WebGLRenderer];
 
   /** Proxy for the root store refs. */
   refs: { [name: string]: React.RefObject<HTMLElement> };

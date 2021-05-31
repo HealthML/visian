@@ -13,14 +13,7 @@ export const EditorScreen: React.FC = observer(() => {
 
   useEffect(() => {
     if (canvasRef.current && store) {
-      store.editor.setSliceRenderer(
-        new SliceRenderer(
-          canvasRef.current,
-          store.refs.upperSideView.current as HTMLCanvasElement,
-          store.refs.lowerSideView.current as HTMLCanvasElement,
-          store.editor,
-        ),
-      );
+      store.editor.setSliceRenderer(new SliceRenderer(store.editor));
     }
     return () => {
       store?.editor.sliceRenderer?.dispose();
