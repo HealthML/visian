@@ -239,7 +239,7 @@ export class Image<T extends TypedArray = TypedArray>
     return getAtlasSize(this.voxelCount, this.getAtlasGrid());
   }
 
-  public getSlice(sliceNumber: number, viewType: ViewType) {
+  public getSlice(viewType: ViewType, sliceNumber: number) {
     const [horizontal, vertical] = getPlaneAxes(viewType);
     const sliceData = new Uint8Array(
       this.voxelCount[horizontal] * this.voxelCount[vertical],
@@ -267,8 +267,8 @@ export class Image<T extends TypedArray = TypedArray>
   }
 
   public getSliceImage(
-    sliceNumber: number,
     viewType: ViewType,
+    sliceNumber: number,
   ): Image<T | Uint8Array> {
     if (this.dimensionality < 3) return this.clone();
 
@@ -283,7 +283,7 @@ export class Image<T extends TypedArray = TypedArray>
         this.voxelSpacing[horizontal],
         this.voxelSpacing[vertical],
       ],
-      data: this.getSlice(sliceNumber, viewType),
+      data: this.getSlice(viewType, sliceNumber),
     });
   }
 

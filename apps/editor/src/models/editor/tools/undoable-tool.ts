@@ -23,7 +23,7 @@ export class UndoableTool<N extends string> extends Tool<N> {
     ),
   ) {
     this.sliceNumber = sliceNumber;
-    this.oldSliceData = image?.getSlice(sliceNumber, viewType);
+    this.oldSliceData = image?.getSlice(viewType, sliceNumber);
   }
 
   protected endStroke(
@@ -43,7 +43,7 @@ export class UndoableTool<N extends string> extends Tool<N> {
               viewType,
               slice,
               oldSliceData: this.oldSliceData,
-              newSliceData: image.getSlice(slice, viewType),
+              newSliceData: image.getSlice(viewType, slice),
             },
             this.document,
           ),
