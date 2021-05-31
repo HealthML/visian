@@ -1,6 +1,7 @@
 import { IEditor, ISliceRenderer, Theme } from "@visian/ui-shared";
 import { ISerializable } from "@visian/utils";
 import { action, makeObservable, observable } from "mobx";
+import * as THREE from "three";
 import { StoreContext } from "../types";
 
 import { Document, DocumentSnapshot } from "./document";
@@ -19,7 +20,11 @@ export class Editor implements IEditor, ISerializable<EditorSnapshot> {
   public activeDocument?: Document;
 
   public sliceRenderer?: ISliceRenderer;
-  public renderers?: THREE.WebGLRenderer[];
+  public renderers: [
+    THREE.WebGLRenderer,
+    THREE.WebGLRenderer,
+    THREE.WebGLRenderer,
+  ];
 
   constructor(
     snapshot: EditorSnapshot | undefined,
@@ -34,6 +39,12 @@ export class Editor implements IEditor, ISerializable<EditorSnapshot> {
       setSliceRenderer: action,
     });
 
+    this.renderers = [
+      new THREE.WebGLRenderer({ alpha: true }),
+      new THREE.WebGLRenderer({ alpha: true }),
+      new THREE.WebGLRenderer({ alpha: true }),
+    ];
+
     this.applySnapshot(snapshot);
   }
 
@@ -43,8 +54,6 @@ export class Editor implements IEditor, ISerializable<EditorSnapshot> {
 
   public setSliceRenderer(sliceRenderer?: ISliceRenderer): void {
     this.sliceRenderer = sliceRenderer;
-
-    this.renderers = this.sliceRenderer?.renderers;
   }
 
   // Proxies

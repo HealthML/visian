@@ -29,6 +29,7 @@ import {
 
 export class SliceRenderer implements IDisposable, ISliceRenderer {
   private _renderers: THREE.WebGLRenderer[];
+  private canvases: HTMLCanvasElement[];
   private mainCamera: THREE.OrthographicCamera;
   private sideCamera: THREE.OrthographicCamera;
   private scenes = viewTypes.map(() => new THREE.Scene());
@@ -45,21 +46,12 @@ export class SliceRenderer implements IDisposable, ISliceRenderer {
 
   private disposers: IDisposer[] = [];
 
-  constructor(
-    private mainCanvas: HTMLCanvasElement,
-    private upperSideCanvas: HTMLCanvasElement,
-    private lowerSideCanvas: HTMLCanvasElement,
-    private editor: IEditor,
-  ) {
-    this._renderers = this.canvases.map(
-      (canvas) =>
-        new THREE.WebGLRenderer({
-          alpha: true,
-          canvas,
-        }),
-    );
+  constructor(private editor: IEditor) {
+    this._renderers = editor.renderers;
 
-    const aspect = mainCanvas.clientWidth / mainCanvas.clientHeight;
+    this.canvases = editor.renderers.map((renderer) => renderer.domElement);
+
+    const aspect = this.canvases[0].clientWidth / this.canvases[0].clientHeight;
     this.mainCamera = new THREE.OrthographicCamera(
       -aspect,
       aspect,
@@ -78,11 +70,11 @@ export class SliceRenderer implements IDisposable, ISliceRenderer {
 
     this.resizeSensors.push(
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      new ResizeSensor(this.upperSideCanvas.parentElement!, () =>
+      new ResizeSensor(this.canvases[1].parentElement!, () =>
         resizeRenderer(this._renderers[1], this.eagerRender),
       ),
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      new ResizeSensor(this.lowerSideCanvas.parentElement!, () =>
+      new ResizeSensor(this.canvases[2].parentElement!, () =>
         resizeRenderer(this._renderers[2], this.eagerRender),
       ),
     );
@@ -189,7 +181,7 @@ export class SliceRenderer implements IDisposable, ISliceRenderer {
 
     if (!this.editor.activeDocument) return;
 
-    setMainCameraPlanes(this.editor, this.mainCanvas, this.mainCamera);
+    setMainCameraPlanes(this.editor, this.canvases[0], this.mainCamera);
 
     this.eagerRender();
   };
@@ -197,7 +189,7 @@ export class SliceRenderer implements IDisposable, ISliceRenderer {
   private updateCamera = () => {
     if (!this.editor.activeDocument) return;
 
-    setMainCameraPlanes(this.editor, this.mainCanvas, this.mainCamera);
+    setMainCameraPlanes(this.editor, this.canvases[0], this.mainCamera);
     this.lazyRender();
   };
 
@@ -223,7 +215,7 @@ export class SliceRenderer implements IDisposable, ISliceRenderer {
 
   /** Converts a WebGL position to a screen space one. */
   public getMainViewScreenPosition(webGLPosition: Pixel): Pixel {
-    const boundingBox = this.mainCanvas.getBoundingClientRect();
+    const boundingBox = this.canvases[0].getBoundingClientRect();
     const webGLSize = this.getWebGLSize();
     return {
       x:
@@ -341,10 +333,6 @@ export class SliceRenderer implements IDisposable, ISliceRenderer {
       (Math.floor(uv.x * scanWidth) + xOffset) / scanWidth,
       (Math.floor(uv.y * scanHeight) + yOffset) / scanHeight,
     );
-  }
-
-  private get canvases() {
-    return [this.mainCanvas, this.upperSideCanvas, this.lowerSideCanvas];
   }
 
   private get activeRenderers() {
