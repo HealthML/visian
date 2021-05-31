@@ -1,4 +1,10 @@
-import { DragPoint, IDocument, ITool, ViewMode } from "@visian/ui-shared";
+import {
+  DragPoint,
+  IconType,
+  IDocument,
+  ITool,
+  ViewMode,
+} from "@visian/ui-shared";
 import { ISerializable } from "@visian/utils";
 import { makeObservable, observable } from "mobx";
 
@@ -15,6 +21,7 @@ export interface ToolSnapshot<N extends string> {
 export interface ToolConfig<N extends string> {
   name: N;
 
+  icon: IconType;
   label?: string;
   labelTx?: string;
 
@@ -35,6 +42,7 @@ export class Tool<N extends string>
 
   public readonly name: N;
 
+  public icon: IconType;
   public label?: string;
   public labelTx?: string;
 
@@ -50,6 +58,7 @@ export class Tool<N extends string>
 
   constructor(config: ToolConfig<N>, protected document: IDocument) {
     this.name = config.name;
+    this.icon = config.icon;
     this.label = config.label;
     this.labelTx = config.labelTx || config.name;
     this.isDrawingTool = Boolean(config.isDrawingTool);

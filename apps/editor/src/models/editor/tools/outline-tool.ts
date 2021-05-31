@@ -23,6 +23,7 @@ export class OutlineTool<
       {
         name: (value ? "outline-tool" : "outline-eraser") as N,
         altToolName: (value ? "outline-eraser" : "outline-tool") as N,
+        icon: value ? "outline" : "outline",
         supportedViewModes: ["2D"],
         supportedLayerKinds: ["image"],
         isDrawingTool: true,

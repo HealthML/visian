@@ -6,6 +6,7 @@ export class CrosshairTool<N extends "crosshair-tool"> extends Tool<N> {
     super(
       {
         name: "crosshair-tool" as N,
+        icon: "crosshair",
         labelTx: "crosshair-tool",
         supportedViewModes: ["2D"],
         supportedLayerKinds: ["image"],
