@@ -107,6 +107,8 @@ export interface ITools<N extends string> {
 
   /** Indicates if the current tool is in use this moment. */
   isToolInUse: boolean;
+  /** Indicates if a tool is currently drawing. */
+  isDrawing: boolean;
 
   setActiveTool(nameOrTool?: N | ITool<N>): void;
 

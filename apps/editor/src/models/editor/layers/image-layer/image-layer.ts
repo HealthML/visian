@@ -86,6 +86,10 @@ export class ImageLayer
   ) {
     super(snapshot, document, true);
     this.applySnapshot(snapshot);
+    this.excludeFromSnapshotTracking = [
+      ...this.excludeFromSnapshotTracking,
+      "emptySlices",
+    ];
 
     makeObservable<this, "emptySlices" | "setEmptySlices" | "setIsSliceEmpty">(
       this,
@@ -147,7 +151,11 @@ export class ImageLayer
   }
 
   protected setEmptySlices(emptySlices?: boolean[][]): void {
-    this.emptySlices = emptySlices || [[], [], []];
+    this.emptySlices =
+      emptySlices ||
+      this.image.voxelCount
+        .toArray()
+        .map((sliceCount) => new Array(sliceCount).fill(true));
   }
 
   protected isSliceEmpty(viewType: ViewType, slice: number): boolean {

@@ -8,6 +8,8 @@ export interface ISliceRenderer extends IDisposable {
   renderers: THREE.WebGLRenderer[];
 
   lazyRender(): void;
+  eagerRender(): void;
+  resize(): void;
   getOutline(viewType?: ViewType): IOutline;
   showBrushCursorPreview(viewType?: ViewType): void;
   subscribeToRenderLoop(subscriber: IRenderLoopSubscriber): void;

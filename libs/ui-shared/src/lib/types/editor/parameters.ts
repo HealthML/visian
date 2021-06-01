@@ -1,4 +1,4 @@
-import type { TooltipPosition } from "../../components";
+import type { SerializationMethod, TooltipPosition } from "../../components";
 import { ILayer } from "./layers";
 import type { ScaleType } from "./types";
 
@@ -116,6 +116,14 @@ export interface INumberRangeParameter
     >,
     IParameter<[number, number]> {
   kind: "number-range";
+
+  /**
+   * Configures if and how the range-limiting values are enfored to keep their
+   * order.
+   *
+   * Defaults to `"push"`.
+   */
+  serializationMethod: SerializationMethod;
 }
 
 /** A text parameter, typically displayed as a text field. */

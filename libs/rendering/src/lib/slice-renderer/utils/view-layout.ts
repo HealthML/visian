@@ -14,12 +14,12 @@ export const getSpriteAspectRatio = (image: Image) => {
  * [topPadding, rightPadding, bottomPadding, leftPadding]
  */
 export const getMainViewPaddings = (editor: IEditor) => {
-  const floatingUIRect = editor.refs.uiOverlay.current?.getBoundingClientRect();
-  const undoRedoButtonsRect = editor.refs.undoRedoButtons.current?.getBoundingClientRect();
-  const toolbarRect = editor.refs.toolbar.current?.getBoundingClientRect();
-  const viewSettingsRect = editor.refs.viewSettings.current?.getBoundingClientRect();
-  const sliceSliderRect = editor.refs.sliceSlider.current?.getBoundingClientRect();
-  const sideViewsRect = editor.refs.sideViews.current?.getBoundingClientRect();
+  const floatingUIRect = editor.refs.uiOverlay?.current?.getBoundingClientRect();
+  const undoRedoButtonsRect = editor.refs.undoRedoButtons?.current?.getBoundingClientRect();
+  const toolbarRect = editor.refs.toolbar?.current?.getBoundingClientRect();
+  const viewSettingsRect = editor.refs.viewSettings?.current?.getBoundingClientRect();
+  const sliceSliderRect = editor.refs.sliceSlider?.current?.getBoundingClientRect();
+  const sideViewsRect = editor.refs.sideViews?.current?.getBoundingClientRect();
 
   const topMargin =
     undoRedoButtonsRect && floatingUIRect

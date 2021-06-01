@@ -24,6 +24,4 @@ export interface IEditor {
 
   /** Proxy for the root store theme. */
   theme: Theme;
-
-  setSliceRenderer(sliceRenderer: ISliceRenderer): void;
 }
