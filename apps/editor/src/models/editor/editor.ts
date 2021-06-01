@@ -1,15 +1,18 @@
+import { SliceRenderer } from "@visian/rendering";
 import { IEditor, ISliceRenderer, Theme } from "@visian/ui-shared";
-import { ISerializable } from "@visian/utils";
+import { IDisposable, ISerializable } from "@visian/utils";
 import { action, makeObservable, observable } from "mobx";
-import { StoreContext } from "../types";
+import * as THREE from "three";
 
+import { StoreContext } from "../types";
 import { Document, DocumentSnapshot } from "./document";
 
 export interface EditorSnapshot {
   activeDocument?: DocumentSnapshot;
 }
 
-export class Editor implements IEditor, ISerializable<EditorSnapshot> {
+export class Editor
+  implements IEditor, ISerializable<EditorSnapshot>, IDisposable {
   public readonly excludeFromSnapshotTracking = [
     "context",
     "sliceRenderer",
@@ -19,7 +22,11 @@ export class Editor implements IEditor, ISerializable<EditorSnapshot> {
   public activeDocument?: Document;
 
   public sliceRenderer?: ISliceRenderer;
-  public renderers?: THREE.WebGLRenderer[];
+  public renderers: [
+    THREE.WebGLRenderer,
+    THREE.WebGLRenderer,
+    THREE.WebGLRenderer,
+  ];
 
   constructor(
     snapshot: EditorSnapshot | undefined,
@@ -27,24 +34,27 @@ export class Editor implements IEditor, ISerializable<EditorSnapshot> {
   ) {
     makeObservable(this, {
       activeDocument: observable,
-      sliceRenderer: observable,
       renderers: observable,
 
       setActiveDocument: action,
-      setSliceRenderer: action,
     });
+
+    this.renderers = [
+      new THREE.WebGLRenderer({ alpha: true }),
+      new THREE.WebGLRenderer({ alpha: true }),
+      new THREE.WebGLRenderer({ alpha: true }),
+    ];
+    this.sliceRenderer = new SliceRenderer(this);
 
     this.applySnapshot(snapshot);
   }
 
-  public setActiveDocument(value?: Document): void {
-    this.activeDocument = value;
+  public dispose(): void {
+    this.sliceRenderer?.dispose();
   }
 
-  public setSliceRenderer(sliceRenderer?: ISliceRenderer): void {
-    this.sliceRenderer = sliceRenderer;
-
-    this.renderers = this.sliceRenderer?.renderers;
+  public setActiveDocument(value?: Document): void {
+    this.activeDocument = value;
   }
 
   // Proxies

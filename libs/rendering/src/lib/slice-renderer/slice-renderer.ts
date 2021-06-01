@@ -12,7 +12,6 @@ import {
   IRenderLoopSubscriber,
   ISliceRenderer,
 } from "@visian/ui-shared";
-import ResizeSensor from "css-element-queries/src/ResizeSensor";
 import { reaction } from "mobx";
 import * as THREE from "three";
 
@@ -22,13 +21,13 @@ import {
   getOrder,
   getPositionWithinPixel,
   getWebGLSizeFromCamera,
-  resizeRenderer,
   setMainCameraPlanes,
   synchCrosshairs,
 } from "./utils";
 
 export class SliceRenderer implements IDisposable, ISliceRenderer {
   private _renderers: THREE.WebGLRenderer[];
+  private canvases: HTMLCanvasElement[];
   private mainCamera: THREE.OrthographicCamera;
   private sideCamera: THREE.OrthographicCamera;
   private scenes = viewTypes.map(() => new THREE.Scene());
@@ -39,27 +38,16 @@ export class SliceRenderer implements IDisposable, ISliceRenderer {
 
   private isImageLoaded = false;
 
-  private resizeSensors: ResizeSensor[] = [];
-
   private renderLoopSubscribers: IRenderLoopSubscriber[] = [];
 
   private disposers: IDisposer[] = [];
 
-  constructor(
-    private mainCanvas: HTMLCanvasElement,
-    private upperSideCanvas: HTMLCanvasElement,
-    private lowerSideCanvas: HTMLCanvasElement,
-    private editor: IEditor,
-  ) {
-    this._renderers = this.canvases.map(
-      (canvas) =>
-        new THREE.WebGLRenderer({
-          alpha: true,
-          canvas,
-        }),
-    );
+  constructor(private editor: IEditor) {
+    this._renderers = editor.renderers;
 
-    const aspect = mainCanvas.clientWidth / mainCanvas.clientHeight;
+    this.canvases = editor.renderers.map((renderer) => renderer.domElement);
+
+    const aspect = this.canvases[0].clientWidth / this.canvases[0].clientHeight;
     this.mainCamera = new THREE.OrthographicCamera(
       -aspect,
       aspect,
@@ -75,17 +63,6 @@ export class SliceRenderer implements IDisposable, ISliceRenderer {
 
     window.addEventListener("resize", this.resize);
     this.resize();
-
-    this.resizeSensors.push(
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      new ResizeSensor(this.upperSideCanvas.parentElement!, () =>
-        resizeRenderer(this._renderers[1], this.eagerRender),
-      ),
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      new ResizeSensor(this.lowerSideCanvas.parentElement!, () =>
-        resizeRenderer(this._renderers[2], this.eagerRender),
-      ),
-    );
 
     this.disposers.push(
       reaction(
@@ -160,7 +137,6 @@ export class SliceRenderer implements IDisposable, ISliceRenderer {
     this.disposers.forEach((disposer) => disposer());
     this.slices.forEach((slice) => slice.dispose());
     window.removeEventListener("resize", this.resize);
-    this.resizeSensors.forEach((sensor) => sensor.detach());
   }
 
   public get renderers() {
@@ -184,12 +160,12 @@ export class SliceRenderer implements IDisposable, ISliceRenderer {
     );
   }
 
-  private resize = () => {
+  public resize = () => {
     this._renderers[0].setSize(window.innerWidth, window.innerHeight);
 
     if (!this.editor.activeDocument) return;
 
-    setMainCameraPlanes(this.editor, this.mainCanvas, this.mainCamera);
+    setMainCameraPlanes(this.editor, this.canvases[0], this.mainCamera);
 
     this.eagerRender();
   };
@@ -197,7 +173,7 @@ export class SliceRenderer implements IDisposable, ISliceRenderer {
   private updateCamera = () => {
     if (!this.editor.activeDocument) return;
 
-    setMainCameraPlanes(this.editor, this.mainCanvas, this.mainCamera);
+    setMainCameraPlanes(this.editor, this.canvases[0], this.mainCamera);
     this.lazyRender();
   };
 
@@ -223,7 +199,7 @@ export class SliceRenderer implements IDisposable, ISliceRenderer {
 
   /** Converts a WebGL position to a screen space one. */
   public getMainViewScreenPosition(webGLPosition: Pixel): Pixel {
-    const boundingBox = this.mainCanvas.getBoundingClientRect();
+    const boundingBox = this.canvases[0].getBoundingClientRect();
     const webGLSize = this.getWebGLSize();
     return {
       x:
@@ -343,17 +319,13 @@ export class SliceRenderer implements IDisposable, ISliceRenderer {
     );
   }
 
-  private get canvases() {
-    return [this.mainCanvas, this.upperSideCanvas, this.lowerSideCanvas];
-  }
-
   private get activeRenderers() {
     return this.editor.activeDocument?.viewport2D.showSideViews
       ? this._renderers
       : [this._renderers[0]];
   }
 
-  private eagerRender = () => {
+  public eagerRender = () => {
     if (!this.isImageLoaded) return;
     this.lazyRenderTriggered = false;
 
