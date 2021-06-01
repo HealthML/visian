@@ -12,7 +12,6 @@ import {
   IRenderLoopSubscriber,
   ISliceRenderer,
 } from "@visian/ui-shared";
-import ResizeSensor from "css-element-queries/src/ResizeSensor";
 import { reaction } from "mobx";
 import * as THREE from "three";
 
@@ -22,7 +21,6 @@ import {
   getOrder,
   getPositionWithinPixel,
   getWebGLSizeFromCamera,
-  resizeRenderer,
   setMainCameraPlanes,
   synchCrosshairs,
 } from "./utils";
@@ -39,8 +37,6 @@ export class SliceRenderer implements IDisposable, ISliceRenderer {
   private lazyRenderTriggered = true;
 
   private isImageLoaded = false;
-
-  private resizeSensors: ResizeSensor[] = [];
 
   private renderLoopSubscribers: IRenderLoopSubscriber[] = [];
 
@@ -67,17 +63,6 @@ export class SliceRenderer implements IDisposable, ISliceRenderer {
 
     window.addEventListener("resize", this.resize);
     this.resize();
-
-    this.resizeSensors.push(
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      new ResizeSensor(this.canvases[1].parentElement!, () =>
-        resizeRenderer(this._renderers[1], this.eagerRender),
-      ),
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      new ResizeSensor(this.canvases[2].parentElement!, () =>
-        resizeRenderer(this._renderers[2], this.eagerRender),
-      ),
-    );
 
     this.disposers.push(
       reaction(
@@ -152,7 +137,6 @@ export class SliceRenderer implements IDisposable, ISliceRenderer {
     this.disposers.forEach((disposer) => disposer());
     this.slices.forEach((slice) => slice.dispose());
     window.removeEventListener("resize", this.resize);
-    this.resizeSensors.forEach((sensor) => sensor.detach());
   }
 
   public get renderers() {
@@ -341,7 +325,7 @@ export class SliceRenderer implements IDisposable, ISliceRenderer {
       : [this._renderers[0]];
   }
 
-  private eagerRender = () => {
+  public eagerRender = () => {
     if (!this.isImageLoaded) return;
     this.lazyRenderTriggered = false;
 
