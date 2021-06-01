@@ -48,7 +48,7 @@ export class Viewport2D
       zoomLevel: observable,
       offset: observable,
 
-      markers: computed,
+      sliceMarkers: computed,
 
       setMainViewType: action,
       setShowSideViews: action,
@@ -64,7 +64,7 @@ export class Viewport2D
     });
   }
 
-  public get markers(): MarkerConfig[] {
+  public get sliceMarkers(): MarkerConfig[] {
     return this.document.markers.getSliceMarkers(this.mainViewType);
   }
 

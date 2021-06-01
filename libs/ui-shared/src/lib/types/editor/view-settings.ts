@@ -50,7 +50,7 @@ export interface IViewport2D {
   /**
    * All slice markers, aggregated for the document and current main view type.
    */
-  markers: MarkerConfig[];
+  sliceMarkers: MarkerConfig[];
 
   /**
    * Returns the selected slice for the given `ViewType`.
