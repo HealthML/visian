@@ -86,6 +86,10 @@ export class ImageLayer
   ) {
     super(snapshot, document, true);
     this.applySnapshot(snapshot);
+    this.excludeFromSnapshotTracking = [
+      ...this.excludeFromSnapshotTracking,
+      "emptySlices",
+    ];
 
     makeObservable<this, "emptySlices" | "setEmptySlices" | "setIsSliceEmpty">(
       this,

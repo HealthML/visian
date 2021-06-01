@@ -21,7 +21,7 @@ export class Editor
 
   public activeDocument?: Document;
 
-  public sliceRenderer?: ISliceRenderer;
+  public sliceRenderer: ISliceRenderer;
   public renderers: [
     THREE.WebGLRenderer,
     THREE.WebGLRenderer,
@@ -32,13 +32,11 @@ export class Editor
     snapshot: EditorSnapshot | undefined,
     protected context: StoreContext,
   ) {
-    makeObservable<this, "setSliceRenderer">(this, {
+    makeObservable(this, {
       activeDocument: observable,
-      sliceRenderer: observable,
       renderers: observable,
 
       setActiveDocument: action,
-      setSliceRenderer: action,
     });
 
     this.renderers = [
@@ -46,7 +44,7 @@ export class Editor
       new THREE.WebGLRenderer({ alpha: true }),
       new THREE.WebGLRenderer({ alpha: true }),
     ];
-    this.setSliceRenderer(new SliceRenderer(this));
+    this.sliceRenderer = new SliceRenderer(this);
 
     this.applySnapshot(snapshot);
   }
@@ -57,10 +55,6 @@ export class Editor
 
   public setActiveDocument(value?: Document): void {
     this.activeDocument = value;
-  }
-
-  protected setSliceRenderer(sliceRenderer?: ISliceRenderer): void {
-    this.sliceRenderer = sliceRenderer;
   }
 
   // Proxies
