@@ -53,12 +53,15 @@ export const MainView = observer<{}>(() => {
   const [ref, setRef] = useState<HTMLDivElement | null>(null);
   const canvas = store?.editor.renderers[0].domElement;
   useEffect(() => {
-    if (ref && canvas) ref.appendChild(canvas);
+    if (ref && canvas) {
+      ref.appendChild(canvas);
+      store?.editor.sliceRenderer?.resize();
+    }
 
     return () => {
       if (ref) ref.innerHTML = "";
     };
-  }, [canvas, ref]);
+  }, [canvas, ref, store]);
 
   return (
     <MainViewContainer

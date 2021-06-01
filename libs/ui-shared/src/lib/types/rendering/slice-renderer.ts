@@ -9,6 +9,7 @@ export interface ISliceRenderer extends IDisposable {
 
   lazyRender(): void;
   eagerRender(): void;
+  resize(): void;
   getOutline(viewType?: ViewType): IOutline;
   showBrushCursorPreview(viewType?: ViewType): void;
   subscribeToRenderLoop(subscriber: IRenderLoopSubscriber): void;

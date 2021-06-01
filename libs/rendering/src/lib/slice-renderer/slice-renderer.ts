@@ -160,7 +160,7 @@ export class SliceRenderer implements IDisposable, ISliceRenderer {
     );
   }
 
-  private resize = () => {
+  public resize = () => {
     this._renderers[0].setSize(window.innerWidth, window.innerHeight);
 
     if (!this.editor.activeDocument) return;
