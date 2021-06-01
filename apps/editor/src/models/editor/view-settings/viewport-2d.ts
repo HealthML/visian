@@ -12,7 +12,7 @@ import {
   ViewType,
 } from "@visian/utils";
 import { action, computed, makeObservable, observable } from "mobx";
-import { maxZoom, minZoom, zoomStep } from "../../constants";
+import { maxZoom, minZoom, zoomStep } from "../../../constants";
 
 export interface Viewport2DSnapshot {
   mainViewType: ViewType;

@@ -8,6 +8,8 @@ export interface NumberParameterConfig extends ParameterConfig<number> {
   max: number;
   stepSize?: number;
   extendBeyondMinMax?: boolean;
+
+  getHistogram?: () => number[] | undefined;
 }
 
 export class NumberParameter
@@ -22,6 +24,8 @@ export class NumberParameter
   public stepSize?: number;
   public extendBeyondMinMax?: boolean;
 
+  public getHistogram?: () => number[] | undefined;
+
   constructor(config: NumberParameterConfig) {
     super(config);
     this.scaleType = config.scaleType;
@@ -29,5 +33,7 @@ export class NumberParameter
     this.max = config.max;
     this.stepSize = config.stepSize;
     this.extendBeyondMinMax = config.extendBeyondMinMax;
+
+    this.getHistogram = config.getHistogram;
   }
 }

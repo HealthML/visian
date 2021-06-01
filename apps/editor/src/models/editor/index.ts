@@ -6,5 +6,3 @@ export * from "./markers";
 export * from "./parameters";
 export * from "./tools";
 export * from "./view-settings";
-export * from "./viewport-2d";
-export * from "./viewport-3d";

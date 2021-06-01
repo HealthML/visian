@@ -1,8 +1,9 @@
 import type { Pixel, Vector, ViewType, Voxel } from "@visian/utils";
 import type { Matrix4 } from "three";
+import { IParameter } from "./parameters";
 import { MarkerConfig } from "./markers";
 
-import type { ViewMode } from "./types";
+import type { Reference, ViewMode } from "./types";
 
 /** View settings affecting the whole document. */
 export interface IViewSettings {
@@ -88,8 +89,50 @@ export interface IViewport2D {
   zoomOut(): void;
 }
 
+export type ShadingMode = "none" | "phong" | "lao";
+
+export interface ITransferFunction<N extends string> {
+  /**
+   * The transfer function's name.
+   * A (locally) unique identifier.
+   */
+  name: N;
+
+  /**
+   * The transfer function's label.
+   * A user-facing display name.
+   */
+  label?: string;
+  /**
+   * The label's translation key.
+   * If set, overrides the `label`.
+   */
+  labelTx?: string;
+
+  /** This transfer function's parameters. */
+  params: { [name: string]: IParameter };
+}
+
 /** View settings for the 3D viewport. */
-export interface IViewport3D {
+export interface IViewport3D<N extends string> {
+  /** Indicates if the user is currently in AR or VR. */
+  isInXR: boolean;
+
   /** The 3D camera's world matrix. */
   cameraMatrix: Matrix4;
+
+  /** The volumetric rendering opacity, scales the density of every voxel. */
+  opacity: number;
+  shadingMode: ShadingMode;
+
+  activeTransferFunction?: Reference<ITransferFunction<N>>;
+  transferFunctions: Record<N, ITransferFunction<N>>;
+
+  setIsInXR(value?: boolean): void;
+  setCameraMatrix(value?: Matrix4): void;
+  setOpacity(value?: number): void;
+  setShadingMode(value?: ShadingMode): void;
+  setActiveTransferFunction(
+    nameOrTransferFunction?: N | ITransferFunction<N>,
+  ): void;
 }
