@@ -21,7 +21,7 @@ export class Editor
 
   public activeDocument?: Document;
 
-  public sliceRenderer: ISliceRenderer;
+  public sliceRenderer?: ISliceRenderer;
   public renderers: [
     THREE.WebGLRenderer,
     THREE.WebGLRenderer,

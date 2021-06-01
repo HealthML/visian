@@ -10,7 +10,7 @@ export interface IEditor {
   activeDocument?: IDocument;
 
   /** The slice renderer. */
-  sliceRenderer: ISliceRenderer;
+  sliceRenderer?: ISliceRenderer;
   /**
    * The 3 webGL renderers used for the 3 canvases.
    * [0]: The main canvas's renderer.
