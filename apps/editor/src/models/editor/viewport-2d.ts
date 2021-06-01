@@ -129,6 +129,8 @@ export class Viewport2D
   }
 
   public stepSelectedSlice(viewType = this.mainViewType, stepSize = 1): void {
+    if (this.document.tools?.isDrawing) return;
+
     this.setSelectedSlice(viewType, this.getSelectedSlice(viewType) + stepSize);
   }
 

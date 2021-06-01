@@ -53,7 +53,7 @@ export class Tools
   protected isCursorOverDrawableArea = false;
   protected isCursorOverFloatingUI = false;
   protected isNavigationDragged = false;
-  protected isDrawing = false;
+  public isDrawing = false;
 
   private toolRenderer: ToolRenderer;
 
@@ -70,7 +70,6 @@ export class Tools
       | "isCursorOverDrawableArea"
       | "isCursorOverFloatingUI"
       | "isNavigationDragged"
-      | "isDrawing"
       | "resetBrushSettings"
     >(this, {
       activeToolName: observable,
