@@ -119,7 +119,7 @@ export const SliceSlider: React.FC = observer(() => {
         min={0}
         max={store.editor.activeDocument.viewport2D.getMaxSlice()}
         value={store.editor.activeDocument.viewport2D.getSelectedSlice()}
-        markers={store.editor.activeDocument.viewport2D.markers}
+        markers={store.editor.activeDocument.viewport2D.sliceMarkers}
         onChange={setSelectedSlice}
         onStart={handleDragStart}
         onEnd={handleDragEnd}
