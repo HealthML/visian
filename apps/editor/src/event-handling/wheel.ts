@@ -56,6 +56,7 @@ export const setUpWheelHandling = (store: RootStore): IDisposer => {
           break;
       }
     } else {
+      if (store.editor.activeDocument.tools?.isDrawing) return;
       store.editor.activeDocument.viewport2D.stepSelectedSlice(
         undefined,
         -Math.sign(event.deltaY),

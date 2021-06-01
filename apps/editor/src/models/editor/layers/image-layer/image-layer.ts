@@ -147,7 +147,11 @@ export class ImageLayer
   }
 
   protected setEmptySlices(emptySlices?: boolean[][]): void {
-    this.emptySlices = emptySlices || [[], [], []];
+    this.emptySlices =
+      emptySlices ||
+      this.image.voxelCount
+        .toArray()
+        .map((sliceCount) => new Array(sliceCount).fill(true));
   }
 
   protected isSliceEmpty(viewType: ViewType, slice: number): boolean {

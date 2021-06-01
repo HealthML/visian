@@ -32,6 +32,7 @@ export const Sheet = styled.div<SheetProps>`
   align-items: center;
   border-radius: ${radius("default")};
   justify-content: center;
+  cursor: auto;
 `;
 
 export default Sheet;
