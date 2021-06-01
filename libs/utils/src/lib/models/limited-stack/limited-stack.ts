@@ -37,17 +37,17 @@ export class LimitedStack<T> implements ISerializable<LimitedStackSnapshot<T>> {
     }
   }
 
-  public getCurrent(): T {
+  public getCurrent(): T | undefined {
     return this.buffer[this.currentItem];
   }
 
   /** Pops an item off of the stack. */
-  public navigateBackward(): T {
+  public navigateBackward(): T | undefined {
     this.currentItem = Math.max(this.currentItem - 1, -1);
     return this.buffer[this.currentItem];
   }
 
-  public navigateForward(): T {
+  public navigateForward(): T | undefined {
     this.currentItem = Math.min(this.currentItem + 1, this.buffer.length - 1);
     return this.buffer[this.currentItem];
   }

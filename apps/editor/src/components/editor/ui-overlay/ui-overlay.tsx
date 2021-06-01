@@ -9,10 +9,11 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
+import { ImageLayer } from "../../../models";
 import { DropSheet } from "../drop-sheet";
-import { ShortcutPopUp } from "../shortcut-popup";
 import { Layers } from "../layers";
 import { Menu } from "../menu";
+import { ShortcutPopUp } from "../shortcut-popup";
 import { SideViews } from "../side-views";
 import { SliceSlider } from "../slice-slider";
 import { Toolbar } from "../toolbar";
@@ -48,6 +49,7 @@ const ColumnCenter = styled.div`
   flex: 1;
   flex-direction: column;
   justify-content: flex-start;
+  min-width: 0;
 `;
 
 const ColumnRight = styled.div`
@@ -91,12 +93,12 @@ export const UIOverlay = observer<UIOverlayProps>(
     }, [store, containerRef]);
 
     const enterFloatingUI = useCallback(() => {
-      store?.editor.tools.setIsCursorOverFloatingUI(true);
+      store?.editor.activeDocument?.tools.setIsCursorOverFloatingUI(true);
     }, [store]);
     const leaveFloatingUI = useCallback(
       (event: React.PointerEvent) => {
         if (event.pointerType === "touch") return;
-        store?.editor.tools.setIsCursorOverFloatingUI(false);
+        store?.editor.activeDocument?.tools.setIsCursorOverFloatingUI(false);
       },
       [store],
     );
@@ -117,7 +119,7 @@ export const UIOverlay = observer<UIOverlayProps>(
         onPointerLeave={leaveFloatingUI}
         ref={containerRef}
       >
-        {!store?.editor.image && (
+        {!store?.editor.activeDocument?.layers.length && (
           <StartTextContainer>
             <Text tx="start" />
           </StartTextContainer>
@@ -140,7 +142,10 @@ export const UIOverlay = observer<UIOverlayProps>(
               icon="export"
               tooltipTx="export"
               tooltipPosition="left"
-              onPointerDown={store?.editor.quickExport}
+              onPointerDown={
+                (store?.editor.activeDocument?.activeLayer as ImageLayer)
+                  ?.quickExport
+              }
               isActive={false}
             />
             <ViewSettings />

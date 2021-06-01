@@ -67,15 +67,6 @@ export const ListIcon = styled(Icon).withConfig({
     `}
 `;
 
-export const ListFirstIcon = styled.div`
-  width: 20px;
-  height: 20px;
-  border-radius: 10px;
-  margin-right: 10px;
-  background-color: #d0c068;
-  cursor: pointer;
-`;
-
 export const List: React.FC<ListProps> = ({ children, ...rest }) => (
   <ListContainer {...rest}>{children}</ListContainer>
 );
@@ -123,7 +114,8 @@ export const ListItem: React.FC<ListItemProps> = ({
             />
           ) : (
             <ListIcon
-              as={Color}
+              as={!icon.icon ? Color : undefined}
+              icon={icon.icon}
               color={icon.color}
               isDisabled={disableIcon}
               ref={iconRef as React.Ref<HTMLDivElement>}

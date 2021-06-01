@@ -42,7 +42,7 @@ export class RootStore implements ISerializable<RootSnapshot> {
   public pointerDispatch?: IDispatch;
 
   constructor(protected config: RootStoreConfig = {}) {
-    this.editor = new Editor({
+    this.editor = new Editor(undefined, {
       persist: this.persist,
       persistImmediately: this.persistImmediately,
       setDirty: action(this.setIsDirty),
@@ -67,7 +67,7 @@ export class RootStore implements ISerializable<RootSnapshot> {
       setRef: action,
     });
     deepObserve(this.editor, this.persist, {
-      exclude: Editor.excludeFromSnapshotTracking,
+      exclusionAttribute: "excludeFromSnapshotTracking",
     });
   }
 
@@ -158,6 +158,7 @@ export class RootStore implements ISerializable<RootSnapshot> {
     localStorage.clear();
     await this.config.storageBackend?.clear();
 
+    this.setIsDirty(false);
     window.location.reload();
   };
 }

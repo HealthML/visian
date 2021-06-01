@@ -3,103 +3,114 @@ import hotkeys from "hotkeys-js";
 
 import { skipSlices } from "../constants";
 
-import { RootStore, ToolType } from "../models";
+import { ImageLayer, RootStore } from "../models";
 
 export const setUpHotKeys = (store: RootStore): IDisposer => {
   // Tool Selection
   hotkeys("h", (event) => {
     event.preventDefault();
-    store.editor.tools.setActiveTool(ToolType.Navigate);
+    store.editor.activeDocument?.tools.setActiveTool("navigation-tool");
   });
   hotkeys("c", (event) => {
     event.preventDefault();
-    store.editor.tools.setActiveTool(ToolType.Crosshair);
+    if (!store.editor.activeDocument?.has3DLayers) return;
+    store.editor.activeDocument?.tools.setActiveTool("crosshair-tool");
   });
   hotkeys("b", (event) => {
     event.preventDefault();
-    store.editor.tools.setActiveTool(ToolType.Brush);
+    store.editor.activeDocument?.tools.setActiveTool("pixel-brush");
   });
   hotkeys("s", (event) => {
     event.preventDefault();
-    store.editor.tools.setActiveTool(ToolType.SmartBrush);
+    store.editor.activeDocument?.tools.setActiveTool("smart-brush");
   });
   hotkeys("e", (event) => {
     event.preventDefault();
-    store.editor.tools.setActiveTool(ToolType.Eraser);
+    store.editor.activeDocument?.tools.setActiveTool("pixel-eraser");
   });
   hotkeys("o", (event) => {
     event.preventDefault();
-    store.editor.tools.setActiveTool(ToolType.Outline);
+    store.editor.activeDocument?.tools.setActiveTool("outline-tool");
   });
 
   // Tools
   hotkeys("del,backspace", (event) => {
     event.preventDefault();
-    store.editor.tools.clearSlice();
+    store.editor.activeDocument?.tools.setActiveTool("clear-image");
   });
   hotkeys("ctrl+del,ctrl+backspace", (event) => {
     event.preventDefault();
-    store.editor.tools.clearImage();
+    store.editor.activeDocument?.tools.setActiveTool("clear-image");
   });
 
   // Brush Size
   hotkeys("*", (event) => {
     // "+" doesn't currently work with hotkeys-js (https://github.com/jaywcjlove/hotkeys/issues/270)
     if (event.key === "+" && !event.ctrlKey) {
-      store.editor.tools.incrementBrushSize();
+      store.editor.activeDocument?.tools.incrementBrushSize();
     }
   });
   hotkeys("-", () => {
-    store.editor.tools.decrementBrushSize();
+    store.editor.activeDocument?.tools.decrementBrushSize();
   });
 
   // Undo/Redo
   hotkeys("ctrl+z", () => {
-    store.editor.undoRedo.undo();
+    store.editor.activeDocument?.history.undo();
   });
   hotkeys("ctrl+shift+z,ctrl+y", () => {
-    store.editor.undoRedo.redo();
+    store.editor.activeDocument?.history.redo();
   });
 
   // Layer Controls
   hotkeys("m", () => {
-    store.editor.setIsAnnotationVisible(!store.editor.isAnnotationVisible);
+    store.editor.activeDocument?.activeLayer?.setIsVisible(
+      !store.editor.activeDocument.activeLayer.isVisible,
+    );
   });
 
   // View Types
   hotkeys("1", () => {
-    store.editor.viewSettings.setMainViewType(ViewType.Transverse);
+    store.editor.activeDocument?.viewport2D.setMainViewType(
+      ViewType.Transverse,
+    );
   });
   hotkeys("2", () => {
-    store.editor.viewSettings.setMainViewType(ViewType.Sagittal);
+    store.editor.activeDocument?.viewport2D.setMainViewType(ViewType.Sagittal);
   });
   hotkeys("3", () => {
-    store.editor.viewSettings.setMainViewType(ViewType.Coronal);
+    store.editor.activeDocument?.viewport2D.setMainViewType(ViewType.Coronal);
   });
   hotkeys("0", () => {
-    store.editor.viewSettings.toggleSideViews();
+    store.editor.activeDocument?.viewport2D.toggleSideViews();
   });
 
   // Slice Navigation
   hotkeys("up", (event) => {
     event.preventDefault();
-    store.editor.viewSettings.stepSelectedSlice(1);
+    store.editor.activeDocument?.viewport2D.stepSelectedSlice(undefined, 1);
   });
   hotkeys("shift+up", (event) => {
     event.preventDefault();
-    store.editor.viewSettings.stepSelectedSlice(skipSlices);
+    store.editor.activeDocument?.viewport2D.stepSelectedSlice(
+      undefined,
+      skipSlices,
+    );
   });
   hotkeys("down", (event) => {
     event.preventDefault();
-    store.editor.viewSettings.stepSelectedSlice(-1);
+    store.editor.activeDocument?.viewport2D.stepSelectedSlice(undefined, -1);
   });
   hotkeys("shift+down", (event) => {
     event.preventDefault();
-    store.editor.viewSettings.stepSelectedSlice(-skipSlices);
+    store.editor.activeDocument?.viewport2D.stepSelectedSlice(
+      undefined,
+      -skipSlices,
+    );
   });
   hotkeys("alt+0", (event) => {
     event.preventDefault();
-    store.editor.viewSettings.setSelectedVoxel();
+    store.editor.activeDocument?.viewSettings.setSelectedVoxel();
   });
 
   // Zoom
@@ -107,31 +118,32 @@ export const setUpHotKeys = (store: RootStore): IDisposer => {
     // "+" doesn't currently work with hotkeys-js (https://github.com/jaywcjlove/hotkeys/issues/270)
     if (event.key === "+" && event.ctrlKey) {
       event.preventDefault();
-      store.editor.viewSettings.zoomIn();
+      store.editor.activeDocument?.viewport2D.zoomIn();
     }
   });
   hotkeys("ctrl+-", (event) => {
     event.preventDefault();
-    store.editor.viewSettings.zoomOut();
+    store.editor.activeDocument?.viewport2D.zoomOut();
   });
   hotkeys("ctrl+0", (event) => {
     event.preventDefault();
-    store.editor.viewSettings.setZoomLevel();
-    store.editor.viewSettings.setOffset();
+    store.editor.activeDocument?.viewport2D.setZoomLevel();
+    store.editor.activeDocument?.viewport2D.setOffset();
   });
 
   // Save & Export
   hotkeys("ctrl+s", (event) => {
     event.preventDefault();
-    store.persistImmediately();
+    store.editor.activeDocument?.save();
   });
   hotkeys("ctrl+e", (event) => {
     event.preventDefault();
-    store.editor.quickExport();
+    (store.editor.activeDocument?.activeLayer as ImageLayer)?.quickExport?.();
   });
   hotkeys("ctrl+shift+e", (event) => {
     event.preventDefault();
-    store.editor.quickExportSlice();
+    (store.editor.activeDocument
+      ?.activeLayer as ImageLayer)?.quickExportSlice?.();
   });
 
   return () => hotkeys.unbind();

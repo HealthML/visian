@@ -33,6 +33,7 @@
     },
     "editor": { "tags": [] },
     "editor-e2e": { "tags": [], "implicitDependencies": ["editor"] },
-    "utils": { "tags": [] }
+    "utils": { "tags": [] },
+    "rendering": { "tags": [] }
   }
 }

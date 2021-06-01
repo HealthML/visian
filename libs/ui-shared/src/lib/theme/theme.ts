@@ -30,6 +30,7 @@ const colorModes = {
     text: "rgba(0,0,0,0.8)",
     lightText: "rgba(0,0,0,0.4)",
     background: "#fff",
+    foreground: "#000",
     primary: "#00f",
     secondary: "#00a",
     gray: "rgba(0,0,0,0.5)",
@@ -50,11 +51,13 @@ const colorModes = {
     sideViewBorder: "rgba(0, 0, 0, 0.3)",
 
     ...dataColors,
+    Mercury: "#000000",
   },
   dark: {
     text: "rgba(255,255,255,0.8)",
     lightText: "rgba(255,255,255,0.4)",
     background: "#0C0E1B",
+    foreground: "#fff",
     primary: "#0cf",
     secondary: "#f0e",
     gray: "rgba(255,255,255,0.5)",

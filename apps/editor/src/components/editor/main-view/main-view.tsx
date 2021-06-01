@@ -9,24 +9,24 @@ import React, { useCallback } from "react";
 import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
-import { ToolType } from "../../../models";
+import { ToolName } from "../../../models";
 
 const SyledCanvas = styled(WebGLCanvas)<
   WebGLCanvasProps & {
-    activeTool?: ToolType;
+    activeTool?: ToolName;
     isDrawable?: boolean;
-    isNavigationDragged?: boolean;
+    isToolInUse?: boolean;
   }
 >`
   cursor: ${(props) => {
     switch (props.activeTool) {
-      case ToolType.Navigate:
-        if (props.isNavigationDragged) document.body.style.cursor = "grabbing";
-        return props.isNavigationDragged ? "grabbing" : "grab";
+      case "navigation-tool":
+        if (props.isToolInUse) document.body.style.cursor = "grabbing";
+        return props.isToolInUse ? "grabbing" : "grab";
 
-      case ToolType.Crosshair:
-      case ToolType.Outline:
-      case ToolType.OutlineEraser:
+      case "crosshair-tool":
+      case "outline-tool":
+      case "outline-eraser":
         return "crosshair";
 
       case undefined:
@@ -53,14 +53,14 @@ export const MainView = observer<{}, HTMLCanvasElement>(
     );
 
     const handlePointerOut = useCallback(() => {
-      store?.editor.tools.setIsCursorOverDrawableArea(false);
+      store?.editor.activeDocument?.tools.setIsCursorOverDrawableArea(false);
     }, [store]);
 
     return (
       <SyledCanvas
-        activeTool={store?.editor.tools.activeTool}
-        isDrawable={store?.editor.tools.canDraw}
-        isNavigationDragged={store?.editor.tools.isNavigationDragged}
+        activeTool={store?.editor.activeDocument?.tools.activeTool?.name}
+        isDrawable={store?.editor.activeDocument?.tools.canDraw}
+        isToolInUse={store?.editor.activeDocument?.tools.isToolInUse}
         onContextMenu={preventDefault}
         onPointerDown={handlePointerDown}
         onPointerOut={handlePointerOut}

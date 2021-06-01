@@ -1,4 +1,4 @@
-import { ScreenAlignedQuad } from "@visian/utils";
+import { ScreenAlignedQuad } from "@visian/rendering";
 import { IReactionDisposer, reaction } from "mobx";
 import * as THREE from "three";
 

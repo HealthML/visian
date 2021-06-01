@@ -36,7 +36,9 @@ export const DropSheet: React.FC<DropSheetProps> = observer(
             const item = event.dataTransfer.items[0];
             const entry = item?.webkitGetAsEntry();
             const dirFiles: File[] = [];
+            let dirName: string | undefined;
             if (entry && entry.isDirectory) {
+              dirName = entry.name;
               const dirReader = entry.createReader();
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
               const entries = await new Promise<any[]>((resolve) => {
@@ -64,9 +66,12 @@ export const DropSheet: React.FC<DropSheetProps> = observer(
             }
 
             if (dirFiles.length) {
-              await store?.editor.importImage(dirFiles);
+              await store?.editor.activeDocument?.importImage(
+                dirFiles,
+                dirName,
+              );
             } else {
-              await store?.editor.importImage(files[0]);
+              await store?.editor.activeDocument?.importImage(files[0]);
             }
             store?.setError();
           } catch (error) {
@@ -76,7 +81,7 @@ export const DropSheet: React.FC<DropSheetProps> = observer(
             });
           }
           setIsLoadingImage(false);
-          store?.editor.tools.setIsCursorOverFloatingUI(false);
+          store?.editor.activeDocument?.tools.setIsCursorOverFloatingUI(false);
           onDropCompleted();
         })();
       },
@@ -89,7 +94,7 @@ export const DropSheet: React.FC<DropSheetProps> = observer(
         (async () => {
           setIsLoadingAnnotation(true);
           try {
-            await store?.editor.importAnnotation(files[0]);
+            await store?.editor.activeDocument?.importAnnotation(files[0]);
             store?.setError();
           } catch (error) {
             store?.setError({
@@ -98,7 +103,7 @@ export const DropSheet: React.FC<DropSheetProps> = observer(
             });
           }
           setIsLoadingAnnotation(false);
-          store?.editor.tools.setIsCursorOverFloatingUI(false);
+          store?.editor.activeDocument?.tools.setIsCursorOverFloatingUI(false);
           onDropCompleted();
         })();
       },

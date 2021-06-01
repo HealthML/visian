@@ -29,10 +29,49 @@ export interface IParameter<T = unknown> {
   tooltipTx?: string;
   tooltipPosition?: TooltipPosition;
 
+  /** The default value this parameter is reset to. */
+  defaultValue: T;
   /** The parameter's current value. */
   value: T;
   /** Sets the parameter's current value. */
-  setValue: (value: T) => void;
+  setValue(value: T): void;
+  reset(): void;
+}
+
+/** A boolean parameter, typically displayed as a checkbox or switch. */
+export interface IBooleanParameter extends IParameter<boolean> {
+  kind: "bool";
+}
+
+/** A button parameter, used to invoke some action. */
+export interface IButtonParameter<T = void> extends IParameter<T> {
+  kind: "button";
+
+  /** A user-defined callback that is invoked when the button is pressed. */
+  onClick?: (name: string, value: T) => void;
+
+  /** A callback that should be invoked when the button is pressed. */
+  handleClick(): void;
+}
+
+/** An option that can be choosen for an enum parameter. */
+export interface IEnumParameterOption<T> {
+  label?: string;
+  labelTx?: string;
+
+  tooltip?: string;
+  tooltipTx?: string;
+  tooltipPosition?: TooltipPosition;
+
+  value: T;
+}
+
+/** A class selection parameter, typically displayed as a select field or switch. */
+export interface IEnumParameter<T> extends IParameter<T> {
+  kind: "enum";
+
+  /** The options to choose from. */
+  options: IEnumParameterOption<T>[];
 }
 
 /** A numeric parameter, typically displayed as a slider. */
@@ -65,29 +104,7 @@ export interface INumberParameter extends IParameter<number> {
   extendBeyondMinMax?: boolean;
 }
 
-/** A boolean parameter, typically displayed as a checkbox or switch. */
-export interface IBooleanParameter extends IParameter<boolean> {
-  kind: "bool";
-}
-
 /** A text parameter, typically displayed as a text field. */
 export interface IStringParameter extends IParameter<string> {
   kind: "string";
-}
-
-/** A class selection parameter, typically displayed as a select field or switch. */
-export interface IEnumParameter<T> extends IParameter<T> {
-  kind: "enum";
-
-  /** The options to choose from. */
-  options: {
-    label?: string;
-    labelTx?: string;
-
-    tooltip?: string;
-    tooltipTx?: string;
-    tooltipPosition?: TooltipPosition;
-
-    value: T;
-  }[];
 }

@@ -1,4 +1,5 @@
-import { IDisposable, ScreenAlignedQuad } from "@visian/utils";
+import { ScreenAlignedQuad } from "@visian/rendering";
+import { IDisposable } from "@visian/utils";
 import * as THREE from "three";
 
 import { RenderParams, RenderSubject } from "./types";
