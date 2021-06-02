@@ -102,8 +102,12 @@ export class SharedUniforms implements IDisposable {
           : 0;
       }),
       autorun(() => {
-        this.uniforms.uLaoIntensity.value =
-          editor.activeDocument?.viewSettings.brightness ?? 1;
+        const brightness = editor.activeDocument?.viewSettings.brightness ?? 1;
+        const factor =
+          editor.activeDocument?.viewport3D.activeTransferFunction
+            ?.laoBrightnessFactor ?? 1;
+
+        this.uniforms.uLaoIntensity.value = brightness * factor;
       }),
       autorun(() => {
         const customTransferFunction =

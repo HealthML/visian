@@ -109,6 +109,8 @@ export class ConeTransferFunction
       coneDirection: observable,
       setConeDirection: action,
     });
+
+    this.laoBrightnessFactor = 2.5;
   }
 
   public activate() {

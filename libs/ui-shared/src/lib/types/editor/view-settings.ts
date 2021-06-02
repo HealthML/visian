@@ -112,6 +112,8 @@ export interface ITransferFunction<N extends string> {
   /** This transfer function's parameters. */
   params: { [name: string]: IParameter };
 
+  laoBrightnessFactor: number;
+
   /** Called when the transfer function becomes active. */
   activate(): void;
 }

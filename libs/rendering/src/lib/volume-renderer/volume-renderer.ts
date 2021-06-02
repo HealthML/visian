@@ -202,6 +202,7 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
           annotationLayer?.color,
 
           editor.activeDocument?.viewSettings.viewMode,
+          editor.activeDocument?.viewSettings.brightness,
           editor.activeDocument?.viewport3D.shadingMode,
           editor.activeDocument?.viewport3D.opacity,
           transferFunction?.name,

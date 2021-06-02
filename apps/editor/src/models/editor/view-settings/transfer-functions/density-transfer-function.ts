@@ -56,6 +56,8 @@ export class DensityTransferFunction extends TransferFunction<"density"> {
       },
       document,
     );
+
+    this.laoBrightnessFactor = 2.5;
   }
 
   public activate() {

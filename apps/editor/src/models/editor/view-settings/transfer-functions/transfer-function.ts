@@ -28,6 +28,8 @@ export class TransferFunction<N extends string>
 
   public params!: { [name: string]: Parameter };
 
+  public laoBrightnessFactor = 1;
+
   constructor(
     config: TransferFunctionConfig<N>,
     protected document: IDocument,
