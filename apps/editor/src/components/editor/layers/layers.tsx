@@ -26,7 +26,8 @@ const LayerList = styled(List)`
 
 const LayerListItem = observer<{
   layer: ILayer;
-}>(({ layer }) => {
+  isLast?: boolean;
+}>(({ layer, isLast }) => {
   const toggleAnnotationVisibility = useCallback(() => {
     layer.setIsVisible(!layer.isVisible);
   }, [layer]);
@@ -69,6 +70,7 @@ const LayerListItem = observer<{
         trailingIcon={layer.isVisible ? "eye" : "eyeCrossed"}
         disableTrailingIcon={layer.isVisible}
         onTrailingIconPress={toggleAnnotationVisibility}
+        isLast={isLast}
       />
       <LayerSettings
         layer={layer}
@@ -98,6 +100,7 @@ export const Layers: React.FC = observer(() => {
   const [buttonRef, setButtonRef] = useState<HTMLButtonElement | null>(null);
 
   const layers = store?.editor.activeDocument?.layers;
+  const layerCount = layers?.length;
   return (
     <>
       <FloatingUIButton
@@ -115,9 +118,14 @@ export const Layers: React.FC = observer(() => {
         position="right"
       >
         <LayerList>
-          {layers?.length ? (
-            layers.map((layer) => (
-              <LayerListItem key={layer.id} layer={layer} />
+          {layerCount ? (
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            layers!.map((layer, index) => (
+              <LayerListItem
+                key={layer.id}
+                layer={layer}
+                isLast={index === layerCount - 1}
+              />
             ))
           ) : (
             <ListItem isLast>

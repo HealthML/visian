@@ -1,9 +1,10 @@
 import {
+  BooleanParam,
   Modal,
+  NumberParam,
+  Param,
   PointerButton,
   preventDefault,
-  SliderField,
-  Switch,
   Tool,
   Toolbar as GenericToolbar,
 } from "@visian/ui-shared";
@@ -12,26 +13,16 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
-import { NumberParameter, ToolName } from "../../../models";
+import { ToolName } from "../../../models";
 
 // Styled Components
 const StyledToolbar = styled(GenericToolbar)`
   margin-bottom: 16px;
 `;
 
-const SpacedSliderField = styled(SliderField)`
-  margin-bottom: 14px;
-`;
-
 const BrushModal = styled(Modal)`
   padding-bottom: 0px;
 `;
-
-// Menu Items
-const adaptiveBrushSizeSwitchItems = [
-  { labelTx: "on", value: true },
-  { labelTx: "off", value: false },
-];
 
 export const Toolbar: React.FC = observer(() => {
   const store = useStore();
@@ -131,44 +122,30 @@ export const Toolbar: React.FC = observer(() => {
       >
         {activeTool?.isBrush && (
           <>
-            <Switch
+            <BooleanParam
               labelTx="adaptive-brush-size"
-              items={adaptiveBrushSizeSwitchItems}
               value={Boolean(
                 store?.editor.activeDocument?.tools.useAdaptiveBrushSize,
               )}
-              onChange={
+              setValue={
                 store?.editor.activeDocument?.tools.setUseAdaptiveBrushSize
               }
             />
-            <SpacedSliderField
+            <NumberParam
               labelTx="brush-size"
               min={0}
               max={250}
               scaleType="quadratic"
               value={store?.editor.activeDocument?.tools.brushSize}
-              onChange={setBrushSize}
+              setValue={setBrushSize}
             />
           </>
         )}
 
         {activeTool &&
-          // TODO: Extract param rendering
-          Object.values(activeTool.params).map((param) =>
-            param.kind === "number" ? (
-              <SpacedSliderField
-                key={param.name}
-                labelTx={param.labelTx}
-                label={param.label}
-                min={(param as NumberParameter).min}
-                max={(param as NumberParameter).max}
-                value={(param as NumberParameter).value}
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                onChange={(param as NumberParameter).setValue as any}
-              />
-            ) : // TODO: Render UI for other param kinds
-            null,
-          )}
+          Object.values(activeTool.params).map((param) => (
+            <Param {...param} key={param.name} />
+          ))}
       </BrushModal>
     </StyledToolbar>
   );
