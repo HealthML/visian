@@ -62,6 +62,9 @@ export interface ITool<N extends string> {
   /** This tool's parameters. */
   params: { [name: string]: IParameter };
 
+  /** Returns `true` if the tool supports the current view mode & layer kind. */
+  canActivate(): boolean;
+
   /**
    * Called when the tool becomes active.
    *

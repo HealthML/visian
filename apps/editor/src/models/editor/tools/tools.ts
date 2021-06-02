@@ -143,8 +143,34 @@ export class Tools
     this.applySnapshot(snapshot);
   }
 
+  protected getDefaultToolName(): ToolName {
+    return "navigation-tool";
+  }
+
   public get activeTool(): ITool<ToolName> | undefined {
-    return this.activeToolName ? this.tools[this.activeToolName] : undefined;
+    const toolName =
+      this.activeToolName === "crosshair-tool" && !this.document?.has3DLayers
+        ? "pixel-brush"
+        : this.activeToolName;
+    const tool = toolName ? this.tools[toolName] : undefined;
+
+    return tool && !tool.canActivate()
+      ? this.tools[this.getDefaultToolName()]
+      : tool;
+  }
+
+  public setActiveTool(nameOrTool?: ToolName | ITool<ToolName>): void {
+    const previouslyActiveTool = this.activeTool;
+
+    this.activeToolName = nameOrTool
+      ? typeof nameOrTool === "string"
+        ? nameOrTool
+        : nameOrTool.name
+      : "pixel-brush";
+
+    if (this.activeTool?.canActivate()) {
+      this.activeTool.activate(previouslyActiveTool);
+    }
   }
 
   private get pixelWidth() {
@@ -196,19 +222,6 @@ export class Tools
 
   public get useAdaptiveBrushSize(): boolean {
     return this.lockedBrushSize === undefined;
-  }
-
-  public setActiveTool(nameOrTool?: ToolName | ITool<ToolName>): void {
-    const previouslyActiveTool = this.activeTool;
-
-    // TODO: Handle cases when the active tool does not support the current
-    // view mode or layer kind
-    this.activeToolName = nameOrTool
-      ? typeof nameOrTool === "string"
-        ? nameOrTool
-        : nameOrTool.name
-      : "pixel-brush";
-    this.activeTool?.activate(previouslyActiveTool);
   }
 
   public setBrushSize(value = 5, showPreview = false): void {

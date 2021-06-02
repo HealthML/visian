@@ -76,29 +76,11 @@ export const Toolbar: React.FC = observer(() => {
     [store],
   );
 
-  // The crosshair cannot be used for 2D scans
-  // TODO: This logic should probably be moved into the model
-  if (
-    activeToolName === "crosshair-tool" &&
-    !store?.editor.activeDocument?.has3DLayers
-  ) {
-    store?.editor.activeDocument?.tools.setActiveTool();
-  }
-
-  // TODO: Handle cases when the active tool does not support the current view
-  // mode or layer kind
-
-  const viewMode = store?.editor.activeDocument?.viewSettings.viewMode;
-  const activeLayerKind = store?.editor.activeDocument?.activeLayer?.kind;
   return (
     <StyledToolbar ref={ref}>
       {store?.editor.activeDocument?.tools.toolGroups.map(
         ({ activeTool: tool }, index) =>
-          (!tool.supportedViewModes ||
-            (viewMode && tool.supportedViewModes.includes(viewMode))) &&
-          (!tool.supportedLayerKinds ||
-            (activeLayerKind &&
-              tool.supportedLayerKinds.includes(activeLayerKind))) && (
+          tool.canActivate() && (
             <Tool
               key={index}
               icon={tool.icon}

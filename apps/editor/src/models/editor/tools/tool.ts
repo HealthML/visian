@@ -80,6 +80,18 @@ export class Tool<N extends string>
       : undefined;
   }
 
+  public canActivate(): boolean {
+    return Boolean(
+      (!this.supportedViewModes ||
+        this.supportedViewModes.includes(
+          this.document.viewSettings.viewMode,
+        )) &&
+        (!this.supportedLayerKinds ||
+          (this.document.activeLayer &&
+            this.supportedLayerKinds.includes(this.document.activeLayer.kind))),
+    );
+  }
+
   public activate(_previousTool?: ITool<N>): void {
     // Intentionally left blank
   }
