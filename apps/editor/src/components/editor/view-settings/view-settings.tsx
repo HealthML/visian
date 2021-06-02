@@ -1,9 +1,9 @@
 import {
   BooleanParam,
+  EnumParam,
   FloatingUIButton,
   Modal,
   NumberParam,
-  Switch,
   useMultiRef,
 } from "@visian/ui-shared";
 import { ViewType } from "@visian/utils";
@@ -84,11 +84,11 @@ export const ViewSettings: React.FC = observer(() => {
                 store?.editor.activeDocument?.viewport2D.toggleSideViews
               }
             />
-            <Switch
+            <EnumParam
               labelTx="main-view-type"
-              items={mainViewTypeSwitchItems}
+              options={mainViewTypeSwitchItems}
               value={store?.editor.activeDocument?.viewport2D.mainViewType}
-              onChange={
+              setValue={
                 store?.editor.activeDocument?.viewport2D.setMainViewType
               }
             />

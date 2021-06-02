@@ -3,10 +3,10 @@ import {
   color,
   ColorMode,
   Divider,
+  EnumParam,
   FloatingUIButton,
   Modal,
   sheetNoise,
-  Switch,
   Theme,
   useTranslation,
 } from "@visian/ui-shared";
@@ -122,17 +122,17 @@ export const Menu: React.FC<MenuProps> = observer(({ onOpenShortcutPopUp }) => {
         baseZIndex={theme.zIndices.modal + 1}
         onOutsidePress={closeModal}
       >
-        <Switch
+        <EnumParam
           labelTx="theme"
-          items={themeSwitchItems}
-          onChange={setTheme}
+          options={themeSwitchItems}
           value={store?.colorMode || "dark"}
+          setValue={setTheme}
         />
-        <Switch
+        <EnumParam
           labelTx="language"
-          items={languageSwitchItems}
+          options={languageSwitchItems}
           value={i18n.language.split("-")[0]}
-          onChange={setLanguage}
+          setValue={setLanguage}
         />
         {feedbackMailAddress && (
           <>

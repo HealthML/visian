@@ -3,6 +3,7 @@ import React from "react";
 import { IParameter } from "../../types";
 import { BooleanParam, BooleanParamProps } from "./boolean-param";
 import { ButtonParam, ButtonParamProps } from "./button-param";
+import { EnumParam, EnumParamProps } from "./enum-param";
 import { NumberParam, NumberParamProps } from "./number-param";
 import { NumberRangeParam, NumberRangeParamProps } from "./number-range-param";
 import { IsLastProps } from "./types";
@@ -15,6 +16,8 @@ export const Param: React.FC<ParamProps> = (props) => {
       return <BooleanParam {...(props as BooleanParamProps)} />;
     case "button":
       return <ButtonParam {...(props as ButtonParamProps)} />;
+    case "enum":
+      return <EnumParam {...(props as EnumParamProps)} />;
     case "number":
       return <NumberParam {...(props as NumberParamProps)} />;
     case "number-range":
