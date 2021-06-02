@@ -47,6 +47,10 @@ export class TransferFunction<N extends string>
     });
   }
 
+  public activate(): void {
+    // Intentionally left blank
+  }
+
   // Serialization
   public toJSON(): TransferFunctionSnapshot<N> {
     return {

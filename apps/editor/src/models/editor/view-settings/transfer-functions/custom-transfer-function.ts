@@ -69,6 +69,12 @@ export class CustomTransferFunction
     );
   }
 
+  public activate() {
+    if (!this.document.getLayer(this.params.image.value as string)) {
+      this.params.image.reset();
+    }
+  }
+
   protected setTexture(texture?: THREE.Texture) {
     this.document.viewport3D.onTransferFunctionChange();
 

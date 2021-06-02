@@ -111,6 +111,9 @@ export interface ITransferFunction<N extends string> {
 
   /** This transfer function's parameters. */
   params: { [name: string]: IParameter };
+
+  /** Called when the transfer function becomes active. */
+  activate(): void;
 }
 
 export interface IConeTransferFunction extends ITransferFunction<"fc-cone"> {

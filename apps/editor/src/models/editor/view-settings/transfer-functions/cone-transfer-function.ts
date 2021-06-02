@@ -111,12 +111,23 @@ export class ConeTransferFunction
     });
   }
 
+  public activate() {
+    if (!this.document.getLayer(this.params.annotation.value as string)) {
+      this.params.annotation.reset();
+    }
+
+    if (!this.document.getLayer(this.params.image.value as string)) {
+      this.params.image.reset();
+    }
+  }
+
   public setConeDirection(x: number, y: number, z: number) {
     this.document.viewport3D.onTransferFunctionChange();
 
     this.coneDirection.set(x, y, z);
   }
 
+  // Serialization
   public toJSON(): ConeTransferFunctionSnapshot {
     return {
       ...super.toJSON(),

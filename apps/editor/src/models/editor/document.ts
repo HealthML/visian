@@ -145,7 +145,7 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
   }
 
   public getLayer(id: string): ILayer | undefined {
-    return this.layerMap[id];
+    return id ? this.layerMap[id] : undefined;
   }
 
   public setActiveLayer = (idOrLayer?: string | ILayer): void => {

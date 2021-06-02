@@ -83,4 +83,14 @@ export class EdgesTransferFunction extends TransferFunction<"fc-edges"> {
       }) as Parameter<unknown>,
     ]);
   }
+
+  public activate() {
+    if (!this.document.getLayer(this.params.annotation.value as string)) {
+      this.params.annotation.reset();
+    }
+
+    if (!this.document.getLayer(this.params.image.value as string)) {
+      this.params.image.reset();
+    }
+  }
 }

@@ -5,7 +5,7 @@ import {
   ITransferFunction,
 } from "@visian/ui-shared";
 import { ISerializable } from "@visian/utils";
-import { action, computed, makeObservable, observable } from "mobx";
+import { action, autorun, computed, makeObservable, observable } from "mobx";
 import { Matrix4 } from "three";
 import {
   ConeTransferFunction,
@@ -93,6 +93,12 @@ export class Viewport3D
     } else {
       this.reset();
     }
+
+    autorun(() => {
+      if (this.document.viewSettings.viewMode === "3D") {
+        this.activeTransferFunction?.activate();
+      }
+    });
   }
 
   public get activeTransferFunction():
@@ -130,6 +136,8 @@ export class Viewport3D
         ? nameOrTransferFunction
         : nameOrTransferFunction.name
       : "fc-edges";
+
+    this.activeTransferFunction?.activate();
   }
 
   public setIsInXR(value = false) {

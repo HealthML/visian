@@ -57,4 +57,14 @@ export class DensityTransferFunction extends TransferFunction<"density"> {
       document,
     );
   }
+
+  public activate() {
+    if (!this.document.getLayer(this.params.annotation.value as string)) {
+      this.params.annotation.reset();
+    }
+
+    if (!this.document.getLayer(this.params.image.value as string)) {
+      this.params.image.reset();
+    }
+  }
 }
