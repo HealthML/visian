@@ -1,5 +1,7 @@
 export * from "./boolean-param";
+export * from "./button-param";
 export * from "./number-param";
 export * from "./number-range-param";
 
 export * from "./param";
+export * from "./types";

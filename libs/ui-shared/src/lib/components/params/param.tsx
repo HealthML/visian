@@ -2,15 +2,19 @@ import React from "react";
 
 import { IParameter } from "../../types";
 import { BooleanParam, BooleanParamProps } from "./boolean-param";
+import { ButtonParam, ButtonParamProps } from "./button-param";
 import { NumberParam, NumberParamProps } from "./number-param";
 import { NumberRangeParam, NumberRangeParamProps } from "./number-range-param";
+import { IsLastProps } from "./types";
 
-export type ParamProps = IParameter;
+export type ParamProps = IParameter & IsLastProps;
 
 export const Param: React.FC<ParamProps> = (props) => {
   switch (props.kind) {
     case "bool":
       return <BooleanParam {...(props as BooleanParamProps)} />;
+    case "button":
+      return <ButtonParam {...(props as ButtonParamProps)} />;
     case "number":
       return <NumberParam {...(props as NumberParamProps)} />;
     case "number-range":

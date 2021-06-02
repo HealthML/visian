@@ -1,5 +1,5 @@
 import {
-  Button,
+  ButtonParam,
   color,
   ColorMode,
   Divider,
@@ -23,30 +23,22 @@ const MenuButton = styled(FloatingUIButton)`
   margin-right: 16px;
 `;
 
-const FeedbackButton = styled(Button)`
-  width: 100%;
+const FeedbackButton = styled(ButtonParam)`
   background: ${sheetNoise}, ${color("blueSheet")};
   border-color: ${color("blueBorder")};
-  margin-bottom: 16px;
 
   &:active {
     border-color: rgba(0, 133, 255, 1);
   }
 `;
 
-const ResetButton = styled(Button)`
-  width: 100%;
+const ResetButton = styled(ButtonParam)`
   background: ${sheetNoise}, ${color("redSheet")};
   border-color: ${color("redBorder")};
-  margin-bottom: 16px;
 
   &:active {
     border-color: rgba(202, 51, 69, 1);
   }
-`;
-
-const ShortcutButton = styled(Button)`
-  width: 100%;
 `;
 
 // Menu Items
@@ -100,8 +92,8 @@ export const Menu: React.FC<MenuProps> = observer(({ onOpenShortcutPopUp }) => {
   );
 
   const openShortcutPopUp = useCallback(
-    (event: React.SyntheticEvent) => {
-      event.stopPropagation();
+    (event?: React.PointerEvent) => {
+      event?.stopPropagation();
       if (onOpenShortcutPopUp) onOpenShortcutPopUp();
     },
     [onOpenShortcutPopUp],
@@ -145,11 +137,14 @@ export const Menu: React.FC<MenuProps> = observer(({ onOpenShortcutPopUp }) => {
         {feedbackMailAddress && (
           <>
             <Divider />
-            <FeedbackButton tx="ideas-feedback" onPointerDown={sendFeedback} />
+            <FeedbackButton
+              labelTx="ideas-feedback"
+              handlePress={sendFeedback}
+            />
           </>
         )}
-        <ResetButton tx="clear-data" onPointerDown={destroy} />
-        <ShortcutButton text="Shortcuts" onPointerDown={openShortcutPopUp} />
+        <ResetButton labelTx="clear-data" handlePress={destroy} />
+        <ButtonParam label="Shortcuts" handlePress={openShortcutPopUp} isLast />
       </Modal>
     </>
   );

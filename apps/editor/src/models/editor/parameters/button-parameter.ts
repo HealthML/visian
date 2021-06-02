@@ -1,3 +1,4 @@
+import type React from "react";
 import { IButtonParameter } from "@visian/ui-shared";
 
 import { Parameter, ParameterConfig } from "./parameter";
@@ -12,15 +13,19 @@ export class ButtonParameter<T = void>
   public static readonly kind = "button";
   public readonly kind = "button";
 
-  public onClick?: (name: string, value: T) => void;
+  public onPress?: (
+    name: string,
+    value: T,
+    event?: PointerEvent | React.PointerEvent,
+  ) => void;
 
   constructor(config: ButtonParameterConfig<T>) {
     super(config);
-    this.onClick = config.onClick;
+    this.onPress = config.onClick;
   }
 
-  public handleClick(): void {
-    if (!this.onClick) return;
-    this.onClick(this.name, this.value);
+  public handlePress(event?: PointerEvent | React.PointerEvent): void {
+    if (!this.onPress) return;
+    this.onPress(this.name, this.value, event);
   }
 }
