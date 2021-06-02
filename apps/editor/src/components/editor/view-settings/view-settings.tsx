@@ -1,27 +1,18 @@
 import {
+  BooleanParam,
   FloatingUIButton,
   Modal,
-  SliderField,
+  NumberParam,
   Switch,
   useMultiRef,
 } from "@visian/ui-shared";
 import { ViewType } from "@visian/utils";
 import { observer } from "mobx-react-lite";
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
 
-// Styled Components
-const SpacedSliderField = styled(SliderField)`
-  margin-bottom: 16px;
-`;
-
 // Menu Items
-const sideViewsSwitchItems = [
-  { labelTx: "on", value: true },
-  { labelTx: "off", value: false },
-];
 const mainViewTypeSwitchItems = [
   { label: "T", value: ViewType.Transverse, tooltipTx: "transverse" },
   { label: "S", value: ViewType.Sagittal, tooltipTx: "sagittal" },
@@ -84,13 +75,12 @@ export const ViewSettings: React.FC = observer(() => {
       >
         {store?.editor.activeDocument?.has3DLayers && (
           <>
-            <Switch
+            <BooleanParam
               labelTx="side-views"
-              items={sideViewsSwitchItems}
               value={Boolean(
                 store?.editor.activeDocument?.viewport2D.showSideViews,
               )}
-              onChange={
+              setValue={
                 store?.editor.activeDocument?.viewport2D.toggleSideViews
               }
             />
@@ -104,21 +94,21 @@ export const ViewSettings: React.FC = observer(() => {
             />
           </>
         )}
-        <SpacedSliderField
+        <NumberParam
           labelTx="contrast"
-          unlockValueLabelRange
+          extendBeyondMinMax
           min={0}
           max={2}
           value={store?.editor.activeDocument?.viewSettings.contrast}
-          onChange={setContrast}
+          setValue={setContrast}
         />
-        <SliderField
+        <NumberParam
           labelTx="brightness"
-          unlockValueLabelRange
+          extendBeyondMinMax
           min={0}
           max={2}
           value={store?.editor.activeDocument?.viewSettings.brightness}
-          onChange={setBrightness}
+          setValue={setBrightness}
         />
       </Modal>
     </>

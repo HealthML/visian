@@ -4,14 +4,14 @@ import { IBooleanParameter } from "../../types";
 import { Switch } from "../switch";
 
 const booleanSwitchItems = [
-  { labelTx: "on", value: true },
   { labelTx: "off", value: false },
+  { labelTx: "on", value: true },
 ];
 
 export type BooleanParamProps = IBooleanParameter &
   Omit<React.HTMLAttributes<HTMLDivElement>, "defaultValue" | "onChange">;
 
-export const BooleanParam: React.FC<BooleanParamProps> = ({
+export const BooleanParam: React.FC<Partial<BooleanParamProps>> = ({
   labelTx,
   label,
   value,

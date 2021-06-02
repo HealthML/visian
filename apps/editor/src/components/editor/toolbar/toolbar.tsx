@@ -1,10 +1,10 @@
 import {
+  BooleanParam,
   Modal,
+  NumberParam,
   Param,
   PointerButton,
   preventDefault,
-  SliderField,
-  Switch,
   Tool,
   Toolbar as GenericToolbar,
 } from "@visian/ui-shared";
@@ -20,19 +20,9 @@ const StyledToolbar = styled(GenericToolbar)`
   margin-bottom: 16px;
 `;
 
-const SpacedSliderField = styled(SliderField)`
-  margin-bottom: 14px;
-`;
-
 const BrushModal = styled(Modal)`
   padding-bottom: 0px;
 `;
-
-// Menu Items
-const adaptiveBrushSizeSwitchItems = [
-  { labelTx: "on", value: true },
-  { labelTx: "off", value: false },
-];
 
 export const Toolbar: React.FC = observer(() => {
   const store = useStore();
@@ -132,23 +122,22 @@ export const Toolbar: React.FC = observer(() => {
       >
         {activeTool?.isBrush && (
           <>
-            <Switch
+            <BooleanParam
               labelTx="adaptive-brush-size"
-              items={adaptiveBrushSizeSwitchItems}
               value={Boolean(
                 store?.editor.activeDocument?.tools.useAdaptiveBrushSize,
               )}
-              onChange={
+              setValue={
                 store?.editor.activeDocument?.tools.setUseAdaptiveBrushSize
               }
             />
-            <SpacedSliderField
+            <NumberParam
               labelTx="brush-size"
               min={0}
               max={250}
               scaleType="quadratic"
               value={store?.editor.activeDocument?.tools.brushSize}
-              onChange={setBrushSize}
+              setValue={setBrushSize}
             />
           </>
         )}

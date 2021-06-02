@@ -11,7 +11,7 @@ const SpacedSliderField = styled(SliderField)`
 export type NumberParamProps = INumberParameter &
   React.HTMLAttributes<HTMLDivElement>;
 
-export const NumberParam: React.FC<NumberParamProps> = ({
+export const NumberParam: React.FC<Partial<NumberParamProps>> = ({
   extendBeyondMinMax,
   labelTx,
   label,
