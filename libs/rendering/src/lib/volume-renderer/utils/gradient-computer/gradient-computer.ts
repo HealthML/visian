@@ -128,10 +128,6 @@ export class GradientComputer implements IDisposable {
     );
   }
 
-  private get volumeTexture() {
-    return this.sharedUniforms.uniforms.uVolume.value as THREE.Texture;
-  }
-
   public dispose() {
     this.gradientMaterial.dispose();
     this.reactionDisposers.forEach((disposer) => disposer());
@@ -170,22 +166,13 @@ export class GradientComputer implements IDisposable {
 
   private renderFirstDerivative() {
     // TODO: Set uInputDimensions depending on image.
-    const { volumeTexture } = this;
-    if (!volumeTexture) return;
 
     this.gradientMaterial.uniforms.uInputDimensions.value = 1;
     this.gradientMaterial.setGradientMode(GradientMode.First);
 
     this.renderer.setRenderTarget(this.firstDerivativeRenderTarget);
 
-    const { magFilter } = volumeTexture;
-    volumeTexture.magFilter = THREE.NearestFilter;
-    volumeTexture.needsUpdate = true;
-
     this.screenAlignedQuad.renderWith(this.renderer);
-
-    volumeTexture.magFilter = magFilter;
-    volumeTexture.needsUpdate = true;
 
     this.renderer.setRenderTarget(null);
 
@@ -243,22 +230,12 @@ export class GradientComputer implements IDisposable {
   };
 
   private renderOutputDerivative() {
-    const { volumeTexture } = this;
-    if (!volumeTexture) return;
-
     this.gradientMaterial.uniforms.uInputDimensions.value = 1;
     this.gradientMaterial.setGradientMode(GradientMode.Output);
 
     this.renderer.setRenderTarget(this.outputDerivativeRenderTarget);
 
-    const { magFilter } = volumeTexture;
-    volumeTexture.magFilter = THREE.NearestFilter;
-    volumeTexture.needsUpdate = true;
-
     this.screenAlignedQuad.renderWith(this.renderer);
-
-    volumeTexture.magFilter = magFilter;
-    volumeTexture.needsUpdate = true;
 
     this.renderer.setRenderTarget(null);
 
