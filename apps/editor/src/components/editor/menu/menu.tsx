@@ -107,6 +107,10 @@ export const Menu: React.FC<MenuProps> = observer(({ onOpenShortcutPopUp }) => {
     [onOpenShortcutPopUp],
   );
 
+  const destroy = useCallback(() => {
+    store?.destroy();
+  }, [store]);
+
   const theme = useTheme() as Theme;
   return (
     <>
@@ -144,7 +148,7 @@ export const Menu: React.FC<MenuProps> = observer(({ onOpenShortcutPopUp }) => {
             <FeedbackButton tx="ideas-feedback" onPointerDown={sendFeedback} />
           </>
         )}
-        <ResetButton tx="clear-data" onPointerDown={store?.destroy} />
+        <ResetButton tx="clear-data" onPointerDown={destroy} />
         <ShortcutButton text="Shortcuts" onPointerDown={openShortcutPopUp} />
       </Modal>
     </>

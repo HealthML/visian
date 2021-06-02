@@ -149,10 +149,10 @@ export class RootStore implements ISerializable<RootSnapshot> {
     this.shouldPersist = true;
   }
 
-  public destroy = async () => {
-    if (!this.shouldPersist) return;
+  public destroy = async (forceDestroy?: boolean) => {
+    if (!this.shouldPersist && !forceDestroy) return;
     // eslint-disable-next-line no-alert
-    if (!window.confirm("Erase all application data?")) return;
+    if (!forceDestroy && !window.confirm("Erase all application data?")) return;
 
     this.shouldPersist = false;
     localStorage.clear();
