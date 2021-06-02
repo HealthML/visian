@@ -6,7 +6,7 @@ import { LayerSettingsProps } from "./layer-settings.props";
 
 export const LayerSettings = observer<LayerSettingsProps>(
   ({ layer, ...rest }) => (
-    <Modal {...rest} labelTx="layer-settings">
+    <Modal {...rest} labelTx="layer-settings" onReset={layer.resetSettings}>
       <NumberParam
         labelTx="opacity"
         value={layer.opacity}

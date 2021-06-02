@@ -4,7 +4,10 @@ import { action, computed, makeObservable, observable } from "mobx";
 import { Matrix4 } from "three";
 import { v4 as uuidv4 } from "uuid";
 
-import { defaultAnnotationOpacity } from "../../../constants";
+import {
+  defaultAnnotationColor,
+  defaultAnnotationOpacity,
+} from "../../../constants";
 
 export interface LayerSnapshot {
   kind: string;
@@ -73,6 +76,7 @@ export class Layer implements ILayer, ISerializable<LayerSnapshot> {
         setColor: action,
         setIsVisible: action,
         setOpacity: action,
+        resetSettings: action,
         setTransformation: action,
         applySnapshot: action,
       },
@@ -131,6 +135,12 @@ export class Layer implements ILayer, ISerializable<LayerSnapshot> {
 
   public setOpacity = (value?: number): void => {
     this.opacityOverride = value;
+  };
+
+  public resetSettings = (): void => {
+    this.setBlendMode();
+    this.setColor(this.isAnnotation ? defaultAnnotationColor : undefined);
+    this.setOpacity();
   };
 
   public setTransformation = (value?: Matrix4): void => {
