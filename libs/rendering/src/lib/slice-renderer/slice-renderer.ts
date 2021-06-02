@@ -178,6 +178,8 @@ export class SliceRenderer implements IDisposable, ISliceRenderer {
   };
 
   private animate = () => {
+    if (this.editor.activeDocument?.viewSettings.viewMode !== "2D") return;
+
     if (this.lazyRenderTriggered) {
       this.eagerRender();
     }

@@ -113,6 +113,15 @@ export interface ITransferFunction<N extends string> {
   params: { [name: string]: IParameter };
 }
 
+export interface IConeTransferFunction extends ITransferFunction<"fc-cone"> {
+  coneDirection: Vector;
+  setConeDirection(x: number, y: number, z: number): void;
+}
+
+export interface ICustomTransferFunction extends ITransferFunction<"custom"> {
+  texture?: THREE.Texture;
+}
+
 /** View settings for the 3D viewport. */
 export interface IViewport3D<N extends string> {
   /** Indicates if the user is currently in AR or VR. */
@@ -120,6 +129,7 @@ export interface IViewport3D<N extends string> {
 
   /** The 3D camera's world matrix. */
   cameraMatrix: Matrix4;
+  volumeSpaceCameraPosition: [number, number, number];
 
   /** The volumetric rendering opacity, scales the density of every voxel. */
   opacity: number;
@@ -128,8 +138,11 @@ export interface IViewport3D<N extends string> {
   activeTransferFunction?: Reference<ITransferFunction<N>>;
   transferFunctions: Record<N, ITransferFunction<N>>;
 
+  onTransferFunctionChange: () => void;
+
   setIsInXR(value?: boolean): void;
   setCameraMatrix(value?: Matrix4): void;
+  setVolumeSpaceCameraPosition(x: number, y: number, z: number): void;
   setOpacity(value?: number): void;
   setShadingMode(value?: ShadingMode): void;
   setActiveTransferFunction(

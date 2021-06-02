@@ -1,0 +1,64 @@
+import { IEditor, IImageLayer } from "@visian/ui-shared";
+import { IDisposable, IDisposer } from "@visian/utils";
+import { autorun } from "mobx";
+import * as THREE from "three";
+import { RenderedImage } from "../rendered-image";
+import { SharedUniforms } from "./utils";
+
+import { VolumeMaterial } from "./volume-material";
+
+/** A volume domain. */
+export class Volume extends THREE.Mesh implements IDisposable {
+  private disposers: IDisposer[] = [];
+  constructor(
+    editor: IEditor,
+    sharedUniforms: SharedUniforms,
+    firstDerivative: THREE.Texture,
+    secondDerivative: THREE.Texture,
+    outputDerivative: THREE.Texture,
+    lao: THREE.Texture,
+  ) {
+    super(
+      new THREE.BoxGeometry(1, 1, 1),
+      new VolumeMaterial(
+        sharedUniforms,
+        firstDerivative,
+        secondDerivative,
+        outputDerivative,
+        lao,
+      ),
+    );
+
+    // The coordinate system in medical images usually has the object
+    // laying on the side. We want it to be upright.
+    this.rotateX(-Math.PI / 2);
+
+    this.disposers.push(
+      autorun(() => {
+        const imageId =
+          editor.activeDocument?.viewport3D.activeTransferFunction?.params.image
+            ?.value;
+
+        if (!imageId) return;
+
+        const imageLayer = editor.activeDocument?.getLayer(imageId as string);
+
+        if (!imageLayer) return;
+
+        const image = (imageLayer as IImageLayer).image as RenderedImage;
+
+        const scale = image.voxelCount
+          .clone(false)
+          .multiply(image.voxelSpacing)
+          .multiplyScalar(0.001);
+
+        this.scale.set(scale.x, scale.y, scale.z);
+      }),
+    );
+  }
+
+  public dispose() {
+    (this.material as VolumeMaterial).dispose();
+    this.disposers.forEach((disposer) => disposer());
+  }
+}

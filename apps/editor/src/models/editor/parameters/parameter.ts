@@ -20,6 +20,8 @@ export interface ParameterConfig<T = unknown> {
   tooltipTx?: string;
   tooltipPosition?: TooltipPosition;
 
+  onBeforeValueChange?: () => void;
+
   defaultValue: T;
 }
 
@@ -40,6 +42,8 @@ export class Parameter<T = unknown>
   public value!: T;
   public defaultValue!: T;
 
+  private onBeforeValueChange?: () => void;
+
   constructor(config: ParameterConfig<T>) {
     this.name = config.name;
     this.label = config.label;
@@ -49,6 +53,7 @@ export class Parameter<T = unknown>
     this.tooltipPosition = config.tooltipPosition;
     this.value = config.defaultValue;
     this.defaultValue = config.defaultValue;
+    this.onBeforeValueChange = config.onBeforeValueChange;
 
     makeObservable(this, {
       value: observable,
@@ -59,10 +64,18 @@ export class Parameter<T = unknown>
   }
 
   public setValue = (value: T): void => {
+    if (value !== this.value && this.onBeforeValueChange) {
+      this.onBeforeValueChange();
+    }
+
     this.value = value;
   };
 
   public reset(): void {
+    if (this.value !== this.defaultValue && this.onBeforeValueChange) {
+      this.onBeforeValueChange();
+    }
+
     this.value = this.defaultValue;
   }
 

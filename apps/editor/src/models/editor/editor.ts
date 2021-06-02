@@ -1,5 +1,10 @@
-import { SliceRenderer } from "@visian/rendering";
-import { IEditor, ISliceRenderer, Theme } from "@visian/ui-shared";
+import { SliceRenderer, VolumeRenderer } from "@visian/rendering";
+import {
+  IEditor,
+  ISliceRenderer,
+  Theme,
+  IVolumeRenderer,
+} from "@visian/ui-shared";
 import { IDisposable, ISerializable } from "@visian/utils";
 import { action, makeObservable, observable } from "mobx";
 import * as THREE from "three";
@@ -22,6 +27,7 @@ export class Editor
   public activeDocument?: Document;
 
   public sliceRenderer?: ISliceRenderer;
+  public volumeRenderer?: IVolumeRenderer;
   public renderers: [
     THREE.WebGLRenderer,
     THREE.WebGLRenderer,
@@ -45,6 +51,7 @@ export class Editor
       new THREE.WebGLRenderer({ alpha: true }),
     ];
     this.sliceRenderer = new SliceRenderer(this);
+    this.volumeRenderer = new VolumeRenderer(this);
 
     this.applySnapshot(snapshot);
   }

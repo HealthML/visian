@@ -209,7 +209,7 @@ export class VolumeRendererModel {
   };
 
   public setCutAwayConeDirection = (x: number, y: number, z: number) => {
-    if (!this.isConeLinkedToCamera) this.onTransferFunctionChange();
+    this.onTransferFunctionChange();
 
     this.cutAwayConeDirection.set(x, y, z);
   };

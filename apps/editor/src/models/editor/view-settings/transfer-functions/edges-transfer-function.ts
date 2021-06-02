@@ -1,7 +1,6 @@
 import { IDocument } from "@visian/ui-shared";
 import {
   BooleanParameter,
-  ColorParameter,
   LayerParameter,
   NumberParameter,
   NumberRangeParameter,
@@ -28,6 +27,7 @@ export class EdgesTransferFunction extends TransferFunction<"fc-edges"> {
           filter: (layer) =>
             layer.isAnnotation &&
             layer.id !== (this.params.image as LayerParameter)?.value,
+          onBeforeValueChange: document.viewport3D.onTransferFunctionChange,
         },
         document,
       ) as Parameter<unknown>,
@@ -39,6 +39,7 @@ export class EdgesTransferFunction extends TransferFunction<"fc-edges"> {
           // We allow other annotations as the image, but not the selected annotation.
           filter: (layer) =>
             layer.id !== (this.params.annotation as LayerParameter)?.value,
+          onBeforeValueChange: document.viewport3D.onTransferFunctionChange,
         },
         document,
       ) as Parameter<unknown>,
@@ -46,18 +47,15 @@ export class EdgesTransferFunction extends TransferFunction<"fc-edges"> {
         name: "useFocus",
         labelTx: "use-focus",
         defaultValue: true,
+        onBeforeValueChange: document.viewport3D.onTransferFunctionChange,
       }) as Parameter<unknown>,
       new NumberRangeParameter({
-        name: "range",
+        name: "densityRange",
         labelTx: "density-range",
         defaultValue: [0.05, 1],
         min: 0,
         max: 1,
-      }) as Parameter<unknown>,
-      new ColorParameter({
-        name: "focusColor",
-        labelTx: "focus-color",
-        defaultValue: "rgba(255, 255, 255, 1)",
+        onBeforeValueChange: document.viewport3D.onTransferFunctionChange,
       }) as Parameter<unknown>,
       new NumberParameter({
         name: "contextOpacity",
@@ -66,6 +64,16 @@ export class EdgesTransferFunction extends TransferFunction<"fc-edges"> {
         min: 0,
         max: 1,
         scaleType: "quadratic",
+        onBeforeValueChange: document.viewport3D.onTransferFunctionChange,
+      }) as Parameter<unknown>,
+      new NumberParameter({
+        name: "focusOpacity",
+        labelTx: "focus-opacity",
+        defaultValue: 1,
+        min: 0,
+        max: 1,
+        scaleType: "quadratic",
+        onBeforeValueChange: document.viewport3D.onTransferFunctionChange,
       }) as Parameter<unknown>,
     ]);
   }

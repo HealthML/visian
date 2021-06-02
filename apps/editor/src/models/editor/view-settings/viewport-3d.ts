@@ -32,7 +32,6 @@ export interface Viewport3DSnapshot<N extends string> {
   transferFunctions: TransferFunctionSnapshot<N>[];
 }
 
-// TODO: Handle lighting mode supression when transfer function changes.
 export class Viewport3D
   implements
     IViewport3D<TransferFunctionName>,
@@ -42,9 +41,11 @@ export class Viewport3D
   public isInXR!: boolean;
 
   public cameraMatrix!: Matrix4;
+  public volumeSpaceCameraPosition: [number, number, number] = [0, 0, 0];
 
   public opacity!: number;
   public shadingMode!: ShadingMode;
+  public suppressesShadingMode?: ShadingMode;
 
   protected activeTransferFunctionName?: TransferFunctionName;
   public transferFunctions: Record<
@@ -52,24 +53,31 @@ export class Viewport3D
     TransferFunction<TransferFunctionName>
   >;
 
+  private shadingTimeout?: NodeJS.Timer;
+
   constructor(
     snapshot: Partial<Viewport3DSnapshot<TransferFunctionName>> | undefined,
     protected document: IDocument,
   ) {
-    makeObservable(this, {
+    makeObservable<this, "setSuppressedShadingMode">(this, {
       isInXR: observable,
       cameraMatrix: observable.ref,
+      volumeSpaceCameraPosition: observable,
       opacity: observable,
       shadingMode: observable,
+      suppressesShadingMode: observable,
       transferFunctions: observable,
 
       activeTransferFunction: computed,
 
       setCameraMatrix: action,
+      setVolumeSpaceCameraPosition: action,
       setActiveTransferFunction: action,
       setIsInXR: action,
       setOpacity: action,
       setShadingMode: action,
+      setSuppressedShadingMode: action,
+      onTransferFunctionChange: action,
       applySnapshot: action,
     });
 
@@ -100,11 +108,23 @@ export class Viewport3D
     this.cameraMatrix = value || new Matrix4();
   }
 
+  public setVolumeSpaceCameraPosition(x: number, y: number, z: number) {
+    this.volumeSpaceCameraPosition = [x, y, z];
+
+    if (!this.transferFunctions["fc-cone"].params.isConeLocked.value) {
+      (this.transferFunctions[
+        "fc-cone"
+      ] as ConeTransferFunction).setConeDirection(x, y, z);
+    }
+  }
+
   public setActiveTransferFunction(
     nameOrTransferFunction?:
       | TransferFunctionName
       | ITransferFunction<TransferFunctionName>,
   ): void {
+    this.onTransferFunctionChange();
+
     this.activeTransferFunctionName = nameOrTransferFunction
       ? typeof nameOrTransferFunction === "string"
         ? nameOrTransferFunction
@@ -117,12 +137,37 @@ export class Viewport3D
   }
 
   public setOpacity(value = 1) {
+    this.onTransferFunctionChange();
+
     this.opacity = Math.min(1, Math.max(0, value));
   }
 
   public setShadingMode(value: ShadingMode = "lao") {
     this.shadingMode = value;
   }
+
+  protected setSuppressedShadingMode(value?: ShadingMode) {
+    this.suppressesShadingMode = value;
+  }
+
+  public onTransferFunctionChange = () => {
+    if (this.shadingMode === "none" && !this.suppressesShadingMode) return;
+
+    if (!this.suppressesShadingMode) {
+      this.setSuppressedShadingMode(this.shadingMode);
+      this.setShadingMode("none");
+    }
+
+    if (this.shadingTimeout !== undefined) {
+      clearTimeout(this.shadingTimeout);
+    }
+    this.shadingTimeout = setTimeout(() => {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      this.setShadingMode(this.suppressesShadingMode!);
+      this.setSuppressedShadingMode();
+      this.shadingTimeout = undefined;
+    }, 200);
+  };
 
   public reset = (): void => {
     this.setIsInXR();
