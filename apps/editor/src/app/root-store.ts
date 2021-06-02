@@ -17,7 +17,7 @@ export const setupRootStore = async () => {
     // TODO: Resolve old data models after breaking changes more gracefully
     // eslint-disable-next-line no-alert
     window.alert("Data model outdated. Reset required.");
-    await store.destroy();
+    await store.destroy(true);
   }
 
   window.addEventListener("beforeunload", (event) => {

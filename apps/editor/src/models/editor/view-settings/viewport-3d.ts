@@ -56,12 +56,6 @@ export class Viewport3D
     snapshot: Partial<Viewport3DSnapshot<TransferFunctionName>> | undefined,
     protected document: IDocument,
   ) {
-    if (snapshot) {
-      this.applySnapshot(snapshot);
-    } else {
-      this.reset();
-    }
-
     makeObservable(this, {
       isInXR: observable,
       cameraMatrix: observable.ref,
@@ -85,6 +79,12 @@ export class Viewport3D
       "fc-cone": new ConeTransferFunction(document),
       custom: new CustomTransferFunction(document),
     };
+
+    if (snapshot) {
+      this.applySnapshot(snapshot);
+    } else {
+      this.reset();
+    }
   }
 
   public get activeTransferFunction():
@@ -161,8 +161,9 @@ export class Viewport3D
       const transferFunction = this.transferFunctions[
         transferFunctionSnapshot.name
       ];
-      if (transferFunction)
+      if (transferFunction) {
         transferFunction.applySnapshot(transferFunctionSnapshot);
+      }
     });
 
     return Promise.resolve();

@@ -1,6 +1,6 @@
 import { IParameter, TooltipPosition } from "@visian/ui-shared";
 import { ISerializable } from "@visian/utils";
-import { action, makeObservable, observable } from "mobx";
+import { action, makeObservable, observable, toJS } from "mobx";
 
 export interface ParameterSnapshot<T = unknown> {
   name: string;
@@ -70,7 +70,7 @@ export class Parameter<T = unknown>
   public toJSON(): ParameterSnapshot<T> {
     return {
       name: this.name,
-      value: this.value,
+      value: toJS(this.value),
     };
   }
 

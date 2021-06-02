@@ -26,7 +26,7 @@ export class TransferFunction<N extends string>
   public label?: string;
   public labelTx?: string;
 
-  public params: { [name: string]: Parameter };
+  public params!: { [name: string]: Parameter };
 
   constructor(
     config: TransferFunctionConfig<N>,
@@ -35,12 +35,16 @@ export class TransferFunction<N extends string>
     this.name = config.name;
     this.label = config.label;
     this.labelTx = config.labelTx || config.name;
-    this.params = {};
-    config.params?.forEach((param) => {
-      this.params[param.name] = param;
-    });
+    this.initializeParams(config.params);
 
     makeObservable(this, { params: observable });
+  }
+
+  protected initializeParams(params?: Parameter[]): void {
+    this.params = {};
+    params?.forEach((param) => {
+      this.params[param.name] = param;
+    });
   }
 
   // Serialization
