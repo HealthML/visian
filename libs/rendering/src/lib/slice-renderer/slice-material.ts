@@ -95,6 +95,7 @@ export class ImageSliceMaterial extends SliceMaterial {
         uContrast: { value: editor.activeDocument?.viewSettings.contrast },
         uBrightness: { value: editor.activeDocument?.viewSettings.brightness },
         uForegroundColor: { value: new THREE.Color("white") },
+        uImageOpacity: { value: 1 },
       },
     );
 
@@ -121,6 +122,15 @@ export class ImageSliceMaterial extends SliceMaterial {
             },
           ),
         );
+        editor.sliceRenderer?.lazyRender();
+      }),
+      autorun(() => {
+        if (!editor.activeDocument || editor.activeDocument.layers.length < 2) {
+          return;
+        }
+
+        this.uniforms.uImageOpacity.value =
+          editor.activeDocument?.layers[1].opacity;
         editor.sliceRenderer?.lazyRender();
       }),
     );

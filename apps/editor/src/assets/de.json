@@ -41,7 +41,8 @@
   "layers": "Ebenen",
   "no-layers": "Keine Ebenen geladen.",
   "untitled-layer": "Unbenannte Ebene",
-  "color-panel": "Farbe wählen",
+  "layer-settings": "Ebeneneinstellungen",
+  "opacity": "Deckkraft",
   "background-color": "Hintergrundfarbe",
 
   "view-settings": "Ansichtseinstellungen",
