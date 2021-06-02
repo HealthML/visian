@@ -76,6 +76,7 @@ export interface ILayer {
 
   setColor(value?: string): void;
   setIsVisible(value?: boolean): void;
+  setOpacity(value?: number): void;
 
   /** Sets this layer's parent layer, typically the group it is contained in. */
   setParent(idOrLayer?: string | ILayer): void;

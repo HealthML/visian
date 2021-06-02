@@ -124,9 +124,9 @@ export class Layer implements ILayer, ISerializable<LayerSnapshot> {
   };
 
   public get opacity(): number {
-    return this.opacityOverride ?? this.isAnnotation
-      ? defaultAnnotationOpacity
-      : 1;
+    return (
+      this.opacityOverride ?? (this.isAnnotation ? defaultAnnotationOpacity : 1)
+    );
   }
 
   public setOpacity = (value?: number): void => {

@@ -9,7 +9,6 @@ import { InputLabel } from "../text";
 import { ListPositionProps } from "./types";
 
 const LayerList = styled(List)`
-  margin-top: -16px;
   margin-bottom: 10px;
 `;
 
@@ -44,8 +43,8 @@ export const ColorParam: React.FC<Partial<ColorParamProps>> = ({
   ...rest
 }) => (
   <>
+    {(labelTx || label) && <InputLabel tx={labelTx} text={label} />}
     <LayerList>
-      {(labelTx || label) && <InputLabel tx={labelTx} text={label} />}
       {(!isFirst || labelTx || label) && <ListDivider />}
       {value && <ListItem icon={{ color: value }} label={value} />}
     </LayerList>
