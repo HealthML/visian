@@ -88,15 +88,6 @@ export const ViewSettings: React.FC = observer(() => {
       >
         {store?.editor.activeDocument?.has3DLayers && (
           <>
-            <BooleanParam
-              labelTx="side-views"
-              value={Boolean(
-                store?.editor.activeDocument?.viewport2D.showSideViews,
-              )}
-              setValue={
-                store?.editor.activeDocument?.viewport2D.toggleSideViews
-              }
-            />
             <EnumParam
               labelTx="main-view-type"
               options={mainViewTypeSwitchItems}
@@ -107,6 +98,17 @@ export const ViewSettings: React.FC = observer(() => {
               }
               setValue={setViewType}
             />
+            {store?.editor.activeDocument?.viewSettings.viewMode === "2D" && (
+              <BooleanParam
+                labelTx="side-views"
+                value={Boolean(
+                  store?.editor.activeDocument?.viewport2D.showSideViews,
+                )}
+                setValue={
+                  store?.editor.activeDocument?.viewport2D.toggleSideViews
+                }
+              />
+            )}
           </>
         )}
         <NumberParam
