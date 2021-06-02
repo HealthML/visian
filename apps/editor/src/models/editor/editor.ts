@@ -53,6 +53,8 @@ export class Editor
     this.sliceRenderer = new SliceRenderer(this);
     this.volumeRenderer = new VolumeRenderer(this);
 
+    this.renderers[0].setAnimationLoop(this.animate);
+
     this.applySnapshot(snapshot);
   }
 
@@ -88,4 +90,9 @@ export class Editor
     );
     return Promise.resolve();
   }
+
+  private animate = () => {
+    this.sliceRenderer?.animate();
+    this.volumeRenderer?.animate();
+  };
 }

@@ -26,7 +26,7 @@ export class CustomTransferFunction
               labelTx: "image-layer",
               defaultValue: undefined,
               onBeforeValueChange: () =>
-                document.viewport3D.onTransferFunctionChange(),
+                document.viewport3D?.onTransferFunctionChange(),
             },
             document,
           ) as Parameter<unknown>,

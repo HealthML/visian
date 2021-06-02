@@ -219,7 +219,6 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
     );
 
     this.onCameraMove();
-    this.renderer.setAnimationLoop(this.animate);
   }
 
   public dispose = () => {
@@ -256,7 +255,7 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
     this.lazyRender();
   };
 
-  private animate = () => {
+  public animate = () => {
     if (this.editor.activeDocument?.viewSettings.viewMode !== "3D") return;
 
     this.gradientComputer.tick();

@@ -117,11 +117,11 @@ export class GradientComputer implements IDisposable {
             .focusOpacity?.value,
           editor.activeDocument?.viewport3D.opacity,
           editor.activeDocument?.viewport3D.activeTransferFunction?.params
-            .contextOpacity.value,
+            .contextOpacity?.value,
           editor.activeDocument?.viewport3D.activeTransferFunction?.params
-            .densityRange.value,
+            .densityRange?.value,
           editor.activeDocument?.viewport3D.activeTransferFunction?.params
-            .coneAngle.value,
+            .coneAngle?.value,
           editor.activeDocument?.viewport3D.activeTransferFunction?.name,
         ];
       }, this.updateOutputDerivative),
@@ -170,12 +170,14 @@ export class GradientComputer implements IDisposable {
 
   private renderFirstDerivative() {
     // TODO: Set uInputDimensions depending on image.
+    const { volumeTexture } = this;
+    if (!volumeTexture) return;
+
     this.gradientMaterial.uniforms.uInputDimensions.value = 1;
     this.gradientMaterial.setGradientMode(GradientMode.First);
 
     this.renderer.setRenderTarget(this.firstDerivativeRenderTarget);
 
-    const { volumeTexture } = this;
     const { magFilter } = volumeTexture;
     volumeTexture.magFilter = THREE.NearestFilter;
     volumeTexture.needsUpdate = true;
@@ -241,12 +243,14 @@ export class GradientComputer implements IDisposable {
   };
 
   private renderOutputDerivative() {
+    const { volumeTexture } = this;
+    if (!volumeTexture) return;
+
     this.gradientMaterial.uniforms.uInputDimensions.value = 1;
     this.gradientMaterial.setGradientMode(GradientMode.Output);
 
     this.renderer.setRenderTarget(this.outputDerivativeRenderTarget);
 
-    const { volumeTexture } = this;
     const { magFilter } = volumeTexture;
     volumeTexture.magFilter = THREE.NearestFilter;
     volumeTexture.needsUpdate = true;

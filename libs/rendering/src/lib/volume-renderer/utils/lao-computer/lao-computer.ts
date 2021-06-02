@@ -114,11 +114,11 @@ export class LAOComputer extends TiledRenderer {
             .focusOpacity?.value,
           editor.activeDocument?.viewport3D.opacity,
           editor.activeDocument?.viewport3D.activeTransferFunction?.params
-            .contextOpacity.value,
+            .contextOpacity?.value,
           editor.activeDocument?.viewport3D.activeTransferFunction?.params
-            .densityRange.value,
+            .densityRange?.value,
           editor.activeDocument?.viewport3D.activeTransferFunction?.params
-            .coneAngle.value,
+            .coneAngle?.value,
           editor.activeDocument?.viewport3D.activeTransferFunction?.name,
         ];
       }, this.setDirty),

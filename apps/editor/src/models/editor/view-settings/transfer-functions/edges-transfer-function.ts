@@ -28,7 +28,7 @@ export class EdgesTransferFunction extends TransferFunction<"fc-edges"> {
             layer.isAnnotation &&
             layer.id !== (this.params.image as LayerParameter)?.value,
           onBeforeValueChange: () =>
-            document.viewport3D.onTransferFunctionChange(),
+            document.viewport3D?.onTransferFunctionChange(),
         },
         document,
       ) as Parameter<unknown>,
@@ -41,7 +41,7 @@ export class EdgesTransferFunction extends TransferFunction<"fc-edges"> {
           filter: (layer) =>
             layer.id !== (this.params.annotation as LayerParameter)?.value,
           onBeforeValueChange: () =>
-            document.viewport3D.onTransferFunctionChange(),
+            document.viewport3D?.onTransferFunctionChange(),
         },
         document,
       ) as Parameter<unknown>,
@@ -50,7 +50,7 @@ export class EdgesTransferFunction extends TransferFunction<"fc-edges"> {
         labelTx: "use-focus",
         defaultValue: true,
         onBeforeValueChange: () =>
-          document.viewport3D.onTransferFunctionChange(),
+          document.viewport3D?.onTransferFunctionChange(),
       }) as Parameter<unknown>,
       new NumberRangeParameter({
         name: "densityRange",
@@ -59,7 +59,7 @@ export class EdgesTransferFunction extends TransferFunction<"fc-edges"> {
         min: 0,
         max: 1,
         onBeforeValueChange: () =>
-          document.viewport3D.onTransferFunctionChange(),
+          document.viewport3D?.onTransferFunctionChange(),
       }) as Parameter<unknown>,
       new NumberParameter({
         name: "contextOpacity",
@@ -69,7 +69,7 @@ export class EdgesTransferFunction extends TransferFunction<"fc-edges"> {
         max: 1,
         scaleType: "quadratic",
         onBeforeValueChange: () =>
-          document.viewport3D.onTransferFunctionChange(),
+          document.viewport3D?.onTransferFunctionChange(),
       }) as Parameter<unknown>,
       new NumberParameter({
         name: "focusOpacity",
@@ -79,7 +79,7 @@ export class EdgesTransferFunction extends TransferFunction<"fc-edges"> {
         max: 1,
         scaleType: "quadratic",
         onBeforeValueChange: () =>
-          document.viewport3D.onTransferFunctionChange(),
+          document.viewport3D?.onTransferFunctionChange(),
       }) as Parameter<unknown>,
     ]);
   }

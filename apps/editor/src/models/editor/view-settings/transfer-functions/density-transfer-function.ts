@@ -21,7 +21,7 @@ export class DensityTransferFunction extends TransferFunction<"density"> {
               defaultValue: undefined,
               filter: (layer) => layer.isAnnotation,
               onBeforeValueChange: () =>
-                document.viewport3D.onTransferFunctionChange(),
+                document.viewport3D?.onTransferFunctionChange(),
             },
             document,
           ) as Parameter<unknown>,
@@ -32,7 +32,7 @@ export class DensityTransferFunction extends TransferFunction<"density"> {
               defaultValue: undefined,
               filter: (layer) => !layer.isAnnotation,
               onBeforeValueChange: () =>
-                document.viewport3D.onTransferFunctionChange(),
+                document.viewport3D?.onTransferFunctionChange(),
             },
             document,
           ) as Parameter<unknown>,
@@ -41,7 +41,7 @@ export class DensityTransferFunction extends TransferFunction<"density"> {
             labelTx: "use-focus",
             defaultValue: true,
             onBeforeValueChange: () =>
-              document.viewport3D.onTransferFunctionChange(),
+              document.viewport3D?.onTransferFunctionChange(),
           }) as Parameter<unknown>,
           new NumberRangeParameter({
             name: "densityRange",
@@ -50,7 +50,7 @@ export class DensityTransferFunction extends TransferFunction<"density"> {
             min: 0,
             max: 1,
             onBeforeValueChange: () =>
-              document.viewport3D.onTransferFunctionChange(),
+              document.viewport3D?.onTransferFunctionChange(),
           }) as Parameter<unknown>,
         ],
       },

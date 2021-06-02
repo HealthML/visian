@@ -129,8 +129,6 @@ export class SliceRenderer implements IDisposable, ISliceRenderer {
         },
       ),
     );
-
-    this._renderers[0].setAnimationLoop(this.animate);
   }
 
   public dispose() {
@@ -177,7 +175,7 @@ export class SliceRenderer implements IDisposable, ISliceRenderer {
     this.lazyRender();
   };
 
-  private animate = () => {
+  public animate = () => {
     if (this.editor.activeDocument?.viewSettings.viewMode !== "2D") return;
 
     if (this.lazyRenderTriggered) {

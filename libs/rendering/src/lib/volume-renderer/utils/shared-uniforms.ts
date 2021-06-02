@@ -72,7 +72,7 @@ export class SharedUniforms implements IDisposable {
       autorun(() => {
         this.uniforms.uContextOpacity.value =
           editor.activeDocument?.viewport3D.activeTransferFunction?.params
-            .contextOpacity.value ?? 1;
+            .contextOpacity?.value ?? 1;
       }),
       autorun(() => {
         const rangeParameter =
@@ -89,7 +89,7 @@ export class SharedUniforms implements IDisposable {
       autorun(() => {
         this.uniforms.uConeAngle.value =
           editor.activeDocument?.viewport3D.activeTransferFunction?.params
-            .coneAngle.value ?? 1;
+            .coneAngle?.value ?? 1;
       }),
       autorun(() => {
         const shadingMode = editor.activeDocument?.viewport3D.shadingMode;

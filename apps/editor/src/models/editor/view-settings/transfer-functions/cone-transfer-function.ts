@@ -43,7 +43,7 @@ export class ConeTransferFunction
             layer.isAnnotation &&
             layer.id !== (this.params.image as LayerParameter)?.value,
           onBeforeValueChange: () =>
-            document.viewport3D.onTransferFunctionChange(),
+            document.viewport3D?.onTransferFunctionChange(),
         },
         document,
       ) as Parameter<unknown>,
@@ -56,7 +56,7 @@ export class ConeTransferFunction
           filter: (layer) =>
             layer.id !== (this.params.annotation as LayerParameter)?.value,
           onBeforeValueChange: () =>
-            document.viewport3D.onTransferFunctionChange(),
+            document.viewport3D?.onTransferFunctionChange(),
         },
         document,
       ) as Parameter<unknown>,
@@ -65,14 +65,14 @@ export class ConeTransferFunction
         labelTx: "use-focus",
         defaultValue: true,
         onBeforeValueChange: () =>
-          document.viewport3D.onTransferFunctionChange(),
+          document.viewport3D?.onTransferFunctionChange(),
       }) as Parameter<unknown>,
       new BooleanParameter({
         name: "isConeLocked",
         labelTx: "lock-cone",
         defaultValue: false,
         onBeforeValueChange: () =>
-          document.viewport3D.onTransferFunctionChange(),
+          document.viewport3D?.onTransferFunctionChange(),
       }) as Parameter<unknown>,
       new NumberParameter({
         name: "coneAngle",
@@ -81,7 +81,7 @@ export class ConeTransferFunction
         min: 0,
         max: Math.PI,
         onBeforeValueChange: () =>
-          document.viewport3D.onTransferFunctionChange(),
+          document.viewport3D?.onTransferFunctionChange(),
       }) as Parameter<unknown>,
       new NumberParameter({
         name: "contextOpacity",
@@ -91,7 +91,7 @@ export class ConeTransferFunction
         max: 1,
         scaleType: "quadratic",
         onBeforeValueChange: () =>
-          document.viewport3D.onTransferFunctionChange(),
+          document.viewport3D?.onTransferFunctionChange(),
       }) as Parameter<unknown>,
       new NumberParameter({
         name: "focusOpacity",
@@ -101,7 +101,7 @@ export class ConeTransferFunction
         max: 1,
         scaleType: "quadratic",
         onBeforeValueChange: () =>
-          document.viewport3D.onTransferFunctionChange(),
+          document.viewport3D?.onTransferFunctionChange(),
       }) as Parameter<unknown>,
     ]);
 

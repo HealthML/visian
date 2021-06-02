@@ -7,6 +7,8 @@ import type { IRenderLoopSubscriber } from "./render-loop-subscriber";
 export interface ISliceRenderer extends IDisposable {
   renderers: THREE.WebGLRenderer[];
 
+  animate: () => void;
+
   lazyRender(): void;
   eagerRender(): void;
   resize(): void;
