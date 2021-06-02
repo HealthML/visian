@@ -17,6 +17,7 @@ const mainViewTypeSwitchItems = [
   { label: "T", value: ViewType.Transverse, tooltipTx: "transverse" },
   { label: "S", value: ViewType.Sagittal, tooltipTx: "sagittal" },
   { label: "C", value: ViewType.Coronal, tooltipTx: "coronal" },
+  { label: "3D", value: "3D" },
 ];
 
 export const ViewSettings: React.FC = observer(() => {
@@ -55,6 +56,18 @@ export const ViewSettings: React.FC = observer(() => {
     [store],
   );
 
+  const setViewType = useCallback(
+    (viewType: ViewType | "3D") => {
+      if (viewType === "3D") {
+        store?.editor.activeDocument?.viewSettings.setViewMode("3D");
+      } else {
+        store?.editor.activeDocument?.viewSettings.setViewMode("2D");
+        store?.editor.activeDocument?.viewport2D.setMainViewType(viewType);
+      }
+    },
+    [store],
+  );
+
   return (
     <>
       <FloatingUIButton
@@ -87,10 +100,12 @@ export const ViewSettings: React.FC = observer(() => {
             <EnumParam
               labelTx="main-view-type"
               options={mainViewTypeSwitchItems}
-              value={store?.editor.activeDocument?.viewport2D.mainViewType}
-              setValue={
-                store?.editor.activeDocument?.viewport2D.setMainViewType
+              value={
+                store?.editor.activeDocument?.viewSettings.viewMode === "3D"
+                  ? "3D"
+                  : store?.editor.activeDocument?.viewport2D.mainViewType
               }
+              setValue={setViewType}
             />
           </>
         )}

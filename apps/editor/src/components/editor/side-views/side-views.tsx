@@ -65,7 +65,8 @@ export const SideViews = observer(() => {
   const store = useStore();
   const showSideViews =
     store?.editor.activeDocument?.has3DLayers &&
-    store.editor.activeDocument?.viewport2D.showSideViews;
+    store.editor.activeDocument.viewSettings.viewMode === "2D" &&
+    store.editor.activeDocument.viewport2D.showSideViews;
 
   // Ref Management
   const wrapperRef = useRef<HTMLDivElement>(null);
