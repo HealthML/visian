@@ -39,7 +39,7 @@ export class DensityTransferFunction extends TransferFunction<"density"> {
           new BooleanParameter({
             name: "useFocus",
             labelTx: "use-focus",
-            defaultValue: true,
+            defaultValue: false,
             onBeforeValueChange: () =>
               document.viewport3D?.onTransferFunctionChange(),
           }) as Parameter<unknown>,

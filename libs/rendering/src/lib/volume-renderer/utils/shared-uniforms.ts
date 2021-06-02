@@ -50,8 +50,11 @@ export class SharedUniforms implements IDisposable {
       }),
       autorun(() => {
         this.uniforms.uUseFocus.value =
-          editor.activeDocument?.viewport3D.activeTransferFunction?.params
-            .useFocus?.value ?? false;
+          (editor.activeDocument?.viewport3D.activeTransferFunction?.params
+            .annotation?.value &&
+            editor.activeDocument?.viewport3D.activeTransferFunction?.params
+              .useFocus?.value) ??
+          false;
       }),
       autorun(() => {
         this.uniforms.uFocusOpacity.value =
