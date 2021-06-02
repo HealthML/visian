@@ -25,7 +25,7 @@ const ListItemInner = styled.div`
   overflow: hidden;
 `;
 
-const ListDivider = styled(Divider)`
+export const ListDivider = styled(Divider)`
   margin-bottom: 0;
 `;
 

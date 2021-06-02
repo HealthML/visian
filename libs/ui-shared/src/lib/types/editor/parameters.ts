@@ -1,3 +1,4 @@
+import type React from "react";
 import type { SerializationMethod, TooltipPosition } from "../../components";
 import { ILayer } from "./layers";
 import type { ScaleType } from "./types";
@@ -49,13 +50,17 @@ export interface IButtonParameter<T = void> extends IParameter<T> {
   kind: "button";
 
   /** A user-defined callback that is invoked when the button is pressed. */
-  onClick?: (name: string, value: T) => void;
+  onPress?: (
+    name: string,
+    value: T,
+    event?: PointerEvent | React.PointerEvent,
+  ) => void;
 
   /** A callback that should be invoked when the button is pressed. */
-  handleClick(): void;
+  handlePress(event?: PointerEvent | React.PointerEvent): void;
 }
 
-/** An option that can be choosen for an enum parameter. */
+/** An option that can be chosen for an enum parameter. */
 export interface IEnumParameterOption<T> {
   label?: string;
   labelTx?: string;
