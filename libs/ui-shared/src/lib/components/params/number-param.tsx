@@ -34,6 +34,7 @@ export const NumberParam: React.FC<NumberParamProps> = ({
     min={min}
     max={max}
     scaleType={scaleType}
+    showValueLabel
     stepSize={stepSize}
     unlockValueLabelRange={extendBeyondMinMax}
     value={value}
