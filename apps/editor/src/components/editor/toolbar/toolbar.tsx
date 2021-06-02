@@ -1,5 +1,6 @@
 import {
   Modal,
+  Param,
   PointerButton,
   preventDefault,
   SliderField,
@@ -12,7 +13,7 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
-import { NumberParameter, ToolName } from "../../../models";
+import { ToolName } from "../../../models";
 
 // Styled Components
 const StyledToolbar = styled(GenericToolbar)`
@@ -153,22 +154,9 @@ export const Toolbar: React.FC = observer(() => {
         )}
 
         {activeTool &&
-          // TODO: Extract param rendering
-          Object.values(activeTool.params).map((param) =>
-            param.kind === "number" ? (
-              <SpacedSliderField
-                key={param.name}
-                labelTx={param.labelTx}
-                label={param.label}
-                min={(param as NumberParameter).min}
-                max={(param as NumberParameter).max}
-                value={(param as NumberParameter).value}
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                onChange={(param as NumberParameter).setValue as any}
-              />
-            ) : // TODO: Render UI for other param kinds
-            null,
-          )}
+          Object.values(activeTool.params).map((param) => (
+            <Param {...param} key={param.name} />
+          ))}
       </BrushModal>
     </StyledToolbar>
   );
