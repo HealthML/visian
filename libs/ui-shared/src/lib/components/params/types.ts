@@ -1,3 +1,4 @@
-export interface IsLastProps {
+export interface ListPositionProps {
+  isFirst?: boolean;
   isLast?: boolean;
 }

@@ -3,15 +3,15 @@ import styled from "styled-components";
 
 import { IButtonParameter } from "../../types";
 import { Button } from "../button";
-import { IsLastProps } from "./types";
+import { ListPositionProps } from "./types";
 
-const StyledButton = styled(Button)<IsLastProps>`
+const StyledButton = styled(Button)<ListPositionProps>`
   width: 100%;
   margin-bottom: ${(props) => (props.isLast ? "0" : "16px")};
 `;
 
 export type ButtonParamProps = IButtonParameter &
-  IsLastProps &
+  ListPositionProps &
   React.HTMLAttributes<HTMLButtonElement>;
 
 export const ButtonParam: React.FC<Partial<ButtonParamProps>> = ({
