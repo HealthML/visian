@@ -22,6 +22,10 @@ export const NumberRangeParam: React.FC<NumberRangeParamProps> = ({
   stepSize,
   value,
   setValue,
+
+  defaultValue,
+  kind,
+  name,
   ...rest
 }) => (
   <SpacedSliderField
