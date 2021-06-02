@@ -109,7 +109,6 @@ export class Tools
           name: "navigation-tool",
           icon: "navigationTool",
           labelTx: "navigation-tool",
-          supportedLayerKinds: [],
           supportedViewModes: ["2D", "3D"],
         },
         this.document,
@@ -201,6 +200,9 @@ export class Tools
 
   public setActiveTool(nameOrTool?: ToolName | ITool<ToolName>): void {
     const previouslyActiveTool = this.activeTool;
+
+    // TODO: Handle cases when the active tool does not support the current
+    // view mode or layer kind
     this.activeToolName = nameOrTool
       ? typeof nameOrTool === "string"
         ? nameOrTool

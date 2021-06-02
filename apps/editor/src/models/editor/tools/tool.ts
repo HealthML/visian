@@ -30,8 +30,8 @@ export interface ToolConfig<N extends string> {
 
   altToolName?: N;
 
-  supportedViewModes: ViewMode[];
-  supportedLayerKinds: string[];
+  supportedViewModes?: ViewMode[];
+  supportedLayerKinds?: string[];
 
   params?: Parameter[];
 }
@@ -51,8 +51,8 @@ export class Tool<N extends string>
 
   public altToolName?: string;
 
-  public supportedViewModes: ViewMode[];
-  public supportedLayerKinds: string[];
+  public supportedViewModes?: ViewMode[];
+  public supportedLayerKinds?: string[];
 
   public params: { [name: string]: Parameter };
 

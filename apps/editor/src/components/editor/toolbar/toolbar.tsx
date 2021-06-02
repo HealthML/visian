@@ -85,27 +85,37 @@ export const Toolbar: React.FC = observer(() => {
     store?.editor.activeDocument?.tools.setActiveTool();
   }
 
+  // TODO: Handle cases when the active tool does not support the current view
+  // mode or layer kind
+
+  const viewMode = store?.editor.activeDocument?.viewSettings.viewMode;
+  const activeLayerKind = store?.editor.activeDocument?.activeLayer?.kind;
   return (
     <StyledToolbar ref={ref}>
       {store?.editor.activeDocument?.tools.toolGroups.map(
-        ({ activeTool: tool }, index) => (
-          <Tool
-            key={index}
-            icon={tool.icon}
-            isDisabled={
-              tool.name === "crosshair-tool" &&
-              !store?.editor.activeDocument?.has3DLayers
-            }
-            tooltipTx={tool.labelTx}
-            tooltip={tool.label}
-            activeTool={activeToolName}
-            value={tool.name}
-            showTooltip={!isModalOpen || activeToolName !== tool.name}
-            ref={activeToolName === tool.name ? setButtonRef : undefined}
-            onPress={setActiveTool}
-            onContextMenu={preventDefault}
-          />
-        ),
+        ({ activeTool: tool }, index) =>
+          (!tool.supportedViewModes ||
+            (viewMode && tool.supportedViewModes.includes(viewMode))) &&
+          (!tool.supportedLayerKinds ||
+            (activeLayerKind &&
+              tool.supportedLayerKinds.includes(activeLayerKind))) && (
+            <Tool
+              key={index}
+              icon={tool.icon}
+              isDisabled={
+                tool.name === "crosshair-tool" &&
+                !store?.editor.activeDocument?.has3DLayers
+              }
+              tooltipTx={tool.labelTx}
+              tooltip={tool.label}
+              activeTool={activeToolName}
+              value={tool.name}
+              showTooltip={!isModalOpen || activeToolName !== tool.name}
+              ref={activeToolName === tool.name ? setButtonRef : undefined}
+              onPress={setActiveTool}
+              onContextMenu={preventDefault}
+            />
+          ),
       )}
       <BrushModal
         isOpen={Boolean(

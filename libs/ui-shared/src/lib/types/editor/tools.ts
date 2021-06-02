@@ -48,10 +48,16 @@ export interface ITool<N extends string> {
    */
   altTool?: Reference<ITool<N>>;
 
-  /** An array of all view modes this tool can be used in. */
-  supportedViewModes: ViewMode[];
-  /** An array of all layer kinds this tool can be used on. */
-  supportedLayerKinds: string[];
+  /**
+   * An array of all view modes this tool can be used in.
+   * If none is given, the tool can be activated in all view modes.
+   */
+  supportedViewModes?: ViewMode[];
+  /**
+   * An array of all layer kinds this tool can be used on.
+   * If none is given, the tool can be activated on all kinds of layers.
+   */
+  supportedLayerKinds?: string[];
 
   /** This tool's parameters. */
   params: { [name: string]: IParameter };
