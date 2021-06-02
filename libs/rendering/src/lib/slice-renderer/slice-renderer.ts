@@ -128,6 +128,10 @@ export class SliceRenderer implements IDisposable, ISliceRenderer {
           setTimeout(this.updateCamera);
         },
       ),
+      reaction(
+        () => editor.activeDocument?.viewSettings.viewMode,
+        this.lazyRender,
+      ),
     );
   }
 

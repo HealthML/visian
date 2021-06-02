@@ -201,6 +201,7 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
           annotation,
           annotationLayer?.color,
 
+          editor.activeDocument?.viewSettings.viewMode,
           editor.activeDocument?.viewport3D.shadingMode,
           editor.activeDocument?.viewport3D.opacity,
           transferFunction?.name,
@@ -294,8 +295,10 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
     if (
       !this.editor.activeDocument?.viewport3D.activeTransferFunction?.params
         .image.value
-    )
+    ) {
+      this.renderer.clear();
       return;
+    }
 
     this.renderer.setRenderTarget(null);
     if (this.renderer.xr.isPresenting) {
