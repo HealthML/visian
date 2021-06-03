@@ -80,8 +80,6 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
     if (matrix) this.camera.applyMatrix4(matrix);
     this.camera.updateMatrixWorld();
 
-    document.addEventListener("keydown", this.onKeyDown);
-
     this.gradientComputer = new GradientComputer(
       this.editor,
       this.renderer,
@@ -237,6 +235,10 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
           }
         },
       ),
+      reaction(
+        () => editor.activeDocument?.tools.activeTool?.name === "fly-tool",
+        this.toggleFly,
+      ),
     );
   }
 
@@ -249,8 +251,7 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
     this.flyControls.removeEventListener("lock", this.onFlyControlsLock);
     this.flyControls.removeEventListener("unlock", this.onFlyControlsUnlock);
     this.flyControls.dispose();
-    document.removeEventListener("keydown", this.onKeyDown);
-    document.removeEventListener("click", this.toggleFly);
+    document.removeEventListener("click", this.selectNavigationTool);
     this.gradientComputer.dispose();
     this.laoComputer.dispose();
     this.screenAlignedQuad.dispose();
@@ -367,12 +368,12 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
 
   private onFlyControlsLock = () => {
     this.orbitControls.enabled = false;
-    document.addEventListener("pointerdown", this.toggleFly);
+    document.addEventListener("pointerdown", this.selectNavigationTool);
   };
 
   private onFlyControlsUnlock = () => {
     this.orbitControls.enabled = true;
-    document.removeEventListener("pointerdown", this.toggleFly);
+    document.removeEventListener("pointerdown", this.selectNavigationTool);
 
     this.raycaster.setFromCamera({ x: 0.5, y: 0.5 }, this.camera);
     (this.volume.material as VolumeMaterial).side = THREE.DoubleSide;
@@ -388,17 +389,15 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
     this.orbitControls.target.add(this.camera.position);
   };
 
-  public toggleFly = () => {
+  private selectNavigationTool = () => {
+    this.editor.activeDocument?.tools.setActiveTool("navigation-tool");
+  };
+
+  private toggleFly = () => {
     if (this.flyControls.isLocked) {
       this.flyControls.unlock();
     } else {
       this.flyControls.lock();
-    }
-  };
-
-  private onKeyDown = (event: KeyboardEvent) => {
-    if (event.key === "F") {
-      this.toggleFly();
     }
   };
 

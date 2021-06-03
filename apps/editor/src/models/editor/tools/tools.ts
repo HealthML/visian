@@ -22,7 +22,8 @@ export type ToolName =
   | "outline-tool"
   | "outline-eraser"
   | "clear-slice"
-  | "clear-image";
+  | "clear-image"
+  | "fly-tool";
 
 export interface ToolsSnapshot<N extends string> {
   activeToolName?: N;
@@ -122,6 +123,15 @@ export class Tools
       "outline-eraser": new OutlineTool(document, this.toolRenderer, 0),
       "clear-slice": new ClearSliceTool(document, this.toolRenderer),
       "clear-image": new ClearImageTool(document, this.toolRenderer),
+      "fly-tool": new Tool(
+        {
+          name: "fly-tool",
+          icon: "crosshairPointer",
+          labelTx: "fly-tool",
+          supportedViewModes: ["3D"],
+        },
+        this.document,
+      ),
     };
 
     this.toolGroups.push(
@@ -138,6 +148,7 @@ export class Tools
         document,
       ),
       new ToolGroup({ toolNames: ["clear-slice", "clear-image"] }, document),
+      new ToolGroup({ toolNames: ["fly-tool"] }, document),
     );
 
     this.applySnapshot(snapshot);

@@ -32,6 +32,15 @@ export const setUpHotKeys = (store: RootStore): IDisposer => {
     event.preventDefault();
     store.editor.activeDocument?.tools.setActiveTool("outline-tool");
   });
+  hotkeys("f", (event) => {
+    event.preventDefault();
+    if (store.editor.activeDocument?.viewSettings.viewMode !== "3D") return;
+
+    const activeTool = store.editor.activeDocument?.tools.activeTool?.name;
+    store.editor.activeDocument?.tools.setActiveTool(
+      activeTool === "fly-tool" ? "navigation-tool" : "fly-tool",
+    );
+  });
 
   // Tools
   hotkeys("del,backspace", (event) => {
