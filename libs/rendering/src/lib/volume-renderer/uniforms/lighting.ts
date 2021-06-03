@@ -1,4 +1,5 @@
 export const lightingUniforms = {
   uLightingMode: { value: 0 },
-  uLaoIntensity: { value: 1 },
+  uBrightness: { value: 1 },
+  uContrast: { value: 1 },
 };

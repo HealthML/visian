@@ -1,2 +1,3 @@
 uniform int uLightingMode;
-uniform float uLaoIntensity;
+uniform float uBrightness;
+uniform float uContrast;
