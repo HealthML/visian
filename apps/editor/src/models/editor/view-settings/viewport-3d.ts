@@ -114,8 +114,29 @@ export class Viewport3D
   }
 
   public setCameraMatrix(value?: Matrix4): void {
-    // TODO: Reset to a meaningful camera alignment
-    this.cameraMatrix = value || new Matrix4();
+    if (value) {
+      this.cameraMatrix = value;
+      return;
+    }
+
+    this.cameraMatrix = new Matrix4().fromArray([
+      -0.7071067811865475,
+      0,
+      -0.7071067811865475,
+      0,
+      -0.408248290463863,
+      0.816496580927726,
+      0.408248290463863,
+      0,
+      0.5773502691896257,
+      0.5773502691896257,
+      -0.5773502691896255,
+      0,
+      0.3,
+      1.5,
+      -0.3,
+      1,
+    ]);
   }
 
   public setVolumeSpaceCameraPosition(x: number, y: number, z: number) {

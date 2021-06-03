@@ -1,5 +1,4 @@
 import {
-  IBooleanParameter,
   IConeTransferFunction,
   IEditor,
   IImageLayer,
@@ -73,12 +72,13 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
     this.orbitControls.addEventListener("change", this.onCameraMove);
 
     this.flyControls = new FlyControls(this.camera, this.renderer.domElement);
-    this.flyControls.addEventListener("change", this.onCameraMove);
+    this.flyControls.addEventListener("change", () => this.onCameraMove());
     this.flyControls.addEventListener("lock", this.onFlyControlsLock);
     this.flyControls.addEventListener("unlock", this.onFlyControlsUnlock);
 
-    this.camera.position.set(0.3, 1.5, 0.3);
-    this.camera.lookAt(new THREE.Vector3(0, 1.2, 0));
+    const matrix = editor.activeDocument?.viewport3D.cameraMatrix;
+    if (matrix) this.camera.applyMatrix4(matrix);
+    this.camera.updateMatrixWorld();
 
     document.addEventListener("keydown", this.onKeyDown);
 
@@ -148,21 +148,6 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
     this.disposers.push(
       reaction(
         () => {
-          const coneTransferFunction =
-            editor.activeDocument?.viewport3D.transferFunctions["fc-cone"];
-          if (!coneTransferFunction) return undefined;
-
-          return (coneTransferFunction.params.isConeLocked as IBooleanParameter)
-            .value;
-        },
-        (value) => {
-          if (!value) {
-            this.onCameraMove();
-          }
-        },
-      ),
-      reaction(
-        () => {
           const layerParameter =
             editor.activeDocument?.viewport3D.activeTransferFunction?.params
               .image;
@@ -171,14 +156,14 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
           const layerId = (layerParameter as ILayerParameter).value;
           if (!layerId) return undefined;
 
-          // As we alsoready know that the layer parameter exist, we can be sure
-          // that the aactive document is not undefined.
+          // As we already know that the layer parameter exist, we can be sure
+          // that the active document is not undefined.
           // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           return (editor.activeDocument!.getLayer(layerId) as IImageLayer)
             .image;
         },
 
-        this.onCameraMove,
+        () => this.onCameraMove(false),
       ),
       reaction(() => {
         const annotationLayerParameter =
@@ -228,9 +213,21 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
             this.orbitControls.enabled = !this.flyControls.isLocked;
         }
       }),
-    );
+      reaction(
+        () => editor.activeDocument?.viewport3D.cameraMatrix?.toArray(),
+        (array?: number[]) => {
+          if (array) {
+            this.workingMatrix.fromArray(array);
+            this.camera.position.setFromMatrixPosition(this.workingMatrix);
+            this.camera.rotation.setFromRotationMatrix(this.workingMatrix);
 
-    this.onCameraMove();
+            this.camera.updateMatrixWorld();
+          }
+          this.onCameraMove(false);
+          this.lazyRender();
+        },
+      ),
+    );
   }
 
   public dispose = () => {
@@ -238,7 +235,7 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
     window.removeEventListener("resize", this.resize);
     this.orbitControls.removeEventListener("change", this.onCameraMove);
     this.orbitControls.dispose();
-    this.flyControls.removeEventListener("change", this.onCameraMove);
+    this.flyControls.removeEventListener("change", () => this.onCameraMove());
     this.flyControls.removeEventListener("lock", this.onFlyControlsLock);
     this.flyControls.removeEventListener("unlock", this.onFlyControlsUnlock);
     this.flyControls.dispose();
@@ -327,7 +324,14 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
     return this.resolutionComputer.fullResolutionFlushed;
   }
 
-  private onCameraMove = () => {
+  private onCameraMove = (pushMatrix = true) => {
+    if (pushMatrix) {
+      this.camera.updateMatrix();
+      this.editor.activeDocument?.viewport3D.setCameraMatrix(
+        this.camera.matrix,
+      );
+    }
+
     this.updateCameraPosition();
     this.lazyRender();
   };
