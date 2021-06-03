@@ -26,11 +26,6 @@
     "ui-shared-e2e": { "tags": [], "implicitDependencies": ["ui-shared"] },
     "ar-demo": { "tags": [] },
     "ar-demo-e2e": { "tags": [], "implicitDependencies": ["ar-demo"] },
-    "ativ-seminar": { "tags": [] },
-    "ativ-seminar-e2e": {
-      "tags": [],
-      "implicitDependencies": ["ativ-seminar"]
-    },
     "editor": { "tags": [] },
     "editor-e2e": { "tags": [], "implicitDependencies": ["editor"] },
     "utils": { "tags": [] },
