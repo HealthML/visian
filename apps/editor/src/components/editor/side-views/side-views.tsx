@@ -28,7 +28,6 @@ const SideViewContainer = styled.div<{ showSideViews?: boolean }>`
   display: ${(props) => (props.showSideViews ? "flex" : "none")};
   flex-direction: column;
   position: relative;
-  margin-right: 22px;
 `;
 
 const SideViewWrapper = styled.div`
@@ -36,6 +35,8 @@ const SideViewWrapper = styled.div`
   position: absolute;
   right: 0;
   top: 0;
+
+  margin-right: 22px;
 `;
 
 const SideView = styled(Sheet)`
