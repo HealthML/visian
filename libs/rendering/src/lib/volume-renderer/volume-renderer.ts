@@ -227,6 +227,16 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
           this.lazyRender();
         },
       ),
+      reaction(
+        () =>
+          editor.activeDocument?.viewport3D.activeTransferFunction?.params
+            .isConeLocked?.value,
+        (value?: unknown) => {
+          if (value === false) {
+            this.onCameraMove(false);
+          }
+        },
+      ),
     );
   }
 

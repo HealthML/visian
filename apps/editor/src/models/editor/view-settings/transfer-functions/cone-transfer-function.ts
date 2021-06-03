@@ -71,8 +71,10 @@ export class ConeTransferFunction
         name: "isConeLocked",
         labelTx: "lock-cone",
         defaultValue: false,
-        onBeforeValueChange: () =>
-          document.viewport3D?.onTransferFunctionChange(),
+        onBeforeValueChange: () => {
+          if (this.params.isConeLocked.value)
+            document.viewport3D?.onTransferFunctionChange();
+        },
       }) as Parameter<unknown>,
       new NumberParameter({
         name: "coneAngle",
@@ -124,7 +126,9 @@ export class ConeTransferFunction
   }
 
   public setConeDirection(x: number, y: number, z: number) {
-    this.document.viewport3D.onTransferFunctionChange();
+    if (this.document.viewport3D.activeTransferFunction?.name === this.name) {
+      this.document.viewport3D.onTransferFunctionChange();
+    }
 
     this.coneDirection.set(x, y, z);
   }
