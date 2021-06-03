@@ -134,7 +134,7 @@ export class SharedUniforms implements IDisposable {
         (image?: RenderedImage) => {
           if (!image) return;
 
-          this.uniforms.uVolume.value = image.getTexture();
+          this.uniforms.uVolume.value = image.getTexture(0, THREE.LinearFilter);
           this.uniforms.uVoxelCount.value = image.voxelCount;
           this.uniforms.uAtlasGrid.value = image.getAtlasGrid();
           this.uniforms.uStepSize.value = getStepSize(image);
@@ -157,7 +157,10 @@ export class SharedUniforms implements IDisposable {
         },
         (imageLayer?: IImageLayer) => {
           if (imageLayer) {
-            this.uniforms.uFocus.value = (imageLayer.image as RenderedImage).getTexture();
+            this.uniforms.uFocus.value = (imageLayer.image as RenderedImage).getTexture(
+              0,
+              THREE.LinearFilter,
+            );
             (this.uniforms.uFocusColor.value as THREE.Color).set(
               color(
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
