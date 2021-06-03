@@ -129,6 +129,16 @@ export class SliceRenderer implements IDisposable, ISliceRenderer {
         },
       ),
       reaction(
+        () => editor.activeDocument?.viewSettings.viewMode === "2D",
+        (switchingTo2D?: boolean) => {
+          if (switchingTo2D) {
+            // Wrapped in a setTimeout, because the side views need to actually
+            // appear before updating the camera planes.
+            setTimeout(this.updateCamera);
+          }
+        },
+      ),
+      reaction(
         () => editor.activeDocument?.viewSettings.viewMode,
         this.lazyRender,
       ),
