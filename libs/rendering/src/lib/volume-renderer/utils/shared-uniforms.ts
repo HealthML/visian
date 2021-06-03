@@ -153,9 +153,16 @@ export class SharedUniforms implements IDisposable {
 
           if (!imageLayer) return undefined;
 
-          return imageLayer as IImageLayer;
+          return [imageLayer as IImageLayer, imageLayer.color] as [
+            IImageLayer,
+            string | undefined,
+          ];
         },
-        (imageLayer?: IImageLayer) => {
+        (params?: [IImageLayer, string | undefined]) => {
+          if (!params) return;
+
+          const [imageLayer, imageColor] = params;
+
           if (imageLayer) {
             this.uniforms.uFocus.value = (imageLayer.image as RenderedImage).getTexture(
               0,
@@ -164,7 +171,7 @@ export class SharedUniforms implements IDisposable {
             (this.uniforms.uFocusColor.value as THREE.Color).set(
               color(
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                (imageLayer.color as any) || "foreground",
+                (imageColor as any) || "foreground",
               )({
                 theme: editor.theme,
               }),
