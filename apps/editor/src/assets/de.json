@@ -62,5 +62,25 @@
   "import-error": "Importfehler",
   "annotation-mismatch-error": "Diese Annotation passt nicht auf den Scan.",
   "no-image-error": "Sie müssen einen Scan laden, bevor Sie eine Annotation importieren.",
-  "image-loading-error": "Diese Datei scheint nicht unterstützt zu sein."
+  "image-loading-error": "Diese Datei scheint nicht unterstützt zu sein.",
+
+  "transfer-function": "3D Ansicht",
+  "tf-density": "Dichte",
+  "tf-fc-edges": "Kanten",
+  "tf-fc-cone": "Kegelschnitt",
+  "tf-custom": "Eigene",
+
+  "annotation-layer": "Fokusvolumen",
+  "image-layer": "Volumen",
+
+  "use-focus": "Fokusvolumen anzeigen",
+  "density-range": "Dichteintervall",
+
+  "context-opacity": "Kontextdeckkraft",
+  "focus-opacity": "Fokusdeckkraft",
+
+  "lock-cone": "Kegel festhalten",
+  "cone-angle": "Kegelwinkel",
+
+  "custom-tf-file": "Datei hochladen"
 }
