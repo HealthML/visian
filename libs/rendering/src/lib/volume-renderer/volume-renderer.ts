@@ -7,7 +7,7 @@ import {
   IVolumeRenderer,
 } from "@visian/ui-shared";
 import { IDisposable, IDisposer } from "@visian/utils";
-import { reaction } from "mobx";
+import { autorun, reaction } from "mobx";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import Stats from "three/examples/jsm/libs/stats.module";
@@ -218,6 +218,16 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
             : undefined,
         ];
       }, this.lazyRender),
+      autorun(() => {
+        switch (editor.activeDocument?.viewSettings.viewMode) {
+          case "2D":
+            if (this.flyControls.isLocked) this.flyControls.unlock();
+            this.orbitControls.enabled = false;
+            break;
+          case "3D":
+            this.orbitControls.enabled = !this.flyControls.isLocked;
+        }
+      }),
     );
 
     this.onCameraMove();
