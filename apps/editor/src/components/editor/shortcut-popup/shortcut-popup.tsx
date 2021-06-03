@@ -295,6 +295,14 @@ export const ShortcutPopUp: React.FC<ShortcutPopUpProps> = ({
           </ShortcutRow>
           <ShortcutRow>
             <ShortcutContainer>
+              <KeyIcon text="4" />
+            </ShortcutContainer>
+            <ShortcutDescriptionContainer>
+              <ShortcutDescription text="Switch to 3D view" />
+            </ShortcutDescriptionContainer>
+          </ShortcutRow>
+          <ShortcutRow>
+            <ShortcutContainer>
               <KeyIcon text="0" />
             </ShortcutContainer>
             <ShortcutDescriptionContainer>
