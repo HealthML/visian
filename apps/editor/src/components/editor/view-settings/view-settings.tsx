@@ -4,6 +4,7 @@ import {
   FloatingUIButton,
   Modal,
   NumberParam,
+  Param,
   useMultiRef,
 } from "@visian/ui-shared";
 import { ViewType } from "@visian/utils";
@@ -127,6 +128,32 @@ export const ViewSettings: React.FC = observer(() => {
           value={store?.editor.activeDocument?.viewSettings.brightness}
           setValue={setBrightness}
         />
+        {store?.editor.activeDocument?.viewSettings.viewMode === "3D" && (
+          <>
+            <EnumParam
+              labelTx="transfer-function"
+              options={Object.values(
+                store.editor.activeDocument.viewport3D.transferFunctions,
+              ).map((transferFunction) => ({
+                labelTx: transferFunction.labelTx,
+                label: transferFunction.label,
+                value: transferFunction.name,
+              }))}
+              value={
+                store.editor.activeDocument.viewport3D.activeTransferFunction
+                  ?.name
+              }
+              setValue={
+                store.editor.activeDocument.viewport3D.setActiveTransferFunction
+              }
+            />
+            {store.editor.activeDocument.viewport3D.activeTransferFunction &&
+              Object.values(
+                store.editor.activeDocument.viewport3D.activeTransferFunction
+                  .params,
+              ).map((param) => <Param parameter={param} key={param.name} />)}
+          </>
+        )}
       </Modal>
     </>
   );

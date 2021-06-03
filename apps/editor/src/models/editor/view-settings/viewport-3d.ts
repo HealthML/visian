@@ -59,13 +59,17 @@ export class Viewport3D
     snapshot: Partial<Viewport3DSnapshot<TransferFunctionName>> | undefined,
     protected document: IDocument,
   ) {
-    makeObservable<this, "setSuppressedShadingMode">(this, {
+    makeObservable<
+      this,
+      "activeTransferFunctionName" | "setSuppressedShadingMode"
+    >(this, {
       isInXR: observable,
       cameraMatrix: observable.ref,
       volumeSpaceCameraPosition: observable,
       opacity: observable,
       shadingMode: observable,
       suppressesShadingMode: observable,
+      activeTransferFunctionName: observable,
       transferFunctions: observable,
 
       activeTransferFunction: computed,
@@ -124,11 +128,11 @@ export class Viewport3D
     }
   }
 
-  public setActiveTransferFunction(
+  public setActiveTransferFunction = (
     nameOrTransferFunction?:
       | TransferFunctionName
       | ITransferFunction<TransferFunctionName>,
-  ): void {
+  ): void => {
     this.onTransferFunctionChange();
 
     this.activeTransferFunctionName = nameOrTransferFunction
@@ -138,7 +142,7 @@ export class Viewport3D
       : "fc-edges";
 
     this.activeTransferFunction?.activate();
-  }
+  };
 
   public setIsInXR(value = false) {
     this.isInXR = value;

@@ -36,4 +36,24 @@ export class NumberParameter
 
     this.getHistogram = config.getHistogram;
   }
+
+  public toProps(): INumberParameter {
+    return {
+      ...(super.toProps() as Omit<
+        INumberParameter,
+        | "scaleType"
+        | "min"
+        | "max"
+        | "stepSize"
+        | "extendBeyondMinMax"
+        | "getHistogram"
+      >),
+      scaleType: this.scaleType,
+      min: this.min,
+      max: this.max,
+      stepSize: this.stepSize,
+      extendBeyondMinMax: this.extendBeyondMinMax,
+      getHistogram: this.getHistogram,
+    };
+  }
 }

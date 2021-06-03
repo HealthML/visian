@@ -1,3 +1,4 @@
+import { observer } from "mobx-react-lite";
 import React from "react";
 
 import { IParameter } from "../../types";
@@ -9,23 +10,43 @@ import { NumberParam, NumberParamProps } from "./number-param";
 import { NumberRangeParam, NumberRangeParamProps } from "./number-range-param";
 import { ListPositionProps } from "./types";
 
-export type ParamProps = IParameter & ListPositionProps;
+export interface ParamProps extends ListPositionProps {
+  parameter: IParameter;
+}
 
-export const Param: React.FC<ParamProps> = (props) => {
-  switch (props.kind) {
+export const Param = observer<ParamProps>(({ parameter, ...rest }) => {
+  switch (parameter.kind) {
     case "bool":
-      return <BooleanParam {...(props as BooleanParamProps)} />;
+      return (
+        <BooleanParam
+          {...rest}
+          {...(parameter.toProps() as BooleanParamProps)}
+        />
+      );
     case "button":
-      return <ButtonParam {...(props as ButtonParamProps)} />;
+      return (
+        <ButtonParam {...rest} {...(parameter.toProps() as ButtonParamProps)} />
+      );
     case "color":
-      return <ColorParam {...(props as ColorParamProps)} />;
+      return (
+        <ColorParam {...rest} {...(parameter.toProps() as ColorParamProps)} />
+      );
     case "enum":
-      return <EnumParam {...(props as EnumParamProps)} />;
+      return (
+        <EnumParam {...rest} {...(parameter.toProps() as EnumParamProps)} />
+      );
     case "number":
-      return <NumberParam {...(props as NumberParamProps)} />;
+      return (
+        <NumberParam {...rest} {...(parameter.toProps() as NumberParamProps)} />
+      );
     case "number-range":
-      return <NumberRangeParam {...(props as NumberRangeParamProps)} />;
+      return (
+        <NumberRangeParam
+          {...rest}
+          {...(parameter.toProps() as NumberRangeParamProps)}
+        />
+      );
     default:
       return null;
   }
-};
+});

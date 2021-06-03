@@ -136,7 +136,7 @@ export const Toolbar: React.FC = observer(() => {
 
         {activeTool &&
           Object.values(activeTool.params).map((param) => (
-            <Param {...param} key={param.name} />
+            <Param parameter={param} key={param.name} />
           ))}
       </BrushModal>
     </StyledToolbar>

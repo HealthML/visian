@@ -38,6 +38,21 @@ export interface IParameter<T = unknown> {
   /** Sets the parameter's current value. */
   setValue(value: T): void;
   reset(): void;
+
+  /**
+   * An optional event listener that is called before the parameter value is
+   * updated.
+   */
+  onBeforeValueChange?: () => void;
+
+  /**
+   * Returns an object that can be passed to a React component using the object
+   * spread syntax.
+   *
+   * This is necessary as inherited class properties are not necessarily
+   * included when spreading an object.
+   */
+  toProps(): IParameter<T>;
 }
 
 /** A boolean parameter, typically displayed as a checkbox or switch. */
@@ -117,7 +132,7 @@ export interface INumberParameter extends IParameter<number> {
 export interface INumberRangeParameter
   extends Omit<
       INumberParameter,
-      "kind" | "value" | "defaultValue" | "setValue"
+      "kind" | "value" | "defaultValue" | "setValue" | "toProps"
     >,
     IParameter<[number, number]> {
   kind: "number-range";

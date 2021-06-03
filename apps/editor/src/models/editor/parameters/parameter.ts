@@ -42,7 +42,7 @@ export class Parameter<T = unknown>
   public value!: T;
   public defaultValue!: T;
 
-  private onBeforeValueChange?: () => void;
+  public onBeforeValueChange?: () => void;
 
   constructor(config: ParameterConfig<T>) {
     this.name = config.name;
@@ -77,6 +77,23 @@ export class Parameter<T = unknown>
     }
 
     this.value = this.defaultValue;
+  }
+
+  public toProps(): IParameter<T> {
+    return {
+      kind: this.kind,
+      name: this.name,
+      label: this.label,
+      labelTx: this.labelTx,
+      tooltip: this.tooltip,
+      tooltipTx: this.tooltipTx,
+      tooltipPosition: this.tooltipPosition,
+      value: this.value,
+      defaultValue: this.defaultValue,
+      setValue: this.setValue,
+      reset: this.reset,
+      toProps: this.toProps,
+    };
   }
 
   // Serialization

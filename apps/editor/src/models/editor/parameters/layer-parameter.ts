@@ -26,4 +26,11 @@ export class LayerParameter
     super.reset();
     this.setValue(this.document?.layers.find(this.filter)?.id);
   }
+
+  public toProps(): ILayerParameter {
+    return {
+      ...(super.toProps() as Omit<ILayerParameter, "filter">),
+      filter: this.filter,
+    };
+  }
 }

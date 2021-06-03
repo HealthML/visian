@@ -23,6 +23,7 @@ export const NumberParam: React.FC<Partial<NumberParamProps>> = ({
   setValue,
 
   defaultValue,
+  onBeforeValueChange,
   kind,
   name,
   ...rest
