@@ -74,12 +74,18 @@ export const setUpHotKeys = (store: RootStore): IDisposer => {
     store.editor.activeDocument?.viewport2D.setMainViewType(
       ViewType.Transverse,
     );
+    store.editor.activeDocument?.viewSettings.setViewMode("2D");
   });
   hotkeys("2", () => {
     store.editor.activeDocument?.viewport2D.setMainViewType(ViewType.Sagittal);
+    store.editor.activeDocument?.viewSettings.setViewMode("2D");
   });
   hotkeys("3", () => {
     store.editor.activeDocument?.viewport2D.setMainViewType(ViewType.Coronal);
+    store.editor.activeDocument?.viewSettings.setViewMode("2D");
+  });
+  hotkeys("4", () => {
+    store.editor.activeDocument?.viewSettings.setViewMode("3D");
   });
   hotkeys("0", () => {
     store.editor.activeDocument?.viewport2D.toggleSideViews();
