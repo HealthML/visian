@@ -1,6 +1,5 @@
 import { IDocument } from "@visian/ui-shared";
 import {
-  BooleanParameter,
   LayerParameter,
   NumberParameter,
   NumberRangeParameter,
@@ -45,13 +44,6 @@ export class EdgesTransferFunction extends TransferFunction<"fc-edges"> {
         },
         document,
       ) as Parameter<unknown>,
-      new BooleanParameter({
-        name: "useFocus",
-        labelTx: "use-focus",
-        defaultValue: true,
-        onBeforeValueChange: () =>
-          document.viewport3D?.onTransferFunctionChange(),
-      }) as Parameter<unknown>,
       new NumberRangeParameter({
         name: "densityRange",
         labelTx: "density-range",

@@ -49,11 +49,26 @@ export class SharedUniforms implements IDisposable {
         this.uniforms.uConeDirection.value = (coneTransferFunction as IConeTransferFunction).coneDirection.toArray();
       }),
       autorun(() => {
+        const focusId = editor.activeDocument?.viewport3D.activeTransferFunction
+          ?.params.annotation?.value as string | undefined;
+
+        const isFocusSelected = Boolean(focusId);
+
+        const isLayerVisibilityOverridden = Boolean(
+          editor.activeDocument?.viewport3D.activeTransferFunction?.params
+            .useFocus,
+        );
+
+        const isFocusLayerVisible = focusId
+          ? editor.activeDocument?.getLayer(focusId)?.isVisible
+          : undefined;
+
         this.uniforms.uUseFocus.value =
-          (editor.activeDocument?.viewport3D.activeTransferFunction?.params
-            .annotation?.value &&
-            editor.activeDocument?.viewport3D.activeTransferFunction?.params
-              .useFocus?.value) ??
+          (isFocusSelected &&
+            (isLayerVisibilityOverridden
+              ? editor.activeDocument?.viewport3D.activeTransferFunction?.params
+                  .useFocus?.value
+              : isFocusLayerVisible)) ??
           false;
       }),
       autorun(() => {

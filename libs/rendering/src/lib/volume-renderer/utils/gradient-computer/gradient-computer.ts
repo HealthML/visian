@@ -111,6 +111,7 @@ export class GradientComputer implements IDisposable {
         return [
           annotationLayer?.image,
           customTransferFunctionTexture,
+          editor.activeDocument?.layers.map((layer) => layer.isVisible),
           editor.activeDocument?.viewport3D.activeTransferFunction?.params
             .useFocus?.value,
           editor.activeDocument?.viewport3D.activeTransferFunction?.params

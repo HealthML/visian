@@ -181,6 +181,7 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
           editor.activeDocument?.viewport3D.activeTransferFunction;
 
         return [
+          editor.activeDocument?.layers.map((layer) => layer.isVisible),
           annotation,
           annotationLayer?.color,
 

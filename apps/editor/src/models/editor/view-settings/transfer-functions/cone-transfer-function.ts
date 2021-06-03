@@ -61,13 +61,6 @@ export class ConeTransferFunction
         document,
       ) as Parameter<unknown>,
       new BooleanParameter({
-        name: "useFocus",
-        labelTx: "use-focus",
-        defaultValue: true,
-        onBeforeValueChange: () =>
-          document.viewport3D?.onTransferFunctionChange(),
-      }) as Parameter<unknown>,
-      new BooleanParameter({
         name: "isConeLocked",
         labelTx: "lock-cone",
         defaultValue: false,
