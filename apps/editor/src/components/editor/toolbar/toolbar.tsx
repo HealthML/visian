@@ -117,7 +117,7 @@ export const Toolbar: React.FC = observer(() => {
         value={ToolType.Navigate}
         onPress={setActiveTool}
         onContextMenu={preventDefault}
-        delayTooltip={shouldDelayTooltips}
+        forceTooltip={!shouldDelayTooltips}
         onPointerLeave={setNoTooltipDelayTimer}
       />
       <Tool
@@ -130,7 +130,7 @@ export const Toolbar: React.FC = observer(() => {
         }
         onPress={setActiveTool}
         onContextMenu={preventDefault}
-        delayTooltip={shouldDelayTooltips}
+        forceTooltip={!shouldDelayTooltips}
         onPointerLeave={setNoTooltipDelayTimer}
       />
       <Tool
@@ -142,7 +142,7 @@ export const Toolbar: React.FC = observer(() => {
         ref={activeTool === ToolType.Brush ? setButtonRef : undefined}
         onPress={setActiveTool}
         onContextMenu={preventDefault}
-        delayTooltip={shouldDelayTooltips}
+        forceTooltip={!shouldDelayTooltips}
         onPointerLeave={setNoTooltipDelayTimer}
       />
       <Tool
@@ -154,7 +154,7 @@ export const Toolbar: React.FC = observer(() => {
         ref={activeTool === ToolType.SmartBrush ? setButtonRef : undefined}
         onPress={setActiveTool}
         onContextMenu={preventDefault}
-        delayTooltip={shouldDelayTooltips}
+        forceTooltip={!shouldDelayTooltips}
         onPointerLeave={setNoTooltipDelayTimer}
       />
       <Tool
@@ -166,7 +166,7 @@ export const Toolbar: React.FC = observer(() => {
         ref={activeTool === ToolType.Outline ? setButtonRef : undefined}
         onPress={setActiveTool}
         onContextMenu={preventDefault}
-        delayTooltip={shouldDelayTooltips}
+        forceTooltip={!shouldDelayTooltips}
         onPointerLeave={setNoTooltipDelayTimer}
       />
       <Tool
@@ -178,7 +178,7 @@ export const Toolbar: React.FC = observer(() => {
         ref={activeTool === ToolType.Eraser ? setButtonRef : undefined}
         onPress={setActiveTool}
         onContextMenu={preventDefault}
-        delayTooltip={shouldDelayTooltips}
+        forceTooltip={!shouldDelayTooltips}
         onPointerLeave={setNoTooltipDelayTimer}
       />
       <Tool
@@ -186,7 +186,7 @@ export const Toolbar: React.FC = observer(() => {
         tooltipTx="clear-slice"
         onPress={clearSlice}
         onContextMenu={preventDefault}
-        delayTooltip={shouldDelayTooltips}
+        forceTooltip={!shouldDelayTooltips}
         onPointerLeave={setNoTooltipDelayTimer}
       />
       <BrushModal

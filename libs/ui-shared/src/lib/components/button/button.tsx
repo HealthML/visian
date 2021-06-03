@@ -42,7 +42,7 @@ const BaseButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
     {
       children,
       data,
-      delayTooltip = true,
+      forceTooltip = false,
       icon,
       tooltip,
       tooltipTx,
@@ -68,19 +68,19 @@ const BaseButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
       }, []),
       duration("tooltipDelay")({ theme }) as number,
     );
+
+    const [isPointerOverButton, setIsPointerOverButton] = useState(false);
     const enterButton = useCallback(
       (event: React.PointerEvent<HTMLButtonElement>) => {
+        setIsPointerOverButton(true);
         if (onPointerEnter) onPointerEnter(event);
-        if (delayTooltip) {
-          scheduleTooltip();
-        } else {
-          setShowTooltip(true);
-        }
+        scheduleTooltip();
       },
-      [delayTooltip, onPointerEnter, scheduleTooltip],
+      [onPointerEnter, scheduleTooltip],
     );
     const leaveButton = useCallback(
       (event: React.PointerEvent<HTMLButtonElement>) => {
+        setIsPointerOverButton(false);
         if (onPointerLeave) onPointerLeave(event);
         cancelTooltip();
         setShowTooltip(false);
@@ -112,7 +112,10 @@ const BaseButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
           <Tooltip
             text={tooltip}
             tx={tooltipTx}
-            isShown={showTooltip && externalShowTooltip}
+            isShown={
+              (showTooltip || (forceTooltip && isPointerOverButton)) &&
+              externalShowTooltip
+            }
             parentElement={buttonRef}
             position={tooltipPosition}
           />

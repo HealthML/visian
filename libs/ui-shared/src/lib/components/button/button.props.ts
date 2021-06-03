@@ -13,7 +13,7 @@ export interface ButtonProps
   tooltipTx?: string;
   tooltipPosition?: TooltipPosition;
   showTooltip?: boolean;
-  delayTooltip?: boolean;
+  forceTooltip?: boolean;
 
   isActive?: boolean;
   isDisabled?: boolean;
