@@ -53,6 +53,12 @@ export class TransferFunction<N extends string>
     // Intentionally left blank
   }
 
+  public reset = (): void => {
+    Object.values(this.params).forEach((param) => {
+      param.reset();
+    });
+  };
+
   // Serialization
   public toJSON(): TransferFunctionSnapshot<N> {
     return {

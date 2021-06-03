@@ -186,6 +186,9 @@ export class Viewport3D
     this.setCameraMatrix();
     this.setOpacity();
     this.setShadingMode();
+    Object.values(this.transferFunctions).forEach((transferFunction) => {
+      transferFunction.reset();
+    });
     this.setActiveTransferFunction();
   };
 

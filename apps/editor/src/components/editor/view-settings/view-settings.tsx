@@ -1,8 +1,10 @@
 import {
   BooleanParam,
+  Divider,
   EnumParam,
   FloatingUIButton,
   Modal,
+  ModalTitleRow,
   NumberParam,
   Param,
   useMultiRef,
@@ -130,8 +132,15 @@ export const ViewSettings: React.FC = observer(() => {
         />
         {store?.editor.activeDocument?.viewSettings.viewMode === "3D" && (
           <>
-            <EnumParam
+            <Divider />
+            <ModalTitleRow
               labelTx="transfer-function"
+              onReset={
+                store.editor.activeDocument.viewport3D.activeTransferFunction
+                  ?.reset
+              }
+            />
+            <EnumParam
               options={Object.values(
                 store.editor.activeDocument.viewport3D.transferFunctions,
               ).map((transferFunction) => ({

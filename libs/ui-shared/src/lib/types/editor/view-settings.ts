@@ -116,6 +116,9 @@ export interface ITransferFunction<N extends string> {
 
   /** Called when the transfer function becomes active. */
   activate(): void;
+
+  /** Resets all parameters of the transfer function to their default values. */
+  reset(): void;
 }
 
 export interface IConeTransferFunction extends ITransferFunction<"fc-cone"> {
