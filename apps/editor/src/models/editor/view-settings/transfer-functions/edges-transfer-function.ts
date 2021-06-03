@@ -55,7 +55,7 @@ export class EdgesTransferFunction extends TransferFunction<"fc-edges"> {
       new NumberRangeParameter({
         name: "densityRange",
         labelTx: "density-range",
-        defaultValue: [0.05, 1],
+        defaultValue: [0.1, 1],
         min: 0,
         max: 1,
         onBeforeValueChange: () =>
