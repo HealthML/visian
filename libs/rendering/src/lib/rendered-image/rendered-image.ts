@@ -179,7 +179,7 @@ export class RenderedImage<T extends TypedArray = TypedArray>
 
         if (
           this.voxelsToRender.length &&
-          !this.voxelsRendered[filter][rendererIndex]
+          this.voxelsRendered[filter][rendererIndex] === false
         ) {
           if (this.isVoxelGeometryDirty) {
             this.voxels.updateGeometry(this.voxelsToRender);
