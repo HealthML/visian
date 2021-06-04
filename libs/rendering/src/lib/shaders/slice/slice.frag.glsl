@@ -9,6 +9,7 @@ uniform vec2 uAtlasGrid;
   uniform vec3 uForegroundColor;
   uniform float uContrast;
   uniform float uBrightness;
+  uniform float uImageOpacity;
   uniform int uComponents;
 #endif // IMAGE
 
@@ -39,21 +40,20 @@ void main() {
     if(uComponents == 3) {
       gl_FragColor = vec4(
         uBrightness * pow(texelValue.rgb, vec3(uContrast)),
-        1.0
+        uImageOpacity
       );
       return;
     }
     if(uComponents == 4) {
       gl_FragColor = vec4(
         uBrightness * pow(texelValue.rgb, vec3(uContrast)),
-        texelValue.a
+        mix(0.0, uImageOpacity, texelValue.a)
       );
       return;
     }
 
     float contrastedColor = uBrightness * pow(texelValue.x, uContrast);
-
-    gl_FragColor = vec4(uForegroundColor, contrastedColor);
+    gl_FragColor = vec4(uForegroundColor, mix(0.0, uImageOpacity, contrastedColor));
   #endif // IMAGE
   
   #ifdef ANNOTATION

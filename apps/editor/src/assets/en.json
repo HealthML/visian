@@ -42,7 +42,8 @@
   "layers": "Layers",
   "no-layers": "No layers loaded.",
   "untitled-layer": "Untitled layer",
-  "color-panel": "Choose Color",
+  "layer-settings": "Layer Settings",
+  "opacity": "Opacity",
   "background-color": "Background Color",
 
   "view-settings": "View Settings",
