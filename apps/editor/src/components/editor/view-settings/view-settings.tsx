@@ -20,7 +20,13 @@ const mainViewTypeSwitchItems = [
   { label: "T", value: ViewType.Transverse, tooltipTx: "transverse" },
   { label: "S", value: ViewType.Sagittal, tooltipTx: "sagittal" },
   { label: "C", value: ViewType.Coronal, tooltipTx: "coronal" },
-  { label: "3D", value: "3D" },
+  { label: "3D", value: "3D", tooltipTx: "3d-view" },
+];
+
+const shadingModeItems = [
+  { labelTx: "shading-none", value: "none", tooltipTx: "shading-none-full" },
+  { labelTx: "shading-phong", value: "phong", tooltipTx: "shading-phong-full" },
+  { labelTx: "shading-lao", value: "lao", tooltipTx: "shading-lao-full" },
 ];
 
 export const ViewSettings: React.FC = observer(() => {
@@ -134,13 +140,23 @@ export const ViewSettings: React.FC = observer(() => {
           <>
             <Divider />
             <ModalTitleRow
-              labelTx="transfer-function"
+              labelTx="3d-view"
               onReset={
                 store.editor.activeDocument.viewport3D.activeTransferFunction
                   ?.reset
               }
             />
             <EnumParam
+              labelTx="shading-mode"
+              options={shadingModeItems}
+              value={
+                store.editor.activeDocument.viewport3D.suppressedShadingMode ||
+                store.editor.activeDocument.viewport3D.shadingMode
+              }
+              setValue={store.editor.activeDocument.viewport3D.setShadingMode}
+            />
+            <EnumParam
+              labelTx="transfer-function"
               options={Object.values(
                 store.editor.activeDocument.viewport3D.transferFunctions,
               ).map((transferFunction) => ({

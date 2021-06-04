@@ -45,7 +45,7 @@ export class Viewport3D
 
   public opacity!: number;
   public shadingMode!: ShadingMode;
-  public suppressesShadingMode?: ShadingMode;
+  public suppressedShadingMode?: ShadingMode;
 
   protected activeTransferFunctionName?: TransferFunctionName;
   public transferFunctions: Record<
@@ -68,7 +68,7 @@ export class Viewport3D
       volumeSpaceCameraPosition: observable,
       opacity: observable,
       shadingMode: observable,
-      suppressesShadingMode: observable,
+      suppressedShadingMode: observable,
       activeTransferFunctionName: observable,
       transferFunctions: observable,
 
@@ -175,18 +175,18 @@ export class Viewport3D
     this.opacity = Math.min(1, Math.max(0, value));
   }
 
-  public setShadingMode(value: ShadingMode = "lao") {
+  public setShadingMode = (value: ShadingMode = "lao") => {
     this.shadingMode = value;
-  }
+  };
 
   protected setSuppressedShadingMode(value?: ShadingMode) {
-    this.suppressesShadingMode = value;
+    this.suppressedShadingMode = value;
   }
 
   public onTransferFunctionChange = () => {
-    if (this.shadingMode === "none" && !this.suppressesShadingMode) return;
+    if (this.shadingMode === "none" && !this.suppressedShadingMode) return;
 
-    if (!this.suppressesShadingMode) {
+    if (!this.suppressedShadingMode) {
       this.setSuppressedShadingMode(this.shadingMode);
       this.setShadingMode("none");
     }
@@ -196,7 +196,7 @@ export class Viewport3D
     }
     this.shadingTimeout = setTimeout(() => {
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      this.setShadingMode(this.suppressesShadingMode!);
+      this.setShadingMode(this.suppressedShadingMode!);
       this.setSuppressedShadingMode();
       this.shadingTimeout = undefined;
     }, 200);

@@ -142,6 +142,12 @@ export interface IViewport3D<N extends string> {
   /** The volumetric rendering opacity, scales the density of every voxel. */
   opacity: number;
   shadingMode: ShadingMode;
+  /**
+   * The targeted shading mode, as chosen by the user.
+   * This will only be set if the shading mode is automatically switched for,
+   * e.g., performance reasons and thus deviates from the user-selected one.
+   */
+  suppressedShadingMode?: ShadingMode;
 
   activeTransferFunction?: Reference<ITransferFunction<N>>;
   transferFunctions: Record<N, ITransferFunction<N>>;
