@@ -65,8 +65,9 @@ export class ConeTransferFunction
         labelTx: "lock-cone",
         defaultValue: false,
         onBeforeValueChange: () => {
-          if (this.params.isConeLocked.value)
+          if (this.params.isConeLocked.value) {
             document.viewport3D?.onTransferFunctionChange();
+          }
         },
       }) as Parameter<unknown>,
       new NumberParameter({

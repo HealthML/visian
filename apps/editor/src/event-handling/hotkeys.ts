@@ -13,26 +13,36 @@ export const setUpHotKeys = (store: RootStore): IDisposer => {
   });
   hotkeys("c", (event) => {
     event.preventDefault();
+    if (store.editor.activeDocument?.viewSettings.viewMode !== "2D") return;
     if (!store.editor.activeDocument?.has3DLayers) return;
+
     store.editor.activeDocument?.tools.setActiveTool("crosshair-tool");
   });
   hotkeys("b", (event) => {
     event.preventDefault();
+    if (store.editor.activeDocument?.viewSettings.viewMode !== "2D") return;
+
     store.editor.activeDocument?.tools.setActiveTool("pixel-brush");
   });
   hotkeys("s", (event) => {
     event.preventDefault();
+    if (store.editor.activeDocument?.viewSettings.viewMode !== "2D") return;
+
     store.editor.activeDocument?.tools.setActiveTool("smart-brush");
   });
   hotkeys("e", (event) => {
     event.preventDefault();
+    if (store.editor.activeDocument?.viewSettings.viewMode !== "2D") return;
+
     store.editor.activeDocument?.tools.setActiveTool("pixel-eraser");
   });
   hotkeys("o", (event) => {
     event.preventDefault();
+    if (store.editor.activeDocument?.viewSettings.viewMode !== "2D") return;
+
     store.editor.activeDocument?.tools.setActiveTool("outline-tool");
   });
-  hotkeys("f", (event) => {
+  hotkeys("shift+f,f", (event) => {
     event.preventDefault();
     if (store.editor.activeDocument?.viewSettings.viewMode !== "3D") return;
 
@@ -45,7 +55,9 @@ export const setUpHotKeys = (store: RootStore): IDisposer => {
   // Tools
   hotkeys("del,backspace", (event) => {
     event.preventDefault();
-    store.editor.activeDocument?.tools.setActiveTool("clear-image");
+    if (store.editor.activeDocument?.viewSettings.viewMode !== "2D") return;
+
+    store.editor.activeDocument?.tools.setActiveTool("clear-slice");
   });
   hotkeys("ctrl+del,ctrl+backspace", (event) => {
     event.preventDefault();
@@ -103,10 +115,14 @@ export const setUpHotKeys = (store: RootStore): IDisposer => {
   // Slice Navigation
   hotkeys("up", (event) => {
     event.preventDefault();
+    if (store.editor.activeDocument?.viewSettings.viewMode !== "2D") return;
+
     store.editor.activeDocument?.viewport2D.stepSelectedSlice(undefined, 1);
   });
   hotkeys("shift+up", (event) => {
     event.preventDefault();
+    if (store.editor.activeDocument?.viewSettings.viewMode !== "2D") return;
+
     store.editor.activeDocument?.viewport2D.stepSelectedSlice(
       undefined,
       skipSlices,
@@ -114,10 +130,14 @@ export const setUpHotKeys = (store: RootStore): IDisposer => {
   });
   hotkeys("down", (event) => {
     event.preventDefault();
+    if (store.editor.activeDocument?.viewSettings.viewMode !== "2D") return;
+
     store.editor.activeDocument?.viewport2D.stepSelectedSlice(undefined, -1);
   });
   hotkeys("shift+down", (event) => {
     event.preventDefault();
+    if (store.editor.activeDocument?.viewSettings.viewMode !== "2D") return;
+
     store.editor.activeDocument?.viewport2D.stepSelectedSlice(
       undefined,
       -skipSlices,
@@ -125,6 +145,8 @@ export const setUpHotKeys = (store: RootStore): IDisposer => {
   });
   hotkeys("alt+0", (event) => {
     event.preventDefault();
+    if (store.editor.activeDocument?.viewSettings.viewMode !== "2D") return;
+
     store.editor.activeDocument?.viewSettings.setSelectedVoxel();
   });
 
@@ -133,15 +155,21 @@ export const setUpHotKeys = (store: RootStore): IDisposer => {
     // "+" doesn't currently work with hotkeys-js (https://github.com/jaywcjlove/hotkeys/issues/270)
     if (event.key === "+" && event.ctrlKey) {
       event.preventDefault();
+      if (store.editor.activeDocument?.viewSettings.viewMode !== "2D") return;
+
       store.editor.activeDocument?.viewport2D.zoomIn();
     }
   });
   hotkeys("ctrl+-", (event) => {
     event.preventDefault();
+    if (store.editor.activeDocument?.viewSettings.viewMode !== "2D") return;
+
     store.editor.activeDocument?.viewport2D.zoomOut();
   });
   hotkeys("ctrl+0", (event) => {
     event.preventDefault();
+    if (store.editor.activeDocument?.viewSettings.viewMode !== "2D") return;
+
     store.editor.activeDocument?.viewport2D.setZoomLevel();
     store.editor.activeDocument?.viewport2D.setOffset();
   });
@@ -157,6 +185,8 @@ export const setUpHotKeys = (store: RootStore): IDisposer => {
   });
   hotkeys("ctrl+shift+e", (event) => {
     event.preventDefault();
+    if (store.editor.activeDocument?.viewSettings.viewMode !== "2D") return;
+
     (store.editor.activeDocument
       ?.activeLayer as ImageLayer)?.quickExportSlice?.();
   });

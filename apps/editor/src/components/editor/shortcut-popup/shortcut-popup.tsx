@@ -173,6 +173,22 @@ export const ShortcutPopUp: React.FC<ShortcutPopUpProps> = ({
               <ShortcutDescription text="Select Eraser tool" />
             </ShortcutDescriptionContainer>
           </ShortcutRow>
+          <ShortcutRow>
+            <ShortcutContainer>
+              <KeyIcon text="O" />
+            </ShortcutContainer>
+            <ShortcutDescriptionContainer>
+              <ShortcutDescription text="Select Outline tool" />
+            </ShortcutDescriptionContainer>
+          </ShortcutRow>
+          <ShortcutRow>
+            <ShortcutContainer>
+              <KeyIcon text="F" />
+            </ShortcutContainer>
+            <ShortcutDescriptionContainer>
+              <ShortcutDescription text="Select Fly tool (3D)" />
+            </ShortcutDescriptionContainer>
+          </ShortcutRow>
         </ShortcutGroup>
         <ShortcutGroup>
           <GroupTitleContainer>
