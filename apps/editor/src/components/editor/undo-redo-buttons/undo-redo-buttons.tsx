@@ -31,7 +31,8 @@ export const UndoRedoButtons = observer(() => {
     };
   }, [store, wrapperRef]);
 
-  return (
+  // TODO: Remove check as soon as undo/redo is correctly updated in the 3D view
+  return store?.editor.activeDocument?.viewSettings.viewMode !== "3D" ? (
     <Container>
       <Wrapper ref={wrapperRef}>
         <StyledButton
@@ -52,5 +53,5 @@ export const UndoRedoButtons = observer(() => {
         />
       </Wrapper>
     </Container>
-  );
+  ) : null;
 });

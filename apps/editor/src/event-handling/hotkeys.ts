@@ -76,10 +76,18 @@ export const setUpHotKeys = (store: RootStore): IDisposer => {
   });
 
   // Undo/Redo
-  hotkeys("ctrl+z", () => {
+  hotkeys("ctrl+z", (event) => {
+    event.preventDefault();
+    // TODO: Remove check as soon as undo/redo is correctly updated in the 3D view
+    if (store.editor.activeDocument?.viewSettings.viewMode === "3D") return;
+
     store.editor.activeDocument?.history.undo();
   });
-  hotkeys("ctrl+shift+z,ctrl+y", () => {
+  hotkeys("ctrl+shift+z,ctrl+y", (event) => {
+    event.preventDefault();
+    // TODO: Remove check as soon as undo/redo is correctly updated in the 3D view
+    if (store.editor.activeDocument?.viewSettings.viewMode === "3D") return;
+
     store.editor.activeDocument?.history.redo();
   });
 
