@@ -20,7 +20,11 @@ const StyledButton = styled(SquareButton)`
 `;
 
 export const UndoRedoButtons = observer<UndoRedoButtonsProps>((props) => {
-  const { onPointerLeaveButton, shouldForceTooltip } = props;
+  const {
+    onPointerEnterButton,
+    onPointerLeaveButton,
+    shouldForceTooltip,
+  } = props;
   const store = useStore();
 
   // Ref Management
@@ -43,6 +47,7 @@ export const UndoRedoButtons = observer<UndoRedoButtonsProps>((props) => {
           isActive={false}
           isDisabled={!store?.editor.undoRedo.isUndoAvailable}
           onPointerDown={store?.editor.undoRedo.undo}
+          onPointerEnter={onPointerEnterButton}
           onPointerLeave={onPointerLeaveButton}
           shouldForceTooltip={shouldForceTooltip}
         />
@@ -53,6 +58,7 @@ export const UndoRedoButtons = observer<UndoRedoButtonsProps>((props) => {
           isActive={false}
           isDisabled={!store?.editor.undoRedo.isRedoAvailable}
           onPointerDown={store?.editor.undoRedo.redo}
+          onPointerEnter={onPointerEnterButton}
           onPointerLeave={onPointerLeaveButton}
           shouldForceTooltip={shouldForceTooltip}
         />

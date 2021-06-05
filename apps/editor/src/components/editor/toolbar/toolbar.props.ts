@@ -1,4 +1,5 @@
 export interface ToolbarProps {
-  onPointerLeaveTool?: () => void;
+  onPointerEnterButton?: () => void;
+  onPointerLeaveButton?: () => void;
   shouldForceTooltip?: boolean;
 }

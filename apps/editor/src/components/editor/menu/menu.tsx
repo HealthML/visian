@@ -63,6 +63,7 @@ const languageSwitchItems = [
 export const Menu: React.FC<MenuProps> = observer((props) => {
   const {
     onOpenShortcutPopUp,
+    onPointerEnterButton,
     onPointerLeaveButton,
     shouldForceTooltip,
   } = props;
@@ -123,6 +124,7 @@ export const Menu: React.FC<MenuProps> = observer((props) => {
         onPointerDown={isModalOpen ? undefined : openModal}
         isActive={isModalOpen}
         shouldForceTooltip={shouldForceTooltip}
+        onPointerEnter={onPointerEnterButton}
         onPointerLeave={onPointerLeaveButton}
       />
       <Modal

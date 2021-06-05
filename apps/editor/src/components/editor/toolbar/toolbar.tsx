@@ -35,7 +35,11 @@ const adaptiveBrushSizeSwitchItems = [
 ];
 
 export const Toolbar: React.FC<ToolbarProps> = observer((props) => {
-  const { shouldForceTooltip, onPointerLeaveTool } = props;
+  const {
+    onPointerEnterButton,
+    onPointerLeaveButton,
+    shouldForceTooltip,
+  } = props;
   const store = useStore();
 
   // Ref Management
@@ -102,7 +106,8 @@ export const Toolbar: React.FC<ToolbarProps> = observer((props) => {
         onPress={setActiveTool}
         onContextMenu={preventDefault}
         shouldForceTooltip={shouldForceTooltip}
-        onPointerLeave={onPointerLeaveTool}
+        onPointerEnter={onPointerEnterButton}
+        onPointerLeave={onPointerLeaveButton}
       />
       <Tool
         icon="crosshair"
@@ -115,7 +120,8 @@ export const Toolbar: React.FC<ToolbarProps> = observer((props) => {
         onPress={setActiveTool}
         onContextMenu={preventDefault}
         shouldForceTooltip={shouldForceTooltip}
-        onPointerLeave={onPointerLeaveTool}
+        onPointerEnter={onPointerEnterButton}
+        onPointerLeave={onPointerLeaveButton}
       />
       <Tool
         icon="pixelBrush"
@@ -127,7 +133,8 @@ export const Toolbar: React.FC<ToolbarProps> = observer((props) => {
         onPress={setActiveTool}
         onContextMenu={preventDefault}
         shouldForceTooltip={shouldForceTooltip}
-        onPointerLeave={onPointerLeaveTool}
+        onPointerEnter={onPointerEnterButton}
+        onPointerLeave={onPointerLeaveButton}
       />
       <Tool
         icon="magicBrush"
@@ -139,7 +146,8 @@ export const Toolbar: React.FC<ToolbarProps> = observer((props) => {
         onPress={setActiveTool}
         onContextMenu={preventDefault}
         shouldForceTooltip={shouldForceTooltip}
-        onPointerLeave={onPointerLeaveTool}
+        onPointerEnter={onPointerEnterButton}
+        onPointerLeave={onPointerLeaveButton}
       />
       <Tool
         icon="outline"
@@ -151,7 +159,8 @@ export const Toolbar: React.FC<ToolbarProps> = observer((props) => {
         onPress={setActiveTool}
         onContextMenu={preventDefault}
         shouldForceTooltip={shouldForceTooltip}
-        onPointerLeave={onPointerLeaveTool}
+        onPointerEnter={onPointerEnterButton}
+        onPointerLeave={onPointerLeaveButton}
       />
       <Tool
         icon="erase"
@@ -163,7 +172,8 @@ export const Toolbar: React.FC<ToolbarProps> = observer((props) => {
         onPress={setActiveTool}
         onContextMenu={preventDefault}
         shouldForceTooltip={shouldForceTooltip}
-        onPointerLeave={onPointerLeaveTool}
+        onPointerEnter={onPointerEnterButton}
+        onPointerLeave={onPointerLeaveButton}
       />
       <Tool
         icon="trash"
@@ -171,7 +181,8 @@ export const Toolbar: React.FC<ToolbarProps> = observer((props) => {
         onPress={clearSlice}
         onContextMenu={preventDefault}
         shouldForceTooltip={shouldForceTooltip}
-        onPointerLeave={onPointerLeaveTool}
+        onPointerEnter={onPointerEnterButton}
+        onPointerLeave={onPointerLeaveButton}
       />
       <BrushModal
         isOpen={

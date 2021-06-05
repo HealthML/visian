@@ -116,7 +116,7 @@ export const UIOverlay = observer<UIOverlayProps>(
 
     // Tooltip Delay Handling
     const [shouldDelayTooltips, setShouldDelayTooltips] = useState(true);
-    const [scheduleTooltipsDelay] = useDelay(
+    const [scheduleTooltipsDelay, cancelTooltipsDelay] = useDelay(
       useCallback(() => {
         setShouldDelayTooltips(true);
       }, []),
@@ -143,19 +143,23 @@ export const UIOverlay = observer<UIOverlayProps>(
           <MenuRow>
             <Menu
               onOpenShortcutPopUp={openShortcutPopUp}
+              onPointerEnterButton={cancelTooltipsDelay}
               onPointerLeaveButton={setNoTooltipDelayTimer}
               shouldForceTooltip={!shouldDelayTooltips}
             />
             <UndoRedoButtons
+              onPointerEnterButton={cancelTooltipsDelay}
               onPointerLeaveButton={setNoTooltipDelayTimer}
               shouldForceTooltip={!shouldDelayTooltips}
             />
           </MenuRow>
           <Toolbar
-            onPointerLeaveTool={setNoTooltipDelayTimer}
+            onPointerEnterButton={cancelTooltipsDelay}
+            onPointerLeaveButton={setNoTooltipDelayTimer}
             shouldForceTooltip={!shouldDelayTooltips}
           />
           <Layers
+            onPointerEnterButton={cancelTooltipsDelay}
             onPointerLeaveButton={setNoTooltipDelayTimer}
             shouldForceTooltip={!shouldDelayTooltips}
           />
@@ -172,10 +176,12 @@ export const UIOverlay = observer<UIOverlayProps>(
               tooltipPosition="left"
               onPointerDown={store?.editor.quickExport}
               isActive={false}
+              onPointerEnter={cancelTooltipsDelay}
               onPointerLeave={setNoTooltipDelayTimer}
               shouldForceTooltip={!shouldDelayTooltips}
             />
             <ViewSettings
+              onPointerEnterButton={cancelTooltipsDelay}
               onPointerLeaveButton={setNoTooltipDelayTimer}
               shouldForceTooltip={!shouldDelayTooltips}
             />

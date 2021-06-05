@@ -28,7 +28,11 @@ const noop = () => {
 };
 
 export const Layers: React.FC<LayersProps> = observer((props) => {
-  const { onPointerLeaveButton, shouldForceTooltip } = props;
+  const {
+    onPointerEnterButton,
+    onPointerLeaveButton,
+    shouldForceTooltip,
+  } = props;
   const store = useStore();
 
   // Menu Toggling
@@ -75,6 +79,7 @@ export const Layers: React.FC<LayersProps> = observer((props) => {
         ref={setButtonRef}
         onPointerDown={toggleModal}
         isActive={isModalOpen}
+        onPointerEnter={onPointerEnterButton}
         onPointerLeave={onPointerLeaveButton}
         shouldForceTooltip={shouldForceTooltip}
       />

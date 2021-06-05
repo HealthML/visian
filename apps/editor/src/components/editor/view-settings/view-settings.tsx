@@ -30,7 +30,11 @@ const mainViewTypeSwitchItems = [
 ];
 
 export const ViewSettings: React.FC<ViewSettingsProps> = observer((props) => {
-  const { onPointerLeaveButton, shouldForceTooltip } = props;
+  const {
+    onPointerEnterButton,
+    onPointerLeaveButton,
+    shouldForceTooltip,
+  } = props;
   const store = useStore();
 
   // Ref Management
@@ -76,6 +80,7 @@ export const ViewSettings: React.FC<ViewSettingsProps> = observer((props) => {
         ref={updateButtonRef}
         onPointerDown={toggleModal}
         isActive={isModalOpen}
+        onPointerEnter={onPointerEnterButton}
         onPointerLeave={onPointerLeaveButton}
         shouldForceTooltip={shouldForceTooltip}
       />
