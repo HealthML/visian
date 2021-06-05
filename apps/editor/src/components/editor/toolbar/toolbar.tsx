@@ -1,21 +1,19 @@
 import {
-  duration,
   Modal,
   PointerButton,
   preventDefault,
   SliderField,
   Switch,
-  Theme,
   Tool,
   Toolbar as GenericToolbar,
-  useDelay,
 } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import styled, { useTheme } from "styled-components";
+import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
 import { ToolType } from "../../../models";
+import { ToolbarProps } from "./toolbar.props";
 
 // Styled Components
 const StyledToolbar = styled(GenericToolbar)`
@@ -36,9 +34,9 @@ const adaptiveBrushSizeSwitchItems = [
   { labelTx: "off", value: false },
 ];
 
-export const Toolbar: React.FC = observer(() => {
+export const Toolbar: React.FC<ToolbarProps> = observer((props) => {
+  const { shouldForceTooltip = false, onPointerLeaveTool } = props;
   const store = useStore();
-  const theme = useTheme() as Theme;
 
   // Ref Management
   const ref = useRef<HTMLDivElement>(null);
@@ -94,20 +92,6 @@ export const Toolbar: React.FC = observer(() => {
     [store],
   );
 
-  const [shouldDelayTooltips, setShouldDelayTooltips] = useState(true);
-
-  const [scheduleTooltipsDelay] = useDelay(
-    useCallback(() => {
-      setShouldDelayTooltips(true);
-    }, []),
-    duration("noTooltipDelayInterval")({ theme }) as number,
-  );
-
-  const setNoTooltipDelayTimer = useCallback(() => {
-    setShouldDelayTooltips(false);
-    scheduleTooltipsDelay();
-  }, [scheduleTooltipsDelay]);
-
   return (
     <StyledToolbar ref={ref}>
       <Tool
@@ -117,8 +101,8 @@ export const Toolbar: React.FC = observer(() => {
         value={ToolType.Navigate}
         onPress={setActiveTool}
         onContextMenu={preventDefault}
-        forceTooltip={!shouldDelayTooltips}
-        onPointerLeave={setNoTooltipDelayTimer}
+        forceTooltip={shouldForceTooltip}
+        onPointerLeave={onPointerLeaveTool}
       />
       <Tool
         icon="crosshair"
@@ -130,8 +114,8 @@ export const Toolbar: React.FC = observer(() => {
         }
         onPress={setActiveTool}
         onContextMenu={preventDefault}
-        forceTooltip={!shouldDelayTooltips}
-        onPointerLeave={setNoTooltipDelayTimer}
+        forceTooltip={shouldForceTooltip}
+        onPointerLeave={onPointerLeaveTool}
       />
       <Tool
         icon="pixelBrush"
@@ -142,8 +126,8 @@ export const Toolbar: React.FC = observer(() => {
         ref={activeTool === ToolType.Brush ? setButtonRef : undefined}
         onPress={setActiveTool}
         onContextMenu={preventDefault}
-        forceTooltip={!shouldDelayTooltips}
-        onPointerLeave={setNoTooltipDelayTimer}
+        forceTooltip={shouldForceTooltip}
+        onPointerLeave={onPointerLeaveTool}
       />
       <Tool
         icon="magicBrush"
@@ -154,8 +138,8 @@ export const Toolbar: React.FC = observer(() => {
         ref={activeTool === ToolType.SmartBrush ? setButtonRef : undefined}
         onPress={setActiveTool}
         onContextMenu={preventDefault}
-        forceTooltip={!shouldDelayTooltips}
-        onPointerLeave={setNoTooltipDelayTimer}
+        forceTooltip={shouldForceTooltip}
+        onPointerLeave={onPointerLeaveTool}
       />
       <Tool
         icon="outline"
@@ -166,8 +150,8 @@ export const Toolbar: React.FC = observer(() => {
         ref={activeTool === ToolType.Outline ? setButtonRef : undefined}
         onPress={setActiveTool}
         onContextMenu={preventDefault}
-        forceTooltip={!shouldDelayTooltips}
-        onPointerLeave={setNoTooltipDelayTimer}
+        forceTooltip={shouldForceTooltip}
+        onPointerLeave={onPointerLeaveTool}
       />
       <Tool
         icon="erase"
@@ -178,16 +162,16 @@ export const Toolbar: React.FC = observer(() => {
         ref={activeTool === ToolType.Eraser ? setButtonRef : undefined}
         onPress={setActiveTool}
         onContextMenu={preventDefault}
-        forceTooltip={!shouldDelayTooltips}
-        onPointerLeave={setNoTooltipDelayTimer}
+        forceTooltip={shouldForceTooltip}
+        onPointerLeave={onPointerLeaveTool}
       />
       <Tool
         icon="trash"
         tooltipTx="clear-slice"
         onPress={clearSlice}
         onContextMenu={preventDefault}
-        forceTooltip={!shouldDelayTooltips}
-        onPointerLeave={setNoTooltipDelayTimer}
+        forceTooltip={shouldForceTooltip}
+        onPointerLeave={onPointerLeaveTool}
       />
       <BrushModal
         isOpen={

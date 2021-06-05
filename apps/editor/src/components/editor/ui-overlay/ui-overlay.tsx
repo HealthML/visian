@@ -1,12 +1,15 @@
 import {
   AbsoluteCover,
+  duration,
   FloatingUIButton,
   Notification,
   Text,
+  Theme,
+  useDelay,
 } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import styled from "styled-components";
+import styled, { useTheme } from "styled-components";
 
 import { useStore } from "../../../app/root-store";
 import { DropSheet } from "../drop-sheet";
@@ -79,6 +82,7 @@ const ErrorNotification = styled(Notification)`
 export const UIOverlay = observer<UIOverlayProps>(
   ({ isDraggedOver, onDropCompleted, ...rest }) => {
     const store = useStore();
+    const theme = useTheme() as Theme;
 
     // Ref Management
     const containerRef = useRef<HTMLDivElement>(null);
@@ -110,6 +114,19 @@ export const UIOverlay = observer<UIOverlayProps>(
       setIsShortcutPopUpOpen(false);
     }, []);
 
+    // Tooltip Delay Handling
+    const [shouldDelayTooltips, setShouldDelayTooltips] = useState(true);
+    const [scheduleTooltipsDelay] = useDelay(
+      useCallback(() => {
+        setShouldDelayTooltips(true);
+      }, []),
+      duration("noTooltipDelayInterval")({ theme }) as number,
+    );
+    const setNoTooltipDelayTimer = useCallback(() => {
+      setShouldDelayTooltips(false);
+      scheduleTooltipsDelay();
+    }, [scheduleTooltipsDelay]);
+
     return (
       <Container
         {...rest}
@@ -127,7 +144,10 @@ export const UIOverlay = observer<UIOverlayProps>(
             <Menu onOpenShortcutPopUp={openShortcutPopUp} />
             <UndoRedoButtons />
           </MenuRow>
-          <Toolbar />
+          <Toolbar
+            shouldForceTooltip={!shouldDelayTooltips}
+            onPointerLeaveTool={setNoTooltipDelayTimer}
+          />
           <Layers />
         </ColumnLeft>
         <ColumnCenter>
