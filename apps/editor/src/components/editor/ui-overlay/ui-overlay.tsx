@@ -141,14 +141,24 @@ export const UIOverlay = observer<UIOverlayProps>(
         )}
         <ColumnLeft>
           <MenuRow>
-            <Menu onOpenShortcutPopUp={openShortcutPopUp} />
-            <UndoRedoButtons />
+            <Menu
+              onOpenShortcutPopUp={openShortcutPopUp}
+              onPointerLeaveButton={setNoTooltipDelayTimer}
+              shouldForceTooltip={!shouldDelayTooltips}
+            />
+            <UndoRedoButtons
+              onPointerLeaveButton={setNoTooltipDelayTimer}
+              shouldForceTooltip={!shouldDelayTooltips}
+            />
           </MenuRow>
           <Toolbar
-            shouldForceTooltip={!shouldDelayTooltips}
             onPointerLeaveTool={setNoTooltipDelayTimer}
+            shouldForceTooltip={!shouldDelayTooltips}
           />
-          <Layers />
+          <Layers
+            onPointerLeaveButton={setNoTooltipDelayTimer}
+            shouldForceTooltip={!shouldDelayTooltips}
+          />
         </ColumnLeft>
         <ColumnCenter>
           <TopConsole />
@@ -162,8 +172,13 @@ export const UIOverlay = observer<UIOverlayProps>(
               tooltipPosition="left"
               onPointerDown={store?.editor.quickExport}
               isActive={false}
+              onPointerLeave={setNoTooltipDelayTimer}
+              shouldForceTooltip={!shouldDelayTooltips}
             />
-            <ViewSettings />
+            <ViewSettings
+              onPointerLeaveButton={setNoTooltipDelayTimer}
+              shouldForceTooltip={!shouldDelayTooltips}
+            />
             <SliceSlider />
           </RightBar>
         </ColumnRight>

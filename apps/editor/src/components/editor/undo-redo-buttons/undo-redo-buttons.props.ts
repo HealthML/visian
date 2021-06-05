@@ -1,5 +1,4 @@
-export interface MenuProps {
-  onOpenShortcutPopUp?: () => void;
+export interface UndoRedoButtonsProps {
   onPointerLeaveButton?: () => void;
   shouldForceTooltip?: boolean;
 }

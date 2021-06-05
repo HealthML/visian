@@ -42,7 +42,7 @@ const BaseButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
     {
       children,
       data,
-      forceTooltip = false,
+      shouldForceTooltip = false,
       icon,
       tooltip,
       tooltipTx,
@@ -113,7 +113,7 @@ const BaseButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
             text={tooltip}
             tx={tooltipTx}
             isShown={
-              (showTooltip || (forceTooltip && isPointerOverButton)) &&
+              (showTooltip || (shouldForceTooltip && isPointerOverButton)) &&
               externalShowTooltip
             }
             parentElement={buttonRef}

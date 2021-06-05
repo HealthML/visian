@@ -11,6 +11,7 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
+import { ViewSettingsProps } from "./view-settings.props";
 
 // Styled Components
 const SpacedSliderField = styled(SliderField)`
@@ -28,7 +29,8 @@ const mainViewTypeSwitchItems = [
   { label: "C", value: ViewType.Coronal, tooltipTx: "coronal" },
 ];
 
-export const ViewSettings: React.FC = observer(() => {
+export const ViewSettings: React.FC<ViewSettingsProps> = observer((props) => {
+  const { onPointerLeaveButton, shouldForceTooltip } = props;
   const store = useStore();
 
   // Ref Management
@@ -74,6 +76,8 @@ export const ViewSettings: React.FC = observer(() => {
         ref={updateButtonRef}
         onPointerDown={toggleModal}
         isActive={isModalOpen}
+        onPointerLeave={onPointerLeaveButton}
+        shouldForceTooltip={shouldForceTooltip}
       />
       <Modal
         isOpen={isModalOpen}

@@ -11,6 +11,7 @@ import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
 import { ColorPanel } from "../color-panel";
+import { LayersProps } from "./layers.props";
 
 // Styled Components
 const LayerList = styled(List)`
@@ -26,7 +27,8 @@ const noop = () => {
   // Intentionally left blank
 };
 
-export const Layers: React.FC = observer(() => {
+export const Layers: React.FC<LayersProps> = observer((props) => {
+  const { onPointerLeaveButton, shouldForceTooltip } = props;
   const store = useStore();
 
   // Menu Toggling
@@ -73,6 +75,8 @@ export const Layers: React.FC = observer(() => {
         ref={setButtonRef}
         onPointerDown={toggleModal}
         isActive={isModalOpen}
+        onPointerLeave={onPointerLeaveButton}
+        shouldForceTooltip={shouldForceTooltip}
       />
       <LayerModal
         isOpen={isModalOpen}

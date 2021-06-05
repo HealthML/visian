@@ -1,5 +1,4 @@
-export interface MenuProps {
-  onOpenShortcutPopUp?: () => void;
+export interface LayersProps {
   onPointerLeaveButton?: () => void;
   shouldForceTooltip?: boolean;
 }

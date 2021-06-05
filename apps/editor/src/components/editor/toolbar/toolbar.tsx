@@ -35,7 +35,7 @@ const adaptiveBrushSizeSwitchItems = [
 ];
 
 export const Toolbar: React.FC<ToolbarProps> = observer((props) => {
-  const { shouldForceTooltip = false, onPointerLeaveTool } = props;
+  const { shouldForceTooltip, onPointerLeaveTool } = props;
   const store = useStore();
 
   // Ref Management
@@ -101,7 +101,7 @@ export const Toolbar: React.FC<ToolbarProps> = observer((props) => {
         value={ToolType.Navigate}
         onPress={setActiveTool}
         onContextMenu={preventDefault}
-        forceTooltip={shouldForceTooltip}
+        shouldForceTooltip={shouldForceTooltip}
         onPointerLeave={onPointerLeaveTool}
       />
       <Tool
@@ -114,7 +114,7 @@ export const Toolbar: React.FC<ToolbarProps> = observer((props) => {
         }
         onPress={setActiveTool}
         onContextMenu={preventDefault}
-        forceTooltip={shouldForceTooltip}
+        shouldForceTooltip={shouldForceTooltip}
         onPointerLeave={onPointerLeaveTool}
       />
       <Tool
@@ -126,7 +126,7 @@ export const Toolbar: React.FC<ToolbarProps> = observer((props) => {
         ref={activeTool === ToolType.Brush ? setButtonRef : undefined}
         onPress={setActiveTool}
         onContextMenu={preventDefault}
-        forceTooltip={shouldForceTooltip}
+        shouldForceTooltip={shouldForceTooltip}
         onPointerLeave={onPointerLeaveTool}
       />
       <Tool
@@ -138,7 +138,7 @@ export const Toolbar: React.FC<ToolbarProps> = observer((props) => {
         ref={activeTool === ToolType.SmartBrush ? setButtonRef : undefined}
         onPress={setActiveTool}
         onContextMenu={preventDefault}
-        forceTooltip={shouldForceTooltip}
+        shouldForceTooltip={shouldForceTooltip}
         onPointerLeave={onPointerLeaveTool}
       />
       <Tool
@@ -150,7 +150,7 @@ export const Toolbar: React.FC<ToolbarProps> = observer((props) => {
         ref={activeTool === ToolType.Outline ? setButtonRef : undefined}
         onPress={setActiveTool}
         onContextMenu={preventDefault}
-        forceTooltip={shouldForceTooltip}
+        shouldForceTooltip={shouldForceTooltip}
         onPointerLeave={onPointerLeaveTool}
       />
       <Tool
@@ -162,7 +162,7 @@ export const Toolbar: React.FC<ToolbarProps> = observer((props) => {
         ref={activeTool === ToolType.Eraser ? setButtonRef : undefined}
         onPress={setActiveTool}
         onContextMenu={preventDefault}
-        forceTooltip={shouldForceTooltip}
+        shouldForceTooltip={shouldForceTooltip}
         onPointerLeave={onPointerLeaveTool}
       />
       <Tool
@@ -170,7 +170,7 @@ export const Toolbar: React.FC<ToolbarProps> = observer((props) => {
         tooltipTx="clear-slice"
         onPress={clearSlice}
         onContextMenu={preventDefault}
-        forceTooltip={shouldForceTooltip}
+        shouldForceTooltip={shouldForceTooltip}
         onPointerLeave={onPointerLeaveTool}
       />
       <BrushModal

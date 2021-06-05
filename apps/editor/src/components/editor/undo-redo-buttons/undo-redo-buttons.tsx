@@ -4,6 +4,7 @@ import React, { useEffect, useRef } from "react";
 import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
+import { UndoRedoButtonsProps } from "./undo-redo-buttons.props";
 
 const Container = styled.div`
   position: relative;
@@ -18,7 +19,8 @@ const StyledButton = styled(SquareButton)`
   margin-right: 8px;
 `;
 
-export const UndoRedoButtons = observer(() => {
+export const UndoRedoButtons = observer<UndoRedoButtonsProps>((props) => {
+  const { onPointerLeaveButton, shouldForceTooltip } = props;
   const store = useStore();
 
   // Ref Management
@@ -41,6 +43,8 @@ export const UndoRedoButtons = observer(() => {
           isActive={false}
           isDisabled={!store?.editor.undoRedo.isUndoAvailable}
           onPointerDown={store?.editor.undoRedo.undo}
+          onPointerLeave={onPointerLeaveButton}
+          shouldForceTooltip={shouldForceTooltip}
         />
         <StyledButton
           icon="redo"
@@ -49,6 +53,8 @@ export const UndoRedoButtons = observer(() => {
           isActive={false}
           isDisabled={!store?.editor.undoRedo.isRedoAvailable}
           onPointerDown={store?.editor.undoRedo.redo}
+          onPointerLeave={onPointerLeaveButton}
+          shouldForceTooltip={shouldForceTooltip}
         />
       </Wrapper>
     </Container>
