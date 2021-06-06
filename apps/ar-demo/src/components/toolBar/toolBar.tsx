@@ -102,7 +102,7 @@ const ToolBar: React.FC<ToolBarProps> = (props) => {
           );
         })}
         <ToolContainer active={isTransformEnabled}>
-          {/* Todo: Add better icon. */}
+          {/* TODO: Add better icon. */}
           <CrosshairPointer onPointerDown={toggleTransform} />
         </ToolContainer>
         <ToolContainer active={showSettings}>

@@ -1,3 +1,4 @@
+import { Voxel } from "@visian/utils";
 import { action, makeObservable, observable } from "mobx";
 
 import {
@@ -45,39 +46,43 @@ export interface ImageSnapshot<T extends TypedArray = TypedArray> {
   atlas?: Uint8Array;
 }
 
+export const itkImageToImageSnapshot = <T extends TypedArray = TypedArray>(
+  image: ITKImage<T>,
+): ImageSnapshot => ({
+  name: image.name,
+  dimensionality: image.imageType.dimension,
+  voxelCount:
+    image.imageType.dimension === 2
+      ? [...image.size, 1]
+      : swapAxesForMetadata(image.size, image.direction),
+  voxelSpacing:
+    image.imageType.dimension === 2
+      ? [...image.spacing, 1]
+      : swapAxesForMetadata(image.spacing, image.direction),
+  voxelType: image.imageType.pixelType,
+  voxelComponents: image.imageType.components,
+  voxelComponentType: image.imageType.componentType,
+  origin: image.origin,
+  orientation:
+    image.imageType.dimension === 2
+      ? image.direction
+      : calculateNewOrientation(image.direction),
+  data: unifyOrientation(
+    image.data,
+    image.direction,
+    image.imageType.dimension,
+    image.size,
+    image.imageType.components,
+  ),
+});
+
 /** A generic, observable multi-dimensional image class. */
 export class Image<T extends TypedArray = TypedArray>
   implements ISerializable<ImageSnapshot<T>> {
   public static fromITKImage<T2 extends TypedArray = TypedArray>(
     image: ITKImage<T2>,
   ) {
-    return new Image({
-      name: image.name,
-      dimensionality: image.imageType.dimension,
-      voxelCount:
-        image.imageType.dimension === 2
-          ? [...image.size, 1]
-          : swapAxesForMetadata(image.size, image.direction),
-      voxelSpacing:
-        image.imageType.dimension === 2
-          ? [...image.spacing, 1]
-          : swapAxesForMetadata(image.spacing, image.direction),
-      voxelType: image.imageType.pixelType,
-      voxelComponents: image.imageType.components,
-      voxelComponentType: image.imageType.componentType,
-      origin: image.origin,
-      orientation:
-        image.imageType.dimension === 2
-          ? image.direction
-          : calculateNewOrientation(image.direction),
-      data: unifyOrientation(
-        image.data,
-        image.direction,
-        image.imageType.dimension,
-        image.size,
-        image.imageType.components,
-      ),
-    });
+    return new Image(itkImageToImageSnapshot(image));
   }
 
   public static async fromFile(file: File) {
@@ -234,7 +239,7 @@ export class Image<T extends TypedArray = TypedArray>
     return getAtlasSize(this.voxelCount, this.getAtlasGrid());
   }
 
-  public getSlice(sliceNumber: number, viewType: ViewType) {
+  public getSlice(viewType: ViewType, sliceNumber: number) {
     const [horizontal, vertical] = getPlaneAxes(viewType);
     const sliceData = new Uint8Array(
       this.voxelCount[horizontal] * this.voxelCount[vertical],
@@ -262,8 +267,8 @@ export class Image<T extends TypedArray = TypedArray>
   }
 
   public getSliceImage(
-    sliceNumber: number,
     viewType: ViewType,
+    sliceNumber: number,
   ): Image<T | Uint8Array> {
     if (this.dimensionality < 3) return this.clone();
 
@@ -278,11 +283,11 @@ export class Image<T extends TypedArray = TypedArray>
         this.voxelSpacing[horizontal],
         this.voxelSpacing[vertical],
       ],
-      data: this.getSlice(sliceNumber, viewType),
+      data: this.getSlice(viewType, sliceNumber),
     });
   }
 
-  public getVoxelData(voxel: Vector) {
+  public getVoxelData(voxel: Voxel | Vector) {
     const index = getAtlasIndexFor(voxel, this);
     return this.getAtlas()[index];
   }
@@ -321,7 +326,7 @@ export class Image<T extends TypedArray = TypedArray>
     }
   }
 
-  public setAtlasVoxel(voxel: Vector, value: number) {
+  public setAtlasVoxel(voxel: Voxel | Vector, value: number) {
     const index = getAtlasIndexFor(voxel, this);
     this.getAtlas()[index] = value;
     this.isDataDirty = true;

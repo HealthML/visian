@@ -22,9 +22,10 @@ const ListItemInner = styled.div`
   flex-direction: row;
   align-items: center;
   height: 40px;
+  overflow: hidden;
 `;
 
-const ListDivider = styled(Divider)`
+export const ListDivider = styled(Divider)`
   margin-bottom: 0;
 `;
 
@@ -34,6 +35,7 @@ export const ListItemLabel = styled(Text)`
   font-size: 14px;
   text-overflow: ellipsis;
   overflow: hidden;
+  white-space: nowrap;
   user-select: none;
 `;
 
@@ -63,15 +65,6 @@ export const ListIcon = styled(Icon).withConfig({
     css`
       cursor: pointer;
     `}
-`;
-
-export const ListFirstIcon = styled.div`
-  width: 20px;
-  height: 20px;
-  border-radius: 10px;
-  margin-right: 10px;
-  background-color: #d0c068;
-  cursor: pointer;
 `;
 
 export const List: React.FC<ListProps> = ({ children, ...rest }) => (
@@ -121,7 +114,8 @@ export const ListItem: React.FC<ListItemProps> = ({
             />
           ) : (
             <ListIcon
-              as={Color}
+              as={!icon.icon ? Color : undefined}
+              icon={icon.icon}
               color={icon.color}
               isDisabled={disableIcon}
               ref={iconRef as React.Ref<HTMLDivElement>}

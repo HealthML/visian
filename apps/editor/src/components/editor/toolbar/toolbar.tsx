@@ -1,10 +1,11 @@
 import {
+  BooleanParam,
   DelayHandlingButtonContainerProps,
   Modal,
+  NumberParam,
+  Param,
   PointerButton,
   preventDefault,
-  SliderField,
-  Switch,
   Tool,
   Toolbar as GenericToolbar,
 } from "@visian/ui-shared";
@@ -13,26 +14,16 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
-import { ToolType } from "../../../models";
+import { ToolName } from "../../../models";
 
 // Styled Components
 const StyledToolbar = styled(GenericToolbar)`
   margin-bottom: 16px;
 `;
 
-const SpacedSliderField = styled(SliderField)`
-  margin-bottom: 14px;
-`;
-
 const BrushModal = styled(Modal)`
   padding-bottom: 0px;
 `;
-
-// Menu Items
-const adaptiveBrushSizeSwitchItems = [
-  { labelTx: "on", value: true },
-  { labelTx: "off", value: false },
-];
 
 export const Toolbar: React.FC<DelayHandlingButtonContainerProps> = observer(
   (props) => {
@@ -62,7 +53,8 @@ export const Toolbar: React.FC<DelayHandlingButtonContainerProps> = observer(
     // Menu Positioning
     const [buttonRef, setButtonRef] = useState<HTMLButtonElement | null>(null);
 
-    const activeTool = store?.editor.tools.activeTool;
+    const activeTool = store?.editor.activeDocument?.tools.activeTool;
+    const activeToolName = activeTool?.name;
     const setActiveTool = useCallback(
       (
         value: string | number | undefined,
@@ -70,179 +62,100 @@ export const Toolbar: React.FC<DelayHandlingButtonContainerProps> = observer(
       ) => {
         if (
           event.button === PointerButton.RMB ||
-          store?.editor.tools.activeTool === value
+          store?.editor.activeDocument?.tools.activeTool?.name === value
         ) {
           event.preventDefault();
           event.stopPropagation();
           setIsModalOpen(
-            store?.editor.tools.activeTool !== value || !isModalOpen,
+            store?.editor.activeDocument?.tools.activeTool?.name !== value ||
+              !isModalOpen,
           );
         }
 
-        store?.editor.tools.setActiveTool(value as ToolType);
+        store?.editor.activeDocument?.tools.setActiveTool(value as ToolName);
       },
       [isModalOpen, store],
     );
-    const clearSlice = useCallback(
-      (_value: string | number | undefined, event: React.PointerEvent) => {
-        if (event.button !== PointerButton.LMB) return;
-        store?.editor.tools.clearSlice();
-      },
-      [store],
-    );
     const setBrushSize = useCallback(
       (value: number | number[]) => {
-        store?.editor.tools.setBrushSizePixels(value as number, true);
+        store?.editor.activeDocument?.tools.setBrushSize(value as number, true);
       },
       [store],
     );
 
+    // The crosshair cannot be used for 2D scans
+    // TODO: This logic should probably be moved into the model
+    if (
+      activeToolName === "crosshair-tool" &&
+      !store?.editor.activeDocument?.has3DLayers
+    ) {
+      store?.editor.activeDocument?.tools.setActiveTool();
+    }
+
     return (
       <StyledToolbar ref={ref}>
-        <Tool
-          icon="moveTool"
-          tooltipTx="navigation-tool"
-          activeTool={activeTool}
-          value={ToolType.Navigate}
-          onPress={setActiveTool}
-          onContextMenu={preventDefault}
-          shouldForceTooltip={shouldForceTooltip}
-          onPointerEnter={onPointerEnterButton}
-          onPointerLeave={onPointerLeaveButton}
-        />
-        <Tool
-          icon="crosshair"
-          tooltipTx="crosshair-tool"
-          activeTool={activeTool}
-          value={ToolType.Crosshair}
-          isDisabled={
-            !store?.editor.isIn3DMode ||
-            !store.editor.viewSettings.showSideViews
-          }
-          onPress={setActiveTool}
-          onContextMenu={preventDefault}
-          shouldForceTooltip={shouldForceTooltip}
-          onPointerEnter={onPointerEnterButton}
-          onPointerLeave={onPointerLeaveButton}
-        />
-        <Tool
-          icon="pixelBrush"
-          tooltipTx="pixel-brush"
-          showTooltip={!isModalOpen || activeTool !== ToolType.Brush}
-          activeTool={activeTool}
-          value={ToolType.Brush}
-          ref={activeTool === ToolType.Brush ? setButtonRef : undefined}
-          onPress={setActiveTool}
-          onContextMenu={preventDefault}
-          shouldForceTooltip={shouldForceTooltip}
-          onPointerEnter={onPointerEnterButton}
-          onPointerLeave={onPointerLeaveButton}
-        />
-        <Tool
-          icon="magicBrush"
-          tooltipTx="smart-brush"
-          showTooltip={!isModalOpen || activeTool !== ToolType.SmartBrush}
-          activeTool={activeTool}
-          value={ToolType.SmartBrush}
-          ref={activeTool === ToolType.SmartBrush ? setButtonRef : undefined}
-          onPress={setActiveTool}
-          onContextMenu={preventDefault}
-          shouldForceTooltip={shouldForceTooltip}
-          onPointerEnter={onPointerEnterButton}
-          onPointerLeave={onPointerLeaveButton}
-        />
-        <Tool
-          icon="outline"
-          tooltipTx="outline-tool"
-          showTooltip={!isModalOpen || activeTool !== ToolType.Outline}
-          activeTool={activeTool}
-          value={ToolType.Outline}
-          ref={activeTool === ToolType.Outline ? setButtonRef : undefined}
-          onPress={setActiveTool}
-          onContextMenu={preventDefault}
-          shouldForceTooltip={shouldForceTooltip}
-          onPointerEnter={onPointerEnterButton}
-          onPointerLeave={onPointerLeaveButton}
-        />
-        <Tool
-          icon="erase"
-          tooltipTx="pixel-eraser"
-          showTooltip={!isModalOpen || activeTool !== ToolType.Eraser}
-          activeTool={activeTool}
-          value={ToolType.Eraser}
-          ref={activeTool === ToolType.Eraser ? setButtonRef : undefined}
-          onPress={setActiveTool}
-          onContextMenu={preventDefault}
-          shouldForceTooltip={shouldForceTooltip}
-          onPointerEnter={onPointerEnterButton}
-          onPointerLeave={onPointerLeaveButton}
-        />
-        <Tool
-          icon="trash"
-          tooltipTx="clear-slice"
-          onPress={clearSlice}
-          onContextMenu={preventDefault}
-          shouldForceTooltip={shouldForceTooltip}
-          onPointerEnter={onPointerEnterButton}
-          onPointerLeave={onPointerLeaveButton}
-        />
+        {store?.editor.activeDocument?.tools.toolGroups.map(
+          ({ activeTool: tool }, index) => (
+            <Tool
+              key={index}
+              icon={tool.icon}
+              isDisabled={
+                tool.name === "crosshair-tool" &&
+                !store?.editor.activeDocument?.has3DLayers
+              }
+              tooltipTx={tool.labelTx}
+              tooltip={tool.label}
+              activeTool={activeToolName}
+              value={tool.name}
+              showTooltip={!isModalOpen || activeToolName !== tool.name}
+              ref={activeToolName === tool.name ? setButtonRef : undefined}
+              onPress={setActiveTool}
+              onContextMenu={preventDefault}
+              shouldForceTooltip={shouldForceTooltip}
+              onPointerEnter={onPointerEnterButton}
+              onPointerLeave={onPointerLeaveButton}
+            />
+          ),
+        )}
         <BrushModal
-          isOpen={
+          isOpen={Boolean(
             isModalOpen &&
-            activeTool !== ToolType.Navigate &&
-            activeTool !== ToolType.Crosshair &&
-            activeTool !== ToolType.Outline
-          }
-          labelTx={
-            activeTool === ToolType.SmartBrush
-              ? "smart-brush-settings"
-              : "brush-settings"
-          }
+              activeTool &&
+              (activeTool.isBrush || Object.keys(activeTool.params).length),
+          )}
+          labelTx={activeTool?.labelTx}
+          label={activeTool?.label}
           parentElement={buttonRef}
           position="right"
           onOutsidePress={closeModal}
-          onReset={
-            activeTool === ToolType.SmartBrush
-              ? store?.editor.tools.resetSmartBrush
-              : store?.editor.tools.resetBrushSize
-          }
+          onReset={store?.editor.activeDocument?.tools.resetActiveToolSetings}
         >
-          <Switch
-            labelTx="lock-brush-size"
-            items={adaptiveBrushSizeSwitchItems}
-            value={Boolean(store?.editor.tools.isBrushSizeLocked)}
-            onChange={store?.editor.tools.lockBrushSize}
-          />
-          <SpacedSliderField
-            labelTx="brush-size"
-            min={0}
-            max={250}
-            scaleType="quadratic"
-            value={store?.editor.tools.brushSizePixels}
-            onChange={setBrushSize}
-          />
-          {activeTool === ToolType.SmartBrush && (
+          {activeTool?.isBrush && (
             <>
-              <SpacedSliderField
-                labelTx="seed-threshold"
-                min={1}
-                max={20}
-                value={store?.editor.tools.smartBrushSeedThreshold}
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                onChange={store?.editor.tools.setSmartBrushSeedThreshold as any}
-              />
-              <SpacedSliderField
-                labelTx="neighbor-threshold"
-                min={1}
-                max={20}
-                value={store?.editor.tools.smartBrushNeighborThreshold}
-                onChange={
-                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                  store?.editor.tools.setSmartBrushNeighborThreshold as any
+              <BooleanParam
+                labelTx="adaptive-brush-size"
+                value={Boolean(
+                  store?.editor.activeDocument?.tools.useAdaptiveBrushSize,
+                )}
+                setValue={
+                  store?.editor.activeDocument?.tools.setUseAdaptiveBrushSize
                 }
+              />
+              <NumberParam
+                labelTx="brush-size"
+                min={0}
+                max={250}
+                scaleType="quadratic"
+                value={store?.editor.activeDocument?.tools.brushSize}
+                setValue={setBrushSize}
               />
             </>
           )}
+
+          {activeTool &&
+            Object.values(activeTool.params).map((param) => (
+              <Param {...param} key={param.name} />
+            ))}
         </BrushModal>
       </StyledToolbar>
     );

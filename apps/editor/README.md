@@ -1,4 +1,4 @@
-# Visian Stand-Alone Editor
+# VISIAN Stand-Alone Editor
 
 ## Get Started
 

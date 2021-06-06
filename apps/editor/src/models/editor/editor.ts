@@ -1,221 +1,84 @@
-import {
-  ImageSnapshot,
-  ISerializable,
-  writeSingleMedicalImage,
-} from "@visian/utils";
-import FileSaver from "file-saver";
-import isEqual from "lodash.isequal";
+import { SliceRenderer } from "@visian/rendering";
+import { IEditor, ISliceRenderer, Theme } from "@visian/ui-shared";
+import { IDisposable, ISerializable } from "@visian/utils";
 import { action, makeObservable, observable } from "mobx";
+import * as THREE from "three";
 
-import { EditorTools, RenderedImage, SliceRenderer } from "../../rendering";
 import { StoreContext } from "../types";
-import { EditorMarkers } from "./markers";
-import { EditorUndoRedo } from "./undo-redo";
-import {
-  EditorViewSettings,
-  EditorViewSettingsSnapshot,
-} from "./view-settings";
+import { Document, DocumentSnapshot } from "./document";
 
 export interface EditorSnapshot {
-  backgroundColor?: string;
-  image?: ImageSnapshot;
-  annotation?: ImageSnapshot;
-
-  viewSettings?: EditorViewSettingsSnapshot;
+  activeDocument?: DocumentSnapshot;
 }
 
-export class Editor implements ISerializable<EditorSnapshot> {
-  public static readonly excludeFromSnapshotTracking = [
-    "/markers",
-    ...EditorViewSettings.excludeFromSnapshotTracking.map(
-      (path) => `/viewSettings${path}`,
-    ),
-    ...EditorTools.excludeFromSnapshotTracking.map((path) => `/tools${path}`),
-    ...EditorUndoRedo.excludeFromSnapshotTracking.map(
-      (path) => `/undoRedo${path}`,
-    ),
-    "/sliceRenderer",
+export class Editor
+  implements IEditor, ISerializable<EditorSnapshot>, IDisposable {
+  public readonly excludeFromSnapshotTracking = [
+    "context",
+    "sliceRenderer",
+    "renderers",
   ];
 
-  public markers: EditorMarkers;
-  public sliceRenderer?: SliceRenderer;
+  public activeDocument?: Document;
 
-  // Layers
-  public foregroundColor = "#ffffff";
-  public annotation?: RenderedImage;
-  public isAnnotationVisible = true;
-  public image?: RenderedImage;
-  public isImageVisible = true;
-  protected backgroundColor?: string;
+  public sliceRenderer?: ISliceRenderer;
+  public renderers: [
+    THREE.WebGLRenderer,
+    THREE.WebGLRenderer,
+    THREE.WebGLRenderer,
+  ];
 
-  public viewSettings: EditorViewSettings;
-  public tools: EditorTools;
-  public undoRedo: EditorUndoRedo;
+  constructor(
+    snapshot: EditorSnapshot | undefined,
+    protected context: StoreContext,
+  ) {
+    makeObservable(this, {
+      activeDocument: observable,
+      renderers: observable,
 
-  public renderers?: THREE.WebGLRenderer[];
-
-  constructor(protected context: StoreContext) {
-    this.viewSettings = new EditorViewSettings(this, context);
-    this.undoRedo = new EditorUndoRedo(this, context);
-
-    makeObservable<this, "backgroundColor">(this, {
-      sliceRenderer: observable,
-      foregroundColor: observable,
-      annotation: observable,
-      isAnnotationVisible: observable,
-      image: observable,
-      isImageVisible: observable,
-      backgroundColor: observable,
-      renderers: observable.ref,
-
-      setSliceRenderer: action,
-      setForegroundColor: action,
-      setImage: action,
-      setAnnotation: action,
-      setIsImageVisible: action,
-      setIsAnnotationVisible: action,
-      setBackgroundColor: action,
-      applySnapshot: action,
+      setActiveDocument: action,
     });
 
-    this.tools = new EditorTools(this, context);
-    this.markers = new EditorMarkers(this, this.context);
+    this.renderers = [
+      new THREE.WebGLRenderer({ alpha: true }),
+      new THREE.WebGLRenderer({ alpha: true }),
+      new THREE.WebGLRenderer({ alpha: true }),
+    ];
+    this.sliceRenderer = new SliceRenderer(this);
+
+    this.applySnapshot(snapshot);
   }
 
-  public get refs() {
+  public dispose(): void {
+    this.sliceRenderer?.dispose();
+  }
+
+  public setActiveDocument(value?: Document): void {
+    this.activeDocument = value;
+  }
+
+  // Proxies
+  public get refs(): { [name: string]: React.RefObject<HTMLElement> } {
     return this.context.getRefs();
   }
-  public get theme() {
+
+  public get theme(): Theme {
     return this.context.getTheme();
   }
 
-  public getBackgroundColor() {
-    return this.backgroundColor || this.context.getTheme().colors.background;
-  }
-
-  public setSliceRenderer(sliceRenderer?: SliceRenderer) {
-    this.sliceRenderer = sliceRenderer;
-
-    this.renderers = this.sliceRenderer?.renderers;
-  }
-
-  public setForegroundColor(foregroundColor: string) {
-    this.foregroundColor = foregroundColor;
-  }
-
-  public setImage(image: RenderedImage) {
-    this.image = image;
-    this.annotation = this.getNewAnnotationLayer();
-
-    this.tools.setActiveTool();
-    this.viewSettings.reset();
-    this.undoRedo.clear();
-
-    this.context?.persistImmediately();
-  }
-  public async importImage(imageFile: File | File[]) {
-    this.setImage(await RenderedImage.fromFile(imageFile));
-  }
-
-  public getNewAnnotationLayer() {
-    if (!this.image) return;
-
-    return new RenderedImage({
-      name: `${this.image.name.split(".")[0]}_annotation`,
-      dimensionality: this.image.dimensionality,
-      origin: this.image.origin.toArray(),
-      orientation: this.image.orientation,
-      voxelCount: this.image.voxelCount.toArray(),
-      voxelSpacing: this.image.voxelSpacing.toArray(),
-    });
-  }
-
-  public setAnnotation(image: RenderedImage) {
-    if (!this.image) throw new Error("no-image-error");
-    if (!isEqual(image.voxelCount, this.image.voxelCount)) {
-      throw new Error("annotation-mismatch-error");
-    }
-    this.annotation = image;
-
-    this.undoRedo.clear();
-
-    this.context?.persistImmediately();
-  }
-  public async importAnnotation(imageFile: File) {
-    this.setAnnotation(await RenderedImage.fromFile(imageFile));
-  }
-
-  public get isIn3DMode() {
-    if (!this.image) return false;
-    return (
-      this.image.voxelCount
-        .toArray()
-        .reduce((previous, current) => previous + (current > 1 ? 1 : 0), 0) > 2
-    );
-  }
-
-  public setBackgroundColor(backgroundColor: string) {
-    this.backgroundColor = backgroundColor;
-  }
-
-  public setIsImageVisible(value: boolean) {
-    this.isImageVisible = value;
-  }
-  public setIsAnnotationVisible(value: boolean) {
-    this.isAnnotationVisible = value;
-  }
-
-  public quickExport = async () => {
-    const image = this.annotation;
-    if (!image) return;
-    if (image.dimensionality < 3) return this.quickExportSlice();
-
-    const file = await writeSingleMedicalImage(
-      image.toITKImage(),
-      `${image.name.split(".")[0]}.nii.gz`,
-    );
-
-    if (!file) return;
-    FileSaver.saveAs(file, file.name);
-  };
-
-  public quickExportSlice = async () => {
-    const image = this.annotation;
-    if (!image) return;
-
-    const sliceImage = image.getSliceImage(
-      this.viewSettings.getSelectedSlice(),
-      this.viewSettings.mainViewType,
-    );
-    const file = await writeSingleMedicalImage(
-      sliceImage.toITKImage(),
-      `${sliceImage.name.split(".")[0]}.png`,
-    );
-
-    if (!file) return;
-    FileSaver.saveAs(file, file.name);
-  };
-
-  public toJSON() {
+  // Serialization
+  public toJSON(): EditorSnapshot {
     return {
-      backgroundColor: this.backgroundColor,
-      image: this.image?.toJSON(),
-      annotation: this.annotation?.toJSON(),
-
-      viewSettings: this.viewSettings.toJSON(),
+      activeDocument: this.activeDocument?.toJSON(),
     };
   }
 
-  public async applySnapshot(snapshot: EditorSnapshot) {
-    this.backgroundColor = snapshot.backgroundColor;
-    this.image = snapshot.image && new RenderedImage(snapshot.image);
-    this.annotation = snapshot.annotation
-      ? new RenderedImage(snapshot.annotation)
-      : this.getNewAnnotationLayer();
-    this.markers.inferAnnotatedSlices();
-
-    if (snapshot.viewSettings) {
-      this.viewSettings.applySnapshot(snapshot.viewSettings);
-    }
+  public applySnapshot(snapshot?: Partial<EditorSnapshot>): Promise<void> {
+    this.setActiveDocument(
+      snapshot?.activeDocument
+        ? new Document(snapshot.activeDocument, this, this.context)
+        : new Document(undefined, this, this.context),
+    );
+    return Promise.resolve();
   }
 }

@@ -27,16 +27,22 @@ interface Entry {
 
 export interface DeepObserveConfig {
   /**
-   * Paths to make deeply observable.
+   * Paths to observe deeply.
    * If any are given, all others will be ignored.
    */
   include?: string[];
 
   /**
-   * Paths to not make deeply observable.
+   * Paths to not observe deeply.
    * If a path is explicitly included and excluded, it will be excluded as well.
    */
   exclude?: string[];
+
+  /**
+   * The name of an attribute on the observable state that, if set, holds the
+   * names of the direct children to not observe deeply.
+   */
+  exclusionAttribute?: string;
 }
 
 /** Returns a composed path for the given entry. */
@@ -131,15 +137,24 @@ export const deepObserve = <T>(
     const entry = entrySet.get(change.object)!;
     processChange(change, entry);
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const subPath = `${(change as any).name || ""}${
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (change as any).index ?? ""
+    }`;
     const path = buildPath({
       parent: entry,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      path: `${(change as any).name || ""}${(change as any).index ?? ""}`,
+      path: subPath,
     });
+
     if (
       (config.include &&
         !~config.include.findIndex((included) => path.startsWith(included))) ||
-      (config.exclude && ~config.exclude.indexOf(path))
+      (config.exclude && ~config.exclude.indexOf(path)) ||
+      (config.exclusionAttribute &&
+        ((change.object as unknown) as { [key: string]: string[] | undefined })[
+          config.exclusionAttribute
+        ]?.some((exclude) => exclude === subPath))
     ) {
       return;
     }
@@ -155,6 +170,7 @@ export const deepObserve = <T>(
     if (config.include || config.exclude) {
       childPath = buildPath({ parent, path });
     }
+
     if (
       (config.include &&
         !~config.include.findIndex((included) =>
@@ -191,6 +207,15 @@ export const deepObserve = <T>(
         };
         entrySet.set(thing, nextEntry);
         entries(thing).forEach(([key, value]) => {
+          if (
+            config.exclusionAttribute &&
+            ((thing as unknown) as { [key: string]: string[] | undefined })[
+              config.exclusionAttribute
+            ]?.some((exclude) => exclude === key)
+          ) {
+            return;
+          }
+
           observeRecursively(value, nextEntry, key);
         });
       }

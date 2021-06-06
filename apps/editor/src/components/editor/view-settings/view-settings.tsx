@@ -1,28 +1,19 @@
 import {
+  BooleanParam,
   DelayHandlingButtonContainerProps,
+  EnumParam,
   FloatingUIButton,
   Modal,
-  SliderField,
-  Switch,
+  NumberParam,
   useMultiRef,
 } from "@visian/ui-shared";
 import { ViewType } from "@visian/utils";
 import { observer } from "mobx-react-lite";
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
 
-// Styled Components
-const SpacedSliderField = styled(SliderField)`
-  margin-bottom: 16px;
-`;
-
 // Menu Items
-const sideViewsSwitchItems = [
-  { labelTx: "on", value: true },
-  { labelTx: "off", value: false },
-];
 const mainViewTypeSwitchItems = [
   { label: "T", value: ViewType.Transverse, tooltipTx: "transverse" },
   { label: "S", value: ViewType.Sagittal, tooltipTx: "sagittal" },
@@ -60,13 +51,15 @@ export const ViewSettings: React.FC<DelayHandlingButtonContainerProps> = observe
     // Menu Actions
     const setContrast = useCallback(
       (value: number | number[]) => {
-        store?.editor.viewSettings.setContrast(value as number);
+        store?.editor.activeDocument?.viewSettings.setContrast(value as number);
       },
       [store],
     );
     const setBrightness = useCallback(
       (value: number | number[]) => {
-        store?.editor.viewSettings.setBrightness(value as number);
+        store?.editor.activeDocument?.viewSettings.setBrightness(
+          value as number,
+        );
       },
       [store],
     );
@@ -90,39 +83,44 @@ export const ViewSettings: React.FC<DelayHandlingButtonContainerProps> = observe
           labelTx="view-settings"
           parentElement={buttonRef}
           position="left"
-          onReset={store?.editor.viewSettings.resetSettings}
+          onReset={store?.editor.activeDocument?.viewSettings.reset}
         >
-          {store?.editor.isIn3DMode && (
+          {store?.editor.activeDocument?.has3DLayers && (
             <>
-              <Switch
+              <BooleanParam
                 labelTx="side-views"
-                items={sideViewsSwitchItems}
-                value={Boolean(store?.editor.viewSettings.showSideViews)}
-                onChange={store?.editor.viewSettings.toggleSideViews}
+                value={Boolean(
+                  store?.editor.activeDocument?.viewport2D.showSideViews,
+                )}
+                setValue={
+                  store?.editor.activeDocument?.viewport2D.toggleSideViews
+                }
               />
-              <Switch
+              <EnumParam
                 labelTx="main-view-type"
-                items={mainViewTypeSwitchItems}
-                value={store?.editor.viewSettings.mainViewType}
-                onChange={store?.editor.viewSettings.setMainViewType}
+                options={mainViewTypeSwitchItems}
+                value={store?.editor.activeDocument?.viewport2D.mainViewType}
+                setValue={
+                  store?.editor.activeDocument?.viewport2D.setMainViewType
+                }
               />
             </>
           )}
-          <SpacedSliderField
+          <NumberParam
             labelTx="contrast"
-            unlockValueLabelRange
+            extendBeyondMinMax
             min={0}
             max={2}
-            value={store?.editor.viewSettings.contrast}
-            onChange={setContrast}
+            value={store?.editor.activeDocument?.viewSettings.contrast}
+            setValue={setContrast}
           />
-          <SliderField
+          <NumberParam
             labelTx="brightness"
-            unlockValueLabelRange
+            extendBeyondMinMax
             min={0}
             max={2}
-            value={store?.editor.viewSettings.brightness}
-            onChange={setBrightness}
+            value={store?.editor.activeDocument?.viewSettings.brightness}
+            setValue={setBrightness}
           />
         </Modal>
       </>

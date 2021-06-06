@@ -5,6 +5,7 @@
   "drop-image": "Drop your scan here",
   "drop-annotation": "Drop your annotation here",
 
+  "untitled-document": "Untitled Document",
   "start": "Start by dragging in a scan.",
   "unsaved-changes": "Unsaved changes.",
   "saved-in-browser": "All changes saved in browser.",
@@ -33,13 +34,15 @@
   "brush-settings": "Brush Settings",
   "smart-brush-settings": "Smart Brush Settings",
   "brush-size": "Brush Size",
-  "lock-brush-size": "Lock Brush Size",
+  "adaptive-brush-size": "Adaptive Brush Size",
   "seed-threshold": "Seed Threshold",
   "neighbor-threshold": "Neighbor Threshold",
 
   "layers": "Layers",
   "no-layers": "No layers loaded.",
-  "color-panel": "Choose Color",
+  "untitled-layer": "Untitled layer",
+  "layer-settings": "Layer Settings",
+  "opacity": "Opacity",
   "background-color": "Background Color",
 
   "view-settings": "View Settings",

@@ -95,26 +95,26 @@ export const findVoxelInAtlas = (
 
 /**
  * Returns an array of boolean arrays that indicate for each slice and
- * `ViewType` if the slice is not empty.
+ * `ViewType` if the slice is empty.
  */
-export const getNonEmptySlices = (
+export const getEmptySlices = (
   image: Pick<Image, "getAtlas" | "voxelCount" | "voxelComponents">,
 ) => {
   const transverse = new Array<boolean>(
     image.voxelCount.getFromView(ViewType.Transverse),
-  );
+  ).fill(true);
   const sagittal = new Array<boolean>(
     image.voxelCount.getFromView(ViewType.Sagittal),
-  );
+  ).fill(true);
   const coronal = new Array<boolean>(
     image.voxelCount.getFromView(ViewType.Coronal),
-  );
+  ).fill(true);
 
   findVoxelInAtlas(image, (voxel, value) => {
     if (!value) return;
-    transverse[voxel.getFromView(ViewType.Transverse)] = true;
-    sagittal[voxel.getFromView(ViewType.Sagittal)] = true;
-    coronal[voxel.getFromView(ViewType.Coronal)] = true;
+    transverse[voxel.getFromView(ViewType.Transverse)] = false;
+    sagittal[voxel.getFromView(ViewType.Sagittal)] = false;
+    coronal[voxel.getFromView(ViewType.Coronal)] = false;
   });
 
   const returnedArray: boolean[][] = [];

@@ -13,7 +13,7 @@ export interface SwitchProps<T = any>
 
   items: SwitchItemType[];
 
-  defaultValue?: string;
+  defaultValue?: T;
   value?: T;
   onChange?: (value: T) => void;
 }

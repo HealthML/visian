@@ -5,6 +5,7 @@
   "drop-image": "Legen Sie Ihren Scan hier ab",
   "drop-annotation": "Legen Sie Ihre Annotation hier ab",
 
+  "untitled-document": "Unbenanntes Dokument",
   "start": "Starten Sie, in dem Sie einen Scan hier ablegen.",
   "unsaved-changes": "Ungespeicherte Änderungen.",
   "saved-in-browser": "Alle Änderungen im Browser gespeichert.",
@@ -33,13 +34,15 @@
   "brush-settings": "Pinseleinstellungen",
   "smart-brush-settings": "Smarter Pinseleinstellungen",
   "brush-size": "Pinselgröße",
-  "lock-brush-size": "Pinselgröße fixieren",
+  "adaptive-brush-size": "Adaptive Pinselgröße",
   "seed-threshold": "Startschwellwert",
   "neighbor-threshold": "Nachbarschwellwert",
 
   "layers": "Ebenen",
   "no-layers": "Keine Ebenen geladen.",
-  "color-panel": "Farbe wählen",
+  "untitled-layer": "Unbenannte Ebene",
+  "layer-settings": "Ebeneneinstellungen",
+  "opacity": "Deckkraft",
   "background-color": "Hintergrundfarbe",
 
   "view-settings": "Ansichtseinstellungen",

@@ -1,12 +1,12 @@
 import {
-  Button,
+  ButtonParam,
   color,
   ColorMode,
   Divider,
+  EnumParam,
   FloatingUIButton,
   Modal,
   sheetNoise,
-  Switch,
   Theme,
   useTranslation,
 } from "@visian/ui-shared";
@@ -23,30 +23,22 @@ const MenuButton = styled(FloatingUIButton)`
   margin-right: 16px;
 `;
 
-const FeedbackButton = styled(Button)`
-  width: 100%;
+const FeedbackButton = styled(ButtonParam)`
   background: ${sheetNoise}, ${color("blueSheet")};
   border-color: ${color("blueBorder")};
-  margin-bottom: 16px;
 
   &:active {
     border-color: rgba(0, 133, 255, 1);
   }
 `;
 
-const ResetButton = styled(Button)`
-  width: 100%;
+const ResetButton = styled(ButtonParam)`
   background: ${sheetNoise}, ${color("redSheet")};
   border-color: ${color("redBorder")};
-  margin-bottom: 16px;
 
   &:active {
     border-color: rgba(202, 51, 69, 1);
   }
-`;
-
-const ShortcutButton = styled(Button)`
-  width: 100%;
 `;
 
 // Menu Items
@@ -106,12 +98,16 @@ export const Menu: React.FC<MenuProps> = observer((props) => {
   );
 
   const openShortcutPopUp = useCallback(
-    (event: React.SyntheticEvent) => {
-      event.stopPropagation();
+    (event?: React.PointerEvent) => {
+      event?.stopPropagation();
       if (onOpenShortcutPopUp) onOpenShortcutPopUp();
     },
     [onOpenShortcutPopUp],
   );
+
+  const destroy = useCallback(() => {
+    store?.destroy();
+  }, [store]);
 
   const theme = useTheme() as Theme;
   return (
@@ -135,26 +131,29 @@ export const Menu: React.FC<MenuProps> = observer((props) => {
         baseZIndex={theme.zIndices.modal + 1}
         onOutsidePress={closeModal}
       >
-        <Switch
+        <EnumParam
           labelTx="theme"
-          items={themeSwitchItems}
-          onChange={setTheme}
+          options={themeSwitchItems}
           value={store?.colorMode || "dark"}
+          setValue={setTheme}
         />
-        <Switch
+        <EnumParam
           labelTx="language"
-          items={languageSwitchItems}
+          options={languageSwitchItems}
           value={i18n.language.split("-")[0]}
-          onChange={setLanguage}
+          setValue={setLanguage}
         />
         {feedbackMailAddress && (
           <>
             <Divider />
-            <FeedbackButton tx="ideas-feedback" onPointerDown={sendFeedback} />
+            <FeedbackButton
+              labelTx="ideas-feedback"
+              handlePress={sendFeedback}
+            />
           </>
         )}
-        <ResetButton tx="clear-data" onPointerDown={store?.destroy} />
-        <ShortcutButton text="Shortcuts" onPointerDown={openShortcutPopUp} />
+        <ResetButton labelTx="clear-data" handlePress={destroy} />
+        <ButtonParam label="Shortcuts" handlePress={openShortcutPopUp} isLast />
       </Modal>
     </>
   );

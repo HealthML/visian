@@ -1,4 +1,4 @@
-# Visian
+# VISIAN
 
 > Concepts for the future of image analysis systems.
 
@@ -27,7 +27,7 @@ The contents of this monorepo are structured in the following way:
 - `.storybook/`: [Storybook](https://storybook.js.org/) config
 - `.vscode/`: [VSCode](https://code.visualstudio.com/) config
 - `apps/`: Source of the applications in this monorepo
-  - `api/`: The Visian GraphQL API
+  - `api/`: The VISIAN GraphQL API
   - `editor/`: The stand-alone editor (default app)
   - `*-demo/`: Various stand-alone demos for testing out new concepts
 - `dist/`: Build artifacts (excluded from version control)
@@ -126,6 +126,9 @@ yarn nx g @nrwl/react:storybook-configuration ui-shared --configureCypress --gen
 yarn remove @storybook/addon-knobs
 yarn add -D @storybook/addon-essentials @storybook/addon-a11y
 yarn add i18next react-i18next i18next-browser-languagedetector i18next-http-backend moment
+
+yarn nx g @nrwl/workspace:lib utils
+yarn nx g @nrwl/workspace:lib rendering
 
 yarn nx g @nrwl/react:app editor # using styled-components & react-router
 ```

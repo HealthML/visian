@@ -9,6 +9,7 @@ export * from "./color";
 export * from "./drop-zone";
 export * from "./modal";
 export * from "./notification";
+export * from "./params";
 export * from "./popup";
 export * from "./screen";
 export * from "./sheet";

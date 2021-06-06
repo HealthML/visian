@@ -1,5 +1,6 @@
 import type { Image, ViewType, Voxel, VoxelWithValue } from "@visian/utils";
 import type { Matrix4 } from "three";
+import { MarkerConfig } from "./markers";
 
 /**
  * The supported layer blending modes
@@ -24,17 +25,29 @@ export type BlendMode =
 export interface ILayer {
   /** The type of layer. */
   kind: string;
-
   /** `true` for layers that hold annotation information. */
   isAnnotation: boolean;
+  /**
+   * Indicates if this layer hold information in at least 3 spatial
+   * dimensions.
+   */
+  is3DLayer: boolean;
 
   /** The layer's UUID. */
   id: string;
   /**
-   * The layer's title.
-   * A user-defined display name.
+   * The layer's (user-defined) display name.
+   * If none is set manually, the name of the layer's content (if any) will be
+   * used, e.g., the ImageLayer's image name.
    */
-  title: string;
+  title?: string;
+  /**
+   * The parent layer of this layer.
+   * Typically, this is the group the layer is contained in.
+   * If none is set, the layer is assumed to be directly contained in the
+   * document.
+   */
+  parent?: ILayer;
 
   /**
    * The blend mode used to combine this layer on top of the ones below.
@@ -42,8 +55,10 @@ export interface ILayer {
    */
   blendMode?: BlendMode;
   /**
-   * The color used to render layers without intrinsic color information.
+   * The color used to render layers without intrinsic color information,
+   * provided as a theme key or CSS color string.
    * This is also used to color the layer icon in the layer menu.
+   * If none is set, a default is chosen by the theme.
    */
   color?: string;
   /** Indicates if the layer should be rendered. */
@@ -53,28 +68,66 @@ export interface ILayer {
 
   /** The layer's transform matrix used to position it during rendering. */
   transformation?: Matrix4;
+
+  /**
+   * Returns all slice markers, aggregated for the layer and given view type.
+   */
+  getSliceMarkers(viewType: ViewType): MarkerConfig[];
+
+  setBlendMode(blendMode?: BlendMode): void;
+  setColor(value?: string): void;
+  setIsVisible(value?: boolean): void;
+  setOpacity(value?: number): void;
+  resetSettings(): void;
+
+  /** Sets this layer's parent layer, typically the group it is contained in. */
+  setParent(idOrLayer?: string | ILayer): void;
 }
 
 /**
  * A layer that holds dense pixel/voxel data.
  * It is typically used for, e.g., MRI scans and segmentation annotations.
  */
-export interface IImageLayer extends ILayer, Image {
+export interface IImageLayer extends ILayer {
   kind: "image";
 
-  /**
-   * Local contrast adjustment of the layer.
-   * `1` is the original contrast.
-   */
-  contrast: number;
+  image: Image;
+
   /**
    * Local brightness adjustment of the layer.
    * `1` is the original brightness.
    */
   brightness: number;
+  /**
+   * Local contrast adjustment of the layer.
+   * `1` is the original contrast.
+   */
+  contrast: number;
+
+  /**
+   * Triggers the slice markers of this layer to be recomputed.
+   *
+   * If a view type and slice number are given, only the marker state for this
+   * slice will be updated. To additionally filter out unnecessary updates for
+   * this slice, `isDeleteOperation` can be passed. It prohibits updating the
+   * marker for an empty slice when `true` and that of a non-empty slice when
+   * `false`.
+   */
+  recomputeSliceMarkers(
+    viewType?: ViewType,
+    slice?: number,
+    isDeleteOperation?: boolean,
+  ): Promise<void>;
+  /**
+   * Deletes all slice markers of this layer.
+   *
+   * If a view type and slice number are given, only the marker state for this
+   * slice will be cleared.
+   */
+  clearSliceMarkers(viewType?: ViewType, slice?: number): Promise<void>;
 
   getVoxel(voxel: Voxel): number;
-  setVoxel(voxel: Voxel, value: number): number;
+  setVoxel(voxel: Voxel, value: number): void;
   setVoxels(voxels: VoxelWithValue[]): void;
 
   getSlice(viewType: ViewType, slice: number): Uint8Array;
@@ -89,5 +142,11 @@ export interface ILayerGroup extends ILayer {
   kind: "group";
 
   /** All layers in the group. */
-  subLayers: ILayer[];
+  layers: ILayer[];
+
+  /** Adds a layer to the group. */
+  addLayer(idOrlayer: string | ILayer): void;
+
+  /** Removes a layer from the document (but keeps it in the document). */
+  removeLayer(idOrLayer: string | ILayer): void;
 }

@@ -49,7 +49,7 @@ export function App() {
       <GlobalStyles />
       <Switch>
         <Route path="/">
-          <Screen title="Visian AR Demo">
+          <Screen title="VISIAN AR Demo">
             <WebGLCanvas ref={canvasRef} />
             {renderer && <UIOverlay renderer={renderer} />}
           </Screen>

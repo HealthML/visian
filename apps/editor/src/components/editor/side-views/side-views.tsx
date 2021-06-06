@@ -1,3 +1,4 @@
+import { resizeRenderer } from "@visian/rendering";
 import {
   color,
   computeStyleValue,
@@ -8,6 +9,7 @@ import {
   sheetNoise,
   useUpdateOnResize,
 } from "@visian/ui-shared";
+import ResizeSensor from "css-element-queries/src/ResizeSensor";
 import { observer } from "mobx-react-lite";
 import React, {
   useCallback,
@@ -38,6 +40,7 @@ const SideViewWrapper = styled.div`
 
 const SideView = styled(Sheet)`
   border-radius: 10px;
+  cursor: crosshair;
   padding-bottom: 100%;
   pointer-events: auto;
   position: relative;
@@ -51,34 +54,68 @@ const SideView = styled(Sheet)`
             (sheet, background) => tc.mix(sheet, background, 80).toRgbString(),
           )
         : color("sideViewSheet")};
-  border: 1px solid ${color("sideViewBorder")}; ;
-`;
+  border: 1px solid ${color("sideViewBorder")};
 
-const SideViewCanvas = styled.canvas`
-  ${coverMixin}
-  cursor: crosshair;
+  canvas {
+    ${coverMixin}
+  }
 `;
 
 export const SideViews = observer(() => {
   const store = useStore();
   const showSideViews =
-    store?.editor.isIn3DMode && store.editor.viewSettings.showSideViews;
+    store?.editor.activeDocument?.has3DLayers &&
+    store.editor.activeDocument?.viewport2D.showSideViews;
 
   // Ref Management
   const wrapperRef = useRef<HTMLDivElement>(null);
-  const upperSideViewRef = useRef<HTMLCanvasElement>(null);
-  const lowerSideViewRef = useRef<HTMLCanvasElement>(null);
   useEffect(() => {
     store?.setRef("sideViews", wrapperRef);
-    store?.setRef("upperSideView", upperSideViewRef);
-    store?.setRef("lowerSideView", lowerSideViewRef);
 
     return () => {
       store?.setRef("sideViews");
-      store?.setRef("upperSideView");
-      store?.setRef("lowerSideView");
     };
-  }, [store, upperSideViewRef, lowerSideViewRef, wrapperRef]);
+  }, [store, wrapperRef]);
+
+  const [upperRef, setUpperRef] = useState<HTMLDivElement | null>(null);
+  const upperCanvas = store?.editor.renderers[1].domElement;
+  useEffect(() => {
+    let resizeSensor: ResizeSensor | undefined;
+    if (store && upperRef && upperCanvas) {
+      upperRef.appendChild(upperCanvas);
+      resizeSensor = new ResizeSensor(upperRef, () => {
+        resizeRenderer(
+          store.editor.renderers[1],
+          store.editor.sliceRenderer?.eagerRender,
+        );
+      });
+    }
+
+    return () => {
+      if (resizeSensor) resizeSensor.detach();
+      if (upperRef) upperRef.innerHTML = "";
+    };
+  }, [store, upperCanvas, upperRef]);
+
+  const [lowerRef, setLowerRef] = useState<HTMLDivElement | null>(null);
+  const lowerCanvas = store?.editor.renderers[2].domElement;
+  useEffect(() => {
+    let resizeSensor: ResizeSensor | undefined;
+    if (store && lowerRef && lowerCanvas) {
+      lowerRef.appendChild(lowerCanvas);
+      resizeSensor = new ResizeSensor(lowerRef, () => {
+        resizeRenderer(
+          store.editor.renderers[2],
+          store.editor.sliceRenderer?.eagerRender,
+        );
+      });
+    }
+
+    return () => {
+      if (resizeSensor) resizeSensor.detach();
+      if (lowerRef) lowerRef.innerHTML = "";
+    };
+  }, [lowerCanvas, lowerRef, store]);
 
   // Pointer Event Handling
   const pointerDispatch = store?.pointerDispatch;
@@ -112,22 +149,12 @@ export const SideViews = observer(() => {
   return (
     <SideViewContainer showSideViews={showSideViews} ref={setContainerRef}>
       <SideViewWrapper style={{ width: sideViewSize }} ref={wrapperRef}>
-        <SideView style={{ marginBottom: 16 }}>
-          <SideViewCanvas
-            width={400}
-            height={400}
-            onPointerDown={onPointerDownUpper}
-            ref={upperSideViewRef}
-          />
-        </SideView>
-        <SideView>
-          <SideViewCanvas
-            width={400}
-            height={400}
-            onPointerDown={onPointerDownLower}
-            ref={lowerSideViewRef}
-          />
-        </SideView>
+        <SideView
+          style={{ marginBottom: 16 }}
+          onPointerDown={onPointerDownUpper}
+          ref={setUpperRef}
+        />
+        <SideView onPointerDown={onPointerDownLower} ref={setLowerRef} />
       </SideViewWrapper>
     </SideViewContainer>
   );

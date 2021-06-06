@@ -1,4 +1,6 @@
-import type { TooltipPosition } from "../../components";
+import type React from "react";
+import type { SerializationMethod, TooltipPosition } from "../../components";
+import { ILayer } from "./layers";
 import type { ScaleType } from "./types";
 
 /** A generic setting that corresponds to a (procedurally rendered) UI control. */
@@ -29,10 +31,53 @@ export interface IParameter<T = unknown> {
   tooltipTx?: string;
   tooltipPosition?: TooltipPosition;
 
+  /** The default value this parameter is reset to. */
+  defaultValue: T;
   /** The parameter's current value. */
   value: T;
   /** Sets the parameter's current value. */
-  setValue: (value: T) => void;
+  setValue(value: T): void;
+  reset(): void;
+}
+
+/** A boolean parameter, typically displayed as a checkbox or switch. */
+export interface IBooleanParameter extends IParameter<boolean> {
+  kind: "bool";
+}
+
+/** A button parameter, used to invoke some action. */
+export interface IButtonParameter<T = void> extends IParameter<T> {
+  kind: "button";
+
+  /** A user-defined callback that is invoked when the button is pressed. */
+  onPress?: (
+    name: string,
+    value: T,
+    event?: PointerEvent | React.PointerEvent,
+  ) => void;
+
+  /** A callback that should be invoked when the button is pressed. */
+  handlePress(event?: PointerEvent | React.PointerEvent): void;
+}
+
+/** An option that can be chosen for an enum parameter. */
+export interface IEnumParameterOption<T> {
+  label?: string;
+  labelTx?: string;
+
+  tooltip?: string;
+  tooltipTx?: string;
+  tooltipPosition?: TooltipPosition;
+
+  value: T;
+}
+
+/** A class selection parameter, typically displayed as a select field or switch. */
+export interface IEnumParameter<T> extends IParameter<T> {
+  kind: "enum";
+
+  /** The options to choose from. */
+  options: IEnumParameterOption<T>[];
 }
 
 /** A numeric parameter, typically displayed as a slider. */
@@ -63,11 +108,27 @@ export interface INumberParameter extends IParameter<number> {
    * the defined [min, max]-range.
    */
   extendBeyondMinMax?: boolean;
+
+  /** An optional method that computes frequency data to display along the slider. */
+  getHistogram?: () => number[] | undefined;
 }
 
-/** A boolean parameter, typically displayed as a checkbox or switch. */
-export interface IBooleanParameter extends IParameter<boolean> {
-  kind: "bool";
+/** A numeric range parameter, typically displayed as a slider with two thumbs. */
+export interface INumberRangeParameter
+  extends Omit<
+      INumberParameter,
+      "kind" | "value" | "defaultValue" | "setValue"
+    >,
+    IParameter<[number, number]> {
+  kind: "number-range";
+
+  /**
+   * Configures if and how the range-limiting values are enfored to keep their
+   * order.
+   *
+   * Defaults to `"push"`.
+   */
+  serializationMethod: SerializationMethod;
 }
 
 /** A text parameter, typically displayed as a text field. */
@@ -75,19 +136,30 @@ export interface IStringParameter extends IParameter<string> {
   kind: "string";
 }
 
-/** A class selection parameter, typically displayed as a select field or switch. */
-export interface IEnumParameter<T> extends IParameter<T> {
-  kind: "enum";
+/**
+ * A color parameter, typically displayed as a color picker.
+ * The color is stored as a CSS color string.
+ */
+export interface IColorParameter extends IParameter<string> {
+  kind: "color";
+}
 
-  /** The options to choose from. */
-  options: {
-    label?: string;
-    labelTx?: string;
+/**
+ * A layer parameter, typically displayed as a layer selection drop-down.
+ * The layer is stored by its id.
+ */
+export interface ILayerParameter extends IParameter<string | undefined> {
+  kind: "layer";
 
-    tooltip?: string;
-    tooltipTx?: string;
-    tooltipPosition?: TooltipPosition;
+  /**
+   * A filter specifiying what kind of layers can be selected.
+   * Could, i.e., be used to only allow annotations to be selected.
+   * Defaults to allowing all layers.
+   */
+  filter: (layer: ILayer) => boolean;
+}
 
-    value: T;
-  }[];
+/** A file parameter, typically displayed as a file picker. */
+export interface IFileParameter extends IParameter<File | undefined> {
+  kind: "file";
 }
