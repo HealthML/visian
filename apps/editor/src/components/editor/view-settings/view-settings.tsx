@@ -1,4 +1,5 @@
 import {
+  DelayHandlingButtonContainerProps,
   FloatingUIButton,
   Modal,
   SliderField,
@@ -11,7 +12,6 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
-import { ViewSettingsProps } from "./view-settings.props";
 
 // Styled Components
 const SpacedSliderField = styled(SliderField)`
@@ -29,101 +29,103 @@ const mainViewTypeSwitchItems = [
   { label: "C", value: ViewType.Coronal, tooltipTx: "coronal" },
 ];
 
-export const ViewSettings: React.FC<ViewSettingsProps> = observer((props) => {
-  const {
-    onPointerEnterButton,
-    onPointerLeaveButton,
-    shouldForceTooltip,
-  } = props;
-  const store = useStore();
+export const ViewSettings: React.FC<DelayHandlingButtonContainerProps> = observer(
+  (props) => {
+    const {
+      onPointerEnterButton,
+      onPointerLeaveButton,
+      shouldForceTooltip,
+    } = props;
+    const store = useStore();
 
-  // Ref Management
-  const [buttonRef, setButtonRef] = useState<HTMLButtonElement | null>(null);
-  const outerRef = useRef<HTMLButtonElement>(null);
-  const updateButtonRef = useMultiRef(setButtonRef, outerRef);
+    // Ref Management
+    const [buttonRef, setButtonRef] = useState<HTMLButtonElement | null>(null);
+    const outerRef = useRef<HTMLButtonElement>(null);
+    const updateButtonRef = useMultiRef(setButtonRef, outerRef);
 
-  useEffect(() => {
-    store?.setRef("viewSettings", outerRef);
+    useEffect(() => {
+      store?.setRef("viewSettings", outerRef);
 
-    return () => {
-      store?.setRef("viewSettings");
-    };
-  }, [store, outerRef]);
+      return () => {
+        store?.setRef("viewSettings");
+      };
+    }, [store, outerRef]);
 
-  // Menu Toggling
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const toggleModal = useCallback(() => {
-    setIsModalOpen(!isModalOpen);
-  }, [isModalOpen]);
+    // Menu Toggling
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const toggleModal = useCallback(() => {
+      setIsModalOpen(!isModalOpen);
+    }, [isModalOpen]);
 
-  // Menu Actions
-  const setContrast = useCallback(
-    (value: number | number[]) => {
-      store?.editor.viewSettings.setContrast(value as number);
-    },
-    [store],
-  );
-  const setBrightness = useCallback(
-    (value: number | number[]) => {
-      store?.editor.viewSettings.setBrightness(value as number);
-    },
-    [store],
-  );
+    // Menu Actions
+    const setContrast = useCallback(
+      (value: number | number[]) => {
+        store?.editor.viewSettings.setContrast(value as number);
+      },
+      [store],
+    );
+    const setBrightness = useCallback(
+      (value: number | number[]) => {
+        store?.editor.viewSettings.setBrightness(value as number);
+      },
+      [store],
+    );
 
-  return (
-    <>
-      <FloatingUIButton
-        icon="settings"
-        tooltipTx="view-settings"
-        tooltipPosition="left"
-        showTooltip={!isModalOpen}
-        ref={updateButtonRef}
-        onPointerDown={toggleModal}
-        isActive={isModalOpen}
-        onPointerEnter={onPointerEnterButton}
-        onPointerLeave={onPointerLeaveButton}
-        shouldForceTooltip={shouldForceTooltip}
-      />
-      <Modal
-        isOpen={isModalOpen}
-        labelTx="view-settings"
-        parentElement={buttonRef}
-        position="left"
-        onReset={store?.editor.viewSettings.resetSettings}
-      >
-        {store?.editor.isIn3DMode && (
-          <>
-            <Switch
-              labelTx="side-views"
-              items={sideViewsSwitchItems}
-              value={Boolean(store?.editor.viewSettings.showSideViews)}
-              onChange={store?.editor.viewSettings.toggleSideViews}
-            />
-            <Switch
-              labelTx="main-view-type"
-              items={mainViewTypeSwitchItems}
-              value={store?.editor.viewSettings.mainViewType}
-              onChange={store?.editor.viewSettings.setMainViewType}
-            />
-          </>
-        )}
-        <SpacedSliderField
-          labelTx="contrast"
-          unlockValueLabelRange
-          min={0}
-          max={2}
-          value={store?.editor.viewSettings.contrast}
-          onChange={setContrast}
+    return (
+      <>
+        <FloatingUIButton
+          icon="settings"
+          tooltipTx="view-settings"
+          tooltipPosition="left"
+          showTooltip={!isModalOpen}
+          ref={updateButtonRef}
+          onPointerDown={toggleModal}
+          isActive={isModalOpen}
+          onPointerEnter={onPointerEnterButton}
+          onPointerLeave={onPointerLeaveButton}
+          shouldForceTooltip={shouldForceTooltip}
         />
-        <SliderField
-          labelTx="brightness"
-          unlockValueLabelRange
-          min={0}
-          max={2}
-          value={store?.editor.viewSettings.brightness}
-          onChange={setBrightness}
-        />
-      </Modal>
-    </>
-  );
-});
+        <Modal
+          isOpen={isModalOpen}
+          labelTx="view-settings"
+          parentElement={buttonRef}
+          position="left"
+          onReset={store?.editor.viewSettings.resetSettings}
+        >
+          {store?.editor.isIn3DMode && (
+            <>
+              <Switch
+                labelTx="side-views"
+                items={sideViewsSwitchItems}
+                value={Boolean(store?.editor.viewSettings.showSideViews)}
+                onChange={store?.editor.viewSettings.toggleSideViews}
+              />
+              <Switch
+                labelTx="main-view-type"
+                items={mainViewTypeSwitchItems}
+                value={store?.editor.viewSettings.mainViewType}
+                onChange={store?.editor.viewSettings.setMainViewType}
+              />
+            </>
+          )}
+          <SpacedSliderField
+            labelTx="contrast"
+            unlockValueLabelRange
+            min={0}
+            max={2}
+            value={store?.editor.viewSettings.contrast}
+            onChange={setContrast}
+          />
+          <SliderField
+            labelTx="brightness"
+            unlockValueLabelRange
+            min={0}
+            max={2}
+            value={store?.editor.viewSettings.brightness}
+            onChange={setBrightness}
+          />
+        </Modal>
+      </>
+    );
+  },
+);

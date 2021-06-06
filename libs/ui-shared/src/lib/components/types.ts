@@ -28,3 +28,10 @@ export interface AsProps {
    */
   as?: string | React.ComponentType<unknown>;
 }
+
+export interface DelayHandlingButtonContainerProps {
+  onPointerEnterButton?: () => void;
+  onPointerLeaveButton?: () => void;
+  /** If true, the tooltip is shown without any delay after PointerEnter. */
+  shouldForceTooltip?: boolean;
+}

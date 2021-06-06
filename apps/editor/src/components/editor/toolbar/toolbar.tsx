@@ -1,4 +1,5 @@
 import {
+  DelayHandlingButtonContainerProps,
   Modal,
   PointerButton,
   preventDefault,
@@ -13,7 +14,6 @@ import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
 import { ToolType } from "../../../models";
-import { ToolbarProps } from "./toolbar.props";
 
 // Styled Components
 const StyledToolbar = styled(GenericToolbar)`
@@ -34,214 +34,217 @@ const adaptiveBrushSizeSwitchItems = [
   { labelTx: "off", value: false },
 ];
 
-export const Toolbar: React.FC<ToolbarProps> = observer((props) => {
-  const {
-    onPointerEnterButton,
-    onPointerLeaveButton,
-    shouldForceTooltip,
-  } = props;
-  const store = useStore();
+export const Toolbar: React.FC<DelayHandlingButtonContainerProps> = observer(
+  (props) => {
+    const {
+      onPointerEnterButton,
+      onPointerLeaveButton,
+      shouldForceTooltip,
+    } = props;
+    const store = useStore();
 
-  // Ref Management
-  const ref = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    store?.setRef("toolbar", ref);
+    // Ref Management
+    const ref = useRef<HTMLDivElement>(null);
+    useEffect(() => {
+      store?.setRef("toolbar", ref);
 
-    return () => {
-      store?.setRef("toolbar");
-    };
-  }, [store, ref]);
+      return () => {
+        store?.setRef("toolbar");
+      };
+    }, [store, ref]);
 
-  // Menu Toggling
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const closeModal = useCallback(() => {
-    setIsModalOpen(false);
-  }, []);
+    // Menu Toggling
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const closeModal = useCallback(() => {
+      setIsModalOpen(false);
+    }, []);
 
-  // Menu Positioning
-  const [buttonRef, setButtonRef] = useState<HTMLButtonElement | null>(null);
+    // Menu Positioning
+    const [buttonRef, setButtonRef] = useState<HTMLButtonElement | null>(null);
 
-  const activeTool = store?.editor.tools.activeTool;
-  const setActiveTool = useCallback(
-    (
-      value: string | number | undefined,
-      event: React.PointerEvent<HTMLButtonElement>,
-    ) => {
-      if (
-        event.button === PointerButton.RMB ||
-        store?.editor.tools.activeTool === value
-      ) {
-        event.preventDefault();
-        event.stopPropagation();
-        setIsModalOpen(
-          store?.editor.tools.activeTool !== value || !isModalOpen,
-        );
-      }
-
-      store?.editor.tools.setActiveTool(value as ToolType);
-    },
-    [isModalOpen, store],
-  );
-  const clearSlice = useCallback(
-    (_value: string | number | undefined, event: React.PointerEvent) => {
-      if (event.button !== PointerButton.LMB) return;
-      store?.editor.tools.clearSlice();
-    },
-    [store],
-  );
-  const setBrushSize = useCallback(
-    (value: number | number[]) => {
-      store?.editor.tools.setBrushSizePixels(value as number, true);
-    },
-    [store],
-  );
-
-  return (
-    <StyledToolbar ref={ref}>
-      <Tool
-        icon="moveTool"
-        tooltipTx="navigation-tool"
-        activeTool={activeTool}
-        value={ToolType.Navigate}
-        onPress={setActiveTool}
-        onContextMenu={preventDefault}
-        shouldForceTooltip={shouldForceTooltip}
-        onPointerEnter={onPointerEnterButton}
-        onPointerLeave={onPointerLeaveButton}
-      />
-      <Tool
-        icon="crosshair"
-        tooltipTx="crosshair-tool"
-        activeTool={activeTool}
-        value={ToolType.Crosshair}
-        isDisabled={
-          !store?.editor.isIn3DMode || !store.editor.viewSettings.showSideViews
+    const activeTool = store?.editor.tools.activeTool;
+    const setActiveTool = useCallback(
+      (
+        value: string | number | undefined,
+        event: React.PointerEvent<HTMLButtonElement>,
+      ) => {
+        if (
+          event.button === PointerButton.RMB ||
+          store?.editor.tools.activeTool === value
+        ) {
+          event.preventDefault();
+          event.stopPropagation();
+          setIsModalOpen(
+            store?.editor.tools.activeTool !== value || !isModalOpen,
+          );
         }
-        onPress={setActiveTool}
-        onContextMenu={preventDefault}
-        shouldForceTooltip={shouldForceTooltip}
-        onPointerEnter={onPointerEnterButton}
-        onPointerLeave={onPointerLeaveButton}
-      />
-      <Tool
-        icon="pixelBrush"
-        tooltipTx="pixel-brush"
-        showTooltip={!isModalOpen || activeTool !== ToolType.Brush}
-        activeTool={activeTool}
-        value={ToolType.Brush}
-        ref={activeTool === ToolType.Brush ? setButtonRef : undefined}
-        onPress={setActiveTool}
-        onContextMenu={preventDefault}
-        shouldForceTooltip={shouldForceTooltip}
-        onPointerEnter={onPointerEnterButton}
-        onPointerLeave={onPointerLeaveButton}
-      />
-      <Tool
-        icon="magicBrush"
-        tooltipTx="smart-brush"
-        showTooltip={!isModalOpen || activeTool !== ToolType.SmartBrush}
-        activeTool={activeTool}
-        value={ToolType.SmartBrush}
-        ref={activeTool === ToolType.SmartBrush ? setButtonRef : undefined}
-        onPress={setActiveTool}
-        onContextMenu={preventDefault}
-        shouldForceTooltip={shouldForceTooltip}
-        onPointerEnter={onPointerEnterButton}
-        onPointerLeave={onPointerLeaveButton}
-      />
-      <Tool
-        icon="outline"
-        tooltipTx="outline-tool"
-        showTooltip={!isModalOpen || activeTool !== ToolType.Outline}
-        activeTool={activeTool}
-        value={ToolType.Outline}
-        ref={activeTool === ToolType.Outline ? setButtonRef : undefined}
-        onPress={setActiveTool}
-        onContextMenu={preventDefault}
-        shouldForceTooltip={shouldForceTooltip}
-        onPointerEnter={onPointerEnterButton}
-        onPointerLeave={onPointerLeaveButton}
-      />
-      <Tool
-        icon="erase"
-        tooltipTx="pixel-eraser"
-        showTooltip={!isModalOpen || activeTool !== ToolType.Eraser}
-        activeTool={activeTool}
-        value={ToolType.Eraser}
-        ref={activeTool === ToolType.Eraser ? setButtonRef : undefined}
-        onPress={setActiveTool}
-        onContextMenu={preventDefault}
-        shouldForceTooltip={shouldForceTooltip}
-        onPointerEnter={onPointerEnterButton}
-        onPointerLeave={onPointerLeaveButton}
-      />
-      <Tool
-        icon="trash"
-        tooltipTx="clear-slice"
-        onPress={clearSlice}
-        onContextMenu={preventDefault}
-        shouldForceTooltip={shouldForceTooltip}
-        onPointerEnter={onPointerEnterButton}
-        onPointerLeave={onPointerLeaveButton}
-      />
-      <BrushModal
-        isOpen={
-          isModalOpen &&
-          activeTool !== ToolType.Navigate &&
-          activeTool !== ToolType.Crosshair &&
-          activeTool !== ToolType.Outline
-        }
-        labelTx={
-          activeTool === ToolType.SmartBrush
-            ? "smart-brush-settings"
-            : "brush-settings"
-        }
-        parentElement={buttonRef}
-        position="right"
-        onOutsidePress={closeModal}
-        onReset={
-          activeTool === ToolType.SmartBrush
-            ? store?.editor.tools.resetSmartBrush
-            : store?.editor.tools.resetBrushSize
-        }
-      >
-        <Switch
-          labelTx="lock-brush-size"
-          items={adaptiveBrushSizeSwitchItems}
-          value={Boolean(store?.editor.tools.isBrushSizeLocked)}
-          onChange={store?.editor.tools.lockBrushSize}
+
+        store?.editor.tools.setActiveTool(value as ToolType);
+      },
+      [isModalOpen, store],
+    );
+    const clearSlice = useCallback(
+      (_value: string | number | undefined, event: React.PointerEvent) => {
+        if (event.button !== PointerButton.LMB) return;
+        store?.editor.tools.clearSlice();
+      },
+      [store],
+    );
+    const setBrushSize = useCallback(
+      (value: number | number[]) => {
+        store?.editor.tools.setBrushSizePixels(value as number, true);
+      },
+      [store],
+    );
+
+    return (
+      <StyledToolbar ref={ref}>
+        <Tool
+          icon="moveTool"
+          tooltipTx="navigation-tool"
+          activeTool={activeTool}
+          value={ToolType.Navigate}
+          onPress={setActiveTool}
+          onContextMenu={preventDefault}
+          shouldForceTooltip={shouldForceTooltip}
+          onPointerEnter={onPointerEnterButton}
+          onPointerLeave={onPointerLeaveButton}
         />
-        <SpacedSliderField
-          labelTx="brush-size"
-          min={0}
-          max={250}
-          scaleType="quadratic"
-          value={store?.editor.tools.brushSizePixels}
-          onChange={setBrushSize}
+        <Tool
+          icon="crosshair"
+          tooltipTx="crosshair-tool"
+          activeTool={activeTool}
+          value={ToolType.Crosshair}
+          isDisabled={
+            !store?.editor.isIn3DMode ||
+            !store.editor.viewSettings.showSideViews
+          }
+          onPress={setActiveTool}
+          onContextMenu={preventDefault}
+          shouldForceTooltip={shouldForceTooltip}
+          onPointerEnter={onPointerEnterButton}
+          onPointerLeave={onPointerLeaveButton}
         />
-        {activeTool === ToolType.SmartBrush && (
-          <>
-            <SpacedSliderField
-              labelTx="seed-threshold"
-              min={1}
-              max={20}
-              value={store?.editor.tools.smartBrushSeedThreshold}
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              onChange={store?.editor.tools.setSmartBrushSeedThreshold as any}
-            />
-            <SpacedSliderField
-              labelTx="neighbor-threshold"
-              min={1}
-              max={20}
-              value={store?.editor.tools.smartBrushNeighborThreshold}
-              onChange={
+        <Tool
+          icon="pixelBrush"
+          tooltipTx="pixel-brush"
+          showTooltip={!isModalOpen || activeTool !== ToolType.Brush}
+          activeTool={activeTool}
+          value={ToolType.Brush}
+          ref={activeTool === ToolType.Brush ? setButtonRef : undefined}
+          onPress={setActiveTool}
+          onContextMenu={preventDefault}
+          shouldForceTooltip={shouldForceTooltip}
+          onPointerEnter={onPointerEnterButton}
+          onPointerLeave={onPointerLeaveButton}
+        />
+        <Tool
+          icon="magicBrush"
+          tooltipTx="smart-brush"
+          showTooltip={!isModalOpen || activeTool !== ToolType.SmartBrush}
+          activeTool={activeTool}
+          value={ToolType.SmartBrush}
+          ref={activeTool === ToolType.SmartBrush ? setButtonRef : undefined}
+          onPress={setActiveTool}
+          onContextMenu={preventDefault}
+          shouldForceTooltip={shouldForceTooltip}
+          onPointerEnter={onPointerEnterButton}
+          onPointerLeave={onPointerLeaveButton}
+        />
+        <Tool
+          icon="outline"
+          tooltipTx="outline-tool"
+          showTooltip={!isModalOpen || activeTool !== ToolType.Outline}
+          activeTool={activeTool}
+          value={ToolType.Outline}
+          ref={activeTool === ToolType.Outline ? setButtonRef : undefined}
+          onPress={setActiveTool}
+          onContextMenu={preventDefault}
+          shouldForceTooltip={shouldForceTooltip}
+          onPointerEnter={onPointerEnterButton}
+          onPointerLeave={onPointerLeaveButton}
+        />
+        <Tool
+          icon="erase"
+          tooltipTx="pixel-eraser"
+          showTooltip={!isModalOpen || activeTool !== ToolType.Eraser}
+          activeTool={activeTool}
+          value={ToolType.Eraser}
+          ref={activeTool === ToolType.Eraser ? setButtonRef : undefined}
+          onPress={setActiveTool}
+          onContextMenu={preventDefault}
+          shouldForceTooltip={shouldForceTooltip}
+          onPointerEnter={onPointerEnterButton}
+          onPointerLeave={onPointerLeaveButton}
+        />
+        <Tool
+          icon="trash"
+          tooltipTx="clear-slice"
+          onPress={clearSlice}
+          onContextMenu={preventDefault}
+          shouldForceTooltip={shouldForceTooltip}
+          onPointerEnter={onPointerEnterButton}
+          onPointerLeave={onPointerLeaveButton}
+        />
+        <BrushModal
+          isOpen={
+            isModalOpen &&
+            activeTool !== ToolType.Navigate &&
+            activeTool !== ToolType.Crosshair &&
+            activeTool !== ToolType.Outline
+          }
+          labelTx={
+            activeTool === ToolType.SmartBrush
+              ? "smart-brush-settings"
+              : "brush-settings"
+          }
+          parentElement={buttonRef}
+          position="right"
+          onOutsidePress={closeModal}
+          onReset={
+            activeTool === ToolType.SmartBrush
+              ? store?.editor.tools.resetSmartBrush
+              : store?.editor.tools.resetBrushSize
+          }
+        >
+          <Switch
+            labelTx="lock-brush-size"
+            items={adaptiveBrushSizeSwitchItems}
+            value={Boolean(store?.editor.tools.isBrushSizeLocked)}
+            onChange={store?.editor.tools.lockBrushSize}
+          />
+          <SpacedSliderField
+            labelTx="brush-size"
+            min={0}
+            max={250}
+            scaleType="quadratic"
+            value={store?.editor.tools.brushSizePixels}
+            onChange={setBrushSize}
+          />
+          {activeTool === ToolType.SmartBrush && (
+            <>
+              <SpacedSliderField
+                labelTx="seed-threshold"
+                min={1}
+                max={20}
+                value={store?.editor.tools.smartBrushSeedThreshold}
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                store?.editor.tools.setSmartBrushNeighborThreshold as any
-              }
-            />
-          </>
-        )}
-      </BrushModal>
-    </StyledToolbar>
-  );
-});
+                onChange={store?.editor.tools.setSmartBrushSeedThreshold as any}
+              />
+              <SpacedSliderField
+                labelTx="neighbor-threshold"
+                min={1}
+                max={20}
+                value={store?.editor.tools.smartBrushNeighborThreshold}
+                onChange={
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  store?.editor.tools.setSmartBrushNeighborThreshold as any
+                }
+              />
+            </>
+          )}
+        </BrushModal>
+      </StyledToolbar>
+    );
+  },
+);
