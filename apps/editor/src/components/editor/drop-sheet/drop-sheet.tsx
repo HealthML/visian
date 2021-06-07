@@ -117,7 +117,7 @@ export const DropSheet: React.FC<DropSheetProps> = observer(
       <StyledOverlay>
         <StyledDropZone
           isAlwaysVisible
-          labelTx={isLoadingFiles ? "loading" : "drop-image"}
+          labelTx={isLoadingFiles ? "loading" : "drop-file"}
           onFileDrop={importFiles}
         />
       </StyledOverlay>

@@ -2,8 +2,7 @@
   "loading": "Loading...",
   "reset": "Reset",
 
-  "drop-image": "Drop your scan here",
-  "drop-annotation": "Drop your annotation here",
+  "drop-file": "Drop your scan or annotation here",
 
   "untitled-document": "Untitled Document",
   "start": "Start by dragging in a scan.",
