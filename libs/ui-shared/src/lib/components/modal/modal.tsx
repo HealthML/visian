@@ -56,6 +56,23 @@ export const Divider = styled.div`
   margin-bottom: 16px;
 `;
 
+export const ModalTitleRow: React.FC<
+  Pick<ModalProps, "label" | "labelTx" | "onReset">
+> = ({ label, labelTx, onReset }) => (
+  <TitleRow>
+    <ModalTitle tx={labelTx} text={label} />
+    {onReset && (
+      <StyledButton
+        icon="reset"
+        tooltipTx="reset"
+        tooltipPosition="left"
+        isActive={false}
+        onPointerDown={onReset}
+      />
+    )}
+  </TitleRow>
+);
+
 export const Modal: React.FC<ModalProps> = ({
   labelTx,
   label,
@@ -88,18 +105,7 @@ export const Modal: React.FC<ModalProps> = ({
       <ModalContainer {...rest} style={modalStyle} ref={ref}>
         {(labelTx || label) && (
           <>
-            <TitleRow>
-              <ModalTitle tx={labelTx} text={label} />
-              {onReset && (
-                <StyledButton
-                  icon="reset"
-                  tooltipTx="reset"
-                  tooltipPosition="left"
-                  isActive={false}
-                  onPointerDown={onReset}
-                />
-              )}
-            </TitleRow>
+            <ModalTitleRow labelTx={labelTx} label={label} onReset={onReset} />
             <Divider />
           </>
         )}

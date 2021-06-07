@@ -128,9 +128,21 @@ export class SliceRenderer implements IDisposable, ISliceRenderer {
           setTimeout(this.updateCamera);
         },
       ),
+      reaction(
+        () => editor.activeDocument?.viewSettings.viewMode === "2D",
+        (switchingTo2D?: boolean) => {
+          if (switchingTo2D) {
+            // Wrapped in a setTimeout, because the side views need to actually
+            // appear before updating the camera planes.
+            setTimeout(this.updateCamera);
+          }
+        },
+      ),
+      reaction(
+        () => editor.activeDocument?.viewSettings.viewMode,
+        this.lazyRender,
+      ),
     );
-
-    this._renderers[0].setAnimationLoop(this.animate);
   }
 
   public dispose() {
@@ -177,7 +189,9 @@ export class SliceRenderer implements IDisposable, ISliceRenderer {
     this.lazyRender();
   };
 
-  private animate = () => {
+  public animate = () => {
+    if (this.editor.activeDocument?.viewSettings.viewMode !== "2D") return;
+
     if (this.lazyRenderTriggered) {
       this.eagerRender();
     }

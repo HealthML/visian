@@ -135,22 +135,22 @@ export const setMainCameraPlanes = (
     spriteEdgePlanes.left -
     ((2 * spriteEdgePlanes.right * mainCanvas.width) / sizeBetweenOverlays.x -
       2 * spriteEdgePlanes.right) *
-      (leftPadding / (rightPadding + leftPadding));
+      (leftPadding ? leftPadding / (rightPadding + leftPadding) : 0);
   mainCamera.right =
     spriteEdgePlanes.right +
     ((2 * spriteEdgePlanes.right * mainCanvas.width) / sizeBetweenOverlays.x -
       2 * spriteEdgePlanes.right) *
-      (rightPadding / (rightPadding + leftPadding));
+      (rightPadding ? rightPadding / (rightPadding + leftPadding) : 0);
   mainCamera.bottom =
     spriteEdgePlanes.bottom -
     ((2 * spriteEdgePlanes.top * mainCanvas.height) / sizeBetweenOverlays.y -
       2 * spriteEdgePlanes.top) *
-      (bottomPadding / (topPadding + bottomPadding));
+      (bottomPadding ? bottomPadding / (topPadding + bottomPadding) : 0);
   mainCamera.top =
     spriteEdgePlanes.top +
     ((2 * spriteEdgePlanes.top * mainCanvas.height) / sizeBetweenOverlays.y -
       2 * spriteEdgePlanes.top) *
-      (topPadding / (topPadding + bottomPadding));
+      (topPadding ? topPadding / (topPadding + bottomPadding) : 0);
 
   mainCamera.updateProjectionMatrix();
 };

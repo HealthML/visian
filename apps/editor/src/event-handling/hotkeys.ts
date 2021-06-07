@@ -13,30 +13,51 @@ export const setUpHotKeys = (store: RootStore): IDisposer => {
   });
   hotkeys("c", (event) => {
     event.preventDefault();
+    if (store.editor.activeDocument?.viewSettings.viewMode !== "2D") return;
     if (!store.editor.activeDocument?.has3DLayers) return;
+
     store.editor.activeDocument?.tools.setActiveTool("crosshair-tool");
   });
   hotkeys("b", (event) => {
     event.preventDefault();
+    if (store.editor.activeDocument?.viewSettings.viewMode !== "2D") return;
+
     store.editor.activeDocument?.tools.setActiveTool("pixel-brush");
   });
   hotkeys("s", (event) => {
     event.preventDefault();
+    if (store.editor.activeDocument?.viewSettings.viewMode !== "2D") return;
+
     store.editor.activeDocument?.tools.setActiveTool("smart-brush");
   });
   hotkeys("e", (event) => {
     event.preventDefault();
+    if (store.editor.activeDocument?.viewSettings.viewMode !== "2D") return;
+
     store.editor.activeDocument?.tools.setActiveTool("pixel-eraser");
   });
   hotkeys("o", (event) => {
     event.preventDefault();
+    if (store.editor.activeDocument?.viewSettings.viewMode !== "2D") return;
+
     store.editor.activeDocument?.tools.setActiveTool("outline-tool");
+  });
+  hotkeys("shift+f,f", (event) => {
+    event.preventDefault();
+    if (store.editor.activeDocument?.viewSettings.viewMode !== "3D") return;
+
+    const activeTool = store.editor.activeDocument?.tools.activeTool?.name;
+    store.editor.activeDocument?.tools.setActiveTool(
+      activeTool === "fly-tool" ? "navigation-tool" : "fly-tool",
+    );
   });
 
   // Tools
   hotkeys("del,backspace", (event) => {
     event.preventDefault();
-    store.editor.activeDocument?.tools.setActiveTool("clear-image");
+    if (store.editor.activeDocument?.viewSettings.viewMode !== "2D") return;
+
+    store.editor.activeDocument?.tools.setActiveTool("clear-slice");
   });
   hotkeys("ctrl+del,ctrl+backspace", (event) => {
     event.preventDefault();
@@ -55,10 +76,18 @@ export const setUpHotKeys = (store: RootStore): IDisposer => {
   });
 
   // Undo/Redo
-  hotkeys("ctrl+z", () => {
+  hotkeys("ctrl+z", (event) => {
+    event.preventDefault();
+    // TODO: Remove check as soon as undo/redo is correctly updated in the 3D view
+    if (store.editor.activeDocument?.viewSettings.viewMode === "3D") return;
+
     store.editor.activeDocument?.history.undo();
   });
-  hotkeys("ctrl+shift+z,ctrl+y", () => {
+  hotkeys("ctrl+shift+z,ctrl+y", (event) => {
+    event.preventDefault();
+    // TODO: Remove check as soon as undo/redo is correctly updated in the 3D view
+    if (store.editor.activeDocument?.viewSettings.viewMode === "3D") return;
+
     store.editor.activeDocument?.history.redo();
   });
 
@@ -74,12 +103,18 @@ export const setUpHotKeys = (store: RootStore): IDisposer => {
     store.editor.activeDocument?.viewport2D.setMainViewType(
       ViewType.Transverse,
     );
+    store.editor.activeDocument?.viewSettings.setViewMode("2D");
   });
   hotkeys("2", () => {
     store.editor.activeDocument?.viewport2D.setMainViewType(ViewType.Sagittal);
+    store.editor.activeDocument?.viewSettings.setViewMode("2D");
   });
   hotkeys("3", () => {
     store.editor.activeDocument?.viewport2D.setMainViewType(ViewType.Coronal);
+    store.editor.activeDocument?.viewSettings.setViewMode("2D");
+  });
+  hotkeys("4", () => {
+    store.editor.activeDocument?.viewSettings.setViewMode("3D");
   });
   hotkeys("0", () => {
     store.editor.activeDocument?.viewport2D.toggleSideViews();
@@ -88,10 +123,14 @@ export const setUpHotKeys = (store: RootStore): IDisposer => {
   // Slice Navigation
   hotkeys("up", (event) => {
     event.preventDefault();
+    if (store.editor.activeDocument?.viewSettings.viewMode !== "2D") return;
+
     store.editor.activeDocument?.viewport2D.stepSelectedSlice(undefined, 1);
   });
   hotkeys("shift+up", (event) => {
     event.preventDefault();
+    if (store.editor.activeDocument?.viewSettings.viewMode !== "2D") return;
+
     store.editor.activeDocument?.viewport2D.stepSelectedSlice(
       undefined,
       skipSlices,
@@ -99,10 +138,14 @@ export const setUpHotKeys = (store: RootStore): IDisposer => {
   });
   hotkeys("down", (event) => {
     event.preventDefault();
+    if (store.editor.activeDocument?.viewSettings.viewMode !== "2D") return;
+
     store.editor.activeDocument?.viewport2D.stepSelectedSlice(undefined, -1);
   });
   hotkeys("shift+down", (event) => {
     event.preventDefault();
+    if (store.editor.activeDocument?.viewSettings.viewMode !== "2D") return;
+
     store.editor.activeDocument?.viewport2D.stepSelectedSlice(
       undefined,
       -skipSlices,
@@ -110,6 +153,8 @@ export const setUpHotKeys = (store: RootStore): IDisposer => {
   });
   hotkeys("alt+0", (event) => {
     event.preventDefault();
+    if (store.editor.activeDocument?.viewSettings.viewMode !== "2D") return;
+
     store.editor.activeDocument?.viewSettings.setSelectedVoxel();
   });
 
@@ -118,15 +163,21 @@ export const setUpHotKeys = (store: RootStore): IDisposer => {
     // "+" doesn't currently work with hotkeys-js (https://github.com/jaywcjlove/hotkeys/issues/270)
     if (event.key === "+" && event.ctrlKey) {
       event.preventDefault();
+      if (store.editor.activeDocument?.viewSettings.viewMode !== "2D") return;
+
       store.editor.activeDocument?.viewport2D.zoomIn();
     }
   });
   hotkeys("ctrl+-", (event) => {
     event.preventDefault();
+    if (store.editor.activeDocument?.viewSettings.viewMode !== "2D") return;
+
     store.editor.activeDocument?.viewport2D.zoomOut();
   });
   hotkeys("ctrl+0", (event) => {
     event.preventDefault();
+    if (store.editor.activeDocument?.viewSettings.viewMode !== "2D") return;
+
     store.editor.activeDocument?.viewport2D.setZoomLevel();
     store.editor.activeDocument?.viewport2D.setOffset();
   });
@@ -142,6 +193,8 @@ export const setUpHotKeys = (store: RootStore): IDisposer => {
   });
   hotkeys("ctrl+shift+e", (event) => {
     event.preventDefault();
+    if (store.editor.activeDocument?.viewSettings.viewMode !== "2D") return;
+
     (store.editor.activeDocument
       ?.activeLayer as ImageLayer)?.quickExportSlice?.();
   });

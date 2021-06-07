@@ -28,4 +28,11 @@ export class ButtonParameter<T = void>
     if (!this.onPress) return;
     this.onPress(this.name, this.value, event);
   }
+
+  public toProps(): IButtonParameter<T> {
+    return {
+      ...(super.toProps() as Omit<IButtonParameter<T>, "handlePress">),
+      handlePress: this.handlePress,
+    };
+  }
 }

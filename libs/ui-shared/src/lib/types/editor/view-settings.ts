@@ -111,6 +111,23 @@ export interface ITransferFunction<N extends string> {
 
   /** This transfer function's parameters. */
   params: { [name: string]: IParameter };
+
+  laoBrightnessFactor: number;
+
+  /** Called when the transfer function becomes active. */
+  activate(): void;
+
+  /** Resets all parameters of the transfer function to their default values. */
+  reset(): void;
+}
+
+export interface IConeTransferFunction extends ITransferFunction<"fc-cone"> {
+  coneDirection: Vector;
+  setConeDirection(x: number, y: number, z: number): void;
+}
+
+export interface ICustomTransferFunction extends ITransferFunction<"custom"> {
+  texture?: THREE.Texture;
 }
 
 /** View settings for the 3D viewport. */
@@ -120,16 +137,26 @@ export interface IViewport3D<N extends string> {
 
   /** The 3D camera's world matrix. */
   cameraMatrix: Matrix4;
+  volumeSpaceCameraPosition: [number, number, number];
 
   /** The volumetric rendering opacity, scales the density of every voxel. */
   opacity: number;
   shadingMode: ShadingMode;
+  /**
+   * The targeted shading mode, as chosen by the user.
+   * This will only be set if the shading mode is automatically switched for,
+   * e.g., performance reasons and thus deviates from the user-selected one.
+   */
+  suppressedShadingMode?: ShadingMode;
 
   activeTransferFunction?: Reference<ITransferFunction<N>>;
   transferFunctions: Record<N, ITransferFunction<N>>;
 
+  onTransferFunctionChange: () => void;
+
   setIsInXR(value?: boolean): void;
   setCameraMatrix(value?: Matrix4): void;
+  setVolumeSpaceCameraPosition(x: number, y: number, z: number): void;
   setOpacity(value?: number): void;
   setShadingMode(value?: ShadingMode): void;
   setActiveTransferFunction(

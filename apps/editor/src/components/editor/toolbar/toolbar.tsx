@@ -95,27 +95,28 @@ export const Toolbar: React.FC<DelayHandlingButtonContainerProps> = observer(
     return (
       <StyledToolbar ref={ref}>
         {store?.editor.activeDocument?.tools.toolGroups.map(
-          ({ activeTool: tool }, index) => (
-            <Tool
-              key={index}
-              icon={tool.icon}
-              isDisabled={
-                tool.name === "crosshair-tool" &&
-                !store?.editor.activeDocument?.has3DLayers
-              }
-              tooltipTx={tool.labelTx}
-              tooltip={tool.label}
-              activeTool={activeToolName}
-              value={tool.name}
-              showTooltip={!isModalOpen || activeToolName !== tool.name}
-              ref={activeToolName === tool.name ? setButtonRef : undefined}
-              onPress={setActiveTool}
-              onContextMenu={preventDefault}
-              shouldForceTooltip={shouldForceTooltip}
-              onPointerEnter={onPointerEnterButton}
-              onPointerLeave={onPointerLeaveButton}
-            />
-          ),
+          ({ activeTool: tool }, index) =>
+            tool.canActivate() && (
+              <Tool
+                key={index}
+                icon={tool.icon}
+                isDisabled={
+                  tool.name === "crosshair-tool" &&
+                  !store?.editor.activeDocument?.has3DLayers
+                }
+                tooltipTx={tool.labelTx}
+                tooltip={tool.label}
+                activeTool={activeToolName}
+                value={tool.name}
+                showTooltip={!isModalOpen || activeToolName !== tool.name}
+                ref={activeToolName === tool.name ? setButtonRef : undefined}
+                onPress={setActiveTool}
+                onContextMenu={preventDefault}
+                shouldForceTooltip={shouldForceTooltip}
+                onPointerEnter={onPointerEnterButton}
+                onPointerLeave={onPointerLeaveButton}
+              />
+            ),
         )}
         <BrushModal
           isOpen={Boolean(
@@ -154,7 +155,7 @@ export const Toolbar: React.FC<DelayHandlingButtonContainerProps> = observer(
 
           {activeTool &&
             Object.values(activeTool.params).map((param) => (
-              <Param {...param} key={param.name} />
+              <Param parameter={param} key={param.name} />
             ))}
         </BrushModal>
       </StyledToolbar>

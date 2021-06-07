@@ -30,6 +30,7 @@
   "pixel-eraser": "Eraser (E)",
   "outline-tool": "Outline Tool (O)",
   "clear-slice": "Clear Slice (Del)",
+  "fly-tool": "Fly Controls (F)",
 
   "brush-settings": "Brush Settings",
   "smart-brush-settings": "Smart Brush Settings",
@@ -62,5 +63,34 @@
   "import-error": "Import Error",
   "annotation-mismatch-error": "This annotation does not match the original image's size.",
   "no-image-error": "You have to load a base image before importing an annotation.",
-  "image-loading-error": "Looks like this file is not supported."
+  "image-loading-error": "Looks like this file is not supported.",
+
+  "3d-view": "3D View",
+  "3d-view-tooltip": "3D View (4)",
+  "shading-mode": "Shading Mode",
+  "shading-none": "None",
+  "shading-none-full": "No shading",
+  "shading-phong": "Phong",
+  "shading-phong-full": "Phong Shading",
+  "shading-lao": "LAO",
+  "shading-lao-full": "Local Ambient Occlusion",
+  "transfer-function": "Transfer Function",
+  "tf-density": "Density",
+  "tf-fc-edges": "Edges",
+  "tf-fc-cone": "Cone-Cut",
+  "tf-custom": "Custom",
+
+  "annotation-layer": "Focus Volume",
+  "image-layer": "Volume",
+
+  "use-focus": "Show Focus Volume",
+  "density-range": "Density Range",
+
+  "context-opacity": "Context Opacity",
+  "focus-opacity": "Focus Opacity",
+
+  "lock-cone": "Lock Cone",
+  "cone-angle": "Cone Angle",
+
+  "custom-tf-file": "Upload File"
 }

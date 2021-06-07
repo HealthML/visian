@@ -8,7 +8,8 @@ import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
 
-const Container = styled.div`
+const Container = styled.div<{ showUndoRedo?: boolean }>`
+  display: ${(props) => (props.showUndoRedo ? "block" : "none")};
   position: relative;
 `;
 const Wrapper = styled.div`
@@ -41,7 +42,12 @@ export const UndoRedoButtons = observer<DelayHandlingButtonContainerProps>(
     }, [store, wrapperRef]);
 
     return (
-      <Container>
+      <Container
+        showUndoRedo={
+          // TODO: Remove check as soon as undo/redo is correctly updated in the 3D view
+          store?.editor.activeDocument?.viewSettings.viewMode !== "3D"
+        }
+      >
         <Wrapper ref={wrapperRef}>
           <StyledButton
             icon="undo"

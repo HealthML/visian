@@ -18,4 +18,11 @@ export class EnumParameter<T>
     super(config);
     this.options = config.options;
   }
+
+  public toProps(): IEnumParameter<T> {
+    return {
+      ...(super.toProps() as Omit<IEnumParameter<T>, "options">),
+      options: this.options,
+    };
+  }
 }

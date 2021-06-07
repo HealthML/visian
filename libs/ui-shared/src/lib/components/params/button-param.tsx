@@ -23,6 +23,7 @@ export const ButtonParam: React.FC<Partial<ButtonParamProps>> = ({
   handlePress,
 
   defaultValue,
+  onBeforeValueChange,
   kind,
   name,
   ...rest

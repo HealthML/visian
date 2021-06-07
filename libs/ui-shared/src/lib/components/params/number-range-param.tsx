@@ -24,6 +24,7 @@ export const NumberRangeParam: React.FC<Partial<NumberRangeParamProps>> = ({
   setValue,
 
   defaultValue,
+  onBeforeValueChange,
   kind,
   name,
   ...rest

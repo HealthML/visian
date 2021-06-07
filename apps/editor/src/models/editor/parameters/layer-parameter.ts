@@ -12,14 +12,25 @@ export class LayerParameter
   public static readonly kind = "layer";
   public readonly kind = "layer";
 
-  constructor(config: LayerParameterConfig, document: IDocument) {
+  public readonly excludeFromSnapshotTracking = ["document"];
+
+  constructor(config: LayerParameterConfig, protected document: IDocument) {
     super(config);
     if (config.filter) this.filter = config.filter;
-
-    if (this.value === undefined) {
-      this.setValue(document.layers.find(this.filter || (() => true))?.id);
-    }
+    if (this.value === undefined) this.reset();
   }
 
   public filter: (layer: ILayer) => boolean = () => true;
+
+  public reset(): void {
+    super.reset();
+    this.setValue(this.document?.layers.find(this.filter)?.id);
+  }
+
+  public toProps(): ILayerParameter {
+    return {
+      ...(super.toProps() as Omit<ILayerParameter, "filter">),
+      filter: this.filter,
+    };
+  }
 }

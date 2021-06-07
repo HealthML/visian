@@ -22,7 +22,8 @@ export type ToolName =
   | "outline-tool"
   | "outline-eraser"
   | "clear-slice"
-  | "clear-image";
+  | "clear-image"
+  | "fly-tool";
 
 export interface ToolsSnapshot<N extends string> {
   activeToolName?: N;
@@ -109,7 +110,6 @@ export class Tools
           name: "navigation-tool",
           icon: "navigationTool",
           labelTx: "navigation-tool",
-          supportedLayerKinds: [],
           supportedViewModes: ["2D", "3D"],
         },
         this.document,
@@ -123,6 +123,15 @@ export class Tools
       "outline-eraser": new OutlineTool(document, this.toolRenderer, 0),
       "clear-slice": new ClearSliceTool(document, this.toolRenderer),
       "clear-image": new ClearImageTool(document, this.toolRenderer),
+      "fly-tool": new Tool(
+        {
+          name: "fly-tool",
+          icon: "crosshairPointer",
+          labelTx: "fly-tool",
+          supportedViewModes: ["3D"],
+        },
+        this.document,
+      ),
     };
 
     this.toolGroups.push(
@@ -139,13 +148,40 @@ export class Tools
         document,
       ),
       new ToolGroup({ toolNames: ["clear-slice", "clear-image"] }, document),
+      new ToolGroup({ toolNames: ["fly-tool"] }, document),
     );
 
     this.applySnapshot(snapshot);
   }
 
+  protected getDefaultToolName(): ToolName {
+    return "navigation-tool";
+  }
+
   public get activeTool(): ITool<ToolName> | undefined {
-    return this.activeToolName ? this.tools[this.activeToolName] : undefined;
+    const toolName =
+      this.activeToolName === "crosshair-tool" && !this.document?.has3DLayers
+        ? "pixel-brush"
+        : this.activeToolName;
+    const tool = toolName ? this.tools[toolName] : undefined;
+
+    return tool && !tool.canActivate()
+      ? this.tools[this.getDefaultToolName()]
+      : tool;
+  }
+
+  public setActiveTool(nameOrTool?: ToolName | ITool<ToolName>): void {
+    const previouslyActiveTool = this.activeTool;
+
+    this.activeToolName = nameOrTool
+      ? typeof nameOrTool === "string"
+        ? nameOrTool
+        : nameOrTool.name
+      : "pixel-brush";
+
+    if (this.activeTool?.canActivate()) {
+      this.activeTool.activate(previouslyActiveTool);
+    }
   }
 
   private get pixelWidth() {
@@ -197,16 +233,6 @@ export class Tools
 
   public get useAdaptiveBrushSize(): boolean {
     return this.lockedBrushSize === undefined;
-  }
-
-  public setActiveTool(nameOrTool?: ToolName | ITool<ToolName>): void {
-    const previouslyActiveTool = this.activeTool;
-    this.activeToolName = nameOrTool
-      ? typeof nameOrTool === "string"
-        ? nameOrTool
-        : nameOrTool.name
-      : "pixel-brush";
-    this.activeTool?.activate(previouslyActiveTool);
   }
 
   public setBrushSize(value = 5, showPreview = false): void {
