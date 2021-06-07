@@ -1,7 +1,7 @@
 import type * as THREE from "three";
 
 import type { Theme } from "../../theme";
-import type { ISliceRenderer } from "../rendering";
+import type { ISliceRenderer, IVolumeRenderer } from "../rendering";
 import type { IDocument } from "./document";
 
 /** The state of VISIAN's annotation editor. */
@@ -11,6 +11,8 @@ export interface IEditor {
 
   /** The slice renderer. */
   sliceRenderer?: ISliceRenderer;
+  /** The volume renderer */
+  volumeRenderer?: IVolumeRenderer;
   /**
    * The 3 webGL renderers used for the 3 canvases.
    * [0]: The main canvas's renderer.

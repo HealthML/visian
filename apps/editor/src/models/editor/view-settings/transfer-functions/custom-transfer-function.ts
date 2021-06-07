@@ -1,9 +1,19 @@
-import { IDocument } from "@visian/ui-shared";
+import {
+  ICustomTransferFunction,
+  IDocument,
+  IFileParameter,
+} from "@visian/ui-shared";
+import { action, makeObservable, observable, reaction } from "mobx";
+import * as THREE from "three";
 import { LayerParameter, Parameter } from "../../parameters";
 import { FileParameter } from "../../parameters/file-parameter";
 import { TransferFunction } from "./transfer-function";
 
-export class CustomTransferFunction extends TransferFunction<"custom"> {
+export class CustomTransferFunction
+  extends TransferFunction<"custom">
+  implements ICustomTransferFunction {
+  public texture?: THREE.Texture;
+
   constructor(document: IDocument) {
     super(
       {
@@ -15,6 +25,8 @@ export class CustomTransferFunction extends TransferFunction<"custom"> {
               name: "image",
               labelTx: "image-layer",
               defaultValue: undefined,
+              onBeforeValueChange: () =>
+                document.viewport3D?.onTransferFunctionChange(),
             },
             document,
           ) as Parameter<unknown>,
@@ -27,5 +39,45 @@ export class CustomTransferFunction extends TransferFunction<"custom"> {
       },
       document,
     );
+
+    makeObservable<this, "setTexture">(this, {
+      texture: observable,
+      setTexture: action,
+    });
+
+    reaction(
+      () => (this.params.file as IFileParameter).value,
+      (file?: File) => {
+        if (!file) return this.setTexture();
+
+        const reader = new FileReader();
+        reader.addEventListener(
+          "load",
+          () => {
+            new THREE.TextureLoader().load(
+              reader.result as string,
+              (texture) => {
+                this.setTexture(texture);
+              },
+            );
+          },
+          false,
+        );
+
+        reader.readAsDataURL(file);
+      },
+    );
+  }
+
+  public activate() {
+    if (!this.document.getLayer(this.params.image.value as string)) {
+      this.params.image.reset();
+    }
+  }
+
+  protected setTexture(texture?: THREE.Texture) {
+    this.document.viewport3D.onTransferFunctionChange();
+
+    this.texture = texture;
   }
 }

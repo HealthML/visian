@@ -4,7 +4,6 @@ module.exports = {
     "<rootDir>/libs/api-models",
     "<rootDir>/libs/ui-shared",
     "<rootDir>/apps/ar-demo",
-    "<rootDir>/apps/ativ-seminar",
     "<rootDir>/apps/editor",
     "<rootDir>/libs/utils",
     "<rootDir>/libs/rendering",

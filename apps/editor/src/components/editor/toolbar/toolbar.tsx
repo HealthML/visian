@@ -76,36 +76,28 @@ export const Toolbar: React.FC = observer(() => {
     [store],
   );
 
-  // The crosshair cannot be used for 2D scans
-  // TODO: This logic should probably be moved into the model
-  if (
-    activeToolName === "crosshair-tool" &&
-    !store?.editor.activeDocument?.has3DLayers
-  ) {
-    store?.editor.activeDocument?.tools.setActiveTool();
-  }
-
   return (
     <StyledToolbar ref={ref}>
       {store?.editor.activeDocument?.tools.toolGroups.map(
-        ({ activeTool: tool }, index) => (
-          <Tool
-            key={index}
-            icon={tool.icon}
-            isDisabled={
-              tool.name === "crosshair-tool" &&
-              !store?.editor.activeDocument?.has3DLayers
-            }
-            tooltipTx={tool.labelTx}
-            tooltip={tool.label}
-            activeTool={activeToolName}
-            value={tool.name}
-            showTooltip={!isModalOpen || activeToolName !== tool.name}
-            ref={activeToolName === tool.name ? setButtonRef : undefined}
-            onPress={setActiveTool}
-            onContextMenu={preventDefault}
-          />
-        ),
+        ({ activeTool: tool }, index) =>
+          tool.canActivate() && (
+            <Tool
+              key={index}
+              icon={tool.icon}
+              isDisabled={
+                tool.name === "crosshair-tool" &&
+                !store?.editor.activeDocument?.has3DLayers
+              }
+              tooltipTx={tool.labelTx}
+              tooltip={tool.label}
+              activeTool={activeToolName}
+              value={tool.name}
+              showTooltip={!isModalOpen || activeToolName !== tool.name}
+              ref={activeToolName === tool.name ? setButtonRef : undefined}
+              onPress={setActiveTool}
+              onContextMenu={preventDefault}
+            />
+          ),
       )}
       <BrushModal
         isOpen={Boolean(
@@ -144,7 +136,7 @@ export const Toolbar: React.FC = observer(() => {
 
         {activeTool &&
           Object.values(activeTool.params).map((param) => (
-            <Param {...param} key={param.name} />
+            <Param parameter={param} key={param.name} />
           ))}
       </BrushModal>
     </StyledToolbar>

@@ -28,6 +28,8 @@ export class TransferFunction<N extends string>
 
   public params!: { [name: string]: Parameter };
 
+  public laoBrightnessFactor = 1;
+
   constructor(
     config: TransferFunctionConfig<N>,
     protected document: IDocument,
@@ -46,6 +48,16 @@ export class TransferFunction<N extends string>
       this.params[param.name] = param;
     });
   }
+
+  public activate(): void {
+    // Intentionally left blank
+  }
+
+  public reset = (): void => {
+    Object.values(this.params).forEach((param) => {
+      param.reset();
+    });
+  };
 
   // Serialization
   public toJSON(): TransferFunctionSnapshot<N> {

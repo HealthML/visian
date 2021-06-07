@@ -18,6 +18,7 @@ export const BooleanParam: React.FC<Partial<BooleanParamProps>> = ({
   setValue,
 
   defaultValue,
+  onBeforeValueChange,
   kind,
   name,
   ...rest

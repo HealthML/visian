@@ -8,7 +8,7 @@ module.exports = {
       { cwd: __dirname, configFile: "./babel-jest.config.json" },
     ],
   },
-  transformIgnorePatterns: ["node_modules/(?!itk/.*|mobx-utils)"],
+  transformIgnorePatterns: ["node_modules/(?!itk/.*|mobx-utils|three/.*)"],
   moduleFileExtensions: ["ts", "tsx", "js", "jsx"],
   moduleNameMapper: {
     "^worker-loader!.+$": "<rootDir>/__mocks__/worker-mock.ts",

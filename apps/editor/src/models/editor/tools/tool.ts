@@ -30,8 +30,8 @@ export interface ToolConfig<N extends string> {
 
   altToolName?: N;
 
-  supportedViewModes: ViewMode[];
-  supportedLayerKinds: string[];
+  supportedViewModes?: ViewMode[];
+  supportedLayerKinds?: string[];
 
   params?: Parameter[];
 }
@@ -51,8 +51,8 @@ export class Tool<N extends string>
 
   public altToolName?: string;
 
-  public supportedViewModes: ViewMode[];
-  public supportedLayerKinds: string[];
+  public supportedViewModes?: ViewMode[];
+  public supportedLayerKinds?: string[];
 
   public params: { [name: string]: Parameter };
 
@@ -78,6 +78,18 @@ export class Tool<N extends string>
     return this.altToolName
       ? this.document.tools.tools[this.altToolName]
       : undefined;
+  }
+
+  public canActivate(): boolean {
+    return Boolean(
+      (!this.supportedViewModes ||
+        this.supportedViewModes.includes(
+          this.document.viewSettings.viewMode,
+        )) &&
+        (!this.supportedLayerKinds ||
+          (this.document.activeLayer &&
+            this.supportedLayerKinds.includes(this.document.activeLayer.kind))),
+    );
   }
 
   public activate(_previousTool?: ITool<N>): void {

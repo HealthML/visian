@@ -88,6 +88,11 @@ export class ViewSettings
   }
 
   public setViewMode = (value?: ViewMode): void => {
+    if (!this.document.has3DLayers) {
+      this.viewMode = "2D";
+      return;
+    }
+
     this.viewMode = value || "2D";
   };
 

@@ -38,4 +38,26 @@ export class NumberRangeParameter
 
     this.getHistogram = config.getHistogram;
   }
+
+  public toProps(): INumberRangeParameter {
+    return {
+      ...(super.toProps() as Omit<
+        INumberRangeParameter,
+        | "scaleType"
+        | "serializationMethod"
+        | "min"
+        | "max"
+        | "stepSize"
+        | "extendBeyondMinMax"
+        | "getHistogram"
+      >),
+      scaleType: this.scaleType,
+      serializationMethod: this.serializationMethod,
+      min: this.min,
+      max: this.max,
+      stepSize: this.stepSize,
+      extendBeyondMinMax: this.extendBeyondMinMax,
+      getHistogram: this.getHistogram,
+    };
+  }
 }

@@ -38,6 +38,7 @@ export const ColorParam: React.FC<Partial<ColorParamProps>> = ({
   setValue,
 
   defaultValue,
+  onBeforeValueChange,
   kind,
   name,
   ...rest

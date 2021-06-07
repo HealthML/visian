@@ -60,7 +60,8 @@ export const setUpPointerHandling = (
 
       if (
         !store.editor.activeDocument ||
-        !store.editor.activeDocument.tools.activeTool?.isBrush
+        !store.editor.activeDocument.tools.activeTool?.isBrush ||
+        store.editor.activeDocument.viewSettings.viewMode !== "2D"
       ) {
         return;
       }
@@ -78,7 +79,12 @@ export const setUpPointerHandling = (
     },
     forPointers: ({ context, detail, id }, { eventType }) => {
       handleDeviceSwitch(context.device);
-      if (!store.editor.activeDocument) return;
+      if (
+        !store.editor.activeDocument ||
+        store.editor.activeDocument.viewSettings.viewMode !== "2D"
+      ) {
+        return;
+      }
 
       const { activeTool } = store.editor.activeDocument.tools;
       store.editor.activeDocument.tools.setIsCursorOverFloatingUI(false);

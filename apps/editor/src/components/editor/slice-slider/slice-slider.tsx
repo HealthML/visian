@@ -102,7 +102,8 @@ export const SliceSlider: React.FC = observer(() => {
     [maxSlice],
   );
 
-  return store?.editor.activeDocument?.has3DLayers ? (
+  return store?.editor.activeDocument?.has3DLayers &&
+    store.editor.activeDocument.viewSettings.viewMode === "2D" ? (
     <StyledSheet
       ref={ref}
       onPointerEnter={handlePointerEnter}

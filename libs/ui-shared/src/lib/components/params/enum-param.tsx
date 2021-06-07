@@ -19,6 +19,7 @@ export const EnumParam: React.FC<
   setValue,
 
   defaultValue,
+  onBeforeValueChange,
   kind,
   name,
   ...rest

@@ -1,9 +1,12 @@
 import {
   BooleanParam,
+  Divider,
   EnumParam,
   FloatingUIButton,
   Modal,
+  ModalTitleRow,
   NumberParam,
+  Param,
   useMultiRef,
 } from "@visian/ui-shared";
 import { ViewType } from "@visian/utils";
@@ -17,6 +20,13 @@ const mainViewTypeSwitchItems = [
   { label: "T", value: ViewType.Transverse, tooltipTx: "transverse" },
   { label: "S", value: ViewType.Sagittal, tooltipTx: "sagittal" },
   { label: "C", value: ViewType.Coronal, tooltipTx: "coronal" },
+  { label: "3D", value: "3D", tooltipTx: "3d-view-tooltip" },
+];
+
+const shadingModeItems = [
+  { labelTx: "shading-none", value: "none", tooltipTx: "shading-none-full" },
+  { labelTx: "shading-phong", value: "phong", tooltipTx: "shading-phong-full" },
+  { labelTx: "shading-lao", value: "lao", tooltipTx: "shading-lao-full" },
 ];
 
 export const ViewSettings: React.FC = observer(() => {
@@ -55,6 +65,18 @@ export const ViewSettings: React.FC = observer(() => {
     [store],
   );
 
+  const setViewType = useCallback(
+    (viewType: ViewType | "3D") => {
+      if (viewType === "3D") {
+        store?.editor.activeDocument?.viewSettings.setViewMode("3D");
+      } else {
+        store?.editor.activeDocument?.viewSettings.setViewMode("2D");
+        store?.editor.activeDocument?.viewport2D.setMainViewType(viewType);
+      }
+    },
+    [store],
+  );
+
   return (
     <>
       <FloatingUIButton
@@ -75,23 +97,27 @@ export const ViewSettings: React.FC = observer(() => {
       >
         {store?.editor.activeDocument?.has3DLayers && (
           <>
-            <BooleanParam
-              labelTx="side-views"
-              value={Boolean(
-                store?.editor.activeDocument?.viewport2D.showSideViews,
-              )}
-              setValue={
-                store?.editor.activeDocument?.viewport2D.toggleSideViews
-              }
-            />
             <EnumParam
               labelTx="main-view-type"
               options={mainViewTypeSwitchItems}
-              value={store?.editor.activeDocument?.viewport2D.mainViewType}
-              setValue={
-                store?.editor.activeDocument?.viewport2D.setMainViewType
+              value={
+                store?.editor.activeDocument?.viewSettings.viewMode === "3D"
+                  ? "3D"
+                  : store?.editor.activeDocument?.viewport2D.mainViewType
               }
+              setValue={setViewType}
             />
+            {store?.editor.activeDocument?.viewSettings.viewMode === "2D" && (
+              <BooleanParam
+                labelTx="side-views"
+                value={Boolean(
+                  store?.editor.activeDocument?.viewport2D.showSideViews,
+                )}
+                setValue={
+                  store?.editor.activeDocument?.viewport2D.toggleSideViews
+                }
+              />
+            )}
           </>
         )}
         <NumberParam
@@ -110,6 +136,49 @@ export const ViewSettings: React.FC = observer(() => {
           value={store?.editor.activeDocument?.viewSettings.brightness}
           setValue={setBrightness}
         />
+        {store?.editor.activeDocument?.viewSettings.viewMode === "3D" && (
+          <>
+            <Divider />
+            <ModalTitleRow
+              labelTx="3d-view"
+              onReset={
+                store.editor.activeDocument.viewport3D.activeTransferFunction
+                  ?.reset
+              }
+            />
+            <EnumParam
+              labelTx="shading-mode"
+              options={shadingModeItems}
+              value={
+                store.editor.activeDocument.viewport3D.suppressedShadingMode ||
+                store.editor.activeDocument.viewport3D.shadingMode
+              }
+              setValue={store.editor.activeDocument.viewport3D.setShadingMode}
+            />
+            <EnumParam
+              labelTx="transfer-function"
+              options={Object.values(
+                store.editor.activeDocument.viewport3D.transferFunctions,
+              ).map((transferFunction) => ({
+                labelTx: transferFunction.labelTx,
+                label: transferFunction.label,
+                value: transferFunction.name,
+              }))}
+              value={
+                store.editor.activeDocument.viewport3D.activeTransferFunction
+                  ?.name
+              }
+              setValue={
+                store.editor.activeDocument.viewport3D.setActiveTransferFunction
+              }
+            />
+            {store.editor.activeDocument.viewport3D.activeTransferFunction &&
+              Object.values(
+                store.editor.activeDocument.viewport3D.activeTransferFunction
+                  .params,
+              ).map((param) => <Param parameter={param} key={param.name} />)}
+          </>
+        )}
       </Modal>
     </>
   );

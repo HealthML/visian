@@ -30,6 +30,7 @@
   "pixel-eraser": "Radierer (E)",
   "outline-tool": "Umrandungswerkzeug (O)",
   "clear-slice": "Schicht leeren (Entf)",
+  "fly-tool": "Flugsteuerung (F)",
 
   "brush-settings": "Pinseleinstellungen",
   "smart-brush-settings": "Smarter Pinseleinstellungen",
@@ -62,5 +63,34 @@
   "import-error": "Importfehler",
   "annotation-mismatch-error": "Diese Annotation passt nicht auf den Scan.",
   "no-image-error": "Sie müssen einen Scan laden, bevor Sie eine Annotation importieren.",
-  "image-loading-error": "Diese Datei scheint nicht unterstützt zu sein."
+  "image-loading-error": "Diese Datei scheint nicht unterstützt zu sein.",
+
+  "3d-view": "3D Ansicht",
+  "3d-view-tooltip": "3D Ansicht (4)",
+  "shading-mode": "Schattierungsmodus",
+  "shading-none": "Keine",
+  "shading-none-full": "Keine Schattierung",
+  "shading-phong": "Phong",
+  "shading-phong-full": "Phong Shading",
+  "shading-lao": "LAO",
+  "shading-lao-full": "Local Ambient Occlusion",
+  "transfer-function": "Transfer Function",
+  "tf-density": "Dichte",
+  "tf-fc-edges": "Kanten",
+  "tf-fc-cone": "Kegelschnitt",
+  "tf-custom": "Eigene",
+
+  "annotation-layer": "Fokusvolumen",
+  "image-layer": "Volumen",
+
+  "use-focus": "Fokusvolumen anzeigen",
+  "density-range": "Dichteintervall",
+
+  "context-opacity": "Kontextdeckkraft",
+  "focus-opacity": "Fokusdeckkraft",
+
+  "lock-cone": "Kegel festhalten",
+  "cone-angle": "Kegelwinkel",
+
+  "custom-tf-file": "Datei hochladen"
 }
