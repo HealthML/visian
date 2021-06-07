@@ -52,13 +52,7 @@ const languageSwitchItems = [
   { label: "Deutsch", value: "de" },
 ];
 
-export const Menu: React.FC<MenuProps> = observer((props) => {
-  const {
-    onOpenShortcutPopUp,
-    onPointerEnterButton,
-    onPointerLeaveButton,
-    shouldForceTooltip,
-  } = props;
+export const Menu: React.FC<MenuProps> = observer(({ onOpenShortcutPopUp }) => {
   const store = useStore();
 
   // Menu Toggling
@@ -119,9 +113,6 @@ export const Menu: React.FC<MenuProps> = observer((props) => {
         ref={setButtonRef}
         onPointerDown={isModalOpen ? undefined : openModal}
         isActive={isModalOpen}
-        shouldForceTooltip={shouldForceTooltip}
-        onPointerEnter={onPointerEnterButton}
-        onPointerLeave={onPointerLeaveButton}
       />
       <Modal
         isOpen={isModalOpen}

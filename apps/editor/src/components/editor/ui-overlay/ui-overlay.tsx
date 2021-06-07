@@ -1,15 +1,12 @@
 import {
   AbsoluteCover,
-  duration,
   FloatingUIButton,
   Notification,
   Text,
-  Theme,
-  useDelay,
 } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import styled, { useTheme } from "styled-components";
+import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
 import { ImageLayer } from "../../../models";
@@ -84,7 +81,6 @@ const ErrorNotification = styled(Notification)`
 export const UIOverlay = observer<UIOverlayProps>(
   ({ isDraggedOver, onDropCompleted, ...rest }) => {
     const store = useStore();
-    const theme = useTheme() as Theme;
 
     // Ref Management
     const containerRef = useRef<HTMLDivElement>(null);
@@ -116,19 +112,6 @@ export const UIOverlay = observer<UIOverlayProps>(
       setIsShortcutPopUpOpen(false);
     }, []);
 
-    // Tooltip Delay Handling
-    const [shouldDelayTooltips, setShouldDelayTooltips] = useState(true);
-    const [scheduleTooltipsDelay, cancelTooltipsDelay] = useDelay(
-      useCallback(() => {
-        setShouldDelayTooltips(true);
-      }, []),
-      duration("noTooltipDelayInterval")({ theme }) as number,
-    );
-    const setNoTooltipDelayTimer = useCallback(() => {
-      setShouldDelayTooltips(false);
-      scheduleTooltipsDelay();
-    }, [scheduleTooltipsDelay]);
-
     return (
       <Container
         {...rest}
@@ -143,28 +126,11 @@ export const UIOverlay = observer<UIOverlayProps>(
         )}
         <ColumnLeft>
           <MenuRow>
-            <Menu
-              onOpenShortcutPopUp={openShortcutPopUp}
-              onPointerEnterButton={cancelTooltipsDelay}
-              onPointerLeaveButton={setNoTooltipDelayTimer}
-              shouldForceTooltip={!shouldDelayTooltips}
-            />
-            <UndoRedoButtons
-              onPointerEnterButton={cancelTooltipsDelay}
-              onPointerLeaveButton={setNoTooltipDelayTimer}
-              shouldForceTooltip={!shouldDelayTooltips}
-            />
+            <Menu onOpenShortcutPopUp={openShortcutPopUp} />
+            <UndoRedoButtons />
           </MenuRow>
-          <Toolbar
-            onPointerEnterButton={cancelTooltipsDelay}
-            onPointerLeaveButton={setNoTooltipDelayTimer}
-            shouldForceTooltip={!shouldDelayTooltips}
-          />
-          <Layers
-            onPointerEnterButton={cancelTooltipsDelay}
-            onPointerLeaveButton={setNoTooltipDelayTimer}
-            shouldForceTooltip={!shouldDelayTooltips}
-          />
+          <Toolbar />
+          <Layers />
         </ColumnLeft>
         <ColumnCenter>
           <TopConsole />
@@ -181,15 +147,8 @@ export const UIOverlay = observer<UIOverlayProps>(
                   ?.quickExport
               }
               isActive={false}
-              onPointerEnter={cancelTooltipsDelay}
-              onPointerLeave={setNoTooltipDelayTimer}
-              shouldForceTooltip={!shouldDelayTooltips}
             />
-            <ViewSettings
-              onPointerEnterButton={cancelTooltipsDelay}
-              onPointerLeaveButton={setNoTooltipDelayTimer}
-              shouldForceTooltip={!shouldDelayTooltips}
-            />
+            <ViewSettings />
             <SliceSlider />
           </RightBar>
         </ColumnRight>

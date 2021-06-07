@@ -1,6 +1,5 @@
 import {
   BooleanParam,
-  TooltipDelayProps,
   Modal,
   NumberParam,
   Param,
@@ -25,12 +24,7 @@ const BrushModal = styled(Modal)`
   padding-bottom: 0px;
 `;
 
-export const Toolbar: React.FC<TooltipDelayProps> = observer((props) => {
-  const {
-    onPointerEnterButton,
-    onPointerLeaveButton,
-    shouldForceTooltip,
-  } = props;
+export const Toolbar: React.FC = observer(() => {
   const store = useStore();
 
   // Ref Management
@@ -111,9 +105,6 @@ export const Toolbar: React.FC<TooltipDelayProps> = observer((props) => {
               ref={activeToolName === tool.name ? setButtonRef : undefined}
               onPress={setActiveTool}
               onContextMenu={preventDefault}
-              shouldForceTooltip={shouldForceTooltip}
-              onPointerEnter={onPointerEnterButton}
-              onPointerLeave={onPointerLeaveButton}
             />
           ),
       )}

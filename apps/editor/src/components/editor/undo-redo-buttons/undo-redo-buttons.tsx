@@ -1,4 +1,4 @@
-import { TooltipDelayProps, SquareButton } from "@visian/ui-shared";
+import { SquareButton } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
 import React, { useEffect, useRef } from "react";
 import styled from "styled-components";
@@ -19,12 +19,7 @@ const StyledButton = styled(SquareButton)`
   margin-right: 8px;
 `;
 
-export const UndoRedoButtons = observer<TooltipDelayProps>((props) => {
-  const {
-    onPointerEnterButton,
-    onPointerLeaveButton,
-    shouldForceTooltip,
-  } = props;
+export const UndoRedoButtons = observer(() => {
   const store = useStore();
 
   // Ref Management
@@ -52,9 +47,6 @@ export const UndoRedoButtons = observer<TooltipDelayProps>((props) => {
           isActive={false}
           isDisabled={!store?.editor.activeDocument?.history.canUndo}
           onPointerDown={store?.editor.activeDocument?.history.undo}
-          onPointerEnter={onPointerEnterButton}
-          onPointerLeave={onPointerLeaveButton}
-          shouldForceTooltip={shouldForceTooltip}
         />
         <StyledButton
           icon="redo"
@@ -63,9 +55,6 @@ export const UndoRedoButtons = observer<TooltipDelayProps>((props) => {
           isActive={false}
           isDisabled={!store?.editor.activeDocument?.history.canRedo}
           onPointerDown={store?.editor.activeDocument?.history.redo}
-          onPointerEnter={onPointerEnterButton}
-          onPointerLeave={onPointerLeaveButton}
-          shouldForceTooltip={shouldForceTooltip}
         />
       </Wrapper>
     </Container>

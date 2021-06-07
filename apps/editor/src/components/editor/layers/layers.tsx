@@ -1,5 +1,4 @@
 import {
-  TooltipDelayProps,
   FloatingUIButton,
   ILayer,
   List,
@@ -88,12 +87,7 @@ const LayerModal = styled(Modal)`
   padding-bottom: 0px;
 `;
 
-export const Layers: React.FC<TooltipDelayProps> = observer((props) => {
-  const {
-    onPointerEnterButton,
-    onPointerLeaveButton,
-    shouldForceTooltip,
-  } = props;
+export const Layers: React.FC = observer(() => {
   const store = useStore();
 
   // Menu Toggling
@@ -116,9 +110,6 @@ export const Layers: React.FC<TooltipDelayProps> = observer((props) => {
         ref={setButtonRef}
         onPointerDown={toggleModal}
         isActive={isModalOpen}
-        onPointerEnter={onPointerEnterButton}
-        onPointerLeave={onPointerLeaveButton}
-        shouldForceTooltip={shouldForceTooltip}
       />
       <LayerModal
         isOpen={isModalOpen}

@@ -42,7 +42,6 @@ const BaseButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
     {
       children,
       data,
-      shouldForceTooltip = false,
       icon,
       tooltip,
       tooltipTx,
@@ -69,23 +68,37 @@ const BaseButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
       duration("tooltipDelay")({ theme }) as number,
     );
 
+    // Tooltip Delay Handling
+    const [scheduleTooltipsDelay, cancelTooltipsDelay] = useDelay(
+      useCallback(() => {
+        theme.setShouldForceTooltip(false);
+      }, [theme]),
+      duration("noTooltipDelayInterval")({ theme }) as number,
+    );
+    const setNoTooltipDelayTimer = useCallback(() => {
+      theme.setShouldForceTooltip(true);
+      scheduleTooltipsDelay();
+    }, [scheduleTooltipsDelay, theme]);
+
     const [isPointerOverButton, setIsPointerOverButton] = useState(false);
     const enterButton = useCallback(
       (event: React.PointerEvent<HTMLButtonElement>) => {
         setIsPointerOverButton(true);
         if (onPointerEnter) onPointerEnter(event);
+        cancelTooltipsDelay();
         scheduleTooltip();
       },
-      [onPointerEnter, scheduleTooltip],
+      [cancelTooltipsDelay, onPointerEnter, scheduleTooltip],
     );
     const leaveButton = useCallback(
       (event: React.PointerEvent<HTMLButtonElement>) => {
         setIsPointerOverButton(false);
         if (onPointerLeave) onPointerLeave(event);
+        setNoTooltipDelayTimer();
         cancelTooltip();
         setShowTooltip(false);
       },
-      [cancelTooltip, onPointerLeave],
+      [setNoTooltipDelayTimer, cancelTooltip, onPointerLeave],
     );
 
     // Tooltip Positioning
@@ -113,7 +126,8 @@ const BaseButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
             text={tooltip}
             tx={tooltipTx}
             isShown={
-              (showTooltip || (shouldForceTooltip && isPointerOverButton)) &&
+              (showTooltip ||
+                (theme.shouldForceTooltip && isPointerOverButton)) &&
               externalShowTooltip
             }
             parentElement={buttonRef}

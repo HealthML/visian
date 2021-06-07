@@ -1,6 +1,5 @@
 import {
   BooleanParam,
-  TooltipDelayProps,
   Divider,
   EnumParam,
   FloatingUIButton,
@@ -30,12 +29,7 @@ const shadingModeItems = [
   { labelTx: "shading-lao", value: "lao", tooltipTx: "shading-lao-full" },
 ];
 
-export const ViewSettings: React.FC<TooltipDelayProps> = observer((props) => {
-  const {
-    onPointerEnterButton,
-    onPointerLeaveButton,
-    shouldForceTooltip,
-  } = props;
+export const ViewSettings: React.FC = observer(() => {
   const store = useStore();
 
   // Ref Management
@@ -93,9 +87,6 @@ export const ViewSettings: React.FC<TooltipDelayProps> = observer((props) => {
         ref={updateButtonRef}
         onPointerDown={toggleModal}
         isActive={isModalOpen}
-        onPointerEnter={onPointerEnterButton}
-        onPointerLeave={onPointerLeaveButton}
-        shouldForceTooltip={shouldForceTooltip}
       />
       <Modal
         isOpen={isModalOpen}
