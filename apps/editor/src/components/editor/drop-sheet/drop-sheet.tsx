@@ -1,4 +1,5 @@
 import { color, coverMixin, DropZone, zIndex } from "@visian/ui-shared";
+import { readMedicalImage } from "@visian/utils";
 import { observer } from "mobx-react-lite";
 import React, { useCallback, useState } from "react";
 import styled from "styled-components";
@@ -23,15 +24,30 @@ const StyledOverlay = styled.div`
   z-index: ${zIndex("overlay")};
 `;
 
+const uniqueValuesForAnnotationThreshold = 20;
+
+const isFileAnnotation = async (file: File) => {
+  const image = await readMedicalImage(file);
+  const { data } = image;
+  const uniqueValues = new Set();
+  for (let index = 0; index < data.length; index++) {
+    uniqueValues.add(data[index]);
+    if (uniqueValues.size > uniqueValuesForAnnotationThreshold) {
+      return false;
+    }
+  }
+  return true;
+};
+
 export const DropSheet: React.FC<DropSheetProps> = observer(
   ({ onDropCompleted }) => {
     const store = useStore();
 
-    const [isLoadingImage, setIsLoadingImage] = useState(false);
-    const importImage = useCallback(
+    const [isLoadingFiles, setIsLoadingFiles] = useState(false);
+    const importFiles = useCallback(
       (files: FileList, event: React.DragEvent) => {
         (async () => {
-          setIsLoadingImage(true);
+          setIsLoadingFiles(true);
           try {
             const item = event.dataTransfer.items[0];
             const entry = item?.webkitGetAsEntry();
@@ -66,10 +82,19 @@ export const DropSheet: React.FC<DropSheetProps> = observer(
             }
 
             if (dirFiles.length) {
-              await store?.editor.activeDocument?.importImage(
-                dirFiles,
-                dirName,
-              );
+              if (await isFileAnnotation(dirFiles[0])) {
+                await store?.editor.activeDocument?.importAnnotation(
+                  dirFiles,
+                  dirName,
+                );
+              } else {
+                await store?.editor.activeDocument?.importImage(
+                  dirFiles,
+                  dirName,
+                );
+              }
+            } else if (await isFileAnnotation(files[0])) {
+              await store?.editor.activeDocument?.importAnnotation(files[0]);
             } else {
               await store?.editor.activeDocument?.importImage(files[0]);
             }
@@ -80,29 +105,7 @@ export const DropSheet: React.FC<DropSheetProps> = observer(
               descriptionTx: error.message,
             });
           }
-          setIsLoadingImage(false);
-          store?.editor.activeDocument?.tools.setIsCursorOverFloatingUI(false);
-          onDropCompleted();
-        })();
-      },
-      [onDropCompleted, store],
-    );
-
-    const [isLoadingAnnotation, setIsLoadingAnnotation] = useState(false);
-    const importAnnotation = useCallback(
-      (files: FileList) => {
-        (async () => {
-          setIsLoadingAnnotation(true);
-          try {
-            await store?.editor.activeDocument?.importAnnotation(files[0]);
-            store?.setError();
-          } catch (error) {
-            store?.setError({
-              titleTx: "import-error",
-              descriptionTx: error.message,
-            });
-          }
-          setIsLoadingAnnotation(false);
+          setIsLoadingFiles(false);
           store?.editor.activeDocument?.tools.setIsCursorOverFloatingUI(false);
           onDropCompleted();
         })();
@@ -114,13 +117,8 @@ export const DropSheet: React.FC<DropSheetProps> = observer(
       <StyledOverlay>
         <StyledDropZone
           isAlwaysVisible
-          labelTx={isLoadingImage ? "loading" : "drop-image"}
-          onFileDrop={importImage}
-        />
-        <StyledDropZone
-          isAlwaysVisible
-          labelTx={isLoadingAnnotation ? "loading" : "drop-annotation"}
-          onFileDrop={importAnnotation}
+          labelTx={isLoadingFiles ? "loading" : "drop-image"}
+          onFileDrop={importFiles}
         />
       </StyledOverlay>
     );
