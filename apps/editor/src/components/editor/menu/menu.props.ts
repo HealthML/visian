@@ -1,5 +1,5 @@
-import { DelayHandlingButtonContainerProps } from "@visian/ui-shared";
+import { TooltipDelayProps } from "@visian/ui-shared";
 
-export interface MenuProps extends DelayHandlingButtonContainerProps {
+export interface MenuProps extends TooltipDelayProps {
   onOpenShortcutPopUp?: () => void;
 }

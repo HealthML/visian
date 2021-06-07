@@ -1,5 +1,5 @@
 import {
-  DelayHandlingButtonContainerProps,
+  TooltipDelayProps,
   FloatingUIButton,
   ILayer,
   List,
@@ -88,63 +88,61 @@ const LayerModal = styled(Modal)`
   padding-bottom: 0px;
 `;
 
-export const Layers: React.FC<DelayHandlingButtonContainerProps> = observer(
-  (props) => {
-    const {
-      onPointerEnterButton,
-      onPointerLeaveButton,
-      shouldForceTooltip,
-    } = props;
-    const store = useStore();
+export const Layers: React.FC<TooltipDelayProps> = observer((props) => {
+  const {
+    onPointerEnterButton,
+    onPointerLeaveButton,
+    shouldForceTooltip,
+  } = props;
+  const store = useStore();
 
-    // Menu Toggling
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const toggleModal = useCallback(() => {
-      setIsModalOpen(!isModalOpen);
-    }, [isModalOpen]);
+  // Menu Toggling
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const toggleModal = useCallback(() => {
+    setIsModalOpen(!isModalOpen);
+  }, [isModalOpen]);
 
-    // Menu Positioning
-    const [buttonRef, setButtonRef] = useState<HTMLButtonElement | null>(null);
+  // Menu Positioning
+  const [buttonRef, setButtonRef] = useState<HTMLButtonElement | null>(null);
 
-    const layers = store?.editor.activeDocument?.layers;
-    const layerCount = layers?.length;
-    return (
-      <>
-        <FloatingUIButton
-          icon="layers"
-          tooltipTx="layers"
-          showTooltip={!isModalOpen}
-          ref={setButtonRef}
-          onPointerDown={toggleModal}
-          isActive={isModalOpen}
-          onPointerEnter={onPointerEnterButton}
-          onPointerLeave={onPointerLeaveButton}
-          shouldForceTooltip={shouldForceTooltip}
-        />
-        <LayerModal
-          isOpen={isModalOpen}
-          labelTx="layers"
-          parentElement={buttonRef}
-          position="right"
-        >
-          <LayerList>
-            {layerCount ? (
-              // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-              layers!.map((layer, index) => (
-                <LayerListItem
-                  key={layer.id}
-                  layer={layer}
-                  isLast={index === layerCount - 1}
-                />
-              ))
-            ) : (
-              <ListItem isLast>
-                <SubtleText tx="no-layers" />
-              </ListItem>
-            )}
-          </LayerList>
-        </LayerModal>
-      </>
-    );
-  },
-);
+  const layers = store?.editor.activeDocument?.layers;
+  const layerCount = layers?.length;
+  return (
+    <>
+      <FloatingUIButton
+        icon="layers"
+        tooltipTx="layers"
+        showTooltip={!isModalOpen}
+        ref={setButtonRef}
+        onPointerDown={toggleModal}
+        isActive={isModalOpen}
+        onPointerEnter={onPointerEnterButton}
+        onPointerLeave={onPointerLeaveButton}
+        shouldForceTooltip={shouldForceTooltip}
+      />
+      <LayerModal
+        isOpen={isModalOpen}
+        labelTx="layers"
+        parentElement={buttonRef}
+        position="right"
+      >
+        <LayerList>
+          {layerCount ? (
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            layers!.map((layer, index) => (
+              <LayerListItem
+                key={layer.id}
+                layer={layer}
+                isLast={index === layerCount - 1}
+              />
+            ))
+          ) : (
+            <ListItem isLast>
+              <SubtleText tx="no-layers" />
+            </ListItem>
+          )}
+        </LayerList>
+      </LayerModal>
+    </>
+  );
+});

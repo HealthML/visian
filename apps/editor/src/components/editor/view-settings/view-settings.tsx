@@ -1,6 +1,6 @@
 import {
   BooleanParam,
-  DelayHandlingButtonContainerProps,
+  TooltipDelayProps,
   Divider,
   EnumParam,
   FloatingUIButton,
@@ -30,171 +30,165 @@ const shadingModeItems = [
   { labelTx: "shading-lao", value: "lao", tooltipTx: "shading-lao-full" },
 ];
 
-export const ViewSettings: React.FC<DelayHandlingButtonContainerProps> = observer(
-  (props) => {
-    const {
-      onPointerEnterButton,
-      onPointerLeaveButton,
-      shouldForceTooltip,
-    } = props;
-    const store = useStore();
+export const ViewSettings: React.FC<TooltipDelayProps> = observer((props) => {
+  const {
+    onPointerEnterButton,
+    onPointerLeaveButton,
+    shouldForceTooltip,
+  } = props;
+  const store = useStore();
 
-    // Ref Management
-    const [buttonRef, setButtonRef] = useState<HTMLButtonElement | null>(null);
-    const outerRef = useRef<HTMLButtonElement>(null);
-    const updateButtonRef = useMultiRef(setButtonRef, outerRef);
+  // Ref Management
+  const [buttonRef, setButtonRef] = useState<HTMLButtonElement | null>(null);
+  const outerRef = useRef<HTMLButtonElement>(null);
+  const updateButtonRef = useMultiRef(setButtonRef, outerRef);
 
-    useEffect(() => {
-      store?.setRef("viewSettings", outerRef);
+  useEffect(() => {
+    store?.setRef("viewSettings", outerRef);
 
-      return () => {
-        store?.setRef("viewSettings");
-      };
-    }, [store, outerRef]);
+    return () => {
+      store?.setRef("viewSettings");
+    };
+  }, [store, outerRef]);
 
-    // Menu Toggling
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const toggleModal = useCallback(() => {
-      setIsModalOpen(!isModalOpen);
-    }, [isModalOpen]);
+  // Menu Toggling
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const toggleModal = useCallback(() => {
+    setIsModalOpen(!isModalOpen);
+  }, [isModalOpen]);
 
-    // Menu Actions
-    const setContrast = useCallback(
-      (value: number | number[]) => {
-        store?.editor.activeDocument?.viewSettings.setContrast(value as number);
-      },
-      [store],
-    );
-    const setBrightness = useCallback(
-      (value: number | number[]) => {
-        store?.editor.activeDocument?.viewSettings.setBrightness(
-          value as number,
-        );
-      },
-      [store],
-    );
+  // Menu Actions
+  const setContrast = useCallback(
+    (value: number | number[]) => {
+      store?.editor.activeDocument?.viewSettings.setContrast(value as number);
+    },
+    [store],
+  );
+  const setBrightness = useCallback(
+    (value: number | number[]) => {
+      store?.editor.activeDocument?.viewSettings.setBrightness(value as number);
+    },
+    [store],
+  );
 
-    const setViewType = useCallback(
-      (viewType: ViewType | "3D") => {
-        if (viewType === "3D") {
-          store?.editor.activeDocument?.viewSettings.setViewMode("3D");
-        } else {
-          store?.editor.activeDocument?.viewSettings.setViewMode("2D");
-          store?.editor.activeDocument?.viewport2D.setMainViewType(viewType);
-        }
-      },
-      [store],
-    );
+  const setViewType = useCallback(
+    (viewType: ViewType | "3D") => {
+      if (viewType === "3D") {
+        store?.editor.activeDocument?.viewSettings.setViewMode("3D");
+      } else {
+        store?.editor.activeDocument?.viewSettings.setViewMode("2D");
+        store?.editor.activeDocument?.viewport2D.setMainViewType(viewType);
+      }
+    },
+    [store],
+  );
 
-    return (
-      <>
-        <FloatingUIButton
-          icon="settings"
-          tooltipTx="view-settings"
-          tooltipPosition="left"
-          showTooltip={!isModalOpen}
-          ref={updateButtonRef}
-          onPointerDown={toggleModal}
-          isActive={isModalOpen}
-          onPointerEnter={onPointerEnterButton}
-          onPointerLeave={onPointerLeaveButton}
-          shouldForceTooltip={shouldForceTooltip}
-        />
-        <Modal
-          isOpen={isModalOpen}
-          labelTx="view-settings"
-          parentElement={buttonRef}
-          position="left"
-          onReset={store?.editor.activeDocument?.viewSettings.reset}
-        >
-          {store?.editor.activeDocument?.has3DLayers && (
-            <>
-              <EnumParam
-                labelTx="main-view-type"
-                options={mainViewTypeSwitchItems}
-                value={
-                  store?.editor.activeDocument?.viewSettings.viewMode === "3D"
-                    ? "3D"
-                    : store?.editor.activeDocument?.viewport2D.mainViewType
-                }
-                setValue={setViewType}
-              />
-              {store?.editor.activeDocument?.viewSettings.viewMode === "2D" && (
-                <BooleanParam
-                  labelTx="side-views"
-                  value={Boolean(
-                    store?.editor.activeDocument?.viewport2D.showSideViews,
-                  )}
-                  setValue={
-                    store?.editor.activeDocument?.viewport2D.toggleSideViews
-                  }
-                />
-              )}
-            </>
-          )}
-          <NumberParam
-            labelTx="contrast"
-            extendBeyondMinMax
-            min={0}
-            max={2}
-            value={store?.editor.activeDocument?.viewSettings.contrast}
-            setValue={setContrast}
-          />
-          <NumberParam
-            labelTx="brightness"
-            extendBeyondMinMax
-            min={0}
-            max={2}
-            value={store?.editor.activeDocument?.viewSettings.brightness}
-            setValue={setBrightness}
-          />
-          {store?.editor.activeDocument?.viewSettings.viewMode === "3D" && (
-            <>
-              <Divider />
-              <ModalTitleRow
-                labelTx="3d-view"
-                onReset={
-                  store.editor.activeDocument.viewport3D.activeTransferFunction
-                    ?.reset
-                }
-              />
-              <EnumParam
-                labelTx="shading-mode"
-                options={shadingModeItems}
-                value={
-                  store.editor.activeDocument.viewport3D
-                    .suppressedShadingMode ||
-                  store.editor.activeDocument.viewport3D.shadingMode
-                }
-                setValue={store.editor.activeDocument.viewport3D.setShadingMode}
-              />
-              <EnumParam
-                labelTx="transfer-function"
-                options={Object.values(
-                  store.editor.activeDocument.viewport3D.transferFunctions,
-                ).map((transferFunction) => ({
-                  labelTx: transferFunction.labelTx,
-                  label: transferFunction.label,
-                  value: transferFunction.name,
-                }))}
-                value={
-                  store.editor.activeDocument.viewport3D.activeTransferFunction
-                    ?.name
-                }
+  return (
+    <>
+      <FloatingUIButton
+        icon="settings"
+        tooltipTx="view-settings"
+        tooltipPosition="left"
+        showTooltip={!isModalOpen}
+        ref={updateButtonRef}
+        onPointerDown={toggleModal}
+        isActive={isModalOpen}
+        onPointerEnter={onPointerEnterButton}
+        onPointerLeave={onPointerLeaveButton}
+        shouldForceTooltip={shouldForceTooltip}
+      />
+      <Modal
+        isOpen={isModalOpen}
+        labelTx="view-settings"
+        parentElement={buttonRef}
+        position="left"
+        onReset={store?.editor.activeDocument?.viewSettings.reset}
+      >
+        {store?.editor.activeDocument?.has3DLayers && (
+          <>
+            <EnumParam
+              labelTx="main-view-type"
+              options={mainViewTypeSwitchItems}
+              value={
+                store?.editor.activeDocument?.viewSettings.viewMode === "3D"
+                  ? "3D"
+                  : store?.editor.activeDocument?.viewport2D.mainViewType
+              }
+              setValue={setViewType}
+            />
+            {store?.editor.activeDocument?.viewSettings.viewMode === "2D" && (
+              <BooleanParam
+                labelTx="side-views"
+                value={Boolean(
+                  store?.editor.activeDocument?.viewport2D.showSideViews,
+                )}
                 setValue={
-                  store.editor.activeDocument.viewport3D
-                    .setActiveTransferFunction
+                  store?.editor.activeDocument?.viewport2D.toggleSideViews
                 }
               />
-              {store.editor.activeDocument.viewport3D.activeTransferFunction &&
-                Object.values(
-                  store.editor.activeDocument.viewport3D.activeTransferFunction
-                    .params,
-                ).map((param) => <Param parameter={param} key={param.name} />)}
-            </>
-          )}
-        </Modal>
-      </>
-    );
-  },
-);
+            )}
+          </>
+        )}
+        <NumberParam
+          labelTx="contrast"
+          extendBeyondMinMax
+          min={0}
+          max={2}
+          value={store?.editor.activeDocument?.viewSettings.contrast}
+          setValue={setContrast}
+        />
+        <NumberParam
+          labelTx="brightness"
+          extendBeyondMinMax
+          min={0}
+          max={2}
+          value={store?.editor.activeDocument?.viewSettings.brightness}
+          setValue={setBrightness}
+        />
+        {store?.editor.activeDocument?.viewSettings.viewMode === "3D" && (
+          <>
+            <Divider />
+            <ModalTitleRow
+              labelTx="3d-view"
+              onReset={
+                store.editor.activeDocument.viewport3D.activeTransferFunction
+                  ?.reset
+              }
+            />
+            <EnumParam
+              labelTx="shading-mode"
+              options={shadingModeItems}
+              value={
+                store.editor.activeDocument.viewport3D.suppressedShadingMode ||
+                store.editor.activeDocument.viewport3D.shadingMode
+              }
+              setValue={store.editor.activeDocument.viewport3D.setShadingMode}
+            />
+            <EnumParam
+              labelTx="transfer-function"
+              options={Object.values(
+                store.editor.activeDocument.viewport3D.transferFunctions,
+              ).map((transferFunction) => ({
+                labelTx: transferFunction.labelTx,
+                label: transferFunction.label,
+                value: transferFunction.name,
+              }))}
+              value={
+                store.editor.activeDocument.viewport3D.activeTransferFunction
+                  ?.name
+              }
+              setValue={
+                store.editor.activeDocument.viewport3D.setActiveTransferFunction
+              }
+            />
+            {store.editor.activeDocument.viewport3D.activeTransferFunction &&
+              Object.values(
+                store.editor.activeDocument.viewport3D.activeTransferFunction
+                  .params,
+              ).map((param) => <Param parameter={param} key={param.name} />)}
+          </>
+        )}
+      </Modal>
+    </>
+  );
+});
