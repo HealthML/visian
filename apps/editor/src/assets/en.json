@@ -65,7 +65,8 @@
   "no-image-error": "You have to load a base image before importing an annotation.",
   "image-loading-error": "Looks like this file is not supported.",
 
-  "3d-view": "3D View (4)",
+  "3d-view": "3D View",
+  "3d-view-tooltip": "3D View (4)",
   "shading-mode": "Shading Mode",
   "shading-none": "None",
   "shading-none-full": "No shading",

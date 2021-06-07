@@ -65,7 +65,8 @@
   "no-image-error": "Sie müssen einen Scan laden, bevor Sie eine Annotation importieren.",
   "image-loading-error": "Diese Datei scheint nicht unterstützt zu sein.",
 
-  "3d-view": "3D Ansicht (4)",
+  "3d-view": "3D Ansicht",
+  "3d-view-tooltip": "3D Ansicht (4)",
   "shading-mode": "Schattierungsmodus",
   "shading-none": "Keine",
   "shading-none-full": "Keine Schattierung",

@@ -20,7 +20,7 @@ const mainViewTypeSwitchItems = [
   { label: "T", value: ViewType.Transverse, tooltipTx: "transverse" },
   { label: "S", value: ViewType.Sagittal, tooltipTx: "sagittal" },
   { label: "C", value: ViewType.Coronal, tooltipTx: "coronal" },
-  { label: "3D", value: "3D", tooltipTx: "3d-view" },
+  { label: "3D", value: "3D", tooltipTx: "3d-view-tooltip" },
 ];
 
 const shadingModeItems = [
