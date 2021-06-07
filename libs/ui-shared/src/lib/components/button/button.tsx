@@ -94,7 +94,8 @@ const BaseButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
       (event: React.PointerEvent<HTMLButtonElement>) => {
         setIsPointerOverButton(false);
         if (onPointerLeave) onPointerLeave(event);
-        if (showTooltip && (tooltipTx || tooltip)) setNoTooltipDelayTimer();
+        if ((showTooltip || theme.shouldForceTooltip) && (tooltipTx || tooltip))
+          setNoTooltipDelayTimer();
         cancelTooltip();
         setShowTooltip(false);
       },
@@ -103,6 +104,7 @@ const BaseButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
         cancelTooltip,
         onPointerLeave,
         showTooltip,
+        theme.shouldForceTooltip,
         tooltipTx,
         tooltip,
       ],
