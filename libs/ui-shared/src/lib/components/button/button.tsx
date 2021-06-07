@@ -94,11 +94,18 @@ const BaseButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
       (event: React.PointerEvent<HTMLButtonElement>) => {
         setIsPointerOverButton(false);
         if (onPointerLeave) onPointerLeave(event);
-        setNoTooltipDelayTimer();
+        if (showTooltip && (tooltipTx || tooltip)) setNoTooltipDelayTimer();
         cancelTooltip();
         setShowTooltip(false);
       },
-      [setNoTooltipDelayTimer, cancelTooltip, onPointerLeave],
+      [
+        setNoTooltipDelayTimer,
+        cancelTooltip,
+        onPointerLeave,
+        showTooltip,
+        tooltipTx,
+        tooltip,
+      ],
     );
 
     // Tooltip Positioning
