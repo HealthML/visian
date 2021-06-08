@@ -87,9 +87,18 @@ export interface IEnumParameterOption<T> {
   value: T;
 }
 
+export type EnumSelector = "switch" | "drop-down";
+
 /** A class selection parameter, typically displayed as a select field or switch. */
 export interface IEnumParameter<T> extends IParameter<T> {
   kind: "enum";
+
+  /**
+   * The UI components used pick an option.
+   * If none is set, the component is determined automatically based on the
+   * number of options.
+   */
+  selector?: EnumSelector;
 
   /** The options to choose from. */
   options: IEnumParameterOption<T>[];
