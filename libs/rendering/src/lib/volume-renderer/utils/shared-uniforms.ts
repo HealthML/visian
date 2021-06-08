@@ -5,6 +5,7 @@ import {
   IEditor,
   IImageLayer,
   INumberRangeParameter,
+  Theme,
 } from "@visian/ui-shared";
 import { IDisposable, IDisposer } from "@visian/utils";
 import { autorun, reaction } from "mobx";
@@ -150,15 +151,30 @@ export class SharedUniforms implements IDisposable {
 
           if (!imageLayer) return undefined;
 
-          return (imageLayer as IImageLayer).image as RenderedImage;
+          return [
+            imageLayer as IImageLayer,
+            imageLayer.color,
+            editor.theme,
+          ] as [IImageLayer, string | undefined, Theme];
         },
-        (image?: RenderedImage) => {
-          if (!image) return;
+        (params?: [IImageLayer, string | undefined, Theme]) => {
+          if (!params) return;
+
+          const [imageLayer, imageColor, theme] = params;
+
+          const image = imageLayer.image as RenderedImage;
 
           this.uniforms.uVolume.value = image.getTexture(0, THREE.LinearFilter);
           this.uniforms.uVoxelCount.value = image.voxelCount;
           this.uniforms.uAtlasGrid.value = image.getAtlasGrid();
           this.uniforms.uStepSize.value = getStepSize(image);
+
+          (this.uniforms.uContextColor.value as THREE.Color).set(
+            color(
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              (imageColor as any) || "foreground",
+            )({ theme }),
+          );
         },
         { fireImmediately: true },
       ),
@@ -174,17 +190,16 @@ export class SharedUniforms implements IDisposable {
 
           if (!imageLayer) return undefined;
 
-          return [imageLayer as IImageLayer, imageLayer.color] as [
-            IImageLayer,
-            string | undefined,
-          ];
+          return [
+            imageLayer as IImageLayer,
+            imageLayer.color,
+            editor.theme,
+          ] as [IImageLayer, string | undefined, Theme];
         },
-        (params?: [IImageLayer, string | undefined]) => {
-          if (!params) return;
+        (params?: [IImageLayer, string | undefined, Theme]) => {
+          if (params) {
+            const [imageLayer, imageColor, theme] = params;
 
-          const [imageLayer, imageColor] = params;
-
-          if (imageLayer) {
             this.uniforms.uFocus.value = (imageLayer.image as RenderedImage).getTexture(
               0,
               THREE.LinearFilter,
@@ -193,9 +208,7 @@ export class SharedUniforms implements IDisposable {
               color(
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 (imageColor as any) || "foreground",
-              )({
-                theme: editor.theme,
-              }),
+              )({ theme }),
             );
           } else {
             this.uniforms.uFocus.value = null;

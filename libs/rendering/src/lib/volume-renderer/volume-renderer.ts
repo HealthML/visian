@@ -164,14 +164,27 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
         () => this.onCameraMove(false),
       ),
       reaction(() => {
+        const imageLayerParameter =
+          editor.activeDocument?.viewport3D.activeTransferFunction?.params
+            .image;
+        const imageLayerId = imageLayerParameter
+          ? (imageLayerParameter as ILayerParameter).value
+          : undefined;
+        const imageLayer = imageLayerId
+          ? editor.activeDocument?.getLayer(imageLayerId)
+          : undefined;
+        const imageColor = imageLayer
+          ? (imageLayer as IImageLayer).color
+          : undefined;
+
         const annotationLayerParameter =
           editor.activeDocument?.viewport3D.activeTransferFunction?.params
             .annotation;
-        const layerId = annotationLayerParameter
+        const annotationLayerId = annotationLayerParameter
           ? (annotationLayerParameter as ILayerParameter).value
           : undefined;
-        const annotationLayer = layerId
-          ? editor.activeDocument?.getLayer(layerId)
+        const annotationLayer = annotationLayerId
+          ? editor.activeDocument?.getLayer(annotationLayerId)
           : undefined;
         const annotation = annotationLayer
           ? (annotationLayer as IImageLayer).image
@@ -181,7 +194,9 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
           editor.activeDocument?.viewport3D.activeTransferFunction;
 
         return [
+          editor.theme,
           editor.activeDocument?.layers.map((layer) => layer.isVisible),
+          imageColor,
           annotation,
           annotationLayer?.color,
 
