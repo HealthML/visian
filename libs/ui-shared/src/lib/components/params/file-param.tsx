@@ -75,7 +75,7 @@ export const FileParam: React.FC<Partial<FileParamProps>> = ({
         <InvisibleFileInput {...rest} onChange={setFile} />
         <FileInputText
           isFileLoaded={Boolean(value)}
-          tx={value ? undefined : "upload"}
+          tx={value ? undefined : "upload-file"}
           text={value?.name}
         />
         {Boolean(value) && <XButton onPointerDown={clearFile} />}
