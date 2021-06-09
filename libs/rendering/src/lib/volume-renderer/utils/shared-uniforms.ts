@@ -202,7 +202,7 @@ export class SharedUniforms implements IDisposable {
 
             this.uniforms.uFocus.value = (imageLayer.image as RenderedImage).getTexture(
               0,
-              THREE.LinearFilter,
+              THREE.NearestFilter,
             );
             (this.uniforms.uFocusColor.value as THREE.Color).set(
               color(
