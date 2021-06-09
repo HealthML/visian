@@ -37,7 +37,7 @@ const computeStyle = ({
 };
 
 /**
- * Returns a style object that absolutely positions a tooltip next to the
+ * Returns a style object that absolutely positions a modal next to the
  * element it refers to.
  */
 export const useModalPosition = (

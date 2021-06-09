@@ -1,35 +1,22 @@
-import React from "react";
+import React, { useCallback, useState } from "react";
 import styled from "styled-components";
 
-import { fontSize } from "../../theme";
-import { Icon } from "../icon";
 import { sheetMixin } from "../sheet";
-import { InputLabel, Text } from "../text";
+import { InputLabel } from "../text";
+import {
+  DropDownOptions,
+  ExpandIcon,
+  Option,
+  OptionText,
+} from "./drop-down-options";
 import { DropDownProps } from "./drop-down.props";
 
-const Selector = styled.div`
+const Selector = styled(Option)`
   ${sheetMixin}
-  align-items: center;
-  box-sizing: border-box;
   border-radius: 12px;
-  cursor: pointer;
-  display: flex;
-  height: 24px;
+  position: relative;
   margin-bottom: 10px;
   width: 100%;
-`;
-
-const OptionText = styled(Text)`
-  flex: 1;
-  font-size: ${fontSize("small")};
-  line-height: 10px;
-  margin: 0 14px;
-`;
-
-const ExpandIcon = styled(Icon).attrs(() => ({ icon: "arrowDown" }))`
-  height: 16px;
-  margin-right: 10px;
-  width: 16px;
 `;
 
 export const DropDown: React.FC<DropDownProps> = ({
@@ -41,31 +28,60 @@ export const DropDown: React.FC<DropDownProps> = ({
   onChange,
   ...rest
 }) => {
-  const { length } = options;
   const actualValue =
     value === undefined
       ? defaultValue === undefined
-        ? length
-          ? options[0].value
-          : ""
+        ? options[0]?.value
         : defaultValue
       : value;
-  const activeOption =
-    options.find((option) => option.value === actualValue) || options[0];
+  const activeIndex = Math.max(
+    0,
+    options.findIndex((option) => option.value === actualValue),
+  );
+  const activeOption = options[activeIndex];
+
+  const [parentRef, setParentRef] = useState<HTMLDivElement | null>(null);
+  const [showOptions, setShowOptions] = useState(false);
+  const openOptions = useCallback((event: React.PointerEvent) => {
+    event.stopPropagation();
+    setShowOptions(true);
+  }, []);
+  const closeOptions = useCallback(() => {
+    setShowOptions(false);
+  }, []);
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const setValue = useCallback(
+    (newValue: any) => {
+      if (onChange) onChange(newValue);
+      closeOptions();
+    },
+    [closeOptions, onChange],
+  );
 
   return (
     <>
       {(labelTx || label) && <InputLabel tx={labelTx} text={label} />}
-      <Selector {...rest}>
-        {length && (
-          <>
-            <OptionText
-              tx={activeOption.labelTx}
-              text={activeOption.label || activeOption.value}
-            />
-          </>
+      <Selector
+        {...rest}
+        ref={setParentRef}
+        onPointerDown={showOptions ? undefined : openOptions}
+      >
+        {activeOption && (
+          <OptionText
+            tx={activeOption.labelTx}
+            text={activeOption.label || activeOption.value}
+          />
         )}
-        <ExpandIcon />
+        <ExpandIcon icon="arrowDown" />
+        <DropDownOptions
+          activeIndex={activeIndex}
+          options={options}
+          parentElement={parentRef}
+          isOpen={showOptions}
+          onChange={setValue}
+          onDismiss={closeOptions}
+        />
       </Selector>
     </>
   );

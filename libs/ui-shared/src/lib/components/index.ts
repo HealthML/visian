@@ -6,6 +6,7 @@ export * from "./utils";
 export * from "./box";
 export * from "./button";
 export * from "./color";
+export * from "./drop-down";
 export * from "./drop-zone";
 export * from "./modal";
 export * from "./notification";

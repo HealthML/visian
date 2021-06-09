@@ -143,7 +143,7 @@ export const useDelay = (
   return [schedule, cancel];
 };
 
-export interface RelativePositionConfig<P extends string> {
+export interface RelativePositionConfig<P = void> {
   /** The parent element. */
   parentElement?: HTMLElement | SVGSVGElement | null;
 
@@ -172,7 +172,7 @@ export interface RelativePositionConfig<P extends string> {
   style?: React.CSSProperties;
 }
 
-export interface RelativePositionStyleConfig<P extends string>
+export interface RelativePositionStyleConfig<P = void>
   extends Pick<RelativePositionConfig<P>, "distance" | "position"> {
   /** The parent element's bounding client rect. */
   rect: DOMRect;
@@ -185,7 +185,7 @@ export interface RelativePositionStyleConfig<P extends string>
  * Returns a style object that absolutely positions an element next to the
  * parent element it refers to.
  */
-export const useRelativePosition = <P extends string>(
+export const useRelativePosition = <P = void>(
   computeStyle: (config: RelativePositionStyleConfig<P>) => React.CSSProperties,
   {
     parentElement,

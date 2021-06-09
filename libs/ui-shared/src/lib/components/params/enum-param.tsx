@@ -1,7 +1,7 @@
 import React from "react";
 
 import { IEnumParameter } from "../../types";
-import { DropDown } from "../drop-down/drop-down";
+import { DropDown } from "../drop-down";
 import { Switch } from "../switch";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

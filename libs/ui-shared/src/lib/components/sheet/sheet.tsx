@@ -16,7 +16,7 @@ export const sheetMixin = () => css<any>`
     ${isFirefox()
         ? computeStyleValue(
             [color("sideViewSheet"), color("background")],
-            (sheet, background) => tc.mix(sheet, background, 80).toRgbString(),
+            (sheet, background) => tc.mix(sheet, background, 85).toRgbString(),
           )
         : color("sheet")};
   border: 1px solid ${color("sheetBorder")};
