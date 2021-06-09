@@ -50,8 +50,8 @@ export const DropDown: React.FC<DropDownProps> = ({
     setShowOptions(false);
   }, []);
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const setValue = useCallback(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (newValue: any) => {
       if (onChange) onChange(newValue);
       closeOptions();

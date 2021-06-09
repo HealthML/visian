@@ -181,6 +181,12 @@ export interface ILayerParameter extends IParameter<string | undefined> {
    * Defaults to allowing all layers.
    */
   filter: (layer: ILayer) => boolean;
+
+  /**
+   * The qualifying layer to choose from.
+   * These are computed based on the filter.
+   */
+  layerOptions: ILayer[];
 }
 
 /** A file parameter, typically displayed as a file picker. */

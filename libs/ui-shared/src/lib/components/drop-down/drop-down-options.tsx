@@ -19,6 +19,7 @@ export const Option = styled.div<{ isSelected?: boolean }>`
   cursor: pointer;
   display: flex;
   height: 24px;
+  overflow: hidden;
   user-select: none;
 
   ${(props) =>
@@ -40,10 +41,11 @@ const ExpandedSelector = styled(Option)`
 `;
 
 export const OptionText = styled(Text)`
-  flex: 1;
+  flex: 1 0;
   font-size: ${fontSize("small")};
-  line-height: 10px;
   margin: 0 14px;
+  overflow: hidden;
+  text-overflow: ellipsis;
 `;
 
 const OptionDivider = styled(Divider)<{ isHidden?: boolean }>`
