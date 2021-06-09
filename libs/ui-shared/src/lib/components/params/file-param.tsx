@@ -42,8 +42,6 @@ export type FileParamProps = IFileParameter &
   ListPositionProps &
   Omit<React.HTMLAttributes<HTMLInputElement>, "defaultValue" | "onChange">;
 
-// TODO: In the future, we should probably offer a more flexible pop up color
-// picker that allows user to specify fully custom colors
 export const FileParam: React.FC<Partial<FileParamProps>> = ({
   isFirst,
   labelTx,
