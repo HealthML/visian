@@ -46,6 +46,7 @@ export const OptionText = styled(Text)`
   margin: 0 14px;
   overflow: hidden;
   text-overflow: ellipsis;
+  white-space: nowrap;
 `;
 
 const OptionDivider = styled(Divider)<{ isHidden?: boolean }>`
