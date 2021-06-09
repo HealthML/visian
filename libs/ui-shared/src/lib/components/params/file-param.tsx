@@ -21,7 +21,6 @@ const Container = styled.label`
   display: flex;
   height: 24px;
   margin-bottom: 10px;
-  padding: 0 14px;
   width: 100%;
 `;
 
@@ -29,13 +28,14 @@ const FileInputText = styled(Text)<{ isFileLoaded?: boolean }>`
   flex: 1;
   font-size: ${fontSize("small")};
   line-height: 10px;
+  margin: 0 14px;
   text-align: ${(props) => (props.isFileLoaded ? "left" : "center")};
 `;
 
-// TODO: Replace `trash` with an x icon
-const XButton = styled(InvisibleButton).attrs(() => ({ icon: "trash" }))`
-  height: 20px;
-  width: 20px;
+const XButton = styled(InvisibleButton).attrs(() => ({ icon: "xSmall" }))`
+  height: 16px;
+  margin-right: 10px;
+  width: 16px;
 `;
 
 export type FileParamProps = IFileParameter &
