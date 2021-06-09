@@ -73,25 +73,6 @@ export const useIsDraggedOver = () => {
   ];
 };
 
-export const useOutsidePress = <T extends HTMLElement>(
-  ref: React.RefObject<T>,
-  callback?: (event: PointerEvent) => void,
-  activateHandler?: boolean,
-) => {
-  useEffect(() => {
-    const handleOutsidePress = (event: PointerEvent) => {
-      if (ref.current && !ref.current.contains(event.target as Node)) {
-        if (callback && activateHandler !== false) callback(event);
-      }
-    };
-
-    document.addEventListener("pointerdown", handleOutsidePress);
-    return () => {
-      document.removeEventListener("pointerdown", handleOutsidePress);
-    };
-  }, [activateHandler, callback, ref]);
-};
-
 export const useUpdateOnResize = (isActive = true) => {
   const [size, setSize] = useState<string | undefined>(undefined);
   useEffect(() => {
@@ -141,6 +122,42 @@ export const useDelay = (
   );
 
   return [schedule, cancel];
+};
+
+export const useOutsidePress = <T extends HTMLElement>(
+  ref: React.RefObject<T>,
+  callback?: (event: PointerEvent) => void,
+  activateHandler?: boolean,
+) => {
+  const handleOutsidePress = useCallback(
+    (event: PointerEvent) => {
+      if (ref.current && !ref.current.contains(event.target as Node)) {
+        if (callback) callback(event);
+      }
+    },
+    [callback, ref],
+  );
+
+  const [schedule, cancel] = useDelay(
+    useCallback(() => {
+      document.addEventListener("pointerdown", handleOutsidePress);
+    }, [handleOutsidePress]),
+    35,
+  );
+
+  useEffect(() => {
+    if (activateHandler) {
+      schedule();
+
+      return () => {
+        cancel();
+        document.removeEventListener("pointerdown", handleOutsidePress);
+      };
+    }
+
+    cancel();
+    document.removeEventListener("pointerdown", handleOutsidePress);
+  }, [activateHandler, cancel, schedule, handleOutsidePress]);
 };
 
 export interface RelativePositionConfig<P extends string> {
