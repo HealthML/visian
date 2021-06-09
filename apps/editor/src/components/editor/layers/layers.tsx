@@ -99,6 +99,10 @@ export const Layers: React.FC = observer(() => {
   // Menu Positioning
   const [buttonRef, setButtonRef] = useState<HTMLButtonElement | null>(null);
 
+  // This is required to force an update when the view mode changes
+  // (otherwise the layer menu stays fixed in place when switching the view mode)
+  const _viewMode = store?.editor.activeDocument?.viewSettings.viewMode;
+
   const layers = store?.editor.activeDocument?.layers;
   const layerCount = layers?.length;
   return (

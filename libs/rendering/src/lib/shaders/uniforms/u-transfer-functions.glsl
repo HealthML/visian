@@ -1,5 +1,6 @@
 uniform vec3 uFocusColor;
 uniform float uFocusOpacity;
+uniform vec3 uContextColor;
 uniform float uContextOpacity;
 uniform float uLimitLow;
 uniform float uLimitHigh;

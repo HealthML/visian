@@ -29,3 +29,4 @@ export { ReactComponent as settings } from "./settings.svg";
 export { ReactComponent as trash } from "./trash.svg";
 export { ReactComponent as undo } from "./undo.svg";
 export { ReactComponent as upArrow } from "./up-arrow.svg";
+export { ReactComponent as xSmall } from "./x-small.svg";

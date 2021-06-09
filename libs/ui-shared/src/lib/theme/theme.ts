@@ -1,5 +1,5 @@
 import { ThemeProps as StyledThemeProps } from "styled-components";
-import { makeObservable, observable } from "mobx";
+import { action, makeObservable, observable } from "mobx";
 
 const dataColors = {
   "Salient Safran": "#D0C068",
@@ -100,7 +100,11 @@ export const theme = {
   borderWidths: {},
   // breakpoints: ["478px", "767px", "991px", "1280px", "1440px", "1920px"],
   colors: colorModes.light,
-  durations: { tooltipDelay: 400, autoHideDelay: 800 },
+  durations: {
+    tooltipDelay: 400,
+    noTooltipDelayInterval: 1000,
+    autoHideDelay: 800,
+  },
   fonts: {
     default: "DIN2014",
   },
@@ -168,8 +172,16 @@ export const getTheme = (mode: ColorMode = "light") =>
     {
       ...theme,
       colors: colorModes[mode] || theme.colors,
+      shouldForceTooltip: false,
+      setShouldForceTooltip(shouldForceTooltip: boolean) {
+        this.shouldForceTooltip = shouldForceTooltip;
+      },
     },
-    { colors: observable },
+    {
+      colors: observable,
+      shouldForceTooltip: observable,
+      setShouldForceTooltip: action,
+    },
   );
 
 export type Theme = ReturnType<typeof getTheme>;

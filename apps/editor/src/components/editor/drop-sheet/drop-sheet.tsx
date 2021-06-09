@@ -1,7 +1,14 @@
-import { color, coverMixin, DropZone, zIndex } from "@visian/ui-shared";
+import {
+  color,
+  coverMixin,
+  DropZone,
+  useModalRoot,
+  zIndex,
+} from "@visian/ui-shared";
 import { readMedicalImage } from "@visian/utils";
 import { observer } from "mobx-react-lite";
 import React, { useCallback, useState } from "react";
+import ReactDOM from "react-dom";
 import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
@@ -113,7 +120,8 @@ export const DropSheet: React.FC<DropSheetProps> = observer(
       [onDropCompleted, store],
     );
 
-    return (
+    const modalRootRef = useModalRoot();
+    const node = (
       <StyledOverlay>
         <StyledDropZone
           isAlwaysVisible
@@ -122,5 +130,9 @@ export const DropSheet: React.FC<DropSheetProps> = observer(
         />
       </StyledOverlay>
     );
+
+    return modalRootRef.current
+      ? ReactDOM.createPortal(node, modalRootRef.current)
+      : node;
   },
 );
