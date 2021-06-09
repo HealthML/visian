@@ -39,24 +39,24 @@ const ActiveSwitchItem = styled(Sheet)`
 export const Switch: React.FC<SwitchProps> = ({
   labelTx,
   label,
-  items,
+  options,
   defaultValue,
   value,
   onChange,
   ...rest
 }) => {
-  const { length } = items;
+  const { length } = options;
   const actualValue =
     value === undefined
       ? defaultValue === undefined
         ? length
-          ? items[0].value
+          ? options[0].value
           : ""
         : defaultValue
       : value;
   const activeIndex = Math.max(
     0,
-    items.findIndex((item) => item.value === actualValue),
+    options.findIndex((option) => option.value === actualValue),
   );
 
   return (
@@ -71,7 +71,7 @@ export const Switch: React.FC<SwitchProps> = ({
                 left: `${(100 / length) * activeIndex}%`,
               }}
             />
-            {items.map((item) => (
+            {options.map((item) => (
               <SwitchItem key={item.value} onChange={onChange} {...item} />
             ))}
           </>

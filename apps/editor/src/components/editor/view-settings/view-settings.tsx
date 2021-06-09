@@ -99,6 +99,7 @@ export const ViewSettings: React.FC = observer(() => {
           <>
             <EnumParam
               labelTx="main-view-type"
+              selector="switch"
               options={mainViewTypeSwitchItems}
               value={
                 store?.editor.activeDocument?.viewSettings.viewMode === "3D"

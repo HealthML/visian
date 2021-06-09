@@ -27,7 +27,7 @@ export const BooleanParam: React.FC<Partial<BooleanParamProps>> = ({
     {...rest}
     labelTx={labelTx}
     label={label}
-    items={booleanSwitchItems}
+    options={booleanSwitchItems}
     value={Boolean(value)}
     onChange={setValue}
   />
