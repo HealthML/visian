@@ -6,6 +6,7 @@ import { BooleanParam, BooleanParamProps } from "./boolean-param";
 import { ButtonParam, ButtonParamProps } from "./button-param";
 import { ColorParam, ColorParamProps } from "./color-param";
 import { EnumParam, EnumParamProps } from "./enum-param";
+import { FileParam, FileParamProps } from "./file-param";
 import { NumberParam, NumberParamProps } from "./number-param";
 import { NumberRangeParam, NumberRangeParamProps } from "./number-range-param";
 import { ListPositionProps } from "./types";
@@ -34,6 +35,10 @@ export const Param = observer<ParamProps>(({ parameter, ...rest }) => {
     case "enum":
       return (
         <EnumParam {...rest} {...(parameter.toProps() as EnumParamProps)} />
+      );
+    case "file":
+      return (
+        <FileParam {...rest} {...(parameter.toProps() as FileParamProps)} />
       );
     case "number":
       return (
