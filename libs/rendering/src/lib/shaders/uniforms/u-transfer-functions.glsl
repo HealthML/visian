@@ -9,3 +9,4 @@ uniform vec3 uConeDirection;
 uniform int uTransferFunction;
 uniform bool uUseFocus;
 uniform sampler2D uCustomTFTexture;
+uniform bool uVolumeNearestFiltering;

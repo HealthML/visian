@@ -37,6 +37,13 @@ export class DensityTransferFunction extends TransferFunction<"density"> {
             document,
           ) as Parameter<unknown>,
           new BooleanParameter({
+            name: "useBlockyContext",
+            labelTx: "use-blocky-context",
+            defaultValue: false,
+            onBeforeValueChange: () =>
+              document.viewport3D?.onTransferFunctionChange(),
+          }) as Parameter<unknown>,
+          new BooleanParameter({
             name: "useFocus",
             labelTx: "use-focus",
             defaultValue: false,
