@@ -71,17 +71,6 @@ export interface IViewport2D {
    * @param slice The slice number.
    */
   setSelectedSlice(viewType: ViewType | undefined, slice: number): void;
-  /**
-   * Sets crosshair position for the given `ViewType`.
-   * The new position should be written into the `ViewSettings`'
-   * `selectedVoxel` attribute.
-   *
-   * @param viewType The `ViewType` to set the crosshair position for.
-   * Defaults to the current `mainViewType`.
-   * @param slicePosition The pixel position the the slice as seen from the
-   * passed `viewType`.
-   */
-  moveCrosshair(viewType: ViewType | undefined, slicePosition: Pixel): void;
 
   /** Increases the current `zoomLevel` by adding the current `zoomStep`. */
   zoomIn(): void;
