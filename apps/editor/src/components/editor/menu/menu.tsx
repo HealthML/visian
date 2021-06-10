@@ -57,9 +57,7 @@ export const Menu: React.FC<MenuProps> = observer(({ onOpenShortcutPopUp }) => {
 
   // Menu Toggling
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const openModal = useCallback((event: React.PointerEvent) => {
-    event.preventDefault();
-    event.stopPropagation();
+  const openModal = useCallback(() => {
     setIsModalOpen(true);
   }, []);
   const closeModal = useCallback(() => {
@@ -93,7 +91,6 @@ export const Menu: React.FC<MenuProps> = observer(({ onOpenShortcutPopUp }) => {
 
   const openShortcutPopUp = useCallback(
     (event?: React.PointerEvent) => {
-      event?.stopPropagation();
       if (onOpenShortcutPopUp) onOpenShortcutPopUp();
     },
     [onOpenShortcutPopUp],
