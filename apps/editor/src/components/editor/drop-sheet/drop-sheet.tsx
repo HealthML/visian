@@ -7,6 +7,7 @@ import {
 } from "@visian/ui-shared";
 import { readMedicalImage } from "@visian/utils";
 import { observer } from "mobx-react-lite";
+import path from "path";
 import React, { useCallback, useState } from "react";
 import ReactDOM from "react-dom";
 import styled from "styled-components";
@@ -46,6 +47,8 @@ const isFileAnnotation = async (file: File) => {
   return true;
 };
 
+const getFileExtension = (file: File) => path.extname(file.name);
+
 export const DropSheet: React.FC<DropSheetProps> = observer(
   ({ onDropCompleted }) => {
     const store = useStore();
@@ -63,7 +66,12 @@ export const DropSheet: React.FC<DropSheetProps> = observer(
 
     const importFileList = useCallback(
       async (dirFiles: File[], dirName: string | undefined) => {
-        if (await isFileAnnotation(dirFiles[0])) {
+        // Check if file list belongs together
+        if (dirFiles.some((file) => getFileExtension(file) !== ".dcm")) {
+          const promises: Promise<void>[] = [];
+          dirFiles.forEach((file) => promises.push(importSingleFile(file)));
+          await Promise.all(promises);
+        } else if (await isFileAnnotation(dirFiles[0])) {
           await store?.editor.activeDocument?.importAnnotation(
             dirFiles,
             dirName,
@@ -72,7 +80,7 @@ export const DropSheet: React.FC<DropSheetProps> = observer(
           await store?.editor.activeDocument?.importImage(dirFiles, dirName);
         }
       },
-      [store?.editor.activeDocument],
+      [importSingleFile, store?.editor.activeDocument],
     );
 
     const getFile = useCallback(
@@ -127,19 +135,17 @@ export const DropSheet: React.FC<DropSheetProps> = observer(
                 });
               }),
             );
+          } else {
+            promises.push(importDirectoryItem(entries[i]));
           }
         }
         await Promise.all(promises);
 
         if (dirFiles.length) {
-          if (dirFiles.length > 1) {
-            await importFileList(dirFiles, dirName);
-          } else {
-            await importSingleFile(dirFiles[0]);
-          }
+          await importFileList(dirFiles, dirName);
         }
       },
-      [importFileList, importSingleFile],
+      [importFileList],
     );
 
     const [isLoadingFiles, setIsLoadingFiles] = useState(false);
@@ -151,7 +157,7 @@ export const DropSheet: React.FC<DropSheetProps> = observer(
             const { items } = event.dataTransfer;
             const promises: Promise<void>[] = [];
             for (let fileIndex = 0; fileIndex < items.length; fileIndex++) {
-              const item = event.dataTransfer.items[0];
+              const item = event.dataTransfer.items[fileIndex];
               const entry = item?.webkitGetAsEntry();
               if (entry) {
                 if (entry.isDirectory) {
