@@ -157,8 +157,8 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
           // As we already know that the layer parameter exist, we can be sure
           // that the active document is not undefined.
           // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          return (editor.activeDocument!.getLayer(layerId) as IImageLayer)
-            .image;
+          const imageLayer = editor.activeDocument!.getLayer(layerId);
+          return imageLayer ? (imageLayer as IImageLayer).image : undefined;
         },
 
         () => this.onCameraMove(false),

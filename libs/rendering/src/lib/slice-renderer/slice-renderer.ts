@@ -331,15 +331,11 @@ export class SliceRenderer implements IDisposable, ISliceRenderer {
     this.slices.forEach((slice) => slice.setImage(image));
     this.isImageLoaded = true;
 
-    image.setRenderers(this._renderers);
-
     this.lazyRender();
   }
 
   private setAnnotation = (image?: RenderedImage) => {
     this.slices.forEach((slice) => slice.setAnnotation(image));
-
-    image?.setRenderers(this._renderers);
 
     this.lazyRender();
   };
