@@ -4,7 +4,7 @@ import {
   ShadingMode,
   ITransferFunction,
 } from "@visian/ui-shared";
-import { ISerializable } from "@visian/utils";
+import { ISerializable, Vector } from "@visian/utils";
 import { action, autorun, computed, makeObservable, observable } from "mobx";
 import { Matrix4 } from "three";
 import {
@@ -24,6 +24,7 @@ export type TransferFunctionName =
 
 export interface Viewport3DSnapshot<N extends string> {
   cameraMatrix: number[];
+  orbitTarget: number[];
 
   opacity: number;
   shadingMode: ShadingMode;
@@ -41,6 +42,7 @@ export class Viewport3D
   public isInXR!: boolean;
 
   public cameraMatrix!: Matrix4;
+  public orbitTarget = new Vector(3);
   public volumeSpaceCameraPosition: [number, number, number] = [0, 0, 0];
 
   public opacity!: number;
@@ -65,6 +67,7 @@ export class Viewport3D
     >(this, {
       isInXR: observable,
       cameraMatrix: observable.ref,
+      orbitTarget: observable,
       volumeSpaceCameraPosition: observable,
       opacity: observable,
       shadingMode: observable,
@@ -75,6 +78,7 @@ export class Viewport3D
       activeTransferFunction: computed,
 
       setCameraMatrix: action,
+      setOrbitTarget: action,
       setVolumeSpaceCameraPosition: action,
       setActiveTransferFunction: action,
       setIsInXR: action,
@@ -137,6 +141,10 @@ export class Viewport3D
       -0.3,
       1,
     ]);
+  }
+
+  public setOrbitTarget(x = 0, y = 1.2, z = 0) {
+    this.orbitTarget.set(x, y, z);
   }
 
   public setVolumeSpaceCameraPosition(x: number, y: number, z: number) {
@@ -205,6 +213,7 @@ export class Viewport3D
   public reset = (): void => {
     this.setIsInXR();
     this.setCameraMatrix();
+    this.setOrbitTarget();
     this.setOpacity();
     this.setShadingMode();
     Object.values(this.transferFunctions).forEach((transferFunction) => {
@@ -217,6 +226,7 @@ export class Viewport3D
   public toJSON(): Viewport3DSnapshot<TransferFunctionName> {
     return {
       cameraMatrix: this.cameraMatrix.toArray(),
+      orbitTarget: this.orbitTarget.toJSON(),
       opacity: this.opacity,
       shadingMode: this.shadingMode,
       activeTransferFunctionName: this.activeTransferFunctionName,
@@ -235,6 +245,12 @@ export class Viewport3D
         ? new Matrix4().fromArray(snapshot.cameraMatrix)
         : undefined,
     );
+    const orbitTarget = snapshot?.orbitTarget;
+    if (orbitTarget) {
+      this.setOrbitTarget(orbitTarget[0], orbitTarget[1], orbitTarget[2]);
+    } else {
+      this.setOrbitTarget();
+    }
     this.setOpacity(snapshot?.opacity);
     this.setShadingMode(snapshot?.shadingMode);
     this.setActiveTransferFunction(snapshot?.activeTransferFunctionName);

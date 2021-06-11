@@ -126,6 +126,7 @@ export interface IViewport3D<N extends string> {
 
   /** The 3D camera's world matrix. */
   cameraMatrix: Matrix4;
+  orbitTarget: Vector;
   volumeSpaceCameraPosition: [number, number, number];
 
   /** The volumetric rendering opacity, scales the density of every voxel. */
@@ -145,6 +146,7 @@ export interface IViewport3D<N extends string> {
 
   setIsInXR(value?: boolean): void;
   setCameraMatrix(value?: Matrix4): void;
+  setOrbitTarget(x?: number, y?: number, z?: number): void;
   setVolumeSpaceCameraPosition(x: number, y: number, z: number): void;
   setOpacity(value?: number): void;
   setShadingMode(value?: ShadingMode): void;
