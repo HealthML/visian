@@ -151,6 +151,7 @@ export class ToolRenderer {
     this.circlesToRender.push(...circles);
 
     this.document.sliceRenderer?.lazyRender();
+    this.document.volumeRenderer?.lazyRender(true);
   }
 
   public renderShape(geometry: THREE.ShapeGeometry, material?: THREE.Material) {
@@ -159,6 +160,7 @@ export class ToolRenderer {
     );
 
     this.document.sliceRenderer?.lazyRender();
+    this.document.volumeRenderer?.lazyRender(true);
   }
 
   public waitForRender() {

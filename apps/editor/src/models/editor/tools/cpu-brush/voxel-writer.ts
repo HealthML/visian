@@ -80,6 +80,7 @@ export class VoxelWriter<N extends string> extends Tool<N> {
     image.setAtlasVoxels(voxels);
 
     this.document.sliceRenderer?.lazyRender();
+    this.document.volumeRenderer?.lazyRender(true);
   }
 }
 
