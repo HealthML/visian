@@ -171,6 +171,8 @@ export class Tools
   }
 
   public setActiveTool(nameOrTool?: ToolName | ITool<ToolName>): void {
+    if (this.isDrawing) return;
+
     const previouslyActiveTool = this.activeTool;
 
     this.activeToolName = nameOrTool
