@@ -39,9 +39,17 @@ export const Toolbar: React.FC = observer(() => {
 
   // Menu Toggling
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const closeModal = useCallback(() => {
-    setIsModalOpen(false);
-  }, []);
+  const closeModal = useCallback(
+    (value?: unknown) => {
+      if (
+        !value ||
+        store?.editor.activeDocument?.tools.activeTool?.name === value
+      ) {
+        setIsModalOpen(false);
+      }
+    },
+    [store],
+  );
 
   // Menu Positioning
   const [buttonRef, setButtonRef] = useState<HTMLButtonElement | null>(null);
@@ -53,19 +61,15 @@ export const Toolbar: React.FC = observer(() => {
       value: string | number | undefined,
       event: React.PointerEvent<HTMLButtonElement>,
     ) => {
+      const previousTool = store?.editor.activeDocument?.tools.activeTool?.name;
+      store?.editor.activeDocument?.tools.setActiveTool(value as ToolName);
+
       if (
-        event.button === PointerButton.RMB ||
+        (event.button === PointerButton.RMB || previousTool === value) &&
         store?.editor.activeDocument?.tools.activeTool?.name === value
       ) {
-        event.preventDefault();
-        event.stopPropagation();
-        setIsModalOpen(
-          store?.editor.activeDocument?.tools.activeTool?.name !== value ||
-            !isModalOpen,
-        );
+        setIsModalOpen(previousTool !== value || !isModalOpen);
       }
-
-      store?.editor.activeDocument?.tools.setActiveTool(value as ToolName);
     },
     [isModalOpen, store],
   );
@@ -107,6 +111,7 @@ export const Toolbar: React.FC = observer(() => {
         )}
         labelTx={activeTool?.labelTx}
         label={activeTool?.label}
+        value={activeTool?.name}
         parentElement={buttonRef}
         position="right"
         onOutsidePress={closeModal}

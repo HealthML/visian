@@ -194,6 +194,8 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
     this.setActiveLayer(annotationLayer);
 
     this.viewSettings.reset();
+    this.viewport2D.reset();
+    this.viewport3D.reset();
     this.history.clear();
   }
 

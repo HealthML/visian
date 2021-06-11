@@ -42,8 +42,7 @@ export const DropDown: React.FC<DropDownProps> = ({
 
   const [parentRef, setParentRef] = useState<HTMLDivElement | null>(null);
   const [showOptions, setShowOptions] = useState(false);
-  const openOptions = useCallback((event: React.PointerEvent) => {
-    event.stopPropagation();
+  const openOptions = useCallback(() => {
     setShowOptions(true);
   }, []);
   const closeOptions = useCallback(() => {

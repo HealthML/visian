@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useCallback, useRef } from "react";
 import ReactDOM from "react-dom";
 import styled from "styled-components";
 
@@ -75,6 +75,7 @@ export const ModalTitleRow: React.FC<
 export const Modal: React.FC<ModalProps> = ({
   labelTx,
   label,
+  value,
   isOpen,
   children,
   parentElement,
@@ -85,8 +86,15 @@ export const Modal: React.FC<ModalProps> = ({
   onReset,
   ...rest
 }) => {
+  const handleOutsidePress = useCallback(() => {
+    if (onOutsidePress) onOutsidePress(value);
+  }, [onOutsidePress, value]);
+  const handleReset = useCallback(() => {
+    if (onReset) onReset(value);
+  }, [onReset, value]);
+
   const ref = useRef<HTMLDivElement>(null);
-  useOutsidePress(ref, onOutsidePress, isOpen);
+  useOutsidePress(ref, handleOutsidePress, isOpen);
 
   const modalRootRef = useModalRoot();
 
@@ -104,7 +112,11 @@ export const Modal: React.FC<ModalProps> = ({
       <ModalContainer {...rest} style={modalStyle} ref={ref}>
         {(labelTx || label) && (
           <>
-            <ModalTitleRow labelTx={labelTx} label={label} onReset={onReset} />
+            <ModalTitleRow
+              labelTx={labelTx}
+              label={label}
+              onReset={handleReset}
+            />
             <Divider />
           </>
         )}
