@@ -1,4 +1,3 @@
-import { IRenderLoopSubscriber } from "@visian/ui-shared";
 import {
   getTextureFromAtlas,
   Image,
@@ -23,9 +22,7 @@ import {
 } from "./edit-rendering";
 import { SliceAtlasAdapter } from "./slice-atlas-adapter";
 
-export class RenderedImage<T extends TypedArray = TypedArray>
-  extends Image<T>
-  implements IRenderLoopSubscriber {
+export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
   public static fromITKImage<T2 extends TypedArray = TypedArray>(
     image: ITKImage<T2>,
   ) {

@@ -56,7 +56,7 @@ export class Tools
   protected isNavigationDragged = false;
   public isDrawing = false;
 
-  private toolRenderer: ToolRenderer;
+  public toolRenderer: ToolRenderer;
 
   constructor(
     snapshot: Partial<ToolsSnapshot<ToolName>> | undefined,
