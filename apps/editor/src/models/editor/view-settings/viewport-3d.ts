@@ -247,7 +247,7 @@ export class Viewport3D
     );
     const orbitTarget = snapshot?.orbitTarget;
     if (orbitTarget) {
-      this.setOrbitTarget(orbitTarget[0], orbitTarget[1], orbitTarget[2]);
+      this.setOrbitTarget(...orbitTarget);
     } else {
       this.setOrbitTarget();
     }
