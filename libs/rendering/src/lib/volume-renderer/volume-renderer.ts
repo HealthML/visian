@@ -161,63 +161,103 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
           return imageLayer ? (imageLayer as IImageLayer).image : undefined;
         },
 
-        () => this.onCameraMove(false),
+        () => {
+          this.onCameraMove(false);
+          this.lazyRender(true);
+        },
       ),
-      reaction(() => {
-        const imageLayerParameter =
-          editor.activeDocument?.viewport3D.activeTransferFunction?.params
-            .image;
-        const imageLayerId = imageLayerParameter
-          ? (imageLayerParameter as ILayerParameter).value
-          : undefined;
-        const imageLayer = imageLayerId
-          ? editor.activeDocument?.getLayer(imageLayerId)
-          : undefined;
-        const imageColor = imageLayer
-          ? (imageLayer as IImageLayer).color
-          : undefined;
+      reaction(
+        () => {
+          const annotationLayerParameter =
+            editor.activeDocument?.viewport3D.activeTransferFunction?.params
+              .annotation;
+          const annotationLayerId = annotationLayerParameter
+            ? (annotationLayerParameter as ILayerParameter).value
+            : undefined;
+          const annotationLayer = annotationLayerId
+            ? editor.activeDocument?.getLayer(annotationLayerId)
+            : undefined;
+          const annotation = annotationLayer
+            ? (annotationLayer as IImageLayer).image
+            : undefined;
 
-        const annotationLayerParameter =
-          editor.activeDocument?.viewport3D.activeTransferFunction?.params
-            .annotation;
-        const annotationLayerId = annotationLayerParameter
-          ? (annotationLayerParameter as ILayerParameter).value
-          : undefined;
-        const annotationLayer = annotationLayerId
-          ? editor.activeDocument?.getLayer(annotationLayerId)
-          : undefined;
-        const annotation = annotationLayer
-          ? (annotationLayer as IImageLayer).image
-          : undefined;
+          const transferFunction =
+            editor.activeDocument?.viewport3D.activeTransferFunction;
 
-        const transferFunction =
-          editor.activeDocument?.viewport3D.activeTransferFunction;
+          return [
+            editor.activeDocument?.layers.map((layer) => layer.isVisible),
+            annotation,
+            editor.activeDocument?.viewport3D.opacity,
 
-        return [
-          editor.theme,
-          editor.activeDocument?.layers.map((layer) => layer.isVisible),
-          imageColor,
-          annotation,
-          annotationLayer?.color,
+            transferFunction?.name,
+            transferFunction?.params.useFocus?.value,
+            transferFunction?.params.densityRange?.value,
+            transferFunction?.params.contextOpacity?.value,
+            transferFunction?.params.focusOpacity?.value,
+            transferFunction?.params.coneAngle?.value,
+            transferFunction?.params.file?.value,
 
-          editor.activeDocument?.viewSettings.viewMode,
-          editor.activeDocument?.viewSettings.brightness,
-          editor.activeDocument?.viewSettings.contrast,
-          editor.activeDocument?.viewport3D.shadingMode,
-          editor.activeDocument?.viewport3D.opacity,
-          transferFunction?.name,
-          transferFunction?.params.useFocus?.value,
-          transferFunction?.params.densityRange?.value,
-          transferFunction?.params.contextOpacity?.value,
-          transferFunction?.params.focusOpacity?.value,
-          transferFunction?.params.coneAngle?.value,
-          transferFunction?.params.file?.value,
+            transferFunction?.name === "fc-cone"
+              ? (transferFunction as IConeTransferFunction).coneDirection.toArray()
+              : undefined,
+          ];
+        },
+        () => {
+          this.lazyRender(true);
+        },
+      ),
+      reaction(
+        () => {
+          const coneTransferFunction =
+            editor.activeDocument?.viewport3D.transferFunctions["fc-cone"];
+          if (!coneTransferFunction) return undefined;
 
-          transferFunction?.name === "fc-cone"
-            ? (transferFunction as IConeTransferFunction).coneDirection.toArray()
-            : undefined,
-        ];
-      }, this.lazyRender),
+          return (coneTransferFunction as IConeTransferFunction).coneDirection.toArray();
+        },
+        () => {
+          const shouldUpdateLighting =
+            editor.activeDocument?.viewport3D.activeTransferFunction?.name ===
+            "fc-cone";
+
+          this.lazyRender(shouldUpdateLighting);
+        },
+      ),
+      reaction(
+        () => {
+          const imageLayerParameter =
+            editor.activeDocument?.viewport3D.activeTransferFunction?.params
+              .image;
+          const imageLayerId = imageLayerParameter
+            ? (imageLayerParameter as ILayerParameter).value
+            : undefined;
+          const imageLayer = imageLayerId
+            ? editor.activeDocument?.getLayer(imageLayerId)
+            : undefined;
+
+          const annotationLayerParameter =
+            editor.activeDocument?.viewport3D.activeTransferFunction?.params
+              .annotation;
+          const annotationLayerId = annotationLayerParameter
+            ? (annotationLayerParameter as ILayerParameter).value
+            : undefined;
+          const annotationLayer = annotationLayerId
+            ? editor.activeDocument?.getLayer(annotationLayerId)
+            : undefined;
+
+          return [
+            editor.theme,
+            imageLayer?.color,
+            annotationLayer?.color,
+            editor.activeDocument?.viewSettings.viewMode,
+            editor.activeDocument?.viewSettings.brightness,
+            editor.activeDocument?.viewSettings.contrast,
+            editor.activeDocument?.viewport3D.shadingMode,
+          ];
+        },
+        () => {
+          this.lazyRender();
+        },
+      ),
       autorun(() => {
         switch (editor.activeDocument?.viewSettings.viewMode) {
           case "2D":
@@ -323,8 +363,13 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
     this.flyControls.tick();
   };
 
-  public lazyRender = () => {
+  public lazyRender = (updateLighting = false) => {
     this.lazyRenderTriggered = true;
+
+    if (updateLighting) {
+      this.laoComputer.setDirty();
+      this.gradientComputer.updateOutputDerivative();
+    }
   };
 
   private eagerRender = () => {

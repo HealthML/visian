@@ -1,9 +1,4 @@
-import {
-  IConeTransferFunction,
-  ICustomTransferFunction,
-  IEditor,
-  IImageLayer,
-} from "@visian/ui-shared";
+import { IEditor, IImageLayer } from "@visian/ui-shared";
 import { Image } from "@visian/utils";
 import { IReactionDisposer, reaction } from "mobx";
 import * as THREE from "three";
@@ -43,23 +38,6 @@ export class LAOComputer extends TiledRenderer {
     this.reactionDisposers.push(
       reaction(
         () => {
-          const coneTransferFunction =
-            editor.activeDocument?.viewport3D.transferFunctions["fc-cone"];
-          if (!coneTransferFunction) return undefined;
-
-          return (coneTransferFunction as IConeTransferFunction).coneDirection.toArray();
-        },
-        () => {
-          if (
-            editor.activeDocument?.viewport3D.activeTransferFunction?.name ===
-            "fc-cone"
-          ) {
-            this.setDirty();
-          }
-        },
-      ),
-      reaction(
-        () => {
           const imageId =
             editor.activeDocument?.viewport3D.activeTransferFunction?.params
               .image?.value;
@@ -87,42 +65,6 @@ export class LAOComputer extends TiledRenderer {
           this.setDirty();
         },
       ),
-      reaction(() => {
-        const annotationId = editor.activeDocument?.viewport3D
-          .activeTransferFunction?.params.annotation?.value as
-          | string
-          | undefined;
-        const annotationLayer =
-          annotationId && editor.activeDocument
-            ? (editor.activeDocument.getLayer(
-                annotationId as string,
-              ) as IImageLayer)
-            : undefined;
-
-        const customTransferFunction =
-          editor.activeDocument?.viewport3D.transferFunctions.custom;
-        const customTransferFunctionTexture = customTransferFunction
-          ? (customTransferFunction as ICustomTransferFunction).texture
-          : undefined;
-
-        return [
-          annotationLayer?.image,
-          customTransferFunctionTexture,
-          editor.activeDocument?.layers.map((layer) => layer.isVisible),
-          editor.activeDocument?.viewport3D.activeTransferFunction?.params
-            .useFocus?.value,
-          editor.activeDocument?.viewport3D.activeTransferFunction?.params
-            .focusOpacity?.value,
-          editor.activeDocument?.viewport3D.opacity,
-          editor.activeDocument?.viewport3D.activeTransferFunction?.params
-            .contextOpacity?.value,
-          editor.activeDocument?.viewport3D.activeTransferFunction?.params
-            .densityRange?.value,
-          editor.activeDocument?.viewport3D.activeTransferFunction?.params
-            .coneAngle?.value,
-          editor.activeDocument?.viewport3D.activeTransferFunction?.name,
-        ];
-      }, this.setDirty),
     );
   }
 
@@ -176,7 +118,7 @@ export class LAOComputer extends TiledRenderer {
     this._isDirty = false;
   }
 
-  private setDirty = () => {
+  public setDirty = () => {
     this._isDirty = true;
     this._isFinalLAOFlushed = false;
   };
