@@ -1,12 +1,11 @@
 import {
-  IConeTransferFunction,
   IEditor,
   IImageLayer,
   ILayerParameter,
   IVolumeRenderer,
 } from "@visian/ui-shared";
 import { IDisposable, IDisposer } from "@visian/utils";
-import { autorun, reaction } from "mobx";
+import { reaction } from "mobx";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import Stats from "three/examples/jsm/libs/stats.module";
@@ -160,114 +159,26 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
           const imageLayer = editor.activeDocument!.getLayer(layerId);
           return imageLayer ? (imageLayer as IImageLayer).image : undefined;
         },
-
         () => {
           this.onCameraMove(false);
-          this.lazyRender(true);
         },
       ),
       reaction(
-        () => {
-          const annotationLayerParameter =
-            editor.activeDocument?.viewport3D.activeTransferFunction?.params
-              .annotation;
-          const annotationLayerId = annotationLayerParameter
-            ? (annotationLayerParameter as ILayerParameter).value
-            : undefined;
-          const annotationLayer = annotationLayerId
-            ? editor.activeDocument?.getLayer(annotationLayerId)
-            : undefined;
-          const annotation = annotationLayer
-            ? (annotationLayer as IImageLayer).image
-            : undefined;
+        () => editor.activeDocument?.viewSettings.viewMode,
+        (viewMode) => {
+          switch (viewMode) {
+            case "2D":
+              if (this.flyControls.isLocked) this.flyControls.unlock();
+              this.orbitControls.enabled = false;
+              break;
+            case "3D":
+              this.orbitControls.enabled = !this.flyControls.isLocked;
+          }
 
-          const transferFunction =
-            editor.activeDocument?.viewport3D.activeTransferFunction;
-
-          return [
-            editor.activeDocument?.layers.map((layer) => layer.isVisible),
-            annotation,
-            editor.activeDocument?.viewport3D.opacity,
-
-            transferFunction?.name,
-            transferFunction?.params.useFocus?.value,
-            transferFunction?.params.densityRange?.value,
-            transferFunction?.params.contextOpacity?.value,
-            transferFunction?.params.focusOpacity?.value,
-            transferFunction?.params.coneAngle?.value,
-            transferFunction?.params.file?.value,
-
-            transferFunction?.name === "fc-cone"
-              ? (transferFunction as IConeTransferFunction).coneDirection.toArray()
-              : undefined,
-          ];
-        },
-        () => {
-          this.lazyRender(true);
-        },
-      ),
-      reaction(
-        () => {
-          const coneTransferFunction =
-            editor.activeDocument?.viewport3D.transferFunctions["fc-cone"];
-          if (!coneTransferFunction) return undefined;
-
-          return (coneTransferFunction as IConeTransferFunction).coneDirection.toArray();
-        },
-        () => {
-          const shouldUpdateLighting =
-            editor.activeDocument?.viewport3D.activeTransferFunction?.name ===
-            "fc-cone";
-
-          this.lazyRender(shouldUpdateLighting);
-        },
-      ),
-      reaction(
-        () => {
-          const imageLayerParameter =
-            editor.activeDocument?.viewport3D.activeTransferFunction?.params
-              .image;
-          const imageLayerId = imageLayerParameter
-            ? (imageLayerParameter as ILayerParameter).value
-            : undefined;
-          const imageLayer = imageLayerId
-            ? editor.activeDocument?.getLayer(imageLayerId)
-            : undefined;
-
-          const annotationLayerParameter =
-            editor.activeDocument?.viewport3D.activeTransferFunction?.params
-              .annotation;
-          const annotationLayerId = annotationLayerParameter
-            ? (annotationLayerParameter as ILayerParameter).value
-            : undefined;
-          const annotationLayer = annotationLayerId
-            ? editor.activeDocument?.getLayer(annotationLayerId)
-            : undefined;
-
-          return [
-            editor.theme,
-            imageLayer?.color,
-            annotationLayer?.color,
-            editor.activeDocument?.viewSettings.viewMode,
-            editor.activeDocument?.viewSettings.brightness,
-            editor.activeDocument?.viewSettings.contrast,
-            editor.activeDocument?.viewport3D.shadingMode,
-          ];
-        },
-        () => {
           this.lazyRender();
         },
+        { fireImmediately: true },
       ),
-      autorun(() => {
-        switch (editor.activeDocument?.viewSettings.viewMode) {
-          case "2D":
-            if (this.flyControls.isLocked) this.flyControls.unlock();
-            this.orbitControls.enabled = false;
-            break;
-          case "3D":
-            this.orbitControls.enabled = !this.flyControls.isLocked;
-        }
-      }),
       reaction(
         () => editor.activeDocument?.viewport3D.cameraMatrix?.toArray(),
         (array?: number[]) => {
