@@ -31,12 +31,12 @@ export const ExportPopUp: React.FC = () => (
   <ExportPopUpContainer title="Export" secondaryTitle="T1.nii">
     <InlineRow>
       <InlineLabel text="Export:" />
-      <ExportSwitch items={[{ value: "Annotation" }, { value: "Scan" }]} />
+      <ExportSwitch options={[{ value: "Annotation" }, { value: "Scan" }]} />
     </InlineRow>
     <InlineRow>
       <InlineLabel text="Export as:" />
       <ExportSwitch
-        items={[
+        options={[
           { value: "NIFTI" },
           { value: "DICOM" },
           { value: "PNG (Current Slice)" },

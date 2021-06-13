@@ -3,9 +3,9 @@ import styled from "styled-components";
 import { InvisibleButton } from "../button";
 
 import { Text } from "../text";
-import { SwitchItemProps } from "./switch-item.props";
+import { SwitchOptionProps } from "./switch-option.props";
 
-const SwitchItemContainer = styled(InvisibleButton)`
+const SwitchOptionContainer = styled(InvisibleButton)`
   cursor: pointer;
   flex: 1;
   height: 100%;
@@ -17,12 +17,12 @@ const SwitchItemContainer = styled(InvisibleButton)`
   justify-content: center;
 `;
 
-const SwitchItemLabel = styled(Text)`
+const SwitchOptionLabel = styled(Text)`
   font-size: 12px;
   line-height: 12px;
 `;
 
-export const SwitchItem: React.FC<SwitchItemProps> = ({
+export const SwitchOption: React.FC<SwitchOptionProps> = ({
   labelTx,
   label,
   value,
@@ -35,12 +35,12 @@ export const SwitchItem: React.FC<SwitchItemProps> = ({
   }, [value, onChange]);
 
   return (
-    <SwitchItemContainer
+    <SwitchOptionContainer
       {...rest}
       tooltipPosition={tooltipPosition}
       onPointerDown={changeHandler}
     >
-      <SwitchItemLabel tx={labelTx} text={label || value} />
-    </SwitchItemContainer>
+      <SwitchOptionLabel tx={labelTx} text={label || value} />
+    </SwitchOptionContainer>
   );
 };

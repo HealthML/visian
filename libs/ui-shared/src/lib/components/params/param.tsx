@@ -7,6 +7,7 @@ import { ButtonParam, ButtonParamProps } from "./button-param";
 import { ColorParam, ColorParamProps } from "./color-param";
 import { EnumParam, EnumParamProps } from "./enum-param";
 import { FileParam, FileParamProps } from "./file-param";
+import { LayerParam, LayerParamProps } from "./layer-param";
 import { NumberParam, NumberParamProps } from "./number-param";
 import { NumberRangeParam, NumberRangeParamProps } from "./number-range-param";
 import { ListPositionProps } from "./types";
@@ -39,6 +40,10 @@ export const Param = observer<ParamProps>(({ parameter, ...rest }) => {
     case "file":
       return (
         <FileParam {...rest} {...(parameter.toProps() as FileParamProps)} />
+      );
+    case "layer":
+      return (
+        <LayerParam {...rest} {...(parameter.toProps() as LayerParamProps)} />
       );
     case "number":
       return (
