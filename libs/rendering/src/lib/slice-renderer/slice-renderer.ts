@@ -6,12 +6,7 @@ import {
   ViewType,
   viewTypes,
 } from "@visian/utils";
-import {
-  IEditor,
-  IImageLayer,
-  IRenderLoopSubscriber,
-  ISliceRenderer,
-} from "@visian/ui-shared";
+import { IEditor, IImageLayer, ISliceRenderer } from "@visian/ui-shared";
 import { reaction } from "mobx";
 import * as THREE from "three";
 
@@ -37,8 +32,6 @@ export class SliceRenderer implements IDisposable, ISliceRenderer {
   private lazyRenderTriggered = true;
 
   private isImageLoaded = false;
-
-  private renderLoopSubscribers: IRenderLoopSubscriber[] = [];
 
   private disposers: IDisposer[] = [];
 
@@ -71,11 +64,7 @@ export class SliceRenderer implements IDisposable, ISliceRenderer {
             ? ((editor.activeDocument.layers[1] as IImageLayer)
                 .image as RenderedImage)
             : undefined,
-        (image?: RenderedImage, oldImage?: RenderedImage) => {
-          if (oldImage) {
-            this.unsubscribeFromRenderLoop(oldImage);
-          }
-
+        (image?: RenderedImage) => {
           if (!image) return;
           this.setImage(image);
 
@@ -91,13 +80,7 @@ export class SliceRenderer implements IDisposable, ISliceRenderer {
             ? ((editor.activeDocument?.layers[0] as IImageLayer)
                 .image as RenderedImage)
             : undefined,
-        (image?: RenderedImage, oldImage?: RenderedImage) => {
-          if (oldImage) {
-            this.unsubscribeFromRenderLoop(oldImage);
-          }
-
-          this.setAnnotation(image);
-        },
+        this.setAnnotation,
         { fireImmediately: true },
       ),
       reaction(
@@ -160,16 +143,6 @@ export class SliceRenderer implements IDisposable, ISliceRenderer {
       ViewType.Transverse,
   ) {
     return this.slices[viewType].outline;
-  }
-
-  public subscribeToRenderLoop(subscriber: IRenderLoopSubscriber) {
-    this.renderLoopSubscribers.push(subscriber);
-  }
-
-  public unsubscribeFromRenderLoop(unsubscriber: IRenderLoopSubscriber) {
-    this.renderLoopSubscribers = this.renderLoopSubscribers.filter(
-      (subscriber) => subscriber !== unsubscriber,
-    );
   }
 
   public resize = () => {
@@ -343,8 +316,6 @@ export class SliceRenderer implements IDisposable, ISliceRenderer {
     if (!this.isImageLoaded) return;
     this.lazyRenderTriggered = false;
 
-    this.renderLoopSubscribers.forEach((subscriber) => subscriber.render());
-
     const order = getOrder(
       this.editor.activeDocument?.viewport2D.mainViewType ??
         ViewType.Transverse,
@@ -360,22 +331,14 @@ export class SliceRenderer implements IDisposable, ISliceRenderer {
     this.slices.forEach((slice) => slice.setImage(image));
     this.isImageLoaded = true;
 
-    image.setRenderers(this._renderers);
-
-    this.subscribeToRenderLoop(image);
-
     this.lazyRender();
   }
 
-  private setAnnotation(image?: RenderedImage) {
+  private setAnnotation = (image?: RenderedImage) => {
     this.slices.forEach((slice) => slice.setAnnotation(image));
 
-    image?.setRenderers(this._renderers);
-
-    if (image) this.subscribeToRenderLoop(image);
-
     this.lazyRender();
-  }
+  };
 }
 
 export default SliceRenderer;

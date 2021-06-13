@@ -1,9 +1,4 @@
-import {
-  IConeTransferFunction,
-  ICustomTransferFunction,
-  IEditor,
-  IImageLayer,
-} from "@visian/ui-shared";
+import { IEditor, IImageLayer } from "@visian/ui-shared";
 import { IDisposable, Image } from "@visian/utils";
 import { IReactionDisposer, reaction } from "mobx";
 import * as THREE from "three";
@@ -29,7 +24,7 @@ export class GradientComputer implements IDisposable {
   constructor(
     private editor: IEditor,
     private renderer: THREE.WebGLRenderer,
-    private sharedUniforms: SharedUniforms,
+    sharedUniforms: SharedUniforms,
   ) {
     this.firstDerivativeRenderTarget = new THREE.WebGLRenderTarget(1, 1);
     this.secondDerivativeRenderTarget = new THREE.WebGLRenderTarget(1, 1);
@@ -72,60 +67,6 @@ export class GradientComputer implements IDisposable {
           this.updateOutputDerivative();
         },
       ),
-      reaction(
-        () => {
-          const coneTransferFunction = this.editor.activeDocument?.viewport3D
-            .transferFunctions["fc-cone"];
-
-          if (!coneTransferFunction) return undefined;
-
-          return (coneTransferFunction as IConeTransferFunction).coneDirection.toArray();
-        },
-        () => {
-          if (
-            this.editor.activeDocument?.viewport3D.activeTransferFunction
-              ?.name === "fc-cone"
-          ) {
-            this.updateOutputDerivative();
-          }
-        },
-      ),
-      reaction(() => {
-        const annotationId = editor.activeDocument?.viewport3D
-          .activeTransferFunction?.params.annotation?.value as
-          | string
-          | undefined;
-        const annotationLayer =
-          annotationId && editor.activeDocument
-            ? (editor.activeDocument.getLayer(
-                annotationId as string,
-              ) as IImageLayer)
-            : undefined;
-
-        const customTransferFunction =
-          editor.activeDocument?.viewport3D.transferFunctions.custom;
-        const customTransferFunctionTexture = customTransferFunction
-          ? (customTransferFunction as ICustomTransferFunction).texture
-          : undefined;
-
-        return [
-          annotationLayer?.image,
-          customTransferFunctionTexture,
-          editor.activeDocument?.layers.map((layer) => layer.isVisible),
-          editor.activeDocument?.viewport3D.activeTransferFunction?.params
-            .useFocus?.value,
-          editor.activeDocument?.viewport3D.activeTransferFunction?.params
-            .focusOpacity?.value,
-          editor.activeDocument?.viewport3D.opacity,
-          editor.activeDocument?.viewport3D.activeTransferFunction?.params
-            .contextOpacity?.value,
-          editor.activeDocument?.viewport3D.activeTransferFunction?.params
-            .densityRange?.value,
-          editor.activeDocument?.viewport3D.activeTransferFunction?.params
-            .coneAngle?.value,
-          editor.activeDocument?.viewport3D.activeTransferFunction?.name,
-        ];
-      }, this.updateOutputDerivative),
     );
   }
 
@@ -204,7 +145,7 @@ export class GradientComputer implements IDisposable {
     //   generateHistogram(gradientMagnitudes),
     // );
 
-    this.editor.volumeRenderer?.lazyRender();
+    this.editor.volumeRenderer?.lazyRender(true);
   }
 
   private updateSecondDerivative() {
@@ -223,10 +164,10 @@ export class GradientComputer implements IDisposable {
 
     this.secondDerivativeDirty = false;
 
-    this.editor.volumeRenderer?.lazyRender();
+    this.editor.volumeRenderer?.lazyRender(true);
   }
 
-  private updateOutputDerivative = () => {
+  public updateOutputDerivative = () => {
     this.outputDerivativeDirty = true;
   };
 

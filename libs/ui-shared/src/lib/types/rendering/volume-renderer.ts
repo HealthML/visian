@@ -1,5 +1,5 @@
 export interface IVolumeRenderer {
   animate: () => void;
 
-  lazyRender(): void;
+  lazyRender(updateLighting?: boolean): void;
 }

@@ -1,6 +1,6 @@
 import type * as THREE from "three";
 
-import type { ISliceRenderer } from "../rendering";
+import type { ISliceRenderer, IVolumeRenderer } from "../rendering";
 import type { IHistory } from "./history";
 import type { ILayer } from "./layers";
 import type { ITools } from "./tools";
@@ -43,6 +43,7 @@ export interface IDocument {
   markers: IMarkers;
 
   sliceRenderer?: Reference<ISliceRenderer>;
+  volumeRenderer?: Reference<IVolumeRenderer>;
   renderers?: Reference<THREE.WebGLRenderer[]>;
 
   /** Reads a layer based on its id. */
