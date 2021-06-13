@@ -171,6 +171,8 @@ export class SharedUniforms implements IDisposable {
           editor.activeDocument?.viewport3D.activeTransferFunction?.params
             .useBlockyContext?.value,
         );
+
+        editor.activeDocument?.volumeRenderer?.lazyRender(true);
       }),
       reaction(
         () => {
