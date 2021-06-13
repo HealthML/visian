@@ -16,14 +16,14 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useStore } from "../../../app/root-store";
 
 // Menu Items
-const mainViewTypeSwitchItems = [
+const mainViewTypeSwitchOptions = [
   { label: "T", value: ViewType.Transverse, tooltipTx: "transverse" },
   { label: "S", value: ViewType.Sagittal, tooltipTx: "sagittal" },
   { label: "C", value: ViewType.Coronal, tooltipTx: "coronal" },
   { label: "3D", value: "3D", tooltipTx: "3d-view-tooltip" },
 ];
 
-const shadingModeItems = [
+const shadingModeSwitchOptions = [
   { labelTx: "shading-none", value: "none", tooltipTx: "shading-none-full" },
   { labelTx: "shading-phong", value: "phong", tooltipTx: "shading-phong-full" },
   { labelTx: "shading-lao", value: "lao", tooltipTx: "shading-lao-full" },
@@ -100,7 +100,7 @@ export const ViewSettings: React.FC = observer(() => {
             <EnumParam
               labelTx="main-view-type"
               selector="switch"
-              options={mainViewTypeSwitchItems}
+              options={mainViewTypeSwitchOptions}
               value={
                 store?.editor.activeDocument?.viewSettings.viewMode === "3D"
                   ? "3D"
@@ -149,7 +149,7 @@ export const ViewSettings: React.FC = observer(() => {
             />
             <EnumParam
               labelTx="shading-mode"
-              options={shadingModeItems}
+              options={shadingModeSwitchOptions}
               value={
                 store.editor.activeDocument.viewport3D.suppressedShadingMode ||
                 store.editor.activeDocument.viewport3D.shadingMode

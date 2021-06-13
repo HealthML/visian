@@ -5,7 +5,7 @@ import { color } from "../../theme";
 import { InputContainer } from "../box";
 import { Sheet } from "../sheet";
 import { InputLabel } from "../text";
-import { SwitchItem } from "./switch-item";
+import { SwitchOption } from "./switch-option";
 import { SwitchProps } from "./switch.props";
 
 const SwitchContainer = styled.div`
@@ -23,7 +23,7 @@ const SwitchContainer = styled.div`
   justify-content: center;
 `;
 
-const ActiveSwitchItem = styled(Sheet)`
+const ActiveSwitchOption = styled(Sheet)`
   height: 100%;
   transition: left 0.5s;
   position: absolute;
@@ -65,14 +65,14 @@ export const Switch: React.FC<SwitchProps> = ({
       <SwitchContainer>
         {length && (
           <>
-            <ActiveSwitchItem
+            <ActiveSwitchOption
               style={{
                 width: `${100 / length}%`,
                 left: `${(100 / length) * activeIndex}%`,
               }}
             />
             {options.map((item) => (
-              <SwitchItem key={item.value} onChange={onChange} {...item} />
+              <SwitchOption key={item.value} onChange={onChange} {...item} />
             ))}
           </>
         )}

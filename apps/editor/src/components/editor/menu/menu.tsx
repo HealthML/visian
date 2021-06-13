@@ -42,12 +42,12 @@ const ResetButton = styled(ButtonParam)`
 `;
 
 // Menu Items
-const themeSwitchItems = [
+const themeSwitchOptions = [
   { value: "dark", labelTx: "dark" },
   { value: "light", labelTx: "light" },
 ];
 
-const languageSwitchItems = [
+const languageSwitchOptions = [
   { label: "English", value: "en" },
   { label: "Deutsch", value: "de" },
 ];
@@ -121,13 +121,13 @@ export const Menu: React.FC<MenuProps> = observer(({ onOpenShortcutPopUp }) => {
       >
         <EnumParam
           labelTx="theme"
-          options={themeSwitchItems}
+          options={themeSwitchOptions}
           value={store?.colorMode || "dark"}
           setValue={setTheme}
         />
         <EnumParam
           labelTx="language"
-          options={languageSwitchItems}
+          options={languageSwitchOptions}
           value={i18n.language.split("-")[0]}
           setValue={setLanguage}
         />
