@@ -166,6 +166,14 @@ export class SharedUniforms implements IDisposable {
 
         editor.activeDocument?.volumeRenderer?.lazyRender(true);
       }),
+      autorun(() => {
+        this.uniforms.uVolumeNearestFiltering.value = Boolean(
+          editor.activeDocument?.viewport3D.activeTransferFunction?.params
+            .useBlockyContext?.value,
+        );
+
+        editor.activeDocument?.volumeRenderer?.lazyRender(true);
+      }),
       reaction(
         () => {
           const imageId =
@@ -178,23 +186,32 @@ export class SharedUniforms implements IDisposable {
 
           if (!imageLayer) return undefined;
 
+          const useNearestFiltering = Boolean(
+            editor.activeDocument?.viewport3D.activeTransferFunction?.params
+              .useBlockyContext?.value,
+          );
+
           return [
             imageLayer as IImageLayer,
             imageLayer.color,
             editor.theme,
-          ] as [IImageLayer, string | undefined, Theme];
+            useNearestFiltering,
+          ] as [IImageLayer, string | undefined, Theme, boolean];
         },
         (
-          params?: [IImageLayer, string | undefined, Theme],
-          previousParams?: [IImageLayer, string | undefined, Theme],
+          params?: [IImageLayer, string | undefined, Theme, boolean],
+          previousParams?: [IImageLayer, string | undefined, Theme, boolean],
         ) => {
           if (!params) return editor.volumeRenderer?.lazyRender();
 
-          const [imageLayer, imageColor, theme] = params;
+          const [imageLayer, imageColor, theme, useNearestFiltering] = params;
 
           const image = imageLayer.image as RenderedImage;
 
-          this.uniforms.uVolume.value = image.getTexture(0, THREE.LinearFilter);
+          this.uniforms.uVolume.value = image.getTexture(
+            0,
+            useNearestFiltering ? THREE.NearestFilter : THREE.LinearFilter,
+          );
           this.uniforms.uVoxelCount.value = image.voxelCount;
           this.uniforms.uAtlasGrid.value = image.getAtlasGrid();
           this.uniforms.uStepSize.value = getStepSize(image);

@@ -84,6 +84,7 @@
   "annotation-layer": "Fokusvolumen",
   "image-layer": "Volumen",
 
+  "use-blocky-context": "Kontextvolumen-Voxel anzeigen",
   "use-focus": "Fokusvolumen anzeigen",
   "density-range": "Dichteintervall",
 
