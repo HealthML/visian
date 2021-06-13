@@ -67,8 +67,15 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
       this.camera,
       this.renderer.domElement,
     );
-    this.orbitControls.target.set(0, 1.2, 0);
-    this.orbitControls.addEventListener("change", this.onCameraMove);
+    const orbitTarget = editor.activeDocument?.viewport3D.orbitTarget;
+    if (orbitTarget) {
+      this.orbitControls.target.set(
+        orbitTarget.x,
+        orbitTarget.y,
+        orbitTarget.z,
+      );
+    }
+    this.orbitControls.addEventListener("change", this.onOrbitControlsChange);
 
     this.flyControls = new FlyControls(this.camera, this.renderer.domElement);
     this.flyControls.addEventListener("change", () => this.onCameraMove());
@@ -194,6 +201,15 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
         },
       ),
       reaction(
+        () => editor.activeDocument?.viewport3D.orbitTarget.toArray(),
+        () => {
+          const target = editor.activeDocument?.viewport3D.orbitTarget;
+          if (target) {
+            this.orbitControls.target.set(target.x, target.y, target.z);
+          }
+        },
+      ),
+      reaction(
         () =>
           editor.activeDocument?.viewport3D.activeTransferFunction?.params
             .isConeLocked?.value,
@@ -308,6 +324,17 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
     return this.resolutionComputer.fullResolutionFlushed;
   }
 
+  private onOrbitControlsChange = () => {
+    const { target } = this.orbitControls;
+    this.editor.activeDocument?.viewport3D.setOrbitTarget(
+      target.x,
+      target.y,
+      target.z,
+    );
+
+    this.onCameraMove();
+  };
+
   private onCameraMove = (pushMatrix = true) => {
     if (pushMatrix) {
       this.camera.updateMatrix();
@@ -360,6 +387,7 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
         : 1,
     );
     this.orbitControls.target.add(this.camera.position);
+    this.onOrbitControlsChange();
   };
 
   private selectNavigationTool = () => {

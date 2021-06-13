@@ -170,10 +170,18 @@ export const setUpHotKeys = (store: RootStore): IDisposer => {
   });
   hotkeys("ctrl+0", (event) => {
     event.preventDefault();
-    if (store.editor.activeDocument?.viewSettings.viewMode !== "2D") return;
+    const mode = store.editor.activeDocument?.viewSettings.viewMode;
 
-    store.editor.activeDocument?.viewport2D.setZoomLevel();
-    store.editor.activeDocument?.viewport2D.setOffset();
+    switch (mode) {
+      case "2D":
+        store.editor.activeDocument?.viewport2D.setZoomLevel();
+        store.editor.activeDocument?.viewport2D.setOffset();
+        return;
+      case "3D":
+        store.editor.activeDocument?.viewport3D.setCameraMatrix();
+        store.editor.activeDocument?.viewport3D.setOrbitTarget();
+        store.editor.volumeRenderer?.lazyRender();
+    }
   });
 
   // Save & Export
