@@ -3,6 +3,7 @@ import {
   IEditor,
   ILayer,
   ISliceRenderer,
+  IVolumeRenderer,
   ValueType,
 } from "@visian/ui-shared";
 import { ISerializable, readMedicalImage } from "@visian/utils";
@@ -194,6 +195,8 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
     this.setActiveLayer(annotationLayer);
 
     this.viewSettings.reset();
+    this.viewport2D.reset();
+    this.viewport3D.reset();
     this.history.clear();
   }
 
@@ -233,6 +236,10 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
   // Proxies
   public get sliceRenderer(): ISliceRenderer | undefined {
     return this.editor.sliceRenderer;
+  }
+
+  public get volumeRenderer(): IVolumeRenderer | undefined {
+    return this.editor.volumeRenderer;
   }
 
   public get renderers(): THREE.WebGLRenderer[] | undefined {

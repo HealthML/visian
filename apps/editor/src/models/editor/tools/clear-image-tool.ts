@@ -28,6 +28,7 @@ export class ClearImageTool<
     const emptyAtlas = new Uint8Array(oldAtlas.length);
     image.setAtlas(emptyAtlas);
     this.document.sliceRenderer?.lazyRender();
+    this.document.volumeRenderer?.lazyRender(true);
 
     this.document.history.addCommand(
       new AtlasCommand(

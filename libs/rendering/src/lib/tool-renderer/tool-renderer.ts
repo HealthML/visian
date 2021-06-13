@@ -1,9 +1,4 @@
-import {
-  IDocument,
-  IImageLayer,
-  ISliceRenderer,
-  IRenderLoopSubscriber,
-} from "@visian/ui-shared";
+import { IDocument, IImageLayer } from "@visian/ui-shared";
 import { getOrthogonalAxis, getPlaneAxes, IDisposer } from "@visian/utils";
 import { reaction } from "mobx";
 import * as THREE from "three";
@@ -13,7 +8,7 @@ import { Circles } from "./circles";
 import { ToolCamera } from "./tool-camera";
 import { Circle } from "./types";
 
-export class ToolRenderer implements IRenderLoopSubscriber {
+export class ToolRenderer {
   private circlesToRender: Circle[] = [];
   private shapesToRender: THREE.Mesh[] = [];
 
@@ -65,20 +60,11 @@ export class ToolRenderer implements IRenderLoopSubscriber {
         },
         { fireImmediately: true },
       ),
-      reaction(
-        () => document.sliceRenderer,
-        (sliceRenderer?: ISliceRenderer, oldSliceRenderer?: ISliceRenderer) => {
-          oldSliceRenderer?.unsubscribeFromRenderLoop(this);
-          sliceRenderer?.subscribeToRenderLoop(this);
-        },
-        { fireImmediately: true },
-      ),
     );
   }
 
   public dispose() {
     this.circles.dispose();
-    this.document.sliceRenderer?.unsubscribeFromRenderLoop(this);
     this.disposers.forEach((disposer) => disposer());
   }
 
@@ -165,6 +151,7 @@ export class ToolRenderer implements IRenderLoopSubscriber {
     this.circlesToRender.push(...circles);
 
     this.document.sliceRenderer?.lazyRender();
+    this.document.volumeRenderer?.lazyRender(true);
   }
 
   public renderShape(geometry: THREE.ShapeGeometry, material?: THREE.Material) {
@@ -173,6 +160,7 @@ export class ToolRenderer implements IRenderLoopSubscriber {
     );
 
     this.document.sliceRenderer?.lazyRender();
+    this.document.volumeRenderer?.lazyRender(true);
   }
 
   public waitForRender() {

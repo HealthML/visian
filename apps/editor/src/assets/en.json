@@ -4,6 +4,7 @@
 
   "drop-image": "Drop your scan here",
   "drop-annotation": "Drop your annotation here",
+  "upload-file": "Upload file",
 
   "untitled-document": "Untitled Document",
   "start": "Start by dragging in a scan.",
@@ -93,5 +94,5 @@
   "lock-cone": "Lock Cone",
   "cone-angle": "Cone Angle",
 
-  "custom-tf-file": "Upload File"
+  "custom-tf-file": "Transfer Function Image"
 }

@@ -56,7 +56,7 @@ export class Tools
   protected isNavigationDragged = false;
   public isDrawing = false;
 
-  private toolRenderer: ToolRenderer;
+  public toolRenderer: ToolRenderer;
 
   constructor(
     snapshot: Partial<ToolsSnapshot<ToolName>> | undefined,
@@ -171,6 +171,8 @@ export class Tools
   }
 
   public setActiveTool(nameOrTool?: ToolName | ITool<ToolName>): void {
+    if (this.isDrawing) return;
+
     const previouslyActiveTool = this.activeTool;
 
     this.activeToolName = nameOrTool

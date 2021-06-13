@@ -28,6 +28,7 @@ export class ClearSliceTool<
     const oldSliceData = image.getSlice(viewType, slice);
     image.setSlice(viewType, slice);
     this.document.sliceRenderer?.lazyRender();
+    this.document.volumeRenderer?.lazyRender(true);
 
     this.document.history.addCommand(
       new SliceCommand(

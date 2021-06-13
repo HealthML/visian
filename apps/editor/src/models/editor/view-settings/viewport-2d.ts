@@ -4,13 +4,7 @@ import {
   IViewport2D,
   MarkerConfig,
 } from "@visian/ui-shared";
-import {
-  getPlaneAxes,
-  ISerializable,
-  Pixel,
-  Vector,
-  ViewType,
-} from "@visian/utils";
+import { ISerializable, Vector, ViewType } from "@visian/utils";
 import { action, computed, makeObservable, observable } from "mobx";
 import { maxZoom, minZoom, zoomStep } from "../../../constants";
 
@@ -57,7 +51,6 @@ export class Viewport2D
       reset: action,
       toggleSideViews: action,
       setSelectedSlice: action,
-      moveCrosshair: action,
       zoomIn: action,
       zoomOut: action,
       applySnapshot: action,
@@ -130,16 +123,6 @@ export class Viewport2D
 
   public stepSelectedSlice(viewType = this.mainViewType, stepSize = 1): void {
     this.setSelectedSlice(viewType, this.getSelectedSlice(viewType) + stepSize);
-  }
-
-  public moveCrosshair(
-    viewType = this.mainViewType,
-    slicePosition: Pixel,
-  ): void {
-    const [widthAxis, heightAxis] = getPlaneAxes(viewType);
-
-    this.document.viewSettings.selectedVoxel[widthAxis] = slicePosition.x;
-    this.document.viewSettings.selectedVoxel[heightAxis] = slicePosition.y;
   }
 
   public zoomIn() {

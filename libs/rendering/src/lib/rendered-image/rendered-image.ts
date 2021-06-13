@@ -1,4 +1,4 @@
-import { IRenderLoopSubscriber } from "@visian/ui-shared";
+import { IDocument } from "@visian/ui-shared";
 import {
   getTextureFromAtlas,
   Image,
@@ -23,24 +23,24 @@ import {
 } from "./edit-rendering";
 import { SliceAtlasAdapter } from "./slice-atlas-adapter";
 
-export class RenderedImage<T extends TypedArray = TypedArray>
-  extends Image<T>
-  implements IRenderLoopSubscriber {
+export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
   public static fromITKImage<T2 extends TypedArray = TypedArray>(
     image: ITKImage<T2>,
+    document?: IDocument,
   ) {
-    return new RenderedImage(itkImageToImageSnapshot(image));
+    return new RenderedImage(itkImageToImageSnapshot(image), document);
   }
 
-  public static async fromFile(file: File | File[]) {
+  public static async fromFile(file: File | File[], document?: IDocument) {
     const renderedImage = RenderedImage.fromITKImage(
       await readMedicalImage(file),
+      document,
     );
     renderedImage.name = Array.isArray(file) ? file[0]?.name || "" : file.name;
     return renderedImage;
   }
 
-  private renderers: THREE.WebGLRenderer[] = [];
+  public excludeFromSnapshotTracking = ["document"];
 
   /** Used to update the atlas from the CPU. */
   private internalTexture: THREE.DataTexture;
@@ -99,6 +99,7 @@ export class RenderedImage<T extends TypedArray = TypedArray>
 
   constructor(
     image: ImageSnapshot<T> & Pick<ImageSnapshot<T>, "voxelCount" | "data">,
+    protected document?: IDocument,
   ) {
     super(image);
 
@@ -127,15 +128,6 @@ export class RenderedImage<T extends TypedArray = TypedArray>
     );
   }
 
-  public setRenderers(renderers: THREE.WebGLRenderer[]) {
-    this.renderers = renderers;
-
-    if (this.renderers.length) {
-      this.rendererCallbacks.forEach((callback) => callback());
-      this.rendererCallbacks = [];
-    }
-  }
-
   public getTexture(rendererIndex = 0, filter = THREE.NearestFilter) {
     if (!this.renderTargets[filter][rendererIndex]) {
       this.renderTargets[filter][rendererIndex] = new ImageRenderTarget(
@@ -156,7 +148,7 @@ export class RenderedImage<T extends TypedArray = TypedArray>
   }
 
   public waitForRenderers() {
-    if (this.renderers.length) {
+    if (this.document?.renderers) {
       return Promise.resolve();
     }
 
@@ -166,9 +158,11 @@ export class RenderedImage<T extends TypedArray = TypedArray>
   }
 
   public render() {
-    if (!this.renderers.length) return;
+    if (!this.document?.renderers) return;
 
-    this.renderers.forEach((renderer, rendererIndex) => {
+    this.rendererCallbacks.forEach((callback) => callback());
+
+    this.document.renderers.forEach((renderer, rendererIndex) => {
       [THREE.NearestFilter, THREE.LinearFilter].forEach((filter) => {
         if (
           this.hasCPUUpdates[filter][rendererIndex] &&
@@ -213,7 +207,9 @@ export class RenderedImage<T extends TypedArray = TypedArray>
     rendererIndex: number,
     filter: THREE.TextureFilter,
   ) {
-    const renderer = this.renderers[rendererIndex];
+    const renderers = this.document?.renderers;
+    if (!renderers) return;
+    const renderer = renderers[rendererIndex];
     if (!renderer) return;
 
     copyToRenderTarget(
@@ -240,12 +236,12 @@ export class RenderedImage<T extends TypedArray = TypedArray>
   }
 
   private pullAtlasFromGPU() {
-    if (!this.renderers.length) return;
+    if (!this.document?.renderers?.length) return;
 
     const atlasSize = this.getAtlasSize();
     const buffer = new Uint8Array(atlasSize.product() * 4);
 
-    this.renderers[0].readRenderTargetPixels(
+    this.document.renderers[0].readRenderTargetPixels(
       this.renderTargets[THREE.NearestFilter][0],
       0,
       0,
@@ -281,7 +277,7 @@ export class RenderedImage<T extends TypedArray = TypedArray>
   }
 
   public setAtlasVoxel(voxel: Voxel | Vector, value: number) {
-    if (this.renderers.length) {
+    if (this.document?.renderers?.length) {
       const { x, y, z } = voxel;
       this.voxelsToRender.push({ x, y, z, value });
       this.voxelsRendered[THREE.NearestFilter].fill(false);
@@ -300,20 +296,20 @@ export class RenderedImage<T extends TypedArray = TypedArray>
     slice: number,
     sliceData?: Uint8Array | THREE.Texture[],
   ) {
-    if (this.renderers.length) {
+    if (this.document?.renderers?.length) {
       this.sliceAtlasAdapter.writeSlice(
         slice,
         viewType,
         sliceData,
         this.renderTargets[THREE.NearestFilter],
-        this.renderers,
+        this.document.renderers,
       );
       this.sliceAtlasAdapter.writeSlice(
         slice,
         viewType,
         sliceData,
         this.renderTargets[THREE.LinearFilter],
-        this.renderers,
+        this.document.renderers,
       );
 
       this.onModificationsOnGPU();
@@ -328,11 +324,11 @@ export class RenderedImage<T extends TypedArray = TypedArray>
   }
 
   public getSlice(viewType: ViewType, sliceNumber: number) {
-    if (this.renderers.length) {
+    if (this.document?.renderers?.length) {
       return this.sliceAtlasAdapter.readSlice(
         sliceNumber,
         viewType,
-        this.renderers[0],
+        this.document.renderers[0],
       );
     }
 
@@ -346,7 +342,9 @@ export class RenderedImage<T extends TypedArray = TypedArray>
     rendererIndex: number,
     target: THREE.WebGLRenderTarget,
   ) {
-    const renderer = this.renderers[rendererIndex];
+    const renderers = this.document?.renderers;
+    if (!renderers) return;
+    const renderer = renderers[rendererIndex];
     if (!renderer) return;
 
     if (this.hasCPUUpdates[THREE.NearestFilter][rendererIndex]) {

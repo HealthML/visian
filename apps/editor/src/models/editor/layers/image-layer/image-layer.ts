@@ -318,7 +318,7 @@ export class ImageLayer
     }
 
     super.applySnapshot(snapshot);
-    this.setImage(new RenderedImage(snapshot.image));
+    this.setImage(new RenderedImage(snapshot.image, this.document));
     this.setBrightness(snapshot.brightness);
     this.setContrast(snapshot.contrast);
 

@@ -4,6 +4,7 @@
 
   "drop-image": "Legen Sie Ihren Scan hier ab",
   "drop-annotation": "Legen Sie Ihre Annotation hier ab",
+  "upload-file": "Datei hochladen",
 
   "untitled-document": "Unbenanntes Dokument",
   "start": "Starten Sie, in dem Sie einen Scan hier ablegen.",
@@ -93,5 +94,5 @@
   "lock-cone": "Kegel festhalten",
   "cone-angle": "Kegelwinkel",
 
-  "custom-tf-file": "Datei hochladen"
+  "custom-tf-file": "Transferfunktionsbild"
 }
