@@ -157,7 +157,12 @@ export const UIOverlay = observer<UIOverlayProps>(
           isOpen={isShortcutPopUpOpen}
           onClose={closeShortcutPopUp}
         />
-        {isDraggedOver && <DropSheet onDropCompleted={onDropCompleted} />}
+        {isDraggedOver && (
+          <DropSheet
+            onDropCompleted={onDropCompleted}
+            onOutsideDrop={onDropCompleted}
+          />
+        )}
         {store?.error && (
           <ErrorNotification
             title={store?.error.title}

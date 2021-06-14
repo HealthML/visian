@@ -50,7 +50,7 @@ const isFileAnnotation = async (file: File) => {
 const getFileExtension = (file: File) => path.extname(file.name);
 
 export const DropSheet: React.FC<DropSheetProps> = observer(
-  ({ onDropCompleted }) => {
+  ({ onDropCompleted, onOutsideDrop }) => {
     const store = useStore();
 
     const importSingleFile = useCallback(
@@ -140,6 +140,7 @@ export const DropSheet: React.FC<DropSheetProps> = observer(
     const importFiles = useCallback(
       (files: FileList, event: React.DragEvent) => {
         (async () => {
+          event.stopPropagation();
           setIsLoadingFiles(true);
           try {
             const { items } = event.dataTransfer;
@@ -171,9 +172,21 @@ export const DropSheet: React.FC<DropSheetProps> = observer(
       [importDirectoryEntry, importFileEntry, onDropCompleted, store],
     );
 
+    const preventOutsideDrop = (event: React.DragEvent<HTMLDivElement>) => {
+      event.preventDefault();
+    };
+
+    const handleOutsideDrop = useCallback(
+      (event: React.DragEvent<HTMLDivElement>) => {
+        event.preventDefault();
+        if (onOutsideDrop) onOutsideDrop();
+      },
+      [onOutsideDrop],
+    );
+
     const modalRootRef = useModalRoot();
     const node = (
-      <StyledOverlay>
+      <StyledOverlay onDrop={handleOutsideDrop} onDragOver={preventOutsideDrop}>
         <StyledDropZone
           isAlwaysVisible
           labelTx={isLoadingFiles ? "loading" : "drop-file"}
