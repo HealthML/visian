@@ -112,6 +112,16 @@ export const UIOverlay = observer<UIOverlayProps>(
       setIsShortcutPopUpOpen(false);
     }, []);
 
+    // Drop status tracking for visualization
+    const [isDropInProgress, setIsDropInProgress] = useState(false);
+    const onSuccessfulDrop = useCallback(() => {
+      onDropCompleted();
+      setIsDropInProgress(false);
+    }, [onDropCompleted]);
+    const onDropStarted = () => {
+      setIsDropInProgress(true);
+    };
+
     return (
       <Container
         {...rest}
@@ -149,7 +159,7 @@ export const UIOverlay = observer<UIOverlayProps>(
               isActive={false}
             />
             <ViewSettings />
-            <SliceSlider />
+            <SliceSlider shouldIgnoreChange={isDropInProgress} />
           </RightBar>
         </ColumnRight>
 
@@ -159,7 +169,8 @@ export const UIOverlay = observer<UIOverlayProps>(
         />
         {isDraggedOver && (
           <DropSheet
-            onDropCompleted={onDropCompleted}
+            onDropCompleted={onSuccessfulDrop}
+            onDropStarted={onDropStarted}
             onOutsideDrop={onDropCompleted}
           />
         )}

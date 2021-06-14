@@ -50,7 +50,7 @@ const isFileAnnotation = async (file: File) => {
 const getFileExtension = (file: File) => path.extname(file.name);
 
 export const DropSheet: React.FC<DropSheetProps> = observer(
-  ({ onDropCompleted, onOutsideDrop }) => {
+  ({ onDropCompleted, onDropStarted, onOutsideDrop }) => {
     const store = useStore();
 
     const importSingleFile = useCallback(
@@ -140,6 +140,7 @@ export const DropSheet: React.FC<DropSheetProps> = observer(
     const importFiles = useCallback(
       (files: FileList, event: React.DragEvent) => {
         (async () => {
+          if (onDropStarted) onDropStarted();
           event.stopPropagation();
           setIsLoadingFiles(true);
           try {
@@ -169,7 +170,13 @@ export const DropSheet: React.FC<DropSheetProps> = observer(
           onDropCompleted();
         })();
       },
-      [importDirectoryEntry, importFileEntry, onDropCompleted, store],
+      [
+        importDirectoryEntry,
+        importFileEntry,
+        onDropCompleted,
+        onDropStarted,
+        store,
+      ],
     );
 
     const preventOutsideDrop = (event: React.DragEvent<HTMLDivElement>) => {
