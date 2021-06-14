@@ -59,9 +59,9 @@ export class ViewSettings
   }
 
   public setSelectedVoxel(x?: number, y?: number, z?: number): void {
-    // TODO: Do not rely on `layer[0]`
-    const voxelCount = (this.document.layers[0] as IImageLayer | undefined)
-      ?.image.voxelCount;
+    const voxelCount = (this.document.layers.find(
+      (layer) => layer.kind === "image",
+    ) as IImageLayer | undefined)?.image.voxelCount;
 
     if (!x || !y || !z) {
       if (voxelCount) {

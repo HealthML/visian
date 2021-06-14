@@ -103,10 +103,9 @@ export class Viewport2D
   };
 
   public getMaxSlice(viewType = this.mainViewType): number {
-    // TODO: Do not rely on `layer[0]`
-    const sliceCount = (this.document.layers[0] as
-      | IImageLayer
-      | undefined)?.image?.voxelCount.getFromView(viewType);
+    const sliceCount = (this.document.layers.find(
+      (layer) => layer.kind === "image",
+    ) as IImageLayer | undefined)?.image?.voxelCount.getFromView(viewType);
     return sliceCount ? sliceCount - 1 : 0;
   }
 

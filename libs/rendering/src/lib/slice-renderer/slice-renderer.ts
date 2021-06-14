@@ -256,10 +256,10 @@ export class SliceRenderer implements IDisposable, ISliceRenderer {
     )
       return;
 
-    const { image } = this.editor.activeDocument.layers[1] as IImageLayer;
-    if (!image) return;
+    const imageLayer = this.editor.activeDocument.activeLayer;
+    if (!imageLayer) return;
 
-    const { voxelCount } = image;
+    const { voxelCount } = (imageLayer as IImageLayer).image;
 
     const [widthAxis, heightAxis] = getPlaneAxes(viewType);
     const scanWidth = voxelCount[widthAxis];

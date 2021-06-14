@@ -123,7 +123,7 @@ export const setUpPointerHandling = (
 
       if (
         !uv ||
-        !store.editor.activeDocument.layers.length ||
+        !store.editor.activeDocument.activeLayer ||
         !store.editor.activeDocument.tools.activeTool
       ) {
         return;
@@ -144,13 +144,13 @@ export const setUpPointerHandling = (
       if (
         !tool ||
         (tool.isDrawingTool &&
-          (!store.editor.activeDocument.layers[0].isVisible ||
-            !store.editor.activeDocument.layers[0].isAnnotation))
+          (!store.editor.activeDocument.activeLayer.isVisible ||
+            !store.editor.activeDocument.activeLayer.isAnnotation))
       )
         return;
 
       const dragPoint = getDragPoint(
-        (store.editor.activeDocument.layers[1] as IImageLayer).image,
+        (store.editor.activeDocument.activeLayer as IImageLayer).image,
         store.editor.activeDocument.viewSettings,
         viewType,
         uv,

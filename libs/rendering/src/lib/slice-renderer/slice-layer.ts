@@ -2,7 +2,6 @@ import { IEditor, IImageLayer } from "@visian/ui-shared";
 import { IDisposable, ViewType } from "@visian/utils";
 import { autorun, IReactionDisposer, reaction } from "mobx";
 import * as THREE from "three";
-import { RenderedImage } from "../rendered-image";
 import { AnnotationSliceMaterial, ImageSliceMaterial } from "./slice-material";
 
 export class SliceLayer extends THREE.Mesh implements IDisposable {
@@ -17,16 +16,8 @@ export class SliceLayer extends THREE.Mesh implements IDisposable {
     super(
       geometry,
       layer.isAnnotation
-        ? new AnnotationSliceMaterial(
-            editor,
-            viewType,
-            layer.image as RenderedImage,
-          )
-        : new ImageSliceMaterial(
-            editor,
-            viewType,
-            layer.image as RenderedImage,
-          ),
+        ? new AnnotationSliceMaterial(editor, viewType, layer)
+        : new ImageSliceMaterial(editor, viewType, layer),
     );
 
     this.disposers.push(
@@ -36,16 +27,8 @@ export class SliceLayer extends THREE.Mesh implements IDisposable {
           const oldMaterial = this.material;
 
           this.material = isAnnotation
-            ? new AnnotationSliceMaterial(
-                editor,
-                viewType,
-                layer.image as RenderedImage,
-              )
-            : new ImageSliceMaterial(
-                editor,
-                viewType,
-                layer.image as RenderedImage,
-              );
+            ? new AnnotationSliceMaterial(editor, viewType, layer)
+            : new ImageSliceMaterial(editor, viewType, layer);
 
           (oldMaterial as IDisposable).dispose();
 
