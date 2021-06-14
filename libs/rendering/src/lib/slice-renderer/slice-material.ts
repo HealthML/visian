@@ -12,11 +12,10 @@ export abstract class SliceMaterial
   implements IDisposable {
   protected disposers: IDisposer[] = [];
 
-  private image?: RenderedImage;
-
   constructor(
     private editor: IEditor,
     private viewType: ViewType,
+    private image: RenderedImage,
     defines = {},
     uniforms = {},
   ) {
@@ -50,6 +49,11 @@ export abstract class SliceMaterial
         break;
     }
 
+    this.uniforms.uVoxelCount.value = image.voxelCount;
+    this.uniforms.uAtlasGrid.value = image.getAtlasGrid();
+    this.uniforms.uComponents.value = image.voxelComponents;
+    this.updateTexture();
+
     this.disposers.push(
       autorun(() => {
         this.uniforms.uActiveSlices.value = editor.activeDocument?.viewSettings.selectedVoxel.toArray();
@@ -62,15 +66,6 @@ export abstract class SliceMaterial
   public dispose() {
     super.dispose();
     this.disposers.forEach((disposer) => disposer());
-  }
-
-  /** Updates the rendered image. */
-  public setImage(image: RenderedImage) {
-    this.uniforms.uVoxelCount.value = image.voxelCount;
-    this.uniforms.uAtlasGrid.value = image.getAtlasGrid();
-    this.uniforms.uComponents.value = image.voxelComponents;
-    this.image = image;
-    this.updateTexture();
   }
 
   private updateTexture = () => {
@@ -86,10 +81,11 @@ export abstract class SliceMaterial
 export default SliceMaterial;
 
 export class ImageSliceMaterial extends SliceMaterial {
-  constructor(editor: IEditor, viewType: ViewType) {
+  constructor(editor: IEditor, viewType: ViewType, image: RenderedImage) {
     super(
       editor,
       viewType,
+      image,
       { IMAGE: "" },
       {
         uContrast: { value: editor.activeDocument?.viewSettings.contrast },
@@ -138,10 +134,11 @@ export class ImageSliceMaterial extends SliceMaterial {
 }
 
 export class AnnotationSliceMaterial extends SliceMaterial {
-  constructor(editor: IEditor, viewType: ViewType) {
+  constructor(editor: IEditor, viewType: ViewType, image: RenderedImage) {
     super(
       editor,
       viewType,
+      image,
       { ANNOTATION: "" },
       {
         uAnnotationColor: { value: new THREE.Color("white") },
