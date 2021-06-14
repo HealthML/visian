@@ -220,7 +220,6 @@ export class Tools
       this.activeTool?.isBrush &&
         this.isCursorOverDrawableArea &&
         !this.isCursorOverFloatingUI &&
-        this.document.layers.length &&
         this.document.activeLayer?.isAnnotation &&
         this.document.activeLayer?.isVisible,
     );

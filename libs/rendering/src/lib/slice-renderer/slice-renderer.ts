@@ -250,14 +250,10 @@ export class SliceRenderer implements IDisposable, ISliceRenderer {
       ViewType.Transverse,
     preview = false,
   ) {
-    if (
-      !this.editor.activeDocument ||
-      this.editor.activeDocument.layers.length < 2
-    )
+    if (!this.editor.activeDocument || !this.editor.activeDocument.activeLayer)
       return;
 
     const imageLayer = this.editor.activeDocument.activeLayer;
-    if (!imageLayer) return;
 
     const { voxelCount } = (imageLayer as IImageLayer).image;
 

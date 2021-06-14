@@ -109,9 +109,6 @@ export class ImageSliceMaterial extends SliceMaterial {
         editor.sliceRenderer?.lazyRender();
       }),
       autorun(() => {
-        if (!editor.activeDocument || editor.activeDocument.layers.length < 2) {
-          return;
-        }
         (this.uniforms.uForegroundColor.value as THREE.Color).set(
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           color((imageLayer.color as any) || "foreground")({
@@ -121,10 +118,6 @@ export class ImageSliceMaterial extends SliceMaterial {
         editor.sliceRenderer?.lazyRender();
       }),
       autorun(() => {
-        if (!editor.activeDocument || editor.activeDocument.layers.length < 2) {
-          return;
-        }
-
         this.uniforms.uImageOpacity.value = imageLayer.opacity;
         editor.sliceRenderer?.lazyRender();
       }),
@@ -147,10 +140,6 @@ export class AnnotationSliceMaterial extends SliceMaterial {
 
     this.disposers.push(
       autorun(() => {
-        if (!editor.activeDocument || editor.activeDocument.layers.length < 1) {
-          return;
-        }
-
         (this.uniforms.uAnnotationColor.value as THREE.Color).set(
           color(
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -162,10 +151,6 @@ export class AnnotationSliceMaterial extends SliceMaterial {
         editor.sliceRenderer?.lazyRender();
       }),
       autorun(() => {
-        if (!editor.activeDocument || !editor.activeDocument.layers.length) {
-          return;
-        }
-
         this.uniforms.uAnnotationOpacity.value = imageLayer.opacity;
         editor.sliceRenderer?.lazyRender();
       }),
