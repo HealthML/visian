@@ -175,7 +175,7 @@ export class Slice extends THREE.Group implements IDisposable {
       if (!sliceLayer) return;
 
       sliceLayer.position.z =
-        min + (index / (imageLayers.length - 1)) * intervallLength;
+        min + (index / (Math.max(2, imageLayers.length) - 1)) * intervallLength;
     });
 
     this.editor.sliceRenderer?.lazyRender();
