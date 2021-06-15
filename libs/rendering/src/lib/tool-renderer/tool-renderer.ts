@@ -33,8 +33,8 @@ export class ToolRenderer {
           selectedSlice: document.viewSettings.selectedVoxel.getFromView(
             document.viewport2D.mainViewType,
           ),
-          annotation: document.layers.length
-            ? ((document.layers[0] as IImageLayer).image as RenderedImage)
+          annotation: document.activeLayer
+            ? ((document.activeLayer as IImageLayer).image as RenderedImage)
             : undefined,
         }),
         (params) => {
@@ -78,8 +78,8 @@ export class ToolRenderer {
       selectedSlice: this.document.viewSettings.selectedVoxel.getFromView(
         this.document.viewport2D.mainViewType,
       ),
-      annotation: this.document.layers.length
-        ? ((this.document.layers[0] as IImageLayer).image as RenderedImage)
+      annotation: this.document.activeLayer
+        ? ((this.document.activeLayer as IImageLayer).image as RenderedImage)
         : undefined,
     },
   ) => {
@@ -101,10 +101,10 @@ export class ToolRenderer {
     const circles = this.circlesToRender.length;
     const shapes = this.shapesToRender.length;
 
-    if (!circles && !shapes) return;
+    if ((!circles && !shapes) || !this.document.activeLayer) return;
 
     const { renderers } = this.document;
-    const annotation = (this.document.layers[0] as IImageLayer)
+    const annotation = (this.document.activeLayer as IImageLayer)
       .image as RenderedImage;
     if (!renderers) return;
 
@@ -178,9 +178,9 @@ export class ToolRenderer {
   }
 
   private resizeRenderTargets = () => {
-    if (!this.document.layers.length) return;
+    if (!this.document.activeLayer) return;
 
-    const { voxelCount } = (this.document.layers[0] as IImageLayer).image;
+    const { voxelCount } = (this.document.activeLayer as IImageLayer).image;
     if (!voxelCount) return;
 
     const [widthAxis, heightAxis] = getPlaneAxes(

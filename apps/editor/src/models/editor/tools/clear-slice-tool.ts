@@ -20,8 +20,10 @@ export class ClearSliceTool<
   }
 
   public activate(previousTool?: ITool<N>) {
-    const imageLayer = this.document.layers[0] as IImageLayer;
-    const { image } = imageLayer;
+    const imageLayer = this.document.activeLayer;
+    if (!imageLayer || imageLayer.kind !== "image") return;
+
+    const { image } = imageLayer as IImageLayer;
     const viewType = this.document.viewport2D.mainViewType;
     const slice = this.document.viewport2D.getSelectedSlice();
 
@@ -44,7 +46,7 @@ export class ClearSliceTool<
 
     this.toolRenderer.handleCurrentSliceChanged();
 
-    imageLayer.clearSliceMarkers(viewType, slice);
+    (imageLayer as IImageLayer).clearSliceMarkers(viewType, slice);
 
     super.activate(previousTool);
   }

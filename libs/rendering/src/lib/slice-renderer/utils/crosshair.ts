@@ -62,22 +62,23 @@ export class Crosshair extends THREE.Group implements IDisposable {
   private updateTarget = () => {
     if (
       !this.editor.activeDocument ||
-      this.editor.activeDocument.layers.length < 2
+      !this.editor.activeDocument.activeLayer
     ) {
       return;
     }
 
-    const { image } = this.editor.activeDocument.layers[1] as IImageLayer;
+    const { voxelCount } = (this.editor.activeDocument
+      .activeLayer as IImageLayer).image;
 
     const x =
       1 -
       (this.editor.activeDocument.viewSettings.selectedVoxel[this.widthAxis] +
         0.5) /
-        image.voxelCount[this.widthAxis];
+        voxelCount[this.widthAxis];
     const y =
       (this.editor.activeDocument.viewSettings.selectedVoxel[this.heightAxis] +
         0.5) /
-      image.voxelCount[this.heightAxis];
+      voxelCount[this.heightAxis];
 
     this.verticalLine.visible = x >= 0 && x <= 1;
     this.verticalLine.position.x = x - 0.5;
@@ -89,13 +90,13 @@ export class Crosshair extends THREE.Group implements IDisposable {
   private updateVisibility = () => {
     if (
       !this.editor.activeDocument ||
-      this.editor.activeDocument.layers.length < 2
+      !this.editor.activeDocument.activeLayer
     ) {
       return;
     }
 
     this.visible =
-      (this.editor.activeDocument.layers[1] as IImageLayer).is3DLayer &&
+      (this.editor.activeDocument.activeLayer as IImageLayer).is3DLayer &&
       this.editor.activeDocument.viewport2D.showSideViews;
   };
 }

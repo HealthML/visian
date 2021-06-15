@@ -80,7 +80,9 @@ export class SmartBrush<
 
   protected finishStroke(
     isDeleteOperation: boolean | undefined,
-    imageLayer = this.document.layers[0] as IImageLayer,
+    imageLayer = this.document.activeLayer
+      ? (this.document.activeLayer as IImageLayer)
+      : undefined,
     viewType = this.document.viewport2D.mainViewType,
   ) {
     this.doRegionGrowing();
@@ -92,9 +94,13 @@ export class SmartBrush<
   }
 
   private doRegionGrowing(
-    image = (this.document.layers[1] as IImageLayer).image,
+    imageLayer = this.document.layers.find(
+      (layer) =>
+        !layer.isAnnotation && layer.isVisible && layer.kind === "image",
+    ),
   ) {
-    if (!image) return;
+    if (!imageLayer) return;
+    const { image } = imageLayer as IImageLayer;
 
     this.minValue = Infinity;
     this.maxValue = -Infinity;

@@ -8,16 +8,18 @@ export const getCrosshairOffset = (viewType: ViewType, document: IDocument) => {
   const [widthAxis, heightAxis] = getPlaneAxes(viewType);
   const crosshairOffset = new THREE.Vector2();
 
-  const { image } = document.layers[1] as IImageLayer;
-  if (!image) return crosshairOffset;
+  const imageLayer = document.activeLayer;
+  if (!imageLayer) return crosshairOffset;
+
+  const { voxelCount } = (imageLayer as IImageLayer).image;
 
   crosshairOffset.set(
     0.5 -
       (document.viewSettings.selectedVoxel[widthAxis] + 0.5) /
-        image.voxelCount[widthAxis],
+        voxelCount[widthAxis],
     -0.5 +
       (document.viewSettings.selectedVoxel[heightAxis] + 0.5) /
-        image.voxelCount[heightAxis],
+        voxelCount[heightAxis],
   );
 
   return crosshairOffset;

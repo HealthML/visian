@@ -1,24 +1,18 @@
-import { IEditor } from "@visian/ui-shared";
+import { IEditor, IImageLayer, ILayer } from "@visian/ui-shared";
 import { IDisposable, IDisposer, ViewType } from "@visian/utils";
-import { autorun } from "mobx";
+import { autorun, reaction } from "mobx";
 import * as THREE from "three";
 
-import { RenderedImage } from "../rendered-image";
+import { SliceLayer } from "./slice-layer";
 import {
-  AnnotationSliceMaterial,
-  ImageSliceMaterial,
-  SliceMaterial,
-} from "./slice-material";
-import {
-  annotationMeshZ,
   BrushCursor,
   toolOverlayZ,
   Crosshair,
   crosshairZ,
   getGeometrySize,
-  imageMeshZ,
   Outline,
   PreviewBrushCursor,
+  sliceLayerIntervall,
 } from "./utils";
 
 export class Slice extends THREE.Group implements IDisposable {
@@ -33,11 +27,7 @@ export class Slice extends THREE.Group implements IDisposable {
 
   private geometry = new THREE.PlaneGeometry();
 
-  private imageMaterial: SliceMaterial;
-  public imageMesh: THREE.Mesh;
-
-  private annotationMaterial: SliceMaterial;
-  private annotationMesh: THREE.Mesh;
+  private sliceLayers: SliceLayer[] = [];
 
   private crosshair: Crosshair;
 
@@ -53,22 +43,6 @@ export class Slice extends THREE.Group implements IDisposable {
     this.geometry.scale(-1, 1, 1);
 
     this.add(this.crosshairShiftGroup);
-
-    this.imageMaterial = new ImageSliceMaterial(editor, viewType);
-    this.imageMesh = new THREE.Mesh(this.geometry, this.imageMaterial);
-    this.imageMesh.position.z = imageMeshZ;
-    this.imageMesh.userData = {
-      viewType,
-    };
-    this.crosshairShiftGroup.add(this.imageMesh);
-
-    this.annotationMaterial = new AnnotationSliceMaterial(editor, viewType);
-    this.annotationMesh = new THREE.Mesh(
-      this.geometry,
-      this.annotationMaterial,
-    );
-    this.annotationMesh.position.z = annotationMeshZ;
-    this.crosshairShiftGroup.add(this.annotationMesh);
 
     this.crosshair = new Crosshair(this.viewType, editor);
     this.crosshair.position.z = crosshairZ;
@@ -89,51 +63,45 @@ export class Slice extends THREE.Group implements IDisposable {
     this.disposers.push(
       autorun(this.updateScale),
       autorun(this.updateOffset),
-      autorun(() => {
-        if (!editor.activeDocument || !editor.activeDocument.layers.length) {
-          return;
-        }
+      reaction(
+        () =>
+          this.editor.activeDocument?.layers.find(
+            (layer) => layer.kind === "image",
+          ),
+        (layer?: ILayer) => {
+          if (!layer) return;
 
-        this.annotationMesh.visible = editor.activeDocument.layers[0].isVisible;
-        editor.sliceRenderer?.lazyRender();
-      }),
-      autorun(() => {
-        if (!editor.activeDocument || editor.activeDocument.layers.length < 2) {
-          return;
-        }
-
-        this.imageMesh.visible = editor.activeDocument.layers[1].isVisible;
-        editor.sliceRenderer?.lazyRender();
-      }),
+          const imageLayer = layer as IImageLayer;
+          const { image } = imageLayer;
+          this.baseSize.copy(
+            getGeometrySize(
+              image.voxelCount,
+              image.voxelSpacing,
+              this.viewType,
+            ),
+          );
+          this.updateScale();
+        },
+        { fireImmediately: true },
+      ),
+      reaction(
+        () =>
+          editor.activeDocument
+            ? editor.activeDocument.layers.filter(
+                (layer) => layer.kind === "image",
+              )
+            : [],
+        this.updateSliceLayers,
+        { fireImmediately: true },
+      ),
     );
   }
 
   public dispose() {
-    this.imageMaterial.dispose();
     this.crosshair.dispose();
     this.brushCursor.dispose();
     this.outline.dispose();
     this.disposers.forEach((disposer) => disposer());
-  }
-
-  public setImage(image: RenderedImage) {
-    this.imageMaterial.setImage(image);
-
-    this.baseSize.copy(
-      getGeometrySize(image.voxelCount, image.voxelSpacing, this.viewType),
-    );
-    this.updateScale();
-  }
-
-  public setAnnotation(image?: RenderedImage) {
-    if (image) {
-      this.annotationMaterial.setImage(image);
-      this.annotationMesh.visible = true;
-    } else {
-      this.annotationMesh.visible = false;
-    }
-
-    this.updateScale();
   }
 
   public setCrosshairSynchOffset(offset = new THREE.Vector2()) {
@@ -154,6 +122,63 @@ export class Slice extends THREE.Group implements IDisposable {
       x: 1 - localPosition.x,
       y: localPosition.y,
     };
+  }
+
+  private updateSliceLayers = (layers: ILayer[]) => {
+    // Add new layers.
+    layers
+      .filter(
+        (layer) =>
+          !this.sliceLayers.find(
+            (sliceLayer) => sliceLayer.layerId === layer.id,
+          ),
+      )
+      .forEach((newLayer) => {
+        const sliceLayer = new SliceLayer(
+          this.editor,
+          this.viewType,
+          this.geometry,
+          newLayer as IImageLayer,
+        );
+        this.sliceLayers.push(sliceLayer);
+        this.crosshairShiftGroup.add(sliceLayer);
+      });
+
+    // Remove old layers.
+    this.sliceLayers
+      .filter(
+        (sliceLayer) =>
+          !layers.find((layer) => layer.id === sliceLayer.layerId),
+      )
+      .forEach((oldSliceLayer) => {
+        const sliceLayerIndex = this.sliceLayers.indexOf(oldSliceLayer);
+        this.sliceLayers.splice(sliceLayerIndex, 1);
+        this.crosshairShiftGroup.remove(oldSliceLayer);
+        oldSliceLayer.dispose();
+      });
+
+    this.updateSliceLayerOrder();
+  };
+
+  private updateSliceLayerOrder() {
+    const layers = this.editor.activeDocument?.layers;
+    if (!layers) return;
+
+    const [min, max] = sliceLayerIntervall;
+    const intervallLength = max - min;
+
+    const imageLayers = layers.filter((layer) => layer.kind === "image");
+    imageLayers.forEach((imageLayer, index) => {
+      const sliceLayer = this.sliceLayers.find(
+        (layer) => layer.layerId === imageLayer.id,
+      );
+      if (!sliceLayer) return;
+
+      sliceLayer.position.z =
+        min + (index / (Math.max(2, imageLayers.length) - 1)) * intervallLength;
+    });
+
+    this.editor.sliceRenderer?.lazyRender();
   }
 
   private updateScale = () => {

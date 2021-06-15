@@ -13,14 +13,13 @@ export class ToolCamera
 
     this.disposers.push(
       autorun(() => {
-        if (!document.layers.length) return;
+        if (!document.activeLayer) return;
 
-        const { image } = document.layers[0] as IImageLayer;
-        if (!image) return;
+        const { voxelCount } = (document.activeLayer as IImageLayer).image;
 
         const [xAxis, yAxis] = getPlaneAxes(document.viewport2D.mainViewType);
-        const x = image.voxelCount[xAxis];
-        const y = image.voxelCount[yAxis];
+        const x = voxelCount[xAxis];
+        const y = voxelCount[yAxis];
 
         this.right = x - 0.5;
         this.top = y - 0.5;

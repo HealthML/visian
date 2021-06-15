@@ -1,4 +1,4 @@
-import { color, IEditor } from "@visian/ui-shared";
+import { color, IEditor, IImageLayer } from "@visian/ui-shared";
 import { IDisposable, IDisposer, ViewType } from "@visian/utils";
 import { autorun } from "mobx";
 import * as THREE from "three";
@@ -12,11 +12,10 @@ export abstract class SliceMaterial
   implements IDisposable {
   protected disposers: IDisposer[] = [];
 
-  private image?: RenderedImage;
-
   constructor(
     private editor: IEditor,
     private viewType: ViewType,
+    private imageLayer: IImageLayer,
     defines = {},
     uniforms = {},
   ) {
@@ -50,6 +49,12 @@ export abstract class SliceMaterial
         break;
     }
 
+    const image = imageLayer.image as RenderedImage;
+    this.uniforms.uVoxelCount.value = image.voxelCount;
+    this.uniforms.uAtlasGrid.value = image.getAtlasGrid();
+    this.uniforms.uComponents.value = image.voxelComponents;
+    this.updateTexture();
+
     this.disposers.push(
       autorun(() => {
         this.uniforms.uActiveSlices.value = editor.activeDocument?.viewSettings.selectedVoxel.toArray();
@@ -64,32 +69,25 @@ export abstract class SliceMaterial
     this.disposers.forEach((disposer) => disposer());
   }
 
-  /** Updates the rendered image. */
-  public setImage(image: RenderedImage) {
-    this.uniforms.uVoxelCount.value = image.voxelCount;
-    this.uniforms.uAtlasGrid.value = image.getAtlasGrid();
-    this.uniforms.uComponents.value = image.voxelComponents;
-    this.image = image;
-    this.updateTexture();
-  }
-
   private updateTexture = () => {
     if (!this.editor.activeDocument) return;
 
     const canvasIndex = getOrder(
       this.editor.activeDocument.viewport2D.mainViewType,
     ).indexOf(this.viewType);
-    this.uniforms.uDataTexture.value = this.image?.getTexture(canvasIndex);
+    this.uniforms.uDataTexture.value = (this.imageLayer
+      .image as RenderedImage).getTexture(canvasIndex);
   };
 }
 
 export default SliceMaterial;
 
 export class ImageSliceMaterial extends SliceMaterial {
-  constructor(editor: IEditor, viewType: ViewType) {
+  constructor(editor: IEditor, viewType: ViewType, imageLayer: IImageLayer) {
     super(
       editor,
       viewType,
+      imageLayer,
       { IMAGE: "" },
       {
         uContrast: { value: editor.activeDocument?.viewSettings.contrast },
@@ -111,26 +109,16 @@ export class ImageSliceMaterial extends SliceMaterial {
         editor.sliceRenderer?.lazyRender();
       }),
       autorun(() => {
-        if (!editor.activeDocument || editor.activeDocument.layers.length < 2) {
-          return;
-        }
         (this.uniforms.uForegroundColor.value as THREE.Color).set(
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          color((editor.activeDocument.layers[1].color as any) || "foreground")(
-            {
-              theme: editor.theme,
-            },
-          ),
+          color((imageLayer.color as any) || "foreground")({
+            theme: editor.theme,
+          }),
         );
         editor.sliceRenderer?.lazyRender();
       }),
       autorun(() => {
-        if (!editor.activeDocument || editor.activeDocument.layers.length < 2) {
-          return;
-        }
-
-        this.uniforms.uImageOpacity.value =
-          editor.activeDocument?.layers[1].opacity;
+        this.uniforms.uImageOpacity.value = imageLayer.opacity;
         editor.sliceRenderer?.lazyRender();
       }),
     );
@@ -138,10 +126,11 @@ export class ImageSliceMaterial extends SliceMaterial {
 }
 
 export class AnnotationSliceMaterial extends SliceMaterial {
-  constructor(editor: IEditor, viewType: ViewType) {
+  constructor(editor: IEditor, viewType: ViewType, imageLayer: IImageLayer) {
     super(
       editor,
       viewType,
+      imageLayer,
       { ANNOTATION: "" },
       {
         uAnnotationColor: { value: new THREE.Color("white") },
@@ -151,14 +140,10 @@ export class AnnotationSliceMaterial extends SliceMaterial {
 
     this.disposers.push(
       autorun(() => {
-        if (!editor.activeDocument || editor.activeDocument.layers.length < 1) {
-          return;
-        }
-
         (this.uniforms.uAnnotationColor.value as THREE.Color).set(
           color(
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            (editor.activeDocument?.layers[0].color as any) || "foreground",
+            (imageLayer.color as any) || "foreground",
           )({
             theme: editor.theme,
           }),
@@ -166,12 +151,7 @@ export class AnnotationSliceMaterial extends SliceMaterial {
         editor.sliceRenderer?.lazyRender();
       }),
       autorun(() => {
-        if (!editor.activeDocument || !editor.activeDocument.layers.length) {
-          return;
-        }
-
-        this.uniforms.uAnnotationOpacity.value =
-          editor.activeDocument?.layers[0].opacity;
+        this.uniforms.uAnnotationOpacity.value = imageLayer.opacity;
         editor.sliceRenderer?.lazyRender();
       }),
     );

@@ -10,7 +10,6 @@ import { IEditor, IImageLayer, ISliceRenderer } from "@visian/ui-shared";
 import { reaction } from "mobx";
 import * as THREE from "three";
 
-import { RenderedImage } from "../rendered-image";
 import { Slice } from "./slice";
 import {
   getOrder,
@@ -30,8 +29,6 @@ export class SliceRenderer implements IDisposable, ISliceRenderer {
   private slices: Slice[];
 
   private lazyRenderTriggered = true;
-
-  private isImageLoaded = false;
 
   private disposers: IDisposer[] = [];
 
@@ -59,29 +56,12 @@ export class SliceRenderer implements IDisposable, ISliceRenderer {
 
     this.disposers.push(
       reaction(
-        () =>
-          editor.activeDocument && editor.activeDocument.layers.length > 1
-            ? ((editor.activeDocument.layers[1] as IImageLayer)
-                .image as RenderedImage)
-            : undefined,
-        (image?: RenderedImage) => {
-          if (!image) return;
-          this.setImage(image);
-
+        () => editor.activeDocument && editor.activeDocument.layers.length > 0,
+        () => {
           // Wrapped in a setTimeout, because if no image was previously loaded
           // the side views need to actually appear before updating the camera planes.
           setTimeout(this.updateCamera);
         },
-        { fireImmediately: true },
-      ),
-      reaction(
-        () =>
-          editor.activeDocument && editor.activeDocument.layers.length
-            ? ((editor.activeDocument?.layers[0] as IImageLayer)
-                .image as RenderedImage)
-            : undefined,
-        this.setAnnotation,
-        { fireImmediately: true },
       ),
       reaction(
         () => editor.activeDocument?.viewport2D.mainViewType,
@@ -270,16 +250,12 @@ export class SliceRenderer implements IDisposable, ISliceRenderer {
       ViewType.Transverse,
     preview = false,
   ) {
-    if (
-      !this.editor.activeDocument ||
-      this.editor.activeDocument.layers.length < 2
-    )
+    if (!this.editor.activeDocument || !this.editor.activeDocument.activeLayer)
       return;
 
-    const { image } = this.editor.activeDocument.layers[1] as IImageLayer;
-    if (!image) return;
+    const imageLayer = this.editor.activeDocument.activeLayer;
 
-    const { voxelCount } = image;
+    const { voxelCount } = (imageLayer as IImageLayer).image;
 
     const [widthAxis, heightAxis] = getPlaneAxes(viewType);
     const scanWidth = voxelCount[widthAxis];
@@ -313,7 +289,12 @@ export class SliceRenderer implements IDisposable, ISliceRenderer {
   }
 
   public eagerRender = () => {
-    if (!this.isImageLoaded) return;
+    if (
+      !this.editor.activeDocument ||
+      this.editor.activeDocument.layers.length < 1
+    ) {
+      return;
+    }
     this.lazyRenderTriggered = false;
 
     const order = getOrder(
@@ -325,19 +306,6 @@ export class SliceRenderer implements IDisposable, ISliceRenderer {
       const camera = index ? this.sideCamera : this.mainCamera;
       renderer.render(this.scenes[viewType], camera);
     });
-  };
-
-  private setImage(image: RenderedImage) {
-    this.slices.forEach((slice) => slice.setImage(image));
-    this.isImageLoaded = true;
-
-    this.lazyRender();
-  }
-
-  private setAnnotation = (image?: RenderedImage) => {
-    this.slices.forEach((slice) => slice.setAnnotation(image));
-
-    this.lazyRender();
   };
 }
 
