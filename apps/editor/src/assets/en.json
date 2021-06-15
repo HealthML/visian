@@ -1,6 +1,7 @@
 {
   "loading": "Loading...",
   "reset": "Reset",
+  "add": "Add new",
 
   "drop-image": "Drop your scan here",
   "drop-annotation": "Drop your annotation here",
@@ -41,6 +42,7 @@
   "neighbor-threshold": "Neighbor Threshold",
 
   "layers": "Layers",
+  "add-annotation-layer": "Add new annotation",
   "no-layers": "No layers loaded.",
   "untitled-layer": "Untitled layer",
   "layer-settings": "Layer Settings",

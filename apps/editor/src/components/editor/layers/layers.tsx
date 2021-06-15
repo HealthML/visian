@@ -4,6 +4,7 @@ import {
   List,
   ListItem,
   Modal,
+  ModalHeaderButton,
   SubtleText,
   useDelay,
 } from "@visian/ui-shared";
@@ -120,6 +121,14 @@ export const Layers: React.FC = observer(() => {
         labelTx="layers"
         parentElement={buttonRef}
         position="right"
+        headerChildren={
+          <ModalHeaderButton
+            icon="plus"
+            tooltipTx="add-annotation-layer"
+            isDisabled={!layerCount}
+            onPointerDown={store?.editor.activeDocument?.newAnnotationLayer}
+          />
+        }
       >
         <LayerList>
           {layerCount ? (

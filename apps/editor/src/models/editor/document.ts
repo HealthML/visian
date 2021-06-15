@@ -164,6 +164,14 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
     });
   };
 
+  public newAnnotationLayer = () => {
+    const baseLayer = this.layers.find((layer) => layer.kind === "image") as
+      | ImageLayer
+      | undefined;
+    if (!baseLayer) return;
+    this.addLayer(ImageLayer.fromNewAnnotationForImage(baseLayer.image, this));
+  };
+
   public deleteLayer = (idOrLayer: string | ILayer): void => {
     this.layerIds = this.layerIds.filter((id) =>
       typeof idOrLayer === "string" ? id !== idOrLayer : id !== idOrLayer.id,
