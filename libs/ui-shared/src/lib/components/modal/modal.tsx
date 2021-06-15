@@ -115,7 +115,7 @@ export const Modal: React.FC<ModalProps> = ({
             <ModalTitleRow
               labelTx={labelTx}
               label={label}
-              onReset={handleReset}
+              onReset={onReset ? handleReset : undefined}
             />
             <Divider />
           </>
