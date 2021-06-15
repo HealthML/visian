@@ -80,9 +80,15 @@ export class SharedUniforms implements IDisposable {
         editor.activeDocument?.volumeRenderer?.lazyRender(true);
       }),
       autorun(() => {
-        this.uniforms.uFocusOpacity.value =
+        const layerId =
           editor.activeDocument?.viewport3D.activeTransferFunction?.params
-            .focusOpacity?.value ?? 1;
+            .annotation?.value;
+
+        const focusOpacity = layerId
+          ? editor.activeDocument?.getLayer(layerId as string)?.opacity ?? 1
+          : 1;
+
+        this.uniforms.uFocusOpacity.value = focusOpacity;
 
         editor.activeDocument?.volumeRenderer?.lazyRender(true);
       }),
@@ -102,9 +108,18 @@ export class SharedUniforms implements IDisposable {
         editor.activeDocument?.volumeRenderer?.lazyRender(true);
       }),
       autorun(() => {
-        this.uniforms.uContextOpacity.value =
-          editor.activeDocument?.viewport3D.activeTransferFunction?.params
-            .contextOpacity?.value ?? 1;
+        const layerId =
+          editor.activeDocument?.viewport3D.activeTransferFunction?.params.image
+            ?.value;
+
+        const contextOpacity = layerId
+          ? editor.activeDocument?.getLayer(layerId as string)?.opacity ?? 1
+          : 1;
+
+        const opacityFactor =
+          (editor.activeDocument?.viewport3D.activeTransferFunction?.params
+            .contextOpacity?.value as number | undefined) ?? 1;
+        this.uniforms.uContextOpacity.value = contextOpacity * opacityFactor;
 
         editor.activeDocument?.volumeRenderer?.lazyRender(true);
       }),

@@ -63,16 +63,6 @@ export class EdgesTransferFunction extends TransferFunction<"fc-edges"> {
         onBeforeValueChange: () =>
           document.viewport3D?.onTransferFunctionChange(),
       }) as Parameter<unknown>,
-      new NumberParameter({
-        name: "focusOpacity",
-        labelTx: "focus-opacity",
-        defaultValue: 1,
-        min: 0,
-        max: 1,
-        scaleType: "quadratic",
-        onBeforeValueChange: () =>
-          document.viewport3D?.onTransferFunctionChange(),
-      }) as Parameter<unknown>,
     ]);
   }
 

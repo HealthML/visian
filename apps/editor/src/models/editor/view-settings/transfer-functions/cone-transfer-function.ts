@@ -79,26 +79,6 @@ export class ConeTransferFunction
         onBeforeValueChange: () =>
           document.viewport3D?.onTransferFunctionChange(),
       }) as Parameter<unknown>,
-      new NumberParameter({
-        name: "contextOpacity",
-        labelTx: "context-opacity",
-        defaultValue: 0.4,
-        min: 0,
-        max: 1,
-        scaleType: "quadratic",
-        onBeforeValueChange: () =>
-          document.viewport3D?.onTransferFunctionChange(),
-      }) as Parameter<unknown>,
-      new NumberParameter({
-        name: "focusOpacity",
-        labelTx: "focus-opacity",
-        defaultValue: 1,
-        min: 0,
-        max: 1,
-        scaleType: "quadratic",
-        onBeforeValueChange: () =>
-          document.viewport3D?.onTransferFunctionChange(),
-      }) as Parameter<unknown>,
     ]);
 
     makeObservable<this>(this, {
