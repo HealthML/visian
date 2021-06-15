@@ -12,4 +12,5 @@ export const transferFunctionsUniforms = {
   uTransferFunction: { value: 0 },
   uUseFocus: { value: false },
   uCustomTFTexture: { value: null },
+  uVolumeNearestFiltering: { value: false },
 };

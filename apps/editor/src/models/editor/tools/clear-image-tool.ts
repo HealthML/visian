@@ -20,14 +20,16 @@ export class ClearImageTool<
   }
 
   public activate(previousTool?: ITool<N>) {
-    const imageLayer = this.document.layers[0] as IImageLayer;
-    const { image } = imageLayer;
+    const imageLayer = this.document.activeLayer;
+    if (!imageLayer || imageLayer.kind !== "image") return;
+    const { image } = imageLayer as IImageLayer;
 
     const oldAtlas = new Uint8Array(image.getAtlas());
 
     const emptyAtlas = new Uint8Array(oldAtlas.length);
     image.setAtlas(emptyAtlas);
     this.document.sliceRenderer?.lazyRender();
+    this.document.volumeRenderer?.lazyRender(true);
 
     this.document.history.addCommand(
       new AtlasCommand(
@@ -42,7 +44,7 @@ export class ClearImageTool<
 
     this.toolRenderer.handleCurrentSliceChanged();
 
-    imageLayer.clearSliceMarkers();
+    (imageLayer as IImageLayer).clearSliceMarkers();
 
     super.activate(previousTool);
   }

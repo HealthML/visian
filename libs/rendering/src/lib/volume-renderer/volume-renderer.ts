@@ -1,12 +1,11 @@
 import {
-  IConeTransferFunction,
   IEditor,
   IImageLayer,
   ILayerParameter,
   IVolumeRenderer,
 } from "@visian/ui-shared";
 import { IDisposable, IDisposer } from "@visian/utils";
-import { autorun, reaction } from "mobx";
+import { reaction } from "mobx";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import Stats from "three/examples/jsm/libs/stats.module";
@@ -68,8 +67,15 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
       this.camera,
       this.renderer.domElement,
     );
-    this.orbitControls.target.set(0, 1.2, 0);
-    this.orbitControls.addEventListener("change", this.onCameraMove);
+    const orbitTarget = editor.activeDocument?.viewport3D.orbitTarget;
+    if (orbitTarget) {
+      this.orbitControls.target.set(
+        orbitTarget.x,
+        orbitTarget.y,
+        orbitTarget.z,
+      );
+    }
+    this.orbitControls.addEventListener("change", this.onOrbitControlsChange);
 
     this.flyControls = new FlyControls(this.camera, this.renderer.domElement);
     this.flyControls.addEventListener("change", () => this.onCameraMove());
@@ -157,77 +163,29 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
           // As we already know that the layer parameter exist, we can be sure
           // that the active document is not undefined.
           // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          return (editor.activeDocument!.getLayer(layerId) as IImageLayer)
-            .image;
+          const imageLayer = editor.activeDocument!.getLayer(layerId);
+          return imageLayer ? (imageLayer as IImageLayer).image : undefined;
         },
-
-        () => this.onCameraMove(false),
+        () => {
+          this.onCameraMove(false);
+        },
       ),
-      reaction(() => {
-        const imageLayerParameter =
-          editor.activeDocument?.viewport3D.activeTransferFunction?.params
-            .image;
-        const imageLayerId = imageLayerParameter
-          ? (imageLayerParameter as ILayerParameter).value
-          : undefined;
-        const imageLayer = imageLayerId
-          ? editor.activeDocument?.getLayer(imageLayerId)
-          : undefined;
-        const imageColor = imageLayer
-          ? (imageLayer as IImageLayer).color
-          : undefined;
+      reaction(
+        () => editor.activeDocument?.viewSettings.viewMode,
+        (viewMode) => {
+          switch (viewMode) {
+            case "2D":
+              if (this.flyControls.isLocked) this.flyControls.unlock();
+              this.orbitControls.enabled = false;
+              break;
+            case "3D":
+              this.orbitControls.enabled = !this.flyControls.isLocked;
+          }
 
-        const annotationLayerParameter =
-          editor.activeDocument?.viewport3D.activeTransferFunction?.params
-            .annotation;
-        const annotationLayerId = annotationLayerParameter
-          ? (annotationLayerParameter as ILayerParameter).value
-          : undefined;
-        const annotationLayer = annotationLayerId
-          ? editor.activeDocument?.getLayer(annotationLayerId)
-          : undefined;
-        const annotation = annotationLayer
-          ? (annotationLayer as IImageLayer).image
-          : undefined;
-
-        const transferFunction =
-          editor.activeDocument?.viewport3D.activeTransferFunction;
-
-        return [
-          editor.theme,
-          editor.activeDocument?.layers.map((layer) => layer.isVisible),
-          imageColor,
-          annotation,
-          annotationLayer?.color,
-
-          editor.activeDocument?.viewSettings.viewMode,
-          editor.activeDocument?.viewSettings.brightness,
-          editor.activeDocument?.viewSettings.contrast,
-          editor.activeDocument?.viewport3D.shadingMode,
-          editor.activeDocument?.viewport3D.opacity,
-          transferFunction?.name,
-          transferFunction?.params.useFocus?.value,
-          transferFunction?.params.densityRange?.value,
-          transferFunction?.params.contextOpacity?.value,
-          transferFunction?.params.focusOpacity?.value,
-          transferFunction?.params.coneAngle?.value,
-          transferFunction?.params.file?.value,
-
-          transferFunction?.name === "fc-cone"
-            ? (transferFunction as IConeTransferFunction).coneDirection.toArray()
-            : undefined,
-        ];
-      }, this.lazyRender),
-      autorun(() => {
-        switch (editor.activeDocument?.viewSettings.viewMode) {
-          case "2D":
-            if (this.flyControls.isLocked) this.flyControls.unlock();
-            this.orbitControls.enabled = false;
-            break;
-          case "3D":
-            this.orbitControls.enabled = !this.flyControls.isLocked;
-        }
-      }),
+          this.lazyRender();
+        },
+        { fireImmediately: true },
+      ),
       reaction(
         () => editor.activeDocument?.viewport3D.cameraMatrix?.toArray(),
         (array?: number[]) => {
@@ -240,6 +198,15 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
           }
           this.onCameraMove(false);
           this.lazyRender();
+        },
+      ),
+      reaction(
+        () => editor.activeDocument?.viewport3D.orbitTarget.toArray(),
+        () => {
+          const target = editor.activeDocument?.viewport3D.orbitTarget;
+          if (target) {
+            this.orbitControls.target.set(target.x, target.y, target.z);
+          }
         },
       ),
       reaction(
@@ -323,8 +290,13 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
     this.flyControls.tick();
   };
 
-  public lazyRender = () => {
+  public lazyRender = (updateLighting = false) => {
     this.lazyRenderTriggered = true;
+
+    if (updateLighting) {
+      this.laoComputer.setDirty();
+      this.gradientComputer.updateOutputDerivative();
+    }
   };
 
   private eagerRender = () => {
@@ -351,6 +323,17 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
   public get isShowingFullResolution() {
     return this.resolutionComputer.fullResolutionFlushed;
   }
+
+  private onOrbitControlsChange = () => {
+    const { target } = this.orbitControls;
+    this.editor.activeDocument?.viewport3D.setOrbitTarget(
+      target.x,
+      target.y,
+      target.z,
+    );
+
+    this.onCameraMove();
+  };
 
   private onCameraMove = (pushMatrix = true) => {
     if (pushMatrix) {
@@ -404,6 +387,7 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
         : 1,
     );
     this.orbitControls.target.add(this.camera.position);
+    this.onOrbitControlsChange();
   };
 
   private selectNavigationTool = () => {

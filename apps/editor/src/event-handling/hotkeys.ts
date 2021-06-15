@@ -78,16 +78,10 @@ export const setUpHotKeys = (store: RootStore): IDisposer => {
   // Undo/Redo
   hotkeys("ctrl+z", (event) => {
     event.preventDefault();
-    // TODO: Remove check as soon as undo/redo is correctly updated in the 3D view
-    if (store.editor.activeDocument?.viewSettings.viewMode === "3D") return;
-
     store.editor.activeDocument?.history.undo();
   });
   hotkeys("ctrl+shift+z,ctrl+y", (event) => {
     event.preventDefault();
-    // TODO: Remove check as soon as undo/redo is correctly updated in the 3D view
-    if (store.editor.activeDocument?.viewSettings.viewMode === "3D") return;
-
     store.editor.activeDocument?.history.redo();
   });
 
@@ -176,10 +170,18 @@ export const setUpHotKeys = (store: RootStore): IDisposer => {
   });
   hotkeys("ctrl+0", (event) => {
     event.preventDefault();
-    if (store.editor.activeDocument?.viewSettings.viewMode !== "2D") return;
+    const mode = store.editor.activeDocument?.viewSettings.viewMode;
 
-    store.editor.activeDocument?.viewport2D.setZoomLevel();
-    store.editor.activeDocument?.viewport2D.setOffset();
+    switch (mode) {
+      case "2D":
+        store.editor.activeDocument?.viewport2D.setZoomLevel();
+        store.editor.activeDocument?.viewport2D.setOffset();
+        return;
+      case "3D":
+        store.editor.activeDocument?.viewport3D.setCameraMatrix();
+        store.editor.activeDocument?.viewport3D.setOrbitTarget();
+        store.editor.volumeRenderer?.lazyRender();
+    }
   });
 
   // Save & Export

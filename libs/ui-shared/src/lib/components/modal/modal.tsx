@@ -20,7 +20,6 @@ const ModalContainer = styled(Sheet)<Pick<ModalProps, "baseZIndex">>`
   justify-content: flex-start;
   align-items: flex-start;
   flex-direction: column;
-  overflow: hidden;
   padding: 14px;
   pointer-events: auto;
 
@@ -51,8 +50,8 @@ const TitleRow = styled.div`
 export const Divider = styled.div`
   width: 100%;
   height: 1px;
-  border-radius: 1px;
   background-color: ${color("sheetBorder")};
+  border-radius: 1px;
   margin-bottom: 16px;
 `;
 

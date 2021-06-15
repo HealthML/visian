@@ -27,9 +27,11 @@ export class VoxelWriter<N extends string> extends Tool<N> {
 
   protected finishStroke(
     isDeleteOperation: boolean | undefined,
-    imageLayer = this.document.layers[0] as IImageLayer,
+    layer = this.document.activeLayer,
     viewType = this.document.viewport2D.mainViewType,
   ) {
+    if (!layer) return;
+    const imageLayer = layer as IImageLayer;
     const image = imageLayer.image as RenderedImage;
 
     // The RenderedImage needs to receive one more update before the modified
@@ -67,9 +69,10 @@ export class VoxelWriter<N extends string> extends Tool<N> {
   protected writeVoxels(
     voxels: VoxelWithValue[],
     viewType = this.document.viewport2D.mainViewType,
-    image = (this.document.layers[0] as IImageLayer).image as RenderedImage,
+    layer = this.document.activeLayer,
   ) {
-    if (!image || !voxels.length) return;
+    if (!layer || !voxels.length) return;
+    const image = (layer as IImageLayer).image as RenderedImage;
 
     if (this.undoable && !this.strokeActive) {
       this.strokeActive = true;
@@ -80,6 +83,7 @@ export class VoxelWriter<N extends string> extends Tool<N> {
     image.setAtlasVoxels(voxels);
 
     this.document.sliceRenderer?.lazyRender();
+    this.document.volumeRenderer?.lazyRender(true);
   }
 }
 

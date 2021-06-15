@@ -1,6 +1,5 @@
 import React from "react";
-
-import { SwitchItemType } from "./switch-item.props";
+import { IEnumParameterOption } from "../../types";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export interface SwitchProps<T = any>
@@ -11,7 +10,7 @@ export interface SwitchProps<T = any>
   labelTx?: string;
   label?: string;
 
-  items: SwitchItemType[];
+  options: IEnumParameterOption<T>[];
 
   defaultValue?: T;
   value?: T;

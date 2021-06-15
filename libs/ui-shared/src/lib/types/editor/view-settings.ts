@@ -71,17 +71,6 @@ export interface IViewport2D {
    * @param slice The slice number.
    */
   setSelectedSlice(viewType: ViewType | undefined, slice: number): void;
-  /**
-   * Sets crosshair position for the given `ViewType`.
-   * The new position should be written into the `ViewSettings`'
-   * `selectedVoxel` attribute.
-   *
-   * @param viewType The `ViewType` to set the crosshair position for.
-   * Defaults to the current `mainViewType`.
-   * @param slicePosition The pixel position the the slice as seen from the
-   * passed `viewType`.
-   */
-  moveCrosshair(viewType: ViewType | undefined, slicePosition: Pixel): void;
 
   /** Increases the current `zoomLevel` by adding the current `zoomStep`. */
   zoomIn(): void;
@@ -137,6 +126,7 @@ export interface IViewport3D<N extends string> {
 
   /** The 3D camera's world matrix. */
   cameraMatrix: Matrix4;
+  orbitTarget: Vector;
   volumeSpaceCameraPosition: [number, number, number];
 
   /** The volumetric rendering opacity, scales the density of every voxel. */
@@ -156,6 +146,7 @@ export interface IViewport3D<N extends string> {
 
   setIsInXR(value?: boolean): void;
   setCameraMatrix(value?: Matrix4): void;
+  setOrbitTarget(x?: number, y?: number, z?: number): void;
   setVolumeSpaceCameraPosition(x: number, y: number, z: number): void;
   setOpacity(value?: number): void;
   setShadingMode(value?: ShadingMode): void;

@@ -66,7 +66,7 @@ VolumeData getInterpolatedVolumeData(vec3 volumeCoords) {
 
   VolumeData interpolatedData;
 
-  interpolatedData.density = mix(lowerData.density, upperData.density, interpolation);
+  interpolatedData.density = mix(lowerData.density, upperData.density, uVolumeNearestFiltering ? step(0.5, interpolation) : interpolation);
   interpolatedData.firstDerivative = mix(lowerData.firstDerivative, upperData.firstDerivative, interpolation);
   interpolatedData.secondDerivative = mix(lowerData.secondDerivative, upperData.secondDerivative, interpolation);
 

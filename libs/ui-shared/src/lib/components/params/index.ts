@@ -3,6 +3,7 @@ export * from "./button-param";
 export * from "./color-param";
 export * from "./enum-param";
 export * from "./file-param";
+export * from "./layer-param";
 export * from "./number-param";
 export * from "./number-range-param";
 

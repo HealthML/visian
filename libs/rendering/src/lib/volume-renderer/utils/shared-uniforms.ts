@@ -48,6 +48,11 @@ export class SharedUniforms implements IDisposable {
         if (!coneTransferFunction) return;
 
         this.uniforms.uConeDirection.value = (coneTransferFunction as IConeTransferFunction).coneDirection.toArray();
+
+        const shouldUpdateLighting =
+          editor.activeDocument?.viewport3D.activeTransferFunction?.name ===
+          "fc-cone";
+        editor.activeDocument?.volumeRenderer?.lazyRender(shouldUpdateLighting);
       }),
       autorun(() => {
         const focusId = editor.activeDocument?.viewport3D.activeTransferFunction
@@ -71,11 +76,15 @@ export class SharedUniforms implements IDisposable {
                   .useFocus?.value
               : isFocusLayerVisible)) ??
           false;
+
+        editor.activeDocument?.volumeRenderer?.lazyRender(true);
       }),
       autorun(() => {
         this.uniforms.uFocusOpacity.value =
           editor.activeDocument?.viewport3D.activeTransferFunction?.params
             .focusOpacity?.value ?? 1;
+
+        editor.activeDocument?.volumeRenderer?.lazyRender(true);
       }),
       autorun(() => {
         const transferFunctionName =
@@ -83,15 +92,21 @@ export class SharedUniforms implements IDisposable {
         this.uniforms.uTransferFunction.value = transferFunctionName
           ? transferFunctionNameToId(transferFunctionName)
           : 0;
+
+        editor.activeDocument?.volumeRenderer?.lazyRender(true);
       }),
       autorun(() => {
         this.uniforms.uOpacity.value =
           editor.activeDocument?.viewport3D.opacity ?? 1;
+
+        editor.activeDocument?.volumeRenderer?.lazyRender(true);
       }),
       autorun(() => {
         this.uniforms.uContextOpacity.value =
           editor.activeDocument?.viewport3D.activeTransferFunction?.params
             .contextOpacity?.value ?? 1;
+
+        editor.activeDocument?.volumeRenderer?.lazyRender(true);
       }),
       autorun(() => {
         const rangeParameter =
@@ -104,11 +119,15 @@ export class SharedUniforms implements IDisposable {
         ] = rangeParameter
           ? (rangeParameter as INumberRangeParameter).value
           : [0, 1];
+
+        editor.activeDocument?.volumeRenderer?.lazyRender(true);
       }),
       autorun(() => {
         this.uniforms.uConeAngle.value =
           editor.activeDocument?.viewport3D.activeTransferFunction?.params
             .coneAngle?.value ?? 1;
+
+        editor.activeDocument?.volumeRenderer?.lazyRender(true);
       }),
       autorun(() => {
         const shadingMode = editor.activeDocument?.viewport3D.shadingMode;
@@ -116,6 +135,8 @@ export class SharedUniforms implements IDisposable {
         this.uniforms.uLightingMode.value = shadingMode
           ? shadingModeNameToId(shadingMode)
           : 0;
+
+        editor.activeDocument?.volumeRenderer?.lazyRender();
       }),
       autorun(() => {
         const brightness = editor.activeDocument?.viewSettings.brightness ?? 1;
@@ -126,10 +147,14 @@ export class SharedUniforms implements IDisposable {
             : 1;
 
         this.uniforms.uBrightness.value = brightness * factor;
+
+        editor.activeDocument?.volumeRenderer?.lazyRender();
       }),
       autorun(() => {
         this.uniforms.uContrast.value =
           editor.activeDocument?.viewSettings.contrast ?? 1;
+
+        editor.activeDocument?.volumeRenderer?.lazyRender();
       }),
       autorun(() => {
         const customTransferFunction =
@@ -138,6 +163,16 @@ export class SharedUniforms implements IDisposable {
         this.uniforms.uCustomTFTexture.value = customTransferFunction
           ? (customTransferFunction as ICustomTransferFunction).texture
           : null;
+
+        editor.activeDocument?.volumeRenderer?.lazyRender(true);
+      }),
+      autorun(() => {
+        this.uniforms.uVolumeNearestFiltering.value = Boolean(
+          editor.activeDocument?.viewport3D.activeTransferFunction?.params
+            .useBlockyContext?.value,
+        );
+
+        editor.activeDocument?.volumeRenderer?.lazyRender(true);
       }),
       reaction(
         () => {
@@ -151,20 +186,32 @@ export class SharedUniforms implements IDisposable {
 
           if (!imageLayer) return undefined;
 
+          const useNearestFiltering = Boolean(
+            editor.activeDocument?.viewport3D.activeTransferFunction?.params
+              .useBlockyContext?.value,
+          );
+
           return [
             imageLayer as IImageLayer,
             imageLayer.color,
             editor.theme,
-          ] as [IImageLayer, string | undefined, Theme];
+            useNearestFiltering,
+          ] as [IImageLayer, string | undefined, Theme, boolean];
         },
-        (params?: [IImageLayer, string | undefined, Theme]) => {
-          if (!params) return;
+        (
+          params?: [IImageLayer, string | undefined, Theme, boolean],
+          previousParams?: [IImageLayer, string | undefined, Theme, boolean],
+        ) => {
+          if (!params) return editor.volumeRenderer?.lazyRender();
 
-          const [imageLayer, imageColor, theme] = params;
+          const [imageLayer, imageColor, theme, useNearestFiltering] = params;
 
           const image = imageLayer.image as RenderedImage;
 
-          this.uniforms.uVolume.value = image.getTexture(0, THREE.LinearFilter);
+          this.uniforms.uVolume.value = image.getTexture(
+            0,
+            useNearestFiltering ? THREE.NearestFilter : THREE.LinearFilter,
+          );
           this.uniforms.uVoxelCount.value = image.voxelCount;
           this.uniforms.uAtlasGrid.value = image.getAtlasGrid();
           this.uniforms.uStepSize.value = getStepSize(image);
@@ -175,6 +222,13 @@ export class SharedUniforms implements IDisposable {
               (imageColor as any) || "foreground",
             )({ theme }),
           );
+
+          const previousImageLayer = previousParams
+            ? previousParams[0]
+            : undefined;
+          const shouldUpdateLighting = imageLayer.id !== previousImageLayer?.id;
+
+          editor.volumeRenderer?.lazyRender(shouldUpdateLighting);
         },
         { fireImmediately: true },
       ),
@@ -196,7 +250,10 @@ export class SharedUniforms implements IDisposable {
             editor.theme,
           ] as [IImageLayer, string | undefined, Theme];
         },
-        (params?: [IImageLayer, string | undefined, Theme]) => {
+        (
+          params?: [IImageLayer, string | undefined, Theme],
+          previousParams?: [IImageLayer, string | undefined, Theme],
+        ) => {
           if (params) {
             const [imageLayer, imageColor, theme] = params;
 
@@ -210,8 +267,17 @@ export class SharedUniforms implements IDisposable {
                 (imageColor as any) || "foreground",
               )({ theme }),
             );
+
+            const previousImageLayer = previousParams
+              ? previousParams[0]
+              : undefined;
+            const shouldUpdateLighting =
+              imageLayer.id !== previousImageLayer?.id;
+
+            editor.volumeRenderer?.lazyRender(shouldUpdateLighting);
           } else {
             this.uniforms.uFocus.value = null;
+            editor.activeDocument?.volumeRenderer?.lazyRender(true);
           }
         },
         { fireImmediately: true },

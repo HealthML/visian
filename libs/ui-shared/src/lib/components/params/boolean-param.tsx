@@ -3,7 +3,7 @@ import React from "react";
 import { IBooleanParameter } from "../../types";
 import { Switch } from "../switch";
 
-const booleanSwitchItems = [
+const booleanSwitchOptions = [
   { labelTx: "off", value: false },
   { labelTx: "on", value: true },
 ];
@@ -27,7 +27,7 @@ export const BooleanParam: React.FC<Partial<BooleanParamProps>> = ({
     {...rest}
     labelTx={labelTx}
     label={label}
-    items={booleanSwitchItems}
+    options={booleanSwitchOptions}
     value={Boolean(value)}
     onChange={setValue}
   />

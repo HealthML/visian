@@ -83,6 +83,7 @@
   "annotation-layer": "Focus Volume",
   "image-layer": "Volume",
 
+  "use-blocky-context": "Show Context Volume Voxels",
   "use-focus": "Show Focus Volume",
   "density-range": "Density Range",
 

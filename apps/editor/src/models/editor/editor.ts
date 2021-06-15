@@ -11,6 +11,7 @@ import * as THREE from "three";
 
 import { StoreContext } from "../types";
 import { Document, DocumentSnapshot } from "./document";
+import { ImageLayer } from "./layers";
 
 export interface EditorSnapshot {
   activeDocument?: DocumentSnapshot;
@@ -92,6 +93,10 @@ export class Editor
   }
 
   private animate = () => {
+    this.activeDocument?.tools.toolRenderer.render();
+    this.activeDocument?.layers
+      .filter((layer) => layer.kind === "image")
+      .forEach((imageLayer) => (imageLayer as ImageLayer).image.render());
     this.sliceRenderer?.animate();
     this.volumeRenderer?.animate();
   };

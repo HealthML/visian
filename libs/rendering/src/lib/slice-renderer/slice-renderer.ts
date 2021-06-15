@@ -6,16 +6,10 @@ import {
   ViewType,
   viewTypes,
 } from "@visian/utils";
-import {
-  IEditor,
-  IImageLayer,
-  IRenderLoopSubscriber,
-  ISliceRenderer,
-} from "@visian/ui-shared";
+import { IEditor, IImageLayer, ISliceRenderer } from "@visian/ui-shared";
 import { reaction } from "mobx";
 import * as THREE from "three";
 
-import { RenderedImage } from "../rendered-image";
 import { Slice } from "./slice";
 import {
   getOrder,
@@ -35,10 +29,6 @@ export class SliceRenderer implements IDisposable, ISliceRenderer {
   private slices: Slice[];
 
   private lazyRenderTriggered = true;
-
-  private isImageLoaded = false;
-
-  private renderLoopSubscribers: IRenderLoopSubscriber[] = [];
 
   private disposers: IDisposer[] = [];
 
@@ -66,39 +56,12 @@ export class SliceRenderer implements IDisposable, ISliceRenderer {
 
     this.disposers.push(
       reaction(
-        () =>
-          editor.activeDocument && editor.activeDocument.layers.length > 1
-            ? ((editor.activeDocument.layers[1] as IImageLayer)
-                .image as RenderedImage)
-            : undefined,
-        (image?: RenderedImage, oldImage?: RenderedImage) => {
-          if (oldImage) {
-            this.unsubscribeFromRenderLoop(oldImage);
-          }
-
-          if (!image) return;
-          this.setImage(image);
-
+        () => editor.activeDocument && editor.activeDocument.layers.length > 0,
+        () => {
           // Wrapped in a setTimeout, because if no image was previously loaded
           // the side views need to actually appear before updating the camera planes.
           setTimeout(this.updateCamera);
         },
-        { fireImmediately: true },
-      ),
-      reaction(
-        () =>
-          editor.activeDocument && editor.activeDocument.layers.length
-            ? ((editor.activeDocument?.layers[0] as IImageLayer)
-                .image as RenderedImage)
-            : undefined,
-        (image?: RenderedImage, oldImage?: RenderedImage) => {
-          if (oldImage) {
-            this.unsubscribeFromRenderLoop(oldImage);
-          }
-
-          this.setAnnotation(image);
-        },
-        { fireImmediately: true },
       ),
       reaction(
         () => editor.activeDocument?.viewport2D.mainViewType,
@@ -160,16 +123,6 @@ export class SliceRenderer implements IDisposable, ISliceRenderer {
       ViewType.Transverse,
   ) {
     return this.slices[viewType].outline;
-  }
-
-  public subscribeToRenderLoop(subscriber: IRenderLoopSubscriber) {
-    this.renderLoopSubscribers.push(subscriber);
-  }
-
-  public unsubscribeFromRenderLoop(unsubscriber: IRenderLoopSubscriber) {
-    this.renderLoopSubscribers = this.renderLoopSubscribers.filter(
-      (subscriber) => subscriber !== unsubscriber,
-    );
   }
 
   public resize = () => {
@@ -297,16 +250,12 @@ export class SliceRenderer implements IDisposable, ISliceRenderer {
       ViewType.Transverse,
     preview = false,
   ) {
-    if (
-      !this.editor.activeDocument ||
-      this.editor.activeDocument.layers.length < 2
-    )
+    if (!this.editor.activeDocument || !this.editor.activeDocument.activeLayer)
       return;
 
-    const { image } = this.editor.activeDocument.layers[1] as IImageLayer;
-    if (!image) return;
+    const imageLayer = this.editor.activeDocument.activeLayer;
 
-    const { voxelCount } = image;
+    const { voxelCount } = (imageLayer as IImageLayer).image;
 
     const [widthAxis, heightAxis] = getPlaneAxes(viewType);
     const scanWidth = voxelCount[widthAxis];
@@ -340,10 +289,13 @@ export class SliceRenderer implements IDisposable, ISliceRenderer {
   }
 
   public eagerRender = () => {
-    if (!this.isImageLoaded) return;
+    if (
+      !this.editor.activeDocument ||
+      this.editor.activeDocument.layers.length < 1
+    ) {
+      return;
+    }
     this.lazyRenderTriggered = false;
-
-    this.renderLoopSubscribers.forEach((subscriber) => subscriber.render());
 
     const order = getOrder(
       this.editor.activeDocument?.viewport2D.mainViewType ??
@@ -355,27 +307,6 @@ export class SliceRenderer implements IDisposable, ISliceRenderer {
       renderer.render(this.scenes[viewType], camera);
     });
   };
-
-  private setImage(image: RenderedImage) {
-    this.slices.forEach((slice) => slice.setImage(image));
-    this.isImageLoaded = true;
-
-    image.setRenderers(this._renderers);
-
-    this.subscribeToRenderLoop(image);
-
-    this.lazyRender();
-  }
-
-  private setAnnotation(image?: RenderedImage) {
-    this.slices.forEach((slice) => slice.setAnnotation(image));
-
-    image?.setRenderers(this._renderers);
-
-    if (image) this.subscribeToRenderLoop(image);
-
-    this.lazyRender();
-  }
 }
 
 export default SliceRenderer;

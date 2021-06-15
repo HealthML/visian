@@ -56,7 +56,7 @@ export class Tools
   protected isNavigationDragged = false;
   public isDrawing = false;
 
-  private toolRenderer: ToolRenderer;
+  public toolRenderer: ToolRenderer;
 
   constructor(
     snapshot: Partial<ToolsSnapshot<ToolName>> | undefined,
@@ -171,6 +171,8 @@ export class Tools
   }
 
   public setActiveTool(nameOrTool?: ToolName | ITool<ToolName>): void {
+    if (this.isDrawing) return;
+
     const previouslyActiveTool = this.activeTool;
 
     this.activeToolName = nameOrTool
@@ -218,9 +220,8 @@ export class Tools
       this.activeTool?.isBrush &&
         this.isCursorOverDrawableArea &&
         !this.isCursorOverFloatingUI &&
-        this.document.layers.length &&
-        this.document.layers[0].isAnnotation &&
-        this.document.layers[0].isVisible,
+        this.document.activeLayer?.isAnnotation &&
+        this.document.activeLayer?.isVisible,
     );
   }
 
