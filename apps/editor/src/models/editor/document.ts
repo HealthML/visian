@@ -218,8 +218,6 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
       throw new Error("annotation-mismatch-error");
     }
 
-    // Replace old annotation (if any)
-    if (this.layerIds.length > 1) this.deleteLayer(this.layerIds[0]);
     this.addLayer(annotationLayer);
     this.setActiveLayer(annotationLayer);
   }
