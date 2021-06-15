@@ -71,6 +71,12 @@ export class ResolutionComputer extends TiledRenderer {
     super.setSize(this.workingVector.x, this.workingVector.y);
   }
 
+  public setResolutionSteps(steps = 2) {
+    this.resolutionSteps = steps;
+
+    if (!this._fullResolutionFlushed) this.restart();
+  }
+
   private get currentResolutionReduction() {
     return 2 ** (this.resolutionSteps - this.currentResolutionStep - 1);
   }
