@@ -1,12 +1,12 @@
 import {
+  BlueButtonParam,
   ButtonParam,
-  color,
   ColorMode,
   Divider,
   EnumParam,
   FloatingUIButton,
   Modal,
-  sheetNoise,
+  RedButtonParam,
   Theme,
   useTranslation,
 } from "@visian/ui-shared";
@@ -21,24 +21,6 @@ import { MenuProps } from "./menu.props";
 // Styled Components
 const MenuButton = styled(FloatingUIButton)`
   margin-right: 16px;
-`;
-
-const FeedbackButton = styled(ButtonParam)`
-  background: ${sheetNoise}, ${color("blueSheet")};
-  border-color: ${color("blueBorder")};
-
-  &:active {
-    border-color: rgba(0, 133, 255, 1);
-  }
-`;
-
-const ResetButton = styled(ButtonParam)`
-  background: ${sheetNoise}, ${color("redSheet")};
-  border-color: ${color("redBorder")};
-
-  &:active {
-    border-color: rgba(202, 51, 69, 1);
-  }
 `;
 
 // Menu Items
@@ -89,12 +71,9 @@ export const Menu: React.FC<MenuProps> = observer(({ onOpenShortcutPopUp }) => {
     [i18n],
   );
 
-  const openShortcutPopUp = useCallback(
-    (event?: React.PointerEvent) => {
-      if (onOpenShortcutPopUp) onOpenShortcutPopUp();
-    },
-    [onOpenShortcutPopUp],
-  );
+  const openShortcutPopUp = useCallback(() => {
+    if (onOpenShortcutPopUp) onOpenShortcutPopUp();
+  }, [onOpenShortcutPopUp]);
 
   const destroy = useCallback(() => {
     store?.destroy();
@@ -134,13 +113,13 @@ export const Menu: React.FC<MenuProps> = observer(({ onOpenShortcutPopUp }) => {
         {feedbackMailAddress && (
           <>
             <Divider />
-            <FeedbackButton
+            <BlueButtonParam
               labelTx="ideas-feedback"
               handlePress={sendFeedback}
             />
           </>
         )}
-        <ResetButton labelTx="clear-data" handlePress={destroy} />
+        <RedButtonParam labelTx="clear-data" handlePress={destroy} />
         <ButtonParam label="Shortcuts" handlePress={openShortcutPopUp} isLast />
       </Modal>
     </>

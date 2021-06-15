@@ -82,6 +82,12 @@ export interface ILayer {
 
   /** Sets this layer's parent layer, typically the group it is contained in. */
   setParent(idOrLayer?: string | ILayer): void;
+
+  /**
+   * Deletes this layer from the document it is contained in and any potential
+   * parents.
+   * */
+  delete(): void;
 }
 
 /**

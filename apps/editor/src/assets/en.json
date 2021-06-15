@@ -46,6 +46,8 @@
   "layer-settings": "Layer Settings",
   "opacity": "Opacity",
   "background-color": "Background Color",
+  "delete-layer": "Delete Layer",
+  "delete-layer-confirmation": "Delete layer \"{{layer}}\"?",
 
   "view-settings": "View Settings",
   "transverse": "Transverse (1)",

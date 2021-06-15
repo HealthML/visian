@@ -16,7 +16,7 @@ const ColorList = styled.div`
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
-  margin-left: -12px;
+  margin: 0 0 10px -12px;
 `;
 
 const StyledColor = styled(Color)`
