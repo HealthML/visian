@@ -165,12 +165,13 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
   };
 
   public deleteLayer = (idOrLayer: string | ILayer): void => {
-    this.layerIds = this.layerIds.filter((id) =>
-      typeof idOrLayer === "string" ? id !== idOrLayer : id !== idOrLayer.id,
-    );
-    delete this.layerMap[
-      typeof idOrLayer === "string" ? idOrLayer : idOrLayer.id
-    ];
+    const layerId = typeof idOrLayer === "string" ? idOrLayer : idOrLayer.id;
+
+    this.layerIds = this.layerIds.filter((id) => id !== layerId);
+    delete this.layerMap[layerId];
+    if (this.activeLayerId === layerId) {
+      this.setActiveLayer(this.layerIds[0]);
+    }
   };
 
   public get has3DLayers(): boolean {
