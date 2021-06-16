@@ -307,6 +307,10 @@ export class SliceRenderer implements IDisposable, ISliceRenderer {
       renderer.render(this.scenes[viewType], camera);
     });
   };
+
+  public resetCrosshairOffset() {
+    this.slices.forEach((slice) => slice.setCrosshairSynchOffset());
+  }
 }
 
 export default SliceRenderer;

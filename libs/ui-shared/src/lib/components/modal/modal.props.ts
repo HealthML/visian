@@ -16,6 +16,8 @@ export interface ModalProps
   /** If set to `false`, hides the modal. */
   isOpen?: boolean;
 
+  headerChildren?: React.ReactNode;
+
   /**
    * If provided, a reset button is shown and this handler is called when it
    * is pressed.
