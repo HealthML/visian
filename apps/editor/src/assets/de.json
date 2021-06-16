@@ -41,6 +41,7 @@
   "neighbor-threshold": "Nachbarschwellwert",
 
   "layers": "Ebenen",
+  "add-annotation-layer": "Neue Annotation hinzufügen",
   "no-layers": "Keine Ebenen geladen.",
   "untitled-layer": "Unbenannte Ebene",
   "layer-settings": "Ebeneneinstellungen",

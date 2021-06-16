@@ -41,6 +41,7 @@
   "neighbor-threshold": "Neighbor Threshold",
 
   "layers": "Layers",
+  "add-annotation-layer": "Add new annotation",
   "no-layers": "No layers loaded.",
   "untitled-layer": "Untitled layer",
   "layer-settings": "Layer Settings",

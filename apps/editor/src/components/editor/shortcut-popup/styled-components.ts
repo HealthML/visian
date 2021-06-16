@@ -71,7 +71,7 @@ export const ShortcutPopUpContainer = styled(PopUp)`
   max-height: 800px;
 `;
 
-export const PlusIcon = styled(Icon).attrs(() => ({ icon: "plusIcon" }))`
+export const PlusIcon = styled(Icon).attrs(() => ({ icon: "plusSmall" }))`
   margin: 0 8px;
   height: 7px;
   width: 7px;

@@ -47,11 +47,12 @@ export class ImageLayer
   public static fromNewAnnotationForImage<T2 extends TypedArray = TypedArray>(
     image: Image<T2>,
     document: IDocument,
+    color?: string,
   ) {
     return new this(
       {
         isAnnotation: true,
-        color: defaultAnnotationColor,
+        color: color || defaultAnnotationColor,
         image: {
           name: `${image.name.split(".")[0]}_annotation`,
           dimensionality: image.dimensionality,
