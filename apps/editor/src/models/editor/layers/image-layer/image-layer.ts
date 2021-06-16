@@ -54,6 +54,7 @@ export class ImageLayer
         isAnnotation: true,
         color: color || defaultAnnotationColor,
         image: {
+          atlas: new Uint8Array(image.getAtlas().length),
           name: `${image.name.split(".")[0]}_annotation`,
           dimensionality: image.dimensionality,
           origin: image.origin.toArray(),
