@@ -1,4 +1,5 @@
 import {
+  dataColorKeys,
   IDocument,
   IEditor,
   ILayer,
@@ -115,6 +116,7 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
       setTitle: action,
       setActiveLayer: action,
       addLayer: action,
+      addNewAnnotationLayer: action,
       deleteLayer: action,
       importImage: action,
       importAnnotation: action,
@@ -162,6 +164,31 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
       this.layerMap[layer.id] = layer;
       this.layerIds.unshift(layer.id);
     });
+  };
+
+  public addNewAnnotationLayer = () => {
+    const layerStack = this.layers;
+
+    const baseLayer = layerStack.find(
+      (layer) => layer.kind === "image" && !layer.isAnnotation,
+    ) as ImageLayer | undefined;
+    if (!baseLayer) return;
+
+    const usedColors: { [key: string]: boolean } = {};
+    layerStack.forEach((layer) => {
+      if (layer.color) {
+        usedColors[layer.color] = true;
+      }
+    });
+    const colorCandidates = dataColorKeys.filter((color) => !usedColors[color]);
+
+    const annotationLayer = ImageLayer.fromNewAnnotationForImage(
+      baseLayer.image,
+      this,
+      colorCandidates.length ? colorCandidates[0] : undefined,
+    );
+    this.addLayer(annotationLayer);
+    this.setActiveLayer(annotationLayer);
   };
 
   public deleteLayer = (idOrLayer: string | ILayer): void => {
