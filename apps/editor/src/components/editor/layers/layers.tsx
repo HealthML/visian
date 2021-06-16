@@ -126,7 +126,7 @@ export const Layers: React.FC = observer(() => {
             icon="plus"
             tooltipTx="add-annotation-layer"
             isDisabled={!layerCount}
-            onPointerDown={store?.editor.activeDocument?.newAnnotationLayer}
+            onPointerDown={store?.editor.activeDocument?.addNewAnnotationLayer}
           />
         }
       >
