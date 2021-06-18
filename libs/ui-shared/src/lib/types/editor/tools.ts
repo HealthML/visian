@@ -129,6 +129,4 @@ export interface ITools<N extends string> {
   setIsCursorOverFloatingUI(value: boolean): void;
   setIsNavigationDragged(value: boolean): void;
   setIsDrawing(value: boolean): void;
-
-  handleCurrentSliceChanged(): void;
 }

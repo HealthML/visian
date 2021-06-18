@@ -17,13 +17,13 @@ export class OutlineTool<
   constructor(
     document: IDocument,
     toolRenderer: ToolRenderer,
-    private value = 255,
+    private isPositive = true,
   ) {
     super(
       {
-        name: (value ? "outline-tool" : "outline-eraser") as N,
-        altToolName: (value ? "outline-eraser" : "outline-tool") as N,
-        icon: value ? "outline" : "outline",
+        name: (isPositive ? "outline-tool" : "outline-eraser") as N,
+        altToolName: (isPositive ? "outline-eraser" : "outline-tool") as N,
+        icon: isPositive ? "outline" : "outline",
         supportedViewModes: ["2D"],
         supportedLayerKinds: ["image"],
         isDrawingTool: true,
@@ -32,9 +32,7 @@ export class OutlineTool<
       toolRenderer,
     );
 
-    this.material = new THREE.MeshBasicMaterial({
-      color: new THREE.Color(this.value, this.value, this.value),
-    });
+    this.material = new THREE.MeshBasicMaterial();
   }
 
   public startAt(dragPoint: DragPoint) {
@@ -71,7 +69,9 @@ export class OutlineTool<
 
     this.lastPoint = undefined;
 
-    this.endStroke(!this.value);
+    this.endStroke(!this.isPositive);
+
+    this.toolRenderer.waitForRender().then(() => this.toolRenderer.endStroke());
   }
 
   private getCoords(dragPoint: DragPoint) {
@@ -92,6 +92,10 @@ export class OutlineTool<
 
     this.geometry = new THREE.ShapeGeometry(this.outline);
 
-    this.toolRenderer.renderShape(this.geometry, this.material);
+    this.toolRenderer.renderShape(
+      this.geometry,
+      this.material,
+      this.isPositive,
+    );
   }
 }

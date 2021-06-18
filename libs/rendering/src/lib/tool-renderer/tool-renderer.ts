@@ -2,11 +2,13 @@ import { IDocument, IImageLayer } from "@visian/ui-shared";
 import { getOrthogonalAxis, getPlaneAxes, IDisposer } from "@visian/utils";
 import { reaction } from "mobx";
 import * as THREE from "three";
-import { RenderedImage } from "../rendered-image";
+import { MergeFunction, RenderedImage } from "../rendered-image";
 
 import { Circles, ToolCamera, Circle } from "./utils";
 
 export class ToolRenderer {
+  protected isCurrentStrokePositive = true;
+
   protected circlesToRender: Circle[] = [];
   private shapesToRender: THREE.Mesh[] = [];
 
@@ -26,21 +28,16 @@ export class ToolRenderer {
 
     this.disposers.push(
       reaction(
-        () => ({
-          mainViewType: document.viewport2D.mainViewType,
-          selectedSlice: document.viewSettings.selectedVoxel.getFromView(
+        () => [
+          document.viewport2D.mainViewType,
+          document.viewSettings.selectedVoxel.getFromView(
             document.viewport2D.mainViewType,
           ),
-          annotation: document.activeLayer
+          document.activeLayer
             ? ((document.activeLayer as IImageLayer).image as RenderedImage)
             : undefined,
-        }),
-        (params) => {
-          if (!params.annotation) return;
-
-          this.resizeRenderTargets();
-          this.handleCurrentSliceChanged(params);
-        },
+        ],
+        this.resizeRenderTargets,
         { fireImmediately: true },
       ),
       reaction(
@@ -51,7 +48,6 @@ export class ToolRenderer {
               () => new THREE.WebGLRenderTarget(1, 1),
             );
             this.resizeRenderTargets();
-            this.handleCurrentSliceChanged();
           } else {
             this.renderTargets = [];
           }
@@ -66,34 +62,13 @@ export class ToolRenderer {
     this.disposers.forEach((disposer) => disposer());
   }
 
-  /**
-   * Needs to be called whenever the current slice of the active annotation is
-   * changed by some other source than this tool renderer.
-   */
-  public handleCurrentSliceChanged = (
-    { mainViewType, selectedSlice, annotation } = {
-      mainViewType: this.document.viewport2D.mainViewType,
-      selectedSlice: this.document.viewSettings.selectedVoxel.getFromView(
-        this.document.viewport2D.mainViewType,
-      ),
-      annotation: this.document.activeLayer
-        ? ((this.document.activeLayer as IImageLayer).image as RenderedImage)
-        : undefined,
-    },
-  ) => {
-    if (!annotation) return;
-
-    annotation.waitForRenderers().then(() => {
-      this.renderTargets.forEach((renderTarget, index) => {
-        annotation.readSliceToTarget(
-          selectedSlice,
-          mainViewType,
-          index,
-          renderTarget,
-        );
-      });
+  public endStroke() {
+    this.document.renderers?.forEach((renderer, rendererIndex) => {
+      renderer.setRenderTarget(this.renderTargets[rendererIndex]);
+      renderer.clear();
+      renderer.setRenderTarget(null);
     });
-  };
+  }
 
   public render() {
     const circles = this.circlesToRender.length;
@@ -107,7 +82,7 @@ export class ToolRenderer {
     if (!renderers) return;
 
     if (circles) {
-      this.updateCircles();
+      this.circles.setCircles(this.circlesToRender);
       this.circlesToRender = [];
     }
 
@@ -146,24 +121,27 @@ export class ToolRenderer {
       viewType,
       this.document.viewSettings.selectedVoxel[orthogonalAxis],
       this.textures,
+      this.isCurrentStrokePositive ? MergeFunction.Add : MergeFunction.Subtract,
     );
   }
 
-  protected updateCircles() {
-    this.circles.setCircles(this.circlesToRender);
-  }
+  public renderCircles(isPositiveStroke: boolean, ...circles: Circle[]) {
+    this.isCurrentStrokePositive = isPositiveStroke;
 
-  public renderCircles(...circles: Circle[]) {
     this.circlesToRender.push(...circles);
 
     this.document.sliceRenderer?.lazyRender();
     this.document.volumeRenderer?.lazyRender(true);
   }
 
-  public renderShape(geometry: THREE.ShapeGeometry, material?: THREE.Material) {
-    this.shapesToRender.push(
-      new THREE.Mesh(geometry, material || new THREE.MeshBasicMaterial()),
-    );
+  public renderShape(
+    geometry: THREE.ShapeGeometry,
+    material: THREE.Material,
+    isPositiveStroke: boolean,
+  ) {
+    this.isCurrentStrokePositive = isPositiveStroke;
+
+    this.shapesToRender.push(new THREE.Mesh(geometry, material));
 
     this.document.sliceRenderer?.lazyRender();
     this.document.volumeRenderer?.lazyRender(true);

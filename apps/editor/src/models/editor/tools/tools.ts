@@ -118,11 +118,15 @@ export class Tools
       ),
       "crosshair-tool": new CrosshairTool(document),
       "pixel-brush": new CircleBrush(document, this.toolRenderer),
-      "pixel-eraser": new CircleBrush(document, this.toolRenderer, 0),
+      "pixel-eraser": new CircleBrush(document, this.toolRenderer, false),
       "smart-brush": new SmartBrush(document, this.regionGrowingRenderer),
-      "smart-eraser": new SmartBrush(document, this.regionGrowingRenderer, 0),
+      "smart-eraser": new SmartBrush(
+        document,
+        this.regionGrowingRenderer,
+        false,
+      ),
       "outline-tool": new OutlineTool(document, this.toolRenderer),
-      "outline-eraser": new OutlineTool(document, this.toolRenderer, 0),
+      "outline-eraser": new OutlineTool(document, this.toolRenderer, false),
       "clear-slice": new ClearSliceTool(document, this.toolRenderer),
       "clear-image": new ClearImageTool(document, this.toolRenderer),
       "fly-tool": new Tool(
@@ -292,10 +296,6 @@ export class Tools
 
   public setIsDrawing(value = true) {
     this.isDrawing = value;
-  }
-
-  public handleCurrentSliceChanged() {
-    this.toolRenderer.handleCurrentSliceChanged();
   }
 
   protected resetBrushSettings(): void {
