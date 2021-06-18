@@ -27,7 +27,7 @@ export class SmartBrush<
           min: 0,
           max: 20,
           stepSize: 1,
-          defaultValue: 10,
+          defaultValue: 5,
         }) as Parameter<unknown>,
       ],
     });
