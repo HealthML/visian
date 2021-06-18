@@ -14,6 +14,7 @@ export class RegionGrowingMaterial extends THREE.ShaderMaterial {
         uRegionTexture: { value: null },
         uDataTexture: { value: null },
         uThreshold: { value: 0.1 },
+        uSeed: { value: 0 },
       },
     });
   }
@@ -32,5 +33,9 @@ export class RegionGrowingMaterial extends THREE.ShaderMaterial {
 
   public setThreshold(value: number) {
     this.uniforms.uThreshold.value = value / 255;
+  }
+
+  public setSeed(value: number) {
+    this.uniforms.uSeed.value = value / 255;
   }
 }

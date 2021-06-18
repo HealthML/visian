@@ -4,9 +4,12 @@ uniform sampler2D uDataTexture;
 uniform sampler2D uRegionTexture;
 uniform vec2 uRegionSize;
 uniform float uThreshold;
+uniform float uSeed;
 
 bool canGrowFrom(float ownData, float neightborData, float neightborRegion) {
-  return neightborRegion > 0.0 && abs(ownData - neightborData) <= uThreshold;
+  return neightborRegion > 0.0 &&
+    abs(ownData - uSeed) <= 1.5 * uThreshold &&
+    abs(ownData - neightborData) <= uThreshold;
 }
 
 void main() {

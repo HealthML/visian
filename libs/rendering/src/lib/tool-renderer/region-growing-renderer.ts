@@ -19,6 +19,8 @@ export class RegionGrowingRenderer extends ToolRenderer {
   protected regionGrowingMaterial: RegionGrowingMaterial;
   protected regionGrowingQuad: ScreenAlignedQuad;
 
+  protected lastCircle?: Circle;
+
   constructor(document: IDocument) {
     super(document);
 
@@ -61,22 +63,24 @@ export class RegionGrowingRenderer extends ToolRenderer {
   }
 
   public doRegionGrowing(threshold: number) {
+    if (!this.lastCircle) return;
+
     const annotation = (this.document.activeLayer as IImageLayer | undefined)
       ?.image as RenderedImage | undefined;
 
     if (!annotation) return;
 
+    const sourceImage = (this.document.layers.find(
+      (layer) =>
+        layer.kind === "image" && !layer.isAnnotation && layer.isVisible,
+    ) as IImageLayer | undefined)?.image as RenderedImage | undefined;
+    if (!sourceImage) return;
+
+    const slice = this.document.viewSettings.selectedVoxel.getFromView(
+      this.document.viewport2D.mainViewType,
+    );
+
     if (this.isDataSourceDirty) {
-      const sourceImage = (this.document.layers.find(
-        (layer) =>
-          layer.kind === "image" && !layer.isAnnotation && layer.isVisible,
-      ) as IImageLayer | undefined)?.image as RenderedImage | undefined;
-      if (!sourceImage) return;
-
-      const slice = this.document.viewSettings.selectedVoxel.getFromView(
-        this.document.viewport2D.mainViewType,
-      );
-
       this.dataSourceRenderTargets.forEach((renderTarget, renderIndex) => {
         sourceImage.readSliceToTarget(
           slice,
@@ -96,7 +100,19 @@ export class RegionGrowingRenderer extends ToolRenderer {
     const height = annotation.voxelCount[heightAxis];
     this.regionGrowingMaterial.setRegionSize(width, height);
 
+    const depthAxis = getOrthogonalAxis(this.document.viewport2D.mainViewType);
+
+    const seed = sourceImage.getVoxelData({
+      [depthAxis]: slice,
+      [widthAxis]: this.lastCircle.x,
+      [heightAxis]: this.lastCircle.y,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } as any);
+    this.lastCircle = undefined;
+
+    this.regionGrowingMaterial.setSeed(seed);
     this.regionGrowingMaterial.setThreshold(threshold);
+
     this.document.renderers?.forEach((renderer, rendererIndex) => {
       this.regionGrowingMaterial.setDataTexture(
         this.dataSourceRenderTargets[rendererIndex].texture,
@@ -151,6 +167,8 @@ export class RegionGrowingRenderer extends ToolRenderer {
   public renderCircles(...circles: Circle[]) {
     if (circles.length) {
       this.isCurrentStrokePositive = Boolean(circles[0].value);
+
+      this.lastCircle = circles[circles.length - 1];
     }
 
     super.renderCircles(...circles);
