@@ -27,6 +27,7 @@ export interface ToolConfig<N extends string> {
 
   isDrawingTool?: boolean;
   isBrush?: boolean;
+  isSmartBrush?: boolean;
 
   altToolName?: N;
 
@@ -48,6 +49,7 @@ export class Tool<N extends string>
 
   public isDrawingTool: boolean;
   public isBrush: boolean;
+  public isSmartBrush: boolean;
 
   public altToolName?: string;
 
@@ -63,6 +65,7 @@ export class Tool<N extends string>
     this.labelTx = config.labelTx || config.name;
     this.isDrawingTool = Boolean(config.isDrawingTool);
     this.isBrush = Boolean(config.isBrush);
+    this.isSmartBrush = Boolean(config.isSmartBrush);
     this.altToolName = config.altToolName;
     this.supportedViewModes = config.supportedViewModes;
     this.supportedLayerKinds = config.supportedLayerKinds;

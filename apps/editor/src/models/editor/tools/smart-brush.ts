@@ -1,6 +1,5 @@
 import { RegionGrowingRenderer } from "@visian/rendering";
 import { IDocument, IImageLayer } from "@visian/ui-shared";
-import { NumberParameter, Parameter } from "../parameters";
 import { CircleBrush } from "./circle-brush";
 
 export class SmartBrush<
@@ -19,17 +18,7 @@ export class SmartBrush<
       supportedLayerKinds: ["image"],
       isDrawingTool: true,
       isBrush: true,
-      params: [
-        new NumberParameter({
-          name: "threshold",
-          labelTx: "threshold",
-          scaleType: "linear",
-          min: 0,
-          max: 20,
-          stepSize: 1,
-          defaultValue: 5,
-        }) as Parameter<unknown>,
-      ],
+      isSmartBrush: true,
     });
   }
 
@@ -39,7 +28,7 @@ export class SmartBrush<
     viewType = this.document.viewport2D.mainViewType,
   ) {
     this.regionGrowingRenderer.doRegionGrowing(
-      this.params.threshold.value as number,
+      this.document.tools.smartBrushThreshold,
     );
 
     super.endStroke(isDeleteOperation, imageLayer, viewType);

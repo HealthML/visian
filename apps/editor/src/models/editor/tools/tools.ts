@@ -32,6 +32,7 @@ export interface ToolsSnapshot<N extends string> {
 
   brushSize: number;
   lockedBrushSize?: number;
+  smartBrushThreshold: number;
 }
 
 export class Tools
@@ -50,6 +51,8 @@ export class Tools
 
   private screenSpaceBrushSize = 0.02;
   private lockedBrushSize?: number;
+
+  public smartBrushThreshold = 5;
 
   protected isCursorOverDrawableArea = false;
   protected isCursorOverFloatingUI = false;
@@ -79,6 +82,7 @@ export class Tools
       toolGroups: observable,
       screenSpaceBrushSize: observable,
       lockedBrushSize: observable,
+      smartBrushThreshold: observable,
       isCursorOverDrawableArea: observable,
       isCursorOverFloatingUI: observable,
       isNavigationDragged: observable,
@@ -94,6 +98,7 @@ export class Tools
       setActiveTool: action,
       setBrushSize: action,
       setUseAdaptiveBrushSize: action,
+      setSmartBrushThreshold: action,
       setIsCursorOverDrawableArea: action,
       setIsCursorOverFloatingUI: action,
       setIsNavigationDragged: action,
@@ -282,6 +287,10 @@ export class Tools
     this.setBrushSize(this.brushSize - decrement);
   }
 
+  public setSmartBrushThreshold(value = 5) {
+    this.smartBrushThreshold = Math.min(20, Math.max(0, value));
+  }
+
   public setIsCursorOverDrawableArea(value = true) {
     this.isCursorOverDrawableArea = value;
   }
@@ -307,6 +316,7 @@ export class Tools
     const { activeTool } = this;
     if (!activeTool) return;
     if (activeTool.isBrush) this.resetBrushSettings();
+    if (activeTool.isSmartBrush) this.setSmartBrushThreshold();
     Object.values(activeTool.params).forEach((param) => {
       param.reset();
     });
@@ -320,6 +330,7 @@ export class Tools
       toolGroups: this.toolGroups.map((toolGroup) => toolGroup.toJSON()),
       brushSize: this.brushSize,
       lockedBrushSize: this.lockedBrushSize,
+      smartBrushThreshold: this.smartBrushThreshold,
     };
   }
 
@@ -338,6 +349,7 @@ export class Tools
 
     this.setBrushSize(snapshot?.brushSize);
     this.lockedBrushSize = snapshot?.lockedBrushSize;
+    this.setSmartBrushThreshold(snapshot?.smartBrushThreshold);
 
     return Promise.resolve();
   }
