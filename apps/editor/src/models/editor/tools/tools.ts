@@ -12,7 +12,6 @@ import { Tool, ToolSnapshot } from "./tool";
 
 import { ToolGroup, ToolGroupSnapshot } from "./tool-group";
 import { BoundedSmartBrush } from "./bounded-smart-brush";
-import { NumberParameter } from "../parameters";
 
 export type ToolName =
   | "navigation-tool"
@@ -36,6 +35,8 @@ export interface ToolsSnapshot<N extends string> {
 
   brushSize: number;
   lockedBrushSize?: number;
+  smartBrushThreshold: number;
+  boundedSmartBrushRadius: number;
 }
 
 export class Tools
@@ -54,6 +55,9 @@ export class Tools
 
   private screenSpaceBrushSize = 0.02;
   private lockedBrushSize?: number;
+
+  public smartBrushThreshold = 5;
+  public boundedSmartBrushRadius = 7;
 
   protected isCursorOverDrawableArea = false;
   protected isCursorOverFloatingUI = false;
@@ -83,6 +87,8 @@ export class Tools
       toolGroups: observable,
       screenSpaceBrushSize: observable,
       lockedBrushSize: observable,
+      smartBrushThreshold: observable,
+      boundedSmartBrushRadius: observable,
       isCursorOverDrawableArea: observable,
       isCursorOverFloatingUI: observable,
       isNavigationDragged: observable,
@@ -98,6 +104,8 @@ export class Tools
       setActiveTool: action,
       setBrushSize: action,
       setUseAdaptiveBrushSize: action,
+      setSmartBrushThreshold: action,
+      setBoundedSmartBrushRadius: action,
       setIsCursorOverDrawableArea: action,
       setIsCursorOverFloatingUI: action,
       setIsNavigationDragged: action,
@@ -288,13 +296,8 @@ export class Tools
   };
 
   public incrementBrushSize() {
-    const boxRadiusParam = this.activeTool?.params.boxRadius as
-      | NumberParameter
-      | undefined;
-    if (boxRadiusParam) {
-      boxRadiusParam.setValue(
-        Math.min(boxRadiusParam.max, boxRadiusParam.value + 1),
-      );
+    if (this.activeTool?.isBoundedSmartBrush) {
+      this.setBoundedSmartBrushRadius(this.boundedSmartBrushRadius + 1);
       return;
     }
 
@@ -304,19 +307,22 @@ export class Tools
   }
 
   public decrementBrushSize() {
-    const boxRadiusParam = this.activeTool?.params.boxRadius as
-      | NumberParameter
-      | undefined;
-    if (boxRadiusParam) {
-      boxRadiusParam.setValue(
-        Math.max(boxRadiusParam.min, boxRadiusParam.value - 1),
-      );
+    if (this.activeTool?.isBoundedSmartBrush) {
+      this.setBoundedSmartBrushRadius(this.boundedSmartBrushRadius - 1);
       return;
     }
 
     // Allow brush size 0.5.
     const decrement = this.brushSize <= 1 ? 0.5 : 1;
     this.setBrushSize(this.brushSize - decrement);
+  }
+
+  public setSmartBrushThreshold(value = 5) {
+    this.smartBrushThreshold = Math.min(20, Math.max(0, value));
+  }
+
+  public setBoundedSmartBrushRadius(value = 7) {
+    this.boundedSmartBrushRadius = Math.min(40, Math.max(3, value));
   }
 
   public setIsCursorOverDrawableArea(value = true) {
@@ -343,7 +349,11 @@ export class Tools
   public resetActiveToolSetings = (): void => {
     const { activeTool } = this;
     if (!activeTool) return;
-    if (activeTool.isBrush) this.resetBrushSettings();
+    if (activeTool.isBrush && !activeTool.isBoundedSmartBrush) {
+      this.resetBrushSettings();
+    }
+    if (activeTool.isSmartBrush) this.setSmartBrushThreshold();
+    if (activeTool.isBoundedSmartBrush) this.setBoundedSmartBrushRadius();
     Object.values(activeTool.params).forEach((param) => {
       param.reset();
     });
@@ -357,6 +367,8 @@ export class Tools
       toolGroups: this.toolGroups.map((toolGroup) => toolGroup.toJSON()),
       brushSize: this.brushSize,
       lockedBrushSize: this.lockedBrushSize,
+      smartBrushThreshold: this.smartBrushThreshold,
+      boundedSmartBrushRadius: this.boundedSmartBrushRadius,
     };
   }
 
@@ -375,6 +387,8 @@ export class Tools
 
     this.setBrushSize(snapshot?.brushSize);
     this.lockedBrushSize = snapshot?.lockedBrushSize;
+    this.setSmartBrushThreshold(snapshot?.smartBrushThreshold);
+    this.setBoundedSmartBrushRadius(snapshot?.boundedSmartBrushRadius);
 
     return Promise.resolve();
   }

@@ -79,6 +79,22 @@ export const Toolbar: React.FC = observer(() => {
     },
     [store],
   );
+  const setSmartBrushThreshold = useCallback(
+    (value: number | number[]) => {
+      store?.editor.activeDocument?.tools.setSmartBrushThreshold(
+        value as number,
+      );
+    },
+    [store],
+  );
+  const setBoundedSmartBrushRadius = useCallback(
+    (value: number | number[]) => {
+      store?.editor.activeDocument?.tools.setBoundedSmartBrushRadius(
+        value as number,
+      );
+    },
+    [store],
+  );
 
   return (
     <StyledToolbar ref={ref}>
@@ -117,7 +133,7 @@ export const Toolbar: React.FC = observer(() => {
         onOutsidePress={closeModal}
         onReset={store?.editor.activeDocument?.tools.resetActiveToolSetings}
       >
-        {activeTool?.isBrush && !activeTool?.isBrushSizeFixed && (
+        {activeTool?.isBrush && !activeTool?.isBoundedSmartBrush && (
           <>
             <BooleanParam
               labelTx="adaptive-brush-size"
@@ -137,6 +153,26 @@ export const Toolbar: React.FC = observer(() => {
               setValue={setBrushSize}
             />
           </>
+        )}
+        {activeTool?.isBoundedSmartBrush && (
+          <NumberParam
+            labelTx="box-radius"
+            min={3}
+            max={40}
+            stepSize={1}
+            value={store?.editor.activeDocument?.tools.boundedSmartBrushRadius}
+            setValue={setBoundedSmartBrushRadius}
+          />
+        )}
+        {activeTool?.isSmartBrush && (
+          <NumberParam
+            labelTx="threshold"
+            min={0}
+            max={20}
+            stepSize={1}
+            value={store?.editor.activeDocument?.tools.smartBrushThreshold}
+            setValue={setSmartBrushThreshold}
+          />
         )}
 
         {activeTool &&

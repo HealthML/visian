@@ -42,8 +42,11 @@ export interface ITool<N extends string> {
    */
   isBrush: boolean;
 
+  /** Indicates if the tool is a smart brush. */
+  isSmartBrush: boolean;
+
   /** Indicates if the brush size for this tool is fixed. */
-  isBrushSizeFixed: boolean;
+  isBoundedSmartBrush: boolean;
 
   /**
    * The tool that is used as the alternative mode of this tool.
@@ -114,6 +117,12 @@ export interface ITools<N extends string> {
    */
   useAdaptiveBrushSize: boolean;
 
+  /** The threshold for all smart brushes. */
+  smartBrushThreshold: number;
+
+  /** The size of the bounded smart brush bounding boxes. */
+  boundedSmartBrushRadius: number;
+
   /** Indicates if a brush stroke can be started this moment. */
   canDraw: boolean;
 
@@ -127,6 +136,9 @@ export interface ITools<N extends string> {
   setBrushSize(value?: number, showPreview?: boolean): void;
   incrementBrushSize(): void;
   decrementBrushSize(): void;
+
+  setSmartBrushThreshold(value?: number): void;
+  setBoundedSmartBrushRadius(value?: number): void;
 
   setIsCursorOverDrawableArea(value: boolean): void;
   setIsCursorOverFloatingUI(value: boolean): void;

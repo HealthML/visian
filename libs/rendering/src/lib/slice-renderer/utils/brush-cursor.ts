@@ -100,10 +100,10 @@ export class BrushCursor extends THREE.LineSegments implements IDisposable {
 
     this.points = [];
 
-    if (this.editor.activeDocument.tools.activeTool?.params.boxRadius) {
-      const boxRadius = this.editor.activeDocument.tools.activeTool.params
-        .boxRadius.value as number;
-      this.points = getBoundedBrushCursorPoints(boxRadius);
+    if (this.editor.activeDocument.tools.activeTool?.isBoundedSmartBrush) {
+      this.points = getBoundedBrushCursorPoints(
+        this.editor.activeDocument.tools.boundedSmartBrushRadius,
+      );
     } else if (this.editor.activeDocument.tools.brushSize === 0.5) {
       this.points = get2x2BrushCursorPoints();
     } else {

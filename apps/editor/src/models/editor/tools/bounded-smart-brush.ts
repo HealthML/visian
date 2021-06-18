@@ -1,6 +1,5 @@
 import { RegionGrowingRenderer } from "@visian/rendering";
 import { DragPoint, IDocument } from "@visian/ui-shared";
-import { NumberParameter, Parameter } from "../parameters";
 import { CircleBrush } from "./circle-brush";
 
 export class BoundedSmartBrush<
@@ -22,29 +21,8 @@ export class BoundedSmartBrush<
       supportedLayerKinds: ["image"],
       isDrawingTool: true,
       isBrush: true,
-      isBrushSizeFixed: true,
-      params: [
-        new NumberParameter({
-          name: "boxRadius",
-          labelTx: "box-radius",
-          scaleType: "linear",
-          min: 3,
-          max: 40,
-          stepSize: 1,
-          defaultValue: 7,
-          onBeforeValueChange: () =>
-            document.sliceRenderer?.showBrushCursorPreview(),
-        }) as Parameter<unknown>,
-        new NumberParameter({
-          name: "threshold",
-          labelTx: "threshold",
-          scaleType: "linear",
-          min: 0,
-          max: 20,
-          stepSize: 1,
-          defaultValue: 5,
-        }) as Parameter<unknown>,
-      ],
+      isSmartBrush: true,
+      isBoundedSmartBrush: true,
     });
   }
 
@@ -65,8 +43,8 @@ export class BoundedSmartBrush<
   private triggerRegionGrowing() {
     this.regionGrowingRenderer.waitForRender().then(() => {
       this.regionGrowingRenderer.doRegionGrowing(
-        this.params.threshold.value as number,
-        this.params.boxRadius.value as number,
+        this.document.tools.smartBrushThreshold,
+        this.document.tools.boundedSmartBrushRadius,
       );
     });
   }
