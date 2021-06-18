@@ -12,6 +12,7 @@ import { Tool, ToolSnapshot } from "./tool";
 
 import { ToolGroup, ToolGroupSnapshot } from "./tool-group";
 import { BoundedSmartBrush } from "./bounded-smart-brush";
+import { NumberParameter } from "../parameters";
 
 export type ToolName =
   | "navigation-tool"
@@ -287,12 +288,32 @@ export class Tools
   };
 
   public incrementBrushSize() {
+    const boxRadiusParam = this.activeTool?.params.boxRadius as
+      | NumberParameter
+      | undefined;
+    if (boxRadiusParam) {
+      boxRadiusParam.setValue(
+        Math.min(boxRadiusParam.max, boxRadiusParam.value + 1),
+      );
+      return;
+    }
+
     // Allow brush size 0.5.
     const increment = this.brushSize < 1 ? 0.5 : 1;
     this.setBrushSize(this.brushSize + increment);
   }
 
   public decrementBrushSize() {
+    const boxRadiusParam = this.activeTool?.params.boxRadius as
+      | NumberParameter
+      | undefined;
+    if (boxRadiusParam) {
+      boxRadiusParam.setValue(
+        Math.max(boxRadiusParam.min, boxRadiusParam.value - 1),
+      );
+      return;
+    }
+
     // Allow brush size 0.5.
     const decrement = this.brushSize <= 1 ? 0.5 : 1;
     this.setBrushSize(this.brushSize - decrement);

@@ -38,7 +38,7 @@ export class BoundedSmartBrush<
           labelTx: "box-radius",
           scaleType: "linear",
           min: 3,
-          max: 20,
+          max: 40,
           stepSize: 1,
           defaultValue: 7,
           onBeforeValueChange: () =>
