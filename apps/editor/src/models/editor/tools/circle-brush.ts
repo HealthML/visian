@@ -19,14 +19,14 @@ export class CircleBrush<
   constructor(
     document: IDocument,
     toolRenderer: ToolRenderer,
-    private value = 255,
+    private isPositive = true,
     toolConfig?: ToolConfig<N>,
   ) {
     super(
       toolConfig || {
-        name: (value ? "pixel-brush" : "pixel-eraser") as N,
-        altToolName: (value ? "pixel-eraser" : "pixel-brush") as N,
-        icon: value ? "pixelBrush" : "eraser",
+        name: (isPositive ? "pixel-brush" : "pixel-eraser") as N,
+        altToolName: (isPositive ? "pixel-eraser" : "pixel-brush") as N,
+        icon: isPositive ? "pixelBrush" : "eraser",
         supportedViewModes: ["2D"],
         supportedLayerKinds: ["image"],
         isDrawingTool: true,
@@ -60,7 +60,9 @@ export class CircleBrush<
   public endAt(dragPoint: DragPoint | null) {
     if (dragPoint) this.moveTo(dragPoint);
 
-    this.endStroke(!this.value);
+    this.endStroke(!this.isPositive);
+
+    this.toolRenderer.waitForRender().then(() => this.toolRenderer.endStroke());
   }
 
   protected get brushSize() {
@@ -84,10 +86,10 @@ export class CircleBrush<
       const pixelOffsetY = dragPoint.bottom ? -1 : 0;
 
       this.toolRenderer.renderCircles(
+        this.isPositive,
         ...circleQuad.map((pixel) => ({
           x: x + pixel.x + pixelOffsetX,
           y: y + pixel.y + pixelOffsetY,
-          value: this.value,
           radius: 0,
         })),
       );
@@ -95,10 +97,9 @@ export class CircleBrush<
       return;
     }
 
-    this.toolRenderer.renderCircles({
+    this.toolRenderer.renderCircles(this.isPositive, {
       x,
       y,
-      value: this.value,
       radius: this.brushSize,
     });
   }

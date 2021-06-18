@@ -2,15 +2,13 @@ import * as THREE from "three";
 import { IDocument, IImageLayer } from "@visian/ui-shared";
 import { getOrthogonalAxis, getPlaneAxes } from "@visian/utils";
 import { reaction } from "mobx";
-import { MergeFunction, RenderedImage } from "../rendered-image";
+import { RenderedImage } from "../rendered-image";
 import { ToolRenderer } from "./tool-renderer";
 import { Circle } from "./utils";
 import { RegionGrowingMaterial } from "./utils/region-growing-material";
 import ScreenAlignedQuad from "../screen-aligned-quad";
 
 export class RegionGrowingRenderer extends ToolRenderer {
-  protected isCurrentStrokePositive = true;
-
   protected blipRenderTargets: THREE.WebGLRenderTarget[] = [];
   protected dataSourceRenderTargets: THREE.WebGLRenderTarget[] = [];
 
@@ -39,7 +37,6 @@ export class RegionGrowingRenderer extends ToolRenderer {
               () => new THREE.WebGLRenderTarget(1, 1),
             );
             this.resizeRenderTargets();
-            this.handleCurrentSliceChanged();
           }
         },
         { fireImmediately: true },
@@ -142,48 +139,25 @@ export class RegionGrowingRenderer extends ToolRenderer {
     });
 
     this.flushToAnnotation(annotation);
+  }
+
+  public endStroke() {
+    super.endStroke();
 
     this.document.renderers?.forEach((renderer, rendererIndex) => {
-      renderer.setRenderTarget(this.renderTargets[rendererIndex]);
-      renderer.clear();
       renderer.setRenderTarget(this.blipRenderTargets[rendererIndex]);
       renderer.clear();
       renderer.setRenderTarget(null);
     });
   }
 
-  protected flushToAnnotation(annotation: RenderedImage) {
-    const viewType = this.document.viewport2D.mainViewType;
-    const orthogonalAxis = getOrthogonalAxis(viewType);
-    annotation.setSlice(
-      viewType,
-      this.document.viewSettings.selectedVoxel[orthogonalAxis],
-      this.textures,
-      this.isCurrentStrokePositive ? MergeFunction.Add : MergeFunction.Subtract,
-    );
-  }
-
-  protected updateCircles() {
-    this.circles.setCircles(this.circlesToRender, 255);
-  }
-
-  public renderCircles(...circles: Circle[]) {
+  public renderCircles(isPositiveStroke: boolean, ...circles: Circle[]) {
     if (circles.length) {
-      this.isCurrentStrokePositive = Boolean(circles[0].value);
-
       this.lastCircle = circles[circles.length - 1];
     }
 
-    super.renderCircles(...circles);
+    super.renderCircles(isPositiveStroke, ...circles);
   }
-
-  public handleCurrentSliceChanged = () => {
-    this.document.renderers?.forEach((renderer, rendererIndex) => {
-      renderer.setRenderTarget(this.renderTargets[rendererIndex]);
-      renderer.clear();
-      renderer.setRenderTarget(null);
-    });
-  };
 
   protected setRenderTargetSize(width: number, height: number) {
     super.setRenderTargetSize(width, height);
