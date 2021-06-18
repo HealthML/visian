@@ -63,12 +63,16 @@ export class CircleBrush<
     this.endStroke(!this.value);
   }
 
+  protected get brushSize() {
+    return this.document.tools.brushSize;
+  }
+
   private drawCircleAround(dragPoint: DragPoint) {
     const [xAxis, yAxis] = getPlaneAxes(this.document.viewport2D.mainViewType);
     const x = dragPoint[xAxis];
     const y = dragPoint[yAxis];
 
-    if (this.document.tools.brushSize === 0.5) {
+    if (this.brushSize === 0.5) {
       const circleQuad = [
         { x: 0, y: 0 },
         { x: 0, y: 1 },
@@ -95,7 +99,7 @@ export class CircleBrush<
       x,
       y,
       value: this.value,
-      radius: this.document.tools.brushSize,
+      radius: this.brushSize,
     });
   }
 

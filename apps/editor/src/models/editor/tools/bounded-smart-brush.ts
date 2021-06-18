@@ -55,6 +55,10 @@ export class BoundedSmartBrush<
     this.triggerRegionGrowing();
   }
 
+  protected get brushSize() {
+    return 0;
+  }
+
   private triggerRegionGrowing() {
     this.regionGrowingRenderer.waitForRender().then(() => {
       this.regionGrowingRenderer.doRegionGrowing(
