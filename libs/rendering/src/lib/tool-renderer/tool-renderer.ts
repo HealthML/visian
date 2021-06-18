@@ -4,25 +4,23 @@ import { reaction } from "mobx";
 import * as THREE from "three";
 import { RenderedImage } from "../rendered-image";
 
-import { Circles } from "./circles";
-import { ToolCamera } from "./tool-camera";
-import { Circle } from "./types";
+import { Circles, ToolCamera, Circle } from "./utils";
 
 export class ToolRenderer {
-  private circlesToRender: Circle[] = [];
+  protected circlesToRender: Circle[] = [];
   private shapesToRender: THREE.Mesh[] = [];
 
   private camera: ToolCamera;
   private shapeScene = new THREE.Scene();
 
-  private circles: Circles;
-  private renderTargets: THREE.WebGLRenderTarget[] = [];
+  protected circles: Circles;
+  protected renderTargets: THREE.WebGLRenderTarget[] = [];
 
-  private renderCallbacks: (() => void)[] = [];
+  protected renderCallbacks: (() => void)[] = [];
 
-  private disposers: IDisposer[] = [];
+  protected disposers: IDisposer[] = [];
 
-  constructor(private document: IDocument) {
+  constructor(protected document: IDocument) {
     this.camera = new ToolCamera(document);
     this.circles = new Circles();
 
@@ -109,7 +107,7 @@ export class ToolRenderer {
     if (!renderers) return;
 
     if (circles) {
-      this.circles.setCircles(this.circlesToRender);
+      this.updateCircles();
       this.circlesToRender = [];
     }
 
@@ -135,6 +133,13 @@ export class ToolRenderer {
       renderer.setRenderTarget(null);
     });
 
+    this.flushToAnnotation(annotation);
+
+    this.renderCallbacks.forEach((callback) => callback());
+    this.renderCallbacks = [];
+  }
+
+  protected flushToAnnotation(annotation: RenderedImage) {
     const viewType = this.document.viewport2D.mainViewType;
     const orthogonalAxis = getOrthogonalAxis(viewType);
     annotation.setSlice(
@@ -142,9 +147,10 @@ export class ToolRenderer {
       this.document.viewSettings.selectedVoxel[orthogonalAxis],
       this.textures,
     );
+  }
 
-    this.renderCallbacks.forEach((callback) => callback());
-    this.renderCallbacks = [];
+  protected updateCircles() {
+    this.circles.setCircles(this.circlesToRender);
   }
 
   public renderCircles(...circles: Circle[]) {
@@ -173,11 +179,11 @@ export class ToolRenderer {
     });
   }
 
-  private get textures() {
+  protected get textures() {
     return this.renderTargets.map((renderTarget) => renderTarget.texture);
   }
 
-  private resizeRenderTargets = () => {
+  protected resizeRenderTargets = () => {
     if (!this.document.activeLayer) return;
 
     const { voxelCount } = (this.document.activeLayer as IImageLayer).image;
@@ -190,8 +196,12 @@ export class ToolRenderer {
     const width = voxelCount[widthAxis];
     const height = voxelCount[heightAxis];
 
+    this.setRenderTargetSize(width, height);
+  };
+
+  protected setRenderTargetSize(width: number, height: number) {
     this.renderTargets.forEach((renderTarget) => {
       renderTarget.setSize(width, height);
     });
-  };
+  }
 }

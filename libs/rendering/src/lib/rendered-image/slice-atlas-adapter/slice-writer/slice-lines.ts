@@ -6,6 +6,7 @@ import {
   ViewType,
 } from "@visian/utils";
 import * as THREE from "three";
+import { MergeFunction } from "../../types";
 
 import { SliceLinesMaterial } from "./slice-lines-material";
 import { SliceScene } from "./types";
@@ -88,5 +89,9 @@ export class SliceLines extends THREE.Scene implements SliceScene {
     (this.lines.material as SliceLinesMaterial).setTexture(
       texture || this.textures[this.viewType],
     );
+  }
+
+  public setMergeFunction(mergeFunction: MergeFunction) {
+    (this.lines.material as SliceLinesMaterial).setMergeFunction(mergeFunction);
   }
 }

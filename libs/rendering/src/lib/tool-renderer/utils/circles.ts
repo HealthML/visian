@@ -60,19 +60,20 @@ export class Circles extends THREE.Scene implements IDisposable {
     );
   }
 
-  public setCircles(circles: Circle[]) {
+  public setCircles(circles: Circle[], valueOverride?: number) {
     this.ensureCirclesFit(circles.length);
     this.mesh.count = circles.length;
 
     const instanceColorAttribute = this.geometry.attributes.instanceColor;
 
     circles.forEach((circle, index) => {
+      const value = valueOverride ?? circle.value;
       // Add the color once per vertex of the plane.
       const i = 4 * index;
-      instanceColorAttribute.setX(i, circle.value);
-      instanceColorAttribute.setX(i + 1, circle.value);
-      instanceColorAttribute.setX(i + 2, circle.value);
-      instanceColorAttribute.setX(i + 3, circle.value);
+      instanceColorAttribute.setX(i, value);
+      instanceColorAttribute.setX(i + 1, value);
+      instanceColorAttribute.setX(i + 2, value);
+      instanceColorAttribute.setX(i + 3, value);
 
       this.dummy.position.set(circle.x, circle.y, 0);
 

@@ -1,11 +1,11 @@
-import { ToolRenderer } from "@visian/rendering";
+import { RegionGrowingRenderer, ToolRenderer } from "@visian/rendering";
 import { IDocument, IImageLayer, ITool, ITools } from "@visian/ui-shared";
 import { getPlaneAxes, ISerializable } from "@visian/utils";
 import { action, computed, makeObservable, observable } from "mobx";
 import { CircleBrush } from "./circle-brush";
 import { ClearImageTool } from "./clear-image-tool";
 import { ClearSliceTool } from "./clear-slice-tool";
-import { SmartBrush } from "./cpu-brush";
+import { SmartBrush } from "./smart-brush";
 import { CrosshairTool } from "./crosshair-tool";
 import { OutlineTool } from "./outline-tool";
 import { Tool, ToolSnapshot } from "./tool";
@@ -57,6 +57,7 @@ export class Tools
   public isDrawing = false;
 
   public toolRenderer: ToolRenderer;
+  public regionGrowingRenderer: RegionGrowingRenderer;
 
   constructor(
     snapshot: Partial<ToolsSnapshot<ToolName>> | undefined,
@@ -103,6 +104,7 @@ export class Tools
     });
 
     this.toolRenderer = new ToolRenderer(document);
+    this.regionGrowingRenderer = new RegionGrowingRenderer(document);
 
     this.tools = {
       "navigation-tool": new Tool(
@@ -117,8 +119,8 @@ export class Tools
       "crosshair-tool": new CrosshairTool(document),
       "pixel-brush": new CircleBrush(document, this.toolRenderer),
       "pixel-eraser": new CircleBrush(document, this.toolRenderer, 0),
-      "smart-brush": new SmartBrush(document),
-      "smart-eraser": new SmartBrush(document, 0),
+      "smart-brush": new SmartBrush(document, this.regionGrowingRenderer),
+      "smart-eraser": new SmartBrush(document, this.regionGrowingRenderer, 0),
       "outline-tool": new OutlineTool(document, this.toolRenderer),
       "outline-eraser": new OutlineTool(document, this.toolRenderer, 0),
       "clear-slice": new ClearSliceTool(document, this.toolRenderer),

@@ -37,8 +37,7 @@
   "smart-brush-settings": "Smart Brush Settings",
   "brush-size": "Brush Size",
   "adaptive-brush-size": "Adaptive Brush Size",
-  "seed-threshold": "Seed Threshold",
-  "neighbor-threshold": "Neighbor Threshold",
+  "threshold": "Threshold",
 
   "layers": "Layers",
   "add-annotation-layer": "Add new annotation",

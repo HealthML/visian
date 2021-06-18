@@ -1,11 +1,12 @@
 import { ToolRenderer } from "@visian/rendering";
 import { DragPoint, IDocument } from "@visian/ui-shared";
 import { calculateLine, getOrthogonalAxis, getPlaneAxes } from "@visian/utils";
+import { ToolConfig } from "./tool";
 import { UndoableTool } from "./undoable-tool";
 import { dragPointsEqual } from "./utils";
 
 export class CircleBrush<
-  N extends "pixel-brush" | "pixel-eraser"
+  N extends "pixel-brush" | "pixel-eraser" | "smart-brush" | "smart-eraser"
 > extends UndoableTool<N> {
   private lastDragPoint?: DragPoint;
 
@@ -13,9 +14,10 @@ export class CircleBrush<
     document: IDocument,
     toolRenderer: ToolRenderer,
     private value = 255,
+    toolConfig?: ToolConfig<N>,
   ) {
     super(
-      {
+      toolConfig || {
         name: (value ? "pixel-brush" : "pixel-eraser") as N,
         altToolName: (value ? "pixel-eraser" : "pixel-brush") as N,
         icon: value ? "pixelBrush" : "eraser",

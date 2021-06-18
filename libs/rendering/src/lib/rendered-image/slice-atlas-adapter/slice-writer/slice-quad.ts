@@ -1,5 +1,6 @@
 import { Vector } from "@visian/utils";
 import * as THREE from "three";
+import { MergeFunction } from "../../types";
 
 import { SliceQuadMaterial } from "./slice-quad-material";
 import { SliceScene } from "./types";
@@ -50,5 +51,9 @@ export class SliceQuad extends THREE.Scene implements SliceScene {
     (this.quad.material as SliceQuadMaterial).setTexture(
       texture || this.texture,
     );
+  }
+
+  public setMergeFunction(mergeFunction: MergeFunction) {
+    (this.quad.material as SliceQuadMaterial).setMergeFunction(mergeFunction);
   }
 }
