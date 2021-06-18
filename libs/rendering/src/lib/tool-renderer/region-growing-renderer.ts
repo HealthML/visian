@@ -4,8 +4,7 @@ import { getOrthogonalAxis, getPlaneAxes } from "@visian/utils";
 import { reaction } from "mobx";
 import { RenderedImage } from "../rendered-image";
 import { ToolRenderer } from "./tool-renderer";
-import { Circle } from "./utils";
-import { RegionGrowingMaterial } from "./utils/region-growing-material";
+import { Circle, RegionGrowingMaterial } from "./utils";
 import ScreenAlignedQuad from "../screen-aligned-quad";
 
 export class RegionGrowingRenderer extends ToolRenderer {
@@ -105,11 +104,23 @@ export class RegionGrowingRenderer extends ToolRenderer {
       [heightAxis]: this.lastCircle.y,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any);
-    this.lastCircle = undefined;
 
     this.regionGrowingMaterial.setSeed(seed);
     this.regionGrowingMaterial.setThreshold(threshold);
-    this.regionGrowingMaterial.setBoundingRadius(boundingRadius);
+
+    const targetX = (this.lastCircle.x + 0.5) / width;
+    const targetY = (this.lastCircle.y + 0.5) / height;
+    const minUV =
+      boundingRadius !== undefined
+        ? [targetX - boundingRadius / width, targetY - boundingRadius / height]
+        : undefined;
+    const maxUV =
+      boundingRadius !== undefined
+        ? [targetX + boundingRadius / width, targetY + boundingRadius / height]
+        : undefined;
+    this.regionGrowingMaterial.setUVBounds(minUV, maxUV);
+
+    this.lastCircle = undefined;
 
     const blipSteps = (boundingRadius ?? width + height) / 2;
 

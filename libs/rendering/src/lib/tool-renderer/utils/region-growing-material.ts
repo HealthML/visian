@@ -15,8 +15,8 @@ export class RegionGrowingMaterial extends THREE.ShaderMaterial {
         uDataTexture: { value: null },
         uThreshold: { value: 0.1 },
         uSeed: { value: 0 },
-        uUseBound: { value: false },
-        uBondingRadius: { value: 0 },
+        uMinUv: { value: [0, 0] },
+        uMaxUv: { value: [1, 1] },
       },
     });
   }
@@ -41,12 +41,8 @@ export class RegionGrowingMaterial extends THREE.ShaderMaterial {
     this.uniforms.uSeed.value = value / 255;
   }
 
-  public setBoundingRadius(value?: number) {
-    if (value !== undefined) {
-      this.uniforms.uUseBound.value = true;
-      this.uniforms.uBondingRadius.value = value;
-    } else {
-      this.uniforms.uUseBound.value = false;
-    }
+  public setUVBounds(minUv = [0, 0], maxUv = [1, 1]) {
+    this.uniforms.uMinUv.value = minUv;
+    this.uniforms.uMaxUv.value = maxUv;
   }
 }
