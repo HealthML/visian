@@ -30,6 +30,12 @@ export const setUpHotKeys = (store: RootStore): IDisposer => {
 
     store.editor.activeDocument?.tools.setActiveTool("smart-brush");
   });
+  hotkeys("r", (event) => {
+    event.preventDefault();
+    if (store.editor.activeDocument?.viewSettings.viewMode !== "2D") return;
+
+    store.editor.activeDocument?.tools.setActiveTool("bounded-smart-brush");
+  });
   hotkeys("e", (event) => {
     event.preventDefault();
     if (store.editor.activeDocument?.viewSettings.viewMode !== "2D") return;

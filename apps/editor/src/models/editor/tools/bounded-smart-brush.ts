@@ -25,15 +25,6 @@ export class BoundedSmartBrush<
       isBrushSizeFixed: true,
       params: [
         new NumberParameter({
-          name: "threshold",
-          labelTx: "threshold",
-          scaleType: "linear",
-          min: 0,
-          max: 20,
-          stepSize: 1,
-          defaultValue: 5,
-        }) as Parameter<unknown>,
-        new NumberParameter({
           name: "boxRadius",
           labelTx: "box-radius",
           scaleType: "linear",
@@ -43,6 +34,15 @@ export class BoundedSmartBrush<
           defaultValue: 7,
           onBeforeValueChange: () =>
             document.sliceRenderer?.showBrushCursorPreview(),
+        }) as Parameter<unknown>,
+        new NumberParameter({
+          name: "threshold",
+          labelTx: "threshold",
+          scaleType: "linear",
+          min: 0,
+          max: 20,
+          stepSize: 1,
+          defaultValue: 5,
         }) as Parameter<unknown>,
       ],
     });

@@ -28,6 +28,7 @@
   "crosshair-tool": "Crosshair Tool (C)",
   "pixel-brush": "Brush (B)",
   "smart-brush": "Smart Brush (S)",
+  "bounded-smart-brush": "Bounded Smart Brush (R)",
   "pixel-eraser": "Eraser (E)",
   "outline-tool": "Outline Tool (O)",
   "clear-slice": "Clear Slice (Del)",
@@ -38,6 +39,7 @@
   "brush-size": "Brush Size",
   "adaptive-brush-size": "Adaptive Brush Size",
   "threshold": "Threshold",
+  "box-radius": "Bounding Box Radius",
 
   "layers": "Layers",
   "add-annotation-layer": "Add new annotation",
