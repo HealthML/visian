@@ -22,6 +22,7 @@ export class BoundedSmartBrush<
       supportedLayerKinds: ["image"],
       isDrawingTool: true,
       isBrush: true,
+      isBrushSizeFixed: true,
       params: [
         new NumberParameter({
           name: "threshold",

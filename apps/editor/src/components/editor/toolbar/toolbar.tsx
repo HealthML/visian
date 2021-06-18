@@ -117,7 +117,7 @@ export const Toolbar: React.FC = observer(() => {
         onOutsidePress={closeModal}
         onReset={store?.editor.activeDocument?.tools.resetActiveToolSetings}
       >
-        {activeTool?.isBrush && (
+        {activeTool?.isBrush && !activeTool?.isBrushSizeFixed && (
           <>
             <BooleanParam
               labelTx="adaptive-brush-size"

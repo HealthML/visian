@@ -42,6 +42,9 @@ export interface ITool<N extends string> {
    */
   isBrush: boolean;
 
+  /** Indicates if the brush size for this tool is fixed. */
+  isBrushSizeFixed: boolean;
+
   /**
    * The tool that is used as the alternative mode of this tool.
    * Typically, this is activated using the `alt` key or right mouse button.
