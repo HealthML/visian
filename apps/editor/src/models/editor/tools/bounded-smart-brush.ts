@@ -1,0 +1,66 @@
+import { RegionGrowingRenderer } from "@visian/rendering";
+import { DragPoint, IDocument } from "@visian/ui-shared";
+import { NumberParameter, Parameter } from "../parameters";
+import { CircleBrush } from "./circle-brush";
+
+export class BoundedSmartBrush<
+  N extends "bounded-smart-brush" | "bounded-smart-eraser"
+> extends CircleBrush<N> {
+  constructor(
+    document: IDocument,
+    private regionGrowingRenderer: RegionGrowingRenderer,
+    value = 255,
+  ) {
+    super(document, regionGrowingRenderer, value, {
+      name: (value ? "bounded-smart-brush" : "bounded-smart-eraser") as N,
+      altToolName: (value
+        ? "bounded-smart-eraser"
+        : "bounded-smart-brush") as N,
+      // TODO: Add icon.
+      icon: value ? "magicBrush" : "eraser",
+      supportedViewModes: ["2D"],
+      supportedLayerKinds: ["image"],
+      isDrawingTool: true,
+      isBrush: true,
+      params: [
+        new NumberParameter({
+          name: "threshold",
+          labelTx: "threshold",
+          scaleType: "linear",
+          min: 0,
+          max: 20,
+          stepSize: 1,
+          defaultValue: 5,
+        }) as Parameter<unknown>,
+        new NumberParameter({
+          name: "boxRadius",
+          labelTx: "box-radius",
+          scaleType: "linear",
+          min: 3,
+          max: 20,
+          stepSize: 1,
+          defaultValue: 7,
+        }) as Parameter<unknown>,
+      ],
+    });
+  }
+
+  public startAt(dragPoint: DragPoint) {
+    super.startAt(dragPoint);
+    this.triggerRegionGrowing();
+  }
+
+  public moveTo(dragPoint: DragPoint) {
+    super.moveTo(dragPoint);
+    this.triggerRegionGrowing();
+  }
+
+  private triggerRegionGrowing() {
+    this.regionGrowingRenderer.waitForRender().then(() => {
+      this.regionGrowingRenderer.doRegionGrowing(
+        this.params.threshold.value as number,
+        this.params.boxRadius.value as number,
+      );
+    });
+  }
+}

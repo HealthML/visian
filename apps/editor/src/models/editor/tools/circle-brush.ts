@@ -6,7 +6,13 @@ import { UndoableTool } from "./undoable-tool";
 import { dragPointsEqual } from "./utils";
 
 export class CircleBrush<
-  N extends "pixel-brush" | "pixel-eraser" | "smart-brush" | "smart-eraser"
+  N extends
+    | "pixel-brush"
+    | "pixel-eraser"
+    | "smart-brush"
+    | "smart-eraser"
+    | "bounded-smart-brush"
+    | "bounded-smart-eraser"
 > extends UndoableTool<N> {
   private lastDragPoint?: DragPoint;
 

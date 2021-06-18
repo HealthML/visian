@@ -11,6 +11,7 @@ import { OutlineTool } from "./outline-tool";
 import { Tool, ToolSnapshot } from "./tool";
 
 import { ToolGroup, ToolGroupSnapshot } from "./tool-group";
+import { BoundedSmartBrush } from "./bounded-smart-brush";
 
 export type ToolName =
   | "navigation-tool"
@@ -19,6 +20,8 @@ export type ToolName =
   | "pixel-eraser"
   | "smart-brush"
   | "smart-eraser"
+  | "bounded-smart-brush"
+  | "bounded-smart-eraser"
   | "outline-tool"
   | "outline-eraser"
   | "clear-slice"
@@ -121,6 +124,15 @@ export class Tools
       "pixel-eraser": new CircleBrush(document, this.toolRenderer, 0),
       "smart-brush": new SmartBrush(document, this.regionGrowingRenderer),
       "smart-eraser": new SmartBrush(document, this.regionGrowingRenderer, 0),
+      "bounded-smart-brush": new BoundedSmartBrush(
+        document,
+        this.regionGrowingRenderer,
+      ),
+      "bounded-smart-eraser": new BoundedSmartBrush(
+        document,
+        this.regionGrowingRenderer,
+        0,
+      ),
       "outline-tool": new OutlineTool(document, this.toolRenderer),
       "outline-eraser": new OutlineTool(document, this.toolRenderer, 0),
       "clear-slice": new ClearSliceTool(document, this.toolRenderer),
@@ -141,6 +153,10 @@ export class Tools
       new ToolGroup({ toolNames: ["crosshair-tool"] }, document),
       new ToolGroup({ toolNames: ["pixel-brush"] }, document),
       new ToolGroup({ toolNames: ["smart-brush", "smart-eraser"] }, document),
+      new ToolGroup(
+        { toolNames: ["bounded-smart-brush", "bounded-smart-eraser"] },
+        document,
+      ),
       new ToolGroup(
         { toolNames: ["outline-tool", "outline-eraser"] },
         document,

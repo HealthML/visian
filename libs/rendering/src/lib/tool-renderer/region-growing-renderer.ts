@@ -62,7 +62,7 @@ export class RegionGrowingRenderer extends ToolRenderer {
     );
   }
 
-  public doRegionGrowing(threshold: number) {
+  public doRegionGrowing(threshold: number, boundingRadius?: number) {
     if (!this.lastCircle) return;
 
     const annotation = (this.document.activeLayer as IImageLayer | undefined)
@@ -112,6 +112,9 @@ export class RegionGrowingRenderer extends ToolRenderer {
 
     this.regionGrowingMaterial.setSeed(seed);
     this.regionGrowingMaterial.setThreshold(threshold);
+    this.regionGrowingMaterial.setBoundingRadius(boundingRadius);
+
+    const blipSteps = (boundingRadius ?? width + height) / 2;
 
     this.document.renderers?.forEach((renderer, rendererIndex) => {
       this.regionGrowingMaterial.setDataTexture(
@@ -120,7 +123,7 @@ export class RegionGrowingRenderer extends ToolRenderer {
 
       renderer.autoClear = false;
 
-      for (let i = 0; i < (width + height) / 2; i++) {
+      for (let i = 0; i < blipSteps; i++) {
         this.regionGrowingMaterial.setRegionTexture(
           this.renderTargets[rendererIndex].texture,
         );
