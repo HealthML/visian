@@ -41,6 +41,8 @@ export class BoundedSmartBrush<
           max: 20,
           stepSize: 1,
           defaultValue: 7,
+          onBeforeValueChange: () =>
+            document.sliceRenderer?.showBrushCursorPreview(),
         }) as Parameter<unknown>,
       ],
     });

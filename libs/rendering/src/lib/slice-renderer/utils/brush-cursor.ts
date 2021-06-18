@@ -16,6 +16,28 @@ export const get2x2BrushCursorPoints = () => [
   new THREE.Vector3(2, 2, 0),
 ];
 
+export const getBoundedBrushCursorPoints = (radius: number) => {
+  const actualRadius = radius + 0.5;
+  return [
+    new THREE.Vector3(-actualRadius, -actualRadius, 0),
+    new THREE.Vector3(-actualRadius, actualRadius, 0),
+    new THREE.Vector3(-actualRadius, -actualRadius, 0),
+    new THREE.Vector3(actualRadius, -actualRadius, 0),
+    new THREE.Vector3(-actualRadius, actualRadius, 0),
+    new THREE.Vector3(actualRadius, actualRadius, 0),
+    new THREE.Vector3(actualRadius, -actualRadius, 0),
+    new THREE.Vector3(actualRadius, actualRadius, 0),
+    new THREE.Vector3(-0.5, -0.5, 0),
+    new THREE.Vector3(-0.5, 0.5, 0),
+    new THREE.Vector3(-0.5, -0.5, 0),
+    new THREE.Vector3(0.5, -0.5, 0),
+    new THREE.Vector3(-0.5, 0.5, 0),
+    new THREE.Vector3(0.5, 0.5, 0),
+    new THREE.Vector3(0.5, -0.5, 0),
+    new THREE.Vector3(0.5, 0.5, 0),
+  ];
+};
+
 export class BrushCursor extends THREE.LineSegments implements IDisposable {
   private points: THREE.Vector3[] = [];
   private workingMatrix = new THREE.Matrix4();
@@ -78,7 +100,11 @@ export class BrushCursor extends THREE.LineSegments implements IDisposable {
 
     this.points = [];
 
-    if (this.editor.activeDocument.tools.brushSize === 0.5) {
+    if (this.editor.activeDocument.tools.activeTool?.params.boxRadius) {
+      const boxRadius = this.editor.activeDocument.tools.activeTool.params
+        .boxRadius.value as number;
+      this.points = getBoundedBrushCursorPoints(boxRadius);
+    } else if (this.editor.activeDocument.tools.brushSize === 0.5) {
       this.points = get2x2BrushCursorPoints();
     } else {
       const radius = this.editor.activeDocument.tools.brushSize + 0.5;
