@@ -57,13 +57,20 @@ export const DropSheet: React.FC<DropSheetProps> = observer(
       async (file: File) => {
         // Exclude hidden system files from import
         if (file.name.startsWith(".")) return;
-        if (await isFileAnnotation(file)) {
-          await store?.editor.activeDocument?.importAnnotation(file);
-        } else {
-          await store?.editor.activeDocument?.importImage(file);
+        try {
+          if (await isFileAnnotation(file)) {
+            await store?.editor.activeDocument?.importAnnotation(file);
+          } else {
+            await store?.editor.activeDocument?.importImage(file);
+          }
+        } catch (error) {
+          store?.setError({
+            titleTx: "import-error",
+            descriptionTx: error.message,
+          });
         }
       },
-      [store?.editor.activeDocument],
+      [store],
     );
 
     const importFileList = useCallback(
@@ -158,7 +165,6 @@ export const DropSheet: React.FC<DropSheetProps> = observer(
               }
             }
             await Promise.all(promises);
-            store?.setError();
           } catch (error) {
             store?.setError({
               titleTx: "import-error",
