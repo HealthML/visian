@@ -160,7 +160,19 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
   public addLayer = (...newLayers: Layer[]): void => {
     newLayers.forEach((layer) => {
       this.layerMap[layer.id] = layer;
-      this.layerIds.unshift(layer.id);
+      if (layer.isAnnotation) {
+        this.layerIds.unshift(layer.id);
+      } else {
+        // insert image layer after all annotation layers
+        let insertIndex = 0;
+        for (let i = 0; i < this.layerIds.length; i++) {
+          if (!this.layerMap[this.layerIds[i]].isAnnotation) {
+            insertIndex = i;
+            break;
+          }
+        }
+        this.layerIds.splice(insertIndex, 0, layer.id);
+      }
     });
   };
 
