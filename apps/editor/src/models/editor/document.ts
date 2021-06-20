@@ -179,20 +179,20 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
 
   // I/O (DEPRECATED)
   public async importImage(file: File | File[], name?: string) {
-    this.layerIds = [];
-    this.layerMap = {};
-
     const image = await readMedicalImage(file);
     image.name =
       name || (Array.isArray(file) ? file[0]?.name || "" : file.name);
     const imageLayer = ImageLayer.fromITKImage(image, this);
-
-    const annotationLayer = ImageLayer.fromNewAnnotationForImage(
-      imageLayer.image,
-      this,
-    );
-    this.addLayer(imageLayer, annotationLayer);
-    this.setActiveLayer(annotationLayer);
+    if (!this.layerIds.length) {
+      const annotationLayer = ImageLayer.fromNewAnnotationForImage(
+        imageLayer.image,
+        this,
+      );
+      this.addLayer(imageLayer, annotationLayer);
+      this.setActiveLayer(annotationLayer);
+    } else {
+      this.addLayer(imageLayer);
+    }
 
     this.viewSettings.reset();
     this.viewport2D.reset();
