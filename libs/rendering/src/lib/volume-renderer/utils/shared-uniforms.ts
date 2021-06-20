@@ -27,6 +27,9 @@ export class SharedUniforms implements IDisposable {
 
   private disposers: IDisposer[] = [];
 
+  private workingVector = new THREE.Vector3();
+  private readonly coneAxis = new THREE.Vector3(0, 1, 0);
+
   constructor(editor: IEditor) {
     this.uniforms = THREE.UniformsUtils.merge([
       opacityUniforms,
@@ -47,7 +50,34 @@ export class SharedUniforms implements IDisposable {
           editor.activeDocument?.viewport3D.transferFunctions["fc-cone"];
         if (!coneTransferFunction) return;
 
-        this.uniforms.uConeDirection.value = (coneTransferFunction as IConeTransferFunction).coneDirection.toArray();
+        const { coneDirection } = coneTransferFunction as IConeTransferFunction;
+
+        // TODO: Why does y have to be flipped here?
+        this.workingVector
+          .set(coneDirection.x, -coneDirection.y, coneDirection.z)
+          .normalize();
+        const cos = this.workingVector.dot(this.coneAxis);
+        const k = 1 / (1 + cos);
+
+        this.workingVector.cross(this.coneAxis);
+
+        (this.uniforms.uConeMatrix.value as THREE.Matrix3).set(
+          this.workingVector.x * this.workingVector.x * k + cos,
+          this.workingVector.x * this.workingVector.y * k +
+            this.workingVector.z,
+          this.workingVector.x * this.workingVector.z * k -
+            this.workingVector.y,
+          this.workingVector.y * this.workingVector.x * k -
+            this.workingVector.z,
+          this.workingVector.y * this.workingVector.y * k + cos,
+          this.workingVector.y * this.workingVector.z * k +
+            this.workingVector.x,
+          this.workingVector.z * this.workingVector.x * k +
+            this.workingVector.y,
+          this.workingVector.z * this.workingVector.y * k -
+            this.workingVector.x,
+          this.workingVector.z * this.workingVector.z * k + cos,
+        );
 
         const shouldUpdateLighting =
           editor.activeDocument?.viewport3D.activeTransferFunction?.name ===
