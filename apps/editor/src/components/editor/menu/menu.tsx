@@ -110,17 +110,15 @@ export const Menu: React.FC<MenuProps> = observer(({ onOpenShortcutPopUp }) => {
           value={i18n.language.split("-")[0]}
           setValue={setLanguage}
         />
+        <Divider />
+        <ButtonParam label="Shortcuts" handlePress={openShortcutPopUp} />
         {feedbackMailAddress && (
-          <>
-            <Divider />
-            <BlueButtonParam
-              labelTx="ideas-feedback"
-              handlePress={sendFeedback}
-            />
-          </>
+          <BlueButtonParam
+            labelTx="ideas-feedback"
+            handlePress={sendFeedback}
+          />
         )}
-        <RedButtonParam labelTx="clear-data" handlePress={destroy} />
-        <ButtonParam label="Shortcuts" handlePress={openShortcutPopUp} isLast />
+        <RedButtonParam labelTx="clear-data" handlePress={destroy} isLast />
       </Modal>
     </>
   );
