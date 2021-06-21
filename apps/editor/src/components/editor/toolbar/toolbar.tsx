@@ -133,28 +133,31 @@ export const Toolbar: React.FC = observer(() => {
         onOutsidePress={closeModal}
         onReset={store?.editor.activeDocument?.tools.resetActiveToolSetings}
       >
-        {activeTool?.isBrush && !activeTool?.isBoundedSmartBrush && (
-          <>
-            <BooleanParam
-              labelTx="adaptive-brush-size"
-              value={Boolean(
-                store?.editor.activeDocument?.tools.useAdaptiveBrushSize,
-              )}
-              setValue={
-                store?.editor.activeDocument?.tools.setUseAdaptiveBrushSize
-              }
-            />
-            <NumberParam
-              labelTx="brush-size"
-              min={0}
-              max={250}
-              scaleType="quadratic"
-              value={store?.editor.activeDocument?.tools.brushSize}
-              setValue={setBrushSize}
-            />
-          </>
-        )}
-        {activeTool?.isBoundedSmartBrush && (
+        {activeTool?.isBrush &&
+          activeTool?.name !== "bounded-smart-brush" &&
+          activeTool?.name !== "bounded-smart-eraser" && (
+            <>
+              <BooleanParam
+                labelTx="adaptive-brush-size"
+                value={Boolean(
+                  store?.editor.activeDocument?.tools.useAdaptiveBrushSize,
+                )}
+                setValue={
+                  store?.editor.activeDocument?.tools.setUseAdaptiveBrushSize
+                }
+              />
+              <NumberParam
+                labelTx="brush-size"
+                min={0}
+                max={250}
+                scaleType="quadratic"
+                value={store?.editor.activeDocument?.tools.brushSize}
+                setValue={setBrushSize}
+              />
+            </>
+          )}
+        {(activeTool?.name === "bounded-smart-brush" ||
+          activeTool?.name === "bounded-smart-eraser") && (
           <NumberParam
             labelTx="box-radius"
             min={3}

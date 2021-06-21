@@ -100,7 +100,12 @@ export class BrushCursor extends THREE.LineSegments implements IDisposable {
 
     this.points = [];
 
-    if (this.editor.activeDocument.tools.activeTool?.isBoundedSmartBrush) {
+    if (
+      this.editor.activeDocument.tools.activeTool?.name ===
+        "bounded-smart-brush" ||
+      this.editor.activeDocument.tools.activeTool?.name ===
+        "bounded-smart-eraser"
+    ) {
       this.points = getBoundedBrushCursorPoints(
         this.editor.activeDocument.tools.boundedSmartBrushRadius,
       );

@@ -22,7 +22,6 @@ export class BoundedSmartBrush<
       isDrawingTool: true,
       isBrush: true,
       isSmartBrush: true,
-      isBoundedSmartBrush: true,
     });
   }
 

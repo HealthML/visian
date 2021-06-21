@@ -296,7 +296,10 @@ export class Tools
   };
 
   public incrementBrushSize() {
-    if (this.activeTool?.isBoundedSmartBrush) {
+    if (
+      this.activeTool?.name === "bounded-smart-brush" ||
+      this.activeTool?.name === "bounded-smart-eraser"
+    ) {
       this.setBoundedSmartBrushRadius(this.boundedSmartBrushRadius + 1);
       return;
     }
@@ -307,7 +310,10 @@ export class Tools
   }
 
   public decrementBrushSize() {
-    if (this.activeTool?.isBoundedSmartBrush) {
+    if (
+      this.activeTool?.name === "bounded-smart-brush" ||
+      this.activeTool?.name === "bounded-smart-eraser"
+    ) {
       this.setBoundedSmartBrushRadius(this.boundedSmartBrushRadius - 1);
       return;
     }
@@ -349,11 +355,21 @@ export class Tools
   public resetActiveToolSetings = (): void => {
     const { activeTool } = this;
     if (!activeTool) return;
-    if (activeTool.isBrush && !activeTool.isBoundedSmartBrush) {
+    if (
+      activeTool.isBrush &&
+      !(
+        this.activeTool?.name === "bounded-smart-brush" ||
+        this.activeTool?.name === "bounded-smart-eraser"
+      )
+    ) {
       this.resetBrushSettings();
     }
     if (activeTool.isSmartBrush) this.setSmartBrushThreshold();
-    if (activeTool.isBoundedSmartBrush) this.setBoundedSmartBrushRadius();
+    if (
+      this.activeTool?.name === "bounded-smart-brush" ||
+      this.activeTool?.name === "bounded-smart-eraser"
+    )
+      this.setBoundedSmartBrushRadius();
     Object.values(activeTool.params).forEach((param) => {
       param.reset();
     });

@@ -45,9 +45,6 @@ export interface ITool<N extends string> {
   /** Indicates if the tool is a smart brush. */
   isSmartBrush: boolean;
 
-  /** Indicates if the brush size for this tool is fixed. */
-  isBoundedSmartBrush: boolean;
-
   /**
    * The tool that is used as the alternative mode of this tool.
    * Typically, this is activated using the `alt` key or right mouse button.
