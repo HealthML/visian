@@ -87,6 +87,15 @@ export const Toolbar: React.FC = observer(() => {
     },
     [store],
   );
+  const setBoundedSmartBrushRadius = useCallback(
+    (value: number | number[]) => {
+      store?.editor.activeDocument?.tools.setBoundedSmartBrushRadius(
+        value as number,
+        true,
+      );
+    },
+    [store],
+  );
 
   return (
     <StyledToolbar ref={ref}>
@@ -125,26 +134,39 @@ export const Toolbar: React.FC = observer(() => {
         onOutsidePress={closeModal}
         onReset={store?.editor.activeDocument?.tools.resetActiveToolSetings}
       >
-        {activeTool?.isBrush && (
-          <>
-            <BooleanParam
-              labelTx="adaptive-brush-size"
-              value={Boolean(
-                store?.editor.activeDocument?.tools.useAdaptiveBrushSize,
-              )}
-              setValue={
-                store?.editor.activeDocument?.tools.setUseAdaptiveBrushSize
-              }
-            />
-            <NumberParam
-              labelTx="brush-size"
-              min={0}
-              max={250}
-              scaleType="quadratic"
-              value={store?.editor.activeDocument?.tools.brushSize}
-              setValue={setBrushSize}
-            />
-          </>
+        {activeTool?.isBrush &&
+          activeTool?.name !== "bounded-smart-brush" &&
+          activeTool?.name !== "bounded-smart-eraser" && (
+            <>
+              <BooleanParam
+                labelTx="adaptive-brush-size"
+                value={Boolean(
+                  store?.editor.activeDocument?.tools.useAdaptiveBrushSize,
+                )}
+                setValue={
+                  store?.editor.activeDocument?.tools.setUseAdaptiveBrushSize
+                }
+              />
+              <NumberParam
+                labelTx="brush-size"
+                min={0}
+                max={250}
+                scaleType="quadratic"
+                value={store?.editor.activeDocument?.tools.brushSize}
+                setValue={setBrushSize}
+              />
+            </>
+          )}
+        {(activeTool?.name === "bounded-smart-brush" ||
+          activeTool?.name === "bounded-smart-eraser") && (
+          <NumberParam
+            labelTx="box-radius"
+            min={3}
+            max={40}
+            stepSize={1}
+            value={store?.editor.activeDocument?.tools.boundedSmartBrushRadius}
+            setValue={setBoundedSmartBrushRadius}
+          />
         )}
         {activeTool?.isSmartBrush && (
           <NumberParam

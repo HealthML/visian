@@ -11,6 +11,7 @@ import { OutlineTool } from "./outline-tool";
 import { Tool, ToolSnapshot } from "./tool";
 
 import { ToolGroup, ToolGroupSnapshot } from "./tool-group";
+import { BoundedSmartBrush } from "./bounded-smart-brush";
 
 export type ToolName =
   | "navigation-tool"
@@ -19,6 +20,8 @@ export type ToolName =
   | "pixel-eraser"
   | "smart-brush"
   | "smart-eraser"
+  | "bounded-smart-brush"
+  | "bounded-smart-eraser"
   | "outline-tool"
   | "outline-eraser"
   | "clear-slice"
@@ -33,6 +36,7 @@ export interface ToolsSnapshot<N extends string> {
   brushSize: number;
   lockedBrushSize?: number;
   smartBrushThreshold: number;
+  boundedSmartBrushRadius: number;
 }
 
 export class Tools
@@ -53,6 +57,7 @@ export class Tools
   private lockedBrushSize?: number;
 
   public smartBrushThreshold = 5;
+  public boundedSmartBrushRadius = 7;
 
   protected isCursorOverDrawableArea = false;
   protected isCursorOverFloatingUI = false;
@@ -83,6 +88,7 @@ export class Tools
       screenSpaceBrushSize: observable,
       lockedBrushSize: observable,
       smartBrushThreshold: observable,
+      boundedSmartBrushRadius: observable,
       isCursorOverDrawableArea: observable,
       isCursorOverFloatingUI: observable,
       isNavigationDragged: observable,
@@ -99,6 +105,7 @@ export class Tools
       setBrushSize: action,
       setUseAdaptiveBrushSize: action,
       setSmartBrushThreshold: action,
+      setBoundedSmartBrushRadius: action,
       setIsCursorOverDrawableArea: action,
       setIsCursorOverFloatingUI: action,
       setIsNavigationDragged: action,
@@ -130,6 +137,15 @@ export class Tools
         this.regionGrowingRenderer,
         false,
       ),
+      "bounded-smart-brush": new BoundedSmartBrush(
+        document,
+        this.regionGrowingRenderer,
+      ),
+      "bounded-smart-eraser": new BoundedSmartBrush(
+        document,
+        this.regionGrowingRenderer,
+        false,
+      ),
       "outline-tool": new OutlineTool(document, this.toolRenderer),
       "outline-eraser": new OutlineTool(document, this.toolRenderer, false),
       "clear-slice": new ClearSliceTool(document, this.toolRenderer),
@@ -150,6 +166,10 @@ export class Tools
       new ToolGroup({ toolNames: ["crosshair-tool"] }, document),
       new ToolGroup({ toolNames: ["pixel-brush"] }, document),
       new ToolGroup({ toolNames: ["smart-brush", "smart-eraser"] }, document),
+      new ToolGroup(
+        { toolNames: ["bounded-smart-brush", "bounded-smart-eraser"] },
+        document,
+      ),
       new ToolGroup(
         { toolNames: ["outline-tool", "outline-eraser"] },
         document,
@@ -276,12 +296,28 @@ export class Tools
   };
 
   public incrementBrushSize() {
+    if (
+      this.activeTool?.name === "bounded-smart-brush" ||
+      this.activeTool?.name === "bounded-smart-eraser"
+    ) {
+      this.setBoundedSmartBrushRadius(this.boundedSmartBrushRadius + 1);
+      return;
+    }
+
     // Allow brush size 0.5.
     const increment = this.brushSize < 1 ? 0.5 : 1;
     this.setBrushSize(this.brushSize + increment);
   }
 
   public decrementBrushSize() {
+    if (
+      this.activeTool?.name === "bounded-smart-brush" ||
+      this.activeTool?.name === "bounded-smart-eraser"
+    ) {
+      this.setBoundedSmartBrushRadius(this.boundedSmartBrushRadius - 1);
+      return;
+    }
+
     // Allow brush size 0.5.
     const decrement = this.brushSize <= 1 ? 0.5 : 1;
     this.setBrushSize(this.brushSize - decrement);
@@ -289,6 +325,13 @@ export class Tools
 
   public setSmartBrushThreshold(value = 5) {
     this.smartBrushThreshold = Math.min(20, Math.max(0, value));
+  }
+
+  public setBoundedSmartBrushRadius(value = 7, showPreview = false) {
+    this.boundedSmartBrushRadius = Math.min(40, Math.max(3, value));
+
+    if (!showPreview) return;
+    this.document.sliceRenderer?.showBrushCursorPreview();
   }
 
   public setIsCursorOverDrawableArea(value = true) {
@@ -315,8 +358,21 @@ export class Tools
   public resetActiveToolSetings = (): void => {
     const { activeTool } = this;
     if (!activeTool) return;
-    if (activeTool.isBrush) this.resetBrushSettings();
+    if (
+      activeTool.isBrush &&
+      !(
+        this.activeTool?.name === "bounded-smart-brush" ||
+        this.activeTool?.name === "bounded-smart-eraser"
+      )
+    ) {
+      this.resetBrushSettings();
+    }
     if (activeTool.isSmartBrush) this.setSmartBrushThreshold();
+    if (
+      this.activeTool?.name === "bounded-smart-brush" ||
+      this.activeTool?.name === "bounded-smart-eraser"
+    )
+      this.setBoundedSmartBrushRadius();
     Object.values(activeTool.params).forEach((param) => {
       param.reset();
     });
@@ -331,6 +387,7 @@ export class Tools
       brushSize: this.brushSize,
       lockedBrushSize: this.lockedBrushSize,
       smartBrushThreshold: this.smartBrushThreshold,
+      boundedSmartBrushRadius: this.boundedSmartBrushRadius,
     };
   }
 
@@ -350,6 +407,7 @@ export class Tools
     this.setBrushSize(snapshot?.brushSize);
     this.lockedBrushSize = snapshot?.lockedBrushSize;
     this.setSmartBrushThreshold(snapshot?.smartBrushThreshold);
+    this.setBoundedSmartBrushRadius(snapshot?.boundedSmartBrushRadius);
 
     return Promise.resolve();
   }

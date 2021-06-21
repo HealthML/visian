@@ -117,6 +117,9 @@ export interface ITools<N extends string> {
   /** The threshold for all smart brushes. */
   smartBrushThreshold: number;
 
+  /** The size of the bounded smart brush bounding boxes. */
+  boundedSmartBrushRadius: number;
+
   /** Indicates if a brush stroke can be started this moment. */
   canDraw: boolean;
 
@@ -132,6 +135,7 @@ export interface ITools<N extends string> {
   decrementBrushSize(): void;
 
   setSmartBrushThreshold(value?: number): void;
+  setBoundedSmartBrushRadius(value?: number): void;
 
   setIsCursorOverDrawableArea(value: boolean): void;
   setIsCursorOverFloatingUI(value: boolean): void;
