@@ -7,6 +7,7 @@ import {
   viewTypes,
 } from "@visian/utils";
 import * as THREE from "three";
+import { MergeFunction } from "../../types";
 
 import { SliceLines } from "./slice-lines";
 import { SliceQuad } from "./slice-quad";
@@ -52,6 +53,7 @@ export class SliceWriter {
     sliceData: Uint8Array | THREE.Texture[] | undefined,
     renderTargets: THREE.WebGLRenderTarget[],
     renderers: THREE.WebGLRenderer[],
+    mergeFunction: MergeFunction,
   ) {
     const textureData = this.textureDatas[viewType];
     if (sliceData) {
@@ -79,6 +81,8 @@ export class SliceWriter {
       scene = this.sliceLines;
       camera = this.sliceLines.camera;
     }
+
+    scene.setMergeFunction(mergeFunction);
 
     renderTargets.forEach((renderTarget, index) => {
       if (sliceData && !(sliceData instanceof Uint8Array)) {

@@ -44,8 +44,6 @@ export class ClearSliceTool<
       ),
     );
 
-    this.toolRenderer.handleCurrentSliceChanged();
-
     (imageLayer as IImageLayer).clearSliceMarkers(viewType, slice);
 
     super.activate(previousTool);

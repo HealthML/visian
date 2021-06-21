@@ -1,11 +1,11 @@
-import { ToolRenderer } from "@visian/rendering";
+import { RegionGrowingRenderer, ToolRenderer } from "@visian/rendering";
 import { IDocument, IImageLayer, ITool, ITools } from "@visian/ui-shared";
 import { getPlaneAxes, ISerializable } from "@visian/utils";
 import { action, computed, makeObservable, observable } from "mobx";
 import { CircleBrush } from "./circle-brush";
 import { ClearImageTool } from "./clear-image-tool";
 import { ClearSliceTool } from "./clear-slice-tool";
-import { SmartBrush } from "./cpu-brush";
+import { SmartBrush } from "./smart-brush";
 import { CrosshairTool } from "./crosshair-tool";
 import { OutlineTool } from "./outline-tool";
 import { Tool, ToolSnapshot } from "./tool";
@@ -32,6 +32,7 @@ export interface ToolsSnapshot<N extends string> {
 
   brushSize: number;
   lockedBrushSize?: number;
+  smartBrushThreshold: number;
 }
 
 export class Tools
@@ -51,12 +52,15 @@ export class Tools
   private screenSpaceBrushSize = 0.02;
   private lockedBrushSize?: number;
 
+  public smartBrushThreshold = 5;
+
   protected isCursorOverDrawableArea = false;
   protected isCursorOverFloatingUI = false;
   protected isNavigationDragged = false;
   public isDrawing = false;
 
   public toolRenderer: ToolRenderer;
+  public regionGrowingRenderer: RegionGrowingRenderer;
 
   constructor(
     snapshot: Partial<ToolsSnapshot<ToolName>> | undefined,
@@ -78,6 +82,7 @@ export class Tools
       toolGroups: observable,
       screenSpaceBrushSize: observable,
       lockedBrushSize: observable,
+      smartBrushThreshold: observable,
       isCursorOverDrawableArea: observable,
       isCursorOverFloatingUI: observable,
       isNavigationDragged: observable,
@@ -93,6 +98,7 @@ export class Tools
       setActiveTool: action,
       setBrushSize: action,
       setUseAdaptiveBrushSize: action,
+      setSmartBrushThreshold: action,
       setIsCursorOverDrawableArea: action,
       setIsCursorOverFloatingUI: action,
       setIsNavigationDragged: action,
@@ -103,6 +109,7 @@ export class Tools
     });
 
     this.toolRenderer = new ToolRenderer(document);
+    this.regionGrowingRenderer = new RegionGrowingRenderer(document);
 
     this.tools = {
       "navigation-tool": new Tool(
@@ -116,11 +123,15 @@ export class Tools
       ),
       "crosshair-tool": new CrosshairTool(document),
       "pixel-brush": new CircleBrush(document, this.toolRenderer),
-      "pixel-eraser": new CircleBrush(document, this.toolRenderer, 0),
-      "smart-brush": new SmartBrush(document),
-      "smart-eraser": new SmartBrush(document, 0),
+      "pixel-eraser": new CircleBrush(document, this.toolRenderer, false),
+      "smart-brush": new SmartBrush(document, this.regionGrowingRenderer),
+      "smart-eraser": new SmartBrush(
+        document,
+        this.regionGrowingRenderer,
+        false,
+      ),
       "outline-tool": new OutlineTool(document, this.toolRenderer),
-      "outline-eraser": new OutlineTool(document, this.toolRenderer, 0),
+      "outline-eraser": new OutlineTool(document, this.toolRenderer, false),
       "clear-slice": new ClearSliceTool(document, this.toolRenderer),
       "clear-image": new ClearImageTool(document, this.toolRenderer),
       "fly-tool": new Tool(
@@ -276,6 +287,10 @@ export class Tools
     this.setBrushSize(this.brushSize - decrement);
   }
 
+  public setSmartBrushThreshold(value = 5) {
+    this.smartBrushThreshold = Math.min(20, Math.max(0, value));
+  }
+
   public setIsCursorOverDrawableArea(value = true) {
     this.isCursorOverDrawableArea = value;
   }
@@ -292,10 +307,6 @@ export class Tools
     this.isDrawing = value;
   }
 
-  public handleCurrentSliceChanged() {
-    this.toolRenderer.handleCurrentSliceChanged();
-  }
-
   protected resetBrushSettings(): void {
     this.setUseAdaptiveBrushSize();
     this.setBrushSize();
@@ -305,6 +316,7 @@ export class Tools
     const { activeTool } = this;
     if (!activeTool) return;
     if (activeTool.isBrush) this.resetBrushSettings();
+    if (activeTool.isSmartBrush) this.setSmartBrushThreshold();
     Object.values(activeTool.params).forEach((param) => {
       param.reset();
     });
@@ -318,6 +330,7 @@ export class Tools
       toolGroups: this.toolGroups.map((toolGroup) => toolGroup.toJSON()),
       brushSize: this.brushSize,
       lockedBrushSize: this.lockedBrushSize,
+      smartBrushThreshold: this.smartBrushThreshold,
     };
   }
 
@@ -336,6 +349,7 @@ export class Tools
 
     this.setBrushSize(snapshot?.brushSize);
     this.lockedBrushSize = snapshot?.lockedBrushSize;
+    this.setSmartBrushThreshold(snapshot?.smartBrushThreshold);
 
     return Promise.resolve();
   }

@@ -22,6 +22,7 @@ import {
   Voxels,
 } from "./edit-rendering";
 import { SliceAtlasAdapter } from "./slice-atlas-adapter";
+import { MergeFunction } from "./types";
 
 export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
   public static fromITKImage<T2 extends TypedArray = TypedArray>(
@@ -295,6 +296,7 @@ export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
     viewType: ViewType,
     slice: number,
     sliceData?: Uint8Array | THREE.Texture[],
+    mergeFunction = MergeFunction.Replace,
   ) {
     if (this.document?.renderers?.length) {
       this.sliceAtlasAdapter.writeSlice(
@@ -303,6 +305,7 @@ export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
         sliceData,
         this.renderTargets[THREE.NearestFilter],
         this.document.renderers,
+        mergeFunction,
       );
       this.sliceAtlasAdapter.writeSlice(
         slice,
@@ -310,6 +313,7 @@ export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
         sliceData,
         this.renderTargets[THREE.LinearFilter],
         this.document.renderers,
+        mergeFunction,
       );
 
       this.onModificationsOnGPU();

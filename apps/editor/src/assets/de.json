@@ -36,8 +36,7 @@
   "smart-brush-settings": "Smarter Pinseleinstellungen",
   "brush-size": "Pinselgröße",
   "adaptive-brush-size": "Adaptive Pinselgröße",
-  "seed-threshold": "Startschwellwert",
-  "neighbor-threshold": "Nachbarschwellwert",
+  "threshold": "Schwellwert",
 
   "layers": "Ebenen",
   "add-annotation-layer": "Neue Annotation hinzufügen",

@@ -79,6 +79,14 @@ export const Toolbar: React.FC = observer(() => {
     },
     [store],
   );
+  const setSmartBrushThreshold = useCallback(
+    (value: number | number[]) => {
+      store?.editor.activeDocument?.tools.setSmartBrushThreshold(
+        value as number,
+      );
+    },
+    [store],
+  );
 
   return (
     <StyledToolbar ref={ref}>
@@ -137,6 +145,16 @@ export const Toolbar: React.FC = observer(() => {
               setValue={setBrushSize}
             />
           </>
+        )}
+        {activeTool?.isSmartBrush && (
+          <NumberParam
+            labelTx="threshold"
+            min={0}
+            max={20}
+            stepSize={1}
+            value={store?.editor.activeDocument?.tools.smartBrushThreshold}
+            setValue={setSmartBrushThreshold}
+          />
         )}
 
         {activeTool &&

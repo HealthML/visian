@@ -2,6 +2,7 @@ import { Vector, ViewType } from "@visian/utils";
 import * as THREE from "three";
 
 import { linesFragmentShader, linesVertexShader } from "../../../shaders";
+import { MergeFunction } from "../../types";
 
 export class SliceLinesMaterial extends THREE.ShaderMaterial {
   constructor(
@@ -17,6 +18,7 @@ export class SliceLinesMaterial extends THREE.ShaderMaterial {
         uVoxelCount: { value: voxelCount.toArray() },
         uViewType: { value: ViewType.Transverse },
         uDataTexture: { value: texture },
+        uMergeFunction: { value: MergeFunction.Replace },
       },
     });
   }
@@ -27,5 +29,9 @@ export class SliceLinesMaterial extends THREE.ShaderMaterial {
 
   public setTexture(texture: THREE.Texture | null) {
     this.uniforms.uDataTexture.value = texture;
+  }
+
+  public setMergeFunction(mergeFunction: MergeFunction) {
+    this.uniforms.uMergeFunction.value = mergeFunction;
   }
 }
