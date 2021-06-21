@@ -327,8 +327,11 @@ export class Tools
     this.smartBrushThreshold = Math.min(20, Math.max(0, value));
   }
 
-  public setBoundedSmartBrushRadius(value = 7) {
+  public setBoundedSmartBrushRadius(value = 7, showPreview = false) {
     this.boundedSmartBrushRadius = Math.min(40, Math.max(3, value));
+
+    if (!showPreview) return;
+    this.document.sliceRenderer?.showBrushCursorPreview();
   }
 
   public setIsCursorOverDrawableArea(value = true) {
