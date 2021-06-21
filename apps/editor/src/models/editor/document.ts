@@ -117,6 +117,7 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
       addLayer: action,
       addNewAnnotationLayer: action,
       deleteLayer: action,
+      updateLayerOrder: action,
       importImage: action,
       importAnnotation: action,
       applySnapshot: action,
