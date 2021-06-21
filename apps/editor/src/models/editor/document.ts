@@ -213,6 +213,18 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
     }
   };
 
+  /** Updates the layer order so that annotation layers are always on top of image layers. */
+  public updateLayerOrder = (): void => {
+    let hasFoundImage = false;
+    for (let i = 0; i < this.layerIds.length; i++) {
+      if (!this.layerMap[this.layerIds[i]].isAnnotation) {
+        hasFoundImage = true;
+      } else if (hasFoundImage) {
+        this.layerIds.unshift(this.layerIds.splice(i, 1)[0]);
+      }
+    }
+  };
+
   public get has3DLayers(): boolean {
     return Object.values(this.layerMap).some((layer) => layer.is3DLayer);
   }

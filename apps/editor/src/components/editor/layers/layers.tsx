@@ -67,6 +67,7 @@ const LayerListItem = observer<{
         // right click
       } else if (event.button === 2) {
         layer.setIsAnnotation(!layer.isAnnotation);
+        store?.editor.activeDocument?.updateLayerOrder();
       }
     },
     [layer, store?.editor.activeDocument],
