@@ -13,7 +13,6 @@ import { action, computed, makeObservable, observable, toJS } from "mobx";
 import * as THREE from "three";
 import { v4 as uuidv4 } from "uuid";
 
-import { defaultAnnotationColor } from "../../constants";
 import { History, HistorySnapshot } from "./history";
 import { ImageLayer, Layer, LayerSnapshot } from "./layers";
 import * as layers from "./layers";
@@ -178,14 +177,8 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
     });
   };
 
-  public addNewAnnotationLayer = () => {
+  private getColorForNewAnnotation = (): string | undefined => {
     const layerStack = this.layers;
-
-    const baseLayer = layerStack.find(
-      (layer) => layer.kind === "image" && !layer.isAnnotation,
-    ) as ImageLayer | undefined;
-    if (!baseLayer) return;
-
     const usedColors: { [key: string]: boolean } = {};
     layerStack.forEach((layer) => {
       if (layer.color) {
@@ -193,11 +186,21 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
       }
     });
     const colorCandidates = dataColorKeys.filter((color) => !usedColors[color]);
+    return colorCandidates.length ? colorCandidates[0] : undefined;
+  };
+
+  public addNewAnnotationLayer = () => {
+    const baseLayer = this.layers.find(
+      (layer) => layer.kind === "image" && !layer.isAnnotation,
+    ) as ImageLayer | undefined;
+    if (!baseLayer) return;
+
+    const annotationColor = this.getColorForNewAnnotation();
 
     const annotationLayer = ImageLayer.fromNewAnnotationForImage(
       baseLayer.image,
       this,
-      colorCandidates.length ? colorCandidates[0] : undefined,
+      annotationColor,
     );
     this.addLayer(annotationLayer);
     this.setActiveLayer(annotationLayer);
@@ -260,7 +263,7 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
       name || (Array.isArray(file) ? file[0]?.name || "" : file.name);
     const annotationLayer = ImageLayer.fromITKImage(image, this, {
       isAnnotation: true,
-      color: defaultAnnotationColor,
+      color: this.getColorForNewAnnotation(),
     });
     if (
       !isEqual(
