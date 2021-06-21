@@ -91,6 +91,7 @@ export const Toolbar: React.FC = observer(() => {
     (value: number | number[]) => {
       store?.editor.activeDocument?.tools.setBoundedSmartBrushRadius(
         value as number,
+        true,
       );
     },
     [store],
