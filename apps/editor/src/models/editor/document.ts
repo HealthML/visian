@@ -234,9 +234,10 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
     const image = await readMedicalImage(file);
     image.name =
       name || (Array.isArray(file) ? file[0]?.name || "" : file.name);
-    const annotationLayer = ImageLayer.fromITKImage(image, this);
-    annotationLayer.setIsAnnotation(true);
-    annotationLayer.setColor(defaultAnnotationColor);
+    const annotationLayer = ImageLayer.fromITKImage(image, this, {
+      isAnnotation: true,
+      color: defaultAnnotationColor,
+    });
     if (
       !isEqual(
         (this.layerMap[this.layerIds[0]] as ImageLayer)?.image?.voxelCount,

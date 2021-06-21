@@ -40,8 +40,12 @@ export class ImageLayer
   public static fromITKImage<T2 extends TypedArray = TypedArray>(
     image: ITKImage<T2>,
     document: IDocument,
+    snapshot?: Partial<ImageLayerSnapshot>,
   ) {
-    return new this({ image: itkImageToImageSnapshot(image) }, document);
+    return new this(
+      { ...snapshot, image: itkImageToImageSnapshot(image) },
+      document,
+    );
   }
 
   public static fromNewAnnotationForImage<T2 extends TypedArray = TypedArray>(
