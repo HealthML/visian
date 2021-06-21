@@ -1,6 +1,7 @@
 export { ReactComponent as arrowDown } from "./arrow-down.svg";
 export { ReactComponent as arrowUp } from "./arrow-up.svg";
 export { ReactComponent as backspace } from "./backspace.svg";
+export { ReactComponent as boundedSmartBrush } from "./bounded-smart-brush.svg";
 export { ReactComponent as crosshairPointer } from "./crosshair-pointer.svg";
 export { ReactComponent as crosshair } from "./crosshair.svg";
 export { ReactComponent as downArrow } from "./down-arrow.svg";

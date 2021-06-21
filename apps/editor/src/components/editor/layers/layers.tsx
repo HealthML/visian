@@ -27,8 +27,9 @@ const LayerList = styled(List)`
 
 const LayerListItem = observer<{
   layer: ILayer;
+  isActive?: boolean;
   isLast?: boolean;
-}>(({ layer, isLast }) => {
+}>(({ layer, isActive, isLast }) => {
   const store = useStore();
 
   const toggleAnnotationVisibility = useCallback(() => {
@@ -90,6 +91,7 @@ const LayerListItem = observer<{
         trailingIcon={layer.isVisible ? "eye" : "eyeCrossed"}
         disableTrailingIcon={layer.isVisible}
         onTrailingIconPress={toggleAnnotationVisibility}
+        isActive={isActive}
         isLast={isLast}
         onPointerDown={handlePointerDown}
         onContextMenu={handleContextMenu}
@@ -127,6 +129,8 @@ export const Layers: React.FC = observer(() => {
 
   const layers = store?.editor.activeDocument?.layers;
   const layerCount = layers?.length;
+  const activeLayer = store?.editor.activeDocument?.activeLayer;
+  const activeLayerIndex = layers?.findIndex((layer) => layer === activeLayer);
   return (
     <>
       <FloatingUIButton
@@ -139,6 +143,7 @@ export const Layers: React.FC = observer(() => {
       />
       <LayerModal
         isOpen={isModalOpen}
+        hideHeaderDivider={activeLayerIndex === 0}
         labelTx="layers"
         parentElement={buttonRef}
         position="right"
@@ -158,7 +163,10 @@ export const Layers: React.FC = observer(() => {
               <LayerListItem
                 key={layer.id}
                 layer={layer}
-                isLast={index === layerCount - 1}
+                isActive={layer === activeLayer}
+                isLast={
+                  index === layerCount - 1 || index + 1 === activeLayerIndex
+                }
               />
             ))
           ) : (

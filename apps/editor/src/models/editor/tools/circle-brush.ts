@@ -6,7 +6,13 @@ import { UndoableTool } from "./undoable-tool";
 import { dragPointsEqual } from "./utils";
 
 export class CircleBrush<
-  N extends "pixel-brush" | "pixel-eraser" | "smart-brush" | "smart-eraser"
+  N extends
+    | "pixel-brush"
+    | "pixel-eraser"
+    | "smart-brush"
+    | "smart-eraser"
+    | "bounded-smart-brush"
+    | "bounded-smart-eraser"
 > extends UndoableTool<N> {
   private lastDragPoint?: DragPoint;
 
@@ -59,12 +65,16 @@ export class CircleBrush<
     this.toolRenderer.waitForRender().then(() => this.toolRenderer.endStroke());
   }
 
+  protected get brushSize() {
+    return this.document.tools.brushSize;
+  }
+
   private drawCircleAround(dragPoint: DragPoint) {
     const [xAxis, yAxis] = getPlaneAxes(this.document.viewport2D.mainViewType);
     const x = dragPoint[xAxis];
     const y = dragPoint[yAxis];
 
-    if (this.document.tools.brushSize === 0.5) {
+    if (this.brushSize === 0.5) {
       const circleQuad = [
         { x: 0, y: 0 },
         { x: 0, y: 1 },
@@ -90,7 +100,7 @@ export class CircleBrush<
     this.toolRenderer.renderCircles(this.isAdditive, {
       x,
       y,
-      radius: this.document.tools.brushSize,
+      radius: this.brushSize,
     });
   }
 

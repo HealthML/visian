@@ -1,9 +1,10 @@
 import React, { useCallback } from "react";
 import styled, { css } from "styled-components";
-import { Color } from "../color";
 
+import { Color } from "../color";
 import { Icon } from "../icon";
 import { Divider } from "../modal/modal";
+import { sheetMixin } from "../sheet";
 import { Text } from "../text";
 import { ListItemProps, ListProps } from "./list.props";
 
@@ -17,12 +18,22 @@ const ListItemContainer = styled.div`
   flex-direction: column;
 `;
 
-const ListItemInner = styled.div`
+const ListItemInner = styled.div<Pick<ListItemProps, "isActive">>`
   display: flex;
   flex-direction: row;
   align-items: center;
   height: 40px;
   overflow: hidden;
+
+  ${(props) =>
+    props.isActive &&
+    css`
+      ${sheetMixin};
+      border-radius: 8px;
+      margin: 0 -8px;
+      // Accounting for the 1px border that was added
+      padding: 0 7px;
+    `}
 `;
 
 export const ListDivider = styled(Divider)`
@@ -79,11 +90,12 @@ export const ListItem: React.FC<ListItemProps> = ({
   trailingIcon,
   trailingIconRef,
   value,
+  isActive,
+  isLast,
   onIconPress,
   onTrailingIconPress,
   disableIcon,
   disableTrailingIcon,
-  isLast,
   children,
   ...rest
 }) => {
@@ -104,7 +116,7 @@ export const ListItem: React.FC<ListItemProps> = ({
 
   return (
     <ListItemContainer {...rest}>
-      <ListItemInner>
+      <ListItemInner isActive={isActive}>
         {icon &&
           (typeof icon === "string" ? (
             <ListIcon
@@ -138,7 +150,7 @@ export const ListItem: React.FC<ListItemProps> = ({
           />
         )}
       </ListItemInner>
-      {!isLast && <ListDivider />}
+      {!isActive && !isLast && <ListDivider />}
     </ListItemContainer>
   );
 };

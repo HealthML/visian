@@ -5,6 +5,8 @@ uniform sampler2D uRegionTexture;
 uniform vec2 uRegionSize;
 uniform float uThreshold;
 uniform float uSeed;
+uniform vec2 uMinUv;
+uniform vec2 uMaxUv;
 
 bool canGrowFrom(float ownData, float neightborData, float neightborRegion) {
   return neightborRegion > 0.0 &&
@@ -13,6 +15,8 @@ bool canGrowFrom(float ownData, float neightborData, float neightborRegion) {
 }
 
 void main() {
+  if(vUv.x < uMinUv.x || vUv.x > uMaxUv.x || vUv.y < uMinUv.y || vUv.y > uMaxUv.y) discard;
+  
   vec4 data = texture2D(uDataTexture, vUv);
   vec4 region = texture2D(uRegionTexture, vUv);
 

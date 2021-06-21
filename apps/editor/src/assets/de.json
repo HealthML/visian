@@ -27,6 +27,7 @@
   "crosshair-tool": "Fadenkreuzwerkzeug (C)",
   "pixel-brush": "Pinsel (B)",
   "smart-brush": "Smarter Pinsel (S)",
+  "bounded-smart-brush": "Begrenzter Smarter Pinsel (R)",
   "pixel-eraser": "Radierer (E)",
   "outline-tool": "Umrandungswerkzeug (O)",
   "clear-slice": "Schicht leeren (Entf)",
@@ -37,6 +38,7 @@
   "brush-size": "Pinselgröße",
   "adaptive-brush-size": "Adaptive Pinselgröße",
   "threshold": "Schwellwert",
+  "box-radius": "Begrenzungsradius",
 
   "layers": "Ebenen",
   "add-annotation-layer": "Neue Annotation hinzufügen",
