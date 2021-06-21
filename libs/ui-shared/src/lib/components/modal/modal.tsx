@@ -50,9 +50,9 @@ const TitleRow = styled.div`
   width: 100%;
 `;
 
-export const Divider = styled.div`
+export const Divider = styled.div<{ isHidden?: boolean }>`
   width: 100%;
-  height: 1px;
+  height: ${(props) => (props.isHidden ? "0px" : "1px")};
   background-color: ${color("sheetBorder")};
   border-radius: 1px;
   margin-bottom: 16px;
@@ -79,6 +79,7 @@ export const Modal: React.FC<ModalProps> = ({
   label,
   value,
   isOpen,
+  hideHeaderDivider,
   children,
   headerChildren,
   parentElement,
@@ -122,7 +123,7 @@ export const Modal: React.FC<ModalProps> = ({
             >
               {headerChildren}
             </ModalTitleRow>
-            <Divider />
+            <Divider isHidden={hideHeaderDivider} />
           </>
         )}
         {children}
