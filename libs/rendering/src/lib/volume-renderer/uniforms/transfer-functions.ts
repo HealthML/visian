@@ -8,7 +8,7 @@ export const transferFunctionsUniforms = {
   uLimitLow: { value: 0 },
   uLimitHigh: { value: 1 },
   uConeAngle: { value: 1 },
-  uConeDirection: { value: [1, 0, 0] },
+  uConeMatrix: { value: new THREE.Matrix3() },
   uTransferFunction: { value: 0 },
   uUseFocus: { value: false },
   uCustomTFTexture: { value: null },

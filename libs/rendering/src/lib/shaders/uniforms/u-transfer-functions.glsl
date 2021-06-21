@@ -5,7 +5,7 @@ uniform float uContextOpacity;
 uniform float uLimitLow;
 uniform float uLimitHigh;
 uniform float uConeAngle;
-uniform vec3 uConeDirection;
+uniform mat3 uConeMatrix;
 uniform int uTransferFunction;
 uniform bool uUseFocus;
 uniform sampler2D uCustomTFTexture;

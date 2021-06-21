@@ -138,7 +138,7 @@ export class ImageLayer
 
   // Slice Markers
   public getSliceMarkers(viewType: ViewType): MarkerConfig[] {
-    if (!this.is3DLayer || !this.isAnnotation) return [];
+    if (!this.is3DLayer || !this.isAnnotation || !this.isVisible) return [];
 
     const nonEmptySlices: number[] = [];
     this.emptySlices[viewType].forEach((isEmpty, slice) => {

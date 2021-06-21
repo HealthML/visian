@@ -9,33 +9,9 @@ float sdCone(vec3 p, float angle) {
 }
 
 vec3 transformToCutawaySpace(vec3 volumeCoords) {
-  // TODO: Why does y have to be flipped?
-  vec3 normalizedConeDirecion = normalize(vec3(uConeDirection.x, -uConeDirection.y, uConeDirection.z));
-  vec3 normalizedConeAxis = vec3(0.0, 1.0, 0.0);
-
-  /**
-  * Taken from https://gist.github.com/kevinmoran/b45980723e53edeb8a5a43c49f134724
-  */
-  vec3 axis = cross( normalizedConeDirecion, normalizedConeAxis );
-
-  float cosA = dot( normalizedConeDirecion, normalizedConeAxis );
-  float k = 1.0 / (1.0 + cosA);
-
-  mat3 rotation = mat3( 
-    (axis.x * axis.x * k) + cosA,
-    (axis.y * axis.x * k) - axis.z, 
-    (axis.z * axis.x * k) + axis.y,
-    (axis.x * axis.y * k) + axis.z,  
-    (axis.y * axis.y * k) + cosA,      
-    (axis.z * axis.y * k) - axis.x,
-    (axis.x * axis.z * k) - axis.y,  
-    (axis.y * axis.z * k) + axis.x,  
-    (axis.z * axis.z * k) + cosA 
-  );
-
   // The cutaway origin should be at the center of the volume.
   // Thus, we subtract vec3(0.5).
-  return rotation * (volumeCoords - vec3(0.5));
+  return uConeMatrix * (volumeCoords - vec3(0.5));
 }
 
 /** The transfer function. */
