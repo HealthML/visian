@@ -8,6 +8,7 @@ import {
   defaultAnnotationColor,
   defaultAnnotationOpacity,
 } from "../../../constants";
+import { LayerGroup } from "./layer-group";
 
 export interface LayerSnapshot {
   kind: string;
@@ -78,6 +79,7 @@ export class Layer implements ILayer, ISerializable<LayerSnapshot> {
         setOpacity: action,
         resetSettings: action,
         setTransformation: action,
+        delete: action,
         applySnapshot: action,
       },
     );
@@ -145,6 +147,11 @@ export class Layer implements ILayer, ISerializable<LayerSnapshot> {
 
   public setTransformation = (value?: Matrix4): void => {
     this.transformation = value || new Matrix4();
+  };
+
+  public delete = () => {
+    (this.parent as LayerGroup)?.removeLayer?.(this.id);
+    this.document.deleteLayer(this.id);
   };
 
   // Serialization

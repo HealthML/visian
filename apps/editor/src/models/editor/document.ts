@@ -1,4 +1,5 @@
 import {
+  dataColorKeys,
   IDocument,
   IEditor,
   ILayer,
@@ -115,6 +116,7 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
       setTitle: action,
       setActiveLayer: action,
       addLayer: action,
+      addNewAnnotationLayer: action,
       deleteLayer: action,
       importImage: action,
       importAnnotation: action,
@@ -176,13 +178,39 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
     });
   };
 
-  public deleteLayer = (idOrLayer: string | ILayer): void => {
-    this.layerIds = this.layerIds.filter((id) =>
-      typeof idOrLayer === "string" ? id !== idOrLayer : id !== idOrLayer.id,
+  public addNewAnnotationLayer = () => {
+    const layerStack = this.layers;
+
+    const baseLayer = layerStack.find(
+      (layer) => layer.kind === "image" && !layer.isAnnotation,
+    ) as ImageLayer | undefined;
+    if (!baseLayer) return;
+
+    const usedColors: { [key: string]: boolean } = {};
+    layerStack.forEach((layer) => {
+      if (layer.color) {
+        usedColors[layer.color] = true;
+      }
+    });
+    const colorCandidates = dataColorKeys.filter((color) => !usedColors[color]);
+
+    const annotationLayer = ImageLayer.fromNewAnnotationForImage(
+      baseLayer.image,
+      this,
+      colorCandidates.length ? colorCandidates[0] : undefined,
     );
-    delete this.layerMap[
-      typeof idOrLayer === "string" ? idOrLayer : idOrLayer.id
-    ];
+    this.addLayer(annotationLayer);
+    this.setActiveLayer(annotationLayer);
+  };
+
+  public deleteLayer = (idOrLayer: string | ILayer): void => {
+    const layerId = typeof idOrLayer === "string" ? idOrLayer : idOrLayer.id;
+
+    this.layerIds = this.layerIds.filter((id) => id !== layerId);
+    delete this.layerMap[layerId];
+    if (this.activeLayerId === layerId) {
+      this.setActiveLayer(this.layerIds[0]);
+    }
   };
 
   public get has3DLayers(): boolean {
@@ -218,9 +246,10 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
     const image = await readMedicalImage(file);
     image.name =
       name || (Array.isArray(file) ? file[0]?.name || "" : file.name);
-    const annotationLayer = ImageLayer.fromITKImage(image, this);
-    annotationLayer.setIsAnnotation(true);
-    annotationLayer.setColor(defaultAnnotationColor);
+    const annotationLayer = ImageLayer.fromITKImage(image, this, {
+      isAnnotation: true,
+      color: defaultAnnotationColor,
+    });
     if (
       !isEqual(
         (this.layerMap[this.layerIds[0]] as ImageLayer)?.image?.voxelCount,

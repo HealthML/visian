@@ -1,5 +1,3 @@
-export * from "./circle-material";
-export * from "./circles";
-export * from "./tool-camera";
+export * from "./region-growing-renderer";
 export * from "./tool-renderer";
-export * from "./types";
+export * from "./utils";

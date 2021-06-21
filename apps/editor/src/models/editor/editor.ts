@@ -94,6 +94,7 @@ export class Editor
 
   private animate = () => {
     this.activeDocument?.tools.toolRenderer.render();
+    this.activeDocument?.tools.regionGrowingRenderer.render();
     this.activeDocument?.layers
       .filter((layer) => layer.kind === "image")
       .forEach((imageLayer) => (imageLayer as ImageLayer).image.render());

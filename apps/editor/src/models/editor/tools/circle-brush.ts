@@ -1,24 +1,26 @@
 import { ToolRenderer } from "@visian/rendering";
 import { DragPoint, IDocument } from "@visian/ui-shared";
 import { calculateLine, getOrthogonalAxis, getPlaneAxes } from "@visian/utils";
+import { ToolConfig } from "./tool";
 import { UndoableTool } from "./undoable-tool";
 import { dragPointsEqual } from "./utils";
 
 export class CircleBrush<
-  N extends "pixel-brush" | "pixel-eraser"
+  N extends "pixel-brush" | "pixel-eraser" | "smart-brush" | "smart-eraser"
 > extends UndoableTool<N> {
   private lastDragPoint?: DragPoint;
 
   constructor(
     document: IDocument,
     toolRenderer: ToolRenderer,
-    private value = 255,
+    private isAdditive = true,
+    toolConfig?: ToolConfig<N>,
   ) {
     super(
-      {
-        name: (value ? "pixel-brush" : "pixel-eraser") as N,
-        altToolName: (value ? "pixel-eraser" : "pixel-brush") as N,
-        icon: value ? "pixelBrush" : "eraser",
+      toolConfig || {
+        name: (isAdditive ? "pixel-brush" : "pixel-eraser") as N,
+        altToolName: (isAdditive ? "pixel-eraser" : "pixel-brush") as N,
+        icon: isAdditive ? "pixelBrush" : "eraser",
         supportedViewModes: ["2D"],
         supportedLayerKinds: ["image"],
         isDrawingTool: true,
@@ -52,7 +54,9 @@ export class CircleBrush<
   public endAt(dragPoint: DragPoint | null) {
     if (dragPoint) this.moveTo(dragPoint);
 
-    this.endStroke(!this.value);
+    this.endStroke(!this.isAdditive);
+
+    this.toolRenderer.waitForRender().then(() => this.toolRenderer.endStroke());
   }
 
   private drawCircleAround(dragPoint: DragPoint) {
@@ -72,10 +76,10 @@ export class CircleBrush<
       const pixelOffsetY = dragPoint.bottom ? -1 : 0;
 
       this.toolRenderer.renderCircles(
+        this.isAdditive,
         ...circleQuad.map((pixel) => ({
           x: x + pixel.x + pixelOffsetX,
           y: y + pixel.y + pixelOffsetY,
-          value: this.value,
           radius: 0,
         })),
       );
@@ -83,10 +87,9 @@ export class CircleBrush<
       return;
     }
 
-    this.toolRenderer.renderCircles({
+    this.toolRenderer.renderCircles(this.isAdditive, {
       x,
       y,
-      value: this.value,
       radius: this.document.tools.brushSize,
     });
   }

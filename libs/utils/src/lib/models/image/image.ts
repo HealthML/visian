@@ -82,7 +82,7 @@ export class Image<T extends TypedArray = TypedArray>
   public static fromITKImage<T2 extends TypedArray = TypedArray>(
     image: ITKImage<T2>,
   ) {
-    return new Image(itkImageToImageSnapshot(image));
+    return new this(itkImageToImageSnapshot(image));
   }
 
   public static async fromFile(file: File) {

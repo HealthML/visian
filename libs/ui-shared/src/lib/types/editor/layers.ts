@@ -84,6 +84,11 @@ export interface ILayer {
   setParent(idOrLayer?: string | ILayer): void;
 
   setIsAnnotation(value?: boolean): void;
+  /**
+   * Deletes this layer from the document it is contained in and any potential
+   * parents.
+   * */
+  delete(): void;
 }
 
 /**

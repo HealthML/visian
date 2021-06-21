@@ -1,8 +1,10 @@
 import React from "react";
 import styled from "styled-components";
 
+import { color } from "../../theme";
 import { IButtonParameter } from "../../types";
 import { Button } from "../button";
+import { sheetNoise } from "../sheet";
 import { ListPositionProps } from "./types";
 
 const StyledButton = styled(Button)<ListPositionProps>`
@@ -38,3 +40,21 @@ export const ButtonParam: React.FC<Partial<ButtonParamProps>> = ({
     onPointerDown={handlePress}
   />
 );
+
+export const BlueButtonParam = styled(ButtonParam)`
+  background: ${sheetNoise}, ${color("blueSheet")};
+  border-color: ${color("blueBorder")};
+
+  &:active {
+    border-color: rgba(0, 133, 255, 1);
+  }
+`;
+
+export const RedButtonParam = styled(ButtonParam)`
+  background: ${sheetNoise}, ${color("redSheet")};
+  border-color: ${color("redBorder")};
+
+  &:active {
+    border-color: rgba(202, 51, 69, 1);
+  }
+`;

@@ -1,4 +1,5 @@
 import { Vector, ViewType } from "@visian/utils";
+import { MergeFunction } from "../types";
 
 import { SliceReader } from "./slice-reader";
 import { SliceWriter } from "./slice-writer";
@@ -57,6 +58,7 @@ export class SliceAtlasAdapter {
     sliceData: Uint8Array | THREE.Texture[] | undefined,
     renderTargets: THREE.WebGLRenderTarget[],
     renderers: THREE.WebGLRenderer[],
+    mergeFunction: MergeFunction,
   ) {
     return this.sliceWriter.writeSlice(
       sliceNumber,
@@ -64,6 +66,7 @@ export class SliceAtlasAdapter {
       sliceData,
       renderTargets,
       renderers,
+      mergeFunction,
     );
   }
 }
