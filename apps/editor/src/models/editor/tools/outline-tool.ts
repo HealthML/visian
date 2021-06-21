@@ -17,13 +17,13 @@ export class OutlineTool<
   constructor(
     document: IDocument,
     toolRenderer: ToolRenderer,
-    private isPositive = true,
+    private isAdditive = true,
   ) {
     super(
       {
-        name: (isPositive ? "outline-tool" : "outline-eraser") as N,
-        altToolName: (isPositive ? "outline-eraser" : "outline-tool") as N,
-        icon: isPositive ? "outline" : "outline",
+        name: (isAdditive ? "outline-tool" : "outline-eraser") as N,
+        altToolName: (isAdditive ? "outline-eraser" : "outline-tool") as N,
+        icon: isAdditive ? "outline" : "outline",
         supportedViewModes: ["2D"],
         supportedLayerKinds: ["image"],
         isDrawingTool: true,
@@ -69,7 +69,7 @@ export class OutlineTool<
 
     this.lastPoint = undefined;
 
-    this.endStroke(!this.isPositive);
+    this.endStroke(!this.isAdditive);
 
     this.toolRenderer.waitForRender().then(() => this.toolRenderer.endStroke());
   }
@@ -95,7 +95,7 @@ export class OutlineTool<
     this.toolRenderer.renderShape(
       this.geometry,
       this.material,
-      this.isPositive,
+      this.isAdditive,
     );
   }
 }

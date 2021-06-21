@@ -125,8 +125,8 @@ export class ToolRenderer {
     );
   }
 
-  public renderCircles(isPositiveStroke: boolean, ...circles: Circle[]) {
-    this.isCurrentStrokePositive = isPositiveStroke;
+  public renderCircles(isAdditiveStroke: boolean, ...circles: Circle[]) {
+    this.isCurrentStrokePositive = isAdditiveStroke;
 
     this.circlesToRender.push(...circles);
 
@@ -137,9 +137,9 @@ export class ToolRenderer {
   public renderShape(
     geometry: THREE.ShapeGeometry,
     material: THREE.Material,
-    isPositiveStroke: boolean,
+    isAdditiveStroke: boolean,
   ) {
-    this.isCurrentStrokePositive = isPositiveStroke;
+    this.isCurrentStrokePositive = isAdditiveStroke;
 
     this.shapesToRender.push(new THREE.Mesh(geometry, material));
 

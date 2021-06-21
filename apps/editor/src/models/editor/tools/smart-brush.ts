@@ -8,12 +8,12 @@ export class SmartBrush<
   constructor(
     document: IDocument,
     private regionGrowingRenderer: RegionGrowingRenderer,
-    isPositive = true,
+    isAdditive = true,
   ) {
-    super(document, regionGrowingRenderer, isPositive, {
-      name: (isPositive ? "smart-brush" : "smart-eraser") as N,
-      altToolName: (isPositive ? "smart-eraser" : "smart-brush") as N,
-      icon: isPositive ? "magicBrush" : "eraser",
+    super(document, regionGrowingRenderer, isAdditive, {
+      name: (isAdditive ? "smart-brush" : "smart-eraser") as N,
+      altToolName: (isAdditive ? "smart-eraser" : "smart-brush") as N,
+      icon: isAdditive ? "magicBrush" : "eraser",
       supportedViewModes: ["2D"],
       supportedLayerKinds: ["image"],
       isDrawingTool: true,
