@@ -16,9 +16,7 @@ export class UndoableTool<N extends string> extends Tool<N> {
   }
 
   protected startStroke(
-    image = this.document.activeLayer
-      ? (this.document.activeLayer as IImageLayer).image
-      : undefined,
+    image = (this.document.activeLayer as IImageLayer | undefined)?.image,
     viewType = this.document.viewport2D.mainViewType,
     sliceNumber = this.document.viewSettings.selectedVoxel.getFromView(
       viewType,
@@ -30,9 +28,7 @@ export class UndoableTool<N extends string> extends Tool<N> {
 
   protected endStroke(
     isDeleteOperation: boolean | undefined,
-    imageLayer = this.document.activeLayer
-      ? (this.document.activeLayer as IImageLayer)
-      : undefined,
+    imageLayer = this.document.activeLayer as IImageLayer | undefined,
     viewType = this.document.viewport2D.mainViewType,
   ) {
     if (!imageLayer) return;

@@ -42,6 +42,9 @@ export interface ITool<N extends string> {
    */
   isBrush: boolean;
 
+  /** Indicates if the tool is a smart brush. */
+  isSmartBrush: boolean;
+
   /**
    * The tool that is used as the alternative mode of this tool.
    * Typically, this is activated using the `alt` key or right mouse button.
@@ -111,6 +114,9 @@ export interface ITools<N extends string> {
    */
   useAdaptiveBrushSize: boolean;
 
+  /** The threshold for all smart brushes. */
+  smartBrushThreshold: number;
+
   /** Indicates if a brush stroke can be started this moment. */
   canDraw: boolean;
 
@@ -125,10 +131,10 @@ export interface ITools<N extends string> {
   incrementBrushSize(): void;
   decrementBrushSize(): void;
 
+  setSmartBrushThreshold(value?: number): void;
+
   setIsCursorOverDrawableArea(value: boolean): void;
   setIsCursorOverFloatingUI(value: boolean): void;
   setIsNavigationDragged(value: boolean): void;
   setIsDrawing(value: boolean): void;
-
-  handleCurrentSliceChanged(): void;
 }

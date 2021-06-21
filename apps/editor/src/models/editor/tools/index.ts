@@ -1,4 +1,3 @@
-export * from "./cpu-brush";
 export * from "./circle-brush";
 export * from "./clear-image-tool";
 export * from "./clear-slice-tool";
