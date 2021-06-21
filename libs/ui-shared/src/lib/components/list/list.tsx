@@ -31,7 +31,8 @@ const ListItemInner = styled.div<Pick<ListItemProps, "isActive">>`
       ${sheetMixin};
       border-radius: 8px;
       margin: 0 -8px;
-      padding: 0 8px;
+      // Accounting for the 1px border that was added
+      padding: 0 7px;
     `}
 `;
 
