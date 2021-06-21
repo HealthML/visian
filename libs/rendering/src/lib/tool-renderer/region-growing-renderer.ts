@@ -162,12 +162,12 @@ export class RegionGrowingRenderer extends ToolRenderer {
     });
   }
 
-  public renderCircles(isPositiveStroke: boolean, ...circles: Circle[]) {
+  public renderCircles(isAdditiveStroke: boolean, ...circles: Circle[]) {
     if (circles.length) {
       this.lastCircle = circles[circles.length - 1];
     }
 
-    super.renderCircles(isPositiveStroke, ...circles);
+    super.renderCircles(isAdditiveStroke, ...circles);
   }
 
   protected setRenderTargetSize(width: number, height: number) {

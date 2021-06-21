@@ -8,15 +8,15 @@ export class BoundedSmartBrush<
   constructor(
     document: IDocument,
     private regionGrowingRenderer: RegionGrowingRenderer,
-    isPositive = true,
+    isAdditive = true,
   ) {
-    super(document, regionGrowingRenderer, isPositive, {
-      name: (isPositive ? "bounded-smart-brush" : "bounded-smart-eraser") as N,
-      altToolName: (isPositive
+    super(document, regionGrowingRenderer, isAdditive, {
+      name: (isAdditive ? "bounded-smart-brush" : "bounded-smart-eraser") as N,
+      altToolName: (isAdditive
         ? "bounded-smart-eraser"
         : "bounded-smart-brush") as N,
       // TODO: Add icon.
-      icon: isPositive ? "magicBrush" : "eraser",
+      icon: isAdditive ? "magicBrush" : "eraser",
       supportedViewModes: ["2D"],
       supportedLayerKinds: ["image"],
       isDrawingTool: true,
