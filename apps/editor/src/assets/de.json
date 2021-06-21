@@ -40,11 +40,14 @@
   "neighbor-threshold": "Nachbarschwellwert",
 
   "layers": "Ebenen",
+  "add-annotation-layer": "Neue Annotation hinzufügen",
   "no-layers": "Keine Ebenen geladen.",
   "untitled-layer": "Unbenannte Ebene",
   "layer-settings": "Ebeneneinstellungen",
   "opacity": "Deckkraft",
   "background-color": "Hintergrundfarbe",
+  "deleted-layer": "Ebene löschen",
+  "delete-layer-confirmation": "Ebene \"{{layer}}\" löschen?",
 
   "view-settings": "Ansichtseinstellungen",
   "transverse": "Transverse (1)",

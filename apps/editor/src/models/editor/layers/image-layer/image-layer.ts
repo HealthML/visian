@@ -47,12 +47,14 @@ export class ImageLayer
   public static fromNewAnnotationForImage<T2 extends TypedArray = TypedArray>(
     image: Image<T2>,
     document: IDocument,
+    color?: string,
   ) {
     return new this(
       {
         isAnnotation: true,
-        color: defaultAnnotationColor,
+        color: color || defaultAnnotationColor,
         image: {
+          atlas: new Uint8Array(image.getAtlas().length),
           name: `${image.name.split(".")[0]}_annotation`,
           dimensionality: image.dimensionality,
           origin: image.origin.toArray(),
@@ -136,7 +138,7 @@ export class ImageLayer
 
   // Slice Markers
   public getSliceMarkers(viewType: ViewType): MarkerConfig[] {
-    if (!this.is3DLayer || !this.isAnnotation) return [];
+    if (!this.is3DLayer || !this.isAnnotation || !this.isVisible) return [];
 
     const nonEmptySlices: number[] = [];
     this.emptySlices[viewType].forEach((isEmpty, slice) => {

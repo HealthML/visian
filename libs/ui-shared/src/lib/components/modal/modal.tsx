@@ -11,7 +11,10 @@ import { useOutsidePress } from "../utils";
 import { ModalProps } from "./modal.props";
 import { useModalPosition } from "./utils";
 
-const StyledButton = styled(InvisibleButton)`
+export const ModalHeaderButton = styled(InvisibleButton).attrs(() => ({
+  isActive: false,
+  tooltipPosition: "left",
+}))`
   width: 16px;
   height: 16px;
 `;
@@ -57,15 +60,14 @@ export const Divider = styled.div`
 
 export const ModalTitleRow: React.FC<
   Pick<ModalProps, "label" | "labelTx" | "onReset">
-> = ({ label, labelTx, onReset }) => (
+> = ({ children, label, labelTx, onReset }) => (
   <TitleRow>
     <ModalTitle tx={labelTx} text={label} />
+    {children}
     {onReset && (
-      <StyledButton
+      <ModalHeaderButton
         icon="reset"
         tooltipTx="reset"
-        tooltipPosition="left"
-        isActive={false}
         onPointerDown={onReset}
       />
     )}
@@ -78,6 +80,7 @@ export const Modal: React.FC<ModalProps> = ({
   value,
   isOpen,
   children,
+  headerChildren,
   parentElement,
   position,
   distance,
@@ -115,8 +118,10 @@ export const Modal: React.FC<ModalProps> = ({
             <ModalTitleRow
               labelTx={labelTx}
               label={label}
-              onReset={handleReset}
-            />
+              onReset={onReset ? handleReset : undefined}
+            >
+              {headerChildren}
+            </ModalTitleRow>
             <Divider />
           </>
         )}

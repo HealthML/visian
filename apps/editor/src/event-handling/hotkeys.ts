@@ -176,6 +176,8 @@ export const setUpHotKeys = (store: RootStore): IDisposer => {
       case "2D":
         store.editor.activeDocument?.viewport2D.setZoomLevel();
         store.editor.activeDocument?.viewport2D.setOffset();
+        store.editor.sliceRenderer?.resetCrosshairOffset();
+        store.editor.sliceRenderer?.lazyRender();
         return;
       case "3D":
         store.editor.activeDocument?.viewport3D.setCameraMatrix();

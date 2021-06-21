@@ -20,4 +20,6 @@ export interface ISliceRenderer extends IDisposable {
   getMainViewScreenPosition(webGLPosition: Pixel): Pixel;
   /** Converts a screen space position to a WebGL one. */
   getWebGLPosition(screenPosition: Pixel, viewType?: ViewType): Pixel;
+
+  resetCrosshairOffset(): void;
 }
