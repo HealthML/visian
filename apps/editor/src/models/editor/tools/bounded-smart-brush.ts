@@ -15,8 +15,7 @@ export class BoundedSmartBrush<
       altToolName: (isAdditive
         ? "bounded-smart-eraser"
         : "bounded-smart-brush") as N,
-      // TODO: Add icon.
-      icon: isAdditive ? "magicBrush" : "eraser",
+      icon: isAdditive ? "boundedSmartBrush" : "eraser",
       supportedViewModes: ["2D"],
       supportedLayerKinds: ["image"],
       isDrawingTool: true,
