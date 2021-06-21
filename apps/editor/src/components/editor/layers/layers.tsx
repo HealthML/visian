@@ -27,8 +27,9 @@ const LayerList = styled(List)`
 
 const LayerListItem = observer<{
   layer: ILayer;
+  isActive?: boolean;
   isLast?: boolean;
-}>(({ layer, isLast }) => {
+}>(({ layer, isActive, isLast }) => {
   const toggleAnnotationVisibility = useCallback(() => {
     layer.setIsVisible(!layer.isVisible);
   }, [layer]);
@@ -71,6 +72,7 @@ const LayerListItem = observer<{
         trailingIcon={layer.isVisible ? "eye" : "eyeCrossed"}
         disableTrailingIcon={layer.isVisible}
         onTrailingIconPress={toggleAnnotationVisibility}
+        isActive={isActive}
         isLast={isLast}
       />
       <LayerSettings
@@ -106,6 +108,7 @@ export const Layers: React.FC = observer(() => {
 
   const layers = store?.editor.activeDocument?.layers;
   const layerCount = layers?.length;
+  const activeLayer = store?.editor.activeDocument?.activeLayer;
   return (
     <>
       <FloatingUIButton
@@ -137,6 +140,7 @@ export const Layers: React.FC = observer(() => {
               <LayerListItem
                 key={layer.id}
                 layer={layer}
+                isActive={layer === activeLayer}
                 isLast={index === layerCount - 1}
               />
             ))

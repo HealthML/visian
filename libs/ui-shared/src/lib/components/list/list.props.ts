@@ -11,6 +11,18 @@ export interface ListItemProps extends React.HTMLAttributes<HTMLDivElement> {
   value?: string;
 
   /**
+   * If set to `true`, the list item is displayed in a highlighted active
+   * state.
+   */
+  isActive?: boolean;
+
+  /**
+   * If set to `true`, signals that this is the last item and the following
+   * divider should thus be omitted.
+   */
+  isLast?: boolean;
+
+  /**
    * The key of the list item's icon (if any).
    * Alternatively, an object with a color can be passed to render a palette
    * element.
@@ -36,10 +48,4 @@ export interface ListItemProps extends React.HTMLAttributes<HTMLDivElement> {
     value: string | undefined,
     event: React.PointerEvent,
   ) => void;
-
-  /**
-   * If set to `true`, signals that this is the last item and the following
-   * divider should thus be omitted.
-   */
-  isLast?: boolean;
 }
