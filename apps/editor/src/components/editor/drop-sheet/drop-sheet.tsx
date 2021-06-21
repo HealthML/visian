@@ -8,7 +8,7 @@ import {
 import { readMedicalImage } from "@visian/utils";
 import { observer } from "mobx-react-lite";
 import path from "path";
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useRef, useState } from "react";
 import ReactDOM from "react-dom";
 import styled from "styled-components";
 
@@ -53,13 +53,23 @@ export const DropSheet: React.FC<DropSheetProps> = observer(
   ({ onDropCompleted, onDropStarted, onOutsideDrop }) => {
     const store = useStore();
 
+    const filesToTryAgain = useRef<File[]>([]);
+    const fileListsToTryAgain = useRef<[File[], string | undefined][]>([]);
+
     const importSingleFile = useCallback(
-      async (file: File) => {
+      async (file: File, isRetry = false) => {
         // Exclude hidden system files from import
         if (file.name.startsWith(".")) return;
         try {
           if (await isFileAnnotation(file)) {
-            await store?.editor.activeDocument?.importAnnotation(file);
+            await store?.editor.activeDocument
+              ?.importAnnotation(file)
+              .catch((error) => {
+                if (isRetry) {
+                  throw error;
+                }
+                filesToTryAgain.current.push(file);
+              });
           } else {
             await store?.editor.activeDocument?.importImage(file);
           }
@@ -70,26 +80,34 @@ export const DropSheet: React.FC<DropSheetProps> = observer(
           });
         }
       },
-      [store],
+      [filesToTryAgain, store],
     );
 
     const importFileList = useCallback(
-      async (dirFiles: File[], dirName: string | undefined) => {
+      async (
+        dirFiles: File[],
+        dirName: string | undefined,
+        isRetry = false,
+      ) => {
         // Check if file list belongs together
         if (dirFiles.some((file) => getFileExtension(file) !== ".dcm")) {
           const promises: Promise<void>[] = [];
           dirFiles.forEach((file) => promises.push(importSingleFile(file)));
           await Promise.all(promises);
         } else if (await isFileAnnotation(dirFiles[0])) {
-          await store?.editor.activeDocument?.importAnnotation(
-            dirFiles,
-            dirName,
-          );
+          await store?.editor.activeDocument
+            ?.importAnnotation(dirFiles, dirName)
+            .catch((error) => {
+              if (isRetry) {
+                throw error;
+              }
+              fileListsToTryAgain.current.push([dirFiles, dirName]);
+            });
         } else {
           await store?.editor.activeDocument?.importImage(dirFiles, dirName);
         }
       },
-      [importSingleFile, store?.editor.activeDocument],
+      [fileListsToTryAgain, importSingleFile, store?.editor.activeDocument],
     );
 
     const importFileEntry = useCallback(
@@ -150,9 +168,13 @@ export const DropSheet: React.FC<DropSheetProps> = observer(
           if (onDropStarted) onDropStarted();
           event.stopPropagation();
           setIsLoadingFiles(true);
+
+          filesToTryAgain.current = [];
+          fileListsToTryAgain.current = [];
+
           try {
             const { items } = event.dataTransfer;
-            const promises: Promise<void>[] = [];
+            let promises: Promise<void>[] = [];
             for (let fileIndex = 0; fileIndex < items.length; fileIndex++) {
               const item = event.dataTransfer.items[fileIndex];
               const entry = item?.webkitGetAsEntry();
@@ -163,6 +185,16 @@ export const DropSheet: React.FC<DropSheetProps> = observer(
                   promises.push(importFileEntry(entry));
                 }
               }
+            }
+            await Promise.all(promises);
+
+            promises = [];
+            for (let i = 0; i < filesToTryAgain.current.length; i++) {
+              promises.push(importSingleFile(filesToTryAgain.current[i], true));
+            }
+            for (let i = 0; i < fileListsToTryAgain.current.length; i++) {
+              const [dirFiles, dirName] = fileListsToTryAgain.current[i];
+              promises.push(importFileList(dirFiles, dirName));
             }
             await Promise.all(promises);
           } catch (error) {
@@ -179,6 +211,8 @@ export const DropSheet: React.FC<DropSheetProps> = observer(
       [
         importDirectoryEntry,
         importFileEntry,
+        importFileList,
+        importSingleFile,
         onDropCompleted,
         onDropStarted,
         store,
