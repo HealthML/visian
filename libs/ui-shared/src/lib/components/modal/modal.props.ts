@@ -13,6 +13,8 @@ export interface ModalProps
   /** The z-index of the surface below. */
   baseZIndex?: number;
 
+  hideHeaderDivider?: boolean;
+
   /** If set to `false`, hides the modal. */
   isOpen?: boolean;
 
