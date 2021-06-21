@@ -82,6 +82,8 @@ export interface ILayer {
 
   /** Sets this layer's parent layer, typically the group it is contained in. */
   setParent(idOrLayer?: string | ILayer): void;
+
+  setIsAnnotation(value?: boolean): void;
 }
 
 /**

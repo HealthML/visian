@@ -89,12 +89,14 @@ export const ListItem: React.FC<ListItemProps> = ({
 }) => {
   const handleIconPress = useCallback(
     (event: React.PointerEvent) => {
+      event.stopPropagation();
       if (onIconPress) onIconPress(value, event);
     },
     [onIconPress, value],
   );
   const handleTrailingIconPress = useCallback(
     (event: React.PointerEvent) => {
+      event.stopPropagation();
       if (onTrailingIconPress) onTrailingIconPress(value, event);
     },
     [onTrailingIconPress, value],

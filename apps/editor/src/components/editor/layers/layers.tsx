@@ -28,6 +28,8 @@ const LayerListItem = observer<{
   layer: ILayer;
   isLast?: boolean;
 }>(({ layer, isLast }) => {
+  const store = useStore();
+
   const toggleAnnotationVisibility = useCallback(() => {
     layer.setIsVisible(!layer.isVisible);
   }, [layer]);
@@ -55,6 +57,23 @@ const LayerListItem = observer<{
     HTMLDivElement | SVGSVGElement | null
   >(null);
 
+  const handlePointerDown = useCallback(
+    (event: React.PointerEvent<HTMLDivElement>) => {
+      // left click
+      if (event.button === 0) {
+        store?.editor.activeDocument?.setActiveLayer(layer);
+        // right click
+      } else if (event.button === 2) {
+        layer.setIsAnnotation(!layer.isAnnotation);
+      }
+    },
+    [layer, store?.editor.activeDocument],
+  );
+
+  const handleContextMenu = (event: React.MouseEvent<HTMLDivElement>) => {
+    event.preventDefault();
+  };
+
   return (
     <>
       <ListItem
@@ -71,6 +90,8 @@ const LayerListItem = observer<{
         disableTrailingIcon={layer.isVisible}
         onTrailingIconPress={toggleAnnotationVisibility}
         isLast={isLast}
+        onPointerDown={handlePointerDown}
+        onContextMenu={handleContextMenu}
       />
       <LayerSettings
         layer={layer}
