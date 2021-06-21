@@ -149,10 +149,14 @@ export class Layer implements ILayer, ISerializable<LayerSnapshot> {
     this.transformation = value || new Matrix4();
   };
 
-  public delete = () => {
+  public delete = (): void => {
     (this.parent as LayerGroup)?.removeLayer?.(this.id);
     this.document.deleteLayer(this.id);
   };
+
+  public async toFile(): Promise<File | undefined> {
+    return undefined;
+  }
 
   // Serialization
   public toJSON(): LayerSnapshot {

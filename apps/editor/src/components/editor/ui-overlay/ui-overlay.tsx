@@ -9,7 +9,6 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
-import { ImageLayer } from "../../../models";
 import { DropSheet } from "../drop-sheet";
 import { Layers } from "../layers";
 import { Menu } from "../menu";
@@ -142,10 +141,7 @@ export const UIOverlay = observer<UIOverlayProps>(
               icon="export"
               tooltipTx="export"
               tooltipPosition="left"
-              onPointerDown={
-                (store?.editor.activeDocument?.activeLayer as ImageLayer)
-                  ?.quickExport
-              }
+              onPointerDown={store?.editor.activeDocument?.exportZip}
               isActive={false}
             />
             <ViewSettings />

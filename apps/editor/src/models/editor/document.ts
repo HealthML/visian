@@ -7,13 +7,15 @@ import {
   IVolumeRenderer,
   ValueType,
 } from "@visian/ui-shared";
-import { ISerializable, readMedicalImage } from "@visian/utils";
+import { ISerializable, readMedicalImage, Zip } from "@visian/utils";
+import FileSaver from "file-saver";
 import isEqual from "lodash.isequal";
 import { action, computed, makeObservable, observable, toJS } from "mobx";
 import * as THREE from "three";
 import { v4 as uuidv4 } from "uuid";
 
 import { defaultAnnotationColor } from "../../constants";
+import { StoreContext } from "../types";
 import { History, HistorySnapshot } from "./history";
 import { ImageLayer, Layer, LayerSnapshot } from "./layers";
 import * as layers from "./layers";
@@ -28,7 +30,6 @@ import {
   ViewSettings,
   ViewSettingsSnapshot,
 } from "./view-settings";
-import { StoreContext } from "../types";
 
 export const layerMap: {
   [kind: string]: ValueType<typeof layers>;
@@ -204,6 +205,20 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
   public get has3DLayers(): boolean {
     return Object.values(this.layerMap).some((layer) => layer.is3DLayer);
   }
+
+  // I/O
+  public exportZip = async () => {
+    const zip = new Zip();
+
+    // TODO: Rework for group layers
+    const files = await Promise.all(this.layers.map((layer) => layer.toFile()));
+    files.forEach((file, index) => {
+      if (!file) return;
+      zip.setFile(`${`00${index}`.slice(-2)}_${file.name}`, file);
+    });
+
+    FileSaver.saveAs(await zip.toBlob(), `${this.title}.zip`);
+  };
 
   // I/O (DEPRECATED)
   public async importImage(file: File | File[], name?: string) {

@@ -88,6 +88,8 @@ export interface ILayer {
    * parents.
    * */
   delete(): void;
+
+  toFile(): Promise<File | undefined>;
 }
 
 /**
