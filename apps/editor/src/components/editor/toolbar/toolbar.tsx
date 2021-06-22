@@ -5,12 +5,13 @@ import {
   Param,
   PointerButton,
   preventDefault,
+  Theme,
   Tool,
   Toolbar as GenericToolbar,
 } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import styled from "styled-components";
+import styled, { useTheme } from "styled-components";
 
 import { useStore } from "../../../app/root-store";
 import { ToolName } from "../../../models";
@@ -97,6 +98,7 @@ export const Toolbar: React.FC = observer(() => {
     [store],
   );
 
+  const modalZ = (useTheme() as Theme).zIndices.modal + 1;
   return (
     <StyledToolbar ref={ref}>
       {store?.editor.activeDocument?.tools.toolGroups.map(
@@ -131,6 +133,7 @@ export const Toolbar: React.FC = observer(() => {
         value={activeTool?.name}
         parentElement={buttonRef}
         position="right"
+        baseZIndex={modalZ}
         onOutsidePress={closeModal}
         onReset={store?.editor.activeDocument?.tools.resetActiveToolSetings}
       >
