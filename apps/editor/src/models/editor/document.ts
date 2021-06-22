@@ -179,6 +179,7 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
   };
 
   private getColorForNewAnnotation = (): string | undefined => {
+    // TODO: Rework to work with group layers
     const layerStack = this.layers;
     const usedColors: { [key: string]: boolean } = {};
     layerStack.forEach((layer) => {
@@ -191,6 +192,7 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
   };
 
   public addNewAnnotationLayer = () => {
+    // TODO: Rework to work with group layers
     const baseLayer = this.layers.find(
       (layer) => layer.kind === "image" && !layer.isAnnotation,
     ) as ImageLayer | undefined;

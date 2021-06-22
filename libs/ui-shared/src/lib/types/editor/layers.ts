@@ -74,16 +74,17 @@ export interface ILayer {
    */
   getSliceMarkers(viewType: ViewType): MarkerConfig[];
 
+  /** Sets this layer's parent layer, typically the group it is contained in. */
+  setParent(idOrLayer?: string | ILayer): void;
+
+  setIsAnnotation(value?: boolean): void;
+
   setBlendMode(blendMode?: BlendMode): void;
   setColor(value?: string): void;
   setIsVisible(value?: boolean): void;
   setOpacity(value?: number): void;
   resetSettings(): void;
 
-  /** Sets this layer's parent layer, typically the group it is contained in. */
-  setParent(idOrLayer?: string | ILayer): void;
-
-  setIsAnnotation(value?: boolean): void;
   /**
    * Deletes this layer from the document it is contained in and any potential
    * parents.
