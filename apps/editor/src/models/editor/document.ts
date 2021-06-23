@@ -117,6 +117,7 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
       setActiveLayer: action,
       addLayer: action,
       addNewAnnotationLayer: action,
+      moveLayer: action,
       deleteLayer: action,
       importImage: action,
       importAnnotation: action,
@@ -190,6 +191,14 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
     this.addLayer(annotationLayer);
     this.setActiveLayer(annotationLayer);
   };
+
+  public moveLayer(idOrLayer: string | ILayer, newIndex: number) {
+    const layerId = typeof idOrLayer === "string" ? idOrLayer : idOrLayer.id;
+    const oldIndex = this.layerIds.indexOf(layerId);
+    if (!~oldIndex) return;
+
+    this.layerIds.splice(newIndex, 0, this.layerIds.splice(oldIndex, 1)[0]);
+  }
 
   public deleteLayer = (idOrLayer: string | ILayer): void => {
     const layerId = typeof idOrLayer === "string" ? idOrLayer : idOrLayer.id;

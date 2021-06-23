@@ -8,8 +8,18 @@ import {
   SubtleText,
   useDelay,
 } from "@visian/ui-shared";
-import { observer } from "mobx-react-lite";
+import { Observer, observer } from "mobx-react-lite";
 import React, { useCallback, useRef, useState } from "react";
+import {
+  DragDropContext,
+  Draggable,
+  DraggableProvided,
+  DraggableStateSnapshot,
+  DraggingStyle,
+  DragUpdate,
+  Droppable,
+  DroppableProvided,
+} from "react-beautiful-dnd";
 import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
@@ -27,9 +37,11 @@ const LayerList = styled(List)`
 
 const LayerListItem = observer<{
   layer: ILayer;
+  index: number;
   isActive?: boolean;
   isLast?: boolean;
-}>(({ layer, isActive, isLast }) => {
+  parentElement?: HTMLDivElement | null;
+}>(({ layer, index, isActive, isLast, parentElement }) => {
   const toggleAnnotationVisibility = useCallback(() => {
     layer.setIsVisible(!layer.isVisible);
   }, [layer]);
@@ -59,22 +71,45 @@ const LayerListItem = observer<{
 
   return (
     <>
-      <ListItem
-        icon={{
-          color: layer.color || "text",
-          icon:
-            layer.kind === "image" && !layer.isAnnotation ? "image" : undefined,
+      <Draggable draggableId={layer.id} index={index}>
+        {(provided: DraggableProvided, snapshot: DraggableStateSnapshot) => {
+          if (snapshot.isDragging && provided.draggableProps.style) {
+            const offset = parentElement?.getBoundingClientRect();
+            (provided.draggableProps.style as DraggingStyle).left -=
+              offset?.left || 0;
+            (provided.draggableProps.style as DraggingStyle).top -=
+              offset?.top || 0;
+          }
+
+          return (
+            <Observer>
+              {() => (
+                <ListItem
+                  {...provided.draggableProps}
+                  {...provided.dragHandleProps}
+                  ref={provided.innerRef}
+                  icon={{
+                    color: layer.color || "text",
+                    icon:
+                      layer.kind === "image" && !layer.isAnnotation
+                        ? "image"
+                        : undefined,
+                  }}
+                  iconRef={setColorRef}
+                  onIconPress={areLayerSettingsOpen ? noop : openLayerSettings}
+                  labelTx={layer.title ? undefined : "untitled-layer"}
+                  label={layer.title}
+                  trailingIcon={layer.isVisible ? "eye" : "eyeCrossed"}
+                  disableTrailingIcon={!layer.isVisible}
+                  onTrailingIconPress={toggleAnnotationVisibility}
+                  isActive={isActive}
+                  isLast={isLast}
+                />
+              )}
+            </Observer>
+          );
         }}
-        iconRef={setColorRef}
-        onIconPress={areLayerSettingsOpen ? noop : openLayerSettings}
-        labelTx={layer.title ? undefined : "untitled-layer"}
-        label={layer.title}
-        trailingIcon={layer.isVisible ? "eye" : "eyeCrossed"}
-        disableTrailingIcon={!layer.isVisible}
-        onTrailingIconPress={toggleAnnotationVisibility}
-        isActive={isActive}
-        isLast={isLast}
-      />
+      </Draggable>
       <LayerSettings
         layer={layer}
         isOpen={areLayerSettingsOpen}
@@ -101,6 +136,19 @@ export const Layers: React.FC = observer(() => {
 
   // Menu Positioning
   const [buttonRef, setButtonRef] = useState<HTMLButtonElement | null>(null);
+
+  const [modalRef, setModalRef] = useState<HTMLDivElement | null>(null);
+
+  const handleDrag = useCallback(
+    (result: DragUpdate) => {
+      if (!result.destination) return;
+      store?.editor.activeDocument?.moveLayer(
+        result.draggableId,
+        result.destination.index,
+      );
+    },
+    [store],
+  );
 
   // This is required to force an update when the view mode changes
   // (otherwise the layer menu stays fixed in place when switching the view mode)
@@ -134,26 +182,38 @@ export const Layers: React.FC = observer(() => {
             onPointerDown={store?.editor.activeDocument?.addNewAnnotationLayer}
           />
         }
+        ref={setModalRef}
       >
-        <LayerList>
-          {layerCount ? (
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            layers!.map((layer, index) => (
-              <LayerListItem
-                key={layer.id}
-                layer={layer}
-                isActive={layer === activeLayer}
-                isLast={
-                  index === layerCount - 1 || index + 1 === activeLayerIndex
-                }
-              />
-            ))
-          ) : (
-            <ListItem isLast>
-              <SubtleText tx="no-layers" />
-            </ListItem>
-          )}
-        </LayerList>
+        {/* TODO: Should we update on every drag change or just on drop? */}
+        <DragDropContext onDragUpdate={handleDrag} onDragEnd={handleDrag}>
+          <Droppable droppableId="layer-stack">
+            {(provided: DroppableProvided) => (
+              <LayerList {...provided.droppableProps} ref={provided.innerRef}>
+                {layerCount ? (
+                  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                  layers!.map((layer, index) => (
+                    <LayerListItem
+                      key={layer.id}
+                      layer={layer}
+                      index={index}
+                      isActive={layer === activeLayer}
+                      isLast={
+                        index === layerCount - 1 ||
+                        index + 1 === activeLayerIndex
+                      }
+                      parentElement={modalRef}
+                    />
+                  ))
+                ) : (
+                  <ListItem isLast>
+                    <SubtleText tx="no-layers" />
+                  </ListItem>
+                )}
+                {provided.placeholder}
+              </LayerList>
+            )}
+          </Droppable>
+        </DragDropContext>
       </LayerModal>
     </>
   );
