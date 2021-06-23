@@ -1,8 +1,4 @@
 export interface DropSheetProps {
-  /** A function called when a file drop inside the drop zone completes successfully. */
+  /** A function called when a file drop completes (inside or outside the drop zone). */
   onDropCompleted: () => void;
-  /** A function called when a file drop is initiated inside the drop zone. */
-  onDropStarted?: () => void;
-  /** A function called when a file is dropped outside the drop zone. */
-  onOutsideDrop?: () => void;
 }

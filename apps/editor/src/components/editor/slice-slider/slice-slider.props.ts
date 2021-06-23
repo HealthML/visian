@@ -1,3 +1,4 @@
 export interface SliceSliderProps {
-  shouldIgnoreChange?: boolean;
+  /** Indicates whether the value label should be shown on slice change. */
+  showValueLabelOnChange?: boolean;
 }

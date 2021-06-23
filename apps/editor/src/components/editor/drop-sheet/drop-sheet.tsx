@@ -8,7 +8,7 @@ import {
 import { readMedicalImage } from "@visian/utils";
 import { observer } from "mobx-react-lite";
 import path from "path";
-import React, { useCallback, useRef, useState } from "react";
+import React, { useCallback, useState } from "react";
 import ReactDOM from "react-dom";
 import styled from "styled-components";
 
@@ -50,26 +50,16 @@ const isFileAnnotation = async (file: File) => {
 const getFileExtension = (file: File) => path.extname(file.name);
 
 export const DropSheet: React.FC<DropSheetProps> = observer(
-  ({ onDropCompleted, onDropStarted, onOutsideDrop }) => {
+  ({ onDropCompleted }) => {
     const store = useStore();
 
-    const filesToTryAgain = useRef<File[]>([]);
-    const fileListsToTryAgain = useRef<[File[], string | undefined][]>([]);
-
     const importSingleFile = useCallback(
-      async (file: File, isRetry = false) => {
+      async (file: File) => {
         // Exclude hidden system files from import
         if (file.name.startsWith(".")) return;
         try {
           if (await isFileAnnotation(file)) {
-            await store?.editor.activeDocument
-              ?.importAnnotation(file)
-              .catch((error) => {
-                if (isRetry) {
-                  throw error;
-                }
-                filesToTryAgain.current.push(file);
-              });
+            await store?.editor.activeDocument?.importAnnotation(file);
           } else {
             await store?.editor.activeDocument?.importImage(file);
           }
@@ -80,34 +70,26 @@ export const DropSheet: React.FC<DropSheetProps> = observer(
           });
         }
       },
-      [filesToTryAgain, store],
+      [store],
     );
 
     const importFileList = useCallback(
-      async (
-        dirFiles: File[],
-        dirName: string | undefined,
-        isRetry = false,
-      ) => {
+      async (dirFiles: File[], dirName: string | undefined) => {
         // Check if file list belongs together
         if (dirFiles.some((file) => getFileExtension(file) !== ".dcm")) {
           const promises: Promise<void>[] = [];
           dirFiles.forEach((file) => promises.push(importSingleFile(file)));
           await Promise.all(promises);
         } else if (await isFileAnnotation(dirFiles[0])) {
-          await store?.editor.activeDocument
-            ?.importAnnotation(dirFiles, dirName)
-            .catch((error) => {
-              if (isRetry) {
-                throw error;
-              }
-              fileListsToTryAgain.current.push([dirFiles, dirName]);
-            });
+          await store?.editor.activeDocument?.importAnnotation(
+            dirFiles,
+            dirName,
+          );
         } else {
           await store?.editor.activeDocument?.importImage(dirFiles, dirName);
         }
       },
-      [fileListsToTryAgain, importSingleFile, store?.editor.activeDocument],
+      [importSingleFile, store?.editor.activeDocument],
     );
 
     const importFileEntry = useCallback(
@@ -165,16 +147,12 @@ export const DropSheet: React.FC<DropSheetProps> = observer(
     const importFiles = useCallback(
       (files: FileList, event: React.DragEvent) => {
         (async () => {
-          if (onDropStarted) onDropStarted();
           event.stopPropagation();
           setIsLoadingFiles(true);
 
-          filesToTryAgain.current = [];
-          fileListsToTryAgain.current = [];
-
           try {
             const { items } = event.dataTransfer;
-            let promises: Promise<void>[] = [];
+            const promises: Promise<void>[] = [];
             for (let fileIndex = 0; fileIndex < items.length; fileIndex++) {
               const item = event.dataTransfer.items[fileIndex];
               const entry = item?.webkitGetAsEntry();
@@ -185,16 +163,6 @@ export const DropSheet: React.FC<DropSheetProps> = observer(
                   promises.push(importFileEntry(entry));
                 }
               }
-            }
-            await Promise.all(promises);
-
-            promises = [];
-            for (let i = 0; i < filesToTryAgain.current.length; i++) {
-              promises.push(importSingleFile(filesToTryAgain.current[i], true));
-            }
-            for (let i = 0; i < fileListsToTryAgain.current.length; i++) {
-              const [dirFiles, dirName] = fileListsToTryAgain.current[i];
-              promises.push(importFileList(dirFiles, dirName));
             }
             await Promise.all(promises);
           } catch (error) {
@@ -208,15 +176,7 @@ export const DropSheet: React.FC<DropSheetProps> = observer(
           onDropCompleted();
         })();
       },
-      [
-        importDirectoryEntry,
-        importFileEntry,
-        importFileList,
-        importSingleFile,
-        onDropCompleted,
-        onDropStarted,
-        store,
-      ],
+      [importDirectoryEntry, importFileEntry, onDropCompleted, store],
     );
 
     const preventOutsideDrop = (event: React.DragEvent<HTMLDivElement>) => {
@@ -226,9 +186,9 @@ export const DropSheet: React.FC<DropSheetProps> = observer(
     const handleOutsideDrop = useCallback(
       (event: React.DragEvent<HTMLDivElement>) => {
         event.preventDefault();
-        if (onOutsideDrop) onOutsideDrop();
+        onDropCompleted();
       },
-      [onOutsideDrop],
+      [onDropCompleted],
     );
 
     const modalRootRef = useModalRoot();

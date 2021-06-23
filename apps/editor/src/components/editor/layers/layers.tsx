@@ -5,6 +5,7 @@ import {
   ListItem,
   Modal,
   ModalHeaderButton,
+  PointerButton,
   SubtleText,
   useDelay,
   useModalRoot,
@@ -73,11 +74,9 @@ const LayerListItem = observer<{
 
   const handlePointerDown = useCallback(
     (event: React.PointerEvent<HTMLDivElement>) => {
-      // left click
-      if (event.button === 0) {
+      if (event.button === PointerButton.LMB) {
         store?.editor.activeDocument?.setActiveLayer(layer);
-        // right click
-      } else if (event.button === 2) {
+      } else if (event.button === PointerButton.RMB) {
         layer.setIsAnnotation(!layer.isAnnotation);
         store?.editor.activeDocument?.updateLayerOrder();
       }

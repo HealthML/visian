@@ -21,7 +21,7 @@ const StyledSheet = styled(Sheet)`
 `;
 
 export const SliceSlider: React.FC<SliceSliderProps> = observer(
-  ({ shouldIgnoreChange = false }) => {
+  ({ showValueLabelOnChange = false }) => {
     const store = useStore();
 
     // Ref Management
@@ -127,7 +127,7 @@ export const SliceSlider: React.FC<SliceSliderProps> = observer(
           onStart={handleDragStart}
           onEnd={handleDragEnd}
           showFloatingValueLabel={
-            isHovered || isDragged || (hasChanged && !shouldIgnoreChange)
+            isHovered || isDragged || (hasChanged && showValueLabelOnChange)
           }
           formatValueLabel={formatValueLabel}
         />

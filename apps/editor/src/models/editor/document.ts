@@ -28,6 +28,7 @@ import {
   ViewSettingsSnapshot,
 } from "./view-settings";
 import { StoreContext } from "../types";
+import { defaultAnnotationColor } from "../../constants";
 
 export const layerMap: {
   [kind: string]: ValueType<typeof layers>;
@@ -179,7 +180,7 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
     });
   };
 
-  private getColorForNewAnnotation = (): string | undefined => {
+  private getColorForNewAnnotation = (): string => {
     // TODO: Rework to work with group layers
     const layerStack = this.layers;
     const usedColors: { [key: string]: boolean } = {};
@@ -189,7 +190,7 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
       }
     });
     const colorCandidates = dataColorKeys.filter((color) => !usedColors[color]);
-    return colorCandidates.length ? colorCandidates[0] : undefined;
+    return colorCandidates.length ? colorCandidates[0] : defaultAnnotationColor;
   };
 
   public addNewAnnotationLayer = () => {
@@ -244,7 +245,6 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
     return Object.values(this.layerMap).some((layer) => layer.is3DLayer);
   }
 
-  // I/O (DEPRECATED)
   public async importImage(file: File | File[], name?: string) {
     const image = await readMedicalImage(file);
     image.name =
@@ -268,8 +268,6 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
   }
 
   public async importAnnotation(file: File | File[], name?: string) {
-    if (!this.layerIds.length) throw new Error("no-image-error");
-
     const image = await readMedicalImage(file);
     image.name =
       name || (Array.isArray(file) ? file[0]?.name || "" : file.name);
@@ -278,6 +276,7 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
       color: this.getColorForNewAnnotation(),
     });
     if (
+      this.layers.length &&
       !isEqual(
         (this.layerMap[this.layerIds[0]] as ImageLayer)?.image?.voxelCount,
         annotationLayer.image.voxelCount,
