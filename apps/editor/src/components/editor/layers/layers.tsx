@@ -17,7 +17,6 @@ import {
   Draggable,
   DraggableProvided,
   DraggableStateSnapshot,
-  DraggingStyle,
   DragUpdate,
   Droppable,
   DroppableProvided,
