@@ -7,7 +7,7 @@ import { useModalRoot } from "../box";
 import { InvisibleButton } from "../button";
 import { Sheet } from "../sheet";
 import { Title } from "../text";
-import { useMultiRef, useOutsidePress } from "../utils";
+import { useOutsidePress } from "../utils";
 import { ModalProps } from "./modal.props";
 import { useModalPosition } from "./utils";
 
