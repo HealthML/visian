@@ -75,69 +75,63 @@ export const ModalTitleRow: React.FC<
   </TitleRow>
 );
 
-export const Modal = React.forwardRef<HTMLDivElement, ModalProps>(
-  (
-    {
-      labelTx,
-      label,
-      value,
-      isOpen,
-      hideHeaderDivider,
-      children,
-      headerChildren,
-      parentElement,
-      position,
-      distance,
-      style,
-      onOutsidePress,
-      onReset,
-      ...rest
-    },
-    ref,
-  ) => {
-    const handleOutsidePress = useCallback(() => {
-      if (onOutsidePress) onOutsidePress(value);
-    }, [onOutsidePress, value]);
-    const handleReset = useCallback(() => {
-      if (onReset) onReset(value);
-    }, [onReset, value]);
+export const Modal: React.FC<ModalProps> = ({
+  labelTx,
+  label,
+  value,
+  isOpen,
+  hideHeaderDivider,
+  children,
+  headerChildren,
+  parentElement,
+  position,
+  distance,
+  style,
+  onOutsidePress,
+  onReset,
+  ...rest
+}) => {
+  const handleOutsidePress = useCallback(() => {
+    if (onOutsidePress) onOutsidePress(value);
+  }, [onOutsidePress, value]);
+  const handleReset = useCallback(() => {
+    if (onReset) onReset(value);
+  }, [onReset, value]);
 
-    const modalRef = useRef<HTMLDivElement>(null);
-    useOutsidePress(modalRef, handleOutsidePress, isOpen);
-    const innerRef = useMultiRef(modalRef, ref);
+  const ref = useRef<HTMLDivElement>(null);
+  useOutsidePress(ref, handleOutsidePress, isOpen);
 
-    const modalRootRef = useModalRoot();
+  const modalRootRef = useModalRoot();
 
-    const modalStyle = useModalPosition({
-      parentElement,
-      isActive: isOpen,
-      positionRelativeToOffsetParent: !modalRootRef.current,
-      position,
-      distance,
-      style,
-    });
+  const modalStyle = useModalPosition({
+    parentElement,
+    isActive: isOpen,
+    positionRelativeToOffsetParent: !modalRootRef.current,
+    position,
+    distance,
+    style,
+  });
 
-    const node =
-      isOpen === false ? null : (
-        <ModalContainer {...rest} style={modalStyle} ref={innerRef}>
-          {(labelTx || label) && (
-            <>
-              <ModalTitleRow
-                labelTx={labelTx}
-                label={label}
-                onReset={onReset ? handleReset : undefined}
-              >
-                {headerChildren}
-              </ModalTitleRow>
-              <Divider isHidden={hideHeaderDivider} />
-            </>
-          )}
-          {children}
-        </ModalContainer>
-      );
+  const node =
+    isOpen === false ? null : (
+      <ModalContainer {...rest} style={modalStyle} ref={ref}>
+        {(labelTx || label) && (
+          <>
+            <ModalTitleRow
+              labelTx={labelTx}
+              label={label}
+              onReset={onReset ? handleReset : undefined}
+            >
+              {headerChildren}
+            </ModalTitleRow>
+            <Divider isHidden={hideHeaderDivider} />
+          </>
+        )}
+        {children}
+      </ModalContainer>
+    );
 
-    return modalRootRef.current
-      ? ReactDOM.createPortal(node, modalRootRef.current)
-      : node;
-  },
-);
+  return modalRootRef.current
+    ? ReactDOM.createPortal(node, modalRootRef.current)
+    : node;
+};

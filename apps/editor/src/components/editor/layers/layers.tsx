@@ -7,9 +7,11 @@ import {
   ModalHeaderButton,
   SubtleText,
   useDelay,
+  useModalRoot,
 } from "@visian/ui-shared";
 import { Observer, observer } from "mobx-react-lite";
 import React, { useCallback, useRef, useState } from "react";
+import ReactDOM from "react-dom";
 import {
   DragDropContext,
   Draggable,
@@ -40,8 +42,7 @@ const LayerListItem = observer<{
   index: number;
   isActive?: boolean;
   isLast?: boolean;
-  parentElement?: HTMLDivElement | null;
-}>(({ layer, index, isActive, isLast, parentElement }) => {
+}>(({ layer, index, isActive, isLast }) => {
   const toggleAnnotationVisibility = useCallback(() => {
     layer.setIsVisible(!layer.isVisible);
   }, [layer]);
@@ -69,19 +70,13 @@ const LayerListItem = observer<{
     HTMLDivElement | SVGSVGElement | null
   >(null);
 
+  const modalRootRef = useModalRoot();
+
   return (
     <>
       <Draggable draggableId={layer.id} index={index}>
         {(provided: DraggableProvided, snapshot: DraggableStateSnapshot) => {
-          if (snapshot.isDragging && provided.draggableProps.style) {
-            const offset = parentElement?.getBoundingClientRect();
-            (provided.draggableProps.style as DraggingStyle).left -=
-              offset?.left || 0;
-            (provided.draggableProps.style as DraggingStyle).top -=
-              offset?.top || 0;
-          }
-
-          return (
+          const node = (
             <Observer>
               {() => (
                 <ListItem
@@ -108,6 +103,10 @@ const LayerListItem = observer<{
               )}
             </Observer>
           );
+
+          return snapshot.isDragging && modalRootRef.current
+            ? ReactDOM.createPortal(node, modalRootRef.current)
+            : node;
         }}
       </Draggable>
       <LayerSettings
@@ -136,8 +135,6 @@ export const Layers: React.FC = observer(() => {
 
   // Menu Positioning
   const [buttonRef, setButtonRef] = useState<HTMLButtonElement | null>(null);
-
-  const [modalRef, setModalRef] = useState<HTMLDivElement | null>(null);
 
   const handleDrag = useCallback(
     (result: DragUpdate) => {
@@ -182,7 +179,6 @@ export const Layers: React.FC = observer(() => {
             onPointerDown={store?.editor.activeDocument?.addNewAnnotationLayer}
           />
         }
-        ref={setModalRef}
       >
         {/* TODO: Should we update on every drag change or just on drop? */}
         <DragDropContext onDragUpdate={handleDrag} onDragEnd={handleDrag}>
@@ -201,7 +197,6 @@ export const Layers: React.FC = observer(() => {
                         index === layerCount - 1 ||
                         index + 1 === activeLayerIndex
                       }
-                      parentElement={modalRef}
                     />
                   ))
                 ) : (
