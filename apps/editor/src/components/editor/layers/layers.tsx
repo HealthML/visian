@@ -74,7 +74,11 @@ const LayerListItem = observer<{
 
   return (
     <>
-      <Draggable draggableId={layer.id} index={index}>
+      <Draggable
+        draggableId={layer.id}
+        index={index}
+        isDragDisabled={areLayerSettingsOpen}
+      >
         {(provided: DraggableProvided, snapshot: DraggableStateSnapshot) => {
           const node = (
             <Observer>
@@ -98,7 +102,7 @@ const LayerListItem = observer<{
                   disableTrailingIcon={!layer.isVisible}
                   onTrailingIconPress={toggleAnnotationVisibility}
                   isActive={isActive}
-                  isLast={isLast}
+                  isLast={isLast || snapshot.isDragging}
                 />
               )}
             </Observer>
