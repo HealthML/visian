@@ -293,6 +293,7 @@ export class SliceRenderer implements IDisposable, ISliceRenderer {
       !this.editor.activeDocument ||
       this.editor.activeDocument.layers.length < 1
     ) {
+      this.activeRenderers.forEach((renderer) => renderer.clear());
       return;
     }
     this.lazyRenderTriggered = false;

@@ -161,8 +161,9 @@ export class Viewport3D
     nameOrTransferFunction?:
       | TransferFunctionName
       | ITransferFunction<TransferFunctionName>,
+    isSilent?: boolean,
   ): void => {
-    this.onTransferFunctionChange();
+    if (!isSilent) this.onTransferFunctionChange();
 
     this.activeTransferFunctionName = nameOrTransferFunction
       ? typeof nameOrTransferFunction === "string"
@@ -253,7 +254,7 @@ export class Viewport3D
     }
     this.setOpacity(snapshot?.opacity);
     this.setShadingMode(snapshot?.shadingMode);
-    this.setActiveTransferFunction(snapshot?.activeTransferFunctionName);
+    this.setActiveTransferFunction(snapshot?.activeTransferFunctionName, true);
     snapshot?.transferFunctions?.forEach((transferFunctionSnapshot) => {
       const transferFunction = this.transferFunctions[
         transferFunctionSnapshot.name

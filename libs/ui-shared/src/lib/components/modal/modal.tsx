@@ -40,6 +40,7 @@ const ModalTitle = styled(Title)`
   font-size: 16px;
   font-weight: ${fontWeight("regular")};
   line-height: 16px;
+  user-select: none;
 `;
 
 const TitleRow = styled.div`

@@ -63,9 +63,18 @@ export class Editor
     this.sliceRenderer?.dispose();
   }
 
-  public setActiveDocument(value?: Document): void {
+  public setActiveDocument(
+    value = new Document(undefined, this, this.context),
+  ): void {
     this.activeDocument = value;
   }
+
+  public newDocument = (forceDestroy?: boolean) => {
+    // eslint-disable-next-line no-alert
+    if (forceDestroy || window.confirm("Discard the current document?")) {
+      this.setActiveDocument();
+    }
+  };
 
   // Proxies
   public get refs(): { [name: string]: React.RefObject<HTMLElement> } {
@@ -87,7 +96,7 @@ export class Editor
     this.setActiveDocument(
       snapshot?.activeDocument
         ? new Document(snapshot.activeDocument, this, this.context)
-        : new Document(undefined, this, this.context),
+        : undefined,
     );
     return Promise.resolve();
   }

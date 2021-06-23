@@ -192,6 +192,14 @@ export const setUpHotKeys = (store: RootStore): IDisposer => {
     }
   });
 
+  // New Document
+  // Ctrl + N in Chrome only works in application mode
+  // See https://src.chromium.org/viewvc/chrome?revision=127787&view=revision
+  hotkeys("ctrl+n,ctrl+alt+n", (event) => {
+    event.preventDefault();
+    store.editor.newDocument();
+  });
+
   // Save & Export
   hotkeys("ctrl+s", (event) => {
     event.preventDefault();

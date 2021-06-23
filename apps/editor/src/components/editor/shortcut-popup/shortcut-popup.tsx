@@ -420,6 +420,18 @@ export const ShortcutPopUp: React.FC<ShortcutPopUpProps> = ({
             <ShortcutContainer>
               <KeyIcon text="Ctrl" />
               <PlusIcon />
+              <KeyIcon text="Alt" />
+              <PlusIcon />
+              <KeyIcon text="N" />
+            </ShortcutContainer>
+            <ShortcutDescriptionContainer>
+              <ShortcutDescription text="Create a new document" />
+            </ShortcutDescriptionContainer>
+          </ShortcutRow>
+          <ShortcutRow>
+            <ShortcutContainer>
+              <KeyIcon text="Ctrl" />
+              <PlusIcon />
               <KeyIcon text="S" />
             </ShortcutContainer>
             <ShortcutDescriptionContainer>

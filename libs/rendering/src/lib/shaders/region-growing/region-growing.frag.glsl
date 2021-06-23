@@ -48,16 +48,20 @@ void main() {
   vec4 dataW = texture2D(uDataTexture, uvW);
   vec4 dataNW = texture2D(uDataTexture, uvNW);
 
-  bool shouldGrow = canGrowFrom(data.x, dataN.x, regionN.x) ||
+
+  // For some reason this shader freezes on iPad if we use 7 or more bools for
+  // one big || concatination. Using two bools which concat 4 bools each it works.
+  bool shouldGrow1 = canGrowFrom(data.x, dataN.x, regionN.x) ||
     canGrowFrom(data.x, dataNO.x, regionNO.x) ||
     canGrowFrom(data.x, dataO.x, regionO.x) ||
-    canGrowFrom(data.x, dataSO.x, regionSO.x) ||
-    canGrowFrom(data.x, dataS.x, regionS.x) ||
+    canGrowFrom(data.x, dataSO.x, regionSO.x);
+
+  bool shouldGrow2 = canGrowFrom(data.x, dataS.x, regionS.x) ||
     canGrowFrom(data.x, dataSW.x, regionSW.x) ||
     canGrowFrom(data.x, dataW.x, regionW.x) ||
     canGrowFrom(data.x, dataNW.x, regionNW.x);
 
-  if(!shouldGrow && region.x == 0.0) discard;
+  if(!shouldGrow1 && !shouldGrow2 && region.x == 0.0) discard;
 
   gl_FragColor = vec4(1.0);
 }
