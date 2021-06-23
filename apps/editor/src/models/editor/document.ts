@@ -245,6 +245,7 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
     return Object.values(this.layerMap).some((layer) => layer.is3DLayer);
   }
 
+  // I/O
   public async importImage(file: File | File[], name?: string) {
     const image = await readMedicalImage(file);
     image.name =
@@ -289,7 +290,6 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
     this.setActiveLayer(annotationLayer);
   }
 
-  // I/O
   public async save(): Promise<void> {
     return this.context?.persistImmediately();
   }
