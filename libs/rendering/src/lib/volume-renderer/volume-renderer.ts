@@ -9,16 +9,18 @@ import { reaction } from "mobx";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import Stats from "three/examples/jsm/libs/stats.module";
+import { XRControllerModelFactory } from "three/examples/jsm/webxr/XRControllerModelFactory.js";
+
 import { ScreenAlignedQuad } from "../screen-aligned-quad";
 import {
-  LAOComputer,
   FlyControls,
   GradientComputer,
+  LAOComputer,
   ResolutionComputer,
   SharedUniforms,
 } from "./utils";
-import { VolumeMaterial } from "./volume-material";
 import { Volume } from "./volume";
+import { VolumeMaterial } from "./volume-material";
 
 export class VolumeRenderer implements IVolumeRenderer, IDisposable {
   private sharedUniforms: SharedUniforms;
@@ -26,6 +28,7 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
   public renderer: THREE.WebGLRenderer;
   public camera: THREE.PerspectiveCamera;
   public scene = new THREE.Scene();
+  public xrGeometry?: THREE.Group;
 
   private intermediateRenderTarget: THREE.WebGLRenderTarget;
   private screenAlignedQuad: ScreenAlignedQuad;
@@ -110,6 +113,7 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
     // Position the volume in a reasonable height for XR.
     this.volume.position.set(0, 1.2, 0);
     this.scene.add(this.volume);
+    this.scene.add(new THREE.AmbientLight(0xffffff));
     this.volume.onBeforeRender = (_renderer, _scene, camera) => {
       if (this.renderer.xr.isPresenting) {
         this.updateCameraPosition(camera);
@@ -275,6 +279,7 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
 
     if (this.renderer.xr.isPresenting) {
       this.eagerRender();
+      // TODO: Render spectator view
       return;
     }
 
@@ -404,6 +409,40 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
   };
 
   // XR Management
+  protected setupXRWorld(): void {
+    if (this.xrGeometry) return;
+    this.xrGeometry = new THREE.Group();
+
+    // Controllers
+    const controllerModelFactory = new XRControllerModelFactory();
+
+    const controllerGrip1 = this.renderer.xr.getControllerGrip(0);
+    const model1 = controllerModelFactory.createControllerModel(
+      controllerGrip1,
+    );
+    controllerGrip1.add(model1);
+    this.xrGeometry.add(controllerGrip1);
+
+    const controllerGrip2 = this.renderer.xr.getControllerGrip(1);
+    const model2 = controllerModelFactory.createControllerModel(
+      controllerGrip2,
+    );
+    controllerGrip2.add(model2);
+    this.xrGeometry.add(controllerGrip2);
+
+    // Floor
+    this.xrGeometry.add(new THREE.GridHelper(5, 10));
+
+    // Mount to Scene
+    this.scene.add(this.xrGeometry);
+  }
+
+  protected destroyXRWorld(): void {
+    if (!this.xrGeometry) return;
+    this.scene.remove(this.xrGeometry);
+    this.xrGeometry = undefined;
+  }
+
   public isInXR() {
     return this.renderer.xr.isPresenting;
   }
@@ -411,12 +450,14 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
   protected onXRSessionEnded = () => {
     this.editor.activeDocument?.viewport3D.setIsInXR(false);
     this.renderer.xr.removeEventListener("sessionend", this.onXRSessionEnded);
+    this.destroyXRWorld();
     this.resize();
   };
   protected onXRSessionStarted = (session: THREE.XRSession) => {
     this.editor.activeDocument?.viewport3D.setIsInXR(true);
     this.renderer.xr.setSession(session);
     this.renderer.xr.addEventListener("sessionend", this.onXRSessionEnded);
+    this.setupXRWorld();
   };
 
   public enterXR = async () => {
