@@ -124,6 +124,27 @@ export const useDelay = (
   return [schedule, cancel];
 };
 
+export const useShortTap = <T extends Element>(
+  handleShortTap: (event: React.PointerEvent<T>) => void,
+  maxDuration = 300,
+): [() => void, (event: React.PointerEvent<T>) => void] => {
+  const timeRef = useRef<number | undefined>();
+
+  const startTap = useCallback(() => {
+    timeRef.current = Date.now();
+  }, []);
+  const stopTap = useCallback(
+    (event: React.PointerEvent<T>) => {
+      if (timeRef.current === undefined) return;
+      if (Date.now() - timeRef.current <= maxDuration) handleShortTap(event);
+      timeRef.current = undefined;
+    },
+    [handleShortTap, maxDuration],
+  );
+
+  return [startTap, stopTap];
+};
+
 export const useOutsidePress = <T extends HTMLElement>(
   ref: React.RefObject<T>,
   callback?: (event: PointerEvent) => void,

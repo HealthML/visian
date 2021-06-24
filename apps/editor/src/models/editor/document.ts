@@ -119,7 +119,7 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
       addNewAnnotationLayer: action,
       moveLayer: action,
       deleteLayer: action,
-      updateLayerOrder: action,
+      sortLayers: action,
       importImage: action,
       importAnnotation: action,
       applySnapshot: action,
@@ -230,7 +230,7 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
   };
 
   /** Updates the layer order so that annotation layers are always on top of image layers. */
-  public updateLayerOrder = (): void => {
+  public sortLayers = (): void => {
     let hasFoundImage = false;
     for (let i = 0; i < this.layerIds.length; i++) {
       if (!this.layerMap[this.layerIds[i]].isAnnotation) {

@@ -9,6 +9,7 @@ import {
   SubtleText,
   useDelay,
   useModalRoot,
+  useShortTap,
 } from "@visian/ui-shared";
 import { Observer, observer } from "mobx-react-lite";
 import React, { useCallback, useRef, useState } from "react";
@@ -74,6 +75,12 @@ const LayerListItem = observer<{
 
   const trailingIconRef = useRef<SVGSVGElement | null>(null);
 
+  const [startTap, stopTap] = useShortTap(
+    useCallback(() => {
+      store?.editor.activeDocument?.setActiveLayer(layer);
+    }, [layer, store?.editor.activeDocument]),
+  );
+
   const handlePointerDown = useCallback(
     (event: React.PointerEvent<HTMLDivElement>) => {
       if (
@@ -84,13 +91,12 @@ const LayerListItem = observer<{
       }
 
       if (event.button === PointerButton.LMB) {
-        store?.editor.activeDocument?.setActiveLayer(layer);
+        startTap();
       } else if (event.button === PointerButton.RMB) {
         layer.setIsAnnotation(!layer.isAnnotation);
-        store?.editor.activeDocument?.updateLayerOrder();
       }
     },
-    [colorRef, layer, store?.editor.activeDocument],
+    [colorRef, layer, startTap],
   );
 
   const handleContextMenu = (event: React.MouseEvent<HTMLDivElement>) => {
@@ -131,6 +137,7 @@ const LayerListItem = observer<{
                   isActive={isActive}
                   isLast={isLast || snapshot.isDragging}
                   onPointerDown={handlePointerDown}
+                  onPointerUp={stopTap}
                   onContextMenu={handleContextMenu}
                 />
               )}
