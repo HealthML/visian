@@ -72,7 +72,7 @@ const LayerListItem = observer<{
     HTMLDivElement | SVGSVGElement | null
   >(null);
 
-  const trailingIconRef = useRef<HTMLDivElement | SVGSVGElement | null>(null);
+  const trailingIconRef = useRef<SVGSVGElement | null>(null);
 
   const handlePointerDown = useCallback(
     (event: React.PointerEvent<HTMLDivElement>) => {
