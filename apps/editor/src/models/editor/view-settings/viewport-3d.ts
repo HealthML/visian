@@ -39,6 +39,7 @@ export class Viewport3D
     ISerializable<Viewport3DSnapshot<TransferFunctionName>> {
   public readonly excludeFromSnapshotTracking = ["document"];
 
+  public isXRAvailable?: boolean;
   public isInXR!: boolean;
 
   public cameraMatrix!: Matrix4;
@@ -63,8 +64,11 @@ export class Viewport3D
   ) {
     makeObservable<
       this,
-      "activeTransferFunctionName" | "setSuppressedShadingMode"
+      | "activeTransferFunctionName"
+      | "setSuppressedShadingMode"
+      | "setIsXRAvailable"
     >(this, {
+      isXRAvailable: observable,
       isInXR: observable,
       cameraMatrix: observable.ref,
       orbitTarget: observable,
@@ -81,11 +85,13 @@ export class Viewport3D
       setOrbitTarget: action,
       setVolumeSpaceCameraPosition: action,
       setActiveTransferFunction: action,
-      setIsInXR: action,
       setOpacity: action,
       setShadingMode: action,
       setSuppressedShadingMode: action,
       onTransferFunctionChange: action,
+      setIsXRAvailable: action,
+      setIsInXR: action,
+      reset: action,
       applySnapshot: action,
     });
 
@@ -107,6 +113,8 @@ export class Viewport3D
         this.activeTransferFunction?.activate();
       }
     });
+
+    this.checkIsXRAvailable();
   }
 
   public get activeTransferFunction():
@@ -174,10 +182,6 @@ export class Viewport3D
     this.activeTransferFunction?.activate();
   };
 
-  public setIsInXR(value = false) {
-    this.isInXR = value;
-  }
-
   public setOpacity(value = 1) {
     this.onTransferFunctionChange();
 
@@ -209,6 +213,34 @@ export class Viewport3D
       this.setSuppressedShadingMode();
       this.shadingTimeout = undefined;
     }, 200);
+  };
+
+  // XR
+  protected setIsXRAvailable(value = false) {
+    this.isXRAvailable = value;
+  }
+  public async checkIsXRAvailable() {
+    const isXRAvailable =
+      "xr" in navigator &&
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      (await (navigator as THREE.Navigator).xr!.isSessionSupported(
+        "immersive-vr",
+      ));
+
+    this.setIsXRAvailable(isXRAvailable);
+    return isXRAvailable;
+  }
+  public setIsInXR(value = false) {
+    this.isInXR = value;
+  }
+
+  public enterXR = () => {
+    // TODO: When entering XR from a 2D view, nothing is shown
+    this.document.viewSettings.setViewMode("3D");
+    this.document.volumeRenderer?.enterXR();
+  };
+  public exitXR = () => {
+    this.document.volumeRenderer?.exitXR();
   };
 
   public reset = (): void => {

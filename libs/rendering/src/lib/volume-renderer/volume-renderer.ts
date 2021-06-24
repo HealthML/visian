@@ -273,6 +273,11 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
       this.laoComputer.tick();
     }
 
+    if (this.renderer.xr.isPresenting) {
+      this.eagerRender();
+      return;
+    }
+
     if (this.lazyRenderTriggered) {
       this.resolutionComputer.restart();
       this.lazyRenderTriggered = false;
@@ -280,10 +285,6 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
 
     if (!this.resolutionComputer.fullResolutionFlushed) {
       this.resolutionComputer.tick();
-    }
-
-    if (this.renderer.xr.isPresenting) {
-      this.eagerRender();
     }
 
     this.stats.update();
@@ -403,31 +404,23 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
   };
 
   // XR Management
-  public async isXRAvailable() {
-    if (!("xr" in navigator)) return false;
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    return (navigator as THREE.Navigator).xr!.isSessionSupported(
-      "immersive-vr",
-    );
-  }
   public isInXR() {
     return this.renderer.xr.isPresenting;
   }
 
   protected onXRSessionEnded = () => {
     this.editor.activeDocument?.viewport3D.setIsInXR(false);
-    const session = this.renderer.xr.getSession();
-    if (!session) return;
-    session.removeEventListener("end", this.onXRSessionEnded);
+    this.renderer.xr.removeEventListener("sessionend", this.onXRSessionEnded);
+    this.resize();
   };
   protected onXRSessionStarted = (session: THREE.XRSession) => {
     this.editor.activeDocument?.viewport3D.setIsInXR(true);
-    session.addEventListener("end", this.onXRSessionEnded);
-    return this.renderer.xr.setSession(session);
+    this.renderer.xr.setSession(session);
+    this.renderer.xr.addEventListener("sessionend", this.onXRSessionEnded);
   };
 
-  public async enterXR() {
-    if (this.renderer.xr.getSession()) return;
+  public enterXR = async () => {
+    if (this.isInXR()) return;
 
     this.editor.activeDocument?.viewport3D.transferFunctions[
       "fc-cone"
@@ -440,11 +433,11 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
     );
     if (!session) return;
     this.onXRSessionStarted(session);
-  }
+  };
 
-  public async exitXR() {
+  public exitXR = async () => {
     const session = this.renderer.xr.getSession();
     if (!session) return;
     return session.end();
-  }
+  };
 }
