@@ -1,8 +1,9 @@
 import { LocalForageBackend } from "@visian/ui-shared";
+import { readFileFromURL } from "@visian/utils";
 import React from "react";
 
-import { RootStore } from "../models";
 import { storePersistInterval } from "../constants";
+import { RootStore } from "../models";
 
 export const storageBackend = new LocalForageBackend(
   storePersistInterval,
@@ -18,6 +19,16 @@ export const setupRootStore = async () => {
     // eslint-disable-next-line no-alert
     window.alert("Data model outdated. Reset required.");
     await store.destroy(true);
+  }
+
+  // Load scan based on GET parameter
+  // Example: http://localhost:4200/?load=http://data.idoimaging.com/nifti/1010_brain_mr_04.nii.gz
+  const url = new URL(window.location.href);
+  const loadScanParam = url.searchParams.get("load");
+  if (loadScanParam && store.editor.newDocument()) {
+    await store.editor.activeDocument?.importImage(
+      await readFileFromURL(loadScanParam, true),
+    );
   }
 
   window.addEventListener("beforeunload", (event) => {
