@@ -409,26 +409,50 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
   };
 
   // XR Management
+  protected startSelection = (event: THREE.Event) => {
+    const controller = event.target;
+    controller.attach(this.volume);
+    this.volume.userData.selections =
+      (this.volume.userData.selections || 0) + 1;
+    controller.userData.selected = this.volume;
+  };
+  protected endSelection = (event: THREE.Event) => {
+    const controller = event.target;
+
+    if (controller.userData.selected !== undefined) {
+      const object = controller.userData.selected;
+      object.userData.selections = (this.volume.userData.selections || 1) - 1;
+      if (!object.userData.selections) {
+        this.scene.attach(object);
+        controller.userData.selected = undefined;
+      }
+    }
+  };
+
+  protected setupXRController(
+    id: number,
+    controllerModelFactory = new XRControllerModelFactory(),
+  ) {
+    if (!this.xrGeometry) return;
+
+    const controllerGrip = this.renderer.xr.getControllerGrip(id);
+    const model = controllerModelFactory.createControllerModel(controllerGrip);
+    controllerGrip.add(model);
+    this.xrGeometry.add(controllerGrip);
+
+    const controller = this.renderer.xr.getController(id);
+    controller.addEventListener("selectstart", this.startSelection);
+    controller.addEventListener("selectend", this.endSelection);
+    this.xrGeometry.add(controller);
+  }
   protected setupXRWorld(): void {
     if (this.xrGeometry) return;
     this.xrGeometry = new THREE.Group();
 
     // Controllers
     const controllerModelFactory = new XRControllerModelFactory();
-
-    const controllerGrip1 = this.renderer.xr.getControllerGrip(0);
-    const model1 = controllerModelFactory.createControllerModel(
-      controllerGrip1,
-    );
-    controllerGrip1.add(model1);
-    this.xrGeometry.add(controllerGrip1);
-
-    const controllerGrip2 = this.renderer.xr.getControllerGrip(1);
-    const model2 = controllerModelFactory.createControllerModel(
-      controllerGrip2,
-    );
-    controllerGrip2.add(model2);
-    this.xrGeometry.add(controllerGrip2);
+    this.setupXRController(0, controllerModelFactory);
+    this.setupXRController(1, controllerModelFactory);
 
     // Floor
     this.xrGeometry.add(new THREE.GridHelper(5, 10));
