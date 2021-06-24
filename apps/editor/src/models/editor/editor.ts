@@ -68,8 +68,13 @@ export class Editor
 
   public setActiveDocument(
     value = new Document(undefined, this, this.context),
+    isSilent?: boolean,
   ): void {
     this.activeDocument = value;
+
+    // TODO: Somehow updates to the active document are not being registered.
+    // This is (hopefully) only a temporary workaround.
+    if (!isSilent) this.context.setDirty();
   }
 
   public newDocument = (forceDestroy?: boolean) => {
@@ -100,6 +105,7 @@ export class Editor
       snapshot?.activeDocument
         ? new Document(snapshot.activeDocument, this, this.context)
         : undefined,
+      true,
     );
     return Promise.resolve();
   }
