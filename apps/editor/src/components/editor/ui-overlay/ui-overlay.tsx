@@ -149,7 +149,7 @@ export const UIOverlay = observer<UIOverlayProps>(
               isActive={false}
             />
             <ViewSettings />
-            <SliceSlider />
+            <SliceSlider showValueLabelOnChange={!isDraggedOver} />
           </RightBar>
         </ColumnRight>
 

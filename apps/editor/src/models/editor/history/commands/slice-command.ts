@@ -42,6 +42,7 @@ export class SliceCommand
   }
 
   public undo(): void {
+    this.document.setActiveLayer(this.layerId);
     const imageLayer = this.document.getLayer(this.layerId) as
       | IImageLayer
       | undefined;
@@ -51,6 +52,7 @@ export class SliceCommand
   }
 
   public redo(): void {
+    this.document.setActiveLayer(this.layerId);
     const imageLayer = this.document.getLayer(this.layerId) as
       | IImageLayer
       | undefined;

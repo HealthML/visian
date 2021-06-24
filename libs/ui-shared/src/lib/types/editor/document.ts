@@ -49,6 +49,9 @@ export interface IDocument {
   /** Reads a layer based on its id. */
   getLayer(id: string): ILayer | undefined;
 
+  /** Sets the active layer. */
+  setActiveLayer(idOrLayer?: string | ILayer): void;
+
   /** Adds a layer to the document. */
   addLayer(layer: ILayer): void;
 
