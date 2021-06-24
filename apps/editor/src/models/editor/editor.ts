@@ -51,6 +51,9 @@ export class Editor
       new THREE.WebGLRenderer({ alpha: true }),
       new THREE.WebGLRenderer({ alpha: true }),
     ];
+    this.renderers.forEach((renderer) => {
+      renderer.setClearAlpha(0);
+    });
     this.sliceRenderer = new SliceRenderer(this);
     this.volumeRenderer = new VolumeRenderer(this);
 
