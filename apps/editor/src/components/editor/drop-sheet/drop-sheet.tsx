@@ -17,16 +17,20 @@ import { DropSheetProps } from "./drop-sheet.props";
 
 const StyledDropZone = styled(DropZone)`
   flex: 1;
+  height: 100%;
   margin: 10% 0 10% 10%;
+  max-height: 600px;
+  max-width: 800px;
 `;
 
 const StyledOverlay = styled.div`
   ${coverMixin}
 
-  align-items: stretch;
+  align-items: center;
   background-color: ${color("modalUnderlay")};
   display: flex;
   flex-direction: row;
+  justify-content: center;
   padding-right: 10%;
   pointer-events: auto;
   z-index: ${zIndex("overlay")};
