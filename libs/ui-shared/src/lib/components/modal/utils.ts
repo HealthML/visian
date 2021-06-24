@@ -17,11 +17,19 @@ const computeStyle = ({
   rect,
   offsetRect,
 }: RelativePositionStyleConfig<ModalPosition>): React.CSSProperties => {
+  const shouldPositionToBottom = rect.top / window.innerHeight < 2 / 3;
+
   switch (position) {
     case "left":
       return {
+        bottom: shouldPositionToBottom
+          ? undefined
+          : (offsetRect?.bottom ||
+              document.body.getBoundingClientRect().height) - rect.bottom,
         position: "absolute",
-        top: rect.top - (offsetRect?.top || 0),
+        top: shouldPositionToBottom
+          ? rect.top - (offsetRect?.top || 0)
+          : undefined,
         right:
           (offsetRect?.right || document.body.getBoundingClientRect().width) -
           (rect.left - distance),
@@ -29,8 +37,14 @@ const computeStyle = ({
 
     default:
       return {
+        bottom: shouldPositionToBottom
+          ? undefined
+          : (offsetRect?.bottom ||
+              document.body.getBoundingClientRect().height) - rect.bottom,
         position: "absolute",
-        top: rect.top - (offsetRect?.top || 0),
+        top: shouldPositionToBottom
+          ? rect.top - (offsetRect?.top || 0)
+          : undefined,
         left: rect.right + distance - (offsetRect?.left || 0),
       };
   }
