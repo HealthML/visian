@@ -21,14 +21,22 @@ export const setupRootStore = async () => {
     await store.destroy(true);
   }
 
-  // Load scan based on GET parameter
-  // Example: http://localhost:4200/?load=http://data.idoimaging.com/nifti/1010_brain_mr_04.nii.gz
-  const url = new URL(window.location.href);
-  const loadScanParam = url.searchParams.get("load");
-  if (loadScanParam && store.editor.newDocument()) {
-    await store.editor.activeDocument?.importImage(
-      await readFileFromURL(loadScanParam, true),
-    );
+  try {
+    // Load scan based on GET parameter
+    // Example: http://localhost:4200/?load=http://data.idoimaging.com/nifti/1010_brain_mr_04.nii.gz
+    const url = new URL(window.location.href);
+    const loadScanParam = url.searchParams.get("load");
+    if (loadScanParam && store.editor.newDocument()) {
+      await store.editor.activeDocument?.importImage(
+        await readFileFromURL(loadScanParam, true),
+      );
+    }
+  } catch {
+    store.setError({
+      titleTx: "import-error",
+      descriptionTx: "remote-file-error",
+    });
+    store.editor.setActiveDocument();
   }
 
   window.addEventListener("beforeunload", (event) => {

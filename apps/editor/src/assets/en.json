@@ -66,8 +66,8 @@
 
   "import-error": "Import Error",
   "annotation-mismatch-error": "This annotation does not match the original image's size.",
-  "no-image-error": "You have to load a base image before importing an annotation.",
   "image-loading-error": "Looks like this file is not supported.",
+  "remote-file-error": "The specified file could not be loaded.",
 
   "3d-view": "3D View",
   "3d-view-tooltip": "3D View (4)",

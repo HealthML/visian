@@ -66,8 +66,8 @@
 
   "import-error": "Importfehler",
   "annotation-mismatch-error": "Diese Annotation passt nicht auf den Scan.",
-  "no-image-error": "Sie müssen einen Scan laden, bevor Sie eine Annotation importieren.",
   "image-loading-error": "Diese Datei scheint nicht unterstützt zu sein.",
+  "remote-file-error": "Die angegebene Datei konnte nicht geladen werden.",
 
   "3d-view": "3D Ansicht",
   "3d-view-tooltip": "3D Ansicht (4)",
