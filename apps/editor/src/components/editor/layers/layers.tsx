@@ -5,6 +5,7 @@ import {
   ListItem,
   Modal,
   ModalHeaderButton,
+  PointerButton,
   SubtleText,
   useDelay,
   useModalRoot,
@@ -42,6 +43,8 @@ const LayerListItem = observer<{
   isActive?: boolean;
   isLast?: boolean;
 }>(({ layer, index, isActive, isLast }) => {
+  const store = useStore();
+
   const toggleAnnotationVisibility = useCallback(() => {
     layer.setIsVisible(!layer.isVisible);
   }, [layer]);
@@ -69,8 +72,32 @@ const LayerListItem = observer<{
     HTMLDivElement | SVGSVGElement | null
   >(null);
 
-  const modalRootRef = useModalRoot();
+  const trailingIconRef = useRef<SVGSVGElement | null>(null);
 
+  const handlePointerDown = useCallback(
+    (event: React.PointerEvent<HTMLDivElement>) => {
+      if (
+        colorRef?.contains(event.target as Node) ||
+        trailingIconRef.current?.contains(event.target as Node)
+      ) {
+        return;
+      }
+
+      if (event.button === PointerButton.LMB) {
+        store?.editor.activeDocument?.setActiveLayer(layer);
+      } else if (event.button === PointerButton.RMB) {
+        layer.setIsAnnotation(!layer.isAnnotation);
+        store?.editor.activeDocument?.updateLayerOrder();
+      }
+    },
+    [colorRef, layer, store?.editor.activeDocument],
+  );
+
+  const handleContextMenu = (event: React.MouseEvent<HTMLDivElement>) => {
+    event.preventDefault();
+  };
+
+  const modalRootRef = useModalRoot();
   return (
     <>
       <Draggable
@@ -99,9 +126,12 @@ const LayerListItem = observer<{
                   label={layer.title}
                   trailingIcon={layer.isVisible ? "eye" : "eyeCrossed"}
                   disableTrailingIcon={!layer.isVisible}
+                  trailingIconRef={trailingIconRef}
                   onTrailingIconPress={toggleAnnotationVisibility}
                   isActive={isActive}
                   isLast={isLast || snapshot.isDragging}
+                  onPointerDown={handlePointerDown}
+                  onContextMenu={handleContextMenu}
                 />
               )}
             </Observer>

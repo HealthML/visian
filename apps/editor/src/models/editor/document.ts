@@ -13,7 +13,6 @@ import { action, computed, makeObservable, observable, toJS } from "mobx";
 import * as THREE from "three";
 import { v4 as uuidv4 } from "uuid";
 
-import { defaultAnnotationColor } from "../../constants";
 import { History, HistorySnapshot } from "./history";
 import { ImageLayer, Layer, LayerSnapshot } from "./layers";
 import * as layers from "./layers";
@@ -29,6 +28,7 @@ import {
   ViewSettingsSnapshot,
 } from "./view-settings";
 import { StoreContext } from "../types";
+import { defaultAnnotationColor } from "../../constants";
 
 export const layerMap: {
   [kind: string]: ValueType<typeof layers>;
@@ -119,6 +119,7 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
       addNewAnnotationLayer: action,
       moveLayer: action,
       deleteLayer: action,
+      updateLayerOrder: action,
       importImage: action,
       importAnnotation: action,
       applySnapshot: action,
@@ -163,18 +164,25 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
   public addLayer = (...newLayers: Layer[]): void => {
     newLayers.forEach((layer) => {
       this.layerMap[layer.id] = layer;
-      this.layerIds.unshift(layer.id);
+      if (layer.isAnnotation) {
+        this.layerIds.unshift(layer.id);
+      } else {
+        // insert image layer after all annotation layers
+        let insertIndex = 0;
+        for (let i = 0; i < this.layerIds.length; i++) {
+          if (!this.layerMap[this.layerIds[i]].isAnnotation) {
+            insertIndex = i;
+            break;
+          }
+        }
+        this.layerIds.splice(insertIndex, 0, layer.id);
+      }
     });
   };
 
-  public addNewAnnotationLayer = () => {
+  private getColorForNewAnnotation = (): string => {
+    // TODO: Rework to work with group layers
     const layerStack = this.layers;
-
-    const baseLayer = layerStack.find(
-      (layer) => layer.kind === "image" && !layer.isAnnotation,
-    ) as ImageLayer | undefined;
-    if (!baseLayer) return;
-
     const usedColors: { [key: string]: boolean } = {};
     layerStack.forEach((layer) => {
       if (layer.color) {
@@ -182,11 +190,22 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
       }
     });
     const colorCandidates = dataColorKeys.filter((color) => !usedColors[color]);
+    return colorCandidates.length ? colorCandidates[0] : defaultAnnotationColor;
+  };
+
+  public addNewAnnotationLayer = () => {
+    // TODO: Rework to work with group layers
+    const baseLayer = this.layers.find(
+      (layer) => layer.kind === "image" && !layer.isAnnotation,
+    ) as ImageLayer | undefined;
+    if (!baseLayer) return;
+
+    const annotationColor = this.getColorForNewAnnotation();
 
     const annotationLayer = ImageLayer.fromNewAnnotationForImage(
       baseLayer.image,
       this,
-      colorCandidates.length ? colorCandidates[0] : undefined,
+      annotationColor,
     );
     this.addLayer(annotationLayer);
     this.setActiveLayer(annotationLayer);
@@ -210,26 +229,38 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
     }
   };
 
+  /** Updates the layer order so that annotation layers are always on top of image layers. */
+  public updateLayerOrder = (): void => {
+    let hasFoundImage = false;
+    for (let i = 0; i < this.layerIds.length; i++) {
+      if (!this.layerMap[this.layerIds[i]].isAnnotation) {
+        hasFoundImage = true;
+      } else if (hasFoundImage) {
+        this.layerIds.unshift(this.layerIds.splice(i, 1)[0]);
+      }
+    }
+  };
+
   public get has3DLayers(): boolean {
     return Object.values(this.layerMap).some((layer) => layer.is3DLayer);
   }
 
-  // I/O (DEPRECATED)
+  // I/O
   public async importImage(file: File | File[], name?: string) {
-    this.layerIds = [];
-    this.layerMap = {};
-
     const image = await readMedicalImage(file);
     image.name =
       name || (Array.isArray(file) ? file[0]?.name || "" : file.name);
     const imageLayer = ImageLayer.fromITKImage(image, this);
-
-    const annotationLayer = ImageLayer.fromNewAnnotationForImage(
-      imageLayer.image,
-      this,
-    );
-    this.addLayer(imageLayer, annotationLayer);
-    this.setActiveLayer(annotationLayer);
+    if (!this.layerIds.length) {
+      const annotationLayer = ImageLayer.fromNewAnnotationForImage(
+        imageLayer.image,
+        this,
+      );
+      this.addLayer(imageLayer, annotationLayer);
+      this.setActiveLayer(annotationLayer);
+    } else {
+      this.addLayer(imageLayer);
+    }
 
     this.viewSettings.reset();
     this.viewport2D.reset();
@@ -238,16 +269,15 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
   }
 
   public async importAnnotation(file: File | File[], name?: string) {
-    if (!this.layerIds.length) throw new Error("no-image-error");
-
     const image = await readMedicalImage(file);
     image.name =
       name || (Array.isArray(file) ? file[0]?.name || "" : file.name);
     const annotationLayer = ImageLayer.fromITKImage(image, this, {
       isAnnotation: true,
-      color: defaultAnnotationColor,
+      color: this.getColorForNewAnnotation(),
     });
     if (
+      this.layers.length &&
       !isEqual(
         (this.layerMap[this.layerIds[0]] as ImageLayer)?.image?.voxelCount,
         annotationLayer.image.voxelCount,
@@ -256,13 +286,10 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
       throw new Error("annotation-mismatch-error");
     }
 
-    // Replace old annotation (if any)
-    if (this.layerIds.length > 1) this.deleteLayer(this.layerIds[0]);
     this.addLayer(annotationLayer);
     this.setActiveLayer(annotationLayer);
   }
 
-  // I/O
   public async save(): Promise<void> {
     return this.context?.persistImmediately();
   }

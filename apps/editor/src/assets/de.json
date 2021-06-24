@@ -2,8 +2,7 @@
   "loading": "Lädt...",
   "reset": "Zurücksetzen",
 
-  "drop-image": "Legen Sie Ihren Scan hier ab",
-  "drop-annotation": "Legen Sie Ihre Annotation hier ab",
+  "drop-file": "Legen Sie Scan oder Annotation hier ab",
   "upload-file": "Datei hochladen",
 
   "untitled-document": "Unbenanntes Dokument",
