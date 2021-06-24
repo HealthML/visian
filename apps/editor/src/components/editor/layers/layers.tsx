@@ -72,8 +72,17 @@ const LayerListItem = observer<{
     HTMLDivElement | SVGSVGElement | null
   >(null);
 
+  const trailingIconRef = useRef<HTMLDivElement | SVGSVGElement | null>(null);
+
   const handlePointerDown = useCallback(
     (event: React.PointerEvent<HTMLDivElement>) => {
+      if (
+        colorRef?.contains(event.target as Node) ||
+        trailingIconRef.current?.contains(event.target as Node)
+      ) {
+        return;
+      }
+
       if (event.button === PointerButton.LMB) {
         store?.editor.activeDocument?.setActiveLayer(layer);
       } else if (event.button === PointerButton.RMB) {
@@ -81,7 +90,7 @@ const LayerListItem = observer<{
         store?.editor.activeDocument?.updateLayerOrder();
       }
     },
-    [layer, store?.editor.activeDocument],
+    [colorRef, layer, store?.editor.activeDocument],
   );
 
   const handleContextMenu = (event: React.MouseEvent<HTMLDivElement>) => {
@@ -117,6 +126,7 @@ const LayerListItem = observer<{
                   label={layer.title}
                   trailingIcon={layer.isVisible ? "eye" : "eyeCrossed"}
                   disableTrailingIcon={!layer.isVisible}
+                  trailingIconRef={trailingIconRef}
                   onTrailingIconPress={toggleAnnotationVisibility}
                   isActive={isActive}
                   isLast={isLast || snapshot.isDragging}
