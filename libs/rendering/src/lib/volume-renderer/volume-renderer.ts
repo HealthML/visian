@@ -455,7 +455,7 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
     this.setupXRController(1, controllerModelFactory);
 
     // Floor
-    this.xrGeometry.add(new THREE.GridHelper(5, 10));
+    this.xrGeometry.add(new THREE.GridHelper(5, 10, 0x404040, 0x404040));
 
     // Mount to Scene
     this.scene.add(this.xrGeometry);
