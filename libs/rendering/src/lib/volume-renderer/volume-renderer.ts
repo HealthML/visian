@@ -28,7 +28,7 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
   public renderer: THREE.WebGLRenderer;
   public camera: THREE.PerspectiveCamera;
   public scene = new THREE.Scene();
-  public xrGeometry?: THREE.Group;
+  public xrWorld?: THREE.Group;
 
   private intermediateRenderTarget: THREE.WebGLRenderTarget;
   private screenAlignedQuad: ScreenAlignedQuad;
@@ -547,19 +547,19 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
     id: number,
     controllerModelFactory = new XRControllerModelFactory(),
   ) {
-    if (!this.xrGeometry) return;
+    if (!this.xrWorld) return;
 
     const controllerGrip = this.renderer.xr.getControllerGrip(id);
     const model = controllerModelFactory.createControllerModel(controllerGrip);
     controllerGrip.add(model);
-    this.xrGeometry.add(controllerGrip);
+    this.xrWorld.add(controllerGrip);
 
     const controller = this.renderer.xr.getController(id);
-    this.xrGeometry.add(controller);
+    this.xrWorld.add(controller);
   }
   protected setupXRWorld(): void {
-    if (this.xrGeometry) return;
-    this.xrGeometry = new THREE.Group();
+    if (this.xrWorld) return;
+    this.xrWorld = new THREE.Group();
 
     // Controllers
     const controllerModelFactory = new XRControllerModelFactory();
@@ -567,16 +567,16 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
     this.setupXRController(1, controllerModelFactory);
 
     // Floor
-    this.xrGeometry.add(new THREE.GridHelper(5, 10, 0x404040, 0x404040));
+    this.xrWorld.add(new THREE.GridHelper(5, 10, 0x404040, 0x404040));
 
     // Mount to Scene
-    this.scene.add(this.xrGeometry);
+    this.scene.add(this.xrWorld);
   }
 
   protected destroyXRWorld(): void {
-    if (!this.xrGeometry) return;
-    this.scene.remove(this.xrGeometry);
-    this.xrGeometry = undefined;
+    if (!this.xrWorld) return;
+    this.scene.remove(this.xrWorld);
+    this.xrWorld = undefined;
   }
 
   public isInXR() {
