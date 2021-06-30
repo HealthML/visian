@@ -357,7 +357,7 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
     if (pushMatrix) {
       this.camera.updateMatrix();
       this.editor.activeDocument?.viewport3D.setCameraMatrix(
-        this.camera.matrix,
+        this.camera.matrix.clone(),
       );
     }
 
