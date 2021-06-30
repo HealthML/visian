@@ -259,10 +259,10 @@ export class Viewport3D
 
   public enterXR = () => {
     this.document.viewSettings.setViewMode("3D");
-    this.document.volumeRenderer?.enterXR();
+    this.document.volumeRenderer?.xr.enterXR();
   };
   public exitXR = () => {
-    this.document.volumeRenderer?.exitXR();
+    this.document.volumeRenderer?.xr.exitXR();
   };
 
   public reset = (): void => {

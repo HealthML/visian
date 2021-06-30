@@ -9,7 +9,6 @@ import { reaction } from "mobx";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import Stats from "three/examples/jsm/libs/stats.module";
-import { XRControllerModelFactory } from "three/examples/jsm/webxr/XRControllerModelFactory.js";
 
 import { ScreenAlignedQuad } from "../screen-aligned-quad";
 import {
@@ -21,6 +20,7 @@ import {
 } from "./utils";
 import { Volume } from "./volume";
 import { VolumeMaterial } from "./volume-material";
+import { XRManager } from "./xr-manager";
 
 export class VolumeRenderer implements IVolumeRenderer, IDisposable {
   private sharedUniforms: SharedUniforms;
@@ -28,12 +28,12 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
   public renderer: THREE.WebGLRenderer;
   public camera: THREE.PerspectiveCamera;
   public scene = new THREE.Scene();
-  public xrWorld?: THREE.Group;
+  public xr: XRManager;
 
   private intermediateRenderTarget: THREE.WebGLRenderTarget;
   private screenAlignedQuad: ScreenAlignedQuad;
 
-  private volume: Volume;
+  public volume: Volume;
 
   private orbitControls: OrbitControls;
   private flyControls: FlyControls;
@@ -119,6 +119,7 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
       }
     };
     this.resetScene();
+    this.xr = new XRManager(this, editor);
 
     this.intermediateRenderTarget = new THREE.WebGLRenderTarget(1, 1);
     // this.intermediateRenderTarget.texture.magFilter = THREE.NearestFilter;
@@ -261,7 +262,7 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
     }
   }
 
-  private resize = () => {
+  public resize = () => {
     const aspect = window.innerWidth / window.innerHeight;
 
     this.resolutionComputer.setSize(window.innerWidth, window.innerHeight);
@@ -289,7 +290,7 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
     }
 
     if (this.renderer.xr.isPresenting) {
-      this.animateXR();
+      this.xr.animate();
       this.eagerRender();
       // TODO: Render spectator view
       return;
@@ -418,204 +419,5 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
     } else {
       this.flyControls.lock();
     }
-  };
-
-  // XR Management
-  protected startGrab = (controller: THREE.Group) => {
-    controller.attach(this.volume);
-    this.volume.userData.selections =
-      (this.volume.userData.selections || 0) + 1;
-    controller.userData.selected = this.volume;
-  };
-  protected endGrab = (controller: THREE.Group) => {
-    if (controller.userData.selected !== undefined) {
-      const object = controller.userData.selected;
-      object.userData.selections = (this.volume.userData.selections || 1) - 1;
-      controller.userData.selected = undefined;
-      if (!object.userData.selections) {
-        this.scene.attach(object);
-      }
-    }
-  };
-
-  protected animateXR() {
-    const session = this.renderer.xr.getSession();
-    if (!session) return;
-
-    const transferFunction = this.editor.activeDocument?.viewport3D
-      .activeTransferFunction;
-    session.inputSources.forEach((source, index) => {
-      const controller = this.renderer.xr.getController(index);
-
-      // Grabbing
-      if (controller.userData.selected) {
-        if (
-          source.gamepad.buttons[1].value < controller.userData.lastSqueezeValue
-        ) {
-          this.endGrab(controller);
-        }
-      } else if (
-        source.gamepad.buttons[1].value > controller.userData.lastSqueezeValue
-      ) {
-        this.startGrab(controller);
-      }
-      controller.userData.lastSqueezeValue = source.gamepad.buttons[1].value;
-
-      const stickThreshold = 0.01;
-      const maxSliderSpeed = 0.01;
-      switch (source.handedness) {
-        case "left":
-          // Axes (Thumb Stick)
-          // 2: Left to right
-          // 3: Top to bottom
-
-          if (
-            transferFunction?.name === "density" ||
-            transferFunction?.name === "fc-edges"
-          ) {
-            if (Math.abs(source.gamepad.axes[2]) > stickThreshold) {
-              const [low, high] = transferFunction.params.densityRange
-                .value as [number, number];
-              transferFunction.params.densityRange.setValue([
-                Math.min(
-                  Math.max(0, low + maxSliderSpeed * source.gamepad.axes[2]),
-                  high,
-                ),
-                high,
-              ]);
-            }
-          }
-
-          // Buttons
-          // 0: Trigger
-          // 1: Squeeze
-          // 3: Gamepad
-          // 4: X
-          // 5: Y
-
-          if (
-            source.gamepad.buttons[4].pressed &&
-            !controller.userData.isXPressed
-          ) {
-            this.editor.activeDocument?.viewport3D.cycleActiveTransferFunction();
-          }
-          controller.userData.isXPressed = source.gamepad.buttons[4].pressed;
-
-          if (
-            source.gamepad.buttons[5].pressed &&
-            !controller.userData.isYPressed
-          ) {
-            this.editor.activeDocument?.viewport3D.cycleShadingMode();
-          }
-          controller.userData.isYPressed = source.gamepad.buttons[5].pressed;
-
-          break;
-        case "right":
-          // Axes (Thumb Stick)
-          // 2: Left to right
-          // 3: Top to bottom
-
-          if (
-            transferFunction?.name === "density" ||
-            transferFunction?.name === "fc-edges"
-          ) {
-            if (Math.abs(source.gamepad.axes[2]) > stickThreshold) {
-              const [low, high] = transferFunction.params.densityRange
-                .value as [number, number];
-              transferFunction.params.densityRange.setValue([
-                low,
-                Math.min(
-                  Math.max(low, high + maxSliderSpeed * source.gamepad.axes[2]),
-                  1,
-                ),
-              ]);
-            }
-          }
-
-          // Buttons
-          // 0: Trigger
-          // 1: Squeeze
-          // 3: Gamepad
-          // 4: A
-          // 5: B
-          break;
-      }
-    });
-  }
-
-  protected setupXRController(
-    id: number,
-    controllerModelFactory = new XRControllerModelFactory(),
-  ) {
-    if (!this.xrWorld) return;
-
-    const controllerGrip = this.renderer.xr.getControllerGrip(id);
-    const model = controllerModelFactory.createControllerModel(controllerGrip);
-    controllerGrip.add(model);
-    this.xrWorld.add(controllerGrip);
-
-    const controller = this.renderer.xr.getController(id);
-    this.xrWorld.add(controller);
-  }
-  protected setupXRWorld(): void {
-    if (this.xrWorld) return;
-    this.xrWorld = new THREE.Group();
-
-    // Controllers
-    const controllerModelFactory = new XRControllerModelFactory();
-    this.setupXRController(0, controllerModelFactory);
-    this.setupXRController(1, controllerModelFactory);
-
-    // Floor
-    this.xrWorld.add(new THREE.GridHelper(5, 10, 0x404040, 0x404040));
-
-    // Mount to Scene
-    this.scene.add(this.xrWorld);
-  }
-
-  protected destroyXRWorld(): void {
-    if (!this.xrWorld) return;
-    this.scene.remove(this.xrWorld);
-    this.xrWorld = undefined;
-  }
-
-  public isInXR() {
-    return this.renderer.xr.isPresenting;
-  }
-
-  protected onXRSessionEnded = () => {
-    this.editor.activeDocument?.viewport3D.setIsInXR(false);
-    this.renderer.xr.removeEventListener("sessionend", this.onXRSessionEnded);
-    this.destroyXRWorld();
-    this.resize();
-    this.resetScene(true);
-  };
-  protected onXRSessionStarted = (session: THREE.XRSession) => {
-    this.editor.activeDocument?.viewport3D.setIsInXR(true);
-    this.renderer.xr.setSession(session);
-    this.renderer.xr.addEventListener("sessionend", this.onXRSessionEnded);
-    this.setupXRWorld();
-  };
-
-  public enterXR = async () => {
-    if (this.isInXR()) return;
-
-    this.editor.activeDocument?.viewport3D.transferFunctions[
-      "fc-cone"
-    ].params.isConeLocked.setValue(true);
-
-    const sessionInit = { optionalFeatures: ["local-floor"] };
-    const session = await (navigator as THREE.Navigator).xr?.requestSession(
-      "immersive-vr",
-      sessionInit,
-    );
-    if (!session) return;
-    this.onXRSessionStarted(session);
-  };
-
-  public exitXR = async () => {
-    const session = this.renderer.xr.getSession();
-    if (!session) return;
-    return session.end();
   };
 }
