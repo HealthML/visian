@@ -159,6 +159,6 @@ export class RootStore implements ISerializable<RootSnapshot> {
     await this.config.storageBackend?.clear();
 
     this.setIsDirty(false);
-    window.location.reload();
+    window.location.href = window.location.pathname;
   };
 }
