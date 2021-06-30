@@ -431,25 +431,57 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
     const session = this.renderer.xr.getSession();
     if (!session) return;
 
+    const transferFunction = this.editor.activeDocument?.viewport3D
+      .activeTransferFunction;
     session.inputSources.forEach((source, index) => {
       const controller = this.renderer.xr.getController(index);
 
       // Grabbing
       if (controller.userData.selected) {
-        if (source.gamepad.buttons[1].value < 0.99) {
+        if (
+          source.gamepad.buttons[1].value < controller.userData.lastSqueezeValue
+        ) {
           this.endGrab(controller);
         }
-      } else if (source.gamepad.buttons[1].value > 0.01) {
+      } else if (
+        source.gamepad.buttons[1].value > controller.userData.lastSqueezeValue
+      ) {
         this.startGrab(controller);
       }
+      controller.userData.lastSqueezeValue = source.gamepad.buttons[1].value;
 
+      const stickThreshold = 0.01;
+      const maxSliderSpeed = 0.01;
       switch (source.handedness) {
         case "left":
+          // Axes (Thumb Stick)
+          // 2: Left to right
+          // 3: Top to bottom
+
+          if (
+            transferFunction?.name === "density" ||
+            transferFunction?.name === "fc-edges"
+          ) {
+            if (Math.abs(source.gamepad.axes[2]) > stickThreshold) {
+              const [low, high] = transferFunction.params.densityRange
+                .value as [number, number];
+              transferFunction.params.densityRange.setValue([
+                Math.min(
+                  Math.max(0, low + maxSliderSpeed * source.gamepad.axes[2]),
+                  high,
+                ),
+                high,
+              ]);
+            }
+          }
+
+          // Buttons
           // 0: Trigger
           // 1: Squeeze
           // 3: Gamepad
           // 4: X
           // 5: Y
+
           if (
             source.gamepad.buttons[4].pressed &&
             !controller.userData.isXPressed
@@ -468,6 +500,28 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
 
           break;
         case "right":
+          // Axes (Thumb Stick)
+          // 2: Left to right
+          // 3: Top to bottom
+
+          if (
+            transferFunction?.name === "density" ||
+            transferFunction?.name === "fc-edges"
+          ) {
+            if (Math.abs(source.gamepad.axes[2]) > stickThreshold) {
+              const [low, high] = transferFunction.params.densityRange
+                .value as [number, number];
+              transferFunction.params.densityRange.setValue([
+                low,
+                Math.min(
+                  Math.max(low, high + maxSliderSpeed * source.gamepad.axes[2]),
+                  1,
+                ),
+              ]);
+            }
+          }
+
+          // Buttons
           // 0: Trigger
           // 1: Squeeze
           // 3: Gamepad
