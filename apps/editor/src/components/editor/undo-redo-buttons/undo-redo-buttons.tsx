@@ -31,7 +31,7 @@ export const UndoRedoButtons = observer(() => {
     };
   }, [store, wrapperRef]);
 
-  return (
+  return store?.editor.activeDocument?.viewport3D.isInXR ? null : (
     <Container>
       <Wrapper ref={wrapperRef}>
         <StyledButton

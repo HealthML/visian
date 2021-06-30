@@ -23,6 +23,7 @@ export class VolumeMaterial
         uOutputFirstDerivative: { value: null },
         uLAO: { value: null },
       },
+      transparent: true,
     });
 
     // Always render the back faces.

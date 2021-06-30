@@ -29,9 +29,7 @@ export class Volume extends THREE.Mesh implements IDisposable {
       ),
     );
 
-    // The coordinate system in medical images usually has the object
-    // laying on the side. We want it to be upright.
-    this.rotateX(-Math.PI / 2);
+    this.resetRotation();
 
     this.disposers.push(
       autorun(() => {
@@ -55,6 +53,12 @@ export class Volume extends THREE.Mesh implements IDisposable {
         this.scale.set(scale.x, scale.y, scale.z);
       }),
     );
+  }
+
+  public resetRotation() {
+    // The coordinate system in medical images usually has the object
+    // laying on the side. We want it to be upright.
+    this.rotation.set(-Math.PI / 2, 0, 0);
   }
 
   public dispose() {

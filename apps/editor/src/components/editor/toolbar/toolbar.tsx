@@ -21,7 +21,7 @@ const StyledToolbar = styled(GenericToolbar)`
   margin-bottom: 16px;
 `;
 
-const BrushModal = styled(Modal)`
+const ToolSettingsModal = styled(Modal)`
   padding-bottom: 0px;
 `;
 
@@ -122,7 +122,7 @@ export const Toolbar: React.FC = observer(() => {
             />
           ),
       )}
-      <BrushModal
+      <ToolSettingsModal
         isOpen={Boolean(
           isModalOpen &&
             activeTool &&
@@ -186,7 +186,7 @@ export const Toolbar: React.FC = observer(() => {
           Object.values(activeTool.params).map((param) => (
             <Param parameter={param} key={param.name} />
           ))}
-      </BrushModal>
+      </ToolSettingsModal>
     </StyledToolbar>
   );
 });

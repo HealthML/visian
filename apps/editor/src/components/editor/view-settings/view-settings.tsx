@@ -11,7 +11,13 @@ import {
 } from "@visian/ui-shared";
 import { ViewType } from "@visian/utils";
 import { observer } from "mobx-react-lite";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
 import { useStore } from "../../../app/root-store";
 
@@ -66,17 +72,35 @@ export const ViewSettings: React.FC = observer(() => {
   );
 
   const setViewType = useCallback(
-    (viewType: ViewType | "3D") => {
-      if (viewType === "3D") {
-        store?.editor.activeDocument?.viewSettings.setViewMode("3D");
+    async (viewType: ViewType | "3D" | "XR") => {
+      if (viewType === "XR") {
+        store?.editor.activeDocument?.viewport3D.enterXR();
       } else {
-        store?.editor.activeDocument?.viewSettings.setViewMode("2D");
-        store?.editor.activeDocument?.viewport2D.setMainViewType(viewType);
+        if (store?.editor.activeDocument?.viewport3D.isInXR) {
+          await store?.editor.activeDocument?.viewport3D.exitXR();
+        }
+        if (viewType === "3D") {
+          store?.editor.activeDocument?.viewSettings.setViewMode("3D");
+        } else {
+          store?.editor.activeDocument?.viewSettings.setViewMode("2D");
+          store?.editor.activeDocument?.viewport2D.setMainViewType(viewType);
+        }
       }
     },
     [store],
   );
 
+  const isXRAvailable = store?.editor.activeDocument?.viewport3D.isXRAvailable;
+  const enrichedMainViewTypeSwitchOptions = useMemo(
+    () =>
+      isXRAvailable
+        ? [
+            ...mainViewTypeSwitchOptions,
+            { label: "XR", value: "XR", tooltipTx: "xr-view-tooltip" },
+          ]
+        : mainViewTypeSwitchOptions,
+    [isXRAvailable],
+  );
   return (
     <>
       <FloatingUIButton
@@ -100,9 +124,11 @@ export const ViewSettings: React.FC = observer(() => {
             <EnumParam
               labelTx="main-view-type"
               selector="switch"
-              options={mainViewTypeSwitchOptions}
+              options={enrichedMainViewTypeSwitchOptions}
               value={
-                store?.editor.activeDocument?.viewSettings.viewMode === "3D"
+                store?.editor.activeDocument?.viewport3D.isInXR
+                  ? "XR"
+                  : store?.editor.activeDocument?.viewSettings.viewMode === "3D"
                   ? "3D"
                   : store?.editor.activeDocument?.viewport2D.mainViewType
               }
