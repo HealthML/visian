@@ -30,6 +30,7 @@ export const setupRootStore = async () => {
       await store.editor.activeDocument?.importImage(
         await readFileFromURL(loadScanParam, true),
       );
+      window.history.replaceState({}, document.title, window.location.pathname);
     }
   } catch {
     store.setError({
