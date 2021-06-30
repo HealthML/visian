@@ -186,7 +186,8 @@ export class Viewport3D
     this.setActiveTransferFunction(
       transferFunctionNames[
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        transferFunctionNames.indexOf(this.activeTransferFunctionName!) + 1
+        (transferFunctionNames.indexOf(this.activeTransferFunctionName!) + 1) %
+          transferFunctionNames.length
       ],
     );
   }
