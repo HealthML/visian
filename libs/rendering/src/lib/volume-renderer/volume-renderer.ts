@@ -278,6 +278,7 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
     }
 
     if (this.renderer.xr.isPresenting) {
+      this.animateXR();
       this.eagerRender();
       // TODO: Render spectator view
       return;
@@ -409,16 +410,13 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
   };
 
   // XR Management
-  protected startSelection = (event: THREE.Event) => {
-    const controller = event.target;
+  protected startGrab = (controller: THREE.Group) => {
     controller.attach(this.volume);
     this.volume.userData.selections =
       (this.volume.userData.selections || 0) + 1;
     controller.userData.selected = this.volume;
   };
-  protected endSelection = (event: THREE.Event) => {
-    const controller = event.target;
-
+  protected endGrab = (controller: THREE.Group) => {
     if (controller.userData.selected !== undefined) {
       const object = controller.userData.selected;
       object.userData.selections = (this.volume.userData.selections || 1) - 1;
@@ -428,6 +426,57 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
       }
     }
   };
+
+  protected animateXR() {
+    const session = this.renderer.xr.getSession();
+    if (!session) return;
+
+    session.inputSources.forEach((source, index) => {
+      const controller = this.renderer.xr.getController(index);
+
+      // Grabbing
+      if (controller.userData.selected) {
+        if (source.gamepad.buttons[1].value < 0.99) {
+          this.endGrab(controller);
+        }
+      } else if (source.gamepad.buttons[1].value > 0.01) {
+        this.startGrab(controller);
+      }
+
+      switch (source.handedness) {
+        case "left":
+          // 0: Trigger
+          // 1: Squeeze
+          // 3: Gamepad
+          // 4: X
+          // 5: Y
+          if (
+            source.gamepad.buttons[4].pressed &&
+            !controller.userData.isXPressed
+          ) {
+            this.editor.activeDocument?.viewport3D.cycleActiveTransferFunction();
+          }
+          controller.userData.isXPressed = source.gamepad.buttons[4].pressed;
+
+          if (
+            source.gamepad.buttons[5].pressed &&
+            !controller.userData.isYPressed
+          ) {
+            this.editor.activeDocument?.viewport3D.cycleShadingMode();
+          }
+          controller.userData.isYPressed = source.gamepad.buttons[5].pressed;
+
+          break;
+        case "right":
+          // 0: Trigger
+          // 1: Squeeze
+          // 3: Gamepad
+          // 4: A
+          // 5: B
+          break;
+      }
+    });
+  }
 
   protected setupXRController(
     id: number,
@@ -441,8 +490,6 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
     this.xrGeometry.add(controllerGrip);
 
     const controller = this.renderer.xr.getController(id);
-    controller.addEventListener("selectstart", this.startSelection);
-    controller.addEventListener("selectend", this.endSelection);
     this.xrGeometry.add(controller);
   }
   protected setupXRWorld(): void {

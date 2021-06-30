@@ -155,7 +155,9 @@ export interface IViewport3D<N extends string> {
   setVolumeSpaceCameraPosition(x: number, y: number, z: number): void;
   setOpacity(value?: number): void;
   setShadingMode(value?: ShadingMode): void;
+  cycleShadingMode(): void;
   setActiveTransferFunction(
     nameOrTransferFunction?: N | ITransferFunction<N>,
   ): void;
+  cycleActiveTransferFunction(): void;
 }

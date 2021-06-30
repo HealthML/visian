@@ -182,6 +182,18 @@ export class Viewport3D
     this.activeTransferFunction?.activate();
   };
 
+  public cycleActiveTransferFunction(): void {
+    const transferFunctionNames = Object.keys(
+      this.transferFunctions,
+    ) as TransferFunctionName[];
+    this.setActiveTransferFunction(
+      transferFunctionNames[
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        transferFunctionNames.indexOf(this.activeTransferFunctionName!) + 1
+      ],
+    );
+  }
+
   public setOpacity(value = 1) {
     this.onTransferFunctionChange();
 
@@ -191,6 +203,19 @@ export class Viewport3D
   public setShadingMode = (value: ShadingMode = "lao") => {
     this.shadingMode = value;
   };
+
+  public cycleShadingMode(): void {
+    switch (this.shadingMode) {
+      case "none":
+        this.setShadingMode("phong");
+        break;
+      case "phong":
+        this.setShadingMode("lao");
+        break;
+      case "lao":
+        this.setShadingMode("none");
+    }
+  }
 
   protected setSuppressedShadingMode(value?: ShadingMode) {
     this.suppressedShadingMode = value;
