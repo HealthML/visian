@@ -110,8 +110,7 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
       this.gradientComputer.getOutputDerivative(),
       this.laoComputer.output,
     );
-    // Position the volume in a reasonable height for XR.
-    this.volume.position.set(0, 1.2, 0);
+
     this.scene.add(this.volume);
     this.scene.add(new THREE.AmbientLight(0xffffff));
     this.volume.onBeforeRender = (_renderer, _scene, camera) => {
@@ -119,6 +118,7 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
         this.updateCameraPosition(camera);
       }
     };
+    this.resetScene();
 
     this.intermediateRenderTarget = new THREE.WebGLRenderTarget(1, 1);
     // this.intermediateRenderTarget.texture.magFilter = THREE.NearestFilter;
@@ -249,6 +249,17 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
     this.sharedUniforms.dispose();
     this.disposers.forEach((disposer) => disposer());
   };
+
+  public resetScene(hardReset = false) {
+    // Position the volume in a reasonable height for XR.
+    this.volume.resetRotation();
+    this.volume.position.set(0, 1.2, 0);
+
+    if (hardReset) {
+      this.editor.activeDocument?.viewport3D.setCameraMatrix();
+      this.editor.activeDocument?.viewport3D.setOrbitTarget();
+    }
+  }
 
   private resize = () => {
     const aspect = window.innerWidth / window.innerHeight;
@@ -577,6 +588,7 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
     this.renderer.xr.removeEventListener("sessionend", this.onXRSessionEnded);
     this.destroyXRWorld();
     this.resize();
+    this.resetScene(true);
   };
   protected onXRSessionStarted = (session: THREE.XRSession) => {
     this.editor.activeDocument?.viewport3D.setIsInXR(true);
