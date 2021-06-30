@@ -420,9 +420,9 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
     if (controller.userData.selected !== undefined) {
       const object = controller.userData.selected;
       object.userData.selections = (this.volume.userData.selections || 1) - 1;
+      controller.userData.selected = undefined;
       if (!object.userData.selections) {
         this.scene.attach(object);
-        controller.userData.selected = undefined;
       }
     }
   };
