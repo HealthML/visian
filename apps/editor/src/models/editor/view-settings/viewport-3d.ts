@@ -258,7 +258,6 @@ export class Viewport3D
   }
 
   public enterXR = () => {
-    // TODO: When entering XR from a 2D view, nothing is shown
     this.document.viewSettings.setViewMode("3D");
     this.document.volumeRenderer?.enterXR();
   };
