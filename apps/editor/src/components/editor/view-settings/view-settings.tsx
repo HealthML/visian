@@ -96,7 +96,7 @@ export const ViewSettings: React.FC = observer(() => {
       isXRAvailable
         ? [
             ...mainViewTypeSwitchOptions,
-            { label: "XR", value: "XR", tooltipTx: "xr-tooltip" },
+            { label: "XR", value: "XR", tooltipTx: "xr-view-tooltip" },
           ]
         : mainViewTypeSwitchOptions,
     [isXRAvailable],

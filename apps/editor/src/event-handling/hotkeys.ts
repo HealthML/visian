@@ -99,22 +99,42 @@ export const setUpHotKeys = (store: RootStore): IDisposer => {
   });
 
   // View Types
+  const handleXR = async (enterXR = false) => {
+    if (enterXR) {
+      store.editor.activeDocument?.viewport3D.enterXR();
+    } else if (store.editor.activeDocument?.viewport3D.isInXR) {
+      await store?.editor.activeDocument?.viewport3D.exitXR();
+    }
+  };
   hotkeys("1", () => {
-    store.editor.activeDocument?.viewport2D.setMainViewType(
-      ViewType.Transverse,
-    );
-    store.editor.activeDocument?.viewSettings.setViewMode("2D");
+    handleXR().then(() => {
+      store.editor.activeDocument?.viewport2D.setMainViewType(
+        ViewType.Transverse,
+      );
+      store.editor.activeDocument?.viewSettings.setViewMode("2D");
+    });
   });
   hotkeys("2", () => {
-    store.editor.activeDocument?.viewport2D.setMainViewType(ViewType.Sagittal);
-    store.editor.activeDocument?.viewSettings.setViewMode("2D");
+    handleXR().then(() => {
+      store.editor.activeDocument?.viewport2D.setMainViewType(
+        ViewType.Sagittal,
+      );
+      store.editor.activeDocument?.viewSettings.setViewMode("2D");
+    });
   });
   hotkeys("3", () => {
-    store.editor.activeDocument?.viewport2D.setMainViewType(ViewType.Coronal);
-    store.editor.activeDocument?.viewSettings.setViewMode("2D");
+    handleXR().then(() => {
+      store.editor.activeDocument?.viewport2D.setMainViewType(ViewType.Coronal);
+      store.editor.activeDocument?.viewSettings.setViewMode("2D");
+    });
   });
   hotkeys("4", () => {
-    store.editor.activeDocument?.viewSettings.setViewMode("3D");
+    handleXR().then(() => {
+      store.editor.activeDocument?.viewSettings.setViewMode("3D");
+    });
+  });
+  hotkeys("5", () => {
+    handleXR(true);
   });
   hotkeys("0", () => {
     store.editor.activeDocument?.viewport2D.toggleSideViews();
