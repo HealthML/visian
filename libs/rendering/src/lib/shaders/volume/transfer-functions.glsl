@@ -8,6 +8,13 @@ float sdCone(vec3 p, float angle) {
     return d * ((q.x*c.y-q.y*c.x<0.0)?-1.0:1.0);
 }
 
+/**
+ * Taken from https://www.iquilezles.org/www/articles/distfunctions/distfunctions.htm
+ */
+float sdPlane(vec3 p, vec3 n, float h) {
+  return dot(p, n) + h;
+}
+
 vec3 transformToCutawaySpace(vec3 volumeCoords) {
   // The cutaway origin should be at the center of the volume.
   // Thus, we subtract vec3(0.5).
@@ -15,7 +22,7 @@ vec3 transformToCutawaySpace(vec3 volumeCoords) {
 }
 
 /** The transfer function. */
-vec4 transferFunction(VolumeData data, vec3 volumeCoords) {
+vec4 baseTransferFunction(VolumeData data, vec3 volumeCoords) {
   // F+C Edges
   if (uTransferFunction == 1) {
     vec4 edgeColor = vec4(uContextColor, mix(0.0, 0.015, step(uLimitLow, length(data.firstDerivative)) * (1.0 - step(uLimitHigh, length(data.firstDerivative)))) * uContextOpacity);
@@ -48,4 +55,12 @@ vec4 transferFunction(VolumeData data, vec3 volumeCoords) {
   return uUseFocus ?
       densityColor * data.focus
     : densityColor;
+}
+
+vec4 transferFunction(VolumeData data, vec3 volumeCoords) {
+  vec4 baseTransferedColor = baseTransferFunction(data, volumeCoords);
+  if(!uUsePlane) return baseTransferedColor;
+
+  float planeFactor = step(0.0, sdPlane(volumeCoords - vec3(0.5), uPlaneNormal, uPlaneDistance));
+  return baseTransferedColor * planeFactor;
 }

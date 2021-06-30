@@ -10,7 +10,32 @@ import type { RootStore } from "../models";
 export const setUpWheelHandling = (store: RootStore): IDisposer => {
   const wheelHandler = (event: WheelEvent) => {
     event.preventDefault();
-    if (!(store.editor.sliceRenderer && store.editor.activeDocument)) {
+    if (
+      !(
+        store.editor.sliceRenderer &&
+        store.editor.volumeRenderer &&
+        store.editor.activeDocument
+      )
+    ) {
+      return;
+    }
+
+    if (store.editor.activeDocument?.viewSettings.viewMode === "3D") {
+      if (
+        store.editor.activeDocument?.tools.activeTool?.name === "plane-tool"
+      ) {
+        const interactionType = getWheelInteractionType(event);
+        switch (interactionType) {
+          case WheelInteractionType.Up:
+            store.editor.activeDocument.viewport3D.decreaseCuttingPlaneDistance();
+            break;
+
+          case WheelInteractionType.Down:
+            store.editor.activeDocument.viewport3D.increaseCuttingPlaneDistance();
+            break;
+        }
+      }
+
       return;
     }
 

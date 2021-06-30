@@ -219,6 +219,24 @@ export class SharedUniforms implements IDisposable {
 
         editor.activeDocument?.volumeRenderer?.lazyRender(true);
       }),
+      autorun(() => {
+        this.uniforms.uUsePlane.value = Boolean(
+          editor.activeDocument?.viewport3D.useCuttingPlane,
+        );
+
+        editor.activeDocument?.volumeRenderer?.lazyRender(true);
+      }),
+      autorun(() => {
+        this.uniforms.uPlaneNormal.value = editor.activeDocument?.viewport3D.cuttingPlaneNormal.toArray();
+
+        editor.activeDocument?.volumeRenderer?.lazyRender(true);
+      }),
+      autorun(() => {
+        this.uniforms.uPlaneDistance.value =
+          editor.activeDocument?.viewport3D.cuttingPlaneDistance;
+
+        editor.activeDocument?.volumeRenderer?.lazyRender(true);
+      }),
       reaction(
         () => {
           const imageId =

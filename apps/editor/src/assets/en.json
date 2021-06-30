@@ -32,6 +32,7 @@
   "outline-tool": "Outline Tool (O)",
   "clear-slice": "Clear Slice (Del)",
   "fly-tool": "Fly Controls (F)",
+  "plane-tool": "Plane Tool (P)",
 
   "brush-settings": "Brush Settings",
   "smart-brush-settings": "Smart Brush Settings",
@@ -39,6 +40,7 @@
   "adaptive-brush-size": "Adaptive Brush Size",
   "threshold": "Threshold",
   "box-radius": "Bounding Box Radius",
+  "enable-plane": "Use Cutting Plane",
 
   "layers": "Layers",
   "add-annotation-layer": "Add new annotation",

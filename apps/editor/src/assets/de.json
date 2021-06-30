@@ -32,6 +32,7 @@
   "outline-tool": "Umrandungswerkzeug (O)",
   "clear-slice": "Schicht leeren (Entf)",
   "fly-tool": "Flugsteuerung (F)",
+  "plane-tool": "Ebenenwerkzeug (P)",
 
   "brush-settings": "Pinseleinstellungen",
   "smart-brush-settings": "Smarter Pinseleinstellungen",
@@ -39,6 +40,7 @@
   "adaptive-brush-size": "Adaptive Pinselgröße",
   "threshold": "Schwellwert",
   "box-radius": "Begrenzungsradius",
+  "enable-plane": "Schnittebene nutzen",
 
   "layers": "Ebenen",
   "add-annotation-layer": "Neue Annotation hinzufügen",

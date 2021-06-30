@@ -147,6 +147,10 @@ export interface IViewport3D<N extends string> {
   activeTransferFunction?: Reference<ITransferFunction<N>>;
   transferFunctions: Record<N, ITransferFunction<N>>;
 
+  useCuttingPlane: boolean;
+  cuttingPlaneNormal: Vector;
+  cuttingPlaneDistance: number;
+
   onTransferFunctionChange: () => void;
 
   setIsInXR(value?: boolean): void;
@@ -160,4 +164,10 @@ export interface IViewport3D<N extends string> {
     nameOrTransferFunction?: N | ITransferFunction<N>,
   ): void;
   cycleActiveTransferFunction(): void;
+  setUseCuttingPlane(value?: boolean): void;
+  setCuttingPlaneNormal(x?: number, y?: number, z?: number): void;
+  setCuttingPlaneDistance(value?: number): void;
+  increaseCuttingPlaneDistance(): void;
+  decreaseCuttingPlaneDistance(): void;
+  resetCuttingPlane(): void;
 }
