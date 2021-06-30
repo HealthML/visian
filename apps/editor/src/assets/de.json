@@ -47,7 +47,7 @@
   "layer-settings": "Ebeneneinstellungen",
   "opacity": "Deckkraft",
   "background-color": "Hintergrundfarbe",
-  "deleted-layer": "Ebene löschen",
+  "delete-layer": "Ebene löschen",
   "delete-layer-confirmation": "Ebene \"{{layer}}\" löschen?",
 
   "view-settings": "Ansichtseinstellungen",
