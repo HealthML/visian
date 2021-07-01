@@ -4,8 +4,7 @@ import { reaction } from "mobx";
 import * as THREE from "three";
 
 export class CuttingPlane extends THREE.Mesh implements IDisposable {
-  private workingPlane = new THREE.Plane();
-  private workingVector = new THREE.Vector3();
+  private plane = new THREE.Plane();
   private workingQuaternion = new THREE.Quaternion();
 
   private defaultNormal = new THREE.Vector3(0, 0, -1);
@@ -23,6 +22,10 @@ export class CuttingPlane extends THREE.Mesh implements IDisposable {
         () => editor.activeDocument?.viewport3D.cuttingPlaneNormal.toArray(),
         this.setNormal,
       ),
+      reaction(
+        () => editor.activeDocument?.viewport3D.cuttingPlaneDistance,
+        this.setDisatance,
+      ),
     );
   }
 
@@ -33,11 +36,24 @@ export class CuttingPlane extends THREE.Mesh implements IDisposable {
 
   private setNormal = (normal?: number[]) => {
     if (!normal) return;
-    this.workingVector.set(normal[0], normal[1], normal[2]).normalize();
+    this.plane.normal.set(normal[0], normal[1], normal[2]).normalize();
     this.workingQuaternion.setFromUnitVectors(
       this.defaultNormal,
-      this.workingVector,
+      this.plane.normal,
     );
     this.setRotationFromQuaternion(this.workingQuaternion);
+
+    this.updatePosition();
   };
+
+  private setDisatance = (distance?: number) => {
+    if (distance === undefined) return;
+    this.plane.constant = distance;
+
+    this.updatePosition();
+  };
+
+  private updatePosition() {
+    this.position.copy(this.plane.normal).multiplyScalar(-this.plane.constant);
+  }
 }

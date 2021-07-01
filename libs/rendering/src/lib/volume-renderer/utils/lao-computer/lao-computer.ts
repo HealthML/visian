@@ -8,7 +8,7 @@ import { TiledRenderer } from "../tiled-renderer";
 import LAOMaterial from "./lao-material";
 
 // TODO: Tweak based on performance.
-export const totalLAORays = 32; // Set to 8 to turn progressive LAO off.
+export const totalLAORays = 8; // Set to 8 to turn progressive LAO off.
 // TODO: Tweak based on performance.
 export const quadSize = 1024;
 
