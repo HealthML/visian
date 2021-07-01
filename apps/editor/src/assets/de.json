@@ -47,6 +47,9 @@
   "layer-settings": "Ebeneneinstellungen",
   "opacity": "Deckkraft",
   "background-color": "Hintergrundfarbe",
+  "mark-annotation": "Zu Annotation",
+  "mark-not-annotation": "Zu nicht Annotation",
+  "export-layer": "Ebene exportieren",
   "delete-layer": "Ebene löschen",
   "delete-layer-confirmation": "Ebene \"{{layer}}\" löschen?",
 
@@ -61,8 +64,8 @@
   "contrast": "Kontrast",
   "brightness": "Helligkeit",
 
-  "export": "Export (Strg + E)",
-  "export-button": "Export",
+  "export": "Export",
+  "export-tooltip": "Export (Strg + E)",
 
   "import-error": "Importfehler",
   "annotation-mismatch-error": "Diese Annotation passt nicht auf den Scan.",

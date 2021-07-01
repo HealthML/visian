@@ -1,4 +1,6 @@
 import {
+  ContextMenu,
+  ContextMenuItem,
   FloatingUIButton,
   ILayer,
   List,
@@ -10,10 +12,11 @@ import {
   useDelay,
   useModalRoot,
   useShortTap,
+  useTranslation,
 } from "@visian/ui-shared";
+import { Pixel } from "@visian/utils";
 import { Observer, observer } from "mobx-react-lite";
 import React, { useCallback, useRef, useState } from "react";
-import ReactDOM from "react-dom";
 import {
   DragDropContext,
   Draggable,
@@ -23,9 +26,11 @@ import {
   Droppable,
   DroppableProvided,
 } from "react-beautiful-dnd";
+import ReactDOM from "react-dom";
 import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
+import { ImageLayer } from "../../../models";
 import { LayerSettings } from "../layer-settings";
 
 // Utilities
@@ -81,6 +86,36 @@ const LayerListItem = observer<{
     }, [layer, store?.editor.activeDocument]),
   );
 
+  // Context Menu
+  const [contextMenuPosition, setContextMenuPosition] = useState<Pixel | null>(
+    null,
+  );
+  const closeContextMenu = useCallback(() => {
+    setContextMenuPosition(null);
+  }, []);
+
+  const { t } = useTranslation();
+  const toggleAnnotation = useCallback(() => {
+    layer.setIsAnnotation(!layer.isAnnotation);
+    setContextMenuPosition(null);
+  }, [layer]);
+  const exportLayer = useCallback(() => {
+    if (layer.kind !== "image") return;
+    (layer as ImageLayer).quickExport().then(() => {
+      setContextMenuPosition(null);
+    });
+  }, [layer]);
+  const deleteLayer = useCallback(() => {
+    if (
+      // eslint-disable-next-line no-alert
+      window.confirm(t("delete-layer-confirmation", { layer: layer.title }))
+    ) {
+      layer.delete();
+    }
+    setContextMenuPosition(null);
+  }, [layer, t]);
+
+  // Press Handler
   const handlePointerDown = useCallback(
     (event: React.PointerEvent<HTMLDivElement>) => {
       if (
@@ -93,10 +128,10 @@ const LayerListItem = observer<{
       if (event.button === PointerButton.LMB) {
         startTap();
       } else if (event.button === PointerButton.RMB) {
-        layer.setIsAnnotation(!layer.isAnnotation);
+        setContextMenuPosition({ x: event.clientX, y: event.clientY });
       }
     },
-    [colorRef, layer, startTap],
+    [colorRef, startTap],
   );
 
   const handleContextMenu = (event: React.MouseEvent<HTMLDivElement>) => {
@@ -156,6 +191,24 @@ const LayerListItem = observer<{
         position="right"
         onOutsidePress={closeLayerSettings}
       />
+      <ContextMenu
+        parentElement={contextMenuPosition}
+        isOpen={Boolean(contextMenuPosition)}
+        onOutsidePress={closeContextMenu}
+      >
+        <ContextMenuItem
+          labelTx={
+            layer.isAnnotation ? "mark-not-annotation" : "mark-annotation"
+          }
+          onPointerDown={toggleAnnotation}
+        />
+        <ContextMenuItem labelTx="export-layer" onPointerDown={exportLayer} />
+        <ContextMenuItem
+          labelTx="delete-layer"
+          onPointerDown={deleteLayer}
+          isLast
+        />
+      </ContextMenu>
     </>
   );
 });

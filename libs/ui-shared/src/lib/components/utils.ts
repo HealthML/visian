@@ -1,3 +1,4 @@
+import { Pixel } from "@visian/utils";
 import React, {
   useCallback,
   useEffect,
@@ -183,7 +184,7 @@ export const useOutsidePress = <T extends HTMLElement>(
 
 export interface RelativePositionConfig<P = void> {
   /** The parent element. */
-  parentElement?: HTMLElement | SVGSVGElement | null;
+  parentElement?: HTMLElement | SVGSVGElement | Pixel | null;
 
   /**
    * If set to `true`, the position is actively updated.
@@ -244,7 +245,10 @@ export const useRelativePosition = <P = void>(
   useLayoutEffect(() => {
     if (!isActive) return;
 
-    const rect = parentElement?.getBoundingClientRect();
+    const rect: DOMRect | undefined =
+      !parentElement || (parentElement as Element).nodeName
+        ? (parentElement as Element).getBoundingClientRect()
+        : new DOMRect((parentElement as Pixel).x, (parentElement as Pixel).y);
     if (!rect) return;
 
     const offsetRect = positionRelativeToOffsetParent
