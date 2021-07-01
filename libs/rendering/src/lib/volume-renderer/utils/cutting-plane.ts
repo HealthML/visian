@@ -1,6 +1,6 @@
 import { IEditor } from "@visian/ui-shared";
 import { IDisposable, IDisposer } from "@visian/utils";
-import { reaction } from "mobx";
+import { autorun, reaction } from "mobx";
 import * as THREE from "three";
 import { CuttingPlaneMaterial } from "./cutting-plane-material";
 
@@ -32,6 +32,13 @@ export class CuttingPlane extends THREE.Mesh implements IDisposable {
         this.setDistance,
         { fireImmediately: true },
       ),
+      autorun(() => {
+        this.visible = Boolean(
+          editor.activeDocument?.viewport3D.shouldCuttingPlaneRender,
+        );
+
+        editor.volumeRenderer?.lazyRender();
+      }),
     );
   }
 

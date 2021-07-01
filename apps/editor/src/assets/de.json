@@ -41,6 +41,7 @@
   "threshold": "Schwellwert",
   "box-radius": "Begrenzungsradius",
   "enable-plane": "Schnittebene nutzen",
+  "render-plane": "Bild auf der Schnittebene anzeigen",
 
   "layers": "Ebenen",
   "add-annotation-layer": "Neue Annotation hinzufügen",

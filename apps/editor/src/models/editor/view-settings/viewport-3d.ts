@@ -63,6 +63,7 @@ export class Viewport3D
   public useCuttingPlane = false;
   public cuttingPlaneNormal = new Vector([0, 1, 0]);
   public cuttingPlaneDistance = 0;
+  public shouldCuttingPlaneRender = false;
 
   private shadingTimeout?: NodeJS.Timer;
 
@@ -89,6 +90,7 @@ export class Viewport3D
       useCuttingPlane: observable,
       cuttingPlaneNormal: observable,
       cuttingPlaneDistance: observable,
+      shouldCuttingPlaneRender: observable,
 
       activeTransferFunction: computed,
 
@@ -107,6 +109,7 @@ export class Viewport3D
       setCuttingPlaneDistance: action,
       increaseCuttingPlaneDistance: action,
       decreaseCuttingPlaneDistance: action,
+      setShouldCuttingPlaneRender: action,
       resetCuttingPlane: action,
       reset: action,
       applySnapshot: action,
@@ -288,8 +291,12 @@ export class Viewport3D
 
   // Cutting Plane
   public setUseCuttingPlane = (value = false) => {
-    this.useCuttingPlane = value;
-    this.onTransferFunctionChange();
+    if (value !== this.useCuttingPlane) {
+      this.useCuttingPlane = value;
+      this.onTransferFunctionChange();
+    }
+
+    if (!value) this.setShouldCuttingPlaneRender();
   };
 
   public setCuttingPlaneNormal(x = 0, y = 1, z = 0) {
@@ -308,10 +315,17 @@ export class Viewport3D
   public decreaseCuttingPlaneDistance() {
     this.setCuttingPlaneDistance(this.cuttingPlaneDistance - 0.02);
   }
+
+  public setShouldCuttingPlaneRender = (value = false) => {
+    this.shouldCuttingPlaneRender = value;
+    if (value) this.setUseCuttingPlane(true);
+  };
+
   public resetCuttingPlane = () => {
     this.setUseCuttingPlane();
     this.setCuttingPlaneNormal();
     this.setCuttingPlaneDistance();
+    this.setShouldCuttingPlaneRender();
   };
 
   public reset = (): void => {

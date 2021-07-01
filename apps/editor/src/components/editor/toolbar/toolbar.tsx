@@ -188,15 +188,28 @@ export const Toolbar: React.FC = observer(() => {
           />
         )}
         {activeTool?.name === "plane-tool" && (
-          <BooleanParam
-            labelTx="enable-plane"
-            value={Boolean(
-              store?.editor.activeDocument?.viewport3D.useCuttingPlane,
-            )}
-            setValue={
-              store?.editor.activeDocument?.viewport3D.setUseCuttingPlane
-            }
-          />
+          <>
+            <BooleanParam
+              labelTx="enable-plane"
+              value={Boolean(
+                store?.editor.activeDocument?.viewport3D.useCuttingPlane,
+              )}
+              setValue={
+                store?.editor.activeDocument?.viewport3D.setUseCuttingPlane
+              }
+            />
+            <BooleanParam
+              labelTx="render-plane"
+              value={Boolean(
+                store?.editor.activeDocument?.viewport3D
+                  .shouldCuttingPlaneRender,
+              )}
+              setValue={
+                store?.editor.activeDocument?.viewport3D
+                  .setShouldCuttingPlaneRender
+              }
+            />
+          </>
         )}
 
         {activeTool &&

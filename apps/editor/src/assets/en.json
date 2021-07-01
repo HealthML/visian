@@ -41,6 +41,7 @@
   "threshold": "Threshold",
   "box-radius": "Bounding Box Radius",
   "enable-plane": "Use Cutting Plane",
+  "render-plane": "Show Image on Cutting Plane",
 
   "layers": "Layers",
   "add-annotation-layer": "Add new annotation",
