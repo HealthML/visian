@@ -247,7 +247,7 @@ export const useRelativePosition = <P = void>(
 
     const rect: DOMRect | undefined =
       !parentElement || (parentElement as Element).nodeName
-        ? (parentElement as Element).getBoundingClientRect()
+        ? (parentElement as Element)?.getBoundingClientRect()
         : new DOMRect((parentElement as Pixel).x, (parentElement as Pixel).y);
     if (!rect) return;
 
