@@ -3,7 +3,7 @@ import { ContextMenuPositionConfig } from "./utils";
 
 export interface ContextMenuProps
   extends React.HTMLAttributes<HTMLDivElement>,
-    Pick<ContextMenuPositionConfig, "parentElement" | "distance"> {
+    Pick<ContextMenuPositionConfig, "anchor" | "distance"> {
   /** The z-index of the surface below. */
   baseZIndex?: number;
 

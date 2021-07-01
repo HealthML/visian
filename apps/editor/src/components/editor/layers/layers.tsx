@@ -187,12 +187,12 @@ const LayerListItem = observer<{
       <LayerSettings
         layer={layer}
         isOpen={areLayerSettingsOpen}
-        parentElement={colorRef}
+        anchor={colorRef}
         position="right"
         onOutsidePress={closeLayerSettings}
       />
       <ContextMenu
-        parentElement={contextMenuPosition}
+        anchor={contextMenuPosition}
         isOpen={Boolean(contextMenuPosition)}
         onOutsidePress={closeContextMenu}
       >
@@ -262,7 +262,7 @@ export const Layers: React.FC = observer(() => {
         isOpen={isModalOpen}
         hideHeaderDivider={activeLayerIndex === 0}
         labelTx="layers"
-        parentElement={buttonRef}
+        anchor={buttonRef}
         position="right"
         headerChildren={
           <ModalHeaderButton

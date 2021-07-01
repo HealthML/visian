@@ -76,7 +76,7 @@ export const DropDown: React.FC<DropDownProps> = ({
         <DropDownOptions
           activeIndex={activeIndex}
           options={options}
-          parentElement={parentRef}
+          anchor={parentRef}
           isOpen={showOptions}
           onChange={setValue}
           onDismiss={closeOptions}

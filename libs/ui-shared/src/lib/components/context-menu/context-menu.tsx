@@ -36,7 +36,7 @@ export const ContextMenuItem = styled(ListItem)`
 export const ContextMenu: React.FC<ContextMenuProps> = ({
   isOpen,
   children,
-  parentElement,
+  anchor,
   distance,
   style,
   value,
@@ -53,7 +53,7 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
   const modalRootRef = useModalRoot();
 
   const modalStyle = useContextMenuPosition({
-    parentElement,
+    anchor,
     isActive: isOpen,
     positionRelativeToOffsetParent: !modalRootRef.current,
     distance,
