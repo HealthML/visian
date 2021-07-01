@@ -17,6 +17,7 @@ export const List = styled.div`
 const ListItemContainer = styled.div`
   display: flex;
   flex-direction: column;
+  outline: none;
 `;
 
 const ListItemInner = styled.div<Pick<ListItemProps, "isActive">>`

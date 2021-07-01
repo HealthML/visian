@@ -16,7 +16,7 @@ import {
 } from "@visian/ui-shared";
 import { Pixel } from "@visian/utils";
 import { Observer, observer } from "mobx-react-lite";
-import React, { useCallback, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   DragDropContext,
   Draggable,
@@ -93,6 +93,9 @@ const LayerListItem = observer<{
   const closeContextMenu = useCallback(() => {
     setContextMenuPosition(null);
   }, []);
+  useEffect(() => {
+    setContextMenuPosition(null);
+  }, [store?.editor.activeDocument?.viewSettings.viewMode]);
 
   const { t } = useTranslation();
   const toggleAnnotation = useCallback(() => {
@@ -102,6 +105,12 @@ const LayerListItem = observer<{
   const exportLayer = useCallback(() => {
     if (layer.kind !== "image") return;
     (layer as ImageLayer).quickExport().then(() => {
+      setContextMenuPosition(null);
+    });
+  }, [layer]);
+  const exportLayerSlice = useCallback(() => {
+    if (layer.kind !== "image") return;
+    (layer as ImageLayer).quickExportSlice().then(() => {
       setContextMenuPosition(null);
     });
   }, [layer]);
@@ -203,6 +212,12 @@ const LayerListItem = observer<{
           onPointerDown={toggleAnnotation}
         />
         <ContextMenuItem labelTx="export-layer" onPointerDown={exportLayer} />
+        {store?.editor.activeDocument?.viewSettings.viewMode === "2D" && (
+          <ContextMenuItem
+            labelTx="export-slice"
+            onPointerDown={exportLayerSlice}
+          />
+        )}
         <ContextMenuItem
           labelTx="delete-layer"
           onPointerDown={deleteLayer}

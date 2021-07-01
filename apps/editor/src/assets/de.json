@@ -50,6 +50,7 @@
   "mark-annotation": "Zu Annotation",
   "mark-not-annotation": "Zu nicht Annotation",
   "export-layer": "Ebene exportieren",
+  "export-slice": "Aktuelle Schicht exportieren",
   "delete-layer": "Ebene löschen",
   "delete-layer-confirmation": "Ebene \"{{layer}}\" löschen?",
 
