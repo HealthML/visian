@@ -1,4 +1,5 @@
 export * from "./conversion";
+export * from "./cutting-plane-material";
 export * from "./cutting-plane";
 export * from "./fly-controls";
 export * from "./gradient-computer";
