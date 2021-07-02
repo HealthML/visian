@@ -154,8 +154,7 @@ export class Tools
       "plane-tool": new Tool(
         {
           name: "plane-tool",
-          // TODO: Add Icon
-          icon: "navigationTool",
+          icon: "planeTool",
           labelTx: "plane-tool",
           supportedViewModes: ["3D"],
         },
