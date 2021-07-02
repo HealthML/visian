@@ -9,13 +9,15 @@ import { Text } from "../text";
 import { ListItemProps } from "./list.props";
 
 export const List = styled.div`
-  min-width: 200px;
+  display: flex;
+  flex-direction: column;
   width: 100%;
 `;
 
 const ListItemContainer = styled.div`
   display: flex;
   flex-direction: column;
+  outline: none;
 `;
 
 const ListItemInner = styled.div<Pick<ListItemProps, "isActive">>`

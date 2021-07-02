@@ -93,7 +93,7 @@ export const Menu: React.FC<MenuProps> = observer(({ onOpenShortcutPopUp }) => {
       <Modal
         isOpen={isModalOpen}
         labelTx="menu"
-        parentElement={buttonRef}
+        anchor={buttonRef}
         position="right"
         baseZIndex={theme.zIndices.modal + 1}
         onOutsidePress={closeModal}

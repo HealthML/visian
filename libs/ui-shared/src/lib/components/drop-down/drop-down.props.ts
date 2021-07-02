@@ -13,7 +13,7 @@ export interface DropDownOptionsProps<T = any>
       React.HTMLAttributes<HTMLDivElement>,
       "defaultValue" | "onChange"
     >,
-    Pick<RelativePositionConfig, "parentElement"> {
+    Pick<RelativePositionConfig, "anchor"> {
   activeIndex?: number;
   options: IEnumParameterOption<T>[];
 

@@ -131,7 +131,7 @@ export const Toolbar: React.FC = observer(() => {
         labelTx={activeTool?.labelTx}
         label={activeTool?.label}
         value={activeTool?.name}
-        parentElement={buttonRef}
+        anchor={buttonRef}
         position="right"
         baseZIndex={modalZ}
         onOutsidePress={closeModal}

@@ -79,7 +79,7 @@ export const DropDownOptions: React.FC<DropDownOptionsProps> = ({
   activeIndex = 0,
   options,
   isOpen,
-  parentElement,
+  anchor,
   style,
   onChange,
   onDismiss,
@@ -91,7 +91,7 @@ export const DropDownOptions: React.FC<DropDownOptionsProps> = ({
   const modalRootRef = useModalRoot();
 
   const optionsStyle = useOptionsPosition({
-    parentElement,
+    anchor,
     isActive: isOpen,
     positionRelativeToOffsetParent: !modalRootRef.current,
     style,

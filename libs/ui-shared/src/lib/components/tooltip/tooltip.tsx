@@ -31,7 +31,7 @@ export const Tooltip: React.FC<TooltipProps> = ({
   data,
   text,
   isShown,
-  parentElement,
+  anchor,
   position,
   distance,
   style,
@@ -40,7 +40,7 @@ export const Tooltip: React.FC<TooltipProps> = ({
   const modalRootRef = useModalRoot();
 
   const tooltipStyle = useTooltipPosition({
-    parentElement,
+    anchor,
     isActive: isShown,
     positionRelativeToOffsetParent: !modalRootRef.current,
     position,
