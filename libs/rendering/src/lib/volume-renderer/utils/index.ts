@@ -1,3 +1,4 @@
+export * from "./bounding-box";
 export * from "./conversion";
 export * from "./cutting-plane-material";
 export * from "./cutting-plane";
