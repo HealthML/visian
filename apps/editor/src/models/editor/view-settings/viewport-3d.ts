@@ -35,6 +35,7 @@ export interface Viewport3DSnapshot<N extends string> {
   useCuttingPlane: boolean;
   cuttingPlaneNormal: number[];
   cuttingPlaneDistance: number;
+  shouldCuttingPlaneRender: boolean;
 }
 
 export class Viewport3D
@@ -355,6 +356,7 @@ export class Viewport3D
       useCuttingPlane: this.useCuttingPlane,
       cuttingPlaneNormal: this.cuttingPlaneNormal.toJSON(),
       cuttingPlaneDistance: this.cuttingPlaneDistance,
+      shouldCuttingPlaneRender: this.shouldCuttingPlaneRender,
     };
   }
 
@@ -396,6 +398,7 @@ export class Viewport3D
       this.setCuttingPlaneNormal();
     }
     this.setCuttingPlaneDistance(snapshot?.cuttingPlaneDistance);
+    this.setShouldCuttingPlaneRender(snapshot?.shouldCuttingPlaneRender);
 
     return Promise.resolve();
   }
