@@ -94,9 +94,10 @@ const LayerListItem = observer<{
         startTap();
       } else if (event.button === PointerButton.RMB) {
         layer.setIsAnnotation(!layer.isAnnotation);
+        store?.editor.activeDocument?.sortLayers();
       }
     },
-    [colorRef, layer, startTap],
+    [colorRef, layer, startTap, store?.editor.activeDocument],
   );
 
   const handleContextMenu = (event: React.MouseEvent<HTMLDivElement>) => {
