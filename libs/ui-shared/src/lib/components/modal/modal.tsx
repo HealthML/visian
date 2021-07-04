@@ -83,7 +83,7 @@ export const Modal: React.FC<ModalProps> = ({
   hideHeaderDivider,
   children,
   headerChildren,
-  parentElement,
+  anchor,
   position,
   distance,
   style,
@@ -104,7 +104,7 @@ export const Modal: React.FC<ModalProps> = ({
   const modalRootRef = useModalRoot();
 
   const modalStyle = useModalPosition({
-    parentElement,
+    anchor,
     isActive: isOpen,
     positionRelativeToOffsetParent: !modalRootRef.current,
     position,

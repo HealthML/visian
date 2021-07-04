@@ -9,16 +9,18 @@ import { reaction } from "mobx";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import Stats from "three/examples/jsm/libs/stats.module";
+
 import { ScreenAlignedQuad } from "../screen-aligned-quad";
 import {
-  LAOComputer,
   FlyControls,
   GradientComputer,
+  LAOComputer,
   ResolutionComputer,
   SharedUniforms,
 } from "./utils";
-import { VolumeMaterial } from "./volume-material";
 import { Volume } from "./volume";
+import { VolumeMaterial } from "./volume-material";
+import { XRManager } from "./xr-manager";
 
 export class VolumeRenderer implements IVolumeRenderer, IDisposable {
   private sharedUniforms: SharedUniforms;
@@ -26,11 +28,12 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
   public renderer: THREE.WebGLRenderer;
   public camera: THREE.PerspectiveCamera;
   public scene = new THREE.Scene();
+  public xr: XRManager;
 
   private intermediateRenderTarget: THREE.WebGLRenderTarget;
   private screenAlignedQuad: ScreenAlignedQuad;
 
-  private volume: Volume;
+  public volume: Volume;
 
   private orbitControls: OrbitControls;
   private flyControls: FlyControls;
@@ -107,14 +110,16 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
       this.gradientComputer.getOutputDerivative(),
       this.laoComputer.output,
     );
-    // Position the volume in a reasonable height for XR.
-    this.volume.position.set(0, 1.2, 0);
+
     this.scene.add(this.volume);
+    this.scene.add(new THREE.AmbientLight(0xffffff));
     this.volume.onBeforeRender = (_renderer, _scene, camera) => {
       if (this.renderer.xr.isPresenting) {
         this.updateCameraPosition(camera);
       }
     };
+    this.resetScene();
+    this.xr = new XRManager(this, editor);
 
     this.intermediateRenderTarget = new THREE.WebGLRenderTarget(1, 1);
     // this.intermediateRenderTarget.texture.magFilter = THREE.NearestFilter;
@@ -246,7 +251,18 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
     this.disposers.forEach((disposer) => disposer());
   };
 
-  private resize = () => {
+  public resetScene(hardReset = false) {
+    // Position the volume in a reasonable height for XR.
+    this.volume.resetRotation();
+    this.volume.position.set(0, 1.2, 0);
+
+    if (hardReset) {
+      this.editor.activeDocument?.viewport3D.setCameraMatrix();
+      this.editor.activeDocument?.viewport3D.setOrbitTarget();
+    }
+  }
+
+  public resize = () => {
     const aspect = window.innerWidth / window.innerHeight;
 
     this.resolutionComputer.setSize(window.innerWidth, window.innerHeight);
@@ -273,6 +289,13 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
       this.laoComputer.tick();
     }
 
+    if (this.renderer.xr.isPresenting) {
+      this.xr.animate();
+      this.eagerRender();
+      // TODO: Render spectator view
+      return;
+    }
+
     if (this.lazyRenderTriggered) {
       this.resolutionComputer.restart();
       this.lazyRenderTriggered = false;
@@ -280,10 +303,6 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
 
     if (!this.resolutionComputer.fullResolutionFlushed) {
       this.resolutionComputer.tick();
-    }
-
-    if (this.renderer.xr.isPresenting) {
-      this.eagerRender();
     }
 
     this.stats.update();
@@ -339,7 +358,7 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
     if (pushMatrix) {
       this.camera.updateMatrix();
       this.editor.activeDocument?.viewport3D.setCameraMatrix(
-        this.camera.matrix,
+        this.camera.matrix.clone(),
       );
     }
 
@@ -401,50 +420,4 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
       this.flyControls.lock();
     }
   };
-
-  // XR Management
-  public async isXRAvailable() {
-    if (!("xr" in navigator)) return false;
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    return (navigator as THREE.Navigator).xr!.isSessionSupported(
-      "immersive-vr",
-    );
-  }
-  public isInXR() {
-    return this.renderer.xr.isPresenting;
-  }
-
-  protected onXRSessionEnded = () => {
-    this.editor.activeDocument?.viewport3D.setIsInXR(false);
-    const session = this.renderer.xr.getSession();
-    if (!session) return;
-    session.removeEventListener("end", this.onXRSessionEnded);
-  };
-  protected onXRSessionStarted = (session: THREE.XRSession) => {
-    this.editor.activeDocument?.viewport3D.setIsInXR(true);
-    session.addEventListener("end", this.onXRSessionEnded);
-    return this.renderer.xr.setSession(session);
-  };
-
-  public async enterXR() {
-    if (this.renderer.xr.getSession()) return;
-
-    this.editor.activeDocument?.viewport3D.transferFunctions[
-      "fc-cone"
-    ].params.isConeLocked.setValue(true);
-
-    const sessionInit = { optionalFeatures: ["local-floor"] };
-    const session = await (navigator as THREE.Navigator).xr?.requestSession(
-      "immersive-vr",
-      sessionInit,
-    );
-    if (!session) return;
-    this.onXRSessionStarted(session);
-  }
-
-  public async exitXR() {
-    const session = this.renderer.xr.getSession();
-    if (!session) return;
-    return session.end();
-  }
 }

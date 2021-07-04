@@ -113,6 +113,9 @@ export class TiledRenderer implements IDisposable {
    * target and then copies it to the correct part of the output.
    */
   private render(target = this.target) {
+    const isXrEnabled = this.renderer.xr.enabled;
+    this.renderer.xr.enabled = false;
+
     const { camera, scene } = this.renderParams;
 
     if (this.grid.equals(this.workingVector.setScalar(1))) {
@@ -125,6 +128,7 @@ export class TiledRenderer implements IDisposable {
 
       if (this.onFrameFinished) this.onFrameFinished();
 
+      this.renderer.xr.enabled = isXrEnabled;
       return;
     }
 
@@ -157,6 +161,7 @@ export class TiledRenderer implements IDisposable {
 
     this.renderer.autoClear = true;
     this.renderer.setRenderTarget(null);
+    this.renderer.xr.enabled = isXrEnabled;
 
     this.quadId++;
     if (this.isFrameFinished && this.onFrameFinished) {

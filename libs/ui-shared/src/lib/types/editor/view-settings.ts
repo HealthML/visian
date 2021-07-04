@@ -30,6 +30,8 @@ export interface IViewSettings {
   /** The background color as as CSS color string. */
   backgroundColor: string;
 
+  setViewMode(value: ViewMode): void;
+
   setSelectedVoxel(x?: number, y?: number, z?: number): void;
 }
 
@@ -121,6 +123,9 @@ export interface ICustomTransferFunction extends ITransferFunction<"custom"> {
 
 /** View settings for the 3D viewport. */
 export interface IViewport3D<N extends string> {
+  /** Indicates if the device supports AR or VR. */
+  isXRAvailable?: boolean;
+
   /** Indicates if the user is currently in AR or VR. */
   isInXR: boolean;
 
@@ -150,7 +155,9 @@ export interface IViewport3D<N extends string> {
   setVolumeSpaceCameraPosition(x: number, y: number, z: number): void;
   setOpacity(value?: number): void;
   setShadingMode(value?: ShadingMode): void;
+  cycleShadingMode(): void;
   setActiveTransferFunction(
     nameOrTransferFunction?: N | ITransferFunction<N>,
   ): void;
+  cycleActiveTransferFunction(): void;
 }

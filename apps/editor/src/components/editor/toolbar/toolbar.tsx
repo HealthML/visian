@@ -21,7 +21,7 @@ const StyledToolbar = styled(GenericToolbar)`
   margin-bottom: 16px;
 `;
 
-const BrushModal = styled(Modal)`
+const ToolSettingsModal = styled(Modal)`
   padding-bottom: 0px;
 `;
 
@@ -122,7 +122,7 @@ export const Toolbar: React.FC = observer(() => {
             />
           ),
       )}
-      <BrushModal
+      <ToolSettingsModal
         isOpen={Boolean(
           isModalOpen &&
             activeTool &&
@@ -131,7 +131,7 @@ export const Toolbar: React.FC = observer(() => {
         labelTx={activeTool?.labelTx}
         label={activeTool?.label}
         value={activeTool?.name}
-        parentElement={buttonRef}
+        anchor={buttonRef}
         position="right"
         baseZIndex={modalZ}
         onOutsidePress={closeModal}
@@ -186,7 +186,7 @@ export const Toolbar: React.FC = observer(() => {
           Object.values(activeTool.params).map((param) => (
             <Param parameter={param} key={param.name} />
           ))}
-      </BrushModal>
+      </ToolSettingsModal>
     </StyledToolbar>
   );
 });

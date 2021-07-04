@@ -81,7 +81,9 @@ export class Editor
     // eslint-disable-next-line no-alert
     if (forceDestroy || window.confirm("Discard the current document?")) {
       this.setActiveDocument();
+      return true;
     }
+    return false;
   };
 
   // Proxies

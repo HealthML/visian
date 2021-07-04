@@ -47,6 +47,10 @@
   "layer-settings": "Layer Settings",
   "opacity": "Opacity",
   "background-color": "Background Color",
+  "mark-annotation": "Mark as Annotation",
+  "mark-not-annotation": "Mark as not Annotation",
+  "export-layer": "Export Layer",
+  "export-slice": "Export Current Slice",
   "delete-layer": "Delete Layer",
   "delete-layer-confirmation": "Delete layer \"{{layer}}\"?",
 
@@ -61,16 +65,17 @@
   "contrast": "Contrast",
   "brightness": "Brightness",
 
-  "export": "Export (Ctrl + E)",
-  "export-button": "Export",
+  "export": "Export",
+  "export-tooltip": "Export (Ctrl + E)",
 
   "import-error": "Import Error",
   "annotation-mismatch-error": "This annotation does not match the original image's size.",
-  "no-image-error": "You have to load a base image before importing an annotation.",
   "image-loading-error": "Looks like this file is not supported.",
+  "remote-file-error": "The specified file could not be loaded.",
 
   "3d-view": "3D View",
   "3d-view-tooltip": "3D View (4)",
+  "xr-view-tooltip": "XR View (5)",
   "shading-mode": "Shading Mode",
   "shading-none": "None",
   "shading-none-full": "No shading",
