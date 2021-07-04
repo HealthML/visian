@@ -5,7 +5,6 @@ import {
   useModalRoot,
   zIndex,
 } from "@visian/ui-shared";
-import { readMedicalImage } from "@visian/utils";
 import { observer } from "mobx-react-lite";
 import path from "path";
 import React, { useCallback, useState } from "react";
@@ -36,21 +35,6 @@ const StyledOverlay = styled.div`
   z-index: ${zIndex("overlay")};
 `;
 
-const uniqueValuesForAnnotationThreshold = 20;
-
-const isFileAnnotation = async (file: File) => {
-  const image = await readMedicalImage(file);
-  const { data } = image;
-  const uniqueValues = new Set();
-  for (let index = 0; index < data.length; index++) {
-    uniqueValues.add(data[index]);
-    if (uniqueValues.size > uniqueValuesForAnnotationThreshold) {
-      return false;
-    }
-  }
-  return true;
-};
-
 const getFileExtension = (file: File) => path.extname(file.name);
 
 export const DropSheet: React.FC<DropSheetProps> = observer(
@@ -62,11 +46,7 @@ export const DropSheet: React.FC<DropSheetProps> = observer(
         // Exclude hidden system files from import
         if (file.name.startsWith(".")) return;
         try {
-          if (await isFileAnnotation(file)) {
-            await store?.editor.activeDocument?.importAnnotation(file);
-          } else {
-            await store?.editor.activeDocument?.importImage(file);
-          }
+          await store?.editor.activeDocument?.importFile(file);
         } catch (error) {
           store?.setError({
             titleTx: "import-error",
@@ -84,13 +64,8 @@ export const DropSheet: React.FC<DropSheetProps> = observer(
           const promises: Promise<void>[] = [];
           dirFiles.forEach((file) => promises.push(importSingleFile(file)));
           await Promise.all(promises);
-        } else if (await isFileAnnotation(dirFiles[0])) {
-          await store?.editor.activeDocument?.importAnnotation(
-            dirFiles,
-            dirName,
-          );
         } else {
-          await store?.editor.activeDocument?.importImage(dirFiles, dirName);
+          await store?.editor.activeDocument?.importFile(dirFiles, dirName);
         }
       },
       [importSingleFile, store?.editor.activeDocument],
