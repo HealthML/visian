@@ -171,9 +171,9 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
       } else {
         // insert image layer after all annotation layers
         let insertIndex = 0;
-        for (let i = 0; i < this.layerIds.length; i++) {
-          if (!this.layerMap[this.layerIds[i]].isAnnotation) {
-            insertIndex = i;
+        for (let i = this.layerIds.length - 1; i >= 0; i--) {
+          if (this.layerMap[this.layerIds[i]].isAnnotation) {
+            insertIndex = i + 1;
             break;
           }
         }
