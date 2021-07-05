@@ -102,7 +102,7 @@ const LayerListItem = observer<{
     layer.setIsAnnotation(!layer.isAnnotation);
     store?.editor.activeDocument?.sortLayers();
     setContextMenuPosition(null);
-  }, [layer]);
+  }, [layer, store?.editor.activeDocument]);
   const exportLayer = useCallback(() => {
     if (layer.kind !== "image") return;
     (layer as ImageLayer).quickExport().then(() => {

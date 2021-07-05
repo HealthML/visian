@@ -150,7 +150,7 @@ export const DropSheet: React.FC<DropSheetProps> = observer(
               descriptionTx: error.message,
             });
           }
-          store?.editor.activeDocument?.finishFileSeriesImport();
+          store?.editor.activeDocument?.finishBatchImport();
           setIsLoadingFiles(false);
           store?.editor.activeDocument?.tools.setIsCursorOverFloatingUI(false);
           onDropCompleted();

@@ -65,7 +65,6 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
   protected activeLayerId?: string;
   protected layerMap: { [key: string]: Layer };
   protected layerIds: string[];
-  protected generatedAnnotationLayer: Layer | undefined;
 
   public history: History;
 
@@ -249,16 +248,9 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
   }
 
   // I/O
-  public finishFileSeriesImport() {
-    if (
-      this.generatedAnnotationLayer &&
-      !Object.values(this.layerMap).some((layer) => layer.isAnnotation)
-    ) {
-      this.addLayer(this.generatedAnnotationLayer);
-      this.setActiveLayer(this.generatedAnnotationLayer);
-      this.generatedAnnotationLayer = undefined;
-    } else {
-      delete this.generatedAnnotationLayer;
+  public finishBatchImport() {
+    if (!Object.values(this.layerMap).some((layer) => layer.isAnnotation)) {
+      this.addNewAnnotationLayer();
     }
   }
 
@@ -296,16 +288,7 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
 
   public async importImage(image: ITKImage) {
     const imageLayer = ImageLayer.fromITKImage(image, this);
-    if (!this.layerIds.length) {
-      const annotationLayer = ImageLayer.fromNewAnnotationForImage(
-        imageLayer.image,
-        this,
-      );
-      this.generatedAnnotationLayer = annotationLayer;
-      this.addLayer(imageLayer);
-    } else {
-      this.addLayer(imageLayer);
-    }
+    this.addLayer(imageLayer);
 
     this.viewSettings.reset();
     this.viewport2D.reset();
