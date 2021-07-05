@@ -43,7 +43,7 @@ export class Viewport3D
   implements
     IViewport3D<TransferFunctionName>,
     ISerializable<Viewport3DSnapshot<TransferFunctionName>> {
-  public readonly excludeFromSnapshotTracking = ["document"];
+  public readonly excludeFromSnapshotTracking = ["document", "isXRAvailable"];
 
   public isXRAvailable?: boolean;
   public isInXR!: boolean;
