@@ -16,5 +16,6 @@ export class PlaneTool extends Tool<"plane-tool"> {
 
   public activate() {
     this.document.viewport3D.setShouldCuttingPlaneRender(true);
+    this.document.viewport3D.setCuttingPlaneNormalToFaceCamera();
   }
 }

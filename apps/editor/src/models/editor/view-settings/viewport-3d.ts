@@ -107,6 +107,7 @@ export class Viewport3D
       setIsInXR: action,
       setUseCuttingPlane: action,
       setCuttingPlaneNormal: action,
+      setCuttingPlaneNormalToFaceCamera: action,
       setCuttingPlaneDistance: action,
       increaseCuttingPlaneDistance: action,
       decreaseCuttingPlaneDistance: action,
@@ -183,8 +184,13 @@ export class Viewport3D
     }
 
     if (this.document.tools.activeTool?.name === "plane-tool") {
-      this.setCuttingPlaneNormal(-x, -y, -z);
+      this.setCuttingPlaneNormalToFaceCamera();
     }
+  }
+
+  public setCuttingPlaneNormalToFaceCamera() {
+    const [x, y, z] = this.volumeSpaceCameraPosition;
+    this.setCuttingPlaneNormal(-x, -y, -z);
   }
 
   public setActiveTransferFunction = (
