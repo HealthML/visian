@@ -1,4 +1,4 @@
-import { IEditor, IImageLayer } from "@visian/ui-shared";
+import { IEditor, IImageLayer, isPerformanceLow } from "@visian/ui-shared";
 import { Image } from "@visian/utils";
 import { IReactionDisposer, reaction } from "mobx";
 import * as THREE from "three";
@@ -7,10 +7,8 @@ import { SharedUniforms } from "../shared-uniforms";
 import { TiledRenderer } from "../tiled-renderer";
 import LAOMaterial from "./lao-material";
 
-// TODO: Tweak based on performance.
-export const totalLAORays = 32; // Set to 8 to turn progressive LAO off.
-// TODO: Tweak based on performance.
-export const quadSize = 1024;
+export const totalLAORays = isPerformanceLow ? 8 : 32; // Set to 8 to turn progressive LAO off.
+export const quadSize = isPerformanceLow ? 512 : 1024;
 
 export class LAOComputer extends TiledRenderer {
   private _isDirty = true;

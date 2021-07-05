@@ -2,6 +2,7 @@ import {
   IEditor,
   IImageLayer,
   ILayerParameter,
+  isPerformanceLow,
   IVolumeRenderer,
 } from "@visian/ui-shared";
 import { IDisposable, IDisposer } from "@visian/utils";
@@ -127,11 +128,7 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
       this.intermediateRenderTarget.texture,
     );
 
-    const url = new URL(window.location.href);
-    const resolutionStepsParam = url.searchParams.get("resolutionSteps");
-    const resolutionSteps = resolutionStepsParam
-      ? Math.min(5, Math.max(1, parseInt(resolutionStepsParam)))
-      : 3;
+    const resolutionSteps = isPerformanceLow ? 4 : 3;
     this.resolutionComputer = new ResolutionComputer(
       { scene: this.scene, camera: this.camera },
       this.renderer,
