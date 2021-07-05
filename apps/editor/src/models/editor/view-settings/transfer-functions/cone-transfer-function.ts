@@ -105,6 +105,7 @@ export class ConeTransferFunction
     }
 
     this.coneDirection.set(x, y, z);
+    this.coneDirection.normalize();
   }
 
   // Serialization

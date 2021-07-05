@@ -126,7 +126,9 @@ export const Toolbar: React.FC = observer(() => {
         isOpen={Boolean(
           isModalOpen &&
             activeTool &&
-            (activeTool.isBrush || Object.keys(activeTool.params).length),
+            (activeTool.isBrush ||
+              Object.keys(activeTool.params).length ||
+              activeTool.name === "plane-tool"),
         )}
         labelTx={activeTool?.labelTx}
         label={activeTool?.label}
@@ -135,7 +137,11 @@ export const Toolbar: React.FC = observer(() => {
         position="right"
         baseZIndex={modalZ}
         onOutsidePress={closeModal}
-        onReset={store?.editor.activeDocument?.tools.resetActiveToolSetings}
+        onReset={
+          store?.editor.activeDocument?.tools.activeTool?.name === "plane-tool"
+            ? store?.editor.activeDocument?.viewport3D.resetCuttingPlane
+            : store?.editor.activeDocument?.tools.resetActiveToolSetings
+        }
       >
         {activeTool?.isBrush &&
           activeTool?.name !== "bounded-smart-brush" &&
@@ -180,6 +186,30 @@ export const Toolbar: React.FC = observer(() => {
             value={store?.editor.activeDocument?.tools.smartBrushThreshold}
             setValue={setSmartBrushThreshold}
           />
+        )}
+        {activeTool?.name === "plane-tool" && (
+          <>
+            <BooleanParam
+              labelTx="enable-plane"
+              value={Boolean(
+                store?.editor.activeDocument?.viewport3D.useCuttingPlane,
+              )}
+              setValue={
+                store?.editor.activeDocument?.viewport3D.setUseCuttingPlane
+              }
+            />
+            <BooleanParam
+              labelTx="render-plane"
+              value={Boolean(
+                store?.editor.activeDocument?.viewport3D
+                  .shouldCuttingPlaneRender,
+              )}
+              setValue={
+                store?.editor.activeDocument?.viewport3D
+                  .setShouldCuttingPlaneRender
+              }
+            />
+          </>
         )}
 
         {activeTool &&

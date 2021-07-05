@@ -12,6 +12,7 @@ import { Tool, ToolSnapshot } from "./tool";
 
 import { ToolGroup, ToolGroupSnapshot } from "./tool-group";
 import { BoundedSmartBrush } from "./bounded-smart-brush";
+import { PlaneTool } from "./plane-tool";
 
 export type ToolName =
   | "navigation-tool"
@@ -26,6 +27,7 @@ export type ToolName =
   | "outline-eraser"
   | "clear-slice"
   | "clear-image"
+  | "plane-tool"
   | "fly-tool";
 
 export interface ToolsSnapshot<N extends string> {
@@ -150,6 +152,7 @@ export class Tools
       "outline-eraser": new OutlineTool(document, this.toolRenderer, false),
       "clear-slice": new ClearSliceTool(document, this.toolRenderer),
       "clear-image": new ClearImageTool(document, this.toolRenderer),
+      "plane-tool": new PlaneTool(this.document),
       "fly-tool": new Tool(
         {
           name: "fly-tool",
@@ -179,6 +182,7 @@ export class Tools
         document,
       ),
       new ToolGroup({ toolNames: ["clear-slice", "clear-image"] }, document),
+      new ToolGroup({ toolNames: ["plane-tool"] }, document),
       new ToolGroup({ toolNames: ["fly-tool"] }, document),
     );
 

@@ -3,12 +3,14 @@ import { IDisposable, IDisposer } from "@visian/utils";
 import { autorun } from "mobx";
 import * as THREE from "three";
 import { RenderedImage } from "../rendered-image";
-import { SharedUniforms } from "./utils";
+import { CuttingPlane, SharedUniforms } from "./utils";
 
 import { VolumeMaterial } from "./volume-material";
 
 /** A volume domain. */
 export class Volume extends THREE.Mesh implements IDisposable {
+  private cuttingPlane: CuttingPlane;
+
   private disposers: IDisposer[] = [];
   constructor(
     editor: IEditor,
@@ -30,6 +32,9 @@ export class Volume extends THREE.Mesh implements IDisposable {
     );
 
     this.resetRotation();
+
+    this.cuttingPlane = new CuttingPlane(editor);
+    this.add(this.cuttingPlane);
 
     this.disposers.push(
       autorun(() => {
@@ -63,6 +68,7 @@ export class Volume extends THREE.Mesh implements IDisposable {
 
   public dispose() {
     (this.material as VolumeMaterial).dispose();
+    this.cuttingPlane.dispose();
     this.disposers.forEach((disposer) => disposer());
   }
 }

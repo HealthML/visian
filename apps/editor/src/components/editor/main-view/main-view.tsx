@@ -16,6 +16,7 @@ const MainViewContainer = styled.div<{
   cursor: ${(props) => {
     switch (props.activeTool) {
       case "navigation-tool":
+      case "plane-tool":
         if (props.isToolInUse) document.body.style.cursor = "grabbing";
         return props.isToolInUse ? "grabbing" : "grab";
 

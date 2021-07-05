@@ -57,6 +57,12 @@ export const setUpHotKeys = (store: RootStore): IDisposer => {
       activeTool === "fly-tool" ? "navigation-tool" : "fly-tool",
     );
   });
+  hotkeys("p", (event) => {
+    event.preventDefault();
+    if (store.editor.activeDocument?.viewSettings.viewMode !== "3D") return;
+
+    store.editor.activeDocument?.tools.setActiveTool("plane-tool");
+  });
 
   // Tools
   hotkeys("del,backspace", (event) => {
@@ -70,14 +76,24 @@ export const setUpHotKeys = (store: RootStore): IDisposer => {
     store.editor.activeDocument?.tools.setActiveTool("clear-image");
   });
 
-  // Brush Size
+  // Brush Size/Cutting Plane Distance
   hotkeys("*", (event) => {
     // "+" doesn't currently work with hotkeys-js (https://github.com/jaywcjlove/hotkeys/issues/270)
     if (event.key === "+" && !event.ctrlKey) {
+      if (store.editor.activeDocument?.viewSettings.viewMode === "3D") {
+        store.editor.activeDocument?.viewport3D.increaseCuttingPlaneDistance();
+        return;
+      }
+
       store.editor.activeDocument?.tools.incrementBrushSize();
     }
   });
   hotkeys("-", () => {
+    if (store.editor.activeDocument?.viewSettings.viewMode === "3D") {
+      store.editor.activeDocument?.viewport3D.decreaseCuttingPlaneDistance();
+      return;
+    }
+
     store.editor.activeDocument?.tools.decrementBrushSize();
   });
 

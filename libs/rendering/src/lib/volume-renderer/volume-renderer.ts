@@ -6,7 +6,7 @@ import {
   IVolumeRenderer,
 } from "@visian/ui-shared";
 import { IDisposable, IDisposer } from "@visian/utils";
-import { reaction } from "mobx";
+import { autorun, reaction } from "mobx";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import Stats from "three/examples/jsm/libs/stats.module";
@@ -225,6 +225,10 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
         () => editor.activeDocument?.tools.activeTool?.name === "fly-tool",
         this.toggleFly,
       ),
+      autorun(() => {
+        this.orbitControls.enableZoom =
+          this.editor.activeDocument?.tools.activeTool?.name !== "plane-tool";
+      }),
     );
   }
 

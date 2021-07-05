@@ -32,6 +32,11 @@ export interface Viewport3DSnapshot<N extends string> {
 
   activeTransferFunctionName?: N;
   transferFunctions: TransferFunctionSnapshot<N>[];
+
+  useCuttingPlane: boolean;
+  cuttingPlaneNormal: number[];
+  cuttingPlaneDistance: number;
+  shouldCuttingPlaneRender: boolean;
 }
 
 export class Viewport3D
@@ -57,6 +62,11 @@ export class Viewport3D
     TransferFunction<TransferFunctionName>
   >;
 
+  public useCuttingPlane = false;
+  public cuttingPlaneNormal = new Vector([0, 1, 0]);
+  public cuttingPlaneDistance = 0;
+  public shouldCuttingPlaneRender = false;
+
   private shadingTimeout?: NodeJS.Timer;
 
   constructor(
@@ -79,6 +89,10 @@ export class Viewport3D
       suppressedShadingMode: observable,
       activeTransferFunctionName: observable,
       transferFunctions: observable,
+      useCuttingPlane: observable,
+      cuttingPlaneNormal: observable,
+      cuttingPlaneDistance: observable,
+      shouldCuttingPlaneRender: observable,
 
       activeTransferFunction: computed,
 
@@ -92,6 +106,14 @@ export class Viewport3D
       onTransferFunctionChange: action,
       setIsXRAvailable: action,
       setIsInXR: action,
+      setUseCuttingPlane: action,
+      setCuttingPlaneNormal: action,
+      setCuttingPlaneNormalToFaceCamera: action,
+      setCuttingPlaneDistance: action,
+      increaseCuttingPlaneDistance: action,
+      decreaseCuttingPlaneDistance: action,
+      setShouldCuttingPlaneRender: action,
+      resetCuttingPlane: action,
       reset: action,
       applySnapshot: action,
     });
@@ -161,6 +183,15 @@ export class Viewport3D
         "fc-cone"
       ] as ConeTransferFunction).setConeDirection(x, y, z);
     }
+
+    if (this.document.tools.activeTool?.name === "plane-tool") {
+      this.setCuttingPlaneNormalToFaceCamera();
+    }
+  }
+
+  public setCuttingPlaneNormalToFaceCamera() {
+    const [x, y, z] = this.volumeSpaceCameraPosition;
+    this.setCuttingPlaneNormal(-x, -y, -z);
   }
 
   public setActiveTransferFunction = (
@@ -269,6 +300,45 @@ export class Viewport3D
     this.document.volumeRenderer?.xr.exitXR();
   };
 
+  // Cutting Plane
+  public setUseCuttingPlane = (value = false) => {
+    if (value !== this.useCuttingPlane) {
+      this.useCuttingPlane = value;
+      this.onTransferFunctionChange();
+    }
+
+    if (!value) this.setShouldCuttingPlaneRender();
+  };
+
+  public setCuttingPlaneNormal(x = 0, y = 1, z = 0) {
+    this.cuttingPlaneNormal.set(x, y, z);
+    this.cuttingPlaneNormal.normalize();
+    this.onTransferFunctionChange();
+  }
+
+  public setCuttingPlaneDistance(value = 0) {
+    this.cuttingPlaneDistance = value;
+    this.onTransferFunctionChange();
+  }
+  public increaseCuttingPlaneDistance() {
+    this.setCuttingPlaneDistance(this.cuttingPlaneDistance + 0.02);
+  }
+  public decreaseCuttingPlaneDistance() {
+    this.setCuttingPlaneDistance(this.cuttingPlaneDistance - 0.02);
+  }
+
+  public setShouldCuttingPlaneRender = (value = false) => {
+    this.shouldCuttingPlaneRender = value;
+    if (value) this.setUseCuttingPlane(true);
+  };
+
+  public resetCuttingPlane = () => {
+    this.setUseCuttingPlane();
+    this.setCuttingPlaneNormal();
+    this.setCuttingPlaneDistance();
+    this.setShouldCuttingPlaneRender();
+  };
+
   public reset = (): void => {
     this.setIsInXR();
     this.setCameraMatrix();
@@ -279,6 +349,7 @@ export class Viewport3D
       transferFunction.reset();
     });
     this.setActiveTransferFunction();
+    this.resetCuttingPlane();
   };
 
   // Serialization
@@ -292,6 +363,10 @@ export class Viewport3D
       transferFunctions: Object.values(
         this.transferFunctions,
       ).map((transferFunction) => transferFunction.toJSON()),
+      useCuttingPlane: this.useCuttingPlane,
+      cuttingPlaneNormal: this.cuttingPlaneNormal.toJSON(),
+      cuttingPlaneDistance: this.cuttingPlaneDistance,
+      shouldCuttingPlaneRender: this.shouldCuttingPlaneRender,
     };
   }
 
@@ -321,6 +396,19 @@ export class Viewport3D
         transferFunction.applySnapshot(transferFunctionSnapshot);
       }
     });
+    this.setUseCuttingPlane(snapshot?.useCuttingPlane);
+    const cuttingPlaneNormal = snapshot?.cuttingPlaneNormal;
+    if (cuttingPlaneNormal) {
+      this.setCuttingPlaneNormal(
+        cuttingPlaneNormal[0],
+        cuttingPlaneNormal[1],
+        cuttingPlaneNormal[2],
+      );
+    } else {
+      this.setCuttingPlaneNormal();
+    }
+    this.setCuttingPlaneDistance(snapshot?.cuttingPlaneDistance);
+    this.setShouldCuttingPlaneRender(snapshot?.shouldCuttingPlaneRender);
 
     return Promise.resolve();
   }
