@@ -12,7 +12,7 @@ import { RenderParams, RenderSubject } from "./types";
 export class TiledRenderer implements IDisposable {
   private renderParams: RenderParams;
 
-  private intermediatRenderTarget = new THREE.WebGLRenderTarget(1, 1);
+  private intermediateRenderTarget = new THREE.WebGLRenderTarget(1, 1);
 
   private copyQuad: THREE.Mesh;
   private copyScene = new THREE.Scene();
@@ -54,7 +54,7 @@ export class TiledRenderer implements IDisposable {
     this.copyQuad = new THREE.Mesh(
       new THREE.PlaneBufferGeometry().translate(0.5, -0.5, 0).scale(1, -1, 1),
       new THREE.MeshBasicMaterial({
-        map: this.intermediatRenderTarget.texture,
+        map: this.intermediateRenderTarget.texture,
       }),
     );
     this.copyScene.add(this.copyQuad);
@@ -72,7 +72,7 @@ export class TiledRenderer implements IDisposable {
    * Should be called, when this tiled renderer is no longer needed.
    */
   public dispose() {
-    this.intermediatRenderTarget.dispose();
+    this.intermediateRenderTarget.dispose();
     this.target.dispose();
     this.copyQuad.geometry.dispose();
     (this.copyQuad.material as THREE.MeshBasicMaterial).dispose();
@@ -133,12 +133,12 @@ export class TiledRenderer implements IDisposable {
     }
 
     // Render subject.
-    this.renderer.setRenderTarget(this.intermediatRenderTarget);
+    this.renderer.setRenderTarget(this.intermediateRenderTarget);
 
     const gridPositionX = this.quadId % this.grid.x;
     const gridPositionY = Math.floor(this.quadId / this.grid.x);
 
-    const { width, height } = this.intermediatRenderTarget;
+    const { width, height } = this.intermediateRenderTarget;
     camera.setViewOffset(
       this.size.x,
       this.size.y,
@@ -184,7 +184,7 @@ export class TiledRenderer implements IDisposable {
   private resizeIntermediate() {
     this.workingVector.copy(this.size).divide(this.grid).ceil();
 
-    this.intermediatRenderTarget.setSize(
+    this.intermediateRenderTarget.setSize(
       this.workingVector.x,
       this.workingVector.y,
     );
