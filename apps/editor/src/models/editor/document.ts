@@ -121,7 +121,7 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
       addNewAnnotationLayer: action,
       moveLayer: action,
       deleteLayer: action,
-      sortLayers: action,
+      toggleAndRepositionLayer: action,
       importImage: action,
       importAnnotation: action,
       applySnapshot: action,
@@ -231,16 +231,26 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
     }
   };
 
-  /** Updates the layer order so that annotation layers are always on top of image layers. */
-  public sortLayers = (): void => {
-    let hasFoundImage = false;
+  /** Toggles the type of the layer (annotation or not) and repositions it accordingly */
+  public toggleAndRepositionLayer = (idOrLayer: string | ILayer): void => {
+    const layerId = typeof idOrLayer === "string" ? idOrLayer : idOrLayer.id;
+    let lastAnnotationIndex = this.layerIds.length - 1;
     for (let i = 0; i < this.layerIds.length; i++) {
       if (!this.layerMap[this.layerIds[i]].isAnnotation) {
-        hasFoundImage = true;
-      } else if (hasFoundImage) {
-        this.layerIds.unshift(this.layerIds.splice(i, 1)[0]);
+        lastAnnotationIndex = i - 1;
+        break;
       }
     }
+
+    if (this.layerMap[layerId].isAnnotation) {
+      this.moveLayer(layerId, lastAnnotationIndex);
+    } else {
+      this.moveLayer(layerId, lastAnnotationIndex + 1);
+    }
+
+    this.layerMap[layerId].setIsAnnotation(
+      !this.layerMap[layerId].isAnnotation,
+    );
   };
 
   public get has3DLayers(): boolean {

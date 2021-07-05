@@ -99,8 +99,7 @@ const LayerListItem = observer<{
 
   const { t } = useTranslation();
   const toggleAnnotation = useCallback(() => {
-    layer.setIsAnnotation(!layer.isAnnotation);
-    store?.editor.activeDocument?.sortLayers();
+    store?.editor.activeDocument?.toggleAndRepositionLayer(layer);
     setContextMenuPosition(null);
   }, [layer, store?.editor.activeDocument]);
   const exportLayer = useCallback(() => {
