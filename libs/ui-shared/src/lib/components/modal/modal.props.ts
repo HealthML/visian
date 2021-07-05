@@ -3,7 +3,7 @@ import type { ModalPositionConfig } from "./utils";
 
 export interface ModalProps
   extends React.HTMLAttributes<HTMLDivElement>,
-    Pick<ModalPositionConfig, "parentElement" | "position" | "distance"> {
+    Pick<ModalPositionConfig, "anchor" | "position" | "distance"> {
   labelTx?: string;
   label?: string;
 

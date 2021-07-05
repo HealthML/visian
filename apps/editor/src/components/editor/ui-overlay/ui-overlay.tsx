@@ -140,7 +140,7 @@ export const UIOverlay = observer<UIOverlayProps>(
           <RightBar>
             <FloatingUIButton
               icon="export"
-              tooltipTx="export"
+              tooltipTx="export-tooltip"
               tooltipPosition="left"
               onPointerDown={
                 (store?.editor.activeDocument?.activeLayer as ImageLayer)

@@ -115,7 +115,7 @@ export const ViewSettings: React.FC = observer(() => {
       <Modal
         isOpen={isModalOpen}
         labelTx="view-settings"
-        parentElement={buttonRef}
+        anchor={buttonRef}
         position="left"
         onReset={store?.editor.activeDocument?.viewSettings.reset}
       >

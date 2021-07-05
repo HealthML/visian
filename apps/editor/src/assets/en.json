@@ -47,6 +47,10 @@
   "layer-settings": "Layer Settings",
   "opacity": "Opacity",
   "background-color": "Background Color",
+  "mark-annotation": "Mark as Annotation",
+  "mark-not-annotation": "Mark as not Annotation",
+  "export-layer": "Export Layer",
+  "export-slice": "Export Current Slice",
   "delete-layer": "Delete Layer",
   "delete-layer-confirmation": "Delete layer \"{{layer}}\"?",
 
@@ -61,8 +65,8 @@
   "contrast": "Contrast",
   "brightness": "Brightness",
 
-  "export": "Export (Ctrl + E)",
-  "export-button": "Export",
+  "export": "Export",
+  "export-tooltip": "Export (Ctrl + E)",
 
   "import-error": "Import Error",
   "annotation-mismatch-error": "This annotation does not match the original image's size.",
