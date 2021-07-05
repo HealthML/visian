@@ -12,6 +12,7 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import Stats from "three/examples/jsm/libs/stats.module";
 
 import { ScreenAlignedQuad } from "../screen-aligned-quad";
+import { postFragmentShader, postVertexShader } from "../shaders";
 import {
   FlyControls,
   GradientComputer,
@@ -33,6 +34,7 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
 
   private intermediateRenderTarget: THREE.WebGLRenderTarget;
   private screenAlignedQuad: ScreenAlignedQuad;
+  private postMaterial: THREE.ShaderMaterial;
 
   public volume: Volume;
 
@@ -123,10 +125,23 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
     this.xr = new XRManager(this, editor);
 
     this.intermediateRenderTarget = new THREE.WebGLRenderTarget(1, 1);
+    this.intermediateRenderTarget.depthBuffer = true;
+    // TODO: Somehow, this works but still asks for an explicit texture size
+    this.intermediateRenderTarget.depthTexture = new THREE.DepthTexture();
+    this.intermediateRenderTarget.depthTexture.format = THREE.DepthFormat;
+    this.intermediateRenderTarget.depthTexture.type = THREE.UnsignedIntType;
     // this.intermediateRenderTarget.texture.magFilter = THREE.NearestFilter;
-    this.screenAlignedQuad = ScreenAlignedQuad.forTexture(
-      this.intermediateRenderTarget.texture,
-    );
+    this.postMaterial = new THREE.ShaderMaterial({
+      vertexShader: postVertexShader,
+      fragmentShader: postFragmentShader,
+      uniforms: {
+        cameraNear: { value: this.camera.near },
+        cameraFar: { value: this.camera.far },
+        tDiffuse: { value: null },
+        tDepth: { value: null },
+      },
+    });
+    this.screenAlignedQuad = new ScreenAlignedQuad(this.postMaterial);
 
     const resolutionSteps = isPerformanceLow ? 4 : 3;
     this.resolutionComputer = new ResolutionComputer(
@@ -332,6 +347,7 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
     if (this.renderer.xr.isPresenting) {
       this.renderer.render(this.scene, this.camera);
     } else {
+      this.postMaterial.uniforms.tDepth.value = this.intermediateRenderTarget.depthTexture;
       this.screenAlignedQuad.renderWith(this.renderer);
     }
   };
