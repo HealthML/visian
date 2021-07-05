@@ -167,6 +167,7 @@ export interface IViewport3D<N extends string> {
   cycleActiveTransferFunction(): void;
   setUseCuttingPlane(value?: boolean): void;
   setCuttingPlaneNormal(x?: number, y?: number, z?: number): void;
+  setCuttingPlaneNormalToFaceCamera(): void;
   setCuttingPlaneDistance(value?: number): void;
   increaseCuttingPlaneDistance(): void;
   decreaseCuttingPlaneDistance(): void;

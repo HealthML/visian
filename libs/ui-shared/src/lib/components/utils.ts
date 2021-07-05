@@ -1,3 +1,4 @@
+import { Pixel } from "@visian/utils";
 import React, {
   useCallback,
   useEffect,
@@ -182,8 +183,8 @@ export const useOutsidePress = <T extends HTMLElement>(
 };
 
 export interface RelativePositionConfig<P = void> {
-  /** The parent element. */
-  parentElement?: HTMLElement | SVGSVGElement | null;
+  /** The anchor element or position. */
+  anchor?: HTMLElement | SVGSVGElement | Pixel | null;
 
   /**
    * If set to `true`, the position is actively updated.
@@ -226,7 +227,7 @@ export interface RelativePositionStyleConfig<P = void>
 export const useRelativePosition = <P = void>(
   computeStyle: (config: RelativePositionStyleConfig<P>) => React.CSSProperties,
   {
-    parentElement,
+    anchor,
     isActive = true,
     positionRelativeToOffsetParent,
     position,
@@ -244,11 +245,14 @@ export const useRelativePosition = <P = void>(
   useLayoutEffect(() => {
     if (!isActive) return;
 
-    const rect = parentElement?.getBoundingClientRect();
+    const rect: DOMRect | undefined =
+      !anchor || (anchor as Element).nodeName
+        ? (anchor as Element)?.getBoundingClientRect()
+        : new DOMRect((anchor as Pixel).x, (anchor as Pixel).y);
     if (!rect) return;
 
     const offsetRect = positionRelativeToOffsetParent
-      ? (parentElement as HTMLElement)?.offsetParent?.getBoundingClientRect()
+      ? (anchor as HTMLElement)?.offsetParent?.getBoundingClientRect()
       : undefined;
 
     // Prevent unnecessary updates

@@ -3,6 +3,7 @@ import {
   IViewport3D,
   ShadingMode,
   ITransferFunction,
+  isPerformanceLow,
 } from "@visian/ui-shared";
 import { ISerializable, Vector } from "@visian/utils";
 import { action, autorun, computed, makeObservable, observable } from "mobx";
@@ -107,6 +108,7 @@ export class Viewport3D
       setIsInXR: action,
       setUseCuttingPlane: action,
       setCuttingPlaneNormal: action,
+      setCuttingPlaneNormalToFaceCamera: action,
       setCuttingPlaneDistance: action,
       increaseCuttingPlaneDistance: action,
       decreaseCuttingPlaneDistance: action,
@@ -183,8 +185,13 @@ export class Viewport3D
     }
 
     if (this.document.tools.activeTool?.name === "plane-tool") {
-      this.setCuttingPlaneNormal(-x, -y, -z);
+      this.setCuttingPlaneNormalToFaceCamera();
     }
+  }
+
+  public setCuttingPlaneNormalToFaceCamera() {
+    const [x, y, z] = this.volumeSpaceCameraPosition;
+    this.setCuttingPlaneNormal(-x, -y, -z);
   }
 
   public setActiveTransferFunction = (
@@ -255,12 +262,15 @@ export class Viewport3D
     if (this.shadingTimeout !== undefined) {
       clearTimeout(this.shadingTimeout);
     }
-    this.shadingTimeout = setTimeout(() => {
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      this.setShadingMode(this.suppressedShadingMode!);
-      this.setSuppressedShadingMode();
-      this.shadingTimeout = undefined;
-    }, 200);
+    this.shadingTimeout = setTimeout(
+      () => {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        this.setShadingMode(this.suppressedShadingMode!);
+        this.setSuppressedShadingMode();
+        this.shadingTimeout = undefined;
+      },
+      isPerformanceLow ? 400 : 200,
+    );
   };
 
   // XR
