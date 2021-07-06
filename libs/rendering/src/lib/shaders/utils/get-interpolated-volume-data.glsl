@@ -24,7 +24,7 @@ VolumeData getVolumeData(vec3 volumeCoords) {
 
   vec4 imageValue = vec4(0.0);
   {{reduceLayerStack(imageValue, uv, false)}}
-  data.density = imageValue.r;
+  data.image = imageValue;
   data.firstDerivative = decodeVec3(texture2D(uInputFirstDerivative, uv));
   data.secondDerivative = decodeVec3(texture2D(uInputSecondDerivative, uv));
 
@@ -44,7 +44,7 @@ VolumeData getVolumeData(vec3 volumeCoords) {
   if(uUseFocus) {
     vec4 focusValue = vec4(0.0);
     {{reduceLayerStack(focusValue, uv, false)}}
-    data.focus = focusValue.r;
+    data.annotation = focusValue;
   }
 
   return data;
@@ -70,7 +70,7 @@ VolumeData getInterpolatedVolumeData(vec3 volumeCoords) {
 
   VolumeData interpolatedData;
 
-  interpolatedData.density = mix(lowerData.density, upperData.density, uVolumeNearestFiltering ? step(0.5, interpolation) : interpolation);
+  interpolatedData.image = mix(lowerData.image, upperData.image, uVolumeNearestFiltering ? step(0.5, interpolation) : interpolation);
   interpolatedData.firstDerivative = mix(lowerData.firstDerivative, upperData.firstDerivative, interpolation);
   interpolatedData.secondDerivative = mix(lowerData.secondDerivative, upperData.secondDerivative, interpolation);
 
@@ -89,7 +89,7 @@ VolumeData getInterpolatedVolumeData(vec3 volumeCoords) {
 
   if(uUseFocus) {
     // The focus texture should not be interpolated.
-    interpolatedData.focus = mix(lowerData.focus, upperData.focus, step(0.5, interpolation));
+    interpolatedData.annotation = mix(lowerData.annotation, upperData.annotation, step(0.5, interpolation));
   }
 
   return interpolatedData;

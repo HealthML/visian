@@ -255,11 +255,8 @@ export class SharedUniforms implements IDisposable {
         this.uniforms.uLayerAnnotationStatuses.value = layers.map(
           (layer) => layer.isAnnotation,
         );
-        this.uniforms.uLayerVisibilities.value = layers.map(
-          (layer) => layer.isVisible,
-        );
-        this.uniforms.uLayerOpacities.value = layers.map(
-          (layer) => layer.opacity,
+        this.uniforms.uLayerOpacities.value = layers.map((layer) =>
+          layer.isVisible ? layer.opacity : 0,
         );
         this.uniforms.uLayerColors.value = layers.map(
           (layer) =>

@@ -53,14 +53,14 @@ vec4 getImageValue(vec3 voxelCoords) {
 
   VolumeData data;
 
-  data.density = imageValue.r;
+  data.image = imageValue;
   data.firstDerivative = decodeVec3(texture2D(uInputFirstDerivative, uv));
   data.secondDerivative = decodeVec3(texture2D(uInputSecondDerivative, uv));
   
   if(uUseFocus) {
     vec4 focusValue = vec4(0.0);
     {{reduceLayerStack(focusValue, uv, false)}}
-    data.focus = focusValue.r;
+    data.annotation = focusValue;
   }
 
   vec3 volumeCoords = (voxelCoords + 0.5) / uVoxelCount;

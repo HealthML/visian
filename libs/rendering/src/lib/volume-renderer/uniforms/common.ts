@@ -6,7 +6,6 @@ export const commonUniforms = {
 
   uLayerData: { value: [] },
   uLayerAnnotationStatuses: { value: [] },
-  uLayerVisibilities: { value: [] },
   uLayerOpacities: { value: [] },
   uLayerColors: { value: [] },
 };

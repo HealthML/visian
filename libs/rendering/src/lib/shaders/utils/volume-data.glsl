@@ -1,8 +1,8 @@
 struct VolumeData {
-  float density;
+  vec4 image;
+  vec4 annotation;
   vec3 firstDerivative;
   vec3 secondDerivative;
   vec3 normal;
-  float focus;
   float lao;
 };
