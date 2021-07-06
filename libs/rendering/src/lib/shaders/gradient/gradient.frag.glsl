@@ -59,7 +59,7 @@ vec4 getImageValue(vec3 voxelCoords) {
   
   if(uUseFocus) {
     vec4 focusValue = vec4(0.0);
-    {{reduceLayerStack(focusValue, uv, false)}}
+    {{reduceLayerStack(focusValue, uv, true)}}
     data.annotation = focusValue;
   }
 
