@@ -1,5 +1,8 @@
+import { IEditor } from "@visian/ui-shared";
+import { reaction } from "mobx";
 import * as THREE from "three";
 import { gradientFragmentShader, gradientVertexShader } from "../../../shaders";
+import { composeLayeredShader } from "../compose-layered-shader";
 
 import { SharedUniforms } from "../shared-uniforms";
 
@@ -11,6 +14,7 @@ export enum GradientMode {
 
 export class GradientMaterial extends THREE.ShaderMaterial {
   constructor(
+    editor: IEditor,
     private firstDerivativeTexture: THREE.Texture,
     private secondDerivativeTexture: THREE.Texture,
     sharedUniforms: SharedUniforms,
@@ -27,6 +31,20 @@ export class GradientMaterial extends THREE.ShaderMaterial {
 
     this.uniforms.uInputFirstDerivative.value = firstDerivativeTexture;
     this.uniforms.uInputSecondDerivative.value = secondDerivativeTexture;
+
+    // TODO: Dispose
+    reaction(
+      () =>
+        editor.activeDocument?.layers.filter((layer) => layer.kind === "image")
+          .length || 0,
+      (layerCount: number) => {
+        this.fragmentShader = composeLayeredShader(
+          gradientFragmentShader,
+          layerCount,
+        );
+        this.needsUpdate = true;
+      },
+    );
   }
 
   public setGradientMode(mode: GradientMode) {

@@ -1,12 +1,16 @@
+import { IEditor } from "@visian/ui-shared";
+import { reaction } from "mobx";
 import * as THREE from "three";
-import { laoFragmentShader, laoVertexShader } from "../../../shaders";
 
+import { laoFragmentShader, laoVertexShader } from "../../../shaders";
+import { composeLayeredShader } from "../compose-layered-shader";
 import { SharedUniforms } from "../shared-uniforms";
 import { totalLAORays } from "./lao-computer";
 import { getLAODirectionTexture } from "./lao-directions";
 
 export class LAOMaterial extends THREE.ShaderMaterial {
   constructor(
+    editor: IEditor,
     firstDerivativeTexture: THREE.Texture,
     secondDerivativeTexture: THREE.Texture,
     private previousFrameTexture: THREE.Texture,
@@ -26,6 +30,20 @@ export class LAOMaterial extends THREE.ShaderMaterial {
 
     this.uniforms.uInputFirstDerivative.value = firstDerivativeTexture;
     this.uniforms.uInputSecondDerivative.value = secondDerivativeTexture;
+
+    // TODO: Dispose
+    reaction(
+      () =>
+        editor.activeDocument?.layers.filter((layer) => layer.kind === "image")
+          .length || 0,
+      (layerCount: number) => {
+        this.fragmentShader = composeLayeredShader(
+          laoFragmentShader,
+          layerCount,
+        );
+        this.needsUpdate = true;
+      },
+    );
   }
 
   public setPreviousDirections(amount: number) {

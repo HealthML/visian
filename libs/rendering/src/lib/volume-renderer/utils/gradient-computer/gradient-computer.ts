@@ -31,6 +31,7 @@ export class GradientComputer implements IDisposable {
     this.outputDerivativeRenderTarget = new THREE.WebGLRenderTarget(1, 1);
 
     this.gradientMaterial = new GradientMaterial(
+      editor,
       this.firstDerivativeRenderTarget.texture,
       this.secondDerivativeRenderTarget.texture,
       sharedUniforms,

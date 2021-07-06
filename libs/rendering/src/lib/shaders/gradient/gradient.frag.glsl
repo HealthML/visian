@@ -40,11 +40,11 @@ vec4 getImageValue(vec3 voxelCoords) {
   vec2 uvOffset = sliceSize * sliceOffset;
   vec2 uv = ((voxelCoords.xy + vec2(0.5)) / uVoxelCount.xy / uAtlasGrid + uvOffset);
 
-  vec4 imageValue;
+  vec4 imageValue = vec4(0.0);
   if (uGradientMode == 2) {
     imageValue = texture2D(uInputFirstDerivative, uv);
   } else {
-    imageValue = texture2D(uVolume, uv);
+    {{reduceLayerStack(imageValue, uv, false)}}
   }
   
   if (uGradientMode != 0) {
@@ -58,7 +58,9 @@ vec4 getImageValue(vec3 voxelCoords) {
   data.secondDerivative = decodeVec3(texture2D(uInputSecondDerivative, uv));
   
   if(uUseFocus) {
-    data.focus = texture2D(uFocus, uv).r;
+    vec4 focusValue = vec4(0.0);
+    {{reduceLayerStack(focusValue, uv, false)}}
+    data.focus = focusValue.r;
   }
 
   vec3 volumeCoords = (voxelCoords + 0.5) / uVoxelCount;

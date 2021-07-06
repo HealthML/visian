@@ -25,6 +25,7 @@ export class LAOComputer extends TiledRenderer {
     private flush: () => void,
     target = new THREE.WebGLRenderTarget(1, 1),
     private laoMaterial = new LAOMaterial(
+      editor,
       firstDerivativeTexture,
       secondDerivativeTexture,
       target.texture,

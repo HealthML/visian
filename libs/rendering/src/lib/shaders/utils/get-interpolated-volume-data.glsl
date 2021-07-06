@@ -22,7 +22,9 @@ VolumeData getVolumeData(vec3 volumeCoords) {
 
   VolumeData data;
 
-  data.density = texture2D(uVolume, uv).r;
+  vec4 imageValue = vec4(0.0);
+  {{reduceLayerStack(imageValue, uv, false)}}
+  data.density = imageValue.r;
   data.firstDerivative = decodeVec3(texture2D(uInputFirstDerivative, uv));
   data.secondDerivative = decodeVec3(texture2D(uInputSecondDerivative, uv));
 
@@ -40,7 +42,9 @@ VolumeData getVolumeData(vec3 volumeCoords) {
   #endif // LAO
   
   if(uUseFocus) {
-    data.focus = texture2D(uFocus, uv).r;
+    vec4 focusValue = vec4(0.0);
+    {{reduceLayerStack(focusValue, uv, false)}}
+    data.focus = focusValue.r;
   }
 
   return data;

@@ -237,6 +237,40 @@ export class SharedUniforms implements IDisposable {
 
         editor.activeDocument?.volumeRenderer?.lazyRender(true);
       }),
+      autorun(() => {
+        const useNearestFiltering = Boolean(
+          editor.activeDocument?.viewport3D.activeTransferFunction?.params
+            .useBlockyContext?.value,
+        );
+
+        const layers = (editor.activeDocument?.layers.filter(
+          (layer) => layer.kind === "image",
+        ) || []) as IImageLayer[];
+        this.uniforms.uLayerData.value = layers.map((layer) =>
+          ((layer as IImageLayer).image as RenderedImage).getTexture(
+            0,
+            useNearestFiltering ? THREE.NearestFilter : THREE.LinearFilter,
+          ),
+        );
+        this.uniforms.uLayerAnnotationStatuses.value = layers.map(
+          (layer) => layer.isAnnotation,
+        );
+        this.uniforms.uLayerVisibilities.value = layers.map(
+          (layer) => layer.isVisible,
+        );
+        this.uniforms.uLayerOpacities.value = layers.map(
+          (layer) => layer.opacity,
+        );
+        this.uniforms.uLayerColors.value = layers.map(
+          (layer) =>
+            new THREE.Color(
+              color(
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                (layer.color as any) || "foreground",
+              )({ theme: editor.theme }),
+            ),
+        );
+      }),
       reaction(
         () => {
           const imageId =
@@ -249,35 +283,25 @@ export class SharedUniforms implements IDisposable {
 
           if (!imageLayer) return undefined;
 
-          const useNearestFiltering = Boolean(
-            editor.activeDocument?.viewport3D.activeTransferFunction?.params
-              .useBlockyContext?.value,
-          );
-
           return [
             imageLayer as IImageLayer,
             imageLayer.color,
             editor.theme,
-            useNearestFiltering,
-          ] as [IImageLayer, string | undefined, Theme, boolean];
+          ] as [IImageLayer, string | undefined, Theme];
         },
         (
-          params?: [IImageLayer, string | undefined, Theme, boolean],
-          previousParams?: [IImageLayer, string | undefined, Theme, boolean],
+          params?: [IImageLayer, string | undefined, Theme],
+          previousParams?: [IImageLayer, string | undefined, Theme],
         ) => {
           if (!params) return editor.volumeRenderer?.lazyRender();
 
-          const [imageLayer, imageColor, theme, useNearestFiltering] = params;
+          const [imageLayer, imageColor, theme] = params;
 
-          const image = imageLayer.image as RenderedImage;
+          const baseImage = imageLayer.image as RenderedImage;
 
-          this.uniforms.uVolume.value = image.getTexture(
-            0,
-            useNearestFiltering ? THREE.NearestFilter : THREE.LinearFilter,
-          );
-          this.uniforms.uVoxelCount.value = image.voxelCount;
-          this.uniforms.uAtlasGrid.value = image.getAtlasGrid();
-          this.uniforms.uStepSize.value = getStepSize(image);
+          this.uniforms.uVoxelCount.value = baseImage.voxelCount;
+          this.uniforms.uAtlasGrid.value = baseImage.getAtlasGrid();
+          this.uniforms.uStepSize.value = getStepSize(baseImage);
 
           (this.uniforms.uContextColor.value as THREE.Color).set(
             color(
@@ -320,10 +344,6 @@ export class SharedUniforms implements IDisposable {
           if (params) {
             const [imageLayer, imageColor, theme] = params;
 
-            this.uniforms.uFocus.value = (imageLayer.image as RenderedImage).getTexture(
-              0,
-              THREE.NearestFilter,
-            );
             (this.uniforms.uFocusColor.value as THREE.Color).set(
               color(
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -339,7 +359,6 @@ export class SharedUniforms implements IDisposable {
 
             editor.volumeRenderer?.lazyRender(shouldUpdateLighting);
           } else {
-            this.uniforms.uFocus.value = null;
             editor.activeDocument?.volumeRenderer?.lazyRender(true);
           }
         },

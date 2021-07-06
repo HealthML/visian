@@ -25,6 +25,7 @@ export class Volume extends THREE.Mesh implements IDisposable {
     super(
       new THREE.BoxGeometry(1, 1, 1),
       new VolumeMaterial(
+        editor,
         sharedUniforms,
         firstDerivative,
         secondDerivative,
