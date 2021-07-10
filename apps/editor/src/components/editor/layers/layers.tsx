@@ -99,7 +99,7 @@ const LayerListItem = observer<{
 
   const { t } = useTranslation();
   const toggleAnnotation = useCallback(() => {
-    store?.editor.activeDocument?.toggleAndRepositionLayer(layer);
+    store?.editor.activeDocument?.toggleTypeAndRepositionLayer(layer);
     setContextMenuPosition(null);
   }, [layer, store?.editor.activeDocument]);
   const exportLayer = useCallback(() => {

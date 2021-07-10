@@ -121,7 +121,7 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
       addNewAnnotationLayer: action,
       moveLayer: action,
       deleteLayer: action,
-      toggleAndRepositionLayer: action,
+      toggleTypeAndRepositionLayer: action,
       importImage: action,
       importAnnotation: action,
       applySnapshot: action,
@@ -232,7 +232,7 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
   };
 
   /** Toggles the type of the layer (annotation or not) and repositions it accordingly */
-  public toggleAndRepositionLayer = (idOrLayer: string | ILayer): void => {
+  public toggleTypeAndRepositionLayer = (idOrLayer: string | ILayer): void => {
     const layerId = typeof idOrLayer === "string" ? idOrLayer : idOrLayer.id;
     let lastAnnotationIndex = this.layerIds.length - 1;
     for (let i = 0; i < this.layerIds.length; i++) {
