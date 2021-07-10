@@ -7,7 +7,7 @@ import {
   IVolumeRenderer,
   ValueType,
 } from "@visian/ui-shared";
-import { ISerializable, readMedicalImage } from "@visian/utils";
+import { ITKImage, ISerializable, readMedicalImage } from "@visian/utils";
 import isEqual from "lodash.isequal";
 import { action, computed, makeObservable, observable, toJS } from "mobx";
 import * as THREE from "three";
@@ -29,6 +29,8 @@ import {
 } from "./view-settings";
 import { StoreContext } from "../types";
 import { defaultAnnotationColor } from "../../constants";
+
+const uniqueValuesForAnnotationThreshold = 20;
 
 export const layerMap: {
   [kind: string]: ValueType<typeof layers>;
@@ -119,7 +121,7 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
       addNewAnnotationLayer: action,
       moveLayer: action,
       deleteLayer: action,
-      sortLayers: action,
+      toggleTypeAndRepositionLayer: action,
       importImage: action,
       importAnnotation: action,
       applySnapshot: action,
@@ -169,9 +171,9 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
       } else {
         // insert image layer after all annotation layers
         let insertIndex = 0;
-        for (let i = 0; i < this.layerIds.length; i++) {
-          if (!this.layerMap[this.layerIds[i]].isAnnotation) {
-            insertIndex = i;
+        for (let i = this.layerIds.length - 1; i >= 0; i--) {
+          if (this.layerMap[this.layerIds[i]].isAnnotation) {
+            insertIndex = i + 1;
             break;
           }
         }
@@ -229,16 +231,26 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
     }
   };
 
-  /** Updates the layer order so that annotation layers are always on top of image layers. */
-  public sortLayers = (): void => {
-    let hasFoundImage = false;
+  /** Toggles the type of the layer (annotation or not) and repositions it accordingly */
+  public toggleTypeAndRepositionLayer = (idOrLayer: string | ILayer): void => {
+    const layerId = typeof idOrLayer === "string" ? idOrLayer : idOrLayer.id;
+    let lastAnnotationIndex = this.layerIds.length - 1;
     for (let i = 0; i < this.layerIds.length; i++) {
       if (!this.layerMap[this.layerIds[i]].isAnnotation) {
-        hasFoundImage = true;
-      } else if (hasFoundImage) {
-        this.layerIds.unshift(this.layerIds.splice(i, 1)[0]);
+        lastAnnotationIndex = i - 1;
+        break;
       }
     }
+
+    if (this.layerMap[layerId].isAnnotation) {
+      this.moveLayer(layerId, lastAnnotationIndex);
+    } else {
+      this.moveLayer(layerId, lastAnnotationIndex + 1);
+    }
+
+    this.layerMap[layerId].setIsAnnotation(
+      !this.layerMap[layerId].isAnnotation,
+    );
   };
 
   public get has3DLayers(): boolean {
@@ -246,21 +258,47 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
   }
 
   // I/O
-  public async importImage(file: File | File[], name?: string) {
+  public finishBatchImport() {
+    if (!Object.values(this.layerMap).some((layer) => layer.isAnnotation)) {
+      this.addNewAnnotationLayer();
+    }
+  }
+
+  public async importFile(
+    file: File | File[],
+    name?: string,
+    isAnnotation?: boolean,
+  ) {
     const image = await readMedicalImage(file);
     image.name =
       name || (Array.isArray(file) ? file[0]?.name || "" : file.name);
-    const imageLayer = ImageLayer.fromITKImage(image, this);
-    if (!this.layerIds.length) {
-      const annotationLayer = ImageLayer.fromNewAnnotationForImage(
-        imageLayer.image,
-        this,
-      );
-      this.addLayer(imageLayer, annotationLayer);
-      this.setActiveLayer(annotationLayer);
+
+    if (isAnnotation) {
+      await this.importAnnotation(image);
+    } else if (isAnnotation !== undefined) {
+      await this.importImage(image);
     } else {
-      this.addLayer(imageLayer);
+      // infer type
+      let isLikelyImage = false;
+      const { data } = image;
+      const uniqueValues = new Set();
+      for (let index = 0; index < data.length; index++) {
+        uniqueValues.add(data[index]);
+        if (uniqueValues.size > uniqueValuesForAnnotationThreshold) {
+          isLikelyImage = true;
+        }
+      }
+      if (isLikelyImage) {
+        await this.importImage(image);
+      } else {
+        await this.importAnnotation(image);
+      }
     }
+  }
+
+  public async importImage(image: ITKImage) {
+    const imageLayer = ImageLayer.fromITKImage(image, this);
+    this.addLayer(imageLayer);
 
     this.viewSettings.reset();
     this.viewport2D.reset();
@@ -268,10 +306,7 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
     this.history.clear();
   }
 
-  public async importAnnotation(file: File | File[], name?: string) {
-    const image = await readMedicalImage(file);
-    image.name =
-      name || (Array.isArray(file) ? file[0]?.name || "" : file.name);
+  public async importAnnotation(image: ITKImage) {
     const annotationLayer = ImageLayer.fromITKImage(image, this, {
       isAnnotation: true,
       color: this.getColorForNewAnnotation(),

@@ -27,7 +27,7 @@ export const setupRootStore = async () => {
     const url = new URL(window.location.href);
     const loadScanParam = url.searchParams.get("load");
     if (loadScanParam && store.editor.newDocument()) {
-      await store.editor.activeDocument?.importImage(
+      await store.editor.activeDocument?.importFile(
         await readFileFromURL(loadScanParam, true),
       );
       window.history.replaceState({}, document.title, window.location.pathname);
