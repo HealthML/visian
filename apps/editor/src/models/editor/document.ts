@@ -269,6 +269,7 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
     name?: string,
     isAnnotation?: boolean,
   ) {
+    const isFirstLayer = !this.layerIds.length;
     const image = await readMedicalImage(file);
     image.name =
       name || (Array.isArray(file) ? file[0]?.name || "" : file.name);
@@ -294,16 +295,18 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
         await this.importAnnotation(image);
       }
     }
+
+    if (isFirstLayer) {
+      this.viewSettings.reset();
+      this.viewport2D.reset();
+      this.viewport3D.reset();
+      this.history.clear();
+    }
   }
 
   public async importImage(image: ITKImage) {
     const imageLayer = ImageLayer.fromITKImage(image, this);
     this.addLayer(imageLayer);
-
-    this.viewSettings.reset();
-    this.viewport2D.reset();
-    this.viewport3D.reset();
-    this.history.clear();
   }
 
   public async importAnnotation(image: ITKImage) {
