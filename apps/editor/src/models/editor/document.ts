@@ -7,7 +7,13 @@ import {
   IVolumeRenderer,
   ValueType,
 } from "@visian/ui-shared";
-import { ITKImage, ISerializable, readMedicalImage } from "@visian/utils";
+import {
+  ITKImage,
+  ISerializable,
+  readMedicalImage,
+  blobToText,
+  dataURLToBlob,
+} from "@visian/utils";
 import isEqual from "lodash.isequal";
 import { action, computed, makeObservable, observable, toJS } from "mobx";
 import * as THREE from "three";
@@ -269,7 +275,15 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
     name?: string,
     isAnnotation?: boolean,
   ) {
-    const image = await readMedicalImage(file);
+    const image =
+      !Array.isArray(file) && file.name.endsWith(".base64.txt")
+        ? await readMedicalImage(
+            new File(
+              [dataURLToBlob(await blobToText(file))],
+              `${file.name.split(".")[0]}.nii.gz`,
+            ),
+          )
+        : await readMedicalImage(file);
     image.name =
       name || (Array.isArray(file) ? file[0]?.name || "" : file.name);
 

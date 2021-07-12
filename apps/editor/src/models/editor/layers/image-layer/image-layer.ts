@@ -289,6 +289,11 @@ export class ImageLayer
     );
 
     if (!file) return;
+    // Base64 Export
+    /* FileSaver.saveAs(
+      textToBlob(await blobToDataURL(new Blob([file]))),
+      `${this.image.name.split(".")[0]}.base64.txt`,
+    ); */
     FileSaver.saveAs(file, file.name);
   };
 
