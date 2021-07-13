@@ -121,11 +121,12 @@ export const setUpPointerHandling = (
         store.editor.sliceRenderer,
       );
 
-      if (
-        !uv ||
-        !store.editor.activeDocument.activeLayer ||
-        !store.editor.activeDocument.tools.activeTool
-      ) {
+      if (!uv || !store.editor.activeDocument.tools.activeTool) {
+        return;
+      }
+
+      if (!store.editor.activeDocument.activeLayer) {
+        store.editor.activeDocument.setIsLayerMenuOpen(true);
         return;
       }
 
@@ -141,13 +142,16 @@ export const setUpPointerHandling = (
         tool = tool.altTool;
       }
 
+      if (!tool) return;
+
       if (
-        !tool ||
-        (tool.isDrawingTool &&
-          (!store.editor.activeDocument.activeLayer.isVisible ||
-            !store.editor.activeDocument.activeLayer.isAnnotation))
-      )
+        tool.isDrawingTool &&
+        (!store.editor.activeDocument.activeLayer.isVisible ||
+          !store.editor.activeDocument.activeLayer.isAnnotation)
+      ) {
+        store.editor.activeDocument.setIsLayerMenuOpen(true);
         return;
+      }
 
       const dragPoint = getDragPoint(
         (store.editor.activeDocument.activeLayer as IImageLayer).image,

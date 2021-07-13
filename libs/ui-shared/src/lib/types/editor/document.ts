@@ -46,6 +46,12 @@ export interface IDocument {
   volumeRenderer?: Reference<IVolumeRenderer>;
   renderers?: Reference<THREE.WebGLRenderer[]>;
 
+  /** Indicates wether the layer menu is open. */
+  isLayerMenuOpen: boolean;
+
+  setIsLayerMenuOpen(value?: boolean): void;
+  toggleIsLayerMenuOpen(): void;
+
   /** Reads a layer based on its id. */
   getLayer(id: string): ILayer | undefined;
 
