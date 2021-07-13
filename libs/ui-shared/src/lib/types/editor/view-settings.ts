@@ -27,9 +27,6 @@ export interface IViewSettings {
    */
   contrast: number;
 
-  /** The background color as as CSS color string. */
-  backgroundColor: string;
-
   setViewMode(value: ViewMode): void;
 
   setSelectedVoxel(x?: number, y?: number, z?: number): void;
