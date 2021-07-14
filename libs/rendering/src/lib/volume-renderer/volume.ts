@@ -44,18 +44,12 @@ export class Volume extends THREE.Mesh implements IDisposable {
 
     this.disposers.push(
       autorun(() => {
-        const imageId =
-          editor.activeDocument?.viewport3D.activeTransferFunction?.params.image
-            ?.value;
-
-        if (!imageId) return;
-
-        const imageLayer = editor.activeDocument?.getLayer(imageId as string);
-
+        const imageLayer = editor.activeDocument?.layers.find(
+          (layer) => layer.kind === "image",
+        );
         if (!imageLayer) return;
 
         const image = (imageLayer as IImageLayer).image as RenderedImage;
-
         const scale = image.voxelCount
           .clone(false)
           .multiply(image.voxelSpacing)

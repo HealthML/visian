@@ -7,16 +7,17 @@ import {
   INumberRangeParameter,
 } from "@visian/ui-shared";
 import { IDisposable, IDisposer } from "@visian/utils";
-import { autorun, reaction } from "mobx";
+import { autorun } from "mobx";
 import * as THREE from "three";
+
 import { RenderedImage } from "../../rendered-image";
 import {
-  imageInfoUniforms,
   atlasInfoUniforms,
   commonUniforms,
-  transferFunctionsUniforms,
-  opacityUniforms,
+  imageInfoUniforms,
   lightingUniforms,
+  opacityUniforms,
+  transferFunctionsUniforms,
 } from "../uniforms";
 import { shadingModeNameToId, transferFunctionNameToId } from "./conversion";
 import { getStepSize } from "./step-size";
@@ -198,6 +199,7 @@ export class SharedUniforms implements IDisposable {
         const layers = (editor.activeDocument?.layers.filter(
           (layer) => layer.kind === "image",
         ) || []) as IImageLayer[];
+
         this.uniforms.uLayerData.value = layers.map((layer) =>
           ((layer as IImageLayer).image as RenderedImage).getTexture(
             0,
@@ -217,6 +219,8 @@ export class SharedUniforms implements IDisposable {
               : layer.opacity * opacityFactor
             : 0,
         );
+
+        // TODO: Do not update lighting for color change only
         this.uniforms.uLayerColors.value = layers.map(
           (layer) =>
             new THREE.Color(
@@ -226,33 +230,24 @@ export class SharedUniforms implements IDisposable {
               )({ theme: editor.theme }),
             ),
         );
-        // TODO: Only update lighting if required
+
+        editor.activeDocument?.viewport3D.onTransferFunctionChange();
         editor.activeDocument?.volumeRenderer?.lazyRender(true);
       }),
-      reaction(
-        () => {
-          const imageLayer = editor.activeDocument?.layers[0];
+      autorun(() => {
+        const imageLayer = editor.activeDocument?.layers.find(
+          (layer) => layer.kind === "image",
+        );
+        if (!imageLayer) return;
 
-          if (!imageLayer) return undefined;
+        const image = (imageLayer as IImageLayer).image as RenderedImage;
 
-          return imageLayer as IImageLayer;
-        },
-        (imageLayer?: IImageLayer, previousImageLayer?: IImageLayer) => {
-          if (!imageLayer) return editor.volumeRenderer?.lazyRender();
+        this.uniforms.uVoxelCount.value = image.voxelCount;
+        this.uniforms.uAtlasGrid.value = image.getAtlasGrid();
+        this.uniforms.uStepSize.value = getStepSize(image);
 
-          const baseImage = imageLayer.image as RenderedImage;
-
-          this.uniforms.uVoxelCount.value = baseImage.voxelCount;
-          this.uniforms.uAtlasGrid.value = baseImage.getAtlasGrid();
-          this.uniforms.uStepSize.value = getStepSize(baseImage);
-
-          const shouldUpdateLighting = imageLayer.id !== previousImageLayer?.id;
-          editor.activeDocument?.volumeRenderer?.lazyRender(
-            shouldUpdateLighting,
-          );
-        },
-        { fireImmediately: true },
-      ),
+        editor.activeDocument?.volumeRenderer?.lazyRender();
+      }),
     );
   }
 

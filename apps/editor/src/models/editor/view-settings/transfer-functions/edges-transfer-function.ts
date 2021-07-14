@@ -1,6 +1,6 @@
 import { IDocument } from "@visian/ui-shared";
+
 import {
-  LayerParameter,
   NumberParameter,
   NumberRangeParameter,
   Parameter,
@@ -18,32 +18,6 @@ export class EdgesTransferFunction extends TransferFunction<"fc-edges"> {
     );
 
     this.initializeParams([
-      new LayerParameter(
-        {
-          name: "annotation",
-          labelTx: "annotation-layer",
-          defaultValue: undefined,
-          filter: (layer) =>
-            layer.isAnnotation &&
-            layer.id !== (this.params.image as LayerParameter)?.value,
-          onBeforeValueChange: () =>
-            document.viewport3D?.onTransferFunctionChange(),
-        },
-        document,
-      ) as Parameter<unknown>,
-      new LayerParameter(
-        {
-          name: "image",
-          labelTx: "image-layer",
-          defaultValue: undefined,
-          // We allow other annotations as the image, but not the selected annotation.
-          filter: (layer) =>
-            layer.id !== (this.params.annotation as LayerParameter)?.value,
-          onBeforeValueChange: () =>
-            document.viewport3D?.onTransferFunctionChange(),
-        },
-        document,
-      ) as Parameter<unknown>,
       new NumberRangeParameter({
         name: "densityRange",
         labelTx: "density-range",
@@ -64,15 +38,5 @@ export class EdgesTransferFunction extends TransferFunction<"fc-edges"> {
           document.viewport3D?.onTransferFunctionChange(),
       }) as Parameter<unknown>,
     ]);
-  }
-
-  public activate() {
-    if (!this.document.getLayer(this.params.annotation.value as string)) {
-      this.params.annotation.reset();
-    }
-
-    if (!this.document.getLayer(this.params.image.value as string)) {
-      this.params.image.reset();
-    }
   }
 }

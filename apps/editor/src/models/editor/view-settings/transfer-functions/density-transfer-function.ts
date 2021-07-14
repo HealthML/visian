@@ -1,7 +1,7 @@
 import { IDocument } from "@visian/ui-shared";
+
 import {
   BooleanParameter,
-  LayerParameter,
   NumberRangeParameter,
   Parameter,
 } from "../../parameters";
@@ -14,28 +14,6 @@ export class DensityTransferFunction extends TransferFunction<"density"> {
         name: "density",
         labelTx: "tf-density",
         params: [
-          new LayerParameter(
-            {
-              name: "annotation",
-              labelTx: "annotation-layer",
-              defaultValue: undefined,
-              filter: (layer) => layer.isAnnotation,
-              onBeforeValueChange: () =>
-                document.viewport3D?.onTransferFunctionChange(),
-            },
-            document,
-          ) as Parameter<unknown>,
-          new LayerParameter(
-            {
-              name: "image",
-              labelTx: "image-layer",
-              defaultValue: undefined,
-              filter: (layer) => !layer.isAnnotation,
-              onBeforeValueChange: () =>
-                document.viewport3D?.onTransferFunctionChange(),
-            },
-            document,
-          ) as Parameter<unknown>,
           new BooleanParameter({
             name: "useBlockyContext",
             labelTx: "use-blocky-context",
@@ -65,15 +43,5 @@ export class DensityTransferFunction extends TransferFunction<"density"> {
     );
 
     this.laoBrightnessFactor = 2.5;
-  }
-
-  public activate() {
-    if (!this.document.getLayer(this.params.annotation.value as string)) {
-      this.params.annotation.reset();
-    }
-
-    if (!this.document.getLayer(this.params.image.value as string)) {
-      this.params.image.reset();
-    }
   }
 }
