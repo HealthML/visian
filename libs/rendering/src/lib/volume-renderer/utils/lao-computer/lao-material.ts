@@ -1,4 +1,5 @@
 import { IEditor } from "@visian/ui-shared";
+import { IDisposer } from "@visian/utils";
 import { reaction } from "mobx";
 import * as THREE from "three";
 
@@ -9,6 +10,8 @@ import { totalLAORays } from "./lao-computer";
 import { getLAODirectionTexture } from "./lao-directions";
 
 export class LAOMaterial extends THREE.ShaderMaterial {
+  private disposers: IDisposer[];
+
   constructor(
     editor: IEditor,
     firstDerivativeTexture: THREE.Texture,
@@ -31,19 +34,21 @@ export class LAOMaterial extends THREE.ShaderMaterial {
     this.uniforms.uInputFirstDerivative.value = firstDerivativeTexture;
     this.uniforms.uInputSecondDerivative.value = secondDerivativeTexture;
 
-    // TODO: Dispose
-    reaction(
-      () =>
-        editor.activeDocument?.layers.filter((layer) => layer.kind === "image")
-          .length || 0,
-      (layerCount: number) => {
-        this.fragmentShader = composeLayeredShader(
-          laoFragmentShader,
-          layerCount,
-        );
-        this.needsUpdate = true;
-      },
-    );
+    this.disposers = [
+      reaction(
+        () =>
+          editor.activeDocument?.layers.filter(
+            (layer) => layer.kind === "image",
+          ).length || 0,
+        (layerCount: number) => {
+          this.fragmentShader = composeLayeredShader(
+            laoFragmentShader,
+            layerCount,
+          );
+          this.needsUpdate = true;
+        },
+      ),
+    ];
   }
 
   public setPreviousDirections(amount: number) {
@@ -58,6 +63,11 @@ export class LAOMaterial extends THREE.ShaderMaterial {
 
   public get previousDirections() {
     return this.uniforms.uPreviousDirections.value;
+  }
+
+  public dispose() {
+    super.dispose();
+    this.disposers.forEach((disposer) => disposer());
   }
 }
 

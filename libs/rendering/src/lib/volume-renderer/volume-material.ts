@@ -1,5 +1,5 @@
 import { IEditor } from "@visian/ui-shared";
-import { IDisposable } from "@visian/utils";
+import { IDisposable, IDisposer } from "@visian/utils";
 import { reaction } from "mobx";
 import * as THREE from "three";
 
@@ -10,6 +10,8 @@ import { composeLayeredShader, SharedUniforms } from "./utils";
 export class VolumeMaterial
   extends THREE.ShaderMaterial
   implements IDisposable {
+  private disposers: IDisposer[];
+
   constructor(
     editor: IEditor,
     sharedUniforms: SharedUniforms,
@@ -41,18 +43,25 @@ export class VolumeMaterial
     this.uniforms.uOutputFirstDerivative.value = outputDerivative;
     this.uniforms.uLAO.value = lao;
 
-    // TODO: Dispose
-    reaction(
-      () =>
-        editor.activeDocument?.layers.filter((layer) => layer.kind === "image")
-          .length || 0,
-      (layerCount: number) => {
-        this.fragmentShader = composeLayeredShader(
-          volumeFragmentShader,
-          layerCount,
-        );
-        this.needsUpdate = true;
-      },
-    );
+    this.disposers = [
+      reaction(
+        () =>
+          editor.activeDocument?.layers.filter(
+            (layer) => layer.kind === "image",
+          ).length || 0,
+        (layerCount: number) => {
+          this.fragmentShader = composeLayeredShader(
+            volumeFragmentShader,
+            layerCount,
+          );
+          this.needsUpdate = true;
+        },
+      ),
+    ];
+  }
+
+  public dispose() {
+    super.dispose();
+    this.disposers.forEach((disposer) => disposer());
   }
 }
