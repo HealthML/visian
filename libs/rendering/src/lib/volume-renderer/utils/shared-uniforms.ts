@@ -217,7 +217,6 @@ export class SharedUniforms implements IDisposable {
               : layer.opacity * opacityFactor
             : 0,
         );
-        console.log(this.uniforms.uLayerOpacities.value);
         this.uniforms.uLayerColors.value = layers.map(
           (layer) =>
             new THREE.Color(
