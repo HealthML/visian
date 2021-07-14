@@ -5,7 +5,6 @@ import {
   IEditor,
   IImageLayer,
   INumberRangeParameter,
-  Theme,
 } from "@visian/ui-shared";
 import { IDisposable, IDisposer } from "@visian/utils";
 import { autorun, reaction } from "mobx";
@@ -110,19 +109,6 @@ export class SharedUniforms implements IDisposable {
         editor.activeDocument?.volumeRenderer?.lazyRender(true);
       }),
       autorun(() => {
-        const layerId =
-          editor.activeDocument?.viewport3D.activeTransferFunction?.params
-            .annotation?.value;
-
-        const focusOpacity = layerId
-          ? editor.activeDocument?.getLayer(layerId as string)?.opacity ?? 1
-          : 1;
-
-        this.uniforms.uFocusOpacity.value = focusOpacity;
-
-        editor.activeDocument?.volumeRenderer?.lazyRender(true);
-      }),
-      autorun(() => {
         const transferFunctionName =
           editor.activeDocument?.viewport3D.activeTransferFunction?.name;
         this.uniforms.uTransferFunction.value = transferFunctionName
@@ -134,22 +120,6 @@ export class SharedUniforms implements IDisposable {
       autorun(() => {
         this.uniforms.uOpacity.value =
           editor.activeDocument?.viewport3D.opacity ?? 1;
-
-        editor.activeDocument?.volumeRenderer?.lazyRender(true);
-      }),
-      autorun(() => {
-        const layerId =
-          editor.activeDocument?.viewport3D.activeTransferFunction?.params.image
-            ?.value;
-
-        const contextOpacity = layerId
-          ? editor.activeDocument?.getLayer(layerId as string)?.opacity ?? 1
-          : 1;
-
-        const opacityFactor =
-          (editor.activeDocument?.viewport3D.activeTransferFunction?.params
-            .contextOpacity?.value as number | undefined) ?? 1;
-        this.uniforms.uContextOpacity.value = contextOpacity * opacityFactor;
 
         editor.activeDocument?.volumeRenderer?.lazyRender(true);
       }),
@@ -255,8 +225,15 @@ export class SharedUniforms implements IDisposable {
         this.uniforms.uLayerAnnotationStatuses.value = layers.map(
           (layer) => layer.isAnnotation,
         );
+        const opacityFactor =
+          (editor.activeDocument?.viewport3D.activeTransferFunction?.params
+            .contextOpacity?.value as number | undefined) ?? 1;
         this.uniforms.uLayerOpacities.value = layers.map((layer) =>
-          layer.isVisible ? layer.opacity : 0,
+          layer.isVisible
+            ? layer.isAnnotation
+              ? layer.opacity
+              : layer.opacity * opacityFactor
+            : 0,
         );
         this.uniforms.uLayerColors.value = layers.map(
           (layer) =>
@@ -267,32 +244,19 @@ export class SharedUniforms implements IDisposable {
               )({ theme: editor.theme }),
             ),
         );
+        // TODO: Only update lighting if required
+        editor.activeDocument?.volumeRenderer?.lazyRender(true);
       }),
       reaction(
         () => {
-          const imageId =
-            editor.activeDocument?.viewport3D.activeTransferFunction?.params
-              .image?.value;
-
-          if (!imageId) return undefined;
-
-          const imageLayer = editor.activeDocument?.getLayer(imageId as string);
+          const imageLayer = editor.activeDocument?.layers[0];
 
           if (!imageLayer) return undefined;
 
-          return [
-            imageLayer as IImageLayer,
-            imageLayer.color,
-            editor.theme,
-          ] as [IImageLayer, string | undefined, Theme];
+          return imageLayer as IImageLayer;
         },
-        (
-          params?: [IImageLayer, string | undefined, Theme],
-          previousParams?: [IImageLayer, string | undefined, Theme],
-        ) => {
-          if (!params) return editor.volumeRenderer?.lazyRender();
-
-          const [imageLayer, imageColor, theme] = params;
+        (imageLayer?: IImageLayer, previousImageLayer?: IImageLayer) => {
+          if (!imageLayer) return editor.volumeRenderer?.lazyRender();
 
           const baseImage = imageLayer.image as RenderedImage;
 
@@ -300,64 +264,10 @@ export class SharedUniforms implements IDisposable {
           this.uniforms.uAtlasGrid.value = baseImage.getAtlasGrid();
           this.uniforms.uStepSize.value = getStepSize(baseImage);
 
-          (this.uniforms.uContextColor.value as THREE.Color).set(
-            color(
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              (imageColor as any) || "foreground",
-            )({ theme }),
-          );
-
-          const previousImageLayer = previousParams
-            ? previousParams[0]
-            : undefined;
           const shouldUpdateLighting = imageLayer.id !== previousImageLayer?.id;
-
-          editor.volumeRenderer?.lazyRender(shouldUpdateLighting);
-        },
-        { fireImmediately: true },
-      ),
-      reaction(
-        () => {
-          const imageId =
-            editor.activeDocument?.viewport3D.activeTransferFunction?.params
-              .annotation?.value;
-
-          if (!imageId) return undefined;
-
-          const imageLayer = editor.activeDocument?.getLayer(imageId as string);
-
-          if (!imageLayer) return undefined;
-
-          return [
-            imageLayer as IImageLayer,
-            imageLayer.color,
-            editor.theme,
-          ] as [IImageLayer, string | undefined, Theme];
-        },
-        (
-          params?: [IImageLayer, string | undefined, Theme],
-          previousParams?: [IImageLayer, string | undefined, Theme],
-        ) => {
-          if (params) {
-            const [imageLayer, imageColor, theme] = params;
-
-            (this.uniforms.uFocusColor.value as THREE.Color).set(
-              color(
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                (imageColor as any) || "foreground",
-              )({ theme }),
-            );
-
-            const previousImageLayer = previousParams
-              ? previousParams[0]
-              : undefined;
-            const shouldUpdateLighting =
-              imageLayer.id !== previousImageLayer?.id;
-
-            editor.volumeRenderer?.lazyRender(shouldUpdateLighting);
-          } else {
-            editor.activeDocument?.volumeRenderer?.lazyRender(true);
-          }
+          editor.activeDocument?.volumeRenderer?.lazyRender(
+            shouldUpdateLighting,
+          );
         },
         { fireImmediately: true },
       ),

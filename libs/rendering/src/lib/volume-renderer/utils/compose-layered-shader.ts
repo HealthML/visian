@@ -4,12 +4,17 @@ const generateReduceLayerStack = (
   uvName = "uv",
   reduceAnnotations?: boolean,
 ) => {
-  let fragment = "float _alpha = 0.0;\n";
+  const alpha = `_alpha${Math.floor(Math.random() * 1000)}`;
+  let fragment = `float ${alpha} = 0.0;\n`;
   for (let i = 0; i < layerCount; i++) {
+    const filter = `(${
+      reduceAnnotations ? "" : "1.0 - "
+    }float(uLayerAnnotationStatuses[${i}]))`;
+
     fragment += `
-    _alpha = texture2D(uLayerData[${i}], ${uvName}).r * uLayerOpacities[${i}];
-    ${outputName}.rgb += (1.0 - ${outputName}.a) * uLayerColors[${i}] * _alpha;
-    ${outputName}.a += (1.0 - ${outputName}.a) * _alpha;\n
+    ${alpha} = texture2D(uLayerData[${i}], ${uvName}).r * uLayerOpacities[${i}];
+    ${outputName}.rgb += ${filter} * (1.0 - ${outputName}.a) * uLayerColors[${i}] * ${alpha};
+    ${outputName}.a += ${filter} * (1.0 - ${outputName}.a) * ${alpha};\n
     `;
   }
   return fragment;
