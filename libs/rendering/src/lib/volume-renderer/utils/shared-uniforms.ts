@@ -84,27 +84,9 @@ export class SharedUniforms implements IDisposable {
         editor.activeDocument?.volumeRenderer?.lazyRender(shouldUpdateLighting);
       }),
       autorun(() => {
-        const focusId = editor.activeDocument?.viewport3D.activeTransferFunction
-          ?.params.annotation?.value as string | undefined;
-
-        const isFocusSelected = Boolean(focusId);
-
-        const isLayerVisibilityOverridden = Boolean(
-          editor.activeDocument?.viewport3D.activeTransferFunction?.params
-            .useFocus,
-        );
-
-        const isFocusLayerVisible = focusId
-          ? editor.activeDocument?.getLayer(focusId)?.isVisible
-          : undefined;
-
         this.uniforms.uUseFocus.value =
-          (isFocusSelected &&
-            (isLayerVisibilityOverridden
-              ? editor.activeDocument?.viewport3D.activeTransferFunction?.params
-                  .useFocus?.value
-              : isFocusLayerVisible)) ??
-          false;
+          editor.activeDocument?.viewport3D.activeTransferFunction?.params
+            .useFocus?.value ?? true;
 
         editor.activeDocument?.volumeRenderer?.lazyRender(true);
       }),
@@ -235,6 +217,7 @@ export class SharedUniforms implements IDisposable {
               : layer.opacity * opacityFactor
             : 0,
         );
+        console.log(this.uniforms.uLayerOpacities.value);
         this.uniforms.uLayerColors.value = layers.map(
           (layer) =>
             new THREE.Color(
