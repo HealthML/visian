@@ -42,14 +42,9 @@ export class GradientComputer implements IDisposable {
     this.reactionDisposers.push(
       reaction(
         () => {
-          const imageId =
-            editor.activeDocument?.viewport3D.activeTransferFunction?.params
-              .image?.value;
-
-          if (!imageId) return undefined;
-
-          const imageLayer = editor.activeDocument?.getLayer(imageId as string);
-
+          const imageLayer = editor.activeDocument?.layers.find(
+            (layer) => layer.kind === "image",
+          );
           if (!imageLayer) return undefined;
 
           return (imageLayer as IImageLayer).image;

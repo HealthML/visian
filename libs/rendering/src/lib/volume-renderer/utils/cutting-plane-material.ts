@@ -1,7 +1,8 @@
-import { IEditor, IImageLayer, ILayerParameter } from "@visian/ui-shared";
+import { IEditor, IImageLayer } from "@visian/ui-shared";
 import { IDisposer } from "@visian/utils";
-import { reaction } from "mobx";
+import { autorun } from "mobx";
 import * as THREE from "three";
+
 import { RenderedImage } from "../../rendered-image";
 import {
   cuttingPlaneFragmentShader,
@@ -24,19 +25,14 @@ export class CuttingPlaneMaterial extends THREE.ShaderMaterial {
     });
 
     this.disposers.push(
-      reaction(
-        () =>
-          (editor.activeDocument?.viewport3D.activeTransferFunction?.params
-            .image as ILayerParameter | undefined)?.value,
-        (layerId?: string) => {
-          if (!layerId) return this.setImage();
+      autorun(() => {
+        const imageLayer = editor.activeDocument?.layers.find(
+          (layer) => layer.kind === "image",
+        );
+        if (!imageLayer) return this.setImage();
 
-          const layer = editor.activeDocument?.getLayer(layerId);
-          if (!layer || layer.kind !== "image") return this.setImage();
-
-          this.setImage((layer as IImageLayer).image as RenderedImage);
-        },
-      ),
+        this.setImage((imageLayer as IImageLayer).image as RenderedImage);
+      }),
     );
   }
 

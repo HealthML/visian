@@ -154,18 +154,11 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
     this.disposers.push(
       reaction(
         () => {
-          const layerParameter =
-            editor.activeDocument?.viewport3D.activeTransferFunction?.params
-              .image;
-          if (!layerParameter) return undefined;
-
-          const layerId = (layerParameter as ILayerParameter).value;
-          if (!layerId) return undefined;
-
-          // As we already know that the layer parameter exist, we can be sure
-          // that the active document is not undefined.
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          const imageLayer = editor.activeDocument!.getLayer(layerId);
+          // TODO: This can't be right.
+          // @Jonas please check when the camera actually needs to be updated
+          const imageLayer = editor.activeDocument?.layers.find(
+            (layer) => layer.kind === "image",
+          );
           return imageLayer ? (imageLayer as IImageLayer).image : undefined;
         },
         () => {
