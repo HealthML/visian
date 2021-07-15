@@ -249,9 +249,7 @@ export class SharedUniforms implements IDisposable {
         editor.activeDocument?.volumeRenderer?.lazyRender();
       }),
       autorun(() => {
-        const imageLayer = editor.activeDocument?.layers.find(
-          (layer) => layer.kind === "image",
-        );
+        const imageLayer = editor.activeDocument?.baseImageLayer;
         if (!imageLayer) return;
 
         const image = (imageLayer as IImageLayer).image as RenderedImage;

@@ -294,11 +294,7 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
   };
 
   private eagerRender = () => {
-    if (
-      !this.editor.activeDocument?.layers.find(
-        (layer) => layer.kind === "image",
-      )
-    ) {
+    if (!this.editor.activeDocument?.baseImageLayer) {
       this.renderer.clear();
       return;
     }

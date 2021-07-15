@@ -26,9 +26,7 @@ export class CuttingPlaneMaterial extends THREE.ShaderMaterial {
 
     this.disposers.push(
       autorun(() => {
-        const imageLayer = editor.activeDocument?.layers.find(
-          (layer) => layer.kind === "image",
-        );
+        const imageLayer = editor.activeDocument?.baseImageLayer;
         if (!imageLayer) return this.setImage();
 
         this.setImage((imageLayer as IImageLayer).image as RenderedImage);
