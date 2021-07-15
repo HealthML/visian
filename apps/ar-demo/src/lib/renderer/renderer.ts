@@ -1,6 +1,7 @@
 import * as THREE from "three";
 
 import { IDisposable } from "..";
+import { USE_HIT_TEST } from "../../constants";
 import * as SCAN from "../staticScan";
 import {
   defaultStructureColor,
@@ -216,8 +217,8 @@ export default class Renderer implements IDisposable {
     this.domOverlay.style.display = "";
 
     const sessionInit = {
-      requiredFeatures: ["hit-test"],
-      optionalFeatures: ["dom-overlay"],
+      requiredFeatures: [],
+      optionalFeatures: ["hit-test", "dom-overlay"],
       domOverlay: { root: this.domOverlay },
     };
 
@@ -232,9 +233,11 @@ export default class Renderer implements IDisposable {
         this.renderer.xr.setReferenceSpaceType("local");
         this.renderer.xr.setSession(session);
 
-        this.reticle.activate();
+        if (USE_HIT_TEST) {
+          this.reticle.activate();
+        }
 
-        this.scanContainer.visible = false;
+        this.scanContainer.visible = !USE_HIT_TEST;
 
         this.updateUI();
 
@@ -269,6 +272,7 @@ export default class Renderer implements IDisposable {
 
         this.reticle.hide();
 
+        // TODO: Fix camera reset
         if (this.oldCameraPosition) {
           this.camera.position.copy(this.oldCameraPosition);
           this.oldCameraPosition = undefined;
@@ -301,16 +305,20 @@ export default class Renderer implements IDisposable {
   private onARSelect = () => {
     if (!this.acceptARSelect) return;
 
-    this.scanContainer.visible = true;
+    if (USE_HIT_TEST) {
+      this.scanContainer.visible = true;
 
-    if (this.reticle.active) {
-      if (this.reticle.visible) {
-        this.scanContainer.position.setFromMatrixPosition(this.reticle.matrix);
+      if (this.reticle.active) {
+        if (this.reticle.visible) {
+          this.scanContainer.position.setFromMatrixPosition(
+            this.reticle.matrix,
+          );
 
-        this.reticle.activate(false);
+          this.reticle.activate(false);
+        }
+      } else {
+        this.reticle.activate();
       }
-    } else {
-      this.reticle.activate();
     }
   };
 
