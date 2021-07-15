@@ -56,6 +56,10 @@ export class Volume extends THREE.Mesh implements IDisposable {
           .multiplyScalar(0.001);
 
         this.scale.set(scale.x, scale.y, scale.z);
+
+        // The camera position has to be converted to the new volume coordinate system.
+        editor.volumeRenderer?.updateCameraPosition();
+        editor.volumeRenderer?.lazyRender();
       }),
     );
   }

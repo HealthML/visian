@@ -1,10 +1,4 @@
-import {
-  IEditor,
-  IImageLayer,
-  ILayerParameter,
-  isPerformanceLow,
-  IVolumeRenderer,
-} from "@visian/ui-shared";
+import { IEditor, isPerformanceLow, IVolumeRenderer } from "@visian/ui-shared";
 import { IDisposable, IDisposer } from "@visian/utils";
 import { autorun, reaction } from "mobx";
 import * as THREE from "three";
@@ -152,19 +146,6 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
     this.stats.dom.style.left = "auto";
 
     this.disposers.push(
-      reaction(
-        () => {
-          // TODO: This can't be right.
-          // @Jonas please check when the camera actually needs to be updated
-          const imageLayer = editor.activeDocument?.layers.find(
-            (layer) => layer.kind === "image",
-          );
-          return imageLayer ? (imageLayer as IImageLayer).image : undefined;
-        },
-        () => {
-          this.onCameraMove(false);
-        },
-      ),
       reaction(
         () => editor.activeDocument?.viewSettings.viewMode,
         (viewMode) => {
@@ -364,7 +345,7 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
   /**
    * @see https://davidpeicho.github.io/blog/cloud-raymarching-walkthrough-part1/
    */
-  private updateCameraPosition(camera: THREE.Camera = this.camera) {
+  public updateCameraPosition(camera: THREE.Camera = this.camera) {
     this.volume.updateMatrixWorld();
 
     this.workingVector.setFromMatrixPosition(camera.matrixWorld);

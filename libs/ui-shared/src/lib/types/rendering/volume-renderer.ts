@@ -17,6 +17,7 @@ export interface IVolumeRenderer {
 
   animate(): void;
 
+  updateCameraPosition(): void;
   resetScene(hardReset?: boolean): void;
   resize(): void;
   lazyRender(updateLighting?: boolean): void;
