@@ -191,21 +191,29 @@ export class SharedUniforms implements IDisposable {
         editor.activeDocument?.volumeRenderer?.lazyRender(true);
       }),
       autorun(() => {
-        const useNearestFiltering = Boolean(
-          editor.activeDocument?.viewport3D.activeTransferFunction?.params
-            .useBlockyContext?.value,
-        );
-
         const layers = (editor.activeDocument?.layers.filter(
           (layer) => layer.kind === "image",
         ) || []) as IImageLayer[];
 
+        const useNearestFiltering = Boolean(
+          editor.activeDocument?.viewport3D.activeTransferFunction?.params
+            .useBlockyContext?.value,
+        );
         this.uniforms.uLayerData.value = layers.map((layer) =>
           ((layer as IImageLayer).image as RenderedImage).getTexture(
             0,
             useNearestFiltering ? THREE.NearestFilter : THREE.LinearFilter,
           ),
         );
+
+        editor.activeDocument?.viewport3D.onTransferFunctionChange();
+        editor.activeDocument?.volumeRenderer?.lazyRender(true);
+      }),
+      autorun(() => {
+        const layers = (editor.activeDocument?.layers.filter(
+          (layer) => layer.kind === "image",
+        ) || []) as IImageLayer[];
+
         this.uniforms.uLayerAnnotationStatuses.value = layers.map(
           (layer) => layer.isAnnotation,
         );
@@ -220,7 +228,14 @@ export class SharedUniforms implements IDisposable {
             : 0,
         );
 
-        // TODO: Do not update lighting for color change only
+        editor.activeDocument?.viewport3D.onTransferFunctionChange();
+        editor.activeDocument?.volumeRenderer?.lazyRender(true);
+      }),
+      autorun(() => {
+        const layers = (editor.activeDocument?.layers.filter(
+          (layer) => layer.kind === "image",
+        ) || []) as IImageLayer[];
+
         this.uniforms.uLayerColors.value = layers.map(
           (layer) =>
             new THREE.Color(
@@ -231,8 +246,7 @@ export class SharedUniforms implements IDisposable {
             ),
         );
 
-        editor.activeDocument?.viewport3D.onTransferFunctionChange();
-        editor.activeDocument?.volumeRenderer?.lazyRender(true);
+        editor.activeDocument?.volumeRenderer?.lazyRender();
       }),
       autorun(() => {
         const imageLayer = editor.activeDocument?.layers.find(
