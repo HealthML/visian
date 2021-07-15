@@ -16,8 +16,7 @@ export class XRManager implements IXRManager {
   protected endGrab = (controller: THREE.Group) => {
     if (controller.userData.selected !== undefined) {
       const object = controller.userData.selected;
-      object.userData.selections =
-        (this.renderer.volume.userData.selections || 1) - 1;
+      object.userData.selections = (object.userData.selections || 1) - 1;
       controller.userData.selected = undefined;
       if (!object.userData.selections) {
         this.renderer.scene.attach(object);

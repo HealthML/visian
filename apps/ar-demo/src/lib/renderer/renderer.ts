@@ -241,9 +241,20 @@ export default class Renderer implements IDisposable {
 
         this.updateUI();
 
-        const controller = this.renderer.xr.getController(0);
-        controller.addEventListener("select", this.onARSelect);
-        this.scene.add(controller);
+        // TODO: The HoloLens sadly does not stay consistent in its controller enumeration.
+        // Instead, the primary (right) hand is controller 0, as long as it is visible.
+        // If only the other (left) hand is visible, it becomes controller 0
+        // until the primary hand becomes visible (again).
+        // This has to be accounted for when trying to ensure continous drag & drop interactions.
+        const controller1 = this.renderer.xr.getController(0);
+        controller1.addEventListener("selectstart", this.onARSelect);
+        controller1.addEventListener("selectend", this.onARDeselect);
+
+        const controller2 = this.renderer.xr.getController(1);
+        controller2.addEventListener("selectstart", this.onARSelect);
+        controller2.addEventListener("selectend", this.onARDeselect);
+
+        this.scene.add(controller1);
       })
       .catch((e) => {
         // eslint-disable-next-line no-console
@@ -267,8 +278,13 @@ export default class Renderer implements IDisposable {
         // The XR session hides everything else. So we have to show it again.
         document.getElementById("root")?.setAttribute("style", "");
 
-        const controller = this.renderer.xr.getController(0);
-        controller.removeEventListener("select", this.onARSelect);
+        const controller1 = this.renderer.xr.getController(0);
+        controller1.removeEventListener("selectstart", this.onARSelect);
+        controller1.removeEventListener("selectend", this.onARDeselect);
+
+        const controller2 = this.renderer.xr.getController(1);
+        controller2.removeEventListener("selectstart", this.onARSelect);
+        controller2.removeEventListener("selectend", this.onARDeselect);
 
         this.reticle.hide();
 
@@ -302,7 +318,25 @@ export default class Renderer implements IDisposable {
       });
   };
 
-  private onARSelect = () => {
+  // Controller Interaction
+  protected startGrab = (controller: THREE.Group) => {
+    controller.attach(this.scanContainer);
+    this.scanContainer.userData.selections =
+      (this.scanContainer.userData.selections || 0) + 1;
+    controller.userData.selected = this.scanContainer;
+  };
+  protected endGrab = (controller: THREE.Group) => {
+    if (controller.userData.selected !== undefined) {
+      const object = controller.userData.selected;
+      object.userData.selections = (object.userData.selections || 1) - 1;
+      controller.userData.selected = undefined;
+      if (!object.userData.selections) {
+        this.scene.attach(object);
+      }
+    }
+  };
+
+  private onARSelect = (event: THREE.Event) => {
     if (!this.acceptARSelect) return;
 
     if (USE_HIT_TEST) {
@@ -319,6 +353,14 @@ export default class Renderer implements IDisposable {
       } else {
         this.reticle.activate();
       }
+    } else {
+      this.startGrab(event.target);
+    }
+  };
+
+  private onARDeselect = (event: THREE.Event) => {
+    if (!USE_HIT_TEST) {
+      this.endGrab(event.target);
     }
   };
 
