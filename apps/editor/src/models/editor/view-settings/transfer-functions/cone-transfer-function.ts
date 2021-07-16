@@ -55,8 +55,6 @@ export class ConeTransferFunction
       coneDirection: observable,
       setConeDirection: action,
     });
-
-    this.laoBrightnessFactor = 2.5;
   }
 
   public setConeDirection(x: number, y: number, z: number) {

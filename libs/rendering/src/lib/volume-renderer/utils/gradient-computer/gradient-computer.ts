@@ -56,10 +56,15 @@ export class GradientComputer implements IDisposable {
           this.secondDerivativeRenderTarget.setSize(atlasSize.x, atlasSize.y);
           this.outputDerivativeRenderTarget.setSize(atlasSize.x, atlasSize.y);
 
-          this.updateFirstDerivative();
-          this.updateSecondDerivative();
-          this.updateOutputDerivative();
+          this.updateAllDerivatives();
         },
+      ),
+      reaction(
+        () =>
+          editor.activeDocument?.layers
+            .filter((layer) => layer.kind === "image" && layer.isVisible)
+            .map((layer) => layer.id),
+        this.updateAllDerivatives,
       ),
     );
   }
@@ -95,6 +100,12 @@ export class GradientComputer implements IDisposable {
   public getOutputDerivative() {
     return this.outputDerivativeRenderTarget.texture;
   }
+
+  private updateAllDerivatives = () => {
+    this.updateFirstDerivative();
+    this.updateSecondDerivative();
+    this.updateOutputDerivative();
+  };
 
   private updateFirstDerivative() {
     this.firstDerivativeDirty = true;

@@ -139,10 +139,7 @@ export class SharedUniforms implements IDisposable {
       autorun(() => {
         const brightness = editor.activeDocument?.viewSettings.brightness ?? 1;
         const factor =
-          editor.activeDocument?.viewport3D.shadingMode === "lao"
-            ? editor.activeDocument?.viewport3D.activeTransferFunction
-                ?.laoBrightnessFactor ?? 1
-            : 1;
+          editor.activeDocument?.viewport3D.shadingMode === "lao" ? 2.5 : 1;
 
         this.uniforms.uBrightness.value = brightness * factor;
 
@@ -217,6 +214,8 @@ export class SharedUniforms implements IDisposable {
         this.uniforms.uLayerAnnotationStatuses.value = layers.map(
           (layer) => layer.isAnnotation,
         );
+
+        // TODO: This factor probably doesn't belong here.
         const opacityFactor =
           (editor.activeDocument?.viewport3D.activeTransferFunction?.params
             .contextOpacity?.value as number | undefined) ?? 1;
