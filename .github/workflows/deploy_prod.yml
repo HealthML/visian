@@ -22,7 +22,7 @@ jobs:
         with:
           node-version: "14"
       - run: yarn install --frozen-lockfile
-      - run: yarn build editor editor --prod --skip-nx-cache --baseHref ${NX_DEPLOY_URL:-/} --deployUrl ${NX_DEPLOY_URL:-/}
+      - run: yarn build editor editor --prod --skip-nx-cache --baseHref ${NX_DEPLOY_URL:-/} --deployUrl ${NX_DEPLOY_URL:-/} --webpackConfig apps/editor/webpack.prod.config.js
 
       - name: Deploy to production
         uses: peaceiris/actions-gh-pages@v3
