@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="100%" height="100%" viewBox="0 0 20 20" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;">
+    <g transform="matrix(1,0,0,1,-1889.33,-287)">
+        <g id="Artboard1" transform="matrix(0.5,0,0,0.5,1889.33,287)">
+            <rect x="0" y="0" width="40" height="40" style="fill:none;"/>
+            <g transform="matrix(2,0,0,2,-3778.66,-574)">
+                <path d="M1899.33,296.293L1894.18,291.146C1893.99,290.951 1893.67,290.951 1893.48,291.146C1893.28,291.342 1893.28,291.658 1893.48,291.854L1898.62,297L1893.48,302.146C1893.28,302.342 1893.28,302.658 1893.48,302.854C1893.67,303.049 1893.99,303.049 1894.18,302.854L1899.33,297.707L1904.48,302.854C1904.67,303.049 1904.99,303.049 1905.18,302.854C1905.38,302.658 1905.38,302.342 1905.18,302.146L1900.04,297L1905.18,291.854C1905.38,291.658 1905.38,291.342 1905.18,291.146C1904.99,290.951 1904.67,290.951 1904.48,291.146L1899.33,296.293Z"/>
+            </g>
+        </g>
+    </g>
+</svg>

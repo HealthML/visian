@@ -1,0 +1,125 @@
+import {
+  getAtlasGrid,
+  getAtlasIndexFor,
+  getAtlasSize,
+  getScanVoxelFor,
+} from "../../io/texture-atlas";
+import { Voxel } from "../../types";
+import { Vector } from "../vector";
+import { getOrthogonalAxis, getPlaneAxes, ViewType } from "../view-types";
+
+import type { Image } from "./image";
+
+/**
+ * Iterates over a particular slice in the plane of the given view type
+ * until the predicate returns true.
+ *
+ * @param image The image.
+ * @param viewType The view's type, dictating the orientation of the search plane.
+ * @param slice The index of the slice to search.
+ * @param predicate The predicate.
+ * @param atlasSize The size of the texture atlas in pixels.
+ * @param atlasGrid The number of slices in the texture atlas in x/y direction.
+ * @returns The voxel coordinates, value, and index for which the predicate first returned true.
+ */
+export const findVoxelInSlice = (
+  image: Pick<Image, "getAtlas" | "voxelComponents" | "voxelCount">,
+  viewType: ViewType,
+  slice: number,
+  predicate: (
+    voxel: Vector & Voxel,
+    value: number,
+    index: number,
+  ) => boolean | undefined | void,
+  atlasGrid = getAtlasGrid(image.voxelCount),
+  atlasSize = getAtlasSize(image.voxelCount, atlasGrid),
+) => {
+  const atlas = image.getAtlas();
+  const { voxelCount } = image;
+
+  const fixedCoordinate = getOrthogonalAxis(viewType);
+  const [horizontalAxis, verticalAxis] = getPlaneAxes(viewType);
+  const horizontalCount = voxelCount[horizontalAxis];
+  const verticalCount = voxelCount[verticalAxis];
+  for (let vertical = 0; vertical < verticalCount; vertical++) {
+    for (let horizontal = 0; horizontal < horizontalCount; horizontal++) {
+      const voxel = Vector.fromObject(
+        {
+          [fixedCoordinate]: slice,
+          [horizontalAxis]: horizontal,
+          [verticalAxis]: vertical,
+        } as { x: number; y: number; z: number },
+        false,
+      );
+
+      const index = getAtlasIndexFor(voxel, image, atlasGrid, atlasSize);
+      const value = atlas[index];
+
+      if (predicate(voxel, value, index)) {
+        return { voxel, value, index };
+      }
+    }
+  }
+};
+
+/**
+ * Iterates over the given image's texture atlas until the predicate returns true.
+ *
+ * @param image The image.
+ * @param predicate The predicate.
+ * @param atlasSize The size of the texture atlas in pixels.
+ * @param atlasGrid The number of slices in the texture atlas in x/y direction.
+ * @returns The voxel coordinates, value, and index for which the predicate first returned true.
+ */
+export const findVoxelInAtlas = (
+  image: Pick<Image, "getAtlas" | "voxelComponents" | "voxelCount">,
+  predicate: (
+    voxel: Vector & Voxel,
+    value: number,
+    index: number,
+  ) => boolean | undefined | void,
+  atlasGrid = getAtlasGrid(image.voxelCount),
+  atlasSize = getAtlasSize(image.voxelCount, atlasGrid),
+) => {
+  const atlas = image.getAtlas();
+  const atlasLength = atlas.length;
+
+  for (let index = 0; index < atlasLength; index++) {
+    const value = atlas[index];
+    const voxel = getScanVoxelFor(index, image, atlasGrid, atlasSize);
+    if (predicate(voxel, value, index)) {
+      return { voxel, value, index };
+    }
+  }
+};
+
+/**
+ * Returns an array of boolean arrays that indicate for each slice and
+ * `ViewType` if the slice is empty.
+ */
+export const getEmptySlices = (
+  image: Pick<Image, "getAtlas" | "voxelCount" | "voxelComponents">,
+) => {
+  const transverse = new Array<boolean>(
+    image.voxelCount.getFromView(ViewType.Transverse),
+  ).fill(true);
+  const sagittal = new Array<boolean>(
+    image.voxelCount.getFromView(ViewType.Sagittal),
+  ).fill(true);
+  const coronal = new Array<boolean>(
+    image.voxelCount.getFromView(ViewType.Coronal),
+  ).fill(true);
+
+  findVoxelInAtlas(image, (voxel, value) => {
+    if (!value) return;
+    transverse[voxel.getFromView(ViewType.Transverse)] = false;
+    sagittal[voxel.getFromView(ViewType.Sagittal)] = false;
+    coronal[voxel.getFromView(ViewType.Coronal)] = false;
+  });
+
+  const returnedArray: boolean[][] = [];
+  returnedArray[ViewType.Transverse] = transverse;
+  returnedArray[ViewType.Sagittal] = sagittal;
+  returnedArray[ViewType.Coronal] = coronal;
+  return returnedArray;
+};

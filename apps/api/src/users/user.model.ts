@@ -1,25 +1,25 @@
 import { Field } from "@nestjs/graphql";
 import { NodeInterface, NodeType } from "nestjs-relay";
 
-export interface UserDTO {
-  id: string;
-  email: string;
-  name: string;
-}
+import { UserEntity } from "./user.entity";
 
-@NodeType()
-export class User extends NodeInterface {
-  constructor(props: UserDTO) {
-    super();
-    Object.assign(this, props);
-  }
-
+@NodeType("User")
+export class UserModel extends NodeInterface {
   @Field({ description: "The user's email address." })
-  email: string;
+  public email: string;
 
   @Field({ description: "The user name displayed in the UI." })
-  name: string;
+  public name: string;
 
   // The `password` should never be passed to the client.
   // Thus, we do not need to include it in our API.
+
+  constructor(props: UserEntity) {
+    super();
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    this.id = props.id as any;
+    this.email = props.email;
+    this.name = props.name;
+  }
 }

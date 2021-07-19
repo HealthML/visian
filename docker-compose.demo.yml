@@ -1,0 +1,10 @@
+version: "3"
+services:
+  ar-demo:
+    build:
+      context: .
+      args:
+        app: ar-demo
+    ports:
+      - ${AR_PORT:-8000}:80
+    restart: always
