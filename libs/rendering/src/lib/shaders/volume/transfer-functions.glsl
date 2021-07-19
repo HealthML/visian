@@ -50,7 +50,7 @@ vec4 baseTransferFunction(VolumeData data, vec3 volumeCoords) {
   }
 
   // Density
-  vec4 densityColor = vec4(((data.image.a - uLimitLow) / (uLimitHigh - uLimitLow)) * step(uLimitLow, data.image.a) * (1.0 - step(uLimitHigh, data.image.a)));
+  vec4 densityColor = data.image * vec4(step(uLimitLow, data.imageRaw.a) * (1.0 - step(uLimitHigh, data.imageRaw.a)));
   return uUseFocus ?
       densityColor * data.annotation.a
     : densityColor;

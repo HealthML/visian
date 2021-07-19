@@ -41,10 +41,11 @@ vec4 getImageValue(vec3 voxelCoords) {
   vec2 uv = ((voxelCoords.xy + vec2(0.5)) / uVoxelCount.xy / uAtlasGrid + uvOffset);
 
   vec4 imageValue = vec4(0.0);
+  vec4 imageValueRaw = vec4(0.0);
   if (uGradientMode == 2) {
     imageValue = texture2D(uInputFirstDerivative, uv);
   } else {
-    {{reduceLayerStack(imageValue, uv, false)}}
+    {{reduceLayerStack(imageValue, uv, false, imageValueRaw)}}
   }
   
   if (uGradientMode != 0) {
@@ -54,6 +55,7 @@ vec4 getImageValue(vec3 voxelCoords) {
   VolumeData data;
 
   data.image = imageValue;
+  data.imageRaw = imageValueRaw;
   data.firstDerivative = decodeVec3(texture2D(uInputFirstDerivative, uv));
   data.secondDerivative = decodeVec3(texture2D(uInputSecondDerivative, uv));
   
