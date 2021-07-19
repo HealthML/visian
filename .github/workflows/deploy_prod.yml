@@ -9,7 +9,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     env:
-      NX_DEPLOY_URL: /visian-prod/
+      NX_DEPLOY_URL: /
 
     steps:
       - uses: actions/checkout@v2
