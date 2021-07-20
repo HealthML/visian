@@ -36,9 +36,9 @@ vec4 baseTransferFunction(VolumeData data, vec3 volumeCoords) {
   if (uTransferFunction == 2) {
     float cone = sdCone(transformToCutawaySpace(volumeCoords), uConeAngle);
     float contextFactor = step(0.0, cone);
-    float filteredDensity = data.image.a * step(0.05, data.image.a);
+    vec4 filteredDensity = data.image * step(0.05, data.image.a);
 
-    vec4 contextColor = vec4(filteredDensity) * contextFactor;
+    vec4 contextColor = filteredDensity * contextFactor;
     return uUseFocus ?
         mix(contextColor, data.annotation, step(0.1, data.annotation.a))
       : contextColor;
