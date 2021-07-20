@@ -30,8 +30,28 @@ const generateReduceLayerStack = (
   return fragment;
 };
 
+const generateReduceLayerColors = (
+  layerCount: number,
+  outputName = "imageColor",
+  reduceAnnotations?: boolean,
+) => {
+  let fragment = "";
+  for (let i = 0; i < layerCount; i++) {
+    const filter = `(${
+      reduceAnnotations ? "" : "1.0 - "
+    }float(uLayerAnnotationStatuses[${i}]))`;
+
+    fragment += `
+    ${outputName}.rgb += ${filter} * (1.0 - ${outputName}.a) * uLayerColors[${i}] * uLayerOpacities[${i}];
+    ${outputName}.a += ${filter} * (1.0 - ${outputName}.a) * uLayerOpacities[${i}];
+    `;
+  }
+  return fragment;
+};
+
 const layerCountRegex = /{{layerCount}}/g;
 const reduceLayerStackRegex = /{{reduceLayerStack\((\w+),\s*(\w+),\s*(\w+)(,\s*(\w+))?\)}}/g;
+const reduceLayerColorsRegex = /{{reduceLayerColors\((\w+),\s*(\w+)\)}}/g;
 export const composeLayeredShader = (shader: string, layerCount: number) =>
   shader
     .replace(layerCountRegex, `${layerCount}`)
@@ -52,4 +72,11 @@ export const composeLayeredShader = (shader: string, layerCount: number) =>
           reduceAnnotations === "true",
           rawOutputName,
         ),
+    )
+    .replace(reduceLayerColorsRegex, (_match, outputName, reduceAnnotations) =>
+      generateReduceLayerColors(
+        layerCount,
+        outputName,
+        reduceAnnotations === "true",
+      ),
     );

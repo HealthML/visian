@@ -26,7 +26,7 @@ vec4 baseTransferFunction(VolumeData data, vec3 volumeCoords) {
   // F+C Edges
   if (uTransferFunction == 1) {
     // TODO: Add correct color and opacity
-    vec4 edgeColor = vec4(vec3(1.0), mix(0.0, 0.015, step(uLimitLow, length(data.firstDerivative)) * (1.0 - step(uLimitHigh, length(data.firstDerivative)))));
+    vec4 edgeColor = vec4(data.imageColor.rgb, data.imageColor.a * mix(0.0, 0.015, step(uLimitLow, length(data.firstDerivative)) * (1.0 - step(uLimitHigh, length(data.firstDerivative)))));
     return uUseFocus ?
         mix(edgeColor, data.annotation, step(0.1, data.annotation.a))
       : edgeColor;

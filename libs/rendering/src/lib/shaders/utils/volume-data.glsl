@@ -1,6 +1,7 @@
 struct VolumeData {
   vec4 image;
   vec4 imageRaw;
+  vec4 imageColor;
   vec4 annotation;
   vec3 firstDerivative;
   vec3 secondDerivative;
