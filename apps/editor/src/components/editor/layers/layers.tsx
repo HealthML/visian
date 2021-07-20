@@ -99,9 +99,9 @@ const LayerListItem = observer<{
 
   const { t } = useTranslation();
   const toggleAnnotation = useCallback(() => {
-    layer.setIsAnnotation(!layer.isAnnotation);
+    store?.editor.activeDocument?.toggleTypeAndRepositionLayer(layer);
     setContextMenuPosition(null);
-  }, [layer]);
+  }, [layer, store?.editor.activeDocument]);
   const exportLayer = useCallback(() => {
     if (layer.kind !== "image") return;
     (layer as ImageLayer).quickExport().then(() => {
