@@ -145,7 +145,8 @@ export const Toolbar: React.FC = observer(() => {
       >
         {activeTool?.isBrush &&
           activeTool?.name !== "bounded-smart-brush" &&
-          activeTool?.name !== "bounded-smart-eraser" && (
+          activeTool?.name !== "bounded-smart-eraser" &&
+          activeTool?.name !== "smart-brush-3d" && (
             <>
               <BooleanParam
                 labelTx="adaptive-brush-size"
