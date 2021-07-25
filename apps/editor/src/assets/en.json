@@ -28,6 +28,7 @@
   "pixel-brush": "Brush (B)",
   "smart-brush": "Smart Brush (S)",
   "bounded-smart-brush": "Bounded Smart Brush (R)",
+  "smart-brush-3d": "3D Smart Brush (D)",
   "pixel-eraser": "Eraser (E)",
   "outline-tool": "Outline Tool (O)",
   "clear-slice": "Clear Slice (Del)",
@@ -40,6 +41,8 @@
   "adaptive-brush-size": "Adaptive Brush Size",
   "threshold": "Threshold",
   "box-radius": "Bounding Box Radius",
+  "region-growing-steps": "Maximum Distance to Seed",
+  "submit-3D-region-growing": "Apply (Enter)",
   "enable-plane": "Use Cutting Plane",
   "render-plane": "Show Image on Cutting Plane",
 

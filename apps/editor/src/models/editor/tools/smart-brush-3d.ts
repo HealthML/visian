@@ -29,41 +29,17 @@ export class SmartBrush3D<N extends "smart-brush-3d"> extends Tool<N> {
             max: 244,
             stepSize: 1,
           }) as Parameter<unknown>,
-          new ButtonParameter({
-            name: "submit",
-            labelTx: "submit-3D-region-growing",
-            onClick: () => {
-              const imageLayer = this.document.activeLayer;
-              if (!imageLayer || imageLayer.kind !== "image") return;
-              const { image } = imageLayer as IImageLayer;
-              const oldAtlas = new Uint8Array(image.getAtlas());
-
-              this.regionGrowingRenderer.flushToAnnotation();
-
-              const newAtlas = new Uint8Array(image.getAtlas());
-              this.document.history.addCommand(
-                new AtlasCommand(
-                  {
-                    layerId: imageLayer.id,
-                    oldAtlas,
-                    newAtlas,
-                  },
-                  this.document,
-                ),
-              );
-
-              (imageLayer as IImageLayer).recomputeSliceMarkers(
-                undefined,
-                undefined,
-                false,
-              );
-            },
-            defaultValue: undefined as unknown,
-          }),
         ],
       },
       document,
     );
+
+    this.params.submit = new ButtonParameter({
+      name: "submit",
+      labelTx: "submit-3D-region-growing",
+      onClick: this.submit,
+      defaultValue: undefined as unknown,
+    });
   }
 
   public startAt(dragPoint: DragPoint): void {
@@ -93,4 +69,31 @@ export class SmartBrush3D<N extends "smart-brush-3d"> extends Tool<N> {
       this.isSeedSet = false;
     }
   }
+
+  public submit = () => {
+    const imageLayer = this.document.activeLayer;
+    if (!imageLayer || imageLayer.kind !== "image") return;
+    const { image } = imageLayer as IImageLayer;
+    const oldAtlas = new Uint8Array(image.getAtlas());
+
+    this.regionGrowingRenderer.flushToAnnotation();
+
+    const newAtlas = new Uint8Array(image.getAtlas());
+    this.document.history.addCommand(
+      new AtlasCommand(
+        {
+          layerId: imageLayer.id,
+          oldAtlas,
+          newAtlas,
+        },
+        this.document,
+      ),
+    );
+
+    (imageLayer as IImageLayer).recomputeSliceMarkers(
+      undefined,
+      undefined,
+      false,
+    );
+  };
 }
