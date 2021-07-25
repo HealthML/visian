@@ -66,9 +66,11 @@ void main() {
     if(uUseMergeTexture) {
       float mergeValue = texture2D(uMergeTexture, uv).x;
       float merge = step(uMergeThreshold, mergeValue);
-      annotation = mix(annotation, 1.0, merge);
+
+      gl_FragColor = vec4(uAnnotationColor, mix(0.0, uAnnotationOpacity / mix(1.0, 2.0, merge * (1.0 - annotation)), mix(annotation, 1.0, merge)));
+    } else {
+      gl_FragColor = vec4(uAnnotationColor, mix(0.0, uAnnotationOpacity, annotation));
     }
 
-    gl_FragColor = vec4(uAnnotationColor, mix(0.0, uAnnotationOpacity, annotation));
   #endif // ANNOTATION
 }
