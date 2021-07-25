@@ -68,6 +68,8 @@ export class RegionGrowingRenderer3D implements IDisposable {
   }
 
   public setSeed(voxel: Voxel) {
+    this.clearRenderTargets();
+
     this.seedVoxel = voxel;
 
     this.seed.setPosition(voxel);
