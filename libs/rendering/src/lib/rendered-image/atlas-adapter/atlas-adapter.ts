@@ -74,9 +74,10 @@ export class AtlasAdapter {
 
   public addToAltas(
     data: THREE.Texture[],
+    threshold: number,
     renderTargets: THREE.WebGLRenderTarget[],
     renderers: THREE.WebGLRenderer[],
   ) {
-    this.atlasWriter.addToAltas(data, renderTargets, renderers);
+    this.atlasWriter.addToAltas(data, threshold, renderTargets, renderers);
   }
 }

@@ -292,16 +292,18 @@ export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
     this.scheduleGPUPush();
   }
 
-  public addToAtlas(textures: THREE.Texture[]) {
+  public addToAtlas(textures: THREE.Texture[], threshold = 0) {
     if (!this.document?.renderers) return;
 
     this.atlasAdapter.addToAltas(
       textures,
+      threshold,
       this.renderTargets[THREE.NearestFilter],
       this.document.renderers,
     );
     this.atlasAdapter.addToAltas(
       textures,
+      threshold,
       this.renderTargets[THREE.LinearFilter],
       this.document.renderers,
     );

@@ -29,10 +29,18 @@ export class RegionGrowingRenderer3D implements IDisposable {
         (renderers) => {
           if (renderers) {
             this.renderTargets = renderers.map(
-              () => new THREE.WebGLRenderTarget(1, 1),
+              () =>
+                new THREE.WebGLRenderTarget(1, 1, {
+                  magFilter: THREE.NearestFilter,
+                  minFilter: THREE.NearestFilter,
+                }),
             );
             this.blipRenderTargets = renderers.map(
-              () => new THREE.WebGLRenderTarget(1, 1),
+              () =>
+                new THREE.WebGLRenderTarget(1, 1, {
+                  magFilter: THREE.NearestFilter,
+                  minFilter: THREE.NearestFilter,
+                }),
             );
             this.resizeRenderTargets();
           }
@@ -69,8 +77,6 @@ export class RegionGrowingRenderer3D implements IDisposable {
       renderer.render(this.seed, this.seed.camera);
       renderer.setRenderTarget(null);
     });
-
-    this.flushToAnnotation();
   }
 
   public doRegionGrowing(threshold: number) {
@@ -88,7 +94,9 @@ export class RegionGrowingRenderer3D implements IDisposable {
     this.regionGrowingMaterial.setVoxelCount(sourceImage.voxelCount.toArray());
     this.regionGrowingMaterial.setThreshold(threshold);
 
-    const blipSteps = Math.min(255, sourceImage.voxelCount.sum());
+    const blipSteps = Math.ceil(
+      Math.min(254, sourceImage.voxelCount.sum()) / 2,
+    );
 
     this.document.renderers?.forEach((renderer, rendererIndex) => {
       this.regionGrowingMaterial.setDataTexture(
@@ -101,12 +109,14 @@ export class RegionGrowingRenderer3D implements IDisposable {
         this.regionGrowingMaterial.setRegionTexture(
           this.renderTargets[rendererIndex].texture,
         );
+        this.regionGrowingMaterial.setStep(2 * i);
         renderer.setRenderTarget(this.blipRenderTargets[rendererIndex]);
         this.regionGrowingQuad.renderWith(renderer);
 
         this.regionGrowingMaterial.setRegionTexture(
           this.blipRenderTargets[rendererIndex].texture,
         );
+        this.regionGrowingMaterial.setStep(2 * i + 1);
         renderer.setRenderTarget(this.renderTargets[rendererIndex]);
         this.regionGrowingQuad.renderWith(renderer);
       }
@@ -114,8 +124,6 @@ export class RegionGrowingRenderer3D implements IDisposable {
       renderer.setRenderTarget(null);
       renderer.autoClear = true;
     });
-
-    this.flushToAnnotation();
   }
 
   public flushToAnnotation() {
@@ -128,9 +136,22 @@ export class RegionGrowingRenderer3D implements IDisposable {
 
     const annotation = (this.document.activeLayer as IImageLayer)
       .image as RenderedImage;
+
+    const addThreshold = this.document.tools.tools["smart-brush-3d"].params
+      .steps?.value as number | undefined;
+
     annotation.addToAtlas(
-      this.renderTargets.map((renderTarget) => renderTarget.texture),
+      this.outputTextures,
+      addThreshold !== undefined ? (255 - addThreshold) / 255 : addThreshold,
     );
+
+    this.clearRenderTargets();
+
+    this.document.sliceRenderer?.lazyRender();
+  }
+
+  public get outputTextures() {
+    return this.renderTargets.map((renderTarget) => renderTarget.texture);
   }
 
   private resizeRenderTargets = () => {
@@ -146,4 +167,14 @@ export class RegionGrowingRenderer3D implements IDisposable {
       },
     );
   };
+
+  private clearRenderTargets() {
+    this.document.renderers?.forEach((renderer, rendererIndex) => {
+      renderer.setRenderTarget(this.renderTargets[rendererIndex]);
+      renderer.clear();
+      renderer.setRenderTarget(this.blipRenderTargets[rendererIndex]);
+      renderer.clear();
+      renderer.setRenderTarget(null);
+    });
+  }
 }

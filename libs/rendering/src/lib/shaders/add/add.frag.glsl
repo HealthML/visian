@@ -1,11 +1,12 @@
 varying vec2 vUv;
 
 uniform sampler2D uDataTexture;
+uniform float uThreshold;
 
 void main() {
-  vec4 data = texture2D(uDataTexture, vUv);
+  float data = texture2D(uDataTexture, vUv).x;
 
-  if(max(data.r, max(data.g, data.b)) == 0.0) {
+  if(data < uThreshold) {
     discard;
   }
   

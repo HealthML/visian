@@ -1,6 +1,6 @@
 import { RegionGrowingRenderer3D } from "@visian/rendering";
 import { DragPoint, IDocument } from "@visian/ui-shared";
-import { ButtonParameter } from "../parameters";
+import { ButtonParameter, NumberParameter, Parameter } from "../parameters";
 import { Tool } from "./tool";
 
 export class SmartBrush3D<N extends "smart-brush-3d"> extends Tool<N> {
@@ -18,6 +18,14 @@ export class SmartBrush3D<N extends "smart-brush-3d"> extends Tool<N> {
         isBrush: true,
         isSmartBrush: true,
         params: [
+          new NumberParameter({
+            name: "steps",
+            labelTx: "region-growing-steps",
+            defaultValue: 244,
+            min: 0,
+            max: 244,
+            stepSize: 1,
+          }) as Parameter<unknown>,
           new ButtonParameter({
             name: "submit",
             labelTx: "submit-3D-region-growing",

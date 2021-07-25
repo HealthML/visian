@@ -9,6 +9,8 @@ uniform vec2 uAtlasGrid;
 uniform float uThreshold;
 uniform float uSeed;
 
+uniform float uRenderValue;
+
 bool canGrowFrom(float ownData, float neightborData, float neightborRegion) {
   return neightborRegion > 0.0 &&
     abs(ownData - uSeed) <= 1.5 * uThreshold &&
@@ -18,6 +20,11 @@ bool canGrowFrom(float ownData, float neightborData, float neightborRegion) {
 void main() {
   vec4 data = texture2D(uDataTexture, vUv);
   vec4 region = texture2D(uRegionTexture, vUv);
+
+  if(region.x > 0.0) {
+    gl_FragColor = region;
+    return;
+  }
 
   vec2 sliceSize = vec2(1.0) / uAtlasGrid;
   vec2 sliceTilePosition = floor(vUv / sliceSize);
@@ -77,7 +84,7 @@ void main() {
 
   bool shouldGrow = canGrowFromR || canGrowFromL || canGrowFromU || canGrowFromD || canGrowFromB || canGrowFromF;
 
-  if(!shouldGrow && region.x == 0.0) discard;
+  if(!shouldGrow) discard;
 
-  gl_FragColor = vec4(1.0);
+  gl_FragColor = vec4(vec3(uRenderValue), 1.0);
 }

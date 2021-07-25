@@ -135,6 +135,9 @@ export class AnnotationSliceMaterial extends SliceMaterial {
       {
         uAnnotationColor: { value: new THREE.Color("white") },
         uAnnotationOpacity: { value: 0.5 },
+        uUseMergeTexture: { value: false },
+        uMergeTexture: { value: null },
+        uMergeThreshold: { value: 0 },
       },
     );
 
@@ -152,6 +155,35 @@ export class AnnotationSliceMaterial extends SliceMaterial {
       }),
       autorun(() => {
         this.uniforms.uAnnotationOpacity.value = imageLayer.opacity;
+        editor.sliceRenderer?.lazyRender();
+      }),
+      autorun(() => {
+        const useMergeTexture =
+          editor.activeDocument?.activeLayer?.id === imageLayer.id;
+        this.uniforms.uUseMergeTexture.value = useMergeTexture;
+
+        if (useMergeTexture) {
+          const canvasIndex = getOrder(
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            editor.activeDocument!.viewport2D.mainViewType,
+          ).indexOf(viewType);
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          this.uniforms.uMergeTexture.value = editor.activeDocument!.tools.layerMergeTextures[
+            canvasIndex
+          ];
+        } else {
+          this.uniforms.uMergeTexture.value = null;
+        }
+      }),
+      autorun(() => {
+        let steps = editor.activeDocument?.tools.tools["smart-brush-3d"].params
+          .steps?.value as number | undefined;
+
+        if (steps === undefined) {
+          steps = 0;
+        }
+
+        this.uniforms.uMergeThreshold.value = (255 - steps) / 255;
         editor.sliceRenderer?.lazyRender();
       }),
     );

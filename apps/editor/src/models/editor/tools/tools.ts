@@ -1,3 +1,4 @@
+import * as THREE from "three";
 import {
   RegionGrowingRenderer,
   RegionGrowingRenderer3D,
@@ -282,6 +283,10 @@ export class Tools
 
   public get useAdaptiveBrushSize(): boolean {
     return this.lockedBrushSize === undefined;
+  }
+
+  public get layerMergeTextures(): THREE.Texture[] {
+    return this.regionGrowingRenderer3D.outputTextures;
   }
 
   public setBrushSize(value = 5, showPreview = false): void {

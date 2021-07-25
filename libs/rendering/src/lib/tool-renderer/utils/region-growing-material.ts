@@ -62,6 +62,7 @@ export class RegionGrowing3DMaterial extends RegionGrowingMaterial {
         uSeed: { value: 0 },
         uVoxelCount: { value: [1, 1, 1] },
         uAtlasGrid: { value: [1, 1] },
+        uRenderValue: { value: 244 / 255 },
       },
     });
   }
@@ -80,5 +81,9 @@ export class RegionGrowing3DMaterial extends RegionGrowingMaterial {
 
   public setAtlasGird(atlasGrid: number[]) {
     this.uniforms.uAtlasGrid.value = atlasGrid;
+  }
+
+  public setStep(step: number) {
+    this.uniforms.uRenderValue.value = (255 - step) / 255;
   }
 }

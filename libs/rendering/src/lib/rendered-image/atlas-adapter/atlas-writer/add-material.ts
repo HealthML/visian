@@ -8,11 +8,16 @@ export class AddMaterial extends THREE.ShaderMaterial {
       fragmentShader: addFragmentShader,
       uniforms: {
         uDataTexture: { value: null },
+        uThreshold: { value: 0 },
       },
     });
   }
 
   public setSource(texture: THREE.Texture) {
     this.uniforms.uDataTexture.value = texture;
+  }
+
+  public setThreshold(threshold: number) {
+    this.uniforms.uThreshold.value = threshold;
   }
 }

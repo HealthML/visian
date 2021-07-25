@@ -12,12 +12,14 @@ export class AtlasWriter {
 
   public addToAltas(
     data: THREE.Texture[],
+    threshold: number,
     renderTargets: THREE.WebGLRenderTarget[],
     renderers: THREE.WebGLRenderer[],
   ) {
     renderTargets.forEach((renderTarget, rendererIndex) => {
       const renderer = renderers[rendererIndex];
       this.addMaterial.setSource(data[rendererIndex]);
+      this.addMaterial.setThreshold(threshold);
       renderer.setRenderTarget(renderTarget);
       renderer.autoClear = false;
       this.addQuad.renderWith(renderer);

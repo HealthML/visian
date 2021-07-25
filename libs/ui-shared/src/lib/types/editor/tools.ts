@@ -1,3 +1,4 @@
+import * as THREE from "three";
 import type { Voxel } from "@visian/utils";
 import type { IconType } from "../../components";
 import type { IParameter } from "./parameters";
@@ -127,6 +128,8 @@ export interface ITools<N extends string> {
   isToolInUse: boolean;
   /** Indicates if a tool is currently drawing. */
   isDrawing: boolean;
+
+  layerMergeTextures: THREE.Texture[];
 
   setActiveTool(nameOrTool?: N | ITool<N>): void;
 
