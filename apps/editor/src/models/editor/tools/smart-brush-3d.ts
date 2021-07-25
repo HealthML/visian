@@ -1,5 +1,6 @@
 import { RegionGrowingRenderer3D } from "@visian/rendering";
 import { DragPoint, IDocument, IImageLayer } from "@visian/ui-shared";
+import { AtlasCommand } from "../history";
 import { ButtonParameter, NumberParameter, Parameter } from "../parameters";
 import { Tool } from "./tool";
 
@@ -32,7 +33,30 @@ export class SmartBrush3D<N extends "smart-brush-3d"> extends Tool<N> {
             name: "submit",
             labelTx: "submit-3D-region-growing",
             onClick: () => {
+              const imageLayer = this.document.activeLayer;
+              if (!imageLayer || imageLayer.kind !== "image") return;
+              const { image } = imageLayer as IImageLayer;
+              const oldAtlas = new Uint8Array(image.getAtlas());
+
               this.regionGrowingRenderer.flushToAnnotation();
+
+              const newAtlas = new Uint8Array(image.getAtlas());
+              this.document.history.addCommand(
+                new AtlasCommand(
+                  {
+                    layerId: imageLayer.id,
+                    oldAtlas,
+                    newAtlas,
+                  },
+                  this.document,
+                ),
+              );
+
+              (imageLayer as IImageLayer).recomputeSliceMarkers(
+                undefined,
+                undefined,
+                false,
+              );
             },
             defaultValue: undefined as unknown,
           }),
