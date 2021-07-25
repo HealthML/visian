@@ -63,7 +63,7 @@ export class GradientComputer implements IDisposable {
         () =>
           editor.activeDocument?.layers
             .filter((layer) => layer.kind === "image" && layer.isVisible)
-            .map((layer) => layer.id),
+            .map((layer) => [layer.id, layer.opacity]),
         this.updateAllDerivatives,
       ),
     );
