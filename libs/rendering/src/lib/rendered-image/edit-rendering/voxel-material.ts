@@ -12,6 +12,9 @@ export class VoxelMaterial extends THREE.ShaderMaterial {
         uVoxelCount: { value: voxelCount.toArray() },
         uAtlasGrid: { value: atlasGrid.toArray() },
       },
+      defines: {
+        COLOR: "",
+      },
     });
   }
 }

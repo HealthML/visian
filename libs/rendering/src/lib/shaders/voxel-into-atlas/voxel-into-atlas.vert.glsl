@@ -1,12 +1,15 @@
 uniform vec2 uAtlasGrid;
 uniform vec3 uVoxelCount;
 
-attribute vec3 color;
-
-varying vec3 vColor;
+#ifdef COLOR
+  attribute vec3 color;
+  varying vec3 vColor;
+#endif // COLOR
 
 void main() {
-  vColor = color;
+  #ifdef COLOR
+    vColor = color;
+  #endif // COLOR
 
   @import ../utils/atlas-position;
 

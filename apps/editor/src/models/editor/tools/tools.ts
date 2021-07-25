@@ -1,4 +1,8 @@
-import { RegionGrowingRenderer, ToolRenderer } from "@visian/rendering";
+import {
+  RegionGrowingRenderer,
+  RegionGrowingRenderer3D,
+  ToolRenderer,
+} from "@visian/rendering";
 import { IDocument, IImageLayer, ITool, ITools } from "@visian/ui-shared";
 import { getPlaneAxes, ISerializable } from "@visian/utils";
 import { action, computed, makeObservable, observable } from "mobx";
@@ -13,6 +17,7 @@ import { Tool, ToolSnapshot } from "./tool";
 import { ToolGroup, ToolGroupSnapshot } from "./tool-group";
 import { BoundedSmartBrush } from "./bounded-smart-brush";
 import { PlaneTool } from "./plane-tool";
+import { SmartBrush3D } from "./smart-brush-3d";
 
 export type ToolName =
   | "navigation-tool"
@@ -20,6 +25,7 @@ export type ToolName =
   | "pixel-brush"
   | "pixel-eraser"
   | "smart-brush"
+  | "smart-brush-3d"
   | "smart-eraser"
   | "bounded-smart-brush"
   | "bounded-smart-eraser"
@@ -68,6 +74,7 @@ export class Tools
 
   public toolRenderer: ToolRenderer;
   public regionGrowingRenderer: RegionGrowingRenderer;
+  public regionGrowingRenderer3D: RegionGrowingRenderer3D;
 
   constructor(
     snapshot: Partial<ToolsSnapshot<ToolName>> | undefined,
@@ -119,6 +126,7 @@ export class Tools
 
     this.toolRenderer = new ToolRenderer(document);
     this.regionGrowingRenderer = new RegionGrowingRenderer(document);
+    this.regionGrowingRenderer3D = new RegionGrowingRenderer3D(document);
 
     this.tools = {
       "navigation-tool": new Tool(
@@ -148,6 +156,10 @@ export class Tools
         this.regionGrowingRenderer,
         false,
       ),
+      "smart-brush-3d": new SmartBrush3D(
+        document,
+        this.regionGrowingRenderer3D,
+      ),
       "outline-tool": new OutlineTool(document, this.toolRenderer),
       "outline-eraser": new OutlineTool(document, this.toolRenderer, false),
       "clear-slice": new ClearSliceTool(document, this.toolRenderer),
@@ -173,6 +185,7 @@ export class Tools
         { toolNames: ["bounded-smart-brush", "bounded-smart-eraser"] },
         document,
       ),
+      new ToolGroup({ toolNames: ["smart-brush-3d"] }, document),
       new ToolGroup(
         { toolNames: ["outline-tool", "outline-eraser"] },
         document,
