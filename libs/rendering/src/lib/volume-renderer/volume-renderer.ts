@@ -284,8 +284,12 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
     this.flyControls.tick();
   };
 
-  public lazyRender = (updateLighting = false) => {
+  public lazyRender = (updateLighting = false, updateGradients = false) => {
     this.lazyRenderTriggered = true;
+
+    if (updateGradients) {
+      this.gradientComputer.updateAllDerivatives();
+    }
 
     if (updateLighting) {
       this.laoComputer.setDirty();

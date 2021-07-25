@@ -204,7 +204,7 @@ export class SharedUniforms implements IDisposable {
         );
 
         editor.activeDocument?.viewport3D.onTransferFunctionChange();
-        editor.activeDocument?.volumeRenderer?.lazyRender(true);
+        editor.activeDocument?.volumeRenderer?.lazyRender(true, true);
       }),
       autorun(() => {
         const layers = (editor.activeDocument?.layers.filter(
@@ -228,7 +228,7 @@ export class SharedUniforms implements IDisposable {
         );
 
         editor.activeDocument?.viewport3D.onTransferFunctionChange();
-        editor.activeDocument?.volumeRenderer?.lazyRender(true);
+        editor.activeDocument?.volumeRenderer?.lazyRender(true, true);
       }),
       autorun(() => {
         const layers = (editor.activeDocument?.layers.filter(

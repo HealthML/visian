@@ -59,13 +59,6 @@ export class GradientComputer implements IDisposable {
           this.updateAllDerivatives();
         },
       ),
-      reaction(
-        () =>
-          editor.activeDocument?.layers
-            .filter((layer) => layer.kind === "image" && layer.isVisible)
-            .map((layer) => [layer.id, layer.opacity]),
-        this.updateAllDerivatives,
-      ),
     );
   }
 
@@ -101,7 +94,7 @@ export class GradientComputer implements IDisposable {
     return this.outputDerivativeRenderTarget.texture;
   }
 
-  private updateAllDerivatives = () => {
+  public updateAllDerivatives = () => {
     this.updateFirstDerivative();
     this.updateSecondDerivative();
     this.updateOutputDerivative();
