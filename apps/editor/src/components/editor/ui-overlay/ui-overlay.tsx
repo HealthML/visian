@@ -21,6 +21,9 @@ import { TopConsole } from "../top-console";
 import { UndoRedoButtons } from "../undo-redo-buttons";
 import { ViewSettings } from "../view-settings";
 import { UIOverlayProps } from "./ui-overlay.props";
+import { ProcessPopUp } from "../process-popup";
+import { ImportPopUp } from "../import-popup";
+import { LogInPopUp } from "../login-popup";
 
 const Container = styled(AbsoluteCover)`
   align-items: stretch;
@@ -157,6 +160,9 @@ export const UIOverlay = observer<UIOverlayProps>(
           isOpen={isShortcutPopUpOpen}
           onClose={closeShortcutPopUp}
         />
+
+        <LogInPopUp />
+
         {isDraggedOver && <DropSheet onDropCompleted={onDropCompleted} />}
         {store?.error && (
           <ErrorNotification

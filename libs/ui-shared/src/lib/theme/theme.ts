@@ -154,7 +154,7 @@ export const theme = {
     iconMargin: "12px",
     listIndentation: "16px",
     buttonPadding: "12px 20px",
-    inputPadding: "12px 22px",
+    inputPadding: "9px 16px",
     sliderLabelDistance: "16px",
     sliderMarkerMargin: "0px",
   },
