@@ -94,6 +94,8 @@ export class RegionGrowingRenderer3D implements IDisposable {
     this.regionGrowingMaterial.setVoxelCount(sourceImage.voxelCount.toArray());
     this.regionGrowingMaterial.setThreshold(threshold);
 
+    this.document.tools.tools["smart-brush-3d"].params.steps?.setValue(244);
+
     const blipSteps = Math.ceil(
       Math.min(254, sourceImage.voxelCount.sum()) / 2,
     );

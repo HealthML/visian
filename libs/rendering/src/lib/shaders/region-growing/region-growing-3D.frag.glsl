@@ -76,11 +76,11 @@ void main() {
   vec4 dataF = texture2D(uDataTexture, uvF);
 
   bool canGrowFromR = voxelCoords.x < uVoxelCount.x - 1.0 && canGrowFrom(data.x, dataR.x, regionR.x);
-  bool canGrowFromL = voxelCoords.x > 0.0 && canGrowFrom(data.x, dataL.x, regionL.x);
+  bool canGrowFromL = voxelCoords.x >= 1.0 && canGrowFrom(data.x, dataL.x, regionL.x);
   bool canGrowFromU = voxelCoords.y < uVoxelCount.y - 1.0 && canGrowFrom(data.x, dataU.x, regionU.x);
-  bool canGrowFromD = voxelCoords.y > 0.0 && canGrowFrom(data.x, dataD.x, regionD.x);
+  bool canGrowFromD = voxelCoords.y >= 1.0 && canGrowFrom(data.x, dataD.x, regionD.x);
   bool canGrowFromB = voxelCoords.z < uVoxelCount.z - 1.0 && canGrowFrom(data.x, dataB.x, regionB.x);
-  bool canGrowFromF = voxelCoords.z > 0.0 && canGrowFrom(data.x, dataF.x, regionF.x);
+  bool canGrowFromF = voxelCoords.z >= 1.0 && canGrowFrom(data.x, dataF.x, regionF.x);
 
   bool shouldGrow = canGrowFromR || canGrowFromL || canGrowFromU || canGrowFromD || canGrowFromB || canGrowFromF;
 
