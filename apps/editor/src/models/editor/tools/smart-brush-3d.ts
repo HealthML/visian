@@ -1,9 +1,11 @@
 import { RegionGrowingRenderer3D } from "@visian/rendering";
-import { DragPoint, IDocument } from "@visian/ui-shared";
+import { DragPoint, IDocument, IImageLayer } from "@visian/ui-shared";
 import { ButtonParameter, NumberParameter, Parameter } from "../parameters";
 import { Tool } from "./tool";
 
 export class SmartBrush3D<N extends "smart-brush-3d"> extends Tool<N> {
+  private isSeedSet = false;
+
   constructor(
     document: IDocument,
     private regionGrowingRenderer: RegionGrowingRenderer3D,
@@ -41,12 +43,30 @@ export class SmartBrush3D<N extends "smart-brush-3d"> extends Tool<N> {
   }
 
   public startAt(dragPoint: DragPoint): void {
+    if (this.document.activeLayer?.kind !== "image") return;
+
+    const { voxelCount } = (this.document.activeLayer as IImageLayer).image;
+    if (
+      dragPoint.x < 0 ||
+      dragPoint.x >= voxelCount.x ||
+      dragPoint.y < 0 ||
+      dragPoint.y >= voxelCount.y ||
+      dragPoint.z < 0 ||
+      dragPoint.z >= voxelCount.z
+    ) {
+      return;
+    }
+
     this.regionGrowingRenderer.setSeed(dragPoint);
+    this.isSeedSet = true;
   }
 
   public endAt(_dragPoint: DragPoint): void {
-    this.regionGrowingRenderer.doRegionGrowing(
-      this.document.tools.smartBrushThreshold,
-    );
+    if (this.isSeedSet) {
+      this.regionGrowingRenderer.doRegionGrowing(
+        this.document.tools.smartBrushThreshold,
+      );
+      this.isSeedSet = false;
+    }
   }
 }
