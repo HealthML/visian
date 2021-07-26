@@ -30,7 +30,7 @@ export class EdgesTransferFunction extends TransferFunction<"fc-edges"> {
       new NumberParameter({
         name: "contextOpacity",
         labelTx: "context-opacity",
-        defaultValue: 0.4,
+        defaultValue: 0.7,
         min: 0,
         max: 1,
         scaleType: "quadratic",
