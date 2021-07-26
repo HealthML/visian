@@ -308,9 +308,7 @@ export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
       this.document.renderers,
     );
 
-    this.atlasAdapter.invalidateCache();
-
-    this.hasGPUUpdates = true;
+    this.onModificationsOnGPU();
   }
 
   public setSlice(
