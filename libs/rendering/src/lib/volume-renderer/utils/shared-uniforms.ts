@@ -197,7 +197,9 @@ export class SharedUniforms implements IDisposable {
         this.uniforms.uLayerData.value = layers.map((layer) =>
           ((layer as IImageLayer).image as RenderedImage).getTexture(
             0,
-            useNearestFiltering ? THREE.NearestFilter : THREE.LinearFilter,
+            useNearestFiltering || layer.isAnnotation
+              ? THREE.NearestFilter
+              : THREE.LinearFilter,
           ),
         );
 
