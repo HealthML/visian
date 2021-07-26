@@ -139,7 +139,7 @@ export class SharedUniforms implements IDisposable {
       autorun(() => {
         const brightness = editor.activeDocument?.viewSettings.brightness ?? 1;
         const factor =
-          editor.activeDocument?.viewport3D.shadingMode === "lao" ? 2.5 : 1;
+          editor.activeDocument?.viewport3D.shadingMode !== "phong" ? 2.5 : 1;
 
         this.uniforms.uBrightness.value = brightness * factor;
 
@@ -194,7 +194,7 @@ export class SharedUniforms implements IDisposable {
           editor.activeDocument?.viewport3D.activeTransferFunction?.params
             .useBlockyContext?.value,
         );
-        this.uniforms.uLayerData.value = layers.map((layer) =>
+        const layerData = layers.map((layer) =>
           ((layer as IImageLayer).image as RenderedImage).getTexture(
             0,
             useNearestFiltering || layer.isAnnotation
@@ -203,20 +203,32 @@ export class SharedUniforms implements IDisposable {
           ),
         );
 
+        this.uniforms.uLayerData.value = [
+          // additional layer for 3d region growing
+          editor.activeDocument?.tools.layerMergeTextures[0] || null,
+          ...layerData,
+        ];
+
         editor.activeDocument?.viewport3D.onTransferFunctionChange();
         editor.activeDocument?.volumeRenderer?.lazyRender(true, true);
       }),
       autorun(() => {
         const layers = editor.activeDocument?.imageLayers || [];
 
-        this.uniforms.uLayerAnnotationStatuses.value = layers.map(
+        const layerAnnotationStatuses = layers.map(
           (layer) => layer.isAnnotation,
         );
+
+        this.uniforms.uLayerAnnotationStatuses.value = [
+          // additional layer for 3d region growing
+          true,
+          ...layerAnnotationStatuses,
+        ];
 
         const opacityFactor =
           (editor.activeDocument?.viewport3D.activeTransferFunction?.params
             .contextOpacity?.value as number | undefined) ?? 1;
-        this.uniforms.uLayerOpacities.value = layers.map((layer) =>
+        const layerOpacities = layers.map((layer) =>
           layer.isVisible
             ? layer.isAnnotation
               ? layer.opacity
@@ -224,13 +236,19 @@ export class SharedUniforms implements IDisposable {
             : 0,
         );
 
+        this.uniforms.uLayerOpacities.value = [
+          // additional layer for 3d region growing
+          editor.activeDocument?.activeLayer?.opacity ?? 0,
+          ...layerOpacities,
+        ];
+
         editor.activeDocument?.viewport3D.onTransferFunctionChange();
         editor.activeDocument?.volumeRenderer?.lazyRender(true, true);
       }),
       autorun(() => {
         const layers = editor.activeDocument?.imageLayers || [];
 
-        this.uniforms.uLayerColors.value = layers.map(
+        const layerColors = layers.map(
           (layer) =>
             new THREE.Color(
               color(
@@ -239,6 +257,12 @@ export class SharedUniforms implements IDisposable {
               )({ theme: editor.theme }),
             ),
         );
+
+        this.uniforms.uLayerColors.value = [
+          // additional layer for 3d region growing
+          new THREE.Color("red"),
+          ...layerColors,
+        ];
 
         editor.activeDocument?.volumeRenderer?.lazyRender();
       }),
@@ -253,6 +277,16 @@ export class SharedUniforms implements IDisposable {
         this.uniforms.uStepSize.value = getStepSize(image);
 
         editor.activeDocument?.volumeRenderer?.lazyRender();
+      }),
+      autorun(() => {
+        const steps =
+          (editor.activeDocument?.tools.tools["smart-brush-3d"].params.steps
+            ?.value as number | undefined) ?? 0;
+
+        this.uniforms.uRegionGrowingThreshold.value = (255 - steps) / 255;
+
+        editor.activeDocument?.viewport3D.onTransferFunctionChange();
+        editor.volumeRenderer?.lazyRender(true);
       }),
     );
   }

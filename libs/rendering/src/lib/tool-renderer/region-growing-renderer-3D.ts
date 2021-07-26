@@ -152,6 +152,7 @@ export class RegionGrowingRenderer3D implements IDisposable {
     this.clearRenderTargets();
 
     this.document.sliceRenderer?.lazyRender();
+    this.document.volumeRenderer?.lazyRender(true);
   }
 
   public get outputTextures() {

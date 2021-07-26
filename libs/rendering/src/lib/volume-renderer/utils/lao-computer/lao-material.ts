@@ -40,7 +40,7 @@ export class LAOMaterial extends THREE.ShaderMaterial {
         (layerCount: number) => {
           this.fragmentShader = composeLayeredShader(
             laoFragmentShader,
-            layerCount,
+            layerCount + 1, // additional layer for 3d region growing
           );
           this.needsUpdate = true;
         },

@@ -49,7 +49,7 @@ export class VolumeMaterial
         (layerCount: number) => {
           this.fragmentShader = composeLayeredShader(
             volumeFragmentShader,
-            layerCount,
+            layerCount + 1, // additional layer for 3d region growing
           );
           this.needsUpdate = true;
         },

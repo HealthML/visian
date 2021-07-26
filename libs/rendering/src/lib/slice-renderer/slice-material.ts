@@ -176,12 +176,9 @@ export class AnnotationSliceMaterial extends SliceMaterial {
         }
       }),
       autorun(() => {
-        let steps = editor.activeDocument?.tools.tools["smart-brush-3d"].params
-          .steps?.value as number | undefined;
-
-        if (steps === undefined) {
-          steps = 0;
-        }
+        const steps =
+          (editor.activeDocument?.tools.tools["smart-brush-3d"].params.steps
+            ?.value as number | undefined) ?? 0;
 
         this.uniforms.uMergeThreshold.value = (255 - steps) / 255;
         editor.sliceRenderer?.lazyRender();
