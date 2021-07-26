@@ -1,6 +1,9 @@
 uniform vec3 uCameraPosition;
-uniform sampler2D uVolume;
 uniform sampler2D uInputFirstDerivative;
 uniform sampler2D uInputSecondDerivative;
-uniform sampler2D uFocus;
 uniform float uStepSize;
+
+uniform sampler2D uLayerData[{{layerCount}}];
+uniform bool uLayerAnnotationStatuses[{{layerCount}}];
+uniform float uLayerOpacities[{{layerCount}}];
+uniform vec3 uLayerColors[{{layerCount}}];

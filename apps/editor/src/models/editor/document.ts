@@ -2,6 +2,7 @@ import {
   dataColorKeys,
   IDocument,
   IEditor,
+  IImageLayer,
   ILayer,
   ISliceRenderer,
   IVolumeRenderer,
@@ -114,6 +115,8 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
 
       title: computed,
       activeLayer: computed,
+      imageLayers: computed,
+      baseImageLayer: computed,
 
       setTitle: action,
       setActiveLayer: action,
@@ -149,6 +152,28 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
     return Object.values(this.layerMap).find(
       (layer) => layer.id === this.activeLayerId,
     );
+  }
+
+  public get imageLayers(): IImageLayer[] {
+    return this.layers.filter(
+      (layer) => layer.kind === "image",
+    ) as IImageLayer[];
+  }
+  public get baseImageLayer(): IImageLayer | undefined {
+    // TODO: Rework to work with group layers
+    let baseImageLayer: ImageLayer | undefined;
+    this.layerIds
+      .slice()
+      .reverse()
+      .find((id) => {
+        const layer = this.layerMap[id];
+        if (layer.kind === "image") {
+          baseImageLayer = layer as ImageLayer;
+          return true;
+        }
+        return false;
+      });
+    return baseImageLayer;
   }
 
   public getLayer(id: string): ILayer | undefined {
@@ -196,16 +221,12 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
   };
 
   public addNewAnnotationLayer = () => {
-    // TODO: Rework to work with group layers
-    const baseLayer = this.layers.find(
-      (layer) => layer.kind === "image" && !layer.isAnnotation,
-    ) as ImageLayer | undefined;
-    if (!baseLayer) return;
+    if (!this.baseImageLayer) return;
 
     const annotationColor = this.getColorForNewAnnotation();
 
     const annotationLayer = ImageLayer.fromNewAnnotationForImage(
-      baseLayer.image,
+      this.baseImageLayer.image,
       this,
       annotationColor,
     );

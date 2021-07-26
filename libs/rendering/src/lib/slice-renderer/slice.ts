@@ -64,14 +64,10 @@ export class Slice extends THREE.Group implements IDisposable {
       autorun(this.updateScale),
       autorun(this.updateOffset),
       reaction(
-        () =>
-          this.editor.activeDocument?.layers.find(
-            (layer) => layer.kind === "image",
-          ),
-        (layer?: ILayer) => {
-          if (!layer) return;
+        () => this.editor.activeDocument?.baseImageLayer,
+        (imageLayer?: IImageLayer) => {
+          if (!imageLayer) return;
 
-          const imageLayer = layer as IImageLayer;
           const { image } = imageLayer;
           this.baseSize.copy(
             getGeometrySize(
@@ -85,12 +81,7 @@ export class Slice extends THREE.Group implements IDisposable {
         { fireImmediately: true },
       ),
       reaction(
-        () =>
-          editor.activeDocument
-            ? editor.activeDocument.layers.filter(
-                (layer) => layer.kind === "image",
-              )
-            : [],
+        () => editor.activeDocument?.imageLayers || [],
         this.updateSliceLayers,
         { fireImmediately: true },
       ),
@@ -161,13 +152,12 @@ export class Slice extends THREE.Group implements IDisposable {
   };
 
   private updateSliceLayerOrder() {
-    const layers = this.editor.activeDocument?.layers;
-    if (!layers) return;
+    const imageLayers = this.editor.activeDocument?.imageLayers;
+    if (!imageLayers) return;
 
     const [min, max] = sliceLayerIntervall;
     const intervallLength = max - min;
 
-    const imageLayers = layers.filter((layer) => layer.kind === "image");
     imageLayers.forEach((imageLayer, index) => {
       const sliceLayer = this.sliceLayers.find(
         (layer) => layer.layerId === imageLayer.id,

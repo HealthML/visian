@@ -1,11 +1,7 @@
-import {
-  IDocument,
-  IImageLayer,
-  IViewport2D,
-  MarkerConfig,
-} from "@visian/ui-shared";
+import { IDocument, IViewport2D, MarkerConfig } from "@visian/ui-shared";
 import { ISerializable, Vector, ViewType } from "@visian/utils";
 import { action, computed, makeObservable, observable } from "mobx";
+
 import { maxZoom, minZoom, zoomStep } from "../../../constants";
 
 export interface Viewport2DSnapshot {
@@ -103,9 +99,9 @@ export class Viewport2D
   };
 
   public getMaxSlice(viewType = this.mainViewType): number {
-    const sliceCount = (this.document.layers.find(
-      (layer) => layer.kind === "image",
-    ) as IImageLayer | undefined)?.image?.voxelCount.getFromView(viewType);
+    const sliceCount = this.document.baseImageLayer?.image?.voxelCount.getFromView(
+      viewType,
+    );
     return sliceCount ? sliceCount - 1 : 0;
   }
 

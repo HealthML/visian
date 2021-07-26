@@ -46,9 +46,8 @@ export class RegionGrowingRenderer extends ToolRenderer {
           this.document.viewSettings.selectedVoxel.getFromView(
             this.document.viewport2D.mainViewType,
           ),
-          this.document.layers.find(
-            (layer) =>
-              layer.kind === "image" && !layer.isAnnotation && layer.isVisible,
+          this.document.imageLayers.find(
+            (layer) => !layer.isAnnotation && layer.isVisible,
           )?.id,
         ],
         () => {
@@ -73,9 +72,8 @@ export class RegionGrowingRenderer extends ToolRenderer {
 
     if (!annotation) return;
 
-    const sourceImage = (this.document.layers.find(
-      (layer) =>
-        layer.kind === "image" && !layer.isAnnotation && layer.isVisible,
+    const sourceImage = (this.document.imageLayers.find(
+      (layer) => !layer.isAnnotation && layer.isVisible,
     ) as IImageLayer | undefined)?.image as RenderedImage | undefined;
     if (!sourceImage) return;
 
