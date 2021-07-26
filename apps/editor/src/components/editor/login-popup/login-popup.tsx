@@ -12,19 +12,6 @@ const LogInButton = styled(Button)`
   min-width: 110px;
 `;
 
-const InlineRow = styled.div`
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  margin-bottom: 28px;
-`;
-
-const InlineRowLast = styled(InlineRow)`
-  margin-bottom: 10px;
-`;
-
 const ProcessTitle = styled(Text)`
   font-size: 26px;
   font-weight: 400;

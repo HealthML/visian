@@ -24,6 +24,7 @@ import { UIOverlayProps } from "./ui-overlay.props";
 import { ProcessPopUp } from "../process-popup";
 import { ImportPopUp } from "../import-popup";
 import { LogInPopUp } from "../login-popup";
+import { ServerPopUp } from "../server-popup";
 
 const Container = styled(AbsoluteCover)`
   align-items: stretch;
@@ -161,7 +162,7 @@ export const UIOverlay = observer<UIOverlayProps>(
           onClose={closeShortcutPopUp}
         />
 
-        <LogInPopUp />
+        <ServerPopUp />
 
         {isDraggedOver && <DropSheet onDropCompleted={onDropCompleted} />}
         {store?.error && (
