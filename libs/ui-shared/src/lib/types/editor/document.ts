@@ -29,6 +29,9 @@ export interface IDocument {
   has3DLayers: boolean;
   /** The layer that is currently selected for editing. */
   activeLayer?: Reference<ILayer>;
+
+  /** A view on the document's `layers`, containing only its image layers. */
+  imageLayers: Reference<IImageLayer>[];
   /**
    * The base image layer that serves as a reference for all other image
    * layers to be registered to it.

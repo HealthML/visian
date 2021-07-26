@@ -1,4 +1,4 @@
-import { IEditor, IImageLayer } from "@visian/ui-shared";
+import { IEditor } from "@visian/ui-shared";
 import { IDisposer } from "@visian/utils";
 import { autorun } from "mobx";
 import * as THREE from "three";
@@ -29,7 +29,7 @@ export class CuttingPlaneMaterial extends THREE.ShaderMaterial {
         const imageLayer = editor.activeDocument?.baseImageLayer;
         if (!imageLayer) return this.setImage();
 
-        this.setImage((imageLayer as IImageLayer).image as RenderedImage);
+        this.setImage(imageLayer.image as RenderedImage);
       }),
     );
   }

@@ -115,6 +115,7 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
 
       title: computed,
       activeLayer: computed,
+      imageLayers: computed,
       baseImageLayer: computed,
 
       setTitle: action,
@@ -153,6 +154,11 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
     );
   }
 
+  public get imageLayers(): IImageLayer[] {
+    return this.layers.filter(
+      (layer) => layer.kind === "image",
+    ) as IImageLayer[];
+  }
   public get baseImageLayer(): IImageLayer | undefined {
     // TODO: Rework to work with group layers
     let baseImageLayer: ImageLayer | undefined;

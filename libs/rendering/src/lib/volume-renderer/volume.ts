@@ -1,10 +1,10 @@
-import { IEditor, IImageLayer } from "@visian/ui-shared";
+import { IEditor } from "@visian/ui-shared";
 import { IDisposable, IDisposer } from "@visian/utils";
 import { autorun } from "mobx";
 import * as THREE from "three";
+
 import { RenderedImage } from "../rendered-image";
 import { BoundingBox, CuttingPlane, SharedUniforms } from "./utils";
-
 import { VolumeMaterial } from "./volume-material";
 
 /** A volume domain. */
@@ -47,7 +47,7 @@ export class Volume extends THREE.Mesh implements IDisposable {
         const imageLayer = editor.activeDocument?.baseImageLayer;
         if (!imageLayer) return;
 
-        const image = (imageLayer as IImageLayer).image as RenderedImage;
+        const image = imageLayer.image as RenderedImage;
         const scale = image.voxelCount
           .clone(false)
           .multiply(image.voxelSpacing)

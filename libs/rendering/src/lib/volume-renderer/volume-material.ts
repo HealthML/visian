@@ -45,10 +45,7 @@ export class VolumeMaterial
 
     this.disposers = [
       reaction(
-        () =>
-          editor.activeDocument?.layers.filter(
-            (layer) => layer.kind === "image",
-          ).length || 0,
+        () => editor.activeDocument?.imageLayers.length || 0,
         (layerCount: number) => {
           this.fragmentShader = composeLayeredShader(
             volumeFragmentShader,

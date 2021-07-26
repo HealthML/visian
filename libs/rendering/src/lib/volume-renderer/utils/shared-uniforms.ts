@@ -188,9 +188,7 @@ export class SharedUniforms implements IDisposable {
         editor.activeDocument?.volumeRenderer?.lazyRender(true);
       }),
       autorun(() => {
-        const layers = (editor.activeDocument?.layers.filter(
-          (layer) => layer.kind === "image",
-        ) || []) as IImageLayer[];
+        const layers = editor.activeDocument?.imageLayers || [];
 
         const useNearestFiltering = Boolean(
           editor.activeDocument?.viewport3D.activeTransferFunction?.params
@@ -207,15 +205,12 @@ export class SharedUniforms implements IDisposable {
         editor.activeDocument?.volumeRenderer?.lazyRender(true, true);
       }),
       autorun(() => {
-        const layers = (editor.activeDocument?.layers.filter(
-          (layer) => layer.kind === "image",
-        ) || []) as IImageLayer[];
+        const layers = editor.activeDocument?.imageLayers || [];
 
         this.uniforms.uLayerAnnotationStatuses.value = layers.map(
           (layer) => layer.isAnnotation,
         );
 
-        // TODO: This factor probably doesn't belong here.
         const opacityFactor =
           (editor.activeDocument?.viewport3D.activeTransferFunction?.params
             .contextOpacity?.value as number | undefined) ?? 1;
@@ -231,9 +226,7 @@ export class SharedUniforms implements IDisposable {
         editor.activeDocument?.volumeRenderer?.lazyRender(true, true);
       }),
       autorun(() => {
-        const layers = (editor.activeDocument?.layers.filter(
-          (layer) => layer.kind === "image",
-        ) || []) as IImageLayer[];
+        const layers = editor.activeDocument?.imageLayers || [];
 
         this.uniforms.uLayerColors.value = layers.map(
           (layer) =>
@@ -251,7 +244,7 @@ export class SharedUniforms implements IDisposable {
         const imageLayer = editor.activeDocument?.baseImageLayer;
         if (!imageLayer) return;
 
-        const image = (imageLayer as IImageLayer).image as RenderedImage;
+        const image = imageLayer.image as RenderedImage;
 
         this.uniforms.uVoxelCount.value = image.voxelCount;
         this.uniforms.uAtlasGrid.value = image.getAtlasGrid();

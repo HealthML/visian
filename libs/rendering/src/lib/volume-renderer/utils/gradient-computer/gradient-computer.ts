@@ -1,9 +1,9 @@
-import { IEditor, IImageLayer } from "@visian/ui-shared";
+import { IEditor } from "@visian/ui-shared";
 import { IDisposable, Image } from "@visian/utils";
 import { IReactionDisposer, reaction } from "mobx";
 import * as THREE from "three";
-import { ScreenAlignedQuad } from "../../../screen-aligned-quad";
 
+import { ScreenAlignedQuad } from "../../../screen-aligned-quad";
 import { SharedUniforms } from "../shared-uniforms";
 import { GradientMaterial, GradientMode } from "./gradient-material";
 
@@ -41,12 +41,7 @@ export class GradientComputer implements IDisposable {
 
     this.reactionDisposers.push(
       reaction(
-        () => {
-          const imageLayer = editor.activeDocument?.baseImageLayer;
-          if (!imageLayer) return undefined;
-
-          return (imageLayer as IImageLayer).image;
-        },
+        () => editor.activeDocument?.baseImageLayer?.image,
         (image?: Image) => {
           if (!image) return;
 
