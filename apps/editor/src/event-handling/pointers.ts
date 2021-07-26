@@ -126,7 +126,7 @@ export const setUpPointerHandling = (
       }
 
       if (!store.editor.activeDocument.activeLayer) {
-        store.editor.activeDocument.setIsLayerMenuOpen(true);
+        store.editor.activeDocument.setShowLayerMenu(true);
         return;
       }
 
@@ -149,7 +149,7 @@ export const setUpPointerHandling = (
         (!store.editor.activeDocument.activeLayer.isVisible ||
           !store.editor.activeDocument.activeLayer.isAnnotation)
       ) {
-        store.editor.activeDocument.setIsLayerMenuOpen(true);
+        store.editor.activeDocument.setShowLayerMenu(true);
         return;
       }
 

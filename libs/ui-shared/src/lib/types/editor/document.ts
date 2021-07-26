@@ -47,10 +47,10 @@ export interface IDocument {
   renderers?: Reference<THREE.WebGLRenderer[]>;
 
   /** Indicates wether the layer menu is open. */
-  isLayerMenuOpen: boolean;
+  showLayerMenu: boolean;
 
-  setIsLayerMenuOpen(value?: boolean): void;
-  toggleIsLayerMenuOpen(): void;
+  setShowLayerMenu(value?: boolean): void;
+  toggleLayerMenu(): void;
 
   /** Reads a layer based on its id. */
   getLayer(id: string): ILayer | undefined;

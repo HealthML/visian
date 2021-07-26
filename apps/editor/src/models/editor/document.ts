@@ -74,7 +74,7 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
 
   public tools: Tools;
 
-  public isLayerMenuOpen = false;
+  public showLayerMenu = false;
 
   public markers: Markers = new Markers(this);
 
@@ -113,7 +113,7 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
       viewport2D: observable,
       viewport3D: observable,
       tools: observable,
-      isLayerMenuOpen: observable,
+      showLayerMenu: observable,
 
       title: computed,
       activeLayer: computed,
@@ -127,8 +127,8 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
       toggleTypeAndRepositionLayer: action,
       importImage: action,
       importAnnotation: action,
-      setIsLayerMenuOpen: action,
-      toggleIsLayerMenuOpen: action,
+      setShowLayerMenu: action,
+      toggleLayerMenu: action,
       applySnapshot: action,
     });
 
@@ -342,11 +342,11 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
   }
 
   // UI state
-  public setIsLayerMenuOpen = (value = false): void => {
-    this.isLayerMenuOpen = value;
+  public setShowLayerMenu = (value = false): void => {
+    this.showLayerMenu = value;
   };
-  public toggleIsLayerMenuOpen = (): void => {
-    this.setIsLayerMenuOpen(!this.isLayerMenuOpen);
+  public toggleLayerMenu = (): void => {
+    this.setShowLayerMenu(!this.showLayerMenu);
   };
 
   // Proxies
