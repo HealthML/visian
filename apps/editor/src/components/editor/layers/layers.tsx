@@ -8,6 +8,8 @@ import {
   Modal,
   ModalHeaderButton,
   PointerButton,
+  size,
+  stopPropagation,
   SubtleText,
   useDelay,
   useModalRoot,
@@ -41,6 +43,12 @@ const noop = () => {
 // Styled Components
 const LayerList = styled(List)`
   margin-top: -16px;
+  max-height: calc(
+    6 * (${size("listElementHeight")} + ${size("dividerHeight")})
+  );
+  max-width: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
 `;
 
 const LayerListItem = observer<{
@@ -292,7 +300,11 @@ export const Layers: React.FC = observer(() => {
         <DragDropContext onDragUpdate={handleDrag} onDragEnd={noop}>
           <Droppable droppableId="layer-stack">
             {(provided: DroppableProvided) => (
-              <LayerList {...provided.droppableProps} ref={provided.innerRef}>
+              <LayerList
+                {...provided.droppableProps}
+                ref={provided.innerRef}
+                onWheel={stopPropagation}
+              >
                 {layerCount ? (
                   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
                   layers!.map((layer, index) => (

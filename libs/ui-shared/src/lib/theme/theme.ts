@@ -138,8 +138,10 @@ export const theme = {
   },
   shadows: {},
   sizes: {
+    dividerHeight: "1px",
     icon: "24px",
     iconLarge: "30px",
+    listElementHeight: "40px",
     maxContentWidth: "940px",
     recordImage: "220px",
     buttonHeight: "40px",

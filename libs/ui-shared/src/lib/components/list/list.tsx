@@ -1,5 +1,6 @@
 import React, { useCallback } from "react";
 import styled, { css } from "styled-components";
+import { size } from "../../theme";
 
 import { Color } from "../color";
 import { Icon } from "../icon";
@@ -24,7 +25,7 @@ const ListItemInner = styled.div<Pick<ListItemProps, "isActive">>`
   display: flex;
   flex-direction: row;
   align-items: center;
-  height: 40px;
+  height: ${size("listElementHeight")};
   overflow: hidden;
 
   ${(props) =>
