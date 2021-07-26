@@ -1,9 +1,4 @@
-import {
-  IDocument,
-  IImageLayer,
-  IViewSettings,
-  ViewMode,
-} from "@visian/ui-shared";
+import { IDocument, IViewSettings, ViewMode } from "@visian/ui-shared";
 import { ISerializable, Vector } from "@visian/utils";
 import { action, makeObservable, observable } from "mobx";
 
@@ -59,9 +54,7 @@ export class ViewSettings
   }
 
   public setSelectedVoxel(x?: number, y?: number, z?: number): void {
-    const voxelCount = (this.document.layers.find(
-      (layer) => layer.kind === "image",
-    ) as IImageLayer | undefined)?.image.voxelCount;
+    const voxelCount = this.document.baseImageLayer?.image.voxelCount;
 
     if (!x || !y || !z) {
       if (voxelCount) {

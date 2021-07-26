@@ -1,9 +1,13 @@
-import { SliceRenderer, VolumeRenderer } from "@visian/rendering";
+import {
+  RenderedImage,
+  SliceRenderer,
+  VolumeRenderer,
+} from "@visian/rendering";
 import {
   IEditor,
   ISliceRenderer,
-  Theme,
   IVolumeRenderer,
+  Theme,
 } from "@visian/ui-shared";
 import { IDisposable, ISerializable } from "@visian/utils";
 import { action, makeObservable, observable } from "mobx";
@@ -11,7 +15,6 @@ import * as THREE from "three";
 
 import { StoreContext } from "../types";
 import { Document, DocumentSnapshot } from "./document";
-import { ImageLayer } from "./layers";
 
 export interface EditorSnapshot {
   activeDocument?: DocumentSnapshot;
@@ -115,9 +118,9 @@ export class Editor
   private animate = () => {
     this.activeDocument?.tools.toolRenderer.render();
     this.activeDocument?.tools.regionGrowingRenderer.render();
-    this.activeDocument?.layers
-      .filter((layer) => layer.kind === "image")
-      .forEach((imageLayer) => (imageLayer as ImageLayer).image.render());
+    this.activeDocument?.imageLayers.forEach((imageLayer) =>
+      (imageLayer.image as RenderedImage).render(),
+    );
     this.sliceRenderer?.animate();
     this.volumeRenderer?.animate();
   };

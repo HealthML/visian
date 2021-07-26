@@ -25,10 +25,9 @@ vec3 transformToCutawaySpace(vec3 volumeCoords) {
 vec4 baseTransferFunction(VolumeData data, vec3 volumeCoords) {
   // F+C Edges
   if (uTransferFunction == 1) {
-    vec4 edgeColor = vec4(uContextColor, mix(0.0, 0.015, step(uLimitLow, length(data.firstDerivative)) * (1.0 - step(uLimitHigh, length(data.firstDerivative)))) * uContextOpacity);
-    vec4 focusColor = vec4(uFocusColor, uFocusOpacity);
+    vec4 edgeColor = vec4(data.imageColor.rgb, data.imageColor.a * mix(0.0, 0.015, step(uLimitLow, length(data.firstDerivative)) * (1.0 - step(uLimitHigh, length(data.firstDerivative)))));
     return uUseFocus ?
-        mix(edgeColor, focusColor, step(0.1, data.focus))
+        mix(edgeColor, data.annotation, step(0.1, data.annotation.a))
       : edgeColor;
   }
 
@@ -36,24 +35,23 @@ vec4 baseTransferFunction(VolumeData data, vec3 volumeCoords) {
   if (uTransferFunction == 2) {
     float cone = sdCone(transformToCutawaySpace(volumeCoords), uConeAngle);
     float contextFactor = step(0.0, cone);
-    float filteredDensity = data.density * step(0.05, data.density);
+    vec4 filteredDensity = data.image * step(0.05, data.image.a);
 
-    vec4 contextColor = vec4(vec3(filteredDensity), filteredDensity * uContextOpacity) * contextFactor;
-    vec4 focusColor = vec4(uFocusColor, uFocusOpacity);
+    vec4 contextColor = filteredDensity * contextFactor;
     return uUseFocus ?
-        mix(contextColor,focusColor, step(0.1, data.focus))
+        mix(contextColor, data.annotation, step(0.1, data.annotation.a))
       : contextColor;
   }
 
   // Custom
   if (uTransferFunction == 3) {
-    return texture2D(uCustomTFTexture, vec2(data.density, 0));
+    return texture2D(uCustomTFTexture, vec2(data.image.a, 0));
   }
 
   // Density
-  vec4 densityColor = vec4(((data.density - uLimitLow) / (uLimitHigh - uLimitLow)) * step(uLimitLow, data.density) * (1.0 - step(uLimitHigh, data.density)));
+  vec4 densityColor = data.image * vec4(step(uLimitLow, data.imageRaw.a) * (1.0 - step(uLimitHigh, data.imageRaw.a)));
   return uUseFocus ?
-      densityColor * data.focus
+      densityColor * data.annotation.a
     : densityColor;
 }
 

@@ -25,6 +25,7 @@ export class LAOComputer extends TiledRenderer {
     private flush: () => void,
     target = new THREE.WebGLRenderTarget(1, 1),
     private laoMaterial = new LAOMaterial(
+      editor,
       firstDerivativeTexture,
       secondDerivativeTexture,
       target.texture,
@@ -36,14 +37,7 @@ export class LAOComputer extends TiledRenderer {
     this.reactionDisposers.push(
       reaction(
         () => {
-          const imageId =
-            editor.activeDocument?.viewport3D.activeTransferFunction?.params
-              .image?.value;
-
-          if (!imageId) return undefined;
-
-          const imageLayer = editor.activeDocument?.getLayer(imageId as string);
-
+          const imageLayer = editor.activeDocument?.baseImageLayer;
           if (!imageLayer) return undefined;
 
           return (imageLayer as IImageLayer).image;

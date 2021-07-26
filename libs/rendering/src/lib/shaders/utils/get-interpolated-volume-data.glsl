@@ -22,7 +22,16 @@ VolumeData getVolumeData(vec3 volumeCoords) {
 
   VolumeData data;
 
-  data.density = texture2D(uVolume, uv).r;
+  vec4 imageValue = vec4(0.0);
+  vec4 imageRaw = vec4(0.0);
+  {{reduceLayerStack(imageValue, uv, false, imageRaw)}}
+
+  vec4 imageColor = vec4(0.0);
+  {{reduceLayerColors(imageColor, false)}}
+
+  data.image = imageValue;
+  data.imageRaw = imageRaw;
+  data.imageColor = imageColor;
   data.firstDerivative = decodeVec3(texture2D(uInputFirstDerivative, uv));
   data.secondDerivative = decodeVec3(texture2D(uInputSecondDerivative, uv));
 
@@ -40,7 +49,9 @@ VolumeData getVolumeData(vec3 volumeCoords) {
   #endif // LAO
   
   if(uUseFocus) {
-    data.focus = texture2D(uFocus, uv).r;
+    vec4 focusValue = vec4(0.0);
+    {{reduceLayerStack(focusValue, uv, true)}}
+    data.annotation = focusValue;
   }
 
   return data;
@@ -66,7 +77,9 @@ VolumeData getInterpolatedVolumeData(vec3 volumeCoords) {
 
   VolumeData interpolatedData;
 
-  interpolatedData.density = mix(lowerData.density, upperData.density, uVolumeNearestFiltering ? step(0.5, interpolation) : interpolation);
+  interpolatedData.image = mix(lowerData.image, upperData.image, uVolumeNearestFiltering ? step(0.5, interpolation) : interpolation);
+  interpolatedData.imageRaw = mix(lowerData.imageRaw, upperData.imageRaw, uVolumeNearestFiltering ? step(0.5, interpolation) : interpolation);
+  interpolatedData.imageColor = mix(lowerData.imageColor, upperData.imageColor, uVolumeNearestFiltering ? step(0.5, interpolation) : interpolation);
   interpolatedData.firstDerivative = mix(lowerData.firstDerivative, upperData.firstDerivative, interpolation);
   interpolatedData.secondDerivative = mix(lowerData.secondDerivative, upperData.secondDerivative, interpolation);
 
@@ -85,7 +98,7 @@ VolumeData getInterpolatedVolumeData(vec3 volumeCoords) {
 
   if(uUseFocus) {
     // The focus texture should not be interpolated.
-    interpolatedData.focus = mix(lowerData.focus, upperData.focus, step(0.5, interpolation));
+    interpolatedData.annotation = mix(lowerData.annotation, upperData.annotation, step(0.5, interpolation));
   }
 
   return interpolatedData;

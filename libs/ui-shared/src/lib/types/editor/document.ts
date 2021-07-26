@@ -2,7 +2,7 @@ import type * as THREE from "three";
 
 import type { ISliceRenderer, IVolumeRenderer } from "../rendering";
 import type { IHistory } from "./history";
-import type { ILayer } from "./layers";
+import type { IImageLayer, ILayer } from "./layers";
 import type { ITools } from "./tools";
 import type { Reference } from "./types";
 import type { IViewport2D, IViewport3D, IViewSettings } from "./view-settings";
@@ -19,15 +19,24 @@ export interface IDocument {
    */
   title?: string;
 
-  /** The layer that is currently selected for editing. */
-  activeLayer?: Reference<ILayer>;
   /**
    * The document's layer stack.
    * This contains all top-level layers (not contained in some group), sorted
    * top-to-bottom.
    */
   layers: ILayer[];
+  /** `true` if the document holds three-dimensional layers. */
   has3DLayers: boolean;
+  /** The layer that is currently selected for editing. */
+  activeLayer?: Reference<ILayer>;
+
+  /** A view on the document's `layers`, containing only its image layers. */
+  imageLayers: Reference<IImageLayer>[];
+  /**
+   * The base image layer that serves as a reference for all other image
+   * layers to be registered to it.
+   */
+  baseImageLayer?: Reference<IImageLayer>;
 
   /** The document's history.' */
   history: IHistory;

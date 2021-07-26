@@ -289,7 +289,7 @@ export const Layers: React.FC = observer(() => {
         }
       >
         {/* TODO: Should we update on every drag change or just on drop? */}
-        <DragDropContext onDragUpdate={handleDrag} onDragEnd={handleDrag}>
+        <DragDropContext onDragUpdate={handleDrag} onDragEnd={noop}>
           <Droppable droppableId="layer-stack">
             {(provided: DroppableProvided) => (
               <LayerList {...provided.droppableProps} ref={provided.innerRef}>

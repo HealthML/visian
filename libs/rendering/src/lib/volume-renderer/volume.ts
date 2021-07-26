@@ -1,10 +1,10 @@
-import { IEditor, IImageLayer } from "@visian/ui-shared";
+import { IEditor } from "@visian/ui-shared";
 import { IDisposable, IDisposer } from "@visian/utils";
 import { autorun } from "mobx";
 import * as THREE from "three";
+
 import { RenderedImage } from "../rendered-image";
 import { BoundingBox, CuttingPlane, SharedUniforms } from "./utils";
-
 import { VolumeMaterial } from "./volume-material";
 
 /** A volume domain. */
@@ -25,6 +25,7 @@ export class Volume extends THREE.Mesh implements IDisposable {
     super(
       new THREE.BoxGeometry(1, 1, 1),
       new VolumeMaterial(
+        editor,
         sharedUniforms,
         firstDerivative,
         secondDerivative,
@@ -43,24 +44,20 @@ export class Volume extends THREE.Mesh implements IDisposable {
 
     this.disposers.push(
       autorun(() => {
-        const imageId =
-          editor.activeDocument?.viewport3D.activeTransferFunction?.params.image
-            ?.value;
-
-        if (!imageId) return;
-
-        const imageLayer = editor.activeDocument?.getLayer(imageId as string);
-
+        const imageLayer = editor.activeDocument?.baseImageLayer;
         if (!imageLayer) return;
 
-        const image = (imageLayer as IImageLayer).image as RenderedImage;
-
+        const image = imageLayer.image as RenderedImage;
         const scale = image.voxelCount
           .clone(false)
           .multiply(image.voxelSpacing)
           .multiplyScalar(0.001);
 
         this.scale.set(scale.x, scale.y, scale.z);
+
+        // The camera position has to be converted to the new volume coordinate system.
+        editor.volumeRenderer?.updateCameraPosition();
+        editor.volumeRenderer?.lazyRender();
       }),
     );
   }
