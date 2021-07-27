@@ -78,6 +78,7 @@ export class RegionGrowingRenderer3D
       doRegionGrowing: action,
       setSteps: action,
       flushToAnnotation: action,
+      discard: action,
     });
   }
 
@@ -181,12 +182,16 @@ export class RegionGrowingRenderer3D
       this.steps !== undefined ? (255 - this.steps) / 255 : this.steps,
     );
 
+    this.discard();
+  }
+
+  public discard = () => {
     this.clearRenderTargets();
     this.holdsPreview = false;
 
     this.document.sliceRenderer?.lazyRender();
     this.document.volumeRenderer?.lazyRender(true);
-  }
+  };
 
   public get outputTextures() {
     return this.renderTargets.map((renderTarget) => renderTarget.texture);

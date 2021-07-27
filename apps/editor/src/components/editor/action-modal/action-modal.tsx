@@ -1,4 +1,10 @@
-import { ButtonParam, ColorParam, Modal, NumberParam } from "@visian/ui-shared";
+import {
+  ButtonParam,
+  ColorParam,
+  Modal,
+  ModalHeaderButton,
+  NumberParam,
+} from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
 import React, { useCallback } from "react";
 
@@ -18,7 +24,18 @@ export const ActionModal = observer(() => {
 
   return store?.editor.activeDocument?.tools.regionGrowingRenderer3D
     .holdsPreview ? (
-    <Modal labelTx="smart-brush-3d">
+    <Modal
+      labelTx="smart-brush-3d"
+      headerChildren={
+        <ModalHeaderButton
+          icon="xSmall"
+          tooltipTx="discard-region-growing"
+          onPointerDown={
+            store?.editor.activeDocument?.tools.regionGrowingRenderer3D.discard
+          }
+        />
+      }
+    >
       <ColorParam
         labelTx="preview-color"
         isCollapsed

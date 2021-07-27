@@ -44,6 +44,7 @@
   "preview-color": "Vorschaufarbe",
   "region-growing-steps": "Maximale Distanz zum Start",
   "submit-3D-region-growing": "Anwenden (Enter)",
+  "discard-region-growing": "Abbrechen",
   "enable-plane": "Schnittebene nutzen",
   "render-plane": "Bild auf der Schnittebene anzeigen",
 
