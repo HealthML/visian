@@ -182,7 +182,8 @@ export const Toolbar: React.FC = observer(() => {
           <NumberParam
             labelTx="threshold"
             min={0}
-            max={20}
+            max={40}
+            extendBeyondMinMax
             stepSize={1}
             value={store?.editor.activeDocument?.tools.smartBrushThreshold}
             setValue={setSmartBrushThreshold}

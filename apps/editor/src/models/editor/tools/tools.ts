@@ -348,7 +348,7 @@ export class Tools
   }
 
   public setSmartBrushThreshold(value = 5) {
-    this.smartBrushThreshold = Math.min(20, Math.max(0, value));
+    this.smartBrushThreshold = Math.max(0, value);
   }
 
   public setBoundedSmartBrushRadius(value = 7, showPreview = false) {
