@@ -24,6 +24,7 @@ import { ViewSettings } from "../view-settings";
 import { UIOverlayProps } from "./ui-overlay.props";
 
 import type { ImageLayer } from "../../../models";
+
 const Container = styled(AbsoluteCover)`
   align-items: stretch;
   display: flex;

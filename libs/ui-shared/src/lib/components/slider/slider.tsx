@@ -2,7 +2,7 @@ import React, { useCallback, useRef, useState } from "react";
 import { useTheme } from "styled-components";
 
 import { parseNumberFromMetric, Theme } from "../../theme";
-import { InputContainer, Spacer } from "../box";
+import { InputContainer } from "../box";
 import { Tooltip } from "../tooltip";
 import { SliderMarker, SliderRangeMarker } from "./markers";
 import { SliderFieldProps, SliderProps } from "./slider.props";
