@@ -2,7 +2,7 @@ import React, { useCallback, useRef, useState } from "react";
 import { useTheme } from "styled-components";
 
 import { parseNumberFromMetric, Theme } from "../../theme";
-import { InputContainer } from "../box";
+import { InputContainer, Spacer } from "../box";
 import { Tooltip } from "../tooltip";
 import { SliderMarker, SliderRangeMarker } from "./markers";
 import { SliderFieldProps, SliderProps } from "./slider.props";
@@ -321,11 +321,14 @@ export const SliderField: React.FC<SliderFieldProps> = ({
           {(labelTx || label) && <SliderLabel text={label} tx={labelTx} />}
           {showValueLabel &&
             (Array.isArray(actualValue) ? (
-              <SliderLabel
-                text={formatValueLabel(
-                  Array.isArray(actualValue) ? actualValue : [actualValue],
-                )}
-              />
+              <>
+                <Spacer />
+                <SliderLabel
+                  text={formatValueLabel(
+                    Array.isArray(actualValue) ? actualValue : [actualValue],
+                  )}
+                />
+              </>
             ) : (
               <SliderValueInputWrapper>
                 <SliderValueInput
