@@ -75,6 +75,8 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
 
   public tools: Tools;
 
+  public showLayerMenu = false;
+
   public markers: Markers = new Markers(this);
 
   constructor(
@@ -112,6 +114,7 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
       viewport2D: observable,
       viewport3D: observable,
       tools: observable,
+      showLayerMenu: observable,
 
       title: computed,
       activeLayer: computed,
@@ -127,6 +130,8 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
       toggleTypeAndRepositionLayer: action,
       importImage: action,
       importAnnotation: action,
+      setShowLayerMenu: action,
+      toggleLayerMenu: action,
       applySnapshot: action,
     });
 
@@ -356,6 +361,14 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
   public async requestSave(): Promise<void> {
     return this.context?.persist();
   }
+
+  // UI state
+  public setShowLayerMenu = (value = false): void => {
+    this.showLayerMenu = value;
+  };
+  public toggleLayerMenu = (): void => {
+    this.setShowLayerMenu(!this.showLayerMenu);
+  };
 
   // Proxies
   public get sliceRenderer(): ISliceRenderer | undefined {
