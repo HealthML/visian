@@ -4,7 +4,14 @@ import { AtlasCommand } from "../history";
 import { ButtonParameter, NumberParameter, Parameter } from "../parameters";
 import { Tool } from "./tool";
 
-export class SmartBrush3D<N extends "smart-brush-3d"> extends Tool<N> {
+export class SmartBrush3D<
+  N extends "smart-brush-3d" = "smart-brush-3d"
+> extends Tool<N> {
+  public readonly excludeFromSnapshotTracking = [
+    "document",
+    "regionGrowingRenderer",
+  ];
+
   private isSeedSet = false;
 
   constructor(
@@ -20,26 +27,9 @@ export class SmartBrush3D<N extends "smart-brush-3d"> extends Tool<N> {
         isDrawingTool: true,
         isBrush: true,
         isSmartBrush: true,
-        params: [
-          new NumberParameter({
-            name: "steps",
-            labelTx: "region-growing-steps",
-            defaultValue: 244,
-            min: 0,
-            max: 244,
-            stepSize: 1,
-          }) as Parameter<unknown>,
-        ],
       },
       document,
     );
-
-    this.params.submit = new ButtonParameter({
-      name: "submit",
-      labelTx: "submit-3D-region-growing",
-      onClick: this.submit,
-      defaultValue: undefined as unknown,
-    });
   }
 
   public startAt(dragPoint: DragPoint): void {

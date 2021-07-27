@@ -207,7 +207,7 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
     });
   };
 
-  private getColorForNewAnnotation = (): string => {
+  public getFirstUnusedColor = (): string => {
     // TODO: Rework to work with group layers
     const layerStack = this.layers;
     const usedColors: { [key: string]: boolean } = {};
@@ -223,7 +223,7 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
   public addNewAnnotationLayer = () => {
     if (!this.baseImageLayer) return;
 
-    const annotationColor = this.getColorForNewAnnotation();
+    const annotationColor = this.getFirstUnusedColor();
 
     const annotationLayer = ImageLayer.fromNewAnnotationForImage(
       this.baseImageLayer.image,
@@ -333,7 +333,7 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
   public async importAnnotation(image: ITKImage) {
     const annotationLayer = ImageLayer.fromITKImage(image, this, {
       isAnnotation: true,
-      color: this.getColorForNewAnnotation(),
+      color: this.getFirstUnusedColor(),
     });
     if (
       this.layers.length &&

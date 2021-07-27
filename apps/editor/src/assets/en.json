@@ -41,6 +41,7 @@
   "adaptive-brush-size": "Adaptive Brush Size",
   "threshold": "Threshold",
   "box-radius": "Bounding Box Radius",
+  "preview-color": "Preview Color",
   "region-growing-steps": "Maximum Distance to Seed",
   "submit-3D-region-growing": "Apply (Enter)",
   "enable-plane": "Use Cutting Plane",

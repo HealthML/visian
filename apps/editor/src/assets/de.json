@@ -41,6 +41,7 @@
   "adaptive-brush-size": "Adaptive Pinselgröße",
   "threshold": "Schwellwert",
   "box-radius": "Begrenzungsradius",
+  "preview-color": "Vorschaufarbe",
   "region-growing-steps": "Maximale Distanz zum Start",
   "submit-3D-region-growing": "Anwenden (Enter)",
   "enable-plane": "Schnittebene nutzen",

@@ -83,9 +83,14 @@ export const setUpHotKeys = (store: RootStore): IDisposer => {
   });
   hotkeys("enter", (event) => {
     event.preventDefault();
-    (store.editor.activeDocument?.tools.tools[
-      "smart-brush-3d"
-    ] as SmartBrush3D<"smart-brush-3d">).submit();
+
+    if (
+      store.editor.activeDocument?.tools.regionGrowingRenderer3D.holdsPreview
+    ) {
+      (store.editor.activeDocument?.tools.tools[
+        "smart-brush-3d"
+      ] as SmartBrush3D<"smart-brush-3d">).submit();
+    }
   });
 
   // Brush Size/Cutting Plane Distance

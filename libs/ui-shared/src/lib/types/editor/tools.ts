@@ -98,6 +98,14 @@ export interface IToolGroup<N extends string> {
   setActiveTool(nameOrTool: N | ITool<N>): void;
 }
 
+export interface IRegionGrowingRenderer3D {
+  holdsPreview: boolean;
+  previewColor?: string;
+
+  /** The number of steps to region grow. */
+  steps: number;
+}
+
 /** The editor's tools and their settings for the document. */
 export interface ITools<N extends string> {
   /** The currently selected tool. */
@@ -130,6 +138,7 @@ export interface ITools<N extends string> {
   isDrawing: boolean;
 
   layerMergeTextures: THREE.Texture[];
+  regionGrowingRenderer3D: IRegionGrowingRenderer3D;
 
   setActiveTool(nameOrTool?: N | ITool<N>): void;
 

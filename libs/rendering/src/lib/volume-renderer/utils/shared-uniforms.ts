@@ -260,7 +260,13 @@ export class SharedUniforms implements IDisposable {
 
         this.uniforms.uLayerColors.value = [
           // additional layer for 3d region growing
-          new THREE.Color("red"),
+          new THREE.Color(
+            color(
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              (editor.activeDocument?.tools.regionGrowingRenderer3D
+                .previewColor as any) || "foreground",
+            )({ theme: editor.theme }),
+          ),
           ...layerColors,
         ];
 
@@ -280,8 +286,7 @@ export class SharedUniforms implements IDisposable {
       }),
       autorun(() => {
         const steps =
-          (editor.activeDocument?.tools.tools["smart-brush-3d"].params.steps
-            ?.value as number | undefined) ?? 0;
+          editor.activeDocument?.tools.regionGrowingRenderer3D.steps ?? 0;
 
         this.uniforms.uRegionGrowingThreshold.value = (255 - steps) / 255;
 

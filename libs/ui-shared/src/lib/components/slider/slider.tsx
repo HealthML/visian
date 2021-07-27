@@ -319,7 +319,6 @@ export const SliderField: React.FC<SliderFieldProps> = ({
       {(labelTx || label || showValueLabel) && (
         <SliderLabelRow>
           {(labelTx || label) && <SliderLabel text={label} tx={labelTx} />}
-          <Spacer />
           {showValueLabel &&
             (Array.isArray(actualValue) ? (
               <SliderLabel

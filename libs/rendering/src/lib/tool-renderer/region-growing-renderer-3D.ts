@@ -1,12 +1,26 @@
-import * as THREE from "three";
+import {
+  IDocument,
+  IImageLayer,
+  IRegionGrowingRenderer3D,
+} from "@visian/ui-shared";
 import { IDisposable, IDisposer, Voxel } from "@visian/utils";
-import { IDocument, IImageLayer } from "@visian/ui-shared";
-import { reaction } from "mobx";
+import { action, makeObservable, observable, reaction } from "mobx";
+import * as THREE from "three";
+
 import { RenderedImage } from "../rendered-image";
 import ScreenAlignedQuad from "../screen-aligned-quad";
 import { RegionGrowing3DMaterial, Seed } from "./utils";
 
-export class RegionGrowingRenderer3D implements IDisposable {
+const MAX_STEPS = 244;
+
+export class RegionGrowingRenderer3D
+  implements IRegionGrowingRenderer3D, IDisposable {
+  public readonly excludeFromSnapshotTracking = ["document"];
+
+  public holdsPreview = false;
+  public previewColor?: string;
+  public steps = MAX_STEPS;
+
   private disposers: IDisposer[] = [];
 
   private renderTargets: THREE.WebGLRenderTarget[] = [];
@@ -55,6 +69,16 @@ export class RegionGrowingRenderer3D implements IDisposable {
         this.resizeRenderTargets,
       ),
     );
+
+    makeObservable(this, {
+      holdsPreview: observable,
+      previewColor: observable,
+      steps: observable,
+      setPreviewColor: action,
+      doRegionGrowing: action,
+      setSteps: action,
+      flushToAnnotation: action,
+    });
   }
 
   public dispose() {
@@ -81,6 +105,10 @@ export class RegionGrowingRenderer3D implements IDisposable {
     });
   }
 
+  public setPreviewColor = (value: string) => {
+    this.previewColor = value;
+  };
+
   public doRegionGrowing(threshold: number) {
     const sourceImage = (this.document.layers.find(
       (layer) =>
@@ -96,7 +124,7 @@ export class RegionGrowingRenderer3D implements IDisposable {
     this.regionGrowingMaterial.setVoxelCount(sourceImage.voxelCount.toArray());
     this.regionGrowingMaterial.setThreshold(threshold);
 
-    this.document.tools.tools["smart-brush-3d"].params.steps?.setValue(244);
+    this.steps = MAX_STEPS;
 
     const blipSteps = Math.ceil(
       Math.min(254, sourceImage.voxelCount.sum()) / 2,
@@ -128,7 +156,14 @@ export class RegionGrowingRenderer3D implements IDisposable {
       renderer.setRenderTarget(null);
       renderer.autoClear = true;
     });
+
+    this.previewColor = this.document.getFirstUnusedColor();
+    this.holdsPreview = true;
   }
+
+  public setSteps = (value: number) => {
+    this.steps = Math.min(value, MAX_STEPS);
+  };
 
   public flushToAnnotation() {
     if (
@@ -141,15 +176,13 @@ export class RegionGrowingRenderer3D implements IDisposable {
     const annotation = (this.document.activeLayer as IImageLayer)
       .image as RenderedImage;
 
-    const addThreshold = this.document.tools.tools["smart-brush-3d"].params
-      .steps?.value as number | undefined;
-
     annotation.addToAtlas(
       this.outputTextures,
-      addThreshold !== undefined ? (255 - addThreshold) / 255 : addThreshold,
+      this.steps !== undefined ? (255 - this.steps) / 255 : this.steps,
     );
 
     this.clearRenderTargets();
+    this.holdsPreview = false;
 
     this.document.sliceRenderer?.lazyRender();
     this.document.volumeRenderer?.lazyRender(true);
