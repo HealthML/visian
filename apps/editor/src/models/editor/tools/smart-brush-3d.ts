@@ -20,7 +20,7 @@ export class SmartBrush3D<
     super(
       {
         name: "smart-brush-3d" as N,
-        icon: "magicBrush",
+        icon: "smartBrush3D",
         supportedViewModes: ["2D", "3D"],
         supportedLayerKinds: ["image"],
         isDrawingTool: true,
