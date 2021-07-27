@@ -1,6 +1,6 @@
 import { ButtonParam, ColorParam, Modal, NumberParam } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
-import React from "react";
+import React, { useCallback } from "react";
 
 import { useStore } from "../../../app/root-store";
 
@@ -8,6 +8,13 @@ import type { SmartBrush3D } from "../../../models";
 
 export const ActionModal = observer(() => {
   const store = useStore();
+
+  const submit = useCallback(() => {
+    (store?.editor.activeDocument?.tools.tools[
+      "smart-brush-3d"
+    ] as SmartBrush3D).submit();
+    store?.editor.activeDocument?.tools.setIsCursorOverFloatingUI(false);
+  }, [store]);
 
   return store?.editor.activeDocument?.tools.regionGrowingRenderer3D
     .holdsPreview ? (
@@ -41,11 +48,7 @@ export const ActionModal = observer(() => {
       <ButtonParam
         labelTx="submit-3D-region-growing"
         isLast
-        handlePress={
-          (store?.editor.activeDocument?.tools.tools[
-            "smart-brush-3d"
-          ] as SmartBrush3D).submit
-        }
+        handlePress={submit}
       />
     </Modal>
   ) : null;

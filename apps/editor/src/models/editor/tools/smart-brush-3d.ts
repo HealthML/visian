@@ -1,7 +1,6 @@
 import { RegionGrowingRenderer3D } from "@visian/rendering";
 import { DragPoint, IDocument, IImageLayer } from "@visian/ui-shared";
 import { AtlasCommand } from "../history";
-import { ButtonParameter, NumberParameter, Parameter } from "../parameters";
 import { Tool } from "./tool";
 
 export class SmartBrush3D<

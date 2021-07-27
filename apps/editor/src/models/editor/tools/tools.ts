@@ -268,6 +268,7 @@ export class Tools
     return Boolean(
       this.activeTool?.isBrush &&
         this.isCursorOverDrawableArea &&
+        this.document.viewSettings.viewMode === "2D" &&
         !this.isCursorOverFloatingUI &&
         this.document.activeLayer?.isAnnotation &&
         this.document.activeLayer?.isVisible,
