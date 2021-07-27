@@ -1,4 +1,5 @@
 import {
+  computeStyleValue,
   ContextMenu,
   ContextMenuItem,
   FloatingUIButton,
@@ -8,6 +9,7 @@ import {
   Modal,
   ModalHeaderButton,
   PointerButton,
+  radius,
   size,
   stopPropagation,
   SubtleText,
@@ -43,12 +45,18 @@ const noop = () => {
 // Styled Components
 const LayerList = styled(List)`
   margin-top: -16px;
-  max-height: calc(
-    6 * (${size("listElementHeight")} + ${size("dividerHeight")})
-  );
+  max-height: ${computeStyleValue(
+    [size("listElementHeight"), size("dividerHeight")],
+    (listElementHeight, dividerHeight) =>
+      6 * (listElementHeight + dividerHeight),
+  )};
   max-width: 100%;
   overflow-x: hidden;
   overflow-y: auto;
+`;
+
+const StyledListItemContainer = styled.div`
+  margin: 0 ${radius("activeLayerBorderRadius")};
 `;
 
 const LayerListItem = observer<{
@@ -167,31 +175,35 @@ const LayerListItem = observer<{
           const node = (
             <Observer>
               {() => (
-                <ListItem
-                  {...provided.draggableProps}
-                  {...provided.dragHandleProps}
-                  ref={provided.innerRef}
-                  icon={{
-                    color: layer.color || "text",
-                    icon:
-                      layer.kind === "image" && !layer.isAnnotation
-                        ? "image"
-                        : undefined,
-                  }}
-                  iconRef={setColorRef}
-                  onIconPress={areLayerSettingsOpen ? noop : openLayerSettings}
-                  labelTx={layer.title ? undefined : "untitled-layer"}
-                  label={layer.title}
-                  trailingIcon={layer.isVisible ? "eye" : "eyeCrossed"}
-                  disableTrailingIcon={!layer.isVisible}
-                  trailingIconRef={trailingIconRef}
-                  onTrailingIconPress={toggleAnnotationVisibility}
-                  isActive={isActive}
-                  isLast={isLast || snapshot.isDragging}
-                  onPointerDown={handlePointerDown}
-                  onPointerUp={stopTap}
-                  onContextMenu={handleContextMenu}
-                />
+                <StyledListItemContainer>
+                  <ListItem
+                    {...provided.draggableProps}
+                    {...provided.dragHandleProps}
+                    ref={provided.innerRef}
+                    icon={{
+                      color: layer.color || "text",
+                      icon:
+                        layer.kind === "image" && !layer.isAnnotation
+                          ? "image"
+                          : undefined,
+                    }}
+                    iconRef={setColorRef}
+                    onIconPress={
+                      areLayerSettingsOpen ? noop : openLayerSettings
+                    }
+                    labelTx={layer.title ? undefined : "untitled-layer"}
+                    label={layer.title}
+                    trailingIcon={layer.isVisible ? "eye" : "eyeCrossed"}
+                    disableTrailingIcon={!layer.isVisible}
+                    trailingIconRef={trailingIconRef}
+                    onTrailingIconPress={toggleAnnotationVisibility}
+                    isActive={isActive}
+                    isLast={isLast || snapshot.isDragging}
+                    onPointerDown={handlePointerDown}
+                    onPointerUp={stopTap}
+                    onContextMenu={handleContextMenu}
+                  />
+                </StyledListItemContainer>
               )}
             </Observer>
           );

@@ -134,6 +134,7 @@ export const theme = {
     print: "@media print",
   },
   radii: {
+    activeLayerBorderRadius: "8px",
     default: "10px",
   },
   shadows: {},
