@@ -8,8 +8,8 @@ import { List, ListDivider, ListItem } from "../list";
 import { InputLabel } from "../text";
 import { ListPositionProps } from "./types";
 
-const SelectedColor = styled(List)`
-  margin-bottom: 10px;
+const SelectedColor = styled(List)<{ isCollapsed?: boolean }>`
+  margin-bottom: ${(props) => (props.isCollapsed ? "20px" : "10px")};
 `;
 
 const ColorList = styled.div`
@@ -47,11 +47,9 @@ export const ColorParam: React.FC<Partial<ColorParamProps>> = ({
 }) => (
   <>
     {(labelTx || label) && <InputLabel tx={labelTx} text={label} />}
-    <SelectedColor>
-      {(!isFirst || labelTx || label) && !isCollapsed && <ListDivider />}
-      {value && (
-        <ListItem icon={{ color: value }} label={value} isLast={isCollapsed} />
-      )}
+    <SelectedColor isCollapsed={isCollapsed}>
+      {(!isFirst || labelTx || label) && <ListDivider />}
+      {value && <ListItem icon={{ color: value }} label={value} />}
     </SelectedColor>
     {!isCollapsed && (
       <ColorList {...rest}>
