@@ -52,8 +52,6 @@ export class SmartBrush3D<
 
   public endAt(_dragPoint: DragPoint): void {
     if (this.isSeedSet) {
-      this.document.viewSettings.setViewMode("3D");
-      this.document.viewport3D.setActiveTransferFunction("fc-edges");
       this.regionGrowingRenderer.doRegionGrowing(
         this.document.tools.smartBrushThreshold,
       );
