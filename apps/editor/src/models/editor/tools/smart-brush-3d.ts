@@ -21,7 +21,7 @@ export class SmartBrush3D<
       {
         name: "smart-brush-3d" as N,
         icon: "smartBrush3D",
-        supportedViewModes: ["2D", "3D"],
+        supportedViewModes: ["2D"],
         supportedLayerKinds: ["image"],
         isDrawingTool: true,
         isBrush: true,
@@ -52,6 +52,8 @@ export class SmartBrush3D<
 
   public endAt(_dragPoint: DragPoint): void {
     if (this.isSeedSet) {
+      this.document.viewSettings.setViewMode("3D");
+      this.document.viewport3D.setActiveTransferFunction("fc-edges");
       this.regionGrowingRenderer.doRegionGrowing(
         this.document.tools.smartBrushThreshold,
       );
