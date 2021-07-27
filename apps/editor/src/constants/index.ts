@@ -13,6 +13,7 @@ export const errorDisplayDuration = 12000;
 
 export const defaultAnnotationOpacity = 0.5;
 export const defaultAnnotationColor = "Conifer";
+export const defaultRegionGrowingPreviewColor = "Azure Radiance";
 
 // Obfuscated using HEX representation to prevent spam
 export const feedbackMailAddress =

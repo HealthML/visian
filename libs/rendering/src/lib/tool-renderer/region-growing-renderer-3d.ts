@@ -158,7 +158,7 @@ export class RegionGrowingRenderer3D
       renderer.autoClear = true;
     });
 
-    this.previewColor = this.document.getFirstUnusedColor();
+    this.previewColor = this.document.getRegionGrowingPreviewColor();
     this.holdsPreview = true;
   }
 
