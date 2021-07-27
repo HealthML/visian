@@ -205,7 +205,7 @@ export class SharedUniforms implements IDisposable {
 
         this.uniforms.uLayerData.value = [
           // additional layer for 3d region growing
-          editor.activeDocument?.tools.layerMergeTextures[0] || null,
+          editor.activeDocument?.tools.layerPreviewTextures[0] || null,
           ...layerData,
         ];
 

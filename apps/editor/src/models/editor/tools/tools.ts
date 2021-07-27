@@ -110,6 +110,7 @@ export class Tools
       canDraw: computed,
       isToolInUse: computed,
       useAdaptiveBrushSize: computed,
+      layerPreviewTextures: computed,
 
       setActiveTool: action,
       setBrushSize: action,
@@ -286,7 +287,7 @@ export class Tools
     return this.lockedBrushSize === undefined;
   }
 
-  public get layerMergeTextures(): THREE.Texture[] {
+  public get layerPreviewTextures(): THREE.Texture[] {
     return this.regionGrowingRenderer3D.outputTextures;
   }
 

@@ -137,7 +137,7 @@ export interface ITools<N extends string> {
   /** Indicates if a tool is currently drawing. */
   isDrawing: boolean;
 
-  layerMergeTextures: THREE.Texture[];
+  layerPreviewTextures: THREE.Texture[];
   regionGrowingRenderer3D: IRegionGrowingRenderer3D;
 
   setActiveTool(nameOrTool?: N | ITool<N>): void;

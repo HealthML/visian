@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { color, IEditor, IImageLayer } from "@visian/ui-shared";
 import { IDisposable, IDisposer, ViewType } from "@visian/utils";
 import { autorun } from "mobx";
@@ -135,9 +136,10 @@ export class AnnotationSliceMaterial extends SliceMaterial {
       {
         uAnnotationColor: { value: new THREE.Color("white") },
         uAnnotationOpacity: { value: 0.5 },
-        uUseMergeTexture: { value: false },
-        uMergeTexture: { value: null },
-        uMergeThreshold: { value: 0 },
+        uUsePreviewTexture: { value: false },
+        uPreviewTexture: { value: null },
+        uPreviewThreshold: { value: 0 },
+        uPreviewColor: { value: new THREE.Color("white") },
       },
     );
 
@@ -158,28 +160,36 @@ export class AnnotationSliceMaterial extends SliceMaterial {
         editor.sliceRenderer?.lazyRender();
       }),
       autorun(() => {
-        const useMergeTexture =
+        const usePreviewTexture =
           editor.activeDocument?.activeLayer?.id === imageLayer.id;
-        this.uniforms.uUseMergeTexture.value = useMergeTexture;
+        this.uniforms.uUsePreviewTexture.value = usePreviewTexture;
 
-        if (useMergeTexture) {
+        if (usePreviewTexture) {
           const canvasIndex = getOrder(
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             editor.activeDocument!.viewport2D.mainViewType,
           ).indexOf(viewType);
           // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          this.uniforms.uMergeTexture.value = editor.activeDocument!.tools.layerMergeTextures[
+          this.uniforms.uPreviewTexture.value = editor.activeDocument!.tools.layerPreviewTextures[
             canvasIndex
           ];
+          (this.uniforms.uPreviewColor.value as THREE.Color).set(
+            color(
+              (editor.activeDocument?.tools.regionGrowingRenderer3D
+                .previewColor as any) || "foreground",
+            )({
+              theme: editor.theme,
+            }),
+          );
         } else {
-          this.uniforms.uMergeTexture.value = null;
+          this.uniforms.uPreviewTexture.value = null;
         }
       }),
       autorun(() => {
         const steps =
           editor.activeDocument?.tools.regionGrowingRenderer3D.steps ?? 0;
 
-        this.uniforms.uMergeThreshold.value = (255 - steps) / 255;
+        this.uniforms.uPreviewThreshold.value = (255 - steps) / 255;
         editor.sliceRenderer?.lazyRender();
       }),
     );

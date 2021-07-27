@@ -17,9 +17,10 @@ uniform vec2 uAtlasGrid;
   uniform vec3 uAnnotationColor;
   uniform float uAnnotationOpacity;
 
-  uniform bool uUseMergeTexture;
-  uniform sampler2D uMergeTexture;
-  uniform float uMergeThreshold;
+  uniform bool uUsePreviewTexture;
+  uniform sampler2D uPreviewTexture;
+  uniform float uPreviewThreshold;
+  uniform vec3 uPreviewColor;
 #endif // ANNOTATION
 
 void main() {
@@ -63,11 +64,11 @@ void main() {
   #ifdef ANNOTATION
     float annotation = step(0.01, texelValue.x);
 
-    if(uUseMergeTexture) {
-      float mergeValue = texture2D(uMergeTexture, uv).x;
-      float merge = step(uMergeThreshold, mergeValue);
+    if(uUsePreviewTexture) {
+      float previewValue = texture2D(uPreviewTexture, uv).x;
+      float preview = step(uPreviewThreshold, previewValue);
 
-      gl_FragColor = vec4(uAnnotationColor, mix(0.0, uAnnotationOpacity / mix(1.0, 2.0, merge * (1.0 - annotation)), mix(annotation, 1.0, merge)));
+      gl_FragColor = vec4(mix(uAnnotationColor, uPreviewColor, max(0.0, preview - annotation)), mix(0.0, uAnnotationOpacity, max(annotation, preview)));
     } else {
       gl_FragColor = vec4(uAnnotationColor, mix(0.0, uAnnotationOpacity, annotation));
     }

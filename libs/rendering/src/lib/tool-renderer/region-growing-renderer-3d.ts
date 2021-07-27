@@ -76,6 +76,7 @@ export class RegionGrowingRenderer3D
       steps: observable,
       setPreviewColor: action,
       doRegionGrowing: action,
+      setSeed: action,
       setSteps: action,
       flushToAnnotation: action,
       discard: action,
@@ -94,6 +95,8 @@ export class RegionGrowingRenderer3D
 
   public setSeed(voxel: Voxel) {
     this.clearRenderTargets();
+
+    this.previewColor = this.document.getRegionGrowingPreviewColor();
 
     this.seedVoxel = voxel;
 
@@ -158,7 +161,6 @@ export class RegionGrowingRenderer3D
       renderer.autoClear = true;
     });
 
-    this.previewColor = this.document.getRegionGrowingPreviewColor();
     this.holdsPreview = true;
   }
 
