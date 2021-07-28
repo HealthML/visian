@@ -9,8 +9,6 @@ export interface ViewSettingsSnapshot {
 
   brightness: number;
   contrast: number;
-
-  backgroundColor: string;
 }
 
 export class ViewSettings
@@ -23,8 +21,6 @@ export class ViewSettings
 
   public brightness!: number;
   public contrast!: number;
-
-  public backgroundColor!: string;
 
   constructor(
     snapshot: Partial<ViewSettingsSnapshot> | undefined,
@@ -41,13 +37,11 @@ export class ViewSettings
       selectedVoxel: observable,
       brightness: observable,
       contrast: observable,
-      backgroundColor: observable,
 
       setSelectedVoxel: action,
       setViewMode: action,
       setContrast: action,
       setBrightness: action,
-      setBackgroundColor: action,
       reset: action,
       applySnapshot: action,
     });
@@ -97,16 +91,11 @@ export class ViewSettings
     this.contrast = value ?? 1;
   };
 
-  public setBackgroundColor = (value?: string): void => {
-    this.backgroundColor = value || "transparent";
-  };
-
   public reset = (): void => {
     this.setViewMode();
     this.setSelectedVoxel();
     this.setBrightness();
     this.setContrast();
-    this.setBackgroundColor();
   };
 
   // Serialization
@@ -118,8 +107,6 @@ export class ViewSettings
 
       brightness: this.brightness,
       contrast: this.contrast,
-
-      backgroundColor: this.backgroundColor,
     };
   }
 
@@ -134,8 +121,6 @@ export class ViewSettings
 
     this.setBrightness(snapshot.brightness);
     this.setContrast(snapshot.contrast);
-
-    this.setBackgroundColor(snapshot.backgroundColor);
 
     return Promise.resolve();
   }

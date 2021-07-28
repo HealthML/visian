@@ -235,11 +235,8 @@ const LayerModal = styled(Modal)`
 export const Layers: React.FC = observer(() => {
   const store = useStore();
 
-  // Menu Toggling
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const toggleModal = useCallback(() => {
-    setIsModalOpen(!isModalOpen);
-  }, [isModalOpen]);
+  // Menu State
+  const isModalOpen = Boolean(store?.editor.activeDocument?.showLayerMenu);
 
   // Menu Positioning
   const [buttonRef, setButtonRef] = useState<HTMLButtonElement | null>(null);
@@ -270,7 +267,7 @@ export const Layers: React.FC = observer(() => {
         tooltipTx="layers"
         showTooltip={!isModalOpen}
         ref={setButtonRef}
-        onPointerDown={toggleModal}
+        onPointerDown={store?.editor.activeDocument?.toggleLayerMenu}
         isActive={isModalOpen}
       />
       <LayerModal
