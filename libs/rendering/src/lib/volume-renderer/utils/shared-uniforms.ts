@@ -139,7 +139,7 @@ export class SharedUniforms implements IDisposable {
       autorun(() => {
         const brightness = editor.activeDocument?.viewSettings.brightness ?? 1;
         const factor =
-          editor.activeDocument?.viewport3D.shadingMode !== "phong" ? 2.5 : 1;
+          editor.activeDocument?.viewport3D.shadingMode === "lao" ? 3 : 1.25;
 
         this.uniforms.uBrightness.value = brightness * factor;
 
