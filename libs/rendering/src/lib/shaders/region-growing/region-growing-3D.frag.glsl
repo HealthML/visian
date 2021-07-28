@@ -11,10 +11,10 @@ uniform float uSeed;
 
 uniform float uRenderValue;
 
-bool canGrowFrom(float ownData, float neightborData, float neightborRegion) {
-  return neightborRegion > 0.0 &&
+bool canGrowFrom(float ownData, float neighborData, float neighborRegion) {
+  return neighborRegion > 0.0 &&
     abs(ownData - uSeed) <= 1.5 * uThreshold &&
-    abs(ownData - neightborData) <= uThreshold;
+    abs(ownData - neighborData) <= uThreshold;
 }
 
 void main() {
