@@ -236,9 +236,10 @@ export class SharedUniforms implements IDisposable {
             : 0,
         );
 
+        const activeLayer = editor.activeDocument?.activeLayer;
         this.uniforms.uLayerOpacities.value = [
           // additional layer for 3d region growing
-          editor.activeDocument?.activeLayer?.opacity ?? 0,
+          activeLayer?.isVisible ? activeLayer.opacity : 0,
           ...layerOpacities,
         ];
 
