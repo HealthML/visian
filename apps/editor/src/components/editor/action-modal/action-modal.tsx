@@ -15,6 +15,11 @@ import type { SmartBrush3D } from "../../../models";
 export const ActionModal = observer(() => {
   const store = useStore();
 
+  const discard = useCallback(() => {
+    store?.editor.activeDocument?.tools.regionGrowingRenderer3D.discard();
+    store?.editor.activeDocument?.tools.setIsCursorOverFloatingUI(false);
+  }, [store]);
+
   const submit = useCallback(() => {
     (store?.editor.activeDocument?.tools.tools[
       "smart-brush-3d"
@@ -30,9 +35,7 @@ export const ActionModal = observer(() => {
         <ModalHeaderButton
           icon="xSmall"
           tooltipTx="discard-region-growing"
-          onPointerDown={
-            store?.editor.activeDocument?.tools.regionGrowingRenderer3D.discard
-          }
+          onPointerDown={discard}
         />
       }
     >
