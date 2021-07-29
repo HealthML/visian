@@ -57,6 +57,10 @@ export class RegionGrowingRenderer3D
                 }),
             );
             this.resizeRenderTargets();
+
+            renderers.forEach((renderer) => {
+              this.regionGrowingQuad.compileWith(renderer);
+            });
           }
         },
         { fireImmediately: true },
