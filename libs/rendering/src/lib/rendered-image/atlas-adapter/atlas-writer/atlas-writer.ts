@@ -2,6 +2,11 @@ import * as THREE from "three";
 import ScreenAlignedQuad from "../../../screen-aligned-quad";
 import { AddMaterial } from "./add-material";
 
+/**
+ * Wrapper providing a clean interface for using the `AddMaterial` to add one
+ * texture atlas to another.
+ * See `./atlas-writer.ts` for more details.
+ */
 export class AtlasWriter {
   private addMaterial = new AddMaterial();
   private addQuad: ScreenAlignedQuad;
