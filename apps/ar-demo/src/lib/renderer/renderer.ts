@@ -67,6 +67,18 @@ export default class Renderer implements IDisposable {
   private scanBaseRotation = Math.PI;
   private acceptARSelect = true;
 
+  private controller1?: THREE.Group;
+  private controller2?: THREE.Group;
+
+  private grabbedDimension?: number;
+  private startPosition = new THREE.Vector3();
+  private startSlice?: number;
+
+  private helperBall = new THREE.Mesh(
+    new THREE.SphereBufferGeometry(0.003),
+    new THREE.MeshBasicMaterial(),
+  );
+
   constructor(private canvas: HTMLCanvasElement, public updateUI: () => void) {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     this.domOverlay = document.getElementById("ar-overlay")!;
@@ -191,6 +203,37 @@ export default class Renderer implements IDisposable {
       if (frame) {
         this.reticle.update(frame);
       }
+
+      if (
+        this.controller1 &&
+        this.grabbedDimension !== undefined &&
+        this.startSlice !== undefined
+      ) {
+        const offset = new THREE.Vector3()
+          .copy(this.controller1.position)
+          .sub(this.startPosition);
+        this.scanOffsetGroup.worldToLocal(offset);
+        offset.divide(SCAN.voxelDimensions).round();
+
+        const sliceOffset = offset.getComponent(this.grabbedDimension);
+        const newSlice = Math.max(
+          0,
+          Math.min(
+            SCAN.voxelCount.getComponent(this.grabbedDimension) - 1,
+            this.startSlice + sliceOffset,
+          ),
+        );
+
+        const newSelectedVoxel = new THREE.Vector3()
+          .copy(this.spriteHandler.selectedVoxel)
+          .setComponent(this.grabbedDimension, newSlice);
+
+        if (this.grabbedDimension === 0) {
+          newSelectedVoxel.x = SCAN.voxelCount.x - newSelectedVoxel.x - 1;
+        }
+
+        this.spriteHandler.setSelectedVoxel(newSelectedVoxel);
+      }
     }
 
     if (this.renderDirty || this.arActive) this.forceRender();
@@ -246,15 +289,18 @@ export default class Renderer implements IDisposable {
         // If only the other (left) hand is visible, it becomes controller 0
         // until the primary hand becomes visible (again).
         // This has to be accounted for when trying to ensure continous drag & drop interactions.
-        const controller1 = this.renderer.xr.getController(0);
-        controller1.addEventListener("selectstart", this.onARSelect);
-        controller1.addEventListener("selectend", this.onARDeselect);
+        this.controller1 = this.renderer.xr.getController(0);
+        this.controller1.addEventListener("selectstart", this.onARSelect);
+        this.controller1.addEventListener("selectend", this.onARDeselect);
 
-        const controller2 = this.renderer.xr.getController(1);
-        controller2.addEventListener("selectstart", this.onARSelect);
-        controller2.addEventListener("selectend", this.onARDeselect);
+        this.controller2 = this.renderer.xr.getController(1);
+        this.controller2.addEventListener("selectstart", this.onARSelect);
+        this.controller2.addEventListener("selectend", this.onARDeselect);
 
-        this.scene.add(controller1);
+        this.controller1.add(this.helperBall);
+
+        this.scene.add(this.controller1);
+        this.scene.add(this.controller2);
       })
       .catch((e) => {
         // eslint-disable-next-line no-console
@@ -320,12 +366,39 @@ export default class Renderer implements IDisposable {
 
   // Controller Interaction
   protected startGrab = (controller: THREE.Group) => {
-    controller.attach(this.scanContainer);
-    this.scanContainer.userData.selections =
-      (this.scanContainer.userData.selections || 0) + 1;
-    controller.userData.selected = this.scanContainer;
+    const controllerPosition = new THREE.Vector3();
+    controller.getWorldPosition(controllerPosition);
+    this.scanOffsetGroup.worldToLocal(controllerPosition);
+    controllerPosition.divide(SCAN.voxelDimensions);
+    controllerPosition.sub(this.spriteHandler.selectedVoxel);
+    let index = 0;
+    let distance = Infinity;
+    controllerPosition.toArray().forEach((d, i) => {
+      const absD = Math.abs(d);
+      if (absD < distance) {
+        distance = absD;
+        index = i;
+      }
+    });
+
+    if (distance < 50) {
+      this.grabbedDimension = index;
+      this.startPosition.copy(controller.position);
+      this.startSlice = [
+        this.spriteHandler.selectedVoxel.x,
+        this.spriteHandler.selectedVoxel.y,
+        this.spriteHandler.selectedVoxel.z,
+      ][index];
+    } else {
+      controller.attach(this.scanContainer);
+      this.scanContainer.userData.selections =
+        (this.scanContainer.userData.selections || 0) + 1;
+      controller.userData.selected = this.scanContainer;
+    }
   };
   protected endGrab = (controller: THREE.Group) => {
+    this.grabbedDimension = undefined;
+    this.startSlice = undefined;
     if (controller.userData.selected !== undefined) {
       const object = controller.userData.selected;
       object.userData.selections = (object.userData.selections || 1) - 1;

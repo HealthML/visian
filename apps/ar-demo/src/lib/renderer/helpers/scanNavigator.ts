@@ -194,21 +194,12 @@ export default class ScanNavigator implements IDisposable {
   };
 
   private handleTransformMove = () => {
-    this.workingVector.copy(this.transformObject.position);
-
-    this.workingVector.x =
-      Math.round(this.workingVector.x / this.voxelDimensions.x) *
-      this.voxelDimensions.x;
-    this.workingVector.y =
-      Math.round(this.workingVector.y / this.voxelDimensions.y) *
-      this.voxelDimensions.y;
-    this.workingVector.z =
-      Math.round(this.workingVector.z / this.voxelDimensions.z) *
-      this.voxelDimensions.z;
-
-    this.workingVector.divide(this.voxelDimensions);
-    this.workingVector.max(this.minSelectedVoxel);
-    this.workingVector.min(this.maxSelectedVoxel);
+    this.workingVector
+      .copy(this.transformObject.position)
+      .divide(this.voxelDimensions)
+      .round()
+      .max(this.minSelectedVoxel)
+      .min(this.maxSelectedVoxel);
 
     // x is inverted...
     this.workingVector.x = SCAN.voxelCount.x - this.workingVector.x - 1;
