@@ -79,6 +79,9 @@ export default class Renderer implements IDisposable {
     new THREE.MeshBasicMaterial(),
   );
 
+  private workingVector1 = new THREE.Vector3();
+  private workingVector2 = new THREE.Vector3();
+
   constructor(private canvas: HTMLCanvasElement, public updateUI: () => void) {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     this.domOverlay = document.getElementById("ar-overlay")!;
@@ -129,13 +132,11 @@ export default class Renderer implements IDisposable {
       this.cameraNavigator,
     );
 
-    this.camera.position.copy(
-      this.scanOffsetGroup.localToWorld(
-        new THREE.Vector3(
-          -0.25 * SCAN.scanSize.x,
-          1.25 * SCAN.scanSize.y,
-          1.25 * SCAN.scanSize.z,
-        ),
+    this.scanOffsetGroup.localToWorld(
+      this.camera.position.set(
+        -0.25 * SCAN.scanSize.x,
+        1.25 * SCAN.scanSize.y,
+        1.25 * SCAN.scanSize.z,
       ),
     );
     const target = this.scanOffsetGroup.localToWorld(
@@ -209,7 +210,7 @@ export default class Renderer implements IDisposable {
         this.grabbedDimension !== undefined &&
         this.startSlice !== undefined
       ) {
-        const offset = new THREE.Vector3().copy(this.controller1.position);
+        const offset = this.workingVector1.copy(this.controller1.position);
         this.scanOffsetGroup.worldToLocal(offset);
         offset.sub(this.startPosition);
         offset.divide(SCAN.voxelDimensions).round();
@@ -224,7 +225,7 @@ export default class Renderer implements IDisposable {
           ),
         );
 
-        const newSelectedVoxel = new THREE.Vector3()
+        const newSelectedVoxel = this.workingVector1
           .copy(this.spriteHandler.selectedVoxel)
           .setComponent(this.grabbedDimension, newSlice);
         this.spriteHandler.setSelectedVoxel(newSelectedVoxel);
@@ -361,7 +362,7 @@ export default class Renderer implements IDisposable {
 
   // Controller Interaction
   protected startGrab = (controller: THREE.Group) => {
-    const controllerPosition = new THREE.Vector3();
+    const controllerPosition = this.workingVector2;
     controller.getWorldPosition(controllerPosition);
     this.scanOffsetGroup.worldToLocal(controllerPosition);
     controllerPosition.divide(SCAN.voxelDimensions);
