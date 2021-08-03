@@ -21,6 +21,7 @@ const StyledDiv = styled.div<{
   display: flex;
   justify-content: center;
   pointer-events: auto;
+  user-select: none;
 `;
 
 export const DropZone: React.FC<DropZoneProps> = (props) => {
