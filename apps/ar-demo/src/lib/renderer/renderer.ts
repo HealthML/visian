@@ -209,11 +209,11 @@ export default class Renderer implements IDisposable {
         this.grabbedDimension !== undefined &&
         this.startSlice !== undefined
       ) {
-        const offset = new THREE.Vector3()
-          .copy(this.controller1.position)
-          .sub(this.startPosition);
+        const offset = new THREE.Vector3().copy(this.controller1.position);
         this.scanOffsetGroup.worldToLocal(offset);
+        offset.sub(this.startPosition);
         offset.divide(SCAN.voxelDimensions).round();
+        offset.x *= -1;
 
         const sliceOffset = offset.getComponent(this.grabbedDimension);
         const newSlice = Math.max(
@@ -227,11 +227,6 @@ export default class Renderer implements IDisposable {
         const newSelectedVoxel = new THREE.Vector3()
           .copy(this.spriteHandler.selectedVoxel)
           .setComponent(this.grabbedDimension, newSlice);
-
-        if (this.grabbedDimension === 0) {
-          newSelectedVoxel.x = SCAN.voxelCount.x - newSelectedVoxel.x - 1;
-        }
-
         this.spriteHandler.setSelectedVoxel(newSelectedVoxel);
       }
     }
@@ -370,6 +365,7 @@ export default class Renderer implements IDisposable {
     controller.getWorldPosition(controllerPosition);
     this.scanOffsetGroup.worldToLocal(controllerPosition);
     controllerPosition.divide(SCAN.voxelDimensions);
+    controllerPosition.x = SCAN.voxelCount.x - controllerPosition.x - 1;
     controllerPosition.sub(this.spriteHandler.selectedVoxel);
     let index = 0;
     let distance = Infinity;
@@ -384,6 +380,7 @@ export default class Renderer implements IDisposable {
     if (distance < 50) {
       this.grabbedDimension = index;
       this.startPosition.copy(controller.position);
+      this.scanOffsetGroup.worldToLocal(this.startPosition);
       this.startSlice = [
         this.spriteHandler.selectedVoxel.x,
         this.spriteHandler.selectedVoxel.y,
