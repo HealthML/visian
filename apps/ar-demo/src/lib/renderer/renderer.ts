@@ -377,7 +377,9 @@ export default class Renderer implements IDisposable {
       }
     });
 
-    if (distance < 50) {
+    const maxDistance = Math.max(...controllerPosition.toArray());
+
+    if (distance < 50 && maxDistance < 300) {
       this.grabbedDimension = index;
       this.startPosition.copy(controller.position);
       this.scanOffsetGroup.worldToLocal(this.startPosition);
