@@ -1,4 +1,5 @@
 import {
+  color,
   computeStyleValue,
   ContextMenu,
   ContextMenuItem,
@@ -45,6 +46,8 @@ const noop = () => {
 // Styled Components
 const LayerList = styled(List)`
   margin-top: -16px;
+  padding-bottom: 15px;
+  padding-right: 7px;
   max-height: ${computeStyleValue(
     [size("listElementHeight"), size("dividerHeight")],
     (listElementHeight, dividerHeight) =>
@@ -53,6 +56,31 @@ const LayerList = styled(List)`
   max-width: 100%;
   overflow-x: hidden;
   overflow-y: auto;
+
+  /* width */
+::-webkit-scrollbar {
+  width: 4px;
+  margin-bottom: 10px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: transparent; 
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: ${color("lightGray")}; 
+  border-radius: 10px;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: ${color("gray")}; 
+}
+
+
+  }
 `;
 
 const StyledListItemContainer = styled.div`
@@ -250,6 +278,7 @@ const LayerListItem = observer<{
 
 const LayerModal = styled(Modal)`
   padding-bottom: 0px;
+  width: 250px;
 `;
 
 export const Layers: React.FC = observer(() => {
