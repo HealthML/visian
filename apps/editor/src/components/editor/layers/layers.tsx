@@ -47,44 +47,46 @@ const noop = () => {
 const LayerList = styled(List)`
   margin-top: -16px;
   padding-bottom: 15px;
-  padding-right: 7px;
+  padding-left: 8px;
+  padding-right: 8px;
+  margin-left: -8px;
+  margin-right: -8px;
   max-height: ${computeStyleValue(
     [size("listElementHeight"), size("dividerHeight")],
     (listElementHeight, dividerHeight) =>
       6 * (listElementHeight + dividerHeight),
   )};
   max-width: 100%;
-  overflow-x: hidden;
-  overflow-y: auto;
+  overflow-x: visible;
+  overflow-y: scroll;
 
   /* width */
-::-webkit-scrollbar {
-  width: 4px;
-  margin-bottom: 10px;
-}
+  ::-webkit-scrollbar {
+    width: 4px;
+    margin-bottom: 10px;
+  }
 
-/* Track */
-::-webkit-scrollbar-track {
-  background: transparent; 
-}
+  /* Track */
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
 
-/* Handle */
-::-webkit-scrollbar-thumb {
-  background: ${color("lightGray")}; 
-  border-radius: 10px;
-}
+  /* Handle */
+  ::-webkit-scrollbar-thumb {
+    background: ${color("lightGray")};
+    border-radius: 10px;
+  }
 
-/* Handle on hover */
-::-webkit-scrollbar-thumb:hover {
-  background: ${color("gray")}; 
-}
-
-
+  /* Handle on hover */
+  ::-webkit-scrollbar-thumb:hover {
+    background: ${color("gray")};
   }
 `;
 
 const StyledListItemContainer = styled.div`
-  margin: 0 ${radius("activeLayerBorderRadius")};
+  margin: 0 -8px;
+  padding: 0 ${radius("activeLayerBorderRadius")};
+  overflow: visible;
 `;
 
 const LayerListItem = observer<{
@@ -203,35 +205,31 @@ const LayerListItem = observer<{
           const node = (
             <Observer>
               {() => (
-                <StyledListItemContainer>
-                  <ListItem
-                    {...provided.draggableProps}
-                    {...provided.dragHandleProps}
-                    ref={provided.innerRef}
-                    icon={{
-                      color: layer.color || "text",
-                      icon:
-                        layer.kind === "image" && !layer.isAnnotation
-                          ? "image"
-                          : undefined,
-                    }}
-                    iconRef={setColorRef}
-                    onIconPress={
-                      areLayerSettingsOpen ? noop : openLayerSettings
-                    }
-                    labelTx={layer.title ? undefined : "untitled-layer"}
-                    label={layer.title}
-                    trailingIcon={layer.isVisible ? "eye" : "eyeCrossed"}
-                    disableTrailingIcon={!layer.isVisible}
-                    trailingIconRef={trailingIconRef}
-                    onTrailingIconPress={toggleAnnotationVisibility}
-                    isActive={isActive}
-                    isLast={isLast || snapshot.isDragging}
-                    onPointerDown={handlePointerDown}
-                    onPointerUp={stopTap}
-                    onContextMenu={handleContextMenu}
-                  />
-                </StyledListItemContainer>
+                <ListItem
+                  {...provided.draggableProps}
+                  {...provided.dragHandleProps}
+                  ref={provided.innerRef}
+                  icon={{
+                    color: layer.color || "text",
+                    icon:
+                      layer.kind === "image" && !layer.isAnnotation
+                        ? "image"
+                        : undefined,
+                  }}
+                  iconRef={setColorRef}
+                  onIconPress={areLayerSettingsOpen ? noop : openLayerSettings}
+                  labelTx={layer.title ? undefined : "untitled-layer"}
+                  label={layer.title}
+                  trailingIcon={layer.isVisible ? "eye" : "eyeCrossed"}
+                  disableTrailingIcon={!layer.isVisible}
+                  trailingIconRef={trailingIconRef}
+                  onTrailingIconPress={toggleAnnotationVisibility}
+                  isActive={isActive}
+                  isLast={isLast || snapshot.isDragging}
+                  onPointerDown={handlePointerDown}
+                  onPointerUp={stopTap}
+                  onContextMenu={handleContextMenu}
+                />
               )}
             </Observer>
           );
@@ -278,7 +276,8 @@ const LayerListItem = observer<{
 
 const LayerModal = styled(Modal)`
   padding-bottom: 0px;
-  width: 250px;
+  width: 230px;
+  justify-content: center;
 `;
 
 export const Layers: React.FC = observer(() => {
