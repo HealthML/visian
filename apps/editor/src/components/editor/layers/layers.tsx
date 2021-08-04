@@ -64,6 +64,7 @@ const LayerList = styled(List)`
   ::-webkit-scrollbar {
     width: 4px;
     margin-bottom: 10px;
+    display: none;
   }
 
   /* Track */
