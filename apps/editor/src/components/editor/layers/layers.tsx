@@ -10,7 +10,6 @@ import {
   Modal,
   ModalHeaderButton,
   PointerButton,
-  radius,
   size,
   stopPropagation,
   SubtleText,
@@ -46,7 +45,7 @@ const noop = () => {
 // Styled Components
 const LayerList = styled(List)`
   margin-top: -16px;
-  padding-bottom: 15px;
+  padding-bottom: 7px;
   padding-left: 8px;
   padding-right: 8px;
   margin-left: -8px;
@@ -58,13 +57,12 @@ const LayerList = styled(List)`
   )};
   max-width: 100%;
   overflow-x: visible;
-  overflow-y: scroll;
+  overflow-y: auto;
 
   /* width */
   ::-webkit-scrollbar {
     width: 4px;
     margin-bottom: 10px;
-    display: none;
   }
 
   /* Track */
@@ -82,12 +80,6 @@ const LayerList = styled(List)`
   ::-webkit-scrollbar-thumb:hover {
     background: ${color("gray")};
   }
-`;
-
-const StyledListItemContainer = styled.div`
-  margin: 0 -8px;
-  padding: 0 ${radius("activeLayerBorderRadius")};
-  overflow: visible;
 `;
 
 const LayerListItem = observer<{
