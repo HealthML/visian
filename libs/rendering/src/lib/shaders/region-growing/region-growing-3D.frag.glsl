@@ -11,10 +11,14 @@ uniform float uSeed;
 
 uniform float uRenderValue;
 
+const float two_over_three = 2.0 / 3.0;
+
 bool canGrowFrom(float ownData, float neighborData, float neighborRegion) {
-  return neighborRegion > 0.0 &&
-    abs(ownData - uSeed) <= 1.5 * uThreshold &&
-    abs(ownData - neighborData) <= uThreshold;
+  return all(lessThan(vec3(
+      -neighborRegion,
+      abs(ownData - uSeed) * two_over_three - uThreshold,
+      abs(ownData - neighborData) - uThreshold),
+    vec3(0.0)));
 }
 
 void main() {

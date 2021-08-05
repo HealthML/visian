@@ -8,10 +8,14 @@ uniform float uSeed;
 uniform vec2 uMinUv;
 uniform vec2 uMaxUv;
 
-bool canGrowFrom(float ownData, float neightborData, float neightborRegion) {
-  return neightborRegion > 0.0 &&
-    abs(ownData - uSeed) <= 1.5 * uThreshold &&
-    abs(ownData - neightborData) <= uThreshold;
+const float two_over_three = 2.0 / 3.0;
+
+bool canGrowFrom(float ownData, float neighborData, float neighborRegion) {
+  return all(lessThan(vec3(
+      -neighborRegion,
+      abs(ownData - uSeed) * two_over_three - uThreshold,
+      abs(ownData - neighborData) - uThreshold),
+    vec3(0.0)));
 }
 
 void main() {
@@ -32,17 +36,17 @@ void main() {
   vec2 uvNW = vec2(vUv.x - texelStep.x, vUv.y + texelStep.y);
 
   vec4 regionN = texture2D(uRegionTexture, uvN);
-  vec4 regionNE = texture2D(uRegionTexture, uvNO);
-  vec4 regionE = texture2D(uRegionTexture, uvO);
-  vec4 regionSE = texture2D(uRegionTexture, uvSO);
+  vec4 regionNE = texture2D(uRegionTexture, uvNE);
+  vec4 regionE = texture2D(uRegionTexture, uvE);
+  vec4 regionSE = texture2D(uRegionTexture, uvSE);
   vec4 regionS = texture2D(uRegionTexture, uvS);
   vec4 regionSW = texture2D(uRegionTexture, uvSW);
   vec4 regionW = texture2D(uRegionTexture, uvW);
   vec4 regionNW = texture2D(uRegionTexture, uvNW);
   vec4 dataN = texture2D(uDataTexture, uvN);
-  vec4 dataNE = texture2D(uDataTexture, uvNO);
-  vec4 dataE = texture2D(uDataTexture, uvO);
-  vec4 dataSE = texture2D(uDataTexture, uvSO);
+  vec4 dataNE = texture2D(uDataTexture, uvNE);
+  vec4 dataE = texture2D(uDataTexture, uvE);
+  vec4 dataSE = texture2D(uDataTexture, uvSE);
   vec4 dataS = texture2D(uDataTexture, uvS);
   vec4 dataSW = texture2D(uDataTexture, uvSW);
   vec4 dataW = texture2D(uDataTexture, uvW);
