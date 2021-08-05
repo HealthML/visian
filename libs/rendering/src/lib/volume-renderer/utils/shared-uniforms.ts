@@ -11,6 +11,7 @@ import { autorun } from "mobx";
 import * as THREE from "three";
 
 import { RenderedImage } from "../../rendered-image";
+import { MAX_REGION_GROWING_STEPS } from "../../tool-renderer";
 import {
   atlasInfoUniforms,
   commonUniforms,
@@ -289,7 +290,9 @@ export class SharedUniforms implements IDisposable {
         const steps =
           editor.activeDocument?.tools.regionGrowingRenderer3D.steps ?? 0;
 
-        this.uniforms.uRegionGrowingThreshold.value = (255 - steps) / 255;
+        this.uniforms.uRegionGrowingThreshold.value =
+          (MAX_REGION_GROWING_STEPS + 1 - steps) /
+          (MAX_REGION_GROWING_STEPS + 1);
 
         editor.activeDocument?.viewport3D.onTransferFunctionChange();
         editor.volumeRenderer?.lazyRender(true);

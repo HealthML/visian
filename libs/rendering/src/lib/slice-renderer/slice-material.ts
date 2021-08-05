@@ -6,6 +6,7 @@ import * as THREE from "three";
 
 import { RenderedImage } from "../rendered-image";
 import { sliceFragmentShader, sliceVertexShader } from "../shaders";
+import { MAX_REGION_GROWING_STEPS } from "../tool-renderer";
 import { getOrder } from "./utils";
 
 export abstract class SliceMaterial
@@ -189,7 +190,9 @@ export class AnnotationSliceMaterial extends SliceMaterial {
         const steps =
           editor.activeDocument?.tools.regionGrowingRenderer3D.steps ?? 0;
 
-        this.uniforms.uPreviewThreshold.value = (255 - steps) / 255;
+        this.uniforms.uPreviewThreshold.value =
+          (MAX_REGION_GROWING_STEPS + 1 - steps) /
+          (MAX_REGION_GROWING_STEPS + 1);
         editor.sliceRenderer?.lazyRender();
       }),
     );

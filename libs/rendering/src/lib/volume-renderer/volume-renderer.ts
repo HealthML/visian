@@ -1,6 +1,6 @@
 import { IEditor, isPerformanceLow, IVolumeRenderer } from "@visian/ui-shared";
 import { IDisposable, IDisposer } from "@visian/utils";
-import { autorun, reaction } from "mobx";
+import { autorun, computed, makeObservable, reaction } from "mobx";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import Stats from "three/examples/jsm/libs/stats.module";
@@ -18,6 +18,8 @@ import { VolumeMaterial } from "./volume-material";
 import { XRManager } from "./xr-manager";
 
 export class VolumeRenderer implements IVolumeRenderer, IDisposable {
+  public readonly excludeFromSnapshotTracking = ["editor"];
+
   private sharedUniforms: SharedUniforms;
 
   public renderer: THREE.WebGLRenderer;
@@ -204,6 +206,10 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
           this.editor.activeDocument?.tools.activeTool?.name !== "plane-tool";
       }),
     );
+
+    makeObservable(this, {
+      renderedImageLayerCount: computed,
+    });
   }
 
   public dispose = () => {
@@ -225,6 +231,11 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
     this.sharedUniforms.dispose();
     this.disposers.forEach((disposer) => disposer());
   };
+
+  public get renderedImageLayerCount() {
+    // additional layer for 3d region growing preview
+    return (this.editor.activeDocument?.imageLayers.length || 0) + 1;
+  }
 
   public resetScene(hardReset = false) {
     // Position the volume in a reasonable height for XR.

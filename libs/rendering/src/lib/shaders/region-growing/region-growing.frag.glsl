@@ -23,26 +23,26 @@ void main() {
   vec2 texelStep = vec2(1.0) / uRegionSize;
 
   vec2 uvN = vec2(vUv.x, vUv.y + texelStep.y);
-  vec2 uvNO = vUv + texelStep;
-  vec2 uvO = vec2(vUv.x + texelStep.x, vUv.y);
-  vec2 uvSO = vec2(vUv.x + texelStep.x, vUv.y - texelStep.y);
+  vec2 uvNE = vUv + texelStep;
+  vec2 uvE = vec2(vUv.x + texelStep.x, vUv.y);
+  vec2 uvSE = vec2(vUv.x + texelStep.x, vUv.y - texelStep.y);
   vec2 uvS = vec2(vUv.x, vUv.y - texelStep.y);
   vec2 uvSW = vUv - texelStep;
   vec2 uvW = vec2(vUv.x - texelStep.x, vUv.y);
   vec2 uvNW = vec2(vUv.x - texelStep.x, vUv.y + texelStep.y);
 
   vec4 regionN = texture2D(uRegionTexture, uvN);
-  vec4 regionNO = texture2D(uRegionTexture, uvNO);
-  vec4 regionO = texture2D(uRegionTexture, uvO);
-  vec4 regionSO = texture2D(uRegionTexture, uvSO);
+  vec4 regionNE = texture2D(uRegionTexture, uvNO);
+  vec4 regionE = texture2D(uRegionTexture, uvO);
+  vec4 regionSE = texture2D(uRegionTexture, uvSO);
   vec4 regionS = texture2D(uRegionTexture, uvS);
   vec4 regionSW = texture2D(uRegionTexture, uvSW);
   vec4 regionW = texture2D(uRegionTexture, uvW);
   vec4 regionNW = texture2D(uRegionTexture, uvNW);
   vec4 dataN = texture2D(uDataTexture, uvN);
-  vec4 dataNO = texture2D(uDataTexture, uvNO);
-  vec4 dataO = texture2D(uDataTexture, uvO);
-  vec4 dataSO = texture2D(uDataTexture, uvSO);
+  vec4 dataNE = texture2D(uDataTexture, uvNO);
+  vec4 dataE = texture2D(uDataTexture, uvO);
+  vec4 dataSE = texture2D(uDataTexture, uvSO);
   vec4 dataS = texture2D(uDataTexture, uvS);
   vec4 dataSW = texture2D(uDataTexture, uvSW);
   vec4 dataW = texture2D(uDataTexture, uvW);
@@ -52,9 +52,9 @@ void main() {
   // For some reason this shader freezes on iPad if we use 7 or more bools for
   // one big || concatination. Using two bools which concat 4 bools each it works.
   bool shouldGrow1 = canGrowFrom(data.x, dataN.x, regionN.x) ||
-    canGrowFrom(data.x, dataNO.x, regionNO.x) ||
-    canGrowFrom(data.x, dataO.x, regionO.x) ||
-    canGrowFrom(data.x, dataSO.x, regionSO.x);
+    canGrowFrom(data.x, dataNE.x, regionNE.x) ||
+    canGrowFrom(data.x, dataE.x, regionE.x) ||
+    canGrowFrom(data.x, dataSE.x, regionSE.x);
 
   bool shouldGrow2 = canGrowFrom(data.x, dataS.x, regionS.x) ||
     canGrowFrom(data.x, dataSW.x, regionSW.x) ||

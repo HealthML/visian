@@ -40,9 +40,11 @@ void main() {
 
   vec2 texelStep = vec2(1.0) / (uAtlasGrid * uVoxelCount.xy);
 
+  // right, left
   vec2 uvR = vec2(vUv.x + texelStep.x, vUv.y);
   vec2 uvL = vec2(vUv.x - texelStep.x, vUv.y);
 
+  // up, down
   vec2 uvU = vec2(vUv.x, vUv.y + texelStep.y);
   vec2 uvD = vec2(vUv.x, vUv.y - texelStep.y);
   
@@ -52,6 +54,7 @@ void main() {
     vec2(-sliceSize.x * (uAtlasGrid.x - 1.0), sliceSize.y), 
     lastInSliceRow
   );
+  // back
   vec2 uvB = vUv + uvOffsetB;
 
   float firstInSliceRow = clamp(1.0 - sliceTilePosition.x , 0.0, 1.0);
@@ -60,8 +63,10 @@ void main() {
     vec2(sliceSize.x * (uAtlasGrid.x - 1.0), -sliceSize.y), 
     firstInSliceRow
   );
+  // front
   vec2 uvF = vUv + uvOffsetF;
 
+  // right, left, up, down, back, front
   vec4 regionR = texture2D(uRegionTexture, uvR);
   vec4 regionL = texture2D(uRegionTexture, uvL);
   vec4 regionU = texture2D(uRegionTexture, uvU);
@@ -75,6 +80,7 @@ void main() {
   vec4 dataB = texture2D(uDataTexture, uvB);
   vec4 dataF = texture2D(uDataTexture, uvF);
 
+  // right, left, up, down, back, front
   bool canGrowFromR = voxelCoords.x < uVoxelCount.x - 1.0 && canGrowFrom(data.x, dataR.x, regionR.x);
   bool canGrowFromL = voxelCoords.x >= 1.0 && canGrowFrom(data.x, dataL.x, regionL.x);
   bool canGrowFromU = voxelCoords.y < uVoxelCount.y - 1.0 && canGrowFrom(data.x, dataU.x, regionU.x);

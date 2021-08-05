@@ -4,6 +4,7 @@ import {
   regionGrowingFragmentShader,
   regionGrowingVertexShader,
 } from "../../shaders";
+import { MAX_REGION_GROWING_STEPS } from "../region-growing-renderer-3d";
 
 export class RegionGrowingMaterial extends THREE.ShaderMaterial {
   constructor(parameters?: THREE.ShaderMaterialParameters) {
@@ -37,11 +38,11 @@ export class RegionGrowingMaterial extends THREE.ShaderMaterial {
   }
 
   public setThreshold(value: number) {
-    this.uniforms.uThreshold.value = value / 255;
+    this.uniforms.uThreshold.value = value / (MAX_REGION_GROWING_STEPS + 1);
   }
 
   public setSeed(value: number) {
-    this.uniforms.uSeed.value = value / 255;
+    this.uniforms.uSeed.value = value / (MAX_REGION_GROWING_STEPS + 1);
   }
 
   public setUVBounds(minUv = [0, 0], maxUv = [1, 1]) {
@@ -62,7 +63,9 @@ export class RegionGrowing3DMaterial extends RegionGrowingMaterial {
         uSeed: { value: 0 },
         uVoxelCount: { value: [1, 1, 1] },
         uAtlasGrid: { value: [1, 1] },
-        uRenderValue: { value: 244 / 255 },
+        uRenderValue: {
+          value: MAX_REGION_GROWING_STEPS / (MAX_REGION_GROWING_STEPS + 1),
+        },
       },
     });
   }
@@ -84,6 +87,7 @@ export class RegionGrowing3DMaterial extends RegionGrowingMaterial {
   }
 
   public setStep(step: number) {
-    this.uniforms.uRenderValue.value = (255 - step) / 255;
+    this.uniforms.uRenderValue.value =
+      (MAX_REGION_GROWING_STEPS + 1 - step) / (MAX_REGION_GROWING_STEPS + 1);
   }
 }

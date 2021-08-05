@@ -1,3 +1,4 @@
+import { MAX_REGION_GROWING_STEPS } from "@visian/rendering";
 import {
   ButtonParam,
   ColorParam,
@@ -56,7 +57,7 @@ export const ActionModal = observer(() => {
       <NumberParam
         labelTx="region-growing-steps"
         min={0}
-        max={244}
+        max={MAX_REGION_GROWING_STEPS}
         stepSize={1}
         value={
           store?.editor.activeDocument?.tools.regionGrowingRenderer3D.steps

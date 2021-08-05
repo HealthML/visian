@@ -11,7 +11,7 @@ import { RenderedImage } from "../rendered-image";
 import ScreenAlignedQuad from "../screen-aligned-quad";
 import { RegionGrowing3DMaterial, Seed } from "./utils";
 
-const MAX_STEPS = 244;
+export const MAX_REGION_GROWING_STEPS = 254;
 
 export class RegionGrowingRenderer3D
   implements IRegionGrowingRenderer3D, IDisposable {
@@ -19,7 +19,7 @@ export class RegionGrowingRenderer3D
 
   public holdsPreview = false;
   public previewColor?: string;
-  public steps = MAX_STEPS;
+  public steps = MAX_REGION_GROWING_STEPS;
 
   private disposers: IDisposer[] = [];
 
@@ -132,10 +132,10 @@ export class RegionGrowingRenderer3D
     this.regionGrowingMaterial.setVoxelCount(sourceImage.voxelCount.toArray());
     this.regionGrowingMaterial.setThreshold(threshold);
 
-    this.steps = MAX_STEPS;
+    this.steps = MAX_REGION_GROWING_STEPS;
 
     const blipSteps = Math.ceil(
-      Math.min(254, sourceImage.voxelCount.sum()) / 2,
+      Math.min(MAX_REGION_GROWING_STEPS, sourceImage.voxelCount.sum()) / 2,
     );
 
     this.document.renderers?.forEach((renderer, rendererIndex) => {
@@ -169,7 +169,7 @@ export class RegionGrowingRenderer3D
   }
 
   public setSteps = (value: number) => {
-    this.steps = Math.min(value, MAX_STEPS);
+    this.steps = Math.min(value, MAX_REGION_GROWING_STEPS);
   };
 
   public flushToAnnotation() {
@@ -185,7 +185,10 @@ export class RegionGrowingRenderer3D
 
     annotation.addToAtlas(
       this.outputTextures,
-      this.steps !== undefined ? (255 - this.steps) / 255 : this.steps,
+      this.steps !== undefined
+        ? (MAX_REGION_GROWING_STEPS + 1 - this.steps) /
+            (MAX_REGION_GROWING_STEPS + 1)
+        : this.steps,
     );
 
     this.discard();
