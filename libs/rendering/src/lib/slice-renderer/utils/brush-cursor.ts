@@ -109,10 +109,16 @@ export class BrushCursor extends THREE.LineSegments implements IDisposable {
       this.points = getBoundedBrushCursorPoints(
         this.editor.activeDocument.tools.boundedSmartBrushRadius,
       );
-    } else if (this.editor.activeDocument.tools.brushSize === 0.5) {
+    } else if (
+      this.editor.activeDocument.tools.brushSize === 0.5 &&
+      this.editor.activeDocument.tools.activeTool?.name !== "smart-brush-3d"
+    ) {
       this.points = get2x2BrushCursorPoints();
     } else {
-      const radius = this.editor.activeDocument.tools.brushSize + 0.5;
+      const radius =
+        this.editor.activeDocument.tools.activeTool?.name === "smart-brush-3d"
+          ? 0.5
+          : this.editor.activeDocument.tools.brushSize + 0.5;
 
       let d = 1 - radius;
       let x = 0;

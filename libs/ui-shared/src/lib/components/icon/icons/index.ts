@@ -29,6 +29,7 @@ export { ReactComponent as rightMouse } from "./right-mouse.svg";
 export { ReactComponent as scrollDown } from "./scroll-down-mouse.svg";
 export { ReactComponent as scrollUp } from "./scroll-up-mouse.svg";
 export { ReactComponent as settings } from "./settings.svg";
+export { ReactComponent as smartBrush3D } from "./smart-brush-3d.svg";
 export { ReactComponent as trash } from "./trash.svg";
 export { ReactComponent as undo } from "./undo.svg";
 export { ReactComponent as upArrow } from "./up-arrow.svg";

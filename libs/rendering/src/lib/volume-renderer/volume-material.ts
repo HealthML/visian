@@ -45,7 +45,7 @@ export class VolumeMaterial
 
     this.disposers = [
       reaction(
-        () => editor.activeDocument?.imageLayers.length || 0,
+        () => editor.volumeRenderer?.renderedImageLayerCount || 1,
         (layerCount: number) => {
           this.fragmentShader = composeLayeredShader(
             volumeFragmentShader,
@@ -53,6 +53,7 @@ export class VolumeMaterial
           );
           this.needsUpdate = true;
         },
+        { fireImmediately: true },
       ),
     ];
   }

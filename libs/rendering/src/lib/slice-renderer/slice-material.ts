@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { color, IEditor, IImageLayer } from "@visian/ui-shared";
 import { IDisposable, IDisposer, ViewType } from "@visian/utils";
 import { autorun } from "mobx";
@@ -5,6 +6,7 @@ import * as THREE from "three";
 
 import { RenderedImage } from "../rendered-image";
 import { sliceFragmentShader, sliceVertexShader } from "../shaders";
+import { MAX_REGION_GROWING_STEPS } from "../tool-renderer";
 import { getOrder } from "./utils";
 
 export abstract class SliceMaterial
@@ -135,6 +137,10 @@ export class AnnotationSliceMaterial extends SliceMaterial {
       {
         uAnnotationColor: { value: new THREE.Color("white") },
         uAnnotationOpacity: { value: 0.5 },
+        uUsePreviewTexture: { value: false },
+        uPreviewTexture: { value: null },
+        uPreviewThreshold: { value: 0 },
+        uPreviewColor: { value: new THREE.Color("white") },
       },
     );
 
@@ -152,6 +158,41 @@ export class AnnotationSliceMaterial extends SliceMaterial {
       }),
       autorun(() => {
         this.uniforms.uAnnotationOpacity.value = imageLayer.opacity;
+        editor.sliceRenderer?.lazyRender();
+      }),
+      autorun(() => {
+        const usePreviewTexture =
+          editor.activeDocument?.activeLayer?.id === imageLayer.id;
+        this.uniforms.uUsePreviewTexture.value = usePreviewTexture;
+
+        if (usePreviewTexture) {
+          const canvasIndex = getOrder(
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            editor.activeDocument!.viewport2D.mainViewType,
+          ).indexOf(viewType);
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          this.uniforms.uPreviewTexture.value = editor.activeDocument!.tools.layerPreviewTextures[
+            canvasIndex
+          ];
+          (this.uniforms.uPreviewColor.value as THREE.Color).set(
+            color(
+              (editor.activeDocument?.tools.regionGrowingRenderer3D
+                .previewColor as any) || "foreground",
+            )({
+              theme: editor.theme,
+            }),
+          );
+        } else {
+          this.uniforms.uPreviewTexture.value = null;
+        }
+      }),
+      autorun(() => {
+        const steps =
+          editor.activeDocument?.tools.regionGrowingRenderer3D.steps ?? 0;
+
+        this.uniforms.uPreviewThreshold.value =
+          (MAX_REGION_GROWING_STEPS + 1 - steps) /
+          (MAX_REGION_GROWING_STEPS + 1);
         editor.sliceRenderer?.lazyRender();
       }),
     );

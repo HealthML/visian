@@ -16,6 +16,11 @@ uniform vec2 uAtlasGrid;
 #ifdef ANNOTATION
   uniform vec3 uAnnotationColor;
   uniform float uAnnotationOpacity;
+
+  uniform bool uUsePreviewTexture;
+  uniform sampler2D uPreviewTexture;
+  uniform float uPreviewThreshold;
+  uniform vec3 uPreviewColor;
 #endif // ANNOTATION
 
 void main() {
@@ -58,6 +63,15 @@ void main() {
   
   #ifdef ANNOTATION
     float annotation = step(0.01, texelValue.x);
-    gl_FragColor = vec4(uAnnotationColor, mix(0.0, uAnnotationOpacity, annotation));
+
+    if(uUsePreviewTexture) {
+      float previewValue = texture2D(uPreviewTexture, uv).x;
+      float preview = step(uPreviewThreshold, previewValue);
+
+      gl_FragColor = vec4(mix(uAnnotationColor, uPreviewColor, max(0.0, preview - annotation)), mix(0.0, uAnnotationOpacity, max(annotation, preview)));
+    } else {
+      gl_FragColor = vec4(uAnnotationColor, mix(0.0, uAnnotationOpacity, annotation));
+    }
+
   #endif // ANNOTATION
 }

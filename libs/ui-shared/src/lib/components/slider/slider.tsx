@@ -319,14 +319,16 @@ export const SliderField: React.FC<SliderFieldProps> = ({
       {(labelTx || label || showValueLabel) && (
         <SliderLabelRow>
           {(labelTx || label) && <SliderLabel text={label} tx={labelTx} />}
-          <Spacer />
           {showValueLabel &&
             (Array.isArray(actualValue) ? (
-              <SliderLabel
-                text={formatValueLabel(
-                  Array.isArray(actualValue) ? actualValue : [actualValue],
-                )}
-              />
+              <>
+                <Spacer />
+                <SliderLabel
+                  text={formatValueLabel(
+                    Array.isArray(actualValue) ? actualValue : [actualValue],
+                  )}
+                />
+              </>
             ) : (
               <SliderValueInputWrapper>
                 <SliderValueInput

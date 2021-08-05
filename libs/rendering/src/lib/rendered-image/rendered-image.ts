@@ -21,7 +21,7 @@ import {
   renderVoxels,
   Voxels,
 } from "./edit-rendering";
-import { SliceAtlasAdapter } from "./slice-atlas-adapter";
+import { AtlasAdapter } from "./atlas-adapter";
 import { MergeFunction } from "./types";
 
 export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
@@ -96,7 +96,7 @@ export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
   /** Whether or not the atlas needs to be pulled from the GPU. */
   private hasGPUUpdates = false;
 
-  private sliceAtlasAdapter: SliceAtlasAdapter;
+  private atlasAdapter: AtlasAdapter;
 
   constructor(
     image: ImageSnapshot<T> & Pick<ImageSnapshot<T>, "voxelCount" | "data">,
@@ -121,7 +121,7 @@ export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
       this.voxelCount,
     );
 
-    this.sliceAtlasAdapter = new SliceAtlasAdapter(
+    this.atlasAdapter = new AtlasAdapter(
       this.renderTargets[THREE.NearestFilter][0].texture,
       this.getAtlasGrid(),
       this.voxelCount.clone(false),
@@ -219,7 +219,7 @@ export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
       renderer,
     );
 
-    this.sliceAtlasAdapter.invalidateCache();
+    this.atlasAdapter.invalidateCache();
 
     this.hasCPUUpdates[filter][rendererIndex] = false;
   }
@@ -227,7 +227,7 @@ export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
   private onModificationsOnGPU() {
     this.hasGPUUpdates = true;
     this.isDataDirty = true;
-    this.sliceAtlasAdapter.invalidateCache();
+    this.atlasAdapter.invalidateCache();
   }
 
   private scheduleGPUPush() {
@@ -292,6 +292,25 @@ export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
     this.scheduleGPUPush();
   }
 
+  public addToAtlas(textures: THREE.Texture[], threshold = 0) {
+    if (!this.document?.renderers) return;
+
+    this.atlasAdapter.addToAltas(
+      textures,
+      threshold,
+      this.renderTargets[THREE.NearestFilter],
+      this.document.renderers,
+    );
+    this.atlasAdapter.addToAltas(
+      textures,
+      threshold,
+      this.renderTargets[THREE.LinearFilter],
+      this.document.renderers,
+    );
+
+    this.onModificationsOnGPU();
+  }
+
   public setSlice(
     viewType: ViewType,
     slice: number,
@@ -299,7 +318,7 @@ export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
     mergeFunction = MergeFunction.Replace,
   ) {
     if (this.document?.renderers?.length) {
-      this.sliceAtlasAdapter.writeSlice(
+      this.atlasAdapter.writeSlice(
         slice,
         viewType,
         sliceData,
@@ -307,7 +326,7 @@ export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
         this.document.renderers,
         mergeFunction,
       );
-      this.sliceAtlasAdapter.writeSlice(
+      this.atlasAdapter.writeSlice(
         slice,
         viewType,
         sliceData,
@@ -329,7 +348,7 @@ export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
 
   public getSlice(viewType: ViewType, sliceNumber: number) {
     if (this.document?.renderers?.length) {
-      return this.sliceAtlasAdapter.readSlice(
+      return this.atlasAdapter.readSlice(
         sliceNumber,
         viewType,
         this.document.renderers[0],
@@ -355,7 +374,7 @@ export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
       this.copyToRenderTarget(rendererIndex, THREE.NearestFilter);
     }
 
-    this.sliceAtlasAdapter.readSliceToTarget(
+    this.atlasAdapter.readSliceToTarget(
       sliceNumber,
       viewType,
       renderer,

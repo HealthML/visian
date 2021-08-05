@@ -29,7 +29,10 @@ import {
   ViewSettingsSnapshot,
 } from "./view-settings";
 import { StoreContext } from "../types";
-import { defaultAnnotationColor } from "../../constants";
+import {
+  defaultAnnotationColor,
+  defaultRegionGrowingPreviewColor,
+} from "../../constants";
 
 const uniqueValuesForAnnotationThreshold = 20;
 
@@ -212,7 +215,9 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
     });
   };
 
-  private getColorForNewAnnotation = (): string => {
+  public getFirstUnusedColor = (
+    defaultColor = defaultAnnotationColor,
+  ): string => {
     // TODO: Rework to work with group layers
     const layerStack = this.layers;
     const usedColors: { [key: string]: boolean } = {};
@@ -222,13 +227,22 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
       }
     });
     const colorCandidates = dataColorKeys.filter((color) => !usedColors[color]);
-    return colorCandidates.length ? colorCandidates[0] : defaultAnnotationColor;
+    return colorCandidates.length ? colorCandidates[0] : defaultColor;
+  };
+
+  public getRegionGrowingPreviewColor = (): string => {
+    const isDefaultUsed = this.layers.find(
+      (layer) => layer.color === defaultRegionGrowingPreviewColor,
+    );
+    return isDefaultUsed
+      ? this.getFirstUnusedColor(this.activeLayer?.color)
+      : defaultRegionGrowingPreviewColor;
   };
 
   public addNewAnnotationLayer = () => {
     if (!this.baseImageLayer) return;
 
-    const annotationColor = this.getColorForNewAnnotation();
+    const annotationColor = this.getFirstUnusedColor();
 
     const annotationLayer = ImageLayer.fromNewAnnotationForImage(
       this.baseImageLayer.image,
@@ -338,7 +352,7 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
   public async importAnnotation(image: ITKImage) {
     const annotationLayer = ImageLayer.fromITKImage(image, this, {
       isAnnotation: true,
-      color: this.getColorForNewAnnotation(),
+      color: this.getFirstUnusedColor(),
     });
     if (
       this.layers.length &&

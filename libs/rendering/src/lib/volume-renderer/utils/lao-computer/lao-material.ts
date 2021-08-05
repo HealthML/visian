@@ -36,7 +36,7 @@ export class LAOMaterial extends THREE.ShaderMaterial {
 
     this.disposers = [
       reaction(
-        () => editor.activeDocument?.imageLayers.length || 0,
+        () => editor.volumeRenderer?.renderedImageLayerCount || 1,
         (layerCount: number) => {
           this.fragmentShader = composeLayeredShader(
             laoFragmentShader,
@@ -44,6 +44,7 @@ export class LAOMaterial extends THREE.ShaderMaterial {
           );
           this.needsUpdate = true;
         },
+        { fireImmediately: true },
       ),
     ];
   }

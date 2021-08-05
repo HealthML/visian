@@ -23,7 +23,14 @@ const generateReduceLayerStack = (
   const alpha = `_alpha${Math.floor(Math.random() * 1000)}`;
   let fragment = `float ${alpha} = 0.0;\n`;
   for (let i = 0; i < layerCount; i++) {
-    fragment += `${alpha} = texture2D(uLayerData[${i}], ${uvName}).r;`;
+    fragment += `${alpha} = texture2D(uLayerData[${i}], ${uvName}).r;
+    `;
+
+    if (i === 0) {
+      // Region growing preview
+      fragment += `${alpha} = step(uRegionGrowingThreshold, ${alpha});
+      `;
+    }
 
     const filter = `(${
       reduceAnnotations ? "" : "1.0 - "

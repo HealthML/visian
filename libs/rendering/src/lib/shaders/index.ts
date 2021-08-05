@@ -1,3 +1,5 @@
+export { default as addFragmentShader } from "./add/add.frag.glsl";
+export { default as addVertexShader } from "./add/add.vert.glsl";
 export { default as circleFragmentShader } from "./circle/circle.frag.glsl";
 export { default as circleVertexShader } from "./circle/circle.vert.glsl";
 export { default as cuttingPlaneFragmentShader } from "./cutting-plane/cutting-plane.frag.glsl";
@@ -11,6 +13,7 @@ export { default as linesVertexShader } from "./slice-into-atlas/lines-into-atla
 export { default as rawSliceFragmentShader } from "./slice/raw-slice.frag.glsl";
 export { default as rawSliceVertexShader } from "./slice/slice.vert.glsl";
 export { default as regionGrowingFragmentShader } from "./region-growing/region-growing.frag.glsl";
+export { default as regionGrowing3DFragmentShader } from "./region-growing/region-growing-3D.frag.glsl";
 export { default as regionGrowingVertexShader } from "./region-growing/region-growing.vert.glsl";
 export { default as sliceFragmentShader } from "./slice/slice.frag.glsl";
 export { default as sliceVertexShader } from "./slice/slice.vert.glsl";

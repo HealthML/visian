@@ -8,4 +8,6 @@ export const commonUniforms = {
   uLayerAnnotationStatuses: { value: [] },
   uLayerOpacities: { value: [] },
   uLayerColors: { value: [] },
+
+  uRegionGrowingThreshold: { value: 0 },
 };

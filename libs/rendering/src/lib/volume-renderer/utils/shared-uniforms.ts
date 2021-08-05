@@ -11,6 +11,7 @@ import { autorun } from "mobx";
 import * as THREE from "three";
 
 import { RenderedImage } from "../../rendered-image";
+import { MAX_REGION_GROWING_STEPS } from "../../tool-renderer";
 import {
   atlasInfoUniforms,
   commonUniforms,
@@ -139,7 +140,7 @@ export class SharedUniforms implements IDisposable {
       autorun(() => {
         const brightness = editor.activeDocument?.viewSettings.brightness ?? 1;
         const factor =
-          editor.activeDocument?.viewport3D.shadingMode === "lao" ? 2.5 : 1;
+          editor.activeDocument?.viewport3D.shadingMode === "lao" ? 3 : 1.25;
 
         this.uniforms.uBrightness.value = brightness * factor;
 
@@ -194,7 +195,7 @@ export class SharedUniforms implements IDisposable {
           editor.activeDocument?.viewport3D.activeTransferFunction?.params
             .useBlockyContext?.value,
         );
-        this.uniforms.uLayerData.value = layers.map((layer) =>
+        const layerData = layers.map((layer) =>
           ((layer as IImageLayer).image as RenderedImage).getTexture(
             0,
             useNearestFiltering || layer.isAnnotation
@@ -203,20 +204,32 @@ export class SharedUniforms implements IDisposable {
           ),
         );
 
+        this.uniforms.uLayerData.value = [
+          // additional layer for 3d region growing
+          editor.activeDocument?.tools.layerPreviewTextures[0] || null,
+          ...layerData,
+        ];
+
         editor.activeDocument?.viewport3D.onTransferFunctionChange();
         editor.activeDocument?.volumeRenderer?.lazyRender(true, true);
       }),
       autorun(() => {
         const layers = editor.activeDocument?.imageLayers || [];
 
-        this.uniforms.uLayerAnnotationStatuses.value = layers.map(
+        const layerAnnotationStatuses = layers.map(
           (layer) => layer.isAnnotation,
         );
+
+        this.uniforms.uLayerAnnotationStatuses.value = [
+          // additional layer for 3d region growing
+          true,
+          ...layerAnnotationStatuses,
+        ];
 
         const opacityFactor =
           (editor.activeDocument?.viewport3D.activeTransferFunction?.params
             .contextOpacity?.value as number | undefined) ?? 1;
-        this.uniforms.uLayerOpacities.value = layers.map((layer) =>
+        const layerOpacities = layers.map((layer) =>
           layer.isVisible
             ? layer.isAnnotation
               ? layer.opacity
@@ -224,13 +237,20 @@ export class SharedUniforms implements IDisposable {
             : 0,
         );
 
+        const activeLayer = editor.activeDocument?.activeLayer;
+        this.uniforms.uLayerOpacities.value = [
+          // additional layer for 3d region growing
+          activeLayer?.isVisible ? activeLayer.opacity : 0,
+          ...layerOpacities,
+        ];
+
         editor.activeDocument?.viewport3D.onTransferFunctionChange();
         editor.activeDocument?.volumeRenderer?.lazyRender(true, true);
       }),
       autorun(() => {
         const layers = editor.activeDocument?.imageLayers || [];
 
-        this.uniforms.uLayerColors.value = layers.map(
+        const layerColors = layers.map(
           (layer) =>
             new THREE.Color(
               color(
@@ -239,6 +259,18 @@ export class SharedUniforms implements IDisposable {
               )({ theme: editor.theme }),
             ),
         );
+
+        this.uniforms.uLayerColors.value = [
+          // additional layer for 3d region growing
+          new THREE.Color(
+            color(
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              (editor.activeDocument?.tools.regionGrowingRenderer3D
+                .previewColor as any) || "foreground",
+            )({ theme: editor.theme }),
+          ),
+          ...layerColors,
+        ];
 
         editor.activeDocument?.volumeRenderer?.lazyRender();
       }),
@@ -253,6 +285,17 @@ export class SharedUniforms implements IDisposable {
         this.uniforms.uStepSize.value = getStepSize(image);
 
         editor.activeDocument?.volumeRenderer?.lazyRender();
+      }),
+      autorun(() => {
+        const steps =
+          editor.activeDocument?.tools.regionGrowingRenderer3D.steps ?? 0;
+
+        this.uniforms.uRegionGrowingThreshold.value =
+          (MAX_REGION_GROWING_STEPS + 1 - steps) /
+          (MAX_REGION_GROWING_STEPS + 1);
+
+        editor.activeDocument?.viewport3D.onTransferFunctionChange();
+        editor.volumeRenderer?.lazyRender(true);
       }),
     );
   }

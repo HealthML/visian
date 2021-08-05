@@ -105,7 +105,7 @@ export const Modal: React.FC<ModalProps> = ({
 
   const modalStyle = useModalPosition({
     anchor,
-    isActive: isOpen,
+    isActive: isOpen && Boolean(anchor),
     positionRelativeToOffsetParent: !modalRootRef.current,
     position,
     distance,
@@ -114,7 +114,11 @@ export const Modal: React.FC<ModalProps> = ({
 
   const node =
     isOpen === false ? null : (
-      <ModalContainer {...rest} style={modalStyle} ref={ref}>
+      <ModalContainer
+        {...rest}
+        style={anchor ? modalStyle : undefined}
+        ref={ref}
+      >
         {(labelTx || label) && (
           <>
             <ModalTitleRow
@@ -131,7 +135,7 @@ export const Modal: React.FC<ModalProps> = ({
       </ModalContainer>
     );
 
-  return modalRootRef.current
+  return modalRootRef.current && anchor
     ? ReactDOM.createPortal(node, modalRootRef.current)
     : node;
 };
