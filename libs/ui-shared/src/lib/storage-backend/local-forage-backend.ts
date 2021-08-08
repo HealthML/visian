@@ -50,8 +50,12 @@ export class LocalForageBackend<T = unknown> implements IStorageBackend<T> {
     return this.instance.removeItem(key);
   }
 
-  public async persist(key: string, data: T | (() => T | Promise<T>)) {
-    if (this.waitTime) return this.getPersistor(key)(data);
+  public async persist(
+    key: string,
+    data: T | (() => T | Promise<T>),
+    setDirty?: (dirty: boolean) => void,
+  ) {
+    if (this.waitTime) return this.getPersistor(key, setDirty)(data);
     await this.instance.setItem(key, await resolveData<T>(data));
   }
 
@@ -68,15 +72,14 @@ export class LocalForageBackend<T = unknown> implements IStorageBackend<T> {
     return this.instance.getItem(key);
   }
 
-  protected getPersistor(key: string) {
+  protected getPersistor(key: string, setDirty?: (dirty: boolean) => void) {
     let persistor = this.persistors[key];
 
     if (!persistor) {
-      persistor = asyncThrottle(
-        async (data: T | (() => T | Promise<T>)) =>
-          this.instance.setItem(key, await resolveData<T>(data)),
-        this.waitTime,
-      );
+      persistor = asyncThrottle(async (data: T | (() => T | Promise<T>)) => {
+        this.instance.setItem(key, await resolveData<T>(data));
+        if (setDirty) setDirty(false);
+      }, this.waitTime);
       this.persistors[key] = persistor;
     }
 

@@ -108,10 +108,11 @@ export class RootStore implements ISerializable<RootSnapshot> {
   public persist = async () => {
     if (!this.shouldPersist) return;
     this.setIsDirty(true);
-    await this.config.storageBackend?.persist("/editor", () =>
-      this.editor.toJSON(),
+    await this.config.storageBackend?.persist(
+      "/editor",
+      () => this.editor.toJSON(),
+      this.setIsDirty,
     );
-    this.setIsDirty(false);
   };
 
   public persistImmediately = async () => {
