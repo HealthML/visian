@@ -53,9 +53,10 @@ export class LocalForageBackend<T = unknown> implements IStorageBackend<T> {
   public async persist(
     key: string,
     data: T | (() => T | Promise<T>),
-    setDirty?: (dirty: boolean) => void,
+    finishedPersistCallback: () => void,
   ) {
-    if (this.waitTime) return this.getPersistor(key, setDirty)(data);
+    if (this.waitTime)
+      return this.getPersistor(key, finishedPersistCallback)(data);
     await this.instance.setItem(key, await resolveData<T>(data));
   }
 
@@ -72,13 +73,13 @@ export class LocalForageBackend<T = unknown> implements IStorageBackend<T> {
     return this.instance.getItem(key);
   }
 
-  protected getPersistor(key: string, setDirty?: (dirty: boolean) => void) {
+  protected getPersistor(key: string, finishedPersistCallback: () => void) {
     let persistor = this.persistors[key];
 
     if (!persistor) {
       persistor = asyncThrottle(async (data: T | (() => T | Promise<T>)) => {
         this.instance.setItem(key, await resolveData<T>(data));
-        if (setDirty) setDirty(false);
+        if (finishedPersistCallback) finishedPersistCallback();
       }, this.waitTime);
       this.persistors[key] = persistor;
     }

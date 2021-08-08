@@ -111,7 +111,7 @@ export class RootStore implements ISerializable<RootSnapshot> {
     await this.config.storageBackend?.persist(
       "/editor",
       () => this.editor.toJSON(),
-      this.setIsDirty,
+      () => this.setIsDirty(false),
     );
   };
 

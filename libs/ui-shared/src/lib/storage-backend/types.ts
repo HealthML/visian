@@ -9,7 +9,7 @@ export interface IStorageBackend<T = unknown> {
   persist(
     key: string,
     data: T | (() => T | Promise<T>),
-    setDirty?: (dirty: boolean) => void,
+    finishedPersistCallback: () => void,
   ): Promise<void>;
 
   /**
