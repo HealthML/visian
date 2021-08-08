@@ -81,9 +81,7 @@ export class Editor
   ): void {
     this.activeDocument = value;
 
-    // TODO: Somehow updates to the active document are not being registered.
-    // This is (hopefully) only a temporary workaround.
-    if (!isSilent) this.context.setDirty();
+    if (!isSilent) this.activeDocument.requestSave();
   }
 
   public newDocument = (forceDestroy?: boolean) => {
