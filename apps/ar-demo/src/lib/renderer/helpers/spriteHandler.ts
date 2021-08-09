@@ -57,7 +57,7 @@ export default class SpriteHandler {
       contrast: { value: 1 },
       brightness: { value: 1 },
       blueTint: { value: true },
-      opacity: { value: 0.5 },
+      opacity: { value: 0.7 },
     };
 
     this.materials = viewTypes.map(
