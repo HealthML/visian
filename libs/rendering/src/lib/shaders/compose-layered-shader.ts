@@ -52,9 +52,72 @@ const generateReduceLayerStack = (
   return fragment;
 };
 
+/**
+ * Generates the GLSL code for the `reduceFullLayerStack` macro which blends the
+ * image data of all layers, taking into account their layer settings, after
+ * applying an enhancement function to the non-annotation layers.
+ *
+ * @param layerCount The number of layers.
+ * @param outputName The output variable to assign the blended color to.
+ * @param uvName The name of the variable holding the current UV coordinates.
+ * @param enhancementFunctionName The name of the function which is applied
+ * to every non-annotation layer before blending.
+ * @returns The generated GLSL code.
+ */
+const generateReduceFullLayerStack = (
+  layerCount: number,
+  outputName = "imageValue",
+  uvName = "uv",
+  enhancementFunctionName = "applyBrightnessContrast",
+) => {
+  const image = `_image${Math.floor(Math.random() * 1000)}`;
+  const oldAlpha = `_oldAlpha${Math.floor(Math.random() * 1000)}`;
+  let fragment = `
+  vec4 ${image} = vec4(0.0);
+  float ${oldAlpha} = 0.0;
+  `;
+
+  for (let i = layerCount - 1; i >= 0; i--) {
+    // back to front blending
+    fragment += `${image} = texture2D(uLayerData[${i}], ${uvName});
+    `;
+
+    if (i === 0) {
+      // Region growing preview
+      fragment += `${image}.rgb = step(uPreviewThreshold, ${image}.rgb);
+      `;
+    }
+
+    fragment += `
+    if(uComponents < 3 || uLayerAnnotationStatuses[${i}]) {
+      ${image}.a = ${image}.x;
+      ${image}.rgb = uLayerColors[${i}];
+    }
+
+    if(uLayerAnnotationStatuses[${i}]) {
+      ${image}.a = step(0.01, ${image}.a);
+    } else {
+      ${image} = ${enhancementFunctionName}(${image});
+    }
+    
+    ${image}.a *= uLayerOpacities[${i}];
+    
+    ${oldAlpha} = ${outputName}.a;
+    ${outputName}.a = mix(${oldAlpha}, 1.0, ${image}.a);
+    ${outputName}.rgb = mix(
+      ${oldAlpha} * ${outputName}.rgb,
+      ${image}.rgb,
+      ${image}.a) / max(${outputName}.a, 0.00001); // avoid division by 0
+    `;
+  }
+
+  return fragment;
+};
+
 // Macro definitions
 const layerCountRegex = /{{layerCount}}/g;
 const reduceLayerStackRegex = /{{reduceLayerStack\((\w+),\s*(\w+),\s*(\w+)(,\s*(\w+))?\)}}/g;
+const reduceFullLayerStackRegex = /{{reduceFullLayerStack\((\w+),\s*(\w+),\s*(\w+)\)}}/g;
 
 /**
  * Pre-processes a given shader string to replace custom macros with
@@ -83,5 +146,15 @@ export const composeLayeredShader = (shader: string, layerCount: number) =>
           uvName,
           reduceAnnotations === "true",
           rawOutputName,
+        ),
+    )
+    .replace(
+      reduceFullLayerStackRegex,
+      (_match, outputName, uvName, enhancementFunctionName) =>
+        generateReduceFullLayerStack(
+          layerCount,
+          outputName,
+          uvName,
+          enhancementFunctionName,
         ),
     );
