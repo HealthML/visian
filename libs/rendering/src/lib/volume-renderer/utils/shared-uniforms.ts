@@ -303,9 +303,13 @@ export class SharedUniforms implements IDisposable {
           alpha += (1 - alpha) * layer.opacity;
         });
 
+        const opacityFactor =
+          (editor.activeDocument?.viewport3D.activeTransferFunction?.params
+            .contextOpacity?.value as number | undefined) ?? 1;
+
         this.uniforms.uEdgeColor.value = [
           ...this.workingVector1.toArray(),
-          alpha,
+          alpha * opacityFactor,
         ];
 
         editor.activeDocument?.viewport3D.onTransferFunctionChange();
