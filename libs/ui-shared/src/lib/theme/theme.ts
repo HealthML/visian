@@ -134,12 +134,15 @@ export const theme = {
     print: "@media print",
   },
   radii: {
+    activeLayerBorderRadius: "8px",
     default: "10px",
   },
   shadows: {},
   sizes: {
+    dividerHeight: "1px",
     icon: "24px",
     iconLarge: "30px",
+    listElementHeight: "40px",
     maxContentWidth: "940px",
     recordImage: "220px",
     buttonHeight: "40px",

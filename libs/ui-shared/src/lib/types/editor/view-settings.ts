@@ -27,9 +27,6 @@ export interface IViewSettings {
    */
   contrast: number;
 
-  /** The background color as as CSS color string. */
-  backgroundColor: string;
-
   setViewMode(value: ViewMode): void;
 
   setSelectedVoxel(x?: number, y?: number, z?: number): void;
@@ -102,8 +99,6 @@ export interface ITransferFunction<N extends string> {
 
   /** This transfer function's parameters. */
   params: { [name: string]: IParameter };
-
-  laoBrightnessFactor: number;
 
   /** Called when the transfer function becomes active. */
   activate(): void;

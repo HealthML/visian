@@ -1,12 +1,6 @@
-import {
-  IEditor,
-  IImageLayer,
-  ILayerParameter,
-  isPerformanceLow,
-  IVolumeRenderer,
-} from "@visian/ui-shared";
+import { IEditor, isPerformanceLow, IVolumeRenderer } from "@visian/ui-shared";
 import { IDisposable, IDisposer } from "@visian/utils";
-import { autorun, reaction } from "mobx";
+import { autorun, computed, makeObservable, reaction } from "mobx";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import Stats from "three/examples/jsm/libs/stats.module";
@@ -24,6 +18,8 @@ import { VolumeMaterial } from "./volume-material";
 import { XRManager } from "./xr-manager";
 
 export class VolumeRenderer implements IVolumeRenderer, IDisposable {
+  public readonly excludeFromSnapshotTracking = ["editor"];
+
   private sharedUniforms: SharedUniforms;
 
   public renderer: THREE.WebGLRenderer;
@@ -153,26 +149,6 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
 
     this.disposers.push(
       reaction(
-        () => {
-          const layerParameter =
-            editor.activeDocument?.viewport3D.activeTransferFunction?.params
-              .image;
-          if (!layerParameter) return undefined;
-
-          const layerId = (layerParameter as ILayerParameter).value;
-          if (!layerId) return undefined;
-
-          // As we already know that the layer parameter exist, we can be sure
-          // that the active document is not undefined.
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          const imageLayer = editor.activeDocument!.getLayer(layerId);
-          return imageLayer ? (imageLayer as IImageLayer).image : undefined;
-        },
-        () => {
-          this.onCameraMove(false);
-        },
-      ),
-      reaction(
         () => editor.activeDocument?.viewSettings.viewMode,
         (viewMode) => {
           switch (viewMode) {
@@ -230,6 +206,10 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
           this.editor.activeDocument?.tools.activeTool?.name !== "plane-tool";
       }),
     );
+
+    makeObservable(this, {
+      renderedImageLayerCount: computed,
+    });
   }
 
   public dispose = () => {
@@ -251,6 +231,11 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
     this.sharedUniforms.dispose();
     this.disposers.forEach((disposer) => disposer());
   };
+
+  public get renderedImageLayerCount() {
+    // additional layer for 3d region growing preview
+    return (this.editor.activeDocument?.imageLayers.length || 0) + 1;
+  }
 
   public resetScene(hardReset = false) {
     // Position the volume in a reasonable height for XR.
@@ -310,8 +295,12 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
     this.flyControls.tick();
   };
 
-  public lazyRender = (updateLighting = false) => {
+  public lazyRender = (updateLighting = false, updateGradients = false) => {
     this.lazyRenderTriggered = true;
+
+    if (updateGradients) {
+      this.gradientComputer.updateAllDerivatives();
+    }
 
     if (updateLighting) {
       this.laoComputer.setDirty();
@@ -320,10 +309,7 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
   };
 
   private eagerRender = () => {
-    if (
-      !this.editor.activeDocument?.viewport3D.activeTransferFunction?.params
-        .image.value
-    ) {
+    if (!this.editor.activeDocument?.baseImageLayer) {
       this.renderer.clear();
       return;
     }
@@ -370,7 +356,7 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
   /**
    * @see https://davidpeicho.github.io/blog/cloud-raymarching-walkthrough-part1/
    */
-  private updateCameraPosition(camera: THREE.Camera = this.camera) {
+  public updateCameraPosition(camera: THREE.Camera = this.camera) {
     this.volume.updateMatrixWorld();
 
     this.workingVector.setFromMatrixPosition(camera.matrixWorld);

@@ -65,6 +65,10 @@ export class ScreenAlignedQuad extends THREE.Mesh implements IDisposable {
       this.camera.clearViewOffset();
     }
   }
+
+  public compileWith(renderer: THREE.WebGLRenderer) {
+    renderer.compile(this.scene, this.camera);
+  }
 }
 
 export default ScreenAlignedQuad;

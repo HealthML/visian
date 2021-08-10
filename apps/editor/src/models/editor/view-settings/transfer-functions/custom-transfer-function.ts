@@ -5,7 +5,8 @@ import {
 } from "@visian/ui-shared";
 import { action, makeObservable, observable, reaction } from "mobx";
 import * as THREE from "three";
-import { LayerParameter, Parameter } from "../../parameters";
+
+import { Parameter } from "../../parameters";
 import { FileParameter } from "../../parameters/file-parameter";
 import { TransferFunction } from "./transfer-function";
 
@@ -20,16 +21,6 @@ export class CustomTransferFunction
         name: "custom",
         labelTx: "tf-custom",
         params: [
-          new LayerParameter(
-            {
-              name: "image",
-              labelTx: "image-layer",
-              defaultValue: undefined,
-              onBeforeValueChange: () =>
-                document.viewport3D?.onTransferFunctionChange(),
-            },
-            document,
-          ) as Parameter<unknown>,
           new FileParameter({
             name: "file",
             labelTx: "custom-tf-file",
@@ -67,12 +58,6 @@ export class CustomTransferFunction
         reader.readAsDataURL(file);
       },
     );
-  }
-
-  public activate() {
-    if (!this.document.getLayer(this.params.image.value as string)) {
-      this.params.image.reset();
-    }
   }
 
   protected setTexture(texture?: THREE.Texture) {

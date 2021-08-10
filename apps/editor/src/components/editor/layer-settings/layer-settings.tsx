@@ -55,7 +55,11 @@ export const LayerSettings = observer<LayerSettingsProps>(
         />
         <ColorParam value={layer.color} setValue={layer.setColor} />
         <Divider />
-        <RedButtonParam labelTx="delete-layer" handlePress={deleteLayer} />
+        <RedButtonParam
+          labelTx="delete-layer"
+          handlePress={deleteLayer}
+          isLast
+        />
       </Modal>
     );
   },
