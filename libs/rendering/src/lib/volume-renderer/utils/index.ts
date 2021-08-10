@@ -1,5 +1,4 @@
 export * from "./bounding-box";
-export * from "./compose-layered-shader";
 export * from "./conversion";
 export * from "./cutting-plane-material";
 export * from "./cutting-plane";

@@ -3,8 +3,11 @@ import { IDisposer } from "@visian/utils";
 import { reaction } from "mobx";
 import * as THREE from "three";
 
-import { laoFragmentShader, laoVertexShader } from "../../../shaders";
-import { composeLayeredShader } from "../compose-layered-shader";
+import {
+  laoFragmentShader,
+  laoVertexShader,
+  composeLayeredShader,
+} from "../../../shaders";
 import { SharedUniforms } from "../shared-uniforms";
 import { totalLAORays } from "./lao-computer";
 import { getLAODirectionTexture } from "./lao-directions";

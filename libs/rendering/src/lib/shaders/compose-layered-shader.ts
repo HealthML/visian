@@ -52,39 +52,9 @@ const generateReduceLayerStack = (
   return fragment;
 };
 
-/**
- * Generates the GLSL code for the `reduceLayerColors` macro which blends all
- * layer colors.
- *
- * @param layerCount The number of layers.
- * @param outputName The output variable to assign the blended color to.
- * @param reduceAnnotations If set, blends only annotation layers. If not,
- * blends only non-annotation layers.
- * @returns The generated GLSL code.
- */
-const generateReduceLayerColors = (
-  layerCount: number,
-  outputName = "imageColor",
-  reduceAnnotations?: boolean,
-) => {
-  let fragment = "";
-  for (let i = 0; i < layerCount; i++) {
-    const filter = `(${
-      reduceAnnotations ? "" : "1.0 - "
-    }float(uLayerAnnotationStatuses[${i}]))`;
-
-    fragment += `
-    ${outputName}.rgb += ${filter} * (1.0 - ${outputName}.a) * uLayerColors[${i}] * uLayerOpacities[${i}];
-    ${outputName}.a += ${filter} * (1.0 - ${outputName}.a) * uLayerOpacities[${i}];
-    `;
-  }
-  return fragment;
-};
-
 // Macro definitions
 const layerCountRegex = /{{layerCount}}/g;
 const reduceLayerStackRegex = /{{reduceLayerStack\((\w+),\s*(\w+),\s*(\w+)(,\s*(\w+))?\)}}/g;
-const reduceLayerColorsRegex = /{{reduceLayerColors\((\w+),\s*(\w+)\)}}/g;
 
 /**
  * Pre-processes a given shader string to replace custom macros with
@@ -114,11 +84,4 @@ export const composeLayeredShader = (shader: string, layerCount: number) =>
           reduceAnnotations === "true",
           rawOutputName,
         ),
-    )
-    .replace(reduceLayerColorsRegex, (_match, outputName, reduceAnnotations) =>
-      generateReduceLayerColors(
-        layerCount,
-        outputName,
-        reduceAnnotations === "true",
-      ),
     );

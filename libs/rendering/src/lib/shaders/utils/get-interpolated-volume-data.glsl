@@ -26,12 +26,8 @@ VolumeData getVolumeData(vec3 volumeCoords) {
   vec4 imageRaw = vec4(0.0);
   {{reduceLayerStack(imageValue, uv, false, imageRaw)}}
 
-  vec4 imageColor = vec4(0.0);
-  {{reduceLayerColors(imageColor, false)}}
-
   data.image = imageValue;
   data.imageRaw = imageRaw;
-  data.imageColor = imageColor;
   data.firstDerivative = decodeVec3(texture2D(uInputFirstDerivative, uv));
   data.secondDerivative = decodeVec3(texture2D(uInputSecondDerivative, uv));
 
@@ -79,7 +75,6 @@ VolumeData getInterpolatedVolumeData(vec3 volumeCoords) {
 
   interpolatedData.image = mix(lowerData.image, upperData.image, uVolumeNearestFiltering ? step(0.5, interpolation) : interpolation);
   interpolatedData.imageRaw = mix(lowerData.imageRaw, upperData.imageRaw, uVolumeNearestFiltering ? step(0.5, interpolation) : interpolation);
-  interpolatedData.imageColor = mix(lowerData.imageColor, upperData.imageColor, uVolumeNearestFiltering ? step(0.5, interpolation) : interpolation);
   interpolatedData.firstDerivative = mix(lowerData.firstDerivative, upperData.firstDerivative, interpolation);
   interpolatedData.secondDerivative = mix(lowerData.secondDerivative, upperData.secondDerivative, interpolation);
 

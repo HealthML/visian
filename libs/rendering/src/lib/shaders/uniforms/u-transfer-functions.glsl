@@ -9,3 +9,4 @@ uniform bool uVolumeNearestFiltering;
 uniform bool uUsePlane;
 uniform vec3 uPlaneNormal;
 uniform float uPlaneDistance;
+uniform vec4 uEdgeColor;

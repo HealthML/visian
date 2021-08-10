@@ -12,4 +12,5 @@ export const transferFunctionsUniforms = {
   uUsePlane: { value: false },
   uPlaneNormal: { value: [0, 1, 0] },
   uPlaneDistance: { value: 0 },
+  uEdgeColor: { value: [1, 1, 1, 1] },
 };

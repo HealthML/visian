@@ -28,7 +28,9 @@ export class SharedUniforms implements IDisposable {
 
   private disposers: IDisposer[] = [];
 
-  private workingVector = new THREE.Vector3();
+  private workingVector1 = new THREE.Vector3();
+  private workingVector2 = new THREE.Vector3();
+  private workingColor = new THREE.Color();
   private readonly coneAxis = new THREE.Vector3(0, 1, 0);
 
   constructor(editor: IEditor) {
@@ -54,30 +56,30 @@ export class SharedUniforms implements IDisposable {
         const { coneDirection } = coneTransferFunction as IConeTransferFunction;
 
         // TODO: Why does y have to be flipped here?
-        this.workingVector
+        this.workingVector1
           .set(coneDirection.x, -coneDirection.y, coneDirection.z)
           .normalize();
-        const cos = this.workingVector.dot(this.coneAxis);
+        const cos = this.workingVector1.dot(this.coneAxis);
         const k = 1 / (1 + cos);
 
-        this.workingVector.cross(this.coneAxis);
+        this.workingVector1.cross(this.coneAxis);
 
         (this.uniforms.uConeMatrix.value as THREE.Matrix3).set(
-          this.workingVector.x * this.workingVector.x * k + cos,
-          this.workingVector.x * this.workingVector.y * k +
-            this.workingVector.z,
-          this.workingVector.x * this.workingVector.z * k -
-            this.workingVector.y,
-          this.workingVector.y * this.workingVector.x * k -
-            this.workingVector.z,
-          this.workingVector.y * this.workingVector.y * k + cos,
-          this.workingVector.y * this.workingVector.z * k +
-            this.workingVector.x,
-          this.workingVector.z * this.workingVector.x * k +
-            this.workingVector.y,
-          this.workingVector.z * this.workingVector.y * k -
-            this.workingVector.x,
-          this.workingVector.z * this.workingVector.z * k + cos,
+          this.workingVector1.x * this.workingVector1.x * k + cos,
+          this.workingVector1.x * this.workingVector1.y * k +
+            this.workingVector1.z,
+          this.workingVector1.x * this.workingVector1.z * k -
+            this.workingVector1.y,
+          this.workingVector1.y * this.workingVector1.x * k -
+            this.workingVector1.z,
+          this.workingVector1.y * this.workingVector1.y * k + cos,
+          this.workingVector1.y * this.workingVector1.z * k +
+            this.workingVector1.x,
+          this.workingVector1.z * this.workingVector1.x * k +
+            this.workingVector1.y,
+          this.workingVector1.z * this.workingVector1.y * k -
+            this.workingVector1.x,
+          this.workingVector1.z * this.workingVector1.z * k + cos,
         );
 
         const shouldUpdateLighting =
@@ -273,6 +275,41 @@ export class SharedUniforms implements IDisposable {
         ];
 
         editor.activeDocument?.volumeRenderer?.lazyRender();
+      }),
+      autorun(() => {
+        const visibleScanLayers =
+          editor.activeDocument?.imageLayers.filter(
+            (layer) => !layer.isAnnotation && layer.isVisible,
+          ) || [];
+
+        this.workingVector1.setScalar(0); // Used for mixing the color
+        let alpha = 0;
+
+        visibleScanLayers.forEach((layer) => {
+          this.workingColor.set(
+            color(
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              (layer.color as any) || "foreground",
+            )({ theme: editor.theme }),
+          );
+          this.workingVector2 // Used for adding to the mixed color
+            .fromArray(this.workingColor.toArray());
+
+          this.workingVector1.addScaledVector(
+            this.workingVector2,
+            (1 - alpha) * layer.opacity,
+          );
+
+          alpha += (1 - alpha) * layer.opacity;
+        });
+
+        this.uniforms.uEdgeColor.value = [
+          ...this.workingVector1.toArray(),
+          alpha,
+        ];
+
+        editor.activeDocument?.viewport3D.onTransferFunctionChange();
+        editor.activeDocument?.volumeRenderer?.lazyRender(true);
       }),
       autorun(() => {
         const imageLayer = editor.activeDocument?.baseImageLayer;
