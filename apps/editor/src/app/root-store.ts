@@ -31,7 +31,13 @@ export const setupRootStore = async () => {
         await readFileFromURL(loadScanParam, true),
       );
       store.editor.activeDocument?.finishBatchImport();
-      window.history.replaceState({}, document.title, window.location.pathname);
+      if (url.searchParams.get("demo") === null) {
+        window.history.replaceState(
+          {},
+          document.title,
+          window.location.pathname,
+        );
+      }
     }
   } catch {
     store.setError({
