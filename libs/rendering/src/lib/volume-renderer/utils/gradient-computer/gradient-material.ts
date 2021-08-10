@@ -3,8 +3,11 @@ import { IDisposer } from "@visian/utils";
 import { reaction } from "mobx";
 import * as THREE from "three";
 
-import { gradientFragmentShader, gradientVertexShader } from "../../../shaders";
-import { composeLayeredShader } from "../compose-layered-shader";
+import {
+  gradientFragmentShader,
+  gradientVertexShader,
+  composeLayeredShader,
+} from "../../../shaders";
 import { SharedUniforms } from "../shared-uniforms";
 
 export enum GradientMode {

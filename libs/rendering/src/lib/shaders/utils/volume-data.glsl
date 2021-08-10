@@ -13,12 +13,6 @@ struct VolumeData {
   vec4 imageRaw;
 
   /**
-   * Holds the blended base color from all non-annotation image layers, as
-   * defined in the layer settings, weighted by their opacities.
-   */
-  vec4 imageColor;
-
-  /**
    * Holds the blended image data from all annotation layers, taking
    * into account the layers' colors & opacities.
    */

@@ -3,8 +3,12 @@ import { IDisposable, IDisposer } from "@visian/utils";
 import { reaction } from "mobx";
 import * as THREE from "three";
 
-import { volumeFragmentShader, volumeVertexShader } from "../shaders";
-import { composeLayeredShader, SharedUniforms } from "./utils";
+import {
+  composeLayeredShader,
+  volumeFragmentShader,
+  volumeVertexShader,
+} from "../shaders";
+import { SharedUniforms } from "./utils";
 
 /** A volume domain material. */
 export class VolumeMaterial
