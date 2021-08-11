@@ -31,6 +31,7 @@ export class SliceMaterial extends THREE.ShaderMaterial implements IDisposable {
         uContrast: { value: editor.activeDocument?.viewSettings.contrast },
         uBrightness: { value: editor.activeDocument?.viewSettings.brightness },
         uComponents: { value: 1 },
+        uActiveLayerData: { value: null },
         uPreviewThreshold: { value: 0 },
       },
       transparent: true,
@@ -115,6 +116,13 @@ export class SliceMaterial extends THREE.ShaderMaterial implements IDisposable {
             null,
           ...layerData,
         ];
+
+        const activeLayer = editor.activeDocument?.activeLayer;
+        this.uniforms.uActiveLayerData.value = activeLayer
+          ? ((activeLayer as IImageLayer).image as RenderedImage).getTexture(
+              canvasIndex,
+            )
+          : null;
 
         editor.sliceRenderer?.lazyRender();
       }),

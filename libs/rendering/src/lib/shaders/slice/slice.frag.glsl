@@ -13,8 +13,8 @@ uniform float uContrast;
 uniform float uBrightness;
 uniform int uComponents;
 
+uniform sampler2D uActiveLayerData;
 uniform float uPreviewThreshold;
-
 
 vec4 applyBrightnessContrast(vec4 image) {
   if(uComponents >= 3) {

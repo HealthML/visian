@@ -71,9 +71,11 @@ const generateReduceFullLayerStack = (
   enhancementFunctionName = "applyBrightnessContrast",
 ) => {
   const image = `_image${Math.floor(Math.random() * 1000)}`;
+  const activeLayer = `_activeLayer${Math.floor(Math.random() * 1000)}`;
   const oldAlpha = `_oldAlpha${Math.floor(Math.random() * 1000)}`;
   let fragment = `
   vec4 ${image} = vec4(0.0);
+  vec4 ${activeLayer} = texture2D(uActiveLayerData, ${uvName});
   float ${oldAlpha} = 0.0;
   `;
 
@@ -84,7 +86,9 @@ const generateReduceFullLayerStack = (
 
     if (i === 0) {
       // Region growing preview
-      fragment += `${image}.rgb = step(uPreviewThreshold, ${image}.rgb);
+      fragment += `
+      ${image}.rgb = step(uPreviewThreshold, ${image}.rgb);
+      ${image}.rgb *= vec3(1.0) - step(0.001, ${activeLayer}.rgb);
       `;
     }
 
