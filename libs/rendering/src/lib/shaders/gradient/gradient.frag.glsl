@@ -40,18 +40,17 @@ vec4 getImageValue(vec3 voxelCoords) {
   vec2 uvOffset = sliceSize * sliceOffset;
   vec2 uv = ((voxelCoords.xy + vec2(0.5)) / uVoxelCount.xy / uAtlasGrid + uvOffset);
 
-  vec4 imageValue = vec4(0.0);
-  vec4 imageRaw = vec4(0.0);
   if (uGradientMode == 2) {
-    imageValue = texture2D(uInputFirstDerivative, uv);
-  } else {
-    {{reduceLayerStack(imageValue, uv, false, imageRaw)}}
-  }
-  
-  if (uGradientMode != 0) {
+    return texture2D(uInputFirstDerivative, uv);
+  } else if (uGradientMode == 1) {
+    vec4 imageValue = vec4(0.0);
+    {{reduceRawImages(imageValue, uv)}}
     return imageValue;
   }
-
+  
+  vec4 imageValue = vec4(0.0);
+  vec4 imageRaw = vec4(0.0);
+  {{reduceLayerStack(imageValue, uv, false, imageRaw)}}
   VolumeData data;
 
   data.image = imageValue;

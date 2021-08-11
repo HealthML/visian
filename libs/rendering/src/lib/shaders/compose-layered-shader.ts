@@ -52,9 +52,38 @@ const generateReduceLayerStack = (
   return fragment;
 };
 
+/**
+ * Generates the GLSL code for the `reduceRawImages` macro which blends the
+ * raw image data of all non-annotation layers, taking into account their opacities.
+ *
+ * @param layerCount The number of layers.
+ * @param outputName The output variable to assign the blended color to.
+ * @param uvName The name of the variable holding the current UV coordinates.
+ * @returns The generated GLSL code.
+ */
+const generateReduceRawImages = (
+  layerCount: number,
+  outputName = "imageValue",
+  uvName = "uv",
+) => {
+  const alpha = `_alpha${Math.floor(Math.random() * 1000)}`;
+
+  let fragment = `
+  float ${alpha} = 0.0;`;
+
+  for (let i = 0; i < layerCount; i++) {
+    fragment += `
+    ${alpha} = texture2D(uLayerData[${i}], ${uvName}).r;
+    ${outputName} += (1.0 - float(uLayerAnnotationStatuses[${i}])) * (1.0 - ${outputName}.a) * ${alpha} * uLayerOpacities[${i}];`;
+  }
+
+  return fragment;
+};
+
 // Macro definitions
 const layerCountRegex = /{{layerCount}}/g;
 const reduceLayerStackRegex = /{{reduceLayerStack\((\w+),\s*(\w+),\s*(\w+)(,\s*(\w+))?\)}}/g;
+const reduceRawImagesRegex = /{{reduceRawImages\((\w+),\s*(\w+)\)}}/g;
 
 /**
  * Pre-processes a given shader string to replace custom macros with
@@ -84,4 +113,7 @@ export const composeLayeredShader = (shader: string, layerCount: number) =>
           reduceAnnotations === "true",
           rawOutputName,
         ),
+    )
+    .replace(reduceRawImagesRegex, (_match, outputName, uvName) =>
+      generateReduceRawImages(layerCount, outputName, uvName),
     );
