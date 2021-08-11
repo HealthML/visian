@@ -21,14 +21,20 @@ const generateReduceLayerStack = (
   rawOutputName?: string,
 ) => {
   const alpha = `_alpha${Math.floor(Math.random() * 1000)}`;
-  let fragment = `float ${alpha} = 0.0;\n`;
+  const activeLayer = `_activeLayer${Math.floor(Math.random() * 1000)}`;
+  let fragment = `
+  float ${alpha} = 0.0;
+  float ${activeLayer} = texture2D(uActiveLayerData, ${uvName}).r;
+  `;
   for (let i = 0; i < layerCount; i++) {
     fragment += `${alpha} = texture2D(uLayerData[${i}], ${uvName}).r;
     `;
 
     if (i === 0) {
       // Region growing preview
-      fragment += `${alpha} = step(uRegionGrowingThreshold, ${alpha});
+      fragment += `
+      ${alpha} = step(uRegionGrowingThreshold, ${alpha});
+      ${alpha} *= 1.0 - step(0.001, ${activeLayer});
       `;
     }
 

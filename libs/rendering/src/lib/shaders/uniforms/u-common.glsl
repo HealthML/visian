@@ -8,4 +8,5 @@ uniform bool uLayerAnnotationStatuses[{{layerCount}}];
 uniform float uLayerOpacities[{{layerCount}}];
 uniform vec3 uLayerColors[{{layerCount}}];
 
+uniform sampler2D uActiveLayerData;
 uniform float uRegionGrowingThreshold;

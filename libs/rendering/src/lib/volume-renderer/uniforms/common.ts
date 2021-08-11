@@ -9,5 +9,6 @@ export const commonUniforms = {
   uLayerOpacities: { value: [] },
   uLayerColors: { value: [] },
 
+  uActiveLayerData: { value: null },
   uRegionGrowingThreshold: { value: 0 },
 };
