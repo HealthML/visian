@@ -10,9 +10,11 @@
  *
  * Returns a vec4 containing the accumulated color.
  */
-vec4 marchRay(vec3 origin, vec3 direction, float near, float far, float stepSize) {
-  // Entry aligned sampling.
-  float dist = near + stepSize / 2.0;
+vec4 marchRay(vec3 origin, vec3 direction, float near, float far, float stepSize, bool useRayDithering) {
+  float random = fract(sin(gl_FragCoord.x * 12.9898 + gl_FragCoord.y * 78.233) * 43758.5453) * float(useRayDithering);
+
+  // Entry aligned sampling with ray dithering if `useRayDithering` is set to true.
+  float dist = near + stepSize * (0.5 + random);
   vec3 samplePosition = origin + dist * direction;
   vec3 scaledDirection = direction * stepSize;
 

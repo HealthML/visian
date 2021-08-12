@@ -54,5 +54,5 @@ void main() {
   float far;
   computeNearFar(normalizedRayDirection, near, far);
 
-  gl_FragColor = marchRay(vRayOrigin, normalizedRayDirection, near, far, uStepSize);
+  gl_FragColor = marchRay(vRayOrigin, normalizedRayDirection, near, far, uStepSize, true);
 }
