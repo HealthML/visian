@@ -1,40 +1,39 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { color, IEditor, IImageLayer } from "@visian/ui-shared";
 import { IDisposable, IDisposer, ViewType } from "@visian/utils";
-import { autorun } from "mobx";
+import { autorun, reaction } from "mobx";
 import * as THREE from "three";
 
 import { RenderedImage } from "../rendered-image";
-import { sliceFragmentShader, sliceVertexShader } from "../shaders";
+import {
+  composeLayeredShader,
+  sliceFragmentShader,
+  sliceVertexShader,
+} from "../shaders";
 import { MAX_REGION_GROWING_STEPS } from "../tool-renderer";
 import { getOrder } from "./utils";
 
-export abstract class SliceMaterial
-  extends THREE.ShaderMaterial
-  implements IDisposable {
+export class SliceMaterial extends THREE.ShaderMaterial implements IDisposable {
   protected disposers: IDisposer[] = [];
 
-  constructor(
-    private editor: IEditor,
-    private viewType: ViewType,
-    private imageLayer: IImageLayer,
-    defines = {},
-    uniforms = {},
-  ) {
+  constructor(private editor: IEditor, private viewType: ViewType) {
     super({
-      defines,
       vertexShader: sliceVertexShader,
       fragmentShader: sliceFragmentShader,
-      uniforms: THREE.UniformsUtils.merge([
-        {
-          uDataTexture: { value: null },
-          uActiveSlices: { value: [0, 0, 0] },
-          uVoxelCount: { value: [1, 1, 1] },
-          uAtlasGrid: { value: [1, 1] },
-          uComponents: { value: 1 },
-        },
-        uniforms,
-      ]),
+      uniforms: {
+        uLayerData: { value: [] },
+        uLayerAnnotationStatuses: { value: [] },
+        uLayerOpacities: { value: [] },
+        uLayerColors: { value: [] },
+        uActiveSlices: { value: [0, 0, 0] },
+        uVoxelCount: { value: [1, 1, 1] },
+        uAtlasGrid: { value: [1, 1] },
+        uContrast: { value: editor.activeDocument?.viewSettings.contrast },
+        uBrightness: { value: editor.activeDocument?.viewSettings.brightness },
+        uComponents: { value: 1 },
+        uActiveLayerData: { value: null },
+        uPreviewThreshold: { value: 0 },
+      },
       transparent: true,
       side: THREE.DoubleSide,
     });
@@ -51,55 +50,34 @@ export abstract class SliceMaterial
         break;
     }
 
-    const image = imageLayer.image as RenderedImage;
-    this.uniforms.uVoxelCount.value = image.voxelCount;
-    this.uniforms.uAtlasGrid.value = image.getAtlasGrid();
-    this.uniforms.uComponents.value = image.voxelComponents;
-    this.updateTexture();
-
     this.disposers.push(
+      reaction(
+        () => editor.volumeRenderer?.renderedImageLayerCount || 1,
+        (layerCount: number) => {
+          this.fragmentShader = composeLayeredShader(
+            sliceFragmentShader,
+            layerCount,
+          );
+          this.needsUpdate = true;
+        },
+        { fireImmediately: true },
+      ),
+      autorun(() => {
+        const imageLayer = editor.activeDocument?.baseImageLayer;
+        if (!imageLayer) return;
+
+        const image = imageLayer.image as RenderedImage;
+
+        this.uniforms.uVoxelCount.value = image.voxelCount;
+        this.uniforms.uAtlasGrid.value = image.getAtlasGrid();
+        this.uniforms.uComponents.value = image.voxelComponents;
+
+        editor.sliceRenderer?.lazyRender();
+      }),
       autorun(() => {
         this.uniforms.uActiveSlices.value = editor.activeDocument?.viewSettings.selectedVoxel.toArray();
         editor.sliceRenderer?.lazyRender();
       }),
-      autorun(this.updateTexture),
-    );
-  }
-
-  public dispose() {
-    super.dispose();
-    this.disposers.forEach((disposer) => disposer());
-  }
-
-  private updateTexture = () => {
-    if (!this.editor.activeDocument) return;
-
-    const canvasIndex = getOrder(
-      this.editor.activeDocument.viewport2D.mainViewType,
-    ).indexOf(this.viewType);
-    this.uniforms.uDataTexture.value = (this.imageLayer
-      .image as RenderedImage).getTexture(canvasIndex);
-  };
-}
-
-export default SliceMaterial;
-
-export class ImageSliceMaterial extends SliceMaterial {
-  constructor(editor: IEditor, viewType: ViewType, imageLayer: IImageLayer) {
-    super(
-      editor,
-      viewType,
-      imageLayer,
-      { IMAGE: "" },
-      {
-        uContrast: { value: editor.activeDocument?.viewSettings.contrast },
-        uBrightness: { value: editor.activeDocument?.viewSettings.brightness },
-        uForegroundColor: { value: new THREE.Color("white") },
-        uImageOpacity: { value: 1 },
-      },
-    );
-
-    this.disposers.push(
       autorun(() => {
         this.uniforms.uContrast.value =
           editor.activeDocument?.viewSettings.contrast;
@@ -111,82 +89,6 @@ export class ImageSliceMaterial extends SliceMaterial {
         editor.sliceRenderer?.lazyRender();
       }),
       autorun(() => {
-        (this.uniforms.uForegroundColor.value as THREE.Color).set(
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          color((imageLayer.color as any) || "foreground")({
-            theme: editor.theme,
-          }),
-        );
-        editor.sliceRenderer?.lazyRender();
-      }),
-      autorun(() => {
-        this.uniforms.uImageOpacity.value = imageLayer.opacity;
-        editor.sliceRenderer?.lazyRender();
-      }),
-    );
-  }
-}
-
-export class AnnotationSliceMaterial extends SliceMaterial {
-  constructor(editor: IEditor, viewType: ViewType, imageLayer: IImageLayer) {
-    super(
-      editor,
-      viewType,
-      imageLayer,
-      { ANNOTATION: "" },
-      {
-        uAnnotationColor: { value: new THREE.Color("white") },
-        uAnnotationOpacity: { value: 0.5 },
-        uUsePreviewTexture: { value: false },
-        uPreviewTexture: { value: null },
-        uPreviewThreshold: { value: 0 },
-        uPreviewColor: { value: new THREE.Color("white") },
-      },
-    );
-
-    this.disposers.push(
-      autorun(() => {
-        (this.uniforms.uAnnotationColor.value as THREE.Color).set(
-          color(
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            (imageLayer.color as any) || "foreground",
-          )({
-            theme: editor.theme,
-          }),
-        );
-        editor.sliceRenderer?.lazyRender();
-      }),
-      autorun(() => {
-        this.uniforms.uAnnotationOpacity.value = imageLayer.opacity;
-        editor.sliceRenderer?.lazyRender();
-      }),
-      autorun(() => {
-        const usePreviewTexture =
-          editor.activeDocument?.activeLayer?.id === imageLayer.id;
-        this.uniforms.uUsePreviewTexture.value = usePreviewTexture;
-
-        if (usePreviewTexture) {
-          const canvasIndex = getOrder(
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            editor.activeDocument!.viewport2D.mainViewType,
-          ).indexOf(viewType);
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          this.uniforms.uPreviewTexture.value = editor.activeDocument!.tools.layerPreviewTextures[
-            canvasIndex
-          ];
-          (this.uniforms.uPreviewColor.value as THREE.Color).set(
-            color(
-              (editor.activeDocument?.tools.regionGrowingRenderer3D
-                .previewColor as any) || "foreground",
-            )({
-              theme: editor.theme,
-            }),
-          );
-        } else {
-          this.uniforms.uPreviewTexture.value = null;
-        }
-      }),
-      autorun(() => {
         const steps =
           editor.activeDocument?.tools.regionGrowingRenderer3D.steps ?? 0;
 
@@ -195,6 +97,93 @@ export class AnnotationSliceMaterial extends SliceMaterial {
           (MAX_REGION_GROWING_STEPS + 1);
         editor.sliceRenderer?.lazyRender();
       }),
+      autorun(() => {
+        const layers = editor.activeDocument?.imageLayers || [];
+        const canvasIndex = getOrder(
+          this.editor.activeDocument?.viewport2D.mainViewType ??
+            ViewType.Transverse,
+        ).indexOf(this.viewType);
+
+        const layerData = layers.map((layer) =>
+          ((layer as IImageLayer).image as RenderedImage).getTexture(
+            canvasIndex,
+          ),
+        );
+
+        this.uniforms.uLayerData.value = [
+          // additional layer for 3d region growing
+          editor.activeDocument?.tools.layerPreviewTextures[canvasIndex] ||
+            null,
+          ...layerData,
+        ];
+
+        const activeLayer = editor.activeDocument?.activeLayer;
+        this.uniforms.uActiveLayerData.value = activeLayer
+          ? ((activeLayer as IImageLayer).image as RenderedImage).getTexture(
+              canvasIndex,
+            )
+          : null;
+
+        editor.sliceRenderer?.lazyRender();
+      }),
+      autorun(() => {
+        const layers = editor.activeDocument?.imageLayers || [];
+
+        const layerAnnotationStatuses = layers.map(
+          (layer) => layer.isAnnotation,
+        );
+
+        this.uniforms.uLayerAnnotationStatuses.value = [
+          // additional layer for 3d region growing preview
+          true,
+          ...layerAnnotationStatuses,
+        ];
+
+        const layerOpacities = layers.map((layer) =>
+          layer.isVisible ? layer.opacity : 0,
+        );
+
+        const activeLayer = editor.activeDocument?.activeLayer;
+        this.uniforms.uLayerOpacities.value = [
+          // additional layer for 3d region growing
+          activeLayer?.isVisible ? activeLayer.opacity : 0,
+          ...layerOpacities,
+        ];
+
+        editor.sliceRenderer?.lazyRender();
+      }),
+      autorun(() => {
+        const layers = editor.activeDocument?.imageLayers || [];
+
+        const layerColors = layers.map(
+          (layer) =>
+            new THREE.Color(
+              color(
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                (layer.color as any) || "foreground",
+              )({ theme: editor.theme }),
+            ),
+        );
+
+        this.uniforms.uLayerColors.value = [
+          // additional layer for 3d region growing preview
+          new THREE.Color(
+            color(
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              (editor.activeDocument?.tools.regionGrowingRenderer3D
+                .previewColor as any) || "foreground",
+            )({ theme: editor.theme }),
+          ),
+          ...layerColors,
+        ];
+
+        editor.sliceRenderer?.lazyRender();
+      }),
     );
+  }
+
+  public dispose() {
+    super.dispose();
+    this.disposers.forEach((disposer) => disposer());
   }
 }

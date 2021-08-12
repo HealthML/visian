@@ -169,13 +169,25 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
   }
   public get baseImageLayer(): IImageLayer | undefined {
     // TODO: Rework to work with group layers
+
+    const areAllLayersAnnotations = Boolean(
+      !this.layerIds.find((layerId) => {
+        const layer = this.layerMap[layerId];
+        return layer.kind === "image" && !layer.isAnnotation;
+      }),
+    );
+
     let baseImageLayer: ImageLayer | undefined;
     this.layerIds
       .slice()
       .reverse()
       .find((id) => {
         const layer = this.layerMap[id];
-        if (layer.kind === "image") {
+        if (
+          layer.kind === "image" &&
+          // use non-annotation layer if possible
+          (!layer.isAnnotation || areAllLayersAnnotations)
+        ) {
           baseImageLayer = layer as ImageLayer;
           return true;
         }

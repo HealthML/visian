@@ -212,6 +212,16 @@ export class SharedUniforms implements IDisposable {
           ...layerData,
         ];
 
+        const activeLayer = editor.activeDocument?.activeLayer;
+        this.uniforms.uActiveLayerData.value = activeLayer
+          ? ((activeLayer as IImageLayer).image as RenderedImage).getTexture(
+              0,
+              useNearestFiltering || activeLayer.isAnnotation
+                ? THREE.NearestFilter
+                : THREE.LinearFilter,
+            )
+          : null;
+
         editor.activeDocument?.viewport3D.onTransferFunctionChange();
         editor.activeDocument?.volumeRenderer?.lazyRender(true, true);
       }),

@@ -21,14 +21,20 @@ const generateReduceLayerStack = (
   rawOutputName?: string,
 ) => {
   const alpha = `_alpha${Math.floor(Math.random() * 1000)}`;
-  let fragment = `float ${alpha} = 0.0;\n`;
+  const activeLayer = `_activeLayer${Math.floor(Math.random() * 1000)}`;
+  let fragment = `
+  float ${alpha} = 0.0;
+  float ${activeLayer} = texture2D(uActiveLayerData, ${uvName}).r;
+  `;
   for (let i = 0; i < layerCount; i++) {
     fragment += `${alpha} = texture2D(uLayerData[${i}], ${uvName}).r;
     `;
 
     if (i === 0) {
       // Region growing preview
-      fragment += `${alpha} = step(uRegionGrowingThreshold, ${alpha});
+      fragment += `
+      ${alpha} = step(uRegionGrowingThreshold, ${alpha});
+      ${alpha} *= 1.0 - step(0.001, ${activeLayer});
       `;
     }
 
@@ -49,6 +55,72 @@ const generateReduceLayerStack = (
     ${outputName}.a += ${filter} * (1.0 - ${outputName}.a) * ${alpha};
     `;
   }
+  return fragment;
+};
+
+/**
+ * Generates the GLSL code for the `reduceEnhancedLayerStack` macro which blends the
+ * image data of all layers, taking into account their layer settings, after
+ * applying an enhancement function to the non-annotation layers.
+ *
+ * @param layerCount The number of layers.
+ * @param outputName The output variable to assign the blended color to.
+ * @param uvName The name of the variable holding the current UV coordinates.
+ * @param enhancementFunctionName The name of the function which is applied
+ * to every non-annotation layer before blending.
+ * @returns The generated GLSL code.
+ */
+const generateReduceEnhancedLayerStack = (
+  layerCount: number,
+  outputName = "imageValue",
+  uvName = "uv",
+  enhancementFunctionName = "applyBrightnessContrast",
+) => {
+  const image = `_image${Math.floor(Math.random() * 1000)}`;
+  const activeLayer = `_activeLayer${Math.floor(Math.random() * 1000)}`;
+  const oldAlpha = `_oldAlpha${Math.floor(Math.random() * 1000)}`;
+  let fragment = `
+  vec4 ${image} = vec4(0.0);
+  vec4 ${activeLayer} = texture2D(uActiveLayerData, ${uvName});
+  float ${oldAlpha} = 0.0;
+  `;
+
+  for (let i = layerCount - 1; i >= 0; i--) {
+    // back to front blending
+    fragment += `${image} = texture2D(uLayerData[${i}], ${uvName});
+    `;
+
+    if (i === 0) {
+      // Region growing preview
+      fragment += `
+      ${image}.rgb = step(uPreviewThreshold, ${image}.rgb);
+      ${image}.rgb *= vec3(1.0) - step(0.001, ${activeLayer}.rgb);
+      `;
+    }
+
+    fragment += `
+    if(uComponents < 3 || uLayerAnnotationStatuses[${i}]) {
+      ${image}.a = ${image}.x;
+      ${image}.rgb = uLayerColors[${i}];
+    }
+
+    if(uLayerAnnotationStatuses[${i}]) {
+      ${image}.a = step(0.01, ${image}.a);
+    } else {
+      ${image} = ${enhancementFunctionName}(${image});
+    }
+    
+    ${image}.a *= uLayerOpacities[${i}];
+    
+    ${oldAlpha} = ${outputName}.a;
+    ${outputName}.a = mix(${oldAlpha}, 1.0, ${image}.a);
+    ${outputName}.rgb = mix(
+      ${oldAlpha} * ${outputName}.rgb,
+      ${image}.rgb,
+      ${image}.a) / max(${outputName}.a, 0.00001); // avoid division by 0
+    `;
+  }
+
   return fragment;
 };
 
@@ -83,6 +155,7 @@ const generateReduceRawImages = (
 // Macro definitions
 const layerCountRegex = /{{layerCount}}/g;
 const reduceLayerStackRegex = /{{reduceLayerStack\((\w+),\s*(\w+),\s*(\w+)(,\s*(\w+))?\)}}/g;
+const reduceEnhancedLayerStackRegex = /{{reduceEnhancedLayerStack\((\w+),\s*(\w+),\s*(\w+)\)}}/g;
 const reduceRawImagesRegex = /{{reduceRawImages\((\w+),\s*(\w+)\)}}/g;
 
 /**
@@ -112,6 +185,16 @@ export const composeLayeredShader = (shader: string, layerCount: number) =>
           uvName,
           reduceAnnotations === "true",
           rawOutputName,
+        ),
+    )
+    .replace(
+      reduceEnhancedLayerStackRegex,
+      (_match, outputName, uvName, enhancementFunctionName) =>
+        generateReduceEnhancedLayerStack(
+          layerCount,
+          outputName,
+          uvName,
+          enhancementFunctionName,
         ),
     )
     .replace(reduceRawImagesRegex, (_match, outputName, uvName) =>
