@@ -6,6 +6,8 @@ varying vec3 vRayOrigin;
 uniform sampler2D uOutputFirstDerivative;
 uniform sampler2D uLAO;
 
+uniform bool uUseRayDithering;
+
 @import ../uniforms/u-opacity;
 @import ../uniforms/u-common;
 @import ../uniforms/u-atlas-info;
@@ -54,5 +56,5 @@ void main() {
   float far;
   computeNearFar(normalizedRayDirection, near, far);
 
-  gl_FragColor = marchRay(vRayOrigin, normalizedRayDirection, near, far, uStepSize, true);
+  gl_FragColor = marchRay(vRayOrigin, normalizedRayDirection, near, far, uStepSize, uUseRayDithering);
 }
