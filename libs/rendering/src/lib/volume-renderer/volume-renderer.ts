@@ -464,10 +464,25 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
       canvasRect,
     );
 
+    const objects: THREE.Object3D[] = [];
+    if (this.editor.activeDocument?.viewport3D.useCuttingPlane) {
+      objects.push(this.volume.cuttingPlane);
+    }
+    const useCone =
+      this.editor.activeDocument?.viewport3D.activeTransferFunction?.name ===
+      "fc-cone";
+    if (useCone) {
+      objects.push(this.volume.raycastingCone);
+      this.volume.raycastingCone.updateGeometry();
+      this.volume.raycastingCone.visible = true;
+    }
+
     this.raycaster.setFromCamera(webGLPosition, this.camera);
-    const intersections = this.raycaster.intersectObjects([
-      this.volume.cuttingPlane,
-    ]);
+    const intersections = this.raycaster.intersectObjects(objects);
+
+    if (useCone) {
+      this.volume.raycastingCone.visible = false;
+    }
 
     if (!intersections.length) return;
 
