@@ -77,7 +77,7 @@
   "export-tooltip": "Export (Strg + E)",
 
   "import-error": "Importfehler",
-  "annotation-mismatch-error": "Diese Annotation passt nicht auf den Scan.",
+  "image-mismatch-error": "Diese Datei passt nicht auf die schon geladenen.",
   "image-loading-error": "Diese Datei scheint nicht unterstützt zu sein.",
   "remote-file-error": "Die angegebene Datei konnte nicht geladen werden.",
 

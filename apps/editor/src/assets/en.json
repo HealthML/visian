@@ -77,7 +77,7 @@
   "export-tooltip": "Export (Ctrl + E)",
 
   "import-error": "Import Error",
-  "annotation-mismatch-error": "This annotation does not match the original image's size.",
+  "image-mismatch-error": "This file does not match the loaded images' size.",
   "image-loading-error": "Looks like this file is not supported.",
   "remote-file-error": "The specified file could not be loaded.",
 

@@ -9,7 +9,6 @@ import {
   ValueType,
 } from "@visian/ui-shared";
 import { ITKImage, ISerializable, readMedicalImage } from "@visian/utils";
-import isEqual from "lodash.isequal";
 import { action, computed, makeObservable, observable, toJS } from "mobx";
 import * as THREE from "three";
 import { v4 as uuidv4 } from "uuid";
@@ -358,6 +357,12 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
 
   public async importImage(image: ITKImage) {
     const imageLayer = ImageLayer.fromITKImage(image, this);
+    if (
+      this.baseImageLayer &&
+      !this.baseImageLayer.image.voxelCount.equals(imageLayer.image.voxelCount)
+    ) {
+      throw new Error("image-mismatch-error");
+    }
     this.addLayer(imageLayer);
   }
 
@@ -367,13 +372,12 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
       color: this.getFirstUnusedColor(),
     });
     if (
-      this.layers.length &&
-      !isEqual(
-        (this.layerMap[this.layerIds[0]] as ImageLayer)?.image?.voxelCount,
+      this.baseImageLayer &&
+      !this.baseImageLayer.image.voxelCount.equals(
         annotationLayer.image.voxelCount,
       )
     ) {
-      throw new Error("annotation-mismatch-error");
+      throw new Error("image-mismatch-error");
     }
 
     this.addLayer(annotationLayer);
