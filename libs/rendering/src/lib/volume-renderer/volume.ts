@@ -9,7 +9,7 @@ import { VolumeMaterial } from "./volume-material";
 
 /** A volume domain. */
 export class Volume extends THREE.Mesh implements IDisposable {
-  private cuttingPlane: CuttingPlane;
+  public cuttingPlane: CuttingPlane;
 
   private boundingBox: BoundingBox;
 

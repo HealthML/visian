@@ -1,5 +1,3 @@
-import { ViewType } from "../types";
-
 /**
  * Returns a normalized position in the WebGL screen coordinate system.
  *
@@ -15,15 +13,3 @@ export const convertPositionToWebGLPosition = (
   x: (2 * position.x) / boxDimensions.width - 1,
   y: (-2 * position.y) / boxDimensions.height + 1,
 });
-
-// eslint-disable-next-line consistent-return
-export const getPlaneAxes = (viewType: ViewType) => {
-  switch (viewType) {
-    case ViewType.Transverse:
-      return ["x", "y"] as ["x", "y"];
-    case ViewType.Sagittal:
-      return ["y", "z"] as ["y", "z"];
-    case ViewType.Coronal:
-      return ["x", "z"] as ["x", "z"];
-  }
-};

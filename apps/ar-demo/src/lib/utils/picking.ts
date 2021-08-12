@@ -1,7 +1,7 @@
+import { convertPositionToWebGLPosition } from "@visian/utils";
 import * as THREE from "three";
 
 import { ClickPosition, Pixel } from "../types";
-import { convertPositionToWebGLPosition } from "./conversion";
 
 const raycaster = new THREE.Raycaster();
 
