@@ -59,7 +59,7 @@ const generateReduceLayerStack = (
 };
 
 /**
- * Generates the GLSL code for the `reduceFullLayerStack` macro which blends the
+ * Generates the GLSL code for the `reduceEnhancedLayerStack` macro which blends the
  * image data of all layers, taking into account their layer settings, after
  * applying an enhancement function to the non-annotation layers.
  *
@@ -70,7 +70,7 @@ const generateReduceLayerStack = (
  * to every non-annotation layer before blending.
  * @returns The generated GLSL code.
  */
-const generateReduceFullLayerStack = (
+const generateReduceEnhancedLayerStack = (
   layerCount: number,
   outputName = "imageValue",
   uvName = "uv",
@@ -155,7 +155,7 @@ const generateReduceRawImages = (
 // Macro definitions
 const layerCountRegex = /{{layerCount}}/g;
 const reduceLayerStackRegex = /{{reduceLayerStack\((\w+),\s*(\w+),\s*(\w+)(,\s*(\w+))?\)}}/g;
-const reduceFullLayerStackRegex = /{{reduceFullLayerStack\((\w+),\s*(\w+),\s*(\w+)\)}}/g;
+const reduceEnhancedLayerStackRegex = /{{reduceEnhancedLayerStack\((\w+),\s*(\w+),\s*(\w+)\)}}/g;
 const reduceRawImagesRegex = /{{reduceRawImages\((\w+),\s*(\w+)\)}}/g;
 
 /**
@@ -188,9 +188,9 @@ export const composeLayeredShader = (shader: string, layerCount: number) =>
         ),
     )
     .replace(
-      reduceFullLayerStackRegex,
+      reduceEnhancedLayerStackRegex,
       (_match, outputName, uvName, enhancementFunctionName) =>
-        generateReduceFullLayerStack(
+        generateReduceEnhancedLayerStack(
           layerCount,
           outputName,
           uvName,

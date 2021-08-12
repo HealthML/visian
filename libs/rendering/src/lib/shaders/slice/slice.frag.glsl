@@ -43,7 +43,7 @@ void main() {
   @import ../utils/volume-coords-to-uv;
   
   vec4 imageValue = vec4(0.0);
-  {{reduceFullLayerStack(imageValue, uv, applyBrightnessContrast)}}
+  {{reduceEnhancedLayerStack(imageValue, uv, applyBrightnessContrast)}}
 
   gl_FragColor = imageValue;
 }
