@@ -13,7 +13,7 @@ export class CuttingPlane extends THREE.Mesh implements IDisposable {
 
   private disposers: IDisposer[] = [];
 
-  constructor(editor: IEditor) {
+  constructor(private editor: IEditor) {
     super(new THREE.PlaneGeometry(), new CuttingPlaneMaterial(editor));
 
     this.geometry.setAttribute(
@@ -39,6 +39,7 @@ export class CuttingPlane extends THREE.Mesh implements IDisposable {
 
         editor.volumeRenderer?.lazyRender();
       }),
+      autorun(this.updateDepthWrite),
     );
   }
 
@@ -57,6 +58,7 @@ export class CuttingPlane extends THREE.Mesh implements IDisposable {
     this.setRotationFromQuaternion(this.workingQuaternion);
 
     this.updatePosition();
+    this.updateDepthWrite();
   };
 
   private setDistance = (distance?: number) => {
@@ -64,6 +66,7 @@ export class CuttingPlane extends THREE.Mesh implements IDisposable {
     this.plane.constant = distance;
 
     this.updatePosition();
+    this.updateDepthWrite();
   };
 
   private updatePosition() {
@@ -97,4 +100,15 @@ export class CuttingPlane extends THREE.Mesh implements IDisposable {
 
     volumeCoords.needsUpdate = true;
   }
+
+  private updateDepthWrite = () => {
+    const camera = this.editor.activeDocument?.viewport3D
+      .volumeSpaceCameraPosition;
+    if (!camera) return;
+    this.workingVector.fromArray(camera);
+
+    // Only write depth for front face
+    (this.material as CuttingPlaneMaterial).depthWrite =
+      this.plane.distanceToPoint(this.workingVector) < 0;
+  };
 }
