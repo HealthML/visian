@@ -1,6 +1,7 @@
 import { IEditor, IVolumeRenderer, IXRManager } from "@visian/ui-shared";
 import * as THREE from "three";
 import { XRControllerModelFactory } from "three/examples/jsm/webxr/XRControllerModelFactory";
+import { VolumeMaterial } from "./volume-material";
 
 export class XRManager implements IXRManager {
   public xrWorld?: THREE.Group;
@@ -197,6 +198,8 @@ export class XRManager implements IXRManager {
       "fc-cone"
     ].params.isConeLocked.setValue(true);
 
+    (this.renderer.volume.material as VolumeMaterial).setUseRayDithering(false);
+
     const sessionInit = { optionalFeatures: ["local-floor"] };
     const session = await (navigator as THREE.Navigator).xr?.requestSession(
       "immersive-vr",
@@ -209,6 +212,9 @@ export class XRManager implements IXRManager {
   public exitXR = async () => {
     const session = this.renderer.renderer.xr.getSession();
     if (!session) return;
+
+    (this.renderer.volume.material as VolumeMaterial).setUseRayDithering(true);
+
     return session.end();
   };
 }

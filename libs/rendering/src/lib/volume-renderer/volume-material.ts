@@ -31,6 +31,7 @@ export class VolumeMaterial
         ...sharedUniforms.uniforms,
         uOutputFirstDerivative: { value: null },
         uLAO: { value: null },
+        uUseRayDithering: { value: true },
       },
       transparent: true,
     });
@@ -65,5 +66,9 @@ export class VolumeMaterial
   public dispose() {
     super.dispose();
     this.disposers.forEach((disposer) => disposer());
+  }
+
+  public setUseRayDithering(value: boolean) {
+    this.uniforms.uUseRayDithering.value = value;
   }
 }
