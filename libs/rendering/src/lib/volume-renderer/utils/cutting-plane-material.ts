@@ -22,6 +22,7 @@ export class CuttingPlaneMaterial extends THREE.ShaderMaterial {
         uDataTexture: { value: null },
       },
       transparent: true,
+      side: THREE.DoubleSide,
     });
 
     this.disposers.push(
