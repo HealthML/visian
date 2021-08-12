@@ -148,22 +148,20 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
     this.stats.dom.style.left = "auto";
 
     this.disposers.push(
-      reaction(
-        () => editor.activeDocument?.viewSettings.viewMode,
-        (viewMode) => {
-          switch (viewMode) {
-            case "2D":
-              if (this.flyControls.isLocked) this.flyControls.unlock();
-              this.orbitControls.enabled = false;
-              break;
-            case "3D":
-              this.orbitControls.enabled = !this.flyControls.isLocked;
-          }
-
-          this.lazyRender();
-        },
-        { fireImmediately: true },
-      ),
+      autorun(() => {
+        switch (editor.activeDocument?.viewSettings.viewMode) {
+          case "2D":
+            if (this.flyControls.isLocked) this.flyControls.unlock();
+            this.orbitControls.enabled = false;
+            break;
+          case "3D":
+            this.orbitControls.enabled =
+              !this.flyControls.isLocked &&
+              editor.activeDocument?.tools.activeTool?.name !==
+                "smart-brush-3d";
+        }
+        this.lazyRender();
+      }),
       reaction(
         () => editor.activeDocument?.viewport3D.cameraMatrix?.toArray(),
         (array?: number[]) => {
