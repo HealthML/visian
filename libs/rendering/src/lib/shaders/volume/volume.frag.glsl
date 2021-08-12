@@ -44,6 +44,7 @@ vec4 getVolumeColor(vec3 volumeCoords) {
   return vec4(volumeColor.rgb, volumeColor.a * uOpacity);
 }
 
+#define RAY_DITHERING
 @import ../utils/march-ray;
 
 /**
