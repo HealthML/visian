@@ -21,7 +21,7 @@ export class SmartBrush3D<
       {
         name: "smart-brush-3d" as N,
         icon: "smartBrush3D",
-        supportedViewModes: ["2D"],
+        supportedViewModes: ["2D", "3D"],
         supportedLayerKinds: ["image"],
         isDrawingTool: true,
         isBrush: true,

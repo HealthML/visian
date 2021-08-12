@@ -10,6 +10,7 @@ const MainViewContainer = styled.div<{
   activeTool?: ToolName;
   isDrawable?: boolean;
   isToolInUse?: boolean;
+  isIn3DView?: boolean;
 }>`
   ${coverMixin}
 
@@ -28,6 +29,9 @@ const MainViewContainer = styled.div<{
       case undefined:
         return "auto";
 
+      case "smart-brush-3d":
+        if (props.isIn3DView) return "crosshair";
+      // eslint-disable-next-line no-fallthrough
       default:
         return props.isDrawable ? "none" : "auto";
     }
@@ -68,6 +72,7 @@ export const MainView = observer(() => {
       activeTool={store?.editor.activeDocument?.tools.activeTool?.name}
       isDrawable={store?.editor.activeDocument?.tools.canDraw}
       isToolInUse={store?.editor.activeDocument?.tools.isToolInUse}
+      isIn3DView={store?.editor.activeDocument?.viewSettings.viewMode === "3D"}
       onContextMenu={preventDefault}
       onPointerDown={handlePointerDown}
       onPointerOut={handlePointerOut}
