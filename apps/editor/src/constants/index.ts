@@ -12,7 +12,9 @@ export const maxUndoRedoSteps = 20;
 export const errorDisplayDuration = 12000;
 
 export const defaultAnnotationOpacity = 0.5;
-export const defaultAnnotationColor = "Conifer";
+export const defaultAnnotationColor = "Genome Gold";
+
+export const defaultImageColor = "Mighty Mercury";
 
 // Obfuscated using HEX representation to prevent spam
 export const feedbackMailAddress =

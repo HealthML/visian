@@ -29,7 +29,7 @@ import {
   ViewSettingsSnapshot,
 } from "./view-settings";
 import { StoreContext } from "../types";
-import { defaultAnnotationColor } from "../../constants";
+import { defaultAnnotationColor, defaultImageColor } from "../../constants";
 
 const uniqueValuesForAnnotationThreshold = 20;
 
@@ -331,7 +331,9 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
   }
 
   public async importImage(image: ITKImage) {
-    const imageLayer = ImageLayer.fromITKImage(image, this);
+    const imageLayer = ImageLayer.fromITKImage(image, this, {
+      color: defaultImageColor,
+    });
     this.addLayer(imageLayer);
   }
 
