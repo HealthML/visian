@@ -34,8 +34,7 @@ const MainViewContainer = styled.div<{
   }};
 `;
 
-// eslint-disable-next-line @typescript-eslint/ban-types
-export const MainView = observer<{}>(() => {
+export const MainView = observer(() => {
   const store = useStore();
 
   const pointerDispatch = store?.pointerDispatch;

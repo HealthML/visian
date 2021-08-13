@@ -3,8 +3,12 @@ import { IDisposable, IDisposer } from "@visian/utils";
 import { reaction } from "mobx";
 import * as THREE from "three";
 
-import { volumeFragmentShader, volumeVertexShader } from "../shaders";
-import { composeLayeredShader, SharedUniforms } from "./utils";
+import {
+  composeLayeredShader,
+  volumeFragmentShader,
+  volumeVertexShader,
+} from "../shaders";
+import { SharedUniforms } from "./utils";
 
 /** A volume domain material. */
 export class VolumeMaterial
@@ -27,6 +31,7 @@ export class VolumeMaterial
         ...sharedUniforms.uniforms,
         uOutputFirstDerivative: { value: null },
         uLAO: { value: null },
+        uUseRayDithering: { value: true },
       },
       transparent: true,
     });
@@ -45,7 +50,7 @@ export class VolumeMaterial
 
     this.disposers = [
       reaction(
-        () => editor.activeDocument?.imageLayers.length || 0,
+        () => editor.volumeRenderer?.renderedImageLayerCount || 1,
         (layerCount: number) => {
           this.fragmentShader = composeLayeredShader(
             volumeFragmentShader,
@@ -53,6 +58,7 @@ export class VolumeMaterial
           );
           this.needsUpdate = true;
         },
+        { fireImmediately: true },
       ),
     ];
   }
@@ -60,5 +66,9 @@ export class VolumeMaterial
   public dispose() {
     super.dispose();
     this.disposers.forEach((disposer) => disposer());
+  }
+
+  public setUseRayDithering(value: boolean) {
+    this.uniforms.uUseRayDithering.value = value;
   }
 }

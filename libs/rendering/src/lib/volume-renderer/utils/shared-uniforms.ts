@@ -11,6 +11,7 @@ import { autorun } from "mobx";
 import * as THREE from "three";
 
 import { RenderedImage } from "../../rendered-image";
+import { MAX_REGION_GROWING_STEPS } from "../../tool-renderer";
 import {
   atlasInfoUniforms,
   commonUniforms,
@@ -27,7 +28,9 @@ export class SharedUniforms implements IDisposable {
 
   private disposers: IDisposer[] = [];
 
-  private workingVector = new THREE.Vector3();
+  private workingVector1 = new THREE.Vector3();
+  private workingVector2 = new THREE.Vector3();
+  private workingColor = new THREE.Color();
   private readonly coneAxis = new THREE.Vector3(0, 1, 0);
 
   constructor(editor: IEditor) {
@@ -53,30 +56,30 @@ export class SharedUniforms implements IDisposable {
         const { coneDirection } = coneTransferFunction as IConeTransferFunction;
 
         // TODO: Why does y have to be flipped here?
-        this.workingVector
+        this.workingVector1
           .set(coneDirection.x, -coneDirection.y, coneDirection.z)
           .normalize();
-        const cos = this.workingVector.dot(this.coneAxis);
+        const cos = this.workingVector1.dot(this.coneAxis);
         const k = 1 / (1 + cos);
 
-        this.workingVector.cross(this.coneAxis);
+        this.workingVector1.cross(this.coneAxis);
 
         (this.uniforms.uConeMatrix.value as THREE.Matrix3).set(
-          this.workingVector.x * this.workingVector.x * k + cos,
-          this.workingVector.x * this.workingVector.y * k +
-            this.workingVector.z,
-          this.workingVector.x * this.workingVector.z * k -
-            this.workingVector.y,
-          this.workingVector.y * this.workingVector.x * k -
-            this.workingVector.z,
-          this.workingVector.y * this.workingVector.y * k + cos,
-          this.workingVector.y * this.workingVector.z * k +
-            this.workingVector.x,
-          this.workingVector.z * this.workingVector.x * k +
-            this.workingVector.y,
-          this.workingVector.z * this.workingVector.y * k -
-            this.workingVector.x,
-          this.workingVector.z * this.workingVector.z * k + cos,
+          this.workingVector1.x * this.workingVector1.x * k + cos,
+          this.workingVector1.x * this.workingVector1.y * k +
+            this.workingVector1.z,
+          this.workingVector1.x * this.workingVector1.z * k -
+            this.workingVector1.y,
+          this.workingVector1.y * this.workingVector1.x * k -
+            this.workingVector1.z,
+          this.workingVector1.y * this.workingVector1.y * k + cos,
+          this.workingVector1.y * this.workingVector1.z * k +
+            this.workingVector1.x,
+          this.workingVector1.z * this.workingVector1.x * k +
+            this.workingVector1.y,
+          this.workingVector1.z * this.workingVector1.y * k -
+            this.workingVector1.x,
+          this.workingVector1.z * this.workingVector1.z * k + cos,
         );
 
         const shouldUpdateLighting =
@@ -139,7 +142,7 @@ export class SharedUniforms implements IDisposable {
       autorun(() => {
         const brightness = editor.activeDocument?.viewSettings.brightness ?? 1;
         const factor =
-          editor.activeDocument?.viewport3D.shadingMode === "lao" ? 2.5 : 1;
+          editor.activeDocument?.viewport3D.shadingMode === "lao" ? 3 : 1.25;
 
         this.uniforms.uBrightness.value = brightness * factor;
 
@@ -194,7 +197,7 @@ export class SharedUniforms implements IDisposable {
           editor.activeDocument?.viewport3D.activeTransferFunction?.params
             .useBlockyContext?.value,
         );
-        this.uniforms.uLayerData.value = layers.map((layer) =>
+        const layerData = layers.map((layer) =>
           ((layer as IImageLayer).image as RenderedImage).getTexture(
             0,
             useNearestFiltering || layer.isAnnotation
@@ -203,20 +206,42 @@ export class SharedUniforms implements IDisposable {
           ),
         );
 
+        this.uniforms.uLayerData.value = [
+          // additional layer for 3d region growing
+          editor.activeDocument?.tools.layerPreviewTextures[0] || null,
+          ...layerData,
+        ];
+
+        const activeLayer = editor.activeDocument?.activeLayer;
+        this.uniforms.uActiveLayerData.value = activeLayer
+          ? ((activeLayer as IImageLayer).image as RenderedImage).getTexture(
+              0,
+              useNearestFiltering || activeLayer.isAnnotation
+                ? THREE.NearestFilter
+                : THREE.LinearFilter,
+            )
+          : null;
+
         editor.activeDocument?.viewport3D.onTransferFunctionChange();
         editor.activeDocument?.volumeRenderer?.lazyRender(true, true);
       }),
       autorun(() => {
         const layers = editor.activeDocument?.imageLayers || [];
 
-        this.uniforms.uLayerAnnotationStatuses.value = layers.map(
+        const layerAnnotationStatuses = layers.map(
           (layer) => layer.isAnnotation,
         );
+
+        this.uniforms.uLayerAnnotationStatuses.value = [
+          // additional layer for 3d region growing
+          true,
+          ...layerAnnotationStatuses,
+        ];
 
         const opacityFactor =
           (editor.activeDocument?.viewport3D.activeTransferFunction?.params
             .contextOpacity?.value as number | undefined) ?? 1;
-        this.uniforms.uLayerOpacities.value = layers.map((layer) =>
+        const layerOpacities = layers.map((layer) =>
           layer.isVisible
             ? layer.isAnnotation
               ? layer.opacity
@@ -224,13 +249,20 @@ export class SharedUniforms implements IDisposable {
             : 0,
         );
 
+        const activeLayer = editor.activeDocument?.activeLayer;
+        this.uniforms.uLayerOpacities.value = [
+          // additional layer for 3d region growing
+          activeLayer?.isVisible ? activeLayer.opacity : 0,
+          ...layerOpacities,
+        ];
+
         editor.activeDocument?.viewport3D.onTransferFunctionChange();
         editor.activeDocument?.volumeRenderer?.lazyRender(true, true);
       }),
       autorun(() => {
         const layers = editor.activeDocument?.imageLayers || [];
 
-        this.uniforms.uLayerColors.value = layers.map(
+        const layerColors = layers.map(
           (layer) =>
             new THREE.Color(
               color(
@@ -240,7 +272,58 @@ export class SharedUniforms implements IDisposable {
             ),
         );
 
+        this.uniforms.uLayerColors.value = [
+          // additional layer for 3d region growing
+          new THREE.Color(
+            color(
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              (editor.activeDocument?.tools.regionGrowingRenderer3D
+                .previewColor as any) || "foreground",
+            )({ theme: editor.theme }),
+          ),
+          ...layerColors,
+        ];
+
         editor.activeDocument?.volumeRenderer?.lazyRender();
+      }),
+      autorun(() => {
+        const visibleScanLayers =
+          editor.activeDocument?.imageLayers.filter(
+            (layer) => !layer.isAnnotation && layer.isVisible,
+          ) || [];
+
+        this.workingVector1.setScalar(0); // Used for mixing the color
+        let alpha = 0;
+
+        visibleScanLayers.forEach((layer) => {
+          this.workingColor.set(
+            color(
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              (layer.color as any) || "foreground",
+            )({ theme: editor.theme }),
+          );
+          this.workingVector2 // Used for adding to the mixed color
+            .fromArray(this.workingColor.toArray());
+
+          this.workingVector1.addScaledVector(
+            this.workingVector2,
+            (1 - alpha) * layer.opacity,
+          );
+
+          alpha += (1 - alpha) * layer.opacity;
+        });
+
+        const opacity =
+          (editor.activeDocument?.viewport3D.activeTransferFunction?.params
+            .contextOpacity?.value as number | undefined) ?? 1;
+
+        this.uniforms.uEdgeColor.value = [
+          ...this.workingVector1.toArray(),
+          opacity,
+        ];
+
+        editor.activeDocument?.viewport3D.onTransferFunctionChange();
+        editor.activeDocument?.volumeRenderer?.lazyRender(true);
       }),
       autorun(() => {
         const imageLayer = editor.activeDocument?.baseImageLayer;
@@ -253,6 +336,17 @@ export class SharedUniforms implements IDisposable {
         this.uniforms.uStepSize.value = getStepSize(image);
 
         editor.activeDocument?.volumeRenderer?.lazyRender();
+      }),
+      autorun(() => {
+        const steps =
+          editor.activeDocument?.tools.regionGrowingRenderer3D.steps ?? 0;
+
+        this.uniforms.uRegionGrowingThreshold.value =
+          (MAX_REGION_GROWING_STEPS + 1 - steps) /
+          (MAX_REGION_GROWING_STEPS + 1);
+
+        editor.activeDocument?.viewport3D.onTransferFunctionChange();
+        editor.volumeRenderer?.lazyRender(true);
       }),
     );
   }

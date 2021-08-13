@@ -73,6 +73,11 @@ export interface IDocument {
   /** Deletes a layer from the document. */
   deleteLayer(idOrLayer: string | ILayer): void;
 
+  /** Returns the first color that is not yet used to color any layer. */
+  getFirstUnusedColor(): string;
+  /** Returns the color to be used for 3D region growing preview. */
+  getRegionGrowingPreviewColor(): string;
+
   /** Persists the document immediately. */
   save(): Promise<void>;
 

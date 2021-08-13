@@ -1,12 +1,14 @@
 import { Vector, ViewType } from "@visian/utils";
 import { MergeFunction } from "../types";
 
+import { AtlasWriter } from "./atlas-writer";
 import { SliceReader } from "./slice-reader";
 import { SliceWriter } from "./slice-writer";
 
-export class SliceAtlasAdapter {
+export class AtlasAdapter {
   private sliceReader: SliceReader;
   private sliceWriter: SliceWriter;
+  private atlasWriter = new AtlasWriter();
 
   constructor(
     atlasTexture: THREE.Texture,
@@ -68,5 +70,14 @@ export class SliceAtlasAdapter {
       renderers,
       mergeFunction,
     );
+  }
+
+  public addToAltas(
+    data: THREE.Texture[],
+    threshold: number,
+    renderTargets: THREE.WebGLRenderTarget[],
+    renderers: THREE.WebGLRenderer[],
+  ) {
+    this.atlasWriter.addToAltas(data, threshold, renderTargets, renderers);
   }
 }

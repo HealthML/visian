@@ -25,9 +25,9 @@ vec3 transformToCutawaySpace(vec3 volumeCoords) {
 vec4 baseTransferFunction(VolumeData data, vec3 volumeCoords) {
   // F+C Edges
   if (uTransferFunction == 1) {
-    vec4 edgeColor = vec4(data.imageColor.rgb, data.imageColor.a * mix(0.0, 0.015, step(uLimitLow, length(data.firstDerivative)) * (1.0 - step(uLimitHigh, length(data.firstDerivative)))));
+    vec4 edgeColor = vec4(uEdgeColor.rgb, uEdgeColor.a * mix(0.0, 0.015, step(uLimitLow, length(data.firstDerivative)) * (1.0 - step(uLimitHigh, length(data.firstDerivative)))));
     return uUseFocus ?
-        mix(edgeColor, data.annotation, step(0.1, data.annotation.a))
+        mix(edgeColor, data.annotation, step(0.001, data.annotation.a))
       : edgeColor;
   }
 
@@ -39,7 +39,7 @@ vec4 baseTransferFunction(VolumeData data, vec3 volumeCoords) {
 
     vec4 contextColor = filteredDensity * contextFactor;
     return uUseFocus ?
-        mix(contextColor, data.annotation, step(0.1, data.annotation.a))
+        mix(contextColor, data.annotation, step(0.001, data.annotation.a))
       : contextColor;
   }
 

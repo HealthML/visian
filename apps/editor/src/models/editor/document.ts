@@ -9,7 +9,6 @@ import {
   ValueType,
 } from "@visian/ui-shared";
 import { ITKImage, ISerializable, readMedicalImage } from "@visian/utils";
-import isEqual from "lodash.isequal";
 import { action, computed, makeObservable, observable, toJS } from "mobx";
 import * as THREE from "three";
 import { v4 as uuidv4 } from "uuid";
@@ -29,7 +28,11 @@ import {
   ViewSettingsSnapshot,
 } from "./view-settings";
 import { StoreContext } from "../types";
-import { defaultAnnotationColor, defaultImageColor } from "../../constants";
+import {
+  defaultAnnotationColor,
+  defaultImageColor,
+  defaultRegionGrowingPreviewColor,
+} from "../../constants";
 
 const uniqueValuesForAnnotationThreshold = 20;
 
@@ -166,13 +169,25 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
   }
   public get baseImageLayer(): IImageLayer | undefined {
     // TODO: Rework to work with group layers
+
+    const areAllLayersAnnotations = Boolean(
+      !this.layerIds.find((layerId) => {
+        const layer = this.layerMap[layerId];
+        return layer.kind === "image" && !layer.isAnnotation;
+      }),
+    );
+
     let baseImageLayer: ImageLayer | undefined;
     this.layerIds
       .slice()
       .reverse()
       .find((id) => {
         const layer = this.layerMap[id];
-        if (layer.kind === "image") {
+        if (
+          layer.kind === "image" &&
+          // use non-annotation layer if possible
+          (!layer.isAnnotation || areAllLayersAnnotations)
+        ) {
           baseImageLayer = layer as ImageLayer;
           return true;
         }
@@ -212,7 +227,9 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
     });
   };
 
-  private getColorForNewAnnotation = (): string => {
+  public getFirstUnusedColor = (
+    defaultColor = defaultAnnotationColor,
+  ): string => {
     // TODO: Rework to work with group layers
     const layerStack = this.layers;
     const usedColors: { [key: string]: boolean } = {};
@@ -222,13 +239,22 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
       }
     });
     const colorCandidates = dataColorKeys.filter((color) => !usedColors[color]);
-    return colorCandidates.length ? colorCandidates[0] : defaultAnnotationColor;
+    return colorCandidates.length ? colorCandidates[0] : defaultColor;
+  };
+
+  public getRegionGrowingPreviewColor = (): string => {
+    const isDefaultUsed = this.layers.find(
+      (layer) => layer.color === defaultRegionGrowingPreviewColor,
+    );
+    return isDefaultUsed
+      ? this.getFirstUnusedColor(this.activeLayer?.color)
+      : defaultRegionGrowingPreviewColor;
   };
 
   public addNewAnnotationLayer = () => {
     if (!this.baseImageLayer) return;
 
-    const annotationColor = this.getColorForNewAnnotation();
+    const annotationColor = this.getFirstUnusedColor();
 
     const annotationLayer = ImageLayer.fromNewAnnotationForImage(
       this.baseImageLayer.image,
@@ -334,22 +360,27 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
     const imageLayer = ImageLayer.fromITKImage(image, this, {
       color: defaultImageColor,
     });
+    if (
+      this.baseImageLayer &&
+      !this.baseImageLayer.image.voxelCount.equals(imageLayer.image.voxelCount)
+    ) {
+      throw new Error("image-mismatch-error");
+    }
     this.addLayer(imageLayer);
   }
 
   public async importAnnotation(image: ITKImage) {
     const annotationLayer = ImageLayer.fromITKImage(image, this, {
       isAnnotation: true,
-      color: this.getColorForNewAnnotation(),
+      color: this.getFirstUnusedColor(),
     });
     if (
-      this.layers.length &&
-      !isEqual(
-        (this.layerMap[this.layerIds[0]] as ImageLayer)?.image?.voxelCount,
+      this.baseImageLayer &&
+      !this.baseImageLayer.image.voxelCount.equals(
         annotationLayer.image.voxelCount,
       )
     ) {
-      throw new Error("annotation-mismatch-error");
+      throw new Error("image-mismatch-error");
     }
 
     this.addLayer(annotationLayer);

@@ -57,6 +57,13 @@ export class RegionGrowingRenderer extends ToolRenderer {
     );
   }
 
+  public dispose() {
+    super.dispose();
+
+    this.regionGrowingMaterial.dispose();
+    this.regionGrowingQuad.dispose();
+  }
+
   public doRegionGrowing(threshold: number, boundingRadius?: number) {
     if (!this.lastCircle) return;
 

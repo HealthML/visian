@@ -3,8 +3,11 @@ import { IDisposer } from "@visian/utils";
 import { reaction } from "mobx";
 import * as THREE from "three";
 
-import { laoFragmentShader, laoVertexShader } from "../../../shaders";
-import { composeLayeredShader } from "../compose-layered-shader";
+import {
+  laoFragmentShader,
+  laoVertexShader,
+  composeLayeredShader,
+} from "../../../shaders";
 import { SharedUniforms } from "../shared-uniforms";
 import { totalLAORays } from "./lao-computer";
 import { getLAODirectionTexture } from "./lao-directions";
@@ -36,7 +39,7 @@ export class LAOMaterial extends THREE.ShaderMaterial {
 
     this.disposers = [
       reaction(
-        () => editor.activeDocument?.imageLayers.length || 0,
+        () => editor.volumeRenderer?.renderedImageLayerCount || 1,
         (layerCount: number) => {
           this.fragmentShader = composeLayeredShader(
             laoFragmentShader,
@@ -44,6 +47,7 @@ export class LAOMaterial extends THREE.ShaderMaterial {
           );
           this.needsUpdate = true;
         },
+        { fireImmediately: true },
       ),
     ];
   }

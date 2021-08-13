@@ -3,7 +3,7 @@ import hotkeys from "hotkeys-js";
 
 import { skipSlices } from "../constants";
 
-import { ImageLayer, RootStore } from "../models";
+import { ImageLayer, RootStore, SmartBrush3D } from "../models";
 
 export const setUpHotKeys = (store: RootStore): IDisposer => {
   // Tool Selection
@@ -35,6 +35,12 @@ export const setUpHotKeys = (store: RootStore): IDisposer => {
     if (store.editor.activeDocument?.viewSettings.viewMode !== "2D") return;
 
     store.editor.activeDocument?.tools.setActiveTool("bounded-smart-brush");
+  });
+  hotkeys("d", (event) => {
+    event.preventDefault();
+    if (store.editor.activeDocument?.viewSettings.viewMode !== "2D") return;
+
+    store.editor.activeDocument?.tools.setActiveTool("smart-brush-3d");
   });
   hotkeys("e", (event) => {
     event.preventDefault();
@@ -74,6 +80,17 @@ export const setUpHotKeys = (store: RootStore): IDisposer => {
   hotkeys("ctrl+del,ctrl+backspace", (event) => {
     event.preventDefault();
     store.editor.activeDocument?.tools.setActiveTool("clear-image");
+  });
+  hotkeys("enter", (event) => {
+    event.preventDefault();
+
+    if (
+      store.editor.activeDocument?.tools.regionGrowingRenderer3D.holdsPreview
+    ) {
+      (store.editor.activeDocument?.tools.tools[
+        "smart-brush-3d"
+      ] as SmartBrush3D<"smart-brush-3d">).submit();
+    }
   });
 
   // Brush Size/Cutting Plane Distance

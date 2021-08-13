@@ -1,5 +1,6 @@
 import React, { useCallback } from "react";
 import styled, { css } from "styled-components";
+import { radius, size } from "../../theme";
 
 import { Color } from "../color";
 import { Icon } from "../icon";
@@ -24,15 +25,15 @@ const ListItemInner = styled.div<Pick<ListItemProps, "isActive">>`
   display: flex;
   flex-direction: row;
   align-items: center;
-  height: 40px;
+  height: ${size("listElementHeight")};
   overflow: hidden;
 
   ${(props) =>
     props.isActive &&
     css`
       ${sheetMixin};
-      border-radius: 8px;
-      margin: 0 -8px;
+      border-radius: ${radius("activeLayerBorderRadius")};
+      margin: 0 -${radius("activeLayerBorderRadius")};
       // Accounting for the 1px border that was added
       padding: 0 7px;
     `}

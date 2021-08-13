@@ -3,8 +3,11 @@ import { IDisposer } from "@visian/utils";
 import { reaction } from "mobx";
 import * as THREE from "three";
 
-import { gradientFragmentShader, gradientVertexShader } from "../../../shaders";
-import { composeLayeredShader } from "../compose-layered-shader";
+import {
+  gradientFragmentShader,
+  gradientVertexShader,
+  composeLayeredShader,
+} from "../../../shaders";
 import { SharedUniforms } from "../shared-uniforms";
 
 export enum GradientMode {
@@ -37,7 +40,7 @@ export class GradientMaterial extends THREE.ShaderMaterial {
 
     this.disposers = [
       reaction(
-        () => editor.activeDocument?.imageLayers.length || 0,
+        () => editor.volumeRenderer?.renderedImageLayerCount || 1,
         (layerCount: number) => {
           this.fragmentShader = composeLayeredShader(
             gradientFragmentShader,
@@ -45,6 +48,7 @@ export class GradientMaterial extends THREE.ShaderMaterial {
           );
           this.needsUpdate = true;
         },
+        { fireImmediately: true },
       ),
     ];
   }

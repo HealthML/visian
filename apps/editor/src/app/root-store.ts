@@ -30,7 +30,14 @@ export const setupRootStore = async () => {
       await store.editor.activeDocument?.importFile(
         await readFileFromURL(loadScanParam, true),
       );
-      window.history.replaceState({}, document.title, window.location.pathname);
+      store.editor.activeDocument?.finishBatchImport();
+      if (url.searchParams.get("demo") === null) {
+        window.history.replaceState(
+          {},
+          document.title,
+          window.location.pathname,
+        );
+      }
     }
   } catch {
     store.setError({

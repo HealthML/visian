@@ -36,6 +36,8 @@ export class Volume extends THREE.Mesh implements IDisposable {
 
     this.resetRotation();
 
+    this.renderOrder = 1;
+
     this.cuttingPlane = new CuttingPlane(editor);
     this.add(this.cuttingPlane);
 

@@ -10,7 +10,7 @@ import {
   Theme,
 } from "@visian/ui-shared";
 import { IDisposable, ISerializable } from "@visian/utils";
-import { action, makeObservable, observable } from "mobx";
+import { action, makeObservable, observable, runInAction } from "mobx";
 import * as THREE from "three";
 
 import { StoreContext } from "../types";
@@ -25,6 +25,7 @@ export class Editor
   public readonly excludeFromSnapshotTracking = [
     "context",
     "sliceRenderer",
+    "volumeRenderer",
     "renderers",
   ];
 
@@ -32,7 +33,7 @@ export class Editor
 
   public sliceRenderer?: ISliceRenderer;
   public volumeRenderer?: IVolumeRenderer;
-  public renderers: [
+  public renderers!: [
     THREE.WebGLRenderer,
     THREE.WebGLRenderer,
     THREE.WebGLRenderer,
@@ -45,22 +46,27 @@ export class Editor
     makeObservable(this, {
       activeDocument: observable,
       renderers: observable,
+      sliceRenderer: observable,
+      volumeRenderer: observable,
 
       setActiveDocument: action,
+      applySnapshot: action,
     });
 
-    this.renderers = [
-      new THREE.WebGLRenderer({ alpha: true }),
-      new THREE.WebGLRenderer({ alpha: true }),
-      new THREE.WebGLRenderer({ alpha: true }),
-    ];
-    this.renderers.forEach((renderer) => {
-      renderer.setClearAlpha(0);
-    });
-    this.sliceRenderer = new SliceRenderer(this);
-    this.volumeRenderer = new VolumeRenderer(this);
+    runInAction(() => {
+      this.renderers = [
+        new THREE.WebGLRenderer({ alpha: true }),
+        new THREE.WebGLRenderer({ alpha: true }),
+        new THREE.WebGLRenderer({ alpha: true }),
+      ];
+      this.renderers.forEach((renderer) => {
+        renderer.setClearAlpha(0);
+      });
+      this.sliceRenderer = new SliceRenderer(this);
+      this.volumeRenderer = new VolumeRenderer(this);
 
-    this.renderers[0].setAnimationLoop(this.animate);
+      this.renderers[0].setAnimationLoop(this.animate);
+    });
 
     this.applySnapshot(snapshot);
   }
