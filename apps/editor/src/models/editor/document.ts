@@ -101,7 +101,7 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
     this.layerIds = snapshot?.layerIds || [];
 
     Object.values(this.layerMap).forEach((layer) =>
-      layer.removePotentiallyBadColor(),
+      layer.fixPotentiallyBadColor(),
     );
 
     this.history = new History(snapshot?.history, this);

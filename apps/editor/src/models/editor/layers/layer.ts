@@ -14,6 +14,7 @@ import tc from "tinycolor2";
 import {
   defaultAnnotationColor,
   defaultAnnotationOpacity,
+  defaultImageColor,
 } from "../../../constants";
 import { LayerGroup } from "./layer-group";
 
@@ -156,7 +157,11 @@ export class Layer implements ILayer, ISerializable<LayerSnapshot> {
     this.transformation = value || new Matrix4();
   };
 
-  public removePotentiallyBadColor() {
+  /**
+   * Adjusts `this.color` if the color lookup returns an invalid color.
+   * Mainly used for backwards compatibility when a color is removed.
+   */
+  public fixPotentiallyBadColor() {
     if (!this.color) return;
 
     const colorString = color(
@@ -169,7 +174,7 @@ export class Layer implements ILayer, ISerializable<LayerSnapshot> {
     this.setColor(
       this.isAnnotation
         ? this.document.getFirstUnusedColor()
-        : "Mighty Mercury",
+        : defaultImageColor,
     );
   }
 
