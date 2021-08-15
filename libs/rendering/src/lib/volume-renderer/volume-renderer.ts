@@ -180,7 +180,7 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
       ),
       autorun(() => {
         this.orbitControls.mouseButtons.LEFT =
-          editor.activeDocument?.tools.activeTool?.name === "navigation-tool"
+          editor.activeDocument?.tools.activeTool?.name !== "smart-brush-3d"
             ? THREE.MOUSE.ROTATE
             : -1;
       }),
