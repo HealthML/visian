@@ -20,29 +20,7 @@ export const lookup = <TK extends keyof Theme>(themeKey: TK) => <
 export const border = lookup("borders");
 export const borderStyle = lookup("borderStyles");
 export const borderWidths = lookup("borderWidths");
-
-/**
- * Backwards copatible version of `lookup("colors")` that maps "Mercury" to "Mighty Mercury"
- * and all other unknown colors to "Genome Gold"
- */
-export const color = <VK extends keyof Theme["colors"]>(valueKey: VK) => ({
-  theme,
-}: ThemeProps): Theme["colors"][VK] | VK => {
-  if (!theme) return valueKey;
-
-  const values = theme.colors;
-  if (!values) return valueKey;
-
-  const value = values[valueKey];
-  if (value === undefined) {
-    if ((valueKey as string) === "Mercury") {
-      return values["Mighty Mercury"];
-    }
-    return values["Genome Gold"];
-  }
-  return value;
-};
-
+export const color = lookup("colors");
 export const duration = lookup("durations");
 export const font = lookup("fonts");
 export const fontSize = lookup("fontSizes");

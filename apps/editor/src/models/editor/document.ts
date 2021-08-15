@@ -6,6 +6,7 @@ import {
   ILayer,
   ISliceRenderer,
   IVolumeRenderer,
+  Theme,
   ValueType,
 } from "@visian/ui-shared";
 import { ITKImage, ISerializable, readMedicalImage } from "@visian/utils";
@@ -98,6 +99,11 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
       this.layerMap[layer.id] = new LayerKind(layer as any, this);
     });
     this.layerIds = snapshot?.layerIds || [];
+
+    Object.values(this.layerMap).forEach((layer) =>
+      layer.removePotentiallyBadColor(),
+    );
+
     this.history = new History(snapshot?.history, this);
     this.viewSettings = new ViewSettings(snapshot?.viewSettings, this);
     this.viewport2D = new Viewport2D(snapshot?.viewport2D, this);
@@ -414,6 +420,10 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
 
   public get renderers(): THREE.WebGLRenderer[] | undefined {
     return this.editor.renderers;
+  }
+
+  public get theme(): Theme {
+    return this.editor.theme;
   }
 
   // Serialization

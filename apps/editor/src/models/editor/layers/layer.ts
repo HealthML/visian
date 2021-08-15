@@ -1,8 +1,15 @@
-import { BlendMode, IDocument, ILayer, MarkerConfig } from "@visian/ui-shared";
+import {
+  BlendMode,
+  color,
+  IDocument,
+  ILayer,
+  MarkerConfig,
+} from "@visian/ui-shared";
 import { ISerializable, ViewType } from "@visian/utils";
 import { action, computed, makeObservable, observable } from "mobx";
 import { Matrix4 } from "three";
 import { v4 as uuidv4 } from "uuid";
+import tc from "tinycolor2";
 
 import {
   defaultAnnotationColor,
@@ -148,6 +155,23 @@ export class Layer implements ILayer, ISerializable<LayerSnapshot> {
   public setTransformation = (value?: Matrix4): void => {
     this.transformation = value || new Matrix4();
   };
+
+  public removePotentiallyBadColor() {
+    if (!this.color) return;
+
+    const colorString = color(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      this.color as any,
+    )({ theme: this.document.theme });
+
+    if (tc(colorString).isValid()) return;
+
+    this.setColor(
+      this.isAnnotation
+        ? this.document.getFirstUnusedColor()
+        : "Mighty Mercury",
+    );
+  }
 
   public delete = () => {
     (this.parent as LayerGroup)?.removeLayer?.(this.id);
