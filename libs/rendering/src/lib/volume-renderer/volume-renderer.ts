@@ -84,6 +84,11 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
         orbitTarget.z,
       );
     }
+    this.orbitControls.mouseButtons = {
+      LEFT: THREE.MOUSE.ROTATE,
+      MIDDLE: THREE.MOUSE.ROTATE,
+      RIGHT: THREE.MOUSE.ROTATE,
+    };
     this.orbitControls.addEventListener("change", this.onOrbitControlsChange);
 
     this.flyControls = new FlyControls(this.camera, this.renderer.domElement);
@@ -157,19 +162,27 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
     this.stats.dom.style.left = "auto";
 
     this.disposers.push(
+      reaction(
+        () => editor.activeDocument?.viewSettings.viewMode,
+        (viewMode) => {
+          switch (viewMode) {
+            case "2D":
+              if (this.flyControls.isLocked) this.flyControls.unlock();
+              this.orbitControls.enabled = false;
+              break;
+            case "3D":
+              this.orbitControls.enabled = !this.flyControls.isLocked;
+          }
+
+          this.lazyRender();
+        },
+        { fireImmediately: true },
+      ),
       autorun(() => {
-        switch (editor.activeDocument?.viewSettings.viewMode) {
-          case "2D":
-            if (this.flyControls.isLocked) this.flyControls.unlock();
-            this.orbitControls.enabled = false;
-            break;
-          case "3D":
-            this.orbitControls.enabled =
-              !this.flyControls.isLocked &&
-              editor.activeDocument?.tools.activeTool?.name !==
-                "smart-brush-3d";
-        }
-        this.lazyRender();
+        this.orbitControls.mouseButtons.LEFT =
+          editor.activeDocument?.tools.activeTool?.name === "navigation-tool"
+            ? THREE.MOUSE.ROTATE
+            : -1;
       }),
       reaction(
         () => editor.activeDocument?.viewport3D.cameraMatrix?.toArray(),
@@ -438,6 +451,8 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
   };
 
   private onSmartBrushClick = (event: PointerEvent) => {
+    if (event.button !== 0) return;
+
     const image = this.editor.activeDocument?.baseImageLayer?.image;
     const smartBrush3D = this.editor.activeDocument?.tools.tools[
       "smart-brush-3d"
