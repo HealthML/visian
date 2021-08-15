@@ -93,12 +93,12 @@ export const setUpHotKeys = (store: RootStore): IDisposer => {
     }
   });
 
-  // Brush Size/Cutting Plane Distance
+  // Brush Size/Clipping Plane Distance
   hotkeys("*", (event) => {
     // "+" doesn't currently work with hotkeys-js (https://github.com/jaywcjlove/hotkeys/issues/270)
     if (event.key === "+" && !event.ctrlKey) {
       if (store.editor.activeDocument?.viewSettings.viewMode === "3D") {
-        store.editor.activeDocument?.viewport3D.increaseCuttingPlaneDistance();
+        store.editor.activeDocument?.viewport3D.increaseClippingPlaneDistance();
         return;
       }
 
@@ -107,7 +107,7 @@ export const setUpHotKeys = (store: RootStore): IDisposer => {
   });
   hotkeys("-", () => {
     if (store.editor.activeDocument?.viewSettings.viewMode === "3D") {
-      store.editor.activeDocument?.viewport3D.decreaseCuttingPlaneDistance();
+      store.editor.activeDocument?.viewport3D.decreaseClippingPlaneDistance();
       return;
     }
 

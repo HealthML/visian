@@ -6,18 +6,18 @@ import { RenderedImage } from "../../rendered-image";
 
 import {
   composeLayeredShader,
-  cuttingPlaneFragmentShader,
-  cuttingPlaneVertexShader,
+  clippingPlaneFragmentShader,
+  clippingPlaneVertexShader,
 } from "../../shaders";
 import { SharedUniforms } from "./shared-uniforms";
 
-export class CuttingPlaneMaterial extends THREE.ShaderMaterial {
+export class ClippingPlaneMaterial extends THREE.ShaderMaterial {
   private disposers: IDisposer[] = [];
 
   constructor(editor: IEditor, sharedUniforms: SharedUniforms) {
     super({
-      vertexShader: cuttingPlaneVertexShader,
-      fragmentShader: cuttingPlaneFragmentShader,
+      vertexShader: clippingPlaneVertexShader,
+      fragmentShader: clippingPlaneFragmentShader,
       uniforms: {
         ...sharedUniforms.uniforms,
         uLayerData: { value: [] },
@@ -32,7 +32,7 @@ export class CuttingPlaneMaterial extends THREE.ShaderMaterial {
         () => editor.volumeRenderer?.renderedImageLayerCount || 1,
         (layerCount: number) => {
           this.fragmentShader = composeLayeredShader(
-            cuttingPlaneFragmentShader,
+            clippingPlaneFragmentShader,
             layerCount,
           );
           this.needsUpdate = true;
@@ -58,7 +58,8 @@ export class CuttingPlaneMaterial extends THREE.ShaderMaterial {
         const layerOpacities = layers.map((layer) =>
           layer.isVisible &&
           (!layer.isAnnotation ||
-            editor.activeDocument?.viewport3D.shouldCuttingPlaneShowAnnotations)
+            editor.activeDocument?.viewport3D
+              .shouldClippingPlaneShowAnnotations)
             ? layer.opacity
             : 0,
         );
