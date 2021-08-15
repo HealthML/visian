@@ -166,6 +166,9 @@ export class RegionGrowingRenderer3D
     });
 
     this.holdsPreview = true;
+
+    this.document.sliceRenderer?.lazyRender();
+    this.document.volumeRenderer?.lazyRender(true);
   }
 
   public setSteps = (value: number) => {

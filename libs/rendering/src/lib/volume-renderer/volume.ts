@@ -4,14 +4,21 @@ import { autorun } from "mobx";
 import * as THREE from "three";
 
 import { RenderedImage } from "../rendered-image";
-import { BoundingBox, CuttingPlane, SharedUniforms } from "./utils";
+import {
+  BoundingBox,
+  CuttingPlane,
+  RaycastingCone,
+  SharedUniforms,
+} from "./utils";
 import { VolumeMaterial } from "./volume-material";
 
 /** A volume domain. */
 export class Volume extends THREE.Mesh implements IDisposable {
-  private cuttingPlane: CuttingPlane;
+  public cuttingPlane: CuttingPlane;
 
   private boundingBox: BoundingBox;
+
+  public raycastingCone: RaycastingCone;
 
   private disposers: IDisposer[] = [];
   constructor(
@@ -43,6 +50,9 @@ export class Volume extends THREE.Mesh implements IDisposable {
 
     this.boundingBox = new BoundingBox(editor);
     this.add(this.boundingBox);
+
+    this.raycastingCone = new RaycastingCone(editor);
+    this.add(this.raycastingCone);
 
     this.disposers.push(
       autorun(() => {

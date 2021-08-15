@@ -7,6 +7,7 @@ import type { ITools } from "./tools";
 import type { Reference } from "./types";
 import type { IViewport2D, IViewport3D, IViewSettings } from "./view-settings";
 import type { IMarkers } from "./markers";
+import { Theme } from "../../theme";
 
 /** A VISIAN document, consisting of up to multiple editable layers. */
 export interface IDocument {
@@ -54,6 +55,7 @@ export interface IDocument {
   sliceRenderer?: Reference<ISliceRenderer>;
   volumeRenderer?: Reference<IVolumeRenderer>;
   renderers?: Reference<THREE.WebGLRenderer[]>;
+  theme: Theme;
 
   /** Indicates wether the layer menu is open. */
   showLayerMenu: boolean;
