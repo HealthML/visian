@@ -8,6 +8,7 @@ import {
   convertPositionToWebGLPosition,
   IDisposable,
   IDisposer,
+  Voxel,
 } from "@visian/utils";
 import { autorun, computed, makeObservable, reaction } from "mobx";
 import * as THREE from "three";
@@ -234,10 +235,21 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
               "pointerdown",
               this.onSmartBrushClick,
             );
+            this.renderer.domElement.addEventListener(
+              "pointermove",
+              this.onSmartBrushMove,
+            );
           } else {
             this.renderer.domElement.removeEventListener(
               "pointerdown",
               this.onSmartBrushClick,
+            );
+            this.renderer.domElement.removeEventListener(
+              "pointermove",
+              this.onSmartBrushMove,
+            );
+            this.editor.activeDocument?.tools.setIsCursorOverDrawableArea(
+              false,
             );
           }
         },
@@ -450,14 +462,9 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
     }
   };
 
-  private onSmartBrushClick = (event: PointerEvent) => {
-    if (event.button !== 0) return;
-
+  private getSmartBrushIntersection(event: PointerEvent): Voxel | undefined {
     const image = this.editor.activeDocument?.baseImageLayer?.image;
-    const smartBrush3D = this.editor.activeDocument?.tools.tools[
-      "smart-brush-3d"
-    ];
-    if (!image || !smartBrush3D) return;
+    if (!image) return undefined;
 
     const clickPosition = { x: event.clientX, y: event.clientY };
     const canvasRect = this.renderer.domElement.getBoundingClientRect();
@@ -467,7 +474,7 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
       clickPosition.y <= canvasRect.top ||
       clickPosition.y >= canvasRect.bottom
     )
-      return;
+      return undefined;
 
     const canvasPosition = {
       x: clickPosition.x - canvasRect.left,
@@ -499,7 +506,7 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
       this.volume.raycastingCone.visible = false;
     }
 
-    if (!intersections.length) return;
+    if (!intersections.length) return undefined;
 
     this.workingVector.set(
       image.voxelCount.x,
@@ -514,6 +521,37 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
       .addScalar(0.5)
       .multiply(this.workingVector)
       .round();
+
+    if (
+      seedPoint
+        .toArray()
+        .every(
+          (value, index) =>
+            value >= 0 && value < this.workingVector.getComponent(index),
+        )
+    ) {
+      return seedPoint;
+    }
+
+    return undefined;
+  }
+
+  private onSmartBrushMove = (event: PointerEvent) => {
+    this.editor.activeDocument?.tools.setIsCursorOverDrawableArea(
+      !!this.getSmartBrushIntersection(event),
+    );
+  };
+
+  private onSmartBrushClick = (event: PointerEvent) => {
+    if (event.button !== 0) return;
+
+    const smartBrush3D = this.editor.activeDocument?.tools.tools[
+      "smart-brush-3d"
+    ];
+    if (!smartBrush3D) return;
+
+    const seedPoint = this.getSmartBrushIntersection(event);
+    if (!seedPoint) return;
 
     const seedDragPoint: DragPoint = {
       x: seedPoint.x,
