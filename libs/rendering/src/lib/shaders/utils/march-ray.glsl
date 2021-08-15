@@ -10,7 +10,7 @@
  *
  * Returns a vec4 containing the accumulated color.
  */
-vec4 marchRay(vec3 origin, vec3 direction, float near, float far, float stepSize, bool useRayDithering) {
+vec4 marchRay(vec3 origin, vec3 direction, float near, float far, float stepSize, bool useRayDithering, float cutDepth) {
   #ifdef RAY_DITHERING
     float random = fract(sin(gl_FragCoord.x * 12.9898 + gl_FragCoord.y * 78.233) * 43758.5453) * float(useRayDithering);
   
@@ -28,6 +28,11 @@ vec4 marchRay(vec3 origin, vec3 direction, float near, float far, float stepSize
 
   vec4 currentVoxel;
   for (int i = 0; i < MAX_STEPS; ++i) {
+    #ifdef VOLUMETRIC_OCCLUSION
+      float voxelZ = (modelViewMatrix * vec4(samplePosition - 0.5, 1.0)).z;
+      if (voxelZ < cutDepth) break;
+    #endif
+
     currentVoxel = getVolumeColor(samplePosition);
 
     acc.rgb += (1.0 - acc.a) * currentVoxel.rgb * currentVoxel.a;
@@ -36,9 +41,7 @@ vec4 marchRay(vec3 origin, vec3 direction, float near, float far, float stepSize
     samplePosition += scaledDirection;
     dist += stepSize;
 
-    if (dist > far) {
-      break;
-    }
+    if (dist > far) break;
   }
 
   return acc;

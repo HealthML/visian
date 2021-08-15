@@ -1,3 +1,5 @@
+#include <packing>
+
 /** The position within the volume. Ranging [0, 1] in each dimension. */
 varying vec3 vPosition;
 varying vec3 vRayDirection;
@@ -5,6 +7,10 @@ varying vec3 vRayOrigin;
 
 uniform sampler2D uOutputFirstDerivative;
 uniform sampler2D uLAO;
+uniform sampler2D uDepthPass;
+uniform vec2 uDepthSize;
+uniform float uCameraNear;
+uniform float uCameraFar;
 
 uniform bool uUseRayDithering;
 
@@ -57,5 +63,11 @@ void main() {
   float far;
   computeNearFar(normalizedRayDirection, near, far);
 
-  gl_FragColor = marchRay(vRayOrigin, normalizedRayDirection, near, far, uStepSize, uUseRayDithering);
+  #ifdef VOLUMETRIC_OCCLUSION
+    float depth = texture2D(uDepthPass, gl_FragCoord.xy / uDepthSize).x;
+    float viewZ = perspectiveDepthToViewZ(depth, uCameraNear, uCameraFar);
+  #else
+    float viewZ = 1.0;
+  #endif
+  gl_FragColor = marchRay(vRayOrigin, normalizedRayDirection, near, far, uStepSize, uUseRayDithering, viewZ);
 }

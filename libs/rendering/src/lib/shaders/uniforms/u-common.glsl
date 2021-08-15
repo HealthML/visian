@@ -1,3 +1,6 @@
+uniform mat4 modelViewMatrix;
+uniform mat4 projectionMatrix;
+
 uniform vec3 uCameraPosition;
 uniform sampler2D uInputFirstDerivative;
 uniform sampler2D uInputSecondDerivative;

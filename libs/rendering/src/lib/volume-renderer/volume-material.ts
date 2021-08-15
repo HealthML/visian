@@ -32,8 +32,14 @@ export class VolumeMaterial
         uOutputFirstDerivative: { value: null },
         uLAO: { value: null },
         uUseRayDithering: { value: true },
+        uDepthPass: { value: null },
+        uDepthSize: { value: [1, 1] },
+        uCameraNear: { value: 0 },
+        uCameraFar: { value: 1 },
       },
+      defines: {},
       transparent: true,
+      depthTest: false,
     });
 
     // Always render the back faces.
@@ -61,6 +67,15 @@ export class VolumeMaterial
         { fireImmediately: true },
       ),
     ];
+  }
+
+  public setVolumetricOcclusion(value: boolean) {
+    if (value) {
+      this.defines.VOLUMETRIC_OCCLUSION = "";
+    } else {
+      delete this.defines.VOLUMETRIC_OCCLUSION;
+    }
+    this.needsUpdate = true;
   }
 
   public dispose() {

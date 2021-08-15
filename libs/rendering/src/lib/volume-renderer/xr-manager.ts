@@ -1,12 +1,19 @@
 import { IEditor, IVolumeRenderer, IXRManager } from "@visian/ui-shared";
 import * as THREE from "three";
 import { XRControllerModelFactory } from "three/examples/jsm/webxr/XRControllerModelFactory";
+
 import { VolumeMaterial } from "./volume-material";
 
 export class XRManager implements IXRManager {
   public xrWorld?: THREE.Group;
 
-  constructor(protected renderer: IVolumeRenderer, protected editor: IEditor) {}
+  constructor(protected renderer: IVolumeRenderer, protected editor: IEditor) {
+    // DEBUG
+    (this.renderer.volume.material as VolumeMaterial).setVolumetricOcclusion(
+      true,
+    );
+    this.setupXRWorld();
+  }
 
   protected startGrab = (controller: THREE.Group) => {
     controller.attach(this.renderer.volume);
@@ -156,6 +163,14 @@ export class XRManager implements IXRManager {
 
     // Floor
     this.xrWorld.add(new THREE.GridHelper(5, 10, 0x404040, 0x404040));
+
+    // DEBUG
+    this.xrWorld.add(
+      new THREE.Mesh(
+        new THREE.SphereGeometry(0.05, 32, 16),
+        new THREE.MeshBasicMaterial({ color: 0x111100 }),
+      ).translateY(1.2),
+    );
 
     // Mount to Scene
     this.renderer.scene.add(this.xrWorld);

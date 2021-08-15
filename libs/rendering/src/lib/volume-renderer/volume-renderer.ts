@@ -25,6 +25,7 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
   public renderer: THREE.WebGLRenderer;
   public camera: THREE.PerspectiveCamera;
   public scene = new THREE.Scene();
+  public depthTarget: THREE.WebGLRenderTarget;
   public xr: XRManager;
 
   private intermediateRenderTarget: THREE.WebGLRenderTarget;
@@ -110,16 +111,62 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
 
     this.scene.add(this.volume);
     this.scene.add(new THREE.AmbientLight(0xffffff));
+
+    this.depthTarget = new THREE.WebGLRenderTarget(
+      this.renderer.domElement.width,
+      this.renderer.domElement.height,
+    );
+    this.depthTarget.depthBuffer = true;
+    this.depthTarget.depthTexture = new THREE.DepthTexture(
+      this.renderer.domElement.width,
+      this.renderer.domElement.height,
+    );
+
     this.volume.onBeforeRender = (_renderer, _scene, camera) => {
       if (this.renderer.xr.isPresenting) {
         this.updateCameraPosition(camera);
       }
+
+      // TODO: This should only be used while in XR (for now)
+      const isXrEnabled = this.renderer.xr.enabled;
+      this.renderer.xr.enabled = false;
+      this.volume.visible = false;
+
+      // TODO: The depth rendering target needs to be of the same size as the
+      // XR output for the current eye --> getRenderTarget while in XR
+      this.renderer.setRenderTarget(this.depthTarget);
+      this.renderer.render(this.scene, camera);
+      this.renderer.setRenderTarget(null);
+
+      // TODO: Reuse RGB pass
+      (this.volume
+        .material as VolumeMaterial).uniforms.uDepthPass.value = this.depthTarget.depthTexture;
+      (this.volume.material as VolumeMaterial).uniforms.uDepthSize.value = [
+        this.renderer.domElement.width,
+        this.renderer.domElement.height,
+      ];
+      (this.volume
+        .material as VolumeMaterial).uniforms.uCameraNear.value = (camera as THREE.PerspectiveCamera).near;
+      (this.volume
+        .material as VolumeMaterial).uniforms.uCameraFar.value = (camera as THREE.PerspectiveCamera).far;
+
+      this.scene.children.forEach((object) => {
+        object.visible = false;
+      });
+      this.volume.visible = true;
+      this.renderer.xr.enabled = isXrEnabled;
     };
+    this.volume.onAfterRender = () => {
+      // TODO: This should respect the intended visibilities
+      this.scene.children.forEach((object) => {
+        object.visible = true;
+      });
+    };
+
     this.resetScene();
     this.xr = new XRManager(this, editor);
 
     this.intermediateRenderTarget = new THREE.WebGLRenderTarget(1, 1);
-    // this.intermediateRenderTarget.texture.magFilter = THREE.NearestFilter;
     this.screenAlignedQuad = ScreenAlignedQuad.forTexture(
       this.intermediateRenderTarget.texture,
     );
@@ -257,6 +304,10 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
     this.camera.updateProjectionMatrix();
 
     this.renderer.setSize(window.innerWidth, window.innerHeight);
+    this.depthTarget.setSize(
+      this.renderer.domElement.width,
+      this.renderer.domElement.height,
+    );
 
     this.lazyRender();
   };
@@ -275,8 +326,9 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
       this.laoComputer.tick();
     }
 
-    if (this.renderer.xr.isPresenting) {
-      this.xr.animate();
+    // DEBUG
+    if (true || this.renderer.xr.isPresenting) {
+      // this.xr.animate();
       this.eagerRender();
       // TODO: Render spectator view
       return;
@@ -315,7 +367,8 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
     }
 
     this.renderer.setRenderTarget(null);
-    if (this.renderer.xr.isPresenting) {
+    // DEBUG
+    if (true || this.renderer.xr.isPresenting) {
       this.renderer.render(this.scene, this.camera);
     } else {
       this.screenAlignedQuad.renderWith(this.renderer);
