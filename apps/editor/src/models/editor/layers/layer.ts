@@ -162,14 +162,14 @@ export class Layer implements ILayer, ISerializable<LayerSnapshot> {
    * Mainly used for backwards compatibility when a color is removed.
    */
   public fixPotentiallyBadColor() {
-    if (!this.color) return;
+    if (this.color) {
+      const colorString = color(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        this.color as any,
+      )({ theme: this.document.theme });
 
-    const colorString = color(
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      this.color as any,
-    )({ theme: this.document.theme });
-
-    if (tc(colorString).isValid()) return;
+      if (tc(colorString).isValid()) return;
+    }
 
     this.setColor(
       this.isAnnotation
