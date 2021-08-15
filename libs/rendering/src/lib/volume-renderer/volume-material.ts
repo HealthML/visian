@@ -39,7 +39,7 @@ export class VolumeMaterial
       },
       defines: {},
       transparent: true,
-      depthTest: false,
+      depthTest: true,
     });
 
     // Always render the back faces.
@@ -70,6 +70,7 @@ export class VolumeMaterial
   }
 
   public setVolumetricOcclusion(value: boolean) {
+    this.depthTest = !value;
     if (value) {
       this.defines.VOLUMETRIC_OCCLUSION = "";
     } else {
@@ -78,12 +79,12 @@ export class VolumeMaterial
     this.needsUpdate = true;
   }
 
+  public setUseRayDithering(value: boolean) {
+    this.uniforms.uUseRayDithering.value = value;
+  }
+
   public dispose() {
     super.dispose();
     this.disposers.forEach((disposer) => disposer());
-  }
-
-  public setUseRayDithering(value: boolean) {
-    this.uniforms.uUseRayDithering.value = value;
   }
 }

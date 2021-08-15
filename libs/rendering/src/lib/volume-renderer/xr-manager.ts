@@ -7,13 +7,7 @@ import { VolumeMaterial } from "./volume-material";
 export class XRManager implements IXRManager {
   public xrWorld?: THREE.Group;
 
-  constructor(protected renderer: IVolumeRenderer, protected editor: IEditor) {
-    // DEBUG
-    (this.renderer.volume.material as VolumeMaterial).setVolumetricOcclusion(
-      true,
-    );
-    this.setupXRWorld();
-  }
+  constructor(protected renderer: IVolumeRenderer, protected editor: IEditor) {}
 
   protected startGrab = (controller: THREE.Group) => {
     controller.attach(this.renderer.volume);
@@ -164,14 +158,6 @@ export class XRManager implements IXRManager {
     // Floor
     this.xrWorld.add(new THREE.GridHelper(5, 10, 0x404040, 0x404040));
 
-    // DEBUG
-    this.xrWorld.add(
-      new THREE.Mesh(
-        new THREE.SphereGeometry(0.05, 32, 16),
-        new THREE.MeshBasicMaterial({ color: 0x111100 }),
-      ).translateY(1.2),
-    );
-
     // Mount to Scene
     this.renderer.scene.add(this.xrWorld);
   }
@@ -197,6 +183,7 @@ export class XRManager implements IXRManager {
     this.renderer.resetScene(true);
   };
   protected onXRSessionStarted = (session: THREE.XRSession) => {
+    this.renderer.resize();
     this.editor.activeDocument?.viewport3D.setIsInXR(true);
     this.renderer.renderer.xr.setSession(session);
     this.renderer.renderer.xr.addEventListener(
@@ -213,6 +200,9 @@ export class XRManager implements IXRManager {
       "fc-cone"
     ].params.isConeLocked.setValue(true);
 
+    (this.renderer.volume.material as VolumeMaterial).setVolumetricOcclusion(
+      true,
+    );
     (this.renderer.volume.material as VolumeMaterial).setUseRayDithering(false);
 
     const sessionInit = { optionalFeatures: ["local-floor"] };
@@ -228,6 +218,9 @@ export class XRManager implements IXRManager {
     const session = this.renderer.renderer.xr.getSession();
     if (!session) return;
 
+    (this.renderer.volume.material as VolumeMaterial).setVolumetricOcclusion(
+      false,
+    );
     (this.renderer.volume.material as VolumeMaterial).setUseRayDithering(true);
 
     return session.end();

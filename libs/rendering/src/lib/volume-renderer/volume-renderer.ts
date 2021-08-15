@@ -113,54 +113,34 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
     this.scene.add(new THREE.AmbientLight(0xffffff));
 
     this.depthTarget = new THREE.WebGLRenderTarget(
-      this.renderer.domElement.width,
-      this.renderer.domElement.height,
+      ...this.getRenderTargetSize(),
     );
     this.depthTarget.depthBuffer = true;
-    this.depthTarget.depthTexture = new THREE.DepthTexture(
-      this.renderer.domElement.width,
-      this.renderer.domElement.height,
-    );
 
     this.volume.onBeforeRender = (_renderer, _scene, camera) => {
       if (this.renderer.xr.isPresenting) {
         this.updateCameraPosition(camera);
+
+        this.renderer.xr.enabled = false;
+        this.volume.visible = false;
+
+        // TODO: Changing the render target & calling render here seems to trip
+        // up the XR output for the volume
+        this.renderer.setRenderTarget(this.depthTarget);
+        this.renderer.render(this.scene, camera);
+        this.renderer.setRenderTarget(null);
+
+        // TODO: Reuse RGB pass
+        (this.volume
+          .material as VolumeMaterial).uniforms.uDepthPass.value = this.depthTarget.depthTexture;
+        (this.volume
+          .material as VolumeMaterial).uniforms.uCameraNear.value = (camera as THREE.PerspectiveCamera).near;
+        (this.volume
+          .material as VolumeMaterial).uniforms.uCameraFar.value = (camera as THREE.PerspectiveCamera).far;
+
+        this.volume.visible = true;
+        this.renderer.xr.enabled = true;
       }
-
-      // TODO: This should only be used while in XR (for now)
-      const isXrEnabled = this.renderer.xr.enabled;
-      this.renderer.xr.enabled = false;
-      this.volume.visible = false;
-
-      // TODO: The depth rendering target needs to be of the same size as the
-      // XR output for the current eye --> getRenderTarget while in XR
-      this.renderer.setRenderTarget(this.depthTarget);
-      this.renderer.render(this.scene, camera);
-      this.renderer.setRenderTarget(null);
-
-      // TODO: Reuse RGB pass
-      (this.volume
-        .material as VolumeMaterial).uniforms.uDepthPass.value = this.depthTarget.depthTexture;
-      (this.volume.material as VolumeMaterial).uniforms.uDepthSize.value = [
-        this.renderer.domElement.width,
-        this.renderer.domElement.height,
-      ];
-      (this.volume
-        .material as VolumeMaterial).uniforms.uCameraNear.value = (camera as THREE.PerspectiveCamera).near;
-      (this.volume
-        .material as VolumeMaterial).uniforms.uCameraFar.value = (camera as THREE.PerspectiveCamera).far;
-
-      this.scene.children.forEach((object) => {
-        object.visible = false;
-      });
-      this.volume.visible = true;
-      this.renderer.xr.enabled = isXrEnabled;
-    };
-    this.volume.onAfterRender = () => {
-      // TODO: This should respect the intended visibilities
-      this.scene.children.forEach((object) => {
-        object.visible = true;
-      });
     };
 
     this.resetScene();
@@ -279,6 +259,12 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
     this.disposers.forEach((disposer) => disposer());
   };
 
+  public getRenderTargetSize() {
+    const vector = new THREE.Vector2();
+    this.renderer.getSize(vector);
+    return vector.toArray();
+  }
+
   public get renderedImageLayerCount() {
     // additional layer for 3d region growing preview
     return (this.editor.activeDocument?.imageLayers.length || 0) + 1;
@@ -304,10 +290,12 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
     this.camera.updateProjectionMatrix();
 
     this.renderer.setSize(window.innerWidth, window.innerHeight);
-    this.depthTarget.setSize(
-      this.renderer.domElement.width,
-      this.renderer.domElement.height,
-    );
+
+    const renderTargetSize = this.getRenderTargetSize();
+    this.depthTarget.setSize(...renderTargetSize);
+    this.depthTarget.depthTexture = new THREE.DepthTexture(...renderTargetSize);
+    (this.volume
+      .material as VolumeMaterial).uniforms.uDepthSize.value = renderTargetSize;
 
     this.lazyRender();
   };
@@ -326,11 +314,9 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
       this.laoComputer.tick();
     }
 
-    // DEBUG
-    if (true || this.renderer.xr.isPresenting) {
-      // this.xr.animate();
+    if (this.renderer.xr.isPresenting) {
+      this.xr.animate();
       this.eagerRender();
-      // TODO: Render spectator view
       return;
     }
 
@@ -367,8 +353,7 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
     }
 
     this.renderer.setRenderTarget(null);
-    // DEBUG
-    if (true || this.renderer.xr.isPresenting) {
+    if (this.renderer.xr.isPresenting) {
       this.renderer.render(this.scene, this.camera);
     } else {
       this.screenAlignedQuad.renderWith(this.renderer);
