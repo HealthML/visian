@@ -1,15 +1,11 @@
+import { getPlaneAxes } from "@visian/utils";
 import * as THREE from "three";
 
 import { Renderer } from "..";
 import * as SCAN from "../../staticScan";
 import atlas from "../../staticScan/brain-texture-atlas.png";
 import { ViewType, viewTypes, Voxel } from "../../types";
-import {
-  getCameraOctant,
-  getOctantPlanes,
-  getPlaneAxes,
-  getSplitPlane,
-} from "../../utils";
+import { getCameraOctant, getOctantPlanes, getSplitPlane } from "../../utils";
 import { fragmentShader, SpriteUniforms, vertexShader } from "../shader";
 
 export default class SpriteHandler {
