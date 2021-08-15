@@ -211,6 +211,17 @@ export const Toolbar: React.FC = observer(() => {
                   .setShouldCuttingPlaneRender
               }
             />
+            <BooleanParam
+              labelTx="render-plane-annotations"
+              value={Boolean(
+                store?.editor.activeDocument?.viewport3D
+                  .shouldCuttingPlaneShowAnnotations,
+              )}
+              setValue={
+                store?.editor.activeDocument?.viewport3D
+                  .setShouldCuttingPlaneShowAnnotations
+              }
+            />
           </>
         )}
 

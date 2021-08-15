@@ -1,36 +1,76 @@
-import { IEditor } from "@visian/ui-shared";
+import { IEditor, IImageLayer } from "@visian/ui-shared";
 import { IDisposer } from "@visian/utils";
-import { autorun } from "mobx";
+import { autorun, reaction } from "mobx";
 import * as THREE from "three";
-
 import { RenderedImage } from "../../rendered-image";
+
 import {
+  composeLayeredShader,
   cuttingPlaneFragmentShader,
   cuttingPlaneVertexShader,
 } from "../../shaders";
+import { SharedUniforms } from "./shared-uniforms";
 
 export class CuttingPlaneMaterial extends THREE.ShaderMaterial {
   private disposers: IDisposer[] = [];
 
-  constructor(editor: IEditor) {
+  constructor(editor: IEditor, sharedUniforms: SharedUniforms) {
     super({
       vertexShader: cuttingPlaneVertexShader,
       fragmentShader: cuttingPlaneFragmentShader,
       uniforms: {
-        uAtlasGrid: { value: [1, 1] },
-        uVoxelCount: { value: [1, 1, 1] },
-        uDataTexture: { value: null },
+        ...sharedUniforms.uniforms,
+        uLayerData: { value: [] },
+        uLayerOpacities: { value: [] },
       },
       transparent: true,
       side: THREE.DoubleSide,
     });
 
     this.disposers.push(
+      reaction(
+        () => editor.volumeRenderer?.renderedImageLayerCount || 1,
+        (layerCount: number) => {
+          this.fragmentShader = composeLayeredShader(
+            cuttingPlaneFragmentShader,
+            layerCount,
+          );
+          this.needsUpdate = true;
+        },
+        { fireImmediately: true },
+      ),
       autorun(() => {
-        const imageLayer = editor.activeDocument?.baseImageLayer;
-        if (!imageLayer) return this.setImage();
+        const layers = editor.activeDocument?.imageLayers || [];
 
-        this.setImage(imageLayer.image as RenderedImage);
+        const layerData = layers.map((layer) =>
+          ((layer as IImageLayer).image as RenderedImage).getTexture(0),
+        );
+
+        this.uniforms.uLayerData.value = [
+          // additional layer for 3d region growing
+          editor.activeDocument?.tools.layerPreviewTextures[0] || null,
+          ...layerData,
+        ];
+      }),
+      autorun(() => {
+        const layers = editor.activeDocument?.imageLayers || [];
+
+        const layerOpacities = layers.map((layer) =>
+          layer.isVisible &&
+          (!layer.isAnnotation ||
+            editor.activeDocument?.viewport3D.shouldCuttingPlaneShowAnnotations)
+            ? layer.opacity
+            : 0,
+        );
+
+        const activeLayer = editor.activeDocument?.activeLayer;
+        this.uniforms.uLayerOpacities.value = [
+          // additional layer for 3d region growing
+          activeLayer?.isVisible ? activeLayer.opacity : 0,
+          ...layerOpacities,
+        ];
+
+        editor.volumeRenderer?.lazyRender();
       }),
     );
   }
@@ -38,12 +78,5 @@ export class CuttingPlaneMaterial extends THREE.ShaderMaterial {
   public dispose() {
     super.dispose();
     this.disposers.forEach((disposer) => disposer());
-  }
-
-  private setImage(image?: RenderedImage) {
-    this.uniforms.uDataTexture.value =
-      image?.getTexture(0, THREE.NearestFilter) ?? null;
-    this.uniforms.uAtlasGrid.value = image?.getAtlasGrid().toArray() ?? [1, 1];
-    this.uniforms.uVoxelCount.value = image?.voxelCount.toArray() ?? [1, 1, 1];
   }
 }

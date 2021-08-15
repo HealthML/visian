@@ -3,6 +3,7 @@ import { IDisposable, IDisposer } from "@visian/utils";
 import { autorun, reaction } from "mobx";
 import * as THREE from "three";
 import { CuttingPlaneMaterial } from "./cutting-plane-material";
+import { SharedUniforms } from "./shared-uniforms";
 
 export class CuttingPlane extends THREE.Mesh implements IDisposable {
   private plane = new THREE.Plane();
@@ -13,8 +14,11 @@ export class CuttingPlane extends THREE.Mesh implements IDisposable {
 
   private disposers: IDisposer[] = [];
 
-  constructor(private editor: IEditor) {
-    super(new THREE.PlaneGeometry(), new CuttingPlaneMaterial(editor));
+  constructor(private editor: IEditor, sharedUniforms: SharedUniforms) {
+    super(
+      new THREE.PlaneGeometry(),
+      new CuttingPlaneMaterial(editor, sharedUniforms),
+    );
 
     this.geometry.setAttribute(
       "volumeCoords",

@@ -146,6 +146,7 @@ export interface IViewport3D<N extends string> {
   cuttingPlaneNormal: Vector;
   cuttingPlaneDistance: number;
   shouldCuttingPlaneRender: boolean;
+  shouldCuttingPlaneShowAnnotations: boolean;
 
   onTransferFunctionChange: () => void;
 
@@ -167,5 +168,6 @@ export interface IViewport3D<N extends string> {
   increaseCuttingPlaneDistance(): void;
   decreaseCuttingPlaneDistance(): void;
   setShouldCuttingPlaneRender(value?: boolean): void;
+  setShouldCuttingPlaneShowAnnotations(value?: boolean): void;
   resetCuttingPlane(): void;
 }

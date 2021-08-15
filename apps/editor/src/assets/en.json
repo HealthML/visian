@@ -47,6 +47,7 @@
   "discard-region-growing": "Discard",
   "enable-plane": "Use Cutting Plane",
   "render-plane": "Show Image on Cutting Plane",
+  "render-plane-annotations": "Show Annotations",
 
   "layers": "Layers",
   "add-annotation-layer": "Add new annotation",

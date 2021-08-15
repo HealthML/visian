@@ -66,15 +66,15 @@ const generateReduceLayerStack = (
  * @param layerCount The number of layers.
  * @param outputName The output variable to assign the blended color to.
  * @param uvName The name of the variable holding the current UV coordinates.
- * @param enhancementFunctionName The name of the function which is applied
- * to every non-annotation layer before blending.
+ * @param enhancementFunctionName The optional name of the function which is
+ * applied to every non-annotation layer before blending.
  * @returns The generated GLSL code.
  */
 const generateReduceEnhancedLayerStack = (
   layerCount: number,
   outputName = "imageValue",
   uvName = "uv",
-  enhancementFunctionName = "applyBrightnessContrast",
+  enhancementFunctionName?: string,
 ) => {
   const image = `_image${Math.floor(Math.random() * 1000)}`;
   const activeLayer = `_activeLayer${Math.floor(Math.random() * 1000)}`;
@@ -93,7 +93,7 @@ const generateReduceEnhancedLayerStack = (
     if (i === 0) {
       // Region growing preview
       fragment += `
-      ${image}.rgb = step(uPreviewThreshold, ${image}.rgb);
+      ${image}.rgb = step(uRegionGrowingThreshold, ${image}.rgb);
       ${image}.rgb *= vec3(1.0) - step(0.001, ${activeLayer}.rgb);
       `;
     }
@@ -106,8 +106,12 @@ const generateReduceEnhancedLayerStack = (
 
     if(uLayerAnnotationStatuses[${i}]) {
       ${image}.a = step(0.01, ${image}.a);
-    } else {
+    } ${
+      enhancementFunctionName
+        ? `else {
       ${image} = ${enhancementFunctionName}(${image});
+    }`
+        : ""
     }
     
     ${image}.a *= uLayerOpacities[${i}];
@@ -155,7 +159,7 @@ const generateReduceRawImages = (
 // Macro definitions
 const layerCountRegex = /{{layerCount}}/g;
 const reduceLayerStackRegex = /{{reduceLayerStack\((\w+),\s*(\w+),\s*(\w+)(,\s*(\w+))?\)}}/g;
-const reduceEnhancedLayerStackRegex = /{{reduceEnhancedLayerStack\((\w+),\s*(\w+),\s*(\w+)\)}}/g;
+const reduceEnhancedLayerStackRegex = /{{reduceEnhancedLayerStack\((\w+),\s*(\w+)(,\s*(\w+))?\)}}/g;
 const reduceRawImagesRegex = /{{reduceRawImages\((\w+),\s*(\w+)\)}}/g;
 
 /**
@@ -189,7 +193,13 @@ export const composeLayeredShader = (shader: string, layerCount: number) =>
     )
     .replace(
       reduceEnhancedLayerStackRegex,
-      (_match, outputName, uvName, enhancementFunctionName) =>
+      (
+        _match,
+        outputName,
+        uvName,
+        _fullEnhancementFunctionName,
+        enhancementFunctionName,
+      ) =>
         generateReduceEnhancedLayerStack(
           layerCount,
           outputName,

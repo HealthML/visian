@@ -37,6 +37,7 @@ export interface Viewport3DSnapshot<N extends string> {
   cuttingPlaneNormal: number[];
   cuttingPlaneDistance: number;
   shouldCuttingPlaneRender: boolean;
+  shouldCuttingPlaneShowAnnotations: boolean;
 }
 
 export class Viewport3D
@@ -66,6 +67,7 @@ export class Viewport3D
   public cuttingPlaneNormal = new Vector([0, 1, 0]);
   public cuttingPlaneDistance = 0;
   public shouldCuttingPlaneRender = false;
+  public shouldCuttingPlaneShowAnnotations = true;
 
   private shadingTimeout?: NodeJS.Timer;
 
@@ -93,6 +95,7 @@ export class Viewport3D
       cuttingPlaneNormal: observable,
       cuttingPlaneDistance: observable,
       shouldCuttingPlaneRender: observable,
+      shouldCuttingPlaneShowAnnotations: observable,
 
       activeTransferFunction: computed,
 
@@ -113,6 +116,7 @@ export class Viewport3D
       increaseCuttingPlaneDistance: action,
       decreaseCuttingPlaneDistance: action,
       setShouldCuttingPlaneRender: action,
+      setShouldCuttingPlaneShowAnnotations: action,
       resetCuttingPlane: action,
       reset: action,
       applySnapshot: action,
@@ -332,11 +336,16 @@ export class Viewport3D
     if (value) this.setUseCuttingPlane(true);
   };
 
+  public setShouldCuttingPlaneShowAnnotations = (value = true) => {
+    this.shouldCuttingPlaneShowAnnotations = value;
+  };
+
   public resetCuttingPlane = () => {
     this.setUseCuttingPlane();
     this.setCuttingPlaneNormal();
     this.setCuttingPlaneDistance();
     this.setShouldCuttingPlaneRender();
+    this.setShouldCuttingPlaneShowAnnotations();
   };
 
   public reset = (): void => {
@@ -367,6 +376,7 @@ export class Viewport3D
       cuttingPlaneNormal: this.cuttingPlaneNormal.toJSON(),
       cuttingPlaneDistance: this.cuttingPlaneDistance,
       shouldCuttingPlaneRender: this.shouldCuttingPlaneRender,
+      shouldCuttingPlaneShowAnnotations: this.shouldCuttingPlaneShowAnnotations,
     };
   }
 
@@ -409,6 +419,9 @@ export class Viewport3D
     }
     this.setCuttingPlaneDistance(snapshot?.cuttingPlaneDistance);
     this.setShouldCuttingPlaneRender(snapshot?.shouldCuttingPlaneRender);
+    this.setShouldCuttingPlaneShowAnnotations(
+      snapshot?.shouldCuttingPlaneShowAnnotations,
+    );
 
     return Promise.resolve();
   }

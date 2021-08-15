@@ -1,8 +1,11 @@
 varying vec3 vVolumeCoords;
 
-uniform sampler2D uDataTexture;
-uniform vec3 uVoxelCount;
-uniform vec2 uAtlasGrid;
+@import ../uniforms/u-common;
+@import ../uniforms/u-atlas-info;
+@import ../uniforms/u-image-info;
+
+uniform int uComponents;
+
 
 void main() {
   vec3 volumeCoords = vVolumeCoords;
@@ -16,9 +19,12 @@ void main() {
   
   @import ../utils/volume-coords-to-uv;
 
-  float density = texture2D(uDataTexture, uv).x;
+  vec4 imageValue = vec4(0.0);
+  {{reduceEnhancedLayerStack(imageValue, uv)}}
 
-  if(density < 0.01) discard;
+  if(imageValue.a < 0.01) discard;
 
-  gl_FragColor = vec4(vec3(density), 1.0);
+  imageValue.rgb *= imageValue.a;
+  imageValue.a = 1.0;
+  gl_FragColor = imageValue;
 }
