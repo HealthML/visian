@@ -32,7 +32,7 @@ export class SliceMaterial extends THREE.ShaderMaterial implements IDisposable {
         uBrightness: { value: editor.activeDocument?.viewSettings.brightness },
         uComponents: { value: 1 },
         uActiveLayerData: { value: null },
-        uPreviewThreshold: { value: 0 },
+        uRegionGrowingThreshold: { value: 0 },
       },
       transparent: true,
       side: THREE.DoubleSide,
@@ -92,7 +92,7 @@ export class SliceMaterial extends THREE.ShaderMaterial implements IDisposable {
         const steps =
           editor.activeDocument?.tools.regionGrowingRenderer3D.steps ?? 0;
 
-        this.uniforms.uPreviewThreshold.value =
+        this.uniforms.uRegionGrowingThreshold.value =
           (MAX_REGION_GROWING_STEPS + 1 - steps) /
           (MAX_REGION_GROWING_STEPS + 1);
         editor.sliceRenderer?.lazyRender();

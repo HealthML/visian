@@ -1,5 +1,15 @@
-import { IEditor, isPerformanceLow, IVolumeRenderer } from "@visian/ui-shared";
-import { IDisposable, IDisposer } from "@visian/utils";
+import {
+  DragPoint,
+  IEditor,
+  isPerformanceLow,
+  IVolumeRenderer,
+} from "@visian/ui-shared";
+import {
+  convertPositionToWebGLPosition,
+  IDisposable,
+  IDisposer,
+  Voxel,
+} from "@visian/utils";
 import { autorun, computed, makeObservable, reaction } from "mobx";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
@@ -76,6 +86,11 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
         orbitTarget.z,
       );
     }
+    this.orbitControls.mouseButtons = {
+      LEFT: THREE.MOUSE.ROTATE,
+      MIDDLE: THREE.MOUSE.ROTATE,
+      RIGHT: THREE.MOUSE.ROTATE,
+    };
     this.orbitControls.addEventListener("change", this.onOrbitControlsChange);
 
     this.flyControls = new FlyControls(this.camera, this.renderer.domElement);
@@ -191,6 +206,12 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
         },
         { fireImmediately: true },
       ),
+      autorun(() => {
+        this.orbitControls.mouseButtons.LEFT =
+          editor.activeDocument?.tools.activeTool?.name !== "smart-brush-3d"
+            ? THREE.MOUSE.ROTATE
+            : -1;
+      }),
       reaction(
         () => editor.activeDocument?.viewport3D.cameraMatrix?.toArray(),
         (array?: number[]) => {
@@ -232,6 +253,35 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
         this.orbitControls.enableZoom =
           this.editor.activeDocument?.tools.activeTool?.name !== "plane-tool";
       }),
+      reaction(
+        () =>
+          editor.activeDocument?.tools.activeTool?.name === "smart-brush-3d",
+        (is3DSmartBrushSelected: boolean) => {
+          if (is3DSmartBrushSelected) {
+            this.renderer.domElement.addEventListener(
+              "pointerdown",
+              this.onSmartBrushClick,
+            );
+            this.renderer.domElement.addEventListener(
+              "pointermove",
+              this.onSmartBrushMove,
+            );
+          } else {
+            this.renderer.domElement.removeEventListener(
+              "pointerdown",
+              this.onSmartBrushClick,
+            );
+            this.renderer.domElement.removeEventListener(
+              "pointermove",
+              this.onSmartBrushMove,
+            );
+            this.editor.activeDocument?.tools.setIsCursorOverDrawableArea(
+              false,
+            );
+          }
+        },
+        { fireImmediately: true },
+      ),
     );
 
     makeObservable(this, {
@@ -249,6 +299,10 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
     this.flyControls.removeEventListener("unlock", this.onFlyControlsUnlock);
     this.flyControls.dispose();
     document.removeEventListener("click", this.selectNavigationTool);
+    this.renderer.domElement.removeEventListener(
+      "pointerdown",
+      this.onSmartBrushClick,
+    );
     this.gradientComputer.dispose();
     this.laoComputer.dispose();
     this.screenAlignedQuad.dispose();
@@ -444,5 +498,108 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
     } else {
       this.flyControls.lock();
     }
+  };
+
+  private getSmartBrushIntersection(event: PointerEvent): Voxel | undefined {
+    const image = this.editor.activeDocument?.baseImageLayer?.image;
+    if (!image) return undefined;
+
+    const clickPosition = { x: event.clientX, y: event.clientY };
+    const canvasRect = this.renderer.domElement.getBoundingClientRect();
+    if (
+      clickPosition.x <= canvasRect.left ||
+      clickPosition.x >= canvasRect.right ||
+      clickPosition.y <= canvasRect.top ||
+      clickPosition.y >= canvasRect.bottom
+    )
+      return undefined;
+
+    const canvasPosition = {
+      x: clickPosition.x - canvasRect.left,
+      y: clickPosition.y - canvasRect.top,
+    };
+
+    const webGLPosition = convertPositionToWebGLPosition(
+      canvasPosition,
+      canvasRect,
+    );
+
+    const objects: THREE.Object3D[] = [];
+    if (this.editor.activeDocument?.viewport3D.useClippingPlane) {
+      objects.push(this.volume.clippingPlane);
+    }
+    const useCone =
+      this.editor.activeDocument?.viewport3D.activeTransferFunction?.name ===
+      "fc-cone";
+    if (useCone) {
+      objects.push(this.volume.raycastingCone);
+      this.volume.raycastingCone.updateGeometry();
+      this.volume.raycastingCone.visible = true;
+    }
+
+    this.raycaster.setFromCamera(webGLPosition, this.camera);
+    const intersections = this.raycaster.intersectObjects(objects);
+
+    if (useCone) {
+      this.volume.raycastingCone.visible = false;
+    }
+
+    if (!intersections.length) return undefined;
+
+    this.workingVector.set(
+      image.voxelCount.x,
+      image.voxelCount.y,
+      image.voxelCount.z,
+    );
+
+    const seedPoint = intersections[0].point;
+
+    this.volume
+      .worldToLocal(seedPoint)
+      .addScalar(0.5)
+      .multiply(this.workingVector)
+      .round();
+
+    if (
+      seedPoint
+        .toArray()
+        .every(
+          (value, index) =>
+            value >= 0 && value < this.workingVector.getComponent(index),
+        )
+    ) {
+      return seedPoint;
+    }
+
+    return undefined;
+  }
+
+  private onSmartBrushMove = (event: PointerEvent) => {
+    this.editor.activeDocument?.tools.setIsCursorOverDrawableArea(
+      !!this.getSmartBrushIntersection(event),
+    );
+  };
+
+  private onSmartBrushClick = (event: PointerEvent) => {
+    if (event.button !== 0) return;
+
+    const smartBrush3D = this.editor.activeDocument?.tools.tools[
+      "smart-brush-3d"
+    ];
+    if (!smartBrush3D) return;
+
+    const seedPoint = this.getSmartBrushIntersection(event);
+    if (!seedPoint) return;
+
+    const seedDragPoint: DragPoint = {
+      x: seedPoint.x,
+      y: seedPoint.y,
+      z: seedPoint.z,
+      right: false,
+      bottom: false,
+    };
+
+    smartBrush3D.startAt(seedDragPoint);
+    smartBrush3D.endAt(seedDragPoint);
   };
 }

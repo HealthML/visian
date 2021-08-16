@@ -142,10 +142,11 @@ export interface IViewport3D<N extends string> {
   activeTransferFunction?: Reference<ITransferFunction<N>>;
   transferFunctions: Record<N, ITransferFunction<N>>;
 
-  useCuttingPlane: boolean;
-  cuttingPlaneNormal: Vector;
-  cuttingPlaneDistance: number;
-  shouldCuttingPlaneRender: boolean;
+  useClippingPlane: boolean;
+  clippingPlaneNormal: Vector;
+  clippingPlaneDistance: number;
+  shouldClippingPlaneRender: boolean;
+  shouldClippingPlaneShowAnnotations: boolean;
 
   onTransferFunctionChange: () => void;
 
@@ -160,12 +161,13 @@ export interface IViewport3D<N extends string> {
     nameOrTransferFunction?: N | ITransferFunction<N>,
   ): void;
   cycleActiveTransferFunction(): void;
-  setUseCuttingPlane(value?: boolean): void;
-  setCuttingPlaneNormal(x?: number, y?: number, z?: number): void;
-  setCuttingPlaneNormalToFaceCamera(): void;
-  setCuttingPlaneDistance(value?: number): void;
-  increaseCuttingPlaneDistance(): void;
-  decreaseCuttingPlaneDistance(): void;
-  setShouldCuttingPlaneRender(value?: boolean): void;
-  resetCuttingPlane(): void;
+  setUseClippingPlane(value?: boolean): void;
+  setClippingPlaneNormal(x?: number, y?: number, z?: number): void;
+  setClippingPlaneNormalToFaceCamera(): void;
+  setClippingPlaneDistance(value?: number): void;
+  increaseClippingPlaneDistance(): void;
+  decreaseClippingPlaneDistance(): void;
+  setShouldClippingPlaneRender(value?: boolean): void;
+  setShouldClippingPlaneShowAnnotations(value?: boolean): void;
+  resetClippingPlane(): void;
 }

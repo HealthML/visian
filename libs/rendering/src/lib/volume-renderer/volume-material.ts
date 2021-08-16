@@ -14,7 +14,7 @@ import { SharedUniforms } from "./utils";
 export class VolumeMaterial
   extends THREE.ShaderMaterial
   implements IDisposable {
-  private disposers: IDisposer[];
+  private disposers: IDisposer[] = [];
 
   constructor(
     editor: IEditor,
@@ -54,7 +54,7 @@ export class VolumeMaterial
     this.uniforms.uOutputFirstDerivative.value = outputDerivative;
     this.uniforms.uLAO.value = lao;
 
-    this.disposers = [
+    this.disposers.push(
       reaction(
         () => editor.volumeRenderer?.renderedImageLayerCount || 1,
         (layerCount: number) => {
@@ -66,7 +66,7 @@ export class VolumeMaterial
         },
         { fireImmediately: true },
       ),
-    ];
+    );
   }
 
   public setVolumetricOcclusion(value: boolean) {

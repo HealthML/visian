@@ -47,6 +47,7 @@
   "discard-region-growing": "Abbrechen",
   "enable-plane": "Schnittebene nutzen",
   "render-plane": "Bild auf der Schnittebene anzeigen",
+  "render-plane-annotations": "Annotationen anzeigen",
 
   "layers": "Ebenen",
   "add-annotation-layer": "Neue Annotation hinzufügen",

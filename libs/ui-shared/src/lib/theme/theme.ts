@@ -2,24 +2,19 @@ import { ThemeProps as StyledThemeProps } from "styled-components";
 import { action, makeObservable, observable } from "mobx";
 
 const dataColors = {
-  "Salient Safran": "#D0C068",
-  Conifer: "#8AD64F",
-  "Lavender Magenta": "#EA92E1",
-  Jaffa: "#EA7E30",
-  "Green Haze": "#049C6D",
-  "Azure Radiance": "#0085FF",
-  "Brick Red": "#CA3345",
-  Turquoise: "#2CD9D9",
-  "Chestnut Rose": "#D06868",
-  "True V": "#8368D0",
-  "Cerulean Blue": "#3159C2",
-  Whiskey: "#D0A768",
-  Mercury: "#E7E7E7",
-  "Purple Heart": "#5A3FC6",
-  Downy: "#68D09E",
-  "Brilliant Rose": "#EC42C6",
-  Lima: "#58DC2A",
-  "Honey Flower": "#62156F",
+  "Genome Gold": "#FFC700",
+  "Neuronic Neon": "#68D09E",
+  "Salient Safran": "#E1FA47",
+  "Frontal Flamingo": "#FF6B93",
+  "Sexy Sapphire": "#3269F5",
+  "Obviously Orange": "#FF6B00",
+
+  "Mighty Mercury": "#FFFFFF",
+  "Augmented Aqua": "#69F5F5",
+  "Visian Vanilla": "#FFE998",
+  "Matter Magenta": "#CF52E3",
+  "Posterior Plum": "#7B386D",
+  "Beamy Bronze": "#8E4B19",
 };
 export const dataColorKeys = Object.keys(
   dataColors,
@@ -51,7 +46,7 @@ const colorModes = {
     sideViewBorder: "rgba(0, 0, 0, 0.3)",
 
     ...dataColors,
-    Mercury: "#000000",
+    "Mighty Mercury": "#000000",
   },
   dark: {
     text: "rgba(255,255,255,0.8)",

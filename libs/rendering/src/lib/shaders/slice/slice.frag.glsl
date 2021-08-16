@@ -14,7 +14,7 @@ uniform float uBrightness;
 uniform int uComponents;
 
 uniform sampler2D uActiveLayerData;
-uniform float uPreviewThreshold;
+uniform float uRegionGrowingThreshold;
 
 vec4 applyBrightnessContrast(vec4 image) {
   if(uComponents >= 3) {
