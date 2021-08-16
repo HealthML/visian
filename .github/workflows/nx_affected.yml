@@ -39,12 +39,14 @@ jobs:
       #- run: yarn affected:e2e --base=origin/master
 
       - uses: actions/upload-artifact@v2
+        if: success() && (github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/master')
         with:
           name: editor-build
           path: dist/apps/editor/
           if-no-files-found: ignore
           retention-days: 1
       - uses: actions/upload-artifact@v2
+        if: success() && (github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/master')
         with:
           name: ar-demo-build
           path: dist/apps/ar-demo/
