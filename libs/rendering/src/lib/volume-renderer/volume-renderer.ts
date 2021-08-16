@@ -228,7 +228,8 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
       }),
       reaction(
         () =>
-          editor.activeDocument?.tools.activeTool?.name === "smart-brush-3d",
+          editor.activeDocument?.tools.activeTool?.name === "smart-brush-3d" &&
+          editor.activeDocument?.viewSettings.viewMode === "3D",
         (is3DSmartBrushSelected: boolean) => {
           if (is3DSmartBrushSelected) {
             this.renderer.domElement.addEventListener(
@@ -544,6 +545,14 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
 
   private onSmartBrushClick = (event: PointerEvent) => {
     if (event.button !== 0) return;
+
+    if (
+      !this.editor.activeDocument?.activeLayer?.isVisible ||
+      !this.editor.activeDocument?.activeLayer?.isAnnotation
+    ) {
+      this.editor.activeDocument?.setShowLayerMenu(true);
+      return;
+    }
 
     const smartBrush3D = this.editor.activeDocument?.tools.tools[
       "smart-brush-3d"
