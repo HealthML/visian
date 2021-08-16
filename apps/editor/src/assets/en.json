@@ -45,8 +45,9 @@
   "region-growing-steps": "Maximum Distance to Seed",
   "submit-3D-region-growing": "Apply (Enter)",
   "discard-region-growing": "Discard",
-  "enable-plane": "Use Cutting Plane",
-  "render-plane": "Show Image on Cutting Plane",
+  "enable-plane": "Use Clipping Plane",
+  "render-plane": "Show Image on Clipping Plane",
+  "render-plane-annotations": "Show Annotations",
 
   "layers": "Layers",
   "add-annotation-layer": "Add new annotation",

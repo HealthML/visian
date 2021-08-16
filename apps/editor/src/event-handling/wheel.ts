@@ -27,11 +27,11 @@ export const setUpWheelHandling = (store: RootStore): IDisposer => {
         const interactionType = getWheelInteractionType(event);
         switch (interactionType) {
           case WheelInteractionType.Up:
-            store.editor.activeDocument.viewport3D.decreaseCuttingPlaneDistance();
+            store.editor.activeDocument.viewport3D.decreaseClippingPlaneDistance();
             break;
 
           case WheelInteractionType.Down:
-            store.editor.activeDocument.viewport3D.increaseCuttingPlaneDistance();
+            store.editor.activeDocument.viewport3D.increaseClippingPlaneDistance();
             break;
         }
       }

@@ -139,7 +139,7 @@ export const Toolbar: React.FC = observer(() => {
         onOutsidePress={closeModal}
         onReset={
           store?.editor.activeDocument?.tools.activeTool?.name === "plane-tool"
-            ? store?.editor.activeDocument?.viewport3D.resetCuttingPlane
+            ? store?.editor.activeDocument?.viewport3D.resetClippingPlane
             : store?.editor.activeDocument?.tools.resetActiveToolSetings
         }
       >
@@ -194,21 +194,32 @@ export const Toolbar: React.FC = observer(() => {
             <BooleanParam
               labelTx="enable-plane"
               value={Boolean(
-                store?.editor.activeDocument?.viewport3D.useCuttingPlane,
+                store?.editor.activeDocument?.viewport3D.useClippingPlane,
               )}
               setValue={
-                store?.editor.activeDocument?.viewport3D.setUseCuttingPlane
+                store?.editor.activeDocument?.viewport3D.setUseClippingPlane
               }
             />
             <BooleanParam
               labelTx="render-plane"
               value={Boolean(
                 store?.editor.activeDocument?.viewport3D
-                  .shouldCuttingPlaneRender,
+                  .shouldClippingPlaneRender,
               )}
               setValue={
                 store?.editor.activeDocument?.viewport3D
-                  .setShouldCuttingPlaneRender
+                  .setShouldClippingPlaneRender
+              }
+            />
+            <BooleanParam
+              labelTx="render-plane-annotations"
+              value={Boolean(
+                store?.editor.activeDocument?.viewport3D
+                  .shouldClippingPlaneShowAnnotations,
+              )}
+              setValue={
+                store?.editor.activeDocument?.viewport3D
+                  .setShouldClippingPlaneShowAnnotations
               }
             />
           </>

@@ -487,8 +487,8 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
     );
 
     const objects: THREE.Object3D[] = [];
-    if (this.editor.activeDocument?.viewport3D.useCuttingPlane) {
-      objects.push(this.volume.cuttingPlane);
+    if (this.editor.activeDocument?.viewport3D.useClippingPlane) {
+      objects.push(this.volume.clippingPlane);
     }
     const useCone =
       this.editor.activeDocument?.viewport3D.activeTransferFunction?.name ===

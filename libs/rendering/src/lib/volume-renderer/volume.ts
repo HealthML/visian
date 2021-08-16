@@ -6,7 +6,7 @@ import * as THREE from "three";
 import { RenderedImage } from "../rendered-image";
 import {
   BoundingBox,
-  CuttingPlane,
+  ClippingPlane,
   RaycastingCone,
   SharedUniforms,
 } from "./utils";
@@ -14,7 +14,7 @@ import { VolumeMaterial } from "./volume-material";
 
 /** A volume domain. */
 export class Volume extends THREE.Mesh implements IDisposable {
-  public cuttingPlane: CuttingPlane;
+  public clippingPlane: ClippingPlane;
 
   private boundingBox: BoundingBox;
 
@@ -45,8 +45,8 @@ export class Volume extends THREE.Mesh implements IDisposable {
 
     this.renderOrder = 1;
 
-    this.cuttingPlane = new CuttingPlane(editor);
-    this.add(this.cuttingPlane);
+    this.clippingPlane = new ClippingPlane(editor, sharedUniforms);
+    this.add(this.clippingPlane);
 
     this.boundingBox = new BoundingBox(editor);
     this.add(this.boundingBox);
@@ -82,7 +82,7 @@ export class Volume extends THREE.Mesh implements IDisposable {
 
   public dispose() {
     (this.material as VolumeMaterial).dispose();
-    this.cuttingPlane.dispose();
+    this.clippingPlane.dispose();
     this.boundingBox.dispose();
     this.disposers.forEach((disposer) => disposer());
   }
