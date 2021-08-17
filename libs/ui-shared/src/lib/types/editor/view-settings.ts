@@ -27,9 +27,6 @@ export interface IViewSettings {
    */
   contrast: number;
 
-  /** The background color as as CSS color string. */
-  backgroundColor: string;
-
   setViewMode(value: ViewMode): void;
 
   setSelectedVoxel(x?: number, y?: number, z?: number): void;
@@ -54,6 +51,9 @@ export interface IViewport2D {
    * All slice markers, aggregated for the document and current main view type.
    */
   sliceMarkers: MarkerConfig[];
+
+  /** Sets the main view type. */
+  setMainViewType(viewType: ViewType): void;
 
   /**
    * Returns the selected slice for the given `ViewType`.
@@ -103,8 +103,6 @@ export interface ITransferFunction<N extends string> {
   /** This transfer function's parameters. */
   params: { [name: string]: IParameter };
 
-  laoBrightnessFactor: number;
-
   /** Called when the transfer function becomes active. */
   activate(): void;
 
@@ -147,10 +145,13 @@ export interface IViewport3D<N extends string> {
   activeTransferFunction?: Reference<ITransferFunction<N>>;
   transferFunctions: Record<N, ITransferFunction<N>>;
 
-  useCuttingPlane: boolean;
-  cuttingPlaneNormal: Vector;
-  cuttingPlaneDistance: number;
-  shouldCuttingPlaneRender: boolean;
+  useSmoothSegmentations: boolean;
+
+  useClippingPlane: boolean;
+  clippingPlaneNormal: Vector;
+  clippingPlaneDistance: number;
+  shouldClippingPlaneRender: boolean;
+  shouldClippingPlaneShowAnnotations: boolean;
 
   onTransferFunctionChange: () => void;
 
@@ -165,12 +166,14 @@ export interface IViewport3D<N extends string> {
     nameOrTransferFunction?: N | ITransferFunction<N>,
   ): void;
   cycleActiveTransferFunction(): void;
-  setUseCuttingPlane(value?: boolean): void;
-  setCuttingPlaneNormal(x?: number, y?: number, z?: number): void;
-  setCuttingPlaneNormalToFaceCamera(): void;
-  setCuttingPlaneDistance(value?: number): void;
-  increaseCuttingPlaneDistance(): void;
-  decreaseCuttingPlaneDistance(): void;
-  setShouldCuttingPlaneRender(value?: boolean): void;
-  resetCuttingPlane(): void;
+  setUseSmoothSegmentations(value?: boolean): void;
+  setUseClippingPlane(value?: boolean): void;
+  setClippingPlaneNormal(x?: number, y?: number, z?: number): void;
+  setClippingPlaneNormalToFaceCamera(): void;
+  setClippingPlaneDistance(value?: number): void;
+  increaseClippingPlaneDistance(): void;
+  decreaseClippingPlaneDistance(): void;
+  setShouldClippingPlaneRender(value?: boolean): void;
+  setShouldClippingPlaneShowAnnotations(value?: boolean): void;
+  resetClippingPlane(): void;
 }

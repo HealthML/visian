@@ -6,6 +6,8 @@ varying vec3 vRayOrigin;
 uniform sampler2D uOutputFirstDerivative;
 uniform sampler2D uLAO;
 
+uniform bool uUseRayDithering;
+
 @import ../uniforms/u-opacity;
 @import ../uniforms/u-common;
 @import ../uniforms/u-atlas-info;
@@ -42,6 +44,7 @@ vec4 getVolumeColor(vec3 volumeCoords) {
   return vec4(volumeColor.rgb, volumeColor.a * uOpacity);
 }
 
+#define RAY_DITHERING
 @import ../utils/march-ray;
 
 /**
@@ -54,5 +57,5 @@ void main() {
   float far;
   computeNearFar(normalizedRayDirection, near, far);
 
-  gl_FragColor = marchRay(vRayOrigin, normalizedRayDirection, near, far, uStepSize);
+  gl_FragColor = marchRay(vRayOrigin, normalizedRayDirection, near, far, uStepSize, uUseRayDithering);
 }

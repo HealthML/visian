@@ -166,6 +166,12 @@ export interface IStringParameter extends IParameter<string> {
  */
 export interface IColorParameter extends IParameter<string> {
   kind: "color";
+
+  /**
+   * If set to `true`, only the currently selected color is inlined and the
+   * color picker itselfs opens into a new modal.
+   */
+  isCollapsed?: boolean;
 }
 
 /**

@@ -1,12 +1,16 @@
 import {
+  DragPoint,
   IEditor,
-  IImageLayer,
-  ILayerParameter,
   isPerformanceLow,
   IVolumeRenderer,
 } from "@visian/ui-shared";
-import { IDisposable, IDisposer } from "@visian/utils";
-import { autorun, reaction } from "mobx";
+import {
+  convertPositionToWebGLPosition,
+  IDisposable,
+  IDisposer,
+  Voxel,
+} from "@visian/utils";
+import { autorun, computed, makeObservable, reaction } from "mobx";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import Stats from "three/examples/jsm/libs/stats.module";
@@ -24,6 +28,8 @@ import { VolumeMaterial } from "./volume-material";
 import { XRManager } from "./xr-manager";
 
 export class VolumeRenderer implements IVolumeRenderer, IDisposable {
+  public readonly excludeFromSnapshotTracking = ["editor"];
+
   private sharedUniforms: SharedUniforms;
 
   public renderer: THREE.WebGLRenderer;
@@ -79,6 +85,11 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
         orbitTarget.z,
       );
     }
+    this.orbitControls.mouseButtons = {
+      LEFT: THREE.MOUSE.ROTATE,
+      MIDDLE: THREE.MOUSE.ROTATE,
+      RIGHT: THREE.MOUSE.ROTATE,
+    };
     this.orbitControls.addEventListener("change", this.onOrbitControlsChange);
 
     this.flyControls = new FlyControls(this.camera, this.renderer.domElement);
@@ -153,26 +164,6 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
 
     this.disposers.push(
       reaction(
-        () => {
-          const layerParameter =
-            editor.activeDocument?.viewport3D.activeTransferFunction?.params
-              .image;
-          if (!layerParameter) return undefined;
-
-          const layerId = (layerParameter as ILayerParameter).value;
-          if (!layerId) return undefined;
-
-          // As we already know that the layer parameter exist, we can be sure
-          // that the active document is not undefined.
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          const imageLayer = editor.activeDocument!.getLayer(layerId);
-          return imageLayer ? (imageLayer as IImageLayer).image : undefined;
-        },
-        () => {
-          this.onCameraMove(false);
-        },
-      ),
-      reaction(
         () => editor.activeDocument?.viewSettings.viewMode,
         (viewMode) => {
           switch (viewMode) {
@@ -188,6 +179,12 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
         },
         { fireImmediately: true },
       ),
+      autorun(() => {
+        this.orbitControls.mouseButtons.LEFT =
+          editor.activeDocument?.tools.activeTool?.name !== "smart-brush-3d"
+            ? THREE.MOUSE.ROTATE
+            : -1;
+      }),
       reaction(
         () => editor.activeDocument?.viewport3D.cameraMatrix?.toArray(),
         (array?: number[]) => {
@@ -229,7 +226,41 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
         this.orbitControls.enableZoom =
           this.editor.activeDocument?.tools.activeTool?.name !== "plane-tool";
       }),
+      reaction(
+        () =>
+          editor.activeDocument?.tools.activeTool?.name === "smart-brush-3d" &&
+          editor.activeDocument?.viewSettings.viewMode === "3D",
+        (is3DSmartBrushSelected: boolean) => {
+          if (is3DSmartBrushSelected) {
+            this.renderer.domElement.addEventListener(
+              "pointerdown",
+              this.onSmartBrushClick,
+            );
+            this.renderer.domElement.addEventListener(
+              "pointermove",
+              this.onSmartBrushMove,
+            );
+          } else {
+            this.renderer.domElement.removeEventListener(
+              "pointerdown",
+              this.onSmartBrushClick,
+            );
+            this.renderer.domElement.removeEventListener(
+              "pointermove",
+              this.onSmartBrushMove,
+            );
+            this.editor.activeDocument?.tools.setIsCursorOverDrawableArea(
+              false,
+            );
+          }
+        },
+        { fireImmediately: true },
+      ),
     );
+
+    makeObservable(this, {
+      renderedImageLayerCount: computed,
+    });
   }
 
   public dispose = () => {
@@ -242,6 +273,10 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
     this.flyControls.removeEventListener("unlock", this.onFlyControlsUnlock);
     this.flyControls.dispose();
     document.removeEventListener("click", this.selectNavigationTool);
+    this.renderer.domElement.removeEventListener(
+      "pointerdown",
+      this.onSmartBrushClick,
+    );
     this.gradientComputer.dispose();
     this.laoComputer.dispose();
     this.screenAlignedQuad.dispose();
@@ -251,6 +286,11 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
     this.sharedUniforms.dispose();
     this.disposers.forEach((disposer) => disposer());
   };
+
+  public get renderedImageLayerCount() {
+    // additional layer for 3d region growing preview
+    return (this.editor.activeDocument?.imageLayers.length || 0) + 1;
+  }
 
   public resetScene(hardReset = false) {
     // Position the volume in a reasonable height for XR.
@@ -310,8 +350,12 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
     this.flyControls.tick();
   };
 
-  public lazyRender = (updateLighting = false) => {
+  public lazyRender = (updateLighting = false, updateGradients = false) => {
     this.lazyRenderTriggered = true;
+
+    if (updateGradients) {
+      this.gradientComputer.updateAllDerivatives();
+    }
 
     if (updateLighting) {
       this.laoComputer.setDirty();
@@ -320,10 +364,7 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
   };
 
   private eagerRender = () => {
-    if (
-      !this.editor.activeDocument?.viewport3D.activeTransferFunction?.params
-        .image.value
-    ) {
+    if (!this.editor.activeDocument?.baseImageLayer) {
       this.renderer.clear();
       return;
     }
@@ -370,7 +411,7 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
   /**
    * @see https://davidpeicho.github.io/blog/cloud-raymarching-walkthrough-part1/
    */
-  private updateCameraPosition(camera: THREE.Camera = this.camera) {
+  public updateCameraPosition(camera: THREE.Camera = this.camera) {
     this.volume.updateMatrixWorld();
 
     this.workingVector.setFromMatrixPosition(camera.matrixWorld);
@@ -420,5 +461,116 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
     } else {
       this.flyControls.lock();
     }
+  };
+
+  private getSmartBrushIntersection(event: PointerEvent): Voxel | undefined {
+    const image = this.editor.activeDocument?.baseImageLayer?.image;
+    if (!image) return undefined;
+
+    const clickPosition = { x: event.clientX, y: event.clientY };
+    const canvasRect = this.renderer.domElement.getBoundingClientRect();
+    if (
+      clickPosition.x <= canvasRect.left ||
+      clickPosition.x >= canvasRect.right ||
+      clickPosition.y <= canvasRect.top ||
+      clickPosition.y >= canvasRect.bottom
+    )
+      return undefined;
+
+    const canvasPosition = {
+      x: clickPosition.x - canvasRect.left,
+      y: clickPosition.y - canvasRect.top,
+    };
+
+    const webGLPosition = convertPositionToWebGLPosition(
+      canvasPosition,
+      canvasRect,
+    );
+
+    const objects: THREE.Object3D[] = [];
+    if (this.editor.activeDocument?.viewport3D.useClippingPlane) {
+      objects.push(this.volume.clippingPlane);
+    }
+    const useCone =
+      this.editor.activeDocument?.viewport3D.activeTransferFunction?.name ===
+      "fc-cone";
+    if (useCone) {
+      objects.push(this.volume.raycastingCone);
+      this.volume.raycastingCone.updateGeometry();
+      this.volume.raycastingCone.visible = true;
+    }
+
+    this.raycaster.setFromCamera(webGLPosition, this.camera);
+    const intersections = this.raycaster.intersectObjects(objects);
+
+    if (useCone) {
+      this.volume.raycastingCone.visible = false;
+    }
+
+    if (!intersections.length) return undefined;
+
+    this.workingVector.set(
+      image.voxelCount.x,
+      image.voxelCount.y,
+      image.voxelCount.z,
+    );
+
+    const seedPoint = intersections[0].point;
+
+    this.volume
+      .worldToLocal(seedPoint)
+      .addScalar(0.5)
+      .multiply(this.workingVector)
+      .round();
+
+    if (
+      seedPoint
+        .toArray()
+        .every(
+          (value, index) =>
+            value >= 0 && value < this.workingVector.getComponent(index),
+        )
+    ) {
+      return seedPoint;
+    }
+
+    return undefined;
+  }
+
+  private onSmartBrushMove = (event: PointerEvent) => {
+    this.editor.activeDocument?.tools.setIsCursorOverDrawableArea(
+      !!this.getSmartBrushIntersection(event),
+    );
+  };
+
+  private onSmartBrushClick = (event: PointerEvent) => {
+    if (event.button !== 0) return;
+
+    if (
+      !this.editor.activeDocument?.activeLayer?.isVisible ||
+      !this.editor.activeDocument?.activeLayer?.isAnnotation
+    ) {
+      this.editor.activeDocument?.setShowLayerMenu(true);
+      return;
+    }
+
+    const smartBrush3D = this.editor.activeDocument?.tools.tools[
+      "smart-brush-3d"
+    ];
+    if (!smartBrush3D) return;
+
+    const seedPoint = this.getSmartBrushIntersection(event);
+    if (!seedPoint) return;
+
+    const seedDragPoint: DragPoint = {
+      x: seedPoint.x,
+      y: seedPoint.y,
+      z: seedPoint.z,
+      right: false,
+      bottom: false,
+    };
+
+    smartBrush3D.startAt(seedDragPoint);
+    smartBrush3D.endAt(seedDragPoint);
   };
 }

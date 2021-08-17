@@ -1,14 +1,23 @@
-import { IDisposable } from "@visian/utils";
+import { IEditor } from "@visian/ui-shared";
+import { IDisposable, IDisposer } from "@visian/utils";
+import { autorun, reaction } from "mobx";
 import * as THREE from "three";
-import { volumeFragmentShader, volumeVertexShader } from "../shaders";
 
-import { SharedUniforms } from "./utils";
+import {
+  composeLayeredShader,
+  volumeFragmentShader,
+  volumeVertexShader,
+} from "../shaders";
+import { getMaxSteps, SharedUniforms } from "./utils";
 
 /** A volume domain material. */
 export class VolumeMaterial
   extends THREE.ShaderMaterial
   implements IDisposable {
+  private disposers: IDisposer[] = [];
+
   constructor(
+    editor: IEditor,
     sharedUniforms: SharedUniforms,
     firstDerivative: THREE.Texture,
     secondDerivative: THREE.Texture,
@@ -22,6 +31,10 @@ export class VolumeMaterial
         ...sharedUniforms.uniforms,
         uOutputFirstDerivative: { value: null },
         uLAO: { value: null },
+        uUseRayDithering: { value: true },
+      },
+      defines: {
+        MAX_STEPS: 600,
       },
       transparent: true,
     });
@@ -29,13 +42,39 @@ export class VolumeMaterial
     // Always render the back faces.
     this.side = THREE.BackSide;
 
-    const url = new URL(window.location.href);
-    const maxStepsParam = url.searchParams.get("maxSteps");
-    this.defines.MAX_STEPS = maxStepsParam ? parseInt(maxStepsParam) : 600;
-
     this.uniforms.uInputFirstDerivative.value = firstDerivative;
     this.uniforms.uInputSecondDerivative.value = secondDerivative;
     this.uniforms.uOutputFirstDerivative.value = outputDerivative;
     this.uniforms.uLAO.value = lao;
+
+    this.disposers.push(
+      reaction(
+        () => editor.volumeRenderer?.renderedImageLayerCount || 1,
+        (layerCount: number) => {
+          this.fragmentShader = composeLayeredShader(
+            volumeFragmentShader,
+            layerCount,
+          );
+          this.needsUpdate = true;
+        },
+        { fireImmediately: true },
+      ),
+      autorun(() => {
+        const baseImage = editor.activeDocument?.baseImageLayer?.image;
+        if (baseImage) {
+          this.defines.MAX_STEPS = getMaxSteps(baseImage);
+        }
+        this.needsUpdate = true;
+      }),
+    );
+  }
+
+  public dispose() {
+    super.dispose();
+    this.disposers.forEach((disposer) => disposer());
+  }
+
+  public setUseRayDithering(value: boolean) {
+    this.uniforms.uUseRayDithering.value = value;
   }
 }

@@ -1,9 +1,9 @@
-import { IEditor, IImageLayer, ILayer } from "@visian/ui-shared";
+import { IEditor, IImageLayer } from "@visian/ui-shared";
 import { IDisposable, IDisposer, ViewType } from "@visian/utils";
 import { autorun, reaction } from "mobx";
 import * as THREE from "three";
+import { SliceMaterial } from "./slice-material";
 
-import { SliceLayer } from "./slice-layer";
 import {
   BrushCursor,
   toolOverlayZ,
@@ -12,7 +12,8 @@ import {
   getGeometrySize,
   Outline,
   PreviewBrushCursor,
-  sliceLayerIntervall,
+  sliceMeshZ,
+  OverlayMaterial,
 } from "./utils";
 
 export class Slice extends THREE.Group implements IDisposable {
@@ -26,8 +27,7 @@ export class Slice extends THREE.Group implements IDisposable {
   public crosshairSynchOffset = new THREE.Vector2();
 
   private geometry = new THREE.PlaneGeometry();
-
-  private sliceLayers: SliceLayer[] = [];
+  private mesh: THREE.Mesh;
 
   private crosshair: Crosshair;
 
@@ -35,6 +35,9 @@ export class Slice extends THREE.Group implements IDisposable {
   public outline: Outline;
 
   public previewBrushCursor: PreviewBrushCursor;
+
+  private overlayMaterial: OverlayMaterial;
+  private crosshairMaterial: OverlayMaterial;
 
   private disposers: IDisposer[] = [];
 
@@ -44,19 +47,40 @@ export class Slice extends THREE.Group implements IDisposable {
 
     this.add(this.crosshairShiftGroup);
 
-    this.crosshair = new Crosshair(this.viewType, editor);
+    this.mesh = new THREE.Mesh(
+      this.geometry,
+      new SliceMaterial(editor, viewType),
+    );
+    this.mesh.position.z = sliceMeshZ;
+    this.crosshairShiftGroup.add(this.mesh);
+
+    this.overlayMaterial = new OverlayMaterial(editor);
+    this.crosshairMaterial = new OverlayMaterial(editor, {
+      transparent: true,
+      opacity: 0.5,
+    });
+
+    this.crosshair = new Crosshair(
+      editor,
+      this.viewType,
+      this.crosshairMaterial,
+    );
     this.crosshair.position.z = crosshairZ;
     this.crosshairShiftGroup.add(this.crosshair);
 
-    this.brushCursor = new BrushCursor(editor, viewType);
+    this.brushCursor = new BrushCursor(editor, viewType, this.overlayMaterial);
     this.brushCursor.position.z = toolOverlayZ;
     this.crosshairShiftGroup.add(this.brushCursor);
 
-    this.outline = new Outline(editor, viewType);
+    this.outline = new Outline(editor, viewType, this.overlayMaterial);
     this.outline.position.z = toolOverlayZ;
     this.crosshairShiftGroup.add(this.outline);
 
-    this.previewBrushCursor = new PreviewBrushCursor(editor, viewType);
+    this.previewBrushCursor = new PreviewBrushCursor(
+      editor,
+      viewType,
+      this.overlayMaterial,
+    );
     this.previewBrushCursor.position.z = toolOverlayZ;
     this.crosshairShiftGroup.add(this.previewBrushCursor);
 
@@ -64,14 +88,10 @@ export class Slice extends THREE.Group implements IDisposable {
       autorun(this.updateScale),
       autorun(this.updateOffset),
       reaction(
-        () =>
-          this.editor.activeDocument?.layers.find(
-            (layer) => layer.kind === "image",
-          ),
-        (layer?: ILayer) => {
-          if (!layer) return;
+        () => this.editor.activeDocument?.baseImageLayer,
+        (imageLayer?: IImageLayer) => {
+          if (!imageLayer) return;
 
-          const imageLayer = layer as IImageLayer;
           const { image } = imageLayer;
           this.baseSize.copy(
             getGeometrySize(
@@ -84,16 +104,6 @@ export class Slice extends THREE.Group implements IDisposable {
         },
         { fireImmediately: true },
       ),
-      reaction(
-        () =>
-          editor.activeDocument
-            ? editor.activeDocument.layers.filter(
-                (layer) => layer.kind === "image",
-              )
-            : [],
-        this.updateSliceLayers,
-        { fireImmediately: true },
-      ),
     );
   }
 
@@ -101,6 +111,7 @@ export class Slice extends THREE.Group implements IDisposable {
     this.crosshair.dispose();
     this.brushCursor.dispose();
     this.outline.dispose();
+    (this.mesh.material as SliceMaterial).dispose();
     this.disposers.forEach((disposer) => disposer());
   }
 
@@ -122,63 +133,6 @@ export class Slice extends THREE.Group implements IDisposable {
       x: 1 - localPosition.x,
       y: localPosition.y,
     };
-  }
-
-  private updateSliceLayers = (layers: ILayer[]) => {
-    // Add new layers.
-    layers
-      .filter(
-        (layer) =>
-          !this.sliceLayers.find(
-            (sliceLayer) => sliceLayer.layerId === layer.id,
-          ),
-      )
-      .forEach((newLayer) => {
-        const sliceLayer = new SliceLayer(
-          this.editor,
-          this.viewType,
-          this.geometry,
-          newLayer as IImageLayer,
-        );
-        this.sliceLayers.push(sliceLayer);
-        this.crosshairShiftGroup.add(sliceLayer);
-      });
-
-    // Remove old layers.
-    this.sliceLayers
-      .filter(
-        (sliceLayer) =>
-          !layers.find((layer) => layer.id === sliceLayer.layerId),
-      )
-      .forEach((oldSliceLayer) => {
-        const sliceLayerIndex = this.sliceLayers.indexOf(oldSliceLayer);
-        this.sliceLayers.splice(sliceLayerIndex, 1);
-        this.crosshairShiftGroup.remove(oldSliceLayer);
-        oldSliceLayer.dispose();
-      });
-
-    this.updateSliceLayerOrder();
-  };
-
-  private updateSliceLayerOrder() {
-    const layers = this.editor.activeDocument?.layers;
-    if (!layers) return;
-
-    const [min, max] = sliceLayerIntervall;
-    const intervallLength = max - min;
-
-    const imageLayers = layers.filter((layer) => layer.kind === "image");
-    imageLayers.forEach((imageLayer, index) => {
-      const sliceLayer = this.sliceLayers.find(
-        (layer) => layer.layerId === imageLayer.id,
-      );
-      if (!sliceLayer) return;
-
-      sliceLayer.position.z =
-        min + (index / (Math.max(2, imageLayers.length) - 1)) * intervallLength;
-    });
-
-    this.editor.sliceRenderer?.lazyRender();
   }
 
   private updateScale = () => {

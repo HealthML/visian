@@ -2,9 +2,10 @@ import { IEditor } from "@visian/ui-shared";
 import { IDisposable, IDisposer } from "@visian/utils";
 import { autorun, reaction } from "mobx";
 import * as THREE from "three";
-import { CuttingPlaneMaterial } from "./cutting-plane-material";
+import { ClippingPlaneMaterial } from "./clipping-plane-material";
+import { SharedUniforms } from "./shared-uniforms";
 
-export class CuttingPlane extends THREE.Mesh implements IDisposable {
+export class ClippingPlane extends THREE.Mesh implements IDisposable {
   private plane = new THREE.Plane();
   private workingQuaternion = new THREE.Quaternion();
   private workingVector = new THREE.Vector3();
@@ -13,8 +14,11 @@ export class CuttingPlane extends THREE.Mesh implements IDisposable {
 
   private disposers: IDisposer[] = [];
 
-  constructor(editor: IEditor) {
-    super(new THREE.PlaneGeometry(), new CuttingPlaneMaterial(editor));
+  constructor(private editor: IEditor, sharedUniforms: SharedUniforms) {
+    super(
+      new THREE.PlaneGeometry(),
+      new ClippingPlaneMaterial(editor, sharedUniforms),
+    );
 
     this.geometry.setAttribute(
       "volumeCoords",
@@ -23,22 +27,23 @@ export class CuttingPlane extends THREE.Mesh implements IDisposable {
 
     this.disposers.push(
       reaction(
-        () => editor.activeDocument?.viewport3D.cuttingPlaneNormal.toArray(),
+        () => editor.activeDocument?.viewport3D.clippingPlaneNormal.toArray(),
         this.setNormal,
         { fireImmediately: true },
       ),
       reaction(
-        () => editor.activeDocument?.viewport3D.cuttingPlaneDistance,
+        () => editor.activeDocument?.viewport3D.clippingPlaneDistance,
         this.setDistance,
         { fireImmediately: true },
       ),
       autorun(() => {
         this.visible = Boolean(
-          editor.activeDocument?.viewport3D.shouldCuttingPlaneRender,
+          editor.activeDocument?.viewport3D.shouldClippingPlaneRender,
         );
 
         editor.volumeRenderer?.lazyRender();
       }),
+      autorun(this.updateDepthWrite),
     );
   }
 
@@ -57,6 +62,7 @@ export class CuttingPlane extends THREE.Mesh implements IDisposable {
     this.setRotationFromQuaternion(this.workingQuaternion);
 
     this.updatePosition();
+    this.updateDepthWrite();
   };
 
   private setDistance = (distance?: number) => {
@@ -64,6 +70,7 @@ export class CuttingPlane extends THREE.Mesh implements IDisposable {
     this.plane.constant = distance;
 
     this.updatePosition();
+    this.updateDepthWrite();
   };
 
   private updatePosition() {
@@ -97,4 +104,15 @@ export class CuttingPlane extends THREE.Mesh implements IDisposable {
 
     volumeCoords.needsUpdate = true;
   }
+
+  private updateDepthWrite = () => {
+    const camera = this.editor.activeDocument?.viewport3D
+      .volumeSpaceCameraPosition;
+    if (!camera) return;
+    this.workingVector.fromArray(camera);
+
+    // Only write depth for front face
+    (this.material as ClippingPlaneMaterial).depthWrite =
+      this.plane.distanceToPoint(this.workingVector) < 0;
+  };
 }

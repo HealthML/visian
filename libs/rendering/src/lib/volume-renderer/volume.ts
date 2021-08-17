@@ -1,17 +1,24 @@
-import { IEditor, IImageLayer } from "@visian/ui-shared";
+import { IEditor } from "@visian/ui-shared";
 import { IDisposable, IDisposer } from "@visian/utils";
 import { autorun } from "mobx";
 import * as THREE from "three";
-import { RenderedImage } from "../rendered-image";
-import { BoundingBox, CuttingPlane, SharedUniforms } from "./utils";
 
+import { RenderedImage } from "../rendered-image";
+import {
+  BoundingBox,
+  ClippingPlane,
+  RaycastingCone,
+  SharedUniforms,
+} from "./utils";
 import { VolumeMaterial } from "./volume-material";
 
 /** A volume domain. */
 export class Volume extends THREE.Mesh implements IDisposable {
-  private cuttingPlane: CuttingPlane;
+  public clippingPlane: ClippingPlane;
 
   private boundingBox: BoundingBox;
+
+  public raycastingCone: RaycastingCone;
 
   private disposers: IDisposer[] = [];
   constructor(
@@ -25,6 +32,7 @@ export class Volume extends THREE.Mesh implements IDisposable {
     super(
       new THREE.BoxGeometry(1, 1, 1),
       new VolumeMaterial(
+        editor,
         sharedUniforms,
         firstDerivative,
         secondDerivative,
@@ -35,32 +43,33 @@ export class Volume extends THREE.Mesh implements IDisposable {
 
     this.resetRotation();
 
-    this.cuttingPlane = new CuttingPlane(editor);
-    this.add(this.cuttingPlane);
+    this.renderOrder = 1;
+
+    this.clippingPlane = new ClippingPlane(editor, sharedUniforms);
+    this.add(this.clippingPlane);
 
     this.boundingBox = new BoundingBox(editor);
     this.add(this.boundingBox);
 
+    this.raycastingCone = new RaycastingCone(editor);
+    this.add(this.raycastingCone);
+
     this.disposers.push(
       autorun(() => {
-        const imageId =
-          editor.activeDocument?.viewport3D.activeTransferFunction?.params.image
-            ?.value;
-
-        if (!imageId) return;
-
-        const imageLayer = editor.activeDocument?.getLayer(imageId as string);
-
+        const imageLayer = editor.activeDocument?.baseImageLayer;
         if (!imageLayer) return;
 
-        const image = (imageLayer as IImageLayer).image as RenderedImage;
-
+        const image = imageLayer.image as RenderedImage;
         const scale = image.voxelCount
           .clone(false)
           .multiply(image.voxelSpacing)
           .multiplyScalar(0.001);
 
         this.scale.set(scale.x, scale.y, scale.z);
+
+        // The camera position has to be converted to the new volume coordinate system.
+        editor.volumeRenderer?.updateCameraPosition();
+        editor.volumeRenderer?.lazyRender();
       }),
     );
   }
@@ -73,7 +82,7 @@ export class Volume extends THREE.Mesh implements IDisposable {
 
   public dispose() {
     (this.material as VolumeMaterial).dispose();
-    this.cuttingPlane.dispose();
+    this.clippingPlane.dispose();
     this.boundingBox.dispose();
     this.disposers.forEach((disposer) => disposer());
   }

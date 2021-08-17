@@ -42,14 +42,6 @@ export class RootStore implements ISerializable<RootSnapshot> {
   public pointerDispatch?: IDispatch;
 
   constructor(protected config: RootStoreConfig = {}) {
-    this.editor = new Editor(undefined, {
-      persist: this.persist,
-      persistImmediately: this.persistImmediately,
-      setDirty: action(this.setIsDirty),
-      getTheme: () => this.theme,
-      getRefs: () => this.refs,
-    });
-
     makeObservable(this, {
       editor: observable,
       colorMode: observable,
@@ -66,6 +58,15 @@ export class RootStore implements ISerializable<RootSnapshot> {
       setIsDirty: action,
       setRef: action,
     });
+
+    this.editor = new Editor(undefined, {
+      persist: this.persist,
+      persistImmediately: this.persistImmediately,
+      setDirty: action(this.setIsDirty),
+      getTheme: () => this.theme,
+      getRefs: () => this.refs,
+    });
+
     deepObserve(this.editor, this.persist, {
       exclusionAttribute: "excludeFromSnapshotTracking",
     });

@@ -2,13 +2,14 @@ import {
   dataColorKeys,
   IDocument,
   IEditor,
+  IImageLayer,
   ILayer,
   ISliceRenderer,
   IVolumeRenderer,
+  Theme,
   ValueType,
 } from "@visian/ui-shared";
 import { ITKImage, ISerializable, readMedicalImage } from "@visian/utils";
-import isEqual from "lodash.isequal";
 import { action, computed, makeObservable, observable, toJS } from "mobx";
 import * as THREE from "three";
 import { v4 as uuidv4 } from "uuid";
@@ -28,7 +29,11 @@ import {
   ViewSettingsSnapshot,
 } from "./view-settings";
 import { StoreContext } from "../types";
-import { defaultAnnotationColor } from "../../constants";
+import {
+  defaultAnnotationColor,
+  defaultImageColor,
+  defaultRegionGrowingPreviewColor,
+} from "../../constants";
 
 const uniqueValuesForAnnotationThreshold = 20;
 
@@ -74,6 +79,8 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
 
   public tools: Tools;
 
+  public showLayerMenu = false;
+
   public markers: Markers = new Markers(this);
 
   constructor(
@@ -92,6 +99,11 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
       this.layerMap[layer.id] = new LayerKind(layer as any, this);
     });
     this.layerIds = snapshot?.layerIds || [];
+
+    Object.values(this.layerMap).forEach((layer) =>
+      layer.fixPotentiallyBadColor(),
+    );
+
     this.history = new History(snapshot?.history, this);
     this.viewSettings = new ViewSettings(snapshot?.viewSettings, this);
     this.viewport2D = new Viewport2D(snapshot?.viewport2D, this);
@@ -111,9 +123,12 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
       viewport2D: observable,
       viewport3D: observable,
       tools: observable,
+      showLayerMenu: observable,
 
       title: computed,
       activeLayer: computed,
+      imageLayers: computed,
+      baseImageLayer: computed,
 
       setTitle: action,
       setActiveLayer: action,
@@ -124,6 +139,8 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
       toggleTypeAndRepositionLayer: action,
       importImage: action,
       importAnnotation: action,
+      setShowLayerMenu: action,
+      toggleLayerMenu: action,
       applySnapshot: action,
     });
 
@@ -149,6 +166,40 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
     return Object.values(this.layerMap).find(
       (layer) => layer.id === this.activeLayerId,
     );
+  }
+
+  public get imageLayers(): IImageLayer[] {
+    return this.layers.filter(
+      (layer) => layer.kind === "image",
+    ) as IImageLayer[];
+  }
+  public get baseImageLayer(): IImageLayer | undefined {
+    // TODO: Rework to work with group layers
+
+    const areAllLayersAnnotations = Boolean(
+      !this.layerIds.find((layerId) => {
+        const layer = this.layerMap[layerId];
+        return layer.kind === "image" && !layer.isAnnotation;
+      }),
+    );
+
+    let baseImageLayer: ImageLayer | undefined;
+    this.layerIds
+      .slice()
+      .reverse()
+      .find((id) => {
+        const layer = this.layerMap[id];
+        if (
+          layer.kind === "image" &&
+          // use non-annotation layer if possible
+          (!layer.isAnnotation || areAllLayersAnnotations)
+        ) {
+          baseImageLayer = layer as ImageLayer;
+          return true;
+        }
+        return false;
+      });
+    return baseImageLayer;
   }
 
   public getLayer(id: string): ILayer | undefined {
@@ -182,7 +233,9 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
     });
   };
 
-  private getColorForNewAnnotation = (): string => {
+  public getFirstUnusedColor = (
+    defaultColor = defaultAnnotationColor,
+  ): string => {
     // TODO: Rework to work with group layers
     const layerStack = this.layers;
     const usedColors: { [key: string]: boolean } = {};
@@ -192,20 +245,25 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
       }
     });
     const colorCandidates = dataColorKeys.filter((color) => !usedColors[color]);
-    return colorCandidates.length ? colorCandidates[0] : defaultAnnotationColor;
+    return colorCandidates.length ? colorCandidates[0] : defaultColor;
+  };
+
+  public getRegionGrowingPreviewColor = (): string => {
+    const isDefaultUsed = this.layers.find(
+      (layer) => layer.color === defaultRegionGrowingPreviewColor,
+    );
+    return isDefaultUsed
+      ? this.getFirstUnusedColor(this.activeLayer?.color)
+      : defaultRegionGrowingPreviewColor;
   };
 
   public addNewAnnotationLayer = () => {
-    // TODO: Rework to work with group layers
-    const baseLayer = this.layers.find(
-      (layer) => layer.kind === "image" && !layer.isAnnotation,
-    ) as ImageLayer | undefined;
-    if (!baseLayer) return;
+    if (!this.baseImageLayer) return;
 
-    const annotationColor = this.getColorForNewAnnotation();
+    const annotationColor = this.getFirstUnusedColor();
 
     const annotationLayer = ImageLayer.fromNewAnnotationForImage(
-      baseLayer.image,
+      this.baseImageLayer.image,
       this,
       annotationColor,
     );
@@ -305,23 +363,30 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
   }
 
   public async importImage(image: ITKImage) {
-    const imageLayer = ImageLayer.fromITKImage(image, this);
+    const imageLayer = ImageLayer.fromITKImage(image, this, {
+      color: defaultImageColor,
+    });
+    if (
+      this.baseImageLayer &&
+      !this.baseImageLayer.image.voxelCount.equals(imageLayer.image.voxelCount)
+    ) {
+      throw new Error("image-mismatch-error");
+    }
     this.addLayer(imageLayer);
   }
 
   public async importAnnotation(image: ITKImage) {
     const annotationLayer = ImageLayer.fromITKImage(image, this, {
       isAnnotation: true,
-      color: this.getColorForNewAnnotation(),
+      color: this.getFirstUnusedColor(),
     });
     if (
-      this.layers.length &&
-      !isEqual(
-        (this.layerMap[this.layerIds[0]] as ImageLayer)?.image?.voxelCount,
+      this.baseImageLayer &&
+      !this.baseImageLayer.image.voxelCount.equals(
         annotationLayer.image.voxelCount,
       )
     ) {
-      throw new Error("annotation-mismatch-error");
+      throw new Error("image-mismatch-error");
     }
 
     this.addLayer(annotationLayer);
@@ -336,6 +401,14 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
     return this.context?.persist();
   }
 
+  // UI state
+  public setShowLayerMenu = (value = false): void => {
+    this.showLayerMenu = value;
+  };
+  public toggleLayerMenu = (): void => {
+    this.setShowLayerMenu(!this.showLayerMenu);
+  };
+
   // Proxies
   public get sliceRenderer(): ISliceRenderer | undefined {
     return this.editor.sliceRenderer;
@@ -347,6 +420,10 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
 
   public get renderers(): THREE.WebGLRenderer[] | undefined {
     return this.editor.renderers;
+  }
+
+  public get theme(): Theme {
+    return this.editor.theme;
   }
 
   // Serialization

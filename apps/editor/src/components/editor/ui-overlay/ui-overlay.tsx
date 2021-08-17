@@ -2,6 +2,7 @@ import {
   AbsoluteCover,
   FloatingUIButton,
   Notification,
+  Spacer,
   Text,
 } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
@@ -9,7 +10,7 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
-import { ImageLayer } from "../../../models";
+import { ActionModal } from "../action-modal";
 import { DropSheet } from "../drop-sheet";
 import { Layers } from "../layers";
 import { Menu } from "../menu";
@@ -21,6 +22,8 @@ import { TopConsole } from "../top-console";
 import { UndoRedoButtons } from "../undo-redo-buttons";
 import { ViewSettings } from "../view-settings";
 import { UIOverlayProps } from "./ui-overlay.props";
+
+import type { ImageLayer } from "../../../models";
 
 const Container = styled(AbsoluteCover)`
   align-items: stretch;
@@ -131,6 +134,8 @@ export const UIOverlay = observer<UIOverlayProps>(
           </MenuRow>
           <Toolbar />
           <Layers />
+          <Spacer />
+          <ActionModal />
         </ColumnLeft>
         <ColumnCenter>
           <TopConsole />

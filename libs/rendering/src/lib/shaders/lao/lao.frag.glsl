@@ -27,7 +27,7 @@ vec4 getVolumeColor(vec3 volumeCoords) {
 @import ../utils/march-ray;
 
 float getOpacity(vec3 origin, vec3 direction) {
-  return marchRay(origin, direction, 0.01, 100.0, uStepSize).a;
+  return marchRay(origin, direction, 0.01, 100.0, uStepSize, false).a;
 }
 
 vec2 getTextureCoordsForDirection(int index) {

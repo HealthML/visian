@@ -8,8 +8,8 @@ import { List, ListDivider, ListItem } from "../list";
 import { InputLabel } from "../text";
 import { ListPositionProps } from "./types";
 
-const LayerList = styled(List)`
-  margin-bottom: 10px;
+const SelectedColor = styled(List)<{ isCollapsed?: boolean }>`
+  margin-bottom: ${(props) => (props.isCollapsed ? "20px" : "10px")};
 `;
 
 const ColorList = styled.div`
@@ -31,7 +31,9 @@ export type ColorParamProps = IColorParameter &
 // TODO: In the future, we should probably offer a more flexible pop up color
 // picker that allows user to specify fully custom colors
 export const ColorParam: React.FC<Partial<ColorParamProps>> = ({
+  isCollapsed,
   isFirst,
+  isLast,
   labelTx,
   label,
   value,
@@ -45,19 +47,21 @@ export const ColorParam: React.FC<Partial<ColorParamProps>> = ({
 }) => (
   <>
     {(labelTx || label) && <InputLabel tx={labelTx} text={label} />}
-    <LayerList>
+    <SelectedColor isCollapsed={isCollapsed}>
       {(!isFirst || labelTx || label) && <ListDivider />}
       {value && <ListItem icon={{ color: value }} label={value} />}
-    </LayerList>
-    <ColorList {...rest}>
-      {dataColorKeys.map((color) => (
-        <StyledColor
-          key={color}
-          color={color}
-          isSelected={color === value}
-          onPointerDown={() => setValue?.(color)}
-        />
-      ))}
-    </ColorList>
+    </SelectedColor>
+    {!isCollapsed && (
+      <ColorList {...rest}>
+        {dataColorKeys.map((color) => (
+          <StyledColor
+            key={color}
+            color={color}
+            isSelected={color === value}
+            onPointerDown={() => setValue?.(color)}
+          />
+        ))}
+      </ColorList>
+    )}
   </>
 );

@@ -1,4 +1,6 @@
 import {
+  color,
+  computeStyleValue,
   ContextMenu,
   ContextMenuItem,
   FloatingUIButton,
@@ -8,6 +10,8 @@ import {
   Modal,
   ModalHeaderButton,
   PointerButton,
+  size,
+  stopPropagation,
   SubtleText,
   useDelay,
   useModalRoot,
@@ -41,6 +45,41 @@ const noop = () => {
 // Styled Components
 const LayerList = styled(List)`
   margin-top: -16px;
+  padding-bottom: 7px;
+  padding-left: 8px;
+  padding-right: 8px;
+  margin-left: -8px;
+  margin-right: -8px;
+  max-height: ${computeStyleValue(
+    [size("listElementHeight"), size("dividerHeight")],
+    (listElementHeight, dividerHeight) =>
+      6 * (listElementHeight + dividerHeight),
+  )};
+  max-width: 100%;
+  overflow-x: visible;
+  overflow-y: auto;
+
+  /* width */
+  ::-webkit-scrollbar {
+    width: 4px;
+    margin-bottom: 10px;
+  }
+
+  /* Track */
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  /* Handle */
+  ::-webkit-scrollbar-thumb {
+    background: ${color("lightGray")};
+    border-radius: 10px;
+  }
+
+  /* Handle on hover */
+  ::-webkit-scrollbar-thumb:hover {
+    background: ${color("gray")};
+  }
 `;
 
 const LayerListItem = observer<{
@@ -230,16 +269,15 @@ const LayerListItem = observer<{
 
 const LayerModal = styled(Modal)`
   padding-bottom: 0px;
+  width: 230px;
+  justify-content: center;
 `;
 
 export const Layers: React.FC = observer(() => {
   const store = useStore();
 
-  // Menu Toggling
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const toggleModal = useCallback(() => {
-    setIsModalOpen(!isModalOpen);
-  }, [isModalOpen]);
+  // Menu State
+  const isModalOpen = Boolean(store?.editor.activeDocument?.showLayerMenu);
 
   // Menu Positioning
   const [buttonRef, setButtonRef] = useState<HTMLButtonElement | null>(null);
@@ -270,7 +308,7 @@ export const Layers: React.FC = observer(() => {
         tooltipTx="layers"
         showTooltip={!isModalOpen}
         ref={setButtonRef}
-        onPointerDown={toggleModal}
+        onPointerDown={store?.editor.activeDocument?.toggleLayerMenu}
         isActive={isModalOpen}
       />
       <LayerModal
@@ -289,10 +327,14 @@ export const Layers: React.FC = observer(() => {
         }
       >
         {/* TODO: Should we update on every drag change or just on drop? */}
-        <DragDropContext onDragUpdate={handleDrag} onDragEnd={handleDrag}>
+        <DragDropContext onDragUpdate={handleDrag} onDragEnd={noop}>
           <Droppable droppableId="layer-stack">
             {(provided: DroppableProvided) => (
-              <LayerList {...provided.droppableProps} ref={provided.innerRef}>
+              <LayerList
+                {...provided.droppableProps}
+                ref={provided.innerRef}
+                onWheel={stopPropagation}
+              >
                 {layerCount ? (
                   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
                   layers!.map((layer, index) => (

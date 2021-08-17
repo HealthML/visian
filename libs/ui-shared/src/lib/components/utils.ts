@@ -49,7 +49,7 @@ export const useIsDraggedOver = () => {
     }
     dragTimerRef.current = (setTimeout(() => {
       setIsDraggedOver(false);
-    }, 25) as unknown) as NodeJS.Timer;
+    }, 50) as unknown) as NodeJS.Timer;
   }, [setIsDraggedOver]);
 
   const onDrop = useCallback(() => {

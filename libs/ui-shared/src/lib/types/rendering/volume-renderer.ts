@@ -14,10 +14,12 @@ export interface IVolumeRenderer {
   scene: THREE.Scene;
   xr: IXRManager;
   volume: THREE.Mesh;
+  renderedImageLayerCount: number;
 
   animate(): void;
 
+  updateCameraPosition(): void;
   resetScene(hardReset?: boolean): void;
   resize(): void;
-  lazyRender(updateLighting?: boolean): void;
+  lazyRender(updateLighting?: boolean, updateGradients?: boolean): void;
 }
