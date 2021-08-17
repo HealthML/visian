@@ -12,8 +12,8 @@ export class PreviewBrushCursor extends BrushCursor {
 
   private active = false;
 
-  constructor(editor: IEditor, viewType: ViewType) {
-    super(editor, viewType);
+  constructor(editor: IEditor, viewType: ViewType, material: THREE.Material) {
+    super(editor, viewType, material);
     this.disposers.push(
       reaction(
         () => editor.activeDocument?.viewport2D.mainViewType,

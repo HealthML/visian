@@ -3,22 +3,22 @@ import { getPlaneAxes, IDisposable, ViewType } from "@visian/utils";
 import { autorun, IReactionDisposer } from "mobx";
 import * as THREE from "three";
 
-import { crosshair as lineMaterialProps } from "../theme";
-
 export class Crosshair extends THREE.Group implements IDisposable {
   private size = new THREE.Vector2();
 
   private horizontalLine: THREE.Line;
   private verticalLine: THREE.Line;
 
-  private lineMaterial = new THREE.LineBasicMaterial(lineMaterialProps);
-
   private widthAxis: "x" | "y" | "z";
   private heightAxis: "x" | "y" | "z";
 
   private disposers: IReactionDisposer[] = [];
 
-  constructor(viewType: ViewType, private editor: IEditor) {
+  constructor(
+    private editor: IEditor,
+    viewType: ViewType,
+    private material: THREE.Material,
+  ) {
     super();
 
     [this.widthAxis, this.heightAxis] = getPlaneAxes(viewType);
@@ -45,7 +45,6 @@ export class Crosshair extends THREE.Group implements IDisposable {
     this.disposers.forEach((disposer) => disposer());
     this.verticalLine.geometry.dispose();
     this.horizontalLine.geometry.dispose();
-    this.lineMaterial.dispose();
   }
 
   public setSize(size: THREE.Vector2) {
@@ -56,7 +55,7 @@ export class Crosshair extends THREE.Group implements IDisposable {
 
   private createLine(points: THREE.Vector3[]): THREE.Line {
     const geometry = new THREE.BufferGeometry().setFromPoints(points);
-    return new THREE.Line(geometry, this.lineMaterial);
+    return new THREE.Line(geometry, this.material);
   }
 
   private updateTarget = () => {
