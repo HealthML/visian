@@ -1,3 +1,4 @@
+import { Vector } from "@visian/utils";
 import * as THREE from "three";
 
 export interface IXRManager {
@@ -22,4 +23,5 @@ export interface IVolumeRenderer {
   resetScene(hardReset?: boolean): void;
   resize(): void;
   lazyRender(updateLighting?: boolean, updateGradients?: boolean): void;
+  setVolumeSpaceCameraPosition(position: Vector): void;
 }

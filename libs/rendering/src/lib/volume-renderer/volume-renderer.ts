@@ -8,6 +8,7 @@ import {
   convertPositionToWebGLPosition,
   IDisposable,
   IDisposer,
+  Vector,
   Voxel,
 } from "@visian/utils";
 import { autorun, computed, makeObservable, reaction } from "mobx";
@@ -462,6 +463,14 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
       this.flyControls.lock();
     }
   };
+
+  public setVolumeSpaceCameraPosition(position: Vector) {
+    this.workingVector.fromArray(position.toArray());
+    this.volume.localToWorld(this.workingVector);
+    this.camera.position.copy(this.workingVector);
+    this.camera.lookAt(this.volume.position);
+    this.onCameraMove();
+  }
 
   private getSmartBrushIntersection(event: PointerEvent): Voxel | undefined {
     const image = this.editor.activeDocument?.baseImageLayer?.image;

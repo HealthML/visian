@@ -154,6 +154,7 @@ export interface IViewport3D<N extends string> {
   setCameraMatrix(value?: Matrix4): void;
   setOrbitTarget(x?: number, y?: number, z?: number): void;
   setVolumeSpaceCameraPosition(x: number, y: number, z: number): void;
+  setCameraToFaceViewType(viewType: ViewType): void;
   setOpacity(value?: number): void;
   setShadingMode(value?: ShadingMode): void;
   cycleShadingMode(): void;

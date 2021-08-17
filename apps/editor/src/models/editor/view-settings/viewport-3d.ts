@@ -5,7 +5,7 @@ import {
   ITransferFunction,
   isPerformanceLow,
 } from "@visian/ui-shared";
-import { ISerializable, Vector } from "@visian/utils";
+import { ISerializable, Vector, ViewType } from "@visian/utils";
 import { action, autorun, computed, makeObservable, observable } from "mobx";
 import { Matrix4 } from "three";
 import {
@@ -191,6 +191,20 @@ export class Viewport3D
     if (this.document.tools.activeTool?.name === "plane-tool") {
       this.setClippingPlaneNormalToFaceCamera();
     }
+  }
+
+  public setCameraToFaceViewType(viewType: ViewType) {
+    const cameraPosition = new Vector(3, false);
+    cameraPosition.setFromView(viewType, 1.2);
+
+    this.setOrbitTarget();
+
+    this.setVolumeSpaceCameraPosition(
+      cameraPosition.x,
+      cameraPosition.y,
+      cameraPosition.z,
+    );
+    this.document.volumeRenderer?.setVolumeSpaceCameraPosition(cameraPosition);
   }
 
   public setClippingPlaneNormalToFaceCamera() {
