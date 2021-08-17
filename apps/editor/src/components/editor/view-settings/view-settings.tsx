@@ -168,10 +168,7 @@ export const ViewSettings: React.FC = observer(() => {
             <Divider />
             <ModalTitleRow
               labelTx="3d-view"
-              onReset={
-                store.editor.activeDocument.viewport3D.activeTransferFunction
-                  ?.reset
-              }
+              onReset={store.editor.activeDocument.viewport3D.reset}
             />
             <EnumParam
               labelTx="shading-mode"
@@ -197,6 +194,16 @@ export const ViewSettings: React.FC = observer(() => {
               }
               setValue={
                 store.editor.activeDocument.viewport3D.setActiveTransferFunction
+              }
+            />
+            <BooleanParam
+              labelTx="smooth-segmentations"
+              value={
+                store.editor.activeDocument.viewport3D.useSmoothSegmentations
+              }
+              setValue={
+                store.editor.activeDocument?.viewport3D
+                  .setUseSmoothSegmentations
               }
             />
             {store.editor.activeDocument.viewport3D.activeTransferFunction &&

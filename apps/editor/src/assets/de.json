@@ -97,6 +97,7 @@
   "tf-fc-edges": "Kanten",
   "tf-fc-cone": "Kegelschnitt",
   "tf-custom": "Eigene",
+  "smooth-segmentations": "Segmentierungen geglättet anzeigen",
 
   "annotation-layer": "Fokusvolumen",
   "image-layer": "Volumen",
