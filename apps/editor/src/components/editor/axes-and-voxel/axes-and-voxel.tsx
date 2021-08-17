@@ -1,0 +1,82 @@
+/* eslint-disable max-len */
+import { Text, FlexRow, Spacer, FlexColumn, color } from "@visian/ui-shared";
+import React from "react";
+import styled from "styled-components";
+
+const AVContainer = styled(FlexRow)`
+  margin-top: 16px;
+`;
+
+const AxesHorizontalContainer = styled.div`
+  width: 54px;
+  height: 70px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin-right: 20px;
+  position: relative;
+`;
+
+const AxesVerticalContainer = styled(AxesHorizontalContainer)`
+  flex-direction: column;
+  justify-content: center;
+  position: absolute;
+`;
+
+const AxesHorizontal = styled.div`
+  height: 1px;
+  width: 100%;
+  background-color: ${color("sheetBorder")};
+  margin: 0 6px;
+`;
+
+const AxesVertical = styled(AxesHorizontal)`
+  width: 1px;
+  height: 100%;
+  margin: 6px 0;
+`;
+
+const VoxelTitle = styled(Text)`
+  font-size: 13px;
+  font-weight: 700;
+  margin-right: 10px;
+`;
+
+const VoxelContent = styled(Text)`
+  font-size: 13px;
+  font-weight: 500;
+`;
+
+export const AxesAndVoxel: React.FC = () => (
+  <AVContainer>
+    <AxesHorizontalContainer>
+      <VoxelContent tx="R" />
+      <AxesHorizontal />
+      <VoxelContent tx="L" />
+      <AxesVerticalContainer>
+        <VoxelContent tx="A" />
+        <AxesVertical />
+        <VoxelContent tx="P" />
+      </AxesVerticalContainer>
+    </AxesHorizontalContainer>
+    <FlexColumn>
+      <FlexRow>
+        <VoxelTitle tx="X" />
+        <VoxelContent tx="291" />
+      </FlexRow>
+      <FlexRow>
+        <VoxelTitle tx="Y" />
+        <VoxelContent tx="12" />
+      </FlexRow>
+      <FlexRow>
+        <VoxelTitle tx="Z" />
+        <VoxelContent tx="132" />
+      </FlexRow>
+      <Spacer />
+      <FlexRow>
+        <VoxelTitle tx="V" />
+        <VoxelContent tx="240" />
+      </FlexRow>
+    </FlexColumn>
+  </AVContainer>
+);
