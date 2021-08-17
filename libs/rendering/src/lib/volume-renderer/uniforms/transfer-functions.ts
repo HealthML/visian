@@ -9,6 +9,7 @@ export const transferFunctionsUniforms = {
   uUseFocus: { value: false },
   uCustomTFTexture: { value: null },
   uVolumeNearestFiltering: { value: false },
+  uSegmentationLinearFiltering: { value: false },
   uUsePlane: { value: false },
   uPlaneNormal: { value: [0, 1, 0] },
   uPlaneDistance: { value: 0 },

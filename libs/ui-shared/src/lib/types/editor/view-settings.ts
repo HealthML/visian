@@ -142,6 +142,8 @@ export interface IViewport3D<N extends string> {
   activeTransferFunction?: Reference<ITransferFunction<N>>;
   transferFunctions: Record<N, ITransferFunction<N>>;
 
+  useSmoothSegmentations: boolean;
+
   useClippingPlane: boolean;
   clippingPlaneNormal: Vector;
   clippingPlaneDistance: number;
@@ -161,6 +163,7 @@ export interface IViewport3D<N extends string> {
     nameOrTransferFunction?: N | ITransferFunction<N>,
   ): void;
   cycleActiveTransferFunction(): void;
+  setUseSmoothSegmentations(value?: boolean): void;
   setUseClippingPlane(value?: boolean): void;
   setClippingPlaneNormal(x?: number, y?: number, z?: number): void;
   setClippingPlaneNormalToFaceCamera(): void;

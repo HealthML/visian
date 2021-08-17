@@ -93,7 +93,7 @@ VolumeData getInterpolatedVolumeData(vec3 volumeCoords) {
 
   if(uUseFocus) {
     // The focus texture should not be interpolated.
-    interpolatedData.annotation = mix(lowerData.annotation, upperData.annotation, step(0.5, interpolation));
+    interpolatedData.annotation = mix(lowerData.annotation, upperData.annotation, uSegmentationLinearFiltering ? interpolation : step(0.5, interpolation));
   }
 
   return interpolatedData;

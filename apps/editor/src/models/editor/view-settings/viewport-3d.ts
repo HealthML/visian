@@ -33,6 +33,8 @@ export interface Viewport3DSnapshot<N extends string> {
   activeTransferFunctionName?: N;
   transferFunctions: TransferFunctionSnapshot<N>[];
 
+  useSmoothSegmentations: boolean;
+
   useClippingPlane: boolean;
   clippingPlaneNormal: number[];
   clippingPlaneDistance: number;
@@ -63,6 +65,8 @@ export class Viewport3D
     TransferFunction<TransferFunctionName>
   >;
 
+  public useSmoothSegmentations = false;
+
   public useClippingPlane = false;
   public clippingPlaneNormal = new Vector([0, 1, 0]);
   public clippingPlaneDistance = 0;
@@ -91,6 +95,7 @@ export class Viewport3D
       suppressedShadingMode: observable,
       activeTransferFunctionName: observable,
       transferFunctions: observable,
+      useSmoothSegmentations: observable,
       useClippingPlane: observable,
       clippingPlaneNormal: observable,
       clippingPlaneDistance: observable,
@@ -109,6 +114,7 @@ export class Viewport3D
       onTransferFunctionChange: action,
       setIsXRAvailable: action,
       setIsInXR: action,
+      setUseSmoothSegmentations: action,
       setUseClippingPlane: action,
       setClippingPlaneNormal: action,
       setClippingPlaneNormalToFaceCamera: action,
@@ -228,14 +234,24 @@ export class Viewport3D
     );
   }
 
+  public setUseSmoothSegmentations = (value = false) => {
+    this.useSmoothSegmentations = value;
+  };
+
   public setOpacity(value = 1) {
     this.onTransferFunctionChange();
 
     this.opacity = Math.min(1, Math.max(0, value));
   }
 
-  public setShadingMode = (value: ShadingMode = "lao") => {
+  public setShadingMode = (
+    value: ShadingMode = "lao",
+    overwriteSuppressed = false,
+  ) => {
     this.shadingMode = value;
+    if (overwriteSuppressed) {
+      this.setSuppressedShadingMode(value);
+    }
   };
 
   public cycleShadingMode(): void {
@@ -353,11 +369,11 @@ export class Viewport3D
     this.setCameraMatrix();
     this.setOrbitTarget();
     this.setOpacity();
-    this.setShadingMode();
+    this.setShadingMode(undefined, true);
     Object.values(this.transferFunctions).forEach((transferFunction) => {
       transferFunction.reset();
     });
-    this.setActiveTransferFunction();
+    this.setUseSmoothSegmentations();
     this.resetClippingPlane();
   };
 
@@ -372,6 +388,7 @@ export class Viewport3D
       transferFunctions: Object.values(
         this.transferFunctions,
       ).map((transferFunction) => transferFunction.toJSON()),
+      useSmoothSegmentations: this.useSmoothSegmentations,
       useClippingPlane: this.useClippingPlane,
       clippingPlaneNormal: this.clippingPlaneNormal.toJSON(),
       clippingPlaneDistance: this.clippingPlaneDistance,
@@ -397,7 +414,7 @@ export class Viewport3D
       this.setOrbitTarget();
     }
     this.setOpacity(snapshot?.opacity);
-    this.setShadingMode(snapshot?.shadingMode);
+    this.setShadingMode(snapshot?.shadingMode, true);
     this.setActiveTransferFunction(snapshot?.activeTransferFunctionName, true);
     snapshot?.transferFunctions?.forEach((transferFunctionSnapshot) => {
       const transferFunction = this.transferFunctions[
@@ -407,6 +424,7 @@ export class Viewport3D
         transferFunction.applySnapshot(transferFunctionSnapshot);
       }
     });
+    this.setUseSmoothSegmentations(snapshot?.useSmoothSegmentations);
     this.setUseClippingPlane(snapshot?.useClippingPlane);
     const clippingPlaneNormal = snapshot?.clippingPlaneNormal;
     if (clippingPlaneNormal) {

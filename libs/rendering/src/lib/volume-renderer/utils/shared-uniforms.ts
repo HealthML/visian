@@ -173,6 +173,13 @@ export class SharedUniforms implements IDisposable {
         editor.activeDocument?.volumeRenderer?.lazyRender(true);
       }),
       autorun(() => {
+        this.uniforms.uSegmentationLinearFiltering.value = Boolean(
+          editor.activeDocument?.viewport3D.useSmoothSegmentations,
+        );
+
+        editor.activeDocument?.volumeRenderer?.lazyRender(true);
+      }),
+      autorun(() => {
         this.uniforms.uUsePlane.value = Boolean(
           editor.activeDocument?.viewport3D.useClippingPlane,
         );
@@ -193,14 +200,20 @@ export class SharedUniforms implements IDisposable {
       autorun(() => {
         const layers = editor.activeDocument?.imageLayers || [];
 
-        const useNearestFiltering = Boolean(
+        const useNearestFilteringImage = Boolean(
           editor.activeDocument?.viewport3D.activeTransferFunction?.params
             .useBlockyContext?.value,
         );
+        const useNearestFilteringAnnotation = !editor.activeDocument?.viewport3D
+          .useSmoothSegmentations;
         const layerData = layers.map((layer) =>
           ((layer as IImageLayer).image as RenderedImage).getTexture(
             0,
-            useNearestFiltering || layer.isAnnotation
+            (
+              layer.isAnnotation
+                ? useNearestFilteringAnnotation
+                : useNearestFilteringImage
+            )
               ? THREE.NearestFilter
               : THREE.LinearFilter,
           ),
@@ -216,7 +229,11 @@ export class SharedUniforms implements IDisposable {
         this.uniforms.uActiveLayerData.value = activeLayer
           ? ((activeLayer as IImageLayer).image as RenderedImage).getTexture(
               0,
-              useNearestFiltering || activeLayer.isAnnotation
+              (
+                activeLayer.isAnnotation
+                  ? useNearestFilteringAnnotation
+                  : useNearestFilteringImage
+              )
                 ? THREE.NearestFilter
                 : THREE.LinearFilter,
             )
