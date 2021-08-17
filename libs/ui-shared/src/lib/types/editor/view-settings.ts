@@ -52,6 +52,9 @@ export interface IViewport2D {
    */
   sliceMarkers: MarkerConfig[];
 
+  /** Sets the main view type. */
+  setMainViewType(viewType: ViewType): void;
+
   /**
    * Returns the selected slice for the given `ViewType`.
    * This should be derived from the `ViewSettings`' `selectedVoxel` attribute.
