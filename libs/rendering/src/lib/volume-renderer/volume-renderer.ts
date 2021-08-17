@@ -136,14 +136,7 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
       if (this.renderer.xr.isPresenting) {
         this.updateCameraPosition(camera);
 
-        this.renderer.xr.enabled = false;
-        this.volume.visible = false;
-
-        // TODO: Changing the render target & calling render here seems to trip
-        // up the XR output for the volume
-        this.renderer.setRenderTarget(this.depthTarget);
-        this.renderer.render(this.scene, camera);
-        this.renderer.setRenderTarget(null);
+        this.renderDepthPass(camera);
 
         // TODO: Reuse RGB pass
         (this.volume
@@ -152,9 +145,6 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
           .material as VolumeMaterial).uniforms.uCameraNear.value = (camera as THREE.PerspectiveCamera).near;
         (this.volume
           .material as VolumeMaterial).uniforms.uCameraFar.value = (camera as THREE.PerspectiveCamera).far;
-
-        this.volume.visible = true;
-        this.renderer.xr.enabled = true;
       }
     };
 
@@ -353,6 +343,25 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
 
     this.lazyRender();
   };
+
+  public renderDepthPass(camera: THREE.Camera = this.camera) {
+    const isXrEnabled = this.renderer.xr.enabled;
+    this.renderer.xr.enabled = false;
+    this.volume.visible = false;
+
+    // TODO: Bind the XR framebuffer again after rendering to the depthTarget
+    const buffer = this.renderer.xr.getSession().renderState.baseLayer
+      ?.framebuffer;
+    this.renderer.setRenderTarget(this.depthTarget);
+    this.renderer.render(this.scene, camera);
+    this.renderer.setRenderTarget(null);
+    if (buffer) {
+      this.renderer.setFramebuffer(buffer);
+    }
+
+    this.volume.visible = true;
+    this.renderer.xr.enabled = isXrEnabled;
+  }
 
   public animate = () => {
     if (this.editor.activeDocument?.viewSettings.viewMode !== "3D") return;
