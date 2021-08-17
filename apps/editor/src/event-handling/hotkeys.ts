@@ -172,6 +172,51 @@ export const setUpHotKeys = (store: RootStore): IDisposer => {
   hotkeys("0", () => {
     store.editor.activeDocument?.viewport2D.toggleSideViews();
   });
+  hotkeys("ctrl+1", () => {
+    if (store.editor.activeDocument?.viewSettings.viewMode !== "3D") return;
+
+    store.editor.activeDocument?.viewport3D.setCameraToFaceViewType(
+      ViewType.Transverse,
+    );
+  });
+  hotkeys("ctrl+2", () => {
+    if (store.editor.activeDocument?.viewSettings.viewMode !== "3D") return;
+
+    store.editor.activeDocument?.viewport3D.setCameraToFaceViewType(
+      ViewType.Sagittal,
+    );
+  });
+  hotkeys("ctrl+3", () => {
+    if (store.editor.activeDocument?.viewSettings.viewMode !== "3D") return;
+
+    store.editor.activeDocument?.viewport3D.setCameraToFaceViewType(
+      ViewType.Coronal,
+    );
+  });
+  hotkeys("alt+1", () => {
+    if (store.editor.activeDocument?.viewSettings.viewMode !== "3D") return;
+
+    store.editor.activeDocument?.viewport3D.setCameraToFaceViewType(
+      ViewType.Transverse,
+      true,
+    );
+  });
+  hotkeys("alt+2", () => {
+    if (store.editor.activeDocument?.viewSettings.viewMode !== "3D") return;
+
+    store.editor.activeDocument?.viewport3D.setCameraToFaceViewType(
+      ViewType.Sagittal,
+      true,
+    );
+  });
+  hotkeys("alt+3", () => {
+    if (store.editor.activeDocument?.viewSettings.viewMode !== "3D") return;
+
+    store.editor.activeDocument?.viewport3D.setCameraToFaceViewType(
+      ViewType.Coronal,
+      true,
+    );
+  });
 
   // Slice Navigation
   hotkeys("up", (event) => {
