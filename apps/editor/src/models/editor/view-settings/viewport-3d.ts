@@ -193,9 +193,9 @@ export class Viewport3D
     }
   }
 
-  public setCameraToFaceViewType(viewType: ViewType) {
+  public setCameraToFaceViewType(viewType: ViewType, flipped = false) {
     const cameraPosition = new Vector(3, false);
-    cameraPosition.setFromView(viewType, 1.2);
+    cameraPosition.setFromView(viewType, 1.2 * (flipped ? -1 : 1));
 
     this.setOrbitTarget();
 
