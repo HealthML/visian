@@ -31,6 +31,6 @@ export const LogInPopUp: React.FC = () => (
     <LogInInput placeholder="Server" />
     <LogInInput placeholder="Username" />
     <LogInInput placeholder="Password" />
-    <LogInButton tx="Connect" />
+    <LogInButton text="Connect" />
   </LogInPopUpContainer>
 );
