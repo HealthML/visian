@@ -3,13 +3,15 @@ import { getPlaneAxes, IDisposable, IDisposer, ViewType } from "@visian/utils";
 import { autorun } from "mobx";
 import * as THREE from "three";
 
-import { toolOverlays as theme } from "../theme";
-
 export class Outline extends THREE.Line implements IDisposable, IOutline {
   private disposers: IDisposer[] = [];
 
-  constructor(private editor: IEditor, private viewType: ViewType) {
-    super(new THREE.BufferGeometry(), new THREE.LineBasicMaterial(theme));
+  constructor(
+    private editor: IEditor,
+    private viewType: ViewType,
+    material: THREE.Material,
+  ) {
+    super(new THREE.BufferGeometry(), material);
 
     this.position.x = 0.5;
     this.position.y = -0.5;

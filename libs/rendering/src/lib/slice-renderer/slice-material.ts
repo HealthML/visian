@@ -16,7 +16,7 @@ import { getOrder } from "./utils";
 export class SliceMaterial extends THREE.ShaderMaterial implements IDisposable {
   protected disposers: IDisposer[] = [];
 
-  constructor(private editor: IEditor, private viewType: ViewType) {
+  constructor(editor: IEditor, viewType: ViewType) {
     super({
       vertexShader: sliceVertexShader,
       fragmentShader: sliceFragmentShader,
@@ -100,9 +100,8 @@ export class SliceMaterial extends THREE.ShaderMaterial implements IDisposable {
       autorun(() => {
         const layers = editor.activeDocument?.imageLayers || [];
         const canvasIndex = getOrder(
-          this.editor.activeDocument?.viewport2D.mainViewType ??
-            ViewType.Transverse,
-        ).indexOf(this.viewType);
+          editor.activeDocument?.viewport2D.mainViewType ?? ViewType.Transverse,
+        ).indexOf(viewType);
 
         const layerData = layers.map((layer) =>
           ((layer as IImageLayer).image as RenderedImage).getTexture(
