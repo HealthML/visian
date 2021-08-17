@@ -350,13 +350,12 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
     this.volume.visible = false;
 
     // TODO: Bind the XR framebuffer again after rendering to the depthTarget
-    const buffer = this.renderer.xr.getSession().renderState.baseLayer
-      ?.framebuffer;
+    const baseLayer = this.renderer.xr.getSession()?.renderState.baseLayer;
     this.renderer.setRenderTarget(this.depthTarget);
     this.renderer.render(this.scene, camera);
     this.renderer.setRenderTarget(null);
-    if (buffer) {
-      this.renderer.setFramebuffer(buffer);
+    if (baseLayer) {
+      this.renderer.state.bindXRFramebuffer(baseLayer.framebuffer);
     }
 
     this.volume.visible = true;
