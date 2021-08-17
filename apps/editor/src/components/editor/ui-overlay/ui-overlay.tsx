@@ -129,9 +129,15 @@ export const UIOverlay = observer<UIOverlayProps>(
         )}
         <ColumnLeft>
           <MenuRow>
-            <Menu onOpenShortcutPopUp={openShortcutPopUp} />
+            <FloatingUIButton
+              icon="import"
+              tooltipTx="import-tooltip"
+              tooltipPosition="right"
+              isActive={false}
+            />
             <UndoRedoButtons />
           </MenuRow>
+          <Menu onOpenShortcutPopUp={openShortcutPopUp} />
           <Toolbar />
           <Layers />
           <Spacer />

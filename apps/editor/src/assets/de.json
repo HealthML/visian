@@ -10,6 +10,9 @@
   "unsaved-changes": "Ungespeicherte Änderungen.",
   "saved-in-browser": "Alle Änderungen im Browser gespeichert.",
 
+  "import": "Import",
+  "import-tooltip": "Import",
+
   "menu": "Menü",
   "theme": "Farbschema",
   "dark": "Dunkel",
