@@ -199,11 +199,6 @@ export class Viewport3D
 
     this.setOrbitTarget();
 
-    this.setVolumeSpaceCameraPosition(
-      cameraPosition.x,
-      cameraPosition.y,
-      cameraPosition.z,
-    );
     this.document.volumeRenderer?.setVolumeSpaceCameraPosition(cameraPosition);
   }
 
