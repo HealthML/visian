@@ -1,6 +1,6 @@
 import { IEditor } from "@visian/ui-shared";
 import { IDisposable, IDisposer } from "@visian/utils";
-import { reaction } from "mobx";
+import { autorun, reaction } from "mobx";
 import * as THREE from "three";
 
 import {
@@ -8,7 +8,7 @@ import {
   volumeFragmentShader,
   volumeVertexShader,
 } from "../shaders";
-import { SharedUniforms } from "./utils";
+import { getMaxSteps, SharedUniforms } from "./utils";
 
 /** A volume domain material. */
 export class VolumeMaterial
@@ -33,15 +33,14 @@ export class VolumeMaterial
         uLAO: { value: null },
         uUseRayDithering: { value: true },
       },
+      defines: {
+        MAX_STEPS: 600,
+      },
       transparent: true,
     });
 
     // Always render the back faces.
     this.side = THREE.BackSide;
-
-    const url = new URL(window.location.href);
-    const maxStepsParam = url.searchParams.get("maxSteps");
-    this.defines.MAX_STEPS = maxStepsParam ? parseInt(maxStepsParam) : 600;
 
     this.uniforms.uInputFirstDerivative.value = firstDerivative;
     this.uniforms.uInputSecondDerivative.value = secondDerivative;
@@ -60,6 +59,13 @@ export class VolumeMaterial
         },
         { fireImmediately: true },
       ),
+      autorun(() => {
+        const baseImage = editor.activeDocument?.baseImageLayer?.image;
+        if (baseImage) {
+          this.defines.MAX_STEPS = getMaxSteps(baseImage);
+        }
+        this.needsUpdate = true;
+      }),
     );
   }
 
