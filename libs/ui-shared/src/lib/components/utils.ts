@@ -3,6 +3,7 @@ import React, {
   useCallback,
   useEffect,
   useLayoutEffect,
+  useMemo,
   useRef,
   useState,
 } from "react";
@@ -72,6 +73,28 @@ export const useIsDraggedOver = () => {
       onDrop: typeof onDragEnd;
     },
   ];
+};
+
+export const useFilePicker = (
+  callback: (arg: Event) => void,
+  multiple = true,
+) => {
+  const inputElement: HTMLInputElement = useMemo(
+    () => document.createElement("input"),
+    [],
+  );
+  useEffect(() => {
+    inputElement.addEventListener("change", callback);
+    return () => {
+      inputElement.removeEventListener("change", callback);
+    };
+  }, [callback, inputElement]);
+
+  return useCallback(() => {
+    inputElement.type = "file";
+    inputElement.multiple = multiple;
+    inputElement.dispatchEvent(new MouseEvent("click"));
+  }, [inputElement, multiple]);
 };
 
 export const useUpdateOnResize = (isActive = true) => {

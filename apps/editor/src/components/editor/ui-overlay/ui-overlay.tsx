@@ -4,6 +4,7 @@ import {
   Notification,
   Spacer,
   Text,
+  useFilePicker,
 } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
 import React, { useCallback, useEffect, useRef, useState } from "react";
@@ -106,6 +107,18 @@ export const UIOverlay = observer<UIOverlayProps>(
       [store],
     );
 
+    // Import Button
+    const openFilePicker = useFilePicker(
+      useCallback(
+        (event: Event) => {
+          const { files } = event.target as HTMLInputElement;
+          if (!files || !files.length) return;
+          store?.editor.activeDocument?.importFile(Array.from(files));
+        },
+        [store],
+      ),
+    );
+
     // Shortcut Pop Up Toggling
     const [isShortcutPopUpOpen, setIsShortcutPopUpOpen] = useState(false);
     const openShortcutPopUp = useCallback(() => {
@@ -134,6 +147,7 @@ export const UIOverlay = observer<UIOverlayProps>(
               tooltipTx="import-tooltip"
               tooltipPosition="right"
               isActive={false}
+              onPointerDown={openFilePicker}
             />
             <UndoRedoButtons />
           </MenuRow>
