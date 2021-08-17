@@ -27,3 +27,9 @@ export interface ErrorNotification {
   description?: string;
   descriptionTx?: string;
 }
+
+export interface ProgressNotification {
+  label?: string;
+  labelTx?: string;
+  progress?: number;
+}

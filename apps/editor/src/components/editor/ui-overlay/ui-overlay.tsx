@@ -25,6 +25,7 @@ import { ViewSettings } from "../view-settings";
 import { UIOverlayProps } from "./ui-overlay.props";
 
 import type { ImageLayer } from "../../../models";
+import { ProgressPopUp } from "../progress-popup";
 
 const Container = styled(AbsoluteCover)`
   align-items: stretch;
@@ -113,7 +114,12 @@ export const UIOverlay = observer<UIOverlayProps>(
         (event: Event) => {
           const { files } = event.target as HTMLInputElement;
           if (!files || !files.length) return;
-          store?.editor.activeDocument?.importFile(Array.from(files));
+          store?.setProgress({ labelTx: "importing" });
+          store?.editor.activeDocument
+            ?.importFile(Array.from(files))
+            .then(() => {
+              store?.setProgress();
+            });
         },
         [store],
       ),
@@ -182,8 +188,14 @@ export const UIOverlay = observer<UIOverlayProps>(
           isOpen={isShortcutPopUpOpen}
           onClose={closeShortcutPopUp}
         />
-
         {isDraggedOver && <DropSheet onDropCompleted={onDropCompleted} />}
+        {store?.progress && (
+          <ProgressPopUp
+            label={store.progress.label}
+            labelTx={store.progress.labelTx}
+            progress={store.progress.progress}
+          />
+        )}
         {store?.error && (
           <ErrorNotification
             title={store?.error.title}

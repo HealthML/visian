@@ -10,7 +10,7 @@ import { action, computed, makeObservable, observable } from "mobx";
 
 import { errorDisplayDuration } from "../constants";
 import { Editor, EditorSnapshot } from "./editor";
-import { ErrorNotification } from "./types";
+import { ErrorNotification, ProgressNotification } from "./types";
 
 export interface RootSnapshot {
   editor: EditorSnapshot;
@@ -29,6 +29,7 @@ export class RootStore implements ISerializable<RootSnapshot> {
 
   protected errorTimeout?: NodeJS.Timer;
   public error?: ErrorNotification;
+  public progress?: ProgressNotification;
 
   /**
    * Indicates if there are changes that have not yet been written by the
@@ -46,6 +47,7 @@ export class RootStore implements ISerializable<RootSnapshot> {
       editor: observable,
       colorMode: observable,
       error: observable,
+      progress: observable,
       isDirty: observable,
       refs: observable,
 
@@ -53,6 +55,7 @@ export class RootStore implements ISerializable<RootSnapshot> {
 
       setColorMode: action,
       setError: action,
+      setProgress: action,
       applySnapshot: action,
       rehydrate: action,
       setIsDirty: action,
@@ -92,6 +95,9 @@ export class RootStore implements ISerializable<RootSnapshot> {
         this.setError();
       }, errorDisplayDuration) as unknown) as NodeJS.Timer;
     }
+  }
+  public setProgress(progress?: ProgressNotification) {
+    this.progress = progress;
   }
 
   public setIsDirty = (isDirty = true) => {
