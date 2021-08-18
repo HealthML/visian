@@ -49,12 +49,13 @@ export const asyncThrottle = (...args: Parameters<typeof throttle>) => {
             pendingRequests.forEach((request) => {
               request[0](result);
             });
-            pendingRequests = [];
           })
           .catch((exception) => {
             pendingRequests.forEach((request) => {
               request[1](exception);
             });
+          })
+          .finally(() => {
             pendingRequests = [];
           });
       } else {
