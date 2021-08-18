@@ -2,6 +2,7 @@ import {
   AbsoluteCover,
   FloatingUIButton,
   Notification,
+  opacity,
   Spacer,
   Text,
   useFilePicker,
@@ -15,6 +16,7 @@ import { ActionModal } from "../action-modal";
 import { DropSheet } from "../drop-sheet";
 import { Layers } from "../layers";
 import { Menu } from "../menu";
+import { ProgressPopUp } from "../progress-popup";
 import { ShortcutPopUp } from "../shortcut-popup";
 import { SideViews } from "../side-views";
 import { SliceSlider } from "../slice-slider";
@@ -25,7 +27,6 @@ import { ViewSettings } from "../view-settings";
 import { UIOverlayProps } from "./ui-overlay.props";
 
 import type { ImageLayer } from "../../../models";
-import { ProgressPopUp } from "../progress-popup";
 
 const Container = styled(AbsoluteCover)`
   align-items: stretch;
@@ -73,6 +74,12 @@ const RightBar = styled.div`
   display: flex;
   flex-direction: column;
   height: 100%;
+`;
+
+const ImportButton = styled(FloatingUIButton)`
+  &:active > * {
+    opacity: ${opacity("inactiveIcon")};
+  }
 `;
 
 const ErrorNotification = styled(Notification)`
@@ -154,7 +161,7 @@ export const UIOverlay = observer<UIOverlayProps>(
         )}
         <ColumnLeft>
           <MenuRow>
-            <FloatingUIButton
+            <ImportButton
               icon="import"
               tooltipTx="import-tooltip"
               tooltipPosition="right"
