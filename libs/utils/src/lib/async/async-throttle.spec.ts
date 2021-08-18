@@ -67,4 +67,21 @@ describe("asyncThrottle", () => {
     await expect(promise1).rejects.toThrow(Error);
     await expect(promise2).rejects.toThrow(Error);
   });
+
+  it("should wait for inner function to complete", async () => {
+    clear();
+    let resolverFn!: (value: number) => void;
+    throttledFn = asyncThrottle(
+      () =>
+        new Promise((resolve) => {
+          resolverFn = resolve;
+        }),
+    );
+    const promise1 = throttledFn(1);
+    release();
+    // eslint-disable-next-line jest/valid-expect
+    const expectPromise = expect(promise1).resolves.toBe(2);
+    resolverFn(2);
+    await expectPromise;
+  });
 });
