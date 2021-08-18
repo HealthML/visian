@@ -117,6 +117,12 @@ export const UIOverlay = observer<UIOverlayProps>(
           store?.setProgress({ labelTx: "importing" });
           store?.editor.activeDocument
             ?.importFile(Array.from(files))
+            .catch((error) => {
+              store?.setError({
+                titleTx: "import-error",
+                descriptionTx: error.message,
+              });
+            })
             .then(() => {
               store?.setProgress();
             });

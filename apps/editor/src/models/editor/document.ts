@@ -357,10 +357,9 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
 
       if (dirFiles.length) await this.importFile(dirFiles, entry.name);
     } else {
-      await new Promise<void>((resolve) => {
-        entry.file(async (file: File) => {
-          await this.importFile(file);
-          resolve();
+      await new Promise<void>((resolve, reject) => {
+        entry.file((file: File) => {
+          this.importFile(file).then(resolve).catch(reject);
         });
       });
     }

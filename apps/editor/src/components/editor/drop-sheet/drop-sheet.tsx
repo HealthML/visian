@@ -40,7 +40,7 @@ export const DropSheet: React.FC<DropSheetProps> = observer(
 
     const [isLoadingFiles, setIsLoadingFiles] = useState(false);
     const importFiles = useCallback(
-      (files: FileList, event: React.DragEvent) => {
+      (_files: FileList, event: React.DragEvent) => {
         (async () => {
           event.stopPropagation();
           setIsLoadingFiles(true);
