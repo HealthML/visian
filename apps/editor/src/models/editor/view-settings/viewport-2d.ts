@@ -22,6 +22,10 @@ export class Viewport2D
   public zoomLevel!: number;
   public offset = new Vector(2);
 
+  public isVoxelHovered = false;
+  public hoveredVoxel = new Vector(3);
+  public hoveredValue = 0;
+
   constructor(
     snapshot: Partial<Viewport2DSnapshot> | undefined,
     protected document: IDocument,
@@ -37,6 +41,9 @@ export class Viewport2D
       showSideViews: observable,
       zoomLevel: observable,
       offset: observable,
+      isVoxelHovered: observable,
+      hoveredVoxel: observable,
+      hoveredValue: observable,
 
       sliceMarkers: computed,
 
@@ -49,6 +56,9 @@ export class Viewport2D
       setSelectedSlice: action,
       zoomIn: action,
       zoomOut: action,
+      setIsVoxelHovered: action,
+      setHoveredVoxel: action,
+      setHoveredValue: action,
       applySnapshot: action,
     });
   }
@@ -126,6 +136,21 @@ export class Viewport2D
 
   public zoomOut() {
     this.zoomLevel = Math.max(minZoom, this.zoomLevel - this.zoomStep);
+  }
+
+  // Hovered Voxel
+  public setIsVoxelHovered(value = false): void {
+    this.isVoxelHovered = value;
+  }
+
+  public setHoveredVoxel(voxel: Vector): void {
+    this.hoveredVoxel.copy(voxel);
+    this.setIsVoxelHovered(true);
+  }
+
+  public setHoveredValue(value: number): void {
+    this.hoveredValue = value;
+    this.setIsVoxelHovered(true);
   }
 
   // Serialization

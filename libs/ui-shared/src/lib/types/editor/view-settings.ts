@@ -52,6 +52,10 @@ export interface IViewport2D {
    */
   sliceMarkers: MarkerConfig[];
 
+  isVoxelHovered: boolean;
+  hoveredVoxel: Vector;
+  hoveredValue: number;
+
   /** Sets the main view type. */
   setMainViewType(viewType: ViewType): void;
 
@@ -78,6 +82,10 @@ export interface IViewport2D {
   zoomIn(): void;
   /** Decreases the current `zoomLevel` by subtracting the current `zoomStep`. */
   zoomOut(): void;
+
+  setIsVoxelHovered(value?: boolean): void;
+  setHoveredVoxel(voxel: Vector): void;
+  setHoveredValue(value: number): void;
 }
 
 export type ShadingMode = "none" | "phong" | "lao";

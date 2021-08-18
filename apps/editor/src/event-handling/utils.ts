@@ -1,10 +1,16 @@
 import { getPositionWithinPixel } from "@visian/rendering";
-import { DragPoint, ISliceRenderer, IViewSettings } from "@visian/ui-shared";
+import {
+  DragPoint,
+  IEditor,
+  ISliceRenderer,
+  IViewSettings,
+} from "@visian/ui-shared";
 import {
   getOrthogonalAxis,
   getPlaneAxes,
   Image,
   Pixel,
+  Vector,
   ViewType,
 } from "@visian/utils";
 import { Tools } from "../models";
@@ -92,4 +98,33 @@ export const getDragPoint = (
   );
 
   return dragPoint;
+};
+
+export const updateHoveredVoxel = (
+  editor: IEditor,
+  image: Image,
+  dragPoint: DragPoint,
+) => {
+  const voxel = new Vector(
+    [dragPoint.x, dragPoint.y, dragPoint.z],
+    false,
+  ).floor();
+
+  if (
+    voxel.x < 0 ||
+    voxel.y < 0 ||
+    voxel.z < 0 ||
+    voxel.x >= image.voxelCount.x ||
+    voxel.y >= image.voxelCount.y ||
+    voxel.z >= image.voxelCount.z
+  ) {
+    editor.activeDocument?.viewport2D.setIsVoxelHovered(false);
+    return;
+  }
+
+  if (editor.activeDocument?.viewport2D.hoveredVoxel.equals(voxel)) return;
+  const imageValue = image.getVoxelData(voxel);
+
+  editor.activeDocument?.viewport2D.setHoveredValue(imageValue);
+  editor.activeDocument?.viewport2D.setHoveredVoxel(voxel);
 };

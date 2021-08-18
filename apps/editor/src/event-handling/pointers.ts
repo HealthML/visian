@@ -14,7 +14,7 @@ import {
 import { IDisposer, Vector } from "@visian/utils";
 
 import { RootStore, ToolName, OutlineTool } from "../models";
-import { alignBrushCursor, getDragPoint } from "./utils";
+import { alignBrushCursor, getDragPoint, updateHoveredVoxel } from "./utils";
 
 export const setUpPointerHandling = (
   store: RootStore,
@@ -66,7 +66,7 @@ export const setUpPointerHandling = (
         return;
       }
 
-      alignBrushCursor(
+      const uv = alignBrushCursor(
         store.editor.activeDocument.tools,
         {
           x: detail.clientX,
@@ -75,6 +75,21 @@ export const setUpPointerHandling = (
         store.editor.activeDocument.viewport2D.mainViewType,
         true,
         store.editor.sliceRenderer,
+      );
+
+      if (!uv || !store.editor.activeDocument.baseImageLayer) return;
+
+      const dragPoint = getDragPoint(
+        store.editor.activeDocument.baseImageLayer.image,
+        store.editor.activeDocument.viewSettings,
+        store.editor.activeDocument.viewport2D.mainViewType,
+        uv,
+      );
+
+      updateHoveredVoxel(
+        store.editor,
+        store.editor.activeDocument.baseImageLayer.image,
+        dragPoint,
       );
     },
     forPointers: ({ context, detail, id }, { eventType }) => {
@@ -174,6 +189,14 @@ export const setUpPointerHandling = (
           store.editor.activeDocument.tools.setIsDrawing(false);
           tool.endAt(dragPoint);
           break;
+      }
+
+      if (store.editor.activeDocument.baseImageLayer) {
+        updateHoveredVoxel(
+          store.editor,
+          store.editor.activeDocument.baseImageLayer.image,
+          dragPoint,
+        );
       }
 
       store.setIsDirty();

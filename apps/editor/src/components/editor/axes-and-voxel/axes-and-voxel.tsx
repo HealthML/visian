@@ -92,25 +92,47 @@ export const AxesAndVoxel: React.FC = observer(() => {
           )}
         </AxesHorizontalContainer>
       )}
-      <FlexColumn>
-        <FlexRow>
-          <VoxelTitle tx="X" />
-          <VoxelContent tx="291" />
-        </FlexRow>
-        <FlexRow>
-          <VoxelTitle tx="Y" />
-          <VoxelContent tx="12" />
-        </FlexRow>
-        <FlexRow>
-          <VoxelTitle tx="Z" />
-          <VoxelContent tx="132" />
-        </FlexRow>
-        <Spacer />
-        <FlexRow>
-          <VoxelTitle tx="V" />
-          <VoxelContent tx="240" />
-        </FlexRow>
-      </FlexColumn>
+      {store?.editor.activeDocument?.viewport2D.isVoxelHovered && (
+        <FlexColumn>
+          <FlexRow>
+            <VoxelTitle tx="X" />
+            <VoxelContent
+              tx={
+                store?.editor.activeDocument?.viewport2D.hoveredVoxel.x.toString() ??
+                "-"
+              }
+            />
+          </FlexRow>
+          <FlexRow>
+            <VoxelTitle tx="Y" />
+            <VoxelContent
+              tx={
+                store?.editor.activeDocument?.viewport2D.hoveredVoxel.y.toString() ??
+                "-"
+              }
+            />
+          </FlexRow>
+          <FlexRow>
+            <VoxelTitle tx="Z" />
+            <VoxelContent
+              tx={
+                store?.editor.activeDocument?.viewport2D.hoveredVoxel.z.toString() ??
+                "-"
+              }
+            />
+          </FlexRow>
+          <Spacer />
+          <FlexRow>
+            <VoxelTitle tx="V" />
+            <VoxelContent
+              tx={
+                store?.editor.activeDocument?.viewport2D.hoveredValue.toString() ??
+                "-"
+              }
+            />
+          </FlexRow>
+        </FlexColumn>
+      )}
     </AVContainer>
   );
 });
