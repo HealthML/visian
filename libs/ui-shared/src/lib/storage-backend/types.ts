@@ -6,11 +6,7 @@ export interface IStorageBackend<T = unknown> {
   delete(key: string): Promise<void>;
 
   /** Writes data to storage, throttled per key. */
-  persist(
-    key: string,
-    data: T | (() => T | Promise<T>),
-    finishedPersistCallback: () => void,
-  ): Promise<void>;
+  persist(key: string, data: T | (() => T | Promise<T>)): Promise<void>;
 
   /**
    * Writes data to storage, skipping throttle.
