@@ -1,7 +1,11 @@
 /* eslint-disable max-len */
 import { Text, FlexRow, Spacer, FlexColumn, color } from "@visian/ui-shared";
+import { ViewType } from "@visian/utils";
+import { observer } from "mobx-react-lite";
 import React from "react";
 import styled from "styled-components";
+
+import { useStore } from "../../../app/root-store";
 
 const AVContainer = styled(FlexRow)`
   margin-top: 16px;
@@ -47,36 +51,66 @@ const VoxelContent = styled(Text)`
   font-weight: 500;
 `;
 
-export const AxesAndVoxel: React.FC = () => (
-  <AVContainer>
-    <AxesHorizontalContainer>
-      <VoxelContent tx="R" />
-      <AxesHorizontal />
-      <VoxelContent tx="L" />
-      <AxesVerticalContainer>
-        <VoxelContent tx="A" />
-        <AxesVertical />
-        <VoxelContent tx="P" />
-      </AxesVerticalContainer>
-    </AxesHorizontalContainer>
-    <FlexColumn>
-      <FlexRow>
-        <VoxelTitle tx="X" />
-        <VoxelContent tx="291" />
-      </FlexRow>
-      <FlexRow>
-        <VoxelTitle tx="Y" />
-        <VoxelContent tx="12" />
-      </FlexRow>
-      <FlexRow>
-        <VoxelTitle tx="Z" />
-        <VoxelContent tx="132" />
-      </FlexRow>
-      <Spacer />
-      <FlexRow>
-        <VoxelTitle tx="V" />
-        <VoxelContent tx="240" />
-      </FlexRow>
-    </FlexColumn>
-  </AVContainer>
-);
+export const AxesAndVoxel: React.FC = observer(() => {
+  const store = useStore();
+
+  const viewType = store?.editor.activeDocument?.viewport2D.mainViewType;
+
+  return (
+    <AVContainer>
+      {store?.editor.activeDocument?.has3DLayers && (
+        <AxesHorizontalContainer>
+          {viewType !== undefined && (
+            <>
+              {viewType === ViewType.Sagittal ? (
+                <>
+                  <VoxelContent tx="A" />
+                  <AxesHorizontal />
+                  <VoxelContent tx="P" />
+                </>
+              ) : (
+                <>
+                  <VoxelContent tx="R" />
+                  <AxesHorizontal />
+                  <VoxelContent tx="L" />
+                </>
+              )}
+              {viewType === ViewType.Transverse ? (
+                <AxesVerticalContainer>
+                  <VoxelContent tx="A" />
+                  <AxesVertical />
+                  <VoxelContent tx="P" />
+                </AxesVerticalContainer>
+              ) : (
+                <AxesVerticalContainer>
+                  <VoxelContent tx="S" />
+                  <AxesVertical />
+                  <VoxelContent tx="I" />
+                </AxesVerticalContainer>
+              )}
+            </>
+          )}
+        </AxesHorizontalContainer>
+      )}
+      <FlexColumn>
+        <FlexRow>
+          <VoxelTitle tx="X" />
+          <VoxelContent tx="291" />
+        </FlexRow>
+        <FlexRow>
+          <VoxelTitle tx="Y" />
+          <VoxelContent tx="12" />
+        </FlexRow>
+        <FlexRow>
+          <VoxelTitle tx="Z" />
+          <VoxelContent tx="132" />
+        </FlexRow>
+        <Spacer />
+        <FlexRow>
+          <VoxelTitle tx="V" />
+          <VoxelContent tx="240" />
+        </FlexRow>
+      </FlexColumn>
+    </AVContainer>
+  );
+});
