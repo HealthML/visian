@@ -10,6 +10,10 @@
   "unsaved-changes": "Unsaved changes.",
   "saved-in-browser": "All changes saved in browser.",
 
+  "import": "Import",
+  "import-tooltip": "Import",
+  "importing": "Importing",
+
   "menu": "Menu",
   "theme": "Theme",
   "dark": "Dark",

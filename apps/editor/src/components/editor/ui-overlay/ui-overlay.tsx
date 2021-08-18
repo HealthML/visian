@@ -2,8 +2,10 @@ import {
   AbsoluteCover,
   FloatingUIButton,
   Notification,
+  opacity,
   Spacer,
   Text,
+  useFilePicker,
 } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
 import React, { useCallback, useEffect, useRef, useState } from "react";
@@ -14,6 +16,7 @@ import { ActionModal } from "../action-modal";
 import { DropSheet } from "../drop-sheet";
 import { Layers } from "../layers";
 import { Menu } from "../menu";
+import { ProgressPopUp } from "../progress-popup";
 import { ShortcutPopUp } from "../shortcut-popup";
 import { SideViews } from "../side-views";
 import { SliceSlider } from "../slice-slider";
@@ -73,6 +76,12 @@ const RightBar = styled.div`
   height: 100%;
 `;
 
+const ImportButton = styled(FloatingUIButton)`
+  &:active > * {
+    opacity: ${opacity("inactiveIcon")};
+  }
+`;
+
 const ErrorNotification = styled(Notification)`
   position: absolute;
   min-width: 15%;
@@ -106,6 +115,29 @@ export const UIOverlay = observer<UIOverlayProps>(
       [store],
     );
 
+    // Import Button
+    const openFilePicker = useFilePicker(
+      useCallback(
+        (event: Event) => {
+          const { files } = event.target as HTMLInputElement;
+          if (!files || !files.length) return;
+          store?.setProgress({ labelTx: "importing" });
+          store?.editor.activeDocument
+            ?.importFile(Array.from(files))
+            .catch((error) => {
+              store?.setError({
+                titleTx: "import-error",
+                descriptionTx: error.message,
+              });
+            })
+            .then(() => {
+              store?.setProgress();
+            });
+        },
+        [store],
+      ),
+    );
+
     // Shortcut Pop Up Toggling
     const [isShortcutPopUpOpen, setIsShortcutPopUpOpen] = useState(false);
     const openShortcutPopUp = useCallback(() => {
@@ -129,9 +161,16 @@ export const UIOverlay = observer<UIOverlayProps>(
         )}
         <ColumnLeft>
           <MenuRow>
-            <Menu onOpenShortcutPopUp={openShortcutPopUp} />
+            <ImportButton
+              icon="import"
+              tooltipTx="import-tooltip"
+              tooltipPosition="right"
+              isActive={false}
+              onPointerDown={openFilePicker}
+            />
             <UndoRedoButtons />
           </MenuRow>
+          <Menu onOpenShortcutPopUp={openShortcutPopUp} />
           <Toolbar />
           <Layers />
           <Spacer />
@@ -162,8 +201,14 @@ export const UIOverlay = observer<UIOverlayProps>(
           isOpen={isShortcutPopUpOpen}
           onClose={closeShortcutPopUp}
         />
-
         {isDraggedOver && <DropSheet onDropCompleted={onDropCompleted} />}
+        {store?.progress && (
+          <ProgressPopUp
+            label={store.progress.label}
+            labelTx={store.progress.labelTx}
+            progress={store.progress.progress}
+          />
+        )}
         {store?.error && (
           <ErrorNotification
             title={store?.error.title}

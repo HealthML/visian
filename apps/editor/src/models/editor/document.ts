@@ -9,11 +9,18 @@ import {
   Theme,
   ValueType,
 } from "@visian/ui-shared";
-import { ITKImage, ISerializable, readMedicalImage } from "@visian/utils";
+import { ISerializable, ITKImage, readMedicalImage } from "@visian/utils";
 import { action, computed, makeObservable, observable, toJS } from "mobx";
+import path from "path";
 import * as THREE from "three";
 import { v4 as uuidv4 } from "uuid";
 
+import {
+  defaultAnnotationColor,
+  defaultImageColor,
+  defaultRegionGrowingPreviewColor,
+} from "../../constants";
+import { StoreContext } from "../types";
 import { History, HistorySnapshot } from "./history";
 import { ImageLayer, Layer, LayerSnapshot } from "./layers";
 import * as layers from "./layers";
@@ -28,12 +35,6 @@ import {
   ViewSettings,
   ViewSettingsSnapshot,
 } from "./view-settings";
-import { StoreContext } from "../types";
-import {
-  defaultAnnotationColor,
-  defaultImageColor,
-  defaultRegionGrowingPreviewColor,
-} from "../../constants";
 
 const uniqueValuesForAnnotationThreshold = 20;
 
@@ -322,15 +323,69 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
     }
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public async importFileSystemEntry(entry: any): Promise<void> {
+    if (!entry) return;
+    if (entry.isDirectory) {
+      const dirReader = entry.createReader();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const entries = await new Promise<any[]>((resolve) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        dirReader.readEntries((result: any[]) => {
+          resolve(result);
+        });
+      });
+
+      const dirFiles: File[] = [];
+      const promises: Promise<void>[] = [];
+      const { length } = entries;
+      for (let i = 0; i < length; i++) {
+        if (entries[i].isFile) {
+          promises.push(
+            new Promise((resolve) => {
+              entries[i].file((file: File) => {
+                dirFiles.push(file);
+                resolve();
+              });
+            }),
+          );
+        } else {
+          promises.push(this.importFileSystemEntry(entries[i]));
+        }
+      }
+      await Promise.all(promises);
+
+      if (dirFiles.length) await this.importFile(dirFiles, entry.name);
+    } else {
+      await new Promise<void>((resolve, reject) => {
+        entry.file((file: File) => {
+          this.importFile(file).then(resolve).catch(reject);
+        });
+      });
+    }
+  }
+
   public async importFile(
-    file: File | File[],
+    files: File | File[],
     name?: string,
     isAnnotation?: boolean,
-  ) {
+  ): Promise<void> {
+    if (Array.isArray(files)) {
+      if (files.some((file) => path.extname(file.name) !== ".dcm")) {
+        const promises: Promise<void>[] = [];
+        files.forEach((file) => {
+          if (file.name.startsWith(".")) return;
+          promises.push(this.importFile(file));
+        });
+        await Promise.all(promises);
+        return;
+      }
+    }
+
     const isFirstLayer = !this.layerIds.length;
-    const image = await readMedicalImage(file);
+    const image = await readMedicalImage(files);
     image.name =
-      name || (Array.isArray(file) ? file[0]?.name || "" : file.name);
+      name || (Array.isArray(files) ? files[0]?.name || "" : files.name);
 
     if (isAnnotation) {
       await this.importAnnotation(image);
