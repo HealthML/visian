@@ -56,7 +56,7 @@ export const AxesAndVoxel: React.FC = observer(() => {
 
   const viewType = store?.editor.activeDocument?.viewport2D.mainViewType;
 
-  return (
+  return store?.editor.activeDocument?.viewSettings.viewMode === "2D" ? (
     <AVContainer>
       {store?.editor.activeDocument?.has3DLayers && (
         <AxesHorizontalContainer>
@@ -134,5 +134,5 @@ export const AxesAndVoxel: React.FC = observer(() => {
         </FlexColumn>
       )}
     </AVContainer>
-  );
+  ) : null;
 });
