@@ -161,7 +161,7 @@ export interface IViewport3D<N extends string> {
   setVolumeSpaceCameraPosition(x: number, y: number, z: number): void;
   setCameraToFaceViewType(viewType: ViewType, flipped?: boolean): void;
   setOpacity(value?: number): void;
-  setShadingMode(value?: ShadingMode): void;
+  requestShadingMode(value?: ShadingMode): void;
   confirmRequestedShadingMode(): void;
   cycleShadingMode(): void;
   setActiveTransferFunction(
