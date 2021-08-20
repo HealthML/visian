@@ -331,6 +331,10 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
         this.laoComputer.isDirty)
     ) {
       this.laoComputer.tick();
+    } else if (
+      this.editor.activeDocument?.viewport3D.requestedShadingMode === "lao"
+    ) {
+      this.editor.activeDocument?.viewport3D.confirmRequestedShadingMode();
     }
 
     if (this.renderer.xr.isPresenting) {

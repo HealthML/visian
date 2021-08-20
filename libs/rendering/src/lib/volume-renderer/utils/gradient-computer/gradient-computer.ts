@@ -76,6 +76,10 @@ export class GradientComputer implements IDisposable {
       this.outputDerivativeDirty
     ) {
       this.renderOutputDerivative();
+    } else if (
+      this.editor.activeDocument?.viewport3D.requestedShadingMode === "phong"
+    ) {
+      this.editor.activeDocument?.viewport3D.confirmRequestedShadingMode();
     }
   }
 
