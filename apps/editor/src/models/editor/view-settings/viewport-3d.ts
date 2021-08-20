@@ -3,7 +3,6 @@ import {
   IViewport3D,
   ShadingMode,
   ITransferFunction,
-  isPerformanceLow,
 } from "@visian/ui-shared";
 import { ISerializable, Vector, ViewType } from "@visian/utils";
 import { action, autorun, computed, makeObservable, observable } from "mobx";
@@ -57,7 +56,7 @@ export class Viewport3D
 
   public opacity!: number;
   public shadingMode!: ShadingMode;
-  public suppressedShadingMode?: ShadingMode;
+  public requestedShadingMode?: ShadingMode;
 
   protected activeTransferFunctionName?: TransferFunctionName;
   public transferFunctions: Record<
@@ -73,8 +72,6 @@ export class Viewport3D
   public shouldClippingPlaneRender = false;
   public shouldClippingPlaneShowAnnotations = true;
 
-  private shadingTimeout?: NodeJS.Timer;
-
   constructor(
     snapshot: Partial<Viewport3DSnapshot<TransferFunctionName>> | undefined,
     protected document: IDocument,
@@ -82,7 +79,7 @@ export class Viewport3D
     makeObservable<
       this,
       | "activeTransferFunctionName"
-      | "setSuppressedShadingMode"
+      | "setRequestedShadingMode"
       | "setIsXRAvailable"
     >(this, {
       isXRAvailable: observable,
@@ -92,7 +89,7 @@ export class Viewport3D
       volumeSpaceCameraPosition: observable,
       opacity: observable,
       shadingMode: observable,
-      suppressedShadingMode: observable,
+      requestedShadingMode: observable,
       activeTransferFunctionName: observable,
       transferFunctions: observable,
       useSmoothSegmentations: observable,
@@ -110,7 +107,7 @@ export class Viewport3D
       setActiveTransferFunction: action,
       setOpacity: action,
       setShadingMode: action,
-      setSuppressedShadingMode: action,
+      setRequestedShadingMode: action,
       onTransferFunctionChange: action,
       setIsXRAvailable: action,
       setIsInXR: action,
@@ -255,11 +252,11 @@ export class Viewport3D
 
   public setShadingMode = (
     value: ShadingMode = "lao",
-    overwriteSuppressed = false,
+    overwriteRequested = false,
   ) => {
     this.shadingMode = value;
-    if (overwriteSuppressed) {
-      this.setSuppressedShadingMode(value);
+    if (overwriteRequested) {
+      this.setRequestedShadingMode();
     }
   };
 
@@ -276,30 +273,24 @@ export class Viewport3D
     }
   }
 
-  protected setSuppressedShadingMode(value?: ShadingMode) {
-    this.suppressedShadingMode = value;
+  public confirmRequestedShadingMode() {
+    if (this.requestedShadingMode) {
+      this.setShadingMode(this.requestedShadingMode);
+      this.setRequestedShadingMode();
+    }
+  }
+
+  protected setRequestedShadingMode(value?: ShadingMode) {
+    this.requestedShadingMode = value;
   }
 
   public onTransferFunctionChange = () => {
-    if (this.shadingMode === "none" && !this.suppressedShadingMode) return;
+    if (this.shadingMode === "none") return;
 
-    if (!this.suppressedShadingMode) {
-      this.setSuppressedShadingMode(this.shadingMode);
+    if (!this.requestedShadingMode) {
+      this.setRequestedShadingMode(this.shadingMode);
       this.setShadingMode("none");
     }
-
-    if (this.shadingTimeout !== undefined) {
-      clearTimeout(this.shadingTimeout);
-    }
-    this.shadingTimeout = setTimeout(
-      () => {
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        this.setShadingMode(this.suppressedShadingMode!);
-        this.setSuppressedShadingMode();
-        this.shadingTimeout = undefined;
-      },
-      isPerformanceLow ? 400 : 200,
-    );
   };
 
   // XR
@@ -379,6 +370,7 @@ export class Viewport3D
     this.setOrbitTarget();
     this.setOpacity();
     this.setShadingMode(undefined, true);
+    this.onTransferFunctionChange();
     Object.values(this.transferFunctions).forEach((transferFunction) => {
       transferFunction.reset();
     });
@@ -424,6 +416,7 @@ export class Viewport3D
     }
     this.setOpacity(snapshot?.opacity);
     this.setShadingMode(snapshot?.shadingMode, true);
+    this.onTransferFunctionChange();
     this.setActiveTransferFunction(snapshot?.activeTransferFunctionName, true);
     snapshot?.transferFunctions?.forEach((transferFunctionSnapshot) => {
       const transferFunction = this.transferFunctions[

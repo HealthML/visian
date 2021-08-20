@@ -140,7 +140,7 @@ export interface IViewport3D<N extends string> {
    * This will only be set if the shading mode is automatically switched for,
    * e.g., performance reasons and thus deviates from the user-selected one.
    */
-  suppressedShadingMode?: ShadingMode;
+  requestedShadingMode?: ShadingMode;
 
   activeTransferFunction?: Reference<ITransferFunction<N>>;
   transferFunctions: Record<N, ITransferFunction<N>>;
@@ -162,6 +162,7 @@ export interface IViewport3D<N extends string> {
   setCameraToFaceViewType(viewType: ViewType, flipped?: boolean): void;
   setOpacity(value?: number): void;
   setShadingMode(value?: ShadingMode): void;
+  confirmRequestedShadingMode(): void;
   cycleShadingMode(): void;
   setActiveTransferFunction(
     nameOrTransferFunction?: N | ITransferFunction<N>,

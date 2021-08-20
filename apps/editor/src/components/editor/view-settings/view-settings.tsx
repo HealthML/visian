@@ -7,6 +7,7 @@ import {
   ModalTitleRow,
   NumberParam,
   Param,
+  ShadingMode,
   useMultiRef,
 } from "@visian/ui-shared";
 import { ViewType } from "@visian/utils";
@@ -86,6 +87,17 @@ export const ViewSettings: React.FC = observer(() => {
           store?.editor.activeDocument?.viewport2D.setMainViewType(viewType);
         }
       }
+    },
+    [store],
+  );
+
+  const setShadingMode = useCallback(
+    (shadingMode: ShadingMode) => {
+      store?.editor.activeDocument?.viewport3D.setShadingMode(
+        shadingMode,
+        true,
+      );
+      store?.editor.activeDocument?.viewport3D.onTransferFunctionChange();
     },
     [store],
   );
@@ -174,10 +186,10 @@ export const ViewSettings: React.FC = observer(() => {
               labelTx="shading-mode"
               options={shadingModeSwitchOptions}
               value={
-                store.editor.activeDocument.viewport3D.suppressedShadingMode ||
+                store.editor.activeDocument.viewport3D.requestedShadingMode ||
                 store.editor.activeDocument.viewport3D.shadingMode
               }
-              setValue={store.editor.activeDocument.viewport3D.setShadingMode}
+              setValue={setShadingMode}
             />
             <EnumParam
               labelTx="transfer-function"
