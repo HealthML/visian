@@ -28,6 +28,7 @@ const PopUpContainer = styled(Sheet)`
   flex-direction: column;
   padding: 30px 40px;
   pointer-events: auto;
+  overflow: hidden;
 
   z-index: ${zIndex("modal")};
 

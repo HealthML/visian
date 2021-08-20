@@ -9,6 +9,7 @@ import { deepObserve, ISerializable } from "@visian/utils";
 import { action, computed, makeObservable, observable } from "mobx";
 
 import { errorDisplayDuration } from "../constants";
+import { DICOMWebServer } from "./dicomweb-server";
 import { Editor, EditorSnapshot } from "./editor";
 import { ErrorNotification, ProgressNotification } from "./types";
 
@@ -22,6 +23,8 @@ export interface RootStoreConfig {
 }
 
 export class RootStore implements ISerializable<RootSnapshot> {
+  public dicomWebServer?: DICOMWebServer;
+
   public editor: Editor;
 
   /** The current theme. */
@@ -44,6 +47,7 @@ export class RootStore implements ISerializable<RootSnapshot> {
 
   constructor(protected config: RootStoreConfig = {}) {
     makeObservable(this, {
+      dicomWebServer: observable,
       editor: observable,
       colorMode: observable,
       error: observable,
@@ -53,6 +57,7 @@ export class RootStore implements ISerializable<RootSnapshot> {
 
       theme: computed,
 
+      connectToDICOMWebServer: action,
       setColorMode: action,
       setError: action,
       setProgress: action,
@@ -69,10 +74,17 @@ export class RootStore implements ISerializable<RootSnapshot> {
       getTheme: () => this.theme,
       getRefs: () => this.refs,
     });
+    this.dicomWebServer = new DICOMWebServer(
+      "https://cors.bridged.cc/http://dicomserver.co.uk:81/qido",
+    );
 
     deepObserve(this.editor, this.persist, {
       exclusionAttribute: "excludeFromSnapshotTracking",
     });
+  }
+
+  public connectToDICOMWebServer(url?: string) {
+    this.dicomWebServer = url ? new DICOMWebServer(url) : undefined;
   }
 
   public setColorMode(theme: ColorMode, persist = true) {

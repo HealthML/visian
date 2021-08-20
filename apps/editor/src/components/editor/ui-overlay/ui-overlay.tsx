@@ -16,6 +16,7 @@ import { ImportPopUp } from "../import-popup";
 import { Layers } from "../layers";
 import { Menu } from "../menu";
 import { ProgressPopUp } from "../progress-popup";
+import { ServerPopUp } from "../server-popup";
 import { ShortcutPopUp } from "../shortcut-popup";
 import { SideViews } from "../side-views";
 import { SliceSlider } from "../slice-slider";
@@ -180,7 +181,11 @@ export const UIOverlay = observer<UIOverlayProps>(
           isOpen={isShortcutPopUpOpen}
           onClose={closeShortcutPopUp}
         />
-        <ImportPopUp isOpen={isImportPopUpOpen} onClose={closeImportPopUp} />
+        {store?.dicomWebServer ? (
+          <ServerPopUp isOpen={isImportPopUpOpen} onClose={closeImportPopUp} />
+        ) : (
+          <ImportPopUp isOpen={isImportPopUpOpen} onClose={closeImportPopUp} />
+        )}
         {isDraggedOver && <DropSheet onDropCompleted={onDropCompleted} />}
         {store?.progress && (
           <ProgressPopUp

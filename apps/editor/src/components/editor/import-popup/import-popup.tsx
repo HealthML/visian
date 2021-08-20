@@ -112,6 +112,21 @@ export const ImportPopUp = observer<ImportPopUpProps>(({ isOpen, onClose }) => {
     }
   }, [loadURL, store, onClose]);
 
+  // Connect to server
+  const [serverURL, setServerURL] = useState("");
+  const connectToServer = useCallback(async () => {
+    if (!serverURL) return;
+
+    try {
+      await store?.connectToDICOMWebServer(serverURL);
+    } catch {
+      store?.setError({
+        titleTx: "import-error",
+        descriptionTx: "remote-file-error",
+      });
+    }
+  }, [serverURL, store]);
+
   return (
     <ImportPopUpContainer
       title="Import"
@@ -134,8 +149,12 @@ export const ImportPopUp = observer<ImportPopUpProps>(({ isOpen, onClose }) => {
       </InlineRow>
       <SectionLabel text="Connect to Server" />
       <InlineRowLast>
-        <ImportInput placeholder="https://..." />
-        <ImportButton tx="Connect" />
+        <ImportInput
+          placeholder="https://..."
+          value={serverURL}
+          onChangeText={setServerURL}
+        />
+        <ImportButton tx="Connect" onPointerDown={connectToServer} />
       </InlineRowLast>
     </ImportPopUpContainer>
   );
