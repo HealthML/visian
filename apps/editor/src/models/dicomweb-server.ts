@@ -1,5 +1,6 @@
-// See http://dicom.nema.org/dicom/2013/output/chtml/part18/sect_6.7.htmldicom wa
+import { getMultiparts } from "@visian/utils";
 
+// See http://dicom.nema.org/dicom/2013/output/chtml/part18/sect_6.7.html
 const studyFields = {
   StudyDate: "00080020",
   StudyTime: "00080030",
@@ -44,43 +45,71 @@ export interface Instance {
 
 export class DICOMWebServer {
   public readonly url;
+  public readonly qidoHeaders = { Accept: "application/dicom+json" };
+  public readonly wadoHeaders = {
+    Accept: 'multipart/related; type="application/dicom"; transfer-syntax=*',
+  };
 
   constructor(url: string) {
     this.url = url.replace(/\/$/, "");
   }
 
-  public async readStudies(): Promise<Study[]> {
-    const studies = await fetch(`${this.url}/studies?includefield=all`);
+  public async searchStudies(): Promise<Study[]> {
+    const response = await fetch(`${this.url}/studies?includefield=all`, {
+      headers: this.qidoHeaders,
+    });
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return (await studies.json()).map((study: any) => ({
+    return (await response.json()).map((study: any) => ({
       StudyInstanceUID: study[studyFields.StudyInstanceUID].Value[0],
       PatientName: study[studyFields.PatientName]?.Value?.[0]?.Alphabetic,
       PatientID: study[studyFields.PatientID]?.Value?.[0],
     }));
   }
 
-  public async readSeries(study: string): Promise<Series[]> {
-    const studies = await fetch(
+  public async searchSeries(study: string): Promise<Series[]> {
+    const response = await fetch(
       `${this.url}/studies/${study}/series?includefield=all`,
+      { headers: this.qidoHeaders },
     );
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return (await studies.json()).map((series: any) => ({
+    return (await response.json()).map((series: any) => ({
       SeriesInstanceUID: series[seriesFields.SeriesInstanceUID].Value[0],
       Modality: series[seriesFields.Modality]?.Value?.[0],
       SeriesNumber: series[seriesFields.SeriesNumber]?.Value?.[0],
     }));
   }
 
-  public async readInstances(
+  public async searchInstances(
     study: string,
     series: string,
   ): Promise<Instance[]> {
-    const loadedSeries = await fetch(
+    const response = await fetch(
       `${this.url}/studies/${study}/series/${series}/instances?includefield=all`,
+      { headers: this.qidoHeaders },
     );
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return (await loadedSeries.json()).map((instance: any) => ({
+    return (await response.json()).map((instance: any) => ({
       InstanceNumber: instance[instanceFields.InstanceNumber]?.Value?.[0],
     }));
+  }
+
+  public async retrieveSeries(study: string, series: string) {
+    const response = await fetch(
+      `${this.url}/studies/${study}/series/${series}`,
+      { headers: this.wadoHeaders },
+    );
+
+    return getMultiparts(
+      new Uint8Array(await response.arrayBuffer()),
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      response.headers
+        .get("Content-Type")!
+        .split("boundary=")[1]
+        .replace(/"/g, ""),
+    ).map(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (section: any, index) =>
+        new File([section.file], section.fileName || `${index}.dcm`),
+    );
   }
 }

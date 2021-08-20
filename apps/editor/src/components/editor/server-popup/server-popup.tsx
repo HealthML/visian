@@ -11,8 +11,8 @@ import {
   TextField,
 } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
-import React, { useState } from "react";
-import { useQuery } from "react-query";
+import React, { useCallback, useState } from "react";
+import { useQuery, useQueryClient } from "react-query";
 import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
@@ -140,28 +140,57 @@ const ListItemText = styled(Text)`
   padding-top: 2px;
 `;
 
+// TODO: Make use of the UI components hidden by this flag
+const showTodoUI = false;
+
 export const ServerPopUp = observer<ServerPopUpProps>(({ isOpen, onClose }) => {
   const store = useStore();
+  const queryClient = useQueryClient();
 
   const { data: studies } = useQuery("studies", () =>
-    store?.dicomWebServer?.readStudies(),
+    store?.dicomWebServer?.searchStudies(),
   );
 
   const [selectedStudy, setSelectedStudy] = useState<string | undefined>();
   const { data: series } = useQuery(["series", selectedStudy], () =>
     selectedStudy
-      ? store?.dicomWebServer?.readSeries(selectedStudy)
+      ? store?.dicomWebServer?.searchSeries(selectedStudy)
       : Promise.resolve([]),
   );
 
-  const [selectedSeries, setSelectedSeries] = useState<string | undefined>();
-  const { data: instances } = useQuery(
-    ["instances", selectedStudy, selectedSeries],
-    () =>
-      selectedStudy && selectedSeries
-        ? store?.dicomWebServer?.readInstances(selectedStudy, selectedSeries)
-        : Promise.resolve([]),
+  const loadSeries = useCallback(
+    (seriesId: string) => {
+      if (!selectedStudy) return;
+      // TODO: Create new document
+      if (store?.editor.newDocument()) {
+        store?.setProgress({ labelTx: "importing" });
+        store?.dicomWebServer
+          ?.retrieveSeries(selectedStudy, seriesId)
+          .then((files) =>
+            store.editor.activeDocument?.importFile(files, seriesId),
+          )
+          .then(() => {
+            onClose?.();
+          })
+          .catch((error) => {
+            store?.setError({
+              titleTx: "import-error",
+              descriptionTx: error.message,
+            });
+          })
+          .finally(() => {
+            store?.setProgress();
+          });
+      }
+    },
+    [onClose, selectedStudy, store],
   );
+
+  const disconnect = useCallback(() => {
+    store?.connectToDICOMWebServer();
+    queryClient.invalidateQueries("studies");
+    queryClient.invalidateQueries("series");
+  }, [queryClient, store]);
 
   return (
     <ServerPopUpContainer
@@ -174,21 +203,25 @@ export const ServerPopUp = observer<ServerPopUpProps>(({ isOpen, onClose }) => {
           <SectionLabel text="Server" />
           <ImportInput value={store?.dicomWebServer?.url} />
         </InlineElement>
-        <InlineElement>
-          <SectionLabel text="Username" />
-          <ImportInput placeholder="Capt. James Tiberius Kirk - 2" />
-        </InlineElement>
+        {showTodoUI && (
+          <InlineElement>
+            <SectionLabel text="Username" />
+            <ImportInput placeholder="Capt. James Tiberius Kirk - 2" />
+          </InlineElement>
+        )}
         <ConnectButton
           icon="terminateConnection"
           color="red"
-          onPointerDown={() => store?.connectToDICOMWebServer()}
+          onPointerDown={disconnect}
         />
       </InlineRow>
-      <InlineRowSecond>
-        <ViewButton icon="columnView" />
-        <ViewButtonLast icon="listView" />
-        <SearchInput placeholder="Search" />
-      </InlineRowSecond>
+      {showTodoUI && (
+        <InlineRowSecond>
+          <ViewButton icon="columnView" />
+          <ViewButtonLast icon="listView" />
+          <SearchInput placeholder="Search" />
+        </InlineRowSecond>
+      )}
       <ColumnContainer>
         <SingleColumn>
           {studies?.map((study) => (
@@ -210,45 +243,23 @@ export const ServerPopUp = observer<ServerPopUpProps>(({ isOpen, onClose }) => {
             </ListItemWrapper>
           ))}
         </SingleColumn>
-        <SingleColumn>
-          {series?.map((thisSeries, index) => (
-            <ListItemWrapper
-              key={thisSeries.SeriesInstanceUID}
-              onPointerDown={() =>
-                setSelectedSeries(thisSeries.SeriesInstanceUID)
-              }
-            >
-              {thisSeries.SeriesInstanceUID === selectedSeries ? (
-                <ListItemActive>
-                  <ListItemIcon icon="folder" />
-                  <ListItemText
-                    text={`${thisSeries.SeriesNumber || index}${
-                      thisSeries.Modality ? ` (${thisSeries.Modality})` : ""
-                    }`}
-                  />
-                </ListItemActive>
-              ) : (
+        <SingleColumnLast>
+          {selectedStudy &&
+            series?.map((thisSeries, index) => (
+              <ListItemWrapper
+                key={thisSeries.SeriesInstanceUID}
+                onPointerDown={() => loadSeries(thisSeries.SeriesInstanceUID)}
+              >
                 <ListItem>
-                  <ListItemIcon icon="folder" />
+                  <ListItemIcon icon="document" />
                   <ListItemText
                     text={`${thisSeries.SeriesNumber || index}${
                       thisSeries.Modality ? ` (${thisSeries.Modality})` : ""
                     }`}
                   />
                 </ListItem>
-              )}
-            </ListItemWrapper>
-          ))}
-        </SingleColumn>
-        <SingleColumnLast>
-          {instances?.map((instance, index) => (
-            <InvisibleButton key={instance.InstanceNumber || index}>
-              <ListItem>
-                <ListItemIcon icon="document" />
-                <ListItemText text={`${instance.InstanceNumber || index}`} />
-              </ListItem>
-            </InvisibleButton>
-          ))}
+              </ListItemWrapper>
+            ))}
         </SingleColumnLast>
       </ColumnContainer>
     </ServerPopUpContainer>

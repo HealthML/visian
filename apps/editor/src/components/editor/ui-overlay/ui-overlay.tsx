@@ -110,7 +110,7 @@ export const UIOverlay = observer<UIOverlayProps>(
     );
 
     // Import Button
-    const [isImportPopUpOpen, setIsImportPopUpOpen] = useState(true);
+    const [isImportPopUpOpen, setIsImportPopUpOpen] = useState(false);
     const openImportPopUp = useCallback(() => {
       setIsImportPopUpOpen(true);
     }, []);

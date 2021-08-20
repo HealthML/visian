@@ -74,17 +74,21 @@ export class RootStore implements ISerializable<RootSnapshot> {
       getTheme: () => this.theme,
       getRefs: () => this.refs,
     });
-    this.dicomWebServer = new DICOMWebServer(
-      "https://cors.bridged.cc/http://dicomserver.co.uk:81/qido",
-    );
 
     deepObserve(this.editor, this.persist, {
       exclusionAttribute: "excludeFromSnapshotTracking",
     });
   }
 
-  public connectToDICOMWebServer(url?: string) {
+  public connectToDICOMWebServer(url?: string, persist = true) {
     this.dicomWebServer = url ? new DICOMWebServer(url) : undefined;
+    if (persist && this.shouldPersist) {
+      if (url) {
+        localStorage.setItem("dicomWebServer", url);
+      } else {
+        localStorage.removeItem("dicomWebServer");
+      }
+    }
   }
 
   public setColorMode(theme: ColorMode, persist = true) {
@@ -153,6 +157,9 @@ export class RootStore implements ISerializable<RootSnapshot> {
   public async rehydrate() {
     this.shouldPersist = false;
     const tab = await new Tab().register();
+
+    const dicomWebServer = localStorage.getItem("dicomWebServer");
+    if (dicomWebServer) this.connectToDICOMWebServer(dicomWebServer, false);
 
     const theme = localStorage.getItem("theme");
     if (theme) this.setColorMode(theme as ColorMode, false);
