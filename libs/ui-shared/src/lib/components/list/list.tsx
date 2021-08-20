@@ -6,7 +6,7 @@ import { Color } from "../color";
 import { Icon } from "../icon";
 import { Divider } from "../modal/modal";
 import { sheetMixin } from "../sheet";
-import { Text } from "../text";
+import { TextInput } from "../text-input";
 import { ListItemProps } from "./list.props";
 
 export const List = styled.div`
@@ -43,14 +43,13 @@ export const ListDivider = styled(Divider)`
   margin-bottom: 0;
 `;
 
-export const ListItemLabel = styled(Text)`
+export const ListItemInput = styled(TextInput)`
   display: block;
   flex: 1;
   font-size: 14px;
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;
-  user-select: none;
 `;
 
 export const ListIcon = styled(Icon).withConfig({
@@ -93,6 +92,7 @@ export const ListItem = React.forwardRef<HTMLDivElement, ListItemProps>(
       value,
       isActive,
       isLast,
+      onChangeText,
       onIconPress,
       onTrailingIconPress,
       disableIcon,
@@ -138,7 +138,14 @@ export const ListItem = React.forwardRef<HTMLDivElement, ListItemProps>(
                 hasPressHandler={Boolean(onIconPress)}
               />
             ))}
-          {(labelTx || label) && <ListItemLabel tx={labelTx} text={label} />}
+          {(labelTx || label) && (
+            <ListItemInput
+              valueTx={labelTx}
+              value={label}
+              isEditable={Boolean(onChangeText)}
+              onChangeText={onChangeText}
+            />
+          )}
           {children}
           {trailingIcon && (
             <ListIcon

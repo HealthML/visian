@@ -21,6 +21,12 @@ export interface ListItemProps extends React.HTMLAttributes<HTMLDivElement> {
   isLast?: boolean;
 
   /**
+   * If set, makes the list item's label editable and calls `onChangeText` on
+   * every edit.
+   */
+  onChangeText?: (string: string) => void;
+
+  /**
    * The key of the list item's icon (if any).
    * Alternatively, an object with a color can be passed to render a palette
    * element.
