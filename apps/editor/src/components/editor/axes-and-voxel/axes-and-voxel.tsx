@@ -7,10 +7,6 @@ import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
 
-const AVContainer = styled(FlexRow)`
-  margin-top: 16px;
-`;
-
 const AxesHorizontalContainer = styled.div`
   width: 54px;
   height: 70px;
@@ -57,7 +53,7 @@ export const AxesAndVoxel: React.FC = observer(() => {
   const viewType = store?.editor.activeDocument?.viewport2D.mainViewType;
 
   return store?.editor.activeDocument?.viewSettings.viewMode === "2D" ? (
-    <AVContainer>
+    <FlexRow>
       {store?.editor.activeDocument?.has3DLayers && (
         <AxesHorizontalContainer>
           {viewType !== undefined && (
@@ -133,6 +129,6 @@ export const AxesAndVoxel: React.FC = observer(() => {
           </FlexRow>
         </FlexColumn>
       )}
-    </AVContainer>
+    </FlexRow>
   ) : null;
 });

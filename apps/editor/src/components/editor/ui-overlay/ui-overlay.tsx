@@ -136,8 +136,8 @@ export const UIOverlay = observer<UIOverlayProps>(
           <Toolbar />
           <Layers />
           <Spacer />
-          <ActionModal />
           <AxesAndVoxel />
+          <ActionModal />
         </ColumnLeft>
         <ColumnCenter>
           <TopConsole />
