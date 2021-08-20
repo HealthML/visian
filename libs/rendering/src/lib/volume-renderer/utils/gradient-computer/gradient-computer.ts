@@ -70,7 +70,9 @@ export class GradientComputer implements IDisposable {
       this.renderSecondDerivative();
     }
     if (
-      this.editor.activeDocument?.viewport3D.shadingMode === "phong" &&
+      (this.editor.activeDocument?.viewport3D.shadingMode === "phong" ||
+        this.editor.activeDocument?.viewport3D.requestedShadingMode ===
+          "phong") &&
       this.outputDerivativeDirty
     ) {
       this.renderOutputDerivative();
@@ -186,6 +188,11 @@ export class GradientComputer implements IDisposable {
     this.renderer.xr.enabled = isXrEnabled;
 
     this.outputDerivativeDirty = false;
+    if (
+      this.editor.activeDocument?.viewport3D.requestedShadingMode === "phong"
+    ) {
+      this.editor.activeDocument?.viewport3D.confirmRequestedShadingMode();
+    }
 
     this.editor.volumeRenderer?.lazyRender();
   }
