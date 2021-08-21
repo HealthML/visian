@@ -61,7 +61,8 @@ export class ClippingPlane extends THREE.Mesh implements IDisposable {
 
   public dispose() {
     this.disposers.forEach((disposer) => disposer());
-    (this.material as THREE.Material).dispose();
+    this.mainMaterial.dispose();
+    this.pickingMaterial.dispose();
   }
 
   public onBeforePicking() {
