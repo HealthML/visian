@@ -503,7 +503,7 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
 
     this.renderer.setRenderTarget(null);
 
-    if (pixelBuffer[4] <= 0) return undefined;
+    if (pixelBuffer[3] <= 0) return undefined;
 
     this.workingVector.set(
       image.voxelCount.x,
