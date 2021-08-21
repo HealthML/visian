@@ -478,8 +478,8 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
     this.camera.setViewOffset(
       this.renderer.domElement.width,
       this.renderer.domElement.height,
-      canvasPosition.x,
-      canvasPosition.y,
+      canvasPosition.x * window.devicePixelRatio,
+      canvasPosition.y * window.devicePixelRatio,
       1,
       1,
     );
