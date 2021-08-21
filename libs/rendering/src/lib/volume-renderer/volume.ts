@@ -10,7 +10,7 @@ import {
   RaycastingCone,
   SharedUniforms,
 } from "./utils";
-import { VolumeMaterial } from "./volume-material";
+import { VolumeMaterial, VolumePickingMaterial } from "./volume-material";
 
 /** A volume domain. */
 export class Volume extends THREE.Mesh implements IDisposable {
@@ -19,6 +19,9 @@ export class Volume extends THREE.Mesh implements IDisposable {
   private boundingBox: BoundingBox;
 
   public raycastingCone: RaycastingCone;
+
+  public mainMaterial: VolumeMaterial;
+  public pickingMaterial: VolumePickingMaterial;
 
   private disposers: IDisposer[] = [];
   constructor(
@@ -39,6 +42,16 @@ export class Volume extends THREE.Mesh implements IDisposable {
         outputDerivative,
         lao,
       ),
+    );
+
+    this.mainMaterial = this.material as VolumeMaterial;
+    this.pickingMaterial = new VolumePickingMaterial(
+      editor,
+      sharedUniforms,
+      firstDerivative,
+      secondDerivative,
+      outputDerivative,
+      lao,
     );
 
     this.resetRotation();
@@ -80,8 +93,19 @@ export class Volume extends THREE.Mesh implements IDisposable {
     this.rotation.set(-Math.PI / 2, 0, 0);
   }
 
+  public onBeforePicking() {
+    this.material = this.pickingMaterial;
+    this.remove(this.clippingPlane, this.boundingBox, this.raycastingCone);
+  }
+
+  public onAfterPicking() {
+    this.material = this.mainMaterial;
+    this.add(this.clippingPlane, this.boundingBox, this.raycastingCone);
+  }
+
   public dispose() {
-    (this.material as VolumeMaterial).dispose();
+    this.mainMaterial.dispose();
+    this.pickingMaterial.dispose();
     this.clippingPlane.dispose();
     this.boundingBox.dispose();
     this.disposers.forEach((disposer) => disposer());
