@@ -62,8 +62,8 @@ void main() {
   #ifndef VOXEL_PICKING
     gl_FragColor = marchRay(vRayOrigin, normalizedRayDirection, near, far, uStepSize, uUseRayDithering);
   #else
-    vec4 pickedVoxel = marchRay(vRayOrigin, normalizedRayDirection, near, far, uStepSize, 5.0/255.0);
-    pickedVoxel.a = step(5.0/255.0, pickedVoxel.a);
+    vec4 pickedVoxel = marchRay(vRayOrigin, normalizedRayDirection, near, far, uStepSize, 0.01);
+    pickedVoxel.a = step(0.01, pickedVoxel.a);
     gl_FragColor = pickedVoxel;
   #endif
 }

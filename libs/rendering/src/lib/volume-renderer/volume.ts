@@ -95,12 +95,16 @@ export class Volume extends THREE.Mesh implements IDisposable {
 
   public onBeforePicking() {
     this.material = this.pickingMaterial;
-    this.remove(this.clippingPlane, this.boundingBox, this.raycastingCone);
+    this.remove(this.boundingBox, this.raycastingCone);
+
+    this.clippingPlane.onBeforePicking();
   }
 
   public onAfterPicking() {
     this.material = this.mainMaterial;
-    this.add(this.clippingPlane, this.boundingBox, this.raycastingCone);
+    this.add(this.boundingBox, this.raycastingCone);
+
+    this.clippingPlane.onAfterPicking();
   }
 
   public dispose() {
