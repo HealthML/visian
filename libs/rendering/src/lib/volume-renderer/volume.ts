@@ -4,12 +4,7 @@ import { autorun } from "mobx";
 import * as THREE from "three";
 
 import { RenderedImage } from "../rendered-image";
-import {
-  BoundingBox,
-  ClippingPlane,
-  RaycastingCone,
-  SharedUniforms,
-} from "./utils";
+import { BoundingBox, ClippingPlane, SharedUniforms } from "./utils";
 import { VolumeMaterial, VolumePickingMaterial } from "./volume-material";
 
 /** A volume domain. */
@@ -17,8 +12,6 @@ export class Volume extends THREE.Mesh implements IDisposable {
   public clippingPlane: ClippingPlane;
 
   private boundingBox: BoundingBox;
-
-  public raycastingCone: RaycastingCone;
 
   public mainMaterial: VolumeMaterial;
   public pickingMaterial: VolumePickingMaterial;
@@ -64,9 +57,6 @@ export class Volume extends THREE.Mesh implements IDisposable {
     this.boundingBox = new BoundingBox(editor);
     this.add(this.boundingBox);
 
-    this.raycastingCone = new RaycastingCone(editor);
-    this.add(this.raycastingCone);
-
     this.disposers.push(
       autorun(() => {
         const imageLayer = editor.activeDocument?.baseImageLayer;
@@ -95,14 +85,14 @@ export class Volume extends THREE.Mesh implements IDisposable {
 
   public onBeforePicking() {
     this.material = this.pickingMaterial;
-    this.remove(this.boundingBox, this.raycastingCone);
+    this.remove(this.boundingBox);
 
     this.clippingPlane.onBeforePicking();
   }
 
   public onAfterPicking() {
     this.material = this.mainMaterial;
-    this.add(this.boundingBox, this.raycastingCone);
+    this.add(this.boundingBox);
 
     this.clippingPlane.onAfterPicking();
   }
