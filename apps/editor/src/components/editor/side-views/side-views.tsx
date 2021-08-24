@@ -1,10 +1,10 @@
-import { resizeRenderer } from "@visian/rendering";
+import { getOrder, resizeRenderer } from "@visian/rendering";
 import {
   color,
   computeStyleValue,
   coverMixin,
   EventLike,
-  Icon,
+  InvisibleButton,
   isFirefox,
   Sheet,
   sheetNoise,
@@ -40,12 +40,14 @@ const SideViewWrapper = styled.div`
   margin-right: 22px;
 `;
 
-const SideViewFullscreen = styled(Icon)`
+const SideViewFullscreen = styled(InvisibleButton)`
+  cursor: pointer;
   position: absolute;
   left: 10px;
   top: 10px;
   width: 20px;
   height: 20px;
+  z-index: 100;
 `;
 
 const SideView = styled(Sheet)`
@@ -157,6 +159,35 @@ export const SideViews = observer(() => {
     );
   }, [containerRef, showSideViews, size]);
 
+  // Main View Buttons
+  const setAsMainView = useCallback(
+    (canvasIndex: number) => {
+      if (!store?.editor.activeDocument) return;
+      const order = getOrder(
+        store.editor.activeDocument.viewport2D.mainViewType,
+      );
+      const newMainView = order[canvasIndex];
+      store.editor.activeDocument.viewport2D.setMainViewType(newMainView);
+    },
+    [store],
+  );
+
+  const setUpperAsMainView = useCallback(
+    (event: React.PointerEvent<HTMLButtonElement>) => {
+      event.stopPropagation();
+      setAsMainView(1);
+    },
+    [setAsMainView],
+  );
+
+  const setLowerAsMainView = useCallback(
+    (event: React.PointerEvent<HTMLButtonElement>) => {
+      event.stopPropagation();
+      setAsMainView(2);
+    },
+    [setAsMainView],
+  );
+
   return (
     <SideViewContainer showSideViews={showSideViews} ref={setContainerRef}>
       <SideViewWrapper style={{ width: sideViewSize }} ref={wrapperRef}>
@@ -165,10 +196,16 @@ export const SideViews = observer(() => {
           onPointerDown={onPointerDownUpper}
           ref={setUpperRef}
         >
-          <SideViewFullscreen icon="fullScreenSmall" />
+          <SideViewFullscreen
+            icon="fullScreenSmall"
+            onPointerDown={setUpperAsMainView}
+          />
         </SideView>
         <SideView onPointerDown={onPointerDownLower} ref={setLowerRef}>
-          <SideViewFullscreen icon="fullScreenSmall" />
+          <SideViewFullscreen
+            icon="fullScreenSmall"
+            onPointerDown={setLowerAsMainView}
+          />
         </SideView>
       </SideViewWrapper>
     </SideViewContainer>
