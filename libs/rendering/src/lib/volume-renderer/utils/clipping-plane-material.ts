@@ -81,3 +81,11 @@ export class ClippingPlaneMaterial extends THREE.ShaderMaterial {
     this.disposers.forEach((disposer) => disposer());
   }
 }
+
+export class ClippingPlanePickingMaterial extends ClippingPlaneMaterial {
+  constructor(editor: IEditor, sharedUniforms: SharedUniforms) {
+    super(editor, sharedUniforms);
+
+    this.defines.VOXEL_PICKING = "";
+  }
+}

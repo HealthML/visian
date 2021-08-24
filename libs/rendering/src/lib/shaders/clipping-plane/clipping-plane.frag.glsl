@@ -24,7 +24,13 @@ void main() {
 
   if(imageValue.a < 0.01) discard;
 
-  imageValue.rgb *= imageValue.a;
-  imageValue.a = 1.0;
+  #ifndef VOXEL_PICKING
+    imageValue.rgb *= imageValue.a;
+    imageValue.a = 1.0;
+  #else
+    imageValue.rgb = volumeCoords;
+    imageValue.a = step(0.01, imageValue.a);
+  #endif
+
   gl_FragColor = imageValue;
 }
