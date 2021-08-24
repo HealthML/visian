@@ -174,10 +174,12 @@ export const ViewSettings: React.FC = observer(() => {
               labelTx="shading-mode"
               options={shadingModeSwitchOptions}
               value={
-                store.editor.activeDocument.viewport3D.suppressedShadingMode ||
+                store.editor.activeDocument.viewport3D.requestedShadingMode ||
                 store.editor.activeDocument.viewport3D.shadingMode
               }
-              setValue={store.editor.activeDocument.viewport3D.setShadingMode}
+              setValue={
+                store?.editor.activeDocument?.viewport3D.requestShadingMode
+              }
             />
             <EnumParam
               labelTx="transfer-function"
