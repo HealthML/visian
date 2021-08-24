@@ -132,13 +132,13 @@ export const SideViews = observer(() => {
 
   // Pointer Event Handling
   const pointerDispatch = store?.pointerDispatch;
-  const onPointerDownUpper = useCallback(
+  const upperOnPointerDown = useCallback(
     (event: EventLike) => {
       if (pointerDispatch) pointerDispatch(event, "upperSideView");
     },
     [pointerDispatch],
   );
-  const onPointerDownLower = useCallback(
+  const lowerOnPointerDown = useCallback(
     (event: EventLike) => {
       if (pointerDispatch) pointerDispatch(event, "lowerSideView");
     },
@@ -160,6 +160,23 @@ export const SideViews = observer(() => {
   }, [containerRef, showSideViews, size]);
 
   // Main View Buttons
+  const [isUpperHovered, setIsUpperHovered] = useState(false);
+  const [isLowerHovered, setIsLowerHovered] = useState(false);
+
+  const upperOnPointerEnter = useCallback(() => {
+    setIsUpperHovered(true);
+  }, []);
+  const upperOnPointerLeave = useCallback(() => {
+    setIsUpperHovered(false);
+  }, []);
+
+  const lowerOnPointerEnter = useCallback(() => {
+    setIsLowerHovered(true);
+  }, []);
+  const lowerOnPointerLeave = useCallback(() => {
+    setIsLowerHovered(false);
+  }, []);
+
   const setAsMainView = useCallback(
     (canvasIndex: number) => {
       if (!store?.editor.activeDocument) return;
@@ -193,19 +210,30 @@ export const SideViews = observer(() => {
       <SideViewWrapper style={{ width: sideViewSize }} ref={wrapperRef}>
         <SideView
           style={{ marginBottom: 16 }}
-          onPointerDown={onPointerDownUpper}
+          onPointerEnter={upperOnPointerEnter}
+          onPointerLeave={upperOnPointerLeave}
+          onPointerDown={upperOnPointerDown}
           ref={setUpperRef}
         >
-          <SideViewFullscreen
-            icon="fullScreenSmall"
-            onPointerDown={setUpperAsMainView}
-          />
+          {isUpperHovered && (
+            <SideViewFullscreen
+              icon="fullScreenSmall"
+              onPointerDown={setUpperAsMainView}
+            />
+          )}
         </SideView>
-        <SideView onPointerDown={onPointerDownLower} ref={setLowerRef}>
-          <SideViewFullscreen
-            icon="fullScreenSmall"
-            onPointerDown={setLowerAsMainView}
-          />
+        <SideView
+          onPointerEnter={lowerOnPointerEnter}
+          onPointerLeave={lowerOnPointerLeave}
+          onPointerDown={lowerOnPointerDown}
+          ref={setLowerRef}
+        >
+          {isLowerHovered && (
+            <SideViewFullscreen
+              icon="fullScreenSmall"
+              onPointerDown={setLowerAsMainView}
+            />
+          )}
         </SideView>
       </SideViewWrapper>
     </SideViewContainer>
