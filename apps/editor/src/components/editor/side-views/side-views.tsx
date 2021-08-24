@@ -4,6 +4,7 @@ import {
   computeStyleValue,
   coverMixin,
   EventLike,
+  Icon,
   isFirefox,
   Sheet,
   sheetNoise,
@@ -37,6 +38,14 @@ const SideViewWrapper = styled.div`
   top: 0;
 
   margin-right: 22px;
+`;
+
+const SideViewFullscreen = styled(Icon)`
+  position: absolute;
+  left: 10px;
+  top: 10px;
+  width: 20px;
+  height: 20px;
 `;
 
 const SideView = styled(Sheet)`
@@ -155,8 +164,12 @@ export const SideViews = observer(() => {
           style={{ marginBottom: 16 }}
           onPointerDown={onPointerDownUpper}
           ref={setUpperRef}
-        />
-        <SideView onPointerDown={onPointerDownLower} ref={setLowerRef} />
+        >
+          <SideViewFullscreen icon="fullScreenSmall" />
+        </SideView>
+        <SideView onPointerDown={onPointerDownLower} ref={setLowerRef}>
+          <SideViewFullscreen icon="fullScreenSmall" />
+        </SideView>
       </SideViewWrapper>
     </SideViewContainer>
   );
