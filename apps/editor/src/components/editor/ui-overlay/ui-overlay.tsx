@@ -27,6 +27,7 @@ import { ViewSettings } from "../view-settings";
 import { UIOverlayProps } from "./ui-overlay.props";
 
 import type { ImageLayer } from "../../../models";
+import { SettingsPopUp } from "../settings-popup";
 
 const Container = styled(AbsoluteCover)`
   align-items: stretch;
@@ -147,6 +148,15 @@ export const UIOverlay = observer<UIOverlayProps>(
       setIsShortcutPopUpOpen(false);
     }, []);
 
+    // Settings Pop Up Toggling
+    const [isSettingsPopUpOpen, setIsSettingsPopUpOpen] = useState(false);
+    const openSettingsPopUp = useCallback(() => {
+      setIsSettingsPopUpOpen(true);
+    }, []);
+    const closeSettingsPopUp = useCallback(() => {
+      setIsSettingsPopUpOpen(false);
+    }, []);
+
     return (
       <Container
         {...rest}
@@ -170,7 +180,10 @@ export const UIOverlay = observer<UIOverlayProps>(
             />
             <UndoRedoButtons />
           </MenuRow>
-          <Menu onOpenShortcutPopUp={openShortcutPopUp} />
+          <Menu
+            onOpenShortcutPopUp={openShortcutPopUp}
+            onOpenSettingsPopUp={openSettingsPopUp}
+          />
           <Toolbar />
           <Layers />
           <Spacer />
@@ -196,7 +209,10 @@ export const UIOverlay = observer<UIOverlayProps>(
             <SliceSlider showValueLabelOnChange={!isDraggedOver} />
           </RightBar>
         </ColumnRight>
-
+        <SettingsPopUp
+          isOpen={isSettingsPopUpOpen}
+          onClose={closeSettingsPopUp}
+        />
         <ShortcutPopUp
           isOpen={isShortcutPopUpOpen}
           onClose={closeShortcutPopUp}

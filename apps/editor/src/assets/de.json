@@ -24,6 +24,10 @@
 
   "shortcuts": "Shortcuts",
 
+  "settings": "Einstellungen",
+  "voxelData": "Voxel Daten",
+  "performanceMode": "Performance",
+
   "undo": "Rückgängig",
   "redo": "Wiederholen",
 
