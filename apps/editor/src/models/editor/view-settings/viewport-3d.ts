@@ -3,7 +3,6 @@ import {
   IViewport3D,
   ShadingMode,
   ITransferFunction,
-  isPerformanceLow,
 } from "@visian/ui-shared";
 import { ISerializable, Vector, ViewType } from "@visian/utils";
 import { action, autorun, computed, makeObservable, observable } from "mobx";
@@ -57,7 +56,7 @@ export class Viewport3D
 
   public opacity!: number;
   public shadingMode!: ShadingMode;
-  public suppressedShadingMode?: ShadingMode;
+  public requestedShadingMode?: ShadingMode;
 
   protected activeTransferFunctionName?: TransferFunctionName;
   public transferFunctions: Record<
@@ -73,8 +72,6 @@ export class Viewport3D
   public shouldClippingPlaneRender = false;
   public shouldClippingPlaneShowAnnotations = true;
 
-  private shadingTimeout?: NodeJS.Timer;
-
   constructor(
     snapshot: Partial<Viewport3DSnapshot<TransferFunctionName>> | undefined,
     protected document: IDocument,
@@ -82,8 +79,9 @@ export class Viewport3D
     makeObservable<
       this,
       | "activeTransferFunctionName"
-      | "setSuppressedShadingMode"
+      | "setRequestedShadingMode"
       | "setIsXRAvailable"
+      | "setShadingMode"
     >(this, {
       isXRAvailable: observable,
       isInXR: observable,
@@ -92,7 +90,7 @@ export class Viewport3D
       volumeSpaceCameraPosition: observable,
       opacity: observable,
       shadingMode: observable,
-      suppressedShadingMode: observable,
+      requestedShadingMode: observable,
       activeTransferFunctionName: observable,
       transferFunctions: observable,
       useSmoothSegmentations: observable,
@@ -109,8 +107,9 @@ export class Viewport3D
       setVolumeSpaceCameraPosition: action,
       setActiveTransferFunction: action,
       setOpacity: action,
+      requestShadingMode: action,
       setShadingMode: action,
-      setSuppressedShadingMode: action,
+      setRequestedShadingMode: action,
       onTransferFunctionChange: action,
       setIsXRAvailable: action,
       setIsInXR: action,
@@ -253,53 +252,43 @@ export class Viewport3D
     this.opacity = Math.min(1, Math.max(0, value));
   }
 
-  public setShadingMode = (
-    value: ShadingMode = "lao",
-    overwriteSuppressed = false,
-  ) => {
-    this.shadingMode = value;
-    if (overwriteSuppressed) {
-      this.setSuppressedShadingMode(value);
-    }
+  public requestShadingMode = (mode: ShadingMode = "lao") => {
+    this.setShadingMode("none");
+    this.setRequestedShadingMode(mode === "none" ? undefined : mode);
   };
+
+  protected setShadingMode(value: ShadingMode = "lao") {
+    this.shadingMode = value;
+  }
 
   public cycleShadingMode(): void {
     switch (this.shadingMode) {
       case "none":
-        this.setShadingMode("phong");
+        this.requestShadingMode("phong");
         break;
       case "phong":
-        this.setShadingMode("lao");
+        this.requestShadingMode("lao");
         break;
       case "lao":
-        this.setShadingMode("none");
+        this.requestShadingMode("none");
     }
   }
 
-  protected setSuppressedShadingMode(value?: ShadingMode) {
-    this.suppressedShadingMode = value;
+  public confirmRequestedShadingMode() {
+    if (this.requestedShadingMode) {
+      this.setShadingMode(this.requestedShadingMode);
+      this.setRequestedShadingMode();
+    }
+  }
+
+  protected setRequestedShadingMode(value?: ShadingMode) {
+    this.requestedShadingMode = value;
   }
 
   public onTransferFunctionChange = () => {
-    if (this.shadingMode === "none" && !this.suppressedShadingMode) return;
+    if (this.shadingMode === "none") return;
 
-    if (!this.suppressedShadingMode) {
-      this.setSuppressedShadingMode(this.shadingMode);
-      this.setShadingMode("none");
-    }
-
-    if (this.shadingTimeout !== undefined) {
-      clearTimeout(this.shadingTimeout);
-    }
-    this.shadingTimeout = setTimeout(
-      () => {
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        this.setShadingMode(this.suppressedShadingMode!);
-        this.setSuppressedShadingMode();
-        this.shadingTimeout = undefined;
-      },
-      isPerformanceLow ? 400 : 200,
-    );
+    this.requestShadingMode(this.shadingMode);
   };
 
   // XR
@@ -378,8 +367,8 @@ export class Viewport3D
     this.setCameraMatrix();
     this.setOrbitTarget();
     this.setOpacity();
-    this.setShadingMode(undefined, true);
     this.setActiveTransferFunction(undefined, true);
+    this.requestShadingMode();
     Object.values(this.transferFunctions).forEach((transferFunction) => {
       transferFunction.reset();
     });
@@ -424,7 +413,7 @@ export class Viewport3D
       this.setOrbitTarget();
     }
     this.setOpacity(snapshot?.opacity);
-    this.setShadingMode(snapshot?.shadingMode, true);
+    this.requestShadingMode(snapshot?.shadingMode);
     this.setActiveTransferFunction(snapshot?.activeTransferFunctionName, true);
     snapshot?.transferFunctions?.forEach((transferFunctionSnapshot) => {
       const transferFunction = this.transferFunctions[
