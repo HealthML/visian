@@ -524,7 +524,7 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
     )
       .divideScalar(255)
       .multiply(this.workingVector)
-      .round();
+      .floor();
 
     return seedPoint;
   }
