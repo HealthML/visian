@@ -187,8 +187,10 @@ export const UIOverlay = observer<UIOverlayProps>(
               tooltipTx="export-tooltip"
               tooltipPosition="left"
               onPointerDown={
-                (store?.editor.activeDocument?.activeLayer as ImageLayer)
-                  ?.quickExport
+                store?.editor.activeDocument?.viewSettings.viewMode === "2D"
+                  ? (store?.editor.activeDocument?.activeLayer as ImageLayer)
+                      ?.quickExport
+                  : store?.editor.activeDocument?.viewport3D.exportCanvasImage
               }
               isActive={false}
             />

@@ -16,6 +16,9 @@ import {
   TransferFunctionSnapshot,
 } from "./transfer-functions";
 
+/** Proxy for `document` because TypeScript confuses `Viewport3D.document` with `document`. */
+const doc = document;
+
 export type TransferFunctionName =
   | "density"
   | "fc-edges"
@@ -360,6 +363,15 @@ export class Viewport3D
     this.setClippingPlaneDistance();
     this.setShouldClippingPlaneRender();
     this.setShouldClippingPlaneShowAnnotations();
+  };
+
+  public exportCanvasImage = () => {
+    if (!this.document.volumeRenderer) return;
+
+    const link = doc.createElement("a");
+    link.download = "download.png";
+    link.href = this.document.volumeRenderer.renderer.domElement.toDataURL();
+    link.click();
   };
 
   public reset = (): void => {

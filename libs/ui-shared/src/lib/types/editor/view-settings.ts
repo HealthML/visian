@@ -178,4 +178,5 @@ export interface IViewport3D<N extends string> {
   setShouldClippingPlaneRender(value?: boolean): void;
   setShouldClippingPlaneShowAnnotations(value?: boolean): void;
   resetClippingPlane(): void;
+  exportCanvasImage(): void;
 }
