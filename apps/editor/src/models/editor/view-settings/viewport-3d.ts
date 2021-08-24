@@ -379,6 +379,7 @@ export class Viewport3D
     this.setOrbitTarget();
     this.setOpacity();
     this.setShadingMode(undefined, true);
+    this.setActiveTransferFunction(undefined, true);
     Object.values(this.transferFunctions).forEach((transferFunction) => {
       transferFunction.reset();
     });
