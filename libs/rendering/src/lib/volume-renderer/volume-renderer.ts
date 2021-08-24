@@ -307,12 +307,18 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
     this.gradientComputer.tick();
 
     if (
-      this.editor.activeDocument?.viewport3D.shadingMode === "lao" &&
+      (this.editor.activeDocument?.viewport3D.shadingMode === "lao" ||
+        this.editor.activeDocument?.viewport3D.requestedShadingMode ===
+          "lao") &&
       ((this.resolutionComputer.fullResolutionFlushed &&
         !this.laoComputer.isFinalLAOFlushed) ||
         this.laoComputer.isDirty)
     ) {
       this.laoComputer.tick();
+    } else if (
+      this.editor.activeDocument?.viewport3D.requestedShadingMode === "lao"
+    ) {
+      this.editor.activeDocument?.viewport3D.confirmRequestedShadingMode();
     }
 
     if (this.renderer.xr.isPresenting) {
