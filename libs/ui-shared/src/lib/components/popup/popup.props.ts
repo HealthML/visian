@@ -16,9 +16,12 @@ export interface PopUpProps extends React.HTMLAttributes<HTMLDivElement> {
   /** If set to `false`, hides the modal. */
   isOpen?: boolean;
 
+  /** Handler to dismiss the pop up. */
+  dismiss?: () => void;
+
   /**
-   * If provided, this handler will be called on pointer downs outside the
-   * modal.
+   * If set to `true`, the dismiss handler will be called on pointer downs
+   * outside the modal.
    */
-  onOutsidePress?: () => void;
+  shouldDismissOnOutsidePress?: boolean;
 }

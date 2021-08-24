@@ -27,7 +27,8 @@ export const ShortcutPopUp: React.FC<ShortcutPopUpProps> = observer(
       <ShortcutPopUpContainer
         titleTx="shortcuts"
         isOpen={isOpen}
-        onOutsidePress={onClose}
+        dismiss={onClose}
+        shouldDismissOnOutsidePress
       >
         <ShortcutColumnContainer>
           <ShortcutColumn>

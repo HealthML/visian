@@ -62,7 +62,8 @@ export const SettingsPopUp: React.FC<SettingsPopUpProps> = observer(
       <SettingsPopUpContainer
         titleTx="settings"
         isOpen={isOpen}
-        onOutsidePress={onClose}
+        dismiss={onClose}
+        shouldDismissOnOutsidePress
       >
         <SettingsColumnContainer>
           <SettingsColumn>
