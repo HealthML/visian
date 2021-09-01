@@ -1,9 +1,10 @@
-import { resizeRenderer } from "@visian/rendering";
+import { getOrder, resizeRenderer } from "@visian/rendering";
 import {
   color,
   computeStyleValue,
   coverMixin,
   EventLike,
+  InvisibleButton,
   isFirefox,
   Sheet,
   sheetNoise,
@@ -37,6 +38,16 @@ const SideViewWrapper = styled.div`
   top: 0;
 
   margin-right: 22px;
+`;
+
+const SideViewFullscreen = styled(InvisibleButton)`
+  cursor: pointer;
+  position: absolute;
+  left: 10px;
+  top: 10px;
+  width: 20px;
+  height: 20px;
+  z-index: 100;
 `;
 
 const SideView = styled(Sheet)`
@@ -121,13 +132,13 @@ export const SideViews = observer(() => {
 
   // Pointer Event Handling
   const pointerDispatch = store?.pointerDispatch;
-  const onPointerDownUpper = useCallback(
+  const upperOnPointerDown = useCallback(
     (event: EventLike) => {
       if (pointerDispatch) pointerDispatch(event, "upperSideView");
     },
     [pointerDispatch],
   );
-  const onPointerDownLower = useCallback(
+  const lowerOnPointerDown = useCallback(
     (event: EventLike) => {
       if (pointerDispatch) pointerDispatch(event, "lowerSideView");
     },
@@ -148,15 +159,82 @@ export const SideViews = observer(() => {
     );
   }, [containerRef, showSideViews, size]);
 
+  // Main View Buttons
+  const [isUpperHovered, setIsUpperHovered] = useState(false);
+  const [isLowerHovered, setIsLowerHovered] = useState(false);
+
+  const upperOnPointerEnter = useCallback(() => {
+    setIsUpperHovered(true);
+  }, []);
+  const upperOnPointerLeave = useCallback(() => {
+    setIsUpperHovered(false);
+  }, []);
+
+  const lowerOnPointerEnter = useCallback(() => {
+    setIsLowerHovered(true);
+  }, []);
+  const lowerOnPointerLeave = useCallback(() => {
+    setIsLowerHovered(false);
+  }, []);
+
+  const setAsMainView = useCallback(
+    (canvasIndex: number) => {
+      if (!store?.editor.activeDocument) return;
+      const order = getOrder(
+        store.editor.activeDocument.viewport2D.mainViewType,
+      );
+      const newMainView = order[canvasIndex];
+      store.editor.activeDocument.viewport2D.setMainViewType(newMainView);
+    },
+    [store],
+  );
+
+  const setUpperAsMainView = useCallback(
+    (event: React.PointerEvent<HTMLButtonElement>) => {
+      event.stopPropagation();
+      setAsMainView(1);
+    },
+    [setAsMainView],
+  );
+
+  const setLowerAsMainView = useCallback(
+    (event: React.PointerEvent<HTMLButtonElement>) => {
+      event.stopPropagation();
+      setAsMainView(2);
+    },
+    [setAsMainView],
+  );
+
   return (
     <SideViewContainer showSideViews={showSideViews} ref={setContainerRef}>
       <SideViewWrapper style={{ width: sideViewSize }} ref={wrapperRef}>
         <SideView
           style={{ marginBottom: 16 }}
-          onPointerDown={onPointerDownUpper}
+          onPointerEnter={upperOnPointerEnter}
+          onPointerLeave={upperOnPointerLeave}
+          onPointerDown={upperOnPointerDown}
           ref={setUpperRef}
-        />
-        <SideView onPointerDown={onPointerDownLower} ref={setLowerRef} />
+        >
+          {isUpperHovered && (
+            <SideViewFullscreen
+              icon="fullScreenSmall"
+              onPointerDown={setUpperAsMainView}
+            />
+          )}
+        </SideView>
+        <SideView
+          onPointerEnter={lowerOnPointerEnter}
+          onPointerLeave={lowerOnPointerLeave}
+          onPointerDown={lowerOnPointerDown}
+          ref={setLowerRef}
+        >
+          {isLowerHovered && (
+            <SideViewFullscreen
+              icon="fullScreenSmall"
+              onPointerDown={setLowerAsMainView}
+            />
+          )}
+        </SideView>
       </SideViewWrapper>
     </SideViewContainer>
   );
