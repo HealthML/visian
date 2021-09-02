@@ -186,6 +186,14 @@ const LayerListItem = observer<{
     event.preventDefault();
   };
 
+  const [isLayerNameEditable, setIsLayerNameEditable] = useState(false);
+  const makeLayerNameEditable = useCallback(() => {
+    setIsLayerNameEditable(true);
+  }, []);
+  const makeLayerNameNotEditable = useCallback(() => {
+    setIsLayerNameEditable(false);
+  }, []);
+
   const modalRootRef = useModalRoot();
   return (
     <>
@@ -213,6 +221,9 @@ const LayerListItem = observer<{
                   onIconPress={areLayerSettingsOpen ? noop : openLayerSettings}
                   labelTx={layer.title ? undefined : "untitled-layer"}
                   label={layer.title}
+                  isLabelEditable={isLayerNameEditable}
+                  onChangeLabelText={layer.setTitle}
+                  onConfirmLabelText={makeLayerNameNotEditable}
                   trailingIcon={layer.isVisible ? "eye" : "eyeCrossed"}
                   disableTrailingIcon={!layer.isVisible}
                   trailingIconRef={trailingIconRef}
@@ -257,6 +268,10 @@ const LayerListItem = observer<{
             onPointerDown={exportLayerSlice}
           />
         )}
+        <ContextMenuItem
+          labelTx="rename-layer"
+          onPointerDown={makeLayerNameEditable}
+        />
         <ContextMenuItem
           labelTx="delete-layer"
           onPointerDown={deleteLayer}

@@ -21,6 +21,7 @@ export interface TextInputProps<T = any>
 
   defaultValue?: T;
   value?: T;
+  valueTx?: T;
 
   /** A callback that is called when the value is changed. */
   onChangeText?: (value: string) => void;
