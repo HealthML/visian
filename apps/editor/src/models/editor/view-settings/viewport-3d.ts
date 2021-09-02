@@ -5,6 +5,7 @@ import {
   ITransferFunction,
 } from "@visian/ui-shared";
 import { ISerializable, Vector, ViewType } from "@visian/utils";
+import FileSaver from "file-saver";
 import { action, autorun, computed, makeObservable, observable } from "mobx";
 import { Matrix4 } from "three";
 import {
@@ -15,9 +16,6 @@ import {
   TransferFunction,
   TransferFunctionSnapshot,
 } from "./transfer-functions";
-
-/** Proxy for `document` because TypeScript confuses `Viewport3D.document` with `document`. */
-const doc = document;
 
 export type TransferFunctionName =
   | "density"
@@ -368,10 +366,22 @@ export class Viewport3D
   public exportCanvasImage = () => {
     if (!this.document.volumeRenderer) return;
 
-    const link = doc.createElement("a");
-    link.download = "download.png";
-    link.href = this.document.volumeRenderer.renderer.domElement.toDataURL();
-    link.click();
+    const canvas = this.document.volumeRenderer.renderer.domElement;
+
+    const saveCallback = (blob: Blob | null) => {
+      if (!blob) return;
+      FileSaver.saveAs(blob, "download.png");
+    };
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    if ((canvas as any).msToBlob) {
+      // Edge
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (canvas as any).msToBlob(saveCallback);
+    } else {
+      // Other browsers
+      canvas.toBlob(saveCallback);
+    }
   };
 
   public reset = (): void => {
