@@ -162,7 +162,6 @@ export const ListItem = React.forwardRef<HTMLDivElement, ListItemProps>(
             (isLabelEditable ? (
               // TODO: auto focus and close context menu,
               // possibly rework useOutsidePress (ref)
-              // use title in writeMedicalImage
               <ListItemInput
                 ref={labelInputRef}
                 valueTx={labelTx}

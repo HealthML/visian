@@ -116,7 +116,7 @@ export class ImageLayer
     );
   }
 
-  public get title(): string | undefined {
+  public get title(): string {
     return super.title || this.image.name;
   }
 
@@ -285,7 +285,7 @@ export class ImageLayer
 
     const file = await writeSingleMedicalImage(
       this.image.toITKImage(),
-      `${this.image.name.split(".")[0]}.nii.gz`,
+      `${this.title.split(".")[0]}.nii.gz`,
     );
 
     if (!file) return;
