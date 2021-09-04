@@ -30,7 +30,7 @@ const MainViewContainer = styled.div<{
         return "auto";
 
       case "smart-brush-3d":
-        if (props.isIn3DView && props.isDrawable) return "crosshair";
+        if (props.isIn3DView) return "crosshair";
       // eslint-disable-next-line no-fallthrough
       default:
         return props.isDrawable ? "none" : "auto";

@@ -4,13 +4,7 @@ import {
   isPerformanceLow,
   IVolumeRenderer,
 } from "@visian/ui-shared";
-import {
-  convertPositionToWebGLPosition,
-  IDisposable,
-  IDisposer,
-  Vector,
-  Voxel,
-} from "@visian/utils";
+import { IDisposable, IDisposer, Vector, Voxel } from "@visian/utils";
 import { autorun, computed, makeObservable, reaction } from "mobx";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
@@ -25,7 +19,6 @@ import {
   SharedUniforms,
 } from "./utils";
 import { Volume } from "./volume";
-import { VolumeMaterial } from "./volume-material";
 import { XRManager } from "./xr-manager";
 
 export class VolumeRenderer implements IVolumeRenderer, IDisposable {
@@ -54,6 +47,8 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
   private resolutionComputer: ResolutionComputer;
   private gradientComputer: GradientComputer;
   private laoComputer: LAOComputer;
+
+  private pickingTexture = new THREE.WebGLRenderTarget(1, 1);
 
   private workingVector = new THREE.Vector3();
   private workingMatrix = new THREE.Matrix4();
@@ -237,21 +232,10 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
               "pointerdown",
               this.onSmartBrushClick,
             );
-            this.renderer.domElement.addEventListener(
-              "pointermove",
-              this.onSmartBrushMove,
-            );
           } else {
             this.renderer.domElement.removeEventListener(
               "pointerdown",
               this.onSmartBrushClick,
-            );
-            this.renderer.domElement.removeEventListener(
-              "pointermove",
-              this.onSmartBrushMove,
-            );
-            this.editor.activeDocument?.tools.setIsCursorOverDrawableArea(
-              false,
             );
           }
         },
@@ -444,9 +428,9 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
     document.removeEventListener("pointerdown", this.selectNavigationTool);
 
     this.raycaster.setFromCamera({ x: 0.5, y: 0.5 }, this.camera);
-    (this.volume.material as VolumeMaterial).side = THREE.DoubleSide;
+    this.volume.mainMaterial.side = THREE.DoubleSide;
     const intersections = this.raycaster.intersectObject(this.volume);
-    (this.volume.material as VolumeMaterial).side = THREE.BackSide;
+    this.volume.mainMaterial.side = THREE.BackSide;
 
     this.camera.getWorldDirection(this.orbitControls.target);
     this.orbitControls.target.multiplyScalar(
@@ -497,32 +481,35 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
       y: clickPosition.y - canvasRect.top,
     };
 
-    const webGLPosition = convertPositionToWebGLPosition(
-      canvasPosition,
-      canvasRect,
+    this.camera.setViewOffset(
+      this.renderer.domElement.width,
+      this.renderer.domElement.height,
+      canvasPosition.x * window.devicePixelRatio,
+      canvasPosition.y * window.devicePixelRatio,
+      1,
+      1,
     );
 
-    const objects: THREE.Object3D[] = [];
-    if (this.editor.activeDocument?.viewport3D.useClippingPlane) {
-      objects.push(this.volume.clippingPlane);
-    }
-    const useCone =
-      this.editor.activeDocument?.viewport3D.activeTransferFunction?.name ===
-      "fc-cone";
-    if (useCone) {
-      objects.push(this.volume.raycastingCone);
-      this.volume.raycastingCone.updateGeometry();
-      this.volume.raycastingCone.visible = true;
-    }
+    this.renderer.setRenderTarget(this.pickingTexture);
+    this.volume.onBeforePicking();
+    this.renderer.render(this.scene, this.camera);
+    this.volume.onAfterPicking();
 
-    this.raycaster.setFromCamera(webGLPosition, this.camera);
-    const intersections = this.raycaster.intersectObjects(objects);
+    this.camera.clearViewOffset();
 
-    if (useCone) {
-      this.volume.raycastingCone.visible = false;
-    }
+    const pixelBuffer = new Uint8Array(4);
+    this.renderer.readRenderTargetPixels(
+      this.pickingTexture,
+      0,
+      0,
+      1,
+      1,
+      pixelBuffer,
+    );
 
-    if (!intersections.length) return undefined;
+    this.renderer.setRenderTarget(null);
+
+    if (pixelBuffer[3] <= 0) return undefined;
 
     this.workingVector.set(
       image.voxelCount.x,
@@ -530,33 +517,17 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
       image.voxelCount.z,
     );
 
-    const seedPoint = intersections[0].point;
-
-    this.volume
-      .worldToLocal(seedPoint)
-      .addScalar(0.5)
+    const seedPoint = new THREE.Vector3(
+      pixelBuffer[0],
+      pixelBuffer[1],
+      pixelBuffer[2],
+    )
+      .divideScalar(255)
       .multiply(this.workingVector)
-      .round();
+      .floor();
 
-    if (
-      seedPoint
-        .toArray()
-        .every(
-          (value, index) =>
-            value >= 0 && value < this.workingVector.getComponent(index),
-        )
-    ) {
-      return seedPoint;
-    }
-
-    return undefined;
+    return seedPoint;
   }
-
-  private onSmartBrushMove = (event: PointerEvent) => {
-    this.editor.activeDocument?.tools.setIsCursorOverDrawableArea(
-      !!this.getSmartBrushIntersection(event),
-    );
-  };
 
   private onSmartBrushClick = (event: PointerEvent) => {
     if (event.button !== 0) return;
