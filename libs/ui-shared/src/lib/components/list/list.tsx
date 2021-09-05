@@ -1,4 +1,4 @@
-import React, { useCallback, useRef } from "react";
+import React, { useCallback, useEffect, useRef } from "react";
 import styled, { css } from "styled-components";
 import { radius, size } from "../../theme";
 
@@ -135,6 +135,12 @@ export const ListItem = React.forwardRef<HTMLDivElement, ListItemProps>(
     }, []);
     useOutsidePress(labelInputRef, onOutsidePress, isLabelEditable);
 
+    useEffect(() => {
+      if (isLabelEditable && labelInputRef.current !== document.activeElement) {
+        labelInputRef.current?.focus();
+      }
+    });
+
     return (
       <ListItemContainer {...rest} ref={ref}>
         <ListItemInner isActive={isActive}>
@@ -160,8 +166,6 @@ export const ListItem = React.forwardRef<HTMLDivElement, ListItemProps>(
             ))}
           {(labelTx || label) &&
             (isLabelEditable ? (
-              // TODO: auto focus and close context menu,
-              // possibly rework useOutsidePress (ref)
               <ListItemInput
                 ref={labelInputRef}
                 valueTx={labelTx}

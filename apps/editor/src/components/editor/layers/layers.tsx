@@ -186,11 +186,13 @@ const LayerListItem = observer<{
     event.preventDefault();
   };
 
+  // Layer Renaming Handling
   const [isLayerNameEditable, setIsLayerNameEditable] = useState(false);
-  const makeLayerNameEditable = useCallback(() => {
+  const startEditingLayerName = useCallback(() => {
     setIsLayerNameEditable(true);
-  }, []);
-  const makeLayerNameNotEditable = useCallback(() => {
+    closeContextMenu();
+  }, [closeContextMenu]);
+  const stopEditingLayerName = useCallback(() => {
     setIsLayerNameEditable(false);
   }, []);
 
@@ -223,7 +225,7 @@ const LayerListItem = observer<{
                   label={layer.title}
                   isLabelEditable={isLayerNameEditable}
                   onChangeLabelText={layer.setTitle}
-                  onConfirmLabelText={makeLayerNameNotEditable}
+                  onConfirmLabelText={stopEditingLayerName}
                   trailingIcon={layer.isVisible ? "eye" : "eyeCrossed"}
                   disableTrailingIcon={!layer.isVisible}
                   trailingIconRef={trailingIconRef}
@@ -270,7 +272,7 @@ const LayerListItem = observer<{
         )}
         <ContextMenuItem
           labelTx="rename-layer"
-          onPointerDown={makeLayerNameEditable}
+          onPointerDown={startEditingLayerName}
         />
         <ContextMenuItem
           labelTx="delete-layer"
