@@ -305,14 +305,21 @@ export const setUpHotKeys = (store: RootStore): IDisposer => {
   });
   hotkeys("ctrl+e", (event) => {
     event.preventDefault();
-    (store.editor.activeDocument?.activeLayer as ImageLayer)?.quickExport?.();
+
+    if (store.editor.activeDocument?.viewSettings.viewMode === "2D") {
+      (store.editor.activeDocument?.activeLayer as ImageLayer)?.quickExport?.();
+    } else {
+      store.editor.activeDocument?.viewport3D.exportCanvasImage();
+    }
   });
   hotkeys("ctrl+shift+e", (event) => {
     event.preventDefault();
-    if (store.editor.activeDocument?.viewSettings.viewMode !== "2D") return;
-
-    (store.editor.activeDocument
-      ?.activeLayer as ImageLayer)?.quickExportSlice?.();
+    if (store.editor.activeDocument?.viewSettings.viewMode === "2D") {
+      (store.editor.activeDocument
+        ?.activeLayer as ImageLayer)?.quickExportSlice?.();
+    } else {
+      store.editor.activeDocument?.viewport3D.exportCanvasImage();
+    }
   });
 
   return () => hotkeys.unbind();

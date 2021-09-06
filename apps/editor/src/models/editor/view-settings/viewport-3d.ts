@@ -5,6 +5,7 @@ import {
   ITransferFunction,
 } from "@visian/ui-shared";
 import { ISerializable, Vector, ViewType } from "@visian/utils";
+import FileSaver from "file-saver";
 import { action, autorun, computed, makeObservable, observable } from "mobx";
 import { Matrix4 } from "three";
 import {
@@ -360,6 +361,30 @@ export class Viewport3D
     this.setClippingPlaneDistance();
     this.setShouldClippingPlaneRender();
     this.setShouldClippingPlaneShowAnnotations();
+  };
+
+  public exportCanvasImage = () => {
+    if (!this.document.volumeRenderer) return;
+
+    const canvas = this.document.volumeRenderer.renderer.domElement;
+
+    const saveCallback = (blob: Blob | null) => {
+      if (!blob) return;
+      const name = `${
+        this.document.title?.split(".")[0] || "visian_export"
+      }.png`;
+      FileSaver.saveAs(blob, name);
+    };
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    if ((canvas as any).msToBlob) {
+      // Edge
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (canvas as any).msToBlob(saveCallback);
+    } else {
+      // Other browsers
+      canvas.toBlob(saveCallback);
+    }
   };
 
   public reset = (): void => {
