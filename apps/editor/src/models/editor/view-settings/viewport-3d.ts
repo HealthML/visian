@@ -370,7 +370,10 @@ export class Viewport3D
 
     const saveCallback = (blob: Blob | null) => {
       if (!blob) return;
-      FileSaver.saveAs(blob, "download.png");
+      const name = `${
+        this.document.title?.split(".")[0] || "visian_export"
+      }.png`;
+      FileSaver.saveAs(blob, name);
     };
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
