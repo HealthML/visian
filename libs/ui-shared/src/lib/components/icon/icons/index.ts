@@ -12,6 +12,7 @@ export { ReactComponent as export } from "./export.svg";
 export { ReactComponent as eyeCrossed } from "./eye-crossed.svg";
 export { ReactComponent as eye } from "./eye.svg";
 export { ReactComponent as folder } from "./folder.svg";
+export { ReactComponent as fullScreenSmall } from "./full-screen-small.svg";
 export { ReactComponent as image } from "./image.svg";
 export { ReactComponent as import } from "./import.svg";
 export { ReactComponent as layers } from "./layers.svg";

@@ -2,7 +2,10 @@ import { IEditor } from "@visian/ui-shared";
 import { IDisposable, IDisposer } from "@visian/utils";
 import { autorun, reaction } from "mobx";
 import * as THREE from "three";
-import { ClippingPlaneMaterial } from "./clipping-plane-material";
+import {
+  ClippingPlaneMaterial,
+  ClippingPlanePickingMaterial,
+} from "./clipping-plane-material";
 import { SharedUniforms } from "./shared-uniforms";
 
 export class ClippingPlane extends THREE.Mesh implements IDisposable {
@@ -12,12 +15,21 @@ export class ClippingPlane extends THREE.Mesh implements IDisposable {
 
   private defaultNormal = new THREE.Vector3(0, 0, -1);
 
+  private mainMaterial: ClippingPlaneMaterial;
+  private pickingMaterial: ClippingPlanePickingMaterial;
+
   private disposers: IDisposer[] = [];
 
   constructor(private editor: IEditor, sharedUniforms: SharedUniforms) {
     super(
       new THREE.PlaneGeometry(),
       new ClippingPlaneMaterial(editor, sharedUniforms),
+    );
+
+    this.mainMaterial = this.material as ClippingPlaneMaterial;
+    this.pickingMaterial = new ClippingPlanePickingMaterial(
+      editor,
+      sharedUniforms,
     );
 
     this.geometry.setAttribute(
@@ -49,7 +61,16 @@ export class ClippingPlane extends THREE.Mesh implements IDisposable {
 
   public dispose() {
     this.disposers.forEach((disposer) => disposer());
-    (this.material as THREE.Material).dispose();
+    this.mainMaterial.dispose();
+    this.pickingMaterial.dispose();
+  }
+
+  public onBeforePicking() {
+    this.material = this.pickingMaterial;
+  }
+
+  public onAfterPicking() {
+    this.material = this.mainMaterial;
   }
 
   private setNormal = (normal?: number[]) => {
@@ -112,7 +133,8 @@ export class ClippingPlane extends THREE.Mesh implements IDisposable {
     this.workingVector.fromArray(camera);
 
     // Only write depth for front face
-    (this.material as ClippingPlaneMaterial).depthWrite =
-      this.plane.distanceToPoint(this.workingVector) < 0;
+    const useDepthWrite = this.plane.distanceToPoint(this.workingVector) < 0;
+    this.mainMaterial.depthWrite = useDepthWrite;
+    this.pickingMaterial.depthWrite = useDepthWrite;
   };
 }

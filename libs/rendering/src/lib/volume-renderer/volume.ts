@@ -4,13 +4,8 @@ import { autorun } from "mobx";
 import * as THREE from "three";
 
 import { RenderedImage } from "../rendered-image";
-import {
-  BoundingBox,
-  ClippingPlane,
-  RaycastingCone,
-  SharedUniforms,
-} from "./utils";
-import { VolumeMaterial } from "./volume-material";
+import { BoundingBox, ClippingPlane, SharedUniforms } from "./utils";
+import { VolumeMaterial, VolumePickingMaterial } from "./volume-material";
 
 /** A volume domain. */
 export class Volume extends THREE.Mesh implements IDisposable {
@@ -18,7 +13,8 @@ export class Volume extends THREE.Mesh implements IDisposable {
 
   private boundingBox: BoundingBox;
 
-  public raycastingCone: RaycastingCone;
+  public mainMaterial: VolumeMaterial;
+  public pickingMaterial: VolumePickingMaterial;
 
   private disposers: IDisposer[] = [];
   constructor(
@@ -41,6 +37,16 @@ export class Volume extends THREE.Mesh implements IDisposable {
       ),
     );
 
+    this.mainMaterial = this.material as VolumeMaterial;
+    this.pickingMaterial = new VolumePickingMaterial(
+      editor,
+      sharedUniforms,
+      firstDerivative,
+      secondDerivative,
+      outputDerivative,
+      lao,
+    );
+
     this.resetRotation();
 
     this.renderOrder = 1;
@@ -50,9 +56,6 @@ export class Volume extends THREE.Mesh implements IDisposable {
 
     this.boundingBox = new BoundingBox(editor);
     this.add(this.boundingBox);
-
-    this.raycastingCone = new RaycastingCone(editor);
-    this.add(this.raycastingCone);
 
     this.disposers.push(
       autorun(() => {
@@ -80,8 +83,23 @@ export class Volume extends THREE.Mesh implements IDisposable {
     this.rotation.set(-Math.PI / 2, 0, 0);
   }
 
+  public onBeforePicking() {
+    this.material = this.pickingMaterial;
+    this.remove(this.boundingBox);
+
+    this.clippingPlane.onBeforePicking();
+  }
+
+  public onAfterPicking() {
+    this.material = this.mainMaterial;
+    this.add(this.boundingBox);
+
+    this.clippingPlane.onAfterPicking();
+  }
+
   public dispose() {
-    (this.material as VolumeMaterial).dispose();
+    this.mainMaterial.dispose();
+    this.pickingMaterial.dispose();
     this.clippingPlane.dispose();
     this.boundingBox.dispose();
     this.disposers.forEach((disposer) => disposer());

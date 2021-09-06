@@ -78,3 +78,25 @@ export class VolumeMaterial
     this.uniforms.uUseRayDithering.value = value;
   }
 }
+
+export class VolumePickingMaterial extends VolumeMaterial {
+  constructor(
+    editor: IEditor,
+    sharedUniforms: SharedUniforms,
+    firstDerivative: THREE.Texture,
+    secondDerivative: THREE.Texture,
+    outputDerivative: THREE.Texture,
+    lao: THREE.Texture,
+  ) {
+    super(
+      editor,
+      sharedUniforms,
+      firstDerivative,
+      secondDerivative,
+      outputDerivative,
+      lao,
+    );
+
+    this.defines.VOXEL_PICKING = "";
+  }
+}
