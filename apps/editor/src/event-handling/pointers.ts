@@ -60,7 +60,6 @@ export const setUpPointerHandling = (
 
       if (
         !store.editor.activeDocument ||
-        !store.editor.activeDocument.tools.activeTool?.isBrush ||
         store.editor.activeDocument.viewSettings.viewMode !== "2D"
       ) {
         return;
