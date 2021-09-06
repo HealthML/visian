@@ -3,6 +3,7 @@ import type * as THREE from "three";
 import type { Theme } from "../../theme";
 import type { ISliceRenderer, IVolumeRenderer } from "../rendering";
 import type { IDocument } from "./document";
+import { PerformanceMode } from "./types";
 
 /** The state of VISIAN's annotation editor. */
 export interface IEditor {
@@ -26,4 +27,8 @@ export interface IEditor {
 
   /** Proxy for the root store theme. */
   theme: Theme;
+
+  /** The available graphics performance. */
+  performanceMode: PerformanceMode;
+  setPerformanceMode(mode?: PerformanceMode): void;
 }

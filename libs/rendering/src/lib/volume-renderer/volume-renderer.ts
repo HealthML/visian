@@ -1,9 +1,4 @@
-import {
-  DragPoint,
-  IEditor,
-  isPerformanceLow,
-  IVolumeRenderer,
-} from "@visian/ui-shared";
+import { DragPoint, IEditor, IVolumeRenderer } from "@visian/ui-shared";
 import { IDisposable, IDisposer, Vector, Voxel } from "@visian/utils";
 import { autorun, computed, makeObservable, reaction } from "mobx";
 import * as THREE from "three";
@@ -135,8 +130,8 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
       this.intermediateRenderTarget.texture,
     );
 
-    const resolutionSteps = isPerformanceLow ? 4 : 3;
     this.resolutionComputer = new ResolutionComputer(
+      editor,
       { scene: this.scene, camera: this.camera },
       this.renderer,
       new THREE.Vector2(
@@ -144,7 +139,6 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
         this.renderer.domElement.height,
       ),
       this.eagerRender,
-      resolutionSteps,
       this.intermediateRenderTarget,
     );
 

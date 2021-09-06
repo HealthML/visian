@@ -87,6 +87,8 @@ export const SettingsPopUp: React.FC<SettingsPopUpProps> = observer(
               <Switch
                 labelTx="performanceMode"
                 options={performanceSwitchOptions}
+                value={store?.editor.performanceMode}
+                onChange={store?.editor.setPerformanceMode}
               />
             </SettingsGroup>
           </SettingsColumn>

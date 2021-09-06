@@ -7,6 +7,7 @@ import {
   IEditor,
   ISliceRenderer,
   IVolumeRenderer,
+  PerformanceMode,
   Theme,
 } from "@visian/ui-shared";
 import { IDisposable, ISerializable } from "@visian/utils";
@@ -18,6 +19,8 @@ import { Document, DocumentSnapshot } from "./document";
 
 export interface EditorSnapshot {
   activeDocument?: DocumentSnapshot;
+
+  performaneMode: PerformanceMode;
 }
 
 export class Editor
@@ -39,6 +42,8 @@ export class Editor
     THREE.WebGLRenderer,
   ];
 
+  public performanceMode: PerformanceMode = "high";
+
   constructor(
     snapshot: EditorSnapshot | undefined,
     protected context: StoreContext,
@@ -48,8 +53,10 @@ export class Editor
       renderers: observable,
       sliceRenderer: observable,
       volumeRenderer: observable,
+      performanceMode: observable,
 
       setActiveDocument: action,
+      setPerformanceMode: action,
       applySnapshot: action,
     });
 
@@ -102,10 +109,16 @@ export class Editor
     return this.context.getTheme();
   }
 
+  // Performance Mode
+  public setPerformanceMode = (mode: PerformanceMode = "high") => {
+    this.performanceMode = mode;
+  };
+
   // Serialization
   public toJSON(): EditorSnapshot {
     return {
       activeDocument: this.activeDocument?.toJSON(),
+      performaneMode: this.performanceMode,
     };
   }
 
@@ -116,6 +129,8 @@ export class Editor
         : undefined,
       true,
     );
+    this.setPerformanceMode(snapshot?.performaneMode);
+
     return Promise.resolve();
   }
 
