@@ -289,7 +289,11 @@ export class Image<T extends TypedArray = TypedArray>
 
   public getVoxelData(voxel: Voxel | Vector) {
     const index = getAtlasIndexFor(voxel, this);
-    return this.getAtlas()[index];
+
+    return new Vector(
+      Array.from(this.getAtlas().slice(index, index + this.voxelComponents)),
+      false,
+    );
   }
 
   public setData(data: T) {

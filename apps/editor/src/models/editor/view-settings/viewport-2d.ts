@@ -224,7 +224,7 @@ export class Viewport2D
   }
 
   public get hoveredValue() {
-    if (!this.document.baseImageLayer) return 0;
+    if (!this.document.baseImageLayer) return new Vector([0], false);
 
     return this.document.baseImageLayer.image.getVoxelData(this.hoveredVoxel);
   }

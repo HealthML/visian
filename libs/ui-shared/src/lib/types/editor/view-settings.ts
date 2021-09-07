@@ -58,7 +58,7 @@ export interface IViewport2D {
   hoveredUV: Pixel;
   hoveredDragPoint: DragPoint;
   hoveredVoxel: Voxel;
-  hoveredValue: number;
+  hoveredValue: Vector;
   isVoxelHovered: boolean;
 
   setHoveredScreenCoordinates(coordinates: Pixel, viewType?: ViewType): void;

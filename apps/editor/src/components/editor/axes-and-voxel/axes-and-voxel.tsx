@@ -127,8 +127,9 @@ export const AxesAndVoxel: React.FC = observer(() => {
             <VoxelTitle tx="V" />
             <VoxelContent
               tx={
-                store?.editor.activeDocument?.viewport2D.hoveredValue.toString() ??
-                "-"
+                store?.editor.activeDocument?.viewport2D.hoveredValue
+                  .toString()
+                  .replace(/,/g, ", ") ?? "-"
               }
             />
           </FlexRow>

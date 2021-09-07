@@ -124,7 +124,7 @@ export class RegionGrowingRenderer3D
     ) as IImageLayer | undefined)?.image as RenderedImage | undefined;
     if (!sourceImage) return;
 
-    const seedValue = sourceImage.getVoxelData(this.seedVoxel);
+    const seedValue = sourceImage.getVoxelData(this.seedVoxel).x;
     this.regionGrowingMaterial.setSeed(seedValue);
     this.regionGrowingMaterial.setAtlasGird(
       sourceImage.getAtlasGrid().toArray(),
