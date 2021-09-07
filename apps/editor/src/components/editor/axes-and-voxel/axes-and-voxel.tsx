@@ -110,16 +110,18 @@ export const AxesAndVoxel: React.FC = observer(() => {
               }
             />
           </FlexRow>
-          <FlexRow>
-            <VoxelTitle tx="Z" />
-            <VoxelContent
-              tx={
-                (
-                  store?.editor.activeDocument?.viewport2D.hoveredVoxel.z + 1
-                ).toString() ?? "-"
-              }
-            />
-          </FlexRow>
+          {store?.editor.activeDocument?.has3DLayers && (
+            <FlexRow>
+              <VoxelTitle tx="Z" />
+              <VoxelContent
+                tx={
+                  (
+                    store?.editor.activeDocument?.viewport2D.hoveredVoxel.z + 1
+                  ).toString() ?? "-"
+                }
+              />
+            </FlexRow>
+          )}
           <Spacer />
           <FlexRow>
             <VoxelTitle tx="V" />
