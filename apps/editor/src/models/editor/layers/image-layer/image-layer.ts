@@ -246,8 +246,7 @@ export class ImageLayer
   }
 
   // Special Accessors
-  // TODO: Review regarding correct image component handling
-  public getVoxel(voxel: Voxel | Vector): number {
+  public getVoxel(voxel: Voxel | Vector): Vector {
     return this.image.getVoxelData(voxel);
   }
 

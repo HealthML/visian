@@ -28,6 +28,7 @@ import { UIOverlayProps } from "./ui-overlay.props";
 
 import type { ImageLayer } from "../../../models";
 import { SettingsPopUp } from "../settings-popup";
+import { AxesAndVoxel } from "../axes-and-voxel";
 
 const Container = styled(AbsoluteCover)`
   align-items: stretch;
@@ -187,6 +188,7 @@ export const UIOverlay = observer<UIOverlayProps>(
           <Toolbar />
           <Layers />
           <Spacer />
+          <AxesAndVoxel />
           <ActionModal />
         </ColumnLeft>
         <ColumnCenter>

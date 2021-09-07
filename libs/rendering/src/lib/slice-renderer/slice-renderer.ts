@@ -16,7 +16,6 @@ import {
   getPositionWithinPixel,
   getWebGLSizeFromCamera,
   setMainCameraPlanes,
-  synchCrosshairs,
 } from "./utils";
 
 export class SliceRenderer implements IDisposable, ISliceRenderer {
@@ -26,7 +25,7 @@ export class SliceRenderer implements IDisposable, ISliceRenderer {
   private sideCamera: THREE.OrthographicCamera;
   private scenes = viewTypes.map(() => new THREE.Scene());
 
-  private slices: Slice[];
+  public slices: Slice[];
 
   private lazyRenderTriggered = true;
 
@@ -68,14 +67,12 @@ export class SliceRenderer implements IDisposable, ISliceRenderer {
         (newMainView, oldMainView) => {
           if (newMainView === undefined || oldMainView === undefined) return;
 
+          if (!this.slices.find((slice) => slice.isMainView)) {
+            this.slices[oldMainView].isMainView = true;
+          }
+
           if (editor.activeDocument?.viewport2D.showSideViews) {
-            synchCrosshairs(
-              newMainView,
-              oldMainView,
-              this.slices[newMainView],
-              this.slices[oldMainView],
-              editor.activeDocument,
-            );
+            this.slices[newMainView].ensureMainViewTransformation();
           } else {
             this.slices[newMainView].setCrosshairSynchOffset();
           }
@@ -104,6 +101,16 @@ export class SliceRenderer implements IDisposable, ISliceRenderer {
       reaction(
         () => editor.activeDocument?.viewSettings.viewMode,
         this.lazyRender,
+      ),
+      reaction(
+        () => [
+          editor.activeDocument?.viewport2D.hoveredUV,
+          editor.activeDocument?.viewport2D.mainViewType,
+        ],
+        () => {
+          if (!editor.activeDocument) return;
+          this.alignBrushCursor(editor.activeDocument.viewport2D.hoveredUV);
+        },
       ),
     );
   }
