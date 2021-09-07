@@ -30,8 +30,8 @@ const languageSwitchOptions = [
 ];
 
 const voxelSwitchOptions = [
-  { label: "On", value: "on" },
-  { label: "Off", value: "off" },
+  { label: "On", value: true },
+  { label: "Off", value: false },
 ];
 
 const performanceSwitchOptions = [
@@ -83,7 +83,14 @@ export const SettingsPopUp: React.FC<SettingsPopUpProps> = observer(
                 value={i18n.language.split("-")[0]}
                 setValue={setLanguage}
               />
-              <Switch labelTx="voxelData" options={voxelSwitchOptions} />
+              <Switch
+                labelTx="voxelData"
+                options={voxelSwitchOptions}
+                value={store?.editor.activeDocument?.viewport2D.showVoxelInfo}
+                onChange={
+                  store?.editor.activeDocument?.viewport2D.setShowVoxelInfo
+                }
+              />
               <Switch
                 labelTx="performanceMode"
                 options={performanceSwitchOptions}
