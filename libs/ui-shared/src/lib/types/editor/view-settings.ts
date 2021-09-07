@@ -4,6 +4,7 @@ import { IParameter } from "./parameters";
 import { MarkerConfig } from "./markers";
 
 import type { Reference, ViewMode } from "./types";
+import { DragPoint } from "./tools";
 
 /** View settings affecting the whole document. */
 export interface IViewSettings {
@@ -36,6 +37,8 @@ export interface IViewSettings {
 export interface IViewport2D {
   /** The main view's slicing plane. */
   mainViewType: ViewType;
+  /** The hovered view type. */
+  hoveredViewType: ViewType;
   /** Indicates if the side views should be open. */
   showSideViews: boolean;
 
@@ -52,9 +55,13 @@ export interface IViewport2D {
    */
   sliceMarkers: MarkerConfig[];
 
-  isVoxelHovered: boolean;
-  hoveredVoxel: Vector;
+  hoveredUV: Pixel;
+  hoveredDragPoint: DragPoint;
+  hoveredVoxel: Voxel;
   hoveredValue: number;
+  isVoxelHovered: boolean;
+
+  setHoveredScreenCoordinates(coordinates: Pixel, viewType?: ViewType): void;
 
   /** Sets the main view type. */
   setMainViewType(viewType: ViewType): void;
@@ -82,10 +89,6 @@ export interface IViewport2D {
   zoomIn(): void;
   /** Decreases the current `zoomLevel` by subtracting the current `zoomStep`. */
   zoomOut(): void;
-
-  setIsVoxelHovered(value?: boolean): void;
-  setHoveredVoxel(voxel: Vector): void;
-  setHoveredValue(value: number): void;
 }
 
 export type ShadingMode = "none" | "phong" | "lao";

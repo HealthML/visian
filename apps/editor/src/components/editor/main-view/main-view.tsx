@@ -50,10 +50,6 @@ export const MainView = observer(() => {
     [pointerDispatch],
   );
 
-  const handlePointerOut = useCallback(() => {
-    store?.editor.activeDocument?.tools.setIsCursorOverDrawableArea(false);
-  }, [store]);
-
   const [ref, setRef] = useState<HTMLDivElement | null>(null);
   const canvas = store?.editor.renderers[0].domElement;
   useEffect(() => {
@@ -75,7 +71,6 @@ export const MainView = observer(() => {
       isIn3DView={store?.editor.activeDocument?.viewSettings.viewMode === "3D"}
       onContextMenu={preventDefault}
       onPointerDown={handlePointerDown}
-      onPointerOut={handlePointerOut}
       ref={setRef}
     />
   );

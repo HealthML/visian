@@ -3,7 +3,6 @@ import {
   DeviceType,
   globalListenerTypes,
   IDispatch,
-  IImageLayer,
   isFirefox,
   isWindows,
   ITool,
@@ -13,8 +12,7 @@ import {
 } from "@visian/ui-shared";
 import { IDisposer, Vector } from "@visian/utils";
 
-import { RootStore, ToolName, OutlineTool } from "../models";
-import { alignBrushCursor, getDragPoint, updateHoveredVoxel } from "./utils";
+import { RootStore, ToolName } from "../models";
 
 export const setUpPointerHandling = (
   store: RootStore,
@@ -65,31 +63,10 @@ export const setUpPointerHandling = (
         return;
       }
 
-      const uv = alignBrushCursor(
-        store.editor.activeDocument.tools,
-        {
-          x: detail.clientX,
-          y: detail.clientY,
-        },
-        store.editor.activeDocument.viewport2D.mainViewType,
-        true,
-        store.editor.sliceRenderer,
-      );
-
-      if (!uv || !store.editor.activeDocument.baseImageLayer) return;
-
-      const dragPoint = getDragPoint(
-        store.editor.activeDocument.baseImageLayer.image,
-        store.editor.activeDocument.viewSettings,
-        store.editor.activeDocument.viewport2D.mainViewType,
-        uv,
-      );
-
-      updateHoveredVoxel(
-        store.editor,
-        store.editor.activeDocument.baseImageLayer.image,
-        dragPoint,
-      );
+      store.editor.activeDocument.viewport2D.setHoveredScreenCoordinates({
+        x: detail.clientX,
+        y: detail.clientY,
+      });
     },
     forPointers: ({ context, detail, id }, { eventType }) => {
       handleDeviceSwitch(context.device);
@@ -124,18 +101,15 @@ export const setUpPointerHandling = (
           ? order[1]
           : order[2];
 
-      const uv = alignBrushCursor(
-        store.editor.activeDocument.tools,
+      store.editor.activeDocument?.viewport2D.setHoveredScreenCoordinates(
         {
           x: detail.clientX,
           y: detail.clientY,
         },
         viewType,
-        id === "mainView",
-        store.editor.sliceRenderer,
       );
 
-      if (!uv || !store.editor.activeDocument.tools.activeTool) {
+      if (!store.editor.activeDocument.tools.activeTool) {
         return;
       }
 
@@ -167,14 +141,7 @@ export const setUpPointerHandling = (
         return;
       }
 
-      const dragPoint = getDragPoint(
-        (store.editor.activeDocument.activeLayer as IImageLayer).image,
-        store.editor.activeDocument.viewSettings,
-        viewType,
-        uv,
-        // Only the outline tool needs high resolution drag points
-        !(tool instanceof OutlineTool),
-      );
+      const dragPoint = store.editor.activeDocument.viewport2D.hoveredDragPoint;
 
       switch (eventType) {
         case "start":
@@ -188,14 +155,6 @@ export const setUpPointerHandling = (
           store.editor.activeDocument.tools.setIsDrawing(false);
           tool.endAt(dragPoint);
           break;
-      }
-
-      if (store.editor.activeDocument.baseImageLayer) {
-        updateHoveredVoxel(
-          store.editor,
-          store.editor.activeDocument.baseImageLayer.image,
-          dragPoint,
-        );
       }
 
       store.setIsDirty();

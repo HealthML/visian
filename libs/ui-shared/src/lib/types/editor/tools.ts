@@ -149,7 +149,6 @@ export interface ITools<N extends string> {
   setSmartBrushThreshold(value?: number): void;
   setBoundedSmartBrushRadius(value?: number): void;
 
-  setIsCursorOverDrawableArea(value: boolean): void;
   setIsCursorOverFloatingUI(value: boolean): void;
   setIsNavigationDragged(value: boolean): void;
   setIsDrawing(value: boolean): void;
