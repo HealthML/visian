@@ -94,8 +94,9 @@ export const AxesAndVoxel: React.FC = observer(() => {
             <VoxelTitle tx="X" />
             <VoxelContent
               tx={
-                store?.editor.activeDocument?.viewport2D.hoveredVoxel.x.toString() ??
-                "-"
+                (
+                  store?.editor.activeDocument?.viewport2D.hoveredVoxel.x + 1
+                ).toString() ?? "-"
               }
             />
           </FlexRow>
@@ -103,8 +104,9 @@ export const AxesAndVoxel: React.FC = observer(() => {
             <VoxelTitle tx="Y" />
             <VoxelContent
               tx={
-                store?.editor.activeDocument?.viewport2D.hoveredVoxel.y.toString() ??
-                "-"
+                (
+                  store?.editor.activeDocument?.viewport2D.hoveredVoxel.y + 1
+                ).toString() ?? "-"
               }
             />
           </FlexRow>
@@ -112,8 +114,9 @@ export const AxesAndVoxel: React.FC = observer(() => {
             <VoxelTitle tx="Z" />
             <VoxelContent
               tx={
-                store?.editor.activeDocument?.viewport2D.hoveredVoxel.z.toString() ??
-                "-"
+                (
+                  store?.editor.activeDocument?.viewport2D.hoveredVoxel.z + 1
+                ).toString() ?? "-"
               }
             />
           </FlexRow>
