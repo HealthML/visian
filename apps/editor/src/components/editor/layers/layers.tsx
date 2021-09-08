@@ -188,10 +188,14 @@ const LayerListItem = observer<{
 
   // Layer Renaming Handling
   const [isLayerNameEditable, setIsLayerNameEditable] = useState(false);
-  const startEditingLayerName = useCallback(() => {
-    setIsLayerNameEditable(true);
-    closeContextMenu();
-  }, [closeContextMenu]);
+  const startEditingLayerName = useCallback(
+    (event: React.PointerEvent<HTMLDivElement>) => {
+      event.stopPropagation();
+      setIsLayerNameEditable(true);
+      closeContextMenu();
+    },
+    [closeContextMenu],
+  );
   const stopEditingLayerName = useCallback(() => {
     setIsLayerNameEditable(false);
   }, []);
