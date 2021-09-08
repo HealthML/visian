@@ -56,10 +56,7 @@ export const setUpPointerHandling = (
       }
       handleDeviceSwitch(context.device);
 
-      if (
-        !store.editor.activeDocument ||
-        store.editor.activeDocument.viewSettings.viewMode !== "2D"
-      ) {
+      if (!store.editor.activeDocument) {
         return;
       }
 
@@ -74,6 +71,10 @@ export const setUpPointerHandling = (
         !store.editor.activeDocument ||
         store.editor.activeDocument.viewSettings.viewMode !== "2D"
       ) {
+        store.editor.activeDocument?.viewport2D.setHoveredScreenCoordinates({
+          x: detail.clientX,
+          y: detail.clientY,
+        });
         return;
       }
 

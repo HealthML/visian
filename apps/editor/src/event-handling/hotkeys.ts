@@ -141,24 +141,27 @@ export const setUpHotKeys = (store: RootStore): IDisposer => {
   };
   hotkeys("1", () => {
     handleXR().then(() => {
+      // View mode has to be set first to ensure brush cursor alignment
+      store.editor.activeDocument?.viewSettings.setViewMode("2D");
       store.editor.activeDocument?.viewport2D.setMainViewType(
         ViewType.Transverse,
       );
-      store.editor.activeDocument?.viewSettings.setViewMode("2D");
     });
   });
   hotkeys("2", () => {
     handleXR().then(() => {
+      // View mode has to be set first to ensure brush cursor alignment
+      store.editor.activeDocument?.viewSettings.setViewMode("2D");
       store.editor.activeDocument?.viewport2D.setMainViewType(
         ViewType.Sagittal,
       );
-      store.editor.activeDocument?.viewSettings.setViewMode("2D");
     });
   });
   hotkeys("3", () => {
     handleXR().then(() => {
-      store.editor.activeDocument?.viewport2D.setMainViewType(ViewType.Coronal);
+      // View mode has to be set first to ensure brush cursor alignment
       store.editor.activeDocument?.viewSettings.setViewMode("2D");
+      store.editor.activeDocument?.viewport2D.setMainViewType(ViewType.Coronal);
     });
   });
   hotkeys("4", () => {

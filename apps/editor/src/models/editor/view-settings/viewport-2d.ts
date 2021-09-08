@@ -2,6 +2,7 @@ import { getPositionWithinPixel } from "@visian/rendering";
 import {
   DragPoint,
   IDocument,
+  IImageLayer,
   IViewport2D,
   MarkerConfig,
 } from "@visian/ui-shared";
@@ -233,9 +234,18 @@ export class Viewport2D
   }
 
   public get hoveredValue() {
-    if (!this.document.baseImageLayer) return new Vector([0], false);
+    const { activeLayer } = this.document;
+    const layer =
+      activeLayer &&
+      !activeLayer.isAnnotation &&
+      activeLayer.kind === "image" &&
+      activeLayer.isVisible
+        ? (activeLayer as IImageLayer)
+        : this.document.baseImageLayer;
 
-    return this.document.baseImageLayer.image.getVoxelData(this.hoveredVoxel);
+    if (!layer) return new Vector([0], false);
+
+    return layer.image.getVoxelData(this.hoveredVoxel);
   }
 
   public get isVoxelHovered() {
