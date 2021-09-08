@@ -4,6 +4,8 @@ export { default as circleFragmentShader } from "./circle/circle.frag.glsl";
 export { default as circleVertexShader } from "./circle/circle.vert.glsl";
 export { default as clippingPlaneFragmentShader } from "./clipping-plane/clipping-plane.frag.glsl";
 export { default as clippingPlaneVertexShader } from "./clipping-plane/clipping-plane.vert.glsl";
+export { default as dilateErodeFragmentShader } from "./dilate-erode/dilate-erode.frag.glsl";
+export { default as dilateErodeVertexShader } from "./dilate-erode/dilate-erode.vert.glsl";
 export { default as gradientFragmentShader } from "./gradient/gradient.frag.glsl";
 export { default as gradientVertexShader } from "./gradient/gradient.vert.glsl";
 export { default as laoFragmentShader } from "./lao/lao.frag.glsl";

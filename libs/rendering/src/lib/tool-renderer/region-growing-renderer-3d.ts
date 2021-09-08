@@ -13,6 +13,7 @@ import { RegionGrowing3DMaterial, Seed } from "./utils";
 
 export const MAX_REGION_GROWING_STEPS = 254;
 
+// TODO: Extend BlipRenderer3D to eliminate code duplication
 export class RegionGrowingRenderer3D
   implements IRegionGrowingRenderer3D, IDisposable {
   public readonly excludeFromSnapshotTracking = ["document"];
@@ -126,7 +127,7 @@ export class RegionGrowingRenderer3D
 
     const seedValue = sourceImage.getVoxelData(this.seedVoxel);
     this.regionGrowingMaterial.setSeed(seedValue);
-    this.regionGrowingMaterial.setAtlasGird(
+    this.regionGrowingMaterial.setAtlasGrid(
       sourceImage.getAtlasGrid().toArray(),
     );
     this.regionGrowingMaterial.setVoxelCount(sourceImage.voxelCount.toArray());

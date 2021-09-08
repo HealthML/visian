@@ -82,7 +82,7 @@ export class RegionGrowing3DMaterial extends RegionGrowingMaterial {
     this.uniforms.uVoxelCount.value = voxelCount;
   }
 
-  public setAtlasGird(atlasGrid: number[]) {
+  public setAtlasGrid(atlasGrid: number[]) {
     this.uniforms.uAtlasGrid.value = atlasGrid;
   }
 
