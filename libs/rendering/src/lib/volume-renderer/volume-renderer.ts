@@ -130,7 +130,7 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
 
     this.volume.onBeforeRender = (_renderer, _scene, camera) => {
       if (this.renderer.xr.isPresenting || true) {
-        this.updateCameraPosition(camera);
+        this.updateCameraPosition(camera, false);
 
         this.renderDepthPass(camera);
 
@@ -448,7 +448,10 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
   /**
    * @see https://davidpeicho.github.io/blog/cloud-raymarching-walkthrough-part1/
    */
-  public updateCameraPosition(camera: THREE.Camera = this.camera) {
+  public updateCameraPosition(
+    camera: THREE.Camera = this.camera,
+    updateInStore = true,
+  ) {
     this.volume.updateMatrixWorld();
 
     this.workingVector.setFromMatrixPosition(camera.matrixWorld);
@@ -456,12 +459,14 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
       this.workingMatrix.copy(this.volume.matrixWorld).invert(),
     );
 
-    const { x, y, z } = this.workingVector;
-    this.editor.activeDocument?.viewport3D.setVolumeSpaceCameraPosition(
-      x,
-      y,
-      z,
-    );
+    if (updateInStore) {
+      const { x, y, z } = this.workingVector;
+      this.editor.activeDocument?.viewport3D.setVolumeSpaceCameraPosition(
+        x,
+        y,
+        z,
+      );
+    }
   }
 
   private onFlyControlsLock = () => {
