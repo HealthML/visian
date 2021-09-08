@@ -68,7 +68,7 @@ export class Tools
   public smartBrushThreshold = 5;
   public boundedSmartBrushRadius = 7;
 
-  protected isCursorOverFloatingUI = false;
+  public isCursorOverFloatingUI = false;
   protected isNavigationDragged = false;
   public isDrawing = false;
 
@@ -87,7 +87,6 @@ export class Tools
       | "screenSpaceBrushSize"
       | "lockedBrushSize"
       | "isCursorOverDrawableArea"
-      | "isCursorOverFloatingUI"
       | "isNavigationDragged"
       | "resetBrushSettings"
     >(this, {
