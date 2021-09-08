@@ -88,47 +88,55 @@ export const AxesAndVoxel: React.FC = observer(() => {
           )}
         </AxesHorizontalContainer>
       )}
-      {store?.editor.activeDocument?.viewport2D.isVoxelHovered && (
-        <FlexColumn>
-          <FlexRow>
-            <VoxelTitle tx="X" />
-            <VoxelContent
-              tx={
-                store?.editor.activeDocument?.viewport2D.hoveredVoxel.x.toString() ??
-                "-"
-              }
-            />
-          </FlexRow>
-          <FlexRow>
-            <VoxelTitle tx="Y" />
-            <VoxelContent
-              tx={
-                store?.editor.activeDocument?.viewport2D.hoveredVoxel.y.toString() ??
-                "-"
-              }
-            />
-          </FlexRow>
-          <FlexRow>
-            <VoxelTitle tx="Z" />
-            <VoxelContent
-              tx={
-                store?.editor.activeDocument?.viewport2D.hoveredVoxel.z.toString() ??
-                "-"
-              }
-            />
-          </FlexRow>
-          <Spacer />
-          <FlexRow>
-            <VoxelTitle tx="V" />
-            <VoxelContent
-              tx={
-                store?.editor.activeDocument?.viewport2D.hoveredValue.toString() ??
-                "-"
-              }
-            />
-          </FlexRow>
-        </FlexColumn>
-      )}
+      {store?.editor.activeDocument?.viewport2D.isVoxelHovered &&
+        !store?.editor.activeDocument?.tools.isCursorOverFloatingUI && (
+          <FlexColumn>
+            <FlexRow>
+              <VoxelTitle tx="X" />
+              <VoxelContent
+                tx={
+                  (
+                    store?.editor.activeDocument?.viewport2D.hoveredVoxel.x + 1
+                  ).toString() ?? "-"
+                }
+              />
+            </FlexRow>
+            <FlexRow>
+              <VoxelTitle tx="Y" />
+              <VoxelContent
+                tx={
+                  (
+                    store?.editor.activeDocument?.viewport2D.hoveredVoxel.y + 1
+                  ).toString() ?? "-"
+                }
+              />
+            </FlexRow>
+            {store?.editor.activeDocument?.has3DLayers && (
+              <FlexRow>
+                <VoxelTitle tx="Z" />
+                <VoxelContent
+                  tx={
+                    (
+                      store?.editor.activeDocument?.viewport2D.hoveredVoxel.z +
+                      1
+                    ).toString() ?? "-"
+                  }
+                />
+              </FlexRow>
+            )}
+            <Spacer />
+            <FlexRow>
+              <VoxelTitle tx="V" />
+              <VoxelContent
+                tx={
+                  store?.editor.activeDocument?.viewport2D.hoveredValue
+                    .toString()
+                    .replace(/,/g, ", ") ?? "-"
+                }
+              />
+            </FlexRow>
+          </FlexColumn>
+        )}
     </FlexRow>
   ) : null;
 });

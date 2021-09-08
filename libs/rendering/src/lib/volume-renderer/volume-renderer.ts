@@ -237,21 +237,10 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
               "pointerdown",
               this.onSmartBrushClick,
             );
-            this.renderer.domElement.addEventListener(
-              "pointermove",
-              this.onSmartBrushMove,
-            );
           } else {
             this.renderer.domElement.removeEventListener(
               "pointerdown",
               this.onSmartBrushClick,
-            );
-            this.renderer.domElement.removeEventListener(
-              "pointermove",
-              this.onSmartBrushMove,
-            );
-            this.editor.activeDocument?.tools.setIsCursorOverDrawableArea(
-              false,
             );
           }
         },
@@ -545,12 +534,6 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
 
     return undefined;
   }
-
-  private onSmartBrushMove = (event: PointerEvent) => {
-    this.editor.activeDocument?.tools.setIsCursorOverDrawableArea(
-      !!this.getSmartBrushIntersection(event),
-    );
-  };
 
   private onSmartBrushClick = (event: PointerEvent) => {
     if (event.button !== 0) return;

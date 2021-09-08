@@ -108,7 +108,7 @@ export class RegionGrowingRenderer extends ToolRenderer {
       [widthAxis]: this.lastCircle.x,
       [heightAxis]: this.lastCircle.y,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } as any);
+    } as any).x;
 
     this.regionGrowingMaterial.setSeed(seed);
     this.regionGrowingMaterial.setThreshold(threshold);
