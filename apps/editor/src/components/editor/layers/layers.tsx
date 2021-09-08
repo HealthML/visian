@@ -190,7 +190,7 @@ const LayerListItem = observer<{
   const [isLayerNameEditable, setIsLayerNameEditable] = useState(false);
   const startEditingLayerName = useCallback(
     (event: React.PointerEvent<HTMLDivElement>) => {
-      event.stopPropagation();
+      event.preventDefault();
       setIsLayerNameEditable(true);
       closeContextMenu();
     },
