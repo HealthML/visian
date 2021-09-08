@@ -1,13 +1,14 @@
-import { IEditor, IVolumeRenderer, IXRManager } from "@visian/ui-shared";
+import { IEditor, IXRManager } from "@visian/ui-shared";
 import * as THREE from "three";
 import { XRControllerModelFactory } from "three/examples/jsm/webxr/XRControllerModelFactory";
 
 import { VolumeMaterial } from "./volume-material";
+import { VolumeRenderer } from "./volume-renderer";
 
 export class XRManager implements IXRManager {
   public xrWorld?: THREE.Group;
 
-  constructor(protected renderer: IVolumeRenderer, protected editor: IEditor) {}
+  constructor(protected renderer: VolumeRenderer, protected editor: IEditor) {}
 
   protected startGrab = (controller: THREE.Group) => {
     controller.attach(this.renderer.volume);
@@ -146,7 +147,7 @@ export class XRManager implements IXRManager {
     const controller = this.renderer.renderer.xr.getController(id);
     this.xrWorld.add(controller);
   }
-  protected setupXRWorld(): void {
+  public setupXRWorld(): void {
     if (this.xrWorld) return;
     this.xrWorld = new THREE.Group();
 
@@ -157,6 +158,14 @@ export class XRManager implements IXRManager {
 
     // Floor
     this.xrWorld.add(new THREE.GridHelper(5, 10, 0x404040, 0x404040));
+
+    // DEBUG
+    this.xrWorld.add(
+      new THREE.Mesh(
+        new THREE.SphereGeometry(0.05, 32, 16),
+        new THREE.MeshBasicMaterial({ color: 0x111100 }),
+      ).translateY(1.2),
+    );
 
     // Mount to Scene
     this.renderer.scene.add(this.xrWorld);
@@ -203,7 +212,7 @@ export class XRManager implements IXRManager {
     (this.renderer.volume.material as VolumeMaterial).setVolumetricOcclusion(
       true,
     );
-    (this.renderer.volume.material as VolumeMaterial).setUseRayDithering(false);
+    this.renderer.volume.mainMaterial.setUseRayDithering(false);
 
     const sessionInit = { optionalFeatures: ["local-floor"] };
     const session = await (navigator as THREE.Navigator).xr?.requestSession(
@@ -221,7 +230,7 @@ export class XRManager implements IXRManager {
     (this.renderer.volume.material as VolumeMaterial).setVolumetricOcclusion(
       false,
     );
-    (this.renderer.volume.material as VolumeMaterial).setUseRayDithering(true);
+    this.renderer.volume.mainMaterial.setUseRayDithering(true);
 
     return session.end();
   };

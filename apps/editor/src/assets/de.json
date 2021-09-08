@@ -10,6 +10,10 @@
   "unsaved-changes": "Ungespeicherte Änderungen.",
   "saved-in-browser": "Alle Änderungen im Browser gespeichert.",
 
+  "import": "Import",
+  "import-tooltip": "Import",
+  "importing": "Importieren",
+
   "menu": "Menü",
   "theme": "Farbschema",
   "dark": "Dunkel",
@@ -97,6 +101,7 @@
   "tf-fc-edges": "Kanten",
   "tf-fc-cone": "Kegelschnitt",
   "tf-custom": "Eigene",
+  "smooth-segmentations": "Segmentierungen geglättet anzeigen",
 
   "annotation-layer": "Fokusvolumen",
   "image-layer": "Volumen",

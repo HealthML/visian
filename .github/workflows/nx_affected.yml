@@ -39,12 +39,14 @@ jobs:
       #- run: yarn affected:e2e --base=origin/master
 
       - uses: actions/upload-artifact@v2
+        if: success() && (github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/master')
         with:
           name: editor-build
           path: dist/apps/editor/
           if-no-files-found: ignore
           retention-days: 1
       - uses: actions/upload-artifact@v2
+        if: success() && (github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/master')
         with:
           name: ar-demo-build
           path: dist/apps/ar-demo/
@@ -70,6 +72,7 @@ jobs:
         uses: peaceiris/actions-gh-pages@v3
         if: steps.check_files.outputs.files_exists == 'true'
         with:
+          cname: dev.visian.org
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./dist
           force_orphan: true

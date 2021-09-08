@@ -10,7 +10,20 @@
  *
  * Returns a vec4 containing the accumulated color.
  */
-vec4 marchRay(vec3 origin, vec3 direction, float near, float far, float stepSize, bool useRayDithering, float cutDepth) {
+vec4 marchRay(
+  vec3 origin, 
+  vec3 direction, 
+  float near, 
+  float far, 
+  float stepSize,
+  float cutDepth
+#ifdef RAY_DITHERING 
+  , bool useRayDithering
+#endif
+#ifdef VOXEL_PICKING
+  , float pickingThreshold
+#endif
+) {
   #ifdef RAY_DITHERING
     float random = fract(sin(gl_FragCoord.x * 12.9898 + gl_FragCoord.y * 78.233) * 43758.5453) * float(useRayDithering);
   
@@ -35,8 +48,17 @@ vec4 marchRay(vec3 origin, vec3 direction, float near, float far, float stepSize
 
     currentVoxel = getVolumeColor(samplePosition);
 
-    acc.rgb += (1.0 - acc.a) * currentVoxel.rgb * currentVoxel.a;
+    #ifndef VOXEL_PICKING
+      acc.rgb += (1.0 - acc.a) * currentVoxel.rgb * currentVoxel.a;
+    #endif
     acc.a += (1.0 - acc.a) * currentVoxel.a;
+
+    #ifdef VOXEL_PICKING
+      if (acc.a > pickingThreshold) {
+        acc.rgb = samplePosition;
+        return acc;
+      }
+    #endif
 
     samplePosition += scaledDirection;
     dist += stepSize;

@@ -4,12 +4,7 @@ import {
   isPerformanceLow,
   IVolumeRenderer,
 } from "@visian/ui-shared";
-import {
-  convertPositionToWebGLPosition,
-  IDisposable,
-  IDisposer,
-  Voxel,
-} from "@visian/utils";
+import { IDisposable, IDisposer, Vector, Voxel } from "@visian/utils";
 import { autorun, computed, makeObservable, reaction } from "mobx";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
@@ -24,7 +19,6 @@ import {
   SharedUniforms,
 } from "./utils";
 import { Volume } from "./volume";
-import { VolumeMaterial } from "./volume-material";
 import { XRManager } from "./xr-manager";
 
 export class VolumeRenderer implements IVolumeRenderer, IDisposable {
@@ -54,6 +48,8 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
   private resolutionComputer: ResolutionComputer;
   private gradientComputer: GradientComputer;
   private laoComputer: LAOComputer;
+
+  private pickingTexture = new THREE.WebGLRenderTarget(1, 1);
 
   private workingVector = new THREE.Vector3();
   private workingMatrix = new THREE.Matrix4();
@@ -133,23 +129,24 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
     this.depthTarget.depthBuffer = true;
 
     this.volume.onBeforeRender = (_renderer, _scene, camera) => {
-      if (this.renderer.xr.isPresenting) {
+      if (this.renderer.xr.isPresenting || true) {
         this.updateCameraPosition(camera);
 
         this.renderDepthPass(camera);
 
         // TODO: Reuse RGB pass
-        (this.volume
-          .material as VolumeMaterial).uniforms.uDepthPass.value = this.depthTarget.depthTexture;
-        (this.volume
-          .material as VolumeMaterial).uniforms.uCameraNear.value = (camera as THREE.PerspectiveCamera).near;
-        (this.volume
-          .material as VolumeMaterial).uniforms.uCameraFar.value = (camera as THREE.PerspectiveCamera).far;
+        this.volume.mainMaterial.uniforms.uDepthPass.value = this.depthTarget.depthTexture;
+        this.volume.mainMaterial.uniforms.uCameraNear.value = (camera as THREE.PerspectiveCamera).near;
+        this.volume.mainMaterial.uniforms.uCameraFar.value = (camera as THREE.PerspectiveCamera).far;
       }
     };
 
     this.resetScene();
     this.xr = new XRManager(this, editor);
+
+    // DEBUG
+    this.volume.mainMaterial.setVolumetricOcclusion(true);
+    this.xr.setupXRWorld();
 
     this.intermediateRenderTarget = new THREE.WebGLRenderTarget(1, 1);
     this.screenAlignedQuad = ScreenAlignedQuad.forTexture(
@@ -245,28 +242,18 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
       }),
       reaction(
         () =>
-          editor.activeDocument?.tools.activeTool?.name === "smart-brush-3d",
+          editor.activeDocument?.tools.activeTool?.name === "smart-brush-3d" &&
+          editor.activeDocument?.viewSettings.viewMode === "3D",
         (is3DSmartBrushSelected: boolean) => {
           if (is3DSmartBrushSelected) {
             this.renderer.domElement.addEventListener(
               "pointerdown",
               this.onSmartBrushClick,
             );
-            this.renderer.domElement.addEventListener(
-              "pointermove",
-              this.onSmartBrushMove,
-            );
           } else {
             this.renderer.domElement.removeEventListener(
               "pointerdown",
               this.onSmartBrushClick,
-            );
-            this.renderer.domElement.removeEventListener(
-              "pointermove",
-              this.onSmartBrushMove,
-            );
-            this.editor.activeDocument?.tools.setIsCursorOverDrawableArea(
-              false,
             );
           }
         },
@@ -303,10 +290,8 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
     this.disposers.forEach((disposer) => disposer());
   };
 
-  public getRenderTargetSize() {
-    const vector = new THREE.Vector2();
-    this.renderer.getSize(vector);
-    return vector.toArray();
+  public getRenderTargetSize(): [number, number] {
+    return [this.renderer.domElement.width, this.renderer.domElement.height];
   }
 
   public get renderedImageLayerCount() {
@@ -338,8 +323,7 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
     const renderTargetSize = this.getRenderTargetSize();
     this.depthTarget.setSize(...renderTargetSize);
     this.depthTarget.depthTexture = new THREE.DepthTexture(...renderTargetSize);
-    (this.volume
-      .material as VolumeMaterial).uniforms.uDepthSize.value = renderTargetSize;
+    this.volume.mainMaterial.uniforms.uDepthSize.value = renderTargetSize;
 
     this.lazyRender();
   };
@@ -368,16 +352,23 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
     this.gradientComputer.tick();
 
     if (
-      this.editor.activeDocument?.viewport3D.shadingMode === "lao" &&
+      (this.editor.activeDocument?.viewport3D.shadingMode === "lao" ||
+        this.editor.activeDocument?.viewport3D.requestedShadingMode ===
+          "lao") &&
       ((this.resolutionComputer.fullResolutionFlushed &&
         !this.laoComputer.isFinalLAOFlushed) ||
         this.laoComputer.isDirty)
     ) {
       this.laoComputer.tick();
+    } else if (
+      this.editor.activeDocument?.viewport3D.requestedShadingMode === "lao"
+    ) {
+      this.editor.activeDocument?.viewport3D.confirmRequestedShadingMode();
     }
 
-    if (this.renderer.xr.isPresenting) {
-      this.xr.animate();
+    // DEBUG
+    if (this.renderer.xr.isPresenting || true) {
+      // this.xr.animate();
       this.eagerRender();
       return;
     }
@@ -415,7 +406,8 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
     }
 
     this.renderer.setRenderTarget(null);
-    if (this.renderer.xr.isPresenting) {
+    // DEBUG
+    if (this.renderer.xr.isPresenting || true) {
       this.renderer.render(this.scene, this.camera);
     } else {
       this.screenAlignedQuad.renderWith(this.renderer);
@@ -482,9 +474,9 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
     document.removeEventListener("pointerdown", this.selectNavigationTool);
 
     this.raycaster.setFromCamera({ x: 0.5, y: 0.5 }, this.camera);
-    (this.volume.material as VolumeMaterial).side = THREE.DoubleSide;
+    this.volume.mainMaterial.side = THREE.DoubleSide;
     const intersections = this.raycaster.intersectObject(this.volume);
-    (this.volume.material as VolumeMaterial).side = THREE.BackSide;
+    this.volume.mainMaterial.side = THREE.BackSide;
 
     this.camera.getWorldDirection(this.orbitControls.target);
     this.orbitControls.target.multiplyScalar(
@@ -508,6 +500,14 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
     }
   };
 
+  public setVolumeSpaceCameraPosition(position: Vector) {
+    this.workingVector.fromArray(position.toArray());
+    this.volume.localToWorld(this.workingVector);
+    this.camera.position.copy(this.workingVector);
+    this.camera.lookAt(this.volume.position);
+    this.onCameraMove();
+  }
+
   private getSmartBrushIntersection(event: PointerEvent): Voxel | undefined {
     const image = this.editor.activeDocument?.baseImageLayer?.image;
     if (!image) return undefined;
@@ -527,32 +527,35 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
       y: clickPosition.y - canvasRect.top,
     };
 
-    const webGLPosition = convertPositionToWebGLPosition(
-      canvasPosition,
-      canvasRect,
+    this.camera.setViewOffset(
+      this.renderer.domElement.width,
+      this.renderer.domElement.height,
+      canvasPosition.x * window.devicePixelRatio,
+      canvasPosition.y * window.devicePixelRatio,
+      1,
+      1,
     );
 
-    const objects: THREE.Object3D[] = [];
-    if (this.editor.activeDocument?.viewport3D.useClippingPlane) {
-      objects.push(this.volume.clippingPlane);
-    }
-    const useCone =
-      this.editor.activeDocument?.viewport3D.activeTransferFunction?.name ===
-      "fc-cone";
-    if (useCone) {
-      objects.push(this.volume.raycastingCone);
-      this.volume.raycastingCone.updateGeometry();
-      this.volume.raycastingCone.visible = true;
-    }
+    this.renderer.setRenderTarget(this.pickingTexture);
+    this.volume.onBeforePicking();
+    this.renderer.render(this.scene, this.camera);
+    this.volume.onAfterPicking();
 
-    this.raycaster.setFromCamera(webGLPosition, this.camera);
-    const intersections = this.raycaster.intersectObjects(objects);
+    this.camera.clearViewOffset();
 
-    if (useCone) {
-      this.volume.raycastingCone.visible = false;
-    }
+    const pixelBuffer = new Uint8Array(4);
+    this.renderer.readRenderTargetPixels(
+      this.pickingTexture,
+      0,
+      0,
+      1,
+      1,
+      pixelBuffer,
+    );
 
-    if (!intersections.length) return undefined;
+    this.renderer.setRenderTarget(null);
+
+    if (pixelBuffer[3] <= 0) return undefined;
 
     this.workingVector.set(
       image.voxelCount.x,
@@ -560,36 +563,28 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
       image.voxelCount.z,
     );
 
-    const seedPoint = intersections[0].point;
-
-    this.volume
-      .worldToLocal(seedPoint)
-      .addScalar(0.5)
+    const seedPoint = new THREE.Vector3(
+      pixelBuffer[0],
+      pixelBuffer[1],
+      pixelBuffer[2],
+    )
+      .divideScalar(255)
       .multiply(this.workingVector)
-      .round();
+      .floor();
 
-    if (
-      seedPoint
-        .toArray()
-        .every(
-          (value, index) =>
-            value >= 0 && value < this.workingVector.getComponent(index),
-        )
-    ) {
-      return seedPoint;
-    }
-
-    return undefined;
+    return seedPoint;
   }
-
-  private onSmartBrushMove = (event: PointerEvent) => {
-    this.editor.activeDocument?.tools.setIsCursorOverDrawableArea(
-      !!this.getSmartBrushIntersection(event),
-    );
-  };
 
   private onSmartBrushClick = (event: PointerEvent) => {
     if (event.button !== 0) return;
+
+    if (
+      !this.editor.activeDocument?.activeLayer?.isVisible ||
+      !this.editor.activeDocument?.activeLayer?.isAnnotation
+    ) {
+      this.editor.activeDocument?.setShowLayerMenu(true);
+      return;
+    }
 
     const smartBrush3D = this.editor.activeDocument?.tools.tools[
       "smart-brush-3d"

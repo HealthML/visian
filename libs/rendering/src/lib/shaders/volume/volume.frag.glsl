@@ -50,7 +50,9 @@ vec4 getVolumeColor(vec3 volumeCoords) {
   return vec4(volumeColor.rgb, volumeColor.a * uOpacity);
 }
 
-#define RAY_DITHERING
+#ifndef VOXEL_PICKING
+  #define RAY_DITHERING
+#endif
 @import ../utils/march-ray;
 
 /**
@@ -63,11 +65,17 @@ void main() {
   float far;
   computeNearFar(normalizedRayDirection, near, far);
 
-  #ifdef VOLUMETRIC_OCCLUSION
-    float depth = texture2D(uDepthPass, gl_FragCoord.xy / uDepthSize).x;
-    float viewZ = perspectiveDepthToViewZ(depth, uCameraNear, uCameraFar);
+  #ifndef VOXEL_PICKING
+    #ifdef VOLUMETRIC_OCCLUSION
+      float depth = texture2D(uDepthPass, gl_FragCoord.xy / uDepthSize).x;
+      float viewZ = perspectiveDepthToViewZ(depth, uCameraNear, uCameraFar);
+    #else
+      float viewZ = 1.0;
+    #endif
+    gl_FragColor = marchRay(vRayOrigin, normalizedRayDirection, near, far, uStepSize, viewZ, uUseRayDithering);
   #else
-    float viewZ = 1.0;
+    vec4 pickedVoxel = marchRay(vRayOrigin, normalizedRayDirection, near, far, uStepSize, 1.0, 0.01);
+    pickedVoxel.a = step(0.01, pickedVoxel.a);
+    gl_FragColor = pickedVoxel;
   #endif
-  gl_FragColor = marchRay(vRayOrigin, normalizedRayDirection, near, far, uStepSize, uUseRayDithering, viewZ);
 }

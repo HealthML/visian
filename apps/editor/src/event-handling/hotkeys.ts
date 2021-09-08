@@ -172,6 +172,51 @@ export const setUpHotKeys = (store: RootStore): IDisposer => {
   hotkeys("0", () => {
     store.editor.activeDocument?.viewport2D.toggleSideViews();
   });
+  hotkeys("ctrl+1", () => {
+    if (store.editor.activeDocument?.viewSettings.viewMode !== "3D") return;
+
+    store.editor.activeDocument?.viewport3D.setCameraToFaceViewType(
+      ViewType.Transverse,
+    );
+  });
+  hotkeys("ctrl+2", () => {
+    if (store.editor.activeDocument?.viewSettings.viewMode !== "3D") return;
+
+    store.editor.activeDocument?.viewport3D.setCameraToFaceViewType(
+      ViewType.Sagittal,
+    );
+  });
+  hotkeys("ctrl+3", () => {
+    if (store.editor.activeDocument?.viewSettings.viewMode !== "3D") return;
+
+    store.editor.activeDocument?.viewport3D.setCameraToFaceViewType(
+      ViewType.Coronal,
+    );
+  });
+  hotkeys("alt+1", () => {
+    if (store.editor.activeDocument?.viewSettings.viewMode !== "3D") return;
+
+    store.editor.activeDocument?.viewport3D.setCameraToFaceViewType(
+      ViewType.Transverse,
+      true,
+    );
+  });
+  hotkeys("alt+2", () => {
+    if (store.editor.activeDocument?.viewSettings.viewMode !== "3D") return;
+
+    store.editor.activeDocument?.viewport3D.setCameraToFaceViewType(
+      ViewType.Sagittal,
+      true,
+    );
+  });
+  hotkeys("alt+3", () => {
+    if (store.editor.activeDocument?.viewSettings.viewMode !== "3D") return;
+
+    store.editor.activeDocument?.viewport3D.setCameraToFaceViewType(
+      ViewType.Coronal,
+      true,
+    );
+  });
 
   // Slice Navigation
   hotkeys("up", (event) => {
@@ -260,14 +305,21 @@ export const setUpHotKeys = (store: RootStore): IDisposer => {
   });
   hotkeys("ctrl+e", (event) => {
     event.preventDefault();
-    (store.editor.activeDocument?.activeLayer as ImageLayer)?.quickExport?.();
+
+    if (store.editor.activeDocument?.viewSettings.viewMode === "2D") {
+      (store.editor.activeDocument?.activeLayer as ImageLayer)?.quickExport?.();
+    } else {
+      store.editor.activeDocument?.viewport3D.exportCanvasImage();
+    }
   });
   hotkeys("ctrl+shift+e", (event) => {
     event.preventDefault();
-    if (store.editor.activeDocument?.viewSettings.viewMode !== "2D") return;
-
-    (store.editor.activeDocument
-      ?.activeLayer as ImageLayer)?.quickExportSlice?.();
+    if (store.editor.activeDocument?.viewSettings.viewMode === "2D") {
+      (store.editor.activeDocument
+        ?.activeLayer as ImageLayer)?.quickExportSlice?.();
+    } else {
+      store.editor.activeDocument?.viewport3D.exportCanvasImage();
+    }
   });
 
   return () => hotkeys.unbind();

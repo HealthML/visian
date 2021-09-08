@@ -10,6 +10,10 @@
   "unsaved-changes": "Unsaved changes.",
   "saved-in-browser": "All changes saved in browser.",
 
+  "import": "Import",
+  "import-tooltip": "Import",
+  "importing": "Importing",
+
   "menu": "Menu",
   "theme": "Theme",
   "dark": "Dark",
@@ -97,6 +101,7 @@
   "tf-fc-edges": "Edges",
   "tf-fc-cone": "Cone-Cut",
   "tf-custom": "Custom",
+  "smooth-segmentations": "Smooth Segmentations",
 
   "annotation-layer": "Focus Volume",
   "image-layer": "Volume",

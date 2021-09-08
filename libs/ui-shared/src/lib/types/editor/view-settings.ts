@@ -52,6 +52,9 @@ export interface IViewport2D {
    */
   sliceMarkers: MarkerConfig[];
 
+  /** Sets the main view type. */
+  setMainViewType(viewType: ViewType): void;
+
   /**
    * Returns the selected slice for the given `ViewType`.
    * This should be derived from the `ViewSettings`' `selectedVoxel` attribute.
@@ -137,10 +140,12 @@ export interface IViewport3D<N extends string> {
    * This will only be set if the shading mode is automatically switched for,
    * e.g., performance reasons and thus deviates from the user-selected one.
    */
-  suppressedShadingMode?: ShadingMode;
+  requestedShadingMode?: ShadingMode;
 
   activeTransferFunction?: Reference<ITransferFunction<N>>;
   transferFunctions: Record<N, ITransferFunction<N>>;
+
+  useSmoothSegmentations: boolean;
 
   useClippingPlane: boolean;
   clippingPlaneNormal: Vector;
@@ -154,13 +159,16 @@ export interface IViewport3D<N extends string> {
   setCameraMatrix(value?: Matrix4): void;
   setOrbitTarget(x?: number, y?: number, z?: number): void;
   setVolumeSpaceCameraPosition(x: number, y: number, z: number): void;
+  setCameraToFaceViewType(viewType: ViewType, flipped?: boolean): void;
   setOpacity(value?: number): void;
-  setShadingMode(value?: ShadingMode): void;
+  requestShadingMode(value?: ShadingMode): void;
+  confirmRequestedShadingMode(): void;
   cycleShadingMode(): void;
   setActiveTransferFunction(
     nameOrTransferFunction?: N | ITransferFunction<N>,
   ): void;
   cycleActiveTransferFunction(): void;
+  setUseSmoothSegmentations(value?: boolean): void;
   setUseClippingPlane(value?: boolean): void;
   setClippingPlaneNormal(x?: number, y?: number, z?: number): void;
   setClippingPlaneNormalToFaceCamera(): void;
@@ -170,4 +178,5 @@ export interface IViewport3D<N extends string> {
   setShouldClippingPlaneRender(value?: boolean): void;
   setShouldClippingPlaneShowAnnotations(value?: boolean): void;
   resetClippingPlane(): void;
+  exportCanvasImage(): void;
 }

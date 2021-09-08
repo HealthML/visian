@@ -1,6 +1,6 @@
 import { IEditor } from "@visian/ui-shared";
 import { IDisposable, IDisposer } from "@visian/utils";
-import { reaction } from "mobx";
+import { autorun, reaction } from "mobx";
 import * as THREE from "three";
 
 import {
@@ -8,7 +8,7 @@ import {
   volumeFragmentShader,
   volumeVertexShader,
 } from "../shaders";
-import { SharedUniforms } from "./utils";
+import { getMaxSteps, SharedUniforms } from "./utils";
 
 /** A volume domain material. */
 export class VolumeMaterial
@@ -37,17 +37,15 @@ export class VolumeMaterial
         uCameraNear: { value: 0 },
         uCameraFar: { value: 1 },
       },
-      defines: {},
+      defines: {
+        MAX_STEPS: 600,
+      },
       transparent: true,
       depthTest: true,
     });
 
     // Always render the back faces.
     this.side = THREE.BackSide;
-
-    const url = new URL(window.location.href);
-    const maxStepsParam = url.searchParams.get("maxSteps");
-    this.defines.MAX_STEPS = maxStepsParam ? parseInt(maxStepsParam) : 600;
 
     this.uniforms.uInputFirstDerivative.value = firstDerivative;
     this.uniforms.uInputSecondDerivative.value = secondDerivative;
@@ -66,6 +64,13 @@ export class VolumeMaterial
         },
         { fireImmediately: true },
       ),
+      autorun(() => {
+        const baseImage = editor.activeDocument?.baseImageLayer?.image;
+        if (baseImage) {
+          this.defines.MAX_STEPS = getMaxSteps(baseImage);
+        }
+        this.needsUpdate = true;
+      }),
     );
   }
 
@@ -86,5 +91,27 @@ export class VolumeMaterial
   public dispose() {
     super.dispose();
     this.disposers.forEach((disposer) => disposer());
+  }
+}
+
+export class VolumePickingMaterial extends VolumeMaterial {
+  constructor(
+    editor: IEditor,
+    sharedUniforms: SharedUniforms,
+    firstDerivative: THREE.Texture,
+    secondDerivative: THREE.Texture,
+    outputDerivative: THREE.Texture,
+    lao: THREE.Texture,
+  ) {
+    super(
+      editor,
+      sharedUniforms,
+      firstDerivative,
+      secondDerivative,
+      outputDerivative,
+      lao,
+    );
+
+    this.defines.VOXEL_PICKING = "";
   }
 }

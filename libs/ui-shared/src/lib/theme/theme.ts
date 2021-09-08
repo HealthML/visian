@@ -93,7 +93,6 @@ export const theme = {
   borders: {},
   borderStyles: {},
   borderWidths: {},
-  // breakpoints: ["478px", "767px", "991px", "1280px", "1440px", "1920px"],
   colors: colorModes.light,
   durations: {
     tooltipDelay: 400,
@@ -128,6 +127,9 @@ export const theme = {
     bigDesktopUp: "@media (min-width: 1800px)",
     print: "@media print",
   },
+  opacities: {
+    inactiveIcon: 0.3,
+  },
   radii: {
     activeLayerBorderRadius: "8px",
     default: "10px",
@@ -152,7 +154,7 @@ export const theme = {
     iconMargin: "12px",
     listIndentation: "16px",
     buttonPadding: "12px 20px",
-    inputPadding: "12px 22px",
+    inputPadding: "9px 16px",
     sliderLabelDistance: "16px",
     sliderMarkerMargin: "0px",
   },

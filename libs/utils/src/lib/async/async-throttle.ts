@@ -1,4 +1,5 @@
 import throttle from "lodash.throttle";
+import { isPromise } from "./utils";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /**
@@ -42,15 +43,33 @@ export const asyncThrottle = (...args: Parameters<typeof throttle>) => {
   const throttledFn = throttle((...args2: Parameters<typeof fn>) => {
     try {
       const result = fn(...args2);
-      pendingRequests.forEach((request) => {
-        request[0](result);
-      });
+      if (isPromise(result)) {
+        result
+          .then(() => {
+            pendingRequests.forEach((request) => {
+              request[0](result);
+            });
+          })
+          .catch((exception) => {
+            pendingRequests.forEach((request) => {
+              request[1](exception);
+            });
+          })
+          .finally(() => {
+            pendingRequests = [];
+          });
+      } else {
+        pendingRequests.forEach((request) => {
+          request[0](result);
+        });
+        pendingRequests = [];
+      }
     } catch (exception) {
       pendingRequests.forEach((request) => {
         request[1](exception);
       });
+      pendingRequests = [];
     }
-    pendingRequests = [];
   }, ...rest);
 
   const returnedFunction = (...args2: Parameters<typeof fn>) =>
