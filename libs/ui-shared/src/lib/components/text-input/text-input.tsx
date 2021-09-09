@@ -41,6 +41,7 @@ export const TextInput = React.forwardRef<HTMLInputElement, TextInputProps>(
       placeholder,
       type,
       value,
+      valueTx,
       defaultValue,
       onFocus,
       onChange,
@@ -152,7 +153,7 @@ export const TextInput = React.forwardRef<HTMLInputElement, TextInputProps>(
         }
         type={type}
         defaultValue={defaultValue}
-        value={isActive ? internalValue : value}
+        value={isActive ? internalValue : valueTx ? t(valueTx) : value}
         ref={inputRef}
         onFocus={handleFocus}
         onChange={handleChange}
