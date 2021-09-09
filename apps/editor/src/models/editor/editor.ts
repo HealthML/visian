@@ -62,7 +62,7 @@ export class Editor
 
     runInAction(() => {
       this.renderers = [
-        new THREE.WebGLRenderer({ alpha: true }),
+        new THREE.WebGLRenderer({ alpha: true, preserveDrawingBuffer: true }),
         new THREE.WebGLRenderer({ alpha: true }),
         new THREE.WebGLRenderer({ alpha: true }),
       ];

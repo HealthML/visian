@@ -14,6 +14,9 @@ const TopConsoleContainer = styled.div`
   overflow: hidden;
   padding-bottom: 8px;
   top: 20px;
+  position: absolute;
+  left: 0;
+  right: 0;
 `;
 
 const FileTitle = styled(Text)`
