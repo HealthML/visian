@@ -8,10 +8,15 @@ import {
 } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
 import React, { useCallback } from "react";
+import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
 
 import type { SmartBrush3D } from "../../../models";
+
+const StyledModal = styled(Modal)`
+  margin-top: 16px;
+`;
 
 export const ActionModal = observer(() => {
   const store = useStore();
@@ -30,7 +35,7 @@ export const ActionModal = observer(() => {
 
   return store?.editor.activeDocument?.tools.regionGrowingRenderer3D
     .holdsPreview ? (
-    <Modal
+    <StyledModal
       labelTx="smart-brush-3d"
       headerChildren={
         <ModalHeaderButton
@@ -71,6 +76,6 @@ export const ActionModal = observer(() => {
         isLast
         handlePress={submit}
       />
-    </Modal>
+    </StyledModal>
   ) : null;
 });

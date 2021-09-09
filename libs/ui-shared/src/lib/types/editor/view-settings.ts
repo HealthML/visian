@@ -4,6 +4,7 @@ import { IParameter } from "./parameters";
 import { MarkerConfig } from "./markers";
 
 import type { Reference, ViewMode } from "./types";
+import { DragPoint } from "./tools";
 
 /** View settings affecting the whole document. */
 export interface IViewSettings {
@@ -36,6 +37,8 @@ export interface IViewSettings {
 export interface IViewport2D {
   /** The main view's slicing plane. */
   mainViewType: ViewType;
+  /** The hovered view type. */
+  hoveredViewType: ViewType;
   /** Indicates if the side views should be open. */
   showSideViews: boolean;
 
@@ -51,6 +54,14 @@ export interface IViewport2D {
    * All slice markers, aggregated for the document and current main view type.
    */
   sliceMarkers: MarkerConfig[];
+
+  hoveredUV: Pixel;
+  hoveredDragPoint: DragPoint;
+  hoveredVoxel: Voxel;
+  hoveredValue: Vector;
+  isVoxelHovered: boolean;
+
+  setHoveredScreenCoordinates(coordinates: Pixel, viewType?: ViewType): void;
 
   /** Sets the main view type. */
   setMainViewType(viewType: ViewType): void;
