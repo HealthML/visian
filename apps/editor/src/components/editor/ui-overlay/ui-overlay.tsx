@@ -27,6 +27,7 @@ import { ViewSettings } from "../view-settings";
 import { UIOverlayProps } from "./ui-overlay.props";
 
 import type { ImageLayer } from "../../../models";
+import { AIBar } from "../ai-bar";
 
 const Container = styled(AbsoluteCover)`
   align-items: stretch;
@@ -54,7 +55,8 @@ const ColumnCenter = styled.div`
   display: flex;
   flex: 1;
   flex-direction: column;
-  justify-content: flex-start;
+  justify-content: flex-end;
+  align-items: flex-end;
   min-width: 0;
 `;
 
@@ -161,16 +163,19 @@ export const UIOverlay = observer<UIOverlayProps>(
         )}
         <ColumnLeft>
           <MenuRow>
-            <ImportButton
-              icon="import"
-              tooltipTx="import-tooltip"
-              tooltipPosition="right"
-              isActive={false}
-              onPointerDown={openFilePicker}
-            />
+            <Menu onOpenShortcutPopUp={openShortcutPopUp} />
+            {false && (
+              <ImportButton
+                icon="import"
+                tooltipTx="import-tooltip"
+                tooltipPosition="right"
+                isActive={false}
+                onPointerDown={openFilePicker}
+              />
+            )}
             <UndoRedoButtons />
           </MenuRow>
-          <Menu onOpenShortcutPopUp={openShortcutPopUp} />
+
           <Toolbar />
           <Layers />
           <Spacer />
@@ -178,22 +183,26 @@ export const UIOverlay = observer<UIOverlayProps>(
         </ColumnLeft>
         <ColumnCenter>
           <TopConsole />
+          <Spacer />
+          <AIBar />
         </ColumnCenter>
         <ColumnRight>
           <SideViews />
           <RightBar>
-            <FloatingUIButton
-              icon="export"
-              tooltipTx="export-tooltip"
-              tooltipPosition="left"
-              onPointerDown={
-                store?.editor.activeDocument?.viewSettings.viewMode === "2D"
-                  ? (store?.editor.activeDocument?.activeLayer as ImageLayer)
-                      ?.quickExport
-                  : store?.editor.activeDocument?.viewport3D.exportCanvasImage
-              }
-              isActive={false}
-            />
+            {false && (
+              <FloatingUIButton
+                icon="export"
+                tooltipTx="export-tooltip"
+                tooltipPosition="left"
+                onPointerDown={
+                  store?.editor.activeDocument?.viewSettings.viewMode === "2D"
+                    ? (store?.editor.activeDocument?.activeLayer as ImageLayer)
+                        ?.quickExport
+                    : store?.editor.activeDocument?.viewport3D.exportCanvasImage
+                }
+                isActive={false}
+              />
+            )}
             <ViewSettings />
             <SliceSlider showValueLabelOnChange={!isDraggedOver} />
           </RightBar>
