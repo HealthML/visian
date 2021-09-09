@@ -6,6 +6,7 @@ import {
   fontSize,
   SquareButton,
   BlueButtonParam,
+  sheetNoise,
 } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
 import React from "react";
@@ -18,9 +19,9 @@ const AIBarContainer = styled.div`
   align-self: stretch;
   display: flex;
   justify-content: center;
-  overflow: hidden;
   width: 100%;
   box-sizing: border-box;
+  pointer-events: auto;
 `;
 
 const AIBarSheet = styled(Sheet)`
@@ -96,6 +97,12 @@ const AIContainer = styled.div`
   align-items: center;
 `;
 
+const AIToolsContainer = styled.div`
+  display: flex;
+  flex-direction: row;
+  position: relative;
+`;
+
 const AIButton = styled(BlueButtonParam)`
   width: 40px;
   padding: 0;
@@ -106,6 +113,50 @@ const SkipButton = styled(InvisibleButton)`
   width: 40px;
   height: 40px;
   margin: 0px;
+`;
+
+const AIMessageContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: auto;
+  position: absolute;
+  top: -150px;
+  left: 50%;
+  transform: translateX(-50%);
+`;
+
+const AIMessageConnector = styled.div`
+  width: 1px;
+  height: 60px;
+  margin: 10px 0px;
+  background-color: ${color("lightText")};
+`;
+
+const AIMessage = styled(Sheet)`
+  background: ${sheetNoise}, ${color("blueSheet")};
+  border-color: ${color("blueBorder")};
+  width: 300px;
+  display: flex;
+  align-items: flex-start;
+  flex-direction: column;
+  padding: 14px 20px;
+  box-sizing: border-box;
+`;
+
+const AIMessageTitle = styled(Text)`
+  font-size: 18px;
+  line-height: 18px;
+  height: 18px;
+  padding-bottom: 8px;
+`;
+
+const AIMessageSubtitle = styled(Text)`
+  font-size: 16px;
+  line-height: 12px;
+  height: 12px;
+  color: ${color("lightText")};
 `;
 
 export const AIBar = observer(() => {
@@ -134,13 +185,22 @@ export const AIBar = observer(() => {
           </ActionButtonsContainer>
         </ActionContainer>
         <AIContainer>
-          <SkipButton icon="arrowLeft" />
-          <AIButton
-            icon="whoAI"
-            tooltipTx="export-tooltip"
-            tooltipPosition="right"
-          />
-          <SkipButton icon="arrowRight" />
+          <AIToolsContainer>
+            <AIMessageContainer>
+              <AIMessage>
+                <AIMessageTitle tx="Show me what you are looking for" />
+                <AIMessageSubtitle tx="Start annotating" />
+              </AIMessage>
+              <AIMessageConnector />
+            </AIMessageContainer>
+            <SkipButton icon="arrowLeft" />
+            <AIButton
+              icon="whoAI"
+              tooltipTx="export-tooltip"
+              tooltipPosition="right"
+            />
+            <SkipButton icon="arrowRight" />
+          </AIToolsContainer>
         </AIContainer>
       </AIBarSheet>
     </AIBarContainer>
