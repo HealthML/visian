@@ -20,7 +20,7 @@ import { Document, DocumentSnapshot } from "./document";
 export interface EditorSnapshot {
   activeDocument?: DocumentSnapshot;
 
-  performaneMode: PerformanceMode;
+  performanceMode: PerformanceMode;
 }
 
 export class Editor
@@ -118,7 +118,7 @@ export class Editor
   public toJSON(): EditorSnapshot {
     return {
       activeDocument: this.activeDocument?.toJSON(),
-      performaneMode: this.performanceMode,
+      performanceMode: this.performanceMode,
     };
   }
 
@@ -129,7 +129,7 @@ export class Editor
         : undefined,
       true,
     );
-    this.setPerformanceMode(snapshot?.performaneMode);
+    this.setPerformanceMode(snapshot?.performanceMode);
 
     return Promise.resolve();
   }
