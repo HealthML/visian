@@ -3,7 +3,6 @@ import {
   DeviceType,
   globalListenerTypes,
   IDispatch,
-  IImageLayer,
   isFirefox,
   isWindows,
   ITool,
@@ -13,8 +12,7 @@ import {
 } from "@visian/ui-shared";
 import { IDisposer, Vector } from "@visian/utils";
 
-import { RootStore, ToolName, OutlineTool } from "../models";
-import { alignBrushCursor, getDragPoint } from "./utils";
+import { RootStore, ToolName } from "../models";
 
 export const setUpPointerHandling = (
   store: RootStore,
@@ -58,24 +56,14 @@ export const setUpPointerHandling = (
       }
       handleDeviceSwitch(context.device);
 
-      if (
-        !store.editor.activeDocument ||
-        !store.editor.activeDocument.tools.activeTool?.isBrush ||
-        store.editor.activeDocument.viewSettings.viewMode !== "2D"
-      ) {
+      if (!store.editor.activeDocument) {
         return;
       }
 
-      alignBrushCursor(
-        store.editor.activeDocument.tools,
-        {
-          x: detail.clientX,
-          y: detail.clientY,
-        },
-        store.editor.activeDocument.viewport2D.mainViewType,
-        true,
-        store.editor.sliceRenderer,
-      );
+      store.editor.activeDocument.viewport2D.setHoveredScreenCoordinates({
+        x: detail.clientX,
+        y: detail.clientY,
+      });
     },
     forPointers: ({ context, detail, id }, { eventType }) => {
       handleDeviceSwitch(context.device);
@@ -83,6 +71,10 @@ export const setUpPointerHandling = (
         !store.editor.activeDocument ||
         store.editor.activeDocument.viewSettings.viewMode !== "2D"
       ) {
+        store.editor.activeDocument?.viewport2D.setHoveredScreenCoordinates({
+          x: detail.clientX,
+          y: detail.clientY,
+        });
         return;
       }
 
@@ -110,18 +102,15 @@ export const setUpPointerHandling = (
           ? order[1]
           : order[2];
 
-      const uv = alignBrushCursor(
-        store.editor.activeDocument.tools,
+      store.editor.activeDocument?.viewport2D.setHoveredScreenCoordinates(
         {
           x: detail.clientX,
           y: detail.clientY,
         },
         viewType,
-        id === "mainView",
-        store.editor.sliceRenderer,
       );
 
-      if (!uv || !store.editor.activeDocument.tools.activeTool) {
+      if (!store.editor.activeDocument.tools.activeTool) {
         return;
       }
 
@@ -153,14 +142,7 @@ export const setUpPointerHandling = (
         return;
       }
 
-      const dragPoint = getDragPoint(
-        (store.editor.activeDocument.activeLayer as IImageLayer).image,
-        store.editor.activeDocument.viewSettings,
-        viewType,
-        uv,
-        // Only the outline tool needs high resolution drag points
-        !(tool instanceof OutlineTool),
-      );
+      const dragPoint = store.editor.activeDocument.viewport2D.hoveredDragPoint;
 
       switch (eventType) {
         case "start":

@@ -1,20 +1,22 @@
+import { SliceRenderer } from "@visian/rendering";
 import { IEditor, IImageLayer } from "@visian/ui-shared";
 import { IDisposable, IDisposer, ViewType } from "@visian/utils";
 import { autorun, reaction } from "mobx";
 import * as THREE from "three";
-import { SliceMaterial } from "./slice-material";
 
+import { SliceMaterial } from "./slice-material";
 import {
   BrushCursor,
-  toolOverlayZ,
   Crosshair,
   crosshairZ,
   getGeometrySize,
   Outline,
-  PreviewBrushCursor,
-  sliceMeshZ,
   OverlayLineMaterial,
   OverlayPointsMaterial,
+  PreviewBrushCursor,
+  sliceMeshZ,
+  synchCrosshairs,
+  toolOverlayZ,
 } from "./utils";
 
 export class Slice extends THREE.Group implements IDisposable {
@@ -41,9 +43,11 @@ export class Slice extends THREE.Group implements IDisposable {
   private overlayPointsMaterial: OverlayPointsMaterial;
   private crosshairMaterial: OverlayLineMaterial;
 
+  public isMainView: boolean;
+
   private disposers: IDisposer[] = [];
 
-  constructor(private editor: IEditor, private viewType: ViewType) {
+  constructor(private editor: IEditor, public viewType: ViewType) {
     super();
     this.geometry.scale(-1, 1, 1);
 
@@ -93,6 +97,9 @@ export class Slice extends THREE.Group implements IDisposable {
     this.previewBrushCursor.position.z = toolOverlayZ;
     this.crosshairShiftGroup.add(this.previewBrushCursor);
 
+    this.isMainView =
+      this.viewType === editor.activeDocument?.viewport2D.mainViewType;
+
     this.disposers.push(
       autorun(this.updateScale),
       autorun(this.updateOffset),
@@ -127,6 +134,9 @@ export class Slice extends THREE.Group implements IDisposable {
   public setCrosshairSynchOffset(offset = new THREE.Vector2()) {
     this.crosshairSynchOffset.copy(offset);
     this.crosshairShiftGroup.position.set(-offset.x, -offset.y, 0);
+
+    this.isMainView =
+      this.viewType === this.editor.activeDocument?.viewport2D.mainViewType;
   }
 
   /**
@@ -134,6 +144,8 @@ export class Slice extends THREE.Group implements IDisposable {
    * Virtual means, that uv coordinates can be outside the [0, 1] range aswell.
    */
   public getVirtualUVs(position: THREE.Vector3) {
+    this.ensureMainViewTransformation();
+
     const localPosition = this.crosshairShiftGroup
       .worldToLocal(position)
       .addScalar(0.5);
@@ -142,6 +154,34 @@ export class Slice extends THREE.Group implements IDisposable {
       x: 1 - localPosition.x,
       y: localPosition.y,
     };
+  }
+
+  public ensureMainViewTransformation() {
+    if (
+      this.isMainView ||
+      this.viewType !== this.editor.activeDocument?.viewport2D.mainViewType ||
+      !this.editor.sliceRenderer
+    ) {
+      return;
+    }
+
+    const oldMainViewSlice = (this.editor
+      .sliceRenderer as SliceRenderer).slices.find((slice) => slice.isMainView);
+    if (!oldMainViewSlice) return;
+
+    synchCrosshairs(
+      this.viewType,
+      oldMainViewSlice.viewType,
+      this,
+      oldMainViewSlice,
+      this.editor.activeDocument,
+    );
+
+    this.updateScale();
+    this.updateOffset();
+
+    this.updateMatrixWorld(true);
+    this.crosshairShiftGroup.updateMatrixWorld(true);
   }
 
   private updateScale = () => {
