@@ -44,7 +44,14 @@ export interface Instance {
 }
 
 export class DICOMWebServer {
+  public static async connect(url: string) {
+    const server = new DICOMWebServer(url);
+    await server.runAutoconfig();
+    return server;
+  }
+
   public readonly url;
+  public useSeparateEndpoints = false;
   public readonly qidoHeaders = { Accept: "application/dicom+json" };
   public readonly wadoHeaders = {
     Accept: 'multipart/related; type="application/dicom"; transfer-syntax=*',
@@ -54,10 +61,39 @@ export class DICOMWebServer {
     this.url = url.replace(/\/$/, "");
   }
 
+  public async runAutoconfig() {
+    if (
+      (
+        await fetch(`${this.url}/studies`, {
+          headers: this.qidoHeaders,
+        })
+      ).status === 200
+    ) {
+      return;
+    }
+
+    if (
+      (
+        await fetch(`${this.url}/qido/studies`, {
+          headers: this.qidoHeaders,
+        })
+      ).status === 200
+    ) {
+      this.useSeparateEndpoints = true;
+    }
+  }
+
+  protected getEndpoint(operation: string) {
+    return this.useSeparateEndpoints ? `${this.url}/${operation}` : this.url;
+  }
+
   public async searchStudies(): Promise<Study[]> {
-    const response = await fetch(`${this.url}/studies?includefield=all`, {
-      headers: this.qidoHeaders,
-    });
+    const response = await fetch(
+      `${this.getEndpoint("qido")}/studies?includefield=all`,
+      {
+        headers: this.qidoHeaders,
+      },
+    );
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return (await response.json()).map((study: any) => ({
       StudyInstanceUID: study[studyFields.StudyInstanceUID].Value[0],
@@ -68,7 +104,7 @@ export class DICOMWebServer {
 
   public async searchSeries(study: string): Promise<Series[]> {
     const response = await fetch(
-      `${this.url}/studies/${study}/series?includefield=all`,
+      `${this.getEndpoint("qido")}/studies/${study}/series?includefield=all`,
       { headers: this.qidoHeaders },
     );
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -84,7 +120,9 @@ export class DICOMWebServer {
     series: string,
   ): Promise<Instance[]> {
     const response = await fetch(
-      `${this.url}/studies/${study}/series/${series}/instances?includefield=all`,
+      `${this.getEndpoint(
+        "qido",
+      )}/studies/${study}/series/${series}/instances?includefield=all`,
       { headers: this.qidoHeaders },
     );
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -95,7 +133,7 @@ export class DICOMWebServer {
 
   public async retrieveSeries(study: string, series: string) {
     const response = await fetch(
-      `${this.url}/studies/${study}/series/${series}`,
+      `${this.getEndpoint("wado")}/studies/${study}/series/${series}`,
       { headers: this.wadoHeaders },
     );
 

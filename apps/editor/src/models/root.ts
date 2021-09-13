@@ -88,8 +88,8 @@ export class RootStore implements ISerializable<RootSnapshot> {
    * @param shouldPersist Indicates if the new URL should be persisted.
    * Defaults to `true`.
    */
-  public connectToDICOMWebServer(url?: string, shouldPersist = true) {
-    this.dicomWebServer = url ? new DICOMWebServer(url) : undefined;
+  public async connectToDICOMWebServer(url?: string, shouldPersist = true) {
+    this.dicomWebServer = url ? await DICOMWebServer.connect(url) : undefined;
     if (shouldPersist && this.shouldPersist) {
       if (url) {
         localStorage.setItem("dicomWebServer", url);
@@ -169,7 +169,9 @@ export class RootStore implements ISerializable<RootSnapshot> {
     const tab = await new Tab().register();
 
     const dicomWebServer = localStorage.getItem("dicomWebServer");
-    if (dicomWebServer) this.connectToDICOMWebServer(dicomWebServer, false);
+    if (dicomWebServer) {
+      await this.connectToDICOMWebServer(dicomWebServer, false);
+    }
 
     const theme = localStorage.getItem("theme");
     if (theme) this.setColorMode(theme as ColorMode, false);

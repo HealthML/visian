@@ -48,7 +48,6 @@ const StyledText = styled(Text)`
   padding: 0;
   pointer-events: auto;
   text-overflow: ellipsis;
-  user-select: none;
   white-space: nowrap;
   width: 100%;
 `;
