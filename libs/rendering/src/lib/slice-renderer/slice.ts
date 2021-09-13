@@ -3,19 +3,20 @@ import { IEditor, IImageLayer } from "@visian/ui-shared";
 import { IDisposable, IDisposer, ViewType } from "@visian/utils";
 import { autorun, reaction } from "mobx";
 import * as THREE from "three";
-import { SliceMaterial } from "./slice-material";
 
+import { SliceMaterial } from "./slice-material";
 import {
   BrushCursor,
-  toolOverlayZ,
   Crosshair,
   crosshairZ,
   getGeometrySize,
   Outline,
+  OverlayLineMaterial,
+  OverlayPointsMaterial,
   PreviewBrushCursor,
   sliceMeshZ,
-  OverlayMaterial,
   synchCrosshairs,
+  toolOverlayZ,
 } from "./utils";
 
 export class Slice extends THREE.Group implements IDisposable {
@@ -38,8 +39,9 @@ export class Slice extends THREE.Group implements IDisposable {
 
   public previewBrushCursor: PreviewBrushCursor;
 
-  private overlayMaterial: OverlayMaterial;
-  private crosshairMaterial: OverlayMaterial;
+  private overlayLineMaterial: OverlayLineMaterial;
+  private overlayPointsMaterial: OverlayPointsMaterial;
+  private crosshairMaterial: OverlayLineMaterial;
 
   public isMainView: boolean;
 
@@ -58,8 +60,9 @@ export class Slice extends THREE.Group implements IDisposable {
     this.mesh.position.z = sliceMeshZ;
     this.crosshairShiftGroup.add(this.mesh);
 
-    this.overlayMaterial = new OverlayMaterial(editor);
-    this.crosshairMaterial = new OverlayMaterial(editor, {
+    this.overlayLineMaterial = new OverlayLineMaterial(editor);
+    this.overlayPointsMaterial = new OverlayPointsMaterial(editor);
+    this.crosshairMaterial = new OverlayLineMaterial(editor, {
       transparent: true,
       opacity: 0.5,
     });
@@ -72,18 +75,24 @@ export class Slice extends THREE.Group implements IDisposable {
     this.crosshair.position.z = crosshairZ;
     this.crosshairShiftGroup.add(this.crosshair);
 
-    this.brushCursor = new BrushCursor(editor, viewType, this.overlayMaterial);
+    this.brushCursor = new BrushCursor(
+      editor,
+      viewType,
+      this.overlayLineMaterial,
+      this.overlayPointsMaterial,
+    );
     this.brushCursor.position.z = toolOverlayZ;
     this.crosshairShiftGroup.add(this.brushCursor);
 
-    this.outline = new Outline(editor, viewType, this.overlayMaterial);
+    this.outline = new Outline(editor, viewType, this.overlayLineMaterial);
     this.outline.position.z = toolOverlayZ;
     this.crosshairShiftGroup.add(this.outline);
 
     this.previewBrushCursor = new PreviewBrushCursor(
       editor,
       viewType,
-      this.overlayMaterial,
+      this.overlayLineMaterial,
+      this.overlayPointsMaterial,
     );
     this.previewBrushCursor.position.z = toolOverlayZ;
     this.crosshairShiftGroup.add(this.previewBrushCursor);
