@@ -129,6 +129,9 @@ export interface ITools<N extends string> {
   /** The size of the bounded smart brush bounding boxes. */
   boundedSmartBrushRadius: number;
 
+  /** Indicates if the cursor is over a floating UI element. */
+  isCursorOverFloatingUI: boolean;
+
   /** Indicates if a brush stroke can be started this moment. */
   canDraw: boolean;
 
@@ -149,7 +152,6 @@ export interface ITools<N extends string> {
   setSmartBrushThreshold(value?: number): void;
   setBoundedSmartBrushRadius(value?: number): void;
 
-  setIsCursorOverDrawableArea(value: boolean): void;
   setIsCursorOverFloatingUI(value: boolean): void;
   setIsNavigationDragged(value: boolean): void;
   setIsDrawing(value: boolean): void;

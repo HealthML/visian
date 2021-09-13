@@ -7,7 +7,7 @@ import {
   viewTypes,
 } from "@visian/utils";
 import { IEditor, IImageLayer, ISliceRenderer } from "@visian/ui-shared";
-import { reaction } from "mobx";
+import { autorun, reaction } from "mobx";
 import * as THREE from "three";
 
 import { Slice } from "./slice";
@@ -16,7 +16,6 @@ import {
   getPositionWithinPixel,
   getWebGLSizeFromCamera,
   setMainCameraPlanes,
-  synchCrosshairs,
 } from "./utils";
 
 export class SliceRenderer implements IDisposable, ISliceRenderer {
@@ -26,7 +25,7 @@ export class SliceRenderer implements IDisposable, ISliceRenderer {
   private sideCamera: THREE.OrthographicCamera;
   private scenes = viewTypes.map(() => new THREE.Scene());
 
-  private slices: Slice[];
+  public slices: Slice[];
 
   private lazyRenderTriggered = true;
 
@@ -68,17 +67,17 @@ export class SliceRenderer implements IDisposable, ISliceRenderer {
         (newMainView, oldMainView) => {
           if (newMainView === undefined || oldMainView === undefined) return;
 
+          if (!this.slices.find((slice) => slice.isMainView)) {
+            this.slices[oldMainView].isMainView = true;
+          }
+
           if (editor.activeDocument?.viewport2D.showSideViews) {
-            synchCrosshairs(
-              newMainView,
-              oldMainView,
-              this.slices[newMainView],
-              this.slices[oldMainView],
-              editor.activeDocument,
-            );
+            this.slices[newMainView].ensureMainViewTransformation();
           } else {
             this.slices[newMainView].setCrosshairSynchOffset();
           }
+
+          this.updateMainBrushCursor();
 
           this.updateCamera();
         },
@@ -95,6 +94,8 @@ export class SliceRenderer implements IDisposable, ISliceRenderer {
         () => editor.activeDocument?.viewSettings.viewMode === "2D",
         (switchingTo2D?: boolean) => {
           if (switchingTo2D) {
+            this.updateMainBrushCursor();
+
             // Wrapped in a setTimeout, because the side views need to actually
             // appear before updating the camera planes.
             setTimeout(this.updateCamera);
@@ -105,6 +106,7 @@ export class SliceRenderer implements IDisposable, ISliceRenderer {
         () => editor.activeDocument?.viewSettings.viewMode,
         this.lazyRender,
       ),
+      autorun(this.updateMainBrushCursor),
     );
   }
 
@@ -243,6 +245,16 @@ export class SliceRenderer implements IDisposable, ISliceRenderer {
 
     slice.previewBrushCursor.show();
   }
+
+  private updateMainBrushCursor = () => {
+    if (
+      !this.editor.activeDocument ||
+      this.editor.activeDocument?.viewSettings.viewMode !== "2D"
+    ) {
+      return;
+    }
+    this.alignBrushCursor(this.editor.activeDocument.viewport2D.hoveredUV);
+  };
 
   public alignBrushCursor(
     uv: Pixel,

@@ -4,6 +4,7 @@ import { IParameter } from "./parameters";
 import { MarkerConfig } from "./markers";
 
 import type { Reference, ViewMode } from "./types";
+import { DragPoint } from "./tools";
 
 /** View settings affecting the whole document. */
 export interface IViewSettings {
@@ -36,6 +37,8 @@ export interface IViewSettings {
 export interface IViewport2D {
   /** The main view's slicing plane. */
   mainViewType: ViewType;
+  /** The hovered view type. */
+  hoveredViewType: ViewType;
   /** Indicates if the side views should be open. */
   showSideViews: boolean;
 
@@ -51,6 +54,14 @@ export interface IViewport2D {
    * All slice markers, aggregated for the document and current main view type.
    */
   sliceMarkers: MarkerConfig[];
+
+  hoveredUV: Pixel;
+  hoveredDragPoint: DragPoint;
+  hoveredVoxel: Voxel;
+  hoveredValue: Vector;
+  isVoxelHovered: boolean;
+
+  setHoveredScreenCoordinates(coordinates: Pixel, viewType?: ViewType): void;
 
   /** Sets the main view type. */
   setMainViewType(viewType: ViewType): void;
@@ -140,7 +151,7 @@ export interface IViewport3D<N extends string> {
    * This will only be set if the shading mode is automatically switched for,
    * e.g., performance reasons and thus deviates from the user-selected one.
    */
-  suppressedShadingMode?: ShadingMode;
+  requestedShadingMode?: ShadingMode;
 
   activeTransferFunction?: Reference<ITransferFunction<N>>;
   transferFunctions: Record<N, ITransferFunction<N>>;
@@ -161,7 +172,8 @@ export interface IViewport3D<N extends string> {
   setVolumeSpaceCameraPosition(x: number, y: number, z: number): void;
   setCameraToFaceViewType(viewType: ViewType, flipped?: boolean): void;
   setOpacity(value?: number): void;
-  setShadingMode(value?: ShadingMode): void;
+  requestShadingMode(value?: ShadingMode): void;
+  confirmRequestedShadingMode(): void;
   cycleShadingMode(): void;
   setActiveTransferFunction(
     nameOrTransferFunction?: N | ITransferFunction<N>,
@@ -177,4 +189,5 @@ export interface IViewport3D<N extends string> {
   setShouldClippingPlaneRender(value?: boolean): void;
   setShouldClippingPlaneShowAnnotations(value?: boolean): void;
   resetClippingPlane(): void;
+  exportCanvasImage(): void;
 }

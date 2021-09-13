@@ -141,24 +141,27 @@ export const setUpHotKeys = (store: RootStore): IDisposer => {
   };
   hotkeys("1", () => {
     handleXR().then(() => {
+      // View mode has to be set first to ensure brush cursor alignment
+      store.editor.activeDocument?.viewSettings.setViewMode("2D");
       store.editor.activeDocument?.viewport2D.setMainViewType(
         ViewType.Transverse,
       );
-      store.editor.activeDocument?.viewSettings.setViewMode("2D");
     });
   });
   hotkeys("2", () => {
     handleXR().then(() => {
+      // View mode has to be set first to ensure brush cursor alignment
+      store.editor.activeDocument?.viewSettings.setViewMode("2D");
       store.editor.activeDocument?.viewport2D.setMainViewType(
         ViewType.Sagittal,
       );
-      store.editor.activeDocument?.viewSettings.setViewMode("2D");
     });
   });
   hotkeys("3", () => {
     handleXR().then(() => {
-      store.editor.activeDocument?.viewport2D.setMainViewType(ViewType.Coronal);
+      // View mode has to be set first to ensure brush cursor alignment
       store.editor.activeDocument?.viewSettings.setViewMode("2D");
+      store.editor.activeDocument?.viewport2D.setMainViewType(ViewType.Coronal);
     });
   });
   hotkeys("4", () => {
@@ -305,14 +308,21 @@ export const setUpHotKeys = (store: RootStore): IDisposer => {
   });
   hotkeys("ctrl+e", (event) => {
     event.preventDefault();
-    (store.editor.activeDocument?.activeLayer as ImageLayer)?.quickExport?.();
+
+    if (store.editor.activeDocument?.viewSettings.viewMode === "2D") {
+      (store.editor.activeDocument?.activeLayer as ImageLayer)?.quickExport?.();
+    } else {
+      store.editor.activeDocument?.viewport3D.exportCanvasImage();
+    }
   });
   hotkeys("ctrl+shift+e", (event) => {
     event.preventDefault();
-    if (store.editor.activeDocument?.viewSettings.viewMode !== "2D") return;
-
-    (store.editor.activeDocument
-      ?.activeLayer as ImageLayer)?.quickExportSlice?.();
+    if (store.editor.activeDocument?.viewSettings.viewMode === "2D") {
+      (store.editor.activeDocument
+        ?.activeLayer as ImageLayer)?.quickExportSlice?.();
+    } else {
+      store.editor.activeDocument?.viewport3D.exportCanvasImage();
+    }
   });
 
   return () => hotkeys.unbind();

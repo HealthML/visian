@@ -30,7 +30,7 @@ const MainViewContainer = styled.div<{
         return "auto";
 
       case "smart-brush-3d":
-        if (props.isIn3DView && props.isDrawable) return "crosshair";
+        if (props.isIn3DView) return "crosshair";
       // eslint-disable-next-line no-fallthrough
       default:
         return props.isDrawable ? "none" : "auto";
@@ -49,10 +49,6 @@ export const MainView = observer(() => {
     },
     [pointerDispatch],
   );
-
-  const handlePointerOut = useCallback(() => {
-    store?.editor.activeDocument?.tools.setIsCursorOverDrawableArea(false);
-  }, [store]);
 
   const [ref, setRef] = useState<HTMLDivElement | null>(null);
   const canvas = store?.editor.renderers[0].domElement;
@@ -75,7 +71,6 @@ export const MainView = observer(() => {
       isIn3DView={store?.editor.activeDocument?.viewSettings.viewMode === "3D"}
       onContextMenu={preventDefault}
       onPointerDown={handlePointerDown}
-      onPointerOut={handlePointerOut}
       ref={setRef}
     />
   );

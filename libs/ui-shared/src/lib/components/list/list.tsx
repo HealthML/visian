@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useEffect, useRef } from "react";
 import styled, { css } from "styled-components";
 import { radius, size } from "../../theme";
 
@@ -7,6 +7,8 @@ import { Icon } from "../icon";
 import { Divider } from "../modal/modal";
 import { sheetMixin } from "../sheet";
 import { Text } from "../text";
+import { TextInput } from "../text-input";
+import { useOutsidePress } from "../utils";
 import { ListItemProps } from "./list.props";
 
 export const List = styled.div`
@@ -53,6 +55,15 @@ export const ListItemLabel = styled(Text)`
   user-select: none;
 `;
 
+export const ListItemInput = styled(TextInput)`
+  display: block;
+  flex: 1;
+  font-size: 14px;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+`;
+
 export const ListIcon = styled(Icon).withConfig({
   shouldForwardProp: (prop) =>
     prop.toString() !== "isDisabled" &&
@@ -93,6 +104,9 @@ export const ListItem = React.forwardRef<HTMLDivElement, ListItemProps>(
       value,
       isActive,
       isLast,
+      isLabelEditable = false,
+      onChangeLabelText,
+      onConfirmLabelText,
       onIconPress,
       onTrailingIconPress,
       disableIcon,
@@ -114,6 +128,18 @@ export const ListItem = React.forwardRef<HTMLDivElement, ListItemProps>(
       },
       [onTrailingIconPress, value],
     );
+
+    const labelInputRef = useRef<HTMLInputElement>(null);
+    const onOutsidePress = useCallback(() => {
+      labelInputRef.current?.blur();
+    }, []);
+    useOutsidePress(labelInputRef, onOutsidePress, isLabelEditable);
+
+    useEffect(() => {
+      if (isLabelEditable && labelInputRef.current !== document.activeElement) {
+        labelInputRef.current?.focus();
+      }
+    });
 
     return (
       <ListItemContainer {...rest} ref={ref}>
@@ -138,7 +164,18 @@ export const ListItem = React.forwardRef<HTMLDivElement, ListItemProps>(
                 hasPressHandler={Boolean(onIconPress)}
               />
             ))}
-          {(labelTx || label) && <ListItemLabel tx={labelTx} text={label} />}
+          {(labelTx || label) &&
+            (isLabelEditable ? (
+              <ListItemInput
+                ref={labelInputRef}
+                valueTx={labelTx}
+                value={label}
+                onChangeText={onChangeLabelText}
+                onConfirm={onConfirmLabelText}
+              />
+            ) : (
+              <ListItemLabel tx={labelTx} text={label} />
+            ))}
           {children}
           {trailingIcon && (
             <ListIcon

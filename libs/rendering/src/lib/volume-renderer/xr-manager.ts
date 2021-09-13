@@ -1,12 +1,12 @@
-import { IEditor, IVolumeRenderer, IXRManager } from "@visian/ui-shared";
+import { IEditor, IXRManager } from "@visian/ui-shared";
 import * as THREE from "three";
 import { XRControllerModelFactory } from "three/examples/jsm/webxr/XRControllerModelFactory";
-import { VolumeMaterial } from "./volume-material";
+import { VolumeRenderer } from "./volume-renderer";
 
 export class XRManager implements IXRManager {
   public xrWorld?: THREE.Group;
 
-  constructor(protected renderer: IVolumeRenderer, protected editor: IEditor) {}
+  constructor(protected renderer: VolumeRenderer, protected editor: IEditor) {}
 
   protected startGrab = (controller: THREE.Group) => {
     controller.attach(this.renderer.volume);
@@ -198,7 +198,7 @@ export class XRManager implements IXRManager {
       "fc-cone"
     ].params.isConeLocked.setValue(true);
 
-    (this.renderer.volume.material as VolumeMaterial).setUseRayDithering(false);
+    this.renderer.volume.mainMaterial.setUseRayDithering(false);
 
     const sessionInit = { optionalFeatures: ["local-floor"] };
     const session = await (navigator as THREE.Navigator).xr?.requestSession(
@@ -213,7 +213,7 @@ export class XRManager implements IXRManager {
     const session = this.renderer.renderer.xr.getSession();
     if (!session) return;
 
-    (this.renderer.volume.material as VolumeMaterial).setUseRayDithering(true);
+    this.renderer.volume.mainMaterial.setUseRayDithering(true);
 
     return session.end();
   };

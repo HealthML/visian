@@ -27,6 +27,7 @@ import { ViewSettings } from "../view-settings";
 import { UIOverlayProps } from "./ui-overlay.props";
 
 import type { ImageLayer } from "../../../models";
+import { AxesAndVoxel } from "../axes-and-voxel";
 
 const Container = styled(AbsoluteCover)`
   align-items: stretch;
@@ -154,6 +155,7 @@ export const UIOverlay = observer<UIOverlayProps>(
           <Toolbar />
           <Layers />
           <Spacer />
+          <AxesAndVoxel />
           <ActionModal />
         </ColumnLeft>
         <ColumnCenter>
@@ -167,8 +169,10 @@ export const UIOverlay = observer<UIOverlayProps>(
               tooltipTx="export-tooltip"
               tooltipPosition="left"
               onPointerDown={
-                (store?.editor.activeDocument?.activeLayer as ImageLayer)
-                  ?.quickExport
+                store?.editor.activeDocument?.viewSettings.viewMode === "2D"
+                  ? (store?.editor.activeDocument?.activeLayer as ImageLayer)
+                      ?.quickExport
+                  : store?.editor.activeDocument?.viewport3D.exportCanvasImage
               }
               isActive={false}
             />
