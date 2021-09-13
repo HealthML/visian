@@ -80,9 +80,17 @@ export class RootStore implements ISerializable<RootSnapshot> {
     });
   }
 
-  public connectToDICOMWebServer(url?: string, persist = true) {
+  /**
+   * Connects to a DICOMweb server.
+   * If no URL is given, disconnects from the current server (if any).
+   *
+   * @param url The server's URL
+   * @param shouldPersist Indicates if the new URL should be persisted.
+   * Defaults to `true`.
+   */
+  public connectToDICOMWebServer(url?: string, shouldPersist = true) {
     this.dicomWebServer = url ? new DICOMWebServer(url) : undefined;
-    if (persist && this.shouldPersist) {
+    if (shouldPersist && this.shouldPersist) {
       if (url) {
         localStorage.setItem("dicomWebServer", url);
       } else {
@@ -91,9 +99,11 @@ export class RootStore implements ISerializable<RootSnapshot> {
     }
   }
 
-  public setColorMode(theme: ColorMode, persist = true) {
+  public setColorMode(theme: ColorMode, shouldPersist = true) {
     this.colorMode = theme;
-    if (persist && this.shouldPersist) localStorage.setItem("theme", theme);
+    if (shouldPersist && this.shouldPersist) {
+      localStorage.setItem("theme", theme);
+    }
   }
   public get theme() {
     return getTheme(this.colorMode);

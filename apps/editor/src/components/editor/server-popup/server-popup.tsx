@@ -1,4 +1,3 @@
-/* eslint-disable max-len */
 import {
   color,
   Icon,
@@ -7,8 +6,9 @@ import {
   Sheet,
   sheetNoise,
   SquareButton,
+  styledScrollbarMixin,
   Text,
-  TextField,
+  TextInput,
 } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
 import React, { useCallback, useState } from "react";
@@ -23,7 +23,7 @@ const SectionLabel = styled(Text)`
   margin-bottom: 8px;
 `;
 
-const ImportInput = styled(TextField)`
+const ImportInput = styled(TextInput)`
   margin: 0px 0px 0px 0px;
   box-sizing: border-box;
 `;
@@ -92,6 +92,8 @@ const ColumnContainer = styled.div`
 `;
 
 const SingleColumn = styled.div`
+  ${styledScrollbarMixin}
+
   width: 100%;
   height: 100%;
   box-shadow: 1px 0px 0px 0px rgba(255, 255, 255, 0.2);
@@ -161,7 +163,6 @@ export const ServerPopUp = observer<ServerPopUpProps>(({ isOpen, onClose }) => {
   const loadSeries = useCallback(
     (seriesId: string) => {
       if (!selectedStudy) return;
-      // TODO: Create new document
       if (store?.editor.newDocument()) {
         store?.setProgress({ labelTx: "importing" });
         store?.dicomWebServer
@@ -170,6 +171,7 @@ export const ServerPopUp = observer<ServerPopUpProps>(({ isOpen, onClose }) => {
             store.editor.activeDocument?.importFile(files, seriesId),
           )
           .then(() => {
+            store?.editor.activeDocument?.finishBatchImport();
             onClose?.();
           })
           .catch((error) => {
@@ -201,7 +203,7 @@ export const ServerPopUp = observer<ServerPopUpProps>(({ isOpen, onClose }) => {
       <InlineRow>
         <InlineElement>
           <SectionLabel text="Server" />
-          <ImportInput value={store?.dicomWebServer?.url} />
+          <ImportInput value={store?.dicomWebServer?.url} isEditable={false} />
         </InlineElement>
         {showTodoUI && (
           <InlineElement>

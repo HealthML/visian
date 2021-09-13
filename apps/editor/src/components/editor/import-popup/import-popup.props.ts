@@ -1,4 +1,3 @@
-export interface ImportPopUpProps {
-  isOpen?: boolean;
-  onClose?: () => void;
-}
+import type { StatefulPopUpProps } from "../../types";
+
+export type ImportPopUpProps = StatefulPopUpProps;
