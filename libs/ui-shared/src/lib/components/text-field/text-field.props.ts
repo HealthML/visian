@@ -2,7 +2,8 @@ import type React from "react";
 
 import type { I18nData } from "../types";
 
-export interface TextFieldProps extends React.HTMLAttributes<HTMLInputElement> {
+export interface TextFieldProps
+  extends React.InputHTMLAttributes<HTMLInputElement> {
   /**
    * Additional data, passed to the translation function when `placeholderTx`
    * is being used.
@@ -16,5 +17,5 @@ export interface TextFieldProps extends React.HTMLAttributes<HTMLInputElement> {
   placeholderTx?: string;
 
   /** Callback for value changes. */
-  onEdit?: (value: string) => void;
+  onChangeText?: (value: string) => void;
 }

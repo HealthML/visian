@@ -1,7 +1,18 @@
 /* eslint-disable max-len */
-import { PopUp, Text, Button, TextField } from "@visian/ui-shared";
-import React from "react";
+import {
+  Button,
+  PopUp,
+  Text,
+  TextField,
+  useFilePicker,
+} from "@visian/ui-shared";
+import { readFileFromURL } from "@visian/utils";
+import { observer } from "mobx-react-lite";
+import React, { useCallback, useState } from "react";
 import styled from "styled-components";
+
+import { useStore } from "../../../app/root-store";
+import { ImportPopUpProps } from "./import-popup.props";
 
 const SectionLabel = styled(Text)`
   font-size: 14px;
@@ -53,22 +64,98 @@ const ImportPopUpContainer = styled(PopUp)`
   width: 400px;
 `;
 
-export const ImportPopUp: React.FC = () => (
-  <ImportPopUpContainer title="Import">
-    <SectionLabel text="Upload from Computer" />
-    <DropZoneContainer>
-      <DropZoneLabel text="Drop files or" />
-      <ImportButton tx="Browse" />
-    </DropZoneContainer>
-    <SectionLabel text="Download from URL" />
-    <InlineRow>
-      <ImportInput placeholder="https://..." />
-      <ImportButton tx="Download" />
-    </InlineRow>
-    <SectionLabel text="Connect to Server" />
-    <InlineRowLast>
-      <ImportInput placeholder="https://..." />
-      <ImportButton tx="Connect" />
-    </InlineRowLast>
-  </ImportPopUpContainer>
-);
+export const ImportPopUp = observer<ImportPopUpProps>(({ isOpen, onClose }) => {
+  const store = useStore();
+
+  // Local import
+  const openFilePicker = useFilePicker(
+    useCallback(
+      (event: Event) => {
+        const { files } = event.target as HTMLInputElement;
+        if (!files || !files.length) return;
+        store?.setProgress({ labelTx: "importing" });
+        store?.editor.activeDocument
+          ?.importFile(Array.from(files))
+          .then(() => {
+            onClose?.();
+          })
+          .catch((error) => {
+            store?.setError({
+              titleTx: "import-error",
+              descriptionTx: error.message,
+            });
+          })
+          .finally(() => {
+            store?.setProgress();
+          });
+      },
+      [store, onClose],
+    ),
+  );
+
+  // Load from URL
+  const [loadURL, setLoadURL] = useState("");
+  const loadFromURL = useCallback(async () => {
+    if (!loadURL) return;
+
+    try {
+      await store?.editor.activeDocument?.importFile(
+        await readFileFromURL(loadURL, true),
+      );
+      store?.editor.activeDocument?.finishBatchImport();
+      onClose?.();
+    } catch {
+      store?.setError({
+        titleTx: "import-error",
+        descriptionTx: "remote-file-error",
+      });
+    }
+  }, [loadURL, store, onClose]);
+
+  // Connect to server
+  const [serverURL, setServerURL] = useState("");
+  const connectToServer = useCallback(async () => {
+    if (!serverURL) return;
+
+    try {
+      await store?.connectToDICOMWebServer(serverURL);
+    } catch {
+      store?.setError({
+        titleTx: "import-error",
+        descriptionTx: "remote-file-error",
+      });
+    }
+  }, [serverURL, store]);
+
+  return (
+    <ImportPopUpContainer
+      title="Import"
+      isOpen={isOpen}
+      onOutsidePress={onClose}
+    >
+      <SectionLabel text="Upload from Computer" />
+      <DropZoneContainer>
+        <DropZoneLabel text="Drop files or" />
+        <ImportButton tx="Browse" onPointerDown={openFilePicker} />
+      </DropZoneContainer>
+      <SectionLabel text="Load from URL" />
+      <InlineRow>
+        <ImportInput
+          placeholder="https://..."
+          value={loadURL}
+          onChangeText={setLoadURL}
+        />
+        <ImportButton tx="Load" onPointerDown={loadFromURL} />
+      </InlineRow>
+      <SectionLabel text="Connect to Server" />
+      <InlineRowLast>
+        <ImportInput
+          placeholder="https://..."
+          value={serverURL}
+          onChangeText={setServerURL}
+        />
+        <ImportButton tx="Connect" onPointerDown={connectToServer} />
+      </InlineRowLast>
+    </ImportPopUpContainer>
+  );
+});

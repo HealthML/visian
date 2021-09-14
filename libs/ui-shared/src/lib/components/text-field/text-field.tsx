@@ -1,4 +1,4 @@
-import React, { FormEvent, useCallback } from "react";
+import React, { useCallback } from "react";
 import styled from "styled-components";
 
 import { useTranslation } from "../../i18n";
@@ -31,7 +31,7 @@ export const TextField: React.FC<TextFieldProps> = ({
   placeholder: placeholderText,
   placeholderTx,
   onChange,
-  onEdit,
+  onChangeText,
   ...rest
 }) => {
   const { t } = useTranslation();
@@ -40,13 +40,13 @@ export const TextField: React.FC<TextFieldProps> = ({
     : placeholderText;
 
   const handleChange = useCallback(
-    (event: FormEvent<HTMLInputElement>) => {
+    (event: React.ChangeEvent<HTMLInputElement>) => {
       if (onChange) onChange(event);
-      if (onEdit) {
-        onEdit((event.target as HTMLInputElement).value);
+      if (onChangeText) {
+        onChangeText((event.target as HTMLInputElement).value);
       }
     },
-    [onChange, onEdit],
+    [onChange, onChangeText],
   );
 
   return (
