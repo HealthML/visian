@@ -13,7 +13,7 @@ import { useStore } from "../../../app/root-store";
 
 import type { SmartBrush3D } from "../../../models";
 
-export const ActionModal = observer(() => {
+export const SmartBrush3DModal = observer(() => {
   const store = useStore();
 
   const discard = useCallback(() => {

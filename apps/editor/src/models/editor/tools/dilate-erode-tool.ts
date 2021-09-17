@@ -4,7 +4,7 @@ import { AtlasCommand } from "../history";
 import { SelfDeactivatingTool } from "./self-deactivating-tool";
 
 export class DilateErodeTool<
-  N extends "dilate-erode"
+  N extends "dilate-erode" = "dilate-erode"
 > extends SelfDeactivatingTool<N> {
   public readonly excludeFromSnapshotTracking = [
     "document",
@@ -28,15 +28,16 @@ export class DilateErodeTool<
   }
 
   public activate(previousTool?: ITool<N>) {
+    this.document?.tools.regionGrowingRenderer3D.discard();
+
     const sourceLayer = this.document.activeLayer;
     if (
       sourceLayer &&
       this.document.activeLayer?.kind === "image" &&
       this.document.activeLayer.isAnnotation
     ) {
-      this.dilateErodeRenderer.setShouldErode(true);
-      this.dilateErodeRenderer.render(sourceLayer as IImageLayer);
-      this.submit();
+      this.dilateErodeRenderer.setSourceLayer(sourceLayer as IImageLayer);
+      this.dilateErodeRenderer.render();
     }
 
     super.activate(previousTool);

@@ -104,9 +104,14 @@ export class SliceMaterial extends THREE.ShaderMaterial implements IDisposable {
         ).indexOf(viewType);
 
         const layerData = layers.map((layer) =>
-          ((layer as IImageLayer).image as RenderedImage).getTexture(
-            canvasIndex,
-          ),
+          layer ===
+          editor.activeDocument?.tools.dilateErodeRenderer3D.sourceLayer
+            ? editor.activeDocument.tools.dilateErodeRenderer3D.outputTextures[
+                canvasIndex
+              ]
+            : ((layer as IImageLayer).image as RenderedImage).getTexture(
+                canvasIndex,
+              ),
         );
 
         this.uniforms.uLayerData.value = [

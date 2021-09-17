@@ -12,7 +12,7 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
-import { ActionModal } from "../action-modal";
+import { DilateErodeModal, SmartBrush3DModal } from "../action-modal";
 import { DropSheet } from "../drop-sheet";
 import { Layers } from "../layers";
 import { Menu } from "../menu";
@@ -174,7 +174,8 @@ export const UIOverlay = observer<UIOverlayProps>(
           <Toolbar />
           <Layers />
           <Spacer />
-          <ActionModal />
+          <SmartBrush3DModal />
+          <DilateErodeModal />
         </ColumnLeft>
         <ColumnCenter>
           <TopConsole />

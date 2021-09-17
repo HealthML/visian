@@ -1,8 +1,4 @@
-import {
-  IDocument,
-  IImageLayer,
-  IRegionGrowingRenderer3D,
-} from "@visian/ui-shared";
+import { IDocument, IImageLayer, IBlipRenderer3D } from "@visian/ui-shared";
 import { IDisposable, IDisposer, Voxel } from "@visian/utils";
 import { action, makeObservable, observable, reaction } from "mobx";
 import * as THREE from "three";
@@ -14,8 +10,7 @@ import { RegionGrowing3DMaterial, Seed } from "./utils";
 export const MAX_REGION_GROWING_STEPS = 254;
 
 // TODO: Extend BlipRenderer3D to eliminate code duplication
-export class RegionGrowingRenderer3D
-  implements IRegionGrowingRenderer3D, IDisposable {
+export class RegionGrowingRenderer3D implements IBlipRenderer3D, IDisposable {
   public readonly excludeFromSnapshotTracking = ["document"];
 
   public holdsPreview = false;
@@ -200,6 +195,8 @@ export class RegionGrowingRenderer3D
   }
 
   public discard = () => {
+    if (!this.holdsPreview) return;
+
     this.clearRenderTargets();
     this.holdsPreview = false;
 

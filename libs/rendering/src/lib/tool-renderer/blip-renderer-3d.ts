@@ -1,17 +1,18 @@
-import * as THREE from "three";
 import {
   MergeFunction,
   RenderedImage,
   ScreenAlignedQuad,
 } from "@visian/rendering";
+import { IBlipRenderer3D, IDocument, IImageLayer } from "@visian/ui-shared";
 import { IDisposable, IDisposer } from "@visian/utils";
-import { IDocument, IImageLayer } from "@visian/ui-shared";
 import { action, makeObservable, observable, reaction } from "mobx";
+import * as THREE from "three";
+
 import { Blip3DMaterial } from "./utils/blip-material";
 
 export const MAX_BLIP_STEPS = 254;
 
-export class BlipRenderer3D implements IDisposable {
+export class BlipRenderer3D implements IBlipRenderer3D, IDisposable {
   public readonly excludeFromSnapshotTracking = ["document"];
 
   public holdsPreview = false;
@@ -77,9 +78,12 @@ export class BlipRenderer3D implements IDisposable {
 
     makeObservable(this, {
       holdsPreview: observable,
+      maxSteps: observable,
       previewColor: observable,
       steps: observable,
+
       setPreviewColor: action,
+      setMaxSteps: action,
       setSteps: action,
       render: action,
       flushToAnnotation: action,
@@ -179,12 +183,15 @@ export class BlipRenderer3D implements IDisposable {
     this.discard();
   }
 
-  public discard = () => {
+  public discard() {
+    if (!this.holdsPreview) return;
+
     this.clearRenderTargets();
+    this.holdsPreview = false;
 
     this.document.sliceRenderer?.lazyRender();
     this.document.volumeRenderer?.lazyRender(true);
-  };
+  }
 
   public get outputTextures() {
     return this.renderTargets.map((renderTarget) => renderTarget.texture);

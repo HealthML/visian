@@ -60,6 +60,9 @@ export class Tools
     "isCursorOverFloatingUI",
     "isNavigationDragged",
     "isDrawing",
+    "regionGrowingRenderer",
+    "regionGrowingRenderer3D",
+    "dilateErodeRenderer3D",
   ];
 
   protected activeToolName?: ToolName;

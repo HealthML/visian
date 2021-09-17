@@ -31,6 +31,10 @@ export class SmartBrush3D<
     );
   }
 
+  public activate() {
+    this.document?.tools.dilateErodeRenderer3D.discard();
+  }
+
   public startAt(dragPoint: DragPoint): void {
     if (this.document.activeLayer?.kind !== "image") return;
 
