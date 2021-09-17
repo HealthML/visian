@@ -22,7 +22,9 @@ export const SmartBrush3DModal = observer(() => {
   const store = useStore();
 
   const discard = useCallback(() => {
-    store?.editor.activeDocument?.tools.regionGrowingRenderer3D.discard();
+    (store?.editor.activeDocument?.tools.tools[
+      "smart-brush-3d"
+    ] as SmartBrush3D).discard();
     store?.editor.activeDocument?.tools.setIsCursorOverFloatingUI(false);
   }, [store]);
 

@@ -31,10 +31,6 @@ export class SmartBrush3D<
     );
   }
 
-  public activate() {
-    this.document?.tools.dilateErodeRenderer3D.discard();
-  }
-
   public startAt(dragPoint: DragPoint): void {
     if (this.document.activeLayer?.kind !== "image") return;
 
@@ -89,4 +85,12 @@ export class SmartBrush3D<
       false,
     );
   };
+
+  public discard() {
+    this.document?.tools.regionGrowingRenderer3D.discard();
+  }
+
+  public deactivate() {
+    this.document?.tools.regionGrowingRenderer3D.discard();
+  }
 }

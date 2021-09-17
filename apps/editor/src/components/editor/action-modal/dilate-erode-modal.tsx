@@ -23,7 +23,9 @@ export const DilateErodeModal = observer(() => {
   const store = useStore();
 
   const discard = useCallback(() => {
-    store?.editor.activeDocument?.tools.dilateErodeRenderer3D.discard();
+    (store?.editor.activeDocument?.tools.tools[
+      "dilate-erode"
+    ] as DilateErodeTool).discard();
     store?.editor.activeDocument?.tools.setIsCursorOverFloatingUI(false);
   }, [store]);
 

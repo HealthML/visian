@@ -111,6 +111,10 @@ export class Tool<N extends string>
     // Intentionally left blank
   }
 
+  public deactivate(_nextTool?: ITool<N>): void {
+    // Intentionally left blank
+  }
+
   // Serialization
   public toJSON(): ToolSnapshot<N> {
     return {

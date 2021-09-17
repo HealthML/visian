@@ -1,15 +1,17 @@
 import { DilateErodeRenderer3D } from "@visian/rendering";
 import { IDocument, IImageLayer, ITool } from "@visian/ui-shared";
 import { AtlasCommand } from "../history";
-import { SelfDeactivatingTool } from "./self-deactivating-tool";
+import { Tool } from "./tool";
 
 export class DilateErodeTool<
   N extends "dilate-erode" = "dilate-erode"
-> extends SelfDeactivatingTool<N> {
+> extends Tool<N> {
   public readonly excludeFromSnapshotTracking = [
     "document",
     "dilateErodeRenderer",
   ];
+
+  protected previousTool?: N;
 
   constructor(
     document: IDocument,
@@ -28,7 +30,7 @@ export class DilateErodeTool<
   }
 
   public activate(previousTool?: ITool<N>) {
-    this.document?.tools.regionGrowingRenderer3D.discard();
+    this.previousTool = previousTool?.name;
 
     const sourceLayer = this.document.activeLayer;
     if (
@@ -38,9 +40,9 @@ export class DilateErodeTool<
     ) {
       this.dilateErodeRenderer.setSourceLayer(sourceLayer as IImageLayer);
       this.dilateErodeRenderer.render();
+    } else {
+      this.document.tools.setActiveTool(previousTool);
     }
-
-    super.activate(previousTool);
   }
 
   public submit = () => {
@@ -68,5 +70,16 @@ export class DilateErodeTool<
       undefined,
       false,
     );
+
+    this.document.tools.setActiveTool(this.previousTool);
   };
+
+  public discard = () => {
+    this.document.tools.dilateErodeRenderer3D.discard();
+    this.document.tools.setActiveTool(this.previousTool);
+  };
+
+  public deactivate() {
+    this.document.tools.dilateErodeRenderer3D.discard();
+  }
 }

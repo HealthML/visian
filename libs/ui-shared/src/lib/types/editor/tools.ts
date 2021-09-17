@@ -84,6 +84,13 @@ export interface ITool<N extends string> {
   moveTo(dragPoint: DragPoint): void;
   /** Called when the user ends a drag interaction with this tool selected. */
   endAt(dragPoint: DragPoint): void;
+
+  /**
+   * Called when the tool is deactivated.
+   *
+   * @param nextTool The next active tool (if any).
+   */
+  deactivate(nextTool?: ITool<N>): void;
 }
 
 /** A class of similar tools, typically grouped in the UI. */

@@ -240,6 +240,7 @@ export class Tools
       : "pixel-brush";
 
     if (this.activeTool?.canActivate()) {
+      previouslyActiveTool?.deactivate(this.tools[this.activeToolName]);
       this.activeTool.activate(previouslyActiveTool);
     }
   }

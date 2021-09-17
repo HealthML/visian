@@ -2,8 +2,12 @@ import { IDisposer, ViewType } from "@visian/utils";
 import hotkeys from "hotkeys-js";
 
 import { skipSlices } from "../constants";
-
-import { ImageLayer, RootStore, SmartBrush3D } from "../models";
+import {
+  DilateErodeTool,
+  ImageLayer,
+  RootStore,
+  SmartBrush3D,
+} from "../models";
 
 export const setUpHotKeys = (store: RootStore): IDisposer => {
   // Tool Selection
@@ -84,12 +88,35 @@ export const setUpHotKeys = (store: RootStore): IDisposer => {
   hotkeys("enter", (event) => {
     event.preventDefault();
 
+    if (store.editor.activeDocument?.tools.dilateErodeRenderer3D.holdsPreview) {
+      (store.editor.activeDocument?.tools.tools[
+        "dilate-erode"
+      ] as DilateErodeTool).submit();
+    }
+
     if (
       store.editor.activeDocument?.tools.regionGrowingRenderer3D.holdsPreview
     ) {
       (store.editor.activeDocument?.tools.tools[
         "smart-brush-3d"
-      ] as SmartBrush3D<"smart-brush-3d">).submit();
+      ] as SmartBrush3D).submit();
+    }
+  });
+  hotkeys("escape", (event) => {
+    event.preventDefault();
+
+    if (store.editor.activeDocument?.tools.dilateErodeRenderer3D.holdsPreview) {
+      (store.editor.activeDocument?.tools.tools[
+        "dilate-erode"
+      ] as DilateErodeTool).discard();
+    }
+
+    if (
+      store.editor.activeDocument?.tools.regionGrowingRenderer3D.holdsPreview
+    ) {
+      (store.editor.activeDocument?.tools.tools[
+        "smart-brush-3d"
+      ] as SmartBrush3D).discard();
     }
   });
 
