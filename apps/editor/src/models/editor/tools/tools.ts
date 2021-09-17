@@ -21,6 +21,7 @@ import { BoundedSmartBrush } from "./bounded-smart-brush";
 import { PlaneTool } from "./plane-tool";
 import { SmartBrush3D } from "./smart-brush-3d";
 import { DilateErodeTool } from "./dilate-erode-tool";
+import { SelfDeactivatingTool } from "./self-deactivating-tool";
 
 export type ToolName =
   | "navigation-tool"
@@ -208,7 +209,7 @@ export class Tools
       new ToolGroup({ toolNames: ["fly-tool"] }, document),
     );
 
-    this.applySnapshot(snapshot);
+    if (snapshot) this.applySnapshot(snapshot);
   }
 
   protected getDefaultToolName(): ToolName {
@@ -422,22 +423,28 @@ export class Tools
   }
 
   public applySnapshot(
-    snapshot?: Partial<ToolsSnapshot<ToolName>>,
+    snapshot: Partial<ToolsSnapshot<ToolName>>,
   ): Promise<void> {
-    this.setActiveTool(snapshot?.activeToolName);
-    snapshot?.tools?.forEach((toolSnapshot) => {
+    snapshot.tools?.forEach((toolSnapshot) => {
       const tool = this.tools[toolSnapshot.name];
       if (tool) tool.applySnapshot(toolSnapshot);
     });
+    this.setActiveTool(
+      !snapshot.activeToolName ||
+        !(this.tools[snapshot.activeToolName] as SelfDeactivatingTool<ToolName>)
+          ?.isSelfDeactivating
+        ? snapshot.activeToolName
+        : undefined,
+    );
     this.toolGroups.forEach((toolGroup, index) => {
-      const toolGroupSnapshot = snapshot?.toolGroups?.[index];
+      const toolGroupSnapshot = snapshot.toolGroups?.[index];
       if (toolGroupSnapshot) toolGroup.applySnapshot(toolGroupSnapshot);
     });
 
-    this.setBrushSize(snapshot?.brushSize);
-    this.lockedBrushSize = snapshot?.lockedBrushSize;
-    this.setSmartBrushThreshold(snapshot?.smartBrushThreshold);
-    this.setBoundedSmartBrushRadius(snapshot?.boundedSmartBrushRadius);
+    this.setBrushSize(snapshot.brushSize);
+    this.lockedBrushSize = snapshot.lockedBrushSize;
+    this.setSmartBrushThreshold(snapshot.smartBrushThreshold);
+    this.setBoundedSmartBrushRadius(snapshot.boundedSmartBrushRadius);
 
     return Promise.resolve();
   }

@@ -1,5 +1,9 @@
 import * as THREE from "three";
-import { RenderedImage, ScreenAlignedQuad } from "@visian/rendering";
+import {
+  MergeFunction,
+  RenderedImage,
+  ScreenAlignedQuad,
+} from "@visian/rendering";
 import { IDisposable, IDisposer } from "@visian/utils";
 import { IDocument, IImageLayer } from "@visian/ui-shared";
 import { action, makeObservable, observable, reaction } from "mobx";
@@ -161,15 +165,11 @@ export class BlipRenderer3D implements IDisposable {
     const annotation = layer.image as RenderedImage;
 
     if (shouldReplace) {
-      annotation.addToAtlas(
-        this.outputTextures,
-        this.steps !== undefined
-          ? (this.maxSteps + 1 - this.steps) / (this.maxSteps + 1)
-          : this.steps,
-      );
+      annotation.writeToAtlas(this.outputTextures, MergeFunction.Replace);
     } else {
-      annotation.addToAtlas(
+      annotation.writeToAtlas(
         this.outputTextures,
+        MergeFunction.Add,
         this.steps !== undefined
           ? (this.maxSteps + 1 - this.steps) / (this.maxSteps + 1)
           : this.steps,

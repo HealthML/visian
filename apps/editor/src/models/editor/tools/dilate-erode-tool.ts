@@ -34,6 +34,7 @@ export class DilateErodeTool<
       this.document.activeLayer?.kind === "image" &&
       this.document.activeLayer.isAnnotation
     ) {
+      this.dilateErodeRenderer.setShouldErode(true);
       this.dilateErodeRenderer.render(sourceLayer as IImageLayer);
       this.submit();
     }
@@ -47,7 +48,7 @@ export class DilateErodeTool<
     const { image } = imageLayer as IImageLayer;
     const oldAtlas = new Uint8Array(image.getAtlas());
 
-    this.dilateErodeRenderer.flushToAnnotation();
+    this.dilateErodeRenderer.flushToAnnotation(imageLayer as IImageLayer, true);
 
     const newAtlas = new Uint8Array(image.getAtlas());
     this.document.history.addCommand(

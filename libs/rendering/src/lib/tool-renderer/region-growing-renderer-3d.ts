@@ -7,7 +7,7 @@ import { IDisposable, IDisposer, Voxel } from "@visian/utils";
 import { action, makeObservable, observable, reaction } from "mobx";
 import * as THREE from "three";
 
-import { RenderedImage } from "../rendered-image";
+import { MergeFunction, RenderedImage } from "../rendered-image";
 import ScreenAlignedQuad from "../screen-aligned-quad";
 import { RegionGrowing3DMaterial, Seed } from "./utils";
 
@@ -187,8 +187,9 @@ export class RegionGrowingRenderer3D
     const annotation = (this.document.activeLayer as IImageLayer)
       .image as RenderedImage;
 
-    annotation.addToAtlas(
+    annotation.writeToAtlas(
       this.outputTextures,
+      MergeFunction.Add,
       this.steps !== undefined
         ? (MAX_REGION_GROWING_STEPS + 1 - this.steps) /
             (MAX_REGION_GROWING_STEPS + 1)
