@@ -10,6 +10,7 @@ export class DilateErodeTool<
     "document",
     "dilateErodeRenderer",
   ];
+  public readonly isSelfDeactivating = true;
 
   protected previousTool?: N;
 

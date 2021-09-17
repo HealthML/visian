@@ -63,7 +63,6 @@ export class DilateErodeRenderer3D
   };
 
   public get outputTextures() {
-    // TODO: Making this getter dependent on the `maxSteps` significantly degrades performance
     return this.maxSteps === 0 && this.sourceLayer
       ? this.renderTargets.map((_renderTarget, rendererIndex) =>
           // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
