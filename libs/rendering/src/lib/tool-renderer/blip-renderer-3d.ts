@@ -114,6 +114,7 @@ export class BlipRenderer3D implements IBlipRenderer3D, IDisposable {
     const blipSteps = Math.ceil(
       Math.min(this.maxSteps, sourceImage.voxelCount.sum()) / 2,
     );
+    const useOddOutput = Boolean(this.steps % 2);
 
     this.document.renderers?.forEach((renderer, rendererIndex) => {
       this.material.setSourceTexture(sourceImage.getTexture(rendererIndex));
@@ -133,15 +134,22 @@ export class BlipRenderer3D implements IBlipRenderer3D, IDisposable {
           );
         }
         this.material.setStep(2 * i);
-        renderer.setRenderTarget(this.blipRenderTargets[rendererIndex]);
+        // TODO: This approach causes WebGL warnings, but seems to work
+        renderer.setRenderTarget(
+          i === blipSteps - 1 && useOddOutput
+            ? this.renderTargets[rendererIndex]
+            : this.blipRenderTargets[rendererIndex],
+        );
         this.quad.renderWith(renderer);
 
-        this.material.setTargetTexture(
-          this.blipRenderTargets[rendererIndex].texture,
-        );
-        this.material.setStep(2 * i + 1);
-        renderer.setRenderTarget(this.renderTargets[rendererIndex]);
-        this.quad.renderWith(renderer);
+        if (!(i === blipSteps - 1 && useOddOutput)) {
+          this.material.setTargetTexture(
+            this.blipRenderTargets[rendererIndex].texture,
+          );
+          this.material.setStep(2 * i + 1);
+          renderer.setRenderTarget(this.renderTargets[rendererIndex]);
+          this.quad.renderWith(renderer);
+        }
       }
 
       renderer.setRenderTarget(null);
