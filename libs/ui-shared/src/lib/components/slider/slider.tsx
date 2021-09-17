@@ -300,6 +300,7 @@ export const SliderField: React.FC<SliderFieldProps> = ({
   min = 0,
   max = 1,
   onChange,
+  onValueLabelChange,
   ...rest
 }) => {
   const actualValue = value === undefined ? defaultValue || min : value;
@@ -310,8 +311,9 @@ export const SliderField: React.FC<SliderFieldProps> = ({
         ? newValue
         : Math.max(min, Math.min(max, newValue));
       if (onChange) onChange(clampedValue, 0, clampedValue);
+      if (onValueLabelChange) onValueLabelChange(clampedValue);
     },
-    [max, min, onChange, unlockValueLabelRange],
+    [max, min, onChange, onValueLabelChange, unlockValueLabelRange],
   );
 
   return (

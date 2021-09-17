@@ -207,16 +207,20 @@ export class SharedUniforms implements IDisposable {
         const useNearestFilteringAnnotation = !editor.activeDocument?.viewport3D
           .useSmoothSegmentations;
         const layerData = layers.map((layer) =>
-          ((layer as IImageLayer).image as RenderedImage).getTexture(
-            0,
-            (
-              layer.isAnnotation
-                ? useNearestFilteringAnnotation
-                : useNearestFilteringImage
-            )
-              ? THREE.NearestFilter
-              : THREE.LinearFilter,
-          ),
+          layer ===
+          editor.activeDocument?.tools.dilateErodeRenderer3D.sourceLayer
+            ? editor.activeDocument.tools.dilateErodeRenderer3D
+                .outputTextures[0]
+            : ((layer as IImageLayer).image as RenderedImage).getTexture(
+                0,
+                (
+                  layer.isAnnotation
+                    ? useNearestFilteringAnnotation
+                    : useNearestFilteringImage
+                )
+                  ? THREE.NearestFilter
+                  : THREE.LinearFilter,
+              ),
         );
 
         this.uniforms.uLayerData.value = [

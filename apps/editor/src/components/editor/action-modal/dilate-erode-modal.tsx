@@ -1,4 +1,5 @@
 import {
+  BooleanParam,
   ButtonParam,
   Modal,
   ModalHeaderButton,
@@ -6,12 +7,17 @@ import {
 } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
 import React, { useCallback } from "react";
+import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
 
 import type { DilateErodeTool } from "../../../models";
 
 const MAX_STEPS = 50;
+
+const StyledModal = styled(Modal)`
+  margin-top: 16px;
+`;
 
 export const DilateErodeModal = observer(() => {
   const store = useStore();
@@ -42,18 +48,19 @@ export const DilateErodeModal = observer(() => {
 
   return store?.editor.activeDocument?.tools.dilateErodeRenderer3D
     .holdsPreview ? (
-    <Modal
+    <StyledModal
       labelTx="dilate-erode"
       headerChildren={
         <ModalHeaderButton
           icon="xSmall"
-          tooltipTx="discard-region-growing"
+          tooltipTx="discard-dilate-erode"
           onPointerDown={discard}
         />
       }
     >
       <NumberParam
-        labelTx="region-growing-steps"
+        labelTx="dilate-erode-steps"
+        extendBeyondMinMax
         min={-MAX_STEPS}
         max={MAX_STEPS}
         stepSize={1}
@@ -65,12 +72,22 @@ export const DilateErodeModal = observer(() => {
         }
         setValue={setMaxSteps}
         onEnd={store?.editor.activeDocument?.tools.dilateErodeRenderer3D.render}
+        onValueLabelChange={
+          store?.editor.activeDocument?.tools.dilateErodeRenderer3D.render
+        }
       />
-      <ButtonParam
-        labelTx="submit-3D-region-growing"
-        isLast
-        handlePress={submit}
+      <BooleanParam
+        labelTx="autocompensate-dilate-erode"
+        value={
+          store?.editor.activeDocument?.tools.dilateErodeRenderer3D
+            .shouldAutoCompensate
+        }
+        setValue={
+          store?.editor.activeDocument?.tools.dilateErodeRenderer3D
+            .setShouldAutoCompensate
+        }
       />
-    </Modal>
+      <ButtonParam labelTx="submit-dilate-erode" isLast handlePress={submit} />
+    </StyledModal>
   ) : null;
 });

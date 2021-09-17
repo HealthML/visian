@@ -9,7 +9,9 @@ const SpacedSliderField = styled(SliderField)`
 `;
 
 export type NumberParamProps = INumberParameter & {
+  onStart?: () => void;
   onEnd?: () => void;
+  onValueLabelChange?: (value: number) => void;
 } & React.HTMLAttributes<HTMLDivElement>;
 
 export const NumberParam: React.FC<Partial<NumberParamProps>> = ({
