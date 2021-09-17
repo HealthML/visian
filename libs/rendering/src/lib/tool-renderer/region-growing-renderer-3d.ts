@@ -120,7 +120,7 @@ export class RegionGrowingRenderer3D implements IBlipRenderer3D, IDisposable {
     ) as IImageLayer | undefined)?.image as RenderedImage | undefined;
     if (!sourceImage) return;
 
-    const seedValue = sourceImage.getVoxelData(this.seedVoxel);
+    const seedValue = sourceImage.getVoxelData(this.seedVoxel).x;
     this.regionGrowingMaterial.setSeed(seedValue);
     this.regionGrowingMaterial.setAtlasGrid(
       sourceImage.getAtlasGrid().toArray(),

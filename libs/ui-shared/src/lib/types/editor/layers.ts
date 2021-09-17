@@ -1,4 +1,10 @@
-import type { Image, ViewType, Voxel, VoxelWithValue } from "@visian/utils";
+import type {
+  Image,
+  Vector,
+  ViewType,
+  Voxel,
+  VoxelWithValue,
+} from "@visian/utils";
 import type { Matrix4 } from "three";
 import { MarkerConfig } from "./markers";
 
@@ -74,6 +80,9 @@ export interface ILayer {
    */
   getSliceMarkers(viewType: ViewType): MarkerConfig[];
 
+  /** Sets the layer's title. */
+  setTitle(value?: string): void;
+
   /** Sets this layer's parent layer, typically the group it is contained in. */
   setParent(idOrLayer?: string | ILayer): void;
 
@@ -134,7 +143,7 @@ export interface IImageLayer extends ILayer {
    */
   clearSliceMarkers(viewType?: ViewType, slice?: number): Promise<void>;
 
-  getVoxel(voxel: Voxel): number;
+  getVoxel(voxel: Voxel): Vector;
   setVoxel(voxel: Voxel, value: number): void;
   setVoxels(voxels: VoxelWithValue[]): void;
 
