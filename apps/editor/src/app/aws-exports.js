@@ -1,0 +1,11 @@
+const awsconfig = {
+  aws_project_region: "eu-central-1",
+  aws_cognito_region: "eu-central-1",
+  aws_user_pools_id: "eu-central-1_1cFVgcU36",
+  aws_user_pools_web_client_id: "6gefcom54rvc0pv25lfl8qmf06",
+  oauth: {
+    domain: "fg-ai4h.auth.eu-central-1.amazoncognito.com",
+  },
+};
+
+export default awsconfig;

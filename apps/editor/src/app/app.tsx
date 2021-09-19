@@ -10,11 +10,17 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { Route, Switch } from "react-router-dom";
 
+import Amplify from "aws-amplify";
+import { withAuthenticator } from "@aws-amplify/ui-react";
 import { setUpEventHandling } from "../event-handling";
 import { EditorScreen } from "../screens";
 import { setupRootStore, StoreProvider } from "./root-store";
 
 import type { RootStore } from "../models";
+
+import awsconfig from "./aws-exports";
+
+Amplify.configure(awsconfig);
 
 const queryClient = new QueryClient();
 
@@ -62,4 +68,4 @@ function App() {
   );
 }
 
-export default observer(App);
+export default withAuthenticator(observer(App));
