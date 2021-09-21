@@ -1,4 +1,4 @@
-const awsconfig = {
+export const awsConfigDevelopment = {
   aws_project_region: "eu-central-1",
   aws_cognito_region: "eu-central-1",
   aws_user_pools_id: "eu-central-1_1cFVgcU36",
@@ -8,4 +8,14 @@ const awsconfig = {
   },
 };
 
-export default awsconfig;
+export const awsConfigDeployment = {
+  aws_project_region: "eu-central-1",
+  aws_cognito_region: "eu-central-1",
+  aws_user_pools_id: "eu-central-1_1cFVgcU36",
+  aws_user_pools_web_client_id: "3k9qjs36nfbd3dc62j2t8ttsgn",
+  oauth: {
+    domain: "fg-ai4h.auth.eu-central-1.amazoncognito.com",
+  },
+};
+
+export default awsConfigDeployment;
