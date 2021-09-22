@@ -1,3 +1,3 @@
 import type { StatefulPopUpProps } from "../../types";
 
-export type ShortcutPopUpProps = StatefulPopUpProps;
+export type ServerPopUpProps = StatefulPopUpProps;

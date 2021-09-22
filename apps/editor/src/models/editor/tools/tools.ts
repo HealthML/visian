@@ -68,8 +68,7 @@ export class Tools
   public smartBrushThreshold = 5;
   public boundedSmartBrushRadius = 7;
 
-  protected isCursorOverDrawableArea = false;
-  protected isCursorOverFloatingUI = false;
+  public isCursorOverFloatingUI = false;
   protected isNavigationDragged = false;
   public isDrawing = false;
 
@@ -88,7 +87,6 @@ export class Tools
       | "screenSpaceBrushSize"
       | "lockedBrushSize"
       | "isCursorOverDrawableArea"
-      | "isCursorOverFloatingUI"
       | "isNavigationDragged"
       | "resetBrushSettings"
     >(this, {
@@ -99,7 +97,6 @@ export class Tools
       lockedBrushSize: observable,
       smartBrushThreshold: observable,
       boundedSmartBrushRadius: observable,
-      isCursorOverDrawableArea: observable,
       isCursorOverFloatingUI: observable,
       isNavigationDragged: observable,
       isDrawing: observable,
@@ -107,6 +104,7 @@ export class Tools
       activeTool: computed,
       pixelWidth: computed,
       brushSize: computed,
+      isCursorOverDrawableArea: computed,
       canDraw: computed,
       isToolInUse: computed,
       useAdaptiveBrushSize: computed,
@@ -117,7 +115,6 @@ export class Tools
       setUseAdaptiveBrushSize: action,
       setSmartBrushThreshold: action,
       setBoundedSmartBrushRadius: action,
-      setIsCursorOverDrawableArea: action,
       setIsCursorOverFloatingUI: action,
       setIsNavigationDragged: action,
       setIsDrawing: action,
@@ -265,6 +262,17 @@ export class Tools
     );
   }
 
+  protected get isCursorOverDrawableArea() {
+    return (
+      this.document.viewport2D.hoveredViewType ===
+        this.document.viewport2D.mainViewType &&
+      this.document.viewport2D.hoveredUV.x <= 1 &&
+      this.document.viewport2D.hoveredUV.x >= 0 &&
+      this.document.viewport2D.hoveredUV.y <= 1 &&
+      this.document.viewport2D.hoveredUV.y >= 0
+    );
+  }
+
   public get canDraw(): boolean {
     return Boolean(
       this.activeTool?.isBrush &&
@@ -355,10 +363,6 @@ export class Tools
 
     if (!showPreview) return;
     this.document.sliceRenderer?.showBrushCursorPreview();
-  }
-
-  public setIsCursorOverDrawableArea(value = true) {
-    this.isCursorOverDrawableArea = value;
   }
 
   public setIsCursorOverFloatingUI(value = true) {

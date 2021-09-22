@@ -2,10 +2,8 @@ import {
   AbsoluteCover,
   FloatingUIButton,
   Notification,
-  opacity,
   Spacer,
   Text,
-  useFilePicker,
 } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
 import React, { useCallback, useEffect, useRef, useState } from "react";
@@ -13,10 +11,14 @@ import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
 import { ActionModal } from "../action-modal";
+import { AIBar } from "../ai-bar";
+import { AxesAndVoxel } from "../axes-and-voxel";
 import { DropSheet } from "../drop-sheet";
+import { ImportPopUp } from "../import-popup";
 import { Layers } from "../layers";
 import { Menu } from "../menu";
 import { ProgressPopUp } from "../progress-popup";
+import { ServerPopUp } from "../server-popup";
 import { ShortcutPopUp } from "../shortcut-popup";
 import { SideViews } from "../side-views";
 import { SliceSlider } from "../slice-slider";
@@ -27,7 +29,6 @@ import { ViewSettings } from "../view-settings";
 import { UIOverlayProps } from "./ui-overlay.props";
 
 import type { ImageLayer } from "../../../models";
-import { AIBar } from "../ai-bar";
 
 const Container = styled(AbsoluteCover)`
   align-items: stretch;
@@ -78,12 +79,6 @@ const RightBar = styled.div`
   height: 100%;
 `;
 
-const ImportButton = styled(FloatingUIButton)`
-  &:active > * {
-    opacity: ${opacity("inactiveIcon")};
-  }
-`;
-
 const ErrorNotification = styled(Notification)`
   position: absolute;
   min-width: 15%;
@@ -118,27 +113,13 @@ export const UIOverlay = observer<UIOverlayProps>(
     );
 
     // Import Button
-    const openFilePicker = useFilePicker(
-      useCallback(
-        (event: Event) => {
-          const { files } = event.target as HTMLInputElement;
-          if (!files || !files.length) return;
-          store?.setProgress({ labelTx: "importing" });
-          store?.editor.activeDocument
-            ?.importFile(Array.from(files))
-            .catch((error) => {
-              store?.setError({
-                titleTx: "import-error",
-                descriptionTx: error.message,
-              });
-            })
-            .then(() => {
-              store?.setProgress();
-            });
-        },
-        [store],
-      ),
-    );
+    const [isImportPopUpOpen, setIsImportPopUpOpen] = useState(false);
+    const openImportPopUp = useCallback(() => {
+      setIsImportPopUpOpen(true);
+    }, []);
+    const closeImportPopUp = useCallback(() => {
+      setIsImportPopUpOpen(false);
+    }, []);
 
     // Shortcut Pop Up Toggling
     const [isShortcutPopUpOpen, setIsShortcutPopUpOpen] = useState(false);
@@ -165,12 +146,12 @@ export const UIOverlay = observer<UIOverlayProps>(
           <MenuRow>
             <Menu onOpenShortcutPopUp={openShortcutPopUp} />
             {false && (
-              <ImportButton
+              <FloatingUIButton
                 icon="import"
                 tooltipTx="import-tooltip"
                 tooltipPosition="right"
                 isActive={false}
-                onPointerDown={openFilePicker}
+                onPointerDown={openImportPopUp}
               />
             )}
             <UndoRedoButtons />
@@ -179,6 +160,7 @@ export const UIOverlay = observer<UIOverlayProps>(
           <Toolbar />
           <Layers />
           <Spacer />
+          <AxesAndVoxel />
           <ActionModal />
         </ColumnLeft>
         <ColumnCenter>
@@ -212,6 +194,11 @@ export const UIOverlay = observer<UIOverlayProps>(
           isOpen={isShortcutPopUpOpen}
           onClose={closeShortcutPopUp}
         />
+        {store?.dicomWebServer ? (
+          <ServerPopUp isOpen={isImportPopUpOpen} onClose={closeImportPopUp} />
+        ) : (
+          <ImportPopUp isOpen={isImportPopUpOpen} onClose={closeImportPopUp} />
+        )}
         {isDraggedOver && <DropSheet onDropCompleted={onDropCompleted} />}
         {store?.progress && (
           <ProgressPopUp

@@ -127,10 +127,7 @@ export const getAtlasIndexFor = (
 
   return (
     image.voxelComponents *
-      ((sliceOffset.y + voxel.y) * atlasSize.x + sliceOffset.x + voxel.x) +
-    ((voxel as Vector).size && (voxel as Vector).size > 3
-      ? (voxel as Vector).w
-      : 0)
+    ((sliceOffset.y + voxel.y) * atlasSize.x + sliceOffset.x + voxel.x)
   );
 };
 

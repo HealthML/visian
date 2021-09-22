@@ -307,6 +307,18 @@ export class Vector implements GenericVector {
     return this;
   }
 
+  public round() {
+    return this.map(Math.round);
+  }
+
+  public floor() {
+    return this.map(Math.floor);
+  }
+
+  public ceil() {
+    return this.map(Math.ceil);
+  }
+
   public equals(vector: GenericVector) {
     if (vector.size !== this.size) return false;
     return !~this.data.findIndex(

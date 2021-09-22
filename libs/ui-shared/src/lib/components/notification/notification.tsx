@@ -1,7 +1,9 @@
 import React from "react";
+import ReactDOM from "react-dom";
 import styled from "styled-components";
 
 import { color, fontWeight, zIndex } from "../../theme";
+import { useModalRoot } from "../box";
 import { Sheet } from "../sheet";
 import noise from "../sheet/noise.png";
 import { Title } from "../text";
@@ -40,9 +42,17 @@ export const Notification: React.FC<NotificationProps> = ({
   descriptionTx,
   description,
   ...rest
-}) => (
-  <NotificationContainer {...rest}>
-    <NotificationTitle tx={titleTx} text={title} />
-    <NotificationDescription tx={descriptionTx} text={description} />
-  </NotificationContainer>
-);
+}) => {
+  const modalRootRef = useModalRoot();
+
+  const node = (
+    <NotificationContainer {...rest}>
+      <NotificationTitle tx={titleTx} text={title} />
+      <NotificationDescription tx={descriptionTx} text={description} />
+    </NotificationContainer>
+  );
+
+  return modalRootRef.current
+    ? ReactDOM.createPortal(node, modalRootRef.current)
+    : node;
+};

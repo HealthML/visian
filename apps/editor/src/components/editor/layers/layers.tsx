@@ -1,5 +1,4 @@
 import {
-  color,
   computeStyleValue,
   ContextMenu,
   ContextMenuItem,
@@ -12,6 +11,7 @@ import {
   PointerButton,
   size,
   stopPropagation,
+  styledScrollbarMixin,
   SubtleText,
   useDelay,
   useModalRoot,
@@ -44,6 +44,8 @@ const noop = () => {
 
 // Styled Components
 const LayerList = styled(List)`
+  ${styledScrollbarMixin}
+
   margin-top: -16px;
   padding-bottom: 7px;
   padding-left: 8px;
@@ -58,28 +60,6 @@ const LayerList = styled(List)`
   max-width: 100%;
   overflow-x: visible;
   overflow-y: auto;
-
-  /* width */
-  ::-webkit-scrollbar {
-    width: 4px;
-    margin-bottom: 10px;
-  }
-
-  /* Track */
-  ::-webkit-scrollbar-track {
-    background: transparent;
-  }
-
-  /* Handle */
-  ::-webkit-scrollbar-thumb {
-    background: ${color("lightGray")};
-    border-radius: 10px;
-  }
-
-  /* Handle on hover */
-  ::-webkit-scrollbar-thumb:hover {
-    background: ${color("gray")};
-  }
 `;
 
 const LayerListItem = observer<{

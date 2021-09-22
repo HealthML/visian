@@ -84,7 +84,15 @@
     "jest/expect-expect": ["warn", { "assertFunctionNames": ["expect", "cy"] }],
     "lines-between-class-members": "off",
     "max-classes-per-file": ["warn", 3],
-    "max-len": ["warn", { "code": 100 }],
+    "max-len": [
+      "warn",
+      {
+        "code": 100,
+        "comments": 130,
+        "ignoreStrings": true,
+        "ignoreRegExpLiterals": true
+      }
+    ],
     "@typescript-eslint/member-ordering": [
       "warn",
       {
