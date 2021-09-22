@@ -12,7 +12,7 @@ import { Route, Switch } from "react-router-dom";
 
 import Amplify from "aws-amplify";
 import { withAuthenticator } from "@aws-amplify/ui-react";
-import { isFromWho, isUsingLocalhost } from "@visian/utils";
+import { isFromWHO, isUsingLocalhost } from "@visian/utils";
 import { setUpEventHandling } from "../event-handling";
 import { EditorScreen } from "../screens";
 import { setupRootStore, StoreProvider } from "./root-store";
@@ -21,7 +21,7 @@ import type { RootStore } from "../models";
 
 import { awsConfigDevelopment, awsConfigDeployment } from "./aws-exports";
 
-if (isFromWho()) {
+if (isFromWHO()) {
   if (isUsingLocalhost()) {
     Amplify.configure(awsConfigDevelopment);
   } else {
@@ -34,7 +34,7 @@ const queryClient = new QueryClient();
 // TODO: Refactor for better typing
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function withWhoAuthenticator(wrappedComponent: any) {
-  return isFromWho() ? withAuthenticator(wrappedComponent) : wrappedComponent;
+  return isFromWHO() ? withAuthenticator(wrappedComponent) : wrappedComponent;
 }
 
 function App() {

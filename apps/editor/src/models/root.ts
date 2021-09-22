@@ -12,6 +12,7 @@ import { errorDisplayDuration } from "../constants";
 import { DICOMWebServer } from "./dicomweb-server";
 import { Editor, EditorSnapshot } from "./editor";
 import { ErrorNotification, ProgressNotification } from "./types";
+import { Task } from "./who";
 
 export interface RootSnapshot {
   editor: EditorSnapshot;
@@ -45,6 +46,8 @@ export class RootStore implements ISerializable<RootSnapshot> {
   public refs: { [key: string]: React.RefObject<HTMLElement> } = {};
   public pointerDispatch?: IDispatch;
 
+  public currentTask?: Task;
+
   constructor(protected config: RootStoreConfig = {}) {
     makeObservable(this, {
       dicomWebServer: observable,
@@ -54,6 +57,7 @@ export class RootStore implements ISerializable<RootSnapshot> {
       progress: observable,
       isDirty: observable,
       refs: observable,
+      currentTask: observable,
 
       theme: computed,
 
@@ -65,6 +69,7 @@ export class RootStore implements ISerializable<RootSnapshot> {
       rehydrate: action,
       setIsDirty: action,
       setRef: action,
+      setCurrentTask: action,
     });
 
     this.editor = new Editor(undefined, {
@@ -136,6 +141,10 @@ export class RootStore implements ISerializable<RootSnapshot> {
     } else {
       delete this.refs[key];
     }
+  }
+
+  public setCurrentTask(task?: Task) {
+    this.currentTask = task;
   }
 
   public persist = async () => {

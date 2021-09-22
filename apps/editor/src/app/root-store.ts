@@ -1,9 +1,16 @@
 import { LocalForageBackend } from "@visian/ui-shared";
-import { readFileFromURL } from "@visian/utils";
+import {
+  createFileFromBase64,
+  getWHOTask,
+  getWHOTaskIdFromUrl,
+  isFromWHO,
+  readFileFromURL,
+} from "@visian/utils";
 import React from "react";
 
 import { storePersistInterval } from "../constants";
 import { RootStore } from "../models";
+import { Task, TaskType } from "../models/who";
 
 export const storageBackend = new LocalForageBackend(
   storePersistInterval,
@@ -21,10 +28,10 @@ export const setupRootStore = async () => {
     await store.destroy(true);
   }
 
+  const url = new URL(window.location.href);
   try {
     // Load scan based on GET parameter
     // Example: http://localhost:4200/?load=http://data.idoimaging.com/nifti/1010_brain_mr_04.nii.gz
-    const url = new URL(window.location.href);
     const loadScanParam = url.searchParams.get("load");
     if (loadScanParam && store.editor.newDocument()) {
       await store.editor.activeDocument?.importFile(
@@ -45,6 +52,33 @@ export const setupRootStore = async () => {
       descriptionTx: "remote-file-error",
     });
     store.editor.setActiveDocument();
+  }
+
+  if (isFromWHO()) {
+    try {
+      const taskId = getWHOTaskIdFromUrl();
+      if (taskId) {
+        const taskJson = await getWHOTask(taskId);
+        // TODO
+        const whoTask = new Task(taskJson);
+        await store.editor.activeDocument?.importFile(
+          createFileFromBase64(
+            whoTask.samples[0].title,
+            whoTask.samples[0].data,
+          ),
+        );
+        if (whoTask.kind === TaskType.Create) {
+          store.editor.activeDocument?.finishBatchImport();
+        }
+        store.setCurrentTask(whoTask);
+      }
+    } catch {
+      store.setError({
+        titleTx: "import-error",
+        descriptionTx: "remote-file-error",
+      });
+      store.editor.setActiveDocument();
+    }
   }
 
   window.addEventListener("beforeunload", (event) => {
