@@ -145,15 +145,14 @@ export const UIOverlay = observer<UIOverlayProps>(
         <ColumnLeft>
           <MenuRow>
             <Menu onOpenShortcutPopUp={openShortcutPopUp} />
-            {false && (
-              <FloatingUIButton
-                icon="import"
-                tooltipTx="import-tooltip"
-                tooltipPosition="right"
-                isActive={false}
-                onPointerDown={openImportPopUp}
-              />
-            )}
+            {/* TODO: Disable import button for WHO UI */}
+            <FloatingUIButton
+              icon="import"
+              tooltipTx="import-tooltip"
+              tooltipPosition="right"
+              isActive={false}
+              onPointerDown={openImportPopUp}
+            />
             <UndoRedoButtons />
           </MenuRow>
 
@@ -166,25 +165,25 @@ export const UIOverlay = observer<UIOverlayProps>(
         <ColumnCenter>
           <TopConsole />
           <Spacer />
-          <AIBar />
+          {/* TODO: Enable AI bar for WHO UI */}
+          {false && <AIBar />}
         </ColumnCenter>
         <ColumnRight>
           <SideViews />
           <RightBar>
-            {false && (
-              <FloatingUIButton
-                icon="export"
-                tooltipTx="export-tooltip"
-                tooltipPosition="left"
-                onPointerDown={
-                  store?.editor.activeDocument?.viewSettings.viewMode === "2D"
-                    ? (store?.editor.activeDocument?.activeLayer as ImageLayer)
-                        ?.quickExport
-                    : store?.editor.activeDocument?.viewport3D.exportCanvasImage
-                }
-                isActive={false}
-              />
-            )}
+            {/* TODO: Disable export button for WHO UI */}
+            <FloatingUIButton
+              icon="export"
+              tooltipTx="export-tooltip"
+              tooltipPosition="left"
+              onPointerDown={
+                store?.editor.activeDocument?.viewSettings.viewMode === "2D"
+                  ? (store?.editor.activeDocument?.activeLayer as ImageLayer)
+                      ?.quickExport
+                  : store?.editor.activeDocument?.viewport3D.exportCanvasImage
+              }
+              isActive={false}
+            />
             <ViewSettings />
             <SliceSlider showValueLabelOnChange={!isDraggedOver} />
           </RightBar>
