@@ -11,6 +11,8 @@ import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
 import { ActionModal } from "../action-modal";
+import { AIBar } from "../ai-bar";
+import { AxesAndVoxel } from "../axes-and-voxel";
 import { DropSheet } from "../drop-sheet";
 import { ImportPopUp } from "../import-popup";
 import { Layers } from "../layers";
@@ -27,7 +29,6 @@ import { ViewSettings } from "../view-settings";
 import { UIOverlayProps } from "./ui-overlay.props";
 
 import type { ImageLayer } from "../../../models";
-import { AxesAndVoxel } from "../axes-and-voxel";
 
 const Container = styled(AbsoluteCover)`
   align-items: stretch;
@@ -55,7 +56,8 @@ const ColumnCenter = styled.div`
   display: flex;
   flex: 1;
   flex-direction: column;
-  justify-content: flex-start;
+  justify-content: flex-end;
+  align-items: flex-end;
   min-width: 0;
 `;
 
@@ -142,6 +144,8 @@ export const UIOverlay = observer<UIOverlayProps>(
         )}
         <ColumnLeft>
           <MenuRow>
+            <Menu onOpenShortcutPopUp={openShortcutPopUp} />
+            {/* TODO: Disable import button for WHO UI */}
             <FloatingUIButton
               icon="import"
               tooltipTx="import-tooltip"
@@ -151,7 +155,7 @@ export const UIOverlay = observer<UIOverlayProps>(
             />
             <UndoRedoButtons />
           </MenuRow>
-          <Menu onOpenShortcutPopUp={openShortcutPopUp} />
+
           <Toolbar />
           <Layers />
           <Spacer />
@@ -160,10 +164,14 @@ export const UIOverlay = observer<UIOverlayProps>(
         </ColumnLeft>
         <ColumnCenter>
           <TopConsole />
+          <Spacer />
+          {/* TODO: Enable AI bar for WHO UI */}
+          {false && <AIBar />}
         </ColumnCenter>
         <ColumnRight>
           <SideViews />
           <RightBar>
+            {/* TODO: Disable export button for WHO UI */}
             <FloatingUIButton
               icon="export"
               tooltipTx="export-tooltip"
