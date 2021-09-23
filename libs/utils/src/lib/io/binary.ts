@@ -1,8 +1,11 @@
 export const createFileFromBase64 = (
   fileName: string,
-  base64Data: string,
-  isZipped = true,
+  base64String: string,
 ) => {
+  const base64Data = base64String.replace(
+    "data:application/octet-stream;base64,",
+    "",
+  );
   const decodedData = atob(base64Data);
   const bytes = new Array(decodedData.length);
   for (let i = 0; i < decodedData.length; i++) {
@@ -10,7 +13,7 @@ export const createFileFromBase64 = (
   }
   const binaryData = new Uint8Array(bytes);
 
-  return new File([binaryData], fileName, {
-    type: isZipped ? "application/x-gzip" : "",
-  });
+  // TODO: Delete
+  const fileNameZip = fileName.concat(".gz");
+  return new File([binaryData], fileNameZip);
 };

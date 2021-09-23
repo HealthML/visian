@@ -58,8 +58,14 @@ export const setupRootStore = async () => {
     try {
       const taskId = getWHOTaskIdFromUrl();
       if (taskId) {
-        const taskJson = await getWHOTask(taskId);
+        // const taskJson = await getWHOTask(taskId);
         // TODO
+        // DELETE
+        const request = new XMLHttpRequest();
+        request.open("GET", "./assets/task1.json", false);
+        request.send(null);
+        const taskJson = JSON.parse(request.responseText);
+        // END OF DELETE
         const whoTask = new Task(taskJson);
         await store.editor.activeDocument?.importFile(
           createFileFromBase64(

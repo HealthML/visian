@@ -29,13 +29,11 @@ export class Task {
     this.taskUUID = task.taskUUID;
     this.kind = task.kind;
     this.readOnly = task.readOnly;
-    this.annotationTasks = JSON.parse(task.annotationTasks).array.map(
+    this.annotationTasks = task.annotationTasks.map(
       (annotationTask: any) => new AnnotationTask(annotationTask),
     );
-    this.samples = JSON.parse(task.samples).array.map(
-      (sample: any) => new Sample(sample),
-    );
-    this.annotations = JSON.parse(task.annotations).array.map(
+    this.samples = task.samples.map((sample: any) => new Sample(sample));
+    this.annotations = task.annotations.map(
       (annotation: any) => new Annotation(annotation),
     );
   }
