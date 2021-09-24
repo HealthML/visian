@@ -1,4 +1,4 @@
-import { MAX_REGION_GROWING_STEPS } from "@visian/rendering";
+import { MAX_BLIP_STEPS } from "@visian/rendering";
 import {
   ButtonParam,
   ColorParam,
@@ -64,7 +64,7 @@ export const SmartBrush3DModal = observer(() => {
       <NumberParam
         labelTx="region-growing-steps"
         min={0}
-        max={MAX_REGION_GROWING_STEPS}
+        max={MAX_BLIP_STEPS}
         stepSize={1}
         value={
           store?.editor.activeDocument?.tools.regionGrowingRenderer3D.steps

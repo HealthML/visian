@@ -10,7 +10,7 @@ import {
   sliceFragmentShader,
   sliceVertexShader,
 } from "../shaders";
-import { MAX_REGION_GROWING_STEPS } from "../tool-renderer";
+import { MAX_BLIP_STEPS } from "../tool-renderer";
 import { getOrder } from "./utils";
 
 export class SliceMaterial extends THREE.ShaderMaterial implements IDisposable {
@@ -93,8 +93,7 @@ export class SliceMaterial extends THREE.ShaderMaterial implements IDisposable {
           editor.activeDocument?.tools.regionGrowingRenderer3D.steps ?? 0;
 
         this.uniforms.uRegionGrowingThreshold.value =
-          (MAX_REGION_GROWING_STEPS + 1 - steps) /
-          (MAX_REGION_GROWING_STEPS + 1);
+          (MAX_BLIP_STEPS + 1 - steps) / (MAX_BLIP_STEPS + 1);
         editor.sliceRenderer?.lazyRender();
       }),
       autorun(() => {
@@ -105,7 +104,7 @@ export class SliceMaterial extends THREE.ShaderMaterial implements IDisposable {
 
         const layerData = layers.map((layer) =>
           layer ===
-          editor.activeDocument?.tools.dilateErodeRenderer3D.sourceLayer
+          editor.activeDocument?.tools.dilateErodeRenderer3D.targetLayer
             ? editor.activeDocument.tools.dilateErodeRenderer3D.outputTextures[
                 canvasIndex
               ]

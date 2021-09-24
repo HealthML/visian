@@ -1,5 +1,6 @@
 import * as THREE from "three";
-import { MAX_REGION_GROWING_STEPS } from "../region-growing-renderer-3d";
+
+export const MAX_BLIP_STEPS = 254;
 
 export class BlipMaterial extends THREE.ShaderMaterial {
   constructor(parameters: THREE.ShaderMaterialParameters = {}) {
@@ -24,16 +25,17 @@ export class BlipMaterial extends THREE.ShaderMaterial {
 export class Blip3DMaterial extends BlipMaterial {
   constructor(parameters: THREE.ShaderMaterialParameters = {}) {
     super({
+      ...parameters,
       uniforms: {
         uSourceTexture: { value: null },
         uTargetTexture: { value: null },
         uVoxelCount: { value: [1, 1, 1] },
         uAtlasGrid: { value: [1, 1] },
         uRenderValue: {
-          value: MAX_REGION_GROWING_STEPS / (MAX_REGION_GROWING_STEPS + 1),
+          value: MAX_BLIP_STEPS / (MAX_BLIP_STEPS + 1),
         },
+        ...parameters.uniforms,
       },
-      ...parameters,
     });
   }
 
@@ -47,6 +49,6 @@ export class Blip3DMaterial extends BlipMaterial {
 
   public setStep(step: number) {
     this.uniforms.uRenderValue.value =
-      (MAX_REGION_GROWING_STEPS + 1 - step) / (MAX_REGION_GROWING_STEPS + 1);
+      (MAX_BLIP_STEPS + 1 - step) / (MAX_BLIP_STEPS + 1);
   }
 }

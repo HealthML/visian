@@ -40,13 +40,13 @@ export class DilateErodeTool<N extends "dilate-erode" = "dilate-erode">
   public activate(previousTool?: ITool<N>) {
     this.previousTool = previousTool?.name;
 
-    const sourceLayer = this.document.activeLayer;
+    const targetLayer = this.document.activeLayer;
     if (
-      sourceLayer &&
+      targetLayer &&
       this.document.activeLayer?.kind === "image" &&
       this.document.activeLayer.isAnnotation
     ) {
-      this.dilateErodeRenderer.setSourceLayer(sourceLayer as IImageLayer);
+      this.dilateErodeRenderer.setTargetLayer(targetLayer as IImageLayer);
       this.dilateErodeRenderer.render();
     } else {
       this.document.tools.setActiveTool(previousTool);

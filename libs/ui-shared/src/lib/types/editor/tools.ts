@@ -133,7 +133,7 @@ export interface IBlipRenderer3D {
 }
 
 export interface IDilateErodeRenderer3D extends IBlipRenderer3D {
-  sourceLayer?: IImageLayer;
+  targetLayer?: IImageLayer;
 }
 
 /** The editor's tools and their settings for the document. */

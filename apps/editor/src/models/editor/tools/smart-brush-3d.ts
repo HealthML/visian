@@ -58,9 +58,10 @@ export class SmartBrush3D<N extends "smart-brush-3d" = "smart-brush-3d">
 
   public endAt(_dragPoint: DragPoint): void {
     if (this.isSeedSet) {
-      this.regionGrowingRenderer.doRegionGrowing(
+      this.regionGrowingRenderer.setThreshold(
         this.document.tools.smartBrushThreshold,
       );
+      this.regionGrowingRenderer.render();
       this.isSeedSet = false;
     }
   }

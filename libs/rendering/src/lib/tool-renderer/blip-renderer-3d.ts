@@ -1,16 +1,11 @@
-import {
-  MergeFunction,
-  RenderedImage,
-  ScreenAlignedQuad,
-} from "@visian/rendering";
 import { IBlipRenderer3D, IDocument, IImageLayer } from "@visian/ui-shared";
 import { IDisposable, IDisposer } from "@visian/utils";
 import { action, makeObservable, observable, reaction } from "mobx";
 import * as THREE from "three";
 
-import { Blip3DMaterial } from "./utils/blip-material";
-
-export const MAX_BLIP_STEPS = 254;
+import { MergeFunction, RenderedImage } from "../rendered-image";
+import ScreenAlignedQuad from "../screen-aligned-quad";
+import { Blip3DMaterial, MAX_BLIP_STEPS } from "./utils/blip-material";
 
 export class BlipRenderer3D implements IBlipRenderer3D, IDisposable {
   public readonly excludeFromSnapshotTracking = ["document"];
@@ -34,7 +29,7 @@ export class BlipRenderer3D implements IBlipRenderer3D, IDisposable {
   protected quad: ScreenAlignedQuad;
 
   constructor(
-    private document: IDocument,
+    protected document: IDocument,
     parameters?: THREE.ShaderMaterialParameters,
   ) {
     this.material = new Blip3DMaterial(parameters);
@@ -93,6 +88,13 @@ export class BlipRenderer3D implements IBlipRenderer3D, IDisposable {
     });
   }
 
+  public get sourceLayer(): IImageLayer | undefined {
+    return this.document.layers.find(
+      (layer) =>
+        layer.kind === "image" && !layer.isAnnotation && layer.isVisible,
+    ) as IImageLayer | undefined;
+  }
+
   public setPreviewColor = (value: string) => {
     this.previewColor = value;
   };
@@ -110,10 +112,7 @@ export class BlipRenderer3D implements IBlipRenderer3D, IDisposable {
    * scratch based on just the source image.
    */
   public render(initialTarget?: IImageLayer) {
-    const sourceImage = (this.document.layers.find(
-      (layer) =>
-        layer.kind === "image" && !layer.isAnnotation && layer.isVisible,
-    ) as IImageLayer | undefined)?.image as RenderedImage | undefined;
+    const sourceImage = this.sourceLayer?.image as RenderedImage | undefined;
     if (!sourceImage) return;
 
     this.material.setAtlasGrid(sourceImage.getAtlasGrid().toArray());

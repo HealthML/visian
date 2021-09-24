@@ -13,7 +13,7 @@ export class DilateErodeRenderer3D
   extends BlipRenderer3D
   implements IDilateErodeRenderer3D {
   public shouldErode = false;
-  public sourceLayer?: IImageLayer;
+  public targetLayer?: IImageLayer;
   public shouldAutoCompensate = false;
 
   constructor(document: IDocument) {
@@ -26,11 +26,11 @@ export class DilateErodeRenderer3D
 
     makeObservable(this, {
       shouldErode: observable,
-      sourceLayer: observable,
+      targetLayer: observable,
       shouldAutoCompensate: observable,
 
       setShouldErode: action,
-      setSourceLayer: action,
+      setTargetLayer: action,
       setShouldAutoCompensate: action,
     });
   }
@@ -40,8 +40,8 @@ export class DilateErodeRenderer3D
     this.material.uniforms.uShouldErode.value = value;
   };
 
-  public setSourceLayer(value: IImageLayer) {
-    this.sourceLayer = value;
+  public setTargetLayer(value: IImageLayer) {
+    this.targetLayer = value;
   }
 
   public setShouldAutoCompensate = (value: boolean) => {
@@ -52,9 +52,9 @@ export class DilateErodeRenderer3D
   };
 
   public render = () => {
-    if (!this.sourceLayer) return;
+    if (!this.targetLayer) return;
 
-    super.render(this.sourceLayer);
+    super.render(this.targetLayer);
     if (this.shouldAutoCompensate) {
       this.material.uniforms.uShouldErode.value = !this.shouldErode;
       super.render();
@@ -63,16 +63,16 @@ export class DilateErodeRenderer3D
   };
 
   public get outputTextures() {
-    return this.maxSteps === 0 && this.sourceLayer
+    return this.maxSteps === 0 && this.targetLayer
       ? this.renderTargets.map((_renderTarget, rendererIndex) =>
           // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          (this.sourceLayer!.image as RenderedImage).getTexture(rendererIndex),
+          (this.targetLayer!.image as RenderedImage).getTexture(rendererIndex),
         )
       : super.outputTextures;
   }
 
   public discard() {
-    this.sourceLayer = undefined;
+    this.targetLayer = undefined;
     super.discard();
   }
 }
