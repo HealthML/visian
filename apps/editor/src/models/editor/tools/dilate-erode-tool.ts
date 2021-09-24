@@ -13,18 +13,12 @@ import { mutateAtlas } from "./utils";
 export class DilateErodeTool<N extends "dilate-erode" = "dilate-erode">
   extends Tool<N>
   implements IPreviewedTool<N>, ISelfDeactivatingTool<N> {
-  public readonly excludeFromSnapshotTracking = [
-    "document",
-    "dilateErodeRenderer",
-  ];
+  public readonly excludeFromSnapshotTracking = ["document", "renderer"];
   public readonly isSelfDeactivating = true;
 
   protected previousTool?: N;
 
-  constructor(
-    document: IDocument,
-    protected dilateErodeRenderer: DilateErodeRenderer3D,
-  ) {
+  constructor(document: IDocument, protected renderer: DilateErodeRenderer3D) {
     super(
       {
         name: "dilate-erode" as N,
@@ -46,8 +40,8 @@ export class DilateErodeTool<N extends "dilate-erode" = "dilate-erode">
       this.document.activeLayer?.kind === "image" &&
       this.document.activeLayer.isAnnotation
     ) {
-      this.dilateErodeRenderer.setTargetLayer(targetLayer as IImageLayer);
-      this.dilateErodeRenderer.render();
+      this.renderer.setTargetLayer(targetLayer as IImageLayer);
+      this.renderer.render();
     } else {
       this.document.tools.setActiveTool(previousTool);
     }
@@ -57,11 +51,7 @@ export class DilateErodeTool<N extends "dilate-erode" = "dilate-erode">
     const targetLayer = this.document.activeLayer;
     mutateAtlas(
       targetLayer as IImageLayer,
-      () =>
-        this.dilateErodeRenderer.flushToAnnotation(
-          targetLayer as IImageLayer,
-          true,
-        ),
+      () => this.renderer.flushToAnnotation(targetLayer as IImageLayer, true),
       this.document,
     );
 
@@ -69,11 +59,11 @@ export class DilateErodeTool<N extends "dilate-erode" = "dilate-erode">
   };
 
   public discard = () => {
-    this.document.tools.dilateErodeRenderer3D.discard();
+    this.renderer.discard();
     this.document.tools.setActiveTool(this.previousTool);
   };
 
   public deactivate() {
-    this.document.tools.dilateErodeRenderer3D.discard();
+    this.renderer.discard();
   }
 }

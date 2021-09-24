@@ -12,17 +12,11 @@ import { mutateAtlas } from "./utils";
 export class SmartBrush3D<N extends "smart-brush-3d" = "smart-brush-3d">
   extends Tool<N>
   implements IPreviewedTool<N> {
-  public readonly excludeFromSnapshotTracking = [
-    "document",
-    "regionGrowingRenderer",
-  ];
+  public readonly excludeFromSnapshotTracking = ["document", "renderer"];
 
   private isSeedSet = false;
 
-  constructor(
-    document: IDocument,
-    private regionGrowingRenderer: RegionGrowingRenderer3D,
-  ) {
+  constructor(document: IDocument, private renderer: RegionGrowingRenderer3D) {
     super(
       {
         name: "smart-brush-3d" as N,
@@ -52,16 +46,14 @@ export class SmartBrush3D<N extends "smart-brush-3d" = "smart-brush-3d">
       return;
     }
 
-    this.regionGrowingRenderer.setSeed(dragPoint);
+    this.renderer.setSeed(dragPoint);
     this.isSeedSet = true;
   }
 
   public endAt(_dragPoint: DragPoint): void {
     if (this.isSeedSet) {
-      this.regionGrowingRenderer.setThreshold(
-        this.document.tools.smartBrushThreshold,
-      );
-      this.regionGrowingRenderer.render();
+      this.renderer.setThreshold(this.document.tools.smartBrushThreshold);
+      this.renderer.render();
       this.isSeedSet = false;
     }
   }
@@ -70,16 +62,16 @@ export class SmartBrush3D<N extends "smart-brush-3d" = "smart-brush-3d">
     const targetLayer = this.document.activeLayer;
     mutateAtlas(
       targetLayer as IImageLayer,
-      () => this.regionGrowingRenderer.flushToAnnotation(),
+      () => this.renderer.flushToAnnotation(),
       this.document,
     );
   };
 
   public discard() {
-    this.document?.tools.regionGrowingRenderer3D.discard();
+    this.renderer.discard();
   }
 
   public deactivate() {
-    this.document?.tools.regionGrowingRenderer3D.discard();
+    this.renderer.discard();
   }
 }
