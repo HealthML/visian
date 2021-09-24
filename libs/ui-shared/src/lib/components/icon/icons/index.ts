@@ -1,7 +1,10 @@
 export { ReactComponent as arrowDown } from "./arrow-down.svg";
+export { ReactComponent as arrowLeft } from "./arrow-left.svg";
+export { ReactComponent as arrowRight } from "./arrow-right.svg";
 export { ReactComponent as arrowUp } from "./arrow-up.svg";
 export { ReactComponent as backspace } from "./backspace.svg";
 export { ReactComponent as boundedSmartBrush } from "./bounded-smart-brush.svg";
+export { ReactComponent as check } from "./check.svg";
 export { ReactComponent as columnView } from "./column-view.svg";
 export { ReactComponent as crosshairPointer } from "./crosshair-pointer.svg";
 export { ReactComponent as crosshair } from "./crosshair.svg";
@@ -40,4 +43,5 @@ export { ReactComponent as terminateConnection } from "./terminate-connection.sv
 export { ReactComponent as trash } from "./trash.svg";
 export { ReactComponent as undo } from "./undo.svg";
 export { ReactComponent as upArrow } from "./up-arrow.svg";
+export { ReactComponent as whoAI } from "./who-ai.svg";
 export { ReactComponent as xSmall } from "./x-small.svg";

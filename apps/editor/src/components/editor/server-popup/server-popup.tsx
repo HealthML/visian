@@ -1,24 +1,29 @@
-/* eslint-disable max-len */
 import {
-  PopUp,
-  Text,
-  TextField,
-  SquareButton,
   color,
-  sheetNoise,
   Icon,
   InvisibleButton,
+  PopUp,
   Sheet,
+  sheetNoise,
+  SquareButton,
+  styledScrollbarMixin,
+  Text,
+  TextInput,
 } from "@visian/ui-shared";
-import React from "react";
+import { observer } from "mobx-react-lite";
+import React, { useCallback, useState } from "react";
+import { useQuery, useQueryClient } from "react-query";
 import styled from "styled-components";
+
+import { useStore } from "../../../app/root-store";
+import { ServerPopUpProps } from "./server-popup.props";
 
 const SectionLabel = styled(Text)`
   font-size: 14px;
   margin-bottom: 8px;
 `;
 
-const ImportInput = styled(TextField)`
+const ImportInput = styled(TextInput)`
   margin: 0px 0px 0px 0px;
   box-sizing: border-box;
 `;
@@ -80,20 +85,29 @@ const ServerPopUpContainer = styled(PopUp)`
 
 const ColumnContainer = styled.div`
   width: 100%;
-  height: 100%;
+  flex: 1;
   display: flex;
   flex-direction: row;
+  overflow: hidden;
 `;
 
 const SingleColumn = styled.div`
+  ${styledScrollbarMixin}
+
   width: 100%;
   height: 100%;
   box-shadow: 1px 0px 0px 0px rgba(255, 255, 255, 0.2);
   padding: 0px 10px 0px 10px;
+  overflow-x: hidden;
+  overflow-y: auto;
 `;
 
 const SingleColumnLast = styled(SingleColumn)`
   box-shadow: none;
+`;
+
+const ListItemWrapper = styled(InvisibleButton)`
+  width: 100%;
 `;
 
 const ListItem = styled.div`
@@ -128,95 +142,128 @@ const ListItemText = styled(Text)`
   padding-top: 2px;
 `;
 
-export const ServerPopUp: React.FC = () => (
-  <ServerPopUpContainer title="Import">
-    <InlineRow>
-      <InlineElement>
-        <SectionLabel text="Server" />
-        <ImportInput placeholder="https://federation-database.com" />
-      </InlineElement>
-      <InlineElement>
-        <SectionLabel text="Username" />
-        <ImportInput placeholder="Capt. James Tiberius Kirk - 2" />
-      </InlineElement>
-      <ConnectButton icon="terminateConnection" color="red" />
-    </InlineRow>
-    <InlineRowSecond>
-      <ViewButton icon="columnView" />
-      <ViewButtonLast icon="listView" />
-      <SearchInput placeholder="Search" />
-    </InlineRowSecond>
-    <ColumnContainer>
-      <SingleColumn>
-        <ListItem>
-          <ListItemIcon icon="folder" />
-          <ListItemText text="Folder" />
-        </ListItem>
-        <ListItem>
-          <ListItemIcon icon="folder" />
-          <ListItemText text="Folder" />
-        </ListItem>
-        <ListItem>
-          <ListItemIcon icon="folder" />
-          <ListItemText text="Folder" />
-        </ListItem>
-        <ListItem>
-          <ListItemIcon icon="folder" />
-          <ListItemText text="Folder" />
-        </ListItem>
-        <ListItem>
-          <ListItemIcon icon="folder" />
-          <ListItemText text="Folder" />
-        </ListItem>
-        <ListItem>
-          <ListItemIcon icon="folder" />
-          <ListItemText text="Folder" />
-        </ListItem>
-        <ListItemActive>
-          <ListItemIcon icon="folder" />
-          <ListItemText text="Folder" />
-        </ListItemActive>
-      </SingleColumn>
-      <SingleColumn>
-        <ListItem>
-          <ListItemIcon icon="folder" />
-          <ListItemText text="Folder" />
-        </ListItem>
-        <ListItem>
-          <ListItemIcon icon="folder" />
-          <ListItemText text="Folder" />
-        </ListItem>
-        <ListItem>
-          <ListItemIcon icon="folder" />
-          <ListItemText text="Folder" />
-        </ListItem>
-        <ListItemActive>
-          <ListItemIcon icon="folder" />
-          <ListItemText text="Folder" />
-        </ListItemActive>
-      </SingleColumn>
-      <SingleColumnLast>
-        <ListItem>
-          <ListItemIcon icon="document" />
-          <ListItemText text="File" />
-        </ListItem>
-        <ListItem>
-          <ListItemIcon icon="document" />
-          <ListItemText text="File" />
-        </ListItem>
-        <ListItem>
-          <ListItemIcon icon="document" />
-          <ListItemText text="File" />
-        </ListItem>
-        <ListItem>
-          <ListItemIcon icon="document" />
-          <ListItemText text="File" />
-        </ListItem>
-        <ListItemActive>
-          <ListItemIcon icon="document" />
-          <ListItemText text="File" />
-        </ListItemActive>
-      </SingleColumnLast>
-    </ColumnContainer>
-  </ServerPopUpContainer>
-);
+// TODO: Make use of the UI components hidden by this flag
+const showTodoUI = false;
+
+export const ServerPopUp = observer<ServerPopUpProps>(({ isOpen, onClose }) => {
+  const store = useStore();
+  const queryClient = useQueryClient();
+
+  const { data: studies } = useQuery("studies", () =>
+    store?.dicomWebServer?.searchStudies(),
+  );
+
+  const [selectedStudy, setSelectedStudy] = useState<string | undefined>();
+  const { data: series } = useQuery(["series", selectedStudy], () =>
+    selectedStudy
+      ? store?.dicomWebServer?.searchSeries(selectedStudy)
+      : Promise.resolve([]),
+  );
+
+  const loadSeries = useCallback(
+    (seriesId: string) => {
+      if (!selectedStudy) return;
+      if (store?.editor.newDocument()) {
+        store?.setProgress({ labelTx: "importing" });
+        store?.dicomWebServer
+          ?.retrieveSeries(selectedStudy, seriesId)
+          .then((files) =>
+            store.editor.activeDocument?.importFile(files, seriesId),
+          )
+          .then(() => {
+            store?.editor.activeDocument?.finishBatchImport();
+            onClose?.();
+          })
+          .catch((error) => {
+            store?.setError({
+              titleTx: "import-error",
+              descriptionTx: error.message,
+            });
+          })
+          .finally(() => {
+            store?.setProgress();
+          });
+      }
+    },
+    [onClose, selectedStudy, store],
+  );
+
+  const disconnect = useCallback(() => {
+    store?.connectToDICOMWebServer();
+    queryClient.invalidateQueries("studies");
+    queryClient.invalidateQueries("series");
+  }, [queryClient, store]);
+
+  return (
+    <ServerPopUpContainer
+      title="Import"
+      isOpen={isOpen}
+      onOutsidePress={onClose}
+    >
+      <InlineRow>
+        <InlineElement>
+          <SectionLabel text="Server" />
+          <ImportInput value={store?.dicomWebServer?.url} isEditable={false} />
+        </InlineElement>
+        {showTodoUI && (
+          <InlineElement>
+            <SectionLabel text="Username" />
+            <ImportInput placeholder="Capt. James Tiberius Kirk - 2" />
+          </InlineElement>
+        )}
+        <ConnectButton
+          icon="terminateConnection"
+          color="red"
+          onPointerDown={disconnect}
+        />
+      </InlineRow>
+      {showTodoUI && (
+        <InlineRowSecond>
+          <ViewButton icon="columnView" />
+          <ViewButtonLast icon="listView" />
+          <SearchInput placeholder="Search" />
+        </InlineRowSecond>
+      )}
+      <ColumnContainer>
+        <SingleColumn>
+          {studies?.map((study) => (
+            <ListItemWrapper
+              key={study.StudyInstanceUID}
+              onPointerDown={() => setSelectedStudy(study.StudyInstanceUID)}
+            >
+              {study.StudyInstanceUID === selectedStudy ? (
+                <ListItemActive>
+                  <ListItemIcon icon="folder" />
+                  <ListItemText text={study.PatientName || study.PatientID} />
+                </ListItemActive>
+              ) : (
+                <ListItem>
+                  <ListItemIcon icon="folder" />
+                  <ListItemText text={study.PatientName || study.PatientID} />
+                </ListItem>
+              )}
+            </ListItemWrapper>
+          ))}
+        </SingleColumn>
+        <SingleColumnLast>
+          {selectedStudy &&
+            series?.map((thisSeries, index) => (
+              <ListItemWrapper
+                key={thisSeries.SeriesInstanceUID}
+                onPointerDown={() => loadSeries(thisSeries.SeriesInstanceUID)}
+              >
+                <ListItem>
+                  <ListItemIcon icon="document" />
+                  <ListItemText
+                    text={`${thisSeries.SeriesNumber || index}${
+                      thisSeries.Modality ? ` (${thisSeries.Modality})` : ""
+                    }`}
+                  />
+                </ListItem>
+              </ListItemWrapper>
+            ))}
+        </SingleColumnLast>
+      </ColumnContainer>
+    </ServerPopUpContainer>
+  );
+});

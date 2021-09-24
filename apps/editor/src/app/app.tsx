@@ -7,6 +7,7 @@ import {
 } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import { QueryClient, QueryClientProvider } from "react-query";
 import { Route, Switch } from "react-router-dom";
 
 import { setUpEventHandling } from "../event-handling";
@@ -14,6 +15,8 @@ import { EditorScreen } from "../screens";
 import { setupRootStore, StoreProvider } from "./root-store";
 
 import type { RootStore } from "../models";
+
+const queryClient = new QueryClient();
 
 function App() {
   // TODO: Push loading down to components that need i18n
@@ -40,19 +43,21 @@ function App() {
 
   return (
     <ThemeProvider theme={theme}>
-      <StoreProvider value={rootStoreRef.current}>
-        <GlobalStyles />
-        {isReady && (
-          <React.StrictMode>
-            <ModalRoot />
-            <Switch>
-              <Route path="/">
-                <EditorScreen />
-              </Route>
-            </Switch>
-          </React.StrictMode>
-        )}
-      </StoreProvider>
+      <QueryClientProvider client={queryClient}>
+        <StoreProvider value={rootStoreRef.current}>
+          <GlobalStyles />
+          {isReady && (
+            <React.StrictMode>
+              <ModalRoot />
+              <Switch>
+                <Route path="/">
+                  <EditorScreen />
+                </Route>
+              </Switch>
+            </React.StrictMode>
+          )}
+        </StoreProvider>
+      </QueryClientProvider>
     </ThemeProvider>
   );
 }

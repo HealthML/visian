@@ -9,6 +9,7 @@ import { deepObserve, ISerializable } from "@visian/utils";
 import { action, computed, makeObservable, observable } from "mobx";
 
 import { errorDisplayDuration } from "../constants";
+import { DICOMWebServer } from "./dicomweb-server";
 import { Editor, EditorSnapshot } from "./editor";
 import { ErrorNotification, ProgressNotification } from "./types";
 
@@ -22,6 +23,8 @@ export interface RootStoreConfig {
 }
 
 export class RootStore implements ISerializable<RootSnapshot> {
+  public dicomWebServer?: DICOMWebServer;
+
   public editor: Editor;
 
   /** The current theme. */
@@ -44,6 +47,7 @@ export class RootStore implements ISerializable<RootSnapshot> {
 
   constructor(protected config: RootStoreConfig = {}) {
     makeObservable(this, {
+      dicomWebServer: observable,
       editor: observable,
       colorMode: observable,
       error: observable,
@@ -53,6 +57,7 @@ export class RootStore implements ISerializable<RootSnapshot> {
 
       theme: computed,
 
+      connectToDICOMWebServer: action,
       setColorMode: action,
       setError: action,
       setProgress: action,
@@ -75,9 +80,30 @@ export class RootStore implements ISerializable<RootSnapshot> {
     });
   }
 
-  public setColorMode(theme: ColorMode, persist = true) {
+  /**
+   * Connects to a DICOMweb server.
+   * If no URL is given, disconnects from the current server (if any).
+   *
+   * @param url The server's URL
+   * @param shouldPersist Indicates if the new URL should be persisted.
+   * Defaults to `true`.
+   */
+  public async connectToDICOMWebServer(url?: string, shouldPersist = true) {
+    this.dicomWebServer = url ? await DICOMWebServer.connect(url) : undefined;
+    if (shouldPersist && this.shouldPersist) {
+      if (url) {
+        localStorage.setItem("dicomWebServer", url);
+      } else {
+        localStorage.removeItem("dicomWebServer");
+      }
+    }
+  }
+
+  public setColorMode(theme: ColorMode, shouldPersist = true) {
     this.colorMode = theme;
-    if (persist && this.shouldPersist) localStorage.setItem("theme", theme);
+    if (shouldPersist && this.shouldPersist) {
+      localStorage.setItem("theme", theme);
+    }
   }
   public get theme() {
     return getTheme(this.colorMode);
@@ -141,6 +167,11 @@ export class RootStore implements ISerializable<RootSnapshot> {
   public async rehydrate() {
     this.shouldPersist = false;
     const tab = await new Tab().register();
+
+    const dicomWebServer = localStorage.getItem("dicomWebServer");
+    if (dicomWebServer) {
+      await this.connectToDICOMWebServer(dicomWebServer, false);
+    }
 
     const theme = localStorage.getItem("theme");
     if (theme) this.setColorMode(theme as ColorMode, false);

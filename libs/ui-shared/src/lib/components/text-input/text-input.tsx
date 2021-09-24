@@ -5,9 +5,10 @@ import React, {
   useState,
 } from "react";
 import styled from "styled-components";
-import { useTranslation } from "../../i18n";
 
+import { useTranslation } from "../../i18n";
 import { color, font, fontSize } from "../../theme";
+import { Text } from "../text";
 import { TextInputProps } from "./text-input.props";
 
 const StyledInput = styled.input`
@@ -33,6 +34,24 @@ const StyledInput = styled.input`
   }
 `;
 
+const StyledText = styled(Text)`
+  background: none;
+  border: none;
+  color: ${color("text")};
+  display: block;
+  flex: 1;
+  font-family: ${font("default")};
+  font-size: ${fontSize("default")};
+  margin: 0;
+  outline: none;
+  overflow: hidden;
+  padding: 0;
+  pointer-events: auto;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  width: 100%;
+`;
+
 export const TextInput = React.forwardRef<HTMLInputElement, TextInputProps>(
   (
     {
@@ -43,6 +62,7 @@ export const TextInput = React.forwardRef<HTMLInputElement, TextInputProps>(
       value,
       valueTx,
       defaultValue,
+      isEditable = true,
       onFocus,
       onChange,
       onChangeText,
@@ -145,7 +165,7 @@ export const TextInput = React.forwardRef<HTMLInputElement, TextInputProps>(
     );
 
     const { t } = useTranslation();
-    return (
+    return isEditable ? (
       <StyledInput
         {...rest}
         placeholder={
@@ -160,6 +180,8 @@ export const TextInput = React.forwardRef<HTMLInputElement, TextInputProps>(
         onBlur={handleBlur}
         onKeyDown={handleKeyDown}
       />
+    ) : (
+      <StyledText {...rest} tx={valueTx} text={value} />
     );
   },
 );
