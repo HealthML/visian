@@ -28,7 +28,7 @@ export class DilateErodeTool<N extends "dilate-erode" = "dilate-erode">
     super(
       {
         name: "dilate-erode" as N,
-        icon: "crosshair",
+        icon: "plusMinus",
         labelTx: "dilate-erode",
         supportedViewModes: ["2D", "3D"],
         supportedLayerKinds: ["image"],
