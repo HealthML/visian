@@ -13,7 +13,7 @@ import { useStore } from "../../../app/root-store";
 
 import type { DilateErodeTool } from "../../../models";
 
-const MAX_STEPS = 50;
+const MAX_STEPS = 10;
 
 const StyledModal = styled(Modal)`
   margin-top: 16px;
@@ -44,6 +44,8 @@ export const DilateErodeModal = observer(() => {
       store?.editor.activeDocument?.tools.dilateErodeRenderer3D.setMaxSteps(
         Math.abs(steps),
       );
+
+      store?.editor.activeDocument?.tools.dilateErodeRenderer3D.render();
     },
     [store],
   );
@@ -73,10 +75,6 @@ export const DilateErodeModal = observer(() => {
           store?.editor.activeDocument?.tools.dilateErodeRenderer3D.maxSteps
         }
         setValue={setMaxSteps}
-        onEnd={store?.editor.activeDocument?.tools.dilateErodeRenderer3D.render}
-        onValueLabelChange={
-          store?.editor.activeDocument?.tools.dilateErodeRenderer3D.render
-        }
       />
       <BooleanParam
         labelTx="autocompensate-dilate-erode"

@@ -1,11 +1,18 @@
 import { DilateErodeRenderer3D } from "@visian/rendering";
-import { IDocument, IImageLayer, ITool } from "@visian/ui-shared";
-import { AtlasCommand } from "../history";
-import { Tool } from "./tool";
+import {
+  IDocument,
+  IImageLayer,
+  IPreviewedTool,
+  ISelfDeactivatingTool,
+  ITool,
+} from "@visian/ui-shared";
 
-export class DilateErodeTool<
-  N extends "dilate-erode" = "dilate-erode"
-> extends Tool<N> {
+import { Tool } from "./tool";
+import { mutateAtlas } from "./utils";
+
+export class DilateErodeTool<N extends "dilate-erode" = "dilate-erode">
+  extends Tool<N>
+  implements IPreviewedTool<N>, ISelfDeactivatingTool<N> {
   public readonly excludeFromSnapshotTracking = [
     "document",
     "dilateErodeRenderer",
@@ -47,29 +54,15 @@ export class DilateErodeTool<
   }
 
   public submit = () => {
-    const imageLayer = this.document.activeLayer;
-    if (!imageLayer || imageLayer.kind !== "image") return;
-    const { image } = imageLayer as IImageLayer;
-    const oldAtlas = new Uint8Array(image.getAtlas());
-
-    this.dilateErodeRenderer.flushToAnnotation(imageLayer as IImageLayer, true);
-
-    const newAtlas = new Uint8Array(image.getAtlas());
-    this.document.history.addCommand(
-      new AtlasCommand(
-        {
-          layerId: imageLayer.id,
-          oldAtlas,
-          newAtlas,
-        },
-        this.document,
-      ),
-    );
-
-    (imageLayer as IImageLayer).recomputeSliceMarkers(
-      undefined,
-      undefined,
-      false,
+    const targetLayer = this.document.activeLayer;
+    mutateAtlas(
+      targetLayer as IImageLayer,
+      () =>
+        this.dilateErodeRenderer.flushToAnnotation(
+          targetLayer as IImageLayer,
+          true,
+        ),
+      this.document,
     );
 
     this.document.tools.setActiveTool(this.previousTool);

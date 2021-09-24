@@ -26,6 +26,7 @@ export class BlipRenderer3D implements IBlipRenderer3D, IDisposable {
 
   protected disposers: IDisposer[] = [];
 
+  protected hasOddOutput = false;
   protected renderTargets: THREE.WebGLRenderTarget[] = [];
   protected blipRenderTargets: THREE.WebGLRenderTarget[] = [];
 
@@ -76,11 +77,12 @@ export class BlipRenderer3D implements IBlipRenderer3D, IDisposable {
       ),
     );
 
-    makeObservable(this, {
+    makeObservable<this, "hasOddOutput">(this, {
       holdsPreview: observable,
       maxSteps: observable,
       previewColor: observable,
       steps: observable,
+      hasOddOutput: observable,
 
       setPreviewColor: action,
       setMaxSteps: action,
@@ -106,11 +108,8 @@ export class BlipRenderer3D implements IBlipRenderer3D, IDisposable {
    * @param initialTarget The initial target annotation (if any). This can be
    * used to evolve an existing annotation instead of generating one from
    * scratch based on just the source image.
-   * @param oddLoop A flag to either loop out the result of an odd number of
-   * steps and keep it in the intermediate buffer ("output") or loop in the
-   * result of a previous render contained in the intermediate buffer ("input").
    */
-  public render(initialTarget?: IImageLayer, oddLoop?: "input" | "output") {
+  public render(initialTarget?: IImageLayer) {
     const sourceImage = (this.document.layers.find(
       (layer) =>
         layer.kind === "image" && !layer.isAnnotation && layer.isVisible,
@@ -121,10 +120,12 @@ export class BlipRenderer3D implements IBlipRenderer3D, IDisposable {
     this.material.setVoxelCount(sourceImage.voxelCount.toArray());
 
     this.steps = this.maxSteps;
-    const blipSteps = Math.ceil(
-      Math.min(this.maxSteps, sourceImage.voxelCount.sum()) / 2,
-    );
-    const useOddOutput = Boolean(this.steps % 2);
+    const blipSteps = Math.min(this.maxSteps, sourceImage.voxelCount.sum());
+
+    const hasOddInput = this.hasOddOutput;
+    if (this.steps % 2) {
+      this.hasOddOutput = !this.hasOddOutput;
+    }
 
     this.document.renderers?.forEach((renderer, rendererIndex) => {
       this.material.setSourceTexture(sourceImage.getTexture(rendererIndex));
@@ -132,36 +133,26 @@ export class BlipRenderer3D implements IBlipRenderer3D, IDisposable {
       renderer.autoClear = false;
 
       for (let i = 0; i < blipSteps; i++) {
+        const isOdd = i % 2 ? hasOddInput : !hasOddInput;
+
         if (!i && initialTarget) {
           this.material.setTargetTexture(
             (initialTarget.image as RenderedImage).getTexture(rendererIndex),
           );
-        } else if (!i && useOddOutput && oddLoop === "input") {
-          this.material.setTargetTexture(
-            this.blipRenderTargets[rendererIndex].texture,
-          );
         } else {
           this.material.setTargetTexture(
-            this.renderTargets[rendererIndex].texture,
+            isOdd
+              ? this.renderTargets[rendererIndex].texture
+              : this.blipRenderTargets[rendererIndex].texture,
           );
         }
-        this.material.setStep(2 * i);
-        // TODO: This approach causes WebGL warnings, but seems to work
+        this.material.setStep(i);
         renderer.setRenderTarget(
-          i === blipSteps - 1 && useOddOutput && oddLoop !== "output"
-            ? this.renderTargets[rendererIndex]
-            : this.blipRenderTargets[rendererIndex],
+          isOdd
+            ? this.blipRenderTargets[rendererIndex]
+            : this.renderTargets[rendererIndex],
         );
         this.quad.renderWith(renderer);
-
-        if (!(i === blipSteps - 1 && useOddOutput)) {
-          this.material.setTargetTexture(
-            this.blipRenderTargets[rendererIndex].texture,
-          );
-          this.material.setStep(2 * i + 1);
-          renderer.setRenderTarget(this.renderTargets[rendererIndex]);
-          this.quad.renderWith(renderer);
-        }
       }
 
       renderer.setRenderTarget(null);
@@ -208,13 +199,17 @@ export class BlipRenderer3D implements IBlipRenderer3D, IDisposable {
 
     this.clearRenderTargets();
     this.holdsPreview = false;
+    this.hasOddOutput = false;
 
     this.document.sliceRenderer?.lazyRender();
     this.document.volumeRenderer?.lazyRender(true);
   }
 
   public get outputTextures() {
-    return this.renderTargets.map((renderTarget) => renderTarget.texture);
+    return (this.hasOddOutput
+      ? this.blipRenderTargets
+      : this.renderTargets
+    ).map((renderTarget) => renderTarget.texture);
   }
 
   protected resizeRenderTargets = () => {

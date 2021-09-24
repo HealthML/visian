@@ -1,11 +1,17 @@
 import { RegionGrowingRenderer3D } from "@visian/rendering";
-import { DragPoint, IDocument, IImageLayer } from "@visian/ui-shared";
-import { AtlasCommand } from "../history";
-import { Tool } from "./tool";
+import {
+  DragPoint,
+  IDocument,
+  IImageLayer,
+  IPreviewedTool,
+} from "@visian/ui-shared";
 
-export class SmartBrush3D<
-  N extends "smart-brush-3d" = "smart-brush-3d"
-> extends Tool<N> {
+import { Tool } from "./tool";
+import { mutateAtlas } from "./utils";
+
+export class SmartBrush3D<N extends "smart-brush-3d" = "smart-brush-3d">
+  extends Tool<N>
+  implements IPreviewedTool<N> {
   public readonly excludeFromSnapshotTracking = [
     "document",
     "regionGrowingRenderer",
@@ -60,29 +66,11 @@ export class SmartBrush3D<
   }
 
   public submit = () => {
-    const imageLayer = this.document.activeLayer;
-    if (!imageLayer || imageLayer.kind !== "image") return;
-    const { image } = imageLayer as IImageLayer;
-    const oldAtlas = new Uint8Array(image.getAtlas());
-
-    this.regionGrowingRenderer.flushToAnnotation();
-
-    const newAtlas = new Uint8Array(image.getAtlas());
-    this.document.history.addCommand(
-      new AtlasCommand(
-        {
-          layerId: imageLayer.id,
-          oldAtlas,
-          newAtlas,
-        },
-        this.document,
-      ),
-    );
-
-    (imageLayer as IImageLayer).recomputeSliceMarkers(
-      undefined,
-      undefined,
-      false,
+    const targetLayer = this.document.activeLayer;
+    mutateAtlas(
+      targetLayer as IImageLayer,
+      () => this.regionGrowingRenderer.flushToAnnotation(),
+      this.document,
     );
   };
 

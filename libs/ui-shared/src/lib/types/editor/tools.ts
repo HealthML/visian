@@ -93,6 +93,18 @@ export interface ITool<N extends string> {
   deactivate(nextTool?: ITool<N>): void;
 }
 
+export interface ISelfDeactivatingTool<N extends string> extends ITool<N> {
+  isSelfDeactivating: true;
+}
+
+export interface IPreviewedTool<N extends string> extends ITool<N> {
+  /** Submits the previewed results to be applied. */
+  submit(): void;
+
+  /** Discards the preview results. */
+  discard(): void;
+}
+
 /** A class of similar tools, typically grouped in the UI. */
 export interface IToolGroup<N extends string> {
   /**
