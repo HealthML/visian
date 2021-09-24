@@ -29,7 +29,11 @@ export interface Viewport2DSnapshot {
 
 export class Viewport2D
   implements IViewport2D, ISerializable<Viewport2DSnapshot> {
-  public readonly excludeFromSnapshotTracking = ["document"];
+  public readonly excludeFromSnapshotTracking = [
+    "document",
+    "hoveredScreenCoordinates",
+    "hoveredViewType",
+  ];
 
   public mainViewType!: ViewType;
   public showSideViews!: boolean;
