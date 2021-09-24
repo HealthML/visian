@@ -53,7 +53,7 @@ export const DilateErodeModal = observer(() => {
   return store?.editor.activeDocument?.tools.dilateErodeRenderer3D
     .holdsPreview ? (
     <StyledModal
-      labelTx="dilate-erode"
+      labelTx="dilate-erode-title"
       headerChildren={
         <ModalHeaderButton
           icon="xSmall"

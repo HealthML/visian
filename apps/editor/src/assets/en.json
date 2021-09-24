@@ -33,6 +33,7 @@
   "smart-brush": "Smart Brush (S)",
   "bounded-smart-brush": "Bounded Smart Brush (R)",
   "smart-brush-3d": "3D Smart Brush (D)",
+  "smart-brush-3d-title": "3D Smart Brush",
   "pixel-eraser": "Eraser (E)",
   "outline-tool": "Outline Tool (O)",
   "clear-slice": "Clear Slice (Del)",
@@ -54,6 +55,7 @@
   "render-plane-annotations": "Show Annotations",
 
   "dilate-erode": "Dilate/Erode (Ctrl + D)",
+  "dilate-erode-title": "Dilate/Erode",
   "dilate-erode-steps": "Steps",
   "autocompensate-dilate-erode": "Maintain Annotation Shape",
   "discard-dilate-erode": "Discard (Esc)",

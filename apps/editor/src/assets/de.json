@@ -33,6 +33,7 @@
   "smart-brush": "Smarter Pinsel (S)",
   "bounded-smart-brush": "Begrenzter Smarter Pinsel (R)",
   "smart-brush-3d": "3D Smarter Pinsel (D)",
+  "smart-brush-3d-title": "3D Smarter Pinsel",
   "pixel-eraser": "Radierer (E)",
   "outline-tool": "Umrandungswerkzeug (O)",
   "clear-slice": "Schicht leeren (Entf)",
@@ -54,6 +55,7 @@
   "render-plane-annotations": "Annotationen anzeigen",
 
   "dilate-erode": "Erweitern/Erodieren (Strg + D)",
+  "dilate-erode-title": "Erweitern/Erodieren",
   "dilate-erode-steps": "Schritte",
   "autocompensate-dilate-erode": "Annotationsform bewahren",
   "discard-dilate-erode": "Verwerfen (Esc)",

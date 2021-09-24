@@ -38,7 +38,7 @@ export const SmartBrush3DModal = observer(() => {
   return store?.editor.activeDocument?.tools.regionGrowingRenderer3D
     .holdsPreview ? (
     <StyledModal
-      labelTx="smart-brush-3d"
+      labelTx="smart-brush-3d-title"
       headerChildren={
         <ModalHeaderButton
           icon="xSmall"
