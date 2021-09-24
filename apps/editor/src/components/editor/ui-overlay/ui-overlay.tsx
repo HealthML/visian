@@ -10,7 +10,11 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
-import { DilateErodeModal, SmartBrush3DModal } from "../action-modal";
+import {
+  DilateErodeModal,
+  SmartBrush3DModal,
+  ThresholdAnnotationModal,
+} from "../action-modal";
 import { AIBar } from "../ai-bar";
 import { AxesAndVoxel } from "../axes-and-voxel";
 import { DropSheet } from "../drop-sheet";
@@ -164,7 +168,9 @@ export const UIOverlay = observer<UIOverlayProps>(
           <Layers />
           <Spacer />
           <AxesAndVoxel />
+
           <SmartBrush3DModal />
+          <ThresholdAnnotationModal />
           <DilateErodeModal />
         </ColumnLeft>
         <ColumnCenter>

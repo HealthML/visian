@@ -3,6 +3,7 @@ import {
   DilateErodeRenderer3D,
   RegionGrowingRenderer,
   RegionGrowingRenderer3D,
+  ThresholdAnnotationRenderer3D,
   ToolRenderer,
 } from "@visian/rendering";
 import { IDocument, IImageLayer, ITool, ITools } from "@visian/ui-shared";
@@ -22,6 +23,7 @@ import { PlaneTool } from "./plane-tool";
 import { SmartBrush3D } from "./smart-brush-3d";
 import { DilateErodeTool } from "./dilate-erode-tool";
 import { SelfDeactivatingTool } from "./self-deactivating-tool";
+import { ThresholdAnnotationTool } from "./threshold-annotation-tool";
 
 export type ToolName =
   | "navigation-tool"
@@ -37,6 +39,7 @@ export type ToolName =
   | "outline-eraser"
   | "clear-slice"
   | "clear-image"
+  | "threshold-annotation"
   | "dilate-erode"
   | "plane-tool"
   | "fly-tool";
@@ -82,6 +85,7 @@ export class Tools
   public toolRenderer: ToolRenderer;
   public regionGrowingRenderer: RegionGrowingRenderer;
   public regionGrowingRenderer3D: RegionGrowingRenderer3D;
+  public thresholdAnnotationRenderer3D: ThresholdAnnotationRenderer3D;
   public dilateErodeRenderer3D: DilateErodeRenderer3D;
 
   constructor(
@@ -134,6 +138,9 @@ export class Tools
     this.toolRenderer = new ToolRenderer(document);
     this.regionGrowingRenderer = new RegionGrowingRenderer(document);
     this.regionGrowingRenderer3D = new RegionGrowingRenderer3D(document);
+    this.thresholdAnnotationRenderer3D = new ThresholdAnnotationRenderer3D(
+      document,
+    );
     this.dilateErodeRenderer3D = new DilateErodeRenderer3D(document);
 
     this.tools = {
@@ -172,6 +179,10 @@ export class Tools
       "outline-eraser": new OutlineTool(document, this.toolRenderer, false),
       "clear-slice": new ClearSliceTool(document, this.toolRenderer),
       "clear-image": new ClearImageTool(document, this.toolRenderer),
+      "threshold-annotation": new ThresholdAnnotationTool(
+        document,
+        this.thresholdAnnotationRenderer3D,
+      ),
       "dilate-erode": new DilateErodeTool(document, this.dilateErodeRenderer3D),
       "plane-tool": new PlaneTool(document),
       "fly-tool": new Tool(
@@ -204,6 +215,7 @@ export class Tools
         document,
       ),
       new ToolGroup({ toolNames: ["clear-slice", "clear-image"] }, document),
+      new ToolGroup({ toolNames: ["threshold-annotation"] }, document),
       new ToolGroup({ toolNames: ["dilate-erode"] }, document),
       new ToolGroup({ toolNames: ["plane-tool"] }, document),
       new ToolGroup({ toolNames: ["fly-tool"] }, document),
@@ -307,7 +319,9 @@ export class Tools
   }
 
   public get layerPreviewTextures(): THREE.Texture[] {
-    return this.regionGrowingRenderer3D.outputTextures;
+    return this.regionGrowingRenderer3D.holdsPreview
+      ? this.regionGrowingRenderer3D.outputTextures
+      : this.thresholdAnnotationRenderer3D.outputTextures;
   }
 
   public setBrushSize(value = 5, showPreview = false): void {

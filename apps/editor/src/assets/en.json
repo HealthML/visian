@@ -54,6 +54,12 @@
   "render-plane": "Show Image on Clipping Plane",
   "render-plane-annotations": "Show Annotations",
 
+  "threshold-annotation": "Threshold Annotation (Strg + P)",
+  "threshold-annotation-title": "Threshold Annotation",
+  "threshold-annotation-threshold": "Threshold",
+  "discard-threshold-annotation": "Discard (Esc)",
+  "submit-threshold-annotation": "Apply (Enter)",
+
   "dilate-erode": "Dilate/Erode (Ctrl + D)",
   "dilate-erode-title": "Dilate/Erode",
   "dilate-erode-steps": "Steps",

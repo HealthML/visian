@@ -136,6 +136,10 @@ export interface IDilateErodeRenderer3D extends IBlipRenderer3D {
   targetLayer?: IImageLayer;
 }
 
+export interface IThresholdAnnotationRenderer3D extends IBlipRenderer3D {
+  threshold: [number, number];
+}
+
 /** The editor's tools and their settings for the document. */
 export interface ITools<N extends string> {
   /** The currently selected tool. */
@@ -172,6 +176,7 @@ export interface ITools<N extends string> {
 
   layerPreviewTextures: THREE.Texture[];
   regionGrowingRenderer3D: IBlipRenderer3D;
+  thresholdAnnotationRenderer3D: IThresholdAnnotationRenderer3D;
   dilateErodeRenderer3D: IDilateErodeRenderer3D;
 
   setActiveTool(nameOrTool?: N | ITool<N>): void;

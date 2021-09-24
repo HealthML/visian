@@ -25,5 +25,7 @@ export { default as voxelFragmentShader } from "./voxel-into-atlas/voxel-into-at
 export { default as voxelVertexShader } from "./voxel-into-atlas/voxel-into-atlas.vert.glsl";
 export { default as quadFragmentShader } from "./slice-into-atlas/slice-into-atlas.frag.glsl";
 export { default as quadVertexShader } from "./slice-into-atlas/quad-into-atlas.vert.glsl";
+export { default as thresholdAnnotationFragmentShader } from "./threshold-annotation/threshold-annotation.frag.glsl";
+export { default as thresholdAnnotationVertexShader } from "./threshold-annotation/threshold-annotation.vert.glsl";
 
 export * from "./compose-layered-shader";
