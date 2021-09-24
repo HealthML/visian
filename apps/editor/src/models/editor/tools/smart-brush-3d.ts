@@ -12,10 +12,7 @@ import { mutateAtlas } from "./utils";
 export class SmartBrush3D<N extends "smart-brush-3d" = "smart-brush-3d">
   extends Tool<N>
   implements IPreviewedTool<N> {
-  public readonly excludeFromSnapshotTracking = [
-    "document",
-    "regionGrowingRenderer",
-  ];
+  public readonly excludeFromSnapshotTracking = ["document", "renderer"];
 
   private isSeedSet = false;
 

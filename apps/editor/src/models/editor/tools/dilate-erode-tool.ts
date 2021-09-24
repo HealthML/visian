@@ -13,10 +13,7 @@ import { mutateAtlas } from "./utils";
 export class DilateErodeTool<N extends "dilate-erode" = "dilate-erode">
   extends Tool<N>
   implements IPreviewedTool<N>, ISelfDeactivatingTool<N> {
-  public readonly excludeFromSnapshotTracking = [
-    "document",
-    "dilateErodeRenderer",
-  ];
+  public readonly excludeFromSnapshotTracking = ["document", "renderer"];
   public readonly isSelfDeactivating = true;
 
   protected previousTool?: N;
