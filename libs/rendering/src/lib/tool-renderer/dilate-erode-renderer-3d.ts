@@ -14,7 +14,7 @@ export class DilateErodeRenderer3D
   implements IDilateErodeRenderer3D {
   public shouldErode = false;
   public targetLayer?: IImageLayer;
-  public shouldAutoCompensate = false;
+  public shouldAutoCompensate = true;
 
   constructor(document: IDocument) {
     super(document, {

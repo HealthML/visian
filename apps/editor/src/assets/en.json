@@ -48,10 +48,16 @@
   "preview-color": "Preview Color",
   "region-growing-steps": "Maximum Distance to Seed",
   "submit-3D-region-growing": "Apply (Enter)",
-  "discard-region-growing": "Discard",
+  "discard-region-growing": "Discard (Esc)",
   "enable-plane": "Use Clipping Plane",
   "render-plane": "Show Image on Clipping Plane",
   "render-plane-annotations": "Show Annotations",
+
+  "dilate-erode": "Dilate/Erode",
+  "dilate-erode-steps": "Steps",
+  "autocompensate-dilate-erode": "Maintain Annotation Shape",
+  "discard-dilate-erode": "Discard (Esc)",
+  "submit-dilate-erode": "Apply (Enter)",
 
   "layers": "Layers",
   "add-annotation-layer": "Add new annotation",

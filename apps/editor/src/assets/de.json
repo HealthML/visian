@@ -48,10 +48,16 @@
   "preview-color": "Vorschaufarbe",
   "region-growing-steps": "Maximale Distanz zum Start",
   "submit-3D-region-growing": "Anwenden (Enter)",
-  "discard-region-growing": "Abbrechen",
+  "discard-region-growing": "Verwerfen (Esc)",
   "enable-plane": "Schnittebene nutzen",
   "render-plane": "Bild auf der Schnittebene anzeigen",
   "render-plane-annotations": "Annotationen anzeigen",
+
+  "dilate-erode": "Erweitern/Erodieren",
+  "dilate-erode-steps": "Schritte",
+  "autocompensate-dilate-erode": "Annotationsform bewahren",
+  "discard-dilate-erode": "Verwerfen (Esc)",
+  "submit-dilate-erode": "Anwenden (Enter)",
 
   "layers": "Ebenen",
   "add-annotation-layer": "Neue Annotation hinzufügen",

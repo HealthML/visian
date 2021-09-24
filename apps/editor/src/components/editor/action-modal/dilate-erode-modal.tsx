@@ -13,7 +13,7 @@ import { useStore } from "../../../app/root-store";
 
 import type { DilateErodeTool } from "../../../models";
 
-const MAX_STEPS = 10;
+const MAX_STEPS = 12;
 
 const StyledModal = styled(Modal)`
   margin-top: 16px;
