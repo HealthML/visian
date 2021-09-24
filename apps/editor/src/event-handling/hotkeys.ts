@@ -58,6 +58,10 @@ export const setUpHotKeys = (store: RootStore): IDisposer => {
 
     store.editor.activeDocument?.tools.setActiveTool("outline-tool");
   });
+  hotkeys("ctrl+d", (event) => {
+    event.preventDefault();
+    store.editor.activeDocument?.tools.setActiveTool("dilate-erode");
+  });
   hotkeys("shift+f,f", (event) => {
     event.preventDefault();
     if (store.editor.activeDocument?.viewSettings.viewMode !== "3D") return;

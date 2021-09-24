@@ -53,7 +53,7 @@
   "render-plane": "Bild auf der Schnittebene anzeigen",
   "render-plane-annotations": "Annotationen anzeigen",
 
-  "dilate-erode": "Erweitern/Erodieren",
+  "dilate-erode": "Erweitern/Erodieren (Strg + D)",
   "dilate-erode-steps": "Schritte",
   "autocompensate-dilate-erode": "Annotationsform bewahren",
   "discard-dilate-erode": "Verwerfen (Esc)",

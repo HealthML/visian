@@ -53,7 +53,7 @@
   "render-plane": "Show Image on Clipping Plane",
   "render-plane-annotations": "Show Annotations",
 
-  "dilate-erode": "Dilate/Erode",
+  "dilate-erode": "Dilate/Erode (Ctrl + D)",
   "dilate-erode-steps": "Steps",
   "autocompensate-dilate-erode": "Maintain Annotation Shape",
   "discard-dilate-erode": "Discard (Esc)",

@@ -185,6 +185,16 @@ export const ShortcutPopUp: React.FC<ShortcutPopUpProps> = observer(
               </ShortcutRow>
               <ShortcutRow>
                 <ShortcutContainer>
+                  <KeyIcon text="Ctrl" />
+                  <PlusIcon />
+                  <KeyIcon text="D" />
+                </ShortcutContainer>
+                <ShortcutDescriptionContainer>
+                  <ShortcutDescription text="Select Dilate/Erode tool" />
+                </ShortcutDescriptionContainer>
+              </ShortcutRow>
+              <ShortcutRow>
+                <ShortcutContainer>
                   <KeyIcon text="F" />
                 </ShortcutContainer>
                 <ShortcutDescriptionContainer>
