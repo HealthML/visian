@@ -54,10 +54,13 @@ export class DilateErodeRenderer3D
   public render = () => {
     if (!this.sourceLayer) return;
 
-    super.render(this.sourceLayer);
+    super.render(
+      this.sourceLayer,
+      this.shouldAutoCompensate && this.maxSteps === 1 ? "output" : undefined,
+    );
     if (this.shouldAutoCompensate) {
       this.material.uniforms.uShouldErode.value = !this.shouldErode;
-      super.render();
+      super.render(undefined, this.maxSteps === 1 ? "input" : undefined);
       this.material.uniforms.uShouldErode.value = this.shouldErode;
     }
   };

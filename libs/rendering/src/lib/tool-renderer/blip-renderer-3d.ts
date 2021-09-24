@@ -100,7 +100,17 @@ export class BlipRenderer3D implements IBlipRenderer3D, IDisposable {
     this.steps = Math.min(this.steps, value);
   };
 
-  public render(initialAnnotation?: IImageLayer) {
+  /**
+   * Runs the multi-step blip rendering.
+   *
+   * @param initialTarget The initial target annotation (if any). This can be
+   * used to evolve an existing annotation instead of generating one from
+   * scratch based on just the source image.
+   * @param oddLoop A flag to either loop out the result of an odd number of
+   * steps and keep it in the intermediate buffer ("output") or loop in the
+   * result of a previous render contained in the intermediate buffer ("input").
+   */
+  public render(initialTarget?: IImageLayer, oddLoop?: "input" | "output") {
     const sourceImage = (this.document.layers.find(
       (layer) =>
         layer.kind === "image" && !layer.isAnnotation && layer.isVisible,
@@ -122,11 +132,13 @@ export class BlipRenderer3D implements IBlipRenderer3D, IDisposable {
       renderer.autoClear = false;
 
       for (let i = 0; i < blipSteps; i++) {
-        if (!i && initialAnnotation) {
+        if (!i && initialTarget) {
           this.material.setTargetTexture(
-            (initialAnnotation.image as RenderedImage).getTexture(
-              rendererIndex,
-            ),
+            (initialTarget.image as RenderedImage).getTexture(rendererIndex),
+          );
+        } else if (!i && useOddOutput && oddLoop === "input") {
+          this.material.setTargetTexture(
+            this.blipRenderTargets[rendererIndex].texture,
           );
         } else {
           this.material.setTargetTexture(
@@ -136,7 +148,7 @@ export class BlipRenderer3D implements IBlipRenderer3D, IDisposable {
         this.material.setStep(2 * i);
         // TODO: This approach causes WebGL warnings, but seems to work
         renderer.setRenderTarget(
-          i === blipSteps - 1 && useOddOutput
+          i === blipSteps - 1 && useOddOutput && oddLoop !== "output"
             ? this.renderTargets[rendererIndex]
             : this.blipRenderTargets[rendererIndex],
         );
