@@ -79,6 +79,10 @@ const RightBar = styled.div`
   height: 100%;
 `;
 
+const ImportButton = styled(FloatingUIButton)`
+  margin-right: 16px;
+`;
+
 const ErrorNotification = styled(Notification)`
   position: absolute;
   min-width: 15%;
@@ -144,9 +148,8 @@ export const UIOverlay = observer<UIOverlayProps>(
         )}
         <ColumnLeft>
           <MenuRow>
-            <Menu onOpenShortcutPopUp={openShortcutPopUp} />
             {/* TODO: Disable import button for WHO UI */}
-            <FloatingUIButton
+            <ImportButton
               icon="import"
               tooltipTx="import-tooltip"
               tooltipPosition="right"
@@ -156,6 +159,7 @@ export const UIOverlay = observer<UIOverlayProps>(
             <UndoRedoButtons />
           </MenuRow>
 
+          <Menu onOpenShortcutPopUp={openShortcutPopUp} />
           <Toolbar />
           <Layers />
           <Spacer />
