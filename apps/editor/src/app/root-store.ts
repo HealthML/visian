@@ -57,24 +57,29 @@ export const setupRootStore = async () => {
   if (isFromWHO()) {
     try {
       const taskId = getWHOTaskIdFromUrl();
-      if (taskId) {
+      if (taskId && store.editor.newDocument(true)) {
         const taskJson = await getWHOTask(taskId);
-        // TODO
-        // DELETE
-        // const request = new XMLHttpRequest();
-        // request.open("GET", "./assets/task1.json", false);
-        // request.send(null);
-        // const taskJson = JSON.parse(request.responseText);
-        // END OF DELETE
         const whoTask = new Task(taskJson);
         await store.editor.activeDocument?.importFile(
           createFileFromBase64(
             whoTask.samples[0].title,
             whoTask.samples[0].data,
           ),
+          undefined,
+          false,
         );
         if (whoTask.kind === TaskType.Create) {
           store.editor.activeDocument?.finishBatchImport();
+        } else {
+          // Task Type is Correct or Review
+          await store.editor.activeDocument?.importFile(
+            createFileFromBase64(
+              whoTask.samples[0].title.replace(".nii", "_annotation"),
+              whoTask.annotations[0].data[0].data,
+            ),
+            whoTask.samples[0].title.replace(".nii", "_annotation"),
+            true,
+          );
         }
         store.setCurrentTask(whoTask);
       }

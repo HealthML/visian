@@ -23,7 +23,7 @@ export class Task {
   public readOnly: boolean;
   public annotationTasks: AnnotationTask[];
   public samples: Sample[];
-  public annotations?: Annotation[];
+  public annotations: Annotation[];
 
   constructor(task: any) {
     this.taskUUID = task.taskUUID;
@@ -47,11 +47,9 @@ export class Task {
         this.annotationTasks,
       ).map((annotationTask) => annotationTask.toJSON()),
       samples: Object.values(this.samples).map((sample) => sample.toJSON()),
-      annotations: this.annotations
-        ? Object.values(this.annotations).map((annotation) =>
-            annotation.toJSON(),
-          )
-        : [],
+      annotations: Object.values(this.annotations).map((annotation) =>
+        annotation.toJSON(),
+      ),
     };
   }
 }
