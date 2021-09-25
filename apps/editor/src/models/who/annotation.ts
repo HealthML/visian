@@ -1,4 +1,4 @@
-import { toJS } from "mobx";
+import { AnnotationData, AnnotationDataSnapshot } from "./annotationData";
 import { AnnotationTask, AnnotationTaskSnapshot } from "./annotationTask";
 import { Annotator, AnnotatorSnapshot } from "./annotator";
 
@@ -12,7 +12,7 @@ export interface AnnotationSnapshot {
   annotationUUID: string;
   annotationTask: AnnotationTaskSnapshot;
   status: AnnotationStatus;
-  data: string[];
+  data: AnnotationDataSnapshot;
   annotator: AnnotatorSnapshot;
   submittedAt: string;
 }
@@ -21,15 +21,15 @@ export class Annotation {
   public annotationUUID: string;
   public annotationTask: AnnotationTask;
   public status: AnnotationStatus;
-  public data: string[];
+  public data: AnnotationData;
   public annotator: Annotator;
   public submittedAt: string;
 
   constructor(annotation: any) {
     this.annotationUUID = annotation.annotationUUID;
-    this.annotationTask = annotation.annotationTask;
+    this.annotationTask = new AnnotationTask(annotation.annotationTask);
     this.status = annotation.status;
-    this.data = annotation.data;
+    this.data = new AnnotationData(annotation.data);
     this.annotator = new Annotator(annotation.annotator);
     this.submittedAt = annotation.submittedAt;
   }
@@ -39,7 +39,7 @@ export class Annotation {
       annotationUUID: this.annotationUUID,
       annotationTask: this.annotationTask.toJSON(),
       status: this.status,
-      data: toJS(this.data),
+      data: this.data.toJSON(),
       annotator: this.annotator.toJSON(),
       submittedAt: this.submittedAt,
     };
