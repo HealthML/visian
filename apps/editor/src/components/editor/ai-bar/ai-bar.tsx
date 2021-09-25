@@ -166,11 +166,12 @@ export const AIBar = observer(() => {
       <AIBarSheet>
         <TaskContainer>
           <TaskLabel tx="Task" />
-          <TaskName tx="Ventricle" />
-          <TaskName tx="Segmentation" />
+          <TaskName tx={store.currentTask?.annotationTasks[0].title} />
+          {/* TODO: Styling */}
+          {/* <TaskName tx="Segmentation" /> */}
         </TaskContainer>
         <ActionContainer>
-          <ActionName tx="Annotate to create ground truth" />
+          <ActionName tx={store.currentTask?.annotationTasks[0].description} />
           <ActionButtonsContainer>
             <ActionButtons
               icon="check"
