@@ -7,10 +7,20 @@ import {
   SquareButton,
   BlueButtonParam,
   sheetNoise,
+  IImageLayer,
 } from "@visian/ui-shared";
+import {
+  createBase64StringFromFile,
+  putWHOTask,
+  reloadWithNewTaskId,
+  writeSingleMedicalImage,
+} from "@visian/utils";
 import { observer } from "mobx-react-lite";
-import React from "react";
+import React, { useCallback } from "react";
 import styled from "styled-components";
+import { v4 as uuidv4 } from "uuid";
+import { AnnotationStatus } from "../../../models/who/annotation";
+import { AnnotationData } from "../../../models/who/annotationData";
 
 import { useStore } from "../../../app/root-store";
 
@@ -161,6 +171,54 @@ const AIMessageSubtitle = styled(Text)`
 
 export const AIBar = observer(() => {
   const store = useStore();
+
+  const saveAnnotationToWHOBackend = useCallback(
+    async (status: AnnotationStatus) => {
+      if (!store?.currentTask?.annotations[0]) return;
+      store.currentTask.annotations[0].status = status;
+      const currentAnnotationImage = (store?.editor.activeDocument
+        ?.activeLayer as IImageLayer).image.toITKImage();
+      const currentAnnotationFile = await writeSingleMedicalImage(
+        currentAnnotationImage,
+        "annotation.nii.gz",
+      );
+      if (!currentAnnotationFile) return;
+      const base64Annotation = await createBase64StringFromFile(
+        currentAnnotationFile,
+      );
+
+      const annotationDataForBackend = {
+        annotationDataUUID: uuidv4(),
+        data: base64Annotation,
+      };
+      if (store.currentTask.annotations[0].data.length) {
+        store.currentTask.annotations[0].data = [];
+      }
+      store.currentTask.annotations[0].data.push(
+        new AnnotationData(annotationDataForBackend),
+      );
+      store.currentTask.annotations[0].submittedAt = new Date().toISOString();
+
+      console.log(store.currentTask.toJSON());
+      const responseJson = await putWHOTask(
+        store.currentTask.taskUUID,
+        JSON.stringify(store.currentTask.toJSON()),
+      );
+      if (responseJson?.nextTaskId) {
+        reloadWithNewTaskId(responseJson.nextTaskId);
+      }
+    },
+    [store?.currentTask, store?.editor.activeDocument?.activeLayer],
+  );
+
+  const confirmTaskAnnotation = useCallback(async () => {
+    await saveAnnotationToWHOBackend(AnnotationStatus.Completed);
+  }, [saveAnnotationToWHOBackend]);
+
+  const skipTaskAnnotation = useCallback(async () => {
+    await saveAnnotationToWHOBackend(AnnotationStatus.Rejected);
+  }, [saveAnnotationToWHOBackend]);
+
   return store?.editor.activeDocument ? (
     <AIBarContainer>
       <AIBarSheet>
@@ -168,20 +226,21 @@ export const AIBar = observer(() => {
           <TaskLabel tx="Task" />
           <TaskName tx={store.currentTask?.annotationTasks[0].title} />
           {/* TODO: Styling */}
-          {/* <TaskName tx="Segmentation" /> */}
         </TaskContainer>
         <ActionContainer>
           <ActionName tx={store.currentTask?.annotationTasks[0].description} />
           <ActionButtonsContainer>
             <ActionButtons
               icon="check"
-              tooltipTx="export-tooltip"
+              tooltipTx="confirm-task-annotation-tooltip"
               tooltipPosition="right"
+              onPointerDown={confirmTaskAnnotation}
             />
             <ActionButtons
               icon="redo"
-              tooltipTx="export-tooltip"
+              tooltipTx="skip-task-annotation-tooltip"
               tooltipPosition="right"
+              onPointerDown={skipTaskAnnotation}
             />
           </ActionButtonsContainer>
         </ActionContainer>

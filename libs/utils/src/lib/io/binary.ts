@@ -13,7 +13,15 @@ export const createFileFromBase64 = (
   }
   const binaryData = new Uint8Array(bytes);
 
-  // TODO: Delete
+  // TODO: Find out whether file is zipped or not
   const fileNameZip = fileName.concat(".gz");
   return new File([binaryData], fileNameZip);
 };
+
+export const createBase64StringFromFile = (file: File) =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = (error) => reject(error);
+  });

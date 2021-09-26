@@ -60,6 +60,8 @@ export const setupRootStore = async () => {
       if (taskId && store.editor.newDocument(true)) {
         const taskJson = await getWHOTask(taskId);
         const whoTask = new Task(taskJson);
+        store.setCurrentTask(whoTask);
+
         await store.editor.activeDocument?.importFile(
           createFileFromBase64(
             whoTask.samples[0].title,
@@ -70,18 +72,20 @@ export const setupRootStore = async () => {
         );
         if (whoTask.kind === TaskType.Create) {
           store.editor.activeDocument?.finishBatchImport();
+          store.currentTask?.addNewAnnotation();
         } else {
           // Task Type is Correct or Review
           await store.editor.activeDocument?.importFile(
             createFileFromBase64(
-              whoTask.samples[0].title.replace(".nii", "_annotation"),
+              whoTask.samples[0].title
+                .replace(".nii", "_annotation")
+                .concat(".nii"),
               whoTask.annotations[0].data[0].data,
             ),
             whoTask.samples[0].title.replace(".nii", "_annotation"),
             true,
           );
         }
-        store.setCurrentTask(whoTask);
       }
     } catch {
       store.setError({

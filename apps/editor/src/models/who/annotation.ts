@@ -1,5 +1,6 @@
 import { AnnotationData, AnnotationDataSnapshot } from "./annotationData";
 import { AnnotationTask, AnnotationTaskSnapshot } from "./annotationTask";
+// eslint-disable-next-line unused-imports/no-unused-imports
 import { Annotator, AnnotatorSnapshot } from "./annotator";
 
 export enum AnnotationStatus {
@@ -13,7 +14,7 @@ export interface AnnotationSnapshot {
   annotationTask: AnnotationTaskSnapshot;
   status: AnnotationStatus;
   data: AnnotationDataSnapshot[];
-  annotator: AnnotatorSnapshot;
+  // annotator: AnnotatorSnapshot;
   submittedAt: string;
 }
 
@@ -22,7 +23,7 @@ export class Annotation {
   public annotationTask: AnnotationTask;
   public status: AnnotationStatus;
   public data: AnnotationData[];
-  public annotator: Annotator;
+  // public annotator: Annotator;
   public submittedAt: string;
 
   constructor(annotation: any) {
@@ -32,7 +33,7 @@ export class Annotation {
     this.data = annotation.data.map(
       (annotationData: any) => new AnnotationData(annotationData),
     );
-    this.annotator = new Annotator(annotation.annotator);
+    // this.annotator = new Annotator(annotation.annotator);
     this.submittedAt = annotation.submittedAt;
   }
 
@@ -44,7 +45,7 @@ export class Annotation {
       data: Object.values(this.data).map((annotationData) =>
         annotationData.toJSON(),
       ),
-      annotator: this.annotator.toJSON(),
+      // annotator: this.annotator.toJSON(),
       submittedAt: this.submittedAt,
     };
   }

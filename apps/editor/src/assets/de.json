@@ -82,6 +82,9 @@
   "export": "Export",
   "export-tooltip": "Export (Strg + E)",
 
+  "confirm-task-annotation-tooltip": "Bestätigen",
+  "skip-task-annotation-tooltip": "Überspringen",
+
   "import-error": "Importfehler",
   "image-mismatch-error": "Diese Datei passt nicht auf die schon geladenen.",
   "image-loading-error": "Diese Datei scheint nicht unterstützt zu sein.",
