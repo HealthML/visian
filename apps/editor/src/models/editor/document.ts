@@ -398,6 +398,10 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
         await Promise.all(promises);
         return;
       }
+    } else if (files.name.endsWith(".zip")) {
+      const zip = await Zip.fromZipFile(files);
+      this.importFile(await zip.getAllFiles(), files.name);
+      return;
     }
 
     const isFirstLayer = !this.layerIds.length;
