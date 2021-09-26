@@ -80,6 +80,10 @@ const RightBar = styled.div`
   height: 100%;
 `;
 
+const ImportButton = styled(FloatingUIButton)`
+  margin-right: 16px;
+`;
+
 const ErrorNotification = styled(Notification)`
   position: absolute;
   min-width: 15%;
@@ -145,10 +149,8 @@ export const UIOverlay = observer<UIOverlayProps>(
         )}
         <ColumnLeft>
           <MenuRow>
-            <Menu onOpenShortcutPopUp={openShortcutPopUp} />
-            {/* TODO: Disable import button for WHO UI */}
             {!isFromWHO() && (
-              <FloatingUIButton
+              <ImportButton
                 icon="import"
                 tooltipTx="import-tooltip"
                 tooltipPosition="right"
@@ -159,6 +161,7 @@ export const UIOverlay = observer<UIOverlayProps>(
             <UndoRedoButtons />
           </MenuRow>
 
+          <Menu onOpenShortcutPopUp={openShortcutPopUp} />
           <Toolbar />
           <Layers />
           <Spacer />
@@ -168,13 +171,11 @@ export const UIOverlay = observer<UIOverlayProps>(
         <ColumnCenter>
           <TopConsole />
           <Spacer />
-          {/* TODO: Enable AI bar for WHO UI */}
           {isFromWHO() && <AIBar />}
         </ColumnCenter>
         <ColumnRight>
           <SideViews />
           <RightBar>
-            {/* TODO: Disable export button for WHO UI */}
             {!isFromWHO() && (
               <FloatingUIButton
                 icon="export"
