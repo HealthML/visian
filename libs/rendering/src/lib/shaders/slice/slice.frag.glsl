@@ -1,22 +1,32 @@
 varying vec2 vUv;
 
-uniform sampler2D uDataTexture;
+uniform sampler2D uLayerData[{{layerCount}}];
+uniform bool uLayerAnnotationStatuses[{{layerCount}}];
+uniform float uLayerOpacities[{{layerCount}}];
+uniform vec3 uLayerColors[{{layerCount}}];
+
 uniform vec3 uActiveSlices;
 uniform vec3 uVoxelCount;
 uniform vec2 uAtlasGrid;
 
-#ifdef IMAGE
-  uniform vec3 uForegroundColor;
-  uniform float uContrast;
-  uniform float uBrightness;
-  uniform float uImageOpacity;
-  uniform int uComponents;
-#endif // IMAGE
+uniform float uContrast;
+uniform float uBrightness;
+uniform int uComponents;
 
-#ifdef ANNOTATION
-  uniform vec3 uAnnotationColor;
-  uniform float uAnnotationOpacity;
-#endif // ANNOTATION
+uniform sampler2D uActiveLayerData;
+uniform float uRegionGrowingThreshold;
+
+vec4 applyBrightnessContrast(vec4 image) {
+  if(uComponents >= 3) {
+    return vec4(
+      uBrightness * pow(image.rgb, vec3(uContrast)),
+      image.a
+    );
+  }
+
+  float contrastedIntensity = uBrightness * pow(image.a, uContrast);
+  return vec4(image.rgb, contrastedIntensity);
+}
 
 void main() {
   vec3 volumeCoords;
@@ -32,32 +42,8 @@ void main() {
 
   @import ../utils/volume-coords-to-uv;
   
-  vec4 texelValue = texture2D(uDataTexture, uv);
+  vec4 imageValue = vec4(0.0);
+  {{reduceEnhancedLayerStack(imageValue, uv, applyBrightnessContrast)}}
 
-  #ifdef IMAGE
-    // TODO: How do we display two components?
-
-    if(uComponents == 3) {
-      gl_FragColor = vec4(
-        uBrightness * pow(texelValue.rgb, vec3(uContrast)),
-        uImageOpacity
-      );
-      return;
-    }
-    if(uComponents == 4) {
-      gl_FragColor = vec4(
-        uBrightness * pow(texelValue.rgb, vec3(uContrast)),
-        mix(0.0, uImageOpacity, texelValue.a)
-      );
-      return;
-    }
-
-    float contrastedColor = uBrightness * pow(texelValue.x, uContrast);
-    gl_FragColor = vec4(uForegroundColor, mix(0.0, uImageOpacity, contrastedColor));
-  #endif // IMAGE
-  
-  #ifdef ANNOTATION
-    float annotation = step(0.01, texelValue.x);
-    gl_FragColor = vec4(uAnnotationColor, mix(0.0, uAnnotationOpacity, annotation));
-  #endif // ANNOTATION
+  gl_FragColor = imageValue;
 }

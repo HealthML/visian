@@ -2,6 +2,7 @@ import {
   AbsoluteCover,
   FloatingUIButton,
   Notification,
+  Spacer,
   Text,
 } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
@@ -9,9 +10,15 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
+import { ActionModal } from "../action-modal";
+import { AIBar } from "../ai-bar";
+import { AxesAndVoxel } from "../axes-and-voxel";
 import { DropSheet } from "../drop-sheet";
+import { ImportPopUp } from "../import-popup";
 import { Layers } from "../layers";
 import { Menu } from "../menu";
+import { ProgressPopUp } from "../progress-popup";
+import { ServerPopUp } from "../server-popup";
 import { ShortcutPopUp } from "../shortcut-popup";
 import { SideViews } from "../side-views";
 import { SliceSlider } from "../slice-slider";
@@ -20,6 +27,8 @@ import { TopConsole } from "../top-console";
 import { UndoRedoButtons } from "../undo-redo-buttons";
 import { ViewSettings } from "../view-settings";
 import { UIOverlayProps } from "./ui-overlay.props";
+
+import type { ImageLayer } from "../../../models";
 
 const Container = styled(AbsoluteCover)`
   align-items: stretch;
@@ -47,7 +56,8 @@ const ColumnCenter = styled.div`
   display: flex;
   flex: 1;
   flex-direction: column;
-  justify-content: flex-start;
+  justify-content: flex-end;
+  align-items: flex-end;
   min-width: 0;
 `;
 
@@ -67,6 +77,10 @@ const RightBar = styled.div`
   display: flex;
   flex-direction: column;
   height: 100%;
+`;
+
+const ImportButton = styled(FloatingUIButton)`
+  margin-right: 16px;
 `;
 
 const ErrorNotification = styled(Notification)`
@@ -102,6 +116,15 @@ export const UIOverlay = observer<UIOverlayProps>(
       [store],
     );
 
+    // Import Button
+    const [isImportPopUpOpen, setIsImportPopUpOpen] = useState(false);
+    const openImportPopUp = useCallback(() => {
+      setIsImportPopUpOpen(true);
+    }, []);
+    const closeImportPopUp = useCallback(() => {
+      setIsImportPopUpOpen(false);
+    }, []);
+
     // Shortcut Pop Up Toggling
     const [isShortcutPopUpOpen, setIsShortcutPopUpOpen] = useState(false);
     const openShortcutPopUp = useCallback(() => {
@@ -125,27 +148,47 @@ export const UIOverlay = observer<UIOverlayProps>(
         )}
         <ColumnLeft>
           <MenuRow>
-            <Menu onOpenShortcutPopUp={openShortcutPopUp} />
+            {/* TODO: Disable import button for WHO UI */}
+            <ImportButton
+              icon="import"
+              tooltipTx="import-tooltip"
+              tooltipPosition="right"
+              isActive={false}
+              onPointerDown={openImportPopUp}
+            />
             <UndoRedoButtons />
           </MenuRow>
+
+          <Menu onOpenShortcutPopUp={openShortcutPopUp} />
           <Toolbar />
           <Layers />
+          <Spacer />
+          <AxesAndVoxel />
+          <ActionModal />
         </ColumnLeft>
         <ColumnCenter>
           <TopConsole />
+          <Spacer />
+          {/* TODO: Enable AI bar for WHO UI */}
+          {false && <AIBar />}
         </ColumnCenter>
         <ColumnRight>
           <SideViews />
           <RightBar>
+            {/* TODO: Disable export button for WHO UI */}
             <FloatingUIButton
               icon="export"
-              tooltipTx="export"
+              tooltipTx="export-tooltip"
               tooltipPosition="left"
-              onPointerDown={store?.editor.activeDocument?.exportZip}
+              onPointerDown={
+                store?.editor.activeDocument?.viewSettings.viewMode === "2D"
+                  ? store?.editor.activeDocument?.exportZip
+                  : store?.editor.activeDocument?.viewport3D.exportCanvasImage
+              }
               isActive={false}
             />
             <ViewSettings />
-            <SliceSlider />
+            <SliceSlider showValueLabelOnChange={!isDraggedOver} />
           </RightBar>
         </ColumnRight>
 
@@ -153,7 +196,19 @@ export const UIOverlay = observer<UIOverlayProps>(
           isOpen={isShortcutPopUpOpen}
           onClose={closeShortcutPopUp}
         />
+        {store?.dicomWebServer ? (
+          <ServerPopUp isOpen={isImportPopUpOpen} onClose={closeImportPopUp} />
+        ) : (
+          <ImportPopUp isOpen={isImportPopUpOpen} onClose={closeImportPopUp} />
+        )}
         {isDraggedOver && <DropSheet onDropCompleted={onDropCompleted} />}
+        {store?.progress && (
+          <ProgressPopUp
+            label={store.progress.label}
+            labelTx={store.progress.labelTx}
+            progress={store.progress.progress}
+          />
+        )}
         {store?.error && (
           <ErrorNotification
             title={store?.error.title}

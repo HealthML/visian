@@ -1,5 +1,27 @@
-export interface IVolumeRenderer {
-  animate: () => void;
+import { Vector } from "@visian/utils";
+import * as THREE from "three";
 
-  lazyRender(updateLighting?: boolean): void;
+export interface IXRManager {
+  animate(): void;
+
+  isInXR(): boolean;
+  enterXR(): void;
+  exitXR(): void;
+}
+
+export interface IVolumeRenderer {
+  renderer: THREE.WebGLRenderer;
+  camera: THREE.PerspectiveCamera;
+  scene: THREE.Scene;
+  xr: IXRManager;
+  volume: THREE.Mesh;
+  renderedImageLayerCount: number;
+
+  animate(): void;
+
+  updateCameraPosition(): void;
+  resetScene(hardReset?: boolean): void;
+  resize(): void;
+  lazyRender(updateLighting?: boolean, updateGradients?: boolean): void;
+  setVolumeSpaceCameraPosition(position: Vector): void;
 }

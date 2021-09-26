@@ -1,3 +1,6 @@
+export * from "./bounding-box";
+export * from "./clipping-plane-material";
+export * from "./clipping-plane";
 export * from "./conversion";
 export * from "./fly-controls";
 export * from "./gradient-computer";

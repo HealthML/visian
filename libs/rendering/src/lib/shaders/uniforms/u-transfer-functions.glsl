@@ -1,7 +1,3 @@
-uniform vec3 uFocusColor;
-uniform float uFocusOpacity;
-uniform vec3 uContextColor;
-uniform float uContextOpacity;
 uniform float uLimitLow;
 uniform float uLimitHigh;
 uniform float uConeAngle;
@@ -10,3 +6,8 @@ uniform int uTransferFunction;
 uniform bool uUseFocus;
 uniform sampler2D uCustomTFTexture;
 uniform bool uVolumeNearestFiltering;
+uniform bool uSegmentationLinearFiltering;
+uniform bool uUsePlane;
+uniform vec3 uPlaneNormal;
+uniform float uPlaneDistance;
+uniform vec4 uEdgeColor;

@@ -1,12 +1,8 @@
 import { IConeTransferFunction, IDocument } from "@visian/ui-shared";
 import { ISerializable, Vector } from "@visian/utils";
 import { action, makeObservable, observable } from "mobx";
-import {
-  BooleanParameter,
-  LayerParameter,
-  NumberParameter,
-  Parameter,
-} from "../../parameters";
+
+import { BooleanParameter, NumberParameter, Parameter } from "../../parameters";
 import {
   TransferFunction,
   TransferFunctionSnapshot,
@@ -34,32 +30,6 @@ export class ConeTransferFunction
     );
 
     this.initializeParams([
-      new LayerParameter(
-        {
-          name: "annotation",
-          labelTx: "annotation-layer",
-          defaultValue: undefined,
-          filter: (layer) =>
-            layer.isAnnotation &&
-            layer.id !== (this.params.image as LayerParameter)?.value,
-          onBeforeValueChange: () =>
-            document.viewport3D?.onTransferFunctionChange(),
-        },
-        document,
-      ) as Parameter<unknown>,
-      new LayerParameter(
-        {
-          name: "image",
-          labelTx: "image-layer",
-          defaultValue: undefined,
-          // We allow other annotations as the image, but not the selected annotation.
-          filter: (layer) =>
-            layer.id !== (this.params.annotation as LayerParameter)?.value,
-          onBeforeValueChange: () =>
-            document.viewport3D?.onTransferFunctionChange(),
-        },
-        document,
-      ) as Parameter<unknown>,
       new BooleanParameter({
         name: "isConeLocked",
         labelTx: "lock-cone",
@@ -85,18 +55,6 @@ export class ConeTransferFunction
       coneDirection: observable,
       setConeDirection: action,
     });
-
-    this.laoBrightnessFactor = 2.5;
-  }
-
-  public activate() {
-    if (!this.document.getLayer(this.params.annotation.value as string)) {
-      this.params.annotation.reset();
-    }
-
-    if (!this.document.getLayer(this.params.image.value as string)) {
-      this.params.image.reset();
-    }
   }
 
   public setConeDirection(x: number, y: number, z: number) {
@@ -105,6 +63,7 @@ export class ConeTransferFunction
     }
 
     this.coneDirection.set(x, y, z);
+    this.coneDirection.normalize();
   }
 
   // Serialization

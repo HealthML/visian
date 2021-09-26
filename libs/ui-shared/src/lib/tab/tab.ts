@@ -26,10 +26,14 @@ export class Tab {
         if (!this.isMainTab) return;
 
         // Resolve concurrent conflicting write
-        const previousTab = Tab.fromString(event.oldValue);
-        if (!previousTab) return;
+        const oldTab = Tab.fromString(event.oldValue);
+        const newTab = Tab.fromString(event.newValue);
+        if (!(oldTab && newTab)) {
+          this.isMainTab = false;
+          return;
+        }
 
-        if (this.equals(previousTab)) {
+        if (this.equals(oldTab) && newTab.openedAt > this.openedAt) {
           this.claimMainTab();
         } else {
           this.isMainTab = false;
@@ -40,9 +44,7 @@ export class Tab {
         if (!this.isMainTab) return;
 
         // Respond to ping
-        const pongValue = localStorage.getItem("pong");
-        const pong = pongValue ? parseInt(pongValue) : 0;
-        localStorage.setItem("pong", `${pong + 1}`);
+        localStorage.setItem("pong", `${Date.now()}`);
         break;
       }
       case "pong": {
@@ -78,7 +80,7 @@ export class Tab {
 
         this.isMainTab = this.isMainTab || false;
         resolve(this);
-      }, 20);
+      }, 100);
     });
   }
 

@@ -1,7 +1,9 @@
+import { Pixel } from "@visian/utils";
 import React, {
   useCallback,
   useEffect,
   useLayoutEffect,
+  useMemo,
   useRef,
   useState,
 } from "react";
@@ -48,7 +50,7 @@ export const useIsDraggedOver = () => {
     }
     dragTimerRef.current = (setTimeout(() => {
       setIsDraggedOver(false);
-    }, 25) as unknown) as NodeJS.Timer;
+    }, 50) as unknown) as NodeJS.Timer;
   }, [setIsDraggedOver]);
 
   const onDrop = useCallback(() => {
@@ -71,6 +73,28 @@ export const useIsDraggedOver = () => {
       onDrop: typeof onDragEnd;
     },
   ];
+};
+
+export const useFilePicker = (
+  callback: (arg: Event) => void,
+  multiple = true,
+) => {
+  const inputElement: HTMLInputElement = useMemo(
+    () => document.createElement("input"),
+    [],
+  );
+  useEffect(() => {
+    inputElement.addEventListener("change", callback);
+    return () => {
+      inputElement.removeEventListener("change", callback);
+    };
+  }, [callback, inputElement]);
+
+  return useCallback(() => {
+    inputElement.type = "file";
+    inputElement.multiple = multiple;
+    inputElement.dispatchEvent(new MouseEvent("click"));
+  }, [inputElement, multiple]);
 };
 
 export const useUpdateOnResize = (isActive = true) => {
@@ -124,6 +148,27 @@ export const useDelay = (
   return [schedule, cancel];
 };
 
+export const useShortTap = <T extends Element>(
+  handleShortTap: (event: React.PointerEvent<T>) => void,
+  maxDuration = 300,
+): [() => void, (event: React.PointerEvent<T>) => void] => {
+  const timeRef = useRef<number | undefined>();
+
+  const startTap = useCallback(() => {
+    timeRef.current = Date.now();
+  }, []);
+  const stopTap = useCallback(
+    (event: React.PointerEvent<T>) => {
+      if (timeRef.current === undefined) return;
+      if (Date.now() - timeRef.current <= maxDuration) handleShortTap(event);
+      timeRef.current = undefined;
+    },
+    [handleShortTap, maxDuration],
+  );
+
+  return [startTap, stopTap];
+};
+
 export const useOutsidePress = <T extends HTMLElement>(
   ref: React.RefObject<T>,
   callback?: (event: PointerEvent) => void,
@@ -131,7 +176,11 @@ export const useOutsidePress = <T extends HTMLElement>(
 ) => {
   const handleOutsidePress = useCallback(
     (event: PointerEvent) => {
-      if (ref.current && !ref.current.contains(event.target as Node)) {
+      if (
+        ref.current &&
+        !ref.current.contains(event.target as Node) &&
+        document.body.contains(event.target as Node)
+      ) {
         if (callback) callback(event);
       }
     },
@@ -161,8 +210,8 @@ export const useOutsidePress = <T extends HTMLElement>(
 };
 
 export interface RelativePositionConfig<P = void> {
-  /** The parent element. */
-  parentElement?: HTMLElement | SVGSVGElement | null;
+  /** The anchor element or position. */
+  anchor?: HTMLElement | SVGSVGElement | Pixel | null;
 
   /**
    * If set to `true`, the position is actively updated.
@@ -205,7 +254,7 @@ export interface RelativePositionStyleConfig<P = void>
 export const useRelativePosition = <P = void>(
   computeStyle: (config: RelativePositionStyleConfig<P>) => React.CSSProperties,
   {
-    parentElement,
+    anchor,
     isActive = true,
     positionRelativeToOffsetParent,
     position,
@@ -223,11 +272,14 @@ export const useRelativePosition = <P = void>(
   useLayoutEffect(() => {
     if (!isActive) return;
 
-    const rect = parentElement?.getBoundingClientRect();
+    const rect: DOMRect | undefined =
+      !anchor || (anchor as Element).nodeName
+        ? (anchor as Element)?.getBoundingClientRect()
+        : new DOMRect((anchor as Pixel).x, (anchor as Pixel).y);
     if (!rect) return;
 
     const offsetRect = positionRelativeToOffsetParent
-      ? (parentElement as HTMLElement)?.offsetParent?.getBoundingClientRect()
+      ? (anchor as HTMLElement)?.offsetParent?.getBoundingClientRect()
       : undefined;
 
     // Prevent unnecessary updates

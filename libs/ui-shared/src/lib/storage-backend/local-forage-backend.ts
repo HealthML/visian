@@ -72,11 +72,9 @@ export class LocalForageBackend<T = unknown> implements IStorageBackend<T> {
     let persistor = this.persistors[key];
 
     if (!persistor) {
-      persistor = asyncThrottle(
-        async (data: T | (() => T | Promise<T>)) =>
-          this.instance.setItem(key, await resolveData<T>(data)),
-        this.waitTime,
-      );
+      persistor = asyncThrottle(async (data: T | (() => T | Promise<T>)) => {
+        await this.instance.setItem(key, await resolveData<T>(data));
+      }, this.waitTime);
       this.persistors[key] = persistor;
     }
 

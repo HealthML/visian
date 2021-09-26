@@ -3,7 +3,7 @@ import styled from "styled-components";
 
 import { color } from "../../theme";
 import { IButtonParameter } from "../../types";
-import { Button } from "../button";
+import { Button, ButtonProps } from "../button";
 import { sheetNoise } from "../sheet";
 import { ListPositionProps } from "./types";
 
@@ -14,6 +14,7 @@ const StyledButton = styled(Button)<ListPositionProps>`
 
 export type ButtonParamProps = IButtonParameter &
   ListPositionProps &
+  ButtonProps &
   React.HTMLAttributes<HTMLButtonElement>;
 
 export const ButtonParam: React.FC<Partial<ButtonParamProps>> = ({

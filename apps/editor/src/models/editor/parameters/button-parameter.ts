@@ -24,10 +24,10 @@ export class ButtonParameter<T = void>
     this.onPress = config.onClick;
   }
 
-  public handlePress(event?: PointerEvent | React.PointerEvent): void {
+  public handlePress = (event?: PointerEvent | React.PointerEvent): void => {
     if (!this.onPress) return;
     this.onPress(this.name, this.value, event);
-  }
+  };
 
   public toProps(): IButtonParameter<T> {
     return {

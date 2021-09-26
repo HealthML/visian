@@ -274,7 +274,7 @@ export const Slider: React.FC<SliderProps> = (props) => {
       {showFloatingValueLabel && (
         <Tooltip
           text={formatValueLabel([valueArray[0]])}
-          parentElement={thumbRef}
+          anchor={thumbRef}
           position="left"
           distance={
             (parseNumberFromMetric(theme.sizes.sliderHeight) -
@@ -319,14 +319,16 @@ export const SliderField: React.FC<SliderFieldProps> = ({
       {(labelTx || label || showValueLabel) && (
         <SliderLabelRow>
           {(labelTx || label) && <SliderLabel text={label} tx={labelTx} />}
-          <Spacer />
           {showValueLabel &&
             (Array.isArray(actualValue) ? (
-              <SliderLabel
-                text={formatValueLabel(
-                  Array.isArray(actualValue) ? actualValue : [actualValue],
-                )}
-              />
+              <>
+                <Spacer />
+                <SliderLabel
+                  text={formatValueLabel(
+                    Array.isArray(actualValue) ? actualValue : [actualValue],
+                  )}
+                />
+              </>
             ) : (
               <SliderValueInputWrapper>
                 <SliderValueInput

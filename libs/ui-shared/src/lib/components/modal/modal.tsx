@@ -2,7 +2,7 @@ import React, { useCallback, useRef } from "react";
 import ReactDOM from "react-dom";
 import styled from "styled-components";
 
-import { color, fontWeight, zIndex } from "../../theme";
+import { color, fontWeight, size, zIndex } from "../../theme";
 import { useModalRoot } from "../box";
 import { InvisibleButton } from "../button";
 import { Sheet } from "../sheet";
@@ -40,6 +40,7 @@ const ModalTitle = styled(Title)`
   font-size: 16px;
   font-weight: ${fontWeight("regular")};
   line-height: 16px;
+  user-select: none;
 `;
 
 const TitleRow = styled.div`
@@ -52,7 +53,7 @@ const TitleRow = styled.div`
 
 export const Divider = styled.div<{ isHidden?: boolean }>`
   width: 100%;
-  height: ${(props) => (props.isHidden ? "0px" : "1px")};
+  height: ${(props) => (props.isHidden ? "0px" : size("dividerHeight"))};
   background-color: ${color("sheetBorder")};
   border-radius: 1px;
   margin-bottom: 16px;
@@ -82,7 +83,7 @@ export const Modal: React.FC<ModalProps> = ({
   hideHeaderDivider,
   children,
   headerChildren,
-  parentElement,
+  anchor,
   position,
   distance,
   style,
@@ -103,8 +104,8 @@ export const Modal: React.FC<ModalProps> = ({
   const modalRootRef = useModalRoot();
 
   const modalStyle = useModalPosition({
-    parentElement,
-    isActive: isOpen,
+    anchor,
+    isActive: isOpen && Boolean(anchor),
     positionRelativeToOffsetParent: !modalRootRef.current,
     position,
     distance,
@@ -113,7 +114,11 @@ export const Modal: React.FC<ModalProps> = ({
 
   const node =
     isOpen === false ? null : (
-      <ModalContainer {...rest} style={modalStyle} ref={ref}>
+      <ModalContainer
+        {...rest}
+        style={anchor ? modalStyle : undefined}
+        ref={ref}
+      >
         {(labelTx || label) && (
           <>
             <ModalTitleRow
@@ -130,7 +135,7 @@ export const Modal: React.FC<ModalProps> = ({
       </ModalContainer>
     );
 
-  return modalRootRef.current
+  return modalRootRef.current && anchor
     ? ReactDOM.createPortal(node, modalRootRef.current)
     : node;
 };

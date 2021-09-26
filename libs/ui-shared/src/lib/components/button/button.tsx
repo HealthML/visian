@@ -139,7 +139,7 @@ const BaseButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
                 (theme.shouldForceTooltip && isPointerOverButton)) &&
               externalShowTooltip
             }
-            parentElement={buttonRef}
+            anchor={buttonRef}
             position={tooltipPosition}
           />
         )}

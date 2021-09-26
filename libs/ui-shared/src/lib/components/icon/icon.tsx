@@ -1,7 +1,7 @@
 import React from "react";
 import styled from "styled-components";
 
-import { color } from "../../theme";
+import { color, opacity } from "../../theme";
 import { IconProps } from "./icon.props";
 import * as icons from "./icons";
 
@@ -12,7 +12,8 @@ const StyledSVG = styled.svg.withConfig({
   fill: ${(
     props, // eslint-disable-next-line @typescript-eslint/no-explicit-any
   ) => color((props.color as any) || "text")};
-  opacity: ${(props) => (props.isActive !== false ? 1 : 0.3)};
+  opacity: ${(props) =>
+    props.isActive !== false ? 1 : opacity("inactiveIcon")};
 `;
 
 export const Icon = React.forwardRef<SVGSVGElement, IconProps>(

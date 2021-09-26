@@ -116,7 +116,7 @@ export class ImageLayer
     );
   }
 
-  public get title(): string | undefined {
+  public get title(): string {
     return super.title || this.image.name;
   }
 
@@ -246,8 +246,7 @@ export class ImageLayer
   }
 
   // Special Accessors
-  // TODO: Review regarding correct image component handling
-  public getVoxel(voxel: Voxel | Vector): number {
+  public getVoxel(voxel: Voxel | Vector): Vector {
     return this.image.getVoxelData(voxel);
   }
 
@@ -283,7 +282,7 @@ export class ImageLayer
   public toFile() {
     return writeSingleMedicalImage(
       this.image.toITKImage(),
-      `${this.image.name.split(".")[0]}.nii.gz`,
+      `${this.title.split(".")[0]}.nii.gz`,
     );
   }
   public quickExport = async () => {

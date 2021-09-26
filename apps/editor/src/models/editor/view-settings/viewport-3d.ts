@@ -4,7 +4,8 @@ import {
   ShadingMode,
   ITransferFunction,
 } from "@visian/ui-shared";
-import { ISerializable, Vector } from "@visian/utils";
+import { ISerializable, Vector, ViewType } from "@visian/utils";
+import FileSaver from "file-saver";
 import { action, autorun, computed, makeObservable, observable } from "mobx";
 import { Matrix4 } from "three";
 import {
@@ -31,14 +32,23 @@ export interface Viewport3DSnapshot<N extends string> {
 
   activeTransferFunctionName?: N;
   transferFunctions: TransferFunctionSnapshot<N>[];
+
+  useSmoothSegmentations: boolean;
+
+  useClippingPlane: boolean;
+  clippingPlaneNormal: number[];
+  clippingPlaneDistance: number;
+  shouldClippingPlaneRender: boolean;
+  shouldClippingPlaneShowAnnotations: boolean;
 }
 
 export class Viewport3D
   implements
     IViewport3D<TransferFunctionName>,
     ISerializable<Viewport3DSnapshot<TransferFunctionName>> {
-  public readonly excludeFromSnapshotTracking = ["document"];
+  public readonly excludeFromSnapshotTracking = ["document", "isXRAvailable"];
 
+  public isXRAvailable?: boolean;
   public isInXR!: boolean;
 
   public cameraMatrix!: Matrix4;
@@ -47,7 +57,7 @@ export class Viewport3D
 
   public opacity!: number;
   public shadingMode!: ShadingMode;
-  public suppressedShadingMode?: ShadingMode;
+  public requestedShadingMode?: ShadingMode;
 
   protected activeTransferFunctionName?: TransferFunctionName;
   public transferFunctions: Record<
@@ -55,7 +65,13 @@ export class Viewport3D
     TransferFunction<TransferFunctionName>
   >;
 
-  private shadingTimeout?: NodeJS.Timer;
+  public useSmoothSegmentations = false;
+
+  public useClippingPlane = false;
+  public clippingPlaneNormal = new Vector([0, 1, 0]);
+  public clippingPlaneDistance = 0;
+  public shouldClippingPlaneRender = false;
+  public shouldClippingPlaneShowAnnotations = true;
 
   constructor(
     snapshot: Partial<Viewport3DSnapshot<TransferFunctionName>> | undefined,
@@ -63,17 +79,27 @@ export class Viewport3D
   ) {
     makeObservable<
       this,
-      "activeTransferFunctionName" | "setSuppressedShadingMode"
+      | "activeTransferFunctionName"
+      | "setRequestedShadingMode"
+      | "setIsXRAvailable"
+      | "setShadingMode"
     >(this, {
+      isXRAvailable: observable,
       isInXR: observable,
       cameraMatrix: observable.ref,
       orbitTarget: observable,
       volumeSpaceCameraPosition: observable,
       opacity: observable,
       shadingMode: observable,
-      suppressedShadingMode: observable,
+      requestedShadingMode: observable,
       activeTransferFunctionName: observable,
       transferFunctions: observable,
+      useSmoothSegmentations: observable,
+      useClippingPlane: observable,
+      clippingPlaneNormal: observable,
+      clippingPlaneDistance: observable,
+      shouldClippingPlaneRender: observable,
+      shouldClippingPlaneShowAnnotations: observable,
 
       activeTransferFunction: computed,
 
@@ -81,11 +107,24 @@ export class Viewport3D
       setOrbitTarget: action,
       setVolumeSpaceCameraPosition: action,
       setActiveTransferFunction: action,
-      setIsInXR: action,
       setOpacity: action,
+      requestShadingMode: action,
       setShadingMode: action,
-      setSuppressedShadingMode: action,
+      setRequestedShadingMode: action,
       onTransferFunctionChange: action,
+      setIsXRAvailable: action,
+      setIsInXR: action,
+      setUseSmoothSegmentations: action,
+      setUseClippingPlane: action,
+      setClippingPlaneNormal: action,
+      setClippingPlaneNormalToFaceCamera: action,
+      setClippingPlaneDistance: action,
+      increaseClippingPlaneDistance: action,
+      decreaseClippingPlaneDistance: action,
+      setShouldClippingPlaneRender: action,
+      setShouldClippingPlaneShowAnnotations: action,
+      resetClippingPlane: action,
+      reset: action,
       applySnapshot: action,
     });
 
@@ -107,6 +146,8 @@ export class Viewport3D
         this.activeTransferFunction?.activate();
       }
     });
+
+    this.checkIsXRAvailable();
   }
 
   public get activeTransferFunction():
@@ -118,29 +159,26 @@ export class Viewport3D
   }
 
   public setCameraMatrix(value?: Matrix4): void {
-    if (value) {
-      this.cameraMatrix = value;
-      return;
-    }
-
-    this.cameraMatrix = new Matrix4().fromArray([
-      -0.7071067811865475,
-      0,
-      -0.7071067811865475,
-      0,
-      -0.408248290463863,
-      0.816496580927726,
-      0.408248290463863,
-      0,
-      0.5773502691896257,
-      0.5773502691896257,
-      -0.5773502691896255,
-      0,
-      0.3,
-      1.5,
-      -0.3,
-      1,
-    ]);
+    this.cameraMatrix =
+      value ||
+      new Matrix4().fromArray([
+        -0.7071067811865475,
+        0,
+        -0.7071067811865475,
+        0,
+        -0.408248290463863,
+        0.816496580927726,
+        0.408248290463863,
+        0,
+        0.5773502691896257,
+        0.5773502691896257,
+        -0.5773502691896255,
+        0,
+        0.3,
+        1.5,
+        -0.3,
+        1,
+      ]);
   }
 
   public setOrbitTarget(x = 0, y = 1.2, z = 0) {
@@ -155,14 +193,33 @@ export class Viewport3D
         "fc-cone"
       ] as ConeTransferFunction).setConeDirection(x, y, z);
     }
+
+    if (this.document.tools.activeTool?.name === "plane-tool") {
+      this.setClippingPlaneNormalToFaceCamera();
+    }
+  }
+
+  public setCameraToFaceViewType(viewType: ViewType, flipped = false) {
+    const cameraPosition = new Vector(3, false);
+    cameraPosition.setFromView(viewType, 1.2 * (flipped ? -1 : 1));
+
+    this.setOrbitTarget();
+
+    this.document.volumeRenderer?.setVolumeSpaceCameraPosition(cameraPosition);
+  }
+
+  public setClippingPlaneNormalToFaceCamera() {
+    const [x, y, z] = this.volumeSpaceCameraPosition;
+    this.setClippingPlaneNormal(-x, -y, -z);
   }
 
   public setActiveTransferFunction = (
     nameOrTransferFunction?:
       | TransferFunctionName
       | ITransferFunction<TransferFunctionName>,
+    isSilent?: boolean,
   ): void => {
-    this.onTransferFunctionChange();
+    if (!isSilent) this.onTransferFunctionChange();
 
     this.activeTransferFunctionName = nameOrTransferFunction
       ? typeof nameOrTransferFunction === "string"
@@ -173,9 +230,22 @@ export class Viewport3D
     this.activeTransferFunction?.activate();
   };
 
-  public setIsInXR(value = false) {
-    this.isInXR = value;
+  public cycleActiveTransferFunction(): void {
+    const transferFunctionNames = Object.keys(
+      this.transferFunctions,
+    ) as TransferFunctionName[];
+    this.setActiveTransferFunction(
+      transferFunctionNames[
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        (transferFunctionNames.indexOf(this.activeTransferFunctionName!) + 1) %
+          transferFunctionNames.length
+      ],
+    );
   }
+
+  public setUseSmoothSegmentations = (value = false) => {
+    this.useSmoothSegmentations = value;
+  };
 
   public setOpacity(value = 1) {
     this.onTransferFunctionChange();
@@ -183,31 +253,138 @@ export class Viewport3D
     this.opacity = Math.min(1, Math.max(0, value));
   }
 
-  public setShadingMode = (value: ShadingMode = "lao") => {
-    this.shadingMode = value;
+  public requestShadingMode = (mode: ShadingMode = "lao") => {
+    this.setShadingMode("none");
+    this.setRequestedShadingMode(mode === "none" ? undefined : mode);
   };
 
-  protected setSuppressedShadingMode(value?: ShadingMode) {
-    this.suppressedShadingMode = value;
+  protected setShadingMode(value: ShadingMode = "lao") {
+    this.shadingMode = value;
+  }
+
+  public cycleShadingMode(): void {
+    switch (this.shadingMode) {
+      case "none":
+        this.requestShadingMode("phong");
+        break;
+      case "phong":
+        this.requestShadingMode("lao");
+        break;
+      case "lao":
+        this.requestShadingMode("none");
+    }
+  }
+
+  public confirmRequestedShadingMode() {
+    if (this.requestedShadingMode) {
+      this.setShadingMode(this.requestedShadingMode);
+      this.setRequestedShadingMode();
+    }
+  }
+
+  protected setRequestedShadingMode(value?: ShadingMode) {
+    this.requestedShadingMode = value;
   }
 
   public onTransferFunctionChange = () => {
-    if (this.shadingMode === "none" && !this.suppressedShadingMode) return;
+    if (this.shadingMode === "none") return;
 
-    if (!this.suppressedShadingMode) {
-      this.setSuppressedShadingMode(this.shadingMode);
-      this.setShadingMode("none");
-    }
+    this.requestShadingMode(this.shadingMode);
+  };
 
-    if (this.shadingTimeout !== undefined) {
-      clearTimeout(this.shadingTimeout);
-    }
-    this.shadingTimeout = setTimeout(() => {
+  // XR
+  protected setIsXRAvailable(value = false) {
+    this.isXRAvailable = value;
+  }
+  public async checkIsXRAvailable() {
+    const isXRAvailable =
+      "xr" in navigator &&
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      this.setShadingMode(this.suppressedShadingMode!);
-      this.setSuppressedShadingMode();
-      this.shadingTimeout = undefined;
-    }, 200);
+      (await (navigator as THREE.Navigator).xr!.isSessionSupported(
+        "immersive-vr",
+      ));
+
+    this.setIsXRAvailable(isXRAvailable);
+    return isXRAvailable;
+  }
+  public setIsInXR(value = false) {
+    this.isInXR = value;
+  }
+
+  public enterXR = () => {
+    this.document.viewSettings.setViewMode("3D");
+    this.document.volumeRenderer?.xr.enterXR();
+  };
+  public exitXR = () => {
+    this.document.volumeRenderer?.xr.exitXR();
+  };
+
+  // Clipping Plane
+  public setUseClippingPlane = (value = false) => {
+    if (value !== this.useClippingPlane) {
+      this.useClippingPlane = value;
+      this.onTransferFunctionChange();
+    }
+
+    if (!value) this.setShouldClippingPlaneRender();
+  };
+
+  public setClippingPlaneNormal(x = 0, y = 1, z = 0) {
+    this.clippingPlaneNormal.set(x, y, z);
+    this.clippingPlaneNormal.normalize();
+    this.onTransferFunctionChange();
+  }
+
+  public setClippingPlaneDistance(value = 0) {
+    this.clippingPlaneDistance = value;
+    this.onTransferFunctionChange();
+  }
+  public increaseClippingPlaneDistance() {
+    this.setClippingPlaneDistance(this.clippingPlaneDistance + 0.02);
+  }
+  public decreaseClippingPlaneDistance() {
+    this.setClippingPlaneDistance(this.clippingPlaneDistance - 0.02);
+  }
+
+  public setShouldClippingPlaneRender = (value = false) => {
+    this.shouldClippingPlaneRender = value;
+    if (value) this.setUseClippingPlane(true);
+  };
+
+  public setShouldClippingPlaneShowAnnotations = (value = true) => {
+    this.shouldClippingPlaneShowAnnotations = value;
+  };
+
+  public resetClippingPlane = () => {
+    this.setUseClippingPlane();
+    this.setClippingPlaneNormal();
+    this.setClippingPlaneDistance();
+    this.setShouldClippingPlaneRender();
+    this.setShouldClippingPlaneShowAnnotations();
+  };
+
+  public exportCanvasImage = () => {
+    if (!this.document.volumeRenderer) return;
+
+    const canvas = this.document.volumeRenderer.renderer.domElement;
+
+    const saveCallback = (blob: Blob | null) => {
+      if (!blob) return;
+      const name = `${
+        this.document.title?.split(".")[0] || "visian_export"
+      }.png`;
+      FileSaver.saveAs(blob, name);
+    };
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    if ((canvas as any).msToBlob) {
+      // Edge
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (canvas as any).msToBlob(saveCallback);
+    } else {
+      // Other browsers
+      canvas.toBlob(saveCallback);
+    }
   };
 
   public reset = (): void => {
@@ -215,11 +392,13 @@ export class Viewport3D
     this.setCameraMatrix();
     this.setOrbitTarget();
     this.setOpacity();
-    this.setShadingMode();
+    this.setActiveTransferFunction(undefined, true);
+    this.requestShadingMode();
     Object.values(this.transferFunctions).forEach((transferFunction) => {
       transferFunction.reset();
     });
-    this.setActiveTransferFunction();
+    this.setUseSmoothSegmentations();
+    this.resetClippingPlane();
   };
 
   // Serialization
@@ -233,6 +412,13 @@ export class Viewport3D
       transferFunctions: Object.values(
         this.transferFunctions,
       ).map((transferFunction) => transferFunction.toJSON()),
+      useSmoothSegmentations: this.useSmoothSegmentations,
+      useClippingPlane: this.useClippingPlane,
+      clippingPlaneNormal: this.clippingPlaneNormal.toJSON(),
+      clippingPlaneDistance: this.clippingPlaneDistance,
+      shouldClippingPlaneRender: this.shouldClippingPlaneRender,
+      shouldClippingPlaneShowAnnotations: this
+        .shouldClippingPlaneShowAnnotations,
     };
   }
 
@@ -252,8 +438,8 @@ export class Viewport3D
       this.setOrbitTarget();
     }
     this.setOpacity(snapshot?.opacity);
-    this.setShadingMode(snapshot?.shadingMode);
-    this.setActiveTransferFunction(snapshot?.activeTransferFunctionName);
+    this.requestShadingMode(snapshot?.shadingMode);
+    this.setActiveTransferFunction(snapshot?.activeTransferFunctionName, true);
     snapshot?.transferFunctions?.forEach((transferFunctionSnapshot) => {
       const transferFunction = this.transferFunctions[
         transferFunctionSnapshot.name
@@ -262,6 +448,23 @@ export class Viewport3D
         transferFunction.applySnapshot(transferFunctionSnapshot);
       }
     });
+    this.setUseSmoothSegmentations(snapshot?.useSmoothSegmentations);
+    this.setUseClippingPlane(snapshot?.useClippingPlane);
+    const clippingPlaneNormal = snapshot?.clippingPlaneNormal;
+    if (clippingPlaneNormal) {
+      this.setClippingPlaneNormal(
+        clippingPlaneNormal[0],
+        clippingPlaneNormal[1],
+        clippingPlaneNormal[2],
+      );
+    } else {
+      this.setClippingPlaneNormal();
+    }
+    this.setClippingPlaneDistance(snapshot?.clippingPlaneDistance);
+    this.setShouldClippingPlaneRender(snapshot?.shouldClippingPlaneRender);
+    this.setShouldClippingPlaneShowAnnotations(
+      snapshot?.shouldClippingPlaneShowAnnotations,
+    );
 
     return Promise.resolve();
   }

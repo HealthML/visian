@@ -2,19 +2,25 @@ import {
   dataColorKeys,
   IDocument,
   IEditor,
+  IImageLayer,
   ILayer,
   ISliceRenderer,
   IVolumeRenderer,
+  Theme,
   ValueType,
 } from "@visian/ui-shared";
-import { ISerializable, readMedicalImage, Zip } from "@visian/utils";
+import { ISerializable, ITKImage, readMedicalImage, Zip } from "@visian/utils";
 import FileSaver from "file-saver";
-import isEqual from "lodash.isequal";
 import { action, computed, makeObservable, observable, toJS } from "mobx";
+import path from "path";
 import * as THREE from "three";
 import { v4 as uuidv4 } from "uuid";
 
-import { defaultAnnotationColor } from "../../constants";
+import {
+  defaultAnnotationColor,
+  defaultImageColor,
+  defaultRegionGrowingPreviewColor,
+} from "../../constants";
 import { StoreContext } from "../types";
 import { History, HistorySnapshot } from "./history";
 import { ImageLayer, Layer, LayerSnapshot } from "./layers";
@@ -30,6 +36,8 @@ import {
   ViewSettings,
   ViewSettingsSnapshot,
 } from "./view-settings";
+
+const uniqueValuesForAnnotationThreshold = 20;
 
 export const layerMap: {
   [kind: string]: ValueType<typeof layers>;
@@ -73,6 +81,8 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
 
   public tools: Tools;
 
+  public showLayerMenu = false;
+
   public markers: Markers = new Markers(this);
 
   constructor(
@@ -91,6 +101,11 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
       this.layerMap[layer.id] = new LayerKind(layer as any, this);
     });
     this.layerIds = snapshot?.layerIds || [];
+
+    Object.values(this.layerMap).forEach((layer) =>
+      layer.fixPotentiallyBadColor(),
+    );
+
     this.history = new History(snapshot?.history, this);
     this.viewSettings = new ViewSettings(snapshot?.viewSettings, this);
     this.viewport2D = new Viewport2D(snapshot?.viewport2D, this);
@@ -110,17 +125,24 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
       viewport2D: observable,
       viewport3D: observable,
       tools: observable,
+      showLayerMenu: observable,
 
       title: computed,
       activeLayer: computed,
+      imageLayers: computed,
+      baseImageLayer: computed,
 
       setTitle: action,
       setActiveLayer: action,
       addLayer: action,
       addNewAnnotationLayer: action,
+      moveLayer: action,
       deleteLayer: action,
+      toggleTypeAndRepositionLayer: action,
       importImage: action,
       importAnnotation: action,
+      setShowLayerMenu: action,
+      toggleLayerMenu: action,
       applySnapshot: action,
     });
 
@@ -148,6 +170,40 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
     );
   }
 
+  public get imageLayers(): IImageLayer[] {
+    return this.layers.filter(
+      (layer) => layer.kind === "image",
+    ) as IImageLayer[];
+  }
+  public get baseImageLayer(): IImageLayer | undefined {
+    // TODO: Rework to work with group layers
+
+    const areAllLayersAnnotations = Boolean(
+      !this.layerIds.find((layerId) => {
+        const layer = this.layerMap[layerId];
+        return layer.kind === "image" && !layer.isAnnotation;
+      }),
+    );
+
+    let baseImageLayer: ImageLayer | undefined;
+    this.layerIds
+      .slice()
+      .reverse()
+      .find((id) => {
+        const layer = this.layerMap[id];
+        if (
+          layer.kind === "image" &&
+          // use non-annotation layer if possible
+          (!layer.isAnnotation || areAllLayersAnnotations)
+        ) {
+          baseImageLayer = layer as ImageLayer;
+          return true;
+        }
+        return false;
+      });
+    return baseImageLayer;
+  }
+
   public getLayer(id: string): ILayer | undefined {
     return id ? this.layerMap[id] : undefined;
   }
@@ -163,18 +219,27 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
   public addLayer = (...newLayers: Layer[]): void => {
     newLayers.forEach((layer) => {
       this.layerMap[layer.id] = layer;
-      this.layerIds.unshift(layer.id);
+      if (layer.isAnnotation) {
+        this.layerIds.unshift(layer.id);
+      } else {
+        // insert image layer after all annotation layers
+        let insertIndex = 0;
+        for (let i = this.layerIds.length - 1; i >= 0; i--) {
+          if (this.layerMap[this.layerIds[i]].isAnnotation) {
+            insertIndex = i + 1;
+            break;
+          }
+        }
+        this.layerIds.splice(insertIndex, 0, layer.id);
+      }
     });
   };
 
-  public addNewAnnotationLayer = () => {
+  public getFirstUnusedColor = (
+    defaultColor = defaultAnnotationColor,
+  ): string => {
+    // TODO: Rework to work with group layers
     const layerStack = this.layers;
-
-    const baseLayer = layerStack.find(
-      (layer) => layer.kind === "image" && !layer.isAnnotation,
-    ) as ImageLayer | undefined;
-    if (!baseLayer) return;
-
     const usedColors: { [key: string]: boolean } = {};
     layerStack.forEach((layer) => {
       if (layer.color) {
@@ -182,15 +247,39 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
       }
     });
     const colorCandidates = dataColorKeys.filter((color) => !usedColors[color]);
+    return colorCandidates.length ? colorCandidates[0] : defaultColor;
+  };
+
+  public getRegionGrowingPreviewColor = (): string => {
+    const isDefaultUsed = this.layers.find(
+      (layer) => layer.color === defaultRegionGrowingPreviewColor,
+    );
+    return isDefaultUsed
+      ? this.getFirstUnusedColor(this.activeLayer?.color)
+      : defaultRegionGrowingPreviewColor;
+  };
+
+  public addNewAnnotationLayer = () => {
+    if (!this.baseImageLayer) return;
+
+    const annotationColor = this.getFirstUnusedColor();
 
     const annotationLayer = ImageLayer.fromNewAnnotationForImage(
-      baseLayer.image,
+      this.baseImageLayer.image,
       this,
-      colorCandidates.length ? colorCandidates[0] : undefined,
+      annotationColor,
     );
     this.addLayer(annotationLayer);
     this.setActiveLayer(annotationLayer);
   };
+
+  public moveLayer(idOrLayer: string | ILayer, newIndex: number) {
+    const layerId = typeof idOrLayer === "string" ? idOrLayer : idOrLayer.id;
+    const oldIndex = this.layerIds.indexOf(layerId);
+    if (!~oldIndex) return;
+
+    this.layerIds.splice(newIndex, 0, this.layerIds.splice(oldIndex, 1)[0]);
+  }
 
   public deleteLayer = (idOrLayer: string | ILayer): void => {
     const layerId = typeof idOrLayer === "string" ? idOrLayer : idOrLayer.id;
@@ -200,6 +289,28 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
     if (this.activeLayerId === layerId) {
       this.setActiveLayer(this.layerIds[0]);
     }
+  };
+
+  /** Toggles the type of the layer (annotation or not) and repositions it accordingly */
+  public toggleTypeAndRepositionLayer = (idOrLayer: string | ILayer): void => {
+    const layerId = typeof idOrLayer === "string" ? idOrLayer : idOrLayer.id;
+    let lastAnnotationIndex = this.layerIds.length - 1;
+    for (let i = 0; i < this.layerIds.length; i++) {
+      if (!this.layerMap[this.layerIds[i]].isAnnotation) {
+        lastAnnotationIndex = i - 1;
+        break;
+      }
+    }
+
+    if (this.layerMap[layerId].isAnnotation) {
+      this.moveLayer(layerId, lastAnnotationIndex);
+    } else {
+      this.moveLayer(layerId, lastAnnotationIndex + 1);
+    }
+
+    this.layerMap[layerId].setIsAnnotation(
+      !this.layerMap[layerId].isAnnotation,
+    );
   };
 
   public get has3DLayers(): boolean {
@@ -220,55 +331,137 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
     FileSaver.saveAs(await zip.toBlob(), `${this.title}.zip`);
   };
 
-  // I/O (DEPRECATED)
-  public async importImage(file: File | File[], name?: string) {
-    this.layerIds = [];
-    this.layerMap = {};
-
-    const image = await readMedicalImage(file);
-    image.name =
-      name || (Array.isArray(file) ? file[0]?.name || "" : file.name);
-    const imageLayer = ImageLayer.fromITKImage(image, this);
-
-    const annotationLayer = ImageLayer.fromNewAnnotationForImage(
-      imageLayer.image,
-      this,
-    );
-    this.addLayer(imageLayer, annotationLayer);
-    this.setActiveLayer(annotationLayer);
-
-    this.viewSettings.reset();
-    this.viewport2D.reset();
-    this.viewport3D.reset();
-    this.history.clear();
+  public finishBatchImport() {
+    if (!Object.values(this.layerMap).some((layer) => layer.isAnnotation)) {
+      this.addNewAnnotationLayer();
+    }
   }
 
-  public async importAnnotation(file: File | File[], name?: string) {
-    if (!this.layerIds.length) throw new Error("no-image-error");
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public async importFileSystemEntry(entry: any): Promise<void> {
+    if (!entry) return;
+    if (entry.isDirectory) {
+      const dirReader = entry.createReader();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const entries = await new Promise<any[]>((resolve) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        dirReader.readEntries((result: any[]) => {
+          resolve(result);
+        });
+      });
 
-    const image = await readMedicalImage(file);
+      const dirFiles: File[] = [];
+      const promises: Promise<void>[] = [];
+      const { length } = entries;
+      for (let i = 0; i < length; i++) {
+        if (entries[i].isFile) {
+          promises.push(
+            new Promise((resolve) => {
+              entries[i].file((file: File) => {
+                dirFiles.push(file);
+                resolve();
+              });
+            }),
+          );
+        } else {
+          promises.push(this.importFileSystemEntry(entries[i]));
+        }
+      }
+      await Promise.all(promises);
+
+      if (dirFiles.length) await this.importFile(dirFiles, entry.name);
+    } else {
+      await new Promise<void>((resolve, reject) => {
+        entry.file((file: File) => {
+          this.importFile(file).then(resolve).catch(reject);
+        });
+      });
+    }
+  }
+
+  public async importFile(
+    files: File | File[],
+    name?: string,
+    isAnnotation?: boolean,
+  ): Promise<void> {
+    if (Array.isArray(files)) {
+      if (files.some((file) => path.extname(file.name) !== ".dcm")) {
+        const promises: Promise<void>[] = [];
+        files.forEach((file) => {
+          if (file.name.startsWith(".")) return;
+          promises.push(this.importFile(file));
+        });
+        await Promise.all(promises);
+        return;
+      }
+    }
+
+    const isFirstLayer = !this.layerIds.length;
+    const image = await readMedicalImage(files);
     image.name =
-      name || (Array.isArray(file) ? file[0]?.name || "" : file.name);
-    const annotationLayer = ImageLayer.fromITKImage(image, this, {
-      isAnnotation: true,
-      color: defaultAnnotationColor,
+      name || (Array.isArray(files) ? files[0]?.name || "" : files.name);
+
+    if (isAnnotation) {
+      await this.importAnnotation(image);
+    } else if (isAnnotation !== undefined) {
+      await this.importImage(image);
+    } else {
+      // infer type
+      let isLikelyImage = false;
+      const { data } = image;
+      const uniqueValues = new Set();
+      for (let index = 0; index < data.length; index++) {
+        uniqueValues.add(data[index]);
+        if (uniqueValues.size > uniqueValuesForAnnotationThreshold) {
+          isLikelyImage = true;
+        }
+      }
+      if (isLikelyImage) {
+        await this.importImage(image);
+      } else {
+        await this.importAnnotation(image);
+      }
+    }
+
+    if (isFirstLayer) {
+      this.viewSettings.reset();
+      this.viewport2D.reset();
+      this.viewport3D.reset();
+      this.history.clear();
+    }
+  }
+
+  public async importImage(image: ITKImage) {
+    const imageLayer = ImageLayer.fromITKImage(image, this, {
+      color: defaultImageColor,
     });
     if (
-      !isEqual(
-        (this.layerMap[this.layerIds[0]] as ImageLayer)?.image?.voxelCount,
+      this.baseImageLayer &&
+      !this.baseImageLayer.image.voxelCount.equals(imageLayer.image.voxelCount)
+    ) {
+      throw new Error("image-mismatch-error");
+    }
+    this.addLayer(imageLayer);
+  }
+
+  public async importAnnotation(image: ITKImage) {
+    const annotationLayer = ImageLayer.fromITKImage(image, this, {
+      isAnnotation: true,
+      color: this.getFirstUnusedColor(),
+    });
+    if (
+      this.baseImageLayer &&
+      !this.baseImageLayer.image.voxelCount.equals(
         annotationLayer.image.voxelCount,
       )
     ) {
-      throw new Error("annotation-mismatch-error");
+      throw new Error("image-mismatch-error");
     }
 
-    // Replace old annotation (if any)
-    if (this.layerIds.length > 1) this.deleteLayer(this.layerIds[0]);
     this.addLayer(annotationLayer);
     this.setActiveLayer(annotationLayer);
   }
 
-  // I/O
   public async save(): Promise<void> {
     return this.context?.persistImmediately();
   }
@@ -276,6 +469,14 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
   public async requestSave(): Promise<void> {
     return this.context?.persist();
   }
+
+  // UI state
+  public setShowLayerMenu = (value = false): void => {
+    this.showLayerMenu = value;
+  };
+  public toggleLayerMenu = (): void => {
+    this.setShowLayerMenu(!this.showLayerMenu);
+  };
 
   // Proxies
   public get sliceRenderer(): ISliceRenderer | undefined {
@@ -288,6 +489,10 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
 
   public get renderers(): THREE.WebGLRenderer[] | undefined {
     return this.editor.renderers;
+  }
+
+  public get theme(): Theme {
+    return this.editor.theme;
   }
 
   // Serialization

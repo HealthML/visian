@@ -42,6 +42,7 @@ export class SliceCommand
   }
 
   public undo(): void {
+    this.document.setActiveLayer(this.layerId);
     const imageLayer = this.document.getLayer(this.layerId) as
       | IImageLayer
       | undefined;
@@ -51,6 +52,7 @@ export class SliceCommand
   }
 
   public redo(): void {
+    this.document.setActiveLayer(this.layerId);
     const imageLayer = this.document.getLayer(this.layerId) as
       | IImageLayer
       | undefined;
@@ -60,6 +62,11 @@ export class SliceCommand
   }
 
   private onUndoOrRedo(imageLayer?: IImageLayer) {
+    if (this.document.viewSettings.viewMode === "2D") {
+      this.document.viewport2D.setMainViewType(this.viewType);
+      this.document.viewport2D.setSelectedSlice(this.viewType, this.slice);
+    }
+
     this.document.sliceRenderer?.lazyRender();
     this.document.volumeRenderer?.lazyRender(true);
     imageLayer?.recomputeSliceMarkers(this.viewType, this.slice);

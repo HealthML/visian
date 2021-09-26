@@ -3,8 +3,6 @@ import { getPlaneAxes, IDisposable, IDisposer, ViewType } from "@visian/utils";
 import { autorun } from "mobx";
 import * as THREE from "three";
 
-import { toolOverlays as theme } from "../theme";
-
 export const get2x2BrushCursorPoints = () => [
   new THREE.Vector3(0, 0, 0),
   new THREE.Vector3(0, 2, 0),
@@ -38,14 +36,34 @@ export const getBoundedBrushCursorPoints = (radius: number) => {
   ];
 };
 
-export class BrushCursor extends THREE.LineSegments implements IDisposable {
+export class BrushCursor extends THREE.Group implements IDisposable {
   private points: THREE.Vector3[] = [];
   private workingMatrix = new THREE.Matrix4();
 
+  private lineSegments: THREE.LineSegments;
+  private centerDot: THREE.Points;
+
   protected disposers: IDisposer[] = [];
 
-  constructor(protected editor: IEditor, protected viewType: ViewType) {
-    super(new THREE.BufferGeometry(), new THREE.LineBasicMaterial(theme));
+  constructor(
+    protected editor: IEditor,
+    protected viewType: ViewType,
+    lineMaterial: THREE.LineBasicMaterial,
+    pointsMaterial: THREE.PointsMaterial,
+  ) {
+    super();
+
+    this.lineSegments = new THREE.LineSegments(
+      new THREE.BufferGeometry(),
+      lineMaterial,
+    );
+    this.add(this.lineSegments);
+
+    this.centerDot = new THREE.Points(
+      new THREE.BufferGeometry().setFromPoints([new THREE.Vector2()]),
+      pointsMaterial,
+    );
+    this.add(this.centerDot);
 
     this.disposers.push(
       autorun(this.updateRadius),
@@ -58,8 +76,8 @@ export class BrushCursor extends THREE.LineSegments implements IDisposable {
 
   public dispose() {
     this.disposers.forEach((disposer) => disposer());
-    this.geometry.dispose();
-    (this.material as THREE.LineBasicMaterial).dispose();
+    this.lineSegments.geometry.dispose();
+    (this.lineSegments.material as THREE.Material).dispose();
   }
 
   public setUVTarget(u: number, v: number) {
@@ -109,10 +127,20 @@ export class BrushCursor extends THREE.LineSegments implements IDisposable {
       this.points = getBoundedBrushCursorPoints(
         this.editor.activeDocument.tools.boundedSmartBrushRadius,
       );
-    } else if (this.editor.activeDocument.tools.brushSize === 0.5) {
+
+      this.centerDot.visible = false;
+    } else if (
+      this.editor.activeDocument.tools.brushSize === 0.5 &&
+      this.editor.activeDocument.tools.activeTool?.name !== "smart-brush-3d"
+    ) {
       this.points = get2x2BrushCursorPoints();
+
+      this.centerDot.visible = false;
     } else {
-      const radius = this.editor.activeDocument.tools.brushSize + 0.5;
+      const radius =
+        this.editor.activeDocument.tools.activeTool?.name === "smart-brush-3d"
+          ? 0.5
+          : this.editor.activeDocument.tools.brushSize + 0.5;
 
       let d = 1 - radius;
       let x = 0;
@@ -136,10 +164,14 @@ export class BrushCursor extends THREE.LineSegments implements IDisposable {
         }
         x++;
       }
+
+      this.centerDot.visible = radius > 1;
     }
 
-    this.geometry.dispose();
-    this.geometry = new THREE.BufferGeometry().setFromPoints(this.points);
+    this.lineSegments.geometry.dispose();
+    this.lineSegments.geometry = new THREE.BufferGeometry().setFromPoints(
+      this.points,
+    );
 
     this.editor.sliceRenderer?.lazyRender();
   };

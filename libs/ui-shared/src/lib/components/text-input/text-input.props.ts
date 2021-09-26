@@ -21,6 +21,13 @@ export interface TextInputProps<T = any>
 
   defaultValue?: T;
   value?: T;
+  valueTx?: T;
+
+  /**
+   * If set to `false`, the text input's contents cannot be changed.
+   * Defaults to `true`.
+   */
+  isEditable?: boolean;
 
   /** A callback that is called when the value is changed. */
   onChangeText?: (value: string) => void;

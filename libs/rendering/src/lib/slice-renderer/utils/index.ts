@@ -5,6 +5,7 @@ export * from "./crosshair";
 export * from "./crosshair-synching";
 export * from "./layering";
 export * from "./outline";
+export * from "./overlay-material";
 export * from "./preview-brush-cursor";
 export * from "./slice-size";
 export * from "./view-layout";

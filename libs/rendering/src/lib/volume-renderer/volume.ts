@@ -1,14 +1,21 @@
-import { IEditor, IImageLayer } from "@visian/ui-shared";
+import { IEditor } from "@visian/ui-shared";
 import { IDisposable, IDisposer } from "@visian/utils";
 import { autorun } from "mobx";
 import * as THREE from "three";
-import { RenderedImage } from "../rendered-image";
-import { SharedUniforms } from "./utils";
 
-import { VolumeMaterial } from "./volume-material";
+import { RenderedImage } from "../rendered-image";
+import { BoundingBox, ClippingPlane, SharedUniforms } from "./utils";
+import { VolumeMaterial, VolumePickingMaterial } from "./volume-material";
 
 /** A volume domain. */
 export class Volume extends THREE.Mesh implements IDisposable {
+  public clippingPlane: ClippingPlane;
+
+  private boundingBox: BoundingBox;
+
+  public mainMaterial: VolumeMaterial;
+  public pickingMaterial: VolumePickingMaterial;
+
   private disposers: IDisposer[] = [];
   constructor(
     editor: IEditor,
@@ -21,6 +28,7 @@ export class Volume extends THREE.Mesh implements IDisposable {
     super(
       new THREE.BoxGeometry(1, 1, 1),
       new VolumeMaterial(
+        editor,
         sharedUniforms,
         firstDerivative,
         secondDerivative,
@@ -29,36 +37,71 @@ export class Volume extends THREE.Mesh implements IDisposable {
       ),
     );
 
-    // The coordinate system in medical images usually has the object
-    // laying on the side. We want it to be upright.
-    this.rotateX(-Math.PI / 2);
+    this.mainMaterial = this.material as VolumeMaterial;
+    this.pickingMaterial = new VolumePickingMaterial(
+      editor,
+      sharedUniforms,
+      firstDerivative,
+      secondDerivative,
+      outputDerivative,
+      lao,
+    );
+
+    this.resetRotation();
+
+    this.renderOrder = 1;
+
+    this.clippingPlane = new ClippingPlane(editor, sharedUniforms);
+    this.add(this.clippingPlane);
+
+    this.boundingBox = new BoundingBox(editor);
+    this.add(this.boundingBox);
 
     this.disposers.push(
       autorun(() => {
-        const imageId =
-          editor.activeDocument?.viewport3D.activeTransferFunction?.params.image
-            ?.value;
-
-        if (!imageId) return;
-
-        const imageLayer = editor.activeDocument?.getLayer(imageId as string);
-
+        const imageLayer = editor.activeDocument?.baseImageLayer;
         if (!imageLayer) return;
 
-        const image = (imageLayer as IImageLayer).image as RenderedImage;
-
+        const image = imageLayer.image as RenderedImage;
         const scale = image.voxelCount
           .clone(false)
           .multiply(image.voxelSpacing)
           .multiplyScalar(0.001);
 
         this.scale.set(scale.x, scale.y, scale.z);
+
+        // The camera position has to be converted to the new volume coordinate system.
+        editor.volumeRenderer?.updateCameraPosition();
+        editor.volumeRenderer?.lazyRender();
       }),
     );
   }
 
+  public resetRotation() {
+    // The coordinate system in medical images usually has the object
+    // laying on the side. We want it to be upright.
+    this.rotation.set(-Math.PI / 2, 0, 0);
+  }
+
+  public onBeforePicking() {
+    this.material = this.pickingMaterial;
+    this.remove(this.boundingBox);
+
+    this.clippingPlane.onBeforePicking();
+  }
+
+  public onAfterPicking() {
+    this.material = this.mainMaterial;
+    this.add(this.boundingBox);
+
+    this.clippingPlane.onAfterPicking();
+  }
+
   public dispose() {
-    (this.material as VolumeMaterial).dispose();
+    this.mainMaterial.dispose();
+    this.pickingMaterial.dispose();
+    this.clippingPlane.dispose();
+    this.boundingBox.dispose();
     this.disposers.forEach((disposer) => disposer());
   }
 }

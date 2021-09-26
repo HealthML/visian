@@ -43,6 +43,6 @@ export const ExportPopUp: React.FC = () => (
         ]}
       />
     </InlineRow>
-    <ExportButton tx="export-button" />
+    <ExportButton tx="export" />
   </ExportPopUpContainer>
 );

@@ -10,12 +10,14 @@ const MainViewContainer = styled.div<{
   activeTool?: ToolName;
   isDrawable?: boolean;
   isToolInUse?: boolean;
+  isIn3DView?: boolean;
 }>`
   ${coverMixin}
 
   cursor: ${(props) => {
     switch (props.activeTool) {
       case "navigation-tool":
+      case "plane-tool":
         if (props.isToolInUse) document.body.style.cursor = "grabbing";
         return props.isToolInUse ? "grabbing" : "grab";
 
@@ -27,14 +29,16 @@ const MainViewContainer = styled.div<{
       case undefined:
         return "auto";
 
+      case "smart-brush-3d":
+        if (props.isIn3DView) return "crosshair";
+      // eslint-disable-next-line no-fallthrough
       default:
         return props.isDrawable ? "none" : "auto";
     }
   }};
 `;
 
-// eslint-disable-next-line @typescript-eslint/ban-types
-export const MainView = observer<{}>(() => {
+export const MainView = observer(() => {
   const store = useStore();
 
   const pointerDispatch = store?.pointerDispatch;
@@ -45,10 +49,6 @@ export const MainView = observer<{}>(() => {
     },
     [pointerDispatch],
   );
-
-  const handlePointerOut = useCallback(() => {
-    store?.editor.activeDocument?.tools.setIsCursorOverDrawableArea(false);
-  }, [store]);
 
   const [ref, setRef] = useState<HTMLDivElement | null>(null);
   const canvas = store?.editor.renderers[0].domElement;
@@ -68,9 +68,9 @@ export const MainView = observer<{}>(() => {
       activeTool={store?.editor.activeDocument?.tools.activeTool?.name}
       isDrawable={store?.editor.activeDocument?.tools.canDraw}
       isToolInUse={store?.editor.activeDocument?.tools.isToolInUse}
+      isIn3DView={store?.editor.activeDocument?.viewSettings.viewMode === "3D"}
       onContextMenu={preventDefault}
       onPointerDown={handlePointerDown}
-      onPointerOut={handlePointerOut}
       ref={setRef}
     />
   );

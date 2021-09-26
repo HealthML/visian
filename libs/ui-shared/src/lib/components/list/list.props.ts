@@ -1,8 +1,6 @@
 import type React from "react";
 import type { IconType } from "../icon";
 
-export type ListProps = React.HTMLAttributes<HTMLDivElement>;
-
 export interface ListItemProps extends React.HTMLAttributes<HTMLDivElement> {
   labelTx?: string;
   label?: string;
@@ -21,6 +19,10 @@ export interface ListItemProps extends React.HTMLAttributes<HTMLDivElement> {
    * divider should thus be omitted.
    */
   isLast?: boolean;
+
+  isLabelEditable?: boolean;
+  onChangeLabelText?: (string: string) => void;
+  onConfirmLabelText?: (value: string) => void;
 
   /**
    * The key of the list item's icon (if any).

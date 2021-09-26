@@ -2,14 +2,17 @@
   "loading": "Loading...",
   "reset": "Reset",
 
-  "drop-image": "Drop your scan here",
-  "drop-annotation": "Drop your annotation here",
+  "drop-file": "Drop your scan or annotation here",
   "upload-file": "Upload file",
 
   "untitled-document": "Untitled Document",
   "start": "Start by dragging in a scan.",
   "unsaved-changes": "Unsaved changes.",
   "saved-in-browser": "All changes saved in browser.",
+
+  "import": "Import",
+  "import-tooltip": "Import",
+  "importing": "Importing",
 
   "menu": "Menu",
   "theme": "Theme",
@@ -29,10 +32,12 @@
   "pixel-brush": "Brush (B)",
   "smart-brush": "Smart Brush (S)",
   "bounded-smart-brush": "Bounded Smart Brush (R)",
+  "smart-brush-3d": "3D Smart Brush (D)",
   "pixel-eraser": "Eraser (E)",
   "outline-tool": "Outline Tool (O)",
   "clear-slice": "Clear Slice (Del)",
   "fly-tool": "Fly Controls (F)",
+  "plane-tool": "Plane Tool (P)",
 
   "brush-settings": "Brush Settings",
   "smart-brush-settings": "Smart Brush Settings",
@@ -40,6 +45,13 @@
   "adaptive-brush-size": "Adaptive Brush Size",
   "threshold": "Threshold",
   "box-radius": "Bounding Box Radius",
+  "preview-color": "Preview Color",
+  "region-growing-steps": "Maximum Distance to Seed",
+  "submit-3D-region-growing": "Apply (Enter)",
+  "discard-region-growing": "Discard",
+  "enable-plane": "Use Clipping Plane",
+  "render-plane": "Show Image on Clipping Plane",
+  "render-plane-annotations": "Show Annotations",
 
   "layers": "Layers",
   "add-annotation-layer": "Add new annotation",
@@ -48,6 +60,11 @@
   "layer-settings": "Layer Settings",
   "opacity": "Opacity",
   "background-color": "Background Color",
+  "mark-annotation": "Mark as Annotation",
+  "mark-not-annotation": "Mark as not Annotation",
+  "export-layer": "Export Layer",
+  "export-slice": "Export Current Slice",
+  "rename-layer": "Rename Layer",
   "delete-layer": "Delete Layer",
   "delete-layer-confirmation": "Delete layer \"{{layer}}\"?",
 
@@ -62,16 +79,17 @@
   "contrast": "Contrast",
   "brightness": "Brightness",
 
-  "export": "Export (Ctrl + E)",
-  "export-button": "Export",
+  "export": "Export",
+  "export-tooltip": "Export (Ctrl + E)",
 
   "import-error": "Import Error",
-  "annotation-mismatch-error": "This annotation does not match the original image's size.",
-  "no-image-error": "You have to load a base image before importing an annotation.",
+  "image-mismatch-error": "This file does not match the loaded images' size.",
   "image-loading-error": "Looks like this file is not supported.",
+  "remote-file-error": "The specified file could not be loaded.",
 
   "3d-view": "3D View",
   "3d-view-tooltip": "3D View (4)",
+  "xr-view-tooltip": "XR View (5)",
   "shading-mode": "Shading Mode",
   "shading-none": "None",
   "shading-none-full": "No shading",
@@ -84,6 +102,7 @@
   "tf-fc-edges": "Edges",
   "tf-fc-cone": "Cone-Cut",
   "tf-custom": "Custom",
+  "smooth-segmentations": "Smooth Segmentations",
 
   "annotation-layer": "Focus Volume",
   "image-layer": "Volume",
