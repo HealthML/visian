@@ -400,7 +400,7 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
       }
     } else if (files.name.endsWith(".zip")) {
       const zip = await Zip.fromZipFile(files);
-      this.importFile(await zip.getAllFiles(), files.name);
+      await this.importFile(await zip.getAllFiles(), files.name);
       return;
     }
 
