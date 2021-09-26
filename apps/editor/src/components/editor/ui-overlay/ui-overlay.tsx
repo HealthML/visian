@@ -28,8 +28,6 @@ import { UndoRedoButtons } from "../undo-redo-buttons";
 import { ViewSettings } from "../view-settings";
 import { UIOverlayProps } from "./ui-overlay.props";
 
-import type { ImageLayer } from "../../../models";
-
 const Container = styled(AbsoluteCover)`
   align-items: stretch;
   display: flex;
@@ -134,6 +132,17 @@ export const UIOverlay = observer<UIOverlayProps>(
       setIsShortcutPopUpOpen(false);
     }, []);
 
+    // Export Button
+    const exportZip = useCallback(() => {
+      store?.setProgress({ labelTx: "exporting" });
+      store?.editor.activeDocument
+        ?.exportZip(true)
+        .catch()
+        .then(() => {
+          store?.setProgress();
+        });
+    }, [store]);
+
     return (
       <Container
         {...rest}
@@ -182,7 +191,7 @@ export const UIOverlay = observer<UIOverlayProps>(
               tooltipPosition="left"
               onPointerDown={
                 store?.editor.activeDocument?.viewSettings.viewMode === "2D"
-                  ? store?.editor.activeDocument?.exportZip
+                  ? exportZip
                   : store?.editor.activeDocument?.viewport3D.exportCanvasImage
               }
               isActive={false}

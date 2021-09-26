@@ -81,6 +81,7 @@
 
   "export": "Export",
   "export-tooltip": "Export (Strg + E)",
+  "exporting": "Exportieren",
 
   "import-error": "Importfehler",
   "image-mismatch-error": "Diese Datei passt nicht auf die schon geladenen.",

@@ -318,11 +318,15 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
   }
 
   // I/O
-  public exportZip = async () => {
+  public exportZip = async (limitToAnnotations?: boolean) => {
     const zip = new Zip();
 
     // TODO: Rework for group layers
-    const files = await Promise.all(this.layers.map((layer) => layer.toFile()));
+    const files = await Promise.all(
+      this.layers
+        .filter((layer) => !limitToAnnotations || layer.isAnnotation)
+        .map((layer) => layer.toFile()),
+    );
     files.forEach((file, index) => {
       if (!file) return;
       zip.setFile(`${`00${index}`.slice(-2)}_${file.name}`, file);
