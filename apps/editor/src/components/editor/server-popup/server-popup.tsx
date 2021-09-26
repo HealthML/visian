@@ -185,8 +185,6 @@ export const ServerPopUp = observer<ServerPopUpProps>(({ isOpen, onClose }) => {
             );
           })
           .then(() => {
-            store?.editor.activeDocument?.finishBatchImport();
-
             const study = studies?.find(
               (currentStudy) => currentStudy.StudyInstanceUID === selectedStudy,
             );
@@ -196,7 +194,7 @@ export const ServerPopUp = observer<ServerPopUpProps>(({ isOpen, onClose }) => {
               );
             }
 
-            store?.persist();
+            store?.editor.activeDocument?.finishBatchImport();
             onClose?.();
           })
           .catch((error) => {

@@ -321,6 +321,7 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
     if (!Object.values(this.layerMap).some((layer) => layer.isAnnotation)) {
       this.addNewAnnotationLayer();
     }
+    this.context?.persist();
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
