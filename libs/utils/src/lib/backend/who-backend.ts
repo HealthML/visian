@@ -1,4 +1,5 @@
 /* eslint-disable no-console */
+// TODO: Delete console prints
 export const whoBackendBaseUrl = "https://annotation.ai4h.net";
 
 export const getWHOTask = (taskId: string) =>

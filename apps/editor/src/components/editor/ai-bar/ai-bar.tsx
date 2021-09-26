@@ -199,7 +199,6 @@ export const AIBar = observer(() => {
       );
       store.currentTask.annotations[0].submittedAt = new Date().toISOString();
 
-      console.log(store.currentTask.toJSON());
       const responseJson = await putWHOTask(
         store.currentTask.taskUUID,
         JSON.stringify(store.currentTask.toJSON()),
