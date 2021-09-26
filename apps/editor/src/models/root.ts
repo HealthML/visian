@@ -89,7 +89,10 @@ export class RootStore implements ISerializable<RootSnapshot> {
    * Defaults to `true`.
    */
   public async connectToDICOMWebServer(url?: string, shouldPersist = true) {
+    if (url) this.setProgress({ labelTx: "connecting" });
     this.dicomWebServer = url ? await DICOMWebServer.connect(url) : undefined;
+    if (url) this.setProgress();
+
     if (shouldPersist && this.shouldPersist) {
       if (url) {
         localStorage.setItem("dicomWebServer", url);
@@ -170,7 +173,7 @@ export class RootStore implements ISerializable<RootSnapshot> {
 
     const dicomWebServer = localStorage.getItem("dicomWebServer");
     if (dicomWebServer) {
-      await this.connectToDICOMWebServer(dicomWebServer, false);
+      this.connectToDICOMWebServer(dicomWebServer, false);
     }
 
     const theme = localStorage.getItem("theme");
