@@ -45,6 +45,11 @@ export class Task {
       annotationTask: this.annotationTasks[0].toJSON(),
       status: AnnotationStatus.Pending,
       data: [],
+      annotator: {
+        userUUID: uuidv4(),
+        username: "visian",
+        expertise: "medium",
+      },
       submittedAt: "",
     };
     const annotation = new Annotation(annotationData);
