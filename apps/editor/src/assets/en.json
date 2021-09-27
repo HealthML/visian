@@ -92,6 +92,9 @@
   "image-loading-error": "Looks like this file is not supported.",
   "remote-file-error": "The specified file could not be loaded.",
 
+  "export-error": "Export Error",
+  "file-upload-error": "The file could not be uploaded.",
+
   "3d-view": "3D View",
   "3d-view-tooltip": "3D View (4)",
   "xr-view-tooltip": "XR View (5)",

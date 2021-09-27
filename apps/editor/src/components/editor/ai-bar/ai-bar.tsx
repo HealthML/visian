@@ -1,13 +1,14 @@
 import {
+  BlueButtonParam,
   color,
+  fontSize,
+  IImageLayer,
   InvisibleButton,
   Sheet,
-  Text,
-  fontSize,
-  SquareButton,
-  BlueButtonParam,
   sheetNoise,
-  IImageLayer,
+  SquareButton,
+  Text,
+  zIndex,
 } from "@visian/ui-shared";
 import {
   createBase64StringFromFile,
@@ -18,20 +19,11 @@ import {
 import { observer } from "mobx-react-lite";
 import React, { useCallback } from "react";
 import styled from "styled-components";
-import { AnnotationStatus } from "../../../models/who/annotation";
-import { AnnotationData } from "../../../models/who/annotationData";
 
 import { useStore } from "../../../app/root-store";
-
-const AIBarContainer = styled.div`
-  align-items: center;
-  align-self: stretch;
-  display: flex;
-  justify-content: center;
-  width: 100%;
-  box-sizing: border-box;
-  pointer-events: auto;
-`;
+import { whoHome } from "../../../constants";
+import { AnnotationStatus } from "../../../models/who/annotation";
+import { AnnotationData } from "../../../models/who/annotationData";
 
 const AIBarSheet = styled(Sheet)`
   width: 800px;
@@ -41,6 +33,13 @@ const AIBarSheet = styled(Sheet)`
   flex-direction: row;
   align-items: center;
   justify-content: center;
+  pointer-events: auto;
+
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: ${zIndex("modal")};
 `;
 
 const TaskContainer = styled.div`
@@ -62,8 +61,9 @@ const TaskLabel = styled(Text)`
 const TaskName = styled(Text)`
   font-size: 18px;
   line-height: 18px;
-  height: 18px;
+  margin-right: 20px;
   padding-top: 2px;
+  white-space: wrap;
 `;
 
 const ActionContainer = styled.div`
@@ -82,9 +82,10 @@ const ActionContainer = styled.div`
 
 const ActionName = styled(Text)`
   font-size: 18px;
-  line-height: 10px;
-  height: 12px;
+  line-height: 18px;
+  margin-right: 10px;
   padding-top: 2px;
+  white-space: wrap;
 `;
 
 const ActionButtonsContainer = styled.div`
@@ -197,15 +198,24 @@ export const AIBar = observer(() => {
       );
       store.currentTask.annotations[0].submittedAt = new Date().toISOString();
 
-      const responseJson = await putWHOTask(
-        store.currentTask.taskUUID,
-        JSON.stringify(store.currentTask.toJSON()),
-      );
-      if (responseJson?.nextTaskId) {
-        reloadWithNewTaskId(responseJson.nextTaskId);
+      try {
+        const responseJson = await putWHOTask(
+          store.currentTask.taskUUID,
+          JSON.stringify(store.currentTask.toJSON()),
+        );
+        if (responseJson?.nextTaskId) {
+          reloadWithNewTaskId(responseJson.nextTaskId);
+        } else {
+          window.location.href = whoHome;
+        }
+      } catch {
+        store?.setError({
+          titleTx: "export-error",
+          descriptionTx: "file-upload-error",
+        });
       }
     },
-    [store?.currentTask, store?.editor.activeDocument?.activeLayer],
+    [store],
   );
 
   const confirmTaskAnnotation = useCallback(async () => {
@@ -217,49 +227,52 @@ export const AIBar = observer(() => {
   }, [saveAnnotationToWHOBackend]);
 
   return store?.editor.activeDocument ? (
-    <AIBarContainer>
-      <AIBarSheet>
-        <TaskContainer>
-          <TaskLabel tx="Task" />
-          <TaskName tx={store.currentTask?.annotationTasks[0].title} />
-          {/* TODO: Styling */}
-        </TaskContainer>
-        <ActionContainer>
-          <ActionName tx={store.currentTask?.annotationTasks[0].description} />
-          <ActionButtonsContainer>
-            <ActionButtons
-              icon="check"
-              tooltipTx="confirm-task-annotation-tooltip"
-              tooltipPosition="right"
-              onPointerDown={confirmTaskAnnotation}
-            />
-            <ActionButtons
-              icon="redo"
-              tooltipTx="skip-task-annotation-tooltip"
-              tooltipPosition="right"
-              onPointerDown={skipTaskAnnotation}
-            />
-          </ActionButtonsContainer>
-        </ActionContainer>
-        <AIContainer>
-          <AIToolsContainer>
+    <AIBarSheet>
+      <TaskContainer>
+        <TaskLabel tx="Task" />
+        <TaskName tx={store.currentTask?.annotationTasks[0].title} />
+        {/* TODO: Styling */}
+      </TaskContainer>
+      <ActionContainer>
+        <ActionName tx={store.currentTask?.annotationTasks[0].description} />
+        <ActionButtonsContainer>
+          <ActionButtons
+            icon="check"
+            tooltipTx="confirm-task-annotation-tooltip"
+            tooltipPosition="right"
+            onPointerDown={confirmTaskAnnotation}
+          />
+          <ActionButtons
+            icon="redo"
+            tooltipTx="skip-task-annotation-tooltip"
+            tooltipPosition="right"
+            onPointerDown={skipTaskAnnotation}
+          />
+        </ActionButtonsContainer>
+      </ActionContainer>
+      <AIContainer>
+        <AIToolsContainer>
+          {false && (
             <AIMessageContainer>
               <AIMessage>
-                <AIMessageTitle tx="Show me what you are looking for" />
-                <AIMessageSubtitle tx="Start annotating" />
+                <AIMessageTitle tx="ai-show-me" />
+                <AIMessageSubtitle tx="ai-start-annotating" />
               </AIMessage>
               <AIMessageConnector />
             </AIMessageContainer>
-            <SkipButton icon="arrowLeft" />
+          )}
+
+          <SkipButton icon="arrowLeft" />
+          <a href={whoHome}>
             <AIButton
               icon="whoAI"
-              tooltipTx="export-tooltip"
+              tooltipTx="return-who"
               tooltipPosition="right"
             />
-            <SkipButton icon="arrowRight" />
-          </AIToolsContainer>
-        </AIContainer>
-      </AIBarSheet>
-    </AIBarContainer>
+          </a>
+          <SkipButton icon="arrowRight" />
+        </AIToolsContainer>
+      </AIContainer>
+    </AIBarSheet>
   ) : null;
 });

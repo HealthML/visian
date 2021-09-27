@@ -11,6 +11,7 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
+import { whoHome } from "../../../constants";
 import { ActionModal } from "../action-modal";
 import { AIBar } from "../ai-bar";
 import { AxesAndVoxel } from "../axes-and-voxel";
@@ -158,7 +159,16 @@ export const UIOverlay = observer<UIOverlayProps>(
         )}
         <ColumnLeft>
           <MenuRow>
-            {!isFromWHO() && (
+            {isFromWHO() ? (
+              <a href={whoHome}>
+                <ImportButton
+                  icon="whoAI"
+                  tooltipTx="return-who"
+                  tooltipPosition="right"
+                  isActive={false}
+                />
+              </a>
+            ) : (
               <ImportButton
                 icon="import"
                 tooltipTx="import-tooltip"
@@ -179,8 +189,6 @@ export const UIOverlay = observer<UIOverlayProps>(
         </ColumnLeft>
         <ColumnCenter>
           <TopConsole />
-          <Spacer />
-          {isFromWHO() && <AIBar />}
         </ColumnCenter>
         <ColumnRight>
           <SideViews />
@@ -202,6 +210,8 @@ export const UIOverlay = observer<UIOverlayProps>(
             <SliceSlider showValueLabelOnChange={!isDraggedOver} />
           </RightBar>
         </ColumnRight>
+
+        {isFromWHO() && <AIBar />}
 
         <ShortcutPopUp
           isOpen={isShortcutPopUpOpen}

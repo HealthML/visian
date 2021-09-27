@@ -1,4 +1,4 @@
-export const awsConfigDevelopment = {
+export const whoAwsConfigDevelopment = {
   aws_project_region: "eu-central-1",
   aws_cognito_region: "eu-central-1",
   aws_user_pools_id: "eu-central-1_1cFVgcU36",
@@ -8,7 +8,7 @@ export const awsConfigDevelopment = {
   },
 };
 
-export const awsConfigDeployment = {
+export const whoAwsConfigDeployment = {
   aws_project_region: "eu-central-1",
   aws_cognito_region: "eu-central-1",
   aws_user_pools_id: "eu-central-1_1cFVgcU36",
@@ -18,4 +18,7 @@ export const awsConfigDeployment = {
   },
 };
 
-export default awsConfigDeployment;
+// eslint-disable-next-line @typescript-eslint/naming-convention
+export const whoRequiresAuthentication = false;
+
+export const whoHome = "https://www.ai4h.net/";

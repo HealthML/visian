@@ -1,23 +1,12 @@
-/* eslint-disable no-console */
-// TODO: Delete console prints
 export const whoBackendBaseUrl = "https://annotation.ai4h.net";
 
 export const getWHOTask = (taskId: string) =>
-  fetch(`${whoBackendBaseUrl}/tasks/${taskId}`)
-    .then((data) => {
-      if (!data.ok) {
-        throw new Error(data.status.toString());
-      }
-      return data.json();
-    })
-    .then((task) => {
-      console.log(task);
-      return task;
-    })
-    .catch((error) => {
-      // TODO: Error handling
-      console.log(error);
-    });
+  fetch(`${whoBackendBaseUrl}/tasks/${taskId}`).then((data) => {
+    if (!data.ok) {
+      throw new Error(data.status.toString());
+    }
+    return data.json();
+  });
 
 export const putWHOTask = (taskId: string, task: string) => {
   const options = {
@@ -27,19 +16,10 @@ export const putWHOTask = (taskId: string, task: string) => {
     },
     body: task,
   };
-  return fetch(`${whoBackendBaseUrl}/tasks/${taskId}/next`, options)
-    .then((data) => {
-      if (!data.ok) {
-        throw new Error(data.status.toString());
-      }
+  return fetch(`${whoBackendBaseUrl}/tasks/${taskId}/next`, options).then(
+    (data) => {
+      if (!data.ok) throw new Error(data.status.toString());
       return data.json();
-    })
-    .then((response) => {
-      console.log(response);
-      return response;
-    })
-    .catch((error) => {
-      // TODO: Error handling
-      console.log(error);
-    });
+    },
+  );
 };

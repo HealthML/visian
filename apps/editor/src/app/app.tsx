@@ -1,3 +1,4 @@
+import { withAuthenticator } from "@aws-amplify/ui-react";
 import {
   getTheme,
   GlobalStyles,
@@ -5,37 +6,38 @@ import {
   ModalRoot,
   ThemeProvider,
 } from "@visian/ui-shared";
+import { isFromWHO, isUsingLocalhost } from "@visian/utils";
+import Amplify from "aws-amplify";
 import { observer } from "mobx-react-lite";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { Route, Switch } from "react-router-dom";
 
-import Amplify from "aws-amplify";
-import { withAuthenticator } from "@aws-amplify/ui-react";
-import { isFromWHO, isUsingLocalhost } from "@visian/utils";
+import {
+  whoAwsConfigDeployment,
+  whoAwsConfigDevelopment,
+  whoRequiresAuthentication,
+} from "../constants";
 import { setUpEventHandling } from "../event-handling";
 import { EditorScreen } from "../screens";
 import { setupRootStore, StoreProvider } from "./root-store";
 
 import type { RootStore } from "../models";
 
-import { awsConfigDevelopment, awsConfigDeployment } from "./aws-exports";
-
 if (isFromWHO()) {
   if (isUsingLocalhost()) {
-    Amplify.configure(awsConfigDevelopment);
+    Amplify.configure(whoAwsConfigDevelopment);
   } else {
-    Amplify.configure(awsConfigDeployment);
+    Amplify.configure(whoAwsConfigDeployment);
   }
 }
 
 const queryClient = new QueryClient();
 
-// TODO: Refactor for better typing
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function withWhoAuthenticator(wrappedComponent: any) {
-  return isFromWHO() ? withAuthenticator(wrappedComponent) : wrappedComponent;
-}
+const withWhoAuthenticator = (wrappedComponent: React.ComponentType) =>
+  isFromWHO() && whoRequiresAuthentication
+    ? withAuthenticator(wrappedComponent)
+    : wrappedComponent;
 
 function App() {
   // TODO: Push loading down to components that need i18n

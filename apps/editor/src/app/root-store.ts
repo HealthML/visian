@@ -28,62 +28,23 @@ export const setupRootStore = async () => {
     await store.destroy(true);
   }
 
-  const url = new URL(window.location.href);
-  try {
-    // Load scan based on GET parameter
-    // Example: http://localhost:4200/?load=http://data.idoimaging.com/nifti/1010_brain_mr_04.nii.gz
-    const loadScanParam = url.searchParams.get("load");
-    if (loadScanParam && store.editor.newDocument()) {
-      await store.editor.activeDocument?.importFile(
-        await readFileFromURL(loadScanParam, true),
-      );
-      store.editor.activeDocument?.finishBatchImport();
-      if (url.searchParams.get("demo") === null) {
-        window.history.replaceState(
-          {},
-          document.title,
-          window.location.pathname,
-        );
-      }
-    }
-  } catch {
-    store.setError({
-      titleTx: "import-error",
-      descriptionTx: "remote-file-error",
-    });
-    store.editor.setActiveDocument();
-  }
-
-  if (isFromWHO()) {
+  (async () => {
+    const url = new URL(window.location.href);
     try {
-      const taskId = getWHOTaskIdFromUrl();
-      if (taskId && store.editor.newDocument(true)) {
-        const taskJson = await getWHOTask(taskId);
-        const whoTask = new Task(taskJson);
-        store.setCurrentTask(whoTask);
-
+      // Load scan based on GET parameter
+      // Example: http://localhost:4200/?load=http://data.idoimaging.com/nifti/1010_brain_mr_04.nii.gz
+      const loadScanParam = url.searchParams.get("load");
+      if (loadScanParam && store.editor.newDocument()) {
+        store.setProgress({ labelTx: "importing" });
         await store.editor.activeDocument?.importFile(
-          createFileFromBase64(
-            whoTask.samples[0].title,
-            whoTask.samples[0].data,
-          ),
-          undefined,
-          false,
+          await readFileFromURL(loadScanParam, true),
         );
-        if (whoTask.kind === TaskType.Create) {
-          store.editor.activeDocument?.finishBatchImport();
-          store.currentTask?.addNewAnnotation();
-        } else {
-          // Task Type is Correct or Review
-          await store.editor.activeDocument?.importFile(
-            createFileFromBase64(
-              whoTask.samples[0].title
-                .replace(".nii", "_annotation")
-                .concat(".nii"),
-              whoTask.annotations[0].data[0].data,
-            ),
-            whoTask.samples[0].title.replace(".nii", "_annotation"),
-            true,
+        store.editor.activeDocument?.finishBatchImport();
+        if (url.searchParams.get("demo") === null) {
+          window.history.replaceState(
+            {},
+            document.title,
+            window.location.pathname,
           );
         }
       }
@@ -94,7 +55,54 @@ export const setupRootStore = async () => {
       });
       store.editor.setActiveDocument();
     }
-  }
+
+    if (isFromWHO()) {
+      // Load scan from WHO
+      // Example: http://localhost:4200/?origin=who&taskId=0b2fb698-6e1d-4682-a986-78b115178d94
+      try {
+        const taskId = getWHOTaskIdFromUrl();
+        if (taskId && store.editor.newDocument(true)) {
+          store.setProgress({ labelTx: "importing" });
+          const taskJson = await getWHOTask(taskId);
+          const whoTask = new Task(taskJson);
+          store.setCurrentTask(whoTask);
+
+          await store.editor.activeDocument?.importFile(
+            createFileFromBase64(
+              whoTask.samples[0].title,
+              whoTask.samples[0].data,
+            ),
+            undefined,
+            false,
+          );
+          if (whoTask.kind === TaskType.Create) {
+            store.editor.activeDocument?.finishBatchImport();
+            store.currentTask?.addNewAnnotation();
+          } else {
+            // Task Type is Correct or Review
+            await store.editor.activeDocument?.importFile(
+              createFileFromBase64(
+                whoTask.samples[0].title
+                  .replace(".nii", "_annotation")
+                  .concat(".nii"),
+                whoTask.annotations[0].data[0].data,
+              ),
+              whoTask.samples[0].title.replace(".nii", "_annotation"),
+              true,
+            );
+          }
+        }
+      } catch {
+        store.setError({
+          titleTx: "import-error",
+          descriptionTx: "remote-file-error",
+        });
+        store.editor.setActiveDocument();
+      }
+
+      store.setProgress();
+    }
+  })();
 
   window.addEventListener("beforeunload", (event) => {
     if (store.isDirty) {
