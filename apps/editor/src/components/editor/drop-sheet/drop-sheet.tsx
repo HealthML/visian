@@ -60,7 +60,7 @@ export const DropSheet: React.FC<DropSheetProps> = observer(
           } catch (error) {
             store?.setError({
               titleTx: "import-error",
-              descriptionTx: error.message,
+              descriptionTx: (error as Error).message,
             });
           }
           store?.editor.activeDocument?.finishBatchImport();

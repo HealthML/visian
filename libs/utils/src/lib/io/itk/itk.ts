@@ -45,7 +45,7 @@ export const readDICOMSeries = async (files: File[]) => {
 
 /** Returns a parsed medical image from the given zipped DICOM series. */
 export const readZippedMedicalImage = async (file: File) => {
-  const zip = await Zip.fromFile(file);
+  const zip = await Zip.fromZipFile(file);
   if (
     !zip.files ||
     ~zip.files.findIndex((fileName) => !fileName.endsWith(".dcm"))

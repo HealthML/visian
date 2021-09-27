@@ -82,6 +82,7 @@
 
   "export": "Export",
   "export-tooltip": "Export (Ctrl + E)",
+  "exporting": "Exporting",
 
   "import-error": "Import Error",
   "image-mismatch-error": "This file does not match the loaded images' size.",
