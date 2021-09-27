@@ -214,6 +214,7 @@ export const AIBar = observer(() => {
             const urlElements = newLocation.split("/");
             const newTaskId = urlElements[urlElements.length - 1];
             if (newTaskId !== store.currentTask.taskUUID) {
+              store?.setIsDirty(false, true);
               reloadWithNewTaskId(newTaskId);
               return;
             }

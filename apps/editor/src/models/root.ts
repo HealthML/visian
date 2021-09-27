@@ -146,8 +146,9 @@ export class RootStore implements ISerializable<RootSnapshot> {
     return !(this.isSaved && this.isSaveUpToDate);
   }
 
-  public setIsDirty = (isDirty = true) => {
+  public setIsDirty = (isDirty = true, force = false) => {
     this.isSaved = !isDirty;
+    if (force) this.isSaveUpToDate = !isDirty;
   };
 
   protected setIsSaveUpToDate(value: boolean) {
@@ -227,7 +228,7 @@ export class RootStore implements ISerializable<RootSnapshot> {
     localStorage.clear();
     await this.config.storageBackend?.clear();
 
-    this.setIsDirty(false);
+    this.setIsDirty(false, true);
     window.location.href = window.location.pathname;
   };
 }
