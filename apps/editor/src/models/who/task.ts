@@ -1,4 +1,3 @@
-// import { v4 as uuidv4 } from "uuid";
 import { Annotation, AnnotationSnapshot, AnnotationStatus } from "./annotation";
 import { AnnotationTask, AnnotationTaskSnapshot } from "./annotationTask";
 import { Sample } from "./sample";
@@ -25,6 +24,7 @@ export class Task {
   public samples: Sample[];
   public annotations: Annotation[];
 
+  // TODO: Properly type API response data
   constructor(task: any) {
     this.taskUUID = task.taskUUID;
     this.kind = task.kind;

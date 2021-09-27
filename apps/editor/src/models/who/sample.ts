@@ -9,6 +9,7 @@ export class Sample {
   public title: string;
   public data: string;
 
+  // TODO: Properly type API response data
   constructor(sample: any) {
     this.sampleUUID = sample.sampleUUID;
     this.title = sample.title;

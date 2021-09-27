@@ -25,6 +25,7 @@ export class Annotation {
   public annotator: Annotator;
   public submittedAt: string;
 
+  // TODO: Properly type API response data
   constructor(annotation: any) {
     this.annotationUUID = annotation.annotationUUID;
     this.annotationTask = new AnnotationTask(annotation.annotationTask);

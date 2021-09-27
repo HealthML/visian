@@ -18,6 +18,7 @@ export class AnnotationTask {
   public title: string;
   public description: string;
 
+  // TODO: Properly type API response data
   constructor(annotationTask: any) {
     this.annotationTaskUUID = annotationTask.annotationTaskUUID;
     this.kind = annotationTask.kind;

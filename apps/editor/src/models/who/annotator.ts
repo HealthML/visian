@@ -9,6 +9,7 @@ export class Annotator {
   public username: string;
   public expertise: string;
 
+  // TODO: Properly type API response data
   constructor(annotator: any) {
     this.userUUID = annotator.userUUID;
     this.username = annotator.username;

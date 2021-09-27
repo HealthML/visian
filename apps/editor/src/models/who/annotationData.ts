@@ -7,6 +7,7 @@ export class AnnotationData {
   public annotationDataUUID: string;
   public data: string;
 
+  // TODO: Properly type API response data
   constructor(annotationData: any) {
     this.annotationDataUUID = annotationData.annotationDataUUID;
     this.data = annotationData.data;
