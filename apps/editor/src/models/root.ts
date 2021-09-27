@@ -12,6 +12,7 @@ import { errorDisplayDuration } from "../constants";
 import { DICOMWebServer } from "./dicomweb-server";
 import { Editor, EditorSnapshot } from "./editor";
 import { ErrorNotification, ProgressNotification } from "./types";
+import { Task } from "./who";
 
 export interface RootSnapshot {
   editor: EditorSnapshot;
@@ -44,6 +45,8 @@ export class RootStore implements ISerializable<RootSnapshot> {
   public refs: { [key: string]: React.RefObject<HTMLElement> } = {};
   public pointerDispatch?: IDispatch;
 
+  public currentTask?: Task;
+
   constructor(protected config: RootStoreConfig = {}) {
     makeObservable<this, "isSaved" | "isSaveUpToDate" | "setIsSaveUpToDate">(
       this,
@@ -56,6 +59,7 @@ export class RootStore implements ISerializable<RootSnapshot> {
         isSaved: observable,
         isSaveUpToDate: observable,
         refs: observable,
+        currentTask: observable,
 
         theme: computed,
 
@@ -68,6 +72,7 @@ export class RootStore implements ISerializable<RootSnapshot> {
         setIsDirty: action,
         setIsSaveUpToDate: action,
         setRef: action,
+        setCurrentTask: action,
       },
     );
 
@@ -141,8 +146,9 @@ export class RootStore implements ISerializable<RootSnapshot> {
     return !(this.isSaved && this.isSaveUpToDate);
   }
 
-  public setIsDirty = (isDirty = true) => {
+  public setIsDirty = (isDirty = true, force = false) => {
     this.isSaved = !isDirty;
+    if (force) this.isSaveUpToDate = !isDirty;
   };
 
   protected setIsSaveUpToDate(value: boolean) {
@@ -155,6 +161,10 @@ export class RootStore implements ISerializable<RootSnapshot> {
     } else {
       delete this.refs[key];
     }
+  }
+
+  public setCurrentTask(task?: Task) {
+    this.currentTask = task;
   }
 
   public persist = async () => {
@@ -218,7 +228,7 @@ export class RootStore implements ISerializable<RootSnapshot> {
     localStorage.clear();
     await this.config.storageBackend?.clear();
 
-    this.setIsDirty(false);
+    this.setIsDirty(false, true);
     window.location.href = window.location.pathname;
   };
 }

@@ -84,10 +84,16 @@
   "export-tooltip": "Export (Ctrl + E)",
   "exporting": "Exporting",
 
+  "confirm-task-annotation-tooltip": "Confirm",
+  "skip-task-annotation-tooltip": "Skip",
+
   "import-error": "Import Error",
   "image-mismatch-error": "This file does not match the loaded images' size.",
   "image-loading-error": "Looks like this file is not supported.",
   "remote-file-error": "The specified file could not be loaded.",
+
+  "export-error": "Export Error",
+  "file-upload-error": "The file could not be uploaded.",
 
   "3d-view": "3D View",
   "3d-view-tooltip": "3D View (4)",

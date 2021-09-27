@@ -84,10 +84,16 @@
   "export-tooltip": "Export (Strg + E)",
   "exporting": "Exportieren",
 
+  "confirm-task-annotation-tooltip": "Bestätigen",
+  "skip-task-annotation-tooltip": "Überspringen",
+
   "import-error": "Importfehler",
   "image-mismatch-error": "Diese Datei passt nicht auf die schon geladenen.",
   "image-loading-error": "Diese Datei scheint nicht unterstützt zu sein.",
   "remote-file-error": "Die angegebene Datei konnte nicht geladen werden.",
+
+  "export-error": "Exportfehler",
+  "file-upload-error": "Die Datei konnte nicht hochgeladen werden.",
 
   "3d-view": "3D Ansicht",
   "3d-view-tooltip": "3D Ansicht (4)",

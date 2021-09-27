@@ -4,3 +4,5 @@ export * from "./lib/mobx";
 export * from "./lib/models";
 export * from "./lib/rasterization";
 export * from "./lib/types";
+export * from "./lib/url-utils";
+export * from "./lib/backend";

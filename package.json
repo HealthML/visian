@@ -40,6 +40,7 @@
   },
   "private": true,
   "dependencies": {
+    "@aws-amplify/ui-react": "^1.2.15",
     "@nestjs/common": "^7.0.0",
     "@nestjs/config": "^0.6.1",
     "@nestjs/core": "^7.0.0",
@@ -48,6 +49,7 @@
     "@nestjs/typeorm": "^7.1.5",
     "apollo-server-express": "^2.19.0",
     "argon2": "^0.27.1",
+    "aws-amplify": "^4.2.9",
     "class-transformer": "^0.3.1",
     "class-validator": "^0.12.2",
     "connect-typeorm": "^1.1.4",
