@@ -199,15 +199,19 @@ export const AIBar = observer(() => {
       store.currentTask.annotations[0].submittedAt = new Date().toISOString();
 
       try {
-        const responseJson = await putWHOTask(
+        const response = await putWHOTask(
           store.currentTask.taskUUID,
           JSON.stringify(store.currentTask.toJSON()),
         );
-        if (responseJson?.nextTaskId) {
-          reloadWithNewTaskId(responseJson.nextTaskId);
-        } else {
-          window.location.href = whoHome;
+        if (response) {
+          const newLocation = response.headers.get("location");
+          if (newLocation) {
+            reloadWithNewTaskId(newLocation);
+            return;
+          }
         }
+        // If no new location is given, return to the WHO page
+        window.location.href = whoHome;
       } catch {
         store?.setError({
           titleTx: "export-error",

@@ -1,5 +1,4 @@
 import { AnnotationData, AnnotationDataSnapshot } from "./annotationData";
-import { AnnotationTask, AnnotationTaskSnapshot } from "./annotationTask";
 import { Annotator, AnnotatorSnapshot } from "./annotator";
 
 export enum AnnotationStatus {
@@ -10,7 +9,6 @@ export enum AnnotationStatus {
 
 export interface AnnotationSnapshot {
   annotationUUID: string;
-  annotationTask: AnnotationTaskSnapshot;
   status: AnnotationStatus;
   annotationDataList: AnnotationDataSnapshot[];
   annotator: AnnotatorSnapshot;
@@ -19,7 +17,6 @@ export interface AnnotationSnapshot {
 
 export class Annotation {
   public annotationUUID: string;
-  public annotationTask: AnnotationTask;
   public status: AnnotationStatus;
   public data: AnnotationData[];
   public annotator: Annotator;
@@ -28,7 +25,6 @@ export class Annotation {
   // TODO: Properly type API response data
   constructor(annotation: any) {
     this.annotationUUID = annotation.annotationUUID;
-    this.annotationTask = new AnnotationTask(annotation.annotationTask);
     this.status = annotation.status;
     this.data = annotation.data.map(
       (annotationData: any) => new AnnotationData(annotationData),
@@ -40,7 +36,6 @@ export class Annotation {
   public toJSON(): AnnotationSnapshot {
     return {
       annotationUUID: this.annotationUUID,
-      annotationTask: this.annotationTask.toJSON(),
       status: this.status,
       annotationDataList: Object.values(this.data).map((annotationData) =>
         annotationData.toJSON(),
