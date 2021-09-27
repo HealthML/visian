@@ -1,5 +1,6 @@
 import {
   ButtonParam,
+  ColorParam,
   Modal,
   ModalHeaderButton,
   NumberRangeParam,
@@ -56,6 +57,20 @@ export const ThresholdAnnotationModal = observer(() => {
         />
       }
     >
+      <ColorParam
+        labelTx="preview-color"
+        isCollapsed
+        isFirst
+        isLast
+        value={
+          store?.editor.activeDocument?.tools.thresholdAnnotationRenderer3D
+            .previewColor
+        }
+        setValue={
+          store?.editor.activeDocument?.tools.thresholdAnnotationRenderer3D
+            .setPreviewColor
+        }
+      />
       <NumberRangeParam
         labelTx="threshold-annotation-threshold"
         serializationMethod="push"
