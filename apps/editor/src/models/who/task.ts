@@ -1,14 +1,13 @@
-import { v4 as uuidv4 } from "uuid";
+// import { v4 as uuidv4 } from "uuid";
 import { Annotation, AnnotationSnapshot, AnnotationStatus } from "./annotation";
 import { AnnotationTask, AnnotationTaskSnapshot } from "./annotationTask";
-import { Sample, SampleSnapshot } from "./sample";
+import { Sample } from "./sample";
 
 export interface TaskSnapshot {
   taskUUID: string;
   kind: string;
   readOnly: boolean;
   annotationTasks: AnnotationTaskSnapshot[];
-  samples: SampleSnapshot[];
   annotations?: AnnotationSnapshot[];
 }
 
@@ -41,12 +40,10 @@ export class Task {
 
   public addNewAnnotation(): void {
     const annotationData = {
-      annotationUUID: uuidv4(),
       annotationTask: this.annotationTasks[0].toJSON(),
       status: AnnotationStatus.Pending,
       data: [],
       annotator: {
-        userUUID: uuidv4(),
         username: "visian",
         expertise: "medium",
       },
@@ -64,7 +61,6 @@ export class Task {
       annotationTasks: Object.values(
         this.annotationTasks,
       ).map((annotationTask) => annotationTask.toJSON()),
-      samples: Object.values(this.samples).map((sample) => sample.toJSON()),
       annotations: Object.values(this.annotations).map((annotation) =>
         annotation.toJSON(),
       ),

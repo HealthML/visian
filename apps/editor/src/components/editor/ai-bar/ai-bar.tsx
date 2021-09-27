@@ -18,7 +18,6 @@ import {
 import { observer } from "mobx-react-lite";
 import React, { useCallback } from "react";
 import styled from "styled-components";
-import { v4 as uuidv4 } from "uuid";
 import { AnnotationStatus } from "../../../models/who/annotation";
 import { AnnotationData } from "../../../models/who/annotationData";
 
@@ -188,7 +187,6 @@ export const AIBar = observer(() => {
       );
 
       const annotationDataForBackend = {
-        annotationDataUUID: uuidv4(),
         data: base64Annotation,
       };
       if (store.currentTask.annotations[0].data.length) {

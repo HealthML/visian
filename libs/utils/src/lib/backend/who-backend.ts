@@ -27,9 +27,7 @@ export const putWHOTask = (taskId: string, task: string) => {
     },
     body: task,
   };
-  console.log(taskId);
-  console.log(options);
-  return fetch(`${whoBackendBaseUrl}/tasks/${taskId}`, options)
+  return fetch(`${whoBackendBaseUrl}/tasks/${taskId}/next`, options)
     .then((data) => {
       if (!data.ok) {
         throw new Error(data.status.toString());
