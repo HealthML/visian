@@ -43,9 +43,7 @@ jobs:
 
       - name: Build (production)
         if: success() && (github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/master')
-        run:
-          yarn build editor --prod --skip-nx-cache --baseHref ${NX_DEPLOY_URL:-/} --deployUrl ${NX_DEPLOY_URL:-/} &&\
-          yarn build ar-demo --prod --skip-nx-cache --baseHref ${NX_DEPLOY_URL:-/} --deployUrl ${NX_DEPLOY_URL:-/}
+        run: yarn nx run-many --target=build --projects=editor,ar-demo --prod --skip-nx-cache --baseHref ${NX_DEPLOY_URL:-/} --deployUrl ${NX_DEPLOY_URL:-/}
 
       - uses: actions/upload-artifact@v2
         if: success() && (github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/master')
