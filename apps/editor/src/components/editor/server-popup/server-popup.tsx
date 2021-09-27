@@ -149,15 +149,18 @@ export const ServerPopUp = observer<ServerPopUpProps>(({ isOpen, onClose }) => {
   const store = useStore();
   const queryClient = useQueryClient();
 
-  const { data: studies } = useQuery("studies", () =>
-    store?.dicomWebServer?.searchStudies(),
+  const { data: studies, isLoading: isLoadingStudies } = useQuery(
+    "studies",
+    () => store?.dicomWebServer?.searchStudies(),
   );
 
   const [selectedStudy, setSelectedStudy] = useState<string | undefined>();
-  const { data: series } = useQuery(["series", selectedStudy], () =>
-    selectedStudy
-      ? store?.dicomWebServer?.searchSeries(selectedStudy)
-      : Promise.resolve([]),
+  const { data: series, isLoading: isLoadingSeries } = useQuery(
+    ["series", selectedStudy],
+    () =>
+      selectedStudy
+        ? store?.dicomWebServer?.searchSeries(selectedStudy)
+        : Promise.resolve([]),
   );
 
   const loadSeries = useCallback(
@@ -167,10 +170,30 @@ export const ServerPopUp = observer<ServerPopUpProps>(({ isOpen, onClose }) => {
         store?.setProgress({ labelTx: "importing" });
         store?.dicomWebServer
           ?.retrieveSeries(selectedStudy, seriesId)
-          .then((files) =>
-            store.editor.activeDocument?.importFile(files, seriesId),
-          )
+          .then((files) => {
+            const thisSeries = series?.find(
+              (currentSeries) => currentSeries.SeriesInstanceUID === seriesId,
+            );
+
+            return store.editor.activeDocument?.importFile(
+              files,
+              String(
+                thisSeries
+                  ? thisSeries.SeriesNumber || thisSeries.SeriesInstanceUID
+                  : seriesId,
+              ),
+            );
+          })
           .then(() => {
+            const study = studies?.find(
+              (currentStudy) => currentStudy.StudyInstanceUID === selectedStudy,
+            );
+            if (study) {
+              store?.editor.activeDocument?.setTitle(
+                study.PatientName || study.PatientID || study.StudyInstanceUID,
+              );
+            }
+
             store?.editor.activeDocument?.finishBatchImport();
             onClose?.();
           })
@@ -185,7 +208,7 @@ export const ServerPopUp = observer<ServerPopUpProps>(({ isOpen, onClose }) => {
           });
       }
     },
-    [onClose, selectedStudy, store],
+    [onClose, selectedStudy, series, store, studies],
   );
 
   const disconnect = useCallback(() => {
@@ -226,6 +249,7 @@ export const ServerPopUp = observer<ServerPopUpProps>(({ isOpen, onClose }) => {
       )}
       <ColumnContainer>
         <SingleColumn>
+          {isLoadingStudies && <Text tx="loading" />}
           {studies?.map((study) => (
             <ListItemWrapper
               key={study.StudyInstanceUID}
@@ -234,18 +258,31 @@ export const ServerPopUp = observer<ServerPopUpProps>(({ isOpen, onClose }) => {
               {study.StudyInstanceUID === selectedStudy ? (
                 <ListItemActive>
                   <ListItemIcon icon="folder" />
-                  <ListItemText text={study.PatientName || study.PatientID} />
+                  <ListItemText
+                    text={
+                      study.PatientName ||
+                      study.PatientID ||
+                      study.StudyInstanceUID
+                    }
+                  />
                 </ListItemActive>
               ) : (
                 <ListItem>
                   <ListItemIcon icon="folder" />
-                  <ListItemText text={study.PatientName || study.PatientID} />
+                  <ListItemText
+                    text={
+                      study.PatientName ||
+                      study.PatientID ||
+                      study.StudyInstanceUID
+                    }
+                  />
                 </ListItem>
               )}
             </ListItemWrapper>
           ))}
         </SingleColumn>
         <SingleColumnLast>
+          {isLoadingSeries && <Text tx="loading" />}
           {selectedStudy &&
             series?.map((thisSeries, index) => (
               <ListItemWrapper

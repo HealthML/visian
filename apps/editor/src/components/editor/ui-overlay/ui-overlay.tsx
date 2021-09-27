@@ -5,11 +5,11 @@ import {
   Spacer,
   Text,
 } from "@visian/ui-shared";
+import { isFromWHO } from "@visian/utils";
 import { observer } from "mobx-react-lite";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 
-import { isFromWHO } from "@visian/utils";
 import { useStore } from "../../../app/root-store";
 import { ActionModal } from "../action-modal";
 import { AIBar } from "../ai-bar";
@@ -28,8 +28,6 @@ import { TopConsole } from "../top-console";
 import { UndoRedoButtons } from "../undo-redo-buttons";
 import { ViewSettings } from "../view-settings";
 import { UIOverlayProps } from "./ui-overlay.props";
-
-import type { ImageLayer } from "../../../models";
 
 const Container = styled(AbsoluteCover)`
   align-items: stretch;
@@ -135,6 +133,17 @@ export const UIOverlay = observer<UIOverlayProps>(
       setIsShortcutPopUpOpen(false);
     }, []);
 
+    // Export Button
+    const exportZip = useCallback(() => {
+      store?.setProgress({ labelTx: "exporting" });
+      store?.editor.activeDocument
+        ?.exportZip(true)
+        .catch()
+        .then(() => {
+          store?.setProgress();
+        });
+    }, [store]);
+
     return (
       <Container
         {...rest}
@@ -183,8 +192,7 @@ export const UIOverlay = observer<UIOverlayProps>(
                 tooltipPosition="left"
                 onPointerDown={
                   store?.editor.activeDocument?.viewSettings.viewMode === "2D"
-                    ? (store?.editor.activeDocument?.activeLayer as ImageLayer)
-                        ?.quickExport
+                    ? exportZip
                     : store?.editor.activeDocument?.viewport3D.exportCanvasImage
                 }
                 isActive={false}

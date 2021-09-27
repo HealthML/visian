@@ -13,6 +13,7 @@
   "import": "Import",
   "import-tooltip": "Import",
   "importing": "Importing",
+  "connecting": "Connecting",
 
   "menu": "Menu",
   "theme": "Theme",
@@ -81,6 +82,7 @@
 
   "export": "Export",
   "export-tooltip": "Export (Ctrl + E)",
+  "exporting": "Exporting",
 
   "confirm-task-annotation-tooltip": "Confirm",
   "skip-task-annotation-tooltip": "Skip",

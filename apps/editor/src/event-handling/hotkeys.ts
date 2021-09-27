@@ -310,7 +310,13 @@ export const setUpHotKeys = (store: RootStore): IDisposer => {
     event.preventDefault();
 
     if (store.editor.activeDocument?.viewSettings.viewMode === "2D") {
-      (store.editor.activeDocument?.activeLayer as ImageLayer)?.quickExport?.();
+      store.setProgress({ labelTx: "exporting" });
+      store.editor.activeDocument
+        ?.exportZip(true)
+        .catch()
+        .then(() => {
+          store?.setProgress();
+        });
     } else {
       store.editor.activeDocument?.viewport3D.exportCanvasImage();
     }

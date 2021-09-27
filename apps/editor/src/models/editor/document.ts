@@ -9,7 +9,8 @@ import {
   Theme,
   ValueType,
 } from "@visian/ui-shared";
-import { ISerializable, ITKImage, readMedicalImage } from "@visian/utils";
+import { ISerializable, ITKImage, readMedicalImage, Zip } from "@visian/utils";
+import FileSaver from "file-saver";
 import { action, computed, makeObservable, observable, toJS } from "mobx";
 import path from "path";
 import * as THREE from "three";
@@ -317,10 +318,29 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
   }
 
   // I/O
+  public exportZip = async (limitToAnnotations?: boolean) => {
+    const zip = new Zip();
+
+    // TODO: Rework for group layers
+    const files = await Promise.all(
+      this.layers
+        .filter((layer) => !limitToAnnotations || layer.isAnnotation)
+        .map((layer) => layer.toFile()),
+    );
+    files.forEach((file, index) => {
+      if (!file) return;
+      zip.setFile(`${`00${index}`.slice(-2)}_${file.name}`, file);
+    });
+
+    FileSaver.saveAs(await zip.toBlob(), `${this.title}.zip`);
+  };
+
   public finishBatchImport() {
     if (!Object.values(this.layerMap).some((layer) => layer.isAnnotation)) {
       this.addNewAnnotationLayer();
+      this.viewport2D.setMainViewType();
     }
+    this.context?.persist();
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -380,6 +400,10 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
         await Promise.all(promises);
         return;
       }
+    } else if (files.name.endsWith(".zip")) {
+      const zip = await Zip.fromZipFile(files);
+      await this.importFile(await zip.getAllFiles(), files.name);
+      return;
     }
 
     const isFirstLayer = !this.layerIds.length;

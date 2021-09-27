@@ -13,6 +13,7 @@
   "import": "Import",
   "import-tooltip": "Import",
   "importing": "Importieren",
+  "connecting": "Verbinden",
 
   "menu": "Menü",
   "theme": "Farbschema",
@@ -81,6 +82,7 @@
 
   "export": "Export",
   "export-tooltip": "Export (Strg + E)",
+  "exporting": "Exportieren",
 
   "confirm-task-annotation-tooltip": "Bestätigen",
   "skip-task-annotation-tooltip": "Überspringen",
