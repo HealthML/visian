@@ -39,7 +39,7 @@ jobs:
 
       - name: Build (testing)
         if: success() && github.ref != 'refs/heads/develop' && github.ref != 'refs/heads/master'
-        run: yarn affected:build --skip-nx-cache --baseHref ${NX_DEPLOY_URL:-/} --deployUrl ${NX_DEPLOY_URL:-/} --base=origin/master
+        run: yarn affected:build --skip-nx-cache --baseHref ${NX_DEPLOY_URL:-/} --deployUrl ${NX_DEPLOY_URL:-/} --base=origin/develop
 
       - name: Build (production)
         if: success() && (github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/master')
