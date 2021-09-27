@@ -67,28 +67,36 @@ export const setupRootStore = async () => {
           const whoTask = new Task(taskJson);
           store.setCurrentTask(whoTask);
 
-          await store.editor.activeDocument?.importFile(
-            createFileFromBase64(
-              whoTask.samples[0].title,
-              whoTask.samples[0].data,
-            ),
-            undefined,
-            false,
+          await Promise.all(
+            whoTask.samples.map(async (sample) => {
+              await store.editor.activeDocument?.importFile(
+                createFileFromBase64(sample.title, sample.data),
+                undefined,
+                false,
+              );
+            }),
           );
           if (whoTask.kind === TaskType.Create) {
             store.editor.activeDocument?.finishBatchImport();
             store.currentTask?.addNewAnnotation();
           } else {
             // Task Type is Correct or Review
-            await store.editor.activeDocument?.importFile(
-              createFileFromBase64(
-                whoTask.samples[0].title
-                  .replace(".nii", "_annotation")
-                  .concat(".nii"),
-                whoTask.annotations[0].data[0].data,
-              ),
-              whoTask.samples[0].title.replace(".nii", "_annotation"),
-              true,
+            await Promise.all(
+              whoTask.annotations.map(async (annotation, index) => {
+                const title =
+                  whoTask.samples[index].title ||
+                  whoTask.samples[0].title ||
+                  `annotation_${index}`;
+                // TODO: Get rid of hardcoded array index
+                await store.editor.activeDocument?.importFile(
+                  createFileFromBase64(
+                    title.replace(".nii", "_annotation").concat(".nii"),
+                    annotation.data[0].data,
+                  ),
+                  title.replace(".nii", "_annotation"),
+                  true,
+                );
+              }),
             );
           }
         }

@@ -174,8 +174,10 @@ export const AIBar = observer(() => {
 
   const saveAnnotationToWHOBackend = useCallback(
     async (status: AnnotationStatus) => {
-      if (!store?.currentTask?.annotations[0]) return;
-      store.currentTask.annotations[0].status = status;
+      if (!store?.currentTask?.annotations.length) return;
+      store.currentTask.annotations.forEach((annotation) => {
+        annotation.status = status;
+      });
       const currentAnnotationImage = (store?.editor.activeDocument
         ?.activeLayer as IImageLayer).image.toITKImage();
       const currentAnnotationFile = await writeSingleMedicalImage(
@@ -190,13 +192,13 @@ export const AIBar = observer(() => {
       const annotationDataForBackend = {
         data: base64Annotation,
       };
-      if (store.currentTask.annotations[0].data.length) {
-        store.currentTask.annotations[0].data = [];
-      }
-      store.currentTask.annotations[0].data.push(
-        new AnnotationData(annotationDataForBackend),
-      );
-      store.currentTask.annotations[0].submittedAt = new Date().toISOString();
+      store.currentTask.annotations.forEach((annotation) => {
+        if (annotation.data.length) {
+          annotation.data = [];
+        }
+        annotation.data.push(new AnnotationData(annotationDataForBackend));
+        annotation.submittedAt = new Date().toISOString();
+      });
 
       try {
         const response = await putWHOTask(
@@ -234,11 +236,17 @@ export const AIBar = observer(() => {
     <AIBarSheet>
       <TaskContainer>
         <TaskLabel tx="Task" />
-        <TaskName tx={store.currentTask?.annotationTasks[0].title} />
-        {/* TODO: Styling */}
+        <TaskName
+          tx={store.currentTask?.annotationTasks[0]?.title || "Task Name"}
+        />
       </TaskContainer>
       <ActionContainer>
-        <ActionName tx={store.currentTask?.annotationTasks[0].description} />
+        <ActionName
+          tx={
+            store.currentTask?.annotationTasks[0]?.description ||
+            "Task Description"
+          }
+        />
         <ActionButtonsContainer>
           <ActionButtons
             icon="check"

@@ -40,7 +40,6 @@ export class Task {
 
   public addNewAnnotation(): void {
     const annotationData = {
-      annotationTask: this.annotationTasks[0].toJSON(),
       status: AnnotationStatus.Pending,
       data: [],
       annotator: {
