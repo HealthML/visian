@@ -35,8 +35,17 @@ jobs:
       - run: yarn affected:lint --base=origin/master
       - run: yarn affected:test --base=origin/master
       - run: yarn affected:compile --base=origin/master
-      - run: yarn affected:build --prod --skip-nx-cache --baseHref ${NX_DEPLOY_URL:-/} --deployUrl ${NX_DEPLOY_URL:-/} --base=origin/master
       #- run: yarn affected:e2e --base=origin/master
+
+      - name: Build (testing)
+        if: success() && github.ref != 'refs/heads/develop' && github.ref != 'refs/heads/master'
+        run: yarn affected:build --skip-nx-cache --baseHref ${NX_DEPLOY_URL:-/} --deployUrl ${NX_DEPLOY_URL:-/} --base=origin/master
+
+      - name: Build (production)
+        if: success() && (github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/master')
+        run:
+          yarn build editor --prod --skip-nx-cache --baseHref ${NX_DEPLOY_URL:-/} --deployUrl ${NX_DEPLOY_URL:-/} &&\
+          yarn build ar-demo --prod --skip-nx-cache --baseHref ${NX_DEPLOY_URL:-/} --deployUrl ${NX_DEPLOY_URL:-/}
 
       - uses: actions/upload-artifact@v2
         if: success() && (github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/master')
