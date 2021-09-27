@@ -10,6 +10,11 @@
   "unsaved-changes": "Ungespeicherte Änderungen.",
   "saved-in-browser": "Alle Änderungen im Browser gespeichert.",
 
+  "import": "Import",
+  "import-tooltip": "Import",
+  "importing": "Importieren",
+  "connecting": "Verbinden",
+
   "menu": "Menü",
   "theme": "Farbschema",
   "dark": "Dunkel",
@@ -28,6 +33,7 @@
   "pixel-brush": "Pinsel (B)",
   "smart-brush": "Smarter Pinsel (S)",
   "bounded-smart-brush": "Begrenzter Smarter Pinsel (R)",
+  "smart-brush-3d": "3D Smarter Pinsel (D)",
   "pixel-eraser": "Radierer (E)",
   "outline-tool": "Umrandungswerkzeug (O)",
   "clear-slice": "Schicht leeren (Entf)",
@@ -40,8 +46,13 @@
   "adaptive-brush-size": "Adaptive Pinselgröße",
   "threshold": "Schwellwert",
   "box-radius": "Begrenzungsradius",
+  "preview-color": "Vorschaufarbe",
+  "region-growing-steps": "Maximale Distanz zum Start",
+  "submit-3D-region-growing": "Anwenden (Enter)",
+  "discard-region-growing": "Abbrechen",
   "enable-plane": "Schnittebene nutzen",
   "render-plane": "Bild auf der Schnittebene anzeigen",
+  "render-plane-annotations": "Annotationen anzeigen",
 
   "layers": "Ebenen",
   "add-annotation-layer": "Neue Annotation hinzufügen",
@@ -54,6 +65,7 @@
   "mark-not-annotation": "Zu nicht Annotation",
   "export-layer": "Ebene exportieren",
   "export-slice": "Aktuelle Schicht exportieren",
+  "rename-layer": "Ebene umbenennen",
   "delete-layer": "Ebene löschen",
   "delete-layer-confirmation": "Ebene \"{{layer}}\" löschen?",
 
@@ -70,9 +82,10 @@
 
   "export": "Export",
   "export-tooltip": "Export (Strg + E)",
+  "exporting": "Exportieren",
 
   "import-error": "Importfehler",
-  "annotation-mismatch-error": "Diese Annotation passt nicht auf den Scan.",
+  "image-mismatch-error": "Diese Datei passt nicht auf die schon geladenen.",
   "image-loading-error": "Diese Datei scheint nicht unterstützt zu sein.",
   "remote-file-error": "Die angegebene Datei konnte nicht geladen werden.",
 
@@ -91,6 +104,7 @@
   "tf-fc-edges": "Kanten",
   "tf-fc-cone": "Kegelschnitt",
   "tf-custom": "Eigene",
+  "smooth-segmentations": "Segmentierungen geglättet anzeigen",
 
   "annotation-layer": "Fokusvolumen",
   "image-layer": "Volumen",

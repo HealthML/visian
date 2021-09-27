@@ -1,4 +1,5 @@
 import throttle from "lodash.throttle";
+import { isPromise } from "./utils";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /**
@@ -39,29 +40,49 @@ export const asyncThrottle = (...args: Parameters<typeof throttle>) => {
     (value: ReturnType<typeof fn>) => void,
     (exception: Error) => void,
   ][] = [];
-  const throttledFn = throttle((...args2: Parameters<typeof fn>) => {
+  const throttledFn = throttle((...throttledArgs: Parameters<typeof fn>) => {
     try {
-      const result = fn(...args2);
-      pendingRequests.forEach((request) => {
-        request[0](result);
-      });
+      const result = fn(...throttledArgs);
+      if (isPromise(result)) {
+        result
+          .then(() => {
+            pendingRequests.forEach((request) => {
+              request[0](result);
+            });
+          })
+          .catch((exception) => {
+            pendingRequests.forEach((request) => {
+              request[1](exception);
+            });
+          })
+          .finally(() => {
+            pendingRequests = [];
+          });
+      } else {
+        pendingRequests.forEach((request) => {
+          request[0](result);
+        });
+        pendingRequests = [];
+      }
     } catch (exception) {
       pendingRequests.forEach((request) => {
-        request[1](exception);
+        request[1](exception as Error);
       });
+      pendingRequests = [];
     }
-    pendingRequests = [];
   }, ...rest);
 
-  const returnedFunction = (...args2: Parameters<typeof fn>) =>
+  const returnedFunction = (...throttledArgs: Parameters<typeof fn>) =>
     new Promise<ReturnType<typeof fn>>((resolve, reject) => {
       pendingRequests.push([resolve, reject]);
-      throttledFn(...args2);
+      throttledFn(...throttledArgs);
     });
 
   returnedFunction.cancel = () => throttledFn.cancel();
   returnedFunction.flush = () => throttledFn.flush();
   return returnedFunction as AsyncDebouncedFunc<
-    (...args3: Parameters<typeof fn>) => ReturnType<typeof fn> | undefined
+    (
+      ...throttledArgs: Parameters<typeof fn>
+    ) => ReturnType<typeof fn> | undefined
   >;
 };

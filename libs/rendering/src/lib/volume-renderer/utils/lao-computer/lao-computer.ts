@@ -8,23 +8,25 @@ import { TiledRenderer } from "../tiled-renderer";
 import LAOMaterial from "./lao-material";
 
 export const totalLAORays = isPerformanceLow ? 8 : 32; // Set to 8 to turn progressive LAO off.
-export const quadSize = isPerformanceLow ? 512 : 1024;
+export const quadSize = isPerformanceLow ? 256 : 1024;
 
 export class LAOComputer extends TiledRenderer {
   private _isDirty = true;
 
   private _isFinalLAOFlushed = false;
+  private isFirstFrameStarted = false;
 
   private reactionDisposers: IReactionDisposer[] = [];
 
   constructor(
-    editor: IEditor,
+    private editor: IEditor,
     sharedUniforms: SharedUniforms,
     firstDerivativeTexture: THREE.Texture,
     secondDerivativeTexture: THREE.Texture,
     private flush: () => void,
     target = new THREE.WebGLRenderTarget(1, 1),
     private laoMaterial = new LAOMaterial(
+      editor,
       firstDerivativeTexture,
       secondDerivativeTexture,
       target.texture,
@@ -36,14 +38,7 @@ export class LAOComputer extends TiledRenderer {
     this.reactionDisposers.push(
       reaction(
         () => {
-          const imageId =
-            editor.activeDocument?.viewport3D.activeTransferFunction?.params
-              .image?.value;
-
-          if (!imageId) return undefined;
-
-          const imageLayer = editor.activeDocument?.getLayer(imageId as string);
-
+          const imageLayer = editor.activeDocument?.baseImageLayer;
           if (!imageLayer) return undefined;
 
           return (imageLayer as IImageLayer).image;
@@ -82,17 +77,22 @@ export class LAOComputer extends TiledRenderer {
   }
 
   public tick() {
-    if (this._isDirty) {
-      this.renderInitialFrame();
-
-      return;
+    if (this._isDirty && !this.isFirstFrameStarted) {
+      this.laoMaterial.setPreviousDirections(0);
+      this.restartFrame();
+      this.isFirstFrameStarted = true;
     }
 
     super.tick();
   }
 
   protected onFrameFinished = () => {
+    this._isDirty = false;
+
     this.flush();
+    if (this.editor.activeDocument?.viewport3D.requestedShadingMode === "lao") {
+      this.editor.activeDocument?.viewport3D.confirmRequestedShadingMode();
+    }
 
     this.laoMaterial.setPreviousDirections(
       this.laoMaterial.previousDirections + 8,
@@ -104,20 +104,9 @@ export class LAOComputer extends TiledRenderer {
     }
   };
 
-  private renderInitialFrame() {
-    this.laoMaterial.setPreviousDirections(0);
-
-    const previousGrid = this.grid.clone();
-    this.setRenderGrid(1);
-    this.restartFrame();
-    super.tick();
-    this.setRenderGrid(previousGrid.x, previousGrid.y);
-
-    this._isDirty = false;
-  }
-
   public setDirty = () => {
     this._isDirty = true;
+    this.isFirstFrameStarted = false;
     this._isFinalLAOFlushed = false;
   };
 }

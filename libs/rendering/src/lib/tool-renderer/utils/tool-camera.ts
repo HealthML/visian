@@ -13,7 +13,7 @@ export class ToolCamera
 
     this.disposers.push(
       autorun(() => {
-        if (!document.activeLayer) return;
+        if (document.activeLayer?.kind !== "image") return;
 
         const { voxelCount } = (document.activeLayer as IImageLayer).image;
 

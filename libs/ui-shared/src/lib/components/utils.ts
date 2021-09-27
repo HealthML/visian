@@ -3,6 +3,7 @@ import React, {
   useCallback,
   useEffect,
   useLayoutEffect,
+  useMemo,
   useRef,
   useState,
 } from "react";
@@ -49,7 +50,7 @@ export const useIsDraggedOver = () => {
     }
     dragTimerRef.current = (setTimeout(() => {
       setIsDraggedOver(false);
-    }, 25) as unknown) as NodeJS.Timer;
+    }, 50) as unknown) as NodeJS.Timer;
   }, [setIsDraggedOver]);
 
   const onDrop = useCallback(() => {
@@ -72,6 +73,29 @@ export const useIsDraggedOver = () => {
       onDrop: typeof onDragEnd;
     },
   ];
+};
+
+export const useFilePicker = (
+  callback: (arg: Event) => void,
+  multiple = true,
+) => {
+  const inputElement: HTMLInputElement = useMemo(
+    () => document.createElement("input"),
+    [],
+  );
+  useEffect(() => {
+    inputElement.addEventListener("change", callback);
+    return () => {
+      inputElement.removeEventListener("change", callback);
+    };
+  }, [callback, inputElement]);
+
+  return useCallback(() => {
+    inputElement.value = "";
+    inputElement.type = "file";
+    inputElement.multiple = multiple;
+    inputElement.dispatchEvent(new MouseEvent("click"));
+  }, [inputElement, multiple]);
 };
 
 export const useUpdateOnResize = (isActive = true) => {
@@ -153,7 +177,11 @@ export const useOutsidePress = <T extends HTMLElement>(
 ) => {
   const handleOutsidePress = useCallback(
     (event: PointerEvent) => {
-      if (ref.current && !ref.current.contains(event.target as Node)) {
+      if (
+        ref.current &&
+        !ref.current.contains(event.target as Node) &&
+        document.body.contains(event.target as Node)
+      ) {
         if (callback) callback(event);
       }
     },

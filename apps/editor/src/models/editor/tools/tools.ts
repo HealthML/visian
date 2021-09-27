@@ -1,4 +1,9 @@
-import { RegionGrowingRenderer, ToolRenderer } from "@visian/rendering";
+import * as THREE from "three";
+import {
+  RegionGrowingRenderer,
+  RegionGrowingRenderer3D,
+  ToolRenderer,
+} from "@visian/rendering";
 import { IDocument, IImageLayer, ITool, ITools } from "@visian/ui-shared";
 import { getPlaneAxes, ISerializable } from "@visian/utils";
 import { action, computed, makeObservable, observable } from "mobx";
@@ -13,6 +18,7 @@ import { Tool, ToolSnapshot } from "./tool";
 import { ToolGroup, ToolGroupSnapshot } from "./tool-group";
 import { BoundedSmartBrush } from "./bounded-smart-brush";
 import { PlaneTool } from "./plane-tool";
+import { SmartBrush3D } from "./smart-brush-3d";
 
 export type ToolName =
   | "navigation-tool"
@@ -20,6 +26,7 @@ export type ToolName =
   | "pixel-brush"
   | "pixel-eraser"
   | "smart-brush"
+  | "smart-brush-3d"
   | "smart-eraser"
   | "bounded-smart-brush"
   | "bounded-smart-eraser"
@@ -61,13 +68,13 @@ export class Tools
   public smartBrushThreshold = 5;
   public boundedSmartBrushRadius = 7;
 
-  protected isCursorOverDrawableArea = false;
-  protected isCursorOverFloatingUI = false;
+  public isCursorOverFloatingUI = false;
   protected isNavigationDragged = false;
   public isDrawing = false;
 
   public toolRenderer: ToolRenderer;
   public regionGrowingRenderer: RegionGrowingRenderer;
+  public regionGrowingRenderer3D: RegionGrowingRenderer3D;
 
   constructor(
     snapshot: Partial<ToolsSnapshot<ToolName>> | undefined,
@@ -80,7 +87,6 @@ export class Tools
       | "screenSpaceBrushSize"
       | "lockedBrushSize"
       | "isCursorOverDrawableArea"
-      | "isCursorOverFloatingUI"
       | "isNavigationDragged"
       | "resetBrushSettings"
     >(this, {
@@ -91,7 +97,6 @@ export class Tools
       lockedBrushSize: observable,
       smartBrushThreshold: observable,
       boundedSmartBrushRadius: observable,
-      isCursorOverDrawableArea: observable,
       isCursorOverFloatingUI: observable,
       isNavigationDragged: observable,
       isDrawing: observable,
@@ -99,16 +104,17 @@ export class Tools
       activeTool: computed,
       pixelWidth: computed,
       brushSize: computed,
+      isCursorOverDrawableArea: computed,
       canDraw: computed,
       isToolInUse: computed,
       useAdaptiveBrushSize: computed,
+      layerPreviewTextures: computed,
 
       setActiveTool: action,
       setBrushSize: action,
       setUseAdaptiveBrushSize: action,
       setSmartBrushThreshold: action,
       setBoundedSmartBrushRadius: action,
-      setIsCursorOverDrawableArea: action,
       setIsCursorOverFloatingUI: action,
       setIsNavigationDragged: action,
       setIsDrawing: action,
@@ -119,6 +125,7 @@ export class Tools
 
     this.toolRenderer = new ToolRenderer(document);
     this.regionGrowingRenderer = new RegionGrowingRenderer(document);
+    this.regionGrowingRenderer3D = new RegionGrowingRenderer3D(document);
 
     this.tools = {
       "navigation-tool": new Tool(
@@ -148,6 +155,10 @@ export class Tools
         this.regionGrowingRenderer,
         false,
       ),
+      "smart-brush-3d": new SmartBrush3D(
+        document,
+        this.regionGrowingRenderer3D,
+      ),
       "outline-tool": new OutlineTool(document, this.toolRenderer),
       "outline-eraser": new OutlineTool(document, this.toolRenderer, false),
       "clear-slice": new ClearSliceTool(document, this.toolRenderer),
@@ -173,6 +184,7 @@ export class Tools
         { toolNames: ["bounded-smart-brush", "bounded-smart-eraser"] },
         document,
       ),
+      new ToolGroup({ toolNames: ["smart-brush-3d"] }, document),
       new ToolGroup(
         { toolNames: ["outline-tool", "outline-eraser"] },
         document,
@@ -250,6 +262,17 @@ export class Tools
     );
   }
 
+  protected get isCursorOverDrawableArea() {
+    return (
+      this.document.viewport2D.hoveredViewType ===
+        this.document.viewport2D.mainViewType &&
+      this.document.viewport2D.hoveredUV.x <= 1 &&
+      this.document.viewport2D.hoveredUV.x >= 0 &&
+      this.document.viewport2D.hoveredUV.y <= 1 &&
+      this.document.viewport2D.hoveredUV.y >= 0
+    );
+  }
+
   public get canDraw(): boolean {
     return Boolean(
       this.activeTool?.isBrush &&
@@ -269,6 +292,10 @@ export class Tools
 
   public get useAdaptiveBrushSize(): boolean {
     return this.lockedBrushSize === undefined;
+  }
+
+  public get layerPreviewTextures(): THREE.Texture[] {
+    return this.regionGrowingRenderer3D.outputTextures;
   }
 
   public setBrushSize(value = 5, showPreview = false): void {
@@ -328,7 +355,7 @@ export class Tools
   }
 
   public setSmartBrushThreshold(value = 5) {
-    this.smartBrushThreshold = Math.min(20, Math.max(0, value));
+    this.smartBrushThreshold = Math.max(0, value);
   }
 
   public setBoundedSmartBrushRadius(value = 7, showPreview = false) {
@@ -336,10 +363,6 @@ export class Tools
 
     if (!showPreview) return;
     this.document.sliceRenderer?.showBrushCursorPreview();
-  }
-
-  public setIsCursorOverDrawableArea(value = true) {
-    this.isCursorOverDrawableArea = value;
   }
 
   public setIsCursorOverFloatingUI(value = true) {

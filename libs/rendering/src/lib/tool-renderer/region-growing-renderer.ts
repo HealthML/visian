@@ -46,9 +46,8 @@ export class RegionGrowingRenderer extends ToolRenderer {
           this.document.viewSettings.selectedVoxel.getFromView(
             this.document.viewport2D.mainViewType,
           ),
-          this.document.layers.find(
-            (layer) =>
-              layer.kind === "image" && !layer.isAnnotation && layer.isVisible,
+          this.document.imageLayers.find(
+            (layer) => !layer.isAnnotation && layer.isVisible,
           )?.id,
         ],
         () => {
@@ -56,6 +55,13 @@ export class RegionGrowingRenderer extends ToolRenderer {
         },
       ),
     );
+  }
+
+  public dispose() {
+    super.dispose();
+
+    this.regionGrowingMaterial.dispose();
+    this.regionGrowingQuad.dispose();
   }
 
   public doRegionGrowing(threshold: number, boundingRadius?: number) {
@@ -66,9 +72,8 @@ export class RegionGrowingRenderer extends ToolRenderer {
 
     if (!annotation) return;
 
-    const sourceImage = (this.document.layers.find(
-      (layer) =>
-        layer.kind === "image" && !layer.isAnnotation && layer.isVisible,
+    const sourceImage = (this.document.imageLayers.find(
+      (layer) => !layer.isAnnotation && layer.isVisible,
     ) as IImageLayer | undefined)?.image as RenderedImage | undefined;
     if (!sourceImage) return;
 
@@ -103,7 +108,7 @@ export class RegionGrowingRenderer extends ToolRenderer {
       [widthAxis]: this.lastCircle.x,
       [heightAxis]: this.lastCircle.y,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } as any);
+    } as any).x;
 
     this.regionGrowingMaterial.setSeed(seed);
     this.regionGrowingMaterial.setThreshold(threshold);

@@ -1,17 +1,20 @@
-import { SliceRenderer, VolumeRenderer } from "@visian/rendering";
+import {
+  RenderedImage,
+  SliceRenderer,
+  VolumeRenderer,
+} from "@visian/rendering";
 import {
   IEditor,
   ISliceRenderer,
-  Theme,
   IVolumeRenderer,
+  Theme,
 } from "@visian/ui-shared";
 import { IDisposable, ISerializable } from "@visian/utils";
-import { action, makeObservable, observable } from "mobx";
+import { action, makeObservable, observable, runInAction } from "mobx";
 import * as THREE from "three";
 
 import { StoreContext } from "../types";
 import { Document, DocumentSnapshot } from "./document";
-import { ImageLayer } from "./layers";
 
 export interface EditorSnapshot {
   activeDocument?: DocumentSnapshot;
@@ -22,6 +25,7 @@ export class Editor
   public readonly excludeFromSnapshotTracking = [
     "context",
     "sliceRenderer",
+    "volumeRenderer",
     "renderers",
   ];
 
@@ -29,7 +33,7 @@ export class Editor
 
   public sliceRenderer?: ISliceRenderer;
   public volumeRenderer?: IVolumeRenderer;
-  public renderers: [
+  public renderers!: [
     THREE.WebGLRenderer,
     THREE.WebGLRenderer,
     THREE.WebGLRenderer,
@@ -42,22 +46,27 @@ export class Editor
     makeObservable(this, {
       activeDocument: observable,
       renderers: observable,
+      sliceRenderer: observable,
+      volumeRenderer: observable,
 
       setActiveDocument: action,
+      applySnapshot: action,
     });
 
-    this.renderers = [
-      new THREE.WebGLRenderer({ alpha: true }),
-      new THREE.WebGLRenderer({ alpha: true }),
-      new THREE.WebGLRenderer({ alpha: true }),
-    ];
-    this.renderers.forEach((renderer) => {
-      renderer.setClearAlpha(0);
-    });
-    this.sliceRenderer = new SliceRenderer(this);
-    this.volumeRenderer = new VolumeRenderer(this);
+    runInAction(() => {
+      this.renderers = [
+        new THREE.WebGLRenderer({ alpha: true, preserveDrawingBuffer: true }),
+        new THREE.WebGLRenderer({ alpha: true }),
+        new THREE.WebGLRenderer({ alpha: true }),
+      ];
+      this.renderers.forEach((renderer) => {
+        renderer.setClearAlpha(0);
+      });
+      this.sliceRenderer = new SliceRenderer(this);
+      this.volumeRenderer = new VolumeRenderer(this);
 
-    this.renderers[0].setAnimationLoop(this.animate);
+      this.renderers[0].setAnimationLoop(this.animate);
+    });
 
     this.applySnapshot(snapshot);
   }
@@ -72,9 +81,7 @@ export class Editor
   ): void {
     this.activeDocument = value;
 
-    // TODO: Somehow updates to the active document are not being registered.
-    // This is (hopefully) only a temporary workaround.
-    if (!isSilent) this.context.setDirty();
+    if (!isSilent) this.activeDocument.requestSave();
   }
 
   public newDocument = (forceDestroy?: boolean) => {
@@ -115,9 +122,9 @@ export class Editor
   private animate = () => {
     this.activeDocument?.tools.toolRenderer.render();
     this.activeDocument?.tools.regionGrowingRenderer.render();
-    this.activeDocument?.layers
-      .filter((layer) => layer.kind === "image")
-      .forEach((imageLayer) => (imageLayer as ImageLayer).image.render());
+    this.activeDocument?.imageLayers.forEach((imageLayer) =>
+      (imageLayer.image as RenderedImage).render(),
+    );
     this.sliceRenderer?.animate();
     this.volumeRenderer?.animate();
   };

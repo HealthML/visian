@@ -1,9 +1,9 @@
-import { IEditor, IImageLayer } from "@visian/ui-shared";
+import { IEditor } from "@visian/ui-shared";
 import { IDisposable, Image } from "@visian/utils";
 import { IReactionDisposer, reaction } from "mobx";
 import * as THREE from "three";
-import { ScreenAlignedQuad } from "../../../screen-aligned-quad";
 
+import { ScreenAlignedQuad } from "../../../screen-aligned-quad";
 import { SharedUniforms } from "../shared-uniforms";
 import { GradientMaterial, GradientMode } from "./gradient-material";
 
@@ -31,6 +31,7 @@ export class GradientComputer implements IDisposable {
     this.outputDerivativeRenderTarget = new THREE.WebGLRenderTarget(1, 1);
 
     this.gradientMaterial = new GradientMaterial(
+      editor,
       this.firstDerivativeRenderTarget.texture,
       this.secondDerivativeRenderTarget.texture,
       sharedUniforms,
@@ -40,19 +41,7 @@ export class GradientComputer implements IDisposable {
 
     this.reactionDisposers.push(
       reaction(
-        () => {
-          const imageId =
-            editor.activeDocument?.viewport3D.activeTransferFunction?.params
-              .image?.value;
-
-          if (!imageId) return undefined;
-
-          const imageLayer = editor.activeDocument?.getLayer(imageId as string);
-
-          if (!imageLayer) return undefined;
-
-          return (imageLayer as IImageLayer).image;
-        },
+        () => editor.activeDocument?.baseImageLayer?.image,
         (image?: Image) => {
           if (!image) return;
 
@@ -62,9 +51,7 @@ export class GradientComputer implements IDisposable {
           this.secondDerivativeRenderTarget.setSize(atlasSize.x, atlasSize.y);
           this.outputDerivativeRenderTarget.setSize(atlasSize.x, atlasSize.y);
 
-          this.updateFirstDerivative();
-          this.updateSecondDerivative();
-          this.updateOutputDerivative();
+          this.updateAllDerivatives();
         },
       ),
     );
@@ -83,10 +70,16 @@ export class GradientComputer implements IDisposable {
       this.renderSecondDerivative();
     }
     if (
-      this.editor.activeDocument?.viewport3D.shadingMode === "phong" &&
+      (this.editor.activeDocument?.viewport3D.shadingMode === "phong" ||
+        this.editor.activeDocument?.viewport3D.requestedShadingMode ===
+          "phong") &&
       this.outputDerivativeDirty
     ) {
       this.renderOutputDerivative();
+    } else if (
+      this.editor.activeDocument?.viewport3D.requestedShadingMode === "phong"
+    ) {
+      this.editor.activeDocument?.viewport3D.confirmRequestedShadingMode();
     }
   }
 
@@ -101,6 +94,12 @@ export class GradientComputer implements IDisposable {
   public getOutputDerivative() {
     return this.outputDerivativeRenderTarget.texture;
   }
+
+  public updateAllDerivatives = () => {
+    this.updateFirstDerivative();
+    this.updateSecondDerivative();
+    this.updateOutputDerivative();
+  };
 
   private updateFirstDerivative() {
     this.firstDerivativeDirty = true;
@@ -193,6 +192,11 @@ export class GradientComputer implements IDisposable {
     this.renderer.xr.enabled = isXrEnabled;
 
     this.outputDerivativeDirty = false;
+    if (
+      this.editor.activeDocument?.viewport3D.requestedShadingMode === "phong"
+    ) {
+      this.editor.activeDocument?.viewport3D.confirmRequestedShadingMode();
+    }
 
     this.editor.volumeRenderer?.lazyRender();
   }

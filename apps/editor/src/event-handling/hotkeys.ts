@@ -3,7 +3,7 @@ import hotkeys from "hotkeys-js";
 
 import { skipSlices } from "../constants";
 
-import { ImageLayer, RootStore } from "../models";
+import { ImageLayer, RootStore, SmartBrush3D } from "../models";
 
 export const setUpHotKeys = (store: RootStore): IDisposer => {
   // Tool Selection
@@ -35,6 +35,12 @@ export const setUpHotKeys = (store: RootStore): IDisposer => {
     if (store.editor.activeDocument?.viewSettings.viewMode !== "2D") return;
 
     store.editor.activeDocument?.tools.setActiveTool("bounded-smart-brush");
+  });
+  hotkeys("d", (event) => {
+    event.preventDefault();
+    if (store.editor.activeDocument?.viewSettings.viewMode !== "2D") return;
+
+    store.editor.activeDocument?.tools.setActiveTool("smart-brush-3d");
   });
   hotkeys("e", (event) => {
     event.preventDefault();
@@ -75,13 +81,24 @@ export const setUpHotKeys = (store: RootStore): IDisposer => {
     event.preventDefault();
     store.editor.activeDocument?.tools.setActiveTool("clear-image");
   });
+  hotkeys("enter", (event) => {
+    event.preventDefault();
 
-  // Brush Size/Cutting Plane Distance
+    if (
+      store.editor.activeDocument?.tools.regionGrowingRenderer3D.holdsPreview
+    ) {
+      (store.editor.activeDocument?.tools.tools[
+        "smart-brush-3d"
+      ] as SmartBrush3D<"smart-brush-3d">).submit();
+    }
+  });
+
+  // Brush Size/Clipping Plane Distance
   hotkeys("*", (event) => {
     // "+" doesn't currently work with hotkeys-js (https://github.com/jaywcjlove/hotkeys/issues/270)
     if (event.key === "+" && !event.ctrlKey) {
       if (store.editor.activeDocument?.viewSettings.viewMode === "3D") {
-        store.editor.activeDocument?.viewport3D.increaseCuttingPlaneDistance();
+        store.editor.activeDocument?.viewport3D.increaseClippingPlaneDistance();
         return;
       }
 
@@ -90,7 +107,7 @@ export const setUpHotKeys = (store: RootStore): IDisposer => {
   });
   hotkeys("-", () => {
     if (store.editor.activeDocument?.viewSettings.viewMode === "3D") {
-      store.editor.activeDocument?.viewport3D.decreaseCuttingPlaneDistance();
+      store.editor.activeDocument?.viewport3D.decreaseClippingPlaneDistance();
       return;
     }
 
@@ -124,24 +141,27 @@ export const setUpHotKeys = (store: RootStore): IDisposer => {
   };
   hotkeys("1", () => {
     handleXR().then(() => {
+      // View mode has to be set first to ensure brush cursor alignment
+      store.editor.activeDocument?.viewSettings.setViewMode("2D");
       store.editor.activeDocument?.viewport2D.setMainViewType(
         ViewType.Transverse,
       );
-      store.editor.activeDocument?.viewSettings.setViewMode("2D");
     });
   });
   hotkeys("2", () => {
     handleXR().then(() => {
+      // View mode has to be set first to ensure brush cursor alignment
+      store.editor.activeDocument?.viewSettings.setViewMode("2D");
       store.editor.activeDocument?.viewport2D.setMainViewType(
         ViewType.Sagittal,
       );
-      store.editor.activeDocument?.viewSettings.setViewMode("2D");
     });
   });
   hotkeys("3", () => {
     handleXR().then(() => {
-      store.editor.activeDocument?.viewport2D.setMainViewType(ViewType.Coronal);
+      // View mode has to be set first to ensure brush cursor alignment
       store.editor.activeDocument?.viewSettings.setViewMode("2D");
+      store.editor.activeDocument?.viewport2D.setMainViewType(ViewType.Coronal);
     });
   });
   hotkeys("4", () => {
@@ -154,6 +174,51 @@ export const setUpHotKeys = (store: RootStore): IDisposer => {
   });
   hotkeys("0", () => {
     store.editor.activeDocument?.viewport2D.toggleSideViews();
+  });
+  hotkeys("ctrl+1", () => {
+    if (store.editor.activeDocument?.viewSettings.viewMode !== "3D") return;
+
+    store.editor.activeDocument?.viewport3D.setCameraToFaceViewType(
+      ViewType.Transverse,
+    );
+  });
+  hotkeys("ctrl+2", () => {
+    if (store.editor.activeDocument?.viewSettings.viewMode !== "3D") return;
+
+    store.editor.activeDocument?.viewport3D.setCameraToFaceViewType(
+      ViewType.Sagittal,
+    );
+  });
+  hotkeys("ctrl+3", () => {
+    if (store.editor.activeDocument?.viewSettings.viewMode !== "3D") return;
+
+    store.editor.activeDocument?.viewport3D.setCameraToFaceViewType(
+      ViewType.Coronal,
+    );
+  });
+  hotkeys("alt+1", () => {
+    if (store.editor.activeDocument?.viewSettings.viewMode !== "3D") return;
+
+    store.editor.activeDocument?.viewport3D.setCameraToFaceViewType(
+      ViewType.Transverse,
+      true,
+    );
+  });
+  hotkeys("alt+2", () => {
+    if (store.editor.activeDocument?.viewSettings.viewMode !== "3D") return;
+
+    store.editor.activeDocument?.viewport3D.setCameraToFaceViewType(
+      ViewType.Sagittal,
+      true,
+    );
+  });
+  hotkeys("alt+3", () => {
+    if (store.editor.activeDocument?.viewSettings.viewMode !== "3D") return;
+
+    store.editor.activeDocument?.viewport3D.setCameraToFaceViewType(
+      ViewType.Coronal,
+      true,
+    );
   });
 
   // Slice Navigation
@@ -243,14 +308,27 @@ export const setUpHotKeys = (store: RootStore): IDisposer => {
   });
   hotkeys("ctrl+e", (event) => {
     event.preventDefault();
-    (store.editor.activeDocument?.activeLayer as ImageLayer)?.quickExport?.();
+
+    if (store.editor.activeDocument?.viewSettings.viewMode === "2D") {
+      store.setProgress({ labelTx: "exporting" });
+      store.editor.activeDocument
+        ?.exportZip(true)
+        .catch()
+        .then(() => {
+          store?.setProgress();
+        });
+    } else {
+      store.editor.activeDocument?.viewport3D.exportCanvasImage();
+    }
   });
   hotkeys("ctrl+shift+e", (event) => {
     event.preventDefault();
-    if (store.editor.activeDocument?.viewSettings.viewMode !== "2D") return;
-
-    (store.editor.activeDocument
-      ?.activeLayer as ImageLayer)?.quickExportSlice?.();
+    if (store.editor.activeDocument?.viewSettings.viewMode === "2D") {
+      (store.editor.activeDocument
+        ?.activeLayer as ImageLayer)?.quickExportSlice?.();
+    } else {
+      store.editor.activeDocument?.viewport3D.exportCanvasImage();
+    }
   });
 
   return () => hotkeys.unbind();

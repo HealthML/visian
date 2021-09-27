@@ -1,12 +1,20 @@
-import { BlendMode, IDocument, ILayer, MarkerConfig } from "@visian/ui-shared";
+import {
+  BlendMode,
+  color,
+  IDocument,
+  ILayer,
+  MarkerConfig,
+} from "@visian/ui-shared";
 import { ISerializable, ViewType } from "@visian/utils";
 import { action, computed, makeObservable, observable } from "mobx";
 import { Matrix4 } from "three";
 import { v4 as uuidv4 } from "uuid";
+import tc from "tinycolor2";
 
 import {
   defaultAnnotationColor,
   defaultAnnotationOpacity,
+  defaultImageColor,
 } from "../../../constants";
 import { LayerGroup } from "./layer-group";
 
@@ -149,10 +157,35 @@ export class Layer implements ILayer, ISerializable<LayerSnapshot> {
     this.transformation = value || new Matrix4();
   };
 
-  public delete = () => {
+  /**
+   * Adjusts `this.color` if the color lookup returns an invalid color.
+   * Mainly used for backwards compatibility when a color is removed.
+   */
+  public fixPotentiallyBadColor() {
+    if (this.color) {
+      const colorString = color(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        this.color as any,
+      )({ theme: this.document.theme });
+
+      if (tc(colorString).isValid()) return;
+    }
+
+    this.setColor(
+      this.isAnnotation
+        ? this.document.getFirstUnusedColor()
+        : defaultImageColor,
+    );
+  }
+
+  public delete = (): void => {
     (this.parent as LayerGroup)?.removeLayer?.(this.id);
     this.document.deleteLayer(this.id);
   };
+
+  public async toFile(): Promise<File | undefined> {
+    return undefined;
+  }
 
   // Serialization
   public toJSON(): LayerSnapshot {

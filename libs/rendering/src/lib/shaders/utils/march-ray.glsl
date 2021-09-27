@@ -10,9 +10,29 @@
  *
  * Returns a vec4 containing the accumulated color.
  */
-vec4 marchRay(vec3 origin, vec3 direction, float near, float far, float stepSize) {
-  // Entry aligned sampling.
-  float dist = near + stepSize / 2.0;
+vec4 marchRay(
+  vec3 origin, 
+  vec3 direction, 
+  float near, 
+  float far, 
+  float stepSize
+#ifdef RAY_DITHERING 
+  , bool useRayDithering
+#endif
+#ifdef VOXEL_PICKING
+  , float pickingThreshold
+#endif
+) {
+  #ifdef RAY_DITHERING
+    float random = fract(sin(gl_FragCoord.x * 12.9898 + gl_FragCoord.y * 78.233) * 43758.5453) * float(useRayDithering);
+  
+    // Entry aligned sampling with ray dithering if `useRayDithering` is set to true.
+    float dist = near + stepSize * (0.5 + random);
+  #else
+    // Entry aligned sampling.
+    float dist = near + stepSize * 0.5;
+  #endif
+
   vec3 samplePosition = origin + dist * direction;
   vec3 scaledDirection = direction * stepSize;
 
@@ -22,8 +42,17 @@ vec4 marchRay(vec3 origin, vec3 direction, float near, float far, float stepSize
   for (int i = 0; i < MAX_STEPS; ++i) {
     currentVoxel = getVolumeColor(samplePosition);
 
-    acc.rgb += (1.0 - acc.a) * currentVoxel.rgb * currentVoxel.a;
+    #ifndef VOXEL_PICKING
+      acc.rgb += (1.0 - acc.a) * currentVoxel.rgb * currentVoxel.a;
+    #endif
     acc.a += (1.0 - acc.a) * currentVoxel.a;
+
+    #ifdef VOXEL_PICKING
+      if (acc.a > pickingThreshold) {
+        acc.rgb = samplePosition;
+        return acc;
+      }
+    #endif
 
     samplePosition += scaledDirection;
     dist += stepSize;

@@ -7,6 +7,7 @@ import { useStore } from "../../../app/root-store";
 
 const Container = styled.div`
   position: relative;
+  margin-left: 0px;
 `;
 const Wrapper = styled.div`
   display: flex;

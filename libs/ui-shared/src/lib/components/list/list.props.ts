@@ -20,6 +20,10 @@ export interface ListItemProps extends React.HTMLAttributes<HTMLDivElement> {
    */
   isLast?: boolean;
 
+  isLabelEditable?: boolean;
+  onChangeLabelText?: (string: string) => void;
+  onConfirmLabelText?: (value: string) => void;
+
   /**
    * The key of the list item's icon (if any).
    * Alternatively, an object with a color can be passed to render a palette

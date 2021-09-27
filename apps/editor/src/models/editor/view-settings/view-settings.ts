@@ -1,9 +1,4 @@
-import {
-  IDocument,
-  IImageLayer,
-  IViewSettings,
-  ViewMode,
-} from "@visian/ui-shared";
+import { IDocument, IViewSettings, ViewMode } from "@visian/ui-shared";
 import { ISerializable, Vector } from "@visian/utils";
 import { action, makeObservable, observable } from "mobx";
 
@@ -14,8 +9,6 @@ export interface ViewSettingsSnapshot {
 
   brightness: number;
   contrast: number;
-
-  backgroundColor: string;
 }
 
 export class ViewSettings
@@ -28,8 +21,6 @@ export class ViewSettings
 
   public brightness!: number;
   public contrast!: number;
-
-  public backgroundColor!: string;
 
   constructor(
     snapshot: Partial<ViewSettingsSnapshot> | undefined,
@@ -46,22 +37,18 @@ export class ViewSettings
       selectedVoxel: observable,
       brightness: observable,
       contrast: observable,
-      backgroundColor: observable,
 
       setSelectedVoxel: action,
       setViewMode: action,
       setContrast: action,
       setBrightness: action,
-      setBackgroundColor: action,
       reset: action,
       applySnapshot: action,
     });
   }
 
   public setSelectedVoxel(x?: number, y?: number, z?: number): void {
-    const voxelCount = (this.document.layers.find(
-      (layer) => layer.kind === "image",
-    ) as IImageLayer | undefined)?.image.voxelCount;
+    const voxelCount = this.document.baseImageLayer?.image.voxelCount;
 
     if (!x || !y || !z) {
       if (voxelCount) {
@@ -104,16 +91,11 @@ export class ViewSettings
     this.contrast = value ?? 1;
   };
 
-  public setBackgroundColor = (value?: string): void => {
-    this.backgroundColor = value || "transparent";
-  };
-
   public reset = (): void => {
     this.setViewMode();
     this.setSelectedVoxel();
     this.setBrightness();
     this.setContrast();
-    this.setBackgroundColor();
   };
 
   // Serialization
@@ -125,8 +107,6 @@ export class ViewSettings
 
       brightness: this.brightness,
       contrast: this.contrast,
-
-      backgroundColor: this.backgroundColor,
     };
   }
 
@@ -141,8 +121,6 @@ export class ViewSettings
 
     this.setBrightness(snapshot.brightness);
     this.setContrast(snapshot.contrast);
-
-    this.setBackgroundColor(snapshot.backgroundColor);
 
     return Promise.resolve();
   }

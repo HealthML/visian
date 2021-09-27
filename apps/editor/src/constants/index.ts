@@ -12,7 +12,15 @@ export const maxUndoRedoSteps = 20;
 export const errorDisplayDuration = 12000;
 
 export const defaultAnnotationOpacity = 0.5;
-export const defaultAnnotationColor = "Conifer";
+export const defaultAnnotationColor = "Genome Gold";
+export const defaultRegionGrowingPreviewColor = "Sexy Sapphire";
+export const defaultImageColor = "Mighty Mercury";
+
+/**
+ * The minimum difference between voxel spacings that results in a new default
+ * view type.
+ */
+export const viewTypeDepthThreshold = 0.05;
 
 // Obfuscated using HEX representation to prevent spam
 export const feedbackMailAddress =

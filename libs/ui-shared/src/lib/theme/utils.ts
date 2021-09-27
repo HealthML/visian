@@ -27,6 +27,7 @@ export const fontSize = lookup("fontSizes");
 export const fontWeight = lookup("fontWeights");
 export const letterSpacing = lookup("letterSpacings");
 export const lineHeight = lookup("lineHeights");
+export const opacity = lookup("opacities");
 export const radius = lookup("radii");
 export const shadow = lookup("shadows");
 export const size = lookup("sizes");

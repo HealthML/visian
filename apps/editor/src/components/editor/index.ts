@@ -1,3 +1,4 @@
+export * from "./axes-and-voxel";
 export * from "./drop-sheet";
 export * from "./export-popup";
 export * from "./layer-settings";

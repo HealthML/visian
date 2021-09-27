@@ -1,11 +1,14 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useEffect, useRef } from "react";
 import styled, { css } from "styled-components";
+import { radius, size } from "../../theme";
 
 import { Color } from "../color";
 import { Icon } from "../icon";
 import { Divider } from "../modal/modal";
 import { sheetMixin } from "../sheet";
 import { Text } from "../text";
+import { TextInput } from "../text-input";
+import { useOutsidePress } from "../utils";
 import { ListItemProps } from "./list.props";
 
 export const List = styled.div`
@@ -24,15 +27,15 @@ const ListItemInner = styled.div<Pick<ListItemProps, "isActive">>`
   display: flex;
   flex-direction: row;
   align-items: center;
-  height: 40px;
+  height: ${size("listElementHeight")};
   overflow: hidden;
 
   ${(props) =>
     props.isActive &&
     css`
       ${sheetMixin};
-      border-radius: 8px;
-      margin: 0 -8px;
+      border-radius: ${radius("activeLayerBorderRadius")};
+      margin: 0 -${radius("activeLayerBorderRadius")};
       // Accounting for the 1px border that was added
       padding: 0 7px;
     `}
@@ -50,6 +53,15 @@ export const ListItemLabel = styled(Text)`
   overflow: hidden;
   white-space: nowrap;
   user-select: none;
+`;
+
+export const ListItemInput = styled(TextInput)`
+  display: block;
+  flex: 1;
+  font-size: 14px;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
 `;
 
 export const ListIcon = styled(Icon).withConfig({
@@ -92,6 +104,9 @@ export const ListItem = React.forwardRef<HTMLDivElement, ListItemProps>(
       value,
       isActive,
       isLast,
+      isLabelEditable = false,
+      onChangeLabelText,
+      onConfirmLabelText,
       onIconPress,
       onTrailingIconPress,
       disableIcon,
@@ -113,6 +128,18 @@ export const ListItem = React.forwardRef<HTMLDivElement, ListItemProps>(
       },
       [onTrailingIconPress, value],
     );
+
+    const labelInputRef = useRef<HTMLInputElement>(null);
+    const onOutsidePress = useCallback(() => {
+      labelInputRef.current?.blur();
+    }, []);
+    useOutsidePress(labelInputRef, onOutsidePress, isLabelEditable);
+
+    useEffect(() => {
+      if (isLabelEditable && labelInputRef.current !== document.activeElement) {
+        labelInputRef.current?.focus();
+      }
+    });
 
     return (
       <ListItemContainer {...rest} ref={ref}>
@@ -137,7 +164,18 @@ export const ListItem = React.forwardRef<HTMLDivElement, ListItemProps>(
                 hasPressHandler={Boolean(onIconPress)}
               />
             ))}
-          {(labelTx || label) && <ListItemLabel tx={labelTx} text={label} />}
+          {(labelTx || label) &&
+            (isLabelEditable ? (
+              <ListItemInput
+                ref={labelInputRef}
+                valueTx={labelTx}
+                value={label}
+                onChangeText={onChangeLabelText}
+                onConfirm={onConfirmLabelText}
+              />
+            ) : (
+              <ListItemLabel tx={labelTx} text={label} />
+            ))}
           {children}
           {trailingIcon && (
             <ListIcon
