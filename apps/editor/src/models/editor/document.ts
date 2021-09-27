@@ -338,6 +338,7 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
   public finishBatchImport() {
     if (!Object.values(this.layerMap).some((layer) => layer.isAnnotation)) {
       this.addNewAnnotationLayer();
+      this.viewport2D.setMainViewType();
     }
     this.context?.persist();
   }
