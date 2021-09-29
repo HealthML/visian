@@ -91,6 +91,7 @@ export const useFilePicker = (
   }, [callback, inputElement]);
 
   return useCallback(() => {
+    inputElement.value = "";
     inputElement.type = "file";
     inputElement.multiple = multiple;
     inputElement.dispatchEvent(new MouseEvent("click"));
@@ -176,7 +177,11 @@ export const useOutsidePress = <T extends HTMLElement>(
 ) => {
   const handleOutsidePress = useCallback(
     (event: PointerEvent) => {
-      if (ref.current && !ref.current.contains(event.target as Node)) {
+      if (
+        ref.current &&
+        !ref.current.contains(event.target as Node) &&
+        document.body.contains(event.target as Node)
+      ) {
         if (callback) callback(event);
       }
     },

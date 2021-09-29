@@ -16,7 +16,12 @@ import {
 } from "@visian/utils";
 import { action, computed, makeObservable, observable } from "mobx";
 
-import { maxZoom, minZoom, zoomStep } from "../../../constants";
+import {
+  maxZoom,
+  minZoom,
+  viewTypeDepthThreshold,
+  zoomStep,
+} from "../../../constants";
 import { OutlineTool } from "../tools";
 
 export interface Viewport2DSnapshot {
@@ -30,7 +35,11 @@ export interface Viewport2DSnapshot {
 
 export class Viewport2D
   implements IViewport2D, ISerializable<Viewport2DSnapshot> {
-  public readonly excludeFromSnapshotTracking = ["document"];
+  public readonly excludeFromSnapshotTracking = [
+    "document",
+    "hoveredScreenCoordinates",
+    "hoveredViewType",
+  ];
 
   public mainViewType!: ViewType;
   public showSideViews!: boolean;
@@ -95,13 +104,32 @@ export class Viewport2D
     return zoomStep * Math.sqrt(this.zoomLevel);
   }
 
+  public get defaultViewType() {
+    if (!this.document.has3DLayers) return ViewType.Transverse;
+
+    const voxelSpacing = this.document.baseImageLayer?.image.voxelSpacing;
+    if (!voxelSpacing) return ViewType.Transverse;
+
+    let bestViewType = ViewType.Transverse;
+    let bestViewTypeDepth = voxelSpacing.getFromView(bestViewType);
+
+    [ViewType.Sagittal, ViewType.Coronal].forEach((viewType) => {
+      const viewTypeDepth = voxelSpacing.getFromView(viewType);
+      if (viewTypeDepth - bestViewTypeDepth > viewTypeDepthThreshold) {
+        bestViewType = viewType;
+        bestViewTypeDepth = viewTypeDepth;
+      }
+    });
+    return bestViewType;
+  }
+
   public setMainViewType = (value?: ViewType): void => {
     if (!this.document.has3DLayers) {
       this.mainViewType = ViewType.Transverse;
       return;
     }
 
-    this.mainViewType = value || ViewType.Transverse;
+    this.mainViewType = value ?? this.defaultViewType;
     this.hoveredViewType = this.mainViewType;
   };
 

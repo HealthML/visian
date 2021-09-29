@@ -1,3 +1,4 @@
+import { withAuthenticator } from "@aws-amplify/ui-react";
 import {
   getTheme,
   GlobalStyles,
@@ -5,15 +6,38 @@ import {
   ModalRoot,
   ThemeProvider,
 } from "@visian/ui-shared";
+import { isFromWHO, isUsingLocalhost } from "@visian/utils";
+import Amplify from "aws-amplify";
 import { observer } from "mobx-react-lite";
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import { QueryClient, QueryClientProvider } from "react-query";
 import { Route, Switch } from "react-router-dom";
 
+import {
+  whoAwsConfigDeployment,
+  whoAwsConfigDevelopment,
+  whoRequiresAuthentication,
+} from "../constants";
 import { setUpEventHandling } from "../event-handling";
 import { EditorScreen } from "../screens";
 import { setupRootStore, StoreProvider } from "./root-store";
 
 import type { RootStore } from "../models";
+
+if (isFromWHO()) {
+  if (isUsingLocalhost()) {
+    Amplify.configure(whoAwsConfigDevelopment);
+  } else {
+    Amplify.configure(whoAwsConfigDeployment);
+  }
+}
+
+const queryClient = new QueryClient();
+
+const withWhoAuthenticator = (wrappedComponent: React.ComponentType) =>
+  isFromWHO() && whoRequiresAuthentication
+    ? withAuthenticator(wrappedComponent)
+    : wrappedComponent;
 
 function App() {
   // TODO: Push loading down to components that need i18n
@@ -40,21 +64,23 @@ function App() {
 
   return (
     <ThemeProvider theme={theme}>
-      <StoreProvider value={rootStoreRef.current}>
-        <GlobalStyles />
-        {isReady && (
-          <React.StrictMode>
-            <ModalRoot />
-            <Switch>
-              <Route path="/">
-                <EditorScreen />
-              </Route>
-            </Switch>
-          </React.StrictMode>
-        )}
-      </StoreProvider>
+      <QueryClientProvider client={queryClient}>
+        <StoreProvider value={rootStoreRef.current}>
+          <GlobalStyles />
+          {isReady && (
+            <React.StrictMode>
+              <ModalRoot />
+              <Switch>
+                <Route path="/">
+                  <EditorScreen />
+                </Route>
+              </Switch>
+            </React.StrictMode>
+          )}
+        </StoreProvider>
+      </QueryClientProvider>
     </ThemeProvider>
   );
 }
 
-export default observer(App);
+export default withWhoAuthenticator(observer(App));

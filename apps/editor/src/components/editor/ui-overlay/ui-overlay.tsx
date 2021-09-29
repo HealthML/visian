@@ -2,21 +2,25 @@ import {
   AbsoluteCover,
   FloatingUIButton,
   Notification,
-  opacity,
   Spacer,
   Text,
-  useFilePicker,
 } from "@visian/ui-shared";
+import { isFromWHO } from "@visian/utils";
 import { observer } from "mobx-react-lite";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
+import { whoHome } from "../../../constants";
 import { ActionModal } from "../action-modal";
+import { AIBar } from "../ai-bar";
+import { AxesAndVoxel } from "../axes-and-voxel";
 import { DropSheet } from "../drop-sheet";
+import { ImportPopUp } from "../import-popup";
 import { Layers } from "../layers";
 import { Menu } from "../menu";
 import { ProgressPopUp } from "../progress-popup";
+import { ServerPopUp } from "../server-popup";
 import { ShortcutPopUp } from "../shortcut-popup";
 import { SideViews } from "../side-views";
 import { SliceSlider } from "../slice-slider";
@@ -25,10 +29,7 @@ import { TopConsole } from "../top-console";
 import { UndoRedoButtons } from "../undo-redo-buttons";
 import { ViewSettings } from "../view-settings";
 import { UIOverlayProps } from "./ui-overlay.props";
-
-import type { ImageLayer } from "../../../models";
 import { SettingsPopUp } from "../settings-popup";
-import { AxesAndVoxel } from "../axes-and-voxel";
 
 const Container = styled(AbsoluteCover)`
   align-items: stretch;
@@ -56,7 +57,8 @@ const ColumnCenter = styled.div`
   display: flex;
   flex: 1;
   flex-direction: column;
-  justify-content: flex-start;
+  justify-content: flex-end;
+  align-items: flex-end;
   min-width: 0;
 `;
 
@@ -79,9 +81,7 @@ const RightBar = styled.div`
 `;
 
 const ImportButton = styled(FloatingUIButton)`
-  &:active > * {
-    opacity: ${opacity("inactiveIcon")};
-  }
+  margin-right: 16px;
 `;
 
 const ErrorNotification = styled(Notification)`
@@ -118,27 +118,13 @@ export const UIOverlay = observer<UIOverlayProps>(
     );
 
     // Import Button
-    const openFilePicker = useFilePicker(
-      useCallback(
-        (event: Event) => {
-          const { files } = event.target as HTMLInputElement;
-          if (!files || !files.length) return;
-          store?.setProgress({ labelTx: "importing" });
-          store?.editor.activeDocument
-            ?.importFile(Array.from(files))
-            .catch((error) => {
-              store?.setError({
-                titleTx: "import-error",
-                descriptionTx: error.message,
-              });
-            })
-            .then(() => {
-              store?.setProgress();
-            });
-        },
-        [store],
-      ),
-    );
+    const [isImportPopUpOpen, setIsImportPopUpOpen] = useState(false);
+    const openImportPopUp = useCallback(() => {
+      setIsImportPopUpOpen(true);
+    }, []);
+    const closeImportPopUp = useCallback(() => {
+      setIsImportPopUpOpen(false);
+    }, []);
 
     // Shortcut Pop Up Toggling
     const [isShortcutPopUpOpen, setIsShortcutPopUpOpen] = useState(false);
@@ -158,6 +144,17 @@ export const UIOverlay = observer<UIOverlayProps>(
       setIsSettingsPopUpOpen(false);
     }, []);
 
+    // Export Button
+    const exportZip = useCallback(() => {
+      store?.setProgress({ labelTx: "exporting" });
+      store?.editor.activeDocument
+        ?.exportZip(true)
+        .catch()
+        .then(() => {
+          store?.setProgress();
+        });
+    }, [store]);
+
     return (
       <Container
         {...rest}
@@ -172,13 +169,24 @@ export const UIOverlay = observer<UIOverlayProps>(
         )}
         <ColumnLeft>
           <MenuRow>
-            <ImportButton
-              icon="import"
-              tooltipTx="import-tooltip"
-              tooltipPosition="right"
-              isActive={false}
-              onPointerDown={openFilePicker}
-            />
+            {isFromWHO() ? (
+              <a href={whoHome}>
+                <ImportButton
+                  icon="whoAI"
+                  tooltipTx="return-who"
+                  tooltipPosition="right"
+                  isActive={false}
+                />
+              </a>
+            ) : (
+              <ImportButton
+                icon="import"
+                tooltipTx="import-tooltip"
+                tooltipPosition="right"
+                isActive={false}
+                onPointerDown={openImportPopUp}
+              />
+            )}
             <UndoRedoButtons />
           </MenuRow>
           <Menu
@@ -197,22 +205,26 @@ export const UIOverlay = observer<UIOverlayProps>(
         <ColumnRight>
           <SideViews />
           <RightBar>
-            <FloatingUIButton
-              icon="export"
-              tooltipTx="export-tooltip"
-              tooltipPosition="left"
-              onPointerDown={
-                store?.editor.activeDocument?.viewSettings.viewMode === "2D"
-                  ? (store?.editor.activeDocument?.activeLayer as ImageLayer)
-                      ?.quickExport
-                  : store?.editor.activeDocument?.viewport3D.exportCanvasImage
-              }
-              isActive={false}
-            />
+            {!isFromWHO() && (
+              <FloatingUIButton
+                icon="export"
+                tooltipTx="export-tooltip"
+                tooltipPosition="left"
+                onPointerDown={
+                  store?.editor.activeDocument?.viewSettings.viewMode === "2D"
+                    ? exportZip
+                    : store?.editor.activeDocument?.viewport3D.exportCanvasImage
+                }
+                isActive={false}
+              />
+            )}
             <ViewSettings />
             <SliceSlider showValueLabelOnChange={!isDraggedOver} />
           </RightBar>
         </ColumnRight>
+
+        {isFromWHO() && <AIBar />}
+
         <SettingsPopUp
           isOpen={isSettingsPopUpOpen}
           onClose={closeSettingsPopUp}
@@ -221,6 +233,11 @@ export const UIOverlay = observer<UIOverlayProps>(
           isOpen={isShortcutPopUpOpen}
           onClose={closeShortcutPopUp}
         />
+        {store?.dicomWebServer ? (
+          <ServerPopUp isOpen={isImportPopUpOpen} onClose={closeImportPopUp} />
+        ) : (
+          <ImportPopUp isOpen={isImportPopUpOpen} onClose={closeImportPopUp} />
+        )}
         {isDraggedOver && <DropSheet onDropCompleted={onDropCompleted} />}
         {store?.progress && (
           <ProgressPopUp
