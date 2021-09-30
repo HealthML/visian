@@ -1,6 +1,7 @@
-import { IEditor, IXRManager } from "@visian/ui-shared";
+import { IEditor, IPreviewedTool, IXRManager } from "@visian/ui-shared";
 import * as THREE from "three";
 import { XRControllerModelFactory } from "three/examples/jsm/webxr/XRControllerModelFactory";
+
 import { VolumeRenderer } from "./volume-renderer";
 
 export class XRManager implements IXRManager {
@@ -57,11 +58,29 @@ export class XRManager implements IXRManager {
           // 2: Left to right
           // 3: Top to bottom
 
-          if (
-            transferFunction?.name === "density" ||
-            transferFunction?.name === "fc-edges"
-          ) {
-            if (Math.abs(source.gamepad.axes[2]) > stickThreshold) {
+          if (Math.abs(source.gamepad.axes[2]) > stickThreshold) {
+            if (
+              this.editor.activeDocument?.tools.thresholdAnnotationRenderer3D
+                .holdsPreview
+            ) {
+              const [
+                low,
+                high,
+              ] = this.editor.activeDocument?.tools.thresholdAnnotationRenderer3D.threshold;
+              this.editor.activeDocument?.tools.thresholdAnnotationRenderer3D.setThreshold(
+                [
+                  Math.min(
+                    Math.max(0, low + maxSliderSpeed * source.gamepad.axes[2]),
+                    high,
+                  ),
+                  high,
+                ],
+              );
+              this.editor.activeDocument?.tools.thresholdAnnotationRenderer3D.render();
+            } else if (
+              transferFunction?.name === "density" ||
+              transferFunction?.name === "fc-edges"
+            ) {
               const [low, high] = transferFunction.params.densityRange
                 .value as [number, number];
               transferFunction.params.densityRange.setValue([
@@ -103,11 +122,32 @@ export class XRManager implements IXRManager {
           // 2: Left to right
           // 3: Top to bottom
 
-          if (
-            transferFunction?.name === "density" ||
-            transferFunction?.name === "fc-edges"
-          ) {
-            if (Math.abs(source.gamepad.axes[2]) > stickThreshold) {
+          if (Math.abs(source.gamepad.axes[2]) > stickThreshold) {
+            if (
+              this.editor.activeDocument?.tools.thresholdAnnotationRenderer3D
+                .holdsPreview
+            ) {
+              const [
+                low,
+                high,
+              ] = this.editor.activeDocument?.tools.thresholdAnnotationRenderer3D.threshold;
+              this.editor.activeDocument?.tools.thresholdAnnotationRenderer3D.setThreshold(
+                [
+                  low,
+                  Math.min(
+                    Math.max(
+                      low,
+                      high + maxSliderSpeed * source.gamepad.axes[2],
+                    ),
+                    1,
+                  ),
+                ],
+              );
+              this.editor.activeDocument?.tools.thresholdAnnotationRenderer3D.render();
+            } else if (
+              transferFunction?.name === "density" ||
+              transferFunction?.name === "fc-edges"
+            ) {
               const [low, high] = transferFunction.params.densityRange
                 .value as [number, number];
               transferFunction.params.densityRange.setValue([
@@ -126,6 +166,34 @@ export class XRManager implements IXRManager {
           // 3: Gamepad
           // 4: A
           // 5: B
+
+          if (
+            source.gamepad.buttons[4].pressed &&
+            !controller.userData.isAPressed
+          ) {
+            if (
+              this.editor.activeDocument?.tools.thresholdAnnotationRenderer3D
+                .holdsPreview
+            ) {
+              (this.editor.activeDocument?.tools.tools[
+                "threshold-annotation"
+              ] as IPreviewedTool<string>).submit();
+            } else {
+              this.editor.activeDocument?.tools.setActiveTool(
+                "threshold-annotation",
+              );
+            }
+          }
+          controller.userData.isAPressed = source.gamepad.buttons[4].pressed;
+
+          if (
+            source.gamepad.buttons[5].pressed &&
+            !controller.userData.isBPressed
+          ) {
+            this.editor.activeDocument?.tools.setActiveTool("dilate-erode");
+          }
+          controller.userData.isBPressed = source.gamepad.buttons[5].pressed;
+
           break;
       }
     });

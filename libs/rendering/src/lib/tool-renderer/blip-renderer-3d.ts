@@ -129,6 +129,8 @@ export class BlipRenderer3D implements IBlipRenderer3D, IDisposable {
     this.document.renderers?.forEach((renderer, rendererIndex) => {
       this.material.setSourceTexture(sourceImage.getTexture(rendererIndex));
 
+      const isXREnabled = renderer.xr.enabled;
+      renderer.xr.enabled = false;
       renderer.autoClear = false;
 
       for (let i = 0; i < blipSteps; i++) {
@@ -156,6 +158,7 @@ export class BlipRenderer3D implements IBlipRenderer3D, IDisposable {
 
       renderer.setRenderTarget(null);
       renderer.autoClear = true;
+      renderer.xr.enabled = isXREnabled;
     });
 
     this.holdsPreview = true;
@@ -178,6 +181,12 @@ export class BlipRenderer3D implements IBlipRenderer3D, IDisposable {
 
     const annotation = layer.image as RenderedImage;
 
+    const isXREnabled = this.document.renderers?.map(
+      (renderer) => renderer.xr.enabled,
+    );
+    this.document.renderers?.forEach((renderer) => {
+      renderer.xr.enabled = false;
+    });
     if (shouldReplace) {
       annotation.writeToAtlas(this.outputTextures, MergeFunction.Replace);
     } else {
@@ -189,6 +198,9 @@ export class BlipRenderer3D implements IBlipRenderer3D, IDisposable {
           : this.steps,
       );
     }
+    this.document.renderers?.forEach((renderer, index) => {
+      renderer.xr.enabled = isXREnabled?.[index] || false;
+    });
 
     this.discard();
   }

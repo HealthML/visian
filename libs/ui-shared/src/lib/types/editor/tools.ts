@@ -128,6 +128,7 @@ export interface IBlipRenderer3D {
 
   outputTextures: THREE.Texture[];
 
+  render(): void;
   flushToAnnotation(): void;
   discard(): void;
 }
@@ -138,6 +139,7 @@ export interface IDilateErodeRenderer3D extends IBlipRenderer3D {
 
 export interface IThresholdAnnotationRenderer3D extends IBlipRenderer3D {
   threshold: [number, number];
+  setThreshold(value: [number, number]): void;
 }
 
 /** The editor's tools and their settings for the document. */
