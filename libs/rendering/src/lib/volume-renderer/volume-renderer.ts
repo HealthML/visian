@@ -346,8 +346,13 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
     this.renderer.xr.enabled = isXrEnabled;
   }
 
+  public currentValue = 0;
   public animate = () => {
     if (this.editor.activeDocument?.viewSettings.viewMode !== "3D") return;
+
+    // DEBUG
+    this.currentValue = (this.currentValue + 0.005) % 1;
+    this.xr.sphere?.position.set(0, 1.2, (this.currentValue - 0.5) * 0.4);
 
     this.gradientComputer.tick();
 

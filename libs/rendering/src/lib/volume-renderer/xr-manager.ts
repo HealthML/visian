@@ -7,6 +7,7 @@ import { VolumeRenderer } from "./volume-renderer";
 
 export class XRManager implements IXRManager {
   public xrWorld?: THREE.Group;
+  public sphere?: THREE.Mesh;
 
   constructor(protected renderer: VolumeRenderer, protected editor: IEditor) {}
 
@@ -160,12 +161,11 @@ export class XRManager implements IXRManager {
     this.xrWorld.add(new THREE.GridHelper(5, 10, 0x404040, 0x404040));
 
     // DEBUG
-    this.xrWorld.add(
-      new THREE.Mesh(
-        new THREE.SphereGeometry(0.05, 32, 16),
-        new THREE.MeshBasicMaterial({ color: 0x111100 }),
-      ).translateY(1.2),
-    );
+    this.sphere = new THREE.Mesh(
+      new THREE.SphereGeometry(0.05, 32, 16),
+      new THREE.MeshBasicMaterial({ color: 0x111100 }),
+    ).translateY(1.2);
+    this.xrWorld.add(this.sphere);
 
     // Mount to Scene
     this.renderer.scene.add(this.xrWorld);
