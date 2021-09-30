@@ -145,6 +145,27 @@ export class XRManager implements IXRManager {
               );
               this.editor.activeDocument?.tools.thresholdAnnotationRenderer3D.render();
             } else if (
+              this.editor.activeDocument?.tools.dilateErodeRenderer3D
+                .holdsPreview
+            ) {
+              if (!controller.userData.isRightStickPressed) {
+                const steps =
+                  this.editor.activeDocument?.tools.dilateErodeRenderer3D
+                    .maxSteps *
+                    (this.editor.activeDocument?.tools.dilateErodeRenderer3D
+                      .shouldErode
+                      ? -1
+                      : 1) +
+                  Math.sign(source.gamepad.axes[2]);
+                this.editor.activeDocument?.tools.dilateErodeRenderer3D.setShouldErode(
+                  steps < 0,
+                );
+                this.editor.activeDocument?.tools.dilateErodeRenderer3D.setMaxSteps(
+                  Math.abs(steps),
+                );
+                this.editor.activeDocument?.tools.dilateErodeRenderer3D.render();
+              }
+            } else if (
               transferFunction?.name === "density" ||
               transferFunction?.name === "fc-edges"
             ) {
@@ -159,6 +180,8 @@ export class XRManager implements IXRManager {
               ]);
             }
           }
+          controller.userData.isRightStickPressed =
+            Math.abs(source.gamepad.axes[2]) > stickThreshold;
 
           // Buttons
           // 0: Trigger
@@ -166,6 +189,23 @@ export class XRManager implements IXRManager {
           // 3: Gamepad
           // 4: A
           // 5: B
+
+          if (
+            source.gamepad.buttons[3].pressed &&
+            !controller.userData.isRightPadPressed
+          ) {
+            if (
+              this.editor.activeDocument?.tools.dilateErodeRenderer3D
+                .holdsPreview
+            ) {
+              this.editor.activeDocument?.tools.dilateErodeRenderer3D.setShouldAutoCompensate(
+                !this.editor.activeDocument?.tools.dilateErodeRenderer3D
+                  .shouldAutoCompensate,
+              );
+            }
+          }
+          controller.userData.isRightPadPressed =
+            source.gamepad.buttons[3].pressed;
 
           if (
             source.gamepad.buttons[4].pressed &&
@@ -190,7 +230,16 @@ export class XRManager implements IXRManager {
             source.gamepad.buttons[5].pressed &&
             !controller.userData.isBPressed
           ) {
-            this.editor.activeDocument?.tools.setActiveTool("dilate-erode");
+            if (
+              this.editor.activeDocument?.tools.dilateErodeRenderer3D
+                .holdsPreview
+            ) {
+              (this.editor.activeDocument?.tools.tools[
+                "dilate-erode"
+              ] as IPreviewedTool<string>).submit();
+            } else {
+              this.editor.activeDocument?.tools.setActiveTool("dilate-erode");
+            }
           }
           controller.userData.isBPressed = source.gamepad.buttons[5].pressed;
 
