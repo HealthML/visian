@@ -1,4 +1,3 @@
-export interface SettingsPopUpProps {
-  isOpen?: boolean;
-  onClose?: () => void;
-}
+import type { StatefulPopUpProps } from "@visian/ui-shared";
+
+export type SettingsPopUpProps = StatefulPopUpProps;

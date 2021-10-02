@@ -25,3 +25,8 @@ export interface PopUpProps extends React.HTMLAttributes<HTMLDivElement> {
    */
   shouldDismissOnOutsidePress?: boolean;
 }
+
+export interface StatefulPopUpProps {
+  isOpen?: boolean;
+  onClose?: () => void;
+}

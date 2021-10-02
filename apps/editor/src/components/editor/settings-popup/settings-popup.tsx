@@ -1,6 +1,12 @@
 import {
   ColorMode,
   EnumParam,
+  LargePopUpGroupTitle,
+  LargePopUpGroupTitleContainer,
+  LargePopUp,
+  LargePopUpColumn,
+  LargePopUpColumnContainer,
+  LargePopUpGroup,
   Switch,
   useTranslation,
 } from "@visian/ui-shared";
@@ -9,14 +15,6 @@ import React, { useCallback } from "react";
 
 import { useStore } from "../../../app/root-store";
 import { SettingsPopUpProps } from "./settings-popup.props";
-import {
-  GroupTitle,
-  GroupTitleContainer,
-  SettingsColumn,
-  SettingsColumnContainer,
-  SettingsGroup,
-  SettingsPopUpContainer,
-} from "./styled-components";
 
 // Settings Items
 const themeSwitchOptions = [
@@ -59,18 +57,18 @@ export const SettingsPopUp: React.FC<SettingsPopUpProps> = observer(
     );
 
     return (
-      <SettingsPopUpContainer
+      <LargePopUp
         titleTx="settings"
         isOpen={isOpen}
         dismiss={onClose}
         shouldDismissOnOutsidePress
       >
-        <SettingsColumnContainer>
-          <SettingsColumn>
-            <SettingsGroup>
-              <GroupTitleContainer>
-                <GroupTitle text="General" />
-              </GroupTitleContainer>{" "}
+        <LargePopUpColumnContainer>
+          <LargePopUpColumn>
+            <LargePopUpGroup>
+              <LargePopUpGroupTitleContainer>
+                <LargePopUpGroupTitle text="General" />
+              </LargePopUpGroupTitleContainer>{" "}
               <EnumParam
                 labelTx="theme"
                 options={themeSwitchOptions}
@@ -97,13 +95,13 @@ export const SettingsPopUp: React.FC<SettingsPopUpProps> = observer(
                 value={store?.editor.performanceMode}
                 onChange={store?.editor.setPerformanceMode}
               />
-            </SettingsGroup>
-          </SettingsColumn>
-          <SettingsColumn />
-          <SettingsColumn />
-          <SettingsColumn />
-        </SettingsColumnContainer>
-      </SettingsPopUpContainer>
+            </LargePopUpGroup>
+          </LargePopUpColumn>
+          <LargePopUpColumn />
+          <LargePopUpColumn />
+          <LargePopUpColumn />
+        </LargePopUpColumnContainer>
+      </LargePopUp>
     );
   },
 );
