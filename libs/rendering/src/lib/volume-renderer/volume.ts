@@ -1,5 +1,5 @@
 import { IEditor } from "@visian/ui-shared";
-import { IDisposable, IDisposer } from "@visian/utils";
+import { IDisposable, IDisposer, Voxel } from "@visian/utils";
 import { autorun } from "mobx";
 import * as THREE from "three";
 
@@ -95,6 +95,10 @@ export class Volume extends THREE.Mesh implements IDisposable {
     this.add(this.boundingBox);
 
     this.clippingPlane.onAfterPicking();
+  }
+
+  public setSeedPreview(value?: Voxel) {
+    (this.mainMaterial as VolumeMaterial).setSeedPreview(value);
   }
 
   public dispose() {

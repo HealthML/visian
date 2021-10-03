@@ -1,5 +1,5 @@
 import { IEditor } from "@visian/ui-shared";
-import { IDisposable, IDisposer } from "@visian/utils";
+import { IDisposable, IDisposer, Voxel } from "@visian/utils";
 import { autorun, reaction } from "mobx";
 import * as THREE from "three";
 
@@ -32,6 +32,8 @@ export class VolumeMaterial
         uOutputFirstDerivative: { value: null },
         uLAO: { value: null },
         uUseRayDithering: { value: true },
+        uShowSeedPreview: { value: false },
+        uSeedPreview: { value: [0, 0, 0] },
       },
       defines: {
         MAX_STEPS: 600,
@@ -76,6 +78,14 @@ export class VolumeMaterial
 
   public setUseRayDithering(value: boolean) {
     this.uniforms.uUseRayDithering.value = value;
+  }
+
+  public setSeedPreview(value?: Voxel) {
+    this.uniforms.uShowSeedPreview.value = Boolean(value);
+    if (value) {
+      this.uniforms.uSeedPreview.value = [value.x, value.y, value.z];
+      console.log(this.uniforms.uShowSeedPreview.value);
+    }
   }
 }
 

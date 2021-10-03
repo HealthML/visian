@@ -8,6 +8,9 @@ uniform sampler2D uLAO;
 
 uniform bool uUseRayDithering;
 
+uniform bool uShowSeedPreview;
+uniform vec3 uSeedPreview;
+
 @import ../uniforms/u-opacity;
 @import ../uniforms/u-common;
 @import ../uniforms/u-atlas-info;
@@ -29,6 +32,10 @@ uniform bool uUseRayDithering;
 vec4 getVolumeColor(vec3 volumeCoords) {
   VolumeData volumeData = getInterpolatedVolumeData(volumeCoords);
   vec4 volumeColor = transferFunction(volumeData, volumeCoords);
+
+  if(uShowSeedPreview && length(volumeCoords - uSeedPreview / uVoxelCount ) < 0.004) {
+    volumeColor = vec4(uLayerColors[0], 1.0);
+  }
 
   if(uLightingMode == 1) {
     volumeColor = phong(volumeColor, volumeData, volumeCoords);

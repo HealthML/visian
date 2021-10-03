@@ -27,6 +27,8 @@ export class RegionGrowingRenderer3D extends BlipRenderer3D {
 
     this.seed = new Seed(document);
 
+    this.previewColor = this.document.getRegionGrowingPreviewColor();
+
     makeObservable(this, {
       threshold: observable,
 

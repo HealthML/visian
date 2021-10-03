@@ -232,10 +232,18 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
               "pointerdown",
               this.onSmartBrushClick,
             );
+            this.renderer.domElement.addEventListener(
+              "pointermove",
+              this.onSmartBrushHover,
+            );
           } else {
             this.renderer.domElement.removeEventListener(
               "pointerdown",
               this.onSmartBrushClick,
+            );
+            this.renderer.domElement.removeEventListener(
+              "pointermove",
+              this.onSmartBrushHover,
             );
           }
         },
@@ -261,6 +269,10 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
     this.renderer.domElement.removeEventListener(
       "pointerdown",
       this.onSmartBrushClick,
+    );
+    this.renderer.domElement.removeEventListener(
+      "pointermove",
+      this.onSmartBrushHover,
     );
     this.gradientComputer.dispose();
     this.laoComputer.dispose();
@@ -528,6 +540,26 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
 
     return seedPoint;
   }
+
+  private onSmartBrushHover = (event: PointerEvent) => {
+    if (
+      !this.editor.activeDocument?.activeLayer?.isVisible ||
+      !this.editor.activeDocument?.activeLayer?.isAnnotation
+    ) {
+      return;
+    }
+
+    const smartBrush3D = this.editor.activeDocument?.tools.tools[
+      "smart-brush-3d"
+    ];
+    if (!smartBrush3D) return;
+
+    const hoveredPoint = this.getSmartBrushIntersection(event);
+
+    this.volume.setSeedPreview(hoveredPoint);
+
+    this.lazyRender();
+  };
 
   private onSmartBrushClick = (event: PointerEvent) => {
     if (event.button !== 0) return;
