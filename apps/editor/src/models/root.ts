@@ -12,6 +12,7 @@ import { errorDisplayDuration } from "../constants";
 import { DICOMWebServer } from "./dicomweb-server";
 import { Editor, EditorSnapshot } from "./editor";
 import { ErrorNotification, ProgressNotification } from "./types";
+import { Task } from "./who";
 
 export interface RootSnapshot {
   editor: EditorSnapshot;
@@ -34,38 +35,46 @@ export class RootStore implements ISerializable<RootSnapshot> {
   public error?: ErrorNotification;
   public progress?: ProgressNotification;
 
-  /**
-   * Indicates if there are changes that have not yet been written by the
-   * given storage backend.
-   */
-  public isDirty = false;
+  /** Indicates if the last-triggered save succeeded. */
+  protected isSaved = true;
+  /** Indicates if the last-triggered save used an up-to-date snapshot. */
+  protected isSaveUpToDate = true;
 
   public shouldPersist = false;
 
   public refs: { [key: string]: React.RefObject<HTMLElement> } = {};
   public pointerDispatch?: IDispatch;
 
+  public currentTask?: Task;
+
   constructor(protected config: RootStoreConfig = {}) {
-    makeObservable(this, {
-      dicomWebServer: observable,
-      editor: observable,
-      colorMode: observable,
-      error: observable,
-      progress: observable,
-      isDirty: observable,
-      refs: observable,
+    makeObservable<this, "isSaved" | "isSaveUpToDate" | "setIsSaveUpToDate">(
+      this,
+      {
+        dicomWebServer: observable,
+        editor: observable,
+        colorMode: observable,
+        error: observable,
+        progress: observable,
+        isSaved: observable,
+        isSaveUpToDate: observable,
+        refs: observable,
+        currentTask: observable,
 
-      theme: computed,
+        theme: computed,
 
-      connectToDICOMWebServer: action,
-      setColorMode: action,
-      setError: action,
-      setProgress: action,
-      applySnapshot: action,
-      rehydrate: action,
-      setIsDirty: action,
-      setRef: action,
-    });
+        connectToDICOMWebServer: action,
+        setColorMode: action,
+        setError: action,
+        setProgress: action,
+        applySnapshot: action,
+        rehydrate: action,
+        setIsDirty: action,
+        setIsSaveUpToDate: action,
+        setRef: action,
+        setCurrentTask: action,
+      },
+    );
 
     this.editor = new Editor(undefined, {
       persist: this.persist,
@@ -89,7 +98,10 @@ export class RootStore implements ISerializable<RootSnapshot> {
    * Defaults to `true`.
    */
   public async connectToDICOMWebServer(url?: string, shouldPersist = true) {
+    if (url) this.setProgress({ labelTx: "connecting" });
     this.dicomWebServer = url ? await DICOMWebServer.connect(url) : undefined;
+    if (url) this.setProgress();
+
     if (shouldPersist && this.shouldPersist) {
       if (url) {
         localStorage.setItem("dicomWebServer", url);
@@ -126,9 +138,22 @@ export class RootStore implements ISerializable<RootSnapshot> {
     this.progress = progress;
   }
 
-  public setIsDirty = (isDirty = true) => {
-    this.isDirty = isDirty;
+  /**
+   * Indicates if there are changes that have not yet been written by the
+   * given storage backend.
+   */
+  public get isDirty() {
+    return !(this.isSaved && this.isSaveUpToDate);
+  }
+
+  public setIsDirty = (isDirty = true, force = false) => {
+    this.isSaved = !isDirty;
+    if (force) this.isSaveUpToDate = !isDirty;
   };
+
+  protected setIsSaveUpToDate(value: boolean) {
+    this.isSaveUpToDate = value;
+  }
 
   public setRef<T extends HTMLElement>(key: string, ref?: React.RefObject<T>) {
     if (ref) {
@@ -138,17 +163,24 @@ export class RootStore implements ISerializable<RootSnapshot> {
     }
   }
 
+  public setCurrentTask(task?: Task) {
+    this.currentTask = task;
+  }
+
   public persist = async () => {
     if (!this.shouldPersist) return;
     this.setIsDirty(true);
-    await this.config.storageBackend?.persist("/editor", () =>
-      this.editor.toJSON(),
-    );
+    this.setIsSaveUpToDate(false);
+    await this.config.storageBackend?.persist("/editor", () => {
+      this.setIsSaveUpToDate(true);
+      return this.editor.toJSON();
+    });
     this.setIsDirty(false);
   };
 
   public persistImmediately = async () => {
     if (!this.shouldPersist) return;
+    this.setIsSaveUpToDate(true);
     await this.config.storageBackend?.persistImmediately(
       "/editor",
       this.editor.toJSON(),
@@ -170,7 +202,7 @@ export class RootStore implements ISerializable<RootSnapshot> {
 
     const dicomWebServer = localStorage.getItem("dicomWebServer");
     if (dicomWebServer) {
-      await this.connectToDICOMWebServer(dicomWebServer, false);
+      this.connectToDICOMWebServer(dicomWebServer, false);
     }
 
     const theme = localStorage.getItem("theme");
@@ -196,7 +228,7 @@ export class RootStore implements ISerializable<RootSnapshot> {
     localStorage.clear();
     await this.config.storageBackend?.clear();
 
-    this.setIsDirty(false);
+    this.setIsDirty(false, true);
     window.location.href = window.location.pathname;
   };
 }

@@ -40,9 +40,9 @@ export const asyncThrottle = (...args: Parameters<typeof throttle>) => {
     (value: ReturnType<typeof fn>) => void,
     (exception: Error) => void,
   ][] = [];
-  const throttledFn = throttle((...args2: Parameters<typeof fn>) => {
+  const throttledFn = throttle((...throttledArgs: Parameters<typeof fn>) => {
     try {
-      const result = fn(...args2);
+      const result = fn(...throttledArgs);
       if (isPromise(result)) {
         result
           .then(() => {
@@ -66,21 +66,23 @@ export const asyncThrottle = (...args: Parameters<typeof throttle>) => {
       }
     } catch (exception) {
       pendingRequests.forEach((request) => {
-        request[1](exception);
+        request[1](exception as Error);
       });
       pendingRequests = [];
     }
   }, ...rest);
 
-  const returnedFunction = (...args2: Parameters<typeof fn>) =>
+  const returnedFunction = (...throttledArgs: Parameters<typeof fn>) =>
     new Promise<ReturnType<typeof fn>>((resolve, reject) => {
       pendingRequests.push([resolve, reject]);
-      throttledFn(...args2);
+      throttledFn(...throttledArgs);
     });
 
   returnedFunction.cancel = () => throttledFn.cancel();
   returnedFunction.flush = () => throttledFn.flush();
   return returnedFunction as AsyncDebouncedFunc<
-    (...args3: Parameters<typeof fn>) => ReturnType<typeof fn> | undefined
+    (
+      ...throttledArgs: Parameters<typeof fn>
+    ) => ReturnType<typeof fn> | undefined
   >;
 };

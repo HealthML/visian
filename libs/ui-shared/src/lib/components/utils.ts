@@ -91,6 +91,7 @@ export const useFilePicker = (
   }, [callback, inputElement]);
 
   return useCallback(() => {
+    inputElement.value = "";
     inputElement.type = "file";
     inputElement.multiple = multiple;
     inputElement.dispatchEvent(new MouseEvent("click"));
