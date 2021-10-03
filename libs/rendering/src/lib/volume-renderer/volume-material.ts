@@ -84,7 +84,6 @@ export class VolumeMaterial
     this.uniforms.uShowSeedPreview.value = Boolean(value);
     if (value) {
       this.uniforms.uSeedPreview.value = [value.x, value.y, value.z];
-      console.log(this.uniforms.uShowSeedPreview.value);
     }
   }
 }
