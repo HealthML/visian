@@ -77,6 +77,7 @@ export const ImportPopUp = observer<ImportPopUpProps>(({ isOpen, onClose }) => {
         store?.editor.activeDocument
           ?.importFile(Array.from(files))
           .then(() => {
+            store?.editor.activeDocument?.finishBatchImport();
             onClose?.();
           })
           .catch((error) => {

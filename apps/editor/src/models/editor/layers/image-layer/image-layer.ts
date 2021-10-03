@@ -279,13 +279,15 @@ export class ImageLayer
   }
 
   // I/O
-  public quickExport = async () => {
-    if (this.image.dimensionality < 3) return this.quickExportSlice();
-
-    const file = await writeSingleMedicalImage(
+  public toFile() {
+    return writeSingleMedicalImage(
       this.image.toITKImage(),
       `${this.title.split(".")[0]}.nii.gz`,
     );
+  }
+  public quickExport = async () => {
+    if (this.image.dimensionality < 3) return this.quickExportSlice();
+    const file = await this.toFile();
 
     if (!file) return;
     FileSaver.saveAs(file, file.name);

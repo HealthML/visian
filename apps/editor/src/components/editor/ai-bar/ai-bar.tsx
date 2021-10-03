@@ -1,28 +1,29 @@
 import {
+  BlueButtonParam,
   color,
+  fontSize,
+  IImageLayer,
   InvisibleButton,
   Sheet,
-  Text,
-  fontSize,
-  SquareButton,
-  BlueButtonParam,
   sheetNoise,
+  SquareButton,
+  Text,
+  zIndex,
 } from "@visian/ui-shared";
+import {
+  createBase64StringFromFile,
+  putWHOTask,
+  reloadWithNewTaskId,
+  writeSingleMedicalImage,
+} from "@visian/utils";
 import { observer } from "mobx-react-lite";
-import React from "react";
+import React, { useCallback } from "react";
 import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
-
-const AIBarContainer = styled.div`
-  align-items: center;
-  align-self: stretch;
-  display: flex;
-  justify-content: center;
-  width: 100%;
-  box-sizing: border-box;
-  pointer-events: auto;
-`;
+import { whoHome } from "../../../constants";
+import { AnnotationStatus } from "../../../models/who/annotation";
+import { AnnotationData } from "../../../models/who/annotationData";
 
 const AIBarSheet = styled(Sheet)`
   width: 800px;
@@ -32,6 +33,13 @@ const AIBarSheet = styled(Sheet)`
   flex-direction: row;
   align-items: center;
   justify-content: center;
+  pointer-events: auto;
+
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: ${zIndex("modal")};
 `;
 
 const TaskContainer = styled.div`
@@ -53,8 +61,9 @@ const TaskLabel = styled(Text)`
 const TaskName = styled(Text)`
   font-size: 18px;
   line-height: 18px;
-  height: 18px;
+  margin-right: 20px;
   padding-top: 2px;
+  white-space: wrap;
 `;
 
 const ActionContainer = styled.div`
@@ -73,9 +82,10 @@ const ActionContainer = styled.div`
 
 const ActionName = styled(Text)`
   font-size: 18px;
-  line-height: 10px;
-  height: 12px;
+  line-height: 18px;
+  margin-right: 10px;
   padding-top: 2px;
+  white-space: wrap;
 `;
 
 const ActionButtonsContainer = styled.div`
@@ -161,48 +171,128 @@ const AIMessageSubtitle = styled(Text)`
 
 export const AIBar = observer(() => {
   const store = useStore();
+
+  const saveAnnotationToWHOBackend = useCallback(
+    async (status: AnnotationStatus) => {
+      if (!store?.currentTask?.annotations.length) return;
+      store.currentTask.annotations.forEach((annotation) => {
+        annotation.status = status;
+      });
+      const currentAnnotationImage = (store?.editor.activeDocument
+        ?.activeLayer as IImageLayer).image.toITKImage();
+      const currentAnnotationFile = await writeSingleMedicalImage(
+        currentAnnotationImage,
+        "annotation.nii.gz",
+      );
+      if (!currentAnnotationFile) return;
+      const base64Annotation = await createBase64StringFromFile(
+        currentAnnotationFile,
+      );
+
+      const annotationDataForBackend = {
+        data: base64Annotation,
+      };
+      store.currentTask.annotations.forEach((annotation) => {
+        if (annotation.data.length) {
+          annotation.data = [];
+        }
+        annotation.data.push(new AnnotationData(annotationDataForBackend));
+        annotation.submittedAt = new Date().toISOString();
+      });
+
+      try {
+        const response = await putWHOTask(
+          store.currentTask.taskUUID,
+          JSON.stringify(store.currentTask.toJSON()),
+        );
+        if (response) {
+          // const newLocation = response.headers.get("location");
+          // TODO: Do not use hardcoded location
+          const newLocation =
+            "http://annotation.ai4h.net/tasks/b4009387-4d48-49b6-be2a-8ad50df03307";
+          if (newLocation) {
+            const urlElements = newLocation.split("/");
+            const newTaskId = urlElements[urlElements.length - 1];
+            if (newTaskId !== store.currentTask.taskUUID) {
+              store?.setIsDirty(false, true);
+              reloadWithNewTaskId(newTaskId);
+              return;
+            }
+          }
+        }
+        // If no new location is given, return to the WHO page
+        window.location.href = whoHome;
+      } catch {
+        store?.setError({
+          titleTx: "export-error",
+          descriptionTx: "file-upload-error",
+        });
+      }
+    },
+    [store],
+  );
+
+  const confirmTaskAnnotation = useCallback(async () => {
+    await saveAnnotationToWHOBackend(AnnotationStatus.Completed);
+  }, [saveAnnotationToWHOBackend]);
+
+  const skipTaskAnnotation = useCallback(async () => {
+    await saveAnnotationToWHOBackend(AnnotationStatus.Rejected);
+  }, [saveAnnotationToWHOBackend]);
+
   return store?.editor.activeDocument ? (
-    <AIBarContainer>
-      <AIBarSheet>
-        <TaskContainer>
-          <TaskLabel tx="Task" />
-          <TaskName tx="Ventricle" />
-          <TaskName tx="Segmentation" />
-        </TaskContainer>
-        <ActionContainer>
-          <ActionName tx="Annotate to create ground truth" />
-          <ActionButtonsContainer>
-            <ActionButtons
-              icon="check"
-              tooltipTx="export-tooltip"
-              tooltipPosition="right"
-            />
-            <ActionButtons
-              icon="redo"
-              tooltipTx="export-tooltip"
-              tooltipPosition="right"
-            />
-          </ActionButtonsContainer>
-        </ActionContainer>
-        <AIContainer>
-          <AIToolsContainer>
+    <AIBarSheet>
+      <TaskContainer>
+        <TaskLabel tx="Task" />
+        <TaskName
+          tx={store.currentTask?.annotationTasks[0]?.title || "Task Name"}
+        />
+      </TaskContainer>
+      <ActionContainer>
+        <ActionName
+          tx={
+            store.currentTask?.annotationTasks[0]?.description ||
+            "Task Description"
+          }
+        />
+        <ActionButtonsContainer>
+          <ActionButtons
+            icon="check"
+            tooltipTx="confirm-task-annotation-tooltip"
+            tooltipPosition="right"
+            onPointerDown={confirmTaskAnnotation}
+          />
+          <ActionButtons
+            icon="redo"
+            tooltipTx="skip-task-annotation-tooltip"
+            tooltipPosition="right"
+            onPointerDown={skipTaskAnnotation}
+          />
+        </ActionButtonsContainer>
+      </ActionContainer>
+      <AIContainer>
+        <AIToolsContainer>
+          {false && (
             <AIMessageContainer>
               <AIMessage>
-                <AIMessageTitle tx="Show me what you are looking for" />
-                <AIMessageSubtitle tx="Start annotating" />
+                <AIMessageTitle tx="ai-show-me" />
+                <AIMessageSubtitle tx="ai-start-annotating" />
               </AIMessage>
               <AIMessageConnector />
             </AIMessageContainer>
-            <SkipButton icon="arrowLeft" />
+          )}
+
+          <SkipButton icon="arrowLeft" />
+          <a href={whoHome}>
             <AIButton
               icon="whoAI"
-              tooltipTx="export-tooltip"
+              tooltipTx="return-who"
               tooltipPosition="right"
             />
-            <SkipButton icon="arrowRight" />
-          </AIToolsContainer>
-        </AIContainer>
-      </AIBarSheet>
-    </AIBarContainer>
+          </a>
+          <SkipButton icon="arrowRight" />
+        </AIToolsContainer>
+      </AIContainer>
+    </AIBarSheet>
   ) : null;
 });
