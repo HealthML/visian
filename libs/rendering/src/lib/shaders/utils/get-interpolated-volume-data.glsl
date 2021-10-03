@@ -5,7 +5,7 @@
  */
 VolumeData getVolumeData(vec3 volumeCoords) {
   vec2 sliceSize = vec2(1.0) / uAtlasGrid;
-  float zSlice = floor(volumeCoords.z * uVoxelCount.z);
+  float zSlice = floor(volumeCoords.z * uVoxelCount.z + 0.5);
   vec2 sliceOffset = vec2(
     mod(zSlice, uAtlasGrid.x), 
     floor(zSlice / uAtlasGrid.x)
