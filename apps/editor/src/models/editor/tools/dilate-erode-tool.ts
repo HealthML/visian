@@ -38,12 +38,14 @@ export class DilateErodeTool<N extends "dilate-erode" = "dilate-erode">
     if (
       targetLayer &&
       this.document.activeLayer?.kind === "image" &&
-      this.document.activeLayer.isAnnotation
+      this.document.activeLayer.isAnnotation &&
+      this.document.activeLayer.isVisible
     ) {
       this.renderer.setTargetLayer(targetLayer as IImageLayer);
       this.renderer.render();
     } else {
       this.document.tools.setActiveTool(previousTool);
+      this.document.setShowLayerMenu(true);
     }
   }
 

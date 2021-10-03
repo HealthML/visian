@@ -5,7 +5,7 @@ import * as THREE from "three";
 
 import { MergeFunction, RenderedImage } from "../rendered-image";
 import ScreenAlignedQuad from "../screen-aligned-quad";
-import { Blip3DMaterial, MAX_BLIP_STEPS } from "./utils/blip-material";
+import { Blip3DMaterial, MAX_BLIP_STEPS } from "./utils";
 
 export class BlipRenderer3D implements IBlipRenderer3D, IDisposable {
   public readonly excludeFromSnapshotTracking = ["document"];
