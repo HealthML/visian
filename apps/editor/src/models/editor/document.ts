@@ -146,7 +146,10 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
       applySnapshot: action,
     });
 
-    this.tools = new Tools(snapshot?.tools, this);
+    // This is split up to avoid errors from a tool that is being activated
+    // trying to access document.tools
+    this.tools = new Tools(undefined, this);
+    this.tools.applySnapshot(snapshot?.tools || {});
   }
 
   public get title(): string | undefined {

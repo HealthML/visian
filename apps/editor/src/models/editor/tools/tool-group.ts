@@ -44,13 +44,16 @@ export class ToolGroup<N extends string>
     return this.toolNames.map((name) => this.document.tools.tools[name]);
   }
 
-  public setActiveTool(nameOrTool?: N | ITool<N>): void {
+  public setActiveTool(
+    nameOrTool?: N | ITool<N>,
+    setAsGlobalActiveTool = true,
+  ): void {
     this.activeToolName = nameOrTool
       ? typeof nameOrTool === "string"
         ? nameOrTool
         : nameOrTool.name
       : this.toolNames[0];
-    this.document.tools?.setActiveTool(nameOrTool);
+    if (setAsGlobalActiveTool) this.document.tools?.setActiveTool(nameOrTool);
   }
 
   // Serialization
@@ -65,9 +68,9 @@ export class ToolGroup<N extends string>
       snapshot.activeToolName &&
       !this.toolNames.includes(snapshot.activeToolName)
     ) {
-      this.setActiveTool();
+      this.setActiveTool(undefined, false);
     } else {
-      this.setActiveTool(snapshot.activeToolName);
+      this.setActiveTool(snapshot.activeToolName, false);
     }
     return Promise.resolve();
   }

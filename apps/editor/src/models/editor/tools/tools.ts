@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import {
+  DilateErodeRenderer3D,
   RegionGrowingRenderer,
   RegionGrowingRenderer3D,
   ToolRenderer,
@@ -19,6 +20,8 @@ import { ToolGroup, ToolGroupSnapshot } from "./tool-group";
 import { BoundedSmartBrush } from "./bounded-smart-brush";
 import { PlaneTool } from "./plane-tool";
 import { SmartBrush3D } from "./smart-brush-3d";
+import { DilateErodeTool } from "./dilate-erode-tool";
+import { SelfDeactivatingTool } from "./self-deactivating-tool";
 
 export type ToolName =
   | "navigation-tool"
@@ -34,6 +37,7 @@ export type ToolName =
   | "outline-eraser"
   | "clear-slice"
   | "clear-image"
+  | "dilate-erode"
   | "plane-tool"
   | "fly-tool";
 
@@ -56,6 +60,9 @@ export class Tools
     "isCursorOverFloatingUI",
     "isNavigationDragged",
     "isDrawing",
+    "regionGrowingRenderer",
+    "regionGrowingRenderer3D",
+    "dilateErodeRenderer3D",
   ];
 
   protected activeToolName?: ToolName;
@@ -75,6 +82,7 @@ export class Tools
   public toolRenderer: ToolRenderer;
   public regionGrowingRenderer: RegionGrowingRenderer;
   public regionGrowingRenderer3D: RegionGrowingRenderer3D;
+  public dilateErodeRenderer3D: DilateErodeRenderer3D;
 
   constructor(
     snapshot: Partial<ToolsSnapshot<ToolName>> | undefined,
@@ -126,6 +134,7 @@ export class Tools
     this.toolRenderer = new ToolRenderer(document);
     this.regionGrowingRenderer = new RegionGrowingRenderer(document);
     this.regionGrowingRenderer3D = new RegionGrowingRenderer3D(document);
+    this.dilateErodeRenderer3D = new DilateErodeRenderer3D(document);
 
     this.tools = {
       "navigation-tool": new Tool(
@@ -163,7 +172,8 @@ export class Tools
       "outline-eraser": new OutlineTool(document, this.toolRenderer, false),
       "clear-slice": new ClearSliceTool(document, this.toolRenderer),
       "clear-image": new ClearImageTool(document, this.toolRenderer),
-      "plane-tool": new PlaneTool(this.document),
+      "dilate-erode": new DilateErodeTool(document, this.dilateErodeRenderer3D),
+      "plane-tool": new PlaneTool(document),
       "fly-tool": new Tool(
         {
           name: "fly-tool",
@@ -171,7 +181,7 @@ export class Tools
           labelTx: "fly-tool",
           supportedViewModes: ["3D"],
         },
-        this.document,
+        document,
       ),
     };
 
@@ -194,11 +204,12 @@ export class Tools
         document,
       ),
       new ToolGroup({ toolNames: ["clear-slice", "clear-image"] }, document),
+      new ToolGroup({ toolNames: ["dilate-erode"] }, document),
       new ToolGroup({ toolNames: ["plane-tool"] }, document),
       new ToolGroup({ toolNames: ["fly-tool"] }, document),
     );
 
-    this.applySnapshot(snapshot);
+    if (snapshot) this.applySnapshot(snapshot);
   }
 
   protected getDefaultToolName(): ToolName {
@@ -229,6 +240,7 @@ export class Tools
       : "pixel-brush";
 
     if (this.activeTool?.canActivate()) {
+      previouslyActiveTool?.deactivate(this.tools[this.activeToolName]);
       this.activeTool.activate(previouslyActiveTool);
     }
   }
@@ -419,22 +431,28 @@ export class Tools
   }
 
   public applySnapshot(
-    snapshot?: Partial<ToolsSnapshot<ToolName>>,
+    snapshot: Partial<ToolsSnapshot<ToolName>>,
   ): Promise<void> {
-    this.setActiveTool(snapshot?.activeToolName);
-    snapshot?.tools?.forEach((toolSnapshot) => {
+    snapshot.tools?.forEach((toolSnapshot) => {
       const tool = this.tools[toolSnapshot.name];
       if (tool) tool.applySnapshot(toolSnapshot);
     });
+    this.setActiveTool(
+      !snapshot.activeToolName ||
+        !(this.tools[snapshot.activeToolName] as SelfDeactivatingTool<ToolName>)
+          ?.isSelfDeactivating
+        ? snapshot.activeToolName
+        : undefined,
+    );
     this.toolGroups.forEach((toolGroup, index) => {
-      const toolGroupSnapshot = snapshot?.toolGroups?.[index];
+      const toolGroupSnapshot = snapshot.toolGroups?.[index];
       if (toolGroupSnapshot) toolGroup.applySnapshot(toolGroupSnapshot);
     });
 
-    this.setBrushSize(snapshot?.brushSize);
-    this.lockedBrushSize = snapshot?.lockedBrushSize;
-    this.setSmartBrushThreshold(snapshot?.smartBrushThreshold);
-    this.setBoundedSmartBrushRadius(snapshot?.boundedSmartBrushRadius);
+    this.setBrushSize(snapshot.brushSize);
+    this.lockedBrushSize = snapshot.lockedBrushSize;
+    this.setSmartBrushThreshold(snapshot.smartBrushThreshold);
+    this.setBoundedSmartBrushRadius(snapshot.boundedSmartBrushRadius);
 
     return Promise.resolve();
   }

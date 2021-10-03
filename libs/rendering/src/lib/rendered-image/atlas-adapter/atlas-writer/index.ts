@@ -1,2 +1,2 @@
-export * from "./add-material";
+export * from "./merge-material";
 export * from "./atlas-writer";

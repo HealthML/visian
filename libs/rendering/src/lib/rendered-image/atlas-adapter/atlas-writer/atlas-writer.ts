@@ -1,6 +1,8 @@
 import * as THREE from "three";
+
 import ScreenAlignedQuad from "../../../screen-aligned-quad";
-import { AddMaterial } from "./add-material";
+import { MergeFunction } from "../../types";
+import { MergeMaterial } from "./merge-material";
 
 /**
  * Wrapper providing a clean interface for using the `AddMaterial` to add one
@@ -8,22 +10,24 @@ import { AddMaterial } from "./add-material";
  * See `./atlas-writer.ts` for more details.
  */
 export class AtlasWriter {
-  private addMaterial = new AddMaterial();
+  private addMaterial = new MergeMaterial();
   private addQuad: ScreenAlignedQuad;
 
   constructor() {
     this.addQuad = new ScreenAlignedQuad(this.addMaterial);
   }
 
-  public addToAltas(
+  public writeToAltas(
     data: THREE.Texture[],
-    threshold: number,
     renderTargets: THREE.WebGLRenderTarget[],
     renderers: THREE.WebGLRenderer[],
+    mergeFunction: MergeFunction,
+    threshold?: number,
   ) {
     renderTargets.forEach((renderTarget, rendererIndex) => {
       const renderer = renderers[rendererIndex];
       this.addMaterial.setSource(data[rendererIndex]);
+      this.addMaterial.setMergeFunction(mergeFunction);
       this.addMaterial.setThreshold(threshold);
       renderer.setRenderTarget(renderTarget);
       renderer.autoClear = false;

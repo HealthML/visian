@@ -1,22 +1,22 @@
 import { RegionGrowingRenderer3D } from "@visian/rendering";
-import { DragPoint, IDocument, IImageLayer } from "@visian/ui-shared";
-import { AtlasCommand } from "../history";
-import { Tool } from "./tool";
+import {
+  DragPoint,
+  IDocument,
+  IImageLayer,
+  IPreviewedTool,
+} from "@visian/ui-shared";
 
-export class SmartBrush3D<
-  N extends "smart-brush-3d" = "smart-brush-3d"
-> extends Tool<N> {
-  public readonly excludeFromSnapshotTracking = [
-    "document",
-    "regionGrowingRenderer",
-  ];
+import { Tool } from "./tool";
+import { mutateAtlas } from "./utils";
+
+export class SmartBrush3D<N extends "smart-brush-3d" = "smart-brush-3d">
+  extends Tool<N>
+  implements IPreviewedTool<N> {
+  public readonly excludeFromSnapshotTracking = ["document", "renderer"];
 
   private isSeedSet = false;
 
-  constructor(
-    document: IDocument,
-    private regionGrowingRenderer: RegionGrowingRenderer3D,
-  ) {
+  constructor(document: IDocument, private renderer: RegionGrowingRenderer3D) {
     super(
       {
         name: "smart-brush-3d" as N,
@@ -46,43 +46,32 @@ export class SmartBrush3D<
       return;
     }
 
-    this.regionGrowingRenderer.setSeed(dragPoint);
+    this.renderer.setSeed(dragPoint);
     this.isSeedSet = true;
   }
 
   public endAt(_dragPoint: DragPoint): void {
     if (this.isSeedSet) {
-      this.regionGrowingRenderer.doRegionGrowing(
-        this.document.tools.smartBrushThreshold,
-      );
+      this.renderer.setThreshold(this.document.tools.smartBrushThreshold);
+      this.renderer.render();
       this.isSeedSet = false;
     }
   }
 
   public submit = () => {
-    const imageLayer = this.document.activeLayer;
-    if (!imageLayer || imageLayer.kind !== "image") return;
-    const { image } = imageLayer as IImageLayer;
-    const oldAtlas = new Uint8Array(image.getAtlas());
-
-    this.regionGrowingRenderer.flushToAnnotation();
-
-    const newAtlas = new Uint8Array(image.getAtlas());
-    this.document.history.addCommand(
-      new AtlasCommand(
-        {
-          layerId: imageLayer.id,
-          oldAtlas,
-          newAtlas,
-        },
-        this.document,
-      ),
-    );
-
-    (imageLayer as IImageLayer).recomputeSliceMarkers(
-      undefined,
-      undefined,
-      false,
+    const targetLayer = this.document.activeLayer;
+    mutateAtlas(
+      targetLayer as IImageLayer,
+      () => this.renderer.flushToAnnotation(),
+      this.document,
     );
   };
+
+  public discard() {
+    this.renderer.discard();
+  }
+
+  public deactivate() {
+    this.renderer.discard();
+  }
 }

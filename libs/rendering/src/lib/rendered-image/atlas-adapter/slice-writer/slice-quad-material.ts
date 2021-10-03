@@ -1,4 +1,5 @@
 import * as THREE from "three";
+
 import { quadFragmentShader, quadVertexShader } from "../../../shaders";
 import { MergeFunction } from "../../types";
 

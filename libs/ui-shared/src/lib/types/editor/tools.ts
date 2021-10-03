@@ -1,5 +1,7 @@
-import * as THREE from "three";
 import type { Voxel } from "@visian/utils";
+import * as THREE from "three";
+
+import type { IImageLayer } from "./layers";
 import type { IconType } from "../../components";
 import type { IParameter } from "./parameters";
 import type { Reference, ViewMode } from "./types";
@@ -82,6 +84,25 @@ export interface ITool<N extends string> {
   moveTo(dragPoint: DragPoint): void;
   /** Called when the user ends a drag interaction with this tool selected. */
   endAt(dragPoint: DragPoint): void;
+
+  /**
+   * Called when the tool is deactivated.
+   *
+   * @param nextTool The next active tool (if any).
+   */
+  deactivate(nextTool?: ITool<N>): void;
+}
+
+export interface ISelfDeactivatingTool<N extends string> extends ITool<N> {
+  isSelfDeactivating: true;
+}
+
+export interface IPreviewedTool<N extends string> extends ITool<N> {
+  /** Submits the previewed results to be applied. */
+  submit(): void;
+
+  /** Discards the preview results. */
+  discard(): void;
 }
 
 /** A class of similar tools, typically grouped in the UI. */
@@ -98,12 +119,21 @@ export interface IToolGroup<N extends string> {
   setActiveTool(nameOrTool: N | ITool<N>): void;
 }
 
-export interface IRegionGrowingRenderer3D {
+export interface IBlipRenderer3D {
   holdsPreview: boolean;
   previewColor?: string;
 
   /** The number of steps to region grow. */
   steps: number;
+
+  outputTextures: THREE.Texture[];
+
+  flushToAnnotation(): void;
+  discard(): void;
+}
+
+export interface IDilateErodeRenderer3D extends IBlipRenderer3D {
+  targetLayer?: IImageLayer;
 }
 
 /** The editor's tools and their settings for the document. */
@@ -141,7 +171,8 @@ export interface ITools<N extends string> {
   isDrawing: boolean;
 
   layerPreviewTextures: THREE.Texture[];
-  regionGrowingRenderer3D: IRegionGrowingRenderer3D;
+  regionGrowingRenderer3D: IBlipRenderer3D;
+  dilateErodeRenderer3D: IDilateErodeRenderer3D;
 
   setActiveTool(nameOrTool?: N | ITool<N>): void;
 

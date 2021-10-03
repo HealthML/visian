@@ -1,4 +1,4 @@
-import { MAX_REGION_GROWING_STEPS } from "@visian/rendering";
+import { MAX_BLIP_STEPS } from "@visian/rendering";
 import {
   ButtonParam,
   ColorParam,
@@ -18,11 +18,13 @@ const StyledModal = styled(Modal)`
   margin-top: 16px;
 `;
 
-export const ActionModal = observer(() => {
+export const SmartBrush3DModal = observer(() => {
   const store = useStore();
 
   const discard = useCallback(() => {
-    store?.editor.activeDocument?.tools.regionGrowingRenderer3D.discard();
+    (store?.editor.activeDocument?.tools.tools[
+      "smart-brush-3d"
+    ] as SmartBrush3D).discard();
     store?.editor.activeDocument?.tools.setIsCursorOverFloatingUI(false);
   }, [store]);
 
@@ -36,7 +38,7 @@ export const ActionModal = observer(() => {
   return store?.editor.activeDocument?.tools.regionGrowingRenderer3D
     .holdsPreview ? (
     <StyledModal
-      labelTx="smart-brush-3d"
+      labelTx="smart-brush-3d-title"
       headerChildren={
         <ModalHeaderButton
           icon="xSmall"
@@ -62,7 +64,7 @@ export const ActionModal = observer(() => {
       <NumberParam
         labelTx="region-growing-steps"
         min={0}
-        max={MAX_REGION_GROWING_STEPS}
+        max={MAX_BLIP_STEPS}
         stepSize={1}
         value={
           store?.editor.activeDocument?.tools.regionGrowingRenderer3D.steps

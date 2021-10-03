@@ -11,7 +11,7 @@ import { autorun } from "mobx";
 import * as THREE from "three";
 
 import { RenderedImage } from "../../rendered-image";
-import { MAX_REGION_GROWING_STEPS } from "../../tool-renderer";
+import { MAX_BLIP_STEPS } from "../../tool-renderer";
 import {
   atlasInfoUniforms,
   commonUniforms,
@@ -207,16 +207,20 @@ export class SharedUniforms implements IDisposable {
         const useNearestFilteringAnnotation = !editor.activeDocument?.viewport3D
           .useSmoothSegmentations;
         const layerData = layers.map((layer) =>
-          ((layer as IImageLayer).image as RenderedImage).getTexture(
-            0,
-            (
-              layer.isAnnotation
-                ? useNearestFilteringAnnotation
-                : useNearestFilteringImage
-            )
-              ? THREE.NearestFilter
-              : THREE.LinearFilter,
-          ),
+          layer ===
+          editor.activeDocument?.tools.dilateErodeRenderer3D.targetLayer
+            ? editor.activeDocument.tools.dilateErodeRenderer3D
+                .outputTextures[0]
+            : ((layer as IImageLayer).image as RenderedImage).getTexture(
+                0,
+                (
+                  layer.isAnnotation
+                    ? useNearestFilteringAnnotation
+                    : useNearestFilteringImage
+                )
+                  ? THREE.NearestFilter
+                  : THREE.LinearFilter,
+              ),
         );
 
         this.uniforms.uLayerData.value = [
@@ -359,8 +363,7 @@ export class SharedUniforms implements IDisposable {
           editor.activeDocument?.tools.regionGrowingRenderer3D.steps ?? 0;
 
         this.uniforms.uRegionGrowingThreshold.value =
-          (MAX_REGION_GROWING_STEPS + 1 - steps) /
-          (MAX_REGION_GROWING_STEPS + 1);
+          (MAX_BLIP_STEPS + 1 - steps) / (MAX_BLIP_STEPS + 1);
 
         editor.activeDocument?.viewport3D.onTransferFunctionChange();
         editor.volumeRenderer?.lazyRender(true);
