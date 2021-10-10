@@ -455,7 +455,7 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
     } else if (isAnnotation !== undefined) {
       await this.importImage(image);
     } else {
-      // infer type
+      // Infer Type
       let isLikelyImage = false;
       const { data } = image;
       const uniqueValues = new Set();
