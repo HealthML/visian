@@ -382,6 +382,8 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
       this.renderer.render(this.axesConvention, this.axesConvention.camera);
       this.renderer.autoClear = true;
       this.renderer.setViewport(this.workingVector4);
+
+      this.axesConvention.renderLabels();
     }
   };
 

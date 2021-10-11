@@ -1,4 +1,8 @@
 import * as THREE from "three";
+import {
+  CSS2DRenderer,
+  CSS2DObject,
+} from "three/examples/jsm/renderers/CSS2DRenderer";
 
 const directions = [
   new THREE.Vector3(0, 1, 0),
@@ -9,17 +13,21 @@ const directions = [
   new THREE.Vector3(0, 0, -1),
 ];
 
+const labels = ["S", "I", "R", "L", "P", "A"];
+
 export class AxesConvention extends THREE.Scene {
   public camera: THREE.PerspectiveCamera;
 
   protected superior: THREE.Line;
   protected inferior: THREE.Line;
-  protected left: THREE.Line;
   protected right: THREE.Line;
-  protected anterior: THREE.Line;
+  protected left: THREE.Line;
   protected posterior: THREE.Line;
+  protected anterior: THREE.Line;
 
   protected lineMaterial = new THREE.LineBasicMaterial();
+
+  protected labelRenderer = new CSS2DRenderer();
 
   private workingVector = new THREE.Vector3();
 
@@ -35,15 +43,22 @@ export class AxesConvention extends THREE.Scene {
       this.inferior,
       this.right,
       this.left,
-      this.anterior,
       this.posterior,
-    ] = directions.map(
-      (direction) =>
-        new THREE.Line(
-          new THREE.BufferGeometry().setFromPoints([origin, direction]),
-          this.lineMaterial,
-        ),
-    );
+      this.anterior,
+    ] = directions.map((direction, index) => {
+      const line = new THREE.Line(
+        new THREE.BufferGeometry().setFromPoints([origin, direction]),
+        this.lineMaterial,
+      );
+
+      const labelDiv = document.createElement("div");
+      labelDiv.textContent = labels[index];
+      const earthLabel = new CSS2DObject(labelDiv);
+      earthLabel.position.copy(direction).multiplyScalar(1.3);
+      line.add(earthLabel);
+
+      return line;
+    });
 
     this.add(
       this.superior,
@@ -53,12 +68,22 @@ export class AxesConvention extends THREE.Scene {
       this.anterior,
       this.posterior,
     );
+
+    this.labelRenderer.setSize(100, 100);
+    this.labelRenderer.domElement.style.position = "absolute";
+    this.labelRenderer.domElement.style.bottom = "0px";
+    this.labelRenderer.domElement.style.left = "0px";
+    document.body.appendChild(this.labelRenderer.domElement);
   }
 
   public setCameraDirection(direction: THREE.Vector3) {
-    this.workingVector.copy(direction).normalize().multiplyScalar(-2.5);
+    this.workingVector.copy(direction).normalize().multiplyScalar(-3);
     this.camera.position.copy(this.workingVector);
     this.camera.lookAt(0, 0, 0);
     this.camera.updateProjectionMatrix();
+  }
+
+  public renderLabels() {
+    this.labelRenderer.render(this, this.camera);
   }
 }
