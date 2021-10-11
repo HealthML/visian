@@ -21,12 +21,8 @@ const labels = ["S", "I", "R", "L", "P", "A"];
 export class AxesConvention extends THREE.Scene {
   public camera: THREE.PerspectiveCamera;
 
-  protected superior: THREE.Line;
-  protected inferior: THREE.Line;
-  protected right: THREE.Line;
-  protected left: THREE.Line;
-  protected posterior: THREE.Line;
-  protected anterior: THREE.Line;
+  protected lines: THREE.Line[];
+  protected labels: CSS2DObject[];
 
   protected lineMaterial = new THREE.LineBasicMaterial();
 
@@ -43,36 +39,27 @@ export class AxesConvention extends THREE.Scene {
 
     const origin = new THREE.Vector3();
 
-    [
-      this.superior,
-      this.inferior,
-      this.right,
-      this.left,
-      this.posterior,
-      this.anterior,
-    ] = directions.map((direction, index) => {
+    this.labels = directions.map((direction, index) => {
+      const labelDiv = document.createElement("div");
+      labelDiv.textContent = labels[index];
+      const label = new CSS2DObject(labelDiv);
+      label.position.copy(direction).multiplyScalar(1.3);
+
+      return label;
+    });
+
+    this.lines = directions.map((direction, index) => {
       const line = new THREE.Line(
         new THREE.BufferGeometry().setFromPoints([origin, direction]),
         this.lineMaterial,
       );
 
-      const labelDiv = document.createElement("div");
-      labelDiv.textContent = labels[index];
-      const earthLabel = new CSS2DObject(labelDiv);
-      earthLabel.position.copy(direction).multiplyScalar(1.3);
-      line.add(earthLabel);
+      line.add(this.labels[index]);
 
       return line;
     });
 
-    this.add(
-      this.superior,
-      this.inferior,
-      this.right,
-      this.left,
-      this.anterior,
-      this.posterior,
-    );
+    this.add(...this.lines);
 
     this.labelRenderer.setSize(100, 100);
     this.labelRenderer.domElement.style.position = "absolute";
@@ -95,6 +82,14 @@ export class AxesConvention extends THREE.Scene {
     this.camera.position.copy(this.workingVector);
     this.camera.lookAt(0, 0, 0);
     this.camera.updateProjectionMatrix();
+
+    const threshold = 0.4;
+    this.labels[0].visible = this.camera.position.y >= -threshold;
+    this.labels[1].visible = this.camera.position.y <= threshold;
+    this.labels[2].visible = this.camera.position.x >= -threshold;
+    this.labels[3].visible = this.camera.position.x <= threshold;
+    this.labels[4].visible = this.camera.position.z >= -threshold;
+    this.labels[5].visible = this.camera.position.z <= threshold;
   }
 
   public renderLabels() {
