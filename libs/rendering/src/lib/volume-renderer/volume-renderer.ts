@@ -376,12 +376,15 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
       this.axesConvention.setCameraDirection(this.workingVector3);
 
       this.renderer.getViewport(this.workingVector4);
+
+      const axesBox = this.editor.refs.axes3D?.current?.getBoundingClientRect();
       this.renderer.setViewport(
-        AxesConvention.margin,
-        AxesConvention.margin,
+        axesBox?.left ?? 0,
+        window.innerHeight - (axesBox?.bottom ?? 0),
         AxesConvention.size,
         AxesConvention.size,
       );
+
       this.renderer.autoClear = false;
       this.renderer.clearDepth();
       this.renderer.render(this.axesConvention, this.axesConvention.camera);

@@ -91,6 +91,16 @@ const ErrorNotification = styled(Notification)`
   transform: translateX(-50%);
 `;
 
+const AxesSpacer = styled(Spacer)`
+  position: relative;
+`;
+
+const Axes3D = styled.div`
+  position: absolute;
+  bottom: -5px;
+  left: -5px;
+`;
+
 export const UIOverlay = observer<UIOverlayProps>(
   ({ isDraggedOver, onDropCompleted, ...rest }) => {
     const store = useStore();
@@ -104,6 +114,15 @@ export const UIOverlay = observer<UIOverlayProps>(
         store?.setRef("uiOverlay");
       };
     }, [store, containerRef]);
+
+    const axes3dRef = useRef<HTMLDivElement>(null);
+    useEffect(() => {
+      store?.setRef("axes3D", axes3dRef);
+
+      return () => {
+        store?.setRef("axes3D");
+      };
+    }, [store, axes3dRef]);
 
     const enterFloatingUI = useCallback(() => {
       store?.editor.activeDocument?.tools.setIsCursorOverFloatingUI(true);
@@ -183,7 +202,9 @@ export const UIOverlay = observer<UIOverlayProps>(
           <Menu onOpenShortcutPopUp={openShortcutPopUp} />
           <Toolbar />
           <Layers />
-          <Spacer />
+          <AxesSpacer>
+            <Axes3D ref={axes3dRef} />
+          </AxesSpacer>
           <AxesAndVoxel />
           <SmartBrush3DModal />
           <DilateErodeModal />

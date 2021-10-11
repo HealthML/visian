@@ -1,6 +1,6 @@
 import { IEditor } from "@visian/ui-shared";
 import { IDisposer } from "@visian/utils";
-import { autorun } from "mobx";
+import { autorun, reaction } from "mobx";
 import * as THREE from "three";
 import {
   CSS2DRenderer,
@@ -20,7 +20,6 @@ const labels = ["S", "I", "R", "L", "P", "A"];
 
 export class AxesConvention extends THREE.Scene {
   public static size = 75;
-  public static margin = 15;
 
   public camera: THREE.PerspectiveCamera;
 
@@ -72,9 +71,8 @@ export class AxesConvention extends THREE.Scene {
 
     this.labelRenderer.setSize(AxesConvention.size, AxesConvention.size);
     this.labelRenderer.domElement.style.position = "absolute";
-    this.labelRenderer.domElement.style.bottom = `${AxesConvention.margin}px`;
-    this.labelRenderer.domElement.style.left = `${AxesConvention.margin}px`;
-    document.body.appendChild(this.labelRenderer.domElement);
+    this.labelRenderer.domElement.style.bottom = "0px";
+    this.labelRenderer.domElement.style.left = "0px";
 
     this.disposers.push(
       autorun(() => {
@@ -83,6 +81,13 @@ export class AxesConvention extends THREE.Scene {
             ? "block"
             : "none";
       }),
+      reaction(
+        () => editor.refs.axes3D?.current ?? document.body,
+        (parent) => {
+          parent.appendChild(this.labelRenderer.domElement);
+        },
+        { fireImmediately: true },
+      ),
     );
   }
 
