@@ -19,12 +19,18 @@ const directions = [
 const labels = ["S", "I", "R", "L", "P", "A"];
 
 export class AxesConvention extends THREE.Scene {
+  public static size = 75;
+  public static margin = 15;
+
   public camera: THREE.PerspectiveCamera;
 
   protected lines: THREE.Line[];
   protected labels: CSS2DObject[];
 
-  protected lineMaterial = new THREE.LineBasicMaterial();
+  protected lineMaterial = new THREE.LineBasicMaterial({
+    transparent: true,
+    opacity: 0.5,
+  });
 
   protected labelRenderer = new CSS2DRenderer();
 
@@ -42,8 +48,11 @@ export class AxesConvention extends THREE.Scene {
     this.labels = directions.map((direction, index) => {
       const labelDiv = document.createElement("div");
       labelDiv.textContent = labels[index];
+      labelDiv.style.fontFamily = "DIN2014";
+      labelDiv.style.fontSize = "13px";
+      labelDiv.style.fontWeight = "500";
       const label = new CSS2DObject(labelDiv);
-      label.position.copy(direction).multiplyScalar(1.3);
+      label.position.copy(direction).multiplyScalar(1.5);
 
       return label;
     });
@@ -61,10 +70,10 @@ export class AxesConvention extends THREE.Scene {
 
     this.add(...this.lines);
 
-    this.labelRenderer.setSize(100, 100);
+    this.labelRenderer.setSize(AxesConvention.size, AxesConvention.size);
     this.labelRenderer.domElement.style.position = "absolute";
-    this.labelRenderer.domElement.style.bottom = "0px";
-    this.labelRenderer.domElement.style.left = "0px";
+    this.labelRenderer.domElement.style.bottom = `${AxesConvention.margin}px`;
+    this.labelRenderer.domElement.style.left = `${AxesConvention.margin}px`;
     document.body.appendChild(this.labelRenderer.domElement);
 
     this.disposers.push(
@@ -78,7 +87,7 @@ export class AxesConvention extends THREE.Scene {
   }
 
   public setCameraDirection(direction: THREE.Vector3) {
-    this.workingVector.copy(direction).normalize().multiplyScalar(-3);
+    this.workingVector.copy(direction).normalize().multiplyScalar(-3.5);
     this.camera.position.copy(this.workingVector);
     this.camera.lookAt(0, 0, 0);
     this.camera.updateProjectionMatrix();
