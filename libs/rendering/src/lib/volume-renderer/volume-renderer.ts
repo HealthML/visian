@@ -162,7 +162,7 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
     this.stats.dom.style.right = "0";
     this.stats.dom.style.left = "auto";
 
-    this.axesConvention = new AxesConvention();
+    this.axesConvention = new AxesConvention(editor);
 
     this.disposers.push(
       reaction(

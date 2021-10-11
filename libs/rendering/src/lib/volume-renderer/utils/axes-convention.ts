@@ -1,3 +1,6 @@
+import { IEditor } from "@visian/ui-shared";
+import { IDisposer } from "@visian/utils";
+import { autorun } from "mobx";
 import * as THREE from "three";
 import {
   CSS2DRenderer,
@@ -31,7 +34,9 @@ export class AxesConvention extends THREE.Scene {
 
   private workingVector = new THREE.Vector3();
 
-  constructor() {
+  protected disposers: IDisposer[] = [];
+
+  constructor(editor: IEditor) {
     super();
 
     this.camera = new THREE.PerspectiveCamera(60, 1, 0.0001, 20);
@@ -74,6 +79,15 @@ export class AxesConvention extends THREE.Scene {
     this.labelRenderer.domElement.style.bottom = "0px";
     this.labelRenderer.domElement.style.left = "0px";
     document.body.appendChild(this.labelRenderer.domElement);
+
+    this.disposers.push(
+      autorun(() => {
+        this.labelRenderer.domElement.style.display =
+          editor.activeDocument?.viewSettings.viewMode === "3D"
+            ? "block"
+            : "none";
+      }),
+    );
   }
 
   public setCameraDirection(direction: THREE.Vector3) {
