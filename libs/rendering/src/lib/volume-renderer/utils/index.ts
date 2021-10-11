@@ -1,3 +1,4 @@
+export * from "./axes-convention";
 export * from "./bounding-box";
 export * from "./clipping-plane-material";
 export * from "./clipping-plane";
