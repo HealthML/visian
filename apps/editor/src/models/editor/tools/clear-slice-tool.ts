@@ -14,6 +14,7 @@ export class ClearSliceTool<
         labelTx: "clear-slice",
         supportedViewModes: ["2D"],
         supportedLayerKinds: ["image"],
+        supportAnnotationsOnly: true,
       },
       document,
     );

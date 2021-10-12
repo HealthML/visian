@@ -26,6 +26,7 @@ export class DilateErodeTool<N extends "dilate-erode" = "dilate-erode">
         labelTx: "dilate-erode",
         supportedViewModes: ["2D", "3D"],
         supportedLayerKinds: ["image"],
+        supportAnnotationsOnly: true,
       },
       document,
     );

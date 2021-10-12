@@ -29,6 +29,7 @@ export class CircleBrush<
         icon: isAdditive ? "pixelBrush" : "eraser",
         supportedViewModes: ["2D"],
         supportedLayerKinds: ["image"],
+        supportAnnotationsOnly: true,
         isDrawingTool: true,
         isBrush: true,
       },
