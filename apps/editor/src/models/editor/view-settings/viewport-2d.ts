@@ -105,7 +105,18 @@ export class Viewport2D
   }
 
   public get defaultViewType() {
-    if (!this.document.has3DLayers) return ViewType.Transverse;
+    if (!this.document.has3DLayers) {
+      const voxelCount = this.document.baseImageLayer?.image.voxelCount;
+      if (voxelCount) {
+        const bestViewType = [
+          ViewType.Transverse,
+          ViewType.Sagittal,
+          ViewType.Coronal,
+        ].find((viewType) => voxelCount.getFromView(viewType) <= 1);
+        if (bestViewType !== undefined) return bestViewType;
+      }
+      return ViewType.Transverse;
+    }
 
     const voxelSpacing = this.document.baseImageLayer?.image.voxelSpacing;
     if (!voxelSpacing) return ViewType.Transverse;
@@ -125,7 +136,7 @@ export class Viewport2D
 
   public setMainViewType = (value?: ViewType): void => {
     if (!this.document.has3DLayers) {
-      this.mainViewType = ViewType.Transverse;
+      this.mainViewType = this.defaultViewType;
       return;
     }
 
