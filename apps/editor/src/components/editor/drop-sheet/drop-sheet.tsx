@@ -53,7 +53,9 @@ export const DropSheet: React.FC<DropSheetProps> = observer(
               const entry = item?.webkitGetAsEntry();
               if (entry) entries.push(entry);
             }
-            await store?.editor.activeDocument?.importFileSystemEntry(entries);
+            await store?.editor.activeDocument?.importFileSystemEntries(
+              entries,
+            );
           } catch (error) {
             store?.setError({
               titleTx: "import-error",

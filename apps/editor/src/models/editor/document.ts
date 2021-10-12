@@ -346,14 +346,14 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
     this.context?.persist();
   }
 
-  public async importFileSystemEntry(
+  public async importFileSystemEntries(
     entries: FileSystemEntry | null | (FileSystemEntry | null)[],
   ): Promise<void> {
     if (!entries) return;
     if (Array.isArray(entries)) {
       if (entries.some((entry) => entry && !entry.isFile)) {
         await Promise.all(
-          entries.map((entry) => this.importFileSystemEntry(entry)),
+          entries.map((entry) => this.importFileSystemEntries(entry)),
         );
       } else {
         const files = await Promise.all(
@@ -366,7 +366,7 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
               }),
           ),
         );
-        if (files.length) await this.importFile(files);
+        if (files.length) await this.importFiles(files);
       }
     } else if (entries.isDirectory) {
       const dirReader = (entries as FileSystemDirectoryEntry).createReader();
@@ -398,22 +398,22 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
             }),
           );
         } else {
-          promises.push(this.importFileSystemEntry(subEntries[i]));
+          promises.push(this.importFileSystemEntries(subEntries[i]));
         }
       }
       await Promise.all(promises);
 
-      if (dirFiles.length) await this.importFile(dirFiles, entries.name);
+      if (dirFiles.length) await this.importFiles(dirFiles, entries.name);
     } else {
       await new Promise<void>((resolve, reject) => {
         (entries as FileSystemFileEntry).file((file: File) => {
-          this.importFile(file).then(resolve).catch(reject);
+          this.importFiles(file).then(resolve).catch(reject);
         }, reject);
       });
     }
   }
 
-  public async importFile(
+  public async importFiles(
     files: File | File[],
     name?: string,
     isAnnotation?: boolean,
@@ -431,14 +431,14 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
       ) {
         const promises: Promise<void>[] = [];
         filteredFiles.forEach((file) => {
-          promises.push(this.importFile(file));
+          promises.push(this.importFiles(file));
         });
         await Promise.all(promises);
         return;
       }
     } else if (filteredFiles.name.endsWith(".zip")) {
       const zip = await Zip.fromZipFile(filteredFiles);
-      await this.importFile(await zip.getAllFiles(), filteredFiles.name);
+      await this.importFiles(await zip.getAllFiles(), filteredFiles.name);
       return;
     }
 
