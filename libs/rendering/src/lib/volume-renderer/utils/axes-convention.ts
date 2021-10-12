@@ -1,10 +1,10 @@
-import { IEditor } from "@visian/ui-shared";
+import { IEditor, isWindows } from "@visian/ui-shared";
 import { IDisposer } from "@visian/utils";
 import { autorun, reaction } from "mobx";
 import * as THREE from "three";
 import {
-  CSS2DRenderer,
   CSS2DObject,
+  CSS2DRenderer,
 } from "three/examples/jsm/renderers/CSS2DRenderer";
 
 const directions = [
@@ -50,6 +50,7 @@ export class AxesConvention extends THREE.Scene {
       labelDiv.style.fontFamily = "DIN2014";
       labelDiv.style.fontSize = "13px";
       labelDiv.style.fontWeight = "500";
+      if (isWindows()) labelDiv.style.marginLeft = "-0.07em";
       const label = new CSS2DObject(labelDiv);
       label.position.copy(direction).multiplyScalar(1.5);
 
