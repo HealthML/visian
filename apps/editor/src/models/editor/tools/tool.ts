@@ -33,6 +33,7 @@ export interface ToolConfig<N extends string> {
 
   supportedViewModes?: ViewMode[];
   supportedLayerKinds?: string[];
+  supportAnnotationsOnly?: boolean;
 
   params?: Parameter[];
 }
@@ -55,6 +56,7 @@ export class Tool<N extends string>
 
   public supportedViewModes?: ViewMode[];
   public supportedLayerKinds?: string[];
+  public supportAnnotationsOnly?: boolean;
 
   public params: { [name: string]: Parameter };
 
@@ -69,6 +71,7 @@ export class Tool<N extends string>
     this.altToolName = config.altToolName;
     this.supportedViewModes = config.supportedViewModes;
     this.supportedLayerKinds = config.supportedLayerKinds;
+    this.supportAnnotationsOnly = config.supportAnnotationsOnly;
     this.params = {};
     config.params?.forEach((param) => {
       this.params[param.name] = param;
@@ -91,7 +94,11 @@ export class Tool<N extends string>
         )) &&
         (!this.supportedLayerKinds ||
           (this.document.activeLayer &&
-            this.supportedLayerKinds.includes(this.document.activeLayer.kind))),
+            this.supportedLayerKinds.includes(
+              this.document.activeLayer.kind,
+            ))) &&
+        (!this.supportAnnotationsOnly ||
+          this.document.activeLayer?.isAnnotation),
     );
   }
 

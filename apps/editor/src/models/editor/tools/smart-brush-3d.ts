@@ -23,6 +23,7 @@ export class SmartBrush3D<N extends "smart-brush-3d" = "smart-brush-3d">
         icon: "smartBrush3D",
         supportedViewModes: ["2D", "3D"],
         supportedLayerKinds: ["image"],
+        supportAnnotationsOnly: true,
         isDrawingTool: true,
         isBrush: true,
         isSmartBrush: true,

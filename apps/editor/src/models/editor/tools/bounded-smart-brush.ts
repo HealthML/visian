@@ -18,6 +18,7 @@ export class BoundedSmartBrush<
       icon: isAdditive ? "boundedSmartBrush" : "eraser",
       supportedViewModes: ["2D"],
       supportedLayerKinds: ["image"],
+      supportAnnotationsOnly: true,
       isDrawingTool: true,
       isBrush: true,
       isSmartBrush: true,

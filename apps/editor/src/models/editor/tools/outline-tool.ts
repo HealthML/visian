@@ -26,6 +26,7 @@ export class OutlineTool<
         icon: isAdditive ? "outline" : "outline",
         supportedViewModes: ["2D"],
         supportedLayerKinds: ["image"],
+        supportAnnotationsOnly: true,
         isDrawingTool: true,
       },
       document,

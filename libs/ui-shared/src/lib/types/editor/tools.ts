@@ -64,6 +64,8 @@ export interface ITool<N extends string> {
    * If none is given, the tool can be activated on all kinds of layers.
    */
   supportedLayerKinds?: string[];
+  /** Indicates if the tool should only be usable for annotation layers. */
+  supportAnnotationsOnly?: boolean;
 
   /** This tool's parameters. */
   params: { [name: string]: IParameter };

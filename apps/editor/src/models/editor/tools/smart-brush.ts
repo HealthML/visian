@@ -16,6 +16,7 @@ export class SmartBrush<
       icon: isAdditive ? "magicBrush" : "eraser",
       supportedViewModes: ["2D"],
       supportedLayerKinds: ["image"],
+      supportAnnotationsOnly: true,
       isDrawingTool: true,
       isBrush: true,
       isSmartBrush: true,

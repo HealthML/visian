@@ -14,6 +14,7 @@ export class ClearImageTool<
         labelTx: "clear-image",
         supportedViewModes: ["2D", "3D"],
         supportedLayerKinds: ["image"],
+        supportAnnotationsOnly: true,
       },
       document,
     );
