@@ -1,15 +1,14 @@
 import {
   ColorMode,
   EnumParam,
-  LargePopUpGroupTitle,
-  LargePopUpGroupTitleContainer,
-  LargePopUp,
   LargePopUpColumn,
   LargePopUpColumnContainer,
   LargePopUpGroup,
+  LargePopUpGroupTitle,
+  LargePopUpGroupTitleContainer,
+  PopUp,
   Switch,
   useTranslation,
-  PopUp,
 } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
 import React, { useCallback } from "react";
