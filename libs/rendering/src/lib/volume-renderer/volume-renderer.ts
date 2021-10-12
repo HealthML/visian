@@ -12,6 +12,7 @@ import Stats from "three/examples/jsm/libs/stats.module";
 
 import { ScreenAlignedQuad } from "../screen-aligned-quad";
 import {
+  AxesConvention,
   FlyControls,
   GradientComputer,
   LAOComputer,
@@ -50,7 +51,10 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
 
   private pickingTexture = new THREE.WebGLRenderTarget(1, 1);
 
-  private workingVector = new THREE.Vector3();
+  private axesConvention: AxesConvention;
+
+  private workingVector3 = new THREE.Vector3();
+  private workingVector4 = new THREE.Vector4();
   private workingMatrix = new THREE.Matrix4();
 
   private disposers: IDisposer[] = [];
@@ -157,6 +161,8 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
     this.renderer.domElement.parentElement?.appendChild(this.stats.dom);
     this.stats.dom.style.right = "0";
     this.stats.dom.style.left = "auto";
+
+    this.axesConvention = new AxesConvention(editor);
 
     this.disposers.push(
       reaction(
@@ -365,6 +371,27 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
       this.renderer.render(this.scene, this.camera);
     } else {
       this.screenAlignedQuad.renderWith(this.renderer);
+
+      this.camera.getWorldDirection(this.workingVector3);
+      this.axesConvention.setCameraDirection(this.workingVector3);
+
+      this.renderer.getViewport(this.workingVector4);
+
+      const axesBox = this.editor.refs.axes3D?.current?.getBoundingClientRect();
+      this.renderer.setViewport(
+        axesBox?.left ?? 0,
+        window.innerHeight - (axesBox?.bottom ?? 0),
+        AxesConvention.size,
+        AxesConvention.size,
+      );
+
+      this.renderer.autoClear = false;
+      this.renderer.clearDepth();
+      this.renderer.render(this.axesConvention, this.axesConvention.camera);
+      this.renderer.autoClear = true;
+      this.renderer.setViewport(this.workingVector4);
+
+      this.axesConvention.renderLabels();
     }
   };
 
@@ -405,12 +432,12 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
   public updateCameraPosition(camera: THREE.Camera = this.camera) {
     this.volume.updateMatrixWorld();
 
-    this.workingVector.setFromMatrixPosition(camera.matrixWorld);
-    this.workingVector.applyMatrix4(
+    this.workingVector3.setFromMatrixPosition(camera.matrixWorld);
+    this.workingVector3.applyMatrix4(
       this.workingMatrix.copy(this.volume.matrixWorld).invert(),
     );
 
-    const { x, y, z } = this.workingVector;
+    const { x, y, z } = this.workingVector3;
     this.editor.activeDocument?.viewport3D.setVolumeSpaceCameraPosition(
       x,
       y,
@@ -455,9 +482,9 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
   };
 
   public setVolumeSpaceCameraPosition(position: Vector) {
-    this.workingVector.fromArray(position.toArray());
-    this.volume.localToWorld(this.workingVector);
-    this.camera.position.copy(this.workingVector);
+    this.workingVector3.fromArray(position.toArray());
+    this.volume.localToWorld(this.workingVector3);
+    this.camera.position.copy(this.workingVector3);
     this.camera.lookAt(this.volume.position);
     this.onCameraMove();
   }
@@ -511,7 +538,7 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
 
     if (pixelBuffer[3] <= 0) return undefined;
 
-    this.workingVector.set(
+    this.workingVector3.set(
       image.voxelCount.x,
       image.voxelCount.y,
       image.voxelCount.z,
@@ -523,7 +550,7 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
       pixelBuffer[2],
     )
       .divideScalar(255)
-      .multiply(this.workingVector)
+      .multiply(this.workingVector3)
       .floor();
 
     return seedPoint;
