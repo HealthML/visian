@@ -47,16 +47,15 @@ export const DropSheet: React.FC<DropSheetProps> = observer(
 
           try {
             const { items } = event.dataTransfer;
-            const promises: Promise<void>[] = [];
+            const entries: FileSystemEntry[] = [];
             for (let fileIndex = 0; fileIndex < items.length; fileIndex++) {
-              const item = event.dataTransfer.items[fileIndex];
+              const item = items[fileIndex];
               const entry = item?.webkitGetAsEntry();
-              const promise = store?.editor.activeDocument?.importFileSystemEntry(
-                entry,
-              );
-              if (promise) promises.push(promise);
+              if (entry) entries.push(entry);
             }
-            await Promise.all(promises);
+            await store?.editor.activeDocument?.importFileSystemEntries(
+              entries,
+            );
           } catch (error) {
             store?.setError({
               titleTx: "import-error",

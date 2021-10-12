@@ -36,7 +36,7 @@ export const setupRootStore = async () => {
       const loadScanParam = url.searchParams.get("load");
       if (loadScanParam && store.editor.newDocument()) {
         store.setProgress({ labelTx: "importing" });
-        await store.editor.activeDocument?.importFile(
+        await store.editor.activeDocument?.importFiles(
           await readFileFromURL(loadScanParam, true),
         );
         store.editor.activeDocument?.finishBatchImport();
@@ -69,7 +69,7 @@ export const setupRootStore = async () => {
 
           await Promise.all(
             whoTask.samples.map(async (sample) => {
-              await store.editor.activeDocument?.importFile(
+              await store.editor.activeDocument?.importFiles(
                 createFileFromBase64(sample.title, sample.data),
                 undefined,
                 false,
@@ -88,7 +88,7 @@ export const setupRootStore = async () => {
                   whoTask.samples[0].title ||
                   `annotation_${index}`;
                 // TODO: Get rid of hardcoded array index
-                await store.editor.activeDocument?.importFile(
+                await store.editor.activeDocument?.importFiles(
                   createFileFromBase64(
                     title.replace(".nii", "_annotation").concat(".nii"),
                     annotation.data[0].data,

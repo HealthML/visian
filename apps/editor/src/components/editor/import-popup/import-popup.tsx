@@ -75,7 +75,7 @@ export const ImportPopUp = observer<ImportPopUpProps>(({ isOpen, onClose }) => {
         if (!files || !files.length) return;
         store?.setProgress({ labelTx: "importing" });
         store?.editor.activeDocument
-          ?.importFile(Array.from(files))
+          ?.importFiles(Array.from(files))
           .then(() => {
             store?.editor.activeDocument?.finishBatchImport();
             onClose?.();
@@ -100,7 +100,7 @@ export const ImportPopUp = observer<ImportPopUpProps>(({ isOpen, onClose }) => {
     if (!loadURL) return;
 
     try {
-      await store?.editor.activeDocument?.importFile(
+      await store?.editor.activeDocument?.importFiles(
         await readFileFromURL(loadURL, true),
       );
       store?.editor.activeDocument?.finishBatchImport();

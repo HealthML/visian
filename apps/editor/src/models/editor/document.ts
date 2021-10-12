@@ -346,80 +346,116 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
     this.context?.persist();
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public async importFileSystemEntry(entry: any): Promise<void> {
-    if (!entry) return;
-    if (entry.isDirectory) {
-      const dirReader = entry.createReader();
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const entries = await new Promise<any[]>((resolve) => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        dirReader.readEntries((result: any[]) => {
-          resolve(result);
-        });
-      });
+  public async importFileSystemEntries(
+    entries: FileSystemEntry | null | (FileSystemEntry | null)[],
+  ): Promise<void> {
+    if (!entries) return;
+    if (Array.isArray(entries)) {
+      if (entries.some((entry) => entry && !entry.isFile)) {
+        await Promise.all(
+          entries.map((entry) => this.importFileSystemEntries(entry)),
+        );
+      } else {
+        const files = await Promise.all(
+          entries.map(
+            (entry) =>
+              new Promise<File>((resolve, reject) => {
+                (entry as FileSystemFileEntry).file((file: File) => {
+                  resolve(file);
+                }, reject);
+              }),
+          ),
+        );
+        if (files.length) await this.importFiles(files);
+      }
+    } else if (entries.isDirectory) {
+      const dirReader = (entries as FileSystemDirectoryEntry).createReader();
+      const subEntries: FileSystemEntry[] = [];
+
+      let newSubEntries: FileSystemEntry[];
+      do {
+        // eslint-disable-next-line no-await-in-loop
+        newSubEntries = await new Promise<FileSystemEntry[]>(
+          (resolve, reject) => {
+            dirReader.readEntries(resolve, reject);
+          },
+        );
+        subEntries.push(...newSubEntries);
+      } while (newSubEntries.length);
 
       const dirFiles: File[] = [];
       const promises: Promise<void>[] = [];
-      const { length } = entries;
+      const { length } = subEntries;
       for (let i = 0; i < length; i++) {
-        if (entries[i].isFile) {
+        if (subEntries[i].isFile) {
           promises.push(
-            new Promise((resolve) => {
-              entries[i].file((file: File) => {
+            // eslint-disable-next-line no-loop-func
+            new Promise((resolve, reject) => {
+              (subEntries[i] as FileSystemFileEntry).file((file: File) => {
                 dirFiles.push(file);
                 resolve();
-              });
+              }, reject);
             }),
           );
         } else {
-          promises.push(this.importFileSystemEntry(entries[i]));
+          promises.push(this.importFileSystemEntries(subEntries[i]));
         }
       }
       await Promise.all(promises);
 
-      if (dirFiles.length) await this.importFile(dirFiles, entry.name);
+      if (dirFiles.length) await this.importFiles(dirFiles, entries.name);
     } else {
       await new Promise<void>((resolve, reject) => {
-        entry.file((file: File) => {
-          this.importFile(file).then(resolve).catch(reject);
-        });
+        (entries as FileSystemFileEntry).file((file: File) => {
+          this.importFiles(file).then(resolve).catch(reject);
+        }, reject);
       });
     }
   }
 
-  public async importFile(
+  public async importFiles(
     files: File | File[],
     name?: string,
     isAnnotation?: boolean,
   ): Promise<void> {
-    if (Array.isArray(files)) {
-      if (files.some((file) => path.extname(file.name) !== ".dcm")) {
+    const filteredFiles = Array.isArray(files)
+      ? files.filter(
+          (file) => !file.name.startsWith(".") && file.name !== "DICOMDIR",
+        )
+      : files;
+
+    if (Array.isArray(filteredFiles)) {
+      if (
+        filteredFiles.some((file) => path.extname(file.name) !== ".dcm") &&
+        filteredFiles.some((file) => path.extname(file.name) !== "")
+      ) {
         const promises: Promise<void>[] = [];
-        files.forEach((file) => {
-          if (file.name.startsWith(".")) return;
-          promises.push(this.importFile(file));
+        filteredFiles.forEach((file) => {
+          promises.push(this.importFiles(file));
         });
         await Promise.all(promises);
         return;
       }
-    } else if (files.name.endsWith(".zip")) {
-      const zip = await Zip.fromZipFile(files);
-      await this.importFile(await zip.getAllFiles(), files.name);
+    } else if (filteredFiles.name.endsWith(".zip")) {
+      const zip = await Zip.fromZipFile(filteredFiles);
+      await this.importFiles(await zip.getAllFiles(), filteredFiles.name);
       return;
     }
 
     const isFirstLayer = !this.layerIds.length;
-    const image = await readMedicalImage(files);
+    const image = await readMedicalImage(filteredFiles);
     image.name =
-      name || (Array.isArray(files) ? files[0]?.name || "" : files.name);
+      name ||
+      (Array.isArray(filteredFiles)
+        ? filteredFiles[0]?.name || ""
+        : filteredFiles.name);
 
     if (isAnnotation) {
       await this.importAnnotation(image);
     } else if (isAnnotation !== undefined) {
       await this.importImage(image);
     } else {
-      // infer type
+      // Infer Type
       let isLikelyImage = false;
       const { data } = image;
       const uniqueValues = new Set();

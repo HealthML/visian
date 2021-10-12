@@ -175,7 +175,7 @@ export const ServerPopUp = observer<ServerPopUpProps>(({ isOpen, onClose }) => {
               (currentSeries) => currentSeries.SeriesInstanceUID === seriesId,
             );
 
-            return store.editor.activeDocument?.importFile(
+            return store.editor.activeDocument?.importFiles(
               files,
               String(
                 thisSeries
