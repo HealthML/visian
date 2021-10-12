@@ -97,7 +97,7 @@ export class AxesConvention extends THREE.Scene {
     this.camera.lookAt(0, 0, 0);
     this.camera.updateProjectionMatrix();
 
-    const threshold = 0.4;
+    const threshold = 1.1;
     this.labels[0].visible = this.camera.position.y >= -threshold;
     this.labels[1].visible = this.camera.position.y <= threshold;
     this.labels[2].visible = this.camera.position.x >= -threshold;
