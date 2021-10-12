@@ -133,7 +133,8 @@ export const UIOverlay = observer<UIOverlayProps>(
     }, []);
     const closeShortcutPopUp = useCallback(() => {
       setIsShortcutPopUpOpen(false);
-    }, []);
+      store?.editor.activeDocument?.tools.setIsCursorOverFloatingUI(false);
+    }, [store]);
 
     // Settings Pop Up Toggling
     const [isSettingsPopUpOpen, setIsSettingsPopUpOpen] = useState(false);
@@ -142,7 +143,8 @@ export const UIOverlay = observer<UIOverlayProps>(
     }, []);
     const closeSettingsPopUp = useCallback(() => {
       setIsSettingsPopUpOpen(false);
-    }, []);
+      store?.editor.activeDocument?.tools.setIsCursorOverFloatingUI(false);
+    }, [store]);
 
     // Export Button
     const exportZip = useCallback(() => {
