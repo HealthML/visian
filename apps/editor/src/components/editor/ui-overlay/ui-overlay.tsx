@@ -29,6 +29,7 @@ import { TopConsole } from "../top-console";
 import { UndoRedoButtons } from "../undo-redo-buttons";
 import { ViewSettings } from "../view-settings";
 import { UIOverlayProps } from "./ui-overlay.props";
+import { SettingsPopUp } from "../settings-popup";
 
 const Container = styled(AbsoluteCover)`
   align-items: stretch;
@@ -151,7 +152,18 @@ export const UIOverlay = observer<UIOverlayProps>(
     }, []);
     const closeShortcutPopUp = useCallback(() => {
       setIsShortcutPopUpOpen(false);
+      store?.editor.activeDocument?.tools.setIsCursorOverFloatingUI(false);
+    }, [store]);
+
+    // Settings Pop Up Toggling
+    const [isSettingsPopUpOpen, setIsSettingsPopUpOpen] = useState(false);
+    const openSettingsPopUp = useCallback(() => {
+      setIsSettingsPopUpOpen(true);
     }, []);
+    const closeSettingsPopUp = useCallback(() => {
+      setIsSettingsPopUpOpen(false);
+      store?.editor.activeDocument?.tools.setIsCursorOverFloatingUI(false);
+    }, [store]);
 
     // Export Button
     const exportZip = useCallback(() => {
@@ -198,8 +210,10 @@ export const UIOverlay = observer<UIOverlayProps>(
             )}
             <UndoRedoButtons />
           </MenuRow>
-
-          <Menu onOpenShortcutPopUp={openShortcutPopUp} />
+          <Menu
+            onOpenShortcutPopUp={openShortcutPopUp}
+            onOpenSettingsPopUp={openSettingsPopUp}
+          />
           <Toolbar />
           <Layers />
           <AxesSpacer>
@@ -235,6 +249,10 @@ export const UIOverlay = observer<UIOverlayProps>(
 
         {isFromWHO() && <AIBar />}
 
+        <SettingsPopUp
+          isOpen={isSettingsPopUpOpen}
+          onClose={closeSettingsPopUp}
+        />
         <ShortcutPopUp
           isOpen={isShortcutPopUpOpen}
           onClose={closeShortcutPopUp}

@@ -221,7 +221,8 @@ export const ServerPopUp = observer<ServerPopUpProps>(({ isOpen, onClose }) => {
     <ServerPopUpContainer
       title="Import"
       isOpen={isOpen}
-      onOutsidePress={onClose}
+      dismiss={onClose}
+      shouldDismissOnOutsidePress
     >
       <InlineRow>
         <InlineElement>

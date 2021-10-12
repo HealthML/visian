@@ -1,14 +1,11 @@
-import { IEditor, IImageLayer, isPerformanceLow } from "@visian/ui-shared";
-import { Image } from "@visian/utils";
-import { IReactionDisposer, reaction } from "mobx";
+import { IEditor, IImageLayer } from "@visian/ui-shared";
+import { autorun, IReactionDisposer } from "mobx";
 import * as THREE from "three";
 
 import { SharedUniforms } from "../shared-uniforms";
 import { TiledRenderer } from "../tiled-renderer";
+import { getTotalLAODirections } from "./lao-directions";
 import LAOMaterial from "./lao-material";
-
-export const totalLAORays = isPerformanceLow ? 8 : 32; // Set to 8 to turn progressive LAO off.
-export const quadSize = isPerformanceLow ? 256 : 1024;
 
 export class LAOComputer extends TiledRenderer {
   private _isDirty = true;
@@ -36,28 +33,25 @@ export class LAOComputer extends TiledRenderer {
     super(laoMaterial, editor.renderers[0], undefined, target);
 
     this.reactionDisposers.push(
-      reaction(
-        () => {
-          const imageLayer = editor.activeDocument?.baseImageLayer;
-          if (!imageLayer) return undefined;
+      autorun(() => {
+        const imageLayer = editor.activeDocument?.baseImageLayer as
+          | IImageLayer
+          | undefined;
+        if (!imageLayer) return;
 
-          return (imageLayer as IImageLayer).image;
-        },
-        (image?: Image) => {
-          if (!image) return;
+        const atlasSize = imageLayer.image.getAtlasSize();
 
-          const atlasSize = image.getAtlasSize();
+        this.setSize(atlasSize.x, atlasSize.y);
 
-          this.setSize(atlasSize.x, atlasSize.y);
+        const quadSize = editor.performanceMode === "low" ? 256 : 1024;
 
-          this.setRenderGrid(
-            Math.ceil(atlasSize.x / quadSize),
-            Math.ceil(atlasSize.y / quadSize),
-          );
+        this.setRenderGrid(
+          Math.ceil(atlasSize.x / quadSize),
+          Math.ceil(atlasSize.y / quadSize),
+        );
 
-          this.setDirty();
-        },
-      ),
+        this.setDirty();
+      }),
     );
   }
 
@@ -97,6 +91,9 @@ export class LAOComputer extends TiledRenderer {
     this.laoMaterial.setPreviousDirections(
       this.laoMaterial.previousDirections + 8,
     );
+
+    const totalLAORays = getTotalLAODirections(this.editor.performanceMode);
+
     if (this.laoMaterial.previousDirections < totalLAORays) {
       this.restartFrame();
     } else {

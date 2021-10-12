@@ -132,7 +132,8 @@ export const ImportPopUp = observer<ImportPopUpProps>(({ isOpen, onClose }) => {
     <ImportPopUpContainer
       title="Import"
       isOpen={isOpen}
-      onOutsidePress={onClose}
+      dismiss={onClose}
+      shouldDismissOnOutsidePress
     >
       <SectionLabel text="Upload from Computer" />
       <DropZoneContainer>

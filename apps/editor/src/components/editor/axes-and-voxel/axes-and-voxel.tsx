@@ -89,6 +89,7 @@ export const AxesAndVoxel: React.FC = observer(() => {
         </AxesHorizontalContainer>
       )}
       {store?.editor.activeDocument?.viewport2D.isVoxelHovered &&
+        store?.editor.activeDocument?.viewport2D.showVoxelInfo &&
         !store?.editor.activeDocument?.tools.isCursorOverFloatingUI && (
           <FlexColumn>
             <FlexRow>

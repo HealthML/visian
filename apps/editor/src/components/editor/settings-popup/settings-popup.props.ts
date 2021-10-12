@@ -1,3 +1,3 @@
 import type { StatefulPopUpProps } from "@visian/ui-shared";
 
-export type ImportPopUpProps = StatefulPopUpProps;
+export type SettingsPopUpProps = StatefulPopUpProps;

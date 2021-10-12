@@ -27,6 +27,7 @@ import { OutlineTool } from "../tools";
 export interface Viewport2DSnapshot {
   mainViewType: ViewType;
   showSideViews: boolean;
+  showVoxelInfo: boolean;
 
   zoomLevel: number;
   offset: number[];
@@ -42,6 +43,7 @@ export class Viewport2D
 
   public mainViewType!: ViewType;
   public showSideViews!: boolean;
+  public showVoxelInfo = false;
 
   public zoomLevel!: number;
   public offset = new Vector(2);
@@ -62,6 +64,7 @@ export class Viewport2D
     makeObservable<this, "hoveredScreenCoordinates" | "hoveredViewType">(this, {
       mainViewType: observable,
       showSideViews: observable,
+      showVoxelInfo: observable,
       zoomLevel: observable,
       offset: observable,
       hoveredScreenCoordinates: observable,
@@ -76,6 +79,7 @@ export class Viewport2D
 
       setMainViewType: action,
       setShowSideViews: action,
+      setShowVoxelInfo: action,
       setZoomLevel: action,
       setOffset: action,
       reset: action,
@@ -133,6 +137,10 @@ export class Viewport2D
     this.showSideViews = value ?? true;
   }
 
+  public setShowVoxelInfo = (value?: boolean) => {
+    this.showVoxelInfo = value ?? false;
+  };
+
   public setZoomLevel = (value?: number): void => {
     this.zoomLevel = value ?? 1;
   };
@@ -144,6 +152,7 @@ export class Viewport2D
   public reset = (): void => {
     this.setMainViewType();
     this.setShowSideViews();
+    this.setShowVoxelInfo();
     this.setZoomLevel();
     this.setOffset();
   };
@@ -284,6 +293,7 @@ export class Viewport2D
     return {
       mainViewType: this.mainViewType,
       showSideViews: this.showSideViews,
+      showVoxelInfo: this.showVoxelInfo,
       zoomLevel: this.zoomLevel,
       offset: this.offset.toJSON(),
     };
@@ -292,6 +302,7 @@ export class Viewport2D
   public applySnapshot(snapshot: Partial<Viewport2DSnapshot>): Promise<void> {
     this.setMainViewType(snapshot.mainViewType);
     this.setShowSideViews(snapshot.showSideViews);
+    this.setShowVoxelInfo(snapshot.showVoxelInfo);
 
     this.setZoomLevel(snapshot.zoomLevel);
 

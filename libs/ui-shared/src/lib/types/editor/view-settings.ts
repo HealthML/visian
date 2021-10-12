@@ -41,6 +41,8 @@ export interface IViewport2D {
   hoveredViewType: ViewType;
   /** Indicates if the side views should be open. */
   showSideViews: boolean;
+  /** Indicates if the voxel info should be shown. */
+  showVoxelInfo: boolean;
 
   /**
    * The current zoom level.
@@ -65,6 +67,8 @@ export interface IViewport2D {
 
   /** Sets the main view type. */
   setMainViewType(viewType: ViewType): void;
+
+  setShowVoxelInfo(value?: boolean): void;
 
   /**
    * Returns the selected slice for the given `ViewType`.

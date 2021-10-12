@@ -5,6 +5,7 @@ import styled from "styled-components";
 import { stopPropagation } from "../../event-handling";
 import { color, fontWeight, zIndex } from "../../theme";
 import { useModalRoot } from "../box";
+import { InvisibleButton } from "../button";
 import { coverMixin } from "../mixins";
 import { Sheet } from "../sheet";
 import { Title } from "../text";
@@ -58,6 +59,11 @@ const TitleRow = styled.div`
   width: 100%;
 `;
 
+const CloseIcon = styled(InvisibleButton)`
+  width: 30px;
+  height: 30px;
+`;
+
 export const PopUp: React.FC<PopUpProps> = ({
   titleTx,
   title,
@@ -65,12 +71,17 @@ export const PopUp: React.FC<PopUpProps> = ({
   secondaryTitle,
   showUnderlay = true,
   isOpen,
-  onOutsidePress,
+  dismiss,
+  shouldDismissOnOutsidePress,
   children,
   ...rest
 }) => {
   const ref = useRef<HTMLDivElement>(null);
-  useOutsidePress(ref, onOutsidePress, isOpen);
+  useOutsidePress(
+    ref,
+    shouldDismissOnOutsidePress ? dismiss : undefined,
+    isOpen,
+  );
 
   const modalRootRef = useModalRoot();
 
@@ -80,6 +91,7 @@ export const PopUp: React.FC<PopUpProps> = ({
         <TitleRow>
           <PopUpTitle tx={titleTx} text={title} />
           <ExportFileName tx={secondaryTitleTx} text={secondaryTitle} />
+          <CloseIcon icon="xSmall" onPointerDown={dismiss} />
         </TitleRow>
       )}
       {children}

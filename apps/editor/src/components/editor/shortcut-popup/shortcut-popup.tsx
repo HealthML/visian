@@ -1,22 +1,25 @@
-import { Icon, KeyIcon } from "@visian/ui-shared";
+import {
+  LargePopUpGroupTitle,
+  LargePopUpGroupTitleContainer,
+  Icon,
+  KeyIcon,
+  LargePopUp,
+  LargePopUpColumn,
+  LargePopUpColumnContainer,
+  LargePopUpGroup,
+} from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
 import React from "react";
 
 import { useStore } from "../../../app/root-store";
 import { ShortcutPopUpProps } from "./shortcut-popup.props";
 import {
-  GroupTitle,
-  GroupTitleContainer,
   MouseIcon,
   PlusIcon,
-  ShortcutColumn,
-  ShortcutColumnContainer,
   ShortcutContainer,
   ShortcutDescription,
   ShortcutDescriptionContainer,
-  ShortcutGroup,
   ShortcutLabel,
-  ShortcutPopUpContainer,
   ShortcutRow,
 } from "./styled-components";
 
@@ -24,17 +27,18 @@ export const ShortcutPopUp: React.FC<ShortcutPopUpProps> = observer(
   ({ isOpen, onClose }) => {
     const store = useStore();
     return (
-      <ShortcutPopUpContainer
+      <LargePopUp
         titleTx="shortcuts"
         isOpen={isOpen}
-        onOutsidePress={onClose}
+        dismiss={onClose}
+        shouldDismissOnOutsidePress
       >
-        <ShortcutColumnContainer>
-          <ShortcutColumn>
-            <ShortcutGroup>
-              <GroupTitleContainer>
-                <GroupTitle text="Mouse" />
-              </GroupTitleContainer>
+        <LargePopUpColumnContainer>
+          <LargePopUpColumn>
+            <LargePopUpGroup>
+              <LargePopUpGroupTitleContainer>
+                <LargePopUpGroupTitle text="Mouse" />
+              </LargePopUpGroupTitleContainer>
               <ShortcutRow>
                 <ShortcutContainer>
                   <MouseIcon icon="leftMouse" />
@@ -130,11 +134,11 @@ export const ShortcutPopUp: React.FC<ShortcutPopUpProps> = observer(
                   <ShortcutDescription text="Increase brush size" />
                 </ShortcutDescriptionContainer>
               </ShortcutRow>
-            </ShortcutGroup>
-            <ShortcutGroup>
-              <GroupTitleContainer>
-                <GroupTitle text="Tool Selection" />
-              </GroupTitleContainer>
+            </LargePopUpGroup>
+            <LargePopUpGroup>
+              <LargePopUpGroupTitleContainer>
+                <LargePopUpGroupTitle text="Tool Selection" />
+              </LargePopUpGroupTitleContainer>
               <ShortcutRow>
                 <ShortcutContainer>
                   <KeyIcon text="H" />
@@ -201,11 +205,11 @@ export const ShortcutPopUp: React.FC<ShortcutPopUpProps> = observer(
                   <ShortcutDescription text="Select Fly tool (3D)" />
                 </ShortcutDescriptionContainer>
               </ShortcutRow>
-            </ShortcutGroup>
-            <ShortcutGroup>
-              <GroupTitleContainer>
-                <GroupTitle text="Tools" />
-              </GroupTitleContainer>
+            </LargePopUpGroup>
+            <LargePopUpGroup>
+              <LargePopUpGroupTitleContainer>
+                <LargePopUpGroupTitle text="Tools" />
+              </LargePopUpGroupTitleContainer>
               <ShortcutRow>
                 <ShortcutContainer>
                   <KeyIcon text="Delete" />
@@ -240,13 +244,13 @@ export const ShortcutPopUp: React.FC<ShortcutPopUpProps> = observer(
                   <ShortcutDescription text="Decrease brush size" />
                 </ShortcutDescriptionContainer>
               </ShortcutRow>
-            </ShortcutGroup>
-          </ShortcutColumn>
-          <ShortcutColumn>
-            <ShortcutGroup>
-              <GroupTitleContainer>
-                <GroupTitle text="Undo/Redo" />
-              </GroupTitleContainer>
+            </LargePopUpGroup>
+          </LargePopUpColumn>
+          <LargePopUpColumn>
+            <LargePopUpGroup>
+              <LargePopUpGroupTitleContainer>
+                <LargePopUpGroupTitle text="Undo/Redo" />
+              </LargePopUpGroupTitleContainer>
               <ShortcutRow>
                 <ShortcutContainer>
                   <KeyIcon text="Ctrl" />
@@ -279,11 +283,11 @@ export const ShortcutPopUp: React.FC<ShortcutPopUpProps> = observer(
                   <ShortcutDescription text="Redo" />
                 </ShortcutDescriptionContainer>
               </ShortcutRow>
-            </ShortcutGroup>
-            <ShortcutGroup>
-              <GroupTitleContainer>
-                <GroupTitle text="Layer Controls" />
-              </GroupTitleContainer>
+            </LargePopUpGroup>
+            <LargePopUpGroup>
+              <LargePopUpGroupTitleContainer>
+                <LargePopUpGroupTitle text="Layer Controls" />
+              </LargePopUpGroupTitleContainer>
               <ShortcutRow>
                 <ShortcutContainer>
                   <KeyIcon text="M" />
@@ -292,11 +296,11 @@ export const ShortcutPopUp: React.FC<ShortcutPopUpProps> = observer(
                   <ShortcutDescription text="Toggle annotation visibility (mute/unmute)" />
                 </ShortcutDescriptionContainer>
               </ShortcutRow>
-            </ShortcutGroup>
-            <ShortcutGroup>
-              <GroupTitleContainer>
-                <GroupTitle text="View Types" />
-              </GroupTitleContainer>
+            </LargePopUpGroup>
+            <LargePopUpGroup>
+              <LargePopUpGroupTitleContainer>
+                <LargePopUpGroupTitle text="View Types" />
+              </LargePopUpGroupTitleContainer>
               <ShortcutRow>
                 <ShortcutContainer>
                   <KeyIcon text="1" />
@@ -347,11 +351,11 @@ export const ShortcutPopUp: React.FC<ShortcutPopUpProps> = observer(
                   <ShortcutDescription text="Toggle side views" />
                 </ShortcutDescriptionContainer>
               </ShortcutRow>
-            </ShortcutGroup>
-            <ShortcutGroup>
-              <GroupTitleContainer>
-                <GroupTitle text="Slice Navigation" />
-              </GroupTitleContainer>
+            </LargePopUpGroup>
+            <LargePopUpGroup>
+              <LargePopUpGroupTitleContainer>
+                <LargePopUpGroupTitle text="Slice Navigation" />
+              </LargePopUpGroupTitleContainer>
               <ShortcutRow>
                 <ShortcutContainer>
                   <Icon icon="upArrow" />
@@ -398,11 +402,11 @@ export const ShortcutPopUp: React.FC<ShortcutPopUpProps> = observer(
                   <ShortcutDescription text="Reset selected voxel" />
                 </ShortcutDescriptionContainer>
               </ShortcutRow>
-            </ShortcutGroup>
-            <ShortcutGroup>
-              <GroupTitleContainer>
-                <GroupTitle text="Zoom" />
-              </GroupTitleContainer>
+            </LargePopUpGroup>
+            <LargePopUpGroup>
+              <LargePopUpGroupTitleContainer>
+                <LargePopUpGroupTitle text="Zoom" />
+              </LargePopUpGroupTitleContainer>
               <ShortcutRow>
                 <ShortcutContainer>
                   <KeyIcon text="Ctrl" />
@@ -433,11 +437,11 @@ export const ShortcutPopUp: React.FC<ShortcutPopUpProps> = observer(
                   <ShortcutDescription text="Reset zoom and pan" />
                 </ShortcutDescriptionContainer>
               </ShortcutRow>
-            </ShortcutGroup>
-            <ShortcutGroup>
-              <GroupTitleContainer>
-                <GroupTitle text="Save/Export" />
-              </GroupTitleContainer>
+            </LargePopUpGroup>
+            <LargePopUpGroup>
+              <LargePopUpGroupTitleContainer>
+                <LargePopUpGroupTitle text="Save/Export" />
+              </LargePopUpGroupTitleContainer>
               <ShortcutRow>
                 <ShortcutContainer>
                   <KeyIcon text="Ctrl" />
@@ -482,10 +486,10 @@ export const ShortcutPopUp: React.FC<ShortcutPopUpProps> = observer(
                   <ShortcutDescription text="Download the current annotation slice as *.png" />
                 </ShortcutDescriptionContainer>
               </ShortcutRow>
-            </ShortcutGroup>
-          </ShortcutColumn>
-        </ShortcutColumnContainer>
-      </ShortcutPopUpContainer>
+            </LargePopUpGroup>
+          </LargePopUpColumn>
+        </LargePopUpColumnContainer>
+      </LargePopUp>
     );
   },
 );

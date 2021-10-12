@@ -2,6 +2,8 @@ export type ViewMode = "2D" | "3D";
 
 export type ScaleType = "linear" | "quadratic";
 
+export type PerformanceMode = "low" | "high";
+
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export type ValueType<T> = T extends Record<infer _K, infer V> ? V : T;
 

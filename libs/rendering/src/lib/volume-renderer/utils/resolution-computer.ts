@@ -1,3 +1,4 @@
+import { IEditor } from "@visian/ui-shared";
 import * as THREE from "three";
 
 import { TiledRenderer, RenderParams } from "./tiled-renderer";
@@ -10,11 +11,11 @@ export class ResolutionComputer extends TiledRenderer {
   private targetSize: THREE.Vector2;
 
   constructor(
+    private editor: IEditor,
     subject: THREE.Material | RenderParams,
     renderer: THREE.WebGLRenderer,
     size: THREE.Vector2,
     private flush: () => void,
-    private resolutionSteps = 2,
     target?: THREE.WebGLRenderTarget,
   ) {
     super(subject, renderer, size.clone(), target);
@@ -69,6 +70,10 @@ export class ResolutionComputer extends TiledRenderer {
       .ceil();
 
     super.setSize(this.workingVector.x, this.workingVector.y);
+  }
+
+  private get resolutionSteps() {
+    return this.editor.performanceMode === "low" ? 4 : 3;
   }
 
   private get currentResolutionReduction() {
