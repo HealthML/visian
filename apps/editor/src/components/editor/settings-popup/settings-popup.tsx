@@ -9,12 +9,18 @@ import {
   LargePopUpGroup,
   Switch,
   useTranslation,
+  PopUp,
 } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
 import React, { useCallback } from "react";
+import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
 import { SettingsPopUpProps } from "./settings-popup.props";
+
+const StyledPopUp = styled(PopUp)`
+  width: 280px;
+`;
 
 // Settings Items
 const themeSwitchOptions = [
@@ -57,7 +63,7 @@ export const SettingsPopUp: React.FC<SettingsPopUpProps> = observer(
     );
 
     return (
-      <LargePopUp
+      <StyledPopUp
         titleTx="settings"
         isOpen={isOpen}
         dismiss={onClose}
@@ -68,7 +74,7 @@ export const SettingsPopUp: React.FC<SettingsPopUpProps> = observer(
             <LargePopUpGroup>
               <LargePopUpGroupTitleContainer>
                 <LargePopUpGroupTitle text="General" />
-              </LargePopUpGroupTitleContainer>{" "}
+              </LargePopUpGroupTitleContainer>
               <EnumParam
                 labelTx="theme"
                 options={themeSwitchOptions}
@@ -97,11 +103,8 @@ export const SettingsPopUp: React.FC<SettingsPopUpProps> = observer(
               />
             </LargePopUpGroup>
           </LargePopUpColumn>
-          <LargePopUpColumn />
-          <LargePopUpColumn />
-          <LargePopUpColumn />
         </LargePopUpColumnContainer>
-      </LargePopUp>
+      </StyledPopUp>
     );
   },
 );
