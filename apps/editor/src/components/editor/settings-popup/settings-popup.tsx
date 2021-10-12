@@ -1,4 +1,5 @@
 import {
+  BooleanParam,
   ColorMode,
   EnumParam,
   LargePopUpColumn,
@@ -32,14 +33,9 @@ const languageSwitchOptions = [
   { label: "Deutsch", value: "de" },
 ];
 
-const voxelSwitchOptions = [
-  { label: "On", value: true },
-  { label: "Off", value: false },
-];
-
 const performanceSwitchOptions = [
-  { label: "Low", value: "low" },
-  { label: "High", value: "high" },
+  { labelTx: "low", value: "low" },
+  { labelTx: "high", value: "high" },
 ];
 
 export const SettingsPopUp: React.FC<SettingsPopUpProps> = observer(
@@ -86,11 +82,10 @@ export const SettingsPopUp: React.FC<SettingsPopUpProps> = observer(
                 value={i18n.language.split("-")[0]}
                 setValue={setLanguage}
               />
-              <Switch
+              <BooleanParam
                 labelTx="voxelData"
-                options={voxelSwitchOptions}
                 value={store?.editor.activeDocument?.viewport2D.showVoxelInfo}
-                onChange={
+                setValue={
                   store?.editor.activeDocument?.viewport2D.setShowVoxelInfo
                 }
               />
