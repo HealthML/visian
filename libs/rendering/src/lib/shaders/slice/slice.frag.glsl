@@ -1,20 +1,23 @@
-varying vec2 vUv;
+precision highp sampler3D;
 
-uniform sampler2D uLayerData[{{layerCount}}];
+in vec2 vUv;
+
+{{layerData}}
 uniform bool uLayerAnnotationStatuses[{{layerCount}}];
 uniform float uLayerOpacities[{{layerCount}}];
 uniform vec3 uLayerColors[{{layerCount}}];
 
 uniform vec3 uActiveSlices;
 uniform vec3 uVoxelCount;
-uniform vec2 uAtlasGrid;
 
 uniform float uContrast;
 uniform float uBrightness;
 uniform int uComponents;
 
-uniform sampler2D uActiveLayerData;
+uniform sampler3D uActiveLayerData;
 uniform float uRegionGrowingThreshold;
+
+out vec4 pc_FragColor;
 
 vec4 applyBrightnessContrast(vec4 image) {
   if(uComponents >= 3) {
@@ -39,11 +42,9 @@ void main() {
   #ifdef CORONAL
     volumeCoords = vec3(vUv.x, (uActiveSlices.y + 0.5) / uVoxelCount.y, vUv.y);
   #endif // CORONAL
-
-  @import ../utils/volume-coords-to-uv;
   
   vec4 imageValue = vec4(0.0);
-  {{reduceEnhancedLayerStack(imageValue, uv, applyBrightnessContrast)}}
+  {{reduceEnhancedLayerStack(imageValue, volumeCoords, applyBrightnessContrast)}}
 
-  gl_FragColor = imageValue;
+  pc_FragColor = imageValue;
 }

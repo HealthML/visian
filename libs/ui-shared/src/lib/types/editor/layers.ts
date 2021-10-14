@@ -151,9 +151,6 @@ export interface IImageLayer extends ILayer {
 
   getSlice(viewType: ViewType, slice: number): Uint8Array;
   setSlice(viewType: ViewType, slice: number, sliceData?: Uint8Array): void;
-
-  getAtlas(): Uint8Array;
-  setAtlas(value: Uint8Array): void;
 }
 
 /** A group of layers. */

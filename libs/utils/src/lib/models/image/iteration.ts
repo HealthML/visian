@@ -1,9 +1,4 @@
-import {
-  getAtlasGrid,
-  getAtlasIndexFor,
-  getAtlasSize,
-  getScanVoxelFor,
-} from "../../io/texture-atlas";
+import { TypedArray } from "@visian/utils";
 import { Voxel } from "../../types";
 import { Vector } from "../vector";
 import { getOrthogonalAxis, getPlaneAxes, ViewType } from "../view-types";
@@ -23,37 +18,33 @@ import type { Image } from "./image";
  * @returns The voxel coordinates, value, and index for which the predicate first returned true.
  */
 export const findVoxelInSlice = (
-  image: Pick<Image, "getAtlas" | "voxelComponents" | "voxelCount">,
+  image: Pick<Image, "voxelComponents" | "voxelCount">,
+  data: TypedArray,
   viewType: ViewType,
   slice: number,
   predicate: (
     voxel: Vector & Voxel,
-    value: number,
+    value: Vector,
     index: number,
   ) => boolean | undefined | void,
-  atlasGrid = getAtlasGrid(image.voxelCount),
-  atlasSize = getAtlasSize(image.voxelCount, atlasGrid),
 ) => {
-  const atlas = image.getAtlas();
-  const { voxelCount } = image;
-
+  const voxel = new Vector(3, false);
+  const value = new Vector(image.voxelComponents, false);
   const fixedCoordinate = getOrthogonalAxis(viewType);
   const [horizontalAxis, verticalAxis] = getPlaneAxes(viewType);
-  const horizontalCount = voxelCount[horizontalAxis];
-  const verticalCount = voxelCount[verticalAxis];
+  const horizontalCount = image.voxelCount[horizontalAxis];
+  const verticalCount = image.voxelCount[verticalAxis];
   for (let vertical = 0; vertical < verticalCount; vertical++) {
     for (let horizontal = 0; horizontal < horizontalCount; horizontal++) {
-      const voxel = Vector.fromObject(
-        {
-          [fixedCoordinate]: slice,
-          [horizontalAxis]: horizontal,
-          [verticalAxis]: vertical,
-        } as { x: number; y: number; z: number },
-        false,
-      );
+      voxel.setComponent(fixedCoordinate, slice);
+      voxel.setComponent(horizontalAxis, horizontal);
+      voxel.setComponent(verticalAxis, vertical);
 
-      const index = getAtlasIndexFor(voxel, image, atlasGrid, atlasSize);
-      const value = atlas[index];
+      const index =
+        voxel.x +
+        voxel.y * image.voxelCount.x +
+        voxel.z * image.voxelCount.x * image.voxelCount.y;
+      value.set(...data.slice(index, index + image.voxelComponents));
 
       if (predicate(voxel, value, index)) {
         return { voxel, value, index };
@@ -63,32 +54,40 @@ export const findVoxelInSlice = (
 };
 
 /**
- * Iterates over the given image's texture atlas until the predicate returns true.
+ * Iterates over the given image's texture data until the predicate returns true.
  *
  * @param image The image.
+ * @param data The texture data.
  * @param predicate The predicate.
- * @param atlasSize The size of the texture atlas in pixels.
- * @param atlasGrid The number of slices in the texture atlas in x/y direction.
  * @returns The voxel coordinates, value, and index for which the predicate first returned true.
  */
-export const findVoxelInAtlas = (
-  image: Pick<Image, "getAtlas" | "voxelComponents" | "voxelCount">,
+export const findVoxelInData = (
+  image: Pick<Image, "voxelComponents" | "voxelCount">,
+  data: Uint8Array,
   predicate: (
     voxel: Vector & Voxel,
-    value: number,
+    value: Vector,
     index: number,
   ) => boolean | undefined | void,
-  atlasGrid = getAtlasGrid(image.voxelCount),
-  atlasSize = getAtlasSize(image.voxelCount, atlasGrid),
 ) => {
-  const atlas = image.getAtlas();
-  const atlasLength = atlas.length;
+  const value = new Vector(image.voxelComponents, false);
+  const voxel = new Vector(3, false);
 
-  for (let index = 0; index < atlasLength; index++) {
-    const value = atlas[index];
-    const voxel = getScanVoxelFor(index, image, atlasGrid, atlasSize);
-    if (predicate(voxel, value, index)) {
-      return { voxel, value, index };
+  const rowSize = image.voxelCount.x * image.voxelComponents;
+  const sliceSize = rowSize * image.voxelCount.y;
+
+  for (let z = 0; z < image.voxelCount.z; z++) {
+    const zOffset = z * sliceSize;
+    for (let y = 0; y < image.voxelCount.y; y++) {
+      const yOffset = y * rowSize;
+      for (let x = 0; x < image.voxelCount.x; x++) {
+        const index = zOffset + yOffset + x;
+        value.set(...data.slice(index, index + image.voxelComponents));
+        voxel.set(x, y, z);
+        if (predicate(voxel, value, index)) {
+          return { voxel, value, index };
+        }
+      }
     }
   }
 };
@@ -98,7 +97,8 @@ export const findVoxelInAtlas = (
  * `ViewType` if the slice is empty.
  */
 export const getEmptySlices = (
-  image: Pick<Image, "getAtlas" | "voxelCount" | "voxelComponents">,
+  image: Pick<Image, "voxelCount" | "voxelComponents">,
+  data: Uint8Array,
 ) => {
   const transverse = new Array<boolean>(
     image.voxelCount.getFromView(ViewType.Transverse),
@@ -110,8 +110,8 @@ export const getEmptySlices = (
     image.voxelCount.getFromView(ViewType.Coronal),
   ).fill(true);
 
-  findVoxelInAtlas(image, (voxel, value) => {
-    if (!value) return;
+  findVoxelInData(image, data, (voxel, value) => {
+    if (!value.sum()) return;
     transverse[voxel.getFromView(ViewType.Transverse)] = false;
     sagittal[voxel.getFromView(ViewType.Sagittal)] = false;
     coronal[voxel.getFromView(ViewType.Coronal)] = false;

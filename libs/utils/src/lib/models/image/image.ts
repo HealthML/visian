@@ -2,12 +2,7 @@ import { Voxel } from "@visian/utils";
 import { action, makeObservable, observable } from "mobx";
 
 import {
-  convertAtlasToDataArray,
-  convertDataArrayToAtlas,
   FloatTypes,
-  getAtlasGrid,
-  getAtlasIndexFor,
-  getAtlasSize,
   IntTypes,
   ITKImage,
   ITKImageType,
@@ -43,7 +38,6 @@ export interface ImageSnapshot<T extends TypedArray = TypedArray> {
   orientation?: ITKMatrix;
 
   data?: T;
-  atlas?: Uint8Array;
 }
 
 export const itkImageToImageSnapshot = <T extends TypedArray = TypedArray>(
@@ -157,86 +151,32 @@ export class Image<T extends TypedArray = TypedArray>
 
   /** A TypedArray containing the voxel buffer data in I/O format. */
   private data!: T;
-  protected isDataDirty?: boolean;
-
-  /** A Uint8Array containing the voxel buffer data in texture atlas format. */
-  private atlas?: Uint8Array;
-  protected isAtlasDirty?: boolean;
 
   constructor(
     image: ImageSnapshot<T> & Pick<ImageSnapshot<T>, "voxelCount" | "data">,
   ) {
     this.applySnapshot(image);
 
-    makeObservable<this, "data" | "atlas" | "isDataDirty" | "isAtlasDirty">(
-      this,
-      {
-        name: observable,
-        dimensionality: observable,
-        voxelCount: observable,
-        voxelSpacing: observable,
-        voxelType: observable,
-        voxelComponents: observable,
-        voxelComponentType: observable,
-        origin: observable,
-        // TODO: Make matrix properly observable
-        orientation: observable.ref,
-        data: observable.ref,
-        isDataDirty: observable,
-        atlas: observable.ref,
-        isAtlasDirty: observable,
-        applySnapshot: action,
-        setData: action,
-        setAtlas: action,
-        setAtlasVoxel: action,
-        setSlice: action,
-      },
-    );
+    makeObservable<this, "data">(this, {
+      name: observable,
+      dimensionality: observable,
+      voxelCount: observable,
+      voxelSpacing: observable,
+      voxelType: observable,
+      voxelComponents: observable,
+      voxelComponentType: observable,
+      origin: observable,
+      // TODO: Make matrix properly observable
+      orientation: observable.ref,
+      data: observable.ref,
+      applySnapshot: action,
+      setData: action,
+      setSlice: action,
+    });
   }
 
   public getData() {
-    if (!this.data || this.isDataDirty) {
-      if (!this.atlas) throw new Error("No atlas provided");
-
-      // Explicit access here avoids MobX observability tracking to decrease performance
-      this.data = convertAtlasToDataArray(
-        this.getAtlas(),
-        {
-          voxelComponents: this.voxelComponents,
-          voxelCount: this.voxelCount.clone(false),
-        },
-        this.data,
-      );
-      this.isDataDirty = false;
-    }
     return this.data;
-  }
-
-  public getAtlas() {
-    if (!this.atlas || this.isAtlasDirty) {
-      if (!this.data) throw new Error("No data provided");
-
-      // Explicit access here avoids MobX observability tracking to decrease performance
-      this.atlas = convertDataArrayToAtlas(
-        this.data,
-        {
-          voxelComponents: this.voxelComponents,
-          voxelCount: this.voxelCount.clone(false),
-        },
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        this.atlas as any,
-      );
-      this.isAtlasDirty = false;
-    }
-    return this.atlas;
-  }
-
-  public getAtlasGrid() {
-    return getAtlasGrid(this.voxelCount);
-  }
-
-  public getAtlasSize() {
-    return getAtlasSize(this.voxelCount, this.getAtlasGrid());
   }
 
   public getSlice(viewType: ViewType, sliceNumber: number) {
@@ -251,14 +191,14 @@ export class Image<T extends TypedArray = TypedArray>
     findVoxelInSlice(
       // Explicit access here avoids MobX observability tracking to decrease performance
       {
-        getAtlas: () => this.getAtlas(),
         voxelComponents: this.voxelComponents,
         voxelCount: this.voxelCount.clone(false),
       },
+      this.getData(),
       viewType,
       sliceNumber,
       (_, value) => {
-        sliceData[index] = value;
+        sliceData[index] = value.x;
         index++;
       },
     );
@@ -288,18 +228,15 @@ export class Image<T extends TypedArray = TypedArray>
   }
 
   public getVoxelData(voxel: Voxel | Vector) {
-    const index = getAtlasIndexFor(voxel, this);
+    const index = this.getDataIndex(voxel);
 
     return new Vector(
-      Array.from(this.getAtlas().slice(index, index + this.voxelComponents)),
+      Array.from(this.getData().slice(index, index + this.voxelComponents)),
       false,
     );
   }
 
   public setData(data: T) {
-    this.isDataDirty = false;
-    this.isAtlasDirty = true;
-
     if (data === this.data) return;
 
     if (!this.data) {
@@ -314,50 +251,32 @@ export class Image<T extends TypedArray = TypedArray>
     }
   }
 
-  public setAtlas(atlas: Uint8Array) {
-    this.isDataDirty = true;
-    this.isAtlasDirty = false;
-
-    if (atlas === this.atlas) return;
-
-    if (!this.atlas) {
-      this.atlas = new Uint8Array(atlas);
-    } else {
-      if (atlas.length !== this.atlas.length) {
-        throw new Error("Atlas length has changed");
-      }
-      this.atlas.set(atlas);
-    }
-  }
-
-  public setAtlasVoxel(voxel: Voxel | Vector, value: number) {
-    const index = getAtlasIndexFor(voxel, this);
-    this.getAtlas()[index] = value;
-    this.isDataDirty = true;
+  // TODO: Adapt for more than one component.
+  public setVoxel(voxel: Voxel | Vector, value: number) {
+    const index = this.getDataIndex(voxel);
+    this.getData()[index] = value;
   }
 
   public setSlice(viewType: ViewType, slice: number, sliceData?: Uint8Array) {
-    const atlas = this.getAtlas();
+    const data = this.getData();
 
     const [horizontalAxis, verticalAxis] = getPlaneAxes(viewType);
     const sliceWidth = this.voxelCount[horizontalAxis];
 
     findVoxelInSlice(
       {
-        getAtlas: () => this.getAtlas(),
         voxelComponents: this.voxelComponents,
         voxelCount: this.voxelCount.clone(false),
       },
+      this.getData(),
       viewType,
       slice,
       (voxel, _, index) => {
         const sliceIndex =
           voxel[verticalAxis] * sliceWidth + voxel[horizontalAxis];
-        atlas[index] = sliceData ? sliceData[sliceIndex] : 0;
+        data[index] = sliceData ? sliceData[sliceIndex] : 0;
       },
     );
-
-    this.isDataDirty = true;
   }
 
   public toITKImage() {
@@ -401,10 +320,7 @@ export class Image<T extends TypedArray = TypedArray>
   }
 
   public toJSON() {
-    if (
-      (!this.data || this.isDataDirty) &&
-      (!this.atlas || this.isAtlasDirty)
-    ) {
+    if (!this.data) {
       throw new Error("Saving image without any data");
     }
     return {
@@ -413,8 +329,7 @@ export class Image<T extends TypedArray = TypedArray>
       voxelSpacing: this.voxelSpacing.toJSON(),
       origin: this.origin.toJSON(),
       orientation: this.orientation,
-      data: this.isDataDirty || !this.isAtlasDirty ? undefined : this.data,
-      atlas: this.isAtlasDirty ? undefined : this.atlas,
+      data: this.getData(),
       dimensionality: this.dimensionality,
       voxelComponents: this.voxelComponents,
     };
@@ -449,16 +364,20 @@ export class Image<T extends TypedArray = TypedArray>
       this.orientation.setIdentity();
     }
 
-    if (snapshot.data) {
-      this.setData(snapshot.data);
-    } else if (snapshot.atlas) {
-      this.setAtlas(snapshot.atlas);
-    } else {
-      this.setData(new Uint8Array(this.voxelCount.product()) as T);
-    }
+    this.setData(
+      snapshot.data ?? (new Uint8Array(this.voxelCount.product()) as T),
+    );
   }
 
   public clone() {
     return new Image(this.toJSON());
+  }
+
+  protected getDataIndex(voxel: Voxel) {
+    return (
+      voxel.x +
+      voxel.y * this.voxelCount.x +
+      voxel.z * this.voxelCount.x * this.voxelCount.y
+    );
   }
 }

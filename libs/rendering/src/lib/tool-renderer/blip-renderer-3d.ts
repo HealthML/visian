@@ -179,9 +179,9 @@ export class BlipRenderer3D implements IBlipRenderer3D, IDisposable {
     const annotation = layer.image as RenderedImage;
 
     if (shouldReplace) {
-      annotation.writeToAtlas(this.outputTextures, MergeFunction.Replace);
+      annotation.writeToTexture(this.outputTextures, MergeFunction.Replace);
     } else {
-      annotation.writeToAtlas(
+      annotation.writeToTexture(
         this.outputTextures,
         MergeFunction.Add,
         this.steps !== undefined

@@ -8,8 +8,6 @@ export { default as gradientFragmentShader } from "./gradient/gradient.frag.glsl
 export { default as gradientVertexShader } from "./gradient/gradient.vert.glsl";
 export { default as laoFragmentShader } from "./lao/lao.frag.glsl";
 export { default as laoVertexShader } from "./lao/lao.vert.glsl";
-export { default as linesFragmentShader } from "./slice-into-atlas/slice-into-atlas.frag.glsl";
-export { default as linesVertexShader } from "./slice-into-atlas/lines-into-atlas.vert.glsl";
 export { default as mergeFragmentShader } from "./merge/merge.frag.glsl";
 export { default as mergeVertexShader } from "./merge/merge.vert.glsl";
 export { default as rawSliceFragmentShader } from "./slice/raw-slice.frag.glsl";
@@ -23,7 +21,5 @@ export { default as volumeFragmentShader } from "./volume/volume.frag.glsl";
 export { default as volumeVertexShader } from "./volume/volume.vert.glsl";
 export { default as voxelFragmentShader } from "./voxel-into-atlas/voxel-into-atlas.frag.glsl";
 export { default as voxelVertexShader } from "./voxel-into-atlas/voxel-into-atlas.vert.glsl";
-export { default as quadFragmentShader } from "./slice-into-atlas/slice-into-atlas.frag.glsl";
-export { default as quadVertexShader } from "./slice-into-atlas/quad-into-atlas.vert.glsl";
 
 export * from "./compose-layered-shader";

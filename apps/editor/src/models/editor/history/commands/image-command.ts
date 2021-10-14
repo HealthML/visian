@@ -1,3 +1,4 @@
+import { RenderedImage } from "@visian/rendering";
 import {
   IDocument,
   IImageLayer,
@@ -6,33 +7,33 @@ import {
 } from "@visian/ui-shared";
 import { ISerializable } from "@visian/utils";
 
-export interface AtlasCommandSnapshot extends IUndoRedoCommandSnapshot {
-  kind: "atlas";
+export interface ImageCommandSnapshot extends IUndoRedoCommandSnapshot {
+  kind: "image";
 
   layerId: string;
-  oldAtlas: Uint8Array;
-  newAtlas: Uint8Array;
+  oldData: Uint8Array;
+  newData: Uint8Array;
 }
 
-export class AtlasCommand
-  implements IUndoRedoCommand, ISerializable<AtlasCommandSnapshot> {
+export class ImageCommand
+  implements IUndoRedoCommand, ISerializable<ImageCommandSnapshot> {
   public readonly excludeFromSnapshotTracking = ["document"];
 
   // eslint-disable-next-line @typescript-eslint/member-ordering
-  public static readonly kind = "atlas";
-  public readonly kind = "atlas";
+  public static readonly kind = "image";
+  public readonly kind = "image";
 
   public readonly layerId: string;
-  protected readonly oldAtlas: Uint8Array;
-  protected readonly newAtlas: Uint8Array;
+  protected readonly oldData: Uint8Array;
+  protected readonly newData: Uint8Array;
 
   constructor(
-    snapshot: Omit<AtlasCommandSnapshot, "kind">,
+    snapshot: Omit<ImageCommandSnapshot, "kind">,
     protected readonly document: IDocument,
   ) {
     this.layerId = snapshot.layerId;
-    this.oldAtlas = snapshot.oldAtlas;
-    this.newAtlas = snapshot.newAtlas;
+    this.oldData = snapshot.oldData;
+    this.newData = snapshot.newData;
   }
 
   public undo(): void {
@@ -40,7 +41,9 @@ export class AtlasCommand
     const imageLayer = this.document.getLayer(this.layerId) as
       | IImageLayer
       | undefined;
-    imageLayer?.setAtlas?.(this.oldAtlas);
+    (imageLayer?.image as RenderedImage | undefined)?.setTextureData(
+      this.oldData,
+    );
 
     this.onUndoOrRedo(imageLayer);
   }
@@ -50,7 +53,9 @@ export class AtlasCommand
     const imageLayer = this.document.getLayer(this.layerId) as
       | IImageLayer
       | undefined;
-    imageLayer?.setAtlas?.(this.newAtlas);
+    (imageLayer?.image as RenderedImage | undefined)?.setTextureData(
+      this.newData,
+    );
 
     this.onUndoOrRedo(imageLayer);
   }
@@ -62,12 +67,12 @@ export class AtlasCommand
   }
 
   // Serialization
-  public toJSON(): AtlasCommandSnapshot {
+  public toJSON(): ImageCommandSnapshot {
     return {
       kind: this.kind,
       layerId: this.layerId,
-      oldAtlas: this.oldAtlas,
-      newAtlas: this.newAtlas,
+      oldData: this.oldData,
+      newData: this.newData,
     };
   }
 

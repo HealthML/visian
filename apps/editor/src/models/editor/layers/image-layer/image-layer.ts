@@ -58,7 +58,6 @@ export class ImageLayer
         isAnnotation: true,
         color: color || defaultAnnotationColor,
         image: {
-          atlas: new Uint8Array(image.getAtlas().length),
           name: `${image.name.split(".")[0]}_annotation`,
           dimensionality: image.dimensionality,
           origin: image.origin.toArray(),
@@ -216,7 +215,7 @@ export class ImageLayer
         GetEmptySlicesArgs,
         GetEmptySlicesReturn
       >("getEmptySlices", {
-        atlas: this.image.getAtlas(),
+        data: this.image.getTextureData(),
         voxelCount: this.image.voxelCount.toArray(),
         voxelComponents: this.image.voxelComponents,
       });
@@ -251,11 +250,11 @@ export class ImageLayer
   }
 
   public setVoxel(voxel: Voxel | Vector, value: number): void {
-    this.image.setAtlasVoxel(voxel, value);
+    this.image.setVoxel(voxel, value);
   }
 
   public setVoxels(voxels: VoxelWithValue[]): void {
-    this.image.setAtlasVoxels(voxels);
+    this.image.setVoxels(voxels);
   }
 
   public getSlice(viewType: ViewType, slice: number): Uint8Array {
@@ -268,14 +267,6 @@ export class ImageLayer
     sliceData: Uint8Array,
   ): void {
     this.image.setSlice(viewType, slice, sliceData);
-  }
-
-  public getAtlas(): Uint8Array {
-    return this.image.getAtlas();
-  }
-
-  public setAtlas(atlas: Uint8Array): void {
-    this.image.setAtlas(atlas);
   }
 
   // I/O

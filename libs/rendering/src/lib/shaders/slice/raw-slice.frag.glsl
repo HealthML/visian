@@ -1,11 +1,14 @@
-varying vec2 vUv;
+precision highp sampler3D;
 
-uniform sampler2D uDataTexture;
+in vec2 vUv;
+
+uniform sampler3D uDataTexture;
 uniform vec3 uVoxelCount;
-uniform vec2 uAtlasGrid;
 
 uniform float uSliceNumber;
 uniform int uViewType;
+
+out vec4 pc_FragColor;
 
 void main() {
   vec3 volumeCoords;
@@ -16,8 +19,6 @@ void main() {
   } else {
     volumeCoords = vec3(vUv.x, (uSliceNumber + 0.5) / uVoxelCount.y, vUv.y);
   }
-  
-  @import ../utils/volume-coords-to-uv;
 
-  gl_FragColor = texture2D(uDataTexture, uv);
+  pc_FragColor = texture(uDataTexture, volumeCoords);
 }

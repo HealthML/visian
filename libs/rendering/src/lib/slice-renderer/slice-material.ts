@@ -21,19 +21,19 @@ export class SliceMaterial extends THREE.ShaderMaterial implements IDisposable {
       vertexShader: sliceVertexShader,
       fragmentShader: sliceFragmentShader,
       uniforms: {
-        uLayerData: { value: [] },
+        uLayerData0: { value: null },
         uLayerAnnotationStatuses: { value: [] },
         uLayerOpacities: { value: [] },
         uLayerColors: { value: [] },
         uActiveSlices: { value: [0, 0, 0] },
         uVoxelCount: { value: [1, 1, 1] },
-        uAtlasGrid: { value: [1, 1] },
         uContrast: { value: editor.activeDocument?.viewSettings.contrast },
         uBrightness: { value: editor.activeDocument?.viewSettings.brightness },
         uComponents: { value: 1 },
         uActiveLayerData: { value: null },
         uRegionGrowingThreshold: { value: 0 },
       },
+      glslVersion: THREE.GLSL3,
       transparent: true,
       side: THREE.DoubleSide,
     });
@@ -69,7 +69,6 @@ export class SliceMaterial extends THREE.ShaderMaterial implements IDisposable {
         const image = imageLayer.image as RenderedImage;
 
         this.uniforms.uVoxelCount.value = image.voxelCount;
-        this.uniforms.uAtlasGrid.value = image.getAtlasGrid();
         this.uniforms.uComponents.value = image.voxelComponents;
 
         editor.sliceRenderer?.lazyRender();
@@ -113,12 +112,24 @@ export class SliceMaterial extends THREE.ShaderMaterial implements IDisposable {
               ),
         );
 
-        this.uniforms.uLayerData.value = [
-          // additional layer for 3d region growing
-          editor.activeDocument?.tools.layerPreviewTextures[canvasIndex] ||
-            null,
-          ...layerData,
-        ];
+        // this.uniforms.uLayerData.value = [
+        //   // additional layer for 3d region growing
+        //   // editor.activeDocument?.tools.layerPreviewTextures[canvasIndex] ||
+        //   //   null,
+        //   layerData[0],
+        //   ...layerData,
+        // ];
+
+        // TODO: This should be the preview texture like above, once it is updated to 3D.
+
+        // eslint-disable-next-line prefer-destructuring
+        this.uniforms.uLayerData0.value = layerData[0];
+        for (let i = 0; i < layerData.length; i++) {
+          if (!this.uniforms[`uLayerData${i + 1}`]) {
+            this.uniforms[`uLayerData${i + 1}`] = { value: null };
+          }
+          this.uniforms[`uLayerData${i + 1}`].value = layerData[i];
+        }
 
         const activeLayer = editor.activeDocument?.activeLayer;
         this.uniforms.uActiveLayerData.value = activeLayer

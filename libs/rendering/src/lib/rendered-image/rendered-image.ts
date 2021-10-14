@@ -1,6 +1,5 @@
 import { IDocument } from "@visian/ui-shared";
 import {
-  getTextureFromAtlas,
   Image,
   ImageSnapshot,
   ITKImage,
@@ -13,16 +12,11 @@ import {
   VoxelWithValue,
 } from "@visian/utils";
 import * as THREE from "three";
-import { ScreenAlignedQuad } from "../screen-aligned-quad";
 
-import {
-  copyToRenderTarget,
-  ImageRenderTarget,
-  renderVoxels,
-  Voxels,
-} from "./edit-rendering";
-import { AtlasAdapter } from "./atlas-adapter";
+import { TextureAdapter } from "./texture-adapter";
+import { ImageRenderTarget, renderVoxels, Voxels } from "./edit-rendering";
 import { MergeFunction } from "./types";
+import { textureFormatForComponents } from "./utils";
 
 export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
   public static fromITKImage<T2 extends TypedArray = TypedArray>(
@@ -43,13 +37,13 @@ export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
 
   public excludeFromSnapshotTracking = ["document"];
 
-  /** Used to update the atlas from the CPU. */
-  private internalTexture: THREE.DataTexture;
+  /** Used to update the texture from the CPU. */
+  private internalTexture: THREE.DataTexture3D;
 
-  /** Contains the voxels which have to be rendered into the atlas. */
+  /** Contains the voxels which have to be rendered into the texture. */
   private voxelsToRender: (VoxelWithValue | VoxelWithValue[])[] = [];
   /**
-   * Whether or not @member voxelsToRender have been rendered into the atlas
+   * Whether or not @member voxelsToRender have been rendered into the texture
    * for the different WebGL contexts.
    * See @member renderTargets for texture filter explanation.
    */
@@ -57,13 +51,13 @@ export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
     [THREE.NearestFilter]: [true],
     [THREE.LinearFilter]: [true],
   };
-  /** Used to render voxels into the texture atlas. */
+  /** Used to render voxels into the texture. */
   private voxels: Voxels;
   /** Whether or not @member voxelGeometry needs to be updated before rendering. */
   private isVoxelGeometryDirty = false;
 
   /**
-   * The render targets for the texture atlases for the different WebGL contexts.
+   * The render targets for the textures for the different WebGL contexts.
    *
    * Sadly, Three currently does not let you change the filtering mode of a render targte's
    * texture on the fly. As we need textures with nearest filtering for the 2D view and
@@ -71,12 +65,8 @@ export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
    * See https://github.com/mrdoob/three.js/issues/14375
    * */
   private renderTargets: Record<THREE.TextureFilter, ImageRenderTarget[]> = {
-    [THREE.NearestFilter]: [
-      new ImageRenderTarget(this.getAtlasSize(), THREE.NearestFilter),
-    ],
-    [THREE.LinearFilter]: [
-      new ImageRenderTarget(this.getAtlasSize(), THREE.LinearFilter),
-    ],
+    [THREE.NearestFilter]: [new ImageRenderTarget(this, THREE.NearestFilter)],
+    [THREE.LinearFilter]: [new ImageRenderTarget(this, THREE.LinearFilter)],
   };
   /**
    * Whether or not the corresponding render target needs to be updated from the CPU data.
@@ -90,13 +80,16 @@ export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
   private renderCallbacks: (() => void)[] = [];
   /** Callbacks to be invoked when `renderes` are set. */
   private rendererCallbacks: (() => void)[] = [];
-  /** Used to update the render targets from the CPU data. */
-  private screenAlignedQuad: ScreenAlignedQuad;
 
-  /** Whether or not the atlas needs to be pulled from the GPU. */
+  /** Whether or not the texture data needs to be pulled from the GPU. */
   private hasGPUUpdates = false;
 
-  private atlasAdapter: AtlasAdapter;
+  private textureData: Uint8Array;
+  private isTextureDataDirty = true;
+
+  private isDataDirty = false;
+
+  private textureAdapter: TextureAdapter;
 
   constructor(
     image: ImageSnapshot<T> & Pick<ImageSnapshot<T>, "voxelCount" | "data">,
@@ -104,42 +97,70 @@ export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
   ) {
     super(image);
 
-    this.internalTexture = getTextureFromAtlas(
-      {
-        voxelComponents: this.voxelComponents,
-        voxelCount: this.voxelCount.clone(false),
-      },
-      this.getAtlas(),
-      THREE.NearestFilter,
+    this.textureData = new Uint8Array(
+      this.voxelCount.product() * this.voxelComponents,
     );
 
-    this.screenAlignedQuad = ScreenAlignedQuad.forTexture(this.internalTexture);
-
-    this.voxels = new Voxels(
-      this.getAtlasSize(),
-      this.getAtlasGrid(),
-      this.voxelCount,
+    this.internalTexture = new THREE.DataTexture3D(
+      this.getTextureData(),
+      this.voxelCount.x,
+      this.voxelCount.y,
+      this.voxelCount.z,
     );
-
-    this.atlasAdapter = new AtlasAdapter(
-      this.renderTargets[THREE.NearestFilter][0].texture,
-      this.getAtlasGrid(),
-      this.voxelCount.clone(false),
+    this.internalTexture.magFilter = THREE.NearestFilter;
+    this.internalTexture.format = textureFormatForComponents(
       this.voxelComponents,
     );
+
+    this.voxels = new Voxels(new Vector(2), new Vector(2), this.voxelCount);
+
+    this.textureAdapter = new TextureAdapter(this);
+  }
+
+  public getTextureData() {
+    if (this.isTextureDataDirty) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const maxValue = (this.getData() as any).reduce(
+        (a: number, b: number) => Math.max(a, b),
+        0,
+      );
+
+      const textureData = new Uint8Array(
+        this.getData().map((value: number) =>
+          Math.round((Math.max(0, value) / maxValue) * 255),
+        ),
+      );
+
+      this.textureData.set(textureData);
+
+      this.isTextureDataDirty = false;
+    }
+
+    return this.textureData;
+  }
+
+  public getData() {
+    if (this.isDataDirty) {
+      super.getData().set(this.textureData);
+
+      this.isDataDirty = false;
+    }
+
+    return super.getData();
   }
 
   public getTexture(rendererIndex = 0, filter = THREE.NearestFilter) {
     if (!this.renderTargets[filter][rendererIndex]) {
       this.renderTargets[filter][rendererIndex] = new ImageRenderTarget(
-        this.getAtlasSize(),
+        this,
         filter,
       );
       this.hasCPUUpdates[filter][rendererIndex] = true;
       this.voxelsRendered[filter][rendererIndex] = true;
     }
 
-    return this.renderTargets[filter][rendererIndex].texture;
+    return this.renderTargets[filter][rendererIndex]
+      .texture as THREE.DataTexture3D;
   }
 
   public waitForRender() {
@@ -213,13 +234,14 @@ export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
     const renderer = renderers[rendererIndex];
     if (!renderer) return;
 
-    copyToRenderTarget(
-      this.screenAlignedQuad,
-      this.renderTargets[filter][rendererIndex],
-      renderer,
+    this.textureAdapter.writeImage(
+      [this.internalTexture],
+      [this.renderTargets[filter][rendererIndex]],
+      [renderer],
+      MergeFunction.Replace,
     );
 
-    this.atlasAdapter.invalidateCache();
+    this.textureAdapter.invalidateCache();
 
     this.hasCPUUpdates[filter][rendererIndex] = false;
   }
@@ -227,57 +249,66 @@ export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
   private onModificationsOnGPU() {
     this.hasGPUUpdates = true;
     this.isDataDirty = true;
-    this.atlasAdapter.invalidateCache();
+    this.textureAdapter.invalidateCache();
   }
 
   private scheduleGPUPush() {
+    this.getTextureData();
     this.internalTexture.needsUpdate = true;
     this.hasCPUUpdates[THREE.NearestFilter].fill(true);
     this.hasCPUUpdates[THREE.LinearFilter].fill(true);
   }
 
-  private pullAtlasFromGPU() {
+  private pullDataFromGPU() {
     if (!this.document?.renderers?.length) return;
 
-    const atlasSize = this.getAtlasSize();
-    const buffer = new Uint8Array(atlasSize.product() * 4);
-
-    this.document.renderers[0].readRenderTargetPixels(
-      this.renderTargets[THREE.NearestFilter][0],
-      0,
-      0,
-      atlasSize.x,
-      atlasSize.y,
-      buffer,
+    this.textureAdapter.readImage(
+      this.document.renderers[0],
+      this.getTexture(0, THREE.NearestFilter),
+      this.textureData,
     );
+    this.isDataDirty = true;
 
-    const atlas = new Uint8Array(atlasSize.product());
-    for (let i = 0; i < atlas.length; i++) {
-      atlas[i] = buffer[4 * i];
-    }
-
-    super.setAtlas(atlas);
     this.hasGPUUpdates = false;
   }
 
-  /** Can override unsaved changes to the atlas that are only stored on the GPU. */
-  public setAtlas(atlas: Uint8Array) {
-    super.setAtlas(atlas);
+  /** Can override unsaved changes to the data that are only stored on the GPU. */
+  public setData(data: T) {
+    super.setData(data);
     this.hasGPUUpdates = false;
+    this.isTextureDataDirty = true;
+    this.isDataDirty = false;
 
     if (this.internalTexture) {
       this.scheduleGPUPush();
     }
   }
 
-  public setAtlasVoxels(voxels: VoxelWithValue[]) {
+  public setTextureData(data: Uint8Array) {
+    if (this.textureData === data) return;
+
+    if (data.length !== this.textureData.length) {
+      throw new Error("Provided data has the wrong length.");
+    }
+
+    this.textureData.set(data);
+    this.hasGPUUpdates = false;
+    this.isTextureDataDirty = false;
+    this.isDataDirty = true;
+
+    if (this.internalTexture) {
+      this.scheduleGPUPush();
+    }
+  }
+
+  public setVoxels(voxels: VoxelWithValue[]) {
     this.voxelsToRender.push(voxels);
     this.voxelsRendered[THREE.NearestFilter].fill(false);
     this.voxelsRendered[THREE.LinearFilter].fill(false);
     this.isVoxelGeometryDirty = true;
   }
 
-  public setAtlasVoxel(voxel: Voxel | Vector, value: number) {
+  public setVoxel(voxel: Voxel | Vector, value: number) {
     if (this.document?.renderers?.length) {
       const { x, y, z } = voxel;
       this.voxelsToRender.push({ x, y, z, value });
@@ -288,25 +319,25 @@ export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
       return;
     }
 
-    super.setAtlasVoxel(voxel, value);
+    super.setVoxel(voxel, value);
     this.scheduleGPUPush();
   }
 
-  public writeToAtlas(
-    textures: THREE.Texture[],
+  public writeToTexture(
+    textures: THREE.DataTexture3D[],
     mergeFunction = MergeFunction.Replace,
     threshold?: number,
   ) {
     if (!this.document?.renderers) return;
 
-    this.atlasAdapter.writeToAtlas(
+    this.textureAdapter.writeImage(
       textures,
       this.renderTargets[THREE.NearestFilter],
       this.document.renderers,
       mergeFunction,
       threshold,
     );
-    this.atlasAdapter.writeToAtlas(
+    this.textureAdapter.writeImage(
       textures,
       this.renderTargets[THREE.LinearFilter],
       this.document.renderers,
@@ -324,7 +355,7 @@ export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
     mergeFunction = MergeFunction.Replace,
   ) {
     if (this.document?.renderers?.length) {
-      this.atlasAdapter.writeSlice(
+      this.textureAdapter.writeSlice(
         slice,
         viewType,
         sliceData,
@@ -332,7 +363,7 @@ export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
         this.document.renderers,
         mergeFunction,
       );
-      this.atlasAdapter.writeSlice(
+      this.textureAdapter.writeSlice(
         slice,
         viewType,
         sliceData,
@@ -354,10 +385,11 @@ export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
 
   public getSlice(viewType: ViewType, sliceNumber: number) {
     if (this.document?.renderers?.length) {
-      return this.atlasAdapter.readSlice(
+      return this.textureAdapter.readSlice(
         sliceNumber,
         viewType,
         this.document.renderers[0],
+        this.getTexture(0, THREE.NearestFilter),
       );
     }
 
@@ -380,26 +412,29 @@ export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
       this.copyToRenderTarget(rendererIndex, THREE.NearestFilter);
     }
 
-    this.atlasAdapter.readSliceToTarget(
+    this.textureAdapter.readSliceToTarget(
       sliceNumber,
       viewType,
       renderer,
-      target,
       this.getTexture(rendererIndex, THREE.NearestFilter),
+      target,
     );
   }
 
-  public getAtlas() {
-    if (this.hasGPUUpdates) {
-      this.pullAtlasFromGPU();
-    }
+  public getVoxelData(voxel: Voxel | Vector) {
+    const index = this.getDataIndex(voxel);
 
-    return super.getAtlas();
+    return new Vector(
+      Array.from(
+        this.getTextureData().slice(index, index + this.voxelComponents),
+      ),
+      false,
+    );
   }
 
   public toJSON() {
     if (this.hasGPUUpdates) {
-      this.pullAtlasFromGPU();
+      this.pullDataFromGPU();
     }
 
     return super.toJSON();
