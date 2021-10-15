@@ -49,7 +49,7 @@ export class RegionGrowingRenderer3D extends BlipRenderer3D {
     this.seed.setPosition(voxel);
 
     this.document.renderers?.forEach((renderer, rendererIndex) => {
-      renderer.setRenderTarget(this.renderTargets[rendererIndex]);
+      renderer.setRenderTarget(this.renderTargets[rendererIndex], voxel.z);
       renderer.render(this.seed, this.seed.camera);
       renderer.setRenderTarget(null);
     });
