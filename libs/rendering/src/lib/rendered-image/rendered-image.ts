@@ -13,9 +13,9 @@ import {
 import * as THREE from "three";
 
 import { TextureAdapter } from "./texture-adapter";
-import { ImageRenderTarget } from "./edit-rendering";
-import { MergeFunction } from "./types";
 import { textureFormatForComponents } from "./utils";
+import { MergeFunction } from "./types";
+import { ImageRenderTarget } from "./image-render-target";
 
 export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
   public static fromITKImage<T2 extends TypedArray = TypedArray>(
