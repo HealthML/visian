@@ -10,7 +10,6 @@ import {
   Vector,
   ViewType,
   Voxel,
-  VoxelWithValue,
   writeSingleMedicalImage,
 } from "@visian/utils";
 import FileSaver from "file-saver";
@@ -247,14 +246,6 @@ export class ImageLayer
   // Special Accessors
   public getVoxel(voxel: Voxel | Vector): Vector {
     return this.image.getVoxelData(voxel);
-  }
-
-  public setVoxel(voxel: Voxel | Vector, value: number): void {
-    this.image.setVoxel(voxel, value);
-  }
-
-  public setVoxels(voxels: VoxelWithValue[]): void {
-    this.image.setVoxels(voxels);
   }
 
   public getSlice(viewType: ViewType, slice: number): Uint8Array {

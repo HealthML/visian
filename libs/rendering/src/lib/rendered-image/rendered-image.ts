@@ -9,12 +9,11 @@ import {
   Vector,
   ViewType,
   Voxel,
-  VoxelWithValue,
 } from "@visian/utils";
 import * as THREE from "three";
 
 import { TextureAdapter } from "./texture-adapter";
-import { ImageRenderTarget, renderVoxels, Voxels } from "./edit-rendering";
+import { ImageRenderTarget } from "./edit-rendering";
 import { MergeFunction } from "./types";
 import { textureFormatForComponents } from "./utils";
 
@@ -40,22 +39,6 @@ export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
   /** Used to update the texture from the CPU. */
   private internalTexture: THREE.DataTexture3D;
 
-  /** Contains the voxels which have to be rendered into the texture. */
-  private voxelsToRender: (VoxelWithValue | VoxelWithValue[])[] = [];
-  /**
-   * Whether or not @member voxelsToRender have been rendered into the texture
-   * for the different WebGL contexts.
-   * See @member renderTargets for texture filter explanation.
-   */
-  private voxelsRendered: Record<THREE.TextureFilter, boolean[]> = {
-    [THREE.NearestFilter]: [true],
-    [THREE.LinearFilter]: [true],
-  };
-  /** Used to render voxels into the texture. */
-  private voxels: Voxels;
-  /** Whether or not @member voxelGeometry needs to be updated before rendering. */
-  private isVoxelGeometryDirty = false;
-
   /**
    * The render targets for the textures for the different WebGL contexts.
    *
@@ -76,8 +59,7 @@ export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
     [THREE.NearestFilter]: [true],
     [THREE.LinearFilter]: [true],
   };
-  /** Callbacks to be invoked when the next render succeeds. */
-  private renderCallbacks: (() => void)[] = [];
+
   /** Callbacks to be invoked when `renderes` are set. */
   private rendererCallbacks: (() => void)[] = [];
 
@@ -111,8 +93,6 @@ export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
     this.internalTexture.format = textureFormatForComponents(
       this.voxelComponents,
     );
-
-    this.voxels = new Voxels(new Vector(2), new Vector(2), this.voxelCount);
 
     this.textureAdapter = new TextureAdapter(this);
   }
@@ -156,17 +136,10 @@ export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
         filter,
       );
       this.hasCPUUpdates[filter][rendererIndex] = true;
-      this.voxelsRendered[filter][rendererIndex] = true;
     }
 
     return this.renderTargets[filter][rendererIndex]
       .texture as THREE.DataTexture3D;
-  }
-
-  public waitForRender() {
-    return new Promise<void>((resolve) => {
-      this.renderCallbacks.push(resolve);
-    });
   }
 
   public waitForRenderers() {
@@ -184,42 +157,13 @@ export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
 
     this.rendererCallbacks.forEach((callback) => callback());
 
-    this.document.renderers.forEach((renderer, rendererIndex) => {
+    this.document.renderers.forEach((_, rendererIndex) => {
       [THREE.NearestFilter, THREE.LinearFilter].forEach((filter) => {
         if (
           this.hasCPUUpdates[filter][rendererIndex] &&
           this.renderTargets[filter][rendererIndex]
         ) {
           this.copyToRenderTarget(rendererIndex, filter);
-        }
-
-        if (
-          this.voxelsToRender.length &&
-          this.voxelsRendered[filter][rendererIndex] === false
-        ) {
-          if (this.isVoxelGeometryDirty) {
-            this.voxels.updateGeometry(this.voxelsToRender);
-            this.isVoxelGeometryDirty = false;
-          }
-
-          renderVoxels(
-            this.voxels,
-            this.renderTargets[filter][rendererIndex],
-            renderer,
-          );
-          this.onModificationsOnGPU();
-
-          this.voxelsRendered[filter][rendererIndex] = true;
-          if (
-            this.voxelsRendered[THREE.NearestFilter].every((value) => value) &&
-            this.voxelsRendered[THREE.LinearFilter].every((value) => value)
-          ) {
-            this.voxelsToRender = [];
-            this.isVoxelGeometryDirty = true;
-
-            this.renderCallbacks.forEach((callback) => callback());
-            this.renderCallbacks = [];
-          }
         }
       });
     });
@@ -299,28 +243,6 @@ export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
     if (this.internalTexture) {
       this.scheduleGPUPush();
     }
-  }
-
-  public setVoxels(voxels: VoxelWithValue[]) {
-    this.voxelsToRender.push(voxels);
-    this.voxelsRendered[THREE.NearestFilter].fill(false);
-    this.voxelsRendered[THREE.LinearFilter].fill(false);
-    this.isVoxelGeometryDirty = true;
-  }
-
-  public setVoxel(voxel: Voxel | Vector, value: number) {
-    if (this.document?.renderers?.length) {
-      const { x, y, z } = voxel;
-      this.voxelsToRender.push({ x, y, z, value });
-      this.voxelsRendered[THREE.NearestFilter].fill(false);
-      this.voxelsRendered[THREE.LinearFilter].fill(false);
-      this.isVoxelGeometryDirty = true;
-
-      return;
-    }
-
-    super.setVoxel(voxel, value);
-    this.scheduleGPUPush();
   }
 
   public writeToTexture(

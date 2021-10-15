@@ -1,10 +1,4 @@
-import type {
-  Image,
-  Vector,
-  ViewType,
-  Voxel,
-  VoxelWithValue,
-} from "@visian/utils";
+import type { Image, Vector, ViewType, Voxel } from "@visian/utils";
 import type { Matrix4 } from "three";
 import { MarkerConfig } from "./markers";
 
@@ -146,8 +140,6 @@ export interface IImageLayer extends ILayer {
   clearSliceMarkers(viewType?: ViewType, slice?: number): Promise<void>;
 
   getVoxel(voxel: Voxel): Vector;
-  setVoxel(voxel: Voxel, value: number): void;
-  setVoxels(voxels: VoxelWithValue[]): void;
 
   getSlice(viewType: ViewType, slice: number): Uint8Array;
   setSlice(viewType: ViewType, slice: number, sliceData?: Uint8Array): void;

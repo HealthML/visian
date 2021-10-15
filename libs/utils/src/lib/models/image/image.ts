@@ -251,12 +251,6 @@ export class Image<T extends TypedArray = TypedArray>
     }
   }
 
-  // TODO: Adapt for more than one component.
-  public setVoxel(voxel: Voxel | Vector, value: number) {
-    const index = this.getDataIndex(voxel);
-    this.getData()[index] = value;
-  }
-
   public setSlice(viewType: ViewType, slice: number, sliceData?: Uint8Array) {
     const data = this.getData();
 
