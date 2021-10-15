@@ -18,7 +18,7 @@ import {
   swapAxesForMetadata,
   unifyOrientation,
 } from "./conversion";
-import { findVoxelInSlice } from "./iteration";
+import { findVoxelInSlice, setSlice } from "./iteration";
 
 import type { ISerializable } from "../types";
 
@@ -252,25 +252,7 @@ export class Image<T extends TypedArray = TypedArray>
   }
 
   public setSlice(viewType: ViewType, slice: number, sliceData?: Uint8Array) {
-    const data = this.getData();
-
-    const [horizontalAxis, verticalAxis] = getPlaneAxes(viewType);
-    const sliceWidth = this.voxelCount[horizontalAxis];
-
-    findVoxelInSlice(
-      {
-        voxelComponents: this.voxelComponents,
-        voxelCount: this.voxelCount.clone(false),
-      },
-      this.getData(),
-      viewType,
-      slice,
-      (voxel, _, index) => {
-        const sliceIndex =
-          voxel[verticalAxis] * sliceWidth + voxel[horizontalAxis];
-        data[index] = sliceData ? sliceData[sliceIndex] : 0;
-      },
-    );
+    setSlice(this, this.getData(), viewType, slice, sliceData);
   }
 
   public toITKImage() {

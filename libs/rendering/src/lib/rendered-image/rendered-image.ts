@@ -14,7 +14,7 @@ import * as THREE from "three";
 
 import { TextureAdapter } from "./texture-adapter";
 import { textureFormatForComponents } from "./utils";
-import { MergeFunction } from "./types";
+import { MergeFunction, OrientedSlice } from "./types";
 import { ImageRenderTarget } from "./image-render-target";
 
 export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
@@ -64,7 +64,8 @@ export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
   private rendererCallbacks: (() => void)[] = [];
 
   /** Whether or not the texture data needs to be pulled from the GPU. */
-  private hasGPUUpdates = false;
+  private gpuUpdates: OrientedSlice[] = [];
+  private hasWholeTextureChanged = false;
 
   private textureData: Uint8Array;
   private isTextureDataDirty = true;
@@ -97,6 +98,10 @@ export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
     this.textureAdapter = new TextureAdapter(this);
   }
 
+  private get hasGPUUpdates(): boolean {
+    return this.hasWholeTextureChanged || this.gpuUpdates.length > 0;
+  }
+
   public getTextureData() {
     if (this.isTextureDataDirty) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -121,6 +126,9 @@ export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
 
   public getData() {
     if (this.isDataDirty) {
+      if (this.hasGPUUpdates) {
+        this.pullDataFromGPU();
+      }
       super.getData().set(this.textureData);
 
       this.isDataDirty = false;
@@ -191,7 +199,6 @@ export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
   }
 
   private onModificationsOnGPU() {
-    this.hasGPUUpdates = true;
     this.isDataDirty = true;
     this.textureAdapter.invalidateCache();
   }
@@ -206,20 +213,31 @@ export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
   private pullDataFromGPU() {
     if (!this.document?.renderers?.length) return;
 
-    this.textureAdapter.readImage(
-      this.document.renderers[0],
-      this.getTexture(0, THREE.NearestFilter),
-      this.textureData,
-    );
-    this.isDataDirty = true;
+    if (this.hasWholeTextureChanged) {
+      this.textureAdapter.readImage(
+        this.document.renderers[0],
+        this.getTexture(0, THREE.NearestFilter),
+        this.textureData,
+      );
+      this.isDataDirty = true;
+    } else {
+      this.textureAdapter.readSlices(
+        this.gpuUpdates,
+        this.document.renderers[0],
+        this.getTexture(0, THREE.NearestFilter),
+        this.textureData,
+      );
+    }
 
-    this.hasGPUUpdates = false;
+    this.hasWholeTextureChanged = false;
+    this.gpuUpdates = [];
   }
 
   /** Can override unsaved changes to the data that are only stored on the GPU. */
   public setData(data: T) {
     super.setData(data);
-    this.hasGPUUpdates = false;
+    this.hasWholeTextureChanged = false;
+    this.gpuUpdates = [];
     this.isTextureDataDirty = true;
     this.isDataDirty = false;
 
@@ -236,7 +254,8 @@ export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
     }
 
     this.textureData.set(data);
-    this.hasGPUUpdates = false;
+    this.hasWholeTextureChanged = false;
+    this.gpuUpdates = [];
     this.isTextureDataDirty = false;
     this.isDataDirty = true;
 
@@ -267,6 +286,7 @@ export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
       threshold,
     );
 
+    this.hasWholeTextureChanged = true;
     this.onModificationsOnGPU();
   }
 
@@ -294,6 +314,7 @@ export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
         mergeFunction,
       );
 
+      this.gpuUpdates.push({ slice, viewType });
       this.onModificationsOnGPU();
 
       return;
@@ -301,6 +322,7 @@ export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
 
     if (sliceData === undefined || sliceData instanceof Uint8Array) {
       super.setSlice(viewType, slice, sliceData);
+      this.isTextureDataDirty = true;
       this.scheduleGPUPush();
     }
   }

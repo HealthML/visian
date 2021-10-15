@@ -123,3 +123,29 @@ export const getEmptySlices = (
   returnedArray[ViewType.Coronal] = coronal;
   return returnedArray;
 };
+
+export const setSlice = (
+  image: Pick<Image, "voxelComponents" | "voxelCount">,
+  data: TypedArray,
+  viewType: ViewType,
+  slice: number,
+  sliceData?: Uint8Array,
+) => {
+  const [horizontalAxis, verticalAxis] = getPlaneAxes(viewType);
+  const sliceWidth = image.voxelCount[horizontalAxis];
+
+  findVoxelInSlice(
+    {
+      voxelComponents: image.voxelComponents,
+      voxelCount: image.voxelCount.clone(false),
+    },
+    data,
+    viewType,
+    slice,
+    (voxel, _, index) => {
+      const sliceIndex =
+        voxel[verticalAxis] * sliceWidth + voxel[horizontalAxis];
+      data[index] = sliceData ? sliceData[sliceIndex] : 0;
+    },
+  );
+};

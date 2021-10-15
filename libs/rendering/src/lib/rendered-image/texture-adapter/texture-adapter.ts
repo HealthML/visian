@@ -1,9 +1,15 @@
-import { getPlaneAxes, Image, ViewType, viewTypes } from "@visian/utils";
+import {
+  getPlaneAxes,
+  Image,
+  setSlice,
+  ViewType,
+  viewTypes,
+} from "@visian/utils";
 import * as THREE from "three";
 
 import { ScreenAlignedQuad } from "../../screen-aligned-quad";
 import { SliceLine } from "./slice-line";
-import { MergeFunction } from "../types";
+import { MergeFunction, OrientedSlice } from "../types";
 import { MergeMaterial, MergeMaterial3D } from "./merge-material";
 import { ReadSliceMaterial } from "./read-slice-material";
 import { textureFormatForComponents } from "../utils";
@@ -82,6 +88,28 @@ export class TextureAdapter {
     }
 
     return buffer;
+  }
+
+  public readSlices(
+    slices: OrientedSlice[],
+    renderer: THREE.WebGLRenderer,
+    source: THREE.Texture,
+    buffer: Uint8Array,
+  ) {
+    const sliceOffset =
+      this.image.voxelCount.x *
+      this.image.voxelCount.y *
+      this.image.voxelComponents;
+
+    slices.forEach(({ slice, viewType }) => {
+      const sliceData = this.readSlice(slice, viewType, renderer, source);
+      if (viewType === ViewType.Transverse) {
+        buffer.set(sliceData, slice * sliceOffset);
+        return;
+      }
+
+      setSlice(this.image, buffer, viewType, slice, sliceData);
+    });
   }
 
   public writeImage(
