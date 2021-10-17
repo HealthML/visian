@@ -335,6 +335,11 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
       zip.setFile(`${`00${index}`.slice(-2)}_${file.name}`, file);
     });
 
+    if (this.context?.getTracker()?.isActive) {
+      const trackingFile = this.context.getTracker()?.toFile();
+      if (trackingFile) zip.setFile(trackingFile.name, trackingFile);
+    }
+
     FileSaver.saveAs(await zip.toBlob(), `${this.title}.zip`);
   };
 

@@ -30,6 +30,11 @@ export const setupRootStore = async () => {
 
   (async () => {
     const url = new URL(window.location.href);
+
+    if (url.searchParams.has("tracking")) {
+      store.initializeTracker();
+    }
+
     try {
       // Load scan based on GET parameter
       // Example: http://localhost:4200/?load=http://data.idoimaging.com/nifti/1010_brain_mr_04.nii.gz

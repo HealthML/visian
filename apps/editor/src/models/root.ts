@@ -11,6 +11,7 @@ import { action, computed, makeObservable, observable } from "mobx";
 import { errorDisplayDuration } from "../constants";
 import { DICOMWebServer } from "./dicomweb-server";
 import { Editor, EditorSnapshot } from "./editor";
+import { Tracker } from "./tracking";
 import { ErrorNotification, ProgressNotification } from "./types";
 import { Task } from "./who";
 
@@ -47,6 +48,8 @@ export class RootStore implements ISerializable<RootSnapshot> {
 
   public currentTask?: Task;
 
+  public tracker?: Tracker;
+
   constructor(protected config: RootStoreConfig = {}) {
     makeObservable<this, "isSaved" | "isSaveUpToDate" | "setIsSaveUpToDate">(
       this,
@@ -82,6 +85,7 @@ export class RootStore implements ISerializable<RootSnapshot> {
       setDirty: action(this.setIsDirty),
       getTheme: () => this.theme,
       getRefs: () => this.refs,
+      getTracker: () => this.tracker,
     });
 
     deepObserve(this.editor, this.persist, {
@@ -137,6 +141,14 @@ export class RootStore implements ISerializable<RootSnapshot> {
   public setProgress(progress?: ProgressNotification) {
     this.progress = progress;
   }
+
+  public initializeTracker() {
+    if (this.tracker) return;
+    this.tracker = new Tracker(this.editor);
+    this.tracker.startSession();
+  }
+
+  // Persistence
 
   /**
    * Indicates if there are changes that have not yet been written by the
