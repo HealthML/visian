@@ -48,7 +48,7 @@ export class Viewport2D
   public zoomLevel!: number;
   public offset = new Vector(2);
 
-  private hoveredScreenCoordinates: Pixel = { x: 0, y: 0 };
+  public hoveredScreenCoordinates: Pixel = { x: 0, y: 0 };
   public hoveredViewType = ViewType.Transverse;
 
   constructor(
