@@ -3,6 +3,7 @@ import {
   coverMixin,
   DropZone,
   useModalRoot,
+  useTranslation,
   zIndex,
 } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
@@ -37,38 +38,62 @@ const StyledOverlay = styled.div`
 export const DropSheet: React.FC<DropSheetProps> = observer(
   ({ onDropCompleted }) => {
     const store = useStore();
+    const { t } = useTranslation();
 
     const [isLoadingFiles, setIsLoadingFiles] = useState(false);
-    const importFiles = useCallback(
-      (_files: FileList, event: React.DragEvent) => {
-        (async () => {
-          event.stopPropagation();
-          setIsLoadingFiles(true);
 
-          try {
-            const { items } = event.dataTransfer;
-            const entries: FileSystemEntry[] = [];
-            for (let fileIndex = 0; fileIndex < items.length; fileIndex++) {
-              const item = items[fileIndex];
-              const entry = item?.webkitGetAsEntry();
-              if (entry) entries.push(entry);
+    const importFilesFromFileSystemEntries = useCallback(
+      async (entries: FileSystemEntry[]) => {
+        try {
+          await store?.editor.activeDocument?.importFileSystemEntries(entries);
+        } catch (error) {
+          const errorMessage = (error as Error).message;
+          if (errorMessage.startsWith("image-mismatch-error")) {
+            if (store?.editor.newDocument()) {
+              await importFilesFromFileSystemEntries(entries);
+            } else {
+              const messageParts = errorMessage.split(":");
+              store?.setError({
+                titleTx: "import-error",
+                description: t(messageParts[0], {
+                  fileName: messageParts[1],
+                }),
+              });
             }
-            await store?.editor.activeDocument?.importFileSystemEntries(
-              entries,
-            );
-          } catch (error) {
+          } else {
             store?.setError({
               titleTx: "import-error",
-              descriptionTx: (error as Error).message,
+              descriptionTx: errorMessage,
             });
           }
-          store?.editor.activeDocument?.finishBatchImport();
-          setIsLoadingFiles(false);
-          store?.editor.activeDocument?.tools.setIsCursorOverFloatingUI(false);
-          onDropCompleted();
-        })();
+        }
       },
-      [onDropCompleted, store],
+      [store, t],
+    );
+
+    const importFiles = useCallback(
+      async (_files: FileList, event: React.DragEvent) => {
+        event.stopPropagation();
+        setIsLoadingFiles(true);
+
+        const { items } = event.dataTransfer;
+        const entries: FileSystemEntry[] = [];
+        for (let fileIndex = 0; fileIndex < items.length; fileIndex++) {
+          const item = items[fileIndex];
+          const entry = item?.webkitGetAsEntry();
+          if (entry) entries.push(entry);
+        }
+        await importFilesFromFileSystemEntries(entries);
+        store?.editor.activeDocument?.finishBatchImport();
+        setIsLoadingFiles(false);
+        store?.editor.activeDocument?.tools.setIsCursorOverFloatingUI(false);
+        onDropCompleted();
+      },
+      [
+        importFilesFromFileSystemEntries,
+        onDropCompleted,
+        store?.editor.activeDocument,
+      ],
     );
 
     const preventOutsideDrop = (event: React.DragEvent<HTMLDivElement>) => {

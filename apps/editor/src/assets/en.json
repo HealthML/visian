@@ -104,6 +104,7 @@
 
   "import-error": "Import Error",
   "image-mismatch-error": "This file does not match the loaded images' size.",
+  "image-mismatch-error-filename": "The file  \"{{fileName}}\" does not match the loaded images' size.",
   "image-loading-error": "Looks like this file is not supported.",
   "remote-file-error": "The specified file could not be loaded.",
 

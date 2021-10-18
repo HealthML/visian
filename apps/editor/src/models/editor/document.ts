@@ -493,6 +493,11 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
       this.baseImageLayer &&
       !this.baseImageLayer.image.voxelCount.equals(imageLayer.image.voxelCount)
     ) {
+      if (imageLayer.image.name) {
+        throw new Error(
+          `image-mismatch-error-filename:${imageLayer.image.name}`,
+        );
+      }
       throw new Error("image-mismatch-error");
     }
     this.addLayer(imageLayer);
