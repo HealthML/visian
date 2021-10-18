@@ -69,6 +69,10 @@
   "discard-dilate-erode": "Discard (Esc)",
   "submit-dilate-erode": "Apply (Enter)",
 
+  "data-model-outdated-alert": "Data model outdated. Reset required.",
+  "discard-current-document-confirmation": "Discard the current document?",
+  "erase-application-data-confirmation": "Erase all application data?",
+
   "layers": "Layers",
   "add-annotation-layer": "Add new annotation",
   "no-layers": "No layers loaded.",

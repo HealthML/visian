@@ -69,6 +69,10 @@
   "discard-dilate-erode": "Verwerfen (Esc)",
   "submit-dilate-erode": "Anwenden (Enter)",
 
+  "data-model-outdated-alert": "Datenmodell veraltet. Zurücksetzen notwendig.",
+  "discard-current-document-confirmation": "Aktuelles Dokument verwerfen?",
+  "erase-application-data-confirmation": "Alle Anwendungsdaten löschen?",
+
   "layers": "Ebenen",
   "add-annotation-layer": "Neue Annotation hinzufügen",
   "no-layers": "Keine Ebenen geladen.",
