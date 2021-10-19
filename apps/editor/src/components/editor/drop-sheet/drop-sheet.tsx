@@ -75,6 +75,7 @@ export const DropSheet: React.FC<DropSheetProps> = observer(
       async (_files: FileList, event: React.DragEvent) => {
         event.stopPropagation();
         setIsLoadingFiles(true);
+        store?.setProgress({ labelTx: "importing" });
 
         const { items } = event.dataTransfer;
         const entries: FileSystemEntry[] = [];
@@ -85,15 +86,12 @@ export const DropSheet: React.FC<DropSheetProps> = observer(
         }
         await importFilesFromFileSystemEntries(entries);
         store?.editor.activeDocument?.finishBatchImport();
+        store?.setProgress();
         setIsLoadingFiles(false);
         store?.editor.activeDocument?.tools.setIsCursorOverFloatingUI(false);
         onDropCompleted();
       },
-      [
-        importFilesFromFileSystemEntries,
-        onDropCompleted,
-        store?.editor.activeDocument,
-      ],
+      [importFilesFromFileSystemEntries, onDropCompleted, store],
     );
 
     const preventOutsideDrop = (event: React.DragEvent<HTMLDivElement>) => {
@@ -111,11 +109,13 @@ export const DropSheet: React.FC<DropSheetProps> = observer(
     const modalRootRef = useModalRoot();
     const node = (
       <StyledOverlay onDrop={handleOutsideDrop} onDragOver={preventOutsideDrop}>
-        <StyledDropZone
-          isAlwaysVisible
-          labelTx={isLoadingFiles ? "loading" : "drop-file"}
-          onFileDrop={importFiles}
-        />
+        {!isLoadingFiles && (
+          <StyledDropZone
+            isAlwaysVisible
+            labelTx="drop-file"
+            onFileDrop={importFiles}
+          />
+        )}
       </StyledOverlay>
     );
 
