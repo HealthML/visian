@@ -7,6 +7,7 @@ import {
   ISliceRenderer,
   IVolumeRenderer,
   Theme,
+  TrackingLog,
   ValueType,
 } from "@visian/ui-shared";
 import { ISerializable, ITKImage, readMedicalImage, Zip } from "@visian/utils";
@@ -36,6 +37,7 @@ import {
   ViewSettings,
   ViewSettingsSnapshot,
 } from "./view-settings";
+import { readTrackingLog, TrackingData } from "../tracking";
 
 const uniqueValuesForAnnotationThreshold = 20;
 
@@ -85,6 +87,8 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
 
   public markers: Markers = new Markers(this);
 
+  public trackingData?: TrackingData;
+
   constructor(
     snapshot: DocumentSnapshot | undefined,
     protected editor: IEditor,
@@ -126,6 +130,7 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
       viewport3D: observable,
       tools: observable,
       showLayerMenu: observable,
+      trackingData: observable,
 
       title: computed,
       activeLayer: computed,
@@ -141,6 +146,7 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
       toggleTypeAndRepositionLayer: action,
       importImage: action,
       importAnnotation: action,
+      importTrackingLog: action,
       setShowLayerMenu: action,
       toggleLayerMenu: action,
       applySnapshot: action,
@@ -445,6 +451,9 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
       const zip = await Zip.fromZipFile(filteredFiles);
       await this.importFiles(await zip.getAllFiles(), filteredFiles.name);
       return;
+    } else if (filteredFiles.name.endsWith(".json")) {
+      await readTrackingLog(filteredFiles, this);
+      return;
     }
 
     const isFirstLayer = !this.layerIds.length;
@@ -514,6 +523,11 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
 
     this.addLayer(annotationLayer);
     this.setActiveLayer(annotationLayer);
+  }
+
+  public importTrackingLog(log: TrackingLog) {
+    if (!this.baseImageLayer) return;
+    this.trackingData = new TrackingData(log, this.baseImageLayer.image);
   }
 
   public async save(): Promise<void> {

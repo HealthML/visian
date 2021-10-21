@@ -1,10 +1,9 @@
-import { IEditor } from "@visian/ui-shared";
+import { IEditor, TrackingLog } from "@visian/ui-shared";
 import { IDisposable, IDisposer } from "@visian/utils";
 import throttle from "lodash.throttle";
 import { reaction } from "mobx";
 
 import { minTrackingEventInterval } from "../../constants";
-import { TrackingLog } from "./types";
 
 export class Tracker implements IDisposable {
   public readonly excludeFromSnapshotTracking = ["editor"];

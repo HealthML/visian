@@ -69,7 +69,9 @@ export class Vector implements GenericVector {
         addScalar: action,
         sub: action,
         subVectors: action,
+        multiply: action,
         multiplyScalar: action,
+        divide: action,
         divideScalar: action,
         negate: action,
         normalize: action,
@@ -221,6 +223,14 @@ export class Vector implements GenericVector {
   public multiplyScalar(scalar: number) {
     for (let i = 0; i < this.size; i++) {
       this.data[i] *= scalar;
+    }
+    return this;
+  }
+
+  public divide(vector: GenericVector) {
+    const size = Math.min(this.size, vector.size);
+    for (let i = 0; i < size; i++) {
+      this.data[i] /= vector.getComponent(i);
     }
     return this;
   }

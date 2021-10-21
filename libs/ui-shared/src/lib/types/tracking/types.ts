@@ -1,5 +1,5 @@
-import type { ViewMode } from "@visian/ui-shared";
 import type { ViewType } from "@visian/utils";
+import { ViewMode } from "../editor";
 
 export type TrackingEventKind =
   | "SESSION_START"
