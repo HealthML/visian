@@ -72,7 +72,7 @@ export class TrackingData implements ITrackingData {
           voxelZ < 0 ||
           voxelZ >= image.voxelCount.z
         ) {
-          throw new Error("Log does not fit the scan.");
+          throw new Error("tracking-data-mismatch-error");
         }
         lastTime = event.at;
 

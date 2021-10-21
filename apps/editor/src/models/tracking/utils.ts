@@ -17,7 +17,11 @@ export const readTrackingLog = (file: File, document: IDocument) =>
         return reject();
       }
 
-      document.importTrackingLog(data as TrackingLog);
+      try {
+        document.importTrackingLog(data as TrackingLog);
+      } catch (error) {
+        reject((error as Error).message);
+      }
 
       resolve();
     };

@@ -452,7 +452,11 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
       await this.importFiles(await zip.getAllFiles(), filteredFiles.name);
       return;
     } else if (filteredFiles.name.endsWith(".json")) {
-      await readTrackingLog(filteredFiles, this);
+      try {
+        await readTrackingLog(filteredFiles, this);
+      } catch (e) {
+        throw new Error(e as string);
+      }
       return;
     }
 
@@ -526,7 +530,9 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
   }
 
   public importTrackingLog(log: TrackingLog) {
-    if (!this.baseImageLayer) return;
+    if (!this.baseImageLayer) {
+      throw new Error("tracking-data-no-image-error");
+    }
     this.trackingData = new TrackingData(log, this.baseImageLayer.image);
   }
 
