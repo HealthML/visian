@@ -6,7 +6,7 @@ import {
   TextField,
   useFilePicker,
 } from "@visian/ui-shared";
-import { readFileFromURL } from "@visian/utils";
+import { ImageMismatchError, readFileFromURL } from "@visian/utils";
 import { observer } from "mobx-react-lite";
 import React, { useCallback, useState } from "react";
 import styled from "styled-components";
@@ -67,32 +67,43 @@ const ImportPopUpContainer = styled(PopUp)`
 export const ImportPopUp = observer<ImportPopUpProps>(({ isOpen, onClose }) => {
   const store = useStore();
 
-  // Local import
-  const openFilePicker = useFilePicker(
-    useCallback(
-      (event: Event) => {
-        const { files } = event.target as HTMLInputElement;
-        if (!files || !files.length) return;
-        store?.setProgress({ labelTx: "importing" });
-        store?.editor.activeDocument
-          ?.importFiles(Array.from(files))
-          .then(() => {
-            store?.editor.activeDocument?.finishBatchImport();
-            onClose?.();
-          })
-          .catch((error) => {
+  const importFilesFromInput = useCallback(
+    (event: Event) => {
+      const { files } = event.target as HTMLInputElement;
+      if (!files || !files.length) return;
+      store?.setProgress({ labelTx: "importing" });
+      store?.editor.activeDocument
+        ?.importFiles(Array.from(files))
+        .then(() => {
+          store?.editor.activeDocument?.finishBatchImport();
+          onClose?.();
+        })
+        .catch((error) => {
+          if (error instanceof ImageMismatchError) {
+            if (store?.editor.newDocument()) {
+              importFilesFromInput(event);
+            } else {
+              store?.setError({
+                titleTx: "import-error",
+                description: error.message,
+              });
+            }
+          } else if (error instanceof Error) {
             store?.setError({
               titleTx: "import-error",
               descriptionTx: error.message,
             });
-          })
-          .finally(() => {
-            store?.setProgress();
-          });
-      },
-      [store, onClose],
-    ),
+          }
+        })
+        .finally(() => {
+          store?.setProgress();
+        });
+    },
+    [store, onClose],
   );
+
+  // Local import
+  const openFilePicker = useFilePicker(importFilesFromInput);
 
   // Load from URL
   const [loadURL, setLoadURL] = useState("");

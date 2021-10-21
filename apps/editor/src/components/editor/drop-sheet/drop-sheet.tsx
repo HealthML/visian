@@ -3,9 +3,9 @@ import {
   coverMixin,
   DropZone,
   useModalRoot,
-  useTranslation,
   zIndex,
 } from "@visian/ui-shared";
+import { ImageMismatchError } from "@visian/utils";
 import { observer } from "mobx-react-lite";
 import React, { useCallback, useState } from "react";
 import ReactDOM from "react-dom";
@@ -38,7 +38,6 @@ const StyledOverlay = styled.div`
 export const DropSheet: React.FC<DropSheetProps> = observer(
   ({ onDropCompleted }) => {
     const store = useStore();
-    const { t } = useTranslation();
 
     const [isLoadingFiles, setIsLoadingFiles] = useState(false);
 
@@ -47,28 +46,24 @@ export const DropSheet: React.FC<DropSheetProps> = observer(
         try {
           await store?.editor.activeDocument?.importFileSystemEntries(entries);
         } catch (error) {
-          const errorMessage = (error as Error).message;
-          if (errorMessage.startsWith("image-mismatch-error")) {
+          if (error instanceof ImageMismatchError) {
             if (store?.editor.newDocument()) {
               await importFilesFromFileSystemEntries(entries);
             } else {
-              const messageParts = errorMessage.split(":");
               store?.setError({
                 titleTx: "import-error",
-                description: t(messageParts[0], {
-                  fileName: messageParts[1],
-                }),
+                description: error.message,
               });
             }
-          } else {
+          } else if (error instanceof Error) {
             store?.setError({
               titleTx: "import-error",
-              descriptionTx: errorMessage,
+              descriptionTx: error.message,
             });
           }
         }
       },
-      [store, t],
+      [store],
     );
 
     const importFiles = useCallback(
