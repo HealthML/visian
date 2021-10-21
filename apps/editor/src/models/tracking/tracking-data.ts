@@ -91,6 +91,7 @@ export class TrackingData implements ITrackingData {
     this.texture = getTextureFromAtlas(
       { voxelCount: this.resolution, voxelComponents: 1 },
       atlas,
+      THREE.NearestFilter,
     );
   }
 }
