@@ -5,7 +5,8 @@ export const readTrackingLog = (file: File, document: IDocument) =>
     const reader = new FileReader();
     reader.readAsText(file);
     reader.onload = () => {
-      if (!reader.result) return reject();
+      // eslint-disable-next-line prefer-promise-reject-errors
+      if (!reader.result) return reject("unsupported-json-error");
 
       const data = JSON.parse(reader.result as string);
 
@@ -14,7 +15,8 @@ export const readTrackingLog = (file: File, document: IDocument) =>
         !data.length ||
         data[0].kind !== "SESSION_START"
       ) {
-        return reject();
+        // eslint-disable-next-line prefer-promise-reject-errors
+        return reject("unsupported-json-error");
       }
 
       try {
