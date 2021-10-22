@@ -43,6 +43,8 @@ export class HeatMapMaterial
     const colorTexture = loader.load(colorScheme, () => {
       editor.sliceRenderer?.lazyRender();
     });
+    colorTexture.minFilter = THREE.NearestFilter;
+    colorTexture.magFilter = THREE.NearestFilter;
     this.uniforms.uColorTexture.value = colorTexture;
 
     this.disposers.push(
