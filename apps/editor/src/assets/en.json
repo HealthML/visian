@@ -110,6 +110,10 @@
   "export-error": "Export Error",
   "file-upload-error": "The file could not be uploaded.",
 
+  "tracking-data-mismatch-error": "The tracking log does not belong to the loaded image.",
+  "tracking-data-no-image-error": "To import a tracking log, an image has to be loaded.",
+  "unsupported-json-error": "The imported JSON file does not contain a tracking log.",
+
   "3d-view": "3D View",
   "3d-view-tooltip": "3D View (4)",
   "xr-view-tooltip": "XR View (5)",

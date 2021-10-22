@@ -3,6 +3,8 @@ export * from "./brush-cursor";
 export * from "./conversion";
 export * from "./crosshair";
 export * from "./crosshair-synching";
+export * from "./heat-map";
+export * from "./heat-map-material";
 export * from "./layering";
 export * from "./outline";
 export * from "./overlay-material";

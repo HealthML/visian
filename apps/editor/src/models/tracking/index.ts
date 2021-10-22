@@ -1,2 +1,3 @@
 export * from "./tracker";
-export * from "./types";
+export * from "./tracking-data";
+export * from "./utils";

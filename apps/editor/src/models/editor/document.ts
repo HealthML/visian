@@ -7,6 +7,7 @@ import {
   ISliceRenderer,
   IVolumeRenderer,
   Theme,
+  TrackingLog,
   ValueType,
 } from "@visian/ui-shared";
 import { ISerializable, ITKImage, readMedicalImage, Zip } from "@visian/utils";
@@ -36,6 +37,7 @@ import {
   ViewSettings,
   ViewSettingsSnapshot,
 } from "./view-settings";
+import { readTrackingLog, TrackingData } from "../tracking";
 
 const uniqueValuesForAnnotationThreshold = 20;
 
@@ -85,6 +87,8 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
 
   public markers: Markers = new Markers(this);
 
+  public trackingData?: TrackingData;
+
   constructor(
     snapshot: DocumentSnapshot | undefined,
     protected editor: IEditor,
@@ -126,6 +130,7 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
       viewport3D: observable,
       tools: observable,
       showLayerMenu: observable,
+      trackingData: observable,
 
       title: computed,
       activeLayer: computed,
@@ -141,6 +146,7 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
       toggleTypeAndRepositionLayer: action,
       importImage: action,
       importAnnotation: action,
+      importTrackingLog: action,
       setShowLayerMenu: action,
       toggleLayerMenu: action,
       applySnapshot: action,
@@ -423,13 +429,26 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
     name?: string,
     isAnnotation?: boolean,
   ): Promise<void> {
-    const filteredFiles = Array.isArray(files)
+    let filteredFiles = Array.isArray(files)
       ? files.filter(
           (file) => !file.name.startsWith(".") && file.name !== "DICOMDIR",
         )
       : files;
 
     if (Array.isArray(filteredFiles)) {
+      if (filteredFiles.some((file) => path.extname(file.name) === ".json")) {
+        const nonJsonFiles = filteredFiles.filter(
+          (file) => path.extname(file.name) !== ".json",
+        );
+        if (nonJsonFiles.length) {
+          await this.importFiles(nonJsonFiles);
+        }
+
+        filteredFiles = filteredFiles.filter(
+          (file) => path.extname(file.name) === ".json",
+        );
+      }
+
       if (
         filteredFiles.some((file) => path.extname(file.name) !== ".dcm") &&
         filteredFiles.some((file) => path.extname(file.name) !== "")
@@ -444,6 +463,9 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
     } else if (filteredFiles.name.endsWith(".zip")) {
       const zip = await Zip.fromZipFile(filteredFiles);
       await this.importFiles(await zip.getAllFiles(), filteredFiles.name);
+      return;
+    } else if (filteredFiles.name.endsWith(".json")) {
+      await readTrackingLog(filteredFiles, this);
       return;
     }
 
@@ -514,6 +536,13 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
 
     this.addLayer(annotationLayer);
     this.setActiveLayer(annotationLayer);
+  }
+
+  public importTrackingLog(log: TrackingLog) {
+    if (!this.baseImageLayer) {
+      throw new Error("tracking-data-no-image-error");
+    }
+    this.trackingData = new TrackingData(log, this.baseImageLayer.image);
   }
 
   public async save(): Promise<void> {

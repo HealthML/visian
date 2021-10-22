@@ -10,6 +10,8 @@ import {
   Crosshair,
   crosshairZ,
   getGeometrySize,
+  HeatMap,
+  heatMapZ,
   Outline,
   OverlayLineMaterial,
   OverlayPointsMaterial,
@@ -31,6 +33,8 @@ export class Slice extends THREE.Group implements IDisposable {
 
   private geometry = new THREE.PlaneGeometry();
   private mesh: THREE.Mesh;
+
+  private heatMap: HeatMap;
 
   private crosshair: Crosshair;
 
@@ -59,6 +63,10 @@ export class Slice extends THREE.Group implements IDisposable {
     );
     this.mesh.position.z = sliceMeshZ;
     this.crosshairShiftGroup.add(this.mesh);
+
+    this.heatMap = new HeatMap(editor, viewType, this.geometry);
+    this.heatMap.position.z = heatMapZ;
+    this.crosshairShiftGroup.add(this.heatMap);
 
     this.overlayLineMaterial = new OverlayLineMaterial(editor);
     this.overlayPointsMaterial = new OverlayPointsMaterial(editor);
@@ -128,6 +136,7 @@ export class Slice extends THREE.Group implements IDisposable {
     this.brushCursor.dispose();
     this.outline.dispose();
     (this.mesh.material as SliceMaterial).dispose();
+    this.heatMap.dispose();
     this.disposers.forEach((disposer) => disposer());
   }
 
