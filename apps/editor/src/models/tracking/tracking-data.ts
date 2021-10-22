@@ -13,6 +13,7 @@ import {
 import * as THREE from "three";
 
 export const HEAT_MAP_GRID_SIZE = 10; // mm
+export const HEAT_MAP_MAX_EVENT_TIME = 1000; // ms
 
 export class TrackingData implements ITrackingData {
   public texture: THREE.Texture;
@@ -50,7 +51,7 @@ export class TrackingData implements ITrackingData {
           lastCoordinates.z * zOffset;
         lastCoordinates = undefined;
 
-        data[index] += time;
+        data[index] += Math.min(time, HEAT_MAP_MAX_EVENT_TIME);
       }
 
       if (event.kind === "POINTER_MOVE") {
