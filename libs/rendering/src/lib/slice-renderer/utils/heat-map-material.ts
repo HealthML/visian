@@ -3,6 +3,7 @@ import { IEditor } from "@visian/ui-shared";
 import { IDisposable, IDisposer, ViewType } from "@visian/utils";
 import { autorun } from "mobx";
 import * as THREE from "three";
+import colorScheme from "./heat-map-color-scheme.png";
 
 export class HeatMapMaterial
   extends THREE.ShaderMaterial
@@ -19,6 +20,8 @@ export class HeatMapMaterial
         uImageVoxelCount: { value: [1, 1, 1] },
         uVoxelCount: { value: [1, 1, 1] },
         uAtlasGrid: { value: [1, 1] },
+        uColorTexture: { value: null },
+        uOpacity: { value: 0.5 },
       },
       side: THREE.DoubleSide,
       transparent: true,
@@ -35,6 +38,12 @@ export class HeatMapMaterial
         this.defines.CORONAL = "";
         break;
     }
+
+    const loader = new THREE.TextureLoader();
+    const colorTexture = loader.load(colorScheme, () => {
+      editor.sliceRenderer?.lazyRender();
+    });
+    this.uniforms.uColorTexture.value = colorTexture;
 
     this.disposers.push(
       autorun(() => {

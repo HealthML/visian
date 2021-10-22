@@ -1,6 +1,8 @@
 varying vec2 vUv;
 
 uniform sampler2D uDataTexture;
+uniform sampler2D uColorTexture;
+uniform float uOpacity;
 
 uniform vec3 uActiveSlices;
 uniform vec3 uImageVoxelCount;
@@ -24,5 +26,7 @@ void main() {
   
   vec4 data = texture2D(uDataTexture, uv);
 
-  gl_FragColor = vec4(1.0, 0.0, 0.0, data.x);
+  vec4 color = texture2D(uColorTexture, vec2(data.x, 0.5));
+
+  gl_FragColor = vec4(color.rgb, color.a * uOpacity);
 }
