@@ -13,7 +13,7 @@ export const errorDisplayDuration = 12000;
 
 export const defaultAnnotationOpacity = 0.5;
 export const defaultAnnotationColor = "Genome Gold";
-export const defaultRegionGrowingPreviewColor = "Sexy Sapphire";
+export const defaultRegionGrowingPreviewColor = "Smart Sapphire";
 export const defaultImageColor = "Mighty Mercury";
 
 /**
