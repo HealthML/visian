@@ -465,11 +465,7 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
       await this.importFiles(await zip.getAllFiles(), filteredFiles.name);
       return;
     } else if (filteredFiles.name.endsWith(".json")) {
-      try {
-        await readTrackingLog(filteredFiles, this);
-      } catch (e) {
-        throw new Error(e as string);
-      }
+      await readTrackingLog(filteredFiles, this);
       return;
     }
 
