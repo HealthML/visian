@@ -241,6 +241,10 @@ export class RootStore implements ISerializable<RootSnapshot> {
     await this.config.storageBackend?.clear();
 
     this.setIsDirty(false, true);
-    window.location.href = window.location.pathname;
+    window.location.href = new URL(window.location.href).searchParams.has(
+      "tracking",
+    )
+      ? `${window.location.pathname}?tracking`
+      : window.location.pathname;
   };
 }
