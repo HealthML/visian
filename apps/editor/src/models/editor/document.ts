@@ -429,13 +429,26 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
     name?: string,
     isAnnotation?: boolean,
   ): Promise<void> {
-    const filteredFiles = Array.isArray(files)
+    let filteredFiles = Array.isArray(files)
       ? files.filter(
           (file) => !file.name.startsWith(".") && file.name !== "DICOMDIR",
         )
       : files;
 
     if (Array.isArray(filteredFiles)) {
+      if (filteredFiles.some((file) => path.extname(file.name) === ".json")) {
+        const nonJsonFiles = filteredFiles.filter(
+          (file) => path.extname(file.name) !== ".json",
+        );
+        if (nonJsonFiles.length) {
+          await this.importFiles(nonJsonFiles);
+        }
+
+        filteredFiles = filteredFiles.filter(
+          (file) => path.extname(file.name) === ".json",
+        );
+      }
+
       if (
         filteredFiles.some((file) => path.extname(file.name) !== ".dcm") &&
         filteredFiles.some((file) => path.extname(file.name) !== "")
