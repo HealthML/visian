@@ -74,6 +74,7 @@ const generateReduceEnhancedLayerStack = (
   layerCount: number,
   outputName = "imageValue",
   volumeCoords = "volumeCoords",
+  activeLayerMergeName = "activeLayerMerge",
   enhancementFunctionName?: string,
 ) => {
   const image = `_image${Math.floor(Math.random() * 1000)}`;
@@ -88,6 +89,13 @@ const generateReduceEnhancedLayerStack = (
   for (let i = layerCount - 1; i >= 0; i--) {
     // back to front blending
     fragment += `${image} = texture(uLayerData${i}, ${volumeCoords});
+    ${image} = mix(
+      ${image}, 
+      uToolPreviewMerge == 1
+        ? max(${image}, ${activeLayerMergeName})
+        : clamp(${image} - ${activeLayerMergeName}, 0.0, 1.0),
+      float(${i} == uActiveLayerIndex && uLayerAnnotationStatuses[${i}])
+    );
     `;
 
     if (i === 0) {
@@ -169,7 +177,7 @@ const generateLayerData = (layerCount: number) => {
 const layerCountRegex = /{{layerCount}}/g;
 const layerDataRegex = /{{layerData}}/g;
 const reduceLayerStackRegex = /{{reduceLayerStack\((\w+),\s*(\w+),\s*(\w+)(,\s*(\w+))?\)}}/g;
-const reduceEnhancedLayerStackRegex = /{{reduceEnhancedLayerStack\((\w+),\s*(\w+)(,\s*(\w+))?\)}}/g;
+const reduceEnhancedLayerStackRegex = /{{reduceEnhancedLayerStack\((\w+),\s*(\w+),\s*(\w+)(,\s*(\w+))?\)}}/g;
 const reduceRawImagesRegex = /{{reduceRawImages\((\w+),\s*(\w+)\)}}/g;
 
 /**
@@ -208,6 +216,7 @@ export const composeLayeredShader = (shader: string, layerCount: number) =>
         _match,
         outputName,
         uvName,
+        activeLayerMergeName,
         _fullEnhancementFunctionName,
         enhancementFunctionName,
       ) =>
@@ -215,6 +224,7 @@ export const composeLayeredShader = (shader: string, layerCount: number) =>
           layerCount,
           outputName,
           uvName,
+          activeLayerMergeName,
           enhancementFunctionName,
         ),
     )

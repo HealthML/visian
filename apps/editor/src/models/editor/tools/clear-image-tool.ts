@@ -6,6 +6,8 @@ import { SelfDeactivatingTool } from "./self-deactivating-tool";
 export class ClearImageTool<
   N extends "clear-image"
 > extends SelfDeactivatingTool<N> {
+  public readonly excludeFromSnapshotTracking = ["toolRenderer", "document"];
+
   constructor(document: IDocument, protected toolRenderer: ToolRenderer) {
     super(
       {

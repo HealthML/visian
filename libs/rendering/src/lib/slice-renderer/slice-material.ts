@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { color, IEditor, IImageLayer } from "@visian/ui-shared";
+import { color, IEditor, IImageLayer, MergeFunction } from "@visian/ui-shared";
 import { IDisposable, IDisposer, ViewType } from "@visian/utils";
 import { autorun, reaction } from "mobx";
 import * as THREE from "three";
@@ -32,6 +32,9 @@ export class SliceMaterial extends THREE.ShaderMaterial implements IDisposable {
         uComponents: { value: 1 },
         uActiveLayerData: { value: null },
         uRegionGrowingThreshold: { value: 0 },
+        uActiveLayerIndex: { value: 0 },
+        uToolPreview: { value: null },
+        uToolPreviewMerge: { value: MergeFunction.Add },
       },
       glslVersion: THREE.GLSL3,
       transparent: true,
@@ -121,9 +124,9 @@ export class SliceMaterial extends THREE.ShaderMaterial implements IDisposable {
         // ];
 
         // TODO: This should be the preview texture like above, once it is updated to 3D.
-
         // eslint-disable-next-line prefer-destructuring
         this.uniforms.uLayerData0.value = layerData[0];
+
         for (let i = 0; i < layerData.length; i++) {
           if (!this.uniforms[`uLayerData${i + 1}`]) {
             this.uniforms[`uLayerData${i + 1}`] = { value: null };
@@ -131,12 +134,29 @@ export class SliceMaterial extends THREE.ShaderMaterial implements IDisposable {
           this.uniforms[`uLayerData${i + 1}`].value = layerData[i];
         }
 
-        const activeLayer = editor.activeDocument?.activeLayer;
+        const activeLayer = editor.activeDocument?.activeLayer as
+          | IImageLayer
+          | undefined;
         this.uniforms.uActiveLayerData.value = activeLayer
-          ? ((activeLayer as IImageLayer).image as RenderedImage).getTexture(
-              canvasIndex,
-            )
+          ? (activeLayer.image as RenderedImage).getTexture(canvasIndex)
           : null;
+
+        this.uniforms.uActiveLayerIndex.value = activeLayer
+          ? layers.indexOf(activeLayer) + 1
+          : 1;
+
+        editor.sliceRenderer?.lazyRender();
+      }),
+      autorun(() => {
+        this.uniforms.uToolPreview.value =
+          editor.activeDocument?.tools.slicePreviewTexture ?? null;
+
+        editor.sliceRenderer?.lazyRender();
+      }),
+      autorun(() => {
+        this.uniforms.uToolPreviewMerge.value =
+          editor.activeDocument?.tools.slicePreviewMergeFunction ??
+          MergeFunction.Add;
 
         editor.sliceRenderer?.lazyRender();
       }),

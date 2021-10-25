@@ -6,10 +6,11 @@ import {
   viewTypes,
 } from "@visian/utils";
 import * as THREE from "three";
+import { MergeFunction } from "@visian/ui-shared";
 
 import { ScreenAlignedQuad } from "../../screen-aligned-quad";
 import { SliceLine } from "./slice-line";
-import { MergeFunction, OrientedSlice } from "../types";
+import { OrientedSlice } from "../types";
 import { MergeMaterial, MergeMaterial3D } from "./merge-material";
 import { ReadSliceMaterial } from "./read-slice-material";
 import { textureFormatForComponents } from "../utils";

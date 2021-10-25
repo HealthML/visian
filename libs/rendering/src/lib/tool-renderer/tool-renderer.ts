@@ -1,13 +1,15 @@
-import { IDocument, IImageLayer } from "@visian/ui-shared";
+import { IDocument, IImageLayer, MergeFunction } from "@visian/ui-shared";
 import { getOrthogonalAxis, getPlaneAxes, IDisposer } from "@visian/utils";
-import { reaction } from "mobx";
+import { action, makeObservable, observable, reaction } from "mobx";
 import * as THREE from "three";
-import { MergeFunction, RenderedImage } from "../rendered-image";
+import { RenderedImage } from "../rendered-image";
 
 import { Circles, ToolCamera, Circle } from "./utils";
 
 export class ToolRenderer {
-  protected isCurrentStrokePositive = true;
+  public readonly excludeFromSnapshotTracking = ["document"];
+
+  public mergeFunction = MergeFunction.Add;
 
   protected circlesToRender: Circle[] = [];
   private shapesToRender: THREE.Mesh[] = [];
@@ -25,6 +27,12 @@ export class ToolRenderer {
   constructor(protected document: IDocument) {
     this.camera = new ToolCamera(document);
     this.circles = new Circles();
+
+    makeObservable(this, {
+      mergeFunction: observable,
+      renderCircles: action,
+      renderShape: action,
+    });
 
     this.disposers.push(
       reaction(
@@ -45,7 +53,11 @@ export class ToolRenderer {
         (renderers) => {
           if (renderers) {
             this.renderTargets = renderers.map(
-              () => new THREE.WebGLRenderTarget(1, 1),
+              () =>
+                new THREE.WebGLRenderTarget(1, 1, {
+                  magFilter: THREE.NearestFilter,
+                  minFilter: THREE.NearestFilter,
+                }),
             );
             this.resizeRenderTargets();
           } else {
@@ -63,6 +75,12 @@ export class ToolRenderer {
   }
 
   public endStroke() {
+    if (this.document.activeLayer) {
+      const annotation = (this.document.activeLayer as IImageLayer)
+        .image as RenderedImage;
+      this.flushToAnnotation(annotation);
+    }
+
     this.document.renderers?.forEach((renderer, rendererIndex) => {
       renderer.setRenderTarget(this.renderTargets[rendererIndex]);
       renderer.clear();
@@ -77,8 +95,6 @@ export class ToolRenderer {
     if ((!circles && !shapes) || !this.document.activeLayer) return;
 
     const { renderers } = this.document;
-    const annotation = (this.document.activeLayer as IImageLayer)
-      .image as RenderedImage;
     if (!renderers) return;
 
     if (circles) {
@@ -108,8 +124,6 @@ export class ToolRenderer {
       renderer.setRenderTarget(null);
     });
 
-    this.flushToAnnotation(annotation);
-
     this.renderCallbacks.forEach((callback) => callback());
     this.renderCallbacks = [];
   }
@@ -121,12 +135,14 @@ export class ToolRenderer {
       viewType,
       this.document.viewSettings.selectedVoxel[orthogonalAxis],
       this.textures,
-      this.isCurrentStrokePositive ? MergeFunction.Add : MergeFunction.Subtract,
+      this.mergeFunction,
     );
   }
 
   public renderCircles(isAdditiveStroke: boolean, ...circles: Circle[]) {
-    this.isCurrentStrokePositive = isAdditiveStroke;
+    this.mergeFunction = isAdditiveStroke
+      ? MergeFunction.Add
+      : MergeFunction.Subtract;
 
     this.circlesToRender.push(...circles);
 
@@ -139,7 +155,9 @@ export class ToolRenderer {
     material: THREE.Material,
     isAdditiveStroke: boolean,
   ) {
-    this.isCurrentStrokePositive = isAdditiveStroke;
+    this.mergeFunction = isAdditiveStroke
+      ? MergeFunction.Add
+      : MergeFunction.Subtract;
 
     this.shapesToRender.push(new THREE.Mesh(geometry, material));
 
@@ -157,7 +175,7 @@ export class ToolRenderer {
     });
   }
 
-  protected get textures() {
+  public get textures() {
     return this.renderTargets.map((renderTarget) => renderTarget.texture);
   }
 

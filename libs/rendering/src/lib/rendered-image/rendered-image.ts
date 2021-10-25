@@ -1,4 +1,4 @@
-import { IDocument } from "@visian/ui-shared";
+import { IDocument, MergeFunction } from "@visian/ui-shared";
 import {
   Image,
   ImageSnapshot,
@@ -14,7 +14,7 @@ import * as THREE from "three";
 
 import { TextureAdapter } from "./texture-adapter";
 import { textureFormatForComponents } from "./utils";
-import { MergeFunction, OrientedSlice } from "./types";
+import { OrientedSlice } from "./types";
 import { ImageRenderTarget } from "./image-render-target";
 
 export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {

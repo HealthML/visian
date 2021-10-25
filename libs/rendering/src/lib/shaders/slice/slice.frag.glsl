@@ -17,6 +17,10 @@ uniform int uComponents;
 uniform sampler3D uActiveLayerData;
 uniform float uRegionGrowingThreshold;
 
+uniform sampler2D uToolPreview;
+uniform int uToolPreviewMerge;
+uniform int uActiveLayerIndex;
+
 out vec4 pc_FragColor;
 
 vec4 applyBrightnessContrast(vec4 image) {
@@ -42,9 +46,11 @@ void main() {
   #ifdef CORONAL
     volumeCoords = vec3(vUv.x, (uActiveSlices.y + 0.5) / uVoxelCount.y, vUv.y);
   #endif // CORONAL
+
+  vec4 toolPreview = texture(uToolPreview, vUv);
   
   vec4 imageValue = vec4(0.0);
-  {{reduceEnhancedLayerStack(imageValue, volumeCoords, applyBrightnessContrast)}}
+  {{reduceEnhancedLayerStack(imageValue, volumeCoords, toolPreview, applyBrightnessContrast)}}
 
   pc_FragColor = imageValue;
 }

@@ -1,7 +1,7 @@
+import { MergeFunction } from "@visian/ui-shared";
 import * as THREE from "three";
 
 import { mergeFragmentShader, mergeVertexShader } from "../../shaders";
-import { MergeFunction } from "../types";
 
 /**
  * This material is used to merge one texture to another.

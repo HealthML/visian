@@ -1,9 +1,14 @@
-import { IBlipRenderer3D, IDocument, IImageLayer } from "@visian/ui-shared";
+import {
+  IBlipRenderer3D,
+  IDocument,
+  IImageLayer,
+  MergeFunction,
+} from "@visian/ui-shared";
 import { IDisposable, IDisposer } from "@visian/utils";
 import { action, makeObservable, observable, reaction } from "mobx";
 import * as THREE from "three";
 
-import { MergeFunction, RenderedImage } from "../rendered-image";
+import { RenderedImage } from "../rendered-image";
 import ScreenAlignedQuad from "../screen-aligned-quad";
 import { Blip3DMaterial, MAX_BLIP_STEPS } from "./utils";
 
