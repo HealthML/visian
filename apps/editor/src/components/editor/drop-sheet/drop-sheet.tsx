@@ -42,11 +42,11 @@ export const DropSheet: React.FC<DropSheetProps> = observer(
     const [isLoadingFiles, setIsLoadingFiles] = useState(false);
 
     const importFilesFromFileSystemEntries = useCallback(
-      async (entries: FileSystemEntry[]) => {
+      async (entries: FileSystemEntry[], shouldRetry = false) => {
         try {
           await store?.editor.activeDocument?.importFileSystemEntries(entries);
         } catch (error) {
-          if (error instanceof ImageMismatchError) {
+          if (error instanceof ImageMismatchError && shouldRetry) {
             if (store?.editor.newDocument()) {
               await importFilesFromFileSystemEntries(entries);
             } else {
@@ -55,12 +55,12 @@ export const DropSheet: React.FC<DropSheetProps> = observer(
                 description: error.message,
               });
             }
-          } else if (error instanceof Error) {
-            store?.setError({
-              titleTx: "import-error",
-              descriptionTx: error.message,
-            });
+            return;
           }
+          store?.setError({
+            titleTx: "import-error",
+            descriptionTx: (error as Error).message,
+          });
         }
       },
       [store],
@@ -79,7 +79,7 @@ export const DropSheet: React.FC<DropSheetProps> = observer(
           const entry = item?.webkitGetAsEntry();
           if (entry) entries.push(entry);
         }
-        await importFilesFromFileSystemEntries(entries);
+        await importFilesFromFileSystemEntries(entries, true);
         store?.editor.activeDocument?.finishBatchImport();
         store?.setProgress();
         setIsLoadingFiles(false);
