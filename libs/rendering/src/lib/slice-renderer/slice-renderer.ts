@@ -56,10 +56,8 @@ export class SliceRenderer implements IDisposable, ISliceRenderer {
       color: 0xffffff,
       transmission: 0.95,
       roughness: 0.95,
-      ior: 1.35,
+      ior: 1.4,
       thickness: 0,
-      // transparent: true,
-      // opacity: 0.99,
     };
 
     const testSheetMaterial = new THREE.MeshPhysicalMaterial(params);
