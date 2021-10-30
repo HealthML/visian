@@ -16,7 +16,7 @@ import { getOrder } from "./utils";
 export class SliceMaterial extends THREE.ShaderMaterial implements IDisposable {
   protected disposers: IDisposer[] = [];
 
-  constructor(editor: IEditor, viewType: ViewType) {
+  constructor(editor: IEditor, viewType: ViewType, backgroundBlend: boolean) {
     super({
       vertexShader: sliceVertexShader,
       fragmentShader: sliceFragmentShader,
@@ -33,8 +33,9 @@ export class SliceMaterial extends THREE.ShaderMaterial implements IDisposable {
         uComponents: { value: 1 },
         uActiveLayerData: { value: null },
         uRegionGrowingThreshold: { value: 0 },
+        uBackgroundColor: { value: new THREE.Color(0x0c0e1b) },
       },
-      transparent: true,
+      transparent: !backgroundBlend,
       side: THREE.DoubleSide,
     });
 
@@ -48,6 +49,10 @@ export class SliceMaterial extends THREE.ShaderMaterial implements IDisposable {
       case ViewType.Coronal:
         this.defines.CORONAL = "";
         break;
+    }
+
+    if (backgroundBlend) {
+      this.defines.BACKGROUND_BLEND = "";
     }
 
     this.disposers.push(
@@ -98,9 +103,13 @@ export class SliceMaterial extends THREE.ShaderMaterial implements IDisposable {
       }),
       autorun(() => {
         const layers = editor.activeDocument?.imageLayers || [];
-        const canvasIndex = getOrder(
-          editor.activeDocument?.viewport2D.mainViewType ?? ViewType.Transverse,
-        ).indexOf(viewType);
+        const canvasIndex =
+          viewType === ViewType.Sagittal
+            ? 0
+            : getOrder(
+                editor.activeDocument?.viewport2D.mainViewType ??
+                  ViewType.Transverse,
+              ).indexOf(viewType);
 
         const layerData = layers.map((layer) =>
           layer ===

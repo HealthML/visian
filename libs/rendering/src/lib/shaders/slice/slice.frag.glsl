@@ -16,6 +16,10 @@ uniform int uComponents;
 uniform sampler2D uActiveLayerData;
 uniform float uRegionGrowingThreshold;
 
+#ifdef BACKGROUND_BLEND
+  uniform vec3 uBackgroundColor;
+#endif
+
 vec4 applyBrightnessContrast(vec4 image) {
   if(uComponents >= 3) {
     return vec4(
@@ -44,6 +48,11 @@ void main() {
   
   vec4 imageValue = vec4(0.0);
   {{reduceEnhancedLayerStack(imageValue, uv, applyBrightnessContrast)}}
+
+  #ifdef BACKGROUND_BLEND
+    imageValue.rgb = mix(uBackgroundColor, imageValue.rgb, imageValue.a);
+    imageValue.a = 1.0;
+  #endif
 
   gl_FragColor = imageValue;
 }

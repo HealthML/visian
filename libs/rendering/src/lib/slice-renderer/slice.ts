@@ -59,7 +59,7 @@ export class Slice extends THREE.Group implements IDisposable {
 
     this.mesh = new THREE.Mesh(
       this.geometry,
-      new SliceMaterial(editor, viewType),
+      new SliceMaterial(editor, viewType, !viewType),
     );
     this.mesh.position.z = sliceMeshZ;
     this.crosshairShiftGroup.add(this.mesh);
@@ -200,6 +200,8 @@ export class Slice extends THREE.Group implements IDisposable {
       this.workingVector.multiplyScalar(
         this.editor.activeDocument.viewport2D.zoomLevel,
       );
+    } else if (this.viewType === ViewType.Sagittal) {
+      this.workingVector.multiplyScalar(0.5);
     }
 
     this.scale.set(this.workingVector.x, this.workingVector.y, 1);
@@ -217,7 +219,11 @@ export class Slice extends THREE.Group implements IDisposable {
       );
     }
 
-    this.position.set(this.workingVector.x, this.workingVector.y, 0);
+    this.position.set(
+      this.workingVector.x,
+      this.workingVector.y,
+      this.position.z,
+    );
 
     this.editor.sliceRenderer?.lazyRender();
   };
