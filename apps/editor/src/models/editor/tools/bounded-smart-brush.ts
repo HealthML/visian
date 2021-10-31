@@ -50,6 +50,7 @@ export class BoundedSmartBrush<
       this.regionGrowingRenderer.doRegionGrowing(
         this.document.tools.smartBrushThreshold,
         this.document.tools.boundedSmartBrushRadius,
+        false,
       );
     });
   }
