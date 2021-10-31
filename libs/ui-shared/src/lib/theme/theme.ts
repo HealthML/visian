@@ -42,7 +42,7 @@ const colorModes = {
     redBorder: "rgba(202,51,69,0.5)",
     blueSheet: "rgba(0,133,255,0.4)",
     blueBorder: "rgba(0,133,255,0.6)",
-    sideViewSheet: "rgba(0, 0, 0, 0.05)",
+    sideViewSheet: "rgba(200,200,200,0.4)",
     sideViewBorder: "rgba(0, 0, 0, 0.3)",
 
     ...dataColors,
