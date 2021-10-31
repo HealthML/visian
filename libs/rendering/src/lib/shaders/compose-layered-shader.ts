@@ -165,11 +165,21 @@ const generateReduceRawImages = (
 };
 
 const generateLayerData = (layerCount: number) => {
-  let fragment = "";
+  let fragment = `#ifdef VOLUMETRIC_IMAGE
+  `;
   for (let i = 0; i < layerCount; i++) {
     fragment += `uniform sampler3D uLayerData${i};
     `;
   }
+  fragment += `#else
+  `;
+  for (let i = 0; i < layerCount; i++) {
+    fragment += `uniform sampler2D uLayerData${i};
+    `;
+  }
+  fragment += `#endif
+  `;
+
   return fragment;
 };
 

@@ -119,11 +119,7 @@ export class ImageLayer
   }
 
   public get is3DLayer() {
-    return (
-      this.image.voxelCount
-        .toArray()
-        .reduce((previous, current) => previous + (current > 1 ? 1 : 0), 0) > 2
-    );
+    return this.image.is3D;
   }
 
   public setImage(value: RenderedImage): void {

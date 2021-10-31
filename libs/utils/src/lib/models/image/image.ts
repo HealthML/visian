@@ -12,7 +12,12 @@ import {
   VoxelTypes,
 } from "../../io";
 import { Vector } from "../vector";
-import { getPlaneAxes, getViewTypeInitials, ViewType } from "../view-types";
+import {
+  getPlaneAxes,
+  getViewTypeInitials,
+  ViewType,
+  viewTypeDepthThreshold,
+} from "../view-types";
 import {
   calculateNewOrientation,
   swapAxesForMetadata,
@@ -173,6 +178,37 @@ export class Image<T extends TypedArray = TypedArray>
       setData: action,
       setSlice: action,
     });
+  }
+
+  public get is3D() {
+    return (
+      this.voxelCount
+        .toArray()
+        .reduce((previous, current) => previous + (current > 1 ? 1 : 0), 0) > 2
+    );
+  }
+
+  public get defaultViewType() {
+    if (!this.is3D) {
+      const bestViewType = [
+        ViewType.Transverse,
+        ViewType.Sagittal,
+        ViewType.Coronal,
+      ].find((viewType) => this.voxelCount.getFromView(viewType) <= 1);
+      return bestViewType ?? ViewType.Transverse;
+    }
+
+    let bestViewType = ViewType.Transverse;
+    let bestViewTypeDepth = this.voxelSpacing.getFromView(bestViewType);
+
+    [ViewType.Sagittal, ViewType.Coronal].forEach((viewType) => {
+      const viewTypeDepth = this.voxelSpacing.getFromView(viewType);
+      if (viewTypeDepth - bestViewTypeDepth > viewTypeDepthThreshold) {
+        bestViewType = viewType;
+        bestViewTypeDepth = viewTypeDepth;
+      }
+    });
+    return bestViewType;
   }
 
   public getData() {

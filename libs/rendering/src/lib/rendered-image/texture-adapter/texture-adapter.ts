@@ -27,6 +27,7 @@ export class TextureAdapter {
   private readSliceMaterial: ReadSliceMaterial;
   private readRenderTarget: THREE.WebGLRenderTarget;
   private lastReadViewType: ViewType;
+  private copyMaterial = new THREE.MeshBasicMaterial();
 
   private sliceCache?: {
     sliceNumber: number;
@@ -34,7 +35,12 @@ export class TextureAdapter {
     sliceData: Uint8Array;
   };
 
-  constructor(private image: Pick<Image, "voxelCount" | "voxelComponents">) {
+  constructor(
+    private image: Pick<
+      Image,
+      "voxelCount" | "voxelComponents" | "is3D" | "defaultViewType"
+    >,
+  ) {
     this.quad = new ScreenAlignedQuad(this.mergeMaterial);
     this.sliceLine = new SliceLine(this.mergeMaterial, image.voxelCount);
 
@@ -77,18 +83,31 @@ export class TextureAdapter {
 
     const buffer = inPlaceBuffer ?? new Uint8Array(bufferLength);
 
-    const sliceOffset =
-      this.image.voxelCount.x *
-      this.image.voxelCount.y *
-      this.image.voxelComponents;
-    for (let slice = 0; slice < this.image.voxelCount.z; slice++) {
-      buffer.set(
-        this.readSlice(slice, ViewType.Transverse, renderer, source),
-        slice * sliceOffset,
-      );
+    if (this.image.is3D) {
+      const sliceOffset =
+        this.image.voxelCount.x *
+        this.image.voxelCount.y *
+        this.image.voxelComponents;
+      for (let slice = 0; slice < this.image.voxelCount.z; slice++) {
+        buffer.set(
+          this.readSlice(slice, ViewType.Transverse, renderer, source),
+          slice * sliceOffset,
+        );
+      }
+
+      return buffer;
     }
 
-    return buffer;
+    const image = this.readSlice(
+      0,
+      this.image.defaultViewType,
+      renderer,
+      source,
+    );
+    if (!inPlaceBuffer) return image;
+
+    inPlaceBuffer.set(image);
+    return inPlaceBuffer;
   }
 
   public readSlices(
@@ -114,12 +133,24 @@ export class TextureAdapter {
   }
 
   public writeImage(
-    sources: THREE.DataTexture3D[],
+    sources: THREE.Texture[],
     targets: THREE.WebGLRenderTarget[],
     renderers: THREE.WebGLRenderer[],
     mergeFunction: MergeFunction,
     threshold?: number,
   ) {
+    if (!this.image.is3D) {
+      return this.writeSlice(
+        0,
+        this.image.defaultViewType,
+        sources,
+        targets,
+        renderers,
+        mergeFunction,
+        threshold,
+      );
+    }
+
     this.quad.material = this.mergeMaterial3D;
     targets.forEach((renderTarget, index) => {
       const renderer = renderers[index];
@@ -144,6 +175,7 @@ export class TextureAdapter {
     targets: THREE.WebGLRenderTarget[],
     renderers: THREE.WebGLRenderer[],
     mergeFunction: MergeFunction,
+    threshold?: number,
   ) {
     const textureData = this.sliceData[viewType];
     if (sliceData) {
@@ -161,9 +193,9 @@ export class TextureAdapter {
     }
 
     this.mergeMaterial.setMergeFunction(mergeFunction);
-    this.mergeMaterial.setThreshold();
+    this.mergeMaterial.setThreshold(threshold);
 
-    if (viewType === ViewType.Transverse) {
+    if (viewType === ViewType.Transverse || !this.image.is3D) {
       this.quad.material = this.mergeMaterial;
       targets.forEach((renderTarget, index) => {
         const renderer = renderers[index];
@@ -173,7 +205,10 @@ export class TextureAdapter {
             : sliceData[index],
         );
         renderer.autoClear = false;
-        renderer.setRenderTarget(renderTarget, sliceNumber);
+        renderer.setRenderTarget(
+          renderTarget,
+          this.image.is3D ? sliceNumber : undefined,
+        );
         this.quad.renderWith(renderer);
         renderer.setRenderTarget(null);
         renderer.autoClear = true;
@@ -216,11 +251,17 @@ export class TextureAdapter {
     source: THREE.Texture,
     target = this.readRenderTarget,
   ) {
-    this.readSliceMaterial.setSliceNumber(sliceNumber);
-    this.readSliceMaterial.setViewType(viewType);
-    this.readSliceMaterial.setDataTexture(source);
+    if (this.image.is3D) {
+      this.readSliceMaterial.setSliceNumber(sliceNumber);
+      this.readSliceMaterial.setViewType(viewType);
+      this.readSliceMaterial.setDataTexture(source);
 
-    this.quad.material = this.readSliceMaterial;
+      this.quad.material = this.readSliceMaterial;
+    } else {
+      this.copyMaterial.map = source;
+
+      this.quad.material = this.copyMaterial;
+    }
 
     renderer.setRenderTarget(target);
     this.quad.renderWith(renderer);

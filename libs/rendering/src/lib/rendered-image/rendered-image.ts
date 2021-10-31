@@ -37,7 +37,7 @@ export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
   public excludeFromSnapshotTracking = ["document"];
 
   /** Used to update the texture from the CPU. */
-  private internalTexture: THREE.DataTexture3D;
+  private internalTexture: THREE.DataTexture3D | THREE.DataTexture;
 
   /**
    * The render targets for the textures for the different WebGL contexts.
@@ -84,16 +84,30 @@ export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
       this.voxelCount.product() * this.voxelComponents,
     );
 
-    this.internalTexture = new THREE.DataTexture3D(
-      this.getTextureData(),
-      this.voxelCount.x,
-      this.voxelCount.y,
-      this.voxelCount.z,
-    );
-    this.internalTexture.magFilter = THREE.NearestFilter;
-    this.internalTexture.format = textureFormatForComponents(
-      this.voxelComponents,
-    );
+    if (this.is3D) {
+      this.internalTexture = new THREE.DataTexture3D(
+        this.getTextureData(),
+        this.voxelCount.x,
+        this.voxelCount.y,
+        this.voxelCount.z,
+      );
+      this.internalTexture.magFilter = THREE.NearestFilter;
+      this.internalTexture.format = textureFormatForComponents(
+        this.voxelComponents,
+      );
+    } else {
+      this.internalTexture = new THREE.DataTexture(
+        this.getTextureData(),
+        this.voxelCount.x,
+        this.voxelCount.y,
+        textureFormatForComponents(this.voxelComponents),
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        THREE.NearestFilter,
+      );
+    }
 
     this.textureAdapter = new TextureAdapter(this);
   }
@@ -146,8 +160,7 @@ export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
       this.hasCPUUpdates[filter][rendererIndex] = true;
     }
 
-    return this.renderTargets[filter][rendererIndex]
-      .texture as THREE.DataTexture3D;
+    return this.renderTargets[filter][rendererIndex].texture;
   }
 
   public waitForRenderers() {
@@ -265,7 +278,7 @@ export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
   }
 
   public writeToTexture(
-    textures: THREE.DataTexture3D[],
+    textures: THREE.Texture[],
     mergeFunction = MergeFunction.Replace,
     threshold?: number,
   ) {

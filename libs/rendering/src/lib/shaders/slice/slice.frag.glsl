@@ -14,7 +14,11 @@ uniform float uContrast;
 uniform float uBrightness;
 uniform int uComponents;
 
-uniform sampler3D uActiveLayerData;
+#ifdef VOLUMETRIC_IMAGE
+  uniform sampler3D uActiveLayerData;
+#else
+  uniform sampler2D uActiveLayerData;
+#endif
 uniform float uRegionGrowingThreshold;
 
 uniform sampler2D uToolPreview;
@@ -36,21 +40,25 @@ vec4 applyBrightnessContrast(vec4 image) {
 }
 
 void main() {
-  vec3 volumeCoords;
-  #ifdef TRANSVERSE
-    volumeCoords = vec3(vUv.x, vUv.y, (uActiveSlices.z + 0.5) / uVoxelCount.z);
-  #endif // TRANSVERSE
-  #ifdef SAGITTAL
-    volumeCoords = vec3((uActiveSlices.x + 0.5) / uVoxelCount.x, vUv.x, vUv.y);
-  #endif // SAGITTAL
-  #ifdef CORONAL
-    volumeCoords = vec3(vUv.x, (uActiveSlices.y + 0.5) / uVoxelCount.y, vUv.y);
-  #endif // CORONAL
+  #ifdef VOLUMETRIC_IMAGE
+    vec3 uv;
+    #ifdef TRANSVERSE
+      uv = vec3(vUv.x, vUv.y, (uActiveSlices.z + 0.5) / uVoxelCount.z);
+    #endif // TRANSVERSE
+    #ifdef SAGITTAL
+      uv = vec3((uActiveSlices.x + 0.5) / uVoxelCount.x, vUv.x, vUv.y);
+    #endif // SAGITTAL
+    #ifdef CORONAL
+      uv = vec3(vUv.x, (uActiveSlices.y + 0.5) / uVoxelCount.y, vUv.y);
+    #endif // CORONAL
+  #else // VOLUMETRIC_IMAGE
+    vec2 uv = vUv;
+  #endif // VOLUMETRIC_IMAGE
 
   vec4 toolPreview = texture(uToolPreview, vUv);
   
   vec4 imageValue = vec4(0.0);
-  {{reduceEnhancedLayerStack(imageValue, volumeCoords, toolPreview, applyBrightnessContrast)}}
+  {{reduceEnhancedLayerStack(imageValue, uv, toolPreview, applyBrightnessContrast)}}
 
   pc_FragColor = imageValue;
 }

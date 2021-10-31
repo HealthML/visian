@@ -36,6 +36,7 @@ export class SliceMaterial extends THREE.ShaderMaterial implements IDisposable {
         uToolPreview: { value: null },
         uToolPreviewMerge: { value: MergeFunction.Add },
       },
+      defines: { VOLUMETRIC_IMAGE: "" },
       glslVersion: THREE.GLSL3,
       transparent: true,
       side: THREE.DoubleSide,
@@ -61,6 +62,18 @@ export class SliceMaterial extends THREE.ShaderMaterial implements IDisposable {
             sliceFragmentShader,
             layerCount,
           );
+          this.needsUpdate = true;
+        },
+        { fireImmediately: true },
+      ),
+      reaction(
+        () => Boolean(editor.activeDocument?.baseImageLayer?.is3DLayer),
+        (is3D: boolean) => {
+          if (is3D) {
+            this.defines.VOLUMETRIC_IMAGE = "";
+          } else {
+            delete this.defines.VOLUMETRIC_IMAGE;
+          }
           this.needsUpdate = true;
         },
         { fireImmediately: true },
