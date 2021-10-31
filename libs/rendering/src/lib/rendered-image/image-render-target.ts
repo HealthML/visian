@@ -1,15 +1,28 @@
-import { Image } from "@visian/utils";
+import { getPlaneAxes, Image } from "@visian/utils";
 import * as THREE from "three";
 
 export class ImageRenderTarget extends THREE.WebGLRenderTarget {
   constructor(
-    image: Pick<Image, "voxelCount" | "voxelComponents" | "is3D">,
+    image: Pick<
+      Image,
+      "voxelCount" | "voxelComponents" | "is3D" | "defaultViewType"
+    >,
     filter: THREE.TextureFilter,
   ) {
-    super(image.voxelCount.x, image.voxelCount.y, {
-      magFilter: filter,
-      minFilter: filter,
-    });
+    let widthAxis = "x";
+    let heightAxis = "y";
+    if (!image.is3D) {
+      [widthAxis, heightAxis] = getPlaneAxes(image.defaultViewType);
+    }
+
+    super(
+      image.voxelCount[widthAxis as "x" | "y" | "z"],
+      image.voxelCount[heightAxis as "x" | "y" | "z"],
+      {
+        magFilter: filter,
+        minFilter: filter,
+      },
+    );
 
     if (image.is3D) {
       this.depth = image.voxelCount.z;

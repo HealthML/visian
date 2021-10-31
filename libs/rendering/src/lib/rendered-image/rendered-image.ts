@@ -1,5 +1,6 @@
 import { IDocument, MergeFunction } from "@visian/ui-shared";
 import {
+  getPlaneAxes,
   Image,
   ImageSnapshot,
   ITKImage,
@@ -96,10 +97,11 @@ export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
         this.voxelComponents,
       );
     } else {
+      const [widthAxis, heightAxis] = getPlaneAxes(this.defaultViewType);
       this.internalTexture = new THREE.DataTexture(
         this.getTextureData(),
-        this.voxelCount.x,
-        this.voxelCount.y,
+        this.voxelCount[widthAxis],
+        this.voxelCount[heightAxis],
         textureFormatForComponents(this.voxelComponents),
         undefined,
         undefined,
