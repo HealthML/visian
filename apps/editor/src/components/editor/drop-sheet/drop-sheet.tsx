@@ -5,11 +5,11 @@ import {
   useModalRoot,
   zIndex,
 } from "@visian/ui-shared";
-import { ImageMismatchError } from "@visian/utils";
 import { observer } from "mobx-react-lite";
 import React, { useCallback, useState } from "react";
 import ReactDOM from "react-dom";
 import styled from "styled-components";
+import { importFilesToDocument } from "../../../import-handling";
 
 import { useStore } from "../../../app/root-store";
 import { DropSheetProps } from "./drop-sheet.props";
@@ -41,52 +41,18 @@ export const DropSheet: React.FC<DropSheetProps> = observer(
 
     const [isLoadingFiles, setIsLoadingFiles] = useState(false);
 
-    const importFilesFromFileSystemEntries = useCallback(
-      async (entries: FileSystemEntry[], shouldRetry = false) => {
-        try {
-          await store?.editor.activeDocument?.importFileSystemEntries(entries);
-        } catch (error) {
-          if (error instanceof ImageMismatchError && shouldRetry) {
-            if (store?.editor.newDocument()) {
-              await importFilesFromFileSystemEntries(entries);
-            } else {
-              store?.setError({
-                titleTx: "import-error",
-                description: error.message,
-              });
-            }
-            return;
-          }
-          store?.setError({
-            titleTx: "import-error",
-            descriptionTx: (error as Error).message,
-          });
-        }
-      },
-      [store],
-    );
-
     const importFiles = useCallback(
       async (_files: FileList, event: React.DragEvent) => {
         event.stopPropagation();
+        if (!store) return;
         setIsLoadingFiles(true);
-        store?.setProgress({ labelTx: "importing" });
-
         const { items } = event.dataTransfer;
-        const entries: FileSystemEntry[] = [];
-        for (let fileIndex = 0; fileIndex < items.length; fileIndex++) {
-          const item = items[fileIndex];
-          const entry = item?.webkitGetAsEntry();
-          if (entry) entries.push(entry);
-        }
-        await importFilesFromFileSystemEntries(entries, true);
-        store?.editor.activeDocument?.finishBatchImport();
-        store?.setProgress();
+        importFilesToDocument(items, store, true);
         setIsLoadingFiles(false);
         store?.editor.activeDocument?.tools.setIsCursorOverFloatingUI(false);
         onDropCompleted();
       },
-      [importFilesFromFileSystemEntries, onDropCompleted, store],
+      [onDropCompleted, store],
     );
 
     const preventOutsideDrop = (event: React.DragEvent<HTMLDivElement>) => {

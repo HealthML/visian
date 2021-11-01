@@ -6,10 +6,11 @@ import {
   TextField,
   useFilePicker,
 } from "@visian/ui-shared";
-import { ImageMismatchError, readFileFromURL } from "@visian/utils";
+import { readFileFromURL } from "@visian/utils";
 import { observer } from "mobx-react-lite";
 import React, { useCallback, useState } from "react";
 import styled from "styled-components";
+import { importFilesToDocument } from "../../../import-handling";
 
 import { useStore } from "../../../app/root-store";
 import { ImportPopUpProps } from "./import-popup.props";
@@ -70,34 +71,8 @@ export const ImportPopUp = observer<ImportPopUpProps>(({ isOpen, onClose }) => {
   const importFilesFromInput = useCallback(
     (event: Event) => {
       const { files } = event.target as HTMLInputElement;
-      if (!files || !files.length) return;
-      store?.setProgress({ labelTx: "importing" });
-      store?.editor.activeDocument
-        ?.importFiles(Array.from(files))
-        .then(() => {
-          store?.editor.activeDocument?.finishBatchImport();
-          onClose?.();
-        })
-        .catch((error) => {
-          if (error instanceof ImageMismatchError) {
-            if (store?.editor.newDocument()) {
-              importFilesFromInput(event);
-            } else {
-              store?.setError({
-                titleTx: "import-error",
-                description: error.message,
-              });
-            }
-          } else if (error instanceof Error) {
-            store?.setError({
-              titleTx: "import-error",
-              descriptionTx: error.message,
-            });
-          }
-        })
-        .finally(() => {
-          store?.setProgress();
-        });
+      if (!files || !store) return;
+      importFilesToDocument(files, store, true, onClose);
     },
     [store, onClose],
   );
