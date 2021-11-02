@@ -69,6 +69,10 @@
   "discard-dilate-erode": "Discard (Esc)",
   "submit-dilate-erode": "Apply (Enter)",
 
+  "data-model-outdated-alert": "Data model outdated. Reset required.",
+  "discard-current-document-confirmation": "Discard the current document?",
+  "erase-application-data-confirmation": "Erase all application data?",
+
   "layers": "Layers",
   "add-annotation-layer": "Add new annotation",
   "no-layers": "No layers loaded.",
@@ -104,6 +108,7 @@
 
   "import-error": "Import Error",
   "image-mismatch-error": "This file does not match the loaded images' size.",
+  "image-mismatch-error-filename": "The file  \"{{fileName}}\" does not match the loaded images' size.",
   "image-loading-error": "Looks like this file is not supported.",
   "remote-file-error": "The specified file could not be loaded.",
 

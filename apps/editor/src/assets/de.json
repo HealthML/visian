@@ -69,6 +69,10 @@
   "discard-dilate-erode": "Verwerfen (Esc)",
   "submit-dilate-erode": "Anwenden (Enter)",
 
+  "data-model-outdated-alert": "Datenmodell veraltet. Zurücksetzen notwendig.",
+  "discard-current-document-confirmation": "Aktuelles Dokument verwerfen?",
+  "erase-application-data-confirmation": "Alle Anwendungsdaten löschen?",
+
   "layers": "Ebenen",
   "add-annotation-layer": "Neue Annotation hinzufügen",
   "no-layers": "Keine Ebenen geladen.",
@@ -104,6 +108,7 @@
 
   "import-error": "Importfehler",
   "image-mismatch-error": "Diese Datei passt nicht auf die schon geladenen.",
+  "image-mismatch-error-filename": "Die Datei \"{{fileName}}\" passt nicht auf die schon geladenen.",
   "image-loading-error": "Diese Datei scheint nicht unterstützt zu sein.",
   "remote-file-error": "Die angegebene Datei konnte nicht geladen werden.",
 

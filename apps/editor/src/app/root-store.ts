@@ -1,4 +1,4 @@
-import { LocalForageBackend } from "@visian/ui-shared";
+import { i18n, LocalForageBackend } from "@visian/ui-shared";
 import {
   createFileFromBase64,
   getWHOTask,
@@ -24,7 +24,7 @@ export const setupRootStore = async () => {
   } catch (err) {
     // TODO: Resolve old data models after breaking changes more gracefully
     // eslint-disable-next-line no-alert
-    window.alert("Data model outdated. Reset required.");
+    window.alert(i18n.t("data-model-outdated-alert"));
     await store.destroy(true);
   }
 

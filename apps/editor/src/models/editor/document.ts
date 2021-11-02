@@ -1,5 +1,6 @@
 import {
   dataColorKeys,
+  i18n,
   IDocument,
   IEditor,
   IImageLayer,
@@ -10,7 +11,13 @@ import {
   TrackingLog,
   ValueType,
 } from "@visian/ui-shared";
-import { ISerializable, ITKImage, readMedicalImage, Zip } from "@visian/utils";
+import {
+  ImageMismatchError,
+  ISerializable,
+  ITKImage,
+  readMedicalImage,
+  Zip,
+} from "@visian/utils";
 import FileSaver from "file-saver";
 import { action, computed, makeObservable, observable, toJS } from "mobx";
 import path from "path";
@@ -515,7 +522,14 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
       this.baseImageLayer &&
       !this.baseImageLayer.image.voxelCount.equals(imageLayer.image.voxelCount)
     ) {
-      throw new Error("image-mismatch-error");
+      if (!imageLayer.image.name) {
+        throw new ImageMismatchError(
+          i18n.t("image-mismatch-error-filename", {
+            fileName: imageLayer.image.name,
+          }),
+        );
+      }
+      throw new ImageMismatchError(i18n.t("image-mismatch-error"));
     }
     this.addLayer(imageLayer);
   }
@@ -531,7 +545,14 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
         annotationLayer.image.voxelCount,
       )
     ) {
-      throw new Error("image-mismatch-error");
+      if (annotationLayer.image.name) {
+        throw new ImageMismatchError(
+          i18n.t("image-mismatch-error-filename", {
+            fileName: annotationLayer.image.name,
+          }),
+        );
+      }
+      throw new ImageMismatchError(i18n.t("image-mismatch-error"));
     }
 
     this.addLayer(annotationLayer);

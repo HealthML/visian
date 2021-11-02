@@ -1,6 +1,7 @@
 import {
   ColorMode,
   getTheme,
+  i18n,
   IDispatch,
   IStorageBackend,
   Tab,
@@ -233,8 +234,12 @@ export class RootStore implements ISerializable<RootSnapshot> {
 
   public destroy = async (forceDestroy?: boolean) => {
     if (!this.shouldPersist && !forceDestroy) return;
-    // eslint-disable-next-line no-alert
-    if (!forceDestroy && !window.confirm("Erase all application data?")) return;
+    if (
+      !forceDestroy &&
+      // eslint-disable-next-line no-alert
+      !window.confirm(i18n.t("erase-application-data-confirmation"))
+    )
+      return;
 
     this.shouldPersist = false;
     localStorage.clear();

@@ -4,6 +4,7 @@ import {
   VolumeRenderer,
 } from "@visian/rendering";
 import {
+  i18n,
   IEditor,
   ISliceRenderer,
   IVolumeRenderer,
@@ -92,8 +93,11 @@ export class Editor
   }
 
   public newDocument = (forceDestroy?: boolean) => {
-    // eslint-disable-next-line no-alert
-    if (forceDestroy || window.confirm("Discard the current document?")) {
+    if (
+      forceDestroy ||
+      // eslint-disable-next-line no-alert
+      window.confirm(i18n.t("discard-current-document-confirmation"))
+    ) {
       this.setActiveDocument();
       return true;
     }
