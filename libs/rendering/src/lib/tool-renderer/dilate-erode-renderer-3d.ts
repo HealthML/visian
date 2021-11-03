@@ -4,6 +4,7 @@ import {
   IImageLayer,
 } from "@visian/ui-shared";
 import { action, makeObservable, observable } from "mobx";
+import * as THREE from "three";
 
 import { RenderedImage } from "../rendered-image";
 import { dilateErodeFragmentShader, dilateErodeVertexShader } from "../shaders";
@@ -20,8 +21,10 @@ export class DilateErodeRenderer3D
     super(document, {
       vertexShader: dilateErodeVertexShader,
       fragmentShader: dilateErodeFragmentShader,
+      uniforms: { uShouldErode: { value: false } },
+      glslVersion: THREE.GLSL3,
     });
-    this.material.uniforms.uShouldErode = { value: this.shouldErode };
+
     this.maxSteps = 1;
 
     makeObservable(this, {
