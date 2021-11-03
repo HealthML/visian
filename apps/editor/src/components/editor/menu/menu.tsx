@@ -52,6 +52,10 @@ export const Menu: React.FC<MenuProps> = observer(
       [store],
     );
 
+    const createNewDocument = useCallback(() => {
+      store?.editor.newDocument();
+    }, [store]);
+
     const sendFeedback = useCallback(() => {
       const mail = document.createElement("a");
       mail.href = `mailto:${feedbackMailAddress}`;
@@ -89,6 +93,8 @@ export const Menu: React.FC<MenuProps> = observer(
           baseZIndex={theme.zIndices.modal + 1}
           onOutsidePress={closeModal}
         >
+          <ButtonParam labelTx="new-document" handlePress={createNewDocument} />
+          <Divider />
           <EnumParam
             labelTx="theme"
             options={themeSwitchOptions}
