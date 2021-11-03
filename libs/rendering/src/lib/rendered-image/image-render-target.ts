@@ -3,10 +3,7 @@ import * as THREE from "three";
 
 export class ImageRenderTarget extends THREE.WebGLRenderTarget {
   constructor(
-    image: Pick<
-      Image,
-      "voxelCount" | "voxelComponents" | "is3D" | "defaultViewType"
-    >,
+    image: Pick<Image, "voxelCount" | "is3D" | "defaultViewType">,
     filter: THREE.TextureFilter,
   ) {
     let widthAxis = "x";

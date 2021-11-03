@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { Texture3DMaterial } from "../../texture-3d-renderer";
 
 export const MAX_BLIP_STEPS = 254;
 
@@ -22,15 +23,13 @@ export class BlipMaterial extends THREE.ShaderMaterial {
   }
 }
 
-export class Blip3DMaterial extends BlipMaterial {
+export class Blip3DMaterial extends Texture3DMaterial {
   constructor(parameters: THREE.ShaderMaterialParameters = {}) {
     super({
       ...parameters,
       uniforms: {
         uSourceTexture: { value: null },
         uTargetTexture: { value: null },
-        uVoxelCount: { value: [1, 1, 1] },
-        uAtlasGrid: { value: [1, 1] },
         uRenderValue: {
           value: MAX_BLIP_STEPS / (MAX_BLIP_STEPS + 1),
         },
@@ -39,12 +38,12 @@ export class Blip3DMaterial extends BlipMaterial {
     });
   }
 
-  public setVoxelCount(voxelCount: number[]) {
-    this.uniforms.uVoxelCount.value = voxelCount;
+  public setSourceTexture(texture: THREE.Texture) {
+    this.uniforms.uSourceTexture.value = texture;
   }
 
-  public setAtlasGrid(atlasGrid: number[]) {
-    this.uniforms.uAtlasGrid.value = atlasGrid;
+  public setTargetTexture(texture: THREE.Texture) {
+    this.uniforms.uTargetTexture.value = texture;
   }
 
   public setStep(step: number) {

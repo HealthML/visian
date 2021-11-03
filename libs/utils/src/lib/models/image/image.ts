@@ -1,5 +1,5 @@
 import { Voxel } from "@visian/utils";
-import { action, makeObservable, observable } from "mobx";
+import { action, computed, makeObservable, observable } from "mobx";
 
 import {
   FloatTypes,
@@ -174,6 +174,8 @@ export class Image<T extends TypedArray = TypedArray>
       // TODO: Make matrix properly observable
       orientation: observable.ref,
       data: observable.ref,
+      is3D: computed,
+      defaultViewType: computed,
       applySnapshot: action,
       setData: action,
       setSlice: action,

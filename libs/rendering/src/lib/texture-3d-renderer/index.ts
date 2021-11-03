@@ -1,2 +1,2 @@
 export * from "./texture-3d-renderer";
-export * from "./types";
+export * from "./texture-3d-material";

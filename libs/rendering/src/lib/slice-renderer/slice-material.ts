@@ -128,17 +128,9 @@ export class SliceMaterial extends THREE.ShaderMaterial implements IDisposable {
               ),
         );
 
-        // this.uniforms.uLayerData.value = [
-        //   // additional layer for 3d region growing
-        //   // editor.activeDocument?.tools.layerPreviewTextures[canvasIndex] ||
-        //   //   null,
-        //   layerData[0],
-        //   ...layerData,
-        // ];
-
-        // TODO: This should be the preview texture like above, once it is updated to 3D.
-        // eslint-disable-next-line prefer-destructuring
-        this.uniforms.uLayerData0.value = layerData[0];
+        this.uniforms.uLayerData0.value =
+          editor.activeDocument?.tools.layerPreviewTextures[canvasIndex] ||
+          null;
 
         for (let i = 0; i < layerData.length; i++) {
           if (!this.uniforms[`uLayerData${i + 1}`]) {

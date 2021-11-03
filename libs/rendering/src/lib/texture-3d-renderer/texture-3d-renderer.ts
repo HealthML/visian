@@ -1,9 +1,10 @@
 import { ScreenAlignedQuad } from "@visian/rendering";
+import { IDisposable } from "@visian/utils";
 import * as THREE from "three";
 
-import { Texture3DMaterial } from "./types";
+import { Texture3DMaterial } from "./texture-3d-material";
 
-export class Texture3DRenderer {
+export class Texture3DRenderer implements IDisposable {
   private target?: THREE.WebGLRenderTarget;
   private material?: Texture3DMaterial;
 
@@ -22,9 +23,7 @@ export class Texture3DRenderer {
   private updateMaterialDimensions() {
     if (this.target && this.material) {
       const { width, height, depth } = this.target;
-      this.material.uniforms.uWidth.value = width;
-      this.material.uniforms.uHeight.value = height;
-      this.material.uniforms.uDepth.value = depth;
+      this.material.setSize({ x: width, y: height, z: depth });
     }
   }
 
@@ -39,12 +38,29 @@ export class Texture3DRenderer {
     this.quad.material = this.material;
 
     renderer.autoClear = autoClear;
-    for (let slice = start; slice < Math.min(end, this.target.depth); slice++) {
-      (this.quad.material as Texture3DMaterial).uniforms.uSlice.value = slice;
+    for (
+      let slice = Math.max(0, start);
+      slice < Math.min(end, this.target.depth);
+      slice++
+    ) {
+      (this.quad.material as Texture3DMaterial).setSlice(slice);
       renderer.setRenderTarget(this.target, slice);
       this.quad.renderWith(renderer);
     }
     renderer.setRenderTarget(null);
     renderer.autoClear = true;
+  }
+
+  public clear(renderer: THREE.WebGLRenderer) {
+    if (!this.target) return;
+    for (let i = 0; i < this.target.depth; i++) {
+      renderer.setRenderTarget(this.target, i);
+      renderer.clear();
+    }
+    renderer.setRenderTarget(null);
+  }
+
+  public dispose() {
+    this.quad.dispose();
   }
 }

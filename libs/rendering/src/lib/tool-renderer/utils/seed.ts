@@ -21,7 +21,10 @@ export class Seed extends THREE.Scene implements IDisposable {
       this.workingVector,
     ]);
 
-    const points = new THREE.Points(this.geometry, new THREE.PointsMaterial());
+    const points = new THREE.Points(
+      this.geometry,
+      new THREE.PointsMaterial({ size: 0.5 }),
+    );
     this.add(points);
   }
 

@@ -119,6 +119,10 @@ export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
   }
 
   public getTextureData() {
+    if (this.hasGPUUpdates) {
+      this.pullDataFromGPU();
+    }
+
     if (this.isTextureDataDirty) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const maxValue = (this.getData() as any).reduce(
