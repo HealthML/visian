@@ -43,7 +43,7 @@ export class BlipRenderer3D implements IBlipRenderer3D, IDisposable {
     protected document: IDocument,
     parameters?: THREE.ShaderMaterialParameters,
   ) {
-    this.material = new Blip3DMaterial(parameters);
+    this.material = new Blip3DMaterial(document, parameters);
     this.texture3DRenderer = new Texture3DRenderer();
 
     this.disposers.push(
