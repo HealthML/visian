@@ -82,6 +82,7 @@ export class RootStore implements ISerializable<RootSnapshot> {
       setDirty: action(this.setIsDirty),
       getTheme: () => this.theme,
       getRefs: () => this.refs,
+      setError: this.setError,
     });
 
     deepObserve(this.editor, this.persist, {
@@ -117,11 +118,12 @@ export class RootStore implements ISerializable<RootSnapshot> {
       localStorage.setItem("theme", theme);
     }
   }
+
   public get theme() {
     return getTheme(this.colorMode);
   }
 
-  public setError(error?: ErrorNotification) {
+  public setError = (error?: ErrorNotification) => {
     this.error = error;
 
     if (this.errorTimeout !== undefined) {
@@ -133,7 +135,8 @@ export class RootStore implements ISerializable<RootSnapshot> {
         this.setError();
       }, errorDisplayDuration) as unknown) as NodeJS.Timer;
     }
-  }
+  };
+
   public setProgress(progress?: ProgressNotification) {
     this.progress = progress;
   }

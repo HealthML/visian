@@ -41,6 +41,7 @@ export class Editor
     THREE.WebGLRenderer,
     THREE.WebGLRenderer,
   ];
+  public isAvailable!: boolean;
 
   public performanceMode: PerformanceMode = "high";
 
@@ -54,6 +55,7 @@ export class Editor
       sliceRenderer: observable,
       volumeRenderer: observable,
       performanceMode: observable,
+      isAvailable: observable,
 
       setActiveDocument: action,
       setPerformanceMode: action,
@@ -66,13 +68,17 @@ export class Editor
         new THREE.WebGLRenderer({ alpha: true }),
         new THREE.WebGLRenderer({ alpha: true }),
       ];
-      this.renderers.forEach((renderer) => {
-        renderer.setClearAlpha(0);
-      });
-      this.sliceRenderer = new SliceRenderer(this);
-      this.volumeRenderer = new VolumeRenderer(this);
+      this.isAvailable = this.renderers[0].capabilities.isWebGL2;
 
-      this.renderers[0].setAnimationLoop(this.animate);
+      if (this.isAvailable) {
+        this.renderers.forEach((renderer) => {
+          renderer.setClearAlpha(0);
+        });
+        this.sliceRenderer = new SliceRenderer(this);
+        this.volumeRenderer = new VolumeRenderer(this);
+
+        this.renderers[0].setAnimationLoop(this.animate);
+      }
     });
 
     this.applySnapshot(snapshot);
@@ -123,13 +129,20 @@ export class Editor
   }
 
   public applySnapshot(snapshot?: Partial<EditorSnapshot>): Promise<void> {
-    this.setActiveDocument(
-      snapshot?.activeDocument
-        ? new Document(snapshot.activeDocument, this, this.context)
-        : undefined,
-      true,
-    );
-    this.setPerformanceMode(snapshot?.performanceMode);
+    if (this.isAvailable) {
+      this.setActiveDocument(
+        snapshot?.activeDocument
+          ? new Document(snapshot.activeDocument, this, this.context)
+          : undefined,
+        true,
+      );
+      this.setPerformanceMode(snapshot?.performanceMode);
+    } else {
+      this.context.setError({
+        titleTx: "browser-error",
+        descriptionTx: "no-webgl-2-error",
+      });
+    }
 
     return Promise.resolve();
   }

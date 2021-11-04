@@ -480,7 +480,30 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
     }
   }
 
+  private checkHardwareRequirements(size: number[]) {
+    const renderer = this.renderers?.[0];
+    if (!renderer) return;
+
+    const is3D =
+      size.reduce((previous, current) => previous + (current > 1 ? 1 : 0), 0) >
+      2;
+
+    let dimensionLimit = Infinity;
+    if (is3D) {
+      const gl = renderer.getContext() as WebGL2RenderingContext;
+      dimensionLimit = gl.getParameter(gl.MAX_3D_TEXTURE_SIZE);
+    } else {
+      dimensionLimit = renderer.capabilities.maxTextureSize ?? 0;
+    }
+
+    if (size.some((value) => value > dimensionLimit)) {
+      throw new Error("image-too-large-error");
+    }
+  }
+
   public async importImage(image: ITKImage) {
+    this.checkHardwareRequirements(image.size);
+
     const imageLayer = ImageLayer.fromITKImage(image, this, {
       color: defaultImageColor,
     });
@@ -494,6 +517,8 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
   }
 
   public async importAnnotation(image: ITKImage) {
+    this.checkHardwareRequirements(image.size);
+
     const annotationLayer = ImageLayer.fromITKImage(image, this, {
       isAnnotation: true,
       color: this.getFirstUnusedColor(),

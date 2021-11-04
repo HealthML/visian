@@ -19,6 +19,8 @@ export interface StoreContext {
   getTheme(): Theme;
 
   getRefs(): { [key: string]: React.RefObject<HTMLElement> };
+
+  setError(error: ErrorNotification): void;
 }
 
 export interface ErrorNotification {
