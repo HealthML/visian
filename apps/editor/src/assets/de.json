@@ -17,6 +17,7 @@
   "return-who": "Zurück zu AI4H",
 
   "menu": "Menü",
+  "new-document": "Neues Dokument",
   "theme": "Farbschema",
   "dark": "Dunkel",
   "light": "Hell",
@@ -28,7 +29,7 @@
 
   "settings": "Einstellungen",
   "voxelData": "Voxel Daten",
-  "performanceMode": "Performance",
+  "performanceMode": "Anzeigequalität",
   "low": "Niedrig",
   "high": "Hoch",
 
@@ -69,6 +70,10 @@
   "discard-dilate-erode": "Verwerfen (Esc)",
   "submit-dilate-erode": "Anwenden (Enter)",
 
+  "data-model-outdated-alert": "Datenmodell veraltet. Zurücksetzen notwendig.",
+  "discard-current-document-confirmation": "Aktuelles Dokument verwerfen?",
+  "erase-application-data-confirmation": "Alle Anwendungsdaten löschen?",
+
   "layers": "Ebenen",
   "add-annotation-layer": "Neue Annotation hinzufügen",
   "no-layers": "Keine Ebenen geladen.",
@@ -107,12 +112,17 @@
 
   "import-error": "Importfehler",
   "image-mismatch-error": "Diese Datei passt nicht auf die schon geladenen.",
+  "image-mismatch-error-filename": "Die Datei \"{{fileName}}\" passt nicht auf die schon geladenen.",
   "image-loading-error": "Diese Datei scheint nicht unterstützt zu sein.",
   "remote-file-error": "Die angegebene Datei konnte nicht geladen werden.",
   "image-too-large-error": "Ihr Browser unterstützt keine so großen Bilder.",
 
   "export-error": "Exportfehler",
   "file-upload-error": "Die Datei konnte nicht hochgeladen werden.",
+
+  "tracking-data-mismatch-error": "Der Tracking-Log passt nicht zum geladenen Bild.",
+  "tracking-data-no-image-error": "Um einen Tracking-Log zu importieren muss bereits ein Bild geladen sein.",
+  "unsupported-json-error": "Die importierte JSON-Datei beinhaltet keinen Tracking-Log.",
 
   "3d-view": "3D Ansicht",
   "3d-view-tooltip": "3D Ansicht (4)",

@@ -1,5 +1,6 @@
 import {
   dataColorKeys,
+  i18n,
   IDocument,
   IEditor,
   IImageLayer,
@@ -7,9 +8,16 @@ import {
   ISliceRenderer,
   IVolumeRenderer,
   Theme,
+  TrackingLog,
   ValueType,
 } from "@visian/ui-shared";
-import { ISerializable, ITKImage, readMedicalImage, Zip } from "@visian/utils";
+import {
+  ImageMismatchError,
+  ISerializable,
+  ITKImage,
+  readMedicalImage,
+  Zip,
+} from "@visian/utils";
 import FileSaver from "file-saver";
 import { action, computed, makeObservable, observable, toJS } from "mobx";
 import path from "path";
@@ -36,6 +44,7 @@ import {
   ViewSettings,
   ViewSettingsSnapshot,
 } from "./view-settings";
+import { readTrackingLog, TrackingData } from "../tracking";
 
 const uniqueValuesForAnnotationThreshold = 20;
 
@@ -85,6 +94,8 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
 
   public markers: Markers = new Markers(this);
 
+  public trackingData?: TrackingData;
+
   constructor(
     snapshot: DocumentSnapshot | undefined,
     protected editor: IEditor,
@@ -126,6 +137,7 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
       viewport3D: observable,
       tools: observable,
       showLayerMenu: observable,
+      trackingData: observable,
 
       title: computed,
       activeLayer: computed,
@@ -141,6 +153,7 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
       toggleTypeAndRepositionLayer: action,
       importImage: action,
       importAnnotation: action,
+      importTrackingLog: action,
       setShowLayerMenu: action,
       toggleLayerMenu: action,
       applySnapshot: action,
@@ -335,6 +348,11 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
       zip.setFile(`${`00${index}`.slice(-2)}_${file.name}`, file);
     });
 
+    if (this.context?.getTracker()?.isActive) {
+      const trackingFile = this.context.getTracker()?.toFile();
+      if (trackingFile) zip.setFile(trackingFile.name, trackingFile);
+    }
+
     FileSaver.saveAs(await zip.toBlob(), `${this.title}.zip`);
   };
 
@@ -418,13 +436,26 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
     name?: string,
     isAnnotation?: boolean,
   ): Promise<void> {
-    const filteredFiles = Array.isArray(files)
+    let filteredFiles = Array.isArray(files)
       ? files.filter(
           (file) => !file.name.startsWith(".") && file.name !== "DICOMDIR",
         )
       : files;
 
     if (Array.isArray(filteredFiles)) {
+      if (filteredFiles.some((file) => path.extname(file.name) === ".json")) {
+        const nonJsonFiles = filteredFiles.filter(
+          (file) => path.extname(file.name) !== ".json",
+        );
+        if (nonJsonFiles.length) {
+          await this.importFiles(nonJsonFiles);
+        }
+
+        filteredFiles = filteredFiles.filter(
+          (file) => path.extname(file.name) === ".json",
+        );
+      }
+
       if (
         filteredFiles.some((file) => path.extname(file.name) !== ".dcm") &&
         filteredFiles.some((file) => path.extname(file.name) !== "")
@@ -439,6 +470,9 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
     } else if (filteredFiles.name.endsWith(".zip")) {
       const zip = await Zip.fromZipFile(filteredFiles);
       await this.importFiles(await zip.getAllFiles(), filteredFiles.name);
+      return;
+    } else if (filteredFiles.name.endsWith(".json")) {
+      await readTrackingLog(filteredFiles, this);
       return;
     }
 
@@ -511,7 +545,14 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
       this.baseImageLayer &&
       !this.baseImageLayer.image.voxelCount.equals(imageLayer.image.voxelCount)
     ) {
-      throw new Error("image-mismatch-error");
+      if (!imageLayer.image.name) {
+        throw new ImageMismatchError(
+          i18n.t("image-mismatch-error-filename", {
+            fileName: imageLayer.image.name,
+          }),
+        );
+      }
+      throw new ImageMismatchError(i18n.t("image-mismatch-error"));
     }
     this.addLayer(imageLayer);
   }
@@ -529,11 +570,25 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
         annotationLayer.image.voxelCount,
       )
     ) {
-      throw new Error("image-mismatch-error");
+      if (annotationLayer.image.name) {
+        throw new ImageMismatchError(
+          i18n.t("image-mismatch-error-filename", {
+            fileName: annotationLayer.image.name,
+          }),
+        );
+      }
+      throw new ImageMismatchError(i18n.t("image-mismatch-error"));
     }
 
     this.addLayer(annotationLayer);
     this.setActiveLayer(annotationLayer);
+  }
+
+  public importTrackingLog(log: TrackingLog) {
+    if (!this.baseImageLayer) {
+      throw new Error("tracking-data-no-image-error");
+    }
+    this.trackingData = new TrackingData(log, this.baseImageLayer.image);
   }
 
   public async save(): Promise<void> {

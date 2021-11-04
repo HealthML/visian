@@ -6,6 +6,8 @@ export { default as dilateErodeFragmentShader } from "./dilate-erode/dilate-erod
 export { default as dilateErodeVertexShader } from "./dilate-erode/dilate-erode.vert.glsl";
 export { default as gradientFragmentShader } from "./gradient/gradient.frag.glsl";
 export { default as gradientVertexShader } from "./gradient/gradient.vert.glsl";
+export { default as heatMapFragmentShader } from "./heat-map/heat-map.frag.glsl";
+export { default as heatMapVertexShader } from "./heat-map/heat-map.vert.glsl";
 export { default as laoFragmentShader } from "./lao/lao.frag.glsl";
 export { default as laoVertexShader } from "./lao/lao.vert.glsl";
 export { default as mergeFragmentShader } from "./merge/merge.frag.glsl";

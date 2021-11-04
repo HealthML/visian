@@ -6,7 +6,7 @@ const dataColors = {
   "Neuronic Neon": "#68D09E",
   "Salient Safran": "#E1FA47",
   "Frontal Flamingo": "#FF6B93",
-  "Sexy Sapphire": "#3269F5",
+  "Smart Sapphire": "#3269F5",
   "Obviously Orange": "#FF6B00",
 
   "Mighty Mercury": "#FFFFFF",

@@ -1,4 +1,5 @@
 import type * as THREE from "three";
+import { ITrackingData, TrackingLog } from "@visian/ui-shared";
 
 import type { ISliceRenderer, IVolumeRenderer } from "../rendering";
 import type { IHistory } from "./history";
@@ -60,6 +61,8 @@ export interface IDocument {
   /** Indicates wether the layer menu is open. */
   showLayerMenu: boolean;
 
+  trackingData?: ITrackingData;
+
   setShowLayerMenu(value?: boolean): void;
   toggleLayerMenu(): void;
 
@@ -79,6 +82,8 @@ export interface IDocument {
   getFirstUnusedColor(): string;
   /** Returns the color to be used for 3D region growing preview. */
   getRegionGrowingPreviewColor(): string;
+
+  importTrackingLog(log: TrackingLog): void;
 
   /** Persists the document immediately. */
   save(): Promise<void>;

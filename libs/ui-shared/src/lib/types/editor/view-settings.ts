@@ -57,6 +57,7 @@ export interface IViewport2D {
    */
   sliceMarkers: MarkerConfig[];
 
+  hoveredScreenCoordinates: Pixel;
   hoveredUV: Pixel;
   hoveredDragPoint: DragPoint;
   hoveredVoxel: Voxel;

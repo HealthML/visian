@@ -1,6 +1,7 @@
 import {
   ColorMode,
   getTheme,
+  i18n,
   IDispatch,
   IStorageBackend,
   Tab,
@@ -11,6 +12,7 @@ import { action, computed, makeObservable, observable } from "mobx";
 import { errorDisplayDuration } from "../constants";
 import { DICOMWebServer } from "./dicomweb-server";
 import { Editor, EditorSnapshot } from "./editor";
+import { Tracker } from "./tracking";
 import { ErrorNotification, ProgressNotification } from "./types";
 import { Task } from "./who";
 
@@ -46,6 +48,8 @@ export class RootStore implements ISerializable<RootSnapshot> {
   public pointerDispatch?: IDispatch;
 
   public currentTask?: Task;
+
+  public tracker?: Tracker;
 
   constructor(protected config: RootStoreConfig = {}) {
     makeObservable<this, "isSaved" | "isSaveUpToDate" | "setIsSaveUpToDate">(
@@ -83,6 +87,7 @@ export class RootStore implements ISerializable<RootSnapshot> {
       getTheme: () => this.theme,
       getRefs: () => this.refs,
       setError: this.setError,
+      getTracker: () => this.tracker,
     });
 
     deepObserve(this.editor, this.persist, {
@@ -140,6 +145,14 @@ export class RootStore implements ISerializable<RootSnapshot> {
   public setProgress(progress?: ProgressNotification) {
     this.progress = progress;
   }
+
+  public initializeTracker() {
+    if (this.tracker) return;
+    this.tracker = new Tracker(this.editor);
+    this.tracker.startSession();
+  }
+
+  // Persistence
 
   /**
    * Indicates if there are changes that have not yet been written by the
@@ -224,14 +237,22 @@ export class RootStore implements ISerializable<RootSnapshot> {
 
   public destroy = async (forceDestroy?: boolean) => {
     if (!this.shouldPersist && !forceDestroy) return;
-    // eslint-disable-next-line no-alert
-    if (!forceDestroy && !window.confirm("Erase all application data?")) return;
+    if (
+      !forceDestroy &&
+      // eslint-disable-next-line no-alert
+      !window.confirm(i18n.t("erase-application-data-confirmation"))
+    )
+      return;
 
     this.shouldPersist = false;
     localStorage.clear();
     await this.config.storageBackend?.clear();
 
     this.setIsDirty(false, true);
-    window.location.href = window.location.pathname;
+    window.location.href = new URL(window.location.href).searchParams.has(
+      "tracking",
+    )
+      ? `${window.location.pathname}?tracking`
+      : window.location.pathname;
   };
 }
