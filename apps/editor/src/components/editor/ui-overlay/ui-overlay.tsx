@@ -30,6 +30,7 @@ import { UndoRedoButtons } from "../undo-redo-buttons";
 import { ViewSettings } from "../view-settings";
 import { UIOverlayProps } from "./ui-overlay.props";
 import { SettingsPopUp } from "../settings-popup";
+import { SplashScreen } from "../splash-screen";
 
 const Container = styled(AbsoluteCover)`
   align-items: stretch;
@@ -224,6 +225,7 @@ export const UIOverlay = observer<UIOverlayProps>(
           <DilateErodeModal />
         </ColumnLeft>
         <ColumnCenter>
+          <SplashScreen />
           <TopConsole />
         </ColumnCenter>
         <ColumnRight>
