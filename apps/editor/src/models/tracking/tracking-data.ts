@@ -23,7 +23,7 @@ export class TrackingData implements ITrackingData {
       .divideScalar(HEAT_MAP_GRID_SIZE)
       .ceil();
 
-    const data = new Array<number>(this.resolution.product() * 4).fill(0);
+    const data = new Array<number>(this.resolution.product()).fill(0);
 
     const yOffset = this.resolution.x;
     const zOffset = yOffset * this.resolution.y;
@@ -42,7 +42,7 @@ export class TrackingData implements ITrackingData {
           lastCoordinates.z * zOffset;
         lastCoordinates = undefined;
 
-        data[index * 4] += Math.min(time, HEAT_MAP_MAX_EVENT_TIME);
+        data[index] += Math.min(time, HEAT_MAP_MAX_EVENT_TIME);
       }
 
       if (event.kind === "POINTER_MOVE") {
@@ -81,6 +81,7 @@ export class TrackingData implements ITrackingData {
       this.resolution.y,
       this.resolution.z,
     );
+    this.texture.format = THREE.RedFormat;
     this.texture.magFilter = THREE.NearestFilter;
     this.texture.minFilter = THREE.NearestFilter;
   }
