@@ -25,6 +25,7 @@ export class HeatMapMaterial
       },
       side: THREE.DoubleSide,
       transparent: true,
+      glslVersion: THREE.GLSL3,
     });
 
     switch (viewType) {
@@ -64,10 +65,6 @@ export class HeatMapMaterial
       }),
       autorun(() => {
         this.uniforms.uVoxelCount.value = editor.activeDocument?.trackingData?.resolution.toArray();
-        editor.sliceRenderer?.lazyRender();
-      }),
-      autorun(() => {
-        this.uniforms.uAtlasGrid.value = editor.activeDocument?.trackingData?.atlasGrid.toArray();
         editor.sliceRenderer?.lazyRender();
       }),
     );

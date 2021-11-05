@@ -1,10 +1,4 @@
-import {
-  convertDataArrayToAtlas,
-  getAtlasGrid,
-  getTextureFromAtlas,
-  Image,
-  Vector,
-} from "@visian/utils";
+import { Image, Vector } from "@visian/utils";
 import {
   TrackingLog,
   PointerTrackingEvent,
@@ -17,7 +11,6 @@ export const HEAT_MAP_MAX_EVENT_TIME = 1000; // ms
 
 export class TrackingData implements ITrackingData {
   public texture: THREE.Texture;
-  public atlasGrid: Vector;
   public resolution: Vector;
 
   constructor(
@@ -30,9 +23,7 @@ export class TrackingData implements ITrackingData {
       .divideScalar(HEAT_MAP_GRID_SIZE)
       .ceil();
 
-    this.atlasGrid = getAtlasGrid(this.resolution).clone(true);
-
-    const data = new Array<number>(this.resolution.product()).fill(0);
+    const data = new Array<number>(this.resolution.product() * 4).fill(0);
 
     const yOffset = this.resolution.x;
     const zOffset = yOffset * this.resolution.y;
@@ -51,7 +42,7 @@ export class TrackingData implements ITrackingData {
           lastCoordinates.z * zOffset;
         lastCoordinates = undefined;
 
-        data[index] += Math.min(time, HEAT_MAP_MAX_EVENT_TIME);
+        data[index * 4] += Math.min(time, HEAT_MAP_MAX_EVENT_TIME);
       }
 
       if (event.kind === "POINTER_MOVE") {
@@ -84,15 +75,13 @@ export class TrackingData implements ITrackingData {
       }
     });
 
-    const atlas = convertDataArrayToAtlas(new Int32Array(data), {
-      voxelComponents: 1,
-      voxelCount: this.resolution,
-    });
-
-    this.texture = getTextureFromAtlas(
-      { voxelCount: this.resolution, voxelComponents: 1 },
-      atlas,
-      THREE.NearestFilter,
+    this.texture = new THREE.DataTexture3D(
+      new Uint8Array(data),
+      this.resolution.x,
+      this.resolution.y,
+      this.resolution.z,
     );
+    this.texture.magFilter = THREE.NearestFilter;
+    this.texture.minFilter = THREE.NearestFilter;
   }
 }
