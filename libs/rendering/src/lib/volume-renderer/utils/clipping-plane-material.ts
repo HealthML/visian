@@ -25,6 +25,7 @@ export class ClippingPlaneMaterial extends THREE.ShaderMaterial {
       },
       transparent: true,
       side: THREE.DoubleSide,
+      glslVersion: THREE.GLSL3,
     });
 
     this.disposers.push(
@@ -46,11 +47,15 @@ export class ClippingPlaneMaterial extends THREE.ShaderMaterial {
           ((layer as IImageLayer).image as RenderedImage).getTexture(0),
         );
 
-        this.uniforms.uLayerData.value = [
-          // additional layer for 3d region growing
-          editor.activeDocument?.tools.layerPreviewTextures[0] || null,
-          ...layerData,
-        ];
+        this.uniforms.uLayerData0.value =
+          editor.activeDocument?.tools.layerPreviewTextures[0] || null;
+
+        for (let i = 0; i < layerData.length; i++) {
+          if (!this.uniforms[`uLayerData${i + 1}`]) {
+            this.uniforms[`uLayerData${i + 1}`] = { value: null };
+          }
+          this.uniforms[`uLayerData${i + 1}`].value = layerData[i];
+        }
       }),
       autorun(() => {
         const layers = editor.activeDocument?.imageLayers || [];

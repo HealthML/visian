@@ -1,15 +1,15 @@
+import { Texture3DRenderer } from "@visian/rendering";
 import { IEditor } from "@visian/ui-shared";
-import { IDisposable, Image } from "@visian/utils";
-import { IReactionDisposer, reaction } from "mobx";
+import { IDisposable, Vector, ViewType } from "@visian/utils";
+import { autorun, IReactionDisposer } from "mobx";
 import * as THREE from "three";
+import { ImageRenderTarget } from "../../../rendered-image";
 
-import { ScreenAlignedQuad } from "../../../screen-aligned-quad";
 import { SharedUniforms } from "../shared-uniforms";
 import { GradientMaterial, GradientMode } from "./gradient-material";
 
 export class GradientComputer implements IDisposable {
   private gradientMaterial: GradientMaterial;
-  private screenAlignedQuad: ScreenAlignedQuad;
 
   private firstDerivativeRenderTarget: THREE.WebGLRenderTarget;
   private secondDerivativeRenderTarget: THREE.WebGLRenderTarget;
@@ -19,6 +19,8 @@ export class GradientComputer implements IDisposable {
   private secondDerivativeDirty = true;
   private outputDerivativeDirty = true;
 
+  private texture3DRenderer = new Texture3DRenderer();
+
   private reactionDisposers: IReactionDisposer[] = [];
 
   constructor(
@@ -26,9 +28,23 @@ export class GradientComputer implements IDisposable {
     private renderer: THREE.WebGLRenderer,
     sharedUniforms: SharedUniforms,
   ) {
-    this.firstDerivativeRenderTarget = new THREE.WebGLRenderTarget(1, 1);
-    this.secondDerivativeRenderTarget = new THREE.WebGLRenderTarget(1, 1);
-    this.outputDerivativeRenderTarget = new THREE.WebGLRenderTarget(1, 1);
+    const imageProperties = {
+      voxelCount: new Vector([1, 1, 1]),
+      is3D: true,
+      defaultViewType: ViewType.Transverse,
+    };
+    this.firstDerivativeRenderTarget = new ImageRenderTarget(
+      imageProperties,
+      THREE.LinearFilter,
+    );
+    this.secondDerivativeRenderTarget = new ImageRenderTarget(
+      imageProperties,
+      THREE.LinearFilter,
+    );
+    this.outputDerivativeRenderTarget = new ImageRenderTarget(
+      imageProperties,
+      THREE.LinearFilter,
+    );
 
     this.gradientMaterial = new GradientMaterial(
       editor,
@@ -36,30 +52,32 @@ export class GradientComputer implements IDisposable {
       this.secondDerivativeRenderTarget.texture,
       sharedUniforms,
     );
-
-    this.screenAlignedQuad = new ScreenAlignedQuad(this.gradientMaterial);
+    this.texture3DRenderer.setMaterial(this.gradientMaterial);
 
     this.reactionDisposers.push(
-      reaction(
-        () => editor.activeDocument?.baseImageLayer?.image,
-        (image?: Image) => {
-          if (!image) return;
+      autorun(() => {
+        const baseImageLayer = this.editor.activeDocument?.baseImageLayer;
+        if (!baseImageLayer?.is3DLayer) return;
 
-          const atlasSize = image.getAtlasSize();
+        const { voxelCount } = baseImageLayer.image;
 
-          this.firstDerivativeRenderTarget.setSize(atlasSize.x, atlasSize.y);
-          this.secondDerivativeRenderTarget.setSize(atlasSize.x, atlasSize.y);
-          this.outputDerivativeRenderTarget.setSize(atlasSize.x, atlasSize.y);
-
-          this.updateAllDerivatives();
-        },
-      ),
+        [
+          this.firstDerivativeRenderTarget,
+          this.secondDerivativeRenderTarget,
+          this.outputDerivativeRenderTarget,
+        ].forEach((renderTarget) => {
+          renderTarget.setSize(voxelCount.x, voxelCount.y, voxelCount.z);
+        });
+      }),
     );
   }
 
   public dispose() {
     this.gradientMaterial.dispose();
     this.reactionDisposers.forEach((disposer) => disposer());
+    this.firstDerivativeRenderTarget.dispose();
+    this.secondDerivativeRenderTarget.dispose();
+    this.outputDerivativeRenderTarget.dispose();
   }
 
   public tick() {
@@ -113,26 +131,24 @@ export class GradientComputer implements IDisposable {
     this.gradientMaterial.uniforms.uInputDimensions.value = 1;
     this.gradientMaterial.setGradientMode(GradientMode.First);
 
-    this.renderer.setRenderTarget(this.firstDerivativeRenderTarget);
+    this.texture3DRenderer.setTarget(this.firstDerivativeRenderTarget);
 
-    this.screenAlignedQuad.renderWith(this.renderer);
-
-    this.renderer.setRenderTarget(null);
+    this.texture3DRenderer.render(this.renderer);
 
     this.firstDerivativeDirty = false;
-    const buffer = new Uint8Array(
-      this.firstDerivativeRenderTarget.width *
-        this.firstDerivativeRenderTarget.height *
-        4,
-    );
-    this.renderer.readRenderTargetPixels(
-      this.firstDerivativeRenderTarget,
-      0,
-      0,
-      this.firstDerivativeRenderTarget.width,
-      this.firstDerivativeRenderTarget.height,
-      buffer,
-    );
+    // const buffer = new Uint8Array(
+    //   this.firstDerivativeRenderTarget.width *
+    //     this.firstDerivativeRenderTarget.height *
+    //     4,
+    // );
+    // this.renderer.readRenderTargetPixels(
+    //   this.firstDerivativeRenderTarget,
+    //   0,
+    //   0,
+    //   this.firstDerivativeRenderTarget.width,
+    //   this.firstDerivativeRenderTarget.height,
+    //   buffer,
+    // );
 
     this.renderer.xr.enabled = isXrEnabled;
 
@@ -161,11 +177,10 @@ export class GradientComputer implements IDisposable {
     this.gradientMaterial.uniforms.uInputDimensions.value = 3;
     this.gradientMaterial.setGradientMode(GradientMode.Second);
 
-    this.renderer.setRenderTarget(this.secondDerivativeRenderTarget);
+    this.texture3DRenderer.setTarget(this.secondDerivativeRenderTarget);
 
-    this.screenAlignedQuad.renderWith(this.renderer);
+    this.texture3DRenderer.render(this.renderer);
 
-    this.renderer.setRenderTarget(null);
     this.renderer.xr.enabled = isXrEnabled;
 
     this.secondDerivativeDirty = false;
@@ -184,9 +199,9 @@ export class GradientComputer implements IDisposable {
     this.gradientMaterial.uniforms.uInputDimensions.value = 1;
     this.gradientMaterial.setGradientMode(GradientMode.Output);
 
-    this.renderer.setRenderTarget(this.outputDerivativeRenderTarget);
+    this.texture3DRenderer.setTarget(this.outputDerivativeRenderTarget);
 
-    this.screenAlignedQuad.renderWith(this.renderer);
+    this.texture3DRenderer.render(this.renderer);
 
     this.renderer.setRenderTarget(null);
     this.renderer.xr.enabled = isXrEnabled;
@@ -201,5 +216,3 @@ export class GradientComputer implements IDisposable {
     this.editor.volumeRenderer?.lazyRender();
   }
 }
-
-export default GradientComputer;

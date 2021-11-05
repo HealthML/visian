@@ -1,11 +1,14 @@
-varying vec3 vVolumeCoords;
+precision highp sampler3D;
 
+in vec3 vVolumeCoords;
+
+#define VOLUMETRIC_IMAGE
 @import ../uniforms/u-common;
-@import ../uniforms/u-atlas-info;
 @import ../uniforms/u-image-info;
 
 uniform int uComponents;
 
+out vec4 pc_FragColor;
 
 void main() {
   vec3 volumeCoords = vVolumeCoords;
@@ -16,11 +19,9 @@ void main() {
   ) {
       discard;
     }
-  
-  @import ../utils/volume-coords-to-uv;
 
   vec4 imageValue = vec4(0.0);
-  {{reduceEnhancedLayerStack(imageValue, uv)}}
+  {{reduceEnhancedLayerStack(imageValue, volumeCoords)}}
 
   if(imageValue.a < 0.01) discard;
 
@@ -32,5 +33,5 @@ void main() {
     imageValue.a = step(0.01, imageValue.a);
   #endif
 
-  gl_FragColor = imageValue;
+  pc_FragColor = imageValue;
 }

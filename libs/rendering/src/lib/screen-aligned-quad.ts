@@ -70,5 +70,3 @@ export class ScreenAlignedQuad extends THREE.Mesh implements IDisposable {
     renderer.compile(this.scene, this.camera);
   }
 }
-
-export default ScreenAlignedQuad;

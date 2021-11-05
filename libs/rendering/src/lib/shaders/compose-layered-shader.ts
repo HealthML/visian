@@ -24,10 +24,10 @@ const generateReduceLayerStack = (
   const activeLayer = `_activeLayer${Math.floor(Math.random() * 1000)}`;
   let fragment = `
   float ${alpha} = 0.0;
-  float ${activeLayer} = texture2D(uActiveLayerData, ${uvName}).r;
+  float ${activeLayer} = texture(uActiveLayerData, ${uvName}).r;
   `;
   for (let i = 0; i < layerCount; i++) {
-    fragment += `${alpha} = texture2D(uLayerData[${i}], ${uvName}).r;
+    fragment += `${alpha} = texture(uLayerData${i}, ${uvName}).r;
     `;
 
     if (i === 0) {
@@ -74,7 +74,7 @@ const generateReduceEnhancedLayerStack = (
   layerCount: number,
   outputName = "imageValue",
   volumeCoords = "volumeCoords",
-  activeLayerMergeName = "activeLayerMerge",
+  activeLayerMergeName?: string,
   enhancementFunctionName?: string,
 ) => {
   const image = `_image${Math.floor(Math.random() * 1000)}`;
@@ -89,14 +89,18 @@ const generateReduceEnhancedLayerStack = (
   for (let i = layerCount - 1; i >= 0; i--) {
     // back to front blending
     fragment += `${image} = texture(uLayerData${i}, ${volumeCoords});
-    ${image} = mix(
-      ${image}, 
-      uToolPreviewMerge == 1
+    `;
+
+    if (activeLayerMergeName) {
+      fragment += `${image} = mix(
+        ${image}, 
+        uToolPreviewMerge == 1
         ? max(${image}, ${activeLayerMergeName})
         : clamp(${image} - ${activeLayerMergeName}, 0.0, 1.0),
-      float(${i} == uActiveLayerIndex && uLayerAnnotationStatuses[${i}])
-    );
-    `;
+        float(${i} == uActiveLayerIndex && uLayerAnnotationStatuses[${i}])
+        );
+        `;
+    }
 
     if (i === 0) {
       // Region growing preview
@@ -157,7 +161,7 @@ const generateReduceRawImages = (
 
   for (let i = 0; i < layerCount; i++) {
     fragment += `
-    ${alpha} = texture2D(uLayerData[${i}], ${uvName}).r;
+    ${alpha} = texture(uLayerData${i}, ${uvName}).r;
     ${outputName} += (1.0 - float(uLayerAnnotationStatuses[${i}])) * (1.0 - ${outputName}.a) * ${alpha} * uLayerOpacities[${i}];`;
   }
 
@@ -187,7 +191,7 @@ const generateLayerData = (layerCount: number) => {
 const layerCountRegex = /{{layerCount}}/g;
 const layerDataRegex = /{{layerData}}/g;
 const reduceLayerStackRegex = /{{reduceLayerStack\((\w+),\s*(\w+),\s*(\w+)(,\s*(\w+))?\)}}/g;
-const reduceEnhancedLayerStackRegex = /{{reduceEnhancedLayerStack\((\w+),\s*(\w+),\s*(\w+)(,\s*(\w+))?\)}}/g;
+const reduceEnhancedLayerStackRegex = /{{reduceEnhancedLayerStack\((\w+),\s*(\w+)(,\s*(\w+),\s*(\w+))?\)}}/g;
 const reduceRawImagesRegex = /{{reduceRawImages\((\w+),\s*(\w+)\)}}/g;
 
 /**
@@ -226,8 +230,8 @@ export const composeLayeredShader = (shader: string, layerCount: number) =>
         _match,
         outputName,
         uvName,
+        _fullOptionalNames,
         activeLayerMergeName,
-        _fullEnhancementFunctionName,
         enhancementFunctionName,
       ) =>
         generateReduceEnhancedLayerStack(

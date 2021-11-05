@@ -5,7 +5,7 @@ import { reaction } from "mobx";
 import { RenderedImage } from "../rendered-image";
 import { ToolRenderer } from "./tool-renderer";
 import { Circle, RegionGrowingMaterial } from "./utils";
-import ScreenAlignedQuad from "../screen-aligned-quad";
+import { ScreenAlignedQuad } from "../screen-aligned-quad";
 
 export class RegionGrowingRenderer extends ToolRenderer {
   protected blipRenderTargets: THREE.WebGLRenderTarget[] = [];

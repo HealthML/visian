@@ -1,6 +1,6 @@
 attribute vec3 volumeCoords;
 
-varying vec3 vVolumeCoords;
+out vec3 vVolumeCoords;
 
 void main() {
   vVolumeCoords = volumeCoords;
