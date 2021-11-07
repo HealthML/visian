@@ -2,6 +2,7 @@ import { withAuthenticator } from "@aws-amplify/ui-react";
 import {
   getTheme,
   GlobalStyles,
+  i18n,
   initI18n,
   ModalRoot,
   ThemeProvider,
@@ -14,6 +15,7 @@ import { QueryClient, QueryClientProvider } from "react-query";
 import { Route, Switch } from "react-router-dom";
 
 import {
+  IS_FLOY_DEMO,
   whoAwsConfigDeployment,
   whoAwsConfigDevelopment,
   whoRequiresAuthentication,
@@ -49,6 +51,8 @@ function App() {
         rootStoreRef.current = rootStore;
         const [dispatch, dispose] = setUpEventHandling(rootStore);
         rootStore.pointerDispatch = dispatch;
+
+        if (IS_FLOY_DEMO) i18n.changeLanguage("de");
 
         setIsReady(true);
         return dispose;

@@ -350,7 +350,7 @@ export const FloyBar = observer(() => {
           <AIContainer>
             <TaskContainer>
               <TaskLabel tx="KI Aufgabe" />
-              <TaskName text="MR Risikoeinschätzung" />
+              <TaskName text="Fokale Läsionen" />
             </TaskContainer>
             <ActionContainer onPointerDown={runInferencing}>
               <ActionName text="Floy KI ausführen" />

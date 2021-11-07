@@ -1,5 +1,5 @@
 import { IDocument } from "@visian/ui-shared";
-import { ISerializable, Zip } from "@visian/utils";
+import { deidentifyDicom, ISerializable, Zip } from "@visian/utils";
 import dicomParser from "dicom-parser";
 import { action, makeObservable, observable } from "mobx";
 import path from "path";
@@ -9,6 +9,44 @@ import { FLOY_INFERENCE_API } from "../../constants";
 export interface FloyDemoSnapshot {
   seriesZip?: File;
 }
+
+const deidentifiedElements = [
+  "00101081",
+  "00403001",
+  "00102160",
+  "00080081",
+  "00081040",
+  "00080080",
+  "00101080",
+  "00081060",
+  "00401010",
+  "00102180",
+  "00081070",
+  "00101001",
+  "00101040",
+  "00100030",
+  "00101005",
+  "00100032",
+  "00104000",
+  "00101060",
+  "00100010",
+  "001021F0",
+  "00380500",
+  "00102154",
+  "00401004",
+  "00400243",
+  "00400242",
+  "00081050",
+  "00081048",
+  "00080090",
+  "00102152",
+  "00401001",
+  "00401005",
+  "00321032",
+  "00400006",
+  "00081010",
+  "00324000",
+].map((element) => `x${element.toLowerCase()}`);
 
 export class FloyDemoController implements ISerializable<FloyDemoSnapshot> {
   public readonly excludeFromSnapshotTracking = ["document"];
@@ -39,16 +77,16 @@ export class FloyDemoController implements ISerializable<FloyDemoSnapshot> {
 
     // Filter series
     try {
-      const parsedDicom = dicomParser.parseDicom(
+      const dataSet = dicomParser.parseDicom(
         new Uint8Array(await firstFile.arrayBuffer()),
       );
       if (
-        parsedDicom.string("x00080060") !== "MR" ||
+        dataSet.string("x00080060") !== "MR" ||
         // parsedDicom.string("x00180015") !== "LSPINE" ||
         // !parsedDicom.string("x0008103e").toLowerCase().includes("t1") ||
         // eslint-disable-next-line max-len
         // Alternative: https://stackoverflow.com/questions/34782409/understanding-dicom-image-attributes-to-get-axial-coronal-sagittal-cuts
-        !parsedDicom.string("x0008103e").toLowerCase().includes("sag")
+        !dataSet.string("x0008103e").toLowerCase().includes("sag")
         // TODO: No contrast agent
       ) {
         return false;
@@ -74,8 +112,13 @@ export class FloyDemoController implements ISerializable<FloyDemoSnapshot> {
 
     // Prepare zip
     const zip = new Zip();
-    (Array.isArray(series) ? series : [series]).forEach((file) => {
-      if (!file) return;
+    (
+      await Promise.all(
+        (Array.isArray(series) ? series : [series])
+          .filter((file) => Boolean(file))
+          .map((file) => deidentifyDicom(file, deidentifiedElements)),
+      )
+    ).forEach((file) => {
       zip.setFile(`${name || firstFile.name}/${file.name}`, file);
     });
 
