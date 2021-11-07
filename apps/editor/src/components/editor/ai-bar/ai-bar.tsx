@@ -343,35 +343,37 @@ export const FloyBar = observer(() => {
     }
   }, [hasShownPrivacy, shouldShowPrivacy, store]);
 
-  return store?.editor.activeDocument?.floyDemo.hasDemoCandidate ? (
+  return (
     <>
-      <AIBarSheet>
-        <AIContainer>
-          <TaskContainer>
-            <TaskLabel tx="KI Aufgabe" />
-            <TaskName text="MR Risikoeinschätzung" />
-          </TaskContainer>
-          <ActionContainer onPointerDown={runInferencing}>
-            <ActionName text="Floy KI ausführen" />
-            <ActionButtonsContainer>
-              <ActionButtons
-                icon="playFilled"
-                tooltip="Floy ausführen"
-                tooltipPosition="right"
-              />
-            </ActionButtonsContainer>
-          </ActionContainer>
-          <AIToolsContainer>
-            <a href={FLOY_HOME}>
-              <AIButton
-                icon="floyAI"
-                tooltip="Zurück zu Floy"
-                tooltipPosition="right"
-              />
-            </a>
-          </AIToolsContainer>
-        </AIContainer>
-      </AIBarSheet>
+      {store?.editor.activeDocument?.floyDemo.hasDemoCandidate && (
+        <AIBarSheet>
+          <AIContainer>
+            <TaskContainer>
+              <TaskLabel tx="KI Aufgabe" />
+              <TaskName text="MR Risikoeinschätzung" />
+            </TaskContainer>
+            <ActionContainer onPointerDown={runInferencing}>
+              <ActionName text="Floy KI ausführen" />
+              <ActionButtonsContainer>
+                <ActionButtons
+                  icon="playFilled"
+                  tooltip="Floy ausführen"
+                  tooltipPosition="right"
+                />
+              </ActionButtonsContainer>
+            </ActionContainer>
+            <AIToolsContainer>
+              <a href={FLOY_HOME}>
+                <AIButton
+                  icon="floyAI"
+                  tooltip="Zurück zu Floy"
+                  tooltipPosition="right"
+                />
+              </a>
+            </AIToolsContainer>
+          </AIContainer>
+        </AIBarSheet>
+      )}
       {shouldShowWelcome && (
         <FloyPopUp
           title="Willkommen!"
@@ -420,5 +422,5 @@ export const FloyBar = observer(() => {
         </FloyPopUp>
       )}
     </>
-  ) : null;
+  );
 });
