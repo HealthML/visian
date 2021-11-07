@@ -13,3 +13,12 @@ export const readFileFromURL = async (url: string, useCORSProxy?: boolean) => {
   const urlElements = url.split("/");
   return new File([blob], urlElements[urlElements.length - 1]);
 };
+
+export const uploadFile = (url: string, file: File) => {
+  const formData = new FormData();
+  formData.append("file", file);
+  return fetch(url, {
+    method: "POST",
+    body: formData,
+  });
+};

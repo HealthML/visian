@@ -4,6 +4,7 @@ import {
   fontSize,
   IImageLayer,
   InvisibleButton,
+  mediaQuery,
   Sheet,
   sheetNoise,
   SquareButton,
@@ -21,12 +22,12 @@ import React, { useCallback } from "react";
 import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
-import { whoHome } from "../../../constants";
+import { FLOY_HOME, whoHome } from "../../../constants";
 import { AnnotationStatus } from "../../../models/who/annotation";
 import { AnnotationData } from "../../../models/who/annotationData";
 
 const AIBarSheet = styled(Sheet)`
-  width: 800px;
+  width: 700px;
   height: 70px;
   padding: 10px 28px;
   display: flex;
@@ -40,11 +41,14 @@ const AIBarSheet = styled(Sheet)`
   left: 50%;
   transform: translateX(-50%);
   z-index: ${zIndex("modal")};
+
+  ${mediaQuery("bigDesktopUp")} {
+    width: 800px;
+  }
 `;
 
 const TaskContainer = styled.div`
   height: 100%;
-  width: 100%;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -69,7 +73,6 @@ const TaskName = styled(Text)`
 const ActionContainer = styled.div`
   height: 100%;
   min-width: 450px;
-  width: 100%;
   display: flex;
   flex-direction: row;
   justify-content: space-between;
@@ -103,7 +106,7 @@ const AIContainer = styled.div`
   width: 100%;
   display: flex;
   flex-direction: row;
-  justify-content: flex-end;
+  justify-content: space-between;
   align-items: center;
 `;
 
@@ -291,6 +294,43 @@ export const AIBar = observer(() => {
             />
           </a>
           <SkipButton icon="arrowRight" />
+        </AIToolsContainer>
+      </AIContainer>
+    </AIBarSheet>
+  ) : null;
+});
+
+export const FloyBar = observer(() => {
+  const store = useStore();
+
+  return store?.editor.activeDocument?.floyDemo.hasDemoCandidate ? (
+    <AIBarSheet>
+      <AIContainer>
+        <TaskContainer>
+          <TaskLabel tx="Task" />
+          <TaskName text="MR Bone Analysis" />
+        </TaskContainer>
+        <ActionContainer>
+          <ActionName text="Run Floy AI" />
+          <ActionButtonsContainer>
+            <ActionButtons
+              icon="arrowRight"
+              tooltipTx="run-floy"
+              tooltipPosition="right"
+              onPointerDown={
+                store.editor.activeDocument.floyDemo.runInferencing
+              }
+            />
+          </ActionButtonsContainer>
+        </ActionContainer>
+        <AIToolsContainer>
+          <a href={FLOY_HOME}>
+            <AIButton
+              icon="whoAI"
+              tooltipTx="return-floy"
+              tooltipPosition="right"
+            />
+          </a>
         </AIToolsContainer>
       </AIContainer>
     </AIBarSheet>

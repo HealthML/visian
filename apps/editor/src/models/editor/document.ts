@@ -28,8 +28,11 @@ import {
   defaultAnnotationColor,
   defaultImageColor,
   defaultRegionGrowingPreviewColor,
+  IS_FLOY_DEMO,
 } from "../../constants";
+import { readTrackingLog, TrackingData } from "../tracking";
 import { StoreContext } from "../types";
+import { FloyDemoController, FloyDemoSnapshot } from "./floy";
 import { History, HistorySnapshot } from "./history";
 import { ImageLayer, Layer, LayerSnapshot } from "./layers";
 import * as layers from "./layers";
@@ -44,7 +47,6 @@ import {
   ViewSettings,
   ViewSettingsSnapshot,
 } from "./view-settings";
-import { readTrackingLog, TrackingData } from "../tracking";
 
 const uniqueValuesForAnnotationThreshold = 20;
 
@@ -70,6 +72,8 @@ export interface DocumentSnapshot {
   viewport3D: Viewport3DSnapshot<TransferFunctionName>;
 
   tools: ToolsSnapshot<ToolName>;
+
+  floyDemo?: FloyDemoSnapshot;
 }
 
 export class Document implements IDocument, ISerializable<DocumentSnapshot> {
@@ -96,6 +100,8 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
 
   public trackingData?: TrackingData;
 
+  public floyDemo = new FloyDemoController(this);
+
   constructor(
     snapshot: DocumentSnapshot | undefined,
     protected editor: IEditor,
@@ -121,6 +127,10 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
     this.viewSettings = new ViewSettings(snapshot?.viewSettings, this);
     this.viewport2D = new Viewport2D(snapshot?.viewport2D, this);
     this.viewport3D = new Viewport3D(snapshot?.viewport3D, this);
+
+    if (snapshot?.floyDemo) {
+      this.floyDemo.applySnapshot(snapshot.floyDemo);
+    }
 
     makeObservable<
       this,
@@ -357,6 +367,10 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
   };
 
   public finishBatchImport() {
+    if (IS_FLOY_DEMO && !this.layers.length) {
+      throw new Error("image-loading-error");
+    }
+
     if (!Object.values(this.layerMap).some((layer) => layer.isAnnotation)) {
       this.addNewAnnotationLayer();
       this.viewport2D.setMainViewType();
@@ -474,6 +488,12 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
     } else if (filteredFiles.name.endsWith(".json")) {
       await readTrackingLog(filteredFiles, this);
       return;
+    }
+
+    if (IS_FLOY_DEMO) {
+      if (!(await this.floyDemo.isDemoCandidate(filteredFiles))) return;
+      await this.floyDemo.setDemoCandidate(filteredFiles, name);
+      // await this.floyDemo.runInferencing();
     }
 
     const isFirstLayer = !this.layerIds.length;
@@ -612,6 +632,7 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
       viewport2D: this.viewport2D.toJSON(),
       viewport3D: this.viewport3D.toJSON(),
       tools: this.tools.toJSON(),
+      floyDemo: this.floyDemo.toJSON(),
     };
   }
 

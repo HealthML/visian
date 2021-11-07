@@ -11,9 +11,9 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
-import { whoHome } from "../../../constants";
+import { IS_FLOY_DEMO, whoHome } from "../../../constants";
 import { DilateErodeModal, SmartBrush3DModal } from "../action-modal";
-import { AIBar } from "../ai-bar";
+import { AIBar, FloyBar } from "../ai-bar";
 import { AxesAndVoxel } from "../axes-and-voxel";
 import { DropSheet } from "../drop-sheet";
 import { ImportPopUp } from "../import-popup";
@@ -21,6 +21,7 @@ import { Layers } from "../layers";
 import { Menu } from "../menu";
 import { ProgressPopUp } from "../progress-popup";
 import { ServerPopUp } from "../server-popup";
+import { SettingsPopUp } from "../settings-popup";
 import { ShortcutPopUp } from "../shortcut-popup";
 import { SideViews } from "../side-views";
 import { SliceSlider } from "../slice-slider";
@@ -29,7 +30,6 @@ import { TopConsole } from "../top-console";
 import { UndoRedoButtons } from "../undo-redo-buttons";
 import { ViewSettings } from "../view-settings";
 import { UIOverlayProps } from "./ui-overlay.props";
-import { SettingsPopUp } from "../settings-popup";
 
 const Container = styled(AbsoluteCover)`
   align-items: stretch;
@@ -248,6 +248,7 @@ export const UIOverlay = observer<UIOverlayProps>(
         </ColumnRight>
 
         {isFromWHO() && <AIBar />}
+        {IS_FLOY_DEMO && <FloyBar />}
 
         <SettingsPopUp
           isOpen={isSettingsPopUpOpen}

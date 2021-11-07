@@ -1,4 +1,6 @@
 import { ImageMismatchError } from "@visian/utils";
+
+import { IS_FLOY_DEMO } from "../constants";
 import { RootStore } from "../models";
 
 const importFilesByType = async (
@@ -31,6 +33,9 @@ const handleImportWithErrors = async (
     files instanceof DataTransferItemList
       ? getFileSystemEntriesFromDataTransfer(files)
       : files;
+
+  if (IS_FLOY_DEMO) store.editor.newDocument(true);
+
   try {
     await importFilesByType(filesForImport, store);
   } catch (error) {
@@ -51,7 +56,14 @@ const handleImportWithErrors = async (
     }
   }
 
-  store.editor.activeDocument?.finishBatchImport();
+  try {
+    store.editor.activeDocument?.finishBatchImport();
+  } catch (error) {
+    store.setError({
+      titleTx: "import-error",
+      descriptionTx: (error as Error).message,
+    });
+  }
 };
 
 export const importFilesToDocument = (

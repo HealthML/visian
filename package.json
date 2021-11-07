@@ -55,6 +55,7 @@
     "connect-typeorm": "^1.1.4",
     "core-js": "^3.6.5",
     "css-element-queries": "^1.2.3",
+    "dicom-parser": "^1.8.11",
     "document-register-element": "1.13.1",
     "express-session": "^1.17.1",
     "file-saver": "^2.0.5",

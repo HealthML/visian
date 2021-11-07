@@ -139,9 +139,9 @@ export class RootStore implements ISerializable<RootSnapshot> {
       }, errorDisplayDuration) as unknown) as NodeJS.Timer;
     }
   }
-  public setProgress(progress?: ProgressNotification) {
+  public setProgress = (progress?: ProgressNotification) => {
     this.progress = progress;
-  }
+  };
 
   public initializeTracker() {
     if (this.tracker) return;
