@@ -5,6 +5,14 @@
   "drop-file": "Legen Sie Scan oder Annotation hier ab",
   "upload-file": "Datei hochladen",
 
+  "upload-pc": "Datei hochladen",
+  "drop-files-or": "Dateien ablegen oder",
+  "browse": "Durchsuchen",
+  "load-url": "Laden von URL",
+  "load": "Laden",
+  "connect-server": "Mit Server verbinden",
+  "connect": "Verbinden",
+
   "untitled-document": "Unbenanntes Dokument",
   "start": "Starten Sie, in dem Sie einen Scan hier ablegen.",
   "unsaved-changes": "Ungespeicherte Änderungen.",

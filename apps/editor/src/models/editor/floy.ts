@@ -4,7 +4,7 @@ import dicomParser from "dicom-parser";
 import { action, makeObservable, observable } from "mobx";
 import path from "path";
 
-import { FLOY_INFERENCE_API } from "../../constants";
+import { FLOY_INFERENCE_ENDPOINTS } from "../../constants";
 
 export interface FloyDemoSnapshot {
   seriesZip?: File;
@@ -52,12 +52,18 @@ export class FloyDemoController implements ISerializable<FloyDemoSnapshot> {
   public readonly excludeFromSnapshotTracking = ["document"];
 
   protected seriesZip?: File;
+  public inferenceResults?: { [key: string]: unknown }[];
 
   constructor(protected document: IDocument) {
-    makeObservable<this, "seriesZip" | "setSeriesZip">(this, {
-      seriesZip: observable,
-      setSeriesZip: action,
-    });
+    makeObservable<this, "seriesZip" | "setSeriesZip" | "setInferenceResults">(
+      this,
+      {
+        seriesZip: observable,
+        inferenceResults: observable,
+        setSeriesZip: action,
+        setInferenceResults: action,
+      },
+    );
   }
 
   public get hasDemoCandidate(): boolean {
@@ -130,15 +136,28 @@ export class FloyDemoController implements ISerializable<FloyDemoSnapshot> {
     // FileSaver.saveAs(await zip.toBlob(), `${name || firstFile.name}.zip`);
   }
 
+  protected setInferenceResults(value?: { [key: string]: unknown }[]) {
+    this.inferenceResults = value;
+  }
+
   public runInferencing = async (): Promise<void> => {
     if (!this.seriesZip) return;
 
     const formData = new FormData();
     formData.append("seriesZIP", this.seriesZip);
-    await fetch(FLOY_INFERENCE_API, {
-      method: "POST",
-      body: formData,
-    });
+
+    this.setInferenceResults(
+      await Promise.all(
+        FLOY_INFERENCE_ENDPOINTS.map(async (endpoint) =>
+          (
+            await fetch(endpoint, {
+              method: "POST",
+              body: formData,
+            })
+          ).json(),
+        ),
+      ),
+    );
   };
 
   public toJSON(): FloyDemoSnapshot {

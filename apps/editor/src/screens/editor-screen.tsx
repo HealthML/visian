@@ -3,11 +3,15 @@ import { observer } from "mobx-react-lite";
 import React from "react";
 
 import { MainView, UIOverlay } from "../components/editor";
+import { IS_FLOY_DEMO } from "../constants";
 
 export const EditorScreen: React.FC = observer(() => {
   const [isDraggedOver, { onDrop, ...dragListeners }] = useIsDraggedOver();
   return (
-    <Screen {...dragListeners} title="VISIAN Editor">
+    <Screen
+      {...dragListeners}
+      title={IS_FLOY_DEMO ? "Floy Demo" : "VISIAN Editor"}
+    >
       <AbsoluteCover>
         <MainView />
       </AbsoluteCover>

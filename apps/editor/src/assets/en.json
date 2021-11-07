@@ -5,6 +5,14 @@
   "drop-file": "Drop your scan or annotation here",
   "upload-file": "Upload file",
 
+  "upload-pc": "Upload from Computer",
+  "drop-files-or": "Drop files or",
+  "browse": "Browse",
+  "load-url": "Load from URL",
+  "load": "Load",
+  "connect-server": "Connect to Server",
+  "connect": "Connect",
+
   "untitled-document": "Untitled Document",
   "start": "Start by dragging in a scan.",
   "unsaved-changes": "Unsaved changes.",

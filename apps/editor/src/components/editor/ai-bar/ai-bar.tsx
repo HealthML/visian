@@ -89,7 +89,6 @@ const ActionName = styled(Text)`
   font-size: 18px;
   line-height: 18px;
   margin-right: 10px;
-  padding-top: 2px;
   white-space: wrap;
 `;
 
@@ -334,9 +333,17 @@ export const FloyBar = observer(() => {
     if (hasShownPrivacy || shouldShowPrivacy) {
       setShouldShowPrivacy(false);
       store?.setProgress({ label: "Risikoeinschätzung läuft" });
-      store?.editor?.activeDocument?.floyDemo.runInferencing().then(() => {
-        store?.setProgress();
-      });
+      store?.editor.activeDocument?.floyDemo
+        .runInferencing()
+        .catch(() => {
+          store?.setError({
+            title: "KI Fehler",
+            description: "KI Analyse fehlgeschlagen",
+          });
+        })
+        .then(() => {
+          store?.setProgress();
+        });
     } else {
       setShouldShowPrivacy(true);
       setHasShownPrivacy(true);
@@ -353,7 +360,20 @@ export const FloyBar = observer(() => {
               <TaskName text="Fokale Läsionen" />
             </TaskContainer>
             <ActionContainer onPointerDown={runInferencing}>
-              <ActionName text="Floy KI ausführen" />
+              <ActionName
+                text={
+                  store.editor.activeDocument.floyDemo.inferenceResults
+                    ? `Impact Score: ${
+                        Math.round(
+                          parseFloat(
+                            store.editor.activeDocument.floyDemo
+                              .inferenceResults[0].impactValue as string,
+                          ),
+                        ) * 100
+                      } %`
+                    : "Floy KI ausführen"
+                }
+              />
               <ActionButtonsContainer>
                 <ActionButtons
                   icon="playFilled"
