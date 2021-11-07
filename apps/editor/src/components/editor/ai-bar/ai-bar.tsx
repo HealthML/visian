@@ -1,10 +1,12 @@
 import {
   BlueButtonParam,
+  Button,
   color,
   fontSize,
   IImageLayer,
   InvisibleButton,
   mediaQuery,
+  PopUp,
   Sheet,
   sheetNoise,
   SquareButton,
@@ -18,7 +20,7 @@ import {
   writeSingleMedicalImage,
 } from "@visian/utils";
 import { observer } from "mobx-react-lite";
-import React, { useCallback } from "react";
+import React, { useCallback, useState } from "react";
 import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
@@ -300,39 +302,123 @@ export const AIBar = observer(() => {
   ) : null;
 });
 
+const FloyPopUp = styled(PopUp)`
+  max-height: 80%;
+  max-width: 600px;
+  overflow: auto;
+`;
+
+const StyledParagraph = styled(Text)`
+  margin-bottom: 10px;
+`;
+
+const PopUpButton = styled(Button)`
+  align-self: center;
+  margin-top: 10px;
+`;
+
 export const FloyBar = observer(() => {
   const store = useStore();
 
+  const [shouldShowWelcome, setShouldShowWelcome] = useState(true);
+  const dismissWelcome = useCallback(() => {
+    setShouldShowWelcome(false);
+  }, []);
+
+  const [hasShownPrivacy, setHasShownPrivacy] = useState(false);
+  const [shouldShowPrivacy, setShouldShowPrivacy] = useState(false);
+  const dismissPrivacy = useCallback(() => {
+    setShouldShowPrivacy(false);
+  }, []);
+  const runInferencing = useCallback(() => {
+    if (hasShownPrivacy || shouldShowPrivacy) {
+      setShouldShowPrivacy(false);
+      store?.setProgress({ label: "Risikoeinschätzung läuft" });
+      store?.editor?.activeDocument?.floyDemo.runInferencing().then(() => {
+        store?.setProgress();
+      });
+    } else {
+      setShouldShowPrivacy(true);
+      setHasShownPrivacy(true);
+    }
+  }, [hasShownPrivacy, shouldShowPrivacy, store]);
+
   return store?.editor.activeDocument?.floyDemo.hasDemoCandidate ? (
-    <AIBarSheet>
-      <AIContainer>
-        <TaskContainer>
-          <TaskLabel tx="Task" />
-          <TaskName text="MR Bone Analysis" />
-        </TaskContainer>
-        <ActionContainer>
-          <ActionName text="Run Floy AI" />
-          <ActionButtonsContainer>
-            <ActionButtons
-              icon="arrowRight"
-              tooltipTx="run-floy"
-              tooltipPosition="right"
-              onPointerDown={
-                store.editor.activeDocument.floyDemo.runInferencing
-              }
-            />
-          </ActionButtonsContainer>
-        </ActionContainer>
-        <AIToolsContainer>
-          <a href={FLOY_HOME}>
-            <AIButton
-              icon="whoAI"
-              tooltipTx="return-floy"
-              tooltipPosition="right"
-            />
-          </a>
-        </AIToolsContainer>
-      </AIContainer>
-    </AIBarSheet>
+    <>
+      <AIBarSheet>
+        <AIContainer>
+          <TaskContainer>
+            <TaskLabel tx="KI Aufgabe" />
+            <TaskName text="MR Risikoeinschätzung" />
+          </TaskContainer>
+          <ActionContainer onPointerDown={runInferencing}>
+            <ActionName text="Floy KI ausführen" />
+            <ActionButtonsContainer>
+              <ActionButtons
+                icon="playFilled"
+                tooltip="Floy ausführen"
+                tooltipPosition="right"
+              />
+            </ActionButtonsContainer>
+          </ActionContainer>
+          <AIToolsContainer>
+            <a href={FLOY_HOME}>
+              <AIButton
+                icon="floyAI"
+                tooltip="Zurück zu Floy"
+                tooltipPosition="right"
+              />
+            </a>
+          </AIToolsContainer>
+        </AIContainer>
+      </AIBarSheet>
+      {shouldShowWelcome && (
+        <FloyPopUp
+          title="Willkommen!"
+          dismiss={dismissWelcome}
+          shouldDismissOnOutsidePress
+        >
+          <StyledParagraph>
+            Willkommen zu unserer ersten Produktdemo!
+          </StyledParagraph>
+          <StyledParagraph>
+            Für Demonstrationszwecke unseres ersten Produktes gibt diese Web
+            Applikation Risikoeinschätzungen über die Präsenz von fokalen
+            Läsionen (anhand von Plasmozytomen und Knochenmetastasen) in
+            sagittalen T1-gewichteten LWS MRT Serien.
+          </StyledParagraph>
+          <StyledParagraph>
+            Das finale Produkt kommt am 1. Februar 2022 auf den Markt. Bis dahin
+            wird sich unsere KI Qualität, als auch die Anzahl der unterstützten
+            Körperteile und Indikationen deutlich weiterentwickeln. Ihr Feedback
+            hilft uns bei dieser Weiterentwicklung immens. Für alle weiteren
+            Informationen und Ergebnisbesprechungen melden Sie sich gerne direkt
+            bei unserem Geschäftsführer Benedikt Schneider via
+            benedikt.schneider@floy.com oder +4915786031618.
+          </StyledParagraph>
+          <PopUpButton text="Okay" onPointerDown={dismissWelcome} />
+        </FloyPopUp>
+      )}
+      {shouldShowPrivacy && (
+        <FloyPopUp
+          title="Datenschutzvereinbarung"
+          dismiss={dismissPrivacy}
+          shouldDismissOnOutsidePress
+        >
+          <StyledParagraph>
+            Mit Ihrem Einverständnis dieser Datenschutzvereinbarung und der
+            Nutzung dieser Produktdemo stimmen Sie der notwendigen
+            Datenverarbeitung für die Ausführung der Produktdemo, internen
+            Ergebnisevaluation und weiteren Produktweiterentwicklung durch die
+            Floy GmbH zu. Der Floy GmbH ist es explizit untersagt, diese Daten
+            ohne vorherige schriftliche Genehmigung von Ihnen an Dritte
+            weiterzugeben oder für andere Zwecke, als die oben angegeben, zu
+            verwenden. Die Floy GmbH wird die Daten mit höchstmöglicher Vorsicht
+            behandeln.
+          </StyledParagraph>
+          <PopUpButton text="Weiter" onPointerDown={runInferencing} />
+        </FloyPopUp>
+      )}
+    </>
   ) : null;
 });
