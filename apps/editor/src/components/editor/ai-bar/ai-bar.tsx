@@ -368,7 +368,7 @@ export const FloyBar = observer(() => {
                           store.editor.activeDocument.floyDemo
                             .inferenceResults[0].probability as string,
                         ) * 100,
-                      )} % | Einflussfaktor: ${Math.round(
+                      )} % | Größe: ${Math.round(
                         parseFloat(
                           store.editor.activeDocument.floyDemo
                             .inferenceResults[1].impactValue as string,
