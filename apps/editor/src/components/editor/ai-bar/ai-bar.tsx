@@ -356,21 +356,24 @@ export const FloyBar = observer(() => {
         <AIBarSheet>
           <AIContainer>
             <TaskContainer>
-              <TaskLabel tx="KI Aufgabe" />
+              <TaskLabel tx="KI Analyse" />
               <TaskName text="Fokale Läsionen" />
             </TaskContainer>
             <ActionContainer onPointerDown={runInferencing}>
               <ActionName
                 text={
                   store.editor.activeDocument.floyDemo.inferenceResults
-                    ? `Impact Score: ${
-                        Math.round(
-                          parseFloat(
-                            store.editor.activeDocument.floyDemo
-                              .inferenceResults[0].impactValue as string,
-                          ),
-                        ) * 100
-                      } %`
+                    ? `Probability: ${Math.round(
+                        parseFloat(
+                          store.editor.activeDocument.floyDemo
+                            .inferenceResults[0].probability as string,
+                        ) * 100,
+                      )} % | Impact Score: ${Math.round(
+                        parseFloat(
+                          store.editor.activeDocument.floyDemo
+                            .inferenceResults[1].impactValue as string,
+                        ) * 100,
+                      )} %`
                     : "Floy KI ausführen"
                 }
               />
