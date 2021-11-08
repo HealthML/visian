@@ -119,6 +119,7 @@
   "image-mismatch-error": "This file does not match the loaded images' size.",
   "image-mismatch-error-filename": "The file  \"{{fileName}}\" does not match the loaded images' size.",
   "image-loading-error": "Looks like this file is not supported.",
+  "image-loading-error-demo": "This file is not supported in the demo.",
   "remote-file-error": "The specified file could not be loaded.",
 
   "export-error": "Export Error",

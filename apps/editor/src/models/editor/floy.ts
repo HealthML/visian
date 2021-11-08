@@ -1,13 +1,14 @@
 import { IDocument } from "@visian/ui-shared";
 import { deidentifyDicom, ISerializable, Zip } from "@visian/utils";
 import dicomParser from "dicom-parser";
-import { action, makeObservable, observable } from "mobx";
+import { action, makeObservable, observable, toJS } from "mobx";
 import path from "path";
 
 import { FLOY_INFERENCE_ENDPOINTS } from "../../constants";
 
 export interface FloyDemoSnapshot {
   seriesZip?: File;
+  inferenceResults?: { [key: string]: unknown }[];
 }
 
 const deidentifiedElements = [
@@ -163,6 +164,7 @@ export class FloyDemoController implements ISerializable<FloyDemoSnapshot> {
   public toJSON(): FloyDemoSnapshot {
     return {
       seriesZip: this.seriesZip,
+      inferenceResults: toJS(this.inferenceResults),
     };
   }
 
@@ -170,5 +172,6 @@ export class FloyDemoController implements ISerializable<FloyDemoSnapshot> {
     snapshot: Partial<FloyDemoSnapshot>,
   ): Promise<void> {
     this.setSeriesZip(snapshot.seriesZip);
+    this.setInferenceResults(snapshot.inferenceResults);
   }
 }

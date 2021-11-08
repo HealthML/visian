@@ -17,6 +17,7 @@ import {
 import { action, computed, makeObservable, observable } from "mobx";
 
 import {
+  IS_FLOY_DEMO,
   maxZoom,
   minZoom,
   viewTypeDepthThreshold,
@@ -145,7 +146,7 @@ export class Viewport2D
   };
 
   public setShowSideViews(value?: boolean): void {
-    this.showSideViews = value ?? true;
+    this.showSideViews = value ?? !IS_FLOY_DEMO;
   }
 
   public setShowVoxelInfo = (value?: boolean) => {

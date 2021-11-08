@@ -363,12 +363,12 @@ export const FloyBar = observer(() => {
               <ActionName
                 text={
                   store.editor.activeDocument.floyDemo.inferenceResults
-                    ? `Probability: ${Math.round(
+                    ? `Wahrscheinlichkeit: ${Math.round(
                         parseFloat(
                           store.editor.activeDocument.floyDemo
                             .inferenceResults[0].probability as string,
                         ) * 100,
-                      )} % | Impact Score: ${Math.round(
+                      )} % | Einflussfaktor: ${Math.round(
                         parseFloat(
                           store.editor.activeDocument.floyDemo
                             .inferenceResults[1].impactValue as string,

@@ -119,6 +119,7 @@
   "image-mismatch-error": "Diese Datei passt nicht auf die schon geladenen.",
   "image-mismatch-error-filename": "Die Datei \"{{fileName}}\" passt nicht auf die schon geladenen.",
   "image-loading-error": "Diese Datei scheint nicht unterstützt zu sein.",
+  "image-loading-error-demo": "Diese Datei wird in der Demo nicht unterstützt.",
   "remote-file-error": "Die angegebene Datei konnte nicht geladen werden.",
 
   "export-error": "Exportfehler",

@@ -368,7 +368,7 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
 
   public finishBatchImport() {
     if (IS_FLOY_DEMO && !this.layers.length) {
-      throw new Error("image-loading-error");
+      throw new Error("image-loading-error-demo");
     }
 
     if (!Object.values(this.layerMap).some((layer) => layer.isAnnotation)) {
