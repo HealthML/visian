@@ -1,4 +1,3 @@
-import * as THREE from "three";
 import {
   DilateErodeRenderer3D,
   RegionGrowingRenderer,
@@ -8,20 +7,22 @@ import {
 import { IDocument, IImageLayer, ITool, ITools } from "@visian/ui-shared";
 import { getPlaneAxes, ISerializable } from "@visian/utils";
 import { action, computed, makeObservable, observable } from "mobx";
+import * as THREE from "three";
+
+import { IS_FLOY_DEMO } from "../../../constants";
+import { BoundedSmartBrush } from "./bounded-smart-brush";
 import { CircleBrush } from "./circle-brush";
 import { ClearImageTool } from "./clear-image-tool";
 import { ClearSliceTool } from "./clear-slice-tool";
-import { SmartBrush } from "./smart-brush";
 import { CrosshairTool } from "./crosshair-tool";
-import { OutlineTool } from "./outline-tool";
-import { Tool, ToolSnapshot } from "./tool";
-
-import { ToolGroup, ToolGroupSnapshot } from "./tool-group";
-import { BoundedSmartBrush } from "./bounded-smart-brush";
-import { PlaneTool } from "./plane-tool";
-import { SmartBrush3D } from "./smart-brush-3d";
 import { DilateErodeTool } from "./dilate-erode-tool";
+import { OutlineTool } from "./outline-tool";
+import { PlaneTool } from "./plane-tool";
 import { SelfDeactivatingTool } from "./self-deactivating-tool";
+import { SmartBrush } from "./smart-brush";
+import { SmartBrush3D } from "./smart-brush-3d";
+import { Tool, ToolSnapshot } from "./tool";
+import { ToolGroup, ToolGroupSnapshot } from "./tool-group";
 
 export type ToolName =
   | "navigation-tool"
@@ -188,26 +189,31 @@ export class Tools
     this.toolGroups.push(
       new ToolGroup({ toolNames: ["navigation-tool"] }, document),
       new ToolGroup({ toolNames: ["crosshair-tool"] }, document),
-      new ToolGroup({ toolNames: ["pixel-brush"] }, document),
-      new ToolGroup({ toolNames: ["smart-brush", "smart-eraser"] }, document),
-      new ToolGroup(
-        { toolNames: ["bounded-smart-brush", "bounded-smart-eraser"] },
-        document,
-      ),
-      new ToolGroup({ toolNames: ["smart-brush-3d"] }, document),
-      new ToolGroup(
-        { toolNames: ["outline-tool", "outline-eraser"] },
-        document,
-      ),
-      new ToolGroup(
-        { toolNames: ["pixel-eraser", "smart-eraser", "outline-eraser"] },
-        document,
-      ),
-      new ToolGroup({ toolNames: ["clear-slice", "clear-image"] }, document),
-      new ToolGroup({ toolNames: ["dilate-erode"] }, document),
-      new ToolGroup({ toolNames: ["plane-tool"] }, document),
       new ToolGroup({ toolNames: ["fly-tool"] }, document),
+      new ToolGroup({ toolNames: ["plane-tool"] }, document),
     );
+
+    if (!IS_FLOY_DEMO) {
+      this.toolGroups.push(
+        new ToolGroup({ toolNames: ["pixel-brush"] }, document),
+        new ToolGroup({ toolNames: ["smart-brush", "smart-eraser"] }, document),
+        new ToolGroup(
+          { toolNames: ["bounded-smart-brush", "bounded-smart-eraser"] },
+          document,
+        ),
+        new ToolGroup({ toolNames: ["smart-brush-3d"] }, document),
+        new ToolGroup(
+          { toolNames: ["outline-tool", "outline-eraser"] },
+          document,
+        ),
+        new ToolGroup(
+          { toolNames: ["pixel-eraser", "smart-eraser", "outline-eraser"] },
+          document,
+        ),
+        new ToolGroup({ toolNames: ["clear-slice", "clear-image"] }, document),
+        new ToolGroup({ toolNames: ["dilate-erode"] }, document),
+      );
+    }
 
     if (snapshot) this.applySnapshot(snapshot);
   }
@@ -219,7 +225,7 @@ export class Tools
   public get activeTool(): ITool<ToolName> | undefined {
     const toolName =
       this.activeToolName === "crosshair-tool" && !this.document?.has3DLayers
-        ? "pixel-brush"
+        ? this.getDefaultToolName()
         : this.activeToolName;
     const tool = toolName ? this.tools[toolName] : undefined;
 
@@ -237,7 +243,7 @@ export class Tools
       ? typeof nameOrTool === "string"
         ? nameOrTool
         : nameOrTool.name
-      : "pixel-brush";
+      : this.getDefaultToolName();
 
     if (this.activeTool?.canActivate()) {
       previouslyActiveTool?.deactivate(this.tools[this.activeToolName]);

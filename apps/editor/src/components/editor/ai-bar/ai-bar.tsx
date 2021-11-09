@@ -350,6 +350,10 @@ export const FloyBar = observer(() => {
     }
   }, [hasShownPrivacy, shouldShowPrivacy, store]);
 
+  const reset = useCallback(() => {
+    store?.editor.newDocument();
+  }, [store]);
+
   return (
     <>
       {store?.editor.activeDocument?.floyDemo.hasDemoCandidate && (
@@ -359,7 +363,7 @@ export const FloyBar = observer(() => {
               <TaskLabel tx="KI Analyse" />
               <TaskName text="Fokale Läsionen" />
             </TaskContainer>
-            <ActionContainer onPointerDown={runInferencing}>
+            <ActionContainer>
               <ActionName
                 text={
                   store.editor.activeDocument.floyDemo.inferenceResults
@@ -368,25 +372,37 @@ export const FloyBar = observer(() => {
                           store.editor.activeDocument.floyDemo
                             .inferenceResults[0].probability as string,
                         ) * 100,
-                      )} % | Größe: ${Math.round(
-                        parseFloat(
-                          store.editor.activeDocument.floyDemo
-                            .inferenceResults[1].impactValue as string,
-                        ) * 100,
-                      )} %`
+                      )} % | Größe: ${
+                        Math.round(
+                          parseFloat(
+                            store.editor.activeDocument.floyDemo
+                              .inferenceResults[1].impactValue as string,
+                          ) / 100,
+                        ) / 10
+                      } cm³`
                     : "Floy KI ausführen"
                 }
               />
               <ActionButtonsContainer>
-                <ActionButtons
-                  icon="playFilled"
-                  tooltip="Floy ausführen"
-                  tooltipPosition="right"
-                />
+                {store.editor.activeDocument.floyDemo.inferenceResults ? (
+                  <ActionButtons
+                    icon="trash"
+                    tooltip="Zurücksetzen"
+                    tooltipPosition="right"
+                    onPointerDown={reset}
+                  />
+                ) : (
+                  <ActionButtons
+                    icon="playFilled"
+                    tooltip="Floy ausführen"
+                    tooltipPosition="right"
+                    onPointerDown={runInferencing}
+                  />
+                )}
               </ActionButtonsContainer>
             </ActionContainer>
             <AIToolsContainer>
-              <a href={FLOY_HOME}>
+              <a href={FLOY_HOME} target="_blank" rel="noreferrer">
                 <AIButton
                   icon="floyAI"
                   tooltip="Zurück zu Floy"
@@ -403,9 +419,6 @@ export const FloyBar = observer(() => {
           dismiss={dismissWelcome}
           shouldDismissOnOutsidePress
         >
-          <StyledParagraph>
-            Willkommen zu unserer ersten Produktdemo!
-          </StyledParagraph>
           <StyledParagraph>
             Für Demonstrationszwecke unseres ersten Produktes gibt diese Web
             Applikation Risikoeinschätzungen über die Präsenz von fokalen
@@ -441,7 +454,7 @@ export const FloyBar = observer(() => {
             verwenden. Die Floy GmbH wird die Daten mit höchstmöglicher Vorsicht
             behandeln.
           </StyledParagraph>
-          <PopUpButton text="Weiter" onPointerDown={runInferencing} />
+          <PopUpButton text="Ich stimme zu" onPointerDown={runInferencing} />
         </FloyPopUp>
       )}
     </>
