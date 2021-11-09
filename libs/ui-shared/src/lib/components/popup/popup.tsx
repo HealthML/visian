@@ -1,6 +1,6 @@
 import React, { useRef } from "react";
 import ReactDOM from "react-dom";
-import styled from "styled-components";
+import styled, { css } from "styled-components";
 
 import { stopPropagation } from "../../event-handling";
 import { color, fontWeight, zIndex } from "../../theme";
@@ -19,11 +19,12 @@ const PopUpUnderlay = styled.div`
   background-color: ${color("modalUnderlay")};
   backdrop-filter: blur(3px);
   display: flex;
+  flex-direction: column;
   justify-content: center;
   pointer-events: auto;
   z-index: ${zIndex("overlay")};
 `;
-const PopUpContainer = styled(Sheet)`
+const PopUpContainer = styled(Sheet)<Pick<PopUpProps, "showUnderlay">>`
   justify-content: flex-start;
   align-items: flex-start;
   flex-direction: column;
@@ -33,7 +34,11 @@ const PopUpContainer = styled(Sheet)`
 
   z-index: ${zIndex("modal")};
 
-  position: absolute;
+  ${(props) =>
+    !props.showUnderlay &&
+    css`
+      position: absolute;
+    `}
 `;
 const PopUpTitle = styled(Title)`
   display: block;
@@ -65,6 +70,7 @@ const CloseIcon = styled(InvisibleButton)`
 `;
 
 export const PopUp: React.FC<PopUpProps> = ({
+  childrenBefore,
   titleTx,
   title,
   secondaryTitleTx,
@@ -86,7 +92,12 @@ export const PopUp: React.FC<PopUpProps> = ({
   const modalRootRef = useModalRoot();
 
   const popup = (
-    <PopUpContainer onWheel={stopPropagation} {...rest} ref={ref}>
+    <PopUpContainer
+      onWheel={stopPropagation}
+      {...rest}
+      ref={ref}
+      showUnderlay={showUnderlay}
+    >
       {(titleTx || title) && (
         <TitleRow>
           <PopUpTitle tx={titleTx} text={title} />
@@ -100,7 +111,10 @@ export const PopUp: React.FC<PopUpProps> = ({
 
   const node =
     isOpen === false ? null : showUnderlay ? (
-      <PopUpUnderlay onWheel={stopPropagation}>{popup}</PopUpUnderlay>
+      <PopUpUnderlay onWheel={stopPropagation}>
+        {childrenBefore}
+        {popup}
+      </PopUpUnderlay>
     ) : (
       popup
     );
