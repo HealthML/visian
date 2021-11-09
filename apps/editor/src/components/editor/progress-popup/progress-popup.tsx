@@ -88,7 +88,7 @@ export const ProgressPopUp: React.FC<ProgressPopUpProps> = ({
   label,
   labelTx,
   progress,
-  showSplash = true,
+  showSplash,
   ...rest
 }) => (
   <ProgressPopUpContainer
