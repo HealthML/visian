@@ -9,7 +9,7 @@ import {
 import { IEditor, IImageLayer, ISliceRenderer } from "@visian/ui-shared";
 import { autorun, reaction } from "mobx";
 import * as THREE from "three";
-// import { GUI } from "three/examples/jsm/libs/dat.gui.module.js";
+import { GUI } from "three/examples/jsm/libs/dat.gui.module.js";
 
 import { Slice } from "./slice";
 import {
@@ -54,8 +54,8 @@ export class SliceRenderer implements IDisposable, ISliceRenderer {
 
     const params = {
       color: 0xffffff,
-      transmission: 0.95,
-      roughness: 0.95,
+      transmission: 1,
+      roughness: 0.93,
       ior: 1.4,
       thickness: 0,
     };
@@ -155,24 +155,24 @@ export class SliceRenderer implements IDisposable, ISliceRenderer {
     window.addEventListener("resize", this.resize);
     this.resize();
 
-    // const gui = new GUI();
-    // gui.add(params, "transmission", 0, 1, 0.01).onChange(() => {
-    //   testSheetMaterial.transmission = params.transmission;
-    //   this.lazyRender();
-    // });
-    // gui.add(params, "roughness", 0, 1, 0.01).onChange(() => {
-    //   testSheetMaterial.roughness = params.roughness;
-    //   this.lazyRender();
-    // });
-    // gui.add(params, "ior", 1, 2.333, 0.01).onChange(() => {
-    //   testSheetMaterial.ior = params.ior;
-    //   this.lazyRender();
-    // });
-    // gui.add(params, "thickness", 0, 0.2, 0.005).onChange(() => {
-    //   testSheetMaterial.thickness = params.thickness;
-    //   this.lazyRender();
-    // });
-    // gui.open();
+    const gui = new GUI();
+    gui.add(params, "transmission", 0, 1, 0.01).onChange(() => {
+      testSheetMaterial.transmission = params.transmission;
+      this.lazyRender();
+    });
+    gui.add(params, "roughness", 0, 1, 0.01).onChange(() => {
+      testSheetMaterial.roughness = params.roughness;
+      this.lazyRender();
+    });
+    gui.add(params, "ior", 1, 2.333, 0.01).onChange(() => {
+      testSheetMaterial.ior = params.ior;
+      this.lazyRender();
+    });
+    gui.add(params, "thickness", 0, 0.2, 0.005).onChange(() => {
+      testSheetMaterial.thickness = params.thickness;
+      this.lazyRender();
+    });
+    gui.open();
 
     this.disposers.push(
       reaction(
