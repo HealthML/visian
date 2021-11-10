@@ -345,6 +345,7 @@ export const FloyBar = observer(() => {
         setShouldShowWelcome(false);
       })
       .catch(() => {
+        store?.editor.activeDocument?.floyDemo.clearToken();
         setTokenError("Ungültiger Token!");
       });
   }, [store, token]);
