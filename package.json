@@ -7,6 +7,7 @@
     "start": "nx serve",
     "expose": "lt --port 4200 --local-host localhost",
     "build": "nx build",
+    "heroku-postbuild": "nx build $PROJECT_NAME --prod",
     "test": "nx test",
     "lint": "nx workspace-lint && nx lint",
     "compile": "nx compile",
