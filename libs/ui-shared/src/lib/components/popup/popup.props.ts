@@ -24,6 +24,8 @@ export interface PopUpProps extends React.HTMLAttributes<HTMLDivElement> {
    * outside the modal.
    */
   shouldDismissOnOutsidePress?: boolean;
+
+  childrenBefore?: React.ReactNode;
 }
 
 export interface StatefulPopUpProps {

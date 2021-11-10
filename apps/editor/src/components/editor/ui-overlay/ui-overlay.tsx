@@ -269,6 +269,7 @@ export const UIOverlay = observer<UIOverlayProps>(
             label={store.progress.label}
             labelTx={store.progress.labelTx}
             progress={store.progress.progress}
+            showSplash={store.progress.showSplash}
           />
         )}
         {store?.error && (

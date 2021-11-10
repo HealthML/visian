@@ -103,7 +103,7 @@ export class RootStore implements ISerializable<RootSnapshot> {
    * Defaults to `true`.
    */
   public async connectToDICOMWebServer(url?: string, shouldPersist = true) {
-    if (url) this.setProgress({ labelTx: "connecting" });
+    if (url) this.setProgress({ labelTx: "connecting", showSplash: true });
     this.dicomWebServer = url ? await DICOMWebServer.connect(url) : undefined;
     if (url) this.setProgress();
 

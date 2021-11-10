@@ -73,7 +73,7 @@ export const importFilesToDocument = (
   handleFinishedImport?: () => void,
 ) => {
   if (!files.length) return;
-  store.setProgress({ labelTx: "importing" });
+  store.setProgress({ labelTx: "importing", showSplash: true });
 
   handleImportWithErrors(files, store, shouldRetry).then(() => {
     store.setProgress();
