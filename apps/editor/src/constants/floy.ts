@@ -5,3 +5,5 @@ export const FLOY_INFERENCE_ENDPOINTS = [
   "https://valohai.cloud/floy/mr-bone/web-app/classification/floy-ai",
   "https://valohai.cloud/floy/mr-bone/web-app/segmentation/floy-ai",
 ];
+export const FLOY_API_ROOT =
+  process.env.FLOY_API_ROOT || "http://localhost:3333";

@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import shortid from "shortid";
 import { Repository, UpdateResult } from "typeorm";
+import { ConsentEntity } from "./consent.entity";
 
 import { TokenEntity } from "./token.entity";
 
@@ -10,12 +10,12 @@ export class TokensService {
   constructor(
     @InjectRepository(TokenEntity)
     private tokensRepository: Repository<TokenEntity>,
+    @InjectRepository(ConsentEntity)
+    private consentsRepository: Repository<ConsentEntity>,
   ) {}
 
   public async create(name: string, isActive = true): Promise<TokenEntity> {
-    const token = new TokenEntity();
-    token.token = shortid.generate();
-    token.name = name;
+    const token = new TokenEntity({ name });
     token.isActive = isActive;
 
     return this.tokensRepository.save(token);
@@ -29,17 +29,26 @@ export class TokensService {
     return this.tokensRepository.findOne(token);
   }
 
-  public async log(
-    token: string,
+  public async consent(
+    token: TokenEntity,
     ip: string,
-  ): Promise<TokenEntity | undefined> {
+  ): Promise<ConsentEntity | undefined> {
+    const consent = new ConsentEntity({ token, ip });
+
+    return this.consentsRepository.save(consent);
+  }
+
+  public async findConsents(token: TokenEntity): Promise<ConsentEntity[]> {
+    return this.consentsRepository.find({ token });
+  }
+
+  public async log(token: string): Promise<TokenEntity | undefined> {
     const tokenObj = await this.tokensRepository.findOne(token);
-    if (!tokenObj?.isActive) {
+    if (!tokenObj?.isActive || !(await this.findConsents(tokenObj)).length) {
       throw new HttpException("Unauthorized", HttpStatus.UNAUTHORIZED);
     }
 
     tokenObj.accessCount++;
-    tokenObj.lastIP = ip;
     tokenObj.lastAccess = new Date();
     return this.tokensRepository.save(tokenObj);
   }

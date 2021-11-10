@@ -11,6 +11,7 @@ import {
   sheetNoise,
   SquareButton,
   Text,
+  TextField,
   zIndex,
 } from "@visian/ui-shared";
 import {
@@ -20,7 +21,7 @@ import {
   writeSingleMedicalImage,
 } from "@visian/utils";
 import { observer } from "mobx-react-lite";
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useRef, useState } from "react";
 import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
@@ -311,27 +312,61 @@ const StyledParagraph = styled(Text)`
   margin-bottom: 10px;
 `;
 
-const PopUpButton = styled(Button)`
+const BoldParagraph = styled(StyledParagraph)`
+  font-weight: 700;
+`;
+
+const ErrorParagraph = styled(StyledParagraph)`
+  color: ${color("red")};
+`;
+
+const InputRow = styled.div`
   align-self: center;
   margin-top: 10px;
+`;
+
+const PopUpButton = styled(Button)`
+  margin-left: 10px;
 `;
 
 export const FloyBar = observer(() => {
   const store = useStore();
 
+  const [token, setToken] = useState("");
+  const [tokenError, setTokenError] = useState<string>();
   const [shouldShowWelcome, setShouldShowWelcome] = useState(true);
   const dismissWelcome = useCallback(() => {
-    setShouldShowWelcome(false);
-  }, []);
+    store?.editor.activeDocument?.floyDemo
+      .activateToken(
+        store?.editor.activeDocument?.floyDemo.hasToken() ? undefined : token,
+      )
+      .then(() => {
+        setTokenError(undefined);
+        setShouldShowWelcome(false);
+      })
+      .catch(() => {
+        setTokenError("Ungültiger Token!");
+      });
+  }, [store, token]);
+  const handleKeyDown = useCallback(
+    (event: React.KeyboardEvent<HTMLInputElement>) => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        event.stopPropagation();
 
-  const [hasShownPrivacy, setHasShownPrivacy] = useState(false);
+        dismissWelcome();
+      }
+    },
+    [dismissWelcome],
+  );
+
+  const privacyRef = useRef(false);
   const [shouldShowPrivacy, setShouldShowPrivacy] = useState(false);
   const dismissPrivacy = useCallback(() => {
     setShouldShowPrivacy(false);
   }, []);
   const runInferencing = useCallback(() => {
-    if (hasShownPrivacy || shouldShowPrivacy) {
-      setShouldShowPrivacy(false);
+    if (privacyRef.current) {
       store?.setProgress({ label: "Risikoeinschätzung läuft" });
       store?.editor.activeDocument?.floyDemo
         .runInferencing()
@@ -346,9 +381,24 @@ export const FloyBar = observer(() => {
         });
     } else {
       setShouldShowPrivacy(true);
-      setHasShownPrivacy(true);
     }
-  }, [hasShownPrivacy, shouldShowPrivacy, store]);
+  }, [store]);
+  const consent = useCallback(() => {
+    store?.editor.activeDocument?.floyDemo
+      .consent()
+      .then(() => {
+        setTokenError(undefined);
+        setShouldShowPrivacy(false);
+        privacyRef.current = true;
+        runInferencing();
+      })
+      .catch(() => {
+        store?.editor.activeDocument?.floyDemo.clearToken();
+        setTokenError("Ihr Token wurde deaktiviert!");
+        setShouldShowWelcome(true);
+        setShouldShowPrivacy(false);
+      });
+  }, [runInferencing, store]);
 
   const reset = useCallback(() => {
     store?.editor.newDocument();
@@ -434,7 +484,26 @@ export const FloyBar = observer(() => {
             bei unserem Geschäftsführer Benedikt Schneider via
             benedikt.schneider@floy.com oder +4915786031618.
           </StyledParagraph>
-          <PopUpButton text="Okay" onPointerDown={dismissWelcome} />
+          {!store?.editor.activeDocument?.floyDemo.hasToken() && (
+            <>
+              <BoldParagraph>
+                Bitte geben Sie hier Ihren persönlichen Token ein, um Zugang zur
+                Demo zu erhalten:
+              </BoldParagraph>
+              {tokenError && <ErrorParagraph>{tokenError}</ErrorParagraph>}
+            </>
+          )}
+          <InputRow>
+            {!store?.editor.activeDocument?.floyDemo.hasToken() && (
+              <TextField
+                placeholder="Token"
+                value={token}
+                onChangeText={setToken}
+                onKeyDown={handleKeyDown}
+              />
+            )}
+            <PopUpButton text="Okay" onPointerDown={dismissWelcome} />
+          </InputRow>
         </FloyPopUp>
       )}
       {shouldShowPrivacy && (
@@ -454,7 +523,9 @@ export const FloyBar = observer(() => {
             verwenden. Die Floy GmbH wird die Daten mit höchstmöglicher Vorsicht
             behandeln.
           </StyledParagraph>
-          <PopUpButton text="Ich stimme zu" onPointerDown={runInferencing} />
+          <InputRow>
+            <PopUpButton text="Ich stimme zu" onPointerDown={consent} />
+          </InputRow>
         </FloyPopUp>
       )}
     </>

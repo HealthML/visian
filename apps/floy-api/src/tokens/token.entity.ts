@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-inferrable-types */
+import shortid from "shortid";
 import {
   Column,
   CreateDateColumn,
@@ -21,9 +22,6 @@ export class TokenEntity {
   @Column()
   public accessCount: number = 0;
 
-  @Column({ nullable: true })
-  public lastIP?: string;
-
   @Column({ nullable: true, type: "timestamp" })
   public lastAccess?: Date;
 
@@ -39,4 +37,11 @@ export class TokenEntity {
     onUpdate: "CURRENT_TIMESTAMP(6)",
   })
   public updatedAt!: Date;
+
+  constructor(token?: Pick<TokenEntity, "name">) {
+    if (token) {
+      this.name = token.name;
+      this.token = shortid.generate();
+    }
+  }
 }

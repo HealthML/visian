@@ -3,8 +3,9 @@ import { deidentifyDicom, ISerializable, Zip } from "@visian/utils";
 import dicomParser from "dicom-parser";
 import { action, makeObservable, observable, toJS } from "mobx";
 import path from "path";
+import axios from "axios";
 
-import { FLOY_INFERENCE_ENDPOINTS } from "../../constants";
+import { FLOY_API_ROOT, FLOY_INFERENCE_ENDPOINTS } from "../../constants";
 
 export interface FloyDemoSnapshot {
   seriesZip?: File;
@@ -144,6 +145,8 @@ export class FloyDemoController implements ISerializable<FloyDemoSnapshot> {
   public runInferencing = async (): Promise<void> => {
     if (!this.seriesZip) return;
 
+    await this.log();
+
     const formData = new FormData();
     formData.append("seriesZIP", this.seriesZip);
 
@@ -161,6 +164,50 @@ export class FloyDemoController implements ISerializable<FloyDemoSnapshot> {
     );
   };
 
+  // Token Management
+  public hasToken(): boolean {
+    return Boolean(localStorage.getItem("floyToken"));
+  }
+
+  public async activateToken(token?: string) {
+    const tokenWithDefault = token || localStorage.getItem("floyToken");
+    if (!tokenWithDefault) throw new Error();
+
+    if (
+      (await axios.get(`${FLOY_API_ROOT}/tokens/${tokenWithDefault}`)).status >=
+      400
+    ) {
+      throw new Error();
+    }
+    localStorage.setItem("floyToken", tokenWithDefault);
+  }
+
+  public clearToken() {
+    localStorage.removeItem("floyToken");
+  }
+
+  public async consent() {
+    const token = localStorage.getItem("floyToken");
+    if (!token) throw new Error();
+
+    if (
+      (await axios.post(`${FLOY_API_ROOT}/tokens/${token}/consent`)).status >=
+      400
+    ) {
+      throw new Error();
+    }
+  }
+
+  public async log() {
+    const token = localStorage.getItem("floyToken");
+    if (!token) throw new Error();
+
+    if ((await axios.post(`${FLOY_API_ROOT}/tokens/${token}`)).status >= 400) {
+      throw new Error();
+    }
+  }
+
+  // Serialization
   public toJSON(): FloyDemoSnapshot {
     return {
       seriesZip: this.seriesZip,

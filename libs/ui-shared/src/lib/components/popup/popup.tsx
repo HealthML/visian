@@ -94,6 +94,7 @@ export const PopUp: React.FC<PopUpProps> = ({
   const popup = (
     <PopUpContainer
       onWheel={stopPropagation}
+      onDragOver={stopPropagation}
       {...rest}
       ref={ref}
       showUnderlay={showUnderlay}
@@ -111,7 +112,7 @@ export const PopUp: React.FC<PopUpProps> = ({
 
   const node =
     isOpen === false ? null : showUnderlay ? (
-      <PopUpUnderlay onWheel={stopPropagation}>
+      <PopUpUnderlay onWheel={stopPropagation} onDragOver={stopPropagation}>
         {childrenBefore}
         {popup}
       </PopUpUnderlay>
