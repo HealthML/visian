@@ -8,6 +8,7 @@ import {
 import { getPlaneAxes, IDisposable, IDisposer, Vector } from "@visian/utils";
 import { autorun } from "mobx";
 import * as THREE from "three";
+import { SliceCommand } from "../history";
 
 export class Clipboard implements IClipboard, IDisposable {
   protected renderTargets?: THREE.WebGLRenderTarget[];
@@ -76,13 +77,36 @@ export class Clipboard implements IClipboard, IDisposable {
     const viewType = this.document.viewport2D.mainViewType;
     const sliceNumber = this.document.viewport2D.getSelectedSlice();
 
-    ((this.document.activeLayer as IImageLayer)
-      .image as RenderedImage).setSlice(
+    const imageLayer = this.document.activeLayer as IImageLayer;
+    const image = imageLayer.image as RenderedImage;
+
+    const oldSliceData = image.getSlice(viewType, sliceNumber);
+
+    image.setSlice(
       viewType,
       sliceNumber,
       this.renderTargets.map((target) => target.texture),
       mergeFunction,
     );
+    this.document.sliceRenderer?.lazyRender();
+
+    const newSliceData = image.getSlice(viewType, sliceNumber);
+
+    this.document.history.addCommand(
+      new SliceCommand(
+        {
+          layerId: imageLayer.id,
+          viewType,
+          slice: sliceNumber,
+          oldSliceData,
+          newSliceData,
+        },
+        this.document,
+      ),
+    );
+
+    imageLayer.recomputeSliceMarkers(viewType, sliceNumber);
+    this.document.requestSave();
   }
 
   public dispose() {
