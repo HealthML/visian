@@ -440,56 +440,6 @@
           }
         }
       }
-    },
-    "floy-api": {
-      "root": "apps/floy-api",
-      "sourceRoot": "apps\\floy-api\\src",
-      "projectType": "application",
-      "architect": {
-        "build": {
-          "builder": "@nrwl/node:build",
-          "outputs": ["{options.outputPath}"],
-          "options": {
-            "outputPath": "dist/apps/floy-api",
-            "main": "apps/floy-api/src/main.ts",
-            "tsConfig": "apps/floy-api/tsconfig.app.json",
-            "assets": ["apps/floy-api/src/assets"]
-          },
-          "configurations": {
-            "production": {
-              "optimization": true,
-              "extractLicenses": true,
-              "inspect": false,
-              "fileReplacements": [
-                {
-                  "replace": "apps/floy-api/src/environments/environment.ts",
-                  "with": "apps/floy-api/src/environments/environment.prod.ts"
-                }
-              ]
-            }
-          }
-        },
-        "serve": {
-          "builder": "@nrwl/node:execute",
-          "options": {
-            "buildTarget": "floy-api:build"
-          }
-        },
-        "lint": {
-          "builder": "@nrwl/linter:eslint",
-          "options": {
-            "lintFilePatterns": ["apps/floy-api/**/*.ts"]
-          }
-        },
-        "test": {
-          "builder": "@nrwl/jest:jest",
-          "outputs": ["coverage/apps/floy-api"],
-          "options": {
-            "jestConfig": "apps/floy-api/jest.config.js",
-            "passWithNoTests": true
-          }
-        }
-      }
     }
   }
 }

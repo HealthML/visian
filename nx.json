@@ -29,7 +29,6 @@
     "editor": { "tags": [] },
     "editor-e2e": { "tags": [], "implicitDependencies": ["editor"] },
     "utils": { "tags": [] },
-    "rendering": { "tags": [] },
-    "floy-api": { "tags": [] }
+    "rendering": { "tags": [] }
   }
 }
