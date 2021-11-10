@@ -10,6 +10,7 @@ import { readFileFromURL } from "@visian/utils";
 import { observer } from "mobx-react-lite";
 import React, { useCallback, useState } from "react";
 import styled from "styled-components";
+import { importFilesToDocument } from "../../../import-handling";
 
 import { useStore } from "../../../app/root-store";
 import { ImportPopUpProps } from "./import-popup.props";
@@ -67,32 +68,17 @@ const ImportPopUpContainer = styled(PopUp)`
 export const ImportPopUp = observer<ImportPopUpProps>(({ isOpen, onClose }) => {
   const store = useStore();
 
-  // Local import
-  const openFilePicker = useFilePicker(
-    useCallback(
-      (event: Event) => {
-        const { files } = event.target as HTMLInputElement;
-        if (!files || !files.length) return;
-        store?.setProgress({ labelTx: "importing" });
-        store?.editor.activeDocument
-          ?.importFiles(Array.from(files))
-          .then(() => {
-            store?.editor.activeDocument?.finishBatchImport();
-            onClose?.();
-          })
-          .catch((error) => {
-            store?.setError({
-              titleTx: "import-error",
-              descriptionTx: error.message,
-            });
-          })
-          .finally(() => {
-            store?.setProgress();
-          });
-      },
-      [store, onClose],
-    ),
+  const importFilesFromInput = useCallback(
+    (event: Event) => {
+      const { files } = event.target as HTMLInputElement;
+      if (!files || !store) return;
+      importFilesToDocument(files, store, true, onClose);
+    },
+    [store, onClose],
   );
+
+  // Local import
+  const openFilePicker = useFilePicker(importFilesFromInput);
 
   // Load from URL
   const [loadURL, setLoadURL] = useState("");

@@ -22,6 +22,8 @@ export interface StoreContext {
 
   getRefs(): { [key: string]: React.RefObject<HTMLElement> };
 
+  setError(error: ErrorNotification): void;
+
   getTracker(): Tracker | undefined;
 }
 
@@ -36,4 +38,5 @@ export interface ProgressNotification {
   label?: string;
   labelTx?: string;
   progress?: number;
+  showSplash?: boolean;
 }

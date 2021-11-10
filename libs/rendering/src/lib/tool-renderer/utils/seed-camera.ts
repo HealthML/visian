@@ -18,9 +18,7 @@ export class SeedCamera
         const [
           width,
           height,
-        ] = (document.activeLayer as IImageLayer).image
-          .getAtlasSize()
-          .toArray();
+        ] = (document.activeLayer as IImageLayer).image.voxelCount.toArray();
 
         this.right = width - 0.5;
         this.top = height - 0.5;

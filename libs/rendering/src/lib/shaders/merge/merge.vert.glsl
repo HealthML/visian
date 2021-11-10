@@ -1,1 +1,1 @@
-@import ../utils/uv-vertex-shader;
+@import ../utils/uv-vertex-shader-glsl3;

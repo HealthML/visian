@@ -1,12 +1,25 @@
-varying vec2 vUv;
+precision highp sampler3D;
 
-uniform sampler2D uDataTexture;
+in vec2 vUv;
+
+#ifdef VOLUME_TEXTURE
+  uniform sampler3D uDataTexture;
+  uniform float uDepth;
+#else
+  uniform sampler2D uDataTexture;
+#endif
 uniform int uMergeFunction;
 uniform bool uUseThreshold;
 uniform float uThreshold;
 
+out vec4 pc_FragColor;
+
 void main() {
-  vec4 data = texture2D(uDataTexture, vUv);
+  #ifdef VOLUME_TEXTURE
+    vec4 data = texture(uDataTexture, vec3(vUv, uDepth));
+  #else
+    vec4 data = texture(uDataTexture, vUv);
+  #endif
 
   if (uUseThreshold) {
     if (data.r < uThreshold) {
@@ -14,9 +27,9 @@ void main() {
     }
     
     if (uMergeFunction == 2) { // Subtract
-      gl_FragColor = vec4(vec3(0.0), 1.0);
+      pc_FragColor = vec4(vec3(0.0), 1.0);
     } else {
-      gl_FragColor = vec4(1.0);
+      pc_FragColor = vec4(1.0);
     }
   } else {
     if (uMergeFunction == 1) { // Add
@@ -30,6 +43,6 @@ void main() {
       data.rgb = vec3(0.0);
     }
 
-    gl_FragColor = data;
+    pc_FragColor = data;
   }
 }

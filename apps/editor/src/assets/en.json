@@ -17,6 +17,7 @@
   "return-who": "Return to AI4H",
 
   "menu": "Menu",
+  "new-document": "New Document",
   "theme": "Theme",
   "dark": "Dark",
   "light": "Light",
@@ -69,6 +70,10 @@
   "discard-dilate-erode": "Discard (Esc)",
   "submit-dilate-erode": "Apply (Enter)",
 
+  "data-model-outdated-alert": "Data model outdated. Reset required.",
+  "discard-current-document-confirmation": "Discard the current document?",
+  "erase-application-data-confirmation": "Erase all application data?",
+
   "layers": "Layers",
   "add-annotation-layer": "Add new annotation",
   "no-layers": "No layers loaded.",
@@ -102,10 +107,15 @@
   "confirm-task-annotation-tooltip": "Confirm",
   "skip-task-annotation-tooltip": "Skip",
 
+  "browser-error": "Browser Error",
+  "no-webgl-2-error": "This browser does not support WebGL 2 which is necessary to run VISIAN. Please update your browser to the newest version or use a different browser.",
+
   "import-error": "Import Error",
   "image-mismatch-error": "This file does not match the loaded images' size.",
+  "image-mismatch-error-filename": "The file  \"{{fileName}}\" does not match the loaded images' size.",
   "image-loading-error": "Looks like this file is not supported.",
   "remote-file-error": "The specified file could not be loaded.",
+  "image-too-large-error": "Your browser does not support images this large.",
 
   "export-error": "Export Error",
   "file-upload-error": "The file could not be uploaded.",

@@ -1,4 +1,4 @@
-import { LocalForageBackend } from "@visian/ui-shared";
+import { i18n, LocalForageBackend } from "@visian/ui-shared";
 import {
   createFileFromBase64,
   getWHOTask,
@@ -24,7 +24,7 @@ export const setupRootStore = async () => {
   } catch (err) {
     // TODO: Resolve old data models after breaking changes more gracefully
     // eslint-disable-next-line no-alert
-    window.alert("Data model outdated. Reset required.");
+    window.alert(i18n.t("data-model-outdated-alert"));
     await store.destroy(true);
   }
 
@@ -40,7 +40,7 @@ export const setupRootStore = async () => {
       // Example: http://localhost:4200/?load=http://data.idoimaging.com/nifti/1010_brain_mr_04.nii.gz
       const loadScanParam = url.searchParams.get("load");
       if (loadScanParam && store.editor.newDocument()) {
-        store.setProgress({ labelTx: "importing" });
+        store.setProgress({ labelTx: "importing", showSplash: true });
         await store.editor.activeDocument?.importFiles(
           await readFileFromURL(loadScanParam, true),
         );
@@ -67,7 +67,7 @@ export const setupRootStore = async () => {
       try {
         const taskId = getWHOTaskIdFromUrl();
         if (taskId && store.editor.newDocument(true)) {
-          store.setProgress({ labelTx: "importing" });
+          store.setProgress({ labelTx: "importing", showSplash: true });
           const taskJson = await getWHOTask(taskId);
           const whoTask = new Task(taskJson);
           store.setCurrentTask(whoTask);

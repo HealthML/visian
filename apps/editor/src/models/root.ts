@@ -1,6 +1,7 @@
 import {
   ColorMode,
   getTheme,
+  i18n,
   IDispatch,
   IStorageBackend,
   Tab,
@@ -85,6 +86,7 @@ export class RootStore implements ISerializable<RootSnapshot> {
       setDirty: action(this.setIsDirty),
       getTheme: () => this.theme,
       getRefs: () => this.refs,
+      setError: this.setError,
       getTracker: () => this.tracker,
     });
 
@@ -102,7 +104,7 @@ export class RootStore implements ISerializable<RootSnapshot> {
    * Defaults to `true`.
    */
   public async connectToDICOMWebServer(url?: string, shouldPersist = true) {
-    if (url) this.setProgress({ labelTx: "connecting" });
+    if (url) this.setProgress({ labelTx: "connecting", showSplash: true });
     this.dicomWebServer = url ? await DICOMWebServer.connect(url) : undefined;
     if (url) this.setProgress();
 
@@ -121,11 +123,12 @@ export class RootStore implements ISerializable<RootSnapshot> {
       localStorage.setItem("theme", theme);
     }
   }
+
   public get theme() {
     return getTheme(this.colorMode);
   }
 
-  public setError(error?: ErrorNotification) {
+  public setError = (error?: ErrorNotification) => {
     this.error = error;
 
     if (this.errorTimeout !== undefined) {
@@ -137,7 +140,8 @@ export class RootStore implements ISerializable<RootSnapshot> {
         this.setError();
       }, errorDisplayDuration) as unknown) as NodeJS.Timer;
     }
-  }
+  };
+
   public setProgress(progress?: ProgressNotification) {
     this.progress = progress;
   }
@@ -233,8 +237,12 @@ export class RootStore implements ISerializable<RootSnapshot> {
 
   public destroy = async (forceDestroy?: boolean) => {
     if (!this.shouldPersist && !forceDestroy) return;
-    // eslint-disable-next-line no-alert
-    if (!forceDestroy && !window.confirm("Erase all application data?")) return;
+    if (
+      !forceDestroy &&
+      // eslint-disable-next-line no-alert
+      !window.confirm(i18n.t("erase-application-data-confirmation"))
+    )
+      return;
 
     this.shouldPersist = false;
     localStorage.clear();

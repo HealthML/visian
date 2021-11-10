@@ -1,11 +1,12 @@
 import { IDocument } from "@visian/ui-shared";
 import { Voxel } from "@visian/utils";
 import { action, makeObservable, observable } from "mobx";
+import * as THREE from "three";
 
 import { RenderedImage } from "../rendered-image";
 import {
   regionGrowing3DFragmentShader,
-  regionGrowingVertexShader,
+  regionGrowing3DVertexShader,
 } from "../shaders";
 import { BlipRenderer3D } from "./blip-renderer-3d";
 import { MAX_BLIP_STEPS, Seed } from "./utils";
@@ -20,9 +21,10 @@ export class RegionGrowingRenderer3D extends BlipRenderer3D {
 
   constructor(document: IDocument) {
     super(document, {
-      vertexShader: regionGrowingVertexShader,
+      vertexShader: regionGrowing3DVertexShader,
       fragmentShader: regionGrowing3DFragmentShader,
       uniforms: { uThreshold: { value: 0.1 }, uSeed: { value: 0 } },
+      glslVersion: THREE.GLSL3,
     });
 
     this.seed = new Seed(document);
@@ -49,7 +51,7 @@ export class RegionGrowingRenderer3D extends BlipRenderer3D {
     this.seed.setPosition(voxel);
 
     this.document.renderers?.forEach((renderer, rendererIndex) => {
-      renderer.setRenderTarget(this.renderTargets[rendererIndex]);
+      renderer.setRenderTarget(this.renderTargets[rendererIndex], voxel.z);
       renderer.render(this.seed, this.seed.camera);
       renderer.setRenderTarget(null);
     });
@@ -64,7 +66,10 @@ export class RegionGrowingRenderer3D extends BlipRenderer3D {
     this.material.uniforms.uThreshold.value =
       this.threshold / (MAX_BLIP_STEPS + 1);
 
-    super.render();
+    super.render(undefined, (step: number) => [
+      this.seedVoxel.z - (step + 1),
+      this.seedVoxel.z + (step + 1),
+    ]);
   }
 
   public dispose() {

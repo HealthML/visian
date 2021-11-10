@@ -1,5 +1,6 @@
 import {
   dataColorKeys,
+  i18n,
   IDocument,
   IEditor,
   IImageLayer,
@@ -10,7 +11,13 @@ import {
   TrackingLog,
   ValueType,
 } from "@visian/ui-shared";
-import { ISerializable, ITKImage, readMedicalImage, Zip } from "@visian/utils";
+import {
+  ImageMismatchError,
+  ISerializable,
+  ITKImage,
+  readMedicalImage,
+  Zip,
+} from "@visian/utils";
 import FileSaver from "file-saver";
 import { action, computed, makeObservable, observable, toJS } from "mobx";
 import path from "path";
@@ -507,7 +514,30 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
     }
   }
 
+  private checkHardwareRequirements(size: number[]) {
+    const renderer = this.renderers?.[0];
+    if (!renderer) return;
+
+    const is3D =
+      size.reduce((previous, current) => previous + (current > 1 ? 1 : 0), 0) >
+      2;
+
+    let dimensionLimit = Infinity;
+    if (is3D) {
+      const gl = renderer.getContext() as WebGL2RenderingContext;
+      dimensionLimit = gl.getParameter(gl.MAX_3D_TEXTURE_SIZE);
+    } else {
+      dimensionLimit = renderer.capabilities.maxTextureSize ?? 0;
+    }
+
+    if (size.some((value) => value > dimensionLimit)) {
+      throw new Error("image-too-large-error");
+    }
+  }
+
   public async importImage(image: ITKImage) {
+    this.checkHardwareRequirements(image.size);
+
     const imageLayer = ImageLayer.fromITKImage(image, this, {
       color: defaultImageColor,
     });
@@ -515,12 +545,21 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
       this.baseImageLayer &&
       !this.baseImageLayer.image.voxelCount.equals(imageLayer.image.voxelCount)
     ) {
-      throw new Error("image-mismatch-error");
+      if (!imageLayer.image.name) {
+        throw new ImageMismatchError(
+          i18n.t("image-mismatch-error-filename", {
+            fileName: imageLayer.image.name,
+          }),
+        );
+      }
+      throw new ImageMismatchError(i18n.t("image-mismatch-error"));
     }
     this.addLayer(imageLayer);
   }
 
   public async importAnnotation(image: ITKImage) {
+    this.checkHardwareRequirements(image.size);
+
     const annotationLayer = ImageLayer.fromITKImage(image, this, {
       isAnnotation: true,
       color: this.getFirstUnusedColor(),
@@ -531,7 +570,14 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
         annotationLayer.image.voxelCount,
       )
     ) {
-      throw new Error("image-mismatch-error");
+      if (annotationLayer.image.name) {
+        throw new ImageMismatchError(
+          i18n.t("image-mismatch-error-filename", {
+            fileName: annotationLayer.image.name,
+          }),
+        );
+      }
+      throw new ImageMismatchError(i18n.t("image-mismatch-error"));
     }
 
     this.addLayer(annotationLayer);

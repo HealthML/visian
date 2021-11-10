@@ -5,7 +5,7 @@ import { reaction } from "mobx";
 import { RenderedImage } from "../rendered-image";
 import { ToolRenderer } from "./tool-renderer";
 import { Circle, RegionGrowingMaterial } from "./utils";
-import ScreenAlignedQuad from "../screen-aligned-quad";
+import { ScreenAlignedQuad } from "../screen-aligned-quad";
 
 export class RegionGrowingRenderer extends ToolRenderer {
   protected blipRenderTargets: THREE.WebGLRenderTarget[] = [];
@@ -64,7 +64,11 @@ export class RegionGrowingRenderer extends ToolRenderer {
     this.regionGrowingQuad.dispose();
   }
 
-  public doRegionGrowing(threshold: number, boundingRadius?: number) {
+  public doRegionGrowing(
+    threshold: number,
+    boundingRadius?: number,
+    flush = true,
+  ) {
     if (!this.lastCircle) return;
 
     const annotation = (this.document.activeLayer as IImageLayer | undefined)
@@ -154,7 +158,7 @@ export class RegionGrowingRenderer extends ToolRenderer {
       renderer.autoClear = true;
     });
 
-    this.flushToAnnotation(annotation);
+    if (flush) this.flushToAnnotation(annotation);
   }
 
   public endStroke() {

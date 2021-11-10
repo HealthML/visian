@@ -5,6 +5,12 @@ import { CircleBrush } from "./circle-brush";
 export class SmartBrush<
   N extends "smart-brush" | "smart-eraser"
 > extends CircleBrush<N> {
+  public readonly excludeFromSnapshotTracking = [
+    "regionGrowingRenderer",
+    "document",
+    "toolRenderer",
+  ];
+
   constructor(
     document: IDocument,
     private regionGrowingRenderer: RegionGrowingRenderer,

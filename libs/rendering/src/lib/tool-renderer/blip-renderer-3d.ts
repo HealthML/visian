@@ -1,10 +1,21 @@
-import { IBlipRenderer3D, IDocument, IImageLayer } from "@visian/ui-shared";
-import { IDisposable, IDisposer } from "@visian/utils";
+import { Texture3DRenderer } from "@visian/rendering";
+import {
+  IBlipRenderer3D,
+  IDocument,
+  IImageLayer,
+  MergeFunction,
+} from "@visian/ui-shared";
+import {
+  getPlaneAxes,
+  IDisposable,
+  IDisposer,
+  Vector,
+  ViewType,
+} from "@visian/utils";
 import { action, makeObservable, observable, reaction } from "mobx";
 import * as THREE from "three";
 
-import { MergeFunction, RenderedImage } from "../rendered-image";
-import ScreenAlignedQuad from "../screen-aligned-quad";
+import { ImageRenderTarget, RenderedImage } from "../rendered-image";
 import { Blip3DMaterial, MAX_BLIP_STEPS } from "./utils";
 
 export class BlipRenderer3D implements IBlipRenderer3D, IDisposable {
@@ -26,48 +37,45 @@ export class BlipRenderer3D implements IBlipRenderer3D, IDisposable {
   protected blipRenderTargets: THREE.WebGLRenderTarget[] = [];
 
   protected material: Blip3DMaterial;
-  protected quad: ScreenAlignedQuad;
+  protected texture3DRenderer: Texture3DRenderer;
 
   constructor(
     protected document: IDocument,
     parameters?: THREE.ShaderMaterialParameters,
   ) {
-    this.material = new Blip3DMaterial(parameters);
-    this.quad = new ScreenAlignedQuad(this.material);
+    this.material = new Blip3DMaterial(document, parameters);
+    this.texture3DRenderer = new Texture3DRenderer();
 
     this.disposers.push(
       reaction(
-        () => document.renderers,
-        (renderers) => {
+        () =>
+          [document.renderers, Boolean(document.baseImageLayer?.is3DLayer)] as [
+            THREE.WebGLRenderer[] | undefined,
+            boolean,
+          ],
+        ([renderers, is3D]) => {
           if (renderers) {
+            const imageProperties = {
+              voxelCount: new Vector([1, 1, 1]),
+              is3D,
+              defaultViewType: ViewType.Transverse,
+            };
             this.renderTargets = renderers.map(
-              () =>
-                new THREE.WebGLRenderTarget(1, 1, {
-                  magFilter: THREE.NearestFilter,
-                  minFilter: THREE.NearestFilter,
-                }),
+              () => new ImageRenderTarget(imageProperties, THREE.NearestFilter),
             );
             this.blipRenderTargets = renderers.map(
-              () =>
-                new THREE.WebGLRenderTarget(1, 1, {
-                  magFilter: THREE.NearestFilter,
-                  minFilter: THREE.NearestFilter,
-                }),
+              () => new ImageRenderTarget(imageProperties, THREE.NearestFilter),
             );
             this.resizeRenderTargets();
-
-            renderers.forEach((renderer) => {
-              this.quad.compileWith(renderer);
-            });
           }
         },
         { fireImmediately: true },
       ),
       reaction(
-        () =>
-          document.activeLayer?.kind === "image"
-            ? (document.activeLayer as IImageLayer).image.getAtlasSize()
-            : undefined,
+        () => [
+          document.baseImageLayer?.image.voxelCount.toArray(),
+          document.baseImageLayer?.image.defaultViewType,
+        ],
         this.resizeRenderTargets,
       ),
     );
@@ -111,12 +119,12 @@ export class BlipRenderer3D implements IBlipRenderer3D, IDisposable {
    * used to evolve an existing annotation instead of generating one from
    * scratch based on just the source image.
    */
-  public render(initialTarget?: IImageLayer) {
+  public render(
+    initialTarget?: IImageLayer,
+    getIntervalFromStep?: (step: number) => [number, number],
+  ) {
     const sourceImage = this.sourceLayer?.image as RenderedImage | undefined;
     if (!sourceImage) return;
-
-    this.material.setAtlasGrid(sourceImage.getAtlasGrid().toArray());
-    this.material.setVoxelCount(sourceImage.voxelCount.toArray());
 
     this.steps = this.maxSteps;
     const blipSteps = Math.min(this.maxSteps, sourceImage.voxelCount.sum());
@@ -126,10 +134,10 @@ export class BlipRenderer3D implements IBlipRenderer3D, IDisposable {
       this.hasOddOutput = !this.hasOddOutput;
     }
 
+    this.texture3DRenderer.setMaterial(this.material);
+
     this.document.renderers?.forEach((renderer, rendererIndex) => {
       this.material.setSourceTexture(sourceImage.getTexture(rendererIndex));
-
-      renderer.autoClear = false;
 
       for (let i = 0; i < blipSteps; i++) {
         const isOdd = i % 2 ? hasOddInput : !hasOddInput;
@@ -146,16 +154,18 @@ export class BlipRenderer3D implements IBlipRenderer3D, IDisposable {
           );
         }
         this.material.setStep(i);
-        renderer.setRenderTarget(
+        this.texture3DRenderer.setTarget(
           isOdd
             ? this.blipRenderTargets[rendererIndex]
             : this.renderTargets[rendererIndex],
         );
-        this.quad.renderWith(renderer);
-      }
 
-      renderer.setRenderTarget(null);
-      renderer.autoClear = true;
+        this.texture3DRenderer.render(
+          renderer,
+          getIntervalFromStep?.(i),
+          false,
+        );
+      }
     });
 
     this.holdsPreview = true;
@@ -179,9 +189,9 @@ export class BlipRenderer3D implements IBlipRenderer3D, IDisposable {
     const annotation = layer.image as RenderedImage;
 
     if (shouldReplace) {
-      annotation.writeToAtlas(this.outputTextures, MergeFunction.Replace);
+      annotation.writeToTexture(this.outputTextures, MergeFunction.Replace);
     } else {
-      annotation.writeToAtlas(
+      annotation.writeToTexture(
         this.outputTextures,
         MergeFunction.Add,
         this.steps !== undefined
@@ -212,34 +222,44 @@ export class BlipRenderer3D implements IBlipRenderer3D, IDisposable {
   }
 
   protected resizeRenderTargets = () => {
-    if (!this.document.baseImageLayer) return;
+    const { baseImageLayer } = this.document;
+    if (!baseImageLayer) return;
 
-    const [
-      width,
-      height,
-    ] = this.document.baseImageLayer.image.getAtlasSize().toArray();
+    const { voxelCount } = baseImageLayer.image;
+
+    let width = 0;
+    let height = 0;
+    let depth = 1;
+    if (baseImageLayer.is3DLayer) {
+      width = voxelCount.x;
+      height = voxelCount.y;
+      depth = voxelCount.z;
+    } else {
+      [width, height] = getPlaneAxes(baseImageLayer.image.defaultViewType).map(
+        (axis) => voxelCount[axis],
+      );
+    }
 
     [...this.renderTargets, ...this.blipRenderTargets].forEach(
       (renderTarget) => {
-        renderTarget.setSize(width, height);
+        renderTarget.setSize(width, height, depth);
       },
     );
   };
 
   protected clearRenderTargets() {
     this.document.renderers?.forEach((renderer, rendererIndex) => {
-      renderer.setRenderTarget(this.renderTargets[rendererIndex]);
-      renderer.clear();
-      renderer.setRenderTarget(this.blipRenderTargets[rendererIndex]);
-      renderer.clear();
-      renderer.setRenderTarget(null);
+      this.texture3DRenderer.setTarget(this.renderTargets[rendererIndex]);
+      this.texture3DRenderer.clear(renderer);
+      this.texture3DRenderer.setTarget(this.blipRenderTargets[rendererIndex]);
+      this.texture3DRenderer.clear(renderer);
     });
   }
 
   public dispose() {
     this.disposers.forEach((disposer) => disposer());
     this.material.dispose();
-    this.quad.dispose();
+    this.texture3DRenderer.dispose();
     [...this.renderTargets, ...this.blipRenderTargets].forEach((rendertarget) =>
       rendertarget.dispose(),
     );

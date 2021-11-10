@@ -5,6 +5,12 @@ import { CircleBrush } from "./circle-brush";
 export class BoundedSmartBrush<
   N extends "bounded-smart-brush" | "bounded-smart-eraser"
 > extends CircleBrush<N> {
+  public readonly excludeFromSnapshotTracking = [
+    "document",
+    "regionGrowingRenderer",
+    "toolRenderer",
+  ];
+
   constructor(
     document: IDocument,
     private regionGrowingRenderer: RegionGrowingRenderer,
@@ -44,6 +50,7 @@ export class BoundedSmartBrush<
       this.regionGrowingRenderer.doRegionGrowing(
         this.document.tools.smartBrushThreshold,
         this.document.tools.boundedSmartBrushRadius,
+        false,
       );
     });
   }

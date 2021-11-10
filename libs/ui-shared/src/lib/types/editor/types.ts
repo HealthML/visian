@@ -12,3 +12,9 @@ export type ValueType<T> = T extends Record<infer _K, infer V> ? V : T;
  * another object that should be resolved under the hood.
  */
 export type Reference<T> = T;
+
+export enum MergeFunction {
+  Replace = 0,
+  Add = 1,
+  Subtract = 2,
+}

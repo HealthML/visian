@@ -446,5 +446,3 @@ export class SliceRenderer implements IDisposable, ISliceRenderer {
     this.slices.forEach((slice) => slice.setCrosshairSynchOffset());
   }
 }
-
-export default SliceRenderer;

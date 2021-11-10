@@ -37,7 +37,10 @@ export class VolumeMaterial
         MAX_STEPS: 600,
       },
       transparent: true,
+      glslVersion: THREE.GLSL3,
     });
+
+    sharedUniforms.subscribe(this);
 
     // Always render the back faces.
     this.side = THREE.BackSide;
