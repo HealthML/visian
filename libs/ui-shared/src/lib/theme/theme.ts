@@ -42,7 +42,7 @@ const colorModes = {
     redBorder: "rgba(202,51,69,0.5)",
     blueSheet: "rgba(0,133,255,0.4)",
     blueBorder: "rgba(0,133,255,0.6)",
-    sideViewSheet: "rgba(0, 0, 0, 0.05)",
+    sideViewSheet: "rgba(200,200,200,0.4)",
     sideViewBorder: "rgba(0, 0, 0, 0.3)",
 
     ...dataColors,
@@ -58,7 +58,7 @@ const colorModes = {
     gray: "rgba(255,255,255,0.5)",
     lightGray: "rgba(255,255,255,0.3)",
     veryLightGray: "rgba(255,255,255,0.1)",
-    sheet: "rgba(255,255,255,0.1)",
+    sheet: "rgba(78, 80, 89, 0.4)",
     sheetBorder: "rgba(255, 255, 255, 0.3)",
     placeholder: "rgba(255, 255, 255, 0.2)",
     modalUnderlay: "rgba(12, 14, 27, 0.8)",
@@ -68,7 +68,7 @@ const colorModes = {
     redBorder: "rgba(202,51,69,0.5)",
     blueSheet: "rgba(0,133,255,0.4)",
     blueBorder: "rgba(0,133,255,0.6)",
-    sideViewSheet: "rgba(255, 255, 255, 0.05)",
+    sideViewSheet: "rgba(78, 80, 89, 0.2)",
     sideViewBorder: "rgba(255, 255, 255, 0.3)",
 
     ...dataColors,
@@ -128,7 +128,7 @@ export const theme = {
     print: "@media print",
   },
   opacities: {
-    inactiveIcon: 0.3,
+    inactiveIcon: 0.4,
   },
   radii: {
     activeLayerBorderRadius: "8px",

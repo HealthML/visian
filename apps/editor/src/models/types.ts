@@ -38,4 +38,5 @@ export interface ProgressNotification {
   label?: string;
   labelTx?: string;
   progress?: number;
+  showSplash?: boolean;
 }

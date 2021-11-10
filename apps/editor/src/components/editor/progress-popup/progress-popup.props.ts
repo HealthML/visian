@@ -7,4 +7,6 @@ export interface ProgressPopUpProps {
    * If none is given, an indeterminate progress indicator will be displayed.
    */
   progress?: number;
+
+  showSplash?: boolean;
 }
