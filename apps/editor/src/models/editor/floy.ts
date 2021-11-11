@@ -1,11 +1,15 @@
 import { IDocument } from "@visian/ui-shared";
 import { deidentifyDicom, ISerializable, Zip } from "@visian/utils";
+import axios from "axios";
 import dicomParser from "dicom-parser";
 import { action, makeObservable, observable, toJS } from "mobx";
 import path from "path";
-import axios from "axios";
 
-import { FLOY_API_ROOT, FLOY_INFERENCE_ENDPOINTS } from "../../constants";
+import {
+  FLOY_API_ROOT,
+  FLOY_INFERENCE_ENDPOINTS,
+  FLOY_TOKEN_KEY,
+} from "../../constants";
 
 export interface FloyDemoSnapshot {
   seriesZip?: File;
@@ -166,11 +170,11 @@ export class FloyDemoController implements ISerializable<FloyDemoSnapshot> {
 
   // Token Management
   public hasToken(): boolean {
-    return Boolean(localStorage.getItem("floyToken"));
+    return Boolean(localStorage.getItem(FLOY_TOKEN_KEY));
   }
 
   public async activateToken(token?: string) {
-    const tokenWithDefault = token || localStorage.getItem("floyToken");
+    const tokenWithDefault = token || localStorage.getItem(FLOY_TOKEN_KEY);
     if (!tokenWithDefault) throw new Error();
 
     if (
@@ -179,15 +183,15 @@ export class FloyDemoController implements ISerializable<FloyDemoSnapshot> {
     ) {
       throw new Error();
     }
-    localStorage.setItem("floyToken", tokenWithDefault);
+    localStorage.setItem(FLOY_TOKEN_KEY, tokenWithDefault);
   }
 
   public clearToken() {
-    localStorage.removeItem("floyToken");
+    localStorage.removeItem(FLOY_TOKEN_KEY);
   }
 
   public async consent() {
-    const token = localStorage.getItem("floyToken");
+    const token = localStorage.getItem(FLOY_TOKEN_KEY);
     if (!token) throw new Error();
 
     if (
@@ -199,7 +203,7 @@ export class FloyDemoController implements ISerializable<FloyDemoSnapshot> {
   }
 
   public async log() {
-    const token = localStorage.getItem("floyToken");
+    const token = localStorage.getItem(FLOY_TOKEN_KEY);
     if (!token) throw new Error();
 
     if ((await axios.post(`${FLOY_API_ROOT}/tokens/${token}`)).status >= 400) {

@@ -1,3 +1,4 @@
+/* eslint-disable react/no-unescaped-entities */
 import {
   BlueButtonParam,
   Button,
@@ -174,6 +175,13 @@ const AIMessageSubtitle = styled(Text)`
   color: ${color("lightText")};
 `;
 
+export const ScrollView = styled.div`
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  overflow: auto;
+`;
+
 export const AIBar = observer(() => {
   const store = useStore();
 
@@ -303,7 +311,7 @@ export const AIBar = observer(() => {
 });
 
 const FloyPopUp = styled(PopUp)`
-  max-height: 80%;
+  max-height: 75%;
   max-width: 600px;
   overflow: auto;
 `;
@@ -400,6 +408,10 @@ export const FloyBar = observer(() => {
         setShouldShowPrivacy(false);
       });
   }, [runInferencing, store]);
+  const rejectConsent = useCallback(() => {
+    // eslint-disable-next-line no-alert
+    alert("Bitte Annehmen oder die Website verlassen");
+  }, []);
 
   const reset = useCallback(() => {
     store?.editor.newDocument();
@@ -509,23 +521,101 @@ export const FloyBar = observer(() => {
       )}
       {shouldShowPrivacy && (
         <FloyPopUp
-          title="Datenschutzvereinbarung"
+          title="AGB"
           dismiss={dismissPrivacy}
           shouldDismissOnOutsidePress
         >
-          <StyledParagraph>
-            Mit Ihrem Einverständnis dieser Datenschutzvereinbarung und der
-            Nutzung dieser Produktdemo stimmen Sie der notwendigen
-            Datenverarbeitung für die Ausführung der Produktdemo, internen
-            Ergebnisevaluation und weiteren Produktweiterentwicklung durch die
-            Floy GmbH zu. Der Floy GmbH ist es explizit untersagt, diese Daten
-            ohne vorherige schriftliche Genehmigung von Ihnen an Dritte
-            weiterzugeben oder für andere Zwecke, als die oben angegeben, zu
-            verwenden. Die Floy GmbH wird die Daten mit höchstmöglicher Vorsicht
-            behandeln.
-          </StyledParagraph>
+          <ScrollView>
+            <BoldParagraph>
+              Allgemeine Bedingungen zur Nutzung des Web Demonstrators der Floy
+              GmbH
+            </BoldParagraph>
+            <StyledParagraph>
+              Die unter der Internetadresse "demo.floy.com" bereitgestellten
+              Dienste ("Demonstrator") werden von der Floy GmbH, Loristraße 12,
+              80335 München (HRB 267609) ("Floy") betrieben. Der Demonstrator
+              soll Ihnen Leistungsfähigkeit der KI demonstrieren. Soweit Sie den
+              Demonstrator kostenlos nutzen möchten, müssen sie den folgenden
+              Bedingungen zustimmen. Mit Anklicken der Schaltfläche "Annehmen"
+              stimmen Sie den folgenden Bedingungen zu. Wenn Sie den folgenden
+              Bedingungen nicht zustimmen, müssen sie die Schaltfläche "Nicht
+              Annehmen" klicken und dürfen die Dienste unter demo.floy.com nicht
+              nutzen, darauf zugreifen oder anderweitig verwenden. Wenn Sie eine
+              gesonderte schriftliche Vereinbarung mit Floy abgeschlossen haben,
+              gilt diese gesonderte Vereinbarung und diese Bedingungen finden
+              keine Anwendung.
+            </StyledParagraph>
+            <BoldParagraph>Nutzungsrechte</BoldParagraph>
+            <StyledParagraph>
+              1.1 Floy räumt Ihnen ein unentgeltliches einfaches Recht zur
+              Nutzung des Demonstrator ein, beschränkt auf den Upload und die
+              Prüfung von bis zu zehn (10) radiologischen Lichtbilder für eigene
+              Testzwecke ein. Eine Nutzung der des Demonstrators zu
+              kommerziellen oder medizinischen Zwecken oder zur Behandlung von
+              Patienten ist untersagt. Sie erkennen ausdrücklich an, dass Floy
+              das alleinige Eigentum an sämtlichen Rechten an dem Demonstrator
+              behält und Ihnen durch die Nutzung des Demonstrators keine Rechte
+              an dem Demonstrator zuwachsen.
+            </StyledParagraph>
+            <StyledParagraph>
+              1.2 Sie garantieren, ausschließlich solche radiologischen
+              Lichtbilder im Rahmen des Demonstrators zu verwenden, für die Sie
+              der Inhaber sämtlicher für die Verwendung im Rahmen des
+              Demonstrators notwendigen Nutzungsrechte sind. Sie garantieren
+              ferner, ausschließlich Lichtbilder zu verwenden, die neben dem
+              Lichtbild keine weiteren Information in Bezug auf den Patienten
+              enthalten.
+            </StyledParagraph>
+            <BoldParagraph>Datenschutz</BoldParagraph>
+            <StyledParagraph>
+              2.1 Sie sind für die Einhaltung der Pflichten des Datenschutzes,
+              insbesondere aus der Datenschutz-Grundverordnung ("DSGVO") und dem
+              Bundesdatenschutzgesetz, sowie für die Einhaltung
+              berufsrechtlicher Pflichten allein verantwortlich. Sie
+              garantieren, radiologische Lichtbilder im Rahmen des Demonstrators
+              ausschließlich dann zu verwenden, wenn die jeweiligen Patienten in
+              die Verwendung der radiologischen Lichtbilder zu den vorgenannten
+              Zwecken wirksam eingewilligt haben. Floy wird die Lichtbilder
+              ausschließlich nach gesonderter Bestätigung in Textform, und
+              ausschließlich für den Fall, dass die jeweiligen Patienten wirksam
+              in die Übermittlung der Bilder und deren Weiterverarbeitung durch
+              Floy eingewilligt haben, selbstständig für das weitere Training
+              seiner KI nutzen.
+            </StyledParagraph>
+            <StyledParagraph>
+              2.2 Weitergehende Informationen zur Verarbeitung personenbezogener
+              Daten durch Floy und wie diese geschützt werden, finden Sie auf
+              der Webseite von Floy unter "floy.com" in der dort
+              bereitgestellten Datenschutzerklärung.
+            </StyledParagraph>
+            <BoldParagraph>Haftung und Gewährleistung</BoldParagraph>
+            <StyledParagraph>
+              3.1 Eine Gewährleistung für die Funktionsfähigkeit des
+              Demonstrators ist ausgeschlossen. Der Demonstrator wird
+              ausschließlich zu Testzwecken bereitgestellt. Aufgrund der frühen
+              Entwicklungsphase kann der Demonstrator Fehlfunktionen enthalten.
+            </StyledParagraph>
+            <StyledParagraph>
+              3.2 Floy haftet uneingeschränkt für Schäden aus der Verletzung von
+              Leben, Körper oder Gesundheit, die auf einer vorsätzlichen
+              oderfahrlässigen Pflichtverletzung von Floy oder einer
+              vorsätzlichen oder fahrlässigen Pflichtverletzung eines
+              gesetzlichen Vertreters oder Erfüllungsgehilfen von Floy beruhen.
+              Für sonstige Haftungsansprüche haftet Floy uneingeschränkt nur bei
+              Fehlen einer garantierten Qualität sowie für Schäden aufgrund von
+              Vorsatz und grober Fahrlässigkeit einschließlich derjenigen seiner
+              gesetzlichen Vertreter und leitenden Angestellten. Für leichte
+              Fahrlässigkeit haftet Floy nur bei Verletzung einer Pflicht, deren
+              Erfüllung für die Erreichung des Vertragszwecks von besonderer
+              Bedeutung ist ("Kardinalpflicht"). Bei Verletzung einer
+              Kardinalpflicht ist die Haftung insgesamt auf das EUR 100 sowie
+              auf Verluste begrenzt, deren Entstehung typischerweise im
+              Zusammenhang mit dem Demonstrator zu erwarten wäre.
+            </StyledParagraph>
+          </ScrollView>
           <InputRow>
-            <PopUpButton text="Ich stimme zu" onPointerDown={consent} />
+            <Button text="Annehmen" onPointerDown={consent} />
+            <PopUpButton text="Ablehnen" onPointerDown={rejectConsent} />
           </InputRow>
         </FloyPopUp>
       )}

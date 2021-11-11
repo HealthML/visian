@@ -14,12 +14,16 @@ import React, { useCallback, useState } from "react";
 import styled, { useTheme } from "styled-components";
 
 import { useStore } from "../../../app/root-store";
-import { feedbackMailAddress } from "../../../constants";
+import { feedbackMailAddress, IS_FLOY_DEMO } from "../../../constants";
 import { MenuProps } from "./menu.props";
 
 // Styled Components
 const MenuButton = styled(FloatingUIButton)`
   margin-right: 16px;
+`;
+
+const StyledLink = styled.a`
+  width: 100%;
 `;
 
 // Menu Items
@@ -110,7 +114,26 @@ export const Menu: React.FC<MenuProps> = observer(
               handlePress={sendFeedback}
             />
           )}
-          <RedButtonParam labelTx="clear-data" handlePress={destroy} isLast />
+          <RedButtonParam labelTx="clear-data" handlePress={destroy} />
+          {IS_FLOY_DEMO && (
+            <>
+              <Divider />
+              <StyledLink
+                href="https://www.floy.com/data-privacy"
+                target="_blank"
+                rel="noreferrer"
+              >
+                <ButtonParam label="Datenschutz" />
+              </StyledLink>
+              <StyledLink
+                href="https://www.floy.com/legal-notice"
+                target="_blank"
+                rel="noreferrer"
+              >
+                <ButtonParam label="Impressum" isLast />
+              </StyledLink>
+            </>
+          )}
         </Modal>
       </>
     );

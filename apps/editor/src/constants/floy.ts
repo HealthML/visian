@@ -7,3 +7,4 @@ export const FLOY_INFERENCE_ENDPOINTS = [
 ];
 export const FLOY_API_ROOT =
   process.env.FLOY_API_ROOT || "https://demo-api.floy.com";
+export const FLOY_TOKEN_KEY = "floyToken";

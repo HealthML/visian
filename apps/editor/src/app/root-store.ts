@@ -8,7 +8,11 @@ import {
 } from "@visian/utils";
 import React from "react";
 
-import { storePersistInterval } from "../constants";
+import {
+  FLOY_TOKEN_KEY,
+  IS_FLOY_DEMO,
+  storePersistInterval,
+} from "../constants";
 import { RootStore } from "../models";
 import { Task, TaskType } from "../models/who";
 
@@ -33,6 +37,13 @@ export const setupRootStore = async () => {
 
     if (url.searchParams.has("tracking")) {
       store.initializeTracker();
+    }
+
+    if (IS_FLOY_DEMO) {
+      const tokenParam = url.searchParams.get("token");
+      if (tokenParam) {
+        localStorage.setItem(FLOY_TOKEN_KEY, tokenParam);
+      }
     }
 
     try {
