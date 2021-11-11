@@ -9,7 +9,6 @@ import {
 import { IEditor, IImageLayer, ISliceRenderer } from "@visian/ui-shared";
 import { autorun, reaction } from "mobx";
 import * as THREE from "three";
-import { GUI } from "three/examples/jsm/libs/dat.gui.module.js";
 
 import { Slice } from "./slice";
 import {
@@ -18,7 +17,7 @@ import {
   getWebGLSizeFromCamera,
   setMainCameraPlanes,
 } from "./utils";
-import noise from "./noise.png";
+import { RenderedSheet } from "../rendered-sheet";
 
 export class SliceRenderer implements IDisposable, ISliceRenderer {
   private _renderers: THREE.WebGLRenderer[];
@@ -52,97 +51,7 @@ export class SliceRenderer implements IDisposable, ISliceRenderer {
     this.slices = viewTypes.map((viewType) => new Slice(editor, viewType));
     this.slices.forEach((slice, viewType) => this.scenes[viewType].add(slice));
 
-    const params = {
-      color: 0xffffff,
-      transmission: 1,
-      roughness: 0.93,
-      ior: 1.4,
-      thickness: 0,
-    };
-
-    const testSheetMaterial = new THREE.MeshPhysicalMaterial(params);
-    testSheetMaterial.thickness = params.thickness;
-
-    const width = 1;
-    const height = 1;
-    const x = -width / 2;
-    const y = -height / 2;
-    const radius = 0.018;
-
-    const shape = new THREE.Shape();
-    shape.moveTo(x, y + radius);
-    shape.lineTo(x, y + height - radius);
-    shape.absarc(
-      x + radius,
-      y + height - radius,
-      radius,
-      Math.PI,
-      0.5 * Math.PI,
-      true,
-    );
-    shape.moveTo(x + radius, y + height);
-    shape.lineTo(x + width - radius, y + height);
-    shape.absarc(
-      x + width - radius,
-      y + height - radius,
-      radius,
-      0.5 * Math.PI,
-      0,
-      true,
-    );
-    shape.moveTo(x + width, y + height - radius);
-    shape.lineTo(x + width, y + radius);
-    shape.absarc(
-      x + width - radius,
-      y + radius,
-      radius,
-      0,
-      -0.5 * Math.PI,
-      true,
-    );
-    shape.moveTo(x + width - radius, y);
-    shape.lineTo(x + radius, y);
-    shape.absarc(x + radius, y + radius, radius, -0.5 * Math.PI, Math.PI, true);
-
-    const geometry = new THREE.ShapeBufferGeometry(shape);
-    (geometry.attributes.uv as THREE.BufferAttribute).copyArray(
-      (geometry.attributes.uv.array as Array<number>).map((a) => 5 * a),
-    );
-
-    const testSheet = new THREE.Mesh(geometry, testSheetMaterial);
-
-    testSheet.add(
-      new THREE.Mesh(
-        geometry,
-        new THREE.MeshBasicMaterial({ transparent: true, opacity: 0.05 }),
-      ),
-    );
-
-    const loader = new THREE.TextureLoader();
-    const noiseMap = loader.load(noise, () => this.lazyRender());
-    noiseMap.wrapS = THREE.RepeatWrapping;
-    noiseMap.wrapT = THREE.RepeatWrapping;
-    testSheet.add(
-      new THREE.Mesh(
-        geometry,
-        new THREE.MeshBasicMaterial({
-          map: noiseMap,
-          transparent: true,
-          opacity: 1,
-        }),
-      ),
-    );
-
-    const outline = new THREE.Line(
-      new THREE.BufferGeometry().setFromPoints(shape.getPoints()),
-      new THREE.LineBasicMaterial({
-        transparent: true,
-        opacity: 0.3,
-      }),
-    );
-    outline.position.z = 1;
-    testSheet.add(outline);
-
+    const testSheet = new RenderedSheet(editor);
     testSheet.position.z = -1;
 
     testSheet.add(this.slices[1]);
@@ -154,25 +63,6 @@ export class SliceRenderer implements IDisposable, ISliceRenderer {
 
     window.addEventListener("resize", this.resize);
     this.resize();
-
-    const gui = new GUI();
-    gui.add(params, "transmission", 0, 1, 0.01).onChange(() => {
-      testSheetMaterial.transmission = params.transmission;
-      this.lazyRender();
-    });
-    gui.add(params, "roughness", 0, 1, 0.01).onChange(() => {
-      testSheetMaterial.roughness = params.roughness;
-      this.lazyRender();
-    });
-    gui.add(params, "ior", 1, 2.333, 0.01).onChange(() => {
-      testSheetMaterial.ior = params.ior;
-      this.lazyRender();
-    });
-    gui.add(params, "thickness", 0, 0.2, 0.005).onChange(() => {
-      testSheetMaterial.thickness = params.thickness;
-      this.lazyRender();
-    });
-    gui.open();
 
     this.disposers.push(
       reaction(

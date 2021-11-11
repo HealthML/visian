@@ -2,10 +2,9 @@ import React from "react";
 import ReactDOM from "react-dom";
 import styled from "styled-components";
 
-import { color, fontWeight, zIndex } from "../../theme";
+import { color, fontWeight, noise, zIndex } from "../../theme";
 import { useModalRoot } from "../box";
 import { Sheet } from "../sheet";
-import noise from "../sheet/noise.png";
 import { Title } from "../text";
 import { NotificationProps } from "./notification.props";
 
