@@ -1,5 +1,10 @@
 import { IDocument } from "@visian/ui-shared";
-import { deidentifyDicom, ISerializable, Zip } from "@visian/utils";
+import {
+  createFileFromBase64,
+  deidentifyDicom,
+  ISerializable,
+  Zip,
+} from "@visian/utils";
 import axios from "axios";
 import dicomParser from "dicom-parser";
 import { action, makeObservable, observable, toJS } from "mobx";
@@ -156,14 +161,30 @@ export class FloyDemoController implements ISerializable<FloyDemoSnapshot> {
 
     this.setInferenceResults(
       await Promise.all(
-        FLOY_INFERENCE_ENDPOINTS.map(async (endpoint) =>
-          (
+        FLOY_INFERENCE_ENDPOINTS.map(async (endpoint) => {
+          const data = await (
             await fetch(endpoint, {
               method: "POST",
               body: formData,
             })
-          ).json(),
-        ),
+          ).json();
+
+          if (data.segmentationMasksNIFTI) {
+            try {
+              await this.document.importFiles(
+                createFileFromBase64(
+                  "segmentation.nii",
+                  data.segmentationMasksNIFTI,
+                ),
+                "Segmentation",
+                true,
+              );
+            } catch {
+              /* Intentionally left blank */
+            }
+          }
+          return data;
+        }),
       ),
     );
   };

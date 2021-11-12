@@ -372,7 +372,7 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
     }
 
     if (!Object.values(this.layerMap).some((layer) => layer.isAnnotation)) {
-      this.addNewAnnotationLayer();
+      if (!IS_FLOY_DEMO) this.addNewAnnotationLayer();
       this.viewport2D.setMainViewType();
     }
     this.context?.persist();
@@ -490,10 +490,9 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
       return;
     }
 
-    if (IS_FLOY_DEMO) {
+    if (IS_FLOY_DEMO && !isAnnotation) {
       if (!(await this.floyDemo.isDemoCandidate(filteredFiles))) return;
       await this.floyDemo.setDemoCandidate(filteredFiles, name);
-      // await this.floyDemo.runInferencing();
     }
 
     const isFirstLayer = !this.layerIds.length;

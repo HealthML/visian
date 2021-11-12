@@ -75,6 +75,12 @@ export interface IDocument {
   /** Adds a layer to the document. */
   addLayer(layer: ILayer): void;
 
+  importFiles(
+    files: File[] | File,
+    name?: string,
+    isAnnotation?: boolean,
+  ): Promise<void>;
+
   /** Deletes a layer from the document. */
   deleteLayer(idOrLayer: string | ILayer): void;
 
