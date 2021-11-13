@@ -1,11 +1,8 @@
 import type { IDisposable, Pixel, ViewType } from "@visian/utils";
-import type * as THREE from "three";
 
 import type { IOutline } from "./outline";
 
 export interface ISliceRenderer extends IDisposable {
-  renderers: THREE.WebGLRenderer[];
-
   animate: () => void;
 
   lazyRender(): void;

@@ -25,10 +25,9 @@ import {
 import { RenderedSheet } from "../rendered-sheet";
 
 export class SliceRenderer implements IDisposable, ISliceRenderer {
-  private _renderers: THREE.WebGLRenderer[];
-  private mainCamera: THREE.OrthographicCamera;
-  private sideCamera: THREE.OrthographicCamera;
-  private scenes = viewTypes.map(() => new THREE.Scene());
+  private renderer: THREE.WebGLRenderer;
+  private camera: THREE.OrthographicCamera;
+  private scene = new THREE.Scene();
 
   public slices: Slice[];
 
@@ -37,21 +36,13 @@ export class SliceRenderer implements IDisposable, ISliceRenderer {
   private disposers: IDisposer[] = [];
 
   constructor(private editor: IEditor) {
-    this._renderers = editor.renderers;
+    [this.renderer] = editor.renderers;
 
     const aspect = this.canvas.clientWidth / this.canvas.clientHeight;
-    this.mainCamera = new THREE.OrthographicCamera(
-      -aspect,
-      aspect,
-      1,
-      -1,
-      -20,
-      20,
-    );
-    this.sideCamera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 20);
+    this.camera = new THREE.OrthographicCamera(-aspect, aspect, 1, -1, -20, 20);
 
     this.slices = viewTypes.map((viewType) => new Slice(editor, viewType));
-    this.slices.forEach((slice, viewType) => this.scenes[viewType].add(slice));
+    this.scene.add(this.slices[ViewType.Transverse]);
 
     const testSheet = new RenderedSheet(editor);
     testSheet.position.z = -1;
@@ -60,8 +51,8 @@ export class SliceRenderer implements IDisposable, ISliceRenderer {
 
     this.slices[1].position.z = 20;
 
-    this.scenes[0].add(testSheet);
-    this.scenes[0].background = new THREE.Color(0x0c0e1b);
+    this.scene.add(testSheet);
+    this.scene.background = new THREE.Color(0x0c0e1b);
 
     window.addEventListener("resize", this.resize);
     this.resize();
@@ -121,7 +112,7 @@ export class SliceRenderer implements IDisposable, ISliceRenderer {
       ),
       autorun(this.updateMainBrushCursor),
       autorun(() => {
-        (this.scenes[0].background as THREE.Color).set(
+        (this.scene.background as THREE.Color).set(
           c("background")({ theme: editor.theme }),
         );
         this.lazyRender();
@@ -134,10 +125,6 @@ export class SliceRenderer implements IDisposable, ISliceRenderer {
     this.disposers.forEach((disposer) => disposer());
     this.slices.forEach((slice) => slice.dispose());
     window.removeEventListener("resize", this.resize);
-  }
-
-  public get renderers() {
-    return this._renderers;
   }
 
   private get viewportElements() {
@@ -160,11 +147,11 @@ export class SliceRenderer implements IDisposable, ISliceRenderer {
   }
 
   public resize = () => {
-    this._renderers[0].setSize(window.innerWidth, window.innerHeight);
+    this.renderer.setSize(window.innerWidth, window.innerHeight);
 
     if (!this.editor.activeDocument) return;
 
-    setMainCameraPlanes(this.editor, this.canvas, this.mainCamera);
+    setMainCameraPlanes(this.editor, this.canvas, this.camera);
 
     this.eagerRender();
   };
@@ -172,7 +159,7 @@ export class SliceRenderer implements IDisposable, ISliceRenderer {
   private updateCamera = () => {
     if (!this.editor.activeDocument) return;
 
-    setMainCameraPlanes(this.editor, this.canvas, this.mainCamera);
+    setMainCameraPlanes(this.editor, this.canvas, this.camera);
     this.lazyRender();
   };
 
@@ -191,11 +178,11 @@ export class SliceRenderer implements IDisposable, ISliceRenderer {
   public getWebGLSize(
     viewType = this.editor.activeDocument?.viewport2D.mainViewType,
   ) {
-    return getWebGLSizeFromCamera(
-      viewType === this.editor.activeDocument?.viewport2D.mainViewType
-        ? this.mainCamera
-        : this.sideCamera,
-    );
+    if (viewType === this.editor.activeDocument?.viewport2D.mainViewType) {
+      return getWebGLSizeFromCamera(this.camera);
+    }
+
+    return { x: 2, y: 2 };
   }
 
   /** Converts a WebGL position to a screen space one. */
@@ -204,11 +191,11 @@ export class SliceRenderer implements IDisposable, ISliceRenderer {
     const webGLSize = this.getWebGLSize();
     return {
       x:
-        ((webGLPosition.x - this.mainCamera.left) / webGLSize.x) *
+        ((webGLPosition.x - this.camera.left) / webGLSize.x) *
           boundingBox.width +
         boundingBox.left,
       y:
-        ((webGLPosition.y - this.mainCamera.top) / -webGLSize.y) *
+        ((webGLPosition.y - this.camera.top) / -webGLSize.y) *
           boundingBox.height +
         boundingBox.top,
     };
@@ -232,17 +219,18 @@ export class SliceRenderer implements IDisposable, ISliceRenderer {
     const boundingBox = viewportElement.getBoundingClientRect();
     const webGLSize = this.getWebGLSize(viewType);
 
-    const camera = viewportIndex ? this.sideCamera : this.mainCamera;
+    const left = viewportIndex ? -1 : this.camera.left;
+    const top = viewportIndex ? 1 : this.camera.top;
 
     return {
       x:
         ((screenPosition.x - boundingBox.left) / boundingBox.width) *
           webGLSize.x +
-        camera.left,
+        left,
       y:
         ((screenPosition.y - boundingBox.top) / boundingBox.height) *
           -webGLSize.y +
-        camera.top,
+        top,
     };
   }
 
@@ -328,31 +316,17 @@ export class SliceRenderer implements IDisposable, ISliceRenderer {
     );
   }
 
-  private get activeRenderers() {
-    return this.editor.activeDocument?.viewport2D.showSideViews
-      ? this._renderers
-      : [this._renderers[0]];
-  }
-
   public eagerRender = () => {
     if (
       !this.editor.activeDocument ||
       this.editor.activeDocument.layers.length < 1
     ) {
-      this.activeRenderers.forEach((renderer) => renderer.clear());
+      this.renderer.clear();
       return;
     }
     this.lazyRenderTriggered = false;
 
-    const order = getOrder(
-      this.editor.activeDocument?.viewport2D.mainViewType ??
-        ViewType.Transverse,
-    );
-    this.activeRenderers.forEach((renderer, index) => {
-      const viewType = order[index];
-      const camera = index ? this.sideCamera : this.mainCamera;
-      renderer.render(this.scenes[viewType], camera);
-    });
+    this.renderer.render(this.scene, this.camera);
   };
 
   public resetCrosshairOffset() {
