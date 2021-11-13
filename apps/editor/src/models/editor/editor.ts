@@ -4,6 +4,7 @@ import {
   VolumeRenderer,
 } from "@visian/rendering";
 import {
+  ColorMode,
   i18n,
   IEditor,
   ISliceRenderer,
@@ -12,7 +13,13 @@ import {
   Theme,
 } from "@visian/ui-shared";
 import { IDisposable, ISerializable } from "@visian/utils";
-import { action, makeObservable, observable, runInAction } from "mobx";
+import {
+  action,
+  computed,
+  makeObservable,
+  observable,
+  runInAction,
+} from "mobx";
 import * as THREE from "three";
 
 import { StoreContext } from "../types";
@@ -57,6 +64,8 @@ export class Editor
       volumeRenderer: observable,
       performanceMode: observable,
       isAvailable: observable,
+
+      colorMode: computed,
 
       setActiveDocument: action,
       setPerformanceMode: action,
@@ -117,6 +126,10 @@ export class Editor
 
   public get theme(): Theme {
     return this.context.getTheme();
+  }
+
+  public get colorMode(): ColorMode {
+    return this.context.getColorMode();
   }
 
   // Performance Mode

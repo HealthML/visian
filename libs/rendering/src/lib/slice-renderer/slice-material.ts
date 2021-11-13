@@ -227,6 +227,13 @@ export class SliceMaterial extends THREE.ShaderMaterial implements IDisposable {
 
         editor.sliceRenderer?.lazyRender();
       }),
+      autorun(() => {
+        this.uniforms.uBackgroundColor.value.set(
+          color("background")({ theme: editor.theme }),
+        );
+
+        editor.sliceRenderer?.lazyRender();
+      }),
     );
   }
 

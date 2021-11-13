@@ -1,11 +1,9 @@
 import * as THREE from "three";
 
 export class BlurMaterial extends THREE.MeshPhysicalMaterial {
-  constructor(
-    params: THREE.MeshPhysicalMaterialParameters & { thickness: number },
-  ) {
-    super(params);
+  constructor() {
+    super({ transmission: 1, roughness: 0.75, ior: 1.49 });
 
-    this.thickness = params.thickness;
+    this.thickness = 0;
   }
 }

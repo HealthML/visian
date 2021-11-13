@@ -88,6 +88,7 @@ export class RootStore implements ISerializable<RootSnapshot> {
       getRefs: () => this.refs,
       setError: this.setError,
       getTracker: () => this.tracker,
+      getColorMode: () => this.colorMode,
     });
 
     deepObserve(this.editor, this.persist, {

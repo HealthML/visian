@@ -1,6 +1,6 @@
 import type * as THREE from "three";
 
-import type { Theme } from "../../theme";
+import type { ColorMode, Theme } from "../../theme";
 import type { ISliceRenderer, IVolumeRenderer } from "../rendering";
 import type { IDocument } from "./document";
 import { PerformanceMode } from "./types";
@@ -30,6 +30,9 @@ export interface IEditor {
 
   /** Proxy for the root store theme. */
   theme: Theme;
+
+  /** Proxy for the root store color mode. */
+  colorMode: ColorMode;
 
   /** The available graphics performance. */
   performanceMode: PerformanceMode;

@@ -1,23 +1,17 @@
 import { IEditor, noise } from "@visian/ui-shared";
+import { IDisposable, IDisposer } from "@visian/utils";
+import { autorun } from "mobx";
 import * as THREE from "three";
 import { BlurMaterial } from "./blur-material";
 import { RenderedSheetGeometry } from "./rendered-sheet-geometry";
 
-export class RenderedSheet extends THREE.Mesh {
+export class RenderedSheet extends THREE.Mesh implements IDisposable {
   private sharedGeometry: RenderedSheetGeometry;
 
-  constructor(editor: IEditor) {
-    const params = {
-      transmission: 1,
-      roughness: 0.75,
-      ior: 1.49,
-      thickness: 0,
-      backgroundOpacity: 0.2,
-      noiseOpacity: 1,
-      outlineOpacity: 0.3,
-    };
+  private disposers: IDisposer[] = [];
 
-    super(new RenderedSheetGeometry(), new BlurMaterial(params));
+  constructor(editor: IEditor) {
+    super(new RenderedSheetGeometry(), new BlurMaterial());
 
     this.sharedGeometry = this.geometry as RenderedSheetGeometry;
 
@@ -25,7 +19,7 @@ export class RenderedSheet extends THREE.Mesh {
       this.sharedGeometry,
       new THREE.MeshBasicMaterial({
         transparent: true,
-        opacity: params.backgroundOpacity,
+        opacity: 0.2,
         color: 0x4e5059,
       }),
     );
@@ -42,7 +36,7 @@ export class RenderedSheet extends THREE.Mesh {
       new THREE.MeshBasicMaterial({
         map: noiseMap,
         transparent: true,
-        opacity: params.noiseOpacity,
+        opacity: 1,
       }),
     );
     this.add(noiseLayer);
@@ -53,10 +47,27 @@ export class RenderedSheet extends THREE.Mesh {
       ),
       new THREE.LineBasicMaterial({
         transparent: true,
-        opacity: params.outlineOpacity,
+        opacity: 0.3,
       }),
     );
     outline.position.z = 1;
     this.add(outline);
+
+    this.disposers.push(
+      autorun(() => {
+        if (editor.colorMode === "dark") {
+          backgroundLayer.material.color.set(0x4e5059);
+          backgroundLayer.material.opacity = 0.2;
+        } else {
+          backgroundLayer.material.color.set(0xc8c8c8);
+          backgroundLayer.material.opacity = 0.4;
+        }
+        editor.sliceRenderer?.lazyRender();
+      }),
+    );
+  }
+
+  public dispose() {
+    this.disposers.forEach((disposer) => disposer());
   }
 }

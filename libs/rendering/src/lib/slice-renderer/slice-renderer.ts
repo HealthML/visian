@@ -6,7 +6,12 @@ import {
   ViewType,
   viewTypes,
 } from "@visian/utils";
-import { IEditor, IImageLayer, ISliceRenderer } from "@visian/ui-shared";
+import {
+  IEditor,
+  IImageLayer,
+  ISliceRenderer,
+  color as c,
+} from "@visian/ui-shared";
 import { autorun, reaction } from "mobx";
 import * as THREE from "three";
 
@@ -118,10 +123,17 @@ export class SliceRenderer implements IDisposable, ISliceRenderer {
         this.lazyRender,
       ),
       autorun(this.updateMainBrushCursor),
+      autorun(() => {
+        (this.scenes[0].background as THREE.Color).set(
+          c("background")({ theme: editor.theme }),
+        );
+        this.lazyRender();
+      }),
     );
   }
 
   public dispose() {
+    // TODO: dispose rendered sheets
     this.disposers.forEach((disposer) => disposer());
     this.slices.forEach((slice) => slice.dispose());
     window.removeEventListener("resize", this.resize);
