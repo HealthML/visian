@@ -175,6 +175,17 @@ const AIMessageSubtitle = styled(Text)`
   color: ${color("lightText")};
 `;
 
+const NoticeText = styled(Text)`
+  font-size: 10px;
+  left: 50%;
+  opacity: 0.8;
+  position: absolute;
+  width: 500px;
+  text-align: center;
+  top: 40px;
+  transform: translateX(-50%);
+`;
+
 export const ScrollView = styled.div`
   display: flex;
   flex: 1;
@@ -419,6 +430,12 @@ export const FloyBar = observer(() => {
 
   return (
     <>
+      <NoticeText>
+        Diese Web Applikation dient lediglich zu Demonstrationszwecken und ist
+        noch nicht als Medizinprodukt zertifiziert. Demzufolge darf sie unter
+        keinen Umständen in der Praxis angewandt werden. Bitte kontaktieren Sie
+        info@floy.com für weitere Informationen.
+      </NoticeText>
       {store?.editor.activeDocument?.floyDemo.hasDemoCandidate && (
         <AIBarSheet>
           <AIContainer>
