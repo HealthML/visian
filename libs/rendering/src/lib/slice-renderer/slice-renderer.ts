@@ -26,7 +26,6 @@ import { RenderedSheet } from "../rendered-sheet";
 
 export class SliceRenderer implements IDisposable, ISliceRenderer {
   private _renderers: THREE.WebGLRenderer[];
-  private canvases: HTMLCanvasElement[];
   private mainCamera: THREE.OrthographicCamera;
   private sideCamera: THREE.OrthographicCamera;
   private scenes = viewTypes.map(() => new THREE.Scene());
@@ -40,9 +39,7 @@ export class SliceRenderer implements IDisposable, ISliceRenderer {
   constructor(private editor: IEditor) {
     this._renderers = editor.renderers;
 
-    this.canvases = editor.renderers.map((renderer) => renderer.domElement);
-
-    const aspect = this.canvases[0].clientWidth / this.canvases[0].clientHeight;
+    const aspect = this.canvas.clientWidth / this.canvas.clientHeight;
     this.mainCamera = new THREE.OrthographicCamera(
       -aspect,
       aspect,
@@ -143,6 +140,18 @@ export class SliceRenderer implements IDisposable, ISliceRenderer {
     return this._renderers;
   }
 
+  private get viewportElements() {
+    return [
+      this.editor.renderers[0].domElement,
+      this.editor.refs.upperSideView?.current,
+      this.editor.refs.lowerSideView?.current,
+    ];
+  }
+
+  private get canvas() {
+    return this.viewportElements[0] as HTMLCanvasElement;
+  }
+
   public getOutline(
     viewType = this.editor.activeDocument?.viewport2D.mainViewType ??
       ViewType.Transverse,
@@ -155,7 +164,7 @@ export class SliceRenderer implements IDisposable, ISliceRenderer {
 
     if (!this.editor.activeDocument) return;
 
-    setMainCameraPlanes(this.editor, this.canvases[0], this.mainCamera);
+    setMainCameraPlanes(this.editor, this.canvas, this.mainCamera);
 
     this.eagerRender();
   };
@@ -163,7 +172,7 @@ export class SliceRenderer implements IDisposable, ISliceRenderer {
   private updateCamera = () => {
     if (!this.editor.activeDocument) return;
 
-    setMainCameraPlanes(this.editor, this.canvases[0], this.mainCamera);
+    setMainCameraPlanes(this.editor, this.canvas, this.mainCamera);
     this.lazyRender();
   };
 
@@ -191,7 +200,7 @@ export class SliceRenderer implements IDisposable, ISliceRenderer {
 
   /** Converts a WebGL position to a screen space one. */
   public getMainViewScreenPosition(webGLPosition: Pixel): Pixel {
-    const boundingBox = this.canvases[0].getBoundingClientRect();
+    const boundingBox = this.canvas.getBoundingClientRect();
     const webGLSize = this.getWebGLSize();
     return {
       x:
@@ -213,15 +222,17 @@ export class SliceRenderer implements IDisposable, ISliceRenderer {
   ): Pixel {
     if (!this.editor.activeDocument) return { x: 0, y: 0 };
 
-    const canvasIndex = getOrder(
+    const viewportIndex = getOrder(
       this.editor.activeDocument?.viewport2D.mainViewType,
     ).indexOf(viewType);
-    const canvas = this.canvases[canvasIndex];
+    const viewportElement = this.viewportElements[viewportIndex];
 
-    const boundingBox = canvas.getBoundingClientRect();
+    if (!viewportElement) return { x: 0, y: 0 };
+
+    const boundingBox = viewportElement.getBoundingClientRect();
     const webGLSize = this.getWebGLSize(viewType);
 
-    const camera = canvasIndex ? this.sideCamera : this.mainCamera;
+    const camera = viewportIndex ? this.sideCamera : this.mainCamera;
 
     return {
       x:
