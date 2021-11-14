@@ -2,10 +2,12 @@ import { IEditor, noise } from "@visian/ui-shared";
 import { IDisposable, IDisposer } from "@visian/utils";
 import { autorun, reaction } from "mobx";
 import * as THREE from "three";
+import ResizeSensor from "css-element-queries/src/ResizeSensor";
+
 import { BlurMaterial } from "./blur-material";
 import { RenderedSheetGeometry } from "./rendered-sheet-geometry";
 
-const DEFAULT_RADIUS = 0.018;
+const DEFAULT_RADIUS = 0.02;
 const RADIUS_UPDATE_EDGE = 0.004;
 
 export class RenderedSheet extends THREE.Mesh implements IDisposable {
@@ -13,6 +15,7 @@ export class RenderedSheet extends THREE.Mesh implements IDisposable {
   private currentRadius: number;
 
   private domElement?: HTMLElement;
+  private resizeSensor?: ResizeSensor;
 
   private disposers: IDisposer[] = [];
 
@@ -68,8 +71,14 @@ export class RenderedSheet extends THREE.Mesh implements IDisposable {
         (domElement) => {
           if (domElement) {
             this.domElement = domElement;
+            this.resizeSensor = new ResizeSensor(
+              domElement,
+              this.synchPosition,
+            );
           } else {
             this.domElement = undefined;
+            this.resizeSensor?.detach();
+            this.resizeSensor = undefined;
           }
           this.updateVisibility();
         },
@@ -87,43 +96,51 @@ export class RenderedSheet extends THREE.Mesh implements IDisposable {
   }
 
   public synchPosition = () => {
-    if (!this.domElement) return;
-    const boundingBox = this.domElement.getBoundingClientRect();
+    // Wrapped in setTimeout to ensure the DOM has updated.
+    setTimeout(() => {
+      if (!this.domElement) return;
+      const boundingBox = this.domElement.getBoundingClientRect();
 
-    // Position
-    const center = {
-      x: (boundingBox.left + boundingBox.right) / 2 / window.innerWidth,
-      y:
-        (window.innerHeight - (boundingBox.top + boundingBox.bottom) / 2) /
-        window.innerHeight,
-    };
+      // Position
+      const center = {
+        x: (boundingBox.left + boundingBox.right) / 2 / window.innerWidth,
+        y:
+          (window.innerHeight - (boundingBox.top + boundingBox.bottom) / 2) /
+          window.innerHeight,
+      };
 
-    const cameraSize = {
-      width: this.camera.right - this.camera.left,
-      height: this.camera.top - this.camera.bottom,
-    };
+      const cameraSize = {
+        width: this.camera.right - this.camera.left,
+        height: this.camera.top - this.camera.bottom,
+      };
 
-    this.position.set(
-      center.x * cameraSize.width + this.camera.left,
-      center.y * cameraSize.height + this.camera.bottom,
-      this.position.z,
-    );
+      this.position.set(
+        center.x * cameraSize.width + this.camera.left,
+        center.y * cameraSize.height + this.camera.bottom,
+        this.position.z,
+      );
 
-    // Scale
-    this.scale.set(
-      (boundingBox.width / window.innerWidth) * cameraSize.width,
-      (boundingBox.height / window.innerHeight) * cameraSize.height,
-      1,
-    );
+      // Scale
+      this.scale.set(
+        (boundingBox.width / window.innerWidth) * cameraSize.width,
+        (boundingBox.height / window.innerHeight) * cameraSize.height,
+        1,
+      );
 
-    // Radius
-    const radius = 10 / boundingBox.width;
-    if (Math.abs(this.currentRadius - radius) >= RADIUS_UPDATE_EDGE) {
-      const newGeometry = new RenderedSheetGeometry(radius);
-      this.sharedGeometry.copy(newGeometry);
-      newGeometry.dispose();
-      this.currentRadius = radius;
-    }
+      // Radius
+      const radius = 10 / boundingBox.width;
+      if (
+        radius !== Infinity &&
+        Math.abs(this.currentRadius - radius) >= RADIUS_UPDATE_EDGE
+      ) {
+        const newGeometry = new RenderedSheetGeometry(radius);
+        this.sharedGeometry.copy(newGeometry);
+        newGeometry.dispose();
+        this.currentRadius = radius;
+      }
+
+      this.editor.sliceRenderer?.lazyRender();
+    }, 10);
   };
 
   private updateVisibility = () => {
@@ -132,7 +149,7 @@ export class RenderedSheet extends THREE.Mesh implements IDisposable {
     );
 
     // Wrapped in setTimeout to ensure the DOM has updated.
-    if (this.visible) setTimeout(this.synchPosition, 10);
+    if (this.visible) this.synchPosition();
 
     this.editor.sliceRenderer?.lazyRender();
   };
