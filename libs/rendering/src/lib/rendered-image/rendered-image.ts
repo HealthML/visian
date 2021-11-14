@@ -43,7 +43,7 @@ export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
   /**
    * The render targets for the textures for the different WebGL contexts.
    *
-   * Sadly, Three currently does not let you change the filtering mode of a render targte's
+   * Sadly, Three currently does not let you change the filtering mode of a render target's
    * texture on the fly. As we need textures with nearest filtering for the 2D view and
    * linear filtering for the 3D view, we hold render targets for both filters.
    * See https://github.com/mrdoob/three.js/issues/14375
