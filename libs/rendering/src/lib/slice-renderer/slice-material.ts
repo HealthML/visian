@@ -41,6 +41,8 @@ export class SliceMaterial extends THREE.ShaderMaterial implements IDisposable {
       },
       defines: { VOLUMETRIC_IMAGE: "" },
       glslVersion: THREE.GLSL3,
+      // The main view can not be transparent because it has to be seen through the transmissive rendered
+      // sheets for the side views. Thus, it is blended onto the background color in the shader.
       transparent: !useBackgroundBlend,
       side: THREE.DoubleSide,
     });
