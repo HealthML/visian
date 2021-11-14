@@ -28,6 +28,7 @@ export class SliceRenderer implements IDisposable, ISliceRenderer {
   private renderer: THREE.WebGLRenderer;
   private camera: THREE.OrthographicCamera;
   private scene = new THREE.Scene();
+  private renderedSheets: RenderedSheet[];
 
   public slices: Slice[];
 
@@ -44,14 +45,26 @@ export class SliceRenderer implements IDisposable, ISliceRenderer {
     this.slices = viewTypes.map((viewType) => new Slice(editor, viewType));
     this.scene.add(this.slices[ViewType.Transverse]);
 
-    const testSheet = new RenderedSheet(editor);
-    testSheet.position.z = -1;
-
-    testSheet.add(this.slices[1]);
-
+    const upperSideViewSheet = new RenderedSheet(
+      editor,
+      "upperSideView",
+      this.camera,
+    );
+    upperSideViewSheet.position.z = -1;
+    upperSideViewSheet.add(this.slices[1]);
     this.slices[1].position.z = 20;
 
-    this.scene.add(testSheet);
+    const lowerSideViewSheet = new RenderedSheet(
+      editor,
+      "lowerSideView",
+      this.camera,
+    );
+    lowerSideViewSheet.position.z = -1;
+    lowerSideViewSheet.add(this.slices[2]);
+    this.slices[2].position.z = 20;
+
+    this.renderedSheets = [upperSideViewSheet, lowerSideViewSheet];
+    this.scene.add(...this.renderedSheets);
     this.scene.background = new THREE.Color(0x0c0e1b);
 
     window.addEventListener("resize", this.resize);
@@ -152,6 +165,10 @@ export class SliceRenderer implements IDisposable, ISliceRenderer {
     if (!this.editor.activeDocument) return;
 
     setMainCameraPlanes(this.editor, this.canvas, this.camera);
+
+    this.renderedSheets.forEach((renderedSheet) =>
+      renderedSheet.synchPosition(),
+    );
 
     this.eagerRender();
   };

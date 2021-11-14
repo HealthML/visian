@@ -200,7 +200,7 @@ export class Slice extends THREE.Group implements IDisposable {
       this.workingVector.multiplyScalar(
         this.editor.activeDocument.viewport2D.zoomLevel,
       );
-    } else if (this.viewType === ViewType.Sagittal) {
+    } else {
       this.workingVector.multiplyScalar(0.5);
     }
 

@@ -11,7 +11,6 @@ import {
   sliceVertexShader,
 } from "../shaders";
 import { MAX_BLIP_STEPS } from "../tool-renderer";
-import { getOrder } from "./utils";
 
 export class SliceMaterial extends THREE.ShaderMaterial implements IDisposable {
   protected disposers: IDisposer[] = [];
@@ -118,28 +117,17 @@ export class SliceMaterial extends THREE.ShaderMaterial implements IDisposable {
       }),
       autorun(() => {
         const layers = editor.activeDocument?.imageLayers || [];
-        const canvasIndex =
-          viewType === ViewType.Sagittal
-            ? 0
-            : getOrder(
-                editor.activeDocument?.viewport2D.mainViewType ??
-                  ViewType.Transverse,
-              ).indexOf(viewType);
 
         const layerData = layers.map((layer) =>
           layer ===
           editor.activeDocument?.tools.dilateErodeRenderer3D.targetLayer
-            ? editor.activeDocument.tools.dilateErodeRenderer3D.outputTextures[
-                canvasIndex
-              ]
-            : ((layer as IImageLayer).image as RenderedImage).getTexture(
-                canvasIndex,
-              ),
+            ? editor.activeDocument.tools.dilateErodeRenderer3D
+                .outputTextures[0]
+            : ((layer as IImageLayer).image as RenderedImage).getTexture(0),
         );
 
         this.uniforms.uLayerData0.value =
-          editor.activeDocument?.tools.layerPreviewTextures[canvasIndex] ||
-          null;
+          editor.activeDocument?.tools.layerPreviewTextures[0] || null;
 
         for (let i = 0; i < layerData.length; i++) {
           if (!this.uniforms[`uLayerData${i + 1}`]) {
@@ -152,7 +140,7 @@ export class SliceMaterial extends THREE.ShaderMaterial implements IDisposable {
           | IImageLayer
           | undefined;
         this.uniforms.uActiveLayerData.value = activeLayer
-          ? (activeLayer.image as RenderedImage).getTexture(canvasIndex)
+          ? (activeLayer.image as RenderedImage).getTexture(0)
           : null;
 
         this.uniforms.uActiveLayerIndex.value = activeLayer

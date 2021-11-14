@@ -1,6 +1,6 @@
 import { IEditor, noise } from "@visian/ui-shared";
 import { IDisposable, IDisposer } from "@visian/utils";
-import { autorun } from "mobx";
+import { autorun, reaction } from "mobx";
 import * as THREE from "three";
 import { BlurMaterial } from "./blur-material";
 import { RenderedSheetGeometry } from "./rendered-sheet-geometry";
@@ -8,9 +8,15 @@ import { RenderedSheetGeometry } from "./rendered-sheet-geometry";
 export class RenderedSheet extends THREE.Mesh implements IDisposable {
   private sharedGeometry: RenderedSheetGeometry;
 
+  private domElement?: HTMLElement;
+
   private disposers: IDisposer[] = [];
 
-  constructor(editor: IEditor) {
+  constructor(
+    private editor: IEditor,
+    viewportElementName: string,
+    private camera: THREE.OrthographicCamera,
+  ) {
     super(new RenderedSheetGeometry(), new BlurMaterial());
 
     this.sharedGeometry = this.geometry as RenderedSheetGeometry;
@@ -41,18 +47,6 @@ export class RenderedSheet extends THREE.Mesh implements IDisposable {
     );
     this.add(noiseLayer);
 
-    const outline = new THREE.Line(
-      new THREE.BufferGeometry().setFromPoints(
-        this.sharedGeometry.shape.getPoints(),
-      ),
-      new THREE.LineBasicMaterial({
-        transparent: true,
-        opacity: 0.3,
-      }),
-    );
-    outline.position.z = 1;
-    this.add(outline);
-
     this.disposers.push(
       autorun(() => {
         if (editor.colorMode === "dark") {
@@ -64,10 +58,59 @@ export class RenderedSheet extends THREE.Mesh implements IDisposable {
         }
         editor.sliceRenderer?.lazyRender();
       }),
+      reaction(
+        () => editor.refs[viewportElementName]?.current,
+        (domElement) => {
+          if (domElement) {
+            this.domElement = domElement;
+          } else {
+            this.domElement = undefined;
+          }
+          this.updateVisibility();
+        },
+        { fireImmediately: true },
+      ),
+      reaction(
+        () => this.editor.activeDocument?.viewport2D.showSideViews,
+        this.updateVisibility,
+      ),
     );
   }
 
   public dispose() {
     this.disposers.forEach((disposer) => disposer());
   }
+
+  public synchPosition = () => {
+    if (!this.domElement) return;
+    const boundingBox = this.domElement.getBoundingClientRect();
+    const center = {
+      x: (boundingBox.left + boundingBox.right) / 2 / window.innerWidth,
+      y:
+        (window.innerHeight - (boundingBox.top + boundingBox.bottom) / 2) /
+        window.innerHeight,
+    };
+
+    const cameraSize = {
+      width: this.camera.right - this.camera.left,
+      height: this.camera.top - this.camera.bottom,
+    };
+
+    this.position.set(
+      center.x * cameraSize.width + this.camera.left,
+      center.y * cameraSize.height + this.camera.bottom,
+      this.position.z,
+    );
+  };
+
+  private updateVisibility = () => {
+    this.visible = Boolean(
+      this.domElement && this.editor.activeDocument?.viewport2D.showSideViews,
+    );
+
+    // Wrapped in setTimeout to ensure the dom element has appeared.
+    if (this.visible) setTimeout(this.synchPosition, 10);
+
+    this.editor.sliceRenderer?.lazyRender();
+  };
 }
