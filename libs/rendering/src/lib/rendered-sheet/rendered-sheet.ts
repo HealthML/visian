@@ -5,8 +5,12 @@ import * as THREE from "three";
 import { BlurMaterial } from "./blur-material";
 import { RenderedSheetGeometry } from "./rendered-sheet-geometry";
 
+const DEFAULT_RADIUS = 0.018;
+const RADIUS_UPDATE_EDGE = 0.004;
+
 export class RenderedSheet extends THREE.Mesh implements IDisposable {
   private sharedGeometry: RenderedSheetGeometry;
+  private currentRadius: number;
 
   private domElement?: HTMLElement;
 
@@ -17,7 +21,8 @@ export class RenderedSheet extends THREE.Mesh implements IDisposable {
     viewportElementName: string,
     private camera: THREE.OrthographicCamera,
   ) {
-    super(new RenderedSheetGeometry(), new BlurMaterial());
+    super(new RenderedSheetGeometry(DEFAULT_RADIUS), new BlurMaterial());
+    this.currentRadius = DEFAULT_RADIUS;
 
     this.sharedGeometry = this.geometry as RenderedSheetGeometry;
 
@@ -105,12 +110,20 @@ export class RenderedSheet extends THREE.Mesh implements IDisposable {
     );
 
     // Scale
-
     this.scale.set(
       (boundingBox.width / window.innerWidth) * cameraSize.width,
       (boundingBox.height / window.innerHeight) * cameraSize.height,
       1,
     );
+
+    // Radius
+    const radius = 10 / boundingBox.width;
+    if (Math.abs(this.currentRadius - radius) >= RADIUS_UPDATE_EDGE) {
+      const newGeometry = new RenderedSheetGeometry(radius);
+      this.sharedGeometry.copy(newGeometry);
+      newGeometry.dispose();
+      this.currentRadius = radius;
+    }
   };
 
   private updateVisibility = () => {

@@ -3,12 +3,11 @@ import * as THREE from "three";
 export class RenderedSheetGeometry extends THREE.ShapeBufferGeometry {
   public shape: THREE.Shape;
 
-  constructor() {
+  constructor(radius: number) {
     const width = 1;
     const height = 1;
     const x = -width / 2;
     const y = -height / 2;
-    const radius = 0.018;
 
     const shape = new THREE.Shape();
     shape.moveTo(x, y + radius);
