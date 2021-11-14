@@ -202,14 +202,8 @@ export class SliceRenderer implements IDisposable, ISliceRenderer {
     this.lazyRenderTriggered = true;
   };
 
-  public getWebGLSize(
-    viewType = this.editor.activeDocument?.viewport2D.mainViewType,
-  ) {
-    if (viewType === this.editor.activeDocument?.viewport2D.mainViewType) {
-      return getWebGLSizeFromCamera(this.camera);
-    }
-
-    return { x: 2, y: 2 };
+  public getWebGLSize() {
+    return getWebGLSizeFromCamera(this.camera);
   }
 
   /** Converts a WebGL position to a screen space one. */
@@ -229,35 +223,21 @@ export class SliceRenderer implements IDisposable, ISliceRenderer {
   }
 
   /** Converts a screen space position to a WebGL one. */
-  public getWebGLPosition(
-    screenPosition: Pixel,
-    viewType = this.editor.activeDocument?.viewport2D.mainViewType ??
-      ViewType.Transverse,
-  ): Pixel {
+  public getWebGLPosition(screenPosition: Pixel): Pixel {
     if (!this.editor.activeDocument) return { x: 0, y: 0 };
 
-    const viewportIndex = getOrder(
-      this.editor.activeDocument?.viewport2D.mainViewType,
-    ).indexOf(viewType);
-    const viewportElement = this.viewportElements[viewportIndex];
-
-    if (!viewportElement) return { x: 0, y: 0 };
-
-    const boundingBox = viewportElement.getBoundingClientRect();
-    const webGLSize = this.getWebGLSize(viewType);
-
-    const left = viewportIndex ? -1 : this.camera.left;
-    const top = viewportIndex ? 1 : this.camera.top;
+    const boundingBox = this.canvas.getBoundingClientRect();
+    const webGLSize = this.getWebGLSize();
 
     return {
       x:
         ((screenPosition.x - boundingBox.left) / boundingBox.width) *
           webGLSize.x +
-        left,
+        this.camera.left,
       y:
         ((screenPosition.y - boundingBox.top) / boundingBox.height) *
           -webGLSize.y +
-        top,
+        this.camera.top,
     };
   }
 
@@ -271,7 +251,7 @@ export class SliceRenderer implements IDisposable, ISliceRenderer {
     viewType = this.editor.activeDocument?.viewport2D.mainViewType ??
       ViewType.Transverse,
   ) {
-    const webGLPosition = this.getWebGLPosition(screenPosition, viewType);
+    const webGLPosition = this.getWebGLPosition(screenPosition);
     return this.slices[viewType].getVirtualUVs(
       new THREE.Vector3(webGLPosition.x, webGLPosition.y, 0),
     );
