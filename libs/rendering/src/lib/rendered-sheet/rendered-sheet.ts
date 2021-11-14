@@ -84,6 +84,8 @@ export class RenderedSheet extends THREE.Mesh implements IDisposable {
   public synchPosition = () => {
     if (!this.domElement) return;
     const boundingBox = this.domElement.getBoundingClientRect();
+
+    // Position
     const center = {
       x: (boundingBox.left + boundingBox.right) / 2 / window.innerWidth,
       y:
@@ -101,6 +103,14 @@ export class RenderedSheet extends THREE.Mesh implements IDisposable {
       center.y * cameraSize.height + this.camera.bottom,
       this.position.z,
     );
+
+    // Scale
+
+    this.scale.set(
+      (boundingBox.width / window.innerWidth) * cameraSize.width,
+      (boundingBox.height / window.innerHeight) * cameraSize.height,
+      1,
+    );
   };
 
   private updateVisibility = () => {
@@ -108,7 +118,7 @@ export class RenderedSheet extends THREE.Mesh implements IDisposable {
       this.domElement && this.editor.activeDocument?.viewport2D.showSideViews,
     );
 
-    // Wrapped in setTimeout to ensure the dom element has appeared.
+    // Wrapped in setTimeout to ensure the DOM has updated.
     if (this.visible) setTimeout(this.synchPosition, 10);
 
     this.editor.sliceRenderer?.lazyRender();

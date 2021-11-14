@@ -171,11 +171,16 @@ export class SliceRenderer implements IDisposable, ISliceRenderer {
 
     setMainCameraPlanes(this.editor, this.canvas, this.camera);
 
-    this.renderedSheets.forEach((renderedSheet) =>
-      renderedSheet.synchPosition(),
-    );
-
     this.eagerRender();
+
+    // Wrapped in setTimeout to ensure the DOM has updated.
+    setTimeout(() => {
+      this.renderedSheets.forEach((renderedSheet) =>
+        renderedSheet.synchPosition(),
+      );
+
+      this.eagerRender();
+    }, 10);
   };
 
   private updateCamera = () => {
