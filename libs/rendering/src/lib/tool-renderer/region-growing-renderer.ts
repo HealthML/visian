@@ -8,8 +8,8 @@ import { Circle, RegionGrowingMaterial } from "./utils";
 import { ScreenAlignedQuad } from "../screen-aligned-quad";
 
 export class RegionGrowingRenderer extends ToolRenderer {
-  protected blipRenderTargets: THREE.WebGLRenderTarget[] = [];
-  protected dataSourceRenderTargets: THREE.WebGLRenderTarget[] = [];
+  protected blipRenderTarget = new THREE.WebGLRenderTarget(1, 1);
+  protected dataSourceRenderTarget = new THREE.WebGLRenderTarget(1, 1);
 
   protected isDataSourceDirty = true;
 
@@ -24,22 +24,9 @@ export class RegionGrowingRenderer extends ToolRenderer {
     this.regionGrowingMaterial = new RegionGrowingMaterial();
     this.regionGrowingQuad = new ScreenAlignedQuad(this.regionGrowingMaterial);
 
+    this.resizeRenderTarget();
+
     this.disposers.push(
-      reaction(
-        () => document.renderers,
-        (renderers) => {
-          if (renderers) {
-            this.blipRenderTargets = renderers.map(
-              () => new THREE.WebGLRenderTarget(1, 1),
-            );
-            this.dataSourceRenderTargets = renderers.map(
-              () => new THREE.WebGLRenderTarget(1, 1),
-            );
-            this.resizeRenderTargets();
-          }
-        },
-        { fireImmediately: true },
-      ),
       reaction(
         () => [
           this.document.viewport2D.mainViewType,
@@ -69,7 +56,7 @@ export class RegionGrowingRenderer extends ToolRenderer {
     boundingRadius?: number,
     flush = true,
   ) {
-    if (!this.lastCircle) return;
+    if (!this.lastCircle || !this.document.renderer) return;
 
     const annotation = (this.document.activeLayer as IImageLayer | undefined)
       ?.image as RenderedImage | undefined;
@@ -86,14 +73,11 @@ export class RegionGrowingRenderer extends ToolRenderer {
     );
 
     if (this.isDataSourceDirty) {
-      this.dataSourceRenderTargets.forEach((renderTarget, renderIndex) => {
-        sourceImage.readSliceToTarget(
-          slice,
-          this.document.viewport2D.mainViewType,
-          renderIndex,
-          renderTarget,
-        );
-      });
+      sourceImage.readSliceToTarget(
+        slice,
+        this.document.viewport2D.mainViewType,
+        this.dataSourceRenderTarget,
+      );
 
       this.isDataSourceDirty = false;
     }
@@ -133,30 +117,26 @@ export class RegionGrowingRenderer extends ToolRenderer {
 
     const blipSteps = (boundingRadius ?? width + height) / 2;
 
-    this.document.renderers?.forEach((renderer, rendererIndex) => {
-      this.regionGrowingMaterial.setDataTexture(
-        this.dataSourceRenderTargets[rendererIndex].texture,
+    this.regionGrowingMaterial.setDataTexture(
+      this.dataSourceRenderTarget.texture,
+    );
+
+    this.document.renderer.autoClear = false;
+
+    for (let i = 0; i < blipSteps; i++) {
+      this.regionGrowingMaterial.setRegionTexture(this.renderTarget.texture);
+      this.document.renderer.setRenderTarget(this.blipRenderTarget);
+      this.regionGrowingQuad.renderWith(this.document.renderer);
+
+      this.regionGrowingMaterial.setRegionTexture(
+        this.blipRenderTarget.texture,
       );
+      this.document.renderer.setRenderTarget(this.renderTarget);
+      this.regionGrowingQuad.renderWith(this.document.renderer);
+    }
 
-      renderer.autoClear = false;
-
-      for (let i = 0; i < blipSteps; i++) {
-        this.regionGrowingMaterial.setRegionTexture(
-          this.renderTargets[rendererIndex].texture,
-        );
-        renderer.setRenderTarget(this.blipRenderTargets[rendererIndex]);
-        this.regionGrowingQuad.renderWith(renderer);
-
-        this.regionGrowingMaterial.setRegionTexture(
-          this.blipRenderTargets[rendererIndex].texture,
-        );
-        renderer.setRenderTarget(this.renderTargets[rendererIndex]);
-        this.regionGrowingQuad.renderWith(renderer);
-      }
-
-      renderer.setRenderTarget(null);
-      renderer.autoClear = true;
-    });
+    this.document.renderer.setRenderTarget(null);
+    this.document.renderer.autoClear = true;
 
     if (flush) this.flushToAnnotation(annotation);
   }
@@ -164,11 +144,11 @@ export class RegionGrowingRenderer extends ToolRenderer {
   public endStroke() {
     super.endStroke();
 
-    this.document.renderers?.forEach((renderer, rendererIndex) => {
-      renderer.setRenderTarget(this.blipRenderTargets[rendererIndex]);
-      renderer.clear();
-      renderer.setRenderTarget(null);
-    });
+    if (!this.document.renderer) return;
+
+    this.document.renderer.setRenderTarget(this.blipRenderTarget);
+    this.document.renderer.clear();
+    this.document.renderer.setRenderTarget(null);
   }
 
   public renderCircles(isAdditiveStroke: boolean, ...circles: Circle[]) {
@@ -182,11 +162,7 @@ export class RegionGrowingRenderer extends ToolRenderer {
   protected setRenderTargetSize(width: number, height: number) {
     super.setRenderTargetSize(width, height);
 
-    this.blipRenderTargets?.forEach((renderTarget) => {
-      renderTarget.setSize(width, height);
-    });
-    this.dataSourceRenderTargets?.forEach((renderTarget) => {
-      renderTarget.setSize(width, height);
-    });
+    this.blipRenderTarget?.setSize(width, height);
+    this.dataSourceRenderTarget?.setSize(width, height);
   }
 }

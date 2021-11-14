@@ -57,7 +57,7 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
   constructor(private editor: IEditor) {
     this.sharedUniforms = new SharedUniforms(editor);
 
-    [this.renderer] = editor.renderers;
+    this.renderer = editor.renderer;
     this.renderer.xr.enabled = true;
     this.renderer.setPixelRatio(window.devicePixelRatio);
 

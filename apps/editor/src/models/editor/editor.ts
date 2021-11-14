@@ -37,18 +37,14 @@ export class Editor
     "context",
     "sliceRenderer",
     "volumeRenderer",
-    "renderers",
+    "renderer",
   ];
 
   public activeDocument?: Document;
 
   public sliceRenderer?: ISliceRenderer;
   public volumeRenderer?: IVolumeRenderer;
-  public renderers!: [
-    THREE.WebGLRenderer,
-    THREE.WebGLRenderer,
-    THREE.WebGLRenderer,
-  ];
+  public renderer!: THREE.WebGLRenderer;
   public isAvailable!: boolean;
 
   public performanceMode: PerformanceMode = "high";
@@ -59,7 +55,7 @@ export class Editor
   ) {
     makeObservable(this, {
       activeDocument: observable,
-      renderers: observable,
+      renderer: observable,
       sliceRenderer: observable,
       volumeRenderer: observable,
       performanceMode: observable,
@@ -73,21 +69,19 @@ export class Editor
     });
 
     runInAction(() => {
-      this.renderers = [
-        new THREE.WebGLRenderer({ alpha: true, preserveDrawingBuffer: true }),
-        new THREE.WebGLRenderer({ alpha: true }),
-        new THREE.WebGLRenderer({ alpha: true }),
-      ];
-      this.isAvailable = this.renderers[0].capabilities.isWebGL2;
+      this.renderer = new THREE.WebGLRenderer({
+        alpha: true,
+        preserveDrawingBuffer: true,
+      });
+      this.isAvailable = this.renderer.capabilities.isWebGL2;
 
       if (this.isAvailable) {
-        this.renderers.forEach((renderer) => {
-          renderer.setClearAlpha(0);
-        });
+        this.renderer.setClearAlpha(0);
+
         this.sliceRenderer = new SliceRenderer(this);
         this.volumeRenderer = new VolumeRenderer(this);
 
-        this.renderers[0].setAnimationLoop(this.animate);
+        this.renderer.setAnimationLoop(this.animate);
       }
     });
 

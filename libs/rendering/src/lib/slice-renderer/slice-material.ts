@@ -141,13 +141,12 @@ export class SliceMaterial extends THREE.ShaderMaterial implements IDisposable {
         const layerData = layers.map((layer) =>
           layer ===
           editor.activeDocument?.tools.dilateErodeRenderer3D.targetLayer
-            ? editor.activeDocument.tools.dilateErodeRenderer3D
-                .outputTextures[0]
-            : ((layer as IImageLayer).image as RenderedImage).getTexture(0),
+            ? editor.activeDocument.tools.dilateErodeRenderer3D.outputTexture
+            : ((layer as IImageLayer).image as RenderedImage).getTexture(),
         );
 
         this.uniforms.uLayerData0.value =
-          editor.activeDocument?.tools.layerPreviewTextures[0] || null;
+          editor.activeDocument?.tools.layerPreviewTexture || null;
 
         for (let i = 0; i < layerData.length; i++) {
           if (!this.uniforms[`uLayerData${i + 1}`]) {
@@ -160,7 +159,7 @@ export class SliceMaterial extends THREE.ShaderMaterial implements IDisposable {
           | IImageLayer
           | undefined;
         this.uniforms.uActiveLayerData.value = activeLayer
-          ? (activeLayer.image as RenderedImage).getTexture(0)
+          ? (activeLayer.image as RenderedImage).getTexture()
           : null;
 
         this.uniforms.uActiveLayerIndex.value = activeLayer

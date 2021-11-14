@@ -133,9 +133,9 @@ export class TextureAdapter {
   }
 
   public writeImage(
-    sources: THREE.Texture[],
-    targets: THREE.WebGLRenderTarget[],
-    renderers: THREE.WebGLRenderer[],
+    source: THREE.Texture,
+    target: THREE.WebGLRenderTarget,
+    renderer: THREE.WebGLRenderer,
     mergeFunction: MergeFunction,
     threshold?: number,
   ) {
@@ -143,37 +143,34 @@ export class TextureAdapter {
       return this.writeSlice(
         0,
         this.image.defaultViewType,
-        sources,
-        targets,
-        renderers,
+        source,
+        target,
+        renderer,
         mergeFunction,
         threshold,
       );
     }
 
     this.quad.material = this.mergeMaterial3D;
-    targets.forEach((renderTarget, index) => {
-      const renderer = renderers[index];
-      this.mergeMaterial3D.setSource(sources[index]);
-      this.mergeMaterial3D.setMergeFunction(mergeFunction);
-      this.mergeMaterial3D.setThreshold(threshold);
-      renderer.autoClear = false;
-      for (let slice = 0; slice < this.image.voxelCount.z; slice++) {
-        renderer.setRenderTarget(renderTarget, slice);
-        this.mergeMaterial3D.setSlice(slice, this.image.voxelCount.z);
-        this.quad.renderWith(renderer);
-      }
-      renderer.setRenderTarget(null);
-      renderer.autoClear = true;
-    });
+    this.mergeMaterial3D.setSource(source);
+    this.mergeMaterial3D.setMergeFunction(mergeFunction);
+    this.mergeMaterial3D.setThreshold(threshold);
+    renderer.autoClear = false;
+    for (let slice = 0; slice < this.image.voxelCount.z; slice++) {
+      renderer.setRenderTarget(target, slice);
+      this.mergeMaterial3D.setSlice(slice, this.image.voxelCount.z);
+      this.quad.renderWith(renderer);
+    }
+    renderer.setRenderTarget(null);
+    renderer.autoClear = true;
   }
 
   public writeSlice(
     sliceNumber: number,
     viewType: ViewType,
-    sliceData: Uint8Array | THREE.Texture[] | undefined,
-    targets: THREE.WebGLRenderTarget[],
-    renderers: THREE.WebGLRenderer[],
+    sliceData: Uint8Array | THREE.Texture | undefined,
+    target: THREE.WebGLRenderTarget,
+    renderer: THREE.WebGLRenderer,
     mergeFunction: MergeFunction,
     threshold?: number,
   ) {
@@ -197,47 +194,41 @@ export class TextureAdapter {
 
     if (viewType === ViewType.Transverse || !this.image.is3D) {
       this.quad.material = this.mergeMaterial;
-      targets.forEach((renderTarget, index) => {
-        const renderer = renderers[index];
-        this.mergeMaterial.setSource(
-          sliceData instanceof Uint8Array || !sliceData
-            ? this.sliceTextures[viewType]
-            : sliceData[index],
-        );
-        renderer.autoClear = false;
-        renderer.setRenderTarget(
-          renderTarget,
-          this.image.is3D ? sliceNumber : undefined,
-        );
-        this.quad.renderWith(renderer);
-        renderer.setRenderTarget(null);
-        renderer.autoClear = true;
-      });
+      this.mergeMaterial.setSource(
+        sliceData instanceof Uint8Array || !sliceData
+          ? this.sliceTextures[viewType]
+          : sliceData,
+      );
+      renderer.autoClear = false;
+      renderer.setRenderTarget(
+        target,
+        this.image.is3D ? sliceNumber : undefined,
+      );
+      this.quad.renderWith(renderer);
+      renderer.setRenderTarget(null);
+      renderer.autoClear = true;
 
       return;
     }
 
     this.sliceLine.setSourceSlice(sliceNumber, viewType);
-    targets.forEach((renderTarget, index) => {
-      const renderer = renderers[index];
-      this.mergeMaterial.setSource(
-        sliceData instanceof Uint8Array || !sliceData
-          ? this.sliceTextures[viewType]
-          : sliceData[index],
-      );
-      renderer.autoClear = false;
-      for (
-        let targetSlice = 0;
-        targetSlice < this.image.voxelCount.z;
-        targetSlice++
-      ) {
-        renderer.setRenderTarget(renderTarget, targetSlice);
-        this.sliceLine.setTargetSlice(targetSlice);
-        renderer.render(this.sliceLine, this.sliceLine.camera);
-      }
-      renderer.setRenderTarget(null);
-      renderer.autoClear = true;
-    });
+    this.mergeMaterial.setSource(
+      sliceData instanceof Uint8Array || !sliceData
+        ? this.sliceTextures[viewType]
+        : sliceData,
+    );
+    renderer.autoClear = false;
+    for (
+      let targetSlice = 0;
+      targetSlice < this.image.voxelCount.z;
+      targetSlice++
+    ) {
+      renderer.setRenderTarget(target, targetSlice);
+      this.sliceLine.setTargetSlice(targetSlice);
+      renderer.render(this.sliceLine, this.sliceLine.camera);
+    }
+    renderer.setRenderTarget(null);
+    renderer.autoClear = true;
   }
 
   public invalidateCache() {

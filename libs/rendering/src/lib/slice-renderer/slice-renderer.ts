@@ -37,7 +37,7 @@ export class SliceRenderer implements IDisposable, ISliceRenderer {
   private disposers: IDisposer[] = [];
 
   constructor(private editor: IEditor) {
-    [this.renderer] = editor.renderers;
+    this.renderer = editor.renderer;
 
     const aspect = this.canvas.clientWidth / this.canvas.clientHeight;
     this.camera = new THREE.OrthographicCamera(-aspect, aspect, 1, -1, -20, 20);
@@ -147,7 +147,7 @@ export class SliceRenderer implements IDisposable, ISliceRenderer {
 
   private get viewportElements() {
     return [
-      this.editor.renderers[0].domElement,
+      this.renderer.domElement,
       this.editor.refs.upperSideView?.current,
       this.editor.refs.lowerSideView?.current,
     ];
