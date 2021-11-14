@@ -20,7 +20,7 @@ import {
   getOrder,
   getPositionWithinPixel,
   getWebGLSizeFromCamera,
-  setMainCameraPlanes,
+  setCameraPlanes,
 } from "./utils";
 import { RenderedSheet } from "../rendered-sheet";
 
@@ -169,7 +169,7 @@ export class SliceRenderer implements IDisposable, ISliceRenderer {
 
     if (!this.editor.activeDocument) return;
 
-    setMainCameraPlanes(this.editor, this.canvas, this.camera);
+    setCameraPlanes(this.editor, this.canvas, this.camera);
 
     this.eagerRender();
 
@@ -186,7 +186,7 @@ export class SliceRenderer implements IDisposable, ISliceRenderer {
   private updateCamera = () => {
     if (!this.editor.activeDocument) return;
 
-    setMainCameraPlanes(this.editor, this.canvas, this.camera);
+    setCameraPlanes(this.editor, this.canvas, this.camera);
     this.lazyRender();
   };
 
