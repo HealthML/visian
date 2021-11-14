@@ -6,12 +6,7 @@ import {
   ViewType,
   viewTypes,
 } from "@visian/utils";
-import {
-  IEditor,
-  IImageLayer,
-  ISliceRenderer,
-  color as c,
-} from "@visian/ui-shared";
+import { IEditor, IImageLayer, ISliceRenderer } from "@visian/ui-shared";
 import { autorun, reaction } from "mobx";
 import * as THREE from "three";
 
@@ -63,7 +58,6 @@ export class SliceRenderer implements IDisposable, ISliceRenderer {
 
     this.renderedSheets = [upperSideViewSheet, lowerSideViewSheet];
     this.scene.add(...this.renderedSheets);
-    this.scene.background = new THREE.Color(0x0c0e1b);
 
     window.addEventListener("resize", this.resize);
     this.resize();
@@ -129,12 +123,6 @@ export class SliceRenderer implements IDisposable, ISliceRenderer {
         this.lazyRender,
       ),
       autorun(this.updateMainBrushCursor),
-      autorun(() => {
-        (this.scene.background as THREE.Color).set(
-          c("background")({ theme: editor.theme }),
-        );
-        this.lazyRender();
-      }),
     );
   }
 
