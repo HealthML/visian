@@ -50,18 +50,16 @@ export class SliceRenderer implements IDisposable, ISliceRenderer {
       "upperSideView",
       this.camera,
     );
-    upperSideViewSheet.position.z = -1;
     upperSideViewSheet.add(this.slices[1]);
-    this.slices[1].position.z = 20;
+    this.slices[1].position.z = 10;
 
     const lowerSideViewSheet = new RenderedSheet(
       editor,
       "lowerSideView",
       this.camera,
     );
-    lowerSideViewSheet.position.z = -1;
     lowerSideViewSheet.add(this.slices[2]);
-    this.slices[2].position.z = 20;
+    this.slices[2].position.z = 10;
 
     this.renderedSheets = [upperSideViewSheet, lowerSideViewSheet];
     this.scene.add(...this.renderedSheets);
@@ -97,6 +95,13 @@ export class SliceRenderer implements IDisposable, ISliceRenderer {
           this.updateMainBrushCursor();
 
           this.updateCamera();
+
+          const order = getOrder(newMainView);
+          [this.scene, ...this.renderedSheets].forEach((container, index) =>
+            container.add(this.slices[order[index]]),
+          );
+
+          this.lazyRender();
         },
       ),
       reaction(

@@ -13,9 +13,12 @@ import {
 import { MAX_BLIP_STEPS } from "../tool-renderer";
 
 export class SliceMaterial extends THREE.ShaderMaterial implements IDisposable {
-  protected disposers: IDisposer[] = [];
+  protected disposers: IDisposer[];
 
-  constructor(editor: IEditor, viewType: ViewType, backgroundBlend: boolean) {
+  constructor(editor: IEditor, viewType: ViewType) {
+    const useBackgroundBlend =
+      viewType === editor.activeDocument?.viewport2D.mainViewType;
+
     super({
       vertexShader: sliceVertexShader,
       fragmentShader: sliceFragmentShader,
@@ -38,7 +41,7 @@ export class SliceMaterial extends THREE.ShaderMaterial implements IDisposable {
       },
       defines: { VOLUMETRIC_IMAGE: "" },
       glslVersion: THREE.GLSL3,
-      transparent: !backgroundBlend,
+      transparent: !useBackgroundBlend,
       side: THREE.DoubleSide,
     });
 
@@ -54,11 +57,28 @@ export class SliceMaterial extends THREE.ShaderMaterial implements IDisposable {
         break;
     }
 
-    if (backgroundBlend) {
+    if (useBackgroundBlend) {
       this.defines.BACKGROUND_BLEND = "";
     }
 
+    this.disposers = [];
     this.disposers.push(
+      reaction(
+        () => viewType === editor.activeDocument?.viewport2D.mainViewType,
+        (backgroundBlend) => {
+          this.transparent = !backgroundBlend;
+
+          if (backgroundBlend) {
+            this.defines.BACKGROUND_BLEND = "";
+          } else {
+            delete this.defines.BACKGROUND_BLEND;
+          }
+
+          this.needsUpdate = true;
+
+          editor.sliceRenderer?.lazyRender();
+        },
+      ),
       reaction(
         () => editor.volumeRenderer?.renderedImageLayerCount || 1,
         (layerCount: number) => {
