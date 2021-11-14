@@ -64,10 +64,10 @@ export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
   /** Callbacks to be invoked when `renderes` are set. */
   private rendererCallbacks: (() => void)[] = [];
 
-  /** Whether or not the texture data needs to be pulled from the GPU. */
   private gpuUpdates: OrientedSlice[] = [];
   private hasWholeTextureChanged = false;
 
+  /** Reflects the content of `Image.data`, but is normalized to a Uint8Array as it is used on the GPU. */
   private textureData: Uint8Array;
   private isTextureDataDirty = true;
 
@@ -114,6 +114,7 @@ export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
     this.textureAdapter = new TextureAdapter(this);
   }
 
+  /** Whether or not the texture data needs to be pulled from the GPU. */
   private get hasGPUUpdates(): boolean {
     return this.hasWholeTextureChanged || this.gpuUpdates.length > 0;
   }
