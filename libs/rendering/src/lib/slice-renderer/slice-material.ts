@@ -171,7 +171,9 @@ export class SliceMaterial extends THREE.ShaderMaterial implements IDisposable {
       }),
       autorun(() => {
         this.uniforms.uToolPreview.value =
-          editor.activeDocument?.tools.slicePreviewTexture ?? null;
+          (editor.activeDocument?.viewport2D.mainViewType === viewType &&
+            editor.activeDocument?.tools.slicePreviewTexture) ||
+          null;
 
         editor.sliceRenderer?.lazyRender();
       }),
