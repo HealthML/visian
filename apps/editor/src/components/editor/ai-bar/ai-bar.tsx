@@ -477,19 +477,10 @@ export const FloyBar = observer(() => {
               <ActionName
                 text={
                   store.editor.activeDocument.floyDemo.inferenceResults
-                    ? `Wahrscheinlichkeit: ${Math.round(
-                        parseFloat(
-                          store.editor.activeDocument.floyDemo
-                            .inferenceResults[0].probability as string,
-                        ) * 100,
-                      )} % | Größe: ${
-                        Math.round(
-                          parseFloat(
-                            store.editor.activeDocument.floyDemo
-                              .inferenceResults[1].impactValue as string,
-                          ) / 100,
-                        ) / 10
-                      } cm³`
+                    ? (store.editor.activeDocument.floyDemo.inferenceResults[0]
+                        .classification as string) === "1"
+                      ? "Bitte erneut überprüfen"
+                      : "Unauffällig"
                     : "Floy KI ausführen"
                 }
               />
