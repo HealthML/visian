@@ -1,3 +1,5 @@
+import { IS_FLOY_DEMO } from "./floy";
+
 /** The minimum wait time in ms b/w writing the store to local storage. */
 export const storePersistInterval = 10000;
 
@@ -11,7 +13,7 @@ export const maxUndoRedoSteps = 20;
 
 export const errorDisplayDuration = 12000;
 
-export const defaultAnnotationOpacity = 0.5;
+export const defaultAnnotationOpacity = IS_FLOY_DEMO ? 0.2 : 0.5;
 export const defaultAnnotationColor = "Genome Gold";
 export const defaultRegionGrowingPreviewColor = "Smart Sapphire";
 export const defaultImageColor = "Mighty Mercury";

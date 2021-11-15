@@ -180,13 +180,23 @@ const NoticeText = styled(Text)`
   left: 50%;
   opacity: 0.8;
   position: absolute;
-  width: 500px;
+  width: 700px;
   text-align: center;
   top: 40px;
   transform: translateX(-50%);
 `;
 
-export const ScrollView = styled.div`
+const LegalContainer = styled.div`
+  bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  opacity: 0.5;
+  position: absolute;
+  pointer-events: auto;
+  right: 80px;
+`;
+
+const ScrollView = styled.div`
   display: flex;
   flex: 1;
   flex-direction: column;
@@ -436,6 +446,26 @@ export const FloyBar = observer(() => {
         keinen Umständen in der Praxis angewandt werden. Bitte kontaktieren Sie
         info@floy.com für weitere Informationen.
       </NoticeText>
+      <LegalContainer>
+        <Text
+          as="a"
+          text="Datenschutz"
+          {...({
+            href: "https://www.floy.com/data-privacy",
+            target: "_blank",
+            rel: "noreferrer",
+          } as unknown)}
+        />
+        <Text
+          as="a"
+          text="Impressum"
+          {...({
+            href: "https://www.floy.com/legal-notice",
+            target: "_blank",
+            rel: "noreferrer",
+          } as unknown)}
+        />
+      </LegalContainer>
       {store?.editor.activeDocument?.floyDemo.hasDemoCandidate && (
         <AIBarSheet>
           <AIContainer>
