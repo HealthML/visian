@@ -108,7 +108,7 @@
   "skip-task-annotation-tooltip": "Überspringen",
 
   "browser-error": "Browserfehler",
-  "no-webgl-2-error": "Dieser Browser unterstützt WebGL 2 nicht. Um VISIAN auszuführen ist WebbGL 2 notwendig. Bitte updaten Sie Ihren Browser oder nutzen Sie einen anderen Browser..",
+  "no-webgl-2-error": "Dieser Browser unterstützt WebGL 2 nicht. Um VISIAN auszuführen ist WebGL 2 notwendig. Bitte updaten Sie Ihren Browser oder nutzen Sie einen anderen Browser.",
 
   "import-error": "Importfehler",
   "image-mismatch-error": "Diese Datei passt nicht auf die schon geladenen.",

@@ -285,7 +285,16 @@ export class SliceRenderer implements IDisposable, ISliceRenderer {
     const scanWidth = voxelCount[widthAxis];
     const scanHeight = voxelCount[heightAxis];
 
-    const { brushSize } = this.editor.activeDocument.tools;
+    let { brushSize } = this.editor.activeDocument.tools;
+
+    // The bounded and 3D smart brushes have a constant brush size of 0.
+    if (
+      this.editor.activeDocument.tools.activeTool?.name ===
+        "bounded-smart-brush" ||
+      this.editor.activeDocument.tools.activeTool?.name === "smart-brush-3d"
+    ) {
+      brushSize = 0;
+    }
 
     let isRight = false;
     let isBottom = false;
