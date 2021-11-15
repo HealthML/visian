@@ -18,6 +18,7 @@ export class ImageRenderTarget extends THREE.WebGLRenderTarget {
       {
         magFilter: filter,
         minFilter: filter,
+        depthBuffer: false,
       },
     );
 
