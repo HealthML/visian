@@ -8,7 +8,7 @@ import { BlurMaterial } from "./blur-material";
 import { RenderedSheetGeometry } from "./rendered-sheet-geometry";
 
 const DEFAULT_RADIUS = 0.02;
-const RADIUS_UPDATE_EDGE = 0.004;
+const RADIUS_UPDATE_EDGE = 0.002;
 
 export class RenderedSheet extends THREE.Mesh implements IDisposable {
   private sharedGeometry: RenderedSheetGeometry;
