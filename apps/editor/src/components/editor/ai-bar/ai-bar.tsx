@@ -206,10 +206,7 @@ export const AIBar = observer(() => {
           JSON.stringify(store.currentTask.toJSON()),
         );
         if (response) {
-          // const newLocation = response.headers.get("location");
-          // TODO: Do not use hardcoded location
-          const newLocation =
-            "http://annotation.ai4h.net/tasks/b4009387-4d48-49b6-be2a-8ad50df03307";
+          const newLocation = response.headers.get("location");
           if (newLocation) {
             const urlElements = newLocation.split("/");
             const newTaskId = urlElements[urlElements.length - 1];
