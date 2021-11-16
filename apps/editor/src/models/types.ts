@@ -22,6 +22,8 @@ export interface StoreContext {
 
   getRefs(): { [key: string]: React.RefObject<HTMLElement> };
 
+  setError(error: ErrorNotification): void;
+
   getTracker(): Tracker | undefined;
 }
 

@@ -1,24 +1,20 @@
 import { Vector, ViewType } from "@visian/utils";
 import * as THREE from "three";
 
-import { rawSliceFragmentShader, sliceVertexShader } from "../../../shaders";
+import { rawSliceFragmentShader, sliceVertexShader } from "../../shaders";
 
-export class SliceReaderMaterial extends THREE.ShaderMaterial {
-  constructor(
-    dataTexture: THREE.Texture,
-    atlasGrid: Vector,
-    voxelCount: Vector,
-  ) {
+export class ReadSliceMaterial extends THREE.ShaderMaterial {
+  constructor(voxelCount: Vector) {
     super({
       vertexShader: sliceVertexShader,
       fragmentShader: rawSliceFragmentShader,
       uniforms: {
-        uDataTexture: { value: dataTexture },
-        uVoxelCount: { value: voxelCount.toArray() },
-        uAtlasGrid: { value: atlasGrid.toArray() },
+        uDataTexture: { value: null },
         uSliceNumber: { value: 0 },
         uViewType: { value: ViewType.Transverse },
+        uVoxelCount: { value: voxelCount.toArray() },
       },
+      glslVersion: THREE.GLSL3,
     });
   }
 

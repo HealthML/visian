@@ -8,7 +8,7 @@ import {
 } from "@visian/ui-shared";
 
 import { Tool } from "./tool";
-import { mutateAtlas } from "./utils";
+import { mutateTextureData } from "./utils";
 
 export class DilateErodeTool<N extends "dilate-erode" = "dilate-erode">
   extends Tool<N>
@@ -52,7 +52,7 @@ export class DilateErodeTool<N extends "dilate-erode" = "dilate-erode">
 
   public submit = () => {
     const targetLayer = this.document.activeLayer;
-    mutateAtlas(
+    mutateTextureData(
       targetLayer as IImageLayer,
       () => this.renderer.flushToAnnotation(targetLayer as IImageLayer, true),
       this.document,

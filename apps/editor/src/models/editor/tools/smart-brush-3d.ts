@@ -7,7 +7,7 @@ import {
 } from "@visian/ui-shared";
 
 import { Tool } from "./tool";
-import { mutateAtlas } from "./utils";
+import { mutateTextureData } from "./utils";
 
 export class SmartBrush3D<N extends "smart-brush-3d" = "smart-brush-3d">
   extends Tool<N>
@@ -61,7 +61,7 @@ export class SmartBrush3D<N extends "smart-brush-3d" = "smart-brush-3d">
 
   public submit = () => {
     const targetLayer = this.document.activeLayer;
-    mutateAtlas(
+    mutateTextureData(
       targetLayer as IImageLayer,
       () => this.renderer.flushToAnnotation(),
       this.document,

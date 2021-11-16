@@ -5,7 +5,13 @@ import {
   RegionGrowingRenderer3D,
   ToolRenderer,
 } from "@visian/rendering";
-import { IDocument, IImageLayer, ITool, ITools } from "@visian/ui-shared";
+import {
+  IDocument,
+  IImageLayer,
+  ITool,
+  ITools,
+  MergeFunction,
+} from "@visian/ui-shared";
 import { getPlaneAxes, ISerializable } from "@visian/utils";
 import { action, computed, makeObservable, observable } from "mobx";
 import { CircleBrush } from "./circle-brush";
@@ -22,6 +28,7 @@ import { PlaneTool } from "./plane-tool";
 import { SmartBrush3D } from "./smart-brush-3d";
 import { DilateErodeTool } from "./dilate-erode-tool";
 import { SelfDeactivatingTool } from "./self-deactivating-tool";
+import { UndoableTool } from "./undoable-tool";
 
 export type ToolName =
   | "navigation-tool"
@@ -117,6 +124,8 @@ export class Tools
       isToolInUse: computed,
       useAdaptiveBrushSize: computed,
       layerPreviewTextures: computed,
+      slicePreviewTexture: computed,
+      slicePreviewMergeFunction: computed,
 
       setActiveTool: action,
       setBrushSize: action,
@@ -308,6 +317,18 @@ export class Tools
 
   public get layerPreviewTextures(): THREE.Texture[] {
     return this.regionGrowingRenderer3D.outputTextures;
+  }
+
+  public get slicePreviewTexture(): THREE.Texture | undefined {
+    if (!(this.activeTool instanceof UndoableTool)) return undefined;
+
+    return this.activeTool.toolRenderer.textures[0];
+  }
+
+  public get slicePreviewMergeFunction(): MergeFunction | undefined {
+    if (!(this.activeTool instanceof UndoableTool)) return undefined;
+
+    return this.activeTool.toolRenderer.mergeFunction;
   }
 
   public setBrushSize(value = 5, showPreview = false): void {

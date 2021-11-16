@@ -1,11 +1,13 @@
-import { ToolRenderer } from "@visian/rendering";
+import { RenderedImage, ToolRenderer } from "@visian/rendering";
 import { IDocument, IImageLayer, ITool } from "@visian/ui-shared";
-import { AtlasCommand } from "../history";
+import { ImageCommand } from "../history";
 import { SelfDeactivatingTool } from "./self-deactivating-tool";
 
 export class ClearImageTool<
   N extends "clear-image"
 > extends SelfDeactivatingTool<N> {
+  public readonly excludeFromSnapshotTracking = ["toolRenderer", "document"];
+
   constructor(document: IDocument, protected toolRenderer: ToolRenderer) {
     super(
       {
@@ -23,21 +25,21 @@ export class ClearImageTool<
   public activate(previousTool?: ITool<N>) {
     const imageLayer = this.document.activeLayer;
     if (!imageLayer || imageLayer.kind !== "image") return;
-    const { image } = imageLayer as IImageLayer;
+    const image = (imageLayer as IImageLayer).image as RenderedImage;
 
-    const oldAtlas = new Uint8Array(image.getAtlas());
+    const oldData = new Uint8Array(image.getTextureData());
 
-    const emptyAtlas = new Uint8Array(oldAtlas.length);
-    image.setAtlas(emptyAtlas);
+    const emptyData = new Uint8Array(oldData.length);
+    image.setTextureData(emptyData);
     this.document.sliceRenderer?.lazyRender();
     this.document.volumeRenderer?.lazyRender(true);
 
     this.document.history.addCommand(
-      new AtlasCommand(
+      new ImageCommand(
         {
           layerId: imageLayer.id,
-          oldAtlas,
-          newAtlas: emptyAtlas,
+          oldData,
+          newData: emptyData,
         },
         this.document,
       ),

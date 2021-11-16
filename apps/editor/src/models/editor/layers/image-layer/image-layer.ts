@@ -10,7 +10,6 @@ import {
   Vector,
   ViewType,
   Voxel,
-  VoxelWithValue,
   writeSingleMedicalImage,
 } from "@visian/utils";
 import FileSaver from "file-saver";
@@ -58,7 +57,6 @@ export class ImageLayer
         isAnnotation: true,
         color: color || defaultAnnotationColor,
         image: {
-          atlas: new Uint8Array(image.getAtlas().length),
           name: `${image.name.split(".")[0]}_annotation`,
           dimensionality: image.dimensionality,
           origin: image.origin.toArray(),
@@ -121,11 +119,7 @@ export class ImageLayer
   }
 
   public get is3DLayer() {
-    return (
-      this.image.voxelCount
-        .toArray()
-        .reduce((previous, current) => previous + (current > 1 ? 1 : 0), 0) > 2
-    );
+    return this.image.is3D;
   }
 
   public setImage(value: RenderedImage): void {
@@ -216,7 +210,7 @@ export class ImageLayer
         GetEmptySlicesArgs,
         GetEmptySlicesReturn
       >("getEmptySlices", {
-        atlas: this.image.getAtlas(),
+        data: this.image.getTextureData(),
         voxelCount: this.image.voxelCount.toArray(),
         voxelComponents: this.image.voxelComponents,
       });
@@ -250,14 +244,6 @@ export class ImageLayer
     return this.image.getVoxelData(voxel);
   }
 
-  public setVoxel(voxel: Voxel | Vector, value: number): void {
-    this.image.setAtlasVoxel(voxel, value);
-  }
-
-  public setVoxels(voxels: VoxelWithValue[]): void {
-    this.image.setAtlasVoxels(voxels);
-  }
-
   public getSlice(viewType: ViewType, slice: number): Uint8Array {
     return this.image.getSlice(viewType, slice);
   }
@@ -268,14 +254,6 @@ export class ImageLayer
     sliceData: Uint8Array,
   ): void {
     this.image.setSlice(viewType, slice, sliceData);
-  }
-
-  public getAtlas(): Uint8Array {
-    return this.image.getAtlas();
-  }
-
-  public setAtlas(atlas: Uint8Array): void {
-    this.image.setAtlas(atlas);
   }
 
   // I/O

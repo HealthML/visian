@@ -14,6 +14,8 @@ export class CircleBrush<
     | "bounded-smart-brush"
     | "bounded-smart-eraser"
 > extends UndoableTool<N> {
+  public readonly excludeFromSnapshotTracking = ["toolRenderer", "document"];
+
   private lastDragPoint?: DragPoint;
 
   constructor(
@@ -62,8 +64,6 @@ export class CircleBrush<
     if (dragPoint) this.moveTo(dragPoint);
 
     this.endStroke(!this.isAdditive);
-
-    this.toolRenderer.waitForRender().then(() => this.toolRenderer.endStroke());
   }
 
   protected get brushSize() {

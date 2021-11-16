@@ -3,6 +3,5 @@ import { Vector } from "@visian/utils";
 
 export interface ITrackingData {
   texture: THREE.Texture;
-  atlasGrid: Vector;
   resolution: Vector;
 }

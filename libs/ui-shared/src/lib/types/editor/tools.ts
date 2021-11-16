@@ -4,7 +4,7 @@ import * as THREE from "three";
 import type { IImageLayer } from "./layers";
 import type { IconType } from "../../components";
 import type { IParameter } from "./parameters";
-import type { Reference, ViewMode } from "./types";
+import type { MergeFunction, Reference, ViewMode } from "./types";
 
 export interface DragPoint extends Voxel {
   /** Whether the cursor is on the right side of the pixel. */
@@ -172,6 +172,8 @@ export interface ITools<N extends string> {
   /** Indicates if a tool is currently drawing. */
   isDrawing: boolean;
 
+  slicePreviewTexture?: THREE.Texture;
+  slicePreviewMergeFunction?: MergeFunction;
   layerPreviewTextures: THREE.Texture[];
   regionGrowingRenderer3D: IBlipRenderer3D;
   dilateErodeRenderer3D: IDilateErodeRenderer3D;

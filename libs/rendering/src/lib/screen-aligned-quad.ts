@@ -21,7 +21,7 @@ export class ScreenAlignedQuad extends THREE.Mesh implements IDisposable {
     100,
   );
 
-  constructor(material: THREE.Material | THREE.Material[]) {
+  constructor(material?: THREE.Material | THREE.Material[]) {
     super(ScreenAlignedQuad.quadGeometry, material);
 
     this.scene.add(this);
@@ -70,5 +70,3 @@ export class ScreenAlignedQuad extends THREE.Mesh implements IDisposable {
     renderer.compile(this.scene, this.camera);
   }
 }
-
-export default ScreenAlignedQuad;

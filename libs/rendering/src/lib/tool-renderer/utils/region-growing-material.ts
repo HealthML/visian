@@ -4,7 +4,6 @@ import {
   regionGrowingFragmentShader,
   regionGrowingVertexShader,
 } from "../../shaders";
-import { MAX_BLIP_STEPS } from "./blip-material";
 
 export class RegionGrowingMaterial extends THREE.ShaderMaterial {
   constructor(parameters?: THREE.ShaderMaterialParameters) {
@@ -38,11 +37,11 @@ export class RegionGrowingMaterial extends THREE.ShaderMaterial {
   }
 
   public setThreshold(value: number) {
-    this.uniforms.uThreshold.value = value / (MAX_BLIP_STEPS + 1);
+    this.uniforms.uThreshold.value = value / 255;
   }
 
   public setSeed(value: number) {
-    this.uniforms.uSeed.value = value / (MAX_BLIP_STEPS + 1);
+    this.uniforms.uSeed.value = value / 255;
   }
 
   public setUVBounds(minUv = [0, 0], maxUv = [1, 1]) {

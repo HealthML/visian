@@ -194,5 +194,3 @@ export class BrushCursor extends THREE.Group implements IDisposable {
     }
   }
 }
-
-export default BrushCursor;

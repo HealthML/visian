@@ -99,5 +99,3 @@ export class Crosshair extends THREE.Group implements IDisposable {
       this.editor.activeDocument.viewport2D.showSideViews;
   };
 }
-
-export default Crosshair;
