@@ -238,7 +238,23 @@ export const ShortcutPopUp: React.FC<ShortcutPopUpProps> = observer(
               </ShortcutRow>
               <ShortcutRow>
                 <ShortcutContainer>
+                  <KeyIcon text="W" />
+                </ShortcutContainer>
+                <ShortcutDescriptionContainer>
+                  <ShortcutDescription text="Increase brush size" />
+                </ShortcutDescriptionContainer>
+              </ShortcutRow>
+              <ShortcutRow>
+                <ShortcutContainer>
                   <KeyIcon text="-" />
+                </ShortcutContainer>
+                <ShortcutDescriptionContainer>
+                  <ShortcutDescription text="Decrease brush size" />
+                </ShortcutDescriptionContainer>
+              </ShortcutRow>
+              <ShortcutRow>
+                <ShortcutContainer>
+                  <KeyIcon text="Q" />
                 </ShortcutContainer>
                 <ShortcutDescriptionContainer>
                   <ShortcutDescription text="Decrease brush size" />
