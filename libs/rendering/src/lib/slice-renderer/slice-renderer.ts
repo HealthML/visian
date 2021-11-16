@@ -127,22 +127,14 @@ export class SliceRenderer implements IDisposable, ISliceRenderer {
   }
 
   public dispose() {
-    // TODO: dispose rendered sheets
     this.disposers.forEach((disposer) => disposer());
     this.slices.forEach((slice) => slice.dispose());
+    this.renderedSheets.forEach((renderedSheet) => renderedSheet.dispose());
     window.removeEventListener("resize", this.resize);
   }
 
-  private get viewportElements() {
-    return [
-      this.renderer.domElement,
-      this.editor.refs.upperSideView?.current,
-      this.editor.refs.lowerSideView?.current,
-    ];
-  }
-
   private get canvas() {
-    return this.viewportElements[0] as HTMLCanvasElement;
+    return this.renderer.domElement;
   }
 
   public getOutline(

@@ -148,7 +148,6 @@ export class RenderedSheet extends THREE.Mesh implements IDisposable {
       this.domElement && this.editor.activeDocument?.viewport2D.showSideViews,
     );
 
-    // Wrapped in setTimeout to ensure the DOM has updated.
     if (this.visible) this.synchPosition();
 
     this.editor.sliceRenderer?.lazyRender();
