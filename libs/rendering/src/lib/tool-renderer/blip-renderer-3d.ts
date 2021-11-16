@@ -12,7 +12,14 @@ import {
   Vector,
   ViewType,
 } from "@visian/utils";
-import { action, makeObservable, observable, reaction } from "mobx";
+import {
+  action,
+  computed,
+  makeObservable,
+  observable,
+  reaction,
+  runInAction,
+} from "mobx";
 import * as THREE from "three";
 
 import { ImageRenderTarget, RenderedImage } from "../rendered-image";
@@ -46,24 +53,48 @@ export class BlipRenderer3D implements IBlipRenderer3D, IDisposable {
     this.material = new Blip3DMaterial(document, parameters);
     this.texture3DRenderer = new Texture3DRenderer();
 
+    makeObservable<this, "hasOddOutput" | "renderTarget" | "blipRenderTarget">(
+      this,
+      {
+        holdsPreview: observable,
+        maxSteps: observable,
+        previewColor: observable,
+        steps: observable,
+        hasOddOutput: observable,
+        renderTarget: observable,
+        blipRenderTarget: observable,
+
+        outputTexture: computed,
+
+        setPreviewColor: action,
+        setMaxSteps: action,
+        setSteps: action,
+        render: action,
+        flushToAnnotation: action,
+        discard: action,
+      },
+    );
+
     this.disposers.push(
       reaction(
         () => Boolean(document.baseImageLayer?.is3DLayer),
         (is3D) => {
-          const imageProperties = {
-            voxelCount: new Vector([1, 1, 1]),
-            is3D,
-            defaultViewType: ViewType.Transverse,
-          };
-          this.renderTarget = new ImageRenderTarget(
-            imageProperties,
-            THREE.NearestFilter,
-          );
-          this.blipRenderTarget = new ImageRenderTarget(
-            imageProperties,
-            THREE.NearestFilter,
-          );
-          this.resizeRenderTargets();
+          runInAction(() => {
+            const imageProperties = {
+              voxelCount: new Vector([1, 1, 1]),
+              is3D,
+              defaultViewType: ViewType.Transverse,
+            };
+            this.renderTarget = new ImageRenderTarget(
+              imageProperties,
+              THREE.NearestFilter,
+            );
+            this.blipRenderTarget = new ImageRenderTarget(
+              imageProperties,
+              THREE.NearestFilter,
+            );
+            this.resizeRenderTargets();
+          });
         },
         { fireImmediately: true },
       ),
@@ -75,21 +106,6 @@ export class BlipRenderer3D implements IBlipRenderer3D, IDisposable {
         this.resizeRenderTargets,
       ),
     );
-
-    makeObservable<this, "hasOddOutput">(this, {
-      holdsPreview: observable,
-      maxSteps: observable,
-      previewColor: observable,
-      steps: observable,
-      hasOddOutput: observable,
-
-      setPreviewColor: action,
-      setMaxSteps: action,
-      setSteps: action,
-      render: action,
-      flushToAnnotation: action,
-      discard: action,
-    });
   }
 
   public get sourceLayer(): IImageLayer | undefined {
