@@ -2,7 +2,11 @@ precision highp sampler3D;
 
 in vec2 vUv;
 
-{{layerData}}
+#ifdef VOLUMETRIC_IMAGE
+  uniform sampler3D uLayerData[{{layerCount}}];
+#else 
+  uniform sampler2D uLayerData[{{layerCount}}];
+#endif
 uniform bool uLayerAnnotationStatuses[{{layerCount}}];
 uniform float uLayerOpacities[{{layerCount}}];
 uniform vec3 uLayerColors[{{layerCount}}];
