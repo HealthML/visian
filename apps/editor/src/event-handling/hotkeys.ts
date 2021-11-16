@@ -1,3 +1,4 @@
+import { MergeFunction } from "@visian/ui-shared";
 import { IDisposer, ViewType } from "@visian/utils";
 import hotkeys from "hotkeys-js";
 
@@ -76,6 +77,20 @@ export const setUpHotKeys = (store: RootStore): IDisposer => {
     if (store.editor.activeDocument?.viewSettings.viewMode !== "3D") return;
 
     store.editor.activeDocument?.tools.setActiveTool("plane-tool");
+  });
+
+  // Copy and Paste
+  hotkeys("ctrl+c", (event) => {
+    event.preventDefault();
+    store.editor.activeDocument?.clipboard.copy();
+  });
+  hotkeys("ctrl+v", (event) => {
+    event.preventDefault();
+    store.editor.activeDocument?.clipboard.paste();
+  });
+  hotkeys("ctrl+shift+v", (event) => {
+    event.preventDefault();
+    store.editor.activeDocument?.clipboard.paste(MergeFunction.Add);
   });
 
   // Tools
