@@ -479,7 +479,7 @@ export const FloyBar = observer(() => {
                   store.editor.activeDocument.floyDemo.inferenceResults
                     ? (store.editor.activeDocument.floyDemo.inferenceResults[0]
                         .classification as string) === "1"
-                      ? "Bitte erneut überprüfen"
+                      ? "Auffälligkeiten gefunden"
                       : "Unauffällig"
                     : "Floy KI ausführen"
                 }
