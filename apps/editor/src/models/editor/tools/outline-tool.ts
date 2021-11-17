@@ -71,8 +71,6 @@ export class OutlineTool<
     this.lastPoint = undefined;
 
     this.endStroke(!this.isAdditive);
-
-    this.toolRenderer.waitForRender().then(() => this.toolRenderer.endStroke());
   }
 
   private getCoords(dragPoint: DragPoint) {

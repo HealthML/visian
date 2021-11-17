@@ -16,13 +16,7 @@ import {
 } from "@visian/utils";
 import { action, computed, makeObservable, observable } from "mobx";
 
-import {
-  IS_FLOY_DEMO,
-  maxZoom,
-  minZoom,
-  viewTypeDepthThreshold,
-  zoomStep,
-} from "../../../constants";
+import { IS_FLOY_DEMO, maxZoom, minZoom, zoomStep } from "../../../constants";
 import { OutlineTool } from "../tools";
 
 export interface Viewport2DSnapshot {
@@ -106,33 +100,9 @@ export class Viewport2D
   }
 
   public get defaultViewType() {
-    if (!this.document.has3DLayers) {
-      const voxelCount = this.document.baseImageLayer?.image.voxelCount;
-      if (voxelCount) {
-        const bestViewType = [
-          ViewType.Transverse,
-          ViewType.Sagittal,
-          ViewType.Coronal,
-        ].find((viewType) => voxelCount.getFromView(viewType) <= 1);
-        if (bestViewType !== undefined) return bestViewType;
-      }
-      return ViewType.Transverse;
-    }
-
-    const voxelSpacing = this.document.baseImageLayer?.image.voxelSpacing;
-    if (!voxelSpacing) return ViewType.Transverse;
-
-    let bestViewType = ViewType.Transverse;
-    let bestViewTypeDepth = voxelSpacing.getFromView(bestViewType);
-
-    [ViewType.Sagittal, ViewType.Coronal].forEach((viewType) => {
-      const viewTypeDepth = voxelSpacing.getFromView(viewType);
-      if (viewTypeDepth - bestViewTypeDepth > viewTypeDepthThreshold) {
-        bestViewType = viewType;
-        bestViewTypeDepth = viewTypeDepth;
-      }
-    });
-    return bestViewType;
+    return (
+      this.document.baseImageLayer?.image.defaultViewType ?? ViewType.Transverse
+    );
   }
 
   public setMainViewType = (value?: ViewType): void => {

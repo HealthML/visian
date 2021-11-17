@@ -1,3 +1,4 @@
+import { Texture3DMaterial } from "@visian/rendering";
 import { IEditor } from "@visian/ui-shared";
 import { IDisposer } from "@visian/utils";
 import { autorun, reaction } from "mobx";
@@ -14,7 +15,7 @@ import {
   getTotalLAODirections,
 } from "./lao-directions";
 
-export class LAOMaterial extends THREE.ShaderMaterial {
+export class LAOMaterial extends Texture3DMaterial {
   private disposers: IDisposer[] = [];
 
   constructor(
@@ -34,7 +35,10 @@ export class LAOMaterial extends THREE.ShaderMaterial {
         uPreviousDirections: { value: 0 },
         uTotalDirections: { value: 32 },
       },
+      glslVersion: THREE.GLSL3,
     });
+
+    sharedUniforms.subscribe(this);
 
     this.uniforms.uInputFirstDerivative.value = firstDerivativeTexture;
     this.uniforms.uInputSecondDerivative.value = secondDerivativeTexture;
@@ -79,5 +83,3 @@ export class LAOMaterial extends THREE.ShaderMaterial {
     this.disposers.forEach((disposer) => disposer());
   }
 }
-
-export default LAOMaterial;

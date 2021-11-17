@@ -115,12 +115,16 @@
   "confirm-task-annotation-tooltip": "Bestätigen",
   "skip-task-annotation-tooltip": "Überspringen",
 
+  "browser-error": "Browserfehler",
+  "no-webgl-2-error": "Dieser Browser unterstützt WebGL 2 nicht. Um VISIAN auszuführen ist WebGL 2 notwendig. Bitte updaten Sie Ihren Browser oder nutzen Sie einen anderen Browser.",
+
   "import-error": "Importfehler",
   "image-mismatch-error": "Diese Datei passt nicht auf die schon geladenen.",
   "image-mismatch-error-filename": "Die Datei \"{{fileName}}\" passt nicht auf die schon geladenen.",
   "image-loading-error": "Diese Datei scheint nicht unterstützt zu sein.",
   "image-loading-error-demo": "Diese Datei wird in der Demo nicht unterstützt.",
   "remote-file-error": "Die angegebene Datei konnte nicht geladen werden.",
+  "image-too-large-error": "Ihr Browser unterstützt keine so großen Bilder.",
 
   "export-error": "Exportfehler",
   "file-upload-error": "Die Datei konnte nicht hochgeladen werden.",

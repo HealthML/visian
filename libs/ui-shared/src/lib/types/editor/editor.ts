@@ -7,6 +7,9 @@ import { PerformanceMode } from "./types";
 
 /** The state of VISIAN's annotation editor. */
 export interface IEditor {
+  /** Whether the editor is available. Currently only `false` if WebGL 2 is unavailable. */
+  isAvailable: boolean;
+
   /** The document the user is currently working on. */
   activeDocument?: IDocument;
 

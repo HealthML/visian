@@ -92,27 +92,39 @@ export const AxesAndVoxel: React.FC = observer(() => {
         store?.editor.activeDocument?.viewport2D.showVoxelInfo &&
         !store?.editor.activeDocument?.tools.isCursorOverFloatingUI && (
           <FlexColumn>
-            <FlexRow>
-              <VoxelTitle tx="X" />
-              <VoxelContent
-                tx={
-                  (
-                    store?.editor.activeDocument?.viewport2D.hoveredVoxel.x + 1
-                  ).toString() ?? "-"
-                }
-              />
-            </FlexRow>
-            <FlexRow>
-              <VoxelTitle tx="Y" />
-              <VoxelContent
-                tx={
-                  (
-                    store?.editor.activeDocument?.viewport2D.hoveredVoxel.y + 1
-                  ).toString() ?? "-"
-                }
-              />
-            </FlexRow>
-            {store?.editor.activeDocument?.has3DLayers && (
+            {(store?.editor.activeDocument?.has3DLayers ||
+              store?.editor.activeDocument?.viewport2D.mainViewType !==
+                ViewType.Sagittal) && (
+              <FlexRow>
+                <VoxelTitle tx="X" />
+                <VoxelContent
+                  tx={
+                    (
+                      store?.editor.activeDocument?.viewport2D.hoveredVoxel.x +
+                      1
+                    ).toString() ?? "-"
+                  }
+                />
+              </FlexRow>
+            )}
+            {(store?.editor.activeDocument?.has3DLayers ||
+              store?.editor.activeDocument?.viewport2D.mainViewType !==
+                ViewType.Coronal) && (
+              <FlexRow>
+                <VoxelTitle tx="Y" />
+                <VoxelContent
+                  tx={
+                    (
+                      store?.editor.activeDocument?.viewport2D.hoveredVoxel.y +
+                      1
+                    ).toString() ?? "-"
+                  }
+                />
+              </FlexRow>
+            )}
+            {(store?.editor.activeDocument?.has3DLayers ||
+              store?.editor.activeDocument?.viewport2D.mainViewType !==
+                ViewType.Transverse) && (
               <FlexRow>
                 <VoxelTitle tx="Z" />
                 <VoxelContent

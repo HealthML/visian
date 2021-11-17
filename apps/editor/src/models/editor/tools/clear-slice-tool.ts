@@ -6,6 +6,8 @@ import { SelfDeactivatingTool } from "./self-deactivating-tool";
 export class ClearSliceTool<
   N extends "clear-slice"
 > extends SelfDeactivatingTool<N> {
+  public readonly excludeFromSnapshotTracking = ["toolRenderer", "document"];
+
   constructor(document: IDocument, protected toolRenderer: ToolRenderer) {
     super(
       {

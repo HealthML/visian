@@ -45,7 +45,7 @@ vec4 baseTransferFunction(VolumeData data, vec3 volumeCoords) {
 
   // Custom
   if (uTransferFunction == 3) {
-    return texture2D(uCustomTFTexture, vec2(data.image.a, 0));
+    return texture(uCustomTFTexture, vec2(data.image.a, 0));
   }
 
   // Density
