@@ -342,7 +342,7 @@ const StyledParagraph = styled(Text)`
 `;
 
 const BoldParagraph = styled(StyledParagraph)`
-  font-weight: 700;
+  font-weight: 500;
 `;
 
 const ErrorParagraph = styled(StyledParagraph)`
