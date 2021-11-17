@@ -158,6 +158,7 @@ export class FloyDemoController implements ISerializable<FloyDemoSnapshot> {
 
     const formData = new FormData();
     formData.append("seriesZIP", this.seriesZip);
+    formData.append("studyZIP", this.seriesZip);
     formData.append("tokenStr", localStorage.getItem(FLOY_TOKEN_KEY) || "");
 
     this.setInferenceResults(
