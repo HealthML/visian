@@ -80,14 +80,17 @@ const generateReduceEnhancedLayerStack = (
   const image = `_image${Math.floor(Math.random() * 1000)}`;
   const activeLayer = `_activeLayer${Math.floor(Math.random() * 1000)}`;
   const oldAlpha = `_oldAlpha${Math.floor(Math.random() * 1000)}`;
+  const accumulatedAnnotations = `_accumulatedAnnotations${Math.floor(
+    Math.random() * 1000,
+  )}`;
   let fragment = `
   vec4 ${image} = vec4(0.0);
   vec4 ${activeLayer} = texture(uActiveLayerData, ${volumeCoords});
   float ${oldAlpha} = 0.0;
+  float ${accumulatedAnnotations} = 0.0;
   `;
 
-  for (let i = layerCount - 1; i >= 0; i--) {
-    // back to front blending
+  for (let i = 0; i < layerCount; i++) {
     fragment += `${image} = texture(uLayerData${i}, ${volumeCoords});
     `;
 
@@ -116,6 +119,11 @@ const generateReduceEnhancedLayerStack = (
       ${image}.rgb = uLayerColors[${i}];
     }
 
+    if(uUseExclusiveAnnotations && uLayerAnnotationStatuses[${i}]) {
+      ${image}.a = mix(${image}.a, 0.0, step(0.001, ${accumulatedAnnotations}));
+      ${accumulatedAnnotations} = mix(${accumulatedAnnotations}, 1.0, step(0.001, ${image}.a));
+    }
+
     if(uLayerAnnotationStatuses[${i}]) {
       ${image}.a = step(0.01, ${image}.a);
     } ${
@@ -129,11 +137,11 @@ const generateReduceEnhancedLayerStack = (
     ${image}.a *= uLayerOpacities[${i}];
     
     ${oldAlpha} = ${outputName}.a;
-    ${outputName}.a = mix(${oldAlpha}, 1.0, ${image}.a);
+    ${outputName}.a = mix(${image}.a, 1.0, ${oldAlpha});
     ${outputName}.rgb = mix(
-      ${oldAlpha} * ${outputName}.rgb,
-      ${image}.rgb,
-      ${image}.a) / max(${outputName}.a, 0.00001); // avoid division by 0
+      ${image}.a * ${image}.rgb,
+      ${outputName}.rgb,
+      ${oldAlpha}) / max(${outputName}.a, 0.00001); // avoid division by 0
     `;
   }
 

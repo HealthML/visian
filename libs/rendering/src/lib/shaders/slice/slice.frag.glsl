@@ -14,6 +14,8 @@ uniform float uContrast;
 uniform float uBrightness;
 uniform int uComponents;
 
+uniform bool uUseExclusiveAnnotations;
+
 #ifdef VOLUMETRIC_IMAGE
   uniform sampler3D uActiveLayerData;
 #else

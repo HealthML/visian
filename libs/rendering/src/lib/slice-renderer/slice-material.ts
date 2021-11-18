@@ -38,6 +38,7 @@ export class SliceMaterial extends THREE.ShaderMaterial implements IDisposable {
         uActiveLayerIndex: { value: 0 },
         uToolPreview: { value: null },
         uToolPreviewMerge: { value: MergeFunction.Add },
+        uUseExclusiveAnnotations: { value: false },
       },
       defines: { VOLUMETRIC_IMAGE: "" },
       glslVersion: THREE.GLSL3,
