@@ -8,6 +8,7 @@ import type { ITools } from "./tools";
 import type { Reference } from "./types";
 import type { IViewport2D, IViewport3D, IViewSettings } from "./view-settings";
 import type { IMarkers } from "./markers";
+import type { IClipboard } from "./clipboard";
 import { Theme } from "../../theme";
 
 /** A VISIAN document, consisting of up to multiple editable layers. */
@@ -40,8 +41,11 @@ export interface IDocument {
    */
   baseImageLayer?: Reference<IImageLayer>;
 
-  /** The document's history.' */
+  /** The document's history. */
   history: IHistory;
+
+  /** The document's clipboard. */
+  clipboard: IClipboard;
 
   viewSettings: IViewSettings;
   viewport2D: IViewport2D;

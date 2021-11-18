@@ -37,6 +37,7 @@ import { History, HistorySnapshot } from "./history";
 import { ImageLayer, Layer, LayerSnapshot } from "./layers";
 import * as layers from "./layers";
 import { Markers } from "./markers";
+import { Clipboard } from "./clipboard";
 import { ToolName, Tools, ToolsSnapshot } from "./tools";
 import {
   TransferFunctionName,
@@ -87,6 +88,7 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
   protected layerIds: string[];
 
   public history: History;
+  public clipboard: Clipboard = new Clipboard(this);
 
   public viewSettings: ViewSettings;
   public viewport2D: Viewport2D;
