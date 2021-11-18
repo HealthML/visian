@@ -360,6 +360,13 @@ export class SharedUniforms implements IDisposable {
         editor.activeDocument?.viewport3D.onTransferFunctionChange();
         editor.volumeRenderer?.lazyRender(true);
       }),
+      autorun(() => {
+        this.uniforms.uUseExclusiveAnnotations.value =
+          editor.activeDocument?.useExclusiveAnnotations;
+
+        editor.activeDocument?.viewport3D.onTransferFunctionChange();
+        editor.volumeRenderer?.lazyRender(true);
+      }),
     );
   }
 

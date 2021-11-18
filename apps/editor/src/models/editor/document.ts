@@ -71,6 +71,8 @@ export interface DocumentSnapshot {
   viewport3D: Viewport3DSnapshot<TransferFunctionName>;
 
   tools: ToolsSnapshot<ToolName>;
+
+  useExclusiveAnnotations: boolean;
 }
 
 export class Document implements IDocument, ISerializable<DocumentSnapshot> {
@@ -98,6 +100,8 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
 
   public trackingData?: TrackingData;
 
+  public useExclusiveAnnotations = false;
+
   constructor(
     snapshot: DocumentSnapshot | undefined,
     protected editor: IEditor,
@@ -124,6 +128,8 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
     this.viewport2D = new Viewport2D(snapshot?.viewport2D, this);
     this.viewport3D = new Viewport3D(snapshot?.viewport3D, this);
 
+    this.useExclusiveAnnotations = Boolean(snapshot?.useExclusiveAnnotations);
+
     makeObservable<
       this,
       "titleOverride" | "activeLayerId" | "layerMap" | "layerIds"
@@ -140,6 +146,7 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
       tools: observable,
       showLayerMenu: observable,
       trackingData: observable,
+      useExclusiveAnnotations: observable,
 
       title: computed,
       activeLayer: computed,
@@ -158,6 +165,7 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
       importTrackingLog: action,
       setShowLayerMenu: action,
       toggleLayerMenu: action,
+      setUseExclusiveAnnotations: action,
       applySnapshot: action,
     });
 
@@ -608,6 +616,11 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
     this.setShowLayerMenu(!this.showLayerMenu);
   };
 
+  // Exclusive Annotations
+  public setUseExclusiveAnnotations = (value = false) => {
+    this.useExclusiveAnnotations = value;
+  };
+
   // Proxies
   public get sliceRenderer(): ISliceRenderer | undefined {
     return this.editor.sliceRenderer;
@@ -638,6 +651,7 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
       viewport2D: this.viewport2D.toJSON(),
       viewport3D: this.viewport3D.toJSON(),
       tools: this.tools.toJSON(),
+      useExclusiveAnnotations: this.useExclusiveAnnotations,
     };
   }
 

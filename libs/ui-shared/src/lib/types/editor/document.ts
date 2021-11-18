@@ -67,6 +67,8 @@ export interface IDocument {
 
   trackingData?: ITrackingData;
 
+  useExclusiveAnnotations: boolean;
+
   setShowLayerMenu(value?: boolean): void;
   toggleLayerMenu(): void;
 
@@ -97,4 +99,6 @@ export interface IDocument {
    * This may be delayed until the next auto-save.
    */
   requestSave(): Promise<void>;
+
+  setUseExclusiveAnnotations(value: boolean): void;
 }
