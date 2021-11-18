@@ -12,5 +12,5 @@ export const commonUniforms = {
   uActiveLayerData: { value: null },
   uRegionGrowingThreshold: { value: 0 },
 
-  uUseExclusiveAnnotations: { value: false },
+  uUseExclusiveSegmentations: { value: false },
 };

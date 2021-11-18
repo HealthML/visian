@@ -11,4 +11,4 @@ uniform vec3 uLayerColors[{{layerCount}}];
 uniform sampler3D uActiveLayerData;
 uniform float uRegionGrowingThreshold;
 
-uniform bool uUseExclusiveAnnotations;
+uniform bool uUseExclusiveSegmentations;

@@ -49,7 +49,7 @@ const generateReduceLayerStack = (
 
     if (reduceAnnotations) {
       fragment += `
-      if(uUseExclusiveAnnotations) {
+      if(uUseExclusiveSegmentations) {
         ${alpha} = mix(${alpha}, 0.0, step(0.001, ${accumulatedAnnotations}));
         ${accumulatedAnnotations} = mix(${accumulatedAnnotations}, 1.0, step(0.001, ${alpha} * step(0.001, uLayerOpacities[${i}])));
       }
@@ -137,7 +137,7 @@ const generateReduceEnhancedLayerStack = (
       ${image}.rgb = uLayerColors[${i}];
     }
 
-    if(uUseExclusiveAnnotations && uLayerAnnotationStatuses[${i}]) {
+    if(uUseExclusiveSegmentations && uLayerAnnotationStatuses[${i}]) {
       ${image}.a = mix(${image}.a, 0.0, step(0.001, ${accumulatedAnnotations}));
       ${accumulatedAnnotations} = mix(${accumulatedAnnotations}, 1.0, step(0.001, ${image}.a * step(0.001, uLayerOpacities[${i}])));
     }

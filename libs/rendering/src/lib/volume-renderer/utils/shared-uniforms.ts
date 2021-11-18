@@ -361,8 +361,8 @@ export class SharedUniforms implements IDisposable {
         editor.volumeRenderer?.lazyRender(true);
       }),
       autorun(() => {
-        this.uniforms.uUseExclusiveAnnotations.value =
-          editor.activeDocument?.useExclusiveAnnotations;
+        this.uniforms.uUseExclusiveSegmentations.value =
+          editor.activeDocument?.useExclusiveSegmentations;
 
         editor.activeDocument?.viewport3D.onTransferFunctionChange();
         editor.volumeRenderer?.lazyRender(true);

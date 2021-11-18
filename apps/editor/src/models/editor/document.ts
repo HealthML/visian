@@ -72,7 +72,7 @@ export interface DocumentSnapshot {
 
   tools: ToolsSnapshot<ToolName>;
 
-  useExclusiveAnnotations: boolean;
+  useExclusiveSegmentations: boolean;
 }
 
 export class Document implements IDocument, ISerializable<DocumentSnapshot> {
@@ -100,7 +100,7 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
 
   public trackingData?: TrackingData;
 
-  public useExclusiveAnnotations = false;
+  public useExclusiveSegmentations = false;
 
   constructor(
     snapshot: DocumentSnapshot | undefined,
@@ -128,7 +128,9 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
     this.viewport2D = new Viewport2D(snapshot?.viewport2D, this);
     this.viewport3D = new Viewport3D(snapshot?.viewport3D, this);
 
-    this.useExclusiveAnnotations = Boolean(snapshot?.useExclusiveAnnotations);
+    this.useExclusiveSegmentations = Boolean(
+      snapshot?.useExclusiveSegmentations,
+    );
 
     makeObservable<
       this,
@@ -146,7 +148,7 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
       tools: observable,
       showLayerMenu: observable,
       trackingData: observable,
-      useExclusiveAnnotations: observable,
+      useExclusiveSegmentations: observable,
 
       title: computed,
       activeLayer: computed,
@@ -165,7 +167,7 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
       importTrackingLog: action,
       setShowLayerMenu: action,
       toggleLayerMenu: action,
-      setUseExclusiveAnnotations: action,
+      setUseExclusiveSegmentations: action,
       applySnapshot: action,
     });
 
@@ -617,12 +619,12 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
   };
 
   // Exclusive Segmentations
-  public setUseExclusiveAnnotations = (value = false) => {
-    this.useExclusiveAnnotations = value;
+  public setUseExclusiveSegmentations = (value = false) => {
+    this.useExclusiveSegmentations = value;
   };
 
   public getExcludedSegmentations(layer: ILayer) {
-    if (!this.useExclusiveAnnotations) return undefined;
+    if (!this.useExclusiveSegmentations) return undefined;
     const layerIndex = this.layerIds.indexOf(layer.id);
     if (layerIndex <= 0) return undefined;
     return (this.layerIds
@@ -667,7 +669,7 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
       viewport2D: this.viewport2D.toJSON(),
       viewport3D: this.viewport3D.toJSON(),
       tools: this.tools.toJSON(),
-      useExclusiveAnnotations: this.useExclusiveAnnotations,
+      useExclusiveSegmentations: this.useExclusiveSegmentations,
     };
   }
 

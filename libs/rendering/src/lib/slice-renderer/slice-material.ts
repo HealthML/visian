@@ -38,7 +38,7 @@ export class SliceMaterial extends THREE.ShaderMaterial implements IDisposable {
         uActiveLayerIndex: { value: 0 },
         uToolPreview: { value: null },
         uToolPreviewMerge: { value: MergeFunction.Add },
-        uUseExclusiveAnnotations: { value: false },
+        uUseExclusiveSegmentations: { value: false },
       },
       defines: { VOLUMETRIC_IMAGE: "" },
       glslVersion: THREE.GLSL3,
@@ -247,8 +247,8 @@ export class SliceMaterial extends THREE.ShaderMaterial implements IDisposable {
         editor.sliceRenderer?.lazyRender();
       }),
       autorun(() => {
-        this.uniforms.uUseExclusiveAnnotations.value =
-          editor.activeDocument?.useExclusiveAnnotations;
+        this.uniforms.uUseExclusiveSegmentations.value =
+          editor.activeDocument?.useExclusiveSegmentations;
 
         editor.sliceRenderer?.lazyRender();
       }),

@@ -84,9 +84,9 @@ export const SettingsPopUp: React.FC<SettingsPopUpProps> = observer(
               />
               <BooleanParam
                 labelTx="exclusive-segmentations"
-                value={store?.editor.activeDocument?.useExclusiveAnnotations}
+                value={store?.editor.activeDocument?.useExclusiveSegmentations}
                 setValue={
-                  store?.editor.activeDocument?.setUseExclusiveAnnotations
+                  store?.editor.activeDocument?.setUseExclusiveSegmentations
                 }
               />
               <BooleanParam
