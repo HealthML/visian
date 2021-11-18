@@ -616,10 +616,26 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
     this.setShowLayerMenu(!this.showLayerMenu);
   };
 
-  // Exclusive Annotations
+  // Exclusive Segmentations
   public setUseExclusiveAnnotations = (value = false) => {
     this.useExclusiveAnnotations = value;
   };
+
+  public getExcludedSegmentations(layer: ILayer) {
+    if (!this.useExclusiveAnnotations) return undefined;
+    const layerIndex = this.layerIds.indexOf(layer.id);
+    if (layerIndex <= 0) return undefined;
+    return (this.layerIds
+      .slice(0, layerIndex)
+      .map((layerId) => this.layerMap[layerId])
+      .filter(
+        (potentialLayer) =>
+          potentialLayer.isAnnotation &&
+          potentialLayer.kind === "image" &&
+          potentialLayer.isVisible &&
+          potentialLayer.opacity > 0,
+      ) as unknown) as IImageLayer[];
+  }
 
   // Proxies
   public get sliceRenderer(): ISliceRenderer | undefined {

@@ -101,4 +101,5 @@ export interface IDocument {
   requestSave(): Promise<void>;
 
   setUseExclusiveAnnotations(value: boolean): void;
+  getExcludedSegmentations(layer: ILayer): IImageLayer[] | undefined;
 }

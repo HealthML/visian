@@ -51,7 +51,7 @@ const generateReduceLayerStack = (
       fragment += `
       if(uUseExclusiveAnnotations) {
         ${alpha} = mix(${alpha}, 0.0, step(0.001, ${accumulatedAnnotations}));
-        ${accumulatedAnnotations} = mix(${accumulatedAnnotations}, 1.0, step(0.001, ${alpha}));
+        ${accumulatedAnnotations} = mix(${accumulatedAnnotations}, 1.0, step(0.001, ${alpha} * step(0.001, uLayerOpacities[${i}])));
       }
       `;
     }
@@ -62,8 +62,8 @@ const generateReduceLayerStack = (
 
     if (rawOutputName) {
       fragment += `
-      ${rawOutputName}.rgb += ${filter} * (1.0 - ${rawOutputName}.a) * ${alpha} * step(0.0, uLayerOpacities[${i}]);
-      ${rawOutputName}.a += ${filter} * (1.0 - ${rawOutputName}.a) * ${alpha} * step(0.0, uLayerOpacities[${i}]);
+      ${rawOutputName}.rgb += ${filter} * (1.0 - ${rawOutputName}.a) * ${alpha} * step(0.001, uLayerOpacities[${i}]);
+      ${rawOutputName}.a += ${filter} * (1.0 - ${rawOutputName}.a) * ${alpha} * step(0.001, uLayerOpacities[${i}]);
       `;
     }
 
@@ -139,7 +139,7 @@ const generateReduceEnhancedLayerStack = (
 
     if(uUseExclusiveAnnotations && uLayerAnnotationStatuses[${i}]) {
       ${image}.a = mix(${image}.a, 0.0, step(0.001, ${accumulatedAnnotations}));
-      ${accumulatedAnnotations} = mix(${accumulatedAnnotations}, 1.0, step(0.001, ${image}.a));
+      ${accumulatedAnnotations} = mix(${accumulatedAnnotations}, 1.0, step(0.001, ${image}.a * step(0.001, uLayerOpacities[${i}])));
     }
 
     if(uLayerAnnotationStatuses[${i}]) {
