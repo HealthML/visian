@@ -22,10 +22,19 @@ const generateReduceLayerStack = (
 ) => {
   const alpha = `_alpha${Math.floor(Math.random() * 1000)}`;
   const activeLayer = `_activeLayer${Math.floor(Math.random() * 1000)}`;
+  const accumulatedAnnotations = `_accumulatedAnnotations${Math.floor(
+    Math.random() * 1000,
+  )}`;
   let fragment = `
   float ${alpha} = 0.0;
   float ${activeLayer} = texture(uActiveLayerData, ${uvName}).r;
   `;
+  if (reduceAnnotations) {
+    fragment += `
+    float ${accumulatedAnnotations} = 0.0;
+    `;
+  }
+
   for (let i = 0; i < layerCount; i++) {
     fragment += `${alpha} = texture(uLayerData${i}, ${uvName}).r;
     `;
@@ -35,6 +44,15 @@ const generateReduceLayerStack = (
       fragment += `
       ${alpha} = step(uRegionGrowingThreshold, ${alpha});
       ${alpha} *= 1.0 - step(0.001, ${activeLayer});
+      `;
+    }
+
+    if (reduceAnnotations) {
+      fragment += `
+      if(uUseExclusiveAnnotations) {
+        ${alpha} = mix(${alpha}, 0.0, step(0.001, ${accumulatedAnnotations}));
+        ${accumulatedAnnotations} = mix(${accumulatedAnnotations}, 1.0, step(0.001, ${alpha}));
+      }
       `;
     }
 
