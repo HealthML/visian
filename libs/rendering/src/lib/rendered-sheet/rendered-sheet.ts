@@ -1,8 +1,9 @@
-import { IEditor, noise } from "@visian/ui-shared";
+import { IEditor, noise, color } from "@visian/ui-shared";
 import { IDisposable, IDisposer } from "@visian/utils";
 import { autorun, reaction } from "mobx";
 import * as THREE from "three";
 import ResizeSensor from "css-element-queries/src/ResizeSensor";
+import tc from "tinycolor2";
 
 import { BlurMaterial } from "./blur-material";
 import { RenderedSheetGeometry } from "./rendered-sheet-geometry";
@@ -33,8 +34,6 @@ export class RenderedSheet extends THREE.Mesh implements IDisposable {
       this.sharedGeometry,
       new THREE.MeshBasicMaterial({
         transparent: true,
-        opacity: 0.2,
-        color: 0x4e5059,
       }),
     );
     this.add(backgroundLayer);
@@ -57,13 +56,15 @@ export class RenderedSheet extends THREE.Mesh implements IDisposable {
 
     this.disposers.push(
       autorun(() => {
-        if (editor.colorMode === "dark") {
-          backgroundLayer.material.color.set(0x4e5059);
-          backgroundLayer.material.opacity = 0.2;
-        } else {
-          backgroundLayer.material.color.set(0xc8c8c8);
-          backgroundLayer.material.opacity = 0.4;
-        }
+        const backgroundColor = tc(
+          color("sideViewSheet")({ theme: editor.theme }),
+        );
+
+        backgroundLayer.material.color.setHex(
+          parseInt(backgroundColor.toHex(), 16),
+        );
+        backgroundLayer.material.opacity = backgroundColor.getAlpha();
+
         editor.sliceRenderer?.lazyRender();
       }),
       reaction(
