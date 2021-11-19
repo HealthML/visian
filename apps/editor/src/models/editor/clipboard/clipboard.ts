@@ -5,37 +5,25 @@ import {
   IImageLayer,
   MergeFunction,
 } from "@visian/ui-shared";
-import { getPlaneAxes, IDisposable, IDisposer, Vector } from "@visian/utils";
-import { autorun } from "mobx";
+import { getPlaneAxes, IDisposable, Vector } from "@visian/utils";
 import * as THREE from "three";
 import { SliceCommand } from "../history";
 
 export class Clipboard implements IClipboard, IDisposable {
-  protected renderTargets?: THREE.WebGLRenderTarget[];
+  protected renderTarget: THREE.WebGLRenderTarget;
   protected size = new Vector([1, 1], false);
   protected hasCopiedSlice = false;
 
-  protected disposers: IDisposer[] = [];
   constructor(protected document: IDocument) {
-    this.disposers.push(
-      autorun(() => {
-        const { renderers } = document;
-        if (!renderers) return;
-        this.renderTargets = renderers.map(
-          () =>
-            new THREE.WebGLRenderTarget(1, 1, {
-              magFilter: THREE.NearestFilter,
-              minFilter: THREE.NearestFilter,
-            }),
-        );
-      }),
-    );
+    this.renderTarget = new THREE.WebGLRenderTarget(1, 1, {
+      magFilter: THREE.NearestFilter,
+      minFilter: THREE.NearestFilter,
+    });
   }
 
   public copy() {
     if (
       this.document.viewSettings.viewMode !== "2D" ||
-      !this.renderTargets ||
       !this.document.activeLayer?.isAnnotation ||
       !this.document.activeLayer?.isVisible ||
       this.document.activeLayer.kind !== "image"
@@ -48,15 +36,12 @@ export class Clipboard implements IClipboard, IDisposable {
     const viewType = this.document.viewport2D.mainViewType;
     const sliceNumber = this.document.viewport2D.getSelectedSlice();
 
-    this.renderTargets.forEach((target, index) => {
-      ((this.document.activeLayer as IImageLayer)
-        .image as RenderedImage).readSliceToTarget(
-        sliceNumber,
-        viewType,
-        index,
-        target,
-      );
-    });
+    ((this.document.activeLayer as IImageLayer)
+      .image as RenderedImage).readSliceToTarget(
+      sliceNumber,
+      viewType,
+      this.renderTarget,
+    );
 
     this.hasCopiedSlice = true;
   }
@@ -65,7 +50,6 @@ export class Clipboard implements IClipboard, IDisposable {
     if (
       !this.hasCopiedSlice ||
       this.document.viewSettings.viewMode !== "2D" ||
-      !this.renderTargets ||
       !this.document.activeLayer?.isAnnotation ||
       !this.document.activeLayer?.isVisible ||
       this.document.activeLayer.kind !== "image" ||
@@ -85,7 +69,7 @@ export class Clipboard implements IClipboard, IDisposable {
     image.setSlice(
       viewType,
       sliceNumber,
-      this.renderTargets.map((target) => target.texture),
+      this.renderTarget.texture,
       mergeFunction,
     );
     this.document.sliceRenderer?.lazyRender();
@@ -110,8 +94,7 @@ export class Clipboard implements IClipboard, IDisposable {
   }
 
   public dispose() {
-    this.disposers.forEach((disposer) => disposer());
-    this.renderTargets?.forEach((renderTarget) => renderTarget.dispose());
+    this.renderTarget.dispose();
   }
 
   private getCurrentSize() {
@@ -132,7 +115,6 @@ export class Clipboard implements IClipboard, IDisposable {
 
   private ensureRenderTargetSize() {
     if (
-      !this.renderTargets ||
       !this.document.activeLayer?.isAnnotation ||
       !this.document.activeLayer?.isVisible ||
       this.document.activeLayer.kind !== "image"
@@ -144,9 +126,7 @@ export class Clipboard implements IClipboard, IDisposable {
 
     if (this.size.equals(size)) return;
 
-    this.renderTargets.forEach((renderTarget) =>
-      renderTarget.setSize(size.x, size.y),
-    );
+    this.renderTarget.setSize(size.x, size.y);
     this.hasCopiedSlice = false;
 
     this.size.copy(size);

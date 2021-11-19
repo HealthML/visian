@@ -18,7 +18,10 @@ export class ToolRenderer {
   private shapeScene = new THREE.Scene();
 
   protected circles: Circles;
-  protected renderTargets: THREE.WebGLRenderTarget[] = [];
+  protected renderTarget = new THREE.WebGLRenderTarget(1, 1, {
+    magFilter: THREE.NearestFilter,
+    minFilter: THREE.NearestFilter,
+  });
 
   protected renderCallbacks: (() => void)[] = [];
 
@@ -34,6 +37,8 @@ export class ToolRenderer {
       renderShape: action,
     });
 
+    this.resizeRenderTarget();
+
     this.disposers.push(
       reaction(
         () => [
@@ -45,25 +50,7 @@ export class ToolRenderer {
             ? ((document.activeLayer as IImageLayer).image as RenderedImage)
             : undefined,
         ],
-        this.resizeRenderTargets,
-        { fireImmediately: true },
-      ),
-      reaction(
-        () => document.renderers,
-        (renderers) => {
-          if (renderers) {
-            this.renderTargets = renderers.map(
-              () =>
-                new THREE.WebGLRenderTarget(1, 1, {
-                  magFilter: THREE.NearestFilter,
-                  minFilter: THREE.NearestFilter,
-                }),
-            );
-            this.resizeRenderTargets();
-          } else {
-            this.renderTargets = [];
-          }
-        },
+        this.resizeRenderTarget,
         { fireImmediately: true },
       ),
     );
@@ -81,11 +68,11 @@ export class ToolRenderer {
       this.flushToAnnotation(annotation);
     }
 
-    this.document.renderers?.forEach((renderer, rendererIndex) => {
-      renderer.setRenderTarget(this.renderTargets[rendererIndex]);
-      renderer.clear();
-      renderer.setRenderTarget(null);
-    });
+    const { renderer } = this.document;
+    if (!renderer) return;
+    renderer.setRenderTarget(this.renderTarget);
+    renderer.clear();
+    renderer.setRenderTarget(null);
   }
 
   public render() {
@@ -94,8 +81,8 @@ export class ToolRenderer {
 
     if ((!circles && !shapes) || !this.document.activeLayer) return;
 
-    const { renderers } = this.document;
-    if (!renderers) return;
+    const { renderer } = this.document;
+    if (!renderer) return;
 
     if (circles) {
       this.circles.setCircles(this.circlesToRender);
@@ -108,21 +95,19 @@ export class ToolRenderer {
       this.shapesToRender = [];
     }
 
-    renderers.forEach((renderer, index) => {
-      renderer.setRenderTarget(this.renderTargets[index]);
-      renderer.autoClear = false;
+    renderer.setRenderTarget(this.renderTarget);
+    renderer.autoClear = false;
 
-      if (circles) {
-        renderer.render(this.circles, this.camera);
-      }
+    if (circles) {
+      renderer.render(this.circles, this.camera);
+    }
 
-      if (shapes) {
-        renderer.render(this.shapeScene, this.camera);
-      }
+    if (shapes) {
+      renderer.render(this.shapeScene, this.camera);
+    }
 
-      renderer.autoClear = true;
-      renderer.setRenderTarget(null);
-    });
+    renderer.autoClear = true;
+    renderer.setRenderTarget(null);
 
     this.renderCallbacks.forEach((callback) => callback());
     this.renderCallbacks = [];
@@ -134,7 +119,7 @@ export class ToolRenderer {
     annotation.setSlice(
       viewType,
       this.document.viewSettings.selectedVoxel[orthogonalAxis],
-      this.textures,
+      this.texture,
       this.mergeFunction,
     );
   }
@@ -175,11 +160,11 @@ export class ToolRenderer {
     });
   }
 
-  public get textures() {
-    return this.renderTargets.map((renderTarget) => renderTarget.texture);
+  public get texture() {
+    return this.renderTarget.texture;
   }
 
-  protected resizeRenderTargets = () => {
+  protected resizeRenderTarget = () => {
     if (!this.document.activeLayer) return;
 
     const { voxelCount } = (this.document.activeLayer as IImageLayer).image;
@@ -196,8 +181,6 @@ export class ToolRenderer {
   };
 
   protected setRenderTargetSize(width: number, height: number) {
-    this.renderTargets.forEach((renderTarget) => {
-      renderTarget.setSize(width, height);
-    });
+    this.renderTarget.setSize(width, height);
   }
 }

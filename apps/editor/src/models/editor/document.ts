@@ -517,8 +517,7 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
   }
 
   private checkHardwareRequirements(size: number[]) {
-    const renderer = this.renderers?.[0];
-    if (!renderer) return;
+    if (!this.renderer) return;
 
     const is3D =
       size.reduce((previous, current) => previous + (current > 1 ? 1 : 0), 0) >
@@ -526,10 +525,10 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
 
     let dimensionLimit = Infinity;
     if (is3D) {
-      const gl = renderer.getContext() as WebGL2RenderingContext;
+      const gl = this.renderer.getContext() as WebGL2RenderingContext;
       dimensionLimit = gl.getParameter(gl.MAX_3D_TEXTURE_SIZE);
     } else {
-      dimensionLimit = renderer.capabilities.maxTextureSize ?? 0;
+      dimensionLimit = this.renderer.capabilities.maxTextureSize ?? 0;
     }
 
     if (size.some((value) => value > dimensionLimit)) {
@@ -618,8 +617,8 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
     return this.editor.volumeRenderer;
   }
 
-  public get renderers(): THREE.WebGLRenderer[] | undefined {
-    return this.editor.renderers;
+  public get renderer(): THREE.WebGLRenderer | undefined {
+    return this.editor.renderer;
   }
 
   public get theme(): Theme {

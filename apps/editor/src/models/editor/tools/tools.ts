@@ -123,7 +123,7 @@ export class Tools
       canDraw: computed,
       isToolInUse: computed,
       useAdaptiveBrushSize: computed,
-      layerPreviewTextures: computed,
+      layerPreviewTexture: computed,
       slicePreviewTexture: computed,
       slicePreviewMergeFunction: computed,
 
@@ -315,14 +315,14 @@ export class Tools
     return this.lockedBrushSize === undefined;
   }
 
-  public get layerPreviewTextures(): THREE.Texture[] {
-    return this.regionGrowingRenderer3D.outputTextures;
+  public get layerPreviewTexture(): THREE.Texture {
+    return this.regionGrowingRenderer3D.outputTexture;
   }
 
   public get slicePreviewTexture(): THREE.Texture | undefined {
     if (!(this.activeTool instanceof UndoableTool)) return undefined;
 
-    return this.activeTool.toolRenderer.textures[0];
+    return this.activeTool.toolRenderer.texture;
   }
 
   public get slicePreviewMergeFunction(): MergeFunction | undefined {

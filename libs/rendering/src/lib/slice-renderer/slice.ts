@@ -24,7 +24,8 @@ import {
 export class Slice extends THREE.Group implements IDisposable {
   public readonly baseSize = new THREE.Vector2();
 
-  private workingVector = new THREE.Vector2();
+  private workingVector2 = new THREE.Vector2();
+  private workingVector3 = new THREE.Vector3();
 
   // Wrapper around every part of the slice.
   // Used to synch the crosshair position when the main view changes.
@@ -194,30 +195,33 @@ export class Slice extends THREE.Group implements IDisposable {
   }
 
   private updateScale = () => {
-    this.workingVector.copy(this.baseSize);
+    this.workingVector2.copy(this.baseSize);
 
     if (this.viewType === this.editor.activeDocument?.viewport2D.mainViewType) {
-      this.workingVector.multiplyScalar(
+      this.workingVector2.multiplyScalar(
         this.editor.activeDocument.viewport2D.zoomLevel,
       );
+    } else {
+      this.workingVector2.multiplyScalar(0.5);
     }
 
-    this.scale.set(this.workingVector.x, this.workingVector.y, 1);
+    this.scale.set(this.workingVector2.x, this.workingVector2.y, 1);
 
     this.editor.sliceRenderer?.lazyRender();
   };
 
   private updateOffset = () => {
-    this.workingVector.setScalar(0);
+    this.workingVector3.set(0, 0, 10);
 
     if (this.viewType === this.editor.activeDocument?.viewport2D.mainViewType) {
-      this.workingVector.set(
+      this.workingVector3.set(
         this.editor.activeDocument.viewport2D.offset.x,
         this.editor.activeDocument.viewport2D.offset.y,
+        0,
       );
     }
 
-    this.position.set(this.workingVector.x, this.workingVector.y, 0);
+    this.position.copy(this.workingVector3);
 
     this.editor.sliceRenderer?.lazyRender();
   };

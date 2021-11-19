@@ -41,27 +41,25 @@ export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
   private internalTexture: THREE.DataTexture3D | THREE.DataTexture;
 
   /**
-   * The render targets for the textures for the different WebGL contexts.
-   *
    * Sadly, Three currently does not let you change the filtering mode of a render target's
    * texture on the fly. As we need textures with nearest filtering for the 2D view and
    * linear filtering for the 3D view, we hold render targets for both filters.
    * See https://github.com/mrdoob/three.js/issues/14375
    * */
-  private renderTargets: Record<THREE.TextureFilter, ImageRenderTarget[]> = {
-    [THREE.NearestFilter]: [new ImageRenderTarget(this, THREE.NearestFilter)],
-    [THREE.LinearFilter]: [new ImageRenderTarget(this, THREE.LinearFilter)],
+  private renderTargets: Record<THREE.TextureFilter, ImageRenderTarget> = {
+    [THREE.NearestFilter]: new ImageRenderTarget(this, THREE.NearestFilter),
+    [THREE.LinearFilter]: new ImageRenderTarget(this, THREE.LinearFilter),
   };
   /**
    * Whether or not the corresponding render target needs to be updated from the CPU data.
    * See @member renderTargets for texture filter explanation.
    */
-  private hasCPUUpdates: Record<THREE.TextureFilter, boolean[]> = {
-    [THREE.NearestFilter]: [true],
-    [THREE.LinearFilter]: [true],
+  private hasCPUUpdates: Record<THREE.TextureFilter, boolean> = {
+    [THREE.NearestFilter]: true,
+    [THREE.LinearFilter]: true,
   };
 
-  /** Callbacks to be invoked when `renderes` are set. */
+  /** Callbacks to be invoked when `renderer` is set. */
   private rendererCallbacks: (() => void)[] = [];
 
   private gpuUpdates: OrientedSlice[] = [];
@@ -158,20 +156,17 @@ export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
     return super.getData();
   }
 
-  public getTexture(rendererIndex = 0, filter = THREE.NearestFilter) {
-    if (!this.renderTargets[filter][rendererIndex]) {
-      this.renderTargets[filter][rendererIndex] = new ImageRenderTarget(
-        this,
-        filter,
-      );
-      this.hasCPUUpdates[filter][rendererIndex] = true;
+  public getTexture(filter = THREE.NearestFilter) {
+    if (!this.renderTargets[filter]) {
+      this.renderTargets[filter] = new ImageRenderTarget(this, filter);
+      this.hasCPUUpdates[filter] = true;
     }
 
-    return this.renderTargets[filter][rendererIndex].texture;
+    return this.renderTargets[filter].texture;
   }
 
-  public waitForRenderers() {
-    if (this.document?.renderers) {
+  public waitForRenderer() {
+    if (this.document?.renderer) {
       return Promise.resolve();
     }
 
@@ -181,41 +176,31 @@ export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
   }
 
   public render() {
-    if (!this.document?.renderers) return;
+    if (!this.document?.renderer) return;
 
     this.rendererCallbacks.forEach((callback) => callback());
 
-    this.document.renderers.forEach((_, rendererIndex) => {
-      [THREE.NearestFilter, THREE.LinearFilter].forEach((filter) => {
-        if (
-          this.hasCPUUpdates[filter][rendererIndex] &&
-          this.renderTargets[filter][rendererIndex]
-        ) {
-          this.copyToRenderTarget(rendererIndex, filter);
-        }
-      });
+    [THREE.NearestFilter, THREE.LinearFilter].forEach((filter) => {
+      if (this.hasCPUUpdates[filter] && this.renderTargets[filter]) {
+        this.copyToRenderTarget(filter);
+      }
     });
   }
 
-  private copyToRenderTarget(
-    rendererIndex: number,
-    filter: THREE.TextureFilter,
-  ) {
-    const renderers = this.document?.renderers;
-    if (!renderers) return;
-    const renderer = renderers[rendererIndex];
+  private copyToRenderTarget(filter: THREE.TextureFilter) {
+    const renderer = this.document?.renderer;
     if (!renderer) return;
 
     this.textureAdapter.writeImage(
-      [this.internalTexture],
-      [this.renderTargets[filter][rendererIndex]],
-      [renderer],
+      this.internalTexture,
+      this.renderTargets[filter],
+      renderer,
       MergeFunction.Replace,
     );
 
     this.textureAdapter.invalidateCache();
 
-    this.hasCPUUpdates[filter][rendererIndex] = false;
+    this.hasCPUUpdates[filter] = false;
   }
 
   private onModificationsOnGPU() {
@@ -226,25 +211,25 @@ export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
   private scheduleGPUPush() {
     this.getTextureData();
     this.internalTexture.needsUpdate = true;
-    this.hasCPUUpdates[THREE.NearestFilter].fill(true);
-    this.hasCPUUpdates[THREE.LinearFilter].fill(true);
+    this.hasCPUUpdates[THREE.NearestFilter] = true;
+    this.hasCPUUpdates[THREE.LinearFilter] = true;
   }
 
   private pullDataFromGPU() {
-    if (!this.document?.renderers?.length) return;
+    if (!this.document?.renderer) return;
 
     if (this.hasWholeTextureChanged) {
       this.textureAdapter.readImage(
-        this.document.renderers[0],
-        this.getTexture(0, THREE.NearestFilter),
+        this.document.renderer,
+        this.getTexture(THREE.NearestFilter),
         this.textureData,
       );
       this.isDataDirty = true;
     } else {
       this.textureAdapter.readSlices(
         this.gpuUpdates,
-        this.document.renderers[0],
-        this.getTexture(0, THREE.NearestFilter),
+        this.document.renderer,
+        this.getTexture(THREE.NearestFilter),
         this.textureData,
       );
     }
@@ -285,23 +270,23 @@ export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
   }
 
   public writeToTexture(
-    textures: THREE.Texture[],
+    texture: THREE.Texture,
     mergeFunction = MergeFunction.Replace,
     threshold?: number,
   ) {
-    if (!this.document?.renderers) return;
+    if (!this.document?.renderer) return;
 
     this.textureAdapter.writeImage(
-      textures,
+      texture,
       this.renderTargets[THREE.NearestFilter],
-      this.document.renderers,
+      this.document.renderer,
       mergeFunction,
       threshold,
     );
     this.textureAdapter.writeImage(
-      textures,
+      texture,
       this.renderTargets[THREE.LinearFilter],
-      this.document.renderers,
+      this.document.renderer,
       mergeFunction,
       threshold,
     );
@@ -313,16 +298,16 @@ export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
   public setSlice(
     viewType: ViewType,
     slice: number,
-    sliceData?: Uint8Array | THREE.Texture[],
+    sliceData?: Uint8Array | THREE.Texture,
     mergeFunction = MergeFunction.Replace,
   ) {
-    if (this.document?.renderers?.length) {
+    if (this.document?.renderer) {
       this.textureAdapter.writeSlice(
         slice,
         viewType,
         sliceData,
         this.renderTargets[THREE.NearestFilter],
-        this.document.renderers,
+        this.document.renderer,
         mergeFunction,
       );
       this.textureAdapter.writeSlice(
@@ -330,7 +315,7 @@ export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
         viewType,
         sliceData,
         this.renderTargets[THREE.LinearFilter],
-        this.document.renderers,
+        this.document.renderer,
         mergeFunction,
       );
 
@@ -348,12 +333,12 @@ export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
   }
 
   public getSlice(viewType: ViewType, sliceNumber: number) {
-    if (this.document?.renderers?.length) {
+    if (this.document?.renderer) {
       return this.textureAdapter.readSlice(
         sliceNumber,
         viewType,
-        this.document.renderers[0],
-        this.getTexture(0, THREE.NearestFilter),
+        this.document.renderer,
+        this.getTexture(THREE.NearestFilter),
       );
     }
 
@@ -364,23 +349,20 @@ export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
   public readSliceToTarget(
     sliceNumber: number,
     viewType: ViewType,
-    rendererIndex: number,
     target: THREE.WebGLRenderTarget,
   ) {
-    const renderers = this.document?.renderers;
-    if (!renderers) return;
-    const renderer = renderers[rendererIndex];
+    const renderer = this.document?.renderer;
     if (!renderer) return;
 
-    if (this.hasCPUUpdates[THREE.NearestFilter][rendererIndex]) {
-      this.copyToRenderTarget(rendererIndex, THREE.NearestFilter);
+    if (this.hasCPUUpdates[THREE.NearestFilter]) {
+      this.copyToRenderTarget(THREE.NearestFilter);
     }
 
     this.textureAdapter.readSliceToTarget(
       sliceNumber,
       viewType,
       renderer,
-      this.getTexture(rendererIndex, THREE.NearestFilter),
+      this.getTexture(THREE.NearestFilter),
       target,
     );
   }

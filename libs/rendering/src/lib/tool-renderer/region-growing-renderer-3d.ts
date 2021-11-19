@@ -9,7 +9,7 @@ import {
   regionGrowing3DVertexShader,
 } from "../shaders";
 import { BlipRenderer3D } from "./blip-renderer-3d";
-import { MAX_BLIP_STEPS, Seed } from "./utils";
+import { Seed } from "./utils";
 
 export class RegionGrowingRenderer3D extends BlipRenderer3D {
   public readonly excludeFromSnapshotTracking = ["document"];
@@ -50,11 +50,9 @@ export class RegionGrowingRenderer3D extends BlipRenderer3D {
 
     this.seed.setPosition(voxel);
 
-    this.document.renderers?.forEach((renderer, rendererIndex) => {
-      renderer.setRenderTarget(this.renderTargets[rendererIndex], voxel.z);
-      renderer.render(this.seed, this.seed.camera);
-      renderer.setRenderTarget(null);
-    });
+    this.document.renderer?.setRenderTarget(this.renderTarget, voxel.z);
+    this.document.renderer?.render(this.seed, this.seed.camera);
+    this.document.renderer?.setRenderTarget(null);
   }
 
   public render() {
@@ -62,9 +60,8 @@ export class RegionGrowingRenderer3D extends BlipRenderer3D {
     if (!sourceImage) return;
 
     const seedValue = sourceImage.getVoxelData(this.seedVoxel).x;
-    this.material.uniforms.uSeed.value = seedValue / (MAX_BLIP_STEPS + 1);
-    this.material.uniforms.uThreshold.value =
-      this.threshold / (MAX_BLIP_STEPS + 1);
+    this.material.uniforms.uSeed.value = seedValue / 255;
+    this.material.uniforms.uThreshold.value = this.threshold / 255;
 
     super.render(undefined, (step: number) => [
       this.seedVoxel.z - (step + 1),

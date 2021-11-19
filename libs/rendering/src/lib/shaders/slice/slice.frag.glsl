@@ -25,6 +25,10 @@ uniform sampler2D uToolPreview;
 uniform int uToolPreviewMerge;
 uniform int uActiveLayerIndex;
 
+#ifdef BACKGROUND_BLEND
+  uniform vec3 uBackgroundColor;
+#endif
+
 out vec4 pc_FragColor;
 
 vec4 applyBrightnessContrast(vec4 image) {
@@ -59,6 +63,11 @@ void main() {
   
   vec4 imageValue = vec4(0.0);
   {{reduceEnhancedLayerStack(imageValue, uv, toolPreview, applyBrightnessContrast)}}
+
+  #ifdef BACKGROUND_BLEND
+    imageValue.rgb = mix(uBackgroundColor, imageValue.rgb, imageValue.a);
+    imageValue.a = 1.0;
+  #endif
 
   pc_FragColor = imageValue;
 }

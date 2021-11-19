@@ -59,7 +59,7 @@ export interface IDocument {
 
   sliceRenderer?: Reference<ISliceRenderer>;
   volumeRenderer?: Reference<IVolumeRenderer>;
-  renderers?: Reference<THREE.WebGLRenderer[]>;
+  renderer?: Reference<THREE.WebGLRenderer>;
   theme: Theme;
 
   /** Indicates wether the layer menu is open. */

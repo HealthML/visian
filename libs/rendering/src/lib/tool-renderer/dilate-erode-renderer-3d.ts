@@ -65,13 +65,11 @@ export class DilateErodeRenderer3D
     }
   };
 
-  public get outputTextures() {
+  public get outputTexture() {
     return this.maxSteps === 0 && this.targetLayer
-      ? this.renderTargets.map((_renderTarget, rendererIndex) =>
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          (this.targetLayer!.image as RenderedImage).getTexture(rendererIndex),
-        )
-      : super.outputTextures;
+      ? // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        (this.targetLayer!.image as RenderedImage).getTexture()
+      : super.outputTexture;
   }
 
   public discard() {
