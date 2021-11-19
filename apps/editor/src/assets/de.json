@@ -28,8 +28,9 @@
   "shortcuts": "Shortcuts",
 
   "settings": "Einstellungen",
-  "voxelData": "Voxel Daten",
-  "performanceMode": "Anzeigequalität",
+  "voxel-data": "Voxel Daten",
+  "performance-mode": "Anzeigequalität",
+  "exclusive-segmentations": "Überlappungsfreie Segmentierungen",
   "low": "Niedrig",
   "high": "Hoch",
 

@@ -293,7 +293,7 @@ export class Image<T extends TypedArray = TypedArray>
     setSlice(this, this.getData(), viewType, slice, sliceData);
   }
 
-  public toITKImage() {
+  public toITKImage(excludedImages?: Image[]) {
     const image = new ITKImage<T>(
       new ITKImageType(
         this.dimensionality,
@@ -321,6 +321,16 @@ export class Image<T extends TypedArray = TypedArray>
     // Clone the data array to protect it from modifications
     // & enable hand-off to web workers
     image.data = this.getData();
+
+    if (excludedImages) {
+      const excludedData = excludedImages.map((excludedImage) =>
+        excludedImage.getData(),
+      );
+      image.data = image.data.map((value, index) =>
+        excludedData.some((data) => data[index] > 0) ? 0 : value,
+      ) as typeof image.data;
+    }
+
     image.data = unifyOrientation(
       new (image.data.constructor as new (data: T) => T)(image.data),
       this.orientation,

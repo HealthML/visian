@@ -83,14 +83,21 @@ export const SettingsPopUp: React.FC<SettingsPopUpProps> = observer(
                 setValue={setLanguage}
               />
               <BooleanParam
-                labelTx="voxelData"
+                labelTx="exclusive-segmentations"
+                value={store?.editor.activeDocument?.useExclusiveSegmentations}
+                setValue={
+                  store?.editor.activeDocument?.setUseExclusiveSegmentations
+                }
+              />
+              <BooleanParam
+                labelTx="voxel-data"
                 value={store?.editor.activeDocument?.viewport2D.showVoxelInfo}
                 setValue={
                   store?.editor.activeDocument?.viewport2D.setShowVoxelInfo
                 }
               />
               <Switch
-                labelTx="performanceMode"
+                labelTx="performance-mode"
                 options={performanceSwitchOptions}
                 value={store?.editor.performanceMode}
                 onChange={store?.editor.setPerformanceMode}
