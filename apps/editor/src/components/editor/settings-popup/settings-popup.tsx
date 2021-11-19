@@ -1,6 +1,7 @@
 import {
   BooleanParam,
   ColorMode,
+  Divider,
   EnumParam,
   LargePopUpColumn,
   LargePopUpColumnContainer,
@@ -82,6 +83,7 @@ export const SettingsPopUp: React.FC<SettingsPopUpProps> = observer(
                 value={i18n.language.split("-")[0]}
                 setValue={setLanguage}
               />
+              <Divider />
               <BooleanParam
                 labelTx="exclusive-segmentations"
                 value={store?.editor.activeDocument?.useExclusiveSegmentations}
