@@ -1,5 +1,5 @@
 import { IEditor, isWindows } from "@visian/ui-shared";
-import { IDisposer } from "@visian/utils";
+import { IDisposable, IDisposer } from "@visian/utils";
 import { autorun, reaction } from "mobx";
 import * as THREE from "three";
 import {
@@ -18,7 +18,7 @@ const directions = [
 
 const labels = ["S", "I", "R", "L", "P", "A"];
 
-export class AxesConvention extends THREE.Scene {
+export class AxesConvention extends THREE.Scene implements IDisposable {
   public static size = 75;
 
   public camera: THREE.PerspectiveCamera;
@@ -90,6 +90,12 @@ export class AxesConvention extends THREE.Scene {
         { fireImmediately: true },
       ),
     );
+  }
+
+  public dispose() {
+    this.disposers.forEach((disposer) => disposer());
+    this.lineMaterial.dispose();
+    this.lines.forEach((line) => line.geometry.dispose());
   }
 
   public setCameraDirection(direction: THREE.Vector3) {

@@ -90,12 +90,16 @@ export class Editor
 
   public dispose(): void {
     this.sliceRenderer?.dispose();
+    this.volumeRenderer?.dispose();
+    this.activeDocument?.dispose();
+    this.renderer.dispose();
   }
 
   public setActiveDocument(
     value = new Document(undefined, this, this.context),
     isSilent?: boolean,
   ): void {
+    this.activeDocument?.dispose();
     this.activeDocument = value;
 
     if (!isSilent) this.activeDocument.requestSave();

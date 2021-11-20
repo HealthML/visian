@@ -6,7 +6,7 @@ import {
   IStorageBackend,
   Tab,
 } from "@visian/ui-shared";
-import { deepObserve, ISerializable } from "@visian/utils";
+import { deepObserve, IDisposable, ISerializable } from "@visian/utils";
 import { action, computed, makeObservable, observable } from "mobx";
 
 import { errorDisplayDuration } from "../constants";
@@ -25,7 +25,7 @@ export interface RootStoreConfig {
   storageBackend?: IStorageBackend;
 }
 
-export class RootStore implements ISerializable<RootSnapshot> {
+export class RootStore implements ISerializable<RootSnapshot>, IDisposable {
   public dicomWebServer?: DICOMWebServer;
 
   public editor: Editor;
@@ -94,6 +94,11 @@ export class RootStore implements ISerializable<RootSnapshot> {
     deepObserve(this.editor, this.persist, {
       exclusionAttribute: "excludeFromSnapshotTracking",
     });
+  }
+
+  public dispose() {
+    this.editor.dispose();
+    this.tracker?.dispose();
   }
 
   /**

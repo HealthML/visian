@@ -1,6 +1,7 @@
 import { IDocument, MergeFunction } from "@visian/ui-shared";
 import {
   getPlaneAxes,
+  IDisposable,
   Image,
   ImageSnapshot,
   ITKImage,
@@ -18,7 +19,9 @@ import { textureFormatForComponents } from "./utils";
 import { OrientedSlice } from "./types";
 import { ImageRenderTarget } from "./image-render-target";
 
-export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
+export class RenderedImage<T extends TypedArray = TypedArray>
+  extends Image<T>
+  implements IDisposable {
   public static fromITKImage<T2 extends TypedArray = TypedArray>(
     image: ITKImage<T2>,
     document?: IDocument,
@@ -110,6 +113,13 @@ export class RenderedImage<T extends TypedArray = TypedArray> extends Image<T> {
     }
 
     this.textureAdapter = new TextureAdapter(this);
+  }
+
+  public dispose() {
+    this.textureAdapter.dispose();
+    this.internalTexture.dispose();
+    this.renderTargets[THREE.NearestFilter].dispose();
+    this.renderTargets[THREE.LinearFilter].dispose();
   }
 
   /** Whether or not the texture data needs to be pulled from the GPU. */

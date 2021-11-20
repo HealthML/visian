@@ -12,7 +12,7 @@ import {
   ITools,
   MergeFunction,
 } from "@visian/ui-shared";
-import { getPlaneAxes, ISerializable } from "@visian/utils";
+import { getPlaneAxes, IDisposable, ISerializable } from "@visian/utils";
 import { action, computed, makeObservable, observable } from "mobx";
 import { CircleBrush } from "./circle-brush";
 import { ClearImageTool } from "./clear-image-tool";
@@ -60,7 +60,10 @@ export interface ToolsSnapshot<N extends string> {
 }
 
 export class Tools
-  implements ITools<ToolName>, ISerializable<ToolsSnapshot<ToolName>> {
+  implements
+    ITools<ToolName>,
+    ISerializable<ToolsSnapshot<ToolName>>,
+    IDisposable {
   public readonly excludeFromSnapshotTracking = [
     "document",
     "isCursorOverDrawableArea",
@@ -219,6 +222,13 @@ export class Tools
     );
 
     if (snapshot) this.applySnapshot(snapshot);
+  }
+
+  public dispose() {
+    this.toolRenderer.dispose();
+    this.regionGrowingRenderer.dispose();
+    this.regionGrowingRenderer3D.dispose();
+    this.dilateErodeRenderer3D.dispose();
   }
 
   protected getDefaultToolName(): ToolName {

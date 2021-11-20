@@ -139,6 +139,9 @@ export class Slice extends THREE.Group implements IDisposable {
     (this.mesh.material as SliceMaterial).dispose();
     this.heatMap.dispose();
     this.disposers.forEach((disposer) => disposer());
+    this.overlayLineMaterial.dispose();
+    this.overlayPointsMaterial.dispose();
+    this.crosshairMaterial.dispose();
   }
 
   public setCrosshairSynchOffset(offset = new THREE.Vector2()) {
