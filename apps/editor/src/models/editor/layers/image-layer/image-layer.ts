@@ -257,9 +257,13 @@ export class ImageLayer
   }
 
   // I/O
-  public toFile() {
+  public toFile(): Promise<File | undefined> {
     return writeSingleMedicalImage(
-      this.image.toITKImage(),
+      this.image.toITKImage(
+        this.document
+          .getExcludedSegmentations(this)
+          ?.map((imageLayer) => imageLayer.image),
+      ),
       `${this.title.split(".")[0]}.nii.gz`,
     );
   }
@@ -277,7 +281,16 @@ export class ImageLayer
       this.document.viewport2D.getSelectedSlice(),
     );
     const file = await writeSingleMedicalImage(
-      sliceImage.toITKImage(),
+      sliceImage.toITKImage(
+        this.document
+          .getExcludedSegmentations(this)
+          ?.map((imageLayer) =>
+            imageLayer.image.getSliceImage(
+              this.document.viewport2D.mainViewType,
+              this.document.viewport2D.getSelectedSlice(),
+            ),
+          ),
+      ),
       `${sliceImage.name.split(".")[0]}.png`,
     );
 

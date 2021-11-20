@@ -71,6 +71,8 @@ export interface DocumentSnapshot {
   viewport3D: Viewport3DSnapshot<TransferFunctionName>;
 
   tools: ToolsSnapshot<ToolName>;
+
+  useExclusiveSegmentations: boolean;
 }
 
 export class Document implements IDocument, ISerializable<DocumentSnapshot> {
@@ -98,6 +100,8 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
 
   public trackingData?: TrackingData;
 
+  public useExclusiveSegmentations = false;
+
   constructor(
     snapshot: DocumentSnapshot | undefined,
     protected editor: IEditor,
@@ -124,6 +128,10 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
     this.viewport2D = new Viewport2D(snapshot?.viewport2D, this);
     this.viewport3D = new Viewport3D(snapshot?.viewport3D, this);
 
+    this.useExclusiveSegmentations = Boolean(
+      snapshot?.useExclusiveSegmentations,
+    );
+
     makeObservable<
       this,
       "titleOverride" | "activeLayerId" | "layerMap" | "layerIds"
@@ -140,6 +148,7 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
       tools: observable,
       showLayerMenu: observable,
       trackingData: observable,
+      useExclusiveSegmentations: observable,
 
       title: computed,
       activeLayer: computed,
@@ -158,6 +167,7 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
       importTrackingLog: action,
       setShowLayerMenu: action,
       toggleLayerMenu: action,
+      setUseExclusiveSegmentations: action,
       applySnapshot: action,
     });
 
@@ -608,6 +618,27 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
     this.setShowLayerMenu(!this.showLayerMenu);
   };
 
+  // Exclusive Segmentations
+  public setUseExclusiveSegmentations = (value = false) => {
+    this.useExclusiveSegmentations = value;
+  };
+
+  public getExcludedSegmentations(layer: ILayer) {
+    if (!this.useExclusiveSegmentations) return undefined;
+    const layerIndex = this.layerIds.indexOf(layer.id);
+    if (layerIndex <= 0) return undefined;
+    return (this.layerIds
+      .slice(0, layerIndex)
+      .map((layerId) => this.layerMap[layerId])
+      .filter(
+        (potentialLayer) =>
+          potentialLayer.isAnnotation &&
+          potentialLayer.kind === "image" &&
+          potentialLayer.isVisible &&
+          potentialLayer.opacity > 0,
+      ) as unknown) as IImageLayer[];
+  }
+
   // Proxies
   public get sliceRenderer(): ISliceRenderer | undefined {
     return this.editor.sliceRenderer;
@@ -638,6 +669,7 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
       viewport2D: this.viewport2D.toJSON(),
       viewport3D: this.viewport3D.toJSON(),
       tools: this.tools.toJSON(),
+      useExclusiveSegmentations: this.useExclusiveSegmentations,
     };
   }
 

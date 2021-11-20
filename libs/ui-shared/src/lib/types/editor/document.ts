@@ -67,6 +67,8 @@ export interface IDocument {
 
   trackingData?: ITrackingData;
 
+  useExclusiveSegmentations: boolean;
+
   setShowLayerMenu(value?: boolean): void;
   toggleLayerMenu(): void;
 
@@ -97,4 +99,7 @@ export interface IDocument {
    * This may be delayed until the next auto-save.
    */
   requestSave(): Promise<void>;
+
+  setUseExclusiveSegmentations(value: boolean): void;
+  getExcludedSegmentations(layer: ILayer): IImageLayer[] | undefined;
 }

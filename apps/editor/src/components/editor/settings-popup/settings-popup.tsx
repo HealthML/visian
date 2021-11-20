@@ -1,6 +1,7 @@
 import {
   BooleanParam,
   ColorMode,
+  Divider,
   EnumParam,
   LargePopUpColumn,
   LargePopUpColumnContainer,
@@ -82,15 +83,23 @@ export const SettingsPopUp: React.FC<SettingsPopUpProps> = observer(
                 value={i18n.language.split("-")[0]}
                 setValue={setLanguage}
               />
+              <Divider />
               <BooleanParam
-                labelTx="voxelData"
+                labelTx="exclusive-segmentations"
+                value={store?.editor.activeDocument?.useExclusiveSegmentations}
+                setValue={
+                  store?.editor.activeDocument?.setUseExclusiveSegmentations
+                }
+              />
+              <BooleanParam
+                labelTx="voxel-data"
                 value={store?.editor.activeDocument?.viewport2D.showVoxelInfo}
                 setValue={
                   store?.editor.activeDocument?.viewport2D.setShowVoxelInfo
                 }
               />
               <Switch
-                labelTx="performanceMode"
+                labelTx="performance-mode"
                 options={performanceSwitchOptions}
                 value={store?.editor.performanceMode}
                 onChange={store?.editor.setPerformanceMode}
