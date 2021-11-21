@@ -18,7 +18,9 @@ export const createFileFromBase64 = (
   return new File([binaryData], fileNameZip);
 };
 
-export const createBase64StringFromFile = (file: File) =>
+export const createBase64StringFromFile = (
+  file: File,
+): Promise<string | ArrayBuffer | null> =>
   new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.readAsDataURL(file);

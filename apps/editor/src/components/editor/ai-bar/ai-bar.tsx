@@ -178,6 +178,7 @@ export const AIBar = observer(() => {
       store.currentTask.annotations.forEach((annotation) => {
         annotation.status = status;
       });
+      // TODO: For all layers
       const currentAnnotationImage = (store?.editor.activeDocument
         ?.activeLayer as IImageLayer).image.toITKImage();
       const currentAnnotationFile = await writeSingleMedicalImage(
@@ -188,15 +189,19 @@ export const AIBar = observer(() => {
       const base64Annotation = await createBase64StringFromFile(
         currentAnnotationFile,
       );
+      if (!(typeof base64Annotation === "string")) return;
 
-      const annotationDataForBackend = {
-        data: base64Annotation,
-      };
       store.currentTask.annotations.forEach((annotation) => {
         if (annotation.data.length) {
-          annotation.data = [];
+          annotation.data.forEach((annotationData) => {
+            annotationData.data = base64Annotation;
+          });
+        } else {
+          const annotationDataForBackend = {
+            data: base64Annotation,
+          };
+          annotation.data.push(new AnnotationData(annotationDataForBackend));
         }
-        annotation.data.push(new AnnotationData(annotationDataForBackend));
         annotation.submittedAt = new Date().toISOString();
       });
 

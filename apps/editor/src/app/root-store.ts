@@ -69,6 +69,10 @@ export const setupRootStore = async () => {
         if (taskId && store.editor.newDocument(true)) {
           store.setProgress({ labelTx: "importing", showSplash: true });
           const taskJson = await getWHOTask(taskId);
+          // We want to ignore possible other annotations if type is "CREATE"
+          if (taskJson.kind === TaskType.Create) {
+            taskJson.annotations = [];
+          }
           const whoTask = new Task(taskJson);
           store.setCurrentTask(whoTask);
 
@@ -92,14 +96,18 @@ export const setupRootStore = async () => {
                   whoTask.samples[index].title ||
                   whoTask.samples[0].title ||
                   `annotation_${index}`;
-                // TODO: Get rid of hardcoded array index
-                await store.editor.activeDocument?.importFiles(
-                  createFileFromBase64(
-                    title.replace(".nii", "_annotation").concat(".nii"),
-                    annotation.data[0].data,
-                  ),
-                  title.replace(".nii", "_annotation"),
-                  true,
+
+                await Promise.all(
+                  annotation.data.map(async (annotationData) => {
+                    await store.editor.activeDocument?.importFiles(
+                      createFileFromBase64(
+                        title.replace(".nii", "_annotation").concat(".nii"),
+                        annotationData.data,
+                      ),
+                      title.replace(".nii", "_annotation"),
+                      true,
+                    );
+                  }),
                 );
               }),
             );
