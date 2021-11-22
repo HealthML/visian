@@ -1,5 +1,5 @@
 export interface GetEmptySlicesArgs {
-  atlas: Uint8Array;
+  data: Uint8Array;
   voxelComponents: number;
   voxelCount: number[];
 }

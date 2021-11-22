@@ -5,8 +5,14 @@ import {
   RegionGrowingRenderer3D,
   ToolRenderer,
 } from "@visian/rendering";
-import { IDocument, IImageLayer, ITool, ITools } from "@visian/ui-shared";
-import { getPlaneAxes, ISerializable } from "@visian/utils";
+import {
+  IDocument,
+  IImageLayer,
+  ITool,
+  ITools,
+  MergeFunction,
+} from "@visian/ui-shared";
+import { getPlaneAxes, IDisposable, ISerializable } from "@visian/utils";
 import { action, computed, makeObservable, observable } from "mobx";
 import { CircleBrush } from "./circle-brush";
 import { ClearImageTool } from "./clear-image-tool";
@@ -22,6 +28,7 @@ import { PlaneTool } from "./plane-tool";
 import { SmartBrush3D } from "./smart-brush-3d";
 import { DilateErodeTool } from "./dilate-erode-tool";
 import { SelfDeactivatingTool } from "./self-deactivating-tool";
+import { UndoableTool } from "./undoable-tool";
 
 export type ToolName =
   | "navigation-tool"
@@ -53,7 +60,10 @@ export interface ToolsSnapshot<N extends string> {
 }
 
 export class Tools
-  implements ITools<ToolName>, ISerializable<ToolsSnapshot<ToolName>> {
+  implements
+    ITools<ToolName>,
+    ISerializable<ToolsSnapshot<ToolName>>,
+    IDisposable {
   public readonly excludeFromSnapshotTracking = [
     "document",
     "isCursorOverDrawableArea",
@@ -116,7 +126,9 @@ export class Tools
       canDraw: computed,
       isToolInUse: computed,
       useAdaptiveBrushSize: computed,
-      layerPreviewTextures: computed,
+      layerPreviewTexture: computed,
+      slicePreviewTexture: computed,
+      slicePreviewMergeFunction: computed,
 
       setActiveTool: action,
       setBrushSize: action,
@@ -210,6 +222,13 @@ export class Tools
     );
 
     if (snapshot) this.applySnapshot(snapshot);
+  }
+
+  public dispose() {
+    this.toolRenderer.dispose();
+    this.regionGrowingRenderer.dispose();
+    this.regionGrowingRenderer3D.dispose();
+    this.dilateErodeRenderer3D.dispose();
   }
 
   protected getDefaultToolName(): ToolName {
@@ -306,8 +325,20 @@ export class Tools
     return this.lockedBrushSize === undefined;
   }
 
-  public get layerPreviewTextures(): THREE.Texture[] {
-    return this.regionGrowingRenderer3D.outputTextures;
+  public get layerPreviewTexture(): THREE.Texture {
+    return this.regionGrowingRenderer3D.outputTexture;
+  }
+
+  public get slicePreviewTexture(): THREE.Texture | undefined {
+    if (!(this.activeTool instanceof UndoableTool)) return undefined;
+
+    return this.activeTool.toolRenderer.texture;
+  }
+
+  public get slicePreviewMergeFunction(): MergeFunction | undefined {
+    if (!(this.activeTool instanceof UndoableTool)) return undefined;
+
+    return this.activeTool.toolRenderer.mergeFunction;
   }
 
   public setBrushSize(value = 5, showPreview = false): void {

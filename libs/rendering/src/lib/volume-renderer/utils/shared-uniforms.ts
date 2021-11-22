@@ -13,7 +13,6 @@ import * as THREE from "three";
 import { RenderedImage } from "../../rendered-image";
 import { MAX_BLIP_STEPS } from "../../tool-renderer";
 import {
-  atlasInfoUniforms,
   commonUniforms,
   imageInfoUniforms,
   lightingUniforms,
@@ -33,11 +32,12 @@ export class SharedUniforms implements IDisposable {
   private workingColor = new THREE.Color();
   private readonly coneAxis = new THREE.Vector3(0, 1, 0);
 
+  private subscribedMaterials: THREE.ShaderMaterial[] = [];
+
   constructor(editor: IEditor) {
     this.uniforms = THREE.UniformsUtils.merge([
       opacityUniforms,
       commonUniforms,
-      atlasInfoUniforms,
       imageInfoUniforms,
       transferFunctionsUniforms,
       lightingUniforms,
@@ -165,21 +165,6 @@ export class SharedUniforms implements IDisposable {
         editor.activeDocument?.volumeRenderer?.lazyRender(true);
       }),
       autorun(() => {
-        this.uniforms.uVolumeNearestFiltering.value = Boolean(
-          editor.activeDocument?.viewport3D.activeTransferFunction?.params
-            .useBlockyContext?.value,
-        );
-
-        editor.activeDocument?.volumeRenderer?.lazyRender(true);
-      }),
-      autorun(() => {
-        this.uniforms.uSegmentationLinearFiltering.value = Boolean(
-          editor.activeDocument?.viewport3D.useSmoothSegmentations,
-        );
-
-        editor.activeDocument?.volumeRenderer?.lazyRender(true);
-      }),
-      autorun(() => {
         this.uniforms.uUsePlane.value = Boolean(
           editor.activeDocument?.viewport3D.useClippingPlane,
         );
@@ -209,10 +194,8 @@ export class SharedUniforms implements IDisposable {
         const layerData = layers.map((layer) =>
           layer ===
           editor.activeDocument?.tools.dilateErodeRenderer3D.targetLayer
-            ? editor.activeDocument.tools.dilateErodeRenderer3D
-                .outputTextures[0]
+            ? editor.activeDocument.tools.dilateErodeRenderer3D.outputTexture
             : ((layer as IImageLayer).image as RenderedImage).getTexture(
-                0,
                 (
                   layer.isAnnotation
                     ? useNearestFilteringAnnotation
@@ -223,16 +206,19 @@ export class SharedUniforms implements IDisposable {
               ),
         );
 
-        this.uniforms.uLayerData.value = [
-          // additional layer for 3d region growing
-          editor.activeDocument?.tools.layerPreviewTextures[0] || null,
-          ...layerData,
-        ];
+        this.uniforms.uLayerData0.value =
+          editor.activeDocument?.tools.layerPreviewTexture || null;
+
+        for (let i = 0; i < layerData.length; i++) {
+          if (!this.uniforms[`uLayerData${i + 1}`]) {
+            this.uniforms[`uLayerData${i + 1}`] = { value: null };
+          }
+          this.uniforms[`uLayerData${i + 1}`].value = layerData[i];
+        }
 
         const activeLayer = editor.activeDocument?.activeLayer;
         this.uniforms.uActiveLayerData.value = activeLayer
           ? ((activeLayer as IImageLayer).image as RenderedImage).getTexture(
-              0,
               (
                 activeLayer.isAnnotation
                   ? useNearestFilteringAnnotation
@@ -242,6 +228,13 @@ export class SharedUniforms implements IDisposable {
                 : THREE.LinearFilter,
             )
           : null;
+
+        this.subscribedMaterials.forEach((material) => {
+          material.uniforms = {
+            ...material.uniforms,
+            ...this.uniforms,
+          };
+        });
 
         editor.activeDocument?.viewport3D.onTransferFunctionChange();
         editor.activeDocument?.volumeRenderer?.lazyRender(true, true);
@@ -353,7 +346,6 @@ export class SharedUniforms implements IDisposable {
         const image = imageLayer.image as RenderedImage;
 
         this.uniforms.uVoxelCount.value = image.voxelCount;
-        this.uniforms.uAtlasGrid.value = image.getAtlasGrid();
         this.uniforms.uStepSize.value = getStepSize(image);
 
         editor.activeDocument?.volumeRenderer?.lazyRender();
@@ -368,7 +360,18 @@ export class SharedUniforms implements IDisposable {
         editor.activeDocument?.viewport3D.onTransferFunctionChange();
         editor.volumeRenderer?.lazyRender(true);
       }),
+      autorun(() => {
+        this.uniforms.uUseExclusiveSegmentations.value =
+          editor.activeDocument?.useExclusiveSegmentations;
+
+        editor.activeDocument?.viewport3D.onTransferFunctionChange();
+        editor.volumeRenderer?.lazyRender(true);
+      }),
     );
+  }
+
+  public subscribe(material: THREE.ShaderMaterial) {
+    this.subscribedMaterials.push(material);
   }
 
   public dispose() {

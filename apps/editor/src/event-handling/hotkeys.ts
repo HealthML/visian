@@ -1,3 +1,4 @@
+import { MergeFunction } from "@visian/ui-shared";
 import { IDisposer, ViewType } from "@visian/utils";
 import hotkeys from "hotkeys-js";
 
@@ -78,6 +79,20 @@ export const setUpHotKeys = (store: RootStore): IDisposer => {
     store.editor.activeDocument?.tools.setActiveTool("plane-tool");
   });
 
+  // Copy and Paste
+  hotkeys("ctrl+c", (event) => {
+    event.preventDefault();
+    store.editor.activeDocument?.clipboard.copy();
+  });
+  hotkeys("ctrl+v", (event) => {
+    event.preventDefault();
+    store.editor.activeDocument?.clipboard.paste();
+  });
+  hotkeys("ctrl+shift+v", (event) => {
+    event.preventDefault();
+    store.editor.activeDocument?.clipboard.paste(MergeFunction.Add);
+  });
+
   // Tools
   hotkeys("del,backspace", (event) => {
     event.preventDefault();
@@ -127,7 +142,7 @@ export const setUpHotKeys = (store: RootStore): IDisposer => {
   // Brush Size/Clipping Plane Distance
   hotkeys("*", (event) => {
     // "+" doesn't currently work with hotkeys-js (https://github.com/jaywcjlove/hotkeys/issues/270)
-    if (event.key === "+" && !event.ctrlKey) {
+    if ((event.key === "+" || event.key === "w") && !event.ctrlKey) {
       if (store.editor.activeDocument?.viewSettings.viewMode === "3D") {
         store.editor.activeDocument?.viewport3D.increaseClippingPlaneDistance();
         return;
@@ -136,7 +151,7 @@ export const setUpHotKeys = (store: RootStore): IDisposer => {
       store.editor.activeDocument?.tools.incrementBrushSize();
     }
   });
-  hotkeys("-", () => {
+  hotkeys("-,q", () => {
     if (store.editor.activeDocument?.viewSettings.viewMode === "3D") {
       store.editor.activeDocument?.viewport3D.decreaseClippingPlaneDistance();
       return;

@@ -1,3 +1,4 @@
+export * from "./clipboard";
 export * from "./document";
 export * from "./editor";
 export * from "./history";

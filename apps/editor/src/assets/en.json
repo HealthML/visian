@@ -28,8 +28,9 @@
   "shortcuts": "Shortcuts",
 
   "settings": "Settings",
-  "voxelData": "Voxel Data",
-  "performanceMode": "View Quality",
+  "voxel-data": "Voxel Data",
+  "performance-mode": "View Quality",
+  "exclusive-segmentations": "Exclusive Segmentations",
   "low": "Low",
   "high": "High",
 
@@ -107,11 +108,15 @@
   "confirm-task-annotation-tooltip": "Confirm",
   "skip-task-annotation-tooltip": "Skip",
 
+  "browser-error": "Browser Error",
+  "no-webgl-2-error": "This browser does not support WebGL 2 which is necessary to run VISIAN. Please update your browser to the newest version or use a different browser.",
+
   "import-error": "Import Error",
   "image-mismatch-error": "This file does not match the loaded images' size.",
   "image-mismatch-error-filename": "The file  \"{{fileName}}\" does not match the loaded images' size.",
   "image-loading-error": "Looks like this file is not supported.",
   "remote-file-error": "The specified file could not be loaded.",
+  "image-too-large-error": "Your browser does not support images this large.",
 
   "export-error": "Export Error",
   "file-upload-error": "The file could not be uploaded.",

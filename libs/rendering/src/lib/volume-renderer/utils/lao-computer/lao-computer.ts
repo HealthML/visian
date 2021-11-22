@@ -1,17 +1,32 @@
-import { IEditor, IImageLayer } from "@visian/ui-shared";
+import { ImageRenderTarget, Texture3DRenderer } from "@visian/rendering";
+import { IEditor } from "@visian/ui-shared";
+import { IDisposable, Vector, ViewType } from "@visian/utils";
 import { autorun, IReactionDisposer } from "mobx";
 import * as THREE from "three";
+import { Texture3DCopyMaterial } from "../../../texture-3d-renderer/texture-3d-copy-material";
 
 import { SharedUniforms } from "../shared-uniforms";
-import { TiledRenderer } from "../tiled-renderer";
 import { getTotalLAODirections } from "./lao-directions";
-import LAOMaterial from "./lao-material";
+import { LAOMaterial } from "./lao-material";
 
-export class LAOComputer extends TiledRenderer {
+export class LAOComputer implements IDisposable {
   private _isDirty = true;
 
   private _isFinalLAOFlushed = false;
   private isFirstFrameStarted = false;
+
+  private target: THREE.WebGLRenderTarget;
+  private intermediateTarget: THREE.WebGLRenderTarget;
+
+  private laoMaterial: LAOMaterial;
+  private copyMaterial: Texture3DCopyMaterial;
+
+  private startSlice = 0;
+  private sliceCount = 0;
+
+  private renderer: THREE.WebGLRenderer;
+
+  private texture3DRenderer = new Texture3DRenderer();
 
   private reactionDisposers: IReactionDisposer[] = [];
 
@@ -21,34 +36,44 @@ export class LAOComputer extends TiledRenderer {
     firstDerivativeTexture: THREE.Texture,
     secondDerivativeTexture: THREE.Texture,
     private flush: () => void,
-    target = new THREE.WebGLRenderTarget(1, 1),
-    private laoMaterial = new LAOMaterial(
+  ) {
+    this.renderer = editor.renderer;
+
+    const imageProperties = {
+      voxelCount: new Vector([1, 1, 1]),
+      is3D: true,
+      defaultViewType: ViewType.Transverse,
+    };
+    this.target = new ImageRenderTarget(imageProperties, THREE.LinearFilter);
+    this.intermediateTarget = new ImageRenderTarget(
+      imageProperties,
+      THREE.LinearFilter,
+    );
+
+    this.laoMaterial = new LAOMaterial(
       editor,
       firstDerivativeTexture,
       secondDerivativeTexture,
-      target.texture,
+      this.target.texture,
       sharedUniforms,
-    ),
-  ) {
-    super(laoMaterial, editor.renderers[0], undefined, target);
+    );
+
+    this.copyMaterial = new Texture3DCopyMaterial(
+      this.intermediateTarget.texture,
+    );
 
     this.reactionDisposers.push(
       autorun(() => {
-        const imageLayer = editor.activeDocument?.baseImageLayer as
-          | IImageLayer
-          | undefined;
-        if (!imageLayer) return;
+        const baseImageLayer = this.editor.activeDocument?.baseImageLayer;
+        if (!baseImageLayer?.is3DLayer) return;
 
-        const atlasSize = imageLayer.image.getAtlasSize();
+        const { voxelCount } = baseImageLayer.image;
 
-        this.setSize(atlasSize.x, atlasSize.y);
+        [this.target, this.intermediateTarget].forEach((renderTarget) => {
+          renderTarget.setSize(voxelCount.x, voxelCount.y, voxelCount.z);
+        });
 
-        const quadSize = editor.performanceMode === "low" ? 256 : 1024;
-
-        this.setRenderGrid(
-          Math.ceil(atlasSize.x / quadSize),
-          Math.ceil(atlasSize.y / quadSize),
-        );
+        this.sliceCount = voxelCount.z;
 
         this.setDirty();
       }),
@@ -56,13 +81,17 @@ export class LAOComputer extends TiledRenderer {
   }
 
   public dispose() {
-    super.dispose();
     this.reactionDisposers.forEach((disposer) => disposer());
     this.laoMaterial.dispose();
+    this.texture3DRenderer.dispose();
   }
 
   public get isDirty() {
     return this._isDirty;
+  }
+
+  public get output() {
+    return this.target.texture;
   }
 
   /** Whether or not the final progressive LAO frame has been flushed. */
@@ -70,17 +99,53 @@ export class LAOComputer extends TiledRenderer {
     return this._isFinalLAOFlushed;
   }
 
+  public get isFrameFinished() {
+    return this.startSlice >= this.sliceCount;
+  }
+
   public tick() {
     if (this._isDirty && !this.isFirstFrameStarted) {
       this.laoMaterial.setPreviousDirections(0);
-      this.restartFrame();
+      this.startSlice = 0;
       this.isFirstFrameStarted = true;
     }
 
-    super.tick();
+    if (!this.isFrameFinished) {
+      this.render();
+    }
   }
 
-  protected onFrameFinished = () => {
+  private render() {
+    const slicesToRender = this.editor.performanceMode === "high" ? 16 : 1;
+
+    const isXrEnabled = this.renderer.xr.enabled;
+    this.renderer.xr.enabled = false;
+
+    this.texture3DRenderer.setMaterial(this.laoMaterial);
+    this.texture3DRenderer.setTarget(this.intermediateTarget);
+
+    this.texture3DRenderer.render(this.renderer, [
+      this.startSlice,
+      this.startSlice + slicesToRender,
+    ]);
+
+    this.texture3DRenderer.setMaterial(this.copyMaterial);
+    this.texture3DRenderer.setTarget(this.target);
+
+    this.texture3DRenderer.render(this.renderer, [
+      this.startSlice,
+      this.startSlice + slicesToRender,
+    ]);
+
+    this.renderer.xr.enabled = isXrEnabled;
+
+    this.startSlice += slicesToRender;
+    if (this.isFrameFinished) {
+      this.onFrameFinished();
+    }
+  }
+
+  protected onFrameFinished() {
     this._isDirty = false;
 
     this.flush();
@@ -95,11 +160,11 @@ export class LAOComputer extends TiledRenderer {
     const totalLAORays = getTotalLAODirections(this.editor.performanceMode);
 
     if (this.laoMaterial.previousDirections < totalLAORays) {
-      this.restartFrame();
+      this.startSlice = 0;
     } else {
       this._isFinalLAOFlushed = true;
     }
-  };
+  }
 
   public setDirty = () => {
     this._isDirty = true;
@@ -107,5 +172,3 @@ export class LAOComputer extends TiledRenderer {
     this._isFinalLAOFlushed = false;
   };
 }
-
-export default LAOComputer;

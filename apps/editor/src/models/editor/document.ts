@@ -12,6 +12,7 @@ import {
   ValueType,
 } from "@visian/ui-shared";
 import {
+  IDisposable,
   ImageMismatchError,
   ISerializable,
   ITKImage,
@@ -34,6 +35,7 @@ import { History, HistorySnapshot } from "./history";
 import { ImageLayer, Layer, LayerSnapshot } from "./layers";
 import * as layers from "./layers";
 import { Markers } from "./markers";
+import { Clipboard } from "./clipboard";
 import { ToolName, Tools, ToolsSnapshot } from "./tools";
 import {
   TransferFunctionName,
@@ -70,9 +72,12 @@ export interface DocumentSnapshot {
   viewport3D: Viewport3DSnapshot<TransferFunctionName>;
 
   tools: ToolsSnapshot<ToolName>;
+
+  useExclusiveSegmentations: boolean;
 }
 
-export class Document implements IDocument, ISerializable<DocumentSnapshot> {
+export class Document
+  implements IDocument, ISerializable<DocumentSnapshot>, IDisposable {
   public readonly excludeFromSnapshotTracking = ["editor"];
 
   public id: string;
@@ -83,6 +88,7 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
   protected layerIds: string[];
 
   public history: History;
+  public clipboard: Clipboard = new Clipboard(this);
 
   public viewSettings: ViewSettings;
   public viewport2D: Viewport2D;
@@ -95,6 +101,8 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
   public markers: Markers = new Markers(this);
 
   public trackingData?: TrackingData;
+
+  public useExclusiveSegmentations = false;
 
   constructor(
     snapshot: DocumentSnapshot | undefined,
@@ -122,6 +130,10 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
     this.viewport2D = new Viewport2D(snapshot?.viewport2D, this);
     this.viewport3D = new Viewport3D(snapshot?.viewport3D, this);
 
+    this.useExclusiveSegmentations = Boolean(
+      snapshot?.useExclusiveSegmentations,
+    );
+
     makeObservable<
       this,
       "titleOverride" | "activeLayerId" | "layerMap" | "layerIds"
@@ -138,6 +150,7 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
       tools: observable,
       showLayerMenu: observable,
       trackingData: observable,
+      useExclusiveSegmentations: observable,
 
       title: computed,
       activeLayer: computed,
@@ -157,6 +170,7 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
       importTrackingLog: action,
       setShowLayerMenu: action,
       toggleLayerMenu: action,
+      setUseExclusiveSegmentations: action,
       applySnapshot: action,
     });
 
@@ -164,6 +178,12 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
     // trying to access document.tools
     this.tools = new Tools(undefined, this);
     this.tools.applySnapshot(snapshot?.tools || {});
+  }
+
+  public dispose() {
+    this.clipboard.dispose();
+    this.tools.dispose();
+    Object.values(this.layerMap).forEach((layer) => layer.delete());
   }
 
   public get title(): string | undefined {
@@ -531,7 +551,29 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
     return createdLayerId;
   }
 
+  private checkHardwareRequirements(size: number[]) {
+    if (!this.renderer) return;
+
+    const is3D =
+      size.reduce((previous, current) => previous + (current > 1 ? 1 : 0), 0) >
+      2;
+
+    let dimensionLimit = Infinity;
+    if (is3D) {
+      const gl = this.renderer.getContext() as WebGL2RenderingContext;
+      dimensionLimit = gl.getParameter(gl.MAX_3D_TEXTURE_SIZE);
+    } else {
+      dimensionLimit = this.renderer.capabilities.maxTextureSize ?? 0;
+    }
+
+    if (size.some((value) => value > dimensionLimit)) {
+      throw new Error("image-too-large-error");
+    }
+  }
+
   public async importImage(image: ITKImage) {
+    this.checkHardwareRequirements(image.size);
+
     const imageLayer = ImageLayer.fromITKImage(image, this, {
       color: defaultImageColor,
     });
@@ -553,6 +595,8 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
   }
 
   public async importAnnotation(image: ITKImage) {
+    this.checkHardwareRequirements(image.size);
+
     const annotationLayer = ImageLayer.fromITKImage(image, this, {
       isAnnotation: true,
       color: this.getFirstUnusedColor(),
@@ -601,6 +645,27 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
     this.setShowLayerMenu(!this.showLayerMenu);
   };
 
+  // Exclusive Segmentations
+  public setUseExclusiveSegmentations = (value = false) => {
+    this.useExclusiveSegmentations = value;
+  };
+
+  public getExcludedSegmentations(layer: ILayer) {
+    if (!this.useExclusiveSegmentations) return undefined;
+    const layerIndex = this.layerIds.indexOf(layer.id);
+    if (layerIndex <= 0) return undefined;
+    return (this.layerIds
+      .slice(0, layerIndex)
+      .map((layerId) => this.layerMap[layerId])
+      .filter(
+        (potentialLayer) =>
+          potentialLayer.isAnnotation &&
+          potentialLayer.kind === "image" &&
+          potentialLayer.isVisible &&
+          potentialLayer.opacity > 0,
+      ) as unknown) as IImageLayer[];
+  }
+
   // Proxies
   public get sliceRenderer(): ISliceRenderer | undefined {
     return this.editor.sliceRenderer;
@@ -610,8 +675,8 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
     return this.editor.volumeRenderer;
   }
 
-  public get renderers(): THREE.WebGLRenderer[] | undefined {
-    return this.editor.renderers;
+  public get renderer(): THREE.WebGLRenderer | undefined {
+    return this.editor.renderer;
   }
 
   public get theme(): Theme {
@@ -631,6 +696,7 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
       viewport2D: this.viewport2D.toJSON(),
       viewport3D: this.viewport3D.toJSON(),
       tools: this.tools.toJSON(),
+      useExclusiveSegmentations: this.useExclusiveSegmentations,
     };
   }
 

@@ -1,13 +1,20 @@
-import { IDocument, IImageLayer } from "@visian/ui-shared";
-import { getOrthogonalAxis, getPlaneAxes, IDisposer } from "@visian/utils";
-import { reaction } from "mobx";
+import { IDocument, IImageLayer, MergeFunction } from "@visian/ui-shared";
+import {
+  getOrthogonalAxis,
+  getPlaneAxes,
+  IDisposable,
+  IDisposer,
+} from "@visian/utils";
+import { action, makeObservable, observable, reaction } from "mobx";
 import * as THREE from "three";
-import { MergeFunction, RenderedImage } from "../rendered-image";
+import { RenderedImage } from "../rendered-image";
 
 import { Circles, ToolCamera, Circle } from "./utils";
 
-export class ToolRenderer {
-  protected isCurrentStrokePositive = true;
+export class ToolRenderer implements IDisposable {
+  public readonly excludeFromSnapshotTracking = ["document"];
+
+  public mergeFunction = MergeFunction.Add;
 
   protected circlesToRender: Circle[] = [];
   private shapesToRender: THREE.Mesh[] = [];
@@ -16,7 +23,10 @@ export class ToolRenderer {
   private shapeScene = new THREE.Scene();
 
   protected circles: Circles;
-  protected renderTargets: THREE.WebGLRenderTarget[] = [];
+  protected renderTarget = new THREE.WebGLRenderTarget(1, 1, {
+    magFilter: THREE.NearestFilter,
+    minFilter: THREE.NearestFilter,
+  });
 
   protected renderCallbacks: (() => void)[] = [];
 
@@ -25,6 +35,14 @@ export class ToolRenderer {
   constructor(protected document: IDocument) {
     this.camera = new ToolCamera(document);
     this.circles = new Circles();
+
+    makeObservable(this, {
+      mergeFunction: observable,
+      renderCircles: action,
+      renderShape: action,
+    });
+
+    this.resizeRenderTarget();
 
     this.disposers.push(
       reaction(
@@ -37,21 +55,7 @@ export class ToolRenderer {
             ? ((document.activeLayer as IImageLayer).image as RenderedImage)
             : undefined,
         ],
-        this.resizeRenderTargets,
-        { fireImmediately: true },
-      ),
-      reaction(
-        () => document.renderers,
-        (renderers) => {
-          if (renderers) {
-            this.renderTargets = renderers.map(
-              () => new THREE.WebGLRenderTarget(1, 1),
-            );
-            this.resizeRenderTargets();
-          } else {
-            this.renderTargets = [];
-          }
-        },
+        this.resizeRenderTarget,
         { fireImmediately: true },
       ),
     );
@@ -59,15 +63,22 @@ export class ToolRenderer {
 
   public dispose() {
     this.circles.dispose();
+    this.camera.dispose();
     this.disposers.forEach((disposer) => disposer());
   }
 
   public endStroke() {
-    this.document.renderers?.forEach((renderer, rendererIndex) => {
-      renderer.setRenderTarget(this.renderTargets[rendererIndex]);
-      renderer.clear();
-      renderer.setRenderTarget(null);
-    });
+    if (this.document.activeLayer) {
+      const annotation = (this.document.activeLayer as IImageLayer)
+        .image as RenderedImage;
+      this.flushToAnnotation(annotation);
+    }
+
+    const { renderer } = this.document;
+    if (!renderer) return;
+    renderer.setRenderTarget(this.renderTarget);
+    renderer.clear();
+    renderer.setRenderTarget(null);
   }
 
   public render() {
@@ -76,10 +87,8 @@ export class ToolRenderer {
 
     if ((!circles && !shapes) || !this.document.activeLayer) return;
 
-    const { renderers } = this.document;
-    const annotation = (this.document.activeLayer as IImageLayer)
-      .image as RenderedImage;
-    if (!renderers) return;
+    const { renderer } = this.document;
+    if (!renderer) return;
 
     if (circles) {
       this.circles.setCircles(this.circlesToRender);
@@ -92,23 +101,22 @@ export class ToolRenderer {
       this.shapesToRender = [];
     }
 
-    renderers.forEach((renderer, index) => {
-      renderer.setRenderTarget(this.renderTargets[index]);
-      renderer.autoClear = false;
+    renderer.setRenderTarget(this.renderTarget);
+    renderer.autoClear = false;
 
-      if (circles) {
-        renderer.render(this.circles, this.camera);
-      }
+    if (circles) {
+      renderer.render(this.circles, this.camera);
+    }
 
-      if (shapes) {
-        renderer.render(this.shapeScene, this.camera);
-      }
+    if (shapes) {
+      renderer.render(this.shapeScene, this.camera);
+      this.shapeScene.children.forEach((shape) => {
+        (shape as THREE.Mesh).geometry.dispose();
+      });
+    }
 
-      renderer.autoClear = true;
-      renderer.setRenderTarget(null);
-    });
-
-    this.flushToAnnotation(annotation);
+    renderer.autoClear = true;
+    renderer.setRenderTarget(null);
 
     this.renderCallbacks.forEach((callback) => callback());
     this.renderCallbacks = [];
@@ -120,13 +128,15 @@ export class ToolRenderer {
     annotation.setSlice(
       viewType,
       this.document.viewSettings.selectedVoxel[orthogonalAxis],
-      this.textures,
-      this.isCurrentStrokePositive ? MergeFunction.Add : MergeFunction.Subtract,
+      this.texture,
+      this.mergeFunction,
     );
   }
 
   public renderCircles(isAdditiveStroke: boolean, ...circles: Circle[]) {
-    this.isCurrentStrokePositive = isAdditiveStroke;
+    this.mergeFunction = isAdditiveStroke
+      ? MergeFunction.Add
+      : MergeFunction.Subtract;
 
     this.circlesToRender.push(...circles);
 
@@ -139,7 +149,9 @@ export class ToolRenderer {
     material: THREE.Material,
     isAdditiveStroke: boolean,
   ) {
-    this.isCurrentStrokePositive = isAdditiveStroke;
+    this.mergeFunction = isAdditiveStroke
+      ? MergeFunction.Add
+      : MergeFunction.Subtract;
 
     this.shapesToRender.push(new THREE.Mesh(geometry, material));
 
@@ -157,11 +169,11 @@ export class ToolRenderer {
     });
   }
 
-  protected get textures() {
-    return this.renderTargets.map((renderTarget) => renderTarget.texture);
+  public get texture() {
+    return this.renderTarget.texture;
   }
 
-  protected resizeRenderTargets = () => {
+  protected resizeRenderTarget = () => {
     if (!this.document.activeLayer) return;
 
     const { voxelCount } = (this.document.activeLayer as IImageLayer).image;
@@ -178,8 +190,6 @@ export class ToolRenderer {
   };
 
   protected setRenderTargetSize(width: number, height: number) {
-    this.renderTargets.forEach((renderTarget) => {
-      renderTarget.setSize(width, height);
-    });
+    this.renderTarget.setSize(width, height);
   }
 }

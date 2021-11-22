@@ -83,11 +83,15 @@ export class Vector implements GenericVector {
     }
   }
 
-  public setComponent(index: number, value: number) {
-    if (process.env.NODE_ENV !== "production" && this.size <= index) {
-      throw new OutOfBoundsError(index);
+  public setComponent(index: number | "x" | "y" | "z" | "w", value: number) {
+    let i = index;
+    if (typeof i === "string") {
+      i = ["x", "y", "z", "w"].indexOf(i);
     }
-    this.data[index] = value;
+    if (process.env.NODE_ENV !== "production" && this.size <= i) {
+      throw new OutOfBoundsError(i);
+    }
+    this.data[i] = value;
     return this;
   }
 

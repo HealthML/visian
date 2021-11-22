@@ -1,12 +1,14 @@
 uniform vec3 uCameraPosition;
-uniform sampler2D uInputFirstDerivative;
-uniform sampler2D uInputSecondDerivative;
+uniform sampler3D uInputFirstDerivative;
+uniform sampler3D uInputSecondDerivative;
 uniform float uStepSize;
 
-uniform sampler2D uLayerData[{{layerCount}}];
+{{layerData}}
 uniform bool uLayerAnnotationStatuses[{{layerCount}}];
 uniform float uLayerOpacities[{{layerCount}}];
 uniform vec3 uLayerColors[{{layerCount}}];
 
-uniform sampler2D uActiveLayerData;
+uniform sampler3D uActiveLayerData;
 uniform float uRegionGrowingThreshold;
+
+uniform bool uUseExclusiveSegmentations;

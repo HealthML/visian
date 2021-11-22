@@ -10,6 +10,7 @@ import {
   createFileFromBase64,
   deepObserve,
   getWHOTask,
+  IDisposable,
   ISerializable,
 } from "@visian/utils";
 import { action, computed, makeObservable, observable } from "mobx";
@@ -30,7 +31,7 @@ export interface RootStoreConfig {
   storageBackend?: IStorageBackend;
 }
 
-export class RootStore implements ISerializable<RootSnapshot> {
+export class RootStore implements ISerializable<RootSnapshot>, IDisposable {
   public dicomWebServer?: DICOMWebServer;
 
   public editor: Editor;
@@ -91,12 +92,19 @@ export class RootStore implements ISerializable<RootSnapshot> {
       setDirty: action(this.setIsDirty),
       getTheme: () => this.theme,
       getRefs: () => this.refs,
+      setError: this.setError,
       getTracker: () => this.tracker,
+      getColorMode: () => this.colorMode,
     });
 
     deepObserve(this.editor, this.persist, {
       exclusionAttribute: "excludeFromSnapshotTracking",
     });
+  }
+
+  public dispose() {
+    this.editor.dispose();
+    this.tracker?.dispose();
   }
 
   /**
@@ -127,11 +135,12 @@ export class RootStore implements ISerializable<RootSnapshot> {
       localStorage.setItem("theme", theme);
     }
   }
+
   public get theme() {
     return getTheme(this.colorMode);
   }
 
-  public setError(error?: ErrorNotification) {
+  public setError = (error?: ErrorNotification) => {
     this.error = error;
 
     if (this.errorTimeout !== undefined) {
@@ -143,7 +152,8 @@ export class RootStore implements ISerializable<RootSnapshot> {
         this.setError();
       }, errorDisplayDuration) as unknown) as NodeJS.Timer;
     }
-  }
+  };
+
   public setProgress(progress?: ProgressNotification) {
     this.progress = progress;
   }

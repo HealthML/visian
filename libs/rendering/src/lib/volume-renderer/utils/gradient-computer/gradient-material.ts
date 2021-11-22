@@ -1,3 +1,4 @@
+import { Texture3DMaterial } from "@visian/rendering";
 import { IEditor } from "@visian/ui-shared";
 import { IDisposer } from "@visian/utils";
 import { reaction } from "mobx";
@@ -16,7 +17,7 @@ export enum GradientMode {
   Second = 2,
 }
 
-export class GradientMaterial extends THREE.ShaderMaterial {
+export class GradientMaterial extends Texture3DMaterial {
   private disposers: IDisposer[];
 
   constructor(
@@ -33,7 +34,10 @@ export class GradientMaterial extends THREE.ShaderMaterial {
         uInputDimensions: { value: 1 },
         uGradientMode: { value: GradientMode.Output },
       },
+      glslVersion: THREE.GLSL3,
     });
+
+    sharedUniforms.subscribe(this);
 
     this.uniforms.uInputFirstDerivative.value = firstDerivativeTexture;
     this.uniforms.uInputSecondDerivative.value = secondDerivativeTexture;
@@ -68,5 +72,3 @@ export class GradientMaterial extends THREE.ShaderMaterial {
     this.disposers.forEach((disposer) => disposer());
   }
 }
-
-export default GradientMaterial;
