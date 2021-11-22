@@ -1,16 +1,9 @@
 import { i18n, LocalForageBackend } from "@visian/ui-shared";
-import {
-  createFileFromBase64,
-  getWHOTask,
-  getWHOTaskIdFromUrl,
-  isFromWHO,
-  readFileFromURL,
-} from "@visian/utils";
+import { getWHOTaskIdFromUrl, isFromWHO, readFileFromURL } from "@visian/utils";
 import React from "react";
 
 import { storePersistInterval } from "../constants";
 import { RootStore } from "../models";
-import { Task, TaskType } from "../models/who";
 
 export const storageBackend = new LocalForageBackend(
   storePersistInterval,
@@ -64,66 +57,8 @@ export const setupRootStore = async () => {
     if (isFromWHO()) {
       // Load scan from WHO
       // Example: http://localhost:4200/?origin=who&taskId=0b2fb698-6e1d-4682-a986-78b115178d94
-      try {
-        const taskId = getWHOTaskIdFromUrl();
-        if (taskId && store.editor.newDocument(true)) {
-          store.setProgress({ labelTx: "importing", showSplash: true });
-          const taskJson = await getWHOTask(taskId);
-          // We want to ignore possible other annotations if type is "CREATE"
-          if (taskJson.kind === TaskType.Create) {
-            taskJson.annotations = [];
-          }
-          const whoTask = new Task(taskJson);
-          store.setCurrentTask(whoTask);
-
-          await Promise.all(
-            whoTask.samples.map(async (sample) => {
-              await store.editor.activeDocument?.importFiles(
-                createFileFromBase64(sample.title, sample.data),
-                undefined,
-                false,
-              );
-            }),
-          );
-          if (whoTask.kind === TaskType.Create) {
-            store.editor.activeDocument?.finishBatchImport();
-            store.currentTask?.addNewAnnotation();
-          } else {
-            // Task Type is Correct or Review
-            await Promise.all(
-              whoTask.annotations.map(async (annotation, index) => {
-                const title =
-                  whoTask.samples[index].title ||
-                  whoTask.samples[0].title ||
-                  `annotation_${index}`;
-
-                await Promise.all(
-                  annotation.data.map(async (annotationData) => {
-                    const createdLayerId = await store.editor.activeDocument?.importFiles(
-                      createFileFromBase64(
-                        title.replace(".nii", "_annotation").concat(".nii"),
-                        annotationData.data,
-                      ),
-                      title.replace(".nii", "_annotation"),
-                      true,
-                    );
-                    if (createdLayerId)
-                      annotationData.correspondingLayerId = createdLayerId;
-                  }),
-                );
-              }),
-            );
-          }
-        }
-      } catch {
-        store.setError({
-          titleTx: "import-error",
-          descriptionTx: "remote-file-error",
-        });
-        store.editor.setActiveDocument();
-      }
-
-      store.setProgress();
+      const taskId = getWHOTaskIdFromUrl();
+      if (taskId) await store.loadWHOTask(taskId);
     }
   })();
 

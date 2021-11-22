@@ -6,7 +6,12 @@ import {
   IStorageBackend,
   Tab,
 } from "@visian/ui-shared";
-import { deepObserve, ISerializable } from "@visian/utils";
+import {
+  createFileFromBase64,
+  deepObserve,
+  getWHOTask,
+  ISerializable,
+} from "@visian/utils";
 import { action, computed, makeObservable, observable } from "mobx";
 
 import { errorDisplayDuration } from "../constants";
@@ -14,7 +19,7 @@ import { DICOMWebServer } from "./dicomweb-server";
 import { Editor, EditorSnapshot } from "./editor";
 import { Tracker } from "./tracking";
 import { ErrorNotification, ProgressNotification } from "./types";
-import { Task } from "./who";
+import { Task, TaskType } from "./who";
 
 export interface RootSnapshot {
   editor: EditorSnapshot;
@@ -147,6 +152,70 @@ export class RootStore implements ISerializable<RootSnapshot> {
     if (this.tracker) return;
     this.tracker = new Tracker(this.editor);
     this.tracker.startSession();
+  }
+
+  public async loadWHOTask(taskId: string) {
+    if (!taskId) return;
+
+    try {
+      if (this.editor.newDocument(true)) {
+        this.setProgress({ labelTx: "importing", showSplash: true });
+        const taskJson = await getWHOTask(taskId);
+        // We want to ignore possible other annotations if type is "CREATE"
+        if (taskJson.kind === TaskType.Create) {
+          taskJson.annotations = [];
+        }
+        const whoTask = new Task(taskJson);
+        this.setCurrentTask(whoTask);
+
+        await Promise.all(
+          whoTask.samples.map(async (sample) => {
+            await this.editor.activeDocument?.importFiles(
+              createFileFromBase64(sample.title, sample.data),
+              undefined,
+              false,
+            );
+          }),
+        );
+        if (whoTask.kind === TaskType.Create) {
+          this.editor.activeDocument?.finishBatchImport();
+          this.currentTask?.addNewAnnotation();
+        } else {
+          // Task Type is Correct or Review
+          await Promise.all(
+            whoTask.annotations.map(async (annotation, index) => {
+              const title =
+                whoTask.samples[index].title ||
+                whoTask.samples[0].title ||
+                `annotation_${index}`;
+
+              await Promise.all(
+                annotation.data.map(async (annotationData) => {
+                  const createdLayerId = await this.editor.activeDocument?.importFiles(
+                    createFileFromBase64(
+                      title.replace(".nii", "_annotation").concat(".nii"),
+                      annotationData.data,
+                    ),
+                    title.replace(".nii", "_annotation"),
+                    true,
+                  );
+                  if (createdLayerId)
+                    annotationData.correspondingLayerId = createdLayerId;
+                }),
+              );
+            }),
+          );
+        }
+      }
+    } catch {
+      this.setError({
+        titleTx: "import-error",
+        descriptionTx: "remote-file-error",
+      });
+      this.editor.setActiveDocument();
+    }
+
+    this.setProgress();
   }
 
   // Persistence

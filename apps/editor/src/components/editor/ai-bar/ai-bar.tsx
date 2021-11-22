@@ -12,7 +12,7 @@ import {
 import {
   createBase64StringFromFile,
   putWHOTask,
-  reloadWithNewTaskId,
+  setNewTaskIdForUrl,
 } from "@visian/utils";
 import { observer } from "mobx-react-lite";
 import React, { useCallback } from "react";
@@ -257,7 +257,8 @@ export const AIBar = observer(() => {
             const newTaskId = urlElements[urlElements.length - 1];
             if (newTaskId !== store.currentTask.taskUUID) {
               store?.setIsDirty(false, true);
-              reloadWithNewTaskId(newTaskId);
+              setNewTaskIdForUrl(newTaskId);
+              await store.loadWHOTask(newTaskId);
               return;
             }
           }
