@@ -99,7 +99,7 @@ export const setupRootStore = async () => {
 
                 await Promise.all(
                   annotation.data.map(async (annotationData) => {
-                    await store.editor.activeDocument?.importFiles(
+                    const createdLayerId = await store.editor.activeDocument?.importFiles(
                       createFileFromBase64(
                         title.replace(".nii", "_annotation").concat(".nii"),
                         annotationData.data,
@@ -107,6 +107,8 @@ export const setupRootStore = async () => {
                       title.replace(".nii", "_annotation"),
                       true,
                     );
+                    if (createdLayerId)
+                      annotationData.correspondingLayerId = createdLayerId;
                   }),
                 );
               }),

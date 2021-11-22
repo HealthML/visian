@@ -2,7 +2,6 @@ import {
   BlueButtonParam,
   color,
   fontSize,
-  IImageLayer,
   InvisibleButton,
   Sheet,
   sheetNoise,
@@ -14,7 +13,6 @@ import {
   createBase64StringFromFile,
   putWHOTask,
   reloadWithNewTaskId,
-  writeSingleMedicalImage,
 } from "@visian/utils";
 import { observer } from "mobx-react-lite";
 import React, { useCallback } from "react";
@@ -172,38 +170,80 @@ const AIMessageSubtitle = styled(Text)`
 export const AIBar = observer(() => {
   const store = useStore();
 
+  const getBase64LayerDataForId = useCallback(
+    async (layerId: string) => {
+      const layerFile = await store?.editor.activeDocument?.getFileForLayer(
+        layerId,
+      );
+      if (!layerFile) return;
+      const base64LayerData = await createBase64StringFromFile(layerFile);
+      if (!base64LayerData || !(typeof base64LayerData === "string")) return;
+      return base64LayerData;
+    },
+    [store?.editor.activeDocument],
+  );
+
+  const getBase64LayerDataForAnnotationData = useCallback(
+    async (annotationData: AnnotationData) => {
+      const { correspondingLayerId } = annotationData;
+      if (!correspondingLayerId) return;
+      const base64LayerData = await getBase64LayerDataForId(
+        correspondingLayerId,
+      );
+      return base64LayerData;
+    },
+    [getBase64LayerDataForId],
+  );
+
   const saveAnnotationToWHOBackend = useCallback(
     async (status: AnnotationStatus) => {
       if (!store?.currentTask?.annotations.length) return;
       store.currentTask.annotations.forEach((annotation) => {
         annotation.status = status;
       });
-      // TODO: For all layers
-      const currentAnnotationImage = (store?.editor.activeDocument
-        ?.activeLayer as IImageLayer).image.toITKImage();
-      const currentAnnotationFile = await writeSingleMedicalImage(
-        currentAnnotationImage,
-        "annotation.nii.gz",
-      );
-      if (!currentAnnotationFile) return;
-      const base64Annotation = await createBase64StringFromFile(
-        currentAnnotationFile,
-      );
-      if (!(typeof base64Annotation === "string")) return;
 
-      store.currentTask.annotations.forEach((annotation) => {
-        if (annotation.data.length) {
-          annotation.data.forEach((annotationData) => {
-            annotationData.data = base64Annotation;
-          });
-        } else {
-          const annotationDataForBackend = {
-            data: base64Annotation,
-          };
-          annotation.data.push(new AnnotationData(annotationDataForBackend));
-        }
-        annotation.submittedAt = new Date().toISOString();
-      });
+      const newAnnotations = await Promise.all(
+        store.currentTask.annotations.map(async (annotation) => {
+          if (annotation.data.length) {
+            // Add base64 data for each existing AnnotationData object
+            const base64Data = await Promise.all(
+              annotation.data.map(async (annotationData) => {
+                const base64Annotation = await getBase64LayerDataForAnnotationData(
+                  annotationData,
+                );
+                if (base64Annotation) annotationData.data = base64Annotation;
+                return annotationData;
+              }),
+            );
+            annotation.data = base64Data;
+          } else {
+            // Add new AnnotationData object for each existing annotation layer
+            const annotationLayerIds = store.editor.activeDocument?.annotationLayers.map(
+              (annotationLayer) => annotationLayer.id,
+            );
+            if (annotationLayerIds) {
+              const base64Data = await Promise.all(
+                annotationLayerIds.map((annotationLayerId) =>
+                  getBase64LayerDataForId(annotationLayerId),
+                ),
+              );
+              base64Data.forEach((base64Annotation) => {
+                if (!base64Annotation) return;
+                const annotationDataForBackend = {
+                  data: base64Annotation,
+                };
+                annotation.data.push(
+                  new AnnotationData(annotationDataForBackend),
+                );
+              });
+            }
+          }
+          annotation.submittedAt = new Date().toISOString();
+          return annotation;
+        }),
+      );
+
+      store.currentTask.annotations = newAnnotations;
 
       try {
         const response = await putWHOTask(
@@ -231,7 +271,7 @@ export const AIBar = observer(() => {
         });
       }
     },
-    [store],
+    [getBase64LayerDataForAnnotationData, getBase64LayerDataForId, store],
   );
 
   const confirmTaskAnnotation = useCallback(async () => {
