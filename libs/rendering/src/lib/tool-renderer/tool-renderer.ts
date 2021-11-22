@@ -1,12 +1,17 @@
 import { IDocument, IImageLayer, MergeFunction } from "@visian/ui-shared";
-import { getOrthogonalAxis, getPlaneAxes, IDisposer } from "@visian/utils";
+import {
+  getOrthogonalAxis,
+  getPlaneAxes,
+  IDisposable,
+  IDisposer,
+} from "@visian/utils";
 import { action, makeObservable, observable, reaction } from "mobx";
 import * as THREE from "three";
 import { RenderedImage } from "../rendered-image";
 
 import { Circles, ToolCamera, Circle } from "./utils";
 
-export class ToolRenderer {
+export class ToolRenderer implements IDisposable {
   public readonly excludeFromSnapshotTracking = ["document"];
 
   public mergeFunction = MergeFunction.Add;
@@ -58,6 +63,7 @@ export class ToolRenderer {
 
   public dispose() {
     this.circles.dispose();
+    this.camera.dispose();
     this.disposers.forEach((disposer) => disposer());
   }
 
@@ -104,6 +110,9 @@ export class ToolRenderer {
 
     if (shapes) {
       renderer.render(this.shapeScene, this.camera);
+      this.shapeScene.children.forEach((shape) => {
+        (shape as THREE.Mesh).geometry.dispose();
+      });
     }
 
     renderer.autoClear = true;

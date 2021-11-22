@@ -178,10 +178,10 @@ export class Layer implements ILayer, ISerializable<LayerSnapshot> {
     );
   }
 
-  public delete = (): void => {
+  public delete() {
     (this.parent as LayerGroup)?.removeLayer?.(this.id);
     this.document.deleteLayer(this.id);
-  };
+  }
 
   public async toFile(): Promise<File | undefined> {
     return undefined;

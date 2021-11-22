@@ -12,6 +12,7 @@ import {
   ValueType,
 } from "@visian/ui-shared";
 import {
+  IDisposable,
   ImageMismatchError,
   ISerializable,
   ITKImage,
@@ -75,7 +76,8 @@ export interface DocumentSnapshot {
   useExclusiveSegmentations: boolean;
 }
 
-export class Document implements IDocument, ISerializable<DocumentSnapshot> {
+export class Document
+  implements IDocument, ISerializable<DocumentSnapshot>, IDisposable {
   public readonly excludeFromSnapshotTracking = ["editor"];
 
   public id: string;
@@ -175,6 +177,12 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
     // trying to access document.tools
     this.tools = new Tools(undefined, this);
     this.tools.applySnapshot(snapshot?.tools || {});
+  }
+
+  public dispose() {
+    this.clipboard.dispose();
+    this.tools.dispose();
+    Object.values(this.layerMap).forEach((layer) => layer.delete());
   }
 
   public get title(): string | undefined {

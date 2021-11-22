@@ -51,7 +51,10 @@ function App() {
         rootStore.pointerDispatch = dispatch;
 
         setIsReady(true);
-        return dispose;
+        return () => {
+          dispose();
+          rootStore.dispose();
+        };
       },
     );
     return () => {

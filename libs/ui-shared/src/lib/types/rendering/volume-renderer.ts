@@ -1,4 +1,4 @@
-import { Vector } from "@visian/utils";
+import { IDisposable, Vector } from "@visian/utils";
 import * as THREE from "three";
 
 export interface IXRManager {
@@ -9,7 +9,7 @@ export interface IXRManager {
   exitXR(): void;
 }
 
-export interface IVolumeRenderer {
+export interface IVolumeRenderer extends IDisposable {
   renderer: THREE.WebGLRenderer;
   camera: THREE.PerspectiveCamera;
   scene: THREE.Scene;

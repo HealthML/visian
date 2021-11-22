@@ -83,6 +83,7 @@ export class LAOComputer implements IDisposable {
   public dispose() {
     this.reactionDisposers.forEach((disposer) => disposer());
     this.laoMaterial.dispose();
+    this.texture3DRenderer.dispose();
   }
 
   public get isDirty() {

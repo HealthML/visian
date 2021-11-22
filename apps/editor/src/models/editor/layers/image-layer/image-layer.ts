@@ -1,6 +1,7 @@
 import { RenderedImage } from "@visian/rendering";
 import { IDocument, IImageLayer, MarkerConfig } from "@visian/ui-shared";
 import {
+  IDisposable,
   Image,
   ImageSnapshot,
   ISerializable,
@@ -35,7 +36,7 @@ export interface ImageLayerSnapshot extends LayerSnapshot {
 
 export class ImageLayer
   extends Layer
-  implements IImageLayer, ISerializable<ImageLayerSnapshot> {
+  implements IImageLayer, ISerializable<ImageLayerSnapshot>, IDisposable {
   public static fromITKImage<T2 extends TypedArray = TypedArray>(
     image: ITKImage<T2>,
     document: IDocument,
@@ -114,6 +115,10 @@ export class ImageLayer
     );
   }
 
+  public dispose() {
+    this.image.dispose();
+  }
+
   public get title(): string {
     return super.title || this.image.name;
   }
@@ -132,6 +137,11 @@ export class ImageLayer
 
   public setContrast(value?: number): void {
     this.contrast = value ?? 1;
+  }
+
+  public delete() {
+    super.delete();
+    this.dispose();
   }
 
   // Slice Markers

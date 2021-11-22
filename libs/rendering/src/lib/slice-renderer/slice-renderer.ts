@@ -1,6 +1,5 @@
 import {
   getPlaneAxes,
-  IDisposable,
   IDisposer,
   Pixel,
   ViewType,
@@ -19,7 +18,7 @@ import {
 } from "./utils";
 import { RenderedSheet } from "../rendered-sheet";
 
-export class SliceRenderer implements IDisposable, ISliceRenderer {
+export class SliceRenderer implements ISliceRenderer {
   private renderer: THREE.WebGLRenderer;
   private camera: THREE.OrthographicCamera;
   private scene = new THREE.Scene();

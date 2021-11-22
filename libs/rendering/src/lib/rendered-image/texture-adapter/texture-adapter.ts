@@ -1,5 +1,6 @@
 import {
   getPlaneAxes,
+  IDisposable,
   Image,
   setSlice,
   ViewType,
@@ -15,7 +16,7 @@ import { MergeMaterial, MergeMaterial3D } from "./merge-material";
 import { ReadSliceMaterial } from "./read-slice-material";
 import { textureFormatForComponents } from "../utils";
 
-export class TextureAdapter {
+export class TextureAdapter implements IDisposable {
   private mergeMaterial = new MergeMaterial();
   private mergeMaterial3D = new MergeMaterial3D();
   private quad: ScreenAlignedQuad;
@@ -67,6 +68,17 @@ export class TextureAdapter {
       image.voxelCount.y,
     );
     this.lastReadViewType = ViewType.Transverse;
+  }
+
+  public dispose() {
+    this.sliceTextures.forEach((texture) => texture.dispose());
+    this.readRenderTarget.dispose();
+    this.copyMaterial.dispose();
+    this.mergeMaterial.dispose();
+    this.mergeMaterial3D.dispose();
+    this.readSliceMaterial.dispose();
+    this.quad.dispose();
+    this.sliceLine.dispose();
   }
 
   public readImage(

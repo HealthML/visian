@@ -1,9 +1,9 @@
-import { getPlaneAxes, Vector, ViewType } from "@visian/utils";
+import { getPlaneAxes, IDisposable, Vector, ViewType } from "@visian/utils";
 import * as THREE from "three";
 
 import { MergeMaterial } from "./merge-material";
 
-export class SliceLine extends THREE.Scene {
+export class SliceLine extends THREE.Scene implements IDisposable {
   public camera: THREE.Camera;
 
   private line: THREE.Line;
@@ -32,6 +32,11 @@ export class SliceLine extends THREE.Scene {
       new THREE.Float32BufferAttribute([0, 1, 1, 1], 2),
     );
     this.add(this.line);
+  }
+
+  public dispose() {
+    this.material.dispose();
+    this.line.geometry.dispose();
   }
 
   public setSourceSlice(sourceSlice: number, viewType: ViewType) {
