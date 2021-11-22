@@ -1,3 +1,13 @@
+const GZIP_MAGIC_NUMBER = "1f8b";
+
+const isGzipData = (dataArray: Uint8Array) => {
+  const hexData = Array.from(dataArray, (byte) =>
+    `0${(byte & 0xff).toString(16)}`.slice(-2),
+  ).join("");
+  if (hexData.substring(0, 4) === GZIP_MAGIC_NUMBER) return true;
+  return false;
+};
+
 export const createFileFromBase64 = (
   fileName: string,
   base64String: string,
@@ -13,9 +23,11 @@ export const createFileFromBase64 = (
   }
   const binaryData = new Uint8Array(bytes);
 
-  // TODO: Find out whether file is zipped or not
-  const fileNameZip = fileName.concat(".gz");
-  return new File([binaryData], fileNameZip);
+  const fileNameForType =
+    isGzipData(binaryData) && !fileName.endsWith(".gz")
+      ? fileName.concat(".gz")
+      : fileName;
+  return new File([binaryData], fileNameForType);
 };
 
 export const createBase64StringFromFile = (
