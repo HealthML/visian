@@ -53,6 +53,8 @@ const generateReduceLayerStack = (
         ${alpha} = mix(${alpha}, 0.0, step(0.001, ${accumulatedAnnotations}));
         ${accumulatedAnnotations} = mix(${accumulatedAnnotations}, 1.0, step(0.001, ${alpha} * step(0.001, uLayerOpacities[${i}])));
       }
+
+      ${alpha} = step(0.001, ${alpha});
       `;
     }
 
