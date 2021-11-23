@@ -220,12 +220,13 @@ export class Image<T extends TypedArray = TypedArray>
   public getSlice(viewType: ViewType, sliceNumber: number) {
     const [horizontal, vertical] = getPlaneAxes(viewType);
     const sliceData = new Uint8Array(
-      this.voxelCount[horizontal] * this.voxelCount[vertical],
+      this.voxelCount[horizontal] *
+        this.voxelCount[vertical] *
+        this.voxelComponents,
     );
 
     let index = 0;
     // TODO: performance !!!
-    // TODO: Adapt for more than 1 component.
     findVoxelInSlice(
       // Explicit access here avoids MobX observability tracking to decrease performance
       {
@@ -236,8 +237,10 @@ export class Image<T extends TypedArray = TypedArray>
       viewType,
       sliceNumber,
       (_, value) => {
-        sliceData[index] = value.x;
-        index++;
+        for (let c = 0; c < this.voxelComponents; c++) {
+          sliceData[index + c] = value.getComponent(c);
+          index++;
+        }
       },
     );
 

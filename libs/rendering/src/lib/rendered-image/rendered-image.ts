@@ -352,7 +352,6 @@ export class RenderedImage<T extends TypedArray = TypedArray>
       );
     }
 
-    // Attention: super.getSlice does not work for more than one component at the moment!
     return super.getSlice(viewType, sliceNumber);
   }
 
