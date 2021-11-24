@@ -23,7 +23,11 @@ export class RegionGrowingRenderer3D extends BlipRenderer3D {
     super(document, {
       vertexShader: regionGrowing3DVertexShader,
       fragmentShader: regionGrowing3DFragmentShader,
-      uniforms: { uThreshold: { value: 0.1 }, uSeed: { value: 0 } },
+      uniforms: {
+        uThreshold: { value: 0.1 },
+        uSeed: { value: [0, 0, 0, 0] },
+        uComponents: { value: 1 },
+      },
       glslVersion: THREE.GLSL3,
     });
 
@@ -59,9 +63,12 @@ export class RegionGrowingRenderer3D extends BlipRenderer3D {
     const sourceImage = this.sourceLayer?.image as RenderedImage | undefined;
     if (!sourceImage) return;
 
-    const seedValue = sourceImage.getVoxelData(this.seedVoxel).x;
-    this.material.uniforms.uSeed.value = seedValue / 255;
+    const seedValues = sourceImage.getVoxelData(this.seedVoxel).toArray();
+    seedValues.forEach((value, index) => {
+      this.material.uniforms.uSeed.value[index] = value / 255;
+    });
     this.material.uniforms.uThreshold.value = this.threshold / 255;
+    this.material.uniforms.uComponents.value = sourceImage.voxelComponents;
 
     super.render(undefined, (step: number) => [
       this.seedVoxel.z - (step + 1),

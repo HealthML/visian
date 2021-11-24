@@ -91,15 +91,18 @@ export class RegionGrowingRenderer extends ToolRenderer {
 
     const depthAxis = getOrthogonalAxis(this.document.viewport2D.mainViewType);
 
-    const seed = sourceImage.getVoxelData({
-      [depthAxis]: slice,
-      [widthAxis]: this.lastCircle.x,
-      [heightAxis]: this.lastCircle.y,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } as any).x;
+    const seed = sourceImage
+      .getVoxelData({
+        [depthAxis]: slice,
+        [widthAxis]: this.lastCircle.x,
+        [heightAxis]: this.lastCircle.y,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } as any)
+      .toArray();
 
     this.regionGrowingMaterial.setSeed(seed);
     this.regionGrowingMaterial.setThreshold(threshold);
+    this.regionGrowingMaterial.setComponents(sourceImage.voxelComponents);
 
     const targetX = (this.lastCircle.x + 0.5) / width;
     const targetY = (this.lastCircle.y + 0.5) / height;
