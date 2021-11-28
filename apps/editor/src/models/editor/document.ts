@@ -156,6 +156,7 @@ export class Document
       activeLayer: computed,
       imageLayers: computed,
       baseImageLayer: computed,
+      annotationLayers: computed,
 
       setTitle: action,
       setActiveLayer: action,
@@ -238,6 +239,12 @@ export class Document
         return false;
       });
     return baseImageLayer;
+  }
+
+  public get annotationLayers(): ImageLayer[] {
+    return this.layers.filter(
+      (layer) => layer.kind === "image" && layer.isAnnotation,
+    ) as ImageLayer[];
   }
 
   public getLayer(id: string): ILayer | undefined {
@@ -376,6 +383,13 @@ export class Document
     FileSaver.saveAs(await zip.toBlob(), `${this.title}.zip`);
   };
 
+  public getFileForLayer = async (idOrLayer: string | ILayer) => {
+    const layerId = typeof idOrLayer === "string" ? idOrLayer : idOrLayer.id;
+    const layer = this.layerMap[layerId];
+    const file = await layer.toFile();
+    return file;
+  };
+
   public finishBatchImport() {
     if (!Object.values(this.layerMap).some((layer) => layer.isAnnotation)) {
       this.addNewAnnotationLayer();
@@ -443,7 +457,7 @@ export class Document
 
       if (dirFiles.length) await this.importFiles(dirFiles, entries.name);
     } else {
-      await new Promise<void>((resolve, reject) => {
+      await new Promise<string | void>((resolve, reject) => {
         (entries as FileSystemFileEntry).file((file: File) => {
           this.importFiles(file).then(resolve).catch(reject);
         }, reject);
@@ -455,7 +469,7 @@ export class Document
     files: File | File[],
     name?: string,
     isAnnotation?: boolean,
-  ): Promise<void> {
+  ): Promise<string | void> {
     let filteredFiles = Array.isArray(files)
       ? files.filter(
           (file) => !file.name.startsWith(".") && file.name !== "DICOMDIR",
@@ -480,7 +494,7 @@ export class Document
         filteredFiles.some((file) => path.extname(file.name) !== ".dcm") &&
         filteredFiles.some((file) => path.extname(file.name) !== "")
       ) {
-        const promises: Promise<void>[] = [];
+        const promises: Promise<string | void>[] = [];
         filteredFiles.forEach((file) => {
           promises.push(this.importFiles(file));
         });
@@ -496,6 +510,7 @@ export class Document
       return;
     }
 
+    let createdLayerId = "";
     const isFirstLayer = !this.layerIds.length;
     const image = await readMedicalImage(filteredFiles);
     image.name =
@@ -505,9 +520,9 @@ export class Document
         : filteredFiles.name);
 
     if (isAnnotation) {
-      await this.importAnnotation(image);
+      createdLayerId = await this.importAnnotation(image);
     } else if (isAnnotation !== undefined) {
-      await this.importImage(image);
+      createdLayerId = await this.importImage(image);
     } else {
       // Infer Type
       let isLikelyImage = false;
@@ -520,9 +535,9 @@ export class Document
         }
       }
       if (isLikelyImage) {
-        await this.importImage(image);
+        createdLayerId = await this.importImage(image);
       } else {
-        await this.importAnnotation(image);
+        createdLayerId = await this.importAnnotation(image);
       }
     }
 
@@ -532,6 +547,8 @@ export class Document
       this.viewport3D.reset();
       this.history.clear();
     }
+
+    return createdLayerId;
   }
 
   private checkHardwareRequirements(size: number[]) {
@@ -574,6 +591,7 @@ export class Document
       throw new ImageMismatchError(i18n.t("image-mismatch-error"));
     }
     this.addLayer(imageLayer);
+    return imageLayer.id;
   }
 
   public async importAnnotation(image: ITKImage) {
@@ -601,6 +619,7 @@ export class Document
 
     this.addLayer(annotationLayer);
     this.setActiveLayer(annotationLayer);
+    return annotationLayer.id;
   }
 
   public importTrackingLog(log: TrackingLog) {
