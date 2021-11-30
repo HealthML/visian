@@ -39,6 +39,12 @@ const performanceSwitchOptions = [
   { labelTx: "high", value: "high" },
 ];
 
+const voxelInfoSwitchOptions = [
+  { labelTx: "off", value: "off" },
+  { labelTx: "delay", value: "delay" },
+  { labelTx: "on", value: "on" },
+];
+
 export const SettingsPopUp: React.FC<SettingsPopUpProps> = observer(
   ({ isOpen, onClose }) => {
     const store = useStore();
@@ -91,11 +97,12 @@ export const SettingsPopUp: React.FC<SettingsPopUpProps> = observer(
                   store?.editor.activeDocument?.setUseExclusiveSegmentations
                 }
               />
-              <BooleanParam
+              <EnumParam
                 labelTx="voxel-data"
-                value={store?.editor.activeDocument?.viewport2D.showVoxelInfo}
+                options={voxelInfoSwitchOptions}
+                value={store?.editor.activeDocument?.viewport2D.voxelInfoMode}
                 setValue={
-                  store?.editor.activeDocument?.viewport2D.setShowVoxelInfo
+                  store?.editor.activeDocument?.viewport2D?.setVoxelInfoMode
                 }
               />
               <Switch
