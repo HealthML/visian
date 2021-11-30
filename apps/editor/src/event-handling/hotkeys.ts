@@ -377,5 +377,23 @@ export const setUpHotKeys = (store: RootStore): IDisposer => {
     }
   });
 
+  // Voxel Info
+  hotkeys("i", (event) => {
+    event.preventDefault();
+    store.editor.activeDocument?.viewport2D.setVoxelInfoMode(
+      store.editor.activeDocument?.viewport2D.voxelInfoMode === "on"
+        ? "off"
+        : "on",
+    );
+  });
+  hotkeys("ctrl+i", (event) => {
+    event.preventDefault();
+    store.editor.activeDocument?.viewport2D.setVoxelInfoMode(
+      store.editor.activeDocument?.viewport2D.voxelInfoMode === "delay"
+        ? "on"
+        : "delay",
+    );
+  });
+
   return () => hotkeys.unbind();
 };
