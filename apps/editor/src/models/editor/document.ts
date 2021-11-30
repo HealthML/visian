@@ -581,7 +581,7 @@ export class Document
       this.baseImageLayer &&
       !this.baseImageLayer.image.voxelCount.equals(imageLayer.image.voxelCount)
     ) {
-      if (!imageLayer.image.name) {
+      if (imageLayer.image.name) {
         throw new ImageMismatchError(
           i18n.t("image-mismatch-error-filename", {
             fileName: imageLayer.image.name,
