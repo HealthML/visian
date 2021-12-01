@@ -38,8 +38,6 @@ export class LAOMaterial extends Texture3DMaterial {
       glslVersion: THREE.GLSL3,
     });
 
-    sharedUniforms.subscribe(this);
-
     this.uniforms.uInputFirstDerivative.value = firstDerivativeTexture;
     this.uniforms.uInputSecondDerivative.value = secondDerivativeTexture;
 

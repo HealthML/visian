@@ -36,7 +36,7 @@ const generateReduceLayerStack = (
   }
 
   for (let i = 0; i < layerCount; i++) {
-    fragment += `${alpha} = texture(uLayerData${i}, ${uvName}).r;
+    fragment += `${alpha} = texture(uLayerData[${i}], ${uvName}).r;
     `;
 
     if (i === 0) {
@@ -111,7 +111,7 @@ const generateReduceEnhancedLayerStack = (
   `;
 
   for (let i = 0; i < layerCount; i++) {
-    fragment += `${image} = texture(uLayerData${i}, ${volumeCoords});
+    fragment += `${image} = texture(uLayerData[${i}], ${volumeCoords});
     `;
 
     if (activeLayerMergeName) {
@@ -189,35 +189,15 @@ const generateReduceRawImages = (
 
   for (let i = 0; i < layerCount; i++) {
     fragment += `
-    ${alpha} = texture(uLayerData${i}, ${uvName}).r;
+    ${alpha} = texture(uLayerData[${i}], ${uvName}).r;
     ${outputName} += (1.0 - float(uLayerAnnotationStatuses[${i}])) * (1.0 - ${outputName}.a) * ${alpha} * uLayerOpacities[${i}];`;
   }
 
   return fragment;
 };
 
-const generateLayerData = (layerCount: number) => {
-  let fragment = `#ifdef VOLUMETRIC_IMAGE
-  `;
-  for (let i = 0; i < layerCount; i++) {
-    fragment += `uniform sampler3D uLayerData${i};
-    `;
-  }
-  fragment += `#else
-  `;
-  for (let i = 0; i < layerCount; i++) {
-    fragment += `uniform sampler2D uLayerData${i};
-    `;
-  }
-  fragment += `#endif
-  `;
-
-  return fragment;
-};
-
 // Macro definitions
 const layerCountRegex = /{{layerCount}}/g;
-const layerDataRegex = /{{layerData}}/g;
 const reduceLayerStackRegex = /{{reduceLayerStack\((\w+),\s*(\w+),\s*(\w+)(,\s*(\w+))?\)}}/g;
 const reduceEnhancedLayerStackRegex = /{{reduceEnhancedLayerStack\((\w+),\s*(\w+)(,\s*(\w+),\s*(\w+))?\)}}/g;
 const reduceRawImagesRegex = /{{reduceRawImages\((\w+),\s*(\w+)\)}}/g;
@@ -233,7 +213,6 @@ const reduceRawImagesRegex = /{{reduceRawImages\((\w+),\s*(\w+)\)}}/g;
 export const composeLayeredShader = (shader: string, layerCount: number) =>
   shader
     .replace(layerCountRegex, `${layerCount}`)
-    .replace(layerDataRegex, generateLayerData(layerCount))
     .replace(
       reduceLayerStackRegex,
       (

@@ -23,7 +23,7 @@ export class SliceMaterial extends THREE.ShaderMaterial implements IDisposable {
       vertexShader: sliceVertexShader,
       fragmentShader: sliceFragmentShader,
       uniforms: {
-        uLayerData0: { value: null },
+        uLayerData: { value: [] },
         uLayerAnnotationStatuses: { value: [] },
         uLayerOpacities: { value: [] },
         uLayerColors: { value: [] },
@@ -148,15 +148,10 @@ export class SliceMaterial extends THREE.ShaderMaterial implements IDisposable {
             : ((layer as IImageLayer).image as RenderedImage).getTexture(),
         );
 
-        this.uniforms.uLayerData0.value =
-          editor.activeDocument?.tools.layerPreviewTexture || null;
-
-        for (let i = 0; i < layerData.length; i++) {
-          if (!this.uniforms[`uLayerData${i + 1}`]) {
-            this.uniforms[`uLayerData${i + 1}`] = { value: null };
-          }
-          this.uniforms[`uLayerData${i + 1}`].value = layerData[i];
-        }
+        this.uniforms.uLayerData.value = [
+          editor.activeDocument?.tools.layerPreviewTexture || null,
+          ...layerData,
+        ];
 
         const activeLayer = editor.activeDocument?.activeLayer as
           | IImageLayer
