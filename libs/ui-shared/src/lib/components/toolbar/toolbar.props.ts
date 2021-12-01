@@ -1,6 +1,7 @@
 import type React from "react";
 import type { ButtonProps } from "../button";
 import type { IconType } from "../icon";
+import type { ModalProps } from "../modal";
 
 export interface ToolProps extends ButtonProps {
   isActive?: boolean;
@@ -28,6 +29,14 @@ export interface ToolProps extends ButtonProps {
   ) => void;
 }
 
-export interface ToolbarProps {
-  children?: React.ReactNode;
-}
+export type ToolGroupProps = React.HTMLAttributes<HTMLDivElement> &
+  Pick<
+    ModalProps,
+    | "anchor"
+    | "position"
+    | "distance"
+    | "baseZIndex"
+    | "isOpen"
+    | "onOutsidePress"
+    | "value"
+  >;

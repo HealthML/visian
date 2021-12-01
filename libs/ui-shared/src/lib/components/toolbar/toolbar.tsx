@@ -1,25 +1,15 @@
-import React, { useCallback } from "react";
-import styled, { StyledComponentProps } from "styled-components";
+import React, { useCallback, useRef } from "react";
+import ReactDOM from "react-dom";
+import styled from "styled-components";
 
-import { Theme } from "../../theme";
-import { ButtonProps, InvisibleButton } from "../button";
+import { useModalRoot } from "../box";
+import { InvisibleButton } from "../button";
+import { useModalPosition } from "../modal";
 import { Sheet } from "../sheet";
-import { ToolbarProps, ToolProps } from "./toolbar.props";
+import { useOutsidePress } from "../utils";
+import { ToolGroupProps, ToolProps } from "./toolbar.props";
 
-const ToolbarContainer = styled(Sheet)`
-  box-sizing: border-box;
-  justify-content: flex-start;
-  align-items: center;
-  flex-direction: column;
-  padding: 6px 0;
-  position: static;
-
-  width: 40px;
-`;
-
-const StyledButton = styled(InvisibleButton)<
-  Omit<ButtonProps & ToolProps, "icon">
->`
+const StyledButton = styled(InvisibleButton)`
   width: 40px;
   height: 40px;
 `;
@@ -63,11 +53,71 @@ export const Tool = React.forwardRef<HTMLButtonElement, ToolProps>(
   },
 );
 
-export const Toolbar = React.forwardRef<
-  HTMLDivElement,
-  StyledComponentProps<"div", Theme, ToolbarProps, never>
->(({ children, ...rest }, ref) => (
-  <ToolbarContainer ref={ref} {...rest}>
-    {children}
-  </ToolbarContainer>
-));
+export const Toolbar = styled(Sheet)`
+  box-sizing: border-box;
+  justify-content: flex-start;
+  align-items: center;
+  flex-direction: column;
+  padding: 6px 0;
+  position: static;
+
+  width: 40px;
+`;
+
+const ToolGroupContainer = styled(Sheet)`
+  box-sizing: border-box;
+  justify-content: flex-start;
+  align-items: center;
+  flex-direction: row;
+  padding: 0 6px;
+  position: static;
+
+  height: 40px;
+`;
+
+export const ToolGroup: React.FC<ToolGroupProps> = ({
+  anchor,
+  position,
+  distance,
+
+  baseZIndex,
+  children,
+  isOpen,
+  onOutsidePress,
+  style,
+  value,
+  ...rest
+}) => {
+  const handleOutsidePress = useCallback(() => {
+    if (onOutsidePress) onOutsidePress(value);
+  }, [onOutsidePress, value]);
+
+  const ref = useRef<HTMLDivElement>(null);
+  useOutsidePress(ref, handleOutsidePress, isOpen);
+
+  const modalRootRef = useModalRoot();
+
+  const modalStyle = useModalPosition({
+    anchor,
+    isActive: isOpen && Boolean(anchor),
+    positionRelativeToOffsetParent: !modalRootRef.current,
+    position,
+    distance,
+    style,
+  });
+
+  const node =
+    isOpen === false ? null : (
+      <ToolGroupContainer
+        {...rest}
+        style={anchor ? modalStyle : undefined}
+        ref={ref}
+      >
+        {children}
+      </ToolGroupContainer>
+    );
+
+  return modalRootRef.current && anchor
+    ? ReactDOM.createPortal(node, modalRootRef.current)
+    : node;
+};

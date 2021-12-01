@@ -4,7 +4,7 @@ import type { TooltipPosition } from "../tooltip";
 import type { I18nProps } from "../types";
 
 export interface ButtonProps
-  extends React.HTMLAttributes<HTMLButtonElement>,
+  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
     I18nProps {
   /** The key of the button's icon (if any). */
   icon?: IconType;
