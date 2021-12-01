@@ -21,6 +21,15 @@ export interface ToolProps extends ButtonProps {
     value: string | number | undefined,
     event: React.PointerEvent<HTMLButtonElement>,
   ) => void;
+
+  /**
+   * An optional listener that is called when the tool is released.
+   * Will not be called if `isDisabled` is set.
+   */
+  onRelease?: (
+    value: string | number | undefined,
+    event: React.PointerEvent<HTMLButtonElement>,
+  ) => void;
 }
 
 export type ToolGroupProps = React.HTMLAttributes<HTMLDivElement> &

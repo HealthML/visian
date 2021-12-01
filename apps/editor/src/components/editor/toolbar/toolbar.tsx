@@ -1,4 +1,8 @@
-import { PointerButton, Toolbar as GenericToolbar } from "@visian/ui-shared";
+import {
+  PointerButton,
+  Toolbar as GenericToolbar,
+  useLongPress,
+} from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import styled from "styled-components";
@@ -63,6 +67,21 @@ export const Toolbar: React.FC = observer(() => {
     },
     [isModalOpen, store],
   );
+  const [startPress, stopPress] = useLongPress(
+    useCallback(() => {
+      setIsModalOpen(true);
+    }, []),
+  );
+  const handlePress = useCallback(
+    (
+      value: string | number | undefined,
+      event: React.PointerEvent<HTMLButtonElement>,
+    ) => {
+      setActiveTool(value, event);
+      startPress(event);
+    },
+    [setActiveTool, startPress],
+  );
 
   return (
     <StyledToolbar ref={ref}>
@@ -71,6 +90,9 @@ export const Toolbar: React.FC = observer(() => {
           <ToolGroup
             key={index}
             toolGroup={toolGroup}
+            canExpand={
+              !isModalOpen || activeToolName !== toolGroup.activeTool.name
+            }
             showTooltip={
               !isModalOpen || activeToolName !== toolGroup.activeTool.name
             }
@@ -79,7 +101,8 @@ export const Toolbar: React.FC = observer(() => {
                 ? setActiveToolRef
                 : undefined
             }
-            onPress={setActiveTool}
+            onPress={handlePress}
+            onRelease={stopPress}
           />
         ),
       )}

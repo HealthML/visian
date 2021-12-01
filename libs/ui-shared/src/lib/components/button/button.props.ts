@@ -12,6 +12,7 @@ export interface ButtonProps
   tooltip?: string;
   tooltipTx?: string;
   tooltipPosition?: TooltipPosition;
+  /** Defaults to `true`. */
   showTooltip?: boolean;
 
   isActive?: boolean;

@@ -3,6 +3,7 @@ import {
   ToolGroup as GenericToolGroup,
   ToolProps,
   useMultiRef,
+  useShortTap,
 } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
 import React, { useCallback, useState } from "react";
@@ -12,12 +13,13 @@ import { Tool } from "./tool";
 import type { ToolGroup as ToolGroupModel, ToolName } from "../../../models";
 
 export const ToolGroup = observer<
-  Pick<ToolProps, "onPress" | "showTooltip"> & {
+  Pick<ToolProps, "onPress" | "onRelease" | "showTooltip"> & {
     toolGroup: ToolGroupModel<ToolName>;
+    canExpand?: boolean;
   },
   HTMLButtonElement
 >(
-  ({ toolGroup, onPress, showTooltip }, ref) => {
+  ({ toolGroup, canExpand = true, onPress, onRelease, showTooltip }, ref) => {
     const [innerToolRef, setInnerToolRef] = useState<HTMLButtonElement | null>(
       null,
     );
@@ -28,21 +30,20 @@ export const ToolGroup = observer<
       setIsExpanded(false);
     }, []);
 
-    const handlePress = useCallback(
-      (
-        value: string | number | undefined,
-        event: React.PointerEvent<HTMLButtonElement>,
-      ) => {
-        onPress?.(value, event);
-
-        if (
-          toolGroup.activeTool.isActive &&
-          event.button === PointerButton.LMB
-        ) {
-          setIsExpanded(true);
-        }
-      },
-      [onPress, toolGroup],
+    const [startTap, stopTap] = useShortTap(
+      useCallback(
+        (event: React.PointerEvent) => {
+          if (
+            toolGroup.activeTool.isActive &&
+            event.button === PointerButton.LMB
+          ) {
+            setIsExpanded(true);
+          }
+        },
+        [toolGroup],
+      ),
+      undefined,
+      canExpand && !isExpanded && toolGroup.activeTool.isActive,
     );
 
     const activateTool = useCallback(
@@ -62,7 +63,10 @@ export const ToolGroup = observer<
           tool={toolGroup.activeTool}
           showTooltip={showTooltip && !isExpanded}
           ref={toolRef}
-          onPress={handlePress}
+          onPress={onPress}
+          onRelease={onRelease}
+          onPointerDown={startTap}
+          onPointerUp={stopTap}
         />
         <GenericToolGroup
           isOpen={isExpanded}

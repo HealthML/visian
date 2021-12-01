@@ -23,18 +23,28 @@ export const Tool = React.forwardRef<HTMLButtonElement, ToolProps>(
       isActive,
       isDisabled,
       onPress,
+      onRelease,
       onPointerDown,
+      onPointerUp,
       ...rest
     },
     ref,
   ) => {
     const handlePress = useCallback(
       (event: React.PointerEvent<HTMLButtonElement>) => {
-        if (onPointerDown) onPointerDown(event);
+        onPointerDown?.(event);
         if (isDisabled) return;
-        if (onPress) onPress(value, event);
+        onPress?.(value, event);
       },
       [isDisabled, onPointerDown, onPress, value],
+    );
+    const handleRelease = useCallback(
+      (event: React.PointerEvent<HTMLButtonElement>) => {
+        onPointerUp?.(event);
+        if (isDisabled) return;
+        onRelease?.(value, event);
+      },
+      [isDisabled, onPointerUp, onRelease, value],
     );
 
     return (
@@ -44,6 +54,7 @@ export const Tool = React.forwardRef<HTMLButtonElement, ToolProps>(
         isActive={isActive}
         isDisabled={isDisabled}
         onPointerDown={handlePress}
+        onPointerUp={handleRelease}
         ref={ref}
       />
     );

@@ -10,22 +10,21 @@ import React from "react";
 import type { ToolName } from "../../../models";
 
 export const Tool = observer<
-  Pick<ToolProps, "onPress" | "showTooltip"> & {
+  ToolProps & {
     tool: ITool<ToolName>;
   },
   HTMLButtonElement
 >(
-  ({ tool, onPress, showTooltip = true }, ref) => (
+  ({ tool, ...rest }, ref) => (
     <GenericTool
+      {...rest}
       icon={tool.icon}
       isActive={tool.isActive}
       isDisabled={!tool.canActivate()}
       tooltipTx={tool.labelTx}
       tooltip={tool.label}
       value={tool.name}
-      showTooltip={showTooltip}
       ref={ref}
-      onPress={onPress}
       onContextMenu={preventDefault}
     />
   ),
