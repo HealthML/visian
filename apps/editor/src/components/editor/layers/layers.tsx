@@ -108,7 +108,7 @@ const LayerListItem = observer<{
   );
   const startTap2 = useDoubleTap(
     useCallback((event: React.PointerEvent) => {
-      if (event.pointerType !== "touch") return;
+      if (event.pointerType === "mouse") return;
       setContextMenuPosition({ x: event.clientX, y: event.clientY });
     }, []),
   );
