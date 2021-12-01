@@ -20,7 +20,6 @@ export const Tool = React.forwardRef<HTMLButtonElement, ToolProps>(
       children,
       icon,
       value,
-      activeTool,
       isActive,
       isDisabled,
       onPress,
@@ -42,9 +41,7 @@ export const Tool = React.forwardRef<HTMLButtonElement, ToolProps>(
       <StyledButton
         {...rest}
         icon={icon}
-        isActive={
-          isActive || (activeTool !== undefined && value === activeTool)
-        }
+        isActive={isActive}
         isDisabled={isDisabled}
         onPointerDown={handlePress}
         ref={ref}

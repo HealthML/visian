@@ -14,12 +14,6 @@ export interface ToolProps extends ButtonProps {
   value?: string | number;
 
   /**
-   * When passing the identifier of the currently active tool, this one will
-   * appear as active if it has the same value.
-   */
-  activeTool?: string | number;
-
-  /**
    * An optional listener that is called when the tool is pressed.
    * Will not be called if `isDisabled` is set.
    */

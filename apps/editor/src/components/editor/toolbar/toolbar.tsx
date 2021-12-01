@@ -1,15 +1,11 @@
-import {
-  PointerButton,
-  preventDefault,
-  Tool,
-  Toolbar as GenericToolbar,
-} from "@visian/ui-shared";
+import { PointerButton, Toolbar as GenericToolbar } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
 import { ToolName } from "../../../models";
+import { ToolGroup } from "./tool-group";
 import { ToolSettings } from "./tool-settings";
 
 // Styled Components
@@ -30,6 +26,10 @@ export const Toolbar: React.FC = observer(() => {
     };
   }, [store, ref]);
 
+  const [activeToolRef, setActiveToolRef] = useState<HTMLButtonElement | null>(
+    null,
+  );
+
   // Menu Toggling
   const [isModalOpen, setIsModalOpen] = useState(false);
   const closeModal = useCallback(
@@ -44,8 +44,6 @@ export const Toolbar: React.FC = observer(() => {
     [store],
   );
 
-  const [buttonRef, setButtonRef] = useState<HTMLButtonElement | null>(null);
-
   const activeTool = store?.editor.activeDocument?.tools.activeTool;
   const activeToolName = activeTool?.name;
   const setActiveTool = useCallback(
@@ -57,7 +55,7 @@ export const Toolbar: React.FC = observer(() => {
       store?.editor.activeDocument?.tools.setActiveTool(value as ToolName);
 
       if (
-        (event.button === PointerButton.RMB || previousTool === value) &&
+        event.button === PointerButton.RMB &&
         store?.editor.activeDocument?.tools.activeTool?.name === value
       ) {
         setIsModalOpen(previousTool !== value || !isModalOpen);
@@ -69,28 +67,24 @@ export const Toolbar: React.FC = observer(() => {
   return (
     <StyledToolbar ref={ref}>
       {store?.editor.activeDocument?.tools.toolGroups.map(
-        ({ activeTool: tool }, index) =>
-          tool.canActivate() && (
-            <Tool
-              key={index}
-              icon={tool.icon}
-              isDisabled={
-                tool.name === "crosshair-tool" &&
-                !store?.editor.activeDocument?.has3DLayers
-              }
-              tooltipTx={tool.labelTx}
-              tooltip={tool.label}
-              activeTool={activeToolName}
-              value={tool.name}
-              showTooltip={!isModalOpen || activeToolName !== tool.name}
-              ref={activeToolName === tool.name ? setButtonRef : undefined}
-              onPress={setActiveTool}
-              onContextMenu={preventDefault}
-            />
-          ),
+        (toolGroup, index) => (
+          <ToolGroup
+            key={index}
+            toolGroup={toolGroup}
+            showTooltip={
+              !isModalOpen || activeToolName !== toolGroup.activeTool.name
+            }
+            ref={
+              activeToolName === toolGroup.activeTool.name
+                ? setActiveToolRef
+                : undefined
+            }
+            onPress={setActiveTool}
+          />
+        ),
       )}
       <ToolSettings
-        activeToolRef={buttonRef}
+        activeToolRef={activeToolRef}
         isOpen={isModalOpen}
         onDismiss={closeModal}
       />

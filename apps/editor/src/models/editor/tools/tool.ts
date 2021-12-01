@@ -86,6 +86,10 @@ export class Tool<N extends string>
       : undefined;
   }
 
+  public get isActive(): boolean {
+    return this.document.tools.activeTool === this;
+  }
+
   public canActivate(): boolean {
     return Boolean(
       (!this.supportedViewModes ||
