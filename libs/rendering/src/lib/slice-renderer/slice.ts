@@ -113,7 +113,7 @@ export class Slice extends THREE.Group implements IDisposable {
       this.viewType === editor.activeDocument?.viewport2D.mainViewType;
 
     this.path = new Path(editor, viewType, this.overlayLineMaterial);
-    this.add(this.path);
+    this.crosshairShiftGroup.add(this.path);
 
     this.disposers.push(
       autorun(this.updateScale),
