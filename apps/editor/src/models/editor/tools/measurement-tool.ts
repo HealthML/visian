@@ -15,7 +15,7 @@ export class MeasurementTool<N extends "measurement-tool" = "measurement-tool">
 
   private lastPoint?: DragPoint;
 
-  private path: Vector[] = [];
+  public path: Vector[] = [];
 
   constructor(document: IDocument) {
     super(
@@ -28,7 +28,7 @@ export class MeasurementTool<N extends "measurement-tool" = "measurement-tool">
       document,
     );
 
-    makeObservable<this, "path">(this, {
+    makeObservable<this>(this, {
       path: observable,
 
       hasPath: computed,
@@ -48,10 +48,18 @@ export class MeasurementTool<N extends "measurement-tool" = "measurement-tool">
   public get pathLength() {
     if (!this.hasPath) return 0;
 
+    const scale =
+      this.document.baseImageLayer?.image.voxelSpacing ||
+      new Vector([1, 1, 1], false);
+
     return this.path
       .slice(1)
       .map((pointB, pointAIndex) =>
-        pointB.clone(false).sub(this.path[pointAIndex]).length(),
+        pointB
+          .clone(false)
+          .sub(this.path[pointAIndex])
+          .multiply(scale)
+          .length(),
       )
       .reduce((previous, current) => previous + current);
   }
