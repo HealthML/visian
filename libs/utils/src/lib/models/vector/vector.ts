@@ -353,7 +353,7 @@ export class Vector implements GenericVector {
   }
 
   public toArray() {
-    return toJS(this.data);
+    return [...this.data];
   }
 
   public toString() {
