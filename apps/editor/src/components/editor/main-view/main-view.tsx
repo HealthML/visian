@@ -24,6 +24,7 @@ const MainViewContainer = styled.div<{
       case "crosshair-tool":
       case "outline-tool":
       case "outline-eraser":
+      case "measurement-tool":
         return "crosshair";
 
       case undefined:
