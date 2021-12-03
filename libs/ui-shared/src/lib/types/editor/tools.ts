@@ -1,4 +1,4 @@
-import type { Voxel } from "@visian/utils";
+import type { Vector, Voxel } from "@visian/utils";
 import * as THREE from "three";
 
 import type { IImageLayer } from "./layers";
@@ -95,6 +95,9 @@ export interface ITool<N extends string> {
   deactivate(nextTool?: ITool<N>): void;
 }
 
+export interface IMeasurementTool extends ITool<"measurement-tool"> {
+  path: Vector[];
+}
 export interface ISelfDeactivatingTool<N extends string> extends ITool<N> {
   isSelfDeactivating: true;
 }

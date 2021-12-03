@@ -19,6 +19,7 @@ import {
   sliceMeshZ,
   synchCrosshairs,
   toolOverlayZ,
+  Path,
 } from "./utils";
 
 export class Slice extends THREE.Group implements IDisposable {
@@ -43,6 +44,8 @@ export class Slice extends THREE.Group implements IDisposable {
   public outline: Outline;
 
   public previewBrushCursor: PreviewBrushCursor;
+
+  private path: Path;
 
   private overlayLineMaterial: OverlayLineMaterial;
   private overlayPointsMaterial: OverlayPointsMaterial;
@@ -109,6 +112,9 @@ export class Slice extends THREE.Group implements IDisposable {
     this.isMainView =
       this.viewType === editor.activeDocument?.viewport2D.mainViewType;
 
+    this.path = new Path(editor, viewType, this.overlayLineMaterial);
+    this.add(this.path);
+
     this.disposers.push(
       autorun(this.updateScale),
       autorun(this.updateOffset),
@@ -142,6 +148,7 @@ export class Slice extends THREE.Group implements IDisposable {
     this.overlayLineMaterial.dispose();
     this.overlayPointsMaterial.dispose();
     this.crosshairMaterial.dispose();
+    this.path.dispose();
   }
 
   public setCrosshairSynchOffset(offset = new THREE.Vector2()) {

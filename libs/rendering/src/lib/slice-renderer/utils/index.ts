@@ -8,6 +8,7 @@ export * from "./heat-map-material";
 export * from "./layering";
 export * from "./outline";
 export * from "./overlay-material";
+export * from "./path";
 export * from "./preview-brush-cursor";
 export * from "./slice-size";
 export * from "./view-layout";
