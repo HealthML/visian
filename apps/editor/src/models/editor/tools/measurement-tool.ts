@@ -1,25 +1,17 @@
-import {
-  DragPoint,
-  IDocument,
-  IPreviewedTool,
-  ISelfDeactivatingTool,
-} from "@visian/ui-shared";
+import { DragPoint, IDocument, IPreviewedTool } from "@visian/ui-shared";
 import { Vector } from "@visian/utils";
+import { action, computed, makeObservable, observable } from "mobx";
 import { Tool } from "./tool";
 import { dragPointsEqual } from "./utils";
 
-export class MeasurementTool<N extends "measurement-tool">
+export class MeasurementTool<N extends "measurement-tool" = "measurement-tool">
   extends Tool<N>
-  implements IPreviewedTool<N>, ISelfDeactivatingTool<N> {
+  implements IPreviewedTool<N> {
   public readonly excludeFromSnapshotTracking = [
     "document",
     "path",
     "lastPoint",
-    "previousTool",
   ];
-  public readonly isSelfDeactivating = true;
-
-  private previousTool?: N;
 
   private lastPoint?: DragPoint;
 
@@ -35,6 +27,18 @@ export class MeasurementTool<N extends "measurement-tool">
       },
       document,
     );
+
+    makeObservable<this, "path">(this, {
+      path: observable,
+
+      hasPath: computed,
+      pathLength: computed,
+
+      startAt: action,
+      moveTo: action,
+      endAt: action,
+      discard: action,
+    });
   }
 
   public get hasPath() {
@@ -75,17 +79,28 @@ export class MeasurementTool<N extends "measurement-tool">
 
   public endAt(dragPoint: DragPoint | null) {
     if (dragPoint) this.moveTo(dragPoint);
+
+    const pathLength = this.path.length;
+    if (
+      pathLength > 1 &&
+      this.path[pathLength - 1].equals(this.path[pathLength - 2])
+    ) {
+      this.path.pop();
+    }
   }
 
   public discard = () => {
     this.path = [];
     this.onPathChange();
-    this.document.tools.setActiveTool(this.previousTool);
   };
 
   public submit = () => {
     this.discard();
   };
+
+  public deactivate() {
+    this.discard();
+  }
 
   private onPathChange() {
     // Todo: Update preview
