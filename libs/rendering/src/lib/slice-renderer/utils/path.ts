@@ -12,6 +12,7 @@ import * as THREE from "three";
 
 export class Path extends THREE.Group implements IDisposable {
   private lines = new THREE.LineSegments();
+  private points = new THREE.Points();
 
   private disposers: IDisposer[] = [];
 
@@ -19,37 +20,41 @@ export class Path extends THREE.Group implements IDisposable {
     private editor: IEditor,
     private viewType: ViewType,
     lineMaterial: THREE.Material,
+    nodeMaterial: THREE.Material,
   ) {
     super();
 
     this.lines.material = lineMaterial;
+    this.points.material = nodeMaterial;
 
     this.position.set(0.5, -0.5, 0);
     this.scale.set(-1, 1, 1);
 
     this.add(this.lines);
+    this.add(this.points);
 
-    this.disposers.push(autorun(this.updateLines));
+    this.disposers.push(autorun(this.updateGeometries));
   }
 
   public dispose() {
     this.disposers.forEach((disposer) => disposer());
     this.lines.geometry.dispose();
+    this.points.geometry.dispose();
   }
 
-  private updateLines = () => {
+  private updateGeometries = () => {
     if (!this.editor.activeDocument?.baseImageLayer) return;
 
     const path = (this.editor.activeDocument.tools.tools["measurement-tool"] as
       | IMeasurementTool
       | undefined)?.path;
 
-    if (!path || path.length < 2) {
-      this.lines.visible = false;
+    if (!path || path.length < 1) {
+      this.visible = false;
       this.editor.sliceRenderer?.lazyRender();
       return;
     }
-    this.lines.visible = true;
+    this.visible = true;
 
     const sliceAxis = getOrthogonalAxis(this.viewType);
 
@@ -59,69 +64,91 @@ export class Path extends THREE.Group implements IDisposable {
 
     const [widthAxis, heightAxis] = getPlaneAxes(this.viewType);
 
-    const points: THREE.Vector2[] = [];
+    const linePoints: THREE.Vector2[] = [];
+    const nodePoints: THREE.Vector2[] = [];
 
-    path.forEach((point, index) => {
-      if (index === path.length - 1) return;
+    if (path.length > 1) {
+      path.forEach((point, index) => {
+        if (index === path.length - 1) return;
 
-      const nextPoint = path[index + 1];
+        const nextPoint = path[index + 1];
 
-      if (point[sliceAxis] === slice) {
-        if (nextPoint[sliceAxis] === slice) {
-          points.push(
-            new THREE.Vector2(point[widthAxis], point[heightAxis]),
-            new THREE.Vector2(nextPoint[widthAxis], nextPoint[heightAxis]),
-          );
-        } else {
-          points.push(
-            new THREE.Vector2(point[widthAxis], point[heightAxis]),
-            this.getInterpolatedPoint(point, nextPoint, sliceAxis, [
+        if (point[sliceAxis] === slice) {
+          if (nextPoint[sliceAxis] === slice) {
+            linePoints.push(
+              new THREE.Vector2(point[widthAxis], point[heightAxis]),
+              new THREE.Vector2(nextPoint[widthAxis], nextPoint[heightAxis]),
+            );
+            nodePoints.push(
+              new THREE.Vector2(point[widthAxis], point[heightAxis]),
+              new THREE.Vector2(nextPoint[widthAxis], nextPoint[heightAxis]),
+            );
+          } else {
+            linePoints.push(
+              new THREE.Vector2(point[widthAxis], point[heightAxis]),
+              this.getInterpolatedPoint(point, nextPoint, sliceAxis, [
+                widthAxis,
+                heightAxis,
+              ]),
+            );
+            nodePoints.push(
+              new THREE.Vector2(point[widthAxis], point[heightAxis]),
+            );
+          }
+        } else if (nextPoint[sliceAxis] === slice) {
+          linePoints.push(
+            this.getInterpolatedPoint(nextPoint, point, sliceAxis, [
               widthAxis,
               heightAxis,
             ]),
+            new THREE.Vector2(nextPoint[widthAxis], nextPoint[heightAxis]),
+          );
+          nodePoints.push(
+            new THREE.Vector2(nextPoint[widthAxis], nextPoint[heightAxis]),
+          );
+        } else if (
+          (point[sliceAxis] < slice && nextPoint[sliceAxis] > slice) ||
+          (point[sliceAxis] > slice && nextPoint[sliceAxis] < slice)
+        ) {
+          const sliceOffset = Math.abs(slice - point[sliceAxis]) - 1;
+          linePoints.push(
+            this.getInterpolatedPoint(
+              point,
+              nextPoint,
+              sliceAxis,
+              [widthAxis, heightAxis],
+              sliceOffset,
+            ),
+            this.getInterpolatedPoint(
+              point,
+              nextPoint,
+              sliceAxis,
+              [widthAxis, heightAxis],
+              sliceOffset + 1,
+            ),
           );
         }
-      } else if (nextPoint[sliceAxis] === slice) {
-        points.push(
-          this.getInterpolatedPoint(nextPoint, point, sliceAxis, [
-            widthAxis,
-            heightAxis,
-          ]),
-          new THREE.Vector2(nextPoint[widthAxis], nextPoint[heightAxis]),
-        );
-      } else if (
-        (point[sliceAxis] < slice && nextPoint[sliceAxis] > slice) ||
-        (point[sliceAxis] > slice && nextPoint[sliceAxis] < slice)
-      ) {
-        const sliceOffset = Math.abs(slice - point[sliceAxis]) - 1;
-        points.push(
-          this.getInterpolatedPoint(
-            point,
-            nextPoint,
-            sliceAxis,
-            [widthAxis, heightAxis],
-            sliceOffset,
-          ),
-          this.getInterpolatedPoint(
-            point,
-            nextPoint,
-            sliceAxis,
-            [widthAxis, heightAxis],
-            sliceOffset + 1,
-          ),
-        );
-      }
-    });
+      });
+    } else {
+      nodePoints.push(
+        new THREE.Vector2(path[0][widthAxis], path[0][heightAxis]),
+      );
+    }
 
     const { voxelCount } = this.editor.activeDocument.baseImageLayer.image;
     const scale = new THREE.Vector2(
       voxelCount[widthAxis],
       voxelCount[heightAxis],
     );
-    points.forEach((point) => point.addScalar(0.5).divide(scale));
+    linePoints.forEach((point) => point.addScalar(0.5).divide(scale));
+    nodePoints.forEach((point) => point.addScalar(0.5).divide(scale));
 
     this.lines.geometry.dispose();
-    this.lines.geometry = new THREE.BufferGeometry().setFromPoints(points);
+    this.lines.geometry = new THREE.BufferGeometry().setFromPoints(linePoints);
+
+    this.points.geometry.dispose();
+    this.points.geometry = new THREE.BufferGeometry().setFromPoints(nodePoints);
+
     this.editor.sliceRenderer?.lazyRender();
   };
 

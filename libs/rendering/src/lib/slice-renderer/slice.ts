@@ -20,6 +20,7 @@ import {
   synchCrosshairs,
   toolOverlayZ,
   Path,
+  OverlayRoundedPointsMaterial,
 } from "./utils";
 
 export class Slice extends THREE.Group implements IDisposable {
@@ -49,6 +50,7 @@ export class Slice extends THREE.Group implements IDisposable {
 
   private overlayLineMaterial: OverlayLineMaterial;
   private overlayPointsMaterial: OverlayPointsMaterial;
+  private overlayRoundedPointsMaterial: OverlayRoundedPointsMaterial;
   private crosshairMaterial: OverlayLineMaterial;
 
   public isMainView: boolean;
@@ -74,6 +76,9 @@ export class Slice extends THREE.Group implements IDisposable {
 
     this.overlayLineMaterial = new OverlayLineMaterial(editor);
     this.overlayPointsMaterial = new OverlayPointsMaterial(editor);
+    this.overlayRoundedPointsMaterial = new OverlayRoundedPointsMaterial(
+      editor,
+    );
     this.crosshairMaterial = new OverlayLineMaterial(editor, {
       transparent: true,
       opacity: 0.5,
@@ -112,7 +117,12 @@ export class Slice extends THREE.Group implements IDisposable {
     this.isMainView =
       this.viewType === editor.activeDocument?.viewport2D.mainViewType;
 
-    this.path = new Path(editor, viewType, this.overlayLineMaterial);
+    this.path = new Path(
+      editor,
+      viewType,
+      this.overlayLineMaterial,
+      this.overlayRoundedPointsMaterial,
+    );
     this.crosshairShiftGroup.add(this.path);
 
     this.disposers.push(
@@ -147,6 +157,7 @@ export class Slice extends THREE.Group implements IDisposable {
     this.disposers.forEach((disposer) => disposer());
     this.overlayLineMaterial.dispose();
     this.overlayPointsMaterial.dispose();
+    this.overlayRoundedPointsMaterial.dispose();
     this.crosshairMaterial.dispose();
     this.path.dispose();
   }
