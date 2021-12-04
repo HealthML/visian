@@ -42,11 +42,11 @@ export class MeasurementTool<N extends "measurement-tool" = "measurement-tool">
   }
 
   public get hasPath() {
-    return this.path.length > 1;
+    return this.path.length > 0;
   }
 
   public get pathLength() {
-    if (!this.hasPath) return 0;
+    if (this.path.length < 2) return 0;
 
     const scale =
       this.document.baseImageLayer?.image.voxelSpacing ||

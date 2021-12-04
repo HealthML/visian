@@ -189,6 +189,14 @@ export const ShortcutPopUp: React.FC<ShortcutPopUpProps> = observer(
               </ShortcutRow>
               <ShortcutRow>
                 <ShortcutContainer>
+                  <KeyIcon text="L" />
+                </ShortcutContainer>
+                <ShortcutDescriptionContainer>
+                  <ShortcutDescription text="Select Measurement tool" />
+                </ShortcutDescriptionContainer>
+              </ShortcutRow>
+              <ShortcutRow>
+                <ShortcutContainer>
                   <KeyIcon text="Ctrl" />
                   <PlusIcon />
                   <KeyIcon text="D" />
