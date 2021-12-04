@@ -95,9 +95,6 @@ export interface ITool<N extends string> {
   deactivate(nextTool?: ITool<N>): void;
 }
 
-export interface IMeasurementTool extends ITool<"measurement-tool"> {
-  path: Vector[];
-}
 export interface ISelfDeactivatingTool<N extends string> extends ITool<N> {
   isSelfDeactivating: true;
 }
@@ -108,6 +105,12 @@ export interface IPreviewedTool<N extends string> extends ITool<N> {
 
   /** Discards the preview results. */
   discard(): void;
+}
+
+export interface IMeasurementTool extends IPreviewedTool<"measurement-tool"> {
+  path: Vector[];
+
+  setToDeleteMode: () => void;
 }
 
 /** A class of similar tools, typically grouped in the UI. */

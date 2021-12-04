@@ -1,4 +1,4 @@
-import { DragPoint, IDocument, IPreviewedTool } from "@visian/ui-shared";
+import { DragPoint, IDocument, IMeasurementTool } from "@visian/ui-shared";
 import { Vector } from "@visian/utils";
 import { action, computed, makeObservable, observable } from "mobx";
 import { Tool } from "./tool";
@@ -6,16 +6,20 @@ import { dragPointsEqual } from "./utils";
 
 export class MeasurementTool<N extends "measurement-tool" = "measurement-tool">
   extends Tool<N>
-  implements IPreviewedTool<N> {
+  implements IMeasurementTool {
   public readonly excludeFromSnapshotTracking = [
     "document",
     "path",
     "lastPoint",
+    "draggedVector",
+    "isSetToDeleteMode",
   ];
 
   private lastPoint?: DragPoint;
 
   private draggedVector?: Vector;
+
+  private isSetToDeleteMode = false;
 
   public path: Vector[] = [];
 
@@ -23,6 +27,7 @@ export class MeasurementTool<N extends "measurement-tool" = "measurement-tool">
     super(
       {
         name: "measurement-tool" as N,
+        altToolName: "measurement-tool" as N,
         icon: "arrowUp", // Todo: Add icon
         supportedViewModes: ["2D"],
         supportedLayerKinds: ["image"],
@@ -66,6 +71,10 @@ export class MeasurementTool<N extends "measurement-tool" = "measurement-tool">
       .reduce((previous, current) => previous + current);
   }
 
+  public setToDeleteMode() {
+    this.isSetToDeleteMode = true;
+  }
+
   public startAt(dragPoint: DragPoint) {
     const vector = Vector.fromObject(dragPoint);
 
@@ -75,7 +84,7 @@ export class MeasurementTool<N extends "measurement-tool" = "measurement-tool">
 
     if (equalPathVector) {
       this.draggedVector = equalPathVector;
-    } else {
+    } else if (!this.isSetToDeleteMode) {
       this.path.push(vector);
       this.draggedVector = vector;
     }
@@ -88,8 +97,9 @@ export class MeasurementTool<N extends "measurement-tool" = "measurement-tool">
       !this.lastPoint ||
       dragPointsEqual(this.lastPoint, dragPoint) ||
       !this.draggedVector
-    )
+    ) {
       return;
+    }
 
     this.draggedVector.setFromObject(dragPoint);
 
@@ -99,15 +109,25 @@ export class MeasurementTool<N extends "measurement-tool" = "measurement-tool">
   public endAt(dragPoint: DragPoint | null) {
     if (dragPoint) this.moveTo(dragPoint);
 
-    const pathLength = this.path.length;
-    if (
-      pathLength > 1 &&
-      this.path[pathLength - 1].equals(this.path[pathLength - 2])
-    ) {
-      this.path.pop();
+    if (this.isSetToDeleteMode) {
+      if (this.draggedVector) {
+        const index = this.path.indexOf(this.draggedVector);
+        if (index >= 0) {
+          this.path.splice(index, 1);
+        }
+      }
+    } else {
+      const pathLength = this.path.length;
+      if (
+        pathLength > 1 &&
+        this.path[pathLength - 1].equals(this.path[pathLength - 2])
+      ) {
+        this.path.pop();
+      }
     }
 
     this.draggedVector = undefined;
+    this.isSetToDeleteMode = false;
   }
 
   public discard = () => {
