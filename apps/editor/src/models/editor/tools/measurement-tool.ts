@@ -70,7 +70,6 @@ export class MeasurementTool<N extends "measurement-tool" = "measurement-tool">
 
   public startAt(dragPoint: DragPoint) {
     this.addDragPointToPath(dragPoint);
-    this.onPathChange();
 
     this.lastPoint = dragPoint;
   }
@@ -80,7 +79,6 @@ export class MeasurementTool<N extends "measurement-tool" = "measurement-tool">
 
     this.path.pop();
     this.addDragPointToPath(dragPoint);
-    this.onPathChange();
 
     this.lastPoint = dragPoint;
   }
@@ -99,7 +97,6 @@ export class MeasurementTool<N extends "measurement-tool" = "measurement-tool">
 
   public discard = () => {
     this.path = [];
-    this.onPathChange();
   };
 
   public submit = () => {
@@ -108,9 +105,5 @@ export class MeasurementTool<N extends "measurement-tool" = "measurement-tool">
 
   public deactivate() {
     this.discard();
-  }
-
-  private onPathChange() {
-    // Todo: Update preview
   }
 }
