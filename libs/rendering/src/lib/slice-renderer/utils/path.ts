@@ -129,7 +129,7 @@ export class Path extends THREE.Group implements IDisposable {
           );
         }
       });
-    } else {
+    } else if (path[0][sliceAxis] === slice) {
       nodePoints.push(
         new THREE.Vector2(path[0][widthAxis], path[0][heightAxis]),
       );
