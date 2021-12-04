@@ -15,6 +15,8 @@ export class MeasurementTool<N extends "measurement-tool" = "measurement-tool">
 
   private lastPoint?: DragPoint;
 
+  private draggedVector?: Vector;
+
   public path: Vector[] = [];
 
   constructor(document: IDocument) {
@@ -64,21 +66,32 @@ export class MeasurementTool<N extends "measurement-tool" = "measurement-tool">
       .reduce((previous, current) => previous + current);
   }
 
-  private addDragPointToPath(dragPoint: DragPoint) {
-    this.path.push(Vector.fromObject(dragPoint, false));
-  }
-
   public startAt(dragPoint: DragPoint) {
-    this.addDragPointToPath(dragPoint);
+    const vector = Vector.fromObject(dragPoint);
+
+    const equalPathVector = this.path.find((pathVector) =>
+      pathVector.equals(vector),
+    );
+
+    if (equalPathVector) {
+      this.draggedVector = equalPathVector;
+    } else {
+      this.path.push(vector);
+      this.draggedVector = vector;
+    }
 
     this.lastPoint = dragPoint;
   }
 
   public moveTo(dragPoint: DragPoint) {
-    if (!this.lastPoint || dragPointsEqual(this.lastPoint, dragPoint)) return;
+    if (
+      !this.lastPoint ||
+      dragPointsEqual(this.lastPoint, dragPoint) ||
+      !this.draggedVector
+    )
+      return;
 
-    this.path.pop();
-    this.addDragPointToPath(dragPoint);
+    this.draggedVector.setFromObject(dragPoint);
 
     this.lastPoint = dragPoint;
   }
@@ -93,6 +106,8 @@ export class MeasurementTool<N extends "measurement-tool" = "measurement-tool">
     ) {
       this.path.pop();
     }
+
+    this.draggedVector = undefined;
   }
 
   public discard = () => {

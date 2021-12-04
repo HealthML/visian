@@ -26,16 +26,16 @@ export class Vector implements GenericVector {
     object: { x: number; y?: number; z?: number; w?: number },
     isObservable = true,
   ) {
-    const array = [object.x];
+    let size = 1;
     ["y", "z", "w"].forEach((axis) => {
       const value = object[axis as "y" | "z" | "w"];
       if (value !== undefined) {
-        array.push(value);
+        size++;
       } else {
-        return new this(array, isObservable);
+        return new this(size, isObservable).setFromObject(object);
       }
     });
-    return new this(array, isObservable);
+    return new this(size, isObservable).setFromObject(object);
   }
 
   /** The number of components in this vector. */
@@ -59,6 +59,7 @@ export class Vector implements GenericVector {
       makeObservable<this, "data">(this, {
         data: observable,
 
+        setFromObject: action,
         setComponent: action,
         set: action,
         setScalar: action,
@@ -81,6 +82,24 @@ export class Vector implements GenericVector {
         setFromView: action,
       });
     }
+  }
+
+  public setFromObject(object: {
+    x: number;
+    y?: number;
+    z?: number;
+    w?: number;
+  }) {
+    const array = [object.x];
+    ["y", "z", "w"].forEach((axis) => {
+      const value = object[axis as "y" | "z" | "w"];
+      if (value !== undefined) {
+        array.push(value);
+      } else {
+        return this.set(...array);
+      }
+    });
+    return this.set(...array);
   }
 
   public setComponent(index: number | "x" | "y" | "z" | "w", value: number) {
