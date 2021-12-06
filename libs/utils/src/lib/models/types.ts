@@ -11,3 +11,5 @@ export interface ISerializable<T> {
    */
   applySnapshot(snapshot: Partial<T>): Promise<void>;
 }
+
+export type VoxelInfoMode = "off" | "on" | "delay";
