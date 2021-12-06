@@ -381,9 +381,9 @@ export const setUpHotKeys = (store: RootStore): IDisposer => {
   hotkeys("i", (event) => {
     event.preventDefault();
     store.editor.activeDocument?.viewport2D.setVoxelInfoMode(
-      store.editor.activeDocument?.viewport2D.voxelInfoMode === "on"
-        ? "off"
-        : "on",
+      store.editor.activeDocument?.viewport2D.voxelInfoMode === "off"
+        ? "on"
+        : "off",
     );
   });
   hotkeys("ctrl+i", (event) => {
