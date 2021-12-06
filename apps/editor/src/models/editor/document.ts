@@ -510,6 +510,8 @@ export class Document
       return;
     }
 
+    if (Array.isArray(filteredFiles) && !filteredFiles.length) return;
+
     let createdLayerId = "";
     const isFirstLayer = !this.layerIds.length;
     const image = await readMedicalImage(filteredFiles);
