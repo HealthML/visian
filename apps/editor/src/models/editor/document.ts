@@ -398,15 +398,30 @@ export class Document
     this.context?.persist();
   }
 
+  private checkPromiseAllSettled(
+    results:
+      | PromiseSettledResult<string | void>[]
+      | PromiseSettledResult<void>[],
+  ) {
+    const rejectedResult = results.find(
+      (result) => result.status === "rejected",
+    ) as PromiseRejectedResult;
+    if (rejectedResult) {
+      throw rejectedResult.reason;
+    }
+  }
+
   public async importFileSystemEntries(
     entries: FileSystemEntry | null | (FileSystemEntry | null)[],
   ): Promise<void> {
     if (!entries) return;
     if (Array.isArray(entries)) {
       if (entries.some((entry) => entry && !entry.isFile)) {
-        await Promise.all(
+        // TODO
+        const test = await Promise.allSettled(
           entries.map((entry) => this.importFileSystemEntries(entry)),
         );
+        this.checkPromiseAllSettled(test);
       } else {
         const files = await Promise.all(
           entries.map(
@@ -453,7 +468,9 @@ export class Document
           promises.push(this.importFileSystemEntries(subEntries[i]));
         }
       }
-      await Promise.all(promises);
+      // TODO
+      const test3 = await Promise.allSettled(promises);
+      this.checkPromiseAllSettled(test3);
 
       if (dirFiles.length) await this.importFiles(dirFiles, entries.name);
     } else {
@@ -498,7 +515,9 @@ export class Document
         filteredFiles.forEach((file) => {
           promises.push(this.importFiles(file));
         });
-        await Promise.all(promises);
+        // TODO
+        const test2 = await Promise.allSettled(promises);
+        this.checkPromiseAllSettled(test2);
         return;
       }
     } else if (filteredFiles.name.endsWith(".zip")) {
