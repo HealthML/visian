@@ -359,6 +359,8 @@ export class Image<T extends TypedArray = TypedArray>
       data: this.getData(),
       dimensionality: this.dimensionality,
       voxelComponents: this.voxelComponents,
+      voxelComponentType: this.voxelComponentType,
+      voxelType: this.voxelType,
     };
   }
 

@@ -32,6 +32,14 @@ export const useMultiRef = <T>(...refs: React.ForwardedRef<T>[]) =>
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, refs);
 
+export const useForwardEvent = <E>(...callbacks: ((event: E) => void)[]) =>
+  useCallback((event: E) => {
+    callbacks.forEach((callback) => {
+      callback(event);
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, callbacks);
+
 export const useIsDraggedOver = () => {
   const [isDraggedOver, setIsDraggedOver] = useState(false);
   const dragTimerRef = useRef<NodeJS.Timer>();
@@ -193,6 +201,27 @@ export const useLongPress = <T extends Element>(
   }, []);
 
   return [startPress, stopPress];
+};
+
+export const useDoubleTap = <T extends Element>(
+  handleDoubleTap: (event: React.PointerEvent<T>) => void,
+  maxDelay = 500,
+): ((event: React.PointerEvent<T>) => void) => {
+  const timeRef = useRef<number | undefined>();
+
+  const startTap = useCallback(
+    (event: React.PointerEvent<T>) => {
+      if (timeRef.current && Date.now() - timeRef.current <= maxDelay) {
+        handleDoubleTap(event);
+        timeRef.current = undefined;
+      } else {
+        timeRef.current = Date.now();
+      }
+    },
+    [handleDoubleTap, maxDelay],
+  );
+
+  return startTap;
 };
 
 export const useOutsidePress = <T extends HTMLElement>(
