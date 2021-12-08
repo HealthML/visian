@@ -59,6 +59,13 @@ export class OverlayRoundedPointsMaterial extends THREE.ShaderMaterial {
 
     this.disposers.push(
       autorun(() => updateOverlayColor(this.uniforms.uColor.value, editor)),
+      autorun(() => {
+        this.uniforms.uPointSize.value = Math.max(
+          (editor.activeDocument?.viewport2D.zoomLevel ?? 1) * 8,
+          12,
+        );
+        editor.sliceRenderer?.lazyRender();
+      }),
     );
   }
 
