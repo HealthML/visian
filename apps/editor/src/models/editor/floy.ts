@@ -99,12 +99,12 @@ export class FloyDemoController implements ISerializable<FloyDemoSnapshot> {
       );
       if (
         dataSet.string("x00080060") !== "MR" ||
+        dataSet.string("x0008103e").toLowerCase().includes("km") || // filter, if series has km in it
+        !dataSet.string("x0008103e").toLowerCase().includes("sag") || // filter, if series is not sagital
+        !dataSet.string("x0008103e").toLowerCase().includes("t1") // filter, if series is not t1
         // parsedDicom.string("x00180015") !== "LSPINE" ||
-        // dataSet.string("x0008103e").toLowerCase().includes("t1") ||
-        // native ones
         // eslint-disable-next-line max-len
         // Alternative: https://stackoverflow.com/questions/34782409/understanding-dicom-image-attributes-to-get-axial-coronal-sagittal-cuts
-        !dataSet.string("x0008103e").toLowerCase().includes("sag")
         // TODO: No contrast agent
       ) {
         return false;
