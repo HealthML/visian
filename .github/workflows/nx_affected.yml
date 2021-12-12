@@ -129,7 +129,7 @@ jobs:
         uses: peaceiris/actions-gh-pages@v3
         if: steps.check_files.outputs.files_exists == 'true'
         with:
-          cname: floy.demo.com
+          cname: floy.visian.org
           deploy_key: ${{ secrets.FLOY_REPO_DEPLOY_KEY }}
           external_repository: HealthML/visian-floy-demo
           publish_branch: main
