@@ -100,7 +100,8 @@ export class FloyDemoController implements ISerializable<FloyDemoSnapshot> {
       if (
         dataSet.string("x00080060") !== "MR" ||
         // parsedDicom.string("x00180015") !== "LSPINE" ||
-        // !parsedDicom.string("x0008103e").toLowerCase().includes("t1") ||
+        // dataSet.string("x0008103e").toLowerCase().includes("t1") ||
+        // native ones
         // eslint-disable-next-line max-len
         // Alternative: https://stackoverflow.com/questions/34782409/understanding-dicom-image-attributes-to-get-axial-coronal-sagittal-cuts
         !dataSet.string("x0008103e").toLowerCase().includes("sag")
@@ -178,7 +179,7 @@ export class FloyDemoController implements ISerializable<FloyDemoSnapshot> {
                   "segmentation.nii",
                   data.segmentationMasksNIFTI,
                 ),
-                "Segmentation",
+                "Bounding Boxen",
                 true,
               );
             } catch {

@@ -11,7 +11,7 @@ export const skipSlices = 10;
 
 export const maxUndoRedoSteps = 20;
 
-export const errorDisplayDuration = 12000;
+export const errorDisplayDuration = 3000;
 
 export const defaultAnnotationOpacity = IS_FLOY_DEMO ? 0.2 : 0.5;
 export const defaultAnnotationColor = "Genome Gold";
