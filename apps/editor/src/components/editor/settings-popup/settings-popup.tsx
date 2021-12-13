@@ -1,6 +1,7 @@
 import {
   BooleanParam,
   ColorMode,
+  Divider,
   EnumParam,
   LargePopUpColumn,
   LargePopUpColumnContainer,
@@ -36,6 +37,12 @@ const languageSwitchOptions = [
 const performanceSwitchOptions = [
   { labelTx: "low", value: "low" },
   { labelTx: "high", value: "high" },
+];
+
+const voxelInfoSwitchOptions = [
+  { labelTx: "off", value: "off" },
+  { labelTx: "delay", value: "delay" },
+  { labelTx: "on", value: "on" },
 ];
 
 export const SettingsPopUp: React.FC<SettingsPopUpProps> = observer(
@@ -82,15 +89,24 @@ export const SettingsPopUp: React.FC<SettingsPopUpProps> = observer(
                 value={i18n.language.split("-")[0]}
                 setValue={setLanguage}
               />
+              <Divider />
               <BooleanParam
-                labelTx="voxelData"
-                value={store?.editor.activeDocument?.viewport2D.showVoxelInfo}
+                labelTx="exclusive-segmentations"
+                value={store?.editor.activeDocument?.useExclusiveSegmentations}
                 setValue={
-                  store?.editor.activeDocument?.viewport2D.setShowVoxelInfo
+                  store?.editor.activeDocument?.setUseExclusiveSegmentations
+                }
+              />
+              <EnumParam
+                labelTx="voxel-data"
+                options={voxelInfoSwitchOptions}
+                value={store?.editor.activeDocument?.viewport2D.voxelInfoMode}
+                setValue={
+                  store?.editor.activeDocument?.viewport2D?.setVoxelInfoMode
                 }
               />
               <Switch
-                labelTx="performanceMode"
+                labelTx="performance-mode"
                 options={performanceSwitchOptions}
                 value={store?.editor.performanceMode}
                 onChange={store?.editor.setPerformanceMode}

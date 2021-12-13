@@ -36,8 +36,9 @@
   "shortcuts": "Shortcuts",
 
   "settings": "Settings",
-  "voxelData": "Voxel Data",
-  "performanceMode": "View Quality",
+  "voxel-data": "Voxel Data",
+  "performance-mode": "View Quality",
+  "exclusive-segmentations": "Exclusive Segmentations",
   "low": "Low",
   "high": "High",
 
@@ -104,6 +105,7 @@
   "side-views": "Side Views",
   "on": "On",
   "off": "Off",
+  "delay": "Delay",
   "main-view-type": "Main View Type",
   "contrast": "Contrast",
   "brightness": "Brightness",

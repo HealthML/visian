@@ -6,6 +6,7 @@ export interface AnnotationDataSnapshot {
 export class AnnotationData {
   public annotationDataUUID: string;
   public data: string;
+  public correspondingLayerId = "";
 
   // TODO: Properly type API response data
   constructor(annotationData: any) {

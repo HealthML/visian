@@ -1,16 +1,10 @@
-import { getOrder, resizeRenderer } from "@visian/rendering";
+import { getOrder } from "@visian/rendering";
 import {
   color,
-  computeStyleValue,
-  coverMixin,
   EventLike,
   InvisibleButton,
-  isFirefox,
-  Sheet,
-  sheetNoise,
   useUpdateOnResize,
 } from "@visian/ui-shared";
-import ResizeSensor from "css-element-queries/src/ResizeSensor";
 import { observer } from "mobx-react-lite";
 import React, {
   useCallback,
@@ -20,7 +14,6 @@ import React, {
   useState,
 } from "react";
 import styled from "styled-components";
-import tc from "tinycolor2";
 
 import { useStore } from "../../../app/root-store";
 
@@ -50,7 +43,7 @@ const SideViewFullscreen = styled(InvisibleButton)`
   z-index: 100;
 `;
 
-const SideView = styled(Sheet)`
+const SideView = styled.div`
   border-radius: 10px;
   cursor: crosshair;
   padding-bottom: 100%;
@@ -58,19 +51,7 @@ const SideView = styled(Sheet)`
   position: relative;
   user-select: none;
   width: 100%;
-  background: ${sheetNoise},
-    // Firefox does not support a blurred background yet
-    ${isFirefox()
-        ? computeStyleValue(
-            [color("sideViewSheet"), color("background")],
-            (sheet, background) => tc.mix(sheet, background, 80).toRgbString(),
-          )
-        : color("sideViewSheet")};
   border: 1px solid ${color("sideViewBorder")};
-
-  canvas {
-    ${coverMixin}
-  }
 `;
 
 export const SideViews = observer(() => {
@@ -90,45 +71,23 @@ export const SideViews = observer(() => {
     };
   }, [store, wrapperRef]);
 
-  const [upperRef, setUpperRef] = useState<HTMLDivElement | null>(null);
-  const upperCanvas = store?.editor.renderers[1].domElement;
+  const upperRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    let resizeSensor: ResizeSensor | undefined;
-    if (store && upperRef && upperCanvas) {
-      upperRef.appendChild(upperCanvas);
-      resizeSensor = new ResizeSensor(upperRef, () => {
-        resizeRenderer(
-          store.editor.renderers[1],
-          store.editor.sliceRenderer?.eagerRender,
-        );
-      });
-    }
+    store?.setRef("upperSideView", upperRef);
 
     return () => {
-      if (resizeSensor) resizeSensor.detach();
-      if (upperRef) upperRef.innerHTML = "";
+      store?.setRef("upperSideView");
     };
-  }, [store, upperCanvas, upperRef]);
+  }, [store, upperRef]);
 
-  const [lowerRef, setLowerRef] = useState<HTMLDivElement | null>(null);
-  const lowerCanvas = store?.editor.renderers[2].domElement;
+  const lowerRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    let resizeSensor: ResizeSensor | undefined;
-    if (store && lowerRef && lowerCanvas) {
-      lowerRef.appendChild(lowerCanvas);
-      resizeSensor = new ResizeSensor(lowerRef, () => {
-        resizeRenderer(
-          store.editor.renderers[2],
-          store.editor.sliceRenderer?.eagerRender,
-        );
-      });
-    }
+    store?.setRef("lowerSideView", lowerRef);
 
     return () => {
-      if (resizeSensor) resizeSensor.detach();
-      if (lowerRef) lowerRef.innerHTML = "";
+      store?.setRef("lowerSideView");
     };
-  }, [lowerCanvas, lowerRef, store]);
+  }, [store, lowerRef]);
 
   // Pointer Event Handling
   const pointerDispatch = store?.pointerDispatch;
@@ -213,7 +172,7 @@ export const SideViews = observer(() => {
           onPointerEnter={upperOnPointerEnter}
           onPointerLeave={upperOnPointerLeave}
           onPointerDown={upperOnPointerDown}
-          ref={setUpperRef}
+          ref={upperRef}
         >
           {isUpperHovered && (
             <SideViewFullscreen
@@ -226,7 +185,7 @@ export const SideViews = observer(() => {
           onPointerEnter={lowerOnPointerEnter}
           onPointerLeave={lowerOnPointerLeave}
           onPointerDown={lowerOnPointerDown}
-          ref={setLowerRef}
+          ref={lowerRef}
         >
           {isLowerHovered && (
             <SideViewFullscreen

@@ -4,11 +4,13 @@ export const commonUniforms = {
   uInputSecondDerivative: { value: null },
   uStepSize: { value: 1 },
 
-  uLayerData0: { value: null },
+  uLayerData: { value: [] },
   uLayerAnnotationStatuses: { value: [] },
   uLayerOpacities: { value: [] },
   uLayerColors: { value: [] },
 
   uActiveLayerData: { value: null },
   uRegionGrowingThreshold: { value: 0 },
+
+  uUseExclusiveSegmentations: { value: false },
 };

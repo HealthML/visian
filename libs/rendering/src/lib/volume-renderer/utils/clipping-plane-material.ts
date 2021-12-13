@@ -44,18 +44,13 @@ export class ClippingPlaneMaterial extends THREE.ShaderMaterial {
         const layers = editor.activeDocument?.imageLayers || [];
 
         const layerData = layers.map((layer) =>
-          ((layer as IImageLayer).image as RenderedImage).getTexture(0),
+          ((layer as IImageLayer).image as RenderedImage).getTexture(),
         );
 
-        this.uniforms.uLayerData0.value =
-          editor.activeDocument?.tools.layerPreviewTextures[0] || null;
-
-        for (let i = 0; i < layerData.length; i++) {
-          if (!this.uniforms[`uLayerData${i + 1}`]) {
-            this.uniforms[`uLayerData${i + 1}`] = { value: null };
-          }
-          this.uniforms[`uLayerData${i + 1}`].value = layerData[i];
-        }
+        this.uniforms.uLayerData.value = [
+          editor.activeDocument?.tools.layerPreviewTexture || null,
+          ...layerData,
+        ];
       }),
       autorun(() => {
         const layers = editor.activeDocument?.imageLayers || [];

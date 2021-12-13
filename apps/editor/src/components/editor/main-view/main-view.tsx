@@ -51,7 +51,7 @@ export const MainView = observer(() => {
   );
 
   const [ref, setRef] = useState<HTMLDivElement | null>(null);
-  const canvas = store?.editor.renderers[0].domElement;
+  const canvas = store?.editor.renderer.domElement;
   useEffect(() => {
     if (ref && canvas) {
       ref.appendChild(canvas);

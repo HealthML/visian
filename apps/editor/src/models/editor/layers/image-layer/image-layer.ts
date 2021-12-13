@@ -1,6 +1,7 @@
 import { RenderedImage } from "@visian/rendering";
 import { IDocument, IImageLayer, MarkerConfig } from "@visian/ui-shared";
 import {
+  IDisposable,
   Image,
   ImageSnapshot,
   ISerializable,
@@ -35,7 +36,7 @@ export interface ImageLayerSnapshot extends LayerSnapshot {
 
 export class ImageLayer
   extends Layer
-  implements IImageLayer, ISerializable<ImageLayerSnapshot> {
+  implements IImageLayer, ISerializable<ImageLayerSnapshot>, IDisposable {
   public static fromITKImage<T2 extends TypedArray = TypedArray>(
     image: ITKImage<T2>,
     document: IDocument,
@@ -114,6 +115,10 @@ export class ImageLayer
     );
   }
 
+  public dispose() {
+    this.image.dispose();
+  }
+
   public get title(): string {
     return super.title || this.image.name;
   }
@@ -132,6 +137,11 @@ export class ImageLayer
 
   public setContrast(value?: number): void {
     this.contrast = value ?? 1;
+  }
+
+  public delete() {
+    super.delete();
+    this.dispose();
   }
 
   // Slice Markers
@@ -257,9 +267,13 @@ export class ImageLayer
   }
 
   // I/O
-  public toFile() {
+  public toFile(): Promise<File | undefined> {
     return writeSingleMedicalImage(
-      this.image.toITKImage(),
+      this.image.toITKImage(
+        this.document
+          .getExcludedSegmentations(this)
+          ?.map((imageLayer) => imageLayer.image),
+      ),
       `${this.title.split(".")[0]}.nii.gz`,
     );
   }
@@ -277,7 +291,16 @@ export class ImageLayer
       this.document.viewport2D.getSelectedSlice(),
     );
     const file = await writeSingleMedicalImage(
-      sliceImage.toITKImage(),
+      sliceImage.toITKImage(
+        this.document
+          .getExcludedSegmentations(this)
+          ?.map((imageLayer) =>
+            imageLayer.image.getSliceImage(
+              this.document.viewport2D.mainViewType,
+              this.document.viewport2D.getSelectedSlice(),
+            ),
+          ),
+      ),
       `${sliceImage.name.split(".")[0]}.png`,
     );
 

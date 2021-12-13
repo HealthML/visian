@@ -78,6 +78,7 @@ export class GradientComputer implements IDisposable {
     this.firstDerivativeRenderTarget.dispose();
     this.secondDerivativeRenderTarget.dispose();
     this.outputDerivativeRenderTarget.dispose();
+    this.texture3DRenderer.dispose();
   }
 
   public tick() {

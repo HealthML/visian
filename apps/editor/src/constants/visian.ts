@@ -9,6 +9,8 @@ export const maxZoom = 100;
 export const zoomStep = 0.15;
 export const skipSlices = 10;
 
+export const voxelInfoDelay = 500; // ms
+
 export const maxUndoRedoSteps = 20;
 
 export const errorDisplayDuration = IS_FLOY_DEMO ? 3000 : 12000;

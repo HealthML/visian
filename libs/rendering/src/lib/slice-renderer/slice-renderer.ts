@@ -1,6 +1,5 @@
 import {
   getPlaneAxes,
-  IDisposable,
   IDisposer,
   Pixel,
   ViewType,
@@ -15,15 +14,15 @@ import {
   getOrder,
   getPositionWithinPixel,
   getWebGLSizeFromCamera,
-  setMainCameraPlanes,
+  setCameraPlanes,
 } from "./utils";
+import { RenderedSheet } from "../rendered-sheet";
 
-export class SliceRenderer implements IDisposable, ISliceRenderer {
-  private _renderers: THREE.WebGLRenderer[];
-  private canvases: HTMLCanvasElement[];
-  private mainCamera: THREE.OrthographicCamera;
-  private sideCamera: THREE.OrthographicCamera;
-  private scenes = viewTypes.map(() => new THREE.Scene());
+export class SliceRenderer implements ISliceRenderer {
+  private renderer: THREE.WebGLRenderer;
+  private camera: THREE.OrthographicCamera;
+  private scene = new THREE.Scene();
+  private renderedSheets: RenderedSheet[];
 
   public slices: Slice[];
 
@@ -32,23 +31,32 @@ export class SliceRenderer implements IDisposable, ISliceRenderer {
   private disposers: IDisposer[] = [];
 
   constructor(private editor: IEditor) {
-    this._renderers = editor.renderers;
+    this.renderer = editor.renderer;
 
-    this.canvases = editor.renderers.map((renderer) => renderer.domElement);
-
-    const aspect = this.canvases[0].clientWidth / this.canvases[0].clientHeight;
-    this.mainCamera = new THREE.OrthographicCamera(
-      -aspect,
-      aspect,
-      1,
-      -1,
-      0,
-      20,
-    );
-    this.sideCamera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 20);
+    const aspect = this.canvas.clientWidth / this.canvas.clientHeight;
+    this.camera = new THREE.OrthographicCamera(-aspect, aspect, 1, -1, -20, 20);
 
     this.slices = viewTypes.map((viewType) => new Slice(editor, viewType));
-    this.slices.forEach((slice, viewType) => this.scenes[viewType].add(slice));
+    this.scene.add(this.slices[ViewType.Transverse]);
+
+    const upperSideViewSheet = new RenderedSheet(
+      editor,
+      "upperSideView",
+      this.camera,
+    );
+    upperSideViewSheet.add(this.slices[1]);
+    this.slices[1].position.z = 10;
+
+    const lowerSideViewSheet = new RenderedSheet(
+      editor,
+      "lowerSideView",
+      this.camera,
+    );
+    lowerSideViewSheet.add(this.slices[2]);
+    this.slices[2].position.z = 10;
+
+    this.renderedSheets = [upperSideViewSheet, lowerSideViewSheet];
+    this.scene.add(...this.renderedSheets);
 
     window.addEventListener("resize", this.resize);
     this.resize();
@@ -80,6 +88,13 @@ export class SliceRenderer implements IDisposable, ISliceRenderer {
           this.updateMainBrushCursor();
 
           this.updateCamera();
+
+          const order = getOrder(newMainView);
+          [this.scene, ...this.renderedSheets].forEach((container, index) =>
+            container.add(this.slices[order[index]]),
+          );
+
+          this.lazyRender();
         },
       ),
       reaction(
@@ -113,11 +128,12 @@ export class SliceRenderer implements IDisposable, ISliceRenderer {
   public dispose() {
     this.disposers.forEach((disposer) => disposer());
     this.slices.forEach((slice) => slice.dispose());
+    this.renderedSheets.forEach((renderedSheet) => renderedSheet.dispose());
     window.removeEventListener("resize", this.resize);
   }
 
-  public get renderers() {
-    return this._renderers;
+  private get canvas() {
+    return this.renderer.domElement;
   }
 
   public getOutline(
@@ -128,11 +144,15 @@ export class SliceRenderer implements IDisposable, ISliceRenderer {
   }
 
   public resize = () => {
-    this._renderers[0].setSize(window.innerWidth, window.innerHeight);
+    this.renderer.setSize(window.innerWidth, window.innerHeight);
 
     if (!this.editor.activeDocument) return;
 
-    setMainCameraPlanes(this.editor, this.canvases[0], this.mainCamera);
+    setCameraPlanes(this.editor, this.canvas, this.camera);
+
+    this.renderedSheets.forEach((renderedSheet) =>
+      renderedSheet.synchPosition(),
+    );
 
     this.eagerRender();
   };
@@ -140,7 +160,7 @@ export class SliceRenderer implements IDisposable, ISliceRenderer {
   private updateCamera = () => {
     if (!this.editor.activeDocument) return;
 
-    setMainCameraPlanes(this.editor, this.canvases[0], this.mainCamera);
+    setCameraPlanes(this.editor, this.canvas, this.camera);
     this.lazyRender();
   };
 
@@ -156,59 +176,42 @@ export class SliceRenderer implements IDisposable, ISliceRenderer {
     this.lazyRenderTriggered = true;
   };
 
-  public getWebGLSize(
-    viewType = this.editor.activeDocument?.viewport2D.mainViewType,
-  ) {
-    return getWebGLSizeFromCamera(
-      viewType === this.editor.activeDocument?.viewport2D.mainViewType
-        ? this.mainCamera
-        : this.sideCamera,
-    );
+  public getWebGLSize() {
+    return getWebGLSizeFromCamera(this.camera);
   }
 
   /** Converts a WebGL position to a screen space one. */
   public getMainViewScreenPosition(webGLPosition: Pixel): Pixel {
-    const boundingBox = this.canvases[0].getBoundingClientRect();
+    const boundingBox = this.canvas.getBoundingClientRect();
     const webGLSize = this.getWebGLSize();
     return {
       x:
-        ((webGLPosition.x - this.mainCamera.left) / webGLSize.x) *
+        ((webGLPosition.x - this.camera.left) / webGLSize.x) *
           boundingBox.width +
         boundingBox.left,
       y:
-        ((webGLPosition.y - this.mainCamera.top) / -webGLSize.y) *
+        ((webGLPosition.y - this.camera.top) / -webGLSize.y) *
           boundingBox.height +
         boundingBox.top,
     };
   }
 
   /** Converts a screen space position to a WebGL one. */
-  public getWebGLPosition(
-    screenPosition: Pixel,
-    viewType = this.editor.activeDocument?.viewport2D.mainViewType ??
-      ViewType.Transverse,
-  ): Pixel {
+  public getWebGLPosition(screenPosition: Pixel): Pixel {
     if (!this.editor.activeDocument) return { x: 0, y: 0 };
 
-    const canvasIndex = getOrder(
-      this.editor.activeDocument?.viewport2D.mainViewType,
-    ).indexOf(viewType);
-    const canvas = this.canvases[canvasIndex];
-
-    const boundingBox = canvas.getBoundingClientRect();
-    const webGLSize = this.getWebGLSize(viewType);
-
-    const camera = canvasIndex ? this.sideCamera : this.mainCamera;
+    const boundingBox = this.canvas.getBoundingClientRect();
+    const webGLSize = this.getWebGLSize();
 
     return {
       x:
         ((screenPosition.x - boundingBox.left) / boundingBox.width) *
           webGLSize.x +
-        camera.left,
+        this.camera.left,
       y:
         ((screenPosition.y - boundingBox.top) / boundingBox.height) *
           -webGLSize.y +
-        camera.top,
+        this.camera.top,
     };
   }
 
@@ -222,7 +225,7 @@ export class SliceRenderer implements IDisposable, ISliceRenderer {
     viewType = this.editor.activeDocument?.viewport2D.mainViewType ??
       ViewType.Transverse,
   ) {
-    const webGLPosition = this.getWebGLPosition(screenPosition, viewType);
+    const webGLPosition = this.getWebGLPosition(screenPosition);
     return this.slices[viewType].getVirtualUVs(
       new THREE.Vector3(webGLPosition.x, webGLPosition.y, 0),
     );
@@ -303,31 +306,17 @@ export class SliceRenderer implements IDisposable, ISliceRenderer {
     );
   }
 
-  private get activeRenderers() {
-    return this.editor.activeDocument?.viewport2D.showSideViews
-      ? this._renderers
-      : [this._renderers[0]];
-  }
-
   public eagerRender = () => {
     if (
       !this.editor.activeDocument ||
       this.editor.activeDocument.layers.length < 1
     ) {
-      this.activeRenderers.forEach((renderer) => renderer.clear());
+      this.renderer.clear();
       return;
     }
     this.lazyRenderTriggered = false;
 
-    const order = getOrder(
-      this.editor.activeDocument?.viewport2D.mainViewType ??
-        ViewType.Transverse,
-    );
-    this.activeRenderers.forEach((renderer, index) => {
-      const viewType = order[index];
-      const camera = index ? this.sideCamera : this.mainCamera;
-      renderer.render(this.scenes[viewType], camera);
-    });
+    this.renderer.render(this.scene, this.camera);
   };
 
   public resetCrosshairOffset() {

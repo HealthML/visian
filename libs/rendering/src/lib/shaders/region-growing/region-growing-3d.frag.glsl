@@ -3,22 +3,15 @@ precision highp sampler3D;
 in vec2 vUv;
 
 uniform float uThreshold;
-uniform float uSeed;
+uniform vec4 uSeed;
+uniform int uComponents;
 
 @import ../uniforms/u-blip-material;
 @import ../uniforms/u-texture-3d-material;
 
 out vec4 pc_FragColor;
 
-const float two_over_three = 2.0 / 3.0;
-
-bool canGrowFrom(float ownData, float neighborData, float neighborRegion) {
-  return all(lessThan(vec3(
-      -neighborRegion,
-      abs(ownData - uSeed) * two_over_three - uThreshold,
-      abs(ownData - neighborData) - uThreshold),
-    vec3(0.0)));
-}
+@import ./can-grow-from;
 
 void main() {
   #ifdef VOLUMETRIC_IMAGE
@@ -55,13 +48,13 @@ void main() {
   #endif
 
   // right, left, up, down, back, front
-  bool canGrowFromR = uv.x < 1.0 - texelStep.x && canGrowFrom(source.x, sourceR.x, targetR.x);
-  bool canGrowFromL = uv.x >= texelStep.x && canGrowFrom(source.x, sourceL.x, targetL.x);
-  bool canGrowFromU = uv.y < 1.0 - texelStep.y && canGrowFrom(source.x, sourceU.x, targetU.x);
-  bool canGrowFromD = uv.y >= texelStep.y && canGrowFrom(source.x, sourceD.x, targetD.x);
+  bool canGrowFromR = uv.x < 1.0 - texelStep.x && canGrowFrom(source, sourceR, targetR.x);
+  bool canGrowFromL = uv.x >= texelStep.x && canGrowFrom(source, sourceL, targetL.x);
+  bool canGrowFromU = uv.y < 1.0 - texelStep.y && canGrowFrom(source, sourceU, targetU.x);
+  bool canGrowFromD = uv.y >= texelStep.y && canGrowFrom(source, sourceD, targetD.x);
   #ifdef VOLUMETRIC_IMAGE
-    bool canGrowFromB = uv.z < 1.0 - texelStep.z && canGrowFrom(source.x, sourceB.x, targetB.x);
-    bool canGrowFromF = uv.z >= texelStep.z && canGrowFrom(source.x, sourceF.x, targetF.x);
+    bool canGrowFromB = uv.z < 1.0 - texelStep.z && canGrowFrom(source, sourceB, targetB.x);
+    bool canGrowFromF = uv.z >= texelStep.z && canGrowFrom(source, sourceF, targetF.x);
   #else
     bool canGrowFromB = false;
     bool canGrowFromF = false;
