@@ -7,6 +7,8 @@ import { ReactComponent as HPILogoImage } from "./hpi-logo.svg";
 import { ProgressPopUpProps } from "./progress-popup.props";
 import SplashScreenImage from "./splash.png";
 import { ReactComponent as VisianLogoImage } from "./visian-logo.svg";
+import { ReactComponent as VisianHPILogoImage } from "./visian-hpi-logo.svg";
+import { ReactComponent as FloyLogoImage } from "./floy-logo.svg";
 
 const ProgressTitle = styled(Text)`
   font-size: 20px;
@@ -63,7 +65,15 @@ const SplashContainer = styled.div`
 
 const VisianLogo = styled(VisianLogoImage)`
   width: 80px;
-  height: Auto;
+  height: auto;
+  position: absolute;
+  top: 28px;
+  left: 28px;
+`;
+
+const FloyLogo = styled(FloyLogoImage)`
+  width: 140px;
+  height: auto;
   position: absolute;
   top: 28px;
   left: 28px;
@@ -71,7 +81,15 @@ const VisianLogo = styled(VisianLogoImage)`
 
 const HPILogo = styled(HPILogoImage)`
   width: 80px;
-  height: Auto;
+  height: auto;
+  position: absolute;
+  bottom: 24px;
+  left: 28px;
+`;
+
+const VisianHPILogo = styled(VisianHPILogoImage)`
+  width: 70px;
+  height: auto;
   position: absolute;
   bottom: 24px;
   left: 28px;
@@ -79,7 +97,7 @@ const HPILogo = styled(HPILogoImage)`
 
 const SplashImage = styled.img`
   height: 90%;
-  width: Auto;
+  width: auto;
   position: absolute;
   right: 0;
   bottom: 0;
@@ -94,10 +112,19 @@ export const ProgressPopUp: React.FC<ProgressPopUpProps> = ({
 }) => (
   <ProgressPopUpContainer
     childrenBefore={
-      showSplash && !IS_FLOY_DEMO ? (
+      showSplash ? (
         <SplashContainer>
-          <VisianLogo />
-          <HPILogo />
+          {IS_FLOY_DEMO ? (
+            <>
+              <FloyLogo />
+              <VisianHPILogo />
+            </>
+          ) : (
+            <>
+              <VisianLogo />
+              <HPILogo />
+            </>
+          )}
           <SplashImage src={SplashScreenImage} />
         </SplashContainer>
       ) : null
