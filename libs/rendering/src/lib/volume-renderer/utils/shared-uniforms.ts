@@ -32,8 +32,6 @@ export class SharedUniforms implements IDisposable {
   private workingColor = new THREE.Color();
   private readonly coneAxis = new THREE.Vector3(0, 1, 0);
 
-  private subscribedMaterials: THREE.ShaderMaterial[] = [];
-
   constructor(editor: IEditor) {
     this.uniforms = THREE.UniformsUtils.merge([
       opacityUniforms,
@@ -194,10 +192,8 @@ export class SharedUniforms implements IDisposable {
         const layerData = layers.map((layer) =>
           layer ===
           editor.activeDocument?.tools.dilateErodeRenderer3D.targetLayer
-            ? editor.activeDocument.tools.dilateErodeRenderer3D
-                .outputTextures[0]
+            ? editor.activeDocument.tools.dilateErodeRenderer3D.outputTexture
             : ((layer as IImageLayer).image as RenderedImage).getTexture(
-                0,
                 (
                   layer.isAnnotation
                     ? useNearestFilteringAnnotation
@@ -208,20 +204,14 @@ export class SharedUniforms implements IDisposable {
               ),
         );
 
-        this.uniforms.uLayerData0.value =
-          editor.activeDocument?.tools.layerPreviewTextures[0] || null;
-
-        for (let i = 0; i < layerData.length; i++) {
-          if (!this.uniforms[`uLayerData${i + 1}`]) {
-            this.uniforms[`uLayerData${i + 1}`] = { value: null };
-          }
-          this.uniforms[`uLayerData${i + 1}`].value = layerData[i];
-        }
+        this.uniforms.uLayerData.value = [
+          editor.activeDocument?.tools.layerPreviewTexture || null,
+          ...layerData,
+        ];
 
         const activeLayer = editor.activeDocument?.activeLayer;
         this.uniforms.uActiveLayerData.value = activeLayer
           ? ((activeLayer as IImageLayer).image as RenderedImage).getTexture(
-              0,
               (
                 activeLayer.isAnnotation
                   ? useNearestFilteringAnnotation
@@ -231,13 +221,6 @@ export class SharedUniforms implements IDisposable {
                 : THREE.LinearFilter,
             )
           : null;
-
-        this.subscribedMaterials.forEach((material) => {
-          material.uniforms = {
-            ...material.uniforms,
-            ...this.uniforms,
-          };
-        });
 
         editor.activeDocument?.viewport3D.onTransferFunctionChange();
         editor.activeDocument?.volumeRenderer?.lazyRender(true, true);
@@ -363,11 +346,14 @@ export class SharedUniforms implements IDisposable {
         editor.activeDocument?.viewport3D.onTransferFunctionChange();
         editor.volumeRenderer?.lazyRender(true);
       }),
-    );
-  }
+      autorun(() => {
+        this.uniforms.uUseExclusiveSegmentations.value =
+          editor.activeDocument?.useExclusiveSegmentations;
 
-  public subscribe(material: THREE.ShaderMaterial) {
-    this.subscribedMaterials.push(material);
+        editor.activeDocument?.viewport3D.onTransferFunctionChange();
+        editor.volumeRenderer?.lazyRender(true);
+      }),
+    );
   }
 
   public dispose() {

@@ -9,11 +9,13 @@ export const maxZoom = 100;
 export const zoomStep = 0.15;
 export const skipSlices = 10;
 
+export const voxelInfoDelay = 500; // ms
+
 export const maxUndoRedoSteps = 20;
 
-export const errorDisplayDuration = 3000;
+export const errorDisplayDuration = IS_FLOY_DEMO ? 3000 : 12000;
 
-export const defaultAnnotationOpacity = IS_FLOY_DEMO ? 0.2 : 0.5;
+export const defaultAnnotationOpacity = 0.5;
 export const defaultAnnotationColor = "Genome Gold";
 export const defaultRegionGrowingPreviewColor = "Smart Sapphire";
 export const defaultImageColor = "Mighty Mercury";

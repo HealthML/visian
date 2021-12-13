@@ -78,6 +78,7 @@ export class BrushCursor extends THREE.Group implements IDisposable {
     this.disposers.forEach((disposer) => disposer());
     this.lineSegments.geometry.dispose();
     (this.lineSegments.material as THREE.Material).dispose();
+    this.centerDot.geometry.dispose();
   }
 
   public setUVTarget(u: number, v: number) {

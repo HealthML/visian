@@ -4,6 +4,7 @@ import {
   VolumeRenderer,
 } from "@visian/rendering";
 import {
+  ColorMode,
   i18n,
   IEditor,
   ISliceRenderer,
@@ -12,7 +13,13 @@ import {
   Theme,
 } from "@visian/ui-shared";
 import { IDisposable, ISerializable } from "@visian/utils";
-import { action, makeObservable, observable, runInAction } from "mobx";
+import {
+  action,
+  computed,
+  makeObservable,
+  observable,
+  runInAction,
+} from "mobx";
 import * as THREE from "three";
 
 import { StoreContext } from "../types";
@@ -30,18 +37,14 @@ export class Editor
     "context",
     "sliceRenderer",
     "volumeRenderer",
-    "renderers",
+    "renderer",
   ];
 
   public activeDocument?: Document;
 
   public sliceRenderer?: ISliceRenderer;
   public volumeRenderer?: IVolumeRenderer;
-  public renderers!: [
-    THREE.WebGLRenderer,
-    THREE.WebGLRenderer,
-    THREE.WebGLRenderer,
-  ];
+  public renderer!: THREE.WebGLRenderer;
   public isAvailable!: boolean;
 
   public performanceMode: PerformanceMode = "high";
@@ -52,11 +55,13 @@ export class Editor
   ) {
     makeObservable(this, {
       activeDocument: observable,
-      renderers: observable,
+      renderer: observable,
       sliceRenderer: observable,
       volumeRenderer: observable,
       performanceMode: observable,
       isAvailable: observable,
+
+      colorMode: computed,
 
       setActiveDocument: action,
       setPerformanceMode: action,
@@ -64,21 +69,19 @@ export class Editor
     });
 
     runInAction(() => {
-      this.renderers = [
-        new THREE.WebGLRenderer({ alpha: true, preserveDrawingBuffer: true }),
-        new THREE.WebGLRenderer({ alpha: true }),
-        new THREE.WebGLRenderer({ alpha: true }),
-      ];
-      this.isAvailable = this.renderers[0].capabilities.isWebGL2;
+      this.renderer = new THREE.WebGLRenderer({
+        alpha: true,
+        preserveDrawingBuffer: true,
+      });
+      this.isAvailable = this.renderer.capabilities.isWebGL2;
 
       if (this.isAvailable) {
-        this.renderers.forEach((renderer) => {
-          renderer.setClearAlpha(0);
-        });
+        this.renderer.setClearAlpha(0);
+
         this.sliceRenderer = new SliceRenderer(this);
         this.volumeRenderer = new VolumeRenderer(this);
 
-        this.renderers[0].setAnimationLoop(this.animate);
+        this.renderer.setAnimationLoop(this.animate);
       }
     });
 
@@ -87,12 +90,16 @@ export class Editor
 
   public dispose(): void {
     this.sliceRenderer?.dispose();
+    this.volumeRenderer?.dispose();
+    this.activeDocument?.dispose();
+    this.renderer.dispose();
   }
 
   public setActiveDocument(
     value = new Document(undefined, this, this.context),
     isSilent?: boolean,
   ): void {
+    this.activeDocument?.dispose();
     this.activeDocument = value;
 
     if (!isSilent) this.activeDocument.requestSave();
@@ -117,6 +124,10 @@ export class Editor
 
   public get theme(): Theme {
     return this.context.getTheme();
+  }
+
+  public get colorMode(): ColorMode {
+    return this.context.getColorMode();
   }
 
   // Performance Mode

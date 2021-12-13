@@ -37,7 +37,7 @@ export class LAOComputer implements IDisposable {
     secondDerivativeTexture: THREE.Texture,
     private flush: () => void,
   ) {
-    [this.renderer] = editor.renderers;
+    this.renderer = editor.renderer;
 
     const imageProperties = {
       voxelCount: new Vector([1, 1, 1]),
@@ -83,6 +83,7 @@ export class LAOComputer implements IDisposable {
   public dispose() {
     this.reactionDisposers.forEach((disposer) => disposer());
     this.laoMaterial.dispose();
+    this.texture3DRenderer.dispose();
   }
 
   public get isDirty() {

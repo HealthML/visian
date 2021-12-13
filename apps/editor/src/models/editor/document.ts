@@ -12,6 +12,7 @@ import {
   ValueType,
 } from "@visian/ui-shared";
 import {
+  IDisposable,
   ImageMismatchError,
   ISerializable,
   ITKImage,
@@ -74,10 +75,13 @@ export interface DocumentSnapshot {
 
   tools: ToolsSnapshot<ToolName>;
 
+  useExclusiveSegmentations: boolean;
+
   floyDemo?: FloyDemoSnapshot;
 }
 
-export class Document implements IDocument, ISerializable<DocumentSnapshot> {
+export class Document
+  implements IDocument, ISerializable<DocumentSnapshot>, IDisposable {
   public readonly excludeFromSnapshotTracking = ["editor"];
 
   public id: string;
@@ -101,6 +105,8 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
   public markers: Markers = new Markers(this);
 
   public trackingData?: TrackingData;
+
+  public useExclusiveSegmentations = false;
 
   public floyDemo = new FloyDemoController(this);
 
@@ -130,6 +136,10 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
     this.viewport2D = new Viewport2D(snapshot?.viewport2D, this);
     this.viewport3D = new Viewport3D(snapshot?.viewport3D, this);
 
+    this.useExclusiveSegmentations = Boolean(
+      snapshot?.useExclusiveSegmentations,
+    );
+
     if (snapshot?.floyDemo) {
       this.floyDemo.applySnapshot(snapshot.floyDemo);
     }
@@ -150,11 +160,14 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
       tools: observable,
       showLayerMenu: observable,
       trackingData: observable,
+      useExclusiveSegmentations: observable,
+      floyDemo: observable,
 
       title: computed,
       activeLayer: computed,
       imageLayers: computed,
       baseImageLayer: computed,
+      annotationLayers: computed,
 
       setTitle: action,
       setActiveLayer: action,
@@ -168,6 +181,7 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
       importTrackingLog: action,
       setShowLayerMenu: action,
       toggleLayerMenu: action,
+      setUseExclusiveSegmentations: action,
       applySnapshot: action,
     });
 
@@ -175,6 +189,12 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
     // trying to access document.tools
     this.tools = new Tools(undefined, this);
     this.tools.applySnapshot(snapshot?.tools || {});
+  }
+
+  public dispose() {
+    this.clipboard.dispose();
+    this.tools.dispose();
+    Object.values(this.layerMap).forEach((layer) => layer.delete());
   }
 
   public get title(): string | undefined {
@@ -230,6 +250,12 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
         return false;
       });
     return baseImageLayer;
+  }
+
+  public get annotationLayers(): ImageLayer[] {
+    return this.layers.filter(
+      (layer) => layer.kind === "image" && layer.isAnnotation,
+    ) as ImageLayer[];
   }
 
   public getLayer(id: string): ILayer | undefined {
@@ -368,6 +394,13 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
     FileSaver.saveAs(await zip.toBlob(), `${this.title}.zip`);
   };
 
+  public getFileForLayer = async (idOrLayer: string | ILayer) => {
+    const layerId = typeof idOrLayer === "string" ? idOrLayer : idOrLayer.id;
+    const layer = this.layerMap[layerId];
+    const file = await layer.toFile();
+    return file;
+  };
+
   public finishBatchImport() {
     if (IS_FLOY_DEMO && !this.layers.length) {
       throw new Error("image-loading-error-demo");
@@ -439,7 +472,7 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
 
       if (dirFiles.length) await this.importFiles(dirFiles, entries.name);
     } else {
-      await new Promise<void>((resolve, reject) => {
+      await new Promise<string | void>((resolve, reject) => {
         (entries as FileSystemFileEntry).file((file: File) => {
           this.importFiles(file).then(resolve).catch(reject);
         }, reject);
@@ -451,7 +484,7 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
     files: File | File[],
     name?: string,
     isAnnotation?: boolean,
-  ): Promise<void> {
+  ): Promise<string | void> {
     let filteredFiles = Array.isArray(files)
       ? files.filter(
           (file) => !file.name.startsWith(".") && file.name !== "DICOMDIR",
@@ -476,7 +509,7 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
         filteredFiles.some((file) => path.extname(file.name) !== ".dcm") &&
         filteredFiles.some((file) => path.extname(file.name) !== "")
       ) {
-        const promises: Promise<void>[] = [];
+        const promises: Promise<string | void>[] = [];
         filteredFiles.forEach((file) => {
           promises.push(this.importFiles(file));
         });
@@ -497,6 +530,7 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
       await this.floyDemo.setDemoCandidate(filteredFiles, name);
     }
 
+    let createdLayerId = "";
     const isFirstLayer = !this.layerIds.length;
     const image = await readMedicalImage(filteredFiles);
     image.name =
@@ -506,9 +540,9 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
         : filteredFiles.name);
 
     if (isAnnotation) {
-      await this.importAnnotation(image);
+      createdLayerId = await this.importAnnotation(image);
     } else if (isAnnotation !== undefined) {
-      await this.importImage(image);
+      createdLayerId = await this.importImage(image);
     } else {
       // Infer Type
       let isLikelyImage = false;
@@ -521,9 +555,9 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
         }
       }
       if (isLikelyImage) {
-        await this.importImage(image);
+        createdLayerId = await this.importImage(image);
       } else {
-        await this.importAnnotation(image);
+        createdLayerId = await this.importAnnotation(image);
       }
     }
 
@@ -533,11 +567,12 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
       this.viewport3D.reset();
       this.history.clear();
     }
+
+    return createdLayerId;
   }
 
   private checkHardwareRequirements(size: number[]) {
-    const renderer = this.renderers?.[0];
-    if (!renderer) return;
+    if (!this.renderer) return;
 
     const is3D =
       size.reduce((previous, current) => previous + (current > 1 ? 1 : 0), 0) >
@@ -545,10 +580,10 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
 
     let dimensionLimit = Infinity;
     if (is3D) {
-      const gl = renderer.getContext() as WebGL2RenderingContext;
+      const gl = this.renderer.getContext() as WebGL2RenderingContext;
       dimensionLimit = gl.getParameter(gl.MAX_3D_TEXTURE_SIZE);
     } else {
-      dimensionLimit = renderer.capabilities.maxTextureSize ?? 0;
+      dimensionLimit = this.renderer.capabilities.maxTextureSize ?? 0;
     }
 
     if (size.some((value) => value > dimensionLimit)) {
@@ -576,6 +611,7 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
       throw new ImageMismatchError(i18n.t("image-mismatch-error"));
     }
     this.addLayer(imageLayer);
+    return imageLayer.id;
   }
 
   public async importAnnotation(image: ITKImage) {
@@ -584,7 +620,6 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
     const annotationLayer = ImageLayer.fromITKImage(image, this, {
       isAnnotation: true,
       color: this.getFirstUnusedColor(),
-      isVisible: IS_FLOY_DEMO,
     });
     if (
       this.baseImageLayer &&
@@ -604,6 +639,7 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
 
     this.addLayer(annotationLayer);
     this.setActiveLayer(annotationLayer);
+    return annotationLayer.id;
   }
 
   public importTrackingLog(log: TrackingLog) {
@@ -629,6 +665,27 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
     this.setShowLayerMenu(!this.showLayerMenu);
   };
 
+  // Exclusive Segmentations
+  public setUseExclusiveSegmentations = (value = false) => {
+    this.useExclusiveSegmentations = value;
+  };
+
+  public getExcludedSegmentations(layer: ILayer) {
+    if (!this.useExclusiveSegmentations) return undefined;
+    const layerIndex = this.layerIds.indexOf(layer.id);
+    if (layerIndex <= 0) return undefined;
+    return (this.layerIds
+      .slice(0, layerIndex)
+      .map((layerId) => this.layerMap[layerId])
+      .filter(
+        (potentialLayer) =>
+          potentialLayer.isAnnotation &&
+          potentialLayer.kind === "image" &&
+          potentialLayer.isVisible &&
+          potentialLayer.opacity > 0,
+      ) as unknown) as IImageLayer[];
+  }
+
   // Proxies
   public get sliceRenderer(): ISliceRenderer | undefined {
     return this.editor.sliceRenderer;
@@ -638,8 +695,8 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
     return this.editor.volumeRenderer;
   }
 
-  public get renderers(): THREE.WebGLRenderer[] | undefined {
-    return this.editor.renderers;
+  public get renderer(): THREE.WebGLRenderer | undefined {
+    return this.editor.renderer;
   }
 
   public get theme(): Theme {
@@ -659,6 +716,7 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
       viewport2D: this.viewport2D.toJSON(),
       viewport3D: this.viewport3D.toJSON(),
       tools: this.tools.toJSON(),
+      useExclusiveSegmentations: this.useExclusiveSegmentations,
       floyDemo: this.floyDemo.toJSON(),
     };
   }

@@ -59,13 +59,15 @@ export interface IDocument {
 
   sliceRenderer?: Reference<ISliceRenderer>;
   volumeRenderer?: Reference<IVolumeRenderer>;
-  renderers?: Reference<THREE.WebGLRenderer[]>;
+  renderer?: Reference<THREE.WebGLRenderer>;
   theme: Theme;
 
   /** Indicates wether the layer menu is open. */
   showLayerMenu: boolean;
 
   trackingData?: ITrackingData;
+
+  useExclusiveSegmentations: boolean;
 
   setShowLayerMenu(value?: boolean): void;
   toggleLayerMenu(): void;
@@ -83,7 +85,7 @@ export interface IDocument {
     files: File[] | File,
     name?: string,
     isAnnotation?: boolean,
-  ): Promise<void>;
+  ): Promise<string | void>;
 
   /** Deletes a layer from the document. */
   deleteLayer(idOrLayer: string | ILayer): void;
@@ -103,4 +105,7 @@ export interface IDocument {
    * This may be delayed until the next auto-save.
    */
   requestSave(): Promise<void>;
+
+  setUseExclusiveSegmentations(value: boolean): void;
+  getExcludedSegmentations(layer: ILayer): IImageLayer[] | undefined;
 }

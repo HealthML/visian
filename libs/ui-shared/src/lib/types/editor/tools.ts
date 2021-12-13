@@ -128,7 +128,7 @@ export interface IBlipRenderer3D {
   /** The number of steps to region grow. */
   steps: number;
 
-  outputTextures: THREE.Texture[];
+  outputTexture: THREE.Texture;
 
   flushToAnnotation(): void;
   discard(): void;
@@ -174,7 +174,7 @@ export interface ITools<N extends string> {
 
   slicePreviewTexture?: THREE.Texture;
   slicePreviewMergeFunction?: MergeFunction;
-  layerPreviewTextures: THREE.Texture[];
+  layerPreviewTexture: THREE.Texture;
   regionGrowingRenderer3D: IBlipRenderer3D;
   dilateErodeRenderer3D: IDilateErodeRenderer3D;
 

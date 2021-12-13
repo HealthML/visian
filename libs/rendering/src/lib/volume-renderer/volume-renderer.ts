@@ -1,5 +1,5 @@
 import { DragPoint, IEditor, IVolumeRenderer } from "@visian/ui-shared";
-import { IDisposable, IDisposer, Vector, Voxel } from "@visian/utils";
+import { IDisposer, Vector, Voxel } from "@visian/utils";
 import { autorun, computed, makeObservable, reaction } from "mobx";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
@@ -17,7 +17,7 @@ import {
 import { Volume } from "./volume";
 import { XRManager } from "./xr-manager";
 
-export class VolumeRenderer implements IVolumeRenderer, IDisposable {
+export class VolumeRenderer implements IVolumeRenderer {
   public readonly excludeFromSnapshotTracking = ["editor"];
 
   private sharedUniforms: SharedUniforms;
@@ -57,7 +57,7 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
   constructor(private editor: IEditor) {
     this.sharedUniforms = new SharedUniforms(editor);
 
-    [this.renderer] = editor.renderers;
+    this.renderer = editor.renderer;
     this.renderer.xr.enabled = true;
     this.renderer.setPixelRatio(window.devicePixelRatio);
 
@@ -270,6 +270,7 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
     this.intermediateRenderTarget.dispose();
     this.sharedUniforms.dispose();
     this.disposers.forEach((disposer) => disposer());
+    this.axesConvention.dispose();
   };
 
   public get renderedImageLayerCount() {

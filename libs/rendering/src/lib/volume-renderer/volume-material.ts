@@ -40,8 +40,6 @@ export class VolumeMaterial
       glslVersion: THREE.GLSL3,
     });
 
-    sharedUniforms.subscribe(this);
-
     // Always render the back faces.
     this.side = THREE.BackSide;
 

@@ -14,6 +14,8 @@ import {
   styledScrollbarMixin,
   SubtleText,
   useDelay,
+  useDoubleTap,
+  useForwardEvent,
   useModalRoot,
   useShortTap,
   useTranslation,
@@ -99,11 +101,18 @@ const LayerListItem = observer<{
 
   const trailingIconRef = useRef<SVGSVGElement | null>(null);
 
-  const [startTap, stopTap] = useShortTap(
+  const [startTap1, stopTap] = useShortTap(
     useCallback(() => {
       store?.editor.activeDocument?.setActiveLayer(layer);
     }, [layer, store?.editor.activeDocument]),
   );
+  const startTap2 = useDoubleTap(
+    useCallback((event: React.PointerEvent) => {
+      if (event.pointerType === "mouse") return;
+      setContextMenuPosition({ x: event.clientX, y: event.clientY });
+    }, []),
+  );
+  const startTap = useForwardEvent(startTap1, startTap2);
 
   // Context Menu
   const [contextMenuPosition, setContextMenuPosition] = useState<Pixel | null>(
@@ -154,7 +163,7 @@ const LayerListItem = observer<{
       }
 
       if (event.button === PointerButton.LMB) {
-        startTap();
+        startTap(event);
       } else if (event.button === PointerButton.RMB) {
         setContextMenuPosition({ x: event.clientX, y: event.clientY });
       }
@@ -296,7 +305,13 @@ export const Layers: React.FC = observer(() => {
 
   // This is required to force an update when the view mode changes
   // (otherwise the layer menu stays fixed in place when switching the view mode)
-  const _viewMode = store?.editor.activeDocument?.viewSettings.viewMode;
+  const viewMode = store?.editor.activeDocument?.viewSettings.viewMode;
+  const [, setLastUpdatedViewMode] = useState<string>();
+  useEffect(() => {
+    setTimeout(() => {
+      setLastUpdatedViewMode(viewMode);
+    }, 50);
+  }, [viewMode]);
 
   const layers = store?.editor.activeDocument?.layers;
   const layerCount = layers?.length;

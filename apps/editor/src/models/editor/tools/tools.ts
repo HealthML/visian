@@ -11,7 +11,7 @@ import {
   ITools,
   MergeFunction,
 } from "@visian/ui-shared";
-import { getPlaneAxes, ISerializable } from "@visian/utils";
+import { getPlaneAxes, IDisposable, ISerializable } from "@visian/utils";
 import { action, computed, makeObservable, observable } from "mobx";
 import * as THREE from "three";
 
@@ -61,7 +61,10 @@ export interface ToolsSnapshot<N extends string> {
 }
 
 export class Tools
-  implements ITools<ToolName>, ISerializable<ToolsSnapshot<ToolName>> {
+  implements
+    ITools<ToolName>,
+    ISerializable<ToolsSnapshot<ToolName>>,
+    IDisposable {
   public readonly excludeFromSnapshotTracking = [
     "document",
     "isCursorOverDrawableArea",
@@ -124,7 +127,7 @@ export class Tools
       canDraw: computed,
       isToolInUse: computed,
       useAdaptiveBrushSize: computed,
-      layerPreviewTextures: computed,
+      layerPreviewTexture: computed,
       slicePreviewTexture: computed,
       slicePreviewMergeFunction: computed,
 
@@ -227,6 +230,13 @@ export class Tools
     if (snapshot) this.applySnapshot(snapshot);
   }
 
+  public dispose() {
+    this.toolRenderer.dispose();
+    this.regionGrowingRenderer.dispose();
+    this.regionGrowingRenderer3D.dispose();
+    this.dilateErodeRenderer3D.dispose();
+  }
+
   protected getDefaultToolName(): ToolName {
     return "navigation-tool";
   }
@@ -321,14 +331,14 @@ export class Tools
     return this.lockedBrushSize === undefined;
   }
 
-  public get layerPreviewTextures(): THREE.Texture[] {
-    return this.regionGrowingRenderer3D.outputTextures;
+  public get layerPreviewTexture(): THREE.Texture {
+    return this.regionGrowingRenderer3D.outputTexture;
   }
 
   public get slicePreviewTexture(): THREE.Texture | undefined {
     if (!(this.activeTool instanceof UndoableTool)) return undefined;
 
-    return this.activeTool.toolRenderer.textures[0];
+    return this.activeTool.toolRenderer.texture;
   }
 
   public get slicePreviewMergeFunction(): MergeFunction | undefined {

@@ -20,6 +20,7 @@ export class Outline extends THREE.Line implements IDisposable, IOutline {
   }
 
   public dispose() {
+    this.geometry.dispose();
     this.disposers.forEach((disposer) => disposer());
   }
 

@@ -2,7 +2,11 @@ precision highp sampler3D;
 
 in vec2 vUv;
 
-{{layerData}}
+#ifdef VOLUMETRIC_IMAGE
+  uniform sampler3D uLayerData[{{layerCount}}];
+#else 
+  uniform sampler2D uLayerData[{{layerCount}}];
+#endif
 uniform bool uLayerAnnotationStatuses[{{layerCount}}];
 uniform float uLayerOpacities[{{layerCount}}];
 uniform vec3 uLayerColors[{{layerCount}}];
@@ -14,6 +18,8 @@ uniform float uContrast;
 uniform float uBrightness;
 uniform int uComponents;
 
+uniform bool uUseExclusiveSegmentations;
+
 #ifdef VOLUMETRIC_IMAGE
   uniform sampler3D uActiveLayerData;
 #else
@@ -24,6 +30,10 @@ uniform float uRegionGrowingThreshold;
 uniform sampler2D uToolPreview;
 uniform int uToolPreviewMerge;
 uniform int uActiveLayerIndex;
+
+#ifdef BACKGROUND_BLEND
+  uniform vec3 uBackgroundColor;
+#endif
 
 out vec4 pc_FragColor;
 
@@ -59,6 +69,11 @@ void main() {
   
   vec4 imageValue = vec4(0.0);
   {{reduceEnhancedLayerStack(imageValue, uv, toolPreview, applyBrightnessContrast)}}
+
+  #ifdef BACKGROUND_BLEND
+    imageValue.rgb = mix(uBackgroundColor, imageValue.rgb, imageValue.a);
+    imageValue.a = 1.0;
+  #endif
 
   pc_FragColor = imageValue;
 }

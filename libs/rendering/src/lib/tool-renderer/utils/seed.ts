@@ -7,6 +7,7 @@ export class Seed extends THREE.Scene implements IDisposable {
   public camera: SeedCamera;
 
   private geometry: THREE.BufferGeometry;
+  private points: THREE.Points;
 
   private workingVector = new THREE.Vector2();
 
@@ -21,16 +22,18 @@ export class Seed extends THREE.Scene implements IDisposable {
       this.workingVector,
     ]);
 
-    const points = new THREE.Points(
+    this.points = new THREE.Points(
       this.geometry,
       new THREE.PointsMaterial({ size: 0.5 }),
     );
-    this.add(points);
+    this.add(this.points);
   }
 
   public dispose() {
     this.disposers.forEach((disposer) => disposer());
     this.camera.dispose();
+    this.geometry.dispose();
+    (this.points.material as THREE.PointsMaterial).dispose();
   }
 
   public setPosition(pixel: Pixel) {

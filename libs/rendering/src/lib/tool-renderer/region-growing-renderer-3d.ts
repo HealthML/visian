@@ -9,7 +9,7 @@ import {
   regionGrowing3DVertexShader,
 } from "../shaders";
 import { BlipRenderer3D } from "./blip-renderer-3d";
-import { MAX_BLIP_STEPS, Seed } from "./utils";
+import { Seed } from "./utils";
 
 export class RegionGrowingRenderer3D extends BlipRenderer3D {
   public readonly excludeFromSnapshotTracking = ["document"];
@@ -23,7 +23,11 @@ export class RegionGrowingRenderer3D extends BlipRenderer3D {
     super(document, {
       vertexShader: regionGrowing3DVertexShader,
       fragmentShader: regionGrowing3DFragmentShader,
-      uniforms: { uThreshold: { value: 0.1 }, uSeed: { value: 0 } },
+      uniforms: {
+        uThreshold: { value: 0.1 },
+        uSeed: { value: [0, 0, 0, 0] },
+        uComponents: { value: 1 },
+      },
       glslVersion: THREE.GLSL3,
     });
 
@@ -50,21 +54,21 @@ export class RegionGrowingRenderer3D extends BlipRenderer3D {
 
     this.seed.setPosition(voxel);
 
-    this.document.renderers?.forEach((renderer, rendererIndex) => {
-      renderer.setRenderTarget(this.renderTargets[rendererIndex], voxel.z);
-      renderer.render(this.seed, this.seed.camera);
-      renderer.setRenderTarget(null);
-    });
+    this.document.renderer?.setRenderTarget(this.renderTarget, voxel.z);
+    this.document.renderer?.render(this.seed, this.seed.camera);
+    this.document.renderer?.setRenderTarget(null);
   }
 
   public render() {
     const sourceImage = this.sourceLayer?.image as RenderedImage | undefined;
     if (!sourceImage) return;
 
-    const seedValue = sourceImage.getVoxelData(this.seedVoxel).x;
-    this.material.uniforms.uSeed.value = seedValue / (MAX_BLIP_STEPS + 1);
-    this.material.uniforms.uThreshold.value =
-      this.threshold / (MAX_BLIP_STEPS + 1);
+    const seedValues = sourceImage.getVoxelData(this.seedVoxel).toArray();
+    seedValues.forEach((value, index) => {
+      this.material.uniforms.uSeed.value[index] = value / 255;
+    });
+    this.material.uniforms.uThreshold.value = this.threshold / 255;
+    this.material.uniforms.uComponents.value = sourceImage.voxelComponents;
 
     super.render(undefined, (step: number) => [
       this.seedVoxel.z - (step + 1),

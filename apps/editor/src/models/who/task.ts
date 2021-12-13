@@ -42,6 +42,7 @@ export class Task {
     const annotationData = {
       status: AnnotationStatus.Pending,
       data: [],
+      // TODO: Use actual username and expertise
       annotator: {
         username: "visian",
         expertise: "medium",

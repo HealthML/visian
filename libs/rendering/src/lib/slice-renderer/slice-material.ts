@@ -11,17 +11,19 @@ import {
   sliceVertexShader,
 } from "../shaders";
 import { MAX_BLIP_STEPS } from "../tool-renderer";
-import { getOrder } from "./utils";
 
 export class SliceMaterial extends THREE.ShaderMaterial implements IDisposable {
-  protected disposers: IDisposer[] = [];
+  protected disposers: IDisposer[];
 
   constructor(editor: IEditor, viewType: ViewType) {
+    const useBackgroundBlend =
+      viewType === editor.activeDocument?.viewport2D.mainViewType;
+
     super({
       vertexShader: sliceVertexShader,
       fragmentShader: sliceFragmentShader,
       uniforms: {
-        uLayerData0: { value: null },
+        uLayerData: { value: [] },
         uLayerAnnotationStatuses: { value: [] },
         uLayerOpacities: { value: [] },
         uLayerColors: { value: [] },
@@ -32,13 +34,17 @@ export class SliceMaterial extends THREE.ShaderMaterial implements IDisposable {
         uComponents: { value: 1 },
         uActiveLayerData: { value: null },
         uRegionGrowingThreshold: { value: 0 },
+        uBackgroundColor: { value: new THREE.Color(0x0c0e1b) },
         uActiveLayerIndex: { value: 0 },
         uToolPreview: { value: null },
         uToolPreviewMerge: { value: MergeFunction.Add },
+        uUseExclusiveSegmentations: { value: false },
       },
       defines: { VOLUMETRIC_IMAGE: "" },
       glslVersion: THREE.GLSL3,
-      transparent: true,
+      // The main view can not be transparent because it has to be seen through the transmissive rendered
+      // sheets for the side views. Thus, it is blended onto the background color in the shader.
+      transparent: !useBackgroundBlend,
       side: THREE.DoubleSide,
     });
 
@@ -54,7 +60,28 @@ export class SliceMaterial extends THREE.ShaderMaterial implements IDisposable {
         break;
     }
 
+    if (useBackgroundBlend) {
+      this.defines.BACKGROUND_BLEND = "";
+    }
+
+    this.disposers = [];
     this.disposers.push(
+      reaction(
+        () => viewType === editor.activeDocument?.viewport2D.mainViewType,
+        (backgroundBlend) => {
+          this.transparent = !backgroundBlend;
+
+          if (backgroundBlend) {
+            this.defines.BACKGROUND_BLEND = "";
+          } else {
+            delete this.defines.BACKGROUND_BLEND;
+          }
+
+          this.needsUpdate = true;
+
+          editor.sliceRenderer?.lazyRender();
+        },
+      ),
       reaction(
         () => editor.volumeRenderer?.renderedImageLayerCount || 1,
         (layerCount: number) => {
@@ -113,37 +140,24 @@ export class SliceMaterial extends THREE.ShaderMaterial implements IDisposable {
       }),
       autorun(() => {
         const layers = editor.activeDocument?.imageLayers || [];
-        const canvasIndex = getOrder(
-          editor.activeDocument?.viewport2D.mainViewType ?? ViewType.Transverse,
-        ).indexOf(viewType);
 
         const layerData = layers.map((layer) =>
           layer ===
           editor.activeDocument?.tools.dilateErodeRenderer3D.targetLayer
-            ? editor.activeDocument.tools.dilateErodeRenderer3D.outputTextures[
-                canvasIndex
-              ]
-            : ((layer as IImageLayer).image as RenderedImage).getTexture(
-                canvasIndex,
-              ),
+            ? editor.activeDocument.tools.dilateErodeRenderer3D.outputTexture
+            : ((layer as IImageLayer).image as RenderedImage).getTexture(),
         );
 
-        this.uniforms.uLayerData0.value =
-          editor.activeDocument?.tools.layerPreviewTextures[canvasIndex] ||
-          null;
-
-        for (let i = 0; i < layerData.length; i++) {
-          if (!this.uniforms[`uLayerData${i + 1}`]) {
-            this.uniforms[`uLayerData${i + 1}`] = { value: null };
-          }
-          this.uniforms[`uLayerData${i + 1}`].value = layerData[i];
-        }
+        this.uniforms.uLayerData.value = [
+          editor.activeDocument?.tools.layerPreviewTexture || null,
+          ...layerData,
+        ];
 
         const activeLayer = editor.activeDocument?.activeLayer as
           | IImageLayer
           | undefined;
         this.uniforms.uActiveLayerData.value = activeLayer
-          ? (activeLayer.image as RenderedImage).getTexture(canvasIndex)
+          ? (activeLayer.image as RenderedImage).getTexture()
           : null;
 
         this.uniforms.uActiveLayerIndex.value = activeLayer
@@ -217,6 +231,19 @@ export class SliceMaterial extends THREE.ShaderMaterial implements IDisposable {
           ),
           ...layerColors,
         ];
+
+        editor.sliceRenderer?.lazyRender();
+      }),
+      autorun(() => {
+        this.uniforms.uBackgroundColor.value.set(
+          color("background")({ theme: editor.theme }),
+        );
+
+        editor.sliceRenderer?.lazyRender();
+      }),
+      autorun(() => {
+        this.uniforms.uUseExclusiveSegmentations.value =
+          editor.activeDocument?.useExclusiveSegmentations;
 
         editor.sliceRenderer?.lazyRender();
       }),

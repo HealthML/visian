@@ -55,7 +55,10 @@ function App() {
         if (IS_FLOY_DEMO) i18n.changeLanguage("de");
 
         setIsReady(true);
-        return dispose;
+        return () => {
+          dispose();
+          rootStore.dispose();
+        };
       },
     );
     return () => {
