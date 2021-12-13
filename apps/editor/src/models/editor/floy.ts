@@ -99,13 +99,13 @@ export class FloyDemoController implements ISerializable<FloyDemoSnapshot> {
       );
       if (
         dataSet.string("x00080060") !== "MR" ||
-        dataSet.string("x0008103e").toLowerCase().includes("km") || // filter, if series has km in it
-        dataSet.string("x0008103e").toLowerCase().includes("flair") || // filter, if series has flair in it
-        dataSet.string("x0008103e").toLowerCase().includes("water") || // filter, if series has water in it
-        dataSet.string("x0008103e").toLowerCase().includes("fat") || // filter, if series has fat in it
-        dataSet.string("x0008103e").toLowerCase().includes("inphase") || // filter, if series has inphase in it
-        !dataSet.string("x0008103e").toLowerCase().includes("sag") || // filter, if series is not sagital
-        !dataSet.string("x0008103e").toLowerCase().includes("t1") // filter, if series is not t1
+        dataSet.string("x0008103e").toLowerCase().includes("km") ||
+        dataSet.string("x0008103e").toLowerCase().includes("flair") ||
+        dataSet.string("x0008103e").toLowerCase().includes("water") ||
+        dataSet.string("x0008103e").toLowerCase().includes("fat") ||
+        dataSet.string("x0008103e").toLowerCase().includes("inphase") ||
+        !dataSet.string("x0008103e").toLowerCase().includes("sag") ||
+        !dataSet.string("x0008103e").toLowerCase().includes("t1")
         // parsedDicom.string("x00180015") !== "LSPINE" ||
         // eslint-disable-next-line max-len
         // Alternative: https://stackoverflow.com/questions/34782409/understanding-dicom-image-attributes-to-get-axial-coronal-sagittal-cuts

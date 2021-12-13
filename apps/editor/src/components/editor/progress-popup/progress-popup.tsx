@@ -112,7 +112,7 @@ export const ProgressPopUp: React.FC<ProgressPopUpProps> = ({
 }) => (
   <ProgressPopUpContainer
     childrenBefore={
-      showSplash ? (
+      showSplash && !IS_FLOY_DEMO ? (
         <SplashContainer>
           {IS_FLOY_DEMO ? (
             <>
