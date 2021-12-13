@@ -12,6 +12,7 @@ import {
   ValueType,
 } from "@visian/ui-shared";
 import {
+  handlePromiseSettledResult,
   IDisposable,
   ImageMismatchError,
   ISerializable,
@@ -404,8 +405,11 @@ export class Document
     if (!entries) return;
     if (Array.isArray(entries)) {
       if (entries.some((entry) => entry && !entry.isFile)) {
-        await Promise.all(
-          entries.map((entry) => this.importFileSystemEntries(entry)),
+        // throw the corresponding error if one promise was rejected
+        handlePromiseSettledResult(
+          await Promise.allSettled(
+            entries.map((entry) => this.importFileSystemEntries(entry)),
+          ),
         );
       } else {
         const files = await Promise.all(
@@ -453,7 +457,8 @@ export class Document
           promises.push(this.importFileSystemEntries(subEntries[i]));
         }
       }
-      await Promise.all(promises);
+      // throw the corresponding error if one promise was rejected
+      handlePromiseSettledResult(await Promise.allSettled(promises));
 
       if (dirFiles.length) await this.importFiles(dirFiles, entries.name);
     } else {
@@ -498,7 +503,8 @@ export class Document
         filteredFiles.forEach((file) => {
           promises.push(this.importFiles(file));
         });
-        await Promise.all(promises);
+        // throw the corresponding error if one promise was rejected
+        handlePromiseSettledResult(await Promise.allSettled(promises));
         return;
       }
     } else if (filteredFiles.name.endsWith(".zip")) {
@@ -509,6 +515,8 @@ export class Document
       await readTrackingLog(filteredFiles, this);
       return;
     }
+
+    if (Array.isArray(filteredFiles) && !filteredFiles.length) return;
 
     let createdLayerId = "";
     const isFirstLayer = !this.layerIds.length;
@@ -581,7 +589,7 @@ export class Document
       this.baseImageLayer &&
       !this.baseImageLayer.image.voxelCount.equals(imageLayer.image.voxelCount)
     ) {
-      if (!imageLayer.image.name) {
+      if (imageLayer.image.name) {
         throw new ImageMismatchError(
           i18n.t("image-mismatch-error-filename", {
             fileName: imageLayer.image.name,
