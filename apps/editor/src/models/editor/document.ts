@@ -584,7 +584,6 @@ export class Document implements IDocument, ISerializable<DocumentSnapshot> {
     const annotationLayer = ImageLayer.fromITKImage(image, this, {
       isAnnotation: true,
       color: this.getFirstUnusedColor(),
-      isVisible: IS_FLOY_DEMO,
     });
     if (
       this.baseImageLayer &&
