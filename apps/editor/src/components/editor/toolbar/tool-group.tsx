@@ -34,8 +34,9 @@ export const ToolGroup = observer<
       useCallback(
         (event: React.PointerEvent) => {
           if (
+            event.button === PointerButton.LMB &&
             toolGroup.activeTool.isActive &&
-            event.button === PointerButton.LMB
+            toolGroup.tools.length > 1
           ) {
             setIsExpanded(true);
           }
