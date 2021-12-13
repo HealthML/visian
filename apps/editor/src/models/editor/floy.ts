@@ -100,6 +100,10 @@ export class FloyDemoController implements ISerializable<FloyDemoSnapshot> {
       if (
         dataSet.string("x00080060") !== "MR" ||
         dataSet.string("x0008103e").toLowerCase().includes("km") || // filter, if series has km in it
+        dataSet.string("x0008103e").toLowerCase().includes("flair") || // filter, if series has flair in it
+        dataSet.string("x0008103e").toLowerCase().includes("water") || // filter, if series has water in it
+        dataSet.string("x0008103e").toLowerCase().includes("fat") || // filter, if series has fat in it
+        dataSet.string("x0008103e").toLowerCase().includes("inphase") || // filter, if series has inphase in it
         !dataSet.string("x0008103e").toLowerCase().includes("sag") || // filter, if series is not sagital
         !dataSet.string("x0008103e").toLowerCase().includes("t1") // filter, if series is not t1
         // parsedDicom.string("x00180015") !== "LSPINE" ||
