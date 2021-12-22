@@ -63,6 +63,7 @@
   "enable-plane": "Use Clipping Plane",
   "render-plane": "Show Image on Clipping Plane",
   "render-plane-annotations": "Show Annotations",
+  "measurement-tool": "Measurement Tool (L)",
   "measurement-title": "Measurement",
   "measurement-length": "Length",
   "discard-measurement": "Discard Measurement",

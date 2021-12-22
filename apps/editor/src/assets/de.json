@@ -63,6 +63,7 @@
   "enable-plane": "Schnittebene nutzen",
   "render-plane": "Bild auf der Schnittebene anzeigen",
   "render-plane-annotations": "Annotationen anzeigen",
+  "measurement-tool": "Messungswerkzeug (L)",
   "measurement-title": "Messung",
   "measurement-length": "Länge",
   "discard-measurement": "Messung verwerfen",
