@@ -71,6 +71,13 @@ export class MeasurementTool<N extends "measurement-tool" = "measurement-tool">
       .reduce((previous, current) => previous + current);
   }
 
+  public get isHoveringNode() {
+    const hoveredVoxel = Vector.fromObject(
+      this.document.viewport2D.hoveredVoxel,
+    );
+    return Boolean(this.path.find((node) => node.equals(hoveredVoxel)));
+  }
+
   public setToDeleteMode() {
     this.isSetToDeleteMode = true;
   }
