@@ -66,74 +66,79 @@ export class Path extends THREE.Group implements IDisposable {
 
     const linePoints: THREE.Vector2[] = [];
     const nodePoints: THREE.Vector2[] = [];
+    const nodeIcons: number[] = [];
 
-    if (path.length > 1) {
-      path.forEach((point, index) => {
-        if (index === path.length - 1) return;
+    path.forEach((point, index) => {
+      const nextPoint = path[Math.min(path.length - 1, index + 1)];
+      const previousPoint = path[Math.max(0, index - 1)];
 
-        const nextPoint = path[index + 1];
+      const isDown =
+        Math.max(nextPoint[sliceAxis], previousPoint[sliceAxis]) >
+        point[sliceAxis];
+      const isUp =
+        Math.min(nextPoint[sliceAxis], previousPoint[sliceAxis]) <
+        point[sliceAxis];
 
-        if (point[sliceAxis] === slice) {
-          if (nextPoint[sliceAxis] === slice) {
-            linePoints.push(
-              new THREE.Vector2(point[widthAxis], point[heightAxis]),
-              new THREE.Vector2(nextPoint[widthAxis], nextPoint[heightAxis]),
-            );
-            nodePoints.push(
-              new THREE.Vector2(point[widthAxis], point[heightAxis]),
-              new THREE.Vector2(nextPoint[widthAxis], nextPoint[heightAxis]),
-            );
-          } else {
-            linePoints.push(
-              new THREE.Vector2(point[widthAxis], point[heightAxis]),
-              this.getInterpolatedPoint(point, nextPoint, sliceAxis, [
-                widthAxis,
-                heightAxis,
-              ]),
-            );
-            nodePoints.push(
-              new THREE.Vector2(point[widthAxis], point[heightAxis]),
-            );
-          }
-        } else if (nextPoint[sliceAxis] === slice) {
+      const nodeIcon = isDown ? (isUp ? 3 : 1) : isUp ? 2 : 0;
+
+      if (point[sliceAxis] === slice) {
+        if (nextPoint[sliceAxis] === slice) {
           linePoints.push(
-            this.getInterpolatedPoint(nextPoint, point, sliceAxis, [
-              widthAxis,
-              heightAxis,
-            ]),
+            new THREE.Vector2(point[widthAxis], point[heightAxis]),
             new THREE.Vector2(nextPoint[widthAxis], nextPoint[heightAxis]),
           );
           nodePoints.push(
-            new THREE.Vector2(nextPoint[widthAxis], nextPoint[heightAxis]),
+            new THREE.Vector2(point[widthAxis], point[heightAxis]),
           );
-        } else if (
-          (point[sliceAxis] < slice && nextPoint[sliceAxis] > slice) ||
-          (point[sliceAxis] > slice && nextPoint[sliceAxis] < slice)
-        ) {
-          const sliceOffset = Math.abs(slice - point[sliceAxis]) - 1;
+          nodeIcons.push(nodeIcon);
+        } else {
           linePoints.push(
-            this.getInterpolatedPoint(
-              point,
-              nextPoint,
-              sliceAxis,
-              [widthAxis, heightAxis],
-              sliceOffset,
-            ),
-            this.getInterpolatedPoint(
-              point,
-              nextPoint,
-              sliceAxis,
-              [widthAxis, heightAxis],
-              sliceOffset + 1,
-            ),
+            new THREE.Vector2(point[widthAxis], point[heightAxis]),
+            this.getInterpolatedPoint(point, nextPoint, sliceAxis, [
+              widthAxis,
+              heightAxis,
+            ]),
           );
+          nodePoints.push(
+            new THREE.Vector2(point[widthAxis], point[heightAxis]),
+          );
+          nodeIcons.push(nodeIcon);
         }
-      });
-    } else if (path[0][sliceAxis] === slice) {
-      nodePoints.push(
-        new THREE.Vector2(path[0][widthAxis], path[0][heightAxis]),
-      );
-    }
+      } else if (nextPoint[sliceAxis] === slice) {
+        linePoints.push(
+          this.getInterpolatedPoint(nextPoint, point, sliceAxis, [
+            widthAxis,
+            heightAxis,
+          ]),
+          new THREE.Vector2(nextPoint[widthAxis], nextPoint[heightAxis]),
+        );
+        nodePoints.push(
+          new THREE.Vector2(nextPoint[widthAxis], nextPoint[heightAxis]),
+        );
+        nodeIcons.push(nodeIcon);
+      } else if (
+        (point[sliceAxis] < slice && nextPoint[sliceAxis] > slice) ||
+        (point[sliceAxis] > slice && nextPoint[sliceAxis] < slice)
+      ) {
+        const sliceOffset = Math.abs(slice - point[sliceAxis]) - 1;
+        linePoints.push(
+          this.getInterpolatedPoint(
+            point,
+            nextPoint,
+            sliceAxis,
+            [widthAxis, heightAxis],
+            sliceOffset,
+          ),
+          this.getInterpolatedPoint(
+            point,
+            nextPoint,
+            sliceAxis,
+            [widthAxis, heightAxis],
+            sliceOffset + 1,
+          ),
+        );
+      }
+    });
 
     const { voxelCount } = this.editor.activeDocument.baseImageLayer.image;
     const scale = new THREE.Vector2(
@@ -148,6 +153,10 @@ export class Path extends THREE.Group implements IDisposable {
 
     this.points.geometry.dispose();
     this.points.geometry = new THREE.BufferGeometry().setFromPoints(nodePoints);
+    this.points.geometry.setAttribute(
+      "textureIndex",
+      new THREE.Float32BufferAttribute(new Float32Array(nodeIcons), 1),
+    );
 
     this.editor.sliceRenderer?.lazyRender();
   };

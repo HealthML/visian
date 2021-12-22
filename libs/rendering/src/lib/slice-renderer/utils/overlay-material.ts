@@ -3,7 +3,7 @@ import { IDisposer } from "@visian/utils";
 import { autorun } from "mobx";
 import * as THREE from "three";
 import { nodeFragmentShader, nodeVertexShader } from "../../shaders";
-import { node } from "./node-icons";
+import { node, nodeDown, nodeUp, nodeUpDown } from "./node-icons";
 
 const updateOverlayColor = (color: THREE.Color, editor: IEditor) => {
   color.set(c("foreground")({ theme: editor.theme }));
@@ -50,16 +50,19 @@ export class OverlayRoundedPointsMaterial extends THREE.ShaderMaterial {
       fragmentShader: nodeFragmentShader,
       uniforms: {
         uPointSize: { value: 20 },
-        uNodeTexture: { value: null },
+        uNodeTextures: { value: [] },
         uInvertRGB: { value: true },
       },
       transparent: true,
     });
 
     const loader = new THREE.TextureLoader();
-    this.uniforms.uNodeTexture.value = loader.load(node, () =>
-      editor.sliceRenderer?.lazyRender(),
-    );
+    this.uniforms.uNodeTextures.value = [
+      loader.load(node, () => editor.sliceRenderer?.lazyRender()),
+      loader.load(nodeDown, () => editor.sliceRenderer?.lazyRender()),
+      loader.load(nodeUp, () => editor.sliceRenderer?.lazyRender()),
+      loader.load(nodeUpDown, () => editor.sliceRenderer?.lazyRender()),
+    ];
 
     this.disposers.push(
       autorun(() => {
