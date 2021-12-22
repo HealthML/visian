@@ -1,8 +1,9 @@
-import { circleFragmentShader, circleVertexShader } from "@visian/rendering";
 import { color as c, IEditor } from "@visian/ui-shared";
 import { IDisposer } from "@visian/utils";
 import { autorun } from "mobx";
 import * as THREE from "three";
+import { nodeFragmentShader, nodeVertexShader } from "../../shaders";
+import { node } from "./node-icons";
 
 const updateOverlayColor = (color: THREE.Color, editor: IEditor) => {
   color.set(c("foreground")({ theme: editor.theme }));
@@ -45,23 +46,29 @@ export class OverlayRoundedPointsMaterial extends THREE.ShaderMaterial {
 
   constructor(editor: IEditor) {
     super({
-      vertexShader: circleVertexShader,
-      fragmentShader: circleFragmentShader,
+      vertexShader: nodeVertexShader,
+      fragmentShader: nodeFragmentShader,
       uniforms: {
         uPointSize: { value: 20 },
-        uColor: { value: new THREE.Color() },
+        uNodeTexture: { value: null },
+        uInvertRGB: { value: true },
       },
-      defines: {
-        POINTS: "",
-        COLOR: "",
-      },
+      transparent: true,
     });
 
+    const loader = new THREE.TextureLoader();
+    this.uniforms.uNodeTexture.value = loader.load(node, () =>
+      editor.sliceRenderer?.lazyRender(),
+    );
+
     this.disposers.push(
-      autorun(() => updateOverlayColor(this.uniforms.uColor.value, editor)),
+      autorun(() => {
+        this.uniforms.uInvertRGB.value = editor.colorMode === "light";
+        editor.sliceRenderer?.lazyRender();
+      }),
       autorun(() => {
         this.uniforms.uPointSize.value = Math.max(
-          (editor.activeDocument?.viewport2D.zoomLevel ?? 1) * 8,
+          (editor.activeDocument?.viewport2D.zoomLevel ?? 1) * 7,
           12,
         );
         editor.sliceRenderer?.lazyRender();

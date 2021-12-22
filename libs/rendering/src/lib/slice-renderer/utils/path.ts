@@ -27,7 +27,7 @@ export class Path extends THREE.Group implements IDisposable {
     this.lines.material = lineMaterial;
     this.points.material = nodeMaterial;
 
-    this.position.set(0.5, -0.5, 0);
+    this.position.set(0.5, -0.5, -1);
     this.scale.set(-1, 1, 1);
 
     this.add(this.lines);
