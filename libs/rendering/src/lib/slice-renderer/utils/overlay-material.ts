@@ -70,10 +70,9 @@ export class OverlayRoundedPointsMaterial extends THREE.ShaderMaterial {
         editor.sliceRenderer?.lazyRender();
       }),
       autorun(() => {
-        this.uniforms.uPointSize.value = Math.max(
-          (editor.activeDocument?.viewport2D.zoomLevel ?? 1) * 7,
-          12,
-        );
+        this.uniforms.uPointSize.value =
+          Math.max((editor.activeDocument?.viewport2D.zoomLevel ?? 1) * 5, 10) *
+          window.devicePixelRatio;
         editor.sliceRenderer?.lazyRender();
       }),
     );
