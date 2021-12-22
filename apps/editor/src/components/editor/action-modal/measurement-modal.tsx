@@ -1,10 +1,4 @@
-import {
-  ButtonParam,
-  Modal,
-  ModalHeaderButton,
-  Text,
-  i18n,
-} from "@visian/ui-shared";
+import { Modal, ModalHeaderButton, Text, i18n } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
 import React, { useCallback } from "react";
 import styled from "styled-components";
@@ -18,7 +12,6 @@ const StyledModal = styled(Modal)`
 `;
 
 const StyledText = styled(Text)`
-  margin-bottom: 10px;
   user-select: text;
 `;
 
@@ -29,13 +22,6 @@ export const MeasurementModal = observer(() => {
     (store?.editor.activeDocument?.tools.tools[
       "measurement-tool"
     ] as MeasurementTool).discard();
-    store?.editor.activeDocument?.tools.setIsCursorOverFloatingUI(false);
-  }, [store]);
-
-  const submit = useCallback(() => {
-    (store?.editor.activeDocument?.tools.tools[
-      "measurement-tool"
-    ] as MeasurementTool).submit();
     store?.editor.activeDocument?.tools.setIsCursorOverFloatingUI(false);
   }, [store]);
 
@@ -53,12 +39,11 @@ export const MeasurementModal = observer(() => {
       }
     >
       <StyledText>
-        {`${i18n.t("measurment-length")} ${(store?.editor.activeDocument?.tools
+        {`${i18n.t("measurement-length")} ${(store?.editor.activeDocument?.tools
           .tools["measurement-tool"] as MeasurementTool).pathLength.toFixed(
           2,
         )}`}
       </StyledText>
-      <ButtonParam labelTx="discard-measurement" isLast handlePress={submit} />
     </StyledModal>
   ) : null;
 });
