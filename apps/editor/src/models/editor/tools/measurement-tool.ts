@@ -28,7 +28,7 @@ export class MeasurementTool<N extends "measurement-tool" = "measurement-tool">
       {
         name: "measurement-tool" as N,
         altToolName: "measurement-tool" as N,
-        icon: "arrowUp", // Todo: Add icon
+        icon: "ruler",
         supportedViewModes: ["2D"],
         supportedLayerKinds: ["image"],
       },
