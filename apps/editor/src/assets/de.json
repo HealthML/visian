@@ -158,5 +158,11 @@
   "lock-cone": "Kegel festhalten",
   "cone-angle": "Kegelwinkel",
 
-  "custom-tf-file": "Transferfunktionsbild"
+  "custom-tf-file": "Transferfunktionsbild",
+
+  "area": "Fläche",
+  "volume": "Volumen",
+  "calculate-area": "Fläche auf Schicht berechnen",
+  "calculate-volume": "Volumen berechnen",
+  "calculating": "Berechnen..."
 }
