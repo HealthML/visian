@@ -32,7 +32,7 @@ export class VolumeMaterial
         uOutputFirstDerivative: { value: null },
         uLAO: { value: null },
         uUseRayDithering: { value: true },
-        uRayDitheringOffset: { value: 0.5 },
+        uRayDitheringOffset: { value: 0 },
       },
       defines: {
         MAX_STEPS: 600,

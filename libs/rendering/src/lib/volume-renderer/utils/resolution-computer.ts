@@ -1,5 +1,6 @@
 import { IEditor } from "@visian/ui-shared";
 import * as THREE from "three";
+import { VolumeMaterial } from "../volume-material";
 
 import { TiledRenderer, RenderParams } from "./tiled-renderer";
 
@@ -16,6 +17,7 @@ export class ResolutionComputer extends TiledRenderer {
     renderer: THREE.WebGLRenderer,
     size: THREE.Vector2,
     private flush: () => void,
+    private volumeMaterial: VolumeMaterial,
     target?: THREE.WebGLRenderTarget,
   ) {
     super(subject, renderer, size.clone(), target);
@@ -62,6 +64,8 @@ export class ResolutionComputer extends TiledRenderer {
   };
 
   private configureRendering() {
+    this.volumeMaterial.setRayDitheringOffset();
+
     this.setRenderGrid(2 ** this.currentResolutionStep);
 
     this.workingVector
