@@ -535,7 +535,7 @@ export class Document
       // Infer Type
       let isLikelyImage = false;
       const { data } = image;
-      const uniqueValues = new Set();
+      const uniqueValues = new Set<number>();
       for (let index = 0; index < data.length; index++) {
         uniqueValues.add(data[index]);
         if (uniqueValues.size > uniqueValuesForAnnotationThreshold) {
@@ -545,7 +545,10 @@ export class Document
       if (isLikelyImage) {
         createdLayerId = await this.importImage(image);
       } else {
-        createdLayerId = await this.importAnnotation(image);
+        uniqueValues.forEach(async (value) => {
+          if (value === 0) return;
+          createdLayerId = await this.importAnnotation(image, value);
+        });
       }
     }
 
@@ -602,13 +605,18 @@ export class Document
     return imageLayer.id;
   }
 
-  public async importAnnotation(image: ITKImage) {
+  public async importAnnotation(image: ITKImage, filterValue?: number) {
     this.checkHardwareRequirements(image.size);
 
-    const annotationLayer = ImageLayer.fromITKImage(image, this, {
-      isAnnotation: true,
-      color: this.getFirstUnusedColor(),
-    });
+    const annotationLayer = ImageLayer.fromITKImage(
+      image,
+      this,
+      {
+        isAnnotation: true,
+        color: this.getFirstUnusedColor(),
+      },
+      filterValue,
+    );
     if (
       this.baseImageLayer &&
       !this.baseImageLayer.image.voxelCount.equals(
