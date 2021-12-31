@@ -165,7 +165,7 @@ export class Document
 
       title: computed,
       activeLayer: computed,
-      volumeDisplayLayer: computed,
+      measurementDisplayLayer: computed,
       imageLayers: computed,
       baseImageLayer: computed,
       annotationLayers: computed,
@@ -221,7 +221,7 @@ export class Document
     );
   }
 
-  public get volumeDisplayLayer(): IImageLayer | undefined {
+  public get measurementDisplayLayer(): IImageLayer | undefined {
     return Object.values(this.layerMap).find(
       (layer) =>
         layer.id === this.measurementDisplayLayerId && layer.kind === "image",

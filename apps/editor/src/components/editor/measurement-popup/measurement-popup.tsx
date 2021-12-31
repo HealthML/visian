@@ -19,8 +19,8 @@ export const MeasurementPopUp: React.FC<MeasurementPopUpProps> = observer(
 
     const value =
       measurementType === "volume"
-        ? store?.editor.activeDocument?.volumeDisplayLayer?.volume
-        : store?.editor.activeDocument?.volumeDisplayLayer?.area?.area;
+        ? store?.editor.activeDocument?.measurementDisplayLayer?.volume
+        : store?.editor.activeDocument?.measurementDisplayLayer?.area?.area;
 
     return (
       <StyledPopUp

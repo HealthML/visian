@@ -281,7 +281,9 @@ export const UIOverlay = observer<UIOverlayProps>(
               />
             )}
             <MeasurementPopUp
-              isOpen={Boolean(store?.editor.activeDocument?.volumeDisplayLayer)}
+              isOpen={Boolean(
+                store?.editor.activeDocument?.measurementDisplayLayer,
+              )}
               onClose={store?.editor.activeDocument?.setMeasurementDisplayLayer}
             />
             {isDraggedOver && <DropSheet onDropCompleted={onDropCompleted} />}
