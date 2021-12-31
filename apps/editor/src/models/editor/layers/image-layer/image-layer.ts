@@ -21,11 +21,16 @@ import { condenseValues } from "../../markers";
 import { Layer, LayerSnapshot } from "../layer";
 import { markerRPCProvider } from "./markers";
 import {
+  GetAreaArgs,
+  GetAreaReturn,
   GetEmptySlicesArgs,
   GetEmptySlicesReturn,
+  GetVolumeArgs,
+  GetVolumeReturn,
   IsSliceEmptyArgs,
   IsSliceEmptyReturn,
 } from "./types";
+import { volumeRPCProvider } from "./volume";
 
 export interface ImageLayerSnapshot extends LayerSnapshot {
   image: ImageSnapshot;
@@ -85,6 +90,13 @@ export class ImageLayer
    */
   protected emptySlices!: boolean[][];
 
+  public volume: number | null = null;
+  public area: {
+    viewType: ViewType;
+    slice: number;
+    area: number;
+  } | null = null;
+
   constructor(
     snapshot: Partial<ImageLayerSnapshot> & Pick<ImageLayerSnapshot, "image">,
     protected document: IDocument,
@@ -96,23 +108,31 @@ export class ImageLayer
       "emptySlices",
     ];
 
-    makeObservable<this, "emptySlices" | "setEmptySlices" | "setIsSliceEmpty">(
+    makeObservable<
       this,
-      {
-        image: observable,
-        brightness: observable,
-        contrast: observable,
-        emptySlices: observable,
+      | "emptySlices"
+      | "setEmptySlices"
+      | "setIsSliceEmpty"
+      | "setVolume"
+      | "setArea"
+    >(this, {
+      image: observable,
+      brightness: observable,
+      contrast: observable,
+      emptySlices: observable,
+      volume: observable,
+      area: observable,
 
-        is3DLayer: computed,
+      is3DLayer: computed,
 
-        setImage: action,
-        setBrightness: action,
-        setContrast: action,
-        setEmptySlices: action,
-        setIsSliceEmpty: action,
-      },
-    );
+      setImage: action,
+      setBrightness: action,
+      setContrast: action,
+      setEmptySlices: action,
+      setIsSliceEmpty: action,
+      setVolume: action,
+      setArea: action,
+    });
   }
 
   public dispose() {
@@ -182,6 +202,54 @@ export class ImageLayer
   ): void {
     if (this.emptySlices[viewType].length <= slice) return;
     this.emptySlices[viewType][slice] = isEmpty;
+  }
+
+  protected setVolume(volume: number | null = null) {
+    this.volume = volume;
+  }
+
+  public async computeVolume() {
+    this.setVolume();
+
+    const volume = await volumeRPCProvider.rpc<GetVolumeArgs, GetVolumeReturn>(
+      "getVolume",
+      {
+        data: this.image.getTextureData(),
+        voxelCount: this.image.voxelCount.toArray(),
+        voxelComponents: this.image.voxelComponents,
+        voxelSpacing: this.image.voxelSpacing.toArray(),
+      },
+    );
+
+    this.setVolume(volume);
+  }
+
+  protected setArea(
+    area: {
+      viewType: ViewType;
+      slice: number;
+      area: number;
+    } | null = null,
+  ) {
+    this.area = area;
+  }
+
+  public async computeArea(viewType: ViewType, slice: number) {
+    this.setArea();
+
+    const area = await volumeRPCProvider.rpc<GetAreaArgs, GetAreaReturn>(
+      "getArea",
+      {
+        data: this.image.getTextureData(),
+        voxelCount: this.image.voxelCount.toArray(),
+        voxelComponents: this.image.voxelComponents,
+        voxelSpacing: this.image.voxelSpacing.toArray(),
+        viewType,
+        slice,
+      },
+    );
+
+    this.setArea({ area, viewType, slice });
   }
 
   public async recomputeSliceMarkers(

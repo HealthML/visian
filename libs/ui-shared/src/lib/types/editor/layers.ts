@@ -117,6 +117,9 @@ export interface IImageLayer extends ILayer {
    */
   contrast: number;
 
+  volume: number | null;
+  area: { slice: number; viewType: ViewType; area: number } | null;
+
   /**
    * Triggers the slice markers of this layer to be recomputed.
    *
@@ -143,6 +146,9 @@ export interface IImageLayer extends ILayer {
 
   getSlice(viewType: ViewType, slice: number): Uint8Array;
   setSlice(viewType: ViewType, slice: number, sliceData?: Uint8Array): void;
+
+  computeVolume(): Promise<void>;
+  computeArea(viewType: ViewType, slice: number): Promise<void>;
 }
 
 /** A group of layers. */

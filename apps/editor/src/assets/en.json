@@ -158,5 +158,11 @@
   "lock-cone": "Lock Cone",
   "cone-angle": "Cone Angle",
 
-  "custom-tf-file": "Transfer Function Image"
+  "custom-tf-file": "Transfer Function Image",
+
+  "area": "Area",
+  "volume": "Volume",
+  "calculate-area": "Calculate Area on Slice",
+  "calculate-volume": "Calculate Volume",
+  "calculating": "Calculating..."
 }
