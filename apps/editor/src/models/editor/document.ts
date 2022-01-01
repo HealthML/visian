@@ -9,6 +9,7 @@ import {
   IVolumeRenderer,
   Theme,
   TrackingLog,
+  ErrorNotification,
   ValueType,
 } from "@visian/ui-shared";
 import {
@@ -698,6 +699,10 @@ export class Document
   public get theme(): Theme {
     return this.editor.theme;
   }
+
+  public setError = (error: ErrorNotification) => {
+    this.context?.setError(error);
+  };
 
   // Serialization
   public toJSON(): DocumentSnapshot {

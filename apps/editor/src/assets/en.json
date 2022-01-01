@@ -158,5 +158,9 @@
   "lock-cone": "Lock Cone",
   "cone-angle": "Cone Angle",
 
-  "custom-tf-file": "Transfer Function Image"
+  "custom-tf-file": "Transfer Function Image",
+
+  "too-many-layers": "Too many Layers",
+  "too-many-layers-2d": "Due to hardware limitations, VISIAN can only render {{count}} layers on your device.",
+  "too-many-layers-3d": "Due to hardware limitations, VISIAN can only render {{count}} layers in the 3D mode on your device."
 }

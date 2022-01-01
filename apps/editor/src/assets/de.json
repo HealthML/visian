@@ -158,5 +158,9 @@
   "lock-cone": "Kegel festhalten",
   "cone-angle": "Kegelwinkel",
 
-  "custom-tf-file": "Transferfunktionsbild"
+  "custom-tf-file": "Transferfunktionsbild",
+
+  "too-many-layers": "Zu viele Schichten",
+  "too-many-layers-2d": "VISIAN kann auf ihrem Gerät auf Grund von Hardwarebeschränkungen nur {{count}} Schichten anzeigen.",
+  "too-many-layers-3d": "Im 3D Modus kann VISIAN auf ihrem Gerät auf Grund von Hardwarebeschränkungen nur {{count}} Schichten anzeigen."
 }
