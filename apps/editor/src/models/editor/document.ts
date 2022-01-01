@@ -52,7 +52,7 @@ import {
 } from "./view-settings";
 import { readTrackingLog, TrackingData } from "../tracking";
 
-const uniqueValuesForAnnotationThreshold = 20;
+const uniqueValuesForAnnotationThreshold = 10;
 
 export const layerMap: {
   [kind: string]: ValueType<typeof layers>;
