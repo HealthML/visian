@@ -42,9 +42,13 @@ export class ImageLayer
     document: IDocument,
     snapshot?: Partial<ImageLayerSnapshot>,
     filterValue?: number,
+    squash?: boolean,
   ) {
     return new this(
-      { ...snapshot, image: itkImageToImageSnapshot(image, filterValue) },
+      {
+        ...snapshot,
+        image: itkImageToImageSnapshot(image, filterValue, squash),
+      },
       document,
     );
   }

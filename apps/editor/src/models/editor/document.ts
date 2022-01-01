@@ -31,6 +31,7 @@ import {
   defaultAnnotationColor,
   defaultImageColor,
   defaultRegionGrowingPreviewColor,
+  generalTextures2d,
 } from "../../constants";
 import { StoreContext } from "../types";
 import { History, HistorySnapshot } from "./history";
@@ -546,10 +547,26 @@ export class Document
       if (isLikelyImage) {
         createdLayerId = await this.importImage(image);
       } else {
-        uniqueValues.forEach(async (value) => {
-          if (value === 0) return;
-          createdLayerId = await this.importAnnotation(image, value);
-        });
+        const numberOfAnnotations = uniqueValues.size - 1;
+
+        if (
+          numberOfAnnotations + this.layers.length >
+          (this.renderer?.capabilities.maxTextures || 0) - generalTextures2d
+        ) {
+          createdLayerId = await this.importAnnotation(image, undefined, true);
+          this.setError({
+            titleTx: "squashed-layers-title",
+            descriptionTx: "squashed-layers-import",
+          });
+        } else {
+          uniqueValues.forEach(async (value) => {
+            if (value === 0) return;
+            createdLayerId = await this.importAnnotation(image, value);
+          });
+
+          // Force switch to 2D if too many layers for 3D
+          this.viewSettings.setViewMode(this.viewSettings.viewMode);
+        }
       }
     }
 
@@ -606,7 +623,11 @@ export class Document
     return imageLayer.id;
   }
 
-  public async importAnnotation(image: ITKImage, filterValue?: number) {
+  public async importAnnotation(
+    image: ITKImage,
+    filterValue?: number,
+    squash?: boolean,
+  ) {
     this.checkHardwareRequirements(image.size);
 
     const annotationLayer = ImageLayer.fromITKImage(
@@ -617,6 +638,7 @@ export class Document
         color: this.getFirstUnusedColor(),
       },
       filterValue,
+      squash,
     );
     if (
       this.baseImageLayer &&
