@@ -32,6 +32,7 @@ import {
   defaultImageColor,
   defaultRegionGrowingPreviewColor,
   generalTextures2d,
+  generalTextures3d,
 } from "../../constants";
 import { StoreContext } from "../types";
 import { History, HistorySnapshot } from "./history";
@@ -160,6 +161,8 @@ export class Document
       imageLayers: computed,
       baseImageLayer: computed,
       annotationLayers: computed,
+      maxLayers: computed,
+      maxLayers3d: computed,
 
       setTitle: action,
       setActiveLayer: action,
@@ -200,6 +203,14 @@ export class Document
   };
 
   // Layer Management
+  public get maxLayers(): number {
+    return (this.renderer?.capabilities.maxTextures || 0) - generalTextures2d;
+  }
+
+  public get maxLayers3d(): number {
+    return (this.renderer?.capabilities.maxTextures || 0) - generalTextures3d;
+  }
+
   public get layers(): ILayer[] {
     return this.layerIds.map((id) => this.layerMap[id]);
   }
@@ -520,6 +531,15 @@ export class Document
 
     if (Array.isArray(filteredFiles) && !filteredFiles.length) return;
 
+    if (this.layers.length >= this.maxLayers) {
+      this.setError({
+        titleTx: "import-error",
+        descriptionTx: "too-many-layers-2d",
+        descriptionData: { count: this.maxLayers },
+      });
+      return;
+    }
+
     let createdLayerId = "";
     const isFirstLayer = !this.layerIds.length;
     const image = await readMedicalImage(filteredFiles);
@@ -549,10 +569,7 @@ export class Document
       } else {
         const numberOfAnnotations = uniqueValues.size - 1;
 
-        if (
-          numberOfAnnotations + this.layers.length >
-          (this.renderer?.capabilities.maxTextures || 0) - generalTextures2d
-        ) {
+        if (numberOfAnnotations + this.layers.length > this.maxLayers) {
           createdLayerId = await this.importAnnotation(image, undefined, true);
           this.setError({
             titleTx: "squashed-layers-title",
@@ -563,11 +580,11 @@ export class Document
             if (value === 0) return;
             createdLayerId = await this.importAnnotation(image, value);
           });
-
-          // Force switch to 2D if too many layers for 3D
-          this.viewSettings.setViewMode(this.viewSettings.viewMode);
         }
       }
+
+      // Force switch to 2D if too many layers for 3D
+      this.viewSettings.setViewMode(this.viewSettings.viewMode);
     }
 
     if (isFirstLayer) {

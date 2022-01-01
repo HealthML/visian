@@ -33,6 +33,10 @@ export interface IDocument {
   has3DLayers: boolean;
   /** The layer that is currently selected for editing. */
   activeLayer?: Reference<ILayer>;
+  /** The maximum amount of layers that can be rendered. */
+  maxLayers: number;
+  /** The maximum amount of layers that can be rendered in 3d. */
+  maxLayers3d: number;
 
   /** A view on the document's `layers`, containing only its image layers. */
   imageLayers: Reference<IImageLayer>[];
