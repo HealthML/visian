@@ -18,6 +18,7 @@ export { ReactComponent as folder } from "./folder.svg";
 export { ReactComponent as fullScreenSmall } from "./full-screen-small.svg";
 export { ReactComponent as image } from "./image.svg";
 export { ReactComponent as import } from "./import.svg";
+export { ReactComponent as info } from "./info.svg";
 export { ReactComponent as layers } from "./layers.svg";
 export { ReactComponent as leftArrow } from "./left-arrow.svg";
 export { ReactComponent as leftMouse } from "./left-mouse.svg";

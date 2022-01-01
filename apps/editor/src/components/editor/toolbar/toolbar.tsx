@@ -1,6 +1,7 @@
 import {
   BooleanParam,
   Modal,
+  ModalHeaderButton,
   NumberParam,
   Param,
   PointerButton,
@@ -23,6 +24,10 @@ const StyledToolbar = styled(GenericToolbar)`
 
 const ToolSettingsModal = styled(Modal)`
   padding-bottom: 0px;
+`;
+
+const StyledModalHeaderButton = styled(ModalHeaderButton)`
+  margin-right: 10px;
 `;
 
 export const Toolbar: React.FC = observer(() => {
@@ -136,6 +141,7 @@ export const Toolbar: React.FC = observer(() => {
         anchor={buttonRef}
         position="right"
         baseZIndex={modalZ}
+        headerChildren={<StyledModalHeaderButton icon="info" />}
         onOutsidePress={closeModal}
         onReset={
           store?.editor.activeDocument?.tools.activeTool?.name === "plane-tool"
