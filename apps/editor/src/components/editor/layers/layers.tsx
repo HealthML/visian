@@ -3,6 +3,7 @@ import {
   ContextMenu,
   ContextMenuItem,
   FloatingUIButton,
+  IImageLayer,
   ILayer,
   List,
   ListItem,
@@ -126,6 +127,26 @@ const LayerListItem = observer<{
   }, [store?.editor.activeDocument?.viewSettings.viewMode]);
 
   const { t } = useTranslation();
+  const calculateVolume = useCallback(() => {
+    if (layer.kind !== "image") return;
+    (layer as IImageLayer).computeVolume();
+    store?.editor.activeDocument?.setMeasurementType("volume");
+    store?.editor.activeDocument?.setMeasurementDisplayLayer(
+      layer as IImageLayer,
+    );
+  }, [layer, store]);
+  const calculateArea = useCallback(() => {
+    if (layer.kind !== "image" || !store?.editor.activeDocument?.viewport2D)
+      return;
+    store?.editor.activeDocument?.setMeasurementType("area");
+    (layer as IImageLayer).computeArea(
+      store.editor.activeDocument.viewport2D.mainViewType,
+      store.editor.activeDocument.viewport2D.getSelectedSlice(),
+    );
+    store.editor.activeDocument.setMeasurementDisplayLayer(
+      layer as IImageLayer,
+    );
+  }, [layer, store]);
   const toggleAnnotation = useCallback(() => {
     store?.editor.activeDocument?.toggleTypeAndRepositionLayer(layer);
     setContextMenuPosition(null);
@@ -250,6 +271,20 @@ const LayerListItem = observer<{
         isOpen={Boolean(contextMenuPosition)}
         onOutsidePress={closeContextMenu}
       >
+        {layer.kind === "image" && layer.isAnnotation && (
+          <>
+            {layer.is3DLayer && (
+              <ContextMenuItem
+                labelTx="calculate-volume"
+                onPointerDown={calculateVolume}
+              />
+            )}
+            <ContextMenuItem
+              labelTx="calculate-area"
+              onPointerDown={calculateArea}
+            />
+          </>
+        )}
         <ContextMenuItem
           labelTx={
             layer.isAnnotation ? "mark-not-annotation" : "mark-annotation"

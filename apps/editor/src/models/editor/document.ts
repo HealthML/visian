@@ -7,6 +7,7 @@ import {
   ILayer,
   ISliceRenderer,
   IVolumeRenderer,
+  MeasurementType,
   Theme,
   TrackingLog,
   ErrorNotification,
@@ -88,8 +89,11 @@ export class Document
   protected titleOverride?: string;
 
   protected activeLayerId?: string;
+  protected measurementDisplayLayerId?: string;
   protected layerMap: { [key: string]: Layer };
   protected layerIds: string[];
+
+  public measurementType: MeasurementType = "volume";
 
   public history: History;
   public clipboard: Clipboard = new Clipboard(this);
@@ -140,13 +144,19 @@ export class Document
 
     makeObservable<
       this,
-      "titleOverride" | "activeLayerId" | "layerMap" | "layerIds"
+      | "titleOverride"
+      | "activeLayerId"
+      | "measurementDisplayLayerId"
+      | "layerMap"
+      | "layerIds"
     >(this, {
       id: observable,
       titleOverride: observable,
       activeLayerId: observable,
+      measurementDisplayLayerId: observable,
       layerMap: observable,
       layerIds: observable,
+      measurementType: observable,
       history: observable,
       viewSettings: observable,
       viewport2D: observable,
@@ -158,6 +168,7 @@ export class Document
 
       title: computed,
       activeLayer: computed,
+      measurementDisplayLayer: computed,
       imageLayers: computed,
       baseImageLayer: computed,
       annotationLayers: computed,
@@ -166,6 +177,8 @@ export class Document
 
       setTitle: action,
       setActiveLayer: action,
+      setMeasurementDisplayLayer: action,
+      setMeasurementType: action,
       addLayer: action,
       addNewAnnotationLayer: action,
       moveLayer: action,
@@ -221,6 +234,13 @@ export class Document
     );
   }
 
+  public get measurementDisplayLayer(): IImageLayer | undefined {
+    return Object.values(this.layerMap).find(
+      (layer) =>
+        layer.id === this.measurementDisplayLayerId && layer.kind === "image",
+    ) as IImageLayer | undefined;
+  }
+
   public get imageLayers(): IImageLayer[] {
     return this.layers.filter(
       (layer) => layer.kind === "image",
@@ -271,6 +291,18 @@ export class Document
         ? idOrLayer
         : idOrLayer.id
       : undefined;
+  };
+
+  public setMeasurementDisplayLayer = (idOrLayer?: string | ILayer): void => {
+    this.measurementDisplayLayerId = idOrLayer
+      ? typeof idOrLayer === "string"
+        ? idOrLayer
+        : idOrLayer.id
+      : undefined;
+  };
+
+  public setMeasurementType = (measurementType: MeasurementType) => {
+    this.measurementType = measurementType;
   };
 
   public addLayer = (...newLayers: Layer[]): void => {

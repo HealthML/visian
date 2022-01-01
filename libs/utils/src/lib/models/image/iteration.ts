@@ -92,6 +92,39 @@ export const findVoxelInData = (
   }
 };
 
+export const getVolume = (
+  image: Pick<Image, "voxelSpacing" | "voxelCount" | "voxelComponents">,
+  data: Uint8Array,
+) => {
+  let nonZeroVoxelCount = 0;
+  findVoxelInData(image, data, (_, value) => {
+    if (value.sum() > 0) {
+      nonZeroVoxelCount++;
+    }
+  });
+  return nonZeroVoxelCount * image.voxelSpacing.product();
+};
+
+export const getArea = (
+  image: Pick<Image, "voxelSpacing" | "voxelCount" | "voxelComponents">,
+  data: Uint8Array,
+  viewType: ViewType,
+  slice: number,
+) => {
+  let nonZeroVoxelCount = 0;
+  findVoxelInSlice(image, data, viewType, slice, (_, value) => {
+    if (value.sum() > 0) {
+      nonZeroVoxelCount++;
+    }
+  });
+
+  const [widthAxis, heightAxis] = getPlaneAxes(viewType);
+  const pixelSize =
+    image.voxelSpacing[widthAxis] * image.voxelSpacing[heightAxis];
+
+  return nonZeroVoxelCount * pixelSize;
+};
+
 /**
  * Returns an array of boolean arrays that indicate for each slice and
  * `ViewType` if the slice is empty.

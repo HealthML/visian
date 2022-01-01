@@ -11,6 +11,7 @@ import type { IMarkers } from "./markers";
 import type { IClipboard } from "./clipboard";
 import type { ErrorNotification } from "../error-notification";
 import { Theme } from "../../theme";
+import { MeasurementType } from ".";
 
 /** A VISIAN document, consisting of up to multiple editable layers. */
 export interface IDocument {
@@ -37,6 +38,11 @@ export interface IDocument {
   maxLayers: number;
   /** The maximum amount of layers that can be rendered in 3d. */
   maxLayers3d: number;
+
+  /** The layer that is currently selected for displaying a measurement. */
+  measurementDisplayLayer?: Reference<IImageLayer>;
+  /** The type of measurement that should be displayed. */
+  measurementType: MeasurementType;
 
   /** A view on the document's `layers`, containing only its image layers. */
   imageLayers: Reference<IImageLayer>[];
@@ -82,6 +88,11 @@ export interface IDocument {
 
   /** Sets the active layer. */
   setActiveLayer(idOrLayer?: string | ILayer): void;
+
+  /** Sets the layer that is currently selected for displaying a measurement. */
+  setMeasurementDisplayLayer(idOrLayer?: string | IImageLayer): void;
+  /** Sets the type of measurement that should be displayed. */
+  setMeasurementType(measurementType: MeasurementType): void;
 
   /** Adds a layer to the document. */
   addLayer(layer: ILayer): void;
