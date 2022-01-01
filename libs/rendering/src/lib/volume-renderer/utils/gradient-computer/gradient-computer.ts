@@ -12,11 +12,11 @@ export class GradientComputer implements IDisposable {
   private gradientMaterial: GradientMaterial;
 
   private firstDerivativeRenderTarget: THREE.WebGLRenderTarget;
-  private secondDerivativeRenderTarget: THREE.WebGLRenderTarget;
+  // private secondDerivativeRenderTarget: THREE.WebGLRenderTarget;
   private outputDerivativeRenderTarget: THREE.WebGLRenderTarget;
 
   private firstDerivativeDirty = true;
-  private secondDerivativeDirty = true;
+  // private secondDerivativeDirty = true;
   private outputDerivativeDirty = true;
 
   private texture3DRenderer = new Texture3DRenderer();
@@ -37,10 +37,10 @@ export class GradientComputer implements IDisposable {
       imageProperties,
       THREE.LinearFilter,
     );
-    this.secondDerivativeRenderTarget = new ImageRenderTarget(
-      imageProperties,
-      THREE.LinearFilter,
-    );
+    // this.secondDerivativeRenderTarget = new ImageRenderTarget(
+    //   imageProperties,
+    //   THREE.LinearFilter,
+    // );
     this.outputDerivativeRenderTarget = new ImageRenderTarget(
       imageProperties,
       THREE.LinearFilter,
@@ -49,7 +49,7 @@ export class GradientComputer implements IDisposable {
     this.gradientMaterial = new GradientMaterial(
       editor,
       this.firstDerivativeRenderTarget.texture,
-      this.secondDerivativeRenderTarget.texture,
+      // this.secondDerivativeRenderTarget.texture,
       sharedUniforms,
     );
     this.texture3DRenderer.setMaterial(this.gradientMaterial);
@@ -63,7 +63,7 @@ export class GradientComputer implements IDisposable {
 
         [
           this.firstDerivativeRenderTarget,
-          this.secondDerivativeRenderTarget,
+          // this.secondDerivativeRenderTarget,
           this.outputDerivativeRenderTarget,
         ].forEach((renderTarget) => {
           renderTarget.setSize(voxelCount.x, voxelCount.y, voxelCount.z);
@@ -76,7 +76,7 @@ export class GradientComputer implements IDisposable {
     this.gradientMaterial.dispose();
     this.reactionDisposers.forEach((disposer) => disposer());
     this.firstDerivativeRenderTarget.dispose();
-    this.secondDerivativeRenderTarget.dispose();
+    // this.secondDerivativeRenderTarget.dispose();
     this.outputDerivativeRenderTarget.dispose();
     this.texture3DRenderer.dispose();
   }
@@ -85,9 +85,9 @@ export class GradientComputer implements IDisposable {
     if (this.firstDerivativeDirty) {
       this.renderFirstDerivative();
     }
-    if (this.secondDerivativeDirty) {
-      this.renderSecondDerivative();
-    }
+    // if (this.secondDerivativeDirty) {
+    //   this.renderSecondDerivative();
+    // }
     if (
       (this.editor.activeDocument?.viewport3D.shadingMode === "phong" ||
         this.editor.activeDocument?.viewport3D.requestedShadingMode ===
@@ -106,9 +106,9 @@ export class GradientComputer implements IDisposable {
     return this.firstDerivativeRenderTarget.texture;
   }
 
-  public getSecondDerivative() {
-    return this.secondDerivativeRenderTarget.texture;
-  }
+  // public getSecondDerivative() {
+  //   return this.secondDerivativeRenderTarget.texture;
+  // }
 
   public getOutputDerivative() {
     return this.outputDerivativeRenderTarget.texture;
@@ -116,7 +116,7 @@ export class GradientComputer implements IDisposable {
 
   public updateAllDerivatives = () => {
     this.updateFirstDerivative();
-    this.updateSecondDerivative();
+    // this.updateSecondDerivative();
     this.updateOutputDerivative();
   };
 
@@ -135,6 +135,10 @@ export class GradientComputer implements IDisposable {
     this.texture3DRenderer.setTarget(this.firstDerivativeRenderTarget);
 
     this.texture3DRenderer.render(this.renderer);
+
+    this.renderer.setRenderTarget(null);
+
+    this.gradientMaterial.setGradientMode();
 
     this.firstDerivativeDirty = false;
     // const buffer = new Uint8Array(
@@ -167,27 +171,31 @@ export class GradientComputer implements IDisposable {
     this.editor.volumeRenderer?.lazyRender(true);
   }
 
-  private updateSecondDerivative() {
-    this.secondDerivativeDirty = true;
-  }
+  // private updateSecondDerivative() {
+  //   this.secondDerivativeDirty = true;
+  // }
 
-  private renderSecondDerivative() {
-    const isXrEnabled = this.renderer.xr.enabled;
-    this.renderer.xr.enabled = false;
+  // private renderSecondDerivative() {
+  // const isXrEnabled = this.renderer.xr.enabled;
+  // this.renderer.xr.enabled = false;
 
-    this.gradientMaterial.uniforms.uInputDimensions.value = 3;
-    this.gradientMaterial.setGradientMode(GradientMode.Second);
+  // this.gradientMaterial.uniforms.uInputDimensions.value = 3;
+  // this.gradientMaterial.setGradientMode(GradientMode.Second);
 
-    this.texture3DRenderer.setTarget(this.secondDerivativeRenderTarget);
+  // this.texture3DRenderer.setTarget(this.secondDerivativeRenderTarget);
 
-    this.texture3DRenderer.render(this.renderer);
+  // this.texture3DRenderer.render(this.renderer);
 
-    this.renderer.xr.enabled = isXrEnabled;
+  // this.renderer.setRenderTarget(null);
 
-    this.secondDerivativeDirty = false;
+  // this.gradientMaterial.setGradientMode();
 
-    this.editor.volumeRenderer?.lazyRender(true);
-  }
+  // this.renderer.xr.enabled = isXrEnabled;
+
+  // this.secondDerivativeDirty = false;
+
+  // this.editor.volumeRenderer?.lazyRender(true);
+  // }
 
   public updateOutputDerivative = () => {
     this.outputDerivativeDirty = true;
@@ -203,6 +211,8 @@ export class GradientComputer implements IDisposable {
     this.texture3DRenderer.setTarget(this.outputDerivativeRenderTarget);
 
     this.texture3DRenderer.render(this.renderer);
+
+    this.gradientMaterial.setGradientMode();
 
     this.renderer.setRenderTarget(null);
     this.renderer.xr.enabled = isXrEnabled;
