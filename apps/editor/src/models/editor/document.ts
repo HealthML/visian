@@ -360,6 +360,9 @@ export class Document
     );
     this.addLayer(annotationLayer);
     this.setActiveLayer(annotationLayer);
+
+    // Force switch to 2D if too many layers for 3D
+    this.viewSettings.setViewMode(this.viewSettings.viewMode);
   };
 
   public moveLayer(idOrLayer: string | ILayer, newIndex: number) {

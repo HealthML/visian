@@ -1,7 +1,6 @@
 import { IDocument, IViewSettings, ViewMode } from "@visian/ui-shared";
 import { ISerializable, Vector } from "@visian/utils";
 import { action, makeObservable, observable } from "mobx";
-import { generalTextures3d } from "../../../constants";
 
 export interface ViewSettingsSnapshot {
   viewMode: ViewMode;
@@ -84,7 +83,7 @@ export class ViewSettings
     this.viewMode = value || "2D";
 
     if (value === "3D") {
-      const maxLayersIn3d = this.document.maxLayers3d - generalTextures3d;
+      const maxLayersIn3d = this.document.maxLayers3d;
 
       if (this.document.layers.length > maxLayersIn3d) {
         this.viewMode = "2D";
