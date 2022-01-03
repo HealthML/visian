@@ -74,6 +74,7 @@ export const itkImageToImageSnapshot = <T extends TypedArray = TypedArray>(
     image.imageType.dimension,
     image.size,
     image.imageType.components,
+    // Segmentations should only contain values 0 and 255
   ).map((value) =>
     filterValue === undefined
       ? squash && value
