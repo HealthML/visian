@@ -164,7 +164,7 @@
   "too-many-layers-2d": "Due to hardware limitations, VISIAN can only render {{count}} layers on your device.",
   "too-many-layers-3d": "Due to hardware limitations, VISIAN can only render {{count}} layers in the 3D mode on your device.",
   "squashed-layers-title": "Squashed Annotations",
-  "squashed-layers-import": "The uploaded file containes multiple annotations. This would have resulted in too many layers. VISIAN squashed all the annotations into one.",
+  "squashed-layers-import": "The uploaded file contains multiple annotations. This would have resulted in too many layers. VISIAN squashed all the annotations into one.",
 
   "area": "Area",
   "volume": "Volume",
