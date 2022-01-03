@@ -18,6 +18,7 @@ import { AxesAndVoxel } from "../axes-and-voxel";
 import { DropSheet } from "../drop-sheet";
 import { ImportPopUp } from "../import-popup";
 import { Layers } from "../layers";
+import { MeasurementPopUp } from "../measurement-popup";
 import { Menu } from "../menu";
 import { ProgressPopUp } from "../progress-popup";
 import { ServerPopUp } from "../server-popup";
@@ -280,6 +281,12 @@ export const UIOverlay = observer<UIOverlayProps>(
                 onClose={closeImportPopUp}
               />
             )}
+            <MeasurementPopUp
+              isOpen={Boolean(
+                store?.editor.activeDocument?.measurementDisplayLayer,
+              )}
+              onClose={store?.editor.activeDocument?.setMeasurementDisplayLayer}
+            />
             {isDraggedOver && <DropSheet onDropCompleted={onDropCompleted} />}
             {store?.progress && (
               <ProgressPopUp

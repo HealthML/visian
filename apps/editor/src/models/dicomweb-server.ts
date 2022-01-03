@@ -1,3 +1,4 @@
+import { i18n } from "@visian/ui-shared";
 import { getMultiparts } from "@visian/utils";
 
 // See http://dicom.nema.org/dicom/2013/output/chtml/part18/sect_6.7.html
@@ -136,6 +137,13 @@ export class DICOMWebServer {
       `${this.getEndpoint("wado")}/studies/${study}/series/${series}`,
       { headers: this.wadoHeaders },
     );
+    if (!response.ok) {
+      throw new Error(
+        i18n.t("server-import-error", {
+          statusText: response.statusText,
+        }),
+      );
+    }
 
     return getMultiparts(
       new Uint8Array(await response.arrayBuffer()),

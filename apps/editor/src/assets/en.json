@@ -128,6 +128,8 @@
   "remote-file-error": "The specified file could not be loaded.",
   "image-too-large-error": "Your browser does not support images this large.",
 
+  "server-import-error": "An error occurred while getting the file from the server: \"{{statusText}}\"",
+
   "export-error": "Export Error",
   "file-upload-error": "The file could not be uploaded.",
 
@@ -165,5 +167,11 @@
   "lock-cone": "Lock Cone",
   "cone-angle": "Cone Angle",
 
-  "custom-tf-file": "Transfer Function Image"
+  "custom-tf-file": "Transfer Function Image",
+
+  "area": "Area",
+  "volume": "Volume",
+  "calculate-area": "Calculate Area on Slice",
+  "calculate-volume": "Calculate Volume",
+  "calculating": "Calculating..."
 }

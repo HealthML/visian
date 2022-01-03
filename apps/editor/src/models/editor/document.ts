@@ -7,11 +7,13 @@ import {
   ILayer,
   ISliceRenderer,
   IVolumeRenderer,
+  MeasurementType,
   Theme,
   TrackingLog,
   ValueType,
 } from "@visian/ui-shared";
 import {
+  handlePromiseSettledResult,
   IDisposable,
   ImageMismatchError,
   ISerializable,
@@ -88,8 +90,11 @@ export class Document
   protected titleOverride?: string;
 
   protected activeLayerId?: string;
+  protected measurementDisplayLayerId?: string;
   protected layerMap: { [key: string]: Layer };
   protected layerIds: string[];
+
+  public measurementType: MeasurementType = "volume";
 
   public history: History;
   public clipboard: Clipboard = new Clipboard(this);
@@ -146,13 +151,19 @@ export class Document
 
     makeObservable<
       this,
-      "titleOverride" | "activeLayerId" | "layerMap" | "layerIds"
+      | "titleOverride"
+      | "activeLayerId"
+      | "measurementDisplayLayerId"
+      | "layerMap"
+      | "layerIds"
     >(this, {
       id: observable,
       titleOverride: observable,
       activeLayerId: observable,
+      measurementDisplayLayerId: observable,
       layerMap: observable,
       layerIds: observable,
+      measurementType: observable,
       history: observable,
       viewSettings: observable,
       viewport2D: observable,
@@ -165,12 +176,15 @@ export class Document
 
       title: computed,
       activeLayer: computed,
+      measurementDisplayLayer: computed,
       imageLayers: computed,
       baseImageLayer: computed,
       annotationLayers: computed,
 
       setTitle: action,
       setActiveLayer: action,
+      setMeasurementDisplayLayer: action,
+      setMeasurementType: action,
       addLayer: action,
       addNewAnnotationLayer: action,
       moveLayer: action,
@@ -216,6 +230,13 @@ export class Document
     return Object.values(this.layerMap).find(
       (layer) => layer.id === this.activeLayerId,
     );
+  }
+
+  public get measurementDisplayLayer(): IImageLayer | undefined {
+    return Object.values(this.layerMap).find(
+      (layer) =>
+        layer.id === this.measurementDisplayLayerId && layer.kind === "image",
+    ) as IImageLayer | undefined;
   }
 
   public get imageLayers(): IImageLayer[] {
@@ -268,6 +289,18 @@ export class Document
         ? idOrLayer
         : idOrLayer.id
       : undefined;
+  };
+
+  public setMeasurementDisplayLayer = (idOrLayer?: string | ILayer): void => {
+    this.measurementDisplayLayerId = idOrLayer
+      ? typeof idOrLayer === "string"
+        ? idOrLayer
+        : idOrLayer.id
+      : undefined;
+  };
+
+  public setMeasurementType = (measurementType: MeasurementType) => {
+    this.measurementType = measurementType;
   };
 
   public addLayer = (...newLayers: Layer[]): void => {
@@ -419,8 +452,11 @@ export class Document
     if (!entries) return;
     if (Array.isArray(entries)) {
       if (entries.some((entry) => entry && !entry.isFile)) {
-        await Promise.all(
-          entries.map((entry) => this.importFileSystemEntries(entry)),
+        // throw the corresponding error if one promise was rejected
+        handlePromiseSettledResult(
+          await Promise.allSettled(
+            entries.map((entry) => this.importFileSystemEntries(entry)),
+          ),
         );
       } else {
         const files = await Promise.all(
@@ -468,7 +504,8 @@ export class Document
           promises.push(this.importFileSystemEntries(subEntries[i]));
         }
       }
-      await Promise.all(promises);
+      // throw the corresponding error if one promise was rejected
+      handlePromiseSettledResult(await Promise.allSettled(promises));
 
       if (dirFiles.length) await this.importFiles(dirFiles, entries.name);
     } else {
@@ -513,7 +550,8 @@ export class Document
         filteredFiles.forEach((file) => {
           promises.push(this.importFiles(file));
         });
-        await Promise.all(promises);
+        // throw the corresponding error if one promise was rejected
+        handlePromiseSettledResult(await Promise.allSettled(promises));
         return;
       }
     } else if (filteredFiles.name.endsWith(".zip")) {
@@ -525,6 +563,7 @@ export class Document
       return;
     }
 
+    if (Array.isArray(filteredFiles) && !filteredFiles.length) return;
     if (IS_FLOY_DEMO && !isAnnotation) {
       if (!(await this.floyDemo.isDemoCandidate(filteredFiles))) return;
       await this.floyDemo.setDemoCandidate(filteredFiles, name);
@@ -601,7 +640,7 @@ export class Document
       this.baseImageLayer &&
       !this.baseImageLayer.image.voxelCount.equals(imageLayer.image.voxelCount)
     ) {
-      if (!imageLayer.image.name) {
+      if (imageLayer.image.name) {
         throw new ImageMismatchError(
           i18n.t("image-mismatch-error-filename", {
             fileName: imageLayer.image.name,

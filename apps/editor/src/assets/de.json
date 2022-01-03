@@ -128,6 +128,8 @@
   "remote-file-error": "Die angegebene Datei konnte nicht geladen werden.",
   "image-too-large-error": "Ihr Browser unterstützt keine so großen Bilder.",
 
+  "server-import-error": "Beim Laden der Datei vom Server ist ein Fehler aufgetreten:  \"{{statusText}}\"",
+
   "export-error": "Exportfehler",
   "file-upload-error": "Die Datei konnte nicht hochgeladen werden.",
 
@@ -165,5 +167,11 @@
   "lock-cone": "Kegel festhalten",
   "cone-angle": "Kegelwinkel",
 
-  "custom-tf-file": "Transferfunktionsbild"
+  "custom-tf-file": "Transferfunktionsbild",
+
+  "area": "Fläche",
+  "volume": "Volumen",
+  "calculate-area": "Fläche auf Schicht berechnen",
+  "calculate-volume": "Volumen berechnen",
+  "calculating": "Berechnen..."
 }
