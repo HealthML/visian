@@ -401,6 +401,15 @@ const PopUpButton = styled(Button)`
   margin-left: 10px;
 `;
 
+const PoweredByText = styled(Text)`
+  font-size: 14px;
+  margin-top: 10px;
+
+  a {
+    color: ${color("text")};
+  }
+`;
+
 export const FloyBar = observer(() => {
   const store = useStore();
 
@@ -508,6 +517,12 @@ export const FloyBar = observer(() => {
             rel: "noreferrer",
           } as unknown)}
         />
+        <PoweredByText>
+          Powered by{" "}
+          <a href="https://visian.org" target="_blank" rel="noreferrer">
+            VISIAN
+          </a>
+        </PoweredByText>
       </LegalContainer>
       {store?.editor.activeDocument?.floyDemo.hasDemoCandidate && (
         <AIBarSheet>
