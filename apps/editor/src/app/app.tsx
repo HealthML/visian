@@ -21,7 +21,7 @@ import {
   whoRequiresAuthentication,
 } from "../constants";
 import { setUpEventHandling } from "../event-handling";
-import { EditorScreen } from "../screens";
+import { EditorScreen, UploadScreen } from "../screens";
 import { setupRootStore, StoreProvider } from "./root-store";
 
 import type { RootStore } from "../models";
@@ -78,9 +78,8 @@ function App() {
             <React.StrictMode>
               <ModalRoot />
               <Switch>
-                <Route path="/">
-                  <EditorScreen />
-                </Route>
+                <Route path="/upload" component={UploadScreen} />
+                <Route path="/" component={EditorScreen} />
               </Switch>
             </React.StrictMode>
           )}

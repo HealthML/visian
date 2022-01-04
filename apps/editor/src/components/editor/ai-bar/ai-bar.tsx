@@ -173,25 +173,25 @@ const AIMessageSubtitle = styled(Text)`
   color: ${color("lightText")};
 `;
 
-const NoticeText = styled(Text)`
+const NoticeText = styled(Text)<{ useBlankScreen?: boolean }>`
   font-size: 10px;
   left: 50%;
   opacity: 0.8;
   position: absolute;
   width: 700px;
   text-align: center;
-  top: 40px;
+  top: ${(props) => (props.useBlankScreen ? "20px" : "40px")};
   transform: translateX(-50%);
 `;
 
-const LegalContainer = styled.div`
+const LegalContainer = styled.div<{ useBlankScreen?: boolean }>`
   bottom: 20px;
   display: flex;
   flex-direction: column;
   opacity: 0.5;
   position: absolute;
   pointer-events: auto;
-  right: 80px;
+  right: ${(props) => (props.useBlankScreen ? "20px" : "80px")};
 `;
 
 const ScrollView = styled.div`
@@ -410,311 +410,318 @@ const PoweredByText = styled(Text)`
   }
 `;
 
-export const FloyBar = observer(() => {
-  const store = useStore();
+export const FloyBar = observer<{ useBlankScreen?: boolean }>(
+  ({ useBlankScreen }) => {
+    const store = useStore();
 
-  const [token, setToken] = useState("");
-  const [tokenError, setTokenError] = useState<string>();
-  const [shouldShowWelcome, setShouldShowWelcome] = useState(true);
-  const dismissWelcome = useCallback(() => {
-    store?.editor.activeDocument?.floyDemo
-      .activateToken(
-        store?.editor.activeDocument?.floyDemo.hasToken() ? undefined : token,
-      )
-      .then(() => {
-        setTokenError(undefined);
-        setShouldShowWelcome(false);
-      })
-      .catch(() => {
-        store?.editor.activeDocument?.floyDemo.clearToken();
-        setTokenError("Ungültiger Token!");
-      });
-  }, [store, token]);
-  const handleKeyDown = useCallback(
-    (event: React.KeyboardEvent<HTMLInputElement>) => {
-      if (event.key === "Enter") {
-        event.preventDefault();
-        event.stopPropagation();
-
-        dismissWelcome();
-      }
-    },
-    [dismissWelcome],
-  );
-
-  const privacyRef = useRef(false);
-  const [shouldShowPrivacy, setShouldShowPrivacy] = useState(false);
-  const dismissPrivacy = useCallback(() => {
-    setShouldShowPrivacy(false);
-  }, []);
-  const runInferencing = useCallback(() => {
-    if (privacyRef.current) {
-      store?.setProgress({ label: "Risikoeinschätzung läuft" });
+    const [token, setToken] = useState("");
+    const [tokenError, setTokenError] = useState<string>();
+    const [shouldShowWelcome, setShouldShowWelcome] = useState(true);
+    const dismissWelcome = useCallback(() => {
       store?.editor.activeDocument?.floyDemo
-        .runInferencing()
-        .catch(() => {
-          store?.setError({
-            title: "KI Fehler",
-            description: "KI Analyse fehlgeschlagen",
-          });
-        })
+        .activateToken(
+          store?.editor.activeDocument?.floyDemo.hasToken() ? undefined : token,
+        )
         .then(() => {
-          store?.setProgress();
+          setTokenError(undefined);
+          setShouldShowWelcome(false);
+        })
+        .catch(() => {
+          store?.editor.activeDocument?.floyDemo.clearToken();
+          setTokenError("Ungültiger Token!");
         });
-    } else {
-      setShouldShowPrivacy(true);
-    }
-  }, [store]);
-  const consent = useCallback(() => {
-    store?.editor.activeDocument?.floyDemo
-      .consent()
-      .then(() => {
-        setTokenError(undefined);
-        setShouldShowPrivacy(false);
-        privacyRef.current = true;
-        runInferencing();
-      })
-      .catch(() => {
-        store?.editor.activeDocument?.floyDemo.clearToken();
-        setTokenError("Ihr Token wurde deaktiviert!");
-        setShouldShowWelcome(true);
-        setShouldShowPrivacy(false);
-      });
-  }, [runInferencing, store]);
-  const rejectConsent = useCallback(() => {
-    // eslint-disable-next-line no-alert
-    alert("Bitte Annehmen oder die Website verlassen");
-  }, []);
+    }, [store, token]);
+    const handleKeyDown = useCallback(
+      (event: React.KeyboardEvent<HTMLInputElement>) => {
+        if (event.key === "Enter") {
+          event.preventDefault();
+          event.stopPropagation();
 
-  const reset = useCallback(() => {
-    store?.editor.newDocument();
-  }, [store]);
+          dismissWelcome();
+        }
+      },
+      [dismissWelcome],
+    );
 
-  return (
-    <>
-      <NoticeText>
-        Diese Web Applikation dient lediglich zu Demonstrationszwecken und ist
-        noch nicht als Medizinprodukt zertifiziert. Demzufolge darf sie unter
-        keinen Umständen in der Praxis angewandt werden. Bitte kontaktieren Sie
-        info@floy.com für weitere Informationen.
-      </NoticeText>
-      <LegalContainer>
-        <Text
-          as="a"
-          text="Datenschutz"
-          {...({
-            href: "https://www.floy.com/data-privacy",
-            target: "_blank",
-            rel: "noreferrer",
-          } as unknown)}
-        />
-        <Text
-          as="a"
-          text="Impressum"
-          {...({
-            href: "https://www.floy.com/legal-notice",
-            target: "_blank",
-            rel: "noreferrer",
-          } as unknown)}
-        />
-        <PoweredByText>
-          Powered by{" "}
-          <a href="https://visian.org" target="_blank" rel="noreferrer">
-            VISIAN
-          </a>
-        </PoweredByText>
-      </LegalContainer>
-      {store?.editor.activeDocument?.floyDemo.hasDemoCandidate && (
-        <AIBarSheet>
-          <AIContainer>
-            <TaskContainer>
-              <TaskLabel tx="KI Analyse" />
-              <TaskName text="Fokale Läsionen" />
-            </TaskContainer>
-            <ActionContainer>
-              <ActionName
-                text={
-                  store.editor.activeDocument.floyDemo.inferenceResults
-                    ? (store.editor.activeDocument.floyDemo.inferenceResults[0]
-                        .classification as string) === "1"
-                      ? "Auffälligkeiten gefunden"
-                      : "Unauffällig"
-                    : "Floy KI ausführen"
-                }
-              />
-              <ActionButtonsContainer>
-                {store.editor.activeDocument.floyDemo.inferenceResults ? (
-                  <ActionButtons
-                    icon="trash"
-                    tooltip="Zurücksetzen"
-                    tooltipPosition="right"
-                    onPointerDown={reset}
+    const privacyRef = useRef(false);
+    const [shouldShowPrivacy, setShouldShowPrivacy] = useState(false);
+    const dismissPrivacy = useCallback(() => {
+      setShouldShowPrivacy(false);
+    }, []);
+    const runInferencing = useCallback(() => {
+      if (privacyRef.current) {
+        store?.setProgress({ label: "Risikoeinschätzung läuft" });
+        store?.editor.activeDocument?.floyDemo
+          .runInferencing()
+          .catch(() => {
+            store?.setError({
+              title: "KI Fehler",
+              description: "KI Analyse fehlgeschlagen",
+            });
+          })
+          .then(() => {
+            store?.setProgress();
+          });
+      } else {
+        setShouldShowPrivacy(true);
+      }
+    }, [store]);
+    const consent = useCallback(() => {
+      store?.editor.activeDocument?.floyDemo
+        .consent()
+        .then(() => {
+          setTokenError(undefined);
+          setShouldShowPrivacy(false);
+          privacyRef.current = true;
+          runInferencing();
+        })
+        .catch(() => {
+          store?.editor.activeDocument?.floyDemo.clearToken();
+          setTokenError("Ihr Token wurde deaktiviert!");
+          setShouldShowWelcome(true);
+          setShouldShowPrivacy(false);
+        });
+    }, [runInferencing, store]);
+    const rejectConsent = useCallback(() => {
+      // eslint-disable-next-line no-alert
+      alert("Bitte Annehmen oder die Website verlassen");
+    }, []);
+
+    const reset = useCallback(() => {
+      store?.editor.newDocument();
+    }, [store]);
+
+    return (
+      <>
+        <NoticeText useBlankScreen={useBlankScreen}>
+          Diese Web Applikation dient lediglich zu Demonstrationszwecken und ist
+          noch nicht als Medizinprodukt zertifiziert. Demzufolge darf sie unter
+          keinen Umständen in der Praxis angewandt werden. Bitte kontaktieren
+          Sie info@floy.com für weitere Informationen.
+        </NoticeText>
+        <LegalContainer useBlankScreen={useBlankScreen}>
+          <Text
+            as="a"
+            text="Datenschutz"
+            {...({
+              href: "https://www.floy.com/data-privacy",
+              target: "_blank",
+              rel: "noreferrer",
+            } as unknown)}
+          />
+          <Text
+            as="a"
+            text="Impressum"
+            {...({
+              href: "https://www.floy.com/legal-notice",
+              target: "_blank",
+              rel: "noreferrer",
+            } as unknown)}
+          />
+          <PoweredByText>
+            Powered by{" "}
+            <a href="https://visian.org" target="_blank" rel="noreferrer">
+              VISIAN
+            </a>
+          </PoweredByText>
+        </LegalContainer>
+        {!useBlankScreen &&
+          store?.editor.activeDocument?.floyDemo.hasDemoCandidate && (
+            <AIBarSheet>
+              <AIContainer>
+                <TaskContainer>
+                  <TaskLabel tx="KI Analyse" />
+                  <TaskName text="Fokale Läsionen" />
+                </TaskContainer>
+                <ActionContainer>
+                  <ActionName
+                    text={
+                      store.editor.activeDocument.floyDemo.inferenceResults
+                        ? (store.editor.activeDocument.floyDemo
+                            .inferenceResults[0].classification as string) ===
+                          "1"
+                          ? "Auffälligkeiten gefunden"
+                          : "Unauffällig"
+                        : "Floy KI ausführen"
+                    }
                   />
-                ) : (
-                  <ActionButtons
-                    icon="playFilled"
-                    tooltip="Floy ausführen"
-                    tooltipPosition="right"
-                    onPointerDown={runInferencing}
-                  />
-                )}
-              </ActionButtonsContainer>
-            </ActionContainer>
-            <AIToolsContainer>
-              <a href={FLOY_HOME} target="_blank" rel="noreferrer">
-                <AIButton
-                  icon="floyAI"
-                  tooltip="Zurück zu Floy"
-                  tooltipPosition="right"
-                />
-              </a>
-            </AIToolsContainer>
-          </AIContainer>
-        </AIBarSheet>
-      )}
-      {shouldShowWelcome && (
-        <FloyPopUp
-          title="Willkommen!"
-          dismiss={dismissWelcome}
-          shouldDismissOnOutsidePress
-        >
-          <StyledParagraph>
-            Für Demonstrationszwecke unseres ersten Produktes gibt diese Web
-            Applikation Risikoeinschätzungen über die Präsenz von fokalen
-            Läsionen (anhand von Plasmozytomen und Knochenmetastasen) in
-            sagittalen T1-gewichteten LWS MRT Serien.
-          </StyledParagraph>
-          <StyledParagraph>
-            Das finale Produkt kommt am 1. Februar 2022 auf den Markt. Bis dahin
-            wird sich unsere KI Qualität, als auch die Anzahl der unterstützten
-            Körperteile und Indikationen deutlich weiterentwickeln. Ihr Feedback
-            hilft uns bei dieser Weiterentwicklung immens. Für alle weiteren
-            Informationen und Ergebnisbesprechungen melden Sie sich gerne direkt
-            bei unserem Geschäftsführer Benedikt Schneider via
-            benedikt.schneider@floy.com oder +4915786031618.
-          </StyledParagraph>
-          {!store?.editor.activeDocument?.floyDemo.hasToken() && (
-            <>
-              <BoldParagraph>
-                Bitte geben Sie hier Ihren persönlichen Token ein, um Zugang zur
-                Demo zu erhalten:
-              </BoldParagraph>
-              {tokenError && <ErrorParagraph>{tokenError}</ErrorParagraph>}
-            </>
+                  <ActionButtonsContainer>
+                    {store.editor.activeDocument.floyDemo.inferenceResults ? (
+                      <ActionButtons
+                        icon="trash"
+                        tooltip="Zurücksetzen"
+                        tooltipPosition="right"
+                        onPointerDown={reset}
+                      />
+                    ) : (
+                      <ActionButtons
+                        icon="playFilled"
+                        tooltip="Floy ausführen"
+                        tooltipPosition="right"
+                        onPointerDown={runInferencing}
+                      />
+                    )}
+                  </ActionButtonsContainer>
+                </ActionContainer>
+                <AIToolsContainer>
+                  <a href={FLOY_HOME} target="_blank" rel="noreferrer">
+                    <AIButton
+                      icon="floyAI"
+                      tooltip="Zurück zu Floy"
+                      tooltipPosition="right"
+                    />
+                  </a>
+                </AIToolsContainer>
+              </AIContainer>
+            </AIBarSheet>
           )}
-          <InputRow>
+        {shouldShowWelcome && (
+          <FloyPopUp
+            title="Willkommen!"
+            dismiss={dismissWelcome}
+            shouldDismissOnOutsidePress
+          >
+            <StyledParagraph>
+              Für Demonstrationszwecke unseres ersten Produktes gibt diese Web
+              Applikation Risikoeinschätzungen über die Präsenz von fokalen
+              Läsionen (anhand von Plasmozytomen und Knochenmetastasen) in
+              sagittalen T1-gewichteten LWS MRT Serien.
+            </StyledParagraph>
+            <StyledParagraph>
+              Das finale Produkt kommt am 1. Februar 2022 auf den Markt. Bis
+              dahin wird sich unsere KI Qualität, als auch die Anzahl der
+              unterstützten Körperteile und Indikationen deutlich
+              weiterentwickeln. Ihr Feedback hilft uns bei dieser
+              Weiterentwicklung immens. Für alle weiteren Informationen und
+              Ergebnisbesprechungen melden Sie sich gerne direkt bei unserem
+              Geschäftsführer Benedikt Schneider via benedikt.schneider@floy.com
+              oder +4915786031618.
+            </StyledParagraph>
             {!store?.editor.activeDocument?.floyDemo.hasToken() && (
-              <TextField
-                placeholder="Token"
-                value={token}
-                onChangeText={setToken}
-                onKeyDown={handleKeyDown}
-              />
+              <>
+                <BoldParagraph>
+                  Bitte geben Sie hier Ihren persönlichen Token ein, um Zugang
+                  zur Demo zu erhalten:
+                </BoldParagraph>
+                {tokenError && <ErrorParagraph>{tokenError}</ErrorParagraph>}
+              </>
             )}
-            <PopUpButton text="Okay" onPointerDown={dismissWelcome} />
-          </InputRow>
-        </FloyPopUp>
-      )}
-      {shouldShowPrivacy && (
-        <FloyPopUp
-          title="AGB"
-          dismiss={dismissPrivacy}
-          shouldDismissOnOutsidePress
-        >
-          <ScrollView>
-            <BoldParagraph>
-              Allgemeine Bedingungen zur Nutzung des Web Demonstrators der Floy
-              GmbH
-            </BoldParagraph>
-            <StyledParagraph>
-              Die unter der Internetadresse "demo.floy.com" bereitgestellten
-              Dienste ("Demonstrator") werden von der Floy GmbH, Loristraße 12,
-              80335 München (HRB 267609) ("Floy") betrieben. Der Demonstrator
-              soll Ihnen Leistungsfähigkeit der KI demonstrieren. Soweit Sie den
-              Demonstrator kostenlos nutzen möchten, müssen sie den folgenden
-              Bedingungen zustimmen. Mit Anklicken der Schaltfläche "Annehmen"
-              stimmen Sie den folgenden Bedingungen zu. Wenn Sie den folgenden
-              Bedingungen nicht zustimmen, müssen sie die Schaltfläche "Nicht
-              Annehmen" klicken und dürfen die Dienste unter demo.floy.com nicht
-              nutzen, darauf zugreifen oder anderweitig verwenden. Wenn Sie eine
-              gesonderte schriftliche Vereinbarung mit Floy abgeschlossen haben,
-              gilt diese gesonderte Vereinbarung und diese Bedingungen finden
-              keine Anwendung.
-            </StyledParagraph>
-            <BoldParagraph>Nutzungsrechte</BoldParagraph>
-            <StyledParagraph>
-              1.1 Floy räumt Ihnen ein unentgeltliches einfaches Recht zur
-              Nutzung des Demonstrator ein, beschränkt auf den Upload und die
-              Prüfung von bis zu zehn (10) radiologischen Lichtbilder für eigene
-              Testzwecke ein. Eine Nutzung der des Demonstrators zu
-              kommerziellen oder medizinischen Zwecken oder zur Behandlung von
-              Patienten ist untersagt. Sie erkennen ausdrücklich an, dass Floy
-              das alleinige Eigentum an sämtlichen Rechten an dem Demonstrator
-              behält und Ihnen durch die Nutzung des Demonstrators keine Rechte
-              an dem Demonstrator zuwachsen.
-            </StyledParagraph>
-            <StyledParagraph>
-              1.2 Sie garantieren, ausschließlich solche radiologischen
-              Lichtbilder im Rahmen des Demonstrators zu verwenden, für die Sie
-              der Inhaber sämtlicher für die Verwendung im Rahmen des
-              Demonstrators notwendigen Nutzungsrechte sind. Sie garantieren
-              ferner, ausschließlich Lichtbilder zu verwenden, die neben dem
-              Lichtbild keine weiteren Information in Bezug auf den Patienten
-              enthalten.
-            </StyledParagraph>
-            <BoldParagraph>Datenschutz</BoldParagraph>
-            <StyledParagraph>
-              2.1 Sie sind für die Einhaltung der Pflichten des Datenschutzes,
-              insbesondere aus der Datenschutz-Grundverordnung ("DSGVO") und dem
-              Bundesdatenschutzgesetz, sowie für die Einhaltung
-              berufsrechtlicher Pflichten allein verantwortlich. Sie
-              garantieren, radiologische Lichtbilder im Rahmen des Demonstrators
-              ausschließlich dann zu verwenden, wenn die jeweiligen Patienten in
-              die Verwendung der radiologischen Lichtbilder zu den vorgenannten
-              Zwecken wirksam eingewilligt haben. Floy wird die Lichtbilder
-              ausschließlich nach gesonderter Bestätigung in Textform, und
-              ausschließlich für den Fall, dass die jeweiligen Patienten wirksam
-              in die Übermittlung der Bilder und deren Weiterverarbeitung durch
-              Floy eingewilligt haben, selbstständig für das weitere Training
-              seiner KI nutzen.
-            </StyledParagraph>
-            <StyledParagraph>
-              2.2 Weitergehende Informationen zur Verarbeitung personenbezogener
-              Daten durch Floy und wie diese geschützt werden, finden Sie auf
-              der Webseite von Floy unter "floy.com" in der dort
-              bereitgestellten Datenschutzerklärung.
-            </StyledParagraph>
-            <BoldParagraph>Haftung und Gewährleistung</BoldParagraph>
-            <StyledParagraph>
-              3.1 Eine Gewährleistung für die Funktionsfähigkeit des
-              Demonstrators ist ausgeschlossen. Der Demonstrator wird
-              ausschließlich zu Testzwecken bereitgestellt. Aufgrund der frühen
-              Entwicklungsphase kann der Demonstrator Fehlfunktionen enthalten.
-            </StyledParagraph>
-            <StyledParagraph>
-              3.2 Floy haftet uneingeschränkt für Schäden aus der Verletzung von
-              Leben, Körper oder Gesundheit, die auf einer vorsätzlichen
-              oderfahrlässigen Pflichtverletzung von Floy oder einer
-              vorsätzlichen oder fahrlässigen Pflichtverletzung eines
-              gesetzlichen Vertreters oder Erfüllungsgehilfen von Floy beruhen.
-              Für sonstige Haftungsansprüche haftet Floy uneingeschränkt nur bei
-              Fehlen einer garantierten Qualität sowie für Schäden aufgrund von
-              Vorsatz und grober Fahrlässigkeit einschließlich derjenigen seiner
-              gesetzlichen Vertreter und leitenden Angestellten. Für leichte
-              Fahrlässigkeit haftet Floy nur bei Verletzung einer Pflicht, deren
-              Erfüllung für die Erreichung des Vertragszwecks von besonderer
-              Bedeutung ist ("Kardinalpflicht"). Bei Verletzung einer
-              Kardinalpflicht ist die Haftung insgesamt auf das EUR 100 sowie
-              auf Verluste begrenzt, deren Entstehung typischerweise im
-              Zusammenhang mit dem Demonstrator zu erwarten wäre.
-            </StyledParagraph>
-          </ScrollView>
-          <InputRow>
-            <Button text="Annehmen" onPointerDown={consent} />
-            <PopUpButton text="Ablehnen" onPointerDown={rejectConsent} />
-          </InputRow>
-        </FloyPopUp>
-      )}
-    </>
-  );
-});
+            <InputRow>
+              {!store?.editor.activeDocument?.floyDemo.hasToken() && (
+                <TextField
+                  placeholder="Token"
+                  value={token}
+                  onChangeText={setToken}
+                  onKeyDown={handleKeyDown}
+                />
+              )}
+              <PopUpButton text="Okay" onPointerDown={dismissWelcome} />
+            </InputRow>
+          </FloyPopUp>
+        )}
+        {shouldShowPrivacy && (
+          <FloyPopUp
+            title="AGB"
+            dismiss={dismissPrivacy}
+            shouldDismissOnOutsidePress
+          >
+            <ScrollView>
+              <BoldParagraph>
+                Allgemeine Bedingungen zur Nutzung des Web Demonstrators der
+                Floy GmbH
+              </BoldParagraph>
+              <StyledParagraph>
+                Die unter der Internetadresse "demo.floy.com" bereitgestellten
+                Dienste ("Demonstrator") werden von der Floy GmbH, Loristraße
+                12, 80335 München (HRB 267609) ("Floy") betrieben. Der
+                Demonstrator soll Ihnen Leistungsfähigkeit der KI demonstrieren.
+                Soweit Sie den Demonstrator kostenlos nutzen möchten, müssen sie
+                den folgenden Bedingungen zustimmen. Mit Anklicken der
+                Schaltfläche "Annehmen" stimmen Sie den folgenden Bedingungen
+                zu. Wenn Sie den folgenden Bedingungen nicht zustimmen, müssen
+                sie die Schaltfläche "Nicht Annehmen" klicken und dürfen die
+                Dienste unter demo.floy.com nicht nutzen, darauf zugreifen oder
+                anderweitig verwenden. Wenn Sie eine gesonderte schriftliche
+                Vereinbarung mit Floy abgeschlossen haben, gilt diese gesonderte
+                Vereinbarung und diese Bedingungen finden keine Anwendung.
+              </StyledParagraph>
+              <BoldParagraph>Nutzungsrechte</BoldParagraph>
+              <StyledParagraph>
+                1.1 Floy räumt Ihnen ein unentgeltliches einfaches Recht zur
+                Nutzung des Demonstrator ein, beschränkt auf den Upload und die
+                Prüfung von bis zu zehn (10) radiologischen Lichtbilder für
+                eigene Testzwecke ein. Eine Nutzung der des Demonstrators zu
+                kommerziellen oder medizinischen Zwecken oder zur Behandlung von
+                Patienten ist untersagt. Sie erkennen ausdrücklich an, dass Floy
+                das alleinige Eigentum an sämtlichen Rechten an dem Demonstrator
+                behält und Ihnen durch die Nutzung des Demonstrators keine
+                Rechte an dem Demonstrator zuwachsen.
+              </StyledParagraph>
+              <StyledParagraph>
+                1.2 Sie garantieren, ausschließlich solche radiologischen
+                Lichtbilder im Rahmen des Demonstrators zu verwenden, für die
+                Sie der Inhaber sämtlicher für die Verwendung im Rahmen des
+                Demonstrators notwendigen Nutzungsrechte sind. Sie garantieren
+                ferner, ausschließlich Lichtbilder zu verwenden, die neben dem
+                Lichtbild keine weiteren Information in Bezug auf den Patienten
+                enthalten.
+              </StyledParagraph>
+              <BoldParagraph>Datenschutz</BoldParagraph>
+              <StyledParagraph>
+                2.1 Sie sind für die Einhaltung der Pflichten des Datenschutzes,
+                insbesondere aus der Datenschutz-Grundverordnung ("DSGVO") und
+                dem Bundesdatenschutzgesetz, sowie für die Einhaltung
+                berufsrechtlicher Pflichten allein verantwortlich. Sie
+                garantieren, radiologische Lichtbilder im Rahmen des
+                Demonstrators ausschließlich dann zu verwenden, wenn die
+                jeweiligen Patienten in die Verwendung der radiologischen
+                Lichtbilder zu den vorgenannten Zwecken wirksam eingewilligt
+                haben. Floy wird die Lichtbilder ausschließlich nach gesonderter
+                Bestätigung in Textform, und ausschließlich für den Fall, dass
+                die jeweiligen Patienten wirksam in die Übermittlung der Bilder
+                und deren Weiterverarbeitung durch Floy eingewilligt haben,
+                selbstständig für das weitere Training seiner KI nutzen.
+              </StyledParagraph>
+              <StyledParagraph>
+                2.2 Weitergehende Informationen zur Verarbeitung
+                personenbezogener Daten durch Floy und wie diese geschützt
+                werden, finden Sie auf der Webseite von Floy unter "floy.com" in
+                der dort bereitgestellten Datenschutzerklärung.
+              </StyledParagraph>
+              <BoldParagraph>Haftung und Gewährleistung</BoldParagraph>
+              <StyledParagraph>
+                3.1 Eine Gewährleistung für die Funktionsfähigkeit des
+                Demonstrators ist ausgeschlossen. Der Demonstrator wird
+                ausschließlich zu Testzwecken bereitgestellt. Aufgrund der
+                frühen Entwicklungsphase kann der Demonstrator Fehlfunktionen
+                enthalten.
+              </StyledParagraph>
+              <StyledParagraph>
+                3.2 Floy haftet uneingeschränkt für Schäden aus der Verletzung
+                von Leben, Körper oder Gesundheit, die auf einer vorsätzlichen
+                oderfahrlässigen Pflichtverletzung von Floy oder einer
+                vorsätzlichen oder fahrlässigen Pflichtverletzung eines
+                gesetzlichen Vertreters oder Erfüllungsgehilfen von Floy
+                beruhen. Für sonstige Haftungsansprüche haftet Floy
+                uneingeschränkt nur bei Fehlen einer garantierten Qualität sowie
+                für Schäden aufgrund von Vorsatz und grober Fahrlässigkeit
+                einschließlich derjenigen seiner gesetzlichen Vertreter und
+                leitenden Angestellten. Für leichte Fahrlässigkeit haftet Floy
+                nur bei Verletzung einer Pflicht, deren Erfüllung für die
+                Erreichung des Vertragszwecks von besonderer Bedeutung ist
+                ("Kardinalpflicht"). Bei Verletzung einer Kardinalpflicht ist
+                die Haftung insgesamt auf das EUR 100 sowie auf Verluste
+                begrenzt, deren Entstehung typischerweise im Zusammenhang mit
+                dem Demonstrator zu erwarten wäre.
+              </StyledParagraph>
+            </ScrollView>
+            <InputRow>
+              <Button text="Annehmen" onPointerDown={consent} />
+              <PopUpButton text="Ablehnen" onPointerDown={rejectConsent} />
+            </InputRow>
+          </FloyPopUp>
+        )}
+      </>
+    );
+  },
+);

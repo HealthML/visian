@@ -5,7 +5,7 @@ import React from "react";
 import { MainView, UIOverlay } from "../components/editor";
 import { IS_FLOY_DEMO } from "../constants";
 
-export const EditorScreen: React.FC = observer(() => {
+export const EditorScreen = observer(() => {
   const [isDraggedOver, { onDrop, ...dragListeners }] = useIsDraggedOver();
   return (
     <Screen
