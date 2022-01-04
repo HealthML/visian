@@ -105,7 +105,7 @@ export class VolumeRenderer implements IVolumeRenderer {
       this.editor,
       this.sharedUniforms,
       this.gradientComputer.getFirstDerivative(),
-      this.gradientComputer.getSecondDerivative(),
+      // this.gradientComputer.getSecondDerivative(),
       this.updateCurrentResolution,
     );
 
@@ -113,7 +113,7 @@ export class VolumeRenderer implements IVolumeRenderer {
       editor,
       this.sharedUniforms,
       this.gradientComputer.getFirstDerivative(),
-      this.gradientComputer.getSecondDerivative(),
+      // this.gradientComputer.getSecondDerivative(),
       this.gradientComputer.getOutputDerivative(),
       this.laoComputer.output,
     );

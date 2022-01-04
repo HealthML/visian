@@ -39,6 +39,7 @@ export const Notification: React.FC<NotificationProps> = ({
   titleTx,
   title,
   descriptionTx,
+  descriptionData,
   description,
   ...rest
 }) => {
@@ -47,7 +48,11 @@ export const Notification: React.FC<NotificationProps> = ({
   const node = (
     <NotificationContainer {...rest}>
       <NotificationTitle tx={titleTx} text={title} />
-      <NotificationDescription tx={descriptionTx} text={description} />
+      <NotificationDescription
+        tx={descriptionTx}
+        data={descriptionData}
+        text={description}
+      />
     </NotificationContainer>
   );
 

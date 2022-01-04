@@ -47,7 +47,7 @@ vec4 getImageValue(vec3 uv) {
   data.image = imageValue;
   data.imageRaw = imageRaw;
   data.firstDerivative = decodeVec3(texture(uInputFirstDerivative, uv));
-  data.secondDerivative = decodeVec3(texture(uInputSecondDerivative, uv));
+  // data.secondDerivative = decodeVec3(texture(uInputSecondDerivative, uv));
   
   if(uUseFocus) {
     vec4 focusValue = vec4(0.0);

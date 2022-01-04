@@ -5,6 +5,7 @@ import {
   IDispatch,
   IStorageBackend,
   Tab,
+  ErrorNotification,
 } from "@visian/ui-shared";
 import {
   createFileFromBase64,
@@ -19,7 +20,7 @@ import { errorDisplayDuration } from "../constants";
 import { DICOMWebServer } from "./dicomweb-server";
 import { Editor, EditorSnapshot } from "./editor";
 import { Tracker } from "./tracking";
-import { ErrorNotification, ProgressNotification } from "./types";
+import { ProgressNotification } from "./types";
 import { Task, TaskType } from "./who";
 
 export interface RootSnapshot {
