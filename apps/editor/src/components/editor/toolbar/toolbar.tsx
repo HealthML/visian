@@ -1,7 +1,6 @@
 import {
   BooleanParam,
   Modal,
-  ModalHeaderButton,
   NumberParam,
   Param,
   PointerButton,
@@ -16,6 +15,7 @@ import styled, { useTheme } from "styled-components";
 
 import { useStore } from "../../../app/root-store";
 import { ToolName } from "../../../models";
+import { InfoText } from "../info-text";
 
 // Styled Components
 const StyledToolbar = styled(GenericToolbar)`
@@ -26,7 +26,7 @@ const ToolSettingsModal = styled(Modal)`
   padding-bottom: 0px;
 `;
 
-const StyledModalHeaderButton = styled(ModalHeaderButton)`
+const StyledInfoText = styled(InfoText)`
   margin-right: 10px;
 `;
 
@@ -141,7 +141,7 @@ export const Toolbar: React.FC = observer(() => {
         anchor={buttonRef}
         position="right"
         baseZIndex={modalZ}
-        headerChildren={<StyledModalHeaderButton icon="info" />}
+        headerChildren={<StyledInfoText infoTx={activeTool?.name} />}
         onOutsidePress={closeModal}
         onReset={
           store?.editor.activeDocument?.tools.activeTool?.name === "plane-tool"

@@ -1,9 +1,6 @@
 import {
   AbsoluteCover,
-  Divider,
   FloatingUIButton,
-  Modal,
-  ModalHeaderButton,
   Notification,
   Spacer,
   Text,
@@ -34,11 +31,6 @@ import { ViewSettings } from "../view-settings";
 import { UIOverlayProps } from "./ui-overlay.props";
 import { SettingsPopUp } from "../settings-popup";
 import { MeasurementPopUp } from "../measurement-popup";
-import {
-  MouseIcon,
-  ShortcutContainer,
-  ShortcutLabel,
-} from "../shortcut-popup/styled-components";
 
 const Container = styled(AbsoluteCover)`
   align-items: stretch;
@@ -114,24 +106,6 @@ const Axes3D = styled.div`
   position: absolute;
   bottom: -5px;
   left: -5px;
-`;
-
-const InfoText = styled(Text)`
-  font-size: 13px;
-  margin-bottom: 14px;
-`;
-
-const SpacedStyledShortcutContainer = styled(ShortcutContainer)`
-  width: 100%;
-  margin-bottom: 10px;
-`;
-
-const StyledShortcutContainer = styled(ShortcutContainer)`
-  width: 100%;
-`;
-
-const ShortcutSpacer = styled(Spacer)`
-  height: 10px;
 `;
 
 export const UIOverlay = observer<UIOverlayProps>(
@@ -261,27 +235,6 @@ export const UIOverlay = observer<UIOverlayProps>(
             </ColumnLeft>
             <ColumnCenter>
               <TopConsole />
-              <Modal
-                labelTx="Velp"
-                headerChildren={<ModalHeaderButton icon="xSmall" />}
-              >
-                <InfoText>
-                  These are the voyages of the Starship Enterprise. Its
-                  continuing mission, to explore strange new worlds, to seek out
-                  new life and new civilizations, to boldly go where no one has
-                  gone before.{" "}
-                </InfoText>
-                <Divider />
-                <SpacedStyledShortcutContainer>
-                  <MouseIcon icon="leftMouse" />
-                  <ShortcutLabel text="Left Click" />
-                </SpacedStyledShortcutContainer>
-                <ShortcutSpacer />
-                <StyledShortcutContainer>
-                  <MouseIcon icon="leftMouse" />
-                  <ShortcutLabel text="Left Click" />
-                </StyledShortcutContainer>
-              </Modal>
             </ColumnCenter>
             <ColumnRight>
               <SideViews />
