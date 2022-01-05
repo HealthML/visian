@@ -11,7 +11,7 @@ import {
 import { observer } from "mobx-react-lite";
 import React, { useCallback, useState } from "react";
 import styled from "styled-components";
-
+import { useStore } from "../app/root-store";
 import { FloyBar } from "../components/editor/ai-bar";
 import { IS_FLOY_DEMO } from "../constants";
 
@@ -29,7 +29,6 @@ const StartText = styled(Text)`
 
 const StyledOverlay = styled.div`
   ${coverMixin}
-
   align-items: center;
   background-color: ${color("modalUnderlay")};
   display: flex;
@@ -52,14 +51,24 @@ export const UploadScreen = observer(() => {
     isDraggedOver,
     { onDrop: onDropCompleted, ...dragListeners },
   ] = useIsDraggedOver();
-
+  const store = useStore();
   const [isLoadingFiles, setIsLoadingFiles] = useState(false);
+
   const importFiles = useCallback(
     async (_files: FileList, event: React.DragEvent) => {
       event.stopPropagation();
       setIsLoadingFiles(true);
       const { items } = event.dataTransfer;
-      // TODO: Process files
+
+      // Add input field for for email
+      // 1) Show Upload-loading Bar while uploading
+      // 2) Show uploaded files on screen
+      // 3) Upload relevant serieses to S3 (later Telekom Cloud)
+      // s3.Bucket(BUCKET).upload_file(str(Path(f'{seriesZIP.filename}')), "demo.floy.com-uploads/" + tokenStr + '(Series) - ' +str(Path(f'{seriesZIP.filename}'))[:len(str(Path(f'{seriesZIP.filename}'))) - 4] + ' - ' + str(datetime.now(tz=None))[:len(str(datetime.now(tz=None))) - 7] + '.zip')
+
+      // 4) Call API after upload is finished
+      store?.editor.activeDocument?.floyDemo.runBulkInferencing();
+
       console.log(items);
       setIsLoadingFiles(false);
       onDropCompleted();
@@ -86,7 +95,7 @@ export const UploadScreen = observer(() => {
       title={IS_FLOY_DEMO ? "Floy Demo" : "VISIAN Editor"}
     >
       <StartTextContainer>
-        <StartText tx="start" />
+        <StartText tx="start-upload" />
       </StartTextContainer>
       <FloyBar useBlankScreen />
 

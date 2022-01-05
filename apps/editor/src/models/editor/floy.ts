@@ -13,6 +13,7 @@ import path from "path";
 import {
   FLOY_API_ROOT,
   FLOY_INFERENCE_ENDPOINTS,
+  FLOY_INFERENCE_ENDPOINTS_BULK,
   FLOY_TOKEN_KEY,
 } from "../../constants";
 
@@ -158,7 +159,6 @@ export class FloyDemoController implements ISerializable<FloyDemoSnapshot> {
 
   public runInferencing = async (): Promise<void> => {
     if (!this.seriesZip) return;
-
     await this.log();
 
     const formData = new FormData();
@@ -190,6 +190,52 @@ export class FloyDemoController implements ISerializable<FloyDemoSnapshot> {
               /* Intentionally left blank */
             }
           }
+          return data;
+        }),
+      ),
+    );
+  };
+
+  // Bulk-Upload
+  public runBulkInferencing = async (): Promise<void> => {
+    // if (!this.seriesZips) return;
+    await this.log();
+
+    // const formData = new FormData();
+    // formData.append("seriesZIP", this.seriesZips);
+    // formData.append("tokenStr", localStorage.getItem(FLOY_TOKEN_KEY) || "");
+
+    this.setInferenceResults(
+      await Promise.all(
+        FLOY_INFERENCE_ENDPOINTS_BULK.map(async (endpoint) => {
+          const data = await (
+            await fetch(endpoint, {
+              method: "POST",
+              mode: "cors",
+              headers: {
+                Authorization: "Token tgIi19m2rwm6BbUjx927Y5M0lXDAl2S1lPqmAKQz", // TO DO: Needs to be retrieved from a proxy server
+                Accept: "*/*",
+                Connection: "keep-alive",
+                "Accept-Encoding": "gzip, deflate, br",
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                project: "017cd0b2-ca35-6f87-caec-c32b29b4bf2d",
+                commit: "MB-segmentation-valohai-bulk-upload",
+                step: "Bulk-Upload",
+                inputs: {
+                  model: ["datum://model-production"],
+                  data: [
+                    "s3://valohai-data-218098999288/demo.floy.com-bulk-uploads/0000E7AE.zip",
+                    "s3://valohai-data-218098999288/demo.floy.com-bulk-uploads/00002A35.zip",
+                  ],
+                },
+                parameters: {
+                  mail: "VIA-VISIAN-firstname.lastname@radiology-x.com",
+                },
+              }),
+            })
+          ).json();
           return data;
         }),
       ),
