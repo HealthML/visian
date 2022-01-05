@@ -34,7 +34,7 @@ export class LAOComputer implements IDisposable {
     private editor: IEditor,
     sharedUniforms: SharedUniforms,
     firstDerivativeTexture: THREE.Texture,
-    secondDerivativeTexture: THREE.Texture,
+    // secondDerivativeTexture: THREE.Texture,
     private flush: () => void,
   ) {
     this.renderer = editor.renderer;
@@ -53,7 +53,7 @@ export class LAOComputer implements IDisposable {
     this.laoMaterial = new LAOMaterial(
       editor,
       firstDerivativeTexture,
-      secondDerivativeTexture,
+      // secondDerivativeTexture,
       this.target.texture,
       sharedUniforms,
     );

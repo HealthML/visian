@@ -21,7 +21,7 @@ export class LAOMaterial extends Texture3DMaterial {
   constructor(
     editor: IEditor,
     firstDerivativeTexture: THREE.Texture,
-    secondDerivativeTexture: THREE.Texture,
+    // secondDerivativeTexture: THREE.Texture,
     private previousFrameTexture: THREE.Texture,
     sharedUniforms: SharedUniforms,
   ) {
@@ -39,7 +39,7 @@ export class LAOMaterial extends Texture3DMaterial {
     });
 
     this.uniforms.uInputFirstDerivative.value = firstDerivativeTexture;
-    this.uniforms.uInputSecondDerivative.value = secondDerivativeTexture;
+    // this.uniforms.uInputSecondDerivative.value = secondDerivativeTexture;
 
     this.disposers.push(
       reaction(

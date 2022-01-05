@@ -21,7 +21,7 @@ export class Volume extends THREE.Mesh implements IDisposable {
     editor: IEditor,
     sharedUniforms: SharedUniforms,
     firstDerivative: THREE.Texture,
-    secondDerivative: THREE.Texture,
+    // secondDerivative: THREE.Texture,
     outputDerivative: THREE.Texture,
     lao: THREE.Texture,
   ) {
@@ -31,7 +31,7 @@ export class Volume extends THREE.Mesh implements IDisposable {
         editor,
         sharedUniforms,
         firstDerivative,
-        secondDerivative,
+        // secondDerivative,
         outputDerivative,
         lao,
       ),
@@ -42,7 +42,7 @@ export class Volume extends THREE.Mesh implements IDisposable {
       editor,
       sharedUniforms,
       firstDerivative,
-      secondDerivative,
+      // secondDerivative,
       outputDerivative,
       lao,
     );

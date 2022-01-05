@@ -20,7 +20,7 @@ export class VolumeMaterial
     editor: IEditor,
     sharedUniforms: SharedUniforms,
     firstDerivative: THREE.Texture,
-    secondDerivative: THREE.Texture,
+    // secondDerivative: THREE.Texture,
     outputDerivative: THREE.Texture,
     lao: THREE.Texture,
   ) {
@@ -44,7 +44,7 @@ export class VolumeMaterial
     this.side = THREE.BackSide;
 
     this.uniforms.uInputFirstDerivative.value = firstDerivative;
-    this.uniforms.uInputSecondDerivative.value = secondDerivative;
+    // this.uniforms.uInputSecondDerivative.value = secondDerivative;
     this.uniforms.uOutputFirstDerivative.value = outputDerivative;
     this.uniforms.uLAO.value = lao;
 
@@ -85,7 +85,7 @@ export class VolumePickingMaterial extends VolumeMaterial {
     editor: IEditor,
     sharedUniforms: SharedUniforms,
     firstDerivative: THREE.Texture,
-    secondDerivative: THREE.Texture,
+    // secondDerivative: THREE.Texture,
     outputDerivative: THREE.Texture,
     lao: THREE.Texture,
   ) {
@@ -93,7 +93,7 @@ export class VolumePickingMaterial extends VolumeMaterial {
       editor,
       sharedUniforms,
       firstDerivative,
-      secondDerivative,
+      // secondDerivative,
       outputDerivative,
       lao,
     );
