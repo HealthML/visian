@@ -37,6 +37,7 @@ export const InfoText = observer<InfoTextProps>(
     shortcuts,
     baseZIndex,
     position,
+    shouldDismissOnOutsidePress = true,
     ...rest
   }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -73,6 +74,7 @@ export const InfoText = observer<InfoTextProps>(
             baseZIndex === undefined ? theme.zIndices.info : baseZIndex
           }
           position={position}
+          onOutsidePress={shouldDismissOnOutsidePress ? closeModal : undefined}
         >
           {hasInfoText && (
             <StyledText tx={infoTx} text={infoText} isLast={!hasShortcuts} />

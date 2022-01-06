@@ -16,4 +16,12 @@ export interface InfoTextProps
   infoText?: string;
 
   shortcuts?: Shortcut[];
+
+  /**
+   * If set to `true`, the dismiss handler will be called on pointer downs
+   * outside the modal.
+   *
+   * Defaults to `true`.
+   */
+  shouldDismissOnOutsidePress?: boolean;
 }
