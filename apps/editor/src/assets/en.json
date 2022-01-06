@@ -170,5 +170,7 @@
   "volume": "Volume",
   "calculate-area": "Calculate Area on Slice",
   "calculate-volume": "Calculate Volume",
-  "calculating": "Calculating..."
+  "calculating": "Calculating...",
+
+  "help": "Help"
 }

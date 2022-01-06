@@ -170,5 +170,7 @@
   "volume": "Volumen",
   "calculate-area": "Fläche auf Schicht berechnen",
   "calculate-volume": "Volumen berechnen",
-  "calculating": "Berechnen..."
+  "calculating": "Berechnen...",
+
+  "help": "Hilfe"
 }

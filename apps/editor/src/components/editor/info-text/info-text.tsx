@@ -51,6 +51,7 @@ export const InfoText = observer<InfoTextProps>(
       <ModalHeaderButton
         icon="info"
         onPointerDown={toggleModal}
+        tooltipTx="help"
         ref={buttonRef}
         {...rest}
       >
