@@ -7,6 +7,10 @@ import { Text } from "../text";
 // import { MouseIcon, ShortcutContainer, ShortcutLabel } from "../shortcut-popup";
 import { InfoTextProps } from "./info-text.props";
 
+const StyledModal = styled(Modal)`
+  width: 220px;
+`;
+
 const StyledText = styled(Text)<{ isLast?: boolean }>`
   font-size: 13px;
   margin-bottom: ${(props) => (props.isLast ? "0px" : "14px")};
@@ -58,7 +62,7 @@ export const InfoText = observer<InfoTextProps>(
           ref={buttonRef}
           {...rest}
         />
-        <Modal
+        <StyledModal
           labelTx={titleTx}
           isOpen={isModalOpen && (hasShortcuts || hasInfoText)}
           anchor={buttonRef.current}
@@ -87,7 +91,7 @@ export const InfoText = observer<InfoTextProps>(
               </StyledShortcutContainer> */}
             </>
           )}
-        </Modal>
+        </StyledModal>
       </>
     );
   },
