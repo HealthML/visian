@@ -2,11 +2,12 @@ import React from "react";
 
 import { IEnumParameter } from "../../types";
 import { DropDown } from "../drop-down";
-import { Switch } from "../switch";
+import { Switch, SwitchProps } from "../switch";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type EnumParamProps<T = any> = IEnumParameter<T> &
-  Omit<React.HTMLAttributes<HTMLDivElement>, "defaultValue" | "onChange">;
+  Omit<React.HTMLAttributes<HTMLDivElement>, "defaultValue" | "onChange"> &
+  Pick<SwitchProps, "infoTx" | "infoPosition">;
 
 export const EnumParam: React.FC<
   Partial<EnumParamProps> & Pick<EnumParamProps, "options">

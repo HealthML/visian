@@ -1,10 +1,9 @@
-import { FlexRow, PopUp, Text, Theme } from "@visian/ui-shared";
+import { FlexRow, PopUp, Text, Theme, InfoText } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
 import React from "react";
 import styled, { useTheme } from "styled-components";
 
 import { useStore } from "../../../app/root-store";
-import { InfoText } from "../info-text";
 import { MeasurementPopUpProps } from "./measurement-popup.props";
 
 const StyledPopUp = styled(PopUp)`

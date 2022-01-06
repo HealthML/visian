@@ -183,6 +183,8 @@ export const ViewSettings: React.FC = observer(() => {
             />
             <EnumParam
               labelTx="transfer-function"
+              infoTx="info-transfer-function"
+              infoPosition="left"
               options={Object.values(
                 store.editor.activeDocument.viewport3D.transferFunctions,
               ).map((transferFunction) => ({

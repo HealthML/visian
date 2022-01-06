@@ -1,4 +1,5 @@
 import type { IconType, ButtonProps } from "@visian/ui-shared";
+import { ModalProps } from "../modal";
 
 export interface Shortcut {
   icons: IconType[];
@@ -7,14 +8,12 @@ export interface Shortcut {
 }
 
 export interface InfoTextProps
-  extends Omit<ButtonProps, "tooltipPosition" | "isActive"> {
+  extends Omit<ButtonProps, "tooltipPosition" | "isActive">,
+    Pick<ModalProps, "baseZIndex" | "position"> {
   titleTx?: string;
 
   infoTx?: string;
   infoText?: string;
 
   shortcuts?: Shortcut[];
-
-  /** The z-index of the surface below. */
-  baseZIndex?: number;
 }

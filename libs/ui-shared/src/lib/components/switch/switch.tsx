@@ -2,7 +2,8 @@ import React from "react";
 import styled from "styled-components";
 
 import { color } from "../../theme";
-import { InputContainer } from "../box";
+import { FlexRow, InputContainer } from "../box";
+import { InfoText } from "../info-text";
 import { Sheet } from "../sheet";
 import { InputLabel } from "../text";
 import { SwitchOption } from "./switch-option";
@@ -36,9 +37,19 @@ const ActiveSwitchOption = styled(Sheet)`
   justify-content: center;
 `;
 
+const LabelRow = styled(FlexRow)`
+  justify-content: space-between;
+`;
+
+const StyledInfoText = styled(InfoText)`
+  margin-top: -4px;
+`;
+
 export const Switch: React.FC<SwitchProps> = ({
   labelTx,
   label,
+  infoTx,
+  infoPosition,
   options,
   defaultValue,
   value,
@@ -61,7 +72,12 @@ export const Switch: React.FC<SwitchProps> = ({
 
   return (
     <InputContainer {...rest}>
-      {(labelTx || label) && <InputLabel tx={labelTx} text={label} />}
+      {(labelTx || label) && (
+        <LabelRow>
+          <InputLabel tx={labelTx} text={label} />
+          {infoTx && <StyledInfoText infoTx={infoTx} position={infoPosition} />}
+        </LabelRow>
+      )}
       <SwitchContainer>
         {length && (
           <>

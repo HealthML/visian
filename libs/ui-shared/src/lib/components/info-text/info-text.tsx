@@ -1,15 +1,10 @@
-import {
-  Divider,
-  Modal,
-  ModalHeaderButton,
-  Spacer,
-  Text,
-  Theme,
-} from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
 import React, { useCallback, useRef, useState } from "react";
 import styled, { useTheme } from "styled-components";
-import { MouseIcon, ShortcutContainer, ShortcutLabel } from "../shortcut-popup";
+import { Theme } from "../../theme";
+import { Divider, Modal, ModalHeaderButton } from "../modal";
+import { Text } from "../text";
+// import { MouseIcon, ShortcutContainer, ShortcutLabel } from "../shortcut-popup";
 import { InfoTextProps } from "./info-text.props";
 
 const StyledText = styled(Text)<{ isLast?: boolean }>`
@@ -17,21 +12,29 @@ const StyledText = styled(Text)<{ isLast?: boolean }>`
   margin-bottom: ${(props) => (props.isLast ? "0px" : "14px")};
 `;
 
-const SpacedStyledShortcutContainer = styled(ShortcutContainer)`
-  width: 100%;
-  margin-bottom: 10px;
-`;
+// const SpacedStyledShortcutContainer = styled(ShortcutContainer)`
+//   width: 100%;
+//   margin-bottom: 10px;
+// `;
 
-const StyledShortcutContainer = styled(ShortcutContainer)`
-  width: 100%;
-`;
+// const StyledShortcutContainer = styled(ShortcutContainer)`
+//   width: 100%;
+// `;
 
-const ShortcutSpacer = styled(Spacer)`
-  height: 10px;
-`;
+// const ShortcutSpacer = styled(Spacer)`
+//   height: 10px;
+// `;
 
 export const InfoText = observer<InfoTextProps>(
-  ({ titleTx = "help", infoTx, infoText, shortcuts, baseZIndex, ...rest }) => {
+  ({
+    titleTx = "help",
+    infoTx,
+    infoText,
+    shortcuts,
+    baseZIndex,
+    position,
+    ...rest
+  }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const toggleModal = useCallback(() => setIsModalOpen(!isModalOpen), [
       isModalOpen,
@@ -51,6 +54,7 @@ export const InfoText = observer<InfoTextProps>(
           icon="info"
           onPointerDown={toggleModal}
           tooltipTx={titleTx}
+          showTooltip={!isModalOpen}
           ref={buttonRef}
           {...rest}
         />
@@ -64,6 +68,7 @@ export const InfoText = observer<InfoTextProps>(
           baseZIndex={
             baseZIndex === undefined ? theme.zIndices.info : baseZIndex
           }
+          position={position}
         >
           {hasInfoText && (
             <StyledText tx={infoTx} text={infoText} isLast={!hasShortcuts} />
@@ -71,7 +76,7 @@ export const InfoText = observer<InfoTextProps>(
           {hasShortcuts && (
             <>
               <Divider />
-              <SpacedStyledShortcutContainer>
+              {/* <SpacedStyledShortcutContainer>
                 <MouseIcon icon="leftMouse" />
                 <ShortcutLabel text="Left Click" />
               </SpacedStyledShortcutContainer>
@@ -79,7 +84,7 @@ export const InfoText = observer<InfoTextProps>(
               <StyledShortcutContainer>
                 <MouseIcon icon="leftMouse" />
                 <ShortcutLabel text="Left Click" />
-              </StyledShortcutContainer>
+              </StyledShortcutContainer> */}
             </>
           )}
         </Modal>

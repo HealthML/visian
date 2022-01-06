@@ -7,6 +7,7 @@ import {
   preventDefault,
   Theme,
   Tool,
+  InfoText,
   Toolbar as GenericToolbar,
 } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
@@ -15,7 +16,6 @@ import styled, { useTheme } from "styled-components";
 
 import { useStore } from "../../../app/root-store";
 import { ToolName } from "../../../models";
-import { InfoText } from "../info-text";
 
 // Styled Components
 const StyledToolbar = styled(GenericToolbar)`
@@ -164,6 +164,7 @@ export const Toolbar: React.FC = observer(() => {
                 setValue={
                   store?.editor.activeDocument?.tools.setUseAdaptiveBrushSize
                 }
+                infoTx="info-adaptive-brush-size"
               />
               <NumberParam
                 labelTx="brush-size"
