@@ -37,6 +37,7 @@ export interface DropDownProps<T = any>
 
   infoTx?: string;
   infoPosition?: ModalPosition;
+  infoBaseZIndex?: number;
 
   options: IEnumParameterOption<T>[];
 

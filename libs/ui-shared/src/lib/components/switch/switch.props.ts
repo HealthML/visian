@@ -13,6 +13,7 @@ export interface SwitchProps<T = any>
 
   infoTx?: string;
   infoPosition?: ModalPosition;
+  infoBaseZIndex?: number;
 
   options: IEnumParameterOption<T>[];
 

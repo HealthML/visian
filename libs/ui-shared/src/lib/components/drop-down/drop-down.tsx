@@ -39,6 +39,7 @@ export const DropDown: React.FC<DropDownProps> = ({
   onChange,
   infoTx,
   infoPosition,
+  infoBaseZIndex,
   ...rest
 }) => {
   const actualValue =
@@ -76,7 +77,13 @@ export const DropDown: React.FC<DropDownProps> = ({
       {(labelTx || label) && (
         <LabelRow>
           <InputLabel tx={labelTx} text={label} />
-          {infoTx && <StyledInfoText infoTx={infoTx} position={infoPosition} />}
+          {infoTx && (
+            <StyledInfoText
+              infoTx={infoTx}
+              position={infoPosition}
+              baseZIndex={infoBaseZIndex}
+            />
+          )}
         </LabelRow>
       )}
       <Selector

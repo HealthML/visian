@@ -10,7 +10,7 @@ const booleanSwitchOptions = [
 
 export type BooleanParamProps = IBooleanParameter &
   Omit<React.HTMLAttributes<HTMLDivElement>, "defaultValue" | "onChange"> &
-  Pick<SwitchProps, "infoTx" | "infoPosition">;
+  Pick<SwitchProps, "infoTx" | "infoPosition" | "infoBaseZIndex">;
 
 export const BooleanParam: React.FC<Partial<BooleanParamProps>> = ({
   labelTx,
