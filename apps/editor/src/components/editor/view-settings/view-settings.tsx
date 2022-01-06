@@ -172,6 +172,8 @@ export const ViewSettings: React.FC = observer(() => {
             />
             <EnumParam
               labelTx="shading-mode"
+              infoTx="info-shading-mode"
+              infoPosition="left"
               options={shadingModeSwitchOptions}
               value={
                 store.editor.activeDocument.viewport3D.requestedShadingMode ||
