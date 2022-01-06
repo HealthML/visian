@@ -32,6 +32,7 @@ export class VolumeMaterial
         uOutputFirstDerivative: { value: null },
         uLAO: { value: null },
         uUseRayDithering: { value: true },
+        uRayDitheringOffset: { value: 0 },
       },
       defines: {
         MAX_STEPS: 600,
@@ -77,6 +78,10 @@ export class VolumeMaterial
 
   public setUseRayDithering(value: boolean) {
     this.uniforms.uUseRayDithering.value = value;
+  }
+
+  public setRayDitheringOffset(value = 0) {
+    this.uniforms.uRayDitheringOffset.value = value;
   }
 }
 
