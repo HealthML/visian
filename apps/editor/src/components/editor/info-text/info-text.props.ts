@@ -8,8 +8,13 @@ export interface Shortcut {
 
 export interface InfoTextProps
   extends Omit<ButtonProps, "tooltipPosition" | "isActive"> {
+  titleTx?: string;
+
   infoTx?: string;
   infoText?: string;
 
   shortcuts?: Shortcut[];
+
+  /** The z-index of the surface below. */
+  baseZIndex?: number;
 }

@@ -4,11 +4,11 @@ import {
   ModalHeaderButton,
   Spacer,
   Text,
-  zIndex,
+  Theme,
 } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
 import React, { useCallback, useRef, useState } from "react";
-import styled from "styled-components";
+import styled, { useTheme } from "styled-components";
 import { MouseIcon, ShortcutContainer, ShortcutLabel } from "../shortcut-popup";
 import { InfoTextProps } from "./info-text.props";
 
@@ -30,12 +30,8 @@ const ShortcutSpacer = styled(Spacer)`
   height: 10px;
 `;
 
-const StyledModal = styled(Modal)`
-  z-index: ${zIndex("info")};
-`;
-
 export const InfoText = observer<InfoTextProps>(
-  ({ infoTx, infoText, shortcuts, ...rest }) => {
+  ({ titleTx = "help", infoTx, infoText, shortcuts, baseZIndex, ...rest }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const toggleModal = useCallback(() => setIsModalOpen(!isModalOpen), [
       isModalOpen,
@@ -47,21 +43,26 @@ export const InfoText = observer<InfoTextProps>(
     const hasShortcuts = Boolean(shortcuts && shortcuts.length);
     const hasInfoText = Boolean(infoTx || infoText);
 
+    const theme = useTheme() as Theme;
+
     return (
       <>
         <ModalHeaderButton
           icon="info"
           onPointerDown={toggleModal}
-          tooltipTx="help"
+          tooltipTx={titleTx}
           ref={buttonRef}
           {...rest}
         />
-        <StyledModal
-          labelTx="help"
+        <Modal
+          labelTx={titleTx}
           isOpen={isModalOpen && (hasShortcuts || hasInfoText)}
           anchor={buttonRef.current}
           headerChildren={
             <ModalHeaderButton icon="xSmall" onPointerDown={closeModal} />
+          }
+          baseZIndex={
+            baseZIndex === undefined ? theme.zIndices.info : baseZIndex
           }
         >
           {hasInfoText && (
@@ -81,7 +82,7 @@ export const InfoText = observer<InfoTextProps>(
               </StyledShortcutContainer>
             </>
           )}
-        </StyledModal>
+        </Modal>
       </>
     );
   },

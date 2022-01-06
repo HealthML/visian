@@ -172,5 +172,8 @@
   "calculate-volume": "Calculate Volume",
   "calculating": "Calculating...",
 
-  "help": "Help"
+  "help": "Help",
+  "unit": "Unit",
+
+  "info-unit": "The unit is not always specified in the data. For medical images such as MRI and CT it is usually mm. For generic images such as PNG or JPG it is simply pixels."
 }

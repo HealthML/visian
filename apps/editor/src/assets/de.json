@@ -172,5 +172,8 @@
   "calculate-volume": "Volumen berechnen",
   "calculating": "Berechnen...",
 
-  "help": "Hilfe"
+  "help": "Hilfe",
+  "unit": "Einheit",
+
+  "info-unit": "Die Einheit ist in den Daten nicht immer spezifiziert. Bei medizinischen Daten wie MRT- und CT-Bildern handelt es sich meist um mm. Bei generischen Bilddaten wie PNG oder JPG Bildern handelt es sich lediglich um Pixel."
 }
