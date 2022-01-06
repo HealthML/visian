@@ -172,6 +172,8 @@ export const ViewSettings: React.FC = observer(() => {
             />
             <EnumParam
               labelTx="shading-mode"
+              infoTx="info-shading-mode"
+              infoPosition="left"
               options={shadingModeSwitchOptions}
               value={
                 store.editor.activeDocument.viewport3D.requestedShadingMode ||
@@ -183,6 +185,8 @@ export const ViewSettings: React.FC = observer(() => {
             />
             <EnumParam
               labelTx="transfer-function"
+              infoTx="info-transfer-function"
+              infoPosition="left"
               options={Object.values(
                 store.editor.activeDocument.viewport3D.transferFunctions,
               ).map((transferFunction) => ({

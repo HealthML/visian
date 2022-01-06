@@ -5,6 +5,7 @@ import {
   FloatingUIButton,
   IImageLayer,
   ILayer,
+  InfoText,
   List,
   ListItem,
   Modal,
@@ -46,6 +47,10 @@ const noop = () => {
 };
 
 // Styled Components
+const StyledInfoText = styled(InfoText)`
+  margin-right: 10px;
+`;
+
 const LayerList = styled(List)`
   ${styledScrollbarMixin}
 
@@ -369,15 +374,20 @@ export const Layers: React.FC = observer(() => {
         anchor={buttonRef}
         position="right"
         headerChildren={
-          <ModalHeaderButton
-            icon="plus"
-            tooltipTx="add-annotation-layer"
-            isDisabled={
-              !layerCount ||
-              layerCount >= (store?.editor.activeDocument?.maxLayers || 0)
-            }
-            onPointerDown={store?.editor.activeDocument?.addNewAnnotationLayer}
-          />
+          <>
+            <StyledInfoText infoTx="info-layer-stack" />
+            <ModalHeaderButton
+              icon="plus"
+              tooltipTx="add-annotation-layer"
+              isDisabled={
+                !layerCount ||
+                layerCount >= (store?.editor.activeDocument?.maxLayers || 0)
+              }
+              onPointerDown={
+                store?.editor.activeDocument?.addNewAnnotationLayer
+              }
+            />
+          </>
         }
       >
         {/* TODO: Should we update on every drag change or just on drop? */}

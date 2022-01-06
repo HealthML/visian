@@ -1,6 +1,7 @@
 import type React from "react";
 import type { IEnumParameterOption } from "../../types";
 import type { RelativePositionConfig } from "../utils";
+import type { ModalPosition } from "../modal";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export interface DropDownOptionProps<T = any> extends IEnumParameterOption<T> {
@@ -33,6 +34,10 @@ export interface DropDownProps<T = any>
   > {
   labelTx?: string;
   label?: string;
+
+  infoTx?: string;
+  infoPosition?: ModalPosition;
+  infoBaseZIndex?: number;
 
   options: IEnumParameterOption<T>[];
 

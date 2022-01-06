@@ -160,15 +160,31 @@
 
   "custom-tf-file": "Transferfunktionsbild",
 
-  "too-many-layers": "Zu viele Schichten",
-  "too-many-layers-2d": "VISIAN kann auf ihrem Gerät auf Grund von Hardwarebeschränkungen nur {{count}} Schichten anzeigen.",
-  "too-many-layers-3d": "Im 3D Modus kann VISIAN auf ihrem Gerät auf Grund von Hardwarebeschränkungen nur {{count}} Schichten anzeigen.",
+  "too-many-layers": "Zu viele Ebenen",
+  "too-many-layers-2d": "VISIAN kann auf ihrem Gerät auf Grund von Hardwarebeschränkungen nur {{count}} Ebenen anzeigen.",
+  "too-many-layers-3d": "Im 3D Modus kann VISIAN auf ihrem Gerät auf Grund von Hardwarebeschränkungen nur {{count}} Ebenen anzeigen.",
   "squashed-layers-title": "Annotationen vereint",
-  "squashed-layers-import": "Die hochgeladene Datei enthält mehrere verschiedene Annotationen. Dadurch wären zu viele Annotationsschichten entstanden. VISIAN hat alle Annotationen zu einer Annotation vereint.",
+  "squashed-layers-import": "Die hochgeladene Datei enthält mehrere verschiedene Annotationen. Dadurch wären zu viele Annotationsebenen entstanden. VISIAN hat alle Annotationen zu einer Annotation vereint.",
 
   "area": "Fläche",
   "volume": "Volumen",
   "calculate-area": "Fläche auf Schicht berechnen",
   "calculate-volume": "Volumen berechnen",
-  "calculating": "Berechnen..."
+  "calculating": "Berechnen...",
+
+  "help": "Hilfe",
+  "unit": "Einheit",
+
+  "info-unit": "Die Einheit ist in den Daten nicht immer spezifiziert. Bei medizinischen Daten wie MRT- und CT-Bildern handelt es sich meist um mm. Bei generischen Bilddaten wie PNG oder JPG Bildern handelt es sich lediglich um Pixel.",
+  "info-brush": "Der Pinsel ist das einfachste Malwerkzeug von VISIAN. Die Pinselgröße kann angepasst werden und mit Links- bzw. Rechtsklick kann gemalt und radiert werden.",
+  "info-smart-brush": "Der smarte Pinsel fürt Regiongrowing auf der aktuellen Schicht basierend auf den gemalten Strichen aus. Der Schwellwert kontrolliert, wie groß der Intensitäts- bzw. Farbunterschied zwischen benachbarten Pixeln/Voxeln sein darf, damit die Region noch wachsen kann. Ein größerer Schwellwert resultiert in einer größeren gewachsenen Region.",
+  "info-bounded-smart-brush": "Der begrenzte smarte Pinsel führt Live-Regiongrowing auf der aktuellen Schicht aus, während gemalt wird. Der Pixel in der Mitte funktioniert wie ein normaler Ein-Pixel-Pinsel. Die Region kann in der Begrenzung darum herum wachsen. Der Schwellwert kontrolliert, wie groß der Intensitäts- bzw. Farbunterschied zwischen benachbarten Pixeln/Voxeln sein darf, damit die Region noch wachsen kann. Ein größerer Schwellwert resultiert in einer größeren gewachsenen Region.",
+  "info-smart-brush-3d": "Der smarte 3D Pinsel führt 3D Regiongrowing basierend auf dem gesetzten Seed aus. Die gewachsene Region wird als Preview angezeigt und kann mit dem sich unten links öffnenden Fenster getuned werden. Wenn die Region getuned wurde, kann sie auf die aktuell aktive Annotationsebene angewendet werden. Der Schwellwert kontrolliert, wie groß der Intensitäts- bzw. Farbunterschied zwischen benachbarten Pixeln/Voxeln sein darf, damit die Region noch wachsen kann. Ein größerer Schwellwert resultiert in einer größeren gewachsenen Region.",
+  "info-adaptive-brush-size": "Die Pinselgröße kann sich adaptiv an den Zoom anpassen. Bei stärkerem Zoom wird die Pinselgröße kleiner, bei geringerem Zoom größer.",
+  "info-shading-mode": "Die Schattierung hilft, um Formen in der 3D-Ansicht zu besser zu erkennen. LAO ist empfohlen. Achtung: Die Schattierung kann dazu führen, dass Intensitätsdaten verfälscht dargestellt werden.",
+  "info-transfer-function": "Die Transferfunktion stellt ein, wie das Volumen dargestellt wird.",
+  "info-exclusive-segmentations": "Mit dieser Option kann sichergestellt werden, dass die Segmentierungsebenen sich nicht überlappen können. Dabei \"gewinnt\" immer die Ebene, die weiter oben im Ebenenstapel liegt. Das Resultat wird dann auch entsprechend exportiert.",
+  "info-voxel-data": "Die Voxeldaten des geladenen Bildes werden unten links im Editor angezeigt. Auf langsamerer Hardware kann das zu Performanceproblemen führen. In diesem Fall ist die Option \"Verzögerung\" empfohlen. Dann werden die Voxeldaten nur angezeigt, wenn die Maus nicht mehr bewegt wird.",
+  "info-performance-mode": "Die Anzeigequalität hat nur im 3D-Modus einen Effekt. Dort kann eine höhere Anzeigequalität zu Performanceproblemen führen. Auf langsamerer Hardware ist die niedrige Anzeigequalität empfohlen.",
+  "info-layer-stack": "Im Ebenenstapel können die Ebenen neu angeordnet (drag and drop) und versteckt werden. Ebenen, die weiter oben im Stapel erscheinen, werden über den anderen Ebenen in der 2D und 3D Ansicht angezeigt. Weitere Aktionen auf einer einzelnen Ebene sind über einen Rechtsklick auf die Ebene im Stapel erreichbar."
 }

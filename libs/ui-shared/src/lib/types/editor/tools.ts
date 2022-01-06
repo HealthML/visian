@@ -34,6 +34,11 @@ export interface ITool<N extends string> {
   labelTx?: string;
 
   /**
+   * The translation key for an info text about the tool.
+   */
+  infoTx?: string;
+
+  /**
    * Indicates if the tool is a drawing tool, i.e., if it the user can use it
    * to paint (modify the values of a number of contiguous voxels).
    */

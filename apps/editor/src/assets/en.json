@@ -170,5 +170,21 @@
   "volume": "Volume",
   "calculate-area": "Calculate Area on Slice",
   "calculate-volume": "Calculate Volume",
-  "calculating": "Calculating..."
+  "calculating": "Calculating...",
+
+  "help": "Help",
+  "unit": "Unit",
+
+  "info-unit": "The unit is not always specified in the data. For medical images such as MRI and CT it is usually mm. For generic images such as PNG or JPG it is simply pixels.",
+  "info-brush": "The brush is the most simple drawing tool of VISIAN. You can change the size of the brush and use left- and right-click to draw and erase.",
+  "info-smart-brush": "The smart brush performs region growing on the current slice based on the strokes you draw. The threshold controls how large the difference between neighboring pixels/voxels intensities or color values may be while still allowing the region to grow further. A larger threshold results in larger grown regions.",
+  "info-bounded-smart-brush": "The bounded smart brush performs live region growing on the current slice while drawing a stroke. The center voxel works like a normal one-pixel brush. The region can grow within the bounding box around it. The threshold controls how large the difference between neighboring pixels/voxels intensities or color values may be while still allowing the region to grow further. A larger threshold results in larger grown regions.",
+  "info-smart-brush-3d": "The 3D smart brush performs 3D region growing based on the seed you place. The grown region is then displayed as a preview and can be tuned using the slider in the window, which opens up in the bottom left of your screen. Once you are happy with the tuned review segmentation, you can apply it to the currently active segmentation layer. The threshold controls how large the difference between neighboring pixels/voxels intensities or color values may be while still allowing the region to grow further. A larger threshold results in larger grown regions.",
+  "info-adaptive-brush-size": "The brush size can adapt to the zoom level. For a higher zoom level, the brush size will be smaller. For a lower zoom level, it will be higher.",
+  "info-shading-mode": "The shading helps to better understand shapes in 3D. LAO is recommended. Warning: Shading can lead to distorted intensity values.",
+  "info-transfer-function": "The transfer functions determine how the volume is displayed.",
+  "info-exclusive-segmentations": "With this option, you can ensure that segmentation layers cannot overlap. Layers further up in the layer stack \"win\" against lower layers. The result will be exported accordingly.",
+  "info-voxel-data": "The voxel data of the loaded image is displayed in the bottom left corner of the editor. On slower hardware, this can lead to reduced performance. In this case, the option \"Delay\" is recommended. This will result in voxel data only being displayed when you don't move the mouse.",
+  "info-performance-mode": "The view quality only has an effect in the 3D mode. There, the higher view quality can lead to reduced performance. On slower hardware, the lower view quality is recommended.",
+  "info-layer-stack": "In the layer stack, you can reorder (drag and drop) and hide layers. Layers higher up in the stack show up above the other layers in both the 2D and 3D view. To perform other actions on a single layer, right click the layer in the stack."
 }
