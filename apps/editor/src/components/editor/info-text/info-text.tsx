@@ -48,13 +48,14 @@ export const InfoText = observer<InfoTextProps>(
     const hasInfoText = Boolean(infoTx || infoText);
 
     return (
-      <ModalHeaderButton
-        icon="info"
-        onPointerDown={toggleModal}
-        tooltipTx="help"
-        ref={buttonRef}
-        {...rest}
-      >
+      <>
+        <ModalHeaderButton
+          icon="info"
+          onPointerDown={toggleModal}
+          tooltipTx="help"
+          ref={buttonRef}
+          {...rest}
+        />
         <StyledModal
           labelTx="help"
           isOpen={isModalOpen && (hasShortcuts || hasInfoText)}
@@ -81,7 +82,7 @@ export const InfoText = observer<InfoTextProps>(
             </>
           )}
         </StyledModal>
-      </ModalHeaderButton>
+      </>
     );
   },
 );
