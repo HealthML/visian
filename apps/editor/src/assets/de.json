@@ -184,5 +184,6 @@
   "info-transfer-function": "Die Transferfunktion stellt ein, wie das Volumen dargestellt wird.",
   "info-exclusive-segmentations": "Mit dieser Option kann sichergestellt werden, dass die Segmentierungsebenen sich nicht überlappen können. Dabei kann \"gewinnt\" immer die Ebene, die weiter oben im Ebenenstapel liegt. Das Resultat wird dann auch entsprechend exportiert.",
   "info-voxel-data": "Die Voxeldaten des geladenen Bildes werden unten links im Editor angezeigt. Auf langsamerer Hardware kann das zu Performanceproblemen führen. In diesem Fall ist die Option \"Verzögerung\" empfohlen. Dann werden die Voxeldaten nur angezeigt, wenn die Maus nicht mehr bewegt wird.",
-  "info-performance-mode": "Die Anzeigequalität hat nur im 3D-Modus einen Effekt. Dort kann eine höhere Anzeigequalität zu Performanceproblemen führen. Auf langsamerer Hardware ist die niedrige Anzeigequalität empfohlen."
+  "info-performance-mode": "Die Anzeigequalität hat nur im 3D-Modus einen Effekt. Dort kann eine höhere Anzeigequalität zu Performanceproblemen führen. Auf langsamerer Hardware ist die niedrige Anzeigequalität empfohlen.",
+  "info-layer-stack": "Im Ebenenstapel können die Ebenen neu angeordnet (drag and drop) und versteckt werden. Ebene die weiter oben im Stapel erscheinen über den anderen Ebenen in der 2D und 3D Ansicht. Weitere Aktionen auf einer einzelnen Ebene sind über einen Rechtsklick auf die Ebene im Stapel erreichbar."
 }
