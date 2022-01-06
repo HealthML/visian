@@ -125,6 +125,8 @@ jobs:
         uses: andstor/file-existence-action@v1
         with:
           files: "dist/index.html"
+      # Make sure that non index entry-points get served as well
+      - run: cp dist/index.html dist/404.html
       - name: Deploy to floy-demo
         uses: peaceiris/actions-gh-pages@v3
         if: steps.check_files.outputs.files_exists == 'true'
