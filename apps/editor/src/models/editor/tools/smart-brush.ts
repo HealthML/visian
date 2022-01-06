@@ -19,6 +19,7 @@ export class SmartBrush<
     super(document, regionGrowingRenderer, isAdditive, {
       name: (isAdditive ? "smart-brush" : "smart-eraser") as N,
       altToolName: (isAdditive ? "smart-eraser" : "smart-brush") as N,
+      infoTx: "info-smart-brush",
       icon: isAdditive ? "magicBrush" : "eraser",
       supportedViewModes: ["2D"],
       supportedLayerKinds: ["image"],

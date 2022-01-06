@@ -20,6 +20,7 @@ export class SmartBrush3D<N extends "smart-brush-3d" = "smart-brush-3d">
     super(
       {
         name: "smart-brush-3d" as N,
+        infoTx: "info-smart-brush-3d",
         icon: "smartBrush3D",
         supportedViewModes: ["2D", "3D"],
         supportedLayerKinds: ["image"],

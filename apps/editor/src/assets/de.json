@@ -160,11 +160,11 @@
 
   "custom-tf-file": "Transferfunktionsbild",
 
-  "too-many-layers": "Zu viele Schichten",
-  "too-many-layers-2d": "VISIAN kann auf ihrem Gerät auf Grund von Hardwarebeschränkungen nur {{count}} Schichten anzeigen.",
-  "too-many-layers-3d": "Im 3D Modus kann VISIAN auf ihrem Gerät auf Grund von Hardwarebeschränkungen nur {{count}} Schichten anzeigen.",
+  "too-many-layers": "Zu viele Ebenen",
+  "too-many-layers-2d": "VISIAN kann auf ihrem Gerät auf Grund von Hardwarebeschränkungen nur {{count}} Ebenen anzeigen.",
+  "too-many-layers-3d": "Im 3D Modus kann VISIAN auf ihrem Gerät auf Grund von Hardwarebeschränkungen nur {{count}} Ebenen anzeigen.",
   "squashed-layers-title": "Annotationen vereint",
-  "squashed-layers-import": "Die hochgeladene Datei enthält mehrere verschiedene Annotationen. Dadurch wären zu viele Annotationsschichten entstanden. VISIAN hat alle Annotationen zu einer Annotation vereint.",
+  "squashed-layers-import": "Die hochgeladene Datei enthält mehrere verschiedene Annotationen. Dadurch wären zu viele Annotationsebenen entstanden. VISIAN hat alle Annotationen zu einer Annotation vereint.",
 
   "area": "Fläche",
   "volume": "Volumen",
@@ -175,5 +175,9 @@
   "help": "Hilfe",
   "unit": "Einheit",
 
-  "info-unit": "Die Einheit ist in den Daten nicht immer spezifiziert. Bei medizinischen Daten wie MRT- und CT-Bildern handelt es sich meist um mm. Bei generischen Bilddaten wie PNG oder JPG Bildern handelt es sich lediglich um Pixel."
+  "info-unit": "Die Einheit ist in den Daten nicht immer spezifiziert. Bei medizinischen Daten wie MRT- und CT-Bildern handelt es sich meist um mm. Bei generischen Bilddaten wie PNG oder JPG Bildern handelt es sich lediglich um Pixel.",
+  "info-brush": "Der Pinsel ist das einfachste Malwerkzeug von VISIAN. Die Pinselgröße kann angepasst werden und mit Links- bzw. Rechtsklick kann gemalt und radiert werden.",
+  "info-smart-brush": "Der Smarte Pinsel fürt Regiongrowing auf der aktuellen Schicht basierend auf den gemalten Strichen aus. Der Schwellwert kontrolliert wie groß der Intensitäts- bzw. Farbunterschied zwischen benachbarten Pixeln/Voxeln sein darf damit die Region noch wachsen kann. Ein größerer Schwellwert resultiert in einer größeren gewachsenen Region.",
+  "info-bounded-smart-brush": "Der begrenzte smarte Pinsel fürt Live-Regiongrowing auf der aktuellen Schicht aus, während gemalt wird. Der Pixel in der Mitte funktioniert wie ein normaler Ein-Pixel-Pinsel. Die Region kann in der Begrenzung darum herum wachsen. Der Schwellwert kontrolliert wie groß der Intensitäts- bzw. Farbunterschied zwischen benachbarten Pixeln/Voxeln sein darf damit die Region noch wachsen kann. Ein größerer Schwellwert resultiert in einer größeren gewachsenen Region.",
+  "info-smart-brush-3d": "Der smarte 3D Pinsel führt 3D Regiongrowing basierend auf dem gesetzten Seed aus. Die gewachsene Region wird als Preview angezeigt und kann mit dem sich unten links öffnenden Fenster getuned werden. Wenn die Region getuned wurde, kann sie auf die aktuell aktive Annotationsebene angewandt werden. Der Schwellwert kontrolliert wie groß der Intensitäts- bzw. Farbunterschied zwischen benachbarten Pixeln/Voxeln sein darf damit die Region noch wachsen kann. Ein größerer Schwellwert resultiert in einer größeren gewachsenen Region."
 }

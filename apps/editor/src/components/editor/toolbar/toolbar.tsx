@@ -141,7 +141,9 @@ export const Toolbar: React.FC = observer(() => {
         anchor={buttonRef}
         position="right"
         baseZIndex={modalZ}
-        headerChildren={<StyledInfoText infoTx={activeTool?.name} />}
+        headerChildren={
+          activeTool?.infoTx && <StyledInfoText infoTx={activeTool?.infoTx} />
+        }
         onOutsidePress={closeModal}
         onReset={
           store?.editor.activeDocument?.tools.activeTool?.name === "plane-tool"

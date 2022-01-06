@@ -175,5 +175,9 @@
   "help": "Help",
   "unit": "Unit",
 
-  "info-unit": "The unit is not always specified in the data. For medical images such as MRI and CT it is usually mm. For generic images such as PNG or JPG it is simply pixels."
+  "info-unit": "The unit is not always specified in the data. For medical images such as MRI and CT it is usually mm. For generic images such as PNG or JPG it is simply pixels.",
+  "info-brush": "The brush is the most simple drawing tool of VISIAN. You can change the size of the brush and use left- and right-click to draw and erase.",
+  "info-smart-brush": "The smart brush performs region growing on the current slice based on the strokes you draw. The threshold controls how large the difference between neighboring pixels/voxels intensities or color values may be while still allowing the region to grow further. A larger threshold results in larger grown regions.",
+  "info-bounded-smart-brush": "The bounded smart brush performs live region growing on the current slice while drawing a stroke. The center voxel works like a normal one-pixel brush. The region can grow within the bounding box around it. The threshold controls how large the difference between neighboring pixels/voxels intensities or color values may be while still allowing the region to grow further. A larger threshold results in larger grown regions.",
+  "info-smart-brush-3d": "The 3D smart brush performs 3D region growing based on the seed you place. The grown region is then dispalyed as a preview and can be tuned using the slider in the window which opens up in the bottom left of your screen. Once you are happy with the tuned review segmentation you can apply to the currently active segmentation layer. The threshold controls how large the difference between neighboring pixels/voxels intensities or color values may be while still allowing the region to grow further. A larger threshold results in larger grown regions."
 }
