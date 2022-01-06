@@ -613,7 +613,10 @@ export class Document
         } else {
           uniqueValues.forEach(async (value) => {
             if (value === 0) return;
-            createdLayerId = await this.importAnnotation(image, value);
+            createdLayerId = await this.importAnnotation(
+              { ...image, name: `${value}_${image.name}` },
+              value,
+            );
           });
         }
       }
