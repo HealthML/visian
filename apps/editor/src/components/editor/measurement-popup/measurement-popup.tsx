@@ -19,6 +19,10 @@ const StyledInfoText = styled(InfoText)`
   margin-right: 5px;
 `;
 
+const StyledText = styled(Text)`
+  font-size: 13pt;
+`;
+
 export const MeasurementPopUp: React.FC<MeasurementPopUpProps> = observer(
   ({ isOpen, onClose }) => {
     const store = useStore();
@@ -42,7 +46,7 @@ export const MeasurementPopUp: React.FC<MeasurementPopUpProps> = observer(
       >
         {value !== null && value !== undefined ? (
           <MeasurementRow>
-            <Text text={value.toFixed(2)} />
+            <StyledText text={value.toFixed(2)} />
             <StyledInfoText
               titleTx="unit"
               infoTx="info-unit"
