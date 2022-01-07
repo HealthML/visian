@@ -86,7 +86,9 @@ export class RenderedSheet extends THREE.Mesh implements IDisposable {
         { fireImmediately: true },
       ),
       reaction(
-        () => this.editor.activeDocument?.viewport2D.showSideViews,
+        () =>
+          this.editor.activeDocument?.viewport2D.showSideViews &&
+          this.editor.activeDocument?.has3DLayers,
         this.updateVisibility,
       ),
     );
@@ -146,7 +148,9 @@ export class RenderedSheet extends THREE.Mesh implements IDisposable {
 
   private updateVisibility = () => {
     this.visible = Boolean(
-      this.domElement && this.editor.activeDocument?.viewport2D.showSideViews,
+      this.domElement &&
+        this.editor.activeDocument?.viewport2D.showSideViews &&
+        this.editor.activeDocument?.has3DLayers,
     );
 
     if (this.visible) this.synchPosition();
