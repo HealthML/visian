@@ -13,7 +13,6 @@ import path from "path";
 import {
   FLOY_API_ROOT,
   FLOY_INFERENCE_ENDPOINTS,
-  FLOY_INFERENCE_ENDPOINTS_BULK,
   FLOY_TOKEN_KEY,
 } from "../../constants";
 
@@ -198,48 +197,23 @@ export class FloyDemoController implements ISerializable<FloyDemoSnapshot> {
 
   // Bulk-Upload
   public runBulkInferencing = async (): Promise<void> => {
+    const token = localStorage.getItem(FLOY_TOKEN_KEY);
+    if (!token) throw new Error();
+
     // if (!this.seriesZips) return;
-    await this.log();
 
     // const formData = new FormData();
     // formData.append("seriesZIP", this.seriesZips);
     // formData.append("tokenStr", localStorage.getItem(FLOY_TOKEN_KEY) || "");
 
-    this.setInferenceResults(
-      await Promise.all(
-        FLOY_INFERENCE_ENDPOINTS_BULK.map(async (endpoint) => {
-          const data = await (
-            await fetch(endpoint, {
-              method: "POST",
-              mode: "cors",
-              headers: {
-                Authorization: "Token tgIi19m2rwm6BbUjx927Y5M0lXDAl2S1lPqmAKQz", // TO DO: Needs to be retrieved from a proxy server
-                Accept: "*/*",
-                Connection: "keep-alive",
-                "Accept-Encoding": "gzip, deflate, br",
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                project: "017cd0b2-ca35-6f87-caec-c32b29b4bf2d",
-                commit: "MB-segmentation-valohai-bulk-upload",
-                step: "Bulk-Upload",
-                inputs: {
-                  model: ["datum://model-production"],
-                  data: [
-                    "s3://valohai-data-218098999288/demo.floy.com-bulk-uploads/0000E7AE.zip",
-                    "s3://valohai-data-218098999288/demo.floy.com-bulk-uploads/00002A35.zip",
-                  ],
-                },
-                parameters: {
-                  mail: "VIA-VISIAN-firstname.lastname@radiology-x.com",
-                },
-              }),
-            })
-          ).json();
-          return data;
-        }),
-      ),
-    );
+    // Log & execute inference run on batch
+    return axios.post(`${FLOY_API_ROOT}/batches/${token}/infer`, {
+      email: "VIA-VISIAN-firstname.lastname@radiology-x.com",
+      data: [
+        "s3://valohai-data-218098999288/demo.floy.com-bulk-uploads/0000E7AE.zip",
+        "s3://valohai-data-218098999288/demo.floy.com-bulk-uploads/00002A35.zip",
+      ],
+    });
   };
 
   // Token Management
@@ -251,12 +225,7 @@ export class FloyDemoController implements ISerializable<FloyDemoSnapshot> {
     const tokenWithDefault = token || localStorage.getItem(FLOY_TOKEN_KEY);
     if (!tokenWithDefault) throw new Error();
 
-    if (
-      (await axios.get(`${FLOY_API_ROOT}/tokens/${tokenWithDefault}`)).status >=
-      400
-    ) {
-      throw new Error();
-    }
+    await axios.get(`${FLOY_API_ROOT}/tokens/${tokenWithDefault}`);
     localStorage.setItem(FLOY_TOKEN_KEY, tokenWithDefault);
   }
 
@@ -264,25 +233,18 @@ export class FloyDemoController implements ISerializable<FloyDemoSnapshot> {
     localStorage.removeItem(FLOY_TOKEN_KEY);
   }
 
-  public async consent() {
+  public consent() {
     const token = localStorage.getItem(FLOY_TOKEN_KEY);
     if (!token) throw new Error();
 
-    if (
-      (await axios.post(`${FLOY_API_ROOT}/tokens/${token}/consent`)).status >=
-      400
-    ) {
-      throw new Error();
-    }
+    return axios.post(`${FLOY_API_ROOT}/tokens/${token}/consent`);
   }
 
-  public async log() {
+  public log() {
     const token = localStorage.getItem(FLOY_TOKEN_KEY);
     if (!token) throw new Error();
 
-    if ((await axios.post(`${FLOY_API_ROOT}/tokens/${token}`)).status >= 400) {
-      throw new Error();
-    }
+    return axios.post(`${FLOY_API_ROOT}/tokens/${token}`);
   }
 
   // Serialization

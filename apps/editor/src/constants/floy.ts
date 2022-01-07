@@ -4,9 +4,6 @@ export const FLOY_HOME = "https://floy.com";
 export const FLOY_INFERENCE_ENDPOINTS = [
   "https://valohai.cloud/floy/mr-bone/web-app/segmentation/floy-ai",
 ];
-export const FLOY_INFERENCE_ENDPOINTS_BULK = [
-  "https://app.valohai.com/api/v0/executions/",
-];
 export const FLOY_API_ROOT =
   process.env.FLOY_API_ROOT || "https://demo-api.floy.com";
 export const FLOY_TOKEN_KEY = "floyToken";
