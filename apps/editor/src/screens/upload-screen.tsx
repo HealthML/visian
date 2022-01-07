@@ -51,6 +51,7 @@ export const UploadScreen = observer(() => {
     isDraggedOver,
     { onDrop: onDropCompleted, ...dragListeners },
   ] = useIsDraggedOver();
+
   const store = useStore();
   const [isLoadingFiles, setIsLoadingFiles] = useState(false);
 
@@ -58,18 +59,39 @@ export const UploadScreen = observer(() => {
     async (_files: FileList, event: React.DragEvent) => {
       event.stopPropagation();
       setIsLoadingFiles(true);
-      const { items } = event.dataTransfer;
+      // const { items } = event.dataTransfer;
+      // console.debug("item: ", event.dataTransfer.items);
+      // console.debug("Files: ", event.dataTransfer.files);
+      console.debug("Files instance: ", event.dataTransfer.files[0]);
+      // console.debug("Files instance text: ", await event.dataTransfer.files[0].text());
+
+      const fileBinary = await event.dataTransfer.files[0].text();
+      // console.debug("fileBinary: ", fileBinary);
 
       // Add input field for for email
       // 1) Show Upload-loading Bar while uploading
       // 2) Show uploaded files on screen
       // 3) Upload relevant serieses to S3 (later Telekom Cloud)
-      // s3.Bucket(BUCKET).upload_file(str(Path(f'{seriesZIP.filename}')), "demo.floy.com-uploads/" + tokenStr + '(Series) - ' +str(Path(f'{seriesZIP.filename}'))[:len(str(Path(f'{seriesZIP.filename}'))) - 4] + ' - ' + str(datetime.now(tz=None))[:len(str(datetime.now(tz=None))) - 7] + '.zip')
+
+      const data = await fetch(
+        "https://kg0rbwuu17.execute-api.eu-central-1.amazonaws.com/uploads",
+        { method: "GET" },
+      );
+      const URL = (await data.text()).split('":"').join('","').split('","')[1];
+      const blobData = new Blob([fileBinary], {
+        type: "text/jpg;charset=UTF-8",
+      });
+
+      console.log("blobData: ", blobData);
+
+      await fetch(URL, {
+        method: "PUT",
+        body: blobData,
+      });
 
       // 4) Call API after upload is finished
-      store?.editor.activeDocument?.floyDemo.runBulkInferencing();
+      // store?.editor.activeDocument?.floyDemo.runBulkInferencing();
 
-      console.log(items);
       setIsLoadingFiles(false);
       onDropCompleted();
     },
