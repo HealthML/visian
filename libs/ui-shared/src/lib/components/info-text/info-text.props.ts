@@ -17,6 +17,8 @@ export interface InfoTextProps
 
   shortcuts?: Shortcut[];
 
+  icon?: IconType;
+
   /**
    * If set to `true`, the dismiss handler will be called on pointer downs
    * outside the modal.
