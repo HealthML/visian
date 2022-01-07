@@ -25,6 +25,8 @@ export interface ToolConfig<N extends string> {
   label?: string;
   labelTx?: string;
 
+  infoTx?: string;
+
   isDrawingTool?: boolean;
   isBrush?: boolean;
   isSmartBrush?: boolean;
@@ -48,6 +50,8 @@ export class Tool<N extends string>
   public label?: string;
   public labelTx?: string;
 
+  public infoTx?: string;
+
   public isDrawingTool: boolean;
   public isBrush: boolean;
   public isSmartBrush: boolean;
@@ -65,6 +69,7 @@ export class Tool<N extends string>
     this.icon = config.icon;
     this.label = config.label;
     this.labelTx = config.labelTx || config.name;
+    this.infoTx = config.infoTx;
     this.isDrawingTool = Boolean(config.isDrawingTool);
     this.isBrush = Boolean(config.isBrush);
     this.isSmartBrush = Boolean(config.isSmartBrush);

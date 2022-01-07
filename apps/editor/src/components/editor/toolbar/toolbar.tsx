@@ -7,6 +7,7 @@ import {
   preventDefault,
   Theme,
   Tool,
+  InfoText,
   Toolbar as GenericToolbar,
 } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
@@ -23,6 +24,10 @@ const StyledToolbar = styled(GenericToolbar)`
 
 const ToolSettingsModal = styled(Modal)`
   padding-bottom: 0px;
+`;
+
+const StyledInfoText = styled(InfoText)`
+  margin-right: 10px;
 `;
 
 export const Toolbar: React.FC = observer(() => {
@@ -136,6 +141,9 @@ export const Toolbar: React.FC = observer(() => {
         anchor={buttonRef}
         position="right"
         baseZIndex={modalZ}
+        headerChildren={
+          activeTool?.infoTx && <StyledInfoText infoTx={activeTool?.infoTx} />
+        }
         onOutsidePress={closeModal}
         onReset={
           store?.editor.activeDocument?.tools.activeTool?.name === "plane-tool"
@@ -156,6 +164,7 @@ export const Toolbar: React.FC = observer(() => {
                 setValue={
                   store?.editor.activeDocument?.tools.setUseAdaptiveBrushSize
                 }
+                infoTx="info-adaptive-brush-size"
               />
               <NumberParam
                 labelTx="brush-size"

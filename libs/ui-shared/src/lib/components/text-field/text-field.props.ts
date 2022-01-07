@@ -1,6 +1,5 @@
 import type React from "react";
-
-import type { I18nData } from "../types";
+import type { I18nData } from "../../types";
 
 export interface TextFieldProps
   extends React.InputHTMLAttributes<HTMLInputElement> {

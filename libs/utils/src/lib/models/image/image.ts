@@ -47,6 +47,8 @@ export interface ImageSnapshot<T extends TypedArray = TypedArray> {
 
 export const itkImageToImageSnapshot = <T extends TypedArray = TypedArray>(
   image: ITKImage<T>,
+  filterValue?: number,
+  squash?: boolean,
 ): ImageSnapshot => ({
   name: image.name,
   dimensionality: image.imageType.dimension,
@@ -72,6 +74,15 @@ export const itkImageToImageSnapshot = <T extends TypedArray = TypedArray>(
     image.imageType.dimension,
     image.size,
     image.imageType.components,
+    // Segmentations should only contain values 0 and 255
+  ).map((value) =>
+    filterValue === undefined
+      ? squash && value
+        ? 255
+        : value
+      : value === filterValue
+      ? 255
+      : 0,
   ),
 });
 

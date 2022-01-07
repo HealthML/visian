@@ -34,6 +34,7 @@ import { UndoRedoButtons } from "../undo-redo-buttons";
 import { ViewSettings } from "../view-settings";
 import { UIOverlayProps } from "./ui-overlay.props";
 import { SettingsPopUp } from "../settings-popup";
+import { MeasurementPopUp } from "../measurement-popup";
 
 const Container = styled(AbsoluteCover)`
   align-items: stretch;
@@ -284,6 +285,12 @@ export const UIOverlay = observer<UIOverlayProps>(
                 onClose={closeImportPopUp}
               />
             )}
+            <MeasurementPopUp
+              isOpen={Boolean(
+                store?.editor.activeDocument?.measurementDisplayLayer,
+              )}
+              onClose={store?.editor.activeDocument?.setMeasurementDisplayLayer}
+            />
             {isDraggedOver && <DropSheet onDropCompleted={onDropCompleted} />}
             {store?.progress && (
               <ProgressPopUp
@@ -301,6 +308,7 @@ export const UIOverlay = observer<UIOverlayProps>(
             titleTx={store?.error.titleTx}
             description={store?.error.description}
             descriptionTx={store?.error.descriptionTx}
+            descriptionData={store?.error.descriptionData}
           />
         )}
       </Container>

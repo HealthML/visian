@@ -3,6 +3,8 @@ export * from "./bounding-box";
 export * from "./clipping-plane-material";
 export * from "./clipping-plane";
 export * from "./conversion";
+export * from "./copy-material";
+export * from "./dithering-renderer";
 export * from "./fly-controls";
 export * from "./gradient-computer";
 export * from "./histogram";

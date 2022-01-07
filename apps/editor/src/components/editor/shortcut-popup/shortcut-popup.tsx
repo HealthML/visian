@@ -269,6 +269,29 @@ export const ShortcutPopUp: React.FC<ShortcutPopUpProps> = observer(
                 </ShortcutDescriptionContainer>
               </ShortcutRow>
             </LargePopUpGroup>
+            <LargePopUpGroup>
+              <LargePopUpGroupTitleContainer>
+                <LargePopUpGroupTitle text="Voxel Info" />
+              </LargePopUpGroupTitleContainer>
+              <ShortcutRow>
+                <ShortcutContainer>
+                  <KeyIcon text="I" />
+                </ShortcutContainer>
+                <ShortcutDescriptionContainer>
+                  <ShortcutDescription text="Toggle the voxel info display" />
+                </ShortcutDescriptionContainer>
+              </ShortcutRow>
+              <ShortcutRow>
+                <ShortcutContainer>
+                  <KeyIcon text="Ctrl" />
+                  <PlusIcon />
+                  <KeyIcon text="I" />
+                </ShortcutContainer>
+                <ShortcutDescriptionContainer>
+                  <ShortcutDescription text="Toggle the voxel info delay" />
+                </ShortcutDescriptionContainer>
+              </ShortcutRow>
+            </LargePopUpGroup>
           </LargePopUpColumn>
           <LargePopUpColumn>
             <LargePopUpGroup>

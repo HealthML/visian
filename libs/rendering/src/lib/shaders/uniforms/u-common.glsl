@@ -1,6 +1,6 @@
 uniform vec3 uCameraPosition;
 uniform sampler3D uInputFirstDerivative;
-uniform sampler3D uInputSecondDerivative;
+// uniform sampler3D uInputSecondDerivative;
 uniform float uStepSize;
 
 #ifdef VOLUMETRIC_IMAGE

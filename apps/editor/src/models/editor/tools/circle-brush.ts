@@ -27,6 +27,7 @@ export class CircleBrush<
     super(
       toolConfig || {
         name: (isAdditive ? "pixel-brush" : "pixel-eraser") as N,
+        infoTx: "info-brush",
         altToolName: (isAdditive ? "pixel-eraser" : "pixel-brush") as N,
         icon: isAdditive ? "pixelBrush" : "eraser",
         supportedViewModes: ["2D"],

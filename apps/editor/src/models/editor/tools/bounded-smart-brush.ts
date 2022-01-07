@@ -21,6 +21,7 @@ export class BoundedSmartBrush<
       altToolName: (isAdditive
         ? "bounded-smart-eraser"
         : "bounded-smart-brush") as N,
+      infoTx: "info-bounded-smart-brush",
       icon: isAdditive ? "boundedSmartBrush" : "eraser",
       supportedViewModes: ["2D"],
       supportedLayerKinds: ["image"],

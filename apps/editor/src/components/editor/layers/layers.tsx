@@ -3,7 +3,9 @@ import {
   ContextMenu,
   ContextMenuItem,
   FloatingUIButton,
+  IImageLayer,
   ILayer,
+  InfoText,
   List,
   ListItem,
   Modal,
@@ -14,6 +16,8 @@ import {
   styledScrollbarMixin,
   SubtleText,
   useDelay,
+  useDoubleTap,
+  useForwardEvent,
   useModalRoot,
   useShortTap,
   useTranslation,
@@ -43,6 +47,10 @@ const noop = () => {
 };
 
 // Styled Components
+const StyledInfoText = styled(InfoText)`
+  margin-right: 10px;
+`;
+
 const LayerList = styled(List)`
   ${styledScrollbarMixin}
 
@@ -99,11 +107,18 @@ const LayerListItem = observer<{
 
   const trailingIconRef = useRef<SVGSVGElement | null>(null);
 
-  const [startTap, stopTap] = useShortTap(
+  const [startTap1, stopTap] = useShortTap(
     useCallback(() => {
       store?.editor.activeDocument?.setActiveLayer(layer);
     }, [layer, store?.editor.activeDocument]),
   );
+  const startTap2 = useDoubleTap(
+    useCallback((event: React.PointerEvent) => {
+      if (event.pointerType === "mouse") return;
+      setContextMenuPosition({ x: event.clientX, y: event.clientY });
+    }, []),
+  );
+  const startTap = useForwardEvent(startTap1, startTap2);
 
   // Context Menu
   const [contextMenuPosition, setContextMenuPosition] = useState<Pixel | null>(
@@ -117,6 +132,26 @@ const LayerListItem = observer<{
   }, [store?.editor.activeDocument?.viewSettings.viewMode]);
 
   const { t } = useTranslation();
+  const calculateVolume = useCallback(() => {
+    if (layer.kind !== "image") return;
+    (layer as IImageLayer).computeVolume();
+    store?.editor.activeDocument?.setMeasurementType("volume");
+    store?.editor.activeDocument?.setMeasurementDisplayLayer(
+      layer as IImageLayer,
+    );
+  }, [layer, store]);
+  const calculateArea = useCallback(() => {
+    if (layer.kind !== "image" || !store?.editor.activeDocument?.viewport2D)
+      return;
+    store?.editor.activeDocument?.setMeasurementType("area");
+    (layer as IImageLayer).computeArea(
+      store.editor.activeDocument.viewport2D.mainViewType,
+      store.editor.activeDocument.viewport2D.getSelectedSlice(),
+    );
+    store.editor.activeDocument.setMeasurementDisplayLayer(
+      layer as IImageLayer,
+    );
+  }, [layer, store]);
   const toggleAnnotation = useCallback(() => {
     store?.editor.activeDocument?.toggleTypeAndRepositionLayer(layer);
     setContextMenuPosition(null);
@@ -154,7 +189,7 @@ const LayerListItem = observer<{
       }
 
       if (event.button === PointerButton.LMB) {
-        startTap();
+        startTap(event);
       } else if (event.button === PointerButton.RMB) {
         setContextMenuPosition({ x: event.clientX, y: event.clientY });
       }
@@ -241,6 +276,20 @@ const LayerListItem = observer<{
         isOpen={Boolean(contextMenuPosition)}
         onOutsidePress={closeContextMenu}
       >
+        {layer.kind === "image" && layer.isAnnotation && (
+          <>
+            {layer.is3DLayer && (
+              <ContextMenuItem
+                labelTx="calculate-volume"
+                onPointerDown={calculateVolume}
+              />
+            )}
+            <ContextMenuItem
+              labelTx="calculate-area"
+              onPointerDown={calculateArea}
+            />
+          </>
+        )}
         <ContextMenuItem
           labelTx={
             layer.isAnnotation ? "mark-not-annotation" : "mark-annotation"
@@ -325,12 +374,20 @@ export const Layers: React.FC = observer(() => {
         anchor={buttonRef}
         position="right"
         headerChildren={
-          <ModalHeaderButton
-            icon="plus"
-            tooltipTx="add-annotation-layer"
-            isDisabled={!layerCount}
-            onPointerDown={store?.editor.activeDocument?.addNewAnnotationLayer}
-          />
+          <>
+            <StyledInfoText infoTx="info-layer-stack" />
+            <ModalHeaderButton
+              icon="plus"
+              tooltipTx="add-annotation-layer"
+              isDisabled={
+                !layerCount ||
+                layerCount >= (store?.editor.activeDocument?.maxLayers || 0)
+              }
+              onPointerDown={
+                store?.editor.activeDocument?.addNewAnnotationLayer
+              }
+            />
+          </>
         }
       >
         {/* TODO: Should we update on every drag change or just on drop? */}

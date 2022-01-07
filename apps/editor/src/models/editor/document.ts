@@ -7,11 +7,14 @@ import {
   ILayer,
   ISliceRenderer,
   IVolumeRenderer,
+  MeasurementType,
   Theme,
   TrackingLog,
+  ErrorNotification,
   ValueType,
 } from "@visian/ui-shared";
 import {
+  handlePromiseSettledResult,
   IDisposable,
   ImageMismatchError,
   ISerializable,
@@ -29,6 +32,8 @@ import {
   defaultAnnotationColor,
   defaultImageColor,
   defaultRegionGrowingPreviewColor,
+  generalTextures2d,
+  generalTextures3d,
 } from "../../constants";
 import { StoreContext } from "../types";
 import { History, HistorySnapshot } from "./history";
@@ -48,7 +53,7 @@ import {
 } from "./view-settings";
 import { readTrackingLog, TrackingData } from "../tracking";
 
-const uniqueValuesForAnnotationThreshold = 20;
+const uniqueValuesForAnnotationThreshold = 10;
 
 export const layerMap: {
   [kind: string]: ValueType<typeof layers>;
@@ -84,8 +89,11 @@ export class Document
   protected titleOverride?: string;
 
   protected activeLayerId?: string;
+  protected measurementDisplayLayerId?: string;
   protected layerMap: { [key: string]: Layer };
   protected layerIds: string[];
+
+  public measurementType: MeasurementType = "volume";
 
   public history: History;
   public clipboard: Clipboard = new Clipboard(this);
@@ -136,13 +144,19 @@ export class Document
 
     makeObservable<
       this,
-      "titleOverride" | "activeLayerId" | "layerMap" | "layerIds"
+      | "titleOverride"
+      | "activeLayerId"
+      | "measurementDisplayLayerId"
+      | "layerMap"
+      | "layerIds"
     >(this, {
       id: observable,
       titleOverride: observable,
       activeLayerId: observable,
+      measurementDisplayLayerId: observable,
       layerMap: observable,
       layerIds: observable,
+      measurementType: observable,
       history: observable,
       viewSettings: observable,
       viewport2D: observable,
@@ -154,12 +168,17 @@ export class Document
 
       title: computed,
       activeLayer: computed,
+      measurementDisplayLayer: computed,
       imageLayers: computed,
       baseImageLayer: computed,
       annotationLayers: computed,
+      maxLayers: computed,
+      maxLayers3d: computed,
 
       setTitle: action,
       setActiveLayer: action,
+      setMeasurementDisplayLayer: action,
+      setMeasurementType: action,
       addLayer: action,
       addNewAnnotationLayer: action,
       moveLayer: action,
@@ -197,6 +216,14 @@ export class Document
   };
 
   // Layer Management
+  public get maxLayers(): number {
+    return (this.renderer?.capabilities.maxTextures || 0) - generalTextures2d;
+  }
+
+  public get maxLayers3d(): number {
+    return (this.renderer?.capabilities.maxTextures || 0) - generalTextures3d;
+  }
+
   public get layers(): ILayer[] {
     return this.layerIds.map((id) => this.layerMap[id]);
   }
@@ -205,6 +232,13 @@ export class Document
     return Object.values(this.layerMap).find(
       (layer) => layer.id === this.activeLayerId,
     );
+  }
+
+  public get measurementDisplayLayer(): IImageLayer | undefined {
+    return Object.values(this.layerMap).find(
+      (layer) =>
+        layer.id === this.measurementDisplayLayerId && layer.kind === "image",
+    ) as IImageLayer | undefined;
   }
 
   public get imageLayers(): IImageLayer[] {
@@ -257,6 +291,18 @@ export class Document
         ? idOrLayer
         : idOrLayer.id
       : undefined;
+  };
+
+  public setMeasurementDisplayLayer = (idOrLayer?: string | ILayer): void => {
+    this.measurementDisplayLayerId = idOrLayer
+      ? typeof idOrLayer === "string"
+        ? idOrLayer
+        : idOrLayer.id
+      : undefined;
+  };
+
+  public setMeasurementType = (measurementType: MeasurementType) => {
+    this.measurementType = measurementType;
   };
 
   public addLayer = (...newLayers: Layer[]): void => {
@@ -314,6 +360,9 @@ export class Document
     );
     this.addLayer(annotationLayer);
     this.setActiveLayer(annotationLayer);
+
+    // Force switch to 2D if too many layers for 3D
+    this.viewSettings.setViewMode(this.viewSettings.viewMode);
   };
 
   public moveLayer(idOrLayer: string | ILayer, newIndex: number) {
@@ -404,8 +453,11 @@ export class Document
     if (!entries) return;
     if (Array.isArray(entries)) {
       if (entries.some((entry) => entry && !entry.isFile)) {
-        await Promise.all(
-          entries.map((entry) => this.importFileSystemEntries(entry)),
+        // throw the corresponding error if one promise was rejected
+        handlePromiseSettledResult(
+          await Promise.allSettled(
+            entries.map((entry) => this.importFileSystemEntries(entry)),
+          ),
         );
       } else {
         const files = await Promise.all(
@@ -453,7 +505,8 @@ export class Document
           promises.push(this.importFileSystemEntries(subEntries[i]));
         }
       }
-      await Promise.all(promises);
+      // throw the corresponding error if one promise was rejected
+      handlePromiseSettledResult(await Promise.allSettled(promises));
 
       if (dirFiles.length) await this.importFiles(dirFiles, entries.name);
     } else {
@@ -498,7 +551,8 @@ export class Document
         filteredFiles.forEach((file) => {
           promises.push(this.importFiles(file));
         });
-        await Promise.all(promises);
+        // throw the corresponding error if one promise was rejected
+        handlePromiseSettledResult(await Promise.allSettled(promises));
         return;
       }
     } else if (filteredFiles.name.endsWith(".zip")) {
@@ -507,6 +561,17 @@ export class Document
       return;
     } else if (filteredFiles.name.endsWith(".json")) {
       await readTrackingLog(filteredFiles, this);
+      return;
+    }
+
+    if (Array.isArray(filteredFiles) && !filteredFiles.length) return;
+
+    if (this.layers.length >= this.maxLayers) {
+      this.setError({
+        titleTx: "import-error",
+        descriptionTx: "too-many-layers-2d",
+        descriptionData: { count: this.maxLayers },
+      });
       return;
     }
 
@@ -527,7 +592,7 @@ export class Document
       // Infer Type
       let isLikelyImage = false;
       const { data } = image;
-      const uniqueValues = new Set();
+      const uniqueValues = new Set<number>();
       for (let index = 0; index < data.length; index++) {
         uniqueValues.add(data[index]);
         if (uniqueValues.size > uniqueValuesForAnnotationThreshold) {
@@ -537,8 +602,27 @@ export class Document
       if (isLikelyImage) {
         createdLayerId = await this.importImage(image);
       } else {
-        createdLayerId = await this.importAnnotation(image);
+        const numberOfAnnotations = uniqueValues.size - 1;
+
+        if (numberOfAnnotations + this.layers.length > this.maxLayers) {
+          createdLayerId = await this.importAnnotation(image, undefined, true);
+          this.setError({
+            titleTx: "squashed-layers-title",
+            descriptionTx: "squashed-layers-import",
+          });
+        } else {
+          uniqueValues.forEach(async (value) => {
+            if (value === 0) return;
+            createdLayerId = await this.importAnnotation(
+              { ...image, name: `${value}_${image.name}` },
+              value,
+            );
+          });
+        }
       }
+
+      // Force switch to 2D if too many layers for 3D
+      this.viewSettings.setViewMode(this.viewSettings.viewMode);
     }
 
     if (isFirstLayer) {
@@ -581,7 +665,7 @@ export class Document
       this.baseImageLayer &&
       !this.baseImageLayer.image.voxelCount.equals(imageLayer.image.voxelCount)
     ) {
-      if (!imageLayer.image.name) {
+      if (imageLayer.image.name) {
         throw new ImageMismatchError(
           i18n.t("image-mismatch-error-filename", {
             fileName: imageLayer.image.name,
@@ -594,13 +678,23 @@ export class Document
     return imageLayer.id;
   }
 
-  public async importAnnotation(image: ITKImage) {
+  public async importAnnotation(
+    image: ITKImage,
+    filterValue?: number,
+    squash?: boolean,
+  ) {
     this.checkHardwareRequirements(image.size);
 
-    const annotationLayer = ImageLayer.fromITKImage(image, this, {
-      isAnnotation: true,
-      color: this.getFirstUnusedColor(),
-    });
+    const annotationLayer = ImageLayer.fromITKImage(
+      image,
+      this,
+      {
+        isAnnotation: true,
+        color: this.getFirstUnusedColor(),
+      },
+      filterValue,
+      squash,
+    );
     if (
       this.baseImageLayer &&
       !this.baseImageLayer.image.voxelCount.equals(
@@ -682,6 +776,10 @@ export class Document
   public get theme(): Theme {
     return this.editor.theme;
   }
+
+  public setError = (error: ErrorNotification) => {
+    this.context?.setError(error);
+  };
 
   // Serialization
   public toJSON(): DocumentSnapshot {

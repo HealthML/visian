@@ -7,6 +7,8 @@ export const maxZoom = 100;
 export const zoomStep = 0.15;
 export const skipSlices = 10;
 
+export const voxelInfoDelay = 500; // ms
+
 export const maxUndoRedoSteps = 20;
 
 export const errorDisplayDuration = 12000;
@@ -25,3 +27,6 @@ export const feedbackMailAddress =
  * event for frequently firing event sources (e.g., pointer move).
  */
 export const minTrackingEventInterval = 200;
+
+export const generalTextures2d = 3;
+export const generalTextures3d = 6;
