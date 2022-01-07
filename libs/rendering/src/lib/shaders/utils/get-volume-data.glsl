@@ -13,7 +13,7 @@ VolumeData getVolumeData(vec3 uv) {
   data.image = imageValue;
   data.imageRaw = imageRaw;
   data.firstDerivative = decodeVec3(texture2D(uInputFirstDerivative, uv));
-  data.secondDerivative = decodeVec3(texture2D(uInputSecondDerivative, uv));
+  // data.secondDerivative = decodeVec3(texture2D(uInputSecondDerivative, uv));
 
   #ifdef NORMAL
     if(uLightingMode == 1) {

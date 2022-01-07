@@ -8,6 +8,7 @@ import Stats from "three/examples/jsm/libs/stats.module";
 import { ScreenAlignedQuad } from "../screen-aligned-quad";
 import {
   AxesConvention,
+  DitheringRenderer,
   FlyControls,
   GradientComputer,
   LAOComputer,
@@ -41,6 +42,7 @@ export class VolumeRenderer implements IVolumeRenderer {
   private lazyRenderTriggered = true;
 
   private resolutionComputer: ResolutionComputer;
+  private ditheringRenderer: DitheringRenderer;
   private gradientComputer: GradientComputer;
   private laoComputer: LAOComputer;
 
@@ -105,7 +107,7 @@ export class VolumeRenderer implements IVolumeRenderer {
       this.editor,
       this.sharedUniforms,
       this.gradientComputer.getFirstDerivative(),
-      this.gradientComputer.getSecondDerivative(),
+      // this.gradientComputer.getSecondDerivative(),
       this.updateCurrentResolution,
     );
 
@@ -113,7 +115,7 @@ export class VolumeRenderer implements IVolumeRenderer {
       editor,
       this.sharedUniforms,
       this.gradientComputer.getFirstDerivative(),
-      this.gradientComputer.getSecondDerivative(),
+      // this.gradientComputer.getSecondDerivative(),
       this.gradientComputer.getOutputDerivative(),
       this.laoComputer.output,
     );
@@ -129,7 +131,6 @@ export class VolumeRenderer implements IVolumeRenderer {
     this.xr = new XRManager(this, editor);
 
     this.intermediateRenderTarget = new THREE.WebGLRenderTarget(1, 1);
-    // this.intermediateRenderTarget.texture.magFilter = THREE.NearestFilter;
     this.screenAlignedQuad = ScreenAlignedQuad.forTexture(
       this.intermediateRenderTarget.texture,
     );
@@ -143,6 +144,18 @@ export class VolumeRenderer implements IVolumeRenderer {
         this.renderer.domElement.height,
       ),
       this.eagerRender,
+      this.volume.mainMaterial,
+      this.intermediateRenderTarget,
+    );
+    this.ditheringRenderer = new DitheringRenderer(
+      { scene: this.scene, camera: this.camera },
+      this.renderer,
+      new THREE.Vector2(
+        this.renderer.domElement.width,
+        this.renderer.domElement.height,
+      ),
+      this.eagerRender,
+      this.volume.mainMaterial,
       this.intermediateRenderTarget,
     );
 
@@ -266,6 +279,7 @@ export class VolumeRenderer implements IVolumeRenderer {
     this.laoComputer.dispose();
     this.screenAlignedQuad.dispose();
     this.resolutionComputer.dispose();
+    this.ditheringRenderer.dispose();
     this.renderer.dispose();
     this.intermediateRenderTarget.dispose();
     this.sharedUniforms.dispose();
@@ -293,6 +307,7 @@ export class VolumeRenderer implements IVolumeRenderer {
     const aspect = window.innerWidth / window.innerHeight;
 
     this.resolutionComputer.setSize(window.innerWidth, window.innerHeight);
+    this.ditheringRenderer.setSize(window.innerWidth, window.innerHeight);
 
     this.camera.aspect = aspect;
     this.camera.updateProjectionMatrix();
@@ -331,11 +346,22 @@ export class VolumeRenderer implements IVolumeRenderer {
 
     if (this.lazyRenderTriggered) {
       this.resolutionComputer.restart();
+      this.ditheringRenderer.restart();
       this.lazyRenderTriggered = false;
     }
 
     if (!this.resolutionComputer.fullResolutionFlushed) {
       this.resolutionComputer.tick();
+    } else if (
+      (!(
+        this.editor.activeDocument?.viewport3D.shadingMode === "lao" ||
+        this.editor.activeDocument?.viewport3D.requestedShadingMode === "lao"
+      ) ||
+        (this.laoComputer.isFinalLAOFlushed && !this.laoComputer.isDirty)) &&
+      this.editor.performanceMode === "high" &&
+      !this.ditheringRenderer.isFinished
+    ) {
+      this.ditheringRenderer.tick();
     }
 
     this.stats.update();
@@ -365,8 +391,10 @@ export class VolumeRenderer implements IVolumeRenderer {
     if (this.renderer.xr.isPresenting) {
       this.renderer.render(this.scene, this.camera);
     } else {
+      // Render output from resolution computer and progressive ray dithering to canvas
       this.screenAlignedQuad.renderWith(this.renderer);
 
+      // Axes convention
       this.camera.getWorldDirection(this.workingVector3);
       this.axesConvention.setCameraDirection(this.workingVector3);
 
@@ -392,6 +420,7 @@ export class VolumeRenderer implements IVolumeRenderer {
 
   public updateCurrentResolution = () => {
     this.resolutionComputer?.restartFrame();
+    this.ditheringRenderer?.restart();
   };
 
   public get isShowingFullResolution() {

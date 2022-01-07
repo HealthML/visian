@@ -372,7 +372,10 @@ export const Layers: React.FC = observer(() => {
           <ModalHeaderButton
             icon="plus"
             tooltipTx="add-annotation-layer"
-            isDisabled={!layerCount}
+            isDisabled={
+              !layerCount ||
+              layerCount >= (store?.editor.activeDocument?.maxLayers || 0)
+            }
             onPointerDown={store?.editor.activeDocument?.addNewAnnotationLayer}
           />
         }

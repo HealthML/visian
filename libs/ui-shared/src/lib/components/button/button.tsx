@@ -53,6 +53,7 @@ const BaseButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
       tx,
       onPointerEnter,
       onPointerLeave,
+      onPointerDown,
       ...rest
     },
     ref,
@@ -118,6 +119,7 @@ const BaseButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
       <>
         <StyledButton
           {...rest}
+          onPointerDown={isDisabled ? undefined : onPointerDown}
           isDisabled={isDisabled}
           onPointerEnter={enterButton}
           onPointerLeave={leaveButton}
@@ -181,7 +183,6 @@ export const InvisibleButton = styled(BaseButton)`
   padding: 0;
 
   box-sizing: border-box;
-  cursor: pointer;
   pointer-events: auto;
   user-select: none;
 `;

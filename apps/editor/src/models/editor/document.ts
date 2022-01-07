@@ -1,5 +1,6 @@
 import {
   dataColorKeys,
+  ErrorNotification,
   i18n,
   IDocument,
   IEditor,
@@ -31,16 +32,18 @@ import {
   defaultAnnotationColor,
   defaultImageColor,
   defaultRegionGrowingPreviewColor,
+  generalTextures2d,
+  generalTextures3d,
   IS_FLOY_DEMO,
 } from "../../constants";
 import { readTrackingLog, TrackingData } from "../tracking";
 import { StoreContext } from "../types";
+import { Clipboard } from "./clipboard";
 import { FloyDemoController, FloyDemoSnapshot } from "./floy";
 import { History, HistorySnapshot } from "./history";
 import { ImageLayer, Layer, LayerSnapshot } from "./layers";
 import * as layers from "./layers";
 import { Markers } from "./markers";
-import { Clipboard } from "./clipboard";
 import { ToolName, Tools, ToolsSnapshot } from "./tools";
 import {
   TransferFunctionName,
@@ -52,7 +55,7 @@ import {
   ViewSettingsSnapshot,
 } from "./view-settings";
 
-const uniqueValuesForAnnotationThreshold = 20;
+const uniqueValuesForAnnotationThreshold = 10;
 
 export const layerMap: {
   [kind: string]: ValueType<typeof layers>;
@@ -180,6 +183,8 @@ export class Document
       imageLayers: computed,
       baseImageLayer: computed,
       annotationLayers: computed,
+      maxLayers: computed,
+      maxLayers3d: computed,
 
       setTitle: action,
       setActiveLayer: action,
@@ -222,6 +227,14 @@ export class Document
   };
 
   // Layer Management
+  public get maxLayers(): number {
+    return (this.renderer?.capabilities.maxTextures || 0) - generalTextures2d;
+  }
+
+  public get maxLayers3d(): number {
+    return (this.renderer?.capabilities.maxTextures || 0) - generalTextures3d;
+  }
+
   public get layers(): ILayer[] {
     return this.layerIds.map((id) => this.layerMap[id]);
   }
@@ -358,6 +371,9 @@ export class Document
     );
     this.addLayer(annotationLayer);
     this.setActiveLayer(annotationLayer);
+
+    // Force switch to 2D if too many layers for 3D
+    this.viewSettings.setViewMode(this.viewSettings.viewMode);
   };
 
   public moveLayer(idOrLayer: string | ILayer, newIndex: number) {
@@ -569,6 +585,15 @@ export class Document
       await this.floyDemo.setDemoCandidate(filteredFiles, name);
     }
 
+    if (this.layers.length >= this.maxLayers) {
+      this.setError({
+        titleTx: "import-error",
+        descriptionTx: "too-many-layers-2d",
+        descriptionData: { count: this.maxLayers },
+      });
+      return;
+    }
+
     let createdLayerId = "";
     const isFirstLayer = !this.layerIds.length;
     const image = await readMedicalImage(filteredFiles);
@@ -586,7 +611,7 @@ export class Document
       // Infer Type
       let isLikelyImage = false;
       const { data } = image;
-      const uniqueValues = new Set();
+      const uniqueValues = new Set<number>();
       for (let index = 0; index < data.length; index++) {
         uniqueValues.add(data[index]);
         if (uniqueValues.size > uniqueValuesForAnnotationThreshold) {
@@ -596,8 +621,24 @@ export class Document
       if (isLikelyImage) {
         createdLayerId = await this.importImage(image);
       } else {
-        createdLayerId = await this.importAnnotation(image);
+        const numberOfAnnotations = uniqueValues.size - 1;
+
+        if (numberOfAnnotations + this.layers.length > this.maxLayers) {
+          createdLayerId = await this.importAnnotation(image, undefined, true);
+          this.setError({
+            titleTx: "squashed-layers-title",
+            descriptionTx: "squashed-layers-import",
+          });
+        } else {
+          uniqueValues.forEach(async (value) => {
+            if (value === 0) return;
+            createdLayerId = await this.importAnnotation(image, value);
+          });
+        }
       }
+
+      // Force switch to 2D if too many layers for 3D
+      this.viewSettings.setViewMode(this.viewSettings.viewMode);
     }
 
     if (isFirstLayer) {
@@ -653,13 +694,23 @@ export class Document
     return imageLayer.id;
   }
 
-  public async importAnnotation(image: ITKImage) {
+  public async importAnnotation(
+    image: ITKImage,
+    filterValue?: number,
+    squash?: boolean,
+  ) {
     this.checkHardwareRequirements(image.size);
 
-    const annotationLayer = ImageLayer.fromITKImage(image, this, {
-      isAnnotation: true,
-      color: this.getFirstUnusedColor(),
-    });
+    const annotationLayer = ImageLayer.fromITKImage(
+      image,
+      this,
+      {
+        isAnnotation: true,
+        color: this.getFirstUnusedColor(),
+      },
+      filterValue,
+      squash,
+    );
     if (
       this.baseImageLayer &&
       !this.baseImageLayer.image.voxelCount.equals(
@@ -741,6 +792,10 @@ export class Document
   public get theme(): Theme {
     return this.editor.theme;
   }
+
+  public setError = (error: ErrorNotification) => {
+    this.context?.setError(error);
+  };
 
   // Serialization
   public toJSON(): DocumentSnapshot {

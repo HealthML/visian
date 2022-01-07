@@ -46,9 +46,14 @@ export class ImageLayer
     image: ITKImage<T2>,
     document: IDocument,
     snapshot?: Partial<ImageLayerSnapshot>,
+    filterValue?: number,
+    squash?: boolean,
   ) {
     return new this(
-      { ...snapshot, image: itkImageToImageSnapshot(image) },
+      {
+        ...snapshot,
+        image: itkImageToImageSnapshot(image, filterValue, squash),
+      },
       document,
     );
   }

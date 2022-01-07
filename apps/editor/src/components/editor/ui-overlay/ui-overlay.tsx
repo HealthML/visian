@@ -304,6 +304,7 @@ export const UIOverlay = observer<UIOverlayProps>(
             titleTx={store?.error.titleTx}
             description={store?.error.description}
             descriptionTx={store?.error.descriptionTx}
+            descriptionData={store?.error.descriptionData}
           />
         )}
       </Container>

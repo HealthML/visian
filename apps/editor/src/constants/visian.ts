@@ -29,3 +29,6 @@ export const feedbackMailAddress =
  * event for frequently firing event sources (e.g., pointer move).
  */
 export const minTrackingEventInterval = 200;
+
+export const generalTextures2d = 3;
+export const generalTextures3d = 6;

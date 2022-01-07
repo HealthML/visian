@@ -9,6 +9,7 @@ import type { Reference } from "./types";
 import type { IViewport2D, IViewport3D, IViewSettings } from "./view-settings";
 import type { IMarkers } from "./markers";
 import type { IClipboard } from "./clipboard";
+import type { ErrorNotification } from "../error-notification";
 import { Theme } from "../../theme";
 import { MeasurementType } from ".";
 
@@ -33,6 +34,10 @@ export interface IDocument {
   has3DLayers: boolean;
   /** The layer that is currently selected for editing. */
   activeLayer?: Reference<ILayer>;
+  /** The maximum amount of layers that can be rendered. */
+  maxLayers: number;
+  /** The maximum amount of layers that can be rendered in 3d. */
+  maxLayers3d: number;
 
   /** The layer that is currently selected for displaying a measurement. */
   measurementDisplayLayer?: Reference<IImageLayer>;
@@ -119,4 +124,6 @@ export interface IDocument {
 
   setUseExclusiveSegmentations(value: boolean): void;
   getExcludedSegmentations(layer: ILayer): IImageLayer[] | undefined;
+
+  setError(error: ErrorNotification): void;
 }
