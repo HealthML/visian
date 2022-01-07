@@ -1,4 +1,11 @@
-import { Modal, ModalHeaderButton, Text, i18n } from "@visian/ui-shared";
+import {
+  Modal,
+  ModalHeaderButton,
+  Text,
+  i18n,
+  FlexRow,
+  InfoText,
+} from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
 import React, { useCallback } from "react";
 import styled from "styled-components";
@@ -9,6 +16,11 @@ import type { MeasurementTool } from "../../../models";
 
 const StyledModal = styled(Modal)`
   margin-top: 16px;
+`;
+
+const TextRow = styled(FlexRow)`
+  width: 100%;
+  justify-content: space-between;
 `;
 
 const StyledText = styled(Text)`
@@ -38,12 +50,15 @@ export const MeasurementModal = observer(() => {
         />
       }
     >
-      <StyledText>
-        {`${i18n.t("measurement-length")} ${(store?.editor.activeDocument?.tools
-          .tools["measurement-tool"] as MeasurementTool).pathLength.toFixed(
-          2,
-        )}`}
-      </StyledText>
+      <TextRow>
+        <StyledText
+          text={`${i18n.t("measurement-length")} ${(store?.editor.activeDocument
+            ?.tools.tools[
+            "measurement-tool"
+          ] as MeasurementTool).pathLength.toFixed(2)}`}
+        />
+        <InfoText infoTx="info-unit" titleTx="unit" />
+      </TextRow>
     </StyledModal>
   ) : null;
 });
