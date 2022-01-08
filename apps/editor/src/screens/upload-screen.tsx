@@ -90,7 +90,7 @@ export const UploadScreen = observer(() => {
       });
 
       // 4) Call API after upload is finished
-      // store?.editor.activeDocument?.floyDemo.runBulkInferencing();
+      store?.editor.activeDocument?.floyDemo.runBulkInferencing();
 
       setIsLoadingFiles(false);
       onDropCompleted();
