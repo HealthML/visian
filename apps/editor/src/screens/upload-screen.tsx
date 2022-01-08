@@ -59,35 +59,42 @@ export const UploadScreen = observer(() => {
     async (_files: FileList, event: React.DragEvent) => {
       event.stopPropagation();
       setIsLoadingFiles(true);
-      // const { items } = event.dataTransfer;
-      // console.debug("item: ", event.dataTransfer.items);
-      // console.debug("Files: ", event.dataTransfer.files);
-      console.debug("Files instance: ", event.dataTransfer.files[0]);
-      // console.debug("Files instance text: ", await event.dataTransfer.files[0].text());
 
-      const fileBinary = await event.dataTransfer.files[0].text();
-      // console.debug("fileBinary: ", fileBinary);
+      const file = event.dataTransfer.files[0];
+      const fileName = file.name;
+      const fileBinary = (await file.stream().getReader().read()).value; // Currently only works with files up to 64kb
+
+      console.debug("file: ", file);
+      // console.debug("fileName: ", fileName);
+      console.debug("fileBinary: ", fileBinary);
 
       // Add input field for for email
       // 1) Show Upload-loading Bar while uploading
       // 2) Show uploaded files on screen
-      // 3) Upload relevant serieses to S3 (later Telekom Cloud)
 
+      // Filter out irrelevant DICOM serieses and other filestypes than zip files
+
+      // 3) Upload relevant serieses to S3 (later Telekom Cloud)
+      // 3.1 Get unique upload URL:
       const data = await fetch(
         "https://kg0rbwuu17.execute-api.eu-central-1.amazonaws.com/uploads",
         { method: "GET" },
       );
-      const URL = (await data.text()).split('":"').join('","').split('","')[1];
-      const blobData = new Blob([fileBinary], {
-        type: "text/jpg;charset=UTF-8",
-      });
+      const dataString = await data.text();
+      const uniqueUploadURL = dataString.split('"')[3];
+      const fileNameKey = dataString.split('"')[7];
 
-      console.log("blobData: ", blobData);
-
-      await fetch(URL, {
+      // 3.2 Upload file(s)
+      await fetch(uniqueUploadURL, {
         method: "PUT",
-        body: blobData,
+        body: new Blob([fileBinary]),
       });
+
+      const dataLinks: string[] = [];
+      dataLinks.push(
+        `s3://s3uploader-s3uploadbucket-1ba2ks21gs4fb/${fileNameKey}`,
+      );
+      // TO DO: Pass link list to runBulkInferencing()
 
       // 4) Call API after upload is finished
       store?.editor.activeDocument?.floyDemo.runBulkInferencing();

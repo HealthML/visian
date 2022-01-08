@@ -200,12 +200,7 @@ export class FloyDemoController implements ISerializable<FloyDemoSnapshot> {
     const token = localStorage.getItem(FLOY_TOKEN_KEY);
     if (!token) throw new Error();
 
-    // if (!this.seriesZips) return;
-
-    // const formData = new FormData();
-    // formData.append("seriesZIP", this.seriesZips);
-    // formData.append("tokenStr", localStorage.getItem(FLOY_TOKEN_KEY) || "");
-
+    console.debug("API should now be executed:");
     // Log & execute inference run on batch
     return axios.post(`${FLOY_API_ROOT}/batches/${token}/infer`, {
       email: "VIA-VISIAN-firstname.lastname@radiology-x.com",
