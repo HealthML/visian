@@ -1,3 +1,4 @@
+/* eslint-disable no-await-in-loop */
 import {
   AbsoluteCover,
   color,
@@ -11,9 +12,11 @@ import {
 import { observer } from "mobx-react-lite";
 import React, { useCallback, useState } from "react";
 import styled from "styled-components";
+import axios from "axios";
 import { useStore } from "../app/root-store";
 import { FloyBar } from "../components/editor/ai-bar";
 import { IS_FLOY_DEMO } from "../constants";
+import { ProgressPopUp } from "../components/editor/progress-popup";
 
 const StartTextContainer = styled(AbsoluteCover)`
   align-items: center;
@@ -60,44 +63,55 @@ export const UploadScreen = observer(() => {
       event.stopPropagation();
       setIsLoadingFiles(true);
 
-      const file = event.dataTransfer.files[0];
-      const fileName = file.name;
-      const fileBinary = (await file.stream().getReader().read()).value; // Currently only works with files up to 64kb
-
-      console.debug("file: ", file);
-      // console.debug("fileName: ", fileName);
-      console.debug("fileBinary: ", fileBinary);
-
-      // Add input field for for email
-      // 1) Show Upload-loading Bar while uploading
-      // 2) Show uploaded files on screen
-
-      // Filter out irrelevant DICOM serieses and other filestypes than zip files
-
-      // 3) Upload relevant serieses to S3 (later Telekom Cloud)
-      // 3.1 Get unique upload URL:
-      const data = await fetch(
-        "https://kg0rbwuu17.execute-api.eu-central-1.amazonaws.com/uploads",
-        { method: "GET" },
-      );
-      const dataString = await data.text();
-      const uniqueUploadURL = dataString.split('"')[3];
-      const fileNameKey = dataString.split('"')[7];
-
-      // 3.2 Upload file(s)
-      await fetch(uniqueUploadURL, {
-        method: "PUT",
-        body: new Blob([fileBinary]),
-      });
-
       const dataLinks: string[] = [];
-      dataLinks.push(
-        `s3://s3uploader-s3uploadbucket-1ba2ks21gs4fb/${fileNameKey}`,
-      );
-      // TO DO: Pass link list to runBulkInferencing()
+      const numberOfFiles = event.dataTransfer.files.length;
+      const { files } = event.dataTransfer;
+      // const file = event.dataTransfer.files[0];
+      // eslint-disable-next-line no-restricted-syntax
+      for (let i = 0; i < numberOfFiles; i++) {
+        const file = files[i];
+        const fileName = file.name;
 
-      // 4) Call API after upload is finished
-      store?.editor.activeDocument?.floyDemo.runBulkInferencing();
+        // Add input field for for email
+        // 2) Show uploaded files on screen
+        // Filter out irrelevant DICOM serieses and other filestypes than zip files
+        // 3) Upload relevant serieses to S3 (TO DO: Telekom Cloud)
+        // 3.1 Get unique upload URL:
+        const data = await fetch(
+          "https://kg0rbwuu17.execute-api.eu-central-1.amazonaws.com/uploads",
+          { method: "GET" },
+        );
+        const dataString = await data.text();
+        const uniqueUploadURL = dataString.split('"')[3];
+        const fileNameKey = dataString.split('"')[7];
+
+        // 3.2 Upload file(s)
+        await axios.request({
+          method: "PUT",
+          url: uniqueUploadURL,
+          data: file,
+          onUploadProgress: (p) => {
+            store?.setProgress({
+              label: "Hochladen",
+              progress: (i + p.loaded / p.total) / numberOfFiles,
+              showSplash: false,
+            });
+            console.log(p.loaded / p.total);
+          },
+        });
+
+        // 4) Call API after upload is finished
+        dataLinks.push(
+          `s3://s3uploader-s3uploadbucket-1ba2ks21gs4fb/${fileNameKey}`,
+        );
+      }
+      store?.setProgress(); // Reset ProgressBar
+
+      console.log("Now the API call happens:");
+      store?.editor.activeDocument?.floyDemo.runBulkInferencing(
+        dataLinks,
+        "luca.steingen@floy.com",
+      );
 
       setIsLoadingFiles(false);
       onDropCompleted();
@@ -127,7 +141,14 @@ export const UploadScreen = observer(() => {
         <StartText tx="start-upload" />
       </StartTextContainer>
       <FloyBar useBlankScreen />
-
+      {store?.progress && (
+        <ProgressPopUp
+          label={store.progress.label}
+          labelTx={store.progress.labelTx}
+          progress={store.progress.progress}
+          showSplash={store.progress.showSplash}
+        />
+      )}
       {isDraggedOver && (
         <StyledOverlay
           onDrop={handleOutsideDrop}

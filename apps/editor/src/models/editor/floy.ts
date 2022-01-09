@@ -196,18 +196,17 @@ export class FloyDemoController implements ISerializable<FloyDemoSnapshot> {
   };
 
   // Bulk-Upload
-  public runBulkInferencing = async (): Promise<void> => {
+  public runBulkInferencing = async (
+    data: string[],
+    email: string,
+  ): Promise<void> => {
     const token = localStorage.getItem(FLOY_TOKEN_KEY);
     if (!token) throw new Error();
 
-    console.debug("API should now be executed:");
     // Log & execute inference run on batch
     return axios.post(`${FLOY_API_ROOT}/batches/${token}/infer`, {
-      email: "VIA-VISIAN-firstname.lastname@radiology-x.com",
-      data: [
-        "s3://valohai-data-218098999288/demo.floy.com-bulk-uploads/0000E7AE.zip",
-        "s3://valohai-data-218098999288/demo.floy.com-bulk-uploads/00002A35.zip",
-      ],
+      email,
+      data,
     });
   };
 
