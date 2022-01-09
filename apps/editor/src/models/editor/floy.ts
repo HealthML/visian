@@ -13,6 +13,7 @@ import path from "path";
 import {
   FLOY_API_ROOT,
   FLOY_INFERENCE_ENDPOINTS,
+  FLOY_MAIL_KEY,
   FLOY_TOKEN_KEY,
 } from "../../constants";
 
@@ -213,6 +214,10 @@ export class FloyDemoController implements ISerializable<FloyDemoSnapshot> {
   // Token Management
   public hasToken(): boolean {
     return Boolean(localStorage.getItem(FLOY_TOKEN_KEY));
+  }
+
+  public hasEmail(): boolean {
+    return Boolean(localStorage.getItem(FLOY_MAIL_KEY));
   }
 
   public async activateToken(token?: string) {
