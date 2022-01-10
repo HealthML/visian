@@ -23,6 +23,10 @@ const StyledText = styled(Text)`
   font-size: 13pt;
 `;
 
+const TextRow = styled(FlexRow)`
+  gap: 7px;
+`;
+
 export const MeasurementPopUp: React.FC<MeasurementPopUpProps> = observer(
   ({ isOpen, onClose }) => {
     const store = useStore();
@@ -35,6 +39,9 @@ export const MeasurementPopUp: React.FC<MeasurementPopUpProps> = observer(
         ? store?.editor.activeDocument?.measurementDisplayLayer?.volume
         : store?.editor.activeDocument?.measurementDisplayLayer?.area?.area;
 
+    const unit =
+      store?.editor.activeDocument?.measurementDisplayLayer?.image.unit;
+
     const theme = useTheme() as Theme;
 
     return (
@@ -46,7 +53,10 @@ export const MeasurementPopUp: React.FC<MeasurementPopUpProps> = observer(
       >
         {value !== null && value !== undefined ? (
           <MeasurementRow>
-            <StyledText text={value.toFixed(2)} />
+            <TextRow>
+              <StyledText text={value.toFixed(2)} />
+              {unit && <StyledText tx={`${measurementType}-${unit}`} />}
+            </TextRow>
             <StyledInfoText
               titleTx="unit"
               infoTx="info-unit"

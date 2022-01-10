@@ -74,6 +74,7 @@
     "mobx-react-lite": "^3.2.0",
     "moment": "^2.29.1",
     "nestjs-relay": "PaulBrachmann/nestjs-relay#dist",
+    "nifti-js": "^1.0.1",
     "pg": "^8.5.1",
     "react": "17.0.1",
     "react-beautiful-dnd": "^13.1.0",
