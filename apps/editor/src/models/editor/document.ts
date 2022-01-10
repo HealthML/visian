@@ -28,6 +28,7 @@ import path from "path";
 import * as THREE from "three";
 import { v4 as uuidv4 } from "uuid";
 import { parseHeader, Unit } from "nifti-js";
+import { inflate } from "pako";
 
 import {
   defaultAnnotationColor,
@@ -592,14 +593,21 @@ export class Document
     if (path.extname(firstFile.name) === ".dcm") {
       // DICOM always has mm as unit: https://dicom.innolitics.com/ciods/ct-image/image-plane/00280030
       unit = "mm";
-    } else if (path.extname(firstFile.name) === ".nii") {
+    } else if (
+      path.extname(firstFile.name) === ".nii" ||
+      firstFile.name.endsWith(".nii.gz")
+    ) {
       try {
+        let arrayBuffer = await firstFile.arrayBuffer();
+        if (firstFile.name.endsWith(".nii.gz")) {
+          arrayBuffer = inflate(new Uint8Array(arrayBuffer));
+        }
         // Nifti specifies one unit per dimension. Usually they are all the same. We don't show a unit if they are not the same.
-        const units = parseHeader(await firstFile.arrayBuffer()).spaceUnits;
+        const units = parseHeader(arrayBuffer).spaceUnits;
         const areAllEqual = units.every((val) => val === units[0]);
         unit = areAllEqual ? units[0] : "";
       } catch (ex) {
-        // Set no unit if parsing fails.
+        // Leave unit undefined if parsing fails.
       }
     }
 
