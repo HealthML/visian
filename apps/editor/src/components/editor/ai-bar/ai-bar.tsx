@@ -640,7 +640,7 @@ export const FloyBar = observer<{
             {!store?.editor.activeDocument?.floyDemo.hasEmail() &&
               setMail != null && (
                 <CustomTextField
-                  placeholder="firstname.lastname@floy.com"
+                  placeholder="E-Mail Adresse"
                   value={mail}
                   onChangeText={setMail}
                   onKeyDown={handleKeyDown}
