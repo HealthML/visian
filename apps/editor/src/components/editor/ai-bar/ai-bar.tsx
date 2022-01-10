@@ -612,9 +612,9 @@ export const FloyBar = observer<{
           {!store?.editor.activeDocument?.floyDemo.hasEmail() &&
             setMail != null && (
               <BoldParagraph>
-                Bitte geben Sie die E-Mail Adresse ein, an welche sie die
-                Ergebnisse der Demo geschickt bekommen wollen. Sie erhalten eine
-                .csv Datei im Anhang dieser E-Mail.
+                Bitte geben Sie die E-Mail Adresse ein, an welche Sie die
+                Ergebnisse der Demo geschickt bekommen mächten. Sie erhalten
+                diese als .csv Datei im Anhang der E-Mail.
               </BoldParagraph>
             )}
           {!store?.editor.activeDocument?.floyDemo.hasToken() && (
