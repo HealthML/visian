@@ -166,6 +166,7 @@ export class FloyDemoController implements ISerializable<FloyDemoSnapshot> {
     formData.append("studyZIP", this.seriesZip);
     formData.append("tokenStr", localStorage.getItem(FLOY_TOKEN_KEY) || "");
 
+    // demo.floy.com
     this.setInferenceResults(
       await Promise.all(
         FLOY_INFERENCE_ENDPOINTS.map(async (endpoint) => {
@@ -196,7 +197,7 @@ export class FloyDemoController implements ISerializable<FloyDemoSnapshot> {
     );
   };
 
-  // Bulk-Upload
+  // demo.floy.com/upload
   public runBulkInferencing = async (
     data: string[],
     email: string,

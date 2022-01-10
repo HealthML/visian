@@ -67,7 +67,6 @@ export const UploadScreen = observer(() => {
       const dataLinks: string[] = [];
       const numberOfFiles = event.dataTransfer.files.length;
       const { files } = event.dataTransfer;
-      // const file = event.dataTransfer.files[0];
       // eslint-disable-next-line no-restricted-syntax
       for (let i = 0; i < numberOfFiles; i++) {
         const file = files[i];

@@ -597,19 +597,17 @@ export const FloyBar = observer<{
           shouldDismissOnOutsidePress
         >
           <StyledParagraph>
-            Für Demonstrationszwecke unseres ersten Produktes gibt diese Web
-            Applikation Risikoeinschätzungen über die Präsenz von fokalen
-            Läsionen (anhand von Plasmozytomen und Knochenmetastasen) in
-            sagittalen T1-gewichteten LWS MRT Serien.
+            Diese Web Applikation dient ausschließlich zur Demonstration unseres
+            ersten Produkts. In der aktuellen Version werden fokale Läsionen auf
+            Basis einer malignen Neoplasie oder primären malignen Erkrankung wie
+            Plasmozytomen oder Malignen Melanomen in Lendenwirbelkörpern erkannt
+            und visualisiert.
           </StyledParagraph>
           <StyledParagraph>
-            Das finale Produkt kommt am 1. Februar 2022 auf den Markt. Bis dahin
-            wird sich unsere KI Qualität, als auch die Anzahl der unterstützten
-            Körperteile und Indikationen deutlich weiterentwickeln. Ihr Feedback
-            hilft uns bei dieser Weiterentwicklung immens. Für alle weiteren
-            Informationen und Ergebnisbesprechungen melden Sie sich gerne direkt
-            bei unserem Geschäftsführer Benedikt Schneider via
-            benedikt.schneider@floy.com oder +4915786031618.
+            Das hier vorgestellte Produkt wird im April 2022 auf den Markt
+            kommen. Für alle weiteren Informationen und Ergebnisbesprechungen
+            melden Sie sich gerne direkt bei unserem Geschäftsführer Benedikt
+            Schneider via benedikt.schneider@floy.com oder +4915786031618.
           </StyledParagraph>
           {!store?.editor.activeDocument?.floyDemo.hasEmail() &&
             setMail != null && (
