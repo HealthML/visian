@@ -23,6 +23,9 @@ export class LayerGroup
   ) {
     super(snapshot, document);
 
+    // TODO: Investigate why it has to be set here again
+    this.layerIds = snapshot?.layerIds || [];
+
     makeObservable<this, "layerIds">(this, {
       layerIds: observable,
 
@@ -46,6 +49,8 @@ export class LayerGroup
 
     this.layerIds.push(idOrLayer.id);
     idOrLayer.setParent(this.id);
+
+    this.document.reorderLayersForGrouping(idOrLayer);
   }
 
   public removeLayer(idOrLayer: string | ILayer) {
@@ -58,6 +63,13 @@ export class LayerGroup
 
     this.layerIds = this.layerIds.filter((id) => id !== idOrLayer.id);
     idOrLayer.setParent();
+  }
+
+  public delete(): void {
+    this.layers.forEach((layer) => {
+      layer.delete();
+    });
+    super.delete();
   }
 
   // Serialization

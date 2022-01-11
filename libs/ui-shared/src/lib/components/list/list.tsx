@@ -17,10 +17,16 @@ export const List = styled.div`
   width: 100%;
 `;
 
-const ListItemContainer = styled.div`
+const ListItemContainer = styled.div<Pick<ListItemProps, "isChild">>`
   display: flex;
   flex-direction: column;
   outline: none;
+
+  ${(props) =>
+    props.isChild &&
+    css`
+      margin-left: 10px;
+    `}
 `;
 
 const ListItemInner = styled.div<Pick<ListItemProps, "isActive">>`
@@ -104,6 +110,7 @@ export const ListItem = React.forwardRef<HTMLDivElement, ListItemProps>(
       value,
       isActive,
       isLast,
+      isChild,
       isLabelEditable = false,
       onChangeLabelText,
       onConfirmLabelText,
@@ -142,7 +149,7 @@ export const ListItem = React.forwardRef<HTMLDivElement, ListItemProps>(
     });
 
     return (
-      <ListItemContainer {...rest} ref={ref}>
+      <ListItemContainer {...rest} ref={ref} isChild={isChild}>
         <ListItemInner isActive={isActive}>
           {icon &&
             (typeof icon === "string" ? (
