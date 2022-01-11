@@ -415,23 +415,27 @@ const CustomTextField = styled(TextField)`
   margin-left: 10px;
 `;
 
+const validMailRegEx = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+
 export const FloyBar = observer<{
   useBlankScreen?: boolean;
   mail?: string;
   setMail?: (newMail: string) => void;
 }>(({ useBlankScreen, mail, setMail }) => {
   const store = useStore();
-  // const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
   const [token, setToken] = useState("");
   const [tokenError, setTokenError] = useState<string>();
-  // const [mailError, setMailError] = useState<string>();
-  const [shouldShowWelcome, setShouldShowWelcome] = useState(true);
+  const [mailError, setMailError] = useState<string>();
+  const [showWelcome, setShowWelcome] = useState(true);
 
   const dismissWelcome = useCallback(() => {
-    // if (!(mail != null && re.test(mail))) {
-    //   store?.editor.activeDocument?.floyDemo.clearToken();
-    //   setMailError("Ungültige E-Mail!");
-    // }
+    setTokenError(undefined);
+    const isValidMail = mail === undefined || validMailRegEx.test(mail); // If no mail was requested as input or mail is valid
+    if (isValidMail) {
+      setMailError(undefined);
+    } else {
+      setMailError("Ungültige E-Mail!");
+    }
 
     store?.editor.activeDocument?.floyDemo
       .activateToken(
@@ -439,13 +443,15 @@ export const FloyBar = observer<{
       )
       .then(() => {
         setTokenError(undefined);
-        setShouldShowWelcome(false);
+        if (isValidMail) {
+          setShowWelcome(false);
+        }
       })
       .catch(() => {
         store?.editor.activeDocument?.floyDemo.clearToken();
         setTokenError("Ungültiger Token!");
       });
-  }, [store, token]);
+  }, [store, token, mail]);
 
   const handleKeyDown = useCallback(
     (event: React.KeyboardEvent<HTMLInputElement>) => {
@@ -494,7 +500,7 @@ export const FloyBar = observer<{
       .catch(() => {
         store?.editor.activeDocument?.floyDemo.clearToken();
         setTokenError("Ihr Token wurde deaktiviert!");
-        setShouldShowWelcome(true);
+        setShowWelcome(true);
         setShouldShowPrivacy(false);
       });
   }, [runInferencing, store]);
@@ -590,7 +596,7 @@ export const FloyBar = observer<{
             </AIContainer>
           </AIBarSheet>
         )}
-      {shouldShowWelcome && (
+      {showWelcome && (
         <FloyPopUp
           title="Willkommen!"
           dismiss={dismissWelcome}
@@ -609,14 +615,6 @@ export const FloyBar = observer<{
             melden Sie sich gerne direkt bei unserem Geschäftsführer Benedikt
             Schneider via benedikt.schneider@floy.com oder +4915786031618.
           </StyledParagraph>
-          {!store?.editor.activeDocument?.floyDemo.hasEmail() &&
-            setMail != null && (
-              <BoldParagraph>
-                Bitte geben Sie die E-Mail Adresse ein, an welche Sie die
-                Ergebnisse der Demo geschickt bekommen mächten. Sie erhalten
-                diese als .csv Datei im Anhang der E-Mail.
-              </BoldParagraph>
-            )}
           {!store?.editor.activeDocument?.floyDemo.hasToken() && (
             <>
               <BoldParagraph>
@@ -626,6 +624,17 @@ export const FloyBar = observer<{
               {tokenError && <ErrorParagraph>{tokenError}</ErrorParagraph>}
             </>
           )}
+          {!store?.editor.activeDocument?.floyDemo.hasEmail() &&
+            setMail != null && (
+              <>
+                <BoldParagraph>
+                  Bitte geben Sie die E-Mail Adresse ein, an welche Sie die
+                  Ergebnisse der Demo geschickt bekommen möchten. Sie erhalten
+                  diese als .csv Datei im Anhang der E-Mail.
+                </BoldParagraph>
+                {mailError && <ErrorParagraph>{mailError}</ErrorParagraph>}
+              </>
+            )}
           <InputRow>
             {!store?.editor.activeDocument?.floyDemo.hasToken() && (
               <TextField

@@ -8,6 +8,8 @@ import {
   Text,
   useIsDraggedOver,
   zIndex,
+  Button,
+  PopUp,
 } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
 import React, { useCallback, useState } from "react";
@@ -30,6 +32,21 @@ const StartText = styled(Text)`
   text-align: center;
 `;
 
+const StyledParagraph = styled(Text)`
+  margin-bottom: 10px;
+`;
+
+const FloyPopUp = styled(PopUp)`
+  max-height: 75%;
+  max-width: 600px;
+  overflow: auto;
+`;
+
+const PopUpButton = styled(Button)`
+  margin-top: 10px;
+  align-self: center;
+`;
+
 const StyledOverlay = styled.div`
   ${coverMixin}
   align-items: center;
@@ -50,17 +67,22 @@ const StyledDropZone = styled(DropZone)`
 `;
 
 export const UploadScreen = observer(() => {
+  const [mail, setMail] = useState("");
+  const [approxBulkTime, setApproxBulkTime] = useState<string>();
+  const [showProgressPopUp, setShowProgressPopUp] = useState(false);
+  const [isLoadingFiles, setIsLoadingFiles] = useState(false);
+  const store = useStore();
   const [
     isDraggedOver,
     { onDrop: onDropCompleted, ...dragListeners },
   ] = useIsDraggedOver();
-
-  const store = useStore();
-  const [mail, setMail] = useState("");
-  const [isLoadingFiles, setIsLoadingFiles] = useState(false);
+  const dismissProgressPopUp = useCallback(() => {
+    setShowProgressPopUp(false);
+  }, []);
 
   const importFiles = useCallback(
     async (_files: FileList, event: React.DragEvent) => {
+      onDropCompleted();
       event.stopPropagation();
       setIsLoadingFiles(true);
 
@@ -70,13 +92,13 @@ export const UploadScreen = observer(() => {
       // eslint-disable-next-line no-restricted-syntax
       for (let i = 0; i < numberOfFiles; i++) {
         const file = files[i];
-        const fileName = file.name;
+        // const fileName = file.name;
 
-        // Filter out irrelevant DICOM serieses and other filestypes than zip files
+        // TO DO: Filter out irrelevant DICOM serieses and other filestypes than zip files
 
         // 3) Upload relevant serieses to S3 (TO DO: Telekom Cloud)
+        // Get unique upload URL
         const data = await fetch(
-          // Get unique upload URL
           "https://kg0rbwuu17.execute-api.eu-central-1.amazonaws.com/uploads",
           { method: "GET" },
         );
@@ -84,25 +106,29 @@ export const UploadScreen = observer(() => {
         const uniqueUploadURL = dataString.split('"')[3];
         const fileNameKey = dataString.split('"')[7];
 
+        // Upload file(s)
         await axios.request({
-          // Upload file(s)
           method: "PUT",
           url: uniqueUploadURL,
           data: file,
           onUploadProgress: (p) => {
             store?.setProgress({
-              label: "Hochladen",
+              label: "Dateien werden hochgeladen...",
               progress: (i + p.loaded / p.total) / numberOfFiles,
               showSplash: false,
             });
-            // console.log((i + p.loaded / p.total) / numberOfFiles);
+            console.log((i + p.loaded / p.total) / numberOfFiles);
           },
         });
         dataLinks.push(
           `s3://s3uploader-s3uploadbucket-1ba2ks21gs4fb/${fileNameKey}`,
         );
       }
-      store?.setProgress(); // Reset ProgressBar
+
+      // Calculate approximate time from upload to confirmation E-Mail:
+      setApproxBulkTime((10 + numberOfFiles * (26 / 60)).toFixed(2));
+      store?.setProgress(); // Turn off ProgressBar
+      setShowProgressPopUp(true);
 
       // 4) Call API on Valohai after upload is finished
       store?.editor.activeDocument?.floyDemo.runBulkInferencing(
@@ -111,9 +137,8 @@ export const UploadScreen = observer(() => {
       );
 
       setIsLoadingFiles(false);
-      onDropCompleted();
     },
-    [mail, onDropCompleted, store],
+    [onDropCompleted, mail, store],
   );
 
   const preventOutsideDrop = useCallback(
@@ -129,6 +154,7 @@ export const UploadScreen = observer(() => {
     },
     [onDropCompleted],
   );
+
   return (
     <Screen
       {...dragListeners}
@@ -146,6 +172,20 @@ export const UploadScreen = observer(() => {
           showSplash={store.progress.showSplash}
         />
       )}
+      {showProgressPopUp && (
+        <FloyPopUp
+          title="Upload abgeschlossen!"
+          dismiss={dismissProgressPopUp}
+          shouldDismissOnOutsidePress
+        >
+          <StyledParagraph>
+            Sie erhalten in ca. {approxBulkTime} Minuten die Ergebnisse per
+            E-Mail.
+          </StyledParagraph>
+          <PopUpButton text="Okay" onPointerDown={dismissProgressPopUp} />
+        </FloyPopUp>
+      )}
+
       {isDraggedOver && (
         <StyledOverlay
           onDrop={handleOutsideDrop}
