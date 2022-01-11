@@ -126,7 +126,7 @@ export const UploadScreen = observer(() => {
       }
 
       // Calculate approximate time from upload to confirmation E-Mail:
-      setApproxBulkTime((10 + numberOfFiles * (26 / 60)).toFixed(2));
+      setApproxBulkTime((10 + numberOfFiles * (26 / 60)).toFixed(0));
       store?.setProgress(); // Turn off ProgressBar
       setShowProgressPopUp(true);
 
