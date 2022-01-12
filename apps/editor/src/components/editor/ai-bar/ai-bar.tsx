@@ -606,7 +606,7 @@ export const FloyBar = observer<{
             Diese Web Applikation dient ausschließlich zur Demonstration unseres
             ersten Produkts. In der aktuellen Version werden fokale Läsionen auf
             Basis einer malignen Neoplasie oder primären malignen Erkrankung wie
-            Plasmozytomen oder Malignen Melanomen in Lendenwirbelkörpern erkannt
+            Plasmozytomen oder Malignen Myelomen in Lendenwirbelkörpern erkannt
             und visualisiert.
           </StyledParagraph>
           <StyledParagraph>
