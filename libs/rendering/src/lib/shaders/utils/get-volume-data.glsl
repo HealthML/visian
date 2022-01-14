@@ -6,6 +6,12 @@
 VolumeData getVolumeData(vec3 uv) {
   VolumeData data;
 
+  #ifdef NO_WRAPPING
+    if(max(max(uv.x, uv.y), uv.z) > 1.0 || min(min(uv.x, uv.y), uv.z) < 0.0) {
+      return data;
+    }
+  #endif
+
   vec4 imageValue = vec4(0.0);
   vec4 imageRaw = vec4(0.0);
   {{reduceLayerStack(imageValue, uv, false, imageRaw)}}
