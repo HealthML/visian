@@ -183,6 +183,7 @@
   "volume-mm": "mm³",
   "volume-um": "μm³",
   "volume-m": "m³",
+  "copy": "Kopieren",
 
   "info-unit": "Die Einheit ist in den Daten nicht immer spezifiziert. Bei medizinischen Daten wie MRT- und CT-Bildern handelt es sich meist um mm. Bei generischen Bilddaten wie PNG oder JPG Bildern handelt es sich lediglich um Pixel.",
   "info-brush": "Der Pinsel ist das einfachste Malwerkzeug von VISIAN. Die Pinselgröße kann angepasst werden und mit Links- bzw. Rechtsklick kann gemalt und radiert werden.",

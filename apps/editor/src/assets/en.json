@@ -183,6 +183,7 @@
   "volume-mm": "mm³",
   "volume-um": "μm³",
   "volume-m": "m³",
+  "copy": "Copy",
 
   "info-unit": "The unit is not always specified in the data. For medical images such as MRI and CT it is usually mm. For generic images such as PNG or JPG it is simply pixels.",
   "info-brush": "The brush is the most simple drawing tool of VISIAN. You can change the size of the brush and use left- and right-click to draw and erase.",
