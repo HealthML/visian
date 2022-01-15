@@ -1,5 +1,6 @@
 import { Voxel } from "@visian/utils";
 import { action, computed, makeObservable, observable } from "mobx";
+import type { Unit } from "nifti-js";
 
 import {
   FloatTypes,
@@ -43,10 +44,17 @@ export interface ImageSnapshot<T extends TypedArray = TypedArray> {
   orientation?: ITKMatrix;
 
   data?: T;
+
+  unit?: Unit;
+}
+
+export interface ITKImageWithUnit<T extends TypedArray = TypedArray>
+  extends ITKImage<T> {
+  unit?: Unit;
 }
 
 export const itkImageToImageSnapshot = <T extends TypedArray = TypedArray>(
-  image: ITKImage<T>,
+  image: ITKImageWithUnit<T>,
   filterValue?: number,
   squash?: boolean,
 ): ImageSnapshot => ({
@@ -84,6 +92,7 @@ export const itkImageToImageSnapshot = <T extends TypedArray = TypedArray>(
       ? 255
       : 0,
   ),
+  unit: image.unit,
 });
 
 /** A generic, observable multi-dimensional image class. */
@@ -165,6 +174,11 @@ export class Image<T extends TypedArray = TypedArray>
    */
   public orientation!: ITKMatrix;
 
+  /**
+   * The unit of measurment for `voxelSpacing`.
+   */
+  public unit?: Unit;
+
   /** A TypedArray containing the voxel buffer data in I/O format. */
   private data!: T;
 
@@ -182,6 +196,7 @@ export class Image<T extends TypedArray = TypedArray>
       voxelComponents: observable,
       voxelComponentType: observable,
       origin: observable,
+      unit: observable,
       // TODO: Make matrix properly observable
       orientation: observable.ref,
       data: observable.ref,
@@ -372,6 +387,7 @@ export class Image<T extends TypedArray = TypedArray>
       voxelComponents: this.voxelComponents,
       voxelComponentType: this.voxelComponentType,
       voxelType: this.voxelType,
+      unit: this.unit,
     };
   }
 
@@ -403,6 +419,8 @@ export class Image<T extends TypedArray = TypedArray>
       );
       this.orientation.setIdentity();
     }
+
+    this.unit = snapshot?.unit;
 
     this.setData(
       snapshot.data ?? (new Uint8Array(this.voxelCount.product()) as T),

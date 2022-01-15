@@ -18,7 +18,7 @@ import {
   IDisposable,
   ImageMismatchError,
   ISerializable,
-  ITKImage,
+  ITKImageWithUnit,
   readMedicalImage,
   Zip,
 } from "@visian/utils";
@@ -27,6 +27,8 @@ import { action, computed, makeObservable, observable, toJS } from "mobx";
 import path from "path";
 import * as THREE from "three";
 import { v4 as uuidv4 } from "uuid";
+import { parseHeader, Unit } from "nifti-js";
+import { inflate } from "pako";
 
 import {
   defaultAnnotationColor,
@@ -584,10 +586,37 @@ export class Document
         ? filteredFiles[0]?.name || ""
         : filteredFiles.name);
 
+    const firstFile = Array.isArray(filteredFiles)
+      ? filteredFiles[0]
+      : filteredFiles;
+    let unit: Unit = "";
+    if (path.extname(firstFile.name) === ".dcm") {
+      // DICOM always has mm as unit: https://dicom.innolitics.com/ciods/ct-image/image-plane/00280030
+      unit = "mm";
+    } else if (
+      path.extname(firstFile.name) === ".nii" ||
+      firstFile.name.endsWith(".nii.gz")
+    ) {
+      try {
+        let arrayBuffer = await firstFile.arrayBuffer();
+        if (firstFile.name.endsWith(".nii.gz")) {
+          arrayBuffer = inflate(new Uint8Array(arrayBuffer));
+        }
+        // Nifti specifies one unit per dimension. Usually they are all the same. We don't show a unit if they are not the same.
+        const units = parseHeader(arrayBuffer).spaceUnits;
+        const areAllEqual = units.every((val) => val === units[0]);
+        unit = areAllEqual ? units[0] : "";
+      } catch (ex) {
+        // Leave unit undefined if parsing fails.
+      }
+    }
+
+    const imageWithUnit = { unit, ...image };
+
     if (isAnnotation) {
-      createdLayerId = await this.importAnnotation(image);
+      createdLayerId = await this.importAnnotation(imageWithUnit);
     } else if (isAnnotation !== undefined) {
-      createdLayerId = await this.importImage(image);
+      createdLayerId = await this.importImage(imageWithUnit);
     } else {
       // Infer Type
       let isLikelyImage = false;
@@ -600,12 +629,16 @@ export class Document
         }
       }
       if (isLikelyImage) {
-        createdLayerId = await this.importImage(image);
+        createdLayerId = await this.importImage(imageWithUnit);
       } else {
         const numberOfAnnotations = uniqueValues.size - 1;
 
         if (numberOfAnnotations + this.layers.length > this.maxLayers) {
-          createdLayerId = await this.importAnnotation(image, undefined, true);
+          createdLayerId = await this.importAnnotation(
+            imageWithUnit,
+            undefined,
+            true,
+          );
           this.setError({
             titleTx: "squashed-layers-title",
             descriptionTx: "squashed-layers-import",
@@ -614,7 +647,7 @@ export class Document
           uniqueValues.forEach(async (value) => {
             if (value === 0) return;
             createdLayerId = await this.importAnnotation(
-              { ...image, name: `${value}_${image.name}` },
+              { ...imageWithUnit, name: `${value}_${image.name}` },
               value,
             );
           });
@@ -655,7 +688,7 @@ export class Document
     }
   }
 
-  public async importImage(image: ITKImage) {
+  public async importImage(image: ITKImageWithUnit) {
     this.checkHardwareRequirements(image.size);
 
     const imageLayer = ImageLayer.fromITKImage(image, this, {
@@ -679,7 +712,7 @@ export class Document
   }
 
   public async importAnnotation(
-    image: ITKImage,
+    image: ITKImageWithUnit,
     filterValue?: number,
     squash?: boolean,
   ) {
