@@ -5,6 +5,7 @@
 /// <reference path="../../../declarations/itk.d.ts" />
 /// <reference path="../../../declarations/shaders.d.ts" />
 /// <reference path="../../../declarations/workers.d.ts" />
+/// <reference path="../../../declarations/nifti-js.d.ts" />
 
 declare module "webxr-polyfill" {
   export default class WebXRPolyfill {}

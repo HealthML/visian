@@ -37,13 +37,18 @@ export const InfoText = observer<InfoTextProps>(
     shortcuts,
     baseZIndex,
     position,
+    icon = "info",
     shouldDismissOnOutsidePress = true,
     ...rest
   }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const toggleModal = useCallback(() => setIsModalOpen(!isModalOpen), [
-      isModalOpen,
-    ]);
+    const toggleModal = useCallback(
+      (event: React.PointerEvent) => {
+        event.stopPropagation();
+        setIsModalOpen(!isModalOpen);
+      },
+      [isModalOpen],
+    );
     const closeModal = useCallback(() => setIsModalOpen(false), []);
 
     const buttonRef = useRef<HTMLButtonElement>(null);
@@ -56,7 +61,7 @@ export const InfoText = observer<InfoTextProps>(
     return (
       <>
         <ModalHeaderButton
-          icon="info"
+          icon={icon}
           onPointerDown={toggleModal}
           tooltipTx={titleTx}
           showTooltip={!isModalOpen}

@@ -254,7 +254,15 @@ const LayerListItem = observer<{
                   onPointerDown={handlePointerDown}
                   onPointerUp={stopTap}
                   onContextMenu={handleContextMenu}
-                />
+                >
+                  {layer === store?.editor.activeDocument?.baseImageLayer && (
+                    <InfoText
+                      icon="circle"
+                      infoTx="info-base-image-layer"
+                      titleTx="base-image-layer"
+                    />
+                  )}
+                </ListItem>
               )}
             </Observer>
           );

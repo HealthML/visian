@@ -80,6 +80,7 @@
   "erase-application-data-confirmation": "Alle Anwendungsdaten löschen?",
 
   "layers": "Ebenen",
+  "base-image-layer": "Grund-Bildebene",
   "add-annotation-layer": "Neue Annotation hinzufügen",
   "no-layers": "Keine Ebenen geladen.",
   "untitled-layer": "Unbenannte Ebene",
@@ -178,6 +179,16 @@
 
   "help": "Hilfe",
   "unit": "Einheit",
+  "length-um": "μm",
+  "length-mm": "mm",
+  "length-m": "m",
+  "area-mm": "mm²",
+  "area-um": "μm²",
+  "area-m": "m²",
+  "volume-mm": "mm³",
+  "volume-um": "μm³",
+  "volume-m": "m³",
+  "copy": "Kopieren",
 
   "info-unit": "Die Einheit ist in den Daten nicht immer spezifiziert. Bei medizinischen Daten wie MRT- und CT-Bildern handelt es sich meist um mm. Bei generischen Bilddaten wie PNG oder JPG Bildern handelt es sich lediglich um Pixel.",
   "info-brush": "Der Pinsel ist das einfachste Malwerkzeug von VISIAN. Die Pinselgröße kann angepasst werden und mit Links- bzw. Rechtsklick kann gemalt und radiert werden.",
@@ -190,5 +201,6 @@
   "info-exclusive-segmentations": "Mit dieser Option kann sichergestellt werden, dass die Segmentierungsebenen sich nicht überlappen können. Dabei \"gewinnt\" immer die Ebene, die weiter oben im Ebenenstapel liegt. Das Resultat wird dann auch entsprechend exportiert.",
   "info-voxel-data": "Die Voxeldaten des geladenen Bildes werden unten links im Editor angezeigt. Auf langsamerer Hardware kann das zu Performanceproblemen führen. In diesem Fall ist die Option \"Verzögerung\" empfohlen. Dann werden die Voxeldaten nur angezeigt, wenn die Maus nicht mehr bewegt wird.",
   "info-performance-mode": "Die Anzeigequalität hat nur im 3D-Modus einen Effekt. Dort kann eine höhere Anzeigequalität zu Performanceproblemen führen. Auf langsamerer Hardware ist die niedrige Anzeigequalität empfohlen.",
-  "info-layer-stack": "Im Ebenenstapel können die Ebenen neu angeordnet (drag and drop) und versteckt werden. Ebenen, die weiter oben im Stapel erscheinen, werden über den anderen Ebenen in der 2D und 3D Ansicht angezeigt. Weitere Aktionen auf einer einzelnen Ebene sind über einen Rechtsklick auf die Ebene im Stapel erreichbar."
+  "info-layer-stack": "Im Ebenenstapel können die Ebenen neu angeordnet (drag and drop) und versteckt werden. Ebenen, die weiter oben im Stapel erscheinen, werden über den anderen Ebenen in der 2D und 3D Ansicht angezeigt. Weitere Aktionen auf einer einzelnen Ebene sind über einen Rechtsklick auf die Ebene im Stapel erreichbar.",
+  "info-base-image-layer": "Die Daten der Grund-Bildebene werden für alle Regiongrowing Werkzeuge genutzt und (wenn die Voxeldatenanzeige aktiviert ist) unten links im Editorbildschirm angezeigt. Die Grund-Bildebene wird automatisch auf die unterste sichtbare Bildebene im Ebenenstapel gesetzt."
 }
