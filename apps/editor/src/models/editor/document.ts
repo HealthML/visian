@@ -258,6 +258,13 @@ export class Document
       }),
     );
 
+    const areAllImageLayersInvisible = Boolean(
+      !this.layerIds.find((layerId) => {
+        const layer = this.layerMap[layerId];
+        return layer.kind === "image" && !layer.isAnnotation && layer.isVisible;
+      }),
+    );
+
     let baseImageLayer: ImageLayer | undefined;
     this.layerIds
       .slice()
@@ -267,7 +274,8 @@ export class Document
         if (
           layer.kind === "image" &&
           // use non-annotation layer if possible
-          (!layer.isAnnotation || areAllLayersAnnotations)
+          (!layer.isAnnotation || areAllLayersAnnotations) &&
+          (layer.isVisible || areAllImageLayersInvisible)
         ) {
           baseImageLayer = layer as ImageLayer;
           return true;

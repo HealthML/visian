@@ -5,6 +5,7 @@ export { ReactComponent as arrowUp } from "./arrow-up.svg";
 export { ReactComponent as backspace } from "./backspace.svg";
 export { ReactComponent as boundedSmartBrush } from "./bounded-smart-brush.svg";
 export { ReactComponent as check } from "./check.svg";
+export { ReactComponent as circle } from "./circle.svg";
 export { ReactComponent as columnView } from "./column-view.svg";
 export { ReactComponent as copyClipboard } from "./copy-clipboard.svg";
 export { ReactComponent as crosshairPointer } from "./crosshair-pointer.svg";
