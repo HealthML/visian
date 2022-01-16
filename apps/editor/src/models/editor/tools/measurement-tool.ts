@@ -60,11 +60,11 @@ export class MeasurementTool<N extends "measurement-tool" = "measurement-tool">
       new Vector([1, 1, 1], false);
 
     return this.path
-      .slice(1)
-      .map((pointB, pointAIndex) =>
-        pointB
+      .map((pointA, pointAIndex) =>
+        pointA
           .clone(false)
-          .sub(this.path[pointAIndex])
+          // Can't slice the array ro remove the redundant last element because it wouldn't trigger recomputation on change
+          .sub(this.path[Math.min(pointAIndex + 1, this.path.length - 1)])
           .multiply(scale)
           .length(),
       )
