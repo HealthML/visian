@@ -42,6 +42,9 @@ export class OverlayPointsMaterial extends THREE.PointsMaterial {
 }
 
 export class OverlayRoundedPointsMaterial extends THREE.ShaderMaterial {
+  public static readonly minAbsolutePointSize = 10;
+  public static readonly pointSizeZoomScale = 5;
+
   private disposers: IDisposer[] = [];
 
   constructor(editor: IEditor) {
@@ -49,7 +52,7 @@ export class OverlayRoundedPointsMaterial extends THREE.ShaderMaterial {
       vertexShader: nodeVertexShader,
       fragmentShader: nodeFragmentShader,
       uniforms: {
-        uPointSize: { value: 20 },
+        uPointSize: { value: 1 },
         uNodeTextures: { value: [] },
         uInvertRGB: { value: true },
       },
@@ -71,8 +74,11 @@ export class OverlayRoundedPointsMaterial extends THREE.ShaderMaterial {
       }),
       autorun(() => {
         this.uniforms.uPointSize.value =
-          Math.max((editor.activeDocument?.viewport2D.zoomLevel ?? 1) * 5, 10) *
-          window.devicePixelRatio;
+          Math.max(
+            (editor.activeDocument?.viewport2D.zoomLevel ?? 1) *
+              OverlayRoundedPointsMaterial.pointSizeZoomScale,
+            OverlayRoundedPointsMaterial.minAbsolutePointSize,
+          ) * window.devicePixelRatio;
         editor.sliceRenderer?.lazyRender();
       }),
     );
