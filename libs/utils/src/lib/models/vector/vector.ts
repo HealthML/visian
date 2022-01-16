@@ -1,5 +1,4 @@
 import { action, makeObservable, observable, toJS } from "mobx";
-import type * as THREE from "three";
 
 import { getOrthogonalAxis, ViewType } from "../view-types";
 
@@ -10,10 +9,53 @@ export class OutOfBoundsError extends Error {
   }
 }
 
-export interface GenericVector extends THREE.Vector {
+export interface GenericVector {
   size: number;
+  x: number;
+  y: number;
+  z: number;
+  w: number;
+  width: number;
+  height: number;
 
+  setComponent(index: number | "x" | "y" | "z" | "w", value: number): this;
+  getComponent(index: number): number;
+  set(...args: number[]): this;
+  setScalar(scalar: number): this;
+  copy(v: GenericVector): this;
+  add(v: GenericVector): this;
+  addVectors(a: GenericVector, b: GenericVector): this;
+  addScaledVector(vector: GenericVector, scale: number): this;
+  addScalar(scalar: number): this;
+  sub(v: GenericVector): this;
+  subVectors(a: GenericVector, b: GenericVector): this;
+  multiply(vector: GenericVector): this;
+  multiplyScalar(s: number): this;
+  divide(vector: GenericVector): this;
+  divideScalar(s: number): this;
+  negate(): this;
+  dot(v: GenericVector): number;
+  lengthSq(): number;
+  length(): number;
+  sum(): number;
+  product(): number;
+  normalize(): this;
+  distanceTo?(v: Vector): number;
+  distanceToSquared?(v: Vector): number;
+  setLength(l: number): this;
+  lerp(v: GenericVector, alpha: number): this;
+  map(mapper: (value: number, index: number) => number): this;
+  round(): this;
+  floor(): this;
+  ceil(): this;
+  equals(v: GenericVector): boolean;
+  clone(): GenericVector;
+  fromArray(array: number[]): this;
   toArray(): number[];
+  toString(): string;
+  toJSON(): number[];
+  getFromView(viewType: ViewType): number;
+  setFromView(viewType: ViewType): this;
 }
 
 /** An observable vector of generic, fixed size. */
@@ -371,5 +413,6 @@ export class Vector implements GenericVector {
 
   public setFromView(viewType: ViewType, value = 0) {
     this[getOrthogonalAxis(viewType)] = value;
+    return this;
   }
 }
