@@ -10,6 +10,13 @@ import {
 import { autorun } from "mobx";
 import * as THREE from "three";
 
+enum NodeIconMapping {
+  NORMAL = 0,
+  DOWN = 1,
+  UP = 2,
+  UPDOWN = 3,
+}
+
 export class Path extends THREE.Group implements IDisposable {
   private lines = new THREE.LineSegments();
   private points = new THREE.Points();
@@ -79,7 +86,13 @@ export class Path extends THREE.Group implements IDisposable {
         Math.min(nextPoint[sliceAxis], previousPoint[sliceAxis]) <
         point[sliceAxis];
 
-      const nodeIcon = isDown ? (isUp ? 3 : 1) : isUp ? 2 : 0;
+      const nodeIcon = isDown
+        ? isUp
+          ? NodeIconMapping.UPDOWN
+          : NodeIconMapping.DOWN
+        : isUp
+        ? NodeIconMapping.UP
+        : NodeIconMapping.NORMAL;
 
       if (point[sliceAxis] === slice) {
         if (nextPoint[sliceAxis] === slice) {
