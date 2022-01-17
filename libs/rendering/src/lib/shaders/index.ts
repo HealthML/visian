@@ -14,6 +14,8 @@ export { default as laoFragmentShader } from "./lao/lao.frag.glsl";
 export { default as laoVertexShader } from "./lao/lao.vert.glsl";
 export { default as mergeFragmentShader } from "./merge/merge.frag.glsl";
 export { default as mergeVertexShader } from "./merge/merge.vert.glsl";
+export { default as nodeFragmentShader } from "./node/node.frag.glsl";
+export { default as nodeVertexShader } from "./node/node.vert.glsl";
 export { default as progressiveAccumulationFragmentShader } from "./progressive-accumulation/progressive-accumulation.frag.glsl";
 export { default as progressiveAccumulationVertexShader } from "./progressive-accumulation/progressive-accumulation.vert.glsl";
 export { default as rawSliceFragmentShader } from "./slice/raw-slice.frag.glsl";

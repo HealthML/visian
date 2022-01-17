@@ -3,6 +3,7 @@ import {
   DeviceType,
   globalListenerTypes,
   IDispatch,
+  IMeasurementTool,
   isFirefox,
   isWindows,
   ITool,
@@ -128,6 +129,10 @@ export const setUpPointerHandling = (
         context.button === PointerButton.RMB ||
         context.button === PointerButton.Eraser
       ) {
+        if (tool.name === "measurement-tool") {
+          (tool as IMeasurementTool).setToDeleteMode();
+        }
+
         tool = tool.altTool;
       }
 

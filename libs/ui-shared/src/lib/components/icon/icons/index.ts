@@ -39,6 +39,7 @@ export { ReactComponent as redo } from "./redo.svg";
 export { ReactComponent as reset } from "./reset.svg";
 export { ReactComponent as rightArrow } from "./right-arrow.svg";
 export { ReactComponent as rightMouse } from "./right-mouse.svg";
+export { ReactComponent as ruler } from "./ruler.svg";
 export { ReactComponent as scrollDown } from "./scroll-down-mouse.svg";
 export { ReactComponent as scrollUp } from "./scroll-up-mouse.svg";
 export { ReactComponent as settings } from "./settings.svg";

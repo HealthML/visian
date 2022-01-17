@@ -29,6 +29,7 @@ import { SmartBrush3D } from "./smart-brush-3d";
 import { DilateErodeTool } from "./dilate-erode-tool";
 import { SelfDeactivatingTool } from "./self-deactivating-tool";
 import { UndoableTool } from "./undoable-tool";
+import { MeasurementTool } from "./measurement-tool";
 
 export type ToolName =
   | "navigation-tool"
@@ -46,7 +47,8 @@ export type ToolName =
   | "clear-image"
   | "dilate-erode"
   | "plane-tool"
-  | "fly-tool";
+  | "fly-tool"
+  | "measurement-tool";
 
 export interface ToolsSnapshot<N extends string> {
   activeToolName?: N;
@@ -195,6 +197,7 @@ export class Tools
         },
         document,
       ),
+      "measurement-tool": new MeasurementTool(document),
     };
 
     this.toolGroups.push(
@@ -219,6 +222,7 @@ export class Tools
       new ToolGroup({ toolNames: ["dilate-erode"] }, document),
       new ToolGroup({ toolNames: ["plane-tool"] }, document),
       new ToolGroup({ toolNames: ["fly-tool"] }, document),
+      new ToolGroup({ toolNames: ["measurement-tool"] }, document),
     );
 
     if (snapshot) this.applySnapshot(snapshot);
