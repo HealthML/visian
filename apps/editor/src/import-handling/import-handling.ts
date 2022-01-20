@@ -14,7 +14,9 @@ const importFilesByType = async (
   }
 };
 
-const getFileSystemEntriesFromDataTransfer = (items: DataTransferItemList) => {
+export const getFileSystemEntriesFromDataTransfer = (
+  items: DataTransferItemList,
+) => {
   const entries: FileSystemEntry[] = [];
   for (let itemIndex = 0; itemIndex < items.length; itemIndex++) {
     const item = items[itemIndex];

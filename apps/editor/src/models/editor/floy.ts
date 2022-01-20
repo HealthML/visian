@@ -121,15 +121,11 @@ export class FloyDemoController implements ISerializable<FloyDemoSnapshot> {
     return true;
   }
 
-  protected setSeriesZip(value?: File): void {
-    this.seriesZip = value;
-  }
-
-  public async setDemoCandidate(
+  public async prepareSeriesZip(
     series?: File | File[],
     name?: string,
-  ): Promise<void> {
-    if (!series) return this.setSeriesZip();
+  ): Promise<File | undefined> {
+    if (!series) return;
 
     const firstFile = Array.isArray(series) ? series[0] : series;
 
@@ -145,9 +141,21 @@ export class FloyDemoController implements ISerializable<FloyDemoSnapshot> {
       zip.setFile(`${name || firstFile.name}/${file.name}`, file);
     });
 
-    this.setSeriesZip(
-      new File([await zip.toBlob()], `${name || firstFile.name}.zip`),
-    );
+    return new File([await zip.toBlob()], `${name || firstFile.name}.zip`);
+  }
+
+  protected setSeriesZip(value?: File): void {
+    this.seriesZip = value;
+  }
+
+  public async setDemoCandidate(
+    series?: File | File[],
+    name?: string,
+  ): Promise<void> {
+    const zip = await this.prepareSeriesZip(series, name);
+    if (!zip) return this.setSeriesZip();
+
+    this.setSeriesZip(zip);
 
     // DEBUG
     // FileSaver.saveAs(await zip.toBlob(), `${name || firstFile.name}.zip`);

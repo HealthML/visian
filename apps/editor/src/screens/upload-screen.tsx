@@ -1,24 +1,27 @@
 /* eslint-disable no-await-in-loop */
 import {
   AbsoluteCover,
+  Button,
   color,
   coverMixin,
   DropZone,
+  PopUp,
   Screen,
   Text,
   useIsDraggedOver,
   zIndex,
-  Button,
-  PopUp,
 } from "@visian/ui-shared";
+import { extractSeriesFromFileSystemEntries } from "@visian/utils";
+import axios from "axios";
 import { observer } from "mobx-react-lite";
 import React, { useCallback, useState } from "react";
 import styled from "styled-components";
-import axios from "axios";
+
 import { useStore } from "../app/root-store";
 import { FloyBar } from "../components/editor/ai-bar";
-import { IS_FLOY_DEMO } from "../constants";
 import { ProgressPopUp } from "../components/editor/progress-popup";
+import { IS_FLOY_DEMO } from "../constants";
+import { getFileSystemEntriesFromDataTransfer } from "../import-handling";
 
 const StartTextContainer = styled(AbsoluteCover)`
   align-items: center;
@@ -82,51 +85,68 @@ export const UploadScreen = observer(() => {
 
   const importFiles = useCallback(
     async (_files: FileList, event: React.DragEvent) => {
+      if (!store?.editor.activeDocument) return;
+
       onDropCompleted();
       event.stopPropagation();
       setIsLoadingFiles(true);
+      store.setProgress({ labelTx: "importing", showSplash: true });
 
-      const dataLinks: string[] = [];
-      const numberOfFiles = event.dataTransfer.files.length;
-      const { files } = event.dataTransfer;
-      // eslint-disable-next-line no-restricted-syntax
-      for (let i = 0; i < numberOfFiles; i++) {
-        const file = files[i];
-        // const fileName = file.name;
+      // Extract, filter & prepare series for upload
+      const series = await extractSeriesFromFileSystemEntries(
+        getFileSystemEntriesFromDataTransfer(event.dataTransfer.items),
+      );
+      const seriesMask = await Promise.all(
+        series.map(store.editor.activeDocument.floyDemo.isDemoCandidate),
+      );
+      const zips = await Promise.all(
+        series
+          .filter((_value, index) => seriesMask[index])
+          .map((files) =>
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            store.editor.activeDocument!.floyDemo.prepareSeriesZip(files),
+          ),
+      );
 
-        // TO DO: Filter out irrelevant DICOM serieses and other filestypes than zip files
-
-        // 3) Upload relevant serieses to S3 (TO DO: Telekom Cloud)
-        // Get unique upload URL
-        const data = await fetch(
-          "https://kg0rbwuu17.execute-api.eu-central-1.amazonaws.com/uploads",
-          { method: "GET" },
-        );
-        const dataString = await data.text();
-        const uniqueUploadURL = dataString.split('"')[3];
-        const fileNameKey = dataString.split('"')[7];
-
-        // Upload file(s)
-        await axios.request({
-          method: "PUT",
-          url: uniqueUploadURL,
-          data: file,
-          onUploadProgress: (p) => {
-            store?.setProgress({
-              label: "Dateien werden hochgeladen...",
-              progress: (i + p.loaded / p.total) / numberOfFiles,
-              showSplash: false,
-            });
-            console.log((i + p.loaded / p.total) / numberOfFiles);
-          },
-        });
-        dataLinks.push(
-          `s3://s3uploader-s3uploadbucket-1ba2ks21gs4fb/${fileNameKey}`,
-        );
+      if (!zips.length) {
+        store.setProgress();
+        return;
       }
 
+      const dataLinks: string[] = [];
+      Promise.all(
+        zips.map(async (zip, index) => {
+          // 3) Upload relevant serieses to S3 (TO DO: Telekom Cloud)
+          // Get unique upload URL
+          const data = await fetch(
+            "https://kg0rbwuu17.execute-api.eu-central-1.amazonaws.com/uploads",
+            { method: "GET" },
+          );
+          const dataString = await data.text();
+          const uniqueUploadURL = dataString.split('"')[3];
+          const fileNameKey = dataString.split('"')[7];
+
+          // Upload file(s)
+          await axios.request({
+            method: "PUT",
+            url: uniqueUploadURL,
+            data: zip,
+            onUploadProgress: (p) => {
+              store?.setProgress({
+                label: "Dateien werden hochgeladen...",
+                progress: (index + p.loaded / p.total) / zips.length,
+                showSplash: false,
+              });
+            },
+          });
+          dataLinks.push(
+            `s3://s3uploader-s3uploadbucket-1ba2ks21gs4fb/${fileNameKey}`,
+          );
+        }),
+      );
+
       // Calculate approximate time from upload to confirmation E-Mail:
-      setApproxBulkTime((30 + numberOfFiles * (26 / 60)).toFixed(0));
+      setApproxBulkTime((30 + zips.length * (26 / 60)).toFixed(0));
       store?.setProgress(); // Turn off ProgressBar
       setShowProgressPopUp(true);
 
