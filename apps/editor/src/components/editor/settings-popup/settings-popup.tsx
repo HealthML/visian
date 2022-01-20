@@ -10,11 +10,12 @@ import {
   LargePopUpGroupTitleContainer,
   PopUp,
   Switch,
+  Theme,
   useTranslation,
 } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
 import React, { useCallback } from "react";
-import styled from "styled-components";
+import styled, { useTheme } from "styled-components";
 
 import { useStore } from "../../../app/root-store";
 import { SettingsPopUpProps } from "./settings-popup.props";
@@ -64,6 +65,8 @@ export const SettingsPopUp: React.FC<SettingsPopUpProps> = observer(
       [i18n],
     );
 
+    const theme = useTheme() as Theme;
+
     return (
       <StyledPopUp
         titleTx="settings"
@@ -92,6 +95,8 @@ export const SettingsPopUp: React.FC<SettingsPopUpProps> = observer(
               <Divider />
               <BooleanParam
                 labelTx="exclusive-segmentations"
+                infoTx="info-exclusive-segmentations"
+                infoBaseZIndex={theme.zIndices.overlay}
                 value={store?.editor.activeDocument?.useExclusiveSegmentations}
                 setValue={
                   store?.editor.activeDocument?.setUseExclusiveSegmentations
@@ -99,6 +104,8 @@ export const SettingsPopUp: React.FC<SettingsPopUpProps> = observer(
               />
               <EnumParam
                 labelTx="voxel-data"
+                infoTx="info-voxel-data"
+                infoBaseZIndex={theme.zIndices.overlay}
                 options={voxelInfoSwitchOptions}
                 value={store?.editor.activeDocument?.viewport2D.voxelInfoMode}
                 setValue={
@@ -107,6 +114,8 @@ export const SettingsPopUp: React.FC<SettingsPopUpProps> = observer(
               />
               <Switch
                 labelTx="performance-mode"
+                infoTx="info-performance-mode"
+                infoBaseZIndex={theme.zIndices.overlay}
                 options={performanceSwitchOptions}
                 value={store?.editor.performanceMode}
                 onChange={store?.editor.setPerformanceMode}

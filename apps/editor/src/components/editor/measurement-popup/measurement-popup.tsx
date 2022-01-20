@@ -1,9 +1,10 @@
-import { PopUp, Text } from "@visian/ui-shared";
+import { PopUp, Text, Theme } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
 import React from "react";
-import styled from "styled-components";
+import styled, { useTheme } from "styled-components";
 
 import { useStore } from "../../../app/root-store";
+import { Measurement } from "../measurement";
 import { MeasurementPopUpProps } from "./measurement-popup.props";
 
 const StyledPopUp = styled(PopUp)`
@@ -22,6 +23,11 @@ export const MeasurementPopUp: React.FC<MeasurementPopUpProps> = observer(
         ? store?.editor.activeDocument?.measurementDisplayLayer?.volume
         : store?.editor.activeDocument?.measurementDisplayLayer?.area?.area;
 
+    const unit =
+      store?.editor.activeDocument?.measurementDisplayLayer?.image.unit;
+
+    const theme = useTheme() as Theme;
+
     return (
       <StyledPopUp
         titleTx={measurementType}
@@ -30,7 +36,12 @@ export const MeasurementPopUp: React.FC<MeasurementPopUpProps> = observer(
         shouldDismissOnOutsidePress
       >
         {value !== null && value !== undefined ? (
-          <Text text={value.toFixed(2)} />
+          <Measurement
+            value={value}
+            measurementType={measurementType}
+            unit={unit}
+            infoBaseZIndex={theme.zIndices.overlay}
+          />
         ) : (
           <Text tx="calculating" />
         )}

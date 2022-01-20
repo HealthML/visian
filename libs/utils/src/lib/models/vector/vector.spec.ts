@@ -55,4 +55,13 @@ describe("Vector", () => {
 
     expect(new Vector([2, 0]).equals(new Vector([2, 0]))).toBe(true);
   });
+
+  it("should clone properly if it is not observable", () => {
+    const a = new Vector([1, 2], false);
+    const b = a.clone(false);
+    b.y = 0;
+
+    expect(a.toArray()).toEqual([1, 2]);
+    expect(b.toArray()).toEqual([1, 0]);
+  });
 });

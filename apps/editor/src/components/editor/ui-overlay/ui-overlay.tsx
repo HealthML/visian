@@ -12,7 +12,11 @@ import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
 import { IS_FLOY_DEMO, whoHome } from "../../../constants";
-import { DilateErodeModal, SmartBrush3DModal } from "../action-modal";
+import {
+  DilateErodeModal,
+  MeasurementModal,
+  SmartBrush3DModal,
+} from "../action-modal";
 import { AIBar, FloyBar } from "../ai-bar";
 import { AxesAndVoxel } from "../axes-and-voxel";
 import { DropSheet } from "../drop-sheet";
@@ -232,6 +236,7 @@ export const UIOverlay = observer<UIOverlayProps>(
               <AxesAndVoxel />
               <SmartBrush3DModal />
               <DilateErodeModal />
+              <MeasurementModal />
             </ColumnLeft>
             <ColumnCenter>
               <TopConsole />

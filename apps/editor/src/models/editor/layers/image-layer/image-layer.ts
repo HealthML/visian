@@ -5,8 +5,8 @@ import {
   Image,
   ImageSnapshot,
   ISerializable,
-  ITKImage,
   itkImageToImageSnapshot,
+  ITKImageWithUnit,
   TypedArray,
   Vector,
   ViewType,
@@ -43,7 +43,7 @@ export class ImageLayer
   extends Layer
   implements IImageLayer, ISerializable<ImageLayerSnapshot>, IDisposable {
   public static fromITKImage<T2 extends TypedArray = TypedArray>(
-    image: ITKImage<T2>,
+    image: ITKImageWithUnit<T2>,
     document: IDocument,
     snapshot?: Partial<ImageLayerSnapshot>,
     filterValue?: number,
@@ -74,6 +74,7 @@ export class ImageLayer
           orientation: image.orientation,
           voxelCount: image.voxelCount.toArray(),
           voxelSpacing: image.voxelSpacing.toArray(),
+          unit: image.unit,
         },
       },
       document,
