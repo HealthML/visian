@@ -115,36 +115,39 @@ export const UploadScreen = observer(() => {
         }
 
         const dataLinks: string[] = [];
-        await Promise.all(
-          zips.map(async (zip, index) => {
-            // 3) Upload relevant serieses to S3 (TO DO: Telekom Cloud)
-            // Get unique upload URL
-            const data = await fetch(
-              "https://kg0rbwuu17.execute-api.eu-central-1.amazonaws.com/uploads",
-              { method: "GET" },
-            );
-            const dataString = await data.text();
-            const uniqueUploadURL = dataString.split('"')[3];
-            const fileNameKey = dataString.split('"')[7];
+        for (let index = 0; index < zips.length; index++) {
+          // 3) Upload relevant serieses to S3 (TO DO: Telekom Cloud)
+          // Get unique upload URL
+          const data = await fetch(
+            "https://kg0rbwuu17.execute-api.eu-central-1.amazonaws.com/uploads",
+            { method: "GET" },
+          );
+          const dataString = await data.text();
+          const uniqueUploadURL = dataString.split('"')[3];
+          const fileNameKey = dataString.split('"')[7];
 
-            // Upload file(s)
-            await axios.request({
-              method: "PUT",
-              url: uniqueUploadURL,
-              data: zip,
-              onUploadProgress: (p) => {
-                store?.setProgress({
-                  label: "Dateien werden hochgeladen...",
-                  progress: (index + p.loaded / p.total) / zips.length,
-                  showSplash: false,
-                });
-              },
-            });
-            dataLinks.push(
-              `s3://s3uploader-s3uploadbucket-1ba2ks21gs4fb/${fileNameKey}`,
-            );
-          }),
-        );
+          // Upload file(s)
+          await axios.request({
+            method: "PUT",
+            url: uniqueUploadURL,
+            data: zips[index],
+            onUploadProgress: (p) => {
+              store?.setProgress({
+                label: `Datei ${index + 1} von ${
+                  zips.length + 1
+                } wird hochgeladen (${(
+                  (index + p.loaded / p.total) /
+                  zips.length
+                ).toFixed(2)} %)`,
+                progress: (index + p.loaded / p.total) / zips.length,
+                showSplash: false,
+              });
+            },
+          });
+          dataLinks.push(
+            `s3://s3uploader-s3uploadbucket-1ba2ks21gs4fb/${fileNameKey}`,
+          );
+        }
 
         // Calculate approximate time from upload to confirmation E-Mail:
         setApproxBulkTime((30 + zips.length * (26 / 60)).toFixed(0));
