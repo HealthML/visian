@@ -30,11 +30,15 @@ export class LAOComputer implements IDisposable {
 
   private reactionDisposers: IReactionDisposer[] = [];
 
+  // For some reason Chrome has trouble with rendering the LAO and copying it to the output target in the same step.
+  // Thus we seperate the LAO computation and copying steps. This variable tracks the current step.
+  private isCopying = false;
+
   constructor(
     private editor: IEditor,
     sharedUniforms: SharedUniforms,
     firstDerivativeTexture: THREE.Texture,
-    secondDerivativeTexture: THREE.Texture,
+    // secondDerivativeTexture: THREE.Texture,
     private flush: () => void,
   ) {
     this.renderer = editor.renderer;
@@ -53,7 +57,7 @@ export class LAOComputer implements IDisposable {
     this.laoMaterial = new LAOMaterial(
       editor,
       firstDerivativeTexture,
-      secondDerivativeTexture,
+      // secondDerivativeTexture,
       this.target.texture,
       sharedUniforms,
     );
@@ -116,32 +120,42 @@ export class LAOComputer implements IDisposable {
   }
 
   private render() {
-    const slicesToRender = this.editor.performanceMode === "high" ? 16 : 1;
+    const slicesToRender =
+      (this.editor.performanceMode === "high" ? 16 : 1) *
+      (this.isCopying ? 16 : 1); // Copying is much faster than computing LAO.
 
     const isXrEnabled = this.renderer.xr.enabled;
     this.renderer.xr.enabled = false;
 
-    this.texture3DRenderer.setMaterial(this.laoMaterial);
-    this.texture3DRenderer.setTarget(this.intermediateTarget);
+    if (this.isCopying) {
+      this.texture3DRenderer.setMaterial(this.copyMaterial);
+      this.texture3DRenderer.setTarget(this.target);
 
-    this.texture3DRenderer.render(this.renderer, [
-      this.startSlice,
-      this.startSlice + slicesToRender,
-    ]);
+      this.texture3DRenderer.render(this.renderer, [
+        this.startSlice,
+        this.startSlice + slicesToRender,
+      ]);
+    } else {
+      this.texture3DRenderer.setMaterial(this.laoMaterial);
+      this.texture3DRenderer.setTarget(this.intermediateTarget);
 
-    this.texture3DRenderer.setMaterial(this.copyMaterial);
-    this.texture3DRenderer.setTarget(this.target);
-
-    this.texture3DRenderer.render(this.renderer, [
-      this.startSlice,
-      this.startSlice + slicesToRender,
-    ]);
+      this.texture3DRenderer.render(this.renderer, [
+        this.startSlice,
+        this.startSlice + slicesToRender,
+      ]);
+    }
 
     this.renderer.xr.enabled = isXrEnabled;
 
     this.startSlice += slicesToRender;
     if (this.isFrameFinished) {
-      this.onFrameFinished();
+      if (this.isCopying) {
+        this.onFrameFinished();
+        this.isCopying = false;
+      } else {
+        this.startSlice = 0;
+        this.isCopying = true;
+      }
     }
   }
 
@@ -170,5 +184,6 @@ export class LAOComputer implements IDisposable {
     this._isDirty = true;
     this.isFirstFrameStarted = false;
     this._isFinalLAOFlushed = false;
+    this.isCopying = false;
   };
 }

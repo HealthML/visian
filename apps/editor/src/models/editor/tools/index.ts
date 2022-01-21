@@ -4,6 +4,7 @@ export * from "./clear-image-tool";
 export * from "./clear-slice-tool";
 export * from "./crosshair-tool";
 export * from "./dilate-erode-tool";
+export * from "./measurement-tool";
 export * from "./outline-tool";
 export * from "./plane-tool";
 export * from "./self-deactivating-tool";

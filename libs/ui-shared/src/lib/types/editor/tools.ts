@@ -1,4 +1,4 @@
-import type { Voxel } from "@visian/utils";
+import type { Vector, Voxel } from "@visian/utils";
 import * as THREE from "three";
 
 import type { IImageLayer } from "./layers";
@@ -32,6 +32,11 @@ export interface ITool<N extends string> {
    * If set, overrides the `label`.
    */
   labelTx?: string;
+
+  /**
+   * The translation key for an info text about the tool.
+   */
+  infoTx?: string;
 
   /**
    * Indicates if the tool is a drawing tool, i.e., if it the user can use it
@@ -107,6 +112,12 @@ export interface IPreviewedTool<N extends string> extends ITool<N> {
 
   /** Discards the preview results. */
   discard(): void;
+}
+
+export interface IMeasurementTool extends IPreviewedTool<"measurement-tool"> {
+  path: Vector[];
+
+  setToDeleteMode: () => void;
 }
 
 /** A class of similar tools, typically grouped in the UI. */

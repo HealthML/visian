@@ -23,6 +23,7 @@ export * from "./text-input";
 export * from "./tooltip";
 export * from "./webgl-canvas";
 export * from "./icon";
+export * from "./info-text";
 export * from "./toolbar";
 export * from "./list";
 export * from "./key-icon";

@@ -161,6 +161,7 @@ export const theme = {
   zIndices: {
     modal: 50,
     picker: 80,
+    info: 90,
     overlay: 100,
     notification: 150,
   },

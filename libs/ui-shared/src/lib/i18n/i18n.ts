@@ -37,6 +37,7 @@ export const initI18n = (testResources?: {
           },
           fallbackLng: "en",
           load: "languageOnly",
+          nsSeparator: false,
 
           interpolation: {
             // React is XSS-safe already

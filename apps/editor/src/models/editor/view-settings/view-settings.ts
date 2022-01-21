@@ -81,6 +81,19 @@ export class ViewSettings
     }
 
     this.viewMode = value || "2D";
+
+    if (value === "3D") {
+      const maxLayersIn3d = this.document.maxLayers3d;
+
+      if (this.document.layers.length > maxLayersIn3d) {
+        this.viewMode = "2D";
+        this.document.setError({
+          titleTx: "too-many-layers",
+          descriptionTx: "too-many-layers-3d",
+          descriptionData: { count: maxLayersIn3d },
+        });
+      }
+    }
   };
 
   public setBrightness = (value?: number): void => {

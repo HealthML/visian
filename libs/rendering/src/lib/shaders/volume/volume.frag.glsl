@@ -9,6 +9,7 @@ uniform sampler3D uOutputFirstDerivative;
 uniform sampler3D uLAO;
 
 uniform bool uUseRayDithering;
+uniform float uRayDitheringOffset;
 
 #define VOLUMETRIC_IMAGE
 @import ../uniforms/u-opacity;
@@ -64,7 +65,7 @@ void main() {
   computeNearFar(normalizedRayDirection, near, far);
 
   #ifndef VOXEL_PICKING
-    pc_FragColor = marchRay(vRayOrigin, normalizedRayDirection, near, far, uStepSize, uUseRayDithering);
+    pc_FragColor = marchRay(vRayOrigin, normalizedRayDirection, near, far, uStepSize, uUseRayDithering, uRayDitheringOffset);
   #else
     vec4 pickedVoxel = marchRay(vRayOrigin, normalizedRayDirection, near, far, uStepSize, 0.01);
     pickedVoxel.a = step(0.01, pickedVoxel.a);

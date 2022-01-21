@@ -1,6 +1,7 @@
 import {
   BooleanParam,
   Modal,
+  ModalProps,
   NumberParam,
   Param,
   Theme,
@@ -16,11 +17,13 @@ const ToolSettingsModal = styled(Modal)`
   padding-bottom: 0px;
 `;
 
-export const ToolSettings: React.FC<{
-  activeToolRef: HTMLElement | null;
-  isOpen?: boolean;
-  onDismiss?: () => void;
-}> = observer(({ activeToolRef, isOpen, onDismiss }) => {
+export const ToolSettings: React.FC<
+  {
+    activeToolRef: HTMLElement | null;
+    isOpen?: boolean;
+    onDismiss?: () => void;
+  } & ModalProps
+> = observer(({ activeToolRef, isOpen, onDismiss, ...rest }) => {
   const store = useStore();
 
   const activeTool = store?.editor.activeDocument?.tools.activeTool;
@@ -52,6 +55,7 @@ export const ToolSettings: React.FC<{
   const modalZ = (useTheme() as Theme).zIndices.modal + 1;
   return (
     <ToolSettingsModal
+      {...rest}
       isOpen={Boolean(
         isOpen &&
           activeTool &&

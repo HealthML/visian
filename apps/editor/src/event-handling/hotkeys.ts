@@ -6,6 +6,7 @@ import { skipSlices } from "../constants";
 import {
   DilateErodeTool,
   ImageLayer,
+  MeasurementTool,
   RootStore,
   SmartBrush3D,
 } from "../models";
@@ -78,6 +79,12 @@ export const setUpHotKeys = (store: RootStore): IDisposer => {
 
     store.editor.activeDocument?.tools.setActiveTool("plane-tool");
   });
+  hotkeys("l", (event) => {
+    event.preventDefault();
+    if (store.editor.activeDocument?.viewSettings.viewMode !== "3D") return;
+
+    store.editor.activeDocument?.tools.setActiveTool("measurement-tool");
+  });
 
   // Copy and Paste
   hotkeys("ctrl+c", (event) => {
@@ -120,6 +127,16 @@ export const setUpHotKeys = (store: RootStore): IDisposer => {
         "smart-brush-3d"
       ] as SmartBrush3D).submit();
     }
+
+    if (
+      (store.editor.activeDocument?.tools.tools[
+        "measurement-tool"
+      ] as MeasurementTool).hasPath
+    ) {
+      (store.editor.activeDocument?.tools.tools[
+        "measurement-tool"
+      ] as MeasurementTool).submit();
+    }
   });
   hotkeys("escape", (event) => {
     event.preventDefault();
@@ -136,6 +153,16 @@ export const setUpHotKeys = (store: RootStore): IDisposer => {
       (store.editor.activeDocument?.tools.tools[
         "smart-brush-3d"
       ] as SmartBrush3D).discard();
+    }
+
+    if (
+      (store.editor.activeDocument?.tools.tools[
+        "measurement-tool"
+      ] as MeasurementTool).hasPath
+    ) {
+      (store.editor.activeDocument?.tools.tools[
+        "measurement-tool"
+      ] as MeasurementTool).discard();
     }
   });
 

@@ -12,7 +12,11 @@ import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
 import { whoHome } from "../../../constants";
-import { DilateErodeModal, SmartBrush3DModal } from "../action-modal";
+import {
+  DilateErodeModal,
+  SmartBrush3DModal,
+  MeasurementModal,
+} from "../action-modal";
 import { AIBar } from "../ai-bar";
 import { AxesAndVoxel } from "../axes-and-voxel";
 import { DropSheet } from "../drop-sheet";
@@ -30,6 +34,7 @@ import { UndoRedoButtons } from "../undo-redo-buttons";
 import { ViewSettings } from "../view-settings";
 import { UIOverlayProps } from "./ui-overlay.props";
 import { SettingsPopUp } from "../settings-popup";
+import { MeasurementPopUp } from "../measurement-popup";
 
 const Container = styled(AbsoluteCover)`
   align-items: stretch;
@@ -231,6 +236,7 @@ export const UIOverlay = observer<UIOverlayProps>(
               <AxesAndVoxel />
               <SmartBrush3DModal />
               <DilateErodeModal />
+              <MeasurementModal />
             </ColumnLeft>
             <ColumnCenter>
               <TopConsole />
@@ -279,6 +285,12 @@ export const UIOverlay = observer<UIOverlayProps>(
                 onClose={closeImportPopUp}
               />
             )}
+            <MeasurementPopUp
+              isOpen={Boolean(
+                store?.editor.activeDocument?.measurementDisplayLayer,
+              )}
+              onClose={store?.editor.activeDocument?.setMeasurementDisplayLayer}
+            />
             {isDraggedOver && <DropSheet onDropCompleted={onDropCompleted} />}
             {store?.progress && (
               <ProgressPopUp
@@ -296,6 +308,7 @@ export const UIOverlay = observer<UIOverlayProps>(
             titleTx={store?.error.titleTx}
             description={store?.error.description}
             descriptionTx={store?.error.descriptionTx}
+            descriptionData={store?.error.descriptionData}
           />
         )}
       </Container>

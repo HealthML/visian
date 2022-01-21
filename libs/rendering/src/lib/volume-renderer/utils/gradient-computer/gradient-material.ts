@@ -23,7 +23,7 @@ export class GradientMaterial extends Texture3DMaterial {
   constructor(
     editor: IEditor,
     private firstDerivativeTexture: THREE.Texture,
-    private secondDerivativeTexture: THREE.Texture,
+    // private secondDerivativeTexture: THREE.Texture,
     sharedUniforms: SharedUniforms,
   ) {
     super({
@@ -38,7 +38,7 @@ export class GradientMaterial extends Texture3DMaterial {
     });
 
     this.uniforms.uInputFirstDerivative.value = firstDerivativeTexture;
-    this.uniforms.uInputSecondDerivative.value = secondDerivativeTexture;
+    // this.uniforms.uInputSecondDerivative.value = secondDerivativeTexture;
 
     this.disposers = [
       reaction(
@@ -55,14 +55,14 @@ export class GradientMaterial extends Texture3DMaterial {
     ];
   }
 
-  public setGradientMode(mode: GradientMode) {
+  public setGradientMode(mode: GradientMode = GradientMode.Output) {
     this.uniforms.uGradientMode.value = mode;
 
     this.uniforms.uInputFirstDerivative.value =
       mode === GradientMode.First ? null : this.firstDerivativeTexture;
 
-    this.uniforms.uInputSecondDerivative.value =
-      mode === GradientMode.Second ? null : this.secondDerivativeTexture;
+    // this.uniforms.uInputSecondDerivative.value =
+    //   mode === GradientMode.Second ? null : this.secondDerivativeTexture;
   }
 
   public dispose() {

@@ -1,4 +1,5 @@
 import React from "react";
+import { ModalPosition } from "../modal";
 import { IEnumParameterOption } from "../../types";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -9,6 +10,10 @@ export interface SwitchProps<T = any>
   > {
   labelTx?: string;
   label?: string;
+
+  infoTx?: string;
+  infoPosition?: ModalPosition;
+  infoBaseZIndex?: number;
 
   options: IEnumParameterOption<T>[];
 

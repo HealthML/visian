@@ -17,14 +17,15 @@ vec4 marchRay(
   float far, 
   float stepSize
 #ifdef RAY_DITHERING 
-  , bool useRayDithering
+  , bool useRayDithering,
+  float randomOffset
 #endif
 #ifdef VOXEL_PICKING
   , float pickingThreshold
 #endif
 ) {
   #ifdef RAY_DITHERING
-    float random = fract(sin(gl_FragCoord.x * 12.9898 + gl_FragCoord.y * 78.233) * 43758.5453) * float(useRayDithering);
+    float random = fract(sin(gl_FragCoord.x * 12.9898 + gl_FragCoord.y * 78.233) * 43758.5453 + randomOffset) * float(useRayDithering);
   
     // Entry aligned sampling with ray dithering if `useRayDithering` is set to true.
     float dist = near + stepSize * (0.5 + random);

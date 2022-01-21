@@ -1,5 +1,6 @@
 import {
   PointerButton,
+  InfoText,
   Toolbar as GenericToolbar,
   useLongPress,
 } from "@visian/ui-shared";
@@ -15,6 +16,10 @@ import { ToolSettings } from "./tool-settings";
 // Styled Components
 const StyledToolbar = styled(GenericToolbar)`
   margin-bottom: 16px;
+`;
+
+const StyledInfoText = styled(InfoText)`
+  margin-right: 10px;
 `;
 
 export const Toolbar: React.FC = observer(() => {
@@ -110,6 +115,9 @@ export const Toolbar: React.FC = observer(() => {
         activeToolRef={activeToolRef}
         isOpen={isModalOpen}
         onDismiss={closeModal}
+        headerChildren={
+          activeTool?.infoTx && <StyledInfoText infoTx={activeTool?.infoTx} />
+        }
       />
     </StyledToolbar>
   );

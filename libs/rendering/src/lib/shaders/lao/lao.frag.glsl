@@ -21,6 +21,7 @@ out vec4 pc_FragColor;
 @import ../utils/volume-data;
 @import ../utils/decode-vec3;
 @import ../volume/transfer-functions;
+#define NO_WRAPPING
 @import ../utils/get-volume-data;
 
 vec4 getVolumeColor(vec3 volumeCoords) {
