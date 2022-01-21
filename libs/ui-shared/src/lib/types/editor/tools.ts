@@ -191,7 +191,10 @@ export interface ITools<N extends string> {
   regionGrowingRenderer3D: IBlipRenderer3D;
   dilateErodeRenderer3D: IDilateErodeRenderer3D;
 
-  setActiveTool(nameOrTool?: N | ITool<N>): void;
+  setActiveTool(
+    nameOrTool?: N | ITool<N>,
+    setAsGroupActiveTool?: boolean,
+  ): void;
 
   setBrushSize(value?: number, showPreview?: boolean): void;
   incrementBrushSize(): void;

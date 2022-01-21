@@ -255,7 +255,10 @@ export class Tools
       : tool;
   }
 
-  public setActiveTool(nameOrTool?: ToolName | ITool<ToolName>): void {
+  public setActiveTool(
+    nameOrTool?: ToolName | ITool<ToolName>,
+    setAsGroupActiveTool = true,
+  ): void {
     if (this.isDrawing) return;
 
     const previouslyActiveTool = this.activeTool;
@@ -265,6 +268,14 @@ export class Tools
         ? nameOrTool
         : nameOrTool.name
       : "pixel-brush";
+
+    if (setAsGroupActiveTool) {
+      this.toolGroups
+        .find((group) =>
+          group.tools.some((tool) => tool.name === this.activeToolName),
+        )
+        ?.setActiveTool(this.activeToolName, false);
+    }
 
     if (this.activeTool?.canActivate()) {
       previouslyActiveTool?.deactivate(this.tools[this.activeToolName]);
