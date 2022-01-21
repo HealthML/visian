@@ -134,7 +134,7 @@ export const UploadScreen = observer(() => {
             onUploadProgress: (p) => {
               store?.setProgress({
                 label: `Datei ${index + 1} von ${
-                  zips.length + 1
+                  zips.length
                 } wird hochgeladen (${(
                   (index + p.loaded / p.total) /
                   zips.length
