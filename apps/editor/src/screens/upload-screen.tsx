@@ -92,69 +92,77 @@ export const UploadScreen = observer(() => {
       setIsLoadingFiles(true);
       store.setProgress({ labelTx: "importing", showSplash: true });
 
-      // Extract, filter & prepare series for upload
-      const series = await extractSeriesFromFileSystemEntries(
-        getFileSystemEntriesFromDataTransfer(event.dataTransfer.items),
-      );
-      const seriesMask = await Promise.all(
-        series.map(store.editor.activeDocument.floyDemo.isDemoCandidate),
-      );
-      const zips = await Promise.all(
-        series
-          .filter((_value, index) => seriesMask[index])
-          .map((files) =>
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            store.editor.activeDocument!.floyDemo.prepareSeriesZip(files),
-          ),
-      );
+      try {
+        // Extract, filter & prepare series for upload
+        const series = await extractSeriesFromFileSystemEntries(
+          getFileSystemEntriesFromDataTransfer(event.dataTransfer.items),
+        );
+        const seriesMask = await Promise.all(
+          series.map(store.editor.activeDocument.floyDemo.isDemoCandidate),
+        );
+        const zips = await Promise.all(
+          series
+            .filter((_value, index) => seriesMask[index])
+            .map((files) =>
+              // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+              store.editor.activeDocument!.floyDemo.prepareSeriesZip(files),
+            ),
+        );
 
-      if (!zips.length) {
-        store.setProgress();
-        return;
+        if (!zips.length) {
+          store.setProgress();
+          return;
+        }
+
+        const dataLinks: string[] = [];
+        await Promise.all(
+          zips.map(async (zip, index) => {
+            // 3) Upload relevant serieses to S3 (TO DO: Telekom Cloud)
+            // Get unique upload URL
+            const data = await fetch(
+              "https://kg0rbwuu17.execute-api.eu-central-1.amazonaws.com/uploads",
+              { method: "GET" },
+            );
+            const dataString = await data.text();
+            const uniqueUploadURL = dataString.split('"')[3];
+            const fileNameKey = dataString.split('"')[7];
+
+            // Upload file(s)
+            await axios.request({
+              method: "PUT",
+              url: uniqueUploadURL,
+              data: zip,
+              onUploadProgress: (p) => {
+                store?.setProgress({
+                  label: "Dateien werden hochgeladen...",
+                  progress: (index + p.loaded / p.total) / zips.length,
+                  showSplash: false,
+                });
+              },
+            });
+            dataLinks.push(
+              `s3://s3uploader-s3uploadbucket-1ba2ks21gs4fb/${fileNameKey}`,
+            );
+          }),
+        );
+
+        // Calculate approximate time from upload to confirmation E-Mail:
+        setApproxBulkTime((30 + zips.length * (26 / 60)).toFixed(0));
+        store?.setProgress(); // Turn off ProgressBar
+        setShowProgressPopUp(true);
+
+        // 4) Call API on Valohai after upload is finished
+        await store?.editor.activeDocument?.floyDemo.runBulkInferencing(
+          dataLinks,
+          mail,
+        );
+      } catch {
+        store?.setProgress();
+        store?.setError({
+          titleTx: "import-error",
+          descriptionTx: "file-upload-error",
+        });
       }
-
-      const dataLinks: string[] = [];
-      Promise.all(
-        zips.map(async (zip, index) => {
-          // 3) Upload relevant serieses to S3 (TO DO: Telekom Cloud)
-          // Get unique upload URL
-          const data = await fetch(
-            "https://kg0rbwuu17.execute-api.eu-central-1.amazonaws.com/uploads",
-            { method: "GET" },
-          );
-          const dataString = await data.text();
-          const uniqueUploadURL = dataString.split('"')[3];
-          const fileNameKey = dataString.split('"')[7];
-
-          // Upload file(s)
-          await axios.request({
-            method: "PUT",
-            url: uniqueUploadURL,
-            data: zip,
-            onUploadProgress: (p) => {
-              store?.setProgress({
-                label: "Dateien werden hochgeladen...",
-                progress: (index + p.loaded / p.total) / zips.length,
-                showSplash: false,
-              });
-            },
-          });
-          dataLinks.push(
-            `s3://s3uploader-s3uploadbucket-1ba2ks21gs4fb/${fileNameKey}`,
-          );
-        }),
-      );
-
-      // Calculate approximate time from upload to confirmation E-Mail:
-      setApproxBulkTime((30 + zips.length * (26 / 60)).toFixed(0));
-      store?.setProgress(); // Turn off ProgressBar
-      setShowProgressPopUp(true);
-
-      // 4) Call API on Valohai after upload is finished
-      store?.editor.activeDocument?.floyDemo.runBulkInferencing(
-        dataLinks,
-        mail,
-      );
 
       setIsLoadingFiles(false);
     },
