@@ -198,27 +198,31 @@ export class Tools
     };
 
     this.toolGroups.push(
-      new ToolGroup({ toolNames: ["navigation-tool"] }, document),
-      new ToolGroup({ toolNames: ["crosshair-tool"] }, document),
+      new ToolGroup(
+        { toolNames: ["navigation-tool", "crosshair-tool"] },
+        document,
+      ),
+      new ToolGroup({ toolNames: ["fly-tool"] }, document),
+      new ToolGroup({ toolNames: ["plane-tool"] }, document),
       new ToolGroup({ toolNames: ["pixel-brush"] }, document),
-      new ToolGroup({ toolNames: ["smart-brush", "smart-eraser"] }, document),
       new ToolGroup(
-        { toolNames: ["bounded-smart-brush", "bounded-smart-eraser"] },
+        { toolNames: ["smart-brush", "bounded-smart-brush", "smart-brush-3d"] },
         document,
       ),
-      new ToolGroup({ toolNames: ["smart-brush-3d"] }, document),
+      new ToolGroup({ toolNames: ["outline-tool"] }, document),
       new ToolGroup(
-        { toolNames: ["outline-tool", "outline-eraser"] },
-        document,
-      ),
-      new ToolGroup(
-        { toolNames: ["pixel-eraser", "smart-eraser", "outline-eraser"] },
+        {
+          toolNames: [
+            "pixel-eraser",
+            "smart-eraser",
+            "bounded-smart-eraser",
+            "outline-eraser",
+          ],
+        },
         document,
       ),
       new ToolGroup({ toolNames: ["clear-slice", "clear-image"] }, document),
       new ToolGroup({ toolNames: ["dilate-erode"] }, document),
-      new ToolGroup({ toolNames: ["plane-tool"] }, document),
-      new ToolGroup({ toolNames: ["fly-tool"] }, document),
     );
 
     if (snapshot) this.applySnapshot(snapshot);
