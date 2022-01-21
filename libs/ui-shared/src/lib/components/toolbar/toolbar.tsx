@@ -73,20 +73,29 @@ export const Toolbar = styled(Sheet)`
 `;
 
 const ToolGroupContainer = styled(Sheet)`
+  border-bottom-left-radius: 0;
+  border-left: 0;
+  border-top-left-radius: 0;
   box-sizing: border-box;
   justify-content: flex-start;
   align-items: center;
   flex-direction: row;
-  padding: 0 6px;
-  position: static;
+  margin-top: 2px;
+  padding: 0 4px;
 
-  height: 40px;
+  height: 36px;
+`;
+
+const ToolGroupHint = styled(ToolGroupContainer)`
+  padding: 0;
+  width: 4px;
 `;
 
 export const ToolGroup: React.FC<ToolGroupProps> = ({
   anchor,
   position,
-  distance,
+  distance = 0,
+  showHint = true,
 
   baseZIndex,
   children,
@@ -107,7 +116,7 @@ export const ToolGroup: React.FC<ToolGroupProps> = ({
 
   const modalStyle = useModalPosition({
     anchor,
-    isActive: isOpen && Boolean(anchor),
+    isActive: (isOpen || showHint) && Boolean(anchor),
     positionRelativeToOffsetParent: !modalRootRef.current,
     position,
     distance,
@@ -115,7 +124,11 @@ export const ToolGroup: React.FC<ToolGroupProps> = ({
   });
 
   const node =
-    isOpen === false ? null : (
+    isOpen === false ? (
+      showHint ? (
+        <ToolGroupHint {...rest} style={anchor ? modalStyle : undefined} />
+      ) : null
+    ) : (
       <ToolGroupContainer
         {...rest}
         style={anchor ? modalStyle : undefined}

@@ -32,14 +32,17 @@ export interface ToolProps extends ButtonProps {
   ) => void;
 }
 
-export type ToolGroupProps = React.HTMLAttributes<HTMLDivElement> &
-  Pick<
-    ModalProps,
-    | "anchor"
-    | "position"
-    | "distance"
-    | "baseZIndex"
-    | "isOpen"
-    | "onOutsidePress"
-    | "value"
-  >;
+export interface ToolGroupProps
+  extends React.HTMLAttributes<HTMLDivElement>,
+    Pick<
+      ModalProps,
+      | "anchor"
+      | "position"
+      | "distance"
+      | "baseZIndex"
+      | "isOpen"
+      | "onOutsidePress"
+      | "value"
+    > {
+  showHint?: boolean;
+}

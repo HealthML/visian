@@ -70,6 +70,7 @@ export const ToolGroup = observer<
           onPointerUp={stopTap}
         />
         <GenericToolGroup
+          showHint={toolGroup.tools.length > 1}
           isOpen={isExpanded}
           anchor={innerToolRef}
           position="right"
