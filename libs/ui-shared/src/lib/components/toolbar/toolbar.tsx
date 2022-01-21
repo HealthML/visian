@@ -1,6 +1,6 @@
 import React, { useCallback, useRef } from "react";
 import ReactDOM from "react-dom";
-import styled from "styled-components";
+import styled, { css } from "styled-components";
 
 import { useModalRoot } from "../box";
 import { InvisibleButton } from "../button";
@@ -86,9 +86,27 @@ const ToolGroupContainer = styled(Sheet)`
   height: 36px;
 `;
 
-const ToolGroupHint = styled(ToolGroupContainer)`
+const ToolGroupHint = styled(ToolGroupContainer)<{ expand?: boolean }>`
   padding: 0;
+  pointer-events: auto;
+  transition: width 0.2s;
   width: 4px;
+
+  ${(props) =>
+    props.onPointerDown &&
+    css`
+      cursor: pointer;
+    `}
+
+  ${(props) =>
+    props.expand &&
+    css`
+      width: 8px;
+    `}
+
+  &:hover {
+    width: 8px;
+  }
 `;
 
 export const ToolGroup: React.FC<ToolGroupProps> = ({
@@ -96,6 +114,8 @@ export const ToolGroup: React.FC<ToolGroupProps> = ({
   position,
   distance = 0,
   showHint = true,
+  expandHint,
+  onPressHint,
 
   baseZIndex,
   children,
@@ -110,7 +130,7 @@ export const ToolGroup: React.FC<ToolGroupProps> = ({
   }, [onOutsidePress, value]);
 
   const ref = useRef<HTMLDivElement>(null);
-  useOutsidePress(ref, handleOutsidePress, isOpen);
+  useOutsidePress(ref, handleOutsidePress, isOpen, true);
 
   const modalRootRef = useModalRoot();
 
@@ -126,7 +146,12 @@ export const ToolGroup: React.FC<ToolGroupProps> = ({
   const node =
     isOpen === false ? (
       showHint ? (
-        <ToolGroupHint {...rest} style={anchor ? modalStyle : undefined} />
+        <ToolGroupHint
+          {...rest}
+          expand={expandHint}
+          style={anchor ? modalStyle : undefined}
+          onPointerDown={onPressHint}
+        />
       ) : null
     ) : (
       <ToolGroupContainer

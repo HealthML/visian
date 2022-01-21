@@ -25,7 +25,18 @@ export const ToolGroup = observer<
     );
     const toolRef = useMultiRef(ref, setInnerToolRef);
 
+    const [isHovered, setIsHovered] = useState(false);
+    const hover = useCallback(() => {
+      setIsHovered(true);
+    }, []);
+    const unhover = useCallback(() => {
+      setIsHovered(false);
+    }, []);
+
     const [isExpanded, setIsExpanded] = useState(false);
+    const expand = useCallback(() => {
+      setIsExpanded(true);
+    }, []);
     const dismiss = useCallback(() => {
       setIsExpanded(false);
     }, []);
@@ -64,6 +75,8 @@ export const ToolGroup = observer<
           tool={toolGroup.activeTool}
           showTooltip={showTooltip && !isExpanded}
           ref={toolRef}
+          onPointerOver={hover}
+          onPointerOut={unhover}
           onPress={onPress}
           onRelease={onRelease}
           onPointerDown={startTap}
@@ -71,9 +84,11 @@ export const ToolGroup = observer<
         />
         <GenericToolGroup
           showHint={toolGroup.tools.length > 1}
+          expandHint={isHovered}
           isOpen={isExpanded}
           anchor={innerToolRef}
           position="right"
+          onPressHint={expand}
           onOutsidePress={dismiss}
         >
           {toolGroup.tools.map((tool) => (

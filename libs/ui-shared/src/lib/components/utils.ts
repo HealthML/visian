@@ -228,13 +228,14 @@ export const useOutsidePress = <T extends HTMLElement>(
   ref: React.RefObject<T>,
   callback?: (event: PointerEvent) => void,
   activateHandler?: boolean,
+  ignoreUnmounted?: boolean,
 ) => {
   const handleOutsidePress = useCallback(
     (event: PointerEvent) => {
       if (
         ref.current &&
         !ref.current.contains(event.target as Node) &&
-        document.body.contains(event.target as Node)
+        (document.body.contains(event.target as Node) || ignoreUnmounted)
       ) {
         if (callback) callback(event);
       }

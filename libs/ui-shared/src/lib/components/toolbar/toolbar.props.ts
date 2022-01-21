@@ -45,4 +45,6 @@ export interface ToolGroupProps
       | "value"
     > {
   showHint?: boolean;
+  expandHint?: boolean;
+  onPressHint?: () => void;
 }
