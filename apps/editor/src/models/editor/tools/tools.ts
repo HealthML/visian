@@ -201,27 +201,31 @@ export class Tools
     };
 
     this.toolGroups.push(
-      new ToolGroup({ toolNames: ["navigation-tool"] }, document),
-      new ToolGroup({ toolNames: ["crosshair-tool"] }, document),
+      new ToolGroup(
+        { toolNames: ["navigation-tool", "crosshair-tool"] },
+        document,
+      ),
+      new ToolGroup({ toolNames: ["fly-tool"] }, document),
+      new ToolGroup({ toolNames: ["plane-tool"] }, document),
       new ToolGroup({ toolNames: ["pixel-brush"] }, document),
-      new ToolGroup({ toolNames: ["smart-brush", "smart-eraser"] }, document),
       new ToolGroup(
-        { toolNames: ["bounded-smart-brush", "bounded-smart-eraser"] },
+        { toolNames: ["smart-brush", "bounded-smart-brush", "smart-brush-3d"] },
         document,
       ),
-      new ToolGroup({ toolNames: ["smart-brush-3d"] }, document),
+      new ToolGroup({ toolNames: ["outline-tool"] }, document),
       new ToolGroup(
-        { toolNames: ["outline-tool", "outline-eraser"] },
-        document,
-      ),
-      new ToolGroup(
-        { toolNames: ["pixel-eraser", "smart-eraser", "outline-eraser"] },
+        {
+          toolNames: [
+            "pixel-eraser",
+            "smart-eraser",
+            "bounded-smart-eraser",
+            "outline-eraser",
+          ],
+        },
         document,
       ),
       new ToolGroup({ toolNames: ["clear-slice", "clear-image"] }, document),
       new ToolGroup({ toolNames: ["dilate-erode"] }, document),
-      new ToolGroup({ toolNames: ["plane-tool"] }, document),
-      new ToolGroup({ toolNames: ["fly-tool"] }, document),
       new ToolGroup({ toolNames: ["measurement-tool"] }, document),
     );
 
@@ -251,7 +255,10 @@ export class Tools
       : tool;
   }
 
-  public setActiveTool(nameOrTool?: ToolName | ITool<ToolName>): void {
+  public setActiveTool(
+    nameOrTool?: ToolName | ITool<ToolName>,
+    setAsGroupActiveTool = true,
+  ): void {
     if (this.isDrawing) return;
 
     const previouslyActiveTool = this.activeTool;
@@ -261,6 +268,14 @@ export class Tools
         ? nameOrTool
         : nameOrTool.name
       : "pixel-brush";
+
+    if (setAsGroupActiveTool) {
+      this.toolGroups
+        .find((group) =>
+          group.tools.some((tool) => tool.name === this.activeToolName),
+        )
+        ?.setActiveTool(this.activeToolName, false);
+    }
 
     if (this.activeTool?.canActivate()) {
       previouslyActiveTool?.deactivate(this.tools[this.activeToolName]);

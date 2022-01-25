@@ -12,7 +12,7 @@ export class ClearSliceTool<
     super(
       {
         name: "clear-slice" as N,
-        icon: "trash",
+        icon: "clearSlice",
         labelTx: "clear-slice",
         supportedViewModes: ["2D"],
         supportedLayerKinds: ["image"],

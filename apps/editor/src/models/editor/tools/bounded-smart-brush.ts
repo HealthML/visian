@@ -22,7 +22,7 @@ export class BoundedSmartBrush<
         ? "bounded-smart-eraser"
         : "bounded-smart-brush") as N,
       infoTx: "info-bounded-smart-brush",
-      icon: isAdditive ? "boundedSmartBrush" : "eraser",
+      icon: isAdditive ? "boundedSmartBrush" : "boundedSmartEraser",
       supportedViewModes: ["2D"],
       supportedLayerKinds: ["image"],
       supportAnnotationsOnly: true,

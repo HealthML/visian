@@ -75,6 +75,8 @@ export interface ITool<N extends string> {
   /** This tool's parameters. */
   params: { [name: string]: IParameter };
 
+  isActive: boolean;
+
   /** Returns `true` if the tool supports the current view mode & layer kind. */
   canActivate(): boolean;
 
@@ -189,7 +191,10 @@ export interface ITools<N extends string> {
   regionGrowingRenderer3D: IBlipRenderer3D;
   dilateErodeRenderer3D: IDilateErodeRenderer3D;
 
-  setActiveTool(nameOrTool?: N | ITool<N>): void;
+  setActiveTool(
+    nameOrTool?: N | ITool<N>,
+    setAsGroupActiveTool?: boolean,
+  ): void;
 
   setBrushSize(value?: number, showPreview?: boolean): void;
   incrementBrushSize(): void;
