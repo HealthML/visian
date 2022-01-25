@@ -9,7 +9,7 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
-import { ToolName } from "../../../models";
+import { SelfDeactivatingTool, ToolName } from "../../../models";
 import { ToolGroup } from "./tool-group";
 import { ToolSettings } from "./tool-settings";
 
@@ -106,8 +106,16 @@ export const Toolbar: React.FC = observer(() => {
                 ? setActiveToolRef
                 : undefined
             }
-            onPress={handlePress}
-            onRelease={stopPress}
+            onPress={
+              toolGroup.activeTool instanceof SelfDeactivatingTool
+                ? setActiveTool
+                : handlePress
+            }
+            onRelease={
+              toolGroup.activeTool instanceof SelfDeactivatingTool
+                ? undefined
+                : stopPress
+            }
           />
         ),
       )}
