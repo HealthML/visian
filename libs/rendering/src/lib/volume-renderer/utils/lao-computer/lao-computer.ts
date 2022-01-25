@@ -68,10 +68,10 @@ export class LAOComputer implements IDisposable {
 
     this.reactionDisposers.push(
       autorun(() => {
-        const baseImageLayer = this.editor.activeDocument?.baseImageLayer;
-        if (!baseImageLayer?.is3DLayer) return;
+        const mainImageLayer = this.editor.activeDocument?.mainImageLayer;
+        if (!mainImageLayer?.is3DLayer) return;
 
-        const { voxelCount } = baseImageLayer.image;
+        const { voxelCount } = mainImageLayer.image;
 
         [this.target, this.intermediateTarget].forEach((renderTarget) => {
           renderTarget.setSize(voxelCount.x, voxelCount.y, voxelCount.z);

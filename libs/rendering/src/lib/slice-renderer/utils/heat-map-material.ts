@@ -51,7 +51,7 @@ export class HeatMapMaterial
     this.disposers.push(
       autorun(() => {
         this.uniforms.uImageVoxelCount.value =
-          editor.activeDocument?.baseImageLayer?.image.voxelCount;
+          editor.activeDocument?.mainImageLayer?.image.voxelCount;
         editor.sliceRenderer?.lazyRender();
       }),
       autorun(() => {

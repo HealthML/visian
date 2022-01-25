@@ -77,7 +77,7 @@ export class BlipRenderer3D implements IBlipRenderer3D, IDisposable {
 
     this.disposers.push(
       reaction(
-        () => Boolean(document.baseImageLayer?.is3DLayer),
+        () => Boolean(document.mainImageLayer?.is3DLayer),
         (is3D) => {
           runInAction(() => {
             const imageProperties = {
@@ -100,8 +100,8 @@ export class BlipRenderer3D implements IBlipRenderer3D, IDisposable {
       ),
       reaction(
         () => [
-          document.baseImageLayer?.image.voxelCount.toArray(),
-          document.baseImageLayer?.image.defaultViewType,
+          document.mainImageLayer?.image.voxelCount.toArray(),
+          document.mainImageLayer?.image.defaultViewType,
         ],
         this.resizeRenderTargets,
       ),
@@ -228,20 +228,20 @@ export class BlipRenderer3D implements IBlipRenderer3D, IDisposable {
   }
 
   protected resizeRenderTargets = () => {
-    const { baseImageLayer } = this.document;
-    if (!baseImageLayer) return;
+    const { mainImageLayer } = this.document;
+    if (!mainImageLayer) return;
 
-    const { voxelCount } = baseImageLayer.image;
+    const { voxelCount } = mainImageLayer.image;
 
     let width = 0;
     let height = 0;
     let depth = 1;
-    if (baseImageLayer.is3DLayer) {
+    if (mainImageLayer.is3DLayer) {
       width = voxelCount.x;
       height = voxelCount.y;
       depth = voxelCount.z;
     } else {
-      [width, height] = getPlaneAxes(baseImageLayer.image.defaultViewType).map(
+      [width, height] = getPlaneAxes(mainImageLayer.image.defaultViewType).map(
         (axis) => voxelCount[axis],
       );
     }

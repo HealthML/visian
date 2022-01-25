@@ -56,7 +56,7 @@ export class MeasurementTool<N extends "measurement-tool" = "measurement-tool">
     if (this.path.length < 2) return 0;
 
     const scale =
-      this.document.baseImageLayer?.image.voxelSpacing ||
+      this.document.mainImageLayer?.image.voxelSpacing ||
       new Vector([1, 1, 1], false);
 
     return this.path

@@ -48,7 +48,7 @@ export class ViewSettings
   }
 
   public setSelectedVoxel(x?: number, y?: number, z?: number): void {
-    const voxelCount = this.document.baseImageLayer?.image.voxelCount;
+    const voxelCount = this.document.mainImageLayer?.image.voxelCount;
 
     if (!x || !y || !z) {
       if (voxelCount) {

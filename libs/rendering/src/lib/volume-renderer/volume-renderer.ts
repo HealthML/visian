@@ -382,7 +382,7 @@ export class VolumeRenderer implements IVolumeRenderer {
   };
 
   private eagerRender = () => {
-    if (!this.editor.activeDocument?.baseImageLayer) {
+    if (!this.editor.activeDocument?.mainImageLayer) {
       this.renderer.clear();
       return;
     }
@@ -514,7 +514,7 @@ export class VolumeRenderer implements IVolumeRenderer {
   }
 
   private getSmartBrushIntersection(event: PointerEvent): Voxel | undefined {
-    const image = this.editor.activeDocument?.baseImageLayer?.image;
+    const image = this.editor.activeDocument?.mainImageLayer?.image;
     if (!image) return undefined;
 
     const clickPosition = { x: event.clientX, y: event.clientY };
