@@ -11,6 +11,7 @@ import React, { useCallback, useState } from "react";
 import { Tool } from "./tool";
 
 import type { ToolGroup as ToolGroupModel, ToolName } from "../../../models";
+import { useStore } from "../../../app/root-store";
 
 export const ToolGroup = observer<
   Pick<ToolProps, "onPress" | "onRelease" | "showTooltip"> & {
@@ -20,6 +21,8 @@ export const ToolGroup = observer<
   HTMLButtonElement
 >(
   ({ toolGroup, canExpand = true, onPress, onRelease, showTooltip }, ref) => {
+    const store = useStore();
+
     const [innerToolRef, setInnerToolRef] = useState<HTMLButtonElement | null>(
       null,
     );
@@ -62,8 +65,9 @@ export const ToolGroup = observer<
       (value: string | number | undefined) => {
         toolGroup.setActiveTool(value as ToolName);
         setIsExpanded(false);
+        store?.editor.activeDocument?.tools.setIsCursorOverFloatingUI(false);
       },
-      [toolGroup],
+      [toolGroup, store],
     );
 
     const hasActivateableTool = toolGroup.tools.some((tool) =>
