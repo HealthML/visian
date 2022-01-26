@@ -136,6 +136,12 @@ export const setUpHotKeys = (store: RootStore): IDisposer => {
       ] as ThresholdAnnotationTool).submit();
     }
 
+    if (store.editor.activeDocument?.tools.dilateErodeRenderer3D.holdsPreview) {
+      (store.editor.activeDocument?.tools.tools[
+        "dilate-erode"
+      ] as DilateErodeTool).submit();
+    }
+
     if (
       (store.editor.activeDocument?.tools.tools[
         "measurement-tool"
@@ -144,15 +150,6 @@ export const setUpHotKeys = (store: RootStore): IDisposer => {
       (store.editor.activeDocument?.tools.tools[
         "measurement-tool"
       ] as MeasurementTool).submit();
-    }
-  });
-  hotkeys("escape", (event) => {
-    event.preventDefault();
-
-    if (store.editor.activeDocument?.tools.dilateErodeRenderer3D.holdsPreview) {
-      (store.editor.activeDocument?.tools.tools[
-        "dilate-erode"
-      ] as DilateErodeTool).submit();
     }
   });
   hotkeys("escape", (event) => {
