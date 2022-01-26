@@ -14,6 +14,8 @@ export class CircleBrush<
     | "bounded-smart-brush"
     | "bounded-smart-eraser"
 > extends UndoableTool<N> {
+  public readonly excludeFromSnapshotTracking = ["toolRenderer", "document"];
+
   private lastDragPoint?: DragPoint;
 
   constructor(
@@ -25,10 +27,12 @@ export class CircleBrush<
     super(
       toolConfig || {
         name: (isAdditive ? "pixel-brush" : "pixel-eraser") as N,
+        infoTx: "info-brush",
         altToolName: (isAdditive ? "pixel-eraser" : "pixel-brush") as N,
         icon: isAdditive ? "pixelBrush" : "eraser",
         supportedViewModes: ["2D"],
         supportedLayerKinds: ["image"],
+        supportAnnotationsOnly: true,
         isDrawingTool: true,
         isBrush: true,
       },
@@ -61,8 +65,6 @@ export class CircleBrush<
     if (dragPoint) this.moveTo(dragPoint);
 
     this.endStroke(!this.isAdditive);
-
-    this.toolRenderer.waitForRender().then(() => this.toolRenderer.endStroke());
   }
 
   protected get brushSize() {

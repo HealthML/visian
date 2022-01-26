@@ -23,9 +23,10 @@ export class OutlineTool<
       {
         name: (isAdditive ? "outline-tool" : "outline-eraser") as N,
         altToolName: (isAdditive ? "outline-eraser" : "outline-tool") as N,
-        icon: isAdditive ? "outline" : "outline",
+        icon: isAdditive ? "outline" : "outlineEraser",
         supportedViewModes: ["2D"],
         supportedLayerKinds: ["image"],
+        supportAnnotationsOnly: true,
         isDrawingTool: true,
       },
       document,
@@ -70,8 +71,6 @@ export class OutlineTool<
     this.lastPoint = undefined;
 
     this.endStroke(!this.isAdditive);
-
-    this.toolRenderer.waitForRender().then(() => this.toolRenderer.endStroke());
   }
 
   private getCoords(dragPoint: DragPoint) {

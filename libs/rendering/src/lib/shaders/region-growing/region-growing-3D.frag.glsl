@@ -1,62 +1,68 @@
-varying vec2 vUv;
+precision highp sampler3D;
 
-uniform sampler2D uSourceTexture;
-uniform sampler2D uTargetTexture;
-
-uniform vec3 uVoxelCount;
-uniform vec2 uAtlasGrid;
+in vec2 vUv;
 
 uniform float uThreshold;
-uniform float uSeed;
+uniform vec4 uSeed;
+uniform int uComponents;
 
-uniform float uRenderValue;
+@import ../uniforms/u-blip-material;
+@import ../uniforms/u-texture-3d-material;
 
-const float two_over_three = 2.0 / 3.0;
+out vec4 pc_FragColor;
 
-bool canGrowFrom(float ownData, float neighborData, float neighborRegion) {
-  return all(lessThan(vec3(
-      -neighborRegion,
-      abs(ownData - uSeed) * two_over_three - uThreshold,
-      abs(ownData - neighborData) - uThreshold),
-    vec3(0.0)));
-}
+@import ./can-grow-from;
 
 void main() {
-  vec4 source = texture2D(uSourceTexture, vUv);
-  vec4 target = texture2D(uTargetTexture, vUv);
+  #ifdef VOLUMETRIC_IMAGE
+    vec3 uv = vec3(vUv, (uSlice + 0.5) / uSize.z);
+  #else
+    vec2 uv = vUv;
+  #endif
+  vec4 source = texture(uSourceTexture, uv);
+  vec4 target = texture(uTargetTexture, uv);
 
   if (target.x > 0.0) {
-    gl_FragColor = target;
+    pc_FragColor = target;
     return;
   }
 
   @import ../utils/neighbor-uvs;
 
   // right, left, up, down, back, front
-  vec4 sourceR = texture2D(uSourceTexture, uvR);
-  vec4 sourceL = texture2D(uSourceTexture, uvL);
-  vec4 sourceU = texture2D(uSourceTexture, uvU);
-  vec4 sourceD = texture2D(uSourceTexture, uvD);
-  vec4 sourceB = texture2D(uSourceTexture, uvB);
-  vec4 sourceF = texture2D(uSourceTexture, uvF);
-  vec4 targetR = texture2D(uTargetTexture, uvR);
-  vec4 targetL = texture2D(uTargetTexture, uvL);
-  vec4 targetU = texture2D(uTargetTexture, uvU);
-  vec4 targetD = texture2D(uTargetTexture, uvD);
-  vec4 targetB = texture2D(uTargetTexture, uvB);
-  vec4 targetF = texture2D(uTargetTexture, uvF);
+  vec4 sourceR = texture(uSourceTexture, uvR);
+  vec4 sourceL = texture(uSourceTexture, uvL);
+  vec4 sourceU = texture(uSourceTexture, uvU);
+  vec4 sourceD = texture(uSourceTexture, uvD);
+  #ifdef VOLUMETRIC_IMAGE
+    vec4 sourceB = texture(uSourceTexture, uvB);
+    vec4 sourceF = texture(uSourceTexture, uvF);
+  #endif
+  vec4 targetR = texture(uTargetTexture, uvR);
+  vec4 targetL = texture(uTargetTexture, uvL);
+  vec4 targetU = texture(uTargetTexture, uvU);
+  vec4 targetD = texture(uTargetTexture, uvD);
+  #ifdef VOLUMETRIC_IMAGE
+    vec4 targetB = texture(uTargetTexture, uvB);
+    vec4 targetF = texture(uTargetTexture, uvF);
+  #endif
 
   // right, left, up, down, back, front
-  bool canGrowFromR = voxelCoords.x < uVoxelCount.x - 1.0 && canGrowFrom(source.x, sourceR.x, targetR.x);
-  bool canGrowFromL = voxelCoords.x >= 1.0 && canGrowFrom(source.x, sourceL.x, targetL.x);
-  bool canGrowFromU = voxelCoords.y < uVoxelCount.y - 1.0 && canGrowFrom(source.x, sourceU.x, targetU.x);
-  bool canGrowFromD = voxelCoords.y >= 1.0 && canGrowFrom(source.x, sourceD.x, targetD.x);
-  bool canGrowFromB = voxelCoords.z < uVoxelCount.z - 1.0 && canGrowFrom(source.x, sourceB.x, targetB.x);
-  bool canGrowFromF = voxelCoords.z >= 1.0 && canGrowFrom(source.x, sourceF.x, targetF.x);
+  bool canGrowFromR = uv.x < 1.0 - texelStep.x && canGrowFrom(source, sourceR, targetR.x);
+  bool canGrowFromL = uv.x >= texelStep.x && canGrowFrom(source, sourceL, targetL.x);
+  bool canGrowFromU = uv.y < 1.0 - texelStep.y && canGrowFrom(source, sourceU, targetU.x);
+  bool canGrowFromD = uv.y >= texelStep.y && canGrowFrom(source, sourceD, targetD.x);
+  #ifdef VOLUMETRIC_IMAGE
+    bool canGrowFromB = uv.z < 1.0 - texelStep.z && canGrowFrom(source, sourceB, targetB.x);
+    bool canGrowFromF = uv.z >= texelStep.z && canGrowFrom(source, sourceF, targetF.x);
+  #else
+    bool canGrowFromB = false;
+    bool canGrowFromF = false;
+  #endif
 
   bool shouldGrow = canGrowFromR || canGrowFromL || canGrowFromU || canGrowFromD || canGrowFromB || canGrowFromF;
 
   if(!shouldGrow) discard;
 
-  gl_FragColor = vec4(vec3(uRenderValue), 1.0);
+  pc_FragColor = vec4(vec3(uRenderValue), 1.0);
 }

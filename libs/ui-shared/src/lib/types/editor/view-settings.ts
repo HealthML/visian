@@ -1,4 +1,10 @@
-import type { Pixel, Vector, ViewType, Voxel } from "@visian/utils";
+import type {
+  Pixel,
+  Vector,
+  ViewType,
+  Voxel,
+  VoxelInfoMode,
+} from "@visian/utils";
 import type { Matrix4 } from "three";
 import { IParameter } from "./parameters";
 import { MarkerConfig } from "./markers";
@@ -41,6 +47,10 @@ export interface IViewport2D {
   hoveredViewType: ViewType;
   /** Indicates if the side views should be open. */
   showSideViews: boolean;
+  /** Indicates the voxel info mode. */
+  voxelInfoMode: VoxelInfoMode;
+  /** Indicates if the voxel info should be shown. */
+  showVoxelInfo: boolean;
 
   /**
    * The current zoom level.
@@ -55,6 +65,7 @@ export interface IViewport2D {
    */
   sliceMarkers: MarkerConfig[];
 
+  hoveredScreenCoordinates: Pixel;
   hoveredUV: Pixel;
   hoveredDragPoint: DragPoint;
   hoveredVoxel: Voxel;
@@ -65,6 +76,8 @@ export interface IViewport2D {
 
   /** Sets the main view type. */
   setMainViewType(viewType: ViewType): void;
+
+  setVoxelInfoMode(value?: VoxelInfoMode): void;
 
   /**
    * Returns the selected slice for the given `ViewType`.

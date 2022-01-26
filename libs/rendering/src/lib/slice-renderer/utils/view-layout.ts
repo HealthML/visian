@@ -72,10 +72,10 @@ export const getMainViewPaddings = (editor: IEditor) => {
   ];
 };
 
-export const setMainCameraPlanes = (
+export const setCameraPlanes = (
   editor: IEditor,
-  mainCanvas: HTMLCanvasElement,
-  mainCamera: THREE.OrthographicCamera,
+  canvas: HTMLCanvasElement,
+  camera: THREE.OrthographicCamera,
 ) => {
   const document = editor.activeDocument;
   if (!document) return;
@@ -88,8 +88,8 @@ export const setMainCameraPlanes = (
   ] = getMainViewPaddings(editor);
 
   const sizeBetweenOverlays = {
-    x: mainCanvas.width - (leftPadding + rightPadding),
-    y: mainCanvas.height - (bottomPadding + topPadding),
+    x: canvas.width - (leftPadding + rightPadding),
+    y: canvas.height - (bottomPadding + topPadding),
   };
 
   const availableAspectRatio = sizeBetweenOverlays.x / sizeBetweenOverlays.y;
@@ -130,28 +130,28 @@ export const setMainCameraPlanes = (
     spriteEdgePlanes.top = 1 / availableAspectRatio;
   }
 
-  mainCamera.left =
+  camera.left =
     spriteEdgePlanes.left -
-    ((2 * spriteEdgePlanes.right * mainCanvas.width) / sizeBetweenOverlays.x -
+    ((2 * spriteEdgePlanes.right * canvas.width) / sizeBetweenOverlays.x -
       2 * spriteEdgePlanes.right) *
       (leftPadding ? leftPadding / (rightPadding + leftPadding) : 0);
-  mainCamera.right =
+  camera.right =
     spriteEdgePlanes.right +
-    ((2 * spriteEdgePlanes.right * mainCanvas.width) / sizeBetweenOverlays.x -
+    ((2 * spriteEdgePlanes.right * canvas.width) / sizeBetweenOverlays.x -
       2 * spriteEdgePlanes.right) *
       (rightPadding ? rightPadding / (rightPadding + leftPadding) : 0);
-  mainCamera.bottom =
+  camera.bottom =
     spriteEdgePlanes.bottom -
-    ((2 * spriteEdgePlanes.top * mainCanvas.height) / sizeBetweenOverlays.y -
+    ((2 * spriteEdgePlanes.top * canvas.height) / sizeBetweenOverlays.y -
       2 * spriteEdgePlanes.top) *
       (bottomPadding ? bottomPadding / (topPadding + bottomPadding) : 0);
-  mainCamera.top =
+  camera.top =
     spriteEdgePlanes.top +
-    ((2 * spriteEdgePlanes.top * mainCanvas.height) / sizeBetweenOverlays.y -
+    ((2 * spriteEdgePlanes.top * canvas.height) / sizeBetweenOverlays.y -
       2 * spriteEdgePlanes.top) *
       (topPadding ? topPadding / (topPadding + bottomPadding) : 0);
 
-  mainCamera.updateProjectionMatrix();
+  camera.updateProjectionMatrix();
 };
 
 export const getOrder = (mainView: ViewType) => {

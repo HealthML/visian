@@ -25,6 +25,8 @@ export interface ToolConfig<N extends string> {
   label?: string;
   labelTx?: string;
 
+  infoTx?: string;
+
   isDrawingTool?: boolean;
   isBrush?: boolean;
   isSmartBrush?: boolean;
@@ -33,6 +35,7 @@ export interface ToolConfig<N extends string> {
 
   supportedViewModes?: ViewMode[];
   supportedLayerKinds?: string[];
+  supportAnnotationsOnly?: boolean;
 
   params?: Parameter[];
 }
@@ -47,6 +50,8 @@ export class Tool<N extends string>
   public label?: string;
   public labelTx?: string;
 
+  public infoTx?: string;
+
   public isDrawingTool: boolean;
   public isBrush: boolean;
   public isSmartBrush: boolean;
@@ -55,6 +60,7 @@ export class Tool<N extends string>
 
   public supportedViewModes?: ViewMode[];
   public supportedLayerKinds?: string[];
+  public supportAnnotationsOnly?: boolean;
 
   public params: { [name: string]: Parameter };
 
@@ -63,12 +69,14 @@ export class Tool<N extends string>
     this.icon = config.icon;
     this.label = config.label;
     this.labelTx = config.labelTx || config.name;
+    this.infoTx = config.infoTx;
     this.isDrawingTool = Boolean(config.isDrawingTool);
     this.isBrush = Boolean(config.isBrush);
     this.isSmartBrush = Boolean(config.isSmartBrush);
     this.altToolName = config.altToolName;
     this.supportedViewModes = config.supportedViewModes;
     this.supportedLayerKinds = config.supportedLayerKinds;
+    this.supportAnnotationsOnly = config.supportAnnotationsOnly;
     this.params = {};
     config.params?.forEach((param) => {
       this.params[param.name] = param;
@@ -83,6 +91,10 @@ export class Tool<N extends string>
       : undefined;
   }
 
+  public get isActive(): boolean {
+    return this.document.tools.activeTool === this;
+  }
+
   public canActivate(): boolean {
     return Boolean(
       (!this.supportedViewModes ||
@@ -91,7 +103,11 @@ export class Tool<N extends string>
         )) &&
         (!this.supportedLayerKinds ||
           (this.document.activeLayer &&
-            this.supportedLayerKinds.includes(this.document.activeLayer.kind))),
+            this.supportedLayerKinds.includes(
+              this.document.activeLayer.kind,
+            ))) &&
+        (!this.supportAnnotationsOnly ||
+          this.document.activeLayer?.isAnnotation),
     );
   }
 

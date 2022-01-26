@@ -5,6 +5,12 @@ import { CircleBrush } from "./circle-brush";
 export class SmartBrush<
   N extends "smart-brush" | "smart-eraser"
 > extends CircleBrush<N> {
+  public readonly excludeFromSnapshotTracking = [
+    "regionGrowingRenderer",
+    "document",
+    "toolRenderer",
+  ];
+
   constructor(
     document: IDocument,
     private regionGrowingRenderer: RegionGrowingRenderer,
@@ -13,9 +19,11 @@ export class SmartBrush<
     super(document, regionGrowingRenderer, isAdditive, {
       name: (isAdditive ? "smart-brush" : "smart-eraser") as N,
       altToolName: (isAdditive ? "smart-eraser" : "smart-brush") as N,
-      icon: isAdditive ? "magicBrush" : "eraser",
+      infoTx: "info-smart-brush",
+      icon: isAdditive ? "magicBrush" : "smartEraser",
       supportedViewModes: ["2D"],
       supportedLayerKinds: ["image"],
+      supportAnnotationsOnly: true,
       isDrawingTool: true,
       isBrush: true,
       isSmartBrush: true,

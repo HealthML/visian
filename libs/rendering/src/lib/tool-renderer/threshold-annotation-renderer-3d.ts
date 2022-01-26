@@ -1,5 +1,6 @@
 import { IDocument, IThresholdAnnotationRenderer3D } from "@visian/ui-shared";
 import { action, makeObservable, observable } from "mobx";
+import * as THREE from "three";
 
 import {
   thresholdAnnotationFragmentShader,
@@ -16,8 +17,10 @@ export class ThresholdAnnotationRenderer3D
     super(document, {
       vertexShader: thresholdAnnotationVertexShader,
       fragmentShader: thresholdAnnotationFragmentShader,
+      uniforms: { uThreshold: { value: [0.05, 1] } },
+      glslVersion: THREE.GLSL3,
     });
-    this.material.uniforms.uThreshold = { value: this.threshold };
+
     this.maxSteps = 1;
 
     makeObservable(this, {

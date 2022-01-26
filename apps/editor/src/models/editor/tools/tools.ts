@@ -6,8 +6,14 @@ import {
   ThresholdAnnotationRenderer3D,
   ToolRenderer,
 } from "@visian/rendering";
-import { IDocument, IImageLayer, ITool, ITools } from "@visian/ui-shared";
-import { getPlaneAxes, ISerializable } from "@visian/utils";
+import {
+  IDocument,
+  IImageLayer,
+  ITool,
+  ITools,
+  MergeFunction,
+} from "@visian/ui-shared";
+import { getPlaneAxes, IDisposable, ISerializable } from "@visian/utils";
 import { action, computed, makeObservable, observable } from "mobx";
 import { CircleBrush } from "./circle-brush";
 import { ClearImageTool } from "./clear-image-tool";
@@ -24,6 +30,8 @@ import { SmartBrush3D } from "./smart-brush-3d";
 import { DilateErodeTool } from "./dilate-erode-tool";
 import { SelfDeactivatingTool } from "./self-deactivating-tool";
 import { ThresholdAnnotationTool } from "./threshold-annotation-tool";
+import { UndoableTool } from "./undoable-tool";
+import { MeasurementTool } from "./measurement-tool";
 
 export type ToolName =
   | "navigation-tool"
@@ -42,7 +50,8 @@ export type ToolName =
   | "threshold-annotation"
   | "dilate-erode"
   | "plane-tool"
-  | "fly-tool";
+  | "fly-tool"
+  | "measurement-tool";
 
 export interface ToolsSnapshot<N extends string> {
   activeToolName?: N;
@@ -56,7 +65,10 @@ export interface ToolsSnapshot<N extends string> {
 }
 
 export class Tools
-  implements ITools<ToolName>, ISerializable<ToolsSnapshot<ToolName>> {
+  implements
+    ITools<ToolName>,
+    ISerializable<ToolsSnapshot<ToolName>>,
+    IDisposable {
   public readonly excludeFromSnapshotTracking = [
     "document",
     "isCursorOverDrawableArea",
@@ -120,7 +132,9 @@ export class Tools
       canDraw: computed,
       isToolInUse: computed,
       useAdaptiveBrushSize: computed,
-      layerPreviewTextures: computed,
+      layerPreviewTexture: computed,
+      slicePreviewTexture: computed,
+      slicePreviewMergeFunction: computed,
 
       setActiveTool: action,
       setBrushSize: action,
@@ -194,34 +208,50 @@ export class Tools
         },
         document,
       ),
+      "measurement-tool": new MeasurementTool(document),
     };
 
     this.toolGroups.push(
-      new ToolGroup({ toolNames: ["navigation-tool"] }, document),
-      new ToolGroup({ toolNames: ["crosshair-tool"] }, document),
+      new ToolGroup(
+        { toolNames: ["navigation-tool", "crosshair-tool"] },
+        document,
+      ),
+      new ToolGroup({ toolNames: ["fly-tool"] }, document),
+      new ToolGroup({ toolNames: ["plane-tool"] }, document),
       new ToolGroup({ toolNames: ["pixel-brush"] }, document),
-      new ToolGroup({ toolNames: ["smart-brush", "smart-eraser"] }, document),
       new ToolGroup(
-        { toolNames: ["bounded-smart-brush", "bounded-smart-eraser"] },
+        { toolNames: ["smart-brush", "bounded-smart-brush", "smart-brush-3d"] },
         document,
       ),
-      new ToolGroup({ toolNames: ["smart-brush-3d"] }, document),
+      new ToolGroup({ toolNames: ["outline-tool"] }, document),
       new ToolGroup(
-        { toolNames: ["outline-tool", "outline-eraser"] },
-        document,
-      ),
-      new ToolGroup(
-        { toolNames: ["pixel-eraser", "smart-eraser", "outline-eraser"] },
+        {
+          toolNames: [
+            "pixel-eraser",
+            "smart-eraser",
+            "bounded-smart-eraser",
+            "outline-eraser",
+          ],
+        },
         document,
       ),
       new ToolGroup({ toolNames: ["clear-slice", "clear-image"] }, document),
-      new ToolGroup({ toolNames: ["threshold-annotation"] }, document),
-      new ToolGroup({ toolNames: ["dilate-erode"] }, document),
-      new ToolGroup({ toolNames: ["plane-tool"] }, document),
-      new ToolGroup({ toolNames: ["fly-tool"] }, document),
+
+      new ToolGroup(
+        { toolNames: ["dilate-erode", "threshold-annotation"] },
+        document,
+      ),
+      new ToolGroup({ toolNames: ["measurement-tool"] }, document),
     );
 
     if (snapshot) this.applySnapshot(snapshot);
+  }
+
+  public dispose() {
+    this.toolRenderer.dispose();
+    this.regionGrowingRenderer.dispose();
+    this.regionGrowingRenderer3D.dispose();
+    this.dilateErodeRenderer3D.dispose();
   }
 
   protected getDefaultToolName(): ToolName {
@@ -240,7 +270,10 @@ export class Tools
       : tool;
   }
 
-  public setActiveTool(nameOrTool?: ToolName | ITool<ToolName>): void {
+  public setActiveTool(
+    nameOrTool?: ToolName | ITool<ToolName>,
+    setAsGroupActiveTool = true,
+  ): void {
     if (this.isDrawing) return;
 
     const previouslyActiveTool = this.activeTool;
@@ -250,6 +283,14 @@ export class Tools
         ? nameOrTool
         : nameOrTool.name
       : "pixel-brush";
+
+    if (setAsGroupActiveTool) {
+      this.toolGroups
+        .find((group) =>
+          group.tools.some((tool) => tool.name === this.activeToolName),
+        )
+        ?.setActiveTool(this.activeToolName, false);
+    }
 
     if (this.activeTool?.canActivate()) {
       previouslyActiveTool?.deactivate(this.tools[this.activeToolName]);
@@ -318,10 +359,22 @@ export class Tools
     return this.lockedBrushSize === undefined;
   }
 
-  public get layerPreviewTextures(): THREE.Texture[] {
+  public get layerPreviewTexture(): THREE.Texture {
     return this.regionGrowingRenderer3D.holdsPreview
-      ? this.regionGrowingRenderer3D.outputTextures
-      : this.thresholdAnnotationRenderer3D.outputTextures;
+      ? this.regionGrowingRenderer3D.outputTexture
+      : this.thresholdAnnotationRenderer3D.outputTexture;
+  }
+
+  public get slicePreviewTexture(): THREE.Texture | undefined {
+    if (!(this.activeTool instanceof UndoableTool)) return undefined;
+
+    return this.activeTool.toolRenderer.texture;
+  }
+
+  public get slicePreviewMergeFunction(): MergeFunction | undefined {
+    if (!(this.activeTool instanceof UndoableTool)) return undefined;
+
+    return this.activeTool.toolRenderer.mergeFunction;
   }
 
   public setBrushSize(value = 5, showPreview = false): void {

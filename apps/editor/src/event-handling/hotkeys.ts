@@ -1,3 +1,4 @@
+import { MergeFunction } from "@visian/ui-shared";
 import { IDisposer, ViewType } from "@visian/utils";
 import hotkeys from "hotkeys-js";
 
@@ -5,6 +6,7 @@ import { skipSlices } from "../constants";
 import {
   DilateErodeTool,
   ImageLayer,
+  MeasurementTool,
   RootStore,
   SmartBrush3D,
   ThresholdAnnotationTool,
@@ -82,6 +84,26 @@ export const setUpHotKeys = (store: RootStore): IDisposer => {
 
     store.editor.activeDocument?.tools.setActiveTool("plane-tool");
   });
+  hotkeys("l", (event) => {
+    event.preventDefault();
+    if (store.editor.activeDocument?.viewSettings.viewMode !== "3D") return;
+
+    store.editor.activeDocument?.tools.setActiveTool("measurement-tool");
+  });
+
+  // Copy and Paste
+  hotkeys("ctrl+c", (event) => {
+    event.preventDefault();
+    store.editor.activeDocument?.clipboard.copy();
+  });
+  hotkeys("ctrl+v", (event) => {
+    event.preventDefault();
+    store.editor.activeDocument?.clipboard.paste();
+  });
+  hotkeys("ctrl+shift+v", (event) => {
+    event.preventDefault();
+    store.editor.activeDocument?.clipboard.paste(MergeFunction.Add);
+  });
 
   // Tools
   hotkeys("del,backspace", (event) => {
@@ -114,6 +136,19 @@ export const setUpHotKeys = (store: RootStore): IDisposer => {
       ] as ThresholdAnnotationTool).submit();
     }
 
+    if (
+      (store.editor.activeDocument?.tools.tools[
+        "measurement-tool"
+      ] as MeasurementTool).hasPath
+    ) {
+      (store.editor.activeDocument?.tools.tools[
+        "measurement-tool"
+      ] as MeasurementTool).submit();
+    }
+  });
+  hotkeys("escape", (event) => {
+    event.preventDefault();
+
     if (store.editor.activeDocument?.tools.dilateErodeRenderer3D.holdsPreview) {
       (store.editor.activeDocument?.tools.tools[
         "dilate-erode"
@@ -145,12 +180,22 @@ export const setUpHotKeys = (store: RootStore): IDisposer => {
         "dilate-erode"
       ] as DilateErodeTool).discard();
     }
+
+    if (
+      (store.editor.activeDocument?.tools.tools[
+        "measurement-tool"
+      ] as MeasurementTool).hasPath
+    ) {
+      (store.editor.activeDocument?.tools.tools[
+        "measurement-tool"
+      ] as MeasurementTool).discard();
+    }
   });
 
   // Brush Size/Clipping Plane Distance
   hotkeys("*", (event) => {
     // "+" doesn't currently work with hotkeys-js (https://github.com/jaywcjlove/hotkeys/issues/270)
-    if (event.key === "+" && !event.ctrlKey) {
+    if ((event.key === "+" || event.key === "w") && !event.ctrlKey) {
       if (store.editor.activeDocument?.viewSettings.viewMode === "3D") {
         store.editor.activeDocument?.viewport3D.increaseClippingPlaneDistance();
         return;
@@ -159,7 +204,7 @@ export const setUpHotKeys = (store: RootStore): IDisposer => {
       store.editor.activeDocument?.tools.incrementBrushSize();
     }
   });
-  hotkeys("-", () => {
+  hotkeys("-,q", () => {
     if (store.editor.activeDocument?.viewSettings.viewMode === "3D") {
       store.editor.activeDocument?.viewport3D.decreaseClippingPlaneDistance();
       return;
@@ -383,6 +428,24 @@ export const setUpHotKeys = (store: RootStore): IDisposer => {
     } else {
       store.editor.activeDocument?.viewport3D.exportCanvasImage();
     }
+  });
+
+  // Voxel Info
+  hotkeys("i", (event) => {
+    event.preventDefault();
+    store.editor.activeDocument?.viewport2D.setVoxelInfoMode(
+      store.editor.activeDocument?.viewport2D.voxelInfoMode === "off"
+        ? "on"
+        : "off",
+    );
+  });
+  hotkeys("ctrl+i", (event) => {
+    event.preventDefault();
+    store.editor.activeDocument?.viewport2D.setVoxelInfoMode(
+      store.editor.activeDocument?.viewport2D.voxelInfoMode === "delay"
+        ? "on"
+        : "delay",
+    );
   });
 
   return () => hotkeys.unbind();

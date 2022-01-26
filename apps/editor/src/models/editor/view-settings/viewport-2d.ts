@@ -13,20 +13,24 @@ import {
   Pixel,
   Vector,
   ViewType,
+  VoxelInfoMode,
 } from "@visian/utils";
-import { action, computed, makeObservable, observable } from "mobx";
-
 import {
-  maxZoom,
-  minZoom,
-  viewTypeDepthThreshold,
-  zoomStep,
-} from "../../../constants";
+  action,
+  computed,
+  makeObservable,
+  observable,
+  runInAction,
+} from "mobx";
+
+import { maxZoom, minZoom, voxelInfoDelay, zoomStep } from "../../../constants";
 import { OutlineTool } from "../tools";
 
 export interface Viewport2DSnapshot {
   mainViewType: ViewType;
   showSideViews: boolean;
+
+  voxelInfoMode: VoxelInfoMode;
 
   zoomLevel: number;
   offset: number[];
@@ -38,6 +42,8 @@ export class Viewport2D
     "document",
     "hoveredScreenCoordinates",
     "hoveredViewType",
+    "mouseMoveTimeout",
+    "hasMouseRecentlyMoved",
   ];
 
   public mainViewType!: ViewType;
@@ -46,8 +52,12 @@ export class Viewport2D
   public zoomLevel!: number;
   public offset = new Vector(2);
 
-  private hoveredScreenCoordinates: Pixel = { x: 0, y: 0 };
+  public hoveredScreenCoordinates: Pixel = { x: 0, y: 0 };
   public hoveredViewType = ViewType.Transverse;
+
+  public voxelInfoMode!: VoxelInfoMode;
+  private hasMouseRecentlyMoved = true;
+  private mouseMoveTimeout?: NodeJS.Timer;
 
   constructor(
     snapshot: Partial<Viewport2DSnapshot> | undefined,
@@ -59,14 +69,20 @@ export class Viewport2D
       this.reset();
     }
 
-    makeObservable<this, "hoveredScreenCoordinates" | "hoveredViewType">(this, {
+    makeObservable<
+      this,
+      "hoveredScreenCoordinates" | "hoveredViewType" | "hasMouseRecentlyMoved"
+    >(this, {
       mainViewType: observable,
       showSideViews: observable,
       zoomLevel: observable,
       offset: observable,
       hoveredScreenCoordinates: observable,
       hoveredViewType: observable,
+      voxelInfoMode: observable,
+      hasMouseRecentlyMoved: observable,
 
+      showVoxelInfo: computed,
       sliceMarkers: computed,
       hoveredUV: computed,
       hoveredDragPoint: computed,
@@ -76,6 +92,7 @@ export class Viewport2D
 
       setMainViewType: action,
       setShowSideViews: action,
+      setVoxelInfoMode: action,
       setZoomLevel: action,
       setOffset: action,
       reset: action,
@@ -101,27 +118,21 @@ export class Viewport2D
   }
 
   public get defaultViewType() {
-    if (!this.document.has3DLayers) return ViewType.Transverse;
+    return (
+      this.document.baseImageLayer?.image.defaultViewType ?? ViewType.Transverse
+    );
+  }
 
-    const voxelSpacing = this.document.baseImageLayer?.image.voxelSpacing;
-    if (!voxelSpacing) return ViewType.Transverse;
-
-    let bestViewType = ViewType.Transverse;
-    let bestViewTypeDepth = voxelSpacing.getFromView(bestViewType);
-
-    [ViewType.Sagittal, ViewType.Coronal].forEach((viewType) => {
-      const viewTypeDepth = voxelSpacing.getFromView(viewType);
-      if (viewTypeDepth - bestViewTypeDepth > viewTypeDepthThreshold) {
-        bestViewType = viewType;
-        bestViewTypeDepth = viewTypeDepth;
-      }
-    });
-    return bestViewType;
+  public get showVoxelInfo() {
+    return (
+      this.voxelInfoMode === "on" ||
+      (this.voxelInfoMode === "delay" && !this.hasMouseRecentlyMoved)
+    );
   }
 
   public setMainViewType = (value?: ViewType): void => {
     if (!this.document.has3DLayers) {
-      this.mainViewType = ViewType.Transverse;
+      this.mainViewType = this.defaultViewType;
       return;
     }
 
@@ -132,6 +143,44 @@ export class Viewport2D
   public setShowSideViews(value?: boolean): void {
     this.showSideViews = value ?? true;
   }
+
+  private onMouseMove = () => {
+    if (this.mouseMoveTimeout !== undefined) {
+      clearTimeout(this.mouseMoveTimeout);
+    }
+
+    if (!this.hasMouseRecentlyMoved) {
+      // Marking the whole function as an action still resulted in a MobX warning when
+      // it was called by the event listener. Using `runInAction` works.
+      runInAction(() => {
+        this.hasMouseRecentlyMoved = true;
+      });
+    }
+
+    this.mouseMoveTimeout = setTimeout(() => {
+      // Here we need to use `runInAction` because it is called in the timeout.
+      runInAction(() => {
+        this.hasMouseRecentlyMoved = false;
+      });
+    }, voxelInfoDelay);
+  };
+
+  public setVoxelInfoMode = (value?: VoxelInfoMode) => {
+    this.voxelInfoMode = value ?? "off";
+
+    if (this.voxelInfoMode === "delay") {
+      window.addEventListener("mousemove", this.onMouseMove);
+
+      if (!this.hasMouseRecentlyMoved) {
+        this.hasMouseRecentlyMoved = true;
+      }
+    } else {
+      window.removeEventListener("mousemove", this.onMouseMove);
+      if (this.mouseMoveTimeout !== undefined) {
+        clearTimeout(this.mouseMoveTimeout);
+      }
+    }
+  };
 
   public setZoomLevel = (value?: number): void => {
     this.zoomLevel = value ?? 1;
@@ -144,6 +193,7 @@ export class Viewport2D
   public reset = (): void => {
     this.setMainViewType();
     this.setShowSideViews();
+    this.setVoxelInfoMode();
     this.setZoomLevel();
     this.setOffset();
   };
@@ -284,6 +334,7 @@ export class Viewport2D
     return {
       mainViewType: this.mainViewType,
       showSideViews: this.showSideViews,
+      voxelInfoMode: this.voxelInfoMode,
       zoomLevel: this.zoomLevel,
       offset: this.offset.toJSON(),
     };
@@ -292,6 +343,7 @@ export class Viewport2D
   public applySnapshot(snapshot: Partial<Viewport2DSnapshot>): Promise<void> {
     this.setMainViewType(snapshot.mainViewType);
     this.setShowSideViews(snapshot.showSideViews);
+    this.setVoxelInfoMode(snapshot.voxelInfoMode);
 
     this.setZoomLevel(snapshot.zoomLevel);
 

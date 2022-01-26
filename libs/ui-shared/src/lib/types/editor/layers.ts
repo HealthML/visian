@@ -1,10 +1,4 @@
-import type {
-  Image,
-  Vector,
-  ViewType,
-  Voxel,
-  VoxelWithValue,
-} from "@visian/utils";
+import type { Image, Vector, ViewType, Voxel } from "@visian/utils";
 import type { Matrix4 } from "three";
 import { MarkerConfig } from "./markers";
 
@@ -123,6 +117,9 @@ export interface IImageLayer extends ILayer {
    */
   contrast: number;
 
+  volume: number | null;
+  area: { slice: number; viewType: ViewType; area: number } | null;
+
   /**
    * Triggers the slice markers of this layer to be recomputed.
    *
@@ -146,14 +143,12 @@ export interface IImageLayer extends ILayer {
   clearSliceMarkers(viewType?: ViewType, slice?: number): Promise<void>;
 
   getVoxel(voxel: Voxel): Vector;
-  setVoxel(voxel: Voxel, value: number): void;
-  setVoxels(voxels: VoxelWithValue[]): void;
 
   getSlice(viewType: ViewType, slice: number): Uint8Array;
   setSlice(viewType: ViewType, slice: number, sliceData?: Uint8Array): void;
 
-  getAtlas(): Uint8Array;
-  setAtlas(value: Uint8Array): void;
+  computeVolume(): Promise<void>;
+  computeArea(viewType: ViewType, slice: number): Promise<void>;
 }
 
 /** A group of layers. */

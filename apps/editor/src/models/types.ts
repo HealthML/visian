@@ -1,5 +1,7 @@
 import type React from "react";
-import type { Theme } from "@visian/ui-shared";
+import type { ColorMode, ErrorNotification, Theme } from "@visian/ui-shared";
+
+import type { Tracker } from "./tracking";
 
 export interface StoreContext {
   /**
@@ -19,17 +21,17 @@ export interface StoreContext {
   getTheme(): Theme;
 
   getRefs(): { [key: string]: React.RefObject<HTMLElement> };
-}
 
-export interface ErrorNotification {
-  title?: string;
-  titleTx?: string;
-  description?: string;
-  descriptionTx?: string;
+  setError(error: ErrorNotification): void;
+
+  getTracker(): Tracker | undefined;
+
+  getColorMode(): ColorMode;
 }
 
 export interface ProgressNotification {
   label?: string;
   labelTx?: string;
   progress?: number;
+  showSplash?: boolean;
 }

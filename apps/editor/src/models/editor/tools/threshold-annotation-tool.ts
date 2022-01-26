@@ -8,7 +8,7 @@ import {
 } from "@visian/ui-shared";
 
 import { Tool } from "./tool";
-import { mutateAtlas } from "./utils";
+import { mutateTextureData } from "./utils";
 
 export class ThresholdAnnotationTool<
     N extends "threshold-annotation" = "threshold-annotation"
@@ -44,7 +44,7 @@ export class ThresholdAnnotationTool<
 
   public submit = () => {
     const targetLayer = this.document.activeLayer;
-    mutateAtlas(
+    mutateTextureData(
       targetLayer as IImageLayer,
       () => this.renderer.flushToAnnotation(targetLayer as IImageLayer),
       this.document,

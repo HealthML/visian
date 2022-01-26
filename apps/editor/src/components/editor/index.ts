@@ -4,6 +4,7 @@ export * from "./export-popup";
 export * from "./layer-settings";
 export * from "./layers";
 export * from "./main-view";
+export * from "./measurement-popup";
 export * from "./menu";
 export * from "./shortcut-popup";
 export * from "./side-views";

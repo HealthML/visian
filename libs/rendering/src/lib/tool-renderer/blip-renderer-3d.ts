@@ -1,11 +1,29 @@
-import { IBlipRenderer3D, IDocument, IImageLayer } from "@visian/ui-shared";
-import { IDisposable, IDisposer } from "@visian/utils";
-import { action, makeObservable, observable, reaction } from "mobx";
+import { Texture3DRenderer } from "@visian/rendering";
+import {
+  IBlipRenderer3D,
+  IDocument,
+  IImageLayer,
+  MergeFunction,
+} from "@visian/ui-shared";
+import {
+  getPlaneAxes,
+  IDisposable,
+  IDisposer,
+  Vector,
+  ViewType,
+} from "@visian/utils";
+import {
+  action,
+  computed,
+  makeObservable,
+  observable,
+  reaction,
+  runInAction,
+} from "mobx";
 import * as THREE from "three";
 
-import { MergeFunction, RenderedImage } from "../rendered-image";
-import ScreenAlignedQuad from "../screen-aligned-quad";
-import { Blip3DMaterial, MAX_BLIP_STEPS } from "./utils/blip-material";
+import { ImageRenderTarget, RenderedImage } from "../rendered-image";
+import { Blip3DMaterial, MAX_BLIP_STEPS } from "./utils";
 
 export class BlipRenderer3D implements IBlipRenderer3D, IDisposable {
   public readonly excludeFromSnapshotTracking = ["document"];
@@ -22,70 +40,72 @@ export class BlipRenderer3D implements IBlipRenderer3D, IDisposable {
   protected disposers: IDisposer[] = [];
 
   protected hasOddOutput = false;
-  protected renderTargets: THREE.WebGLRenderTarget[] = [];
-  protected blipRenderTargets: THREE.WebGLRenderTarget[] = [];
+  protected renderTarget!: THREE.WebGLRenderTarget;
+  protected blipRenderTarget!: THREE.WebGLRenderTarget;
 
   protected material: Blip3DMaterial;
-  protected quad: ScreenAlignedQuad;
+  protected texture3DRenderer: Texture3DRenderer;
 
   constructor(
     protected document: IDocument,
     parameters?: THREE.ShaderMaterialParameters,
   ) {
-    this.material = new Blip3DMaterial(parameters);
-    this.quad = new ScreenAlignedQuad(this.material);
+    this.material = new Blip3DMaterial(document, parameters);
+    this.texture3DRenderer = new Texture3DRenderer();
+
+    makeObservable<this, "hasOddOutput" | "renderTarget" | "blipRenderTarget">(
+      this,
+      {
+        holdsPreview: observable,
+        maxSteps: observable,
+        previewColor: observable,
+        steps: observable,
+        hasOddOutput: observable,
+        renderTarget: observable,
+        blipRenderTarget: observable,
+
+        outputTexture: computed,
+
+        setPreviewColor: action,
+        setMaxSteps: action,
+        setSteps: action,
+        render: action,
+        flushToAnnotation: action,
+        discard: action,
+      },
+    );
 
     this.disposers.push(
       reaction(
-        () => document.renderers,
-        (renderers) => {
-          if (renderers) {
-            this.renderTargets = renderers.map(
-              () =>
-                new THREE.WebGLRenderTarget(1, 1, {
-                  magFilter: THREE.NearestFilter,
-                  minFilter: THREE.NearestFilter,
-                }),
+        () => Boolean(document.baseImageLayer?.is3DLayer),
+        (is3D) => {
+          runInAction(() => {
+            const imageProperties = {
+              voxelCount: new Vector([1, 1, 1]),
+              is3D,
+              defaultViewType: ViewType.Transverse,
+            };
+            this.renderTarget = new ImageRenderTarget(
+              imageProperties,
+              THREE.NearestFilter,
             );
-            this.blipRenderTargets = renderers.map(
-              () =>
-                new THREE.WebGLRenderTarget(1, 1, {
-                  magFilter: THREE.NearestFilter,
-                  minFilter: THREE.NearestFilter,
-                }),
+            this.blipRenderTarget = new ImageRenderTarget(
+              imageProperties,
+              THREE.NearestFilter,
             );
             this.resizeRenderTargets();
-
-            renderers.forEach((renderer) => {
-              this.quad.compileWith(renderer);
-            });
-          }
+          });
         },
         { fireImmediately: true },
       ),
       reaction(
-        () =>
-          document.activeLayer?.kind === "image"
-            ? (document.activeLayer as IImageLayer).image.getAtlasSize()
-            : undefined,
+        () => [
+          document.baseImageLayer?.image.voxelCount.toArray(),
+          document.baseImageLayer?.image.defaultViewType,
+        ],
         this.resizeRenderTargets,
       ),
     );
-
-    makeObservable<this, "hasOddOutput">(this, {
-      holdsPreview: observable,
-      maxSteps: observable,
-      previewColor: observable,
-      steps: observable,
-      hasOddOutput: observable,
-
-      setPreviewColor: action,
-      setMaxSteps: action,
-      setSteps: action,
-      render: action,
-      flushToAnnotation: action,
-      discard: action,
-    });
   }
 
   public get sourceLayer(): IImageLayer | undefined {
@@ -111,12 +131,14 @@ export class BlipRenderer3D implements IBlipRenderer3D, IDisposable {
    * used to evolve an existing annotation instead of generating one from
    * scratch based on just the source image.
    */
-  public render(initialTarget?: IImageLayer) {
+  public render(
+    initialTarget?: IImageLayer,
+    getIntervalFromStep?: (step: number) => [number, number],
+  ) {
+    if (!this.document.renderer) return;
+
     const sourceImage = this.sourceLayer?.image as RenderedImage | undefined;
     if (!sourceImage) return;
-
-    this.material.setAtlasGrid(sourceImage.getAtlasGrid().toArray());
-    this.material.setVoxelCount(sourceImage.voxelCount.toArray());
 
     this.steps = this.maxSteps;
     const blipSteps = Math.min(this.maxSteps, sourceImage.voxelCount.sum());
@@ -126,40 +148,33 @@ export class BlipRenderer3D implements IBlipRenderer3D, IDisposable {
       this.hasOddOutput = !this.hasOddOutput;
     }
 
-    this.document.renderers?.forEach((renderer, rendererIndex) => {
-      this.material.setSourceTexture(sourceImage.getTexture(rendererIndex));
+    this.texture3DRenderer.setMaterial(this.material);
 
-      const isXREnabled = renderer.xr.enabled;
-      renderer.xr.enabled = false;
-      renderer.autoClear = false;
+    this.material.setSourceTexture(sourceImage.getTexture());
 
-      for (let i = 0; i < blipSteps; i++) {
-        const isOdd = i % 2 ? hasOddInput : !hasOddInput;
+    for (let i = 0; i < blipSteps; i++) {
+      const isOdd = i % 2 ? hasOddInput : !hasOddInput;
 
-        if (!i && initialTarget) {
-          this.material.setTargetTexture(
-            (initialTarget.image as RenderedImage).getTexture(rendererIndex),
-          );
-        } else {
-          this.material.setTargetTexture(
-            isOdd
-              ? this.renderTargets[rendererIndex].texture
-              : this.blipRenderTargets[rendererIndex].texture,
-          );
-        }
-        this.material.setStep(i);
-        renderer.setRenderTarget(
-          isOdd
-            ? this.blipRenderTargets[rendererIndex]
-            : this.renderTargets[rendererIndex],
+      if (!i && initialTarget) {
+        this.material.setTargetTexture(
+          (initialTarget.image as RenderedImage).getTexture(),
         );
-        this.quad.renderWith(renderer);
+      } else {
+        this.material.setTargetTexture(
+          isOdd ? this.renderTarget.texture : this.blipRenderTarget.texture,
+        );
       }
+      this.material.setStep(i);
+      this.texture3DRenderer.setTarget(
+        isOdd ? this.blipRenderTarget : this.renderTarget,
+      );
 
-      renderer.setRenderTarget(null);
-      renderer.autoClear = true;
-      renderer.xr.enabled = isXREnabled;
-    });
+      this.texture3DRenderer.render(
+        this.document.renderer,
+        getIntervalFromStep?.(i),
+        false,
+      );
+    }
 
     this.holdsPreview = true;
 
@@ -175,32 +190,30 @@ export class BlipRenderer3D implements IBlipRenderer3D, IDisposable {
     layer = this.document.activeLayer as IImageLayer,
     shouldReplace = false,
   ) {
-    if (layer.kind !== "image" || !layer.isAnnotation) {
+    if (
+      layer.kind !== "image" ||
+      !layer.isAnnotation ||
+      !this.document.renderer
+    ) {
       return;
     }
 
     const annotation = layer.image as RenderedImage;
 
-    const isXREnabled = this.document.renderers?.map(
-      (renderer) => renderer.xr.enabled,
-    );
-    this.document.renderers?.forEach((renderer) => {
-      renderer.xr.enabled = false;
-    });
+    const isXREnabled = this.document.renderer.xr.enabled;
+    this.document.renderer.xr.enabled = false;
     if (shouldReplace) {
-      annotation.writeToAtlas(this.outputTextures, MergeFunction.Replace);
+      annotation.writeToTexture(this.outputTexture, MergeFunction.Replace);
     } else {
-      annotation.writeToAtlas(
-        this.outputTextures,
+      annotation.writeToTexture(
+        this.outputTexture,
         MergeFunction.Add,
         this.steps !== undefined
           ? (this.maxSteps + 1 - this.steps) / (this.maxSteps + 1)
           : this.steps,
       );
     }
-    this.document.renderers?.forEach((renderer, index) => {
-      renderer.xr.enabled = isXREnabled?.[index] || false;
-    });
+    this.document.renderer.xr.enabled = isXREnabled;
 
     this.discard();
   }
@@ -216,44 +229,50 @@ export class BlipRenderer3D implements IBlipRenderer3D, IDisposable {
     this.document.volumeRenderer?.lazyRender(true);
   }
 
-  public get outputTextures() {
-    return (this.hasOddOutput
-      ? this.blipRenderTargets
-      : this.renderTargets
-    ).map((renderTarget) => renderTarget.texture);
+  public get outputTexture() {
+    return (this.hasOddOutput ? this.blipRenderTarget : this.renderTarget)
+      .texture;
   }
 
   protected resizeRenderTargets = () => {
-    if (!this.document.baseImageLayer) return;
+    const { baseImageLayer } = this.document;
+    if (!baseImageLayer) return;
 
-    const [
-      width,
-      height,
-    ] = this.document.baseImageLayer.image.getAtlasSize().toArray();
+    const { voxelCount } = baseImageLayer.image;
 
-    [...this.renderTargets, ...this.blipRenderTargets].forEach(
-      (renderTarget) => {
-        renderTarget.setSize(width, height);
-      },
-    );
+    let width = 0;
+    let height = 0;
+    let depth = 1;
+    if (baseImageLayer.is3DLayer) {
+      width = voxelCount.x;
+      height = voxelCount.y;
+      depth = voxelCount.z;
+    } else {
+      [width, height] = getPlaneAxes(baseImageLayer.image.defaultViewType).map(
+        (axis) => voxelCount[axis],
+      );
+    }
+
+    [this.renderTarget, this.blipRenderTarget].forEach((renderTarget) => {
+      renderTarget?.setSize(width, height, depth);
+    });
   };
 
   protected clearRenderTargets() {
-    this.document.renderers?.forEach((renderer, rendererIndex) => {
-      renderer.setRenderTarget(this.renderTargets[rendererIndex]);
-      renderer.clear();
-      renderer.setRenderTarget(this.blipRenderTargets[rendererIndex]);
-      renderer.clear();
-      renderer.setRenderTarget(null);
-    });
+    if (!this.document.renderer) return;
+
+    this.texture3DRenderer.setTarget(this.renderTarget);
+    this.texture3DRenderer.clear(this.document.renderer);
+    this.texture3DRenderer.setTarget(this.blipRenderTarget);
+    this.texture3DRenderer.clear(this.document.renderer);
   }
 
   public dispose() {
     this.disposers.forEach((disposer) => disposer());
     this.material.dispose();
-    this.quad.dispose();
-    [...this.renderTargets, ...this.blipRenderTargets].forEach((rendertarget) =>
-      rendertarget.dispose(),
+    this.texture3DRenderer.dispose();
+    [this.renderTarget, this.blipRenderTarget].forEach((renderTarget) =>
+      renderTarget?.dispose(),
     );
   }
 }

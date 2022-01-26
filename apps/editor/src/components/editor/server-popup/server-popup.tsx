@@ -175,7 +175,7 @@ export const ServerPopUp = observer<ServerPopUpProps>(({ isOpen, onClose }) => {
               (currentSeries) => currentSeries.SeriesInstanceUID === seriesId,
             );
 
-            return store.editor.activeDocument?.importFile(
+            return store.editor.activeDocument?.importFiles(
               files,
               String(
                 thisSeries
@@ -221,7 +221,8 @@ export const ServerPopUp = observer<ServerPopUpProps>(({ isOpen, onClose }) => {
     <ServerPopUpContainer
       title="Import"
       isOpen={isOpen}
-      onOutsidePress={onClose}
+      dismiss={onClose}
+      shouldDismissOnOutsidePress
     >
       <InlineRow>
         <InlineElement>

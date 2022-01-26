@@ -1,18 +1,24 @@
-varying vec2 vUv;
+precision highp sampler3D;
+
+#define VOLUMETRIC_IMAGE
+
+in vec2 vUv;
 
 uniform int uInputDimensions;
 uniform int uGradientMode;
 
 @import ../uniforms/u-common;
-@import ../uniforms/u-atlas-info;
 @import ../uniforms/u-image-info;
 @import ../uniforms/u-transfer-functions;
+@import ../uniforms/u-texture-3d-material;
 
 #define CONE_EDGE 0.01
 
 @import ../utils/volume-data;
 @import ../volume/transfer-functions;
 @import ../utils/decode-vec3;
+
+out vec4 pc_FragColor;
 
 vec4 encodeGradient(vec3 gradient) {
   float encodedSigns = 0.5 * step(0.0, gradient.x) + 0.25 * step(0.0, gradient.y) + 0.125 * step(0.0, gradient.z);
@@ -24,24 +30,9 @@ vec4 encodeGradient(vec3 gradient) {
  *
  * @param voxelCoords The voxel coordinates (ranged [0, uVoxelCount.* - 1.0]).
  */
-vec4 getImageValue(vec3 voxelCoords) {
-  vec2 sliceSize = vec2(1.0) / uAtlasGrid;
-  vec2 sliceOffset = vec2(
-    mod(voxelCoords.z, uAtlasGrid.x), 
-    floor(voxelCoords.z / uAtlasGrid.x)
-  );
-
-  // TODO: Why does this case even happpen?
-  if(sliceOffset.x == uAtlasGrid.x) {
-    sliceOffset.x = 0.0;
-    sliceOffset.y += 1.0;
-  }
-
-  vec2 uvOffset = sliceSize * sliceOffset;
-  vec2 uv = ((voxelCoords.xy + vec2(0.5)) / uVoxelCount.xy / uAtlasGrid + uvOffset);
-
+vec4 getImageValue(vec3 uv) {
   if (uGradientMode == 2) {
-    return texture2D(uInputFirstDerivative, uv);
+    return texture(uInputFirstDerivative, uv);
   } else if (uGradientMode == 1) {
     vec4 imageValue = vec4(0.0);
     {{reduceRawImages(imageValue, uv)}}
@@ -55,8 +46,8 @@ vec4 getImageValue(vec3 voxelCoords) {
 
   data.image = imageValue;
   data.imageRaw = imageRaw;
-  data.firstDerivative = decodeVec3(texture2D(uInputFirstDerivative, uv));
-  data.secondDerivative = decodeVec3(texture2D(uInputSecondDerivative, uv));
+  data.firstDerivative = decodeVec3(texture(uInputFirstDerivative, uv));
+  // data.secondDerivative = decodeVec3(texture(uInputSecondDerivative, uv));
   
   if(uUseFocus) {
     vec4 focusValue = vec4(0.0);
@@ -64,45 +55,34 @@ vec4 getImageValue(vec3 voxelCoords) {
     data.annotation = focusValue;
   }
 
-  vec3 volumeCoords = (voxelCoords + 0.5) / uVoxelCount;
-
-  vec4 outputValue = transferFunction(data, volumeCoords);
+  vec4 outputValue = transferFunction(data, uv);
 
   return vec4(outputValue.a);
 }
 
 void main() {
-  vec2 sliceSize = vec2(1.0) / uAtlasGrid;
-  vec2 sliceOffset = floor(vUv / sliceSize);
-  float zSlice = uAtlasGrid.x * sliceOffset.y + sliceOffset.x;
-
-  if (zSlice >= uVoxelCount.z) {
-    gl_FragColor = vec4(vec3(0.0), 1.0);
-    return;
-  }
-
-  vec2 offsetInSlice = fract(vUv / sliceSize);
-
-  vec3 voxelCoords = vec3(offsetInSlice * uVoxelCount.xy, zSlice);
+  vec3 uv = vec3(vUv, (uSlice + 0.5) / uSize.z);
 
   if(uTransferFunction == 2) {
-    vec3 coneSpaceCoordinates = transformToCutawaySpace((voxelCoords + 0.5) / uVoxelCount);
+    vec3 coneSpaceCoordinates = transformToCutawaySpace(uv);
     float coneDist = sdCone(coneSpaceCoordinates, uConeAngle);
     if (coneDist > -CONE_EDGE && coneDist < CONE_EDGE) {
       // TODO: Compute the normal of the cone surface here.
-      gl_FragColor = vec4(0.0);
+      pc_FragColor = vec4(0.0);
       return;
     }
   }
 
-  vec4 upX = getImageValue(vec3(min(uVoxelCount.x - 1.0, voxelCoords.x + 1.0), voxelCoords.yz));
-  vec4 downX = getImageValue(vec3(max(0.0, voxelCoords.x - 1.0), voxelCoords.yz));
+  @import ../utils/neighbor-uvs;
 
-  vec4 upY = getImageValue(vec3(voxelCoords.x, min(uVoxelCount.y - 1.0, voxelCoords.y + 1.0), voxelCoords.z));
-  vec4 downY = getImageValue(vec3(voxelCoords.x, max(0.0, voxelCoords.y - 1.0), voxelCoords.z));
+  vec4 upX = getImageValue(vec3(min(1.0, uvR.x), uvR.yz));
+  vec4 downX = getImageValue(vec3(max(0.0, uvL.x), uvL.yz));
 
-  vec4 upZ = getImageValue(vec3(voxelCoords.xy, min(uVoxelCount.z - 1.0, voxelCoords.z + 1.0)));
-  vec4 downZ = getImageValue(vec3(voxelCoords.xy, max(0.0, voxelCoords.z - 1.0)));
+  vec4 upY = getImageValue(vec3(uvU.x, min(1.0, uvU.y), uvU.z));
+  vec4 downY = getImageValue(vec3(uvD.x, max(0.0, uvD.y), uvD.z));
+
+  vec4 upZ = getImageValue(vec3(uvB.xy, min(1.0, uvB.z)));
+  vec4 downZ = getImageValue(vec3(uvF.xy, max(0.0, uvF.z)));
   
   vec3 up;
   vec3 down;
@@ -137,7 +117,7 @@ void main() {
     down.z = downZ.x;
   }
 
-  vec3 gradient = (up - down) / (mix(vec3(1.0), vec3(2.0), step(0.5, mod(voxelCoords, uVoxelCount - vec3(1.0)))) * uVoxelSpacing);
+  vec3 gradient = (up - down) / (2.0 * uVoxelSpacing);
 
   if (uGradientMode == 0) {
     gradient *= -1.0;
@@ -152,5 +132,5 @@ void main() {
   // TODO: Think about scaling by a bigger value, because the gradient tends to be rather small.
   float gradientScaleFactor = 2.0 * min(uVoxelSpacing.x, min(uVoxelSpacing.y, uVoxelSpacing.z)) / sqrt(float(uInputDimensions));
 
-  gl_FragColor = vec4(encodedGradient.xyz * gradientScaleFactor, encodedGradient.w);
+  pc_FragColor = vec4(encodedGradient.xyz * gradientScaleFactor, encodedGradient.w);
 }

@@ -9,6 +9,7 @@ import { observer } from "mobx-react-lite";
 import React, { useCallback, useState } from "react";
 import ReactDOM from "react-dom";
 import styled from "styled-components";
+import { importFilesToDocument } from "../../../import-handling";
 
 import { useStore } from "../../../app/root-store";
 import { DropSheetProps } from "./drop-sheet.props";
@@ -39,35 +40,17 @@ export const DropSheet: React.FC<DropSheetProps> = observer(
     const store = useStore();
 
     const [isLoadingFiles, setIsLoadingFiles] = useState(false);
-    const importFiles = useCallback(
-      (_files: FileList, event: React.DragEvent) => {
-        (async () => {
-          event.stopPropagation();
-          setIsLoadingFiles(true);
 
-          try {
-            const { items } = event.dataTransfer;
-            const promises: Promise<void>[] = [];
-            for (let fileIndex = 0; fileIndex < items.length; fileIndex++) {
-              const item = event.dataTransfer.items[fileIndex];
-              const entry = item?.webkitGetAsEntry();
-              const promise = store?.editor.activeDocument?.importFileSystemEntry(
-                entry,
-              );
-              if (promise) promises.push(promise);
-            }
-            await Promise.all(promises);
-          } catch (error) {
-            store?.setError({
-              titleTx: "import-error",
-              descriptionTx: (error as Error).message,
-            });
-          }
-          store?.editor.activeDocument?.finishBatchImport();
-          setIsLoadingFiles(false);
-          store?.editor.activeDocument?.tools.setIsCursorOverFloatingUI(false);
-          onDropCompleted();
-        })();
+    const importFiles = useCallback(
+      async (_files: FileList, event: React.DragEvent) => {
+        event.stopPropagation();
+        if (!store) return;
+        setIsLoadingFiles(true);
+        const { items } = event.dataTransfer;
+        importFilesToDocument(items, store, true);
+        setIsLoadingFiles(false);
+        store?.editor.activeDocument?.tools.setIsCursorOverFloatingUI(false);
+        onDropCompleted();
       },
       [onDropCompleted, store],
     );
@@ -87,11 +70,13 @@ export const DropSheet: React.FC<DropSheetProps> = observer(
     const modalRootRef = useModalRoot();
     const node = (
       <StyledOverlay onDrop={handleOutsideDrop} onDragOver={preventOutsideDrop}>
-        <StyledDropZone
-          isAlwaysVisible
-          labelTx={isLoadingFiles ? "loading" : "drop-file"}
-          onFileDrop={importFiles}
-        />
+        {!isLoadingFiles && (
+          <StyledDropZone
+            isAlwaysVisible
+            labelTx="drop-file"
+            onFileDrop={importFiles}
+          />
+        )}
       </StyledOverlay>
     );
 

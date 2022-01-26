@@ -4,19 +4,12 @@ uniform sampler2D uDataTexture;
 uniform sampler2D uRegionTexture;
 uniform vec2 uRegionSize;
 uniform float uThreshold;
-uniform float uSeed;
+uniform vec4 uSeed;
+uniform int uComponents;
 uniform vec2 uMinUv;
 uniform vec2 uMaxUv;
 
-const float two_over_three = 2.0 / 3.0;
-
-bool canGrowFrom(float ownData, float neighborData, float neighborRegion) {
-  return all(lessThan(vec3(
-      -neighborRegion,
-      abs(ownData - uSeed) * two_over_three - uThreshold,
-      abs(ownData - neighborData) - uThreshold),
-    vec3(0.0)));
-}
+@import ./can-grow-from;
 
 void main() {
   if(vUv.x < uMinUv.x || vUv.x > uMaxUv.x || vUv.y < uMinUv.y || vUv.y > uMaxUv.y) discard;
@@ -55,15 +48,15 @@ void main() {
 
   // For some reason this shader freezes on iPad if we use 7 or more bools for
   // one big || concatination. Using two bools which concat 4 bools each it works.
-  bool shouldGrow1 = canGrowFrom(data.x, dataN.x, regionN.x) ||
-    canGrowFrom(data.x, dataNE.x, regionNE.x) ||
-    canGrowFrom(data.x, dataE.x, regionE.x) ||
-    canGrowFrom(data.x, dataSE.x, regionSE.x);
+  bool shouldGrow1 = canGrowFrom(data, dataN, regionN.x) ||
+    canGrowFrom(data, dataNE, regionNE.x) ||
+    canGrowFrom(data, dataE, regionE.x) ||
+    canGrowFrom(data, dataSE, regionSE.x);
 
-  bool shouldGrow2 = canGrowFrom(data.x, dataS.x, regionS.x) ||
-    canGrowFrom(data.x, dataSW.x, regionSW.x) ||
-    canGrowFrom(data.x, dataW.x, regionW.x) ||
-    canGrowFrom(data.x, dataNW.x, regionNW.x);
+  bool shouldGrow2 = canGrowFrom(data, dataS, regionS.x) ||
+    canGrowFrom(data, dataSW, regionSW.x) ||
+    canGrowFrom(data, dataW, regionW.x) ||
+    canGrowFrom(data, dataNW, regionNW.x);
 
   if(!shouldGrow1 && !shouldGrow2 && region.x == 0.0) discard;
 

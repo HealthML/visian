@@ -8,7 +8,7 @@ import {
 } from "@visian/ui-shared";
 
 import { Tool } from "./tool";
-import { mutateAtlas } from "./utils";
+import { mutateTextureData } from "./utils";
 
 export class DilateErodeTool<N extends "dilate-erode" = "dilate-erode">
   extends Tool<N>
@@ -26,6 +26,7 @@ export class DilateErodeTool<N extends "dilate-erode" = "dilate-erode">
         labelTx: "dilate-erode",
         supportedViewModes: ["2D", "3D"],
         supportedLayerKinds: ["image"],
+        supportAnnotationsOnly: true,
       },
       document,
     );
@@ -38,18 +39,20 @@ export class DilateErodeTool<N extends "dilate-erode" = "dilate-erode">
     if (
       targetLayer &&
       this.document.activeLayer?.kind === "image" &&
-      this.document.activeLayer.isAnnotation
+      this.document.activeLayer.isAnnotation &&
+      this.document.activeLayer.isVisible
     ) {
       this.renderer.setTargetLayer(targetLayer as IImageLayer);
       this.renderer.render();
     } else {
       this.document.tools.setActiveTool(previousTool);
+      this.document.setShowLayerMenu(true);
     }
   }
 
   public submit = () => {
     const targetLayer = this.document.activeLayer;
-    mutateAtlas(
+    mutateTextureData(
       targetLayer as IImageLayer,
       () => this.renderer.flushToAnnotation(targetLayer as IImageLayer, true),
       this.document,

@@ -14,6 +14,10 @@ export class CrosshairTool<N extends "crosshair-tool"> extends Tool<N> {
     );
   }
 
+  public canActivate(): boolean {
+    return super.canActivate() && this.document.has3DLayers;
+  }
+
   public startAt(dragPoint: DragPoint): void {
     this.moveTo(dragPoint);
   }

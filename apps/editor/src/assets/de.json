@@ -17,6 +17,7 @@
   "return-who": "Zurück zu AI4H",
 
   "menu": "Menü",
+  "new-document": "Neues Dokument",
   "theme": "Farbschema",
   "dark": "Dunkel",
   "light": "Hell",
@@ -26,6 +27,13 @@
 
   "shortcuts": "Shortcuts",
 
+  "settings": "Einstellungen",
+  "voxel-data": "Voxel Daten",
+  "performance-mode": "Anzeigequalität",
+  "exclusive-segmentations": "Überlappungsfreie Segmentierungen",
+  "low": "Niedrig",
+  "high": "Hoch",
+
   "undo": "Rückgängig",
   "redo": "Wiederholen",
 
@@ -34,11 +42,15 @@
   "pixel-brush": "Pinsel (B)",
   "smart-brush": "Smarter Pinsel (S)",
   "bounded-smart-brush": "Begrenzter Smarter Pinsel (R)",
+  "bounded-smart-eraser": "Begrenzter Smarter Radierer",
   "smart-brush-3d": "3D Smarter Pinsel (D)",
   "smart-brush-3d-title": "3D Smarter Pinsel",
   "pixel-eraser": "Radierer (E)",
+  "smart-eraser": "Smarter Radierer",
   "outline-tool": "Umrandungswerkzeug (O)",
+  "outline-eraser": "Umrandungsradierer",
   "clear-slice": "Schicht leeren (Entf)",
+  "clear-image": "Bild leeren (Strg + Entf)",
   "fly-tool": "Flugsteuerung (F)",
   "plane-tool": "Ebenenwerkzeug (P)",
 
@@ -55,6 +67,10 @@
   "enable-plane": "Schnittebene nutzen",
   "render-plane": "Bild auf der Schnittebene anzeigen",
   "render-plane-annotations": "Annotationen anzeigen",
+  "measurement-tool": "Messungswerkzeug (L)",
+  "measurement-title": "Messung",
+  "measurement-length": "Länge",
+  "discard-measurement": "Messung verwerfen",
 
   "threshold-annotation": "Grenzwert Annotation (Strg + P)",
   "threshold-annotation-title": "Grenzwert Annotation",
@@ -69,7 +85,12 @@
   "discard-dilate-erode": "Verwerfen (Esc)",
   "submit-dilate-erode": "Anwenden (Enter)",
 
+  "data-model-outdated-alert": "Datenmodell veraltet. Zurücksetzen notwendig.",
+  "discard-current-document-confirmation": "Aktuelles Dokument verwerfen?",
+  "erase-application-data-confirmation": "Alle Anwendungsdaten löschen?",
+
   "layers": "Ebenen",
+  "base-image-layer": "Grund-Bildebene",
   "add-annotation-layer": "Neue Annotation hinzufügen",
   "no-layers": "Keine Ebenen geladen.",
   "untitled-layer": "Unbenannte Ebene",
@@ -91,6 +112,7 @@
   "side-views": "Seitenansichten",
   "on": "An",
   "off": "Aus",
+  "delay": "Verzögerung",
   "main-view-type": "Hauptansichtstyp",
   "contrast": "Kontrast",
   "brightness": "Helligkeit",
@@ -102,13 +124,24 @@
   "confirm-task-annotation-tooltip": "Bestätigen",
   "skip-task-annotation-tooltip": "Überspringen",
 
+  "browser-error": "Browserfehler",
+  "no-webgl-2-error": "Dieser Browser unterstützt WebGL 2 nicht. Um VISIAN auszuführen ist WebGL 2 notwendig. Bitte updaten Sie Ihren Browser oder nutzen Sie einen anderen Browser.",
+
   "import-error": "Importfehler",
   "image-mismatch-error": "Diese Datei passt nicht auf die schon geladenen.",
+  "image-mismatch-error-filename": "Die Datei \"{{fileName}}\" passt nicht auf die schon geladenen.",
   "image-loading-error": "Diese Datei scheint nicht unterstützt zu sein.",
   "remote-file-error": "Die angegebene Datei konnte nicht geladen werden.",
+  "image-too-large-error": "Ihr Browser unterstützt keine so großen Bilder.",
+
+  "server-import-error": "Beim Laden der Datei vom Server ist ein Fehler aufgetreten:  \"{{statusText}}\"",
 
   "export-error": "Exportfehler",
   "file-upload-error": "Die Datei konnte nicht hochgeladen werden.",
+
+  "tracking-data-mismatch-error": "Der Tracking-Log passt nicht zum geladenen Bild.",
+  "tracking-data-no-image-error": "Um einen Tracking-Log zu importieren muss bereits ein Bild geladen sein.",
+  "unsupported-json-error": "Die importierte JSON-Datei beinhaltet keinen Tracking-Log.",
 
   "3d-view": "3D Ansicht",
   "3d-view-tooltip": "3D Ansicht (4)",
@@ -140,5 +173,44 @@
   "lock-cone": "Kegel festhalten",
   "cone-angle": "Kegelwinkel",
 
-  "custom-tf-file": "Transferfunktionsbild"
+  "custom-tf-file": "Transferfunktionsbild",
+
+  "too-many-layers": "Zu viele Ebenen",
+  "too-many-layers-2d": "VISIAN kann auf ihrem Gerät auf Grund von Hardwarebeschränkungen nur {{count}} Ebenen anzeigen.",
+  "too-many-layers-3d": "Im 3D Modus kann VISIAN auf ihrem Gerät auf Grund von Hardwarebeschränkungen nur {{count}} Ebenen anzeigen.",
+  "squashed-layers-title": "Annotationen vereint",
+  "squashed-layers-import": "Die hochgeladene Datei enthält mehrere verschiedene Annotationen. Dadurch wären zu viele Annotationsebenen entstanden. VISIAN hat alle Annotationen zu einer Annotation vereint.",
+
+  "area": "Fläche",
+  "volume": "Volumen",
+  "calculate-area": "Fläche auf Schicht berechnen",
+  "calculate-volume": "Volumen berechnen",
+  "calculating": "Berechnen...",
+
+  "help": "Hilfe",
+  "unit": "Einheit",
+  "length-um": "μm",
+  "length-mm": "mm",
+  "length-m": "m",
+  "area-mm": "mm²",
+  "area-um": "μm²",
+  "area-m": "m²",
+  "volume-mm": "mm³",
+  "volume-um": "μm³",
+  "volume-m": "m³",
+  "copy": "Kopieren",
+
+  "info-unit": "Die Einheit ist in den Daten nicht immer spezifiziert. Bei medizinischen Daten wie MRT- und CT-Bildern handelt es sich meist um mm. Bei generischen Bilddaten wie PNG oder JPG Bildern handelt es sich lediglich um Pixel.",
+  "info-brush": "Der Pinsel ist das einfachste Malwerkzeug von VISIAN. Die Pinselgröße kann angepasst werden und mit Links- bzw. Rechtsklick kann gemalt und radiert werden.",
+  "info-smart-brush": "Der smarte Pinsel fürt Regiongrowing auf der aktuellen Schicht basierend auf den gemalten Strichen aus. Der Schwellwert kontrolliert, wie groß der Intensitäts- bzw. Farbunterschied zwischen benachbarten Pixeln/Voxeln sein darf, damit die Region noch wachsen kann. Ein größerer Schwellwert resultiert in einer größeren gewachsenen Region.",
+  "info-bounded-smart-brush": "Der begrenzte smarte Pinsel führt Live-Regiongrowing auf der aktuellen Schicht aus, während gemalt wird. Der Pixel in der Mitte funktioniert wie ein normaler Ein-Pixel-Pinsel. Die Region kann in der Begrenzung darum herum wachsen. Der Schwellwert kontrolliert, wie groß der Intensitäts- bzw. Farbunterschied zwischen benachbarten Pixeln/Voxeln sein darf, damit die Region noch wachsen kann. Ein größerer Schwellwert resultiert in einer größeren gewachsenen Region.",
+  "info-smart-brush-3d": "Der smarte 3D Pinsel führt 3D Regiongrowing basierend auf dem gesetzten Seed aus. Die gewachsene Region wird als Preview angezeigt und kann mit dem sich unten links öffnenden Fenster getuned werden. Wenn die Region getuned wurde, kann sie auf die aktuell aktive Annotationsebene angewendet werden. Der Schwellwert kontrolliert, wie groß der Intensitäts- bzw. Farbunterschied zwischen benachbarten Pixeln/Voxeln sein darf, damit die Region noch wachsen kann. Ein größerer Schwellwert resultiert in einer größeren gewachsenen Region.",
+  "info-adaptive-brush-size": "Die Pinselgröße kann sich adaptiv an den Zoom anpassen. Bei stärkerem Zoom wird die Pinselgröße kleiner, bei geringerem Zoom größer.",
+  "info-shading-mode": "Die Schattierung hilft, um Formen in der 3D-Ansicht zu besser zu erkennen. LAO ist empfohlen. Achtung: Die Schattierung kann dazu führen, dass Intensitätsdaten verfälscht dargestellt werden.",
+  "info-transfer-function": "Die Transferfunktion stellt ein, wie das Volumen dargestellt wird.",
+  "info-exclusive-segmentations": "Mit dieser Option kann sichergestellt werden, dass die Segmentierungsebenen sich nicht überlappen können. Dabei \"gewinnt\" immer die Ebene, die weiter oben im Ebenenstapel liegt. Das Resultat wird dann auch entsprechend exportiert.",
+  "info-voxel-data": "Die Voxeldaten des geladenen Bildes werden unten links im Editor angezeigt. Auf langsamerer Hardware kann das zu Performanceproblemen führen. In diesem Fall ist die Option \"Verzögerung\" empfohlen. Dann werden die Voxeldaten nur angezeigt, wenn die Maus nicht mehr bewegt wird.",
+  "info-performance-mode": "Die Anzeigequalität hat nur im 3D-Modus einen Effekt. Dort kann eine höhere Anzeigequalität zu Performanceproblemen führen. Auf langsamerer Hardware ist die niedrige Anzeigequalität empfohlen.",
+  "info-layer-stack": "Im Ebenenstapel können die Ebenen neu angeordnet (drag and drop) und versteckt werden. Ebenen, die weiter oben im Stapel erscheinen, werden über den anderen Ebenen in der 2D und 3D Ansicht angezeigt. Weitere Aktionen auf einer einzelnen Ebene sind über einen Rechtsklick auf die Ebene im Stapel erreichbar.",
+  "info-base-image-layer": "Die Daten der Grund-Bildebene werden für alle Regiongrowing Werkzeuge genutzt und (wenn die Voxeldatenanzeige aktiviert ist) unten links im Editorbildschirm angezeigt. Die Grund-Bildebene wird automatisch auf die unterste sichtbare Bildebene im Ebenenstapel gesetzt."
 }

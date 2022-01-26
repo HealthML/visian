@@ -1,7 +1,7 @@
 export const commonUniforms = {
   uCameraPosition: { value: [0, 0, 0] },
   uInputFirstDerivative: { value: null },
-  uInputSecondDerivative: { value: null },
+  // uInputSecondDerivative: { value: null },
   uStepSize: { value: 1 },
 
   uLayerData: { value: [] },
@@ -11,4 +11,6 @@ export const commonUniforms = {
 
   uActiveLayerData: { value: null },
   uRegionGrowingThreshold: { value: 0 },
+
+  uUseExclusiveSegmentations: { value: false },
 };

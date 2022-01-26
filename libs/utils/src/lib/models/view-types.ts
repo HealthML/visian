@@ -57,3 +57,9 @@ export const getViewTypeInitials = (viewType: ViewType) => {
       return "C";
   }
 };
+
+/**
+ * The minimum difference between voxel spacings that results in a new default
+ * view type.
+ */
+export const viewTypeDepthThreshold = 0.05;

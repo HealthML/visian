@@ -1,3 +1,4 @@
+import { Texture3DMaterial } from "@visian/rendering";
 import { IEditor } from "@visian/ui-shared";
 import { IDisposer } from "@visian/utils";
 import { reaction } from "mobx";
@@ -16,13 +17,13 @@ export enum GradientMode {
   Second = 2,
 }
 
-export class GradientMaterial extends THREE.ShaderMaterial {
+export class GradientMaterial extends Texture3DMaterial {
   private disposers: IDisposer[];
 
   constructor(
     editor: IEditor,
     private firstDerivativeTexture: THREE.Texture,
-    private secondDerivativeTexture: THREE.Texture,
+    // private secondDerivativeTexture: THREE.Texture,
     sharedUniforms: SharedUniforms,
   ) {
     super({
@@ -33,10 +34,11 @@ export class GradientMaterial extends THREE.ShaderMaterial {
         uInputDimensions: { value: 1 },
         uGradientMode: { value: GradientMode.Output },
       },
+      glslVersion: THREE.GLSL3,
     });
 
     this.uniforms.uInputFirstDerivative.value = firstDerivativeTexture;
-    this.uniforms.uInputSecondDerivative.value = secondDerivativeTexture;
+    // this.uniforms.uInputSecondDerivative.value = secondDerivativeTexture;
 
     this.disposers = [
       reaction(
@@ -53,14 +55,14 @@ export class GradientMaterial extends THREE.ShaderMaterial {
     ];
   }
 
-  public setGradientMode(mode: GradientMode) {
+  public setGradientMode(mode: GradientMode = GradientMode.Output) {
     this.uniforms.uGradientMode.value = mode;
 
     this.uniforms.uInputFirstDerivative.value =
       mode === GradientMode.First ? null : this.firstDerivativeTexture;
 
-    this.uniforms.uInputSecondDerivative.value =
-      mode === GradientMode.Second ? null : this.secondDerivativeTexture;
+    // this.uniforms.uInputSecondDerivative.value =
+    //   mode === GradientMode.Second ? null : this.secondDerivativeTexture;
   }
 
   public dispose() {
@@ -68,5 +70,3 @@ export class GradientMaterial extends THREE.ShaderMaterial {
     this.disposers.forEach((disposer) => disposer());
   }
 }
-
-export default GradientMaterial;

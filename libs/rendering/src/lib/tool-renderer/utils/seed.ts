@@ -1,16 +1,15 @@
 import { IDocument } from "@visian/ui-shared";
-import { IDisposable, IDisposer, Voxel } from "@visian/utils";
+import { IDisposable, IDisposer, Pixel } from "@visian/utils";
 import * as THREE from "three";
 import { SeedCamera } from "./seed-camera";
-import { SeedMaterial } from "./seed-material";
 
 export class Seed extends THREE.Scene implements IDisposable {
   public camera: SeedCamera;
 
   private geometry: THREE.BufferGeometry;
-  private material: SeedMaterial;
+  private points: THREE.Points;
 
-  private workingVector = new THREE.Vector3();
+  private workingVector = new THREE.Vector2();
 
   private disposers: IDisposer[] = [];
 
@@ -22,20 +21,23 @@ export class Seed extends THREE.Scene implements IDisposable {
     this.geometry = new THREE.BufferGeometry().setFromPoints([
       this.workingVector,
     ]);
-    this.material = new SeedMaterial(document);
 
-    const points = new THREE.Points(this.geometry, this.material);
-    points.frustumCulled = false;
-    this.add(points);
+    this.points = new THREE.Points(
+      this.geometry,
+      new THREE.PointsMaterial({ size: 0.5 }),
+    );
+    this.add(this.points);
   }
 
   public dispose() {
     this.disposers.forEach((disposer) => disposer());
     this.camera.dispose();
+    this.geometry.dispose();
+    (this.points.material as THREE.PointsMaterial).dispose();
   }
 
-  public setPosition(voxel: Voxel) {
-    this.workingVector.set(voxel.x, voxel.y, voxel.z);
+  public setPosition(pixel: Pixel) {
+    this.workingVector.set(pixel.x, pixel.y);
     this.geometry.setFromPoints([this.workingVector]);
   }
 }

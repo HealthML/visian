@@ -4,6 +4,7 @@ import {
   IImageLayer,
 } from "@visian/ui-shared";
 import { action, makeObservable, observable } from "mobx";
+import * as THREE from "three";
 
 import { RenderedImage } from "../rendered-image";
 import { dilateErodeFragmentShader, dilateErodeVertexShader } from "../shaders";
@@ -20,8 +21,10 @@ export class DilateErodeRenderer3D
     super(document, {
       vertexShader: dilateErodeVertexShader,
       fragmentShader: dilateErodeFragmentShader,
+      uniforms: { uShouldErode: { value: false } },
+      glslVersion: THREE.GLSL3,
     });
-    this.material.uniforms.uShouldErode = { value: this.shouldErode };
+
     this.maxSteps = 1;
 
     makeObservable(this, {
@@ -62,13 +65,11 @@ export class DilateErodeRenderer3D
     }
   };
 
-  public get outputTextures() {
+  public get outputTexture() {
     return this.maxSteps === 0 && this.targetLayer
-      ? this.renderTargets.map((_renderTarget, rendererIndex) =>
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          (this.targetLayer!.image as RenderedImage).getTexture(rendererIndex),
-        )
-      : super.outputTextures;
+      ? // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        (this.targetLayer!.image as RenderedImage).getTexture()
+      : super.outputTexture;
   }
 
   public discard() {

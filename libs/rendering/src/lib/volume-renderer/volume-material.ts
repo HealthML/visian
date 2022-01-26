@@ -20,7 +20,7 @@ export class VolumeMaterial
     editor: IEditor,
     sharedUniforms: SharedUniforms,
     firstDerivative: THREE.Texture,
-    secondDerivative: THREE.Texture,
+    // secondDerivative: THREE.Texture,
     outputDerivative: THREE.Texture,
     lao: THREE.Texture,
   ) {
@@ -32,18 +32,20 @@ export class VolumeMaterial
         uOutputFirstDerivative: { value: null },
         uLAO: { value: null },
         uUseRayDithering: { value: true },
+        uRayDitheringOffset: { value: 0 },
       },
       defines: {
         MAX_STEPS: 600,
       },
       transparent: true,
+      glslVersion: THREE.GLSL3,
     });
 
     // Always render the back faces.
     this.side = THREE.BackSide;
 
     this.uniforms.uInputFirstDerivative.value = firstDerivative;
-    this.uniforms.uInputSecondDerivative.value = secondDerivative;
+    // this.uniforms.uInputSecondDerivative.value = secondDerivative;
     this.uniforms.uOutputFirstDerivative.value = outputDerivative;
     this.uniforms.uLAO.value = lao;
 
@@ -77,6 +79,10 @@ export class VolumeMaterial
   public setUseRayDithering(value: boolean) {
     this.uniforms.uUseRayDithering.value = value;
   }
+
+  public setRayDitheringOffset(value = 0) {
+    this.uniforms.uRayDitheringOffset.value = value;
+  }
 }
 
 export class VolumePickingMaterial extends VolumeMaterial {
@@ -84,7 +90,7 @@ export class VolumePickingMaterial extends VolumeMaterial {
     editor: IEditor,
     sharedUniforms: SharedUniforms,
     firstDerivative: THREE.Texture,
-    secondDerivative: THREE.Texture,
+    // secondDerivative: THREE.Texture,
     outputDerivative: THREE.Texture,
     lao: THREE.Texture,
   ) {
@@ -92,7 +98,7 @@ export class VolumePickingMaterial extends VolumeMaterial {
       editor,
       sharedUniforms,
       firstDerivative,
-      secondDerivative,
+      // secondDerivative,
       outputDerivative,
       lao,
     );

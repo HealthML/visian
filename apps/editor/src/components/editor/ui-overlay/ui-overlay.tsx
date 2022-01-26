@@ -1,5 +1,6 @@
 import {
   AbsoluteCover,
+  FlexRow,
   FloatingUIButton,
   Notification,
   Spacer,
@@ -16,6 +17,7 @@ import {
   DilateErodeModal,
   SmartBrush3DModal,
   ThresholdAnnotationModal,
+  MeasurementModal,
 } from "../action-modal";
 import { AIBar } from "../ai-bar";
 import { AxesAndVoxel } from "../axes-and-voxel";
@@ -33,6 +35,8 @@ import { TopConsole } from "../top-console";
 import { UndoRedoButtons } from "../undo-redo-buttons";
 import { ViewSettings } from "../view-settings";
 import { UIOverlayProps } from "./ui-overlay.props";
+import { SettingsPopUp } from "../settings-popup";
+import { MeasurementPopUp } from "../measurement-popup";
 
 const Container = styled(AbsoluteCover)`
   align-items: stretch;
@@ -48,6 +52,11 @@ const StartTextContainer = styled(AbsoluteCover)`
   display: flex;
   justify-content: center;
   opacity: 0.4;
+`;
+
+const StartText = styled(Text)`
+  max-width: 50%;
+  text-align: center;
 `;
 
 const ColumnLeft = styled.div`
@@ -95,6 +104,21 @@ const ErrorNotification = styled(Notification)`
   transform: translateX(-50%);
 `;
 
+const AxesSpacer = styled(Spacer)`
+  position: relative;
+`;
+
+const Axes3D = styled.div`
+  position: absolute;
+  bottom: -5px;
+  left: -5px;
+`;
+
+const ModalRow = styled(FlexRow)`
+  gap: 20px;
+  align-items: flex-end;
+`;
+
 export const UIOverlay = observer<UIOverlayProps>(
   ({ isDraggedOver, onDropCompleted, ...rest }) => {
     const store = useStore();
@@ -108,6 +132,15 @@ export const UIOverlay = observer<UIOverlayProps>(
         store?.setRef("uiOverlay");
       };
     }, [store, containerRef]);
+
+    const axes3dRef = useRef<HTMLDivElement>(null);
+    useEffect(() => {
+      store?.setRef("axes3D", axes3dRef);
+
+      return () => {
+        store?.setRef("axes3D");
+      };
+    }, [store, axes3dRef]);
 
     const enterFloatingUI = useCallback(() => {
       store?.editor.activeDocument?.tools.setIsCursorOverFloatingUI(true);
@@ -136,7 +169,18 @@ export const UIOverlay = observer<UIOverlayProps>(
     }, []);
     const closeShortcutPopUp = useCallback(() => {
       setIsShortcutPopUpOpen(false);
+      store?.editor.activeDocument?.tools.setIsCursorOverFloatingUI(false);
+    }, [store]);
+
+    // Settings Pop Up Toggling
+    const [isSettingsPopUpOpen, setIsSettingsPopUpOpen] = useState(false);
+    const openSettingsPopUp = useCallback(() => {
+      setIsSettingsPopUpOpen(true);
     }, []);
+    const closeSettingsPopUp = useCallback(() => {
+      setIsSettingsPopUpOpen(false);
+      store?.editor.activeDocument?.tools.setIsCursorOverFloatingUI(false);
+    }, [store]);
 
     // Export Button
     const exportZip = useCallback(() => {
@@ -158,84 +202,115 @@ export const UIOverlay = observer<UIOverlayProps>(
       >
         {!store?.editor.activeDocument?.layers.length && (
           <StartTextContainer>
-            <Text tx="start" />
+            <StartText
+              tx={store?.editor.isAvailable ? "start" : "no-webgl-2-error"}
+            />
           </StartTextContainer>
         )}
-        <ColumnLeft>
-          <MenuRow>
-            {isFromWHO() ? (
-              <a href={whoHome}>
-                <ImportButton
-                  icon="whoAI"
-                  tooltipTx="return-who"
-                  tooltipPosition="right"
-                  isActive={false}
-                />
-              </a>
+        {store?.editor.isAvailable && (
+          <>
+            <ColumnLeft>
+              <MenuRow>
+                {isFromWHO() ? (
+                  <a href={whoHome}>
+                    <ImportButton
+                      icon="whoAI"
+                      tooltipTx="return-who"
+                      tooltipPosition="right"
+                      isActive={false}
+                    />
+                  </a>
+                ) : (
+                  <ImportButton
+                    icon="import"
+                    tooltipTx="import-tooltip"
+                    tooltipPosition="right"
+                    isActive={false}
+                    onPointerDown={openImportPopUp}
+                  />
+                )}
+                <UndoRedoButtons />
+              </MenuRow>
+              <Menu
+                onOpenShortcutPopUp={openShortcutPopUp}
+                onOpenSettingsPopUp={openSettingsPopUp}
+              />
+              <Toolbar />
+              <Layers />
+              <AxesSpacer>
+                <Axes3D ref={axes3dRef} />
+              </AxesSpacer>
+              <ModalRow>
+                <SmartBrush3DModal />
+                <ThresholdAnnotationModal />
+                <DilateErodeModal />
+                <MeasurementModal />
+                <AxesAndVoxel />
+              </ModalRow>
+            </ColumnLeft>
+            <ColumnCenter>
+              <TopConsole />
+            </ColumnCenter>
+            <ColumnRight>
+              <SideViews />
+              <RightBar>
+                {!isFromWHO() && (
+                  <FloatingUIButton
+                    icon="export"
+                    tooltipTx="export-tooltip"
+                    tooltipPosition="left"
+                    onPointerDown={
+                      store?.editor.activeDocument?.viewSettings.viewMode ===
+                      "2D"
+                        ? exportZip
+                        : store?.editor.activeDocument?.viewport3D
+                            .exportCanvasImage
+                    }
+                    isActive={false}
+                  />
+                )}
+                <ViewSettings />
+                <SliceSlider showValueLabelOnChange={!isDraggedOver} />
+              </RightBar>
+            </ColumnRight>
+
+            {isFromWHO() && <AIBar />}
+
+            <SettingsPopUp
+              isOpen={isSettingsPopUpOpen}
+              onClose={closeSettingsPopUp}
+            />
+            <ShortcutPopUp
+              isOpen={isShortcutPopUpOpen}
+              onClose={closeShortcutPopUp}
+            />
+            {store?.dicomWebServer ? (
+              <ServerPopUp
+                isOpen={isImportPopUpOpen}
+                onClose={closeImportPopUp}
+              />
             ) : (
-              <ImportButton
-                icon="import"
-                tooltipTx="import-tooltip"
-                tooltipPosition="right"
-                isActive={false}
-                onPointerDown={openImportPopUp}
+              <ImportPopUp
+                isOpen={isImportPopUpOpen}
+                onClose={closeImportPopUp}
               />
             )}
-            <UndoRedoButtons />
-          </MenuRow>
-
-          <Menu onOpenShortcutPopUp={openShortcutPopUp} />
-          <Toolbar />
-          <Layers />
-          <Spacer />
-          <AxesAndVoxel />
-
-          <SmartBrush3DModal />
-          <ThresholdAnnotationModal />
-          <DilateErodeModal />
-        </ColumnLeft>
-        <ColumnCenter>
-          <TopConsole />
-        </ColumnCenter>
-        <ColumnRight>
-          <SideViews />
-          <RightBar>
-            {!isFromWHO() && (
-              <FloatingUIButton
-                icon="export"
-                tooltipTx="export-tooltip"
-                tooltipPosition="left"
-                onPointerDown={
-                  store?.editor.activeDocument?.viewSettings.viewMode === "2D"
-                    ? exportZip
-                    : store?.editor.activeDocument?.viewport3D.exportCanvasImage
-                }
-                isActive={false}
+            <MeasurementPopUp
+              isOpen={Boolean(
+                store?.editor.activeDocument?.measurementDisplayLayer,
+              )}
+              onClose={store?.editor.activeDocument?.setMeasurementDisplayLayer}
+            />
+            {isDraggedOver && <DropSheet onDropCompleted={onDropCompleted} />}
+            {store?.progress && (
+              <ProgressPopUp
+                label={store.progress.label}
+                labelTx={store.progress.labelTx}
+                progress={store.progress.progress}
+                showSplash={store.progress.showSplash}
               />
             )}
-            <ViewSettings />
-            <SliceSlider showValueLabelOnChange={!isDraggedOver} />
-          </RightBar>
-        </ColumnRight>
-
-        {isFromWHO() && <AIBar />}
-
-        <ShortcutPopUp
-          isOpen={isShortcutPopUpOpen}
-          onClose={closeShortcutPopUp}
-        />
-        {store?.dicomWebServer ? (
-          <ServerPopUp isOpen={isImportPopUpOpen} onClose={closeImportPopUp} />
-        ) : (
-          <ImportPopUp isOpen={isImportPopUpOpen} onClose={closeImportPopUp} />
-        )}
-        {isDraggedOver && <DropSheet onDropCompleted={onDropCompleted} />}
-        {store?.progress && (
-          <ProgressPopUp
-            label={store.progress.label}
-            labelTx={store.progress.labelTx}
-            progress={store.progress.progress}
-          />
+          </>
         )}
         {store?.error && (
           <ErrorNotification
@@ -243,6 +318,7 @@ export const UIOverlay = observer<UIOverlayProps>(
             titleTx={store?.error.titleTx}
             description={store?.error.description}
             descriptionTx={store?.error.descriptionTx}
+            descriptionData={store?.error.descriptionData}
           />
         )}
       </Container>
