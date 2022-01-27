@@ -72,6 +72,12 @@
   "measurement-length": "Länge",
   "discard-measurement": "Messung verwerfen",
 
+  "threshold-annotation": "Grenzwert Annotation (Strg + P)",
+  "threshold-annotation-title": "Grenzwert Annotation",
+  "threshold-annotation-threshold": "Grenzwerte",
+  "discard-threshold-annotation": "Verwerfen (Esc)",
+  "submit-threshold-annotation": "Anwenden (Enter)",
+
   "dilate-erode": "Erweitern/Erodieren (Strg + D)",
   "dilate-erode-title": "Erweitern/Erodieren",
   "dilate-erode-steps": "Schritte",

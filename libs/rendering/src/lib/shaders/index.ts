@@ -28,5 +28,7 @@ export { default as sliceFragmentShader } from "./slice/slice.frag.glsl";
 export { default as sliceVertexShader } from "./slice/slice.vert.glsl";
 export { default as volumeFragmentShader } from "./volume/volume.frag.glsl";
 export { default as volumeVertexShader } from "./volume/volume.vert.glsl";
+export { default as thresholdAnnotationFragmentShader } from "./threshold-annotation/threshold-annotation.frag.glsl";
+export { default as thresholdAnnotationVertexShader } from "./threshold-annotation/threshold-annotation.vert.glsl";
 
 export * from "./compose-layered-shader";
