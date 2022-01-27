@@ -20,3 +20,5 @@ export enum MergeFunction {
   Add = 1,
   Subtract = 2,
 }
+
+export type Histogram = [number[], number, number];

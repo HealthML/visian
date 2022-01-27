@@ -36,6 +36,7 @@ export class DensityTransferFunction extends TransferFunction<"density"> {
             max: 1,
             onBeforeValueChange: () =>
               document.viewport3D?.onTransferFunctionChange(),
+            getHistogram: () => document.mainImageLayer?.densityHistogram,
           }) as Parameter<unknown>,
         ],
       },

@@ -3,7 +3,8 @@ import { IEditor } from "@visian/ui-shared";
 import { IDisposable, Vector, ViewType } from "@visian/utils";
 import { autorun, IReactionDisposer } from "mobx";
 import * as THREE from "three";
-import { ImageRenderTarget } from "../../../rendered-image";
+import { ImageRenderTarget, TextureAdapter } from "../../../rendered-image";
+import { generateHistogram } from "../histogram";
 
 import { SharedUniforms } from "../shared-uniforms";
 import { GradientMaterial, GradientMode } from "./gradient-material";
@@ -141,32 +142,33 @@ export class GradientComputer implements IDisposable {
     this.gradientMaterial.setGradientMode();
 
     this.firstDerivativeDirty = false;
-    // const buffer = new Uint8Array(
-    //   this.firstDerivativeRenderTarget.width *
-    //     this.firstDerivativeRenderTarget.height *
-    //     4,
-    // );
-    // this.renderer.readRenderTargetPixels(
-    //   this.firstDerivativeRenderTarget,
-    //   0,
-    //   0,
-    //   this.firstDerivativeRenderTarget.width,
-    //   this.firstDerivativeRenderTarget.height,
-    //   buffer,
-    // );
+
+    if (this.editor.activeDocument?.mainImageLayer) {
+      const textureAdapter = new TextureAdapter(
+        this.editor.activeDocument?.mainImageLayer.image,
+      );
+
+      const buffer = textureAdapter.readImage(
+        this.renderer,
+        this.firstDerivativeRenderTarget.texture,
+      );
+
+      textureAdapter.dispose();
+
+      const gradientMagnitudes: number[] = [];
+
+      const workingVector = new THREE.Vector3();
+      for (let i = 0; i < buffer.length; i += 4) {
+        workingVector.set(buffer[i], buffer[i + 1], buffer[i + 2]);
+        gradientMagnitudes.push(workingVector.length());
+      }
+
+      this.editor.activeDocument?.mainImageLayer?.setGradientHistogram(
+        generateHistogram(gradientMagnitudes),
+      );
+    }
 
     this.renderer.xr.enabled = isXrEnabled;
-
-    // TODO: Histogram
-    // const gradientMagnitudes = [];
-    // const workingVector = new THREE.Vector3();
-    // for (let i = 0; i < buffer.length; i += 4) {
-    //   workingVector.set(buffer[i], buffer[i + 1], buffer[i + 2]);
-    //   gradientMagnitudes.push(workingVector.length());
-    // }
-    // this.volumeRenderer.model.setGradientHistogram(
-    //   generateHistogram(gradientMagnitudes),
-    // );
 
     this.editor.volumeRenderer?.lazyRender(true);
   }

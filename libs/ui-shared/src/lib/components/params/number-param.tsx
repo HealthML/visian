@@ -29,6 +29,7 @@ export const NumberParam: React.FC<Partial<NumberParamProps>> = ({
   onBeforeValueChange,
   kind,
   name,
+  getHistogram,
   ...rest
 }) => (
   <SpacedSliderField
@@ -42,6 +43,7 @@ export const NumberParam: React.FC<Partial<NumberParamProps>> = ({
     stepSize={stepSize}
     unlockValueLabelRange={extendBeyondMinMax}
     value={value}
+    histogram={getHistogram?.()}
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onChange={setValue as any}
   />
