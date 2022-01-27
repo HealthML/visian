@@ -3,8 +3,7 @@ import { IEditor } from "@visian/ui-shared";
 import { IDisposable, Vector, ViewType } from "@visian/utils";
 import { autorun, IReactionDisposer } from "mobx";
 import * as THREE from "three";
-import { ImageRenderTarget, TextureAdapter } from "../../../rendered-image";
-import { generateHistogram } from "../histogram";
+import { ImageRenderTarget } from "../../../rendered-image";
 
 import { SharedUniforms } from "../shared-uniforms";
 import { GradientMaterial, GradientMode } from "./gradient-material";
@@ -142,31 +141,6 @@ export class GradientComputer implements IDisposable {
     this.gradientMaterial.setGradientMode();
 
     this.firstDerivativeDirty = false;
-
-    if (this.editor.activeDocument?.mainImageLayer) {
-      const textureAdapter = new TextureAdapter(
-        this.editor.activeDocument?.mainImageLayer.image,
-      );
-
-      const buffer = textureAdapter.readImage(
-        this.renderer,
-        this.firstDerivativeRenderTarget.texture,
-      );
-
-      textureAdapter.dispose();
-
-      const gradientMagnitudes: number[] = [];
-
-      const workingVector = new THREE.Vector3();
-      for (let i = 0; i < buffer.length; i += 4) {
-        workingVector.set(buffer[i], buffer[i + 1], buffer[i + 2]);
-        gradientMagnitudes.push(workingVector.length());
-      }
-
-      this.editor.activeDocument?.mainImageLayer?.setGradientHistogram(
-        generateHistogram(gradientMagnitudes),
-      );
-    }
 
     this.renderer.xr.enabled = isXrEnabled;
 
