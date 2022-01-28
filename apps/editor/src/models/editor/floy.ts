@@ -100,49 +100,67 @@ export class FloyDemoController implements ISerializable<FloyDemoSnapshot> {
         new Uint8Array(await firstFile.arrayBuffer()),
       );
       console.log(
-        "Filtered, if not MR: ",
-        dataSet.string("x00080060") !== "MR",
+        "Filtered, if not MR:",
         dataSet.string("x00080060"),
+        "(",
+        dataSet.string("x00080060") !== "MR",
+        ")",
       );
       console.log(
-        "Filtered, if km: ",
+        "Filtered, if km:",
+        dataSet.string("x0008103e").toLowerCase(),
+        "(",
         dataSet.string("x0008103e").toLowerCase().includes("km"),
-        dataSet.string("x0008103e").toLowerCase(),
+        ")",
       );
       console.log(
-        "Filtered, if flair: ",
+        "Filtered, if flair:",
+        dataSet.string("x0008103e").toLowerCase(),
+        "(",
         dataSet.string("x0008103e").toLowerCase().includes("flair"),
-        dataSet.string("x0008103e").toLowerCase(),
+        ")",
       );
       console.log(
-        "Filtered, if water: ",
+        "Filtered, if water:",
+        dataSet.string("x0008103e").toLowerCase(),
+        "(",
         dataSet.string("x0008103e").toLowerCase().includes("water"),
-        dataSet.string("x0008103e").toLowerCase(),
+        ")",
       );
       console.log(
-        "Filtered, if fat: ",
+        "Filtered, if fat:",
+        dataSet.string("x0008103e").toLowerCase(),
+        "(",
         dataSet.string("x0008103e").toLowerCase().includes("fat"),
-        dataSet.string("x0008103e").toLowerCase(),
+        ")",
       );
       console.log(
-        "Filtered, if inphase: ",
+        "Filtered, if inphase:",
+        dataSet.string("x0008103e").toLowerCase(),
+        "(",
         dataSet.string("x0008103e").toLowerCase().includes("inphase"),
-        dataSet.string("x0008103e").toLowerCase(),
+        ")",
       );
       console.log(
-        "Filtered, if not sag: ",
+        "Filtered, if not sag:",
+        dataSet.string("x0008103e").toLowerCase(),
+        "(",
         !dataSet.string("x0008103e").toLowerCase().includes("sag"),
-        dataSet.string("x0008103e").toLowerCase(),
+        ")",
       );
       console.log(
-        "Filtered, if not contains t1: ",
+        "Filtered, if not contains t1:",
+        dataSet.string("x0008103e").toLowerCase(),
+        "(",
         !dataSet.string("x0008103e").toLowerCase().includes("t1"),
-        dataSet.string("x0008103e").toLowerCase(),
+        ")",
       );
       console.log(
-        "Filtered, if manufacturer is Floy: ", // to filter floy result slices
-        dataSet.string("x00080070").toLowerCase().includes("floy"),
+        "Filtered, if floy:", // to filter floy result slices
         dataSet.string("x00080070").toLowerCase(),
+        "(",
+        dataSet.string("x00080070").toLowerCase().includes("floy"),
+        ")",
       );
       if (
         dataSet.string("x00080060") !== "MR" ||

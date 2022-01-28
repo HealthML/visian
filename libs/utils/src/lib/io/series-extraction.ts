@@ -21,6 +21,7 @@ export const extractSeriesFromFiles = async (
   if (Array.isArray(filteredFiles)) {
     if (
       filteredFiles.some((file) => path.extname(file.name) !== ".dcm") &&
+      filteredFiles.some((file) => path.extname(file.name) !== ".DCM") &&
       filteredFiles.some((file) => path.extname(file.name) !== "")
     ) {
       // Not a single DICOM series --> Handle files individually

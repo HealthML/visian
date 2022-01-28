@@ -570,6 +570,7 @@ export class Document
 
       if (
         filteredFiles.some((file) => path.extname(file.name) !== ".dcm") &&
+        filteredFiles.some((file) => path.extname(file.name) !== ".DCM") &&
         filteredFiles.some((file) => path.extname(file.name) !== "")
       ) {
         const promises: Promise<string | void>[] = [];
