@@ -112,6 +112,38 @@ export class FloyDemoController implements ISerializable<FloyDemoSnapshot> {
         // Alternative: https://stackoverflow.com/questions/34782409/understanding-dicom-image-attributes-to-get-axial-coronal-sagittal-cuts
         // TODO: No contrast agent
       ) {
+        console.log(
+          "Filtered, if not MR: ",
+          dataSet.string("x00080060") !== "MR",
+        );
+        console.log(
+          "Filtered, if contains km: ",
+          dataSet.string("x0008103e").toLowerCase().includes("km"),
+        );
+        console.log(
+          "Filtered, if contains flair: ",
+          dataSet.string("x0008103e").toLowerCase().includes("flair"),
+        );
+        console.log(
+          "Filtered, if contains water: ",
+          dataSet.string("x0008103e").toLowerCase().includes("water"),
+        );
+        console.log(
+          "Filtered, if caintains fat: ",
+          dataSet.string("x0008103e").toLowerCase().includes("fat"),
+        );
+        console.log(
+          "Filtered, if contains inphase: ",
+          dataSet.string("x0008103e").toLowerCase().includes("inphase"),
+        );
+        console.log(
+          "Filtered, if not contains sag: ",
+          dataSet.string("x0008103e").toLowerCase().includes("sag"),
+        );
+        console.log(
+          "Filtered, if not contains t1: ",
+          dataSet.string("x0008103e").toLowerCase().includes("t1"),
+        );
         return false;
       }
     } catch {
