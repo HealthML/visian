@@ -88,6 +88,7 @@ export class FloyDemoController implements ISerializable<FloyDemoSnapshot> {
     // Only accept DICOM
     if (
       path.extname(firstFile.name) !== ".dcm" &&
+      path.extname(firstFile.name) !== ".DCM" &&
       path.extname(firstFile.name) !== ""
     ) {
       return false;
@@ -97,6 +98,46 @@ export class FloyDemoController implements ISerializable<FloyDemoSnapshot> {
     try {
       const dataSet = dicomParser.parseDicom(
         new Uint8Array(await firstFile.arrayBuffer()),
+      );
+      console.log(
+        "Filtered, if not MR: ",
+        dataSet.string("x00080060") !== "MR",
+        dataSet.string("x00080060"),
+      );
+      console.log(
+        "Filtered, if km: ",
+        dataSet.string("x0008103e").toLowerCase().includes("km"),
+        dataSet.string("x0008103e").toLowerCase(),
+      );
+      console.log(
+        "Filtered, if flair: ",
+        dataSet.string("x0008103e").toLowerCase().includes("flair"),
+        dataSet.string("x0008103e").toLowerCase(),
+      );
+      console.log(
+        "Filtered, if water: ",
+        dataSet.string("x0008103e").toLowerCase().includes("water"),
+        dataSet.string("x0008103e").toLowerCase(),
+      );
+      console.log(
+        "Filtered, if fat: ",
+        dataSet.string("x0008103e").toLowerCase().includes("fat"),
+        dataSet.string("x0008103e").toLowerCase(),
+      );
+      console.log(
+        "Filtered, if inphase: ",
+        dataSet.string("x0008103e").toLowerCase().includes("inphase"),
+        dataSet.string("x0008103e").toLowerCase(),
+      );
+      console.log(
+        "Filtered, if not sag: ",
+        !dataSet.string("x0008103e").toLowerCase().includes("sag"),
+        dataSet.string("x0008103e").toLowerCase(),
+      );
+      console.log(
+        "Filtered, if not contains t1: ",
+        !dataSet.string("x0008103e").toLowerCase().includes("t1"),
+        dataSet.string("x0008103e").toLowerCase(),
       );
       if (
         dataSet.string("x00080060") !== "MR" ||
@@ -110,40 +151,7 @@ export class FloyDemoController implements ISerializable<FloyDemoSnapshot> {
         // parsedDicom.string("x00180015") !== "LSPINE" ||
         // eslint-disable-next-line max-len
         // Alternative: https://stackoverflow.com/questions/34782409/understanding-dicom-image-attributes-to-get-axial-coronal-sagittal-cuts
-        // TODO: No contrast agent
       ) {
-        console.log(
-          "Filtered, if not MR: ",
-          dataSet.string("x00080060") !== "MR",
-        );
-        console.log(
-          "Filtered, if contains km: ",
-          dataSet.string("x0008103e").toLowerCase().includes("km"),
-        );
-        console.log(
-          "Filtered, if contains flair: ",
-          dataSet.string("x0008103e").toLowerCase().includes("flair"),
-        );
-        console.log(
-          "Filtered, if contains water: ",
-          dataSet.string("x0008103e").toLowerCase().includes("water"),
-        );
-        console.log(
-          "Filtered, if caintains fat: ",
-          dataSet.string("x0008103e").toLowerCase().includes("fat"),
-        );
-        console.log(
-          "Filtered, if contains inphase: ",
-          dataSet.string("x0008103e").toLowerCase().includes("inphase"),
-        );
-        console.log(
-          "Filtered, if not contains sag: ",
-          dataSet.string("x0008103e").toLowerCase().includes("sag"),
-        );
-        console.log(
-          "Filtered, if not contains t1: ",
-          dataSet.string("x0008103e").toLowerCase().includes("t1"),
-        );
         return false;
       }
     } catch {
