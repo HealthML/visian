@@ -139,6 +139,11 @@ export class FloyDemoController implements ISerializable<FloyDemoSnapshot> {
         !dataSet.string("x0008103e").toLowerCase().includes("t1"),
         dataSet.string("x0008103e").toLowerCase(),
       );
+      console.log(
+        "Filtered, if manufacturer is Floy: ", // to filter floy result slices
+        dataSet.string("x00080070").toLowerCase().includes("floy"),
+        dataSet.string("x00080070").toLowerCase(),
+      );
       if (
         dataSet.string("x00080060") !== "MR" ||
         dataSet.string("x0008103e").toLowerCase().includes("km") ||
@@ -147,7 +152,8 @@ export class FloyDemoController implements ISerializable<FloyDemoSnapshot> {
         dataSet.string("x0008103e").toLowerCase().includes("fat") ||
         dataSet.string("x0008103e").toLowerCase().includes("inphase") ||
         !dataSet.string("x0008103e").toLowerCase().includes("sag") ||
-        !dataSet.string("x0008103e").toLowerCase().includes("t1")
+        !dataSet.string("x0008103e").toLowerCase().includes("t1") ||
+        dataSet.string("x00080070").toLowerCase().includes("floy")
         // parsedDicom.string("x00180015") !== "LSPINE" ||
         // eslint-disable-next-line max-len
         // Alternative: https://stackoverflow.com/questions/34782409/understanding-dicom-image-attributes-to-get-axial-coronal-sagittal-cuts
