@@ -12,6 +12,7 @@ export const generateHistogram = (
   bins = 100,
   limitPositive = true,
   quadratic = true,
+  limitDominatingBin = true,
 ): [number[], number, number] => {
   let min = (data as number[]).reduce((a, b) => Math.min(a, b));
   if (limitPositive) min = Math.max(0, min);
@@ -31,6 +32,21 @@ export const generateHistogram = (
   if (quadratic) {
     histogram = histogram.map((value) => Math.sqrt(value));
   }
+
+  if (limitDominatingBin) {
+    const first = histogram.reduce((a, b) => Math.max(a, b));
+    const second = histogram.reduce(
+      (a, b) => (b === first ? a : Math.max(a, b)),
+      0,
+    );
+
+    if (first > 2 * second) {
+      histogram = histogram.map((value) =>
+        value === first ? second * 2 : value,
+      );
+    }
+  }
+
   return [
     histogram,
     histogram.reduce((a, b) => Math.min(a, b)),
