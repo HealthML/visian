@@ -136,8 +136,8 @@ export const UploadScreen = observer(() => {
                 label: `Datei ${index + 1} von ${
                   zips.length
                 } wird hochgeladen (${(
-                  (index + p.loaded / p.total) /
-                  zips.length
+                  ((index + p.loaded / p.total) / zips.length) *
+                  100
                 ).toFixed(2)} %)`,
                 progress: (index + p.loaded / p.total) / zips.length,
                 showSplash: false,
