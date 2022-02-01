@@ -407,7 +407,7 @@ export class Viewport3D
       cameraMatrix: this.cameraMatrix.toArray(),
       orbitTarget: this.orbitTarget.toJSON(),
       opacity: this.opacity,
-      shadingMode: this.shadingMode,
+      shadingMode: this.requestedShadingMode || this.shadingMode,
       activeTransferFunctionName: this.activeTransferFunctionName,
       transferFunctions: Object.values(
         this.transferFunctions,

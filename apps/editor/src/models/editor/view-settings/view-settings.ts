@@ -109,6 +109,7 @@ export class ViewSettings
     this.setSelectedVoxel();
     this.setBrightness();
     this.setContrast();
+    this.document.viewport3D?.setOpacity();
   };
 
   // Serialization

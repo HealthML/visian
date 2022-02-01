@@ -27,7 +27,7 @@ export class ThresholdAnnotationTool<
     super(
       {
         name: "threshold-annotation" as N,
-        icon: "settings",
+        icon: "threshold",
         labelTx: "threshold-annotation",
         supportedViewModes: ["2D", "3D"],
         supportedLayerKinds: ["image"],
