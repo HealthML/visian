@@ -172,7 +172,7 @@ export class Document
       activeLayer: computed,
       measurementDisplayLayer: computed,
       imageLayers: computed,
-      baseImageLayer: computed,
+      mainImageLayer: computed,
       annotationLayers: computed,
       maxLayers: computed,
       maxLayers3d: computed,
@@ -248,7 +248,7 @@ export class Document
       (layer) => layer.kind === "image",
     ) as IImageLayer[];
   }
-  public get baseImageLayer(): IImageLayer | undefined {
+  public get mainImageLayer(): IImageLayer | undefined {
     // TODO: Rework to work with group layers
 
     const areAllLayersAnnotations = Boolean(
@@ -265,24 +265,21 @@ export class Document
       }),
     );
 
-    let baseImageLayer: ImageLayer | undefined;
-    this.layerIds
-      .slice()
-      .reverse()
-      .find((id) => {
-        const layer = this.layerMap[id];
-        if (
-          layer.kind === "image" &&
-          // use non-annotation layer if possible
-          (!layer.isAnnotation || areAllLayersAnnotations) &&
-          (layer.isVisible || areAllImageLayersInvisible)
-        ) {
-          baseImageLayer = layer as ImageLayer;
-          return true;
-        }
-        return false;
-      });
-    return baseImageLayer;
+    let mainImageLayer: ImageLayer | undefined;
+    this.layerIds.slice().find((id) => {
+      const layer = this.layerMap[id];
+      if (
+        layer.kind === "image" &&
+        // use non-annotation layer if possible
+        (!layer.isAnnotation || areAllLayersAnnotations) &&
+        (layer.isVisible || areAllImageLayersInvisible)
+      ) {
+        mainImageLayer = layer as ImageLayer;
+        return true;
+      }
+      return false;
+    });
+    return mainImageLayer;
   }
 
   public get annotationLayers(): ImageLayer[] {
@@ -359,12 +356,12 @@ export class Document
   };
 
   public addNewAnnotationLayer = () => {
-    if (!this.baseImageLayer) return;
+    if (!this.mainImageLayer) return;
 
     const annotationColor = this.getFirstUnusedColor();
 
     const annotationLayer = ImageLayer.fromNewAnnotationForImage(
-      this.baseImageLayer.image,
+      this.mainImageLayer.image,
       this,
       annotationColor,
     );
@@ -703,8 +700,8 @@ export class Document
       color: defaultImageColor,
     });
     if (
-      this.baseImageLayer &&
-      !this.baseImageLayer.image.voxelCount.equals(imageLayer.image.voxelCount)
+      this.mainImageLayer &&
+      !this.mainImageLayer.image.voxelCount.equals(imageLayer.image.voxelCount)
     ) {
       if (imageLayer.image.name) {
         throw new ImageMismatchError(
@@ -737,8 +734,8 @@ export class Document
       squash,
     );
     if (
-      this.baseImageLayer &&
-      !this.baseImageLayer.image.voxelCount.equals(
+      this.mainImageLayer &&
+      !this.mainImageLayer.image.voxelCount.equals(
         annotationLayer.image.voxelCount,
       )
     ) {
@@ -758,10 +755,10 @@ export class Document
   }
 
   public importTrackingLog(log: TrackingLog) {
-    if (!this.baseImageLayer) {
+    if (!this.mainImageLayer) {
       throw new Error("tracking-data-no-image-error");
     }
-    this.trackingData = new TrackingData(log, this.baseImageLayer.image);
+    this.trackingData = new TrackingData(log, this.mainImageLayer.image);
   }
 
   public async save(): Promise<void> {

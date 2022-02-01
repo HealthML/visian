@@ -50,7 +50,7 @@ export interface IDocument {
    * The base image layer that serves as a reference for all other image
    * layers to be registered to it.
    */
-  baseImageLayer?: Reference<IImageLayer>;
+  mainImageLayer?: Reference<IImageLayer>;
 
   /** The document's history. */
   history: IHistory;

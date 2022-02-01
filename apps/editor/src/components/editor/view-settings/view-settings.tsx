@@ -70,6 +70,12 @@ export const ViewSettings: React.FC = observer(() => {
     },
     [store],
   );
+  const setOpacity = useCallback(
+    (value: number | number[]) => {
+      store?.editor.activeDocument?.viewport3D.setOpacity(value as number);
+    },
+    [store],
+  );
 
   const setViewType = useCallback(
     async (viewType: ViewType | "3D" | "XR") => {
@@ -165,6 +171,13 @@ export const ViewSettings: React.FC = observer(() => {
         />
         {store?.editor.activeDocument?.viewSettings.viewMode === "3D" && (
           <>
+            <NumberParam
+              labelTx="opacity"
+              min={0}
+              max={1}
+              value={store?.editor.activeDocument?.viewport3D.opacity}
+              setValue={setOpacity}
+            />
             <Divider />
             <ModalTitleRow
               labelTx="3d-view"

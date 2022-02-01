@@ -42,7 +42,7 @@ export const MeasurementModal = observer(() => {
           ] as MeasurementTool).pathLength
         }
         measurementType="length"
-        unit={store?.editor.activeDocument?.baseImageLayer?.image.unit}
+        unit={store?.editor.activeDocument?.mainImageLayer?.image.unit}
         prefixTx="measurement-length"
         textSize="small"
       />
