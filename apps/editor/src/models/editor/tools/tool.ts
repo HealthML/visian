@@ -91,12 +91,13 @@ export class Tool<N extends string>
       : undefined;
   }
 
-  public canActivate(): boolean {
+  public canActivate(isSupervisorMode = false): boolean {
     return Boolean(
-      (!this.supportedViewModes ||
-        this.supportedViewModes.includes(
-          this.document.viewSettings.viewMode,
-        )) &&
+      !(isSupervisorMode && this.isDrawingTool) &&
+        (!this.supportedViewModes ||
+          this.supportedViewModes.includes(
+            this.document.viewSettings.viewMode,
+          )) &&
         (!this.supportedLayerKinds ||
           (this.document.activeLayer &&
             this.supportedLayerKinds.includes(

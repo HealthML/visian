@@ -13,6 +13,8 @@ import {
 import { observer } from "mobx-react-lite";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import styled, { useTheme } from "styled-components";
+import { isFromWHO } from "@visian/utils";
+import { TaskType } from "../../../models/who";
 
 import { useStore } from "../../../app/root-store";
 import { ToolName } from "../../../models";
@@ -108,7 +110,9 @@ export const Toolbar: React.FC = observer(() => {
     <StyledToolbar ref={ref}>
       {store?.editor.activeDocument?.tools.toolGroups.map(
         ({ activeTool: tool }, index) =>
-          tool.canActivate() && (
+          tool.canActivate(
+            isFromWHO() && store?.currentTask?.kind === TaskType.Review,
+          ) && (
             <Tool
               key={index}
               icon={tool.icon}

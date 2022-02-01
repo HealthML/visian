@@ -35,6 +35,8 @@ import { ViewSettings } from "../view-settings";
 import { UIOverlayProps } from "./ui-overlay.props";
 import { SettingsPopUp } from "../settings-popup";
 import { MeasurementPopUp } from "../measurement-popup";
+import { SupervisorPanel } from "../supervisor-panel";
+import { TaskType } from "../../../models/who";
 
 const Container = styled(AbsoluteCover)`
   align-items: stretch;
@@ -237,6 +239,9 @@ export const UIOverlay = observer<UIOverlayProps>(
               <SmartBrush3DModal />
               <DilateErodeModal />
               <MeasurementModal />
+              {isFromWHO() && store?.currentTask?.kind === TaskType.Review && (
+                <SupervisorPanel />
+              )}
             </ColumnLeft>
             <ColumnCenter>
               <TopConsole />
