@@ -16,6 +16,7 @@ import { whoHome } from "../../../constants";
 import {
   DilateErodeModal,
   SmartBrush3DModal,
+  ThresholdAnnotationModal,
   MeasurementModal,
 } from "../action-modal";
 import { AIBar } from "../ai-bar";
@@ -241,6 +242,7 @@ export const UIOverlay = observer<UIOverlayProps>(
               </AxesSpacer>
               <ModalRow>
                 <SmartBrush3DModal />
+                <ThresholdAnnotationModal />
                 <DilateErodeModal />
                 <MeasurementModal />
                 <AxesAndVoxel />

@@ -190,12 +190,18 @@ export class BlipRenderer3D implements IBlipRenderer3D, IDisposable {
     layer = this.document.activeLayer as IImageLayer,
     shouldReplace = false,
   ) {
-    if (layer.kind !== "image" || !layer.isAnnotation) {
+    if (
+      layer.kind !== "image" ||
+      !layer.isAnnotation ||
+      !this.document.renderer
+    ) {
       return;
     }
 
     const annotation = layer.image as RenderedImage;
 
+    const isXREnabled = this.document.renderer.xr.enabled;
+    this.document.renderer.xr.enabled = false;
     if (shouldReplace) {
       annotation.writeToTexture(this.outputTexture, MergeFunction.Replace);
     } else {
@@ -207,6 +213,7 @@ export class BlipRenderer3D implements IBlipRenderer3D, IDisposable {
           : this.steps,
       );
     }
+    this.document.renderer.xr.enabled = isXREnabled;
 
     this.discard();
   }

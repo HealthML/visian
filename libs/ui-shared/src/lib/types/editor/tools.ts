@@ -140,15 +140,29 @@ export interface IBlipRenderer3D {
 
   /** The number of steps to region grow. */
   steps: number;
+  maxSteps: number;
 
   outputTexture: THREE.Texture;
 
+  setMaxSteps(value: number): void;
+  render(): void;
   flushToAnnotation(): void;
   discard(): void;
 }
 
 export interface IDilateErodeRenderer3D extends IBlipRenderer3D {
   targetLayer?: IImageLayer;
+
+  shouldErode: boolean;
+  shouldAutoCompensate: boolean;
+
+  setShouldErode(value: boolean): void;
+  setShouldAutoCompensate(value: boolean): void;
+}
+
+export interface IThresholdAnnotationRenderer3D extends IBlipRenderer3D {
+  threshold: [number, number];
+  setThreshold(value: [number, number]): void;
 }
 
 /** The editor's tools and their settings for the document. */
@@ -189,6 +203,7 @@ export interface ITools<N extends string> {
   slicePreviewMergeFunction?: MergeFunction;
   layerPreviewTexture: THREE.Texture;
   regionGrowingRenderer3D: IBlipRenderer3D;
+  thresholdAnnotationRenderer3D: IThresholdAnnotationRenderer3D;
   dilateErodeRenderer3D: IDilateErodeRenderer3D;
 
   setActiveTool(

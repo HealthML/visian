@@ -346,7 +346,7 @@ export class Document
     return colorCandidates.length ? colorCandidates[0] : defaultColor;
   };
 
-  public getRegionGrowingPreviewColor = (): string => {
+  public getAnnotationPreviewColor = (): string => {
     const isDefaultUsed = this.layers.find(
       (layer) => layer.color === defaultRegionGrowingPreviewColor,
     );
