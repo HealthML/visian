@@ -111,6 +111,8 @@
   "export-tooltip": "Export (Strg + E)",
   "exporting": "Exportieren",
 
+  "annotation-time": "Annotationszeit",
+  "show-delta": "Delta anzeigen",
   "confirm-task-annotation-tooltip": "Bestätigen",
   "skip-task-annotation-tooltip": "Überspringen",
 
