@@ -358,7 +358,8 @@ export class VolumeRenderer implements IVolumeRenderer {
 
     if (
       this.currentGradientHistogramSlice <
-      (this.editor.activeDocument?.mainImageLayer?.image.voxelCount.z || 0)
+        (this.editor.activeDocument?.mainImageLayer?.image.voxelCount.z || 0) &&
+      this.editor.performanceMode === "high"
     ) {
       this.tickGradientHistogram();
     }

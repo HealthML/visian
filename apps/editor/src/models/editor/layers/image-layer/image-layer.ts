@@ -166,7 +166,9 @@ export class ImageLayer
 
   public setImage(value: RenderedImage): void {
     this.image = value;
-    this.densityHistogram = generateHistogram(value.getData());
+    if (this.document.performanceMode === "high") {
+      this.densityHistogram = generateHistogram(value.getData());
+    }
   }
 
   public setBrightness(value?: number): void {

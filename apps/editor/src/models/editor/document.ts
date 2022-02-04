@@ -12,6 +12,7 @@ import {
   TrackingLog,
   ErrorNotification,
   ValueType,
+  PerformanceMode,
 } from "@visian/ui-shared";
 import {
   handlePromiseSettledResult,
@@ -818,6 +819,10 @@ export class Document
   public setError = (error: ErrorNotification) => {
     this.context?.setError(error);
   };
+
+  public get performanceMode(): PerformanceMode {
+    return this.editor.performanceMode;
+  }
 
   // Serialization
   public toJSON(): DocumentSnapshot {
