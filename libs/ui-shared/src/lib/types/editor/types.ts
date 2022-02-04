@@ -21,4 +21,11 @@ export enum MergeFunction {
   Subtract = 2,
 }
 
+/**
+ * Representation of a histogam.
+ *
+ * The first value is an array containing the bin-sizes.
+ * The second value is the size of the smalest bin.
+ * The third value is the size of the smalles bin.
+ */
 export type Histogram = [number[], number, number];

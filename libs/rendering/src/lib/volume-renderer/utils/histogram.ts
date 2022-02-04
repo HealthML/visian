@@ -1,3 +1,4 @@
+import { Histogram } from "@visian/ui-shared";
 import { TypedArray } from "@visian/utils";
 
 /**
@@ -5,6 +6,9 @@ import { TypedArray } from "@visian/utils";
  *
  * @param data The data to produce frequency information for.
  * @param bins The number of bins.
+ * @param limitPositive Whether or not to limit the values in the histogram to positive values. Defaults to `true`.
+ * @param quadratic Whether or not to scale the histogram bars quatratically. Defaults to `true`.
+ * @param limitDominatingBin Whether or not to limit the largest bin to 2 times the second largest value. Defaults to `true`.
  * @returns [frequencyArray, minFrequency, maxFrequency]
  */
 export const generateHistogram = (
@@ -13,7 +17,7 @@ export const generateHistogram = (
   limitPositive = true,
   quadratic = true,
   limitDominatingBin = true,
-): [number[], number, number] => {
+): Histogram => {
   let min = (data as number[]).reduce((a, b) => Math.min(a, b));
   if (limitPositive) min = Math.max(0, min);
   const max = (data as number[]).reduce((a, b) => Math.max(a, b));
