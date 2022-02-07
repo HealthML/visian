@@ -24,8 +24,8 @@ export enum MergeFunction {
 /**
  * Representation of a histogam.
  *
- * The first value is an array containing the bin-sizes.
- * The second value is the size of the smalest bin.
- * The third value is the size of the smalles bin.
+ * The first value is an array containing the numbers of elements in each bin.
+ * The second value is the number of elements in the smallest bin.
+ * The third value is the number of elements in the smallest bin.
  */
 export type Histogram = [number[], number, number];
