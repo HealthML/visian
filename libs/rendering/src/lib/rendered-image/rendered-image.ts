@@ -74,7 +74,7 @@ export class RenderedImage<T extends TypedArray = TypedArray>
 
   private isDataDirty = false;
 
-  private textureAdapter: TextureAdapter;
+  public textureAdapter: TextureAdapter;
 
   constructor(
     image: ImageSnapshot<T> & Pick<ImageSnapshot<T>, "voxelCount" | "data">,

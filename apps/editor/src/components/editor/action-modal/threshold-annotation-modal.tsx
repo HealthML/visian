@@ -45,6 +45,11 @@ export const ThresholdAnnotationModal = observer(() => {
     [store],
   );
 
+  const getHistogram = useCallback(
+    () => store?.editor.activeDocument?.mainImageLayer?.densityHistogram,
+    [store],
+  );
+
   return store?.editor.activeDocument?.tools.thresholdAnnotationRenderer3D
     .holdsPreview ? (
     <StyledModal
@@ -78,6 +83,7 @@ export const ThresholdAnnotationModal = observer(() => {
           store?.editor.activeDocument?.tools.thresholdAnnotationRenderer3D
             .threshold
         }
+        getHistogram={getHistogram}
         setValue={setThreshold}
       />
       <ButtonParam

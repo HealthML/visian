@@ -141,32 +141,8 @@ export class GradientComputer implements IDisposable {
     this.gradientMaterial.setGradientMode();
 
     this.firstDerivativeDirty = false;
-    // const buffer = new Uint8Array(
-    //   this.firstDerivativeRenderTarget.width *
-    //     this.firstDerivativeRenderTarget.height *
-    //     4,
-    // );
-    // this.renderer.readRenderTargetPixels(
-    //   this.firstDerivativeRenderTarget,
-    //   0,
-    //   0,
-    //   this.firstDerivativeRenderTarget.width,
-    //   this.firstDerivativeRenderTarget.height,
-    //   buffer,
-    // );
 
     this.renderer.xr.enabled = isXrEnabled;
-
-    // TODO: Histogram
-    // const gradientMagnitudes = [];
-    // const workingVector = new THREE.Vector3();
-    // for (let i = 0; i < buffer.length; i += 4) {
-    //   workingVector.set(buffer[i], buffer[i + 1], buffer[i + 2]);
-    //   gradientMagnitudes.push(workingVector.length());
-    // }
-    // this.volumeRenderer.model.setGradientHistogram(
-    //   generateHistogram(gradientMagnitudes),
-    // );
 
     this.editor.volumeRenderer?.lazyRender(true);
   }

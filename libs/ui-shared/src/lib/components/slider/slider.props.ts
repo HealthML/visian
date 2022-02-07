@@ -1,5 +1,5 @@
 import type React from "react";
-import { MarkerConfig } from "../../types";
+import { Histogram, MarkerConfig } from "../../types";
 import type {
   SerializationMethod,
   SliderConfig,
@@ -66,6 +66,8 @@ export interface SliderProps<T extends number | number[] = number | number[]>
   formatValueLabel?: (value: number[]) => string;
 
   markers?: MarkerConfig[];
+
+  histogram?: Histogram;
 }
 
 export interface SliderRangeSelectionProps

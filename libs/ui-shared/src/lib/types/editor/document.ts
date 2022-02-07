@@ -11,7 +11,7 @@ import type { IMarkers } from "./markers";
 import type { IClipboard } from "./clipboard";
 import type { ErrorNotification } from "../error-notification";
 import { Theme } from "../../theme";
-import { MeasurementType } from ".";
+import { MeasurementType, PerformanceMode } from ".";
 
 /** A VISIAN document, consisting of up to multiple editable layers. */
 export interface IDocument {
@@ -72,6 +72,7 @@ export interface IDocument {
   volumeRenderer?: Reference<IVolumeRenderer>;
   renderer?: Reference<THREE.WebGLRenderer>;
   theme: Theme;
+  performanceMode: PerformanceMode;
 
   /** Indicates wether the layer menu is open. */
   showLayerMenu: boolean;

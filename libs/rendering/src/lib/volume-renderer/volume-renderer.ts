@@ -1,15 +1,17 @@
 import { DragPoint, IEditor, IVolumeRenderer } from "@visian/ui-shared";
-import { IDisposer, Vector, Voxel } from "@visian/utils";
+import { IDisposer, Vector, ViewType, Voxel } from "@visian/utils";
 import { autorun, computed, makeObservable, reaction } from "mobx";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import Stats from "three/examples/jsm/libs/stats.module";
+import { RenderedImage } from "../rendered-image";
 
 import { ScreenAlignedQuad } from "../screen-aligned-quad";
 import {
   AxesConvention,
   DitheringRenderer,
   FlyControls,
+  generateHistogram,
   GradientComputer,
   LAOComputer,
   ResolutionComputer,
@@ -45,6 +47,10 @@ export class VolumeRenderer implements IVolumeRenderer {
   private ditheringRenderer: DitheringRenderer;
   private gradientComputer: GradientComputer;
   private laoComputer: LAOComputer;
+
+  // These two variables are used to progressively calculate the gradient histogram of the main image layer
+  private currentGradientHistogramSlice = 0;
+  private gradientMagnitudes: number[] = [];
 
   private pickingTexture = new THREE.WebGLRenderTarget(1, 1);
 
@@ -317,10 +323,46 @@ export class VolumeRenderer implements IVolumeRenderer {
     this.lazyRender();
   };
 
+  private tickGradientHistogram = () => {
+    if (this.editor.activeDocument?.mainImageLayer) {
+      const buffer = (this.editor.activeDocument?.mainImageLayer
+        .image as RenderedImage).textureAdapter.readSlice(
+        this.currentGradientHistogramSlice,
+        ViewType.Transverse,
+        this.renderer,
+        this.gradientComputer.getFirstDerivative(),
+      );
+
+      const workingVector = new THREE.Vector3();
+      for (let i = 0; i < buffer.length; i += 4) {
+        workingVector.set(buffer[i], buffer[i + 1], buffer[i + 2]);
+        this.gradientMagnitudes.push(workingVector.length());
+      }
+
+      this.currentGradientHistogramSlice++;
+      if (
+        this.currentGradientHistogramSlice ===
+        this.editor.activeDocument?.mainImageLayer?.image.voxelCount.z
+      ) {
+        this.editor.activeDocument?.mainImageLayer?.setGradientHistogram(
+          generateHistogram(this.gradientMagnitudes),
+        );
+      }
+    }
+  };
+
   public animate = () => {
     if (this.editor.activeDocument?.viewSettings.viewMode !== "3D") return;
 
     this.gradientComputer.tick();
+
+    if (
+      this.currentGradientHistogramSlice <
+        (this.editor.activeDocument?.mainImageLayer?.image.voxelCount.z || 0) &&
+      this.editor.performanceMode === "high"
+    ) {
+      this.tickGradientHistogram();
+    }
 
     if (
       (this.editor.activeDocument?.viewport3D.shadingMode === "lao" ||
@@ -373,6 +415,9 @@ export class VolumeRenderer implements IVolumeRenderer {
 
     if (updateGradients) {
       this.gradientComputer.updateAllDerivatives();
+      this.currentGradientHistogramSlice = 0;
+      this.gradientMagnitudes = [];
+      this.editor.activeDocument?.mainImageLayer?.setGradientHistogram();
     }
 
     if (updateLighting) {
