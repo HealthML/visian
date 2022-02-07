@@ -15,7 +15,7 @@
 
   "untitled-document": "Unbenanntes Dokument",
   "start": "Starten Sie, in dem Sie einen Scan hier ablegen.",
-  "start-upload": "Starten Sie, in dem Sie mehrere DICOM Studien oder Serien (jeweils als .zip Datei) hier ablegen.",
+  "start-upload": "Starten Sie, in dem Sie mehrere DICOM Studien oder Serien hier ablegen.",
   "unsaved-changes": "Ungespeicherte Änderungen.",
   "saved-in-browser": "Alle Änderungen im Browser gespeichert.",
 
