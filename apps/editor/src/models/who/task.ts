@@ -1,6 +1,7 @@
 import { Annotation, AnnotationSnapshot, AnnotationStatus } from "./annotation";
 import { AnnotationTask, AnnotationTaskSnapshot } from "./annotationTask";
 import { Sample } from "./sample";
+import { User, UserSnapshot } from "./user";
 
 export interface TaskSnapshot {
   taskUUID: string;
@@ -8,6 +9,7 @@ export interface TaskSnapshot {
   readOnly: boolean;
   annotationTasks: AnnotationTaskSnapshot[];
   annotations?: AnnotationSnapshot[];
+  assignee: UserSnapshot;
 }
 
 export enum TaskType {
@@ -23,6 +25,7 @@ export class Task {
   public annotationTasks: AnnotationTask[];
   public samples: Sample[];
   public annotations: Annotation[];
+  public assignee: User;
 
   // TODO: Properly type API response data
   constructor(task: any) {
@@ -36,17 +39,14 @@ export class Task {
     this.annotations = task.annotations.map(
       (annotation: any) => new Annotation(annotation),
     );
+    this.assignee = new User(task.assignee);
   }
 
   public addNewAnnotation(): void {
     const annotationData = {
       status: AnnotationStatus.Pending,
       data: [],
-      // TODO: Use actual username and expertise
-      annotator: {
-        username: "visian",
-        expertise: "medium",
-      },
+      annotator: this.assignee,
       submittedAt: "",
     };
     const annotation = new Annotation(annotationData);
@@ -64,6 +64,7 @@ export class Task {
       annotations: Object.values(this.annotations).map((annotation) =>
         annotation.toJSON(),
       ),
+      assignee: this.assignee.toJSON(),
     };
   }
 }

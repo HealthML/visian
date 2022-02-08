@@ -1,4 +1,4 @@
-export const whoBackendBaseUrl = "https://annotation.ai4h.net";
+export const whoBackendBaseUrl = "https://annotation.ai4h.net/api/v1";
 
 export const getWHOTask = (taskId: string) =>
   fetch(`${whoBackendBaseUrl}/tasks/${taskId}`).then((data) => {
