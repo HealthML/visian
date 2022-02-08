@@ -194,6 +194,18 @@ const LegalContainer = styled.div<{ useBlankScreen?: boolean }>`
   right: ${(props) => (props.useBlankScreen ? "20px" : "80px")};
 `;
 
+const LegalContainerAirBar = styled.div<{ useBlankScreen?: boolean }>`
+  bottom: 30px;
+  flex-direction: column;
+  opacity: 0.5;
+  position: absolute;
+  pointer-events: auto;
+  align-self: flex-end;
+  display: inline-flex;
+  padding-left: 50px;
+  right: ${(props) => (props.useBlankScreen ? "20px" : "80px")};
+`;
+
 const ScrollView = styled.div`
   display: flex;
   flex: 1;
@@ -376,7 +388,7 @@ export const AIBar = observer(() => {
 
 const FloyPopUp = styled(PopUp)`
   max-height: 75%;
-  max-width: 600px;
+  max-width: 700px;
   overflow: auto;
 `;
 
@@ -654,6 +666,26 @@ export const FloyBar = observer<{
                 />
               )}
             <PopUpButton text="Okay" onPointerDown={dismissWelcome} />
+            <LegalContainerAirBar useBlankScreen={useBlankScreen}>
+              <Text
+                as="a"
+                text="Datenschutz"
+                {...({
+                  href: "https://www.floy.com/data-privacy",
+                  target: "_blank",
+                  rel: "noreferrer",
+                } as unknown)}
+              />
+              <Text
+                as="a"
+                text="Impressum"
+                {...({
+                  href: "https://www.floy.com/legal-notice",
+                  target: "_blank",
+                  rel: "noreferrer",
+                } as unknown)}
+              />
+            </LegalContainerAirBar>
           </InputRow>
         </FloyPopUp>
       )}
