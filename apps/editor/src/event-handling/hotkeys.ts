@@ -6,8 +6,10 @@ import { skipSlices } from "../constants";
 import {
   DilateErodeTool,
   ImageLayer,
+  MeasurementTool,
   RootStore,
   SmartBrush3D,
+  ThresholdAnnotationTool,
 } from "../models";
 
 export const setUpHotKeys = (store: RootStore): IDisposer => {
@@ -59,6 +61,10 @@ export const setUpHotKeys = (store: RootStore): IDisposer => {
 
     store.editor.activeDocument?.tools.setActiveTool("outline-tool");
   });
+  hotkeys("ctrl+p", (event) => {
+    event.preventDefault();
+    store.editor.activeDocument?.tools.setActiveTool("threshold-annotation");
+  });
   hotkeys("ctrl+d", (event) => {
     event.preventDefault();
     store.editor.activeDocument?.tools.setActiveTool("dilate-erode");
@@ -77,6 +83,12 @@ export const setUpHotKeys = (store: RootStore): IDisposer => {
     if (store.editor.activeDocument?.viewSettings.viewMode !== "3D") return;
 
     store.editor.activeDocument?.tools.setActiveTool("plane-tool");
+  });
+  hotkeys("l", (event) => {
+    event.preventDefault();
+    if (store.editor.activeDocument?.viewSettings.viewMode !== "3D") return;
+
+    store.editor.activeDocument?.tools.setActiveTool("measurement-tool");
   });
 
   // Copy and Paste
@@ -107,12 +119,6 @@ export const setUpHotKeys = (store: RootStore): IDisposer => {
   hotkeys("enter", (event) => {
     event.preventDefault();
 
-    if (store.editor.activeDocument?.tools.dilateErodeRenderer3D.holdsPreview) {
-      (store.editor.activeDocument?.tools.tools[
-        "dilate-erode"
-      ] as DilateErodeTool).submit();
-    }
-
     if (
       store.editor.activeDocument?.tools.regionGrowingRenderer3D.holdsPreview
     ) {
@@ -120,9 +126,51 @@ export const setUpHotKeys = (store: RootStore): IDisposer => {
         "smart-brush-3d"
       ] as SmartBrush3D).submit();
     }
+
+    if (
+      store.editor.activeDocument?.tools.thresholdAnnotationRenderer3D
+        .holdsPreview
+    ) {
+      (store.editor.activeDocument?.tools.tools[
+        "threshold-annotation"
+      ] as ThresholdAnnotationTool).submit();
+    }
+
+    if (store.editor.activeDocument?.tools.dilateErodeRenderer3D.holdsPreview) {
+      (store.editor.activeDocument?.tools.tools[
+        "dilate-erode"
+      ] as DilateErodeTool).submit();
+    }
+
+    if (
+      (store.editor.activeDocument?.tools.tools[
+        "measurement-tool"
+      ] as MeasurementTool).hasPath
+    ) {
+      (store.editor.activeDocument?.tools.tools[
+        "measurement-tool"
+      ] as MeasurementTool).submit();
+    }
   });
   hotkeys("escape", (event) => {
     event.preventDefault();
+
+    if (
+      store.editor.activeDocument?.tools.regionGrowingRenderer3D.holdsPreview
+    ) {
+      (store.editor.activeDocument?.tools.tools[
+        "smart-brush-3d"
+      ] as SmartBrush3D).discard();
+    }
+
+    if (
+      store.editor.activeDocument?.tools.thresholdAnnotationRenderer3D
+        .holdsPreview
+    ) {
+      (store.editor.activeDocument?.tools.tools[
+        "threshold-annotation"
+      ] as ThresholdAnnotationTool).discard();
+    }
 
     if (store.editor.activeDocument?.tools.dilateErodeRenderer3D.holdsPreview) {
       (store.editor.activeDocument?.tools.tools[
@@ -131,11 +179,13 @@ export const setUpHotKeys = (store: RootStore): IDisposer => {
     }
 
     if (
-      store.editor.activeDocument?.tools.regionGrowingRenderer3D.holdsPreview
+      (store.editor.activeDocument?.tools.tools[
+        "measurement-tool"
+      ] as MeasurementTool).hasPath
     ) {
       (store.editor.activeDocument?.tools.tools[
-        "smart-brush-3d"
-      ] as SmartBrush3D).discard();
+        "measurement-tool"
+      ] as MeasurementTool).discard();
     }
   });
 

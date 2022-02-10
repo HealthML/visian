@@ -15,6 +15,8 @@ import {
   SliderTrack,
   SliderValueInput,
   SliderValueInputWrapper,
+  Histogram,
+  HistogramBar,
 } from "./styled-components";
 import { pointerToSliderValue, useDrag, valueToSliderPos } from "./utils";
 
@@ -45,6 +47,7 @@ export const Slider: React.FC<SliderProps> = (props) => {
     showFloatingValueLabel = false,
     formatValueLabel = defaultFormatLabel,
     markers,
+    histogram,
     value,
     onChange,
     onStart,
@@ -252,6 +255,24 @@ export const Slider: React.FC<SliderProps> = (props) => {
             )}
           />
         ),
+      )}
+      {histogram && (
+        <Histogram>
+          {histogram[0].map((val, index) => (
+            <HistogramBar
+              key={index}
+              style={{
+                height: `${
+                  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                  ((val - histogram![1]) /
+                    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                    (histogram![2] - histogram![1])) *
+                  100
+                }%`,
+              }}
+            />
+          ))}
+        </Histogram>
       )}
       {showRange && valueArray.length >= 2 && (
         <SliderRangeSelection

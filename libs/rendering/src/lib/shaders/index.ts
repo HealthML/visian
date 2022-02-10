@@ -14,6 +14,8 @@ export { default as laoFragmentShader } from "./lao/lao.frag.glsl";
 export { default as laoVertexShader } from "./lao/lao.vert.glsl";
 export { default as mergeFragmentShader } from "./merge/merge.frag.glsl";
 export { default as mergeVertexShader } from "./merge/merge.vert.glsl";
+export { default as nodeFragmentShader } from "./node/node.frag.glsl";
+export { default as nodeVertexShader } from "./node/node.vert.glsl";
 export { default as progressiveAccumulationFragmentShader } from "./progressive-accumulation/progressive-accumulation.frag.glsl";
 export { default as progressiveAccumulationVertexShader } from "./progressive-accumulation/progressive-accumulation.vert.glsl";
 export { default as rawSliceFragmentShader } from "./slice/raw-slice.frag.glsl";
@@ -26,5 +28,7 @@ export { default as sliceFragmentShader } from "./slice/slice.frag.glsl";
 export { default as sliceVertexShader } from "./slice/slice.vert.glsl";
 export { default as volumeFragmentShader } from "./volume/volume.frag.glsl";
 export { default as volumeVertexShader } from "./volume/volume.vert.glsl";
+export { default as thresholdAnnotationFragmentShader } from "./threshold-annotation/threshold-annotation.frag.glsl";
+export { default as thresholdAnnotationVertexShader } from "./threshold-annotation/threshold-annotation.vert.glsl";
 
 export * from "./compose-layered-shader";

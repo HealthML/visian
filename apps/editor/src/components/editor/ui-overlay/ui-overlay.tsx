@@ -1,5 +1,6 @@
 import {
   AbsoluteCover,
+  FlexRow,
   FloatingUIButton,
   Notification,
   Spacer,
@@ -12,7 +13,12 @@ import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
 import { whoHome } from "../../../constants";
-import { DilateErodeModal, SmartBrush3DModal } from "../action-modal";
+import {
+  DilateErodeModal,
+  SmartBrush3DModal,
+  ThresholdAnnotationModal,
+  MeasurementModal,
+} from "../action-modal";
 import { AIBar } from "../ai-bar";
 import { AxesAndVoxel } from "../axes-and-voxel";
 import { DropSheet } from "../drop-sheet";
@@ -106,6 +112,11 @@ const Axes3D = styled.div`
   position: absolute;
   bottom: -5px;
   left: -5px;
+`;
+
+const ModalRow = styled(FlexRow)`
+  gap: 20px;
+  align-items: flex-end;
 `;
 
 export const UIOverlay = observer<UIOverlayProps>(
@@ -229,9 +240,13 @@ export const UIOverlay = observer<UIOverlayProps>(
               <AxesSpacer>
                 <Axes3D ref={axes3dRef} />
               </AxesSpacer>
-              <AxesAndVoxel />
-              <SmartBrush3DModal />
-              <DilateErodeModal />
+              <ModalRow>
+                <SmartBrush3DModal />
+                <ThresholdAnnotationModal />
+                <DilateErodeModal />
+                <MeasurementModal />
+                <AxesAndVoxel />
+              </ModalRow>
             </ColumnLeft>
             <ColumnCenter>
               <TopConsole />

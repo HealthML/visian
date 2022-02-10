@@ -276,9 +276,13 @@ export class SharedUniforms implements IDisposable {
           // additional layer for 3d region growing
           new THREE.Color(
             color(
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              (editor.activeDocument?.tools.regionGrowingRenderer3D
-                .previewColor as any) || "foreground",
+              (editor.activeDocument?.tools.regionGrowingRenderer3D.holdsPreview
+                ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  (editor.activeDocument?.tools.regionGrowingRenderer3D
+                    .previewColor as any)
+                : // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  (editor.activeDocument?.tools.thresholdAnnotationRenderer3D
+                    .previewColor as any)) || "foreground",
             )({ theme: editor.theme }),
           ),
           ...layerColors,
@@ -326,7 +330,7 @@ export class SharedUniforms implements IDisposable {
         editor.activeDocument?.volumeRenderer?.lazyRender(true);
       }),
       autorun(() => {
-        const imageLayer = editor.activeDocument?.baseImageLayer;
+        const imageLayer = editor.activeDocument?.mainImageLayer;
         if (!imageLayer) return;
 
         const image = imageLayer.image as RenderedImage;

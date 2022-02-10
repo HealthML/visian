@@ -62,7 +62,7 @@ export class VolumeMaterial
         { fireImmediately: true },
       ),
       autorun(() => {
-        const baseImage = editor.activeDocument?.baseImageLayer?.image;
+        const baseImage = editor.activeDocument?.mainImageLayer?.image;
         if (baseImage) {
           this.defines.MAX_STEPS = getMaxSteps(baseImage);
         }

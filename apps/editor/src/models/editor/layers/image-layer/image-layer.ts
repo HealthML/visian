@@ -1,12 +1,17 @@
-import { RenderedImage } from "@visian/rendering";
-import { IDocument, IImageLayer, MarkerConfig } from "@visian/ui-shared";
+import { RenderedImage, generateHistogram } from "@visian/rendering";
+import {
+  Histogram,
+  IDocument,
+  IImageLayer,
+  MarkerConfig,
+} from "@visian/ui-shared";
 import {
   IDisposable,
   Image,
   ImageSnapshot,
   ISerializable,
-  ITKImage,
   itkImageToImageSnapshot,
+  ITKImageWithUnit,
   TypedArray,
   Vector,
   ViewType,
@@ -43,7 +48,7 @@ export class ImageLayer
   extends Layer
   implements IImageLayer, ISerializable<ImageLayerSnapshot>, IDisposable {
   public static fromITKImage<T2 extends TypedArray = TypedArray>(
-    image: ITKImage<T2>,
+    image: ITKImageWithUnit<T2>,
     document: IDocument,
     snapshot?: Partial<ImageLayerSnapshot>,
     filterValue?: number,
@@ -74,6 +79,7 @@ export class ImageLayer
           orientation: image.orientation,
           voxelCount: image.voxelCount.toArray(),
           voxelSpacing: image.voxelSpacing.toArray(),
+          unit: image.unit,
         },
       },
       document,
@@ -88,6 +94,9 @@ export class ImageLayer
 
   public brightness!: number;
   public contrast!: number;
+
+  public densityHistogram?: Histogram;
+  public gradientHistogram?: Histogram;
 
   /**
    * An array of n-hot arrays indicating empty slices in the direction of every
@@ -127,6 +136,8 @@ export class ImageLayer
       emptySlices: observable,
       volume: observable,
       area: observable,
+      densityHistogram: observable.ref,
+      gradientHistogram: observable.ref,
 
       is3DLayer: computed,
 
@@ -137,6 +148,7 @@ export class ImageLayer
       setIsSliceEmpty: action,
       setVolume: action,
       setArea: action,
+      setGradientHistogram: action,
     });
   }
 
@@ -154,6 +166,9 @@ export class ImageLayer
 
   public setImage(value: RenderedImage): void {
     this.image = value;
+    if (this.document.performanceMode === "high") {
+      this.densityHistogram = generateHistogram(value.getData());
+    }
   }
 
   public setBrightness(value?: number): void {
@@ -162,6 +177,10 @@ export class ImageLayer
 
   public setContrast(value?: number): void {
     this.contrast = value ?? 1;
+  }
+
+  public setGradientHistogram(histogram: Histogram) {
+    this.gradientHistogram = histogram;
   }
 
   public delete() {

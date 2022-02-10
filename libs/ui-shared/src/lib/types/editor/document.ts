@@ -11,7 +11,7 @@ import type { IMarkers } from "./markers";
 import type { IClipboard } from "./clipboard";
 import type { ErrorNotification } from "../error-notification";
 import { Theme } from "../../theme";
-import { MeasurementType } from ".";
+import { MeasurementType, PerformanceMode } from ".";
 
 /** A VISIAN document, consisting of up to multiple editable layers. */
 export interface IDocument {
@@ -50,7 +50,7 @@ export interface IDocument {
    * The base image layer that serves as a reference for all other image
    * layers to be registered to it.
    */
-  baseImageLayer?: Reference<IImageLayer>;
+  mainImageLayer?: Reference<IImageLayer>;
 
   /** The document's history. */
   history: IHistory;
@@ -72,6 +72,7 @@ export interface IDocument {
   volumeRenderer?: Reference<IVolumeRenderer>;
   renderer?: Reference<THREE.WebGLRenderer>;
   theme: Theme;
+  performanceMode: PerformanceMode;
 
   /** Indicates wether the layer menu is open. */
   showLayerMenu: boolean;
@@ -104,8 +105,8 @@ export interface IDocument {
 
   /** Returns the first color that is not yet used to color any layer. */
   getFirstUnusedColor(): string;
-  /** Returns the color to be used for 3D region growing preview. */
-  getRegionGrowingPreviewColor(): string;
+  /** Returns the color to be used for, e.g., 3D region growing preview. */
+  getAnnotationPreviewColor(): string;
 
   importTrackingLog(log: TrackingLog): void;
 

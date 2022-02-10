@@ -1,26 +1,14 @@
-import { FlexRow, PopUp, Text, Theme, InfoText } from "@visian/ui-shared";
+import { PopUp, Text, Theme } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
 import React from "react";
 import styled, { useTheme } from "styled-components";
 
 import { useStore } from "../../../app/root-store";
+import { Measurement } from "../measurement";
 import { MeasurementPopUpProps } from "./measurement-popup.props";
 
 const StyledPopUp = styled(PopUp)`
   width: 280px;
-`;
-
-const MeasurementRow = styled(FlexRow)`
-  width: 100%;
-  justify-content: space-between;
-`;
-
-const StyledInfoText = styled(InfoText)`
-  margin-right: 5px;
-`;
-
-const StyledText = styled(Text)`
-  font-size: 13pt;
 `;
 
 export const MeasurementPopUp: React.FC<MeasurementPopUpProps> = observer(
@@ -35,6 +23,9 @@ export const MeasurementPopUp: React.FC<MeasurementPopUpProps> = observer(
         ? store?.editor.activeDocument?.measurementDisplayLayer?.volume
         : store?.editor.activeDocument?.measurementDisplayLayer?.area?.area;
 
+    const unit =
+      store?.editor.activeDocument?.measurementDisplayLayer?.image.unit;
+
     const theme = useTheme() as Theme;
 
     return (
@@ -45,14 +36,12 @@ export const MeasurementPopUp: React.FC<MeasurementPopUpProps> = observer(
         shouldDismissOnOutsidePress
       >
         {value !== null && value !== undefined ? (
-          <MeasurementRow>
-            <StyledText text={value.toFixed(2)} />
-            <StyledInfoText
-              titleTx="unit"
-              infoTx="info-unit"
-              baseZIndex={theme.zIndices.overlay}
-            />
-          </MeasurementRow>
+          <Measurement
+            value={value}
+            measurementType={measurementType}
+            unit={unit}
+            infoBaseZIndex={theme.zIndices.overlay}
+          />
         ) : (
           <Text tx="calculating" />
         )}

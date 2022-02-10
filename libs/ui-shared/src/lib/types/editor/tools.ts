@@ -1,4 +1,4 @@
-import type { Voxel } from "@visian/utils";
+import type { Vector, Voxel } from "@visian/utils";
 import * as THREE from "three";
 
 import type { IImageLayer } from "./layers";
@@ -75,6 +75,8 @@ export interface ITool<N extends string> {
   /** This tool's parameters. */
   params: { [name: string]: IParameter };
 
+  isActive: boolean;
+
   /** Returns `true` if the tool supports the current view mode & layer kind. */
   canActivate(): boolean;
 
@@ -112,6 +114,12 @@ export interface IPreviewedTool<N extends string> extends ITool<N> {
   discard(): void;
 }
 
+export interface IMeasurementTool extends IPreviewedTool<"measurement-tool"> {
+  path: Vector[];
+
+  setToDeleteMode: () => void;
+}
+
 /** A class of similar tools, typically grouped in the UI. */
 export interface IToolGroup<N extends string> {
   /**
@@ -132,15 +140,29 @@ export interface IBlipRenderer3D {
 
   /** The number of steps to region grow. */
   steps: number;
+  maxSteps: number;
 
   outputTexture: THREE.Texture;
 
+  setMaxSteps(value: number): void;
+  render(): void;
   flushToAnnotation(): void;
   discard(): void;
 }
 
 export interface IDilateErodeRenderer3D extends IBlipRenderer3D {
   targetLayer?: IImageLayer;
+
+  shouldErode: boolean;
+  shouldAutoCompensate: boolean;
+
+  setShouldErode(value: boolean): void;
+  setShouldAutoCompensate(value: boolean): void;
+}
+
+export interface IThresholdAnnotationRenderer3D extends IBlipRenderer3D {
+  threshold: [number, number];
+  setThreshold(value: [number, number]): void;
 }
 
 /** The editor's tools and their settings for the document. */
@@ -181,9 +203,13 @@ export interface ITools<N extends string> {
   slicePreviewMergeFunction?: MergeFunction;
   layerPreviewTexture: THREE.Texture;
   regionGrowingRenderer3D: IBlipRenderer3D;
+  thresholdAnnotationRenderer3D: IThresholdAnnotationRenderer3D;
   dilateErodeRenderer3D: IDilateErodeRenderer3D;
 
-  setActiveTool(nameOrTool?: N | ITool<N>): void;
+  setActiveTool(
+    nameOrTool?: N | ITool<N>,
+    setAsGroupActiveTool?: boolean,
+  ): void;
 
   setBrushSize(value?: number, showPreview?: boolean): void;
   incrementBrushSize(): void;
