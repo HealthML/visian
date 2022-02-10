@@ -129,7 +129,7 @@ export class Slice extends THREE.Group implements IDisposable {
       autorun(this.updateScale),
       autorun(this.updateOffset),
       reaction(
-        () => this.editor.activeDocument?.baseImageLayer,
+        () => this.editor.activeDocument?.mainImageLayer,
         (imageLayer?: IImageLayer) => {
           if (!imageLayer) return;
 

@@ -50,7 +50,7 @@ export class Path extends THREE.Group implements IDisposable {
   }
 
   private updateGeometries = () => {
-    if (!this.editor.activeDocument?.baseImageLayer) return;
+    if (!this.editor.activeDocument?.mainImageLayer) return;
 
     const path = (this.editor.activeDocument.tools.tools["measurement-tool"] as
       | IMeasurementTool
@@ -153,7 +153,7 @@ export class Path extends THREE.Group implements IDisposable {
       }
     });
 
-    const { voxelCount } = this.editor.activeDocument.baseImageLayer.image;
+    const { voxelCount } = this.editor.activeDocument.mainImageLayer.image;
     const scale = new THREE.Vector2(
       voxelCount[widthAxis],
       voxelCount[heightAxis],

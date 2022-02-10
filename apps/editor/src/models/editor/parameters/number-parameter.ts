@@ -1,4 +1,4 @@
-import { INumberParameter, ScaleType } from "@visian/ui-shared";
+import { Histogram, INumberParameter, ScaleType } from "@visian/ui-shared";
 
 import { Parameter, ParameterConfig } from "./parameter";
 
@@ -9,7 +9,7 @@ export interface NumberParameterConfig extends ParameterConfig<number> {
   stepSize?: number;
   extendBeyondMinMax?: boolean;
 
-  getHistogram?: () => number[] | undefined;
+  getHistogram?: () => Histogram | undefined;
 }
 
 export class NumberParameter
@@ -24,7 +24,7 @@ export class NumberParameter
   public stepSize?: number;
   public extendBeyondMinMax?: boolean;
 
-  public getHistogram?: () => number[] | undefined;
+  public getHistogram?: () => Histogram | undefined;
 
   constructor(config: NumberParameterConfig) {
     super(config);

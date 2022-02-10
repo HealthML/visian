@@ -51,11 +51,15 @@
   "pixel-brush": "Pinsel (B)",
   "smart-brush": "Smarter Pinsel (S)",
   "bounded-smart-brush": "Begrenzter Smarter Pinsel (R)",
+  "bounded-smart-eraser": "Begrenzter Smarter Radierer",
   "smart-brush-3d": "3D Smarter Pinsel (D)",
   "smart-brush-3d-title": "3D Smarter Pinsel",
   "pixel-eraser": "Radierer (E)",
+  "smart-eraser": "Smarter Radierer",
   "outline-tool": "Umrandungswerkzeug (O)",
+  "outline-eraser": "Umrandungsradierer",
   "clear-slice": "Schicht leeren (Entf)",
+  "clear-image": "Bild leeren (Strg + Entf)",
   "fly-tool": "Flugsteuerung (F)",
   "plane-tool": "Ebenenwerkzeug (P)",
 
@@ -77,6 +81,12 @@
   "measurement-length": "Länge",
   "discard-measurement": "Messung verwerfen",
 
+  "threshold-annotation": "Grenzwert Annotation (Strg + P)",
+  "threshold-annotation-title": "Grenzwert Annotation",
+  "threshold-annotation-threshold": "Grenzwerte",
+  "discard-threshold-annotation": "Verwerfen (Esc)",
+  "submit-threshold-annotation": "Anwenden (Enter)",
+
   "dilate-erode": "Erweitern/Erodieren (Strg + D)",
   "dilate-erode-title": "Erweitern/Erodieren",
   "dilate-erode-steps": "Schritte",
@@ -89,7 +99,7 @@
   "erase-application-data-confirmation": "Alle Anwendungsdaten löschen?",
 
   "layers": "Ebenen",
-  "base-image-layer": "Grund-Bildebene",
+  "main-image-layer": "Haupt-Bildebene",
   "add-annotation-layer": "Neue Annotation hinzufügen",
   "no-layers": "Keine Ebenen geladen.",
   "untitled-layer": "Unbenannte Ebene",
@@ -212,5 +222,5 @@
   "info-voxel-data": "Die Voxeldaten des geladenen Bildes werden unten links im Editor angezeigt. Auf langsamerer Hardware kann das zu Performanceproblemen führen. In diesem Fall ist die Option \"Verzögerung\" empfohlen. Dann werden die Voxeldaten nur angezeigt, wenn die Maus nicht mehr bewegt wird.",
   "info-performance-mode": "Die Anzeigequalität hat nur im 3D-Modus einen Effekt. Dort kann eine höhere Anzeigequalität zu Performanceproblemen führen. Auf langsamerer Hardware ist die niedrige Anzeigequalität empfohlen.",
   "info-layer-stack": "Im Ebenenstapel können die Ebenen neu angeordnet (drag and drop) und versteckt werden. Ebenen, die weiter oben im Stapel erscheinen, werden über den anderen Ebenen in der 2D und 3D Ansicht angezeigt. Weitere Aktionen auf einer einzelnen Ebene sind über einen Rechtsklick auf die Ebene im Stapel erreichbar.",
-  "info-base-image-layer": "Die Daten der Grund-Bildebene werden für alle Regiongrowing Werkzeuge genutzt und (wenn die Voxeldatenanzeige aktiviert ist) unten links im Editorbildschirm angezeigt. Die Grund-Bildebene wird automatisch auf die unterste sichtbare Bildebene im Ebenenstapel gesetzt."
+  "info-main-image-layer": "Die Daten der Haupt-Bildebene werden für alle Regiongrowing Werkzeuge genutzt und (wenn die Voxeldatenanzeige aktiviert ist) unten links im Editorbildschirm angezeigt. Die Haupt-Bildebene wird automatisch auf die oberste sichtbare Bildebene im Ebenenstapel gesetzt."
 }

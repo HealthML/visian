@@ -53,7 +53,10 @@ export class ToolGroup<N extends string>
         ? nameOrTool
         : nameOrTool.name
       : this.toolNames[0];
-    if (setAsGlobalActiveTool) this.document.tools?.setActiveTool(nameOrTool);
+
+    if (setAsGlobalActiveTool) {
+      this.document.tools?.setActiveTool(nameOrTool, false);
+    }
   }
 
   // Serialization

@@ -77,7 +77,7 @@ export class BlipRenderer3D implements IBlipRenderer3D, IDisposable {
 
     this.disposers.push(
       reaction(
-        () => Boolean(document.baseImageLayer?.is3DLayer),
+        () => Boolean(document.mainImageLayer?.is3DLayer),
         (is3D) => {
           runInAction(() => {
             const imageProperties = {
@@ -100,8 +100,8 @@ export class BlipRenderer3D implements IBlipRenderer3D, IDisposable {
       ),
       reaction(
         () => [
-          document.baseImageLayer?.image.voxelCount.toArray(),
-          document.baseImageLayer?.image.defaultViewType,
+          document.mainImageLayer?.image.voxelCount.toArray(),
+          document.mainImageLayer?.image.defaultViewType,
         ],
         this.resizeRenderTargets,
       ),
@@ -190,12 +190,18 @@ export class BlipRenderer3D implements IBlipRenderer3D, IDisposable {
     layer = this.document.activeLayer as IImageLayer,
     shouldReplace = false,
   ) {
-    if (layer.kind !== "image" || !layer.isAnnotation) {
+    if (
+      layer.kind !== "image" ||
+      !layer.isAnnotation ||
+      !this.document.renderer
+    ) {
       return;
     }
 
     const annotation = layer.image as RenderedImage;
 
+    const isXREnabled = this.document.renderer.xr.enabled;
+    this.document.renderer.xr.enabled = false;
     if (shouldReplace) {
       annotation.writeToTexture(this.outputTexture, MergeFunction.Replace);
     } else {
@@ -207,6 +213,7 @@ export class BlipRenderer3D implements IBlipRenderer3D, IDisposable {
           : this.steps,
       );
     }
+    this.document.renderer.xr.enabled = isXREnabled;
 
     this.discard();
   }
@@ -228,20 +235,20 @@ export class BlipRenderer3D implements IBlipRenderer3D, IDisposable {
   }
 
   protected resizeRenderTargets = () => {
-    const { baseImageLayer } = this.document;
-    if (!baseImageLayer) return;
+    const { mainImageLayer } = this.document;
+    if (!mainImageLayer) return;
 
-    const { voxelCount } = baseImageLayer.image;
+    const { voxelCount } = mainImageLayer.image;
 
     let width = 0;
     let height = 0;
     let depth = 1;
-    if (baseImageLayer.is3DLayer) {
+    if (mainImageLayer.is3DLayer) {
       width = voxelCount.x;
       height = voxelCount.y;
       depth = voxelCount.z;
     } else {
-      [width, height] = getPlaneAxes(baseImageLayer.image.defaultViewType).map(
+      [width, height] = getPlaneAxes(mainImageLayer.image.defaultViewType).map(
         (axis) => voxelCount[axis],
       );
     }

@@ -255,11 +255,11 @@ const LayerListItem = observer<{
                   onPointerUp={stopTap}
                   onContextMenu={handleContextMenu}
                 >
-                  {layer === store?.editor.activeDocument?.baseImageLayer && (
+                  {layer === store?.editor.activeDocument?.mainImageLayer && (
                     <InfoText
                       icon="circle"
-                      infoTx="info-base-image-layer"
-                      titleTx="base-image-layer"
+                      infoTx="info-main-image-layer"
+                      titleTx="main-image-layer"
                     />
                   )}
                 </ListItem>

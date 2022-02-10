@@ -1,4 +1,5 @@
 import {
+  Histogram,
   INumberRangeParameter,
   ScaleType,
   SerializationMethod,
@@ -25,7 +26,7 @@ export class NumberRangeParameter
   public stepSize?: number;
   public extendBeyondMinMax?: boolean;
 
-  public getHistogram?: () => number[] | undefined;
+  public getHistogram?: () => Histogram | undefined;
 
   constructor(config: NumberRangeParameterConfig) {
     super(config);

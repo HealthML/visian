@@ -51,7 +51,7 @@ export class Blip3DMaterial extends Texture3DMaterial implements IDisposable {
 
     this.disposers.push(
       reaction(
-        () => Boolean(document.baseImageLayer?.is3DLayer),
+        () => Boolean(document.mainImageLayer?.is3DLayer),
         (is3D: boolean) => {
           if (is3D) {
             this.defines.VOLUMETRIC_IMAGE = "";

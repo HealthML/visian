@@ -125,7 +125,7 @@ export class Viewport2D
 
   public get defaultViewType() {
     return (
-      this.document.baseImageLayer?.image.defaultViewType ?? ViewType.Transverse
+      this.document.mainImageLayer?.image.defaultViewType ?? ViewType.Transverse
     );
   }
 
@@ -210,7 +210,7 @@ export class Viewport2D
   };
 
   public getMaxSlice(viewType = this.mainViewType): number {
-    const sliceCount = this.document.baseImageLayer?.image?.voxelCount.getFromView(
+    const sliceCount = this.document.mainImageLayer?.image?.voxelCount.getFromView(
       viewType,
     );
     return sliceCount ? sliceCount - 1 : 0;
@@ -266,7 +266,7 @@ export class Viewport2D
       bottom: false,
     };
 
-    if (!this.document.baseImageLayer) return dragPoint;
+    if (!this.document.mainImageLayer) return dragPoint;
 
     const [widthAxis, heightAxis] = getPlaneAxes(this.hoveredViewType);
     const orthogonalAxis = getOrthogonalAxis(this.hoveredViewType);
@@ -276,18 +276,18 @@ export class Viewport2D
     ];
     dragPoint[widthAxis] =
       this.hoveredUV.x *
-      this.document.baseImageLayer.image.voxelCount[widthAxis];
+      this.document.mainImageLayer.image.voxelCount[widthAxis];
     dragPoint[heightAxis] =
       this.hoveredUV.y *
-      this.document.baseImageLayer.image.voxelCount[heightAxis];
+      this.document.mainImageLayer.image.voxelCount[heightAxis];
 
     if (!(this.document.tools.activeTool instanceof OutlineTool)) {
       dragPoint[widthAxis] = Math.floor(dragPoint[widthAxis]);
       dragPoint[heightAxis] = Math.floor(dragPoint[heightAxis]);
     }
 
-    const scanWidth = this.document.baseImageLayer.image.voxelCount[widthAxis];
-    const scanHeight = this.document.baseImageLayer.image.voxelCount[
+    const scanWidth = this.document.mainImageLayer.image.voxelCount[widthAxis];
+    const scanHeight = this.document.mainImageLayer.image.voxelCount[
       heightAxis
     ];
 
@@ -316,7 +316,7 @@ export class Viewport2D
       activeLayer.kind === "image" &&
       activeLayer.isVisible
         ? (activeLayer as IImageLayer)
-        : this.document.baseImageLayer;
+        : this.document.mainImageLayer;
 
     if (!layer) return new Vector([0], false);
 
@@ -325,13 +325,13 @@ export class Viewport2D
 
   public get isVoxelHovered() {
     return Boolean(
-      this.document.baseImageLayer &&
+      this.document.mainImageLayer &&
         this.hoveredVoxel.x >= 0 &&
         this.hoveredVoxel.y >= 0 &&
         this.hoveredVoxel.z >= 0 &&
-        this.hoveredVoxel.x < this.document.baseImageLayer.image.voxelCount.x &&
-        this.hoveredVoxel.y < this.document.baseImageLayer.image.voxelCount.y &&
-        this.hoveredVoxel.z < this.document.baseImageLayer.image.voxelCount.z,
+        this.hoveredVoxel.x < this.document.mainImageLayer.image.voxelCount.x &&
+        this.hoveredVoxel.y < this.document.mainImageLayer.image.voxelCount.y &&
+        this.hoveredVoxel.z < this.document.mainImageLayer.image.voxelCount.z,
     );
   }
 
