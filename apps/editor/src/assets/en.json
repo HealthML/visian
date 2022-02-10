@@ -94,6 +94,7 @@
   "add-annotation-layer": "Add new annotation",
   "no-layers": "No layers loaded.",
   "untitled-layer": "Untitled layer",
+  "untitled-layer-group": "Untitled layer group",
   "layer-settings": "Layer Settings",
   "opacity": "Opacity",
   "background-color": "Background Color",
@@ -104,6 +105,8 @@
   "rename-layer": "Rename Layer",
   "delete-layer": "Delete Layer",
   "delete-layer-confirmation": "Delete layer \"{{layer}}\"?",
+  "delete-layer-group": "Delete Layer Group",
+  "delete-layer-group-confirmation": "Delete layer group \"{{layerGroup}}\"?",
 
   "view-settings": "View Settings",
   "transverse": "Transverse (1)",

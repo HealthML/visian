@@ -12,6 +12,7 @@ import {
   TrackingLog,
   ErrorNotification,
   ValueType,
+  ILayerGroup,
   PerformanceMode,
 } from "@visian/ui-shared";
 import {
@@ -182,6 +183,7 @@ export class Document
       setActiveLayer: action,
       setMeasurementDisplayLayer: action,
       setMeasurementType: action,
+      reorderLayersForGrouping: action,
       addLayer: action,
       addNewAnnotationLayer: action,
       moveLayer: action,
@@ -313,10 +315,28 @@ export class Document
     this.measurementType = measurementType;
   };
 
+  public reorderLayersForGrouping = (idOrLayer: string | ILayer): void => {
+    const layer =
+      typeof idOrLayer === "string" ? this.getLayer(idOrLayer) : idOrLayer;
+    if (!layer) return;
+    if (layer.kind === "group") {
+      (layer as ILayerGroup).layers.forEach((childLayer, index) => {
+        this.moveLayer(childLayer, this.layerIds.indexOf(layer.id) + index + 1);
+      });
+    }
+    if (layer.parent) {
+      // TODO: Move to beginning or end of group based on image/annotation
+      this.moveLayer(layer, this.layerIds.indexOf(layer.parent.id + 1));
+    }
+  };
+
   public addLayer = (...newLayers: Layer[]): void => {
     newLayers.forEach((layer) => {
       this.layerMap[layer.id] = layer;
-      if (layer.isAnnotation) {
+      if (layer.kind === "group") {
+        this.layerIds.unshift(layer.id);
+        this.reorderLayersForGrouping(layer);
+      } else if (layer.isAnnotation) {
         this.layerIds.unshift(layer.id);
       } else {
         // insert image layer after all annotation layers
@@ -329,6 +349,7 @@ export class Document
         }
         this.layerIds.splice(insertIndex, 0, layer.id);
       }
+      if (layer.parent) this.reorderLayersForGrouping(layer);
     });
   };
 

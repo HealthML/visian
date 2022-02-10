@@ -20,6 +20,8 @@ export interface ListItemProps extends React.HTMLAttributes<HTMLDivElement> {
    */
   isLast?: boolean;
 
+  isChild?: boolean;
+
   isLabelEditable?: boolean;
   onChangeLabelText?: (string: string) => void;
   onConfirmLabelText?: (value: string) => void;

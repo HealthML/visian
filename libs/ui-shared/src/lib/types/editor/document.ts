@@ -95,6 +95,8 @@ export interface IDocument {
   /** Sets the type of measurement that should be displayed. */
   setMeasurementType(measurementType: MeasurementType): void;
 
+  reorderLayersForGrouping(idOrLayer: string | ILayer): void;
+
   /** Adds a layer to the document. */
   addLayer(layer: ILayer): void;
 

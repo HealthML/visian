@@ -5,6 +5,7 @@ import {
   FloatingUIButton,
   IImageLayer,
   ILayer,
+  ILayerGroup,
   InfoText,
   List,
   ListItem,
@@ -75,7 +76,8 @@ const LayerListItem = observer<{
   index: number;
   isActive?: boolean;
   isLast?: boolean;
-}>(({ layer, index, isActive, isLast }) => {
+  isChild?: boolean;
+}>(({ layer, index, isActive, isLast, isChild }) => {
   const store = useStore();
 
   const toggleAnnotationVisibility = useCallback(() => {
@@ -251,6 +253,7 @@ const LayerListItem = observer<{
                   onTrailingIconPress={toggleAnnotationVisibility}
                   isActive={isActive}
                   isLast={isLast || snapshot.isDragging}
+                  isChild={isChild}
                   onPointerDown={handlePointerDown}
                   onPointerUp={stopTap}
                   onContextMenu={handleContextMenu}
@@ -318,6 +321,229 @@ const LayerListItem = observer<{
         <ContextMenuItem
           labelTx="delete-layer"
           onPointerDown={deleteLayer}
+          isLast
+        />
+      </ContextMenu>
+    </>
+  );
+});
+
+const LayerGroupListItem = observer<{
+  layerGroup: ILayerGroup;
+  index: number;
+  isActive?: boolean;
+  isLast?: boolean;
+}>(({ layerGroup, index, isActive, isLast }) => {
+  const store = useStore();
+
+  // TODO: Automatically adjust group visibility (icon) if all children (in)visible
+  const toggleAnnotationVisibility = useCallback(() => {
+    layerGroup.layers.forEach((layer) => {
+      layer.setIsVisible(!layerGroup.isVisible);
+    });
+    layerGroup.setIsVisible(!layerGroup.isVisible);
+  }, [layerGroup]);
+
+  // Color Modal Toggling
+  // const [areLayerSettingsOpen, setAreLayerSettingsOpen] = useState(false);
+  // const isOpeningRef = useRef(false);
+  // const resetOpeningRef = useCallback(() => {
+  //   isOpeningRef.current = false;
+  // }, []);
+  // const [schedule, cancel] = useDelay(resetOpeningRef, 25);
+  // const openLayerSettings = useCallback(() => {
+  //   setAreLayerSettingsOpen(true);
+  //   isOpeningRef.current = true;
+  //   schedule();
+  // }, [schedule]);
+  // const closeLayerSettings = useCallback(() => {
+  //   if (!isOpeningRef.current) setAreLayerSettingsOpen(false);
+  //   isOpeningRef.current = false;
+  //   cancel();
+  // }, [cancel]);
+
+  // Color Modal Positioning
+  const [colorRef, setColorRef] = useState<
+    HTMLDivElement | SVGSVGElement | null
+  >(null);
+
+  const trailingIconRef = useRef<SVGSVGElement | null>(null);
+
+  const [isGroupOpen, setIsGroupOpen] = useState(true);
+
+  const [startTap1, stopTap] = useShortTap(
+    useCallback(() => {
+      // setIsGroupOpen(!isGroupOpen);
+    }, []),
+  );
+  const startTap2 = useDoubleTap(
+    useCallback((event: React.PointerEvent) => {
+      if (event.pointerType === "mouse") return;
+      setContextMenuPosition({ x: event.clientX, y: event.clientY });
+    }, []),
+  );
+  const startTap = useForwardEvent(startTap1, startTap2);
+
+  // Context Menu
+  const [contextMenuPosition, setContextMenuPosition] = useState<Pixel | null>(
+    null,
+  );
+  const closeContextMenu = useCallback(() => {
+    setContextMenuPosition(null);
+  }, []);
+  useEffect(() => {
+    setContextMenuPosition(null);
+  }, [store?.editor.activeDocument?.viewSettings.viewMode]);
+
+  const { t } = useTranslation();
+
+  // const exportLayer = useCallback(() => {
+  //   if (layer.kind !== "image") return;
+  //   (layer as ImageLayer).quickExport().then(() => {
+  //     setContextMenuPosition(null);
+  //   });
+  // }, [layer]);
+
+  const deleteLayerGroup = useCallback(() => {
+    if (
+      // eslint-disable-next-line no-alert
+      window.confirm(
+        t("delete-layer-group-confirmation", { layerGroup: layerGroup.title }),
+      )
+    ) {
+      layerGroup.delete();
+    }
+    setContextMenuPosition(null);
+  }, [layerGroup, t]);
+
+  // Press Handler
+  const handlePointerDown = useCallback(
+    (event: React.PointerEvent<HTMLDivElement>) => {
+      if (
+        colorRef?.contains(event.target as Node) ||
+        trailingIconRef.current?.contains(event.target as Node)
+      ) {
+        return;
+      }
+
+      if (event.button === PointerButton.LMB) {
+        startTap(event);
+      } else if (event.button === PointerButton.RMB) {
+        setContextMenuPosition({ x: event.clientX, y: event.clientY });
+      }
+    },
+    [colorRef, startTap],
+  );
+
+  const handleContextMenu = (event: React.MouseEvent<HTMLDivElement>) => {
+    event.preventDefault();
+  };
+
+  // Layer Renaming Handling
+  const [isLayerGroupNameEditable, setIsLayerGroupNameEditable] = useState(
+    false,
+  );
+  const startEditingLayerGroupName = useCallback(
+    (event: React.PointerEvent<HTMLDivElement>) => {
+      event.preventDefault();
+      setIsLayerGroupNameEditable(true);
+      closeContextMenu();
+    },
+    [closeContextMenu],
+  );
+  const stopEditingLayerGroupName = useCallback(() => {
+    setIsLayerGroupNameEditable(false);
+  }, []);
+
+  const layers = store?.editor.activeDocument?.layers;
+  const layerCount = layers?.length;
+  const activeLayer = store?.editor.activeDocument?.activeLayer;
+  const activeLayerIndex = layers?.findIndex((layer) => layer === activeLayer);
+
+  const modalRootRef = useModalRoot();
+  return (
+    <>
+      <Draggable
+        draggableId={layerGroup.id}
+        index={index}
+        // isDragDisabled={areLayerSettingsOpen}
+      >
+        {(provided: DraggableProvided, snapshot: DraggableStateSnapshot) => {
+          const node = (
+            <Observer>
+              {() => (
+                <ListItem
+                  {...provided.draggableProps}
+                  {...provided.dragHandleProps}
+                  ref={provided.innerRef}
+                  icon={{
+                    color: layerGroup.color || "text",
+                    icon: isGroupOpen ? "arrowUp" : "arrowDown",
+                  }}
+                  iconRef={setColorRef}
+                  onIconPress={() => {
+                    setIsGroupOpen(!isGroupOpen);
+                  }}
+                  labelTx={
+                    layerGroup.title ? undefined : "untitled-layer-group"
+                  }
+                  label={layerGroup.title}
+                  isLabelEditable={isLayerGroupNameEditable}
+                  onChangeLabelText={layerGroup.setTitle}
+                  onConfirmLabelText={stopEditingLayerGroupName}
+                  trailingIcon={layerGroup.isVisible ? "eye" : "eyeCrossed"}
+                  disableTrailingIcon={!layerGroup.isVisible}
+                  trailingIconRef={trailingIconRef}
+                  onTrailingIconPress={toggleAnnotationVisibility}
+                  isActive={isActive}
+                  isLast={isLast || snapshot.isDragging}
+                  onPointerDown={handlePointerDown}
+                  onPointerUp={stopTap}
+                  onContextMenu={handleContextMenu}
+                />
+              )}
+            </Observer>
+          );
+
+          return snapshot.isDragging && modalRootRef.current
+            ? ReactDOM.createPortal(node, modalRootRef.current)
+            : node;
+        }}
+      </Draggable>
+      {isGroupOpen &&
+        layerGroup.layers.map((layer, layerIndex) => (
+          <LayerListItem
+            key={layer.id}
+            layer={layer}
+            index={index + layerIndex + 1}
+            isActive={layer === activeLayer}
+            isLast={
+              index + layerIndex + 1 === layerCount! - 1 ||
+              index + layerIndex + 1 + 1 === activeLayerIndex
+            }
+            isChild
+          />
+        ))}
+      {/* <LayerSettings
+        layer={layer}
+        isOpen={areLayerSettingsOpen}
+        anchor={colorRef}
+        position="right"
+        onOutsidePress={closeLayerSettings}
+      /> */}
+      <ContextMenu
+        anchor={contextMenuPosition}
+        isOpen={Boolean(contextMenuPosition)}
+        onOutsidePress={closeContextMenu}
+      >
+        {/* <ContextMenuItem labelTx="export-layer" onPointerDown={exportLayer} /> */}
+        <ContextMenuItem
+          labelTx="rename-layer"
+          onPointerDown={startEditingLayerGroupName}
+        />
+        <ContextMenuItem
+          labelTx="delete-layer"
+          onPointerDown={deleteLayerGroup}
           isLast
         />
       </ContextMenu>
@@ -409,18 +635,35 @@ export const Layers: React.FC = observer(() => {
               >
                 {layerCount ? (
                   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                  layers!.map((layer, index) => (
-                    <LayerListItem
-                      key={layer.id}
-                      layer={layer}
-                      index={index}
-                      isActive={layer === activeLayer}
-                      isLast={
-                        index === layerCount - 1 ||
-                        index + 1 === activeLayerIndex
-                      }
-                    />
-                  ))
+                  layers!.map((layer, index) =>
+                    layer.kind === "group" ? (
+                      <LayerGroupListItem
+                        key={layer.id}
+                        layerGroup={layer as ILayerGroup}
+                        index={index}
+                        isActive={layer === activeLayer}
+                        isLast={
+                          index === layerCount - 1 ||
+                          index + 1 === activeLayerIndex
+                        }
+                      />
+                    ) : (
+                      <>
+                        {layer.parent ? undefined : (
+                          <LayerListItem
+                            key={layer.id}
+                            layer={layer}
+                            index={index}
+                            isActive={layer === activeLayer}
+                            isLast={
+                              index === layerCount - 1 ||
+                              index + 1 === activeLayerIndex
+                            }
+                          />
+                        )}
+                      </>
+                    ),
+                  )
                 ) : (
                   <ListItem isLast>
                     <SubtleText tx="no-layers" />

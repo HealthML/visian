@@ -94,6 +94,7 @@
   "add-annotation-layer": "Neue Annotation hinzufügen",
   "no-layers": "Keine Ebenen geladen.",
   "untitled-layer": "Unbenannte Ebene",
+  "untitled-layer-group": "Unbenannte Ebenengruppe",
   "layer-settings": "Ebeneneinstellungen",
   "opacity": "Deckkraft",
   "background-color": "Hintergrundfarbe",
@@ -104,6 +105,8 @@
   "rename-layer": "Ebene umbenennen",
   "delete-layer": "Ebene löschen",
   "delete-layer-confirmation": "Ebene \"{{layer}}\" löschen?",
+  "delete-layer-group": "Ebenengruppe löschen",
+  "delete-layer-group-confirmation": "Ebenengruppe \"{{layerGroup}}\" löschen?",
 
   "view-settings": "Ansichtseinstellungen",
   "transverse": "Transverse (1)",
