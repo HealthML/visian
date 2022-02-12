@@ -6,6 +6,7 @@ import {
 } from "@visian/ui-shared";
 import { Annotation } from "./annotation";
 import { AnnotationTask } from "./annotationTask";
+import { Campaign } from "./campaign";
 import { Sample } from "./sample";
 import { User } from "./user";
 
@@ -17,6 +18,7 @@ export class Task implements ITask {
   public samples: Sample[];
   public annotations: Annotation[];
   public assignee: User;
+  public campaign?: Campaign;
 
   // TODO: Properly type API response data
   constructor(task: any) {
@@ -31,6 +33,9 @@ export class Task implements ITask {
       (annotation: any) => new Annotation(annotation),
     );
     this.assignee = new User(task.assignee);
+    if (task.campaign && Object.keys(task.campaign).length > 1) {
+      this.campaign = new Campaign(task.campaign);
+    }
   }
 
   public addNewAnnotation(): void {
@@ -56,6 +61,7 @@ export class Task implements ITask {
         annotation.toJSON(),
       ),
       assignee: this.assignee.toJSON(),
+      campaign: this.campaign ? this.campaign.toJSON() : {},
     };
   }
 }
