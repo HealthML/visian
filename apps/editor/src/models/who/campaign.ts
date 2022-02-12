@@ -1,16 +1,10 @@
-import { User, UserSnapshot } from "./user";
+import {
+  CampaignSnapshot,
+  ICampaign,
+} from "libs/ui-shared/src/lib/types/who/campaign";
+import { User } from "./user";
 
-export interface CampaignSnapshot {
-  campaignUUID: string;
-  name: string;
-  description: string;
-  status: string;
-  datasets: string[];
-  annotators: UserSnapshot[];
-  reviewers: UserSnapshot[];
-}
-
-export class Campaign {
+export class Campaign implements ICampaign {
   public campaignUUID: string;
   public name: string;
   public description: string;

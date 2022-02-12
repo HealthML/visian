@@ -1,5 +1,6 @@
 import { AnnotationSnapshot, IAnnotation } from "./annotation";
 import { AnnotationTaskSnapshot, IAnnotationTask } from "./annotationTask";
+import { CampaignSnapshot, ICampaign } from "./campaign";
 import { ISample } from "./sample";
 import { IUser, UserSnapshot } from "./user";
 
@@ -10,6 +11,7 @@ export interface TaskSnapshot {
   annotationTasks: AnnotationTaskSnapshot[];
   annotations?: AnnotationSnapshot[];
   assignee: UserSnapshot;
+  campaign: CampaignSnapshot | Record<string, never>;
 }
 
 export enum TaskType {
@@ -26,6 +28,7 @@ export interface ITask {
   samples: ISample[];
   annotations: IAnnotation[];
   assignee: IUser;
+  campaign?: ICampaign;
 
   addNewAnnotation(): void;
   toJSON(): TaskSnapshot;
