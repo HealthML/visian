@@ -1,5 +1,6 @@
 import type { Image, Vector, ViewType, Voxel } from "@visian/utils";
 import type { Matrix4 } from "three";
+import { Histogram } from "./types";
 import { MarkerConfig } from "./markers";
 
 /**
@@ -117,6 +118,9 @@ export interface IImageLayer extends ILayer {
    */
   contrast: number;
 
+  densityHistogram?: Histogram;
+  gradientHistogram?: Histogram;
+
   volume: number | null;
   area: { slice: number; viewType: ViewType; area: number } | null;
 
@@ -149,6 +153,8 @@ export interface IImageLayer extends ILayer {
 
   computeVolume(): Promise<void>;
   computeArea(viewType: ViewType, slice: number): Promise<void>;
+
+  setGradientHistogram(histogram?: Histogram): void;
 }
 
 /** A group of layers. */

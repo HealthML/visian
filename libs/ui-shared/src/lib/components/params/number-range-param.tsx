@@ -22,6 +22,7 @@ export const NumberRangeParam: React.FC<Partial<NumberRangeParamProps>> = ({
   stepSize,
   value,
   setValue,
+  getHistogram,
 
   defaultValue,
   onBeforeValueChange,
@@ -42,6 +43,7 @@ export const NumberRangeParam: React.FC<Partial<NumberRangeParamProps>> = ({
     stepSize={stepSize}
     unlockValueLabelRange={extendBeyondMinMax}
     value={value}
+    histogram={getHistogram?.()}
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onChange={setValue as any}
   />

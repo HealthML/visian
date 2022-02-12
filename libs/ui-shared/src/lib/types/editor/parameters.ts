@@ -1,4 +1,5 @@
 import type React from "react";
+import { Histogram } from ".";
 import type { SerializationMethod, TooltipPosition } from "../../components";
 import { ILayer } from "./layers";
 import type { ScaleType } from "./types";
@@ -134,7 +135,7 @@ export interface INumberParameter extends IParameter<number> {
   extendBeyondMinMax?: boolean;
 
   /** An optional method that computes frequency data to display along the slider. */
-  getHistogram?: () => number[] | undefined;
+  getHistogram?: () => Histogram | undefined;
 }
 
 /** A numeric range parameter, typically displayed as a slider with two thumbs. */

@@ -42,11 +42,15 @@
   "pixel-brush": "Brush (B)",
   "smart-brush": "Smart Brush (S)",
   "bounded-smart-brush": "Bounded Smart Brush (R)",
+  "bounded-smart-eraser": "Bounded Smart Eraser",
   "smart-brush-3d": "3D Smart Brush (D)",
   "smart-brush-3d-title": "3D Smart Brush",
   "pixel-eraser": "Eraser (E)",
+  "smart-eraser": "Smart Eraser",
   "outline-tool": "Outline Tool (O)",
+  "outline-eraser": "Outline Eraser",
   "clear-slice": "Clear Slice (Del)",
+  "clear-image": "Clear Image (Ctrl + Del)",
   "fly-tool": "Fly Controls (F)",
   "plane-tool": "Plane Tool (P)",
 
@@ -68,6 +72,12 @@
   "measurement-length": "Length",
   "discard-measurement": "Discard Measurement",
 
+  "threshold-annotation": "Threshold Annotation (Strg + P)",
+  "threshold-annotation-title": "Threshold Annotation",
+  "threshold-annotation-threshold": "Threshold",
+  "discard-threshold-annotation": "Discard (Esc)",
+  "submit-threshold-annotation": "Apply (Enter)",
+
   "dilate-erode": "Dilate/Erode (Ctrl + D)",
   "dilate-erode-title": "Dilate/Erode",
   "dilate-erode-steps": "Steps",
@@ -80,7 +90,7 @@
   "erase-application-data-confirmation": "Erase all application data?",
 
   "layers": "Layers",
-  "base-image-layer": "Base Image Layer",
+  "main-image-layer": "Main Image Layer",
   "add-annotation-layer": "Add new annotation",
   "no-layers": "No layers loaded.",
   "untitled-layer": "Untitled layer",
@@ -204,5 +214,5 @@
   "info-voxel-data": "The voxel data of the loaded image is displayed in the bottom left corner of the editor. On slower hardware, this can lead to reduced performance. In this case, the option \"Delay\" is recommended. This will result in voxel data only being displayed when you don't move the mouse.",
   "info-performance-mode": "The view quality only has an effect in the 3D mode. There, the higher view quality can lead to reduced performance. On slower hardware, the lower view quality is recommended.",
   "info-layer-stack": "In the layer stack, you can reorder (drag and drop) and hide layers. Layers higher up in the stack show up above the other layers in both the 2D and 3D view. To perform other actions on a single layer, right click the layer in the stack.",
-  "info-base-image-layer": "The data of the base image layer is used for all region growing tools and is displayed in the bottom left of the editor screen (if the voxel data display is enabled). It is automatically set to the bottom most visible image layer in the layer stack."
+  "info-main-image-layer": "The data of the main image layer is used for all region growing tools and is displayed in the bottom left of the editor screen (if the voxel data display is enabled). It is automatically set to the top most visible image layer in the layer stack."
 }

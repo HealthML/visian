@@ -9,6 +9,7 @@ import {
   size,
   ThemeProps,
 } from "../../theme";
+import { coverMixin } from "../mixins";
 import { Text } from "../text";
 import { TextInput } from "../text-input";
 import { SliderRangeSelectionProps, ThumbProps } from "./slider.props";
@@ -147,4 +148,16 @@ export const SliderValueInput = styled(TextInput)`
   line-height: 10px;
   text-align: right;
   margin-top: -2px;
+`;
+
+export const Histogram = styled.div`
+  ${coverMixin}
+  align-items: flex-end;
+  display: flex;
+  opacity: 0.2;
+`;
+
+export const HistogramBar = styled.div`
+  background-color: ${color("text")};
+  flex: 1;
 `;

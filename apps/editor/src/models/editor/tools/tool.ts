@@ -3,9 +3,10 @@ import {
   IconType,
   IDocument,
   ITool,
+  TaskType,
   ViewMode,
 } from "@visian/ui-shared";
-import { ISerializable } from "@visian/utils";
+import { ISerializable, isFromWHO } from "@visian/utils";
 import { makeObservable, observable } from "mobx";
 
 import { Parameter, ParameterSnapshot } from "../parameters";
@@ -91,7 +92,13 @@ export class Tool<N extends string>
       : undefined;
   }
 
-  public canActivate(isSupervisorMode = false): boolean {
+  public get isActive(): boolean {
+    return this.document.tools.activeTool === this;
+  }
+
+  public canActivate(): boolean {
+    const isSupervisorMode =
+      isFromWHO() && this.document.currentTask?.kind === TaskType.Review;
     return Boolean(
       !(isSupervisorMode && this.isDrawingTool) &&
         (!this.supportedViewModes ||

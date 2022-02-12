@@ -94,7 +94,7 @@ export class SliceMaterial extends THREE.ShaderMaterial implements IDisposable {
         { fireImmediately: true },
       ),
       reaction(
-        () => Boolean(editor.activeDocument?.baseImageLayer?.is3DLayer),
+        () => Boolean(editor.activeDocument?.mainImageLayer?.is3DLayer),
         (is3D: boolean) => {
           if (is3D) {
             this.defines.VOLUMETRIC_IMAGE = "";
@@ -106,7 +106,7 @@ export class SliceMaterial extends THREE.ShaderMaterial implements IDisposable {
         { fireImmediately: true },
       ),
       autorun(() => {
-        const imageLayer = editor.activeDocument?.baseImageLayer;
+        const imageLayer = editor.activeDocument?.mainImageLayer;
         if (!imageLayer) return;
 
         const image = imageLayer.image as RenderedImage;
@@ -224,9 +224,13 @@ export class SliceMaterial extends THREE.ShaderMaterial implements IDisposable {
           // additional layer for 3d region growing preview
           new THREE.Color(
             color(
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              (editor.activeDocument?.tools.regionGrowingRenderer3D
-                .previewColor as any) || "foreground",
+              (editor.activeDocument?.tools.regionGrowingRenderer3D.holdsPreview
+                ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  (editor.activeDocument?.tools.regionGrowingRenderer3D
+                    .previewColor as any)
+                : // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  (editor.activeDocument?.tools.thresholdAnnotationRenderer3D
+                    .previewColor as any)) || "foreground",
             )({ theme: editor.theme }),
           ),
           ...layerColors,

@@ -1,8 +1,10 @@
 import {
   AbsoluteCover,
+  FlexRow,
   FloatingUIButton,
   Notification,
   Spacer,
+  TaskType,
   Text,
 } from "@visian/ui-shared";
 import { isFromWHO } from "@visian/utils";
@@ -15,6 +17,7 @@ import { whoHome } from "../../../constants";
 import {
   DilateErodeModal,
   SmartBrush3DModal,
+  ThresholdAnnotationModal,
   MeasurementModal,
 } from "../action-modal";
 import { AIBar } from "../ai-bar";
@@ -36,7 +39,6 @@ import { UIOverlayProps } from "./ui-overlay.props";
 import { SettingsPopUp } from "../settings-popup";
 import { MeasurementPopUp } from "../measurement-popup";
 import { SupervisorPanel } from "../supervisor-panel";
-import { TaskType } from "../../../models/who";
 
 const Container = styled(AbsoluteCover)`
   align-items: stretch;
@@ -112,6 +114,11 @@ const Axes3D = styled.div`
   position: absolute;
   bottom: -5px;
   left: -5px;
+`;
+
+const ModalRow = styled(FlexRow)`
+  gap: 20px;
+  align-items: flex-end;
 `;
 
 export const UIOverlay = observer<UIOverlayProps>(
@@ -235,13 +242,17 @@ export const UIOverlay = observer<UIOverlayProps>(
               <AxesSpacer>
                 <Axes3D ref={axes3dRef} />
               </AxesSpacer>
-              <AxesAndVoxel />
-              <SmartBrush3DModal />
-              <DilateErodeModal />
-              <MeasurementModal />
-              {isFromWHO() && store?.currentTask?.kind === TaskType.Review && (
-                <SupervisorPanel />
-              )}
+              <ModalRow>
+                <SmartBrush3DModal />
+                <ThresholdAnnotationModal />
+                <DilateErodeModal />
+                <MeasurementModal />
+                {isFromWHO() &&
+                  store?.currentTask?.kind === TaskType.Review && (
+                    <SupervisorPanel />
+                  )}
+                <AxesAndVoxel />
+              </ModalRow>
             </ColumnLeft>
             <ColumnCenter>
               <TopConsole />

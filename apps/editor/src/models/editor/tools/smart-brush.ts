@@ -20,7 +20,7 @@ export class SmartBrush<
       name: (isAdditive ? "smart-brush" : "smart-eraser") as N,
       altToolName: (isAdditive ? "smart-eraser" : "smart-brush") as N,
       infoTx: "info-smart-brush",
-      icon: isAdditive ? "magicBrush" : "eraser",
+      icon: isAdditive ? "magicBrush" : "smartEraser",
       supportedViewModes: ["2D"],
       supportedLayerKinds: ["image"],
       supportAnnotationsOnly: true,

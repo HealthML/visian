@@ -10,6 +10,7 @@ export * from "./plane-tool";
 export * from "./self-deactivating-tool";
 export * from "./smart-brush-3d";
 export * from "./smart-brush";
+export * from "./threshold-annotation-tool";
 export * from "./tool-group";
 export * from "./tool";
 export * from "./tools";

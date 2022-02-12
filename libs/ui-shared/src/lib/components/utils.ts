@@ -160,12 +160,13 @@ export const useDelay = (
 export const useShortTap = <T extends Element>(
   handleShortTap: (event: React.PointerEvent<T>) => void,
   maxDuration = 300,
+  canActivate = true,
 ): [() => void, (event: React.PointerEvent<T>) => void] => {
   const timeRef = useRef<number | undefined>();
 
   const startTap = useCallback(() => {
-    timeRef.current = Date.now();
-  }, []);
+    if (canActivate) timeRef.current = Date.now();
+  }, [canActivate]);
   const stopTap = useCallback(
     (event: React.PointerEvent<T>) => {
       if (timeRef.current === undefined) return;
@@ -176,6 +177,30 @@ export const useShortTap = <T extends Element>(
   );
 
   return [startTap, stopTap];
+};
+
+export const useLongPress = <T extends Element>(
+  handleLongPress: (event: React.PointerEvent<T>) => void,
+  minDuration = 500,
+): [(event: React.PointerEvent<T>) => void, () => void] => {
+  const timerRef = useRef<NodeJS.Timer | undefined>();
+
+  const startPress = useCallback(
+    (event: React.PointerEvent<T>) => {
+      timerRef.current = (setTimeout(() => {
+        handleLongPress(event);
+      }, minDuration) as unknown) as NodeJS.Timer;
+    },
+    [handleLongPress, minDuration],
+  );
+
+  const stopPress = useCallback(() => {
+    if (timerRef.current === undefined) return;
+    clearTimeout(timerRef.current);
+    timerRef.current = undefined;
+  }, []);
+
+  return [startPress, stopPress];
 };
 
 export const useDoubleTap = <T extends Element>(
@@ -203,13 +228,14 @@ export const useOutsidePress = <T extends HTMLElement>(
   ref: React.RefObject<T>,
   callback?: (event: PointerEvent) => void,
   activateHandler?: boolean,
+  ignoreUnmounted?: boolean,
 ) => {
   const handleOutsidePress = useCallback(
     (event: PointerEvent) => {
       if (
         ref.current &&
         !ref.current.contains(event.target as Node) &&
-        document.body.contains(event.target as Node)
+        (document.body.contains(event.target as Node) || ignoreUnmounted)
       ) {
         if (callback) callback(event);
       }
