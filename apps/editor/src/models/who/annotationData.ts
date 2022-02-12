@@ -1,9 +1,6 @@
-export interface AnnotationDataSnapshot {
-  annotationDataUUID: string;
-  data: string;
-}
+import { AnnotationDataSnapshot, IAnnotationData } from "@visian/ui-shared";
 
-export class AnnotationData {
+export class AnnotationData implements IAnnotationData {
   public annotationDataUUID: string;
   public data: string;
   public correspondingLayerId = "";

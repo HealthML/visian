@@ -1,18 +1,10 @@
-export interface AnnotationTaskSnapshot {
-  annotationTaskUUID: string;
-  kind: string;
-  title: string;
-  description: string;
-}
+import {
+  AnnotationTaskSnapshot,
+  AnnotationTaskType,
+  IAnnotationTask,
+} from "@visian/ui-shared";
 
-export enum AnnotationTaskType {
-  Classification = "classification",
-  ObjectDetection = "object_detection",
-  SemanticSegmentation = "semantic_segmentation",
-  InstanceSegmentation = "instance_segmentation",
-}
-
-export class AnnotationTask {
+export class AnnotationTask implements IAnnotationTask {
   public annotationTaskUUID: string;
   public kind: AnnotationTaskType;
   public title: string;

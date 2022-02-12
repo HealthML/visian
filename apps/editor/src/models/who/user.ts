@@ -1,18 +1,8 @@
-import { Annotator, AnnotatorSnapshot } from "./annotator";
-import { Reviewer, ReviewerSnapshot } from "./reviewer";
+import { IUser, UserRole, UserSnapshot } from "@visian/ui-shared";
+import { Annotator } from "./annotator";
+import { Reviewer } from "./reviewer";
 
-export interface UserSnapshot {
-  userUUID: string;
-  idpID: string;
-  username: string;
-  birthdate: string;
-  timezone: string;
-  email: string;
-  annotatorRole: AnnotatorSnapshot | Record<string, never>;
-  reviewerRole: ReviewerSnapshot | Record<string, never>;
-}
-
-export class User {
+export class User implements IUser {
   public userUUID: string;
   public idpID: string;
   public username: string;
@@ -36,6 +26,11 @@ export class User {
     if (user.reviewerRole && Object.keys(user.reviewerRole).length > 1) {
       this.reviewerRole = new Reviewer(user.reviewerRole);
     }
+  }
+
+  // TODO: Return actual role name
+  public getRoleName(): UserRole {
+    return "Annotator";
   }
 
   public toJSON(): UserSnapshot {

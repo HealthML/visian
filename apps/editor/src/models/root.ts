@@ -6,6 +6,8 @@ import {
   IStorageBackend,
   Tab,
   ErrorNotification,
+  TaskType,
+  ITask,
 } from "@visian/ui-shared";
 import {
   createFileFromBase64,
@@ -21,7 +23,7 @@ import { DICOMWebServer } from "./dicomweb-server";
 import { Editor, EditorSnapshot } from "./editor";
 import { Tracker } from "./tracking";
 import { ProgressNotification } from "./types";
-import { Task, TaskType } from "./who";
+import { Task } from "./who";
 
 export interface RootSnapshot {
   editor: EditorSnapshot;
@@ -54,7 +56,7 @@ export class RootStore implements ISerializable<RootSnapshot>, IDisposable {
   public refs: { [key: string]: React.RefObject<HTMLElement> } = {};
   public pointerDispatch?: IDispatch;
 
-  public currentTask?: Task;
+  public currentTask?: ITask;
 
   public tracker?: Tracker;
 
@@ -96,6 +98,7 @@ export class RootStore implements ISerializable<RootSnapshot>, IDisposable {
       setError: this.setError,
       getTracker: () => this.tracker,
       getColorMode: () => this.colorMode,
+      getCurrentTask: () => this.currentTask,
     });
 
     deepObserve(this.editor, this.persist, {

@@ -5,15 +5,15 @@ import {
   fontSize,
   Modal,
   Text,
+  UserRole,
 } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
 import React, { useState } from "react";
 import styled from "styled-components";
-import { AnnotatorRole } from "../../../models/who";
 import { useStore } from "../../../app/root-store";
 
 interface AnnotatorSectionProps {
-  annotatorRole: AnnotatorRole;
+  annotatorRole: UserRole;
   annotatorName: string;
   annotationTime?: string;
   colorAddition: string;

@@ -1,24 +1,15 @@
-import { Annotation, AnnotationSnapshot, AnnotationStatus } from "./annotation";
-import { AnnotationTask, AnnotationTaskSnapshot } from "./annotationTask";
+import {
+  AnnotationStatus,
+  ITask,
+  TaskSnapshot,
+  TaskType,
+} from "@visian/ui-shared";
+import { Annotation } from "./annotation";
+import { AnnotationTask } from "./annotationTask";
 import { Sample } from "./sample";
-import { User, UserSnapshot } from "./user";
+import { User } from "./user";
 
-export interface TaskSnapshot {
-  taskUUID: string;
-  kind: string;
-  readOnly: boolean;
-  annotationTasks: AnnotationTaskSnapshot[];
-  annotations?: AnnotationSnapshot[];
-  assignee: UserSnapshot;
-}
-
-export enum TaskType {
-  Create = "create",
-  Correct = "correct",
-  Review = "review",
-}
-
-export class Task {
+export class Task implements ITask {
   public taskUUID: string;
   public kind: TaskType;
   public readOnly: boolean;

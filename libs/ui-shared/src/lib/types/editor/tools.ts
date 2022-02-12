@@ -78,7 +78,7 @@ export interface ITool<N extends string> {
   isActive: boolean;
 
   /** Returns `true` if the tool supports the current view mode & layer kind. */
-  canActivate(isSupervisorMode?: boolean): boolean;
+  canActivate(): boolean;
 
   /**
    * Called when the tool becomes active.

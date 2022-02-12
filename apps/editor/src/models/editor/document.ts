@@ -13,6 +13,7 @@ import {
   ErrorNotification,
   ValueType,
   PerformanceMode,
+  ITask,
 } from "@visian/ui-shared";
 import {
   handlePromiseSettledResult,
@@ -822,6 +823,10 @@ export class Document
 
   public get performanceMode(): PerformanceMode {
     return this.editor.performanceMode;
+  }
+
+  public get currentTask(): ITask | undefined {
+    return this.context?.getCurrentTask();
   }
 
   // Serialization

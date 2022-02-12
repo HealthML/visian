@@ -1,18 +1,6 @@
-export const AnnotatorRoles = ["Annotator", "Reviewer", "Supervisor"] as const;
-export type AnnotatorRole = typeof AnnotatorRoles[number];
+import { AnnotatorSnapshot, IAnnotator } from "@visian/ui-shared";
 
-export interface AnnotatorSnapshot {
-  annotatorUUID: string;
-  expertise: string;
-  yearsInPractice: number;
-  expectedSalary: number;
-  workCountry: string;
-  studyCountry: string;
-  selfAssessment: number;
-  degree: string;
-}
-
-export class Annotator {
+export class Annotator implements IAnnotator {
   public annotatorUUID: string;
   public expertise: string;
   public yearsInPractice: number;

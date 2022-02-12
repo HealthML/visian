@@ -1,5 +1,10 @@
 import type React from "react";
-import type { ColorMode, ErrorNotification, Theme } from "@visian/ui-shared";
+import type {
+  ColorMode,
+  ErrorNotification,
+  ITask,
+  Theme,
+} from "@visian/ui-shared";
 
 import type { Tracker } from "./tracking";
 
@@ -27,6 +32,8 @@ export interface StoreContext {
   getTracker(): Tracker | undefined;
 
   getColorMode(): ColorMode;
+
+  getCurrentTask(): ITask | undefined;
 }
 
 export interface ProgressNotification {
