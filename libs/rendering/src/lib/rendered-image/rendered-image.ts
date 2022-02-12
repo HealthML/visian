@@ -4,9 +4,6 @@ import {
   IDisposable,
   Image,
   ImageSnapshot,
-  ITKImage,
-  itkImageToImageSnapshot,
-  readMedicalImage,
   TypedArray,
   Vector,
   ViewType,
@@ -22,26 +19,19 @@ import { ImageRenderTarget } from "./image-render-target";
 export class RenderedImage<T extends TypedArray = TypedArray>
   extends Image<T>
   implements IDisposable {
-  public static fromITKImage<T2 extends TypedArray = TypedArray>(
-    image: ITKImage<T2>,
-    document?: IDocument,
-  ) {
-    return new RenderedImage(itkImageToImageSnapshot(image), document);
-  }
-
-  public static async fromFile(file: File | File[], document?: IDocument) {
-    const renderedImage = RenderedImage.fromITKImage(
-      await readMedicalImage(file),
-      document,
-    );
-    renderedImage.name = Array.isArray(file) ? file[0]?.name || "" : file.name;
-    return renderedImage;
-  }
-
   public excludeFromSnapshotTracking = ["document"];
 
-  /** Used to update the texture from the CPU. */
-  private internalTexture: THREE.DataTexture3D | THREE.DataTexture;
+  /**
+   * If this image is an annotation:
+   *    `internalTexture[THREE.NearestFilter]` is used to update the render target texture from the CPU.
+   *
+   * If this image is not an annotation:
+   *    `internalTexture[THREE.NearestFilter]` and `internalTexture[THREE.LinearFilter]` are used as the main textures.
+   * */
+  private internalTexture: Record<
+    THREE.TextureFilter,
+    THREE.DataTexture3D | THREE.DataTexture
+  >;
 
   /**
    * Sadly, Three currently does not let you change the filtering mode of a render target's
@@ -49,10 +39,7 @@ export class RenderedImage<T extends TypedArray = TypedArray>
    * linear filtering for the 3D view, we hold render targets for both filters.
    * See https://github.com/mrdoob/three.js/issues/14375
    * */
-  private renderTargets: Record<THREE.TextureFilter, ImageRenderTarget> = {
-    [THREE.NearestFilter]: new ImageRenderTarget(this, THREE.NearestFilter),
-    [THREE.LinearFilter]: new ImageRenderTarget(this, THREE.LinearFilter),
-  };
+  private renderTargets: Record<THREE.TextureFilter, ImageRenderTarget>;
   /**
    * Whether or not the corresponding render target needs to be updated from the CPU data.
    * See @member renderTargets for texture filter explanation.
@@ -78,7 +65,8 @@ export class RenderedImage<T extends TypedArray = TypedArray>
 
   constructor(
     image: ImageSnapshot<T> & Pick<ImageSnapshot<T>, "voxelCount" | "data">,
-    protected document?: IDocument,
+    protected document: IDocument,
+    protected isAnnotation: boolean, // Defines wheter or not this image can be edited on the GPU.
   ) {
     super(image);
 
@@ -86,20 +74,43 @@ export class RenderedImage<T extends TypedArray = TypedArray>
       this.voxelCount.product() * this.voxelComponents,
     );
 
+    this.internalTexture = {};
+
     if (this.is3D) {
-      this.internalTexture = new THREE.DataTexture3D(
+      const nearestTexture = new THREE.DataTexture3D(
         this.getTextureData(),
         this.voxelCount.x,
         this.voxelCount.y,
         this.voxelCount.z,
       );
-      this.internalTexture.magFilter = THREE.NearestFilter;
-      this.internalTexture.format = textureFormatForComponents(
-        this.voxelComponents,
-      );
+      nearestTexture.magFilter = THREE.NearestFilter;
+      nearestTexture.format = textureFormatForComponents(this.voxelComponents);
+
+      this.internalTexture[THREE.NearestFilter] = nearestTexture;
+
+      if (!isAnnotation) {
+        const linearTexture = new THREE.DataTexture3D(
+          this.getTextureData(),
+          this.voxelCount.x,
+          this.voxelCount.y,
+          this.voxelCount.z,
+        );
+        linearTexture.magFilter = THREE.LinearFilter;
+        linearTexture.minFilter = THREE.LinearFilter;
+        linearTexture.format = textureFormatForComponents(this.voxelComponents);
+
+        nearestTexture.type = THREE.FloatType;
+        linearTexture.type = THREE.FloatType;
+        // R32F cannot be lineraly filtered without an extension.
+        // TODO: Check if the extension is available and use R32F if it makes sense.
+        nearestTexture.internalFormat = "R16F";
+        linearTexture.internalFormat = "R16F";
+
+        this.internalTexture[THREE.LinearFilter] = linearTexture;
+      }
     } else {
       const [widthAxis, heightAxis] = getPlaneAxes(this.defaultViewType);
-      this.internalTexture = new THREE.DataTexture(
+      this.internalTexture[THREE.NearestFilter] = new THREE.DataTexture(
         this.getTextureData(),
         this.voxelCount[widthAxis],
         this.voxelCount[heightAxis],
@@ -109,17 +120,44 @@ export class RenderedImage<T extends TypedArray = TypedArray>
         undefined,
         undefined,
         THREE.NearestFilter,
+        THREE.NearestFilter,
       );
+
+      if (!isAnnotation) {
+        this.internalTexture[THREE.LinearFilter] = new THREE.DataTexture(
+          this.getTextureData(),
+          this.voxelCount[widthAxis],
+          this.voxelCount[heightAxis],
+          textureFormatForComponents(this.voxelComponents),
+          undefined,
+          undefined,
+          undefined,
+          undefined,
+          THREE.LinearFilter,
+          THREE.LinearFilter,
+        );
+      }
     }
+
+    this.renderTargets = isAnnotation
+      ? {
+          [THREE.NearestFilter]: new ImageRenderTarget(
+            this,
+            THREE.NearestFilter,
+          ),
+          [THREE.LinearFilter]: new ImageRenderTarget(this, THREE.LinearFilter),
+        }
+      : {};
 
     this.textureAdapter = new TextureAdapter(this);
   }
 
   public dispose() {
     this.textureAdapter.dispose();
-    this.internalTexture.dispose();
-    this.renderTargets[THREE.NearestFilter].dispose();
-    this.renderTargets[THREE.LinearFilter].dispose();
+    this.internalTexture[THREE.NearestFilter].dispose();
+    this.internalTexture[THREE.LinearFilter]?.dispose();
+    this.renderTargets[THREE.NearestFilter]?.dispose();
+    this.renderTargets[THREE.LinearFilter]?.dispose();
   }
 
   /** Whether or not the texture data needs to be pulled from the GPU. */
@@ -128,6 +166,8 @@ export class RenderedImage<T extends TypedArray = TypedArray>
   }
 
   public getTextureData() {
+    if (!this.isAnnotation) return this.getData();
+
     if (this.hasGPUUpdates) {
       this.pullDataFromGPU();
     }
@@ -167,16 +207,13 @@ export class RenderedImage<T extends TypedArray = TypedArray>
   }
 
   public getTexture(filter = THREE.NearestFilter) {
-    if (!this.renderTargets[filter]) {
-      this.renderTargets[filter] = new ImageRenderTarget(this, filter);
-      this.hasCPUUpdates[filter] = true;
-    }
-
-    return this.renderTargets[filter].texture;
+    return this.isAnnotation
+      ? this.renderTargets[filter].texture
+      : this.internalTexture[filter];
   }
 
   public waitForRenderer() {
-    if (this.document?.renderer) {
+    if (this.document.renderer || !this.isAnnotation) {
       return Promise.resolve();
     }
 
@@ -186,7 +223,7 @@ export class RenderedImage<T extends TypedArray = TypedArray>
   }
 
   public render() {
-    if (!this.document?.renderer) return;
+    if (!this.document.renderer || !this.isAnnotation) return;
 
     this.rendererCallbacks.forEach((callback) => callback());
 
@@ -198,11 +235,13 @@ export class RenderedImage<T extends TypedArray = TypedArray>
   }
 
   private copyToRenderTarget(filter: THREE.TextureFilter) {
-    const renderer = this.document?.renderer;
+    if (!this.isAnnotation) return;
+
+    const { renderer } = this.document;
     if (!renderer) return;
 
     this.textureAdapter.writeImage(
-      this.internalTexture,
+      this.internalTexture[THREE.NearestFilter],
       this.renderTargets[filter],
       renderer,
       MergeFunction.Replace,
@@ -214,19 +253,22 @@ export class RenderedImage<T extends TypedArray = TypedArray>
   }
 
   private onModificationsOnGPU() {
+    if (!this.isAnnotation) return;
     this.isDataDirty = true;
     this.textureAdapter.invalidateCache();
   }
 
   private scheduleGPUPush() {
+    if (!this.isAnnotation) return;
+
     this.getTextureData();
-    this.internalTexture.needsUpdate = true;
+    this.internalTexture[THREE.NearestFilter].needsUpdate = true;
     this.hasCPUUpdates[THREE.NearestFilter] = true;
     this.hasCPUUpdates[THREE.LinearFilter] = true;
   }
 
   private pullDataFromGPU() {
-    if (!this.document?.renderer) return;
+    if (!this.document.renderer || !this.isAnnotation) return;
 
     if (this.hasWholeTextureChanged) {
       this.textureAdapter.readImage(
@@ -253,8 +295,11 @@ export class RenderedImage<T extends TypedArray = TypedArray>
     super.setData(data);
     this.hasWholeTextureChanged = false;
     this.gpuUpdates = [];
-    this.isTextureDataDirty = true;
-    this.isDataDirty = false;
+
+    if (this.isAnnotation) {
+      this.isTextureDataDirty = true;
+      this.isDataDirty = false;
+    }
 
     if (this.internalTexture) {
       this.scheduleGPUPush();
@@ -262,7 +307,7 @@ export class RenderedImage<T extends TypedArray = TypedArray>
   }
 
   public setTextureData(data: Uint8Array) {
-    if (this.textureData === data) return;
+    if (this.textureData === data || !this.isAnnotation) return;
 
     if (data.length !== this.textureData.length) {
       throw new Error("Provided data has the wrong length.");
@@ -284,7 +329,7 @@ export class RenderedImage<T extends TypedArray = TypedArray>
     mergeFunction = MergeFunction.Replace,
     threshold?: number,
   ) {
-    if (!this.document?.renderer) return;
+    if (!this.document.renderer || !this.isAnnotation) return;
 
     this.textureAdapter.writeImage(
       texture,
@@ -311,7 +356,7 @@ export class RenderedImage<T extends TypedArray = TypedArray>
     sliceData?: Uint8Array | THREE.Texture,
     mergeFunction = MergeFunction.Replace,
   ) {
-    if (this.document?.renderer) {
+    if (this.document.renderer && this.isAnnotation) {
       this.textureAdapter.writeSlice(
         slice,
         viewType,
@@ -343,7 +388,7 @@ export class RenderedImage<T extends TypedArray = TypedArray>
   }
 
   public getSlice(viewType: ViewType, sliceNumber: number) {
-    if (this.document?.renderer) {
+    if (this.document.renderer && this.isAnnotation) {
       return this.textureAdapter.readSlice(
         sliceNumber,
         viewType,
@@ -360,7 +405,7 @@ export class RenderedImage<T extends TypedArray = TypedArray>
     viewType: ViewType,
     target: THREE.WebGLRenderTarget,
   ) {
-    const renderer = this.document?.renderer;
+    const { renderer } = this.document;
     if (!renderer) return;
 
     if (this.hasCPUUpdates[THREE.NearestFilter]) {

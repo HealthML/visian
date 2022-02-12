@@ -235,10 +235,12 @@ export class ImageLayer
   public async computeVolume() {
     this.setVolume();
 
+    if (!this.isAnnotation) return;
+
     const volume = await volumeRPCProvider.rpc<GetVolumeArgs, GetVolumeReturn>(
       "getVolume",
       {
-        data: this.image.getTextureData(),
+        data: this.image.getTextureData() as Uint8Array,
         voxelCount: this.image.voxelCount.toArray(),
         voxelComponents: this.image.voxelComponents,
         voxelSpacing: this.image.voxelSpacing.toArray(),
@@ -261,10 +263,12 @@ export class ImageLayer
   public async computeArea(viewType: ViewType, slice: number) {
     this.setArea();
 
+    if (!this.isAnnotation) return;
+
     const area = await volumeRPCProvider.rpc<GetAreaArgs, GetAreaReturn>(
       "getArea",
       {
-        data: this.image.getTextureData(),
+        data: this.image.getTextureData() as Uint8Array,
         voxelCount: this.image.voxelCount.toArray(),
         voxelComponents: this.image.voxelComponents,
         voxelSpacing: this.image.voxelSpacing.toArray(),
@@ -312,7 +316,7 @@ export class ImageLayer
         GetEmptySlicesArgs,
         GetEmptySlicesReturn
       >("getEmptySlices", {
-        data: this.image.getTextureData(),
+        data: this.image.getTextureData() as Uint8Array,
         voxelCount: this.image.voxelCount.toArray(),
         voxelComponents: this.image.voxelComponents,
       });
@@ -418,7 +422,13 @@ export class ImageLayer
     }
 
     super.applySnapshot(snapshot);
-    this.setImage(new RenderedImage(snapshot.image, this.document));
+    this.setImage(
+      new RenderedImage(
+        snapshot.image,
+        this.document,
+        Boolean(snapshot.isAnnotation),
+      ),
+    );
     this.setBrightness(snapshot.brightness);
     this.setContrast(snapshot.contrast);
 

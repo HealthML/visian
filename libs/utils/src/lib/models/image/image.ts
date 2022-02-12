@@ -8,7 +8,6 @@ import {
   ITKImage,
   ITKImageType,
   ITKMatrix,
-  readMedicalImage,
   TypedArray,
   VoxelTypes,
 } from "../../io";
@@ -97,19 +96,7 @@ export const itkImageToImageSnapshot = <T extends TypedArray = TypedArray>(
 
 /** A generic, observable multi-dimensional image class. */
 export class Image<T extends TypedArray = TypedArray>
-  implements ISerializable<ImageSnapshot<T>> {
-  public static fromITKImage<T2 extends TypedArray = TypedArray>(
-    image: ITKImage<T2>,
-  ) {
-    return new this(itkImageToImageSnapshot(image));
-  }
-
-  public static async fromFile(file: File) {
-    const image = Image.fromITKImage(await readMedicalImage(file));
-    image.name = file.name;
-    return image;
-  }
-
+  implements ISerializable<ImageSnapshot<Uint8Array | Float32Array>> {
   /**
    * An name that describes this image.
    *
@@ -180,12 +167,13 @@ export class Image<T extends TypedArray = TypedArray>
   public unit?: Unit;
 
   /** A TypedArray containing the voxel buffer data in I/O format. */
-  private data!: T;
+  private data!: Uint8Array | Float32Array;
 
   constructor(
     image: ImageSnapshot<T> & Pick<ImageSnapshot<T>, "voxelCount" | "data">,
   ) {
-    this.applySnapshot(image);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    this.applySnapshot(image as any);
 
     makeObservable<this, "data">(this, {
       name: observable,
@@ -276,7 +264,7 @@ export class Image<T extends TypedArray = TypedArray>
   public getSliceImage(
     viewType: ViewType,
     sliceNumber: number,
-  ): Image<T | Uint8Array> {
+  ): Image<Uint8Array | Float32Array> {
     if (this.dimensionality < 3) return this.clone();
 
     const [horizontal, vertical] = getPlaneAxes(viewType);
@@ -303,13 +291,27 @@ export class Image<T extends TypedArray = TypedArray>
     );
   }
 
-  public setData(data: T) {
+  public setData(data: T | Uint8Array | Float32Array) {
     if (data === this.data) return;
 
     if (!this.data) {
-      // Clone the data to convert it from a SharedArrayBuffer to an arraybuffer.
-      // This is necessary to store the data in IndexedDB when using Chrome.
-      this.data = new (data.constructor as new (data: T) => T)(data);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const maxValue = (data as any).reduce(
+        (a: number, b: number) => Math.max(a, b),
+        0,
+      );
+
+      if (data.BYTES_PER_ELEMENT === 1) {
+        this.data = new Uint8Array(
+          data.map((value: number) =>
+            Math.round((Math.max(0, value) / maxValue) * 255),
+          ),
+        );
+      } else {
+        this.data = new Float32Array(data).map(
+          (value: number) => Math.max(0, value) / maxValue,
+        );
+      }
     } else {
       if (data.length !== this.data.length) {
         throw new Error("Data length has changed");
@@ -323,7 +325,7 @@ export class Image<T extends TypedArray = TypedArray>
   }
 
   public toITKImage(excludedImages?: Image[]) {
-    const image = new ITKImage<T>(
+    const image = new ITKImage<Uint8Array | Float32Array>(
       new ITKImageType(
         this.dimensionality,
         this.voxelComponentType,
@@ -361,13 +363,15 @@ export class Image<T extends TypedArray = TypedArray>
     }
 
     image.data = unifyOrientation(
-      new (image.data.constructor as new (data: T) => T)(image.data),
+      new (image.data.constructor as new (data: Uint8Array | Float32Array) =>
+        | Uint8Array
+        | Uint16Array)(image.data),
       this.orientation,
       this.dimensionality,
       this.voxelCount.toArray(),
       this.voxelComponents,
       false,
-    ) as T;
+    ) as Uint8Array | Float32Array;
 
     return image;
   }
@@ -391,7 +395,9 @@ export class Image<T extends TypedArray = TypedArray>
     };
   }
 
-  public async applySnapshot(snapshot: ImageSnapshot<T>) {
+  public async applySnapshot(
+    snapshot: ImageSnapshot<Uint8Array | Float32Array>,
+  ) {
     this.name = snapshot.name || "Image";
 
     this.dimensionality = snapshot.dimensionality || snapshot.voxelCount.length;
@@ -422,9 +428,7 @@ export class Image<T extends TypedArray = TypedArray>
 
     this.unit = snapshot?.unit;
 
-    this.setData(
-      snapshot.data ?? (new Uint8Array(this.voxelCount.product()) as T),
-    );
+    this.setData(snapshot.data ?? new Uint8Array(this.voxelCount.product()));
   }
 
   public clone() {
