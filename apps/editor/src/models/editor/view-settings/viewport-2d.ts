@@ -52,6 +52,8 @@ export class Viewport2D
   public zoomLevel!: number;
   public offset = new Vector(2);
 
+  public window: Vector = new Vector([0, 1]);
+
   public hoveredScreenCoordinates: Pixel = { x: 0, y: 0 };
   public hoveredViewType = ViewType.Transverse;
 
@@ -77,6 +79,7 @@ export class Viewport2D
       showSideViews: observable,
       zoomLevel: observable,
       offset: observable,
+      window: observable,
       hoveredScreenCoordinates: observable,
       hoveredViewType: observable,
       voxelInfoMode: observable,
@@ -95,6 +98,7 @@ export class Viewport2D
       setVoxelInfoMode: action,
       setZoomLevel: action,
       setOffset: action,
+      setWindow: action,
       reset: action,
       toggleSideViews: action,
       setSelectedSlice: action,
@@ -189,6 +193,10 @@ export class Viewport2D
   public setOffset(value?: Vector): void {
     this.offset = value || this.offset.setScalar(0);
   }
+
+  public setWindow = (value?: [number, number]): void => {
+    this.window.set(...(value ?? [0, 1]));
+  };
 
   public reset = (): void => {
     this.setMainViewType();

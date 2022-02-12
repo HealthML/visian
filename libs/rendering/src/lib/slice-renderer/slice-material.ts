@@ -31,6 +31,7 @@ export class SliceMaterial extends THREE.ShaderMaterial implements IDisposable {
         uVoxelCount: { value: [1, 1, 1] },
         uContrast: { value: editor.activeDocument?.viewSettings.contrast },
         uBrightness: { value: editor.activeDocument?.viewSettings.brightness },
+        uWindow: { value: editor.activeDocument?.viewport2D.window },
         uComponents: { value: 1 },
         uActiveLayerData: { value: null },
         uRegionGrowingThreshold: { value: 0 },
@@ -128,6 +129,10 @@ export class SliceMaterial extends THREE.ShaderMaterial implements IDisposable {
       autorun(() => {
         this.uniforms.uBrightness.value =
           editor.activeDocument?.viewSettings.brightness;
+        editor.sliceRenderer?.lazyRender();
+      }),
+      autorun(() => {
+        this.uniforms.uWindow.value = editor.activeDocument?.viewport2D.window.toArray();
         editor.sliceRenderer?.lazyRender();
       }),
       autorun(() => {

@@ -16,6 +16,7 @@ uniform vec3 uVoxelCount;
 
 uniform float uContrast;
 uniform float uBrightness;
+uniform vec2 uWindow;
 uniform int uComponents;
 
 uniform bool uUseExclusiveSegmentations;
@@ -37,7 +38,7 @@ uniform int uActiveLayerIndex;
 
 out vec4 pc_FragColor;
 
-vec4 applyBrightnessContrast(vec4 image) {
+vec4 applyEnhancements(vec4 image) {
   if(uComponents >= 3) {
     return vec4(
       uBrightness * pow(image.rgb, vec3(uContrast)),
@@ -45,7 +46,8 @@ vec4 applyBrightnessContrast(vec4 image) {
     );
   }
 
-  float contrastedIntensity = uBrightness * pow(image.a, uContrast);
+  float windowedIntensity = clamp((image.a - uWindow[0]) / (uWindow[1] - uWindow[0]), 0.0, 1.0);
+  float contrastedIntensity = uBrightness * pow(windowedIntensity, uContrast);
   return vec4(image.rgb, contrastedIntensity);
 }
 
@@ -68,7 +70,7 @@ void main() {
   vec4 toolPreview = texture(uToolPreview, vUv);
   
   vec4 imageValue = vec4(0.0);
-  {{reduceEnhancedLayerStack(imageValue, uv, toolPreview, applyBrightnessContrast)}}
+  {{reduceEnhancedLayerStack(imageValue, uv, toolPreview, applyEnhancements)}}
 
   #ifdef BACKGROUND_BLEND
     imageValue.rgb = mix(uBackgroundColor, imageValue.rgb, imageValue.a);

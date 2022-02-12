@@ -6,6 +6,7 @@ import {
   Modal,
   ModalTitleRow,
   NumberParam,
+  NumberRangeParam,
   Param,
   useMultiRef,
 } from "@visian/ui-shared";
@@ -74,6 +75,19 @@ export const ViewSettings: React.FC = observer(() => {
     (value: number | number[]) => {
       store?.editor.activeDocument?.viewport3D.setOpacity(value as number);
     },
+    [store],
+  );
+  const setWindow = useCallback(
+    (value: number | number[]) => {
+      store?.editor.activeDocument?.viewport2D.setWindow(
+        value as [number, number],
+      );
+    },
+    [store],
+  );
+
+  const getHistogram = useCallback(
+    () => store?.editor.activeDocument?.mainImageLayer?.densityHistogram,
     [store],
   );
 
@@ -169,6 +183,21 @@ export const ViewSettings: React.FC = observer(() => {
           value={store?.editor.activeDocument?.viewSettings.brightness}
           setValue={setBrightness}
         />
+        {store?.editor.activeDocument?.viewSettings.viewMode === "2D" && (
+          <NumberRangeParam
+            labelTx="window"
+            min={0}
+            max={1}
+            value={
+              store?.editor.activeDocument?.viewport2D.window.toArray() as
+                | [number, number]
+                | undefined
+            }
+            setValue={setWindow}
+            serializationMethod="block"
+            getHistogram={getHistogram}
+          />
+        )}
         {store?.editor.activeDocument?.viewSettings.viewMode === "3D" && (
           <>
             <NumberParam

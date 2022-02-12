@@ -60,6 +60,8 @@ export interface IViewport2D {
   /** The 2D navigation offset by which the visible image is moved. */
   offset: Pixel;
 
+  window: Vector;
+
   /**
    * All slice markers, aggregated for the document and current main view type.
    */
@@ -71,6 +73,8 @@ export interface IViewport2D {
   hoveredVoxel: Voxel;
   hoveredValue: Vector;
   isVoxelHovered: boolean;
+
+  setWindow(value?: [number, number]): void;
 
   setHoveredScreenCoordinates(coordinates: Pixel, viewType?: ViewType): void;
 

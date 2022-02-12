@@ -116,6 +116,7 @@
   "main-view-type": "Hauptansichtstyp",
   "contrast": "Kontrast",
   "brightness": "Helligkeit",
+  "window": "Fenster",
 
   "export": "Export",
   "export-tooltip": "Export (Strg + E)",
