@@ -14,6 +14,7 @@ export class Campaign implements ICampaign {
   public reviewers: User[];
 
   // TODO: Properly type API response data
+  // TODO: Make observable
   constructor(campaign: any) {
     this.campaignUUID = campaign.campaignUUID;
     this.name = campaign.name;

@@ -6,6 +6,7 @@ export class Sample implements ISample {
   public data: string;
 
   // TODO: Properly type API response data
+  // TODO: Make observable
   constructor(sample: any) {
     this.sampleUUID = sample.sampleUUID;
     this.title = sample.title;

@@ -100,7 +100,10 @@ export class Tool<N extends string>
     const isSupervisorMode =
       isFromWHO() && this.document.currentTask?.kind === TaskType.Review;
     return Boolean(
-      !(isSupervisorMode && this.isDrawingTool) &&
+      !(
+        isSupervisorMode &&
+        (this.isDrawingTool || this.supportAnnotationsOnly)
+      ) &&
         (!this.supportedViewModes ||
           this.supportedViewModes.includes(
             this.document.viewSettings.viewMode,

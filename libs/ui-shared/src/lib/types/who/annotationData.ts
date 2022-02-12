@@ -8,5 +8,6 @@ export interface IAnnotationData {
   data: string;
   correspondingLayerId: string;
 
+  setCorrespondingLayerId(layerId: string): void;
   toJSON(): AnnotationDataSnapshot;
 }

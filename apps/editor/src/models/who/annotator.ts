@@ -11,6 +11,7 @@ export class Annotator implements IAnnotator {
   public degree: string;
 
   // TODO: Properly type API response data
+  // TODO: Make observable
   constructor(annotator: any) {
     this.annotatorUUID = annotator.annotatorUUID;
     this.expertise = annotator.expertise;

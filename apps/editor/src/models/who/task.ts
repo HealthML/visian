@@ -21,6 +21,7 @@ export class Task implements ITask {
   public campaign?: Campaign;
 
   // TODO: Properly type API response data
+  // TODO: Make observable
   constructor(task: any) {
     this.taskUUID = task.taskUUID;
     this.kind = task.kind;

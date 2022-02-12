@@ -1,8 +1,7 @@
 import { AnnotatorSnapshot, IAnnotator } from "./annotator";
 import { IReviewer, ReviewerSnapshot } from "./reviewer";
 
-export const UserRoles = ["Annotator", "Reviewer", "Supervisor"] as const;
-export type UserRole = typeof UserRoles[number];
+export type UserRole = "Annotator" | "Reviewer" | "Supervisor";
 
 export interface UserSnapshot {
   userUUID: string;

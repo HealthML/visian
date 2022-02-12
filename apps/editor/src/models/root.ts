@@ -21,6 +21,7 @@ import { action, computed, makeObservable, observable } from "mobx";
 import { errorDisplayDuration } from "../constants";
 import { DICOMWebServer } from "./dicomweb-server";
 import { Editor, EditorSnapshot } from "./editor";
+import { supervisorTask } from "./supervisorTask";
 import { Tracker } from "./tracking";
 import { ProgressNotification } from "./types";
 import { Task } from "./who";
@@ -197,24 +198,31 @@ export class RootStore implements ISerializable<RootSnapshot>, IDisposable {
         } else {
           // Task Type is Correct or Review
           await Promise.all(
-            whoTask.annotations.map(async (annotation, index) => {
-              const title =
-                whoTask.samples[index].title ||
-                whoTask.samples[0].title ||
-                `annotation_${index}`;
+            whoTask.annotations.map(async (annotation, annotationIndex) => {
+              let baseTitle =
+                whoTask.samples[annotationIndex]?.title ||
+                whoTask.samples[0]?.title ||
+                // TODO: Translation for unnamed
+                "unnamed.nii";
+              // TODO: Handle base title without ".nii" ending
+              baseTitle = baseTitle.replace(
+                ".nii",
+                `_annotation_${annotationIndex}`,
+              );
 
               await Promise.all(
-                annotation.data.map(async (annotationData) => {
+                annotation.data.map(async (annotationData, dataIndex) => {
+                  const title = `${baseTitle}_${dataIndex}`;
                   const createdLayerId = await this.editor.activeDocument?.importFiles(
                     createFileFromBase64(
-                      title.replace(".nii", "_annotation").concat(".nii"),
+                      title.concat(".nii"),
                       annotationData.data,
                     ),
-                    title.replace(".nii", "_annotation"),
+                    title,
                     true,
                   );
                   if (createdLayerId)
-                    annotationData.correspondingLayerId = createdLayerId;
+                    annotationData.setCorrespondingLayerId(createdLayerId);
                 }),
               );
             }),

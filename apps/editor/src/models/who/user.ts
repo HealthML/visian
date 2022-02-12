@@ -13,6 +13,7 @@ export class User implements IUser {
   public reviewerRole?: Reviewer;
 
   // TODO: Properly type API response data
+  // TODO: Make observable
   constructor(user: any) {
     this.userUUID = user.userUUID;
     this.idpID = user.idpID;
@@ -20,17 +21,19 @@ export class User implements IUser {
     this.birthdate = user.birthdate;
     this.timezone = user.timezone;
     this.email = user.email;
-    if (user.annotatorRole && Object.keys(user.annotatorRole).length > 1) {
+    if (user.annotatorRole && "annotatorUUID" in user.annotatorRole) {
       this.annotatorRole = new Annotator(user.annotatorRole);
     }
-    if (user.reviewerRole && Object.keys(user.reviewerRole).length > 1) {
+    if (user.reviewerRole && "reviewerUUID" in user.reviewerRole) {
       this.reviewerRole = new Reviewer(user.reviewerRole);
     }
   }
 
   // TODO: Return actual role name
   public getRoleName(): UserRole {
-    return "Annotator";
+    if (this.reviewerRole) return "Reviewer";
+    if (this.annotatorRole) return "Annotator";
+    return "Supervisor";
   }
 
   public toJSON(): UserSnapshot {

@@ -15,6 +15,7 @@ import {
   stopPropagation,
   styledScrollbarMixin,
   SubtleText,
+  TaskType,
   useDelay,
   useDoubleTap,
   useForwardEvent,
@@ -22,7 +23,7 @@ import {
   useShortTap,
   useTranslation,
 } from "@visian/ui-shared";
-import { Pixel } from "@visian/utils";
+import { isFromWHO, Pixel } from "@visian/utils";
 import { Observer, observer } from "mobx-react-lite";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
@@ -365,6 +366,8 @@ export const Layers: React.FC = observer(() => {
   const layerCount = layers?.length;
   const activeLayer = store?.editor.activeDocument?.activeLayer;
   const activeLayerIndex = layers?.findIndex((layer) => layer === activeLayer);
+  const isSupervisorMode =
+    isFromWHO() && store?.currentTask?.kind === TaskType.Review;
   return (
     <>
       <FloatingUIButton
@@ -389,7 +392,8 @@ export const Layers: React.FC = observer(() => {
               tooltipTx="add-annotation-layer"
               isDisabled={
                 !layerCount ||
-                layerCount >= (store?.editor.activeDocument?.maxLayers || 0)
+                layerCount >= (store?.editor.activeDocument?.maxLayers || 0) ||
+                isSupervisorMode
               }
               onPointerDown={
                 store?.editor.activeDocument?.addNewAnnotationLayer

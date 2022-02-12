@@ -11,6 +11,7 @@ export class AnnotationTask implements IAnnotationTask {
   public description: string;
 
   // TODO: Properly type API response data
+  // TODO: Make observable
   constructor(annotationTask: any) {
     this.annotationTaskUUID = annotationTask.annotationTaskUUID;
     this.kind = annotationTask.kind;
