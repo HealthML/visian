@@ -16,7 +16,7 @@ import axios from "axios";
 import { observer } from "mobx-react-lite";
 import React, { useCallback, useState } from "react";
 import styled from "styled-components";
-import S3 from "aws-sdk/clients/s3";
+
 import { useStore } from "../app/root-store";
 import { FloyBar } from "../components/editor/ai-bar";
 import { ProgressPopUp } from "../components/editor/progress-popup";
@@ -116,41 +116,20 @@ export const UploadScreen = observer(() => {
 
         const dataLinks: string[] = [];
         for (let index = 0; index < zips.length; index++) {
-          // 3) Upload relevant serieses to OTC OBS:
-
-          // Generate .zip filename TO DO FROM lambda S3
-          const randomID = parseInt((Math.random() * 10000000).toString());
-          const fileNameKey = `${randomID}.zip`;
-
-          // Get signedURL:
-          const OTC = new S3({
-            accessKeyId: "UXFZMXZO3DFYLN1UUNAI",
-            secretAccessKey: "GZZtyxJh0CaNHWwghf7TzVsxrLBm1mYIrDvwrpIS",
-            endpoint: "obs.eu-de.otc.t-systems.com",
-            region: "eu-de",
-          });
-
-          const preSignedUrl = OTC.getSignedUrl("putObject", {
-            Bucket: "floy",
-            Key: `demo.floy.com-uploads/${fileNameKey}`,
-            Expires: 300, // Change this value to adjust the signed URL's expiration in seconds
-            ContentType: "application/zip",
-          });
-
-          console.log("fileNameKey: ", fileNameKey);
-          console.log("preSignedUrl: ", preSignedUrl);
-
-          // Rename file to be uploaded
-          Object.defineProperty(zips[index], "name", {
-            writable: true,
-            value: fileNameKey,
-          });
+          // 3) Upload relevant serieses to S3 (TO DO: Telekom Cloud)
+          // Get unique upload URL
+          const data = await fetch(
+            "https://kg0rbwuu17.execute-api.eu-central-1.amazonaws.com/uploads",
+            { method: "GET" },
+          );
+          const dataString = await data.text();
+          const uniqueUploadURL = dataString.split('"')[3];
+          const fileNameKey = dataString.split('"')[7];
 
           // Upload file(s)
           await axios.request({
-            headers: { "Content-Type": "application/zip" },
             method: "PUT",
-            url: preSignedUrl,
+            url: uniqueUploadURL,
             data: zips[index],
             onUploadProgress: (p) => {
               store?.setProgress({
@@ -165,44 +144,10 @@ export const UploadScreen = observer(() => {
               });
             },
           });
-          dataLinks.push(preSignedUrl);
+          dataLinks.push(
+            `s3://s3uploader-s3uploadbucket-1ba2ks21gs4fb/${fileNameKey}`,
+          );
         }
-
-        // VIA AWS:
-        // const dataLinks: string[] = [];
-        // for (let index = 0; index < zips.length; index++) {
-        //   // 3) Upload relevant serieses to S3
-        //   // Get unique upload URL
-        //   const data = await fetch(
-        //     "https://kg0rbwuu17.execute-api.eu-central-1.amazonaws.com/uploads",
-        //     { method: "GET" },
-        //   );
-        //   const dataString = await data.text();
-        //   const uniqueUploadURL = dataString.split('"')[3];
-        //   const fileNameKey = dataString.split('"')[7];
-
-        //   // Upload file(s)
-        //   await axios.request({
-        //     method: "PUT",
-        //     url: uniqueUploadURL,
-        //     data: zips[index],
-        //     onUploadProgress: (p) => {
-        //       store?.setProgress({
-        //         label: `Datei ${index + 1} von ${
-        //           zips.length
-        //         } wird hochgeladen (${(
-        //           ((index + p.loaded / p.total) / zips.length) *
-        //           100
-        //         ).toFixed(2)} %)`,
-        //         progress: (index + p.loaded / p.total) / zips.length,
-        //         showSplash: false,
-        //       });
-        //     },
-        //   });
-        //   dataLinks.push(
-        //     `s3://s3uploader-s3uploadbucket-1ba2ks21gs4fb/${fileNameKey}`,
-        //   );
-        // }
 
         // Calculate approximate time from upload to confirmation E-Mail:
         setApproxBulkTime((3 + zips.length * (15 / 60)).toFixed(0));
