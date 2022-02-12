@@ -1,7 +1,4 @@
-import {
-  CampaignSnapshot,
-  ICampaign,
-} from "libs/ui-shared/src/lib/types/who/campaign";
+import { CampaignSnapshot, ICampaign } from "@visian/ui-shared";
 import { User } from "./user";
 
 export class Campaign implements ICampaign {

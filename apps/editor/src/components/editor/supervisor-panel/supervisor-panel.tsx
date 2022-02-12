@@ -73,47 +73,42 @@ const AnnotatorSection: React.FC<AnnotatorSectionProps> = ({
   colorAddition,
   colorDeletion,
   isLast = false,
-}) => {
-  return (
-    <>
-      <Divider />
-      <SectionContainer isLast={isLast}>
-        <TypeText tx={annotatorRole} />
-        <AnnotatorInformationContainer>
-          <InformationText tx={annotatorName} />
-          <CircleContainer>
-            <EditCircle circleColor={colorAddition}>
-              <Icon icon="pixelBrush" />
+}) => (
+  <>
+    <Divider />
+    <SectionContainer isLast={isLast}>
+      <TypeText tx={annotatorRole} />
+      <AnnotatorInformationContainer>
+        <InformationText tx={annotatorName} />
+        <CircleContainer>
+          <EditCircle circleColor={colorAddition}>
+            <Icon icon="pixelBrush" />
+          </EditCircle>
+          {colorDeletion && (
+            <EditCircle circleColor={colorDeletion}>
+              <Icon icon="eraser" />
             </EditCircle>
-            {colorDeletion && (
-              <EditCircle circleColor={colorDeletion}>
-                <Icon icon="eraser" />
-              </EditCircle>
-            )}
-          </CircleContainer>
-        </AnnotatorInformationContainer>
-        {annotationTime && (
-          <AnnotationTimeContainer>
-            <TypeText tx="annotation-time" />
-            <InformationText tx={annotationTime} />
-          </AnnotationTimeContainer>
-        )}
-      </SectionContainer>
-    </>
-  );
-};
+          )}
+        </CircleContainer>
+      </AnnotatorInformationContainer>
+      {annotationTime && (
+        <AnnotationTimeContainer>
+          <TypeText tx="annotation-time" />
+          <InformationText tx={annotationTime} />
+        </AnnotationTimeContainer>
+      )}
+    </SectionContainer>
+  </>
+);
 
 export const SupervisorPanel = observer(() => {
   const store = useStore();
   if (!(store?.currentTask?.kind === TaskType.Review)) return <></>;
   const annotationCount = store.currentTask.annotations.length;
   const annotations = store.currentTask.annotations.sort(
-    (firstAnnotation, secondAnnotation) => {
-      return (
-        new Date(firstAnnotation.submittedAt).getTime() -
-        new Date(secondAnnotation.submittedAt).getTime()
-      );
-    },
+    (firstAnnotation, secondAnnotation) =>
+      new Date(firstAnnotation.submittedAt).getTime() -
+      new Date(secondAnnotation.submittedAt).getTime(),
   );
 
   const [shouldShowDelta, setShouldShowDelta] = useState(false);

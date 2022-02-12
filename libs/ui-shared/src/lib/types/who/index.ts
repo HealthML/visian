@@ -2,6 +2,7 @@ export * from "./annotation";
 export * from "./annotationData";
 export * from "./annotationTask";
 export * from "./annotator";
+export * from "./campaign";
 export * from "./reviewer";
 export * from "./sample";
 export * from "./task";
