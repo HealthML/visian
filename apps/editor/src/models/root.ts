@@ -21,7 +21,6 @@ import { action, computed, makeObservable, observable } from "mobx";
 import { errorDisplayDuration } from "../constants";
 import { DICOMWebServer } from "./dicomweb-server";
 import { Editor, EditorSnapshot } from "./editor";
-import { supervisorTask } from "./supervisorTask";
 import { Tracker } from "./tracking";
 import { ProgressNotification } from "./types";
 import { Task } from "./who";
