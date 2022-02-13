@@ -11,7 +11,7 @@ import type { IMarkers } from "./markers";
 import type { IClipboard } from "./clipboard";
 import type { ErrorNotification } from "../error-notification";
 import { Theme } from "../../theme";
-import { MeasurementType, PerformanceMode } from ".";
+import { BlendGroup, MeasurementType, PerformanceMode } from ".";
 
 /** A VISIAN document, consisting of up to multiple editable layers. */
 export interface IDocument {
@@ -51,6 +51,8 @@ export interface IDocument {
    * layers to be registered to it.
    */
   mainImageLayer?: Reference<IImageLayer>;
+
+  customBlendGroups: BlendGroup[];
 
   /** The document's history. */
   history: IHistory;
@@ -100,6 +102,12 @@ export interface IDocument {
 
   /** Deletes a layer from the document. */
   deleteLayer(idOrLayer: string | ILayer): void;
+
+  /** Adds a blend group to the document. */
+  addBlendGroup(group: BlendGroup): void;
+
+  /** Deletes a blend group from the document. */
+  deleteBlendGroup(group: BlendGroup): void;
 
   /** Returns the first color that is not yet used to color any layer. */
   getFirstUnusedColor(): string;

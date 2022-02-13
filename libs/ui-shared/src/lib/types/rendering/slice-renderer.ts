@@ -1,4 +1,5 @@
 import type { IDisposable, Pixel, ViewType } from "@visian/utils";
+import { BlendGroup } from "..";
 
 import type { IOutline } from "./outline";
 
@@ -20,5 +21,5 @@ export interface ISliceRenderer extends IDisposable {
 
   resetCrosshairOffset(): void;
 
-  renderedImageLayerCount: number;
+  renderBlendGroups: BlendGroup[];
 }

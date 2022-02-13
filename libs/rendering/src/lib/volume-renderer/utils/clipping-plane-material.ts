@@ -1,4 +1,4 @@
-import { IEditor, IImageLayer } from "@visian/ui-shared";
+import { BlendGroup, IEditor, IImageLayer } from "@visian/ui-shared";
 import { IDisposer } from "@visian/utils";
 import { autorun, reaction } from "mobx";
 import * as THREE from "three";
@@ -30,16 +30,24 @@ export class ClippingPlaneMaterial extends THREE.ShaderMaterial {
 
     this.disposers.push(
       reaction(
-        () => editor.sliceRenderer?.renderedImageLayerCount || 1,
-        (layerCount: number) => {
+        () =>
+          [
+            editor.activeDocument?.imageLayers || [],
+            editor.sliceRenderer?.renderBlendGroups || [],
+          ] as [IImageLayer[], BlendGroup[]],
+        ([layers, blendGroups]) => {
           this.fragmentShader = composeLayeredShader(
             clippingPlaneFragmentShader,
-            layerCount,
+            layers,
+            blendGroups,
           );
           this.needsUpdate = true;
+
+          editor.volumeRenderer?.lazyRender();
         },
         { fireImmediately: true },
       ),
+
       autorun(() => {
         const layers = editor.activeDocument?.imageLayers || [];
 

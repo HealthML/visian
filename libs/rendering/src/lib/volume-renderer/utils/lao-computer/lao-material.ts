@@ -1,5 +1,5 @@
 import { Texture3DMaterial } from "@visian/rendering";
-import { IEditor } from "@visian/ui-shared";
+import { BlendGroup, IEditor, IImageLayer } from "@visian/ui-shared";
 import { IDisposer } from "@visian/utils";
 import { autorun, reaction } from "mobx";
 import * as THREE from "three";
@@ -43,11 +43,16 @@ export class LAOMaterial extends Texture3DMaterial {
 
     this.disposers.push(
       reaction(
-        () => editor.sliceRenderer?.renderedImageLayerCount || 1,
-        (layerCount: number) => {
+        () =>
+          [
+            editor.activeDocument?.imageLayers || [],
+            editor.sliceRenderer?.renderBlendGroups || [],
+          ] as [IImageLayer[], BlendGroup[]],
+        ([layers, blendGroups]) => {
           this.fragmentShader = composeLayeredShader(
             laoFragmentShader,
-            layerCount,
+            layers,
+            blendGroups,
           );
           this.needsUpdate = true;
         },

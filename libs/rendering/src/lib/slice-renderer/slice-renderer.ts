@@ -5,7 +5,13 @@ import {
   ViewType,
   viewTypes,
 } from "@visian/utils";
-import { IEditor, IImageLayer, ISliceRenderer } from "@visian/ui-shared";
+import {
+  BlendGroup,
+  IEditor,
+  IImageLayer,
+  ILayerGroup,
+  ISliceRenderer,
+} from "@visian/ui-shared";
 import { autorun, computed, makeObservable, reaction } from "mobx";
 import * as THREE from "three";
 
@@ -125,7 +131,7 @@ export class SliceRenderer implements ISliceRenderer {
     );
 
     makeObservable(this, {
-      renderedImageLayerCount: computed,
+      renderBlendGroups: computed,
     });
   }
 
@@ -136,9 +142,18 @@ export class SliceRenderer implements ISliceRenderer {
     window.removeEventListener("resize", this.resize);
   }
 
-  public get renderedImageLayerCount() {
-    // additional layer for 3d region growing preview
-    return (this.editor.activeDocument?.imageLayers.length || 0) + 1;
+  public get renderBlendGroups(): BlendGroup[] {
+    return [
+      ...(this.editor.activeDocument?.customBlendGroups || []),
+      ...(this.editor.activeDocument?.layers
+        .filter(
+          (layer) =>
+            layer.kind === "group" &&
+            Boolean((layer as ILayerGroup).blendGroup),
+        )
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        .map((group) => (group as ILayerGroup).blendGroup!) || []),
+    ];
   }
 
   private get canvas() {
