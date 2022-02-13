@@ -19,4 +19,6 @@ export interface ISliceRenderer extends IDisposable {
   getWebGLPosition(screenPosition: Pixel, viewType?: ViewType): Pixel;
 
   resetCrosshairOffset(): void;
+
+  renderedImageLayerCount: number;
 }

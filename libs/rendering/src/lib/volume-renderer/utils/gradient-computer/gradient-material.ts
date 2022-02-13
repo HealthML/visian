@@ -42,7 +42,7 @@ export class GradientMaterial extends Texture3DMaterial {
 
     this.disposers = [
       reaction(
-        () => editor.volumeRenderer?.renderedImageLayerCount || 1,
+        () => editor.sliceRenderer?.renderedImageLayerCount || 1,
         (layerCount: number) => {
           this.fragmentShader = composeLayeredShader(
             gradientFragmentShader,

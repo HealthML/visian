@@ -43,7 +43,7 @@ export class LAOMaterial extends Texture3DMaterial {
 
     this.disposers.push(
       reaction(
-        () => editor.volumeRenderer?.renderedImageLayerCount || 1,
+        () => editor.sliceRenderer?.renderedImageLayerCount || 1,
         (layerCount: number) => {
           this.fragmentShader = composeLayeredShader(
             laoFragmentShader,

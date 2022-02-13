@@ -30,7 +30,7 @@ export class ClippingPlaneMaterial extends THREE.ShaderMaterial {
 
     this.disposers.push(
       reaction(
-        () => editor.volumeRenderer?.renderedImageLayerCount || 1,
+        () => editor.sliceRenderer?.renderedImageLayerCount || 1,
         (layerCount: number) => {
           this.fragmentShader = composeLayeredShader(
             clippingPlaneFragmentShader,

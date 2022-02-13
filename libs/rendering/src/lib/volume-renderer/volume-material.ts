@@ -51,7 +51,7 @@ export class VolumeMaterial
 
     this.disposers.push(
       reaction(
-        () => editor.volumeRenderer?.renderedImageLayerCount || 1,
+        () => editor.sliceRenderer?.renderedImageLayerCount || 1,
         (layerCount: number) => {
           this.fragmentShader = composeLayeredShader(
             volumeFragmentShader,

@@ -6,7 +6,7 @@ import {
   viewTypes,
 } from "@visian/utils";
 import { IEditor, IImageLayer, ISliceRenderer } from "@visian/ui-shared";
-import { autorun, reaction } from "mobx";
+import { autorun, computed, makeObservable, reaction } from "mobx";
 import * as THREE from "three";
 
 import { Slice } from "./slice";
@@ -123,6 +123,10 @@ export class SliceRenderer implements ISliceRenderer {
       ),
       autorun(this.updateMainBrushCursor),
     );
+
+    makeObservable(this, {
+      renderedImageLayerCount: computed,
+    });
   }
 
   public dispose() {
@@ -130,6 +134,11 @@ export class SliceRenderer implements ISliceRenderer {
     this.slices.forEach((slice) => slice.dispose());
     this.renderedSheets.forEach((renderedSheet) => renderedSheet.dispose());
     window.removeEventListener("resize", this.resize);
+  }
+
+  public get renderedImageLayerCount() {
+    // additional layer for 3d region growing preview
+    return (this.editor.activeDocument?.imageLayers.length || 0) + 1;
   }
 
   private get canvas() {

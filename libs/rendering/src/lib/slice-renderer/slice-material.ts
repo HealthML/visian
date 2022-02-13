@@ -83,7 +83,7 @@ export class SliceMaterial extends THREE.ShaderMaterial implements IDisposable {
         },
       ),
       reaction(
-        () => editor.volumeRenderer?.renderedImageLayerCount || 1,
+        () => editor.sliceRenderer?.renderedImageLayerCount || 1,
         (layerCount: number) => {
           this.fragmentShader = composeLayeredShader(
             sliceFragmentShader,
