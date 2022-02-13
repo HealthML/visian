@@ -121,6 +121,11 @@
   "export-tooltip": "Export (Strg + E)",
   "exporting": "Exportieren",
 
+  "annotations": "Annotationen",
+  "unify-annotations": "Annotationen vereinigen",
+  "annotation-consensus": "Annotationskonsens",
+  "show-annotation-density": "Annotationsdichte anzeigen",
+
   "annotation-time": "Annotationszeit",
   "show-delta": "Delta anzeigen",
   "confirm-task-annotation-tooltip": "Bestätigen",

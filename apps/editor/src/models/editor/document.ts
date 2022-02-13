@@ -116,6 +116,8 @@ export class Document
 
   public useExclusiveSegmentations = false;
 
+  public annotationConsensusCount = 1;
+
   constructor(
     snapshot: DocumentSnapshot | undefined,
     protected editor: IEditor,
@@ -169,6 +171,7 @@ export class Document
       showLayerMenu: observable,
       trackingData: observable,
       useExclusiveSegmentations: observable,
+      annotationConsensusCount: observable,
 
       title: computed,
       activeLayer: computed,
@@ -194,6 +197,7 @@ export class Document
       setShowLayerMenu: action,
       toggleLayerMenu: action,
       setUseExclusiveSegmentations: action,
+      setAnnotationConsensusCount: action,
       applySnapshot: action,
     });
 
@@ -799,6 +803,10 @@ export class Document
           potentialLayer.opacity > 0,
       ) as unknown) as IImageLayer[];
   }
+
+  public setAnnotationConsensusCount = (value = 1) => {
+    this.annotationConsensusCount = value;
+  };
 
   // Proxies
   public get sliceRenderer(): ISliceRenderer | undefined {

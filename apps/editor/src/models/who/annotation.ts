@@ -14,6 +14,7 @@ export class Annotation implements IAnnotation {
   public submittedAt: string;
 
   // TODO: Properly type API response data
+  // TODO: Make observable
   constructor(annotation: any) {
     this.annotationUUID = annotation.annotationUUID;
     this.status = annotation.status;
