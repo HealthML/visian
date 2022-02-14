@@ -1,26 +1,27 @@
 import type { Image, Vector, ViewType, Voxel } from "@visian/utils";
 import type { Matrix4 } from "three";
-import { Histogram } from "./types";
+import { Histogram, Reference } from "./types";
 import { MarkerConfig } from "./markers";
 
-/**
- * The supported layer blending modes
- * @see https://helpx.adobe.com/photoshop/using/blending-modes.html
- */
-export type BlendMode =
-  | "COLOR"
-  | "DARKEN"
-  | "DIFFERENCE"
-  | "DIVIDE"
-  | "HUE"
-  | "LIGHTEN"
-  | "LUMINOSITY"
-  | "MULTIPLY"
-  | "NORMAL"
-  | "OVERLAY"
-  | "SATURATION"
-  | "SCREEN"
-  | "SUBTRACT";
+/** The supported layer blending modes. */
+export type BlendMode = "COMPARE" | "MAJORITY_VOTE";
+
+export interface IBaseBlendGroup {
+  mode: BlendMode;
+  layers: Reference<IImageLayer>[];
+}
+
+export interface ICompareBlendGroup extends IBaseBlendGroup {
+  mode: "COMPARE";
+  layers: [Reference<IImageLayer>, Reference<IImageLayer>];
+}
+
+export interface IMajorityBlendGroup extends IBaseBlendGroup {
+  mode: "MAJORITY_VOTE";
+  majority: number;
+}
+
+export type BlendGroup = ICompareBlendGroup | IMajorityBlendGroup;
 
 /** A generic layer. */
 export interface ILayer {
@@ -51,11 +52,6 @@ export interface ILayer {
   parent?: ILayer;
 
   /**
-   * The blend mode used to combine this layer on top of the ones below.
-   * Defaults to `"NORMAL"`.
-   */
-  blendMode?: BlendMode;
-  /**
    * The color used to render layers without intrinsic color information,
    * provided as a theme key or CSS color string.
    * This is also used to color the layer icon in the layer menu.
@@ -83,7 +79,6 @@ export interface ILayer {
 
   setIsAnnotation(value?: boolean): void;
 
-  setBlendMode(blendMode?: BlendMode): void;
   setColor(value?: string): void;
   setIsVisible(value?: boolean): void;
   setOpacity(value?: number): void;
@@ -164,9 +159,13 @@ export interface ILayerGroup extends ILayer {
   /** All layers in the group. */
   layers: ILayer[];
 
+  blendGroup?: BlendGroup;
+
   /** Adds a layer to the group. */
   addLayer(idOrlayer: string | ILayer): void;
 
   /** Removes a layer from the document (but keeps it in the document). */
   removeLayer(idOrLayer: string | ILayer): void;
+
+  setBlendMode(blendMode?: BlendMode): void;
 }

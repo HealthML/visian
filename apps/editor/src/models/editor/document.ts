@@ -14,6 +14,7 @@ import {
   ValueType,
   PerformanceMode,
   ITask,
+  BlendGroup,
 } from "@visian/ui-shared";
 import {
   handlePromiseSettledResult,
@@ -87,7 +88,7 @@ export interface DocumentSnapshot {
 
 export class Document
   implements IDocument, ISerializable<DocumentSnapshot>, IDisposable {
-  public readonly excludeFromSnapshotTracking = ["editor"];
+  public readonly excludeFromSnapshotTracking = ["editor", "customBlendGroups"];
 
   public id: string;
   protected titleOverride?: string;
@@ -96,6 +97,8 @@ export class Document
   protected measurementDisplayLayerId?: string;
   protected layerMap: { [key: string]: Layer };
   protected layerIds: string[];
+
+  public customBlendGroups: BlendGroup[] = [];
 
   public measurementType: MeasurementType = "volume";
 
@@ -162,6 +165,7 @@ export class Document
       measurementDisplayLayerId: observable,
       layerMap: observable,
       layerIds: observable,
+      customBlendGroups: observable,
       measurementType: observable,
       history: observable,
       viewSettings: observable,
@@ -191,6 +195,8 @@ export class Document
       moveLayer: action,
       deleteLayer: action,
       toggleTypeAndRepositionLayer: action,
+      addBlendGroup: action,
+      deleteBlendGroup: action,
       importImage: action,
       importAnnotation: action,
       importTrackingLog: action,
@@ -420,6 +426,16 @@ export class Document
 
   public get has3DLayers(): boolean {
     return Object.values(this.layerMap).some((layer) => layer.is3DLayer);
+  }
+
+  public addBlendGroup(group: BlendGroup): void {
+    this.customBlendGroups.push(group);
+  }
+
+  public deleteBlendGroup(group: BlendGroup): void {
+    this.customBlendGroups = this.customBlendGroups.filter(
+      (blendGroup) => blendGroup !== group,
+    );
   }
 
   // I/O

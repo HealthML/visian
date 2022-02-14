@@ -1,5 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { color, IEditor, IImageLayer, MergeFunction } from "@visian/ui-shared";
+import {
+  BlendGroup,
+  color,
+  IEditor,
+  IImageLayer,
+  MergeFunction,
+} from "@visian/ui-shared";
 import { IDisposable, IDisposer, ViewType } from "@visian/utils";
 import { autorun, reaction } from "mobx";
 import * as THREE from "three";
@@ -83,16 +89,24 @@ export class SliceMaterial extends THREE.ShaderMaterial implements IDisposable {
         },
       ),
       reaction(
-        () => editor.volumeRenderer?.renderedImageLayerCount || 1,
-        (layerCount: number) => {
+        () =>
+          [
+            editor.activeDocument?.imageLayers || [],
+            editor.sliceRenderer?.renderBlendGroups || [],
+          ] as [IImageLayer[], BlendGroup[]],
+        ([layers, blendGroups]) => {
           this.fragmentShader = composeLayeredShader(
             sliceFragmentShader,
-            layerCount,
+            layers,
+            blendGroups,
           );
           this.needsUpdate = true;
+
+          editor.sliceRenderer?.lazyRender();
         },
         { fireImmediately: true },
       ),
+
       reaction(
         () => Boolean(editor.activeDocument?.mainImageLayer?.is3DLayer),
         (is3D: boolean) => {

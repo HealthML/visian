@@ -15,7 +15,6 @@ export interface IVolumeRenderer extends IDisposable {
   scene: THREE.Scene;
   xr: IXRManager;
   volume: THREE.Mesh;
-  renderedImageLayerCount: number;
 
   animate(): void;
 

@@ -1,5 +1,5 @@
 import { Texture3DMaterial } from "@visian/rendering";
-import { IEditor } from "@visian/ui-shared";
+import { BlendGroup, IEditor, IImageLayer } from "@visian/ui-shared";
 import { IDisposer } from "@visian/utils";
 import { reaction } from "mobx";
 import * as THREE from "three";
@@ -42,11 +42,16 @@ export class GradientMaterial extends Texture3DMaterial {
 
     this.disposers = [
       reaction(
-        () => editor.volumeRenderer?.renderedImageLayerCount || 1,
-        (layerCount: number) => {
+        () =>
+          [
+            editor.activeDocument?.imageLayers || [],
+            editor.sliceRenderer?.renderBlendGroups || [],
+          ] as [IImageLayer[], BlendGroup[]],
+        ([layers, blendGroups]) => {
           this.fragmentShader = composeLayeredShader(
             gradientFragmentShader,
-            layerCount,
+            layers,
+            blendGroups,
           );
           this.needsUpdate = true;
         },
