@@ -143,8 +143,13 @@ export const AxesAndVoxel: React.FC = observer(() => {
               <VoxelContent
                 tx={
                   store?.editor.activeDocument?.viewport2D.hoveredValue
-                    .toString()
-                    .replace(/,/g, ", ") ?? "-"
+                    .toArray()
+                    .map((value) =>
+                      Number.isInteger(value)
+                        ? value.toString()
+                        : value.toFixed(5),
+                    )
+                    .join(", ") ?? "-"
                 }
               />
             </FlexRow>
