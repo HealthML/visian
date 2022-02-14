@@ -14,7 +14,7 @@ import { SliceLine } from "./slice-line";
 import { OrientedSlice } from "../types";
 import { MergeMaterial, MergeMaterial3D } from "./merge-material";
 import { ReadSliceMaterial } from "./read-slice-material";
-import { textureFormatForComponents } from "../utils";
+import { getTextureFormat } from "../utils";
 
 export class TextureAdapter implements IDisposable {
   private mergeMaterial = new MergeMaterial();
@@ -58,7 +58,7 @@ export class TextureAdapter implements IDisposable {
         this.sliceData[viewType],
         width,
         height,
-        textureFormatForComponents(image.voxelComponents),
+        getTextureFormat(image.voxelComponents),
       );
     });
 

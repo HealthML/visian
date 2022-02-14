@@ -12,9 +12,10 @@ import {
 import * as THREE from "three";
 
 import { TextureAdapter } from "./texture-adapter";
-import { textureFormatForComponents } from "./utils";
+import { getTextureFormat } from "./utils";
 import { OrientedSlice } from "./types";
 import { ImageRenderTarget } from "./image-render-target";
+import { getInternalTextureFormat } from ".";
 
 export class RenderedImage extends Image implements IDisposable {
   public excludeFromSnapshotTracking = ["document"];
@@ -64,7 +65,8 @@ export class RenderedImage extends Image implements IDisposable {
   constructor(
     image: ImageSnapshot & Pick<ImageSnapshot, "voxelCount" | "data">,
     protected document: IDocument,
-    protected isAnnotation: boolean, // Defines wheter or not this image can be edited on the GPU.
+    // Defines wheter or not this image can be edited on the GPU.
+    protected isAnnotation: boolean,
   ) {
     super(image);
 
@@ -74,15 +76,29 @@ export class RenderedImage extends Image implements IDisposable {
 
     this.internalTexture = {};
 
+    const textureFormat = getTextureFormat(this.voxelComponents);
+
     if (this.is3D) {
+      const textureData = this.getTextureData();
+
+      const bytesPerElement = textureData.BYTES_PER_ELEMENT;
+      const textureType =
+        bytesPerElement === 1 ? THREE.UnsignedByteType : THREE.FloatType;
+      const internalTextureFormat = getInternalTextureFormat(
+        this.voxelComponents,
+        bytesPerElement,
+      );
+
       const nearestTexture = new THREE.DataTexture3D(
-        this.getTextureData(),
+        textureData,
         this.voxelCount.x,
         this.voxelCount.y,
         this.voxelCount.z,
       );
       nearestTexture.magFilter = THREE.NearestFilter;
-      nearestTexture.format = textureFormatForComponents(this.voxelComponents);
+      nearestTexture.format = textureFormat;
+      nearestTexture.type = textureType;
+      nearestTexture.internalFormat = internalTextureFormat;
 
       this.internalTexture[THREE.NearestFilter] = nearestTexture;
 
@@ -95,14 +111,9 @@ export class RenderedImage extends Image implements IDisposable {
         );
         linearTexture.magFilter = THREE.LinearFilter;
         linearTexture.minFilter = THREE.LinearFilter;
-        linearTexture.format = textureFormatForComponents(this.voxelComponents);
-
-        nearestTexture.type = THREE.FloatType;
-        linearTexture.type = THREE.FloatType;
-        // R32F cannot be lineraly filtered without an extension.
-        // TODO: Check if the extension is available and use R32F if it makes sense.
-        nearestTexture.internalFormat = "R16F";
-        linearTexture.internalFormat = "R16F";
+        linearTexture.format = textureFormat;
+        linearTexture.type = textureType;
+        linearTexture.internalFormat = internalTextureFormat;
 
         this.internalTexture[THREE.LinearFilter] = linearTexture;
       }
@@ -112,7 +123,7 @@ export class RenderedImage extends Image implements IDisposable {
         this.getTextureData(),
         this.voxelCount[widthAxis],
         this.voxelCount[heightAxis],
-        textureFormatForComponents(this.voxelComponents),
+        textureFormat,
         undefined,
         undefined,
         undefined,
@@ -126,7 +137,7 @@ export class RenderedImage extends Image implements IDisposable {
           this.getTextureData(),
           this.voxelCount[widthAxis],
           this.voxelCount[heightAxis],
-          textureFormatForComponents(this.voxelComponents),
+          textureFormat,
           undefined,
           undefined,
           undefined,

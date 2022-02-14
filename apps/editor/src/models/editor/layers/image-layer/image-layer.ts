@@ -403,6 +403,20 @@ export class ImageLayer
     FileSaver.saveAs(file, file.name);
   };
 
+  public setIsAnnotation(value?: boolean): void {
+    if (Boolean(value) !== this.isAnnotation && this.image) {
+      const imageSnapshot = this.image.toJSON();
+
+      this.image.dispose();
+
+      this.setImage(
+        new RenderedImage(imageSnapshot, this.document, Boolean(value)),
+      );
+    }
+
+    super.setIsAnnotation(value);
+  }
+
   // Serialization
   public toJSON(): ImageLayerSnapshot {
     return {
