@@ -16,9 +16,7 @@ import { textureFormatForComponents } from "./utils";
 import { OrientedSlice } from "./types";
 import { ImageRenderTarget } from "./image-render-target";
 
-export class RenderedImage<T extends TypedArray = TypedArray>
-  extends Image<T>
-  implements IDisposable {
+export class RenderedImage extends Image implements IDisposable {
   public excludeFromSnapshotTracking = ["document"];
 
   /**
@@ -64,7 +62,7 @@ export class RenderedImage<T extends TypedArray = TypedArray>
   public textureAdapter: TextureAdapter;
 
   constructor(
-    image: ImageSnapshot<T> & Pick<ImageSnapshot<T>, "voxelCount" | "data">,
+    image: ImageSnapshot & Pick<ImageSnapshot, "voxelCount" | "data">,
     protected document: IDocument,
     protected isAnnotation: boolean, // Defines wheter or not this image can be edited on the GPU.
   ) {
@@ -291,7 +289,7 @@ export class RenderedImage<T extends TypedArray = TypedArray>
   }
 
   /** Can override unsaved changes to the data that are only stored on the GPU. */
-  public setData(data: T) {
+  public setData(data: TypedArray | Uint8Array | Float32Array) {
     super.setData(data);
     this.hasWholeTextureChanged = false;
     this.gpuUpdates = [];

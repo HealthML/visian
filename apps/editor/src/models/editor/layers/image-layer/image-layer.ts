@@ -12,7 +12,6 @@ import {
   ISerializable,
   itkImageToImageSnapshot,
   ITKImageWithUnit,
-  TypedArray,
   Vector,
   ViewType,
   Voxel,
@@ -47,8 +46,8 @@ export interface ImageLayerSnapshot extends LayerSnapshot {
 export class ImageLayer
   extends Layer
   implements IImageLayer, ISerializable<ImageLayerSnapshot>, IDisposable {
-  public static fromITKImage<T2 extends TypedArray = TypedArray>(
-    image: ITKImageWithUnit<T2>,
+  public static fromITKImage(
+    image: ITKImageWithUnit,
     document: IDocument,
     snapshot?: Partial<ImageLayerSnapshot>,
     filterValue?: number,
@@ -63,8 +62,8 @@ export class ImageLayer
     );
   }
 
-  public static fromNewAnnotationForImage<T2 extends TypedArray = TypedArray>(
-    image: Image<T2>,
+  public static fromNewAnnotationForImage(
+    image: Image,
     document: IDocument,
     color?: string,
   ) {

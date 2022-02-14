@@ -27,7 +27,7 @@ import { findVoxelInSlice, setSlice } from "./iteration";
 
 import type { ISerializable } from "../types";
 
-export interface ImageSnapshot<T extends TypedArray = TypedArray> {
+export interface ImageSnapshot {
   name?: string;
 
   dimensionality?: number;
@@ -42,18 +42,17 @@ export interface ImageSnapshot<T extends TypedArray = TypedArray> {
   origin?: number[];
   orientation?: ITKMatrix;
 
-  data?: T;
+  data?: Uint8Array | Float32Array | TypedArray;
 
   unit?: Unit;
 }
 
-export interface ITKImageWithUnit<T extends TypedArray = TypedArray>
-  extends ITKImage<T> {
+export interface ITKImageWithUnit extends ITKImage {
   unit?: Unit;
 }
 
-export const itkImageToImageSnapshot = <T extends TypedArray = TypedArray>(
-  image: ITKImageWithUnit<T>,
+export const itkImageToImageSnapshot = (
+  image: ITKImageWithUnit,
   filterValue?: number,
   squash?: boolean,
 ): ImageSnapshot => ({
@@ -95,8 +94,7 @@ export const itkImageToImageSnapshot = <T extends TypedArray = TypedArray>(
 });
 
 /** A generic, observable multi-dimensional image class. */
-export class Image<T extends TypedArray = TypedArray>
-  implements ISerializable<ImageSnapshot<Uint8Array | Float32Array>> {
+export class Image implements ISerializable<ImageSnapshot> {
   /**
    * An name that describes this image.
    *
@@ -170,7 +168,7 @@ export class Image<T extends TypedArray = TypedArray>
   private data!: Uint8Array | Float32Array;
 
   constructor(
-    image: ImageSnapshot<T> & Pick<ImageSnapshot<T>, "voxelCount" | "data">,
+    image: ImageSnapshot & Pick<ImageSnapshot, "voxelCount" | "data">,
   ) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     this.applySnapshot(image as any);
@@ -261,10 +259,7 @@ export class Image<T extends TypedArray = TypedArray>
     return sliceData;
   }
 
-  public getSliceImage(
-    viewType: ViewType,
-    sliceNumber: number,
-  ): Image<Uint8Array | Float32Array> {
+  public getSliceImage(viewType: ViewType, sliceNumber: number): Image {
     if (this.dimensionality < 3) return this.clone();
 
     const [horizontal, vertical] = getPlaneAxes(viewType);
@@ -291,7 +286,7 @@ export class Image<T extends TypedArray = TypedArray>
     );
   }
 
-  public setData(data: T | Uint8Array | Float32Array) {
+  public setData(data: TypedArray | Uint8Array | Float32Array) {
     if (data === this.data) return;
 
     if (!this.data) {
@@ -395,9 +390,7 @@ export class Image<T extends TypedArray = TypedArray>
     };
   }
 
-  public async applySnapshot(
-    snapshot: ImageSnapshot<Uint8Array | Float32Array>,
-  ) {
+  public async applySnapshot(snapshot: ImageSnapshot) {
     this.name = snapshot.name || "Image";
 
     this.dimensionality = snapshot.dimensionality || snapshot.voxelCount.length;
