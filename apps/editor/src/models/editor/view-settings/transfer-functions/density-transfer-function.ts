@@ -34,6 +34,7 @@ export class DensityTransferFunction extends TransferFunction<"density"> {
             defaultValue: [0.05, 1],
             min: 0,
             max: 1,
+            showRangeHandle: true,
             onBeforeValueChange: () =>
               document.viewport3D?.onTransferFunctionChange(),
             getHistogram: () => document.mainImageLayer?.densityHistogram,

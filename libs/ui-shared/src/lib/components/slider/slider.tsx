@@ -17,6 +17,7 @@ import {
   SliderValueInputWrapper,
   Histogram,
   HistogramBar,
+  RangeHandle,
 } from "./styled-components";
 import { pointerToSliderValue, useDrag, valueToSliderPos } from "./utils";
 
@@ -44,6 +45,7 @@ export const Slider: React.FC<SliderProps> = (props) => {
     roundMethod,
     scaleType,
     showRange,
+    showRangeHandle,
     showFloatingValueLabel = false,
     formatValueLabel = defaultFormatLabel,
     markers,
@@ -216,10 +218,111 @@ export const Slider: React.FC<SliderProps> = (props) => {
   const [thumbRef, setThumbRef] = useState<HTMLDivElement | null>(null);
   const theme = useTheme() as Theme;
 
+  // Range Handle
+  const [isHovered, setIsHovered] = useState(false);
+  const onPointerEnter = useCallback(() => {
+    setIsHovered(true);
+  }, []);
+  const onPointerLeave = useCallback(() => {
+    setIsHovered(false);
+  }, []);
+
+  const updateValues = useCallback(
+    (event: PointerEvent | React.PointerEvent) => {
+      if ((!onChange && !onStart) || !sliderRef.current) return;
+
+      if (event.type === "pointerdown") {
+        if (onStart) onStart(event, 0);
+      }
+
+      if (!onChange) return;
+
+      event.stopPropagation();
+
+      const newCenterValue = pointerToSliderValue(event, sliderRef.current, {
+        scaleType,
+        min,
+        max,
+        stepSize,
+        roundMethod,
+        isInverted,
+        isVertical,
+      });
+      if (!Array.isArray(valueRef.current)) {
+        onChange(newCenterValue, 0, newCenterValue);
+        return;
+      }
+
+      const currentMinValue = valueRef.current.reduce(
+        (a, b) => Math.min(a, b),
+        max,
+      );
+      const currentMaxValue = valueRef.current.reduce(
+        (a, b) => Math.max(a, b),
+        min,
+      );
+      const currentCenterValue = (currentMinValue + currentMaxValue) / 2;
+      const offset = Math.max(
+        Math.min(newCenterValue - currentCenterValue, max - currentMaxValue),
+        min - currentMinValue,
+      );
+
+      const newValueArray = valueRef.current.map(
+        (thumbValue) => thumbValue + offset,
+      );
+
+      onChange(newValueArray, 0, newValueArray[0]);
+    },
+    [
+      isInverted,
+      max,
+      min,
+      onChange,
+      onStart,
+      roundMethod,
+      stepSize,
+      isVertical,
+      scaleType,
+    ],
+  );
+
+  const [isRangeHandleDragged, setIsRangeHandleDragged] = useState(false);
+  const startRangeDragHandler = useCallback(
+    (event: PointerEvent | React.PointerEvent) => {
+      setIsRangeHandleDragged(true);
+      updateValues(event);
+    },
+    [updateValues],
+  );
+  const endRangeDragHandler = useCallback(
+    (event: PointerEvent | React.PointerEvent) => {
+      setIsRangeHandleDragged(false);
+      onEnd?.(event, 0);
+    },
+    [onEnd],
+  );
+
+  const { onPointerDown: onRangeHandlePointerDown } = useDrag<number>(
+    startRangeDragHandler,
+    updateValues,
+    endRangeDragHandler,
+  );
+
+  const startRangeHandleDrag = useCallback(
+    (event: PointerEvent | React.PointerEvent) => {
+      if (!onChange || !sliderRef.current) return;
+
+      onRangeHandlePointerDown(event, 0);
+    },
+    [onChange, onRangeHandlePointerDown],
+  );
+
   return (
     <SliderContainer
       {...rest}
       onPointerDown={startDrag}
+      onPointerEnter={onPointerEnter}
+      onPointerLeave={onPointerLeave}
       isVertical={isVertical}
       ref={sliderRef}
     >
@@ -279,7 +382,11 @@ export const Slider: React.FC<SliderProps> = (props) => {
           isInverted={isInverted}
           isVertical={isVertical}
           positions={thumbPositions}
-        />
+        >
+          {showRangeHandle && (isHovered || isRangeHandleDragged) && (
+            <RangeHandle onPointerDown={startRangeHandleDrag} />
+          )}
+        </SliderRangeSelection>
       )}
       {valueArray.map((_thumbValue, index) => {
         const thumbPos = thumbPositions[index];

@@ -196,6 +196,7 @@ export const ViewSettings: React.FC = observer(() => {
             setValue={setWindow}
             serializationMethod="block"
             getHistogram={getHistogram}
+            showRangeHandle
           />
         )}
         {store?.editor.activeDocument?.viewSettings.viewMode === "3D" && (

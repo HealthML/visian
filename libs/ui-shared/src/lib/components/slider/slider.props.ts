@@ -57,6 +57,8 @@ export interface SliderProps<T extends number | number[] = number | number[]>
    */
   showRange?: boolean;
 
+  showRangeHandle?: boolean;
+
   showFloatingValueLabel?: boolean;
 
   /**

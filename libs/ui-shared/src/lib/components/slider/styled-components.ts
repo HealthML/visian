@@ -121,6 +121,16 @@ export const SliderRangeSelection = styled.div.attrs<SliderRangeSelectionProps>(
   }}
   position: absolute;
   z-index: 5;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`;
+
+export const RangeHandle = styled.div`
+  background-color: ${color("gray")};
+  width: 10px;
+  height: 10px;
+  border-radius: 5px;
 `;
 
 export const SliderLabelRow = styled.div`
