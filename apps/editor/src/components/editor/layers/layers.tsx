@@ -39,6 +39,7 @@ import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
 import { ImageLayer } from "../../../models";
+import { InfoShortcuts } from "../info-shortcuts";
 import { LayerSettings } from "../layer-settings";
 
 // Utilities
@@ -383,7 +384,12 @@ export const Layers: React.FC = observer(() => {
         position="right"
         headerChildren={
           <>
-            <StyledInfoText infoTx="info-layer-stack" />
+            <StyledInfoText
+              infoTx="info-layer-stack"
+              shortcuts={
+                <InfoShortcuts hotkeyGroupNames={["layer-controls"]} />
+              }
+            />
             <ModalHeaderButton
               icon="plus"
               tooltipTx="add-annotation-layer"

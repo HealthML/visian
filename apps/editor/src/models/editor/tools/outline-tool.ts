@@ -28,6 +28,7 @@ export class OutlineTool<
         supportedLayerKinds: ["image"],
         supportAnnotationsOnly: true,
         isDrawingTool: true,
+        activationKeys: isAdditive ? "o" : "ctrl+o",
       },
       document,
       toolRenderer,

@@ -1,4 +1,4 @@
-import { MergeFunction } from "@visian/ui-shared";
+import { MergeFunction, ViewMode } from "@visian/ui-shared";
 import { IDisposer, ViewType } from "@visian/utils";
 import hotkeys from "hotkeys-js";
 
@@ -12,400 +12,323 @@ import {
   ThresholdAnnotationTool,
 } from "../models";
 
-export const setUpHotKeys = (store: RootStore): IDisposer => {
-  // Tool Selection
-  hotkeys("h", (event) => {
-    event.preventDefault();
-    store.editor.activeDocument?.tools.setActiveTool("navigation-tool");
-  });
-  hotkeys("c", (event) => {
-    event.preventDefault();
-    if (store.editor.activeDocument?.viewSettings.viewMode !== "2D") return;
-    if (!store.editor.activeDocument?.has3DLayers) return;
+export interface IHotkey {
+  keys: string;
+  preventDefault?: boolean; // Defaults to true
+  condition?: (store: RootStore, event: KeyboardEvent) => boolean;
+  viewMode?: ViewMode;
+  action: (store: RootStore) => void;
+  label?: string;
+  labelTx?: string;
+  name?: string;
+  shortcutGuideSection?: string;
+  displayKeys?: string[];
+}
 
-    store.editor.activeDocument?.tools.setActiveTool("crosshair-tool");
-  });
-  hotkeys("b", (event) => {
-    event.preventDefault();
-    if (store.editor.activeDocument?.viewSettings.viewMode !== "2D") return;
+const handleXR = async (store: RootStore, enterXR = false) => {
+  if (enterXR) {
+    store.editor.activeDocument?.viewport3D.enterXR();
+  } else if (store.editor.activeDocument?.viewport3D.isInXR) {
+    await store?.editor.activeDocument?.viewport3D.exitXR();
+  }
+};
 
-    store.editor.activeDocument?.tools.setActiveTool("pixel-brush");
-  });
-  hotkeys("s", (event) => {
-    event.preventDefault();
-    if (store.editor.activeDocument?.viewSettings.viewMode !== "2D") return;
-
-    store.editor.activeDocument?.tools.setActiveTool("smart-brush");
-  });
-  hotkeys("r", (event) => {
-    event.preventDefault();
-    if (store.editor.activeDocument?.viewSettings.viewMode !== "2D") return;
-
-    store.editor.activeDocument?.tools.setActiveTool("bounded-smart-brush");
-  });
-  hotkeys("d", (event) => {
-    event.preventDefault();
-    if (store.editor.activeDocument?.viewSettings.viewMode !== "2D") return;
-
-    store.editor.activeDocument?.tools.setActiveTool("smart-brush-3d");
-  });
-  hotkeys("e", (event) => {
-    event.preventDefault();
-    if (store.editor.activeDocument?.viewSettings.viewMode !== "2D") return;
-
-    store.editor.activeDocument?.tools.setActiveTool("pixel-eraser");
-  });
-  hotkeys("o", (event) => {
-    event.preventDefault();
-    if (store.editor.activeDocument?.viewSettings.viewMode !== "2D") return;
-
-    store.editor.activeDocument?.tools.setActiveTool("outline-tool");
-  });
-  hotkeys("ctrl+p", (event) => {
-    event.preventDefault();
-    store.editor.activeDocument?.tools.setActiveTool("threshold-annotation");
-  });
-  hotkeys("ctrl+d", (event) => {
-    event.preventDefault();
-    store.editor.activeDocument?.tools.setActiveTool("dilate-erode");
-  });
-  hotkeys("shift+f,f", (event) => {
-    event.preventDefault();
-    if (store.editor.activeDocument?.viewSettings.viewMode !== "3D") return;
-
-    const activeTool = store.editor.activeDocument?.tools.activeTool?.name;
-    store.editor.activeDocument?.tools.setActiveTool(
-      activeTool === "fly-tool" ? "navigation-tool" : "fly-tool",
-    );
-  });
-  hotkeys("p", (event) => {
-    event.preventDefault();
-    if (store.editor.activeDocument?.viewSettings.viewMode !== "3D") return;
-
-    store.editor.activeDocument?.tools.setActiveTool("plane-tool");
-  });
-  hotkeys("l", (event) => {
-    event.preventDefault();
-    if (store.editor.activeDocument?.viewSettings.viewMode !== "3D") return;
-
-    store.editor.activeDocument?.tools.setActiveTool("measurement-tool");
-  });
-
-  // Copy and Paste
-  hotkeys("ctrl+c", (event) => {
-    event.preventDefault();
-    store.editor.activeDocument?.clipboard.copy();
-  });
-  hotkeys("ctrl+v", (event) => {
-    event.preventDefault();
-    store.editor.activeDocument?.clipboard.paste();
-  });
-  hotkeys("ctrl+shift+v", (event) => {
-    event.preventDefault();
-    store.editor.activeDocument?.clipboard.paste(MergeFunction.Add);
-  });
-
-  // Tools
-  hotkeys("del,backspace", (event) => {
-    event.preventDefault();
-    if (store.editor.activeDocument?.viewSettings.viewMode !== "2D") return;
-
-    store.editor.activeDocument?.tools.setActiveTool("clear-slice");
-  });
-  hotkeys("ctrl+del,ctrl+backspace", (event) => {
-    event.preventDefault();
-    store.editor.activeDocument?.tools.setActiveTool("clear-image");
-  });
-  hotkeys("enter", (event) => {
-    event.preventDefault();
-
-    if (
-      store.editor.activeDocument?.tools.regionGrowingRenderer3D.holdsPreview
-    ) {
-      (store.editor.activeDocument?.tools.tools[
-        "smart-brush-3d"
-      ] as SmartBrush3D).submit();
-    }
-
-    if (
-      store.editor.activeDocument?.tools.thresholdAnnotationRenderer3D
-        .holdsPreview
-    ) {
-      (store.editor.activeDocument?.tools.tools[
-        "threshold-annotation"
-      ] as ThresholdAnnotationTool).submit();
-    }
-
-    if (store.editor.activeDocument?.tools.dilateErodeRenderer3D.holdsPreview) {
-      (store.editor.activeDocument?.tools.tools[
-        "dilate-erode"
-      ] as DilateErodeTool).submit();
-    }
-
-    if (
-      (store.editor.activeDocument?.tools.tools[
-        "measurement-tool"
-      ] as MeasurementTool).hasPath
-    ) {
-      (store.editor.activeDocument?.tools.tools[
-        "measurement-tool"
-      ] as MeasurementTool).submit();
-    }
-  });
-  hotkeys("escape", (event) => {
-    event.preventDefault();
-
-    if (
-      store.editor.activeDocument?.tools.regionGrowingRenderer3D.holdsPreview
-    ) {
-      (store.editor.activeDocument?.tools.tools[
-        "smart-brush-3d"
-      ] as SmartBrush3D).discard();
-    }
-
-    if (
-      store.editor.activeDocument?.tools.thresholdAnnotationRenderer3D
-        .holdsPreview
-    ) {
-      (store.editor.activeDocument?.tools.tools[
-        "threshold-annotation"
-      ] as ThresholdAnnotationTool).discard();
-    }
-
-    if (store.editor.activeDocument?.tools.dilateErodeRenderer3D.holdsPreview) {
-      (store.editor.activeDocument?.tools.tools[
-        "dilate-erode"
-      ] as DilateErodeTool).discard();
-    }
-
-    if (
-      (store.editor.activeDocument?.tools.tools[
-        "measurement-tool"
-      ] as MeasurementTool).hasPath
-    ) {
-      (store.editor.activeDocument?.tools.tools[
-        "measurement-tool"
-      ] as MeasurementTool).discard();
-    }
-  });
-
-  // Brush Size/Clipping Plane Distance
-  hotkeys("*", (event) => {
+export const generalHotkeys: IHotkey[] = [
+  // Brush Size
+  {
     // "+" doesn't currently work with hotkeys-js (https://github.com/jaywcjlove/hotkeys/issues/270)
-    if ((event.key === "+" || event.key === "w") && !event.ctrlKey) {
-      if (store.editor.activeDocument?.viewSettings.viewMode === "3D") {
-        store.editor.activeDocument?.viewport3D.increaseClippingPlaneDistance();
-        return;
-      }
+    keys: "*",
+    viewMode: "2D",
+    condition: (_, event) =>
+      (event.key === "+" || event.key === "w") && !event.ctrlKey,
+    action: (store) => store.editor.activeDocument?.tools.incrementBrushSize(),
+    labelTx: "increase-brush-size",
+    name: "increase-brush-size",
+    shortcutGuideSection: "brush-size",
+    displayKeys: ["+"],
+  },
+  {
+    keys: "-",
+    viewMode: "2D",
+    action: (store) => store.editor.activeDocument?.tools.decrementBrushSize(),
+    labelTx: "decrease-brush-size",
+    name: "decrease-brush-size",
+    shortcutGuideSection: "brush-size",
+  },
 
-      store.editor.activeDocument?.tools.incrementBrushSize();
-    }
-  });
-  hotkeys("-,q", () => {
-    if (store.editor.activeDocument?.viewSettings.viewMode === "3D") {
-      store.editor.activeDocument?.viewport3D.decreaseClippingPlaneDistance();
-      return;
-    }
-
-    store.editor.activeDocument?.tools.decrementBrushSize();
-  });
+  // Clipping Plane
+  {
+    // "+" doesn't currently work with hotkeys-js (https://github.com/jaywcjlove/hotkeys/issues/270)
+    keys: "*",
+    viewMode: "3D",
+    condition: (_, event) =>
+      (event.key === "+" || event.key === "w") && !event.ctrlKey,
+    action: (store) =>
+      store.editor.activeDocument?.viewport3D.increaseClippingPlaneDistance(),
+    labelTx: "increase-clipping-plane",
+    name: "increase-clipping-plane",
+    displayKeys: ["+"],
+  },
+  {
+    keys: "-",
+    viewMode: "3D",
+    action: (store) =>
+      store.editor.activeDocument?.viewport3D.decreaseClippingPlaneDistance(),
+    labelTx: "decrease-clipping-plane",
+    name: "decrease-clipping-plane",
+  },
 
   // Undo/Redo
-  hotkeys("ctrl+z", (event) => {
-    event.preventDefault();
-    store.editor.activeDocument?.history.undo();
-  });
-  hotkeys("ctrl+shift+z,ctrl+y", (event) => {
-    event.preventDefault();
-    store.editor.activeDocument?.history.redo();
-  });
+  {
+    keys: "ctrl+z",
+    action: (store) => store.editor.activeDocument?.history.undo(),
+    labelTx: "undo",
+    name: "undo",
+    shortcutGuideSection: "undo-redo",
+  },
+  {
+    keys: "ctrl+shift+z,ctrl+y",
+    action: (store) => store.editor.activeDocument?.history.redo(),
+    labelTx: "redo",
+    name: "redo",
+    shortcutGuideSection: "undo-redo",
+  },
 
-  // Layer Controls
-  hotkeys("m", () => {
-    store.editor.activeDocument?.activeLayer?.setIsVisible(
-      !store.editor.activeDocument.activeLayer.isVisible,
-    );
-  });
+  // Layer Contorls
+  {
+    keys: "m",
+    action: (store) =>
+      store.editor.activeDocument?.activeLayer?.setIsVisible(
+        !store.editor.activeDocument.activeLayer.isVisible,
+      ),
+    labelTx: "toggle-active-layer",
+    name: "toggle-active-layer",
+    shortcutGuideSection: "layer-controls",
+  },
 
   // View Types
-  const handleXR = async (enterXR = false) => {
-    if (enterXR) {
-      store.editor.activeDocument?.viewport3D.enterXR();
-    } else if (store.editor.activeDocument?.viewport3D.isInXR) {
-      await store?.editor.activeDocument?.viewport3D.exitXR();
-    }
-  };
-  hotkeys("1", () => {
-    handleXR().then(() => {
-      // View mode has to be set first to ensure brush cursor alignment
-      store.editor.activeDocument?.viewSettings.setViewMode("2D");
-      store.editor.activeDocument?.viewport2D.setMainViewType(
+  {
+    keys: "1",
+    action: (store) =>
+      handleXR(store).then(() => {
+        // View mode has to be set first to ensure brush cursor alignment
+        store.editor.activeDocument?.viewSettings.setViewMode("2D");
+        store.editor.activeDocument?.viewport2D.setMainViewType(
+          ViewType.Transverse,
+        );
+      }),
+    labelTx: "switch-transverse",
+    shortcutGuideSection: "view-types",
+  },
+  {
+    keys: "2",
+    action: (store) =>
+      handleXR(store).then(() => {
+        // View mode has to be set first to ensure brush cursor alignment
+        store.editor.activeDocument?.viewSettings.setViewMode("2D");
+        store.editor.activeDocument?.viewport2D.setMainViewType(
+          ViewType.Sagittal,
+        );
+      }),
+    labelTx: "switch-sagittal",
+    shortcutGuideSection: "view-types",
+  },
+  {
+    keys: "3",
+    action: (store) =>
+      handleXR(store).then(() => {
+        // View mode has to be set first to ensure brush cursor alignment
+        store.editor.activeDocument?.viewSettings.setViewMode("2D");
+        store.editor.activeDocument?.viewport2D.setMainViewType(
+          ViewType.Coronal,
+        );
+      }),
+    labelTx: "switch-coronal",
+    shortcutGuideSection: "view-types",
+  },
+  {
+    keys: "4",
+    action: (store) =>
+      handleXR(store).then(() => {
+        store.editor.activeDocument?.viewSettings.setViewMode("3D");
+      }),
+    labelTx: "switch-3d",
+    shortcutGuideSection: "view-types",
+  },
+  {
+    keys: "5",
+    action: (store) => handleXR(store, true),
+  },
+  {
+    keys: "0",
+    viewMode: "2D",
+    action: (store) =>
+      store.editor.activeDocument?.viewport2D.toggleSideViews(),
+    labelTx: "toggle-side-views",
+    shortcutGuideSection: "view-types",
+  },
+  {
+    keys: "ctrl+1",
+    viewMode: "3D",
+    action: (store) =>
+      store.editor.activeDocument?.viewport3D.setCameraToFaceViewType(
         ViewType.Transverse,
-      );
-    });
-  });
-  hotkeys("2", () => {
-    handleXR().then(() => {
-      // View mode has to be set first to ensure brush cursor alignment
-      store.editor.activeDocument?.viewSettings.setViewMode("2D");
-      store.editor.activeDocument?.viewport2D.setMainViewType(
+      ),
+  },
+  {
+    keys: "ctrl+2",
+    viewMode: "3D",
+    action: (store) =>
+      store.editor.activeDocument?.viewport3D.setCameraToFaceViewType(
         ViewType.Sagittal,
-      );
-    });
-  });
-  hotkeys("3", () => {
-    handleXR().then(() => {
-      // View mode has to be set first to ensure brush cursor alignment
-      store.editor.activeDocument?.viewSettings.setViewMode("2D");
-      store.editor.activeDocument?.viewport2D.setMainViewType(ViewType.Coronal);
-    });
-  });
-  hotkeys("4", () => {
-    handleXR().then(() => {
-      store.editor.activeDocument?.viewSettings.setViewMode("3D");
-    });
-  });
-  hotkeys("5", () => {
-    handleXR(true);
-  });
-  hotkeys("0", () => {
-    store.editor.activeDocument?.viewport2D.toggleSideViews();
-  });
-  hotkeys("ctrl+1", () => {
-    if (store.editor.activeDocument?.viewSettings.viewMode !== "3D") return;
-
-    store.editor.activeDocument?.viewport3D.setCameraToFaceViewType(
-      ViewType.Transverse,
-    );
-  });
-  hotkeys("ctrl+2", () => {
-    if (store.editor.activeDocument?.viewSettings.viewMode !== "3D") return;
-
-    store.editor.activeDocument?.viewport3D.setCameraToFaceViewType(
-      ViewType.Sagittal,
-    );
-  });
-  hotkeys("ctrl+3", () => {
-    if (store.editor.activeDocument?.viewSettings.viewMode !== "3D") return;
-
-    store.editor.activeDocument?.viewport3D.setCameraToFaceViewType(
-      ViewType.Coronal,
-    );
-  });
-  hotkeys("alt+1", () => {
-    if (store.editor.activeDocument?.viewSettings.viewMode !== "3D") return;
-
-    store.editor.activeDocument?.viewport3D.setCameraToFaceViewType(
-      ViewType.Transverse,
-      true,
-    );
-  });
-  hotkeys("alt+2", () => {
-    if (store.editor.activeDocument?.viewSettings.viewMode !== "3D") return;
-
-    store.editor.activeDocument?.viewport3D.setCameraToFaceViewType(
-      ViewType.Sagittal,
-      true,
-    );
-  });
-  hotkeys("alt+3", () => {
-    if (store.editor.activeDocument?.viewSettings.viewMode !== "3D") return;
-
-    store.editor.activeDocument?.viewport3D.setCameraToFaceViewType(
-      ViewType.Coronal,
-      true,
-    );
-  });
+      ),
+  },
+  {
+    keys: "ctrl+3",
+    viewMode: "3D",
+    action: (store) =>
+      store.editor.activeDocument?.viewport3D.setCameraToFaceViewType(
+        ViewType.Coronal,
+      ),
+  },
+  {
+    keys: "alt+1",
+    viewMode: "3D",
+    action: (store) =>
+      store.editor.activeDocument?.viewport3D.setCameraToFaceViewType(
+        ViewType.Transverse,
+        true,
+      ),
+  },
+  {
+    keys: "alt+2",
+    viewMode: "3D",
+    action: (store) =>
+      store.editor.activeDocument?.viewport3D.setCameraToFaceViewType(
+        ViewType.Sagittal,
+        true,
+      ),
+  },
+  {
+    keys: "alt+3",
+    viewMode: "3D",
+    action: (store) =>
+      store.editor.activeDocument?.viewport3D.setCameraToFaceViewType(
+        ViewType.Coronal,
+        true,
+      ),
+  },
 
   // Slice Navigation
-  hotkeys("up", (event) => {
-    event.preventDefault();
-    if (store.editor.activeDocument?.viewSettings.viewMode !== "2D") return;
-
-    store.editor.activeDocument?.viewport2D.stepSelectedSlice(undefined, 1);
-  });
-  hotkeys("shift+up", (event) => {
-    event.preventDefault();
-    if (store.editor.activeDocument?.viewSettings.viewMode !== "2D") return;
-
-    store.editor.activeDocument?.viewport2D.stepSelectedSlice(
-      undefined,
-      skipSlices,
-    );
-  });
-  hotkeys("down", (event) => {
-    event.preventDefault();
-    if (store.editor.activeDocument?.viewSettings.viewMode !== "2D") return;
-
-    store.editor.activeDocument?.viewport2D.stepSelectedSlice(undefined, -1);
-  });
-  hotkeys("shift+down", (event) => {
-    event.preventDefault();
-    if (store.editor.activeDocument?.viewSettings.viewMode !== "2D") return;
-
-    store.editor.activeDocument?.viewport2D.stepSelectedSlice(
-      undefined,
-      -skipSlices,
-    );
-  });
-  hotkeys("alt+0", (event) => {
-    event.preventDefault();
-    if (store.editor.activeDocument?.viewSettings.viewMode !== "2D") return;
-
-    store.editor.activeDocument?.viewSettings.setSelectedVoxel();
-  });
+  {
+    keys: "up",
+    viewMode: "2D",
+    action: (store: RootStore) =>
+      store.editor.activeDocument?.viewport2D.stepSelectedSlice(undefined, 1),
+    labelTx: "slice-up",
+    shortcutGuideSection: "slice-navigation",
+  },
+  {
+    keys: "shift+up",
+    viewMode: "2D",
+    action: (store: RootStore) =>
+      store.editor.activeDocument?.viewport2D.stepSelectedSlice(
+        undefined,
+        skipSlices,
+      ),
+    labelTx: "slice-skip-up",
+    shortcutGuideSection: "slice-navigation",
+  },
+  {
+    keys: "down",
+    viewMode: "2D",
+    action: (store: RootStore) =>
+      store.editor.activeDocument?.viewport2D.stepSelectedSlice(undefined, -1),
+    labelTx: "slice-down",
+    shortcutGuideSection: "slice-navigation",
+  },
+  {
+    keys: "shift+down",
+    viewMode: "2D",
+    action: (store: RootStore) =>
+      store.editor.activeDocument?.viewport2D.stepSelectedSlice(
+        undefined,
+        -skipSlices,
+      ),
+    labelTx: "slice-skip-down",
+    shortcutGuideSection: "slice-navigation",
+  },
+  {
+    keys: "alt+0",
+    viewMode: "2D",
+    action: (store: RootStore) =>
+      store.editor.activeDocument?.viewSettings.setSelectedVoxel(),
+    labelTx: "reset-selected-voxel",
+    shortcutGuideSection: "slice-navigation",
+  },
 
   // Zoom
-  hotkeys("*", (event) => {
+  {
     // "+" doesn't currently work with hotkeys-js (https://github.com/jaywcjlove/hotkeys/issues/270)
-    if (event.key === "+" && event.ctrlKey) {
-      event.preventDefault();
-      if (store.editor.activeDocument?.viewSettings.viewMode !== "2D") return;
-
-      store.editor.activeDocument?.viewport2D.zoomIn();
-    }
-  });
-  hotkeys("ctrl+-", (event) => {
-    event.preventDefault();
-    if (store.editor.activeDocument?.viewSettings.viewMode !== "2D") return;
-
-    store.editor.activeDocument?.viewport2D.zoomOut();
-  });
-  hotkeys("ctrl+0", (event) => {
-    event.preventDefault();
-    const mode = store.editor.activeDocument?.viewSettings.viewMode;
-
-    switch (mode) {
-      case "2D":
-        store.editor.activeDocument?.viewport2D.setZoomLevel();
-        store.editor.activeDocument?.viewport2D.setOffset();
-        store.editor.sliceRenderer?.resetCrosshairOffset();
-        store.editor.sliceRenderer?.lazyRender();
-        return;
-      case "3D":
-        store.editor.activeDocument?.viewport3D.setCameraMatrix();
-        store.editor.activeDocument?.viewport3D.setOrbitTarget();
-        store.editor.volumeRenderer?.lazyRender();
-    }
-  });
+    keys: "*",
+    viewMode: "2D",
+    condition: (_, event) => event.key === "+" && event.ctrlKey,
+    action: (store) => store.editor.activeDocument?.viewport2D.zoomIn(),
+    labelTx: "zoom-in",
+    shortcutGuideSection: "zoom",
+    displayKeys: ["ctrl", "+"],
+  },
+  {
+    keys: "ctrl+-",
+    viewMode: "2D",
+    action: (store) => store.editor.activeDocument?.viewport2D.zoomOut(),
+    labelTx: "zoom-out",
+    shortcutGuideSection: "zoom",
+  },
+  {
+    keys: "ctrl+0",
+    viewMode: "2D",
+    action: (store) => {
+      store.editor.activeDocument?.viewport2D.setZoomLevel();
+      store.editor.activeDocument?.viewport2D.setOffset();
+      store.editor.sliceRenderer?.resetCrosshairOffset();
+      store.editor.sliceRenderer?.lazyRender();
+    },
+    labelTx: "reset-zoom",
+    shortcutGuideSection: "zoom",
+  },
+  {
+    keys: "ctrl+0",
+    viewMode: "3D",
+    action: (store) => {
+      store.editor.activeDocument?.viewport3D.setCameraMatrix();
+      store.editor.activeDocument?.viewport3D.setOrbitTarget();
+      store.editor.volumeRenderer?.lazyRender();
+    },
+  },
 
   // New Document
-  // Ctrl + N in Chrome only works in application mode
-  // See https://src.chromium.org/viewvc/chrome?revision=127787&view=revision
-  hotkeys("ctrl+n,ctrl+alt+n", (event) => {
-    event.preventDefault();
-    store.editor.newDocument();
-  });
+  {
+    // Ctrl + N in Chrome only works in application mode
+    // See https://src.chromium.org/viewvc/chrome?revision=127787&view=revision
+    keys: "ctrl+n,ctrl+alt+n",
+    action: (store) => store.editor.newDocument(),
+    labelTx: "create-new-document",
+    shortcutGuideSection: "save-export",
+    displayKeys: ["ctrl", "alt", "n"],
+  },
 
   // Save & Export
-  hotkeys("ctrl+s", (event) => {
-    event.preventDefault();
-    store.editor.activeDocument?.save();
-  });
-  hotkeys("ctrl+e", (event) => {
-    event.preventDefault();
-
-    if (store.editor.activeDocument?.viewSettings.viewMode === "2D") {
+  {
+    keys: "ctrl+s",
+    action: (store) => store.editor.activeDocument?.save(),
+    labelTx: "save-in-browser",
+    shortcutGuideSection: "save-export",
+  },
+  {
+    keys: "ctrl+e",
+    viewMode: "2D",
+    action: (store) => {
       store.setProgress({ labelTx: "exporting" });
       store.editor.activeDocument
         ?.exportZip(true)
@@ -413,37 +336,200 @@ export const setUpHotKeys = (store: RootStore): IDisposer => {
         .then(() => {
           store?.setProgress();
         });
-    } else {
-      store.editor.activeDocument?.viewport3D.exportCanvasImage();
-    }
-  });
-  hotkeys("ctrl+shift+e", (event) => {
-    event.preventDefault();
-    if (store.editor.activeDocument?.viewSettings.viewMode === "2D") {
+    },
+    labelTx: "export-current-image",
+    shortcutGuideSection: "save-export",
+  },
+  {
+    keys: "ctrl+e",
+    viewMode: "3D",
+    action: (store) =>
+      store.editor.activeDocument?.viewport3D.exportCanvasImage(),
+  },
+  {
+    keys: "ctrl+shift+e",
+    viewMode: "2D",
+    action: (store) =>
       (store.editor.activeDocument
-        ?.activeLayer as ImageLayer)?.quickExportSlice?.();
-    } else {
-      store.editor.activeDocument?.viewport3D.exportCanvasImage();
-    }
-  });
+        ?.activeLayer as ImageLayer)?.quickExportSlice?.(),
+    labelTx: "export-current-slice",
+    shortcutGuideSection: "save-export",
+  },
 
   // Voxel Info
-  hotkeys("i", (event) => {
-    event.preventDefault();
-    store.editor.activeDocument?.viewport2D.setVoxelInfoMode(
-      store.editor.activeDocument?.viewport2D.voxelInfoMode === "off"
-        ? "on"
-        : "off",
-    );
-  });
-  hotkeys("ctrl+i", (event) => {
-    event.preventDefault();
-    store.editor.activeDocument?.viewport2D.setVoxelInfoMode(
-      store.editor.activeDocument?.viewport2D.voxelInfoMode === "delay"
-        ? "on"
-        : "delay",
-    );
-  });
+  {
+    keys: "i",
+    viewMode: "2D",
+    action: (store) =>
+      store.editor.activeDocument?.viewport2D.setVoxelInfoMode(
+        store.editor.activeDocument?.viewport2D.voxelInfoMode === "off"
+          ? "on"
+          : "off",
+      ),
+    labelTx: "toggle-voxel-display",
+    shortcutGuideSection: "voxel-info",
+  },
+  {
+    keys: "ctrl+i",
+    viewMode: "2D",
+    action: (store) =>
+      store.editor.activeDocument?.viewport2D.setVoxelInfoMode(
+        store.editor.activeDocument?.viewport2D.voxelInfoMode === "delay"
+          ? "on"
+          : "delay",
+      ),
+    labelTx: "toggle-voxel-delay",
+    shortcutGuideSection: "voxel-info",
+  },
+  {
+    keys: "ctrl+c",
+    viewMode: "2D",
+    action: (store) => store.editor.activeDocument?.clipboard.copy(),
+    labelTx: "copy-slice",
+    shortcutGuideSection: "copy-paste",
+  },
+  {
+    keys: "ctrl+v",
+    viewMode: "2D",
+    action: (store) => store.editor.activeDocument?.clipboard.paste(),
+    labelTx: "paste-slice-replace",
+    shortcutGuideSection: "copy-paste",
+  },
+  {
+    keys: "ctrl+shift+v",
+    viewMode: "2D",
+    action: (store) =>
+      store.editor.activeDocument?.clipboard.paste(MergeFunction.Add),
+    labelTx: "paste-slice-add",
+    shortcutGuideSection: "copy-paste",
+  },
+
+  {
+    keys: "enter",
+    action: (store) => {
+      if (
+        store.editor.activeDocument?.tools.regionGrowingRenderer3D.holdsPreview
+      ) {
+        (store.editor.activeDocument?.tools.tools[
+          "smart-brush-3d"
+        ] as SmartBrush3D).submit();
+      }
+
+      if (
+        store.editor.activeDocument?.tools.thresholdAnnotationRenderer3D
+          .holdsPreview
+      ) {
+        (store.editor.activeDocument?.tools.tools[
+          "threshold-annotation"
+        ] as ThresholdAnnotationTool).submit();
+      }
+
+      if (
+        store.editor.activeDocument?.tools.dilateErodeRenderer3D.holdsPreview
+      ) {
+        (store.editor.activeDocument?.tools.tools[
+          "dilate-erode"
+        ] as DilateErodeTool).submit();
+      }
+
+      if (
+        (store.editor.activeDocument?.tools.tools[
+          "measurement-tool"
+        ] as MeasurementTool).hasPath
+      ) {
+        (store.editor.activeDocument?.tools.tools[
+          "measurement-tool"
+        ] as MeasurementTool).submit();
+      }
+    },
+  },
+  {
+    keys: "escape",
+    action: (store) => {
+      if (
+        store.editor.activeDocument?.tools.regionGrowingRenderer3D.holdsPreview
+      ) {
+        (store.editor.activeDocument?.tools.tools[
+          "smart-brush-3d"
+        ] as SmartBrush3D).discard();
+      }
+
+      if (
+        store.editor.activeDocument?.tools.thresholdAnnotationRenderer3D
+          .holdsPreview
+      ) {
+        (store.editor.activeDocument?.tools.tools[
+          "threshold-annotation"
+        ] as ThresholdAnnotationTool).discard();
+      }
+
+      if (
+        store.editor.activeDocument?.tools.dilateErodeRenderer3D.holdsPreview
+      ) {
+        (store.editor.activeDocument?.tools.tools[
+          "dilate-erode"
+        ] as DilateErodeTool).discard();
+      }
+
+      if (
+        (store.editor.activeDocument?.tools.tools[
+          "measurement-tool"
+        ] as MeasurementTool).hasPath
+      ) {
+        (store.editor.activeDocument?.tools.tools[
+          "measurement-tool"
+        ] as MeasurementTool).discard();
+      }
+    },
+  },
+  {
+    keys: "f,shift+f",
+    viewMode: "3D",
+    action: (store) => {
+      const activeTool = store.editor.activeDocument?.tools.activeTool?.name;
+      store.editor.activeDocument?.tools.setActiveTool(
+        activeTool === "fly-tool" ? "navigation-tool" : "fly-tool",
+      );
+    },
+  },
+];
+
+export const setUpHotKeys = (store: RootStore): IDisposer => {
+  if (store.editor.activeDocument) {
+    Object.values(store.editor.activeDocument.tools.tools).forEach((tool) => {
+      if (!tool.activationKeys) return;
+
+      hotkeys(tool.activationKeys, (event) => {
+        if (
+          // Explicitly access from the active document in case the document changes
+          !store?.editor.activeDocument?.tools.tools[tool.name].canActivate() ||
+          store.editor.activeDocument?.tools.activeTool?.name === tool.name
+        ) {
+          return;
+        }
+
+        event.preventDefault();
+        store.editor.activeDocument?.tools.setActiveTool(tool.name);
+      });
+    });
+  }
+
+  generalHotkeys.forEach((config) =>
+    hotkeys(config.keys, (event) => {
+      if (config.condition && !config.condition(store, event)) return;
+
+      if (
+        config.viewMode &&
+        store.editor.activeDocument?.viewSettings.viewMode !== config.viewMode
+      ) {
+        return;
+      }
+
+      if (config.preventDefault !== false) event.preventDefault();
+
+      config.action(store);
+    }),
+  );
 
   return () => hotkeys.unbind();
 };

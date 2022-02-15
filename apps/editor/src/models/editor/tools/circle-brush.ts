@@ -35,6 +35,7 @@ export class CircleBrush<
         supportAnnotationsOnly: true,
         isDrawingTool: true,
         isBrush: true,
+        activationKeys: isAdditive ? "b" : "e",
       },
       document,
       toolRenderer,

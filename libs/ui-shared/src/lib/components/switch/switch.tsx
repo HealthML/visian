@@ -49,6 +49,7 @@ export const Switch: React.FC<SwitchProps> = ({
   labelTx,
   label,
   infoTx,
+  infoShortcuts,
   infoPosition,
   infoBaseZIndex,
   options,
@@ -76,9 +77,10 @@ export const Switch: React.FC<SwitchProps> = ({
       {(labelTx || label) && (
         <LabelRow>
           <InputLabel tx={labelTx} text={label} />
-          {infoTx && (
+          {(infoTx || infoShortcuts) && (
             <StyledInfoText
               infoTx={infoTx}
+              shortcuts={infoShortcuts}
               position={infoPosition}
               baseZIndex={infoBaseZIndex}
             />

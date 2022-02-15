@@ -7,7 +7,10 @@ import { Switch, SwitchProps } from "../switch";
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type EnumParamProps<T = any> = IEnumParameter<T> &
   Omit<React.HTMLAttributes<HTMLDivElement>, "defaultValue" | "onChange"> &
-  Pick<SwitchProps, "infoTx" | "infoPosition" | "infoBaseZIndex">;
+  Pick<
+    SwitchProps,
+    "infoTx" | "infoPosition" | "infoShortcuts" | "infoBaseZIndex"
+  >;
 
 export const EnumParam: React.FC<
   Partial<EnumParamProps> & Pick<EnumParamProps, "options">

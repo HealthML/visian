@@ -164,6 +164,7 @@ export class Tools
           icon: "navigationTool",
           labelTx: "navigation-tool",
           supportedViewModes: ["2D", "3D"],
+          activationKeys: "h",
         },
         this.document,
       ),

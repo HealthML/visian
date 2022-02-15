@@ -38,6 +38,7 @@ export const DropDown: React.FC<DropDownProps> = ({
   value,
   onChange,
   infoTx,
+  infoShortcuts,
   infoPosition,
   infoBaseZIndex,
   ...rest
@@ -80,6 +81,7 @@ export const DropDown: React.FC<DropDownProps> = ({
           {infoTx && (
             <StyledInfoText
               infoTx={infoTx}
+              shortcuts={infoShortcuts}
               position={infoPosition}
               baseZIndex={infoBaseZIndex}
             />

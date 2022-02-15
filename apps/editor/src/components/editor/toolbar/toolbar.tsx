@@ -10,6 +10,7 @@ import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
 import { SelfDeactivatingTool, ToolName } from "../../../models";
+import { InfoShortcuts } from "../info-shortcuts";
 import { ToolGroup } from "./tool-group";
 import { ToolSettings } from "./tool-settings";
 
@@ -124,7 +125,16 @@ export const Toolbar: React.FC = observer(() => {
         isOpen={isModalOpen}
         onDismiss={closeModal}
         headerChildren={
-          activeTool?.infoTx && <StyledInfoText infoTx={activeTool?.infoTx} />
+          activeTool?.infoTx && (
+            <StyledInfoText
+              infoTx={activeTool?.infoTx}
+              shortcuts={
+                activeTool?.isBrush && activeTool.name !== "smart-brush-3d" ? (
+                  <InfoShortcuts hotkeyGroupNames={["brush-size"]} />
+                ) : undefined
+              }
+            />
+          )
         }
       />
     </StyledToolbar>

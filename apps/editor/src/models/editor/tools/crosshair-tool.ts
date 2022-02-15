@@ -9,6 +9,7 @@ export class CrosshairTool<N extends "crosshair-tool"> extends Tool<N> {
         icon: "crosshair",
         labelTx: "crosshair-tool",
         supportedViewModes: ["2D"],
+        activationKeys: "c",
       },
       document,
     );

@@ -28,6 +28,7 @@ export class SmartBrush3D<N extends "smart-brush-3d" = "smart-brush-3d">
         isDrawingTool: true,
         isBrush: true,
         isSmartBrush: true,
+        activationKeys: "d",
       },
       document,
     );

@@ -36,6 +36,7 @@ export interface DropDownProps<T = any>
   label?: string;
 
   infoTx?: string;
+  infoShortcuts?: React.ReactNode;
   infoPosition?: ModalPosition;
   infoBaseZIndex?: number;
 

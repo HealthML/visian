@@ -12,6 +12,7 @@ export interface SwitchProps<T = any>
   label?: string;
 
   infoTx?: string;
+  infoShortcuts?: React.ReactNode;
   infoPosition?: ModalPosition;
   infoBaseZIndex?: number;
 

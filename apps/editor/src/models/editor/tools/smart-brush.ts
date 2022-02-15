@@ -27,6 +27,7 @@ export class SmartBrush<
       isDrawingTool: true,
       isBrush: true,
       isSmartBrush: true,
+      activationKeys: isAdditive ? "s" : "ctrl+e",
     });
   }
 

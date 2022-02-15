@@ -17,6 +17,7 @@ export class ClearSliceTool<
         supportedViewModes: ["2D"],
         supportedLayerKinds: ["image"],
         supportAnnotationsOnly: true,
+        activationKeys: "del,backspace",
       },
       document,
     );
