@@ -126,8 +126,9 @@ export const SliderRangeSelection = styled.div.attrs<SliderRangeSelectionProps>(
   align-items: center;
 `;
 
-export const RangeHandle = styled.div`
-  background-color: ${color("gray")};
+export const RangeHandle = styled.div<{ isHovered?: boolean }>`
+  background-color: ${({ isHovered }) =>
+    color(isHovered ? "foreground" : "gray")};
   width: 10px;
   height: 10px;
   border-radius: 5px;

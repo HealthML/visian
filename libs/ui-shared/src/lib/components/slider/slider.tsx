@@ -227,6 +227,14 @@ export const Slider: React.FC<SliderProps> = (props) => {
     setIsHovered(false);
   }, []);
 
+  const [isRangeHandleHovered, setIsRangeHandleHovered] = useState(false);
+  const onRangeHandlePointerEnter = useCallback(() => {
+    setIsRangeHandleHovered(true);
+  }, []);
+  const onRangeHandlePointerLeave = useCallback(() => {
+    setIsRangeHandleHovered(false);
+  }, []);
+
   const updateValues = useCallback(
     (event: PointerEvent | React.PointerEvent) => {
       if ((!onChange && !onStart) || !sliderRef.current) return;
@@ -384,7 +392,12 @@ export const Slider: React.FC<SliderProps> = (props) => {
           positions={thumbPositions}
         >
           {showRangeHandle && (isHovered || isRangeHandleDragged) && (
-            <RangeHandle onPointerDown={startRangeHandleDrag} />
+            <RangeHandle
+              onPointerDown={startRangeHandleDrag}
+              onPointerEnter={onRangeHandlePointerEnter}
+              onPointerLeave={onRangeHandlePointerLeave}
+              isHovered={isRangeHandleDragged || isRangeHandleHovered}
+            />
           )}
         </SliderRangeSelection>
       )}
