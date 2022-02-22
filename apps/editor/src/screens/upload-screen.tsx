@@ -12,11 +12,10 @@ import {
   zIndex,
 } from "@visian/ui-shared";
 import { extractSeriesFromFileSystemEntries } from "@visian/utils";
-import axios from "axios";
 import { observer } from "mobx-react-lite";
 import React, { useCallback, useState } from "react";
 import styled from "styled-components";
-
+import axios from "axios";
 import { useStore } from "../app/root-store";
 import { FloyBar } from "../components/editor/ai-bar";
 import { ProgressPopUp } from "../components/editor/progress-popup";
@@ -114,23 +113,34 @@ export const UploadScreen = observer(() => {
           return;
         }
 
-        const dataLinks: string[] = [];
+        const signedDownloadURLs: string[] = [];
         for (let index = 0; index < zips.length; index++) {
-          // 3) Upload relevant serieses to S3 (TO DO: Telekom Cloud)
-          // Get unique upload URL
-          const data = await fetch(
-            "https://kg0rbwuu17.execute-api.eu-central-1.amazonaws.com/uploads",
-            { method: "GET" },
-          );
-          const dataString = await data.text();
-          const uniqueUploadURL = dataString.split('"')[3];
-          const fileNameKey = dataString.split('"')[7];
+          // Generate .zip filename:
+          const zipFile = zips[index];
+          const randomID = parseInt((Math.random() * 10000000).toString());
+          const fileNameKey = `${randomID}.zip`;
+          // eslint-disable-next-line max-len
+          // TO DO: const fileNameKey = tokenStr + ' (Study) - ' +str(Path(f'{studyZIP.filename}'))[:len(str(Path(f'{studyZIP.filename}'))) - 4] + ' - ' + str(datetime.now(tz=None))[:len(str(datetime.now(tz=None))) - 7] + '.zip')
 
-          // Upload file(s)
+          // Rename file to be uploaded:
+          Object.defineProperty(zipFile, "name", {
+            writable: true,
+            value: fileNameKey,
+          });
+
+          // Call Floy-API to generate signedURLs to OTC OBS:
+          const response = await store?.editor.activeDocument?.floyDemo.runBulkUpload(
+            fileNameKey,
+          );
+          const signedUploadURL = response[0];
+          const signedDownloadURL = response[1];
+
+          // Upload file to OTC OBS:
           await axios.request({
+            headers: { "Content-Type": "application/zip" },
             method: "PUT",
-            url: uniqueUploadURL,
-            data: zips[index],
+            url: signedUploadURL,
+            data: zipFile,
             onUploadProgress: (p) => {
               store?.setProgress({
                 label: `Datei ${index + 1} von ${
@@ -144,9 +154,7 @@ export const UploadScreen = observer(() => {
               });
             },
           });
-          dataLinks.push(
-            `s3://s3uploader-s3uploadbucket-1ba2ks21gs4fb/${fileNameKey}`,
-          );
+          signedDownloadURLs.push(signedDownloadURL);
         }
 
         // Calculate approximate time from upload to confirmation E-Mail:
@@ -154,9 +162,9 @@ export const UploadScreen = observer(() => {
         store?.setProgress(); // Turn off ProgressBar
         setShowProgressPopUp(true);
 
-        // 4) Call API on Valohai after upload is finished
+        // Call API on Valohai after upload is finished
         await store?.editor.activeDocument?.floyDemo.runBulkInferencing(
-          dataLinks,
+          signedDownloadURLs,
           mail,
         );
       } catch {

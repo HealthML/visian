@@ -269,7 +269,22 @@ export class FloyDemoController implements ISerializable<FloyDemoSnapshot> {
     );
   };
 
-  // demo.floy.com/upload
+  // demo.floy.com/upload (OTC Upload)
+  public runBulkUpload = async (fileNameKey: string): Promise<string> => {
+    const token = localStorage.getItem(FLOY_TOKEN_KEY);
+    if (!token) throw new Error();
+
+    // Log & upload files to OTC
+    const response = await axios.request({
+      method: "POST",
+      // headers: { "Content-Type": "multipart/form-data" },
+      url: `${FLOY_API_ROOT}/upload/${token}/infer`,
+      data: { fileNameKey },
+    });
+    return response.data;
+  };
+
+  // demo.floy.com/upload (Valohai Call)
   public runBulkInferencing = async (
     data: string[],
     email: string,

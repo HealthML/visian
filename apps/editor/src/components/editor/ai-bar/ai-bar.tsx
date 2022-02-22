@@ -442,6 +442,7 @@ export const FloyBar = observer<{
 
   const dismissWelcome = useCallback(() => {
     setTokenError(undefined);
+    // eslint-disable-next-line max-len
     const isValidMail = mail === undefined || validMailRegEx.test(mail); // If no mail was requested as input or mail is valid
     if (isValidMail) {
       setMailError(undefined);
