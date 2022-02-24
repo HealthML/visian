@@ -134,6 +134,8 @@ export const UploadScreen = observer(() => {
           );
           const signedUploadURL = response[0];
           const signedDownloadURL = response[1];
+          console.log("signedDownloadURL: ", signedDownloadURL);
+          console.log("signedUploadURL: ", signedUploadURL);
 
           // Upload file to OTC OBS:
           await axios.request({

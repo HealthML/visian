@@ -42,22 +42,50 @@ export const setupRootStore = async () => {
     try {
       // Load scan based on GET parameter
       // Example: http://localhost:4200/?load=http://data.idoimaging.com/nifti/1010_brain_mr_04.nii.gz
-      const loadScanParam = url.searchParams.get("load");
-      if (loadScanParam && store.editor.newDocument()) {
-        store.setProgress({ labelTx: "importing", showSplash: true });
+      // signedURL generation from parameter
+      const studySig = url.searchParams.get("studySig");
+      const maskSig = url.searchParams.get("maskSig");
+      const studyFile = url.searchParams.get("studyFile");
+      const maskFile = url.searchParams.get("maskFile");
+
+      const signedStudyURL =
+        "https://obs.eu-de.otc.t-systems.com/floy/demo.floy.com-uploads/" +
+        encodeURIComponent(studyFile) +
+        "?AWSAccessKeyId=UXFZMXZO3DFYLN1UUNAI" +
+        "&Expires=2000000000" +
+        "&Signature=" +
+        encodeURIComponent(studySig);
+
+      // https://floy.obs.eu-de.otc.t-systems.com/demo.floy.com-uploads/2234231.zip?AWSAccessKeyId=UXFZMXZO3DFYLN1UUNAI&Expires=2000000000&Signature=5S5XLzRnKD7isC%2FfzByJqwatAMQ%3D
+      // https://obs.eu-de.otc.t-systems.com/floy/demo.floy.com-uploads/2234231.zip?AWSAccessKeyId=UXFZMXZO3DFYLN1UUNAI&Expires=2000000000&Signature=5S5XLzRnKD7isC/fzByJqwatAMQ=
+
+      // http://localhost:4200/?studySig=5S5XLzRnKD7isC%2FfzByJqwatAMQ%3D&studyFile=2234231.zip
+
+      // URL encoding
+      const encodedURL = encodeURIComponent(url.href);
+      console.log("signedStudyURL: ", signedStudyURL);
+      console.log("mask: ", maskSig);
+      console.log("url: ", url);
+      console.log("encodedURL: ", encodedURL);
+
+      if (signedStudyURL && store.editor.newDocument()) {
+        // store.setProgress({ labelTx: "importing", showSplash: false });
         await store.editor.activeDocument?.importFiles(
-          await readFileFromURL(loadScanParam, true),
+          await readFileFromURL(signedStudyURL, false),
         );
         store.editor.activeDocument?.finishBatchImport();
-        if (url.searchParams.get("demo") === null) {
-          window.history.replaceState(
-            {},
-            document.title,
-            window.location.pathname,
-          );
-        }
+
+        // Clean up URL
+        // if (url.searchParams.get("demo") === null) {
+        //   window.history.replaceState(
+        //     {},
+        //     document.title,
+        //     window.location.pathname,
+        //   );
+        // }
       }
-    } catch {
+    } catch (e) {
+      console.log("error:", e);
       store.setError({
         titleTx: "import-error",
         descriptionTx: "remote-file-error",
