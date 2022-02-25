@@ -20,6 +20,7 @@ import {
   ImageMismatchError,
   ISerializable,
   ITKImageWithUnit,
+  ITKMatrix,
   readMedicalImage,
   Zip,
 } from "@visian/utils";
@@ -635,7 +636,56 @@ export class Document
         }
       }
       if (isLikelyImage) {
-        createdLayerId = await this.importImage(imageWithUnit);
+        if (imageWithUnit.imageType.dimension < 4) {
+          createdLayerId = await this.importImage(imageWithUnit);
+        } else if (imageWithUnit.imageType.dimension === 4) {
+          // Import multiple layers from a 4D image
+
+          const numberOfLayers = imageWithUnit.size[3];
+
+          // Remove last row and column.
+          const direction = new ITKMatrix(3, 3);
+          const originalDirection = imageWithUnit.direction.data;
+          direction.data = [
+            originalDirection[0],
+            originalDirection[1],
+            originalDirection[2],
+            originalDirection[4],
+            originalDirection[5],
+            originalDirection[6],
+            originalDirection[8],
+            originalDirection[9],
+            originalDirection[10],
+          ];
+
+          const prototypeImage = {
+            imageType: { ...image.imageType, dimension: 3 },
+            unit: imageWithUnit.unit,
+            direction,
+            size: imageWithUnit.size.slice(0, 3),
+            spacing: imageWithUnit.spacing.slice(0, 3),
+            origin: imageWithUnit.origin.slice(0, 3),
+          };
+
+          const layerSize =
+            prototypeImage.size[0] *
+            prototypeImage.size[1] *
+            prototypeImage.size[2];
+
+          for (let layerIndex = 0; layerIndex < numberOfLayers; layerIndex++) {
+            // eslint-disable-next-line no-await-in-loop
+            createdLayerId = await this.importImage({
+              data: imageWithUnit.data.slice(
+                layerIndex * layerSize,
+                (layerIndex + 1) * layerSize,
+              ),
+              name: `${layerIndex}_${imageWithUnit.name}`,
+              ...prototypeImage,
+            });
+          }
+        } else {
+          this.setError({ titleTx: "import-error" });
+        }
       } else {
         const numberOfAnnotations = uniqueValues.size - 1;
 
