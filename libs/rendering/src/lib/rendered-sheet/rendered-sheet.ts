@@ -91,6 +91,10 @@ export class RenderedSheet extends THREE.Mesh implements IDisposable {
           this.editor.activeDocument?.has3DLayers,
         this.updateVisibility,
       ),
+      reaction(
+        () => this.editor.activeDocument?.viewSettings.viewMode,
+        this.synchPosition,
+      ),
     );
   }
 
