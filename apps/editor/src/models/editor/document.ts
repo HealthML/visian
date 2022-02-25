@@ -684,7 +684,10 @@ export class Document
             });
           }
         } else {
-          this.setError({ titleTx: "import-error" });
+          this.setError({
+            titleTx: "import-error",
+            descriptionTx: "image-loading-error",
+          });
         }
       } else {
         const numberOfAnnotations = uniqueValues.size - 1;
