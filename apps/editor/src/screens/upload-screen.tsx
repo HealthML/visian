@@ -118,7 +118,7 @@ export const UploadScreen = observer(() => {
           // Generate .zip filename:
           const zipFile = zips[index];
           const randomID = parseInt(
-            (Math.random() * 100000000000000).toString(),
+            (Math.random() * 1000000000000000).toString(),
           );
           const fileNameKey = `${randomID}.zip`;
           // eslint-disable-next-line max-len
