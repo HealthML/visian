@@ -1,7 +1,6 @@
 import { i18n, LocalForageBackend } from "@visian/ui-shared";
 import { getWHOTaskIdFromUrl, isFromWHO, readFileFromURL } from "@visian/utils";
 import React from "react";
-
 import {
   FLOY_TOKEN_KEY,
   IS_FLOY_DEMO,
@@ -39,58 +38,56 @@ export const setupRootStore = async () => {
       }
     }
 
-    try {
-      // Load scan based on GET parameter
-      // Example: http://localhost:4200/?load=http://data.idoimaging.com/nifti/1010_brain_mr_04.nii.gz
-      // signedURL generation from parameter
-      const studySig = url.searchParams.get("studySig");
-      const maskSig = url.searchParams.get("maskSig");
-      const studyFile = url.searchParams.get("studyFile");
-      const maskFile = url.searchParams.get("maskFile");
+    // Load scan b:ased on GET parameter
+    // Example:  http://localhost:4200/?study=2234231.zip
+    // signedURL generation from parameter
+    const study = url.searchParams.get("study");
+    const mask = url.searchParams.get("mask");
 
-      const signedStudyURL =
-        "https://obs.eu-de.otc.t-systems.com/floy/demo.floy.com-uploads/" +
-        encodeURIComponent(studyFile) +
-        "?AWSAccessKeyId=UXFZMXZO3DFYLN1UUNAI" +
-        "&Expires=2000000000" +
-        "&Signature=" +
-        encodeURIComponent(studySig);
-
-      // https://floy.obs.eu-de.otc.t-systems.com/demo.floy.com-uploads/2234231.zip?AWSAccessKeyId=UXFZMXZO3DFYLN1UUNAI&Expires=2000000000&Signature=5S5XLzRnKD7isC%2FfzByJqwatAMQ%3D
-      // https://obs.eu-de.otc.t-systems.com/floy/demo.floy.com-uploads/2234231.zip?AWSAccessKeyId=UXFZMXZO3DFYLN1UUNAI&Expires=2000000000&Signature=5S5XLzRnKD7isC/fzByJqwatAMQ=
-
-      // http://localhost:4200/?studySig=5S5XLzRnKD7isC%2FfzByJqwatAMQ%3D&studyFile=2234231.zip
-
-      // URL encoding
-      const encodedURL = encodeURIComponent(url.href);
-      console.log("signedStudyURL: ", signedStudyURL);
-      console.log("mask: ", maskSig);
-      console.log("url: ", url);
-      console.log("encodedURL: ", encodedURL);
-
-      if (signedStudyURL && store.editor.newDocument()) {
-        // store.setProgress({ labelTx: "importing", showSplash: false });
-        await store.editor.activeDocument?.importFiles(
-          await readFileFromURL(signedStudyURL, false),
+    // Check if params were passed
+    if (study != null) {
+      // || mask != null
+      try {
+        // Call Floy-API to generate signedDownloadURL to OTC OBS:
+        const response = await store?.editor.activeDocument?.floyDemo.runBulkUpload(
+          study,
+          false,
+          true,
         );
-        store.editor.activeDocument?.finishBatchImport();
 
-        // Clean up URL
-        // if (url.searchParams.get("demo") === null) {
-        //   window.history.replaceState(
-        //     {},
-        //     document.title,
-        //     window.location.pathname,
-        //   );
-        // }
+        if (response === undefined) {
+          // eslint-disable-next-line no-console
+          console.log("Error: Should never happen");
+        } else {
+          const signedDownloadURL = response[1];
+
+          if (signedDownloadURL && store.editor.newDocument()) {
+            store.setProgress({ labelTx: "importing", showSplash: true });
+            await store.editor.activeDocument?.importFiles(
+              await readFileFromURL(signedDownloadURL, false),
+            );
+            store.editor.activeDocument?.finishBatchImport();
+            store.setProgress();
+          }
+
+          // Clean up URL
+          // if (url.searchParams.get("demo") === null) {
+          //   window.history.replaceState(
+          //     {},
+          //     document.title,
+          //     window.location.pathname,
+          //   );
+          // }
+        }
+      } catch (e) {
+        // eslint-disable-next-line no-console
+        console.log("error:", e);
+        store.setError({
+          titleTx: "import-error",
+          descriptionTx: "remote-file-error",
+        });
+        store.editor.setActiveDocument();
       }
-    } catch (e) {
-      console.log("error:", e);
-      store.setError({
-        titleTx: "import-error",
-        descriptionTx: "remote-file-error",
-      });
-      store.editor.setActiveDocument();
     }
 
     if (isFromWHO()) {

@@ -22,9 +22,8 @@ import {
 import { observer } from "mobx-react-lite";
 import React, { useCallback, useRef, useState } from "react";
 import styled from "styled-components";
-
 import { useStore } from "../../../app/root-store";
-import { FLOY_HOME, whoHome } from "../../../constants";
+import { FLOY_TOKEN_KEY, FLOY_HOME, whoHome } from "../../../constants";
 import { AnnotationStatus } from "../../../models/who/annotation";
 import { AnnotationData } from "../../../models/who/annotationData";
 
@@ -429,6 +428,17 @@ const CustomTextField = styled(TextField)`
 
 const validMailRegEx = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 
+// If the a studyLink was clicked, don't show the welcome message:
+let show: boolean;
+if (
+  new URL(window.location.href).searchParams.get("study") !== null &&
+  localStorage.getItem(FLOY_TOKEN_KEY) !== null
+) {
+  show = false;
+} else {
+  show = true;
+}
+
 export const FloyBar = observer<{
   useBlankScreen?: boolean;
   mail?: string;
@@ -438,7 +448,7 @@ export const FloyBar = observer<{
   const [token, setToken] = useState("");
   const [tokenError, setTokenError] = useState<string>();
   const [mailError, setMailError] = useState<string>();
-  const [showWelcome, setShowWelcome] = useState(true);
+  const [showWelcome, setShowWelcome] = useState(show);
 
   const dismissWelcome = useCallback(() => {
     setTokenError(undefined);

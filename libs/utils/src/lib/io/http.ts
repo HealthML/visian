@@ -7,12 +7,9 @@ export const readFileFromURL = async (url: string, useCORSProxy?: boolean) => {
     useCORSProxy && new URL(url).host !== window.location.host ? `${url}` : url,
   );
   const blob = await response.blob();
-
   const urlElements = url.split("/");
   const urlParams = urlElements[urlElements.length - 1].split("?");
   const file = new File([blob], urlParams[0]);
-  console.log("file: ", file);
-
   return file;
 };
 

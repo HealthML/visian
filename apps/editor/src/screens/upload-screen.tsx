@@ -117,7 +117,9 @@ export const UploadScreen = observer(() => {
         for (let index = 0; index < zips.length; index++) {
           // Generate .zip filename:
           const zipFile = zips[index];
-          const randomID = parseInt((Math.random() * 10000000).toString());
+          const randomID = parseInt(
+            (Math.random() * 100000000000000).toString(),
+          );
           const fileNameKey = `${randomID}.zip`;
           // eslint-disable-next-line max-len
           // TO DO: const fileNameKey = tokenStr + ' (Study) - ' +str(Path(f'{studyZIP.filename}'))[:len(str(Path(f'{studyZIP.filename}'))) - 4] + ' - ' + str(datetime.now(tz=None))[:len(str(datetime.now(tz=None))) - 7] + '.zip')
@@ -131,11 +133,11 @@ export const UploadScreen = observer(() => {
           // Call Floy-API to generate signedURLs to OTC OBS:
           const response = await store?.editor.activeDocument?.floyDemo.runBulkUpload(
             fileNameKey,
+            true,
+            true,
           );
           const signedUploadURL = response[0];
           const signedDownloadURL = response[1];
-          console.log("signedDownloadURL: ", signedDownloadURL);
-          console.log("signedUploadURL: ", signedUploadURL);
 
           // Upload file to OTC OBS:
           await axios.request({

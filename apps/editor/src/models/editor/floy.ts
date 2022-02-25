@@ -270,7 +270,11 @@ export class FloyDemoController implements ISerializable<FloyDemoSnapshot> {
   };
 
   // demo.floy.com/upload (OTC Upload)
-  public runBulkUpload = async (fileNameKey: string): Promise<string> => {
+  public runBulkUpload = async (
+    fileNameKey: string,
+    getSignedUploadURL: boolean,
+    getSignedDownloadURL: boolean,
+  ): Promise<string> => {
     const token = localStorage.getItem(FLOY_TOKEN_KEY);
     if (!token) throw new Error();
 
@@ -279,7 +283,7 @@ export class FloyDemoController implements ISerializable<FloyDemoSnapshot> {
       method: "POST",
       // headers: { "Content-Type": "multipart/form-data" },
       url: `${FLOY_API_ROOT}/upload/${token}/infer`,
-      data: { fileNameKey },
+      data: { fileNameKey, getSignedUploadURL, getSignedDownloadURL },
     });
     return response.data;
   };
