@@ -227,6 +227,7 @@ export class FloyDemoController implements ISerializable<FloyDemoSnapshot> {
 
   protected setInferenceResults(value?: { [key: string]: unknown }[]) {
     this.inferenceResults = value;
+    console.log("value: ", value);
   }
 
   public runInferencing = async (): Promise<void> => {
@@ -269,8 +270,8 @@ export class FloyDemoController implements ISerializable<FloyDemoSnapshot> {
     );
   };
 
-  // demo.floy.com/upload (OTC Upload)
-  public runBulkUpload = async (
+  // demo.floy.com/upload (OTC Upload / Download)
+  public getSignedURLs = async (
     fileNameKey: string,
     getSignedUploadURL: boolean,
     getSignedDownloadURL: boolean,

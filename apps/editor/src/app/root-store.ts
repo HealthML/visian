@@ -7,6 +7,7 @@ import {
   storePersistInterval,
 } from "../constants";
 import { RootStore } from "../models";
+// import { FloyDemoController, FloyDemoSnapshot } from "./floy";
 
 export const storageBackend = new LocalForageBackend(
   storePersistInterval,
@@ -38,34 +39,60 @@ export const setupRootStore = async () => {
       }
     }
 
-    // Load scan b:ased on GET parameter
-    // Example:  http://localhost:4200/?study=2234231.zip
-    // signedURL generation from parameter
+    // Load scan based on GET parameter
+    // Example:  http://localhost:4200/?study=2234231
     const study = url.searchParams.get("study");
-    const mask = url.searchParams.get("mask");
 
-    // Check if params were passed
+    // Check if param was passed:
     if (study != null) {
-      // || mask != null
       try {
+        // Get names:
+        const studyName = `${study}.zip`;
+        const maskName = `${study}.nii.gz`;
+
         // Call Floy-API to generate signedDownloadURL to OTC OBS:
-        const response = await store?.editor.activeDocument?.floyDemo.runBulkUpload(
-          study,
+        const responseStudy = await store?.editor.activeDocument?.floyDemo.getSignedURLs(
+          `demo.floy.com-uploads/${studyName}`,
+          false,
+          true,
+        );
+        const responseMask = await store?.editor.activeDocument?.floyDemo.getSignedURLs(
+          `demo.floy.com-uploads/${maskName}`,
           false,
           true,
         );
 
-        if (response === undefined) {
+        if (responseStudy === undefined || responseMask === undefined) {
           // eslint-disable-next-line no-console
           console.log("Error: Should never happen");
         } else {
-          const signedDownloadURL = response[1];
+          const signedDownloadURLStudy = responseStudy[1];
+          const signedDownloadURLMask = responseMask[1];
 
-          if (signedDownloadURL && store.editor.newDocument()) {
+          if (
+            signedDownloadURLStudy &&
+            signedDownloadURLMask &&
+            store.editor.newDocument()
+          ) {
             store.setProgress({ labelTx: "importing", showSplash: true });
+            // Download study and show in Demo:
             await store.editor.activeDocument?.importFiles(
-              await readFileFromURL(signedDownloadURL, false),
+              await readFileFromURL(signedDownloadURLStudy, false),
             );
+            // Download mask and show in Demo:
+            try {
+              await store.editor.activeDocument?.importFiles(
+                await readFileFromURL(signedDownloadURLMask, false),
+                "Bounding Boxen",
+                true,
+              );
+            } catch {
+              // eslint-disable-next-line no-console
+              // FloyDemoSnapshot.setInferenceResults()
+
+              console.log("No mask file available on this study");
+            }
+            // Show inference result in FloyBar:
             store.editor.activeDocument?.finishBatchImport();
             store.setProgress();
           }

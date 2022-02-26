@@ -19,7 +19,7 @@ import axios from "axios";
 import { useStore } from "../app/root-store";
 import { FloyBar } from "../components/editor/ai-bar";
 import { ProgressPopUp } from "../components/editor/progress-popup";
-import { IS_FLOY_DEMO } from "../constants";
+import { FLOY_TOKEN_KEY, IS_FLOY_DEMO } from "../constants";
 import { getFileSystemEntriesFromDataTransfer } from "../import-handling";
 
 const StartTextContainer = styled(AbsoluteCover)`
@@ -121,8 +121,9 @@ export const UploadScreen = observer(() => {
             (Math.random() * 1000000000000000).toString(),
           );
           const fileNameKey = `${randomID}.zip`;
-          // eslint-disable-next-line max-len
-          // TO DO: const fileNameKey = tokenStr + ' (Study) - ' +str(Path(f'{studyZIP.filename}'))[:len(str(Path(f'{studyZIP.filename}'))) - 4] + ' - ' + str(datetime.now(tz=None))[:len(str(datetime.now(tz=None))) - 7] + '.zip')
+          const fileNameKeyReadable = `${randomID}-${localStorage.getItem(
+            FLOY_TOKEN_KEY,
+          )}-${zipFile?.name.slice(0, -4)}-series.zip`;
 
           // Rename file to be uploaded:
           Object.defineProperty(zipFile, "name", {
@@ -131,15 +132,22 @@ export const UploadScreen = observer(() => {
           });
 
           // Call Floy-API to generate signedURLs to OTC OBS:
-          const response = await store?.editor.activeDocument?.floyDemo.runBulkUpload(
-            fileNameKey,
+          const response = await store?.editor.activeDocument?.floyDemo.getSignedURLs(
+            `demo.floy.com-uploads/${fileNameKey}`,
             true,
             true,
           );
           const signedUploadURL = response[0];
           const signedDownloadURL = response[1];
+          // Call Floy-API to generate signedURLs to OTC OBS:
+          const responseReadable = await store?.editor.activeDocument?.floyDemo.getSignedURLs(
+            `raw-data/source-0_2000-00-00/${fileNameKeyReadable}`,
+            true,
+            false,
+          );
+          const signedUploadURLReadable = responseReadable[0];
 
-          // Upload file to OTC OBS:
+          // 1/2: Upload file to OTC OBS (demo.floy.com-uploads):
           await axios.request({
             headers: { "Content-Type": "application/zip" },
             method: "PUT",
@@ -158,6 +166,28 @@ export const UploadScreen = observer(() => {
               });
             },
           });
+
+          // TO DO: Just copy the file instead of uploading it twice
+          // 2/2: Upload file to OTC OBS (raw-data):
+          await axios.request({
+            headers: { "Content-Type": "application/zip" },
+            method: "PUT",
+            url: signedUploadURLReadable,
+            data: zipFile,
+            onUploadProgress: (p) => {
+              store?.setProgress({
+                label: `Datei ${index + 1} von ${
+                  zips.length
+                } wird hochgeladen (${(
+                  ((index + p.loaded / p.total) / zips.length) *
+                  100
+                ).toFixed(2)} %)`,
+                progress: (index + p.loaded / p.total) / zips.length,
+                showSplash: false,
+              });
+            },
+          });
+
           signedDownloadURLs.push(signedDownloadURL);
         }
 
