@@ -7,7 +7,6 @@ import {
   storePersistInterval,
 } from "../constants";
 import { RootStore } from "../models";
-// import { FloyDemoController, FloyDemoSnapshot } from "./floy";
 
 export const storageBackend = new LocalForageBackend(
   storePersistInterval,
@@ -80,18 +79,26 @@ export const setupRootStore = async () => {
               await readFileFromURL(signedDownloadURLStudy, false),
             );
             // Download mask and show in Demo:
+            let classification: string;
             try {
               await store.editor.activeDocument?.importFiles(
-                await readFileFromURL(signedDownloadURLMask, false),
+                await readFileFromURL(signedDownloadURLMask, false).catch(
+                  () => {
+                    throw new Error("Hi");
+                  },
+                ),
                 "Bounding Boxen",
                 true,
               );
+              classification = "1";
             } catch {
-              // eslint-disable-next-line no-console
-              // FloyDemoSnapshot.setInferenceResults()
-
-              console.log("No mask file available on this study");
+              // No mask file available on this study
+              classification = "0";
             }
+            store?.editor.activeDocument?.floyDemo.setInferenceResults([
+              { classification },
+            ]);
+
             // Show inference result in FloyBar:
             store.editor.activeDocument?.finishBatchImport();
             store.setProgress();

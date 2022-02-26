@@ -225,7 +225,7 @@ export class FloyDemoController implements ISerializable<FloyDemoSnapshot> {
     // FileSaver.saveAs(await zip.toBlob(), `${name || firstFile.name}.zip`);
   }
 
-  protected setInferenceResults(value?: { [key: string]: unknown }[]) {
+  public setInferenceResults(value?: { [key: string]: unknown }[]) {
     this.inferenceResults = value;
   }
 
