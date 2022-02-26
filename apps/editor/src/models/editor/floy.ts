@@ -227,7 +227,6 @@ export class FloyDemoController implements ISerializable<FloyDemoSnapshot> {
 
   protected setInferenceResults(value?: { [key: string]: unknown }[]) {
     this.inferenceResults = value;
-    console.log("value: ", value);
   }
 
   public runInferencing = async (): Promise<void> => {
