@@ -154,10 +154,31 @@ export const Slider: React.FC<SliderProps> = (props) => {
     ],
   );
 
-  const { onPointerDown } = useDrag(updateValue, updateValue, onEnd);
+  const [isThumbDragged, setIsThumbDragged] = useState(false);
+  const startThumbDragHandler = useCallback(
+    (event: PointerEvent | React.PointerEvent, id: number) => {
+      setIsThumbDragged(true);
+      updateValue(event, id);
+    },
+    [updateValue],
+  );
+  const endThumbDragHandler = useCallback(
+    (event: PointerEvent | React.PointerEvent, id: number) => {
+      setIsThumbDragged(false);
+      onEnd?.(event, id);
+    },
+    [onEnd],
+  );
+
+  const { onPointerDown } = useDrag(
+    startThumbDragHandler,
+    updateValue,
+    endThumbDragHandler,
+  );
   const startDrag = useCallback(
     (event: PointerEvent | React.PointerEvent) => {
       if (!onChange || !sliderRef.current) return;
+
       if (!Array.isArray(valueRef.current)) {
         onPointerDown(event, 0);
         return;
@@ -391,14 +412,15 @@ export const Slider: React.FC<SliderProps> = (props) => {
           isVertical={isVertical}
           positions={thumbPositions}
         >
-          {showRangeHandle && (isHovered || isRangeHandleDragged) && (
-            <RangeHandle
-              onPointerDown={startRangeHandleDrag}
-              onPointerEnter={onRangeHandlePointerEnter}
-              onPointerLeave={onRangeHandlePointerLeave}
-              isHovered={isRangeHandleDragged || isRangeHandleHovered}
-            />
-          )}
+          {showRangeHandle &&
+            (isHovered || isRangeHandleDragged || isThumbDragged) && (
+              <RangeHandle
+                onPointerDown={startRangeHandleDrag}
+                onPointerEnter={onRangeHandlePointerEnter}
+                onPointerLeave={onRangeHandlePointerLeave}
+                isHovered={isRangeHandleDragged || isRangeHandleHovered}
+              />
+            )}
         </SliderRangeSelection>
       )}
       {valueArray.map((_thumbValue, index) => {
