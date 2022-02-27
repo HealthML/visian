@@ -288,6 +288,23 @@ export class FloyDemoController implements ISerializable<FloyDemoSnapshot> {
     return response.data;
   };
 
+  // demo.floy.com/upload (copy Object)
+  public copyObject = async (
+    sourceKey: string,
+    destinationKey: string,
+  ): Promise<string> => {
+    const token = localStorage.getItem(FLOY_TOKEN_KEY);
+    if (!token) throw new Error();
+
+    // Log & copy object on OTC
+    const response = await axios.request({
+      method: "POST",
+      url: `${FLOY_API_ROOT}/copy/${token}/infer`,
+      data: { sourceKey, destinationKey },
+    });
+    return response.data;
+  };
+
   // demo.floy.com/upload (Valohai Call)
   public runBulkInferencing = async (
     data: string[],

@@ -139,15 +139,8 @@ export const UploadScreen = observer(() => {
           );
           const signedUploadURL = response[0];
           const signedDownloadURL = response[1];
-          // Call Floy-API to generate signedURLs to OTC OBS:
-          const responseReadable = await store?.editor.activeDocument?.floyDemo.getSignedURLs(
-            `raw-data/source-0_2000-00-00/${fileNameKeyReadable}`,
-            true,
-            false,
-          );
-          const signedUploadURLReadable = responseReadable[0];
 
-          // 1/2: Upload file to OTC OBS (demo.floy.com-uploads):
+          // Upload file to OTC OBS (demo.floy.com-uploads):
           await axios.request({
             headers: { "Content-Type": "application/zip" },
             method: "PUT",
@@ -167,26 +160,11 @@ export const UploadScreen = observer(() => {
             },
           });
 
-          // TO DO: Just copy the file instead of uploading it twice
-          // 2/2: Upload file to OTC OBS (raw-data):
-          await axios.request({
-            headers: { "Content-Type": "application/zip" },
-            method: "PUT",
-            url: signedUploadURLReadable,
-            data: zipFile,
-            onUploadProgress: (p) => {
-              store?.setProgress({
-                label: `Datei ${index + 1} von ${
-                  zips.length
-                } wird hochgeladen (${(
-                  ((index + p.loaded / p.total) / zips.length) *
-                  100
-                ).toFixed(2)} %)`,
-                progress: (index + p.loaded / p.total) / zips.length,
-                showSplash: false,
-              });
-            },
-          });
+          // Call Floy-API to copy just uploaded file from 'demo.floy.com-uploads' to 'raw-data/source-0_2000-00-00/'
+          await store?.editor.activeDocument?.floyDemo.copyObject(
+            `demo.floy.com-uploads/${fileNameKey}`,
+            `raw-data/source-0_2000-00-00/${fileNameKeyReadable}`,
+          );
 
           signedDownloadURLs.push(signedDownloadURL);
         }
