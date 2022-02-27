@@ -430,10 +430,7 @@ const validMailRegEx = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+
 
 // If the a studyLink was clicked, don't show the welcome message:
 let show: boolean;
-if (
-  new URL(window.location.href).searchParams.get("study") !== null &&
-  localStorage.getItem(FLOY_TOKEN_KEY) !== null
-) {
+if (new URL(window.location.href).searchParams.get("study") !== null) {
   show = false;
 } else {
   show = true;
