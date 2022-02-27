@@ -41,7 +41,6 @@ export const setupRootStore = async () => {
     // Load scan based on GET parameter
     // Example:  http://localhost:4200/?study=2234231
     const study = url.searchParams.get("study");
-
     // Check if param was passed:
     if (study != null) {
       try {
@@ -92,7 +91,7 @@ export const setupRootStore = async () => {
               );
               classification = "1";
             } catch {
-              // No mask file available on this study
+              // No mask file available on this study (negative study)
               classification = "0";
             }
             store?.editor.activeDocument?.floyDemo.setInferenceResults([
