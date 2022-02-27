@@ -639,16 +639,22 @@ export class Document
       } else {
         const numberOfAnnotations = uniqueValues.size - 1;
 
-        if (numberOfAnnotations + this.layers.length > this.maxLayers) {
+        if (
+          numberOfAnnotations === 1 ||
+          numberOfAnnotations + this.layers.length > this.maxLayers
+        ) {
           createdLayerId = await this.importAnnotation(
             imageWithUnit,
             undefined,
             true,
           );
-          this.setError({
-            titleTx: "squashed-layers-title",
-            descriptionTx: "squashed-layers-import",
-          });
+
+          if (numberOfAnnotations !== 1) {
+            this.setError({
+              titleTx: "squashed-layers-title",
+              descriptionTx: "squashed-layers-import",
+            });
+          }
         } else {
           uniqueValues.forEach(async (value) => {
             if (value === 0) return;
