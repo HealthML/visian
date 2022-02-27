@@ -121,9 +121,9 @@ export const UploadScreen = observer(() => {
             (Math.random() * 1000000000000000).toString(),
           );
           const fileNameKey = `${randomID}.zip`;
-          const fileNameKeyReadable = `${randomID}-${localStorage.getItem(
+          const fileNameKeyReadable = `${localStorage.getItem(
             FLOY_TOKEN_KEY,
-          )}-${zipFile?.name.slice(0, -4)}-series.zip`;
+          )}-${randomID}-${zipFile?.name.slice(0, -4)}-series.zip`;
 
           // Rename file to be uploaded:
           Object.defineProperty(zipFile, "name", {
