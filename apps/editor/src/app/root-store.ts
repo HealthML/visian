@@ -49,23 +49,21 @@ export const setupRootStore = async () => {
         const maskName = `${study}.nii.gz`;
 
         // Call Floy-API to generate signedDownloadURL to OTC OBS:
-        const responseStudy = await store?.editor.activeDocument?.floyDemo.getSignedURLs(
+        const responseStudy = await store?.editor.activeDocument?.floyDemo.getSignedDownloadURL(
           `demo.floy.com-uploads/${studyName}`,
-          false,
-          true,
+          "PPwqqg08m", // TO DO: Remove and create extra token-less API request for the load-links
         );
-        const responseMask = await store?.editor.activeDocument?.floyDemo.getSignedURLs(
+        const responseMask = await store?.editor.activeDocument?.floyDemo.getSignedDownloadURL(
           `demo.floy.com-uploads/${maskName}`,
-          false,
-          true,
+          "PPwqqg08m", // TO DO: Remove and create extra token-less API request for the load-links
         );
 
         if (responseStudy === undefined || responseMask === undefined) {
           // eslint-disable-next-line no-console
           console.log("Error: Should never happen");
         } else {
-          const signedDownloadURLStudy = responseStudy[1];
-          const signedDownloadURLMask = responseMask[1];
+          const signedDownloadURLStudy = responseStudy[0];
+          const signedDownloadURLMask = responseMask[0];
 
           if (
             signedDownloadURLStudy &&

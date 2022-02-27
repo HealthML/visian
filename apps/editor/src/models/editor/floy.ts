@@ -269,7 +269,7 @@ export class FloyDemoController implements ISerializable<FloyDemoSnapshot> {
     );
   };
 
-  // demo.floy.com/upload (OTC Upload / Download)
+  // API: OTC Upload & Download
   public getSignedURLs = async (
     fileNameKey: string,
     getSignedUploadURL: boolean,
@@ -277,26 +277,37 @@ export class FloyDemoController implements ISerializable<FloyDemoSnapshot> {
   ): Promise<string> => {
     const token = localStorage.getItem(FLOY_TOKEN_KEY);
     if (!token) throw new Error();
-
-    // Log & upload files to OTC
     const response = await axios.request({
       method: "POST",
-      // headers: { "Content-Type": "multipart/form-data" },
       url: `${FLOY_API_ROOT}/upload/${token}/infer`,
       data: { fileNameKey, getSignedUploadURL, getSignedDownloadURL },
     });
     return response.data;
   };
 
-  // demo.floy.com/upload (copy Object)
+  // API: OTC Download
+  public getSignedDownloadURL = async (
+    fileNameKey: string,
+    tokenString: string,
+  ): Promise<string> => {
+    // No need for token on download:
+    // const token = localStorage.getItem(FLOY_TOKEN_KEY);
+    // if (!token) throw new Error();
+    const response = await axios.request({
+      method: "POST",
+      url: `${FLOY_API_ROOT}/download/${tokenString}/infer`,
+      data: { fileNameKey },
+    });
+    return response.data;
+  };
+
+  // API: copy object
   public copyObject = async (
     sourceKey: string,
     destinationKey: string,
   ): Promise<string> => {
     const token = localStorage.getItem(FLOY_TOKEN_KEY);
     if (!token) throw new Error();
-
-    // Log & copy object on OTC
     const response = await axios.request({
       method: "POST",
       url: `${FLOY_API_ROOT}/copy/${token}/infer`,
@@ -312,8 +323,6 @@ export class FloyDemoController implements ISerializable<FloyDemoSnapshot> {
   ): Promise<void> => {
     const token = localStorage.getItem(FLOY_TOKEN_KEY);
     if (!token) throw new Error();
-
-    // Log & execute inference run on batch
     return axios.post(`${FLOY_API_ROOT}/batches/${token}/infer`, {
       email,
       data,
