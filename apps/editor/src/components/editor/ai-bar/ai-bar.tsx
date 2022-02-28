@@ -23,7 +23,7 @@ import { observer } from "mobx-react-lite";
 import React, { useCallback, useRef, useState } from "react";
 import styled from "styled-components";
 import { useStore } from "../../../app/root-store";
-import { FLOY_TOKEN_KEY, FLOY_HOME, whoHome } from "../../../constants";
+import { FLOY_HOME, whoHome } from "../../../constants";
 import { AnnotationStatus } from "../../../models/who/annotation";
 import { AnnotationData } from "../../../models/who/annotationData";
 
