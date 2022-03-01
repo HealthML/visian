@@ -500,11 +500,16 @@ export const setUpHotKeys = (store: RootStore): IDisposer => {
       if (!tool.activationKeys) return;
 
       hotkeys(tool.activationKeys, (event) => {
+        const isToolAlreadyActive =
+          store.editor.activeDocument?.tools.activeTool?.name === tool.name;
         if (
           // Explicitly access from the active document in case the document changes
           !store?.editor.activeDocument?.tools.tools[tool.name].canActivate() ||
-          store.editor.activeDocument?.tools.activeTool?.name === tool.name
+          isToolAlreadyActive
         ) {
+          if (isToolAlreadyActive) {
+            store.editor.activeDocument?.tools.toggleToolSettings();
+          }
           return;
         }
 

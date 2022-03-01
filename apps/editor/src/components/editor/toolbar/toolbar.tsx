@@ -41,14 +41,16 @@ export const Toolbar: React.FC = observer(() => {
   );
 
   // Menu Toggling
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const isModalOpen = Boolean(
+    store?.editor.activeDocument?.tools.showToolSettings,
+  );
   const closeModal = useCallback(
     (value?: unknown) => {
       if (
         !value ||
         store?.editor.activeDocument?.tools.activeTool?.name === value
       ) {
-        setIsModalOpen(false);
+        store?.editor.activeDocument?.tools.setShowToolSettings(false);
       }
     },
     [store],
@@ -68,15 +70,17 @@ export const Toolbar: React.FC = observer(() => {
         event.button === PointerButton.RMB &&
         store?.editor.activeDocument?.tools.activeTool?.name === value
       ) {
-        setIsModalOpen(previousTool !== value || !isModalOpen);
+        store?.editor.activeDocument?.tools.setShowToolSettings(
+          previousTool !== value || !isModalOpen,
+        );
       }
     },
     [isModalOpen, store],
   );
   const [startPress, stopPress] = useLongPress(
     useCallback(() => {
-      setIsModalOpen(true);
-    }, []),
+      store?.editor.activeDocument?.tools.setShowToolSettings(true);
+    }, [store]),
   );
   const handlePress = useCallback(
     (
