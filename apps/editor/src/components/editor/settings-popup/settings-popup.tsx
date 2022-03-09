@@ -18,6 +18,7 @@ import React, { useCallback } from "react";
 import styled, { useTheme } from "styled-components";
 
 import { useStore } from "../../../app/root-store";
+import { InfoShortcuts } from "../info-shortcuts";
 import { SettingsPopUpProps } from "./settings-popup.props";
 
 const StyledPopUp = styled(PopUp)`
@@ -105,6 +106,9 @@ export const SettingsPopUp: React.FC<SettingsPopUpProps> = observer(
               <EnumParam
                 labelTx="voxel-data"
                 infoTx="info-voxel-data"
+                infoShortcuts={
+                  <InfoShortcuts hotkeyGroupNames={["voxel-info"]} />
+                }
                 infoBaseZIndex={theme.zIndices.overlay}
                 options={voxelInfoSwitchOptions}
                 value={store?.editor.activeDocument?.viewport2D.voxelInfoMode}

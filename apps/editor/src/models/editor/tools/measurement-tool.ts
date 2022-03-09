@@ -31,6 +31,7 @@ export class MeasurementTool<N extends "measurement-tool" = "measurement-tool">
         icon: "ruler",
         supportedViewModes: ["2D"],
         supportedLayerKinds: ["image"],
+        activationKeys: "l",
       },
       document,
     );

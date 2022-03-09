@@ -19,10 +19,10 @@ export const ShortcutRow = styled.div`
   align-items: center;
 `;
 
-export const ShortcutContainer = styled.div`
+export const ShortcutContainer = styled.div<{ fullWidth?: boolean }>`
   display: flex;
   flex-direction: row;
-  width: 30%;
+  width: ${({ fullWidth }) => (fullWidth ? "100%" : "30%")};
   align-items: center;
 `;
 

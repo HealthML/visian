@@ -100,6 +100,8 @@ export class Tools
   public thresholdAnnotationRenderer3D: ThresholdAnnotationRenderer3D;
   public dilateErodeRenderer3D: DilateErodeRenderer3D;
 
+  public showToolSettings = false;
+
   constructor(
     snapshot: Partial<ToolsSnapshot<ToolName>> | undefined,
     protected document: IDocument,
@@ -124,6 +126,7 @@ export class Tools
       isCursorOverFloatingUI: observable,
       isNavigationDragged: observable,
       isDrawing: observable,
+      showToolSettings: observable,
 
       activeTool: computed,
       pixelWidth: computed,
@@ -146,6 +149,7 @@ export class Tools
       setIsDrawing: action,
       resetBrushSettings: action,
       resetActiveToolSetings: action,
+      setShowToolSettings: action,
       applySnapshot: action,
     });
 
@@ -164,6 +168,7 @@ export class Tools
           icon: "navigationTool",
           labelTx: "navigation-tool",
           supportedViewModes: ["2D", "3D"],
+          activationKeys: "h",
         },
         this.document,
       ),
@@ -291,6 +296,8 @@ export class Tools
         )
         ?.setActiveTool(this.activeToolName, false);
     }
+
+    this.setShowToolSettings();
 
     if (this.activeTool?.canActivate()) {
       previouslyActiveTool?.deactivate(this.tools[this.activeToolName]);
@@ -482,6 +489,14 @@ export class Tools
     Object.values(activeTool.params).forEach((param) => {
       param.reset();
     });
+  };
+
+  // UI state
+  public setShowToolSettings = (value = false): void => {
+    this.showToolSettings = value;
+  };
+  public toggleToolSettings = (): void => {
+    this.setShowToolSettings(!this.showToolSettings);
   };
 
   // Serialization

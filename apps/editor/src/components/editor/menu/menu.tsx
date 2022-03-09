@@ -103,7 +103,7 @@ export const Menu: React.FC<MenuProps> = observer(
           />
           <ButtonParam labelTx="settings" handlePress={openSettingsPopUp} />
           <Divider />
-          <ButtonParam label="Shortcuts" handlePress={openShortcutPopUp} />
+          <ButtonParam labelTx="shortcuts" handlePress={openShortcutPopUp} />
           {feedbackMailAddress && (
             <BlueButtonParam
               labelTx="ideas-feedback"

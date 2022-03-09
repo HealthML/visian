@@ -4,7 +4,6 @@ import styled, { useTheme } from "styled-components";
 import { Theme } from "../../theme";
 import { Divider, Modal, ModalHeaderButton } from "../modal";
 import { Text } from "../text";
-// import { MouseIcon, ShortcutContainer, ShortcutLabel } from "../shortcut-popup";
 import { InfoTextProps } from "./info-text.props";
 
 const StyledModal = styled(Modal)`
@@ -15,19 +14,6 @@ const StyledText = styled(Text)<{ isLast?: boolean }>`
   font-size: 13px;
   margin-bottom: ${(props) => (props.isLast ? "0px" : "14px")};
 `;
-
-// const SpacedStyledShortcutContainer = styled(ShortcutContainer)`
-//   width: 100%;
-//   margin-bottom: 10px;
-// `;
-
-// const StyledShortcutContainer = styled(ShortcutContainer)`
-//   width: 100%;
-// `;
-
-// const ShortcutSpacer = styled(Spacer)`
-//   height: 10px;
-// `;
 
 export const InfoText = observer<InfoTextProps>(
   ({
@@ -53,7 +39,7 @@ export const InfoText = observer<InfoTextProps>(
 
     const buttonRef = useRef<HTMLButtonElement>(null);
 
-    const hasShortcuts = Boolean(shortcuts && shortcuts.length);
+    const hasShortcuts = Boolean(shortcuts);
     const hasInfoText = Boolean(infoTx || infoText);
 
     const theme = useTheme() as Theme;
@@ -87,15 +73,7 @@ export const InfoText = observer<InfoTextProps>(
           {hasShortcuts && (
             <>
               <Divider />
-              {/* <SpacedStyledShortcutContainer>
-                <MouseIcon icon="leftMouse" />
-                <ShortcutLabel text="Left Click" />
-              </SpacedStyledShortcutContainer>
-              <ShortcutSpacer />
-              <StyledShortcutContainer>
-                <MouseIcon icon="leftMouse" />
-                <ShortcutLabel text="Left Click" />
-              </StyledShortcutContainer> */}
+              {shortcuts}
             </>
           )}
         </StyledModal>

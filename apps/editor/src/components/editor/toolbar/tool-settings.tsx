@@ -89,6 +89,7 @@ export const ToolSettings: React.FC<
               setValue={
                 store?.editor.activeDocument?.tools.setUseAdaptiveBrushSize
               }
+              infoTx="info-adaptive-brush-size"
             />
             <NumberParam
               labelTx="brush-size"

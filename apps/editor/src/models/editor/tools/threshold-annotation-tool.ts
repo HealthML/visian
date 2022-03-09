@@ -32,6 +32,7 @@ export class ThresholdAnnotationTool<
         supportedViewModes: ["2D", "3D"],
         supportedLayerKinds: ["image"],
         supportAnnotationsOnly: true,
+        activationKeys: "t",
       },
       document,
     );

@@ -29,6 +29,7 @@ export class BoundedSmartBrush<
       isDrawingTool: true,
       isBrush: true,
       isSmartBrush: true,
+      activationKeys: isAdditive ? "r" : "ctrl+r",
     });
   }
 

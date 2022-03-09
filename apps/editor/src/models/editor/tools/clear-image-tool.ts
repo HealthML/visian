@@ -17,6 +17,7 @@ export class ClearImageTool<
         supportedViewModes: ["2D", "3D"],
         supportedLayerKinds: ["image"],
         supportAnnotationsOnly: true,
+        activationKeys: "ctrl+del,ctrl+backspace",
       },
       document,
     );

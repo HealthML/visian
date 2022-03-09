@@ -38,6 +38,8 @@ export interface ToolConfig<N extends string> {
   supportAnnotationsOnly?: boolean;
 
   params?: Parameter[];
+
+  activationKeys?: string;
 }
 
 export class Tool<N extends string>
@@ -64,6 +66,8 @@ export class Tool<N extends string>
 
   public params: { [name: string]: Parameter };
 
+  public activationKeys?: string;
+
   constructor(config: ToolConfig<N>, protected document: IDocument) {
     this.name = config.name;
     this.icon = config.icon;
@@ -81,6 +85,7 @@ export class Tool<N extends string>
     config.params?.forEach((param) => {
       this.params[param.name] = param;
     });
+    this.activationKeys = config.activationKeys;
 
     makeObservable(this, { params: observable });
   }

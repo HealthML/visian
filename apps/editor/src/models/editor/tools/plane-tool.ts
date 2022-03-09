@@ -9,6 +9,7 @@ export class PlaneTool extends Tool<"plane-tool"> {
         icon: "planeTool",
         labelTx: "plane-tool",
         supportedViewModes: ["3D"],
+        activationKeys: "p",
       },
       document,
     );
