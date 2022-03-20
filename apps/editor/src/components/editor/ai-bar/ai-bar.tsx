@@ -3,6 +3,7 @@ import {
   BlueButtonParam,
   Button,
   color,
+  EnumParam,
   fontSize,
   InvisibleButton,
   mediaQuery,
@@ -20,12 +21,20 @@ import {
   setNewTaskIdForUrl,
 } from "@visian/utils";
 import { observer } from "mobx-react-lite";
-import React, { useCallback, useRef, useState } from "react";
+import React, { useCallback, useMemo, useRef, useState } from "react";
 import styled from "styled-components";
+
 import { useStore } from "../../../app/root-store";
 import { FLOY_HOME, whoHome } from "../../../constants";
+import { FloyDemoModelKind } from "../../../models/editor/floy";
 import { AnnotationStatus } from "../../../models/who/annotation";
 import { AnnotationData } from "../../../models/who/annotationData";
+
+// TODO: Update to include all selectable models
+const modelOptions = [
+  { value: "MR_SPINE", label: "Fokale Läsionen (MR)" },
+  { value: "CT_SPINE", label: "Fokale Läsionen (CT)" },
+];
 
 const AIBarSheet = styled(Sheet)`
   width: 700px;
@@ -71,9 +80,14 @@ const TaskName = styled(Text)`
   white-space: wrap;
 `;
 
+const TaskSelector = styled(EnumParam)`
+  margin-top: 2px;
+  width: 180px;
+`;
+
 const ActionContainer = styled.div`
   height: 100%;
-  min-width: 450px;
+  min-width: 400px;
   display: flex;
   flex-direction: row;
   justify-content: space-between;
@@ -533,6 +547,16 @@ export const FloyBar = observer<{
     store?.editor.newDocument();
   }, [store]);
 
+  const filteredModelOptions = useMemo(
+    () =>
+      modelOptions.filter((option) =>
+        store?.editor.activeDocument?.floyDemo.selectableModels.includes(
+          option.value as FloyDemoModelKind,
+        ),
+      ),
+    [store?.editor.activeDocument?.floyDemo.selectableModels],
+  );
+
   return (
     <>
       <NoticeText useBlankScreen={useBlankScreen}>
@@ -573,7 +597,15 @@ export const FloyBar = observer<{
             <AIContainer>
               <TaskContainer>
                 <TaskLabel tx="KI Analyse" />
-                <TaskName text="Fokale Läsionen" />
+                <TaskSelector
+                  selector="drop-down"
+                  options={filteredModelOptions}
+                  expandTo="top"
+                  value={store.editor.activeDocument.floyDemo.selectedModel}
+                  setValue={
+                    store.editor.activeDocument.floyDemo.setSelectedModel
+                  }
+                />
               </TaskContainer>
               <ActionContainer>
                 <ActionName

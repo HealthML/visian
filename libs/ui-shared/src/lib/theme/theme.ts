@@ -162,8 +162,8 @@ export const theme = {
     modal: 50,
     picker: 80,
     info: 90,
-    overlay: 100,
-    notification: 150,
+    overlay: 200,
+    notification: 250,
   },
 };
 

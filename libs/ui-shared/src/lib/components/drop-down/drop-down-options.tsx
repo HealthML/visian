@@ -9,7 +9,10 @@ import { Divider } from "../modal";
 import { sheetMixin } from "../sheet";
 import { Text } from "../text";
 import { useOutsidePress } from "../utils";
-import { DropDownOptionsProps } from "./drop-down.props";
+import {
+  DropDownOptionsPosition,
+  DropDownOptionsProps,
+} from "./drop-down.props";
 import { useOptionsPosition } from "./utils";
 
 export const Option = styled.div<{ isSelected?: boolean }>`
@@ -36,8 +39,9 @@ export const Option = styled.div<{ isSelected?: boolean }>`
     `}
 `;
 
-const ExpandedSelector = styled(Option)`
-  margin: -1px -1px 6px -1px;
+const ExpandedSelector = styled(Option)<{ position?: DropDownOptionsPosition }>`
+  margin: ${(props) =>
+    props.position === "top" ? "6px -1px -1px -1px" : "-1px -1px 6px -1px"};
 `;
 
 export const OptionText = styled(Text)`
@@ -80,6 +84,7 @@ export const DropDownOptions: React.FC<DropDownOptionsProps> = ({
   options,
   isOpen,
   anchor,
+  position,
   style,
   onChange,
   onDismiss,
@@ -92,24 +97,29 @@ export const DropDownOptions: React.FC<DropDownOptionsProps> = ({
 
   const optionsStyle = useOptionsPosition({
     anchor,
+    position,
     isActive: isOpen,
     positionRelativeToOffsetParent: !modalRootRef.current,
     style,
   });
 
   const activeOption = options[activeIndex];
+  const selector = (
+    <ExpandedSelector position={position} onPointerDown={onDismiss}>
+      {activeOption && (
+        <OptionText
+          tx={activeOption.labelTx}
+          text={activeOption.label || activeOption.value}
+        />
+      )}
+      <ExpandIcon icon="arrowUp" />
+    </ExpandedSelector>
+  );
+
   const node =
     isOpen === false ? null : (
       <Options {...rest} style={optionsStyle} ref={ref}>
-        <ExpandedSelector onPointerDown={onDismiss}>
-          {activeOption && (
-            <OptionText
-              tx={activeOption.labelTx}
-              text={activeOption.label || activeOption.value}
-            />
-          )}
-          <ExpandIcon icon="arrowUp" />
-        </ExpandedSelector>
+        {position === "bottom" && selector}
         {options.map((option, index) => (
           <React.Fragment key={option.value}>
             <Option
@@ -128,6 +138,7 @@ export const DropDownOptions: React.FC<DropDownOptionsProps> = ({
             )}
           </React.Fragment>
         ))}
+        {position === "top" && selector}
       </Options>
     );
 

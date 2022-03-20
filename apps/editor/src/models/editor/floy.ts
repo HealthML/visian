@@ -17,9 +17,14 @@ import {
   FLOY_TOKEN_KEY,
 } from "../../constants";
 
+// TODO: Add all supported models
+export type FloyDemoModelKind = "MR_SPINE" | "CT_SPINE";
+
 export interface FloyDemoSnapshot {
   seriesZip?: File;
   inferenceResults?: { [key: string]: unknown }[];
+  selectableModels?: FloyDemoModelKind[];
+  selectedModel?: FloyDemoModelKind;
 }
 
 const deidentifiedElements = [
@@ -66,22 +71,47 @@ export class FloyDemoController implements ISerializable<FloyDemoSnapshot> {
   protected seriesZip?: File;
   public inferenceResults?: { [key: string]: unknown }[];
 
+  public selectableModels: FloyDemoModelKind[] = ["MR_SPINE"];
+  public selectedModel: FloyDemoModelKind = "MR_SPINE";
+
   constructor(protected document: IDocument) {
-    makeObservable<this, "seriesZip" | "setSeriesZip" | "setInferenceResults">(
+    makeObservable<
       this,
-      {
-        seriesZip: observable,
-        inferenceResults: observable,
-        setSeriesZip: action,
-        setInferenceResults: action,
-      },
-    );
+      | "seriesZip"
+      | "setSeriesZip"
+      | "setInferenceResults"
+      | "setSelectableModels"
+    >(this, {
+      seriesZip: observable,
+      inferenceResults: observable,
+      selectableModels: observable,
+      selectedModel: observable,
+
+      setSeriesZip: action,
+      setInferenceResults: action,
+      setSelectableModels: action,
+      setSelectedModel: action,
+    });
   }
 
   public get hasDemoCandidate(): boolean {
     return Boolean(this.seriesZip);
   }
 
+  protected setSelectableModels(
+    value: FloyDemoModelKind[] = ["MR_SPINE"],
+  ): void {
+    this.selectableModels = value;
+    if (value[0]) [this.selectedModel] = value;
+  }
+
+  public setSelectedModel = (value: FloyDemoModelKind = "MR_SPINE"): void => {
+    this.selectedModel = value;
+  };
+
+  // TODO: This method could potentially be replaced by extracting the
+  // selection logic for each model to `getSelectableModels` and rejecting all
+  // series that do not yield at least one valid model identifier
   public async isDemoCandidate(series: File | File[]): Promise<boolean> {
     const firstFile = Array.isArray(series) ? series[0] : series;
 
@@ -185,6 +215,43 @@ export class FloyDemoController implements ISerializable<FloyDemoSnapshot> {
     return true;
   }
 
+  public async getSelectableModels(
+    series: File | File[] | undefined,
+  ): Promise<FloyDemoModelKind[]> {
+    const selectableModels: FloyDemoModelKind[] = [];
+
+    if (!series) return selectableModels;
+    const firstFile = Array.isArray(series) ? series[0] : series;
+
+    // Only accept DICOM
+    if (
+      path.extname(firstFile.name) !== ".dcm" &&
+      path.extname(firstFile.name) !== ".DCM" &&
+      path.extname(firstFile.name) !== ""
+    ) {
+      return selectableModels;
+    }
+
+    // Filter series
+    try {
+      const dataSet = dicomParser.parseDicom(
+        new Uint8Array(await firstFile.arrayBuffer()),
+      );
+
+      // TODO: Implement model recommendation logic
+      // The first model pushed will be the default selection
+      if (dataSet.string("x00080060") === "MR") {
+        selectableModels.push("MR_SPINE");
+      }
+      if (dataSet.string("x00080060") === "CT") {
+        selectableModels.push("CT_SPINE");
+      }
+    } catch {
+      // Intentionally left blank
+    }
+    return selectableModels;
+  }
+
   public async prepareSeriesZip(
     series?: File | File[],
     name?: string,
@@ -220,6 +287,7 @@ export class FloyDemoController implements ISerializable<FloyDemoSnapshot> {
     if (!zip) return this.setSeriesZip();
 
     this.setSeriesZip(zip);
+    this.setSelectableModels(await this.getSelectableModels(series));
 
     // DEBUG
     // FileSaver.saveAs(await zip.toBlob(), `${name || firstFile.name}.zip`);
@@ -234,6 +302,8 @@ export class FloyDemoController implements ISerializable<FloyDemoSnapshot> {
     await this.log();
 
     const formData = new FormData();
+    // TODO: Add model kind
+    // formData.append("model", this.selectedModel);
     formData.append("seriesZIP", this.seriesZip);
     formData.append("studyZIP", this.seriesZip);
     formData.append("tokenStr", localStorage.getItem(FLOY_TOKEN_KEY) || "");
@@ -369,6 +439,8 @@ export class FloyDemoController implements ISerializable<FloyDemoSnapshot> {
     return {
       seriesZip: this.seriesZip,
       inferenceResults: toJS(this.inferenceResults),
+      selectableModels: toJS(this.selectableModels),
+      selectedModel: this.selectedModel,
     };
   }
 
@@ -377,5 +449,7 @@ export class FloyDemoController implements ISerializable<FloyDemoSnapshot> {
   ): Promise<void> {
     this.setSeriesZip(snapshot.seriesZip);
     this.setInferenceResults(snapshot.inferenceResults);
+    this.setSelectableModels(snapshot.selectableModels);
+    this.setSelectedModel(snapshot.selectedModel);
   }
 }

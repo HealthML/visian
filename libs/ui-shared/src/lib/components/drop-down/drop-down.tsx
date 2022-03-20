@@ -34,6 +34,7 @@ export const DropDown: React.FC<DropDownProps> = ({
   labelTx,
   label,
   options,
+  expandTo = "bottom",
   defaultValue,
   value,
   onChange,
@@ -102,6 +103,7 @@ export const DropDown: React.FC<DropDownProps> = ({
           activeIndex={activeIndex}
           options={options}
           anchor={parentRef}
+          position={expandTo}
           isOpen={showOptions}
           onChange={setValue}
           onDismiss={closeOptions}

@@ -3,6 +3,8 @@ import type { IEnumParameterOption } from "../../types";
 import type { RelativePositionConfig } from "../utils";
 import type { ModalPosition } from "../modal";
 
+export type DropDownOptionsPosition = "bottom" | "top";
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export interface DropDownOptionProps<T = any> extends IEnumParameterOption<T> {
   onChange?: (value: T) => void;
@@ -14,7 +16,10 @@ export interface DropDownOptionsProps<T = any>
       React.HTMLAttributes<HTMLDivElement>,
       "defaultValue" | "onChange"
     >,
-    Pick<RelativePositionConfig, "anchor"> {
+    Pick<
+      RelativePositionConfig<DropDownOptionsPosition>,
+      "anchor" | "position"
+    > {
   activeIndex?: number;
   options: IEnumParameterOption<T>[];
 
@@ -40,6 +45,12 @@ export interface DropDownProps<T = any>
   infoBaseZIndex?: number;
 
   options: IEnumParameterOption<T>[];
+
+  /**
+   * The direction to expand the drop down options in.
+   * Defaults to `"bottom"`.
+   */
+  expandTo?: DropDownOptionsPosition;
 
   defaultValue?: T;
   value?: T;
