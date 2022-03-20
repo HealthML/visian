@@ -3,6 +3,13 @@ import dicomParser, { DataSet } from "dicom-parser";
 export const createDicomFile = (byteArray: Uint8Array | Buffer, name: string) =>
   new File([byteArray], name, { type: "application/dicom" });
 
+export const readDicomValue = async (file: File, tag: string) => {
+  const dataSet = dicomParser.parseDicom(
+    new Uint8Array(await file.arrayBuffer()),
+  );
+  return dataSet.string(`x${tag.replace(",", "").toLowerCase()}`);
+};
+
 /**
  * @see http://stackoverflow.com/questions/1349404/generate-a-string-of-5-random-characters-in-javascript
  */
