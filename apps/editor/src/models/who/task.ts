@@ -1,24 +1,16 @@
-import { Annotation, AnnotationSnapshot, AnnotationStatus } from "./annotation";
-import { AnnotationTask, AnnotationTaskSnapshot } from "./annotationTask";
+import {
+  AnnotationStatus,
+  ITask,
+  TaskSnapshot,
+  TaskType,
+} from "@visian/ui-shared";
+import { Annotation } from "./annotation";
+import { AnnotationTask } from "./annotationTask";
+import { Campaign } from "./campaign";
 import { Sample } from "./sample";
-import { User, UserSnapshot } from "./user";
+import { User } from "./user";
 
-export interface TaskSnapshot {
-  taskUUID: string;
-  kind: string;
-  readOnly: boolean;
-  annotationTasks: AnnotationTaskSnapshot[];
-  annotations?: AnnotationSnapshot[];
-  assignee: UserSnapshot;
-}
-
-export enum TaskType {
-  Create = "create",
-  Correct = "correct",
-  Review = "review",
-}
-
-export class Task {
+export class Task implements ITask {
   public taskUUID: string;
   public kind: TaskType;
   public readOnly: boolean;
@@ -26,8 +18,10 @@ export class Task {
   public samples: Sample[];
   public annotations: Annotation[];
   public assignee: User;
+  public campaign?: Campaign;
 
   // TODO: Properly type API response data
+  // TODO: Make observable
   constructor(task: any) {
     this.taskUUID = task.taskUUID;
     this.kind = task.kind;
@@ -40,6 +34,9 @@ export class Task {
       (annotation: any) => new Annotation(annotation),
     );
     this.assignee = new User(task.assignee);
+    if (task.campaign && Object.keys(task.campaign).length > 1) {
+      this.campaign = new Campaign(task.campaign);
+    }
   }
 
   public addNewAnnotation(): void {
@@ -65,6 +62,7 @@ export class Task {
         annotation.toJSON(),
       ),
       assignee: this.assignee.toJSON(),
+      campaign: this.campaign ? this.campaign.toJSON() : {},
     };
   }
 }

@@ -5,8 +5,14 @@ import {
   ViewType,
   viewTypes,
 } from "@visian/utils";
-import { IEditor, IImageLayer, ISliceRenderer } from "@visian/ui-shared";
-import { autorun, reaction } from "mobx";
+import {
+  BlendGroup,
+  IEditor,
+  IImageLayer,
+  ILayerGroup,
+  ISliceRenderer,
+} from "@visian/ui-shared";
+import { autorun, computed, makeObservable, reaction } from "mobx";
 import * as THREE from "three";
 
 import { Slice } from "./slice";
@@ -123,6 +129,10 @@ export class SliceRenderer implements ISliceRenderer {
       ),
       autorun(this.updateMainBrushCursor),
     );
+
+    makeObservable(this, {
+      renderBlendGroups: computed,
+    });
   }
 
   public dispose() {
@@ -130,6 +140,20 @@ export class SliceRenderer implements ISliceRenderer {
     this.slices.forEach((slice) => slice.dispose());
     this.renderedSheets.forEach((renderedSheet) => renderedSheet.dispose());
     window.removeEventListener("resize", this.resize);
+  }
+
+  public get renderBlendGroups(): BlendGroup[] {
+    return [
+      ...(this.editor.activeDocument?.customBlendGroups || []),
+      ...(this.editor.activeDocument?.layers
+        .filter(
+          (layer) =>
+            layer.kind === "group" &&
+            Boolean((layer as ILayerGroup).blendGroup),
+        )
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        .map((group) => (group as ILayerGroup).blendGroup!) || []),
+    ];
   }
 
   private get canvas() {

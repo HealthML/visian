@@ -4,6 +4,7 @@ import {
   FloatingUIButton,
   Notification,
   Spacer,
+  TaskType,
   Text,
 } from "@visian/ui-shared";
 import { isFromWHO } from "@visian/utils";
@@ -37,6 +38,8 @@ import { ViewSettings } from "../view-settings";
 import { UIOverlayProps } from "./ui-overlay.props";
 import { SettingsPopUp } from "../settings-popup";
 import { MeasurementPopUp } from "../measurement-popup";
+import { SupervisorPanel } from "../supervisor-panel";
+import { ReviewerPanel } from "../reviewer-panel";
 
 const Container = styled(AbsoluteCover)`
   align-items: stretch;
@@ -245,6 +248,14 @@ export const UIOverlay = observer<UIOverlayProps>(
                 <ThresholdAnnotationModal />
                 <DilateErodeModal />
                 <MeasurementModal />
+                {isFromWHO() &&
+                  store?.currentTask?.kind === TaskType.Review && (
+                    <SupervisorPanel />
+                  )}
+                {isFromWHO() &&
+                  store?.currentTask?.kind === TaskType.Correct && (
+                    <ReviewerPanel />
+                  )}
                 <AxesAndVoxel />
               </ModalRow>
             </ColumnLeft>

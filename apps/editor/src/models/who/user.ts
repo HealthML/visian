@@ -1,18 +1,8 @@
-import { Annotator, AnnotatorSnapshot } from "./annotator";
-import { Reviewer, ReviewerSnapshot } from "./reviewer";
+import { IUser, UserRole, UserSnapshot } from "@visian/ui-shared";
+import { Annotator } from "./annotator";
+import { Reviewer } from "./reviewer";
 
-export interface UserSnapshot {
-  userUUID: string;
-  idpID: string;
-  username: string;
-  birthdate: string;
-  timezone: string;
-  email: string;
-  annotatorRole: AnnotatorSnapshot | Record<string, never>;
-  reviewerRole: ReviewerSnapshot | Record<string, never>;
-}
-
-export class User {
+export class User implements IUser {
   public userUUID: string;
   public idpID: string;
   public username: string;
@@ -23,6 +13,7 @@ export class User {
   public reviewerRole?: Reviewer;
 
   // TODO: Properly type API response data
+  // TODO: Make observable
   constructor(user: any) {
     this.userUUID = user.userUUID;
     this.idpID = user.idpID;
@@ -30,12 +21,19 @@ export class User {
     this.birthdate = user.birthdate;
     this.timezone = user.timezone;
     this.email = user.email;
-    if (user.annotatorRole && Object.keys(user.annotatorRole).length > 1) {
+    if (user.annotatorRole && "annotatorUUID" in user.annotatorRole) {
       this.annotatorRole = new Annotator(user.annotatorRole);
     }
-    if (user.reviewerRole && Object.keys(user.reviewerRole).length > 1) {
+    if (user.reviewerRole && "reviewerUUID" in user.reviewerRole) {
       this.reviewerRole = new Reviewer(user.reviewerRole);
     }
+  }
+
+  // TODO: Return actual role name
+  public getRoleName(): UserRole {
+    if (this.reviewerRole) return "Reviewer";
+    if (this.annotatorRole) return "Annotator";
+    return "Supervisor";
   }
 
   public toJSON(): UserSnapshot {

@@ -13,6 +13,8 @@ import {
   ErrorNotification,
   ValueType,
   PerformanceMode,
+  ITask,
+  BlendGroup,
 } from "@visian/ui-shared";
 import {
   handlePromiseSettledResult,
@@ -86,7 +88,7 @@ export interface DocumentSnapshot {
 
 export class Document
   implements IDocument, ISerializable<DocumentSnapshot>, IDisposable {
-  public readonly excludeFromSnapshotTracking = ["editor"];
+  public readonly excludeFromSnapshotTracking = ["editor", "customBlendGroups"];
 
   public id: string;
   protected titleOverride?: string;
@@ -95,6 +97,8 @@ export class Document
   protected measurementDisplayLayerId?: string;
   protected layerMap: { [key: string]: Layer };
   protected layerIds: string[];
+
+  public customBlendGroups: BlendGroup[] = [];
 
   public measurementType: MeasurementType = "volume";
 
@@ -114,6 +118,8 @@ export class Document
   public trackingData?: TrackingData;
 
   public useExclusiveSegmentations = false;
+
+  public annotationConsensusCount = 1;
 
   constructor(
     snapshot: DocumentSnapshot | undefined,
@@ -159,6 +165,7 @@ export class Document
       measurementDisplayLayerId: observable,
       layerMap: observable,
       layerIds: observable,
+      customBlendGroups: observable,
       measurementType: observable,
       history: observable,
       viewSettings: observable,
@@ -168,6 +175,7 @@ export class Document
       showLayerMenu: observable,
       trackingData: observable,
       useExclusiveSegmentations: observable,
+      annotationConsensusCount: observable,
 
       title: computed,
       activeLayer: computed,
@@ -187,12 +195,15 @@ export class Document
       moveLayer: action,
       deleteLayer: action,
       toggleTypeAndRepositionLayer: action,
+      addBlendGroup: action,
+      deleteBlendGroup: action,
       importImage: action,
       importAnnotation: action,
       importTrackingLog: action,
       setShowLayerMenu: action,
       toggleLayerMenu: action,
       setUseExclusiveSegmentations: action,
+      setAnnotationConsensusCount: action,
       applySnapshot: action,
     });
 
@@ -415,6 +426,16 @@ export class Document
 
   public get has3DLayers(): boolean {
     return Object.values(this.layerMap).some((layer) => layer.is3DLayer);
+  }
+
+  public addBlendGroup(group: BlendGroup): void {
+    this.customBlendGroups.push(group);
+  }
+
+  public deleteBlendGroup(group: BlendGroup): void {
+    this.customBlendGroups = this.customBlendGroups.filter(
+      (blendGroup) => blendGroup !== group,
+    );
   }
 
   // I/O
@@ -805,6 +826,10 @@ export class Document
       ) as unknown) as IImageLayer[];
   }
 
+  public setAnnotationConsensusCount = (value = 1) => {
+    this.annotationConsensusCount = value;
+  };
+
   // Proxies
   public get sliceRenderer(): ISliceRenderer | undefined {
     return this.editor.sliceRenderer;
@@ -828,6 +853,10 @@ export class Document
 
   public get performanceMode(): PerformanceMode {
     return this.editor.performanceMode;
+  }
+
+  public get currentTask(): ITask | undefined {
+    return this.context?.getCurrentTask();
   }
 
   // Serialization

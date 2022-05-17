@@ -1,6 +1,6 @@
 import { DragPoint, IEditor, IVolumeRenderer } from "@visian/ui-shared";
 import { IDisposer, Vector, ViewType, Voxel } from "@visian/utils";
-import { autorun, computed, makeObservable, reaction } from "mobx";
+import { autorun, reaction } from "mobx";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import Stats from "three/examples/jsm/libs/stats.module";
@@ -261,10 +261,6 @@ export class VolumeRenderer implements IVolumeRenderer {
         { fireImmediately: true },
       ),
     );
-
-    makeObservable(this, {
-      renderedImageLayerCount: computed,
-    });
   }
 
   public dispose = () => {
@@ -292,11 +288,6 @@ export class VolumeRenderer implements IVolumeRenderer {
     this.disposers.forEach((disposer) => disposer());
     this.axesConvention.dispose();
   };
-
-  public get renderedImageLayerCount() {
-    // additional layer for 3d region growing preview
-    return (this.editor.activeDocument?.imageLayers.length || 0) + 1;
-  }
 
   public resetScene(hardReset = false) {
     // Position the volume in a reasonable height for XR.

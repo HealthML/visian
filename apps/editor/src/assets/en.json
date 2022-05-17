@@ -121,6 +121,13 @@
   "export-tooltip": "Export (Ctrl + E)",
   "exporting": "Exporting",
 
+  "annotations": "Annotations",
+  "unify-annotations": "Unify annotations",
+  "annotation-consensus": "Annotation consensus",
+  "show-annotation-density": "Show annotation density",
+
+  "annotation-time": "Annotation Time",
+  "show-delta": "Show delta",
   "confirm-task-annotation-tooltip": "Confirm",
   "skip-task-annotation-tooltip": "Skip",
 

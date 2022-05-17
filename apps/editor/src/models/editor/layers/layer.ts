@@ -1,10 +1,4 @@
-import {
-  BlendMode,
-  color,
-  IDocument,
-  ILayer,
-  MarkerConfig,
-} from "@visian/ui-shared";
+import { color, IDocument, ILayer, MarkerConfig } from "@visian/ui-shared";
 import { ISerializable, ViewType } from "@visian/utils";
 import { action, computed, makeObservable, observable } from "mobx";
 import { Matrix4 } from "three";
@@ -26,7 +20,6 @@ export interface LayerSnapshot {
   titleOverride?: string;
   parentId?: string;
 
-  blendMode: BlendMode;
   color?: string;
   isVisible: boolean;
   opacityOverride?: number;
@@ -46,7 +39,6 @@ export class Layer implements ILayer, ISerializable<LayerSnapshot> {
   protected titleOverride?: string;
   protected parentId?: string;
 
-  public blendMode!: BlendMode;
   public color?: string;
   public isVisible!: boolean;
   protected opacityOverride?: number;
@@ -68,7 +60,6 @@ export class Layer implements ILayer, ISerializable<LayerSnapshot> {
         id: observable,
         titleOverride: observable,
         parentId: observable,
-        blendMode: observable,
         color: observable,
         isVisible: observable,
         opacityOverride: observable,
@@ -81,7 +72,6 @@ export class Layer implements ILayer, ISerializable<LayerSnapshot> {
         setParent: action,
         setIsAnnotation: action,
         setTitle: action,
-        setBlendMode: action,
         setColor: action,
         setIsVisible: action,
         setOpacity: action,
@@ -125,10 +115,6 @@ export class Layer implements ILayer, ISerializable<LayerSnapshot> {
       : undefined;
   }
 
-  public setBlendMode = (value?: BlendMode): void => {
-    this.blendMode = value || "NORMAL";
-  };
-
   public setColor = (value?: string): void => {
     this.color = value;
   };
@@ -148,7 +134,6 @@ export class Layer implements ILayer, ISerializable<LayerSnapshot> {
   };
 
   public resetSettings = (): void => {
-    this.setBlendMode();
     this.setColor(this.isAnnotation ? defaultAnnotationColor : undefined);
     this.setOpacity();
   };
@@ -195,7 +180,6 @@ export class Layer implements ILayer, ISerializable<LayerSnapshot> {
       id: this.id,
       titleOverride: this.titleOverride,
       parentId: this.parentId,
-      blendMode: this.blendMode,
       color: this.color,
       isVisible: this.isVisible,
       opacityOverride: this.opacityOverride,
@@ -211,7 +195,6 @@ export class Layer implements ILayer, ISerializable<LayerSnapshot> {
     this.setIsAnnotation(snapshot?.isAnnotation);
     this.setTitle(snapshot?.titleOverride);
     this.setParent(snapshot?.parentId);
-    this.setBlendMode(snapshot?.blendMode);
     this.setColor(snapshot?.color);
     this.setIsVisible(snapshot?.isVisible);
     this.setOpacity(snapshot?.opacityOverride);

@@ -7,6 +7,7 @@ import {
   ColorMode,
   i18n,
   IEditor,
+  IImageLayer,
   ISliceRenderer,
   IVolumeRenderer,
   PerformanceMode,
@@ -86,6 +87,18 @@ export class Editor
     });
 
     this.applySnapshot(snapshot);
+
+    // TODO: Remove this debug function.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (window as any).addDebugGroup = () => {
+      this.activeDocument?.addBlendGroup({
+        mode: "COMPARE",
+        layers: [
+          this.activeDocument.layers[0] as IImageLayer,
+          this.activeDocument.layers[1] as IImageLayer,
+        ],
+      });
+    };
   }
 
   public dispose(): void {

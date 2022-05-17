@@ -1,4 +1,5 @@
 import {
+  AnnotationStatus,
   BlueButtonParam,
   color,
   fontSize,
@@ -20,7 +21,6 @@ import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
 import { whoHome } from "../../../constants";
-import { AnnotationStatus } from "../../../models/who/annotation";
 import { AnnotationData } from "../../../models/who/annotationData";
 
 const AIBarSheet = styled(Sheet)`
