@@ -6,6 +6,8 @@ import {
   IStorageBackend,
   Tab,
   ErrorNotification,
+  TaskType,
+  ITask,
 } from "@visian/ui-shared";
 import {
   createFileFromBase64,
@@ -21,7 +23,7 @@ import { DICOMWebServer } from "./dicomweb-server";
 import { Editor, EditorSnapshot } from "./editor";
 import { Tracker } from "./tracking";
 import { ProgressNotification } from "./types";
-import { Task, TaskType } from "./who";
+import { Task } from "./who";
 
 export interface RootSnapshot {
   editor: EditorSnapshot;
@@ -54,7 +56,7 @@ export class RootStore implements ISerializable<RootSnapshot>, IDisposable {
   public refs: { [key: string]: React.RefObject<HTMLElement> } = {};
   public pointerDispatch?: IDispatch;
 
-  public currentTask?: Task;
+  public currentTask?: ITask;
 
   public tracker?: Tracker;
 
@@ -96,6 +98,7 @@ export class RootStore implements ISerializable<RootSnapshot>, IDisposable {
       setError: this.setError,
       getTracker: () => this.tracker,
       getColorMode: () => this.colorMode,
+      getCurrentTask: () => this.currentTask,
     });
 
     deepObserve(this.editor, this.persist, {
@@ -194,24 +197,31 @@ export class RootStore implements ISerializable<RootSnapshot>, IDisposable {
         } else {
           // Task Type is Correct or Review
           await Promise.all(
-            whoTask.annotations.map(async (annotation, index) => {
-              const title =
-                whoTask.samples[index].title ||
-                whoTask.samples[0].title ||
-                `annotation_${index}`;
+            whoTask.annotations.map(async (annotation, annotationIndex) => {
+              let baseTitle =
+                whoTask.samples[annotationIndex]?.title ||
+                whoTask.samples[0]?.title ||
+                // TODO: Translation for unnamed
+                "unnamed.nii";
+              // TODO: Handle base title without ".nii" ending
+              baseTitle = baseTitle.replace(
+                ".nii",
+                `_annotation_${annotationIndex}`,
+              );
 
               await Promise.all(
-                annotation.data.map(async (annotationData) => {
+                annotation.data.map(async (annotationData, dataIndex) => {
+                  const title = `${baseTitle}_${dataIndex}`;
                   const createdLayerId = await this.editor.activeDocument?.importFiles(
                     createFileFromBase64(
-                      title.replace(".nii", "_annotation").concat(".nii"),
+                      title.concat(".nii"),
                       annotationData.data,
                     ),
-                    title.replace(".nii", "_annotation"),
+                    title,
                     true,
                   );
                   if (createdLayerId)
-                    annotationData.correspondingLayerId = createdLayerId;
+                    annotationData.setCorrespondingLayerId(createdLayerId);
                 }),
               );
             }),

@@ -1,15 +1,6 @@
-export interface AnnotatorSnapshot {
-  annotatorUUID: string;
-  expertise: string;
-  yearsInPractice: number;
-  expectedSalary: number;
-  workCountry: string;
-  studyCountry: string;
-  selfAssessment: number;
-  degree: string;
-}
+import { AnnotatorSnapshot, IAnnotator } from "@visian/ui-shared";
 
-export class Annotator {
+export class Annotator implements IAnnotator {
   public annotatorUUID: string;
   public expertise: string;
   public yearsInPractice: number;
@@ -20,6 +11,7 @@ export class Annotator {
   public degree: string;
 
   // TODO: Properly type API response data
+  // TODO: Make observable
   constructor(annotator: any) {
     this.annotatorUUID = annotator.annotatorUUID;
     this.expertise = annotator.expertise;

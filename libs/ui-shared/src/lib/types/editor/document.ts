@@ -1,5 +1,5 @@
 import type * as THREE from "three";
-import { ITrackingData, TrackingLog } from "@visian/ui-shared";
+import { ITask, ITrackingData, TrackingLog } from "@visian/ui-shared";
 
 import type { ISliceRenderer, IVolumeRenderer } from "../rendering";
 import type { IHistory } from "./history";
@@ -73,6 +73,8 @@ export interface IDocument {
   renderer?: Reference<THREE.WebGLRenderer>;
   theme: Theme;
   performanceMode: PerformanceMode;
+
+  currentTask: ITask | undefined;
 
   /** Indicates wether the layer menu is open. */
   showLayerMenu: boolean;

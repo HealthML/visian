@@ -1,15 +1,12 @@
-export interface SampleSnapshot {
-  sampleUUID: string;
-  title: string;
-  data: string;
-}
+import { ISample, SampleSnapshot } from "@visian/ui-shared";
 
-export class Sample {
+export class Sample implements ISample {
   public sampleUUID: string;
   public title: string;
   public data: string;
 
   // TODO: Properly type API response data
+  // TODO: Make observable
   constructor(sample: any) {
     this.sampleUUID = sample.sampleUUID;
     this.title = sample.title;

@@ -1,21 +1,12 @@
-import { AnnotationData, AnnotationDataSnapshot } from "./annotationData";
-import { User, UserSnapshot } from "./user";
+import {
+  AnnotationSnapshot,
+  AnnotationStatus,
+  IAnnotation,
+} from "@visian/ui-shared";
+import { AnnotationData } from "./annotationData";
+import { User } from "./user";
 
-export enum AnnotationStatus {
-  Pending = "PENDING",
-  Completed = "COMPLETED",
-  Rejected = "REJECTED",
-}
-
-export interface AnnotationSnapshot {
-  annotationUUID: string;
-  status: AnnotationStatus;
-  annotationDataList: AnnotationDataSnapshot[];
-  annotator: UserSnapshot;
-  submittedAt: string;
-}
-
-export class Annotation {
+export class Annotation implements IAnnotation {
   public annotationUUID: string;
   public status: AnnotationStatus;
   public data: AnnotationData[];
