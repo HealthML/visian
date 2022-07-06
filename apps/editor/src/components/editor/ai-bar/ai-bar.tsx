@@ -32,8 +32,8 @@ import { AnnotationData } from "../../../models/who/annotationData";
 
 // TODO: Update to include all selectable models
 const modelOptions = [
+  { value: "MR_L-SPINE", label: "Fokale Läsionen (MR LWS)" },
   { value: "MR_SPINE", label: "Fokale Läsionen (MR)" },
-  { value: "CT_SPINE", label: "Fokale Läsionen (CT)" },
 ];
 
 const AIBarSheet = styled(Sheet)`
@@ -82,7 +82,7 @@ const TaskName = styled(Text)`
 
 const TaskSelector = styled(EnumParam)`
   margin-top: 2px;
-  width: 180px;
+  width: 220px;
 `;
 
 const ActionContainer = styled.div`
@@ -504,6 +504,7 @@ export const FloyBar = observer<{
   const dismissPrivacy = useCallback(() => {
     setShouldShowPrivacy(false);
   }, []);
+
   const runInferencing = useCallback(() => {
     if (privacyRef.current) {
       store?.setProgress({ label: "Risikoeinschätzung läuft" });
@@ -522,6 +523,7 @@ export const FloyBar = observer<{
       setShouldShowPrivacy(true);
     }
   }, [store]);
+
   const consent = useCallback(() => {
     store?.editor.activeDocument?.floyDemo
       .consent()
@@ -599,7 +601,7 @@ export const FloyBar = observer<{
                 <TaskLabel tx="KI Analyse" />
                 <TaskSelector
                   selector="drop-down"
-                  options={filteredModelOptions}
+                  options={modelOptions} // filteredModelOptions, when a filter function is needed
                   expandTo="top"
                   value={store.editor.activeDocument.floyDemo.selectedModel}
                   setValue={
@@ -655,17 +657,16 @@ export const FloyBar = observer<{
           shouldDismissOnOutsidePress
         >
           <StyledParagraph>
-            Diese Web Applikation dient ausschließlich zur Demonstration unseres
-            ersten Produkts. In der aktuellen Version werden fokale Läsionen auf
-            Basis einer malignen Neoplasie oder primären malignen Erkrankung wie
-            Plasmozytomen oder Malignen Myelomen in Lendenwirbelkörpern erkannt
-            und visualisiert.
+            Diese Web Applikation dient ausschließlich zur Demonstration unserer
+            Produkte. In der aktuellen Version werden fokale Läsionen auf Basis
+            einer malignen Neoplasie oder primären malignen Erkrankung wie
+            Plasmozytomen oder Malignen Myelomen in Wirbelkörpern erkannt und
+            visualisiert.
           </StyledParagraph>
           <StyledParagraph>
-            Das hier vorgestellte Produkt wird im April 2022 auf den Markt
-            kommen. Für alle weiteren Informationen und Ergebnisbesprechungen
-            melden Sie sich gerne direkt bei unserem Geschäftsführer Benedikt
-            Schneider via benedikt.schneider@floy.com oder +4915786031618.
+            Für alle weiteren Informationen und Ergebnisbesprechungen melden Sie
+            sich gerne direkt bei unserem Geschäftsführer Benedikt Schneider via
+            benedikt.schneider@floy.com oder +4915786031618.
           </StyledParagraph>
           {!store?.editor.activeDocument?.floyDemo.hasToken() && (
             <>

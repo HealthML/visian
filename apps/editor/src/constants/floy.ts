@@ -2,7 +2,8 @@
 export const IS_FLOY_DEMO = true;
 export const FLOY_HOME = "https://floy.com";
 export const FLOY_INFERENCE_ENDPOINTS = [
-  "https://valohai.cloud/floy/demo-floy-com/demo-floy-com/floy-vision/floy-ai",
+  "https://valohai.cloud/floy/demo-floy-com/demo-floy-com/floy-vision/floy-ai-v1",
+  "https://valohai.cloud/floy/demo-floy-com/demo-floy-com/floy-vision/floy-ai-v2",
 ];
 export const FLOY_API_ROOT =
   process.env.FLOY_API_ROOT || "https://demo-api.floy.com";

@@ -18,7 +18,7 @@ import {
 } from "../../constants";
 
 // TODO: Add all supported models
-export type FloyDemoModelKind = "MR_SPINE" | "CT_SPINE";
+export type FloyDemoModelKind = "MR_L-SPINE" | "MR_SPINE";
 
 export interface FloyDemoSnapshot {
   seriesZip?: File;
@@ -99,7 +99,7 @@ export class FloyDemoController implements ISerializable<FloyDemoSnapshot> {
   }
 
   protected setSelectableModels(
-    value: FloyDemoModelKind[] = ["MR_SPINE"],
+    value: FloyDemoModelKind[] = ["MR_L-SPINE"],
   ): void {
     this.selectableModels = value;
     if (value[0]) [this.selectedModel] = value;
@@ -241,11 +241,14 @@ export class FloyDemoController implements ISerializable<FloyDemoSnapshot> {
       // TODO: Implement model recommendation logic
       // The first model pushed will be the default selection
       if (dataSet.string("x00080060") === "MR") {
+        selectableModels.push("MR_L-SPINE");
+      }
+      if (dataSet.string("x00080060") === "MR") {
         selectableModels.push("MR_SPINE");
       }
-      if (dataSet.string("x00080060") === "CT") {
-        selectableModels.push("CT_SPINE");
-      }
+      // if (dataSet.string("x00080060") === "CT") {
+      //   selectableModels.push("CT_SPINE");
+      // }
     } catch {
       // Intentionally left blank
     }
@@ -301,17 +304,28 @@ export class FloyDemoController implements ISerializable<FloyDemoSnapshot> {
     if (!this.seriesZip) return;
     await this.log();
 
+    const FLOY_INFERENCE_ENDPOINT: any[] = [];
     const formData = new FormData();
-    // TODO: Add model kind
-    // formData.append("model", this.selectedModel);
     formData.append("seriesZIP", this.seriesZip);
-    formData.append("studyZIP", this.seriesZip);
+    // formData.append("studyZIP", this.seriesZip);
+    formData.append("model", this.selectedModel);
     formData.append("tokenStr", localStorage.getItem(FLOY_TOKEN_KEY) || "");
+
+    if (this.selectedModel === "MR_L-SPINE") {
+      FLOY_INFERENCE_ENDPOINT.push(FLOY_INFERENCE_ENDPOINTS[0]);
+    } else if (this.selectedModel === "MR_SPINE") {
+      FLOY_INFERENCE_ENDPOINT.push(FLOY_INFERENCE_ENDPOINTS[1]);
+    } else {
+      console.log("ERROR: Model not found");
+    }
+
+    console.log("selectedModel: ", this.selectedModel);
+    console.log("FLOY_INFERENCE_ENDPOINT: ", FLOY_INFERENCE_ENDPOINT[0]);
 
     // demo.floy.com
     this.setInferenceResults(
       await Promise.all(
-        FLOY_INFERENCE_ENDPOINTS.map(async (endpoint) => {
+        FLOY_INFERENCE_ENDPOINT.map(async (endpoint) => {
           const data = await (
             await fetch(endpoint, {
               method: "POST",
@@ -386,9 +400,62 @@ export class FloyDemoController implements ISerializable<FloyDemoSnapshot> {
     return response.data;
   };
 
+  // demo.floy.com (Valohai Call)
+  public runInferencingNew = async (model: string): Promise<void> => {
+    console.log("model: ", model);
+
+    if (!this.seriesZip) return;
+    await this.log();
+
+    // Generate .zip filename:
+    const zipFile = this.seriesZip;
+    const randomID = parseInt((Math.random() * 1000000000000000).toString());
+    const fileNameKey = `${randomID}.zip`;
+    const fileNameKeyReadable = `${localStorage.getItem(
+      FLOY_TOKEN_KEY,
+    )}-${randomID}-${zipFile?.name.slice(0, -4)}-series.zip`;
+
+    // Rename file to be uploaded:
+    Object.defineProperty(zipFile, "name", {
+      writable: true,
+      value: fileNameKey,
+    });
+
+    // Call Floy-API to generate signedURLs to OTC OBS:
+    const response = await this.getSignedURLs(
+      `demo.floy.com-uploads/${fileNameKey}`,
+      true,
+      true,
+    );
+    const signedUploadURL = response[0];
+    const signedDownloadURL = response[1];
+
+    // Upload file to OTC OBS (demo.floy.com-uploads):
+    await axios.request({
+      headers: { "Content-Type": "application/zip" },
+      method: "PUT",
+      url: signedUploadURL,
+      data: zipFile,
+    });
+
+    // Call Floy-API to copy just uploaded file from 'demo.floy.com-uploads' to 'raw-data/source-0_2000-00-00/'
+    await this.copyObject(
+      `demo.floy.com-uploads/${fileNameKey}`,
+      `raw-data/source-0_2000-00-00/${fileNameKeyReadable}`,
+    );
+
+    // Call Valohai API with signedDownloadURL
+    const token = localStorage.getItem(FLOY_TOKEN_KEY);
+    if (!token) throw new Error();
+    return axios.post(`${FLOY_API_ROOT}/batch/${token}/infer`, {
+      signedDownloadURL,
+      model,
+    });
+  };
+
   // demo.floy.com/upload (Valohai Call)
   public runBulkInferencing = async (
-    data: string[],
+    data: string[], // signedDownloadURLs
     email: string,
   ): Promise<void> => {
     const token = localStorage.getItem(FLOY_TOKEN_KEY);
