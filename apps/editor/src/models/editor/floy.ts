@@ -423,14 +423,14 @@ export class FloyDemoController implements ISerializable<FloyDemoSnapshot> {
 
     // Call Floy-API to generate signedURLs to OTC OBS:
     const response = await this.getSignedURLs(
-      `demo.floy.com-uploads/${fileNameKey}`,
+      `raw-data/demo-floy-com-production/${fileNameKey}`,
       true,
       true,
     );
     const signedUploadURL = response[0];
     const signedDownloadURL = response[1];
 
-    // Upload file to OTC OBS (demo.floy.com-uploads):
+    // Upload file to OTC OBS (demo-floy-com-production):
     await axios.request({
       headers: { "Content-Type": "application/zip" },
       method: "PUT",
@@ -438,10 +438,10 @@ export class FloyDemoController implements ISerializable<FloyDemoSnapshot> {
       data: zipFile,
     });
 
-    // Call Floy-API to copy just uploaded file from 'demo.floy.com-uploads' to 'raw-data/source-0_2000-00-00/'
+    // Call Floy-API to copy just uploaded file from 'demo-floy-com-production' to 'demo-floy-com'
     await this.copyObject(
-      `demo.floy.com-uploads/${fileNameKey}`,
-      `raw-data/source-0_2000-00-00/${fileNameKeyReadable}`,
+      `raw-data/demo-floy-com-production/${fileNameKey}`,
+      `raw-data/demo-floy-com/${fileNameKeyReadable}`,
     );
 
     // Call Valohai API with signedDownloadURL

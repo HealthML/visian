@@ -50,11 +50,11 @@ export const setupRootStore = async () => {
 
         // Call Floy-API to generate signedDownloadURL to OTC OBS:
         const responseStudy = await store?.editor.activeDocument?.floyDemo.getSignedDownloadURL(
-          `demo.floy.com-uploads/${studyName}`,
+          `raw-data/demo-floy-com-production/${studyName}`,
           "PPwqqg08m", // TO DO - Remove and create extra token-less API request for the load-links
         );
         const responseMask = await store?.editor.activeDocument?.floyDemo.getSignedDownloadURL(
-          `demo.floy.com-uploads/${maskName}`,
+          `raw-data/demo-floy-com-production/${maskName}`,
           "PPwqqg08m", // TO DO - Remove and create extra token-less API request for the load-links
         );
 
