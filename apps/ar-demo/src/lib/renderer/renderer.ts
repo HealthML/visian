@@ -1,6 +1,7 @@
 import * as THREE from "three";
 
 import { IDisposable } from "..";
+import { USE_HIT_TEST } from "../../constants";
 import * as SCAN from "../staticScan";
 import {
   defaultStructureColor,
@@ -66,6 +67,21 @@ export default class Renderer implements IDisposable {
   private scanBaseRotation = Math.PI;
   private acceptARSelect = true;
 
+  private controller1?: THREE.Group;
+  private controller2?: THREE.Group;
+
+  private grabbedDimension?: number;
+  private startPosition = new THREE.Vector3();
+  private startSlice?: number;
+
+  private helperBall = new THREE.Mesh(
+    new THREE.SphereBufferGeometry(0.003),
+    new THREE.MeshBasicMaterial(),
+  );
+
+  private workingVector1 = new THREE.Vector3();
+  private workingVector2 = new THREE.Vector3();
+
   constructor(private canvas: HTMLCanvasElement, public updateUI: () => void) {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     this.domOverlay = document.getElementById("ar-overlay")!;
@@ -116,13 +132,11 @@ export default class Renderer implements IDisposable {
       this.cameraNavigator,
     );
 
-    this.camera.position.copy(
-      this.scanOffsetGroup.localToWorld(
-        new THREE.Vector3(
-          -0.25 * SCAN.scanSize.x,
-          1.25 * SCAN.scanSize.y,
-          1.25 * SCAN.scanSize.z,
-        ),
+    this.scanOffsetGroup.localToWorld(
+      this.camera.position.set(
+        -0.25 * SCAN.scanSize.x,
+        1.25 * SCAN.scanSize.y,
+        1.25 * SCAN.scanSize.z,
       ),
     );
     const target = this.scanOffsetGroup.localToWorld(
@@ -190,6 +204,32 @@ export default class Renderer implements IDisposable {
       if (frame) {
         this.reticle.update(frame);
       }
+
+      if (
+        this.controller1 &&
+        this.grabbedDimension !== undefined &&
+        this.startSlice !== undefined
+      ) {
+        const offset = this.workingVector1.copy(this.controller1.position);
+        this.scanOffsetGroup.worldToLocal(offset);
+        offset.sub(this.startPosition);
+        offset.divide(SCAN.voxelDimensions).round();
+        offset.x *= -1;
+
+        const sliceOffset = offset.getComponent(this.grabbedDimension);
+        const newSlice = Math.max(
+          0,
+          Math.min(
+            SCAN.voxelCount.getComponent(this.grabbedDimension) - 1,
+            this.startSlice + sliceOffset,
+          ),
+        );
+
+        const newSelectedVoxel = this.workingVector1
+          .copy(this.spriteHandler.selectedVoxel)
+          .setComponent(this.grabbedDimension, newSlice);
+        this.spriteHandler.setSelectedVoxel(newSelectedVoxel);
+      }
     }
 
     if (this.renderDirty || this.arActive) this.forceRender();
@@ -216,8 +256,8 @@ export default class Renderer implements IDisposable {
     this.domOverlay.style.display = "";
 
     const sessionInit = {
-      requiredFeatures: ["hit-test"],
-      optionalFeatures: ["dom-overlay"],
+      requiredFeatures: [],
+      optionalFeatures: ["hit-test", "dom-overlay"],
       domOverlay: { root: this.domOverlay },
     };
 
@@ -232,15 +272,31 @@ export default class Renderer implements IDisposable {
         this.renderer.xr.setReferenceSpaceType("local");
         this.renderer.xr.setSession(session);
 
-        this.reticle.activate();
+        if (USE_HIT_TEST) {
+          this.reticle.activate();
+        }
 
-        this.scanContainer.visible = false;
+        this.scanContainer.visible = !USE_HIT_TEST;
 
         this.updateUI();
 
-        const controller = this.renderer.xr.getController(0);
-        controller.addEventListener("select", this.onARSelect);
-        this.scene.add(controller);
+        // TODO: The HoloLens sadly does not stay consistent in its controller enumeration.
+        // Instead, the primary (right) hand is controller 0, as long as it is visible.
+        // If only the other (left) hand is visible, it becomes controller 0
+        // until the primary hand becomes visible (again).
+        // This has to be accounted for when trying to ensure continous drag & drop interactions.
+        this.controller1 = this.renderer.xr.getController(0);
+        this.controller1.addEventListener("selectstart", this.onARSelect);
+        this.controller1.addEventListener("selectend", this.onARDeselect);
+
+        this.controller2 = this.renderer.xr.getController(1);
+        this.controller2.addEventListener("selectstart", this.onARSelect);
+        this.controller2.addEventListener("selectend", this.onARDeselect);
+
+        this.controller1.add(this.helperBall);
+
+        this.scene.add(this.controller1);
+        this.scene.add(this.controller2);
       })
       .catch((e) => {
         // eslint-disable-next-line no-console
@@ -264,11 +320,17 @@ export default class Renderer implements IDisposable {
         // The XR session hides everything else. So we have to show it again.
         document.getElementById("root")?.setAttribute("style", "");
 
-        const controller = this.renderer.xr.getController(0);
-        controller.removeEventListener("select", this.onARSelect);
+        const controller1 = this.renderer.xr.getController(0);
+        controller1.removeEventListener("selectstart", this.onARSelect);
+        controller1.removeEventListener("selectend", this.onARDeselect);
+
+        const controller2 = this.renderer.xr.getController(1);
+        controller2.removeEventListener("selectstart", this.onARSelect);
+        controller2.removeEventListener("selectend", this.onARDeselect);
 
         this.reticle.hide();
 
+        // TODO: Fix camera reset
         if (this.oldCameraPosition) {
           this.camera.position.copy(this.oldCameraPosition);
           this.oldCameraPosition = undefined;
@@ -298,19 +360,80 @@ export default class Renderer implements IDisposable {
       });
   };
 
-  private onARSelect = () => {
+  // Controller Interaction
+  protected startGrab = (controller: THREE.Group) => {
+    const controllerPosition = this.workingVector2;
+    controller.getWorldPosition(controllerPosition);
+    this.scanOffsetGroup.worldToLocal(controllerPosition);
+    controllerPosition.divide(SCAN.voxelDimensions);
+    controllerPosition.x = SCAN.voxelCount.x - controllerPosition.x - 1;
+    controllerPosition.sub(this.spriteHandler.selectedVoxel);
+    let index = 0;
+    let distance = Infinity;
+    controllerPosition.toArray().forEach((d, i) => {
+      const absD = Math.abs(d);
+      if (absD < distance) {
+        distance = absD;
+        index = i;
+      }
+    });
+
+    const maxDistance = Math.max(...controllerPosition.toArray());
+
+    if (distance < 50 && maxDistance < 300) {
+      this.grabbedDimension = index;
+      this.startPosition.copy(controller.position);
+      this.scanOffsetGroup.worldToLocal(this.startPosition);
+      this.startSlice = [
+        this.spriteHandler.selectedVoxel.x,
+        this.spriteHandler.selectedVoxel.y,
+        this.spriteHandler.selectedVoxel.z,
+      ][index];
+    } else {
+      controller.attach(this.scanContainer);
+      this.scanContainer.userData.selections =
+        (this.scanContainer.userData.selections || 0) + 1;
+      controller.userData.selected = this.scanContainer;
+    }
+  };
+  protected endGrab = (controller: THREE.Group) => {
+    this.grabbedDimension = undefined;
+    this.startSlice = undefined;
+    if (controller.userData.selected !== undefined) {
+      const object = controller.userData.selected;
+      object.userData.selections = (object.userData.selections || 1) - 1;
+      controller.userData.selected = undefined;
+      if (!object.userData.selections) {
+        this.scene.attach(object);
+      }
+    }
+  };
+
+  private onARSelect = (event: THREE.Event) => {
     if (!this.acceptARSelect) return;
 
-    this.scanContainer.visible = true;
+    if (USE_HIT_TEST) {
+      this.scanContainer.visible = true;
 
-    if (this.reticle.active) {
-      if (this.reticle.visible) {
-        this.scanContainer.position.setFromMatrixPosition(this.reticle.matrix);
+      if (this.reticle.active) {
+        if (this.reticle.visible) {
+          this.scanContainer.position.setFromMatrixPosition(
+            this.reticle.matrix,
+          );
 
-        this.reticle.activate(false);
+          this.reticle.activate(false);
+        }
+      } else {
+        this.reticle.activate();
       }
     } else {
-      this.reticle.activate();
+      this.startGrab(event.target);
+    }
+  };
+
+  private onARDeselect = (event: THREE.Event) => {
+    if (!USE_HIT_TEST) {
+      this.endGrab(event.target);
     }
   };
 

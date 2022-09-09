@@ -18,11 +18,11 @@ export default class SpriteHandler {
 
   private cameraOctant?: number;
 
-  public selectedVoxel: Voxel = {
-    x: Math.floor(SCAN.voxelCount.x / 2),
-    y: Math.floor(SCAN.voxelCount.y / 2),
-    z: Math.floor(SCAN.voxelCount.z / 2),
-  };
+  public selectedVoxel = new THREE.Vector3(
+    Math.floor(SCAN.voxelCount.x / 2),
+    Math.floor(SCAN.voxelCount.y / 2),
+    Math.floor(SCAN.voxelCount.z / 2),
+  );
 
   constructor(private renderer: Renderer) {
     const loader = new THREE.TextureLoader();
@@ -53,7 +53,7 @@ export default class SpriteHandler {
       contrast: { value: 1 },
       brightness: { value: 1 },
       blueTint: { value: true },
-      opacity: { value: 0.5 },
+      opacity: { value: 0.7 },
     };
 
     this.materials = viewTypes.map(
@@ -147,7 +147,7 @@ export default class SpriteHandler {
   };
 
   public setSelectedVoxel = (voxel: Voxel) => {
-    this.selectedVoxel = voxel;
+    this.selectedVoxel.set(voxel.x, voxel.y, voxel.z);
 
     this.materials.forEach((material) => {
       // eslint-disable-next-line no-param-reassign

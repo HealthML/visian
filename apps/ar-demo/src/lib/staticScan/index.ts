@@ -1,31 +1,21 @@
 import * as THREE from "three";
 
-import { Pixel, Voxel } from "../types";
 import preGeneratedGeometries from "./preGeneratedGeometries";
 
-export const voxelCount: Voxel = {
-  x: 170,
-  y: 244,
-  z: 216,
-};
+export const voxelCount = new THREE.Vector3(170, 244, 216);
 
 // in meters
-export const voxelDimensions: Voxel = {
-  x: 0.0009999985694885254,
-  y: 0.001,
-  z: 0.001,
-};
+export const voxelDimensions = new THREE.Vector3(
+  0.0009999985694885254,
+  0.001,
+  0.001,
+);
 
-export const scanSize = {
-  x: voxelCount.x * voxelDimensions.x,
-  y: voxelCount.y * voxelDimensions.y,
-  z: voxelCount.z * voxelDimensions.z,
-};
+export const scanSize = new THREE.Vector3()
+  .copy(voxelCount)
+  .multiply(voxelDimensions);
 
-export const atlasGrid: Pixel = {
-  x: 18,
-  y: 12,
-};
+export const atlasGrid = new THREE.Vector2(18, 12);
 
 export const getConnectedStructureGeometries: () => Promise<THREE.BufferGeometry>[] = () => {
   const geometryLoader = new THREE.BufferGeometryLoader();

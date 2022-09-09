@@ -109,3 +109,29 @@ jobs:
           publish_branch: main
           publish_dir: ./dist
           force_orphan: true
+
+  deploy-ar-demo:
+    runs-on: ubuntu-latest
+    needs: build
+    #if: success() && github.ref == 'refs/heads/develop'
+
+    steps:
+      - uses: actions/download-artifact@v2
+        with:
+          name: ar-demo-build
+          path: dist
+      - name: Check if build exists
+        id: check_files
+        uses: andstor/file-existence-action@v1
+        with:
+          files: "dist/index.html"
+      - name: Deploy to production
+        uses: peaceiris/actions-gh-pages@v3
+        if: steps.check_files.outputs.files_exists == 'true'
+        with:
+          cname: ar.visian.org
+          deploy_key: ${{ secrets.AR_REPO_DEPLOY_KEY }}
+          external_repository: HealthML/visian-ar
+          publish_branch: main
+          publish_dir: ./dist
+          force_orphan: true
