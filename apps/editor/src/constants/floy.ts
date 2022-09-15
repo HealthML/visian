@@ -2,7 +2,7 @@
 export const IS_FLOY_DEMO = true;
 export const FLOY_HOME = "https://floy.com";
 export const FLOY_INFERENCE_ENDPOINTS = [
-  "https://valohai.cloud/floy/demo-floy-com/demo-floy-com/floy-vision-v1/mr-l-spine",
+  "https://valohai.cloud/floy/demo-floy-com/demo-floy-com/floy-vision/floy-ai-v1",
   "https://valohai.cloud/floy/demo-floy-com/demo-floy-com/floy-vision-v2/mr-spine",
   "https://valohai.cloud/floy/demo-floy-com/demo-floy-com/floy-vision-v2/ct-spine",
 ];
