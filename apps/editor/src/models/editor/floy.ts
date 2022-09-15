@@ -188,13 +188,13 @@ export class FloyDemoController implements ISerializable<FloyDemoSnapshot> {
       if (
         // dataSet.string("x00080060") !== "MR" ||
         // dataSet.string("x00080060") !== "CT" ||
-        dataSet.string("x0008103e").toLowerCase().includes("km") ||
-        dataSet.string("x0008103e").toLowerCase().includes("flair") ||
-        dataSet.string("x0008103e").toLowerCase().includes("water") ||
-        dataSet.string("x0008103e").toLowerCase().includes("fat") ||
-        dataSet.string("x0008103e").toLowerCase().includes("inphase") ||
-        !dataSet.string("x0008103e").toLowerCase().includes("sag") ||
-        !dataSet.string("x0008103e").toLowerCase().includes("t1") ||
+        // dataSet.string("x0008103e").toLowerCase().includes("km") ||
+        // dataSet.string("x0008103e").toLowerCase().includes("flair") ||
+        // dataSet.string("x0008103e").toLowerCase().includes("water") ||
+        // dataSet.string("x0008103e").toLowerCase().includes("fat") ||
+        // dataSet.string("x0008103e").toLowerCase().includes("inphase") ||
+        // !dataSet.string("x0008103e").toLowerCase().includes("sag") ||
+        // !dataSet.string("x0008103e").toLowerCase().includes("t1") ||
         dataSet.string("x00080070").toLowerCase().includes("floy")
         // parsedDicom.string("x00180015") !== "LSPINE" ||
         // eslint-disable-next-line max-len
