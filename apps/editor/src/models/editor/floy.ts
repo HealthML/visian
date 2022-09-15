@@ -130,13 +130,6 @@ export class FloyDemoController implements ISerializable<FloyDemoSnapshot> {
         new Uint8Array(await firstFile.arrayBuffer()),
       );
       console.log(
-        "Filtered, if not MR:",
-        dataSet.string("x00080060"),
-        "(",
-        dataSet.string("x00080060") !== "MR",
-        ")",
-      );
-      console.log(
         "Filtered, if km:",
         dataSet.string("x0008103e").toLowerCase(),
         "(",
@@ -193,7 +186,8 @@ export class FloyDemoController implements ISerializable<FloyDemoSnapshot> {
         ")",
       );
       if (
-        dataSet.string("x00080060") !== "MR" ||
+        // dataSet.string("x00080060") !== "MR" ||
+        // dataSet.string("x00080060") !== "CT" ||
         dataSet.string("x0008103e").toLowerCase().includes("km") ||
         dataSet.string("x0008103e").toLowerCase().includes("flair") ||
         dataSet.string("x0008103e").toLowerCase().includes("water") ||
