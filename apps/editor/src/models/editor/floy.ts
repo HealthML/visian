@@ -315,6 +315,8 @@ export class FloyDemoController implements ISerializable<FloyDemoSnapshot> {
       FLOY_INFERENCE_ENDPOINT.push(FLOY_INFERENCE_ENDPOINTS[0]);
     } else if (this.selectedModel === "MR_SPINE") {
       FLOY_INFERENCE_ENDPOINT.push(FLOY_INFERENCE_ENDPOINTS[1]);
+    } else if (this.selectedModel === "CT_SPINE") {
+      FLOY_INFERENCE_ENDPOINT.push(FLOY_INFERENCE_ENDPOINTS[2]);
     } else {
       console.log("ERROR: Model not found");
     }

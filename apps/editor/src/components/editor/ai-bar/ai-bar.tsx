@@ -32,8 +32,9 @@ import { AnnotationData } from "../../../models/who/annotationData";
 
 // TODO: Update to include all selectable models
 const modelOptions = [
-  { value: "MR_L-SPINE", label: "Fokale Läsionen (MR LWS)" },
-  { value: "MR_SPINE", label: "Fokale Läsionen (MR) - inaktiv" },
+  { value: "MR_L-SPINE", label: "MR L-Spine" },
+  { value: "MR_SPINE", label: "MR Spine" },
+  { value: "CT_SPINE", label: "CT Spine" },
 ];
 
 const AIBarSheet = styled(Sheet)`
