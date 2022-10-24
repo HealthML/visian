@@ -433,12 +433,13 @@ export class RenderedImage extends Image implements IDisposable {
   public getVoxelData(voxel: Voxel | Vector) {
     const index = this.getDataIndex(voxel);
 
+    const textureData = this.getTextureData();
+    const isIntArray = textureData.BYTES_PER_ELEMENT === 1;
+
     return new Vector(
-      Array.from(
-        this.getTextureData().slice(index, index + this.voxelComponents),
-      ),
+      Array.from(textureData.slice(index, index + this.voxelComponents)),
       false,
-    );
+    ).divideScalar(isIntArray ? 255 : 1);
   }
 
   public toJSON() {
