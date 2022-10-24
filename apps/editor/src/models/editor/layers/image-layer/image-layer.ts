@@ -12,7 +12,6 @@ import {
   ISerializable,
   itkImageToImageSnapshot,
   ITKImageWithUnit,
-  TypedArray,
   Vector,
   ViewType,
   Voxel,
@@ -47,8 +46,8 @@ export interface ImageLayerSnapshot extends LayerSnapshot {
 export class ImageLayer
   extends Layer
   implements IImageLayer, ISerializable<ImageLayerSnapshot>, IDisposable {
-  public static fromITKImage<T2 extends TypedArray = TypedArray>(
-    image: ITKImageWithUnit<T2>,
+  public static fromITKImage(
+    image: ITKImageWithUnit,
     document: IDocument,
     snapshot?: Partial<ImageLayerSnapshot>,
     filterValue?: number,
@@ -63,8 +62,8 @@ export class ImageLayer
     );
   }
 
-  public static fromNewAnnotationForImage<T2 extends TypedArray = TypedArray>(
-    image: Image<T2>,
+  public static fromNewAnnotationForImage(
+    image: Image,
     document: IDocument,
     color?: string,
   ) {
@@ -235,10 +234,12 @@ export class ImageLayer
   public async computeVolume() {
     this.setVolume();
 
+    if (!this.isAnnotation) return;
+
     const volume = await volumeRPCProvider.rpc<GetVolumeArgs, GetVolumeReturn>(
       "getVolume",
       {
-        data: this.image.getTextureData(),
+        data: this.image.getTextureData() as Uint8Array,
         voxelCount: this.image.voxelCount.toArray(),
         voxelComponents: this.image.voxelComponents,
         voxelSpacing: this.image.voxelSpacing.toArray(),
@@ -261,10 +262,12 @@ export class ImageLayer
   public async computeArea(viewType: ViewType, slice: number) {
     this.setArea();
 
+    if (!this.isAnnotation) return;
+
     const area = await volumeRPCProvider.rpc<GetAreaArgs, GetAreaReturn>(
       "getArea",
       {
-        data: this.image.getTextureData(),
+        data: this.image.getTextureData() as Uint8Array,
         voxelCount: this.image.voxelCount.toArray(),
         voxelComponents: this.image.voxelComponents,
         voxelSpacing: this.image.voxelSpacing.toArray(),
@@ -312,7 +315,7 @@ export class ImageLayer
         GetEmptySlicesArgs,
         GetEmptySlicesReturn
       >("getEmptySlices", {
-        data: this.image.getTextureData(),
+        data: this.image.getTextureData() as Uint8Array,
         voxelCount: this.image.voxelCount.toArray(),
         voxelComponents: this.image.voxelComponents,
       });
@@ -400,6 +403,20 @@ export class ImageLayer
     FileSaver.saveAs(file, file.name);
   };
 
+  public setIsAnnotation(value?: boolean): void {
+    if (Boolean(value) !== this.isAnnotation && this.image) {
+      const imageSnapshot = this.image.toJSON();
+
+      this.image.dispose();
+
+      this.setImage(
+        new RenderedImage(imageSnapshot, this.document, Boolean(value)),
+      );
+    }
+
+    super.setIsAnnotation(value);
+  }
+
   // Serialization
   public toJSON(): ImageLayerSnapshot {
     return {
@@ -418,7 +435,13 @@ export class ImageLayer
     }
 
     super.applySnapshot(snapshot);
-    this.setImage(new RenderedImage(snapshot.image, this.document));
+    this.setImage(
+      new RenderedImage(
+        snapshot.image,
+        this.document,
+        Boolean(snapshot.isAnnotation),
+      ),
+    );
     this.setBrightness(snapshot.brightness);
     this.setContrast(snapshot.contrast);
 

@@ -85,6 +85,7 @@ export const ThresholdAnnotationModal = observer(() => {
         }
         getHistogram={getHistogram}
         setValue={setThreshold}
+        showRangeHandle
       />
       <ButtonParam
         labelTx="submit-threshold-annotation"

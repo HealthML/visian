@@ -11,6 +11,8 @@ export interface NumberRangeParameterConfig
   extends Omit<NumberParameterConfig, "defaultValue" | "value">,
     ParameterConfig<[number, number]> {
   serializationMethod?: SerializationMethod;
+
+  showRangeHandle?: boolean;
 }
 
 export class NumberRangeParameter
@@ -25,6 +27,7 @@ export class NumberRangeParameter
   public max: number;
   public stepSize?: number;
   public extendBeyondMinMax?: boolean;
+  public showRangeHandle?: boolean;
 
   public getHistogram?: () => Histogram | undefined;
 
@@ -36,6 +39,7 @@ export class NumberRangeParameter
     this.max = config.max;
     this.stepSize = config.stepSize;
     this.extendBeyondMinMax = config.extendBeyondMinMax;
+    this.showRangeHandle = config.showRangeHandle;
 
     this.getHistogram = config.getHistogram;
   }
@@ -58,6 +62,7 @@ export class NumberRangeParameter
       max: this.max,
       stepSize: this.stepSize,
       extendBeyondMinMax: this.extendBeyondMinMax,
+      showRangeHandle: this.showRangeHandle,
       getHistogram: this.getHistogram,
     };
   }

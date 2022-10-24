@@ -43,7 +43,7 @@ export class RegionGrowingMaterial extends THREE.ShaderMaterial {
 
   public setSeed(values: number[]) {
     values.forEach((value, index) => {
-      this.uniforms.uSeed.value[index] = value / 255;
+      this.uniforms.uSeed.value[index] = value;
     });
   }
 

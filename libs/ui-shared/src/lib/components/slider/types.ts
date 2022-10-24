@@ -7,7 +7,7 @@ export interface PointerCoordinates {
 
 export type RoundMethod = "floor" | "ceil" | "round";
 
-export type SerializationMethod = "none" | "block" | "push";
+export type SerializationMethod = "none" | "block" | "push" | "window";
 
 export interface SliderValueSettings {
   /**

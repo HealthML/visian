@@ -154,6 +154,8 @@ export interface INumberRangeParameter
    * Defaults to `"push"`.
    */
   serializationMethod: SerializationMethod;
+
+  showRangeHandle?: boolean;
 }
 
 /** A text parameter, typically displayed as a text field. */

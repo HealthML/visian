@@ -116,6 +116,7 @@
   "main-view-type": "Main View Type",
   "contrast": "Contrast",
   "brightness": "Brightness",
+  "window": "Window",
 
   "export": "Export",
   "export-tooltip": "Export (Ctrl + E)",

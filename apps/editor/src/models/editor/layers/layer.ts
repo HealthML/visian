@@ -93,9 +93,9 @@ export class Layer implements ILayer, ISerializable<LayerSnapshot> {
     );
   }
 
-  public setIsAnnotation = (value?: boolean): void => {
+  public setIsAnnotation(value?: boolean): void {
     this.isAnnotation = Boolean(value);
-  };
+  }
 
   public get is3DLayer(): boolean {
     return false;

@@ -65,7 +65,7 @@ export class RegionGrowingRenderer3D extends BlipRenderer3D {
 
     const seedValues = sourceImage.getVoxelData(this.seedVoxel).toArray();
     seedValues.forEach((value, index) => {
-      this.material.uniforms.uSeed.value[index] = value / 255;
+      this.material.uniforms.uSeed.value[index] = value;
     });
     this.material.uniforms.uThreshold.value = this.threshold / 255;
     this.material.uniforms.uComponents.value = sourceImage.voxelComponents;
