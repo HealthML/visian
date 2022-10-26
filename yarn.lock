@@ -7825,7 +7825,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@typescript-eslint/eslint-plugin@npm:^5.36.1":
+"@typescript-eslint/eslint-plugin@npm:^5.41.0":
   version: 5.41.0
   resolution: "@typescript-eslint/eslint-plugin@npm:5.41.0"
   dependencies:
@@ -7858,7 +7858,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@typescript-eslint/parser@npm:^5.36.1":
+"@typescript-eslint/parser@npm:^5.41.0":
   version: 5.41.0
   resolution: "@typescript-eslint/parser@npm:5.41.0"
   dependencies:
@@ -24149,8 +24149,8 @@ __metadata:
     "@types/three": 0.135.0
     "@types/tinycolor2": ^1.4.3
     "@types/uuid": ^8.3.4
-    "@typescript-eslint/eslint-plugin": ^5.36.1
-    "@typescript-eslint/parser": ^5.36.1
+    "@typescript-eslint/eslint-plugin": ^5.41.0
+    "@typescript-eslint/parser": ^5.41.0
     aws-amplify: ^4.2.9
     babel-jest: 28.1.1
     babel-loader: 8.1.0
