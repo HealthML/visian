@@ -13,6 +13,11 @@
     "build": "nx build",
     "test": "nx test",
     "e2e": "nx e2e",
+    "affected:lint": "nx affected:lint",
+    "affected:compile": "nx affected --target=compile",
+    "affected:build": "nx affected:build",
+    "affected:test": "nx affected:test",
+    "affected:e2e": "nx affected:e2e",
     "graph": "nx graph",
     "storybook": "nx run ui-shared:storybook"
   },
