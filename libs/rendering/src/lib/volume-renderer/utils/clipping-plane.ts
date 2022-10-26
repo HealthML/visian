@@ -2,6 +2,7 @@ import { IEditor } from "@visian/ui-shared";
 import { IDisposable, IDisposer } from "@visian/utils";
 import { autorun, reaction } from "mobx";
 import * as THREE from "three";
+
 import {
   ClippingPlaneMaterial,
   ClippingPlanePickingMaterial,
@@ -127,8 +128,8 @@ export class ClippingPlane extends THREE.Mesh implements IDisposable {
   }
 
   private updateDepthWrite = () => {
-    const camera = this.editor.activeDocument?.viewport3D
-      .volumeSpaceCameraPosition;
+    const camera =
+      this.editor.activeDocument?.viewport3D.volumeSpaceCameraPosition;
     if (!camera) return;
     this.workingVector.fromArray(camera);
 

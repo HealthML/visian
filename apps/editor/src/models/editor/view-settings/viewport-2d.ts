@@ -37,7 +37,8 @@ export interface Viewport2DSnapshot {
 }
 
 export class Viewport2D
-  implements IViewport2D, ISerializable<Viewport2DSnapshot> {
+  implements IViewport2D, ISerializable<Viewport2DSnapshot>
+{
   public readonly excludeFromSnapshotTracking = [
     "document",
     "hoveredScreenCoordinates",
@@ -212,9 +213,8 @@ export class Viewport2D
   };
 
   public getMaxSlice(viewType = this.mainViewType): number {
-    const sliceCount = this.document.mainImageLayer?.image?.voxelCount.getFromView(
-      viewType,
-    );
+    const sliceCount =
+      this.document.mainImageLayer?.image?.voxelCount.getFromView(viewType);
     return sliceCount ? sliceCount - 1 : 0;
   }
 
@@ -222,6 +222,7 @@ export class Viewport2D
     return this.document.viewSettings.selectedVoxel.getFromView(viewType);
   }
 
+  // eslint-disable-next-line default-param-last
   public setSelectedSlice(viewType = this.mainViewType, slice: number): void {
     this.document.viewSettings.selectedVoxel.setFromView(
       viewType,
@@ -273,9 +274,8 @@ export class Viewport2D
     const [widthAxis, heightAxis] = getPlaneAxes(this.hoveredViewType);
     const orthogonalAxis = getOrthogonalAxis(this.hoveredViewType);
 
-    dragPoint[orthogonalAxis] = this.document.viewSettings.selectedVoxel[
-      orthogonalAxis
-    ];
+    dragPoint[orthogonalAxis] =
+      this.document.viewSettings.selectedVoxel[orthogonalAxis];
     dragPoint[widthAxis] =
       this.hoveredUV.x *
       this.document.mainImageLayer.image.voxelCount[widthAxis];
@@ -289,9 +289,8 @@ export class Viewport2D
     }
 
     const scanWidth = this.document.mainImageLayer.image.voxelCount[widthAxis];
-    const scanHeight = this.document.mainImageLayer.image.voxelCount[
-      heightAxis
-    ];
+    const scanHeight =
+      this.document.mainImageLayer.image.voxelCount[heightAxis];
 
     [dragPoint.right, dragPoint.bottom] = getPositionWithinPixel(
       this.hoveredUV,

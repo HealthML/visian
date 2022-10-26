@@ -10,7 +10,8 @@ import { BlipRenderer3D } from "./blip-renderer-3d";
 
 export class ThresholdAnnotationRenderer3D
   extends BlipRenderer3D
-  implements IThresholdAnnotationRenderer3D {
+  implements IThresholdAnnotationRenderer3D
+{
   public threshold: [number, number] = [0.05, 1];
 
   constructor(document: IDocument) {

@@ -86,6 +86,7 @@ export class Vector implements GenericVector {
   protected data: number[];
 
   constructor(
+    // eslint-disable-next-line default-param-last
     sizeOrArray: number | number[] = 3,
     public readonly isObservable = true,
   ) {

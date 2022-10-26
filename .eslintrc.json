@@ -1,5 +1,14 @@
 {
   "root": true,
+  "ignorePatterns": ["**/*"],
+  "settings": {
+    "import/resolver": {
+      "typescript": {
+        "alwaysTryTypes": true,
+        "project": "tsconfig.base.json"
+      }
+    }
+  },
   "env": {
     "browser": true,
     "es2021": true
@@ -9,6 +18,7 @@
     "airbnb",
     "plugin:jest/recommended",
     "plugin:@typescript-eslint/recommended",
+    "plugin:storybook/recommended",
     "prettier"
   ],
   "parser": "@typescript-eslint/parser",
@@ -55,6 +65,7 @@
     "import/no-extraneous-dependencies": [
       "error",
       {
+        "packageDir": ".",
         "devDependencies": [
           "**/*.spec.js",
           "**/*.spec.jsx",
@@ -62,16 +73,38 @@
           "**/*.spec.tsx",
           "**/*.config.js",
           "**/*.config.ts",
-          "apps/*-e2e/**/*"
+          "**/*.stories.jsx",
+          "**/*.stories.tsx",
+          "apps/*-e2e/**/*",
+          "**/test-setup.*"
         ]
+      }
+    ],
+    "import/order": [
+      "error",
+      {
+        "groups": [["builtin", "external", "internal"]],
+        "newlines-between": "always",
+        "alphabetize": {
+          "order": "asc"
+        },
+        "warnOnUnassignedImports": false
+      }
+    ],
+    "sort-imports": [
+      "error",
+      {
+        "ignoreCase": true,
+        "ignoreDeclarationSort": true
       }
     ],
     "import/prefer-default-export": "off",
 
-    "@typescript-eslint/explicit-module-boundary-types": "off",
+    "camelcase": "off",
     "class-methods-use-this": "off",
     "consistent-return": "off",
     "default-case": "off",
+    "dot-notation": "off",
     "@typescript-eslint/explicit-member-accessibility": [
       "error",
       {
@@ -100,13 +133,13 @@
           "static-field",
           "static-method",
 
-          "instance-field",
-          "abstract-field",
+          "field",
+
+          "signature",
 
           "constructor",
 
-          "instance-method",
-          "abstract-method"
+          "method"
         ]
       }
     ],
@@ -122,7 +155,17 @@
         "selector": "variable",
         "types": ["boolean"],
         "format": ["camelCase", "PascalCase", "UPPER_CASE"],
-        "prefix": ["is", "are", "has", "should", "can", "should", "use", "show"]
+        "prefix": [
+          "is",
+          "are",
+          "has",
+          "should",
+          "can",
+          "should",
+          "use",
+          "show",
+          "was"
+        ]
       },
       {
         "selector": "typeLike",
@@ -130,7 +173,7 @@
       }
     ],
     "no-bitwise": "off",
-    "@typescript-eslint/no-explicit-any": "warn",
+    "@typescript-eslint/no-explicit-any": "off",
     "no-nested-ternary": "off",
     "no-param-reassign": ["error", { "props": false }],
     "no-plusplus": "off",
@@ -140,9 +183,9 @@
     "no-use-before-define": "off",
     "@typescript-eslint/no-use-before-define": ["error"],
     "no-useless-constructor": "off",
+    "@typescript-eslint/no-unused-vars": "off",
     "radix": "off",
     "unused-imports/no-unused-imports": "error",
-    "@typescript-eslint/no-unused-vars": "off",
     "unused-imports/no-unused-vars": [
       "warn",
       {
@@ -154,6 +197,14 @@
       }
     ],
 
+    "react/self-closing-comp": "error",
+    "react/function-component-definition": [
+      "error",
+      {
+        "namedComponents": "arrow-function",
+        "unnamedComponents": "arrow-function"
+      }
+    ],
     "react/jsx-filename-extension": [
       "warn",
       { "extensions": [".jsx", ".tsx"] }
@@ -161,16 +212,21 @@
     "react/jsx-props-no-spreading": "off",
     "react/no-array-index-key": "off",
     "react/prop-types": "off",
+    "react/react-in-jsx-scope": "off",
+    "react/static-property-placement": "off",
     "react-hooks/rules-of-hooks": "error",
-    "react-hooks/exhaustive-deps": "warn"
+    "react-hooks/exhaustive-deps": "warn",
+    "react/require-default-props": "off",
+
+    "storybook/prefer-pascal-case": "off"
   },
-  "settings": {
-    "import/resolver": {
-      "typescript": {
-        "alwaysTryTypes": true,
-        "project": "tsconfig.base.json"
-      }
+  "overrides": [
+    {
+      "files": ["*.spec.ts", "*.spec.tsx", "*.spec.js", "*.spec.jsx"],
+      "env": {
+        "jest": true
+      },
+      "rules": {}
     }
-  },
-  "ignorePatterns": ["**/*"]
+  ]
 }

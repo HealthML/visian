@@ -1,4 +1,5 @@
 import type { ViewType } from "@visian/utils";
+
 import { ViewMode } from "../editor";
 
 export type TrackingEventKind =

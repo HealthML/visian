@@ -2,12 +2,12 @@ import { IEditor, IImageLayer } from "@visian/ui-shared";
 import { IDisposer } from "@visian/utils";
 import { autorun, reaction } from "mobx";
 import * as THREE from "three";
-import { RenderedImage } from "../../rendered-image";
 
+import { RenderedImage } from "../../rendered-image";
 import {
-  composeLayeredShader,
   clippingPlaneFragmentShader,
   clippingPlaneVertexShader,
+  composeLayeredShader,
 } from "../../shaders";
 import { SharedUniforms } from "./shared-uniforms";
 

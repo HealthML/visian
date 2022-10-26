@@ -2,11 +2,12 @@ import { ToolRenderer } from "@visian/rendering";
 import { DragPoint, IDocument } from "@visian/ui-shared";
 import { getPlaneAxes } from "@visian/utils";
 import * as THREE from "three";
+
 import { UndoableTool } from "./undoable-tool";
 import { dragPointsEqual } from "./utils";
 
 export class OutlineTool<
-  N extends "outline-tool" | "outline-eraser"
+  N extends "outline-tool" | "outline-eraser",
 > extends UndoableTool<N> {
   private lastPoint?: DragPoint;
 

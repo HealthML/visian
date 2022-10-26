@@ -1,0 +1,91 @@
+{
+  "name": "ar-demo",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/ar-demo/src",
+  "projectType": "application",
+  "targets": {
+    "build": {
+      "executor": "@nrwl/webpack:webpack",
+      "outputs": ["{options.outputPath}"],
+      "defaultConfiguration": "production",
+      "options": {
+        "compiler": "babel",
+        "outputPath": "dist/apps/ar-demo",
+        "index": "apps/ar-demo/src/index.html",
+        "baseHref": "/",
+        "main": "apps/ar-demo/src/main.tsx",
+        "polyfills": "apps/ar-demo/src/polyfills.ts",
+        "tsConfig": "apps/ar-demo/tsconfig.app.json",
+        "assets": ["apps/ar-demo/src/favicon.ico", "apps/ar-demo/src/assets"],
+        "styles": [],
+        "scripts": [],
+        "webpackConfig": "webpack.config"
+      },
+      "configurations": {
+        "development": {
+          "extractLicenses": false,
+          "optimization": false,
+          "sourceMap": true,
+          "vendorChunk": true
+        },
+        "production": {
+          "fileReplacements": [
+            {
+              "replace": "apps/ar-demo/src/environments/environment.ts",
+              "with": "apps/ar-demo/src/environments/environment.prod.ts"
+            }
+          ],
+          "optimization": true,
+          "outputHashing": "all",
+          "sourceMap": false,
+          "namedChunks": false,
+          "extractLicenses": true,
+          "vendorChunk": false
+        }
+      }
+    },
+    "serve": {
+      "executor": "@nrwl/webpack:dev-server",
+      "defaultConfiguration": "development",
+      "options": {
+        "buildTarget": "ar-demo:build",
+        "hmr": true
+      },
+      "configurations": {
+        "development": {
+          "buildTarget": "ar-demo:build:development"
+        },
+        "production": {
+          "buildTarget": "ar-demo:build:production",
+          "hmr": false
+        }
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["apps/ar-demo/**/*.{ts,tsx,js,jsx}"]
+      }
+    },
+    "compile": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          {
+            "command": "yarn tsc --noEmit --pretty -p apps/ar-demo/tsconfig.app.json"
+          }
+        ]
+      }
+    },
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "jestConfig": "apps/ar-demo/jest.config.ts",
+        "passWithNoTests": true
+      }
+    }
+  },
+  "tags": []
+}

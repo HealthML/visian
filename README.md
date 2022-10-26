@@ -7,6 +7,7 @@
 1. Install [node.js](https://nodejs.org/en/) and the [yarn](https://yarnpkg.com/en/docs/install) package manager.
 2. _Optional: To run application components in a containerized environment (e.g. to test deployment or if you don't want to install local dependencies), you should also install [Docker](https://www.docker.com/)._
 3. After cloning the repository, run `yarn` in its root to install all dependencies and set up the git hooks.
+4. _Optional: Configure VSCode as described in "Editor Setup" below._
 
 _Note: See "Available Scripts" below for more information._
 
@@ -26,12 +27,13 @@ The contents of this monorepo are structured in the following way:
 - `.github/workflows/`: GitHub Actions CI workflows
 - `.storybook/`: [Storybook](https://storybook.js.org/) config
 - `.vscode/`: [VSCode](https://code.visualstudio.com/) config
+- `.yarn/`: [Yarn](https://yarnpkg.com/) config
 - `apps/`: Source of the applications in this monorepo
-  - `api/`: The VISIAN GraphQL API
   - `editor/`: The stand-alone editor (default app)
   - `*-demo/`: Various stand-alone demos for testing out new concepts
 - `dist/`: Build artifacts (excluded from version control)
 - `libs/`: Source of the libraries in this monorepo
+  - `rendering/`: WebGL rendering-related code
   - `ui-shared/`: Shared UI code (e.g., the main component library)
   - `utils/`: Shared general-purpose utilities
 
@@ -41,10 +43,10 @@ The contents of this monorepo are structured in the following way:
 
 Launches a development server that runs the specified application in development mode.
 
-After running this command, navigate to [http://localhost:4200](http://localhost:4200) to view the app in your browser.<br />
-The app will automatically reload if you change any of the source files.
-
 Omitting an app name starts the default app.
+
+After running this command, the app will be available at the URL printed in the console.<br />
+The app will automatically reload if you change any of the source files.
 
 ### `yarn format [<app-name>]`
 
@@ -74,6 +76,8 @@ Tests are automatically discovered from all `*.spec.{ts,tsx}` files.
 
 Omitting an app name tests the default app.
 
+Add the `--codeCoverage` flag to collect coverage.
+
 ### `yarn e2e [<app-name>]`
 
 Runs end-to-end tests via [Cypress](https://www.cypress.io).<br />
@@ -97,43 +101,52 @@ The `--skip-nx-cache` forces a build even if one is cached in the [Nx Cloud](htt
 
 Omitting an app name builds the default app.
 
-### `yarn dep-graph`
+### `yarn graph`
 
 Generates a diagram of the dependencies between the libraries and applications in this monorepo.
+
+## Editor Setup
+
+We recommend using [VSCode](https://code.visualstudio.com/).
+
+After opening the monorepo in VSCode, it will ask you if you want to install recommend extensions. For a seamless development experience, we recommend accepting.
 
 ## Project Setup
 
 This project was generated using [Nx](https://nx.dev).
 
-It was bootstrapped using the following commands:
+### Adding a new app/lib to your workspace
 
-```sh
-npx create-nx-workspace@latest visian
-yarn add -D husky lint-staged
+When generating a new project using `yarn nx g <generator> <project-name>`, a new folder for this project will be generated under either the `apps/` or `libs/` directory. It will contain a basic set up to get up and developing. In accordance with our development tooling, a couple of changes still have to be applied to this basic set up:
 
-yarn add -D @nrwl/nest
-npx nx g @nrwl/nest:app api
-yarn add @nestjs/graphql graphql-tools graphql apollo-server-express
-yarn add @nestjs/config nestjs-relay
-yarn add @nestjs/typeorm typeorm pg
-yarn add argon2 express-session connect-typeorm
-yarn add -D @types/express-session
+1. Add a proper `README.md`. Use the existing ones as orientation.
 
-yarn add -D @nrwl/react
-yarn nx g @nrwl/react:lib ui-shared
-yarn add -D @nrwl/storybook @nrwl/cypress cypress
-yarn nx g @nrwl/react:storybook-configuration ui-shared --configureCypress --generateStories
-yarn remove @storybook/addon-knobs
-yarn add -D @storybook/addon-essentials @storybook/addon-a11y
-yarn add i18next react-i18next i18next-browser-languagedetector i18next-http-backend moment
+2. Add the correct parser options to the `.eslintrc.json`:
+   In the overrides rule for `"files": ["*.ts", "*.tsx", "*.js", "*.jsx"],`, add:
 
-yarn nx g @nrwl/workspace:lib utils
-yarn nx g @nrwl/workspace:lib rendering
-
-yarn nx g @nrwl/react:app editor # using styled-components & react-router
+```
+"parserOptions": {
+  "project": ["<apps|libs>/<project-name>/tsconfig.*?.json"]
+},
 ```
 
-## Adding capabilities to your workspace
+3. Add the compile target to the `project.json`:
+   Between the `lint` and `test` targets, add:
+
+```
+"compile": {
+  "executor": "@nrwl/workspace:run-commands",
+  "options": {
+    "commands": [
+      {
+        "command": "yarn tsc --noEmit --pretty -p <apps|libs>/<project-name>/tsconfig.<app|lib>.json"
+      }
+    ]
+  }
+},
+```
+
+### Adding capabilities to your workspace
 
 Nx supports many plugins which add capabilities for developing different types of applications and different tools.
 
@@ -143,7 +156,7 @@ Below are our core plugins:
 
 - [React](https://reactjs.org)
   - `npm install --save-dev @nrwl/react`
-- Web (no-framework front ends)
+- Web (no framework frontends)
   - `npm install --save-dev @nrwl/web`
 - [Angular](https://angular.io)
   - `npm install --save-dev @nrwl/angular`
@@ -154,24 +167,22 @@ Below are our core plugins:
 - [Node](https://nodejs.org)
   - `npm install --save-dev @nrwl/node`
 
-There are also many [community plugins](https://nx.dev/nx-community) you could add.
+There are also many [community plugins](https://nx.dev/community) you could add.
 
-## Generate an application
+### Code scaffolding
 
-Run `nx g @nrwl/react:app my-app` to generate an application.
+Run `nx g @nrwl/react:component my-component --project=my-app` to generate a new component.
 
-> You can use any of the plugins above to generate applications as well.
-
-When using Nx, you can create multiple applications and libraries in the same workspace.
-
-## Generate a library
-
-Run `nx g @nrwl/react:lib my-lib` to generate a library.
-
-> You can also use any of the plugins above to generate libraries as well.
-
-Libraries are sharable across libraries and applications. They can be imported from `@visian/mylib`.
-
-## Further help
+### Further help
 
 Visit the [Nx Documentation](https://nx.dev) to learn more.
+
+### ☁ Nx Cloud
+
+#### Distributed Computation Caching & Distributed Task Execution
+
+Nx Cloud pairs with Nx in order to enable you to build and test code more rapidly, by up to 10 times. Even teams that are new to Nx can connect to Nx Cloud and start saving time instantly.
+
+Teams using Nx gain the advantage of building full-stack applications with their preferred framework alongside Nx’s advanced code generation and project dependency graph, plus a unified experience for both frontend and backend developers.
+
+Visit [Nx Cloud](https://nx.app/) to learn more.

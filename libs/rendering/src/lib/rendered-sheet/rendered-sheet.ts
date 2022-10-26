@@ -1,8 +1,8 @@
-import { IEditor, noise, color } from "@visian/ui-shared";
+import { color, IEditor, noise } from "@visian/ui-shared";
 import { IDisposable, IDisposer } from "@visian/utils";
+import ResizeSensor from "css-element-queries/src/ResizeSensor";
 import { autorun, reaction } from "mobx";
 import * as THREE from "three";
-import ResizeSensor from "css-element-queries/src/ResizeSensor";
 import tc from "tinycolor2";
 
 import { BlurMaterial } from "./blur-material";

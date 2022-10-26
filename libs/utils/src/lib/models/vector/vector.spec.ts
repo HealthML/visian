@@ -29,8 +29,7 @@ describe("Vector", () => {
 
   it("should add a vector", () => {
     expect(new Vector([0, 1]).add(new Vector([1, 2, 3])).toArray()).toEqual([
-      1,
-      3,
+      1, 3,
     ]);
 
     expect(new Vector(3).add(new Vector([1, 2])).toArray()).toEqual([1, 2, 0]);

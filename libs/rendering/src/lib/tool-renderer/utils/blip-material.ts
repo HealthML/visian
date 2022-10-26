@@ -2,6 +2,7 @@ import { IDocument } from "@visian/ui-shared";
 import { IDisposable, IDisposer } from "@visian/utils";
 import { reaction } from "mobx";
 import * as THREE from "three";
+
 import { Texture3DMaterial } from "../../texture-3d-renderer";
 
 export const MAX_BLIP_STEPS = 254;

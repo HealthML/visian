@@ -1,5 +1,7 @@
-import type { IconType, ButtonProps } from "@visian/ui-shared";
 import React from "react";
+
+import { ButtonProps } from "../button";
+import { IconType } from "../icon";
 import { ModalProps } from "../modal";
 
 export interface InfoTextProps

@@ -1,7 +1,7 @@
 import {
-  PointerButton,
-  InfoText,
   Toolbar as GenericToolbar,
+  InfoText,
+  PointerButton,
   useLongPress,
 } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";

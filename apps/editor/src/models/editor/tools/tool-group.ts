@@ -15,7 +15,8 @@ export interface ToolGroupConfig<N extends string>
 }
 
 export class ToolGroup<N extends string>
-  implements IToolGroup<N>, ISerializable<ToolGroupSnapshot<N>> {
+  implements IToolGroup<N>, ISerializable<ToolGroupSnapshot<N>>
+{
   public readonly excludeFromSnapshotTracking = ["document"];
 
   protected activeToolName!: N;

@@ -14,7 +14,8 @@ export interface NumberParameterConfig extends ParameterConfig<number> {
 
 export class NumberParameter
   extends Parameter<number>
-  implements INumberParameter {
+  implements INumberParameter
+{
   public static readonly kind = "number";
   public readonly kind = "number";
 

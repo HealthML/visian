@@ -1,6 +1,6 @@
 import React from "react";
 
-import { Toolbar, Tool } from "./toolbar";
+import { Tool, Toolbar } from "./toolbar";
 
 export default {
   component: Toolbar,

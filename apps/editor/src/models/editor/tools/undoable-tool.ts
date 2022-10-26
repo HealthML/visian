@@ -1,5 +1,6 @@
 import { RenderedImage, ToolRenderer } from "@visian/rendering";
 import { IDocument, IImageLayer } from "@visian/ui-shared";
+
 import { SliceCommand } from "../history";
 import { Tool, ToolConfig } from "./tool";
 

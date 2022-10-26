@@ -1,14 +1,14 @@
-import { Texture3DMaterial } from "@visian/rendering";
 import { IEditor } from "@visian/ui-shared";
 import { IDisposer } from "@visian/utils";
 import { autorun, reaction } from "mobx";
 import * as THREE from "three";
 
 import {
+  composeLayeredShader,
   laoFragmentShader,
   laoVertexShader,
-  composeLayeredShader,
 } from "../../../shaders";
+import { Texture3DMaterial } from "../../../texture-3d-renderer";
 import { SharedUniforms } from "../shared-uniforms";
 import {
   getLAODirectionTexture,

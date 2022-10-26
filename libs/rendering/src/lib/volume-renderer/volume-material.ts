@@ -13,7 +13,8 @@ import { getMaxSteps, SharedUniforms } from "./utils";
 /** A volume domain material. */
 export class VolumeMaterial
   extends THREE.ShaderMaterial
-  implements IDisposable {
+  implements IDisposable
+{
   private disposers: IDisposer[] = [];
 
   constructor(

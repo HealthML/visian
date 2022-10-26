@@ -1,8 +1,8 @@
 import type { Vector, Voxel } from "@visian/utils";
 import * as THREE from "three";
 
-import type { IImageLayer } from "./layers";
 import type { IconType } from "../../components";
+import type { IImageLayer } from "./layers";
 import type { IParameter } from "./parameters";
 import type { MergeFunction, Reference, ViewMode } from "./types";
 

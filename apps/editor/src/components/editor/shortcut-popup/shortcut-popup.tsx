@@ -1,17 +1,16 @@
 import {
-  LargePopUpGroupTitle,
-  LargePopUpGroupTitleContainer,
+  I18nData,
   Icon,
+  IconType,
   KeyIcon,
   LargePopUp,
   LargePopUpColumn,
   LargePopUpColumnContainer,
   LargePopUpGroup,
-  IconType,
+  LargePopUpGroupTitle,
+  LargePopUpGroupTitleContainer,
   useTranslation,
-  I18nData,
 } from "@visian/ui-shared";
-
 import { observer } from "mobx-react-lite";
 import React, { useMemo } from "react";
 

@@ -1,11 +1,11 @@
 import { color, PopUp, Text } from "@visian/ui-shared";
 import React from "react";
 import styled, { css, keyframes } from "styled-components";
-import { ProgressPopUpProps } from "./progress-popup.props";
 
-import { ReactComponent as VisianLogoImage } from "./visian-logo.svg";
 import { ReactComponent as HPILogoImage } from "./hpi-logo.svg";
+import { ProgressPopUpProps } from "./progress-popup.props";
 import SplashScreenImage from "./splash.png";
+import { ReactComponent as VisianLogoImage } from "./visian-logo.svg";
 
 const ProgressTitle = styled(Text)`
   font-size: 20px;

@@ -1,8 +1,8 @@
 import { IEditor } from "@visian/ui-shared";
 import * as THREE from "three";
-import { VolumeMaterial } from "../volume-material";
 
-import { TiledRenderer, RenderParams } from "./tiled-renderer";
+import { VolumeMaterial } from "../volume-material";
+import { RenderParams, TiledRenderer } from "./tiled-renderer";
 
 export class ResolutionComputer extends TiledRenderer {
   private _fullResolutionFlushed = false;

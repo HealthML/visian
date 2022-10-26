@@ -32,7 +32,8 @@ export interface EditorSnapshot {
 }
 
 export class Editor
-  implements IEditor, ISerializable<EditorSnapshot>, IDisposable {
+  implements IEditor, ISerializable<EditorSnapshot>, IDisposable
+{
   public readonly excludeFromSnapshotTracking = [
     "context",
     "sliceRenderer",
@@ -96,6 +97,7 @@ export class Editor
   }
 
   public setActiveDocument(
+    // eslint-disable-next-line default-param-last
     value = new Document(undefined, this, this.context),
     isSilent?: boolean,
   ): void {

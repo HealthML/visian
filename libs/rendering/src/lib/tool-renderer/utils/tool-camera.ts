@@ -5,7 +5,8 @@ import * as THREE from "three";
 
 export class ToolCamera
   extends THREE.OrthographicCamera
-  implements IDisposable {
+  implements IDisposable
+{
   private disposers: IDisposer[] = [];
 
   constructor(document: IDocument) {

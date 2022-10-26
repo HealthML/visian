@@ -1,7 +1,7 @@
 import React, { useCallback } from "react";
 import styled from "styled-components";
-import { InvisibleButton } from "../button";
 
+import { InvisibleButton } from "../button";
 import { Text } from "../text";
 import { SwitchOptionProps } from "./switch-option.props";
 

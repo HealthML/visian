@@ -2,7 +2,7 @@ import styled, { css } from "styled-components";
 import tc from "tinycolor2";
 
 import { isFirefox } from "../../platform-detection";
-import { color, computeStyleValue, radius, noise } from "../../theme";
+import { color, computeStyleValue, noise, radius } from "../../theme";
 import { SheetProps } from "./sheet.props";
 
 export const sheetNoise = `url(${noise}) left top repeat`;

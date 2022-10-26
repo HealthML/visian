@@ -52,9 +52,11 @@ export class Path extends THREE.Group implements IDisposable {
   private updateGeometries = () => {
     if (!this.editor.activeDocument?.mainImageLayer) return;
 
-    const path = (this.editor.activeDocument.tools.tools["measurement-tool"] as
-      | IMeasurementTool
-      | undefined)?.path;
+    const path = (
+      this.editor.activeDocument.tools.tools["measurement-tool"] as
+        | IMeasurementTool
+        | undefined
+    )?.path;
 
     if (!path || path.length < 1) {
       this.visible = false;
@@ -65,9 +67,8 @@ export class Path extends THREE.Group implements IDisposable {
 
     const sliceAxis = getOrthogonalAxis(this.viewType);
 
-    const slice = this.editor.activeDocument.viewSettings.selectedVoxel[
-      sliceAxis
-    ];
+    const slice =
+      this.editor.activeDocument.viewSettings.selectedVoxel[sliceAxis];
 
     const [widthAxis, heightAxis] = getPlaneAxes(this.viewType);
 

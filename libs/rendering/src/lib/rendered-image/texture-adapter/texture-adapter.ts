@@ -1,3 +1,4 @@
+import { MergeFunction } from "@visian/ui-shared";
 import {
   getPlaneAxes,
   IDisposable,
@@ -7,14 +8,13 @@ import {
   viewTypes,
 } from "@visian/utils";
 import * as THREE from "three";
-import { MergeFunction } from "@visian/ui-shared";
 
 import { ScreenAlignedQuad } from "../../screen-aligned-quad";
-import { SliceLine } from "./slice-line";
 import { OrientedSlice } from "../types";
+import { getTextureFormat } from "../utils";
 import { MergeMaterial, MergeMaterial3D } from "./merge-material";
 import { ReadSliceMaterial } from "./read-slice-material";
-import { getTextureFormat } from "../utils";
+import { SliceLine } from "./slice-line";
 
 export class TextureAdapter implements IDisposable {
   private mergeMaterial = new MergeMaterial();

@@ -1,6 +1,7 @@
 import { observer } from "mobx-react-lite";
 import React, { useCallback, useRef, useState } from "react";
 import styled, { useTheme } from "styled-components";
+
 import { Theme } from "../../theme";
 import { Divider, Modal, ModalHeaderButton } from "../modal";
 import { Text } from "../text";

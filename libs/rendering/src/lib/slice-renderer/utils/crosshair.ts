@@ -66,8 +66,9 @@ export class Crosshair extends THREE.Group implements IDisposable {
       return;
     }
 
-    const { voxelCount } = (this.editor.activeDocument
-      .activeLayer as IImageLayer).image;
+    const { voxelCount } = (
+      this.editor.activeDocument.activeLayer as IImageLayer
+    ).image;
 
     const x =
       1 -

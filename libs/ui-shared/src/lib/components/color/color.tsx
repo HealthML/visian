@@ -1,6 +1,6 @@
-import { color, Theme } from "@visian/ui-shared";
 import styled, { css } from "styled-components";
 
+import { color, Theme } from "../../theme";
 import { ColorProps } from "./color.props";
 
 export const Color = styled.div<ColorProps>`

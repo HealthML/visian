@@ -33,6 +33,8 @@ const MainViewContainer = styled.div<{
       case undefined:
         return "auto";
 
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
       case "smart-brush-3d":
         if (props.isIn3DView) return "crosshair";
       // eslint-disable-next-line no-fallthrough

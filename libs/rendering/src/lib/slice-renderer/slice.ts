@@ -1,10 +1,10 @@
-import { SliceRenderer } from "@visian/rendering";
 import { IEditor, IImageLayer } from "@visian/ui-shared";
 import { IDisposable, IDisposer, ViewType } from "@visian/utils";
 import { autorun, reaction } from "mobx";
 import * as THREE from "three";
 
 import { SliceMaterial } from "./slice-material";
+import { SliceRenderer } from "./slice-renderer";
 import {
   BrushCursor,
   Crosshair,
@@ -15,12 +15,12 @@ import {
   Outline,
   OverlayLineMaterial,
   OverlayPointsMaterial,
+  OverlayRoundedPointsMaterial,
+  Path,
   PreviewBrushCursor,
   sliceMeshZ,
   synchCrosshairs,
   toolOverlayZ,
-  Path,
-  OverlayRoundedPointsMaterial,
 } from "./utils";
 
 export class Slice extends THREE.Group implements IDisposable {
@@ -196,8 +196,9 @@ export class Slice extends THREE.Group implements IDisposable {
       return;
     }
 
-    const oldMainViewSlice = (this.editor
-      .sliceRenderer as SliceRenderer).slices.find((slice) => slice.isMainView);
+    const oldMainViewSlice = (
+      this.editor.sliceRenderer as SliceRenderer
+    ).slices.find((slice) => slice.isMainView);
     if (!oldMainViewSlice) return;
 
     synchCrosshairs(

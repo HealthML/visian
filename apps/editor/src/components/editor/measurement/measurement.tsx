@@ -1,12 +1,12 @@
-import React, { useCallback } from "react";
 import {
   FlexRow,
+  i18n,
   InfoText,
   InvisibleButton,
   Text,
-  i18n,
 } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
+import React, { useCallback } from "react";
 import styled from "styled-components";
 
 import { MeasurementProps } from "./measurement.props";
@@ -37,50 +37,54 @@ const CopyButton = styled(InvisibleButton).attrs(() => ({
   width: 24px;
 `;
 
-export const Measurement: React.FC<MeasurementProps> = observer<MeasurementProps>(
-  ({
-    value,
-    measurementType,
-    unit,
-    infoBaseZIndex,
-    prefix,
-    prefixTx,
-    textSize = "large",
-  }) => {
-    const copyValue = useCallback(() => {
-      if (value === undefined || value === null) return;
+export const Measurement: React.FC<MeasurementProps> =
+  observer<MeasurementProps>(
+    ({
+      value,
+      measurementType,
+      unit,
+      infoBaseZIndex,
+      prefix,
+      prefixTx,
+      textSize = "large",
+    }) => {
+      const copyValue = useCallback(() => {
+        if (value === undefined || value === null) return;
 
-      if (navigator.clipboard) {
-        return navigator.clipboard.writeText(value.toFixed(2));
-      }
-    }, [value]);
+        if (navigator.clipboard) {
+          return navigator.clipboard.writeText(value.toFixed(2));
+        }
+      }, [value]);
 
-    return (
-      <MeasurementRow>
-        <SpacedRow>
-          <StyledText
-            textSize={textSize}
-            text={`${
-              prefixTx ? `${i18n.t(prefixTx)}: ` : prefix ? `${prefix}: ` : ""
-            }${value.toFixed(2)}`}
-          />
-          {unit && (
-            <StyledText textSize={textSize} tx={`${measurementType}-${unit}`} />
-          )}
-        </SpacedRow>
-        <SpacedRow>
-          <CopyButton
-            icon="copyClipboard"
-            onPointerDown={copyValue}
-            tooltipTx="copy"
-          />
-          <StyledInfoText
-            titleTx="unit"
-            infoTx="info-unit"
-            baseZIndex={infoBaseZIndex}
-          />
-        </SpacedRow>
-      </MeasurementRow>
-    );
-  },
-);
+      return (
+        <MeasurementRow>
+          <SpacedRow>
+            <StyledText
+              textSize={textSize}
+              text={`${
+                prefixTx ? `${i18n.t(prefixTx)}: ` : prefix ? `${prefix}: ` : ""
+              }${value.toFixed(2)}`}
+            />
+            {unit && (
+              <StyledText
+                textSize={textSize}
+                tx={`${measurementType}-${unit}`}
+              />
+            )}
+          </SpacedRow>
+          <SpacedRow>
+            <CopyButton
+              icon="copyClipboard"
+              onPointerDown={copyValue}
+              tooltipTx="copy"
+            />
+            <StyledInfoText
+              titleTx="unit"
+              infoTx="info-unit"
+              baseZIndex={infoBaseZIndex}
+            />
+          </SpacedRow>
+        </MeasurementRow>
+      );
+    },
+  );

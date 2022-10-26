@@ -15,18 +15,20 @@ import { useStore } from "../../../app/root-store";
 import { whoHome } from "../../../constants";
 import {
   DilateErodeModal,
+  MeasurementModal,
   SmartBrush3DModal,
   ThresholdAnnotationModal,
-  MeasurementModal,
 } from "../action-modal";
 import { AIBar } from "../ai-bar";
 import { AxesAndVoxel } from "../axes-and-voxel";
 import { DropSheet } from "../drop-sheet";
 import { ImportPopUp } from "../import-popup";
 import { Layers } from "../layers";
+import { MeasurementPopUp } from "../measurement-popup";
 import { Menu } from "../menu";
 import { ProgressPopUp } from "../progress-popup";
 import { ServerPopUp } from "../server-popup";
+import { SettingsPopUp } from "../settings-popup";
 import { ShortcutPopUp } from "../shortcut-popup";
 import { SideViews } from "../side-views";
 import { SliceSlider } from "../slice-slider";
@@ -35,8 +37,6 @@ import { TopConsole } from "../top-console";
 import { UndoRedoButtons } from "../undo-redo-buttons";
 import { ViewSettings } from "../view-settings";
 import { UIOverlayProps } from "./ui-overlay.props";
-import { SettingsPopUp } from "../settings-popup";
-import { MeasurementPopUp } from "../measurement-popup";
 
 const Container = styled(AbsoluteCover)`
   align-items: stretch;

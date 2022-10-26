@@ -13,7 +13,8 @@ export interface EnumParameterConfig<T> extends ParameterConfig<T> {
 
 export class EnumParameter<T>
   extends Parameter<T>
-  implements IEnumParameter<T> {
+  implements IEnumParameter<T>
+{
   public static readonly kind = "enum";
   public readonly kind = "enum";
 

@@ -1,5 +1,5 @@
-import { TransformGesture } from "./transform-gesture";
 import { TransformData } from "./transform-data";
+import { TransformGesture } from "./transform-gesture";
 
 describe("TransformGesture", () => {
   it("should create a new gesture", () => {

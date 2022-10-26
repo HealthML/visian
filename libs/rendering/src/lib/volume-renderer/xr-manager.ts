@@ -31,8 +31,8 @@ export class XRManager implements IXRManager {
     const session = this.renderer.renderer.xr.getSession();
     if (!session) return;
 
-    const transferFunction = this.editor.activeDocument?.viewport3D
-      .activeTransferFunction;
+    const transferFunction =
+      this.editor.activeDocument?.viewport3D.activeTransferFunction;
     session.inputSources.forEach((source, index) => {
       const controller = this.renderer.renderer.xr.getController(index);
 
@@ -63,10 +63,9 @@ export class XRManager implements IXRManager {
               this.editor.activeDocument?.tools.thresholdAnnotationRenderer3D
                 .holdsPreview
             ) {
-              const [
-                low,
-                high,
-              ] = this.editor.activeDocument?.tools.thresholdAnnotationRenderer3D.threshold;
+              const [low, high] =
+                this.editor.activeDocument?.tools.thresholdAnnotationRenderer3D
+                  .threshold || [];
               this.editor.activeDocument?.tools.thresholdAnnotationRenderer3D.setThreshold(
                 [
                   Math.min(
@@ -127,10 +126,9 @@ export class XRManager implements IXRManager {
               this.editor.activeDocument?.tools.thresholdAnnotationRenderer3D
                 .holdsPreview
             ) {
-              const [
-                low,
-                high,
-              ] = this.editor.activeDocument?.tools.thresholdAnnotationRenderer3D.threshold;
+              const [low, high] =
+                this.editor.activeDocument?.tools.thresholdAnnotationRenderer3D
+                  .threshold || [];
               this.editor.activeDocument?.tools.thresholdAnnotationRenderer3D.setThreshold(
                 [
                   low,
@@ -150,8 +148,8 @@ export class XRManager implements IXRManager {
             ) {
               if (!controller.userData.isRightStickPressed) {
                 const steps =
-                  this.editor.activeDocument?.tools.dilateErodeRenderer3D
-                    .maxSteps *
+                  (this.editor.activeDocument?.tools.dilateErodeRenderer3D
+                    .maxSteps || 1) *
                     (this.editor.activeDocument?.tools.dilateErodeRenderer3D
                       .shouldErode
                       ? -1
@@ -215,9 +213,11 @@ export class XRManager implements IXRManager {
               this.editor.activeDocument?.tools.thresholdAnnotationRenderer3D
                 .holdsPreview
             ) {
-              (this.editor.activeDocument?.tools.tools[
-                "threshold-annotation"
-              ] as IPreviewedTool<string>).submit();
+              (
+                this.editor.activeDocument?.tools.tools[
+                  "threshold-annotation"
+                ] as IPreviewedTool<string>
+              ).submit();
             } else {
               this.editor.activeDocument?.tools.setActiveTool(
                 "threshold-annotation",
@@ -234,9 +234,11 @@ export class XRManager implements IXRManager {
               this.editor.activeDocument?.tools.dilateErodeRenderer3D
                 .holdsPreview
             ) {
-              (this.editor.activeDocument?.tools.tools[
-                "dilate-erode"
-              ] as IPreviewedTool<string>).submit();
+              (
+                this.editor.activeDocument?.tools.tools[
+                  "dilate-erode"
+                ] as IPreviewedTool<string>
+              ).submit();
             } else {
               this.editor.activeDocument?.tools.setActiveTool("dilate-erode");
             }

@@ -2,6 +2,7 @@ import { IEditor } from "@visian/ui-shared";
 import { IDisposable, IDisposer, ViewType } from "@visian/utils";
 import { autorun } from "mobx";
 import * as THREE from "three";
+
 import { HeatMapMaterial } from "./heat-map-material";
 
 export class HeatMap extends THREE.Mesh implements IDisposable {

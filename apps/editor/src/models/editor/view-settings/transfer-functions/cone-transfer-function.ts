@@ -15,9 +15,8 @@ export interface ConeTransferFunctionSnapshot
 
 export class ConeTransferFunction
   extends TransferFunction<"fc-cone">
-  implements
-    IConeTransferFunction,
-    ISerializable<ConeTransferFunctionSnapshot> {
+  implements IConeTransferFunction, ISerializable<ConeTransferFunctionSnapshot>
+{
   public coneDirection = new Vector([1, 0, 0]);
 
   constructor(document: IDocument) {

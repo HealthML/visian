@@ -8,8 +8,8 @@ import {
 import { ISerializable, ViewType } from "@visian/utils";
 import { action, computed, makeObservable, observable } from "mobx";
 import { Matrix4 } from "three";
-import { v4 as uuidv4 } from "uuid";
 import tc from "tinycolor2";
+import { v4 as uuidv4 } from "uuid";
 
 import {
   defaultAnnotationColor,

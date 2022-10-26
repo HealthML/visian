@@ -58,9 +58,9 @@ export class Task {
       taskUUID: this.taskUUID,
       kind: this.kind,
       readOnly: this.readOnly,
-      annotationTasks: Object.values(
-        this.annotationTasks,
-      ).map((annotationTask) => annotationTask.toJSON()),
+      annotationTasks: Object.values(this.annotationTasks).map(
+        (annotationTask) => annotationTask.toJSON(),
+      ),
       annotations: Object.values(this.annotations).map((annotation) =>
         annotation.toJSON(),
       ),

@@ -1,5 +1,5 @@
-import type React from "react";
 import type { ColorMode, ErrorNotification, Theme } from "@visian/ui-shared";
+import type React from "react";
 
 import type { Tracker } from "./tracking";
 

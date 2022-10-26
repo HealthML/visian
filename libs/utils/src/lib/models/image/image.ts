@@ -1,4 +1,3 @@
-import { Voxel } from "@visian/utils";
 import { action, computed, makeObservable, observable } from "mobx";
 import type { Unit } from "nifti-js";
 
@@ -11,6 +10,8 @@ import {
   TypedArray,
   VoxelTypes,
 } from "../../io";
+import { Voxel } from "../../types";
+import type { ISerializable } from "../types";
 import { Vector } from "../vector";
 import {
   getPlaneAxes,
@@ -24,8 +25,6 @@ import {
   unifyOrientation,
 } from "./conversion";
 import { findVoxelInSlice, setSlice } from "./iteration";
-
-import type { ISerializable } from "../types";
 
 export interface ImageSnapshot {
   name?: string;

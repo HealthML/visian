@@ -1,4 +1,4 @@
-import { isPromise, handleMaybePromise } from "./utils";
+import { handleMaybePromise, isPromise } from "./utils";
 
 describe("isPromise", () => {
   it("should return true for a Promise", () => {

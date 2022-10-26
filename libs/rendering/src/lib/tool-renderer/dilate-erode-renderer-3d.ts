@@ -12,7 +12,8 @@ import { BlipRenderer3D } from "./blip-renderer-3d";
 
 export class DilateErodeRenderer3D
   extends BlipRenderer3D
-  implements IDilateErodeRenderer3D {
+  implements IDilateErodeRenderer3D
+{
   public shouldErode = false;
   public targetLayer?: IImageLayer;
   public shouldAutoCompensate = true;

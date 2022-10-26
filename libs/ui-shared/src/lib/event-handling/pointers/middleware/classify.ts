@@ -37,12 +37,12 @@ export { defaultEventMap as eventMap };
  *
  * @param eventMap An object mapping from `event.type` to `[deviceName, eventClass]`
  */
-export const classify = <ID = string>(
-  eventMap: ClassifyEventMap = defaultEventMap,
-) => (data: PointerEventData<ID>) => {
-  const type = eventMap[data.event.type as keyof EventMap];
+export const classify =
+  <ID = string>(eventMap: ClassifyEventMap = defaultEventMap) =>
+  (data: PointerEventData<ID>) => {
+    const type = eventMap[data.event.type as keyof EventMap];
 
-  if (type) {
-    [data.eventOrigin, data.eventType] = type;
-  }
-};
+    if (type) {
+      [data.eventOrigin, data.eventType] = type;
+    }
+  };

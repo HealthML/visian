@@ -1,10 +1,11 @@
 import { ToolRenderer } from "@visian/rendering";
 import { IDocument, IImageLayer, ITool } from "@visian/ui-shared";
+
 import { SliceCommand } from "../history";
 import { SelfDeactivatingTool } from "./self-deactivating-tool";
 
 export class ClearSliceTool<
-  N extends "clear-slice"
+  N extends "clear-slice",
 > extends SelfDeactivatingTool<N> {
   public readonly excludeFromSnapshotTracking = ["toolRenderer", "document"];
 

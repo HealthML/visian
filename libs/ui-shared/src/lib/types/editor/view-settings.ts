@@ -6,11 +6,11 @@ import type {
   VoxelInfoMode,
 } from "@visian/utils";
 import type { Matrix4 } from "three";
-import { IParameter } from "./parameters";
-import { MarkerConfig } from "./markers";
 
-import type { Reference, ViewMode } from "./types";
+import { MarkerConfig } from "./markers";
+import { IParameter } from "./parameters";
 import { DragPoint } from "./tools";
+import type { Reference, ViewMode } from "./types";
 
 /** View settings affecting the whole document. */
 export interface IViewSettings {

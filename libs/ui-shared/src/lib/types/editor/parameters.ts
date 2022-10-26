@@ -1,4 +1,5 @@
 import type React from "react";
+
 import { Histogram } from ".";
 import type { SerializationMethod, TooltipPosition } from "../../components";
 import { ILayer } from "./layers";

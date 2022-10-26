@@ -1,4 +1,5 @@
 import type React from "react";
+
 import { Histogram, MarkerConfig } from "../../types";
 import type {
   SerializationMethod,

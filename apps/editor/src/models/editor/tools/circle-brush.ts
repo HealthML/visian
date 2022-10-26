@@ -1,6 +1,7 @@
 import { ToolRenderer } from "@visian/rendering";
 import { DragPoint, IDocument } from "@visian/ui-shared";
 import { calculateLine, getOrthogonalAxis, getPlaneAxes } from "@visian/utils";
+
 import { ToolConfig } from "./tool";
 import { UndoableTool } from "./undoable-tool";
 import { dragPointsEqual } from "./utils";
@@ -12,7 +13,7 @@ export class CircleBrush<
     | "smart-brush"
     | "smart-eraser"
     | "bounded-smart-brush"
-    | "bounded-smart-eraser"
+    | "bounded-smart-eraser",
 > extends UndoableTool<N> {
   public readonly excludeFromSnapshotTracking = ["toolRenderer", "document"];
 

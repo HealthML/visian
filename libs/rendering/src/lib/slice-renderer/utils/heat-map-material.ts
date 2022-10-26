@@ -1,13 +1,15 @@
-import { heatMapFragmentShader, heatMapVertexShader } from "@visian/rendering";
 import { IEditor } from "@visian/ui-shared";
 import { IDisposable, IDisposer, ViewType } from "@visian/utils";
 import { autorun } from "mobx";
 import * as THREE from "three";
+
+import { heatMapFragmentShader, heatMapVertexShader } from "../../shaders";
 import colorScheme from "./heat-map-color-scheme.png";
 
 export class HeatMapMaterial
   extends THREE.ShaderMaterial
-  implements IDisposable {
+  implements IDisposable
+{
   private disposers: IDisposer[] = [];
 
   constructor(editor: IEditor, viewType: ViewType) {
@@ -55,7 +57,8 @@ export class HeatMapMaterial
         editor.sliceRenderer?.lazyRender();
       }),
       autorun(() => {
-        this.uniforms.uActiveSlices.value = editor.activeDocument?.viewSettings.selectedVoxel.toArray();
+        this.uniforms.uActiveSlices.value =
+          editor.activeDocument?.viewSettings.selectedVoxel.toArray();
         editor.sliceRenderer?.lazyRender();
       }),
       autorun(() => {
@@ -64,7 +67,8 @@ export class HeatMapMaterial
         editor.sliceRenderer?.lazyRender();
       }),
       autorun(() => {
-        this.uniforms.uVoxelCount.value = editor.activeDocument?.trackingData?.resolution.toArray();
+        this.uniforms.uVoxelCount.value =
+          editor.activeDocument?.trackingData?.resolution.toArray();
         editor.sliceRenderer?.lazyRender();
       }),
     );
