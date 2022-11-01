@@ -287,7 +287,7 @@ export const UIOverlay = observer<UIOverlayProps>(
                         return response.blob();
                       })
                       .then(function (blob) {
-                        saveAs(blob, "testResponse.nii.gz");
+                        saveAs(blob, "Test_" + fileName);
                       })
                       .catch((error) => {
                         //whatever
