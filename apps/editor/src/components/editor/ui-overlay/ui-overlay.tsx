@@ -287,10 +287,17 @@ export const UIOverlay = observer<UIOverlayProps>(
                         return response.blob();
                       })
                       .then(function (blob) {
-                        saveAs(blob, "Test_" + fileName);
+                        //saveAs(blob, "Test_" + fileName);
+                        var file = new File([blob], "Annotation_" + fileName);
+                        console.log(file);
+                        store?.editor.activeDocument?.importFiles(
+                          file,
+                          "Annotation_" + fileName,
+                          false,
+                        );
                       })
                       .catch((error) => {
-                        //whatever
+                        console.log("ERROR");
                       });
                   }}
                   isActive={false}
