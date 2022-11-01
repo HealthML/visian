@@ -6,7 +6,7 @@ import {
   Spacer,
   Text,
 } from "@visian/ui-shared";
-import { isFromWHO } from "@visian/utils";
+import { Image, isFromWHO } from "@visian/utils";
 import { observer } from "mobx-react-lite";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import styled from "styled-components";
@@ -37,6 +37,7 @@ import { ViewSettings } from "../view-settings";
 import { UIOverlayProps } from "./ui-overlay.props";
 import { SettingsPopUp } from "../settings-popup";
 import { MeasurementPopUp } from "../measurement-popup";
+import { Unit } from "nifti-js";
 
 const Container = styled(AbsoluteCover)`
   align-items: stretch;
@@ -229,6 +230,71 @@ export const UIOverlay = observer<UIOverlayProps>(
                     onPointerDown={openImportPopUp}
                   />
                 )}
+                <FloatingUIButton
+                  icon="whoAI"
+                  tooltipTx="export-tooltip"
+                  tooltipPosition="left"
+                  onPointerDown={() => {
+                    //let image: RenderedImage = store.editor.activeDocument?.activeLayer.image;
+                    let scan =
+                      store?.editor.activeDocument?.mainImageLayer?.image;
+                    let image = new Image({
+                      name: "scanTest",
+                      dimensionality: scan.dimensionality,
+                      voxelCount: scan.voxelCount.toArray(),
+                      voxelSpacing: scan.voxelSpacing.toArray(),
+
+                      origin: scan.origin.toArray(),
+                      orientation: scan.orientation,
+                      unit: scan.unit,
+                    });
+
+                    let image_data: Uint8Array = new Uint8Array(
+                      scan.getData().length,
+                    );
+                    for (let i = 0; i < scan.getData().length; i++) {
+                      image_data[i] = scan?.getData()[i] < 0.4 ? 0.0 : 1.0;
+                    }
+                    image.setData(image_data);
+
+                    image = image.toITKImage();
+                    let unit: Unit = "mm";
+                    const imageWithUnit2 = { unit, ...image };
+                    store?.editor.activeDocument?.importAnnotation(
+                      imageWithUnit2,
+                    );
+                  }}
+                  isActive={false}
+                />
+                <FloatingUIButton
+                  icon="export"
+                  tooltipTx="export-tooltip"
+                  tooltipPosition="left"
+                  onPointerDown={async function () {
+                    let scanAsFile = await store?.editor.activeDocument?.mainImageLayer?.toFile();
+                    let fileName = scanAsFile.name;
+
+                    console.log("Scan:", scanAsFile);
+
+                    var data = new FormData();
+                    data.append("file", scanAsFile);
+
+                    fetch("http://localhost:5000/predict", {
+                      method: "POST",
+                      body: data,
+                    })
+                      .then(function (response) {
+                        return response.blob();
+                      })
+                      .then(function (blob) {
+                        saveAs(blob, "testResponse.nii.gz");
+                      })
+                      .catch((error) => {
+                        //whatever
+                      });
+                  }}
+                  isActive={false}
+                />
                 <UndoRedoButtons />
               </MenuRow>
               <Menu
