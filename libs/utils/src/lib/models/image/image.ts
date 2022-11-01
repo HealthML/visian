@@ -302,10 +302,12 @@ export class Image implements ISerializable<ImageSnapshot> {
             Math.round((Math.max(0, value) / maxValue) * 255),
           ),
         );
+        this.voxelComponentType = IntTypes.UInt8;
       } else {
         this.data = new Float32Array(data).map(
           (value: number) => Math.max(0, value) / maxValue,
         );
+        this.voxelComponentType = FloatTypes.Float32;
       }
     } else {
       if (data.length !== this.data.length) {
