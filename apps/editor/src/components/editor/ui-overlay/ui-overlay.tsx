@@ -287,29 +287,15 @@ export const UIOverlay = observer<UIOverlayProps>(
                         return response.blob();
                       })
                       .then(function (blob) {
-                        saveAs(blob, "Test_" + fileName);
+                        //saveAs(blob, "Test_" + fileName);
                         let file = new File([blob], "Annotation_" + fileName, {
                           type: blob.type,
                           lastModified: Date.now(),
                         });
-                        console.log(file);
-                        console.log(file);
-                        console.log(blob);
-
-                        /* hotfixed data download
-                        var url = window.URL || window.webkitURL;
-                        let link = url.createObjectURL(blob);
-                        var a = document.createElement("a");
-                        a.setAttribute("download", fileName);
-                        a.setAttribute("href", link);
-                        document.body.appendChild(a);
-                        a.click();
-                        document.body.removeChild(a);*/
-                        //FileSaver.saveAs(blob, "Annotation_" + fileName);
                         store?.editor.activeDocument?.importFiles(
                           file,
                           "Annotation_" + fileName,
-                          false,
+                          true,
                         );
                       })
                       .catch((error) => {
