@@ -172,6 +172,10 @@ export const FloatingUIButton = styled(SquareButton)`
   margin-bottom: 16px;
 `;
 
+export const LoadableUIButton = styled(FloatingUIButton)`
+  background-color: ${(props) => (props.isActive ? "grey" : "")};
+`;
+
 export const CircularButton = styled(SquareButton)`
   border-radius: 50%;
 `;

@@ -2,6 +2,7 @@ import {
   AbsoluteCover,
   FlexRow,
   FloatingUIButton,
+  LoadableUIButton,
   Notification,
   Spacer,
   Text,
@@ -194,6 +195,9 @@ export const UIOverlay = observer<UIOverlayProps>(
         });
     }, [store]);
 
+    //Preannotation Button
+    const [isPreAnnotationLoading, setPreAnnotationLoading] = useState(false);
+
     return (
       <Container
         {...rest}
@@ -266,11 +270,16 @@ export const UIOverlay = observer<UIOverlayProps>(
                   }}
                   isActive={false}
                 />
-                <FloatingUIButton
+                <LoadableUIButton
                   icon="export"
                   tooltipTx="export-tooltip"
                   tooltipPosition="left"
                   onPointerDown={async function () {
+                    if (isPreAnnotationLoading) {
+                      return;
+                    }
+
+                    setPreAnnotationLoading(true);
                     let scanAsFile = await store?.editor.activeDocument?.mainImageLayer?.toFile();
                     let fileName = scanAsFile.name;
 
@@ -297,12 +306,14 @@ export const UIOverlay = observer<UIOverlayProps>(
                           "Annotation_" + fileName,
                           true,
                         );
+                        setPreAnnotationLoading(false);
                       })
                       .catch((error) => {
                         console.log("ERROR");
-                      });
+                      })
+                      .finally(() => setPreAnnotationLoading(false));
                   }}
-                  isActive={false}
+                  isActive={isPreAnnotationLoading}
                 />
                 <UndoRedoButtons />
               </MenuRow>
