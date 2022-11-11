@@ -7,6 +7,7 @@ import {
 } from "@visian/ui-shared";
 import { getPlaneAxes, IDisposable, Vector } from "@visian/utils";
 import * as THREE from "three";
+
 import { SliceCommand } from "../history";
 
 export class Clipboard implements IClipboard, IDisposable {
@@ -36,12 +37,9 @@ export class Clipboard implements IClipboard, IDisposable {
     const viewType = this.document.viewport2D.mainViewType;
     const sliceNumber = this.document.viewport2D.getSelectedSlice();
 
-    ((this.document.activeLayer as IImageLayer)
-      .image as RenderedImage).readSliceToTarget(
-      sliceNumber,
-      viewType,
-      this.renderTarget,
-    );
+    (
+      (this.document.activeLayer as IImageLayer).image as RenderedImage
+    ).readSliceToTarget(sliceNumber, viewType, this.renderTarget);
 
     this.hasCopiedSlice = true;
   }

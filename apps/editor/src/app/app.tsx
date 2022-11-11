@@ -11,7 +11,7 @@ import Amplify from "aws-amplify";
 import { observer } from "mobx-react-lite";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { QueryClient, QueryClientProvider } from "react-query";
-import { Route, Switch } from "react-router-dom";
+import { Route, Routes } from "react-router-dom";
 
 import {
   whoAwsConfigDeployment,
@@ -19,10 +19,9 @@ import {
   whoRequiresAuthentication,
 } from "../constants";
 import { setUpEventHandling } from "../event-handling";
+import type { RootStore } from "../models";
 import { EditorScreen } from "../screens";
 import { setupRootStore, StoreProvider } from "./root-store";
-
-import type { RootStore } from "../models";
 
 if (isFromWHO()) {
   if (isUsingLocalhost()) {
@@ -34,12 +33,15 @@ if (isFromWHO()) {
 
 const queryClient = new QueryClient();
 
-const withWhoAuthenticator = (wrappedComponent: React.ComponentType) =>
+const withWhoAuthenticator = (
+  wrappedComponent: React.ComponentType,
+): React.ComponentType =>
   isFromWHO() && whoRequiresAuthentication
     ? withAuthenticator(wrappedComponent)
     : wrappedComponent;
 
-function App() {
+// eslint-disable-next-line react/function-component-definition
+function App(): JSX.Element {
   // TODO: Push loading down to components that need i18n
   const [isReady, setIsReady] = useState(false);
   const rootStoreRef = useRef<RootStore | null>(null);
@@ -73,11 +75,9 @@ function App() {
           {isReady && (
             <React.StrictMode>
               <ModalRoot />
-              <Switch>
-                <Route path="/">
-                  <EditorScreen />
-                </Route>
-              </Switch>
+              <Routes>
+                <Route path="/" element={<EditorScreen />} />
+              </Routes>
             </React.StrictMode>
           )}
         </StoreProvider>

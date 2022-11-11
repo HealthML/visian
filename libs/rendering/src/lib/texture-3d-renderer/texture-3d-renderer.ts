@@ -1,7 +1,7 @@
-import { ScreenAlignedQuad } from "@visian/rendering";
 import { IDisposable } from "@visian/utils";
 import * as THREE from "three";
 
+import { ScreenAlignedQuad } from "../screen-aligned-quad";
 import { Texture3DMaterial } from "./texture-3d-material";
 
 export class Texture3DRenderer implements IDisposable {

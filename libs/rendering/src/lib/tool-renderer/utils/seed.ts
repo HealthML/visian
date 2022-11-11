@@ -1,6 +1,7 @@
 import { IDocument } from "@visian/ui-shared";
 import { IDisposable, IDisposer, Pixel } from "@visian/utils";
 import * as THREE from "three";
+
 import { SeedCamera } from "./seed-camera";
 
 export class Seed extends THREE.Scene implements IDisposable {

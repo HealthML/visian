@@ -1,5 +1,5 @@
 /* eslint-disable max-len */
-import { Text, FlexRow, Spacer, FlexColumn, color } from "@visian/ui-shared";
+import { color, FlexColumn, FlexRow, Spacer, Text } from "@visian/ui-shared";
 import { ViewType } from "@visian/utils";
 import { observer } from "mobx-react-lite";
 import React from "react";
@@ -100,8 +100,8 @@ export const AxesAndVoxel: React.FC = observer(() => {
                 <VoxelContent
                   tx={
                     (
-                      store?.editor.activeDocument?.viewport2D.hoveredVoxel.x +
-                      1
+                      (store?.editor.activeDocument?.viewport2D.hoveredVoxel
+                        .x || 0) + 1
                     ).toString() ?? "-"
                   }
                 />
@@ -115,8 +115,8 @@ export const AxesAndVoxel: React.FC = observer(() => {
                 <VoxelContent
                   tx={
                     (
-                      store?.editor.activeDocument?.viewport2D.hoveredVoxel.y +
-                      1
+                      (store?.editor.activeDocument?.viewport2D.hoveredVoxel
+                        .y || 0) + 1
                     ).toString() ?? "-"
                   }
                 />
@@ -130,8 +130,8 @@ export const AxesAndVoxel: React.FC = observer(() => {
                 <VoxelContent
                   tx={
                     (
-                      store?.editor.activeDocument?.viewport2D.hoveredVoxel.z +
-                      1
+                      (store?.editor.activeDocument?.viewport2D.hoveredVoxel
+                        .z || 0) + 1
                     ).toString() ?? "-"
                   }
                 />

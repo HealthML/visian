@@ -1,7 +1,7 @@
 import {
+  Tool as GenericTool,
   ITool,
   preventDefault,
-  Tool as GenericTool,
   ToolProps,
   useTranslation,
 } from "@visian/ui-shared";

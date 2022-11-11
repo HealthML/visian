@@ -43,7 +43,8 @@ export interface ToolConfig<N extends string> {
 }
 
 export class Tool<N extends string>
-  implements ITool<N>, ISerializable<ToolSnapshot<N>> {
+  implements ITool<N>, ISerializable<ToolSnapshot<N>>
+{
   public readonly excludeFromSnapshotTracking = ["document"];
 
   public readonly name: N;

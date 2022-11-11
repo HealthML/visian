@@ -55,9 +55,10 @@ export const setUpWheelHandling = (store: RootStore): IDisposer => {
 
       const scaleFactor =
         store.editor.activeDocument.viewport2D.zoomLevel / startZoom;
-      const transformOrigin = store.editor.sliceRenderer.getMainViewScreenPosition(
-        store.editor.activeDocument.viewport2D.offset,
-      );
+      const transformOrigin =
+        store.editor.sliceRenderer.getMainViewScreenPosition(
+          store.editor.activeDocument.viewport2D.offset,
+        );
       store.editor.activeDocument.viewport2D.setOffset(
         Vector.fromObject(
           store.editor.sliceRenderer.getWebGLPosition(

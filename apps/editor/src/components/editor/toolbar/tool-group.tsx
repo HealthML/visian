@@ -1,6 +1,6 @@
 import {
-  PointerButton,
   ToolGroup as GenericToolGroup,
+  PointerButton,
   ToolProps,
   useMultiRef,
   useShortTap,
@@ -8,10 +8,9 @@ import {
 import { observer } from "mobx-react-lite";
 import React, { useCallback, useState } from "react";
 
-import { Tool } from "./tool";
-
-import type { ToolGroup as ToolGroupModel, ToolName } from "../../../models";
 import { useStore } from "../../../app/root-store";
+import type { ToolGroup as ToolGroupModel, ToolName } from "../../../models";
+import { Tool } from "./tool";
 
 export const ToolGroup = observer<
   Pick<ToolProps, "onPress" | "onRelease" | "showTooltip"> & {

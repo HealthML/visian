@@ -1,4 +1,5 @@
 import type React from "react";
+
 import { ContextMenuPositionConfig } from "./utils";
 
 export interface ContextMenuProps

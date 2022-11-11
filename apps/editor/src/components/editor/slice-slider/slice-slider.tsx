@@ -78,7 +78,8 @@ export const SliceSlider: React.FC<SliceSliderProps> = observer(
       duration("autoHideDelay")({ theme }) as number,
     );
 
-    const currentSlice = store?.editor.activeDocument?.viewport2D.getSelectedSlice();
+    const currentSlice =
+      store?.editor.activeDocument?.viewport2D.getSelectedSlice();
     const previousSliceRef = useRef(currentSlice);
     useEffect(() => {
       if (previousSliceRef.current !== undefined) {

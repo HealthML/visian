@@ -26,7 +26,7 @@ export interface IHistory {
   redo(): void;
 
   /** Pushes an undo/redo command onto the history. */
-  addCommand: (command: IUndoRedoCommand) => void;
+  addCommand(command: IUndoRedoCommand): void;
 
   /** Removes all commands from the history. */
   clear(): void;

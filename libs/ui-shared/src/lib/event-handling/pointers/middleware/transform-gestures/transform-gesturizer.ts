@@ -1,5 +1,3 @@
-import { TransformData } from "./transform-data";
-
 import type {
   AbstractEventType,
   EventMiddleware,
@@ -7,11 +5,12 @@ import type {
   PointerEventData,
   PointerState,
 } from "../../types";
+import { TransformData } from "./transform-data";
 import { TransformGesture } from "./transform-gesture";
 
 /** Event processor state extension to capture the current transform gestures. */
 export interface TransformGestureState<
-  ID extends string | number | symbol = string
+  ID extends string | number | symbol = string,
 > {
   transformGestures?: Partial<Record<ID, TransformGesture>>;
 }
@@ -31,7 +30,7 @@ export interface TransformGestureWrapper<ID = string> {
 }
 
 export interface TransformGestureEventData<
-  ID extends string | number | symbol = string
+  ID extends string | number | symbol = string,
 > extends PointerEventData<ID> {
   transformGestures?: Partial<Record<ID, TransformGestureWrapper<ID>>>;
 }
@@ -74,173 +73,180 @@ export const filterPointers = <ID>(
  * transformation data needs to support zooming to a vanishing point.
  * @param pointerPredicate Used to filter the processed pointers.
  */
-export const gesturizeTransformations = <
-  ID extends number | string | symbol = string,
-  T extends TransformGestureState<ID> &
-    PointerState<ID> = TransformGestureState<ID> & PointerState<ID>
->(
-  pointerPredicate?: (
-    pointer: Pointer<ID>,
-    data: TransformGestureEventData<ID>,
-  ) => boolean,
-): EventMiddleware<TransformGestureEventData<ID>, T> => (data, context) => {
-  const boundPointerPredicate = pointerPredicate
-    ? (pointer: Pointer<ID>) => pointerPredicate(pointer, data)
-    : () => true;
+export const gesturizeTransformations =
+  <
+    ID extends number | string | symbol = string,
+    T extends TransformGestureState<ID> &
+      PointerState<ID> = TransformGestureState<ID> & PointerState<ID>,
+  >(
+    pointerPredicate?: (
+      pointer: Pointer<ID>,
+      data: TransformGestureEventData<ID>,
+    ) => boolean,
+  ): EventMiddleware<TransformGestureEventData<ID>, T> =>
+  (data, context) => {
+    const boundPointerPredicate = pointerPredicate
+      ? (pointer: Pointer<ID>) => pointerPredicate(pointer, data)
+      : () => true;
 
-  const { ids } = data;
-  if (!ids || !data.pointers) return;
+    const { ids } = data;
+    if (!ids || !data.pointers) return;
 
-  const pointerMap = context.pointers;
-  if (!pointerMap) return;
-  const pointers = Object.values(
-    pointerMap as NonNullable<PointerState<ID>["pointers"]>,
-  );
+    const pointerMap = context.pointers;
+    if (!pointerMap) return;
+    const pointers = Object.values(
+      pointerMap as NonNullable<PointerState<ID>["pointers"]>,
+    );
 
-  let gestures = context.transformGestures as NonNullable<
-    TransformGestureState<ID>["transformGestures"]
-  >;
+    let gestures = context.transformGestures as NonNullable<
+      TransformGestureState<ID>["transformGestures"]
+    >;
 
-  switch (data.eventType) {
-    case "start":
-      ids.forEach((id) => {
-        let gesture: TransformGesture | undefined = gestures
-          ? gestures[id]
-          : undefined;
+    switch (data.eventType) {
+      case "start":
+        ids.forEach((id) => {
+          let gesture: TransformGesture | undefined = gestures
+            ? gestures[id]
+            : undefined;
 
-        const filteredPointers = filterPointers(
-          pointers,
-          id,
-          boundPointerPredicate,
-        );
-        if (!filteredPointers.length) return;
+          const filteredPointers = filterPointers(
+            pointers,
+            id,
+            boundPointerPredicate,
+          );
+          if (!filteredPointers.length) return;
 
-        if (gesture) {
-          gesture.rebase(TransformData.fromPointers(filteredPointers));
+          if (gesture) {
+            gesture.rebase(TransformData.fromPointers(filteredPointers));
+
+            // Add gesture to event data
+            if (!data.transformGestures) data.transformGestures = {};
+            data.transformGestures[id] = buildGestureWrapper(
+              "rebase",
+              gesture,
+              id,
+              filteredPointers,
+            );
+          } else {
+            gesture = new TransformGesture(
+              TransformData.fromPointers(filteredPointers),
+              { id },
+            );
+
+            // Write new gesture to state
+            if (!gestures) gestures = {};
+            gestures[id] = gesture;
+            context.transformGestures = gestures;
+
+            // Add gesture to event data
+            if (!data.transformGestures) data.transformGestures = {};
+            data.transformGestures[id] = buildGestureWrapper(
+              "start",
+              gesture,
+              id,
+              filteredPointers,
+            );
+          }
+        });
+        break;
+      case "move":
+        if (!gestures) return;
+        ids.forEach((id) => {
+          const gesture: TransformGesture | undefined = gestures[id];
+          if (!gesture) return;
+
+          const filteredPointers = filterPointers(
+            pointers,
+            id,
+            boundPointerPredicate,
+          );
+          if (!filteredPointers.length) return;
+
+          gesture.setTarget(TransformData.fromPointers(filteredPointers));
 
           // Add gesture to event data
           if (!data.transformGestures) data.transformGestures = {};
           data.transformGestures[id] = buildGestureWrapper(
-            "rebase",
+            "move",
             gesture,
             id,
             filteredPointers,
           );
-        } else {
-          gesture = new TransformGesture(
-            TransformData.fromPointers(filteredPointers),
-            { id },
-          );
+        });
+        break;
+      case "end":
+        if (!gestures) return;
+        ids.forEach((id) => {
+          const gesture: TransformGesture | undefined = gestures[id];
+          if (!gesture) return;
 
-          // Write new gesture to state
-          if (!gestures) gestures = {};
-          gestures[id] = gesture;
-          context.transformGestures = gestures;
-
-          // Add gesture to event data
-          if (!data.transformGestures) data.transformGestures = {};
-          data.transformGestures[id] = buildGestureWrapper(
-            "start",
-            gesture,
+          const currentPointers = filterPointers(
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            data.pointers!,
             id,
-            filteredPointers,
+            boundPointerPredicate,
           );
-        }
-      });
-      break;
-    case "move":
-      if (!gestures) return;
-      ids.forEach((id) => {
-        const gesture: TransformGesture | undefined = gestures[id];
-        if (!gesture) return;
-
-        const filteredPointers = filterPointers(
-          pointers,
-          id,
-          boundPointerPredicate,
-        );
-        if (!filteredPointers.length) return;
-
-        gesture.setTarget(TransformData.fromPointers(filteredPointers));
-
-        // Add gesture to event data
-        if (!data.transformGestures) data.transformGestures = {};
-        data.transformGestures[id] = buildGestureWrapper(
-          "move",
-          gesture,
-          id,
-          filteredPointers,
-        );
-      });
-      break;
-    case "end":
-      if (!gestures) return;
-      ids.forEach((id) => {
-        const gesture: TransformGesture | undefined = gestures[id];
-        if (!gesture) return;
-
-        const currentPointers = filterPointers(
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          data.pointers!,
-          id,
-          boundPointerPredicate,
-        );
-        const filteredPointers = filterPointers(
-          pointers,
-          id,
-          boundPointerPredicate,
-        );
-        const filteredPointersCount = filteredPointers.length;
-        if (!(filteredPointersCount || currentPointers.length)) return;
-
-        gesture.setTarget(
-          TransformData.fromPointers([...currentPointers, ...filteredPointers]),
-        );
-
-        // Check if more pointers are involved in this gesture
-        if (filteredPointersCount) {
-          gesture.rebase(TransformData.fromPointers(filteredPointers));
-
-          // Add gesture to event data
-          if (!data.transformGestures) data.transformGestures = {};
-          data.transformGestures[id] = buildGestureWrapper(
-            "rebase",
-            gesture,
+          const filteredPointers = filterPointers(
+            pointers,
             id,
-            filteredPointers,
+            boundPointerPredicate,
           );
-        } else {
-          delete gestures[id];
+          const filteredPointersCount = filteredPointers.length;
+          if (!(filteredPointersCount || currentPointers.length)) return;
 
-          // Add gesture to event data
-          if (!data.transformGestures) data.transformGestures = {};
-          data.transformGestures[id] = buildGestureWrapper(
-            "end",
-            gesture,
-            id,
-            filteredPointers,
+          gesture.setTarget(
+            TransformData.fromPointers([
+              ...currentPointers,
+              ...filteredPointers,
+            ]),
           );
-        }
-      });
-      break;
-    default:
-      break;
-  }
-};
+
+          // Check if more pointers are involved in this gesture
+          if (filteredPointersCount) {
+            gesture.rebase(TransformData.fromPointers(filteredPointers));
+
+            // Add gesture to event data
+            if (!data.transformGestures) data.transformGestures = {};
+            data.transformGestures[id] = buildGestureWrapper(
+              "rebase",
+              gesture,
+              id,
+              filteredPointers,
+            );
+          } else {
+            delete gestures[id];
+
+            // Add gesture to event data
+            if (!data.transformGestures) data.transformGestures = {};
+            data.transformGestures[id] = buildGestureWrapper(
+              "end",
+              gesture,
+              id,
+              filteredPointers,
+            );
+          }
+        });
+        break;
+      default:
+        break;
+    }
+  };
 
 /** Gesture mapper, runs the mapping function for every gesture. */
-export const forGestures = <ID extends string | number | symbol = string>(
-  mappingFunction: (
-    gesture: TransformGestureWrapper<ID>,
-    data: TransformGestureEventData<ID>,
-  ) => void,
-) => (data: TransformGestureEventData<ID>) => {
-  if (!data.transformGestures) return;
+export const forGestures =
+  <ID extends string | number | symbol = string>(
+    mappingFunction: (
+      gesture: TransformGestureWrapper<ID>,
+      data: TransformGestureEventData<ID>,
+    ) => void,
+  ) =>
+  (data: TransformGestureEventData<ID>) => {
+    if (!data.transformGestures) return;
 
-  Object.values<TransformGestureWrapper<ID>>(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    data.transformGestures as any,
-  ).forEach((gesture) => {
-    mappingFunction(gesture, data);
-  });
-};
+    Object.values<TransformGestureWrapper<ID>>(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      data.transformGestures as any,
+    ).forEach((gesture) => {
+      mappingFunction(gesture, data);
+    });
+  };

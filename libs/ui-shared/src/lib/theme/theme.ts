@@ -1,5 +1,5 @@
-import { ThemeProps as StyledThemeProps } from "styled-components";
 import { action, makeObservable, observable } from "mobx";
+import { ThemeProps as StyledThemeProps } from "styled-components";
 
 const dataColors = {
   "Genome Gold": "#FFC700",

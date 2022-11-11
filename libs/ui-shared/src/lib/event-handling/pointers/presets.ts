@@ -24,7 +24,7 @@ export const pointerPreset = <ID = string>(
   ]);
 
 export const transformGesturePreset = <
-  ID extends string | number | symbol = string
+  ID extends string | number | symbol = string,
 >(config: {
   forUnidentifiedPointers?: (
     pointer: Pointer<undefined>,

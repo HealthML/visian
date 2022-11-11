@@ -10,9 +10,9 @@ import { readFileFromURL } from "@visian/utils";
 import { observer } from "mobx-react-lite";
 import React, { useCallback, useState } from "react";
 import styled from "styled-components";
-import { importFilesToDocument } from "../../../import-handling";
 
 import { useStore } from "../../../app/root-store";
+import { importFilesToDocument } from "../../../import-handling";
 import { ImportPopUpProps } from "./import-popup.props";
 
 const SectionLabel = styled(Text)`

@@ -1,4 +1,5 @@
 import type React from "react";
+
 import { Histogram } from ".";
 import type { SerializationMethod, TooltipPosition } from "../../components";
 import { ILayer } from "./layers";
@@ -44,6 +45,7 @@ export interface IParameter<T = unknown> {
    * An optional event listener that is called before the parameter value is
    * updated.
    */
+  // eslint-disable-next-line @typescript-eslint/member-ordering
   onBeforeValueChange?: () => void;
 
   /**

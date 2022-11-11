@@ -1,10 +1,9 @@
 import { IDispatch } from "@visian/ui-shared";
 import { IDisposer } from "@visian/utils";
 
+import type { RootStore } from "../models";
 import { setUpHotKeys } from "./hotkeys";
 import { setUpPointerHandling } from "./pointers";
-
-import type { RootStore } from "../models";
 import { setUpWheelHandling } from "./wheel";
 
 export const setUpEventHandling = (

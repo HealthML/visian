@@ -9,9 +9,9 @@ import { observer } from "mobx-react-lite";
 import React, { useCallback, useState } from "react";
 import ReactDOM from "react-dom";
 import styled from "styled-components";
-import { importFilesToDocument } from "../../../import-handling";
 
 import { useStore } from "../../../app/root-store";
+import { importFilesToDocument } from "../../../import-handling";
 import { DropSheetProps } from "./drop-sheet.props";
 
 const StyledDropZone = styled(DropZone)`

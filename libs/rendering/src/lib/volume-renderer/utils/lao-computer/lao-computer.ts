@@ -1,10 +1,11 @@
-import { ImageRenderTarget, Texture3DRenderer } from "@visian/rendering";
 import { IEditor } from "@visian/ui-shared";
 import { IDisposable, Vector, ViewType } from "@visian/utils";
 import { autorun, IReactionDisposer } from "mobx";
 import * as THREE from "three";
-import { Texture3DCopyMaterial } from "../../../texture-3d-renderer/texture-3d-copy-material";
 
+import { ImageRenderTarget } from "../../../rendered-image";
+import { Texture3DRenderer } from "../../../texture-3d-renderer";
+import { Texture3DCopyMaterial } from "../../../texture-3d-renderer/texture-3d-copy-material";
 import { SharedUniforms } from "../shared-uniforms";
 import { getTotalLAODirections } from "./lao-directions";
 import { LAOMaterial } from "./lao-material";

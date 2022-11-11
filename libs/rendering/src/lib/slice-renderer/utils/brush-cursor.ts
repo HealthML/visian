@@ -103,8 +103,9 @@ export class BrushCursor extends THREE.Group implements IDisposable {
       return;
     }
 
-    const { voxelCount } = (this.editor.activeDocument
-      .activeLayer as IImageLayer).image;
+    const { voxelCount } = (
+      this.editor.activeDocument.activeLayer as IImageLayer
+    ).image;
 
     const [widthAxis, heightAxis] = getPlaneAxes(this.viewType);
 

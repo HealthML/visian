@@ -350,8 +350,9 @@ export const generalHotkeys: IHotkey[] = [
     keys: "ctrl+shift+e",
     viewMode: "2D",
     action: (store) =>
-      (store.editor.activeDocument
-        ?.activeLayer as ImageLayer)?.quickExportSlice?.(),
+      (
+        store.editor.activeDocument?.activeLayer as ImageLayer
+      )?.quickExportSlice?.(),
     labelTx: "export-current-slice",
     shortcutGuideSection: "save-export",
   },
@@ -410,36 +411,46 @@ export const generalHotkeys: IHotkey[] = [
       if (
         store.editor.activeDocument?.tools.regionGrowingRenderer3D.holdsPreview
       ) {
-        (store.editor.activeDocument?.tools.tools[
-          "smart-brush-3d"
-        ] as SmartBrush3D).submit();
+        (
+          store.editor.activeDocument?.tools.tools[
+            "smart-brush-3d"
+          ] as SmartBrush3D
+        ).submit();
       }
 
       if (
         store.editor.activeDocument?.tools.thresholdAnnotationRenderer3D
           .holdsPreview
       ) {
-        (store.editor.activeDocument?.tools.tools[
-          "threshold-annotation"
-        ] as ThresholdAnnotationTool).submit();
+        (
+          store.editor.activeDocument?.tools.tools[
+            "threshold-annotation"
+          ] as ThresholdAnnotationTool
+        ).submit();
       }
 
       if (
         store.editor.activeDocument?.tools.dilateErodeRenderer3D.holdsPreview
       ) {
-        (store.editor.activeDocument?.tools.tools[
-          "dilate-erode"
-        ] as DilateErodeTool).submit();
+        (
+          store.editor.activeDocument?.tools.tools[
+            "dilate-erode"
+          ] as DilateErodeTool
+        ).submit();
       }
 
       if (
-        (store.editor.activeDocument?.tools.tools[
-          "measurement-tool"
-        ] as MeasurementTool).hasPath
+        (
+          store.editor.activeDocument?.tools.tools[
+            "measurement-tool"
+          ] as MeasurementTool
+        ).hasPath
       ) {
-        (store.editor.activeDocument?.tools.tools[
-          "measurement-tool"
-        ] as MeasurementTool).submit();
+        (
+          store.editor.activeDocument?.tools.tools[
+            "measurement-tool"
+          ] as MeasurementTool
+        ).submit();
       }
     },
   },
@@ -449,36 +460,46 @@ export const generalHotkeys: IHotkey[] = [
       if (
         store.editor.activeDocument?.tools.regionGrowingRenderer3D.holdsPreview
       ) {
-        (store.editor.activeDocument?.tools.tools[
-          "smart-brush-3d"
-        ] as SmartBrush3D).discard();
+        (
+          store.editor.activeDocument?.tools.tools[
+            "smart-brush-3d"
+          ] as SmartBrush3D
+        ).discard();
       }
 
       if (
         store.editor.activeDocument?.tools.thresholdAnnotationRenderer3D
           .holdsPreview
       ) {
-        (store.editor.activeDocument?.tools.tools[
-          "threshold-annotation"
-        ] as ThresholdAnnotationTool).discard();
+        (
+          store.editor.activeDocument?.tools.tools[
+            "threshold-annotation"
+          ] as ThresholdAnnotationTool
+        ).discard();
       }
 
       if (
         store.editor.activeDocument?.tools.dilateErodeRenderer3D.holdsPreview
       ) {
-        (store.editor.activeDocument?.tools.tools[
-          "dilate-erode"
-        ] as DilateErodeTool).discard();
+        (
+          store.editor.activeDocument?.tools.tools[
+            "dilate-erode"
+          ] as DilateErodeTool
+        ).discard();
       }
 
       if (
-        (store.editor.activeDocument?.tools.tools[
-          "measurement-tool"
-        ] as MeasurementTool).hasPath
+        (
+          store.editor.activeDocument?.tools.tools[
+            "measurement-tool"
+          ] as MeasurementTool
+        ).hasPath
       ) {
-        (store.editor.activeDocument?.tools.tools[
-          "measurement-tool"
-        ] as MeasurementTool).discard();
+        (
+          store.editor.activeDocument?.tools.tools[
+            "measurement-tool"
+          ] as MeasurementTool
+        ).discard();
       }
     },
   },

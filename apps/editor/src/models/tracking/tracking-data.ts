@@ -1,9 +1,9 @@
-import { Image, Vector } from "@visian/utils";
 import {
-  TrackingLog,
-  PointerTrackingEvent,
   ITrackingData,
+  PointerTrackingEvent,
+  TrackingLog,
 } from "@visian/ui-shared";
+import { Image, Vector } from "@visian/utils";
 import * as THREE from "three";
 
 export const HEAT_MAP_GRID_SIZE = 10; // mm

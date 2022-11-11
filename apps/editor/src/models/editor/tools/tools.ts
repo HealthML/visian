@@ -1,4 +1,3 @@
-import * as THREE from "three";
 import {
   DilateErodeRenderer3D,
   RegionGrowingRenderer,
@@ -15,23 +14,24 @@ import {
 } from "@visian/ui-shared";
 import { getPlaneAxes, IDisposable, ISerializable } from "@visian/utils";
 import { action, computed, makeObservable, observable } from "mobx";
+import * as THREE from "three";
+
+import { BoundedSmartBrush } from "./bounded-smart-brush";
 import { CircleBrush } from "./circle-brush";
 import { ClearImageTool } from "./clear-image-tool";
 import { ClearSliceTool } from "./clear-slice-tool";
-import { SmartBrush } from "./smart-brush";
 import { CrosshairTool } from "./crosshair-tool";
-import { OutlineTool } from "./outline-tool";
-import { Tool, ToolSnapshot } from "./tool";
-
-import { ToolGroup, ToolGroupSnapshot } from "./tool-group";
-import { BoundedSmartBrush } from "./bounded-smart-brush";
-import { PlaneTool } from "./plane-tool";
-import { SmartBrush3D } from "./smart-brush-3d";
 import { DilateErodeTool } from "./dilate-erode-tool";
-import { SelfDeactivatingTool } from "./self-deactivating-tool";
-import { ThresholdAnnotationTool } from "./threshold-annotation-tool";
-import { UndoableTool } from "./undoable-tool";
 import { MeasurementTool } from "./measurement-tool";
+import { OutlineTool } from "./outline-tool";
+import { PlaneTool } from "./plane-tool";
+import { SelfDeactivatingTool } from "./self-deactivating-tool";
+import { SmartBrush } from "./smart-brush";
+import { SmartBrush3D } from "./smart-brush-3d";
+import { ThresholdAnnotationTool } from "./threshold-annotation-tool";
+import { Tool, ToolSnapshot } from "./tool";
+import { ToolGroup, ToolGroupSnapshot } from "./tool-group";
+import { UndoableTool } from "./undoable-tool";
 
 export type ToolName =
   | "navigation-tool"
@@ -68,7 +68,8 @@ export class Tools
   implements
     ITools<ToolName>,
     ISerializable<ToolsSnapshot<ToolName>>,
-    IDisposable {
+    IDisposable
+{
   public readonly excludeFromSnapshotTracking = [
     "document",
     "isCursorOverDrawableArea",

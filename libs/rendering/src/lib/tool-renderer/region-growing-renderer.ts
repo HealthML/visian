@@ -1,11 +1,12 @@
-import * as THREE from "three";
 import { IDocument, IImageLayer } from "@visian/ui-shared";
 import { getOrthogonalAxis, getPlaneAxes } from "@visian/utils";
 import { reaction } from "mobx";
+import * as THREE from "three";
+
 import { RenderedImage } from "../rendered-image";
+import { ScreenAlignedQuad } from "../screen-aligned-quad";
 import { ToolRenderer } from "./tool-renderer";
 import { Circle, RegionGrowingMaterial } from "./utils";
-import { ScreenAlignedQuad } from "../screen-aligned-quad";
 
 export class RegionGrowingRenderer extends ToolRenderer {
   protected blipRenderTarget = new THREE.WebGLRenderTarget(1, 1);
@@ -63,9 +64,11 @@ export class RegionGrowingRenderer extends ToolRenderer {
 
     if (!annotation) return;
 
-    const sourceImage = (this.document.imageLayers.find(
-      (layer) => !layer.isAnnotation && layer.isVisible,
-    ) as IImageLayer | undefined)?.image as RenderedImage | undefined;
+    const sourceImage = (
+      this.document.imageLayers.find(
+        (layer) => !layer.isAnnotation && layer.isVisible,
+      ) as IImageLayer | undefined
+    )?.image as RenderedImage | undefined;
     if (!sourceImage) return;
 
     const slice = this.document.viewSettings.selectedVoxel.getFromView(

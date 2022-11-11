@@ -4,8 +4,8 @@ import { autorun, computed, makeObservable, reaction } from "mobx";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import Stats from "three/examples/jsm/libs/stats.module";
-import { RenderedImage } from "../rendered-image";
 
+import { RenderedImage } from "../rendered-image";
 import { ScreenAlignedQuad } from "../screen-aligned-quad";
 import {
   AxesConvention,
@@ -325,8 +325,9 @@ export class VolumeRenderer implements IVolumeRenderer {
 
   private tickGradientHistogram = () => {
     if (this.editor.activeDocument?.mainImageLayer) {
-      const buffer = (this.editor.activeDocument?.mainImageLayer
-        .image as RenderedImage).textureAdapter.readSlice(
+      const buffer = (
+        this.editor.activeDocument?.mainImageLayer.image as RenderedImage
+      ).textureAdapter.readSlice(
         this.currentGradientHistogramSlice,
         ViewType.Transverse,
         this.renderer,
@@ -636,9 +637,8 @@ export class VolumeRenderer implements IVolumeRenderer {
       return;
     }
 
-    const smartBrush3D = this.editor.activeDocument?.tools.tools[
-      "smart-brush-3d"
-    ];
+    const smartBrush3D =
+      this.editor.activeDocument?.tools.tools["smart-brush-3d"];
     if (!smartBrush3D) return;
 
     const seedPoint = this.getSmartBrushIntersection(event);

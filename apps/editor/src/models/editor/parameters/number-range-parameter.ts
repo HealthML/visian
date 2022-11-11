@@ -4,6 +4,7 @@ import {
   ScaleType,
   SerializationMethod,
 } from "@visian/ui-shared";
+
 import { NumberParameterConfig } from "./number-parameter";
 import { Parameter, ParameterConfig } from "./parameter";
 
@@ -17,7 +18,8 @@ export interface NumberRangeParameterConfig
 
 export class NumberRangeParameter
   extends Parameter<[number, number]>
-  implements INumberRangeParameter {
+  implements INumberRangeParameter
+{
   public static readonly kind = "number-range";
   public readonly kind = "number-range";
 

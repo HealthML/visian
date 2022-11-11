@@ -16,7 +16,8 @@ export interface ImageCommandSnapshot extends IUndoRedoCommandSnapshot {
 }
 
 export class ImageCommand
-  implements IUndoRedoCommand, ISerializable<ImageCommandSnapshot> {
+  implements IUndoRedoCommand, ISerializable<ImageCommandSnapshot>
+{
   public readonly excludeFromSnapshotTracking = ["document"];
 
   // eslint-disable-next-line @typescript-eslint/member-ordering

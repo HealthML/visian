@@ -1,11 +1,11 @@
 import {
   ColorMode,
+  ErrorNotification,
   getTheme,
   i18n,
   IDispatch,
   IStorageBackend,
   Tab,
-  ErrorNotification,
 } from "@visian/ui-shared";
 import {
   createFileFromBase64,
@@ -149,9 +149,9 @@ export class RootStore implements ISerializable<RootSnapshot>, IDisposable {
       this.errorTimeout = undefined;
     }
     if (error) {
-      this.errorTimeout = (setTimeout(() => {
+      this.errorTimeout = setTimeout(() => {
         this.setError();
-      }, errorDisplayDuration) as unknown) as NodeJS.Timer;
+      }, errorDisplayDuration) as unknown as NodeJS.Timer;
     }
   };
 
@@ -202,14 +202,15 @@ export class RootStore implements ISerializable<RootSnapshot>, IDisposable {
 
               await Promise.all(
                 annotation.data.map(async (annotationData) => {
-                  const createdLayerId = await this.editor.activeDocument?.importFiles(
-                    createFileFromBase64(
-                      title.replace(".nii", "_annotation").concat(".nii"),
-                      annotationData.data,
-                    ),
-                    title.replace(".nii", "_annotation"),
-                    true,
-                  );
+                  const createdLayerId =
+                    await this.editor.activeDocument?.importFiles(
+                      createFileFromBase64(
+                        title.replace(".nii", "_annotation").concat(".nii"),
+                        annotationData.data,
+                      ),
+                      title.replace(".nii", "_annotation"),
+                      true,
+                    );
                   if (createdLayerId)
                     annotationData.correspondingLayerId = createdLayerId;
                 }),

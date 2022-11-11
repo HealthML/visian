@@ -1,6 +1,7 @@
 import React from "react";
-import { ModalPosition } from "../modal";
+
 import { IEnumParameterOption } from "../../types";
+import { ModalPosition } from "../modal";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export interface SwitchProps<T = any>

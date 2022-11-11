@@ -1,4 +1,4 @@
-import { Icon, Text, fontWeight } from "@visian/ui-shared";
+import { fontWeight, Icon, Text } from "@visian/ui-shared";
 import styled from "styled-components";
 
 export const ShortcutLabel = styled(Text)`

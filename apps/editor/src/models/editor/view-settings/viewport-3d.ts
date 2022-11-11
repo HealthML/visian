@@ -1,13 +1,14 @@
 import {
   IDocument,
+  ITransferFunction,
   IViewport3D,
   ShadingMode,
-  ITransferFunction,
 } from "@visian/ui-shared";
 import { ISerializable, Vector, ViewType } from "@visian/utils";
 import FileSaver from "file-saver";
 import { action, autorun, computed, makeObservable, observable } from "mobx";
 import { Matrix4 } from "three";
+
 import {
   ConeTransferFunction,
   CustomTransferFunction,
@@ -45,7 +46,8 @@ export interface Viewport3DSnapshot<N extends string> {
 export class Viewport3D
   implements
     IViewport3D<TransferFunctionName>,
-    ISerializable<Viewport3DSnapshot<TransferFunctionName>> {
+    ISerializable<Viewport3DSnapshot<TransferFunctionName>>
+{
   public readonly excludeFromSnapshotTracking = ["document", "isXRAvailable"];
 
   public isXRAvailable?: boolean;
@@ -162,22 +164,9 @@ export class Viewport3D
     this.cameraMatrix =
       value ||
       new Matrix4().fromArray([
-        -0.7071067811865475,
-        0,
-        -0.7071067811865475,
-        0,
-        -0.408248290463863,
-        0.816496580927726,
-        0.408248290463863,
-        0,
-        0.5773502691896257,
-        0.5773502691896257,
-        -0.5773502691896255,
-        0,
-        0.3,
-        1.5,
-        -0.3,
-        1,
+        -0.7071067811865475, 0, -0.7071067811865475, 0, -0.408248290463863,
+        0.816496580927726, 0.408248290463863, 0, 0.5773502691896257,
+        0.5773502691896257, -0.5773502691896255, 0, 0.3, 1.5, -0.3, 1,
       ]);
   }
 
@@ -189,9 +178,9 @@ export class Viewport3D
     this.volumeSpaceCameraPosition = [x, y, z];
 
     if (!this.transferFunctions["fc-cone"].params.isConeLocked.value) {
-      (this.transferFunctions[
-        "fc-cone"
-      ] as ConeTransferFunction).setConeDirection(x, y, z);
+      (
+        this.transferFunctions["fc-cone"] as ConeTransferFunction
+      ).setConeDirection(x, y, z);
     }
 
     if (this.document.tools.activeTool?.name === "plane-tool") {
@@ -409,16 +398,16 @@ export class Viewport3D
       opacity: this.opacity,
       shadingMode: this.requestedShadingMode || this.shadingMode,
       activeTransferFunctionName: this.activeTransferFunctionName,
-      transferFunctions: Object.values(
-        this.transferFunctions,
-      ).map((transferFunction) => transferFunction.toJSON()),
+      transferFunctions: Object.values(this.transferFunctions).map(
+        (transferFunction) => transferFunction.toJSON(),
+      ),
       useSmoothSegmentations: this.useSmoothSegmentations,
       useClippingPlane: this.useClippingPlane,
       clippingPlaneNormal: this.clippingPlaneNormal.toJSON(),
       clippingPlaneDistance: this.clippingPlaneDistance,
       shouldClippingPlaneRender: this.shouldClippingPlaneRender,
-      shouldClippingPlaneShowAnnotations: this
-        .shouldClippingPlaneShowAnnotations,
+      shouldClippingPlaneShowAnnotations:
+        this.shouldClippingPlaneShowAnnotations,
     };
   }
 
@@ -441,9 +430,8 @@ export class Viewport3D
     this.requestShadingMode(snapshot?.shadingMode);
     this.setActiveTransferFunction(snapshot?.activeTransferFunctionName, true);
     snapshot?.transferFunctions?.forEach((transferFunctionSnapshot) => {
-      const transferFunction = this.transferFunctions[
-        transferFunctionSnapshot.name
-      ];
+      const transferFunction =
+        this.transferFunctions[transferFunctionSnapshot.name];
       if (transferFunction) {
         transferFunction.applySnapshot(transferFunctionSnapshot);
       }

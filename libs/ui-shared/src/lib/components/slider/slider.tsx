@@ -7,6 +7,9 @@ import { Tooltip } from "../tooltip";
 import { SliderMarker, SliderRangeMarker } from "./markers";
 import { SliderFieldProps, SliderProps } from "./slider.props";
 import {
+  Histogram,
+  HistogramBar,
+  RangeHandle,
   SliderContainer,
   SliderLabel,
   SliderLabelRow,
@@ -15,9 +18,6 @@ import {
   SliderTrack,
   SliderValueInput,
   SliderValueInputWrapper,
-  Histogram,
-  HistogramBar,
-  RangeHandle,
 } from "./styled-components";
 import { pointerToSliderValue, useDrag, valueToSliderPos } from "./utils";
 
@@ -376,7 +376,7 @@ export const Slider: React.FC<SliderProps> = (props) => {
           <SliderMarker
             key={`${marker.context}::${marker.color}:${marker.value}`}
             position={getSliderRelativePosition(
-              (marker.value as unknown) as number,
+              marker.value as unknown as number,
             )}
             isVertical={isVertical}
             color={marker.color}

@@ -1,5 +1,6 @@
 import { IDocument, ILayer, ILayerParameter } from "@visian/ui-shared";
 import { computed, makeObservable } from "mobx";
+
 import { Parameter, ParameterConfig } from "./parameter";
 
 export interface LayerParameterConfig
@@ -9,7 +10,8 @@ export interface LayerParameterConfig
 
 export class LayerParameter
   extends Parameter<string | undefined>
-  implements ILayerParameter {
+  implements ILayerParameter
+{
   public static readonly kind = "layer";
   public readonly kind = "layer";
 

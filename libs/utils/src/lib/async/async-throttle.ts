@@ -1,4 +1,5 @@
 import throttle from "lodash.throttle";
+
 import { isPromise } from "./utils";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */

@@ -8,14 +8,16 @@ import {
   Vector,
   ViewType,
   Voxel,
+  // eslint-disable-next-line unused-imports/no-unused-imports
+  VoxelTypes,
 } from "@visian/utils";
 import * as THREE from "three";
 
-import { TextureAdapter } from "./texture-adapter";
-import { getTextureFormat } from "./utils";
-import { OrientedSlice } from "./types";
-import { ImageRenderTarget } from "./image-render-target";
 import { getInternalTextureFormat } from ".";
+import { ImageRenderTarget } from "./image-render-target";
+import { TextureAdapter } from "./texture-adapter";
+import { OrientedSlice } from "./types";
+import { getTextureFormat } from "./utils";
 
 export class RenderedImage extends Image implements IDisposable {
   public excludeFromSnapshotTracking = ["document"];
@@ -335,6 +337,7 @@ export class RenderedImage extends Image implements IDisposable {
 
   public writeToTexture(
     texture: THREE.Texture,
+    // eslint-disable-next-line default-param-last
     mergeFunction = MergeFunction.Replace,
     threshold?: number,
   ) {

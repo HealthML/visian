@@ -1,5 +1,6 @@
 import {
   dataColorKeys,
+  ErrorNotification,
   i18n,
   IDocument,
   IEditor,
@@ -8,11 +9,10 @@ import {
   ISliceRenderer,
   IVolumeRenderer,
   MeasurementType,
+  PerformanceMode,
   Theme,
   TrackingLog,
-  ErrorNotification,
   ValueType,
-  PerformanceMode,
 } from "@visian/ui-shared";
 import {
   handlePromiseSettledResult,
@@ -26,11 +26,11 @@ import {
 } from "@visian/utils";
 import FileSaver from "file-saver";
 import { action, computed, makeObservable, observable, toJS } from "mobx";
+import { parseHeader, Unit } from "nifti-js";
+import { inflate } from "pako";
 import path from "path";
 import * as THREE from "three";
 import { v4 as uuidv4 } from "uuid";
-import { parseHeader, Unit } from "nifti-js";
-import { inflate } from "pako";
 
 import {
   defaultAnnotationColor,
@@ -39,12 +39,13 @@ import {
   generalTextures2d,
   generalTextures3d,
 } from "../../constants";
+import { readTrackingLog, TrackingData } from "../tracking";
 import { StoreContext } from "../types";
+import { Clipboard } from "./clipboard";
 import { History, HistorySnapshot } from "./history";
 import { ImageLayer, Layer, LayerSnapshot } from "./layers";
 import * as layers from "./layers";
 import { Markers } from "./markers";
-import { Clipboard } from "./clipboard";
 import { ToolName, Tools, ToolsSnapshot } from "./tools";
 import {
   TransferFunctionName,
@@ -55,7 +56,6 @@ import {
   ViewSettings,
   ViewSettingsSnapshot,
 } from "./view-settings";
-import { readTrackingLog, TrackingData } from "../tracking";
 
 const uniqueValuesForAnnotationThreshold = 10;
 
@@ -86,7 +86,8 @@ export interface DocumentSnapshot {
 }
 
 export class Document
-  implements IDocument, ISerializable<DocumentSnapshot>, IDisposable {
+  implements IDocument, ISerializable<DocumentSnapshot>, IDisposable
+{
   public readonly excludeFromSnapshotTracking = ["editor"];
 
   public id: string;
@@ -846,7 +847,7 @@ export class Document
     if (!this.useExclusiveSegmentations) return undefined;
     const layerIndex = this.layerIds.indexOf(layer.id);
     if (layerIndex <= 0) return undefined;
-    return (this.layerIds
+    return this.layerIds
       .slice(0, layerIndex)
       .map((layerId) => this.layerMap[layerId])
       .filter(
@@ -855,7 +856,7 @@ export class Document
           potentialLayer.kind === "image" &&
           potentialLayer.isVisible &&
           potentialLayer.opacity > 0,
-      ) as unknown) as IImageLayer[];
+      ) as unknown as IImageLayer[];
   }
 
   // Proxies

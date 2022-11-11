@@ -1,4 +1,4 @@
-import { RenderedImage, generateHistogram } from "@visian/rendering";
+import { generateHistogram, RenderedImage } from "@visian/rendering";
 import {
   Histogram,
   IDocument,
@@ -45,7 +45,8 @@ export interface ImageLayerSnapshot extends LayerSnapshot {
 
 export class ImageLayer
   extends Layer
-  implements IImageLayer, ISerializable<ImageLayerSnapshot>, IDisposable {
+  implements IImageLayer, ISerializable<ImageLayerSnapshot>, IDisposable
+{
   public static fromITKImage(
     image: ITKImageWithUnit,
     document: IDocument,

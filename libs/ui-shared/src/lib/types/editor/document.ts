@@ -1,17 +1,17 @@
 import type * as THREE from "three";
-import { ITrackingData, TrackingLog } from "@visian/ui-shared";
 
+import { MeasurementType, PerformanceMode } from ".";
+import { Theme } from "../../theme";
+import type { ErrorNotification } from "../error-notification";
 import type { ISliceRenderer, IVolumeRenderer } from "../rendering";
+import { ITrackingData, TrackingLog } from "../tracking";
+import type { IClipboard } from "./clipboard";
 import type { IHistory } from "./history";
 import type { IImageLayer, ILayer } from "./layers";
+import type { IMarkers } from "./markers";
 import type { ITools } from "./tools";
 import type { Reference } from "./types";
 import type { IViewport2D, IViewport3D, IViewSettings } from "./view-settings";
-import type { IMarkers } from "./markers";
-import type { IClipboard } from "./clipboard";
-import type { ErrorNotification } from "../error-notification";
-import { Theme } from "../../theme";
-import { MeasurementType, PerformanceMode } from ".";
 
 /** A VISIAN document, consisting of up to multiple editable layers. */
 export interface IDocument {

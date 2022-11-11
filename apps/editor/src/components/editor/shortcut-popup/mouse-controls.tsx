@@ -1,18 +1,19 @@
 import {
-  LargePopUpGroup,
-  LargePopUpGroupTitleContainer,
-  LargePopUpGroupTitle,
   KeyIcon,
+  LargePopUpGroup,
+  LargePopUpGroupTitle,
+  LargePopUpGroupTitleContainer,
 } from "@visian/ui-shared";
 import React from "react";
+
 import {
-  ShortcutRow,
-  ShortcutContainer,
   MouseIcon,
-  ShortcutLabel,
-  ShortcutDescriptionContainer,
-  ShortcutDescription,
   PlusIcon,
+  ShortcutContainer,
+  ShortcutDescription,
+  ShortcutDescriptionContainer,
+  ShortcutLabel,
+  ShortcutRow,
 } from "./styled-components";
 
 export const MouseControls = () => (

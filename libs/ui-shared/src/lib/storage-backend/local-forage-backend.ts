@@ -1,4 +1,4 @@
-import { asyncThrottle, AsyncDebouncedFunc } from "@visian/utils";
+import { AsyncDebouncedFunc, asyncThrottle } from "@visian/utils";
 import localForage from "localforage";
 
 import { IStorageBackend } from "./types";

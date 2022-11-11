@@ -7,9 +7,9 @@ import {
 } from "@visian/utils";
 import { action, makeObservable, observable, reaction } from "mobx";
 import * as THREE from "three";
-import { RenderedImage } from "../rendered-image";
 
-import { Circles, ToolCamera, Circle } from "./utils";
+import { RenderedImage } from "../rendered-image";
+import { Circle, Circles, ToolCamera } from "./utils";
 
 export class ToolRenderer implements IDisposable {
   public readonly excludeFromSnapshotTracking = ["document"];

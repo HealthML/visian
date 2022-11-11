@@ -10,7 +10,6 @@ import React, { useCallback } from "react";
 import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
-
 import type { DilateErodeTool } from "../../../models";
 
 const MAX_STEPS = 12;
@@ -23,16 +22,20 @@ export const DilateErodeModal = observer(() => {
   const store = useStore();
 
   const discard = useCallback(() => {
-    (store?.editor.activeDocument?.tools.tools[
-      "dilate-erode"
-    ] as DilateErodeTool).discard();
+    (
+      store?.editor.activeDocument?.tools.tools[
+        "dilate-erode"
+      ] as DilateErodeTool
+    ).discard();
     store?.editor.activeDocument?.tools.setIsCursorOverFloatingUI(false);
   }, [store]);
 
   const submit = useCallback(() => {
-    (store?.editor.activeDocument?.tools.tools[
-      "dilate-erode"
-    ] as DilateErodeTool).submit();
+    (
+      store?.editor.activeDocument?.tools.tools[
+        "dilate-erode"
+      ] as DilateErodeTool
+    ).submit();
     store?.editor.activeDocument?.tools.setIsCursorOverFloatingUI(false);
   }, [store]);
 
@@ -72,7 +75,8 @@ export const DilateErodeModal = observer(() => {
           (store?.editor.activeDocument?.tools.dilateErodeRenderer3D.shouldErode
             ? -1
             : 1) *
-          store?.editor.activeDocument?.tools.dilateErodeRenderer3D.maxSteps
+          (store?.editor.activeDocument?.tools.dilateErodeRenderer3D.maxSteps ||
+            0)
         }
         setValue={setMaxSteps}
       />

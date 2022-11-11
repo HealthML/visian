@@ -15,7 +15,9 @@
  */
 const generateReduceLayerStack = (
   layerCount: number,
+  // eslint-disable-next-line default-param-last
   outputName = "imageValue",
+  // eslint-disable-next-line default-param-last
   uvName = "uv",
   reduceAnnotations?: boolean,
   rawOutputName?: string,
@@ -90,7 +92,9 @@ const generateReduceLayerStack = (
  */
 const generateReduceEnhancedLayerStack = (
   layerCount: number,
+  // eslint-disable-next-line default-param-last
   outputName = "imageValue",
+  // eslint-disable-next-line default-param-last
   volumeCoords = "volumeCoords",
   activeLayerMergeName?: string,
   enhancementFunctionName?: string,
@@ -196,8 +200,10 @@ const generateReduceRawImages = (
 
 // Macro definitions
 const layerCountRegex = /{{layerCount}}/g;
-const reduceLayerStackRegex = /{{reduceLayerStack\((\w+),\s*(\w+),\s*(\w+)(,\s*(\w+))?\)}}/g;
-const reduceEnhancedLayerStackRegex = /{{reduceEnhancedLayerStack\((\w+),\s*(\w+)(,\s*(\w+),\s*(\w+))?\)}}/g;
+const reduceLayerStackRegex =
+  /{{reduceLayerStack\((\w+),\s*(\w+),\s*(\w+)(,\s*(\w+))?\)}}/g;
+const reduceEnhancedLayerStackRegex =
+  /{{reduceEnhancedLayerStack\((\w+),\s*(\w+)(,\s*(\w+),\s*(\w+))?\)}}/g;
 const reduceRawImagesRegex = /{{reduceRawImages\((\w+),\s*(\w+)\)}}/g;
 
 /**

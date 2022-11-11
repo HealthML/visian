@@ -112,12 +112,10 @@ export class SharedUniforms implements IDisposable {
           editor.activeDocument?.viewport3D.activeTransferFunction?.params
             .densityRange;
 
-        [
-          this.uniforms.uLimitLow.value,
-          this.uniforms.uLimitHigh.value,
-        ] = rangeParameter
-          ? (rangeParameter as INumberRangeParameter).value
-          : [0, 1];
+        [this.uniforms.uLimitLow.value, this.uniforms.uLimitHigh.value] =
+          rangeParameter
+            ? (rangeParameter as INumberRangeParameter).value
+            : [0, 1];
 
         editor.activeDocument?.volumeRenderer?.lazyRender(true);
       }),
@@ -170,7 +168,8 @@ export class SharedUniforms implements IDisposable {
         editor.activeDocument?.volumeRenderer?.lazyRender(true);
       }),
       autorun(() => {
-        this.uniforms.uPlaneNormal.value = editor.activeDocument?.viewport3D.clippingPlaneNormal.toArray();
+        this.uniforms.uPlaneNormal.value =
+          editor.activeDocument?.viewport3D.clippingPlaneNormal.toArray();
 
         editor.activeDocument?.volumeRenderer?.lazyRender(true);
       }),
@@ -187,8 +186,8 @@ export class SharedUniforms implements IDisposable {
           editor.activeDocument?.viewport3D.activeTransferFunction?.params
             .useBlockyContext?.value,
         );
-        const useNearestFilteringAnnotation = !editor.activeDocument?.viewport3D
-          .useSmoothSegmentations;
+        const useNearestFilteringAnnotation =
+          !editor.activeDocument?.viewport3D.useSmoothSegmentations;
         const layerData = layers.map((layer) =>
           layer ===
           editor.activeDocument?.tools.dilateErodeRenderer3D.targetLayer

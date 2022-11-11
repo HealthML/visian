@@ -1,3 +1,4 @@
+import { IEditor, IImageLayer, ISliceRenderer } from "@visian/ui-shared";
 import {
   getPlaneAxes,
   IDisposer,
@@ -5,10 +6,10 @@ import {
   ViewType,
   viewTypes,
 } from "@visian/utils";
-import { IEditor, IImageLayer, ISliceRenderer } from "@visian/ui-shared";
 import { autorun, reaction } from "mobx";
 import * as THREE from "three";
 
+import { RenderedSheet } from "../rendered-sheet";
 import { Slice } from "./slice";
 import {
   getOrder,
@@ -16,7 +17,6 @@ import {
   getWebGLSizeFromCamera,
   setCameraPlanes,
 } from "./utils";
-import { RenderedSheet } from "../rendered-sheet";
 
 export class SliceRenderer implements ISliceRenderer {
   private renderer: THREE.WebGLRenderer;

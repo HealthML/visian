@@ -1,5 +1,5 @@
-import * as THREE from "three";
 import { Vector } from "@visian/utils";
+import * as THREE from "three";
 
 export interface ITrackingData {
   texture: THREE.Texture;

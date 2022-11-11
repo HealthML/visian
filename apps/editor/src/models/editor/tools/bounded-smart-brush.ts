@@ -1,9 +1,10 @@
 import { RegionGrowingRenderer } from "@visian/rendering";
 import { DragPoint, IDocument } from "@visian/ui-shared";
+
 import { CircleBrush } from "./circle-brush";
 
 export class BoundedSmartBrush<
-  N extends "bounded-smart-brush" | "bounded-smart-eraser"
+  N extends "bounded-smart-brush" | "bounded-smart-eraser",
 > extends CircleBrush<N> {
   public readonly excludeFromSnapshotTracking = [
     "document",

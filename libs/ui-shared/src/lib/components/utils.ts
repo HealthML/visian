@@ -56,9 +56,9 @@ export const useIsDraggedOver = () => {
     if (dragTimerRef.current !== undefined) {
       clearTimeout(dragTimerRef.current);
     }
-    dragTimerRef.current = (setTimeout(() => {
+    dragTimerRef.current = setTimeout(() => {
       setIsDraggedOver(false);
-    }, 50) as unknown) as NodeJS.Timer;
+    }, 50) as unknown as NodeJS.Timer;
   }, [setIsDraggedOver]);
 
   const onDrop = useCallback(() => {
@@ -141,7 +141,7 @@ export const useDelay = (
     if (timerRef.current !== undefined) {
       clearTimeout(timerRef.current);
     }
-    timerRef.current = (setTimeout(callback, delay) as unknown) as NodeJS.Timer;
+    timerRef.current = setTimeout(callback, delay) as unknown as NodeJS.Timer;
   }, [callback, delay]);
 
   useEffect(
@@ -187,9 +187,9 @@ export const useLongPress = <T extends Element>(
 
   const startPress = useCallback(
     (event: React.PointerEvent<T>) => {
-      timerRef.current = (setTimeout(() => {
+      timerRef.current = setTimeout(() => {
         handleLongPress(event);
-      }, minDuration) as unknown) as NodeJS.Timer;
+      }, minDuration) as unknown as NodeJS.Timer;
     },
     [handleLongPress, minDuration],
   );
@@ -240,7 +240,7 @@ export const useOutsidePress = <T extends HTMLElement>(
         if (callback) callback(event);
       }
     },
-    [callback, ref],
+    [callback, ignoreUnmounted, ref],
   );
 
   const [schedule, cancel] = useDelay(

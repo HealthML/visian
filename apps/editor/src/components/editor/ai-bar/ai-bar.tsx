@@ -208,9 +208,8 @@ export const AIBar = observer(() => {
             // Add base64 data for each existing AnnotationData object
             const base64Data = await Promise.all(
               annotation.data.map(async (annotationData) => {
-                const base64Annotation = await getBase64LayerDataForAnnotationData(
-                  annotationData,
-                );
+                const base64Annotation =
+                  await getBase64LayerDataForAnnotationData(annotationData);
                 if (base64Annotation) annotationData.data = base64Annotation;
                 return annotationData;
               }),
@@ -218,9 +217,10 @@ export const AIBar = observer(() => {
             annotation.data = base64Data;
           } else {
             // Add new AnnotationData object for each existing annotation layer
-            const annotationLayerIds = store.editor.activeDocument?.annotationLayers.map(
-              (annotationLayer) => annotationLayer.id,
-            );
+            const annotationLayerIds =
+              store.editor.activeDocument?.annotationLayers.map(
+                (annotationLayer) => annotationLayer.id,
+              );
             if (annotationLayerIds) {
               const base64Data = await Promise.all(
                 annotationLayerIds.map((annotationLayerId) =>

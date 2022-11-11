@@ -1,4 +1,5 @@
 import styled from "styled-components";
+
 import { fontWeight } from "../../theme";
 import { Text } from "../text";
 import { PopUp } from "./popup";

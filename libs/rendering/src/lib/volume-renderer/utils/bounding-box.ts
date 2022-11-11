@@ -23,9 +23,11 @@ export class BoundingBox extends THREE.Box3Helper implements IDisposable {
         () =>
           editor.activeDocument?.viewport3D.activeTransferFunction?.name ===
             "fc-cone" &&
-          (editor.activeDocument?.viewport3D.activeTransferFunction as
-            | IConeTransferFunction
-            | undefined)?.coneDirection.toArray(),
+          (
+            editor.activeDocument?.viewport3D.activeTransferFunction as
+              | IConeTransferFunction
+              | undefined
+          )?.coneDirection.toArray(),
         this.show,
       ),
     );

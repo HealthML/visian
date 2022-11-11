@@ -1,7 +1,8 @@
 import type { Image, Vector, ViewType, Voxel } from "@visian/utils";
 import type { Matrix4 } from "three";
-import { Histogram } from "./types";
+
 import { MarkerConfig } from "./markers";
+import { Histogram } from "./types";
 
 /**
  * The supported layer blending modes

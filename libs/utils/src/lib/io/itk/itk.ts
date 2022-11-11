@@ -3,7 +3,6 @@ import readImageFile from "itk/readImageFile";
 import writeImageArrayBuffer from "itk/writeImageArrayBuffer";
 
 import { Zip } from "../zip";
-
 import type { ITKImage } from "./types";
 
 /** Returns a parsed medical image from the given single file. */

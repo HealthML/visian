@@ -5,7 +5,8 @@ import * as THREE from "three";
 
 export class SeedCamera
   extends THREE.OrthographicCamera
-  implements IDisposable {
+  implements IDisposable
+{
   private disposers: IDisposer[] = [];
 
   constructor(document: IDocument) {
@@ -15,10 +16,9 @@ export class SeedCamera
       autorun(() => {
         if (document.activeLayer?.kind !== "image") return;
 
-        const [
-          width,
-          height,
-        ] = (document.activeLayer as IImageLayer).image.voxelCount.toArray();
+        const [width, height] = (
+          document.activeLayer as IImageLayer
+        ).image.voxelCount.toArray();
 
         this.right = width - 0.5;
         this.top = height - 0.5;

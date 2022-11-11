@@ -1,4 +1,5 @@
 import { DragPoint, IDocument } from "@visian/ui-shared";
+
 import { Tool } from "./tool";
 
 export class CrosshairTool<N extends "crosshair-tool"> extends Tool<N> {

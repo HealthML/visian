@@ -11,10 +11,11 @@ import { Tool } from "./tool";
 import { mutateTextureData } from "./utils";
 
 export class ThresholdAnnotationTool<
-    N extends "threshold-annotation" = "threshold-annotation"
+    N extends "threshold-annotation" = "threshold-annotation",
   >
   extends Tool<N>
-  implements IPreviewedTool<N>, ISelfDeactivatingTool<N> {
+  implements IPreviewedTool<N>, ISelfDeactivatingTool<N>
+{
   public readonly excludeFromSnapshotTracking = ["document", "renderer"];
   public readonly isSelfDeactivating = true;
 

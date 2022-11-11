@@ -118,7 +118,8 @@ export class SliceMaterial extends THREE.ShaderMaterial implements IDisposable {
         editor.sliceRenderer?.lazyRender();
       }),
       autorun(() => {
-        this.uniforms.uActiveSlices.value = editor.activeDocument?.viewSettings.selectedVoxel.toArray();
+        this.uniforms.uActiveSlices.value =
+          editor.activeDocument?.viewSettings.selectedVoxel.toArray();
         editor.sliceRenderer?.lazyRender();
       }),
       autorun(() => {
@@ -132,7 +133,8 @@ export class SliceMaterial extends THREE.ShaderMaterial implements IDisposable {
         editor.sliceRenderer?.lazyRender();
       }),
       autorun(() => {
-        this.uniforms.uWindow.value = editor.activeDocument?.viewport2D.window.toArray();
+        this.uniforms.uWindow.value =
+          editor.activeDocument?.viewport2D.window.toArray();
         editor.sliceRenderer?.lazyRender();
       }),
       autorun(() => {

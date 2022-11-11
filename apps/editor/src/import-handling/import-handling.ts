@@ -1,4 +1,5 @@
 import { ImageMismatchError } from "@visian/utils";
+
 import { RootStore } from "../models";
 
 const importFilesByType = async (
@@ -57,6 +58,7 @@ const handleImportWithErrors = async (
 export const importFilesToDocument = (
   files: FileList | DataTransferItemList,
   store: RootStore,
+  // eslint-disable-next-line default-param-last
   shouldRetry = false,
   handleFinishedImport?: () => void,
 ) => {

@@ -1,12 +1,14 @@
 import { DragPoint, IDocument, IMeasurementTool } from "@visian/ui-shared";
 import { Vector } from "@visian/utils";
 import { action, computed, makeObservable, observable } from "mobx";
+
 import { Tool } from "./tool";
 import { dragPointsEqual } from "./utils";
 
 export class MeasurementTool<N extends "measurement-tool" = "measurement-tool">
   extends Tool<N>
-  implements IMeasurementTool {
+  implements IMeasurementTool
+{
   public readonly excludeFromSnapshotTracking = [
     "document",
     "path",

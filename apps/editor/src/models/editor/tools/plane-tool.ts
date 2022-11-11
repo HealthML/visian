@@ -1,4 +1,5 @@
 import { IDocument } from "@visian/ui-shared";
+
 import { Tool } from "./tool";
 
 export class PlaneTool extends Tool<"plane-tool"> {

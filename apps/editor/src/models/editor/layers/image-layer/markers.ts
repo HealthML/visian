@@ -1,7 +1,8 @@
+// eslint-disable-next-line import/no-webpack-loader-syntax, import/no-unresolved
+import MarkerWorker from "worker-loader!./markers.worker";
 import { RpcProvider } from "worker-rpc";
 
 // eslint-disable-next-line import/no-unresolved,import/no-webpack-loader-syntax
-import MarkerWorker from "worker-loader!./markers.worker";
 
 const markerWorker = new MarkerWorker();
 export const markerRPCProvider = new RpcProvider(

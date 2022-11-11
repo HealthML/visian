@@ -10,7 +10,8 @@ export interface LayerGroupSnapshot extends LayerSnapshot {
 
 export class LayerGroup
   extends Layer
-  implements ILayerGroup, ISerializable<LayerGroupSnapshot> {
+  implements ILayerGroup, ISerializable<LayerGroupSnapshot>
+{
   // eslint-disable-next-line @typescript-eslint/member-ordering
   public static readonly kind = "group";
   public readonly kind = "group";

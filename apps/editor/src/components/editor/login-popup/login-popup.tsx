@@ -1,4 +1,4 @@
-import { PopUp, Text, Button, TextField } from "@visian/ui-shared";
+import { Button, PopUp, Text, TextField } from "@visian/ui-shared";
 import React from "react";
 import styled from "styled-components";
 

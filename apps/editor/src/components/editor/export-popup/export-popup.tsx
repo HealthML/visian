@@ -1,4 +1,4 @@
-import { PopUp, Switch, Text, Button } from "@visian/ui-shared";
+import { Button, PopUp, Switch, Text } from "@visian/ui-shared";
 import React from "react";
 import styled from "styled-components";
 

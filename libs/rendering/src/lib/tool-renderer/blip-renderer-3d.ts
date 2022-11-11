@@ -1,4 +1,3 @@
-import { Texture3DRenderer } from "@visian/rendering";
 import {
   IBlipRenderer3D,
   IDocument,
@@ -23,6 +22,7 @@ import {
 import * as THREE from "three";
 
 import { ImageRenderTarget, RenderedImage } from "../rendered-image";
+import { Texture3DRenderer } from "../texture-3d-renderer";
 import { Blip3DMaterial, MAX_BLIP_STEPS } from "./utils";
 
 export class BlipRenderer3D implements IBlipRenderer3D, IDisposable {

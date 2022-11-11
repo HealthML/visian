@@ -1,7 +1,7 @@
 import React, { useCallback, useState } from "react";
 
 import { Slider, SliderField } from "./slider";
-import { SliderProps, SliderFieldProps } from "./slider.props";
+import { SliderFieldProps, SliderProps } from "./slider.props";
 
 export default {
   cmponent: Slider,

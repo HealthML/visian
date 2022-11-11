@@ -11,7 +11,6 @@ import React, { useCallback } from "react";
 import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
-
 import type { SmartBrush3D } from "../../../models";
 
 const StyledModal = styled(Modal)`
@@ -22,16 +21,20 @@ export const SmartBrush3DModal = observer(() => {
   const store = useStore();
 
   const discard = useCallback(() => {
-    (store?.editor.activeDocument?.tools.tools[
-      "smart-brush-3d"
-    ] as SmartBrush3D).discard();
+    (
+      store?.editor.activeDocument?.tools.tools[
+        "smart-brush-3d"
+      ] as SmartBrush3D
+    ).discard();
     store?.editor.activeDocument?.tools.setIsCursorOverFloatingUI(false);
   }, [store]);
 
   const submit = useCallback(() => {
-    (store?.editor.activeDocument?.tools.tools[
-      "smart-brush-3d"
-    ] as SmartBrush3D).submit();
+    (
+      store?.editor.activeDocument?.tools.tools[
+        "smart-brush-3d"
+      ] as SmartBrush3D
+    ).submit();
     store?.editor.activeDocument?.tools.setIsCursorOverFloatingUI(false);
   }, [store]);
 
