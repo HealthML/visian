@@ -125,7 +125,7 @@ export class FloyDemoController implements ISerializable<FloyDemoSnapshot> {
     }
 
     // Filter series
-    try {
+    /* try {
       const dataSet = dicomParser.parseDicom(
         new Uint8Array(await firstFile.arrayBuffer()),
       );
@@ -207,7 +207,7 @@ export class FloyDemoController implements ISerializable<FloyDemoSnapshot> {
       // }
     } catch {
       return false;
-    }
+    } */
 
     return true;
   }
