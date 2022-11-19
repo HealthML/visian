@@ -38,6 +38,10 @@ export const setupRootStore = async () => {
       }
     }
 
+    // Validate Token:
+    const token = localStorage.getItem(FLOY_TOKEN_KEY);
+    if (!token) throw new Error();
+
     // Load scan based on GET parameter
     // Example:  http://localhost:4200/?study=2234231
     const study = url.searchParams.get("study");
@@ -51,11 +55,11 @@ export const setupRootStore = async () => {
         // Call Floy-API to generate signedDownloadURL to OTC OBS:
         const responseStudy = await store?.editor.activeDocument?.floyDemo.getSignedDownloadURL(
           `raw-data/demo-floy-com-production/${studyName}`,
-          "PPwqqg08m", // TO DO - Remove and create extra token-less API request for the load-links
+          token,
         );
         const responseMask = await store?.editor.activeDocument?.floyDemo.getSignedDownloadURL(
           `raw-data/demo-floy-com-production/${maskName}`,
-          "PPwqqg08m", // TO DO - Remove and create extra token-less API request for the load-links
+          token,
         );
 
         if (responseStudy === undefined || responseMask === undefined) {
