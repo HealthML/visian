@@ -1,63 +1,54 @@
-import {
-  Box,
-  FlexRow,
-  Screen,
-  Text,
-  useIsDraggedOver,
-} from "@visian/ui-shared";
+import { Box, Modal, Screen, useIsDraggedOver } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
-import React from "react";
+import React, { useState } from "react";
 import styled from "styled-components";
 
-import { Menu } from "../components/editor";
+import { DatasetNavbar } from "../components/menu/dataset-navbar";
 
 export const ProjectsScreen: React.FC = observer(() => {
   const [isDraggedOver, { onDrop, ...dragListeners }] = useIsDraggedOver();
+  const [inSelectMode, setInSelectMode] = useState(false);
 
-  const Navbar = styled(FlexRow)`
-    position: relative;
-    overflow: hidden;
-    padding: 3rem;
-    background: #ff0000;
+  const Main = styled(Box)`
+    display: flex;
+    justify-content: center;
+    height: 100%;
+    padding-top: 5rem;
+    padding-bottom: 5rem;
+    padding-left: 10rem;
+    padding-right: 10rem;
   `;
 
-  const Searchbar = styled(Text)`
-    font-size: 2rem;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-  `;
-
-  const BoxRight = styled(Box)`
-    font-size: 2rem;
-    position: absolute;
-    top: 50%;
-    left: calc(100% - 3rem);
-    transform: translate(-100%, -50%);
-    background: #00ff00;
-  `;
-
-  const MyMenu = styled(Menu)`
-    margin: 0px;
-  `;
-
-  const TextRight = styled(Text)`
-    font-size: 2rem;
-    position: absolute;
-    top: 50%;
-    left: calc(100% - 3rem);
-    transform: translate(-100%, -50%);
+  const TestModal = styled(Modal)`
+    vertical-align: middle;
+    width: 100%;
   `;
 
   return (
     <Screen {...dragListeners} title="VISIAN Projects">
-      <Navbar>
-        <Searchbar>Test</Searchbar>
-        <BoxRight>
-          <MyMenu />
-        </BoxRight>
-      </Navbar>
+      <Main>
+        <TestModal
+          hideHeaderDivider={false}
+          labelTx="Example Dataset"
+          position="right"
+          headerChildren={
+            <DatasetNavbar
+              inSelectMode={inSelectMode}
+              toggleSelectMode={true}
+            />
+          }
+        >
+          <div>
+            <h1>
+              blasd asd as d asd asd asd as d as das da s das dsa das as d asd
+              as d asd a sd asd a sd asd as da sd asd a
+            </h1>
+          </div>
+          <h1>bla</h1>
+          <h1>bla</h1>
+          <h1>bla</h1>
+        </TestModal>
+      </Main>
     </Screen>
   );
 });
