@@ -20,7 +20,7 @@ import {
 } from "../constants";
 import { setUpEventHandling } from "../event-handling";
 import type { RootStore } from "../models";
-import { EditorScreen, ProjectsScreen } from "../screens";
+import { DatasetScreen, EditorScreen } from "../screens";
 import { setupRootStore, StoreProvider } from "./root-store";
 
 if (isFromWHO()) {
@@ -76,7 +76,7 @@ function App(): JSX.Element {
             <React.StrictMode>
               <ModalRoot />
               <Routes>
-                <Route path="/" element={<ProjectsScreen />} />
+                <Route path="/" element={<DatasetScreen />} />
                 <Route path="/editor" element={<EditorScreen />} />
               </Routes>
             </React.StrictMode>

@@ -1,18 +1,39 @@
-import { SquareButton } from "@visian/ui-shared";
-import { observer } from "mobx-react-lite";
+import { ButtonParam, SquareButton } from "@visian/ui-shared";
 import styled from "styled-components";
 
-const MyButton = styled(SquareButton)`
-  padding: 10px;
+const StyledButton = styled(SquareButton)`
+  margin-left: 10px;
 `;
 
-export const DatasetNavbar = observer<{
-  inSelectMode?: boolean;
-  toggleSelectMode: boolean;
-}>(({ inSelectMode, toggleSelectMode }) =>
+const StyledButtonParam = styled(ButtonParam)`
+  margin: 0px;
+  width: auto;
+`;
+
+// eslint-disable-next-line react/destructuring-assignment
+export const DatasetNavbar = ({
+  inSelectMode,
+  toggleSelectMode,
+}: {
+  inSelectMode: any;
+  toggleSelectMode: any;
+}) =>
   inSelectMode ? (
-    <SquareButton icon="select" tooltipTx="select" />
+    <>
+      <StyledButtonParam labelTx="Select All" />
+      <StyledButton icon="export" tooltipTx="Export" />
+      <StyledButton icon="trash" tooltipTx="Delete" />
+      <StyledButton icon="whoAI" tooltipTx="Auto Anotate" />
+      <StyledButton
+        icon="exit"
+        tooltipTx="Exit"
+        onPointerDown={toggleSelectMode}
+      />
+    </>
   ) : (
-    <SquareButton icon="layers" tooltipTx="layers" />
-  ),
-);
+    <StyledButton
+      icon="select"
+      tooltipTx="Select"
+      onPointerDown={toggleSelectMode}
+    />
+  );
