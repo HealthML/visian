@@ -58,3 +58,5 @@ export { ReactComponent as undo } from "./undo.svg";
 export { ReactComponent as upArrow } from "./up-arrow.svg";
 export { ReactComponent as whoAI } from "./who-ai.svg";
 export { ReactComponent as xSmall } from "./x-small.svg";
+export { ReactComponent as checked } from "./checkbox-checked.svg";
+export { ReactComponent as unchecked } from "./checkbox-unchecked.svg";

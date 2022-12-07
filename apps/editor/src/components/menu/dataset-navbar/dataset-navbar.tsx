@@ -14,20 +14,28 @@ const StyledButtonParam = styled(ButtonParam)`
 export const DatasetNavbar = ({
   inSelectMode,
   toggleSelectMode,
+  toggleSelectAll,
 }: {
   inSelectMode: any;
   toggleSelectMode: any;
+  toggleSelectAll: any;
 }) =>
   inSelectMode ? (
     <>
-      <StyledButtonParam labelTx="Select All" />
+      <StyledButtonParam
+        labelTx="Select All"
+        handlePress={() => toggleSelectAll(true)}
+      />
       <StyledButton icon="export" tooltipTx="Export" />
       <StyledButton icon="trash" tooltipTx="Delete" />
       <StyledButton icon="whoAI" tooltipTx="Auto Anotate" />
       <StyledButton
         icon="exit"
         tooltipTx="Exit"
-        onPointerDown={toggleSelectMode}
+        onPointerDown={() => {
+          toggleSelectMode();
+          toggleSelectAll(false);
+        }}
       />
     </>
   ) : (

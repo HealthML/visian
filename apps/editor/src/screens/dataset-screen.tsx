@@ -3,7 +3,9 @@ import { observer } from "mobx-react-lite";
 import React, { useState } from "react";
 import styled from "styled-components";
 
+import { DatasetFileList } from "../components/menu/dataset-file-list";
 import { DatasetNavbar } from "../components/menu/dataset-navbar";
+import { datasetMoc } from "./dataset-moc";
 
 const Main = styled(Box)`
   display: flex;
@@ -23,6 +25,24 @@ const TestModal = styled(Modal)`
 export const DatasetScreen: React.FC = observer(() => {
   const [isDraggedOver, { onDrop, ...dragListeners }] = useIsDraggedOver();
   const [inSelectMode, setInSelectMode] = useState(false);
+  const [dataset, setDataset] = useState(datasetMoc);
+
+  const setSelection = (id: number, selection: boolean) => {
+    setDataset((prevDataset) =>
+      prevDataset.map((file) =>
+        file.id === id ? { ...file, isSelected: selection } : file,
+      ),
+    );
+  };
+
+  const toggleSelectAll = (select: boolean) => {
+    setDataset((prevDataset) =>
+      prevDataset.map((file) => ({
+        ...file,
+        isSelected: select,
+      })),
+    );
+  };
 
   return (
     <Screen {...dragListeners} title="VISIAN Projects">
@@ -37,12 +57,15 @@ export const DatasetScreen: React.FC = observer(() => {
               toggleSelectMode={() => {
                 setInSelectMode((prev) => !prev);
               }}
+              toggleSelectAll={toggleSelectAll}
             />
           }
         >
-          <div>
-            <h1>blasd asd</h1>
-          </div>
+          <DatasetFileList
+            inSelectMode={inSelectMode}
+            dataset={dataset}
+            setSelection={setSelection}
+          />
         </TestModal>
       </Main>
     </Screen>
