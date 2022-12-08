@@ -1,22 +1,20 @@
-export const datasetMoc = [
+import { Dataset } from "../components/menu/data-types";
+
+export const datasetMoc: Dataset = [
   {
-    id: 0,
+    id: "0",
     name: "File 1",
-    isSelected: false,
   },
   {
-    id: 1,
+    id: "1",
     name: "File 2",
-    isSelected: false,
   },
   {
-    id: 2,
+    id: "2",
     name: "File 3",
-    isSelected: false,
   },
   {
-    id: 3,
+    id: "3",
     name: "File 4",
-    isSelected: false,
   },
 ];

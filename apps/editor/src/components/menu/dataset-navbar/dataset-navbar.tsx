@@ -5,7 +5,7 @@ const StyledButton = styled(SquareButton)`
   margin-left: 10px;
 `;
 
-const StyledButtonParam = styled(ButtonParam)`
+const StyledTextButton = styled(ButtonParam)`
   margin: 0px;
   width: auto;
 `;
@@ -16,15 +16,17 @@ export const DatasetNavbar = ({
   toggleSelectMode,
   toggleSelectAll,
 }: {
-  inSelectMode: any;
-  toggleSelectMode: any;
-  toggleSelectAll: any;
+  inSelectMode: boolean;
+  toggleSelectMode: () => void;
+  toggleSelectAll: (selection: boolean) => void;
 }) =>
   inSelectMode ? (
     <>
-      <StyledButtonParam
+      <StyledTextButton
         labelTx="Select All"
-        handlePress={() => toggleSelectAll(true)}
+        handlePress={() => {
+          toggleSelectAll(true);
+        }}
       />
       <StyledButton icon="export" tooltipTx="Export" />
       <StyledButton icon="trash" tooltipTx="Delete" />
