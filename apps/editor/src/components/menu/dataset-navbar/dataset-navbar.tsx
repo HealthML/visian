@@ -13,20 +13,20 @@ const StyledTextButton = styled(ButtonParam)`
 // eslint-disable-next-line react/destructuring-assignment
 export const DatasetNavbar = ({
   inSelectMode,
+  allSelected,
   toggleSelectMode,
   toggleSelectAll,
 }: {
   inSelectMode: boolean;
+  allSelected: boolean;
   toggleSelectMode: () => void;
-  toggleSelectAll: (selection: boolean) => void;
+  toggleSelectAll: () => void;
 }) =>
   inSelectMode ? (
     <>
       <StyledTextButton
-        labelTx="Select All"
-        handlePress={() => {
-          toggleSelectAll(true);
-        }}
+        labelTx={allSelected ? "Deselect All" : "Select All"}
+        handlePress={toggleSelectAll}
       />
       <StyledButton icon="export" tooltipTx="Export" />
       <StyledButton icon="trash" tooltipTx="Delete" />
@@ -34,10 +34,7 @@ export const DatasetNavbar = ({
       <StyledButton
         icon="exit"
         tooltipTx="Exit"
-        onPointerDown={() => {
-          toggleSelectMode();
-          toggleSelectAll(false);
-        }}
+        onPointerDown={toggleSelectMode}
       />
     </>
   ) : (

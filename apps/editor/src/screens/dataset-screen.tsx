@@ -33,6 +33,7 @@ export const DatasetScreen: React.FC = observer(() => {
   const [inSelectMode, setInSelectMode] = useState(false);
   const [dataset, setDataset] = useState([] as Dataset);
   const [datasetProps, setDatasetProps] = useState({} as DatasetProps);
+  const [selectCount, setSelectCount] = useState(0);
 
   // fetch dataset
   useEffect(() => {
@@ -55,6 +56,12 @@ export const DatasetScreen: React.FC = observer(() => {
   }, [dataset]);
 
   const setSelection = (id: string, selection: boolean) => {
+    if (datasetProps[id].isSelected !== selection) {
+      setSelectCount(
+        (prevCount) =>
+          prevCount + (datasetProps[id].isSelected && !selection ? -1 : 1),
+      );
+    }
     setDatasetProps((prevDatasetProps: DatasetProps) => ({
       ...prevDatasetProps,
       [id]: { ...prevDatasetProps[id], isSelected: selection },
@@ -62,6 +69,7 @@ export const DatasetScreen: React.FC = observer(() => {
   };
 
   const setSelectAll = (select: boolean) => {
+    setSelectCount(select ? dataset.length : 0);
     setDatasetProps((prevDatasetProps: DatasetProps) => {
       const newDatasetProps: DatasetProps = {};
       Object.keys(prevDatasetProps).forEach((id: string) => {
@@ -81,10 +89,18 @@ export const DatasetScreen: React.FC = observer(() => {
           headerChildren={
             <DatasetNavbar
               inSelectMode={inSelectMode}
+              allSelected={selectCount === dataset.length}
               toggleSelectMode={() => {
+                if (inSelectMode) {
+                  setSelectAll(false);
+                }
                 setInSelectMode((prev: boolean) => !prev);
               }}
-              toggleSelectAll={setSelectAll}
+              toggleSelectAll={() =>
+                selectCount === dataset.length
+                  ? setSelectAll(false)
+                  : setSelectAll(true)
+              }
             />
           }
         >

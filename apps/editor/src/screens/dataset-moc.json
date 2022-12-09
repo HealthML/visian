@@ -1,18 +1,49 @@
 [
   {
     "id": "0",
-    "name": "File 1"
+    "name": "File 1",
+    "annotations": [
+      {
+        "id": "0",
+        "name": "Annotaion 1"
+      },
+      {
+        "id": "1",
+        "name": "Annotaion 2"
+      }
+    ]
   },
   {
     "id": "1",
-    "name": "File 2"
+    "name": "File 2",
+    "annotations": [
+      {
+        "id": "0",
+        "name": "Annotaion 1"
+      },
+      {
+        "id": "1",
+        "name": "Annotaion 2"
+      },
+      {
+        "id": "2",
+        "name": "Annotaion 123123"
+      }
+    ]
   },
   {
     "id": "2",
-    "name": "File 3"
+    "name": "File 3",
+    "annotations": []
   },
   {
     "id": "3",
-    "name": "File 4"
+    "name": "File 4",
+    "annotations": [
+      {
+        "id": "0",
+        "name": "Annotaion 1"
+      }
+    ]
   }
 ]

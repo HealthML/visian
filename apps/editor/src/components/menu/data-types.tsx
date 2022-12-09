@@ -9,6 +9,12 @@ export type DatasetProps = {
 export type DocumentItem = {
   id: string;
   name: string;
+  annoations: Annotation[];
 };
 
 export type Dataset = DocumentItem[];
+
+export type Annotation = {
+  id: string;
+  name: string;
+};

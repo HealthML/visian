@@ -60,3 +60,4 @@ export { ReactComponent as whoAI } from "./who-ai.svg";
 export { ReactComponent as xSmall } from "./x-small.svg";
 export { ReactComponent as checked } from "./checkbox-checked.svg";
 export { ReactComponent as unchecked } from "./checkbox-unchecked.svg";
+export { ReactComponent as chevron } from "./chevron.svg";

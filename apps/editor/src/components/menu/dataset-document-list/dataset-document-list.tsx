@@ -1,5 +1,14 @@
+import { List, stopPropagation } from "@visian/ui-shared";
+import styled from "styled-components";
+
 import { Dataset, DatasetProps, DocumentItem } from "../data-types";
-import { FileItem } from "./file-item";
+import { DocumentListItem } from "./document-list-item";
+
+const DocumentList = styled(List)`
+  width: 100%;
+  height: 400px;
+  overflow-y: auto;
+`;
 
 export const DatasetDocumentList = ({
   inSelectMode,
@@ -13,7 +22,7 @@ export const DatasetDocumentList = ({
   setSelection: (id: string, selction: boolean) => void;
 }) => {
   const documentList = dataset.map((documentItem: DocumentItem) => (
-    <FileItem
+    <DocumentListItem
       inSelectMode={inSelectMode}
       documentItem={documentItem}
       documentProp={datasetProps[documentItem.id]}
@@ -25,5 +34,5 @@ export const DatasetDocumentList = ({
   ));
 
   // eslint-disable-next-line react/jsx-no-useless-fragment
-  return <div style={{ width: "100%" }}>{documentList}</div>;
+  return <DocumentList onWheel={stopPropagation}>{documentList}</DocumentList>;
 };
