@@ -10,7 +10,7 @@ import {
 } from "../components/menu/data-types";
 import { DatasetDocumentList } from "../components/menu/dataset-document-list";
 import { DatasetNavbar } from "../components/menu/dataset-navbar";
-import { datasetMoc } from "./dataset-moc";
+import { getDataset } from "./dataset-moc";
 
 const Main = styled(Box)`
   display: flex;
@@ -36,7 +36,7 @@ export const DatasetScreen: React.FC = observer(() => {
 
   // fetch dataset
   useEffect(() => {
-    setDataset(datasetMoc);
+    (async () => setDataset(await getDataset()))();
   }, []);
 
   // sync datasetProps with dataset

@@ -1,20 +1,18 @@
 import { Dataset } from "../components/menu/data-types";
 
-export const datasetMoc: Dataset = [
-  {
-    id: "0",
-    name: "File 1",
-  },
-  {
-    id: "1",
-    name: "File 2",
-  },
-  {
-    id: "2",
-    name: "File 3",
-  },
-  {
-    id: "3",
-    name: "File 4",
-  },
-];
+const path = "https://webhook.site/faaa6131-98ba-4007-9623-e4af82e3580c";
+
+export const getDataset = async () => {
+  let dataset: Dataset = [];
+  await fetch(path)
+    .then((response) => {
+      if (!response.ok) {
+        throw response;
+      }
+      return response.json();
+    })
+    .then((data) => {
+      dataset = data;
+    });
+  return dataset;
+};
