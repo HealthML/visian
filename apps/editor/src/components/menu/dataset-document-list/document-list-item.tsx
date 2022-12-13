@@ -1,8 +1,7 @@
 import { List, ListItem, SquareButton } from "@visian/ui-shared";
-import { useState } from "react";
 import styled from "styled-components";
 
-import { DocumentItem, DocumentProp } from "../data-types";
+import { DocumentItem } from "../data-types";
 
 const Spacer = styled.div`
   width: 10px;
@@ -17,21 +16,25 @@ const InvisibleButton = styled(SquareButton)`
   padding: 12px;
 `;
 
+const AnnotationsListItem = styled(ListItem)`
+  margin-left: 30px;
+`;
+
 export const DocumentListItem = ({
   inSelectMode,
   documentItem,
-  documentProp,
   toggleSelection,
+  toggleShowAnnotations,
 }: {
   inSelectMode: boolean;
   documentItem: DocumentItem;
-  documentProp: DocumentProp;
   toggleSelection: () => void;
+  toggleShowAnnotations: () => void;
 }) => {
-  const [showAnnotations, setShowAnnotations] = useState(false);
-
-  const annotations = documentItem.annoations.map((annotation) => (
-    <ListItem>{annotation.name}</ListItem>
+  const annotations = documentItem.annotations.map((annotation) => (
+    <AnnotationsListItem key={annotation.id}>
+      {annotation.name}
+    </AnnotationsListItem>
   ));
 
   return (
@@ -40,7 +43,11 @@ export const DocumentListItem = ({
         {inSelectMode && (
           <>
             <InvisibleButton
-              icon={documentProp.isSelected === false ? "unchecked" : "checked"}
+              icon={
+                documentItem.props.isSelected === false
+                  ? "unchecked"
+                  : "checked"
+              }
               tooltipTx="Select"
               onPointerDown={toggleSelection}
             />
@@ -52,13 +59,15 @@ export const DocumentListItem = ({
         <InvisibleButton
           icon="chevron"
           style={{
-            transform: showAnnotations ? "rotate(-180deg)" : "rotate(-90deg)",
+            transform: documentItem.props.showAnnotations
+              ? "rotate(-180deg)"
+              : "rotate(-90deg)",
           }}
           tooltipTx="Select"
-          onPointerDown={toggleSelection}
+          onPointerDown={toggleShowAnnotations}
         />
       </ListItem>
-      <List>{annotations}</List>
+      {documentItem.props.showAnnotations && <List>{annotations}</List>}
     </>
   );
 };

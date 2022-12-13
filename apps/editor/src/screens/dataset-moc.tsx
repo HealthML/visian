@@ -1,4 +1,4 @@
-import { Dataset } from "../components/menu/data-types";
+import { Dataset, DocumentItem } from "../components/menu/data-types";
 
 const path = "https://webhook.site/faaa6131-98ba-4007-9623-e4af82e3580c";
 
@@ -11,6 +11,12 @@ export const getDataset = async () => {
       }
       return response.json();
     })
+    .then((data) =>
+      data.map((document: DocumentItem) => ({
+        ...document,
+        props: { isSelected: false, showAnnotations: false },
+      })),
+    )
     .then((data) => {
       dataset = data;
     });

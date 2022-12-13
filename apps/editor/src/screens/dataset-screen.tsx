@@ -3,11 +3,7 @@ import { observer } from "mobx-react-lite";
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 
-import {
-  Dataset,
-  DatasetProps,
-  DocumentItem,
-} from "../components/menu/data-types";
+import { Dataset, DocumentItem } from "../components/menu/data-types";
 import { DatasetDocumentList } from "../components/menu/dataset-document-list";
 import { DatasetNavbar } from "../components/menu/dataset-navbar";
 import { getDataset } from "./dataset-moc";
@@ -32,7 +28,6 @@ export const DatasetScreen: React.FC = observer(() => {
 
   const [inSelectMode, setInSelectMode] = useState(false);
   const [dataset, setDataset] = useState([] as Dataset);
-  const [datasetProps, setDatasetProps] = useState({} as DatasetProps);
   const [selectCount, setSelectCount] = useState(0);
 
   // fetch dataset
@@ -40,43 +35,48 @@ export const DatasetScreen: React.FC = observer(() => {
     (async () => setDataset(await getDataset()))();
   }, []);
 
-  // sync datasetProps with dataset
-  useEffect(() => {
-    setDatasetProps((prevDatasetProps) => {
-      const newDatasetProps: DatasetProps = {};
-      dataset.forEach((documentItem: DocumentItem) => {
-        newDatasetProps[documentItem.id] = prevDatasetProps[
-          documentItem.id
-        ] ?? {
-          isSelected: false,
-        };
-      });
-      return newDatasetProps;
-    });
-  }, [dataset]);
-
   const setSelection = (id: string, selection: boolean) => {
-    if (datasetProps[id].isSelected !== selection) {
-      setSelectCount(
-        (prevCount) =>
-          prevCount + (datasetProps[id].isSelected && !selection ? -1 : 1),
-      );
-    }
-    setDatasetProps((prevDatasetProps: DatasetProps) => ({
-      ...prevDatasetProps,
-      [id]: { ...prevDatasetProps[id], isSelected: selection },
-    }));
+    setDataset((prevDataset: Dataset) =>
+      prevDataset.map((document: DocumentItem) => {
+        if (document.id !== id) return document;
+        if (document.props.isSelected !== selection) {
+          setSelectCount(
+            (prevCount) =>
+              prevCount + (document.props.isSelected && !selection ? -1 : 1),
+          );
+        }
+        return {
+          ...document,
+          props: { ...document.props, isSelected: selection },
+        };
+      }),
+    );
   };
 
-  const setSelectAll = (select: boolean) => {
-    setSelectCount(select ? dataset.length : 0);
-    setDatasetProps((prevDatasetProps: DatasetProps) => {
-      const newDatasetProps: DatasetProps = {};
-      Object.keys(prevDatasetProps).forEach((id: string) => {
-        newDatasetProps[id] = { ...prevDatasetProps[id], isSelected: select };
-      });
-      return newDatasetProps;
-    });
+  const setSelectAll = (selection: boolean) => {
+    setSelectCount(selection ? dataset.length : 0);
+    setDataset((prevDataset: Dataset) =>
+      prevDataset.map((document: DocumentItem) => ({
+        ...document,
+        props: { ...document.props, isSelected: selection },
+      })),
+    );
+  };
+
+  const toggleShowAnnotations = (id: string) => {
+    setDataset((prevDataset: Dataset) =>
+      prevDataset.map((document) =>
+        document.id === id
+          ? {
+              ...document,
+              props: {
+                ...document.props,
+                showAnnotations: !document.props.showAnnotations,
+              },
+            }
+          : document,
+      ),
+    );
   };
 
   return (
@@ -107,8 +107,8 @@ export const DatasetScreen: React.FC = observer(() => {
           <DatasetDocumentList
             inSelectMode={inSelectMode}
             dataset={dataset}
-            datasetProps={datasetProps}
             setSelection={setSelection}
+            toggleShowAnnotations={toggleShowAnnotations}
           />
         </DatasetModal>
       </Main>

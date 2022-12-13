@@ -1,7 +1,7 @@
 import { List, stopPropagation } from "@visian/ui-shared";
 import styled from "styled-components";
 
-import { Dataset, DatasetProps, DocumentItem } from "../data-types";
+import { Dataset, DocumentItem } from "../data-types";
 import { DocumentListItem } from "./document-list-item";
 
 const DocumentList = styled(List)`
@@ -13,22 +13,22 @@ const DocumentList = styled(List)`
 export const DatasetDocumentList = ({
   inSelectMode,
   dataset,
-  datasetProps,
   setSelection,
+  toggleShowAnnotations,
 }: {
   inSelectMode: boolean;
   dataset: Dataset;
-  datasetProps: DatasetProps;
   setSelection: (id: string, selction: boolean) => void;
+  toggleShowAnnotations: (id: string) => void;
 }) => {
   const documentList = dataset.map((documentItem: DocumentItem) => (
     <DocumentListItem
       inSelectMode={inSelectMode}
       documentItem={documentItem}
-      documentProp={datasetProps[documentItem.id]}
       toggleSelection={() =>
-        setSelection(documentItem.id, !datasetProps[documentItem.id].isSelected)
+        setSelection(documentItem.id, !documentItem.props.isSelected)
       }
+      toggleShowAnnotations={() => toggleShowAnnotations(documentItem.id)}
       key={documentItem.id}
     />
   ));

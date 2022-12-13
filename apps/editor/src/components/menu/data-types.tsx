@@ -1,15 +1,13 @@
 export type DocumentProp = {
   isSelected: boolean;
-};
-
-export type DatasetProps = {
-  [id: string]: DocumentProp;
+  showAnnotations: boolean;
 };
 
 export type DocumentItem = {
   id: string;
   name: string;
-  annoations: Annotation[];
+  annotations: Annotation[];
+  props: DocumentProp;
 };
 
 export type Dataset = DocumentItem[];
