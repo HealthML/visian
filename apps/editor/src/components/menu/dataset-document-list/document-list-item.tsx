@@ -21,12 +21,12 @@ const AnnotationsListItem = styled(ListItem)`
 `;
 
 export const DocumentListItem = ({
-  inSelectMode,
+  isInSelectMode,
   documentItem,
   toggleSelection,
   toggleShowAnnotations,
 }: {
-  inSelectMode: boolean;
+  isInSelectMode: boolean;
   documentItem: DocumentItem;
   toggleSelection: () => void;
   toggleShowAnnotations: () => void;
@@ -40,7 +40,7 @@ export const DocumentListItem = ({
   return (
     <>
       <ListItem>
-        {inSelectMode && (
+        {isInSelectMode && (
           <>
             <InvisibleButton
               icon={

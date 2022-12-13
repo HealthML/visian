@@ -11,19 +11,19 @@ const DocumentList = styled(List)`
 `;
 
 export const DatasetDocumentList = ({
-  inSelectMode,
+  isInSelectMode,
   dataset,
   setSelection,
   toggleShowAnnotations,
 }: {
-  inSelectMode: boolean;
+  isInSelectMode: boolean;
   dataset: Dataset;
   setSelection: (id: string, selction: boolean) => void;
   toggleShowAnnotations: (id: string) => void;
 }) => {
   const documentList = dataset.map((documentItem: DocumentItem) => (
     <DocumentListItem
-      inSelectMode={inSelectMode}
+      isInSelectMode={isInSelectMode}
       documentItem={documentItem}
       toggleSelection={() =>
         setSelection(documentItem.id, !documentItem.props.isSelected)

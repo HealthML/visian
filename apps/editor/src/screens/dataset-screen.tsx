@@ -27,9 +27,9 @@ const DatasetModal = styled(Modal)`
 `;
 
 export const DatasetScreen: React.FC = observer(() => {
-  const [isDraggedOver, { onDrop, ...dragListeners }] = useIsDraggedOver();
+  const [, { onDrop, ...dragListeners }] = useIsDraggedOver();
 
-  const [inSelectMode, setInSelectMode] = useState(false);
+  const [isInSelectMode, setIsInSelectMode] = useState(false);
   const [dataset, setDataset] = useState([] as Dataset);
   const [selectCount, setSelectCount] = useState(0);
 
@@ -101,13 +101,13 @@ export const DatasetScreen: React.FC = observer(() => {
           position="right"
           headerChildren={
             <DatasetNavbar
-              inSelectMode={inSelectMode}
+              isInSelectMode={isInSelectMode}
               allSelected={selectCount === dataset.length}
               toggleSelectMode={() => {
-                if (inSelectMode) {
+                if (isInSelectMode) {
                   setSelectAll(false);
                 }
-                setInSelectMode((prev: boolean) => !prev);
+                setIsInSelectMode((prev: boolean) => !prev);
               }}
               toggleSelectAll={() =>
                 selectCount === dataset.length
@@ -119,7 +119,7 @@ export const DatasetScreen: React.FC = observer(() => {
           }
         >
           <DatasetDocumentList
-            inSelectMode={inSelectMode}
+            isInSelectMode={isInSelectMode}
             dataset={dataset}
             setSelection={setSelection}
             toggleShowAnnotations={toggleShowAnnotations}
