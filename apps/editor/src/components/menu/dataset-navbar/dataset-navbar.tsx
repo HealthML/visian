@@ -16,11 +16,13 @@ export const DatasetNavbar = ({
   allSelected,
   toggleSelectMode,
   toggleSelectAll,
+  deleteSelectedDocuments,
 }: {
   inSelectMode: boolean;
   allSelected: boolean;
   toggleSelectMode: () => void;
   toggleSelectAll: () => void;
+  deleteSelectedDocuments: () => void;
 }) =>
   inSelectMode ? (
     <>
@@ -29,7 +31,11 @@ export const DatasetNavbar = ({
         handlePress={toggleSelectAll}
       />
       <StyledButton icon="export" tooltipTx="Export" />
-      <StyledButton icon="trash" tooltipTx="Delete" />
+      <StyledButton
+        icon="trash"
+        tooltipTx="Delete"
+        onPointerDown={deleteSelectedDocuments}
+      />
       <StyledButton icon="whoAI" tooltipTx="Auto Anotate" />
       <StyledButton
         icon="exit"

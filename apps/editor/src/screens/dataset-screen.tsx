@@ -6,7 +6,10 @@ import styled from "styled-components";
 import { Dataset, DocumentItem } from "../components/menu/data-types";
 import { DatasetDocumentList } from "../components/menu/dataset-document-list";
 import { DatasetNavbar } from "../components/menu/dataset-navbar";
-import { getDataset } from "./dataset-moc";
+import {
+  deleteDocumentFromDatabase,
+  getDatasetFormDatabase,
+} from "./hub-actions";
 
 const Main = styled(Box)`
   display: flex;
@@ -32,7 +35,7 @@ export const DatasetScreen: React.FC = observer(() => {
 
   // fetch dataset
   useEffect(() => {
-    (async () => setDataset(await getDataset()))();
+    (async () => setDataset(await getDatasetFormDatabase()))();
   }, []);
 
   const setSelection = (id: string, selection: boolean) => {
@@ -79,6 +82,16 @@ export const DatasetScreen: React.FC = observer(() => {
     );
   };
 
+  const deleteSelectedDocuments = () => {
+    setDataset((prevDataset) =>
+      prevDataset.filter((document) =>
+        document.props.isSelected
+          ? !deleteDocumentFromDatabase(document.id)
+          : true,
+      ),
+    );
+  };
+
   return (
     <Screen {...dragListeners} title="VISIAN Projects">
       <Main>
@@ -101,6 +114,7 @@ export const DatasetScreen: React.FC = observer(() => {
                   ? setSelectAll(false)
                   : setSelectAll(true)
               }
+              deleteSelectedDocuments={deleteSelectedDocuments}
             />
           }
         >
