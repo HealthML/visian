@@ -258,5 +258,13 @@
   "right-click": "Rechtsklick",
   "middle-click": "Mittelklick",
   "scroll-up": "Hoch Scrollen",
-  "scroll-down": "Herunter Scrollen"
+  "scroll-down": "Herunter Scrollen",
+
+  "select-all": "Alles auswählen",
+  "deselect-all": "Auswahl aufheben",
+  "export-documents": "Dokumente exportieren",
+  "delete-documents": "Dokumente löschen",
+  "auto-annotate-documents": "Dokumente automatisch annotieren",
+  "exit-select-mode": "Auswahlmodus verlassen",
+  "select-mode": "Auswahlmodus"
 }

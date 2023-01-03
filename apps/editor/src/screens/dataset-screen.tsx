@@ -1,24 +1,21 @@
 import { Box, Modal, Screen, useIsDraggedOver } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import styled from "styled-components";
 
-import { Dataset, DocumentItem } from "../components/menu/data-types";
 import { DatasetDocumentList } from "../components/menu/dataset-document-list";
-import { DatasetNavbar } from "../components/menu/dataset-navbar";
+import { DatasetNavigationbar } from "../components/menu/dataset-navigationbar";
 import {
   deleteDocumentFromDatabase,
   getDatasetFormDatabase,
-} from "./hub-actions";
+} from "../components/menu/hub-actions";
+import { Dataset, DocumentItem } from "../types/dataset-types";
 
 const Main = styled(Box)`
   display: flex;
   justify-content: center;
   height: 100%;
-  padding-top: 5rem;
-  padding-bottom: 5rem;
-  padding-left: 10rem;
-  padding-right: 10rem;
+  padding: 5rem 10rem;
 `;
 
 const DatasetModal = styled(Modal)`
@@ -38,7 +35,7 @@ export const DatasetScreen: React.FC = observer(() => {
     (async () => setDataset(await getDatasetFormDatabase()))();
   }, []);
 
-  const setSelection = (id: string, selection: boolean) => {
+  const setSelection = useCallback((id: string, selection: boolean) => {
     setDataset((prevDataset: Dataset) =>
       prevDataset.map((document: DocumentItem) => {
         if (document.id !== id) return document;
@@ -54,35 +51,22 @@ export const DatasetScreen: React.FC = observer(() => {
         };
       }),
     );
-  };
+  }, []);
 
-  const setSelectAll = (selection: boolean) => {
-    setSelectCount(selection ? dataset.length : 0);
-    setDataset((prevDataset: Dataset) =>
-      prevDataset.map((document: DocumentItem) => ({
-        ...document,
-        props: { ...document.props, isSelected: selection },
-      })),
-    );
-  };
+  const setSelectAll = useCallback(
+    (selection: boolean) => {
+      setSelectCount(selection ? dataset.length : 0);
+      setDataset((prevDataset: Dataset) =>
+        prevDataset.map((document: DocumentItem) => ({
+          ...document,
+          props: { ...document.props, isSelected: selection },
+        })),
+      );
+    },
+    [dataset],
+  );
 
-  const toggleShowAnnotations = (id: string) => {
-    setDataset((prevDataset: Dataset) =>
-      prevDataset.map((document) =>
-        document.id === id
-          ? {
-              ...document,
-              props: {
-                ...document.props,
-                showAnnotations: !document.props.showAnnotations,
-              },
-            }
-          : document,
-      ),
-    );
-  };
-
-  const deleteSelectedDocuments = () => {
+  const deleteSelectedDocuments = useCallback(() => {
     setDataset((prevDataset) =>
       prevDataset.filter((document) =>
         document.props.isSelected
@@ -90,17 +74,17 @@ export const DatasetScreen: React.FC = observer(() => {
           : true,
       ),
     );
-  };
+  }, []);
 
   return (
     <Screen {...dragListeners} title="VISIAN Projects">
       <Main>
         <DatasetModal
           hideHeaderDivider={false}
-          labelTx="Example Dataset"
+          label="Example Dataset"
           position="right"
           headerChildren={
-            <DatasetNavbar
+            <DatasetNavigationbar
               isInSelectMode={isInSelectMode}
               allSelected={selectCount === dataset.length}
               toggleSelectMode={() => {
@@ -122,7 +106,6 @@ export const DatasetScreen: React.FC = observer(() => {
             isInSelectMode={isInSelectMode}
             dataset={dataset}
             setSelection={setSelection}
-            toggleShowAnnotations={toggleShowAnnotations}
           />
         </DatasetModal>
       </Main>

@@ -1,6 +1,6 @@
-import { Dataset, DocumentItem } from "../components/menu/data-types";
+import { Dataset, DocumentItem } from "../../types/dataset-types";
 
-const path = "https://webhook.site/faaa6131-98ba-4007-9623-e4af82e3580c";
+const path = "https://webhook.site/b9c9c6a8-7804-4477-869e-dc6cec7ba8ba";
 
 // fetches Dataset from Database
 export const getDatasetFormDatabase = async () => {
@@ -15,7 +15,7 @@ export const getDatasetFormDatabase = async () => {
     .then((data) =>
       data.map((document: DocumentItem) => ({
         ...document,
-        props: { isSelected: false, showAnnotations: false },
+        props: { isSelected: false },
       })),
     )
     .then((data) => {

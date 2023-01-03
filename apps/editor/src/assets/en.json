@@ -258,5 +258,13 @@
   "right-click": "Right Click",
   "middle-click": "Middle Click",
   "scroll-up": "Scroll Up",
-  "scroll-down": "Scroll Down"
+  "scroll-down": "Scroll Down",
+
+  "select-all": "Select all",
+  "deselect-all": "Deselect all",
+  "export-documents": "Export documents",
+  "delete-documents": "Delete documents",
+  "auto-annotate-documents": "Auto-annotate documents",
+  "exit-select-mode": "Exit select mode",
+  "select-mode": "Select mode"
 }

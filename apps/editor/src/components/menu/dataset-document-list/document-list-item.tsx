@@ -1,7 +1,8 @@
-import { List, ListItem, SquareButton } from "@visian/ui-shared";
+import { InvisibleButton, List, ListItem, Text } from "@visian/ui-shared";
+import { useCallback, useState } from "react";
 import styled from "styled-components";
 
-import { DocumentItem } from "../data-types";
+import { DocumentItem } from "../../../types/dataset-types";
 
 const Spacer = styled.div`
   width: 10px;
@@ -11,63 +12,61 @@ const ExpandedSpacer = styled.div`
   margin-right: auto;
 `;
 
-const InvisibleButton = styled(SquareButton)`
-  border: none;
-  padding: 12px;
+const IconButton = styled(InvisibleButton)`
+  width: 30px;
 `;
 
-const AnnotationsListItem = styled(ListItem)`
+const AnnotationsList = styled(List)`
   margin-left: 30px;
+  width: calc(100% - 30px);
 `;
 
 export const DocumentListItem = ({
   isInSelectMode,
   documentItem,
   toggleSelection,
-  toggleShowAnnotations,
 }: {
   isInSelectMode: boolean;
   documentItem: DocumentItem;
   toggleSelection: () => void;
-  toggleShowAnnotations: () => void;
 }) => {
-  const annotations = documentItem.annotations.map((annotation) => (
-    <AnnotationsListItem key={annotation.id}>
-      {annotation.name}
-    </AnnotationsListItem>
-  ));
+  const [showAnnotations, setShowAnnotations] = useState(false);
+
+  const toggleShowAnnotations = useCallback(
+    () => setShowAnnotations((prevShowAnnotations) => !prevShowAnnotations),
+    [],
+  );
 
   return (
     <>
       <ListItem>
         {isInSelectMode && (
           <>
-            <InvisibleButton
+            <IconButton
               icon={
                 documentItem.props.isSelected === false
                   ? "unchecked"
                   : "checked"
               }
-              tooltipTx="Select"
               onPointerDown={toggleSelection}
             />
             <Spacer />
           </>
         )}
-        <h4>{documentItem.name}</h4>
+        <Text>{documentItem.name}</Text>
         <ExpandedSpacer />
-        <InvisibleButton
-          icon="chevron"
-          style={{
-            transform: documentItem.props.showAnnotations
-              ? "rotate(-180deg)"
-              : "rotate(-90deg)",
-          }}
-          tooltipTx="Select"
+        <IconButton
+          icon={showAnnotations ? "arrowDown" : "arrowLeft"}
           onPointerDown={toggleShowAnnotations}
         />
       </ListItem>
-      {documentItem.props.showAnnotations && <List>{annotations}</List>}
+      {showAnnotations && (
+        <AnnotationsList>
+          {documentItem.annotations.map((annotation) => (
+            <ListItem key={annotation.id}>{annotation.name}</ListItem>
+          ))}
+        </AnnotationsList>
+      )}
     </>
   );
 };

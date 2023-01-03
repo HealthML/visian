@@ -1,6 +1,5 @@
 export type DocumentProp = {
   isSelected: boolean;
-  showAnnotations: boolean;
 };
 
 export type DocumentItem = {
