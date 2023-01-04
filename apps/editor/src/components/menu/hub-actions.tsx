@@ -25,4 +25,4 @@ export const getDatasetFormDatabase = async () => {
 };
 
 // returns true if Document is succsessfully deleted from Database
-export const deleteDocumentFromDatabase = async (id: string) => true;
+export const deleteDocumentFromDatabase = (id: string) => true;

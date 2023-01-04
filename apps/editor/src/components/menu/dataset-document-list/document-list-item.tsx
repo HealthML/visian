@@ -2,7 +2,7 @@ import { InvisibleButton, List, ListItem, Text } from "@visian/ui-shared";
 import { useCallback, useState } from "react";
 import styled from "styled-components";
 
-import { DocumentWithProps } from "../../../types";
+import { Annotation, DocumentWithProps } from "../../../types";
 
 const Spacer = styled.div`
   width: 10px;
@@ -33,7 +33,10 @@ export const DocumentListItem = ({
   const [showAnnotations, setShowAnnotations] = useState(false);
 
   const toggleShowAnnotations = useCallback(
-    () => setShowAnnotations((prevShowAnnotations) => !prevShowAnnotations),
+    () =>
+      setShowAnnotations(
+        (prevShowAnnotations: boolean) => !prevShowAnnotations,
+      ),
     [],
   );
 
@@ -62,9 +65,11 @@ export const DocumentListItem = ({
       </ListItem>
       {showAnnotations && (
         <AnnotationsList>
-          {documentWithProps.documentItem.annotations.map((annotation) => (
-            <ListItem key={annotation.id}>{annotation.name}</ListItem>
-          ))}
+          {documentWithProps.documentItem.annotations.map(
+            (annotation: Annotation) => (
+              <ListItem key={annotation.id}>{annotation.name}</ListItem>
+            ),
+          )}
         </AnnotationsList>
       )}
     </>

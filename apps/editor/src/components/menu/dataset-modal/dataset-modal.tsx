@@ -2,7 +2,7 @@ import { Modal } from "@visian/ui-shared";
 import { useCallback, useEffect, useState } from "react";
 import styled from "styled-components";
 
-import { Dataset, DocumentWithProps } from "../../../types";
+import { Dataset, DocumentItem, DocumentWithProps } from "../../../types";
 import { DatasetDocumentList } from "../dataset-document-list";
 import { DatasetNavigationbar } from "../dataset-navigationbar";
 
@@ -20,33 +20,42 @@ export const DatasetModal = ({
 }) => {
   const [isInSelectMode, setIsInSelectMode] = useState(false);
   const [datasetWithProps, setDatasetWithProps] = useState(
-    dataset.map((document) => ({
+    dataset.map((document: DocumentItem) => ({
       documentItem: document,
       props: { isSelected: false },
     })),
   );
   const [selectCount, setSelectCount] = useState(0);
 
-  // sync dataset with datasetProps
+  // sync dataset with datasetProps and update selectCount
   useEffect(() => {
-    setDatasetWithProps(
-      dataset.map((document) => ({
+    let newDatasetWithProps: DocumentWithProps[] = [];
+    let prevDatasetWithProps: DocumentWithProps[] = [];
+    setDatasetWithProps((prev: DocumentWithProps[]) => {
+      prevDatasetWithProps = prev;
+      newDatasetWithProps = dataset.map((document: DocumentItem) => ({
         documentItem: document,
-        props: { isSelected: false },
-      })),
+        props: prevDatasetWithProps.find(
+          (prevDocument: DocumentWithProps) =>
+            prevDocument.documentItem.id === document.id,
+        )?.props ?? { isSelected: false },
+      }));
+      return newDatasetWithProps;
+    });
+    setSelectCount(
+      newDatasetWithProps.filter(
+        (document: DocumentWithProps) => document.props.isSelected,
+      ).length,
     );
   }, [dataset]);
 
   const setSelection = useCallback((id: string, selection: boolean) => {
+    let countDiff = 0;
     setDatasetWithProps((prevDatasetWithProps: DocumentWithProps[]) =>
       prevDatasetWithProps.map((documentWithProps: DocumentWithProps) => {
         if (documentWithProps.documentItem.id !== id) return documentWithProps;
         if (documentWithProps.props.isSelected !== selection) {
-          setSelectCount(
-            (prevCount) =>
-              prevCount +
-              (documentWithProps.props.isSelected && !selection ? -1 : 1),
-          );
+          countDiff = documentWithProps.props.isSelected && !selection ? -1 : 1;
         }
         return {
           ...documentWithProps,
@@ -54,6 +63,7 @@ export const DatasetModal = ({
         };
       }),
     );
+    setSelectCount((prevCount: number) => prevCount + countDiff);
   }, []);
 
   const setSelectAll = useCallback(
@@ -81,10 +91,6 @@ export const DatasetModal = ({
       );
     deleteDocuments(selectedIds);
   }, [deleteDocuments, datasetWithProps]);
-
-  useEffect(() => {
-    console.log(selectCount);
-  });
 
   return (
     <StyledModal

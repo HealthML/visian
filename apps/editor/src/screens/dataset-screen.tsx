@@ -4,8 +4,11 @@ import React, { useCallback, useEffect, useState } from "react";
 import styled from "styled-components";
 
 import { DatasetModal } from "../components/menu/dataset-modal";
-import { getDatasetFormDatabase } from "../components/menu/hub-actions";
-import { Dataset } from "../types";
+import {
+  deleteDocumentFromDatabase,
+  getDatasetFormDatabase,
+} from "../components/menu/hub-actions";
+import { Dataset, DocumentItem } from "../types";
 
 const Main = styled(Box)`
   display: flex;
@@ -24,20 +27,13 @@ export const DatasetScreen: React.FC = observer(() => {
     (async () => setDataset(await getDatasetFormDatabase()))();
   }, []);
 
-  const deleteDocuments = (ids: string[]) => {
-    setDataset((prevDataset) =>
-      prevDataset.filter((document) => !ids.includes(document.id)),
+  const deleteDocuments = useCallback((ids: string[]) => {
+    const deletedIds = ids.filter((id) => deleteDocumentFromDatabase(id));
+    setDataset((prevDataset: Dataset) =>
+      prevDataset.filter(
+        (document: DocumentItem) => !deletedIds.includes(document.id),
+      ),
     );
-  };
-
-  const deleteSelectedDocuments = useCallback(() => {
-    // setDataset((prevDataset) =>
-    //   prevDataset.filter((document) =>
-    //     document.props.isSelected
-    //       ? !deleteDocumentFromDatabase(document.id)
-    //       : true,
-    //   ),
-    // );
   }, []);
 
   return (
