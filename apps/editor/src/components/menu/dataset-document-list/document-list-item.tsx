@@ -2,7 +2,7 @@ import { InvisibleButton, List, ListItem, Text } from "@visian/ui-shared";
 import { useCallback, useState } from "react";
 import styled from "styled-components";
 
-import { DocumentItem } from "../../../types/dataset-types";
+import { DocumentWithProps } from "../../../types";
 
 const Spacer = styled.div`
   width: 10px;
@@ -23,11 +23,11 @@ const AnnotationsList = styled(List)`
 
 export const DocumentListItem = ({
   isInSelectMode,
-  documentItem,
+  documentWithProps,
   toggleSelection,
 }: {
   isInSelectMode: boolean;
-  documentItem: DocumentItem;
+  documentWithProps: DocumentWithProps;
   toggleSelection: () => void;
 }) => {
   const [showAnnotations, setShowAnnotations] = useState(false);
@@ -44,7 +44,7 @@ export const DocumentListItem = ({
           <>
             <IconButton
               icon={
-                documentItem.props.isSelected === false
+                documentWithProps.props.isSelected === false
                   ? "unchecked"
                   : "checked"
               }
@@ -53,7 +53,7 @@ export const DocumentListItem = ({
             <Spacer />
           </>
         )}
-        <Text>{documentItem.name}</Text>
+        <Text>{documentWithProps.documentItem.name}</Text>
         <ExpandedSpacer />
         <IconButton
           icon={showAnnotations ? "arrowDown" : "arrowLeft"}
@@ -62,7 +62,7 @@ export const DocumentListItem = ({
       </ListItem>
       {showAnnotations && (
         <AnnotationsList>
-          {documentItem.annotations.map((annotation) => (
+          {documentWithProps.documentItem.annotations.map((annotation) => (
             <ListItem key={annotation.id}>{annotation.name}</ListItem>
           ))}
         </AnnotationsList>

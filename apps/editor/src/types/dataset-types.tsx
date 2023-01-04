@@ -6,7 +6,6 @@ export type DocumentItem = {
   id: string;
   name: string;
   annotations: Annotation[];
-  props: DocumentProp;
 };
 
 export type Dataset = DocumentItem[];
@@ -14,4 +13,9 @@ export type Dataset = DocumentItem[];
 export type Annotation = {
   id: string;
   name: string;
+};
+
+export type DocumentWithProps = {
+  documentItem: DocumentItem;
+  props: DocumentProp;
 };

@@ -1,7 +1,7 @@
 import { List, stopPropagation } from "@visian/ui-shared";
 import styled from "styled-components";
 
-import { Dataset, DocumentItem } from "../../../types/dataset-types";
+import { DocumentWithProps } from "../../../types";
 import { DocumentListItem } from "./document-list-item";
 
 const DocumentList = styled(List)`
@@ -12,22 +12,25 @@ const DocumentList = styled(List)`
 
 export const DatasetDocumentList = ({
   isInSelectMode,
-  dataset,
+  datasetWithProps,
   setSelection,
 }: {
   isInSelectMode: boolean;
-  dataset: Dataset;
+  datasetWithProps: DocumentWithProps[];
   setSelection: (id: string, selction: boolean) => void;
 }) => (
   <DocumentList onWheel={stopPropagation}>
-    {dataset.map((documentItem: DocumentItem) => (
+    {datasetWithProps.map((documentWithProps: DocumentWithProps) => (
       <DocumentListItem
         isInSelectMode={isInSelectMode}
-        documentItem={documentItem}
+        documentWithProps={documentWithProps}
         toggleSelection={() =>
-          setSelection(documentItem.id, !documentItem.props.isSelected)
+          setSelection(
+            documentWithProps.documentItem.id,
+            !documentWithProps.props.isSelected,
+          )
         }
-        key={documentItem.id}
+        key={documentWithProps.documentItem.id}
       />
     ))}
   </DocumentList>
