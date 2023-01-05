@@ -64,7 +64,7 @@ export const DatasetModal = ({ dataset }: { dataset: Dataset }) => {
   return (
     <StyledModal
       hideHeaderDivider={false}
-      label="Example Dataset"
+      label={dataset.name}
       position="right"
       headerChildren={
         <DatasetNavigationbar

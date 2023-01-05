@@ -29,7 +29,11 @@ export const DatasetNavigationbar = ({
       />
       <StyledButton isDisabled icon="export" tooltipTx="export-documents" />
       <StyledButton isDisabled icon="trash" tooltipTx="delete-documents" />
-      <StyledButton icon="whoAI" tooltipTx="auto-annotate-documents" />
+      <StyledButton
+        isDisabled
+        icon="whoAI"
+        tooltipTx="auto-annotate-documents"
+      />
       <StyledButton
         icon="exit"
         tooltipTx="exit-select-mode"
