@@ -51,11 +51,14 @@ export const DatasetModal = ({ dataset }: { dataset: Dataset }) => {
     setIsInSelectMode((prevIsInSelectMode) => !prevIsInSelectMode);
   }, []);
 
-  const toggleSelectAll = useCallback(() => setSelectAll(!areAllSelected), []);
-
   const areAllSelected = useMemo(
     () => [...selectedImages.values()].every((value) => value),
     [selectedImages],
+  );
+
+  const toggleSelectAll = useCallback(
+    () => setSelectAll(!areAllSelected),
+    [areAllSelected, setSelectAll],
   );
 
   return (
