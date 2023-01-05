@@ -11,13 +11,7 @@ const StyledModal = styled(Modal)`
   width: 100%;
 `;
 
-export const DatasetModal = ({
-  dataset,
-  deleteDocuments,
-}: {
-  dataset: Dataset;
-  deleteDocuments: (ids: string[]) => void;
-}) => {
+export const DatasetModal = ({ dataset }: { dataset: Dataset }) => {
   const [isInSelectMode, setIsInSelectMode] = useState(false);
 
   const [selectedImages, setSelectedImages] = useState<Map<string, boolean>>(
@@ -59,23 +53,6 @@ export const DatasetModal = ({
 
   const toggleSelectAll = useCallback(() => setSelectAll(!areAllSelected), []);
 
-  const deleteSelectedDocuments = useCallback(() => {
-    console.log("pass");
-  }, []);
-
-  // const deleteSelectedDocuments = useCallback(() => {
-  //   const selectedIds = datasetWithProps
-  //     .filter(
-  //       (documentWithProps: DocumentWithProps) =>
-  //         documentWithProps.props.isSelected,
-  //     )
-  //     .map(
-  //       (documentWithProps: DocumentWithProps) =>
-  //         documentWithProps.documentItem.id,
-  //     );
-  //   deleteDocuments(selectedIds);
-  // }, [deleteDocuments, datasetWithProps]);
-
   const areAllSelected = useMemo(
     () => [...selectedImages.values()].every((value) => value),
     [selectedImages],
@@ -92,7 +69,6 @@ export const DatasetModal = ({
           allSelected={areAllSelected}
           toggleSelectMode={toggleSelectMode}
           toggleSelectAll={toggleSelectAll}
-          deleteSelectedDocuments={deleteSelectedDocuments}
         />
       }
     >

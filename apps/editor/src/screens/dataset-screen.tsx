@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 
 import { DatasetModal } from "../components/menu/dataset-modal";
-import { getDatasetFormDatabase } from "../components/menu/hub-actions";
+import { fetchDataset } from "../components/menu/hub-actions";
 import { Dataset } from "../types";
 
 const Main = styled(Box)`
@@ -19,7 +19,7 @@ export const DatasetScreen: React.FC = observer(() => {
 
   // fetch dataset
   useEffect(() => {
-    (async () => setDataset(await getDatasetFormDatabase()))();
+    (async () => setDataset(await fetchDataset()))();
   }, []);
 
   if (!dataset?.images) {
@@ -33,12 +33,7 @@ export const DatasetScreen: React.FC = observer(() => {
   return (
     <Screen title="VISIAN Projects">
       <Main>
-        <DatasetModal
-          dataset={dataset}
-          deleteDocuments={() => {
-            console.log("foo");
-          }}
-        />
+        <DatasetModal dataset={dataset} />
       </Main>
     </Screen>
   );

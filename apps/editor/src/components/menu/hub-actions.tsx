@@ -3,8 +3,7 @@ import { Dataset } from "../../types/dataset-types";
 const baseUrl = "http://localhost:3000/";
 const datasetId = "f21452ab-a82a-4f88-9786-0c5cbf1086fa";
 
-// fetches Dataset from Database
-export const getDatasetFormDatabase = async () => {
+export const fetchDataset = async () => {
   const datasetResponse = await fetch(`${baseUrl}datasets/${datasetId}`);
   const dataset = (await datasetResponse.json()) as Dataset;
 
@@ -23,6 +22,3 @@ export const getDatasetFormDatabase = async () => {
 
   return dataset;
 };
-
-// returns true if Document is succsessfully deleted from Database
-export const deleteDocumentFromDatabase = (id: string) => true;
