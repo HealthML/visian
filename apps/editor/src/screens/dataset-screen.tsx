@@ -18,8 +18,6 @@ const Main = styled(Box)`
 `;
 
 export const DatasetScreen: React.FC = observer(() => {
-  const [, { onDrop, ...dragListeners }] = useIsDraggedOver();
-
   const [dataset, setDataset] = useState([] as Dataset);
 
   // fetch dataset
@@ -37,7 +35,7 @@ export const DatasetScreen: React.FC = observer(() => {
   }, []);
 
   return (
-    <Screen {...dragListeners} title="VISIAN Projects">
+    <Screen title="VISIAN Projects">
       <Main>
         <DatasetModal dataset={dataset} deleteDocuments={deleteDocuments} />
       </Main>

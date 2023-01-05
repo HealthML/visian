@@ -19,33 +19,24 @@ export const DatasetModal = ({
   deleteDocuments: (ids: string[]) => void;
 }) => {
   const [isInSelectMode, setIsInSelectMode] = useState(false);
+  // TODO: use a map for props
   const [datasetWithProps, setDatasetWithProps] = useState(
     dataset.map((document: DocumentItem) => ({
       documentItem: document,
       props: { isSelected: false },
     })),
   );
-  const [selectCount, setSelectCount] = useState(0);
 
   // sync dataset with datasetProps and update selectCount
   useEffect(() => {
-    let newDatasetWithProps: DocumentWithProps[] = [];
-    let prevDatasetWithProps: DocumentWithProps[] = [];
-    setDatasetWithProps((prev: DocumentWithProps[]) => {
-      prevDatasetWithProps = prev;
-      newDatasetWithProps = dataset.map((document: DocumentItem) => ({
+    setDatasetWithProps((prev: DocumentWithProps[]) =>
+      dataset.map((document: DocumentItem) => ({
         documentItem: document,
-        props: prevDatasetWithProps.find(
+        props: prev.find(
           (prevDocument: DocumentWithProps) =>
             prevDocument.documentItem.id === document.id,
         )?.props ?? { isSelected: false },
-      }));
-      return newDatasetWithProps;
-    });
-    setSelectCount(
-      newDatasetWithProps.filter(
-        (document: DocumentWithProps) => document.props.isSelected,
-      ).length,
+      })),
     );
   }, [dataset]);
 
@@ -63,21 +54,16 @@ export const DatasetModal = ({
         };
       }),
     );
-    setSelectCount((prevCount: number) => prevCount + countDiff);
   }, []);
 
-  const setSelectAll = useCallback(
-    (selection: boolean) => {
-      setSelectCount(selection ? datasetWithProps.length : 0);
-      setDatasetWithProps((prevDatasetWithProps: DocumentWithProps[]) =>
-        prevDatasetWithProps.map((documentWithProps: DocumentWithProps) => ({
-          ...documentWithProps,
-          props: { ...documentWithProps.props, isSelected: selection },
-        })),
-      );
-    },
-    [datasetWithProps],
-  );
+  const setSelectAll = useCallback((selection: boolean) => {
+    setDatasetWithProps((prevDatasetWithProps: DocumentWithProps[]) =>
+      prevDatasetWithProps.map((documentWithProps: DocumentWithProps) => ({
+        ...documentWithProps,
+        props: { ...documentWithProps.props, isSelected: selection },
+      })),
+    );
+  }, []);
 
   const deleteSelectedDocuments = useCallback(() => {
     const selectedIds = datasetWithProps
