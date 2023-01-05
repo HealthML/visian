@@ -1,14 +1,11 @@
-import { Box, Screen, useIsDraggedOver } from "@visian/ui-shared";
+import { Box, Screen } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 
 import { DatasetModal } from "../components/menu/dataset-modal";
-import {
-  deleteDocumentFromDatabase,
-  getDatasetFormDatabase,
-} from "../components/menu/hub-actions";
-import { Dataset, DocumentItem } from "../types";
+import { getDatasetFormDatabase } from "../components/menu/hub-actions";
+import { Dataset } from "../types";
 
 const Main = styled(Box)`
   display: flex;
@@ -18,26 +15,30 @@ const Main = styled(Box)`
 `;
 
 export const DatasetScreen: React.FC = observer(() => {
-  const [dataset, setDataset] = useState([] as Dataset);
+  const [dataset, setDataset] = useState<Dataset>();
 
   // fetch dataset
   useEffect(() => {
     (async () => setDataset(await getDatasetFormDatabase()))();
   }, []);
 
-  const deleteDocuments = useCallback((ids: string[]) => {
-    const deletedIds = ids.filter((id) => deleteDocumentFromDatabase(id));
-    setDataset((prevDataset: Dataset) =>
-      prevDataset.filter(
-        (document: DocumentItem) => !deletedIds.includes(document.id),
-      ),
+  if (!dataset?.images) {
+    return (
+      <Screen title="VISIAN Projects">
+        <Main>Loading...</Main>
+      </Screen>
     );
-  }, []);
+  }
 
   return (
     <Screen title="VISIAN Projects">
       <Main>
-        <DatasetModal dataset={dataset} deleteDocuments={deleteDocuments} />
+        <DatasetModal
+          dataset={dataset}
+          deleteDocuments={() => {
+            console.log("foo");
+          }}
+        />
       </Main>
     </Screen>
   );

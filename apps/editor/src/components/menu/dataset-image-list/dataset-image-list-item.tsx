@@ -2,7 +2,7 @@ import { InvisibleButton, List, ListItem, Text } from "@visian/ui-shared";
 import { useCallback, useState } from "react";
 import styled from "styled-components";
 
-import { Annotation, DocumentWithProps } from "../../../types";
+import { Annotation, Image } from "../../../types";
 
 const Spacer = styled.div`
   width: 10px;
@@ -21,22 +21,21 @@ const AnnotationsList = styled(List)`
   width: calc(100% - 30px);
 `;
 
-export const DocumentListItem = ({
+export const DatasetImageListItem = ({
   isInSelectMode,
-  documentWithProps,
+  image,
+  isSelected,
   toggleSelection,
 }: {
   isInSelectMode: boolean;
-  documentWithProps: DocumentWithProps;
+  image: Image;
+  isSelected: boolean;
   toggleSelection: () => void;
 }) => {
   const [showAnnotations, setShowAnnotations] = useState(false);
 
   const toggleShowAnnotations = useCallback(
-    () =>
-      setShowAnnotations(
-        (prevShowAnnotations: boolean) => !prevShowAnnotations,
-      ),
+    () => setShowAnnotations((prev: boolean) => !prev),
     [],
   );
 
@@ -46,17 +45,13 @@ export const DocumentListItem = ({
         {isInSelectMode && (
           <>
             <IconButton
-              icon={
-                documentWithProps.props.isSelected === false
-                  ? "unchecked"
-                  : "checked"
-              }
+              icon={isSelected ? "checked" : "unchecked"}
               onPointerDown={toggleSelection}
             />
             <Spacer />
           </>
         )}
-        <Text>{documentWithProps.documentItem.name}</Text>
+        <Text>{image.dataUri}</Text>
         <ExpandedSpacer />
         <IconButton
           icon={showAnnotations ? "arrowDown" : "arrowLeft"}
@@ -65,11 +60,9 @@ export const DocumentListItem = ({
       </ListItem>
       {showAnnotations && (
         <AnnotationsList>
-          {documentWithProps.documentItem.annotations.map(
-            (annotation: Annotation) => (
-              <ListItem key={annotation.id}>{annotation.name}</ListItem>
-            ),
-          )}
+          {image.annotations.map((annotation: Annotation) => (
+            <ListItem key={annotation.id}>{annotation.dataUri}</ListItem>
+          ))}
         </AnnotationsList>
       )}
     </>

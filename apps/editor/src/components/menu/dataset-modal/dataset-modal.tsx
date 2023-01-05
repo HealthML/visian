@@ -2,8 +2,8 @@ import { Modal } from "@visian/ui-shared";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import styled from "styled-components";
 
-import { Dataset, DocumentItem, DocumentWithProps } from "../../../types";
-import { DatasetDocumentList } from "../dataset-document-list";
+import { Dataset } from "../../../types";
+import { DatasetImageList } from "../dataset-image-list";
 import { DatasetNavigationbar } from "../dataset-navigationbar";
 
 const StyledModal = styled(Modal)`
@@ -19,71 +19,66 @@ export const DatasetModal = ({
   deleteDocuments: (ids: string[]) => void;
 }) => {
   const [isInSelectMode, setIsInSelectMode] = useState(false);
-  // TODO: use a map for props
-  const [datasetWithProps, setDatasetWithProps] = useState(
-    dataset.map((document: DocumentItem) => ({
-      documentItem: document,
-      props: { isSelected: false },
-    })),
+
+  const [selectedImages, setSelectedImages] = useState<Map<string, boolean>>(
+    new Map(dataset.images.map((image) => [image.id, false])),
   );
 
   // sync dataset with datasetProps and update selectCount
   useEffect(() => {
-    setDatasetWithProps((prev: DocumentWithProps[]) =>
-      dataset.map((document: DocumentItem) => ({
-        documentItem: document,
-        props: prev.find(
-          (prevDocument: DocumentWithProps) =>
-            prevDocument.documentItem.id === document.id,
-        )?.props ?? { isSelected: false },
-      })),
-    );
+    setSelectedImages((previousSelectedImages) => {
+      const newSelectedImages = new Map(
+        dataset.images.map((image) => [image.id, false]),
+      );
+      previousSelectedImages.forEach((value, key) => {
+        if (newSelectedImages.has(key)) newSelectedImages.set(key, value);
+      });
+      return newSelectedImages;
+    });
   }, [dataset]);
 
   const setSelection = useCallback((id: string, selection: boolean) => {
-    let countDiff = 0;
-    setDatasetWithProps((prevDatasetWithProps: DocumentWithProps[]) =>
-      prevDatasetWithProps.map((documentWithProps: DocumentWithProps) => {
-        if (documentWithProps.documentItem.id !== id) return documentWithProps;
-        if (documentWithProps.props.isSelected !== selection) {
-          countDiff = documentWithProps.props.isSelected && !selection ? -1 : 1;
-        }
-        return {
-          ...documentWithProps,
-          props: { ...documentWithProps.props, isSelected: selection },
-        };
-      }),
-    );
+    setSelectedImages((prevSelectedImages) => {
+      prevSelectedImages.set(id, selection);
+      return new Map(prevSelectedImages);
+    });
   }, []);
 
   const setSelectAll = useCallback((selection: boolean) => {
-    setDatasetWithProps((prevDatasetWithProps: DocumentWithProps[]) =>
-      prevDatasetWithProps.map((documentWithProps: DocumentWithProps) => ({
-        ...documentWithProps,
-        props: { ...documentWithProps.props, isSelected: selection },
-      })),
-    );
+    setSelectedImages((prevSelectedImages) => {
+      prevSelectedImages.forEach((value, key) =>
+        prevSelectedImages.set(key, selection),
+      );
+      return new Map(prevSelectedImages);
+    });
   }, []);
 
+  const toggleSelectMode = useCallback(() => {
+    setIsInSelectMode((prevIsInSelectMode) => !prevIsInSelectMode);
+  }, []);
+
+  const toggleSelectAll = useCallback(() => setSelectAll(!areAllSelected), []);
+
   const deleteSelectedDocuments = useCallback(() => {
-    const selectedIds = datasetWithProps
-      .filter(
-        (documentWithProps: DocumentWithProps) =>
-          documentWithProps.props.isSelected,
-      )
-      .map(
-        (documentWithProps: DocumentWithProps) =>
-          documentWithProps.documentItem.id,
-      );
-    deleteDocuments(selectedIds);
-  }, [deleteDocuments, datasetWithProps]);
+    console.log("pass");
+  }, []);
+
+  // const deleteSelectedDocuments = useCallback(() => {
+  //   const selectedIds = datasetWithProps
+  //     .filter(
+  //       (documentWithProps: DocumentWithProps) =>
+  //         documentWithProps.props.isSelected,
+  //     )
+  //     .map(
+  //       (documentWithProps: DocumentWithProps) =>
+  //         documentWithProps.documentItem.id,
+  //     );
+  //   deleteDocuments(selectedIds);
+  // }, [deleteDocuments, datasetWithProps]);
 
   const areAllSelected = useMemo(
-    () =>
-      datasetWithProps.filter(
-        (document: DocumentWithProps) => document.props.isSelected,
-      ).length === datasetWithProps.length,
-    [datasetWithProps],
+    () => [...selectedImages.values()].every((value) => value),
+    [selectedImages],
   );
 
   return (
@@ -95,24 +90,16 @@ export const DatasetModal = ({
         <DatasetNavigationbar
           isInSelectMode={isInSelectMode}
           allSelected={areAllSelected}
-          // TODO: Use a callback
-          toggleSelectMode={() => {
-            if (isInSelectMode) {
-              setSelectAll(false);
-            }
-            setIsInSelectMode((prev: boolean) => !prev);
-          }}
-          // TODO: Use a callback
-          toggleSelectAll={() =>
-            areAllSelected ? setSelectAll(false) : setSelectAll(true)
-          }
+          toggleSelectMode={toggleSelectMode}
+          toggleSelectAll={toggleSelectAll}
           deleteSelectedDocuments={deleteSelectedDocuments}
         />
       }
     >
-      <DatasetDocumentList
+      <DatasetImageList
         isInSelectMode={isInSelectMode}
-        datasetWithProps={datasetWithProps}
+        dataset={dataset}
+        selectedImages={selectedImages}
         setSelection={setSelection}
       />
     </StyledModal>

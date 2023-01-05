@@ -1,21 +1,16 @@
-export type DocumentProp = {
-  isSelected: boolean;
-};
-
-export type DocumentItem = {
+export type Dataset = {
   id: string;
   name: string;
+  images: Image[];
+};
+
+export type Image = {
+  id: string;
+  dataUri: string;
   annotations: Annotation[];
 };
 
-export type Dataset = DocumentItem[];
-
 export type Annotation = {
   id: string;
-  name: string;
-};
-
-export type DocumentWithProps = {
-  documentItem: DocumentItem;
-  props: DocumentProp;
+  dataUri: string;
 };
