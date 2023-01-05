@@ -1,5 +1,5 @@
 import { Modal } from "@visian/ui-shared";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import styled from "styled-components";
 
 import { Dataset, DocumentItem, DocumentWithProps } from "../../../types";
@@ -92,6 +92,14 @@ export const DatasetModal = ({
     deleteDocuments(selectedIds);
   }, [deleteDocuments, datasetWithProps]);
 
+  const areAllSelected = useMemo(
+    () =>
+      datasetWithProps.filter(
+        (document: DocumentWithProps) => document.props.isSelected,
+      ).length === datasetWithProps.length,
+    [datasetWithProps],
+  );
+
   return (
     <StyledModal
       hideHeaderDivider={false}
@@ -100,17 +108,17 @@ export const DatasetModal = ({
       headerChildren={
         <DatasetNavigationbar
           isInSelectMode={isInSelectMode}
-          allSelected={selectCount === datasetWithProps.length}
+          allSelected={areAllSelected}
+          // TODO: Use a callback
           toggleSelectMode={() => {
             if (isInSelectMode) {
               setSelectAll(false);
             }
             setIsInSelectMode((prev: boolean) => !prev);
           }}
+          // TODO: Use a callback
           toggleSelectAll={() =>
-            selectCount === datasetWithProps.length
-              ? setSelectAll(false)
-              : setSelectAll(true)
+            areAllSelected ? setSelectAll(false) : setSelectAll(true)
           }
           deleteSelectedDocuments={deleteSelectedDocuments}
         />
