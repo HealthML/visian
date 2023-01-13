@@ -1,7 +1,7 @@
 import { List, stopPropagation } from "@visian/ui-shared";
 import styled from "styled-components";
 
-import { Dataset, Image } from "../../../types";
+import { Image } from "../../../types";
 import { DatasetImageListItem } from "./dataset-image-list-item";
 
 const DocumentList = styled(List)`
@@ -12,20 +12,23 @@ const DocumentList = styled(List)`
 
 export const DatasetImageList = ({
   isInSelectMode,
-  dataset,
+  images,
+  refetchImages,
   selectedImages,
   setSelection,
 }: {
   isInSelectMode: boolean;
-  dataset: Dataset;
+  images: Image[];
+  refetchImages: () => void;
   selectedImages: Map<string, boolean>;
   setSelection: (id: string, selection: boolean) => void;
 }) => (
   <DocumentList onWheel={stopPropagation}>
-    {dataset.images.map((image: Image) => (
+    {images.map((image: Image) => (
       <DatasetImageListItem
         isInSelectMode={isInSelectMode}
         image={image}
+        refetchImages={refetchImages}
         isSelected={!!selectedImages.get(image.id)}
         toggleSelection={() =>
           setSelection(image.id, !selectedImages.get(image.id))

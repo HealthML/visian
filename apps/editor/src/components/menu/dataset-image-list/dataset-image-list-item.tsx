@@ -1,7 +1,8 @@
 import { InvisibleButton, List, ListItem, Text } from "@visian/ui-shared";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import styled from "styled-components";
 
+import { useAnnotationsBy } from "../../../querys";
 import { Annotation, Image } from "../../../types";
 
 const Spacer = styled.div`
@@ -24,20 +25,38 @@ const AnnotationsList = styled(List)`
 export const DatasetImageListItem = ({
   isInSelectMode,
   image,
+  refetchImages,
   isSelected,
   toggleSelection,
 }: {
   isInSelectMode: boolean;
   image: Image;
+  refetchImages: () => void;
   isSelected: boolean;
   toggleSelection: () => void;
 }) => {
+  const {
+    annotations,
+    annotationsError,
+    isErrorAnnotations,
+    isLoadingAnnotations,
+    refetchAnnotations,
+  } = useAnnotationsBy(image.id);
+
   const [showAnnotations, setShowAnnotations] = useState(false);
 
-  const toggleShowAnnotations = useCallback(
-    () => setShowAnnotations((prev: boolean) => !prev),
-    [],
-  );
+  // refetch images if annotations can't be loaded
+  useEffect(() => {
+    if (isErrorAnnotations) refetchImages();
+  }, [isErrorAnnotations, refetchImages]);
+
+  const toggleShowAnnotations = useCallback(() => {
+    setShowAnnotations((prev: boolean) => {
+      // refetch annotations if the annotations list is being opened
+      if (!prev) refetchAnnotations();
+      return !prev;
+    });
+  }, [refetchAnnotations]);
 
   return (
     <>
@@ -58,13 +77,20 @@ export const DatasetImageListItem = ({
           onPointerDown={toggleShowAnnotations}
         />
       </ListItem>
-      {showAnnotations && (
-        <AnnotationsList>
-          {image.annotations.map((annotation: Annotation) => (
-            <ListItem key={annotation.id}>{annotation.dataUri}</ListItem>
-          ))}
-        </AnnotationsList>
-      )}
+      {showAnnotations &&
+        (isLoadingAnnotations ? (
+          <Text>Loading Annotations...</Text>
+        ) : isErrorAnnotations ? (
+          <Text>{`Error on loading Annotations: ${annotationsError?.message}`}</Text>
+        ) : (
+          annotations && (
+            <AnnotationsList>
+              {annotations.map((annotation: Annotation) => (
+                <ListItem key={annotation.id}>{annotation.dataUri}</ListItem>
+              ))}
+            </AnnotationsList>
+          )
+        ))}
     </>
   );
 };

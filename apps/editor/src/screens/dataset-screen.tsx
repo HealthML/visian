@@ -1,11 +1,11 @@
-import { Box, Screen } from "@visian/ui-shared";
+import { Box, Modal, Screen, Text } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
-import React, { useEffect, useState } from "react";
+import React from "react";
+import { ReactQueryDevtools } from "react-query/devtools";
 import styled from "styled-components";
 
 import { DatasetModal } from "../components/menu/dataset-modal";
-import { fetchDataset } from "../components/menu/hub-actions";
-import { Dataset } from "../types";
+import { useDataset } from "../querys";
 
 const Main = styled(Box)`
   display: flex;
@@ -14,27 +14,39 @@ const Main = styled(Box)`
   padding: 5rem 10rem;
 `;
 
+const StyledModal = styled(Modal)`
+  vertical-align: middle;
+  width: 100%;
+`;
+
+const datasetId = "2f7c3aaf-6008-4537-9ab2-3893b16a67f6";
+
 export const DatasetScreen: React.FC = observer(() => {
-  const [dataset, setDataset] = useState<Dataset>();
-
-  // fetch dataset
-  useEffect(() => {
-    (async () => setDataset(await fetchDataset()))();
-  }, []);
-
-  if (!dataset?.images) {
-    return (
-      <Screen title="VISIAN Projects">
-        <Main>Loading...</Main>
-      </Screen>
-    );
-  }
+  const { dataset, datasetError, isErrorDataset, isLoadingDataset } =
+    useDataset(datasetId);
 
   return (
-    <Screen title="VISIAN Projects">
+    <Screen
+      title={
+        isLoadingDataset
+          ? "VISIAN Dataset loading..."
+          : isErrorDataset
+          ? "VISIAN Dataset Error!"
+          : dataset
+          ? `VISIAN Dataset: ${dataset.name}`
+          : "VISIAN Dataset"
+      }
+    >
       <Main>
-        <DatasetModal dataset={dataset} />
+        {isLoadingDataset && <StyledModal label="Loading Dataset..." />}
+        {isErrorDataset && (
+          <StyledModal label="Error!">
+            <Text>{`Error on loading Dataset: ${datasetError?.message}`}</Text>
+          </StyledModal>
+        )}
+        {dataset && <DatasetModal dataset={dataset} />}
       </Main>
+      {false && <ReactQueryDevtools initialIsOpen={false} />}
     </Screen>
   );
 });

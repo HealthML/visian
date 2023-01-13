@@ -1,7 +1,8 @@
-import { Modal } from "@visian/ui-shared";
+import { Modal, Text } from "@visian/ui-shared";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import styled from "styled-components";
 
+import { useImagesBy } from "../../../querys";
 import { Dataset } from "../../../types";
 import { DatasetImageList } from "../dataset-image-list";
 import { DatasetNavigationbar } from "../dataset-navigationbar";
@@ -14,22 +15,25 @@ const StyledModal = styled(Modal)`
 export const DatasetModal = ({ dataset }: { dataset: Dataset }) => {
   const [isInSelectMode, setIsInSelectMode] = useState(false);
 
+  const { images, imagesError, isErrorImages, isLoadingImages, refetchImages } =
+    useImagesBy(dataset.id);
+
   const [selectedImages, setSelectedImages] = useState<Map<string, boolean>>(
-    new Map(dataset.images.map((image) => [image.id, false])),
+    new Map((images ?? []).map((image) => [image.id, false])),
   );
 
-  // sync dataset with datasetProps and update selectCount
+  // sync selectedImages and images array
   useEffect(() => {
     setSelectedImages((previousSelectedImages) => {
       const newSelectedImages = new Map(
-        dataset.images.map((image) => [image.id, false]),
+        (images ?? []).map((image) => [image.id, false]),
       );
       previousSelectedImages.forEach((value, key) => {
         if (newSelectedImages.has(key)) newSelectedImages.set(key, value);
       });
       return newSelectedImages;
     });
-  }, [dataset]);
+  }, [images]);
 
   const setSelection = useCallback((id: string, selection: boolean) => {
     setSelectedImages((prevSelectedImages) => {
@@ -75,12 +79,19 @@ export const DatasetModal = ({ dataset }: { dataset: Dataset }) => {
         />
       }
     >
-      <DatasetImageList
-        isInSelectMode={isInSelectMode}
-        dataset={dataset}
-        selectedImages={selectedImages}
-        setSelection={setSelection}
-      />
+      {isLoadingImages && <Text>Loading Images...</Text>}
+      {isErrorImages && (
+        <Text>{`Error on loading Images: ${imagesError?.message}`}</Text>
+      )}
+      {images && (
+        <DatasetImageList
+          isInSelectMode={isInSelectMode}
+          images={images}
+          refetchImages={refetchImages}
+          selectedImages={selectedImages}
+          setSelection={setSelection}
+        />
+      )}
     </StyledModal>
   );
 };

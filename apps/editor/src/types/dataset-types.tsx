@@ -1,16 +1,23 @@
 export type Dataset = {
   id: string;
   name: string;
-  images: Image[];
+  project: string;
+  createdAt: string;
+  updatedAt: string;
 };
 
 export type Image = {
   id: string;
   dataUri: string;
-  annotations: Annotation[];
+  dataset: string;
+  createdAt: string;
+  updatedAt: string;
 };
 
 export type Annotation = {
   id: string;
   dataUri: string;
+  image: string;
+  createdAt: string;
+  updatedAt: string;
 };
