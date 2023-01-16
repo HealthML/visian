@@ -1,23 +1,23 @@
-export type Dataset = {
+export interface Dataset {
   id: string;
   name: string;
   project: string;
   createdAt: string;
   updatedAt: string;
-};
+}
 
-export type Image = {
+export interface Image {
   id: string;
   dataUri: string;
   dataset: string;
   createdAt: string;
   updatedAt: string;
-};
+}
 
-export type Annotation = {
+export interface Annotation {
   id: string;
   dataUri: string;
   image: string;
   createdAt: string;
   updatedAt: string;
-};
+}
