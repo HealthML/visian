@@ -1,5 +1,6 @@
 {
   "loading": "Lädt...",
+  "error": "Fehler!",
   "reset": "Zurücksetzen",
 
   "drop-file": "Legen Sie Scan oder Annotation hier ab",
@@ -258,5 +259,24 @@
   "right-click": "Rechtsklick",
   "middle-click": "Mittelklick",
   "scroll-up": "Hoch Scrollen",
-  "scroll-down": "Herunter Scrollen"
+  "scroll-down": "Herunter Scrollen",
+
+  "select-all": "Alles auswählen",
+  "deselect-all": "Auswahl aufheben",
+  "export-documents": "Dokumente exportieren",
+  "delete-documents": "Dokumente löschen",
+  "auto-annotate-documents": "Dokumente automatisch annotieren",
+  "exit-select-mode": "Auswahlmodus verlassen",
+  "select-mode": "Auswahlmodus",
+
+  "dataset-base-title": "VISIAN Dataset",
+
+  "dataset-loading": "Dataset wird geladen...",
+  "dataset-loading-error": "Fehler beim Laden des Datensatzes:",
+
+  "images-loading": "Images werden geladen...",
+  "images-loading-error": "Fehler beim Laden der Images:",
+
+  "annotations-loading": "Annotationen werden geladen...",
+  "annotations-loading-error": "Fehler beim Laden der Annotationen:"
 }
