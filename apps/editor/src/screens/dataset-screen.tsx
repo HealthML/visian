@@ -1,4 +1,4 @@
-import { Box, Modal, Screen, Text } from "@visian/ui-shared";
+import { Box, Modal, Screen, Text, useTranslation } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
 import React from "react";
 import { ReactQueryDevtools } from "react-query/devtools";
@@ -20,28 +20,32 @@ const StyledModal = styled(Modal)`
 `;
 
 const datasetId = "2f7c3aaf-6008-4537-9ab2-3893b16a67f6";
-
+// `Error on loading Dataset: ${datasetError?.message}`
 export const DatasetScreen: React.FC = observer(() => {
   const { dataset, datasetError, isErrorDataset, isLoadingDataset } =
     useDataset(datasetId);
 
+  const { t: translate } = useTranslation();
+
   return (
     <Screen
-      title={
+      title={`${translate("dataset-base-title")} ${
         isLoadingDataset
-          ? "VISIAN Dataset loading..."
+          ? translate("loading")
           : isErrorDataset
-          ? "VISIAN Dataset Error!"
+          ? translate("error")
           : dataset
-          ? `VISIAN Dataset: ${dataset.name}`
-          : "VISIAN Dataset"
-      }
+          ? dataset.name
+          : ""
+      }`}
     >
       <Main>
-        {isLoadingDataset && <StyledModal label="Loading Dataset..." />}
+        {isLoadingDataset && <StyledModal labelTx="dataset-loading" />}
         {isErrorDataset && (
-          <StyledModal label="Error!">
-            <Text>{`Error on loading Dataset: ${datasetError?.message}`}</Text>
+          <StyledModal labelTx="error">
+            <Text>{`${translate("dataset-loading-error")} ${
+              datasetError?.message
+            }`}</Text>
           </StyledModal>
         )}
         {dataset && <DatasetModal dataset={dataset} />}

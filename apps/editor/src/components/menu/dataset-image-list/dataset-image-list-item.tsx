@@ -1,4 +1,10 @@
-import { InvisibleButton, List, ListItem, Text } from "@visian/ui-shared";
+import {
+  InvisibleButton,
+  List,
+  ListItem,
+  Text,
+  useTranslation,
+} from "@visian/ui-shared";
 import { useCallback, useEffect, useState } from "react";
 import styled from "styled-components";
 
@@ -58,6 +64,8 @@ export const DatasetImageListItem = ({
     });
   }, [refetchAnnotations]);
 
+  const { t: translate } = useTranslation();
+
   return (
     <>
       <ListItem>
@@ -79,9 +87,11 @@ export const DatasetImageListItem = ({
       </ListItem>
       {showAnnotations &&
         (isLoadingAnnotations ? (
-          <Text>Loading Annotations...</Text>
+          <Text tx="annotations-loading" />
         ) : isErrorAnnotations ? (
-          <Text>{`Error on loading Annotations: ${annotationsError?.message}`}</Text>
+          <Text>{`${translate("annotations-loading-error")} ${
+            annotationsError?.message
+          }`}</Text>
         ) : (
           annotations && (
             <AnnotationsList>

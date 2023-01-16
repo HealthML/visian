@@ -1,5 +1,6 @@
 {
   "loading": "Loading...",
+  "error": "Error!",
   "reset": "Reset",
 
   "drop-file": "Drop your scan or annotation here",
@@ -266,5 +267,16 @@
   "delete-documents": "Delete documents",
   "auto-annotate-documents": "Auto-annotate documents",
   "exit-select-mode": "Exit select mode",
-  "select-mode": "Select mode"
+  "select-mode": "Select mode",
+
+  "dataset-base-title": "VISIAN Dataset",
+
+  "dataset-loading": "Loading Dataset...",
+  "dataset-loading-error": "Error on loading Dataset:",
+
+  "images-loading": "Loading Images...",
+  "images-loading-error": "Error on loading Images:",
+
+  "annotations-loading": "Loading Annotations...",
+  "annotations-loading-error": "Error on loading Annotations:"
 }

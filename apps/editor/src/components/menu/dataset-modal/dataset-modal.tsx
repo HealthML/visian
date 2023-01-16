@@ -1,4 +1,4 @@
-import { Modal, Text } from "@visian/ui-shared";
+import { Modal, Text, useTranslation } from "@visian/ui-shared";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import styled from "styled-components";
 
@@ -65,6 +65,8 @@ export const DatasetModal = ({ dataset }: { dataset: Dataset }) => {
     [areAllSelected, setSelectAll],
   );
 
+  const { t: translate } = useTranslation();
+
   return (
     <StyledModal
       hideHeaderDivider={false}
@@ -79,9 +81,11 @@ export const DatasetModal = ({ dataset }: { dataset: Dataset }) => {
         />
       }
     >
-      {isLoadingImages && <Text>Loading Images...</Text>}
+      {isLoadingImages && <Text tx="images-loading" />}
       {isErrorImages && (
-        <Text>{`Error on loading Images: ${imagesError?.message}`}</Text>
+        <Text>{`${translate("images-loading-error")} ${
+          imagesError?.message
+        }`}</Text>
       )}
       {images && (
         <DatasetImageList

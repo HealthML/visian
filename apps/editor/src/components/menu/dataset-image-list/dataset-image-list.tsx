@@ -4,7 +4,7 @@ import styled from "styled-components";
 import { Image } from "../../../types";
 import { DatasetImageListItem } from "./dataset-image-list-item";
 
-const DocumentList = styled(List)`
+const ImageList = styled(List)`
   width: 100%;
   height: 400px;
   overflow-y: auto;
@@ -23,7 +23,7 @@ export const DatasetImageList = ({
   selectedImages: Map<string, boolean>;
   setSelection: (id: string, selection: boolean) => void;
 }) => (
-  <DocumentList onWheel={stopPropagation}>
+  <ImageList onWheel={stopPropagation}>
     {images.map((image: Image) => (
       <DatasetImageListItem
         isInSelectMode={isInSelectMode}
@@ -36,5 +36,5 @@ export const DatasetImageList = ({
         key={image.id}
       />
     ))}
-  </DocumentList>
+  </ImageList>
 );
