@@ -1,21 +1,23 @@
+import axios, { AxiosError } from "axios";
 import { useQuery } from "react-query";
 
 import { Image } from "../types";
 import { baseUrl } from "./base-url";
 
-const fetchImagesBy = async (datasetId: string) => {
-  const imagesResponse = await fetch(`${baseUrl}images?dataset=${datasetId}`);
-  if (!imagesResponse.ok)
-    throw new Error(`${imagesResponse.statusText} (${imagesResponse.status})`);
-  const images = (await imagesResponse.json()) as Image[];
-  return images;
+const getImagesBy = async (datasetId: string) => {
+  const imagesResponse = await axios.get<Image[]>(`${baseUrl}images`, {
+    params: {
+      dataset: datasetId,
+    },
+  });
+  return imagesResponse.data;
 };
 
 export const useImagesBy = (datasetId: string) => {
   const { data, error, isError, isLoading, refetch, remove } = useQuery<
     Image[],
-    Error
-  >(["imagesBy", datasetId], () => fetchImagesBy(datasetId), {
+    AxiosError<Image[]>
+  >(["imagesBy", datasetId], () => getImagesBy(datasetId), {
     retry: 2, // retry twice if fetch fails
     refetchInterval: 1000 * 10, // refetch every 10 seconds
   });

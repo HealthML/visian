@@ -1,23 +1,21 @@
+import axios, { AxiosError } from "axios";
 import { useQuery } from "react-query";
 
 import { Dataset } from "../types";
 import { baseUrl } from "./base-url";
 
-const fetchDataset = async (datasetId: string) => {
-  const datasetResponse = await fetch(`${baseUrl}datasets/${datasetId}`);
-  if (!datasetResponse.ok)
-    throw new Error(
-      `${datasetResponse.statusText} (${datasetResponse.status})`,
-    );
-  const dataset = (await datasetResponse.json()) as Dataset;
-  return dataset;
+const getDataset = async (datasetId: string) => {
+  const datasetResponse = await axios.get<Dataset>(
+    `${baseUrl}datasets/${datasetId}`,
+  );
+  return datasetResponse.data;
 };
 
 export const useDataset = (datasetId: string) => {
   const { data, error, isError, isLoading, refetch, remove } = useQuery<
     Dataset,
-    Error
-  >(["dataset", datasetId], () => fetchDataset(datasetId), {
+    AxiosError<Dataset>
+  >(["dataset", datasetId], () => getDataset(datasetId), {
     retry: 2, // retry twice if fetch fails
     refetchInterval: 1000 * 60, // refetch every minute
   });

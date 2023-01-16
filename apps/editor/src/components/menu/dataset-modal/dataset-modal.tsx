@@ -84,8 +84,8 @@ export const DatasetModal = ({ dataset }: { dataset: Dataset }) => {
       {isLoadingImages && <Text tx="images-loading" />}
       {isErrorImages && (
         <Text>{`${translate("images-loading-error")} ${
-          imagesError?.message
-        }`}</Text>
+          imagesError?.response?.statusText
+        } (${imagesError?.response?.status})`}</Text>
       )}
       {images && (
         <DatasetImageList

@@ -20,7 +20,7 @@ const StyledModal = styled(Modal)`
 `;
 
 const datasetId = "2f7c3aaf-6008-4537-9ab2-3893b16a67f6";
-// `Error on loading Dataset: ${datasetError?.message}`
+
 export const DatasetScreen: React.FC = observer(() => {
   const { dataset, datasetError, isErrorDataset, isLoadingDataset } =
     useDataset(datasetId);
@@ -44,8 +44,8 @@ export const DatasetScreen: React.FC = observer(() => {
         {isErrorDataset && (
           <StyledModal labelTx="error">
             <Text>{`${translate("dataset-loading-error")} ${
-              datasetError?.message
-            }`}</Text>
+              datasetError?.response?.statusText
+            } (${datasetError?.response?.status})`}</Text>
           </StyledModal>
         )}
         {dataset && <DatasetModal dataset={dataset} />}

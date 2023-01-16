@@ -90,8 +90,8 @@ export const DatasetImageListItem = ({
           <Text tx="annotations-loading" />
         ) : isErrorAnnotations ? (
           <Text>{`${translate("annotations-loading-error")} ${
-            annotationsError?.message
-          }`}</Text>
+            annotationsError?.response?.statusText
+          } (${annotationsError?.response?.status})`}</Text>
         ) : (
           annotations && (
             <AnnotationsList>

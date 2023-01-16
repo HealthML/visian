@@ -1,25 +1,26 @@
+import axios, { AxiosError } from "axios";
 import { useQuery } from "react-query";
 
 import { Annotation } from "../types";
 import { baseUrl } from "./base-url";
 
-const fetchAnnotationsBy = async (imageId: string) => {
-  const annotationsResponse = await fetch(
-    `${baseUrl}annotations?image=${imageId}`,
+const getAnnotationsBy = async (imageId: string) => {
+  const annotationsResponse = await axios.get<Annotation[]>(
+    `${baseUrl}annotations`,
+    {
+      params: {
+        image: imageId,
+      },
+    },
   );
-  if (!annotationsResponse.ok)
-    throw new Error(
-      `${annotationsResponse.statusText} (${annotationsResponse.status})`,
-    );
-  const annotations = (await annotationsResponse.json()) as Annotation[];
-  return annotations;
+  return annotationsResponse.data;
 };
 
 export const useAnnotationsBy = (imageId: string) => {
   const { data, error, isError, isLoading, refetch, remove } = useQuery<
     Annotation[],
-    Error
-  >(["annotationsBy", imageId], () => fetchAnnotationsBy(imageId), {
+    AxiosError<Annotation[]>
+  >(["annotationsBy", imageId], () => getAnnotationsBy(imageId), {
     retry: 2, // retry twice if fetch fails
     refetchInterval: 1000 * 20, // refetch every 20 seconds
   });
