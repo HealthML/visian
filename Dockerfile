@@ -1,6 +1,7 @@
 FROM node:18 as build
 
 ENV NODE_ENV=production
+ARG NX_ANNOTATION_SERVICE_HUB_URL
 
 WORKDIR /app
 

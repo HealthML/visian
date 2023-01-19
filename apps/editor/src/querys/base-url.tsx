@@ -1,3 +1,3 @@
-export const baseUrl = "http://localhost:3000/";
+export const baseUrl = process.env.NX_ANNOTATION_SERVICE_HUB_URL;
 
 export default baseUrl;
