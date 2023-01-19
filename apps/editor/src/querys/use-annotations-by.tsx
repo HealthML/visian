@@ -2,11 +2,11 @@ import axios, { AxiosError } from "axios";
 import { useQuery } from "react-query";
 
 import { Annotation } from "../types";
-import { baseUrl } from "./base-url";
+import { hubBaseUrl } from "./hub-base-url";
 
 const getAnnotationsBy = async (imageId: string) => {
   const annotationsResponse = await axios.get<Annotation[]>(
-    `${baseUrl}annotations`,
+    `${hubBaseUrl}annotations`,
     {
       params: {
         image: imageId,

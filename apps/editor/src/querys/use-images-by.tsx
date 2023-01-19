@@ -2,10 +2,10 @@ import axios, { AxiosError } from "axios";
 import { useQuery } from "react-query";
 
 import { Image } from "../types";
-import { baseUrl } from "./base-url";
+import { hubBaseUrl } from "./hub-base-url";
 
 const getImagesBy = async (datasetId: string) => {
-  const imagesResponse = await axios.get<Image[]>(`${baseUrl}images`, {
+  const imagesResponse = await axios.get<Image[]>(`${hubBaseUrl}images`, {
     params: {
       dataset: datasetId,
     },
