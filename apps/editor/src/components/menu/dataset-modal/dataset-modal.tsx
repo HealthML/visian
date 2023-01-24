@@ -6,11 +6,14 @@ import { useImagesBy } from "../../../querys";
 import { Dataset } from "../../../types";
 import { DatasetImageList } from "../dataset-image-list";
 import { DatasetNavigationbar } from "../dataset-navigationbar";
+import {ModelSelectionPopup} from "../ml-model-popup";
 
 const StyledModal = styled(Modal)`
   vertical-align: middle;
   width: 100%;
+  z-index: 49;
 `;
+//TODO: z-index logic
 
 export const DatasetModal = ({ dataset }: { dataset: Dataset }) => {
   const [isInSelectMode, setIsInSelectMode] = useState(false);
@@ -21,6 +24,15 @@ export const DatasetModal = ({ dataset }: { dataset: Dataset }) => {
   const [selectedImages, setSelectedImages] = useState<Map<string, boolean>>(
     new Map((images ?? []).map((image) => [image.id, false])),
   );
+
+  // model selection popup
+  const [isModelSelectionPopUpOpen, setIsModelSelectionPopUpOpen] = useState(false);
+    const openModelSelectionPopUp = useCallback(() => {
+      setIsModelSelectionPopUpOpen(true);
+    }, []);
+    const closeModelSelectionPopUp = useCallback(() => {
+      setIsModelSelectionPopUpOpen(false);
+    }, []);
 
   // sync selectedImages and images array
   useEffect(() => {
@@ -65,8 +77,13 @@ export const DatasetModal = ({ dataset }: { dataset: Dataset }) => {
     [areAllSelected, setSelectAll],
   );
 
-  const { t: translate } = useTranslation();
+  const getSelectedImageList = () => {
+    const imageSelection = [...selectedImages.keys()].filter((image) => selectedImages.get(image));
+    return imageSelection;
+  };
 
+  const { t: translate } = useTranslation();
+  
   return (
     <StyledModal
       hideHeaderDivider={false}
@@ -78,6 +95,7 @@ export const DatasetModal = ({ dataset }: { dataset: Dataset }) => {
           allSelected={areAllSelected}
           toggleSelectMode={toggleSelectMode}
           toggleSelectAll={toggleSelectAll}
+          openModelSelectionPopUp={openModelSelectionPopUp}
         />
       }
     >
@@ -96,6 +114,12 @@ export const DatasetModal = ({ dataset }: { dataset: Dataset }) => {
           setSelection={setSelection}
         />
       )}
+       <ModelSelectionPopup
+          isOpen={isModelSelectionPopUpOpen}
+          onClose={closeModelSelectionPopUp}
+          getSelectedImageList={getSelectedImageList}
+        />
     </StyledModal>
+     
   );
 };

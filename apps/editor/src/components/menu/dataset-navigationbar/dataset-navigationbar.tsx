@@ -15,11 +15,13 @@ export const DatasetNavigationbar = ({
   allSelected,
   toggleSelectMode,
   toggleSelectAll,
+  openModelSelectionPopUp,
 }: {
   isInSelectMode: boolean;
   allSelected: boolean;
   toggleSelectMode: () => void;
   toggleSelectAll: () => void;
+  openModelSelectionPopUp: () => void;
 }) =>
   isInSelectMode ? (
     <>
@@ -30,9 +32,9 @@ export const DatasetNavigationbar = ({
       <StyledButton isDisabled icon="export" tooltipTx="export-documents" />
       <StyledButton isDisabled icon="trash" tooltipTx="delete-documents" />
       <StyledButton
-        isDisabled
         icon="whoAI"
         tooltipTx="auto-annotate-documents"
+        onPointerDown={openModelSelectionPopUp}
       />
       <StyledButton
         icon="exit"
