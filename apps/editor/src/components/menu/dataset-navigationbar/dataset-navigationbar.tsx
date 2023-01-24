@@ -13,12 +13,14 @@ const StyledTextButton = styled(ButtonParam)`
 export const DatasetNavigationbar = ({
   isInSelectMode,
   allSelected,
+  anySelected,
   toggleSelectMode,
   toggleSelectAll,
   openModelSelectionPopUp,
 }: {
   isInSelectMode: boolean;
   allSelected: boolean;
+  anySelected: boolean;
   toggleSelectMode: () => void;
   toggleSelectAll: () => void;
   openModelSelectionPopUp: () => void;
@@ -32,6 +34,7 @@ export const DatasetNavigationbar = ({
       <StyledButton isDisabled icon="export" tooltipTx="export-documents" />
       <StyledButton isDisabled icon="trash" tooltipTx="delete-documents" />
       <StyledButton
+        isDisabled={!anySelected}
         icon="whoAI"
         tooltipTx="auto-annotate-documents"
         onPointerDown={openModelSelectionPopUp}

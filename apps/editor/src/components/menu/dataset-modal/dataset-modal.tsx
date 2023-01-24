@@ -72,6 +72,11 @@ export const DatasetModal = ({ dataset }: { dataset: Dataset }) => {
     [selectedImages],
   );
 
+  const isAnySelected = useMemo(
+    () => [...selectedImages.values()].some((value) => value),
+    [selectedImages],
+  );
+
   const toggleSelectAll = useCallback(
     () => setSelectAll(!areAllSelected),
     [areAllSelected, setSelectAll],
@@ -93,6 +98,7 @@ export const DatasetModal = ({ dataset }: { dataset: Dataset }) => {
         <DatasetNavigationbar
           isInSelectMode={isInSelectMode}
           allSelected={areAllSelected}
+          anySelected={isAnySelected}
           toggleSelectMode={toggleSelectMode}
           toggleSelectAll={toggleSelectAll}
           openModelSelectionPopUp={openModelSelectionPopUp}
