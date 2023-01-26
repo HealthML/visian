@@ -2,11 +2,11 @@ import axios, { AxiosError } from "axios";
 import { useQuery } from "react-query";
 
 import { Dataset } from "../types";
-import { baseUrl } from "./base-url";
+import { hubBaseUrl } from "./hub-base-url";
 
 const getDataset = async (datasetId: string) => {
   const datasetResponse = await axios.get<Dataset>(
-    `${baseUrl}datasets/${datasetId}`,
+    `${hubBaseUrl}datasets/${datasetId}`,
   );
   return datasetResponse.data;
 };

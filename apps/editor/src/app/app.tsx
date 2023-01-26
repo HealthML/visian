@@ -20,6 +20,7 @@ import {
 } from "../constants";
 import { setUpEventHandling } from "../event-handling";
 import type { RootStore } from "../models";
+import hubBaseUrl from "../querys/hub-base-url";
 import { DatasetScreen, EditorScreen } from "../screens";
 import { setupRootStore, StoreProvider } from "./root-store";
 
@@ -75,10 +76,16 @@ function App(): JSX.Element {
           {isReady && (
             <React.StrictMode>
               <ModalRoot />
-              <Routes>
-                <Route path="/" element={<DatasetScreen />} />
-                <Route path="/editor" element={<EditorScreen />} />
-              </Routes>
+              {hubBaseUrl ? (
+                <Routes>
+                  <Route path="/" element={<DatasetScreen />} />
+                  <Route path="/editor" element={<EditorScreen />} />
+                </Routes>
+              ) : (
+                <Routes>
+                  <Route path="/" element={<EditorScreen />} />
+                </Routes>
+              )}
             </React.StrictMode>
           )}
         </StoreProvider>

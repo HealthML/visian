@@ -6,6 +6,7 @@
   "targets": {
     "build": {
       "executor": "@nrwl/webpack:webpack",
+      "inputs": [{ "env": "NX_ANNOTATION_SERVICE_HUB_URL" }],
       "outputs": ["{options.outputPath}"],
       "defaultConfiguration": "production",
       "options": {
