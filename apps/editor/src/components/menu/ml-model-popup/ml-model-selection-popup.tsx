@@ -2,15 +2,18 @@
 import {
   PopUp,
   Text,
+  useTranslation,
 } from "@visian/ui-shared";
+import axios from "axios";
 import { observer } from "mobx-react-lite";
 import styled from "styled-components";
-import { ModelPopUpProps } from "./ml-model-selection-popup.props";
-import useMlModels from "apps/editor/src/querys/use-ml-models";
-import axios from "axios";
+
+
 import { baseUrl } from "../../../querys/base-url";
-import { MlModel } from "apps/editor/src/types";
+import useMlModels from "../../../querys/use-ml-models";
+import { MlModel } from "../../../types";
 import { MlModelList } from "../ml-model-list";
+import { ModelPopUpProps } from "./ml-model-selection-popup.props";
 
 
 const SectionLabel = styled(Text)`
@@ -26,46 +29,42 @@ const ModelSelectionPopupContainer = styled(PopUp)`
 
 export const ModelSelectionPopup = observer<ModelPopUpProps>(({ isOpen, onClose, getSelectedImageList}) => { 
   
-  const {mlModels, mlModelsError, isErrorMlModels, isLoadingMlModels, refetchMlModels, removeMlModels } =
+  const {mlModels, mlModelsError, isErrorMlModels, isLoadingMlModels} =
     useMlModels();
 
   
   const createAutoAnnotationJob = (model: MlModel) => {
     const imageSelection = getSelectedImageList();
 
-    console.log({
-      "images": imageSelection,
-      "modelName": model.name,
-      "modelVersion": model.version
-
-  });
-
     axios.post(`${baseUrl}jobs`, {
       "images": imageSelection,
       "modelName": model.name,
       "modelVersion": model.version
 
-  }).then(function (response) {
-      console.log(response);
-      onClose && onClose();
-    })
-    .catch(function (error) {
-      console.log(error);
-      onClose && onClose();
-    });
+    }).then((_response) => onClose && onClose())
+    .catch((_error) => onClose && onClose());
   };
 
-
+  const { t } = useTranslation();
+  
   return (
     <ModelSelectionPopupContainer
-      title="Model Selection"
+      title={t("ml-model-selection-title")}
       isOpen={isOpen}
       dismiss={onClose}
       shouldDismissOnOutsidePress
     >
-      <SectionLabel text="Select the model you want to use to annotate the images" />
+      <SectionLabel text={t("ml-model-selection-description")} />
+      {isLoadingMlModels && <Text tx={t("ml-models-loading")}/>}
+      {isErrorMlModels && (
+        <Text>{`${t("ml-models-loading-error")} ${
+          mlModelsError?.response?.statusText
+        } (${mlModelsError?.response?.status})`}</Text>
+      )}
       {mlModels && (
-        <MlModelList models={mlModels} createAutoAnnotationJob={createAutoAnnotationJob}/>
+        <MlModelList 
+        models={mlModels}
+        createAutoAnnotationJob={createAutoAnnotationJob}/>
       )}
     </ModelSelectionPopupContainer>
   );

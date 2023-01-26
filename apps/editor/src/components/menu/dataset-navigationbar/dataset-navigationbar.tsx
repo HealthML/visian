@@ -35,7 +35,7 @@ export const DatasetNavigationbar = ({
       <StyledButton isDisabled icon="trash" tooltipTx="delete-documents" />
       <StyledButton
         isDisabled={!anySelected}
-        icon="whoAI"
+        icon="mlAutoAnnotation"
         tooltipTx="auto-annotate-documents"
         onPointerDown={openModelSelectionPopUp}
       />

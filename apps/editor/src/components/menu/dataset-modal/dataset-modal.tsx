@@ -13,7 +13,7 @@ const StyledModal = styled(Modal)`
   width: 100%;
   z-index: 49;
 `;
-//TODO: z-index logic
+// TODO: z-index logic
 
 export const DatasetModal = ({ dataset }: { dataset: Dataset }) => {
   const [isInSelectMode, setIsInSelectMode] = useState(false);

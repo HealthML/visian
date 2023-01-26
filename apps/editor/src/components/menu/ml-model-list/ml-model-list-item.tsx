@@ -4,8 +4,9 @@ import {
   ListItem,
   Text,
 } from "@visian/ui-shared";
-import { MlModel } from "apps/editor/src/types";
 import styled from "styled-components";
+
+import { MlModel } from "../../../types";
 
 const Spacer = styled.div`
   width: 10px;
@@ -32,11 +33,7 @@ export const ModelListItem = ({
 }: {
   model: MlModel;
   createAutoAnnotationJob: () => void;
-}) => {
-  
-  // const { t: translate } = useTranslation();
-
-  return (
+}) => (
     <ListItem>
       <FlexRow onClick={createAutoAnnotationJob}>
         <Text>{model.name}</Text>
@@ -45,9 +42,7 @@ export const ModelListItem = ({
       </FlexRow>
       <ExpandedSpacer />
       <InfoButton
-        icon= {"info"}
-        onPointerDown={() => {console.log("info")}}
+        icon= "info"
       />
     </ListItem>
   );
-};

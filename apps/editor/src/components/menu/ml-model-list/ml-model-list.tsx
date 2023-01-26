@@ -1,6 +1,7 @@
 import { List, stopPropagation } from "@visian/ui-shared";
-import { MlModel } from "apps/editor/src/types";
 import styled from "styled-components";
+
+import { MlModel } from "../../../types";
 import { ModelListItem } from "./ml-model-list-item";
 
 const ModelsList = styled(List)`
