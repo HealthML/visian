@@ -80,17 +80,17 @@ export class RenderedImage extends Image implements IDisposable {
 
     const textureFormat = getTextureFormat(this.voxelComponents);
 
+    const textureData = this.getTextureData();
+
+    const bytesPerElement = textureData.BYTES_PER_ELEMENT;
+    const textureType =
+      bytesPerElement === 1 ? THREE.UnsignedByteType : THREE.FloatType;
+    const internalTextureFormat = getInternalTextureFormat(
+      this.voxelComponents,
+      bytesPerElement,
+    );
+
     if (this.is3D) {
-      const textureData = this.getTextureData();
-
-      const bytesPerElement = textureData.BYTES_PER_ELEMENT;
-      const textureType =
-        bytesPerElement === 1 ? THREE.UnsignedByteType : THREE.FloatType;
-      const internalTextureFormat = getInternalTextureFormat(
-        this.voxelComponents,
-        bytesPerElement,
-      );
-
       const nearestTexture = new THREE.DataTexture3D(
         textureData,
         this.voxelCount.x,
@@ -106,7 +106,7 @@ export class RenderedImage extends Image implements IDisposable {
 
       if (!isAnnotation) {
         const linearTexture = new THREE.DataTexture3D(
-          this.getTextureData(),
+          textureData,
           this.voxelCount.x,
           this.voxelCount.y,
           this.voxelCount.z,
@@ -121,12 +121,12 @@ export class RenderedImage extends Image implements IDisposable {
       }
     } else {
       const [widthAxis, heightAxis] = getPlaneAxes(this.defaultViewType);
-      this.internalTexture[THREE.NearestFilter] = new THREE.DataTexture(
-        this.getTextureData(),
+      const nearestTexture = new THREE.DataTexture(
+        textureData,
         this.voxelCount[widthAxis],
         this.voxelCount[heightAxis],
         textureFormat,
-        undefined,
+        textureType,
         undefined,
         undefined,
         undefined,
@@ -134,19 +134,27 @@ export class RenderedImage extends Image implements IDisposable {
         THREE.NearestFilter,
       );
 
+      nearestTexture.internalFormat = internalTextureFormat;
+
+      this.internalTexture[THREE.NearestFilter] = nearestTexture;
+
       if (!isAnnotation) {
-        this.internalTexture[THREE.LinearFilter] = new THREE.DataTexture(
-          this.getTextureData(),
+        const linearTexture = new THREE.DataTexture(
+          textureData,
           this.voxelCount[widthAxis],
           this.voxelCount[heightAxis],
           textureFormat,
-          undefined,
+          textureType,
           undefined,
           undefined,
           undefined,
           THREE.LinearFilter,
           THREE.LinearFilter,
         );
+
+        linearTexture.internalFormat = internalTextureFormat;
+
+        this.internalTexture[THREE.LinearFilter] = linearTexture;
       }
     }
 
