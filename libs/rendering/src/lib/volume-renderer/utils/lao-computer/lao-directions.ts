@@ -1,3 +1,4 @@
+import { PerformanceMode } from "@visian/ui-shared";
 import * as THREE from "three";
 
 import { SubdividedOctahedron } from "./subdivided-octahedron";
@@ -40,3 +41,6 @@ export const getLAODirectionTexture = (amount: number) => {
 
   return new THREE.DataTexture(data, amount, 1, THREE.RGBAFormat);
 };
+
+export const getTotalLAODirections = (mode: PerformanceMode) =>
+  mode === "low" ? 8 : 32;

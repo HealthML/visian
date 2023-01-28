@@ -1,8 +1,10 @@
+import type { Vector, Voxel } from "@visian/utils";
 import * as THREE from "three";
-import type { Voxel } from "@visian/utils";
+
 import type { IconType } from "../../components";
+import type { IImageLayer } from "./layers";
 import type { IParameter } from "./parameters";
-import type { Reference, ViewMode } from "./types";
+import type { MergeFunction, Reference, ViewMode } from "./types";
 
 export interface DragPoint extends Voxel {
   /** Whether the cursor is on the right side of the pixel. */
@@ -30,6 +32,11 @@ export interface ITool<N extends string> {
    * If set, overrides the `label`.
    */
   labelTx?: string;
+
+  /**
+   * The translation key for an info text about the tool.
+   */
+  infoTx?: string;
 
   /**
    * Indicates if the tool is a drawing tool, i.e., if it the user can use it
@@ -62,9 +69,16 @@ export interface ITool<N extends string> {
    * If none is given, the tool can be activated on all kinds of layers.
    */
   supportedLayerKinds?: string[];
+  /** Indicates if the tool should only be usable for annotation layers. */
+  supportAnnotationsOnly?: boolean;
 
   /** This tool's parameters. */
   params: { [name: string]: IParameter };
+
+  /** Key combination to activate this tool. */
+  activationKeys?: string;
+
+  isActive: boolean;
 
   /** Returns `true` if the tool supports the current view mode & layer kind. */
   canActivate(): boolean;
@@ -82,6 +96,31 @@ export interface ITool<N extends string> {
   moveTo(dragPoint: DragPoint): void;
   /** Called when the user ends a drag interaction with this tool selected. */
   endAt(dragPoint: DragPoint): void;
+
+  /**
+   * Called when the tool is deactivated.
+   *
+   * @param nextTool The next active tool (if any).
+   */
+  deactivate(nextTool?: ITool<N>): void;
+}
+
+export interface ISelfDeactivatingTool<N extends string> extends ITool<N> {
+  isSelfDeactivating: true;
+}
+
+export interface IPreviewedTool<N extends string> extends ITool<N> {
+  /** Submits the previewed results to be applied. */
+  submit(): void;
+
+  /** Discards the preview results. */
+  discard(): void;
+}
+
+export interface IMeasurementTool extends IPreviewedTool<"measurement-tool"> {
+  path: Vector[];
+
+  setToDeleteMode: () => void;
 }
 
 /** A class of similar tools, typically grouped in the UI. */
@@ -98,12 +137,35 @@ export interface IToolGroup<N extends string> {
   setActiveTool(nameOrTool: N | ITool<N>): void;
 }
 
-export interface IRegionGrowingRenderer3D {
+export interface IBlipRenderer3D {
   holdsPreview: boolean;
   previewColor?: string;
 
   /** The number of steps to region grow. */
   steps: number;
+  maxSteps: number;
+
+  outputTexture: THREE.Texture;
+
+  setMaxSteps(value: number): void;
+  render(): void;
+  flushToAnnotation(): void;
+  discard(): void;
+}
+
+export interface IDilateErodeRenderer3D extends IBlipRenderer3D {
+  targetLayer?: IImageLayer;
+
+  shouldErode: boolean;
+  shouldAutoCompensate: boolean;
+
+  setShouldErode(value: boolean): void;
+  setShouldAutoCompensate(value: boolean): void;
+}
+
+export interface IThresholdAnnotationRenderer3D extends IBlipRenderer3D {
+  threshold: [number, number];
+  setThreshold(value: [number, number]): void;
 }
 
 /** The editor's tools and their settings for the document. */
@@ -140,10 +202,17 @@ export interface ITools<N extends string> {
   /** Indicates if a tool is currently drawing. */
   isDrawing: boolean;
 
-  layerPreviewTextures: THREE.Texture[];
-  regionGrowingRenderer3D: IRegionGrowingRenderer3D;
+  slicePreviewTexture?: THREE.Texture;
+  slicePreviewMergeFunction?: MergeFunction;
+  layerPreviewTexture: THREE.Texture;
+  regionGrowingRenderer3D: IBlipRenderer3D;
+  thresholdAnnotationRenderer3D: IThresholdAnnotationRenderer3D;
+  dilateErodeRenderer3D: IDilateErodeRenderer3D;
 
-  setActiveTool(nameOrTool?: N | ITool<N>): void;
+  setActiveTool(
+    nameOrTool?: N | ITool<N>,
+    setAsGroupActiveTool?: boolean,
+  ): void;
 
   setBrushSize(value?: number, showPreview?: boolean): void;
   incrementBrushSize(): void;

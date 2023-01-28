@@ -2,11 +2,12 @@ import { ToolRenderer } from "@visian/rendering";
 import { DragPoint, IDocument } from "@visian/ui-shared";
 import { getPlaneAxes } from "@visian/utils";
 import * as THREE from "three";
+
 import { UndoableTool } from "./undoable-tool";
 import { dragPointsEqual } from "./utils";
 
 export class OutlineTool<
-  N extends "outline-tool" | "outline-eraser"
+  N extends "outline-tool" | "outline-eraser",
 > extends UndoableTool<N> {
   private lastPoint?: DragPoint;
 
@@ -23,10 +24,12 @@ export class OutlineTool<
       {
         name: (isAdditive ? "outline-tool" : "outline-eraser") as N,
         altToolName: (isAdditive ? "outline-eraser" : "outline-tool") as N,
-        icon: isAdditive ? "outline" : "outline",
+        icon: isAdditive ? "outline" : "outlineEraser",
         supportedViewModes: ["2D"],
         supportedLayerKinds: ["image"],
+        supportAnnotationsOnly: true,
         isDrawingTool: true,
+        activationKeys: isAdditive ? "o" : "ctrl+o",
       },
       document,
       toolRenderer,
@@ -70,8 +73,6 @@ export class OutlineTool<
     this.lastPoint = undefined;
 
     this.endStroke(!this.isAdditive);
-
-    this.toolRenderer.waitForRender().then(() => this.toolRenderer.endStroke());
   }
 
   private getCoords(dragPoint: DragPoint) {

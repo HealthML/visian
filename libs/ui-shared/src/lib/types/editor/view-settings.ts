@@ -1,10 +1,16 @@
-import type { Pixel, Vector, ViewType, Voxel } from "@visian/utils";
+import type {
+  Pixel,
+  Vector,
+  ViewType,
+  Voxel,
+  VoxelInfoMode,
+} from "@visian/utils";
 import type { Matrix4 } from "three";
-import { IParameter } from "./parameters";
-import { MarkerConfig } from "./markers";
 
-import type { Reference, ViewMode } from "./types";
+import { MarkerConfig } from "./markers";
+import { IParameter } from "./parameters";
 import { DragPoint } from "./tools";
+import type { Reference, ViewMode } from "./types";
 
 /** View settings affecting the whole document. */
 export interface IViewSettings {
@@ -41,6 +47,10 @@ export interface IViewport2D {
   hoveredViewType: ViewType;
   /** Indicates if the side views should be open. */
   showSideViews: boolean;
+  /** Indicates the voxel info mode. */
+  voxelInfoMode: VoxelInfoMode;
+  /** Indicates if the voxel info should be shown. */
+  showVoxelInfo: boolean;
 
   /**
    * The current zoom level.
@@ -50,21 +60,28 @@ export interface IViewport2D {
   /** The 2D navigation offset by which the visible image is moved. */
   offset: Pixel;
 
+  window: Vector;
+
   /**
    * All slice markers, aggregated for the document and current main view type.
    */
   sliceMarkers: MarkerConfig[];
 
+  hoveredScreenCoordinates: Pixel;
   hoveredUV: Pixel;
   hoveredDragPoint: DragPoint;
   hoveredVoxel: Voxel;
   hoveredValue: Vector;
   isVoxelHovered: boolean;
 
+  setWindow(value?: [number, number]): void;
+
   setHoveredScreenCoordinates(coordinates: Pixel, viewType?: ViewType): void;
 
   /** Sets the main view type. */
   setMainViewType(viewType: ViewType): void;
+
+  setVoxelInfoMode(value?: VoxelInfoMode): void;
 
   /**
    * Returns the selected slice for the given `ViewType`.

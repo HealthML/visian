@@ -4,17 +4,20 @@ import React, { useCallback, useEffect, useState } from "react";
 import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
-import { ToolName } from "../../../models";
+import { MeasurementTool, ToolName } from "../../../models";
 
 const MainViewContainer = styled.div<{
   activeTool?: ToolName;
   isDrawable?: boolean;
   isToolInUse?: boolean;
   isIn3DView?: boolean;
+  cursor?: string;
 }>`
   ${coverMixin}
 
   cursor: ${(props) => {
+    if (props.cursor) return props.cursor;
+
     switch (props.activeTool) {
       case "navigation-tool":
       case "plane-tool":
@@ -24,11 +27,14 @@ const MainViewContainer = styled.div<{
       case "crosshair-tool":
       case "outline-tool":
       case "outline-eraser":
+      case "measurement-tool":
         return "crosshair";
 
       case undefined:
         return "auto";
 
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
       case "smart-brush-3d":
         if (props.isIn3DView) return "crosshair";
       // eslint-disable-next-line no-fallthrough
@@ -51,7 +57,7 @@ export const MainView = observer(() => {
   );
 
   const [ref, setRef] = useState<HTMLDivElement | null>(null);
-  const canvas = store?.editor.renderers[0].domElement;
+  const canvas = store?.editor.renderer.domElement;
   useEffect(() => {
     if (ref && canvas) {
       ref.appendChild(canvas);
@@ -63,6 +69,16 @@ export const MainView = observer(() => {
     };
   }, [canvas, ref, store]);
 
+  const tools = store?.editor.activeDocument?.tools;
+  const measurementTool = tools?.tools["measurement-tool"] as
+    | MeasurementTool
+    | undefined;
+  const cursor =
+    tools?.activeTool?.name === "measurement-tool" &&
+    measurementTool?.isHoveringNode
+      ? "move"
+      : undefined;
+
   return (
     <MainViewContainer
       activeTool={store?.editor.activeDocument?.tools.activeTool?.name}
@@ -71,6 +87,7 @@ export const MainView = observer(() => {
       isIn3DView={store?.editor.activeDocument?.viewSettings.viewMode === "3D"}
       onContextMenu={preventDefault}
       onPointerDown={handlePointerDown}
+      cursor={cursor}
       ref={setRef}
     />
   );

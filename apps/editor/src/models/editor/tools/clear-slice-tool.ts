@@ -1,19 +1,24 @@
 import { ToolRenderer } from "@visian/rendering";
 import { IDocument, IImageLayer, ITool } from "@visian/ui-shared";
+
 import { SliceCommand } from "../history";
 import { SelfDeactivatingTool } from "./self-deactivating-tool";
 
 export class ClearSliceTool<
-  N extends "clear-slice"
+  N extends "clear-slice",
 > extends SelfDeactivatingTool<N> {
+  public readonly excludeFromSnapshotTracking = ["toolRenderer", "document"];
+
   constructor(document: IDocument, protected toolRenderer: ToolRenderer) {
     super(
       {
         name: "clear-slice" as N,
-        icon: "trash",
+        icon: "clearSlice",
         labelTx: "clear-slice",
         supportedViewModes: ["2D"],
         supportedLayerKinds: ["image"],
+        supportAnnotationsOnly: true,
+        activationKeys: "del,backspace",
       },
       document,
     );

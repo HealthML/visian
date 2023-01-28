@@ -1,5 +1,5 @@
 /* eslint-disable max-len */
-import { Text, FlexRow, Spacer, FlexColumn, color } from "@visian/ui-shared";
+import { color, FlexColumn, FlexRow, Spacer, Text } from "@visian/ui-shared";
 import { ViewType } from "@visian/utils";
 import { observer } from "mobx-react-lite";
 import React from "react";
@@ -89,36 +89,49 @@ export const AxesAndVoxel: React.FC = observer(() => {
         </AxesHorizontalContainer>
       )}
       {store?.editor.activeDocument?.viewport2D.isVoxelHovered &&
+        store?.editor.activeDocument?.viewport2D.showVoxelInfo &&
         !store?.editor.activeDocument?.tools.isCursorOverFloatingUI && (
           <FlexColumn>
-            <FlexRow>
-              <VoxelTitle tx="X" />
-              <VoxelContent
-                tx={
-                  (
-                    store?.editor.activeDocument?.viewport2D.hoveredVoxel.x + 1
-                  ).toString() ?? "-"
-                }
-              />
-            </FlexRow>
-            <FlexRow>
-              <VoxelTitle tx="Y" />
-              <VoxelContent
-                tx={
-                  (
-                    store?.editor.activeDocument?.viewport2D.hoveredVoxel.y + 1
-                  ).toString() ?? "-"
-                }
-              />
-            </FlexRow>
-            {store?.editor.activeDocument?.has3DLayers && (
+            {(store?.editor.activeDocument?.has3DLayers ||
+              store?.editor.activeDocument?.viewport2D.mainViewType !==
+                ViewType.Sagittal) && (
+              <FlexRow>
+                <VoxelTitle tx="X" />
+                <VoxelContent
+                  tx={
+                    (
+                      (store?.editor.activeDocument?.viewport2D.hoveredVoxel
+                        .x || 0) + 1
+                    ).toString() ?? "-"
+                  }
+                />
+              </FlexRow>
+            )}
+            {(store?.editor.activeDocument?.has3DLayers ||
+              store?.editor.activeDocument?.viewport2D.mainViewType !==
+                ViewType.Coronal) && (
+              <FlexRow>
+                <VoxelTitle tx="Y" />
+                <VoxelContent
+                  tx={
+                    (
+                      (store?.editor.activeDocument?.viewport2D.hoveredVoxel
+                        .y || 0) + 1
+                    ).toString() ?? "-"
+                  }
+                />
+              </FlexRow>
+            )}
+            {(store?.editor.activeDocument?.has3DLayers ||
+              store?.editor.activeDocument?.viewport2D.mainViewType !==
+                ViewType.Transverse) && (
               <FlexRow>
                 <VoxelTitle tx="Z" />
                 <VoxelContent
                   tx={
                     (
-                      store?.editor.activeDocument?.viewport2D.hoveredVoxel.z +
-                      1
+                      (store?.editor.activeDocument?.viewport2D.hoveredVoxel
+                        .z || 0) + 1
                     ).toString() ?? "-"
                   }
                 />
@@ -130,8 +143,13 @@ export const AxesAndVoxel: React.FC = observer(() => {
               <VoxelContent
                 tx={
                   store?.editor.activeDocument?.viewport2D.hoveredValue
-                    .toString()
-                    .replace(/,/g, ", ") ?? "-"
+                    .toArray()
+                    .map((value) =>
+                      Number.isInteger(value)
+                        ? value.toString()
+                        : value.toFixed(5),
+                    )
+                    .join(", ") ?? "-"
                 }
               />
             </FlexRow>

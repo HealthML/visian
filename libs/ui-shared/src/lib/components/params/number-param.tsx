@@ -8,8 +8,11 @@ const SpacedSliderField = styled(SliderField)`
   margin-bottom: 14px;
 `;
 
-export type NumberParamProps = INumberParameter &
-  React.HTMLAttributes<HTMLDivElement>;
+export type NumberParamProps = INumberParameter & {
+  onStart?: () => void;
+  onEnd?: () => void;
+  onValueLabelChange?: (value: number) => void;
+} & React.HTMLAttributes<HTMLDivElement>;
 
 export const NumberParam: React.FC<Partial<NumberParamProps>> = ({
   extendBeyondMinMax,
@@ -26,6 +29,7 @@ export const NumberParam: React.FC<Partial<NumberParamProps>> = ({
   onBeforeValueChange,
   kind,
   name,
+  getHistogram,
   ...rest
 }) => (
   <SpacedSliderField
@@ -39,6 +43,7 @@ export const NumberParam: React.FC<Partial<NumberParamProps>> = ({
     stepSize={stepSize}
     unlockValueLabelRange={extendBeyondMinMax}
     value={value}
+    histogram={getHistogram?.()}
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onChange={setValue as any}
   />

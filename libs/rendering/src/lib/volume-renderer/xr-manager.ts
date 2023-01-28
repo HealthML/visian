@@ -1,6 +1,7 @@
-import { IEditor, IXRManager } from "@visian/ui-shared";
+import { IEditor, IPreviewedTool, IXRManager } from "@visian/ui-shared";
 import * as THREE from "three";
 import { XRControllerModelFactory } from "three/examples/jsm/webxr/XRControllerModelFactory";
+
 import { VolumeRenderer } from "./volume-renderer";
 
 export class XRManager implements IXRManager {
@@ -30,8 +31,8 @@ export class XRManager implements IXRManager {
     const session = this.renderer.renderer.xr.getSession();
     if (!session) return;
 
-    const transferFunction = this.editor.activeDocument?.viewport3D
-      .activeTransferFunction;
+    const transferFunction =
+      this.editor.activeDocument?.viewport3D.activeTransferFunction;
     session.inputSources.forEach((source, index) => {
       const controller = this.renderer.renderer.xr.getController(index);
 
@@ -57,11 +58,28 @@ export class XRManager implements IXRManager {
           // 2: Left to right
           // 3: Top to bottom
 
-          if (
-            transferFunction?.name === "density" ||
-            transferFunction?.name === "fc-edges"
-          ) {
-            if (Math.abs(source.gamepad.axes[2]) > stickThreshold) {
+          if (Math.abs(source.gamepad.axes[2]) > stickThreshold) {
+            if (
+              this.editor.activeDocument?.tools.thresholdAnnotationRenderer3D
+                .holdsPreview
+            ) {
+              const [low, high] =
+                this.editor.activeDocument?.tools.thresholdAnnotationRenderer3D
+                  .threshold || [];
+              this.editor.activeDocument?.tools.thresholdAnnotationRenderer3D.setThreshold(
+                [
+                  Math.min(
+                    Math.max(0, low + maxSliderSpeed * source.gamepad.axes[2]),
+                    high,
+                  ),
+                  high,
+                ],
+              );
+              this.editor.activeDocument?.tools.thresholdAnnotationRenderer3D.render();
+            } else if (
+              transferFunction?.name === "density" ||
+              transferFunction?.name === "fc-edges"
+            ) {
               const [low, high] = transferFunction.params.densityRange
                 .value as [number, number];
               transferFunction.params.densityRange.setValue([
@@ -103,11 +121,52 @@ export class XRManager implements IXRManager {
           // 2: Left to right
           // 3: Top to bottom
 
-          if (
-            transferFunction?.name === "density" ||
-            transferFunction?.name === "fc-edges"
-          ) {
-            if (Math.abs(source.gamepad.axes[2]) > stickThreshold) {
+          if (Math.abs(source.gamepad.axes[2]) > stickThreshold) {
+            if (
+              this.editor.activeDocument?.tools.thresholdAnnotationRenderer3D
+                .holdsPreview
+            ) {
+              const [low, high] =
+                this.editor.activeDocument?.tools.thresholdAnnotationRenderer3D
+                  .threshold || [];
+              this.editor.activeDocument?.tools.thresholdAnnotationRenderer3D.setThreshold(
+                [
+                  low,
+                  Math.min(
+                    Math.max(
+                      low,
+                      high + maxSliderSpeed * source.gamepad.axes[2],
+                    ),
+                    1,
+                  ),
+                ],
+              );
+              this.editor.activeDocument?.tools.thresholdAnnotationRenderer3D.render();
+            } else if (
+              this.editor.activeDocument?.tools.dilateErodeRenderer3D
+                .holdsPreview
+            ) {
+              if (!controller.userData.isRightStickPressed) {
+                const steps =
+                  (this.editor.activeDocument?.tools.dilateErodeRenderer3D
+                    .maxSteps || 1) *
+                    (this.editor.activeDocument?.tools.dilateErodeRenderer3D
+                      .shouldErode
+                      ? -1
+                      : 1) +
+                  Math.sign(source.gamepad.axes[2]);
+                this.editor.activeDocument?.tools.dilateErodeRenderer3D.setShouldErode(
+                  steps < 0,
+                );
+                this.editor.activeDocument?.tools.dilateErodeRenderer3D.setMaxSteps(
+                  Math.abs(steps),
+                );
+                this.editor.activeDocument?.tools.dilateErodeRenderer3D.render();
+              }
+            } else if (
+              transferFunction?.name === "density" ||
+              transferFunction?.name === "fc-edges"
+            ) {
               const [low, high] = transferFunction.params.densityRange
                 .value as [number, number];
               transferFunction.params.densityRange.setValue([
@@ -119,6 +178,8 @@ export class XRManager implements IXRManager {
               ]);
             }
           }
+          controller.userData.isRightStickPressed =
+            Math.abs(source.gamepad.axes[2]) > stickThreshold;
 
           // Buttons
           // 0: Trigger
@@ -126,6 +187,64 @@ export class XRManager implements IXRManager {
           // 3: Gamepad
           // 4: A
           // 5: B
+
+          if (
+            source.gamepad.buttons[3].pressed &&
+            !controller.userData.isRightPadPressed
+          ) {
+            if (
+              this.editor.activeDocument?.tools.dilateErodeRenderer3D
+                .holdsPreview
+            ) {
+              this.editor.activeDocument?.tools.dilateErodeRenderer3D.setShouldAutoCompensate(
+                !this.editor.activeDocument?.tools.dilateErodeRenderer3D
+                  .shouldAutoCompensate,
+              );
+            }
+          }
+          controller.userData.isRightPadPressed =
+            source.gamepad.buttons[3].pressed;
+
+          if (
+            source.gamepad.buttons[4].pressed &&
+            !controller.userData.isAPressed
+          ) {
+            if (
+              this.editor.activeDocument?.tools.thresholdAnnotationRenderer3D
+                .holdsPreview
+            ) {
+              (
+                this.editor.activeDocument?.tools.tools[
+                  "threshold-annotation"
+                ] as IPreviewedTool<string>
+              ).submit();
+            } else {
+              this.editor.activeDocument?.tools.setActiveTool(
+                "threshold-annotation",
+              );
+            }
+          }
+          controller.userData.isAPressed = source.gamepad.buttons[4].pressed;
+
+          if (
+            source.gamepad.buttons[5].pressed &&
+            !controller.userData.isBPressed
+          ) {
+            if (
+              this.editor.activeDocument?.tools.dilateErodeRenderer3D
+                .holdsPreview
+            ) {
+              (
+                this.editor.activeDocument?.tools.tools[
+                  "dilate-erode"
+                ] as IPreviewedTool<string>
+              ).submit();
+            } else {
+              this.editor.activeDocument?.tools.setActiveTool("dilate-erode");
+            }
+          }
+          controller.userData.isBPressed = source.gamepad.buttons[5].pressed;
+
           break;
       }
     });

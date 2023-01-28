@@ -7,6 +7,9 @@ import { Tooltip } from "../tooltip";
 import { SliderMarker, SliderRangeMarker } from "./markers";
 import { SliderFieldProps, SliderProps } from "./slider.props";
 import {
+  Histogram,
+  HistogramBar,
+  RangeHandle,
   SliderContainer,
   SliderLabel,
   SliderLabelRow,
@@ -42,9 +45,11 @@ export const Slider: React.FC<SliderProps> = (props) => {
     roundMethod,
     scaleType,
     showRange,
+    showRangeHandle,
     showFloatingValueLabel = false,
     formatValueLabel = defaultFormatLabel,
     markers,
+    histogram,
     value,
     onChange,
     onStart,
@@ -149,10 +154,31 @@ export const Slider: React.FC<SliderProps> = (props) => {
     ],
   );
 
-  const { onPointerDown } = useDrag(updateValue, updateValue, onEnd);
+  const [isThumbDragged, setIsThumbDragged] = useState(false);
+  const startThumbDragHandler = useCallback(
+    (event: PointerEvent | React.PointerEvent, id: number) => {
+      setIsThumbDragged(true);
+      updateValue(event, id);
+    },
+    [updateValue],
+  );
+  const endThumbDragHandler = useCallback(
+    (event: PointerEvent | React.PointerEvent, id: number) => {
+      setIsThumbDragged(false);
+      onEnd?.(event, id);
+    },
+    [onEnd],
+  );
+
+  const { onPointerDown } = useDrag(
+    startThumbDragHandler,
+    updateValue,
+    endThumbDragHandler,
+  );
   const startDrag = useCallback(
     (event: PointerEvent | React.PointerEvent) => {
       if (!onChange || !sliderRef.current) return;
+
       if (!Array.isArray(valueRef.current)) {
         onPointerDown(event, 0);
         return;
@@ -213,10 +239,119 @@ export const Slider: React.FC<SliderProps> = (props) => {
   const [thumbRef, setThumbRef] = useState<HTMLDivElement | null>(null);
   const theme = useTheme() as Theme;
 
+  // Range Handle
+  const [isHovered, setIsHovered] = useState(false);
+  const onPointerEnter = useCallback(() => {
+    setIsHovered(true);
+  }, []);
+  const onPointerLeave = useCallback(() => {
+    setIsHovered(false);
+  }, []);
+
+  const [isRangeHandleHovered, setIsRangeHandleHovered] = useState(false);
+  const onRangeHandlePointerEnter = useCallback(() => {
+    setIsRangeHandleHovered(true);
+  }, []);
+  const onRangeHandlePointerLeave = useCallback(() => {
+    setIsRangeHandleHovered(false);
+  }, []);
+
+  const updateValues = useCallback(
+    (event: PointerEvent | React.PointerEvent) => {
+      if ((!onChange && !onStart) || !sliderRef.current) return;
+
+      if (event.type === "pointerdown") {
+        if (onStart) onStart(event, 0);
+      }
+
+      if (!onChange) return;
+
+      event.stopPropagation();
+
+      const newCenterValue = pointerToSliderValue(event, sliderRef.current, {
+        scaleType,
+        min,
+        max,
+        stepSize,
+        roundMethod,
+        isInverted,
+        isVertical,
+      });
+      if (!Array.isArray(valueRef.current)) {
+        onChange(newCenterValue, 0, newCenterValue);
+        return;
+      }
+
+      const currentMinValue = valueRef.current.reduce(
+        (a, b) => Math.min(a, b),
+        max,
+      );
+      const currentMaxValue = valueRef.current.reduce(
+        (a, b) => Math.max(a, b),
+        min,
+      );
+      const currentCenterValue = (currentMinValue + currentMaxValue) / 2;
+      const offset = Math.max(
+        Math.min(newCenterValue - currentCenterValue, max - currentMaxValue),
+        min - currentMinValue,
+      );
+
+      const newValueArray = valueRef.current.map(
+        (thumbValue) => thumbValue + offset,
+      );
+
+      onChange(newValueArray, 0, newValueArray[0]);
+    },
+    [
+      isInverted,
+      max,
+      min,
+      onChange,
+      onStart,
+      roundMethod,
+      stepSize,
+      isVertical,
+      scaleType,
+    ],
+  );
+
+  const [isRangeHandleDragged, setIsRangeHandleDragged] = useState(false);
+  const startRangeDragHandler = useCallback(
+    (event: PointerEvent | React.PointerEvent) => {
+      setIsRangeHandleDragged(true);
+      updateValues(event);
+    },
+    [updateValues],
+  );
+  const endRangeDragHandler = useCallback(
+    (event: PointerEvent | React.PointerEvent) => {
+      setIsRangeHandleDragged(false);
+      onEnd?.(event, 0);
+    },
+    [onEnd],
+  );
+
+  const { onPointerDown: onRangeHandlePointerDown } = useDrag<number>(
+    startRangeDragHandler,
+    updateValues,
+    endRangeDragHandler,
+  );
+
+  const startRangeHandleDrag = useCallback(
+    (event: PointerEvent | React.PointerEvent) => {
+      if (!onChange || !sliderRef.current) return;
+
+      onRangeHandlePointerDown(event, 0);
+    },
+    [onChange, onRangeHandlePointerDown],
+  );
+
   return (
     <SliderContainer
       {...rest}
       onPointerDown={startDrag}
+      onPointerEnter={onPointerEnter}
+      onPointerLeave={onPointerLeave}
       isVertical={isVertical}
       ref={sliderRef}
     >
@@ -241,7 +376,7 @@ export const Slider: React.FC<SliderProps> = (props) => {
           <SliderMarker
             key={`${marker.context}::${marker.color}:${marker.value}`}
             position={getSliderRelativePosition(
-              (marker.value as unknown) as number,
+              marker.value as unknown as number,
             )}
             isVertical={isVertical}
             color={marker.color}
@@ -253,12 +388,40 @@ export const Slider: React.FC<SliderProps> = (props) => {
           />
         ),
       )}
+      {histogram && (
+        <Histogram>
+          {histogram[0].map((val, index) => (
+            <HistogramBar
+              key={index}
+              style={{
+                height: `${
+                  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                  ((val - histogram![1]) /
+                    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                    (histogram![2] - histogram![1])) *
+                  100
+                }%`,
+              }}
+            />
+          ))}
+        </Histogram>
+      )}
       {showRange && valueArray.length >= 2 && (
         <SliderRangeSelection
           isInverted={isInverted}
           isVertical={isVertical}
           positions={thumbPositions}
-        />
+        >
+          {showRangeHandle &&
+            (isHovered || isRangeHandleDragged || isThumbDragged) && (
+              <RangeHandle
+                onPointerDown={startRangeHandleDrag}
+                onPointerEnter={onRangeHandlePointerEnter}
+                onPointerLeave={onRangeHandlePointerLeave}
+                isHovered={isRangeHandleDragged || isRangeHandleHovered}
+              />
+            )}
+        </SliderRangeSelection>
       )}
       {valueArray.map((_thumbValue, index) => {
         const thumbPos = thumbPositions[index];
@@ -300,6 +463,7 @@ export const SliderField: React.FC<SliderFieldProps> = ({
   min = 0,
   max = 1,
   onChange,
+  onValueLabelChange,
   ...rest
 }) => {
   const actualValue = value === undefined ? defaultValue || min : value;
@@ -310,8 +474,9 @@ export const SliderField: React.FC<SliderFieldProps> = ({
         ? newValue
         : Math.max(min, Math.min(max, newValue));
       if (onChange) onChange(clampedValue, 0, clampedValue);
+      if (onValueLabelChange) onValueLabelChange(clampedValue);
     },
-    [max, min, onChange, unlockValueLabelRange],
+    [max, min, onChange, onValueLabelChange, unlockValueLabelRange],
   );
 
   return (

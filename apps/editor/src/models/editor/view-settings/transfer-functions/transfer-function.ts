@@ -1,6 +1,7 @@
 import { IDocument, ITransferFunction } from "@visian/ui-shared";
 import { ISerializable } from "@visian/utils";
 import { makeObservable, observable } from "mobx";
+
 import { Parameter, ParameterSnapshot } from "../../parameters";
 
 export interface TransferFunctionSnapshot<N extends string> {
@@ -18,7 +19,8 @@ export interface TransferFunctionConfig<N extends string> {
 }
 
 export class TransferFunction<N extends string>
-  implements ITransferFunction<N>, ISerializable<TransferFunctionSnapshot<N>> {
+  implements ITransferFunction<N>, ISerializable<TransferFunctionSnapshot<N>>
+{
   public readonly excludeFromSnapshotTracking = ["document"];
 
   public readonly name: N;

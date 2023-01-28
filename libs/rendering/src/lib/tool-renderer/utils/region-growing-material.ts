@@ -1,10 +1,9 @@
 import * as THREE from "three";
+
 import {
-  regionGrowing3DFragmentShader,
   regionGrowingFragmentShader,
   regionGrowingVertexShader,
 } from "../../shaders";
-import { MAX_REGION_GROWING_STEPS } from "../region-growing-renderer-3d";
 
 export class RegionGrowingMaterial extends THREE.ShaderMaterial {
   constructor(parameters?: THREE.ShaderMaterialParameters) {
@@ -17,7 +16,8 @@ export class RegionGrowingMaterial extends THREE.ShaderMaterial {
           uRegionTexture: { value: null },
           uDataTexture: { value: null },
           uThreshold: { value: 0.1 },
-          uSeed: { value: 0 },
+          uSeed: { value: [0, 0, 0, 0] },
+          uComponents: { value: 1 },
           uMinUv: { value: [0, 0] },
           uMaxUv: { value: [1, 1] },
         },
@@ -38,56 +38,21 @@ export class RegionGrowingMaterial extends THREE.ShaderMaterial {
   }
 
   public setThreshold(value: number) {
-    this.uniforms.uThreshold.value = value / (MAX_REGION_GROWING_STEPS + 1);
+    this.uniforms.uThreshold.value = value / 255;
   }
 
-  public setSeed(value: number) {
-    this.uniforms.uSeed.value = value / (MAX_REGION_GROWING_STEPS + 1);
+  public setSeed(values: number[]) {
+    values.forEach((value, index) => {
+      this.uniforms.uSeed.value[index] = value;
+    });
+  }
+
+  public setComponents(value: number) {
+    this.uniforms.uComponents.value = value;
   }
 
   public setUVBounds(minUv = [0, 0], maxUv = [1, 1]) {
     this.uniforms.uMinUv.value = minUv;
     this.uniforms.uMaxUv.value = maxUv;
-  }
-}
-
-export class RegionGrowing3DMaterial extends RegionGrowingMaterial {
-  constructor() {
-    super({
-      vertexShader: regionGrowingVertexShader,
-      fragmentShader: regionGrowing3DFragmentShader,
-      uniforms: {
-        uRegionTexture: { value: null },
-        uDataTexture: { value: null },
-        uThreshold: { value: 0.1 },
-        uSeed: { value: 0 },
-        uVoxelCount: { value: [1, 1, 1] },
-        uAtlasGrid: { value: [1, 1] },
-        uRenderValue: {
-          value: MAX_REGION_GROWING_STEPS / (MAX_REGION_GROWING_STEPS + 1),
-        },
-      },
-    });
-  }
-
-  public setRegionSize(_width: number, _height: number) {
-    throw new Error("3D region growing does not support a region size.");
-  }
-
-  public setUVBounds(_minUv = [0, 0], _maxUv = [1, 1]) {
-    throw new Error("3D region growing does not support uv bounds.");
-  }
-
-  public setVoxelCount(voxelCount: number[]) {
-    this.uniforms.uVoxelCount.value = voxelCount;
-  }
-
-  public setAtlasGird(atlasGrid: number[]) {
-    this.uniforms.uAtlasGrid.value = atlasGrid;
-  }
-
-  public setStep(step: number) {
-    this.uniforms.uRenderValue.value =
-      (MAX_REGION_GROWING_STEPS + 1 - step) / (MAX_REGION_GROWING_STEPS + 1);
   }
 }

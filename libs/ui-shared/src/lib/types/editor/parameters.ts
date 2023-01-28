@@ -1,4 +1,6 @@
 import type React from "react";
+
+import { Histogram } from ".";
 import type { SerializationMethod, TooltipPosition } from "../../components";
 import { ILayer } from "./layers";
 import type { ScaleType } from "./types";
@@ -43,6 +45,7 @@ export interface IParameter<T = unknown> {
    * An optional event listener that is called before the parameter value is
    * updated.
    */
+  // eslint-disable-next-line @typescript-eslint/member-ordering
   onBeforeValueChange?: () => void;
 
   /**
@@ -134,7 +137,7 @@ export interface INumberParameter extends IParameter<number> {
   extendBeyondMinMax?: boolean;
 
   /** An optional method that computes frequency data to display along the slider. */
-  getHistogram?: () => number[] | undefined;
+  getHistogram?: () => Histogram | undefined;
 }
 
 /** A numeric range parameter, typically displayed as a slider with two thumbs. */
@@ -153,6 +156,8 @@ export interface INumberRangeParameter
    * Defaults to `"push"`.
    */
   serializationMethod: SerializationMethod;
+
+  showRangeHandle?: boolean;
 }
 
 /** A text parameter, typically displayed as a text field. */

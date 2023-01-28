@@ -3,6 +3,7 @@ import {
   DeviceType,
   globalListenerTypes,
   IDispatch,
+  IMeasurementTool,
   isFirefox,
   isWindows,
   ITool,
@@ -128,6 +129,10 @@ export const setUpPointerHandling = (
         context.button === PointerButton.RMB ||
         context.button === PointerButton.Eraser
       ) {
+        if (tool.name === "measurement-tool") {
+          (tool as IMeasurementTool).setToDeleteMode();
+        }
+
         tool = tool.altTool;
       }
 
@@ -169,9 +174,10 @@ export const setUpPointerHandling = (
       if (id !== "mainView") return;
       if (eventType === "start" || eventType === "rebase") {
         store.editor.activeDocument.tools.setIsNavigationDragged(true);
-        const transformOrigin = store.editor.sliceRenderer.getMainViewScreenPosition(
-          store.editor.activeDocument.viewport2D.offset,
-        );
+        const transformOrigin =
+          store.editor.sliceRenderer.getMainViewScreenPosition(
+            store.editor.activeDocument.viewport2D.offset,
+          );
         gesture.setStartTransform({
           translateX: transformOrigin.x,
           translateY: transformOrigin.y,

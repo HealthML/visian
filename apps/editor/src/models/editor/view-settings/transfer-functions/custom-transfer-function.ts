@@ -12,7 +12,8 @@ import { TransferFunction } from "./transfer-function";
 
 export class CustomTransferFunction
   extends TransferFunction<"custom">
-  implements ICustomTransferFunction {
+  implements ICustomTransferFunction
+{
   public texture?: THREE.Texture;
 
   constructor(document: IDocument) {

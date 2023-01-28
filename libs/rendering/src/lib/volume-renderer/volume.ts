@@ -21,7 +21,7 @@ export class Volume extends THREE.Mesh implements IDisposable {
     editor: IEditor,
     sharedUniforms: SharedUniforms,
     firstDerivative: THREE.Texture,
-    secondDerivative: THREE.Texture,
+    // secondDerivative: THREE.Texture,
     outputDerivative: THREE.Texture,
     lao: THREE.Texture,
   ) {
@@ -31,7 +31,7 @@ export class Volume extends THREE.Mesh implements IDisposable {
         editor,
         sharedUniforms,
         firstDerivative,
-        secondDerivative,
+        // secondDerivative,
         outputDerivative,
         lao,
       ),
@@ -42,7 +42,7 @@ export class Volume extends THREE.Mesh implements IDisposable {
       editor,
       sharedUniforms,
       firstDerivative,
-      secondDerivative,
+      // secondDerivative,
       outputDerivative,
       lao,
     );
@@ -59,7 +59,7 @@ export class Volume extends THREE.Mesh implements IDisposable {
 
     this.disposers.push(
       autorun(() => {
-        const imageLayer = editor.activeDocument?.baseImageLayer;
+        const imageLayer = editor.activeDocument?.mainImageLayer;
         if (!imageLayer) return;
 
         const image = imageLayer.image as RenderedImage;

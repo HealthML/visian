@@ -1,4 +1,4 @@
-import { EventLike } from "@visian/ui-shared";
+import { EventLike } from "./pointers";
 
 export const preventDefault = (event: EventLike) => {
   event.preventDefault();

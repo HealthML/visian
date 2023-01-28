@@ -1,6 +1,7 @@
 import { ToolRenderer } from "@visian/rendering";
 import { DragPoint, IDocument } from "@visian/ui-shared";
 import { calculateLine, getOrthogonalAxis, getPlaneAxes } from "@visian/utils";
+
 import { ToolConfig } from "./tool";
 import { UndoableTool } from "./undoable-tool";
 import { dragPointsEqual } from "./utils";
@@ -12,8 +13,10 @@ export class CircleBrush<
     | "smart-brush"
     | "smart-eraser"
     | "bounded-smart-brush"
-    | "bounded-smart-eraser"
+    | "bounded-smart-eraser",
 > extends UndoableTool<N> {
+  public readonly excludeFromSnapshotTracking = ["toolRenderer", "document"];
+
   private lastDragPoint?: DragPoint;
 
   constructor(
@@ -25,12 +28,15 @@ export class CircleBrush<
     super(
       toolConfig || {
         name: (isAdditive ? "pixel-brush" : "pixel-eraser") as N,
+        infoTx: "info-brush",
         altToolName: (isAdditive ? "pixel-eraser" : "pixel-brush") as N,
         icon: isAdditive ? "pixelBrush" : "eraser",
         supportedViewModes: ["2D"],
         supportedLayerKinds: ["image"],
+        supportAnnotationsOnly: true,
         isDrawingTool: true,
         isBrush: true,
+        activationKeys: isAdditive ? "b" : "e",
       },
       document,
       toolRenderer,
@@ -61,8 +67,6 @@ export class CircleBrush<
     if (dragPoint) this.moveTo(dragPoint);
 
     this.endStroke(!this.isAdditive);
-
-    this.toolRenderer.waitForRender().then(() => this.toolRenderer.endStroke());
   }
 
   protected get brushSize() {

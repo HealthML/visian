@@ -29,8 +29,7 @@ describe("Vector", () => {
 
   it("should add a vector", () => {
     expect(new Vector([0, 1]).add(new Vector([1, 2, 3])).toArray()).toEqual([
-      1,
-      3,
+      1, 3,
     ]);
 
     expect(new Vector(3).add(new Vector([1, 2])).toArray()).toEqual([1, 2, 0]);
@@ -54,5 +53,14 @@ describe("Vector", () => {
     expect(new Vector([2, 0]).equals(new Vector([2, 1]))).toBe(false);
 
     expect(new Vector([2, 0]).equals(new Vector([2, 0]))).toBe(true);
+  });
+
+  it("should clone properly if it is not observable", () => {
+    const a = new Vector([1, 2], false);
+    const b = a.clone(false);
+    b.y = 0;
+
+    expect(a.toArray()).toEqual([1, 2]);
+    expect(b.toArray()).toEqual([1, 0]);
   });
 });

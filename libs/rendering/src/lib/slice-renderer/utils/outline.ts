@@ -20,6 +20,7 @@ export class Outline extends THREE.Line implements IDisposable, IOutline {
   }
 
   public dispose() {
+    this.geometry.dispose();
     this.disposers.forEach((disposer) => disposer());
   }
 
@@ -36,8 +37,9 @@ export class Outline extends THREE.Line implements IDisposable, IOutline {
       return;
     }
 
-    const { voxelCount } = (this.editor.activeDocument
-      .activeLayer as IImageLayer).image;
+    const { voxelCount } = (
+      this.editor.activeDocument.activeLayer as IImageLayer
+    ).image;
 
     const [widthAxis, heightAxis] = getPlaneAxes(this.viewType);
 

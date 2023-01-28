@@ -5,8 +5,8 @@ import {
   Screen,
   ThemeProvider,
 } from "@visian/ui-shared";
-import React, { useCallback, useEffect, useRef, useState } from "react";
-import { Route, Switch } from "react-router-dom";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { Route, Routes } from "react-router-dom";
 
 import UIOverlay from "../components/uiOverlay/uiOverlay";
 import WebGLCanvas from "../components/webGLCanvas/webGLCanvas";
@@ -14,7 +14,8 @@ import { Renderer } from "../lib";
 
 let renderer: Renderer | undefined;
 
-export function App() {
+// eslint-disable-next-line react/function-component-definition
+export function App(): JSX.Element {
   const [mode] = useState<ColorMode>("light");
   const theme = getTheme(mode);
 
@@ -47,14 +48,17 @@ export function App() {
   return (
     <ThemeProvider theme={theme}>
       <GlobalStyles />
-      <Switch>
-        <Route path="/">
-          <Screen title="VISIAN AR Demo">
-            <WebGLCanvas ref={canvasRef} />
-            {renderer && <UIOverlay renderer={renderer} />}
-          </Screen>
-        </Route>
-      </Switch>
+      <Routes>
+        <Route
+          path="/"
+          element={
+            <Screen title="VISIAN AR Demo">
+              <WebGLCanvas ref={canvasRef} />
+              {renderer && <UIOverlay renderer={renderer} />}
+            </Screen>
+          }
+        />
+      </Routes>
     </ThemeProvider>
   );
 }

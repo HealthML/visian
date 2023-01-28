@@ -1,10 +1,17 @@
 import { RegionGrowingRenderer } from "@visian/rendering";
 import { DragPoint, IDocument } from "@visian/ui-shared";
+
 import { CircleBrush } from "./circle-brush";
 
 export class BoundedSmartBrush<
-  N extends "bounded-smart-brush" | "bounded-smart-eraser"
+  N extends "bounded-smart-brush" | "bounded-smart-eraser",
 > extends CircleBrush<N> {
+  public readonly excludeFromSnapshotTracking = [
+    "document",
+    "regionGrowingRenderer",
+    "toolRenderer",
+  ];
+
   constructor(
     document: IDocument,
     private regionGrowingRenderer: RegionGrowingRenderer,
@@ -15,12 +22,15 @@ export class BoundedSmartBrush<
       altToolName: (isAdditive
         ? "bounded-smart-eraser"
         : "bounded-smart-brush") as N,
-      icon: isAdditive ? "boundedSmartBrush" : "eraser",
+      infoTx: "info-bounded-smart-brush",
+      icon: isAdditive ? "boundedSmartBrush" : "boundedSmartEraser",
       supportedViewModes: ["2D"],
       supportedLayerKinds: ["image"],
+      supportAnnotationsOnly: true,
       isDrawingTool: true,
       isBrush: true,
       isSmartBrush: true,
+      activationKeys: isAdditive ? "r" : "ctrl+r",
     });
   }
 
@@ -43,6 +53,7 @@ export class BoundedSmartBrush<
       this.regionGrowingRenderer.doRegionGrowing(
         this.document.tools.smartBrushThreshold,
         this.document.tools.boundedSmartBrushRadius,
+        false,
       );
     });
   }

@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useRef } from "react";
 import styled, { css } from "styled-components";
-import { radius, size } from "../../theme";
 
+import { radius, size } from "../../theme";
 import { Color } from "../color";
 import { Icon } from "../icon";
 import { Divider } from "../modal/modal";

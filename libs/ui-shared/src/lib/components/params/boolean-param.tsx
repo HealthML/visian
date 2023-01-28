@@ -1,7 +1,7 @@
 import React from "react";
 
 import { IBooleanParameter } from "../../types";
-import { Switch } from "../switch";
+import { Switch, SwitchProps } from "../switch";
 
 const booleanSwitchOptions = [
   { labelTx: "off", value: false },
@@ -9,7 +9,11 @@ const booleanSwitchOptions = [
 ];
 
 export type BooleanParamProps = IBooleanParameter &
-  Omit<React.HTMLAttributes<HTMLDivElement>, "defaultValue" | "onChange">;
+  Omit<React.HTMLAttributes<HTMLDivElement>, "defaultValue" | "onChange"> &
+  Pick<
+    SwitchProps,
+    "infoTx" | "infoShortcuts" | "infoPosition" | "infoBaseZIndex"
+  >;
 
 export const BooleanParam: React.FC<Partial<BooleanParamProps>> = ({
   labelTx,

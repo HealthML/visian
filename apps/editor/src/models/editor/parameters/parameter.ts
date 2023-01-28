@@ -26,7 +26,8 @@ export interface ParameterConfig<T = unknown> {
 }
 
 export class Parameter<T = unknown>
-  implements IParameter<T>, ISerializable<ParameterSnapshot<T>> {
+  implements IParameter<T>, ISerializable<ParameterSnapshot<T>>
+{
   public static readonly kind: string = "none";
   public readonly kind: string = "none";
 

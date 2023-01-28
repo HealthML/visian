@@ -12,7 +12,8 @@ export interface ViewSettingsSnapshot {
 }
 
 export class ViewSettings
-  implements IViewSettings, ISerializable<ViewSettingsSnapshot> {
+  implements IViewSettings, ISerializable<ViewSettingsSnapshot>
+{
   public readonly excludeFromSnapshotTracking = ["document"];
 
   public viewMode!: ViewMode;
@@ -48,7 +49,7 @@ export class ViewSettings
   }
 
   public setSelectedVoxel(x?: number, y?: number, z?: number): void {
-    const voxelCount = this.document.baseImageLayer?.image.voxelCount;
+    const voxelCount = this.document.mainImageLayer?.image.voxelCount;
 
     if (!x || !y || !z) {
       if (voxelCount) {
@@ -81,6 +82,19 @@ export class ViewSettings
     }
 
     this.viewMode = value || "2D";
+
+    if (value === "3D") {
+      const maxLayersIn3d = this.document.maxLayers3d;
+
+      if (this.document.layers.length > maxLayersIn3d) {
+        this.viewMode = "2D";
+        this.document.setError({
+          titleTx: "too-many-layers",
+          descriptionTx: "too-many-layers-3d",
+          descriptionData: { count: maxLayersIn3d },
+        });
+      }
+    }
   };
 
   public setBrightness = (value?: number): void => {
@@ -96,6 +110,7 @@ export class ViewSettings
     this.setSelectedVoxel();
     this.setBrightness();
     this.setContrast();
+    this.document.viewport3D?.setOpacity();
   };
 
   // Serialization

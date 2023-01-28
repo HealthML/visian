@@ -13,31 +13,38 @@ import {
   Pixel,
   Vector,
   ViewType,
+  VoxelInfoMode,
 } from "@visian/utils";
-import { action, computed, makeObservable, observable } from "mobx";
-
 import {
-  maxZoom,
-  minZoom,
-  viewTypeDepthThreshold,
-  zoomStep,
-} from "../../../constants";
+  action,
+  computed,
+  makeObservable,
+  observable,
+  runInAction,
+} from "mobx";
+
+import { maxZoom, minZoom, voxelInfoDelay, zoomStep } from "../../../constants";
 import { OutlineTool } from "../tools";
 
 export interface Viewport2DSnapshot {
   mainViewType: ViewType;
   showSideViews: boolean;
 
+  voxelInfoMode: VoxelInfoMode;
+
   zoomLevel: number;
   offset: number[];
 }
 
 export class Viewport2D
-  implements IViewport2D, ISerializable<Viewport2DSnapshot> {
+  implements IViewport2D, ISerializable<Viewport2DSnapshot>
+{
   public readonly excludeFromSnapshotTracking = [
     "document",
     "hoveredScreenCoordinates",
     "hoveredViewType",
+    "mouseMoveTimeout",
+    "hasMouseRecentlyMoved",
   ];
 
   public mainViewType!: ViewType;
@@ -46,8 +53,14 @@ export class Viewport2D
   public zoomLevel!: number;
   public offset = new Vector(2);
 
-  private hoveredScreenCoordinates: Pixel = { x: 0, y: 0 };
+  public window: Vector = new Vector([0, 1]);
+
+  public hoveredScreenCoordinates: Pixel = { x: 0, y: 0 };
   public hoveredViewType = ViewType.Transverse;
+
+  public voxelInfoMode!: VoxelInfoMode;
+  private hasMouseRecentlyMoved = true;
+  private mouseMoveTimeout?: NodeJS.Timer;
 
   constructor(
     snapshot: Partial<Viewport2DSnapshot> | undefined,
@@ -59,14 +72,21 @@ export class Viewport2D
       this.reset();
     }
 
-    makeObservable<this, "hoveredScreenCoordinates" | "hoveredViewType">(this, {
+    makeObservable<
+      this,
+      "hoveredScreenCoordinates" | "hoveredViewType" | "hasMouseRecentlyMoved"
+    >(this, {
       mainViewType: observable,
       showSideViews: observable,
       zoomLevel: observable,
       offset: observable,
+      window: observable,
       hoveredScreenCoordinates: observable,
       hoveredViewType: observable,
+      voxelInfoMode: observable,
+      hasMouseRecentlyMoved: observable,
 
+      showVoxelInfo: computed,
       sliceMarkers: computed,
       hoveredUV: computed,
       hoveredDragPoint: computed,
@@ -76,8 +96,10 @@ export class Viewport2D
 
       setMainViewType: action,
       setShowSideViews: action,
+      setVoxelInfoMode: action,
       setZoomLevel: action,
       setOffset: action,
+      setWindow: action,
       reset: action,
       toggleSideViews: action,
       setSelectedSlice: action,
@@ -101,27 +123,21 @@ export class Viewport2D
   }
 
   public get defaultViewType() {
-    if (!this.document.has3DLayers) return ViewType.Transverse;
+    return (
+      this.document.mainImageLayer?.image.defaultViewType ?? ViewType.Transverse
+    );
+  }
 
-    const voxelSpacing = this.document.baseImageLayer?.image.voxelSpacing;
-    if (!voxelSpacing) return ViewType.Transverse;
-
-    let bestViewType = ViewType.Transverse;
-    let bestViewTypeDepth = voxelSpacing.getFromView(bestViewType);
-
-    [ViewType.Sagittal, ViewType.Coronal].forEach((viewType) => {
-      const viewTypeDepth = voxelSpacing.getFromView(viewType);
-      if (viewTypeDepth - bestViewTypeDepth > viewTypeDepthThreshold) {
-        bestViewType = viewType;
-        bestViewTypeDepth = viewTypeDepth;
-      }
-    });
-    return bestViewType;
+  public get showVoxelInfo() {
+    return (
+      this.voxelInfoMode === "on" ||
+      (this.voxelInfoMode === "delay" && !this.hasMouseRecentlyMoved)
+    );
   }
 
   public setMainViewType = (value?: ViewType): void => {
     if (!this.document.has3DLayers) {
-      this.mainViewType = ViewType.Transverse;
+      this.mainViewType = this.defaultViewType;
       return;
     }
 
@@ -133,6 +149,44 @@ export class Viewport2D
     this.showSideViews = value ?? true;
   }
 
+  private onMouseMove = () => {
+    if (this.mouseMoveTimeout !== undefined) {
+      clearTimeout(this.mouseMoveTimeout);
+    }
+
+    if (!this.hasMouseRecentlyMoved) {
+      // Marking the whole function as an action still resulted in a MobX warning when
+      // it was called by the event listener. Using `runInAction` works.
+      runInAction(() => {
+        this.hasMouseRecentlyMoved = true;
+      });
+    }
+
+    this.mouseMoveTimeout = setTimeout(() => {
+      // Here we need to use `runInAction` because it is called in the timeout.
+      runInAction(() => {
+        this.hasMouseRecentlyMoved = false;
+      });
+    }, voxelInfoDelay);
+  };
+
+  public setVoxelInfoMode = (value?: VoxelInfoMode) => {
+    this.voxelInfoMode = value ?? "off";
+
+    if (this.voxelInfoMode === "delay") {
+      window.addEventListener("mousemove", this.onMouseMove);
+
+      if (!this.hasMouseRecentlyMoved) {
+        this.hasMouseRecentlyMoved = true;
+      }
+    } else {
+      window.removeEventListener("mousemove", this.onMouseMove);
+      if (this.mouseMoveTimeout !== undefined) {
+        clearTimeout(this.mouseMoveTimeout);
+      }
+    }
+  };
+
   public setZoomLevel = (value?: number): void => {
     this.zoomLevel = value ?? 1;
   };
@@ -141,9 +195,14 @@ export class Viewport2D
     this.offset = value || this.offset.setScalar(0);
   }
 
+  public setWindow = (value?: [number, number]): void => {
+    this.window.set(...(value ?? [0, 1]));
+  };
+
   public reset = (): void => {
     this.setMainViewType();
     this.setShowSideViews();
+    this.setVoxelInfoMode();
     this.setZoomLevel();
     this.setOffset();
   };
@@ -154,9 +213,8 @@ export class Viewport2D
   };
 
   public getMaxSlice(viewType = this.mainViewType): number {
-    const sliceCount = this.document.baseImageLayer?.image?.voxelCount.getFromView(
-      viewType,
-    );
+    const sliceCount =
+      this.document.mainImageLayer?.image?.voxelCount.getFromView(viewType);
     return sliceCount ? sliceCount - 1 : 0;
   }
 
@@ -164,6 +222,7 @@ export class Viewport2D
     return this.document.viewSettings.selectedVoxel.getFromView(viewType);
   }
 
+  // eslint-disable-next-line default-param-last
   public setSelectedSlice(viewType = this.mainViewType, slice: number): void {
     this.document.viewSettings.selectedVoxel.setFromView(
       viewType,
@@ -210,30 +269,28 @@ export class Viewport2D
       bottom: false,
     };
 
-    if (!this.document.baseImageLayer) return dragPoint;
+    if (!this.document.mainImageLayer) return dragPoint;
 
     const [widthAxis, heightAxis] = getPlaneAxes(this.hoveredViewType);
     const orthogonalAxis = getOrthogonalAxis(this.hoveredViewType);
 
-    dragPoint[orthogonalAxis] = this.document.viewSettings.selectedVoxel[
-      orthogonalAxis
-    ];
+    dragPoint[orthogonalAxis] =
+      this.document.viewSettings.selectedVoxel[orthogonalAxis];
     dragPoint[widthAxis] =
       this.hoveredUV.x *
-      this.document.baseImageLayer.image.voxelCount[widthAxis];
+      this.document.mainImageLayer.image.voxelCount[widthAxis];
     dragPoint[heightAxis] =
       this.hoveredUV.y *
-      this.document.baseImageLayer.image.voxelCount[heightAxis];
+      this.document.mainImageLayer.image.voxelCount[heightAxis];
 
     if (!(this.document.tools.activeTool instanceof OutlineTool)) {
       dragPoint[widthAxis] = Math.floor(dragPoint[widthAxis]);
       dragPoint[heightAxis] = Math.floor(dragPoint[heightAxis]);
     }
 
-    const scanWidth = this.document.baseImageLayer.image.voxelCount[widthAxis];
-    const scanHeight = this.document.baseImageLayer.image.voxelCount[
-      heightAxis
-    ];
+    const scanWidth = this.document.mainImageLayer.image.voxelCount[widthAxis];
+    const scanHeight =
+      this.document.mainImageLayer.image.voxelCount[heightAxis];
 
     [dragPoint.right, dragPoint.bottom] = getPositionWithinPixel(
       this.hoveredUV,
@@ -260,7 +317,7 @@ export class Viewport2D
       activeLayer.kind === "image" &&
       activeLayer.isVisible
         ? (activeLayer as IImageLayer)
-        : this.document.baseImageLayer;
+        : this.document.mainImageLayer;
 
     if (!layer) return new Vector([0], false);
 
@@ -269,13 +326,13 @@ export class Viewport2D
 
   public get isVoxelHovered() {
     return Boolean(
-      this.document.baseImageLayer &&
+      this.document.mainImageLayer &&
         this.hoveredVoxel.x >= 0 &&
         this.hoveredVoxel.y >= 0 &&
         this.hoveredVoxel.z >= 0 &&
-        this.hoveredVoxel.x < this.document.baseImageLayer.image.voxelCount.x &&
-        this.hoveredVoxel.y < this.document.baseImageLayer.image.voxelCount.y &&
-        this.hoveredVoxel.z < this.document.baseImageLayer.image.voxelCount.z,
+        this.hoveredVoxel.x < this.document.mainImageLayer.image.voxelCount.x &&
+        this.hoveredVoxel.y < this.document.mainImageLayer.image.voxelCount.y &&
+        this.hoveredVoxel.z < this.document.mainImageLayer.image.voxelCount.z,
     );
   }
 
@@ -284,6 +341,7 @@ export class Viewport2D
     return {
       mainViewType: this.mainViewType,
       showSideViews: this.showSideViews,
+      voxelInfoMode: this.voxelInfoMode,
       zoomLevel: this.zoomLevel,
       offset: this.offset.toJSON(),
     };
@@ -292,6 +350,7 @@ export class Viewport2D
   public applySnapshot(snapshot: Partial<Viewport2DSnapshot>): Promise<void> {
     this.setMainViewType(snapshot.mainViewType);
     this.setShowSideViews(snapshot.showSideViews);
+    this.setVoxelInfoMode(snapshot.voxelInfoMode);
 
     this.setZoomLevel(snapshot.zoomLevel);
 

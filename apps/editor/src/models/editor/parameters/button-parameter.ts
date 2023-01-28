@@ -1,5 +1,5 @@
-import type React from "react";
 import { IButtonParameter } from "@visian/ui-shared";
+import type React from "react";
 
 import { Parameter, ParameterConfig } from "./parameter";
 
@@ -9,7 +9,8 @@ export interface ButtonParameterConfig<T = void> extends ParameterConfig<T> {
 
 export class ButtonParameter<T = void>
   extends Parameter<T>
-  implements IButtonParameter<T> {
+  implements IButtonParameter<T>
+{
   public static readonly kind = "button";
   public readonly kind = "button";
 

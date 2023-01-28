@@ -78,6 +78,7 @@ export class BrushCursor extends THREE.Group implements IDisposable {
     this.disposers.forEach((disposer) => disposer());
     this.lineSegments.geometry.dispose();
     (this.lineSegments.material as THREE.Material).dispose();
+    this.centerDot.geometry.dispose();
   }
 
   public setUVTarget(u: number, v: number) {
@@ -102,8 +103,9 @@ export class BrushCursor extends THREE.Group implements IDisposable {
       return;
     }
 
-    const { voxelCount } = (this.editor.activeDocument
-      .activeLayer as IImageLayer).image;
+    const { voxelCount } = (
+      this.editor.activeDocument.activeLayer as IImageLayer
+    ).image;
 
     const [widthAxis, heightAxis] = getPlaneAxes(this.viewType);
 
@@ -194,5 +196,3 @@ export class BrushCursor extends THREE.Group implements IDisposable {
     }
   }
 }
-
-export default BrushCursor;

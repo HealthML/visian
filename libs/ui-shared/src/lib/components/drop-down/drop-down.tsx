@@ -1,6 +1,8 @@
 import React, { useCallback, useState } from "react";
 import styled from "styled-components";
 
+import { FlexRow } from "../box";
+import { InfoText } from "../info-text";
 import { sheetMixin } from "../sheet";
 import { InputLabel } from "../text";
 import {
@@ -19,6 +21,15 @@ const Selector = styled(Option)`
   width: 100%;
 `;
 
+const LabelRow = styled(FlexRow)`
+  width: 100%;
+  justify-content: space-between;
+`;
+
+const StyledInfoText = styled(InfoText)`
+  margin-top: -4px;
+`;
+
 export const DropDown: React.FC<DropDownProps> = ({
   labelTx,
   label,
@@ -26,6 +37,10 @@ export const DropDown: React.FC<DropDownProps> = ({
   defaultValue,
   value,
   onChange,
+  infoTx,
+  infoShortcuts,
+  infoPosition,
+  infoBaseZIndex,
   ...rest
 }) => {
   const actualValue =
@@ -60,7 +75,19 @@ export const DropDown: React.FC<DropDownProps> = ({
 
   return (
     <>
-      {(labelTx || label) && <InputLabel tx={labelTx} text={label} />}
+      {(labelTx || label) && (
+        <LabelRow>
+          <InputLabel tx={labelTx} text={label} />
+          {infoTx && (
+            <StyledInfoText
+              infoTx={infoTx}
+              shortcuts={infoShortcuts}
+              position={infoPosition}
+              baseZIndex={infoBaseZIndex}
+            />
+          )}
+        </LabelRow>
+      )}
       <Selector
         {...rest}
         ref={setParentRef}

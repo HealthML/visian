@@ -1,18 +1,17 @@
-import {
-  DragPoint,
-  IEditor,
-  isPerformanceLow,
-  IVolumeRenderer,
-} from "@visian/ui-shared";
-import { IDisposable, IDisposer, Vector, Voxel } from "@visian/utils";
+import { DragPoint, IEditor, IVolumeRenderer } from "@visian/ui-shared";
+import { IDisposer, Vector, ViewType, Voxel } from "@visian/utils";
 import { autorun, computed, makeObservable, reaction } from "mobx";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import Stats from "three/examples/jsm/libs/stats.module";
 
+import { RenderedImage } from "../rendered-image";
 import { ScreenAlignedQuad } from "../screen-aligned-quad";
 import {
+  AxesConvention,
+  DitheringRenderer,
   FlyControls,
+  generateHistogram,
   GradientComputer,
   LAOComputer,
   ResolutionComputer,
@@ -21,7 +20,7 @@ import {
 import { Volume } from "./volume";
 import { XRManager } from "./xr-manager";
 
-export class VolumeRenderer implements IVolumeRenderer, IDisposable {
+export class VolumeRenderer implements IVolumeRenderer {
   public readonly excludeFromSnapshotTracking = ["editor"];
 
   private sharedUniforms: SharedUniforms;
@@ -45,12 +44,20 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
   private lazyRenderTriggered = true;
 
   private resolutionComputer: ResolutionComputer;
+  private ditheringRenderer: DitheringRenderer;
   private gradientComputer: GradientComputer;
   private laoComputer: LAOComputer;
 
+  // These two variables are used to progressively calculate the gradient histogram of the main image layer
+  private currentGradientHistogramSlice = 0;
+  private gradientMagnitudes: number[] = [];
+
   private pickingTexture = new THREE.WebGLRenderTarget(1, 1);
 
-  private workingVector = new THREE.Vector3();
+  private axesConvention: AxesConvention;
+
+  private workingVector3 = new THREE.Vector3();
+  private workingVector4 = new THREE.Vector4();
   private workingMatrix = new THREE.Matrix4();
 
   private disposers: IDisposer[] = [];
@@ -58,7 +65,7 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
   constructor(private editor: IEditor) {
     this.sharedUniforms = new SharedUniforms(editor);
 
-    [this.renderer] = editor.renderers;
+    this.renderer = editor.renderer;
     this.renderer.xr.enabled = true;
     this.renderer.setPixelRatio(window.devicePixelRatio);
 
@@ -106,7 +113,7 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
       this.editor,
       this.sharedUniforms,
       this.gradientComputer.getFirstDerivative(),
-      this.gradientComputer.getSecondDerivative(),
+      // this.gradientComputer.getSecondDerivative(),
       this.updateCurrentResolution,
     );
 
@@ -114,7 +121,7 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
       editor,
       this.sharedUniforms,
       this.gradientComputer.getFirstDerivative(),
-      this.gradientComputer.getSecondDerivative(),
+      // this.gradientComputer.getSecondDerivative(),
       this.gradientComputer.getOutputDerivative(),
       this.laoComputer.output,
     );
@@ -130,13 +137,12 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
     this.xr = new XRManager(this, editor);
 
     this.intermediateRenderTarget = new THREE.WebGLRenderTarget(1, 1);
-    // this.intermediateRenderTarget.texture.magFilter = THREE.NearestFilter;
     this.screenAlignedQuad = ScreenAlignedQuad.forTexture(
       this.intermediateRenderTarget.texture,
     );
 
-    const resolutionSteps = isPerformanceLow ? 4 : 3;
     this.resolutionComputer = new ResolutionComputer(
+      editor,
       { scene: this.scene, camera: this.camera },
       this.renderer,
       new THREE.Vector2(
@@ -144,7 +150,18 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
         this.renderer.domElement.height,
       ),
       this.eagerRender,
-      resolutionSteps,
+      this.volume.mainMaterial,
+      this.intermediateRenderTarget,
+    );
+    this.ditheringRenderer = new DitheringRenderer(
+      { scene: this.scene, camera: this.camera },
+      this.renderer,
+      new THREE.Vector2(
+        this.renderer.domElement.width,
+        this.renderer.domElement.height,
+      ),
+      this.eagerRender,
+      this.volume.mainMaterial,
       this.intermediateRenderTarget,
     );
 
@@ -157,6 +174,8 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
     this.renderer.domElement.parentElement?.appendChild(this.stats.dom);
     this.stats.dom.style.right = "0";
     this.stats.dom.style.left = "auto";
+
+    this.axesConvention = new AxesConvention(editor);
 
     this.disposers.push(
       reaction(
@@ -266,10 +285,12 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
     this.laoComputer.dispose();
     this.screenAlignedQuad.dispose();
     this.resolutionComputer.dispose();
+    this.ditheringRenderer.dispose();
     this.renderer.dispose();
     this.intermediateRenderTarget.dispose();
     this.sharedUniforms.dispose();
     this.disposers.forEach((disposer) => disposer());
+    this.axesConvention.dispose();
   };
 
   public get renderedImageLayerCount() {
@@ -292,6 +313,7 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
     const aspect = window.innerWidth / window.innerHeight;
 
     this.resolutionComputer.setSize(window.innerWidth, window.innerHeight);
+    this.ditheringRenderer.setSize(window.innerWidth, window.innerHeight);
 
     this.camera.aspect = aspect;
     this.camera.updateProjectionMatrix();
@@ -301,10 +323,47 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
     this.lazyRender();
   };
 
+  private tickGradientHistogram = () => {
+    if (this.editor.activeDocument?.mainImageLayer) {
+      const buffer = (
+        this.editor.activeDocument?.mainImageLayer.image as RenderedImage
+      ).textureAdapter.readSlice(
+        this.currentGradientHistogramSlice,
+        ViewType.Transverse,
+        this.renderer,
+        this.gradientComputer.getFirstDerivative(),
+      );
+
+      const workingVector = new THREE.Vector3();
+      for (let i = 0; i < buffer.length; i += 4) {
+        workingVector.set(buffer[i], buffer[i + 1], buffer[i + 2]);
+        this.gradientMagnitudes.push(workingVector.length());
+      }
+
+      this.currentGradientHistogramSlice++;
+      if (
+        this.currentGradientHistogramSlice ===
+        this.editor.activeDocument?.mainImageLayer?.image.voxelCount.z
+      ) {
+        this.editor.activeDocument?.mainImageLayer?.setGradientHistogram(
+          generateHistogram(this.gradientMagnitudes),
+        );
+      }
+    }
+  };
+
   public animate = () => {
     if (this.editor.activeDocument?.viewSettings.viewMode !== "3D") return;
 
     this.gradientComputer.tick();
+
+    if (
+      this.currentGradientHistogramSlice <
+        (this.editor.activeDocument?.mainImageLayer?.image.voxelCount.z || 0) &&
+      this.editor.performanceMode === "high"
+    ) {
+      this.tickGradientHistogram();
+    }
 
     if (
       (this.editor.activeDocument?.viewport3D.shadingMode === "lao" ||
@@ -330,11 +389,22 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
 
     if (this.lazyRenderTriggered) {
       this.resolutionComputer.restart();
+      this.ditheringRenderer.restart();
       this.lazyRenderTriggered = false;
     }
 
     if (!this.resolutionComputer.fullResolutionFlushed) {
       this.resolutionComputer.tick();
+    } else if (
+      (!(
+        this.editor.activeDocument?.viewport3D.shadingMode === "lao" ||
+        this.editor.activeDocument?.viewport3D.requestedShadingMode === "lao"
+      ) ||
+        (this.laoComputer.isFinalLAOFlushed && !this.laoComputer.isDirty)) &&
+      this.editor.performanceMode === "high" &&
+      !this.ditheringRenderer.isFinished
+    ) {
+      this.ditheringRenderer.tick();
     }
 
     this.stats.update();
@@ -346,6 +416,9 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
 
     if (updateGradients) {
       this.gradientComputer.updateAllDerivatives();
+      this.currentGradientHistogramSlice = 0;
+      this.gradientMagnitudes = [];
+      this.editor.activeDocument?.mainImageLayer?.setGradientHistogram();
     }
 
     if (updateLighting) {
@@ -355,7 +428,7 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
   };
 
   private eagerRender = () => {
-    if (!this.editor.activeDocument?.baseImageLayer) {
+    if (!this.editor.activeDocument?.mainImageLayer) {
       this.renderer.clear();
       return;
     }
@@ -364,12 +437,36 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
     if (this.renderer.xr.isPresenting) {
       this.renderer.render(this.scene, this.camera);
     } else {
+      // Render output from resolution computer and progressive ray dithering to canvas
       this.screenAlignedQuad.renderWith(this.renderer);
+
+      // Axes convention
+      this.camera.getWorldDirection(this.workingVector3);
+      this.axesConvention.setCameraDirection(this.workingVector3);
+
+      this.renderer.getViewport(this.workingVector4);
+
+      const axesBox = this.editor.refs.axes3D?.current?.getBoundingClientRect();
+      this.renderer.setViewport(
+        axesBox?.left ?? 0,
+        window.innerHeight - (axesBox?.bottom ?? 0),
+        AxesConvention.size,
+        AxesConvention.size,
+      );
+
+      this.renderer.autoClear = false;
+      this.renderer.clearDepth();
+      this.renderer.render(this.axesConvention, this.axesConvention.camera);
+      this.renderer.autoClear = true;
+      this.renderer.setViewport(this.workingVector4);
+
+      this.axesConvention.renderLabels();
     }
   };
 
   public updateCurrentResolution = () => {
     this.resolutionComputer?.restartFrame();
+    this.ditheringRenderer?.restart();
   };
 
   public get isShowingFullResolution() {
@@ -405,12 +502,12 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
   public updateCameraPosition(camera: THREE.Camera = this.camera) {
     this.volume.updateMatrixWorld();
 
-    this.workingVector.setFromMatrixPosition(camera.matrixWorld);
-    this.workingVector.applyMatrix4(
+    this.workingVector3.setFromMatrixPosition(camera.matrixWorld);
+    this.workingVector3.applyMatrix4(
       this.workingMatrix.copy(this.volume.matrixWorld).invert(),
     );
 
-    const { x, y, z } = this.workingVector;
+    const { x, y, z } = this.workingVector3;
     this.editor.activeDocument?.viewport3D.setVolumeSpaceCameraPosition(
       x,
       y,
@@ -438,7 +535,8 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
         ? (intersections[0].distance + intersections[1].distance) / 2
         : 1,
     );
-    this.orbitControls.target.add(this.camera.position);
+    // Reset to
+    this.orbitControls.target.copy(this.volume.position);
     this.onOrbitControlsChange();
   };
 
@@ -455,15 +553,15 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
   };
 
   public setVolumeSpaceCameraPosition(position: Vector) {
-    this.workingVector.fromArray(position.toArray());
-    this.volume.localToWorld(this.workingVector);
-    this.camera.position.copy(this.workingVector);
+    this.workingVector3.fromArray(position.toArray());
+    this.volume.localToWorld(this.workingVector3);
+    this.camera.position.copy(this.workingVector3);
     this.camera.lookAt(this.volume.position);
     this.onCameraMove();
   }
 
   private getSmartBrushIntersection(event: PointerEvent): Voxel | undefined {
-    const image = this.editor.activeDocument?.baseImageLayer?.image;
+    const image = this.editor.activeDocument?.mainImageLayer?.image;
     if (!image) return undefined;
 
     const clickPosition = { x: event.clientX, y: event.clientY };
@@ -511,7 +609,7 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
 
     if (pixelBuffer[3] <= 0) return undefined;
 
-    this.workingVector.set(
+    this.workingVector3.set(
       image.voxelCount.x,
       image.voxelCount.y,
       image.voxelCount.z,
@@ -523,7 +621,7 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
       pixelBuffer[2],
     )
       .divideScalar(255)
-      .multiply(this.workingVector)
+      .multiply(this.workingVector3)
       .floor();
 
     return seedPoint;
@@ -540,9 +638,8 @@ export class VolumeRenderer implements IVolumeRenderer, IDisposable {
       return;
     }
 
-    const smartBrush3D = this.editor.activeDocument?.tools.tools[
-      "smart-brush-3d"
-    ];
+    const smartBrush3D =
+      this.editor.activeDocument?.tools.tools["smart-brush-3d"];
     if (!smartBrush3D) return;
 
     const seedPoint = this.getSmartBrushIntersection(event);

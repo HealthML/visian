@@ -1,4 +1,5 @@
 import { IDocument } from "@visian/ui-shared";
+
 import { Tool } from "./tool";
 
 export class PlaneTool extends Tool<"plane-tool"> {
@@ -9,6 +10,7 @@ export class PlaneTool extends Tool<"plane-tool"> {
         icon: "planeTool",
         labelTx: "plane-tool",
         supportedViewModes: ["3D"],
+        activationKeys: "p",
       },
       document,
     );

@@ -7,13 +7,7 @@ describe("condenseValues", () => {
 
   it("should not combine non-adjacent values", () => {
     expect(condenseValues([0, 2, 4, 6, 8, 2120, 378972])).toEqual([
-      0,
-      2,
-      4,
-      6,
-      8,
-      2120,
-      378972,
+      0, 2, 4, 6, 8, 2120, 378972,
     ]);
   });
 

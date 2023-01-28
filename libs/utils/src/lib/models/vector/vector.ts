@@ -1,5 +1,4 @@
 import { action, makeObservable, observable, toJS } from "mobx";
-import type * as THREE from "three";
 
 import { getOrthogonalAxis, ViewType } from "../view-types";
 
@@ -10,10 +9,53 @@ export class OutOfBoundsError extends Error {
   }
 }
 
-export interface GenericVector extends THREE.Vector {
+export interface GenericVector {
   size: number;
+  x: number;
+  y: number;
+  z: number;
+  w: number;
+  width: number;
+  height: number;
 
+  setComponent(index: number | "x" | "y" | "z" | "w", value: number): this;
+  getComponent(index: number): number;
+  set(...args: number[]): this;
+  setScalar(scalar: number): this;
+  copy(v: GenericVector): this;
+  add(v: GenericVector): this;
+  addVectors(a: GenericVector, b: GenericVector): this;
+  addScaledVector(vector: GenericVector, scale: number): this;
+  addScalar(scalar: number): this;
+  sub(v: GenericVector): this;
+  subVectors(a: GenericVector, b: GenericVector): this;
+  multiply(vector: GenericVector): this;
+  multiplyScalar(s: number): this;
+  divide(vector: GenericVector): this;
+  divideScalar(s: number): this;
+  negate(): this;
+  dot(v: GenericVector): number;
+  lengthSq(): number;
+  length(): number;
+  sum(): number;
+  product(): number;
+  normalize(): this;
+  distanceTo?(v: Vector): number;
+  distanceToSquared?(v: Vector): number;
+  setLength(l: number): this;
+  lerp(v: GenericVector, alpha: number): this;
+  map(mapper: (value: number, index: number) => number): this;
+  round(): this;
+  floor(): this;
+  ceil(): this;
+  equals(v: GenericVector): boolean;
+  clone(): GenericVector;
+  fromArray(array: number[]): this;
   toArray(): number[];
+  toString(): string;
+  toJSON(): number[];
+  getFromView(viewType: ViewType): number;
+  setFromView(viewType: ViewType): this;
 }
 
 /** An observable vector of generic, fixed size. */
@@ -26,16 +68,16 @@ export class Vector implements GenericVector {
     object: { x: number; y?: number; z?: number; w?: number },
     isObservable = true,
   ) {
-    const array = [object.x];
+    let size = 1;
     ["y", "z", "w"].forEach((axis) => {
       const value = object[axis as "y" | "z" | "w"];
       if (value !== undefined) {
-        array.push(value);
+        size++;
       } else {
-        return new this(array, isObservable);
+        return new this(size, isObservable).setFromObject(object);
       }
     });
-    return new this(array, isObservable);
+    return new this(size, isObservable).setFromObject(object);
   }
 
   /** The number of components in this vector. */
@@ -44,6 +86,7 @@ export class Vector implements GenericVector {
   protected data: number[];
 
   constructor(
+    // eslint-disable-next-line default-param-last
     sizeOrArray: number | number[] = 3,
     public readonly isObservable = true,
   ) {
@@ -59,6 +102,7 @@ export class Vector implements GenericVector {
       makeObservable<this, "data">(this, {
         data: observable,
 
+        setFromObject: action,
         setComponent: action,
         set: action,
         setScalar: action,
@@ -69,7 +113,9 @@ export class Vector implements GenericVector {
         addScalar: action,
         sub: action,
         subVectors: action,
+        multiply: action,
         multiplyScalar: action,
+        divide: action,
         divideScalar: action,
         negate: action,
         normalize: action,
@@ -81,11 +127,33 @@ export class Vector implements GenericVector {
     }
   }
 
-  public setComponent(index: number, value: number) {
-    if (process.env.NODE_ENV !== "production" && this.size <= index) {
-      throw new OutOfBoundsError(index);
+  public setFromObject(object: {
+    x: number;
+    y?: number;
+    z?: number;
+    w?: number;
+  }) {
+    const array = [object.x];
+    ["y", "z", "w"].forEach((axis) => {
+      const value = object[axis as "y" | "z" | "w"];
+      if (value !== undefined) {
+        array.push(value);
+      } else {
+        return this.set(...array);
+      }
+    });
+    return this.set(...array);
+  }
+
+  public setComponent(index: number | "x" | "y" | "z" | "w", value: number) {
+    let i = index;
+    if (typeof i === "string") {
+      i = ["x", "y", "z", "w"].indexOf(i);
     }
-    this.data[index] = value;
+    if (process.env.NODE_ENV !== "production" && this.size <= i) {
+      throw new OutOfBoundsError(i);
+    }
+    this.data[i] = value;
     return this;
   }
 
@@ -225,6 +293,14 @@ export class Vector implements GenericVector {
     return this;
   }
 
+  public divide(vector: GenericVector) {
+    const size = Math.min(this.size, vector.size);
+    for (let i = 0; i < size; i++) {
+      this.data[i] /= vector.getComponent(i);
+    }
+    return this;
+  }
+
   public divideScalar(scalar: number) {
     for (let i = 0; i < this.size; i++) {
       this.data[i] /= scalar;
@@ -339,7 +415,7 @@ export class Vector implements GenericVector {
   }
 
   public toArray() {
-    return toJS(this.data);
+    return [...this.data];
   }
 
   public toString() {
@@ -357,5 +433,6 @@ export class Vector implements GenericVector {
 
   public setFromView(viewType: ViewType, value = 0) {
     this[getOrthogonalAxis(viewType)] = value;
+    return this;
   }
 }

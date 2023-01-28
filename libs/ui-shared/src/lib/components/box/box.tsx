@@ -1,6 +1,6 @@
 import styled from "styled-components";
-import { zIndex } from "../../theme";
 
+import { zIndex } from "../../theme";
 import { coverMixin } from "../mixins";
 import { BoxProps } from "./box.props";
 

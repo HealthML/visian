@@ -1,7 +1,7 @@
 import React, { useCallback } from "react";
 import styled from "styled-components";
-import { InvisibleButton } from "../button";
 
+import { InvisibleButton } from "../button";
 import { Text } from "../text";
 import { SwitchOptionProps } from "./switch-option.props";
 
@@ -19,7 +19,6 @@ const SwitchOptionContainer = styled(InvisibleButton)`
 
 const SwitchOptionLabel = styled(Text)`
   font-size: 12px;
-  line-height: 12px;
 `;
 
 export const SwitchOption: React.FC<SwitchOptionProps> = ({

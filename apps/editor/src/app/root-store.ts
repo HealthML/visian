@@ -1,5 +1,5 @@
-import { LocalForageBackend } from "@visian/ui-shared";
-import { readFileFromURL } from "@visian/utils";
+import { i18n, LocalForageBackend } from "@visian/ui-shared";
+import { getWHOTaskIdFromUrl, isFromWHO, readFileFromURL } from "@visian/utils";
 import React from "react";
 
 import { storePersistInterval } from "../constants";
@@ -17,35 +17,50 @@ export const setupRootStore = async () => {
   } catch (err) {
     // TODO: Resolve old data models after breaking changes more gracefully
     // eslint-disable-next-line no-alert
-    window.alert("Data model outdated. Reset required.");
+    window.alert(i18n.t("data-model-outdated-alert"));
     await store.destroy(true);
   }
 
-  try {
-    // Load scan based on GET parameter
-    // Example: http://localhost:4200/?load=http://data.idoimaging.com/nifti/1010_brain_mr_04.nii.gz
+  (async () => {
     const url = new URL(window.location.href);
-    const loadScanParam = url.searchParams.get("load");
-    if (loadScanParam && store.editor.newDocument()) {
-      await store.editor.activeDocument?.importFile(
-        await readFileFromURL(loadScanParam, true),
-      );
-      store.editor.activeDocument?.finishBatchImport();
-      if (url.searchParams.get("demo") === null) {
-        window.history.replaceState(
-          {},
-          document.title,
-          window.location.pathname,
-        );
-      }
+
+    if (url.searchParams.has("tracking")) {
+      store.initializeTracker();
     }
-  } catch {
-    store.setError({
-      titleTx: "import-error",
-      descriptionTx: "remote-file-error",
-    });
-    store.editor.setActiveDocument();
-  }
+
+    try {
+      // Load scan based on GET parameter
+      // Example: http://localhost:4200/?load=http://data.idoimaging.com/nifti/1010_brain_mr_04.nii.gz
+      const loadScanParam = url.searchParams.get("load");
+      if (loadScanParam && store.editor.newDocument()) {
+        store.setProgress({ labelTx: "importing", showSplash: true });
+        await store.editor.activeDocument?.importFiles(
+          await readFileFromURL(loadScanParam, true),
+        );
+        store.editor.activeDocument?.finishBatchImport();
+        if (url.searchParams.get("demo") === null) {
+          window.history.replaceState(
+            {},
+            document.title,
+            window.location.pathname,
+          );
+        }
+      }
+    } catch {
+      store.setError({
+        titleTx: "import-error",
+        descriptionTx: "remote-file-error",
+      });
+      store.editor.setActiveDocument();
+    }
+
+    if (isFromWHO()) {
+      // Load scan from WHO
+      // Example: http://localhost:4200/?origin=who&taskId=0b2fb698-6e1d-4682-a986-78b115178d94
+      const taskId = getWHOTaskIdFromUrl();
+      if (taskId) await store.loadWHOTask(taskId);
+    }
+  })();
 
   window.addEventListener("beforeunload", (event) => {
     if (store.isDirty) {

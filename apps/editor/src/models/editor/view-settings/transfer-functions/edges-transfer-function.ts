@@ -26,6 +26,7 @@ export class EdgesTransferFunction extends TransferFunction<"fc-edges"> {
         max: 1,
         onBeforeValueChange: () =>
           document.viewport3D?.onTransferFunctionChange(),
+        getHistogram: () => document.mainImageLayer?.gradientHistogram,
       }) as Parameter<unknown>,
       new NumberParameter({
         name: "contextOpacity",

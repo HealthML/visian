@@ -1,24 +1,37 @@
-import * as THREE from "three";
 import {
+  DilateErodeRenderer3D,
   RegionGrowingRenderer,
   RegionGrowingRenderer3D,
+  ThresholdAnnotationRenderer3D,
   ToolRenderer,
 } from "@visian/rendering";
-import { IDocument, IImageLayer, ITool, ITools } from "@visian/ui-shared";
-import { getPlaneAxes, ISerializable } from "@visian/utils";
+import {
+  IDocument,
+  IImageLayer,
+  ITool,
+  ITools,
+  MergeFunction,
+} from "@visian/ui-shared";
+import { getPlaneAxes, IDisposable, ISerializable } from "@visian/utils";
 import { action, computed, makeObservable, observable } from "mobx";
+import * as THREE from "three";
+
+import { BoundedSmartBrush } from "./bounded-smart-brush";
 import { CircleBrush } from "./circle-brush";
 import { ClearImageTool } from "./clear-image-tool";
 import { ClearSliceTool } from "./clear-slice-tool";
-import { SmartBrush } from "./smart-brush";
 import { CrosshairTool } from "./crosshair-tool";
+import { DilateErodeTool } from "./dilate-erode-tool";
+import { MeasurementTool } from "./measurement-tool";
 import { OutlineTool } from "./outline-tool";
-import { Tool, ToolSnapshot } from "./tool";
-
-import { ToolGroup, ToolGroupSnapshot } from "./tool-group";
-import { BoundedSmartBrush } from "./bounded-smart-brush";
 import { PlaneTool } from "./plane-tool";
+import { SelfDeactivatingTool } from "./self-deactivating-tool";
+import { SmartBrush } from "./smart-brush";
 import { SmartBrush3D } from "./smart-brush-3d";
+import { ThresholdAnnotationTool } from "./threshold-annotation-tool";
+import { Tool, ToolSnapshot } from "./tool";
+import { ToolGroup, ToolGroupSnapshot } from "./tool-group";
+import { UndoableTool } from "./undoable-tool";
 
 export type ToolName =
   | "navigation-tool"
@@ -34,8 +47,11 @@ export type ToolName =
   | "outline-eraser"
   | "clear-slice"
   | "clear-image"
+  | "threshold-annotation"
+  | "dilate-erode"
   | "plane-tool"
-  | "fly-tool";
+  | "fly-tool"
+  | "measurement-tool";
 
 export interface ToolsSnapshot<N extends string> {
   activeToolName?: N;
@@ -49,13 +65,20 @@ export interface ToolsSnapshot<N extends string> {
 }
 
 export class Tools
-  implements ITools<ToolName>, ISerializable<ToolsSnapshot<ToolName>> {
+  implements
+    ITools<ToolName>,
+    ISerializable<ToolsSnapshot<ToolName>>,
+    IDisposable
+{
   public readonly excludeFromSnapshotTracking = [
     "document",
     "isCursorOverDrawableArea",
     "isCursorOverFloatingUI",
     "isNavigationDragged",
     "isDrawing",
+    "regionGrowingRenderer",
+    "regionGrowingRenderer3D",
+    "dilateErodeRenderer3D",
   ];
 
   protected activeToolName?: ToolName;
@@ -75,6 +98,10 @@ export class Tools
   public toolRenderer: ToolRenderer;
   public regionGrowingRenderer: RegionGrowingRenderer;
   public regionGrowingRenderer3D: RegionGrowingRenderer3D;
+  public thresholdAnnotationRenderer3D: ThresholdAnnotationRenderer3D;
+  public dilateErodeRenderer3D: DilateErodeRenderer3D;
+
+  public showToolSettings = false;
 
   constructor(
     snapshot: Partial<ToolsSnapshot<ToolName>> | undefined,
@@ -100,6 +127,7 @@ export class Tools
       isCursorOverFloatingUI: observable,
       isNavigationDragged: observable,
       isDrawing: observable,
+      showToolSettings: observable,
 
       activeTool: computed,
       pixelWidth: computed,
@@ -108,7 +136,9 @@ export class Tools
       canDraw: computed,
       isToolInUse: computed,
       useAdaptiveBrushSize: computed,
-      layerPreviewTextures: computed,
+      layerPreviewTexture: computed,
+      slicePreviewTexture: computed,
+      slicePreviewMergeFunction: computed,
 
       setActiveTool: action,
       setBrushSize: action,
@@ -120,12 +150,17 @@ export class Tools
       setIsDrawing: action,
       resetBrushSettings: action,
       resetActiveToolSetings: action,
+      setShowToolSettings: action,
       applySnapshot: action,
     });
 
     this.toolRenderer = new ToolRenderer(document);
     this.regionGrowingRenderer = new RegionGrowingRenderer(document);
     this.regionGrowingRenderer3D = new RegionGrowingRenderer3D(document);
+    this.thresholdAnnotationRenderer3D = new ThresholdAnnotationRenderer3D(
+      document,
+    );
+    this.dilateErodeRenderer3D = new DilateErodeRenderer3D(document);
 
     this.tools = {
       "navigation-tool": new Tool(
@@ -134,6 +169,7 @@ export class Tools
           icon: "navigationTool",
           labelTx: "navigation-tool",
           supportedViewModes: ["2D", "3D"],
+          activationKeys: "h",
         },
         this.document,
       ),
@@ -163,7 +199,12 @@ export class Tools
       "outline-eraser": new OutlineTool(document, this.toolRenderer, false),
       "clear-slice": new ClearSliceTool(document, this.toolRenderer),
       "clear-image": new ClearImageTool(document, this.toolRenderer),
-      "plane-tool": new PlaneTool(this.document),
+      "threshold-annotation": new ThresholdAnnotationTool(
+        document,
+        this.thresholdAnnotationRenderer3D,
+      ),
+      "dilate-erode": new DilateErodeTool(document, this.dilateErodeRenderer3D),
+      "plane-tool": new PlaneTool(document),
       "fly-tool": new Tool(
         {
           name: "fly-tool",
@@ -171,34 +212,52 @@ export class Tools
           labelTx: "fly-tool",
           supportedViewModes: ["3D"],
         },
-        this.document,
+        document,
       ),
+      "measurement-tool": new MeasurementTool(document),
     };
 
     this.toolGroups.push(
-      new ToolGroup({ toolNames: ["navigation-tool"] }, document),
-      new ToolGroup({ toolNames: ["crosshair-tool"] }, document),
+      new ToolGroup(
+        { toolNames: ["navigation-tool", "crosshair-tool"] },
+        document,
+      ),
+      new ToolGroup({ toolNames: ["fly-tool"] }, document),
+      new ToolGroup({ toolNames: ["plane-tool"] }, document),
       new ToolGroup({ toolNames: ["pixel-brush"] }, document),
-      new ToolGroup({ toolNames: ["smart-brush", "smart-eraser"] }, document),
       new ToolGroup(
-        { toolNames: ["bounded-smart-brush", "bounded-smart-eraser"] },
+        { toolNames: ["smart-brush", "bounded-smart-brush", "smart-brush-3d"] },
         document,
       ),
-      new ToolGroup({ toolNames: ["smart-brush-3d"] }, document),
+      new ToolGroup({ toolNames: ["outline-tool"] }, document),
       new ToolGroup(
-        { toolNames: ["outline-tool", "outline-eraser"] },
-        document,
-      ),
-      new ToolGroup(
-        { toolNames: ["pixel-eraser", "smart-eraser", "outline-eraser"] },
+        {
+          toolNames: [
+            "pixel-eraser",
+            "smart-eraser",
+            "bounded-smart-eraser",
+            "outline-eraser",
+          ],
+        },
         document,
       ),
       new ToolGroup({ toolNames: ["clear-slice", "clear-image"] }, document),
-      new ToolGroup({ toolNames: ["plane-tool"] }, document),
-      new ToolGroup({ toolNames: ["fly-tool"] }, document),
+
+      new ToolGroup(
+        { toolNames: ["dilate-erode", "threshold-annotation"] },
+        document,
+      ),
+      new ToolGroup({ toolNames: ["measurement-tool"] }, document),
     );
 
-    this.applySnapshot(snapshot);
+    if (snapshot) this.applySnapshot(snapshot);
+  }
+
+  public dispose() {
+    this.toolRenderer.dispose();
+    this.regionGrowingRenderer.dispose();
+    this.regionGrowingRenderer3D.dispose();
+    this.dilateErodeRenderer3D.dispose();
   }
 
   protected getDefaultToolName(): ToolName {
@@ -217,7 +276,10 @@ export class Tools
       : tool;
   }
 
-  public setActiveTool(nameOrTool?: ToolName | ITool<ToolName>): void {
+  public setActiveTool(
+    nameOrTool?: ToolName | ITool<ToolName>,
+    setAsGroupActiveTool = true,
+  ): void {
     if (this.isDrawing) return;
 
     const previouslyActiveTool = this.activeTool;
@@ -228,7 +290,18 @@ export class Tools
         : nameOrTool.name
       : "pixel-brush";
 
+    if (setAsGroupActiveTool) {
+      this.toolGroups
+        .find((group) =>
+          group.tools.some((tool) => tool.name === this.activeToolName),
+        )
+        ?.setActiveTool(this.activeToolName, false);
+    }
+
+    this.setShowToolSettings();
+
     if (this.activeTool?.canActivate()) {
+      previouslyActiveTool?.deactivate(this.tools[this.activeToolName]);
       this.activeTool.activate(previouslyActiveTool);
     }
   }
@@ -294,8 +367,22 @@ export class Tools
     return this.lockedBrushSize === undefined;
   }
 
-  public get layerPreviewTextures(): THREE.Texture[] {
-    return this.regionGrowingRenderer3D.outputTextures;
+  public get layerPreviewTexture(): THREE.Texture {
+    return this.regionGrowingRenderer3D.holdsPreview
+      ? this.regionGrowingRenderer3D.outputTexture
+      : this.thresholdAnnotationRenderer3D.outputTexture;
+  }
+
+  public get slicePreviewTexture(): THREE.Texture | undefined {
+    if (!(this.activeTool instanceof UndoableTool)) return undefined;
+
+    return this.activeTool.toolRenderer.texture;
+  }
+
+  public get slicePreviewMergeFunction(): MergeFunction | undefined {
+    if (!(this.activeTool instanceof UndoableTool)) return undefined;
+
+    return this.activeTool.toolRenderer.mergeFunction;
   }
 
   public setBrushSize(value = 5, showPreview = false): void {
@@ -405,6 +492,14 @@ export class Tools
     });
   };
 
+  // UI state
+  public setShowToolSettings = (value = false): void => {
+    this.showToolSettings = value;
+  };
+  public toggleToolSettings = (): void => {
+    this.setShowToolSettings(!this.showToolSettings);
+  };
+
   // Serialization
   public toJSON(): ToolsSnapshot<ToolName> {
     return {
@@ -419,22 +514,28 @@ export class Tools
   }
 
   public applySnapshot(
-    snapshot?: Partial<ToolsSnapshot<ToolName>>,
+    snapshot: Partial<ToolsSnapshot<ToolName>>,
   ): Promise<void> {
-    this.setActiveTool(snapshot?.activeToolName);
-    snapshot?.tools?.forEach((toolSnapshot) => {
+    snapshot.tools?.forEach((toolSnapshot) => {
       const tool = this.tools[toolSnapshot.name];
       if (tool) tool.applySnapshot(toolSnapshot);
     });
+    this.setActiveTool(
+      !snapshot.activeToolName ||
+        !(this.tools[snapshot.activeToolName] as SelfDeactivatingTool<ToolName>)
+          ?.isSelfDeactivating
+        ? snapshot.activeToolName
+        : undefined,
+    );
     this.toolGroups.forEach((toolGroup, index) => {
-      const toolGroupSnapshot = snapshot?.toolGroups?.[index];
+      const toolGroupSnapshot = snapshot.toolGroups?.[index];
       if (toolGroupSnapshot) toolGroup.applySnapshot(toolGroupSnapshot);
     });
 
-    this.setBrushSize(snapshot?.brushSize);
-    this.lockedBrushSize = snapshot?.lockedBrushSize;
-    this.setSmartBrushThreshold(snapshot?.smartBrushThreshold);
-    this.setBoundedSmartBrushRadius(snapshot?.boundedSmartBrushRadius);
+    this.setBrushSize(snapshot.brushSize);
+    this.lockedBrushSize = snapshot.lockedBrushSize;
+    this.setSmartBrushThreshold(snapshot.smartBrushThreshold);
+    this.setBoundedSmartBrushRadius(snapshot.boundedSmartBrushRadius);
 
     return Promise.resolve();
   }

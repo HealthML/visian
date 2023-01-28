@@ -5,8 +5,6 @@ uniform mat3 uConeMatrix;
 uniform int uTransferFunction;
 uniform bool uUseFocus;
 uniform sampler2D uCustomTFTexture;
-uniform bool uVolumeNearestFiltering;
-uniform bool uSegmentationLinearFiltering;
 uniform bool uUsePlane;
 uniform vec3 uPlaneNormal;
 uniform float uPlaneDistance;

@@ -1,16 +1,20 @@
-import { RenderedImage } from "@visian/rendering";
-import { IDocument, IImageLayer, MarkerConfig } from "@visian/ui-shared";
+import { generateHistogram, RenderedImage } from "@visian/rendering";
 import {
+  Histogram,
+  IDocument,
+  IImageLayer,
+  MarkerConfig,
+} from "@visian/ui-shared";
+import {
+  IDisposable,
   Image,
   ImageSnapshot,
   ISerializable,
-  ITKImage,
   itkImageToImageSnapshot,
-  TypedArray,
+  ITKImageWithUnit,
   Vector,
   ViewType,
   Voxel,
-  VoxelWithValue,
   writeSingleMedicalImage,
 } from "@visian/utils";
 import FileSaver from "file-saver";
@@ -21,11 +25,16 @@ import { condenseValues } from "../../markers";
 import { Layer, LayerSnapshot } from "../layer";
 import { markerRPCProvider } from "./markers";
 import {
+  GetAreaArgs,
+  GetAreaReturn,
   GetEmptySlicesArgs,
   GetEmptySlicesReturn,
+  GetVolumeArgs,
+  GetVolumeReturn,
   IsSliceEmptyArgs,
   IsSliceEmptyReturn,
 } from "./types";
+import { volumeRPCProvider } from "./volume";
 
 export interface ImageLayerSnapshot extends LayerSnapshot {
   image: ImageSnapshot;
@@ -36,20 +45,26 @@ export interface ImageLayerSnapshot extends LayerSnapshot {
 
 export class ImageLayer
   extends Layer
-  implements IImageLayer, ISerializable<ImageLayerSnapshot> {
-  public static fromITKImage<T2 extends TypedArray = TypedArray>(
-    image: ITKImage<T2>,
+  implements IImageLayer, ISerializable<ImageLayerSnapshot>, IDisposable
+{
+  public static fromITKImage(
+    image: ITKImageWithUnit,
     document: IDocument,
     snapshot?: Partial<ImageLayerSnapshot>,
+    filterValue?: number,
+    squash?: boolean,
   ) {
     return new this(
-      { ...snapshot, image: itkImageToImageSnapshot(image) },
+      {
+        ...snapshot,
+        image: itkImageToImageSnapshot(image, filterValue, squash),
+      },
       document,
     );
   }
 
-  public static fromNewAnnotationForImage<T2 extends TypedArray = TypedArray>(
-    image: Image<T2>,
+  public static fromNewAnnotationForImage(
+    image: Image,
     document: IDocument,
     color?: string,
   ) {
@@ -58,13 +73,13 @@ export class ImageLayer
         isAnnotation: true,
         color: color || defaultAnnotationColor,
         image: {
-          atlas: new Uint8Array(image.getAtlas().length),
           name: `${image.name.split(".")[0]}_annotation`,
           dimensionality: image.dimensionality,
           origin: image.origin.toArray(),
           orientation: image.orientation,
           voxelCount: image.voxelCount.toArray(),
           voxelSpacing: image.voxelSpacing.toArray(),
+          unit: image.unit,
         },
       },
       document,
@@ -80,11 +95,21 @@ export class ImageLayer
   public brightness!: number;
   public contrast!: number;
 
+  public densityHistogram?: Histogram;
+  public gradientHistogram?: Histogram;
+
   /**
    * An array of n-hot arrays indicating empty slices in the direction of every
    * view type.
    */
   protected emptySlices!: boolean[][];
+
+  public volume: number | null = null;
+  public area: {
+    viewType: ViewType;
+    slice: number;
+    area: number;
+  } | null = null;
 
   constructor(
     snapshot: Partial<ImageLayerSnapshot> & Pick<ImageLayerSnapshot, "image">,
@@ -97,23 +122,38 @@ export class ImageLayer
       "emptySlices",
     ];
 
-    makeObservable<this, "emptySlices" | "setEmptySlices" | "setIsSliceEmpty">(
+    makeObservable<
       this,
-      {
-        image: observable,
-        brightness: observable,
-        contrast: observable,
-        emptySlices: observable,
+      | "emptySlices"
+      | "setEmptySlices"
+      | "setIsSliceEmpty"
+      | "setVolume"
+      | "setArea"
+    >(this, {
+      image: observable,
+      brightness: observable,
+      contrast: observable,
+      emptySlices: observable,
+      volume: observable,
+      area: observable,
+      densityHistogram: observable.ref,
+      gradientHistogram: observable.ref,
 
-        is3DLayer: computed,
+      is3DLayer: computed,
 
-        setImage: action,
-        setBrightness: action,
-        setContrast: action,
-        setEmptySlices: action,
-        setIsSliceEmpty: action,
-      },
-    );
+      setImage: action,
+      setBrightness: action,
+      setContrast: action,
+      setEmptySlices: action,
+      setIsSliceEmpty: action,
+      setVolume: action,
+      setArea: action,
+      setGradientHistogram: action,
+    });
+  }
+
+  public dispose() {
+    this.image.dispose();
   }
 
   public get title(): string {
@@ -121,15 +161,14 @@ export class ImageLayer
   }
 
   public get is3DLayer() {
-    return (
-      this.image.voxelCount
-        .toArray()
-        .reduce((previous, current) => previous + (current > 1 ? 1 : 0), 0) > 2
-    );
+    return this.image.is3D;
   }
 
   public setImage(value: RenderedImage): void {
     this.image = value;
+    if (this.document.performanceMode === "high") {
+      this.densityHistogram = generateHistogram(value.getData());
+    }
   }
 
   public setBrightness(value?: number): void {
@@ -138,6 +177,15 @@ export class ImageLayer
 
   public setContrast(value?: number): void {
     this.contrast = value ?? 1;
+  }
+
+  public setGradientHistogram(histogram: Histogram) {
+    this.gradientHistogram = histogram;
+  }
+
+  public delete() {
+    super.delete();
+    this.dispose();
   }
 
   // Slice Markers
@@ -180,6 +228,58 @@ export class ImageLayer
     this.emptySlices[viewType][slice] = isEmpty;
   }
 
+  protected setVolume(volume: number | null = null) {
+    this.volume = volume;
+  }
+
+  public async computeVolume() {
+    this.setVolume();
+
+    if (!this.isAnnotation) return;
+
+    const volume = await volumeRPCProvider.rpc<GetVolumeArgs, GetVolumeReturn>(
+      "getVolume",
+      {
+        data: this.image.getTextureData() as Uint8Array,
+        voxelCount: this.image.voxelCount.toArray(),
+        voxelComponents: this.image.voxelComponents,
+        voxelSpacing: this.image.voxelSpacing.toArray(),
+      },
+    );
+
+    this.setVolume(volume);
+  }
+
+  protected setArea(
+    area: {
+      viewType: ViewType;
+      slice: number;
+      area: number;
+    } | null = null,
+  ) {
+    this.area = area;
+  }
+
+  public async computeArea(viewType: ViewType, slice: number) {
+    this.setArea();
+
+    if (!this.isAnnotation) return;
+
+    const area = await volumeRPCProvider.rpc<GetAreaArgs, GetAreaReturn>(
+      "getArea",
+      {
+        data: this.image.getTextureData() as Uint8Array,
+        voxelCount: this.image.voxelCount.toArray(),
+        voxelComponents: this.image.voxelComponents,
+        voxelSpacing: this.image.voxelSpacing.toArray(),
+        viewType,
+        slice,
+      },
+    );
+
+    this.setArea({ area, viewType, slice });
+  }
+
   public async recomputeSliceMarkers(
     viewType?: ViewType,
     slice?: number,
@@ -216,7 +316,7 @@ export class ImageLayer
         GetEmptySlicesArgs,
         GetEmptySlicesReturn
       >("getEmptySlices", {
-        atlas: this.image.getAtlas(),
+        data: this.image.getTextureData() as Uint8Array,
         voxelCount: this.image.voxelCount.toArray(),
         voxelComponents: this.image.voxelComponents,
       });
@@ -250,14 +350,6 @@ export class ImageLayer
     return this.image.getVoxelData(voxel);
   }
 
-  public setVoxel(voxel: Voxel | Vector, value: number): void {
-    this.image.setAtlasVoxel(voxel, value);
-  }
-
-  public setVoxels(voxels: VoxelWithValue[]): void {
-    this.image.setAtlasVoxels(voxels);
-  }
-
   public getSlice(viewType: ViewType, slice: number): Uint8Array {
     return this.image.getSlice(viewType, slice);
   }
@@ -270,18 +362,14 @@ export class ImageLayer
     this.image.setSlice(viewType, slice, sliceData);
   }
 
-  public getAtlas(): Uint8Array {
-    return this.image.getAtlas();
-  }
-
-  public setAtlas(atlas: Uint8Array): void {
-    this.image.setAtlas(atlas);
-  }
-
   // I/O
-  public toFile() {
+  public toFile(): Promise<File | undefined> {
     return writeSingleMedicalImage(
-      this.image.toITKImage(),
+      this.image.toITKImage(
+        this.document
+          .getExcludedSegmentations(this)
+          ?.map((imageLayer) => imageLayer.image),
+      ),
       `${this.title.split(".")[0]}.nii.gz`,
     );
   }
@@ -299,13 +387,36 @@ export class ImageLayer
       this.document.viewport2D.getSelectedSlice(),
     );
     const file = await writeSingleMedicalImage(
-      sliceImage.toITKImage(),
+      sliceImage.toITKImage(
+        this.document
+          .getExcludedSegmentations(this)
+          ?.map((imageLayer) =>
+            imageLayer.image.getSliceImage(
+              this.document.viewport2D.mainViewType,
+              this.document.viewport2D.getSelectedSlice(),
+            ),
+          ),
+      ),
       `${sliceImage.name.split(".")[0]}.png`,
     );
 
     if (!file) return;
     FileSaver.saveAs(file, file.name);
   };
+
+  public setIsAnnotation(value?: boolean): void {
+    if (Boolean(value) !== this.isAnnotation && this.image) {
+      const imageSnapshot = this.image.toJSON();
+
+      this.image.dispose();
+
+      this.setImage(
+        new RenderedImage(imageSnapshot, this.document, Boolean(value)),
+      );
+    }
+
+    super.setIsAnnotation(value);
+  }
 
   // Serialization
   public toJSON(): ImageLayerSnapshot {
@@ -325,7 +436,13 @@ export class ImageLayer
     }
 
     super.applySnapshot(snapshot);
-    this.setImage(new RenderedImage(snapshot.image, this.document));
+    this.setImage(
+      new RenderedImage(
+        snapshot.image,
+        this.document,
+        Boolean(snapshot.isAnnotation),
+      ),
+    );
     this.setBrightness(snapshot.brightness);
     this.setContrast(snapshot.contrast);
 

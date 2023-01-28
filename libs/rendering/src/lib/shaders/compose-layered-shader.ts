@@ -15,19 +15,30 @@
  */
 const generateReduceLayerStack = (
   layerCount: number,
+  // eslint-disable-next-line default-param-last
   outputName = "imageValue",
+  // eslint-disable-next-line default-param-last
   uvName = "uv",
   reduceAnnotations?: boolean,
   rawOutputName?: string,
 ) => {
   const alpha = `_alpha${Math.floor(Math.random() * 1000)}`;
   const activeLayer = `_activeLayer${Math.floor(Math.random() * 1000)}`;
+  const accumulatedAnnotations = `_accumulatedAnnotations${Math.floor(
+    Math.random() * 1000,
+  )}`;
   let fragment = `
   float ${alpha} = 0.0;
-  float ${activeLayer} = texture2D(uActiveLayerData, ${uvName}).r;
+  float ${activeLayer} = texture(uActiveLayerData, ${uvName}).r;
   `;
+  if (reduceAnnotations) {
+    fragment += `
+    float ${accumulatedAnnotations} = 0.0;
+    `;
+  }
+
   for (let i = 0; i < layerCount; i++) {
-    fragment += `${alpha} = texture2D(uLayerData[${i}], ${uvName}).r;
+    fragment += `${alpha} = texture(uLayerData[${i}], ${uvName}).r;
     `;
 
     if (i === 0) {
@@ -38,14 +49,23 @@ const generateReduceLayerStack = (
       `;
     }
 
+    if (reduceAnnotations) {
+      fragment += `
+      if(uUseExclusiveSegmentations) {
+        ${alpha} = mix(${alpha}, 0.0, step(0.001, ${accumulatedAnnotations}));
+        ${accumulatedAnnotations} = mix(${accumulatedAnnotations}, 1.0, step(0.001, ${alpha} * step(0.001, uLayerOpacities[${i}])));
+      }
+      `;
+    }
+
     const filter = `(${
       reduceAnnotations ? "" : "1.0 - "
     }float(uLayerAnnotationStatuses[${i}]))`;
 
     if (rawOutputName) {
       fragment += `
-      ${rawOutputName}.rgb += ${filter} * (1.0 - ${rawOutputName}.a) * ${alpha} * step(0.0, uLayerOpacities[${i}]);
-      ${rawOutputName}.a += ${filter} * (1.0 - ${rawOutputName}.a) * ${alpha} * step(0.0, uLayerOpacities[${i}]);
+      ${rawOutputName}.rgb += ${filter} * (1.0 - ${rawOutputName}.a) * ${alpha} * step(0.001, uLayerOpacities[${i}]);
+      ${rawOutputName}.a += ${filter} * (1.0 - ${rawOutputName}.a) * ${alpha} * step(0.001, uLayerOpacities[${i}]);
       `;
     }
 
@@ -65,30 +85,47 @@ const generateReduceLayerStack = (
  *
  * @param layerCount The number of layers.
  * @param outputName The output variable to assign the blended color to.
- * @param uvName The name of the variable holding the current UV coordinates.
+ * @param volumeCoords The name of the variable holding the current UV coordinates.
  * @param enhancementFunctionName The optional name of the function which is
  * applied to every non-annotation layer before blending.
  * @returns The generated GLSL code.
  */
 const generateReduceEnhancedLayerStack = (
   layerCount: number,
+  // eslint-disable-next-line default-param-last
   outputName = "imageValue",
-  uvName = "uv",
+  // eslint-disable-next-line default-param-last
+  volumeCoords = "volumeCoords",
+  activeLayerMergeName?: string,
   enhancementFunctionName?: string,
 ) => {
   const image = `_image${Math.floor(Math.random() * 1000)}`;
   const activeLayer = `_activeLayer${Math.floor(Math.random() * 1000)}`;
   const oldAlpha = `_oldAlpha${Math.floor(Math.random() * 1000)}`;
+  const accumulatedAnnotations = `_accumulatedAnnotations${Math.floor(
+    Math.random() * 1000,
+  )}`;
   let fragment = `
   vec4 ${image} = vec4(0.0);
-  vec4 ${activeLayer} = texture2D(uActiveLayerData, ${uvName});
+  vec4 ${activeLayer} = texture(uActiveLayerData, ${volumeCoords});
   float ${oldAlpha} = 0.0;
+  float ${accumulatedAnnotations} = 0.0;
   `;
 
-  for (let i = layerCount - 1; i >= 0; i--) {
-    // back to front blending
-    fragment += `${image} = texture2D(uLayerData[${i}], ${uvName});
+  for (let i = 0; i < layerCount; i++) {
+    fragment += `${image} = texture(uLayerData[${i}], ${volumeCoords});
     `;
+
+    if (activeLayerMergeName) {
+      fragment += `${image} = mix(
+        ${image}, 
+        uToolPreviewMerge == 1
+        ? max(${image}, ${activeLayerMergeName})
+        : clamp(${image} - ${activeLayerMergeName}, 0.0, 1.0),
+        float(${i} == uActiveLayerIndex && uLayerAnnotationStatuses[${i}])
+        );
+        `;
+    }
 
     if (i === 0) {
       // Region growing preview
@@ -104,6 +141,11 @@ const generateReduceEnhancedLayerStack = (
       ${image}.rgb = uLayerColors[${i}];
     }
 
+    if(uUseExclusiveSegmentations && uLayerAnnotationStatuses[${i}]) {
+      ${image}.a = mix(${image}.a, 0.0, step(0.001, ${accumulatedAnnotations}));
+      ${accumulatedAnnotations} = mix(${accumulatedAnnotations}, 1.0, step(0.001, ${image}.a * step(0.001, uLayerOpacities[${i}])));
+    }
+
     if(uLayerAnnotationStatuses[${i}]) {
       ${image}.a = step(0.01, ${image}.a);
     } ${
@@ -117,11 +159,11 @@ const generateReduceEnhancedLayerStack = (
     ${image}.a *= uLayerOpacities[${i}];
     
     ${oldAlpha} = ${outputName}.a;
-    ${outputName}.a = mix(${oldAlpha}, 1.0, ${image}.a);
+    ${outputName}.a = mix(${image}.a, 1.0, ${oldAlpha});
     ${outputName}.rgb = mix(
-      ${oldAlpha} * ${outputName}.rgb,
-      ${image}.rgb,
-      ${image}.a) / max(${outputName}.a, 0.00001); // avoid division by 0
+      ${image}.a * ${image}.rgb,
+      ${outputName}.rgb,
+      ${oldAlpha}) / max(${outputName}.a, 0.00001); // avoid division by 0
     `;
   }
 
@@ -149,7 +191,7 @@ const generateReduceRawImages = (
 
   for (let i = 0; i < layerCount; i++) {
     fragment += `
-    ${alpha} = texture2D(uLayerData[${i}], ${uvName}).r;
+    ${alpha} = texture(uLayerData[${i}], ${uvName}).r;
     ${outputName} += (1.0 - float(uLayerAnnotationStatuses[${i}])) * (1.0 - ${outputName}.a) * ${alpha} * uLayerOpacities[${i}];`;
   }
 
@@ -158,8 +200,10 @@ const generateReduceRawImages = (
 
 // Macro definitions
 const layerCountRegex = /{{layerCount}}/g;
-const reduceLayerStackRegex = /{{reduceLayerStack\((\w+),\s*(\w+),\s*(\w+)(,\s*(\w+))?\)}}/g;
-const reduceEnhancedLayerStackRegex = /{{reduceEnhancedLayerStack\((\w+),\s*(\w+)(,\s*(\w+))?\)}}/g;
+const reduceLayerStackRegex =
+  /{{reduceLayerStack\((\w+),\s*(\w+),\s*(\w+)(,\s*(\w+))?\)}}/g;
+const reduceEnhancedLayerStackRegex =
+  /{{reduceEnhancedLayerStack\((\w+),\s*(\w+)(,\s*(\w+),\s*(\w+))?\)}}/g;
 const reduceRawImagesRegex = /{{reduceRawImages\((\w+),\s*(\w+)\)}}/g;
 
 /**
@@ -197,13 +241,15 @@ export const composeLayeredShader = (shader: string, layerCount: number) =>
         _match,
         outputName,
         uvName,
-        _fullEnhancementFunctionName,
+        _fullOptionalNames,
+        activeLayerMergeName,
         enhancementFunctionName,
       ) =>
         generateReduceEnhancedLayerStack(
           layerCount,
           outputName,
           uvName,
+          activeLayerMergeName,
           enhancementFunctionName,
         ),
     )

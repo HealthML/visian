@@ -152,7 +152,7 @@ export const deepObserve = <T>(
         !~config.include.findIndex((included) => path.startsWith(included))) ||
       (config.exclude && ~config.exclude.indexOf(path)) ||
       (config.exclusionAttribute &&
-        ((change.object as unknown) as { [key: string]: string[] | undefined })[
+        (change.object as unknown as { [key: string]: string[] | undefined })[
           config.exclusionAttribute
         ]?.some((exclude) => exclude === subPath))
     ) {
@@ -209,7 +209,7 @@ export const deepObserve = <T>(
         entries(thing).forEach(([key, value]) => {
           if (
             config.exclusionAttribute &&
-            ((thing as unknown) as { [key: string]: string[] | undefined })[
+            (thing as unknown as { [key: string]: string[] | undefined })[
               config.exclusionAttribute
             ]?.some((exclude) => exclude === key)
           ) {

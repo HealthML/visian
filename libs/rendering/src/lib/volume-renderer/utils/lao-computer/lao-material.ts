@@ -1,24 +1,27 @@
 import { IEditor } from "@visian/ui-shared";
 import { IDisposer } from "@visian/utils";
-import { reaction } from "mobx";
+import { autorun, reaction } from "mobx";
 import * as THREE from "three";
 
 import {
+  composeLayeredShader,
   laoFragmentShader,
   laoVertexShader,
-  composeLayeredShader,
 } from "../../../shaders";
+import { Texture3DMaterial } from "../../../texture-3d-renderer";
 import { SharedUniforms } from "../shared-uniforms";
-import { totalLAORays } from "./lao-computer";
-import { getLAODirectionTexture } from "./lao-directions";
+import {
+  getLAODirectionTexture,
+  getTotalLAODirections,
+} from "./lao-directions";
 
-export class LAOMaterial extends THREE.ShaderMaterial {
-  private disposers: IDisposer[];
+export class LAOMaterial extends Texture3DMaterial {
+  private disposers: IDisposer[] = [];
 
   constructor(
     editor: IEditor,
     firstDerivativeTexture: THREE.Texture,
-    secondDerivativeTexture: THREE.Texture,
+    // secondDerivativeTexture: THREE.Texture,
     private previousFrameTexture: THREE.Texture,
     sharedUniforms: SharedUniforms,
   ) {
@@ -28,16 +31,17 @@ export class LAOMaterial extends THREE.ShaderMaterial {
       uniforms: {
         ...sharedUniforms.uniforms,
         uPreviousFrame: { value: null },
-        uDirections: { value: getLAODirectionTexture(totalLAORays) },
+        uDirections: { value: getLAODirectionTexture(32) },
         uPreviousDirections: { value: 0 },
-        uTotalDirections: { value: totalLAORays },
+        uTotalDirections: { value: 32 },
       },
+      glslVersion: THREE.GLSL3,
     });
 
     this.uniforms.uInputFirstDerivative.value = firstDerivativeTexture;
-    this.uniforms.uInputSecondDerivative.value = secondDerivativeTexture;
+    // this.uniforms.uInputSecondDerivative.value = secondDerivativeTexture;
 
-    this.disposers = [
+    this.disposers.push(
       reaction(
         () => editor.volumeRenderer?.renderedImageLayerCount || 1,
         (layerCount: number) => {
@@ -49,7 +53,13 @@ export class LAOMaterial extends THREE.ShaderMaterial {
         },
         { fireImmediately: true },
       ),
-    ];
+      autorun(() => {
+        const totalLAORays = getTotalLAODirections(editor.performanceMode);
+
+        this.uniforms.uTotalDirections.value = totalLAORays;
+        this.uniforms.uDirections.value = getLAODirectionTexture(totalLAORays);
+      }),
+    );
   }
 
   public setPreviousDirections(amount: number) {
@@ -71,5 +81,3 @@ export class LAOMaterial extends THREE.ShaderMaterial {
     this.disposers.forEach((disposer) => disposer());
   }
 }
-
-export default LAOMaterial;

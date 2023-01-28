@@ -1,4 +1,5 @@
 import { DragPoint, IDocument } from "@visian/ui-shared";
+
 import { Tool } from "./tool";
 
 export class CrosshairTool<N extends "crosshair-tool"> extends Tool<N> {
@@ -9,9 +10,14 @@ export class CrosshairTool<N extends "crosshair-tool"> extends Tool<N> {
         icon: "crosshair",
         labelTx: "crosshair-tool",
         supportedViewModes: ["2D"],
+        activationKeys: "c",
       },
       document,
     );
+  }
+
+  public canActivate(): boolean {
+    return super.canActivate() && this.document.has3DLayers;
   }
 
   public startAt(dragPoint: DragPoint): void {

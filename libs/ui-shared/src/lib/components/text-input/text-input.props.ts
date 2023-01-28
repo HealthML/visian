@@ -1,5 +1,6 @@
 import type React from "react";
-import type { I18nData } from "../types";
+
+import type { I18nData } from "../../types";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export interface TextInputProps<T = any>

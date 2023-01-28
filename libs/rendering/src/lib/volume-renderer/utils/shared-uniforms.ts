@@ -11,9 +11,8 @@ import { autorun } from "mobx";
 import * as THREE from "three";
 
 import { RenderedImage } from "../../rendered-image";
-import { MAX_REGION_GROWING_STEPS } from "../../tool-renderer";
+import { MAX_BLIP_STEPS } from "../../tool-renderer";
 import {
-  atlasInfoUniforms,
   commonUniforms,
   imageInfoUniforms,
   lightingUniforms,
@@ -37,7 +36,6 @@ export class SharedUniforms implements IDisposable {
     this.uniforms = THREE.UniformsUtils.merge([
       opacityUniforms,
       commonUniforms,
-      atlasInfoUniforms,
       imageInfoUniforms,
       transferFunctionsUniforms,
       lightingUniforms,
@@ -114,12 +112,10 @@ export class SharedUniforms implements IDisposable {
           editor.activeDocument?.viewport3D.activeTransferFunction?.params
             .densityRange;
 
-        [
-          this.uniforms.uLimitLow.value,
-          this.uniforms.uLimitHigh.value,
-        ] = rangeParameter
-          ? (rangeParameter as INumberRangeParameter).value
-          : [0, 1];
+        [this.uniforms.uLimitLow.value, this.uniforms.uLimitHigh.value] =
+          rangeParameter
+            ? (rangeParameter as INumberRangeParameter).value
+            : [0, 1];
 
         editor.activeDocument?.volumeRenderer?.lazyRender(true);
       }),
@@ -165,21 +161,6 @@ export class SharedUniforms implements IDisposable {
         editor.activeDocument?.volumeRenderer?.lazyRender(true);
       }),
       autorun(() => {
-        this.uniforms.uVolumeNearestFiltering.value = Boolean(
-          editor.activeDocument?.viewport3D.activeTransferFunction?.params
-            .useBlockyContext?.value,
-        );
-
-        editor.activeDocument?.volumeRenderer?.lazyRender(true);
-      }),
-      autorun(() => {
-        this.uniforms.uSegmentationLinearFiltering.value = Boolean(
-          editor.activeDocument?.viewport3D.useSmoothSegmentations,
-        );
-
-        editor.activeDocument?.volumeRenderer?.lazyRender(true);
-      }),
-      autorun(() => {
         this.uniforms.uUsePlane.value = Boolean(
           editor.activeDocument?.viewport3D.useClippingPlane,
         );
@@ -187,7 +168,8 @@ export class SharedUniforms implements IDisposable {
         editor.activeDocument?.volumeRenderer?.lazyRender(true);
       }),
       autorun(() => {
-        this.uniforms.uPlaneNormal.value = editor.activeDocument?.viewport3D.clippingPlaneNormal.toArray();
+        this.uniforms.uPlaneNormal.value =
+          editor.activeDocument?.viewport3D.clippingPlaneNormal.toArray();
 
         editor.activeDocument?.volumeRenderer?.lazyRender(true);
       }),
@@ -204,31 +186,31 @@ export class SharedUniforms implements IDisposable {
           editor.activeDocument?.viewport3D.activeTransferFunction?.params
             .useBlockyContext?.value,
         );
-        const useNearestFilteringAnnotation = !editor.activeDocument?.viewport3D
-          .useSmoothSegmentations;
+        const useNearestFilteringAnnotation =
+          !editor.activeDocument?.viewport3D.useSmoothSegmentations;
         const layerData = layers.map((layer) =>
-          ((layer as IImageLayer).image as RenderedImage).getTexture(
-            0,
-            (
-              layer.isAnnotation
-                ? useNearestFilteringAnnotation
-                : useNearestFilteringImage
-            )
-              ? THREE.NearestFilter
-              : THREE.LinearFilter,
-          ),
+          layer ===
+          editor.activeDocument?.tools.dilateErodeRenderer3D.targetLayer
+            ? editor.activeDocument.tools.dilateErodeRenderer3D.outputTexture
+            : ((layer as IImageLayer).image as RenderedImage).getTexture(
+                (
+                  layer.isAnnotation
+                    ? useNearestFilteringAnnotation
+                    : useNearestFilteringImage
+                )
+                  ? THREE.NearestFilter
+                  : THREE.LinearFilter,
+              ),
         );
 
         this.uniforms.uLayerData.value = [
-          // additional layer for 3d region growing
-          editor.activeDocument?.tools.layerPreviewTextures[0] || null,
+          editor.activeDocument?.tools.layerPreviewTexture || null,
           ...layerData,
         ];
 
         const activeLayer = editor.activeDocument?.activeLayer;
         this.uniforms.uActiveLayerData.value = activeLayer
           ? ((activeLayer as IImageLayer).image as RenderedImage).getTexture(
-              0,
               (
                 activeLayer.isAnnotation
                   ? useNearestFilteringAnnotation
@@ -293,9 +275,13 @@ export class SharedUniforms implements IDisposable {
           // additional layer for 3d region growing
           new THREE.Color(
             color(
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              (editor.activeDocument?.tools.regionGrowingRenderer3D
-                .previewColor as any) || "foreground",
+              (editor.activeDocument?.tools.regionGrowingRenderer3D.holdsPreview
+                ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  (editor.activeDocument?.tools.regionGrowingRenderer3D
+                    .previewColor as any)
+                : // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  (editor.activeDocument?.tools.thresholdAnnotationRenderer3D
+                    .previewColor as any)) || "foreground",
             )({ theme: editor.theme }),
           ),
           ...layerColors,
@@ -343,13 +329,12 @@ export class SharedUniforms implements IDisposable {
         editor.activeDocument?.volumeRenderer?.lazyRender(true);
       }),
       autorun(() => {
-        const imageLayer = editor.activeDocument?.baseImageLayer;
+        const imageLayer = editor.activeDocument?.mainImageLayer;
         if (!imageLayer) return;
 
         const image = imageLayer.image as RenderedImage;
 
         this.uniforms.uVoxelCount.value = image.voxelCount;
-        this.uniforms.uAtlasGrid.value = image.getAtlasGrid();
         this.uniforms.uStepSize.value = getStepSize(image);
 
         editor.activeDocument?.volumeRenderer?.lazyRender();
@@ -359,8 +344,14 @@ export class SharedUniforms implements IDisposable {
           editor.activeDocument?.tools.regionGrowingRenderer3D.steps ?? 0;
 
         this.uniforms.uRegionGrowingThreshold.value =
-          (MAX_REGION_GROWING_STEPS + 1 - steps) /
-          (MAX_REGION_GROWING_STEPS + 1);
+          (MAX_BLIP_STEPS + 1 - steps) / (MAX_BLIP_STEPS + 1);
+
+        editor.activeDocument?.viewport3D.onTransferFunctionChange();
+        editor.volumeRenderer?.lazyRender(true);
+      }),
+      autorun(() => {
+        this.uniforms.uUseExclusiveSegmentations.value =
+          editor.activeDocument?.useExclusiveSegmentations;
 
         editor.activeDocument?.viewport3D.onTransferFunctionChange();
         editor.volumeRenderer?.lazyRender(true);

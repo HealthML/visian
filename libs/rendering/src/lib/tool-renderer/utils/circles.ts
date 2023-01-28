@@ -1,5 +1,6 @@
 import { IDisposable } from "@visian/utils";
 import * as THREE from "three";
+
 import { CircleMaterial } from "./circle-material";
 import { Circle } from "./types";
 

@@ -8,8 +8,8 @@ import {
 import { ISerializable, ViewType } from "@visian/utils";
 import { action, computed, makeObservable, observable } from "mobx";
 import { Matrix4 } from "three";
-import { v4 as uuidv4 } from "uuid";
 import tc from "tinycolor2";
+import { v4 as uuidv4 } from "uuid";
 
 import {
   defaultAnnotationColor,
@@ -93,9 +93,9 @@ export class Layer implements ILayer, ISerializable<LayerSnapshot> {
     );
   }
 
-  public setIsAnnotation = (value?: boolean): void => {
+  public setIsAnnotation(value?: boolean): void {
     this.isAnnotation = Boolean(value);
-  };
+  }
 
   public get is3DLayer(): boolean {
     return false;
@@ -178,10 +178,10 @@ export class Layer implements ILayer, ISerializable<LayerSnapshot> {
     );
   }
 
-  public delete = (): void => {
+  public delete() {
     (this.parent as LayerGroup)?.removeLayer?.(this.id);
     this.document.deleteLayer(this.id);
-  };
+  }
 
   public async toFile(): Promise<File | undefined> {
     return undefined;

@@ -1,5 +1,5 @@
 export const isFirefox = () =>
-  ~navigator.userAgent.toLowerCase().indexOf("firefox");
+  Boolean(~navigator.userAgent.toLowerCase().indexOf("firefox"));
 
 export const isWindows = () =>
-  ~window.navigator.platform.toLowerCase().indexOf("win");
+  Boolean(~window.navigator.platform.toLowerCase().indexOf("win"));

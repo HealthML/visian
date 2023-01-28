@@ -1,16 +1,19 @@
+precision highp sampler3D;
+
 /** The position within the volume. Ranging [0, 1] in each dimension. */
 varying vec3 vPosition;
 varying vec3 vRayDirection;
 varying vec3 vRayOrigin;
 
-uniform sampler2D uOutputFirstDerivative;
-uniform sampler2D uLAO;
+uniform sampler3D uOutputFirstDerivative;
+uniform sampler3D uLAO;
 
 uniform bool uUseRayDithering;
+uniform float uRayDitheringOffset;
 
+#define VOLUMETRIC_IMAGE
 @import ../uniforms/u-opacity;
 @import ../uniforms/u-common;
-@import ../uniforms/u-atlas-info;
 @import ../uniforms/u-image-info;
 @import ../uniforms/u-transfer-functions;
 @import ../uniforms/u-lighting;
@@ -20,14 +23,16 @@ uniform bool uUseRayDithering;
 
 #define NORMAL
 #define LAO
-@import ../utils/get-interpolated-volume-data;
+@import ../utils/get-volume-data;
 
 @import ../utils/phong;
 @import ../utils/compute-near-far;
 @import ./transfer-functions;
 
+out vec4 pc_FragColor;
+
 vec4 getVolumeColor(vec3 volumeCoords) {
-  VolumeData volumeData = getInterpolatedVolumeData(volumeCoords);
+  VolumeData volumeData = getVolumeData(volumeCoords);
   vec4 volumeColor = transferFunction(volumeData, volumeCoords);
 
   if(uLightingMode == 1) {
@@ -60,10 +65,10 @@ void main() {
   computeNearFar(normalizedRayDirection, near, far);
 
   #ifndef VOXEL_PICKING
-    gl_FragColor = marchRay(vRayOrigin, normalizedRayDirection, near, far, uStepSize, uUseRayDithering);
+    pc_FragColor = marchRay(vRayOrigin, normalizedRayDirection, near, far, uStepSize, uUseRayDithering, uRayDitheringOffset);
   #else
     vec4 pickedVoxel = marchRay(vRayOrigin, normalizedRayDirection, near, far, uStepSize, 0.01);
     pickedVoxel.a = step(0.01, pickedVoxel.a);
-    gl_FragColor = pickedVoxel;
+    pc_FragColor = pickedVoxel;
   #endif
 }

@@ -1,3 +1,4 @@
+import { withAuthenticator } from "@aws-amplify/ui-react";
 import {
   getTheme,
   GlobalStyles,
@@ -5,20 +6,42 @@ import {
   ModalRoot,
   ThemeProvider,
 } from "@visian/ui-shared";
+import { isFromWHO, isUsingLocalhost } from "@visian/utils";
+import Amplify from "aws-amplify";
 import { observer } from "mobx-react-lite";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { QueryClient, QueryClientProvider } from "react-query";
-import { Route, Switch } from "react-router-dom";
+import { Route, Routes } from "react-router-dom";
 
+import {
+  whoAwsConfigDeployment,
+  whoAwsConfigDevelopment,
+  whoRequiresAuthentication,
+} from "../constants";
 import { setUpEventHandling } from "../event-handling";
+import type { RootStore } from "../models";
 import { EditorScreen } from "../screens";
 import { setupRootStore, StoreProvider } from "./root-store";
 
-import type { RootStore } from "../models";
+if (isFromWHO()) {
+  if (isUsingLocalhost()) {
+    Amplify.configure(whoAwsConfigDevelopment);
+  } else {
+    Amplify.configure(whoAwsConfigDeployment);
+  }
+}
 
 const queryClient = new QueryClient();
 
-function App() {
+const withWhoAuthenticator = (
+  wrappedComponent: React.ComponentType,
+): React.ComponentType =>
+  isFromWHO() && whoRequiresAuthentication
+    ? withAuthenticator(wrappedComponent)
+    : wrappedComponent;
+
+// eslint-disable-next-line react/function-component-definition
+function App(): JSX.Element {
   // TODO: Push loading down to components that need i18n
   const [isReady, setIsReady] = useState(false);
   const rootStoreRef = useRef<RootStore | null>(null);
@@ -30,7 +53,10 @@ function App() {
         rootStore.pointerDispatch = dispatch;
 
         setIsReady(true);
-        return dispose;
+        return () => {
+          dispose();
+          rootStore.dispose();
+        };
       },
     );
     return () => {
@@ -49,11 +75,9 @@ function App() {
           {isReady && (
             <React.StrictMode>
               <ModalRoot />
-              <Switch>
-                <Route path="/">
-                  <EditorScreen />
-                </Route>
-              </Switch>
+              <Routes>
+                <Route path="/" element={<EditorScreen />} />
+              </Routes>
             </React.StrictMode>
           )}
         </StoreProvider>
@@ -62,4 +86,4 @@ function App() {
   );
 }
 
-export default observer(App);
+export default withWhoAuthenticator(observer(App));

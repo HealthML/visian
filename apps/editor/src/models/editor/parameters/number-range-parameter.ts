@@ -1,8 +1,10 @@
 import {
+  Histogram,
   INumberRangeParameter,
   ScaleType,
   SerializationMethod,
 } from "@visian/ui-shared";
+
 import { NumberParameterConfig } from "./number-parameter";
 import { Parameter, ParameterConfig } from "./parameter";
 
@@ -10,11 +12,14 @@ export interface NumberRangeParameterConfig
   extends Omit<NumberParameterConfig, "defaultValue" | "value">,
     ParameterConfig<[number, number]> {
   serializationMethod?: SerializationMethod;
+
+  showRangeHandle?: boolean;
 }
 
 export class NumberRangeParameter
   extends Parameter<[number, number]>
-  implements INumberRangeParameter {
+  implements INumberRangeParameter
+{
   public static readonly kind = "number-range";
   public readonly kind = "number-range";
 
@@ -24,8 +29,9 @@ export class NumberRangeParameter
   public max: number;
   public stepSize?: number;
   public extendBeyondMinMax?: boolean;
+  public showRangeHandle?: boolean;
 
-  public getHistogram?: () => number[] | undefined;
+  public getHistogram?: () => Histogram | undefined;
 
   constructor(config: NumberRangeParameterConfig) {
     super(config);
@@ -35,6 +41,7 @@ export class NumberRangeParameter
     this.max = config.max;
     this.stepSize = config.stepSize;
     this.extendBeyondMinMax = config.extendBeyondMinMax;
+    this.showRangeHandle = config.showRangeHandle;
 
     this.getHistogram = config.getHistogram;
   }
@@ -57,6 +64,7 @@ export class NumberRangeParameter
       max: this.max,
       stepSize: this.stepSize,
       extendBeyondMinMax: this.extendBeyondMinMax,
+      showRangeHandle: this.showRangeHandle,
       getHistogram: this.getHistogram,
     };
   }

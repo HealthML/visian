@@ -1,17 +1,27 @@
 import {
   ColorMode,
+  ErrorNotification,
   getTheme,
+  i18n,
   IDispatch,
   IStorageBackend,
   Tab,
 } from "@visian/ui-shared";
-import { deepObserve, ISerializable } from "@visian/utils";
+import {
+  createFileFromBase64,
+  deepObserve,
+  getWHOTask,
+  IDisposable,
+  ISerializable,
+} from "@visian/utils";
 import { action, computed, makeObservable, observable } from "mobx";
 
 import { errorDisplayDuration } from "../constants";
 import { DICOMWebServer } from "./dicomweb-server";
 import { Editor, EditorSnapshot } from "./editor";
-import { ErrorNotification, ProgressNotification } from "./types";
+import { Tracker } from "./tracking";
+import { ProgressNotification } from "./types";
+import { Task, TaskType } from "./who";
 
 export interface RootSnapshot {
   editor: EditorSnapshot;
@@ -22,7 +32,7 @@ export interface RootStoreConfig {
   storageBackend?: IStorageBackend;
 }
 
-export class RootStore implements ISerializable<RootSnapshot> {
+export class RootStore implements ISerializable<RootSnapshot>, IDisposable {
   public dicomWebServer?: DICOMWebServer;
 
   public editor: Editor;
@@ -44,6 +54,10 @@ export class RootStore implements ISerializable<RootSnapshot> {
   public refs: { [key: string]: React.RefObject<HTMLElement> } = {};
   public pointerDispatch?: IDispatch;
 
+  public currentTask?: Task;
+
+  public tracker?: Tracker;
+
   constructor(protected config: RootStoreConfig = {}) {
     makeObservable<this, "isSaved" | "isSaveUpToDate" | "setIsSaveUpToDate">(
       this,
@@ -56,6 +70,7 @@ export class RootStore implements ISerializable<RootSnapshot> {
         isSaved: observable,
         isSaveUpToDate: observable,
         refs: observable,
+        currentTask: observable,
 
         theme: computed,
 
@@ -68,6 +83,7 @@ export class RootStore implements ISerializable<RootSnapshot> {
         setIsDirty: action,
         setIsSaveUpToDate: action,
         setRef: action,
+        setCurrentTask: action,
       },
     );
 
@@ -77,11 +93,19 @@ export class RootStore implements ISerializable<RootSnapshot> {
       setDirty: action(this.setIsDirty),
       getTheme: () => this.theme,
       getRefs: () => this.refs,
+      setError: this.setError,
+      getTracker: () => this.tracker,
+      getColorMode: () => this.colorMode,
     });
 
     deepObserve(this.editor, this.persist, {
       exclusionAttribute: "excludeFromSnapshotTracking",
     });
+  }
+
+  public dispose() {
+    this.editor.dispose();
+    this.tracker?.dispose();
   }
 
   /**
@@ -93,7 +117,7 @@ export class RootStore implements ISerializable<RootSnapshot> {
    * Defaults to `true`.
    */
   public async connectToDICOMWebServer(url?: string, shouldPersist = true) {
-    if (url) this.setProgress({ labelTx: "connecting" });
+    if (url) this.setProgress({ labelTx: "connecting", showSplash: true });
     this.dicomWebServer = url ? await DICOMWebServer.connect(url) : undefined;
     if (url) this.setProgress();
 
@@ -112,11 +136,12 @@ export class RootStore implements ISerializable<RootSnapshot> {
       localStorage.setItem("theme", theme);
     }
   }
+
   public get theme() {
     return getTheme(this.colorMode);
   }
 
-  public setError(error?: ErrorNotification) {
+  public setError = (error?: ErrorNotification) => {
     this.error = error;
 
     if (this.errorTimeout !== undefined) {
@@ -124,14 +149,88 @@ export class RootStore implements ISerializable<RootSnapshot> {
       this.errorTimeout = undefined;
     }
     if (error) {
-      this.errorTimeout = (setTimeout(() => {
+      this.errorTimeout = setTimeout(() => {
         this.setError();
-      }, errorDisplayDuration) as unknown) as NodeJS.Timer;
+      }, errorDisplayDuration) as unknown as NodeJS.Timer;
     }
-  }
+  };
+
   public setProgress(progress?: ProgressNotification) {
     this.progress = progress;
   }
+
+  public initializeTracker() {
+    if (this.tracker) return;
+    this.tracker = new Tracker(this.editor);
+    this.tracker.startSession();
+  }
+
+  public async loadWHOTask(taskId: string) {
+    if (!taskId) return;
+
+    try {
+      if (this.editor.newDocument(true)) {
+        this.setProgress({ labelTx: "importing", showSplash: true });
+        const taskJson = await getWHOTask(taskId);
+        // We want to ignore possible other annotations if type is "CREATE"
+        if (taskJson.kind === TaskType.Create) {
+          taskJson.annotations = [];
+        }
+        const whoTask = new Task(taskJson);
+        this.setCurrentTask(whoTask);
+
+        await Promise.all(
+          whoTask.samples.map(async (sample) => {
+            await this.editor.activeDocument?.importFiles(
+              createFileFromBase64(sample.title, sample.data),
+              undefined,
+              false,
+            );
+          }),
+        );
+        if (whoTask.kind === TaskType.Create) {
+          this.editor.activeDocument?.finishBatchImport();
+          this.currentTask?.addNewAnnotation();
+        } else {
+          // Task Type is Correct or Review
+          await Promise.all(
+            whoTask.annotations.map(async (annotation, index) => {
+              const title =
+                whoTask.samples[index].title ||
+                whoTask.samples[0].title ||
+                `annotation_${index}`;
+
+              await Promise.all(
+                annotation.data.map(async (annotationData) => {
+                  const createdLayerId =
+                    await this.editor.activeDocument?.importFiles(
+                      createFileFromBase64(
+                        title.replace(".nii", "_annotation").concat(".nii"),
+                        annotationData.data,
+                      ),
+                      title.replace(".nii", "_annotation"),
+                      true,
+                    );
+                  if (createdLayerId)
+                    annotationData.correspondingLayerId = createdLayerId;
+                }),
+              );
+            }),
+          );
+        }
+      }
+    } catch {
+      this.setError({
+        titleTx: "import-error",
+        descriptionTx: "remote-file-error",
+      });
+      this.editor.setActiveDocument();
+    }
+
+    this.setProgress();
+  }
+
+  // Persistence
 
   /**
    * Indicates if there are changes that have not yet been written by the
@@ -141,8 +240,9 @@ export class RootStore implements ISerializable<RootSnapshot> {
     return !(this.isSaved && this.isSaveUpToDate);
   }
 
-  public setIsDirty = (isDirty = true) => {
+  public setIsDirty = (isDirty = true, force = false) => {
     this.isSaved = !isDirty;
+    if (force) this.isSaveUpToDate = !isDirty;
   };
 
   protected setIsSaveUpToDate(value: boolean) {
@@ -155,6 +255,10 @@ export class RootStore implements ISerializable<RootSnapshot> {
     } else {
       delete this.refs[key];
     }
+  }
+
+  public setCurrentTask(task?: Task) {
+    this.currentTask = task;
   }
 
   public persist = async () => {
@@ -211,14 +315,22 @@ export class RootStore implements ISerializable<RootSnapshot> {
 
   public destroy = async (forceDestroy?: boolean) => {
     if (!this.shouldPersist && !forceDestroy) return;
-    // eslint-disable-next-line no-alert
-    if (!forceDestroy && !window.confirm("Erase all application data?")) return;
+    if (
+      !forceDestroy &&
+      // eslint-disable-next-line no-alert
+      !window.confirm(i18n.t("erase-application-data-confirmation"))
+    )
+      return;
 
     this.shouldPersist = false;
     localStorage.clear();
     await this.config.storageBackend?.clear();
 
-    this.setIsDirty(false);
-    window.location.href = window.location.pathname;
+    this.setIsDirty(false, true);
+    window.location.href = new URL(window.location.href).searchParams.has(
+      "tracking",
+    )
+      ? `${window.location.pathname}?tracking`
+      : window.location.pathname;
   };
 }

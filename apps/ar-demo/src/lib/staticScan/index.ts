@@ -11,6 +11,7 @@ export const voxelCount: Voxel = {
 
 // in meters
 export const voxelDimensions: Voxel = {
+  // eslint-disable-next-line @typescript-eslint/no-loss-of-precision
   x: 0.0009999985694885254,
   y: 0.001,
   z: 0.001,
@@ -27,22 +28,26 @@ export const atlasGrid: Pixel = {
   y: 12,
 };
 
-export const getConnectedStructureGeometries: () => Promise<THREE.BufferGeometry>[] = () => {
-  const geometryLoader = new THREE.BufferGeometryLoader();
+export const getConnectedStructureGeometries: () => Promise<THREE.BufferGeometry>[] =
+  () => {
+    const geometryLoader = new THREE.BufferGeometryLoader();
 
-  return Array.from({ length: preGeneratedGeometries.length }, (_, i) => i).map(
-    (geometryIndex) =>
-      new Promise<THREE.BufferGeometry>((resolve) => {
-        geometryLoader.load(
-          preGeneratedGeometries[geometryIndex],
-          (geometry) => {
-            resolve(geometry.scale(0.001, 0.001, 0.001));
-          },
-          undefined,
-          () => {
-            resolve(new THREE.BufferGeometry());
-          },
-        );
-      }),
-  );
-};
+    return Array.from(
+      { length: preGeneratedGeometries.length },
+      (_, i) => i,
+    ).map(
+      (geometryIndex) =>
+        new Promise<THREE.BufferGeometry>((resolve) => {
+          geometryLoader.load(
+            preGeneratedGeometries[geometryIndex],
+            (geometry) => {
+              resolve(geometry.scale(0.001, 0.001, 0.001));
+            },
+            undefined,
+            () => {
+              resolve(new THREE.BufferGeometry());
+            },
+          );
+        }),
+    );
+  };

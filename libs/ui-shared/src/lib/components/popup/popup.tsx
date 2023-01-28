@@ -1,10 +1,11 @@
 import React, { useRef } from "react";
 import ReactDOM from "react-dom";
-import styled from "styled-components";
+import styled, { css } from "styled-components";
 
 import { stopPropagation } from "../../event-handling";
 import { color, fontWeight, zIndex } from "../../theme";
 import { useModalRoot } from "../box";
+import { InvisibleButton } from "../button";
 import { coverMixin } from "../mixins";
 import { Sheet } from "../sheet";
 import { Title } from "../text";
@@ -18,11 +19,12 @@ const PopUpUnderlay = styled.div`
   background-color: ${color("modalUnderlay")};
   backdrop-filter: blur(3px);
   display: flex;
+  flex-direction: column;
   justify-content: center;
   pointer-events: auto;
   z-index: ${zIndex("overlay")};
 `;
-const PopUpContainer = styled(Sheet)`
+const PopUpContainer = styled(Sheet)<Pick<PopUpProps, "showUnderlay">>`
   justify-content: flex-start;
   align-items: flex-start;
   flex-direction: column;
@@ -32,7 +34,11 @@ const PopUpContainer = styled(Sheet)`
 
   z-index: ${zIndex("modal")};
 
-  position: absolute;
+  ${(props) =>
+    !props.showUnderlay &&
+    css`
+      position: absolute;
+    `}
 `;
 const PopUpTitle = styled(Title)`
   display: block;
@@ -58,28 +64,45 @@ const TitleRow = styled.div`
   width: 100%;
 `;
 
+const CloseIcon = styled(InvisibleButton)`
+  width: 30px;
+  height: 30px;
+`;
+
 export const PopUp: React.FC<PopUpProps> = ({
+  childrenBefore,
   titleTx,
   title,
   secondaryTitleTx,
   secondaryTitle,
   showUnderlay = true,
   isOpen,
-  onOutsidePress,
+  dismiss,
+  shouldDismissOnOutsidePress,
   children,
   ...rest
 }) => {
   const ref = useRef<HTMLDivElement>(null);
-  useOutsidePress(ref, onOutsidePress, isOpen);
+  useOutsidePress(
+    ref,
+    shouldDismissOnOutsidePress ? dismiss : undefined,
+    isOpen,
+  );
 
   const modalRootRef = useModalRoot();
 
   const popup = (
-    <PopUpContainer onWheel={stopPropagation} {...rest} ref={ref}>
+    <PopUpContainer
+      onWheel={stopPropagation}
+      {...rest}
+      ref={ref}
+      showUnderlay={showUnderlay}
+    >
       {(titleTx || title) && (
         <TitleRow>
           <PopUpTitle tx={titleTx} text={title} />
           <ExportFileName tx={secondaryTitleTx} text={secondaryTitle} />
+          <CloseIcon icon="xSmall" onPointerDown={dismiss} />
         </TitleRow>
       )}
       {children}
@@ -88,7 +111,10 @@ export const PopUp: React.FC<PopUpProps> = ({
 
   const node =
     isOpen === false ? null : showUnderlay ? (
-      <PopUpUnderlay onWheel={stopPropagation}>{popup}</PopUpUnderlay>
+      <PopUpUnderlay onWheel={stopPropagation}>
+        {childrenBefore}
+        {popup}
+      </PopUpUnderlay>
     ) : (
       popup
     );

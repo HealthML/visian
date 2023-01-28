@@ -78,7 +78,8 @@ export const SliceSlider: React.FC<SliceSliderProps> = observer(
       duration("autoHideDelay")({ theme }) as number,
     );
 
-    const currentSlice = store?.editor.activeDocument?.viewport2D.getSelectedSlice();
+    const currentSlice =
+      store?.editor.activeDocument?.viewport2D.getSelectedSlice();
     const previousSliceRef = useRef(currentSlice);
     useEffect(() => {
       if (previousSliceRef.current !== undefined) {
@@ -96,7 +97,7 @@ export const SliceSlider: React.FC<SliceSliderProps> = observer(
         if (!maxSlice) return `${Math.trunc(values[0] + 1)}`;
 
         // Pad slice number with leading zeros
-        const maxPlaces = Math.floor(Math.log10(Math.ceil(maxSlice))) + 1;
+        const maxPlaces = Math.floor(Math.log10(Math.ceil(maxSlice + 1))) + 1;
         return `${new Array(maxPlaces).fill("0").join("")}${Math.trunc(
           values[0] + 1,
         )}`.slice(-maxPlaces);

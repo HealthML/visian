@@ -3,7 +3,7 @@ export interface ISerializable<T> {
   toJSON(): T;
 
   /**
-   * Restores the state captures in a snapshot.
+   * Restores the state captured in a snapshot.
    *
    * @param snapshot The snapshot.
    * The use of a `Partial` value here enables backwards compatibility when
@@ -11,3 +11,5 @@ export interface ISerializable<T> {
    */
   applySnapshot(snapshot: Partial<T>): Promise<void>;
 }
+
+export type VoxelInfoMode = "off" | "on" | "delay";

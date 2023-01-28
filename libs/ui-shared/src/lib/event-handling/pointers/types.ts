@@ -42,7 +42,7 @@ export enum PointerButton {
 export interface PointerContext {
   device: DeviceType;
   identifier: string;
-  startTime: DOMTimeStamp | DOMHighResTimeStamp;
+  startTime: DOMHighResTimeStamp;
 
   altKey?: boolean;
   button?: PointerButton;
@@ -143,7 +143,7 @@ export interface PointerState<ID = string> {
 /** Event processor middleware function signature. */
 export type EventMiddleware<
   D extends EventData = EventData,
-  T = { [key: string]: unknown }
+  T = { [key: string]: unknown },
 > = (data: D, context: T) => void;
 
 export type IDispatch<ID = string> = (

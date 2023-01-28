@@ -17,15 +17,17 @@ onmessage = (event) => rpcProvider.dispatch(event.data);
 rpcProvider.registerRpcHandler(
   "getEmptySlices",
   ({
-    atlas,
+    data,
     voxelComponents,
     voxelCount,
   }: GetEmptySlicesArgs): GetEmptySlicesReturn =>
-    getEmptySlices({
-      getAtlas: () => atlas,
-      voxelComponents,
-      voxelCount: new Vector(voxelCount, false),
-    }),
+    getEmptySlices(
+      {
+        voxelComponents,
+        voxelCount: new Vector(voxelCount, false),
+      },
+      data,
+    ),
 );
 
 rpcProvider.registerRpcHandler(

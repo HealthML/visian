@@ -1,5 +1,6 @@
 import type React from "react";
-import { MarkerConfig } from "../../types";
+
+import { Histogram, MarkerConfig } from "../../types";
 import type {
   SerializationMethod,
   SliderConfig,
@@ -57,6 +58,8 @@ export interface SliderProps<T extends number | number[] = number | number[]>
    */
   showRange?: boolean;
 
+  showRangeHandle?: boolean;
+
   showFloatingValueLabel?: boolean;
 
   /**
@@ -66,6 +69,8 @@ export interface SliderProps<T extends number | number[] = number | number[]>
   formatValueLabel?: (value: number[]) => string;
 
   markers?: MarkerConfig[];
+
+  histogram?: Histogram;
 }
 
 export interface SliderRangeSelectionProps
@@ -91,4 +96,12 @@ export interface SliderFieldProps extends Omit<SliderProps, "isVertical"> {
    * value range.
    */
   unlockValueLabelRange?: boolean;
+
+  /**
+   * A function that is called whenever the slider value is directly
+   * manipulated by entering a value into its value label.
+   *
+   * This is called after the main `onChange` listener
+   */
+  onValueLabelChange?: (value: number) => void;
 }
