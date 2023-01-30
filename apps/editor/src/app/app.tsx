@@ -11,6 +11,7 @@ import Amplify from "aws-amplify";
 import { observer } from "mobx-react-lite";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { QueryClient, QueryClientProvider } from "react-query";
+import { ReactQueryDevtools } from "react-query/devtools";
 import { Route, Routes } from "react-router-dom";
 
 import {
@@ -89,6 +90,9 @@ function App(): JSX.Element {
             </React.StrictMode>
           )}
         </StoreProvider>
+        {process.env.NODE_ENV === "development" && (
+          <ReactQueryDevtools initialIsOpen={false} />
+        )}
       </QueryClientProvider>
     </ThemeProvider>
   );
