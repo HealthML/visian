@@ -282,6 +282,6 @@
 
   "ml-model-selection-description": "Select the model you want to use to annotate the images",
   "ml-model-selection-title": "Model Selection",
-  "ml-models-loading": "models loading",
-  "ml-models-loading-error": "Error on loading ml models"
+  "ml-models-loading": "models loading...",
+  "ml-models-loading-error": "Error on loading ml models:"
 }

@@ -1,22 +1,21 @@
 import axios, { AxiosError } from "axios";
 import { useQuery } from "react-query";
 
-import { Image, MlModel } from "../types";
+import { MlModel } from "../types";
 import { baseUrl } from "./base-url";
 
 const getModelVersions = async () => {
-  const modelsResponse = await axios.get<MlModel[]>(`${baseUrl}model-versions`, {
-  });
+  const modelsResponse = await axios.get<MlModel[]>(`${baseUrl}model-versions`);
   return modelsResponse.data;
 };
 
 export const useMlModels = () => {
   const { data, error, isError, isLoading, refetch, remove } = useQuery<
     MlModel[],
-    AxiosError<Image[]>
-  >(["mlModels"], () => getModelVersions(), {
+    AxiosError<MlModel[]>
+  >(["mlModels"], getModelVersions, {
     retry: 2, // retry twice if fetch fails
-    refetchInterval: 1000 * 60, // refetch every 10 seconds
+    refetchInterval: 1000 * 60, // refetch every 60 seconds
   });
 
   return {

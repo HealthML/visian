@@ -1,19 +1,10 @@
-import {
-  FlexRow,
-  InvisibleButton,
-  ListItem,
-  Text,
-} from "@visian/ui-shared";
+import { FlexRow, InvisibleButton, ListItem, Text } from "@visian/ui-shared";
 import styled from "styled-components";
 
 import { MlModel } from "../../../types";
 
 const Spacer = styled.div`
   width: 10px;
-`;
-
-const ExpandedSpacer = styled.div`
-  margin-right: auto;
 `;
 
 const InfoButton = styled(InvisibleButton)`
@@ -26,6 +17,10 @@ const VersionText = styled(Text)`
   margin: auto;
 `;
 
+const ModelFlexRow = styled(FlexRow)`
+  margin-right: auto;
+  cursor: pointer;
+`;
 
 export const ModelListItem = ({
   model,
@@ -34,15 +29,12 @@ export const ModelListItem = ({
   model: MlModel;
   createAutoAnnotationJob: () => void;
 }) => (
-    <ListItem>
-      <FlexRow onClick={createAutoAnnotationJob}>
-        <Text>{model.name}</Text>
-        <Spacer/>
-        <VersionText>{`v${model.version}`}</VersionText>
-      </FlexRow>
-      <ExpandedSpacer />
-      <InfoButton
-        icon= "info"
-      />
-    </ListItem>
-  );
+  <ListItem>
+    <ModelFlexRow onClick={createAutoAnnotationJob}>
+      <Text>{model.name} </Text>
+      <Spacer />
+      <VersionText>{`v${model.version}`}</VersionText>
+    </ModelFlexRow>
+    <InfoButton icon="info" />
+  </ListItem>
+);

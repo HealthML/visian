@@ -12,16 +12,16 @@ const ModelsList = styled(List)`
 
 export const MlModelList = ({
   models,
-  createAutoAnnotationJob
-} : {
+  createAutoAnnotationJob,
+}: {
   models: MlModel[];
-  createAutoAnnotationJob: (model: MlModel) => void
+  createAutoAnnotationJob: (model: MlModel) => void;
 }) => (
   <ModelsList onWheel={stopPropagation}>
     {models.map((model: MlModel) => (
       <ModelListItem
         model={model}
-        createAutoAnnotationJob = {() => createAutoAnnotationJob(model)}
+        createAutoAnnotationJob={() => createAutoAnnotationJob(model)}
         key={`${model.name}${model.version}`}
       />
     ))}

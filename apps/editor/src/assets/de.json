@@ -282,6 +282,6 @@
 
   "ml-model-selection-description": "Wähle das Modell mit dem die Bilder annotiert werden sollen",
   "ml-model-selection-title": "Modell Auswahl",
-  "ml-models-loading": "Modelle werden geladen",
-  "ml-models-loading-error": "Fehler beim Laden der Modelle"
+  "ml-models-loading": "Modelle werden geladen...",
+  "ml-models-loading-error": "Fehler beim Laden der Modelle:"
 }

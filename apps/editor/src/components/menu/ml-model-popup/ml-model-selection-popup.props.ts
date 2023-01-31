@@ -1,6 +1,5 @@
 import type { StatefulPopUpProps } from "@visian/ui-shared";
 
-
-export interface ModelPopUpProps extends StatefulPopUpProps{
-    getSelectedImageList: () => void;
+export interface ModelPopUpProps extends StatefulPopUpProps {
+  activeImageSelection: string[];
 }
