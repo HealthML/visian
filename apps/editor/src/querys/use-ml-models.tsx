@@ -2,10 +2,12 @@ import axios, { AxiosError } from "axios";
 import { useQuery } from "react-query";
 
 import { MlModel } from "../types";
-import { baseUrl } from "./base-url";
+import { hubBaseUrl } from "./hub-base-url";
 
 const getModelVersions = async () => {
-  const modelsResponse = await axios.get<MlModel[]>(`${baseUrl}model-versions`);
+  const modelsResponse = await axios.get<MlModel[]>(
+    `${hubBaseUrl}model-versions`,
+  );
   return modelsResponse.data;
 };
 

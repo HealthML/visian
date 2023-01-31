@@ -4,7 +4,7 @@ import { observer } from "mobx-react-lite";
 import styled from "styled-components";
 
 import { useMlModels } from "../../../querys";
-import { baseUrl } from "../../../querys/base-url";
+import { hubBaseUrl } from "../../../querys/hub-base-url";
 import { MlModel } from "../../../types";
 import { MlModelList } from "../ml-model-list";
 import { ModelPopUpProps } from "./ml-model-selection-popup.props";
@@ -26,7 +26,7 @@ export const ModelSelectionPopup = observer<ModelPopUpProps>(
 
     const createAutoAnnotationJob = async (model: MlModel) => {
       try {
-        await axios.post(`${baseUrl}jobs`, {
+        await axios.post(`${hubBaseUrl}jobs`, {
           images: activeImageSelection,
           modelName: model.name,
           modelVersion: model.version,
