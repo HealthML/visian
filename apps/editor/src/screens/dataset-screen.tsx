@@ -1,7 +1,6 @@
 import { Box, Modal, Screen, Text, useTranslation } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
 import React from "react";
-import { ReactQueryDevtools } from "react-query/devtools";
 import styled from "styled-components";
 
 import { DatasetModal } from "../components/menu/dataset-modal";
@@ -50,7 +49,6 @@ export const DatasetScreen: React.FC = observer(() => {
         )}
         {dataset && <DatasetModal dataset={dataset} />}
       </Main>
-      {false && <ReactQueryDevtools initialIsOpen={false} />}
     </Screen>
   );
 });
