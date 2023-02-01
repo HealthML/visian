@@ -6,11 +6,14 @@ import { useImagesBy } from "../../../querys";
 import { Dataset } from "../../../types";
 import { DatasetImageList } from "../dataset-image-list";
 import { DatasetNavigationbar } from "../dataset-navigationbar";
+import { ModelSelectionPopup } from "../ml-model-popup";
 
 const StyledModal = styled(Modal)`
   vertical-align: middle;
   width: 100%;
+  z-index: 49;
 `;
+// TODO: z-index logic
 
 export const DatasetModal = ({ dataset }: { dataset: Dataset }) => {
   const [isInSelectMode, setIsInSelectMode] = useState(false);
@@ -21,6 +24,16 @@ export const DatasetModal = ({ dataset }: { dataset: Dataset }) => {
   const [selectedImages, setSelectedImages] = useState<Map<string, boolean>>(
     new Map((images ?? []).map((image) => [image.id, false])),
   );
+
+  // model selection popup
+  const [isModelSelectionPopUpOpen, setIsModelSelectionPopUpOpen] =
+    useState(false);
+  const openModelSelectionPopUp = useCallback(() => {
+    setIsModelSelectionPopUpOpen(true);
+  }, []);
+  const closeModelSelectionPopUp = useCallback(() => {
+    setIsModelSelectionPopUpOpen(false);
+  }, []);
 
   // sync selectedImages and images array
   useEffect(() => {
@@ -60,6 +73,19 @@ export const DatasetModal = ({ dataset }: { dataset: Dataset }) => {
     [selectedImages],
   );
 
+  const isAnySelected = useMemo(
+    () => [...selectedImages.values()].some((value) => value),
+    [selectedImages],
+  );
+
+  const activeImageSelection = useMemo(
+    () =>
+      [...selectedImages.keys()].filter((imageId) =>
+        selectedImages.get(imageId),
+      ),
+    [selectedImages],
+  );
+
   const toggleSelectAll = useCallback(
     () => setSelectAll(!areAllSelected),
     [areAllSelected, setSelectAll],
@@ -76,8 +102,10 @@ export const DatasetModal = ({ dataset }: { dataset: Dataset }) => {
         <DatasetNavigationbar
           isInSelectMode={isInSelectMode}
           allSelected={areAllSelected}
+          anySelected={isAnySelected}
           toggleSelectMode={toggleSelectMode}
           toggleSelectAll={toggleSelectAll}
+          openModelSelectionPopUp={openModelSelectionPopUp}
         />
       }
     >
@@ -96,6 +124,11 @@ export const DatasetModal = ({ dataset }: { dataset: Dataset }) => {
           setSelection={setSelection}
         />
       )}
+      <ModelSelectionPopup
+        isOpen={isModelSelectionPopUpOpen}
+        onClose={closeModelSelectionPopUp}
+        activeImageSelection={activeImageSelection}
+      />
     </StyledModal>
   );
 };

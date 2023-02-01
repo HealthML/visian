@@ -33,6 +33,7 @@ export { ReactComponent as listView } from "./list-view.svg";
 export { ReactComponent as magicBrush } from "./magic-brush.svg";
 export { ReactComponent as menu } from "./menu.svg";
 export { ReactComponent as middleMouse } from "./middle-mouse.svg";
+export { ReactComponent as mlAutoAnnotation } from "./ml-auto-annotation.svg";
 export { ReactComponent as navigationTool } from "./navigation-tool.svg";
 export { ReactComponent as outline } from "./outline.svg";
 export { ReactComponent as outlineEraser } from "./outline-eraser.svg";
