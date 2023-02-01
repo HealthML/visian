@@ -139,6 +139,7 @@ export class VolumeRenderer implements IVolumeRenderer {
     this.intermediateRenderTarget = new THREE.WebGLRenderTarget(1, 1);
     this.screenAlignedQuad = ScreenAlignedQuad.forTexture(
       this.intermediateRenderTarget.texture,
+      true,
     );
 
     this.resolutionComputer = new ResolutionComputer(

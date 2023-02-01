@@ -7,8 +7,8 @@ import * as THREE from "three";
 export class ScreenAlignedQuad extends THREE.Mesh implements IDisposable {
   private static quadGeometry = new THREE.PlaneGeometry(1, 1);
 
-  public static forTexture(texture: THREE.Texture) {
-    return new this(new THREE.MeshBasicMaterial({ map: texture }));
+  public static forTexture(texture: THREE.Texture, transparent = false) {
+    return new this(new THREE.MeshBasicMaterial({ map: texture, transparent }));
   }
 
   public readonly scene = new THREE.Scene();

@@ -7706,10 +7706,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/three@npm:0.135.0":
-  version: 0.135.0
-  resolution: "@types/three@npm:0.135.0"
-  checksum: 85977e55cc3d7a14be88816a50bcec4eb0f141876d3cdc6dd7870f72122605af87462d7583e950cd0ee6ab21949b8c1b8304a88174d536648deb8ef97968fa1b
+"@types/three@npm:0.149.0":
+  version: 0.149.0
+  resolution: "@types/three@npm:0.149.0"
+  dependencies:
+    "@types/webxr": "*"
+  checksum: 5def82bd5d4fb0eb6046e747eecced06d68fbf1747ab8f3e7657872e42e58ce7a92218d7c5e4ca26204257927638ad14da5d1cce7310aca15eb8a9bd484ea191
   languageName: node
   linkType: hard
 
@@ -7779,6 +7781,13 @@ __metadata:
     anymatch: ^3.0.0
     source-map: ^0.6.0
   checksum: 5f64818128c94026be0e43e77d687e2d90f0da526a3a7c308c6a0bb12e93a35c9243be427bbf6865f64fd71dc5b32715af9b9da0cd6ae8335081b6db995bad2b
+  languageName: node
+  linkType: hard
+
+"@types/webxr@npm:*":
+  version: 0.5.1
+  resolution: "@types/webxr@npm:0.5.1"
+  checksum: a77c6be72623679341526dbec18971db0824d5697626d56decc8bb5b73491582b64d094c168ae8d00861549122ca066d7dc45d9cbb5c608626be7f48a6cd7c43
   languageName: node
   linkType: hard
 
@@ -22978,10 +22987,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"three@npm:0.135.0":
-  version: 0.135.0
-  resolution: "three@npm:0.135.0"
-  checksum: bd7e195932587a5be0c887947adf2b3898c6fa71722800432562aed10beddb2f448d0f237d937824805eebf90e625fc22ed57054618121f47811a8e82b528507
+"three@npm:0.149.0":
+  version: 0.149.0
+  resolution: "three@npm:0.149.0"
+  checksum: bb11e28054ce11ecfbe94150c2f253fe149cd7532b7b9253cf0806022d234ba3711944f42d65131d146193e7396b92c9965d88cd779b979f007795e13dfb44e9
   languageName: node
   linkType: hard
 
@@ -24146,7 +24155,7 @@ __metadata:
     "@types/react-router-dom": 5.3.3
     "@types/react-test-renderer": 18.0.0
     "@types/styled-components": 5.1.26
-    "@types/three": 0.135.0
+    "@types/three": 0.149.0
     "@types/tinycolor2": ^1.4.3
     "@types/uuid": ^8.3.4
     "@typescript-eslint/eslint-plugin": ^5.41.0
@@ -24202,7 +24211,7 @@ __metadata:
     react-test-renderer: 17.0.2
     regenerator-runtime: 0.13.7
     styled-components: 5.3.5
-    three: 0.135.0
+    three: 0.149.0
     tinycolor2: ^1.4.2
     ts-jest: 28.0.5
     ts-node: 10.9.1

@@ -52,9 +52,10 @@ export class TiledRenderer implements IDisposable {
     this.target.setSize(size.x, size.y);
 
     this.copyQuad = new THREE.Mesh(
-      new THREE.PlaneBufferGeometry().translate(0.5, -0.5, 0).scale(1, -1, 1),
+      new THREE.PlaneGeometry().translate(0.5, -0.5, 0).scale(1, -1, 1),
       new THREE.MeshBasicMaterial({
         map: this.intermediateRenderTarget.texture,
+        transparent: true,
       }),
     );
     this.copyScene.add(this.copyQuad);
@@ -156,6 +157,10 @@ export class TiledRenderer implements IDisposable {
 
     this.renderer.setRenderTarget(target);
     this.renderer.autoClear = false;
+
+    if (this.quadId === 0) {
+      this.renderer.clear();
+    }
 
     this.renderer.render(this.copyScene, this.copyCamera);
 

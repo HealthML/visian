@@ -39,7 +39,9 @@ export const getLAODirectionTexture = (amount: number) => {
     data[stride + 3] = encodeSigns(direction);
   }
 
-  return new THREE.DataTexture(data, amount, 1, THREE.RGBAFormat);
+  const texture = new THREE.DataTexture(data, amount, 1, THREE.RGBAFormat);
+  texture.needsUpdate = true;
+  return texture;
 };
 
 export const getTotalLAODirections = (mode: PerformanceMode) =>

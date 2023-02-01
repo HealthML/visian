@@ -1,6 +1,6 @@
 import * as THREE from "three";
 
-export class RenderedSheetGeometry extends THREE.ShapeBufferGeometry {
+export class RenderedSheetGeometry extends THREE.ShapeGeometry {
   public shape: THREE.Shape;
 
   constructor(radius: number) {
@@ -49,7 +49,9 @@ export class RenderedSheetGeometry extends THREE.ShapeBufferGeometry {
     this.shape = shape;
 
     (this.attributes.uv as THREE.BufferAttribute).copyArray(
-      (this.attributes.uv.array as Array<number>).map((a) => 5 * a),
+      (
+        (this.attributes.uv as THREE.BufferAttribute).array as Array<number>
+      ).map((a) => 5 * a),
     );
   }
 }
