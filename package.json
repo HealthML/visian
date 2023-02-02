@@ -5,7 +5,7 @@
   "scripts": {
     "prepare": "husky install",
     "start": "nx serve",
-    "dev": "NX_ANNOTATION_SERVICE_HUB_URL=\"localhost:3000\" nx serve",
+    "start:hub": "NX_ANNOTATION_SERVICE_HUB_URL=\"localhost:3000\" nx serve",
     "format": "nx format:write",
     "lint": "nx workspace-lint && nx lint",
     "lint:all": "yarn nx run-many --target=lint --all",
