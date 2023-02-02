@@ -15,6 +15,7 @@ import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
 import { whoHome } from "../../../constants";
+import { importFilesToDocument } from "../../../import-handling";
 import { Annotation, Image } from "../../../types";
 import {
   DilateErodeModal,
@@ -205,50 +206,47 @@ export const UIOverlay = observer<UIOverlayProps>(
       }
       return object;
     };
-
     const openImageInEditor = async (image: Image) => {
       const imageFile = await fetchImage(image);
-      store?.editor.activeDocument?.importFiles(
-        imageFile,
-        imageFile.name,
-        false,
-      );
     };
     const openAnnotationInEditor = async (annotation: Annotation) => {
       const annotationFile = await fetchAnnotation(annotation);
-      store?.editor.activeDocument?.importFiles(
-        annotationFile,
-        annotationFile.name,
-        true,
-      );
+      const dT = new DataTransfer();
+      dT.items.add(annotationFile);
+      if (store) {
+        importFilesToDocument(dT.files, store);
+      }
     };
-    const [openedImage, setOpenedImage] = useState<Image | null>(null);
-    const [openedAnnotation, setOpenedAnnotation] = useState<Annotation | null>(
-      null,
-    );
 
-    useEffect(() => {
-      if (openedImage) {
-        openImageInEditor(openedImage);
-      }
-    }, [openedImage]);
-
-    useEffect(() => {
-      if (openedAnnotation) {
-        openAnnotationInEditor(openedAnnotation);
-      }
-    }, [openedAnnotation]);
     const [searchParams] = useSearchParams();
     const loadImagesAndAnnotations = () => {
-      const openImage = searchParams.get("openImage");
-      if (openImage) {
-        setOpenedImage(loadSessionStorage("ImageToOpen"));
+      async function asyncfunc() {
+        if (store?.editor.activeDocument?.layers.length != 0) {
+          return await store?.destroy();
+        }
+        const openImage = searchParams.get("openImage");
+        const dT = new DataTransfer();
+        let shouldImport = false;
+        if (openImage && sessionStorage.getItem("ImageToOpen")) {
+          const image = loadSessionStorage("ImageToOpen");
+          sessionStorage.removeItem("ImageToOpen");
+          const imageFile = await fetchImage(image);
+          dT.items.add(imageFile);
+          shouldImport = true;
+        }
+        const openAnnotation = searchParams.get("openAnnotation");
+        if (openAnnotation && sessionStorage.getItem("AnnotationToOpen")) {
+          const annotation = loadSessionStorage("AnnotationToOpen");
+          sessionStorage.removeItem("AnnotationToOpen");
+          const annotationFile = await fetchAnnotation(annotation);
+          dT.items.add(annotationFile);
+          shouldImport = true;
+        }
+        if (store && shouldImport) {
+          importFilesToDocument(dT.files, store);
+        }
       }
-      const openAnnotation = searchParams.get("openAnnotation");
-
-      if (openAnnotation) {
-        setOpenedAnnotation(loadSessionStorage("AnnotationToOpen"));
-      }
+      asyncfunc();
     };
 
     useEffect(loadImagesAndAnnotations, [searchParams]);
