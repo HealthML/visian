@@ -29,6 +29,10 @@ const AnnotationsList = styled(List)`
   width: calc(100% - 30px);
 `;
 
+const ClickableText = styled(Text)`
+  cursor: pointer;
+`;
+
 export const DatasetImageListItem = ({
   isInSelectMode,
   image,
@@ -79,7 +83,13 @@ export const DatasetImageListItem = ({
             <Spacer />
           </>
         )}
-        <Text>{image.dataUri}</Text>
+        <ClickableText
+          onClick={() => {
+            openInEditor(image, null);
+          }}
+        >
+          {image.dataUri}
+        </ClickableText>
         <ExpandedSpacer />
         <IconButton
           icon={showAnnotations ? "arrowDown" : "arrowLeft"}
@@ -97,13 +107,14 @@ export const DatasetImageListItem = ({
           annotations && (
             <AnnotationsList>
               {annotations.map((annotation: Annotation) => (
-                <ListItem
-                  onPointerDown={() => {
-                    openInEditor(annotation);
-                  }}
-                  key={annotation.id}
-                >
-                  {annotation.dataUri}
+                <ListItem>
+                  <ClickableText
+                    onClick={() => {
+                      openInEditor(image, annotation);
+                    }}
+                  >
+                    {annotation.dataUri}
+                  </ClickableText>
                 </ListItem>
               ))}
             </AnnotationsList>
