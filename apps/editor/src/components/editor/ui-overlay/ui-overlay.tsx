@@ -7,12 +7,15 @@ import {
   Text,
 } from "@visian/ui-shared";
 import { isFromWHO } from "@visian/utils";
+import { fetchAnnotation, fetchImage } from "apps/editor/src/querys/use-files";
 import { observer } from "mobx-react-lite";
 import React, { useCallback, useEffect, useRef, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
 import { whoHome } from "../../../constants";
+import { Annotation, Image } from "../../../types";
 import {
   DilateErodeModal,
   MeasurementModal,
@@ -192,6 +195,63 @@ export const UIOverlay = observer<UIOverlayProps>(
           store?.setProgress();
         });
     }, [store]);
+
+    // Displaying images and annotations from Backend
+    const loadSessionStorage = (key: string) => {
+      let object = null;
+      const objectJSON = sessionStorage.getItem(key);
+      if (objectJSON) {
+        object = JSON.parse(objectJSON);
+      }
+      return object;
+    };
+
+    const openImageInEditor = async (image: Image) => {
+      const imageFile = await fetchImage(image);
+      store?.editor.activeDocument?.importFiles(
+        imageFile,
+        imageFile.name,
+        false,
+      );
+    };
+    const openAnnotationInEditor = async (annotation: Annotation) => {
+      const annotationFile = await fetchAnnotation(annotation);
+      store?.editor.activeDocument?.importFiles(
+        annotationFile,
+        annotationFile.name,
+        true,
+      );
+    };
+    const [openedImage, setOpenedImage] = useState<Image | null>(null);
+    const [openedAnnotation, setOpenedAnnotation] = useState<Annotation | null>(
+      null,
+    );
+
+    useEffect(() => {
+      if (openedImage) {
+        openImageInEditor(openedImage);
+      }
+    }, [openedImage]);
+
+    useEffect(() => {
+      if (openedAnnotation) {
+        openAnnotationInEditor(openedAnnotation);
+      }
+    }, [openedAnnotation]);
+    const [searchParams] = useSearchParams();
+    const loadImagesAndAnnotations = () => {
+      const openImage = searchParams.get("openImage");
+      if (openImage) {
+        setOpenedImage(loadSessionStorage("ImageToOpen"));
+      }
+      const openAnnotation = searchParams.get("openAnnotation");
+
+      if (openAnnotation) {
+        setOpenedAnnotation(loadSessionStorage("AnnotationToOpen"));
+      }
+    };
+
+    useEffect(loadImagesAndAnnotations, [searchParams]);
 
     return (
       <Container

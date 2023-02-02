@@ -10,6 +10,7 @@ import styled from "styled-components";
 
 import { useAnnotationsBy } from "../../../querys";
 import { Annotation, Image } from "../../../types";
+import { openInEditor } from "../util/openInEditor";
 
 const Spacer = styled.div`
   width: 10px;
@@ -96,7 +97,14 @@ export const DatasetImageListItem = ({
           annotations && (
             <AnnotationsList>
               {annotations.map((annotation: Annotation) => (
-                <ListItem key={annotation.id}>{annotation.dataUri}</ListItem>
+                <ListItem
+                  onPointerDown={() => {
+                    openInEditor(annotation);
+                  }}
+                  key={annotation.id}
+                >
+                  {annotation.dataUri}
+                </ListItem>
               ))}
             </AnnotationsList>
           )
