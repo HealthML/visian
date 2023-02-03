@@ -313,7 +313,7 @@ export class RootStore implements ISerializable<RootSnapshot>, IDisposable {
     this.shouldPersist = true;
   }
 
-  public destroy = async (forceDestroy?: boolean): Promise<boolean> => {
+  private destroyLayers = async (forceDestroy?: boolean): Promise<boolean> => {
     if (!this.shouldPersist && !forceDestroy) return false;
     if (
       !forceDestroy &&
@@ -327,8 +327,25 @@ export class RootStore implements ISerializable<RootSnapshot>, IDisposable {
     await this.config.storageBackend?.clear();
 
     this.setIsDirty(false, true);
-    const redirectURl = new URL(window.location.href);
-    window.location.href = redirectURl.href;
     return true;
+  };
+  public destroy = async (forceDestroy?: boolean): Promise<boolean> => {
+    if (await this.destroyLayers(forceDestroy)) {
+      window.location.href = new URL(window.location.href).searchParams.has(
+        "tracking",
+      )
+        ? `${window.location.pathname}?tracking`
+        : window.location.pathname;
+      return true;
+    }
+    return false;
+  };
+  public destroyReload = async (forceDestroy?: boolean): Promise<boolean> => {
+    if (await this.destroyLayers(forceDestroy)) {
+      const redirectURl = new URL(window.location.href);
+      window.location.href = redirectURl.href;
+      return true;
+    }
+    return false;
   };
 }

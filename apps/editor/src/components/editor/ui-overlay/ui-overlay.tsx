@@ -222,7 +222,7 @@ export const UIOverlay = observer<UIOverlayProps>(
     const loadImagesAndAnnotations = () => {
       async function asyncfunc() {
         if (store?.editor.activeDocument?.layers.length !== 0) {
-          return store?.destroy();
+          return store?.destroyReload();
         }
         const openImage = searchParams.get("openImage");
         const dT = new DataTransfer();
