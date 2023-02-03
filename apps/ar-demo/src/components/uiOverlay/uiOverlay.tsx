@@ -36,7 +36,7 @@ const UIOverlay: React.FC<UIOverlayProps> = (props) => {
   useEffect(() => {
     if ("xr" in navigator) {
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      (navigator as THREE.Navigator)
+      navigator
         .xr!.isSessionSupported("immersive-ar")
         .then(setIsARAvailable)
         .catch((e) => {
