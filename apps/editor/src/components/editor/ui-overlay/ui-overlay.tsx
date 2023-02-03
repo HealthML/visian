@@ -16,7 +16,6 @@ import { useStore } from "../../../app/root-store";
 import { whoHome } from "../../../constants";
 import { importFilesToDocument } from "../../../import-handling";
 import { fetchAnnotation, fetchImage } from "../../../querys/use-files";
-import { Annotation, Image } from "../../../types";
 import {
   DilateErodeModal,
   MeasurementModal,
@@ -205,17 +204,6 @@ export const UIOverlay = observer<UIOverlayProps>(
         object = JSON.parse(objectJSON);
       }
       return object;
-    };
-    const openImageInEditor = async (image: Image) => {
-      const imageFile = await fetchImage(image);
-    };
-    const openAnnotationInEditor = async (annotation: Annotation) => {
-      const annotationFile = await fetchAnnotation(annotation);
-      const dT = new DataTransfer();
-      dT.items.add(annotationFile);
-      if (store) {
-        importFilesToDocument(dT.files, store);
-      }
     };
 
     const [searchParams] = useSearchParams();
