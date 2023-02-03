@@ -327,7 +327,7 @@ export class RootStore implements ISerializable<RootSnapshot>, IDisposable {
     await this.config.storageBackend?.clear();
 
     this.setIsDirty(false, true);
-    let redirectURl = new URL(window.location.href);
+    const redirectURl = new URL(window.location.href);
     window.location.href = redirectURl.href;
     return true;
   };

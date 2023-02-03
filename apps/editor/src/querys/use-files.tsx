@@ -1,6 +1,7 @@
 import path from "path";
-import hubBaseUrl from "./hub-base-url";
+
 import { Annotation, Image } from "../types";
+import hubBaseUrl from "./hub-base-url";
 
 const fetchFile = async (
   id: string,

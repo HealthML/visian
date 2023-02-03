@@ -7,7 +7,6 @@ import {
   Text,
 } from "@visian/ui-shared";
 import { isFromWHO } from "@visian/utils";
-import { fetchAnnotation, fetchImage } from "apps/editor/src/querys/use-files";
 import { observer } from "mobx-react-lite";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
@@ -16,6 +15,7 @@ import styled from "styled-components";
 import { useStore } from "../../../app/root-store";
 import { whoHome } from "../../../constants";
 import { importFilesToDocument } from "../../../import-handling";
+import { fetchAnnotation, fetchImage } from "../../../querys/use-files";
 import { Annotation, Image } from "../../../types";
 import {
   DilateErodeModal,
@@ -221,8 +221,8 @@ export const UIOverlay = observer<UIOverlayProps>(
     const [searchParams] = useSearchParams();
     const loadImagesAndAnnotations = () => {
       async function asyncfunc() {
-        if (store?.editor.activeDocument?.layers.length != 0) {
-          return await store?.destroy();
+        if (store?.editor.activeDocument?.layers.length !== 0) {
+          return store?.destroy();
         }
         const openImage = searchParams.get("openImage");
         const dT = new DataTransfer();
