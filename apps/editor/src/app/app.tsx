@@ -22,7 +22,7 @@ import {
 import { setUpEventHandling } from "../event-handling";
 import type { RootStore } from "../models";
 import hubBaseUrl from "../querys/hub-base-url";
-import { DatasetScreen, EditorScreen } from "../screens";
+import { DatasetScreen, EditorScreen, ProjectScreen } from "../screens";
 import { setupRootStore, StoreProvider } from "./root-store";
 
 if (isFromWHO()) {
@@ -81,6 +81,7 @@ function App(): JSX.Element {
                 <Routes>
                   <Route path="/" element={<DatasetScreen />} />
                   <Route path="/editor" element={<EditorScreen />} />
+                  <Route path="/project" element={<ProjectScreen />} />
                 </Routes>
               ) : (
                 <Routes>
