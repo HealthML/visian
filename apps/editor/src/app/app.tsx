@@ -14,6 +14,7 @@ import { QueryClient, QueryClientProvider } from "react-query";
 import { ReactQueryDevtools } from "react-query/devtools";
 import { Route, Routes } from "react-router-dom";
 
+import { ProjectTab } from "../components/menu/project-tab";
 import {
   whoAwsConfigDeployment,
   whoAwsConfigDevelopment,
@@ -21,8 +22,13 @@ import {
 } from "../constants";
 import { setUpEventHandling } from "../event-handling";
 import type { RootStore } from "../models";
-import hubBaseUrl from "../querys/hub-base-url";
-import { DatasetScreen, EditorScreen } from "../screens";
+import hubBaseUrl from "../queries/hub-base-url";
+import {
+  DatasetScreen,
+  EditorScreen,
+  ProjectScreen,
+  ProjectsScreen,
+} from "../screens";
 import { setupRootStore, StoreProvider } from "./root-store";
 
 if (isFromWHO()) {
@@ -79,8 +85,21 @@ function App(): JSX.Element {
               <ModalRoot />
               {hubBaseUrl ? (
                 <Routes>
-                  <Route path="/" element={<DatasetScreen />} />
+                  <Route path="/project" element={<ProjectsScreen />} />
+                  <Route
+                    path="/project/:projectId/datasets"
+                    element={<ProjectScreen />}
+                  />
+                  <Route
+                    path="/project/:projectId/jobs"
+                    element={<ProjectTab />}
+                  />
+                  <Route
+                    path="/project/:projectId/:datasetId"
+                    element={<DatasetScreen />}
+                  />
                   <Route path="/editor" element={<EditorScreen />} />
+                  <Route path="/test" element={<ProjectTab />} />
                 </Routes>
               ) : (
                 <Routes>

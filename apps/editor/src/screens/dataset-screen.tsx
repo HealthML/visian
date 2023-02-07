@@ -1,10 +1,11 @@
 import { Box, Modal, Screen, Text, useTranslation } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
 import React from "react";
+import { useParams } from "react-router-dom";
 import styled from "styled-components";
 
 import { DatasetModal } from "../components/menu/dataset-modal";
-import { useDataset } from "../querys";
+import { useDataset } from "../queries";
 
 const Main = styled(Box)`
   display: flex;
@@ -18,9 +19,9 @@ const StyledModal = styled(Modal)`
   width: 100%;
 `;
 
-const datasetId = "ed74a5b0-bb97-4f92-9bc9-50d47fafc17f";
-
 export const DatasetScreen: React.FC = observer(() => {
+  const datasetId = useParams().datasetId || "";
+
   const { dataset, datasetError, isErrorDataset, isLoadingDataset } =
     useDataset(datasetId);
 

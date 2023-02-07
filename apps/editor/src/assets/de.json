@@ -269,7 +269,15 @@
   "exit-select-mode": "Auswahlmodus verlassen",
   "select-mode": "Auswahlmodus",
 
+  "projects-base-title": "VISIAN Projekte",
+  "project-base-title": "VISIAN Projekt",
   "dataset-base-title": "VISIAN Dataset",
+
+  "projects-loading": "Projekte werden geladen...",
+  "projects-loading-error": "Fehler beim Laden der Projekte:",
+
+  "project-loading": "Projekt wird geladen...",
+  "project-loading-error": "Fehler beim Laden des Projekts:",
 
   "dataset-loading": "Dataset wird geladen...",
   "dataset-loading-error": "Fehler beim Laden des Datensatzes:",
