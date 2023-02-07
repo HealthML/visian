@@ -7,6 +7,7 @@ import { JobList } from "./job-list";
 const StyledModal = styled(Modal)`
   vertical-align: middle;
   width: 100%;
+  height: 50%;
   z-index: 49;
 `;
 

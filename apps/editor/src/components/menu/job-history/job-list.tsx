@@ -6,7 +6,6 @@ import { JobListItem } from "./job-list-item";
 
 const StyledList = styled(List)`
   width: 100%;
-  height: 400px;
   overflow-y: auto;
 `;
 
