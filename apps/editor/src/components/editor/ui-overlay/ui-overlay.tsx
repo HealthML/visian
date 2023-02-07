@@ -15,7 +15,7 @@ import styled from "styled-components";
 import { useStore } from "../../../app/root-store";
 import { whoHome } from "../../../constants";
 import { importFilesToDocument } from "../../../import-handling";
-import { fetchAnnotation, fetchImage } from "../../../querys/use-files";
+import { fetchAnnotation, fetchImage } from "../../../queries/use-files";
 import {
   DilateErodeModal,
   MeasurementModal,

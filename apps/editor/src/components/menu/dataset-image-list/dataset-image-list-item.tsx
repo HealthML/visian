@@ -8,7 +8,7 @@ import {
 import { useCallback, useEffect, useState } from "react";
 import styled from "styled-components";
 
-import { useAnnotationsBy } from "../../../querys";
+import { useAnnotationsBy } from "../../../queries";
 import { Annotation, Image } from "../../../types";
 import { openInEditor } from "../util/openInEditor";
 
