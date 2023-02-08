@@ -3,8 +3,6 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import styled, { useTheme } from "styled-components";
 
-import { useStore } from "../../../app/root-store";
-
 const StyledBox = styled(Box)`
   width: 50%;
   height: 10%;
@@ -15,16 +13,17 @@ const projectTabSwitchOptions = [
   { labelTx: "Jobs", value: "jobs" },
 ];
 
-const tabSelection = "datasets";
-
-function toggleTabSelection(newValue: string) {
-  const pathParts = window.location.pathname.split("/");
-  pathParts[pathParts.length - 1] = newValue;
-  window.location.pathname = pathParts.join("/");
-}
-
+const defaultTabSelection = "datasets";
 export const ProjectTab = () => {
   const theme = useTheme() as Theme;
+  const navigate = useNavigate();
+
+  // expect path like /project/projectId/datasets
+  const handleChange = (newValue: string) => {
+    const pathParts = window.location.pathname.split("/");
+    pathParts[pathParts.length - 1] = newValue;
+    navigate(pathParts.join("/"));
+  };
 
   return (
     <StyledBox>
@@ -32,8 +31,8 @@ export const ProjectTab = () => {
         infoBaseZIndex={theme.zIndices.overlay}
         options={projectTabSwitchOptions}
         // with store?
-        value={tabSelection}
-        onChange={(newValue) => toggleTabSelection(newValue)}
+        value={defaultTabSelection}
+        onChange={(newValue) => handleChange(newValue)}
       />
     </StyledBox>
   );
