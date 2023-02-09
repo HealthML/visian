@@ -1,4 +1,4 @@
-import { ListItem, Text } from "@visian/ui-shared";
+import { color, fontSize, fontWeight, ListItem, Text } from "@visian/ui-shared";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 
@@ -6,23 +6,27 @@ import { Dataset } from "../../../types";
 
 const StyledListItem = styled(ListItem)`
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
-  width: 400px;
-  height: 200px;
-  background-color: lightgray;
+  width: 20vw;
+  height: 15vw;
+  background-color: ${color("sheet")};
   border-radius: 5%;
   cursor: pointer;
-
-  @media (max-width: 800px) {
-    width: 200px;
-    height: 100px;
-  }
+  position: relative;
 `;
 
 const StyledText = styled(Text)`
-  font-size: 16px;
-  color: black;
+  font-size: ${fontSize("navigation")};
+  font-weight: ${fontWeight("regular")};
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 8vw;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 `;
 
 export const DatasetListItem = ({ dataset }: { dataset: Dataset }) => {
@@ -31,6 +35,7 @@ export const DatasetListItem = ({ dataset }: { dataset: Dataset }) => {
   return (
     <StyledListItem
       onClick={() => navigate(`/project/${dataset.project}/${dataset.id}`)}
+      isLast
     >
       <StyledText>{dataset.name}</StyledText>
     </StyledListItem>

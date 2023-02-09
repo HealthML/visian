@@ -4,21 +4,15 @@ import styled from "styled-components";
 import { Dataset } from "../../../types";
 import { DatasetListItem } from "./dataset-list-item";
 
-const StyledDatasetListContainer = styled.div`
-  // width: 90vw;
-  // margin: 0 auto;
-  // margin-top: 2%;
-  border: 1px solid silver;
-`;
-
 const StyledDatasetList = styled(List)`
   width: 90vw;
-  height: 70vh;
+  height: 70vw;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(20rem, 0.5fr));
-  grid-gap: 10vw;
+  grid-template-columns: 1fr 1fr 1fr;
+  column-gap: 30px;
+  row-gap: 60px;
   justify-items: center;
-  // border: 1px solid silver;
+  margin-top: 2%;
   overflow-y: auto;
   scrollbar-width: thin;
   scrollbar-color: #ccc #fff;
@@ -41,11 +35,9 @@ const StyledDatasetListItem = styled(DatasetListItem)`
 `;
 
 export const DatasetList = ({ datasets }: { datasets: Dataset[] }) => (
-  <StyledDatasetListContainer>
-    <StyledDatasetList onWheel={stopPropagation}>
-      {datasets.map((dataset: Dataset) => (
-        <StyledDatasetListItem key={dataset.id} dataset={dataset} />
-      ))}
-    </StyledDatasetList>
-  </StyledDatasetListContainer>
+  <StyledDatasetList onWheel={stopPropagation}>
+    {datasets.map((dataset: Dataset) => (
+      <StyledDatasetListItem key={dataset.id} dataset={dataset} />
+    ))}
+  </StyledDatasetList>
 );
