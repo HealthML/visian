@@ -14,7 +14,7 @@ import { QueryClient, QueryClientProvider } from "react-query";
 import { ReactQueryDevtools } from "react-query/devtools";
 import { Route, Routes } from "react-router-dom";
 
-import { ProjectTab } from "../components/menu/project-tab";
+import { ProjectViewSwitch } from "../components/menu/project-view-switch";
 import {
   whoAwsConfigDeployment,
   whoAwsConfigDevelopment,
@@ -92,14 +92,13 @@ function App(): JSX.Element {
                   />
                   <Route
                     path="/project/:projectId/jobs"
-                    element={<ProjectTab />}
+                    element={<ProjectViewSwitch />}
                   />
                   <Route
                     path="/project/:projectId/:datasetId"
                     element={<DatasetScreen />}
                   />
                   <Route path="/editor" element={<EditorScreen />} />
-                  <Route path="/test" element={<ProjectTab />} />
                 </Routes>
               ) : (
                 <Routes>

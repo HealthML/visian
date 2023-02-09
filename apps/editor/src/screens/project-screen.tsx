@@ -5,18 +5,24 @@ import { useParams } from "react-router-dom";
 import styled from "styled-components";
 
 import { DatasetList } from "../components/menu/dataset-list";
-import { ProjectTab } from "../components/menu/project-tab";
+import { ProjectViewSwitch } from "../components/menu/project-view-switch";
 import useDatasetsBy from "../queries/use-datasets-by";
 
 const Main = styled(Box)`
   display: flex;
   justify-content: center;
-  height: 100%;
-  padding: 5%;
+  height: 90vh;
+  padding: 3%;
 `;
 
 const StyledModal = styled(Modal)`
   vertical-align: middle;
+  width: 100%;
+`;
+
+const StyledProjectViewSwitch = styled(Box)`
+  display flex;
+  justify-content: center;
   width: 100%;
 `;
 
@@ -40,7 +46,9 @@ export const ProjectScreen: React.FC = observer(() => {
           </StyledModal>
         )}
         <StyledModal>
-          <ProjectTab />
+          <StyledProjectViewSwitch>
+            <ProjectViewSwitch />
+          </StyledProjectViewSwitch>
           {datasets && <DatasetList datasets={datasets} />}
         </StyledModal>
       </Main>
