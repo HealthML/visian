@@ -1,31 +1,39 @@
-import { FlexRow, ListItem, Text } from "@visian/ui-shared";
+import { ListItem, Text } from "@visian/ui-shared";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 
-import hubBaseUrl from "../../../queries/hub-base-url";
 import { Dataset } from "../../../types";
 
-const Spacer = styled.div`
-  width: 10px;
+const StyledListItem = styled(ListItem)`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 400px;
+  height: 200px;
+  background-color: lightgray;
+  border-radius: 5%;
+  cursor: pointer;
+
+  @media (max-width: 800px) {
+    width: 200px;
+    height: 100px;
+  }
 `;
 
-const ModelFlexRow = styled(FlexRow)`
-  margin-right: auto;
-  cursor: pointer;
+const StyledText = styled(Text)`
+  font-size: 16px;
+  color: black;
 `;
 
 export const DatasetListItem = ({ dataset }: { dataset: Dataset }) => {
   const navigate = useNavigate();
 
   return (
-    <ListItem>
-      <ModelFlexRow
-        onClick={() => navigate(`/project/${dataset.project}/${dataset.id}`)}
-      >
-        <Text>{dataset.name} </Text>
-        <Spacer />
-      </ModelFlexRow>
-    </ListItem>
+    <StyledListItem
+      onClick={() => navigate(`/project/${dataset.project}/${dataset.id}`)}
+    >
+      <StyledText>{dataset.name}</StyledText>
+    </StyledListItem>
   );
 };
 

@@ -3,9 +3,12 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import styled, { useTheme } from "styled-components";
 
-const StyledBox = styled(Box)`
-  width: 50%;
-  height: 10%;
+const StyledTab = styled(Box)`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 20%;
+  margin: auto;
 `;
 
 const projectTabSwitchOptions = [
@@ -26,7 +29,7 @@ export const ProjectTab = () => {
   };
 
   return (
-    <StyledBox>
+    <StyledTab>
       <Switch
         infoBaseZIndex={theme.zIndices.overlay}
         options={projectTabSwitchOptions}
@@ -34,6 +37,6 @@ export const ProjectTab = () => {
         value={defaultTabSelection}
         onChange={(newValue) => handleChange(newValue)}
       />
-    </StyledBox>
+    </StyledTab>
   );
 };

@@ -10,7 +10,7 @@ const Main = styled(Box)`
   display: flex;
   justify-content: center;
   height: 100%;
-  padding: 5rem 10rem;
+  //padding: 5rem 10rem;
 `;
 
 const StyledModal = styled(Modal)`
