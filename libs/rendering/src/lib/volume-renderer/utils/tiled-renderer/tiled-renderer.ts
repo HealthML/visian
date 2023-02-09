@@ -55,7 +55,7 @@ export class TiledRenderer implements IDisposable {
       new THREE.PlaneGeometry().translate(0.5, -0.5, 0).scale(1, -1, 1),
       new THREE.MeshBasicMaterial({
         map: this.intermediateRenderTarget.texture,
-        transparent: true,
+        blending: THREE.NoBlending,
       }),
     );
     this.copyScene.add(this.copyQuad);
