@@ -198,12 +198,12 @@ export const UIOverlay = observer<UIOverlayProps>(
 
     // Displaying images and annotations from Backend
     const loadSessionStorage = (key: string) => {
-      let object = null;
-      const objectJSON = sessionStorage.getItem(key);
-      if (objectJSON) {
-        object = JSON.parse(objectJSON);
+      let storedObject = null;
+      const storedObjectJSON = sessionStorage.getItem(key);
+      if (storedObjectJSON) {
+        storedObject = JSON.parse(storedObjectJSON);
       }
-      return object;
+      return storedObject;
     };
 
     const [searchParams] = useSearchParams();
