@@ -95,7 +95,7 @@ function App(): JSX.Element {
                     element={<JobHistory />}
                   />
                   <Route
-                    path="/project/:projectId/:datasetId"
+                    path="/project/:projectId/datasets/:datasetId"
                     element={<DatasetScreen />}
                   />
                   <Route path="/editor" element={<EditorScreen />} />

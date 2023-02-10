@@ -34,7 +34,9 @@ export const DatasetListItem = ({ dataset }: { dataset: Dataset }) => {
 
   return (
     <StyledListItem
-      onClick={() => navigate(`/project/${dataset.project}/${dataset.id}`)}
+      onClick={() =>
+        navigate(`/project/${dataset.project}/datasets/${dataset.id}`)
+      }
       isLast
     >
       <StyledText>{dataset.name}</StyledText>
