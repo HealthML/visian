@@ -14,7 +14,7 @@ import { QueryClient, QueryClientProvider } from "react-query";
 import { ReactQueryDevtools } from "react-query/devtools";
 import { Route, Routes } from "react-router-dom";
 
-import { ProjectViewSwitch } from "../components/menu/project-view-switch";
+import { JobHistory } from "../components/menu/job-history";
 import {
   whoAwsConfigDeployment,
   whoAwsConfigDevelopment,
@@ -92,7 +92,7 @@ function App(): JSX.Element {
                   />
                   <Route
                     path="/project/:projectId/jobs"
-                    element={<ProjectViewSwitch />}
+                    element={<JobHistory />}
                   />
                   <Route
                     path="/project/:projectId/:datasetId"
