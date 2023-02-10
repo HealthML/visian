@@ -431,9 +431,10 @@ export class Image implements ISerializable<ImageSnapshot> {
 
   protected getDataIndex(voxel: Voxel) {
     return (
-      voxel.x +
-      voxel.y * this.voxelCount.x +
-      voxel.z * this.voxelCount.x * this.voxelCount.y
+      (voxel.x +
+        voxel.y * this.voxelCount.x +
+        voxel.z * this.voxelCount.x * this.voxelCount.y) *
+      this.voxelComponents
     );
   }
 }
