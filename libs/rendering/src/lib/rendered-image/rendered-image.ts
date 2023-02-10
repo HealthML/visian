@@ -453,7 +453,12 @@ export class RenderedImage extends Image implements IDisposable {
     const isIntArray = textureData.BYTES_PER_ELEMENT === 1;
 
     return new Vector(
-      Array.from(textureData.slice(index, index + this.voxelComponents)),
+      Array.from(
+        textureData.slice(
+          index,
+          index + (this.hasArtificialAlpha ? 3 : this.voxelComponents),
+        ),
+      ),
       false,
     ).divideScalar(isIntArray ? 255 : 1);
   }

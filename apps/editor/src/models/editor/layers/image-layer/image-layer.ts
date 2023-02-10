@@ -80,6 +80,7 @@ export class ImageLayer
           voxelCount: image.voxelCount.toArray(),
           voxelSpacing: image.voxelSpacing.toArray(),
           unit: image.unit,
+          hasArtificialAlpha: false,
         },
       },
       document,
