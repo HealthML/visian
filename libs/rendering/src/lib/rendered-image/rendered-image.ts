@@ -31,7 +31,7 @@ export class RenderedImage extends Image implements IDisposable {
    * */
   private internalTexture: Record<
     THREE.TextureFilter,
-    THREE.DataTexture3D | THREE.DataTexture
+    THREE.Data3DTexture | THREE.DataTexture
   >;
 
   /**
@@ -91,21 +91,23 @@ export class RenderedImage extends Image implements IDisposable {
     );
 
     if (this.is3D) {
-      const nearestTexture = new THREE.DataTexture3D(
+      const nearestTexture = new THREE.Data3DTexture(
         textureData,
         this.voxelCount.x,
         this.voxelCount.y,
         this.voxelCount.z,
       );
       nearestTexture.magFilter = THREE.NearestFilter;
+      nearestTexture.minFilter = THREE.NearestFilter;
       nearestTexture.format = textureFormat;
       nearestTexture.type = textureType;
       nearestTexture.internalFormat = internalTextureFormat;
+      nearestTexture.needsUpdate = true;
 
       this.internalTexture[THREE.NearestFilter] = nearestTexture;
 
       if (!isAnnotation) {
-        const linearTexture = new THREE.DataTexture3D(
+        const linearTexture = new THREE.Data3DTexture(
           textureData,
           this.voxelCount.x,
           this.voxelCount.y,
@@ -116,6 +118,7 @@ export class RenderedImage extends Image implements IDisposable {
         linearTexture.format = textureFormat;
         linearTexture.type = textureType;
         linearTexture.internalFormat = internalTextureFormat;
+        linearTexture.needsUpdate = true;
 
         this.internalTexture[THREE.LinearFilter] = linearTexture;
       }
@@ -135,6 +138,7 @@ export class RenderedImage extends Image implements IDisposable {
       );
 
       nearestTexture.internalFormat = internalTextureFormat;
+      nearestTexture.needsUpdate = true;
 
       this.internalTexture[THREE.NearestFilter] = nearestTexture;
 
@@ -153,6 +157,7 @@ export class RenderedImage extends Image implements IDisposable {
         );
 
         linearTexture.internalFormat = internalTextureFormat;
+        linearTexture.needsUpdate = true;
 
         this.internalTexture[THREE.LinearFilter] = linearTexture;
       }
@@ -175,8 +180,8 @@ export class RenderedImage extends Image implements IDisposable {
     this.textureAdapter.dispose();
     this.internalTexture[THREE.NearestFilter].dispose();
     this.internalTexture[THREE.LinearFilter]?.dispose();
-    this.renderTargets[THREE.NearestFilter]?.dispose();
-    this.renderTargets[THREE.LinearFilter]?.dispose();
+    this.renderTargets[THREE.NearestFilter]?.target.dispose();
+    this.renderTargets[THREE.LinearFilter]?.target.dispose();
   }
 
   /** Whether or not the texture data needs to be pulled from the GPU. */
@@ -227,7 +232,7 @@ export class RenderedImage extends Image implements IDisposable {
 
   public getTexture(filter = THREE.NearestFilter) {
     return this.isAnnotation
-      ? this.renderTargets[filter].texture
+      ? this.renderTargets[filter].target.texture
       : this.internalTexture[filter];
   }
 
@@ -261,7 +266,7 @@ export class RenderedImage extends Image implements IDisposable {
 
     this.textureAdapter.writeImage(
       this.internalTexture[THREE.NearestFilter],
-      this.renderTargets[filter],
+      this.renderTargets[filter].target,
       renderer,
       MergeFunction.Replace,
     );
@@ -353,14 +358,14 @@ export class RenderedImage extends Image implements IDisposable {
 
     this.textureAdapter.writeImage(
       texture,
-      this.renderTargets[THREE.NearestFilter],
+      this.renderTargets[THREE.NearestFilter].target,
       this.document.renderer,
       mergeFunction,
       threshold,
     );
     this.textureAdapter.writeImage(
       texture,
-      this.renderTargets[THREE.LinearFilter],
+      this.renderTargets[THREE.LinearFilter].target,
       this.document.renderer,
       mergeFunction,
       threshold,
@@ -381,7 +386,7 @@ export class RenderedImage extends Image implements IDisposable {
         slice,
         viewType,
         sliceData,
-        this.renderTargets[THREE.NearestFilter],
+        this.renderTargets[THREE.NearestFilter].target,
         this.document.renderer,
         mergeFunction,
       );
@@ -389,7 +394,7 @@ export class RenderedImage extends Image implements IDisposable {
         slice,
         viewType,
         sliceData,
-        this.renderTargets[THREE.LinearFilter],
+        this.renderTargets[THREE.LinearFilter].target,
         this.document.renderer,
         mergeFunction,
       );
@@ -448,7 +453,12 @@ export class RenderedImage extends Image implements IDisposable {
     const isIntArray = textureData.BYTES_PER_ELEMENT === 1;
 
     return new Vector(
-      Array.from(textureData.slice(index, index + this.voxelComponents)),
+      Array.from(
+        textureData.slice(
+          index,
+          index + (this.hasArtificialAlpha ? 3 : this.voxelComponents),
+        ),
+      ),
       false,
     ).divideScalar(isIntArray ? 255 : 1);
   }

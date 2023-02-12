@@ -289,9 +289,7 @@ export class Viewport3D
     const isXRAvailable =
       "xr" in navigator &&
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      (await (navigator as THREE.Navigator).xr!.isSessionSupported(
-        "immersive-vr",
-      ));
+      (await navigator.xr!.isSessionSupported("immersive-vr"));
 
     this.setIsXRAvailable(isXRAvailable);
     return isXRAvailable;
