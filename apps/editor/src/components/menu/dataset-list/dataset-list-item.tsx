@@ -23,7 +23,6 @@ const StyledText = styled(Text)`
   position: absolute;
   left: 0;
   right: 0;
-  bottom: 8vw;
   display: flex;
   justify-content: center;
   align-items: center;

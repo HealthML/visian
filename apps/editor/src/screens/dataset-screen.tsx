@@ -8,18 +8,18 @@ import {
 } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
 import React from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import styled from "styled-components";
 
 import { DatasetModal } from "../components/menu/dataset-modal";
 import { useDataset } from "../queries";
-import { useNavigate } from "react-router-dom";
 
 const Main = styled(Box)`
   display: flex;
   justify-content: center;
   height: 100%;
   padding: 1rem 10rem;
+  padding-bottom: 5rem;
 `;
 
 const StyledModal = styled(Modal)`

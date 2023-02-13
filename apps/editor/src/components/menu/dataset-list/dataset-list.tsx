@@ -5,8 +5,6 @@ import { Dataset } from "../../../types";
 import { DatasetListItem } from "./dataset-list-item";
 
 const StyledDatasetList = styled(List)`
-  width: 90vw;
-  height: 70vw;
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
   column-gap: 30px;
