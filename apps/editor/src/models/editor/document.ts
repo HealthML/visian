@@ -24,6 +24,7 @@ import {
   readMedicalImage,
   Zip,
 } from "@visian/utils";
+import axios from "axios";
 import FileSaver from "file-saver";
 import { action, computed, makeObservable, observable, toJS } from "mobx";
 import { parseHeader, Unit } from "nifti-js";
@@ -440,6 +441,49 @@ export class Document
     }
 
     FileSaver.saveAs(await zip.toBlob(), `${this.title}.zip`);
+  };
+
+  public postToURL = async (
+    url: string,
+    imageId: string,
+    limitToAnnotations?: boolean,
+  ) => {
+    const zip = new Zip();
+
+    // TODO: Rework for group layers
+    const files = await Promise.all(
+      this.layers
+        .filter((layer) => !limitToAnnotations || layer.isAnnotation)
+        .map((layer) => layer.toFile()),
+    );
+    files.forEach((file, index) => {
+      if (!file) return;
+      zip.setFile(`${`00${index}`.slice(-2)}_${file.name}`, file);
+    });
+
+    if (this.context?.getTracker()?.isActive) {
+      const trackingFile = this.context.getTracker()?.toFile();
+      if (trackingFile) zip.setFile(trackingFile.name, trackingFile);
+    }
+    const fileBlob: any = await zip.toBlob();
+    // console.log("")
+
+    const formData = new FormData();
+    formData.append("fileName", `${this.title}.zip`);
+    formData.append("image", imageId);
+    formData.append("file", fileBlob);
+    axios
+      .post(url, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      })
+      .then((response) => {
+        console.log(response);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
   };
 
   public getFileForLayer = async (idOrLayer: string | ILayer) => {

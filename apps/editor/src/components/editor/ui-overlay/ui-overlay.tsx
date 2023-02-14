@@ -15,6 +15,7 @@ import styled from "styled-components";
 import { useStore } from "../../../app/root-store";
 import { whoHome } from "../../../constants";
 import { importFilesToDocument } from "../../../import-handling";
+import { hubBaseUrl } from "../../../querys/hub-base-url";
 import { fetchAnnotation, fetchImage } from "../../../querys/use-files";
 import {
   DilateErodeModal,
@@ -206,6 +207,27 @@ export const UIOverlay = observer<UIOverlayProps>(
       return storedObject;
     };
 
+    const postToURL = () => {
+      if (sessionStorage.getItem("ImageToOpen")) {
+        // const annotation = loadSessionStorage("AnnotationToOpen");
+        const image = loadSessionStorage("ImageToOpen");
+        const url = `${hubBaseUrl}annotations/new`;
+        if (url) {
+          store?.setProgress({ labelTx: "exporting" });
+          store?.editor.activeDocument
+            ?.postToURL(url, image.id, true)
+            .catch()
+            .then(() => {
+              store?.setProgress();
+              sessionStorage.removeItem("ImageToOpen");
+              sessionStorage.removeItem("AnnotationToOpen");
+              // TODO: use navigate
+              store?.destroyRedirect("/", true);
+            });
+        }
+      }
+    };
+
     const [searchParams] = useSearchParams();
     const loadImagesAndAnnotations = () => {
       async function asyncfunc() {
@@ -217,7 +239,7 @@ export const UIOverlay = observer<UIOverlayProps>(
         let shouldImport = false;
         if (openImage && sessionStorage.getItem("ImageToOpen")) {
           const image = loadSessionStorage("ImageToOpen");
-          sessionStorage.removeItem("ImageToOpen");
+          // sessionStorage.removeItem("ImageToOpen");
           const imageFile = await fetchImage(image);
           dT.items.add(imageFile);
           shouldImport = true;
@@ -225,7 +247,7 @@ export const UIOverlay = observer<UIOverlayProps>(
         const openAnnotation = searchParams.get("openAnnotation");
         if (openAnnotation && sessionStorage.getItem("AnnotationToOpen")) {
           const annotation = loadSessionStorage("AnnotationToOpen");
-          sessionStorage.removeItem("AnnotationToOpen");
+          // sessionStorage.removeItem("AnnotationToOpen");
           const annotationFile = await fetchAnnotation(annotation);
           dT.items.add(annotationFile);
           shouldImport = true;
@@ -300,6 +322,16 @@ export const UIOverlay = observer<UIOverlayProps>(
             <ColumnRight>
               <SideViews />
               <RightBar>
+                <FloatingUIButton
+                  icon="check"
+                  // tooltipTx="export-tooltip"
+                  tooltipPosition="left"
+                  onClick={() => {
+                    postToURL();
+                    console.log("saved");
+                  }}
+                  isActive={false}
+                />
                 {!isFromWHO() && (
                   <FloatingUIButton
                     icon="export"

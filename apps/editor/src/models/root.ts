@@ -348,4 +348,16 @@ export class RootStore implements ISerializable<RootSnapshot>, IDisposable {
     }
     return false;
   };
+
+  public destroyRedirect = async (
+    redirect: string,
+    forceDestroy?: boolean,
+  ): Promise<boolean> => {
+    if (await this.destroyLayers(forceDestroy)) {
+      const redirectURl = new URL(window.location.origin + redirect);
+      window.location.href = redirectURl.href;
+      return true;
+    }
+    return false;
+  };
 }

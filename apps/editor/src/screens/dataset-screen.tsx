@@ -18,7 +18,7 @@ const StyledModal = styled(Modal)`
   width: 100%;
 `;
 
-const datasetId = "ed74a5b0-bb97-4f92-9bc9-50d47fafc17f";
+const datasetId = "ef77afe5-e228-4df3-9ade-875bf20d1c6f";
 
 export const DatasetScreen: React.FC = observer(() => {
   const { dataset, datasetError, isErrorDataset, isLoadingDataset } =
