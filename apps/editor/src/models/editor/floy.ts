@@ -18,7 +18,7 @@ import {
 } from "../../constants";
 
 // TODO: Add all supported models
-export type FloyDemoModelKind = "MR_L-SPINE" | "MR_SPINE";
+export type FloyDemoModelKind = "MR_L-SPINE" | "MR_SPINE" | "CT_SPINE";
 
 export interface FloyDemoSnapshot {
   seriesZip?: File;
@@ -105,7 +105,7 @@ export class FloyDemoController implements ISerializable<FloyDemoSnapshot> {
     if (value[0]) [this.selectedModel] = value;
   }
 
-  public setSelectedModel = (value: FloyDemoModelKind = "MR_SPINE"): void => {
+  public setSelectedModel = (value: FloyDemoModelKind = "CT_SPINE"): void => {
     this.selectedModel = value;
   };
 
@@ -243,9 +243,9 @@ export class FloyDemoController implements ISerializable<FloyDemoSnapshot> {
       if (dataSet.string("x00080060") === "MR") {
         selectableModels.push("MR_SPINE");
       }
-      // if (dataSet.string("x00080060") === "CT") {
-      //   selectableModels.push("CT_SPINE");
-      // }
+      if (dataSet.string("x00080060") === "CT") {
+         selectableModels.push("CT_SPINE");
+       }
     } catch {
       // Intentionally left blank
     }

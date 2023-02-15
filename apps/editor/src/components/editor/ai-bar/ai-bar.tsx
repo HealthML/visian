@@ -32,8 +32,8 @@ import { AnnotationData } from "../../../models/who/annotationData";
 
 // TODO: Update to include all selectable models
 const modelOptions = [
-  { value: "MR_L-SPINE", label: "MR L-Spine" },
-  { value: "MR_SPINE", label: "MR Spine" },
+  // { value: "MR_L-SPINE", label: "MR L-Spine" },
+  // { value: "MR_SPINE", label: "MR Spine" },
   { value: "CT_SPINE", label: "CT Spine" },
 ];
 
@@ -658,15 +658,18 @@ export const FloyBar = observer<{
           shouldDismissOnOutsidePress
         >
           <StyledParagraph>
-            Diese Web Applikation dient ausschließlich zur Demonstration unserer
-            Produkte. In der aktuellen Version werden fokale Läsionen auf Basis
-            einer malignen Neoplasie oder primären malignen Erkrankung wie
-            Plasmozytomen oder Malignen Myelomen in Wirbelkörpern erkannt und
-            visualisiert.
+            Diese Web Applikation dient ausschließlich der Demonstration von
+            Floy Produkten. Legen Sie gerne den Ordner einer CT Abdomen, CT
+            Thorax oder CT Wirbelsäulen Studie in der Mitte des Fensters ab.
+            Alternativ können Sie über den Knopf in der linken oberen
+            Bildschirmecke eine Studie auswählen. Drücken Sie in der unteren
+            Leiste auf den Play-Button neben „KI ausführen“, sobald die Studie
+            angezeigt wird. Je nach Internetverbindung und Dateigröße dauert die
+            Anzeige des Ergebnis einige Minuten.
           </StyledParagraph>
           <StyledParagraph>
-            Für alle weiteren Informationen und Ergebnisbesprechungen melden Sie
-            sich gerne direkt bei unserem Geschäftsführer Benedikt Schneider via
+            Kontaktieren Sie zur Ergebnisbesprechung, bei Problemen oder für
+            Fragen unseren Geschäftsführer Benedikt Schneider gerne direkt unter
             benedikt.schneider@floy.com oder +4915786031618.
           </StyledParagraph>
           {!store?.editor.activeDocument?.floyDemo.hasToken() && (
