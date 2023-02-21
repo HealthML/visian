@@ -18,7 +18,9 @@ export const ProjectListItem = ({ project }: { project: Project }) => {
 
   return (
     <ListItem>
-      <ModelFlexRow onClick={() => navigate(`/project/${project.id}/datasets`)}>
+      <ModelFlexRow
+        onClick={() => navigate(`/projects/${project.id}/datasets`)}
+      >
         <Text>{project.name} </Text>
         <Spacer />
       </ModelFlexRow>

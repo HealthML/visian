@@ -53,7 +53,7 @@ export const DatasetScreen: React.FC = observer(() => {
           : ""
       }`}
     >
-      <IconButton icon="menu" onPointerDown={() => navigate(`/project`)} />
+      <IconButton icon="menu" onPointerDown={() => navigate(`/projects`)} />
       <Main>
         {isLoadingDataset && <StyledModal labelTx="dataset-loading" />}
         {isErrorDataset && (
