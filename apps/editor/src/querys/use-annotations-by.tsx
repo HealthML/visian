@@ -16,6 +16,13 @@ const getAnnotationsBy = async (imageId: string) => {
   return annotationsResponse.data;
 };
 
+export const getAnnotation = async (annotationId: string) => {
+  const annotationsResponse = await axios.get<Annotation>(
+    `${hubBaseUrl}annotations/${annotationId}`,
+  );
+  return annotationsResponse.data;
+};
+
 export const useAnnotationsBy = (imageId: string) => {
   const { data, error, isError, isLoading, refetch, remove } = useQuery<
     Annotation[],

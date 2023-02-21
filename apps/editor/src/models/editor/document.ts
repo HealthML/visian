@@ -40,6 +40,7 @@ import {
   generalTextures2d,
   generalTextures3d,
 } from "../../constants";
+import { FileWithMetadata } from "../../types";
 import { readTrackingLog, TrackingData } from "../tracking";
 import { StoreContext } from "../types";
 import { Clipboard } from "./clipboard";
@@ -760,6 +761,7 @@ export class Document
               { ...imageWithUnit, name: `${value}_${image.name}` },
               value,
             );
+            this.addFileMetaData(createdLayerId, files);
           });
         }
       }
@@ -775,6 +777,7 @@ export class Document
       this.history.clear();
     }
 
+    this.addFileMetaData(createdLayerId, files);
     return createdLayerId;
   }
 
@@ -901,6 +904,14 @@ export class Document
           potentialLayer.isVisible &&
           potentialLayer.opacity > 0,
       ) as unknown as IImageLayer[];
+  }
+
+  private addFileMetaData(createdLayerId: string, file: File | File[]) {
+    const layer = this.getLayer(createdLayerId);
+    if (layer && "metadata" in file) {
+      const fileWithMetaData = file as FileWithMetadata;
+      layer.metaDataId = fileWithMetaData.metadata.id;
+    }
   }
 
   // Proxies
