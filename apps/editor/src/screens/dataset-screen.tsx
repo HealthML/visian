@@ -11,7 +11,7 @@ import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import styled from "styled-components";
 
-import { DatasetModal } from "../components/menu/dataset-modal";
+import { DatasetExplorer } from "../components/menu/dataset-explorer";
 import { useDataset } from "../queries";
 
 const Main = styled(Box)`
@@ -63,7 +63,7 @@ export const DatasetScreen: React.FC = observer(() => {
             } (${datasetError?.response?.status})`}</Text>
           </StyledModal>
         )}
-        {dataset && <DatasetModal dataset={dataset} />}
+        {dataset && <DatasetExplorer dataset={dataset} />}
       </Main>
     </Screen>
   );

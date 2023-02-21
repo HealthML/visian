@@ -1,14 +1,12 @@
 import {
   Box,
   InvisibleButton,
-  Modal,
   Screen,
-  Text,
   useTranslation,
 } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
 import React from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 
 import { DatasetsGrid } from "../components/menu/datasets-grid";

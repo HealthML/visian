@@ -15,7 +15,7 @@ const StyledModal = styled(Modal)`
 `;
 // TODO: z-index logic
 
-export const DatasetModal = ({ dataset }: { dataset: Dataset }) => {
+export const DatasetExplorer = ({ dataset }: { dataset: Dataset }) => {
   const [isInSelectMode, setIsInSelectMode] = useState(false);
 
   const { images, imagesError, isErrorImages, isLoadingImages, refetchImages } =
