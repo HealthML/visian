@@ -15,9 +15,11 @@ const projectViewSwitchOptions = [
   { labelTx: "Jobs", value: "jobs" },
 ];
 
-const defaultSwitchSelection = "datasets";
-
-export const ProjectViewSwitch = () => {
+export const ProjectViewSwitch = ({
+  defaultSwitchSelection,
+}: {
+  defaultSwitchSelection: string;
+}) => {
   const theme = useTheme() as Theme;
   const navigate = useNavigate();
 
@@ -33,7 +35,6 @@ export const ProjectViewSwitch = () => {
       <Switch
         infoBaseZIndex={theme.zIndices.overlay}
         options={projectViewSwitchOptions}
-        // with store?
         value={defaultSwitchSelection}
         onChange={(newValue) => handleChange(newValue)}
       />
