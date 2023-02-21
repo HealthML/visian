@@ -13,6 +13,13 @@ const getImagesBy = async (datasetId: string) => {
   return imagesResponse.data;
 };
 
+export const getImage = async (imageId: string) => {
+  const imageResponse = await axios.get<Image>(
+    `${hubBaseUrl}images/${imageId}`,
+  );
+  return imageResponse.data;
+};
+
 export const useImagesBy = (datasetId: string) => {
   const { data, error, isError, isLoading, refetch, remove } = useQuery<
     Image[],

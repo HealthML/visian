@@ -75,12 +75,10 @@ export const DatasetImageListItem = ({
   ): string => {
     const query: string[] = [];
     if (img) {
-      sessionStorage.setItem("ImageToOpen", JSON.stringify(img));
-      query.push("openImage=true");
+      query.push(`imageId=${img.id}`);
     }
     if (annotation) {
-      sessionStorage.setItem("AnnotationToOpen", JSON.stringify(annotation));
-      query.push("openAnnotation=true");
+      query.push(`annotationId=${annotation.id}`);
     }
     return `/editor?${query.join("&")}`;
   };

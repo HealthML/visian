@@ -276,9 +276,11 @@
 
   "images-loading": "Images werden geladen...",
   "images-loading-error": "Fehler beim Laden der Images:",
+  "image-open-error": "Fehler beim Öffnen des Bildes",
 
   "annotations-loading": "Annotationen werden geladen...",
   "annotations-loading-error": "Fehler beim Laden der Annotationen:",
+  "annotation-open-error": "Fehler beim Öffnen der Annotation",
 
   "ml-model-selection-description": "Wähle das Modell mit dem die Bilder annotiert werden sollen",
   "ml-model-selection-title": "Modell Auswahl",
