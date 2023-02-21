@@ -14,7 +14,6 @@ import { QueryClient, QueryClientProvider } from "react-query";
 import { ReactQueryDevtools } from "react-query/devtools";
 import { Route, Routes } from "react-router-dom";
 
-import { JobHistory } from "../components/menu/job-history";
 import {
   whoAwsConfigDeployment,
   whoAwsConfigDevelopment,
@@ -26,7 +25,8 @@ import hubBaseUrl from "../queries/hub-base-url";
 import {
   DatasetScreen,
   EditorScreen,
-  ProjectScreen,
+  ProjectDatasetsScreen,
+  ProjectJobsScreen,
   ProjectsScreen,
 } from "../screens";
 import { setupRootStore, StoreProvider } from "./root-store";
@@ -85,17 +85,17 @@ function App(): JSX.Element {
               <ModalRoot />
               {hubBaseUrl ? (
                 <Routes>
-                  <Route path="/project" element={<ProjectsScreen />} />
+                  <Route path="/projects" element={<ProjectsScreen />} />
                   <Route
-                    path="/project/:projectId/datasets"
-                    element={<ProjectScreen />}
+                    path="/projects/:projectId/datasets"
+                    element={<ProjectDatasetsScreen />}
                   />
                   <Route
-                    path="/project/:projectId/jobs"
-                    element={<JobHistory />}
+                    path="/projects/:projectId/jobs"
+                    element={<ProjectJobsScreen />}
                   />
                   <Route
-                    path="/project/:projectId/datasets/:datasetId"
+                    path="/projects/:projectId/datasets/:datasetId"
                     element={<DatasetScreen />}
                   />
                   <Route path="/editor" element={<EditorScreen />} />

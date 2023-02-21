@@ -5,16 +5,10 @@ import { useJobs } from "../../../queries";
 import { ProjectViewSwitch } from "../project-view-switch";
 import { JobList } from "./job-list";
 
-const Main = styled(Box)`
-  display: flex;
-  justify-content: center;
-  height: 90vh;
-  padding: 3%;
-`;
-
 const StyledModal = styled(Modal)`
   vertical-align: middle;
   width: 100%;
+  position: relative;
 `;
 
 const StyledProjectViewSwitch = styled(Box)`
@@ -29,19 +23,14 @@ export const JobHistory = () => {
   const { t: translate } = useTranslation();
 
   return (
-    <Main>
-      <StyledModal hideHeaderDivider={false} position="right">
-        {isLoadingJobs && <Text tx="images-loading" />}
-        {isErrorJobs && (
-          <Text>{`${translate("images-loading-error")} ${
-            jobsError?.response?.statusText
-          } (${jobsError?.response?.status})`}</Text>
-        )}
-        <StyledProjectViewSwitch>
-          <ProjectViewSwitch />
-        </StyledProjectViewSwitch>
-        {jobs && <JobList jobs={jobs} />}
-      </StyledModal>
-    </Main>
+    <StyledModal hideHeaderDivider={false} position="right">
+      {isLoadingJobs && <Text tx="jobs-loading" />}
+      {isErrorJobs && (
+        <Text>{`${translate("jobs-loading-error")} ${
+          jobsError?.response?.statusText
+        } (${jobsError?.response?.status})`}</Text>
+      )}
+      {jobs && <JobList jobs={jobs} />}
+    </StyledModal>
   );
 };
