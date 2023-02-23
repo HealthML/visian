@@ -1,12 +1,13 @@
 import { Job } from "../../../types";
 import { getDisplayDate } from "../util/display-date";
 
-import { JobsTableLayout } from "./jobs-table-layout";
+import { TableLayout } from "../../../../../../libs/ui-shared/src/lib/components/table";
 import {
   createColumnHelper,
   getCoreRowModel,
   useReactTable,
 } from "@tanstack/react-table";
+import { ListItemLabel } from "@visian/ui-shared";
 
 function getDisplayJob(job: Job): Job {
   return {
@@ -21,19 +22,24 @@ const columnHelper = createColumnHelper<Job>();
 
 const columns = [
   columnHelper.accessor("modelName", {
-    header: "Model",
+    header: () => <ListItemLabel text={"Model"} />,
+    cell: (props) => <ListItemLabel text={props.getValue()} />,
   }),
   columnHelper.accessor("modelVersion", {
-    header: "Version",
+    header: () => <ListItemLabel text={"Version"} />,
+    cell: (props) => <ListItemLabel text={props.getValue()} />,
   }),
   columnHelper.accessor("startedAt", {
-    header: "Started At",
+    header: () => <ListItemLabel text={"Started At"} />,
+    cell: (props) => <ListItemLabel text={props.getValue()} />,
   }),
   columnHelper.accessor("finishedAt", {
-    header: "Finished At",
+    header: () => <ListItemLabel text={"Finished At"} />,
+    cell: (props) => <ListItemLabel text={props.getValue()} />,
   }),
   columnHelper.accessor("status", {
-    header: "Status",
+    header: () => <ListItemLabel text={"Status"} />,
+    cell: (props) => <ListItemLabel text={props.getValue()} />,
   }),
 ];
 
@@ -45,5 +51,5 @@ export const JobsTable = ({ jobs }: { jobs: Job[] }) => {
     columns,
     getCoreRowModel: getCoreRowModel(),
   });
-  return <JobsTableLayout table={table} />;
+  return <TableLayout table={table} />;
 };
