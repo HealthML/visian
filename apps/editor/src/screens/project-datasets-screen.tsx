@@ -34,7 +34,7 @@ const IconButton = styled(InvisibleButton)`
   z-index: 51;
 `;
 
-//TODO z-index logic
+// TODO z-index logic
 
 export const ProjectDatasetsScreen: React.FC = observer(() => {
   const navigate = useNavigate();

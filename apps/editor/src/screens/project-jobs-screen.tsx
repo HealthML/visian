@@ -1,14 +1,12 @@
 import {
   Box,
   InvisibleButton,
-  Modal,
   Screen,
-  Text,
   useTranslation,
 } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
 import React from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 
 import { JobHistory } from "../components/menu/job-history";
@@ -36,7 +34,7 @@ const IconButton = styled(InvisibleButton)`
   z-index: 51;
 `;
 
-//TODO z-index logic
+// TODO z-index logic
 
 export const ProjectJobsScreen: React.FC = observer(() => {
   const navigate = useNavigate();
