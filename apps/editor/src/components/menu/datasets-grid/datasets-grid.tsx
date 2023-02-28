@@ -1,11 +1,4 @@
-import {
-  Box,
-  InvisibleButton,
-  Modal,
-  Screen,
-  Text,
-  useTranslation,
-} from "@visian/ui-shared";
+import { Modal, Text, useTranslation } from "@visian/ui-shared";
 import { useParams } from "react-router-dom";
 import styled from "styled-components";
 
@@ -25,30 +18,25 @@ export const DatasetsGrid = () => {
     useDatasetsBy(projectId);
   const { t: translate } = useTranslation();
 
-  return (
-    // eslint-disable-next-line react/jsx-no-useless-fragment
-    <>
-      {isLoadingDatasets || isErrorDatasets ? (
-        <StyledModal labelTx={isLoadingDatasets ? "project-loading" : "error"}>
-          {isLoadingDatasets ? (
-            <Text>{translate("project-loading")}</Text>
-          ) : (
-            <Text>
-              {`${translate("project-loading-error")} ${
-                datasetsError?.response?.statusText
-              } (${datasetsError?.response?.status})`}
-            </Text>
-          )}
-        </StyledModal>
+  return isLoadingDatasets || isErrorDatasets ? (
+    <StyledModal labelTx={isLoadingDatasets ? "project-loading" : "error"}>
+      {isLoadingDatasets ? (
+        <Text>{translate("project-loading")}</Text>
       ) : (
-        <StyledModal>
-          {datasets && datasets.length > 0 ? (
-            <DatasetList datasets={datasets} />
-          ) : (
-            <Text>{translate("no-datasets-available")}</Text>
-          )}
-        </StyledModal>
+        <Text>
+          {`${translate("project-loading-error")} ${
+            datasetsError?.response?.statusText
+          } (${datasetsError?.response?.status})`}
+        </Text>
       )}
-    </>
+    </StyledModal>
+  ) : (
+    <StyledModal>
+      {datasets && datasets.length > 0 ? (
+        <DatasetList datasets={datasets} />
+      ) : (
+        <Text>{translate("no-datasets-available")}</Text>
+      )}
+    </StyledModal>
   );
 };

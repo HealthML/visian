@@ -85,19 +85,18 @@ function App(): JSX.Element {
               <ModalRoot />
               {hubBaseUrl ? (
                 <Routes>
-                  <Route path="/projects" element={<ProjectsScreen />} />
-                  <Route
-                    path="/projects/:projectId/datasets"
-                    element={<ProjectDatasetsScreen />}
-                  />
-                  <Route
-                    path="/projects/:projectId/jobs"
-                    element={<ProjectJobsScreen />}
-                  />
-                  <Route
-                    path="/projects/:projectId/datasets/:datasetId"
-                    element={<DatasetScreen />}
-                  />
+                  <Route path="projects">
+                    <Route path="" element={<ProjectsScreen />} />
+                    <Route path=":projectId/datasets">
+                      <Route path="" element={<ProjectDatasetsScreen />} />
+                      <Route path=":datasetId" element={<DatasetScreen />} />
+                    </Route>
+                    <Route
+                      path=":projectId/jobs"
+                      element={<ProjectJobsScreen />}
+                    />
+                  </Route>
+
                   <Route path="/editor" element={<EditorScreen />} />
                 </Routes>
               ) : (
