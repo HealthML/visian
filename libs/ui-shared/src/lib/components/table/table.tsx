@@ -1,6 +1,6 @@
+import { Cell, flexRender, Header, Table } from "@tanstack/react-table";
 import styled from "styled-components";
-import { fontWeight } from "../../theme";
-import { List, ListItem, ListItemLabel } from "../list";
+import { List, ListItem } from "../list";
 
 export const TableCell = styled.div.attrs((props: { width?: number }) => props)`
   width: ${(props) => (props.width ? props.width : 20)}%;
@@ -8,132 +8,88 @@ export const TableCell = styled.div.attrs((props: { width?: number }) => props)`
   margin: auto;
 `;
 
-export const HeaderLabel = styled(ListItemLabel)`
-  font-weight: ${fontWeight("bold")};
-`;
-
-export const TableRow = ({
-  data,
-  columns,
-}: {
-  data: any;
-  columns: Column[];
-}) => {
-  const widths = columns.map((column: Column) => column.width);
-
-  return (
-    <ListItem>
-      <TableCell>
-        <ListItemLabel>{data.modelName}</ListItemLabel>
-      </TableCell>
-      <TableCell>
-        <ListItemLabel>{data.modelVersion}</ListItemLabel>
-      </TableCell>
-      <TableCell>
-        <ListItemLabel>{data.startedAt}</ListItemLabel>
-      </TableCell>
-      <TableCell>
-        <ListItemLabel>{data.finishedAt}</ListItemLabel>
-      </TableCell>
-      <TableCell>
-        <ListItemLabel>{data.status}</ListItemLabel>
-      </TableCell>
-    </ListItem>
-  );
+const distributeColumns = (
+  columnWidths: number[] | undefined,
+  columnCount: number,
+) => {
+  if (columnWidths && columnWidths.length === columnCount) {
+    const sum = columnWidths.reduce((partSum, width) => partSum + width, 0);
+    if (sum == 100) {
+      return columnWidths;
+    }
+  }
+  return Array(columnCount).fill(100 / columnCount);
 };
 
-export const TableHeader = ({ columns }: { columns: Column[] }) => {
-  const headers = columns.map((column: Column) => column.header);
+export const TableRow = ({
+  cells,
+  columnWidths,
+}: {
+  cells: Cell<any, unknown>[];
+  columnWidths: number[];
+}) => {
   return (
-    <ListItem isActive={true}>
-      {headers.map((header: string) => (
-        <TableCell>
-          <HeaderLabel>{header}</HeaderLabel>
+    <ListItem>
+      {cells.map((cell, index) => (
+        <TableCell key={cell.id} width={columnWidths[index]}>
+          {flexRender(cell.column.columnDef.cell, cell.getContext())}
         </TableCell>
       ))}
     </ListItem>
   );
 };
 
-export type Column = {
-  accessor: string;
-  header: string;
-  cell?: any;
-  width?: number;
+export const TableHeader = ({
+  headers,
+  columnWidths,
+}: {
+  headers: Header<any, unknown>[];
+  columnWidths: number[];
+}) => {
+  return (
+    <ListItem isActive={true}>
+      {headers.map((header, index) => (
+        <TableCell key={header.id} width={columnWidths[index]}>
+          {header.isPlaceholder
+            ? null
+            : flexRender(header.column.columnDef.header, header.getContext())}
+        </TableCell>
+      ))}
+    </ListItem>
+  );
 };
 
 export const TableLayout = ({
-  columns,
-  data,
+  table,
+  columnWidths,
 }: {
-  columns: Column[];
-  data: any;
+  table: Table<any>;
+  columnWidths?: number[];
 }) => {
+  // We support only rendering the first header group
+  const mainHeaderGroup = table.getHeaderGroups()[0];
+  const widths = distributeColumns(
+    columnWidths,
+    mainHeaderGroup.headers.length,
+  );
+
   return (
     <List>
-      <TableHeader columns={columns} />
+      <TableHeader
+        key={mainHeaderGroup.id}
+        headers={mainHeaderGroup.headers}
+        columnWidths={widths}
+      />
 
-      {data.map((rowData: any) => (
-        <TableRow data={rowData} columns={columns} />
+      {table.getRowModel().rows.map((row) => (
+        <TableRow
+          key={row.id}
+          cells={row.getVisibleCells()}
+          columnWidths={widths}
+        />
       ))}
     </List>
   );
 };
-
-// export const TableLayout = ({ table }: { table: Table<any> }) => {
-//   return (
-//     <List>
-//       <table>
-//         <thead>
-//           {table.getHeaderGroups().map((headerGroup) => (
-//             <tr key={headerGroup.id}>
-//               {headerGroup.headers.map((header) => (
-//                 <th key={header.id}>
-//                   <CenteredCell>
-//                     {header.isPlaceholder
-//                       ? null
-//                       : flexRender(
-//                           header.column.columnDef.header,
-//                           header.getContext(),
-//                         )}
-//                   </CenteredCell>
-//                 </th>
-//               ))}
-//             </tr>
-//           ))}
-//         </thead>
-//         <tbody>
-//           {table.getRowModel().rows.map((row) => (
-//             <tr key={row.id}>
-//               {row.getVisibleCells().map((cell) => (
-//                 <td key={cell.id}>
-//                   <CenteredCell>
-//                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
-//                   </CenteredCell>
-//                 </td>
-//               ))}
-//             </tr>
-//           ))}
-//         </tbody>
-//         <tfoot>
-//           {table.getFooterGroups().map((footerGroup) => (
-//             <tr key={footerGroup.id}>
-//               {footerGroup.headers.map((header) => (
-//                 <th key={header.id}>
-//                   {header.isPlaceholder
-//                     ? null
-//                     : flexRender(
-//                         header.column.columnDef.footer,
-//                         header.getContext(),
-//                       )}
-//                 </th>
-//               ))}
-//             </tr>
-//           ))}
-//         </tfoot>
-//       </table>
-//     </List>
-//   );
-// };
 
 export default TableLayout;
