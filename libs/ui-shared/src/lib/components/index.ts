@@ -17,6 +17,7 @@ export * from "./screen";
 export * from "./sheet";
 export * from "./slider";
 export * from "./switch";
+export * from "./table";
 export * from "./text";
 export * from "./text-field";
 export * from "./text-input";

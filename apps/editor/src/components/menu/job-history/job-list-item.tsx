@@ -7,10 +7,6 @@ const Spacer = styled.div`
   width: 10px;
 `;
 
-const ExpandedSpacer = styled.div`
-  margin-right: auto;
-`;
-
 export const JobListItem = ({
   data,
   isHeader,
