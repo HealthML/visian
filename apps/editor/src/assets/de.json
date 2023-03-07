@@ -139,6 +139,7 @@
   "server-import-error": "Beim Laden der Datei vom Server ist ein Fehler aufgetreten:  \"{{statusText}}\"",
 
   "export-error": "Exportfehler",
+  "saving-error": "Speicherfehler",
   "file-upload-error": "Die Datei konnte nicht hochgeladen werden.",
 
   "tracking-data-mismatch-error": "Der Tracking-Log passt nicht zum geladenen Bild.",
@@ -281,7 +282,9 @@
   "annotations-loading": "Annotationen werden geladen...",
   "annotations-loading-error": "Fehler beim Laden der Annotationen:",
   "annotation-open-error": "Fehler beim Öffnen der Annotation",
-  "save-annotation": "Annotationsebene speichern",
+  "annotation-saving": "Annotationsebene speichern",
+  "annotation-saving-error": "Fehler beim Speichern der Annotationsebene",
+  "annotation-saving-as-error": "Fehler beim Speichern Unter der Annotationsebene",
 
   "ml-model-selection-description": "Wähle das Modell mit dem die Bilder annotiert werden sollen",
   "ml-model-selection-title": "Modell Auswahl",

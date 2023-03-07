@@ -1,10 +1,17 @@
-/* eslint-disable max-len */
 import { Button, PopUp, Text, TextField } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
-import React, { useState } from "react";
+import path from "path";
+import React, { useCallback, useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
+import {
+  deleteAnnotation,
+  patchAnnotationFile,
+  postAnnotation,
+} from "../../../querys";
+import { Annotation } from "../../../types";
 import { SavePopUpProps } from "./save-popup.props";
 
 const SectionLabel = styled(Text)`
@@ -41,11 +48,84 @@ const SavePopUpContainer = styled(PopUp)`
 
 export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
   const store = useStore();
+  const [searchParams] = useSearchParams();
   const [newAnnotationURI, setnewAnnotationURI] = useState("");
 
-  const saveAnnotation = () => {
-    console.log("saved annotation");
+  const saveAnnotation = async (annotation: Annotation | undefined) => {
+    const annotationLayer = store?.editor.activeDocument?.activeLayer;
+    if (annotationLayer) {
+      const annotationFile = await annotationLayer.toFile();
+      const annotationMeta = annotation || annotationLayer.metaData;
+      try {
+        if (!annotationMeta || !annotationFile)
+          throw new Error("Could not create annotation file");
+        if (
+          path.extname(annotationMeta.dataUri) !==
+          path.extname(annotationFile.name)
+        ) {
+          throw new Error("URI does not match file type");
+        }
+        const response = await patchAnnotationFile(
+          annotationMeta as Annotation,
+          annotationFile,
+        );
+        onClose?.();
+        return response;
+      } catch (error: any) {
+        const description = error.response?.data?.message
+          ? error.response.data.message
+          : error.message
+          ? error.message
+          : "annotation-saving-error";
+        store?.setError({
+          titleTx: "saving-error",
+          descriptionTx: description,
+        });
+      }
+    }
   };
+
+  const saveAnnotationAs = async (uri: string) => {
+    const imageId = searchParams.get("imageId");
+    const annotationLayer = store?.editor.activeDocument?.activeLayer;
+    try {
+      if (!imageId || !annotationLayer || !annotationLayer.isAnnotation) {
+        throw new Error("No image or annotation layer selected");
+      }
+      const annotation = await postAnnotation(imageId, uri);
+      const savedAnnotation = await saveAnnotation(annotation);
+      if (!savedAnnotation) {
+        await deleteAnnotation(annotation.id);
+      } else {
+        store?.destroyRedirect("/", true);
+      }
+    } catch (error: any) {
+      const description = error.response?.data?.message
+        ? error.response.data.message
+        : error.message
+        ? error.message
+        : "annotation-saving-as-error";
+      store?.setError({
+        titleTx: "saving-error",
+        descriptionTx: description,
+      });
+    }
+  };
+
+  const getAnnotationURISuggestion = useCallback(() => {
+    const annotationLayerName =
+      store?.editor.activeDocument?.activeLayer?.title;
+    const imageURI =
+      store?.editor.activeDocument?.mainImageLayer?.metaData?.dataUri;
+    const imageName = path.basename(imageURI);
+    return `/annotations/${imageName}/${annotationLayerName}`;
+  }, [store]);
+
+  useEffect(() => {
+    if (isOpen) {
+      setnewAnnotationURI(getAnnotationURISuggestion());
+    }
+  }, [isOpen, getAnnotationURISuggestion]);
 
   return (
     <SavePopUpContainer
@@ -54,16 +134,23 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
       dismiss={onClose}
       shouldDismissOnOutsidePress
     >
-      {store?.editor.activeDocument?.activeLayer?.metaDataId && (
+      {store?.editor.activeDocument?.activeLayer?.metaData?.dataUri && (
         <>
           <SectionLabel text="Overwrite existing annotation file" />
           <InlineRow>
             <SaveInput
-              placeholder="URI"
-              value={store?.editor.activeDocument?.activeLayer?.metaDataId}
+              placeholder={
+                store?.editor.activeDocument?.activeLayer?.metaData?.dataUri
+              }
               readOnly
             />
-            <SaveButton tx="Save" onPointerDown={saveAnnotation} />
+            <SaveButton
+              tx="Save"
+              onPointerDown={() => {
+                saveAnnotation(undefined);
+                store?.destroyRedirect("/", true);
+              }}
+            />
           </InlineRow>
         </>
       )}
@@ -74,7 +161,12 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
           value={newAnnotationURI}
           onChangeText={setnewAnnotationURI}
         />
-        <SaveButton tx="Save As" onPointerDown={saveAnnotation} />
+        <SaveButton
+          tx="Save As"
+          onPointerDown={() => {
+            saveAnnotationAs(newAnnotationURI);
+          }}
+        />
       </InlineRowLast>
     </SavePopUpContainer>
   );

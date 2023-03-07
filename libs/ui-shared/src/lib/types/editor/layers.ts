@@ -71,7 +71,7 @@ export interface ILayer {
   /** The layer's transform matrix used to position it during rendering. */
   transformation?: Matrix4;
   /** The layer's meta data ID. */
-  metaDataId?: string;
+  metaData?: { id: string; [key: string]: any };
 
   /**
    * Returns all slice markers, aggregated for the layer and given view type.

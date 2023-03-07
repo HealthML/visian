@@ -139,6 +139,7 @@
   "server-import-error": "An error occurred while getting the file from the server: \"{{statusText}}\"",
 
   "export-error": "Export Error",
+  "saving-error": "Saving Error",
   "file-upload-error": "The file could not be uploaded.",
 
   "tracking-data-mismatch-error": "The tracking log does not belong to the loaded image.",
@@ -281,7 +282,9 @@
   "annotations-loading": "Loading Annotations...",
   "annotations-loading-error": "Error on loading Annotations:",
   "annotation-open-error": "Error on opening annotation",
-  "save-annotation": "Save annotation layer",
+  "annotation-saving": "Save active annotation layer",
+  "annotation-saving-error": "Error saving annotation layer",
+  "annotation-saving-as-error": "Error saving new annotaion layer",
 
   "ml-model-selection-description": "Select the model you want to use to annotate the images",
   "ml-model-selection-title": "Model Selection",

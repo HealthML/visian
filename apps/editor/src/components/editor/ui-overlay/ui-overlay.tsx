@@ -15,8 +15,8 @@ import styled from "styled-components";
 import { useStore } from "../../../app/root-store";
 import { whoHome } from "../../../constants";
 import { importFilesToDocument } from "../../../import-handling";
+import { fetchAnnotationFile, fetchImageFile } from "../../../querys";
 import { hubBaseUrl } from "../../../querys/hub-base-url";
-import { fetchAnnotationFile, fetchImageFile } from "../../../querys/use-files";
 import {
   DilateErodeModal,
   MeasurementModal,
@@ -217,27 +217,6 @@ export const UIOverlay = observer<UIOverlayProps>(
       return storedObject;
     };
 
-    const postToURL = () => {
-      if (sessionStorage.getItem("ImageToOpen")) {
-        // const annotation = loadSessionStorage("AnnotationToOpen");
-        const image = loadSessionStorage("ImageToOpen");
-        const url = `${hubBaseUrl}annotations/new`;
-        if (url) {
-          store?.setProgress({ labelTx: "exporting" });
-          store?.editor.activeDocument
-            ?.postToURL(url, image.id, true)
-            .catch()
-            .then(() => {
-              store?.setProgress();
-              sessionStorage.removeItem("ImageToOpen");
-              sessionStorage.removeItem("AnnotationToOpen");
-              // TODO: use navigate
-              store?.destroyRedirect("/", true);
-            });
-        }
-      }
-    };
-
     const [searchParams] = useSearchParams();
     const loadImagesAndAnnotations = () => {
       async function asyncfunc() {
@@ -343,7 +322,7 @@ export const UIOverlay = observer<UIOverlayProps>(
                 {store?.editor.activeDocument?.activeLayer?.isAnnotation && (
                   <FloatingUIButton
                     icon="save"
-                    tooltipTx="save-annotation"
+                    tooltipTx="annotation-saving"
                     tooltipPosition="left"
                     onClick={openSavePopUp}
                     isActive={false}

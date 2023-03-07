@@ -444,49 +444,6 @@ export class Document
     FileSaver.saveAs(await zip.toBlob(), `${this.title}.zip`);
   };
 
-  public postToURL = async (
-    url: string,
-    imageId: string,
-    limitToAnnotations?: boolean,
-  ) => {
-    const zip = new Zip();
-
-    // TODO: Rework for group layers
-    const files = await Promise.all(
-      this.layers
-        .filter((layer) => !limitToAnnotations || layer.isAnnotation)
-        .map((layer) => layer.toFile()),
-    );
-    files.forEach((file, index) => {
-      if (!file) return;
-      zip.setFile(`${`00${index}`.slice(-2)}_${file.name}`, file);
-    });
-
-    if (this.context?.getTracker()?.isActive) {
-      const trackingFile = this.context.getTracker()?.toFile();
-      if (trackingFile) zip.setFile(trackingFile.name, trackingFile);
-    }
-    const fileBlob: any = await zip.toBlob();
-    // console.log("")
-
-    const formData = new FormData();
-    formData.append("fileName", `${this.title}.zip`);
-    formData.append("image", imageId);
-    formData.append("file", fileBlob);
-    axios
-      .post(url, formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      })
-      .then((response) => {
-        console.log(response);
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-  };
-
   public getFileForLayer = async (idOrLayer: string | ILayer) => {
     const layerId = typeof idOrLayer === "string" ? idOrLayer : idOrLayer.id;
     const layer = this.layerMap[layerId];
@@ -910,7 +867,7 @@ export class Document
     const layer = this.getLayer(createdLayerId);
     if (layer && "metadata" in file) {
       const fileWithMetaData = file as FileWithMetadata;
-      layer.metaDataId = fileWithMetaData.metadata.id;
+      layer.metaData = fileWithMetaData.metadata;
     }
   }
 
