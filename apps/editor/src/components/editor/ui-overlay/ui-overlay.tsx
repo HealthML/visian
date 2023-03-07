@@ -31,6 +31,7 @@ import { Layers } from "../layers";
 import { MeasurementPopUp } from "../measurement-popup";
 import { Menu } from "../menu";
 import { ProgressPopUp } from "../progress-popup";
+import { SavePopUp } from "../save-popup";
 import { ServerPopUp } from "../server-popup";
 import { SettingsPopUp } from "../settings-popup";
 import { ShortcutPopUp } from "../shortcut-popup";
@@ -186,6 +187,15 @@ export const UIOverlay = observer<UIOverlayProps>(
       store?.editor.activeDocument?.tools.setIsCursorOverFloatingUI(false);
     }, [store]);
 
+    // Save Pop Up Toggling
+    const [isSavePopUpOpen, setIsSavePopUpOpen] = useState(false);
+    const openSavePopUp = useCallback(() => {
+      setIsSavePopUpOpen(true);
+    }, []);
+    const closeSavePopUp = useCallback(() => {
+      setIsSavePopUpOpen(false);
+    }, []);
+
     // Export Button
     const exportZip = useCallback(() => {
       store?.setProgress({ labelTx: "exporting" });
@@ -330,16 +340,15 @@ export const UIOverlay = observer<UIOverlayProps>(
             <ColumnRight>
               <SideViews />
               <RightBar>
-                <FloatingUIButton
-                  icon="check"
-                  // tooltipTx="export-tooltip"
-                  tooltipPosition="left"
-                  onClick={() => {
-                    postToURL();
-                    console.log("saved");
-                  }}
-                  isActive={false}
-                />
+                {store?.editor.activeDocument?.activeLayer?.isAnnotation && (
+                  <FloatingUIButton
+                    icon="save"
+                    tooltipTx="save-annotation"
+                    tooltipPosition="left"
+                    onClick={openSavePopUp}
+                    isActive={false}
+                  />
+                )}
                 {!isFromWHO() && (
                   <FloatingUIButton
                     icon="export"
@@ -387,6 +396,7 @@ export const UIOverlay = observer<UIOverlayProps>(
               )}
               onClose={store?.editor.activeDocument?.setMeasurementDisplayLayer}
             />
+            <SavePopUp isOpen={isSavePopUpOpen} onClose={closeSavePopUp} />
             {isDraggedOver && <DropSheet onDropCompleted={onDropCompleted} />}
             {store?.progress && (
               <ProgressPopUp

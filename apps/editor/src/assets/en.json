@@ -281,6 +281,7 @@
   "annotations-loading": "Loading Annotations...",
   "annotations-loading-error": "Error on loading Annotations:",
   "annotation-open-error": "Error on opening annotation",
+  "save-annotation": "Save annotation layer",
 
   "ml-model-selection-description": "Select the model you want to use to annotate the images",
   "ml-model-selection-title": "Model Selection",
