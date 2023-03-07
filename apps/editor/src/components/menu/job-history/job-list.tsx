@@ -9,6 +9,12 @@ import {
 } from "@tanstack/react-table";
 import { TableLayout, ListItemLabel } from "@visian/ui-shared";
 
+export const HeaderLabel = styled(ListItemLabel)`
+  font-weight: ${fontWeight("bold")};
+`;
+
+const columnHelper = createColumnHelper<Job>();
+
 function getDisplayJob(job: Job): Job {
   return {
     ...job,
@@ -18,32 +24,26 @@ function getDisplayJob(job: Job): Job {
   };
 }
 
-export const HeaderLabel = styled(ListItemLabel)`
-  font-weight: ${fontWeight("bold")};
-`;
-
-const columnHelper = createColumnHelper<Job>();
-
 const columns = [
   columnHelper.accessor("modelName", {
-    header: () => <HeaderLabel text={"Model"} />,
+    header: () => <HeaderLabel tx={"job-model-name"} />,
     cell: (props) => <ListItemLabel text={props.getValue()} />,
   }),
   columnHelper.accessor("modelVersion", {
-    header: () => <HeaderLabel text={"Version"} />,
+    header: () => <HeaderLabel tx={"job-model-version"} />,
     cell: (props) => <ListItemLabel text={props.getValue()} />,
   }),
   columnHelper.accessor("startedAt", {
-    header: () => <HeaderLabel text={"Started At"} />,
+    header: () => <HeaderLabel tx={"job-started"} />,
     cell: (props) => <ListItemLabel text={props.getValue()} />,
   }),
   columnHelper.accessor("finishedAt", {
-    header: () => <HeaderLabel text={"Finished At"} />,
+    header: () => <HeaderLabel tx={"job-finished"} />,
     cell: (props) => <ListItemLabel text={props.getValue()} />,
   }),
   columnHelper.accessor("status", {
-    header: () => <HeaderLabel text={"Status"} />,
-    cell: (props) => <ListItemLabel text={props.getValue()} />,
+    header: () => <HeaderLabel tx={"job-status"} />,
+    cell: (props) => <ListItemLabel tx={`job-status-${props.getValue()}`} />,
   }),
 ];
 
