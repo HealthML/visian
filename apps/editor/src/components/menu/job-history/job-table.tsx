@@ -7,7 +7,7 @@ import {
   getCoreRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { TableLayout, ListItemLabel } from "@visian/ui-shared";
+import { TableLayout, ListItemLabel, StatusBadge } from "@visian/ui-shared";
 
 export const HeaderLabel = styled(ListItemLabel)`
   font-weight: ${fontWeight("bold")};
@@ -23,6 +23,14 @@ function getDisplayJob(job: Job): Job {
     finishedAt: job.finishedAt ? getDisplayDate(new Date(job.finishedAt)) : "",
   };
 }
+
+const badgeColors: Record<string, string> = {
+  queued: "veryLightGray",
+  running: "blueSheet",
+  succeeded: "greenSheet",
+  canceled: "orangeBorder",
+  failed: "redBorder",
+};
 
 const columns = [
   columnHelper.accessor("modelName", {
@@ -43,7 +51,12 @@ const columns = [
   }),
   columnHelper.accessor("status", {
     header: () => <HeaderLabel tx={"job-status"} />,
-    cell: (props) => <ListItemLabel tx={`job-status-${props.getValue()}`} />,
+    cell: (props) => (
+      <StatusBadge
+        color={badgeColors[props.getValue()]}
+        tx={`job-status-${props.getValue()}`}
+      />
+    ),
   }),
 ];
 

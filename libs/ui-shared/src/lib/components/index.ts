@@ -16,6 +16,7 @@ export * from "./popup";
 export * from "./screen";
 export * from "./sheet";
 export * from "./slider";
+export * from "./status-badge";
 export * from "./switch";
 export * from "./table";
 export * from "./text";

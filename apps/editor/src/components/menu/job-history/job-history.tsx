@@ -2,7 +2,7 @@ import { Box, Modal, Text, useTranslation } from "@visian/ui-shared";
 import styled from "styled-components";
 
 import { useJobs } from "../../../queries";
-import { JobsTable } from "./job-list";
+import { JobsTable } from "./job-table";
 
 const StyledModal = styled(Modal)`
   vertical-align: middle;

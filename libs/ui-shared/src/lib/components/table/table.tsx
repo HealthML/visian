@@ -5,6 +5,8 @@ import { List, ListItem } from "../list";
 export const TableCell = styled.div.attrs((props: { width?: number }) => props)`
   width: ${(props) => (props.width ? props.width : 20)}%;
   text-align: center;
+  display: flex;
+  justify-content: center;
   margin: auto;
 `;
 
