@@ -5,22 +5,27 @@ import { fontWeight } from "@visian/ui-shared";
 import {
   createColumnHelper,
   getCoreRowModel,
+  getSortedRowModel,
+  SortingState,
   useReactTable,
 } from "@tanstack/react-table";
 import { TableLayout, ListItemLabel, StatusBadge } from "@visian/ui-shared";
+import React from "react";
 
 export const HeaderLabel = styled(ListItemLabel)`
   font-weight: ${fontWeight("bold")};
 `;
 
-const columnHelper = createColumnHelper<Job>();
-
 function getDisplayJob(job: Job): Job {
   return {
     ...job,
     modelVersion: `v${job.modelVersion}`,
-    startedAt: job.startedAt ? getDisplayDate(new Date(job.startedAt)) : "",
-    finishedAt: job.finishedAt ? getDisplayDate(new Date(job.finishedAt)) : "",
+    startedAt: job.startedAt
+      ? getDisplayDate(new Date(job.startedAt))
+      : undefined,
+    finishedAt: job.finishedAt
+      ? getDisplayDate(new Date(job.finishedAt))
+      : undefined,
   };
 }
 
@@ -31,6 +36,8 @@ const badgeColors: Record<string, string> = {
   canceled: "orangeBorder",
   failed: "redBorder",
 };
+
+const columnHelper = createColumnHelper<Job>();
 
 const columns = [
   columnHelper.accessor("modelName", {
@@ -44,10 +51,14 @@ const columns = [
   columnHelper.accessor("startedAt", {
     header: () => <HeaderLabel tx={"job-started"} />,
     cell: (props) => <ListItemLabel text={props.getValue()} />,
+    sortingFn: "datetime",
+    sortUndefined: -1,
   }),
   columnHelper.accessor("finishedAt", {
     header: () => <HeaderLabel tx={"job-finished"} />,
     cell: (props) => <ListItemLabel text={props.getValue()} />,
+    sortingFn: "datetime",
+    sortUndefined: -1,
   }),
   columnHelper.accessor("status", {
     header: () => <HeaderLabel tx={"job-status"} />,
@@ -57,6 +68,11 @@ const columns = [
         tx={`job-status-${props.getValue()}`}
       />
     ),
+    // Make sure that queued jobs are at the top
+    sortingFn: (rowA, rowB, id) => {
+      if (rowA.getValue(id) == "queued") return -1;
+      return 0;
+    },
   }),
 ];
 
@@ -65,10 +81,22 @@ export const JobsTable = ({ jobs }: { jobs: Job[] }) => {
 
   const columnWidths = [20, 10, 25, 25, 20];
 
+  const [sorting, setSorting] = React.useState<SortingState>([
+    { id: "status", desc: false },
+    { id: "finishedAt", desc: true },
+    { id: "startedAt", desc: true },
+  ]);
+
   const table = useReactTable({
     data,
     columns,
+    state: { sorting },
+    initialState: { sorting },
+    enableSorting: true,
+    enableMultiSort: true,
+    onSortingChange: setSorting,
     getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
   });
   return <TableLayout table={table} columnWidths={columnWidths} />;
 };
