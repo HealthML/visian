@@ -1,6 +1,6 @@
 import {
   Box,
-  InvisibleButton,
+  FloatingUIButton,
   Modal,
   Screen,
   Text,
@@ -14,12 +14,15 @@ import styled from "styled-components";
 import { DatasetExplorer } from "../components/menu/dataset-explorer";
 import { useDataset } from "../queries";
 
+const Container = styled(Screen)`
+  padding: 20px;
+`;
+
 const Main = styled(Box)`
   display: flex;
   justify-content: center;
   height: 100%;
-  padding: 1rem 10rem;
-  padding-bottom: 5rem;
+  padding: 1rem 10rem 5rem;
 `;
 
 const StyledModal = styled(Modal)`
@@ -27,13 +30,19 @@ const StyledModal = styled(Modal)`
   width: 100%;
 `;
 
-const IconButton = styled(InvisibleButton)`
-  width: 40px;
-  margin: 5px;
+const IconButton = styled(FloatingUIButton)`
+  margin-right: 16px;
+`;
+
+const MenuRow = styled.div`
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
 `;
 
 export const DatasetScreen: React.FC = observer(() => {
   const datasetId = useParams().datasetId || "";
+  const projectId = useParams().projectId || "";
 
   const { dataset, datasetError, isErrorDataset, isLoadingDataset } =
     useDataset(datasetId);
@@ -42,7 +51,7 @@ export const DatasetScreen: React.FC = observer(() => {
   const { t: translate } = useTranslation();
 
   return (
-    <Screen
+    <Container
       title={`${translate("dataset-base-title")} ${
         isLoadingDataset
           ? translate("loading")
@@ -53,7 +62,18 @@ export const DatasetScreen: React.FC = observer(() => {
           : ""
       }`}
     >
-      <IconButton icon="menu" onPointerDown={() => navigate(`/projects`)} />
+      <MenuRow>
+        <IconButton
+          icon="menu"
+          tooltipTx="Home"
+          onPointerDown={() => navigate(`/projects`)}
+        />
+        <IconButton
+          icon="arrowLeft"
+          tooltipTx="Back"
+          onPointerDown={() => navigate(`/projects/${projectId}/datasets`)}
+        />
+      </MenuRow>
       <Main>
         {isLoadingDataset && <StyledModal labelTx="dataset-loading" />}
         {isErrorDataset && (
@@ -65,7 +85,7 @@ export const DatasetScreen: React.FC = observer(() => {
         )}
         {dataset && <DatasetExplorer dataset={dataset} />}
       </Main>
-    </Screen>
+    </Container>
   );
 });
 

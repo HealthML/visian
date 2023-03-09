@@ -6,12 +6,16 @@ import styled from "styled-components";
 import { ProjectList } from "../components/menu/projects-list/project-list";
 import { useProjects } from "../queries";
 
+const Container = styled(Screen)`
+  padding: 20px;
+`;
+
 const Main = styled(Box)`
   display: flex;
   justify-content: center;
-  height: 90%;
+  height: 100%;
   padding: 5rem 10rem;
-  padding-top: 4rem;
+  padding-top: 4.5rem;
 `;
 
 const StyledModal = styled(Modal)`
@@ -25,7 +29,7 @@ export const ProjectsScreen: React.FC = observer(() => {
   const { t: translate } = useTranslation();
 
   return (
-    <Screen title={`${translate("projects-base-title")}`}>
+    <Container title={`${translate("projects-base-title")}`}>
       <Main>
         {isLoadingProjects ? (
           <StyledModal labelTx="projects-loading" />
@@ -45,7 +49,7 @@ export const ProjectsScreen: React.FC = observer(() => {
           </StyledModal>
         )}
       </Main>
-    </Screen>
+    </Container>
   );
 });
 

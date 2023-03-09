@@ -1,6 +1,6 @@
 import {
   Box,
-  InvisibleButton,
+  FloatingUIButton,
   Screen,
   useTranslation,
 } from "@visian/ui-shared";
@@ -12,28 +12,32 @@ import styled from "styled-components";
 import { DatasetsGrid } from "../components/menu/datasets-grid";
 import { ProjectViewSwitch } from "../components/menu/project-view-switch";
 
+const Container = styled(Screen)`
+  padding: 20px;
+`;
+
 const Main = styled(Box)`
   display: flex;
   justify-content: center;
-  height: 90%;
-  padding: 1rem 10rem;
+  height: 100%;
+  padding: 1rem 10rem 5rem;
+`;
+
+const MenuRow = styled.div`
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
 `;
 
 const StyledProjectViewSwitch = styled(Box)`
   display: flex;
   justify-content: center;
   width: 100%;
-  position: absolute;
-  top: 20px;
 `;
 
-const IconButton = styled(InvisibleButton)`
-  width: 40px;
-  margin: 5px;
-  z-index: 51;
+const IconButton = styled(FloatingUIButton)`
+  margin-right: 16px;
 `;
-
-// TODO z-index logic
 
 export const ProjectDatasetsScreen: React.FC = observer(() => {
   const navigate = useNavigate();
@@ -43,15 +47,19 @@ export const ProjectDatasetsScreen: React.FC = observer(() => {
   const { t: translate } = useTranslation();
 
   return (
-    <Screen title={`${translate("project-base-title")}`}>
-      <IconButton icon="menu" onPointerDown={() => navigate(`/projects`)} />
-      <Main>
+    <Container title={`${translate("project-base-title")}`}>
+      <MenuRow>
+        <IconButton
+          icon="menu"
+          tooltipTx="Home"
+          onPointerDown={() => navigate(`/projects`)}
+        />
         <StyledProjectViewSwitch>
           <ProjectViewSwitch defaultSwitchSelection="datasets" />
         </StyledProjectViewSwitch>
-        {projectId && <DatasetsGrid projectId={projectId} />}
-      </Main>
-    </Screen>
+      </MenuRow>
+      <Main>{projectId && <DatasetsGrid projectId={projectId} />}</Main>
+    </Container>
   );
 });
 
