@@ -129,14 +129,14 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
 
   return (
     <SavePopUpContainer
-      title="Save Annotation Layer"
+      titleTx="annotation-saving"
       isOpen={isOpen}
       dismiss={onClose}
       shouldDismissOnOutsidePress
     >
       {store?.editor.activeDocument?.activeLayer?.metaData?.dataUri && (
         <>
-          <SectionLabel text="Overwrite existing annotation file" />
+          <SectionLabel tx="annotation-saving-overrwite" />
           <InlineRow>
             <SaveInput
               placeholder={
@@ -145,7 +145,7 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
               readOnly
             />
             <SaveButton
-              tx="Save"
+              tx="save"
               onPointerDown={() => {
                 saveAnnotation(undefined);
                 store?.destroyRedirect("/", true);
@@ -154,7 +154,7 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
           </InlineRow>
         </>
       )}
-      <SectionLabel text="Create new annotation file" />
+      <SectionLabel tx="annotation-saving-as" />
       <InlineRowLast>
         <SaveInput
           placeholder="URI"
@@ -162,7 +162,7 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
           onChangeText={setnewAnnotationURI}
         />
         <SaveButton
-          tx="Save As"
+          tx="save-as"
           onPointerDown={() => {
             saveAnnotationAs(newAnnotationURI);
           }}

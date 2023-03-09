@@ -24,7 +24,6 @@ import {
   readMedicalImage,
   Zip,
 } from "@visian/utils";
-import axios from "axios";
 import FileSaver from "file-saver";
 import { action, computed, makeObservable, observable, toJS } from "mobx";
 import { parseHeader, Unit } from "nifti-js";

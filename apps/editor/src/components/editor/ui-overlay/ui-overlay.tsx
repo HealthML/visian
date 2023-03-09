@@ -16,7 +16,6 @@ import { useStore } from "../../../app/root-store";
 import { whoHome } from "../../../constants";
 import { importFilesToDocument } from "../../../import-handling";
 import { fetchAnnotationFile, fetchImageFile } from "../../../querys";
-import { hubBaseUrl } from "../../../querys/hub-base-url";
 import {
   DilateErodeModal,
   MeasurementModal,
@@ -207,16 +206,6 @@ export const UIOverlay = observer<UIOverlayProps>(
         });
     }, [store]);
 
-    // Displaying images and annotations from Backend
-    const loadSessionStorage = (key: string) => {
-      let storedObject = null;
-      const storedObjectJSON = sessionStorage.getItem(key);
-      if (storedObjectJSON) {
-        storedObject = JSON.parse(storedObjectJSON);
-      }
-      return storedObject;
-    };
-
     const [searchParams] = useSearchParams();
     const loadImagesAndAnnotations = () => {
       async function asyncfunc() {
@@ -319,15 +308,16 @@ export const UIOverlay = observer<UIOverlayProps>(
             <ColumnRight>
               <SideViews />
               <RightBar>
-                {store?.editor.activeDocument?.activeLayer?.isAnnotation && (
-                  <FloatingUIButton
-                    icon="save"
-                    tooltipTx="annotation-saving"
-                    tooltipPosition="left"
-                    onClick={openSavePopUp}
-                    isActive={false}
-                  />
-                )}
+                {store?.editor.activeDocument?.activeLayer?.isAnnotation &&
+                  searchParams.get("imageId") && (
+                    <FloatingUIButton
+                      icon="save"
+                      tooltipTx="annotation-saving"
+                      tooltipPosition="left"
+                      onClick={openSavePopUp}
+                      isActive={false}
+                    />
+                  )}
                 {!isFromWHO() && (
                   <FloatingUIButton
                     icon="export"
