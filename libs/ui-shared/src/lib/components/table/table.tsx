@@ -1,5 +1,6 @@
 import { Cell, flexRender, Header, Table } from "@tanstack/react-table";
 import styled from "styled-components";
+import { stopPropagation } from "../../event-handling";
 import { List, ListItem } from "../list";
 
 export const TableCell = styled.div.attrs((props: { width?: number }) => props)`
@@ -8,6 +9,10 @@ export const TableCell = styled.div.attrs((props: { width?: number }) => props)`
   display: flex;
   justify-content: center;
   margin: auto;
+`;
+
+const TableList = styled(List)`
+  overflow-y: auto;
 `;
 
 const distributeColumns = (
@@ -76,7 +81,7 @@ export const TableLayout = ({
   );
 
   return (
-    <List>
+    <TableList onWheel={stopPropagation}>
       <TableHeader
         key={mainHeaderGroup.id}
         headers={mainHeaderGroup.headers}
@@ -90,7 +95,7 @@ export const TableLayout = ({
           columnWidths={widths}
         />
       ))}
-    </List>
+    </TableList>
   );
 };
 
