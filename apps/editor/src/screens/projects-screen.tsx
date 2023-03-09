@@ -9,7 +9,7 @@ import { useProjects } from "../queries";
 const Main = styled(Box)`
   display: flex;
   justify-content: center;
-  height: 100%;
+  height: 90%;
   padding: 5rem 10rem;
   padding-top: 4rem;
 `;

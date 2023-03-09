@@ -15,9 +15,8 @@ import { ProjectViewSwitch } from "../components/menu/project-view-switch";
 const Main = styled(Box)`
   display: flex;
   justify-content: center;
-  height: 100%;
+  height: 90%;
   padding: 1rem 10rem;
-  padding-bottom: 5rem;
 `;
 
 const StyledProjectViewSwitch = styled(Box)`
