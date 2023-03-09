@@ -313,24 +313,39 @@ export class RootStore implements ISerializable<RootSnapshot>, IDisposable {
     this.shouldPersist = true;
   }
 
-  public destroy = async (forceDestroy?: boolean) => {
-    if (!this.shouldPersist && !forceDestroy) return;
+  private destroyLayers = async (forceDestroy?: boolean): Promise<boolean> => {
+    if (!this.shouldPersist && !forceDestroy) return false;
     if (
       !forceDestroy &&
       // eslint-disable-next-line no-alert
       !window.confirm(i18n.t("erase-application-data-confirmation"))
     )
-      return;
+      return false;
 
     this.shouldPersist = false;
     localStorage.clear();
     await this.config.storageBackend?.clear();
 
     this.setIsDirty(false, true);
-    window.location.href = new URL(window.location.href).searchParams.has(
-      "tracking",
-    )
-      ? `${window.location.pathname}?tracking`
-      : window.location.pathname;
+    return true;
+  };
+  public destroy = async (forceDestroy?: boolean): Promise<boolean> => {
+    if (await this.destroyLayers(forceDestroy)) {
+      window.location.href = new URL(window.location.href).searchParams.has(
+        "tracking",
+      )
+        ? `${window.location.pathname}?tracking`
+        : window.location.pathname;
+      return true;
+    }
+    return false;
+  };
+  public destroyReload = async (forceDestroy?: boolean): Promise<boolean> => {
+    if (await this.destroyLayers(forceDestroy)) {
+      const redirectURl = new URL(window.location.href);
+      window.location.href = redirectURl.href;
+      return true;
+    }
+    return false;
   };
 }

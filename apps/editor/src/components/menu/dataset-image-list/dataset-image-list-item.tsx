@@ -6,6 +6,7 @@ import {
   useTranslation,
 } from "@visian/ui-shared";
 import { useCallback, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 
 import { useAnnotationsBy } from "../../../querys";
@@ -26,6 +27,10 @@ const IconButton = styled(InvisibleButton)`
 const AnnotationsList = styled(List)`
   margin-left: 30px;
   width: calc(100% - 30px);
+`;
+
+const ClickableText = styled(Text)`
+  cursor: pointer;
 `;
 
 export const DatasetImageListItem = ({
@@ -64,7 +69,22 @@ export const DatasetImageListItem = ({
     });
   }, [refetchAnnotations]);
 
+  const configureEditorUrl = (
+    img: Image | null,
+    annotation: Annotation | null,
+  ): string => {
+    const query: string[] = [];
+    if (img) {
+      query.push(`imageId=${img.id}`);
+    }
+    if (annotation) {
+      query.push(`annotationId=${annotation.id}`);
+    }
+    return `/editor?${query.join("&")}`;
+  };
+
   const { t: translate } = useTranslation();
+  const navigate = useNavigate();
 
   return (
     <>
@@ -78,7 +98,13 @@ export const DatasetImageListItem = ({
             <Spacer />
           </>
         )}
-        <Text>{image.dataUri}</Text>
+        <ClickableText
+          onClick={() => {
+            navigate(configureEditorUrl(image, null));
+          }}
+        >
+          {image.dataUri}
+        </ClickableText>
         <ExpandedSpacer />
         <IconButton
           icon={showAnnotations ? "arrowDown" : "arrowLeft"}
@@ -96,7 +122,15 @@ export const DatasetImageListItem = ({
           annotations && (
             <AnnotationsList>
               {annotations.map((annotation: Annotation) => (
-                <ListItem key={annotation.id}>{annotation.dataUri}</ListItem>
+                <ListItem>
+                  <ClickableText
+                    onClick={() => {
+                      navigate(configureEditorUrl(image, annotation));
+                    }}
+                  >
+                    {annotation.dataUri}
+                  </ClickableText>
+                </ListItem>
               ))}
             </AnnotationsList>
           )
