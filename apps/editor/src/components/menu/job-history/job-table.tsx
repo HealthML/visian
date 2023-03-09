@@ -1,7 +1,5 @@
 import { Job } from "../../../types";
 import { getDisplayDate } from "../util/display-date";
-import styled from "styled-components";
-import { fontWeight } from "@visian/ui-shared";
 import {
   createColumnHelper,
   getCoreRowModel,
@@ -9,12 +7,13 @@ import {
   SortingState,
   useReactTable,
 } from "@tanstack/react-table";
-import { TableLayout, ListItemLabel, StatusBadge } from "@visian/ui-shared";
+import {
+  TableLayout,
+  ListItemLabel,
+  StatusBadge,
+  HeaderLabel,
+} from "@visian/ui-shared";
 import React from "react";
-
-export const HeaderLabel = styled(ListItemLabel)`
-  font-weight: ${fontWeight("bold")};
-`;
 
 function getDisplayJob(job: Job): Job {
   return {

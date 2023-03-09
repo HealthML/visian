@@ -1,7 +1,23 @@
 import { Cell, flexRender, Header, Table } from "@tanstack/react-table";
 import styled from "styled-components";
 import { stopPropagation } from "../../event-handling";
-import { List, ListItem } from "../list";
+import { color, radius, fontWeight } from "../../theme";
+import { List, ListItem, ListItemLabel } from "../list";
+
+const TableList = styled(List)`
+  overflow-y: auto;
+`;
+
+const HeaderListItem = styled(ListItem)`
+  border-radius: ${radius("default")};
+  background-color: ${color("veryLightGray")};
+  border: 1px solid;
+  border-color: ${color("sheetBorder")};
+`;
+
+export const HeaderLabel = styled(ListItemLabel)`
+  font-weight: ${fontWeight("bold")};
+`;
 
 export const TableCell = styled.div.attrs((props: { width?: number }) => props)`
   width: ${(props) => (props.width ? props.width : 20)}%;
@@ -9,10 +25,6 @@ export const TableCell = styled.div.attrs((props: { width?: number }) => props)`
   display: flex;
   justify-content: center;
   margin: auto;
-`;
-
-const TableList = styled(List)`
-  overflow-y: auto;
 `;
 
 const distributeColumns = (
@@ -54,7 +66,7 @@ export const TableHeader = ({
   columnWidths: number[];
 }) => {
   return (
-    <ListItem isActive={true}>
+    <HeaderListItem isLast={true}>
       {headers.map((header, index) => (
         <TableCell key={header.id} width={columnWidths[index]}>
           {header.isPlaceholder
@@ -62,7 +74,7 @@ export const TableHeader = ({
             : flexRender(header.column.columnDef.header, header.getContext())}
         </TableCell>
       ))}
-    </ListItem>
+    </HeaderListItem>
   );
 };
 
