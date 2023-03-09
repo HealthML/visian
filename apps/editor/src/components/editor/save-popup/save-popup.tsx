@@ -146,9 +146,10 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
             />
             <SaveButton
               tx="save"
-              onPointerDown={() => {
-                saveAnnotation(undefined);
-                store?.destroyRedirect("/", true);
+              onPointerDown={async () => {
+                if (await saveAnnotation(undefined)) {
+                  store?.destroyRedirect("/", true);
+                }
               }}
             />
           </InlineRow>
