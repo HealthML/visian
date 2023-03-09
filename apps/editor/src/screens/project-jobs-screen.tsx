@@ -38,6 +38,8 @@ const IconButton = styled(InvisibleButton)`
 //TODO z-index logic
 
 export const ProjectJobsScreen: React.FC = observer(() => {
+  const projectId = useParams().projectId || "";
+
   const navigate = useNavigate();
 
   const { t: translate } = useTranslation();
@@ -49,7 +51,7 @@ export const ProjectJobsScreen: React.FC = observer(() => {
         <StyledProjectViewSwitch>
           <ProjectViewSwitch defaultSwitchSelection="jobs" />
         </StyledProjectViewSwitch>
-        <JobHistory />
+        <JobHistory projectId={projectId} />
       </Main>
     </Screen>
   );

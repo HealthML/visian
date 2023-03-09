@@ -1,10 +1,22 @@
-import { PopUp, Text, useTranslation } from "@visian/ui-shared";
+import {
+  color,
+  FlexColumn,
+  FlexRow,
+  Icon,
+  List,
+  ListItem,
+  PopUp,
+  Spacer,
+  Text,
+  useTranslation,
+} from "@visian/ui-shared";
 import axios from "axios";
 import { observer } from "mobx-react-lite";
 import styled from "styled-components";
 
-import { useMlModels } from "../../../queries";
+import { useDataset, useMlModels } from "../../../queries";
 import { hubBaseUrl } from "../../../queries/hub-base-url";
+import useDatasetsBy from "../../../queries/use-datasets-by";
 import { MlModel } from "../../../types";
 import { MlModelList } from "../ml-model-list";
 import { ModelPopUpProps } from "./ml-model-selection-popup.props";
@@ -16,11 +28,38 @@ const SectionLabel = styled(Text)`
 
 const ModelSelectionPopupContainer = styled(PopUp)`
   align-items: left;
-  width: 400px;
+  width: 50vw;
+  height: 70vh;
+`;
+
+const FileExplorer = styled(FlexRow)`
+  width: 100%;
+  height: 50%;
+`;
+
+const StyledList = styled(List)`
+  overflow-y: auto;
+`;
+
+const StyledIcon = styled(Icon)`
+  width: 2rem;
+  height: 2rem;
+  padding-right: 0.8rem;
+`;
+
+const VerticalLine = styled.div`
+  border-left: 1px solid ${color("sheetBorder")};
+  margin: 0 1vw;
 `;
 
 export const ModelSelectionPopup = observer<ModelPopUpProps>(
-  ({ isOpen, onClose, activeImageSelection }) => {
+  ({ isOpen, onClose, activeImageSelection, projectId }) => {
+    const { datasets, datasetsError, isErrorDatasets, isLoadingDatasets } =
+      useDatasetsBy(projectId);
+
+    // const { dataset, datasetError, isErrorDataset, isLoadingDataset } =
+    //   useDataset(datasetId);
+
     const { mlModels, mlModelsError, isErrorMlModels, isLoadingMlModels } =
       useMlModels();
 
@@ -55,12 +94,29 @@ export const ModelSelectionPopup = observer<ModelPopUpProps>(
             mlModelsError?.response?.statusText
           } (${mlModelsError?.response?.status})`}</Text>
         )}
-        {mlModels && (
-          <MlModelList
-            models={mlModels}
-            createAutoAnnotationJob={createAutoAnnotationJob}
-          />
-        )}
+        <FileExplorer>
+          {datasets && (
+            <StyledList>
+              {datasets.map((dataset) => (
+                <ListItem key={dataset.id} isLast={true}>
+                  <StyledIcon icon="folder"></StyledIcon>
+                  <Text>{dataset.name}</Text>
+                </ListItem>
+              ))}
+            </StyledList>
+          )}
+          <VerticalLine></VerticalLine>
+          {datasets && (
+            <StyledList>
+              {datasets.map((dataset) => (
+                <ListItem key={dataset.id} isLast={true}>
+                  <StyledIcon icon="document"></StyledIcon>
+                  <Text>{dataset.name}</Text>
+                </ListItem>
+              ))}
+            </StyledList>
+          )}
+        </FileExplorer>
       </ModelSelectionPopupContainer>
     );
   },
