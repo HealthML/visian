@@ -134,8 +134,7 @@
     "tslib": "^2.3.0",
     "uuid": "^9.0.0",
     "webxr-polyfill": "^2.0.3",
-    "worker-rpc": "^0.2.0",
-    "yarn": "^1.22.19"
+    "worker-rpc": "^0.2.0"
   },
   "resolutions": {
     "@types/hoist-non-react-statics/@types/react": "17.0.30",
