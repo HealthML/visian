@@ -6,7 +6,7 @@ import {
 } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import styled from "styled-components";
 
 import { DatasetsGrid } from "../components/menu/datasets-grid";
@@ -39,6 +39,8 @@ const IconButton = styled(InvisibleButton)`
 export const ProjectDatasetsScreen: React.FC = observer(() => {
   const navigate = useNavigate();
 
+  const projectId = useParams().projectId || "";
+
   const { t: translate } = useTranslation();
 
   return (
@@ -48,7 +50,7 @@ export const ProjectDatasetsScreen: React.FC = observer(() => {
         <StyledProjectViewSwitch>
           <ProjectViewSwitch defaultSwitchSelection="datasets" />
         </StyledProjectViewSwitch>
-        <DatasetsGrid />
+        {projectId && <DatasetsGrid projectId={projectId} />}
       </Main>
     </Screen>
   );

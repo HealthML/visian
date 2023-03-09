@@ -1,5 +1,4 @@
 import { Modal, Text, useTranslation } from "@visian/ui-shared";
-import { useParams } from "react-router-dom";
 import styled from "styled-components";
 
 import useDatasetsBy from "../../../queries/use-datasets-by";
@@ -11,20 +10,18 @@ const StyledModal = styled(Modal)`
   position: relative;
 `;
 
-export const DatasetsGrid = () => {
-  const projectId = useParams().projectId || "";
-
+export const DatasetsGrid = ({ projectId }: { projectId: string }) => {
   const { datasets, datasetsError, isErrorDatasets, isLoadingDatasets } =
     useDatasetsBy(projectId);
   const { t: translate } = useTranslation();
 
   return isLoadingDatasets || isErrorDatasets ? (
-    <StyledModal labelTx={isLoadingDatasets ? "project-loading" : "error"}>
+    <StyledModal labelTx={isLoadingDatasets ? "dataset-loading" : "error"}>
       {isLoadingDatasets ? (
-        <Text>{translate("project-loading")}</Text>
+        <Text>{translate("dataset-loading")}</Text>
       ) : (
         <Text>
-          {`${translate("project-loading-error")} ${
+          {`${translate("dataset-loading-error")} ${
             datasetsError?.response?.statusText
           } (${datasetsError?.response?.status})`}
         </Text>
