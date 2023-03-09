@@ -4,8 +4,8 @@
   "license": "MIT",
   "scripts": {
     "prepare": "husky install",
-    "start": "nx serve",
-    "start:hub": "NX_ANNOTATION_SERVICE_HUB_URL=\"localhost:3000\" nx serve",
+    "start": "nx serve --host 0.0.0.0",
+    "start:hub": "NX_ANNOTATION_SERVICE_HUB_URL=\"localhost:3000\" nx serve --host 0.0.0.0",
     "format": "nx format:write",
     "lint": "nx workspace-lint && nx lint",
     "lint:all": "yarn nx run-many --target=lint --all",
@@ -134,8 +134,7 @@
     "tslib": "^2.3.0",
     "uuid": "^9.0.0",
     "webxr-polyfill": "^2.0.3",
-    "worker-rpc": "^0.2.0",
-    "yarn": "^1.22.19"
+    "worker-rpc": "^0.2.0"
   },
   "resolutions": {
     "@types/hoist-non-react-statics/@types/react": "17.0.30",
