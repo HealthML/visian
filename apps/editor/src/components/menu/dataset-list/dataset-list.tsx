@@ -28,14 +28,10 @@ const StyledDatasetList = styled(List)`
   }
 `;
 
-const StyledDatasetListItem = styled(DatasetListItem)`
-  height: 100px;
-`;
-
 export const DatasetList = ({ datasets }: { datasets: Dataset[] }) => (
   <StyledDatasetList onWheel={stopPropagation}>
     {datasets.map((dataset: Dataset) => (
-      <StyledDatasetListItem key={dataset.id} dataset={dataset} />
+      <DatasetListItem key={dataset.id} dataset={dataset} />
     ))}
   </StyledDatasetList>
 );
