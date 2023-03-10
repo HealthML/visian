@@ -6,11 +6,11 @@ import {
   useTranslation,
 } from "@visian/ui-shared";
 import { useCallback, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 
 import { useAnnotationsBy } from "../../../queries";
 import { Annotation, Image } from "../../../types";
-import { openInEditor } from "../util/openInEditor";
 
 const Spacer = styled.div`
   width: 10px;
@@ -69,7 +69,22 @@ export const DatasetImageListItem = ({
     });
   }, [refetchAnnotations]);
 
+  const configureEditorUrl = (
+    img: Image | null,
+    annotation: Annotation | null,
+  ): string => {
+    const query: string[] = [];
+    if (img) {
+      query.push(`imageId=${img.id}`);
+    }
+    if (annotation) {
+      query.push(`annotationId=${annotation.id}`);
+    }
+    return `/editor?${query.join("&")}`;
+  };
+
   const { t: translate } = useTranslation();
+  const navigate = useNavigate();
 
   return (
     <>
@@ -85,7 +100,7 @@ export const DatasetImageListItem = ({
         )}
         <ClickableText
           onClick={() => {
-            openInEditor(image, null);
+            navigate(configureEditorUrl(image, null));
           }}
         >
           {image.dataUri}
@@ -110,7 +125,7 @@ export const DatasetImageListItem = ({
                 <ListItem>
                   <ClickableText
                     onClick={() => {
-                      openInEditor(image, annotation);
+                      navigate(configureEditorUrl(image, annotation));
                     }}
                   >
                     {annotation.dataUri}

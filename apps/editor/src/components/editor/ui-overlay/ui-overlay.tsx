@@ -15,7 +15,10 @@ import styled from "styled-components";
 import { useStore } from "../../../app/root-store";
 import { whoHome } from "../../../constants";
 import { importFilesToDocument } from "../../../import-handling";
-import { fetchAnnotation, fetchImage } from "../../../queries/use-files";
+import {
+  fetchAnnotationFile,
+  fetchImageFile,
+} from "../../../queries/use-files";
 import {
   DilateErodeModal,
   MeasurementModal,
@@ -196,48 +199,46 @@ export const UIOverlay = observer<UIOverlayProps>(
         });
     }, [store]);
 
-    // Displaying images and annotations from Backend
-    const loadSessionStorage = (key: string) => {
-      let object = null;
-      const objectJSON = sessionStorage.getItem(key);
-      if (objectJSON) {
-        object = JSON.parse(objectJSON);
-      }
-      return object;
-    };
-
     const [searchParams] = useSearchParams();
     const loadImagesAndAnnotations = () => {
       async function asyncfunc() {
         if (store?.editor.activeDocument?.layers.length !== 0) {
           return store?.destroyReload();
         }
-        const openImage = searchParams.get("openImage");
-        const dT = new DataTransfer();
-        let shouldImport = false;
-        if (openImage && sessionStorage.getItem("ImageToOpen")) {
-          const image = loadSessionStorage("ImageToOpen");
-          sessionStorage.removeItem("ImageToOpen");
-          const imageFile = await fetchImage(image);
-          dT.items.add(imageFile);
-          shouldImport = true;
+        const fileTransfer = new DataTransfer();
+        const imageIdToOpen = searchParams.get("imageId");
+        if (imageIdToOpen) {
+          try {
+            const imageFile = await fetchImageFile(imageIdToOpen);
+            fileTransfer.items.add(imageFile);
+          } catch (error) {
+            store?.setError({
+              titleTx: "import-error",
+              descriptionTx: "image-open-error",
+            });
+          }
         }
-        const openAnnotation = searchParams.get("openAnnotation");
-        if (openAnnotation && sessionStorage.getItem("AnnotationToOpen")) {
-          const annotation = loadSessionStorage("AnnotationToOpen");
-          sessionStorage.removeItem("AnnotationToOpen");
-          const annotationFile = await fetchAnnotation(annotation);
-          dT.items.add(annotationFile);
-          shouldImport = true;
+        const annotationIdToOpen = searchParams.get("annotationId");
+        if (annotationIdToOpen) {
+          try {
+            const annotationFile = await fetchAnnotationFile(
+              annotationIdToOpen,
+            );
+            fileTransfer.items.add(annotationFile);
+          } catch (error) {
+            store?.setError({
+              titleTx: "import-error",
+              descriptionTx: "annotation-open-error",
+            });
+          }
         }
-        if (store && shouldImport) {
-          importFilesToDocument(dT.files, store);
+        if (store && fileTransfer.files.length) {
+          importFilesToDocument(fileTransfer.files, store);
         }
       }
       asyncfunc();
     };
-
-    useEffect(loadImagesAndAnnotations, [searchParams]);
+    useEffect(loadImagesAndAnnotations, [searchParams, store]);
 
     return (
       <Container

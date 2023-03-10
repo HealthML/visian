@@ -1,7 +1,9 @@
 import path from "path";
 
-import { Annotation, Image } from "../types";
+import { FileWithMetadata } from "../types";
 import hubBaseUrl from "./hub-base-url";
+import { getAnnotation } from "./use-annotations-by";
+import { getImage } from "./use-images-by";
 
 const fetchFile = async (
   id: string,
@@ -20,14 +22,30 @@ const fetchFile = async (
         }),
     );
 
-export const fetchImage = async (image: Image): Promise<File> => {
+export const fetchImageFile = async (
+  imageId: string,
+): Promise<FileWithMetadata> => {
+  const image = await getImage(imageId);
   const fileName: string = path.basename(image.dataUri);
-  return fetchFile(image.id, "images", fileName);
+  const imageFile = (await fetchFile(
+    image.id,
+    "images",
+    fileName,
+  )) as FileWithMetadata;
+  imageFile.metadata = image;
+  return imageFile;
 };
 
-export const fetchAnnotation = async (
-  annotation: Annotation,
-): Promise<File> => {
+export const fetchAnnotationFile = async (
+  annotationId: string,
+): Promise<FileWithMetadata> => {
+  const annotation = await getAnnotation(annotationId);
   const fileName: string = path.basename(annotation.dataUri);
-  return fetchFile(annotation.id, "annotations", fileName);
+  const annotationFile = (await fetchFile(
+    annotation.id,
+    "annotations",
+    fileName,
+  )) as FileWithMetadata;
+  annotationFile.metadata = annotation;
+  return annotationFile;
 };

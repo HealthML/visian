@@ -9,7 +9,7 @@ import { useProjects } from "../queries";
 const Main = styled(Box)`
   display: flex;
   justify-content: center;
-  height: 100%;
+  height: 90%;
   padding: 5rem 10rem;
   padding-top: 4rem;
 `;
@@ -27,17 +27,23 @@ export const ProjectsScreen: React.FC = observer(() => {
   return (
     <Screen title={`${translate("projects-base-title")}`}>
       <Main>
-        {isLoadingProjects && <StyledModal labelTx="projects-loading" />}
-        {isErrorProjects && (
+        {isLoadingProjects ? (
+          <StyledModal labelTx="projects-loading" />
+        ) : isErrorProjects ? (
           <StyledModal labelTx="error">
             <Text>{`${translate("projects-loading-error")} ${
               projectsError?.response?.statusText
             } (${projectsError?.response?.status})`}</Text>
           </StyledModal>
+        ) : (
+          <StyledModal>
+            {projects && projects.length > 0 ? (
+              <ProjectList projects={projects} />
+            ) : (
+              <Text>{translate("no-projects-available")}</Text>
+            )}
+          </StyledModal>
         )}
-        <StyledModal>
-          {projects && <ProjectList projects={projects} />}
-        </StyledModal>
       </Main>
     </Screen>
   );

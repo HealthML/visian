@@ -274,19 +274,23 @@
   "dataset-base-title": "VISIAN Dataset",
 
   "projects-loading": "Loading projects...",
-  "projects-loading-error": "Error on loading Projects:",
+  "projects-loading-error": "Error on loading projects:",
+  "no-projects-available": "Currently no projects are available",
 
-  "project-loading": "Loading Project",
-  "project-loading-error": "Error on loading Datasets:",
+  "datasets-loading": "Loading datasets...",
+  "datasets-loading-error": "Error on loading datasets:",
+  "no-datasets-available": "Currently no datasets are available",
 
-  "dataset-loading": "Loading Dataset...",
-  "dataset-loading-error": "Error on loading Dataset:",
+  "dataset-loading": "Loading dataset...",
+  "dataset-loading-error": "Error on loading dataset:",
 
-  "images-loading": "Loading Images...",
-  "images-loading-error": "Error on loading Images:",
+  "images-loading": "Loading images...",
+  "images-loading-error": "Error on loading images:",
+  "image-open-error": "Error on opening image",
 
-  "annotations-loading": "Loading Annotations...",
-  "annotations-loading-error": "Error on loading Annotations:",
+  "annotations-loading": "Loading annotations...",
+  "annotations-loading-error": "Error on loading annotations:",
+  "annotation-open-error": "Error on opening annotation",
 
   "ml-model-selection-description": "Select the model you want to use to annotate the images",
   "ml-model-selection-title": "Model Selection",

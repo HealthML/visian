@@ -7,7 +7,7 @@ import { DatasetListItem } from "./dataset-list-item";
 const StyledDatasetList = styled(List)`
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
-  column-gap: 30px;
+  column-gap: 3vw;
   row-gap: 60px;
   justify-items: center;
   margin-top: 2%;
@@ -20,11 +20,11 @@ const StyledDatasetList = styled(List)`
   }
   &::-webkit-scrollbar-thumb {
     background-color: #ccc;
-    border-radius: 10px;
+    border-radius: 15px;
   }
   &::-webkit-scrollbar-track {
     background-color: #fff;
-    border-radius: 10px;
+    border-radius: 15px;
   }
 `;
 
