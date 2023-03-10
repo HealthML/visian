@@ -6,7 +6,7 @@ import { JobsTable } from "./job-table";
 
 const StyledModal = styled(Modal)`
   vertical-align: middle;
-  width: 100%;
+  width: 100vw;
   position: relative;
 `;
 

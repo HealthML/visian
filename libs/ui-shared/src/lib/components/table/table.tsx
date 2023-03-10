@@ -28,6 +28,10 @@ export const TableCell = styled.div.attrs((props: { width?: number }) => props)`
   margin: auto;
 `;
 
+/*
+Distributes the columns evenly if no column widths are provided or if the sum of the column widths is not 100.
+Otherwise it distributes the columns according to the provided column widths.
+*/
 const distributeColumns = (
   columnWidths: number[] | undefined,
   columnCount: number,
