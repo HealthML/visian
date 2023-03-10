@@ -1,7 +1,8 @@
 import { Cell, flexRender, Header, Table } from "@tanstack/react-table";
 import styled from "styled-components";
+
 import { stopPropagation } from "../../event-handling";
-import { color, radius, fontWeight } from "../../theme";
+import { color, fontWeight, radius } from "../../theme";
 import { List, ListItem, ListItemLabel } from "../list";
 
 const TableList = styled(List)`
@@ -33,7 +34,7 @@ const distributeColumns = (
 ) => {
   if (columnWidths && columnWidths.length === columnCount) {
     const sum = columnWidths.reduce((partSum, width) => partSum + width, 0);
-    if (sum == 100) {
+    if (sum === 100) {
       return columnWidths;
     }
   }
@@ -46,17 +47,15 @@ export const TableRow = ({
 }: {
   cells: Cell<any, unknown>[];
   columnWidths: number[];
-}) => {
-  return (
-    <ListItem>
-      {cells.map((cell, index) => (
-        <TableCell key={cell.id} width={columnWidths[index]}>
-          {flexRender(cell.column.columnDef.cell, cell.getContext())}
-        </TableCell>
-      ))}
-    </ListItem>
-  );
-};
+}) => (
+  <ListItem>
+    {cells.map((cell, index) => (
+      <TableCell key={cell.id} width={columnWidths[index]}>
+        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+      </TableCell>
+    ))}
+  </ListItem>
+);
 
 export const TableHeader = ({
   headers,
@@ -64,19 +63,17 @@ export const TableHeader = ({
 }: {
   headers: Header<any, unknown>[];
   columnWidths: number[];
-}) => {
-  return (
-    <HeaderListItem isLast={true}>
-      {headers.map((header, index) => (
-        <TableCell key={header.id} width={columnWidths[index]}>
-          {header.isPlaceholder
-            ? null
-            : flexRender(header.column.columnDef.header, header.getContext())}
-        </TableCell>
-      ))}
-    </HeaderListItem>
-  );
-};
+}) => (
+  <HeaderListItem isLast>
+    {headers.map((header, index) => (
+      <TableCell key={header.id} width={columnWidths[index]}>
+        {header.isPlaceholder
+          ? null
+          : flexRender(header.column.columnDef.header, header.getContext())}
+      </TableCell>
+    ))}
+  </HeaderListItem>
+);
 
 export const TableLayout = ({
   table,

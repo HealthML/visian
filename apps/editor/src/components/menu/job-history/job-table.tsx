@@ -1,5 +1,3 @@
-import { Job } from "../../../types";
-import { getDisplayDate } from "../util/display-date";
 import {
   createColumnHelper,
   getCoreRowModel,
@@ -8,12 +6,15 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import {
-  TableLayout,
+  HeaderLabel,
   ListItemLabel,
   StatusBadge,
-  HeaderLabel,
+  TableLayout,
 } from "@visian/ui-shared";
 import React from "react";
+
+import { Job } from "../../../types";
+import { getDisplayDate } from "../util/display-date";
 
 function getDisplayJob(job: Job): Job {
   return {
@@ -40,27 +41,27 @@ const columnHelper = createColumnHelper<Job>();
 
 const columns = [
   columnHelper.accessor("modelName", {
-    header: () => <HeaderLabel tx={"job-model-name"} />,
+    header: () => <HeaderLabel tx="job-model-name" />,
     cell: (props) => <ListItemLabel text={props.getValue()} />,
   }),
   columnHelper.accessor("modelVersion", {
-    header: () => <HeaderLabel tx={"job-model-version"} />,
+    header: () => <HeaderLabel tx="job-model-version" />,
     cell: (props) => <ListItemLabel text={props.getValue()} />,
   }),
   columnHelper.accessor("startedAt", {
-    header: () => <HeaderLabel tx={"job-started"} />,
+    header: () => <HeaderLabel tx="job-started" />,
     cell: (props) => <ListItemLabel text={props.getValue()} />,
     sortingFn: "datetime",
     sortUndefined: -1,
   }),
   columnHelper.accessor("finishedAt", {
-    header: () => <HeaderLabel tx={"job-finished"} />,
+    header: () => <HeaderLabel tx="job-finished" />,
     cell: (props) => <ListItemLabel text={props.getValue()} />,
     sortingFn: "datetime",
     sortUndefined: -1,
   }),
   columnHelper.accessor("status", {
-    header: () => <HeaderLabel tx={"job-status"} />,
+    header: () => <HeaderLabel tx="job-status" />,
     cell: (props) => (
       <StatusBadge
         color={badgeColors[props.getValue()]}
@@ -69,7 +70,7 @@ const columns = [
     ),
     // Make sure that queued jobs are at the top
     sortingFn: (rowA, rowB, id) => {
-      if (rowA.getValue(id) == "queued") return -1;
+      if (rowA.getValue(id) === "queued") return -1;
       return 0;
     },
   }),
