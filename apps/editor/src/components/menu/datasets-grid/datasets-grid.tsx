@@ -1,13 +1,14 @@
-import { Modal, Text, useTranslation } from "@visian/ui-shared";
+import { AbsoluteCover, Text, useTranslation } from "@visian/ui-shared";
 import styled from "styled-components";
 
 import useDatasetsBy from "../../../queries/use-datasets-by";
 import { DatasetList } from "../dataset-list";
 
-const StyledModal = styled(Modal)`
-  vertical-align: middle;
-  width: 100vw;
-  position: relative;
+const Main = styled(AbsoluteCover)`
+  height: 75vh;
+  width: 75vw;
+  margin: auto;
+  overflow-y: auto;
 `;
 
 export const DatasetsGrid = ({ projectId }: { projectId: string }) => {
@@ -16,7 +17,7 @@ export const DatasetsGrid = ({ projectId }: { projectId: string }) => {
   const { t: translate } = useTranslation();
 
   return isLoadingDatasets || isErrorDatasets ? (
-    <StyledModal labelTx={isLoadingDatasets ? "dataset-loading" : "error"}>
+    <Main title={isLoadingDatasets ? "dataset-loading" : "error"}>
       {isLoadingDatasets ? (
         <Text>{translate("dataset-loading")}</Text>
       ) : (
@@ -26,14 +27,14 @@ export const DatasetsGrid = ({ projectId }: { projectId: string }) => {
           } (${datasetsError?.response?.status})`}
         </Text>
       )}
-    </StyledModal>
+    </Main>
   ) : (
-    <StyledModal>
+    <Main>
       {datasets && datasets.length > 0 ? (
         <DatasetList datasets={datasets} />
       ) : (
         <Text>{translate("no-datasets-available")}</Text>
       )}
-    </StyledModal>
+    </Main>
   );
 };
