@@ -48,7 +48,7 @@ export const ProjectJobsScreen: React.FC = observer(() => {
     <Container title={`${translate("project-base-title")}`}>
       <MenuRow>
         <IconButton
-          icon="menu"
+          icon="home"
           tooltipTx="Home"
           onPointerDown={() => navigate(`/projects`)}
         />

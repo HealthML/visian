@@ -1,3 +1,4 @@
+export { ReactComponent as arrowBack } from "./arrow-back.svg";
 export { ReactComponent as arrowDown } from "./arrow-down.svg";
 export { ReactComponent as arrowLeft } from "./arrow-left.svg";
 export { ReactComponent as arrowRight } from "./arrow-right.svg";
@@ -23,6 +24,7 @@ export { ReactComponent as eyeCrossed } from "./eye-crossed.svg";
 export { ReactComponent as eye } from "./eye.svg";
 export { ReactComponent as folder } from "./folder.svg";
 export { ReactComponent as fullScreenSmall } from "./full-screen-small.svg";
+export { ReactComponent as home } from "./home.svg";
 export { ReactComponent as image } from "./image.svg";
 export { ReactComponent as import } from "./import.svg";
 export { ReactComponent as info } from "./info.svg";

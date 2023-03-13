@@ -64,12 +64,12 @@ export const DatasetScreen: React.FC = observer(() => {
     >
       <MenuRow>
         <IconButton
-          icon="menu"
+          icon="home"
           tooltipTx="Home"
           onPointerDown={() => navigate(`/projects`)}
         />
         <IconButton
-          icon="arrowLeft"
+          icon="arrowBack"
           tooltipTx="Back"
           onPointerDown={() => navigate(`/projects/${projectId}/datasets`)}
         />
