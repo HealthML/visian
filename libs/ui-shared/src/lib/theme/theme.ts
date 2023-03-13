@@ -171,6 +171,7 @@ export const theme = {
     picker: 80,
     info: 90,
     overlay: 100,
+    overlayComponent: 120,
     notification: 150,
   },
 };
