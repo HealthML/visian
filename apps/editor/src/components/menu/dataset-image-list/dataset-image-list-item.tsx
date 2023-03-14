@@ -9,7 +9,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 
-import { useAnnotationsBy } from "../../../queries";
+import { useAnnotationsByImage } from "../../../queries";
 import { Annotation, Image } from "../../../types";
 
 const Spacer = styled.div`
@@ -52,7 +52,7 @@ export const DatasetImageListItem = ({
     isErrorAnnotations,
     isLoadingAnnotations,
     refetchAnnotations,
-  } = useAnnotationsBy(image.id);
+  } = useAnnotationsByImage(image.id);
 
   const [showAnnotations, setShowAnnotations] = useState(false);
 
