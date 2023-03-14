@@ -88,7 +88,7 @@
 
   "data-model-outdated-alert": "Datenmodell veraltet. Zurücksetzen notwendig.",
   "discard-current-document-confirmation": "Aktuelles Dokument verwerfen?",
-  "erase-application-data-confirmation": "Alle Anwendungsdaten löschen?",
+  "erase-application-data-confirmation": "Aktuelle Daten im Editor verwerfen?",
 
   "layers": "Ebenen",
   "main-image-layer": "Haupt-Bildebene",

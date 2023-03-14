@@ -88,7 +88,7 @@
 
   "data-model-outdated-alert": "Data model outdated. Reset required.",
   "discard-current-document-confirmation": "Discard the current document?",
-  "erase-application-data-confirmation": "Erase all application data?",
+  "erase-application-data-confirmation": "Clear current editor data?",
 
   "layers": "Layers",
   "main-image-layer": "Main Image Layer",
