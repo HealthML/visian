@@ -3,8 +3,8 @@ import axios from "axios";
 import { observer } from "mobx-react-lite";
 import styled from "styled-components";
 
-import { useMlModels } from "../../../querys";
-import { hubBaseUrl } from "../../../querys/hub-base-url";
+import { useMlModels } from "../../../queries";
+import { hubBaseUrl } from "../../../queries/hub-base-url";
 import { MlModel } from "../../../types";
 import { MlModelList } from "../ml-model-list";
 import { ModelPopUpProps } from "./ml-model-selection-popup.props";

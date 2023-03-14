@@ -2,7 +2,7 @@ import { Modal, Text, useTranslation } from "@visian/ui-shared";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import styled from "styled-components";
 
-import { useImagesBy } from "../../../querys";
+import { useImagesBy } from "../../../queries";
 import { Dataset } from "../../../types";
 import { DatasetImageList } from "../dataset-image-list";
 import { DatasetNavigationbar } from "../dataset-navigationbar";
@@ -15,7 +15,7 @@ const StyledModal = styled(Modal)`
 `;
 // TODO: z-index logic
 
-export const DatasetModal = ({ dataset }: { dataset: Dataset }) => {
+export const DatasetExplorer = ({ dataset }: { dataset: Dataset }) => {
   const [isInSelectMode, setIsInSelectMode] = useState(false);
 
   const { images, imagesError, isErrorImages, isLoadingImages, refetchImages } =

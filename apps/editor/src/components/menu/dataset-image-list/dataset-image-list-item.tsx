@@ -9,7 +9,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 
-import { useAnnotationsBy } from "../../../querys";
+import { useAnnotationsBy } from "../../../queries";
 import { Annotation, Image } from "../../../types";
 
 const Spacer = styled.div`

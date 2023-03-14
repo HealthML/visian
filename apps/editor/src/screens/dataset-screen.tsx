@@ -1,16 +1,25 @@
-import { Box, Modal, Screen, Text, useTranslation } from "@visian/ui-shared";
+import {
+  Box,
+  InvisibleButton,
+  Modal,
+  Screen,
+  Text,
+  useTranslation,
+} from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
 import React from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import styled from "styled-components";
 
-import { DatasetModal } from "../components/menu/dataset-modal";
-import { useDataset } from "../querys";
+import { DatasetExplorer } from "../components/menu/dataset-explorer";
+import { useDataset } from "../queries";
 
 const Main = styled(Box)`
   display: flex;
   justify-content: center;
   height: 100%;
-  padding: 5rem 10rem;
+  padding: 1rem 10rem;
+  padding-bottom: 5rem;
 `;
 
 const StyledModal = styled(Modal)`
@@ -18,12 +27,18 @@ const StyledModal = styled(Modal)`
   width: 100%;
 `;
 
-const datasetId = "ed74a5b0-bb97-4f92-9bc9-50d47fafc17f";
+const IconButton = styled(InvisibleButton)`
+  width: 40px;
+  margin: 5px;
+`;
 
 export const DatasetScreen: React.FC = observer(() => {
+  const datasetId = useParams().datasetId || "";
+
   const { dataset, datasetError, isErrorDataset, isLoadingDataset } =
     useDataset(datasetId);
 
+  const navigate = useNavigate();
   const { t: translate } = useTranslation();
 
   return (
@@ -38,6 +53,7 @@ export const DatasetScreen: React.FC = observer(() => {
           : ""
       }`}
     >
+      <IconButton icon="menu" onPointerDown={() => navigate(`/projects`)} />
       <Main>
         {isLoadingDataset && <StyledModal labelTx="dataset-loading" />}
         {isErrorDataset && (
@@ -47,7 +63,7 @@ export const DatasetScreen: React.FC = observer(() => {
             } (${datasetError?.response?.status})`}</Text>
           </StyledModal>
         )}
-        {dataset && <DatasetModal dataset={dataset} />}
+        {dataset && <DatasetExplorer dataset={dataset} />}
       </Main>
     </Screen>
   );
