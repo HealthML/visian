@@ -316,6 +316,7 @@ export const UIOverlay = observer<UIOverlayProps>(
                       tooltipPosition="left"
                       onClick={openSavePopUp}
                       isActive={false}
+                      isDisabled={store?.isDirty}
                     />
                   )}
                 {!isFromWHO() && (
