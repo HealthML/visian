@@ -42,21 +42,3 @@ export const getAnnotation = async (annotationId: string) => {
   );
   return annotationsResponse.data;
 };
-
-export const postAnnotation = async (imageId: string, dataUri: string) => {
-  const annotationsResponse = await axios.post<Annotation>(
-    `${hubBaseUrl}annotations`,
-    {
-      image: imageId,
-      dataUri,
-    },
-  );
-  return annotationsResponse.data;
-};
-
-export const deleteAnnotation = async (annotationId: string) => {
-  const annotationsResponse = await axios.delete<Annotation>(
-    `${hubBaseUrl}annotations/${annotationId}`,
-  );
-  return annotationsResponse;
-};

@@ -6,11 +6,7 @@ import { useSearchParams } from "react-router-dom";
 import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
-import {
-  deleteAnnotation,
-  patchAnnotationFile,
-  postAnnotation,
-} from "../../../querys";
+import { patchAnnotationFile, postAnnotationFile } from "../../../querys";
 import { Annotation } from "../../../types";
 import { SavePopUpProps } from "./save-popup.props";
 
@@ -51,54 +47,61 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
   const [searchParams] = useSearchParams();
   const [newAnnotationURI, setnewAnnotationURI] = useState("");
 
-  const saveAnnotation = async (annotation: Annotation | undefined) => {
-    const annotationLayer = store?.editor.activeDocument?.activeLayer;
-    if (annotationLayer) {
-      const annotationFile = await annotationLayer.toFile();
-      const annotationMeta = annotation || annotationLayer.metaData;
-      try {
-        if (!annotationMeta || !annotationFile)
-          throw new Error("Could not create annotation file");
-        if (
-          path.extname(annotationMeta.dataUri) !==
-          path.extname(annotationFile.name)
-        ) {
-          throw new Error("URI does not match file type");
-        }
-        const response = await patchAnnotationFile(
-          annotationMeta as Annotation,
-          annotationFile,
-        );
-        onClose?.();
-        return response;
-      } catch (error: any) {
-        const description = error.response?.data?.message
-          ? error.response.data.message
-          : error.message
-          ? error.message
-          : "annotation-saving-error";
-        store?.setError({
-          titleTx: "saving-error",
-          descriptionTx: description,
-        });
+  const createActiveLayerFile = async (
+    shouldBeAnnotation = true,
+  ): Promise<File | undefined> => {
+    const activeLayer = store?.editor.activeDocument?.activeLayer;
+    if (activeLayer && activeLayer.isAnnotation === shouldBeAnnotation) {
+      const layerFile = await activeLayer.toFile();
+      return layerFile;
+    }
+  };
+
+  const checkAnnotationURI = (file: File, uri: string) => {
+    if (path.extname(uri) !== path.extname(file.name)) {
+      throw new Error(
+        `URI does not match file type ${path.extname(file.name)}`,
+      );
+    }
+  };
+
+  const saveAnnotation = async () => {
+    try {
+      const annotationMeta = store?.editor.activeDocument?.activeLayer
+        ?.metaData as Annotation;
+      const annotationFile = await createActiveLayerFile();
+      if (!annotationMeta || !annotationFile) {
+        throw new Error("Could not create annotation file");
       }
+      checkAnnotationURI(annotationFile, annotationMeta.dataUri);
+      const response = await patchAnnotationFile(
+        annotationMeta,
+        annotationFile,
+      );
+      return response;
+    } catch (error: any) {
+      const description = error.response?.data?.message
+        ? error.response.data.message
+        : error.message
+        ? error.message
+        : "annotation-saving-error";
+      store?.setError({
+        titleTx: "saving-error",
+        descriptionTx: description,
+      });
     }
   };
 
   const saveAnnotationAs = async (uri: string) => {
-    const imageId = searchParams.get("imageId");
-    const annotationLayer = store?.editor.activeDocument?.activeLayer;
     try {
-      if (!imageId || !annotationLayer || !annotationLayer.isAnnotation) {
-        throw new Error("No image or annotation layer selected");
+      const imageId = searchParams.get("imageId");
+      const annotationFile = await createActiveLayerFile();
+      if (!imageId || !annotationFile) {
+        throw new Error("Could not create annotation file");
       }
-      const annotation = await postAnnotation(imageId, uri);
-      const savedAnnotation = await saveAnnotation(annotation);
-      if (!savedAnnotation) {
-        await deleteAnnotation(annotation.id);
-      } else {
-        store?.destroyRedirect("/", true);
-      }
+      checkAnnotationURI(annotationFile, uri);
+      const response = await postAnnotationFile(imageId, uri, annotationFile);
+      return response;
     } catch (error: any) {
       const description = error.response?.data?.message
         ? error.response.data.message
@@ -147,7 +150,8 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
             <SaveButton
               tx="save"
               onPointerDown={async () => {
-                if (await saveAnnotation(undefined)) {
+                if (await saveAnnotation()) {
+                  onClose?.();
                   store?.destroyRedirect("/", true);
                 }
               }}
@@ -164,8 +168,11 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
         />
         <SaveButton
           tx="save-as"
-          onPointerDown={() => {
-            saveAnnotationAs(newAnnotationURI);
+          onPointerDown={async () => {
+            if (await saveAnnotationAs(newAnnotationURI)) {
+              onClose?.();
+              store?.destroyRedirect("/", true);
+            }
           }}
         />
       </InlineRowLast>
