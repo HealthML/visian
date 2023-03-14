@@ -1,7 +1,7 @@
 import { Modal, Text, useTranslation } from "@visian/ui-shared";
 import styled from "styled-components";
 
-import { useJobs } from "../../../queries";
+import useJobsBy from "../../../queries/use-jobs-by";
 import { JobsTable } from "./job-table";
 
 const StyledModal = styled(Modal)`
@@ -10,8 +10,8 @@ const StyledModal = styled(Modal)`
   position: relative;
 `;
 
-export const JobHistory = () => {
-  const { jobs, jobsError, isErrorJobs, isLoadingJobs } = useJobs();
+export const JobHistory = ({ projectId }: { projectId: string }) => {
+  const { jobs, jobsError, isErrorJobs, isLoadingJobs } = useJobsBy(projectId);
 
   const { t: translate } = useTranslation();
 
