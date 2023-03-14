@@ -21,8 +21,7 @@ export const Option = styled.div<{
   box-sizing: border-box;
   cursor: pointer;
   display: flex;
-  height: ${(props) =>
-    props.size == "medium" ? getSize("listElementHeight") : "24px"};
+  height: ${(props) => (props.size == "medium" ? "48px" : "24px")};
   overflow: hidden;
   user-select: none;
 
@@ -47,7 +46,7 @@ const ExpandedSelector = styled(Option)`
 export const OptionText = styled(Text)<{ size?: "small" | "medium" }>`
   flex: 1 0;
   font-size: ${(props) =>
-    props.size == "medium" ? fontSize("default") : fontSize("small")};
+    props.size ? fontSize("default") : fontSize("small")};
   margin: 0 14px;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -120,6 +119,7 @@ export const DropDownOptions: React.FC<DropDownOptionsProps> = ({
         {options.map((option, index) => (
           <React.Fragment key={option.value}>
             <Option
+              size={size}
               isSelected={index === activeIndex}
               onPointerDown={() => onChange?.(option.value)}
               size={size}
