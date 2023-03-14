@@ -1,5 +1,6 @@
 export interface StatusBadgeProps {
-  color: string;
+  color?: string;
+  borderColor?: string;
   text?: string;
   tx?: string;
 }

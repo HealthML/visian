@@ -30,9 +30,17 @@ function getDisplayJob(job: Job): Job {
 }
 
 const badgeColors: Record<string, string> = {
-  queued: "veryLightGray",
-  running: "blueSheet",
-  succeeded: "greenSheet",
+  queued: "veryVeryLightGray",
+  running: "blueBackground",
+  succeeded: "greenBackground",
+  canceled: "orangeBackground",
+  failed: "redBackground",
+};
+
+const badgeBorderColors: Record<string, string> = {
+  queued: "sheetBorder",
+  running: "blueBorder",
+  succeeded: "greenBorder",
   canceled: "orangeBorder",
   failed: "redBorder",
 };
@@ -65,6 +73,7 @@ const columns = [
     cell: (props) => (
       <StatusBadge
         color={badgeColors[props.getValue()]}
+        borderColor={badgeBorderColors[props.getValue()]}
         tx={`job-status-${props.getValue()}`}
       />
     ),
