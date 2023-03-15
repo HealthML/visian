@@ -1,4 +1,10 @@
-import { Box, Modal, Screen, Text, useTranslation } from "@visian/ui-shared";
+import {
+  AbsoluteCover,
+  Box,
+  Modal,
+  Text,
+  useTranslation,
+} from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
 import React from "react";
 import styled from "styled-components";
@@ -6,16 +12,25 @@ import styled from "styled-components";
 import { ProjectList } from "../components/menu/projects-list/project-list";
 import { useProjects } from "../queries";
 
-const Container = styled(Screen)`
+const Container = styled(AbsoluteCover)`
+  display: flex;
+  flex-direction: column;
   padding: 20px;
+`;
+
+const TopBar = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 55px;
 `;
 
 const Main = styled(Box)`
   display: flex;
   justify-content: center;
-  height: 100%;
-  padding: 5rem 10rem;
-  padding-top: 4.5rem;
+  height: 85%;
+  width: 85%;
+  margin: auto;
 `;
 
 const StyledModal = styled(Modal)`
@@ -30,6 +45,7 @@ export const ProjectsScreen: React.FC = observer(() => {
 
   return (
     <Container title={`${translate("projects-base-title")}`}>
+      <TopBar />
       <Main>
         {isLoadingProjects ? (
           <StyledModal labelTx="projects-loading" />
