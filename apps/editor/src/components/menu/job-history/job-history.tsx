@@ -1,17 +1,17 @@
 import { Modal, Text, useTranslation } from "@visian/ui-shared";
 import styled from "styled-components";
 
-import { useJobs } from "../../../queries";
-import { JobList } from "./job-list";
+import useJobsBy from "../../../queries/use-jobs-by";
+import { JobsTable } from "./job-table";
 
 const StyledModal = styled(Modal)`
   vertical-align: middle;
-  width: 100%;
+  width: 100vw;
   position: relative;
 `;
 
-export const JobHistory = () => {
-  const { jobs, jobsError, isErrorJobs, isLoadingJobs } = useJobs();
+export const JobHistory = ({ projectId }: { projectId: string }) => {
+  const { jobs, jobsError, isErrorJobs, isLoadingJobs } = useJobsBy(projectId);
 
   const { t: translate } = useTranslation();
 
@@ -23,7 +23,7 @@ export const JobHistory = () => {
           jobsError?.response?.statusText
         } (${jobsError?.response?.status})`}</Text>
       )}
-      {jobs && <JobList jobs={jobs} />}
+      {jobs && <JobsTable jobs={jobs} />}
     </StyledModal>
   );
 };

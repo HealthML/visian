@@ -6,7 +6,7 @@ import {
 } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import styled from "styled-components";
 
 import { JobHistory } from "../components/menu/job-history";
@@ -42,6 +42,8 @@ const IconButton = styled(FloatingUIButton)`
 export const ProjectJobsScreen: React.FC = observer(() => {
   const navigate = useNavigate();
 
+  const projectId = useParams().projectId || "";
+
   const { t: translate } = useTranslation();
 
   return (
@@ -57,9 +59,7 @@ export const ProjectJobsScreen: React.FC = observer(() => {
           <ProjectViewSwitch defaultSwitchSelection="jobs" />
         </StyledProjectViewSwitch>
       </MenuRow>
-      <Main>
-        <JobHistory />
-      </Main>
+      <Main>{projectId && <JobHistory projectId={projectId} />}</Main>
     </Container>
   );
 });

@@ -295,5 +295,18 @@
   "ml-model-selection-description": "Select the model you want to use to annotate the images",
   "ml-model-selection-title": "Model Selection",
   "ml-models-loading": "models loading...",
-  "ml-models-loading-error": "Error on loading ml models:"
+  "ml-models-loading-error": "Error on loading ml models:",
+
+  "jobs-loading": "Loading jobs...",
+  "jobs-loading-error": "Error on loading jobs:",
+  "job-model-name": "Model",
+  "job-model-version": "Version",
+  "job-started": "Started at",
+  "job-finished": "Finished at",
+  "job-status": "Status",
+  "job-status-queued": "queued",
+  "job-status-running": "running",
+  "job-status-succeeded": "succeeded",
+  "job-status-canceled": "canceled",
+  "job-status-failed": "failed"
 }
