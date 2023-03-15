@@ -28,6 +28,10 @@ export const TableCell = styled.div.attrs((props: { width?: number }) => props)`
   margin: auto;
 `;
 
+export const TableListItem = styled(ListItem)<{ isClickable?: boolean }>`
+  cursor: ${(props) => (props.isClickable ? "pointer" : "default")};
+`;
+
 /*
 Distributes the columns evenly if no column widths are provided or if the sum of the column widths is not 100.
 Otherwise it distributes the columns according to the provided column widths.
@@ -54,7 +58,8 @@ export const TableRow: <T>({
   columnWidths: number[];
   onClick?: (item: T) => void;
 }) => JSX.Element = ({ row, columnWidths, onClick }) => (
-  <ListItem
+  <TableListItem
+    isClickable={onClick ? true : false}
     onClick={() => {
       if (onClick) onClick(row.original);
     }}
@@ -64,7 +69,7 @@ export const TableRow: <T>({
         {flexRender(cell.column.columnDef.cell, cell.getContext())}
       </TableCell>
     ))}
-  </ListItem>
+  </TableListItem>
 );
 
 export const TableHeader: <T>({
