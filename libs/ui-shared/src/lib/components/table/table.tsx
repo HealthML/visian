@@ -1,4 +1,4 @@
-import { Cell, flexRender, Header, Table } from "@tanstack/react-table";
+import { flexRender, Header, Row, Table } from "@tanstack/react-table";
 import styled from "styled-components";
 
 import { stopPropagation } from "../../event-handling";
@@ -45,15 +45,15 @@ const distributeColumns = (
   return Array(columnCount).fill(100 / columnCount);
 };
 
-export const TableRow = ({
-  cells,
+export const TableRow: <T>({
+  row,
   columnWidths,
 }: {
-  cells: Cell<any, unknown>[];
+  row: Row<T>;
   columnWidths: number[];
-}) => (
+}) => JSX.Element = ({ row, columnWidths }) => (
   <ListItem>
-    {cells.map((cell, index) => (
+    {row.getVisibleCells().map((cell, index) => (
       <TableCell key={cell.id} width={columnWidths[index]}>
         {flexRender(cell.column.columnDef.cell, cell.getContext())}
       </TableCell>
@@ -61,13 +61,13 @@ export const TableRow = ({
   </ListItem>
 );
 
-export const TableHeader = ({
+export const TableHeader: <T>({
   headers,
   columnWidths,
 }: {
-  headers: Header<any, unknown>[];
+  headers: Header<T, unknown>[];
   columnWidths: number[];
-}) => (
+}) => JSX.Element = ({ headers, columnWidths }) => (
   <HeaderListItem isLast>
     {headers.map((header, index) => (
       <TableCell key={header.id} width={columnWidths[index]}>
@@ -79,13 +79,13 @@ export const TableHeader = ({
   </HeaderListItem>
 );
 
-export const TableLayout = ({
+export const TableLayout: <T>({
   table,
   columnWidths,
 }: {
-  table: Table<any>;
+  table: Table<T>;
   columnWidths?: number[];
-}) => {
+}) => JSX.Element = ({ table, columnWidths }) => {
   // We support only rendering the first header group
   const mainHeaderGroup = table.getHeaderGroups()[0];
   const widths = distributeColumns(
@@ -101,13 +101,9 @@ export const TableLayout = ({
         columnWidths={widths}
       />
 
-      {table.getRowModel().rows.map((row) => (
-        <TableRow
-          key={row.id}
-          cells={row.getVisibleCells()}
-          columnWidths={widths}
-        />
-      ))}
+      {table.getRowModel().rows.map((row) => {
+        return <TableRow key={row.id} row={row} columnWidths={widths} />;
+      })}
     </TableList>
   );
 };
