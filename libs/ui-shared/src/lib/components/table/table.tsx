@@ -48,11 +48,17 @@ const distributeColumns = (
 export const TableRow: <T>({
   row,
   columnWidths,
+  onClick,
 }: {
   row: Row<T>;
   columnWidths: number[];
-}) => JSX.Element = ({ row, columnWidths }) => (
-  <ListItem>
+  onClick?: (item: T) => void;
+}) => JSX.Element = ({ row, columnWidths, onClick }) => (
+  <ListItem
+    onClick={() => {
+      if (onClick) onClick(row.original);
+    }}
+  >
     {row.getVisibleCells().map((cell, index) => (
       <TableCell key={cell.id} width={columnWidths[index]}>
         {flexRender(cell.column.columnDef.cell, cell.getContext())}
@@ -82,10 +88,12 @@ export const TableHeader: <T>({
 export const TableLayout: <T>({
   table,
   columnWidths,
+  onRowClick,
 }: {
   table: Table<T>;
   columnWidths?: number[];
-}) => JSX.Element = ({ table, columnWidths }) => {
+  onRowClick?: (item: T) => void;
+}) => JSX.Element = ({ table, columnWidths, onRowClick }) => {
   // We support only rendering the first header group
   const mainHeaderGroup = table.getHeaderGroups()[0];
   const widths = distributeColumns(
@@ -102,7 +110,14 @@ export const TableLayout: <T>({
       />
 
       {table.getRowModel().rows.map((row) => {
-        return <TableRow key={row.id} row={row} columnWidths={widths} />;
+        return (
+          <TableRow
+            key={row.id}
+            row={row}
+            columnWidths={widths}
+            onClick={onRowClick}
+          />
+        );
       })}
     </TableList>
   );

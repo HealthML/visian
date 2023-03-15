@@ -7,19 +7,20 @@ import {
 } from "@tanstack/react-table";
 import {
   HeaderLabel,
-  Icon,
   ListItemLabel,
+  PopUp,
   StatusBadge,
   TableLayout,
 } from "@visian/ui-shared";
-import React from "react";
+import React, { useCallback } from "react";
 import styled from "styled-components";
 
 import { Job } from "../../../types";
 import { getDisplayDate } from "../util/display-date";
 
-const StyledIcon = styled(Icon)`
-  width: 30px;
+const StyledPopUp = styled(PopUp)`
+  align-items: left;
+  width: 45vw;
 `;
 
 function getDisplayJob(job: Job): Job {
@@ -89,21 +90,26 @@ const columns = [
       return 0;
     },
   }),
-  columnHelper.display({
-    id: "expand",
-    cell: (props) => {
-      if (props.row.original.status === "succeeded") {
-        return <StyledIcon icon="arrowLeft" />;
-      }
-      return null;
-    },
-  }),
 ];
-
 export const JobsTable = ({ jobs }: { jobs: Job[] }) => {
   const data = jobs.map((job: Job) => getDisplayJob(job));
 
-  const columnWidths = [15, 10, 25, 25, 20, 5];
+  const columnWidths = [20, 10, 25, 25, 20];
+
+  const [isPopupOpen, setPopUpOpen] = React.useState<boolean>(false);
+  const [selectedJob, setSelectedJob] = React.useState<Job | null>(null);
+
+  const openPopup = useCallback(() => {
+    setPopUpOpen(true);
+  }, []);
+  const closePopup = useCallback(() => {
+    setPopUpOpen(false);
+  }, []);
+
+  const handleOnClick = (job: Job) => {
+    setSelectedJob(job);
+    openPopup();
+  };
 
   const [sorting, setSorting] = React.useState<SortingState>([
     { id: "status", desc: false },
@@ -122,5 +128,21 @@ export const JobsTable = ({ jobs }: { jobs: Job[] }) => {
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
   });
-  return <TableLayout table={table} columnWidths={columnWidths} />;
+  return (
+    <>
+      {selectedJob && (
+        <StyledPopUp
+          titleTx="job-details"
+          isOpen={isPopupOpen}
+          dismiss={closePopup}
+          shouldDismissOnOutsidePress
+        ></StyledPopUp>
+      )}
+      <TableLayout
+        table={table}
+        columnWidths={columnWidths}
+        onRowClick={handleOnClick}
+      />
+    </>
+  );
 };

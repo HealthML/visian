@@ -299,6 +299,7 @@
 
   "jobs-loading": "Loading jobs...",
   "jobs-loading-error": "Error on loading jobs:",
+  "job-details": "Job Details",
   "job-model-name": "Model",
   "job-model-version": "Version",
   "job-started": "Started at",
