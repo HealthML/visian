@@ -42,7 +42,7 @@ const DropDownContainer = styled(FlexRow)`
 `;
 
 export const ModelSelectionPopup = observer<ModelPopUpProps>(
-  ({ isOpen, onClose, projectId, activeImageSelection, withOpenDatasetId }) => {
+  ({ isOpen, onClose, projectId, activeImageSelection, openWithDatasetId }) => {
     const { mlModels, mlModelsError, isErrorMlModels, isLoadingMlModels } =
       useMlModels();
 
@@ -114,19 +114,19 @@ export const ModelSelectionPopup = observer<ModelPopUpProps>(
           <DropDown
             options={mlModelNameOptions}
             value={selectedModelName}
-            onChange={(newValue) => setSelectedModelName(newValue)}
+            onChange={setSelectedModelName}
           />
           <DropDown
             options={mlModelVersionOptions}
             value={selectedModel}
-            onChange={(newValue) => setSelectedModel(newValue)}
+            onChange={setSelectedModel}
           />
         </DropDownContainer>
         <ProjectDataExplorer
           projectId={projectId}
           createAutoAnnotationJob={createAutoAnnotationJob}
           activeImageSelection={activeImageSelection}
-          withOpenDatasetId={withOpenDatasetId}
+          openWithDatasetId={openWithDatasetId}
         />
       </ModelSelectionPopupContainer>
     );

@@ -15,7 +15,6 @@ import { Image } from "../../../types";
 import useDatasetsBy from "apps/editor/src/queries/use-datasets-by";
 import { useDataset, useImagesBy } from "apps/editor/src/queries";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { a } from "aws-amplify";
 
 const Main = styled(FlexRow)`
   width: 100%;
@@ -52,20 +51,21 @@ export const ProjectDataExplorer = ({
   projectId,
   createAutoAnnotationJob,
   activeImageSelection,
-  withOpenDatasetId,
+  openWithDatasetId: openWithDatasetId,
 }: {
   projectId: string;
   createAutoAnnotationJob: (imageSelection: string[]) => Promise<void>;
   activeImageSelection: string[] | undefined;
-  withOpenDatasetId: string | undefined;
+  openWithDatasetId: string | undefined;
 }) => {
+  // TODO integrate Query Errors
   const { datasets, datasetsError, isErrorDatasets, isLoadingDatasets } =
     useDatasetsBy(projectId);
 
   const [selectedDataset, setSelectedDataset] = useState(
     (datasets &&
-      withOpenDatasetId &&
-      datasets.filter((dataset) => dataset.id === withOpenDatasetId)[0].id) ||
+      openWithDatasetId &&
+      datasets.filter((dataset) => dataset.id === openWithDatasetId)[0].id) ||
       "",
   );
 
@@ -83,11 +83,11 @@ export const ProjectDataExplorer = ({
   const [selectedImages, setSelectedImages] = useState<
     Map<string, Map<string, boolean>>
   >(
-    (withOpenDatasetId &&
+    (openWithDatasetId &&
       activeImageSelection &&
       new Map<string, Map<string, boolean>>([
         [
-          withOpenDatasetId,
+          openWithDatasetId,
           new Map<string, boolean>(
             (activeImageSelection ?? []).map((image: string) => [image, true]),
           ),

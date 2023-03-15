@@ -25,16 +25,6 @@ export const DatasetExplorer = ({ dataset }: { dataset: Dataset }) => {
     new Map((images ?? []).map((image) => [image.id, false])),
   );
 
-  // model selection popup
-  const [isModelSelectionPopUpOpen, setIsModelSelectionPopUpOpen] =
-    useState(false);
-  const openModelSelectionPopUp = useCallback(() => {
-    setIsModelSelectionPopUpOpen(true);
-  }, []);
-  const closeModelSelectionPopUp = useCallback(() => {
-    setIsModelSelectionPopUpOpen(false);
-  }, []);
-
   // sync selectedImages and images array
   useEffect(() => {
     setSelectedImages((previousSelectedImages) => {
@@ -91,6 +81,18 @@ export const DatasetExplorer = ({ dataset }: { dataset: Dataset }) => {
     [areAllSelected, setSelectAll],
   );
 
+  // model selection popup
+  const [isModelSelectionPopUpOpen, setIsModelSelectionPopUpOpen] =
+    useState(false);
+  const openModelSelectionPopUp = useCallback(() => {
+    setIsModelSelectionPopUpOpen(true);
+  }, []);
+  const closeModelSelectionPopUp = useCallback(() => {
+    setIsModelSelectionPopUpOpen(false);
+    setSelectAll(false);
+    setIsInSelectMode(false);
+  }, [setSelectAll]);
+
   const { t: translate } = useTranslation();
 
   return (
@@ -129,7 +131,7 @@ export const DatasetExplorer = ({ dataset }: { dataset: Dataset }) => {
         onClose={closeModelSelectionPopUp}
         activeImageSelection={activeImageSelection}
         projectId={dataset.project}
-        withOpenDatasetId={dataset.id}
+        openWithDatasetId={dataset.id}
       />
     </StyledModal>
   );
