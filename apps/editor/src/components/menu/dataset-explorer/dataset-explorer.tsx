@@ -2,7 +2,7 @@ import { Modal, Text, useTranslation } from "@visian/ui-shared";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import styled from "styled-components";
 
-import { useImagesBy } from "../../../queries";
+import { useImagesByDataset } from "../../../queries";
 import { Dataset } from "../../../types";
 import { DatasetImageList } from "../dataset-image-list";
 import { DatasetNavigationbar } from "../dataset-navigationbar";
@@ -19,7 +19,7 @@ export const DatasetExplorer = ({ dataset }: { dataset: Dataset }) => {
   const [isInSelectMode, setIsInSelectMode] = useState(false);
 
   const { images, imagesError, isErrorImages, isLoadingImages, refetchImages } =
-    useImagesBy(dataset.id);
+    useImagesByDataset(dataset.id);
 
   const [selectedImages, setSelectedImages] = useState<Map<string, boolean>>(
     new Map((images ?? []).map((image) => [image.id, false])),
