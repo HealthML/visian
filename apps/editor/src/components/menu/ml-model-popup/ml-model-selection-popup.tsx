@@ -48,18 +48,22 @@ export const ModelSelectionPopup = observer<ModelPopUpProps>(
         dismiss={onClose}
         shouldDismissOnOutsidePress
       >
-        <SectionLabel tx="ml-model-selection-description" />
         {isLoadingMlModels && <Text tx="ml-models-loading" />}
         {isErrorMlModels && (
           <Text>{`${t("ml-models-loading-error")} ${
             mlModelsError?.response?.statusText
           } (${mlModelsError?.response?.status})`}</Text>
         )}
-        {mlModels && (
-          <MlModelList
-            models={mlModels}
-            createAutoAnnotationJob={createAutoAnnotationJob}
-          />
+        {mlModels && mlModels.length > 0 ? (
+          <>
+            <SectionLabel tx="ml-model-selection-description" />
+            <MlModelList
+              models={mlModels}
+              createAutoAnnotationJob={createAutoAnnotationJob}
+            />
+          </>
+        ) : (
+          <SectionLabel tx="ml-models-none-available" />
         )}
       </ModelSelectionPopupContainer>
     );
