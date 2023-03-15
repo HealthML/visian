@@ -1,12 +1,23 @@
-import { color, FlexRow, Icon, List, ListItem, Text } from "@visian/ui-shared";
+import {
+  Box,
+  color,
+  FlexColumn,
+  FlexRow,
+  Icon,
+  List,
+  ListItem,
+  Button,
+  Text,
+} from "@visian/ui-shared";
 import styled from "styled-components";
 import { Image } from "../../../types";
 
 import useDatasetsBy from "apps/editor/src/queries/use-datasets-by";
 import { useDataset, useImagesBy } from "apps/editor/src/queries";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { a } from "aws-amplify";
 
-const FileExplorer = styled(FlexRow)`
+const Main = styled(FlexRow)`
   width: 100%;
   height: 50%;
 `;
@@ -26,12 +37,36 @@ const VerticalLine = styled.div`
   margin: 0 1vw;
 `;
 
-export const ProjectDataExplorer = ({ projectId }: { projectId: string }) => {
+const FileExplorer = styled(FlexColumn)`
+  width: 100%;
+  height: 100%;
+`;
+
+const BottomNavigationBar = styled(Box)`
+  display: flex;
+  justify-content: center;
+  margin-top: 10%;
+`;
+
+export const ProjectDataExplorer = ({
+  projectId,
+  createAutoAnnotationJob,
+  activeImageSelection,
+  withOpenDatasetId,
+}: {
+  projectId: string;
+  createAutoAnnotationJob: (imageSelection: string[]) => Promise<void>;
+  activeImageSelection: string[] | undefined;
+  withOpenDatasetId: string | undefined;
+}) => {
   const { datasets, datasetsError, isErrorDatasets, isLoadingDatasets } =
     useDatasetsBy(projectId);
 
   const [selectedDataset, setSelectedDataset] = useState(
-    (datasets && datasets[0].id) || "",
+    (datasets &&
+      withOpenDatasetId &&
+      datasets.filter((dataset) => dataset.id === withOpenDatasetId)[0].id) ||
+      "",
   );
 
   const { images, imagesError, isErrorImages, isLoadingImages, refetchImages } =
@@ -47,7 +82,19 @@ export const ProjectDataExplorer = ({ projectId }: { projectId: string }) => {
 
   const [selectedImages, setSelectedImages] = useState<
     Map<string, Map<string, boolean>>
-  >(new Map());
+  >(
+    (withOpenDatasetId &&
+      activeImageSelection &&
+      new Map<string, Map<string, boolean>>([
+        [
+          withOpenDatasetId,
+          new Map<string, boolean>(
+            (activeImageSelection ?? []).map((image: string) => [image, true]),
+          ),
+        ],
+      ])) ||
+      new Map(),
+  );
 
   const setImageSelection = useCallback(
     (datasetId: string, imageId: string, selection: boolean) => {
@@ -67,46 +114,58 @@ export const ProjectDataExplorer = ({ projectId }: { projectId: string }) => {
     [],
   );
 
+  const imageSelectionForJob = useCallback(() => {
+    const selectionForJob = Array.from(selectedImages.values()).flatMap(
+      (imageMaps) => Array.from(imageMaps.keys()),
+    );
+    return createAutoAnnotationJob(selectionForJob);
+  }, [createAutoAnnotationJob, selectedImages]);
+
   return (
     <FileExplorer>
-      {datasets && (
-        <StyledList>
-          {datasets.map((dataset) => (
-            <ListItem
-              key={dataset.id}
-              isLast
-              isActive={dataset.id === selectedDataset}
-              onPointerDown={() => selectDataset(dataset.id)}
-            >
-              <StyledIcon icon="folder" />
-              <Text>{dataset.name}</Text>
-            </ListItem>
-          ))}
-        </StyledList>
-      )}
-      <VerticalLine />
-      {datasets && (
-        <StyledList>
-          {images &&
-            images.map((image) => (
+      <Main>
+        {datasets && (
+          <StyledList>
+            {datasets.map((dataset) => (
               <ListItem
-                key={image.id}
+                key={dataset.id}
                 isLast
-                isActive={selectedImages.get(image.dataset)?.has(image.id)}
-                onPointerDown={() =>
-                  setImageSelection(
-                    image.dataset,
-                    image.id,
-                    !selectedImages.get(image.dataset)?.get(image.id),
-                  )
-                }
+                isActive={dataset.id === selectedDataset}
+                onPointerDown={() => selectDataset(dataset.id)}
               >
-                <StyledIcon icon="document" />
-                <Text>{image.dataUri}</Text>
+                <StyledIcon icon="folder" />
+                <Text>{dataset.name}</Text>
               </ListItem>
             ))}
-        </StyledList>
-      )}
+          </StyledList>
+        )}
+        <VerticalLine />
+        {datasets && (
+          <StyledList>
+            {images &&
+              images.map((image) => (
+                <ListItem
+                  key={image.id}
+                  isLast
+                  isActive={selectedImages.get(image.dataset)?.has(image.id)}
+                  onPointerDown={() =>
+                    setImageSelection(
+                      image.dataset,
+                      image.id,
+                      !selectedImages.get(image.dataset)?.get(image.id),
+                    )
+                  }
+                >
+                  <StyledIcon icon="document" />
+                  <Text>{image.dataUri}</Text>
+                </ListItem>
+              ))}
+          </StyledList>
+        )}
+      </Main>
+      <BottomNavigationBar>
+        <Button text="Start Job" onPointerDown={imageSelectionForJob} />
+      </BottomNavigationBar>
     </FileExplorer>
   );
 };

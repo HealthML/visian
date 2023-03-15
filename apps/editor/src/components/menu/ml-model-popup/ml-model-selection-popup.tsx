@@ -42,16 +42,16 @@ const DropDownContainer = styled(FlexRow)`
 `;
 
 export const ModelSelectionPopup = observer<ModelPopUpProps>(
-  ({ isOpen, onClose, activeImageSelection, projectId }) => {
+  ({ isOpen, onClose, projectId, activeImageSelection, withOpenDatasetId }) => {
     const { mlModels, mlModelsError, isErrorMlModels, isLoadingMlModels } =
       useMlModels();
 
-    const createAutoAnnotationJob = async (model: MlModel) => {
+    const createAutoAnnotationJob = async (imageSelection: string[]) => {
       try {
         await axios.post(`${hubBaseUrl}jobs`, {
-          images: activeImageSelection,
-          modelName: model.name,
-          modelVersion: model.version,
+          images: imageSelection,
+          modelName: selectedModel.name,
+          modelVersion: selectedModel.version,
         });
         // eslint-disable-next-line no-unused-expressions
         onClose && onClose();
@@ -60,6 +60,7 @@ export const ModelSelectionPopup = observer<ModelPopUpProps>(
         onClose && onClose();
       }
     };
+
     const [selectedModelName, setSelectedModelName] = useState(
       (mlModels && mlModels[0].name) || "",
     );
@@ -121,7 +122,12 @@ export const ModelSelectionPopup = observer<ModelPopUpProps>(
             onChange={(newValue) => setSelectedModel(newValue)}
           />
         </DropDownContainer>
-        <ProjectDataExplorer projectId={projectId} />
+        <ProjectDataExplorer
+          projectId={projectId}
+          createAutoAnnotationJob={createAutoAnnotationJob}
+          activeImageSelection={activeImageSelection}
+          withOpenDatasetId={withOpenDatasetId}
+        />
       </ModelSelectionPopupContainer>
     );
   },
