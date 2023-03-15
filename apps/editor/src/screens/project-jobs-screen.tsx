@@ -51,6 +51,7 @@ export const ProjectJobsScreen: React.FC = observer(() => {
           icon="home"
           tooltipTx="Home"
           onPointerDown={() => navigate(`/projects`)}
+          isActive={false}
         />
         <StyledProjectViewSwitch>
           <ProjectViewSwitch defaultSwitchSelection="jobs" />
