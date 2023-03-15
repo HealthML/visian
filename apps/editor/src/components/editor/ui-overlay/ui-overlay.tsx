@@ -12,7 +12,6 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import styled from "styled-components";
 
-import { UIOverlayProps } from "./ui-overlay.props";
 import { useStore } from "../../../app/root-store";
 import { whoHome } from "../../../constants";
 import { importFilesToDocument } from "../../../import-handling";
@@ -43,6 +42,7 @@ import { Toolbar } from "../toolbar";
 import { TopConsole } from "../top-console";
 import { UndoRedoButtons } from "../undo-redo-buttons";
 import { ViewSettings } from "../view-settings";
+import { UIOverlayProps } from "./ui-overlay.props";
 
 const Container = styled(AbsoluteCover)`
   align-items: stretch;
