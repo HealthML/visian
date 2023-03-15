@@ -1,4 +1,6 @@
 import {
+  Box,
+  Button,
   color,
   DropDown,
   EnumParam,
@@ -13,12 +15,13 @@ import {
   Text,
   useTranslation,
 } from "@visian/ui-shared";
+import useDatasetsBy from "apps/editor/src/queries/use-datasets-by";
 import axios from "axios";
 import { observer } from "mobx-react-lite";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import styled from "styled-components";
 
-import { useDataset, useMlModels } from "../../../queries";
+import { useDataset, useImagesBy, useMlModels } from "../../../queries";
 import { hubBaseUrl } from "../../../queries/hub-base-url";
 import { MlModel } from "../../../types";
 import { MlModelList } from "../ml-model-list";
@@ -41,25 +44,33 @@ const DropDownContainer = styled(FlexRow)`
   hight: 30%;
 `;
 
+const BottomNavigationBar = styled(Box)`
+  display: flex;
+  justify-content: center;
+  margin-top: 10%;
+`;
 export const ModelSelectionPopup = observer<ModelPopUpProps>(
   ({ isOpen, onClose, projectId, activeImageSelection, openWithDatasetId }) => {
     const { mlModels, mlModelsError, isErrorMlModels, isLoadingMlModels } =
       useMlModels();
 
-    const createAutoAnnotationJob = async (imageSelection: string[]) => {
-      try {
-        await axios.post(`${hubBaseUrl}jobs`, {
-          images: imageSelection,
-          modelName: selectedModel.name,
-          modelVersion: selectedModel.version,
-        });
-        // eslint-disable-next-line no-unused-expressions
-        onClose && onClose();
-      } catch (error: any) {
-        // eslint-disable-next-line no-unused-expressions
-        onClose && onClose();
-      }
-    };
+    const createAutoAnnotationJob = useCallback(
+      async (imageSelection: string[]) => {
+        try {
+          await axios.post(`${hubBaseUrl}jobs`, {
+            images: imageSelection,
+            modelName: selectedModel.name,
+            modelVersion: selectedModel.version,
+          });
+          // eslint-disable-next-line no-unused-expressions
+          onClose && onClose();
+        } catch (error: any) {
+          // eslint-disable-next-line no-unused-expressions
+          onClose && onClose();
+        }
+      },
+      [],
+    );
 
     const [selectedModelName, setSelectedModelName] = useState(
       (mlModels && mlModels[0].name) || "",
@@ -94,6 +105,78 @@ export const ModelSelectionPopup = observer<ModelPopUpProps>(
       [availableModelVersions],
     );
 
+    ////
+
+    // TODO integrate Query Errors
+    const { datasets, datasetsError, isErrorDatasets, isLoadingDatasets } =
+      useDatasetsBy(projectId);
+
+    const [selectedDataset, setSelectedDataset] = useState(
+      (datasets &&
+        openWithDatasetId &&
+        datasets.filter((dataset) => dataset.id === openWithDatasetId)[0].id) ||
+        "",
+    );
+
+    const {
+      images,
+      imagesError,
+      isErrorImages,
+      isLoadingImages,
+      refetchImages,
+    } = useImagesBy(selectedDataset);
+
+    const selectDataset = useCallback(
+      (datasetId: string) => {
+        setSelectedDataset(datasetId);
+      },
+      [selectedDataset],
+    );
+
+    const [selectedImages, setSelectedImages] = useState<
+      Map<string, Map<string, boolean>>
+    >(
+      (openWithDatasetId &&
+        activeImageSelection &&
+        new Map<string, Map<string, boolean>>([
+          [
+            openWithDatasetId,
+            new Map<string, boolean>(
+              (activeImageSelection ?? []).map((image: string) => [
+                image,
+                true,
+              ]),
+            ),
+          ],
+        ])) ||
+        new Map(),
+    );
+
+    const setImageSelection = useCallback(
+      (datasetId: string, imageId: string, selection: boolean) => {
+        setSelectedImages((prevSelectedImages) => {
+          if (selection) {
+            prevSelectedImages.get(datasetId)?.set(imageId, selection);
+          } else {
+            prevSelectedImages.get(datasetId)?.delete(imageId);
+          }
+          prevSelectedImages.set(
+            datasetId,
+            prevSelectedImages.get(datasetId) || new Map(),
+          );
+          return new Map(prevSelectedImages);
+        });
+      },
+      [],
+    );
+
+    const imageSelectionForJob = useCallback(() => {
+      const selectionForJob = Array.from(selectedImages.values()).flatMap(
+        (imageMaps) => Array.from(imageMaps.keys()),
+      );
+      return createAutoAnnotationJob(selectionForJob);
+    }, [createAutoAnnotationJob, selectedImages]);
+
     const { t } = useTranslation();
 
     return (
@@ -123,11 +206,17 @@ export const ModelSelectionPopup = observer<ModelPopUpProps>(
           />
         </DropDownContainer>
         <ProjectDataExplorer
-          projectId={projectId}
-          createAutoAnnotationJob={createAutoAnnotationJob}
-          activeImageSelection={activeImageSelection}
-          openWithDatasetId={openWithDatasetId}
+          datasets={datasets}
+          images={images}
+          selectedDataset={selectedDataset}
+          selectedImages={selectedImages}
+          selectDataset={selectDataset}
+          setImageSelection={setImageSelection}
         />
+
+        <BottomNavigationBar>
+          <Button text="Start Job" onPointerDown={imageSelectionForJob} />
+        </BottomNavigationBar>
       </ModelSelectionPopupContainer>
     );
   },
