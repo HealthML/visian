@@ -11,6 +11,7 @@ import styled from "styled-components";
 
 import { useAnnotationsByImage } from "../../../queries";
 import { Annotation, Image } from "../../../types";
+import { editorPath } from "../util";
 
 const Spacer = styled.div`
   width: 10px;
@@ -69,20 +70,6 @@ export const DatasetImageListItem = ({
     });
   }, [refetchAnnotations]);
 
-  const configureEditorUrl = (
-    img: Image | null,
-    annotation: Annotation | null,
-  ): string => {
-    const query: string[] = [];
-    if (img) {
-      query.push(`imageId=${img.id}`);
-    }
-    if (annotation) {
-      query.push(`annotationId=${annotation.id}`);
-    }
-    return `/editor?${query.join("&")}`;
-  };
-
   const { t: translate } = useTranslation();
   const navigate = useNavigate();
 
@@ -100,7 +87,7 @@ export const DatasetImageListItem = ({
         )}
         <ClickableText
           onClick={() => {
-            navigate(configureEditorUrl(image, null));
+            navigate(editorPath(image.id));
           }}
         >
           {image.dataUri}
@@ -125,7 +112,7 @@ export const DatasetImageListItem = ({
                 <ListItem>
                   <ClickableText
                     onClick={() => {
-                      navigate(configureEditorUrl(image, annotation));
+                      navigate(editorPath(image.id, annotation.id));
                     }}
                   >
                     {annotation.dataUri}
