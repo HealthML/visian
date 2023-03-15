@@ -7,14 +7,20 @@ import {
 } from "@tanstack/react-table";
 import {
   HeaderLabel,
+  Icon,
   ListItemLabel,
   StatusBadge,
   TableLayout,
 } from "@visian/ui-shared";
 import React from "react";
+import styled from "styled-components";
 
 import { Job } from "../../../types";
 import { getDisplayDate } from "../util/display-date";
+
+const StyledIcon = styled(Icon)`
+  width: 30px;
+`;
 
 function getDisplayJob(job: Job): Job {
   return {
@@ -83,12 +89,21 @@ const columns = [
       return 0;
     },
   }),
+  columnHelper.display({
+    id: "expand",
+    cell: (props) => {
+      if (props.row.original.status === "succeeded") {
+        return <StyledIcon icon="arrowLeft" />;
+      }
+      return null;
+    },
+  }),
 ];
 
 export const JobsTable = ({ jobs }: { jobs: Job[] }) => {
   const data = jobs.map((job: Job) => getDisplayJob(job));
 
-  const columnWidths = [20, 10, 25, 25, 20];
+  const columnWidths = [15, 10, 25, 25, 20, 5];
 
   const [sorting, setSorting] = React.useState<SortingState>([
     { id: "status", desc: false },
