@@ -7,14 +7,21 @@ import {
   useTranslation,
 } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
+import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import { useAnnotationsByJob } from "../../../../queries";
-import { Job } from "../../../../types";
+import { editorPath } from "../../util";
 import { JobDetailsPopUpProps } from "./job-details-popup.props";
 
 const StyledPopUp = styled(PopUp)`
   align-items: left;
   width: 45vw;
+`;
+
+const ClickableListItem = styled(ListItem)`
+  &:hover {
+    cursor: pointer;
+  }
 `;
 
 export const JobDetailsPopUp = observer<JobDetailsPopUpProps>(
@@ -27,6 +34,7 @@ export const JobDetailsPopUp = observer<JobDetailsPopUpProps>(
     } = useAnnotationsByJob(job.id);
 
     const { t } = useTranslation();
+    const navigate = useNavigate();
 
     return (
       <StyledPopUp
@@ -45,7 +53,13 @@ export const JobDetailsPopUp = observer<JobDetailsPopUpProps>(
         {annotations && (
           <List>
             {annotations?.map((annotation) => (
-              <ListItem>{annotation.dataUri}</ListItem>
+              <ClickableListItem
+                onClick={() =>
+                  navigate(editorPath(annotation.image, annotation.id))
+                }
+              >
+                {annotation.dataUri}
+              </ClickableListItem>
             ))}
           </List>
         )}
