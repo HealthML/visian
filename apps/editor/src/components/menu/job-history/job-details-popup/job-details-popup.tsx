@@ -1,9 +1,8 @@
 import {
-  fontSize,
+  SectionHeader,
   List,
   ListItem,
   PopUp,
-  Subtitle,
   Text,
   useTranslation,
 } from "@visian/ui-shared";
@@ -16,10 +15,6 @@ import { JobDetailsPopUpProps } from "./job-details-popup.props";
 const StyledPopUp = styled(PopUp)`
   align-items: left;
   width: 45vw;
-`;
-
-const StyledSubtitle = styled(Subtitle)`
-  font-size: ${fontSize("navigation")};
 `;
 
 export const JobDetailsPopUp = observer<JobDetailsPopUpProps>(
@@ -40,7 +35,7 @@ export const JobDetailsPopUp = observer<JobDetailsPopUpProps>(
         dismiss={onClose}
         shouldDismissOnOutsidePress
       >
-        <StyledSubtitle tx={"annotations-generated"} />
+        <SectionHeader tx={"annotations-generated"} />
         {isErrorAnnotations && (
           <Text>{`${t("annotations-loading-error")} ${
             annotationsError?.response?.statusText
