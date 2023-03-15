@@ -6,7 +6,7 @@ import {
   useTranslation,
 } from "@visian/ui-shared";
 import { useCallback, useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import styled from "styled-components";
 
 import { useAnnotationsBy } from "../../../queries";
@@ -72,6 +72,8 @@ export const DatasetImageListItem = ({
   const configureEditorUrl = (
     img: Image | null,
     annotation: Annotation | null,
+    project: string | null,
+    dataset: string | null,
   ): string => {
     const query: string[] = [];
     if (img) {
@@ -80,11 +82,20 @@ export const DatasetImageListItem = ({
     if (annotation) {
       query.push(`annotationId=${annotation.id}`);
     }
+    if (project) {
+      query.push(`projectId=${project}`);
+    }
+    if (dataset) {
+      query.push(`datasetId=${dataset}`);
+    }
     return `/editor?${query.join("&")}`;
   };
 
   const { t: translate } = useTranslation();
   const navigate = useNavigate();
+
+  const project = useParams().projectId || "";
+  const dataset = useParams().datasetId || "";
 
   return (
     <>
@@ -100,7 +111,7 @@ export const DatasetImageListItem = ({
         )}
         <ClickableText
           onClick={() => {
-            navigate(configureEditorUrl(image, null));
+            navigate(configureEditorUrl(image, null, project, dataset));
           }}
         >
           {image.dataUri}
@@ -125,7 +136,9 @@ export const DatasetImageListItem = ({
                 <ListItem>
                   <ClickableText
                     onClick={() => {
-                      navigate(configureEditorUrl(image, annotation));
+                      navigate(
+                        configureEditorUrl(image, annotation, project, dataset),
+                      );
                     }}
                   >
                     {annotation.dataUri}
