@@ -291,6 +291,7 @@
   "annotations-loading": "Annotationen werden geladen...",
   "annotations-loading-error": "Fehler beim Laden der Annotationen:",
   "annotation-open-error": "Fehler beim Öffnen der Annotation",
+  "annotations-generated": "Erstellte Annotationen",
 
   "ml-model-selection-description": "Wähle das Modell mit dem die Bilder annotiert werden sollen",
   "ml-model-selection-title": "Modell Auswahl",
