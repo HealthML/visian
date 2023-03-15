@@ -2,7 +2,7 @@ export interface Job {
   id: string;
   modelName: string;
   modelVersion: string;
-  startedAt: string;
-  finishedAt: string;
+  startedAt: string | undefined;
+  finishedAt: string | undefined;
   status: string;
 }
