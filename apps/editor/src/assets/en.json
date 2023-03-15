@@ -291,7 +291,6 @@
   "annotations-loading": "Loading annotations...",
   "annotations-loading-error": "Error on loading annotations:",
   "annotation-open-error": "Error on opening annotation",
-  "annotations-generated": "Generated annotations",
 
   "ml-model-selection-description": "Select the model you want to use to annotate the images",
   "ml-model-selection-title": "Model Selection",
@@ -300,6 +299,7 @@
 
   "jobs-loading": "Loading jobs...",
   "jobs-loading-error": "Error on loading jobs:",
+  "job-selected-images": "Selected images",
   "job-details": "Job Details",
   "job-model-name": "Model",
   "job-model-version": "Version",
