@@ -17,11 +17,7 @@ import styled from "styled-components";
 
 import { Job } from "../../../types";
 import { getDisplayDate } from "../util/display-date";
-
-const StyledPopUp = styled(PopUp)`
-  align-items: left;
-  width: 45vw;
-`;
+import { JobDetailsPopUp } from "./job-details-popup/job-details-popup";
 
 function getDisplayJob(job: Job): Job {
   return {
@@ -131,12 +127,11 @@ export const JobsTable = ({ jobs }: { jobs: Job[] }) => {
   return (
     <>
       {selectedJob && (
-        <StyledPopUp
-          titleTx="job-details"
+        <JobDetailsPopUp
+          job={selectedJob}
           isOpen={isPopupOpen}
-          dismiss={closePopup}
-          shouldDismissOnOutsidePress
-        ></StyledPopUp>
+          onClose={closePopup}
+        ></JobDetailsPopUp>
       )}
       <TableLayout
         table={table}
