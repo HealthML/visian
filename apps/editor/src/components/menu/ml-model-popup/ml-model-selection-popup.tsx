@@ -20,7 +20,7 @@ const ModelSelectionPopupContainer = styled(PopUp)`
 `;
 
 export const ModelSelectionPopup = observer<ModelPopUpProps>(
-  ({ isOpen, onClose, activeImageSelection }) => {
+  ({ isOpen, onClose, activeImageSelection, projectId }) => {
     const { mlModels, mlModelsError, isErrorMlModels, isLoadingMlModels } =
       useMlModels();
 
@@ -30,6 +30,7 @@ export const ModelSelectionPopup = observer<ModelPopUpProps>(
           images: activeImageSelection,
           modelName: model.name,
           modelVersion: model.version,
+          project: projectId,
         });
         // eslint-disable-next-line no-unused-expressions
         onClose && onClose();
