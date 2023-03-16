@@ -17,6 +17,7 @@ import styled from "styled-components";
 import { useAnnotationsByJob } from "../../../../queries";
 import useImagesByJob from "../../../../queries/use-images-by-jobs";
 import { editorPath } from "../../util";
+import { DetailsRow, DetailsTable } from "./details-table";
 import { JobDetailsPopUpProps } from "./job-details-popup.props";
 
 const StyledPopUp = styled(PopUp)`
@@ -33,6 +34,7 @@ const ClickableListItem = styled(ListItem)`
 
 const ScrollableList = styled(List)`
   overflow-y: auto;
+  padding-right: 20px;
 `;
 
 const AnnotationStatus = styled.div<{ color: string; borderColor: string }>`
@@ -45,6 +47,9 @@ const AnnotationStatus = styled.div<{ color: string; borderColor: string }>`
     getColor(props.borderColor as keyof Theme["colors"])};
 `;
 
+const StyledDetailsTable = styled(DetailsTable)`
+  padding-bottom: 20px;
+`;
 export const JobDetailsPopUp = observer<JobDetailsPopUpProps>(
   ({ job, isOpen, onClose }) => {
     const { annotations, annotationsError, isErrorAnnotations } =
@@ -75,6 +80,17 @@ export const JobDetailsPopUp = observer<JobDetailsPopUpProps>(
         dismiss={onClose}
         shouldDismissOnOutsidePress
       >
+        {job && (
+          <StyledDetailsTable>
+            <DetailsRow
+              tx="job-model-name"
+              value={`${job.modelName} ${job.modelVersion}`}
+            />
+            <DetailsRow tx="job-started" value={job.startedAt} />
+            <DetailsRow tx="job-finished" value={job.finishedAt} />
+          </StyledDetailsTable>
+        )}
+        <Spacer />
         <SectionHeader tx="job-selected-images" />
         {isErrorImages && (
           <Text>{`${t("images-loading-error")} ${
