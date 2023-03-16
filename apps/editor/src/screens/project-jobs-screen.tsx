@@ -6,7 +6,7 @@ import {
 } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import styled from "styled-components";
 
 import { JobHistory } from "../components/menu/job-history";
@@ -15,9 +15,8 @@ import { ProjectViewSwitch } from "../components/menu/project-view-switch";
 const Main = styled(Box)`
   display: flex;
   justify-content: center;
-  height: 100%;
+  height: 90%;
   padding: 1rem 10rem;
-  padding-bottom: 5rem;
 `;
 
 const StyledProjectViewSwitch = styled(Box)`
@@ -39,6 +38,8 @@ const IconButton = styled(InvisibleButton)`
 export const ProjectJobsScreen: React.FC = observer(() => {
   const navigate = useNavigate();
 
+  const projectId = useParams().projectId || "";
+
   const { t: translate } = useTranslation();
 
   return (
@@ -48,7 +49,7 @@ export const ProjectJobsScreen: React.FC = observer(() => {
         <StyledProjectViewSwitch>
           <ProjectViewSwitch defaultSwitchSelection="jobs" />
         </StyledProjectViewSwitch>
-        <JobHistory />
+        {projectId && <JobHistory projectId={projectId} />}
       </Main>
     </Screen>
   );
