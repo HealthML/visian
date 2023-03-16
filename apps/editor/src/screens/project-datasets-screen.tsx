@@ -88,6 +88,12 @@ export const ProjectDatasetsScreen: React.FC = observer(() => {
               onPointerDown={() => navigate(`/projects`)}
               isActive={false}
             />
+            <LeftButton
+              icon="pixelBrush"
+              tooltipTx="open-editor"
+              onPointerDown={() => navigate(`/editor`)}
+              isActive={false}
+            />
           </MenuRow>
         </ColumnLeft>
         <ColumnCenter>

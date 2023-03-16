@@ -308,5 +308,7 @@
   "job-status-running": "Wird ausgeführt",
   "job-status-succeeded": "Erfolgreich",
   "job-status-canceled": "Abgebrochen",
-  "job-status-failed": "Fehlgeschlagen"
+  "job-status-failed": "Fehlgeschlagen",
+
+  "open-editor": "Editor öffnen"
 }
