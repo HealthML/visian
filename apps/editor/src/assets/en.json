@@ -310,5 +310,9 @@
   "job-status-canceled": "canceled",
   "job-status-failed": "failed",
 
-  "open-editor": "Open editor"
+  "open-editor": "Open editor",
+  "close-editor": "Close editor",
+
+  "home": "Go to projects overview",
+  "back": "Go back"
 }

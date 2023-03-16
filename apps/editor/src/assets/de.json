@@ -310,5 +310,9 @@
   "job-status-canceled": "Abgebrochen",
   "job-status-failed": "Fehlgeschlagen",
 
-  "open-editor": "Editor öffnen"
+  "open-editor": "Editor öffnen",
+  "close-editor": "Editor schließen",
+
+  "home": "Zur Projektübersicht",
+  "back": "Zurück"
 }

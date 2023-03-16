@@ -242,15 +242,15 @@ export const UIOverlay = observer<UIOverlayProps>(
 
     // navigation for home button
     const getNavigationPath = (
-      project: string | null,
-      dataset: string | null,
+      projectId: string | null,
+      datasetId: string | null,
     ): string => {
       const path: string[] = [];
-      if (project) {
-        path.push(`${project}`);
+      if (datasetId) {
+        path.push(`${projectId}`);
       }
-      if (project && dataset) {
-        path.push(`datasets/${dataset}`);
+      if (projectId && datasetId) {
+        path.push(`datasets/${datasetId}`);
       }
       return `/projects/${path.join("/")}`;
     };
@@ -322,7 +322,7 @@ export const UIOverlay = observer<UIOverlayProps>(
               <RightBar>
                 <FloatingUIButton
                   icon="exit"
-                  tooltipTx="Exit"
+                  tooltipTx="close-editor"
                   tooltipPosition="left"
                   onPointerDown={() =>
                     navigate(getNavigationPath(projectId, datasetId))

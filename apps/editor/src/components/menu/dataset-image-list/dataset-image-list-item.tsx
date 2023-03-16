@@ -72,30 +72,30 @@ export const DatasetImageListItem = ({
   const configureEditorUrl = (
     img: Image | null,
     annotation: Annotation | null,
-    project: string | null,
-    dataset: string | null,
+    projectId: string | null,
+    datasetId: string | null,
   ): string => {
-    const query: string[] = [];
+    const params = new URLSearchParams();
     if (img) {
-      query.push(`imageId=${img.id}`);
+      params.append("imageId", img.id);
     }
     if (annotation) {
-      query.push(`annotationId=${annotation.id}`);
+      params.append("annotationId", annotation.id);
     }
-    if (project) {
-      query.push(`projectId=${project}`);
+    if (projectId) {
+      params.append("projectId", projectId);
     }
-    if (dataset) {
-      query.push(`datasetId=${dataset}`);
+    if (datasetId) {
+      params.append("datasetId", datasetId);
     }
-    return `/editor?${query.join("&")}`;
+    return `/editor?${params.toString()}`;
   };
 
   const { t: translate } = useTranslation();
   const navigate = useNavigate();
 
-  const project = useParams().projectId || "";
-  const dataset = useParams().datasetId || "";
+  const projectId = useParams().projectId || "";
+  const datasetId = useParams().datasetId || "";
 
   return (
     <>
@@ -111,7 +111,7 @@ export const DatasetImageListItem = ({
         )}
         <ClickableText
           onClick={() => {
-            navigate(configureEditorUrl(image, null, project, dataset));
+            navigate(configureEditorUrl(image, null, projectId, datasetId));
           }}
         >
           {image.dataUri}
@@ -137,7 +137,12 @@ export const DatasetImageListItem = ({
                   <ClickableText
                     onClick={() => {
                       navigate(
-                        configureEditorUrl(image, annotation, project, dataset),
+                        configureEditorUrl(
+                          image,
+                          annotation,
+                          projectId,
+                          datasetId,
+                        ),
                       );
                     }}
                   >
