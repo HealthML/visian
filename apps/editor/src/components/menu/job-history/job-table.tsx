@@ -8,12 +8,10 @@ import {
 import {
   HeaderLabel,
   ListItemLabel,
-  PopUp,
   StatusBadge,
   TableLayout,
 } from "@visian/ui-shared";
 import React, { useCallback } from "react";
-import styled from "styled-components";
 
 import { Job } from "../../../types";
 import { getDisplayDate } from "../util/display-date";
@@ -131,7 +129,7 @@ export const JobsTable = ({ jobs }: { jobs: Job[] }) => {
           job={selectedJob}
           isOpen={isPopupOpen}
           onClose={closePopup}
-        ></JobDetailsPopUp>
+        />
       )}
       <TableLayout
         table={table}

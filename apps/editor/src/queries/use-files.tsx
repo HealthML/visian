@@ -1,9 +1,9 @@
 import path from "path";
 
 import { FileWithMetadata } from "../types";
+import { getImage } from "./get-image";
 import hubBaseUrl from "./hub-base-url";
 import { getAnnotation } from "./use-annotations-by";
-import { getImage } from "./get-image";
 
 const fetchFile = async (
   id: string,
