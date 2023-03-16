@@ -3,8 +3,8 @@ import { observer } from "mobx-react-lite";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 
-import { UIOverlayMenuProps } from "./ui-overlay-menu.props";
 import { ProjectViewSwitch } from "../project-view-switch";
+import { UIOverlayMenuProps } from "./ui-overlay-menu.props";
 
 const Container = styled(AbsoluteCover)`
   align-items: stretch;
@@ -93,13 +93,17 @@ export const UIOverlayMenu = observer<UIOverlayMenuProps>(
               <LeftButton
                 icon="home"
                 tooltipTx="Home"
+                tooltipPosition="right"
                 onPointerDown={() => navigate(`/projects`)}
+                isActive={false}
               />
               {backButton && (
                 <LeftButton
                   icon="arrowBack"
                   tooltipTx="Back"
+                  tooltipPosition="right"
                   onPointerDown={() => navigate(`../`)}
+                  isActive={false}
                 />
               )}
             </MenuRow>
@@ -113,7 +117,14 @@ export const UIOverlayMenu = observer<UIOverlayMenuProps>(
           </ColumnCenter>
           <ColumnRight>
             <RightBar>
-              {editButton && <RightButton icon="pixelBrush" tooltipTx="Edit" />}
+              {editButton && (
+                <RightButton
+                  icon="pixelBrush"
+                  tooltipTx="Edit"
+                  tooltipPosition="left"
+                  isActive={false}
+                />
+              )}
             </RightBar>
           </ColumnRight>
         </TopBar>
