@@ -11,16 +11,19 @@ const RowContainer = styled.div`
 
 const DetailsText = styled(Text)`
   display: table-cell;
-  padding: 0.1em 3em;
+  vertical-align: middle;
+  padding: 0.3em 3em;
   padding-left: 0;
 `;
 
 export const DetailsRow = ({
-  value,
   tx,
   text,
+  value,
+  content,
 }: {
-  value: string | undefined;
+  content?: React.ReactNode;
+  value?: string | undefined;
   tx?: string;
   text?: string;
 }) => {
@@ -28,7 +31,8 @@ export const DetailsRow = ({
   return (
     <RowContainer>
       <DetailsText tx={`${t(tx)}:`} text={`${text}:`} />
-      <DetailsText text={value ?? ""} />
+      {value && <DetailsText text={value} />}
+      {!value && content}
     </RowContainer>
   );
 };

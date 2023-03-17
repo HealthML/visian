@@ -8,8 +8,10 @@ export const StatusBadgeContainer = styled.div<
   Pick<StatusBadgeProps, "color" | "borderColor">
 >`
   box-sizing: border-box;
-  padding: 1% 9%;
-  width: 10em;
+  display: inline-block;
+  text-align: center;
+  padding: 0.1em 1em;
+  width: fit-content;
   height: fit-content;
   border-radius: ${radius("default")};
   border: 1px solid;
@@ -34,4 +36,4 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({
   );
 };
 
-export default StatusBadge;
+export default styled(StatusBadge)``;

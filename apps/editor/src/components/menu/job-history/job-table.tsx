@@ -5,17 +5,18 @@ import {
   SortingState,
   useReactTable,
 } from "@tanstack/react-table";
-import {
-  HeaderLabel,
-  ListItemLabel,
-  StatusBadge,
-  TableLayout,
-} from "@visian/ui-shared";
+import { HeaderLabel, ListItemLabel, TableLayout } from "@visian/ui-shared";
 import React, { useCallback } from "react";
+import styled from "styled-components";
 
 import { Job } from "../../../types";
 import { getDisplayDate } from "../util/display-date";
 import { JobDetailsPopUp } from "./job-details-popup/job-details-popup";
+import { JobStatusBadge } from "./job-status-badge/job-status-badge";
+
+const StyledJobStatus = styled(JobStatusBadge)`
+  width: 10em;
+`;
 
 function getDisplayJob(job: Job): Job {
   return {
@@ -29,22 +30,6 @@ function getDisplayJob(job: Job): Job {
       : undefined,
   };
 }
-
-const badgeColors: Record<string, string> = {
-  queued: "veryVeryLightGray",
-  running: "blueBackground",
-  succeeded: "greenBackground",
-  canceled: "orangeBackground",
-  failed: "redBackground",
-};
-
-const badgeBorderColors: Record<string, string> = {
-  queued: "sheetBorder",
-  running: "blueBorder",
-  succeeded: "greenBorder",
-  canceled: "orangeBorder",
-  failed: "redBorder",
-};
 
 const columnHelper = createColumnHelper<Job>();
 
@@ -71,13 +56,7 @@ const columns = [
   }),
   columnHelper.accessor("status", {
     header: () => <HeaderLabel tx="job-status" />,
-    cell: (props) => (
-      <StatusBadge
-        color={badgeColors[props.getValue()]}
-        borderColor={badgeBorderColors[props.getValue()]}
-        tx={`job-status-${props.getValue()}`}
-      />
-    ),
+    cell: (props) => <StyledJobStatus status={props.getValue()} />,
     // Make sure that queued jobs are at the top
     sortingFn: (rowA, rowB, id) => {
       if (rowA.getValue(id) === "queued") return -1;

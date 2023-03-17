@@ -4,5 +4,13 @@ export interface Job {
   modelVersion: string;
   startedAt: string | undefined;
   finishedAt: string | undefined;
-  status: string;
+  status: JobStatus;
+}
+
+export enum JobStatus {
+  queued = "queued",
+  running = "running",
+  succeeded = "succeeded",
+  canceled = "canceled",
+  failed = "failed",
 }

@@ -17,6 +17,7 @@ import styled from "styled-components";
 import { useAnnotationsByJob } from "../../../../queries";
 import useImagesByJob from "../../../../queries/use-images-by-jobs";
 import { editorPath } from "../../util";
+import { JobStatusBadge } from "../job-status-badge/job-status-badge";
 import { DetailsRow, DetailsTable } from "./details-table";
 import { JobDetailsPopUpProps } from "./job-details-popup.props";
 
@@ -88,9 +89,13 @@ export const JobDetailsPopUp = observer<JobDetailsPopUpProps>(
             />
             <DetailsRow tx="job-started" value={job.startedAt} />
             <DetailsRow tx="job-finished" value={job.finishedAt} />
+
+            <DetailsRow
+              tx="job-status"
+              content={<JobStatusBadge status={job.status} />}
+            />
           </StyledDetailsTable>
         )}
-        <Spacer />
         <SectionHeader tx="job-selected-images" />
         {isErrorImages && (
           <Text>{`${t("images-loading-error")} ${
