@@ -299,7 +299,8 @@
 
   "jobs-loading": "Loading jobs...",
   "jobs-loading-error": "Error on loading jobs:",
-  "job-selected-images": "Selected images",
+  "job-images": "Images",
+  "job-number-images": "Number of images",
   "job-details": "Job Details",
   "job-model-name": "Model",
   "job-model-version": "Version",

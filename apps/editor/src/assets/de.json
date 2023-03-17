@@ -281,11 +281,11 @@
   "datasets-loading-error": "Fehler beim Laden der Datensätze:",
   "no-datasets-available": "Aktuell sind keine Datensätze vorhanden",
 
-  "dataset-loading": "Dataset wird geladen...",
+  "dataset-loading": "Datensatz wird geladen...",
   "dataset-loading-error": "Fehler beim Laden des Datensatzes:",
 
-  "images-loading": "Images werden geladen...",
-  "images-loading-error": "Fehler beim Laden der Images:",
+  "images-loading": "Bilder werden geladen...",
+  "images-loading-error": "Fehler beim Laden der Bilder:",
   "image-open-error": "Fehler beim Öffnen des Bildes",
 
   "annotations-loading": "Annotationen werden geladen...",
@@ -300,7 +300,8 @@
   "jobs-loading": "Jobs werden geladen...",
   "jobs-loading-error": "Fehler beim Laden der Jobs:",
   "job-details": "Job Details",
-  "job-selected-images": "Ausgewählte Bilder",
+  "job-images": "Bilder",
+  "job-number-images": "Anzahl Bilder",
   "job-model-name": "Modell",
   "job-model-version": "Version",
   "job-started": "Gestartet am",

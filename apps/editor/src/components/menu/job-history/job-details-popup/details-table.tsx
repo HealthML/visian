@@ -12,7 +12,7 @@ const RowContainer = styled.div`
 const DetailsText = styled(Text)`
   display: table-cell;
   vertical-align: middle;
-  padding: 0.3em 3em;
+  padding: 0.2em 3em;
   padding-left: 0;
 `;
 

@@ -25,6 +25,7 @@ const StyledPopUp = styled(PopUp)`
   align-items: left;
   width: 45vw;
   height: 60vh;
+  max-width: 600px;
 `;
 
 const ClickableListItem = styled(ListItem)`
@@ -49,8 +50,9 @@ const AnnotationStatus = styled.div<{ color: string; borderColor: string }>`
 `;
 
 const StyledDetailsTable = styled(DetailsTable)`
-  padding-bottom: 20px;
+  padding: 20px 0;
 `;
+
 export const JobDetailsPopUp = observer<JobDetailsPopUpProps>(
   ({ job, isOpen, onClose }) => {
     const { annotations, annotationsError, isErrorAnnotations } =
@@ -82,21 +84,23 @@ export const JobDetailsPopUp = observer<JobDetailsPopUpProps>(
         shouldDismissOnOutsidePress
       >
         {job && (
-          <StyledDetailsTable>
-            <DetailsRow
-              tx="job-model-name"
-              value={`${job.modelName} ${job.modelVersion}`}
-            />
-            <DetailsRow tx="job-started" value={job.startedAt} />
-            <DetailsRow tx="job-finished" value={job.finishedAt} />
-
-            <DetailsRow
-              tx="job-status"
-              content={<JobStatusBadge status={job.status} />}
-            />
-          </StyledDetailsTable>
+          <>
+            <JobStatusBadge status={job.status} />
+            <StyledDetailsTable>
+              <DetailsRow
+                tx="job-model-name"
+                value={`${job.modelName} ${job.modelVersion}`}
+              />
+              <DetailsRow tx="job-started" value={job.startedAt} />
+              <DetailsRow tx="job-finished" value={job.finishedAt} />
+              <DetailsRow
+                tx="job-number-images"
+                value={`${images?.length ?? ""}`}
+              />
+            </StyledDetailsTable>
+          </>
         )}
-        <SectionHeader tx="job-selected-images" />
+        <SectionHeader tx="job-images" />
         {isErrorImages && (
           <Text>{`${t("images-loading-error")} ${
             imagesError?.response?.statusText
