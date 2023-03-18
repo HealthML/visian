@@ -57,20 +57,23 @@ export const TableRow: <T>({
   row: Row<T>;
   columnWidths: number[];
   onClick?: (item: T) => void;
-}) => JSX.Element = ({ row, columnWidths, onClick }) => (
-  <TableListItem
-    isClickable={onClick ? true : false}
-    onClick={() => {
-      if (onClick) onClick(row.original);
-    }}
-  >
-    {row.getVisibleCells().map((cell, index) => (
-      <TableCell key={cell.id} width={columnWidths[index]}>
-        {flexRender(cell.column.columnDef.cell, cell.getContext())}
-      </TableCell>
-    ))}
-  </TableListItem>
-);
+}) => JSX.Element = ({ row, columnWidths, onClick }) => {
+  const isClickable = onClick !== undefined;
+  return (
+    <TableListItem
+      isClickable={isClickable}
+      onClick={() => {
+        if (onClick) onClick(row.original);
+      }}
+    >
+      {row.getVisibleCells().map((cell, index) => (
+        <TableCell key={cell.id} width={columnWidths[index]}>
+          {flexRender(cell.column.columnDef.cell, cell.getContext())}
+        </TableCell>
+      ))}
+    </TableListItem>
+  );
+};
 
 export const TableHeader: <T>({
   headers,
@@ -114,16 +117,14 @@ export const TableLayout: <T>({
         columnWidths={widths}
       />
 
-      {table.getRowModel().rows.map((row) => {
-        return (
-          <TableRow
-            key={row.id}
-            row={row}
-            columnWidths={widths}
-            onClick={onRowClick}
-          />
-        );
-      })}
+      {table.getRowModel().rows.map((row) => (
+        <TableRow
+          key={row.id}
+          row={row}
+          columnWidths={widths}
+          onClick={onRowClick}
+        />
+      ))}
     </TableList>
   );
 };
