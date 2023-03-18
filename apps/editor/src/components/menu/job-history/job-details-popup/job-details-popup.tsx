@@ -1,12 +1,10 @@
 import {
-  color as getColor,
   List,
   ListItem,
   PopUp,
   SectionHeader,
-  Spacer,
+  SubtleText,
   Text,
-  Theme,
   useTranslation,
 } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
@@ -36,21 +34,15 @@ const ClickableListItem = styled(ListItem)`
 
 const ScrollableList = styled(List)`
   overflow-y: auto;
-  padding-right: 20px;
-`;
-
-const AnnotationStatus = styled.div<{ color: string; borderColor: string }>`
-  width: 1em;
-  height: 1em;
-  border-radius: 50%;
-  background-color: ${(props) =>
-    getColor(props.color as keyof Theme["colors"])};
-  border-color: ${(props) =>
-    getColor(props.borderColor as keyof Theme["colors"])};
+  padding-right: 1em;
 `;
 
 const StyledDetailsTable = styled(DetailsTable)`
-  padding: 20px 0;
+  padding: 1em 0 1.5em 0;
+`;
+
+const StyledText = styled(Text)`
+  padding-right: 0.8em;
 `;
 
 export const JobDetailsPopUp = observer<JobDetailsPopUpProps>(
@@ -120,13 +112,9 @@ export const JobDetailsPopUp = observer<JobDetailsPopUpProps>(
                   navigate(editorPath(image.id, findAnnotationId(image.id)))
                 }
               >
-                {image.dataUri}
-                <Spacer />
+                <StyledText text={image.dataUri} />
                 {imagesWithAnnotations?.includes(image.id) && (
-                  <AnnotationStatus
-                    color="greenBorder"
-                    borderColor="greenBorder"
-                  />
+                  <SubtleText tx="image-annotated" />
                 )}
               </ClickableListItem>
             ))}
