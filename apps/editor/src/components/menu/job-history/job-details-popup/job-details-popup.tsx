@@ -14,6 +14,7 @@ import styled from "styled-components";
 
 import { useAnnotationsByJob } from "../../../../queries";
 import useImagesByJob from "../../../../queries/use-images-by-jobs";
+import { Image } from "../../../../types";
 import { editorPath } from "../../util";
 import { JobStatusBadge } from "../job-status-badge/job-status-badge";
 import { DetailsRow, DetailsTable } from "./details-table";
@@ -38,7 +39,7 @@ const ScrollableList = styled(List)`
 `;
 
 const StyledDetailsTable = styled(DetailsTable)`
-  padding: 1em 0 1.5em 0;
+  padding: 1.5em 0;
 `;
 
 const StyledText = styled(Text)`
@@ -67,6 +68,16 @@ export const JobDetailsPopUp = observer<JobDetailsPopUpProps>(
       },
       [annotations],
     );
+
+    const compareImages = (a: Image, b: Image) => {
+      if (findAnnotationId(a.id) && !findAnnotationId(b.id)) {
+        return -1;
+      }
+      if (!findAnnotationId(a.id) && findAnnotationId(b.id)) {
+        return 1;
+      }
+      return 0;
+    };
 
     return (
       <StyledPopUp
@@ -106,7 +117,7 @@ export const JobDetailsPopUp = observer<JobDetailsPopUpProps>(
         {isLoadingImages && <Text tx="images-loading" />}
         {images && !isErrorAnnotations && (
           <ScrollableList>
-            {images?.map((image) => (
+            {images?.sort(compareImages).map((image) => (
               <ClickableListItem
                 onClick={() =>
                   navigate(editorPath(image.id, findAnnotationId(image.id)))
