@@ -297,6 +297,7 @@
   "ml-model-selection-title": "Modell Auswahl",
   "ml-models-loading": "Modelle werden geladen...",
   "ml-models-loading-error": "Fehler beim Laden der Modelle:",
+  "ml-models-none-available": "Es sind keine Modelle verfügbar.",
 
   "jobs-loading": "Jobs werden geladen...",
   "jobs-loading-error": "Fehler beim Laden der Jobs:",
@@ -312,5 +313,11 @@
   "job-status-running": "Wird ausgeführt",
   "job-status-succeeded": "Erfolgreich",
   "job-status-canceled": "Abgebrochen",
-  "job-status-failed": "Fehlgeschlagen"
+  "job-status-failed": "Fehlgeschlagen",
+
+  "open-editor": "Editor öffnen",
+  "close-editor": "Editor schließen",
+
+  "home": "Zur Projektübersicht",
+  "back": "Zurück"
 }

@@ -1,12 +1,21 @@
-export function editorPath(image?: string, annotation?: string) {
-  if (!image && !annotation) return "/editor";
-
-  const query: string[] = [];
-  if (image) {
-    query.push(`imageId=${image}`);
+export function editorPath(
+  imageId?: string,
+  annotationId?: string,
+  projectId?: string,
+  datasetId?: string,
+): string {
+  const params = new URLSearchParams();
+  if (imageId) {
+    params.append("imageId", imageId);
   }
-  if (annotation) {
-    query.push(`annotationId=${annotation}`);
+  if (annotationId) {
+    params.append("annotationId", annotationId);
   }
-  return `/editor?${query.join("&")}`;
+  if (projectId) {
+    params.append("projectId", projectId);
+  }
+  if (datasetId) {
+    params.append("datasetId", datasetId);
+  }
+  return `/editor?${params.toString()}`;
 }

@@ -1,8 +1,8 @@
 import {
+  AbsoluteCover,
   Box,
-  InvisibleButton,
+  FloatingUIButton,
   Modal,
-  Screen,
   Text,
   useTranslation,
 } from "@visian/ui-shared";
@@ -14,12 +14,56 @@ import styled from "styled-components";
 import { DatasetExplorer } from "../components/menu/dataset-explorer";
 import { useDataset } from "../queries";
 
+const Container = styled(AbsoluteCover)`
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+`;
+
+const TopBar = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 55px;
+`;
+
+const ColumnLeft = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  width: 33.33%;
+`;
+
+const ColumnCenter = styled.div`
+  display: flex;
+  flex: 1;
+  justify-content: center;
+  width: 33.33%;
+`;
+
+const ColumnRight = styled.div`
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  width: 33.33%;
+`;
+
 const Main = styled(Box)`
   display: flex;
   justify-content: center;
-  height: 100%;
-  padding: 1rem 10rem;
-  padding-bottom: 5rem;
+  height: 85%;
+  width: 85%;
+  margin: auto;
+`;
+
+const MenuRow = styled.div`
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+`;
+
+const LeftButton = styled(FloatingUIButton)`
+  margin-right: 16px;
 `;
 
 const StyledModal = styled(Modal)`
@@ -27,13 +71,9 @@ const StyledModal = styled(Modal)`
   width: 100%;
 `;
 
-const IconButton = styled(InvisibleButton)`
-  width: 40px;
-  margin: 5px;
-`;
-
 export const DatasetScreen: React.FC = observer(() => {
   const datasetId = useParams().datasetId || "";
+  const projectId = useParams().projectId || "";
 
   const { dataset, datasetError, isErrorDataset, isLoadingDataset } =
     useDataset(datasetId);
@@ -42,7 +82,7 @@ export const DatasetScreen: React.FC = observer(() => {
   const { t: translate } = useTranslation();
 
   return (
-    <Screen
+    <Container
       title={`${translate("dataset-base-title")} ${
         isLoadingDataset
           ? translate("loading")
@@ -53,7 +93,32 @@ export const DatasetScreen: React.FC = observer(() => {
           : ""
       }`}
     >
-      <IconButton icon="menu" onPointerDown={() => navigate(`/projects`)} />
+      <TopBar>
+        <ColumnLeft>
+          <MenuRow>
+            <LeftButton
+              icon="home"
+              tooltipTx="home"
+              onPointerDown={() => navigate(`/projects`)}
+              isActive={false}
+            />
+            <LeftButton
+              icon="arrowBack"
+              tooltipTx="back"
+              onPointerDown={() => navigate(`/projects/${projectId}/datasets`)}
+              isActive={false}
+            />
+            <LeftButton
+              icon="pixelBrush"
+              tooltipTx="open-editor"
+              onPointerDown={() => navigate(`/editor`)}
+              isActive={false}
+            />
+          </MenuRow>
+        </ColumnLeft>
+        <ColumnCenter />
+        <ColumnRight />
+      </TopBar>
       <Main>
         {isLoadingDataset && <StyledModal labelTx="dataset-loading" />}
         {isErrorDataset && (
@@ -65,7 +130,7 @@ export const DatasetScreen: React.FC = observer(() => {
         )}
         {dataset && <DatasetExplorer dataset={dataset} />}
       </Main>
-    </Screen>
+    </Container>
   );
 });
 

@@ -6,7 +6,6 @@ import { ProjectListItem } from "./project-list-item";
 
 const StyledProjectList = styled(List)`
   width: 100%;
-  height: 400px;
   overflow-y: auto;
 `;
 

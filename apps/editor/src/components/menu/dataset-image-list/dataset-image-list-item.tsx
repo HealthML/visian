@@ -6,7 +6,7 @@ import {
   useTranslation,
 } from "@visian/ui-shared";
 import { useCallback, useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import styled from "styled-components";
 
 import { useAnnotationsByImage } from "../../../queries";
@@ -73,6 +73,9 @@ export const DatasetImageListItem = ({
   const { t: translate } = useTranslation();
   const navigate = useNavigate();
 
+  const projectId = useParams().projectId || "";
+  const datasetId = useParams().datasetId || "";
+
   return (
     <>
       <ListItem>
@@ -87,7 +90,7 @@ export const DatasetImageListItem = ({
         )}
         <ClickableText
           onClick={() => {
-            navigate(editorPath(image.id));
+            navigate(editorPath(image.id, undefined, projectId, datasetId));
           }}
         >
           {image.dataUri}
@@ -112,7 +115,14 @@ export const DatasetImageListItem = ({
                 <ListItem>
                   <ClickableText
                     onClick={() => {
-                      navigate(editorPath(image.id, annotation.id));
+                      navigate(
+                        editorPath(
+                          image.id,
+                          annotation.id,
+                          projectId,
+                          datasetId,
+                        ),
+                      );
                     }}
                   >
                     {annotation.dataUri}

@@ -1,7 +1,7 @@
 import {
+  AbsoluteCover,
   Box,
-  InvisibleButton,
-  Screen,
+  FloatingUIButton,
   useTranslation,
 } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
@@ -12,28 +12,63 @@ import styled from "styled-components";
 import { JobHistory } from "../components/menu/job-history";
 import { ProjectViewSwitch } from "../components/menu/project-view-switch";
 
+const Container = styled(AbsoluteCover)`
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+`;
+
+const TopBar = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 55px;
+`;
+
+const ColumnLeft = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  width: 33.33%;
+`;
+
+const ColumnCenter = styled.div`
+  display: flex;
+  flex: 1;
+  justify-content: center;
+  width: 33.33%;
+`;
+
+const ColumnRight = styled.div`
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  width: 33.33%;
+`;
+
 const Main = styled(Box)`
   display: flex;
   justify-content: center;
-  height: 90%;
-  padding: 1rem 10rem;
+  height: 85%;
+  width: 85%;
+  margin: auto;
+`;
+
+const MenuRow = styled.div`
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+`;
+
+const LeftButton = styled(FloatingUIButton)`
+  margin-right: 16px;
 `;
 
 const StyledProjectViewSwitch = styled(Box)`
   display: flex;
   justify-content: center;
   width: 100%;
-  position: absolute;
-  top: 20px;
 `;
-
-const IconButton = styled(InvisibleButton)`
-  width: 40px;
-  margin: 5px;
-  z-index: 51;
-`;
-
-// TODO z-index logic
 
 export const ProjectJobsScreen: React.FC = observer(() => {
   const navigate = useNavigate();
@@ -43,15 +78,33 @@ export const ProjectJobsScreen: React.FC = observer(() => {
   const { t: translate } = useTranslation();
 
   return (
-    <Screen title={`${translate("project-base-title")}`}>
-      <IconButton icon="menu" onPointerDown={() => navigate(`/projects`)} />
-      <Main>
-        <StyledProjectViewSwitch>
-          <ProjectViewSwitch defaultSwitchSelection="jobs" />
-        </StyledProjectViewSwitch>
-        {projectId && <JobHistory projectId={projectId} />}
-      </Main>
-    </Screen>
+    <Container title={`${translate("project-base-title")}`}>
+      <TopBar>
+        <ColumnLeft>
+          <MenuRow>
+            <LeftButton
+              icon="home"
+              tooltipTx="home"
+              onPointerDown={() => navigate(`/projects`)}
+              isActive={false}
+            />
+            <LeftButton
+              icon="pixelBrush"
+              tooltipTx="open-editor"
+              onPointerDown={() => navigate(`/editor`)}
+              isActive={false}
+            />
+          </MenuRow>
+        </ColumnLeft>
+        <ColumnCenter>
+          <StyledProjectViewSwitch>
+            <ProjectViewSwitch defaultSwitchSelection="jobs" />
+          </StyledProjectViewSwitch>
+        </ColumnCenter>
+        <ColumnRight />
+      </TopBar>
+      <Main>{projectId && <JobHistory projectId={projectId} />}</Main>
+    </Container>
   );
 });
 
