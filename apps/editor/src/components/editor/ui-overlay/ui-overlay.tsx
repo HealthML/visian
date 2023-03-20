@@ -9,7 +9,7 @@ import {
 import { isFromWHO } from "@visian/utils";
 import { observer } from "mobx-react-lite";
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
@@ -265,7 +265,6 @@ export const UIOverlay = observer<UIOverlayProps>(
       return `/projects/${path.join("/")}`;
     };
 
-    const navigate = useNavigate();
     const projectId = searchParams.get("projectId") || "";
     const datasetId = searchParams.get("datasetId") || "";
 
@@ -335,7 +334,9 @@ export const UIOverlay = observer<UIOverlayProps>(
                   tooltipTx="close-editor"
                   tooltipPosition="left"
                   onPointerDown={() =>
-                    navigate(getNavigationPath(projectId, datasetId))
+                    store?.destroyRedirect(
+                      getNavigationPath(projectId, datasetId),
+                    )
                   }
                   isActive={false}
                 />
