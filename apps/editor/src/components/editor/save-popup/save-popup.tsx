@@ -15,9 +15,15 @@ const SectionLabel = styled(Text)`
   margin-bottom: 8px;
 `;
 
+const SaveAsInput = styled(TextField)`
+  margin: 0px 10px 0px 0px;
+  width: 100%;
+`;
+
 const SaveInput = styled(TextField)`
   margin: 0px 10px 0px 0px;
   width: 100%;
+  color: gray;
 `;
 
 const SaveButton = styled(Button)`
@@ -39,7 +45,7 @@ const InlineRowLast = styled(InlineRow)`
 
 const SavePopUpContainer = styled(PopUp)`
   align-items: left;
-  width: 500px;
+  width: 60%;
 `;
 
 export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
@@ -142,7 +148,7 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
           <SectionLabel tx="annotation-saving-overrwite" />
           <InlineRow>
             <SaveInput
-              placeholder={
+              value={
                 store?.editor.activeDocument?.activeLayer?.metaData?.dataUri
               }
               readOnly
@@ -152,7 +158,6 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
               onPointerDown={async () => {
                 if (await saveAnnotation()) {
                   onClose?.();
-                  store?.destroyRedirect("/", true);
                 }
               }}
             />
@@ -161,7 +166,7 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
       )}
       <SectionLabel tx="annotation-saving-as" />
       <InlineRowLast>
-        <SaveInput
+        <SaveAsInput
           placeholder="URI"
           value={newAnnotationURI}
           onChangeText={setnewAnnotationURI}
@@ -171,7 +176,6 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
           onPointerDown={async () => {
             if (await saveAnnotationAs(newAnnotationURI)) {
               onClose?.();
-              store?.destroyRedirect("/", true);
             }
           }}
         />

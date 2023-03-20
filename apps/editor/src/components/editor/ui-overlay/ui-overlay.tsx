@@ -314,9 +314,8 @@ export const UIOverlay = observer<UIOverlayProps>(
                       icon="save"
                       tooltipTx="annotation-saving"
                       tooltipPosition="left"
-                      onClick={openSavePopUp}
+                      onPointerDown={openSavePopUp}
                       isActive={false}
-                      isDisabled={store?.isDirty}
                     />
                   )}
                 {!isFromWHO() && (
