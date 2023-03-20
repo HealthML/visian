@@ -81,13 +81,19 @@ export const DatasetExplorer = ({ dataset }: { dataset: Dataset }) => {
     [areAllSelected, setSelectAll],
   );
 
+  const [openWithDatasetId, setOpenWithDatasetId] = useState<
+    string | undefined
+  >(dataset.id);
+
   // model selection popup
   const [isModelSelectionPopUpOpen, setIsModelSelectionPopUpOpen] =
     useState(false);
   const openModelSelectionPopUp = useCallback(() => {
     setIsModelSelectionPopUpOpen(true);
+    setOpenWithDatasetId(dataset.id);
   }, []);
   const closeModelSelectionPopUp = useCallback(() => {
+    setOpenWithDatasetId(undefined);
     setIsModelSelectionPopUpOpen(false);
     setSelectAll(false);
     setIsInSelectMode(false);
@@ -131,7 +137,7 @@ export const DatasetExplorer = ({ dataset }: { dataset: Dataset }) => {
         onClose={closeModelSelectionPopUp}
         activeImageSelection={activeImageSelection}
         projectId={dataset.project}
-        openWithDatasetId={dataset.id}
+        openWithDatasetId={openWithDatasetId}
       />
     </StyledModal>
   );
