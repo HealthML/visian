@@ -296,7 +296,7 @@
   "ml-model-selection-title": "Modell Auswahl",
   "ml-models-loading": "Modelle werden geladen...",
   "ml-models-loading-error": "Fehler beim Laden der Modelle:",
-  "ml-models-none-available": "Es sind keine Modelle verfügbar."
+  "ml-models-none-available": "Es sind keine Modelle verfügbar.",
 
   "jobs-loading": "Jobs werden geladen...",
   "jobs-loading-error": "Fehler beim Laden der Jobs:",
