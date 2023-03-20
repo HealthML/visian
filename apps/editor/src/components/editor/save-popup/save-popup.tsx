@@ -107,7 +107,7 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
         ? error.response.data.message
         : error.message
         ? error.message
-        : "annotation-saving-as-error";
+        : "annotation-saving-error";
       store?.setError({
         titleTx: "saving-error",
         descriptionTx: description,

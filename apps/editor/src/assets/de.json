@@ -285,7 +285,6 @@
   "annotation-saving-overrwite": "Existierende Annotationsdatei überschreiben",
   "annotation-saving-as": "Neue Annotationsdatei erstellen",
   "annotation-saving-error": "Fehler beim Speichern der Annotationsebene",
-  "annotation-saving-as-error": "Fehler beim Speichern Unter der Annotationsebene",
 
   "ml-model-selection-description": "Wähle das Modell mit dem die Bilder annotiert werden sollen",
   "ml-model-selection-title": "Modell Auswahl",
