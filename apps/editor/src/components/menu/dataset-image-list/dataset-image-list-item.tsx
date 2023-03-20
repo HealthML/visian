@@ -6,7 +6,7 @@ import {
   useTranslation,
 } from "@visian/ui-shared";
 import { useCallback, useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import styled from "styled-components";
 
 import { useAnnotationsBy } from "../../../queries";
@@ -72,19 +72,30 @@ export const DatasetImageListItem = ({
   const configureEditorUrl = (
     img: Image | null,
     annotation: Annotation | null,
+    projectId: string | null,
+    datasetId: string | null,
   ): string => {
-    const query: string[] = [];
+    const params = new URLSearchParams();
     if (img) {
-      query.push(`imageId=${img.id}`);
+      params.append("imageId", img.id);
     }
     if (annotation) {
-      query.push(`annotationId=${annotation.id}`);
+      params.append("annotationId", annotation.id);
     }
-    return `/editor?${query.join("&")}`;
+    if (projectId) {
+      params.append("projectId", projectId);
+    }
+    if (datasetId) {
+      params.append("datasetId", datasetId);
+    }
+    return `/editor?${params.toString()}`;
   };
 
   const { t: translate } = useTranslation();
   const navigate = useNavigate();
+
+  const projectId = useParams().projectId || "";
+  const datasetId = useParams().datasetId || "";
 
   return (
     <>
@@ -100,7 +111,7 @@ export const DatasetImageListItem = ({
         )}
         <ClickableText
           onClick={() => {
-            navigate(configureEditorUrl(image, null));
+            navigate(configureEditorUrl(image, null, projectId, datasetId));
           }}
         >
           {image.dataUri}
@@ -125,7 +136,14 @@ export const DatasetImageListItem = ({
                 <ListItem>
                   <ClickableText
                     onClick={() => {
-                      navigate(configureEditorUrl(image, annotation));
+                      navigate(
+                        configureEditorUrl(
+                          image,
+                          annotation,
+                          projectId,
+                          datasetId,
+                        ),
+                      );
                     }}
                   >
                     {annotation.dataUri}

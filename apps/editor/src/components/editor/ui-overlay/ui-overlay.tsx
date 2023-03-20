@@ -9,7 +9,7 @@ import {
 import { isFromWHO } from "@visian/utils";
 import { observer } from "mobx-react-lite";
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
@@ -240,6 +240,25 @@ export const UIOverlay = observer<UIOverlayProps>(
     };
     useEffect(loadImagesAndAnnotations, [searchParams, store]);
 
+    // navigation for home button
+    const getNavigationPath = (
+      projectId: string | null,
+      datasetId: string | null,
+    ): string => {
+      const path: string[] = [];
+      if (datasetId) {
+        path.push(`${projectId}`);
+      }
+      if (projectId && datasetId) {
+        path.push(`datasets/${datasetId}`);
+      }
+      return `/projects/${path.join("/")}`;
+    };
+
+    const navigate = useNavigate();
+    const projectId = searchParams.get("projectId") || "";
+    const datasetId = searchParams.get("datasetId") || "";
+
     return (
       <Container
         {...rest}
@@ -301,6 +320,15 @@ export const UIOverlay = observer<UIOverlayProps>(
             <ColumnRight>
               <SideViews />
               <RightBar>
+                <FloatingUIButton
+                  icon="exit"
+                  tooltipTx="close-editor"
+                  tooltipPosition="left"
+                  onPointerDown={() =>
+                    navigate(getNavigationPath(projectId, datasetId))
+                  }
+                  isActive={false}
+                />
                 {!isFromWHO() && (
                   <FloatingUIButton
                     icon="export"
