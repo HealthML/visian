@@ -30,6 +30,10 @@ export const Subtitle = styled(({ as, ...rest }: TextProps) => (
   font-weight: ${fontWeight("regular")};
 `;
 
+export const SectionHeader = styled(Subtitle)`
+  font-size: ${fontSize("navigation")};
+`;
+
 export const Title = styled(({ as, ...rest }: TextProps) => (
   <Text {...rest} as={as || "h2"} />
 ))`

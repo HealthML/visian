@@ -12,7 +12,7 @@ import { observer } from "mobx-react-lite";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { ReactQueryDevtools } from "react-query/devtools";
-import { Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
 
 import {
   whoAwsConfigDeployment,
@@ -21,8 +21,14 @@ import {
 } from "../constants";
 import { setUpEventHandling } from "../event-handling";
 import type { RootStore } from "../models";
-import hubBaseUrl from "../querys/hub-base-url";
-import { DatasetScreen, EditorScreen } from "../screens";
+import hubBaseUrl from "../queries/hub-base-url";
+import {
+  DatasetScreen,
+  EditorScreen,
+  ProjectDatasetsScreen,
+  ProjectJobsScreen,
+  ProjectsScreen,
+} from "../screens";
 import { setupRootStore, StoreProvider } from "./root-store";
 
 if (isFromWHO()) {
@@ -79,7 +85,21 @@ function App(): JSX.Element {
               <ModalRoot />
               {hubBaseUrl ? (
                 <Routes>
-                  <Route path="/" element={<DatasetScreen />} />
+                  <Route path="projects">
+                    <Route path="" element={<ProjectsScreen />} />
+                    <Route path=":projectId/datasets">
+                      <Route path="" element={<ProjectDatasetsScreen />} />
+                      <Route path=":datasetId" element={<DatasetScreen />} />
+                    </Route>
+                    <Route
+                      path=":projectId/jobs"
+                      element={<ProjectJobsScreen />}
+                    />
+                  </Route>
+                  <Route
+                    path="/"
+                    element={<Navigate replace to="/projects" />}
+                  />
                   <Route path="/editor" element={<EditorScreen />} />
                 </Routes>
               ) : (

@@ -4,7 +4,7 @@ import { useQuery } from "react-query";
 import { Image } from "../types";
 import { hubBaseUrl } from "./hub-base-url";
 
-const getImagesBy = async (datasetId: string) => {
+const getImagesByDataset = async (datasetId: string) => {
   const imagesResponse = await axios.get<Image[]>(`${hubBaseUrl}images`, {
     params: {
       dataset: datasetId,
@@ -13,18 +13,11 @@ const getImagesBy = async (datasetId: string) => {
   return imagesResponse.data;
 };
 
-export const getImage = async (imageId: string) => {
-  const imageResponse = await axios.get<Image>(
-    `${hubBaseUrl}images/${imageId}`,
-  );
-  return imageResponse.data;
-};
-
-export const useImagesBy = (datasetId: string) => {
+export const useImagesByDataset = (datasetId: string) => {
   const { data, error, isError, isLoading, refetch, remove } = useQuery<
     Image[],
     AxiosError<Image[]>
-  >(["imagesBy", datasetId], () => getImagesBy(datasetId), {
+  >(["imagesByDataset", datasetId], () => getImagesByDataset(datasetId), {
     retry: 2, // retry twice if fetch fails
     refetchInterval: 1000 * 10, // refetch every 10 seconds
   });
@@ -39,4 +32,4 @@ export const useImagesBy = (datasetId: string) => {
   };
 };
 
-export default useImagesBy;
+export default useImagesByDataset;

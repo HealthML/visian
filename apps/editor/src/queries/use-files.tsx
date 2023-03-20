@@ -2,9 +2,9 @@ import axios from "axios";
 import path from "path";
 
 import { Annotation, FileWithMetadata } from "../types";
+import { getImage } from "./get-image";
 import hubBaseUrl from "./hub-base-url";
 import { getAnnotation } from "./use-annotations-by";
-import { getImage } from "./use-images-by";
 
 const fetchFile = async (
   id: string,

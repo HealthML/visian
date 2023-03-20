@@ -2,8 +2,6 @@ import {
   AbsoluteCover,
   Box,
   FloatingUIButton,
-  Modal,
-  Text,
   useTranslation,
 } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
@@ -11,8 +9,8 @@ import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import styled from "styled-components";
 
-import { DatasetExplorer } from "../components/menu/dataset-explorer";
-import { useDataset } from "../queries";
+import { DatasetsGrid } from "../components/menu/datasets-grid";
+import { ProjectViewSwitch } from "../components/menu/project-view-switch";
 
 const Container = styled(AbsoluteCover)`
   display: flex;
@@ -66,33 +64,21 @@ const LeftButton = styled(FloatingUIButton)`
   margin-right: 16px;
 `;
 
-const StyledModal = styled(Modal)`
-  vertical-align: middle;
+const StyledProjectViewSwitch = styled(Box)`
+  display: flex;
+  justify-content: center;
   width: 100%;
 `;
 
-export const DatasetScreen: React.FC = observer(() => {
-  const datasetId = useParams().datasetId || "";
+export const ProjectDatasetsScreen: React.FC = observer(() => {
+  const navigate = useNavigate();
+
   const projectId = useParams().projectId || "";
 
-  const { dataset, datasetError, isErrorDataset, isLoadingDataset } =
-    useDataset(datasetId);
-
-  const navigate = useNavigate();
   const { t: translate } = useTranslation();
 
   return (
-    <Container
-      title={`${translate("dataset-base-title")} ${
-        isLoadingDataset
-          ? translate("loading")
-          : isErrorDataset
-          ? translate("error")
-          : dataset
-          ? dataset.name
-          : ""
-      }`}
-    >
+    <Container title={`${translate("project-base-title")}`}>
       <TopBar>
         <ColumnLeft>
           <MenuRow>
@@ -103,12 +89,6 @@ export const DatasetScreen: React.FC = observer(() => {
               isActive={false}
             />
             <LeftButton
-              icon="arrowBack"
-              tooltipTx="back"
-              onPointerDown={() => navigate(`/projects/${projectId}/datasets`)}
-              isActive={false}
-            />
-            <LeftButton
               icon="pixelBrush"
               tooltipTx="open-editor"
               onPointerDown={() => navigate(`/editor`)}
@@ -116,22 +96,16 @@ export const DatasetScreen: React.FC = observer(() => {
             />
           </MenuRow>
         </ColumnLeft>
-        <ColumnCenter />
+        <ColumnCenter>
+          <StyledProjectViewSwitch>
+            <ProjectViewSwitch defaultSwitchSelection="datasets" />
+          </StyledProjectViewSwitch>
+        </ColumnCenter>
         <ColumnRight />
       </TopBar>
-      <Main>
-        {isLoadingDataset && <StyledModal labelTx="dataset-loading" />}
-        {isErrorDataset && (
-          <StyledModal labelTx="error">
-            <Text>{`${translate("dataset-loading-error")} ${
-              datasetError?.response?.statusText
-            } (${datasetError?.response?.status})`}</Text>
-          </StyledModal>
-        )}
-        {dataset && <DatasetExplorer dataset={dataset} />}
-      </Main>
+      <Main>{projectId && <DatasetsGrid projectId={projectId} />}</Main>
     </Container>
   );
 });
 
-export default DatasetScreen;
+export default ProjectDatasetsScreen;
