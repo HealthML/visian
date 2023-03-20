@@ -1,6 +1,7 @@
+import axios from "axios";
 import path from "path";
 
-import { FileWithMetadata } from "../types";
+import { Annotation, FileWithMetadata } from "../types";
 import { getImage } from "./get-image";
 import hubBaseUrl from "./hub-base-url";
 import { getAnnotation } from "./use-annotations-by";
@@ -48,4 +49,38 @@ export const fetchAnnotationFile = async (
   )) as FileWithMetadata;
   annotationFile.metadata = annotation;
   return annotationFile;
+};
+
+export const patchAnnotationFile = async (
+  annotation: Annotation,
+  file: File,
+): Promise<Annotation> => {
+  const apiEndpoint = `${hubBaseUrl}annotations/${annotation.id}`;
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("dataUri", annotation.dataUri);
+  const response = await axios.patch(apiEndpoint, formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+  return response.data;
+};
+
+export const postAnnotationFile = async (
+  imageId: string,
+  annotationUri: string,
+  file: File,
+): Promise<Annotation> => {
+  const apiEndpoint = `${hubBaseUrl}annotations`;
+  const formData = new FormData();
+  formData.append("image", imageId);
+  formData.append("dataUri", annotationUri);
+  formData.append("file", file);
+  const response = await axios.post(apiEndpoint, formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+  return response.data;
 };

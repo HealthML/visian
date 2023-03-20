@@ -88,7 +88,7 @@
 
   "data-model-outdated-alert": "Datenmodell veraltet. Zurücksetzen notwendig.",
   "discard-current-document-confirmation": "Aktuelles Dokument verwerfen?",
-  "erase-application-data-confirmation": "Alle Anwendungsdaten löschen?",
+  "erase-application-data-confirmation": "Aktuelle Daten im Editor verwerfen?",
 
   "layers": "Ebenen",
   "main-image-layer": "Haupt-Bildebene",
@@ -292,6 +292,10 @@
   "annotations-loading": "Annotationen werden geladen...",
   "annotations-loading-error": "Fehler beim Laden der Annotationen:",
   "annotation-open-error": "Fehler beim Öffnen der Annotation",
+  "annotation-saving": "Aktive Annotationsebene speichern",
+  "annotation-saving-overrwite": "Existierende Annotationsdatei überschreiben",
+  "annotation-saving-as": "Neue Annotationsdatei erstellen",
+  "annotation-saving-error": "Fehler beim Speichern der Annotationsebene",
 
   "ml-model-selection-description": "Wähle das Modell mit dem die Bilder annotiert werden sollen",
   "ml-model-selection-title": "Modell Auswahl",
@@ -317,7 +321,10 @@
 
   "open-editor": "Editor öffnen",
   "close-editor": "Editor schließen",
-
   "home": "Zur Projektübersicht",
-  "back": "Zurück"
+  "back": "Zurück",
+
+  "save": "Speichern",
+  "save-as": "Speichern Unter",
+  "saving-error": "Fehler beim Speichern"
 }
