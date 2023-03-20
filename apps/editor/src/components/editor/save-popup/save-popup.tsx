@@ -72,6 +72,7 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
   };
 
   const saveAnnotation = async () => {
+    store?.setProgress({ labelTx: "saving" });
     try {
       const annotationMeta = store?.editor.activeDocument?.activeLayer
         ?.metaData as Annotation;
@@ -95,10 +96,13 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
         titleTx: "saving-error",
         descriptionTx: description,
       });
+    } finally {
+      store?.setProgress();
     }
   };
 
   const saveAnnotationAs = async (uri: string) => {
+    store?.setProgress({ labelTx: "saving" });
     try {
       const imageId = searchParams.get("imageId");
       const annotationFile = await createActiveLayerFile();
@@ -118,6 +122,8 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
         titleTx: "saving-error",
         descriptionTx: description,
       });
+    } finally {
+      store?.setProgress();
     }
   };
 

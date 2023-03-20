@@ -326,5 +326,6 @@
 
   "save": "Save",
   "save-as": "Save as",
+  "saving": "Saving...",
   "saving-error": "Saving Error"
 }
