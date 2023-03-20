@@ -12,7 +12,7 @@ import { observer } from "mobx-react-lite";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { ReactQueryDevtools } from "react-query/devtools";
-import { Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
 
 import {
   whoAwsConfigDeployment,
@@ -96,7 +96,10 @@ function App(): JSX.Element {
                       element={<ProjectJobsScreen />}
                     />
                   </Route>
-
+                  <Route
+                    path="/"
+                    element={<Navigate replace to="/projects" />}
+                  />
                   <Route path="/editor" element={<EditorScreen />} />
                 </Routes>
               ) : (

@@ -128,6 +128,7 @@ export const DatasetExplorer = ({ dataset }: { dataset: Dataset }) => {
         isOpen={isModelSelectionPopUpOpen}
         onClose={closeModelSelectionPopUp}
         activeImageSelection={activeImageSelection}
+        projectId={dataset.project}
       />
     </StyledModal>
   );
