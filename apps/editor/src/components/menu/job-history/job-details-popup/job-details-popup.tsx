@@ -48,25 +48,34 @@ const StyledText = styled(Text)`
 
 export const JobDetailsPopUp = observer<JobDetailsPopUpProps>(
   ({ job, isOpen, onClose }) => {
-    const { annotations, annotationsError, isErrorAnnotations } =
-      useAnnotationsByJob(job.id);
+    const {
+      annotations: jobAnnotations,
+      annotationsError,
+      isErrorAnnotations,
+    } = useAnnotationsByJob(job.id);
 
-    const { images, imagesError, isErrorImages, isLoadingImages } =
-      useImagesByJob(job.id);
+    const {
+      images: jobImages,
+      imagesError,
+      isErrorImages,
+      isLoadingImages,
+    } = useImagesByJob(job.id);
 
     const { t } = useTranslation();
     const navigate = useNavigate();
 
-    const imagesWithAnnotations = annotations?.map(
+    const imagesWithAnnotations = jobAnnotations?.map(
       (annotation) => annotation.image,
     );
 
     const findAnnotationId = useCallback(
       (imageId: string) => {
-        const annotation = annotations?.find((anno) => anno.image === imageId);
-        return annotation?.id;
+        const imageAnnotation = jobAnnotations?.find(
+          (annotation) => annotation.image === imageId,
+        );
+        return imageAnnotation?.id;
       },
-      [annotations],
+      [jobAnnotations],
     );
 
     const compareImages = (a: Image, b: Image) => {
@@ -98,7 +107,7 @@ export const JobDetailsPopUp = observer<JobDetailsPopUpProps>(
               <DetailsRow tx="job-finished" value={job.finishedAt} />
               <DetailsRow
                 tx="job-number-images"
-                value={`${images?.length ?? ""}`}
+                value={`${jobImages?.length ?? ""}`}
               />
             </StyledDetailsTable>
           </>
@@ -115,9 +124,9 @@ export const JobDetailsPopUp = observer<JobDetailsPopUpProps>(
           } (${annotationsError?.response?.status})`}</Text>
         )}
         {isLoadingImages && <Text tx="images-loading" />}
-        {images && !isErrorAnnotations && (
+        {jobImages && !isErrorAnnotations && (
           <ScrollableList>
-            {images?.sort(compareImages).map((image) => (
+            {jobImages?.sort(compareImages).map((image) => (
               <ClickableListItem
                 onClick={() =>
                   navigate(editorPath(image.id, findAnnotationId(image.id)))

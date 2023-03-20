@@ -41,7 +41,7 @@ export const useAnnotationsByImage = (imageId: string) => {
     AxiosError<Annotation[]>
   >(["annotationsByImage", imageId], () => getAnnotationsByImage(imageId), {
     retry: 2, // retry twice if fetch fails
-    refetchInterval: 1000 * 20, // refetch every 20 seconds
+    refetchInterval: 1000 * 10, // refetch every 20 seconds
   });
 
   return {
