@@ -6,7 +6,7 @@ import { useSearchParams } from "react-router-dom";
 import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
-import { patchAnnotationFile, postAnnotationFile } from "../../../querys";
+import { patchAnnotationFile, postAnnotationFile } from "../../../queries";
 import { Annotation } from "../../../types";
 import { SavePopUpProps } from "./save-popup.props";
 
