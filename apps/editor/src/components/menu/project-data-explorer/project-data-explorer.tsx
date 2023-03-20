@@ -1,5 +1,6 @@
 import { color, FlexRow, Icon, List, ListItem, Text } from "@visian/ui-shared";
 import styled from "styled-components";
+
 import { Dataset, Image } from "../../../types";
 
 const FileExplorer = styled(FlexRow)`
@@ -15,6 +16,11 @@ const StyledIcon = styled(Icon)`
   width: 2rem;
   height: 2rem;
   padding-right: 0.8rem;
+`;
+
+const StyledListItem = styled(ListItem)`
+  margin-left: 3%;
+  margin-right: 3%;
 `;
 
 const VerticalLine = styled.div`
@@ -45,7 +51,7 @@ export const ProjectDataExplorer = ({
     {datasets && (
       <StyledList>
         {datasets.map((dataset) => (
-          <ListItem
+          <StyledListItem
             key={dataset.id}
             isLast
             isActive={dataset.id === selectedDataset}
@@ -53,7 +59,7 @@ export const ProjectDataExplorer = ({
           >
             <StyledIcon icon="folder" />
             <Text>{dataset.name}</Text>
-          </ListItem>
+          </StyledListItem>
         ))}
       </StyledList>
     )}
@@ -62,7 +68,7 @@ export const ProjectDataExplorer = ({
       <StyledList>
         {images &&
           images.map((image) => (
-            <ListItem
+            <StyledListItem
               key={image.id}
               isLast
               isActive={selectedImages.get(image.dataset)?.has(image.id)}
@@ -76,7 +82,7 @@ export const ProjectDataExplorer = ({
             >
               <StyledIcon icon="document" />
               <Text>{image.dataUri}</Text>
-            </ListItem>
+            </StyledListItem>
           ))}
       </StyledList>
     )}

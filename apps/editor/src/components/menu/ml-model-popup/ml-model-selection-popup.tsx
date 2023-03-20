@@ -1,30 +1,22 @@
 import {
   Box,
   Button,
-  color,
   DropDown,
-  EnumParam,
-  FlexColumn,
   FlexRow,
-  Icon,
   IEnumParameterOption,
-  List,
-  ListItem,
   PopUp,
-  Spacer,
   Text,
   useTranslation,
 } from "@visian/ui-shared";
 import useDatasetsBy from "apps/editor/src/queries/use-datasets-by";
 import axios from "axios";
 import { observer } from "mobx-react-lite";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import styled from "styled-components";
 
-import { useDataset, useImagesBy, useMlModels } from "../../../queries";
+import { useImagesBy, useMlModels } from "../../../queries";
 import { hubBaseUrl } from "../../../queries/hub-base-url";
 import { MlModel } from "../../../types";
-import { MlModelList } from "../ml-model-list";
 import { ProjectDataExplorer } from "../project-data-explorer/project-data-explorer";
 import { ModelPopUpProps } from "./ml-model-selection-popup.props";
 
@@ -41,7 +33,11 @@ const ModelSelectionPopupContainer = styled(PopUp)`
 
 const DropDownContainer = styled(FlexRow)`
   width: 50vw;
-  hight: 30%;
+  padding-bottom: 3%;
+`;
+
+const StyledDropDown = styled(DropDown)`
+  margin: 2%;
 `;
 
 const BottomNavigationBar = styled(Box)`
@@ -54,26 +50,8 @@ export const ModelSelectionPopup = observer<ModelPopUpProps>(
     const { mlModels, mlModelsError, isErrorMlModels, isLoadingMlModels } =
       useMlModels();
 
-    const createAutoAnnotationJob = useCallback(
-      async (imageSelection: string[]) => {
-        try {
-          await axios.post(`${hubBaseUrl}jobs`, {
-            images: imageSelection,
-            modelName: selectedModel.name,
-            modelVersion: selectedModel.version,
-          });
-          // eslint-disable-next-line no-unused-expressions
-          onClose && onClose();
-        } catch (error: any) {
-          // eslint-disable-next-line no-unused-expressions
-          onClose && onClose();
-        }
-      },
-      [],
-    );
-
     const [selectedModelName, setSelectedModelName] = useState(
-      (mlModels && mlModels[0].name) || "",
+      (mlModels && mlModels[0]?.name) || "",
     );
 
     const mlModelNameOptions: IEnumParameterOption<string>[] = useMemo(
@@ -112,11 +90,12 @@ export const ModelSelectionPopup = observer<ModelPopUpProps>(
       useDatasetsBy(projectId);
 
     const [selectedDataset, setSelectedDataset] = useState(
-      (datasets &&
-        openWithDatasetId &&
-        datasets.filter((dataset) => dataset.id === openWithDatasetId)[0].id) ||
-        "",
+      openWithDatasetId || "",
     );
+
+    useEffect(() => {
+      setSelectedDataset(openWithDatasetId || "");
+    }, [openWithDatasetId]);
 
     const {
       images,
@@ -126,12 +105,9 @@ export const ModelSelectionPopup = observer<ModelPopUpProps>(
       refetchImages,
     } = useImagesBy(selectedDataset);
 
-    const selectDataset = useCallback(
-      (datasetId: string) => {
-        setSelectedDataset(datasetId);
-      },
-      [selectedDataset],
-    );
+    const selectDataset = useCallback((datasetId: string) => {
+      setSelectedDataset(datasetId);
+    }, []);
 
     const [selectedImages, setSelectedImages] = useState<
       Map<string, Map<string, boolean>>
@@ -152,6 +128,22 @@ export const ModelSelectionPopup = observer<ModelPopUpProps>(
         new Map(),
     );
 
+    useEffect(() => {
+      if (openWithDatasetId && activeImageSelection) {
+        setSelectedImages(() => {
+          const newSelectedImages = new Map<string, Map<string, boolean>>([
+            [
+              openWithDatasetId,
+              new Map<string, boolean>(
+                activeImageSelection.map((image: string) => [image, true]),
+              ),
+            ],
+          ]);
+          return newSelectedImages;
+        });
+      }
+    }, [activeImageSelection, openWithDatasetId]);
+
     const setImageSelection = useCallback(
       (datasetId: string, imageId: string, selection: boolean) => {
         setSelectedImages((prevSelectedImages) => {
@@ -168,6 +160,24 @@ export const ModelSelectionPopup = observer<ModelPopUpProps>(
         });
       },
       [],
+    );
+
+    const createAutoAnnotationJob = useCallback(
+      async (imageSelection: string[]) => {
+        try {
+          await axios.post(`${hubBaseUrl}jobs`, {
+            images: imageSelection,
+            modelName: selectedModel.name,
+            modelVersion: selectedModel.version,
+          });
+          // eslint-disable-next-line no-unused-expressions
+          onClose && onClose();
+        } catch (error: any) {
+          // eslint-disable-next-line no-unused-expressions
+          onClose && onClose();
+        }
+      },
+      [onClose, selectedModel],
     );
 
     const imageSelectionForJob = useCallback(() => {
@@ -194,12 +204,12 @@ export const ModelSelectionPopup = observer<ModelPopUpProps>(
           } (${mlModelsError?.response?.status})`}</Text>
         )}
         <DropDownContainer>
-          <DropDown
+          <StyledDropDown
             options={mlModelNameOptions}
             value={selectedModelName}
             onChange={setSelectedModelName}
           />
-          <DropDown
+          <StyledDropDown
             options={mlModelVersionOptions}
             value={selectedModel}
             onChange={setSelectedModel}
@@ -215,7 +225,7 @@ export const ModelSelectionPopup = observer<ModelPopUpProps>(
         />
 
         <BottomNavigationBar>
-          <Button text="Start Job" onPointerDown={imageSelectionForJob} />
+          <Button tx="start-job" onPointerDown={imageSelectionForJob} />
         </BottomNavigationBar>
       </ModelSelectionPopupContainer>
     );

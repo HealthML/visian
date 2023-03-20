@@ -1,10 +1,4 @@
-import {
-  Box,
-  Modal,
-  SquareButton,
-  Text,
-  useTranslation,
-} from "@visian/ui-shared";
+import { Modal, SquareButton, Text, useTranslation } from "@visian/ui-shared";
 import { useCallback, useState } from "react";
 import styled from "styled-components";
 
