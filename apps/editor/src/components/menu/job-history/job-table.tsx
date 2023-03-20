@@ -1,5 +1,3 @@
-import { Job } from "../../../types";
-import { getDisplayDate } from "../util/display-date";
 import {
   createColumnHelper,
   getCoreRowModel,
@@ -7,13 +5,18 @@ import {
   SortingState,
   useReactTable,
 } from "@tanstack/react-table";
-import {
-  TableLayout,
-  ListItemLabel,
-  StatusBadge,
-  HeaderLabel,
-} from "@visian/ui-shared";
-import React from "react";
+import { HeaderLabel, ListItemLabel, TableLayout } from "@visian/ui-shared";
+import React, { useCallback } from "react";
+import styled from "styled-components";
+
+import { Job } from "../../../types";
+import { getDisplayDate } from "../util/display-date";
+import { JobDetailsPopUp } from "./job-details-popup/job-details-popup";
+import { JobStatusBadge } from "./job-status-badge/job-status-badge";
+
+const StyledJobStatus = styled(JobStatusBadge)`
+  width: 10em;
+`;
 
 function getDisplayJob(job: Job): Job {
   return {
@@ -28,57 +31,58 @@ function getDisplayJob(job: Job): Job {
   };
 }
 
-const badgeColors: Record<string, string> = {
-  queued: "veryLightGray",
-  running: "blueSheet",
-  succeeded: "greenSheet",
-  canceled: "orangeBorder",
-  failed: "redBorder",
-};
-
 const columnHelper = createColumnHelper<Job>();
 
 const columns = [
   columnHelper.accessor("modelName", {
-    header: () => <HeaderLabel tx={"job-model-name"} />,
+    header: () => <HeaderLabel tx="job-model-name" />,
     cell: (props) => <ListItemLabel text={props.getValue()} />,
   }),
   columnHelper.accessor("modelVersion", {
-    header: () => <HeaderLabel tx={"job-model-version"} />,
+    header: () => <HeaderLabel tx="job-model-version" />,
     cell: (props) => <ListItemLabel text={props.getValue()} />,
   }),
   columnHelper.accessor("startedAt", {
-    header: () => <HeaderLabel tx={"job-started"} />,
+    header: () => <HeaderLabel tx="job-started" />,
     cell: (props) => <ListItemLabel text={props.getValue()} />,
     sortingFn: "datetime",
     sortUndefined: -1,
   }),
   columnHelper.accessor("finishedAt", {
-    header: () => <HeaderLabel tx={"job-finished"} />,
+    header: () => <HeaderLabel tx="job-finished" />,
     cell: (props) => <ListItemLabel text={props.getValue()} />,
     sortingFn: "datetime",
     sortUndefined: -1,
   }),
   columnHelper.accessor("status", {
-    header: () => <HeaderLabel tx={"job-status"} />,
-    cell: (props) => (
-      <StatusBadge
-        color={badgeColors[props.getValue()]}
-        tx={`job-status-${props.getValue()}`}
-      />
-    ),
+    header: () => <HeaderLabel tx="job-status" />,
+    cell: (props) => <StyledJobStatus status={props.getValue()} />,
     // Make sure that queued jobs are at the top
     sortingFn: (rowA, rowB, id) => {
-      if (rowA.getValue(id) == "queued") return -1;
+      if (rowA.getValue(id) === "queued") return -1;
       return 0;
     },
   }),
 ];
-
 export const JobsTable = ({ jobs }: { jobs: Job[] }) => {
   const data = jobs.map((job: Job) => getDisplayJob(job));
 
   const columnWidths = [20, 10, 25, 25, 20];
+
+  const [isPopupOpen, setPopUpOpen] = React.useState<boolean>(false);
+  const [selectedJob, setSelectedJob] = React.useState<Job | null>(null);
+
+  const openPopup = useCallback(() => {
+    setPopUpOpen(true);
+  }, []);
+  const closePopup = useCallback(() => {
+    setPopUpOpen(false);
+  }, []);
+
+  const handleOnClick = (job: Job) => {
+    setSelectedJob(job);
+    openPopup();
+  };
 
   const [sorting, setSorting] = React.useState<SortingState>([
     { id: "status", desc: false },
@@ -97,5 +101,20 @@ export const JobsTable = ({ jobs }: { jobs: Job[] }) => {
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
   });
-  return <TableLayout table={table} columnWidths={columnWidths} />;
+  return (
+    <>
+      {selectedJob && (
+        <JobDetailsPopUp
+          job={selectedJob}
+          isOpen={isPopupOpen}
+          onClose={closePopup}
+        />
+      )}
+      <TableLayout
+        table={table}
+        columnWidths={columnWidths}
+        onRowClick={handleOnClick}
+      />
+    </>
+  );
 };

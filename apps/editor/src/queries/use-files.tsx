@@ -1,7 +1,10 @@
+import axios from "axios";
 import path from "path";
 
-import { Annotation, Image } from "../types";
+import { Annotation, FileWithMetadata } from "../types";
+import { getImage } from "./get-image";
 import hubBaseUrl from "./hub-base-url";
+import { getAnnotation } from "./use-annotations-by";
 
 const fetchFile = async (
   id: string,
@@ -20,14 +23,64 @@ const fetchFile = async (
         }),
     );
 
-export const fetchImage = async (image: Image): Promise<File> => {
+export const fetchImageFile = async (
+  imageId: string,
+): Promise<FileWithMetadata> => {
+  const image = await getImage(imageId);
   const fileName: string = path.basename(image.dataUri);
-  return fetchFile(image.id, "images", fileName);
+  const imageFile = (await fetchFile(
+    image.id,
+    "images",
+    fileName,
+  )) as FileWithMetadata;
+  imageFile.metadata = image;
+  return imageFile;
 };
 
-export const fetchAnnotation = async (
-  annotation: Annotation,
-): Promise<File> => {
+export const fetchAnnotationFile = async (
+  annotationId: string,
+): Promise<FileWithMetadata> => {
+  const annotation = await getAnnotation(annotationId);
   const fileName: string = path.basename(annotation.dataUri);
-  return fetchFile(annotation.id, "annotations", fileName);
+  const annotationFile = (await fetchFile(
+    annotation.id,
+    "annotations",
+    fileName,
+  )) as FileWithMetadata;
+  annotationFile.metadata = annotation;
+  return annotationFile;
+};
+
+export const patchAnnotationFile = async (
+  annotation: Annotation,
+  file: File,
+): Promise<Annotation> => {
+  const apiEndpoint = `${hubBaseUrl}annotations/${annotation.id}`;
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("dataUri", annotation.dataUri);
+  const response = await axios.patch(apiEndpoint, formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+  return response.data;
+};
+
+export const postAnnotationFile = async (
+  imageId: string,
+  annotationUri: string,
+  file: File,
+): Promise<Annotation> => {
+  const apiEndpoint = `${hubBaseUrl}annotations`;
+  const formData = new FormData();
+  formData.append("image", imageId);
+  formData.append("dataUri", annotationUri);
+  formData.append("file", file);
+  const response = await axios.post(apiEndpoint, formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+  return response.data;
 };

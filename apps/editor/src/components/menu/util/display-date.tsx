@@ -4,7 +4,7 @@
  * @returns The date as a string in german format if the timezone is Europe/Berlin, otherwise in english format.
  */
 export function getDisplayDate(date: Date): string {
-  if (Intl.DateTimeFormat().resolvedOptions().timeZone == "Europe/Berlin") {
+  if (Intl.DateTimeFormat().resolvedOptions().timeZone === "Europe/Berlin") {
     return date.toLocaleDateString("de-DE", {
       year: "numeric",
       month: "numeric",

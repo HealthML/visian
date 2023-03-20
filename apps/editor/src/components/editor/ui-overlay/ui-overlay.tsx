@@ -15,7 +15,10 @@ import styled from "styled-components";
 import { useStore } from "../../../app/root-store";
 import { whoHome } from "../../../constants";
 import { importFilesToDocument } from "../../../import-handling";
-import { fetchAnnotation, fetchImage } from "../../../queries/use-files";
+import {
+  fetchAnnotationFile,
+  fetchImageFile,
+} from "../../../queries/use-files";
 import {
   DilateErodeModal,
   MeasurementModal,
@@ -30,6 +33,7 @@ import { Layers } from "../layers";
 import { MeasurementPopUp } from "../measurement-popup";
 import { Menu } from "../menu";
 import { ProgressPopUp } from "../progress-popup";
+import { SavePopUp } from "../save-popup";
 import { ServerPopUp } from "../server-popup";
 import { SettingsPopUp } from "../settings-popup";
 import { ShortcutPopUp } from "../shortcut-popup";
@@ -185,6 +189,15 @@ export const UIOverlay = observer<UIOverlayProps>(
       store?.editor.activeDocument?.tools.setIsCursorOverFloatingUI(false);
     }, [store]);
 
+    // Save Pop Up Toggling
+    const [isSavePopUpOpen, setIsSavePopUpOpen] = useState(false);
+    const openSavePopUp = useCallback(() => {
+      setIsSavePopUpOpen(true);
+    }, []);
+    const closeSavePopUp = useCallback(() => {
+      setIsSavePopUpOpen(false);
+    }, []);
+
     // Export Button
     const exportZip = useCallback(() => {
       store?.setProgress({ labelTx: "exporting" });
@@ -196,48 +209,64 @@ export const UIOverlay = observer<UIOverlayProps>(
         });
     }, [store]);
 
-    // Displaying images and annotations from Backend
-    const loadSessionStorage = (key: string) => {
-      let object = null;
-      const objectJSON = sessionStorage.getItem(key);
-      if (objectJSON) {
-        object = JSON.parse(objectJSON);
-      }
-      return object;
-    };
-
     const [searchParams] = useSearchParams();
     const loadImagesAndAnnotations = () => {
       async function asyncfunc() {
         if (store?.editor.activeDocument?.layers.length !== 0) {
           return store?.destroyReload();
         }
-        const openImage = searchParams.get("openImage");
-        const dT = new DataTransfer();
-        let shouldImport = false;
-        if (openImage && sessionStorage.getItem("ImageToOpen")) {
-          const image = loadSessionStorage("ImageToOpen");
-          sessionStorage.removeItem("ImageToOpen");
-          const imageFile = await fetchImage(image);
-          dT.items.add(imageFile);
-          shouldImport = true;
+        const fileTransfer = new DataTransfer();
+        const imageIdToOpen = searchParams.get("imageId");
+        if (imageIdToOpen) {
+          try {
+            const imageFile = await fetchImageFile(imageIdToOpen);
+            fileTransfer.items.add(imageFile);
+          } catch (error) {
+            store?.setError({
+              titleTx: "import-error",
+              descriptionTx: "image-open-error",
+            });
+          }
         }
-        const openAnnotation = searchParams.get("openAnnotation");
-        if (openAnnotation && sessionStorage.getItem("AnnotationToOpen")) {
-          const annotation = loadSessionStorage("AnnotationToOpen");
-          sessionStorage.removeItem("AnnotationToOpen");
-          const annotationFile = await fetchAnnotation(annotation);
-          dT.items.add(annotationFile);
-          shouldImport = true;
+        const annotationIdToOpen = searchParams.get("annotationId");
+        if (annotationIdToOpen) {
+          try {
+            const annotationFile = await fetchAnnotationFile(
+              annotationIdToOpen,
+            );
+            fileTransfer.items.add(annotationFile);
+          } catch (error) {
+            store?.setError({
+              titleTx: "import-error",
+              descriptionTx: "annotation-open-error",
+            });
+          }
         }
-        if (store && shouldImport) {
-          importFilesToDocument(dT.files, store);
+        if (store && fileTransfer.files.length) {
+          importFilesToDocument(fileTransfer.files, store);
         }
       }
       asyncfunc();
     };
+    useEffect(loadImagesAndAnnotations, [searchParams, store]);
 
-    useEffect(loadImagesAndAnnotations, [searchParams]);
+    // navigation for home button
+    const getNavigationPath = (
+      projectId: string | null,
+      datasetId: string | null,
+    ): string => {
+      const path: string[] = [];
+      if (datasetId) {
+        path.push(`${projectId}`);
+      }
+      if (projectId && datasetId) {
+        path.push(`datasets/${datasetId}`);
+      }
+      return `/projects/${path.join("/")}`;
+    };
+
+    const projectId = searchParams.get("projectId") || "";
+    const datasetId = searchParams.get("datasetId") || "";
 
     return (
       <Container
@@ -300,6 +329,27 @@ export const UIOverlay = observer<UIOverlayProps>(
             <ColumnRight>
               <SideViews />
               <RightBar>
+                <FloatingUIButton
+                  icon="exit"
+                  tooltipTx="close-editor"
+                  tooltipPosition="left"
+                  onPointerDown={() =>
+                    store?.destroyRedirect(
+                      getNavigationPath(projectId, datasetId),
+                    )
+                  }
+                  isActive={false}
+                />
+                {store?.editor.activeDocument?.activeLayer?.isAnnotation &&
+                  searchParams.get("imageId") && (
+                    <FloatingUIButton
+                      icon="save"
+                      tooltipTx="annotation-saving"
+                      tooltipPosition="left"
+                      onPointerDown={openSavePopUp}
+                      isActive={false}
+                    />
+                  )}
                 {!isFromWHO() && (
                   <FloatingUIButton
                     icon="export"
@@ -347,6 +397,7 @@ export const UIOverlay = observer<UIOverlayProps>(
               )}
               onClose={store?.editor.activeDocument?.setMeasurementDisplayLayer}
             />
+            <SavePopUp isOpen={isSavePopUpOpen} onClose={closeSavePopUp} />
             {isDraggedOver && <DropSheet onDropCompleted={onDropCompleted} />}
             {store?.progress && (
               <ProgressPopUp

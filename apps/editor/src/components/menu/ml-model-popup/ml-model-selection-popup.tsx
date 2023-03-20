@@ -14,7 +14,7 @@ import { observer } from "mobx-react-lite";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import styled from "styled-components";
 
-import { useImagesBy, useMlModels } from "../../../queries";
+import { useImagesByDataset, useMlModels } from "../../../queries";
 import { hubBaseUrl } from "../../../queries/hub-base-url";
 import { MlModel } from "../../../types";
 import { ProjectDataExplorer } from "../project-data-explorer/project-data-explorer";
@@ -103,7 +103,7 @@ export const ModelSelectionPopup = observer<ModelPopUpProps>(
       isErrorImages,
       isLoadingImages,
       refetchImages,
-    } = useImagesBy(selectedDataset);
+    } = useImagesByDataset(selectedDataset);
 
     const selectDataset = useCallback((datasetId: string) => {
       setSelectedDataset(datasetId);
@@ -169,6 +169,7 @@ export const ModelSelectionPopup = observer<ModelPopUpProps>(
             images: imageSelection,
             modelName: selectedModel.name,
             modelVersion: selectedModel.version,
+            project: projectId,
           });
           // eslint-disable-next-line no-unused-expressions
           onClose && onClose();
@@ -177,7 +178,7 @@ export const ModelSelectionPopup = observer<ModelPopUpProps>(
           onClose && onClose();
         }
       },
-      [onClose, selectedModel],
+      [onClose, selectedModel, projectId],
     );
 
     const imageSelectionForJob = useCallback(() => {
@@ -196,7 +197,6 @@ export const ModelSelectionPopup = observer<ModelPopUpProps>(
         dismiss={onClose}
         shouldDismissOnOutsidePress
       >
-        <SectionLabel tx="ml-model-selection-description" />
         {isLoadingMlModels && <Text tx="ml-models-loading" />}
         {isErrorMlModels && (
           <Text>{`${t("ml-models-loading-error")} ${

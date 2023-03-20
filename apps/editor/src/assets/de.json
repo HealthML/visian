@@ -88,7 +88,7 @@
 
   "data-model-outdated-alert": "Datenmodell veraltet. Zurücksetzen notwendig.",
   "discard-current-document-confirmation": "Aktuelles Dokument verwerfen?",
-  "erase-application-data-confirmation": "Alle Anwendungsdaten löschen?",
+  "erase-application-data-confirmation": "Aktuelle Daten im Editor verwerfen?",
 
   "layers": "Ebenen",
   "main-image-layer": "Haupt-Bildebene",
@@ -275,26 +275,39 @@
 
   "projects-loading": "Projekte werden geladen...",
   "projects-loading-error": "Fehler beim Laden der Projekte:",
+  "no-projects-available": "Aktuell sind keine Projekte vorhanden",
 
-  "project-loading": "Projekt wird geladen...",
-  "project-loading-error": "Fehler beim Laden des Projekts:",
+  "datasets-loading": "Datensätze werden geladen...",
+  "datasets-loading-error": "Fehler beim Laden der Datensätze:",
+  "no-datasets-available": "Aktuell sind keine Datensätze vorhanden",
 
-  "dataset-loading": "Dataset wird geladen...",
+  "dataset-loading": "Datensatz wird geladen...",
   "dataset-loading-error": "Fehler beim Laden des Datensatzes:",
 
-  "images-loading": "Images werden geladen...",
-  "images-loading-error": "Fehler beim Laden der Images:",
+  "images-loading": "Bilder werden geladen...",
+  "images-loading-error": "Fehler beim Laden der Bilder:",
+  "image-open-error": "Fehler beim Öffnen des Bildes",
+  "image-annotated": "annotiert",
 
   "annotations-loading": "Annotationen werden geladen...",
   "annotations-loading-error": "Fehler beim Laden der Annotationen:",
+  "annotation-open-error": "Fehler beim Öffnen der Annotation",
+  "annotation-saving": "Aktive Annotationsebene speichern",
+  "annotation-saving-overrwite": "Existierende Annotationsdatei überschreiben",
+  "annotation-saving-as": "Neue Annotationsdatei erstellen",
+  "annotation-saving-error": "Fehler beim Speichern der Annotationsebene",
 
   "ml-model-selection-description": "Wähle das Modell mit dem die Bilder annotiert werden sollen",
   "ml-model-selection-title": "Modell Auswahl",
   "ml-models-loading": "Modelle werden geladen...",
   "ml-models-loading-error": "Fehler beim Laden der Modelle:",
+  "ml-models-none-available": "Es sind keine Modelle verfügbar.",
 
   "jobs-loading": "Jobs werden geladen...",
   "jobs-loading-error": "Fehler beim Laden der Jobs:",
+  "job-details": "Job Details",
+  "job-images": "Bilder",
+  "job-number-images": "Anzahl Bilder",
   "job-model-name": "Modell",
   "job-model-version": "Version",
   "job-started": "Gestartet am",
@@ -305,5 +318,14 @@
   "job-status-succeeded": "Erfolgreich",
   "job-status-canceled": "Abgebrochen",
   "job-status-failed": "Fehlgeschlagen",
-  "start-job": "Job starten"
+  "start-job": "Job starten",
+
+  "open-editor": "Editor öffnen",
+  "close-editor": "Editor schließen",
+  "home": "Zur Projektübersicht",
+  "back": "Zurück",
+
+  "save": "Speichern",
+  "save-as": "Speichern Unter",
+  "saving-error": "Fehler beim Speichern"
 }
