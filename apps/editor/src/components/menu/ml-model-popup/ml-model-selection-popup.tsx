@@ -20,11 +20,6 @@ import { MlModel } from "../../../types";
 import { ProjectDataExplorer } from "../project-data-explorer/project-data-explorer";
 import { ModelPopUpProps } from "./ml-model-selection-popup.props";
 
-const SectionLabel = styled(Text)`
-  font-size: 14px;
-  margin-bottom: 8px;
-`;
-
 const ModelSelectionPopupContainer = styled(PopUp)`
   align-items: left;
   width: 50vw;
@@ -54,13 +49,19 @@ export const ModelSelectionPopup = observer<ModelPopUpProps>(
       (mlModels && mlModels[0]?.name) || "",
     );
 
-    const mlModelNameOptions: IEnumParameterOption<string>[] = useMemo(
-      () =>
+    const mlModelNameOptions: IEnumParameterOption<string>[] = useMemo(() => {
+      const uniqueNames: string[] = [];
+      if (mlModels) {
         mlModels
-          ? mlModels.map((model) => ({ label: model.name, value: model.name }))
-          : [],
-      [mlModels],
-    );
+          .map((model) => model.name)
+          .forEach((element) => {
+            if (!uniqueNames.includes(element)) {
+              uniqueNames.push(element);
+            }
+          });
+      }
+      return uniqueNames.map((model) => ({ label: model, value: model }));
+    }, [mlModels]);
 
     const availableModelVersions = useMemo(
       () =>
@@ -82,8 +83,6 @@ export const ModelSelectionPopup = observer<ModelPopUpProps>(
         })),
       [availableModelVersions],
     );
-
-    ////
 
     // TODO integrate Query Errors
     const { datasets, datasetsError, isErrorDatasets, isLoadingDatasets } =
