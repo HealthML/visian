@@ -1,4 +1,4 @@
-import { Cell, flexRender, Header, Table } from "@tanstack/react-table";
+import { flexRender, Header, Row, Table } from "@tanstack/react-table";
 import styled from "styled-components";
 
 import { stopPropagation } from "../../event-handling";
@@ -28,6 +28,10 @@ export const TableCell = styled.div.attrs((props: { width?: number }) => props)`
   margin: auto;
 `;
 
+export const TableListItem = styled(ListItem)<{ isClickable?: boolean }>`
+  cursor: ${(props) => (props.isClickable ? "pointer" : "default")};
+`;
+
 /*
 Distributes the columns evenly if no column widths are provided or if the sum of the column widths is not 100.
 Otherwise it distributes the columns according to the provided column widths.
@@ -45,29 +49,39 @@ const distributeColumns = (
   return Array(columnCount).fill(100 / columnCount);
 };
 
-export const TableRow = ({
-  cells,
+export const TableRow: <T>({
+  row,
   columnWidths,
+  onClick,
 }: {
-  cells: Cell<any, unknown>[];
+  row: Row<T>;
   columnWidths: number[];
-}) => (
-  <ListItem>
-    {cells.map((cell, index) => (
-      <TableCell key={cell.id} width={columnWidths[index]}>
-        {flexRender(cell.column.columnDef.cell, cell.getContext())}
-      </TableCell>
-    ))}
-  </ListItem>
-);
+  onClick?: (item: T) => void;
+}) => JSX.Element = ({ row, columnWidths, onClick }) => {
+  const isClickable = onClick !== undefined;
+  return (
+    <TableListItem
+      isClickable={isClickable}
+      onClick={() => {
+        if (onClick) onClick(row.original);
+      }}
+    >
+      {row.getVisibleCells().map((cell, index) => (
+        <TableCell key={cell.id} width={columnWidths[index]}>
+          {flexRender(cell.column.columnDef.cell, cell.getContext())}
+        </TableCell>
+      ))}
+    </TableListItem>
+  );
+};
 
-export const TableHeader = ({
+export const TableHeader: <T>({
   headers,
   columnWidths,
 }: {
-  headers: Header<any, unknown>[];
+  headers: Header<T, unknown>[];
   columnWidths: number[];
-}) => (
+}) => JSX.Element = ({ headers, columnWidths }) => (
   <HeaderListItem isLast>
     {headers.map((header, index) => (
       <TableCell key={header.id} width={columnWidths[index]}>
@@ -79,13 +93,15 @@ export const TableHeader = ({
   </HeaderListItem>
 );
 
-export const TableLayout = ({
+export const TableLayout: <T>({
   table,
   columnWidths,
+  onRowClick,
 }: {
-  table: Table<any>;
+  table: Table<T>;
   columnWidths?: number[];
-}) => {
+  onRowClick?: (item: T) => void;
+}) => JSX.Element = ({ table, columnWidths, onRowClick }) => {
   // We support only rendering the first header group
   const mainHeaderGroup = table.getHeaderGroups()[0];
   const widths = distributeColumns(
@@ -104,8 +120,9 @@ export const TableLayout = ({
       {table.getRowModel().rows.map((row) => (
         <TableRow
           key={row.id}
-          cells={row.getVisibleCells()}
+          row={row}
           columnWidths={widths}
+          onClick={onRowClick}
         />
       ))}
     </TableList>

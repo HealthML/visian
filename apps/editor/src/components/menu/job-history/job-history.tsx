@@ -8,7 +8,9 @@ const StyledModal = styled(Modal)`
   vertical-align: middle;
   width: 100vw;
   position: relative;
+  z-index: 49;
 `;
+// TODO: z-index logic
 
 export const JobHistory = ({ projectId }: { projectId: string }) => {
   const { jobs, jobsError, isErrorJobs, isLoadingJobs } = useJobsBy(projectId);

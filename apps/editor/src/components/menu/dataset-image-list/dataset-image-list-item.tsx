@@ -9,8 +9,9 @@ import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import styled from "styled-components";
 
-import { useAnnotationsBy } from "../../../queries";
+import { useAnnotationsByImage } from "../../../queries";
 import { Annotation, Image } from "../../../types";
+import { editorPath } from "../util";
 
 const Spacer = styled.div`
   width: 10px;
@@ -52,7 +53,7 @@ export const DatasetImageListItem = ({
     isErrorAnnotations,
     isLoadingAnnotations,
     refetchAnnotations,
-  } = useAnnotationsBy(image.id);
+  } = useAnnotationsByImage(image.id);
 
   const [showAnnotations, setShowAnnotations] = useState(false);
 
@@ -68,28 +69,6 @@ export const DatasetImageListItem = ({
       return !prev;
     });
   }, [refetchAnnotations]);
-
-  const configureEditorUrl = (
-    img: Image | null,
-    annotation: Annotation | null,
-    projectId: string | null,
-    datasetId: string | null,
-  ): string => {
-    const params = new URLSearchParams();
-    if (img) {
-      params.append("imageId", img.id);
-    }
-    if (annotation) {
-      params.append("annotationId", annotation.id);
-    }
-    if (projectId) {
-      params.append("projectId", projectId);
-    }
-    if (datasetId) {
-      params.append("datasetId", datasetId);
-    }
-    return `/editor?${params.toString()}`;
-  };
 
   const { t: translate } = useTranslation();
   const navigate = useNavigate();
@@ -111,7 +90,7 @@ export const DatasetImageListItem = ({
         )}
         <ClickableText
           onClick={() => {
-            navigate(configureEditorUrl(image, null, projectId, datasetId));
+            navigate(editorPath(image.id, undefined, projectId, datasetId));
           }}
         >
           {image.dataUri}
@@ -137,9 +116,9 @@ export const DatasetImageListItem = ({
                   <ClickableText
                     onClick={() => {
                       navigate(
-                        configureEditorUrl(
-                          image,
-                          annotation,
+                        editorPath(
+                          image.id,
+                          annotation.id,
                           projectId,
                           datasetId,
                         ),

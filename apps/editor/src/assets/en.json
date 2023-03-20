@@ -287,6 +287,7 @@
   "images-loading": "Loading images...",
   "images-loading-error": "Error on loading images:",
   "image-open-error": "Error on opening image",
+  "image-annotated": "annotated",
 
   "annotations-loading": "Loading annotations...",
   "annotations-loading-error": "Error on loading annotations:",
@@ -300,6 +301,9 @@
 
   "jobs-loading": "Loading jobs...",
   "jobs-loading-error": "Error on loading jobs:",
+  "job-images": "Images",
+  "job-number-images": "Number of images",
+  "job-details": "Job Details",
   "job-model-name": "Model",
   "job-model-version": "Version",
   "job-started": "Started at",
