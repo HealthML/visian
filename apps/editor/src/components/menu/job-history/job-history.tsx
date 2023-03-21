@@ -1,6 +1,5 @@
 import { Modal, SquareButton, Text, useTranslation } from "@visian/ui-shared";
 import { useCallback, useState } from "react";
-
 import styled from "styled-components";
 
 import useJobsBy from "../../../queries/use-jobs-by";

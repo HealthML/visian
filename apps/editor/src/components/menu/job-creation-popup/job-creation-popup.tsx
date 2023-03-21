@@ -8,7 +8,6 @@ import {
   Text,
   useTranslation,
 } from "@visian/ui-shared";
-import useDatasetsBy from "apps/editor/src/queries/use-datasets-by";
 import axios from "axios";
 import { observer } from "mobx-react-lite";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -16,6 +15,7 @@ import styled from "styled-components";
 
 import { useImagesByDataset, useMlModels } from "../../../queries";
 import { hubBaseUrl } from "../../../queries/hub-base-url";
+import useDatasetsBy from "../../../queries/use-datasets-by";
 import { MlModel } from "../../../types";
 import { ProjectDataExplorer } from "../project-data-explorer/project-data-explorer";
 import { JobCreationPopUpProps } from "./job-creation-popup.props";

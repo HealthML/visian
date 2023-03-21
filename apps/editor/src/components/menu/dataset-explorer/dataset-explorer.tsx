@@ -91,7 +91,7 @@ export const DatasetExplorer = ({ dataset }: { dataset: Dataset }) => {
   const openModelSelectionPopUp = useCallback(() => {
     setIsModelSelectionPopUpOpen(true);
     setOpenWithDatasetId(dataset.id);
-  }, []);
+  }, [dataset.id]);
   const closeModelSelectionPopUp = useCallback(() => {
     setOpenWithDatasetId(undefined);
     setIsModelSelectionPopUpOpen(false);
