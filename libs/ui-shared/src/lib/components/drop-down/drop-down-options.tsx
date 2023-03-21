@@ -2,7 +2,7 @@ import React, { useRef } from "react";
 import ReactDOM from "react-dom";
 import styled, { css } from "styled-components";
 
-import { size as getSize, fontSize, zIndex } from "../../theme";
+import { fontSize, size as getSize, zIndex } from "../../theme";
 import { useModalRoot } from "../box";
 import { Icon } from "../icon";
 import { Divider } from "../modal";
