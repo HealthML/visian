@@ -298,7 +298,6 @@
   "annotation-saving-error": "Error saving annotation layer",
 
   "ml-model-selection-description": "Select the model you want to use to annotate the images",
-  "ml-model-selection-title": "Model Selection",
   "ml-models-loading": "models loading...",
   "ml-models-loading-error": "Error on loading ml models:",
   "ml-models-none-available": "There are no models available.",
@@ -318,6 +317,7 @@
   "job-status-succeeded": "succeeded",
   "job-status-canceled": "canceled",
   "job-status-failed": "failed",
+  "job-creation-popup-title": "Job Creation",
   "start-job": "Start Job",
 
   "open-editor": "Open editor",

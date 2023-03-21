@@ -6,7 +6,7 @@ import { useImagesByDataset } from "../../../queries";
 import { Dataset } from "../../../types";
 import { DatasetImageList } from "../dataset-image-list";
 import { DatasetNavigationbar } from "../dataset-navigationbar";
-import { ModelSelectionPopup } from "../ml-model-popup";
+import { JobCreationPopup } from "../job-creation-popup";
 
 const StyledModal = styled(Modal)`
   vertical-align: middle;
@@ -132,7 +132,7 @@ export const DatasetExplorer = ({ dataset }: { dataset: Dataset }) => {
           setSelection={setSelection}
         />
       )}
-      <ModelSelectionPopup
+      <JobCreationPopup
         isOpen={isModelSelectionPopUpOpen}
         onClose={closeModelSelectionPopUp}
         activeImageSelection={activeImageSelection}

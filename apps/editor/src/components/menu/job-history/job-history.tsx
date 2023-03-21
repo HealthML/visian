@@ -1,10 +1,10 @@
 import { Modal, SquareButton, Text, useTranslation } from "@visian/ui-shared";
 import { useCallback, useState } from "react";
 
-import { ModelSelectionPopup } from "../ml-model-popup";
 import styled from "styled-components";
 
 import useJobsBy from "../../../queries/use-jobs-by";
+import { JobCreationPopup } from "../job-creation-popup";
 import { JobsTable } from "./job-table";
 
 const StyledModal = styled(Modal)`
@@ -53,7 +53,7 @@ export const JobHistory = ({ projectId }: { projectId: string }) => {
         } (${jobsError?.response?.status})`}</Text>
       )}
       {jobs && <JobsTable jobs={jobs} />}
-      <ModelSelectionPopup
+      <JobCreationPopup
         projectId={projectId}
         isOpen={isModelSelectionPopUpOpen}
         onClose={closeModelSelectionPopUp}

@@ -18,7 +18,7 @@ import { useImagesByDataset, useMlModels } from "../../../queries";
 import { hubBaseUrl } from "../../../queries/hub-base-url";
 import { MlModel } from "../../../types";
 import { ProjectDataExplorer } from "../project-data-explorer/project-data-explorer";
-import { ModelPopUpProps } from "./ml-model-selection-popup.props";
+import { JobCreationPopUpProps } from "./job-creation-popup.props";
 
 const ModelSelectionPopupContainer = styled(PopUp)`
   align-items: left;
@@ -38,9 +38,10 @@ const StyledDropDown = styled(DropDown)`
 const BottomNavigationBar = styled(Box)`
   display: flex;
   justify-content: center;
+  width: 50vw;
   margin-top: 10%;
 `;
-export const ModelSelectionPopup = observer<ModelPopUpProps>(
+export const JobCreationPopup = observer<JobCreationPopUpProps>(
   ({ isOpen, onClose, projectId, activeImageSelection, openWithDatasetId }) => {
     const { mlModels, mlModelsError, isErrorMlModels, isLoadingMlModels } =
       useMlModels();
@@ -191,11 +192,12 @@ export const ModelSelectionPopup = observer<ModelPopUpProps>(
 
     return (
       <ModelSelectionPopupContainer
-        titleTx="ml-model-selection-title"
+        titleTx="job-creation-popup-title"
         isOpen={isOpen}
         dismiss={onClose}
         shouldDismissOnOutsidePress
       >
+        <Text>{`${t("ml-model-selection-description")}`}</Text>
         {isLoadingMlModels && <Text tx="ml-models-loading" />}
         {isErrorMlModels && (
           <Text>{`${t("ml-models-loading-error")} ${
