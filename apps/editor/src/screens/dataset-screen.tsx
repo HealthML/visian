@@ -99,18 +99,21 @@ export const DatasetScreen: React.FC = observer(() => {
             <LeftButton
               icon="home"
               tooltipTx="home"
+              tooltipPosition="bottom"
               onPointerDown={() => navigate(`/projects`)}
               isActive={false}
             />
             <LeftButton
               icon="arrowBack"
               tooltipTx="back"
+              tooltipPosition="bottom"
               onPointerDown={() => navigate(`/projects/${projectId}/datasets`)}
               isActive={false}
             />
             <LeftButton
               icon="pixelBrush"
               tooltipTx="open-editor"
+              tooltipPosition="bottom"
               onPointerDown={() => navigate(`/editor`)}
               isActive={false}
             />

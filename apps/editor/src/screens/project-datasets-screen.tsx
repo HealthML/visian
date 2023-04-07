@@ -85,12 +85,14 @@ export const ProjectDatasetsScreen: React.FC = observer(() => {
             <LeftButton
               icon="home"
               tooltipTx="home"
+              tooltipPosition="bottom"
               onPointerDown={() => navigate(`/projects`)}
               isActive={false}
             />
             <LeftButton
               icon="pixelBrush"
               tooltipTx="open-editor"
+              tooltipPosition="bottom"
               onPointerDown={() => navigate(`/editor`)}
               isActive={false}
             />

@@ -326,5 +326,13 @@
 
   "save": "Speichern",
   "save-as": "Speichern Unter",
-  "saving-error": "Fehler beim Speichern"
+  "saving-error": "Fehler beim Speichern",
+
+  "confirm": "Ok",
+  "cancel": "Abbrechen",
+  "delete": "Löschen",
+  "delete-annotation-title": "Annotation Löschen",
+  "delete-annotation-message": "Wollen sie die Annotation \"_\" wirklich löschen?",
+  "delete-images-title": "Scans Löschen",
+  "delete-images-message": "Wollen sie _ Scans wirklich löschen?"
 }

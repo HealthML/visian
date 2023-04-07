@@ -40,12 +40,14 @@ export const DatasetImageListItem = ({
   refetchImages,
   isSelected,
   toggleSelection,
+  deleteAnnotation,
 }: {
   isInSelectMode: boolean;
   image: Image;
   refetchImages: () => void;
   isSelected: boolean;
   toggleSelection: () => void;
+  deleteAnnotation: (annotation: Annotation) => void;
 }) => {
   const {
     annotations,
@@ -127,6 +129,17 @@ export const DatasetImageListItem = ({
                   >
                     {annotation.dataUri}
                   </ClickableText>
+                  {isInSelectMode && (
+                    <IconButton
+                      icon="trash"
+                      tooltipTx="delete-annotation-title"
+                      onPointerDown={() => {
+                        deleteAnnotation(annotation);
+                      }}
+                      style={{ marginLeft: "auto" }}
+                      tooltipPosition="left"
+                    />
+                  )}
                 </ListItem>
               ))}
             </AnnotationsList>

@@ -1,7 +1,7 @@
 import { List, stopPropagation } from "@visian/ui-shared";
 import styled from "styled-components";
 
-import { Image } from "../../../types";
+import { Annotation, Image } from "../../../types";
 import { DatasetImageListItem } from "./dataset-image-list-item";
 
 const ImageList = styled(List)`
@@ -16,12 +16,14 @@ export const DatasetImageList = ({
   refetchImages,
   selectedImages,
   setSelection,
+  deleteAnnotation,
 }: {
   isInSelectMode: boolean;
   images: Image[];
   refetchImages: () => void;
   selectedImages: Map<string, boolean>;
   setSelection: (id: string, selection: boolean) => void;
+  deleteAnnotation: (annotation: Annotation) => void;
 }) => (
   <ImageList onWheel={stopPropagation}>
     {images.map((image: Image) => (
@@ -33,6 +35,7 @@ export const DatasetImageList = ({
         toggleSelection={() =>
           setSelection(image.id, !selectedImages.get(image.id))
         }
+        deleteAnnotation={deleteAnnotation}
         key={image.id}
       />
     ))}

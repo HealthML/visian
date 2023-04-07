@@ -71,6 +71,7 @@ export const ProjectsScreen: React.FC = observer(() => {
             <LeftButton
               icon="pixelBrush"
               tooltipTx="open-editor"
+              tooltipPosition="bottom"
               onPointerDown={() => navigate(`/editor`)}
               isActive={false}
             />
