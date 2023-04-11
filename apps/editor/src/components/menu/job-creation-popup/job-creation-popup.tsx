@@ -181,12 +181,18 @@ export const JobCreationPopup = observer<JobCreationPopUpProps>(
       [onClose, selectedModel, projectId],
     );
 
-    const imageSelectionForJob = useCallback(() => {
-      const selectionForJob = Array.from(selectedImages.values()).flatMap(
-        (imageMaps) => Array.from(imageMaps.keys()),
-      );
-      return createAutoAnnotationJob(selectionForJob);
-    }, [createAutoAnnotationJob, selectedImages]);
+    const selectionForJob: string[] = useMemo(
+      () =>
+        Array.from(selectedImages.values()).flatMap((imageMaps) =>
+          Array.from(imageMaps.keys()),
+        ),
+      [selectedImages],
+    );
+
+    const imageSelectionForJob = useCallback(
+      () => createAutoAnnotationJob(selectionForJob),
+      [createAutoAnnotationJob, selectionForJob],
+    );
 
     const { t } = useTranslation();
 
@@ -226,7 +232,11 @@ export const JobCreationPopup = observer<JobCreationPopUpProps>(
         />
 
         <BottomNavigationBar>
-          <Button tx="start-job" onPointerDown={imageSelectionForJob} />
+          <Button
+            isDisabled={!(selectedModel && selectionForJob.length > 0)}
+            tx="start-job"
+            onPointerDown={imageSelectionForJob}
+          />
         </BottomNavigationBar>
       </ModelSelectionPopupContainer>
     );
