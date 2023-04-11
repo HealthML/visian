@@ -9,10 +9,22 @@ const StyledProjectList = styled(List)`
   overflow-y: auto;
 `;
 
-export const ProjectList = ({ projects }: { projects: Project[] }) => (
+export const ProjectList = ({
+  projects,
+  enableControls,
+  deleteProject,
+}: {
+  projects: Project[];
+  enableControls: boolean;
+  deleteProject: (project: Project) => void;
+}) => (
   <StyledProjectList onWheel={stopPropagation}>
     {projects.map((project: Project) => (
-      <ProjectListItem project={project} />
+      <ProjectListItem
+        project={project}
+        enableControls={enableControls}
+        deleteProject={() => deleteProject(project)}
+      />
     ))}
   </StyledProjectList>
 );

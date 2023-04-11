@@ -330,11 +330,14 @@
 
   "confirm": "Ok",
   "cancel": "Abbrechen",
+  "options": "Optionen",
   "delete": "Löschen",
   "delete-annotation-title": "Annotation Löschen",
   "delete-annotation-message": "Wollen sie die Annotation \"_\" wirklich löschen?",
   "delete-images-title": "Scans Löschen",
   "delete-images-message": "Wollen sie _ Scans wirklich löschen?",
   "delete-dataset-title": "Datensatz löschen",
-  "delete-dataset-message": "Wollen sie den Datensatz \"_\" sämtlich aller enthalten Scans und Annotationen wirklich löschen?"
+  "delete-dataset-message": "Wollen sie den Datensatz \"_\" sämtlich aller enthalten Scans und Annotationen wirklich löschen?",
+  "delete-project-title": "Projekt löschen",
+  "delete-project-message": "Wollen sie das Projekt \"_\" sämtlich aller enthalten Datensätze, Scans und Annotationen wirklich löschen?"
 }
