@@ -40,6 +40,7 @@ export const DatasetNavigationbar = ({
         tooltipPosition="top"
       />
       <StyledButton
+        isDisabled={!anySelected}
         icon="trash"
         tooltipTx="delete-documents"
         onPointerDown={deleteSelectedImages}
