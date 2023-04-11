@@ -86,8 +86,7 @@ export const JobCreationPopup = observer<JobCreationPopUpProps>(
     );
 
     // TODO integrate Query Errors
-    const { datasets, datasetsError, isErrorDatasets, isLoadingDatasets } =
-      useDatasetsBy(projectId);
+    const { datasets } = useDatasetsBy(projectId);
 
     const [selectedDataset, setSelectedDataset] = useState(
       openWithDatasetId || "",
@@ -97,13 +96,7 @@ export const JobCreationPopup = observer<JobCreationPopUpProps>(
       setSelectedDataset(openWithDatasetId || "");
     }, [openWithDatasetId]);
 
-    const {
-      images,
-      imagesError,
-      isErrorImages,
-      isLoadingImages,
-      refetchImages,
-    } = useImagesByDataset(selectedDataset);
+    const { images } = useImagesByDataset(selectedDataset);
 
     const selectDataset = useCallback((datasetId: string) => {
       setSelectedDataset(datasetId);
