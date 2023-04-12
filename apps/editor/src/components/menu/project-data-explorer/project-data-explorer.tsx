@@ -31,6 +31,8 @@ const VerticalLine = styled.div`
 export const ProjectDataExplorer = ({
   datasets,
   images,
+  isErrorImages,
+  isLoadingImages,
   selectedDataset,
   selectedImages,
   selectDataset,
@@ -38,6 +40,8 @@ export const ProjectDataExplorer = ({
 }: {
   datasets: Dataset[] | undefined;
   images: Image[] | undefined;
+  isErrorImages: boolean;
+  isLoadingImages: boolean;
   selectedDataset: string;
   selectedImages: Map<string, Map<string, boolean>>;
   selectDataset: (datasetId: string) => void;
@@ -66,7 +70,11 @@ export const ProjectDataExplorer = ({
     <VerticalLine />
     {datasets && (
       <StyledList>
+        {selectedDataset && isLoadingImages && <Text tx="images-loading" />}
+        {selectedDataset && isErrorImages && <Text tx="images-loading-error" />}
         {images &&
+          !isErrorImages &&
+          !isLoadingImages &&
           images.map((image) => (
             <StyledListItem
               key={image.id}
