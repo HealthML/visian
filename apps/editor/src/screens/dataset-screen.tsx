@@ -66,6 +66,10 @@ const LeftButton = styled(FloatingUIButton)`
   margin-right: 16px;
 `;
 
+const RightButton = styled(FloatingUIButton)`
+  margin-left: 16px;
+`;
+
 const StyledModal = styled(Modal)`
   vertical-align: middle;
   width: 100%;
@@ -110,17 +114,18 @@ export const DatasetScreen: React.FC = observer(() => {
               onPointerDown={() => navigate(`/projects/${projectId}/datasets`)}
               isActive={false}
             />
-            <LeftButton
-              icon="pixelBrush"
-              tooltipTx="open-editor"
-              tooltipPosition="bottom"
-              onPointerDown={() => navigate(`/editor`)}
-              isActive={false}
-            />
           </MenuRow>
         </ColumnLeft>
         <ColumnCenter />
-        <ColumnRight />
+        <ColumnRight>
+          <RightButton
+            icon="pixelBrush"
+            tooltipTx="open-editor"
+            tooltipPosition="left"
+            onPointerDown={() => navigate(`/editor`)}
+            isActive={false}
+          />
+        </ColumnRight>
       </TopBar>
       <Main>
         {isLoadingDataset && <StyledModal labelTx="dataset-loading" />}

@@ -51,14 +51,22 @@ const ColumnLeft = styled.div`
   width: 33.33%;
 `;
 
-const MenuRow = styled.div`
+const ColumnCenter = styled.div`
   display: flex;
-  flex-direction: row;
-  justify-content: flex-start;
+  flex: 1;
+  justify-content: center;
+  width: 33.33%;
 `;
 
-const LeftButton = styled(FloatingUIButton)`
-  margin-right: 16px;
+const ColumnRight = styled.div`
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  width: 33.33%;
+`;
+
+const RightButton = styled(FloatingUIButton)`
+  margin-left: 16px;
 `;
 
 const StyledButton = styled(SquareButton)`
@@ -117,17 +125,17 @@ export const ProjectsScreen: React.FC = observer(() => {
   return (
     <Container title={`${translate("projects-base-title")}`}>
       <TopBar>
-        <ColumnLeft>
-          <MenuRow>
-            <LeftButton
-              icon="pixelBrush"
-              tooltipTx="open-editor"
-              tooltipPosition="bottom"
-              onPointerDown={() => navigate(`/editor`)}
-              isActive={false}
-            />
-          </MenuRow>
-        </ColumnLeft>
+        <ColumnLeft />
+        <ColumnCenter />
+        <ColumnRight>
+          <RightButton
+            icon="pixelBrush"
+            tooltipTx="open-editor"
+            tooltipPosition="left"
+            onPointerDown={() => navigate(`/editor`)}
+            isActive={false}
+          />
+        </ColumnRight>
       </TopBar>
       <Main>
         {isLoadingProjects ? (
