@@ -334,10 +334,10 @@
   "delete": "Delete",
   "delete-annotation-title": "Delete Annotation",
   "delete-annotation-message": "Do you want to delete the Annotation \"_\"?",
-  "delete-images-title": "Delete Scans",
-  "delete-images-message": "Do you really want to delete _ Scans?",
+  "delete-images-title": "Delete Images",
+  "delete-images-message": "Do you really want to delete _ Images?",
   "delete-dataset-title": "Delete Dataset",
-  "delete-dataset-message": "Do you really want to delete the dataset \"_\" including all its scans and annotations?",
+  "delete-dataset-message": "Do you really want to delete the dataset \"_\" including all its Images and annotations?",
   "delete-project-title": "Delete Project",
-  "delete-project-message": "Do you really want to delete the project \"_\" including all its datasets, scans and annotations?"
+  "delete-project-message": "Do you really want to delete the project \"_\" including all its datasets, Images and annotations?"
 }
