@@ -327,5 +327,8 @@
 
   "save": "Save",
   "save-as": "Save as",
-  "saving-error": "Saving Error"
+  "saving-error": "Saving Error",
+
+  "job-creation-error": "Creating Job Error",
+  "post-request-error": "Sending the POST request failed."
 }

@@ -327,5 +327,8 @@
 
   "save": "Speichern",
   "save-as": "Speichern Unter",
-  "saving-error": "Fehler beim Speichern"
+  "saving-error": "Fehler beim Speichern",
+
+  "job-creation-error": "Fehler beim Erstellen des Jobs",
+  "post-request-error": "Beim Senden des POST Requests ist ein Fehler aufgetreten."
 }
