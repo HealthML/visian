@@ -177,10 +177,10 @@ export const JobCreationPopup = observer<JobCreationPopUpProps>(
           });
           // eslint-disable-next-line no-unused-expressions
           onClose && onClose();
-        } catch (error: any) {
+        } catch (error) {
           store?.setError({
-            titleTx: "job-creation-error",
-            descriptionTx: "post-request-error",
+            titleTx: "internal-server-error",
+            descriptionTx: "job-creation-error",
           });
           // eslint-disable-next-line no-unused-expressions
           onClose && onClose();
