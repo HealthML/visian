@@ -13,6 +13,7 @@ import { observer } from "mobx-react-lite";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import styled from "styled-components";
 
+import { useStore } from "../../../app/root-store";
 import { useImagesByDataset, useMlModels } from "../../../queries";
 import { hubBaseUrl } from "../../../queries/hub-base-url";
 import useDatasetsBy from "../../../queries/use-datasets-by";
@@ -20,7 +21,7 @@ import { MlModel } from "../../../types";
 import { ProjectDataExplorer } from "../project-data-explorer/project-data-explorer";
 import { JobCreationPopUpProps } from "./job-creation-popup.props";
 
-const ModelSelectionPopupContainer = styled(PopUp)`
+const JobCreationPopupContainer = styled(PopUp)`
   align-items: left;
   width: 50vw;
   height: 70vh;
@@ -35,14 +36,22 @@ const StyledDropDown = styled(DropDown)`
   margin: 2%;
 `;
 
+const StyledErrorText = styled(Text)`
+  width: 100%;
+  text-align: center;
+`;
+
 const BottomNavigationBar = styled(Box)`
   display: flex;
   justify-content: center;
   width: 50vw;
   margin-top: 10%;
 `;
+
 export const JobCreationPopup = observer<JobCreationPopUpProps>(
   ({ isOpen, onClose, projectId, activeImageSelection, openWithDatasetId }) => {
+    const store = useStore();
+
     const { mlModels, mlModelsError, isErrorMlModels, isLoadingMlModels } =
       useMlModels();
 
@@ -86,7 +95,8 @@ export const JobCreationPopup = observer<JobCreationPopUpProps>(
     );
 
     // TODO integrate Query Errors
-    const { datasets } = useDatasetsBy(projectId);
+    const { datasets, datasetsError, isErrorDatasets, isLoadingDatasets } =
+      useDatasetsBy(projectId);
 
     const [selectedDataset, setSelectedDataset] = useState(
       openWithDatasetId || "",
@@ -96,7 +106,8 @@ export const JobCreationPopup = observer<JobCreationPopUpProps>(
       setSelectedDataset(openWithDatasetId || "");
     }, [openWithDatasetId]);
 
-    const { images } = useImagesByDataset(selectedDataset);
+    const { images, isErrorImages, isLoadingImages } =
+      useImagesByDataset(selectedDataset);
 
     const selectDataset = useCallback((datasetId: string) => {
       setSelectedDataset(datasetId);
@@ -166,12 +177,16 @@ export const JobCreationPopup = observer<JobCreationPopUpProps>(
           });
           // eslint-disable-next-line no-unused-expressions
           onClose && onClose();
-        } catch (error: any) {
+        } catch (error) {
+          store?.setError({
+            titleTx: "internal-server-error",
+            descriptionTx: "job-creation-error",
+          });
           // eslint-disable-next-line no-unused-expressions
           onClose && onClose();
         }
       },
-      [onClose, selectedModel, projectId],
+      [onClose, selectedModel, projectId, store],
     );
 
     const selectionForJob: string[] = useMemo(
@@ -189,8 +204,10 @@ export const JobCreationPopup = observer<JobCreationPopUpProps>(
 
     const { t } = useTranslation();
 
+    const showProjectDataExplorer = !(isLoadingDatasets || isErrorDatasets);
+
     return (
-      <ModelSelectionPopupContainer
+      <JobCreationPopupContainer
         titleTx="job-creation-popup-title"
         isOpen={isOpen}
         dismiss={onClose}
@@ -215,23 +232,34 @@ export const JobCreationPopup = observer<JobCreationPopUpProps>(
             onChange={setSelectedModel}
           />
         </DropDownContainer>
-        <ProjectDataExplorer
-          datasets={datasets}
-          images={images}
-          selectedDataset={selectedDataset}
-          selectedImages={selectedImages}
-          selectDataset={selectDataset}
-          setImageSelection={setImageSelection}
-        />
-
-        <BottomNavigationBar>
-          <Button
-            isDisabled={!(selectedModel && selectionForJob.length > 0)}
-            tx="start-job"
-            onPointerDown={imageSelectionForJob}
+        {isLoadingDatasets && <StyledErrorText tx="datasets-loading" />}
+        {isErrorDatasets && (
+          <StyledErrorText>{`${t("datasets-loading-error")} ${
+            datasetsError?.response?.statusText
+          } (${datasetsError?.response?.status})`}</StyledErrorText>
+        )}
+        {showProjectDataExplorer && (
+          <ProjectDataExplorer
+            datasets={datasets}
+            images={images}
+            isErrorImages={isErrorImages}
+            isLoadingImages={isLoadingImages}
+            selectedDataset={selectedDataset}
+            selectedImages={selectedImages}
+            selectDataset={selectDataset}
+            setImageSelection={setImageSelection}
           />
-        </BottomNavigationBar>
-      </ModelSelectionPopupContainer>
+        )}
+        {showProjectDataExplorer && (
+          <BottomNavigationBar>
+            <Button
+              isDisabled={!(selectedModel && selectionForJob.length > 0)}
+              tx="start-job"
+              onPointerDown={imageSelectionForJob}
+            />
+          </BottomNavigationBar>
+        )}
+      </JobCreationPopupContainer>
     );
   },
 );

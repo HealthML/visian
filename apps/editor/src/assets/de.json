@@ -327,5 +327,8 @@
 
   "save": "Speichern",
   "save-as": "Speichern Unter",
-  "saving-error": "Fehler beim Speichern"
+  "saving-error": "Fehler beim Speichern",
+
+  "internal-server-error": "Interner Serverfehler",
+  "job-creation-error": "Beim Erstellen des Jobs ist ein Fehler aufgetreten."
 }

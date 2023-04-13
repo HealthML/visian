@@ -1,7 +1,8 @@
-import { Modal, Text, useTranslation } from "@visian/ui-shared";
+import { Modal, Notification, Text, useTranslation } from "@visian/ui-shared";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import styled from "styled-components";
 
+import { useStore } from "../../../app/root-store";
 import { useImagesByDataset } from "../../../queries";
 import { Dataset } from "../../../types";
 import { DatasetImageList } from "../dataset-image-list";
@@ -15,7 +16,17 @@ const StyledModal = styled(Modal)`
 `;
 // TODO: z-index logic
 
+const ErrorNotification = styled(Notification)`
+  position: absolute;
+  min-width: 30%;
+  left: 50%;
+  bottom: 15%;
+  transform: translateX(-50%);
+`;
+
 export const DatasetExplorer = ({ dataset }: { dataset: Dataset }) => {
+  const store = useStore();
+
   const [isInSelectMode, setIsInSelectMode] = useState(false);
 
   const { images, imagesError, isErrorImages, isLoadingImages, refetchImages } =
@@ -117,6 +128,15 @@ export const DatasetExplorer = ({ dataset }: { dataset: Dataset }) => {
         />
       }
     >
+      {store?.error && (
+        <ErrorNotification
+          title={store?.error.title}
+          titleTx={store?.error.titleTx}
+          description={store?.error.description}
+          descriptionTx={store?.error.descriptionTx}
+          descriptionData={store?.error.descriptionData}
+        />
+      )}
       {isLoadingImages && <Text tx="images-loading" />}
       {isErrorImages && (
         <Text>{`${translate("images-loading-error")} ${

@@ -327,5 +327,8 @@
 
   "save": "Save",
   "save-as": "Save as",
-  "saving-error": "Saving Error"
+  "saving-error": "Saving Error",
+
+  "internal-server-error": "Internal Server Error",
+  "job-creation-error": "An error occurred while creating the job."
 }
