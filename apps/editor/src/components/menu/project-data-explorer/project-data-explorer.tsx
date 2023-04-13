@@ -43,7 +43,7 @@ export const ProjectDataExplorer = ({
   isErrorImages: boolean;
   isLoadingImages: boolean;
   selectedDataset: string;
-  selectedImages: Map<string, Map<string, boolean>>;
+  selectedImages: Map<string, string[]>;
   selectDataset: (datasetId: string) => void;
   setImageSelection: (
     datasetId: string,
@@ -79,12 +79,14 @@ export const ProjectDataExplorer = ({
             <StyledListItem
               key={image.id}
               isLast
-              isActive={selectedImages.get(image.dataset)?.has(image.id)}
+              isActive={selectedImages.get(image.dataset)?.includes(image.id)}
               onPointerDown={() =>
                 setImageSelection(
                   image.dataset,
                   image.id,
-                  !selectedImages.get(image.dataset)?.get(image.id),
+                  !(
+                    selectedImages.get(image.dataset)?.indexOf(image.id) !== -1
+                  ),
                 )
               }
             >

@@ -97,15 +97,14 @@ export const DatasetExplorer = ({ dataset }: { dataset: Dataset }) => {
   >(dataset.id);
 
   // model selection popup
-  const [isModelSelectionPopUpOpen, setIsModelSelectionPopUpOpen] =
-    useState(false);
-  const openModelSelectionPopUp = useCallback(() => {
-    setIsModelSelectionPopUpOpen(true);
+  const [isJobCreationPopUpOpen, setIsJobCreationPopUpOpen] = useState(false);
+  const openJobCreationPopUp = useCallback(() => {
+    setIsJobCreationPopUpOpen(true);
     setOpenWithDatasetId(dataset.id);
   }, [dataset.id]);
-  const closeModelSelectionPopUp = useCallback(() => {
+  const closeJobCreationPopUp = useCallback(() => {
     setOpenWithDatasetId(undefined);
-    setIsModelSelectionPopUpOpen(false);
+    setIsJobCreationPopUpOpen(false);
     setSelectAll(false);
     setIsInSelectMode(false);
   }, [setSelectAll]);
@@ -124,7 +123,7 @@ export const DatasetExplorer = ({ dataset }: { dataset: Dataset }) => {
           anySelected={isAnySelected}
           toggleSelectMode={toggleSelectMode}
           toggleSelectAll={toggleSelectAll}
-          openModelSelectionPopUp={openModelSelectionPopUp}
+          openModelSelectionPopUp={openJobCreationPopUp}
         />
       }
     >
@@ -153,8 +152,8 @@ export const DatasetExplorer = ({ dataset }: { dataset: Dataset }) => {
         />
       )}
       <JobCreationPopup
-        isOpen={isModelSelectionPopUpOpen}
-        onClose={closeModelSelectionPopUp}
+        isOpen={isJobCreationPopUpOpen}
+        onClose={closeJobCreationPopUp}
         activeImageSelection={activeImageSelection}
         projectId={dataset.project}
         openWithDatasetId={openWithDatasetId}

@@ -117,20 +117,10 @@ export const JobCreationPopup = observer<JobCreationPopUpProps>(
       setSelectedDataset(datasetId);
     }, []);
 
-    const [selectedImages, setSelectedImages] = useState<
-      Map<string, Map<string, boolean>>
-    >(
+    const [selectedImages, setSelectedImages] = useState<Map<string, string[]>>(
       (openWithDatasetId &&
-        new Map<string, Map<string, boolean>>([
-          [
-            openWithDatasetId,
-            new Map<string, boolean>(
-              (activeImageSelection ?? []).map((image: string) => [
-                image,
-                true,
-              ]),
-            ),
-          ],
+        new Map<string, string[]>([
+          [openWithDatasetId, activeImageSelection ?? []],
         ])) ||
         new Map(),
     );
@@ -138,13 +128,8 @@ export const JobCreationPopup = observer<JobCreationPopUpProps>(
     useEffect(() => {
       if (openWithDatasetId && activeImageSelection) {
         setSelectedImages(() => {
-          const newSelectedImages = new Map<string, Map<string, boolean>>([
-            [
-              openWithDatasetId,
-              new Map<string, boolean>(
-                activeImageSelection.map((imageId: string) => [imageId, true]),
-              ),
-            ],
+          const newSelectedImages = new Map<string, string[]>([
+            [openWithDatasetId, activeImageSelection],
           ]);
           return newSelectedImages;
         });
@@ -152,16 +137,19 @@ export const JobCreationPopup = observer<JobCreationPopUpProps>(
     }, [activeImageSelection, openWithDatasetId]);
 
     const setImageSelection = useCallback(
-      (datasetId: string, imageId: string, selection: boolean) => {
+      (datasetId: string, imageId: string, isSelected: boolean) => {
         setSelectedImages((prevSelectedImages) => {
-          if (selection) {
-            prevSelectedImages.get(datasetId)?.set(imageId, selection);
+          if (isSelected) {
+            prevSelectedImages.get(datasetId)?.push(imageId);
           } else {
-            prevSelectedImages.get(datasetId)?.delete(imageId);
+            const index = prevSelectedImages.get(datasetId)?.indexOf(imageId);
+            if (index !== undefined && index > -1) {
+              prevSelectedImages.get(datasetId)?.splice(index, 1);
+            }
           }
           prevSelectedImages.set(
             datasetId,
-            prevSelectedImages.get(datasetId) || new Map(),
+            prevSelectedImages.get(datasetId) || [],
           );
           return new Map(prevSelectedImages);
         });
@@ -178,31 +166,33 @@ export const JobCreationPopup = observer<JobCreationPopUpProps>(
             modelVersion: selectedModel.version,
             project: projectId,
           });
-          // eslint-disable-next-line no-unused-expressions
-          onClose && onClose();
+          onClose?.();
         } catch (error) {
           store?.setError({
             titleTx: "internal-server-error",
             descriptionTx: "job-creation-error",
           });
-          // eslint-disable-next-line no-unused-expressions
           onClose?.();
         }
       },
       [onClose, selectedModel, projectId, store],
     );
 
-    const selectionForJob: string[] = useMemo(
+    const imageSelectionForJob: string[] = useMemo(
       () =>
-        Array.from(selectedImages.values()).flatMap((imageMaps) =>
-          Array.from(imageMaps.keys()),
+        Array.from(selectedImages.values()).reduce(
+          (imageIdsDatasetA: string[], imageIdsDatasetB: string[]) => [
+            ...imageIdsDatasetA,
+            ...imageIdsDatasetB,
+          ],
+          [],
         ),
       [selectedImages],
     );
 
-    const imageSelectionForJob = useCallback(
-      () => createAutoAnnotationJob(selectionForJob),
-      [createAutoAnnotationJob, selectionForJob],
+    const startJob = useCallback(
+      () => createAutoAnnotationJob(imageSelectionForJob),
+      [createAutoAnnotationJob, imageSelectionForJob],
     );
 
     const { t } = useTranslation();
@@ -256,9 +246,9 @@ export const JobCreationPopup = observer<JobCreationPopUpProps>(
         {showProjectDataExplorer && (
           <BottomNavigationBar>
             <Button
-              isDisabled={!(selectedModel && selectionForJob.length > 0)}
+              isDisabled={!(selectedModel && imageSelectionForJob.length > 0)}
               tx="start-job"
-              onPointerDown={imageSelectionForJob}
+              onPointerDown={startJob}
             />
           </BottomNavigationBar>
         )}
