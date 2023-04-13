@@ -59,18 +59,18 @@ export const JobCreationPopup = observer<JobCreationPopUpProps>(
       (mlModels && mlModels[0]?.name) || "",
     );
 
-    const mlModelNameOptions: IEnumParameterOption<string>[] = useMemo(() => {
-      const uniqueNames: string[] = [];
-      if (mlModels) {
-        mlModels
-          .map((model) => model.name)
-          .forEach((element) => {
-            if (!uniqueNames.includes(element)) {
-              uniqueNames.push(element);
-            }
-          });
+    useEffect(() => {
+      if (mlModels && mlModels.length > 0) {
+        setSelectedModelName(mlModels[0].name);
       }
-      return uniqueNames.map((model) => ({ label: model, value: model }));
+    }, [mlModels]);
+
+    const mlModelNameOptions: IEnumParameterOption<string>[] = useMemo(() => {
+      const uniqueNames = new Set(mlModels?.map((model) => model.name));
+      return Array.from(uniqueNames, (model) => ({
+        label: model,
+        value: model,
+      }));
     }, [mlModels]);
 
     const availableModelVersions = useMemo(
@@ -84,6 +84,10 @@ export const JobCreationPopup = observer<JobCreationPopUpProps>(
     const [selectedModel, setSelectedModel] = useState(
       availableModelVersions[0],
     );
+
+    useEffect(() => {
+      setSelectedModel(availableModelVersions[0]);
+    }, [availableModelVersions]);
 
     const mlModelVersionOptions: IEnumParameterOption<MlModel>[] = useMemo(
       () =>
@@ -117,7 +121,6 @@ export const JobCreationPopup = observer<JobCreationPopUpProps>(
       Map<string, Map<string, boolean>>
     >(
       (openWithDatasetId &&
-        activeImageSelection &&
         new Map<string, Map<string, boolean>>([
           [
             openWithDatasetId,
@@ -139,7 +142,7 @@ export const JobCreationPopup = observer<JobCreationPopUpProps>(
             [
               openWithDatasetId,
               new Map<string, boolean>(
-                activeImageSelection.map((image: string) => [image, true]),
+                activeImageSelection.map((imageId: string) => [imageId, true]),
               ),
             ],
           ]);
@@ -183,7 +186,7 @@ export const JobCreationPopup = observer<JobCreationPopUpProps>(
             descriptionTx: "job-creation-error",
           });
           // eslint-disable-next-line no-unused-expressions
-          onClose && onClose();
+          onClose?.();
         }
       },
       [onClose, selectedModel, projectId, store],
