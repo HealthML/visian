@@ -8,14 +8,12 @@ import {
   Text,
   useTranslation,
 } from "@visian/ui-shared";
-import axios from "axios";
 import { observer } from "mobx-react-lite";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
-import { useImagesByDataset, useMlModels } from "../../../queries";
-import { hubBaseUrl } from "../../../queries/hub-base-url";
+import { postJob, useImagesByDataset, useMlModels } from "../../../queries";
 import useDatasetsBy from "../../../queries/use-datasets-by";
 import { MlModel } from "../../../types";
 import { ProjectDataExplorer } from "../project-data-explorer/project-data-explorer";
@@ -160,12 +158,7 @@ export const JobCreationPopup = observer<JobCreationPopUpProps>(
     const createAutoAnnotationJob = useCallback(
       async (imageSelection: string[]) => {
         try {
-          await axios.post(`${hubBaseUrl}jobs`, {
-            images: imageSelection,
-            modelName: selectedModel.name,
-            modelVersion: selectedModel.version,
-            project: projectId,
-          });
+          await postJob(imageSelection, selectedModel, projectId);
           onClose?.();
         } catch (error) {
           store?.setError({
