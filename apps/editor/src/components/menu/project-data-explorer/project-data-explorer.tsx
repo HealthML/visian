@@ -43,13 +43,9 @@ export const ProjectDataExplorer = ({
   isErrorImages: boolean;
   isLoadingImages: boolean;
   selectedDataset: string;
-  selectedImages: Map<string, string[]>;
+  selectedImages: Set<string>;
   selectDataset: (datasetId: string) => void;
-  setImageSelection: (
-    datasetId: string,
-    imageId: string,
-    selection: boolean,
-  ) => void;
+  setImageSelection: (imageId: string, selection: boolean) => void;
 }) => (
   <FileExplorer>
     {datasets && (
@@ -79,15 +75,9 @@ export const ProjectDataExplorer = ({
             <StyledListItem
               key={image.id}
               isLast
-              isActive={selectedImages.get(image.dataset)?.includes(image.id)}
+              isActive={selectedImages.has(image.id)}
               onPointerDown={() =>
-                setImageSelection(
-                  image.dataset,
-                  image.id,
-                  !(
-                    selectedImages.get(image.dataset)?.indexOf(image.id) !== -1
-                  ),
-                )
+                setImageSelection(image.id, !selectedImages.has(image.id))
               }
             >
               <StyledIcon icon="document" />

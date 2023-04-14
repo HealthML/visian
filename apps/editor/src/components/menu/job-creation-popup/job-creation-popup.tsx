@@ -96,7 +96,6 @@ export const JobCreationPopup = observer<JobCreationPopUpProps>(
       [availableModelVersions],
     );
 
-    // TODO integrate Query Errors
     const { datasets, datasetsError, isErrorDatasets, isLoadingDatasets } =
       useDatasetsBy(projectId);
 
@@ -115,44 +114,32 @@ export const JobCreationPopup = observer<JobCreationPopUpProps>(
       setSelectedDataset(datasetId);
     }, []);
 
-    const [selectedImages, setSelectedImages] = useState<Map<string, string[]>>(
-      (openWithDatasetId &&
-        new Map<string, string[]>([
-          [openWithDatasetId, activeImageSelection ?? []],
-        ])) ||
-        new Map(),
+    const [selectedImages, setSelectedImages] = useState<Set<string>>(
+      new Set<string>(),
     );
 
     useEffect(() => {
       if (openWithDatasetId && activeImageSelection) {
         setSelectedImages(() => {
-          const newSelectedImages = new Map<string, string[]>([
-            [openWithDatasetId, activeImageSelection],
-          ]);
+          const newSelectedImages = new Set<string>(activeImageSelection);
           return newSelectedImages;
         });
       }
     }, [activeImageSelection, openWithDatasetId]);
 
     const setImageSelection = useCallback(
-      (datasetId: string, imageId: string, isSelected: boolean) => {
+      (imageId: string, isSelected: boolean) => {
         setSelectedImages((prevSelectedImages) => {
+          const newSelectedImages = new Set(prevSelectedImages);
           if (isSelected) {
-            prevSelectedImages.get(datasetId)?.push(imageId);
+            newSelectedImages.add(imageId);
           } else {
-            const index = prevSelectedImages.get(datasetId)?.indexOf(imageId);
-            if (index !== undefined && index > -1) {
-              prevSelectedImages.get(datasetId)?.splice(index, 1);
-            }
+            newSelectedImages.delete(imageId);
           }
-          prevSelectedImages.set(
-            datasetId,
-            prevSelectedImages.get(datasetId) || [],
-          );
-          return new Map(prevSelectedImages);
+          return newSelectedImages;
         });
       },
-      [],
+      [setSelectedImages],
     );
 
     const createAutoAnnotationJob = useCallback(
@@ -172,14 +159,7 @@ export const JobCreationPopup = observer<JobCreationPopUpProps>(
     );
 
     const imageSelectionForJob: string[] = useMemo(
-      () =>
-        Array.from(selectedImages.values()).reduce(
-          (imageIdsDatasetA: string[], imageIdsDatasetB: string[]) => [
-            ...imageIdsDatasetA,
-            ...imageIdsDatasetB,
-          ],
-          [],
-        ),
+      () => Array.from(selectedImages),
       [selectedImages],
     );
 
@@ -239,7 +219,7 @@ export const JobCreationPopup = observer<JobCreationPopUpProps>(
         {showProjectDataExplorer && (
           <BottomNavigationBar>
             <Button
-              isDisabled={!(selectedModel && imageSelectionForJob.length > 0)}
+              isDisabled={!(selectedModel && selectedImages.size > 0)}
               tx="start-job"
               onPointerDown={startJob}
             />
