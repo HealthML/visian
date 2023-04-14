@@ -158,14 +158,9 @@ export const JobCreationPopup = observer<JobCreationPopUpProps>(
       [onClose, selectedModel, projectId, store],
     );
 
-    const imageSelectionForJob: string[] = useMemo(
-      () => Array.from(selectedImages),
-      [selectedImages],
-    );
-
     const startJob = useCallback(
-      () => createAutoAnnotationJob(imageSelectionForJob),
-      [createAutoAnnotationJob, imageSelectionForJob],
+      () => createAutoAnnotationJob(Array.from(selectedImages)),
+      [createAutoAnnotationJob, selectedImages],
     );
 
     const { t } = useTranslation();
