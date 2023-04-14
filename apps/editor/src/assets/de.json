@@ -297,7 +297,7 @@
   "annotation-saving-as": "Neue Annotationsdatei erstellen",
   "annotation-saving-error": "Fehler beim Speichern der Annotationsebene",
 
-  "ml-model-selection-description": "Wähle das Modell mit dem die Bilder annotiert werden sollen",
+  "ml-model-selection-description": "Wählen Sie ein Modell und die zugehörige Modellversion, die zum Annotieren der Bilder verwendet werden sollen.",
   "ml-models-loading": "Modelle werden geladen...",
   "ml-models-loading-error": "Fehler beim Laden der Modelle:",
   "ml-models-none-available": "Es sind keine Modelle verfügbar.",
