@@ -328,16 +328,16 @@
   "save-as": "Speichern Unter",
   "saving-error": "Fehler beim Speichern",
 
-  "confirm": "Ok",
+  "confirm": "Bestätigen",
   "cancel": "Abbrechen",
   "options": "Optionen",
   "delete": "Löschen",
   "delete-annotation-title": "Annotation Löschen",
-  "delete-annotation-message": "Wollen sie die Annotation \"_\" wirklich löschen?",
+  "delete-annotation-message": "Wollen Sie die Annotation \"_\" wirklich löschen?",
   "delete-images-title": "Bilder Löschen",
-  "delete-images-message": "Wollen sie die _ Bilder wirklich löschen?",
-  "delete-dataset-title": "Datensatz löschen",
-  "delete-dataset-message": "Wollen sie den Datensatz \"_\" sämtlich aller enthalten Bilder und Annotationen wirklich löschen?",
-  "delete-project-title": "Projekt löschen",
-  "delete-project-message": "Wollen sie das Projekt \"_\" sämtlich aller enthalten Datensätze, Bilder und Annotationen wirklich löschen?"
+  "delete-images-message": "Wollen Sie _ Bild(er) sämtlich aller dazugehörigen Annotationen wirklich löschen?",
+  "delete-dataset-title": "Datensatz Löschen",
+  "delete-dataset-message": "Wollen Sie den Datensatz \"_\" sämtlich aller enthaltenen Bilder und Annotationen wirklich löschen?",
+  "delete-project-title": "Projekt Löschen",
+  "delete-project-message": "Wollen Sie das Projekt \"_\" sämtlich aller enthaltenen Datensätze, Bilder und Annotationen wirklich löschen?"
 }

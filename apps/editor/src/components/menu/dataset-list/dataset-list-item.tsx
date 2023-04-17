@@ -81,13 +81,6 @@ export const DatasetListItem = ({
         </ImageContainer>
         <DatasetInfo>
           <StyledText onClick={openDataset}>{dataset.name}</StyledText>
-          {/* <IconButton
-            icon="pixelBrush"
-            tooltipTx="delete-annotation-title"
-            onPointerDown={() => {}}
-            style={{ marginLeft: "auto" }}
-            tooltipPosition="left"
-          /> */}
           <IconButton
             icon="trash"
             tooltipTx="delete-dataset-title"
