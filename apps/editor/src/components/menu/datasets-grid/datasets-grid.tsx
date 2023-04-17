@@ -17,12 +17,12 @@ export const DatasetsGrid = ({ projectId }: { projectId: string }) => {
   const { t: translate } = useTranslation();
 
   return isLoadingDatasets || isErrorDatasets ? (
-    <Main title={isLoadingDatasets ? "dataset-loading" : "error"}>
+    <Main title={isLoadingDatasets ? "datasets-loading" : "error"}>
       {isLoadingDatasets ? (
-        <Text>{translate("dataset-loading")}</Text>
+        <Text>{translate("datasets-loading")}</Text>
       ) : (
         <Text>
-          {`${translate("dataset-loading-error")} ${
+          {`${translate("datasets-loading-error")} ${
             datasetsError?.response?.statusText
           } (${datasetsError?.response?.status})`}
         </Text>

@@ -275,11 +275,11 @@
 
   "projects-loading": "Projekte werden geladen...",
   "projects-loading-error": "Fehler beim Laden der Projekte:",
-  "no-projects-available": "Aktuell sind keine Projekte vorhanden",
+  "no-projects-available": "Aktuell sind keine Projekte vorhanden.",
 
   "datasets-loading": "Datensätze werden geladen...",
   "datasets-loading-error": "Fehler beim Laden der Datensätze:",
-  "no-datasets-available": "Aktuell sind keine Datensätze vorhanden",
+  "no-datasets-available": "Aktuell sind keine Datensätze vorhanden.",
 
   "dataset-loading": "Datensatz wird geladen...",
   "dataset-loading-error": "Fehler beim Laden des Datensatzes:",
@@ -305,6 +305,7 @@
 
   "jobs-loading": "Jobs werden geladen...",
   "jobs-loading-error": "Fehler beim Laden der Jobs:",
+  "no-jobs-available": "Aktuell sind keine Jobs vorhanden.",
   "job-details": "Job Details",
   "job-images": "Bilder",
   "job-number-images": "Anzahl Bilder",
