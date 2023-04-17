@@ -88,7 +88,7 @@
 
   "data-model-outdated-alert": "Data model outdated. Reset required.",
   "discard-current-document-confirmation": "Discard the current document?",
-  "erase-application-data-confirmation": "Erase all application data?",
+  "erase-application-data-confirmation": "Clear current editor data?",
 
   "layers": "Layers",
   "main-image-layer": "Main Image Layer",
@@ -287,18 +287,44 @@
   "images-loading": "Loading images...",
   "images-loading-error": "Error on loading images:",
   "image-open-error": "Error on opening image",
+  "image-annotated": "annotated",
 
   "annotations-loading": "Loading annotations...",
   "annotations-loading-error": "Error on loading annotations:",
   "annotation-open-error": "Error on opening annotation",
+  "annotation-saving": "Save active annotation layer",
+  "annotation-saving-overrwite": "Overwrite existing annotation file",
+  "annotation-saving-as": "Create new annotation file",
+  "annotation-saving-error": "Error saving annotation layer",
 
   "ml-model-selection-description": "Select the model you want to use to annotate the images",
   "ml-model-selection-title": "Model Selection",
   "ml-models-loading": "models loading...",
   "ml-models-loading-error": "Error on loading ml models:",
+  "ml-models-none-available": "There are no models available.",
+
+  "jobs-loading": "Loading jobs...",
+  "jobs-loading-error": "Error on loading jobs:",
+  "job-images": "Images",
+  "job-number-images": "Number of images",
+  "job-details": "Job Details",
+  "job-model-name": "Model",
+  "job-model-version": "Version",
+  "job-started": "Started at",
+  "job-finished": "Finished at",
+  "job-status": "Status",
+  "job-status-queued": "queued",
+  "job-status-running": "running",
+  "job-status-succeeded": "succeeded",
+  "job-status-canceled": "canceled",
+  "job-status-failed": "failed",
 
   "open-editor": "Open editor",
   "close-editor": "Close editor",
   "home": "Go to projects overview",
-  "back": "Go back"
+  "back": "Go back",
+
+  "save": "Save",
+  "save-as": "Save as",
+  "saving-error": "Saving Error"
 }

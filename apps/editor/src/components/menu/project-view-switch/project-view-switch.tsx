@@ -24,9 +24,9 @@ export const ProjectViewSwitch = ({
   const navigate = useNavigate();
 
   // expect path like /project/projectId/datasets
-  const handleChange = (newValue: string) => {
+  const navigateToScreen = (screenName: string) => {
     const pathParts = window.location.pathname.split("/");
-    pathParts[pathParts.length - 1] = newValue;
+    pathParts[pathParts.length - 1] = screenName;
     navigate(pathParts.join("/"));
   };
 
@@ -36,7 +36,7 @@ export const ProjectViewSwitch = ({
         infoBaseZIndex={theme.zIndices.overlay}
         options={projectViewSwitchOptions}
         value={defaultSwitchSelection}
-        onChange={(newValue) => handleChange(newValue)}
+        onChange={(screenName) => navigateToScreen(screenName)}
       />
     </StyledSwitch>
   );

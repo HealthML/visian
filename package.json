@@ -101,6 +101,8 @@
   "packageManager": "yarn@3.2.4",
   "dependencies": {
     "@aws-amplify/ui-react": "^1.2.15",
+    "@tanstack/react-table": "^8.7.9",
+    "@types/react-table": "^7.7.14",
     "aws-amplify": "^4.2.9",
     "axios": "^1.2.2",
     "core-js": "^3.6.5",

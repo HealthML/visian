@@ -866,7 +866,7 @@ export class Document
     const layer = this.getLayer(createdLayerId);
     if (layer && "metadata" in file) {
       const fileWithMetaData = file as FileWithMetadata;
-      layer.metaDataId = fileWithMetaData.metadata.id;
+      layer.metaData = fileWithMetaData.metadata;
     }
   }
 
