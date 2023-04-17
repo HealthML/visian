@@ -14,7 +14,7 @@ import { getDisplayDate } from "../util/display-date";
 import { JobDetailsPopUp } from "./job-details-popup/job-details-popup";
 import { JobStatusBadge } from "./job-status-badge/job-status-badge";
 
-const StyledJobStatus = styled(JobStatusBadge)`
+const BadgeContainer = styled.div`
   width: 10em;
 `;
 
@@ -56,7 +56,11 @@ const columns = [
   }),
   columnHelper.accessor("status", {
     header: () => <HeaderLabel tx="job-status" />,
-    cell: (props) => <StyledJobStatus status={props.getValue()} />,
+    cell: (props) => (
+      <BadgeContainer>
+        <JobStatusBadge status={props.getValue()} full />
+      </BadgeContainer>
+    ),
     // Make sure that queued jobs are at the top
     sortingFn: (rowA, rowB, id) => {
       if (rowA.getValue(id) === "queued") return -1;
