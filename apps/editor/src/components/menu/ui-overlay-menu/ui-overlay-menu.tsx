@@ -77,8 +77,8 @@ const StyledModal = styled(Modal)`
 
 export const UIOverlayMenu = observer<UIOverlayMenuProps>(
   ({
+    homeButton,
     backButton,
-    editButton,
     projectViewSwitch,
     defaultSwitchSelection,
     main,
@@ -90,17 +90,19 @@ export const UIOverlayMenu = observer<UIOverlayMenuProps>(
         <TopBar>
           <ColumnLeft>
             <MenuRow>
-              <LeftButton
-                icon="home"
-                tooltipTx="Home"
-                tooltipPosition="right"
-                onPointerDown={() => navigate(`/projects`)}
-                isActive={false}
-              />
+              {homeButton && (
+                <LeftButton
+                  icon="home"
+                  tooltipTx="home"
+                  tooltipPosition="right"
+                  onPointerDown={() => navigate(`/projects`)}
+                  isActive={false}
+                />
+              )}
               {backButton && (
                 <LeftButton
                   icon="arrowBack"
-                  tooltipTx="Back"
+                  tooltipTx="back"
                   tooltipPosition="right"
                   onPointerDown={() => navigate(`../`)}
                   isActive={false}
@@ -117,14 +119,13 @@ export const UIOverlayMenu = observer<UIOverlayMenuProps>(
           </ColumnCenter>
           <ColumnRight>
             <RightBar>
-              {editButton && (
-                <RightButton
-                  icon="pixelBrush"
-                  tooltipTx="Edit"
-                  tooltipPosition="left"
-                  isActive={false}
-                />
-              )}
+              <RightButton
+                icon="pixelBrush"
+                tooltipTx="open-editor"
+                tooltipPosition="left"
+                onPointerDown={() => navigate(`/editor`)}
+                isActive={false}
+              />
             </RightBar>
           </ColumnRight>
         </TopBar>

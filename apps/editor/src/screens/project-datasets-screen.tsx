@@ -28,8 +28,8 @@ export const ProjectDatasetsScreen: React.FC = observer(() => {
       }`}
     >
       <UIOverlayMenu
+        homeButton
         backButton
-        editButton
         projectViewSwitch
         defaultSwitchSelection="datasets"
         main={
