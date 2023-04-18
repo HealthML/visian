@@ -89,6 +89,7 @@ export const ProjectJobsScreen: React.FC = observer(() => {
             <LeftButton
               icon="home"
               tooltipTx="home"
+              tooltipPosition="bottom"
               onPointerDown={() => navigate(`/projects`)}
               isActive={false}
             />

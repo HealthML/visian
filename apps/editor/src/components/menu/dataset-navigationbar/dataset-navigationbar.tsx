@@ -17,6 +17,7 @@ export const DatasetNavigationbar = ({
   toggleSelectMode,
   toggleSelectAll,
   openModelSelectionPopUp,
+  deleteSelectedImages,
 }: {
   isInSelectMode: boolean;
   allSelected: boolean;
@@ -24,6 +25,7 @@ export const DatasetNavigationbar = ({
   toggleSelectMode: () => void;
   toggleSelectAll: () => void;
   openModelSelectionPopUp: () => void;
+  deleteSelectedImages: () => void;
 }) =>
   isInSelectMode ? (
     <>
@@ -31,17 +33,30 @@ export const DatasetNavigationbar = ({
         labelTx={allSelected ? "deselect-all" : "select-all"}
         handlePress={toggleSelectAll}
       />
-      <StyledButton isDisabled icon="export" tooltipTx="export-documents" />
-      <StyledButton isDisabled icon="trash" tooltipTx="delete-documents" />
+      <StyledButton
+        isDisabled
+        icon="export"
+        tooltipTx="export-documents"
+        tooltipPosition="top"
+      />
+      <StyledButton
+        isDisabled={!anySelected}
+        icon="trash"
+        tooltipTx="delete-documents"
+        onPointerDown={deleteSelectedImages}
+        tooltipPosition="top"
+      />
       <StyledButton
         isDisabled={!anySelected}
         icon="mlAutoAnnotation"
         tooltipTx="auto-annotate-documents"
+        tooltipPosition="top"
         onPointerDown={openModelSelectionPopUp}
       />
       <StyledButton
         icon="exit"
         tooltipTx="exit-select-mode"
+        tooltipPosition="top"
         onPointerDown={toggleSelectMode}
       />
     </>
@@ -49,6 +64,7 @@ export const DatasetNavigationbar = ({
     <StyledButton
       icon="select"
       tooltipTx="select-mode"
+      tooltipPosition="top"
       onPointerDown={toggleSelectMode}
     />
   );

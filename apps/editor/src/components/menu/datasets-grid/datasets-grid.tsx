@@ -1,39 +1,93 @@
 import { Modal, Text, useTranslation } from "@visian/ui-shared";
+import { useCallback, useMemo, useState } from "react";
 import styled from "styled-components";
 
-import useDatasetsBy from "../../../queries/use-datasets-by";
+import useDatasetsBy, {
+  useDeleteDatasetsForProjectMutation,
+} from "../../../queries/use-datasets-by";
+import { Dataset } from "../../../types";
+import { ConfirmationPopup } from "../confimration-popup";
 import { DatasetList } from "../dataset-list";
 
 const StyledModal = styled(Modal)`
   vertical-align: middle;
   width: 100vw;
   position: relative;
+  z-index: 49;
 `;
 
 export const DatasetsGrid = ({ projectId }: { projectId: string }) => {
   const { datasets, datasetsError, isErrorDatasets, isLoadingDatasets } =
     useDatasetsBy(projectId);
+  const [datasetTobBeDeleted, setDatasetTobBeDeleted] = useState<Dataset>();
   const { t: translate } = useTranslation();
+  const { deleteDatasets } = useDeleteDatasetsForProjectMutation();
 
-  return isLoadingDatasets || isErrorDatasets ? (
-    <StyledModal labelTx={isLoadingDatasets ? "dataset-loading" : "error"}>
-      {isLoadingDatasets ? (
-        <Text>{translate("dataset-loading")}</Text>
+  // delete annotation confirmation popup
+  const [
+    isDeleteDatasetConfirmationPopUpOpen,
+    setIsDeleteDatasetConfirmationPopUpOpen,
+  ] = useState(false);
+  const openDeleteDatasetConfirmationPopUp = useCallback(() => {
+    setIsDeleteDatasetConfirmationPopUpOpen(true);
+  }, []);
+  const closeDeleteDatasetConfirmationPopUp = useCallback(() => {
+    setIsDeleteDatasetConfirmationPopUpOpen(false);
+  }, []);
+
+  const deleteDataset = useCallback(
+    (dataset: Dataset) => {
+      setDatasetTobBeDeleted(dataset);
+      openDeleteDatasetConfirmationPopUp();
+    },
+    [setDatasetTobBeDeleted, openDeleteDatasetConfirmationPopUp],
+  );
+
+  const deleteDatasetMessage = useMemo(
+    () =>
+      `${translate("delete-dataset-message")}`.replace(
+        "_",
+        datasetTobBeDeleted?.name ?? "",
+      ),
+    [datasetTobBeDeleted, translate],
+  );
+
+  return (
+    <>
+      {isLoadingDatasets || isErrorDatasets ? (
+        <StyledModal labelTx={isLoadingDatasets ? "dataset-loading" : "error"}>
+          {isLoadingDatasets ? (
+            <Text>{translate("dataset-loading")}</Text>
+          ) : (
+            <Text>
+              {`${translate("dataset-loading-error")} ${
+                datasetsError?.response?.statusText
+              } (${datasetsError?.response?.status})`}
+            </Text>
+          )}
+        </StyledModal>
       ) : (
-        <Text>
-          {`${translate("dataset-loading-error")} ${
-            datasetsError?.response?.statusText
-          } (${datasetsError?.response?.status})`}
-        </Text>
+        <StyledModal>
+          {datasets && datasets.length > 0 ? (
+            <DatasetList datasets={datasets} deleteDataset={deleteDataset} />
+          ) : (
+            <Text>{translate("no-datasets-available")}</Text>
+          )}
+        </StyledModal>
       )}
-    </StyledModal>
-  ) : (
-    <StyledModal>
-      {datasets && datasets.length > 0 ? (
-        <DatasetList datasets={datasets} />
-      ) : (
-        <Text>{translate("no-datasets-available")}</Text>
-      )}
-    </StyledModal>
+      <ConfirmationPopup
+        isOpen={isDeleteDatasetConfirmationPopUpOpen}
+        onClose={closeDeleteDatasetConfirmationPopUp}
+        message={deleteDatasetMessage}
+        titleTx="delete-dataset-title"
+        onConfirm={() => {
+          if (datasetTobBeDeleted)
+            deleteDatasets({
+              projectId,
+              datasetIds: [datasetTobBeDeleted.id],
+            });
+        }}
+      />
+    </>
   );
 };

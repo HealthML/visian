@@ -2,8 +2,13 @@ import { Modal, Text, useTranslation } from "@visian/ui-shared";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import styled from "styled-components";
 
-import { useImagesByDataset } from "../../../queries";
-import { Dataset } from "../../../types";
+import {
+  useDeleteAnnotationsForImageMutation,
+  useDeleteImagesMutation,
+  useImagesByDataset,
+} from "../../../queries";
+import { Annotation, Dataset, Image } from "../../../types";
+import { ConfirmationPopup } from "../confimration-popup/confirmation-popup";
 import { DatasetImageList } from "../dataset-image-list";
 import { DatasetNavigationbar } from "../dataset-navigationbar";
 import { ModelSelectionPopup } from "../ml-model-popup";
@@ -21,6 +26,15 @@ export const DatasetExplorer = ({ dataset }: { dataset: Dataset }) => {
   const { images, imagesError, isErrorImages, isLoadingImages, refetchImages } =
     useImagesByDataset(dataset.id);
 
+  const { deleteImages } = useDeleteImagesMutation(dataset.id);
+
+  const { deleteAnnotations } = useDeleteAnnotationsForImageMutation();
+
+  const [annotationTobBeDeleted, setAnnotationTobBeDeleted] =
+    useState<Annotation>();
+
+  const [imageTobBeDeleted, setImageTobBeDeleted] = useState<Image>();
+
   const [selectedImages, setSelectedImages] = useState<Map<string, boolean>>(
     new Map((images ?? []).map((image) => [image.id, false])),
   );
@@ -33,6 +47,32 @@ export const DatasetExplorer = ({ dataset }: { dataset: Dataset }) => {
   }, []);
   const closeModelSelectionPopUp = useCallback(() => {
     setIsModelSelectionPopUpOpen(false);
+  }, []);
+
+  // delete annotation confirmation popup
+  const [
+    isDeleteAnnotationConfirmationPopUpOpen,
+    setIsDeleteAnnotationConfirmationPopUpOpen,
+  ] = useState(false);
+  const openDeleteAnnotationConfirmationPopUp = useCallback(() => {
+    setIsDeleteAnnotationConfirmationPopUpOpen(true);
+  }, []);
+  const closeDeleteAnnotationConfirmationPopUp = useCallback(() => {
+    setIsDeleteAnnotationConfirmationPopUpOpen(false);
+    setAnnotationTobBeDeleted(undefined);
+  }, []);
+
+  // delete images confirmation popup
+  const [
+    isDeleteImagesConfirmationPopUpOpen,
+    setIsDeleteImagesConfirmationPopUpOpen,
+  ] = useState(false);
+  const openDeleteImagesConfirmationPopUp = useCallback(() => {
+    setIsDeleteImagesConfirmationPopUpOpen(true);
+  }, []);
+  const closeDeleteImagesConfirmationPopUp = useCallback(() => {
+    setIsDeleteImagesConfirmationPopUpOpen(false);
+    setImageTobBeDeleted(undefined);
   }, []);
 
   // sync selectedImages and images array
@@ -91,7 +131,50 @@ export const DatasetExplorer = ({ dataset }: { dataset: Dataset }) => {
     [areAllSelected, setSelectAll],
   );
 
+  const deleteSelectedImages = useCallback(() => {
+    deleteImages(activeImageSelection);
+  }, [activeImageSelection, deleteImages]);
+
+  const deleteAnnotation = useCallback(
+    (annotation: Annotation) => {
+      setAnnotationTobBeDeleted(annotation);
+      openDeleteAnnotationConfirmationPopUp();
+    },
+    [setAnnotationTobBeDeleted, openDeleteAnnotationConfirmationPopUp],
+  );
+
+  const deleteImage = useCallback(
+    (image: Image) => {
+      setImageTobBeDeleted(image);
+      openDeleteImagesConfirmationPopUp();
+    },
+    [setImageTobBeDeleted, openDeleteImagesConfirmationPopUp],
+  );
+
   const { t: translate } = useTranslation();
+
+  const deleteAnnotationMessage = useMemo(
+    () =>
+      `${translate("delete-annotation-message")}`.replace(
+        "_",
+        annotationTobBeDeleted?.dataUri ?? "",
+      ),
+    [annotationTobBeDeleted, translate],
+  );
+
+  const deleteImagesMessage = useMemo(
+    () =>
+      imageTobBeDeleted
+        ? `${translate("delete-image-message")}`.replace(
+            "_",
+            imageTobBeDeleted.dataUri,
+          )
+        : `${translate("delete-images-message")}`.replace(
+            "_",
+            activeImageSelection.length.toString(),
+          ),
+    [activeImageSelection, translate, imageTobBeDeleted],
+  );
 
   return (
     <StyledModal
@@ -106,6 +189,7 @@ export const DatasetExplorer = ({ dataset }: { dataset: Dataset }) => {
           toggleSelectMode={toggleSelectMode}
           toggleSelectAll={toggleSelectAll}
           openModelSelectionPopUp={openModelSelectionPopUp}
+          deleteSelectedImages={openDeleteImagesConfirmationPopUp}
         />
       }
     >
@@ -122,6 +206,8 @@ export const DatasetExplorer = ({ dataset }: { dataset: Dataset }) => {
           refetchImages={refetchImages}
           selectedImages={selectedImages}
           setSelection={setSelection}
+          deleteAnnotation={deleteAnnotation}
+          deleteImage={deleteImage}
         />
       )}
       <ModelSelectionPopup
@@ -129,6 +215,34 @@ export const DatasetExplorer = ({ dataset }: { dataset: Dataset }) => {
         onClose={closeModelSelectionPopUp}
         activeImageSelection={activeImageSelection}
         projectId={dataset.project}
+      />
+      <ConfirmationPopup
+        isOpen={isDeleteAnnotationConfirmationPopUpOpen}
+        onClose={closeDeleteAnnotationConfirmationPopUp}
+        message={deleteAnnotationMessage}
+        titleTx="delete-annotation-title"
+        onConfirm={() => {
+          if (annotationTobBeDeleted)
+            deleteAnnotations({
+              imageId: annotationTobBeDeleted.image,
+              annotationIds: [annotationTobBeDeleted.id],
+            });
+        }}
+      />
+      <ConfirmationPopup
+        isOpen={isDeleteImagesConfirmationPopUpOpen}
+        onClose={closeDeleteImagesConfirmationPopUp}
+        message={deleteImagesMessage}
+        titleTx={
+          imageTobBeDeleted ? "delete-image-title" : "delete-images-title"
+        }
+        onConfirm={() => {
+          if (imageTobBeDeleted) {
+            deleteImages([imageTobBeDeleted.id]);
+          } else {
+            deleteSelectedImages();
+          }
+        }}
       />
     </StyledModal>
   );
