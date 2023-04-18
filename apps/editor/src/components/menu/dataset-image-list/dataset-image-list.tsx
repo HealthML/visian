@@ -17,6 +17,7 @@ export const DatasetImageList = ({
   selectedImages,
   setSelection,
   deleteAnnotation,
+  deleteImage,
 }: {
   isInSelectMode: boolean;
   images: Image[];
@@ -24,6 +25,7 @@ export const DatasetImageList = ({
   selectedImages: Map<string, boolean>;
   setSelection: (id: string, selection: boolean) => void;
   deleteAnnotation: (annotation: Annotation) => void;
+  deleteImage: (image: Image) => void;
 }) => (
   <ImageList onWheel={stopPropagation}>
     {images.map((image: Image) => (
@@ -36,6 +38,7 @@ export const DatasetImageList = ({
           setSelection(image.id, !selectedImages.get(image.id))
         }
         deleteAnnotation={deleteAnnotation}
+        deleteImage={deleteImage}
         key={image.id}
       />
     ))}

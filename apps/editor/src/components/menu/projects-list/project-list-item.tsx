@@ -18,11 +18,9 @@ const ClickableText = styled(Text)`
 
 export const ProjectListItem = ({
   project,
-  enableControls,
   deleteProject,
 }: {
   project: Project;
-  enableControls: boolean;
   deleteProject: () => void;
 }) => {
   const navigate = useNavigate();
@@ -35,15 +33,13 @@ export const ProjectListItem = ({
         {project.name}
       </ClickableText>
       <ExpandedSpacer />
-      {enableControls && (
-        <IconButton
-          icon="trash"
-          tooltipTx="delete-project-title"
-          onPointerDown={deleteProject}
-          style={{ marginLeft: "auto" }}
-          tooltipPosition="left"
-        />
-      )}
+      <IconButton
+        icon="trash"
+        tooltipTx="delete-project-title"
+        onPointerDown={deleteProject}
+        style={{ marginLeft: "auto" }}
+        tooltipPosition="left"
+      />
     </ListItem>
   );
 };

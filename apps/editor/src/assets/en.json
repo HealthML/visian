@@ -336,6 +336,8 @@
   "delete-annotation-message": "Do you really want to delete the annotation \"_\"?",
   "delete-images-title": "Delete Images",
   "delete-images-message": "Do you really want to delete _ image(s) including it's annotations?",
+  "delete-image-title": "Delete Image",
+  "delete-image-message": "Do you really want to delete the image \"_\" including all it's annotations?",
   "delete-dataset-title": "Delete Dataset",
   "delete-dataset-message": "Do you really want to delete the dataset \"_\" including all it's images and annotations?",
   "delete-project-title": "Delete Project",

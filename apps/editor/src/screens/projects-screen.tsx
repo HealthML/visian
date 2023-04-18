@@ -111,17 +111,6 @@ export const ProjectsScreen: React.FC = observer(() => {
     [projectTobBeDeleted, translate],
   );
 
-  const editModeButton = (
-    <StyledButton
-      icon="select"
-      tooltipTx="options"
-      tooltipPosition="top"
-      onPointerDown={() => {
-        setAreControlsEnabled(!areControlsEnabled);
-      }}
-    />
-  );
-
   return (
     <Container title={`${translate("projects-base-title")}`}>
       <TopBar>
@@ -151,14 +140,9 @@ export const ProjectsScreen: React.FC = observer(() => {
             hideHeaderDivider={false}
             labelTx="projects-base-title"
             position="right"
-            headerChildren={editModeButton}
           >
             {projects && projects.length > 0 ? (
-              <ProjectList
-                projects={projects}
-                enableControls={areControlsEnabled}
-                deleteProject={deleteProject}
-              />
+              <ProjectList projects={projects} deleteProject={deleteProject} />
             ) : (
               <Text>{translate("no-projects-available")}</Text>
             )}

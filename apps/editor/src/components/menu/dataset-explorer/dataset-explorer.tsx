@@ -7,7 +7,7 @@ import {
   useDeleteImagesMutation,
   useImagesByDataset,
 } from "../../../queries";
-import { Annotation, Dataset } from "../../../types";
+import { Annotation, Dataset, Image } from "../../../types";
 import { ConfirmationPopup } from "../confimration-popup/confirmation-popup";
 import { DatasetImageList } from "../dataset-image-list";
 import { DatasetNavigationbar } from "../dataset-navigationbar";
@@ -33,6 +33,8 @@ export const DatasetExplorer = ({ dataset }: { dataset: Dataset }) => {
   const [annotationTobBeDeleted, setAnnotationTobBeDeleted] =
     useState<Annotation>();
 
+  const [imageTobBeDeleted, setImageTobBeDeleted] = useState<Image>();
+
   const [selectedImages, setSelectedImages] = useState<Map<string, boolean>>(
     new Map((images ?? []).map((image) => [image.id, false])),
   );
@@ -57,6 +59,7 @@ export const DatasetExplorer = ({ dataset }: { dataset: Dataset }) => {
   }, []);
   const closeDeleteAnnotationConfirmationPopUp = useCallback(() => {
     setIsDeleteAnnotationConfirmationPopUpOpen(false);
+    setAnnotationTobBeDeleted(undefined);
   }, []);
 
   // delete images confirmation popup
@@ -69,6 +72,7 @@ export const DatasetExplorer = ({ dataset }: { dataset: Dataset }) => {
   }, []);
   const closeDeleteImagesConfirmationPopUp = useCallback(() => {
     setIsDeleteImagesConfirmationPopUpOpen(false);
+    setImageTobBeDeleted(undefined);
   }, []);
 
   // sync selectedImages and images array
@@ -139,6 +143,14 @@ export const DatasetExplorer = ({ dataset }: { dataset: Dataset }) => {
     [setAnnotationTobBeDeleted, openDeleteAnnotationConfirmationPopUp],
   );
 
+  const deleteImage = useCallback(
+    (image: Image) => {
+      setImageTobBeDeleted(image);
+      openDeleteImagesConfirmationPopUp();
+    },
+    [setImageTobBeDeleted, openDeleteImagesConfirmationPopUp],
+  );
+
   const { t: translate } = useTranslation();
 
   const deleteAnnotationMessage = useMemo(
@@ -152,11 +164,16 @@ export const DatasetExplorer = ({ dataset }: { dataset: Dataset }) => {
 
   const deleteImagesMessage = useMemo(
     () =>
-      `${translate("delete-images-message")}`.replace(
-        "_",
-        activeImageSelection.length.toString(),
-      ),
-    [activeImageSelection, translate],
+      imageTobBeDeleted
+        ? `${translate("delete-image-message")}`.replace(
+            "_",
+            imageTobBeDeleted.dataUri,
+          )
+        : `${translate("delete-images-message")}`.replace(
+            "_",
+            activeImageSelection.length.toString(),
+          ),
+    [activeImageSelection, translate, imageTobBeDeleted],
   );
 
   return (
@@ -190,6 +207,7 @@ export const DatasetExplorer = ({ dataset }: { dataset: Dataset }) => {
           selectedImages={selectedImages}
           setSelection={setSelection}
           deleteAnnotation={deleteAnnotation}
+          deleteImage={deleteImage}
         />
       )}
       <ModelSelectionPopup
@@ -215,8 +233,16 @@ export const DatasetExplorer = ({ dataset }: { dataset: Dataset }) => {
         isOpen={isDeleteImagesConfirmationPopUpOpen}
         onClose={closeDeleteImagesConfirmationPopUp}
         message={deleteImagesMessage}
-        titleTx="delete-images-title"
-        onConfirm={deleteSelectedImages}
+        titleTx={
+          imageTobBeDeleted ? "delete-image-title" : "delete-images-title"
+        }
+        onConfirm={() => {
+          if (imageTobBeDeleted) {
+            deleteImages([imageTobBeDeleted.id]);
+          } else {
+            deleteSelectedImages();
+          }
+        }}
       />
     </StyledModal>
   );

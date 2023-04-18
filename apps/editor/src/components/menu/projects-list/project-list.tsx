@@ -11,18 +11,15 @@ const StyledProjectList = styled(List)`
 
 export const ProjectList = ({
   projects,
-  enableControls,
   deleteProject,
 }: {
   projects: Project[];
-  enableControls: boolean;
   deleteProject: (project: Project) => void;
 }) => (
   <StyledProjectList onWheel={stopPropagation}>
     {projects.map((project: Project) => (
       <ProjectListItem
         project={project}
-        enableControls={enableControls}
         deleteProject={() => deleteProject(project)}
       />
     ))}
