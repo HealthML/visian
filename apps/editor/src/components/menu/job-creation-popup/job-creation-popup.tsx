@@ -110,12 +110,10 @@ export const JobCreationPopup = observer<JobCreationPopUpProps>(
     const { datasets, datasetsError, isErrorDatasets, isLoadingDatasets } =
       useDatasetsBy(projectId);
 
-    const [selectedDataset, setSelectedDataset] = useState(
-      openWithDatasetId || "",
-    );
+    const [selectedDataset, setSelectedDataset] = useState(openWithDatasetId);
 
     useEffect(() => {
-      setSelectedDataset(openWithDatasetId || "");
+      setSelectedDataset(openWithDatasetId);
     }, [openWithDatasetId]);
 
     const { images, isErrorImages, isLoadingImages } =

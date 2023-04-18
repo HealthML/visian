@@ -42,7 +42,7 @@ export const ProjectDataExplorer = ({
   images: Image[] | undefined;
   isErrorImages: boolean;
   isLoadingImages: boolean;
-  selectedDataset: string;
+  selectedDataset?: string;
   selectedImages: Set<string>;
   selectDataset: (datasetId: string) => void;
   setImageSelection: (imageId: string, selection: boolean) => void;
