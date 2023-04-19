@@ -300,6 +300,7 @@
   "ml-models-loading": "Modelle werden geladen...",
   "ml-models-loading-error": "Fehler beim Laden der Modelle:",
   "ml-models-none-available": "Es sind keine Modelle verfügbar.",
+  "ml-models-not-found-error": "Modellversion konnte nicht gefunden werden.",
 
   "jobs-loading": "Jobs werden geladen...",
   "jobs-loading-error": "Fehler beim Laden der Jobs:",

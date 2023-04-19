@@ -12,7 +12,7 @@ const StyledProjectList = styled(List)`
 export const ProjectList = ({ projects }: { projects: Project[] }) => (
   <StyledProjectList onWheel={stopPropagation}>
     {projects.map((project: Project) => (
-      <ProjectListItem project={project} />
+      <ProjectListItem project={project} key={project.id} />
     ))}
   </StyledProjectList>
 );

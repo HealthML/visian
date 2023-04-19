@@ -16,7 +16,6 @@ import styled from "styled-components";
 import { useStore } from "../../../app/root-store";
 import { postJob, useImagesByDataset, useMlModels } from "../../../queries";
 import useDatasetsBy from "../../../queries/use-datasets-by";
-import { MlModel } from "../../../types";
 import { ProjectDataExplorer } from "../project-data-explorer/project-data-explorer";
 import { JobCreationPopUpProps } from "./job-creation-popup.props";
 
@@ -70,46 +69,56 @@ export const JobCreationPopup = observer<JobCreationPopUpProps>(
 
     const mlModelNameOptions: IEnumParameterOption<string>[] = useMemo(() => {
       const uniqueNames = new Set(mlModels?.map((model) => model.name));
-      return Array.from(uniqueNames, (model) => ({
-        label: model,
-        value: model,
+      return Array.from(uniqueNames, (modelName) => ({
+        label: modelName,
+        value: modelName,
       }));
     }, [mlModels]);
 
     const availableModelVersions = useMemo(
       () =>
         mlModels
-          ? mlModels.filter((model) => model.name === selectedModelName)
+          ? mlModels
+              .filter((model) => model.name === selectedModelName)
+              .map((model) => model.version)
           : [],
       [mlModels, selectedModelName],
     );
 
-    const [selectedModel, setSelectedModel] = useState(
+    const [selectedModelVersion, setSelectedModelVersion] = useState(
       availableModelVersions[0],
     );
 
     useEffect(() => {
-      setSelectedModel(availableModelVersions[0]);
+      setSelectedModelVersion(availableModelVersions[0]);
     }, [availableModelVersions]);
 
-    const mlModelVersionOptions: IEnumParameterOption<MlModel>[] = useMemo(
+    const mlModelVersionOptions: IEnumParameterOption<string>[] = useMemo(
       () =>
-        availableModelVersions.map((model) => ({
-          label: `v${model.version}`,
-          value: model,
+        availableModelVersions.map((modelVersion) => ({
+          label: `v${modelVersion}`,
+          value: modelVersion,
         })),
       [availableModelVersions],
+    );
+
+    const findModel = useCallback(
+      () =>
+        mlModels?.find(
+          (model) =>
+            model.name === selectedModelName &&
+            model.version === selectedModelVersion,
+        ),
+      [mlModels, selectedModelName, selectedModelVersion],
     );
 
     const { datasets, datasetsError, isErrorDatasets, isLoadingDatasets } =
       useDatasetsBy(projectId);
 
-    const [selectedDataset, setSelectedDataset] = useState(
-      openWithDatasetId || "",
-    );
+    const [selectedDataset, setSelectedDataset] = useState(openWithDatasetId);
 
     useEffect(() => {
-      setSelectedDataset(openWithDatasetId || "");
+      setSelectedDataset(openWithDatasetId);
     }, [openWithDatasetId]);
 
     const { images, isErrorImages, isLoadingImages } =
@@ -149,6 +158,15 @@ export const JobCreationPopup = observer<JobCreationPopUpProps>(
 
     const createAutoAnnotationJob = useCallback(
       async (imageSelection: string[]) => {
+        const selectedModel = findModel();
+        if (!selectedModel) {
+          store?.setError({
+            titleTx: "error",
+            descriptionTx: "ml-models-not-found-error",
+          });
+          return;
+        }
+
         try {
           await postJob(imageSelection, selectedModel, projectId);
           onClose?.();
@@ -160,7 +178,7 @@ export const JobCreationPopup = observer<JobCreationPopUpProps>(
           onClose?.();
         }
       },
-      [onClose, selectedModel, projectId, store],
+      [onClose, findModel, projectId, store],
     );
 
     const startJob = useCallback(
@@ -195,8 +213,8 @@ export const JobCreationPopup = observer<JobCreationPopUpProps>(
           />
           <StyledDropDown
             options={mlModelVersionOptions}
-            value={selectedModel}
-            onChange={setSelectedModel}
+            value={selectedModelVersion}
+            onChange={setSelectedModelVersion}
             size="large"
           />
         </DropDownContainer>
@@ -222,7 +240,7 @@ export const JobCreationPopup = observer<JobCreationPopUpProps>(
         {showProjectDataExplorer && (
           <BottomNavigationBar>
             <Button
-              isDisabled={!(selectedModel && selectedImages.size > 0)}
+              isDisabled={!(selectedModelVersion && selectedImages.size > 0)}
               tx="start-job"
               onPointerDown={startJob}
             />
