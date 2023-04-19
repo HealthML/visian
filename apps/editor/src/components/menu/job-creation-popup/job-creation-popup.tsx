@@ -27,11 +27,12 @@ const JobCreationPopupContainer = styled(PopUp)`
 
 const DropDownContainer = styled(FlexRow)`
   width: 50vw;
-  padding-bottom: 3%;
+  padding: 3% 0;
+  justify-content: space-between;
 `;
 
 const StyledDropDown = styled(DropDown)`
-  margin: 2%;
+  width: 48%;
 `;
 
 const StyledErrorText = styled(Text)`
@@ -186,11 +187,13 @@ export const JobCreationPopup = observer<JobCreationPopUpProps>(
             options={mlModelNameOptions}
             value={selectedModelName}
             onChange={setSelectedModelName}
+            size="large"
           />
           <StyledDropDown
             options={mlModelVersionOptions}
             value={selectedModel}
             onChange={setSelectedModel}
+            size="large"
           />
         </DropDownContainer>
         {isLoadingDatasets && <StyledErrorText tx="datasets-loading" />}

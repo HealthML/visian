@@ -14,15 +14,15 @@ import { useOptionsPosition } from "./utils";
 
 export const Option = styled.div<{
   isSelected?: boolean;
-  size?: "small" | "medium";
+  size?: "small" | "medium" | "large";
 }>`
   align-items: center;
   border: 1px solid transparent;
   box-sizing: border-box;
   cursor: pointer;
   display: flex;
-  height: height: ${(props) =>
-    props.size === "medium" ? getSize("listElementHeight") : "24px"};
+  height: ${(props) =>
+    props.size === "small" ? "24px" : getSize("listElementHeight")};
   overflow: hidden;
   user-select: none;
 
@@ -31,12 +31,7 @@ export const Option = styled.div<{
     css`
       ${sheetMixin}
       border-radius: 12px;
-      // TODO: This displays a border of twice the thickness when the last
-      // option is selected. We should figure out a workaround to also use -1px
-      // margin in the vertical direction and still not have the options shift
-      // around when selecting a different one.
-      margin: 0 -1px;
-      padding: 1px;
+      margin: -1px -1px;
     `}
 `;
 
@@ -44,10 +39,13 @@ const ExpandedSelector = styled(Option)`
   margin: -1px -1px 6px -1px;
 `;
 
-export const OptionText = styled(Text)<{ size?: "small" | "medium" }>`
+export const OptionText = styled(Text)<{ size?: "small" | "medium" | "large" }>`
   flex: 1 0;
-  font-size: ${(props) =>
-    props.size === "medium" ? fontSize("default") : fontSize("small")};
+  font-size: ${(props) => {
+    if (props.size === "large") return fontSize("default");
+    if (props.size === "medium") return fontSize("default");
+    return fontSize("small");
+  }};
   margin: 0 14px;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -65,19 +63,29 @@ const OptionDivider = styled(Divider)<{ isHidden?: boolean }>`
     `}
 `;
 
-export const ExpandIcon = styled(Icon)<{ size?: "small" | "medium" }>`
-  height: ${(props) => (props.size === "medium" ? "32px" : "16px")};
+export const ExpandIcon = styled(Icon)<{ size?: "small" | "medium" | "large" }>`
+  height: ${(props) => {
+    if (props.size === "large") return "32px";
+    if (props.size === "medium") return "32px";
+    return "16px";
+  }};
   margin-right: 10px;
-  width: ${(props) => (props.size === "medium" ? "32px" : "16px")}; ;
+  width: ${(props) => {
+    if (props.size === "large") return "32px";
+    if (props.size === "medium") return "32px";
+    return "16px";
+  }};
 `;
 
 const Options = styled.div`
   ${sheetMixin}
   border-radius: 12px;
-  display: flex;
+  display: block;
   flex-direction: column;
   pointer-events: auto;
   z-index: ${zIndex("overlayComponent")};
+  overflow-y: auto;
+  max-height: 40%;
 `;
 
 export const DropDownOptions: React.FC<DropDownOptionsProps> = ({
@@ -115,7 +123,7 @@ export const DropDownOptions: React.FC<DropDownOptionsProps> = ({
               size={size}
             />
           )}
-          <ExpandIcon icon="arrowUp" />
+          <ExpandIcon icon="arrowUp" size={size} />
         </ExpandedSelector>
         {options.map((option, index) => (
           <React.Fragment key={option.value}>
@@ -127,6 +135,7 @@ export const DropDownOptions: React.FC<DropDownOptionsProps> = ({
               <OptionText
                 tx={option.labelTx}
                 text={option.label || option.value}
+                size={size}
               />
             </Option>
             {index < options.length - 1 && (
