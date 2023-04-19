@@ -1,4 +1,4 @@
-import { AbsoluteCover, FloatingUIButton, Modal } from "@visian/ui-shared";
+import { AbsoluteCover, FloatingUIButton } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";

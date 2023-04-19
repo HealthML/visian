@@ -1,5 +1,4 @@
 import { Box, Switch, Theme } from "@visian/ui-shared";
-import React from "react";
 import { useNavigate } from "react-router-dom";
 import styled, { useTheme } from "styled-components";
 
@@ -26,7 +25,7 @@ export const ProjectViewSwitch = ({
   // expect path like /project/projectId/datasets
   const navigateToScreen = (screenName: string) => {
     const newPathname = window.location.pathname.replace(
-      /\/[^\/]*$/,
+      /\/[^/]*$/,
       `/${screenName}`,
     );
     navigate(newPathname);
