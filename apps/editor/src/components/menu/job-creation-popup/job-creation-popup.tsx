@@ -5,6 +5,7 @@ import {
   FlexRow,
   IEnumParameterOption,
   PopUp,
+  SectionHeader,
   Text,
   useTranslation,
 } from "@visian/ui-shared";
@@ -27,12 +28,15 @@ const JobCreationPopupContainer = styled(PopUp)`
 
 const DropDownContainer = styled(FlexRow)`
   width: 50vw;
-  padding: 3% 0;
   justify-content: space-between;
 `;
 
 const StyledDropDown = styled(DropDown)`
   width: 48%;
+`;
+
+const StyledSectionHeader = styled(SectionHeader)`
+  padding: 1em 0 0.5em 0;
 `;
 
 const StyledErrorText = styled(Text)`
@@ -91,7 +95,7 @@ export const JobCreationPopup = observer<JobCreationPopUpProps>(
     const mlModelVersionOptions: IEnumParameterOption<MlModel>[] = useMemo(
       () =>
         availableModelVersions.map((model) => ({
-          label: model.version,
+          label: `v${model.version}`,
           value: model,
         })),
       [availableModelVersions],
@@ -175,7 +179,7 @@ export const JobCreationPopup = observer<JobCreationPopUpProps>(
         dismiss={onClose}
         shouldDismissOnOutsidePress
       >
-        <Text>{`${t("ml-model-selection-description")}`}</Text>
+        <StyledSectionHeader tx="job-creation-model-selection" />
         {isLoadingMlModels && <Text tx="ml-models-loading" />}
         {isErrorMlModels && (
           <Text>{`${t("ml-models-loading-error")} ${
@@ -202,6 +206,7 @@ export const JobCreationPopup = observer<JobCreationPopUpProps>(
             datasetsError?.response?.statusText
           } (${datasetsError?.response?.status})`}</StyledErrorText>
         )}
+        <StyledSectionHeader tx="job-creation-image-selection" />
         {showProjectDataExplorer && (
           <ProjectDataExplorer
             datasets={datasets}
