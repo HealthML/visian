@@ -1,8 +1,9 @@
 import { color, FlexRow, Icon, List, ListItem, Text } from "@visian/ui-shared";
+import { useEffect, useState } from "react";
 import styled from "styled-components";
 
 import { Dataset, Image } from "../../../types";
-import { useCallback, useEffect, useState } from "react";
+import { handleImageSelection } from "../util";
 
 const FileExplorer = styled(FlexRow)`
   width: 100%;
@@ -22,6 +23,7 @@ const StyledIcon = styled(Icon)`
 const StyledListItem = styled(ListItem)`
   margin-left: 3%;
   margin-right: 3%;
+  user-select: none;
 `;
 
 const VerticalLine = styled.div`
@@ -48,7 +50,7 @@ export const ProjectDataExplorer = ({
   selectedImages: Set<string>;
   selectDataset: (datasetId: string) => void;
   setImageSelection: (imageId: string, selection: boolean) => void;
-  setSelectedImages: (selectedImages: Set<string>) => void;
+  setSelectedImages: React.Dispatch<React.SetStateAction<Set<string>>>;
 }) => {
   const [isShiftPressed, setIsShiftPressed] = useState(false);
   const [selectedRange, setSelectedRange] = useState({
@@ -56,43 +58,23 @@ export const ProjectDataExplorer = ({
     end: -1,
   });
 
-  const multiSelection = useCallback(
-    (currentImageIndex: number, isDeselection: boolean) => {
-      const selectedRangeEnd =
-        selectedRange.end !== -1 ? selectedRange.end : currentImageIndex;
-      const startIndex = Math.min(selectedRangeEnd, currentImageIndex);
-      const endIndex = Math.max(selectedRangeEnd, currentImageIndex);
+  useEffect(() => {
+    const handleKeyDown = () => {
+      setIsShiftPressed(true);
+    };
 
-      const updatedSelectedImages = new Set(selectedImages);
+    const handleKeyUp = () => {
+      setIsShiftPressed(false);
+    };
 
-      images?.forEach((image, index) => {
-        if (index >= startIndex && index <= endIndex) {
-          isDeselection
-            ? updatedSelectedImages.delete(image.id)
-            : updatedSelectedImages.add(image.id);
-        } else if (selectedImages.has(image.id)) {
-          updatedSelectedImages.add(image.id);
-        }
-      });
+    window.addEventListener("keydown", handleKeyDown);
+    window.addEventListener("keyup", handleKeyUp);
 
-      setSelectedImages(updatedSelectedImages);
-      setSelectedRange({ start: selectedRange.end, end: currentImageIndex });
-    },
-    [images, selectedImages, selectedRange, setSelectedImages],
-  );
-
-  const handlePointerDown = useCallback(
-    (imageId: string, index: number) => {
-      const isSelected = selectedImages.has(imageId);
-      if (isShiftPressed) {
-        multiSelection(index, isSelected);
-      } else {
-        setSelectedRange({ start: index, end: index });
-        setImageSelection(imageId, !isSelected);
-      }
-    },
-    [isShiftPressed, multiSelection, setImageSelection, selectedImages],
-  );
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("keyup", handleKeyUp);
+    };
+  }, []);
 
   return (
     <FileExplorer>
@@ -126,10 +108,19 @@ export const ProjectDataExplorer = ({
                 key={image.id}
                 isLast
                 isActive={selectedImages.has(image.id)}
-                onPointerDown={() => handlePointerDown(image.id, index)}
-                onKeyDown={(event) => setIsShiftPressed(event.shiftKey)}
-                onKeyUp={() => setIsShiftPressed(false)}
-                tabIndex={0}
+                onPointerDown={() =>
+                  handleImageSelection(
+                    image.id,
+                    index,
+                    selectedImages,
+                    isShiftPressed,
+                    selectedRange,
+                    setSelectedRange,
+                    images,
+                    setImageSelection,
+                    setSelectedImages,
+                  )
+                }
               >
                 <StyledIcon icon="document" />
                 <Text>{image.dataUri}</Text>
