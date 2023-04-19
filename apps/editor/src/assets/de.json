@@ -342,5 +342,7 @@
   "delete-dataset-title": "Datensatz löschen",
   "delete-dataset-message": "Wollen Sie den Datensatz \"_\" sämtlich aller enthaltenen Bilder und Annotationen wirklich löschen?",
   "delete-project-title": "Projekt löschen",
-  "delete-project-message": "Wollen Sie das Projekt \"_\" sämtlich aller enthaltenen Datensätze, Bilder und Annotationen wirklich löschen?"
+  "delete-project-message": "Wollen sie das Projekt \"_\" sämtlich aller enthalten Datensätze, Bilder und Annotationen wirklich löschen?",
+  "delete-job-title": "Job löschen",
+  "delete-job-message": "Wollen sie den Job sämtlich der _ dabei erzeugten Annotation(en) wirklich löschen?"
 }

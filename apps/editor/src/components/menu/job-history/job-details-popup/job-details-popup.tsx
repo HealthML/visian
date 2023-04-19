@@ -6,19 +6,24 @@ import {
   SubtleText,
   Text,
   useTranslation,
+  InvisibleButton,
 } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
-import { useCallback } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 
-import { useAnnotationsByJob } from "../../../../queries";
+import {
+  useAnnotationsByJob,
+  useDeleteJobsForProjectMutation,
+} from "../../../../queries";
 import useImagesByJob from "../../../../queries/use-images-by-jobs";
-import { Image } from "../../../../types";
+import { Image, Job } from "../../../../types";
 import { editorPath } from "../../util";
 import { JobStatusBadge } from "../job-status-badge/job-status-badge";
 import { DetailsRow, DetailsTable } from "./details-table";
 import { JobDetailsPopUpProps } from "./job-details-popup.props";
+import { ConfirmationPopup } from "../../confimration-popup";
 
 const StyledPopUp = styled(PopUp)`
   align-items: left;
@@ -46,6 +51,17 @@ const StyledText = styled(Text)`
   padding-right: 0.8em;
 `;
 
+const IconButton = styled(InvisibleButton)`
+  width: 30px;
+`;
+
+const JobStatusControlsContainer = styled.div`
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+`;
+
 export const JobDetailsPopUp = observer<JobDetailsPopUpProps>(
   ({ job, isOpen, onClose }) => {
     const {
@@ -63,6 +79,19 @@ export const JobDetailsPopUp = observer<JobDetailsPopUpProps>(
 
     const { t } = useTranslation();
     const navigate = useNavigate();
+    const { deleteJobs } = useDeleteJobsForProjectMutation();
+
+    // delete annotation confirmation popup
+    const [
+      isDeleteJobConfirmationPopUpOpen,
+      setIsDeleteJobConfirmationPopUpOpen,
+    ] = useState(false);
+    const openDeleteJobConfirmationPopUp = useCallback(() => {
+      setIsDeleteJobConfirmationPopUpOpen(true);
+    }, []);
+    const closeDeleteJobConfirmationPopUp = useCallback(() => {
+      setIsDeleteJobConfirmationPopUpOpen(false);
+    }, []);
 
     const imagesWithAnnotations = jobAnnotations?.map(
       (annotation) => annotation.image,
@@ -88,6 +117,15 @@ export const JobDetailsPopUp = observer<JobDetailsPopUpProps>(
       return 0;
     };
 
+    const deleteJobMessage = useMemo(
+      () =>
+        `${t("delete-job-message")}`.replace(
+          "_",
+          jobAnnotations?.length.toString() ?? "0",
+        ),
+      [jobAnnotations, t],
+    );
+
     return (
       <StyledPopUp
         titleTx="job-details"
@@ -97,7 +135,16 @@ export const JobDetailsPopUp = observer<JobDetailsPopUpProps>(
       >
         {job && (
           <>
-            <JobStatusBadge status={job.status} />
+            <JobStatusControlsContainer>
+              <JobStatusBadge status={job.status} />
+              <IconButton
+                icon="trash"
+                tooltipTx="delete-job-title"
+                onPointerDown={openDeleteJobConfirmationPopUp}
+                tooltipPosition="right"
+              />
+            </JobStatusControlsContainer>
+
             <StyledDetailsTable>
               <DetailsRow
                 tx="job-model-name"
@@ -108,6 +155,10 @@ export const JobDetailsPopUp = observer<JobDetailsPopUpProps>(
               <DetailsRow
                 tx="job-number-images"
                 value={`${jobImages?.length ?? ""}`}
+              />
+              <DetailsRow
+                tx="job-number-annotations"
+                value={`${jobAnnotations?.length ?? ""}`}
               />
             </StyledDetailsTable>
           </>
@@ -140,6 +191,19 @@ export const JobDetailsPopUp = observer<JobDetailsPopUpProps>(
             ))}
           </ScrollableList>
         )}
+        <ConfirmationPopup
+          isOpen={isDeleteJobConfirmationPopUpOpen}
+          onClose={closeDeleteJobConfirmationPopUp}
+          messageTx={deleteJobMessage}
+          titleTx="delete-job-title"
+          onConfirm={() => {
+            deleteJobs({
+              projectId: job.project,
+              jobIds: [job.id],
+            });
+            onClose?.();
+          }}
+        />
       </StyledPopUp>
     );
   },

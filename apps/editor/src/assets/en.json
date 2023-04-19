@@ -342,5 +342,7 @@
   "delete-dataset-title": "Delete Dataset",
   "delete-dataset-message": "Do you really want to delete the dataset \"_\" including all its images and annotations?",
   "delete-project-title": "Delete Project",
-  "delete-project-message": "Do you really want to delete the project \"_\" including all its datasets, images and annotations?"
+  "delete-project-message": "Do you really want to delete the project \"_\" including all its datasets, Images and annotations?",
+  "delete-job-title": "Delete Job",
+  "delete-job-message": "Do you really want to delete the job including the _ generated annotation(s)?"
 }
