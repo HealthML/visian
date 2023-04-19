@@ -1,14 +1,11 @@
-import { AbsoluteCover, Text, useTranslation } from "@visian/ui-shared";
+import { Modal, Text, useTranslation } from "@visian/ui-shared";
 import styled from "styled-components";
 
 import useJobsBy from "../../../queries/use-jobs-by";
 import { JobsTable } from "./job-table";
 
-const Main = styled(AbsoluteCover)`
-  height: 75vh;
-  width: 75vw;
-  margin: auto;
-  overflow-y: auto;
+const StyledModal = styled(Modal)`
+  width: 100%;
 `;
 
 export const JobHistory = ({ projectId }: { projectId: string }) => {
@@ -16,7 +13,7 @@ export const JobHistory = ({ projectId }: { projectId: string }) => {
   const { t: translate } = useTranslation();
 
   return isLoadingJobs || isErrorJobs ? (
-    <Main title={isLoadingJobs ? "jobs-loading" : "error"}>
+    <StyledModal title={isLoadingJobs ? "jobs-loading" : "error"}>
       {isLoadingJobs ? (
         <Text>{translate("jobs-loading")}</Text>
       ) : (
@@ -26,14 +23,14 @@ export const JobHistory = ({ projectId }: { projectId: string }) => {
           } (${jobsError?.response?.status})`}
         </Text>
       )}
-    </Main>
+    </StyledModal>
   ) : (
-    <Main>
+    <StyledModal>
       {jobs && jobs.length > 0 ? (
         <JobsTable jobs={jobs} />
       ) : (
         <Text>{translate("no-jobs-available")}</Text>
       )}
-    </Main>
+    </StyledModal>
   );
 };

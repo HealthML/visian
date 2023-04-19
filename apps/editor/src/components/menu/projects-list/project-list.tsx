@@ -1,18 +1,23 @@
-import { List, stopPropagation } from "@visian/ui-shared";
+import { List, Modal, stopPropagation } from "@visian/ui-shared";
 import styled from "styled-components";
 
 import { Project } from "../../../types";
 import { ProjectListItem } from "./project-list-item";
 
+const StyledModal = styled(Modal)`
+  width: 100vw;
+`;
+
 const StyledProjectList = styled(List)`
-  width: 100%;
   overflow-y: auto;
 `;
 
 export const ProjectList = ({ projects }: { projects: Project[] }) => (
-  <StyledProjectList onWheel={stopPropagation}>
-    {projects.map((project: Project) => (
-      <ProjectListItem project={project} />
-    ))}
-  </StyledProjectList>
+  <StyledModal>
+    <StyledProjectList onWheel={stopPropagation}>
+      {projects.map((project: Project) => (
+        <ProjectListItem project={project} />
+      ))}
+    </StyledProjectList>
+  </StyledModal>
 );
