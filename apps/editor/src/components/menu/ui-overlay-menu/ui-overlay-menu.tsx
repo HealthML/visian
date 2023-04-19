@@ -67,10 +67,6 @@ const RightButton = styled(FloatingUIButton)`
 const Main = styled.div`
   display: flex;
   margin: auto;
-`;
-
-const StyledModal = styled(Modal)`
-  display: flex;
   height: 75vh;
   width: 75vw;
 `;
@@ -87,7 +83,7 @@ export const UIOverlayMenu = observer<UIOverlayMenuProps>(
 
     const navigateToParent = () => {
       const currentPathname = window.location.pathname;
-      const newPathname = currentPathname.replace(/\/[^/]+$/, "");
+      const newPathname = currentPathname.replace(/\/[^/]+$/, ``);
       navigate(newPathname);
     };
 
@@ -135,9 +131,7 @@ export const UIOverlayMenu = observer<UIOverlayMenuProps>(
             </RightBar>
           </ColumnRight>
         </TopBar>
-        <Main>
-          <StyledModal>{main}</StyledModal>
-        </Main>
+        <Main>{main}</Main>
       </Container>
     );
   },
