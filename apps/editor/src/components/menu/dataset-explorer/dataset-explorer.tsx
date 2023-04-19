@@ -9,11 +9,8 @@ import { DatasetNavigationbar } from "../dataset-navigationbar";
 import { ModelSelectionPopup } from "../ml-model-popup";
 
 const StyledModal = styled(Modal)`
-  vertical-align: middle;
   width: 100%;
-  z-index: 49;
 `;
-// TODO: z-index logic
 
 export const DatasetExplorer = ({ dataset }: { dataset: Dataset }) => {
   const [isInSelectMode, setIsInSelectMode] = useState(false);
