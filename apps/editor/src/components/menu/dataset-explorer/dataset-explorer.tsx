@@ -32,58 +32,49 @@ export const DatasetExplorer = ({ dataset }: { dataset: Dataset }) => {
   const { images, imagesError, isErrorImages, isLoadingImages, refetchImages } =
     useImagesByDataset(dataset.id);
 
-  const [selectedImages, setSelectedImages] = useState<Map<string, boolean>>(
-    new Map((images ?? []).map((image) => [image.id, false])),
+  const [selectedImages, setSelectedImages] = useState<Set<string>>(
+    new Set<string>(),
   );
 
-  // sync selectedImages and images array
-  useEffect(() => {
-    setSelectedImages((previousSelectedImages) => {
-      const newSelectedImages = new Map(
-        (images ?? []).map((image) => [image.id, false]),
-      );
-      previousSelectedImages.forEach((value, key) => {
-        if (newSelectedImages.has(key)) newSelectedImages.set(key, value);
+  const setImageSelection = useCallback(
+    (imageId: string, isSelected: boolean) => {
+      setSelectedImages((prevSelectedImages) => {
+        const newSelectedImages = new Set(prevSelectedImages);
+        if (isSelected) {
+          newSelectedImages.add(imageId);
+        } else {
+          newSelectedImages.delete(imageId);
+        }
+        return newSelectedImages;
       });
-      return newSelectedImages;
-    });
-  }, [images]);
+    },
+    [setSelectedImages],
+  );
 
-  const setSelection = useCallback((id: string, selection: boolean) => {
-    setSelectedImages((prevSelectedImages) => {
-      prevSelectedImages.set(id, selection);
-      return new Map(prevSelectedImages);
-    });
-  }, []);
-
-  const setSelectAll = useCallback((selection: boolean) => {
-    setSelectedImages((prevSelectedImages) => {
-      prevSelectedImages.forEach((value, key) =>
-        prevSelectedImages.set(key, selection),
-      );
-      return new Map(prevSelectedImages);
-    });
-  }, []);
+  const setSelectAll = useCallback(
+    (selection: boolean) => {
+      if (selection) {
+        const newSelection = new Set<string>();
+        images?.forEach((image) => newSelection.add(image.id));
+        setSelectedImages(newSelection);
+        return;
+      }
+      setSelectedImages(new Set<string>());
+    },
+    [images],
+  );
 
   const toggleSelectMode = useCallback(() => {
     setIsInSelectMode((prevIsInSelectMode) => !prevIsInSelectMode);
   }, []);
 
   const areAllSelected = useMemo(
-    () => [...selectedImages.values()].every((value) => value),
-    [selectedImages],
+    () => selectedImages.size === (images?.length || 0),
+    [selectedImages, images],
   );
 
   const isAnySelected = useMemo(
-    () => [...selectedImages.values()].some((value) => value),
-    [selectedImages],
-  );
-
-  const activeImageSelection = useMemo(
-    () =>
-      [...selectedImages.keys()].filter((imageId) =>
-        selectedImages.get(imageId),
-      ),
+    () => selectedImages.size > 0,
     [selectedImages],
   );
 
@@ -96,7 +87,7 @@ export const DatasetExplorer = ({ dataset }: { dataset: Dataset }) => {
     string | undefined
   >(dataset.id);
 
-  // model selection popup
+  // job creation popup
   const [isJobCreationPopUpOpen, setIsJobCreationPopUpOpen] = useState(false);
   const openJobCreationPopUp = useCallback(() => {
     setIsJobCreationPopUpOpen(true);
@@ -148,13 +139,14 @@ export const DatasetExplorer = ({ dataset }: { dataset: Dataset }) => {
           images={images}
           refetchImages={refetchImages}
           selectedImages={selectedImages}
-          setSelection={setSelection}
+          setImageSelection={setImageSelection}
+          setSelectedImages={setSelectedImages}
         />
       )}
       <JobCreationPopup
         isOpen={isJobCreationPopUpOpen}
         onClose={closeJobCreationPopUp}
-        activeImageSelection={activeImageSelection}
+        activeImageSelection={selectedImages}
         projectId={dataset.project}
         openWithDatasetId={openWithDatasetId}
       />
