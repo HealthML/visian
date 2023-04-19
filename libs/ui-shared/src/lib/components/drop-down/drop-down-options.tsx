@@ -2,7 +2,7 @@ import React, { useRef } from "react";
 import ReactDOM from "react-dom";
 import styled, { css } from "styled-components";
 
-import { fontSize, size as getSize, zIndex } from "../../theme";
+import { fontSize, size as getSize, radius, zIndex } from "../../theme";
 import { useModalRoot } from "../box";
 import { Icon } from "../icon";
 import { Divider } from "../modal";
@@ -30,7 +30,7 @@ export const Option = styled.div<{
     props.isSelected &&
     css`
       ${sheetMixin}
-      border-radius: 12px;
+      border-radius: ${radius("activeLayerBorderRadius")};
       margin: -1px -1px;
     `}
 `;
@@ -79,7 +79,7 @@ export const ExpandIcon = styled(Icon)<{ size?: "small" | "medium" | "large" }>`
 
 const Options = styled.div`
   ${sheetMixin}
-  border-radius: 12px;
+  border-radius: ${radius("activeLayerBorderRadius")};
   display: block;
   flex-direction: column;
   pointer-events: auto;
