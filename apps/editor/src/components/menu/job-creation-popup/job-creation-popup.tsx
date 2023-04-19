@@ -209,6 +209,7 @@ export const JobCreationPopup = observer<JobCreationPopUpProps>(
             selectedImages={selectedImages}
             selectDataset={selectDataset}
             setImageSelection={setImageSelection}
+            setSelectedImages={setSelectedImages}
           />
         )}
         {showProjectDataExplorer && (

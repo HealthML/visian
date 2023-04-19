@@ -2,6 +2,7 @@ import { color, FlexRow, Icon, List, ListItem, Text } from "@visian/ui-shared";
 import styled from "styled-components";
 
 import { Dataset, Image } from "../../../types";
+import { useCallback, useEffect, useState } from "react";
 
 const FileExplorer = styled(FlexRow)`
   width: 100%;
@@ -37,6 +38,7 @@ export const ProjectDataExplorer = ({
   selectedImages,
   selectDataset,
   setImageSelection,
+  setSelectedImages,
 }: {
   datasets: Dataset[] | undefined;
   images: Image[] | undefined;
@@ -46,45 +48,95 @@ export const ProjectDataExplorer = ({
   selectedImages: Set<string>;
   selectDataset: (datasetId: string) => void;
   setImageSelection: (imageId: string, selection: boolean) => void;
-}) => (
-  <FileExplorer>
-    {datasets && (
-      <StyledList>
-        {datasets.map((dataset) => (
-          <StyledListItem
-            key={dataset.id}
-            isLast
-            isActive={dataset.id === selectedDataset}
-            onPointerDown={() => selectDataset(dataset.id)}
-          >
-            <StyledIcon icon="folder" />
-            <Text>{dataset.name}</Text>
-          </StyledListItem>
-        ))}
-      </StyledList>
-    )}
-    <VerticalLine />
-    {datasets && (
-      <StyledList>
-        {selectedDataset && isLoadingImages && <Text tx="images-loading" />}
-        {selectedDataset && isErrorImages && <Text tx="images-loading-error" />}
-        {images &&
-          !isErrorImages &&
-          !isLoadingImages &&
-          images.map((image) => (
+  setSelectedImages: (selectedImages: Set<string>) => void;
+}) => {
+  const [isShiftPressed, setIsShiftPressed] = useState(false);
+  const [selectedRange, setSelectedRange] = useState({
+    start: -1,
+    end: -1,
+  });
+
+  const multiSelection = useCallback(
+    (currentImageIndex: number, isDeselection: boolean) => {
+      const selectedRangeEnd =
+        selectedRange.end !== -1 ? selectedRange.end : currentImageIndex;
+      const startIndex = Math.min(selectedRangeEnd, currentImageIndex);
+      const endIndex = Math.max(selectedRangeEnd, currentImageIndex);
+
+      const updatedSelectedImages = new Set(selectedImages);
+
+      images?.forEach((image, index) => {
+        if (index >= startIndex && index <= endIndex) {
+          isDeselection
+            ? updatedSelectedImages.delete(image.id)
+            : updatedSelectedImages.add(image.id);
+        } else if (selectedImages.has(image.id)) {
+          updatedSelectedImages.add(image.id);
+        }
+      });
+
+      setSelectedImages(updatedSelectedImages);
+      setSelectedRange({ start: selectedRange.end, end: currentImageIndex });
+    },
+    [images, selectedImages, selectedRange, setSelectedImages],
+  );
+
+  const handlePointerDown = useCallback(
+    (imageId: string, index: number) => {
+      const isSelected = selectedImages.has(imageId);
+      if (isShiftPressed) {
+        multiSelection(index, isSelected);
+      } else {
+        setSelectedRange({ start: index, end: index });
+        setImageSelection(imageId, !isSelected);
+      }
+    },
+    [isShiftPressed, multiSelection, setImageSelection, selectedImages],
+  );
+
+  return (
+    <FileExplorer>
+      {datasets && (
+        <StyledList>
+          {datasets.map((dataset) => (
             <StyledListItem
-              key={image.id}
+              key={dataset.id}
               isLast
-              isActive={selectedImages.has(image.id)}
-              onPointerDown={() =>
-                setImageSelection(image.id, !selectedImages.has(image.id))
-              }
+              isActive={dataset.id === selectedDataset}
+              onPointerDown={() => selectDataset(dataset.id)}
             >
-              <StyledIcon icon="document" />
-              <Text>{image.dataUri}</Text>
+              <StyledIcon icon="folder" />
+              <Text>{dataset.name}</Text>
             </StyledListItem>
           ))}
-      </StyledList>
-    )}
-  </FileExplorer>
-);
+        </StyledList>
+      )}
+      <VerticalLine />
+      {datasets && (
+        <StyledList>
+          {selectedDataset && isLoadingImages && <Text tx="images-loading" />}
+          {selectedDataset && isErrorImages && (
+            <Text tx="images-loading-error" />
+          )}
+          {images &&
+            !isErrorImages &&
+            !isLoadingImages &&
+            images.map((image, index) => (
+              <StyledListItem
+                key={image.id}
+                isLast
+                isActive={selectedImages.has(image.id)}
+                onPointerDown={() => handlePointerDown(image.id, index)}
+                onKeyDown={(event) => setIsShiftPressed(event.shiftKey)}
+                onKeyUp={() => setIsShiftPressed(false)}
+                tabIndex={0}
+              >
+                <StyledIcon icon="document" />
+                <Text>{image.dataUri}</Text>
+              </StyledListItem>
+            ))}
+        </StyledList>
+      )}
+    </FileExplorer>
+  );
+};
