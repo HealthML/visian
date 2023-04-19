@@ -307,6 +307,7 @@
   "jobs-loading-error": "Error on loading jobs:",
   "job-images": "Images",
   "job-number-images": "Number of images",
+  "job-number-annotations": "Number of annotations",
   "job-details": "Job Details",
   "job-model-name": "Model",
   "job-model-version": "Version",

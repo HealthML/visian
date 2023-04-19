@@ -137,12 +137,14 @@ export const JobDetailsPopUp = observer<JobDetailsPopUpProps>(
           <>
             <JobStatusControlsContainer>
               <JobStatusBadge status={job.status} />
-              <IconButton
-                icon="trash"
-                tooltipTx="delete-job-title"
-                onPointerDown={openDeleteJobConfirmationPopUp}
-                tooltipPosition="right"
-              />
+              {!["queued", "running"].includes(job.status) && (
+                <IconButton
+                  icon="trash"
+                  tooltipTx="delete-job-title"
+                  onPointerDown={openDeleteJobConfirmationPopUp}
+                  tooltipPosition="right"
+                />
+              )}
             </JobStatusControlsContainer>
 
             <StyledDetailsTable>
