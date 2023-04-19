@@ -85,6 +85,12 @@ export const UIOverlayMenu = observer<UIOverlayMenuProps>(
   }) => {
     const navigate = useNavigate();
 
+    const navigateToParent = () => {
+      const currentPathname = window.location.pathname;
+      const newPathname = currentPathname.replace(/\/[^/]+$/, "");
+      navigate(newPathname);
+    };
+
     return (
       <Container>
         <TopBar>
@@ -104,7 +110,7 @@ export const UIOverlayMenu = observer<UIOverlayMenuProps>(
                   icon="arrowBack"
                   tooltipTx="back"
                   tooltipPosition="right"
-                  onPointerDown={() => navigate(`../`)}
+                  onPointerDown={() => navigateToParent()}
                   isActive={false}
                 />
               )}

@@ -25,9 +25,11 @@ export const ProjectViewSwitch = ({
 
   // expect path like /project/projectId/datasets
   const navigateToScreen = (screenName: string) => {
-    const pathParts = window.location.pathname.split("/");
-    pathParts[pathParts.length - 1] = screenName;
-    navigate(pathParts.join("/"));
+    const newPathname = window.location.pathname.replace(
+      /\/[^\/]*$/,
+      `/${screenName}`,
+    );
+    navigate(newPathname);
   };
 
   return (
