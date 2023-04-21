@@ -10,6 +10,7 @@ export { ReactComponent as circle } from "./circle.svg";
 export { ReactComponent as clearScan } from "./clear-scan.svg";
 export { ReactComponent as clearSlice } from "./clear-slice.svg";
 export { ReactComponent as columnView } from "./column-view.svg";
+export { ReactComponent as copilot } from "./copilot.svg";
 export { ReactComponent as copyClipboard } from "./copy-clipboard.svg";
 export { ReactComponent as crosshairPointer } from "./crosshair-pointer.svg";
 export { ReactComponent as crosshair } from "./crosshair.svg";

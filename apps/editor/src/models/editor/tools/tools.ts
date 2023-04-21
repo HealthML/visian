@@ -20,6 +20,7 @@ import { BoundedSmartBrush } from "./bounded-smart-brush";
 import { CircleBrush } from "./circle-brush";
 import { ClearImageTool } from "./clear-image-tool";
 import { ClearSliceTool } from "./clear-slice-tool";
+import { CopilotTool } from "./copilot-tool";
 import { CrosshairTool } from "./crosshair-tool";
 import { DilateErodeTool } from "./dilate-erode-tool";
 import { MeasurementTool } from "./measurement-tool";
@@ -51,7 +52,8 @@ export type ToolName =
   | "dilate-erode"
   | "plane-tool"
   | "fly-tool"
-  | "measurement-tool";
+  | "measurement-tool"
+  | "copilot-tool";
 
 export interface ToolsSnapshot<N extends string> {
   activeToolName?: N;
@@ -199,6 +201,7 @@ export class Tools
       "outline-eraser": new OutlineTool(document, this.toolRenderer, false),
       "clear-slice": new ClearSliceTool(document, this.toolRenderer),
       "clear-image": new ClearImageTool(document, this.toolRenderer),
+      "copilot-tool": new CopilotTool(document, this.toolRenderer),
       "threshold-annotation": new ThresholdAnnotationTool(
         document,
         this.thresholdAnnotationRenderer3D,
@@ -248,6 +251,7 @@ export class Tools
         document,
       ),
       new ToolGroup({ toolNames: ["measurement-tool"] }, document),
+      new ToolGroup({ toolNames: ["copilot-tool"] }, document),
     );
 
     if (snapshot) this.applySnapshot(snapshot);
