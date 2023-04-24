@@ -21,7 +21,7 @@ export const Option = styled.div<{
   box-sizing: border-box;
   cursor: pointer;
   display: flex;
-  height: height: ${(props) =>
+  height: ${(props) =>
     props.size === "medium" ? getSize("listElementHeight") : "24px"};
   overflow: hidden;
   user-select: none;
@@ -30,13 +30,8 @@ export const Option = styled.div<{
     props.isSelected &&
     css`
       ${sheetMixin}
-      border-radius: 12px;
-      // TODO: This displays a border of twice the thickness when the last
-      // option is selected. We should figure out a workaround to also use -1px
-      // margin in the vertical direction and still not have the options shift
-      // around when selecting a different one.
-      margin: 0 -1px;
-      padding: 1px;
+      border-radius: ${props.size === "medium" ? "20px" : "12px"};
+      margin: -1px -1px;
     `}
 `;
 
@@ -68,16 +63,18 @@ const OptionDivider = styled(Divider)<{ isHidden?: boolean }>`
 export const ExpandIcon = styled(Icon)<{ size?: "small" | "medium" }>`
   height: ${(props) => (props.size === "medium" ? "32px" : "16px")};
   margin-right: 10px;
-  width: ${(props) => (props.size === "medium" ? "32px" : "16px")}; ;
+  width: ${(props) => (props.size === "medium" ? "32px" : "16px")};
 `;
 
-const Options = styled.div`
+const Options = styled("div")<{ size?: "small" | "medium" }>`
   ${sheetMixin}
-  border-radius: 12px;
-  display: flex;
+  border-radius: ${(props) => (props.size === "medium" ? "20px" : "12px")};
+  display: block;
   flex-direction: column;
   pointer-events: auto;
   z-index: ${zIndex("overlayComponent")};
+  overflow-y: auto;
+  max-height: 40%;
 `;
 
 export const DropDownOptions: React.FC<DropDownOptionsProps> = ({
@@ -106,7 +103,7 @@ export const DropDownOptions: React.FC<DropDownOptionsProps> = ({
   const activeOption = options[activeIndex];
   const node =
     isOpen === false ? null : (
-      <Options {...rest} style={optionsStyle} ref={ref}>
+      <Options {...rest} style={optionsStyle} ref={ref} size={size}>
         <ExpandedSelector onPointerDown={onDismiss} size={size}>
           {activeOption && (
             <OptionText
@@ -115,7 +112,7 @@ export const DropDownOptions: React.FC<DropDownOptionsProps> = ({
               size={size}
             />
           )}
-          <ExpandIcon icon="arrowUp" />
+          <ExpandIcon icon="arrowUp" size={size} />
         </ExpandedSelector>
         {options.map((option, index) => (
           <React.Fragment key={option.value}>
@@ -127,6 +124,7 @@ export const DropDownOptions: React.FC<DropDownOptionsProps> = ({
               <OptionText
                 tx={option.labelTx}
                 text={option.label || option.value}
+                size={size}
               />
             </Option>
             {index < options.length - 1 && (

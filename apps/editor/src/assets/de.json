@@ -297,7 +297,6 @@
   "annotation-saving-as": "Neue Annotationsdatei erstellen",
   "annotation-saving-error": "Fehler beim Speichern der Annotationsebene",
 
-  "ml-model-selection-description": "Wählen Sie ein Modell und die zugehörige Modellversion, die zum Annotieren der Bilder verwendet werden sollen.",
   "ml-models-loading": "Modelle werden geladen...",
   "ml-models-loading-error": "Fehler beim Laden der Modelle:",
   "ml-models-none-available": "Es sind keine Modelle verfügbar.",
@@ -319,7 +318,10 @@
   "job-status-succeeded": "Erfolgreich",
   "job-status-canceled": "Abgebrochen",
   "job-status-failed": "Fehlgeschlagen",
-  "job-creation-popup-title": "Job Erstellung",
+  "job-creation-popup-title": "Einen neuen Job erstellen",
+  "job-creation-model-selection": "Modell und Version auswählen",
+  "job-creation-image-selection": "Bilder zum Annotieren auswählen",
+  "job-creation-error": "Beim Erstellen des Jobs ist ein Fehler aufgetreten.",
   "start-job": "Job starten",
 
   "open-editor": "Editor öffnen",

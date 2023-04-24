@@ -13,9 +13,9 @@ import {
 } from "./drop-down-options";
 import { DropDownProps } from "./drop-down.props";
 
-const Selector = styled(Option)`
+const Selector = styled(Option)<{ size?: "small" | "medium" }>`
   ${sheetMixin}
-  border-radius: 12px;
+  border-radius: ${(props) => (props.size === "medium" ? "20px" : "12px")};
   position: relative;
   margin-bottom: 10px;
   width: 100%;
@@ -102,7 +102,7 @@ export const DropDown: React.FC<DropDownProps> = ({
             size={size}
           />
         )}
-        <ExpandIcon icon="arrowDown" />
+        <ExpandIcon icon="arrowDown" size={size} />
         <DropDownOptions
           activeIndex={activeIndex}
           options={options}
