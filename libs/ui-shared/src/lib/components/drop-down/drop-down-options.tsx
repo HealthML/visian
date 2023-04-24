@@ -2,7 +2,7 @@ import React, { useRef } from "react";
 import ReactDOM from "react-dom";
 import styled, { css } from "styled-components";
 
-import { fontSize, zIndex } from "../../theme";
+import { fontSize, size as getSize, zIndex } from "../../theme";
 import { useModalRoot } from "../box";
 import { Icon } from "../icon";
 import { Divider } from "../modal";
@@ -12,13 +12,17 @@ import { useOutsidePress } from "../utils";
 import { DropDownOptionsProps } from "./drop-down.props";
 import { useOptionsPosition } from "./utils";
 
-export const Option = styled.div<{ isSelected?: boolean }>`
+export const Option = styled.div<{
+  isSelected?: boolean;
+  size?: "small" | "medium";
+}>`
   align-items: center;
   border: 1px solid transparent;
   box-sizing: border-box;
   cursor: pointer;
   display: flex;
-  height: 24px;
+  height: height: ${(props) =>
+    props.size === "medium" ? getSize("listElementHeight") : "24px"};
   overflow: hidden;
   user-select: none;
 
@@ -40,9 +44,10 @@ const ExpandedSelector = styled(Option)`
   margin: -1px -1px 6px -1px;
 `;
 
-export const OptionText = styled(Text)`
+export const OptionText = styled(Text)<{ size?: "small" | "medium" }>`
   flex: 1 0;
-  font-size: ${fontSize("small")};
+  font-size: ${(props) =>
+    props.size === "medium" ? fontSize("default") : fontSize("small")};
   margin: 0 14px;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -60,10 +65,10 @@ const OptionDivider = styled(Divider)<{ isHidden?: boolean }>`
     `}
 `;
 
-export const ExpandIcon = styled(Icon)`
-  height: 16px;
+export const ExpandIcon = styled(Icon)<{ size?: "small" | "medium" }>`
+  height: ${(props) => (props.size === "medium" ? "32px" : "16px")};
   margin-right: 10px;
-  width: 16px;
+  width: ${(props) => (props.size === "medium" ? "32px" : "16px")}; ;
 `;
 
 const Options = styled.div`
@@ -72,7 +77,7 @@ const Options = styled.div`
   display: flex;
   flex-direction: column;
   pointer-events: auto;
-  z-index: ${zIndex("picker")};
+  z-index: ${zIndex("overlayComponent")};
 `;
 
 export const DropDownOptions: React.FC<DropDownOptionsProps> = ({
@@ -83,6 +88,7 @@ export const DropDownOptions: React.FC<DropDownOptionsProps> = ({
   style,
   onChange,
   onDismiss,
+  size,
   ...rest
 }) => {
   const ref = useRef<HTMLDivElement>(null);
@@ -101,11 +107,12 @@ export const DropDownOptions: React.FC<DropDownOptionsProps> = ({
   const node =
     isOpen === false ? null : (
       <Options {...rest} style={optionsStyle} ref={ref}>
-        <ExpandedSelector onPointerDown={onDismiss}>
+        <ExpandedSelector onPointerDown={onDismiss} size={size}>
           {activeOption && (
             <OptionText
               tx={activeOption.labelTx}
               text={activeOption.label || activeOption.value}
+              size={size}
             />
           )}
           <ExpandIcon icon="arrowUp" />
@@ -115,6 +122,7 @@ export const DropDownOptions: React.FC<DropDownOptionsProps> = ({
             <Option
               isSelected={index === activeIndex}
               onPointerDown={() => onChange?.(option.value)}
+              size={size}
             >
               <OptionText
                 tx={option.labelTx}

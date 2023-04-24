@@ -41,6 +41,7 @@ export const DropDown: React.FC<DropDownProps> = ({
   infoShortcuts,
   infoPosition,
   infoBaseZIndex,
+  size,
   ...rest
 }) => {
   const actualValue =
@@ -92,11 +93,13 @@ export const DropDown: React.FC<DropDownProps> = ({
         {...rest}
         ref={setParentRef}
         onPointerDown={showOptions ? undefined : openOptions}
+        size={size}
       >
         {activeOption && (
           <OptionText
             tx={activeOption.labelTx}
             text={activeOption.label || activeOption.value}
+            size={size}
           />
         )}
         <ExpandIcon icon="arrowDown" />
@@ -107,6 +110,7 @@ export const DropDown: React.FC<DropDownProps> = ({
           isOpen={showOptions}
           onChange={setValue}
           onDismiss={closeOptions}
+          size={size}
         />
       </Selector>
     </>

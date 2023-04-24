@@ -1,7 +1,8 @@
-import { Modal, Text, useTranslation } from "@visian/ui-shared";
+import { Modal, Notification, Text, useTranslation } from "@visian/ui-shared";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import styled from "styled-components";
 
+import { useStore } from "../../../app/root-store";
 import {
   useDeleteAnnotationsForImageMutation,
   useDeleteImagesMutation,
@@ -11,7 +12,7 @@ import { Annotation, Dataset, Image } from "../../../types";
 import { ConfirmationPopup } from "../confimration-popup/confirmation-popup";
 import { DatasetImageList } from "../dataset-image-list";
 import { DatasetNavigationbar } from "../dataset-navigationbar";
-import { ModelSelectionPopup } from "../ml-model-popup";
+import { JobCreationPopup } from "../job-creation-popup";
 
 const StyledModal = styled(Modal)`
   vertical-align: middle;
@@ -20,7 +21,17 @@ const StyledModal = styled(Modal)`
 `;
 // TODO: z-index logic
 
+const ErrorNotification = styled(Notification)`
+  position: absolute;
+  min-width: 30%;
+  left: 50%;
+  bottom: 15%;
+  transform: translateX(-50%);
+`;
+
 export const DatasetExplorer = ({ dataset }: { dataset: Dataset }) => {
+  const store = useStore();
+
   const [isInSelectMode, setIsInSelectMode] = useState(false);
 
   const { images, imagesError, isErrorImages, isLoadingImages, refetchImages } =
@@ -38,16 +49,6 @@ export const DatasetExplorer = ({ dataset }: { dataset: Dataset }) => {
   const [selectedImages, setSelectedImages] = useState<Map<string, boolean>>(
     new Map((images ?? []).map((image) => [image.id, false])),
   );
-
-  // model selection popup
-  const [isModelSelectionPopUpOpen, setIsModelSelectionPopUpOpen] =
-    useState(false);
-  const openModelSelectionPopUp = useCallback(() => {
-    setIsModelSelectionPopUpOpen(true);
-  }, []);
-  const closeModelSelectionPopUp = useCallback(() => {
-    setIsModelSelectionPopUpOpen(false);
-  }, []);
 
   // delete annotation confirmation popup
   const [
@@ -131,6 +132,22 @@ export const DatasetExplorer = ({ dataset }: { dataset: Dataset }) => {
     [areAllSelected, setSelectAll],
   );
 
+  const [openWithDatasetId, setOpenWithDatasetId] = useState<
+    string | undefined
+  >(dataset.id);
+
+  // model selection popup
+  const [isJobCreationPopUpOpen, setIsJobCreationPopUpOpen] = useState(false);
+  const openJobCreationPopUp = useCallback(() => {
+    setIsJobCreationPopUpOpen(true);
+    setOpenWithDatasetId(dataset.id);
+  }, [dataset.id]);
+  const closeJobCreationPopUp = useCallback(() => {
+    setOpenWithDatasetId(undefined);
+    setIsJobCreationPopUpOpen(false);
+    setSelectAll(false);
+    setIsInSelectMode(false);
+  }, [setSelectAll]);
   const deleteSelectedImages = useCallback(() => {
     deleteImages(activeImageSelection);
   }, [activeImageSelection, deleteImages]);
@@ -188,11 +205,20 @@ export const DatasetExplorer = ({ dataset }: { dataset: Dataset }) => {
           anySelected={isAnySelected}
           toggleSelectMode={toggleSelectMode}
           toggleSelectAll={toggleSelectAll}
-          openModelSelectionPopUp={openModelSelectionPopUp}
+          openJobCreationPopUp={openJobCreationPopUp}
           deleteSelectedImages={openDeleteImagesConfirmationPopUp}
         />
       }
     >
+      {store?.error && (
+        <ErrorNotification
+          title={store?.error.title}
+          titleTx={store?.error.titleTx}
+          description={store?.error.description}
+          descriptionTx={store?.error.descriptionTx}
+          descriptionData={store?.error.descriptionData}
+        />
+      )}
       {isLoadingImages && <Text tx="images-loading" />}
       {isErrorImages && (
         <Text>{`${translate("images-loading-error")} ${
@@ -210,11 +236,12 @@ export const DatasetExplorer = ({ dataset }: { dataset: Dataset }) => {
           deleteImage={deleteImage}
         />
       )}
-      <ModelSelectionPopup
-        isOpen={isModelSelectionPopUpOpen}
-        onClose={closeModelSelectionPopUp}
+      <JobCreationPopup
+        isOpen={isJobCreationPopUpOpen}
+        onClose={closeJobCreationPopUp}
         activeImageSelection={activeImageSelection}
         projectId={dataset.project}
+        openWithDatasetId={openWithDatasetId}
       />
       <ConfirmationPopup
         isOpen={isDeleteAnnotationConfirmationPopUpOpen}

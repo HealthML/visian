@@ -20,6 +20,7 @@ export const ProjectList = ({
     {projects.map((project: Project) => (
       <ProjectListItem
         project={project}
+        key={project.id}
         deleteProject={() => deleteProject(project)}
       />
     ))}

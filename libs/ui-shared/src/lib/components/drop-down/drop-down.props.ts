@@ -19,6 +19,8 @@ export interface DropDownOptionsProps<T = any>
   activeIndex?: number;
   options: IEnumParameterOption<T>[];
 
+  size?: "small" | "medium";
+
   /** If set to `false`, hides the modal. */
   isOpen?: boolean;
   onChange?: (value: T) => void;
@@ -42,6 +44,8 @@ export interface DropDownProps<T = any>
   infoBaseZIndex?: number;
 
   options: IEnumParameterOption<T>[];
+
+  size?: "small" | "medium";
 
   defaultValue?: T;
   value?: T;

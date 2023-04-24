@@ -16,7 +16,7 @@ export const DatasetNavigationbar = ({
   anySelected,
   toggleSelectMode,
   toggleSelectAll,
-  openModelSelectionPopUp,
+  openJobCreationPopUp,
   deleteSelectedImages,
 }: {
   isInSelectMode: boolean;
@@ -24,7 +24,7 @@ export const DatasetNavigationbar = ({
   anySelected: boolean;
   toggleSelectMode: () => void;
   toggleSelectAll: () => void;
-  openModelSelectionPopUp: () => void;
+  openJobCreationPopUp: () => void;
   deleteSelectedImages: () => void;
 }) =>
   isInSelectMode ? (
@@ -51,7 +51,7 @@ export const DatasetNavigationbar = ({
         icon="mlAutoAnnotation"
         tooltipTx="auto-annotate-documents"
         tooltipPosition="top"
-        onPointerDown={openModelSelectionPopUp}
+        onPointerDown={openJobCreationPopUp}
       />
       <StyledButton
         icon="exit"
