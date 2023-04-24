@@ -1,12 +1,12 @@
 import { color, FlexRow, Icon, List, ListItem, Text } from "@visian/ui-shared";
-import styled from "styled-components";
+import styled, { css } from "styled-components";
 
 import { Dataset, Image } from "../../../types";
 import { handleImageSelection, useKeyboardShortcuts } from "../util";
 
 const FileExplorer = styled(FlexRow)`
   width: 100%;
-  height: 50%;
+  overflow-y: hidden;
 `;
 
 const StyledList = styled(List)`
@@ -19,10 +19,16 @@ const StyledIcon = styled(Icon)`
   padding-right: 0.8rem;
 `;
 
-const StyledListItem = styled(ListItem)`
-  margin-left: 3%;
-  margin-right: 3%;
+const StyledListItem = styled(ListItem)<{ isActive?: boolean }>`
   user-select: none;
+  // Fix too thick line on intersection between active items
+  margin: 1px 3%;
+  // Fix items moving by 1px on selection / deselection
+  ${(props) =>
+    !props.isActive &&
+    css`
+      padding: 1px 0;
+    `}
 `;
 
 const VerticalLine = styled.div`
@@ -45,7 +51,7 @@ export const ProjectDataExplorer = ({
   images: Image[] | undefined;
   isErrorImages: boolean;
   isLoadingImages: boolean;
-  selectedDataset: string;
+  selectedDataset?: string;
   selectedImages: Set<string>;
   selectDataset: (datasetId: string) => void;
   setImageSelection: (imageId: string, selection: boolean) => void;

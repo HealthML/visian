@@ -1,5 +1,5 @@
 import axios, { AxiosError } from "axios";
-import { useQuery } from "react-query";
+import { useMutation, useQuery, useQueryClient } from "react-query";
 
 import { Dataset } from "../types";
 import { hubBaseUrl } from "./hub-base-url";
@@ -29,6 +29,86 @@ export const useDatasetsBy = (projectId: string) => {
     isLoadingDatasets: isLoading,
     refetchDatasets: refetch,
     removeDatasets: remove,
+  };
+};
+
+const deleteDatasets = async ({
+  projectId,
+  datasetIds,
+}: {
+  projectId: string;
+  datasetIds: string[];
+}) => {
+  const deleteDatasetsResponse = await axios.delete<Dataset[]>(
+    `${hubBaseUrl}datasets`,
+    {
+      data: { ids: datasetIds, cascade: true },
+      timeout: 1000 * 2, // 2 secods
+    },
+  );
+  return deleteDatasetsResponse.data.map((d) => d.id);
+};
+
+export const useDeleteDatasetsForProjectMutation = () => {
+  const queryClient = useQueryClient();
+  const { isError, isIdle, isLoading, isPaused, isSuccess, mutate } =
+    useMutation<
+      string[],
+      AxiosError<Dataset[]>,
+      {
+        projectId: string;
+        datasetIds: string[];
+      },
+      { previousDatasets: Dataset[] }
+    >({
+      mutationFn: deleteDatasets,
+      onMutate: async ({
+        projectId,
+        datasetIds,
+      }: {
+        projectId: string;
+        datasetIds: string[];
+      }) => {
+        await queryClient.cancelQueries({
+          queryKey: ["datasetsBy", projectId],
+        });
+
+        const previousDatasets = queryClient.getQueryData<Dataset[]>([
+          "datasetsBy",
+          projectId,
+        ]);
+
+        if (!previousDatasets) return;
+
+        const newDatasets = previousDatasets.filter(
+          (annotaion: Dataset) => !datasetIds.includes(annotaion.id),
+        );
+
+        queryClient.setQueryData(["datasetsBy", projectId], newDatasets);
+
+        return {
+          previousDatasets,
+        };
+      },
+      onError: (err, { projectId, datasetIds }, context) => {
+        queryClient.setQueryData(
+          ["datasetsBy", projectId],
+          context?.previousDatasets,
+        );
+      },
+      onSettled: (data, err, { projectId, datasetIds }) => {
+        queryClient.invalidateQueries({
+          queryKey: ["datasetsBy", projectId],
+        });
+      },
+    });
+  return {
+    isDeleteDatasetsError: isError,
+    isDeleteDatasetsIdle: isIdle,
+    isDeleteDatasetsLoading: isLoading,
+    isDeleteDatasetsPaused: isPaused,
+    isDeleteDatasetsSuccess: isSuccess,
+    deleteDatasets: mutate,
   };
 };
 

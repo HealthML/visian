@@ -1,9 +1,9 @@
 import { List, stopPropagation } from "@visian/ui-shared";
 import styled from "styled-components";
 
-import { Image } from "../../../types";
-import { DatasetImageListItem } from "./dataset-image-list-item";
+import { Annotation, Image } from "../../../types";
 import { useKeyboardShortcuts } from "../util";
+import { DatasetImageListItem } from "./dataset-image-list-item";
 
 const ImageList = styled(List)`
   width: 100%;
@@ -19,6 +19,8 @@ export const DatasetImageList = ({
   selectedImages,
   setImageSelection,
   setSelectedImages,
+  deleteAnnotation,
+  deleteImage,
 }: {
   isInSelectMode: boolean;
   images: Image[];
@@ -26,6 +28,8 @@ export const DatasetImageList = ({
   selectedImages: Set<string>;
   setImageSelection: (imageId: string, isSelected: boolean) => void;
   setSelectedImages: React.Dispatch<React.SetStateAction<Set<string>>>;
+  deleteAnnotation: (annotation: Annotation) => void;
+  deleteImage: (image: Image) => void;
 }) => {
   const { isShiftPressed, selectedRange, setSelectedRange } =
     useKeyboardShortcuts({ selectedImages, setSelectedImages, images });
@@ -47,6 +51,8 @@ export const DatasetImageList = ({
           isShiftPressed={isShiftPressed}
           selectedRange={selectedRange}
           setSelectedRange={setSelectedRange}
+          deleteAnnotation={deleteAnnotation}
+          deleteImage={deleteImage}
         />
       ))}
     </ImageList>

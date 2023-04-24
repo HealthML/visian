@@ -297,13 +297,14 @@
   "annotation-saving-as": "Neue Annotationsdatei erstellen",
   "annotation-saving-error": "Fehler beim Speichern der Annotationsebene",
 
-  "ml-model-selection-description": "Wählen Sie ein Modell und die zugehörige Modellversion, die zum Annotieren der Bilder verwendet werden sollen.",
   "ml-models-loading": "Modelle werden geladen...",
   "ml-models-loading-error": "Fehler beim Laden der Modelle:",
   "ml-models-none-available": "Es sind keine Modelle verfügbar.",
+  "ml-models-not-found-error": "Modellversion konnte nicht gefunden werden.",
 
   "jobs-loading": "Jobs werden geladen...",
   "jobs-loading-error": "Fehler beim Laden der Jobs:",
+  "job-deleted-images": "Es scheint als wurden alle Bilder des Jobs gelöscht...",
   "job-details": "Job Details",
   "job-images": "Bilder",
   "job-number-images": "Anzahl Bilder",
@@ -317,7 +318,10 @@
   "job-status-succeeded": "Erfolgreich",
   "job-status-canceled": "Abgebrochen",
   "job-status-failed": "Fehlgeschlagen",
-  "job-creation-popup-title": "Job Erstellung",
+  "job-creation-popup-title": "Einen neuen Job erstellen",
+  "job-creation-model-selection": "Modell und Version auswählen",
+  "job-creation-image-selection": "Bilder zum Annotieren auswählen",
+  "job-creation-error": "Beim Erstellen des Jobs ist ein Fehler aufgetreten.",
   "start-job": "Job starten",
 
   "open-editor": "Editor öffnen",
@@ -327,8 +331,24 @@
 
   "save": "Speichern",
   "save-as": "Speichern Unter",
+  "saving": "Speichern...",
   "saving-error": "Fehler beim Speichern",
 
   "internal-server-error": "Interner Serverfehler",
-  "job-creation-error": "Beim Erstellen des Jobs ist ein Fehler aufgetreten."
+  "job-creation-error": "Beim Erstellen des Jobs ist ein Fehler aufgetreten.",
+
+  "confirm": "Bestätigen",
+  "cancel": "Abbrechen",
+  "options": "Optionen",
+  "delete": "Löschen",
+  "delete-annotation-title": "Annotation löschen",
+  "delete-annotation-message": "Wollen Sie die Annotation \"_\" wirklich löschen?",
+  "delete-images-title": "Bilder löschen",
+  "delete-images-message": "Wollen Sie _ Bild(er) sämtlich aller dazugehörigen Annotationen wirklich löschen?",
+  "delete-image-title": "Bild löschen",
+  "delete-image-message": "Wollen Sie das Bild \"_\" sämtlich aller dazugehörigen Annotationen wirklich löschen?",
+  "delete-dataset-title": "Datensatz löschen",
+  "delete-dataset-message": "Wollen Sie den Datensatz \"_\" sämtlich aller enthaltenen Bilder und Annotationen wirklich löschen?",
+  "delete-project-title": "Projekt löschen",
+  "delete-project-message": "Wollen Sie das Projekt \"_\" sämtlich aller enthaltenen Datensätze, Bilder und Annotationen wirklich löschen?"
 }

@@ -5,6 +5,7 @@ import {
   FlexRow,
   IEnumParameterOption,
   PopUp,
+  SectionHeader,
   Text,
   useTranslation,
 } from "@visian/ui-shared";
@@ -15,8 +16,7 @@ import styled from "styled-components";
 import { useStore } from "../../../app/root-store";
 import { postJob, useImagesByDataset, useMlModels } from "../../../queries";
 import useDatasetsBy from "../../../queries/use-datasets-by";
-import { MlModel } from "../../../types";
-import { ProjectDataExplorer } from "../project-data-explorer/project-data-explorer";
+import { ProjectDataExplorer } from "../project-data-explorer";
 import { useImageSelection } from "../util";
 import { JobCreationPopUpProps } from "./job-creation-popup.props";
 
@@ -26,13 +26,29 @@ const JobCreationPopupContainer = styled(PopUp)`
   height: 70vh;
 `;
 
+const ContentContainer = styled.div`
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow-y: hidden;
+  min-height: 200px;
+`;
+
+const StyledProjectDataExplorer = styled(ProjectDataExplorer)`
+  flex: 1;
+`;
+
 const DropDownContainer = styled(FlexRow)`
   width: 50vw;
-  padding-bottom: 3%;
+  justify-content: space-between;
 `;
 
 const StyledDropDown = styled(DropDown)`
-  margin: 2%;
+  width: 48%;
+`;
+
+const StyledSectionHeader = styled(SectionHeader)`
+  padding: 1em 0 0.5em 0;
 `;
 
 const StyledErrorText = styled(Text)`
@@ -40,7 +56,7 @@ const StyledErrorText = styled(Text)`
   text-align: center;
 `;
 
-const BottomNavigationBar = styled(Box)`
+const Footer = styled(Box)`
   display: flex;
   justify-content: center;
   width: 50vw;
@@ -48,7 +64,14 @@ const BottomNavigationBar = styled(Box)`
 `;
 
 export const JobCreationPopup = observer<JobCreationPopUpProps>(
-  ({ isOpen, onClose, projectId, activeImageSelection, openWithDatasetId }) => {
+  ({
+    isOpen,
+    onClose,
+    projectId,
+    activeImageSelection,
+    openWithDatasetId,
+    refetchJobs,
+  }) => {
     const store = useStore();
 
     const { mlModels, mlModelsError, isErrorMlModels, isLoadingMlModels } =
@@ -66,46 +89,56 @@ export const JobCreationPopup = observer<JobCreationPopUpProps>(
 
     const mlModelNameOptions: IEnumParameterOption<string>[] = useMemo(() => {
       const uniqueNames = new Set(mlModels?.map((model) => model.name));
-      return Array.from(uniqueNames, (model) => ({
-        label: model,
-        value: model,
+      return Array.from(uniqueNames, (modelName) => ({
+        label: modelName,
+        value: modelName,
       }));
     }, [mlModels]);
 
     const availableModelVersions = useMemo(
       () =>
         mlModels
-          ? mlModels.filter((model) => model.name === selectedModelName)
+          ? mlModels
+              .filter((model) => model.name === selectedModelName)
+              .map((model) => model.version)
           : [],
       [mlModels, selectedModelName],
     );
 
-    const [selectedModel, setSelectedModel] = useState(
+    const [selectedModelVersion, setSelectedModelVersion] = useState(
       availableModelVersions[0],
     );
 
     useEffect(() => {
-      setSelectedModel(availableModelVersions[0]);
+      setSelectedModelVersion(availableModelVersions[0]);
     }, [availableModelVersions]);
 
-    const mlModelVersionOptions: IEnumParameterOption<MlModel>[] = useMemo(
+    const mlModelVersionOptions: IEnumParameterOption<string>[] = useMemo(
       () =>
-        availableModelVersions.map((model) => ({
-          label: model.version,
-          value: model,
+        availableModelVersions.map((modelVersion) => ({
+          label: `v${modelVersion}`,
+          value: modelVersion,
         })),
       [availableModelVersions],
+    );
+
+    const findModel = useCallback(
+      () =>
+        mlModels?.find(
+          (model) =>
+            model.name === selectedModelName &&
+            model.version === selectedModelVersion,
+        ),
+      [mlModels, selectedModelName, selectedModelVersion],
     );
 
     const { datasets, datasetsError, isErrorDatasets, isLoadingDatasets } =
       useDatasetsBy(projectId);
 
-    const [selectedDataset, setSelectedDataset] = useState(
-      openWithDatasetId || "",
-    );
+    const [selectedDataset, setSelectedDataset] = useState(openWithDatasetId);
 
     useEffect(() => {
-      setSelectedDataset(openWithDatasetId || "");
+      setSelectedDataset(openWithDatasetId);
     }, [openWithDatasetId]);
 
     const { images, isErrorImages, isLoadingImages } =
@@ -129,8 +162,18 @@ export const JobCreationPopup = observer<JobCreationPopUpProps>(
 
     const createAutoAnnotationJob = useCallback(
       async (imageSelection: string[]) => {
+        const selectedModel = findModel();
+        if (!selectedModel) {
+          store?.setError({
+            titleTx: "error",
+            descriptionTx: "ml-models-not-found-error",
+          });
+          return;
+        }
+
         try {
           await postJob(imageSelection, selectedModel, projectId);
+          refetchJobs?.();
           onClose?.();
         } catch (error) {
           store?.setError({
@@ -140,7 +183,7 @@ export const JobCreationPopup = observer<JobCreationPopUpProps>(
           onClose?.();
         }
       },
-      [onClose, selectedModel, projectId, store],
+      [findModel, store, projectId, refetchJobs, onClose],
     );
 
     const startJob = useCallback(
@@ -159,52 +202,57 @@ export const JobCreationPopup = observer<JobCreationPopUpProps>(
         dismiss={onClose}
         shouldDismissOnOutsidePress
       >
-        <Text>{`${t("ml-model-selection-description")}`}</Text>
-        {isLoadingMlModels && <Text tx="ml-models-loading" />}
-        {isErrorMlModels && (
-          <Text>{`${t("ml-models-loading-error")} ${
-            mlModelsError?.response?.statusText
-          } (${mlModelsError?.response?.status})`}</Text>
-        )}
-        <DropDownContainer>
-          <StyledDropDown
-            options={mlModelNameOptions}
-            value={selectedModelName}
-            onChange={setSelectedModelName}
-          />
-          <StyledDropDown
-            options={mlModelVersionOptions}
-            value={selectedModel}
-            onChange={setSelectedModel}
-          />
-        </DropDownContainer>
-        {isLoadingDatasets && <StyledErrorText tx="datasets-loading" />}
-        {isErrorDatasets && (
-          <StyledErrorText>{`${t("datasets-loading-error")} ${
-            datasetsError?.response?.statusText
-          } (${datasetsError?.response?.status})`}</StyledErrorText>
-        )}
+        <ContentContainer>
+          <StyledSectionHeader tx="job-creation-model-selection" />
+          {isLoadingMlModels && <Text tx="ml-models-loading" />}
+          {isErrorMlModels && (
+            <Text>{`${t("ml-models-loading-error")} ${
+              mlModelsError?.response?.statusText
+            } (${mlModelsError?.response?.status})`}</Text>
+          )}
+          <DropDownContainer>
+            <StyledDropDown
+              options={mlModelNameOptions}
+              value={selectedModelName}
+              onChange={setSelectedModelName}
+              size="medium"
+            />
+            <StyledDropDown
+              options={mlModelVersionOptions}
+              value={selectedModelVersion}
+              onChange={setSelectedModelVersion}
+              size="medium"
+            />
+          </DropDownContainer>
+          {isLoadingDatasets && <StyledErrorText tx="datasets-loading" />}
+          {isErrorDatasets && (
+            <StyledErrorText>{`${t("datasets-loading-error")} ${
+              datasetsError?.response?.statusText
+            } (${datasetsError?.response?.status})`}</StyledErrorText>
+          )}
+          <StyledSectionHeader tx="job-creation-image-selection" />
+          {showProjectDataExplorer && (
+            <StyledProjectDataExplorer
+              datasets={datasets}
+              images={images}
+              isErrorImages={isErrorImages}
+              isLoadingImages={isLoadingImages}
+              selectedDataset={selectedDataset}
+              selectedImages={selectedImages}
+              selectDataset={selectDataset}
+              setImageSelection={setImageSelection}
+              setSelectedImages={setSelectedImages}
+            />
+          )}
+        </ContentContainer>
         {showProjectDataExplorer && (
-          <ProjectDataExplorer
-            datasets={datasets}
-            images={images}
-            isErrorImages={isErrorImages}
-            isLoadingImages={isLoadingImages}
-            selectedDataset={selectedDataset}
-            selectedImages={selectedImages}
-            selectDataset={selectDataset}
-            setImageSelection={setImageSelection}
-            setSelectedImages={setSelectedImages}
-          />
-        )}
-        {showProjectDataExplorer && (
-          <BottomNavigationBar>
+          <Footer>
             <Button
-              isDisabled={!(selectedModel && selectedImages.size > 0)}
+              isDisabled={!(selectedModelVersion && selectedImages.size > 0)}
               tx="start-job"
               onPointerDown={startJob}
             />
-          </BottomNavigationBar>
+          </Footer>
         )}
       </JobCreationPopupContainer>
     );

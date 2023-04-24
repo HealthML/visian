@@ -18,10 +18,17 @@ const statusBorderColors: Record<JobStatus, string> = {
   failed: "redBorder",
 };
 
-export const JobStatusBadge = ({ status }: { status: JobStatus }) => (
+export const JobStatusBadge = ({
+  status,
+  full,
+}: {
+  status: JobStatus;
+  full?: boolean;
+}) => (
   <StatusBadge
     color={statusColors[status]}
     borderColor={statusBorderColors[status]}
     tx={`job-status-${status}`}
+    full={full}
   />
 );

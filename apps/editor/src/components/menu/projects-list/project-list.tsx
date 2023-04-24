@@ -10,10 +10,20 @@ const StyledProjectList = styled(List)`
   user-select: none;
 `;
 
-export const ProjectList = ({ projects }: { projects: Project[] }) => (
+export const ProjectList = ({
+  projects,
+  deleteProject,
+}: {
+  projects: Project[];
+  deleteProject: (project: Project) => void;
+}) => (
   <StyledProjectList onWheel={stopPropagation}>
     {projects.map((project: Project) => (
-      <ProjectListItem project={project} />
+      <ProjectListItem
+        project={project}
+        key={project.id}
+        deleteProject={() => deleteProject(project)}
+      />
     ))}
   </StyledProjectList>
 );
