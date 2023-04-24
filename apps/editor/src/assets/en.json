@@ -277,6 +277,9 @@
   "projects-loading-error": "Error on loading projects:",
   "no-projects-available": "Currently no projects are available.",
 
+  "project-loading": "Loading project...",
+  "project-loading-error": "Error on loading project:",
+
   "datasets-loading": "Loading datasets...",
   "datasets-loading-error": "Error on loading datasets:",
   "no-datasets-available": "Currently no datasets are available.",

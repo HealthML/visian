@@ -3,7 +3,6 @@ import { observer } from "mobx-react-lite";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 
-import { ProjectViewSwitch } from "../project-view-switch";
 import { UIOverlayMenuProps } from "./ui-overlay-menu.props";
 
 const Container = styled(AbsoluteCover)`
@@ -72,13 +71,7 @@ const Main = styled.div`
 `;
 
 export const UIOverlayMenu = observer<UIOverlayMenuProps>(
-  ({
-    homeButton,
-    backButton,
-    projectViewSwitch,
-    defaultSwitchSelection,
-    main,
-  }) => {
+  ({ homeButton, backButton, topCenter, main }) => {
     const navigate = useNavigate();
 
     const navigateToParent = () => {
@@ -112,13 +105,7 @@ export const UIOverlayMenu = observer<UIOverlayMenuProps>(
               )}
             </MenuRow>
           </ColumnLeft>
-          <ColumnCenter>
-            {projectViewSwitch && defaultSwitchSelection && (
-              <ProjectViewSwitch
-                defaultSwitchSelection={defaultSwitchSelection}
-              />
-            )}
-          </ColumnCenter>
+          <ColumnCenter>{topCenter}</ColumnCenter>
           <ColumnRight>
             <RightBar>
               <RightButton

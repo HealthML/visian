@@ -29,6 +29,7 @@ import {
   ProjectJobsScreen,
   ProjectsScreen,
 } from "../screens";
+import ProjectScreen from "../screens/project-screen";
 import { setupRootStore, StoreProvider } from "./root-store";
 
 if (isFromWHO()) {
@@ -87,13 +88,17 @@ function App(): JSX.Element {
                 <Routes>
                   <Route path="projects">
                     <Route path="" element={<ProjectsScreen />} />
-                    <Route path=":projectId/datasets">
-                      <Route path="" element={<ProjectDatasetsScreen />} />
-                      <Route path=":datasetId" element={<DatasetScreen />} />
+                    <Route path=":projectId" element={<ProjectScreen />}>
+                      <Route index element={<ProjectDatasetsScreen />} />
+                      <Route
+                        path="datasets"
+                        element={<ProjectDatasetsScreen />}
+                      />
+                      <Route path="jobs" element={<ProjectJobsScreen />} />
                     </Route>
                     <Route
-                      path=":projectId/jobs"
-                      element={<ProjectJobsScreen />}
+                      path=":projectId/datasets/:datasetId"
+                      element={<DatasetScreen />}
                     />
                   </Route>
                   <Route
