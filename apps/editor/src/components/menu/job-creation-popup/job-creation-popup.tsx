@@ -209,13 +209,13 @@ export const JobCreationPopup = observer<JobCreationPopUpProps>(
             options={mlModelNameOptions}
             value={selectedModelName}
             onChange={setSelectedModelName}
-            size="large"
+            size="medium"
           />
           <StyledDropDown
             options={mlModelVersionOptions}
             value={selectedModelVersion}
             onChange={setSelectedModelVersion}
-            size="large"
+            size="medium"
           />
         </DropDownContainer>
         {isLoadingDatasets && <StyledErrorText tx="datasets-loading" />}

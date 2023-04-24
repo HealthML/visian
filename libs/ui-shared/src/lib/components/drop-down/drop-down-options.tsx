@@ -2,7 +2,7 @@ import React, { useRef } from "react";
 import ReactDOM from "react-dom";
 import styled, { css } from "styled-components";
 
-import { fontSize, size as getSize, radius, zIndex } from "../../theme";
+import { fontSize, size as getSize, zIndex } from "../../theme";
 import { useModalRoot } from "../box";
 import { Icon } from "../icon";
 import { Divider } from "../modal";
@@ -14,7 +14,7 @@ import { useOptionsPosition } from "./utils";
 
 export const Option = styled.div<{
   isSelected?: boolean;
-  size?: "small" | "medium" | "large";
+  size?: "small" | "medium";
 }>`
   align-items: center;
   border: 1px solid transparent;
@@ -22,7 +22,7 @@ export const Option = styled.div<{
   cursor: pointer;
   display: flex;
   height: ${(props) =>
-    props.size === "small" ? "24px" : getSize("listElementHeight")};
+    props.size === "medium" ? getSize("listElementHeight") : "24px"};
   overflow: hidden;
   user-select: none;
 
@@ -30,7 +30,7 @@ export const Option = styled.div<{
     props.isSelected &&
     css`
       ${sheetMixin}
-      border-radius: ${radius("activeLayerBorderRadius")};
+      border-radius: ${props.size === "medium" ? "20px" : "12px"};
       margin: -1px -1px;
     `}
 `;
@@ -39,13 +39,10 @@ const ExpandedSelector = styled(Option)`
   margin: -1px -1px 6px -1px;
 `;
 
-export const OptionText = styled(Text)<{ size?: "small" | "medium" | "large" }>`
+export const OptionText = styled(Text)<{ size?: "small" | "medium" }>`
   flex: 1 0;
-  font-size: ${(props) => {
-    if (props.size === "large") return fontSize("default");
-    if (props.size === "medium") return fontSize("default");
-    return fontSize("small");
-  }};
+  font-size: ${(props) =>
+    props.size === "medium" ? fontSize("default") : fontSize("small")};
   margin: 0 14px;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -63,23 +60,15 @@ const OptionDivider = styled(Divider)<{ isHidden?: boolean }>`
     `}
 `;
 
-export const ExpandIcon = styled(Icon)<{ size?: "small" | "medium" | "large" }>`
-  height: ${(props) => {
-    if (props.size === "large") return "32px";
-    if (props.size === "medium") return "32px";
-    return "16px";
-  }};
+export const ExpandIcon = styled(Icon)<{ size?: "small" | "medium" }>`
+  height: ${(props) => (props.size === "medium" ? "32px" : "16px")};
   margin-right: 10px;
-  width: ${(props) => {
-    if (props.size === "large") return "32px";
-    if (props.size === "medium") return "32px";
-    return "16px";
-  }};
+  width: ${(props) => (props.size === "medium" ? "32px" : "16px")};
 `;
 
-const Options = styled.div`
+const Options = styled("div")<{ size?: "small" | "medium" }>`
   ${sheetMixin}
-  border-radius: ${radius("activeLayerBorderRadius")};
+  border-radius: ${(props) => (props.size === "medium" ? "20px" : "12px")};
   display: block;
   flex-direction: column;
   pointer-events: auto;
@@ -114,7 +103,7 @@ export const DropDownOptions: React.FC<DropDownOptionsProps> = ({
   const activeOption = options[activeIndex];
   const node =
     isOpen === false ? null : (
-      <Options {...rest} style={optionsStyle} ref={ref}>
+      <Options {...rest} style={optionsStyle} ref={ref} size={size}>
         <ExpandedSelector onPointerDown={onDismiss} size={size}>
           {activeOption && (
             <OptionText

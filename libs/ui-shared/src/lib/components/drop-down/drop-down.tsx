@@ -1,7 +1,6 @@
 import React, { useCallback, useState } from "react";
 import styled from "styled-components";
 
-import { radius } from "../../theme";
 import { FlexRow } from "../box";
 import { InfoText } from "../info-text";
 import { sheetMixin } from "../sheet";
@@ -14,9 +13,9 @@ import {
 } from "./drop-down-options";
 import { DropDownProps } from "./drop-down.props";
 
-const Selector = styled(Option)<{ size?: "small" | "medium" | "large" }>`
+const Selector = styled(Option)<{ size?: "small" | "medium" }>`
   ${sheetMixin}
-  border-radius: ${radius("activeLayerBorderRadius")};
+  border-radius: ${(props) => (props.size === "medium" ? "20px" : "12px")};
   position: relative;
   margin-bottom: 10px;
   width: 100%;
