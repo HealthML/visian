@@ -3,7 +3,6 @@ import {
   Box,
   FloatingUIButton,
   Modal,
-  SquareButton,
   Text,
   useTranslation,
 } from "@visian/ui-shared";
