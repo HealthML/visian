@@ -36,7 +36,8 @@ const ErrorNotification = styled(Notification)`
 export const JobHistory = ({ projectId }: { projectId: string }) => {
   const store = useStore();
 
-  const { jobs, jobsError, isErrorJobs, isLoadingJobs } = useJobsBy(projectId);
+  const { jobs, jobsError, isErrorJobs, isLoadingJobs, refetchJobs } =
+    useJobsBy(projectId);
 
   const { t: translate } = useTranslation();
 
@@ -82,6 +83,7 @@ export const JobHistory = ({ projectId }: { projectId: string }) => {
         projectId={projectId}
         isOpen={isModelSelectionPopUpOpen}
         onClose={closeModelSelectionPopUp}
+        refetchJobs={refetchJobs}
       />
     </StyledModal>
   );

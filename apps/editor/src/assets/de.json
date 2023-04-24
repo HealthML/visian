@@ -304,6 +304,7 @@
 
   "jobs-loading": "Jobs werden geladen...",
   "jobs-loading-error": "Fehler beim Laden der Jobs:",
+  "job-deleted-images": "Es scheint als wurden alle Bilder des Jobs gelöscht...",
   "job-details": "Job Details",
   "job-images": "Bilder",
   "job-number-images": "Anzahl Bilder",
@@ -330,7 +331,24 @@
 
   "save": "Speichern",
   "save-as": "Speichern Unter",
+  "saving": "Speichern...",
   "saving-error": "Fehler beim Speichern",
 
-  "internal-server-error": "Interner Serverfehler"
+  "internal-server-error": "Interner Serverfehler",
+  "job-creation-error": "Beim Erstellen des Jobs ist ein Fehler aufgetreten.",
+
+  "confirm": "Bestätigen",
+  "cancel": "Abbrechen",
+  "options": "Optionen",
+  "delete": "Löschen",
+  "delete-annotation-title": "Annotation löschen",
+  "delete-annotation-message": "Wollen Sie die Annotation \"_\" wirklich löschen?",
+  "delete-images-title": "Bilder löschen",
+  "delete-images-message": "Wollen Sie _ Bild(er) sämtlich aller dazugehörigen Annotationen wirklich löschen?",
+  "delete-image-title": "Bild löschen",
+  "delete-image-message": "Wollen Sie das Bild \"_\" sämtlich aller dazugehörigen Annotationen wirklich löschen?",
+  "delete-dataset-title": "Datensatz löschen",
+  "delete-dataset-message": "Wollen Sie den Datensatz \"_\" sämtlich aller enthaltenen Bilder und Annotationen wirklich löschen?",
+  "delete-project-title": "Projekt löschen",
+  "delete-project-message": "Wollen Sie das Projekt \"_\" sämtlich aller enthaltenen Datensätze, Bilder und Annotationen wirklich löschen?"
 }

@@ -304,6 +304,7 @@
 
   "jobs-loading": "Loading jobs...",
   "jobs-loading-error": "Error on loading jobs:",
+  "job-deleted-images": "It seems like all images for this job were deleted...",
   "job-images": "Images",
   "job-number-images": "Number of images",
   "job-details": "Job Details",
@@ -330,7 +331,24 @@
 
   "save": "Save",
   "save-as": "Save as",
+  "saving": "Saving...",
   "saving-error": "Saving Error",
 
-  "internal-server-error": "Internal Server Error"
+  "internal-server-error": "Internal Server Error",
+  "job-creation-error": "An error occurred while creating the job.",
+
+  "confirm": "Confirm",
+  "cancel": "Cancel",
+  "options": "Options",
+  "delete": "Delete",
+  "delete-annotation-title": "Delete Annotation",
+  "delete-annotation-message": "Do you really want to delete the annotation \"_\"?",
+  "delete-images-title": "Delete Images",
+  "delete-images-message": "Do you really want to delete _ image(s) including its annotations?",
+  "delete-image-title": "Delete Image",
+  "delete-image-message": "Do you really want to delete the image \"_\" including all its annotations?",
+  "delete-dataset-title": "Delete Dataset",
+  "delete-dataset-message": "Do you really want to delete the dataset \"_\" including all its images and annotations?",
+  "delete-project-title": "Delete Project",
+  "delete-project-message": "Do you really want to delete the project \"_\" including all its datasets, images and annotations?"
 }

@@ -6,7 +6,7 @@ import {
   useRelativePosition,
 } from "../utils";
 
-export type TooltipPosition = "left" | "right" | "bottom";
+export type TooltipPosition = "left" | "right" | "bottom" | "top";
 export type TooltipPositionConfig = RelativePositionConfig<TooltipPosition>;
 
 const defaultTooltipDistance = 10;
@@ -35,7 +35,13 @@ const computeStyle = ({
         left: rect.left + rect.width / 2 - (offsetRect?.left || 0),
         transform: "translateX(-50%)",
       };
-
+    case "top":
+      return {
+        position: "absolute",
+        top: rect.top - distance - rect.height / 2 + (offsetRect?.top || 0),
+        left: rect.left + rect.width / 2 - (offsetRect?.left || 0),
+        transform: "translateX(-50%)",
+      };
     default:
       return {
         position: "absolute",

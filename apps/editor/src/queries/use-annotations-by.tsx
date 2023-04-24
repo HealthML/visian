@@ -1,5 +1,5 @@
 import axios, { AxiosError } from "axios";
-import { useQuery } from "react-query";
+import { useMutation, useQuery, useQueryClient } from "react-query";
 
 import { Annotation } from "../types";
 import { hubBaseUrl } from "./hub-base-url";
@@ -33,6 +33,24 @@ export const getAnnotation = async (annotationId: string) => {
     `${hubBaseUrl}annotations/${annotationId}`,
   );
   return annotationsResponse.data;
+};
+
+const deleteAnnotations = async ({
+  imageId,
+  annotationIds,
+}: {
+  imageId: string;
+  annotationIds: string[];
+}) => {
+  const deleteAnnotationsResponse = await axios.delete<Annotation[]>(
+    `${hubBaseUrl}annotations`,
+    {
+      data: { ids: annotationIds },
+      timeout: 1000 * 2, // 2 secods
+    },
+  );
+
+  return deleteAnnotationsResponse.data.map((i) => i.id);
 };
 
 export const useAnnotationsByImage = (imageId: string) => {
@@ -70,6 +88,72 @@ export const useAnnotationsByJob = (jobId: string) => {
     isLoadingAnnotations: isLoading,
     refetchAnnotations: refetch,
     removeAnnotations: remove,
+  };
+};
+
+export const useDeleteAnnotationsForImageMutation = () => {
+  const queryClient = useQueryClient();
+  const { isError, isIdle, isLoading, isPaused, isSuccess, mutate } =
+    useMutation<
+      string[],
+      AxiosError<Annotation[]>,
+      {
+        imageId: string;
+        annotationIds: string[];
+      },
+      { previousAnnotations: Annotation[] }
+    >({
+      mutationFn: deleteAnnotations,
+      onMutate: async ({
+        imageId,
+        annotationIds,
+      }: {
+        imageId: string;
+        annotationIds: string[];
+      }) => {
+        await queryClient.cancelQueries({
+          queryKey: ["annotationsByImage", imageId],
+        });
+
+        const previousAnnotations = queryClient.getQueryData<Annotation[]>([
+          "annotationsByImage",
+          imageId,
+        ]);
+
+        if (!previousAnnotations) return;
+
+        const newAnnotations = previousAnnotations.filter(
+          (annotaion: Annotation) => !annotationIds.includes(annotaion.id),
+        );
+
+        queryClient.setQueryData(
+          ["annotationsByImage", imageId],
+          newAnnotations,
+        );
+
+        return {
+          previousAnnotations,
+        };
+      },
+      onError: (err, { imageId, annotationIds }, context) => {
+        queryClient.setQueryData(
+          ["annotationsByImage", imageId],
+          context?.previousAnnotations,
+        );
+      },
+      onSettled: (data, err, { imageId, annotationIds }) => {
+        queryClient.invalidateQueries({
+          queryKey: ["annotationsByImage", imageId],
+        });
+      },
+    });
+  return {
+    isDeleteAnnotationsError: isError,
+    isDeleteAnnotationsIdle: isIdle,
+    isDeleteAnnotationsLoading: isLoading,
+    isDeleteAnnotationsPaused: isPaused,
+    isDeleteAnnotationsSuccess: isSuccess,
+    deleteAnnotations: mutate,
   };
 };
 

@@ -40,12 +40,16 @@ export const DatasetImageListItem = ({
   refetchImages,
   isSelected,
   toggleSelection,
+  deleteAnnotation,
+  deleteImage,
 }: {
   isInSelectMode: boolean;
   image: Image;
   refetchImages: () => void;
   isSelected: boolean;
   toggleSelection: () => void;
+  deleteAnnotation: (annotation: Annotation) => void;
+  deleteImage: (image: Image) => void;
 }) => {
   const {
     annotations,
@@ -79,6 +83,19 @@ export const DatasetImageListItem = ({
   return (
     <>
       <ListItem>
+        <IconButton
+          icon={showAnnotations ? "arrowDown" : "arrowRight"}
+          onPointerDown={toggleShowAnnotations}
+        />
+        <Spacer />
+        <ClickableText
+          onClick={() => {
+            navigate(editorPath(image.id, undefined, projectId, datasetId));
+          }}
+        >
+          {image.dataUri}
+        </ClickableText>
+        <ExpandedSpacer />
         {isInSelectMode && (
           <>
             <IconButton
@@ -88,18 +105,15 @@ export const DatasetImageListItem = ({
             <Spacer />
           </>
         )}
-        <ClickableText
-          onClick={() => {
-            navigate(editorPath(image.id, undefined, projectId, datasetId));
-          }}
-        >
-          {image.dataUri}
-        </ClickableText>
-        <ExpandedSpacer />
-        <IconButton
-          icon={showAnnotations ? "arrowDown" : "arrowLeft"}
-          onPointerDown={toggleShowAnnotations}
-        />
+        {!isInSelectMode && (
+          <IconButton
+            icon="trash"
+            tooltipTx="delete-annotation-title"
+            onPointerDown={() => deleteImage(image)}
+            style={{ marginLeft: "auto" }}
+            tooltipPosition="left"
+          />
+        )}
       </ListItem>
       {showAnnotations &&
         (isLoadingAnnotations ? (
@@ -127,6 +141,17 @@ export const DatasetImageListItem = ({
                   >
                     {annotation.dataUri}
                   </ClickableText>
+                  {!isInSelectMode && (
+                    <IconButton
+                      icon="trash"
+                      tooltipTx="delete-annotation-title"
+                      onPointerDown={() => {
+                        deleteAnnotation(annotation);
+                      }}
+                      style={{ marginLeft: "auto" }}
+                      tooltipPosition="left"
+                    />
+                  )}
                 </ListItem>
               ))}
             </AnnotationsList>

@@ -3,4 +3,5 @@ export interface StatusBadgeProps {
   borderColor?: string;
   text?: string;
   tx?: string;
+  full?: boolean;
 }

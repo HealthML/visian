@@ -63,7 +63,14 @@ const Footer = styled(Box)`
 `;
 
 export const JobCreationPopup = observer<JobCreationPopUpProps>(
-  ({ isOpen, onClose, projectId, activeImageSelection, openWithDatasetId }) => {
+  ({
+    isOpen,
+    onClose,
+    projectId,
+    activeImageSelection,
+    openWithDatasetId,
+    refetchJobs,
+  }) => {
     const store = useStore();
 
     const { mlModels, mlModelsError, isErrorMlModels, isLoadingMlModels } =
@@ -181,6 +188,7 @@ export const JobCreationPopup = observer<JobCreationPopUpProps>(
 
         try {
           await postJob(imageSelection, selectedModel, projectId);
+          refetchJobs?.();
           onClose?.();
         } catch (error) {
           store?.setError({
@@ -190,7 +198,7 @@ export const JobCreationPopup = observer<JobCreationPopUpProps>(
           onClose?.();
         }
       },
-      [onClose, findModel, projectId, store],
+      [findModel, store, projectId, refetchJobs, onClose],
     );
 
     const startJob = useCallback(
