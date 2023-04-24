@@ -5,7 +5,7 @@ import { Dataset, Image } from "../../../types";
 
 const FileExplorer = styled(FlexRow)`
   width: 100%;
-  height: 50%;
+  overflow-y: hidden;
 `;
 
 const StyledList = styled(List)`
@@ -20,7 +20,7 @@ const StyledIcon = styled(Icon)`
 
 const StyledListItem = styled(ListItem)<{ isActive?: boolean }>`
   // Fix too thick line on intersection between active items
-  margin: 1px 3% 1px 3%;
+  margin: 1px 3%;
   // Fix items moving by 1px on selection / deselection
   ${(props) =>
     !props.isActive &&

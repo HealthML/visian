@@ -25,6 +25,18 @@ const JobCreationPopupContainer = styled(PopUp)`
   height: 70vh;
 `;
 
+const ContentContainer = styled.div`
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow-y: hidden;
+  min-height: 200px;
+`;
+
+const StyledProjectDataExplorer = styled(ProjectDataExplorer)`
+  flex: 1;
+`;
+
 const DropDownContainer = styled(FlexRow)`
   width: 50vw;
   justify-content: space-between;
@@ -43,7 +55,7 @@ const StyledErrorText = styled(Text)`
   text-align: center;
 `;
 
-const BottomNavigationBar = styled(Box)`
+const Footer = styled(Box)`
   display: flex;
   justify-content: center;
   width: 50vw;
@@ -197,54 +209,56 @@ export const JobCreationPopup = observer<JobCreationPopUpProps>(
         dismiss={onClose}
         shouldDismissOnOutsidePress
       >
-        <StyledSectionHeader tx="job-creation-model-selection" />
-        {isLoadingMlModels && <Text tx="ml-models-loading" />}
-        {isErrorMlModels && (
-          <Text>{`${t("ml-models-loading-error")} ${
-            mlModelsError?.response?.statusText
-          } (${mlModelsError?.response?.status})`}</Text>
-        )}
-        <DropDownContainer>
-          <StyledDropDown
-            options={mlModelNameOptions}
-            value={selectedModelName}
-            onChange={setSelectedModelName}
-            size="medium"
-          />
-          <StyledDropDown
-            options={mlModelVersionOptions}
-            value={selectedModelVersion}
-            onChange={setSelectedModelVersion}
-            size="medium"
-          />
-        </DropDownContainer>
-        {isLoadingDatasets && <StyledErrorText tx="datasets-loading" />}
-        {isErrorDatasets && (
-          <StyledErrorText>{`${t("datasets-loading-error")} ${
-            datasetsError?.response?.statusText
-          } (${datasetsError?.response?.status})`}</StyledErrorText>
-        )}
-        <StyledSectionHeader tx="job-creation-image-selection" />
+        <ContentContainer>
+          <StyledSectionHeader tx="job-creation-model-selection" />
+          {isLoadingMlModels && <Text tx="ml-models-loading" />}
+          {isErrorMlModels && (
+            <Text>{`${t("ml-models-loading-error")} ${
+              mlModelsError?.response?.statusText
+            } (${mlModelsError?.response?.status})`}</Text>
+          )}
+          <DropDownContainer>
+            <StyledDropDown
+              options={mlModelNameOptions}
+              value={selectedModelName}
+              onChange={setSelectedModelName}
+              size="medium"
+            />
+            <StyledDropDown
+              options={mlModelVersionOptions}
+              value={selectedModelVersion}
+              onChange={setSelectedModelVersion}
+              size="medium"
+            />
+          </DropDownContainer>
+          {isLoadingDatasets && <StyledErrorText tx="datasets-loading" />}
+          {isErrorDatasets && (
+            <StyledErrorText>{`${t("datasets-loading-error")} ${
+              datasetsError?.response?.statusText
+            } (${datasetsError?.response?.status})`}</StyledErrorText>
+          )}
+          <StyledSectionHeader tx="job-creation-image-selection" />
+          {showProjectDataExplorer && (
+            <StyledProjectDataExplorer
+              datasets={datasets}
+              images={images}
+              isErrorImages={isErrorImages}
+              isLoadingImages={isLoadingImages}
+              selectedDataset={selectedDataset}
+              selectedImages={selectedImages}
+              selectDataset={selectDataset}
+              setImageSelection={setImageSelection}
+            />
+          )}
+        </ContentContainer>
         {showProjectDataExplorer && (
-          <ProjectDataExplorer
-            datasets={datasets}
-            images={images}
-            isErrorImages={isErrorImages}
-            isLoadingImages={isLoadingImages}
-            selectedDataset={selectedDataset}
-            selectedImages={selectedImages}
-            selectDataset={selectDataset}
-            setImageSelection={setImageSelection}
-          />
-        )}
-        {showProjectDataExplorer && (
-          <BottomNavigationBar>
+          <Footer>
             <Button
               isDisabled={!(selectedModelVersion && selectedImages.size > 0)}
               tx="start-job"
               onPointerDown={startJob}
             />
-          </BottomNavigationBar>
+          </Footer>
         )}
       </JobCreationPopupContainer>
     );
