@@ -1,9 +1,8 @@
 import { color, FlexRow, Icon, List, ListItem, Text } from "@visian/ui-shared";
-import { useEffect, useState } from "react";
 import styled from "styled-components";
 
 import { Dataset, Image } from "../../../types";
-import { handleImageSelection } from "../util";
+import { handleImageSelection, useKeyboardShortcuts } from "../util";
 
 const FileExplorer = styled(FlexRow)`
   width: 100%;
@@ -52,29 +51,8 @@ export const ProjectDataExplorer = ({
   setImageSelection: (imageId: string, selection: boolean) => void;
   setSelectedImages: React.Dispatch<React.SetStateAction<Set<string>>>;
 }) => {
-  const [isShiftPressed, setIsShiftPressed] = useState(false);
-  const [selectedRange, setSelectedRange] = useState({
-    start: -1,
-    end: -1,
-  });
-
-  useEffect(() => {
-    const handleKeyDown = () => {
-      setIsShiftPressed(true);
-    };
-
-    const handleKeyUp = () => {
-      setIsShiftPressed(false);
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    window.addEventListener("keyup", handleKeyUp);
-
-    return () => {
-      window.removeEventListener("keydown", handleKeyDown);
-      window.removeEventListener("keyup", handleKeyUp);
-    };
-  }, []);
+  const { isShiftPressed, selectedRange, setSelectedRange } =
+    useKeyboardShortcuts({ selectedImages, setSelectedImages, images });
 
   return (
     <FileExplorer>

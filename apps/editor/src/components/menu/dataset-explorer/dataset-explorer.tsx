@@ -8,6 +8,8 @@ import { Dataset } from "../../../types";
 import { DatasetImageList } from "../dataset-image-list";
 import { DatasetNavigationbar } from "../dataset-navigationbar";
 import { JobCreationPopup } from "../job-creation-popup";
+import { useImageSelection } from "../util/use-image-selection";
+import { useKeyboardShortcuts } from "../util/use-keyboard-shortcuts";
 
 const StyledModal = styled(Modal)`
   vertical-align: middle;
@@ -32,24 +34,8 @@ export const DatasetExplorer = ({ dataset }: { dataset: Dataset }) => {
   const { images, imagesError, isErrorImages, isLoadingImages, refetchImages } =
     useImagesByDataset(dataset.id);
 
-  const [selectedImages, setSelectedImages] = useState<Set<string>>(
-    new Set<string>(),
-  );
-
-  const setImageSelection = useCallback(
-    (imageId: string, isSelected: boolean) => {
-      setSelectedImages((prevSelectedImages) => {
-        const newSelectedImages = new Set(prevSelectedImages);
-        if (isSelected) {
-          newSelectedImages.add(imageId);
-        } else {
-          newSelectedImages.delete(imageId);
-        }
-        return newSelectedImages;
-      });
-    },
-    [setSelectedImages],
-  );
+  const { selectedImages, setSelectedImages, setImageSelection } =
+    useImageSelection();
 
   const setSelectAll = useCallback(
     (selection: boolean) => {
@@ -61,7 +47,7 @@ export const DatasetExplorer = ({ dataset }: { dataset: Dataset }) => {
       }
       setSelectedImages(new Set<string>());
     },
-    [images],
+    [images, setSelectedImages],
   );
 
   const toggleSelectMode = useCallback(() => {

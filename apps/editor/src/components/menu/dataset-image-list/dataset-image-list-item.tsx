@@ -46,7 +46,6 @@ export const DatasetImageListItem = ({
   setImageSelection,
   setSelectedImages,
   isShiftPressed,
-  setIsShiftPressed,
   selectedRange,
   setSelectedRange,
 }: {
@@ -61,7 +60,6 @@ export const DatasetImageListItem = ({
   setImageSelection: (imageId: string, selection: boolean) => void;
   setSelectedImages: React.Dispatch<React.SetStateAction<Set<string>>>;
   isShiftPressed: boolean;
-  setIsShiftPressed: React.Dispatch<React.SetStateAction<boolean>>;
   selectedRange: { start: number; end: number };
   setSelectedRange: React.Dispatch<
     React.SetStateAction<{ start: number; end: number }>
