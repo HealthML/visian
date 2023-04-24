@@ -128,6 +128,7 @@ export class Slice extends THREE.Group implements IDisposable {
     this.disposers.push(
       autorun(this.updateScale),
       autorun(this.updateOffset),
+      autorun(this.updateRotation),
       reaction(
         () => this.editor.activeDocument?.mainImageLayer,
         (imageLayer?: IImageLayer) => {
@@ -211,10 +212,20 @@ export class Slice extends THREE.Group implements IDisposable {
 
     this.updateScale();
     this.updateOffset();
+    this.updateRotation();
 
     this.updateMatrixWorld(true);
     this.crosshairShiftGroup.updateMatrixWorld(true);
   }
+
+  private updateRotation = () => {
+    this.rotation.set(
+      this.editor.activeDocument?.viewport2D.rotationX ?? 0,
+      this.editor.activeDocument?.viewport2D.rotationY ?? 0,
+      this.editor.activeDocument?.viewport2D.rotationZ ?? 0,
+    );
+    this.editor.sliceRenderer?.lazyRender();
+  };
 
   private updateScale = () => {
     this.workingVector2.copy(this.baseSize);

@@ -59,6 +59,12 @@ export interface IViewport2D {
   zoomLevel: number;
   /** The 2D navigation offset by which the visible image is moved. */
   offset: Pixel;
+  /** The number of degrees (in radians) by which the image is rotated around the X axis. */
+  rotationX: number;
+  /** The number of degrees (in radians) by which the image is rotated around the Y axis. */
+  rotationY: number;
+  /** The number of degrees (in radians) by which the image is rotated around the Z axis. */
+  rotationZ: number;
 
   window: Vector;
 
