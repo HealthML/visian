@@ -20,9 +20,11 @@ const multiSelection = (
 
   images?.forEach((image, index) => {
     if (index >= startIndex && index <= endIndex) {
-      isDeselection
-        ? updatedSelectedImages.delete(image.id)
-        : updatedSelectedImages.add(image.id);
+      if (isDeselection) {
+        updatedSelectedImages.delete(image.id);
+      } else {
+        updatedSelectedImages.add(image.id);
+      }
     } else if (selectedImages.has(image.id)) {
       updatedSelectedImages.add(image.id);
     }

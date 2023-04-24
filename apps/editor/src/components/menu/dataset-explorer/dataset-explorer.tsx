@@ -1,5 +1,5 @@
 import { Modal, Notification, Text, useTranslation } from "@visian/ui-shared";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
@@ -13,7 +13,7 @@ import { ConfirmationPopup } from "../confimration-popup/confirmation-popup";
 import { DatasetImageList } from "../dataset-image-list";
 import { DatasetNavigationbar } from "../dataset-navigationbar";
 import { JobCreationPopup } from "../job-creation-popup";
-import { useImageSelection } from "../util/";
+import { useImageSelection } from "../util";
 
 const StyledModal = styled(Modal)`
   vertical-align: middle;
