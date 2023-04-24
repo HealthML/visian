@@ -43,6 +43,8 @@ export interface ListItemProps extends React.HTMLAttributes<HTMLDivElement> {
   trailingIcon?: IconType;
   trailingIconRef?: React.ForwardedRef<SVGSVGElement>;
 
+  innerHeight?: string;
+
   /** If set to `true`, displays the item's icon in an disabled state. */
   disableTrailingIcon?: boolean;
 

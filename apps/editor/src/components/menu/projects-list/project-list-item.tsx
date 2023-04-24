@@ -1,29 +1,45 @@
-import { FlexRow, ListItem, Text } from "@visian/ui-shared";
+import { InvisibleButton, ListItem, Text } from "@visian/ui-shared";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 
 import { Project } from "../../../types";
 
-const Spacer = styled.div`
-  width: 10px;
+const ExpandedSpacer = styled.div`
+  margin-right: auto;
 `;
 
-const ModelFlexRow = styled(FlexRow)`
-  margin-right: auto;
+const IconButton = styled(InvisibleButton)`
+  width: 30px;
+`;
+
+const ClickableText = styled(Text)`
   cursor: pointer;
 `;
 
-export const ProjectListItem = ({ project }: { project: Project }) => {
+export const ProjectListItem = ({
+  project,
+  deleteProject,
+}: {
+  project: Project;
+  deleteProject: () => void;
+}) => {
   const navigate = useNavigate();
 
   return (
     <ListItem>
-      <ModelFlexRow
+      <ClickableText
         onClick={() => navigate(`/projects/${project.id}/datasets`)}
       >
-        <Text>{project.name} </Text>
-        <Spacer />
-      </ModelFlexRow>
+        {project.name}
+      </ClickableText>
+      <ExpandedSpacer />
+      <IconButton
+        icon="trash"
+        tooltipTx="delete-project-title"
+        onPointerDown={deleteProject}
+        style={{ marginLeft: "auto" }}
+        tooltipPosition="left"
+      />
     </ListItem>
   );
 };

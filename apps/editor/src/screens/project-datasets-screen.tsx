@@ -64,6 +64,10 @@ const LeftButton = styled(FloatingUIButton)`
   margin-right: 16px;
 `;
 
+const RightButton = styled(FloatingUIButton)`
+  margin-left: 16px;
+`;
+
 const StyledProjectViewSwitch = styled(Box)`
   display: flex;
   justify-content: center;
@@ -85,13 +89,8 @@ export const ProjectDatasetsScreen: React.FC = observer(() => {
             <LeftButton
               icon="home"
               tooltipTx="home"
+              tooltipPosition="bottom"
               onPointerDown={() => navigate(`/projects`)}
-              isActive={false}
-            />
-            <LeftButton
-              icon="pixelBrush"
-              tooltipTx="open-editor"
-              onPointerDown={() => navigate(`/editor`)}
               isActive={false}
             />
           </MenuRow>
@@ -101,7 +100,15 @@ export const ProjectDatasetsScreen: React.FC = observer(() => {
             <ProjectViewSwitch defaultSwitchSelection="datasets" />
           </StyledProjectViewSwitch>
         </ColumnCenter>
-        <ColumnRight />
+        <ColumnRight>
+          <RightButton
+            icon="pixelBrush"
+            tooltipTx="open-editor"
+            tooltipPosition="left"
+            onPointerDown={() => navigate(`/editor`)}
+            isActive={false}
+          />
+        </ColumnRight>
       </TopBar>
       <Main>{projectId && <DatasetsGrid projectId={projectId} />}</Main>
     </Container>

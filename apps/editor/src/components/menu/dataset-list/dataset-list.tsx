@@ -28,10 +28,20 @@ const StyledDatasetList = styled(List)`
   }
 `;
 
-export const DatasetList = ({ datasets }: { datasets: Dataset[] }) => (
+export const DatasetList = ({
+  datasets,
+  deleteDataset,
+}: {
+  datasets: Dataset[];
+  deleteDataset: (dataset: Dataset) => void;
+}) => (
   <StyledDatasetList onWheel={stopPropagation}>
     {datasets.map((dataset: Dataset) => (
-      <DatasetListItem key={dataset.id} dataset={dataset} />
+      <DatasetListItem
+        key={dataset.id}
+        dataset={dataset}
+        deleteDataset={() => deleteDataset(dataset)}
+      />
     ))}
   </StyledDatasetList>
 );

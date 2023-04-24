@@ -1,5 +1,5 @@
 import axios, { AxiosError } from "axios";
-import { useQuery } from "react-query";
+import { useMutation, useQuery, useQueryClient } from "react-query";
 
 import { Image } from "../types";
 import { hubBaseUrl } from "./hub-base-url";
@@ -11,6 +11,18 @@ const getImagesByDataset = async (datasetId?: string) => {
     },
   });
   return imagesResponse.data;
+};
+
+const deleteImages = async (imageIds: string[]) => {
+  const deleteImagesResponse = await axios.delete<Image[]>(
+    `${hubBaseUrl}images`,
+    {
+      data: { ids: imageIds, cascade: true },
+      timeout: 1000 * 2, // 2 secods
+    },
+  );
+
+  return deleteImagesResponse.data.map((i) => i.id);
 };
 
 export const useImagesByDataset = (datasetId?: string) => {
@@ -30,6 +42,60 @@ export const useImagesByDataset = (datasetId?: string) => {
     isLoadingImages: isLoading,
     refetchImages: refetch,
     removeImages: remove,
+  };
+};
+
+export const useDeleteImagesMutation = (datasetId: string) => {
+  const queryClient = useQueryClient();
+  const { isError, isIdle, isLoading, isPaused, isSuccess, mutate } =
+    useMutation<
+      string[],
+      AxiosError<Image[]>,
+      string[],
+      { previousImages: Image[] }
+    >({
+      mutationFn: deleteImages,
+      onMutate: async (imageIds: string[]) => {
+        await queryClient.cancelQueries({
+          queryKey: ["imagesByDataset", datasetId],
+        });
+
+        const previousImages = queryClient.getQueryData<Image[]>([
+          "imagesByDataset",
+          datasetId,
+        ]);
+
+        if (!previousImages) return;
+
+        const newImages = previousImages.filter(
+          (image: Image) => !imageIds.includes(image.id),
+        );
+
+        queryClient.setQueryData(["imagesByDataset", datasetId], newImages);
+
+        return {
+          previousImages,
+        };
+      },
+      onError: (err, imagesToBeDeleted, context) => {
+        queryClient.setQueryData(
+          ["imagesByDataset", datasetId],
+          context?.previousImages,
+        );
+      },
+      onSettled: () => {
+        queryClient.invalidateQueries({
+          queryKey: ["imagesByDataset", datasetId],
+        });
+      },
+    });
+  return {
+    isDeleteImagesError: isError,
+    isDeleteImagesIdle: isIdle,
+    isDeleteImagesLoading: isLoading,
+    isDeleteImagesPaused: isPaused,
+    isDeleteImagesSuccess: isSuccess,
+    deleteImages: mutate,
   };
 };
 
