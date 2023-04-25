@@ -219,11 +219,23 @@ export class Slice extends THREE.Group implements IDisposable {
   }
 
   private updateRotation = () => {
-    this.rotation.set(
-      this.editor.activeDocument?.viewport2D.rotationX ?? 0,
-      this.editor.activeDocument?.viewport2D.rotationY ?? 0,
-      this.editor.activeDocument?.viewport2D.rotationZ ?? 0,
-    );
+    if (this.editor.activeDocument?.viewport2D.mainViewType !== this.viewType)
+      return;
+
+    const viewport = this.editor.activeDocument?.viewport2D;
+
+    switch (this.viewType) {
+      case ViewType.Transverse:
+        this.rotation.set(0, 0, viewport.rotationT ?? 0);
+        break;
+      case ViewType.Sagittal:
+        this.rotation.set(0, 0, viewport.rotationS ?? 0);
+        break;
+      case ViewType.Coronal:
+        this.rotation.set(0, 0, viewport.rotationC ?? 0);
+        break;
+    }
+
     this.editor.sliceRenderer?.lazyRender();
   };
 
