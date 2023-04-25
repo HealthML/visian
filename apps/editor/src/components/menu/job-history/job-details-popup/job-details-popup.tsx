@@ -166,18 +166,26 @@ export const JobDetailsPopUp = observer<JobDetailsPopUpProps>(
           </>
         )}
         <SectionHeader tx="job-images" />
+
         {isErrorImages && (
           <Text>{`${t("images-loading-error")} ${
             imagesError?.response?.statusText
           } (${imagesError?.response?.status})`}</Text>
         )}
+
         {isErrorAnnotations && (
           <Text>{`${t("images-loading-error")} ${
             annotationsError?.response?.statusText
           } (${annotationsError?.response?.status})`}</Text>
         )}
+
         {isLoadingImages && <Text tx="images-loading" />}
-        {jobImages && !isErrorAnnotations && (
+
+        {jobImages && jobImages.length === 0 && (
+          <Text tx="job-deleted-images" />
+        )}
+
+        {jobImages && !isErrorImages && !isErrorAnnotations && (
           <ScrollableList>
             {jobImages?.sort(compareImages).map((image) => (
               <ClickableListItem

@@ -305,6 +305,7 @@
 
   "jobs-loading": "Jobs werden geladen...",
   "jobs-loading-error": "Fehler beim Laden der Jobs:",
+  "job-deleted-images": "Es scheint als wurden alle Bilder des Jobs gelöscht...",
   "job-details": "Job Details",
   "job-images": "Bilder",
   "job-number-images": "Anzahl Bilder",

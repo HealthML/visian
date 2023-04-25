@@ -305,6 +305,7 @@
 
   "jobs-loading": "Loading jobs...",
   "jobs-loading-error": "Error on loading jobs:",
+  "job-deleted-images": "It seems like all images for this job were deleted...",
   "job-images": "Images",
   "job-number-images": "Number of images",
   "job-number-annotations": "Number of annotations",
