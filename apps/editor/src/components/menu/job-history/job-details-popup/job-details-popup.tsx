@@ -1,4 +1,5 @@
 import {
+  InvisibleButton,
   List,
   ListItem,
   PopUp,
@@ -6,7 +7,6 @@ import {
   SubtleText,
   Text,
   useTranslation,
-  InvisibleButton,
 } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
 import { useCallback, useMemo, useState } from "react";
@@ -18,12 +18,12 @@ import {
   useDeleteJobsForProjectMutation,
 } from "../../../../queries";
 import useImagesByJob from "../../../../queries/use-images-by-jobs";
-import { Image, Job } from "../../../../types";
+import { Image } from "../../../../types";
+import { ConfirmationPopup } from "../../confimration-popup";
 import { editorPath } from "../../util";
 import { JobStatusBadge } from "../job-status-badge/job-status-badge";
 import { DetailsRow, DetailsTable } from "./details-table";
 import { JobDetailsPopUpProps } from "./job-details-popup.props";
-import { ConfirmationPopup } from "../../confimration-popup";
 
 const StyledPopUp = styled(PopUp)`
   align-items: left;
