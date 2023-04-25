@@ -17,7 +17,7 @@ const deleteImages = async (imageIds: string[]) => {
   const deleteImagesResponse = await axios.delete<Image[]>(
     `${hubBaseUrl}images`,
     {
-      data: { ids: imageIds, cascade: true },
+      data: { ids: imageIds },
       timeout: 1000 * 2, // 2 secods
     },
   );

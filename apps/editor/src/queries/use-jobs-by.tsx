@@ -38,7 +38,7 @@ const deleteJobs = async ({
   jobIds: string[];
 }) => {
   const deleteJobsResponse = await axios.delete<Job[]>(`${hubBaseUrl}jobs`, {
-    data: { ids: jobIds, cascade: true },
+    data: { ids: jobIds },
     timeout: 1000 * 2, // 2 secods
   });
   return deleteJobsResponse.data.map((j) => j.id);
