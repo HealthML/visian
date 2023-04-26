@@ -15,6 +15,10 @@ import { ReactQueryDevtools } from "react-query/devtools";
 import { Navigate, Route, Routes } from "react-router-dom";
 
 import {
+  DatasetsView,
+  JobsView,
+} from "../components/data-manager/project-views";
+import {
   whoAwsConfigDeployment,
   whoAwsConfigDevelopment,
   whoRequiresAuthentication,
@@ -25,11 +29,9 @@ import hubBaseUrl from "../queries/hub-base-url";
 import {
   DatasetScreen,
   EditorScreen,
-  ProjectDatasetsScreen,
-  ProjectJobsScreen,
+  ProjectScreen,
   ProjectsScreen,
 } from "../screens";
-import ProjectScreen from "../screens/project-screen";
 import { setupRootStore, StoreProvider } from "./root-store";
 
 if (isFromWHO()) {
@@ -89,12 +91,12 @@ function App(): JSX.Element {
                   <Route path="projects">
                     <Route path="" element={<ProjectsScreen />} />
                     <Route path=":projectId" element={<ProjectScreen />}>
-                      <Route index element={<ProjectDatasetsScreen />} />
                       <Route
-                        path="datasets"
-                        element={<ProjectDatasetsScreen />}
+                        index
+                        element={<Navigate replace to="datasets" />}
                       />
-                      <Route path="jobs" element={<ProjectJobsScreen />} />
+                      <Route path="datasets" element={<DatasetsView />} />
+                      <Route path="jobs" element={<JobsView />} />
                     </Route>
                   </Route>
                   <Route

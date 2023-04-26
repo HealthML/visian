@@ -3,10 +3,10 @@ import { observer } from "mobx-react-lite";
 import React from "react";
 import { useParams } from "react-router-dom";
 
-import { DatasetsGrid } from "../components/data-manager/datasets-grid";
-import { useDatasetsBy } from "../queries";
+import { useDatasetsBy } from "../../../queries";
+import { DatasetsGrid } from "../datasets-grid";
 
-export const ProjectDatasetsScreen: React.FC = observer(() => {
+export const DatasetsView: React.FC = observer(() => {
   const projectId = useParams().projectId || "";
   const { datasets, datasetsError, isErrorDatasets, isLoadingDatasets } =
     useDatasetsBy(projectId);
@@ -25,4 +25,4 @@ export const ProjectDatasetsScreen: React.FC = observer(() => {
   );
 });
 
-export default ProjectDatasetsScreen;
+export default DatasetsView;

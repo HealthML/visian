@@ -3,10 +3,10 @@ import { observer } from "mobx-react-lite";
 import React from "react";
 import { useParams } from "react-router-dom";
 
-import { JobHistory } from "../components/data-manager/job-history";
-import useJobsBy from "../queries/use-jobs-by";
+import useJobsBy from "../../../queries/use-jobs-by";
+import { JobHistory } from "../job-history";
 
-export const ProjectJobsScreen: React.FC = observer(() => {
+export const JobsView: React.FC = observer(() => {
   const projectId = useParams().projectId || "";
   const { jobs, jobsError, isErrorJobs, isLoadingJobs } = useJobsBy(projectId);
   const { t: translate } = useTranslation();
@@ -24,4 +24,4 @@ export const ProjectJobsScreen: React.FC = observer(() => {
   );
 });
 
-export default ProjectJobsScreen;
+export default JobsView;
