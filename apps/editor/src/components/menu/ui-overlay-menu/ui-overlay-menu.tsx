@@ -71,14 +71,8 @@ const Main = styled.div`
 `;
 
 export const UIOverlayMenu = observer<UIOverlayMenuProps>(
-  ({ homeButton, backButton, topCenter, main }) => {
+  ({ homeButton, backLink, topCenter, main }) => {
     const navigate = useNavigate();
-
-    const navigateToParent = () => {
-      const currentPathname = window.location.pathname;
-      const newPathname = currentPathname.replace(/\/[^/]+$/, ``);
-      navigate(newPathname);
-    };
 
     return (
       <Container>
@@ -94,12 +88,12 @@ export const UIOverlayMenu = observer<UIOverlayMenuProps>(
                   isActive={false}
                 />
               )}
-              {backButton && (
+              {backLink && (
                 <LeftButton
                   icon="arrowBack"
                   tooltipTx="back"
                   tooltipPosition="right"
-                  onPointerDown={() => navigateToParent()}
+                  onPointerDown={() => navigate(backLink)}
                   isActive={false}
                 />
               )}

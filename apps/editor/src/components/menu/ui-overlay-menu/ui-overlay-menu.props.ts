@@ -2,7 +2,7 @@ import React from "react";
 
 export interface UIOverlayMenuProps {
   homeButton?: boolean;
-  backButton?: boolean;
+  backLink?: string;
   topCenter?: React.ReactNode;
   main: React.ReactNode;
 }
