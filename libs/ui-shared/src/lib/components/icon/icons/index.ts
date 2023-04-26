@@ -64,3 +64,4 @@ export { ReactComponent as upArrow } from "./up-arrow.svg";
 export { ReactComponent as whoAI } from "./who-ai.svg";
 export { ReactComponent as xSmall } from "./x-small.svg";
 export { ReactComponent as save } from "./save.svg";
+export { ReactComponent as cancel } from "./cancel.svg";
