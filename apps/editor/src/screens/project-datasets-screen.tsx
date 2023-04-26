@@ -3,7 +3,7 @@ import { observer } from "mobx-react-lite";
 import React from "react";
 import { useParams } from "react-router-dom";
 
-import { DatasetsGrid } from "../components/menu/datasets-grid";
+import { DatasetsGrid } from "../components/data-manager/datasets-grid";
 import { useDatasetsBy } from "../queries";
 
 export const ProjectDatasetsScreen: React.FC = observer(() => {

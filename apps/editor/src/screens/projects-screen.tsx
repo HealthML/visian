@@ -2,8 +2,8 @@ import { Screen, Text, useTranslation } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
 import React from "react";
 
-import { ProjectList } from "../components/menu/projects-list/project-list";
-import { UIOverlayMenu } from "../components/menu/ui-overlay-menu";
+import { ProjectList } from "../components/data-manager/projects-list/project-list";
+import { UIOverlayMenu } from "../components/data-manager/ui-overlay-menu";
 import { useProjects } from "../queries";
 
 export const ProjectsScreen: React.FC = observer(() => {

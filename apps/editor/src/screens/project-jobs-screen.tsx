@@ -3,7 +3,7 @@ import { observer } from "mobx-react-lite";
 import React from "react";
 import { useParams } from "react-router-dom";
 
-import { JobHistory } from "../components/menu/job-history";
+import { JobHistory } from "../components/data-manager/job-history";
 import useJobsBy from "../queries/use-jobs-by";
 
 export const ProjectJobsScreen: React.FC = observer(() => {
