@@ -96,11 +96,11 @@ function App(): JSX.Element {
                       />
                       <Route path="jobs" element={<ProjectJobsScreen />} />
                     </Route>
-                    <Route
-                      path=":projectId/datasets/:datasetId"
-                      element={<DatasetScreen />}
-                    />
                   </Route>
+                  <Route
+                    path="/datasets/:datasetId"
+                    element={<DatasetScreen />}
+                  />
                   <Route
                     path="/"
                     element={<Navigate replace to="/projects" />}

@@ -9,7 +9,6 @@ import { useDataset } from "../queries";
 
 export const DatasetScreen: React.FC = observer(() => {
   const datasetId = useParams().datasetId || "";
-  const projectId = useParams().projectId || "";
 
   const { dataset, datasetError, isErrorDataset, isLoadingDataset } =
     useDataset(datasetId);
@@ -30,7 +29,7 @@ export const DatasetScreen: React.FC = observer(() => {
     >
       <UIOverlayMenu
         homeButton
-        backLink={`/projects/${projectId}/datasets`}
+        backLink={dataset && `/projects/${dataset.project}/datasets`}
         main={
           isLoadingDataset ? (
             <Text>{translate("dataset-loading")}</Text>
