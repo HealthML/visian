@@ -108,7 +108,7 @@ export const DatasetImageListItem = ({
         {!isInSelectMode && (
           <IconButton
             icon="trash"
-            tooltipTx="delete-annotation-title"
+            tooltipTx="delete-image-title"
             onPointerDown={() => deleteImage(image)}
             style={{ marginLeft: "auto" }}
             tooltipPosition="left"

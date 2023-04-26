@@ -42,7 +42,7 @@ const deleteDatasets = async ({
   const deleteDatasetsResponse = await axios.delete<Dataset[]>(
     `${hubBaseUrl}datasets`,
     {
-      data: { ids: datasetIds, cascade: true },
+      data: { ids: datasetIds },
       timeout: 1000 * 2, // 2 secods
     },
   );

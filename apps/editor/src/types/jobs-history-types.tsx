@@ -5,6 +5,7 @@ export interface Job {
   startedAt: string | undefined;
   finishedAt: string | undefined;
   status: JobStatus;
+  project: string;
 }
 
 export enum JobStatus {
