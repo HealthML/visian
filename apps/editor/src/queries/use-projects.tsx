@@ -32,7 +32,7 @@ const deleteProjects = async ({ projectIds }: { projectIds: string[] }) => {
   const deleteProjectsResponse = await axios.delete<Project[]>(
     `${hubBaseUrl}projects`,
     {
-      data: { ids: projectIds, cascade: true },
+      data: { ids: projectIds },
       timeout: 1000 * 2, // 2 secods
     },
   );
