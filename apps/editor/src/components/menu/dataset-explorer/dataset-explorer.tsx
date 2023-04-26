@@ -132,19 +132,14 @@ export const DatasetExplorer = ({ dataset }: { dataset: Dataset }) => {
     [areAllSelected, setSelectAll],
   );
 
-  const [openWithDatasetId, setOpenWithDatasetId] = useState<
-    string | undefined
-  >(dataset.id);
-
   // model selection popup
-  const [isJobCreationPopUpOpen, setIsJobCreationPopUpOpen] = useState(false);
+  const [jobCreationPopUpOpenWith, setJobCreationPopUpOpenWith] =
+    useState<string>();
   const openJobCreationPopUp = useCallback(() => {
-    setIsJobCreationPopUpOpen(true);
-    setOpenWithDatasetId(dataset.id);
+    setJobCreationPopUpOpenWith(dataset.id);
   }, [dataset.id]);
   const closeJobCreationPopUp = useCallback(() => {
-    setOpenWithDatasetId(undefined);
-    setIsJobCreationPopUpOpen(false);
+    setJobCreationPopUpOpenWith(undefined);
     setSelectAll(false);
     setIsInSelectMode(false);
   }, [setSelectAll]);
@@ -237,11 +232,11 @@ export const DatasetExplorer = ({ dataset }: { dataset: Dataset }) => {
         />
       )}
       <JobCreationPopup
-        isOpen={isJobCreationPopUpOpen}
+        isOpen={!!jobCreationPopUpOpenWith}
         onClose={closeJobCreationPopUp}
         activeImageSelection={activeImageSelection}
         projectId={dataset.project}
-        openWithDatasetId={openWithDatasetId}
+        openWithDatasetId={jobCreationPopUpOpenWith}
       />
       <ConfirmationPopup
         isOpen={isDeleteAnnotationConfirmationPopUpOpen}
