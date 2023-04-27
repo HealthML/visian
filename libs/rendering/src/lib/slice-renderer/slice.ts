@@ -1,3 +1,4 @@
+import * as TWEEN from "@tweenjs/tween.js";
 import { IEditor, IImageLayer } from "@visian/ui-shared";
 import { IDisposable, IDisposer, ViewType } from "@visian/utils";
 import { autorun, reaction } from "mobx";
@@ -224,19 +225,32 @@ export class Slice extends THREE.Group implements IDisposable {
 
     const viewport = this.editor.activeDocument?.viewport2D;
 
+    let rotation;
     switch (this.viewType) {
       case ViewType.Transverse:
-        this.rotation.set(0, 0, viewport.rotationT ?? 0);
+        rotation = viewport.rotationT ?? 0;
         break;
       case ViewType.Sagittal:
-        this.rotation.set(0, 0, viewport.rotationS ?? 0);
+        rotation = viewport.rotationS ?? 0;
         break;
       case ViewType.Coronal:
-        this.rotation.set(0, 0, viewport.rotationC ?? 0);
+        rotation = viewport.rotationC ?? 0;
         break;
     }
 
-    this.editor.sliceRenderer?.lazyRender();
+    const targetQuaternion = new THREE.Quaternion().setFromAxisAngle(
+      new THREE.Vector3(0, 0, 1),
+      rotation,
+    );
+
+    new TWEEN.Tween({ t: 0 })
+      .to({ t: 1 }, 250)
+      .easing(TWEEN.Easing.Quadratic.InOut)
+      .onUpdate((tween) => {
+        this.quaternion.slerp(targetQuaternion, tween.t);
+        this.editor.sliceRenderer?.lazyRender();
+      })
+      .start();
   };
 
   private updateScale = () => {

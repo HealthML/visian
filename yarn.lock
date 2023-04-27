@@ -7007,6 +7007,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@tweenjs/tween.js@npm:^20.0.3":
+  version: 20.0.3
+  resolution: "@tweenjs/tween.js@npm:20.0.3"
+  checksum: 21c2caca69a5ec85b23e38ab669c55f2ad33875df83e917fd2b7260eb1653d5322f94507e9264b8aa59a3e374502633fbf597d6eee28f405459a27a7342d05e4
+  languageName: node
+  linkType: hard
+
 "@types/aria-query@npm:^4.2.0":
   version: 4.2.2
   resolution: "@types/aria-query@npm:4.2.2"
@@ -24137,6 +24144,7 @@ __metadata:
     "@storybook/react": ~6.5.9
     "@svgr/webpack": ^5.4.0
     "@testing-library/react": 12.1.2
+    "@tweenjs/tween.js": ^20.0.3
     "@types/babel__core": 7.1.19
     "@types/core-js": ^2.5.5
     "@types/eslint": ~8.4.8

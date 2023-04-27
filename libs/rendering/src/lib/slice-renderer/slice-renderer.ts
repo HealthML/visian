@@ -1,3 +1,4 @@
+import * as TWEEN from "@tweenjs/tween.js";
 import { IEditor, IImageLayer, ISliceRenderer } from "@visian/ui-shared";
 import {
   getPlaneAxes,
@@ -167,6 +168,7 @@ export class SliceRenderer implements ISliceRenderer {
   public animate = () => {
     if (this.editor.activeDocument?.viewSettings.viewMode !== "2D") return;
 
+    TWEEN.update();
     if (this.lazyRenderTriggered) {
       this.eagerRender();
     }
