@@ -353,5 +353,9 @@
   "delete-project-title": "Delete Project",
   "delete-project-message": "Do you really want to delete the project \"_\" including all its datasets, Images and annotations?",
   "delete-job-title": "Delete Job",
-  "delete-job-message": "Do you really want to delete the job including the _ generated annotation(s)?"
+  "delete-job-message": "Do you really want to delete the job including the _ generated annotation(s)?",
+
+  "create": "Create",
+  "create-project": "Create Project",
+  "project-name": "Projectname"
 }
