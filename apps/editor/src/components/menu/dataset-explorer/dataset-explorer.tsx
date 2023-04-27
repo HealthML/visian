@@ -9,7 +9,7 @@ import {
   useImagesByDataset,
 } from "../../../queries";
 import { Annotation, Dataset, Image } from "../../../types";
-import { ConfirmationPopup } from "../confimration-popup/confirmation-popup";
+import { ConfirmationPopup } from "../confirmation-popup/confirmation-popup";
 import { DatasetImageList } from "../dataset-image-list";
 import { DatasetNavigationbar } from "../dataset-navigationbar";
 import { JobCreationPopup } from "../job-creation-popup";

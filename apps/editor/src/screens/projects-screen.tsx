@@ -12,7 +12,7 @@ import React, { useCallback, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 
-import { ConfirmationPopup } from "../components/menu/confimration-popup";
+import { ConfirmationPopup } from "../components/menu/confirmation-popup";
 import { ProjectList } from "../components/menu/projects-list/project-list";
 import { useDeleteProjectsMutation, useProjects } from "../queries";
 import { Project } from "../types";
