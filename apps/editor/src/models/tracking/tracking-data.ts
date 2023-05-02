@@ -75,7 +75,7 @@ export class TrackingData implements ITrackingData {
       }
     });
 
-    this.texture = new THREE.DataTexture3D(
+    this.texture = new THREE.Data3DTexture(
       new Uint8Array(data),
       this.resolution.x,
       this.resolution.y,
@@ -84,5 +84,6 @@ export class TrackingData implements ITrackingData {
     this.texture.format = THREE.RedFormat;
     this.texture.magFilter = THREE.NearestFilter;
     this.texture.minFilter = THREE.NearestFilter;
+    this.texture.needsUpdate = true;
   }
 }

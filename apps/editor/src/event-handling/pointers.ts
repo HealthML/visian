@@ -5,6 +5,7 @@ import {
   IDispatch,
   IMeasurementTool,
   isFirefox,
+  isMac,
   isWindows,
   ITool,
   PointerButton,
@@ -87,7 +88,7 @@ export const setUpPointerHandling = (
           (context.button === PointerButton.MMB ||
             (activeTool?.name === "crosshair-tool" &&
               context.button === PointerButton.RMB) ||
-            context.ctrlKey ||
+            (isMac() ? context.metaKey : context.ctrlKey) ||
             activeTool?.name === "navigation-tool"),
       );
 
