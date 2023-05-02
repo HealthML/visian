@@ -1,3 +1,4 @@
+import { isMac } from "@visian/ui-shared";
 import { useEffect, useState } from "react";
 
 import { Image } from "../../../types";
@@ -22,7 +23,8 @@ export const useKeyboardShortcuts = ({
       if (event.shiftKey) {
         setIsShiftPressed(true);
       }
-      if (event.ctrlKey && event.key === "a") {
+      const isControlKey = isMac() ? event.metaKey : event.ctrlKey;
+      if (isControlKey && event.key === "a") {
         event.preventDefault();
         const newSelectedImages = new Set<string>(selectedImages);
         images?.forEach((image) => newSelectedImages.add(image.id));
