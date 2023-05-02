@@ -151,6 +151,8 @@ export const JobCreationPopup = observer<JobCreationPopUpProps>(
     const { selectedImages, setSelectedImages, setImageSelection } =
       useImageSelection();
 
+    // TODO: Fix this Bug
+    // Select all (Crtl + A) does not work correctly when adding missing dependencies openWithDatasetId and activeImageSelection
     useEffect(() => {
       if (openWithDatasetId && activeImageSelection && isOpen) {
         setSelectedImages(() => {
