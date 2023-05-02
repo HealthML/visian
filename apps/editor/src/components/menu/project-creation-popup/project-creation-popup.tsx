@@ -23,7 +23,7 @@ const ProjectCreationPopupContainer = styled(PopUp)`
   width: 400px;
 `;
 
-const SaveInput = styled(TextField)`
+const TextInput = styled(TextField)`
   margin: 0px 0px 0px 0px;
   width: calc(100% - 40px);
 `;
@@ -45,7 +45,7 @@ export const ProjectCreationPopup = observer<ProjectCreationPopupProps>(
         shouldDismissOnOutsidePress
       >
         <>
-          <SaveInput
+          <TextInput
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholderTx="project-name"
