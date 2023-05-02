@@ -7,6 +7,7 @@ import { ProjectListItem } from "./project-list-item";
 const StyledProjectList = styled(List)`
   width: 100%;
   overflow-y: auto;
+  user-select: none;
 `;
 
 export const ProjectList = ({

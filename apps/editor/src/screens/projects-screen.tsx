@@ -3,7 +3,6 @@ import {
   Box,
   FloatingUIButton,
   Modal,
-  SquareButton,
   Text,
   useTranslation,
 } from "@visian/ui-shared";
@@ -69,14 +68,9 @@ const RightButton = styled(FloatingUIButton)`
   margin-left: 16px;
 `;
 
-const StyledButton = styled(SquareButton)`
-  margin-left: 10px;
-`;
-
 export const ProjectsScreen: React.FC = observer(() => {
   const { projects, projectsError, isErrorProjects, isLoadingProjects } =
     useProjects();
-  const [areControlsEnabled, setAreControlsEnabled] = useState(false);
   const [projectTobBeDeleted, setProjectTobBeDeleted] = useState<Project>();
   const { deleteProjects } = useDeleteProjectsMutation();
   const { t: translate } = useTranslation();
