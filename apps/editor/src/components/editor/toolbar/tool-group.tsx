@@ -2,6 +2,8 @@ import {
   ToolGroup as GenericToolGroup,
   PointerButton,
   ToolProps,
+  useForwardEvent,
+  useLongPress,
   useMultiRef,
   useShortTap,
 } from "@visian/ui-shared";
@@ -9,7 +11,11 @@ import { observer } from "mobx-react-lite";
 import React, { useCallback, useState } from "react";
 
 import { useStore } from "../../../app/root-store";
-import type { ToolGroup as ToolGroupModel, ToolName } from "../../../models";
+import {
+  SelfDeactivatingTool,
+  ToolGroup as ToolGroupModel,
+  ToolName,
+} from "../../../models";
 import { Tool } from "./tool";
 
 export const ToolGroup = observer<
@@ -43,12 +49,44 @@ export const ToolGroup = observer<
       setIsExpanded(false);
     }, []);
 
+    // Short tap on active tool opens settings
     const [startTap, stopTap] = useShortTap(
+      useCallback(
+        (event: React.PointerEvent<HTMLButtonElement>) => {
+          if (event.button === PointerButton.LMB) {
+            store?.editor.activeDocument?.tools.setShowToolSettings(true);
+          }
+        },
+        [store],
+      ),
+      undefined,
+      toolGroup.activeTool.isActive &&
+        !(toolGroup.activeTool instanceof SelfDeactivatingTool) &&
+        !store?.editor.activeDocument?.tools.showToolSettings,
+    );
+
+    // Short tap on inactive tool makes it active
+    const [startTap2, stopTap2] = useShortTap(
+      useCallback(
+        (event: React.PointerEvent<HTMLButtonElement>) => {
+          if (event.button === PointerButton.LMB) {
+            store?.editor.activeDocument?.tools.setActiveTool(
+              toolGroup.activeTool,
+            );
+          }
+        },
+        [store, toolGroup],
+      ),
+      undefined,
+      !toolGroup.activeTool.isActive,
+    );
+
+    // Long press expands group
+    const [startPress, stopPress] = useLongPress(
       useCallback(
         (event: React.PointerEvent) => {
           if (
             event.button === PointerButton.LMB &&
-            toolGroup.activeTool.isActive &&
             toolGroup.tools.length > 1
           ) {
             setIsExpanded(true);
@@ -57,8 +95,26 @@ export const ToolGroup = observer<
         [toolGroup],
       ),
       undefined,
-      canExpand && !isExpanded && toolGroup.activeTool.isActive,
+      canExpand && !isExpanded,
     );
+
+    const handlePointerDown = useForwardEvent(
+      startTap,
+      startTap2,
+      startPress,
+      useCallback(
+        (event: React.PointerEvent<HTMLButtonElement>) => {
+          if (
+            event.button === PointerButton.RMB &&
+            toolGroup.tools.length > 1
+          ) {
+            setIsExpanded(canExpand && !isExpanded);
+          }
+        },
+        [canExpand, isExpanded, toolGroup],
+      ),
+    );
+    const handlePointerUp = useForwardEvent(stopTap, stopTap2, stopPress);
 
     const activateTool = useCallback(
       (value: string | number | undefined) => {
@@ -82,8 +138,8 @@ export const ToolGroup = observer<
           onPointerOut={unhover}
           onPress={onPress}
           onRelease={onRelease}
-          onPointerDown={startTap}
-          onPointerUp={stopTap}
+          onPointerDown={handlePointerDown}
+          onPointerUp={handlePointerUp}
         />
         <GenericToolGroup
           showHint={toolGroup.tools.length > 1}

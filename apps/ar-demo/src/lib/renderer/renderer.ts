@@ -55,7 +55,7 @@ export default class Renderer implements IDisposable {
 
   private lastMouseEvent?: MouseEvent;
 
-  private activeXRSession?: THREE.XRSession;
+  private activeXRSession?: XRSession;
   private canvasContainer: HTMLDivElement;
   private domOverlay: HTMLElement;
 
@@ -170,7 +170,7 @@ export default class Renderer implements IDisposable {
     this.keyEventHandler.dispose();
   };
 
-  private animate = (timestamp: number, frame?: THREE.XRFrame) => {
+  private animate = (timestamp: number, frame?: XRFrame) => {
     const delta = timestamp - this.lastTimestamp;
     this.lastTimestamp = timestamp;
 
@@ -222,7 +222,7 @@ export default class Renderer implements IDisposable {
     };
 
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    (navigator as THREE.Navigator)
+    navigator
       .xr!.requestSession("immersive-ar", sessionInit)
       .then((session) => {
         this.arActive = true;
