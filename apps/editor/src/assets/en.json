@@ -325,6 +325,11 @@
   "job-creation-error": "An error occurred while creating the job.",
   "start-job": "Start Job",
 
+  "import-images": "Import Images",
+  "image-import-popup-title": "Import Images",
+  "import-selected-files": "Selected Images",
+  "import-no-files-selected": "Please select at least one image.",
+
   "open-editor": "Open editor",
   "close-editor": "Close editor",
   "home": "Go to projects overview",

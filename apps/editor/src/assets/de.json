@@ -325,6 +325,11 @@
   "job-creation-error": "Beim Erstellen des Jobs ist ein Fehler aufgetreten.",
   "start-job": "Job starten",
 
+  "import-images": "Bilder importieren",
+  "image-import-popup-title": "Bilder importieren",
+  "import-selected-files": "Ausgewählte Bilder",
+  "import-no-files-selected": "Bitte min. ein Bild auswählen.",
+
   "open-editor": "Editor öffnen",
   "close-editor": "Editor schließen",
   "home": "Zur Projektübersicht",

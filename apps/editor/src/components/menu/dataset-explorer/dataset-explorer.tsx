@@ -12,6 +12,7 @@ import { Annotation, Dataset, Image } from "../../../types";
 import { ConfirmationPopup } from "../confimration-popup/confirmation-popup";
 import { DatasetImageList } from "../dataset-image-list";
 import { DatasetNavigationbar } from "../dataset-navigationbar";
+import { ImageImportPopup } from "../image-import-popup";
 import { JobCreationPopup } from "../job-creation-popup";
 
 const StyledModal = styled(Modal)`
@@ -143,6 +144,17 @@ export const DatasetExplorer = ({ dataset }: { dataset: Dataset }) => {
     setSelectAll(false);
     setIsInSelectMode(false);
   }, [setSelectAll]);
+
+  // image import popup
+  const [imageImportPopUpOpenWith, setImageImportPopUpOpenWith] =
+    useState<string>();
+  const openImageImportPopUp = useCallback(() => {
+    setImageImportPopUpOpenWith(dataset.id);
+  }, [dataset.id]);
+  const closeImageImportPopUp = useCallback(() => {
+    setImageImportPopUpOpenWith(undefined);
+  }, []);
+
   const deleteSelectedImages = useCallback(() => {
     deleteImages(activeImageSelection);
   }, [activeImageSelection, deleteImages]);
@@ -201,6 +213,7 @@ export const DatasetExplorer = ({ dataset }: { dataset: Dataset }) => {
           toggleSelectMode={toggleSelectMode}
           toggleSelectAll={toggleSelectAll}
           openJobCreationPopUp={openJobCreationPopUp}
+          openImageImportPopUp={openImageImportPopUp}
           deleteSelectedImages={openDeleteImagesConfirmationPopUp}
         />
       }
@@ -237,6 +250,11 @@ export const DatasetExplorer = ({ dataset }: { dataset: Dataset }) => {
         activeImageSelection={activeImageSelection}
         projectId={dataset.project}
         openWithDatasetId={jobCreationPopUpOpenWith}
+      />
+      <ImageImportPopup
+        isOpen={!!imageImportPopUpOpenWith}
+        onClose={closeImageImportPopUp}
+        datasetId={imageImportPopUpOpenWith}
       />
       <ConfirmationPopup
         isOpen={isDeleteAnnotationConfirmationPopUpOpen}
