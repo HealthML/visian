@@ -1,10 +1,9 @@
 import { ButtonParam, PopUp, TextField } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
-import { useState, useCallback } from "react";
+import { useCallback, useState } from "react";
 import styled from "styled-components";
 
 import { ProjectCreationPopupProps } from "./project-creation-popup.props";
-import { clear } from "localforage";
 
 const StyledTextButton = styled(ButtonParam)`
   margin: 0px;
@@ -53,11 +52,11 @@ export const ProjectCreationPopup = observer<ProjectCreationPopupProps>(
           />
           <InlineRow>
             <StyledTextButton
-              labelTx={"cancel"}
+              labelTx="cancel"
               handlePress={clearInputsAndClose}
             />
             <StyledTextButton
-              labelTx={"create"}
+              labelTx="create"
               handlePress={() => {
                 if (validate?.({ name })) {
                   onConfirm?.({ name });

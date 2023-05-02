@@ -4,7 +4,6 @@ import {
   FloatingUIButton,
   InvisibleButton,
   Modal,
-  SquareButton,
   Text,
   useTranslation,
 } from "@visian/ui-shared";
