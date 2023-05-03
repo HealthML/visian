@@ -3,8 +3,8 @@ import { observer } from "mobx-react-lite";
 import React from "react";
 import { useParams } from "react-router-dom";
 
-import { DatasetExplorer } from "../components/data-manager/dataset-explorer";
-import { UIOverlayMenu } from "../components/data-manager/ui-overlay-menu";
+import { DatasetExplorer } from "../components/menu/dataset-explorer";
+import { UIOverlayMenu } from "../components/menu/ui-overlay-menu";
 import { useDataset } from "../queries";
 
 export const DatasetScreen: React.FC = observer(() => {

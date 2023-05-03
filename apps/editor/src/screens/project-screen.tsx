@@ -3,8 +3,8 @@ import { observer } from "mobx-react-lite";
 import React from "react";
 import { Outlet, useParams } from "react-router-dom";
 
-import { ProjectViewSwitch } from "../components/data-manager/project-view-switch";
-import { UIOverlayMenu } from "../components/data-manager/ui-overlay-menu";
+import { ProjectViewSwitch } from "../components/menu/project-view-switch";
+import { UIOverlayMenu } from "../components/menu/ui-overlay-menu";
 import { useProject } from "../queries";
 
 export const ProjectScreen: React.FC = observer(() => {
