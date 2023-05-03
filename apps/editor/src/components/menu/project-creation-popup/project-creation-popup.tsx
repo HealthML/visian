@@ -29,7 +29,7 @@ const TextInput = styled(TextField)`
 `;
 
 export const ProjectCreationPopup = observer<ProjectCreationPopupProps>(
-  ({ isOpen, onClose, onConfirm, validate }) => {
+  ({ isOpen, onClose, onConfirm }) => {
     const [name, setName] = useState("");
 
     const clearInputsAndClose = useCallback(() => {
@@ -58,7 +58,7 @@ export const ProjectCreationPopup = observer<ProjectCreationPopupProps>(
             <StyledTextButton
               labelTx="create"
               handlePress={() => {
-                if (validate?.({ name })) {
+                if (name !== "") {
                   onConfirm?.({ name });
                 }
                 clearInputsAndClose();

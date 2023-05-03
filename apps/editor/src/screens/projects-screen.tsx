@@ -186,7 +186,6 @@ export const ProjectsScreen: React.FC = observer(() => {
             <ProjectCreationPopup
               isOpen={isCreateProjectPopupOpen}
               onClose={closeCreateProjectPopup}
-              validate={({ name }) => name !== ""}
               onConfirm={(newProjectDto) => createProject(newProjectDto)}
             />
           </StyledModal>
