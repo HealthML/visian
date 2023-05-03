@@ -49,11 +49,14 @@ export class LAOComputer implements IDisposable {
       is3D: true,
       defaultViewType: ViewType.Transverse,
     };
-    this.target = new ImageRenderTarget(imageProperties, THREE.LinearFilter);
+    this.target = new ImageRenderTarget(
+      imageProperties,
+      THREE.LinearFilter,
+    ).target;
     this.intermediateTarget = new ImageRenderTarget(
       imageProperties,
       THREE.LinearFilter,
-    );
+    ).target;
 
     this.laoMaterial = new LAOMaterial(
       editor,

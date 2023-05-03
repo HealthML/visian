@@ -2,13 +2,13 @@ import * as THREE from "three";
 
 export default class Reticle extends THREE.Mesh {
   private hitTestSourceRequested = false;
-  private hitTestSource: THREE.XRHitTestSource | null = null;
+  private hitTestSource: XRHitTestSource | null = null;
 
   public active = false;
 
   constructor(private renderer: THREE.WebGLRenderer) {
     super(
-      new THREE.RingBufferGeometry(0.05, 0.06, 100).rotateX(-Math.PI / 2),
+      new THREE.RingGeometry(0.05, 0.06, 100).rotateX(-Math.PI / 2),
       new THREE.MeshBasicMaterial({
         transparent: true,
         opacity: 0.3,
@@ -27,7 +27,7 @@ export default class Reticle extends THREE.Mesh {
     this.visible = false;
   };
 
-  public update = (frame: THREE.XRFrame) => {
+  public update = (frame: XRFrame) => {
     if (!this.active) return;
 
     if (!this.hitTestSourceRequested) {
@@ -37,8 +37,8 @@ export default class Reticle extends THREE.Mesh {
         .requestReferenceSpace("viewer")
         .then((referenceSpace) => {
           session
-            .requestHitTestSource({ space: referenceSpace })
-            .then((source) => {
+            .requestHitTestSource?.({ space: referenceSpace })
+            ?.then((source) => {
               this.hitTestSource = source;
             })
             .catch((e) => {

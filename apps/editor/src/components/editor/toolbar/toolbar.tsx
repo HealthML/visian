@@ -1,15 +1,9 @@
-import {
-  Toolbar as GenericToolbar,
-  InfoText,
-  PointerButton,
-  useLongPress,
-} from "@visian/ui-shared";
+import { Toolbar as GenericToolbar, InfoText } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
-import { SelfDeactivatingTool, ToolName } from "../../../models";
 import { InfoShortcuts } from "../info-shortcuts";
 import { ToolGroup } from "./tool-group";
 import { ToolSettings } from "./tool-settings";
@@ -58,40 +52,6 @@ export const Toolbar: React.FC = observer(() => {
 
   const activeTool = store?.editor.activeDocument?.tools.activeTool;
   const activeToolName = activeTool?.name;
-  const setActiveTool = useCallback(
-    (
-      value: string | number | undefined,
-      event: React.PointerEvent<HTMLButtonElement>,
-    ) => {
-      const previousTool = store?.editor.activeDocument?.tools.activeTool?.name;
-      store?.editor.activeDocument?.tools.setActiveTool(value as ToolName);
-
-      if (
-        event.button === PointerButton.RMB &&
-        store?.editor.activeDocument?.tools.activeTool?.name === value
-      ) {
-        store?.editor.activeDocument?.tools.setShowToolSettings(
-          previousTool !== value || !isModalOpen,
-        );
-      }
-    },
-    [isModalOpen, store],
-  );
-  const [startPress, stopPress] = useLongPress(
-    useCallback(() => {
-      store?.editor.activeDocument?.tools.setShowToolSettings(true);
-    }, [store]),
-  );
-  const handlePress = useCallback(
-    (
-      value: string | number | undefined,
-      event: React.PointerEvent<HTMLButtonElement>,
-    ) => {
-      setActiveTool(value, event);
-      startPress(event);
-    },
-    [setActiveTool, startPress],
-  );
 
   return (
     <StyledToolbar ref={ref}>
@@ -110,16 +70,6 @@ export const Toolbar: React.FC = observer(() => {
               activeToolName === toolGroup.activeTool.name
                 ? setActiveToolRef
                 : undefined
-            }
-            onPress={
-              toolGroup.activeTool instanceof SelfDeactivatingTool
-                ? setActiveTool
-                : handlePress
-            }
-            onRelease={
-              toolGroup.activeTool instanceof SelfDeactivatingTool
-                ? undefined
-                : stopPress
             }
           />
         ),

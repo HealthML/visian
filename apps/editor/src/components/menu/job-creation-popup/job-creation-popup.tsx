@@ -16,7 +16,8 @@ import styled from "styled-components";
 import { useStore } from "../../../app/root-store";
 import { postJob, useImagesByDataset, useMlModels } from "../../../queries";
 import useDatasetsBy from "../../../queries/use-datasets-by";
-import { ProjectDataExplorer } from "../project-data-explorer/project-data-explorer";
+import { ProjectDataExplorer } from "../project-data-explorer";
+import { useImageSelection } from "../util";
 import { JobCreationPopUpProps } from "./job-creation-popup.props";
 
 const JobCreationPopupContainer = styled(PopUp)`
@@ -147,33 +148,19 @@ export const JobCreationPopup = observer<JobCreationPopUpProps>(
       setSelectedDataset(datasetId);
     }, []);
 
-    const [selectedImages, setSelectedImages] = useState<Set<string>>(
-      new Set<string>(),
-    );
+    const { selectedImages, setSelectedImages, setImageSelection } =
+      useImageSelection();
 
+    // TODO: Fix this Bug
+    // Select all (Crtl + A) does not work correctly when adding missing dependencies openWithDatasetId and activeImageSelection
     useEffect(() => {
-      if (openWithDatasetId && activeImageSelection) {
+      if (openWithDatasetId && activeImageSelection && isOpen) {
         setSelectedImages(() => {
           const newSelectedImages = new Set<string>(activeImageSelection);
           return newSelectedImages;
         });
       }
-    }, [activeImageSelection, openWithDatasetId]);
-
-    const setImageSelection = useCallback(
-      (imageId: string, isSelected: boolean) => {
-        setSelectedImages((prevSelectedImages) => {
-          const newSelectedImages = new Set(prevSelectedImages);
-          if (isSelected) {
-            newSelectedImages.add(imageId);
-          } else {
-            newSelectedImages.delete(imageId);
-          }
-          return newSelectedImages;
-        });
-      },
-      [setSelectedImages],
-    );
+    }, [isOpen]);
 
     const createAutoAnnotationJob = useCallback(
       async (imageSelection: string[]) => {
@@ -256,6 +243,7 @@ export const JobCreationPopup = observer<JobCreationPopUpProps>(
               selectedImages={selectedImages}
               selectDataset={selectDataset}
               setImageSelection={setImageSelection}
+              setSelectedImages={setSelectedImages}
             />
           )}
         </ContentContainer>

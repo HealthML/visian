@@ -11,7 +11,7 @@ import styled from "styled-components";
 
 import { useAnnotationsByImage } from "../../../queries";
 import { Annotation, Image } from "../../../types";
-import { editorPath } from "../util";
+import { editorPath, handleImageSelection } from "../util";
 
 const Spacer = styled.div`
   width: 10px;
@@ -39,7 +39,14 @@ export const DatasetImageListItem = ({
   image,
   refetchImages,
   isSelected,
-  toggleSelection,
+  index,
+  selectedImages,
+  images,
+  setImageSelection,
+  setSelectedImages,
+  isShiftPressed,
+  selectedRange,
+  setSelectedRange,
   deleteAnnotation,
   deleteImage,
 }: {
@@ -47,7 +54,16 @@ export const DatasetImageListItem = ({
   image: Image;
   refetchImages: () => void;
   isSelected: boolean;
-  toggleSelection: () => void;
+  index: number;
+  selectedImages: Set<string>;
+  images: Image[] | undefined;
+  setImageSelection: (imageId: string, selection: boolean) => void;
+  setSelectedImages: React.Dispatch<React.SetStateAction<Set<string>>>;
+  isShiftPressed: boolean;
+  selectedRange: { start: number; end: number };
+  setSelectedRange: React.Dispatch<
+    React.SetStateAction<{ start: number; end: number }>
+  >;
   deleteAnnotation: (annotation: Annotation) => void;
   deleteImage: (image: Image) => void;
 }) => {
@@ -100,7 +116,19 @@ export const DatasetImageListItem = ({
           <>
             <IconButton
               icon={isSelected ? "checked" : "unchecked"}
-              onPointerDown={toggleSelection}
+              onPointerDown={() =>
+                handleImageSelection(
+                  image.id,
+                  index,
+                  selectedImages,
+                  isShiftPressed,
+                  selectedRange,
+                  setSelectedRange,
+                  images,
+                  setImageSelection,
+                  setSelectedImages,
+                )
+              }
             />
             <Spacer />
           </>

@@ -12,6 +12,7 @@ const StyledDatasetList = styled(List)`
   justify-items: center;
   margin-top: 2%;
   overflow-y: auto;
+  user-select: none;
   scrollbar-width: thin;
   scrollbar-color: #ccc #fff;
 

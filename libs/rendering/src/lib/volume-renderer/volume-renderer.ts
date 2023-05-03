@@ -535,7 +535,8 @@ export class VolumeRenderer implements IVolumeRenderer {
         ? (intersections[0].distance + intersections[1].distance) / 2
         : 1,
     );
-    this.orbitControls.target.add(this.camera.position);
+    // Reset to
+    this.orbitControls.target.copy(this.volume.position);
     this.onOrbitControlsChange();
   };
 

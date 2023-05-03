@@ -204,3 +204,36 @@ export const unifyOrientation = (
   }
   return unifiedData;
 };
+
+export const addArtificialAlpha = <T extends TypedArray>(data: T): T => {
+  const numbeOfVoxels = data.length / 3;
+
+  const dataWithAlpha = new (data.constructor as new (
+    size: number,
+  ) => typeof data)(numbeOfVoxels * 4);
+
+  for (let voxelIndex = 0; voxelIndex < numbeOfVoxels; voxelIndex++) {
+    dataWithAlpha[voxelIndex * 4 + 0] = data[voxelIndex * 3 + 0];
+    dataWithAlpha[voxelIndex * 4 + 1] = data[voxelIndex * 3 + 1];
+    dataWithAlpha[voxelIndex * 4 + 2] = data[voxelIndex * 3 + 2];
+    dataWithAlpha[voxelIndex * 4 + 3] = 255;
+  }
+
+  return dataWithAlpha;
+};
+
+export const removeArtificialAlpha = <T extends TypedArray>(data: T): T => {
+  const numbeOfVoxels = data.length / 4;
+
+  const dataWithoutAlpha = new (data.constructor as new (
+    size: number,
+  ) => typeof data)(numbeOfVoxels * 3);
+
+  for (let voxelIndex = 0; voxelIndex < numbeOfVoxels; voxelIndex++) {
+    dataWithoutAlpha[voxelIndex * 3 + 0] = data[voxelIndex * 4 + 0];
+    dataWithoutAlpha[voxelIndex * 3 + 1] = data[voxelIndex * 4 + 1];
+    dataWithoutAlpha[voxelIndex * 3 + 2] = data[voxelIndex * 4 + 2];
+  }
+
+  return dataWithoutAlpha;
+};

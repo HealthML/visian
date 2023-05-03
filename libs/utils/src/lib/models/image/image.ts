@@ -20,7 +20,9 @@ import {
   viewTypeDepthThreshold,
 } from "../view-types";
 import {
+  addArtificialAlpha,
   calculateNewOrientation,
+  removeArtificialAlpha,
   swapAxesForMetadata,
   unifyOrientation,
 } from "./conversion";
@@ -44,6 +46,8 @@ export interface ImageSnapshot {
   data?: Uint8Array | Float32Array | TypedArray;
 
   unit?: Unit;
+
+  hasArtificialAlpha: boolean;
 }
 
 export interface ITKImageWithUnit extends ITKImage {
@@ -54,26 +58,8 @@ export const itkImageToImageSnapshot = (
   image: ITKImageWithUnit,
   filterValue?: number,
   squash?: boolean,
-): ImageSnapshot => ({
-  name: image.name,
-  dimensionality: image.imageType.dimension,
-  voxelCount:
-    image.imageType.dimension === 2
-      ? [...image.size, 1]
-      : swapAxesForMetadata(image.size, image.direction),
-  voxelSpacing:
-    image.imageType.dimension === 2
-      ? [...image.spacing, 1]
-      : swapAxesForMetadata(image.spacing, image.direction),
-  voxelType: image.imageType.pixelType,
-  voxelComponents: image.imageType.components,
-  voxelComponentType: image.imageType.componentType,
-  origin: image.origin,
-  orientation:
-    image.imageType.dimension === 2
-      ? image.direction
-      : calculateNewOrientation(image.direction),
-  data: unifyOrientation(
+): ImageSnapshot => {
+  let data = unifyOrientation(
     image.data,
     image.direction,
     image.imageType.dimension,
@@ -88,9 +74,38 @@ export const itkImageToImageSnapshot = (
       : value === filterValue
       ? 255
       : 0,
-  ),
-  unit: image.unit,
-});
+  );
+
+  const hasArtificialAlpha = image.imageType.components === 3;
+
+  if (hasArtificialAlpha) {
+    data = addArtificialAlpha(data);
+  }
+
+  return {
+    name: image.name,
+    dimensionality: image.imageType.dimension,
+    voxelCount:
+      image.imageType.dimension === 2
+        ? [...image.size, 1]
+        : swapAxesForMetadata(image.size, image.direction),
+    voxelSpacing:
+      image.imageType.dimension === 2
+        ? [...image.spacing, 1]
+        : swapAxesForMetadata(image.spacing, image.direction),
+    voxelType: image.imageType.pixelType,
+    voxelComponents: hasArtificialAlpha ? 4 : image.imageType.components,
+    voxelComponentType: image.imageType.componentType,
+    origin: image.origin,
+    orientation:
+      image.imageType.dimension === 2
+        ? image.direction
+        : calculateNewOrientation(image.direction),
+    data,
+    unit: image.unit,
+    hasArtificialAlpha,
+  };
+};
 
 /** A generic, observable multi-dimensional image class. */
 export class Image implements ISerializable<ImageSnapshot> {
@@ -165,6 +180,12 @@ export class Image implements ISerializable<ImageSnapshot> {
 
   /** A TypedArray containing the voxel buffer data in I/O format. */
   private data!: Uint8Array | Float32Array;
+
+  /**
+   * We cannot render 3-component images. Thus we add an artificial alpha channel on import. In
+   * order to remove it again on export we store this flag.
+   */
+  protected hasArtificialAlpha!: boolean;
 
   constructor(
     image: ImageSnapshot & Pick<ImageSnapshot, "voxelCount" | "data">,
@@ -273,6 +294,7 @@ export class Image implements ISerializable<ImageSnapshot> {
         this.voxelSpacing[vertical],
       ],
       data: this.getSlice(viewType, sliceNumber),
+      hasArtificialAlpha: this.hasArtificialAlpha,
     });
   }
 
@@ -280,7 +302,12 @@ export class Image implements ISerializable<ImageSnapshot> {
     const index = this.getDataIndex(voxel);
 
     return new Vector(
-      Array.from(this.getData().slice(index, index + this.voxelComponents)),
+      Array.from(
+        this.getData().slice(
+          index,
+          index + (this.hasArtificialAlpha ? 3 : this.voxelComponents),
+        ),
+      ),
       false,
     );
   }
@@ -326,7 +353,7 @@ export class Image implements ISerializable<ImageSnapshot> {
         this.dimensionality,
         this.voxelComponentType,
         this.voxelType,
-        this.voxelComponents,
+        this.hasArtificialAlpha ? 3 : this.voxelComponents,
       ),
     );
 
@@ -369,6 +396,10 @@ export class Image implements ISerializable<ImageSnapshot> {
       false,
     ) as Uint8Array | Float32Array;
 
+    if (this.hasArtificialAlpha) {
+      image.data = removeArtificialAlpha(image.data);
+    }
+
     return image;
   }
 
@@ -388,6 +419,7 @@ export class Image implements ISerializable<ImageSnapshot> {
       voxelComponentType: this.voxelComponentType,
       voxelType: this.voxelType,
       unit: this.unit,
+      hasArtificialAlpha: this.hasArtificialAlpha,
     };
   }
 
@@ -420,9 +452,11 @@ export class Image implements ISerializable<ImageSnapshot> {
       this.orientation.setIdentity();
     }
 
-    this.unit = snapshot?.unit;
+    this.unit = snapshot.unit;
 
     this.setData(snapshot.data ?? new Uint8Array(this.voxelCount.product()));
+
+    this.hasArtificialAlpha = snapshot.hasArtificialAlpha;
   }
 
   public clone() {
@@ -431,9 +465,10 @@ export class Image implements ISerializable<ImageSnapshot> {
 
   protected getDataIndex(voxel: Voxel) {
     return (
-      voxel.x +
-      voxel.y * this.voxelCount.x +
-      voxel.z * this.voxelCount.x * this.voxelCount.y
+      (voxel.x +
+        voxel.y * this.voxelCount.x +
+        voxel.z * this.voxelCount.x * this.voxelCount.y) *
+      this.voxelComponents
     );
   }
 }

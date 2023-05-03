@@ -34,6 +34,7 @@ export class XRManager implements IXRManager {
     const transferFunction =
       this.editor.activeDocument?.viewport3D.activeTransferFunction;
     session.inputSources.forEach((source, index) => {
+      if (!source.gamepad) return;
       const controller = this.renderer.renderer.xr.getController(index);
 
       // Grabbing
@@ -300,7 +301,7 @@ export class XRManager implements IXRManager {
     this.renderer.resize();
     this.renderer.resetScene(true);
   };
-  protected onXRSessionStarted = (session: THREE.XRSession) => {
+  protected onXRSessionStarted = (session: XRSession) => {
     this.editor.activeDocument?.viewport3D.setIsInXR(true);
     this.renderer.renderer.xr.setSession(session);
     this.renderer.renderer.xr.addEventListener(
@@ -320,7 +321,7 @@ export class XRManager implements IXRManager {
     this.renderer.volume.mainMaterial.setUseRayDithering(false);
 
     const sessionInit = { optionalFeatures: ["local-floor"] };
-    const session = await (navigator as THREE.Navigator).xr?.requestSession(
+    const session = await navigator.xr?.requestSession(
       "immersive-vr",
       sessionInit,
     );

@@ -120,7 +120,7 @@
   "window": "Window",
 
   "export": "Export",
-  "export-tooltip": "Export (Ctrl + E)",
+  "export-tooltip": "Export (Ctrl/Cmd + E)",
   "exporting": "Exporting",
 
   "confirm-task-annotation-tooltip": "Confirm",

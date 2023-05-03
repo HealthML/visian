@@ -54,12 +54,14 @@ export class TextureAdapter implements IDisposable {
         image.voxelComponents * width * height,
       );
 
-      return new THREE.DataTexture(
+      const texture = new THREE.DataTexture(
         this.sliceData[viewType],
         width,
         height,
         getTextureFormat(image.voxelComponents),
       );
+      texture.needsUpdate = true;
+      return texture;
     });
 
     this.readSliceMaterial = new ReadSliceMaterial(image.voxelCount);
