@@ -336,7 +336,6 @@
   "saving-error": "Saving Error",
 
   "internal-server-error": "Internal Server Error",
-  "job-creation-error": "An error occurred while creating the job.",
 
   "confirm": "Confirm",
   "cancel": "Cancel",
@@ -353,5 +352,9 @@
   "delete-project-title": "Delete Project",
   "delete-project-message": "Do you really want to delete the project \"_\" including all its datasets, Images and annotations?",
   "delete-job-title": "Delete Job",
-  "delete-job-message": "Do you really want to delete the job including the _ generated annotation(s)?"
+  "delete-job-message": "Do you really want to delete the job including the _ generated annotation(s)?",
+
+  "create": "Create",
+  "create-project": "Create Project",
+  "project-name": "Project Name"
 }

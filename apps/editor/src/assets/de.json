@@ -336,7 +336,6 @@
   "saving-error": "Fehler beim Speichern",
 
   "internal-server-error": "Interner Serverfehler",
-  "job-creation-error": "Beim Erstellen des Jobs ist ein Fehler aufgetreten.",
 
   "confirm": "Bestätigen",
   "cancel": "Abbrechen",
@@ -353,5 +352,8 @@
   "delete-project-title": "Projekt löschen",
   "delete-project-message": "Wollen sie das Projekt \"_\" sämtlich aller enthalten Datensätze, Bilder und Annotationen wirklich löschen?",
   "delete-job-title": "Job löschen",
-  "delete-job-message": "Wollen sie den Job sämtlich der _ dabei erzeugten Annotation(en) wirklich löschen?"
+  "delete-job-message": "Wollen sie den Job sämtlich der _ dabei erzeugten Annotation(en) wirklich löschen?",
+
+  "create-project": "Projekt erstellen",
+  "project-name": "Projektname"
 }
