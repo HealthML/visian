@@ -6,7 +6,7 @@ import useDatasetsBy, {
   useDeleteDatasetsForProjectMutation,
 } from "../../../queries/use-datasets-by";
 import { Dataset } from "../../../types";
-import { ConfirmationPopup } from "../confimration-popup";
+import { ConfirmationPopup } from "../confirmation-popup";
 import { DatasetList } from "../dataset-list";
 
 const StyledModal = styled(Modal)`

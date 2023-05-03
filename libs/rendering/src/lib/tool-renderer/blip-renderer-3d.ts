@@ -88,11 +88,11 @@ export class BlipRenderer3D implements IBlipRenderer3D, IDisposable {
             this.renderTarget = new ImageRenderTarget(
               imageProperties,
               THREE.NearestFilter,
-            );
+            ).target;
             this.blipRenderTarget = new ImageRenderTarget(
               imageProperties,
               THREE.NearestFilter,
-            );
+            ).target;
             this.resizeRenderTargets();
           });
         },

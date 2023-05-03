@@ -1,5 +1,5 @@
 import { Modal, Notification, Text, useTranslation } from "@visian/ui-shared";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
@@ -9,10 +9,11 @@ import {
   useImagesByDataset,
 } from "../../../queries";
 import { Annotation, Dataset, Image } from "../../../types";
-import { ConfirmationPopup } from "../confimration-popup/confirmation-popup";
+import { ConfirmationPopup } from "../confirmation-popup/confirmation-popup";
 import { DatasetImageList } from "../dataset-image-list";
 import { DatasetNavigationbar } from "../dataset-navigationbar";
 import { JobCreationPopup } from "../job-creation-popup";
+import { useImageSelection } from "../util";
 
 const StyledModal = styled(Modal)`
   vertical-align: middle;
@@ -37,6 +38,22 @@ export const DatasetExplorer = ({ dataset }: { dataset: Dataset }) => {
   const { images, imagesError, isErrorImages, isLoadingImages, refetchImages } =
     useImagesByDataset(dataset.id);
 
+  const { selectedImages, setSelectedImages, setImageSelection } =
+    useImageSelection();
+
+  const setSelectAll = useCallback(
+    (selection: boolean) => {
+      if (selection) {
+        const newSelection = new Set<string>();
+        images?.forEach((image) => newSelection.add(image.id));
+        setSelectedImages(newSelection);
+        return;
+      }
+      setSelectedImages(new Set<string>());
+    },
+    [images, setSelectedImages],
+  );
+
   const { deleteImages } = useDeleteImagesMutation(dataset.id);
 
   const { deleteAnnotations } = useDeleteAnnotationsForImageMutation();
@@ -45,10 +62,6 @@ export const DatasetExplorer = ({ dataset }: { dataset: Dataset }) => {
     useState<Annotation>();
 
   const [imageTobBeDeleted, setImageTobBeDeleted] = useState<Image>();
-
-  const [selectedImages, setSelectedImages] = useState<Map<string, boolean>>(
-    new Map((images ?? []).map((image) => [image.id, false])),
-  );
 
   // delete annotation confirmation popup
   const [
@@ -76,54 +89,17 @@ export const DatasetExplorer = ({ dataset }: { dataset: Dataset }) => {
     setImageTobBeDeleted(undefined);
   }, []);
 
-  // sync selectedImages and images array
-  useEffect(() => {
-    setSelectedImages((previousSelectedImages) => {
-      const newSelectedImages = new Map(
-        (images ?? []).map((image) => [image.id, false]),
-      );
-      previousSelectedImages.forEach((value, key) => {
-        if (newSelectedImages.has(key)) newSelectedImages.set(key, value);
-      });
-      return newSelectedImages;
-    });
-  }, [images]);
-
-  const setSelection = useCallback((id: string, selection: boolean) => {
-    setSelectedImages((prevSelectedImages) => {
-      prevSelectedImages.set(id, selection);
-      return new Map(prevSelectedImages);
-    });
-  }, []);
-
-  const setSelectAll = useCallback((selection: boolean) => {
-    setSelectedImages((prevSelectedImages) => {
-      prevSelectedImages.forEach((value, key) =>
-        prevSelectedImages.set(key, selection),
-      );
-      return new Map(prevSelectedImages);
-    });
-  }, []);
-
   const toggleSelectMode = useCallback(() => {
     setIsInSelectMode((prevIsInSelectMode) => !prevIsInSelectMode);
   }, []);
 
   const areAllSelected = useMemo(
-    () => [...selectedImages.values()].every((value) => value),
-    [selectedImages],
+    () => selectedImages.size === (images?.length || 0),
+    [selectedImages, images],
   );
 
   const isAnySelected = useMemo(
-    () => [...selectedImages.values()].some((value) => value),
-    [selectedImages],
-  );
-
-  const activeImageSelection = useMemo(
-    () =>
-      [...selectedImages.keys()].filter((imageId) =>
-        selectedImages.get(imageId),
-      ),
+    () => selectedImages.size > 0,
     [selectedImages],
   );
 
@@ -136,7 +112,7 @@ export const DatasetExplorer = ({ dataset }: { dataset: Dataset }) => {
     string | undefined
   >(dataset.id);
 
-  // model selection popup
+  // job creation popup
   const [isJobCreationPopUpOpen, setIsJobCreationPopUpOpen] = useState(false);
   const openJobCreationPopUp = useCallback(() => {
     setIsJobCreationPopUpOpen(true);
@@ -149,8 +125,8 @@ export const DatasetExplorer = ({ dataset }: { dataset: Dataset }) => {
     setIsInSelectMode(false);
   }, [setSelectAll]);
   const deleteSelectedImages = useCallback(() => {
-    deleteImages(activeImageSelection);
-  }, [activeImageSelection, deleteImages]);
+    deleteImages(Array.from(selectedImages));
+  }, [selectedImages, deleteImages]);
 
   const deleteAnnotation = useCallback(
     (annotation: Annotation) => {
@@ -188,9 +164,9 @@ export const DatasetExplorer = ({ dataset }: { dataset: Dataset }) => {
           )
         : `${translate("delete-images-message")}`.replace(
             "_",
-            activeImageSelection.length.toString(),
+            selectedImages.size.toString(),
           ),
-    [activeImageSelection, translate, imageTobBeDeleted],
+    [selectedImages, translate, imageTobBeDeleted],
   );
 
   return (
@@ -231,7 +207,8 @@ export const DatasetExplorer = ({ dataset }: { dataset: Dataset }) => {
           images={images}
           refetchImages={refetchImages}
           selectedImages={selectedImages}
-          setSelection={setSelection}
+          setImageSelection={setImageSelection}
+          setSelectedImages={setSelectedImages}
           deleteAnnotation={deleteAnnotation}
           deleteImage={deleteImage}
         />
@@ -239,7 +216,7 @@ export const DatasetExplorer = ({ dataset }: { dataset: Dataset }) => {
       <JobCreationPopup
         isOpen={isJobCreationPopUpOpen}
         onClose={closeJobCreationPopUp}
-        activeImageSelection={activeImageSelection}
+        activeImageSelection={selectedImages}
         projectId={dataset.project}
         openWithDatasetId={openWithDatasetId}
       />

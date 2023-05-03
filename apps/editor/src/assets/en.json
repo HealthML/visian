@@ -120,7 +120,7 @@
   "window": "Window",
 
   "export": "Export",
-  "export-tooltip": "Export (Ctrl + E)",
+  "export-tooltip": "Export (Ctrl/Cmd + E)",
   "exporting": "Exporting",
 
   "confirm-task-annotation-tooltip": "Confirm",
@@ -336,7 +336,6 @@
   "saving-error": "Saving Error",
 
   "internal-server-error": "Internal Server Error",
-  "job-creation-error": "An error occurred while creating the job.",
 
   "confirm": "Confirm",
   "cancel": "Cancel",
@@ -355,5 +354,9 @@
   "delete-job-title": "Delete Job",
   "delete-job-message": "Do you really want to delete the job including the _ generated annotation(s)?",
   "cancel-job-title": "Cancel Job",
-  "cancel-job-message": "Do you really want to cancel the job?"
+  "cancel-job-message": "Do you really want to cancel the job?",
+
+  "create": "Create",
+  "create-project": "Create Project",
+  "project-name": "Project Name"
 }

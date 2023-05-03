@@ -182,16 +182,19 @@ export const useShortTap = <T extends Element>(
 export const useLongPress = <T extends Element>(
   handleLongPress: (event: React.PointerEvent<T>) => void,
   minDuration = 500,
+  canActivate = true,
 ): [(event: React.PointerEvent<T>) => void, () => void] => {
   const timerRef = useRef<NodeJS.Timer | undefined>();
 
   const startPress = useCallback(
     (event: React.PointerEvent<T>) => {
-      timerRef.current = setTimeout(() => {
-        handleLongPress(event);
-      }, minDuration) as unknown as NodeJS.Timer;
+      if (canActivate) {
+        timerRef.current = setTimeout(() => {
+          handleLongPress(event);
+        }, minDuration) as unknown as NodeJS.Timer;
+      }
     },
-    [handleLongPress, minDuration],
+    [canActivate, handleLongPress, minDuration],
   );
 
   const stopPress = useCallback(() => {

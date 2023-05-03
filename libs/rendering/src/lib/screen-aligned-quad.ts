@@ -8,7 +8,9 @@ export class ScreenAlignedQuad extends THREE.Mesh implements IDisposable {
   private static quadGeometry = new THREE.PlaneGeometry(1, 1);
 
   public static forTexture(texture: THREE.Texture) {
-    return new this(new THREE.MeshBasicMaterial({ map: texture }));
+    return new this(
+      new THREE.MeshBasicMaterial({ map: texture, blending: THREE.NoBlending }),
+    );
   }
 
   public readonly scene = new THREE.Scene();

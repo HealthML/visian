@@ -2,10 +2,10 @@ import * as THREE from "three";
 
 export const getSplitPlane = (material: THREE.ShaderMaterial) => {
   const geometries = [
-    new THREE.PlaneBufferGeometry(1, 1),
-    new THREE.PlaneBufferGeometry(1, 1),
-    new THREE.PlaneBufferGeometry(1, 1),
-    new THREE.PlaneBufferGeometry(1, 1),
+    new THREE.PlaneGeometry(1, 1),
+    new THREE.PlaneGeometry(1, 1),
+    new THREE.PlaneGeometry(1, 1),
+    new THREE.PlaneGeometry(1, 1),
   ];
 
   /*

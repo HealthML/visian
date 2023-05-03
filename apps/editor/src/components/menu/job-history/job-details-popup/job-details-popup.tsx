@@ -20,7 +20,7 @@ import {
 } from "../../../../queries";
 import useImagesByJob from "../../../../queries/use-images-by-jobs";
 import { Image } from "../../../../types";
-import { ConfirmationPopup } from "../../confimration-popup";
+import { ConfirmationPopup } from "../../confirmation-popup";
 import { editorPath } from "../../util";
 import { JobStatusBadge } from "../job-status-badge/job-status-badge";
 import { DetailsRow, DetailsTable } from "./details-table";

@@ -5,8 +5,6 @@ export const getTextureFormat = (components: number) =>
     ? THREE.RedFormat
     : components === 2
     ? THREE.RGFormat
-    : components === 3
-    ? THREE.RGBFormat
     : THREE.RGBAFormat;
 
 // R32F, etc. cannot be lineraly filtered without an extension.

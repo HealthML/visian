@@ -2,8 +2,8 @@ import {
   AbsoluteCover,
   Box,
   FloatingUIButton,
+  InvisibleButton,
   Modal,
-  SquareButton,
   Text,
   useTranslation,
 } from "@visian/ui-shared";
@@ -12,9 +12,14 @@ import React, { useCallback, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 
-import { ConfirmationPopup } from "../components/menu/confimration-popup";
+import { ConfirmationPopup } from "../components/menu/confirmation-popup";
+import { ProjectCreationPopup } from "../components/menu/project-creation-popup";
 import { ProjectList } from "../components/menu/projects-list/project-list";
-import { useDeleteProjectsMutation, useProjects } from "../queries";
+import {
+  useCreateProjectMutation,
+  useDeleteProjectsMutation,
+  useProjects,
+} from "../queries";
 import { Project } from "../types";
 
 const Container = styled(AbsoluteCover)`
@@ -69,16 +74,16 @@ const RightButton = styled(FloatingUIButton)`
   margin-left: 16px;
 `;
 
-const StyledButton = styled(SquareButton)`
-  margin-left: 10px;
+const IconButton = styled(InvisibleButton)`
+  width: 30px;
 `;
 
 export const ProjectsScreen: React.FC = observer(() => {
   const { projects, projectsError, isErrorProjects, isLoadingProjects } =
     useProjects();
-  const [areControlsEnabled, setAreControlsEnabled] = useState(false);
   const [projectTobBeDeleted, setProjectTobBeDeleted] = useState<Project>();
   const { deleteProjects } = useDeleteProjectsMutation();
+  const { createProject } = useCreateProjectMutation();
   const { t: translate } = useTranslation();
   const navigate = useNavigate();
 
@@ -93,6 +98,18 @@ export const ProjectsScreen: React.FC = observer(() => {
   const closeDeleteProjectConfirmationPopUp = useCallback(() => {
     setIsDeleteProjectConfirmationPopUpOpen(false);
   }, []);
+
+  // create project popup
+  const [isCreateProjectPopupOpen, setIsCreateProjectPopupOpen] =
+    useState(false);
+  const openCreateProjectPopup = useCallback(
+    () => setIsCreateProjectPopupOpen(true),
+    [],
+  );
+  const closeCreateProjectPopup = useCallback(
+    () => setIsCreateProjectPopupOpen(false),
+    [],
+  );
 
   const deleteProject = useCallback(
     (project: Project) => {
@@ -140,6 +157,14 @@ export const ProjectsScreen: React.FC = observer(() => {
             hideHeaderDivider={false}
             labelTx="projects-base-title"
             position="right"
+            headerChildren={
+              <IconButton
+                icon="plus"
+                tooltipTx="create-project"
+                tooltipPosition="left"
+                onPointerDown={openCreateProjectPopup}
+              />
+            }
           >
             {projects && projects.length > 0 ? (
               <ProjectList projects={projects} deleteProject={deleteProject} />
@@ -157,6 +182,11 @@ export const ProjectsScreen: React.FC = observer(() => {
                     projectIds: [projectTobBeDeleted.id],
                   });
               }}
+            />
+            <ProjectCreationPopup
+              isOpen={isCreateProjectPopupOpen}
+              onClose={closeCreateProjectPopup}
+              onConfirm={(newProjectDto) => createProject(newProjectDto)}
             />
           </StyledModal>
         )}
