@@ -193,10 +193,6 @@ export const UIOverlay = observer<UIOverlayProps>(
         });
     }, [store]);
 
-    const rotateScan = () => {
-      store?.editor.activeDocument?.viewport2D.rotateBy90Degrees(true);
-    };
-
     return (
       <Container
         {...rest}
@@ -241,13 +237,6 @@ export const UIOverlay = observer<UIOverlayProps>(
               />
               <Toolbar />
               <Layers />
-              <FloatingUIButton
-                icon="undo"
-                tooltipTx="undo"
-                tooltipPosition="right"
-                isActive={false}
-                onPointerDown={rotateScan}
-              />
               <AxesSpacer>
                 <Axes3D ref={axes3dRef} />
               </AxesSpacer>

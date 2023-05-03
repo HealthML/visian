@@ -7,6 +7,14 @@ import styled from "styled-components";
 import { useStore } from "../../../app/root-store";
 import { AxesIndicator } from "./axes-indicator";
 
+const BottomAlignedFlexRow = styled(FlexRow)`
+  align-items: flex-end;
+`;
+
+const VoxelContainer = styled.div`
+  height: 70px;
+`;
+
 const VoxelTitle = styled(Text)`
   font-size: 13px;
   font-weight: 700;
@@ -22,76 +30,78 @@ export const AxesAndVoxel: React.FC = observer(() => {
   const store = useStore();
 
   return store?.editor.activeDocument?.viewSettings.viewMode === "2D" ? (
-    <FlexRow>
+    <BottomAlignedFlexRow>
       {store?.editor.activeDocument?.has3DLayers && <AxesIndicator />}
 
       {store?.editor.activeDocument?.viewport2D.isVoxelHovered &&
         store?.editor.activeDocument?.viewport2D.showVoxelInfo &&
         !store?.editor.activeDocument?.tools.isCursorOverFloatingUI && (
-          <FlexColumn>
-            {(store?.editor.activeDocument?.has3DLayers ||
-              store?.editor.activeDocument?.viewport2D.mainViewType !==
-                ViewType.Sagittal) && (
+          <VoxelContainer>
+            <FlexColumn>
+              {(store?.editor.activeDocument?.has3DLayers ||
+                store?.editor.activeDocument?.viewport2D.mainViewType !==
+                  ViewType.Sagittal) && (
+                <FlexRow>
+                  <VoxelTitle tx="X" />
+                  <VoxelContent
+                    tx={
+                      (
+                        (store?.editor.activeDocument?.viewport2D.hoveredVoxel
+                          .x || 0) + 1
+                      ).toString() ?? "-"
+                    }
+                  />
+                </FlexRow>
+              )}
+              {(store?.editor.activeDocument?.has3DLayers ||
+                store?.editor.activeDocument?.viewport2D.mainViewType !==
+                  ViewType.Coronal) && (
+                <FlexRow>
+                  <VoxelTitle tx="Y" />
+                  <VoxelContent
+                    tx={
+                      (
+                        (store?.editor.activeDocument?.viewport2D.hoveredVoxel
+                          .y || 0) + 1
+                      ).toString() ?? "-"
+                    }
+                  />
+                </FlexRow>
+              )}
+              {(store?.editor.activeDocument?.has3DLayers ||
+                store?.editor.activeDocument?.viewport2D.mainViewType !==
+                  ViewType.Transverse) && (
+                <FlexRow>
+                  <VoxelTitle tx="Z" />
+                  <VoxelContent
+                    tx={
+                      (
+                        (store?.editor.activeDocument?.viewport2D.hoveredVoxel
+                          .z || 0) + 1
+                      ).toString() ?? "-"
+                    }
+                  />
+                </FlexRow>
+              )}
+              <Spacer />
               <FlexRow>
-                <VoxelTitle tx="X" />
+                <VoxelTitle tx="V" />
                 <VoxelContent
                   tx={
-                    (
-                      (store?.editor.activeDocument?.viewport2D.hoveredVoxel
-                        .x || 0) + 1
-                    ).toString() ?? "-"
+                    store?.editor.activeDocument?.viewport2D.hoveredValue
+                      .toArray()
+                      .map((value) =>
+                        Number.isInteger(value)
+                          ? value.toString()
+                          : value.toFixed(5),
+                      )
+                      .join(", ") ?? "-"
                   }
                 />
               </FlexRow>
-            )}
-            {(store?.editor.activeDocument?.has3DLayers ||
-              store?.editor.activeDocument?.viewport2D.mainViewType !==
-                ViewType.Coronal) && (
-              <FlexRow>
-                <VoxelTitle tx="Y" />
-                <VoxelContent
-                  tx={
-                    (
-                      (store?.editor.activeDocument?.viewport2D.hoveredVoxel
-                        .y || 0) + 1
-                    ).toString() ?? "-"
-                  }
-                />
-              </FlexRow>
-            )}
-            {(store?.editor.activeDocument?.has3DLayers ||
-              store?.editor.activeDocument?.viewport2D.mainViewType !==
-                ViewType.Transverse) && (
-              <FlexRow>
-                <VoxelTitle tx="Z" />
-                <VoxelContent
-                  tx={
-                    (
-                      (store?.editor.activeDocument?.viewport2D.hoveredVoxel
-                        .z || 0) + 1
-                    ).toString() ?? "-"
-                  }
-                />
-              </FlexRow>
-            )}
-            <Spacer />
-            <FlexRow>
-              <VoxelTitle tx="V" />
-              <VoxelContent
-                tx={
-                  store?.editor.activeDocument?.viewport2D.hoveredValue
-                    .toArray()
-                    .map((value) =>
-                      Number.isInteger(value)
-                        ? value.toString()
-                        : value.toFixed(5),
-                    )
-                    .join(", ") ?? "-"
-                }
-              />
-            </FlexRow>
-          </FlexColumn>
+            </FlexColumn>
+          </VoxelContainer>
         )}
-    </FlexRow>
+    </BottomAlignedFlexRow>
   ) : null;
 });

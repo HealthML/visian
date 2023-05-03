@@ -160,7 +160,7 @@ export class Viewport2D
   };
 
   public rotateBy90Degrees = (clockwise = true) => {
-    const rotationAngle = clockwise ? Math.PI / 2 : -Math.PI / 2;
+    const rotationAngle = clockwise ? -Math.PI / 2 : Math.PI / 2;
     switch (this.mainViewType) {
       case ViewType.Transverse:
         this.rotationT += rotationAngle;
