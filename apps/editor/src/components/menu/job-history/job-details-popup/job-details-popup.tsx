@@ -16,6 +16,7 @@ import styled from "styled-components";
 import {
   useAnnotationsByJob,
   useDeleteJobsForProjectMutation,
+  usePatchJobStatusMutation,
 } from "../../../../queries";
 import useImagesByJob from "../../../../queries/use-images-by-jobs";
 import { Image } from "../../../../types";
@@ -80,8 +81,9 @@ export const JobDetailsPopUp = observer<JobDetailsPopUpProps>(
     const { t } = useTranslation();
     const navigate = useNavigate();
     const { deleteJobs } = useDeleteJobsForProjectMutation();
+    const { patchJobStatus } = usePatchJobStatusMutation();
 
-    // delete annotation confirmation popup
+    // delete job confirmation popup
     const [
       isDeleteJobConfirmationPopUpOpen,
       setIsDeleteJobConfirmationPopUpOpen,
@@ -91,6 +93,18 @@ export const JobDetailsPopUp = observer<JobDetailsPopUpProps>(
     }, []);
     const closeDeleteJobConfirmationPopUp = useCallback(() => {
       setIsDeleteJobConfirmationPopUpOpen(false);
+    }, []);
+
+    // cancel job confirmation popup
+    const [
+      isCancelJobConfirmationPopUpOpen,
+      setIsCancelJobConfirmationPopUpOpen,
+    ] = useState(false);
+    const openCancelJobConfirmationPopUp = useCallback(() => {
+      setIsCancelJobConfirmationPopUpOpen(true);
+    }, []);
+    const closeCancelJobConfirmationPopUp = useCallback(() => {
+      setIsCancelJobConfirmationPopUpOpen(false);
     }, []);
 
     const imagesWithAnnotations = jobAnnotations?.map(
@@ -137,7 +151,14 @@ export const JobDetailsPopUp = observer<JobDetailsPopUpProps>(
           <>
             <JobStatusControlsContainer>
               <JobStatusBadge status={job.status} />
-              {!["queued", "running"].includes(job.status) && (
+              {["queued", "running"].includes(job.status) ? (
+                <IconButton
+                  icon="cancel"
+                  tooltipTx="cancel-job-title"
+                  onPointerDown={openCancelJobConfirmationPopUp}
+                  tooltipPosition="right"
+                />
+              ) : (
                 <IconButton
                   icon="trash"
                   tooltipTx="delete-job-title"
@@ -210,6 +231,20 @@ export const JobDetailsPopUp = observer<JobDetailsPopUpProps>(
             deleteJobs({
               projectId: job.project,
               jobIds: [job.id],
+            });
+            onClose?.();
+          }}
+        />
+        <ConfirmationPopup
+          isOpen={isCancelJobConfirmationPopUpOpen}
+          onClose={closeCancelJobConfirmationPopUp}
+          messageTx="cancel-job-message"
+          titleTx="cancel-job-title"
+          onConfirm={() => {
+            patchJobStatus({
+              projectId: job.project,
+              jobId: job.id,
+              jobStatus: "canceled",
             });
             onClose?.();
           }}

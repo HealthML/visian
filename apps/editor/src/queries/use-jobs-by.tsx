@@ -30,6 +30,76 @@ export const useJobsBy = (projectId: string) => {
   };
 };
 
+const patchJobStatus = async ({
+  projectId,
+  jobId,
+  jobStatus,
+}: {
+  projectId: string;
+  jobId: string;
+  jobStatus: string;
+}) => {
+  const jobsResponse = await axios.patch<Job>(
+    `${hubBaseUrl}jobs/${jobId}`,
+    { status: jobStatus },
+    {
+      timeout: 1000 * 2, // 2 seconds
+    },
+  );
+  return jobsResponse.data;
+};
+
+export const usePatchJobStatusMutation = () => {
+  const queryClient = useQueryClient();
+  const { isError, isIdle, isLoading, isPaused, isSuccess, mutate } =
+    useMutation<
+      Job,
+      AxiosError<Job>,
+      { projectId: string; jobId: string; jobStatus: string },
+      { previousJobs: Job[] }
+    >({
+      mutationFn: patchJobStatus,
+      onMutate: async ({ projectId, jobId, jobStatus }) => {
+        await queryClient.cancelQueries({ queryKey: ["jobs", projectId] });
+
+        const previousJobs = queryClient.getQueryData<Job[]>([
+          "jobs",
+          projectId,
+        ]);
+
+        if (!previousJobs) return;
+
+        const updatedJobs = previousJobs.map((job) => {
+          if (job.id === jobId) {
+            return {
+              ...job,
+              status: jobStatus,
+            };
+          }
+          return job;
+        });
+
+        queryClient.setQueryData(["jobs", projectId], updatedJobs);
+
+        return { previousJobs };
+      },
+      onError: (err, { projectId }, context) => {
+        queryClient.setQueryData(["jobs", projectId], context?.previousJobs);
+      },
+      onSettled: (data, err, { projectId }) => {
+        queryClient.invalidateQueries({ queryKey: ["jobs", projectId] });
+      },
+    });
+  return {
+    isPatchJobStatusError: isError,
+    isPatchJobStatusIdle: isIdle,
+    isPatchJobStatusLoading: isLoading,
+    isPatchJobStatusPaused: isPaused,
+    isPatchJobStatusSuccess: isSuccess,
+    patchJobStatus: mutate,
+  };
+};
+
 const deleteJobs = async ({
   projectId,
   jobIds,
