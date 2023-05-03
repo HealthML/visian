@@ -336,7 +336,6 @@
   "saving-error": "Saving Error",
 
   "internal-server-error": "Internal Server Error",
-  "job-creation-error": "An error occurred while creating the job.",
 
   "confirm": "Confirm",
   "cancel": "Cancel",
@@ -357,5 +356,5 @@
 
   "create": "Create",
   "create-project": "Create Project",
-  "project-name": "Projectname"
+  "project-name": "Project Name"
 }
