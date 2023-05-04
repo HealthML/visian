@@ -19,6 +19,7 @@ import {
   SmartBrush3DModal,
   ThresholdAnnotationModal,
 } from "../action-modal";
+import { SAMModal } from "../action-modal/sam-modal";
 import { AIBar } from "../ai-bar";
 import { AxesAndVoxel } from "../axes-and-voxel";
 import { DropSheet } from "../drop-sheet";
@@ -241,6 +242,7 @@ export const UIOverlay = observer<UIOverlayProps>(
                 <Axes3D ref={axes3dRef} />
               </AxesSpacer>
               <ModalRow>
+                <SAMModal />
                 <SmartBrush3DModal />
                 <ThresholdAnnotationModal />
                 <DilateErodeModal />

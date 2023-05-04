@@ -85,6 +85,12 @@
   "discard-dilate-erode": "Verwerfen (Esc)",
   "submit-dilate-erode": "Anwenden (Enter)",
 
+  "sam-tool": "MedSAM Tool",
+  "sam-tool-bounding-box": "Bounding Box",
+  "sam-tool-points": "Punkte",
+  "sam-tool-close": "Verwerfen (Esc)",
+  "sam-tool-accept": "Akzeptieren (Enter)",
+
   "data-model-outdated-alert": "Datenmodell veraltet. Zurücksetzen notwendig.",
   "discard-current-document-confirmation": "Aktuelles Dokument verwerfen?",
   "erase-application-data-confirmation": "Alle Anwendungsdaten löschen?",

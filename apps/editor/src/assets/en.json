@@ -85,6 +85,12 @@
   "discard-dilate-erode": "Discard (Esc)",
   "submit-dilate-erode": "Apply (Enter)",
 
+  "sam-tool": "MedSAM Tool",
+  "sam-tool-bounding-box": "Bounding Box",
+  "sam-tool-points": "Points",
+  "sam-tool-discard": "Discard (Esc)",
+  "sam-tool-accept": "Accept (Enter)",
+
   "data-model-outdated-alert": "Data model outdated. Reset required.",
   "discard-current-document-confirmation": "Discard the current document?",
   "erase-application-data-confirmation": "Erase all application data?",

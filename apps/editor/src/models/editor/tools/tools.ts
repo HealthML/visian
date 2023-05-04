@@ -20,12 +20,12 @@ import { BoundedSmartBrush } from "./bounded-smart-brush";
 import { CircleBrush } from "./circle-brush";
 import { ClearImageTool } from "./clear-image-tool";
 import { ClearSliceTool } from "./clear-slice-tool";
-import { CopilotTool } from "./copilot-tool";
 import { CrosshairTool } from "./crosshair-tool";
 import { DilateErodeTool } from "./dilate-erode-tool";
 import { MeasurementTool } from "./measurement-tool";
 import { OutlineTool } from "./outline-tool";
 import { PlaneTool } from "./plane-tool";
+import { SAMTool } from "./sam-tool";
 import { SelfDeactivatingTool } from "./self-deactivating-tool";
 import { SmartBrush } from "./smart-brush";
 import { SmartBrush3D } from "./smart-brush-3d";
@@ -53,7 +53,7 @@ export type ToolName =
   | "plane-tool"
   | "fly-tool"
   | "measurement-tool"
-  | "copilot-tool";
+  | "sam-tool";
 
 export interface ToolsSnapshot<N extends string> {
   activeToolName?: N;
@@ -201,7 +201,7 @@ export class Tools
       "outline-eraser": new OutlineTool(document, this.toolRenderer, false),
       "clear-slice": new ClearSliceTool(document, this.toolRenderer),
       "clear-image": new ClearImageTool(document, this.toolRenderer),
-      "copilot-tool": new CopilotTool(document, this.toolRenderer),
+      "sam-tool": new SAMTool(document, this.toolRenderer),
       "threshold-annotation": new ThresholdAnnotationTool(
         document,
         this.thresholdAnnotationRenderer3D,
@@ -251,7 +251,7 @@ export class Tools
         document,
       ),
       new ToolGroup({ toolNames: ["measurement-tool"] }, document),
-      new ToolGroup({ toolNames: ["copilot-tool"] }, document),
+      new ToolGroup({ toolNames: ["sam-tool"] }, document),
     );
 
     if (snapshot) this.applySnapshot(snapshot);
