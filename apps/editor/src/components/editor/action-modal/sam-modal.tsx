@@ -9,7 +9,11 @@ import { useCallback } from "react";
 import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
-import type { SAMTool, SAMToolMode } from "../../../models";
+import type {
+  SAMTool,
+  SAMToolEmbeddingState,
+  SAMToolMode,
+} from "../../../models";
 
 const StyledModal = styled(Modal)`
   margin-top: 16px;
@@ -39,6 +43,30 @@ export const SAMModal = observer(() => {
 
   if (!samTool || !samTool.isActive) return null;
 
+  const components: { [key in SAMToolEmbeddingState]: JSX.Element } = {
+    uninitialized: (
+      <ButtonParam
+        labelTx="sam-tool-initialize"
+        handlePress={() => samTool.loadEmbedding()}
+        isLast
+      />
+    ),
+    loading: <>Loading Embedding...</>,
+    ready: (
+      <>
+        <Switch
+          options={[
+            { labelTx: "sam-tool-bounding-box", value: "bounding-box" },
+            { labelTx: "sam-tool-points", value: "points" },
+          ]}
+          value={samTool.mode}
+          onChange={setMode}
+        />
+        <ButtonParam labelTx="sam-tool-accept" isLast handlePress={accept} />
+      </>
+    ),
+  };
+
   return (
     <StyledModal
       labelTx="sam-tool"
@@ -50,15 +78,7 @@ export const SAMModal = observer(() => {
         />
       }
     >
-      <Switch
-        options={[
-          { labelTx: "sam-tool-bounding-box", value: "bounding-box" },
-          { labelTx: "sam-tool-points", value: "points" },
-        ]}
-        value={samTool.mode}
-        onChange={setMode}
-      />
-      <ButtonParam labelTx="sam-tool-accept" isLast handlePress={accept} />
+      {components[samTool.embeddingState]}
     </StyledModal>
   );
 });

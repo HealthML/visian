@@ -117,6 +117,7 @@
     "mobx-react-lite": "^3.4.0",
     "moment": "^2.29.4",
     "nifti-js": "^1.0.1",
+    "onnxruntime-web": "^1.14.0",
     "pako": "^2.0.4",
     "react": "17.0.2",
     "react-beautiful-dnd": "^13.1.1",

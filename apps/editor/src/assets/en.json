@@ -86,6 +86,7 @@
   "submit-dilate-erode": "Apply (Enter)",
 
   "sam-tool": "MedSAM Tool",
+  "sam-tool-initialize": "Initialize",
   "sam-tool-bounding-box": "Bounding Box",
   "sam-tool-points": "Points",
   "sam-tool-discard": "Discard (Esc)",
