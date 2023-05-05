@@ -123,6 +123,13 @@ export interface IMeasurementTool extends IPreviewedTool<"measurement-tool"> {
   setToDeleteMode: () => void;
 }
 
+export interface ISAMTool extends IPreviewedTool<"sam-tool"> {
+  boundingBox?: {
+    start: Vector;
+    end: Vector;
+  };
+}
+
 /** A class of similar tools, typically grouped in the UI. */
 export interface IToolGroup<N extends string> {
   /**

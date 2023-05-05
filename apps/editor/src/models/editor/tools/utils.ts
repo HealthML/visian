@@ -10,6 +10,9 @@ export const dragPointsEqual = (dp1: DragPoint, dp2: DragPoint) =>
   dp1.right === dp2.right &&
   dp1.bottom === dp2.bottom;
 
+export const dragPointsCenterEqual = (dp1: DragPoint, dp2: DragPoint) =>
+  dp1.x === dp2.x && dp1.y === dp2.y && dp1.z === dp2.z;
+
 /**
  * Mutates the texture data of the given image layer by applying a mutator function
  * to it. Additionally, adds the correct image command to the document's

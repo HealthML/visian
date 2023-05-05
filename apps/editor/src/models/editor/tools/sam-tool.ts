@@ -1,17 +1,23 @@
 import { ToolRenderer } from "@visian/rendering";
-import { IDocument, ITool } from "@visian/ui-shared";
+import { DragPoint, IDocument, ISAMTool, ITool } from "@visian/ui-shared";
+import { Vector } from "@visian/utils";
 import { action, makeObservable, observable } from "mobx";
 import * as ort from "onnxruntime-web";
 
 import { Tool } from "./tool";
+import { dragPointsCenterEqual } from "./utils";
 
 export type SAMToolMode = "bounding-box" | "points";
 export type SAMToolEmbeddingState = "uninitialized" | "loading" | "ready";
+export type SAMToolBoundingBox = { topLeft: Vector; bottomRight: Vector };
 
 // Todo: Allow configuration:
 const EMBEDDING_SERVICE_URL = "http://localhost:3000/embedding";
 
-export class SAMTool<N extends "sam-tool" = "sam-tool"> extends Tool<N> {
+export class SAMTool<N extends "sam-tool" = "sam-tool">
+  extends Tool<N>
+  implements ISAMTool
+{
   public readonly excludeFromSnapshotTracking = ["toolRenderer", "document"];
 
   protected previousTool?: N;
@@ -20,6 +26,8 @@ export class SAMTool<N extends "sam-tool" = "sam-tool"> extends Tool<N> {
 
   public embeddingState: SAMToolEmbeddingState = "uninitialized";
   public mode: SAMToolMode = "bounding-box";
+  public boundingBoxStart?: DragPoint;
+  public boundingBoxEnd?: DragPoint;
 
   constructor(document: IDocument, public toolRenderer: ToolRenderer) {
     super(
@@ -38,8 +46,12 @@ export class SAMTool<N extends "sam-tool" = "sam-tool"> extends Tool<N> {
     makeObservable(this, {
       mode: observable,
       embeddingState: observable,
+      boundingBoxStart: observable,
+      boundingBoxEnd: observable,
       setMode: action,
       setEmbeddingState: action,
+      setBoundingBoxStart: action,
+      setBoundingBoxEnd: action,
     });
   }
 
@@ -49,6 +61,22 @@ export class SAMTool<N extends "sam-tool" = "sam-tool"> extends Tool<N> {
 
   public setEmbeddingState(state: SAMToolEmbeddingState) {
     this.embeddingState = state;
+  }
+
+  public setBoundingBoxStart(dragPoint?: DragPoint) {
+    this.boundingBoxStart = dragPoint;
+  }
+
+  public setBoundingBoxEnd(dragPoint?: DragPoint) {
+    this.boundingBoxEnd = dragPoint;
+  }
+
+  public get boundingBox(): { start: Vector; end: Vector } | undefined {
+    if (!this.boundingBoxStart || !this.boundingBoxEnd) return undefined;
+    return {
+      start: Vector.fromObject(this.boundingBoxStart),
+      end: Vector.fromObject(this.boundingBoxEnd),
+    };
   }
 
   public async loadEmbedding() {
@@ -81,6 +109,26 @@ export class SAMTool<N extends "sam-tool" = "sam-tool"> extends Tool<N> {
     this.setEmbeddingState("ready");
   }
 
+  public startAt(_dragPoint: DragPoint): void {
+    this.setBoundingBoxStart(_dragPoint);
+    this.setBoundingBoxEnd(undefined);
+  }
+
+  public moveTo(_dragPoint: DragPoint): void {
+    this.setBoundingBoxEnd(_dragPoint);
+  }
+
+  // Todo: Prevent single line bounding boxes.
+  public endAt(_dragPoint: DragPoint): void {
+    if (
+      !this.boundingBoxStart ||
+      dragPointsCenterEqual(_dragPoint, this.boundingBoxStart)
+    ) {
+      this.setBoundingBoxStart(undefined);
+      this.setBoundingBoxEnd(undefined);
+    }
+  }
+
   public activate(previousTool?: ITool<N>) {
     this.previousTool = previousTool?.name;
 
@@ -107,6 +155,8 @@ export class SAMTool<N extends "sam-tool" = "sam-tool"> extends Tool<N> {
   };
 
   public discard = () => {
+    this.setBoundingBoxStart(undefined);
+    this.setBoundingBoxEnd(undefined);
     console.log("discarded");
   };
 

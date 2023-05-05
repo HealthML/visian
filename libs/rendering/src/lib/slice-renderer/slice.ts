@@ -18,6 +18,7 @@ import {
   OverlayRoundedPointsMaterial,
   Path,
   PreviewBrushCursor,
+  SegPrompt,
   sliceMeshZ,
   synchCrosshairs,
   toolOverlayZ,
@@ -47,6 +48,7 @@ export class Slice extends THREE.Group implements IDisposable {
   public previewBrushCursor: PreviewBrushCursor;
 
   private path: Path;
+  private segPrompt: SegPrompt;
 
   private overlayLineMaterial: OverlayLineMaterial;
   private overlayPointsMaterial: OverlayPointsMaterial;
@@ -125,6 +127,9 @@ export class Slice extends THREE.Group implements IDisposable {
     );
     this.crosshairShiftGroup.add(this.path);
 
+    this.segPrompt = new SegPrompt(editor, viewType, this.overlayLineMaterial);
+    this.crosshairShiftGroup.add(this.segPrompt);
+
     this.disposers.push(
       autorun(this.updateScale),
       autorun(this.updateOffset),
@@ -160,6 +165,7 @@ export class Slice extends THREE.Group implements IDisposable {
     this.overlayRoundedPointsMaterial.dispose();
     this.crosshairMaterial.dispose();
     this.path.dispose();
+    this.segPrompt.dispose();
   }
 
   public setCrosshairSynchOffset(offset = new THREE.Vector2()) {
