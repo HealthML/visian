@@ -310,6 +310,28 @@ export const generalHotkeys: IHotkey[] = [
     },
   },
 
+  // Rotation
+  {
+    keys: "ctrl+right",
+    viewMode: "2D",
+    action: (store) => {
+      store.editor.activeDocument?.viewport2D.rotateBy90Degrees(true);
+      store.editor.sliceRenderer?.lazyRender();
+    },
+    labelTx: "rotate-right",
+    shortcutGuideSection: "rotation",
+  },
+  {
+    keys: "ctrl+left",
+    viewMode: "2D",
+    action: (store) => {
+      store.editor.activeDocument?.viewport2D.rotateBy90Degrees(false);
+      store.editor.sliceRenderer?.lazyRender();
+    },
+    labelTx: "rotate-left",
+    shortcutGuideSection: "rotation",
+  },
+
   // New Document
   {
     // Ctrl + N in Chrome only works in application mode
