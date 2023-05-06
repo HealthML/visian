@@ -231,6 +231,7 @@
   "rotation": "Rotation",
   "rotate-right": "Rotate right",
   "rotate-left": "Rotate left",
+  "reset-rotation": "Reset rotation",
   "save-export": "Save & Export",
   "create-new-document": "Create a new document",
   "save-in-browser": "Save in browser",

@@ -220,10 +220,17 @@ export class Slice extends THREE.Group implements IDisposable {
   }
 
   private updateRotation = () => {
-    if (this.editor.activeDocument?.viewport2D.mainViewType !== this.viewType)
-      return;
-
     const viewport = this.editor.activeDocument?.viewport2D;
+    const wasRotationResetted =
+      viewport?.rotationT === 0 &&
+      viewport?.rotationS === 0 &&
+      viewport?.rotationC === 0;
+
+    if (
+      !viewport ||
+      (viewport.mainViewType !== this.viewType && !wasRotationResetted)
+    )
+      return;
 
     let rotation;
     switch (this.viewType) {

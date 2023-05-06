@@ -331,6 +331,16 @@ export const generalHotkeys: IHotkey[] = [
     labelTx: "rotate-left",
     shortcutGuideSection: "rotation",
   },
+  {
+    keys: "ctrl+shift+r",
+    viewMode: "2D",
+    action: (store) => {
+      store.editor.activeDocument?.viewport2D.resetRotation();
+      store.editor.sliceRenderer?.lazyRender();
+    },
+    labelTx: "reset-rotation",
+    shortcutGuideSection: "rotation",
+  },
 
   // New Document
   {
