@@ -16,6 +16,14 @@ const AxesContainer = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
+  pointer-events: initial;
+  button {
+    opacity: 0.3;
+    transition: opacity 0.05s ease-in-out;
+  }
+  &:hover button {
+    opacity: 1;
+  }
 `;
 
 const StyledRotationButton = styled(InvisibleButton)<{
@@ -51,6 +59,7 @@ const AxesHorizontalContainer = styled(AxesVerticalContainer)<{
   rotation: number;
   isViewTypeChanged: boolean;
 }>`
+  pointer-events: none;
   flex-direction: row;
   transform: rotate(${(props) => -props.rotation}rad);
   transition: transform ${(props) => (props.isViewTypeChanged ? "0s" : "0.25s")}
