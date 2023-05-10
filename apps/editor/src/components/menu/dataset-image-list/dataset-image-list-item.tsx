@@ -11,6 +11,7 @@ import styled from "styled-components";
 
 import { useAnnotationsByImage } from "../../../queries";
 import { Annotation, Image } from "../../../types";
+import { AnnotationListItem } from "../annotation-list-item";
 import { editorPath, handleImageSelection } from "../util";
 
 const Spacer = styled.div`
@@ -154,7 +155,7 @@ export const DatasetImageListItem = ({
           annotations && (
             <AnnotationsList>
               {annotations.map((annotation: Annotation) => (
-                <ListItem>
+                <AnnotationListItem isVerified={annotation.verified}>
                   <ClickableText
                     onClick={() => {
                       navigate(
@@ -180,7 +181,7 @@ export const DatasetImageListItem = ({
                       tooltipPosition="left"
                     />
                   )}
-                </ListItem>
+                </AnnotationListItem>
               ))}
             </AnnotationsList>
           )
