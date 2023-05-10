@@ -329,6 +329,7 @@
   "image-import-popup-title": "Import Images",
   "import-selected-files": "Selected Images",
   "import-no-files-selected": "Please select at least one image.",
+  "importing-images": "Importing image {{current}} of {{total}}...",
 
   "open-editor": "Open editor",
   "close-editor": "Close editor",

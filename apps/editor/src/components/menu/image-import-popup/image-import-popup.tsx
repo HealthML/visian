@@ -9,11 +9,15 @@ import {
   space,
   Text,
   useFilePicker,
+  useTranslation,
 } from "@visian/ui-shared";
+import { promiseAllInBatches } from "@visian/utils";
 import { observer } from "mobx-react-lite";
 import { useCallback, useState } from "react";
 import styled from "styled-components";
 
+import { postImage } from "../../../queries";
+import { ProgressPopUp } from "../../editor/progress-popup";
 import { ImageImportPopUpProps } from "./image-import-popup.props";
 
 const DropZoneContainer = styled.div`
@@ -85,9 +89,15 @@ const ImportButton = styled(Button)`
   min-width: 110px;
 `;
 
+const sanitizeForFS = (name: string) =>
+  name.replace(/[^a-z0-9_\-]/gi, "_").toLowerCase();
+
 export const ImageImportPopup = observer<ImageImportPopUpProps>(
-  ({ isOpen, onClose, datasetId }) => {
+  ({ isOpen, onClose, dataset, onImportFinished }) => {
     const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+    const [isImporting, setIsImporting] = useState(false);
+    const [uploadedFiles, setUploadedFiles] = useState(0);
+    const { t } = useTranslation();
 
     const importFilesFromInput = useCallback((event: Event) => {
       const { files } = event.target as HTMLInputElement;
@@ -107,6 +117,38 @@ export const ImageImportPopup = observer<ImageImportPopUpProps>(
       setSelectedFiles([]);
       if (onClose) onClose();
     }, [onClose]);
+
+    const totalFiles = selectedFiles.length;
+    const importImages = useCallback(async () => {
+      if (!dataset?.id) return;
+      setUploadedFiles(0);
+      setIsImporting(true);
+      await promiseAllInBatches<File, void>(
+        async (file) => {
+          const datasetName = sanitizeForFS(dataset.name);
+          await postImage(dataset.id, `${datasetName}/${file.name}`, file);
+          setUploadedFiles((prevUploadedFiles) => prevUploadedFiles + 1);
+        },
+        selectedFiles,
+        5,
+      );
+      onImportFinished();
+      setIsImporting(false);
+      setSelectedFiles([]);
+      if (onClose) onClose();
+    }, [selectedFiles, dataset, onClose, onImportFinished]);
+
+    if (isImporting) {
+      return (
+        <ProgressPopUp
+          label={t("importing-images", {
+            current: uploadedFiles,
+            total: totalFiles,
+          })}
+          progress={uploadedFiles / totalFiles}
+        />
+      );
+    }
 
     return (
       <LargePopUp
@@ -147,7 +189,11 @@ export const ImageImportPopup = observer<ImageImportPopUpProps>(
         </ExpandingLargePopUpGroup>
         <Footer>
           <CancelButton onPointerDown={cancelImport} tx="cancel" />
-          <Button isDisabled={selectedFiles.length === 0} tx="import-images" />
+          <Button
+            isDisabled={selectedFiles.length === 0}
+            tx="import-images"
+            onPointerDown={importImages}
+          />
         </Footer>
       </LargePopUp>
     );

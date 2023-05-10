@@ -147,10 +147,10 @@ export const DatasetExplorer = ({ dataset }: { dataset: Dataset }) => {
 
   // image import popup
   const [imageImportPopUpOpenWith, setImageImportPopUpOpenWith] =
-    useState<string>();
+    useState<Dataset>();
   const openImageImportPopUp = useCallback(() => {
-    setImageImportPopUpOpenWith(dataset.id);
-  }, [dataset.id]);
+    setImageImportPopUpOpenWith(dataset);
+  }, [dataset]);
   const closeImageImportPopUp = useCallback(() => {
     setImageImportPopUpOpenWith(undefined);
   }, []);
@@ -254,7 +254,8 @@ export const DatasetExplorer = ({ dataset }: { dataset: Dataset }) => {
       <ImageImportPopup
         isOpen={!!imageImportPopUpOpenWith}
         onClose={closeImageImportPopUp}
-        datasetId={imageImportPopUpOpenWith}
+        dataset={imageImportPopUpOpenWith}
+        onImportFinished={refetchImages}
       />
       <ConfirmationPopup
         isOpen={isDeleteAnnotationConfirmationPopUpOpen}
