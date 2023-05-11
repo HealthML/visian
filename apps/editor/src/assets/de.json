@@ -328,8 +328,11 @@
   "import-images": "Bilder importieren",
   "image-import-popup-title": "Bilder importieren",
   "import-selected-files": "Ausgewählte Bilder",
-  "import-no-files-selected": "Bitte min. ein Bild auswählen.",
-  "importing-images": "Bild {{current}} von {{total}} wird importiert...",
+  "import-no-files-selected": "Bitte mind. ein Bild auswählen.",
+  "image-import": "Bild {{current}} von {{total}} wird importiert...",
+  "image-import-error-title": "Import Fehler aufgetreten",
+  "image-import-generic-error-description": "Es wurden {{imported}} von {{total}} Bildern erfolgreich importiert.",
+  "image-import-duplicate-error-description": "Einige Bilder existierten bereits und wurden übersprungen. Es wurde(n) {{imported}} von {{total}} Bilder(n) erfolgreich importiert.",
 
   "open-editor": "Editor öffnen",
   "close-editor": "Editor schließen",

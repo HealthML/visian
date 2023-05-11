@@ -6,14 +6,16 @@ import {
   LargePopUpGroupTitle,
   List,
   ListItem,
+  Notification,
   space,
   Text,
   useFilePicker,
   useTranslation,
 } from "@visian/ui-shared";
 import { promiseAllInBatches } from "@visian/utils";
+import { AxiosError } from "axios";
 import { observer } from "mobx-react-lite";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import styled from "styled-components";
 
 import { postImage } from "../../../queries";
@@ -89,15 +91,32 @@ const ImportButton = styled(Button)`
   min-width: 110px;
 `;
 
+const ErrorNotification = styled(Notification)`
+  position: absolute;
+  min-width: 15%;
+  left: 50%;
+  bottom: 12%;
+  transform: translateX(-50%);
+`;
+
 const sanitizeForFS = (name: string) =>
-  name.replace(/[^a-z0-9_\-]/gi, "_").toLowerCase();
+  name.replace(/[^a-z0-9_-]/gi, "_").toLowerCase();
 
 export const ImageImportPopup = observer<ImageImportPopUpProps>(
   ({ isOpen, onClose, dataset, onImportFinished }) => {
     const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
     const [isImporting, setIsImporting] = useState(false);
     const [uploadedFiles, setUploadedFiles] = useState(0);
+    const [importError, setImportError] = useState<{
+      type: "generic" | "duplicate";
+      imageName: string;
+      totalImages: number;
+    }>();
     const { t } = useTranslation();
+
+    useEffect(() => {
+      if (isOpen) setImportError(undefined);
+    }, [isOpen]);
 
     const importFilesFromInput = useCallback((event: Event) => {
       const { files } = event.target as HTMLInputElement;
@@ -125,9 +144,28 @@ export const ImageImportPopup = observer<ImageImportPopUpProps>(
       setIsImporting(true);
       await promiseAllInBatches<File, void>(
         async (file) => {
-          const datasetName = sanitizeForFS(dataset.name);
-          await postImage(dataset.id, `${datasetName}/${file.name}`, file);
-          setUploadedFiles((prevUploadedFiles) => prevUploadedFiles + 1);
+          try {
+            const datasetName = sanitizeForFS(dataset.name);
+            await postImage(dataset.id, `${datasetName}/${file.name}`, file);
+            setUploadedFiles((prevUploadedFiles) => prevUploadedFiles + 1);
+          } catch (error) {
+            if (!(error instanceof AxiosError)) throw error;
+            if (error.response?.data.message.includes("exists already")) {
+              setImportError({
+                type: "duplicate",
+                imageName: file.name,
+                totalImages: totalFiles,
+              });
+            } else {
+              setImportError({
+                type: "generic",
+                imageName: file.name,
+                totalImages: totalFiles,
+              });
+            }
+            // eslint-disable-next-line no-console
+            console.error(`Error while uploading ${file.name}:`, error);
+          }
         },
         selectedFiles,
         5,
@@ -150,52 +188,79 @@ export const ImageImportPopup = observer<ImageImportPopUpProps>(
       );
     }
 
+    const errorNotification =
+      importError?.type === "duplicate" ? (
+        <ErrorNotification
+          titleTx="image-import-error-title"
+          descriptionTx="image-import-duplicate-error-description"
+          descriptionData={{
+            duplicateImage: importError.imageName,
+            imported: uploadedFiles,
+            total: importError.totalImages,
+          }}
+          onClose={() => setImportError(undefined)}
+        />
+      ) : importError?.type === "generic" ? (
+        <ErrorNotification
+          titleTx="image-import-error-title"
+          descriptionTx="image-import-generic-error-description"
+          descriptionData={{
+            imported: uploadedFiles,
+            total: importError.totalImages,
+          }}
+          onClose={() => setImportError(undefined)}
+        />
+      ) : undefined;
+
     return (
-      <LargePopUp
-        titleTx="image-import-popup-title"
-        isOpen={isOpen}
-        dismiss={cancelImport}
-        shouldDismissOnOutsidePress
-      >
-        <LargePopUpGroup>
-          <DropZoneContainer>
-            <DropZoneLabel text="Drop files or" />
-            <ImportButton tx="Browse" onPointerDown={openFilePicker} />
-          </DropZoneContainer>
-        </LargePopUpGroup>
-        <ExpandingLargePopUpGroup>
-          <LargePopUpGroupTitle tx="import-selected-files" />
-          {selectedFiles.length === 0 ? (
-            <InfoText tx="import-no-files-selected" />
-          ) : (
-            <FileList>
-              {selectedFiles.map((file, index) => (
-                <ListItem
-                  isLast={index === selectedFiles.length - 1}
-                  key={file.name}
-                >
-                  <FileEntry>
-                    <FileEntryText text={file.name} />
-                    <IconButton
-                      icon="xSmall"
-                      tooltipTx="delete-dataset-title"
-                      onPointerDown={() => removeSelectedFile(file)}
-                    />
-                  </FileEntry>
-                </ListItem>
-              ))}
-            </FileList>
-          )}
-        </ExpandingLargePopUpGroup>
-        <Footer>
-          <CancelButton onPointerDown={cancelImport} tx="cancel" />
-          <Button
-            isDisabled={selectedFiles.length === 0}
-            tx="import-images"
-            onPointerDown={importImages}
-          />
-        </Footer>
-      </LargePopUp>
+      <>
+        {errorNotification}
+        <LargePopUp
+          titleTx="image-import-popup-title"
+          isOpen={isOpen}
+          dismiss={cancelImport}
+          shouldDismissOnOutsidePress
+        >
+          <LargePopUpGroup>
+            <DropZoneContainer>
+              <DropZoneLabel text="Drop files or" />
+              <ImportButton tx="Browse" onPointerDown={openFilePicker} />
+            </DropZoneContainer>
+          </LargePopUpGroup>
+          <ExpandingLargePopUpGroup>
+            <LargePopUpGroupTitle tx="import-selected-files" />
+            {selectedFiles.length === 0 ? (
+              <InfoText tx="import-no-files-selected" />
+            ) : (
+              <FileList>
+                {selectedFiles.map((file, index) => (
+                  <ListItem
+                    isLast={index === selectedFiles.length - 1}
+                    key={file.name}
+                  >
+                    <FileEntry>
+                      <FileEntryText text={file.name} />
+                      <IconButton
+                        icon="xSmall"
+                        tooltipTx="delete-dataset-title"
+                        onPointerDown={() => removeSelectedFile(file)}
+                      />
+                    </FileEntry>
+                  </ListItem>
+                ))}
+              </FileList>
+            )}
+          </ExpandingLargePopUpGroup>
+          <Footer>
+            <CancelButton onPointerDown={cancelImport} tx="cancel" />
+            <Button
+              isDisabled={selectedFiles.length === 0}
+              tx="import-images"
+              onPointerDown={importImages}
+            />
+          </Footer>
+        </LargePopUp>
+      </>
     );
   },
 );

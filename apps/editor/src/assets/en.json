@@ -330,6 +330,9 @@
   "import-selected-files": "Selected Images",
   "import-no-files-selected": "Please select at least one image.",
   "importing-images": "Importing image {{current}} of {{total}}...",
+  "image-import-error-title": "Errors occurred during import",
+  "image-import-generic-error-description": "{{imported}} out of {{total}} images have been successfully imported.",
+  "image-import-duplicate-error-description": "Some images already existed and have been skipped. {{imported}} out of {{total}} images have been successfully imported.",
 
   "open-editor": "Open editor",
   "close-editor": "Close editor",
