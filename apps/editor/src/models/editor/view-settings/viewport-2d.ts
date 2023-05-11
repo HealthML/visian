@@ -52,6 +52,9 @@ export class Viewport2D
 
   public zoomLevel!: number;
   public offset = new Vector(2);
+  public rotationT = 0;
+  public rotationS = 0;
+  public rotationC = 0;
 
   public window: Vector = new Vector([0, 1]);
 
@@ -80,6 +83,9 @@ export class Viewport2D
       showSideViews: observable,
       zoomLevel: observable,
       offset: observable,
+      rotationT: observable,
+      rotationS: observable,
+      rotationC: observable,
       window: observable,
       hoveredScreenCoordinates: observable,
       hoveredViewType: observable,
@@ -99,6 +105,8 @@ export class Viewport2D
       setVoxelInfoMode: action,
       setZoomLevel: action,
       setOffset: action,
+      resetRotation: action,
+      rotateBy90Degrees: action,
       setWindow: action,
       reset: action,
       toggleSideViews: action,
@@ -143,6 +151,27 @@ export class Viewport2D
 
     this.mainViewType = value ?? this.defaultViewType;
     this.hoveredViewType = this.mainViewType;
+  };
+
+  public resetRotation = (): void => {
+    this.rotationT = 0;
+    this.rotationS = 0;
+    this.rotationC = 0;
+  };
+
+  public rotateBy90Degrees = (clockwise = true) => {
+    const rotationAngle = clockwise ? -Math.PI / 2 : Math.PI / 2;
+    switch (this.mainViewType) {
+      case ViewType.Transverse:
+        this.rotationT += rotationAngle;
+        break;
+      case ViewType.Sagittal:
+        this.rotationS += rotationAngle;
+        break;
+      case ViewType.Coronal:
+        this.rotationC += rotationAngle;
+        break;
+    }
   };
 
   public setShowSideViews(value?: boolean): void {
@@ -205,6 +234,7 @@ export class Viewport2D
     this.setVoxelInfoMode();
     this.setZoomLevel();
     this.setOffset();
+    this.resetRotation();
   };
 
   // Special Accessors

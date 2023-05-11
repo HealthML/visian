@@ -157,6 +157,7 @@ export const ShortcutPopUp: React.FC<ShortcutPopUpProps> = observer(
             <HotkeySection name="view-types" />
             <HotkeySection name="slice-navigation" />
             <HotkeySection name="zoom" />
+            <HotkeySection name="rotation" />
             <HotkeySection name="save-export" />
           </LargePopUpColumn>
         </LargePopUpColumnContainer>

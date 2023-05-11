@@ -1,3 +1,4 @@
+import * as TWEEN from "@tweenjs/tween.js";
 import {
   RenderedImage,
   SliceRenderer,
@@ -165,6 +166,7 @@ export class Editor
   }
 
   private animate = () => {
+    TWEEN.update();
     this.activeDocument?.tools.toolRenderer.render();
     this.activeDocument?.tools.regionGrowingRenderer.render();
     this.activeDocument?.imageLayers.forEach((imageLayer) =>
