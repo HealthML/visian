@@ -16,11 +16,8 @@ import { JobCreationPopup } from "../job-creation-popup";
 import { useImageSelection } from "../util";
 
 const StyledModal = styled(Modal)`
-  vertical-align: middle;
   width: 100%;
-  z-index: 49;
 `;
-// TODO: z-index logic
 
 const ErrorNotification = styled(Notification)`
   position: absolute;

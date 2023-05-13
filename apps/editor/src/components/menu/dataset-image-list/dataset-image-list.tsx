@@ -6,8 +6,6 @@ import { useKeyboardShortcuts } from "../util";
 import { DatasetImageListItem } from "./dataset-image-list-item";
 
 const ImageList = styled(List)`
-  width: 100%;
-  height: 400px;
   overflow-y: auto;
   user-select: none;
 `;

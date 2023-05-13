@@ -10,10 +10,7 @@ import { ConfirmationPopup } from "../confirmation-popup";
 import { DatasetList } from "../dataset-list";
 
 const StyledModal = styled(Modal)`
-  vertical-align: middle;
-  width: 100vw;
-  position: relative;
-  z-index: 49;
+  width: 100100%;
 `;
 
 export const DatasetsGrid = ({ projectId }: { projectId: string }) => {
@@ -23,7 +20,7 @@ export const DatasetsGrid = ({ projectId }: { projectId: string }) => {
   const { t: translate } = useTranslation();
   const { deleteDatasets } = useDeleteDatasetsForProjectMutation();
 
-  // delete annotation confirmation popup
+  // delete dataset confirmation popup
   const [
     isDeleteDatasetConfirmationPopUpOpen,
     setIsDeleteDatasetConfirmationPopUpOpen,
@@ -55,12 +52,12 @@ export const DatasetsGrid = ({ projectId }: { projectId: string }) => {
   return (
     <>
       {isLoadingDatasets || isErrorDatasets ? (
-        <StyledModal labelTx={isLoadingDatasets ? "dataset-loading" : "error"}>
+        <StyledModal title={isLoadingDatasets ? "datasets-loading" : "error"}>
           {isLoadingDatasets ? (
-            <Text>{translate("dataset-loading")}</Text>
+            <Text>{translate("datasets-loading")}</Text>
           ) : (
             <Text>
-              {`${translate("dataset-loading-error")} ${
+              {`${translate("datasets-loading-error")} ${
                 datasetsError?.response?.statusText
               } (${datasetsError?.response?.status})`}
             </Text>

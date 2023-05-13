@@ -14,12 +14,8 @@ import { JobCreationPopup } from "../job-creation-popup";
 import { JobsTable } from "./job-table";
 
 const StyledModal = styled(Modal)`
-  vertical-align: middle;
-  width: 100vw;
-  position: relative;
-  z-index: 49;
+  width: 100%;
 `;
-// TODO: z-index logic
 
 const StyledButton = styled(SquareButton)`
   margin-left: 10px;

@@ -1,20 +1,18 @@
 import {
-  AbsoluteCover,
-  Box,
-  FloatingUIButton,
   InvisibleButton,
   Modal,
+  Screen,
   Text,
   useTranslation,
 } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
 import React, { useCallback, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 
 import { ConfirmationPopup } from "../components/menu/confirmation-popup";
 import { ProjectCreationPopup } from "../components/menu/project-creation-popup";
 import { ProjectList } from "../components/menu/projects-list/project-list";
+import { UIOverlayDataManager } from "../components/menu/ui-overlay-data-manager";
 import {
   useCreateProjectMutation,
   useDeleteProjectsMutation,
@@ -22,56 +20,8 @@ import {
 } from "../queries";
 import { Project } from "../types";
 
-const Container = styled(AbsoluteCover)`
-  display: flex;
-  flex-direction: column;
-  padding: 20px;
-`;
-
-const TopBar = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  height: 55px;
-`;
-
-const Main = styled(Box)`
-  display: flex;
-  justify-content: center;
-  height: 85%;
-  width: 85%;
-  margin: auto;
-`;
-
 const StyledModal = styled(Modal)`
-  vertical-align: middle;
   width: 100%;
-  z-index: 49;
-`;
-
-const ColumnLeft = styled.div`
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  width: 33.33%;
-`;
-
-const ColumnCenter = styled.div`
-  display: flex;
-  flex: 1;
-  justify-content: center;
-  width: 33.33%;
-`;
-
-const ColumnRight = styled.div`
-  display: flex;
-  flex-direction: row;
-  justify-content: flex-end;
-  width: 33.33%;
-`;
-
-const RightButton = styled(FloatingUIButton)`
-  margin-left: 16px;
 `;
 
 const IconButton = styled(InvisibleButton)`
@@ -85,9 +35,8 @@ export const ProjectsScreen: React.FC = observer(() => {
   const { deleteProjects } = useDeleteProjectsMutation();
   const { createProject } = useCreateProjectMutation();
   const { t: translate } = useTranslation();
-  const navigate = useNavigate();
 
-  // delete annotation confirmation popup
+  // delete project confirmation popup
   const [
     isDeleteProjectConfirmationPopUpOpen,
     setIsDeleteProjectConfirmationPopUpOpen,
@@ -127,71 +76,70 @@ export const ProjectsScreen: React.FC = observer(() => {
       ),
     [projectTobBeDeleted, translate],
   );
-
   return (
-    <Container title={`${translate("projects-base-title")}`}>
-      <TopBar>
-        <ColumnLeft />
-        <ColumnCenter />
-        <ColumnRight>
-          <RightButton
-            icon="pixelBrush"
-            tooltipTx="open-editor"
-            tooltipPosition="left"
-            onPointerDown={() => navigate(`/editor`)}
-            isActive={false}
-          />
-        </ColumnRight>
-      </TopBar>
-      <Main>
-        {isLoadingProjects ? (
-          <StyledModal labelTx="projects-loading" />
-        ) : isErrorProjects ? (
-          <StyledModal labelTx="error">
-            <Text>{`${translate("projects-loading-error")} ${
-              projectsError?.response?.statusText
-            } (${projectsError?.response?.status})`}</Text>
-          </StyledModal>
-        ) : (
-          <StyledModal
-            hideHeaderDivider={false}
-            labelTx="projects-base-title"
-            position="right"
-            headerChildren={
-              <IconButton
-                icon="plus"
-                tooltipTx="create-project"
-                tooltipPosition="left"
-                onPointerDown={openCreateProjectPopup}
+    <Screen
+      title={`${translate("projects-base-title")} ${
+        isLoadingProjects
+          ? translate("loading")
+          : isErrorProjects
+          ? translate("error")
+          : ""
+      }`}
+    >
+      <UIOverlayDataManager
+        main={
+          isLoadingProjects ? (
+            <StyledModal labelTx="projects-loading" />
+          ) : isErrorProjects ? (
+            <StyledModal labelTx="error">
+              <Text>{`${translate("projects-loading-error")} ${
+                projectsError?.response?.statusText
+              } (${projectsError?.response?.status})`}</Text>
+            </StyledModal>
+          ) : (
+            <StyledModal
+              hideHeaderDivider={false}
+              labelTx="projects-base-title"
+              position="right"
+              headerChildren={
+                <IconButton
+                  icon="plus"
+                  tooltipTx="create-project"
+                  tooltipPosition="left"
+                  onPointerDown={openCreateProjectPopup}
+                />
+              }
+            >
+              {projects && projects.length > 0 ? (
+                <ProjectList
+                  projects={projects}
+                  deleteProject={deleteProject}
+                />
+              ) : (
+                <Text>{translate("no-projects-available")}</Text>
+              )}
+              <ConfirmationPopup
+                isOpen={isDeleteProjectConfirmationPopUpOpen}
+                onClose={closeDeleteProjectConfirmationPopUp}
+                message={deleteProjectMessage}
+                titleTx="delete-project-title"
+                onConfirm={() => {
+                  if (projectTobBeDeleted)
+                    deleteProjects({
+                      projectIds: [projectTobBeDeleted.id],
+                    });
+                }}
               />
-            }
-          >
-            {projects && projects.length > 0 ? (
-              <ProjectList projects={projects} deleteProject={deleteProject} />
-            ) : (
-              <Text>{translate("no-projects-available")}</Text>
-            )}
-            <ConfirmationPopup
-              isOpen={isDeleteProjectConfirmationPopUpOpen}
-              onClose={closeDeleteProjectConfirmationPopUp}
-              message={deleteProjectMessage}
-              titleTx="delete-project-title"
-              onConfirm={() => {
-                if (projectTobBeDeleted)
-                  deleteProjects({
-                    projectIds: [projectTobBeDeleted.id],
-                  });
-              }}
-            />
-            <ProjectCreationPopup
-              isOpen={isCreateProjectPopupOpen}
-              onClose={closeCreateProjectPopup}
-              onConfirm={(newProjectDto) => createProject(newProjectDto)}
-            />
-          </StyledModal>
-        )}
-      </Main>
-    </Container>
+              <ProjectCreationPopup
+                isOpen={isCreateProjectPopupOpen}
+                onClose={closeCreateProjectPopup}
+                onConfirm={(newProjectDto) => createProject(newProjectDto)}
+              />
+            </StyledModal>
+          )
+        }
+      />
+    </Screen>
   );
 });
 
