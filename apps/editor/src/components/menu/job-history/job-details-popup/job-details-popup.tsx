@@ -208,11 +208,12 @@ export const JobDetailsPopUp = observer<JobDetailsPopUpProps>(
 
         {jobImages && !isErrorImages && !isErrorAnnotations && (
           <ScrollableList>
-            {jobImages?.sort(compareImages).map((image) => (
+            {jobImages?.sort(compareImages).map((image, index) => (
               <ClickableListItem
                 onClick={() =>
                   navigate(editorPath(image.id, findAnnotationId(image.id)))
                 }
+                isLast={index === jobImages.length - 1}
               >
                 <StyledText text={image.dataUri} />
                 {imagesWithAnnotations?.includes(image.id) && (
