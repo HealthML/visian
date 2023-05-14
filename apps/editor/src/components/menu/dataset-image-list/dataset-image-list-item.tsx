@@ -49,6 +49,7 @@ export const DatasetImageListItem = ({
   setSelectedRange,
   deleteAnnotation,
   deleteImage,
+  isLast,
 }: {
   isInSelectMode: boolean;
   image: Image;
@@ -66,6 +67,7 @@ export const DatasetImageListItem = ({
   >;
   deleteAnnotation: (annotation: Annotation) => void;
   deleteImage: (image: Image) => void;
+  isLast: boolean;
 }) => {
   const {
     annotations,
@@ -98,7 +100,7 @@ export const DatasetImageListItem = ({
 
   return (
     <>
-      <ListItem>
+      <ListItem isLast={isLast}>
         <IconButton
           icon={showAnnotations ? "arrowDown" : "arrowRight"}
           onPointerDown={toggleShowAnnotations}

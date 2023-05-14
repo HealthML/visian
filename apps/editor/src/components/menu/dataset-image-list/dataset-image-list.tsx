@@ -37,6 +37,7 @@ export const DatasetImageList = ({
       {images.map((image: Image, index: number) => (
         <DatasetImageListItem
           key={image.id}
+          isLast={index === images.length - 1}
           isInSelectMode={isInSelectMode}
           image={image}
           refetchImages={refetchImages}
