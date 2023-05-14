@@ -98,6 +98,10 @@ export const DatasetImageListItem = ({
   const projectId = useParams().projectId || "";
   const datasetId = useParams().datasetId || "";
 
+  function extractTitleFromDataUri(dataUri: string) {
+    return dataUri.split("/").pop(); // Extract the last element of the array
+  }
+
   return (
     <>
       <ListItem isLast={isLast}>
@@ -111,7 +115,7 @@ export const DatasetImageListItem = ({
             navigate(editorPath(image.id, undefined, projectId, datasetId));
           }}
         >
-          {image.dataUri}
+          {extractTitleFromDataUri(image.dataUri)}
         </ClickableText>
         <ExpandedSpacer />
         {isInSelectMode && (
@@ -169,7 +173,7 @@ export const DatasetImageListItem = ({
                       );
                     }}
                   >
-                    {annotation.dataUri}
+                    {extractTitleFromDataUri(annotation.dataUri)}
                   </ClickableText>
                   {!isInSelectMode && (
                     <IconButton

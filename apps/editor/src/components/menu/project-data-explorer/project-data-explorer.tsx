@@ -60,6 +60,10 @@ export const ProjectDataExplorer = ({
   const { isShiftPressed, selectedRange, setSelectedRange } =
     useKeyboardShortcuts({ selectedImages, setSelectedImages, images });
 
+  function extractTitleFromDataUri(dataUri: string) {
+    return dataUri.split("/").pop(); // Extract the last element of the array
+  }
+
   return (
     <FileExplorer>
       {datasets && (
@@ -107,7 +111,7 @@ export const ProjectDataExplorer = ({
                 }
               >
                 <StyledIcon icon="document" />
-                <Text>{image.dataUri}</Text>
+                <Text>{extractTitleFromDataUri(image.dataUri)}</Text>
               </StyledListItem>
             ))}
         </StyledList>

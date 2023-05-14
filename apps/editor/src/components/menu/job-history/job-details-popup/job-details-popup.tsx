@@ -140,6 +140,10 @@ export const JobDetailsPopUp = observer<JobDetailsPopUpProps>(
       [jobAnnotations, t],
     );
 
+    function extractTitleFromDataUri(dataUri: string) {
+      return dataUri.split("/").pop(); // Extract the last element of the array
+    }
+
     return (
       <StyledPopUp
         titleTx="job-details"
@@ -215,7 +219,7 @@ export const JobDetailsPopUp = observer<JobDetailsPopUpProps>(
                 }
                 isLast={index === jobImages.length - 1}
               >
-                <StyledText text={image.dataUri} />
+                <StyledText text={extractTitleFromDataUri(image.dataUri)} />
                 {imagesWithAnnotations?.includes(image.id) && (
                   <SubtleText tx="image-annotated" />
                 )}
