@@ -1,4 +1,4 @@
-import { Screen, Text, useTranslation } from "@visian/ui-shared";
+import { Screen, useTranslation } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
 import React from "react";
 import { Outlet, useParams } from "react-router-dom";
@@ -9,8 +9,7 @@ import { useProject } from "../queries";
 
 export const ProjectScreen: React.FC = observer(() => {
   const projectId = useParams().projectId || "";
-  const { project, projectError, isErrorProject, isLoadingProject } =
-    useProject(projectId);
+  const { project, isErrorProject, isLoadingProject } = useProject(projectId);
   const { t: translate } = useTranslation();
 
   return (
@@ -28,17 +27,7 @@ export const ProjectScreen: React.FC = observer(() => {
       <UIOverlayDataManager
         homeButton
         topCenter={<ProjectViewSwitch />}
-        main={
-          isLoadingProject ? (
-            <Text>{translate("project-loading")}</Text>
-          ) : isErrorProject ? (
-            <Text>{`${translate("project-loading-error")} ${
-              projectError?.response?.statusText
-            } (${projectError?.response?.status})`}</Text>
-          ) : (
-            <Outlet />
-          )
-        }
+        main={<Outlet />}
       />
     </Screen>
   );

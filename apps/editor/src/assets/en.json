@@ -289,6 +289,7 @@
 
   "images-loading": "Loading images...",
   "images-loading-error": "Error on loading images:",
+  "no-images-available": "Currently no images are available.",
   "image-open-error": "Error on opening image",
   "image-annotated": "annotated",
 

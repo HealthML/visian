@@ -1,7 +1,7 @@
 import {
-  InvisibleButton,
   Modal,
   Screen,
+  SquareButton,
   Text,
   useTranslation,
 } from "@visian/ui-shared";
@@ -24,8 +24,12 @@ const StyledModal = styled(Modal)`
   width: 100%;
 `;
 
-const IconButton = styled(InvisibleButton)`
-  width: 30px;
+const ErrorMessage = styled(Text)`
+  margin: auto;
+`;
+
+const StyledButton = styled(SquareButton)`
+  margin-left: 10px;
 `;
 
 export const ProjectsScreen: React.FC = observer(() => {
@@ -76,6 +80,18 @@ export const ProjectsScreen: React.FC = observer(() => {
       ),
     [projectTobBeDeleted, translate],
   );
+
+  const altMessage = useMemo(() => {
+    if (isLoadingProjects) return translate("projects-loading");
+    if (isErrorProjects)
+      return `${translate("projects-loading-error")} ${
+        projectsError?.response?.statusText
+      } (${projectsError?.response?.status})`;
+    if (projects && projects.length <= 0)
+      return translate("no-projects-available");
+    return null;
+  }, [isLoadingProjects, isErrorProjects, projects, projectsError, translate]);
+
   return (
     <Screen
       title={`${translate("projects-base-title")} ${
@@ -88,13 +104,9 @@ export const ProjectsScreen: React.FC = observer(() => {
     >
       <UIOverlayDataManager
         main={
-          isLoadingProjects ? (
-            <StyledModal labelTx="projects-loading" />
-          ) : isErrorProjects ? (
-            <StyledModal labelTx="error">
-              <Text>{`${translate("projects-loading-error")} ${
-                projectsError?.response?.statusText
-              } (${projectsError?.response?.status})`}</Text>
+          altMessage ? (
+            <StyledModal>
+              <ErrorMessage tx={altMessage} />
             </StyledModal>
           ) : (
             <StyledModal
@@ -102,21 +114,19 @@ export const ProjectsScreen: React.FC = observer(() => {
               labelTx="projects-base-title"
               position="right"
               headerChildren={
-                <IconButton
-                  icon="plus"
+                <StyledButton
+                  icon="plusSmall"
                   tooltipTx="create-project"
                   tooltipPosition="left"
                   onPointerDown={openCreateProjectPopup}
                 />
               }
             >
-              {projects && projects.length > 0 ? (
+              {projects && (
                 <ProjectList
                   projects={projects}
                   deleteProject={deleteProject}
                 />
-              ) : (
-                <Text>{translate("no-projects-available")}</Text>
               )}
               <ConfirmationPopup
                 isOpen={isDeleteProjectConfirmationPopUpOpen}

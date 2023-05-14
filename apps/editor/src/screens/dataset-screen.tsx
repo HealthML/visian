@@ -1,11 +1,20 @@
-import { Screen, Text, useTranslation } from "@visian/ui-shared";
+import { Modal, Screen, Text, useTranslation } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
-import React from "react";
+import React, { useMemo } from "react";
 import { useParams } from "react-router-dom";
+import styled from "styled-components";
 
 import { DatasetExplorer } from "../components/menu/dataset-explorer";
 import { UIOverlayDataManager } from "../components/menu/ui-overlay-data-manager";
 import { useDataset } from "../queries";
+
+const StyledModal = styled(Modal)`
+  width: 100%;
+`;
+
+const ErrorMessage = styled(Text)`
+  margin: auto;
+`;
 
 export const DatasetScreen: React.FC = observer(() => {
   const datasetId = useParams().datasetId || "";
@@ -14,6 +23,15 @@ export const DatasetScreen: React.FC = observer(() => {
     useDataset(datasetId);
 
   const { t: translate } = useTranslation();
+
+  const altMessage = useMemo(() => {
+    if (isLoadingDataset) return translate("dataset-loading");
+    if (isErrorDataset)
+      return `${translate("dataset-loading-error")} ${
+        datasetError?.response?.statusText
+      } (${datasetError?.response?.status})`;
+    return null;
+  }, [isLoadingDataset, isErrorDataset, datasetError, translate]);
 
   return (
     <Screen
@@ -31,18 +49,12 @@ export const DatasetScreen: React.FC = observer(() => {
         homeButton
         backLink={dataset && `/projects/${dataset.project}/datasets`}
         main={
-          isLoadingDataset ? (
-            <Text>{translate("dataset-loading")}</Text>
-          ) : isErrorDataset ? (
-            <Text>
-              {translate("dataset-loading-error")} $
-              {datasetError?.response?.statusText} ($
-              {datasetError?.response?.status})`
-            </Text>
-          ) : dataset ? (
-            <DatasetExplorer dataset={dataset} />
+          altMessage ? (
+            <StyledModal>
+              <ErrorMessage tx={altMessage} />
+            </StyledModal>
           ) : (
-            <Text>{translate("no-dataset-available")}</Text>
+            dataset && <DatasetExplorer dataset={dataset} />
           )
         }
       />

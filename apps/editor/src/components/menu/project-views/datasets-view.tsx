@@ -1,6 +1,6 @@
-import { Text, useTranslation } from "@visian/ui-shared";
+import { useTranslation } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
-import React from "react";
+import React, { useMemo } from "react";
 import { useParams } from "react-router-dom";
 
 import { useDatasetsBy } from "../../../queries";
@@ -12,17 +12,18 @@ export const DatasetsView: React.FC = observer(() => {
     useDatasetsBy(projectId);
   const { t: translate } = useTranslation();
 
-  return isLoadingDatasets ? (
-    <Text>{translate("datasets-loading")}</Text>
-  ) : isErrorDatasets ? (
-    <Text>{`${translate("datasets-loading-error")} ${
-      datasetsError?.response?.statusText
-    } (${datasetsError?.response?.status})`}</Text>
-  ) : datasets && datasets.length > 0 ? (
-    <DatasetsGrid projectId={projectId} />
-  ) : (
-    <Text>{translate("no-datasets-available")}</Text>
-  );
+  const altMessage = useMemo(() => {
+    if (isLoadingDatasets) return translate("datasets-loading");
+    if (isErrorDatasets)
+      return `${translate("datasets-loading-error")} ${
+        datasetsError?.response?.statusText
+      } (${datasetsError?.response?.status})`;
+    if (datasets && datasets.length <= 0)
+      return translate("no-datasets-available");
+    return null;
+  }, [isLoadingDatasets, isErrorDatasets, datasets, datasetsError, translate]);
+
+  return <DatasetsGrid projectId={projectId} altMessage={altMessage} />;
 });
 
 export default DatasetsView;

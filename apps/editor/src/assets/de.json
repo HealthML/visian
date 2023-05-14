@@ -289,6 +289,7 @@
 
   "images-loading": "Bilder werden geladen...",
   "images-loading-error": "Fehler beim Laden der Bilder:",
+  "no-images-available": "Aktuell sind keine Bilder vorhanden.",
   "image-open-error": "Fehler beim Öffnen des Bildes",
   "image-annotated": "annotiert",
 

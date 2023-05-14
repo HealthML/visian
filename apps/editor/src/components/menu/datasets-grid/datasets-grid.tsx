@@ -10,12 +10,21 @@ import { ConfirmationPopup } from "../confirmation-popup";
 import { DatasetList } from "../dataset-list";
 
 const StyledModal = styled(Modal)`
-  width: 100100%;
+  width: 100%;
 `;
 
-export const DatasetsGrid = ({ projectId }: { projectId: string }) => {
-  const { datasets, datasetsError, isErrorDatasets, isLoadingDatasets } =
-    useDatasetsBy(projectId);
+const ErrorMessage = styled(Text)`
+  margin: auto;
+`;
+
+export const DatasetsGrid = ({
+  projectId,
+  altMessage,
+}: {
+  projectId: string;
+  altMessage: string;
+}) => {
+  const { datasets } = useDatasetsBy(projectId);
   const [datasetTobBeDeleted, setDatasetTobBeDeleted] = useState<Dataset>();
   const { t: translate } = useTranslation();
   const { deleteDatasets } = useDeleteDatasetsForProjectMutation();
@@ -49,29 +58,21 @@ export const DatasetsGrid = ({ projectId }: { projectId: string }) => {
     [datasetTobBeDeleted, translate],
   );
 
+  if (altMessage) {
+    return (
+      <StyledModal>
+        <ErrorMessage tx={altMessage} />
+      </StyledModal>
+    );
+  }
+
   return (
     <>
-      {isLoadingDatasets || isErrorDatasets ? (
-        <StyledModal title={isLoadingDatasets ? "datasets-loading" : "error"}>
-          {isLoadingDatasets ? (
-            <Text>{translate("datasets-loading")}</Text>
-          ) : (
-            <Text>
-              {`${translate("datasets-loading-error")} ${
-                datasetsError?.response?.statusText
-              } (${datasetsError?.response?.status})`}
-            </Text>
-          )}
-        </StyledModal>
-      ) : (
-        <StyledModal>
-          {datasets && datasets.length > 0 ? (
-            <DatasetList datasets={datasets} deleteDataset={deleteDataset} />
-          ) : (
-            <Text>{translate("no-datasets-available")}</Text>
-          )}
-        </StyledModal>
-      )}
+      <StyledModal>
+        {datasets && (
+          <DatasetList datasets={datasets} deleteDataset={deleteDataset} />
+        )}
+      </StyledModal>
       <ConfirmationPopup
         isOpen={isDeleteDatasetConfirmationPopUpOpen}
         onClose={closeDeleteDatasetConfirmationPopUp}

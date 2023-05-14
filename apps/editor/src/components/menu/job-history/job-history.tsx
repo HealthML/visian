@@ -1,10 +1,4 @@
-import {
-  Modal,
-  Notification,
-  SquareButton,
-  Text,
-  useTranslation,
-} from "@visian/ui-shared";
+import { Modal, Notification, SquareButton, Text } from "@visian/ui-shared";
 import { useCallback, useState } from "react";
 import styled from "styled-components";
 
@@ -15,6 +9,10 @@ import { JobsTable } from "./job-table";
 
 const StyledModal = styled(Modal)`
   width: 100%;
+`;
+
+const ErrorMessage = styled(Text)`
+  margin: auto;
 `;
 
 const StyledButton = styled(SquareButton)`
@@ -29,13 +27,16 @@ const ErrorNotification = styled(Notification)`
   transform: translateX(-50%);
 `;
 
-export const JobHistory = ({ projectId }: { projectId: string }) => {
+export const JobHistory = ({
+  projectId,
+  altMessage,
+}: {
+  projectId: string;
+  altMessage: string;
+}) => {
   const store = useStore();
 
-  const { jobs, jobsError, isErrorJobs, isLoadingJobs, refetchJobs } =
-    useJobsBy(projectId);
-
-  const { t: translate } = useTranslation();
+  const { jobs, refetchJobs } = useJobsBy(projectId);
 
   // model selection popup
   const [isModelSelectionPopUpOpen, setIsModelSelectionPopUpOpen] =
@@ -46,6 +47,14 @@ export const JobHistory = ({ projectId }: { projectId: string }) => {
   const closeModelSelectionPopUp = useCallback(() => {
     setIsModelSelectionPopUpOpen(false);
   }, []);
+
+  if (altMessage) {
+    return (
+      <StyledModal>
+        <ErrorMessage tx={altMessage} />
+      </StyledModal>
+    );
+  }
 
   return (
     <StyledModal
@@ -67,12 +76,6 @@ export const JobHistory = ({ projectId }: { projectId: string }) => {
           descriptionTx={store?.error.descriptionTx}
           descriptionData={store?.error.descriptionData}
         />
-      )}
-      {isLoadingJobs && <Text tx="jobs-loading" />}
-      {isErrorJobs && (
-        <Text>{`${translate("jobs-loading-error")} ${
-          jobsError?.response?.statusText
-        } (${jobsError?.response?.status})`}</Text>
       )}
       {jobs && <JobsTable jobs={jobs} />}
       <JobCreationPopup

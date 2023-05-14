@@ -198,6 +198,7 @@ export const DatasetExplorer = ({ dataset }: { dataset: Dataset }) => {
           imagesError?.response?.statusText
         } (${imagesError?.response?.status})`}</Text>
       )}
+      {images && images.length <= 0 && <Text tx="no-images-available" />}
       {images && (
         <DatasetImageList
           isInSelectMode={isInSelectMode}

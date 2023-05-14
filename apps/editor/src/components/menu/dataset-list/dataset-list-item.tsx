@@ -67,7 +67,7 @@ export const DatasetListItem = ({
   const navigate = useNavigate();
 
   const openDataset = () => {
-    navigate(`/projects/${dataset.project}/datasets/${dataset.id}`);
+    navigate(`/datasets/${dataset.id}`);
   };
 
   return (
