@@ -2,7 +2,9 @@ import { promiseAllInBatches } from "./batch";
 
 describe("promiseAllInBatches", () => {
   const asyncTask = (item: number) =>
-    new Promise((resolve) => setTimeout(() => resolve(item * 2), 10));
+    new Promise((resolve) => {
+      setTimeout(() => resolve(item * 2), 10);
+    });
   const items = [1, 2, 3, 4, 5];
 
   test("should process all items with a batchSize of 1", async () => {

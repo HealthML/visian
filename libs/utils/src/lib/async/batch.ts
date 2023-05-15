@@ -22,6 +22,7 @@ export async function promiseAllInBatches<ItemType, ResultType>(
     const itemsForBatch = items.slice(position, position + batchSize);
     results = [
       ...results,
+      // eslint-disable-next-line no-await-in-loop
       ...(await Promise.all(itemsForBatch.map((item) => task(item)))),
     ];
     position += batchSize;
