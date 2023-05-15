@@ -16,11 +16,12 @@ import { JobCreationPopup } from "../job-creation-popup";
 import { useImageSelection } from "../util";
 
 const StyledModal = styled(Modal)`
-  vertical-align: middle;
   width: 100%;
-  z-index: 49;
 `;
-// TODO: z-index logic
+
+const ErrorMessage = styled(Text)`
+  margin: auto;
+`;
 
 const ErrorNotification = styled(Notification)`
   position: absolute;
@@ -195,13 +196,13 @@ export const DatasetExplorer = ({ dataset }: { dataset: Dataset }) => {
           descriptionData={store?.error.descriptionData}
         />
       )}
-      {isLoadingImages && <Text tx="images-loading" />}
-      {isErrorImages && (
-        <Text>{`${translate("images-loading-error")} ${
+      {isLoadingImages ? (
+        <ErrorMessage tx="images-loading" />
+      ) : isErrorImages ? (
+        <ErrorMessage>{`${translate("images-loading-error")} ${
           imagesError?.response?.statusText
-        } (${imagesError?.response?.status})`}</Text>
-      )}
-      {images && (
+        } (${imagesError?.response?.status})`}</ErrorMessage>
+      ) : images && images.length > 0 ? (
         <DatasetImageList
           isInSelectMode={isInSelectMode}
           images={images}
@@ -212,6 +213,8 @@ export const DatasetExplorer = ({ dataset }: { dataset: Dataset }) => {
           deleteAnnotation={deleteAnnotation}
           deleteImage={deleteImage}
         />
+      ) : (
+        <ErrorMessage tx="no-images-available" />
       )}
       <JobCreationPopup
         isOpen={isJobCreationPopUpOpen}

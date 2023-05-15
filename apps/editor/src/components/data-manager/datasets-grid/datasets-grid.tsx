@@ -10,20 +10,26 @@ import { ConfirmationPopup } from "../confirmation-popup";
 import { DatasetList } from "../dataset-list";
 
 const StyledModal = styled(Modal)`
-  vertical-align: middle;
-  width: 100vw;
-  position: relative;
-  z-index: 49;
+  width: 100%;
 `;
 
-export const DatasetsGrid = ({ projectId }: { projectId: string }) => {
-  const { datasets, datasetsError, isErrorDatasets, isLoadingDatasets } =
-    useDatasetsBy(projectId);
+const ErrorMessage = styled(Text)`
+  margin: auto;
+`;
+
+export const DatasetsGrid = ({
+  projectId,
+  altMessage,
+}: {
+  projectId: string;
+  altMessage: string;
+}) => {
+  const { datasets } = useDatasetsBy(projectId);
   const [datasetTobBeDeleted, setDatasetTobBeDeleted] = useState<Dataset>();
   const { t: translate } = useTranslation();
   const { deleteDatasets } = useDeleteDatasetsForProjectMutation();
 
-  // delete annotation confirmation popup
+  // delete dataset confirmation popup
   const [
     isDeleteDatasetConfirmationPopUpOpen,
     setIsDeleteDatasetConfirmationPopUpOpen,
@@ -54,27 +60,15 @@ export const DatasetsGrid = ({ projectId }: { projectId: string }) => {
 
   return (
     <>
-      {isLoadingDatasets || isErrorDatasets ? (
-        <StyledModal labelTx={isLoadingDatasets ? "dataset-loading" : "error"}>
-          {isLoadingDatasets ? (
-            <Text>{translate("dataset-loading")}</Text>
-          ) : (
-            <Text>
-              {`${translate("dataset-loading-error")} ${
-                datasetsError?.response?.statusText
-              } (${datasetsError?.response?.status})`}
-            </Text>
-          )}
-        </StyledModal>
-      ) : (
-        <StyledModal>
-          {datasets && datasets.length > 0 ? (
+      <StyledModal>
+        {altMessage ? (
+          <ErrorMessage tx={altMessage} />
+        ) : (
+          datasets && (
             <DatasetList datasets={datasets} deleteDataset={deleteDataset} />
-          ) : (
-            <Text>{translate("no-datasets-available")}</Text>
-          )}
-        </StyledModal>
-      )}
+          )
+        )}
+      </StyledModal>
       <ConfirmationPopup
         isOpen={isDeleteDatasetConfirmationPopUpOpen}
         onClose={closeDeleteDatasetConfirmationPopUp}

@@ -6,8 +6,6 @@ import { useKeyboardShortcuts } from "../util";
 import { DatasetImageListItem } from "./dataset-image-list-item";
 
 const ImageList = styled(List)`
-  width: 100%;
-  height: 400px;
   overflow-y: auto;
   user-select: none;
 `;
@@ -39,6 +37,7 @@ export const DatasetImageList = ({
       {images.map((image: Image, index: number) => (
         <DatasetImageListItem
           key={image.id}
+          isLast={index === images.length - 1}
           isInSelectMode={isInSelectMode}
           image={image}
           refetchImages={refetchImages}

@@ -1,6 +1,6 @@
 import { Box, Switch, Theme } from "@visian/ui-shared";
-import React from "react";
-import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { useMatch, useNavigate } from "react-router-dom";
 import styled, { useTheme } from "styled-components";
 
 const StyledSwitch = styled(Box)`
@@ -15,19 +15,18 @@ const projectViewSwitchOptions = [
   { labelTx: "Jobs", value: "jobs" },
 ];
 
-export const ProjectViewSwitch = ({
-  defaultSwitchSelection,
-}: {
-  defaultSwitchSelection: string;
-}) => {
+export const ProjectViewSwitch = () => {
   const theme = useTheme() as Theme;
   const navigate = useNavigate();
+  const match = useMatch("projects/:projectId/*");
 
-  // expect path like /project/projectId/datasets
-  const navigateToScreen = (screenName: string) => {
-    const pathParts = window.location.pathname.split("/");
-    pathParts[pathParts.length - 1] = screenName;
-    navigate(pathParts.join("/"));
+  const [selectedOption, setSelectedOption] = useState(
+    match?.params?.["*"] || "datasets",
+  );
+
+  const changeScreen = (screenName: string) => {
+    setSelectedOption(screenName);
+    navigate(`./${screenName}`);
   };
 
   return (
@@ -35,8 +34,8 @@ export const ProjectViewSwitch = ({
       <Switch
         infoBaseZIndex={theme.zIndices.overlay}
         options={projectViewSwitchOptions}
-        value={defaultSwitchSelection}
-        onChange={(screenName) => navigateToScreen(screenName)}
+        value={selectedOption}
+        onChange={changeScreen}
       />
     </StyledSwitch>
   );
