@@ -4,8 +4,8 @@ import React, { useMemo } from "react";
 import { Outlet, useParams } from "react-router-dom";
 import styled from "styled-components";
 
-import { ProjectViewSwitch } from "../components/menu/project-view-switch";
-import { UIOverlayDataManager } from "../components/menu/ui-overlay-data-manager";
+import { ProjectViewSwitch } from "../components/data-manager/project-view-switch";
+import { UIOverlayDataManager } from "../components/data-manager/ui-overlay-data-manager";
 import { useProject } from "../queries";
 
 const StyledModal = styled(Modal)`

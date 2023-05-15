@@ -14,7 +14,10 @@ import { QueryClient, QueryClientProvider } from "react-query";
 import { ReactQueryDevtools } from "react-query/devtools";
 import { Navigate, Route, Routes } from "react-router-dom";
 
-import { DatasetsView, JobsView } from "../components/menu/project-views";
+import {
+  DatasetsView,
+  JobsView,
+} from "../components/data-manager/project-views";
 import {
   whoAwsConfigDeployment,
   whoAwsConfigDevelopment,

@@ -4,8 +4,8 @@ import React, { useMemo } from "react";
 import { useParams } from "react-router-dom";
 import styled from "styled-components";
 
-import { DatasetExplorer } from "../components/menu/dataset-explorer";
-import { UIOverlayDataManager } from "../components/menu/ui-overlay-data-manager";
+import { DatasetExplorer } from "../components/data-manager/dataset-explorer";
+import { UIOverlayDataManager } from "../components/data-manager/ui-overlay-data-manager";
 import { useDataset } from "../queries";
 
 const StyledModal = styled(Modal)`
