@@ -20,5 +20,7 @@ export const ImageImportDropSheet: React.FC<ImageImportDropSheetProps> =
       [onDropCompleted, store],
     );
 
-    return <DropSheet onFilesDropped={importFiles} />;
+    return (
+      <DropSheet onDropCompleted={onDropCompleted} importFiles={importFiles} />
+    );
   });

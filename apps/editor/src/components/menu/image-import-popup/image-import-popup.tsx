@@ -245,7 +245,12 @@ export const ImageImportPopup = observer<ImageImportPopUpProps>(
     return (
       <>
         {errorNotification}
-        {isDraggedOver && <DropSheet onFilesDropped={importFilesFromDrop} />}
+        {isDraggedOver && (
+          <DropSheet
+            onDropCompleted={onDropCompleted}
+            importFiles={importFilesFromDrop}
+          />
+        )}
         <LargePopUp
           titleTx="image-import-popup-title"
           isOpen={isOpen}

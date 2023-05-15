@@ -1,4 +1,5 @@
 export interface DropSheetProps {
   /** A function called when a file drop completes (inside or outside the drop zone). */
-  onFilesDropped: (files: FileList) => void;
+  onDropCompleted: () => void;
+  importFiles: (files: FileList) => void;
 }

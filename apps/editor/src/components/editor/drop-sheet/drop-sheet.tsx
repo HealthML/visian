@@ -34,7 +34,7 @@ const StyledOverlay = styled.div`
 `;
 
 export const DropSheet: React.FC<DropSheetProps> = observer(
-  ({ onFilesDropped }) => {
+  ({ onDropCompleted, importFiles }) => {
     const preventOutsideDrop = (event: React.DragEvent<HTMLDivElement>) => {
       event.preventDefault();
     };
@@ -42,18 +42,18 @@ export const DropSheet: React.FC<DropSheetProps> = observer(
     const handleOutsideDrop = useCallback(
       (event: React.DragEvent<HTMLDivElement>) => {
         event.preventDefault();
-        onFilesDropped(new FileList());
+        onDropCompleted();
       },
-      [onFilesDropped],
+      [onDropCompleted],
     );
 
     const handleDrop = useCallback(
       (files: FileList, event: React.DragEvent) => {
         event.stopPropagation();
         event.preventDefault();
-        onFilesDropped(files);
+        importFiles(files);
       },
-      [onFilesDropped],
+      [importFiles],
     );
 
     const modalRootRef = useModalRoot();
