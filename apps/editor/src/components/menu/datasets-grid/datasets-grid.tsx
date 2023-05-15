@@ -58,19 +58,15 @@ export const DatasetsGrid = ({
     [datasetTobBeDeleted, translate],
   );
 
-  if (altMessage) {
-    return (
-      <StyledModal>
-        <ErrorMessage tx={altMessage} />
-      </StyledModal>
-    );
-  }
-
   return (
     <>
       <StyledModal>
-        {datasets && (
-          <DatasetList datasets={datasets} deleteDataset={deleteDataset} />
+        {altMessage ? (
+          <ErrorMessage tx={altMessage} />
+        ) : (
+          datasets && (
+            <DatasetList datasets={datasets} deleteDataset={deleteDataset} />
+          )
         )}
       </StyledModal>
       <ConfirmationPopup

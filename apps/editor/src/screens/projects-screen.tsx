@@ -104,49 +104,47 @@ export const ProjectsScreen: React.FC = observer(() => {
     >
       <UIOverlayDataManager
         main={
-          altMessage ? (
-            <StyledModal>
+          <StyledModal
+            hideHeaderDivider={false}
+            labelTx="projects-base-title"
+            position="right"
+            headerChildren={
+              <StyledButton
+                icon="plusSmall"
+                tooltipTx="create-project"
+                tooltipPosition="left"
+                onPointerDown={openCreateProjectPopup}
+              />
+            }
+          >
+            {altMessage ? (
               <ErrorMessage tx={altMessage} />
-            </StyledModal>
-          ) : (
-            <StyledModal
-              hideHeaderDivider={false}
-              labelTx="projects-base-title"
-              position="right"
-              headerChildren={
-                <StyledButton
-                  icon="plusSmall"
-                  tooltipTx="create-project"
-                  tooltipPosition="left"
-                  onPointerDown={openCreateProjectPopup}
-                />
-              }
-            >
-              {projects && (
+            ) : (
+              projects && (
                 <ProjectList
                   projects={projects}
                   deleteProject={deleteProject}
                 />
-              )}
-              <ConfirmationPopup
-                isOpen={isDeleteProjectConfirmationPopUpOpen}
-                onClose={closeDeleteProjectConfirmationPopUp}
-                message={deleteProjectMessage}
-                titleTx="delete-project-title"
-                onConfirm={() => {
-                  if (projectTobBeDeleted)
-                    deleteProjects({
-                      projectIds: [projectTobBeDeleted.id],
-                    });
-                }}
-              />
-              <ProjectCreationPopup
-                isOpen={isCreateProjectPopupOpen}
-                onClose={closeCreateProjectPopup}
-                onConfirm={(newProjectDto) => createProject(newProjectDto)}
-              />
-            </StyledModal>
-          )
+              )
+            )}
+            <ConfirmationPopup
+              isOpen={isDeleteProjectConfirmationPopUpOpen}
+              onClose={closeDeleteProjectConfirmationPopUp}
+              message={deleteProjectMessage}
+              titleTx="delete-project-title"
+              onConfirm={() => {
+                if (projectTobBeDeleted)
+                  deleteProjects({
+                    projectIds: [projectTobBeDeleted.id],
+                  });
+              }}
+            />
+            <ProjectCreationPopup
+              isOpen={isCreateProjectPopupOpen}
+              onClose={closeCreateProjectPopup}
+              onConfirm={(newProjectDto) => createProject(newProjectDto)}
+            />
+          </StyledModal>
         }
       />
     </Screen>

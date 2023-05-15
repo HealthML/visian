@@ -19,6 +19,10 @@ const StyledModal = styled(Modal)`
   width: 100%;
 `;
 
+const ErrorMessage = styled(Text)`
+  margin: auto;
+`;
+
 const ErrorNotification = styled(Notification)`
   position: absolute;
   min-width: 30%;
@@ -192,14 +196,13 @@ export const DatasetExplorer = ({ dataset }: { dataset: Dataset }) => {
           descriptionData={store?.error.descriptionData}
         />
       )}
-      {isLoadingImages && <Text tx="images-loading" />}
-      {isErrorImages && (
-        <Text>{`${translate("images-loading-error")} ${
+      {isLoadingImages ? (
+        <ErrorMessage tx="images-loading" />
+      ) : isErrorImages ? (
+        <ErrorMessage>{`${translate("images-loading-error")} ${
           imagesError?.response?.statusText
-        } (${imagesError?.response?.status})`}</Text>
-      )}
-      {images && images.length <= 0 && <Text tx="no-images-available" />}
-      {images && (
+        } (${imagesError?.response?.status})`}</ErrorMessage>
+      ) : images && images.length > 0 ? (
         <DatasetImageList
           isInSelectMode={isInSelectMode}
           images={images}
@@ -210,6 +213,8 @@ export const DatasetExplorer = ({ dataset }: { dataset: Dataset }) => {
           deleteAnnotation={deleteAnnotation}
           deleteImage={deleteImage}
         />
+      ) : (
+        <ErrorMessage tx="no-images-available" />
       )}
       <JobCreationPopup
         isOpen={isJobCreationPopUpOpen}

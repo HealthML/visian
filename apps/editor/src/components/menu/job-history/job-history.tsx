@@ -48,14 +48,6 @@ export const JobHistory = ({
     setIsModelSelectionPopUpOpen(false);
   }, []);
 
-  if (altMessage) {
-    return (
-      <StyledModal>
-        <ErrorMessage tx={altMessage} />
-      </StyledModal>
-    );
-  }
-
   return (
     <StyledModal
       hideHeaderDivider={false}
@@ -77,7 +69,11 @@ export const JobHistory = ({
           descriptionData={store?.error.descriptionData}
         />
       )}
-      {jobs && <JobsTable jobs={jobs} />}
+      {altMessage ? (
+        <ErrorMessage tx={altMessage} />
+      ) : (
+        jobs && <JobsTable jobs={jobs} />
+      )}
       <JobCreationPopup
         projectId={projectId}
         isOpen={isModelSelectionPopUpOpen}
