@@ -127,18 +127,31 @@ export const ImageImportPopup = observer<ImageImportPopUpProps>(
       if (isOpen) setImportError(undefined);
     }, [isOpen]);
 
-    const importFilesFromInput = useCallback((event: Event) => {
-      const { files } = event.target as HTMLInputElement;
-      if (!files) return;
-      setSelectedFiles(Array.from(files));
-    }, []);
+    const addSelectedFiles = useCallback(
+      (files: FileList) => {
+        const uniqueFiles = Array.from(files).filter(
+          (file) => !selectedFiles.some((f) => f.name === file.name),
+        );
+        setSelectedFiles((prevFiles) => [...prevFiles, ...uniqueFiles]);
+      },
+      [selectedFiles],
+    );
+
+    const importFilesFromInput = useCallback(
+      (event: Event) => {
+        const { files } = event.target as HTMLInputElement;
+        if (!files) return;
+        addSelectedFiles(files);
+      },
+      [addSelectedFiles],
+    );
 
     const importFilesFromDrop = useCallback(
-      async (_files: FileList) => {
-        setSelectedFiles(Array.from(_files));
+      async (files: FileList) => {
+        addSelectedFiles(files);
         onDropCompleted();
       },
-      [setSelectedFiles, onDropCompleted],
+      [addSelectedFiles, onDropCompleted],
     );
 
     const openFilePicker = useFilePicker(importFilesFromInput);
