@@ -4,6 +4,7 @@ import {
   FloatingUIButton,
   Modal,
   Text,
+  useIsDraggedOver,
   useTranslation,
 } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
@@ -85,8 +86,11 @@ export const DatasetScreen: React.FC = observer(() => {
   const navigate = useNavigate();
   const { t: translate } = useTranslation();
 
+  const [isDraggedOver, { onDrop, ...dragListeners }] = useIsDraggedOver();
+
   return (
     <Container
+      {...dragListeners}
       title={`${translate("dataset-base-title")} ${
         isLoadingDataset
           ? translate("loading")
@@ -136,7 +140,13 @@ export const DatasetScreen: React.FC = observer(() => {
             } (${datasetError?.response?.status})`}</Text>
           </StyledModal>
         )}
-        {dataset && <DatasetExplorer dataset={dataset} />}
+        {dataset && (
+          <DatasetExplorer
+            dataset={dataset}
+            isDraggedOver={isDraggedOver}
+            onDropCompleted={onDrop}
+          />
+        )}
       </Main>
     </Container>
   );

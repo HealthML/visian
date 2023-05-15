@@ -5,4 +5,6 @@ import { Dataset } from "../../../types";
 export interface ImageImportPopUpProps extends StatefulPopUpProps {
   dataset?: Dataset;
   onImportFinished: () => void;
+  isDraggedOver: boolean;
+  onDropCompleted: () => void;
 }

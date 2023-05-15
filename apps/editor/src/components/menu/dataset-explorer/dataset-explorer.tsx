@@ -30,7 +30,15 @@ const ErrorNotification = styled(Notification)`
   transform: translateX(-50%);
 `;
 
-export const DatasetExplorer = ({ dataset }: { dataset: Dataset }) => {
+export const DatasetExplorer = ({
+  dataset,
+  isDraggedOver,
+  onDropCompleted,
+}: {
+  dataset: Dataset;
+  isDraggedOver: boolean;
+  onDropCompleted: () => void;
+}) => {
   const store = useStore();
 
   const [isInSelectMode, setIsInSelectMode] = useState(false);
@@ -256,6 +264,8 @@ export const DatasetExplorer = ({ dataset }: { dataset: Dataset }) => {
         onClose={closeImageImportPopUp}
         dataset={imageImportPopUpOpenWith}
         onImportFinished={refetchImages}
+        isDraggedOver={isDraggedOver}
+        onDropCompleted={onDropCompleted}
       />
       <ConfirmationPopup
         isOpen={isDeleteAnnotationConfirmationPopUpOpen}

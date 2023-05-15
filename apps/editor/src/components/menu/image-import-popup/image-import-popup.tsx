@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 import {
   Button,
   InvisibleButton,
@@ -19,6 +20,7 @@ import { useCallback, useEffect, useState } from "react";
 import styled from "styled-components";
 
 import { postImage } from "../../../queries";
+import { DropSheet } from "../../editor";
 import { ProgressPopUp } from "../../editor/progress-popup";
 import { ImageImportPopUpProps } from "./image-import-popup.props";
 
@@ -103,7 +105,14 @@ const sanitizeForFS = (name: string) =>
   name.replace(/[^a-z0-9_-]/gi, "_").toLowerCase();
 
 export const ImageImportPopup = observer<ImageImportPopUpProps>(
-  ({ isOpen, onClose, dataset, onImportFinished }) => {
+  ({
+    isOpen,
+    onClose,
+    dataset,
+    onImportFinished,
+    isDraggedOver,
+    onDropCompleted,
+  }) => {
     const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
     const [isImporting, setIsImporting] = useState(false);
     const [uploadedFiles, setUploadedFiles] = useState(0);
@@ -123,6 +132,14 @@ export const ImageImportPopup = observer<ImageImportPopUpProps>(
       if (!files) return;
       setSelectedFiles(Array.from(files));
     }, []);
+
+    const importFilesFromDrop = useCallback(
+      async (_files: FileList) => {
+        setSelectedFiles(Array.from(_files));
+        onDropCompleted();
+      },
+      [setSelectedFiles, onDropCompleted],
+    );
 
     const openFilePicker = useFilePicker(importFilesFromInput);
 
@@ -174,7 +191,7 @@ export const ImageImportPopup = observer<ImageImportPopUpProps>(
       setIsImporting(false);
       setSelectedFiles([]);
       if (onClose) onClose();
-    }, [selectedFiles, dataset, onClose, onImportFinished]);
+    }, [dataset, selectedFiles, onImportFinished, onClose, totalFiles]);
 
     if (isImporting) {
       return (
@@ -215,6 +232,7 @@ export const ImageImportPopup = observer<ImageImportPopUpProps>(
     return (
       <>
         {errorNotification}
+        {isDraggedOver && <DropSheet onFilesDropped={importFilesFromDrop} />}
         <LargePopUp
           titleTx="image-import-popup-title"
           isOpen={isOpen}
