@@ -18,7 +18,7 @@ const projectViewSwitchOptions = [
 export const ProjectViewSwitch = () => {
   const theme = useTheme() as Theme;
   const navigate = useNavigate();
-  const match = useMatch("/:projectId/*");
+  const match = useMatch("projects/:projectId/*");
 
   const [selectedOption, setSelectedOption] = useState(
     match?.params?.["*"] || "datasets",
