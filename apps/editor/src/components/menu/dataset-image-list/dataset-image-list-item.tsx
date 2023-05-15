@@ -155,7 +155,11 @@ export const DatasetImageListItem = ({
           annotations && (
             <AnnotationsList>
               {annotations.map((annotation: Annotation) => (
-                <AnnotationListItem isVerified={annotation.verified}>
+                <AnnotationListItem
+                  isVerified={annotation.verified}
+                  isInSelectMode={isInSelectMode}
+                  deleteAnnotation={() => deleteAnnotation(annotation)}
+                >
                   <ClickableText
                     onClick={() => {
                       navigate(
@@ -170,17 +174,6 @@ export const DatasetImageListItem = ({
                   >
                     {annotation.dataUri}
                   </ClickableText>
-                  {!isInSelectMode && (
-                    <IconButton
-                      icon="trash"
-                      tooltipTx="delete-annotation-title"
-                      onPointerDown={() => {
-                        deleteAnnotation(annotation);
-                      }}
-                      style={{ marginLeft: "auto" }}
-                      tooltipPosition="left"
-                    />
-                  )}
                 </AnnotationListItem>
               ))}
             </AnnotationsList>
