@@ -104,7 +104,7 @@ export const DatasetImageListItem = ({
 
   return (
     <>
-      <ListItem isLast={isLast}>
+      <ListItem isLast={isLast && !showAnnotations}>
         <IconButton
           icon={showAnnotations ? "arrowDown" : "arrowRight"}
           onPointerDown={toggleShowAnnotations}
