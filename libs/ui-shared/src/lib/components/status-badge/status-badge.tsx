@@ -23,6 +23,7 @@ export const StatusBadgeContainer = styled.div<
 
 export const StatusBadge: React.FC<StatusBadgeProps> = ({
   color,
+  textColor,
   borderColor,
   text,
   tx,
@@ -30,13 +31,14 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({
 }) => {
   const lineColor = borderColor ?? "rgba(0, 0, 0, 0)";
   const backgroundColor = color ?? "rgba(0, 0, 0, 0)";
+  // const fontColor = textColor ??
   return (
     <StatusBadgeContainer
       color={backgroundColor}
       borderColor={lineColor}
       full={full}
     >
-      <ListItemLabel tx={tx} text={text} />
+      <ListItemLabel tx={tx} text={text} style={{ color: `${textColor}` }} />
     </StatusBadgeContainer>
   );
 };

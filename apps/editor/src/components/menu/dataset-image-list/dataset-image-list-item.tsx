@@ -2,6 +2,7 @@ import {
   InvisibleButton,
   List,
   ListItem,
+  StatusBadge,
   Text,
   useTranslation,
 } from "@visian/ui-shared";
@@ -11,7 +12,6 @@ import styled from "styled-components";
 
 import { useAnnotationsByImage } from "../../../queries";
 import { Annotation, Image } from "../../../types";
-import { AnnotationListItem } from "../annotation-list-item";
 import { editorPath, handleImageSelection } from "../util";
 
 const Spacer = styled.div`
@@ -33,6 +33,10 @@ const AnnotationsList = styled(List)`
 
 const ClickableText = styled(Text)`
   cursor: pointer;
+`;
+
+const VerifiedStatusBadge = styled(StatusBadge)`
+  margin-left: 20vw;
 `;
 
 export const DatasetImageListItem = ({
@@ -155,11 +159,7 @@ export const DatasetImageListItem = ({
           annotations && (
             <AnnotationsList>
               {annotations.map((annotation: Annotation) => (
-                <AnnotationListItem
-                  isVerified={annotation.verified}
-                  isInSelectMode={isInSelectMode}
-                  deleteAnnotation={() => deleteAnnotation(annotation)}
-                >
+                <ListItem>
                   <ClickableText
                     onClick={() => {
                       navigate(
@@ -174,7 +174,25 @@ export const DatasetImageListItem = ({
                   >
                     {annotation.dataUri}
                   </ClickableText>
-                </AnnotationListItem>
+                  {annotation.verified && (
+                    <VerifiedStatusBadge
+                      textColor="lime"
+                      borderColor="lime"
+                      text="verified"
+                    />
+                  )}
+                  {!isInSelectMode && (
+                    <IconButton
+                      icon="trash"
+                      tooltipTx="delete-annotation-title"
+                      onPointerDown={() => {
+                        deleteAnnotation(annotation);
+                      }}
+                      style={{ marginLeft: "auto" }}
+                      tooltipPosition="left"
+                    />
+                  )}
+                </ListItem>
               ))}
             </AnnotationsList>
           )
