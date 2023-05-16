@@ -9,8 +9,8 @@ import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import styled from "styled-components";
 
-import { JobHistory } from "../components/menu/job-history";
-import { ProjectViewSwitch } from "../components/menu/project-view-switch";
+import { JobHistory } from "../components/data-manager/job-history";
+import { ProjectViewSwitch } from "../components/data-manager/project-view-switch";
 
 const Container = styled(AbsoluteCover)`
   display: flex;

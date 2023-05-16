@@ -9,8 +9,8 @@ import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import styled from "styled-components";
 
-import { DatasetsGrid } from "../components/menu/datasets-grid";
-import { ProjectViewSwitch } from "../components/menu/project-view-switch";
+import { DatasetsGrid } from "../components/data-manager/datasets-grid";
+import { ProjectViewSwitch } from "../components/data-manager/project-view-switch";
 
 const Container = styled(AbsoluteCover)`
   display: flex;
