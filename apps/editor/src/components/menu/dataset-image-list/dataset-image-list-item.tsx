@@ -1,4 +1,5 @@
 import {
+  getTheme,
   InvisibleButton,
   List,
   ListItem,
@@ -6,7 +7,7 @@ import {
   Text,
   useTranslation,
 } from "@visian/ui-shared";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import styled from "styled-components";
 
@@ -19,7 +20,7 @@ const Spacer = styled.div`
 `;
 
 const ExpandedSpacer = styled.div`
-  margin-right: auto;
+  flex-grow: 1;
 `;
 
 const IconButton = styled(InvisibleButton)`
@@ -33,10 +34,6 @@ const AnnotationsList = styled(List)`
 
 const ClickableText = styled(Text)`
   cursor: pointer;
-`;
-
-const VerifiedStatusBadge = styled(StatusBadge)`
-  margin-left: 20vw;
 `;
 
 export const DatasetImageListItem = ({
@@ -101,6 +98,11 @@ export const DatasetImageListItem = ({
   const projectId = useParams().projectId || "";
   const datasetId = useParams().datasetId || "";
 
+  const hasVerifiedAnnotation = useMemo(
+    () => annotations?.some((annotation) => annotation.verified) ?? false,
+    [annotations],
+  );
+
   return (
     <>
       <ListItem>
@@ -117,6 +119,13 @@ export const DatasetImageListItem = ({
           {image.dataUri}
         </ClickableText>
         <ExpandedSpacer />
+        {hasVerifiedAnnotation && (
+          <StatusBadge
+            textColor={getTheme().colors["Neuronic Neon"]}
+            borderColor={getTheme().colors["Neuronic Neon"]}
+            tx="verified"
+          />
+        )}
         {isInSelectMode && (
           <>
             <IconButton
@@ -174,11 +183,12 @@ export const DatasetImageListItem = ({
                   >
                     {annotation.dataUri}
                   </ClickableText>
+                  <ExpandedSpacer />
                   {annotation.verified && (
-                    <VerifiedStatusBadge
-                      textColor="lime"
-                      borderColor="lime"
-                      text="verified"
+                    <StatusBadge
+                      textColor={getTheme().colors["Neuronic Neon"]}
+                      borderColor={getTheme().colors["Neuronic Neon"]}
+                      tx="verified"
                     />
                   )}
                   {!isInSelectMode && (

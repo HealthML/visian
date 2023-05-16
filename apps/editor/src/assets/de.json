@@ -357,5 +357,7 @@
   "cancel-job-message": "Wollen sie den Job wirklich abbrechen?",
 
   "create-project": "Projekt erstellen",
-  "project-name": "Projektname"
+  "project-name": "Projektname",
+
+  "verified": "verifiziert"
 }

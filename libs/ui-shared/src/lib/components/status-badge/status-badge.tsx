@@ -31,14 +31,15 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({
 }) => {
   const lineColor = borderColor ?? "rgba(0, 0, 0, 0)";
   const backgroundColor = color ?? "rgba(0, 0, 0, 0)";
-  // const fontColor = textColor ??
+  const fontColor = textColor ?? "text";
+
   return (
     <StatusBadgeContainer
       color={backgroundColor}
       borderColor={lineColor}
       full={full}
     >
-      <ListItemLabel tx={tx} text={text} style={{ color: `${textColor}` }} />
+      <ListItemLabel tx={tx} text={text} style={{ color: fontColor }} />
     </StatusBadgeContainer>
   );
 };
