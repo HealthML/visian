@@ -132,7 +132,7 @@ export const DatasetImageListItem = ({
         <ExpandedSpacer />
         {hasVerifiedAnnotation && getVerifiedBadge()}
         <Spacer />
-        {isInSelectMode ? (
+        {!isInSelectMode ? (
           <IconButton
             icon="trash"
             tooltipTx="delete-image-title"
