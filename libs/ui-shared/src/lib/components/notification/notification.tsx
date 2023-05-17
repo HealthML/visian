@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import ReactDOM from "react-dom";
 import styled from "styled-components";
 
@@ -58,6 +58,16 @@ export const Notification: React.FC<NotificationProps> = ({
   ...rest
 }) => {
   const modalRootRef = useModalRoot();
+
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      onClose?.(); // Trigger the onClose callback after 15 seconds
+    }, 10000); // 10 seconds delay
+
+    return () => {
+      clearTimeout(timeoutId); // Clean up the timeout if the component unmounts early
+    };
+  }, [onClose]);
 
   const node = (
     <NotificationContainer {...rest}>
