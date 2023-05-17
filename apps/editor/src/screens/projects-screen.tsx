@@ -1,20 +1,18 @@
 import {
-  AbsoluteCover,
-  Box,
-  FloatingUIButton,
-  InvisibleButton,
   Modal,
+  Screen,
+  SquareButton,
   Text,
   useTranslation,
 } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
 import React, { useCallback, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 
-import { ConfirmationPopup } from "../components/menu/confirmation-popup";
-import { ProjectCreationPopup } from "../components/menu/project-creation-popup";
-import { ProjectList } from "../components/menu/projects-list/project-list";
+import { ConfirmationPopup } from "../components/data-manager/confirmation-popup";
+import { ProjectCreationPopup } from "../components/data-manager/project-creation-popup";
+import { ProjectList } from "../components/data-manager/projects-list/project-list";
+import { UIOverlayDataManager } from "../components/data-manager/ui-overlay-data-manager";
 import {
   useCreateProjectMutation,
   useDeleteProjectsMutation,
@@ -22,60 +20,16 @@ import {
 } from "../queries";
 import { Project } from "../types";
 
-const Container = styled(AbsoluteCover)`
-  display: flex;
-  flex-direction: column;
-  padding: 20px;
+const StyledModal = styled(Modal)`
+  width: 100%;
 `;
 
-const TopBar = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  height: 55px;
-`;
-
-const Main = styled(Box)`
-  display: flex;
-  justify-content: center;
-  height: 85%;
-  width: 85%;
+const ErrorMessage = styled(Text)`
   margin: auto;
 `;
 
-const StyledModal = styled(Modal)`
-  vertical-align: middle;
-  width: 100%;
-  z-index: 49;
-`;
-
-const ColumnLeft = styled.div`
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  width: 33.33%;
-`;
-
-const ColumnCenter = styled.div`
-  display: flex;
-  flex: 1;
-  justify-content: center;
-  width: 33.33%;
-`;
-
-const ColumnRight = styled.div`
-  display: flex;
-  flex-direction: row;
-  justify-content: flex-end;
-  width: 33.33%;
-`;
-
-const RightButton = styled(FloatingUIButton)`
-  margin-left: 16px;
-`;
-
-const IconButton = styled(InvisibleButton)`
-  width: 30px;
+const StyledButton = styled(SquareButton)`
+  margin-left: 10px;
 `;
 
 export const ProjectsScreen: React.FC = observer(() => {
@@ -85,9 +39,8 @@ export const ProjectsScreen: React.FC = observer(() => {
   const { deleteProjects } = useDeleteProjectsMutation();
   const { createProject } = useCreateProjectMutation();
   const { t: translate } = useTranslation();
-  const navigate = useNavigate();
 
-  // delete annotation confirmation popup
+  // delete project confirmation popup
   const [
     isDeleteProjectConfirmationPopUpOpen,
     setIsDeleteProjectConfirmationPopUpOpen,
@@ -128,48 +81,51 @@ export const ProjectsScreen: React.FC = observer(() => {
     [projectTobBeDeleted, translate],
   );
 
+  const altMessage = useMemo(() => {
+    if (isLoadingProjects) return translate("projects-loading");
+    if (isErrorProjects)
+      return `${translate("projects-loading-error")} ${
+        projectsError?.response?.statusText
+      } (${projectsError?.response?.status})`;
+    if (projects && projects.length <= 0)
+      return translate("no-projects-available");
+    return null;
+  }, [isLoadingProjects, isErrorProjects, projects, projectsError, translate]);
+
   return (
-    <Container title={`${translate("projects-base-title")}`}>
-      <TopBar>
-        <ColumnLeft />
-        <ColumnCenter />
-        <ColumnRight>
-          <RightButton
-            icon="pixelBrush"
-            tooltipTx="open-editor"
-            tooltipPosition="left"
-            onPointerDown={() => navigate(`/editor`)}
-            isActive={false}
-          />
-        </ColumnRight>
-      </TopBar>
-      <Main>
-        {isLoadingProjects ? (
-          <StyledModal labelTx="projects-loading" />
-        ) : isErrorProjects ? (
-          <StyledModal labelTx="error">
-            <Text>{`${translate("projects-loading-error")} ${
-              projectsError?.response?.statusText
-            } (${projectsError?.response?.status})`}</Text>
-          </StyledModal>
-        ) : (
+    <Screen
+      title={`${translate("projects-base-title")} ${
+        isLoadingProjects
+          ? translate("loading")
+          : isErrorProjects
+          ? translate("error")
+          : ""
+      }`}
+    >
+      <UIOverlayDataManager
+        main={
           <StyledModal
             hideHeaderDivider={false}
             labelTx="projects-base-title"
             position="right"
             headerChildren={
-              <IconButton
-                icon="plus"
+              <StyledButton
+                icon="plusSmall"
                 tooltipTx="create-project"
                 tooltipPosition="left"
                 onPointerDown={openCreateProjectPopup}
               />
             }
           >
-            {projects && projects.length > 0 ? (
-              <ProjectList projects={projects} deleteProject={deleteProject} />
+            {altMessage ? (
+              <ErrorMessage tx={altMessage} />
             ) : (
-              <Text>{translate("no-projects-available")}</Text>
+              projects && (
+                <ProjectList
+                  projects={projects}
+                  deleteProject={deleteProject}
+                />
+              )
             )}
             <ConfirmationPopup
               isOpen={isDeleteProjectConfirmationPopUpOpen}
@@ -189,9 +145,9 @@ export const ProjectsScreen: React.FC = observer(() => {
               onConfirm={(newProjectDto) => createProject(newProjectDto)}
             />
           </StyledModal>
-        )}
-      </Main>
-    </Container>
+        }
+      />
+    </Screen>
   );
 });
 

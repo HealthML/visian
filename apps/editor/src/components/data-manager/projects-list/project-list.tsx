@@ -18,9 +18,10 @@ export const ProjectList = ({
   deleteProject: (project: Project) => void;
 }) => (
   <StyledProjectList onWheel={stopPropagation}>
-    {projects.map((project: Project) => (
+    {projects.map((project: Project, index) => (
       <ProjectListItem
         project={project}
+        isLast={index === projects.length - 1}
         key={project.id}
         deleteProject={() => deleteProject(project)}
       />

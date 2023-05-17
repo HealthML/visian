@@ -13,7 +13,7 @@ import { Dataset } from "../../../types";
 
 const StyledListItem = styled(ListItem)`
   width: 20vw;
-  height: 15vw;
+  height: 14vw;
   background-color: ${color("sheet")};
   border-radius: 15px;
 `;
@@ -67,7 +67,7 @@ export const DatasetListItem = ({
   const navigate = useNavigate();
 
   const openDataset = () => {
-    navigate(`/projects/${dataset.project}/datasets/${dataset.id}`);
+    navigate(`/datasets/${dataset.id}`);
   };
 
   return (

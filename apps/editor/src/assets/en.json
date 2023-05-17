@@ -229,6 +229,10 @@
   "zoom-in": "Zoom in",
   "zoom-out": "Zoom out",
   "reset-zoom": "Reset zoom and pan",
+  "rotation": "Rotation",
+  "rotate-right": "Rotate right",
+  "rotate-left": "Rotate left",
+  "reset-rotation": "Reset rotation",
   "save-export": "Save & Export",
   "create-new-document": "Create a new document",
   "save-in-browser": "Save in browser",
@@ -275,17 +279,21 @@
 
   "projects-loading": "Loading projects...",
   "projects-loading-error": "Error on loading projects:",
-  "no-projects-available": "Currently no projects are available",
+  "no-projects-available": "Currently no projects are available.",
+
+  "project-loading": "Loading project...",
+  "project-loading-error": "Error on loading project:",
 
   "datasets-loading": "Loading datasets...",
   "datasets-loading-error": "Error on loading datasets:",
-  "no-datasets-available": "Currently no datasets are available",
+  "no-datasets-available": "Currently no datasets are available.",
 
   "dataset-loading": "Loading dataset...",
   "dataset-loading-error": "Error on loading dataset:",
 
   "images-loading": "Loading images...",
   "images-loading-error": "Error on loading images:",
+  "no-images-available": "Currently no images are available.",
   "image-open-error": "Error on opening image",
   "image-annotated": "annotated",
 
@@ -304,6 +312,7 @@
 
   "jobs-loading": "Loading jobs...",
   "jobs-loading-error": "Error on loading jobs:",
+  "no-jobs-available": "Currently no jobs are available.",
   "job-deleted-images": "It seems like all images for this job were deleted...",
   "job-images": "Images",
   "job-number-images": "Number of images",

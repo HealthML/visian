@@ -50,6 +50,7 @@ export const DatasetImageListItem = ({
   setSelectedRange,
   deleteAnnotation,
   deleteImage,
+  isLast,
 }: {
   isInSelectMode: boolean;
   image: Image;
@@ -67,6 +68,7 @@ export const DatasetImageListItem = ({
   >;
   deleteAnnotation: (annotation: Annotation) => void;
   deleteImage: (image: Image) => void;
+  isLast: boolean;
 }) => {
   const {
     annotations,
@@ -106,9 +108,13 @@ export const DatasetImageListItem = ({
     <StatusBadge textColor="Neuronic Neon" borderColor="gray" tx="verified" />
   );
 
+  function extractTitleFromDataUri(dataUri: string) {
+    return dataUri.split("/").pop();
+  }
+
   return (
     <>
-      <ListItem>
+      <ListItem isLast={isLast && !showAnnotations}>
         <IconButton
           icon={showAnnotations ? "arrowDown" : "arrowRight"}
           onPointerDown={toggleShowAnnotations}
@@ -119,38 +125,37 @@ export const DatasetImageListItem = ({
             navigate(editorPath(image.id, undefined, projectId, datasetId));
           }}
         >
-          {image.dataUri}
+          {isInSelectMode
+            ? image.dataUri
+            : extractTitleFromDataUri(image.dataUri)}
         </ClickableText>
         <ExpandedSpacer />
         {hasVerifiedAnnotation && getVerifiedBadge()}
         <Spacer />
-        {isInSelectMode && (
-          <>
-            <IconButton
-              icon={isSelected ? "checked" : "unchecked"}
-              onPointerDown={() =>
-                handleImageSelection(
-                  image.id,
-                  index,
-                  selectedImages,
-                  isShiftPressed,
-                  selectedRange,
-                  setSelectedRange,
-                  images,
-                  setImageSelection,
-                  setSelectedImages,
-                )
-              }
-            />
-            <Spacer />
-          </>
-        )}
-        {!isInSelectMode && (
+        {isInSelectMode ? (
           <IconButton
             icon="trash"
             tooltipTx="delete-image-title"
             onPointerDown={() => deleteImage(image)}
+            style={{ marginLeft: "auto" }}
             tooltipPosition="left"
+          />
+        ) : (
+          <IconButton
+            icon={isSelected ? "checked" : "unchecked"}
+            onPointerDown={() =>
+              handleImageSelection(
+                image.id,
+                index,
+                selectedImages,
+                isShiftPressed,
+                selectedRange,
+                setSelectedRange,
+                images,
+                setImageSelection,
+                setSelectedImages,
+              )
+            }
           />
         )}
       </ListItem>
@@ -178,7 +183,9 @@ export const DatasetImageListItem = ({
                       );
                     }}
                   >
-                    {annotation.dataUri}
+                    {isInSelectMode
+                      ? annotation.dataUri
+                      : extractTitleFromDataUri(annotation.dataUri)}
                   </ClickableText>
                   <ExpandedSpacer />
                   {annotation.verified && getVerifiedBadge()}
@@ -190,8 +197,6 @@ export const DatasetImageListItem = ({
                       onPointerDown={() => {
                         deleteAnnotation(annotation);
                       }}
-                      style={{ marginLeft: "auto" }}
-                      tooltipPosition="left"
                     />
                   )}
                 </ListItem>

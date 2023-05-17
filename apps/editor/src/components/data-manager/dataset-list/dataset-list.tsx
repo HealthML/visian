@@ -1,32 +1,16 @@
-import { List, stopPropagation } from "@visian/ui-shared";
+import { stopPropagation } from "@visian/ui-shared";
 import styled from "styled-components";
 
 import { Dataset } from "../../../types";
 import { DatasetListItem } from "./dataset-list-item";
 
-const StyledDatasetList = styled(List)`
+const StyledDatasetList = styled.div`
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  column-gap: 3vw;
-  row-gap: 60px;
-  justify-items: center;
-  margin-top: 2%;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4vh 3.5vw;
+  margin: 3% auto 3% auto;
   overflow-y: auto;
   user-select: none;
-  scrollbar-width: thin;
-  scrollbar-color: #ccc #fff;
-
-  &::-webkit-scrollbar {
-    width: 8px;
-  }
-  &::-webkit-scrollbar-thumb {
-    background-color: #ccc;
-    border-radius: 15px;
-  }
-  &::-webkit-scrollbar-track {
-    background-color: #fff;
-    border-radius: 15px;
-  }
 `;
 
 export const DatasetList = ({

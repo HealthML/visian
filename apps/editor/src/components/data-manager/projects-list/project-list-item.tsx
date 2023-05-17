@@ -19,14 +19,16 @@ const ClickableText = styled(Text)`
 export const ProjectListItem = ({
   project,
   deleteProject,
+  isLast,
 }: {
   project: Project;
   deleteProject: () => void;
+  isLast: boolean;
 }) => {
   const navigate = useNavigate();
 
   return (
-    <ListItem>
+    <ListItem isLast={isLast}>
       <ClickableText
         onClick={() => navigate(`/projects/${project.id}/datasets`)}
       >
