@@ -367,5 +367,7 @@
 
   "create": "Create",
   "create-project": "Create Project",
-  "project-name": "Project Name"
+  "project-name": "Project Name",
+
+  "verified": "verified"
 }
