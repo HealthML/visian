@@ -21,7 +21,7 @@ import { DICOMWebServer } from "./dicomweb-server";
 import { Editor, EditorSnapshot } from "./editor";
 import { Tracker } from "./tracking";
 import { ProgressNotification } from "./types";
-import { Task, TaskType } from "./who";
+import { TaskTypeWHO, TaskWHO } from "./who";
 
 export interface RootSnapshot {
   editor: EditorSnapshot;
@@ -54,7 +54,7 @@ export class RootStore implements ISerializable<RootSnapshot>, IDisposable {
   public refs: { [key: string]: React.RefObject<HTMLElement> } = {};
   public pointerDispatch?: IDispatch;
 
-  public currentTask?: Task;
+  public currentTask?: TaskWHO;
 
   public tracker?: Tracker;
 
@@ -173,10 +173,10 @@ export class RootStore implements ISerializable<RootSnapshot>, IDisposable {
         this.setProgress({ labelTx: "importing", showSplash: true });
         const taskJson = await getWHOTask(taskId);
         // We want to ignore possible other annotations if type is "CREATE"
-        if (taskJson.kind === TaskType.Create) {
+        if (taskJson.kind === TaskTypeWHO.Create) {
           taskJson.annotations = [];
         }
-        const whoTask = new Task(taskJson);
+        const whoTask = new TaskWHO(taskJson);
         this.setCurrentTask(whoTask);
 
         await Promise.all(
@@ -188,7 +188,7 @@ export class RootStore implements ISerializable<RootSnapshot>, IDisposable {
             );
           }),
         );
-        if (whoTask.kind === TaskType.Create) {
+        if (whoTask.kind === TaskTypeWHO.Create) {
           this.editor.activeDocument?.finishBatchImport();
           this.currentTask?.addNewAnnotation();
         } else {
@@ -257,7 +257,7 @@ export class RootStore implements ISerializable<RootSnapshot>, IDisposable {
     }
   }
 
-  public setCurrentTask(task?: Task) {
+  public setCurrentTask(task?: TaskWHO) {
     this.currentTask = task;
   }
 

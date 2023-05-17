@@ -1,10 +1,10 @@
-export interface SampleSnapshot {
+export interface SampleSnapshotWHO {
   sampleUUID: string;
   title: string;
   data: string;
 }
 
-export class Sample {
+export class SampleWHO {
   public sampleUUID: string;
   public title: string;
   public data: string;
@@ -16,7 +16,7 @@ export class Sample {
     this.data = sample.data;
   }
 
-  public toJSON(): SampleSnapshot {
+  public toJSON(): SampleSnapshotWHO {
     return {
       sampleUUID: this.sampleUUID,
       title: this.title,

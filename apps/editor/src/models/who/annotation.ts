@@ -1,5 +1,5 @@
-import { AnnotationData, AnnotationDataSnapshot } from "./annotationData";
-import { User, UserSnapshot } from "./user";
+import { AnnotationDataSnapshotWHO, AnnotationDataWHO } from "./annotationData";
+import { UserSnapshotWHO, UserWHO } from "./user";
 
 export enum AnnotationStatus {
   Pending = "PENDING",
@@ -7,19 +7,19 @@ export enum AnnotationStatus {
   Rejected = "REJECTED",
 }
 
-export interface AnnotationSnapshot {
+export interface AnnotationSnapshotWHO {
   annotationUUID: string;
   status: AnnotationStatus;
-  annotationDataList: AnnotationDataSnapshot[];
-  annotator: UserSnapshot;
+  annotationDataList: AnnotationDataSnapshotWHO[];
+  annotator: UserSnapshotWHO;
   submittedAt: string;
 }
 
-export class Annotation {
+export class AnnotationWHO {
   public annotationUUID: string;
   public status: AnnotationStatus;
-  public data: AnnotationData[];
-  public annotator: User;
+  public data: AnnotationDataWHO[];
+  public annotator: UserWHO;
   public submittedAt: string;
 
   // TODO: Properly type API response data
@@ -27,13 +27,13 @@ export class Annotation {
     this.annotationUUID = annotation.annotationUUID;
     this.status = annotation.status;
     this.data = annotation.data.map(
-      (annotationData: any) => new AnnotationData(annotationData),
+      (annotationData: any) => new AnnotationDataWHO(annotationData),
     );
-    this.annotator = new User(annotation.annotator);
+    this.annotator = new UserWHO(annotation.annotator);
     this.submittedAt = annotation.submittedAt;
   }
 
-  public toJSON(): AnnotationSnapshot {
+  public toJSON(): AnnotationSnapshotWHO {
     return {
       annotationUUID: this.annotationUUID,
       status: this.status,

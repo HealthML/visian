@@ -1,9 +1,9 @@
-export interface AnnotationDataSnapshot {
+export interface AnnotationDataSnapshotWHO {
   annotationDataUUID: string;
   data: string;
 }
 
-export class AnnotationData {
+export class AnnotationDataWHO {
   public annotationDataUUID: string;
   public data: string;
   public correspondingLayerId = "";
@@ -14,7 +14,7 @@ export class AnnotationData {
     this.data = annotationData.data;
   }
 
-  public toJSON(): AnnotationDataSnapshot {
+  public toJSON(): AnnotationDataSnapshotWHO {
     return {
       annotationDataUUID: this.annotationDataUUID,
       data: this.data,

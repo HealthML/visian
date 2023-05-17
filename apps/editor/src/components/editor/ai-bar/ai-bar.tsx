@@ -21,7 +21,7 @@ import styled from "styled-components";
 import { useStore } from "../../../app/root-store";
 import { whoHome } from "../../../constants";
 import { AnnotationStatus } from "../../../models/who/annotation";
-import { AnnotationData } from "../../../models/who/annotationData";
+import { AnnotationDataWHO } from "../../../models/who/annotationData";
 
 const AIBarSheet = styled(Sheet)`
   width: 800px;
@@ -184,7 +184,7 @@ export const AIBar = observer(() => {
   );
 
   const getBase64LayerDataForAnnotationData = useCallback(
-    async (annotationData: AnnotationData) => {
+    async (annotationData: AnnotationDataWHO) => {
       const { correspondingLayerId } = annotationData;
       if (!correspondingLayerId) return;
       const base64LayerData = await getBase64LayerDataForId(
@@ -233,7 +233,7 @@ export const AIBar = observer(() => {
                   data: base64Annotation,
                 };
                 annotation.data.push(
-                  new AnnotationData(annotationDataForBackend),
+                  new AnnotationDataWHO(annotationDataForBackend),
                 );
               });
             }

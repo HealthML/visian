@@ -1,4 +1,4 @@
-export interface AnnotatorSnapshot {
+export interface AnnotatorSnapshotWHO {
   annotatorUUID: string;
   expertise: string;
   yearsInPractice: number;
@@ -9,7 +9,7 @@ export interface AnnotatorSnapshot {
   degree: string;
 }
 
-export class Annotator {
+export class AnnotatorWHO {
   public annotatorUUID: string;
   public expertise: string;
   public yearsInPractice: number;
@@ -31,7 +31,7 @@ export class Annotator {
     this.degree = annotator.degree;
   }
 
-  public toJSON(): AnnotatorSnapshot {
+  public toJSON(): AnnotatorSnapshotWHO {
     return {
       annotatorUUID: this.annotatorUUID,
       expertise: this.expertise,
