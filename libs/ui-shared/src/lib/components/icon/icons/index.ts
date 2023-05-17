@@ -33,6 +33,7 @@ export { ReactComponent as layers } from "./layers.svg";
 export { ReactComponent as leftArrow } from "./left-arrow.svg";
 export { ReactComponent as leftMouse } from "./left-mouse.svg";
 export { ReactComponent as listView } from "./list-view.svg";
+export { ReactComponent as logs } from "./logs.svg";
 export { ReactComponent as magicBrush } from "./magic-brush.svg";
 export { ReactComponent as menu } from "./menu.svg";
 export { ReactComponent as middleMouse } from "./middle-mouse.svg";

@@ -364,6 +364,7 @@
   "delete-job-message": "Wollen sie den Job sämtlich der _ dabei erzeugten Annotation(en) wirklich löschen?",
   "cancel-job-title": "Job abbrechen",
   "cancel-job-message": "Wollen sie den Job wirklich abbrechen?",
+  "open-job-log": "Job Log Datei öffnen",
 
   "create-project": "Projekt erstellen",
   "project-name": "Projektname"
