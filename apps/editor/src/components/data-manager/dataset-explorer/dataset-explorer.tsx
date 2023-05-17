@@ -265,7 +265,10 @@ export const DatasetExplorer = ({
         dataset={imageImportPopUpOpenWith}
         onImportFinished={refetchImages}
         isDraggedOver={isDraggedOver}
-        onDropCompleted={onDropCompleted}
+        onDropCompleted={() => {
+          setImageImportPopUpOpenWith(dataset);
+          onDropCompleted();
+        }}
       />
       <ConfirmationPopup
         isOpen={isDeleteAnnotationConfirmationPopUpOpen}
