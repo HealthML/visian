@@ -10,10 +10,16 @@ import { JobLogPopUpProps } from "./job-log-popup.props";
 const PopUpContainer = styled(PopUp)`
   align-items: left;
   width: 70%;
+  max-height: 80%;
 `;
 
 const StyledDivider = styled(Divider)`
   margin-top: 0.5em;
+`;
+
+const StyledText = styled(Text)`
+  overflow-y: auto;
+  white-space: pre-wrap;
 `;
 
 const getLogText = async (job: Job) => {
@@ -45,7 +51,7 @@ export const JobLogPopup = observer<JobLogPopUpProps>(
       >
         <SectionHeader>{job.logFileUri}</SectionHeader>
         <StyledDivider />
-        <Text style={{ whiteSpace: "pre-wrap" }}>{jobLogContent}</Text>
+        <StyledText>{jobLogContent}</StyledText>
       </PopUpContainer>
     );
   },
