@@ -54,7 +54,7 @@ export class RootStore implements ISerializable<RootSnapshot>, IDisposable {
   public refs: { [key: string]: React.RefObject<HTMLElement> } = {};
   public pointerDispatch?: IDispatch;
 
-  public currentTask?: TaskWHO;
+  public currentTaskWHO?: TaskWHO;
 
   public tracker?: Tracker;
 
@@ -70,7 +70,7 @@ export class RootStore implements ISerializable<RootSnapshot>, IDisposable {
         isSaved: observable,
         isSaveUpToDate: observable,
         refs: observable,
-        currentTask: observable,
+        currentTaskWHO: observable,
 
         theme: computed,
 
@@ -83,7 +83,7 @@ export class RootStore implements ISerializable<RootSnapshot>, IDisposable {
         setIsDirty: action,
         setIsSaveUpToDate: action,
         setRef: action,
-        setCurrentTask: action,
+        setCurrentTaskWHO: action,
       },
     );
 
@@ -177,7 +177,7 @@ export class RootStore implements ISerializable<RootSnapshot>, IDisposable {
           taskJson.annotations = [];
         }
         const whoTask = new TaskWHO(taskJson);
-        this.setCurrentTask(whoTask);
+        this.setCurrentTaskWHO(whoTask);
 
         await Promise.all(
           whoTask.samples.map(async (sample) => {
@@ -190,7 +190,7 @@ export class RootStore implements ISerializable<RootSnapshot>, IDisposable {
         );
         if (whoTask.kind === TaskTypeWHO.Create) {
           this.editor.activeDocument?.finishBatchImport();
-          this.currentTask?.addNewAnnotation();
+          this.currentTaskWHO?.addNewAnnotation();
         } else {
           // Task Type is Correct or Review
           await Promise.all(
@@ -257,8 +257,8 @@ export class RootStore implements ISerializable<RootSnapshot>, IDisposable {
     }
   }
 
-  public setCurrentTask(task?: TaskWHO) {
-    this.currentTask = task;
+  public setCurrentTaskWHO(task?: TaskWHO) {
+    this.currentTaskWHO = task;
   }
 
   public persist = async () => {

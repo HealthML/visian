@@ -197,13 +197,13 @@ export const AIBar = observer(() => {
 
   const saveAnnotationToWHOBackend = useCallback(
     async (status: AnnotationStatus) => {
-      if (!store?.currentTask?.annotations.length) return;
-      store.currentTask.annotations.forEach((annotation) => {
+      if (!store?.currentTaskWHO?.annotations.length) return;
+      store.currentTaskWHO.annotations.forEach((annotation) => {
         annotation.status = status;
       });
 
       const newAnnotations = await Promise.all(
-        store.currentTask.annotations.map(async (annotation) => {
+        store.currentTaskWHO.annotations.map(async (annotation) => {
           if (annotation.data.length) {
             // Add base64 data for each existing AnnotationData object
             const base64Data = await Promise.all(
@@ -243,19 +243,19 @@ export const AIBar = observer(() => {
         }),
       );
 
-      store.currentTask.annotations = newAnnotations;
+      store.currentTaskWHO.annotations = newAnnotations;
 
       try {
         const response = await putWHOTask(
-          store.currentTask.taskUUID,
-          JSON.stringify(store.currentTask.toJSON()),
+          store.currentTaskWHO.taskUUID,
+          JSON.stringify(store.currentTaskWHO.toJSON()),
         );
         if (response) {
           const newLocation = response.headers.get("location");
           if (newLocation) {
             const urlElements = newLocation.split("/");
             const newTaskId = urlElements[urlElements.length - 1];
-            if (newTaskId !== store.currentTask.taskUUID) {
+            if (newTaskId !== store.currentTaskWHO.taskUUID) {
               store?.setIsDirty(false, true);
               setNewTaskIdForUrl(newTaskId);
               await store.loadWHOTask(newTaskId);
@@ -288,13 +288,13 @@ export const AIBar = observer(() => {
       <TaskContainer>
         <TaskLabel tx="Task" />
         <TaskName
-          tx={store.currentTask?.annotationTasks[0]?.title || "Task Name"}
+          tx={store.currentTaskWHO?.annotationTasks[0]?.title || "Task Name"}
         />
       </TaskContainer>
       <ActionContainer>
         <ActionName
           tx={
-            store.currentTask?.annotationTasks[0]?.description ||
+            store.currentTaskWHO?.annotationTasks[0]?.description ||
             "Task Description"
           }
         />
