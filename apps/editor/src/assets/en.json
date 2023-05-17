@@ -333,6 +333,8 @@
   "image-import-error-title": "Errors occurred during import",
   "image-import-generic-error-description": "{{imported}} out of {{total}} images have been successfully imported.",
   "image-import-duplicate-error-description": "Some images already existed and have been skipped. {{imported}} out of {{total}} images have been successfully imported.",
+  "image-import-selected-is-duplicate": "Duplicate, will be skipped",
+  "image-import-selected-has-invalid-type": "Invalid file type, will be skipped",
 
   "open-editor": "Open editor",
   "close-editor": "Close editor",

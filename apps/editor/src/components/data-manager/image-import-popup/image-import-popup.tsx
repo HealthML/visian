@@ -22,6 +22,7 @@ import styled from "styled-components";
 import { postImage } from "../../../queries";
 import { DropSheet } from "../../editor";
 import { ProgressPopUp } from "../../editor/progress-popup";
+import { WarningLabel } from "../warning-label";
 import { ImageImportPopUpProps } from "./image-import-popup.props";
 
 const DropZoneContainer = styled.div`
@@ -60,6 +61,12 @@ const FileList = styled(List)`
   overflow-y: auto;
 `;
 
+const FileTitleContainer = styled.div`
+  display: flex;
+  flex-direction: row;
+  overflow-x: hidden;
+`;
+
 const FileEntry = styled.div`
   width: 100%;
   display: flex;
@@ -68,6 +75,7 @@ const FileEntry = styled.div`
 `;
 
 const FileEntryText = styled(Text)`
+  min-width: 100px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -100,6 +108,12 @@ const ErrorNotification = styled(Notification)`
   transform: translateX(-50%);
 `;
 
+type SelectedFile = {
+  file: File;
+  hasInvalidType?: boolean;
+  isDuplicate?: boolean;
+};
+
 const sanitizeForFS = (name: string) =>
   name.replace(/[^a-z0-9_-]/gi, "_").toLowerCase();
 
@@ -112,13 +126,13 @@ export const ImageImportPopup = observer<ImageImportPopUpProps>(
     isDraggedOver,
     onDropCompleted,
   }) => {
-    const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+    const [selectedFiles, setSelectedFiles] = useState<SelectedFile[]>([]);
     const [isImporting, setIsImporting] = useState(false);
     const [uploadedFiles, setUploadedFiles] = useState(0);
     const [importError, setImportError] = useState<{
-      type: "generic" | "duplicate" | "unsupported";
-      imageName?: string;
-      totalImages?: number;
+      type: "generic" | "duplicate";
+      imageName: string;
+      totalImages: number;
     }>();
     const { t } = useTranslation();
 
@@ -128,10 +142,14 @@ export const ImageImportPopup = observer<ImageImportPopUpProps>(
 
     const addSelectedFiles = useCallback(
       (files: FileList) => {
-        const uniqueFiles = Array.from(files).filter(
-          (file) => !selectedFiles.some((f) => f.name === file.name),
-        );
-        setSelectedFiles((prevFiles) => [...prevFiles, ...uniqueFiles]);
+        const newFiles = Array.from(files).map((file) => {
+          const isDuplicate = selectedFiles.some(
+            (f) => f.file.name === file.name,
+          );
+          const hasInvalidType = !file.name.match(/\.(nii\.gz|dcm|nii)$/i);
+          return { file, isDuplicate, hasInvalidType };
+        });
+        setSelectedFiles((prevFiles) => [...prevFiles, ...newFiles]);
       },
       [selectedFiles],
     );
@@ -147,31 +165,17 @@ export const ImageImportPopup = observer<ImageImportPopUpProps>(
 
     const importFilesFromDrop = useCallback(
       async (files: FileList) => {
-        const supportedExtensions = [".nii.gz", ".nii", ".dcm"];
-        const isValidFile = Array.from(files).every((file) => {
-          const fileName = file.name.toLowerCase();
-          return supportedExtensions.some((extension) =>
-            fileName.endsWith(extension),
-          );
-        });
-
-        if (!isValidFile) {
-          setImportError({
-            type: "unsupported",
-          });
-        } else {
-          addSelectedFiles(files);
-        }
+        addSelectedFiles(files);
         onDropCompleted();
       },
-      [addSelectedFiles, onDropCompleted, setImportError],
+      [addSelectedFiles, onDropCompleted],
     );
 
     const openFilePicker = useFilePicker(importFilesFromInput);
 
     const removeSelectedFile = useCallback(
-      (file: File) =>
-        setSelectedFiles((files) => files.filter((f) => f !== file)),
+      (selection: SelectedFile) =>
+        setSelectedFiles((files) => files.filter((f) => f !== selection)),
       [],
     );
 
@@ -180,45 +184,55 @@ export const ImageImportPopup = observer<ImageImportPopUpProps>(
       if (onClose) onClose();
     }, [onClose]);
 
-    const totalFiles = selectedFiles.length;
+    const validFiles = selectedFiles.filter(
+      (file) => !file.hasInvalidType && !file.isDuplicate,
+    );
+    const totalFiles = validFiles.length;
     const importImages = useCallback(async () => {
       if (!dataset?.id) return;
       setUploadedFiles(0);
       setIsImporting(true);
       const batchSize = 5;
-      await promiseAllInBatches<File, void>(
-        async (file) => {
+      await promiseAllInBatches<SelectedFile, void>(
+        async (selectedFile) => {
           try {
             const datasetName = sanitizeForFS(dataset.name);
-            await postImage(dataset.id, `${datasetName}/${file.name}`, file);
+            await postImage(
+              dataset.id,
+              `${datasetName}/${selectedFile.file.name}`,
+              selectedFile.file,
+            );
             setUploadedFiles((prevUploadedFiles) => prevUploadedFiles + 1);
           } catch (error) {
             if (!(error instanceof AxiosError)) throw error;
             if (error.response?.data.message.includes("exists already")) {
               setImportError({
                 type: "duplicate",
-                imageName: file.name,
+                imageName: selectedFile.file.name,
                 totalImages: totalFiles,
               });
             } else {
               setImportError({
                 type: "generic",
-                imageName: file.name,
+                imageName: selectedFile.file.name,
                 totalImages: totalFiles,
               });
             }
             // eslint-disable-next-line no-console
-            console.error(`Error while uploading ${file.name}:`, error);
+            console.error(
+              `Error while uploading ${selectedFile.file.name}:`,
+              error,
+            );
           }
         },
-        selectedFiles,
+        validFiles,
         batchSize,
       );
       onImportFinished();
       setIsImporting(false);
       setSelectedFiles([]);
       if (onClose) onClose();
-    }, [dataset, selectedFiles, onImportFinished, onClose, totalFiles]);
+    }, [dataset, validFiles, onImportFinished, onClose, totalFiles]);
 
     if (isImporting) {
       return (
@@ -233,13 +247,7 @@ export const ImageImportPopup = observer<ImageImportPopUpProps>(
     }
 
     const errorNotification =
-      importError?.type === "unsupported" ? (
-        <ErrorNotification
-          titleTx="import-error"
-          descriptionTx="image-loading-error"
-          onClose={() => setImportError(undefined)}
-        />
-      ) : importError?.type === "duplicate" ? (
+      importError?.type === "duplicate" ? (
         <ErrorNotification
           titleTx="image-import-error-title"
           descriptionTx="image-import-duplicate-error-description"
@@ -289,17 +297,25 @@ export const ImageImportPopup = observer<ImageImportPopUpProps>(
               <InfoText tx="import-no-files-selected" />
             ) : (
               <FileList>
-                {selectedFiles.map((file, index) => (
+                {selectedFiles.map((selection, index) => (
                   <ListItem
                     isLast={index === selectedFiles.length - 1}
-                    key={file.name}
+                    key={index}
                   >
                     <FileEntry>
-                      <FileEntryText text={file.name} />
+                      <FileTitleContainer>
+                        <FileEntryText text={selection.file.name} />
+                        {selection.isDuplicate && (
+                          <WarningLabel tx="image-import-selected-is-duplicate" />
+                        )}
+                        {selection.hasInvalidType && (
+                          <WarningLabel tx="image-import-selected-has-invalid-type" />
+                        )}
+                      </FileTitleContainer>
                       <IconButton
                         icon="xSmall"
                         tooltipTx="delete-dataset-title"
-                        onPointerDown={() => removeSelectedFile(file)}
+                        onPointerDown={() => removeSelectedFile(selection)}
                       />
                     </FileEntry>
                   </ListItem>
