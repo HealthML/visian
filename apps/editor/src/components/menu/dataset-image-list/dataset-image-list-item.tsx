@@ -1,5 +1,4 @@
 import {
-  getTheme,
   InvisibleButton,
   List,
   ListItem,
@@ -103,6 +102,10 @@ export const DatasetImageListItem = ({
     [annotations],
   );
 
+  const getVerifiedBadge = () => (
+    <StatusBadge textColor="Neuronic Neon" borderColor="gray" tx="verified" />
+  );
+
   return (
     <>
       <ListItem>
@@ -119,13 +122,8 @@ export const DatasetImageListItem = ({
           {image.dataUri}
         </ClickableText>
         <ExpandedSpacer />
-        {hasVerifiedAnnotation && (
-          <StatusBadge
-            textColor={getTheme().colors["Neuronic Neon"]}
-            borderColor={getTheme().colors["Neuronic Neon"]}
-            tx="verified"
-          />
-        )}
+        {hasVerifiedAnnotation && getVerifiedBadge()}
+        <Spacer />
         {isInSelectMode && (
           <>
             <IconButton
@@ -152,7 +150,6 @@ export const DatasetImageListItem = ({
             icon="trash"
             tooltipTx="delete-image-title"
             onPointerDown={() => deleteImage(image)}
-            style={{ marginLeft: "auto" }}
             tooltipPosition="left"
           />
         )}
@@ -184,13 +181,8 @@ export const DatasetImageListItem = ({
                     {annotation.dataUri}
                   </ClickableText>
                   <ExpandedSpacer />
-                  {annotation.verified && (
-                    <StatusBadge
-                      textColor={getTheme().colors["Neuronic Neon"]}
-                      borderColor={getTheme().colors["Neuronic Neon"]}
-                      tx="verified"
-                    />
-                  )}
+                  {annotation.verified && getVerifiedBadge()}
+                  <Spacer />
                   {!isInSelectMode && (
                     <IconButton
                       icon="trash"

@@ -4,7 +4,7 @@ import { color as getColor, radius, Theme } from "../../theme";
 import { ListItemLabel } from "../list";
 import { StatusBadgeProps } from "./status-badge.props";
 
-export const StatusBadgeContainer = styled.div<
+const StatusBadgeContainer = styled.div<
   Pick<StatusBadgeProps, "color" | "borderColor" | "full">
 >`
   box-sizing: border-box;
@@ -19,6 +19,10 @@ export const StatusBadgeContainer = styled.div<
     getColor(props.borderColor as keyof Theme["colors"])};
   background-color: ${(props) =>
     getColor(props.color as keyof Theme["colors"])};
+`;
+
+const Label = styled(ListItemLabel)<Pick<StatusBadgeProps, "textColor">>`
+  color: ${(props) => getColor(props.textColor as keyof Theme["colors"])};
 `;
 
 export const StatusBadge: React.FC<StatusBadgeProps> = ({
@@ -39,7 +43,7 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({
       borderColor={lineColor}
       full={full}
     >
-      <ListItemLabel tx={tx} text={text} style={{ color: fontColor }} />
+      <Label tx={tx} text={text} textColor={fontColor} />
     </StatusBadgeContainer>
   );
 };
