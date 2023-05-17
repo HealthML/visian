@@ -21,6 +21,7 @@ const ErrorMessage = styled(Text)`
 
 const StyledButton = styled(SquareButton)`
   margin-left: 10px;
+  padding: 10px;
 `;
 
 export const DatasetsGrid = ({
@@ -85,7 +86,7 @@ export const DatasetsGrid = ({
         position="right"
         headerChildren={
           <StyledButton
-            icon="plusSmall"
+            icon="plus"
             tooltipTx="create-dataset"
             tooltipPosition="left"
             onPointerDown={openCreateDatasetPopup}
