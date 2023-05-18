@@ -120,6 +120,17 @@ export class Editor
     return false;
   };
 
+  public disposeActiveDocument = () => {
+    if (
+      // eslint-disable-next-line no-alert
+      window.confirm(i18n.t("discard-current-document-confirmation"))
+    ) {
+      this.activeDocument?.dispose();
+      return true;
+    }
+    return false;
+  };
+
   // Proxies
   public get refs(): { [name: string]: React.RefObject<HTMLElement> } {
     return this.context.getRefs();
