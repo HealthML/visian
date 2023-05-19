@@ -342,6 +342,8 @@
   "image-import-error-title": "Import Fehler aufgetreten",
   "image-import-generic-error-description": "Es wurden {{imported}} von {{total}} Bildern erfolgreich importiert.",
   "image-import-duplicate-error-description": "Einige Bilder existierten bereits und wurden übersprungen. Es wurde(n) {{imported}} von {{total}} Bilder(n) erfolgreich importiert.",
+  "image-import-selected-is-duplicate": "Datei bereits ausgewählt, wird übersprungen",
+  "image-import-selected-has-invalid-type": "Ungültiger Dateityp, wird übersprungen",
 
   "open-editor": "Editor öffnen",
   "close-editor": "Editor schließen",
