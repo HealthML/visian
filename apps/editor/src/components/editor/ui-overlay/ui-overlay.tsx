@@ -27,7 +27,7 @@ import {
 } from "../action-modal";
 import { AIBar } from "../ai-bar";
 import { AxesAndVoxel } from "../axes-and-voxel";
-import { DropSheet } from "../drop-sheet";
+import { ImageImportDropSheet } from "../import-image-drop-sheet";
 import { ImportPopUp } from "../import-popup";
 import { Layers } from "../layers";
 import { MeasurementPopUp } from "../measurement-popup";
@@ -398,7 +398,9 @@ export const UIOverlay = observer<UIOverlayProps>(
               onClose={store?.editor.activeDocument?.setMeasurementDisplayLayer}
             />
             <SavePopUp isOpen={isSavePopUpOpen} onClose={closeSavePopUp} />
-            {isDraggedOver && <DropSheet onDropCompleted={onDropCompleted} />}
+            {isDraggedOver && (
+              <ImageImportDropSheet onDropCompleted={onDropCompleted} />
+            )}
             {store?.progress && (
               <ProgressPopUp
                 label={store.progress.label}

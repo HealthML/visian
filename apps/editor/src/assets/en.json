@@ -3,7 +3,7 @@
   "error": "Error!",
   "reset": "Reset",
 
-  "drop-file": "Drop your scan or annotation here",
+  "drop-file": "Drop your file here",
   "upload-file": "Upload file",
 
   "untitled-document": "Untitled Document",
@@ -333,6 +333,17 @@
   "job-creation-image-selection": "Select the images to annotate",
   "job-creation-error": "An error occurred while creating the job.",
   "start-job": "Start Job",
+
+  "import-images": "Import Images",
+  "image-import-popup-title": "Import Images",
+  "import-selected-files": "Selected Images",
+  "import-no-files-selected": "Please select at least one image.",
+  "importing-images": "Importing image {{current}} of {{total}}...",
+  "image-import-error-title": "Errors occurred during import",
+  "image-import-generic-error-description": "{{imported}} out of {{total}} images have been successfully imported.",
+  "image-import-duplicate-error-description": "Some images already existed and have been skipped. {{imported}} out of {{total}} images have been successfully imported.",
+  "image-import-selected-is-duplicate": "Duplicate, will be skipped",
+  "image-import-selected-has-invalid-type": "Invalid file type, will be skipped",
 
   "open-editor": "Open editor",
   "close-editor": "Close editor",

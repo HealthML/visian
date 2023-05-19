@@ -3,7 +3,7 @@
   "error": "Fehler!",
   "reset": "Zurücksetzen",
 
-  "drop-file": "Legen Sie Scan oder Annotation hier ab",
+  "drop-file": "Legen Sie die Datei hier ab",
   "upload-file": "Datei hochladen",
 
   "untitled-document": "Unbenanntes Dokument",
@@ -333,6 +333,17 @@
   "job-creation-image-selection": "Bilder zum Annotieren auswählen",
   "job-creation-error": "Beim Erstellen des Jobs ist ein Fehler aufgetreten.",
   "start-job": "Job starten",
+
+  "import-images": "Bilder importieren",
+  "image-import-popup-title": "Bilder importieren",
+  "import-selected-files": "Ausgewählte Bilder",
+  "import-no-files-selected": "Bitte mind. ein Bild auswählen.",
+  "image-import": "Bild {{current}} von {{total}} wird importiert...",
+  "image-import-error-title": "Import Fehler aufgetreten",
+  "image-import-generic-error-description": "Es wurden {{imported}} von {{total}} Bildern erfolgreich importiert.",
+  "image-import-duplicate-error-description": "Einige Bilder existierten bereits und wurden übersprungen. Es wurde(n) {{imported}} von {{total}} Bilder(n) erfolgreich importiert.",
+  "image-import-selected-is-duplicate": "Datei bereits ausgewählt, wird übersprungen",
+  "image-import-selected-has-invalid-type": "Ungültiger Dateityp, wird übersprungen",
 
   "open-editor": "Editor öffnen",
   "close-editor": "Editor schließen",

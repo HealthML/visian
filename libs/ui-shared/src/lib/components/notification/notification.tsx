@@ -1,9 +1,10 @@
-import React from "react";
+import React, { useEffect } from "react";
 import ReactDOM from "react-dom";
 import styled from "styled-components";
 
 import { color, fontWeight, noise, zIndex } from "../../theme";
 import { useModalRoot } from "../box";
+import { InvisibleButton } from "../button";
 import { Sheet } from "../sheet";
 import { Title } from "../text";
 import { NotificationProps } from "./notification.props";
@@ -20,12 +21,24 @@ const NotificationContainer = styled(Sheet)`
   z-index: ${zIndex("notification")};
 `;
 
+const NotificationHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  width: 100%;
+`;
+
 const NotificationTitle = styled(Title)`
   font-size: 20px;
   line-height: 20px;
   font-weight: ${fontWeight("regular")};
   margin-bottom: 8px;
   color: ${color("text")};
+`;
+
+const CloseButton = styled(InvisibleButton)`
+  flex: 0 0 20px;
+  margin: 0;
 `;
 
 const NotificationDescription = styled(Title)`
@@ -41,13 +54,27 @@ export const Notification: React.FC<NotificationProps> = ({
   descriptionTx,
   descriptionData,
   description,
+  onClose,
   ...rest
 }) => {
   const modalRootRef = useModalRoot();
 
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      onClose?.();
+    }, 10000); // 10 seconds delay
+
+    return () => {
+      clearTimeout(timeoutId);
+    };
+  }, [onClose]);
+
   const node = (
     <NotificationContainer {...rest}>
-      <NotificationTitle tx={titleTx} text={title} />
+      <NotificationHeader>
+        <NotificationTitle tx={titleTx} text={title} />
+        {onClose && <CloseButton icon="xSmall" onPointerDown={onClose} />}
+      </NotificationHeader>
       <NotificationDescription
         tx={descriptionTx}
         data={descriptionData}
