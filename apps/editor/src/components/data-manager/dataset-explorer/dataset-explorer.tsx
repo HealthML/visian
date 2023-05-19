@@ -9,10 +9,10 @@ import {
   useImagesByDataset,
 } from "../../../queries";
 import { Annotation, Dataset, Image } from "../../../types";
-import { ImageImportPopup } from "../../menu/image-import-popup";
 import { ConfirmationPopup } from "../confirmation-popup/confirmation-popup";
 import { DatasetImageList } from "../dataset-image-list";
 import { DatasetNavigationbar } from "../dataset-navigationbar";
+import { ImageImportPopup } from "../image-import-popup";
 import { JobCreationPopup } from "../job-creation-popup";
 import { useImageSelection } from "../util";
 
