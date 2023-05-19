@@ -63,17 +63,16 @@ export const DatasetScreen: React.FC = observer(() => {
               <ErrorMessage tx={altMessage} />
             </StyledModal>
           ) : (
-            dataset && <DatasetExplorer dataset={dataset} />
+            dataset && (
+              <DatasetExplorer
+                dataset={dataset}
+                isDraggedOver={isDraggedOver}
+                onDropCompleted={onDrop}
+              />
+            )
           )
         }
       />
-      {dataset && (
-        <DatasetExplorer
-          dataset={dataset}
-          isDraggedOver={isDraggedOver}
-          onDropCompleted={onDrop}
-        />
-      )}
     </Screen>
   );
 });
