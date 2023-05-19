@@ -2,10 +2,11 @@ import {
   InvisibleButton,
   List,
   ListItem,
+  StatusBadge,
   Text,
   useTranslation,
 } from "@visian/ui-shared";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import styled from "styled-components";
 
@@ -18,7 +19,7 @@ const Spacer = styled.div`
 `;
 
 const ExpandedSpacer = styled.div`
-  margin-right: auto;
+  flex-grow: 1;
 `;
 
 const IconButton = styled(InvisibleButton)`
@@ -80,6 +81,19 @@ export const DatasetImageListItem = ({
   const projectId = useParams().projectId || "";
   const datasetId = useParams().datasetId || "";
 
+  const hasVerifiedAnnotation = useMemo(
+    () => annotations?.some((annotation) => annotation.verified) ?? false,
+    [annotations],
+  );
+
+  const getVerifiedBadge = () => (
+    <StatusBadge textColor="Neuronic Neon" borderColor="gray" tx="verified" />
+  );
+
+  function extractTitleFromDataUri(dataUri: string) {
+    return dataUri.split("/").pop();
+  }
+
   return (
     <>
       <ListItem>
@@ -93,25 +107,37 @@ export const DatasetImageListItem = ({
             navigate(editorPath(image.id, undefined, projectId, datasetId));
           }}
         >
-          {image.dataUri}
+          {isInSelectMode
+            ? image.dataUri
+            : extractTitleFromDataUri(image.dataUri)}
         </ClickableText>
         <ExpandedSpacer />
-        {isInSelectMode && (
-          <>
-            <IconButton
-              icon={isSelected ? "checked" : "unchecked"}
-              onPointerDown={toggleSelection}
-            />
-            <Spacer />
-          </>
-        )}
-        {!isInSelectMode && (
+        {hasVerifiedAnnotation && getVerifiedBadge()}
+        <Spacer />
+        {!isInSelectMode ? (
           <IconButton
             icon="trash"
             tooltipTx="delete-image-title"
             onPointerDown={() => deleteImage(image)}
             style={{ marginLeft: "auto" }}
             tooltipPosition="left"
+          />
+        ) : (
+          <IconButton
+            icon={isSelected ? "checked" : "unchecked"}
+            onPointerDown={() =>
+              handleImageSelection(
+                image.id,
+                index,
+                selectedImages,
+                isShiftPressed,
+                selectedRange,
+                setSelectedRange,
+                images,
+                setImageSelection,
+                setSelectedImages,
+              )
+            }
           />
         )}
       </ListItem>
@@ -139,8 +165,13 @@ export const DatasetImageListItem = ({
                       );
                     }}
                   >
-                    {annotation.dataUri}
+                    {isInSelectMode
+                      ? annotation.dataUri
+                      : extractTitleFromDataUri(annotation.dataUri)}
                   </ClickableText>
+                  <ExpandedSpacer />
+                  {annotation.verified && getVerifiedBadge()}
+                  <Spacer />
                   {!isInSelectMode && (
                     <IconButton
                       icon="trash"
