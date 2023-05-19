@@ -2,6 +2,7 @@ import {
   I18nData,
   Icon,
   IconType,
+  isMac,
   KeyIcon,
   LargePopUp,
   LargePopUpColumn,
@@ -42,7 +43,11 @@ export const Hotkey: React.FC<{
     } else {
       nodes.push(
         <KeyIcon
-          text={`${key[0].toUpperCase()}${key.substring(1)}`}
+          text={
+            key === "ctrl" && isMac()
+              ? "Cmd"
+              : `${key[0].toUpperCase()}${key.substring(1)}`
+          }
           key={index}
           isSmall={isShort}
         />,
@@ -152,6 +157,7 @@ export const ShortcutPopUp: React.FC<ShortcutPopUpProps> = observer(
             <HotkeySection name="view-types" />
             <HotkeySection name="slice-navigation" />
             <HotkeySection name="zoom" />
+            <HotkeySection name="rotation" />
             <HotkeySection name="save-export" />
           </LargePopUpColumn>
         </LargePopUpColumnContainer>

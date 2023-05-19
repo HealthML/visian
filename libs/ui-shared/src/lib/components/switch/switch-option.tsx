@@ -19,7 +19,6 @@ const SwitchOptionContainer = styled(InvisibleButton)`
 
 const SwitchOptionLabel = styled(Text)`
   font-size: 12px;
-  line-height: 12px;
 `;
 
 export const SwitchOption: React.FC<SwitchOptionProps> = ({

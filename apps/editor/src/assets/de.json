@@ -229,6 +229,10 @@
   "zoom-in": "Heranzoomen",
   "zoom-out": "Herauszoomen",
   "reset-zoom": "Zoom und Verschiebung zurücksetzen",
+  "rotation": "Rotation",
+  "rotate-right": "Nach rechts drehen",
+  "rotate-left": "Nach links drehen",
+  "reset-rotation": "Rotation zurücksetzen",
   "save-export": "Speichern & Exportieren",
   "create-new-document": "Ein neues Dokument erstellen",
   "save-in-browser": "Im Browser speichern",
@@ -275,17 +279,21 @@
 
   "projects-loading": "Projekte werden geladen...",
   "projects-loading-error": "Fehler beim Laden der Projekte:",
-  "no-projects-available": "Aktuell sind keine Projekte vorhanden",
+  "no-projects-available": "Aktuell sind keine Projekte vorhanden.",
+
+  "project-loading": "Projekt wird geladen...",
+  "project-loading-error": "Fehler beim Laden des Projektes:",
 
   "datasets-loading": "Datensätze werden geladen...",
   "datasets-loading-error": "Fehler beim Laden der Datensätze:",
-  "no-datasets-available": "Aktuell sind keine Datensätze vorhanden",
+  "no-datasets-available": "Aktuell sind keine Datensätze vorhanden.",
 
   "dataset-loading": "Datensatz wird geladen...",
   "dataset-loading-error": "Fehler beim Laden des Datensatzes:",
 
   "images-loading": "Bilder werden geladen...",
   "images-loading-error": "Fehler beim Laden der Bilder:",
+  "no-images-available": "Aktuell sind keine Bilder vorhanden.",
   "image-open-error": "Fehler beim Öffnen des Bildes",
   "image-annotated": "annotiert",
 
@@ -304,6 +312,7 @@
 
   "jobs-loading": "Jobs werden geladen...",
   "jobs-loading-error": "Fehler beim Laden der Jobs:",
+  "no-jobs-available": "Aktuell sind keine Jobs vorhanden.",
   "job-deleted-images": "Es scheint als wurden alle Bilder des Jobs gelöscht...",
   "job-details": "Job Details",
   "job-images": "Bilder",
@@ -361,5 +370,12 @@
   "delete-project-title": "Projekt löschen",
   "delete-project-message": "Wollen sie das Projekt \"_\" sämtlich aller enthalten Datensätze, Bilder und Annotationen wirklich löschen?",
   "delete-job-title": "Job löschen",
-  "delete-job-message": "Wollen sie den Job sämtlich der _ dabei erzeugten Annotation(en) wirklich löschen?"
+  "delete-job-message": "Wollen sie den Job sämtlich der _ dabei erzeugten Annotation(en) wirklich löschen?",
+  "cancel-job-title": "Job abbrechen",
+  "cancel-job-message": "Wollen sie den Job wirklich abbrechen?",
+
+  "create-project": "Projekt erstellen",
+  "project-name": "Projektname",
+
+  "verified": "verifiziert"
 }

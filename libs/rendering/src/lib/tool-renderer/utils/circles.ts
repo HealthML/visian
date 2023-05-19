@@ -5,7 +5,7 @@ import { CircleMaterial } from "./circle-material";
 import { Circle } from "./types";
 
 export class Circles extends THREE.Scene implements IDisposable {
-  private geometry = new THREE.PlaneBufferGeometry();
+  private geometry = new THREE.PlaneGeometry();
   private material: CircleMaterial;
   private mesh!: THREE.InstancedMesh;
 

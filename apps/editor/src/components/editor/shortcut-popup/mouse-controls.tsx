@@ -1,4 +1,5 @@
 import {
+  isMac,
   KeyIcon,
   LargePopUpGroup,
   LargePopUpGroupTitle,
@@ -50,7 +51,7 @@ export const MouseControls = () => (
     </ShortcutRow>
     <ShortcutRow>
       <ShortcutContainer>
-        <KeyIcon text="Ctrl" />
+        <KeyIcon text={isMac() ? "Cmd" : "Ctrl"} />
         <PlusIcon />
         <MouseIcon icon="leftMouse" />
       </ShortcutContainer>
@@ -78,7 +79,7 @@ export const MouseControls = () => (
     </ShortcutRow>
     <ShortcutRow>
       <ShortcutContainer>
-        <KeyIcon text="Ctrl" />
+        <KeyIcon text={isMac() ? "Cmd" : "Ctrl"} />
         <PlusIcon />
         <MouseIcon icon="scrollUp" />
       </ShortcutContainer>
@@ -88,7 +89,7 @@ export const MouseControls = () => (
     </ShortcutRow>
     <ShortcutRow>
       <ShortcutContainer>
-        <KeyIcon text="Ctrl" />
+        <KeyIcon text={isMac() ? "Cmd" : "Ctrl"} />
         <PlusIcon />
         <MouseIcon icon="scrollDown" />
       </ShortcutContainer>

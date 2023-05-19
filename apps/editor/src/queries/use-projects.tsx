@@ -9,6 +9,14 @@ const getProjects = async () => {
   return projectsResponse.data;
 };
 
+const postProject = async ({ name }: { name: string }) => {
+  const postProjectResponse = await axios.post<Project>(
+    `${hubBaseUrl}projects`,
+    { name },
+  );
+  return postProjectResponse.data;
+};
+
 export const useProjects = () => {
   const { data, error, isError, isLoading, refetch, remove } = useQuery<
     Project[],
@@ -88,6 +96,57 @@ export const useDeleteProjectsMutation = () => {
     isDeleteProjectsPaused: isPaused,
     isDeleteProjectsSuccess: isSuccess,
     deleteProjects: mutate,
+  };
+};
+
+export const useCreateProjectMutation = () => {
+  const queryClient = useQueryClient();
+  const { isError, isIdle, isLoading, isPaused, isSuccess, mutate } =
+    useMutation<
+      Project,
+      AxiosError,
+      { name: string },
+      { previousProjects: Project[] }
+    >({
+      mutationFn: postProject,
+      onMutate: async ({ name }: { name: string }) => {
+        await queryClient.cancelQueries({
+          queryKey: ["project"],
+        });
+
+        const previousProjects =
+          queryClient.getQueryData<Project[]>(["project"]) ?? [];
+
+        const newProject = {
+          id: "new-project",
+          name,
+        };
+
+        queryClient.setQueryData(
+          ["project"],
+          [...previousProjects, newProject],
+        );
+
+        return {
+          previousProjects,
+        };
+      },
+      onError: (err, { name }, context) => {
+        queryClient.setQueryData(["project"], context?.previousProjects);
+      },
+      onSettled: () => {
+        queryClient.invalidateQueries({
+          queryKey: ["project"],
+        });
+      },
+    });
+  return {
+    isCreateProjectError: isError,
+    isCreateProjectIdle: isIdle,
+    isCreateProjectLoading: isLoading,
+    isCreateProjectPaused: isPaused,
+    isCreateProjectSuccess: isSuccess,
+    createProject: mutate,
   };
 };
 

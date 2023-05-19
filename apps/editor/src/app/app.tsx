@@ -15,6 +15,10 @@ import { ReactQueryDevtools } from "react-query/devtools";
 import { Navigate, Route, Routes } from "react-router-dom";
 
 import {
+  DatasetsView,
+  JobsView,
+} from "../components/data-manager/project-views";
+import {
   whoAwsConfigDeployment,
   whoAwsConfigDevelopment,
   whoRequiresAuthentication,
@@ -22,13 +26,8 @@ import {
 import { setUpEventHandling } from "../event-handling";
 import type { RootStore } from "../models";
 import hubBaseUrl from "../queries/hub-base-url";
-import {
-  DatasetScreen,
-  EditorScreen,
-  ProjectDatasetsScreen,
-  ProjectJobsScreen,
-  ProjectsScreen,
-} from "../screens";
+import { DatasetScreen, EditorScreen, ProjectsScreen } from "../screens";
+import ProjectScreen from "../screens/project-screen";
 import { setupRootStore, StoreProvider } from "./root-store";
 
 if (isFromWHO()) {
@@ -87,15 +86,19 @@ function App(): JSX.Element {
                 <Routes>
                   <Route path="projects">
                     <Route path="" element={<ProjectsScreen />} />
-                    <Route path=":projectId/datasets">
-                      <Route path="" element={<ProjectDatasetsScreen />} />
-                      <Route path=":datasetId" element={<DatasetScreen />} />
+                    <Route path=":projectId" element={<ProjectScreen />}>
+                      <Route
+                        index
+                        element={<Navigate replace to="datasets" />}
+                      />
+                      <Route path="datasets" element={<DatasetsView />} />
+                      <Route path="jobs" element={<JobsView />} />
                     </Route>
-                    <Route
-                      path=":projectId/jobs"
-                      element={<ProjectJobsScreen />}
-                    />
                   </Route>
+                  <Route
+                    path="/datasets/:datasetId"
+                    element={<DatasetScreen />}
+                  />
                   <Route
                     path="/"
                     element={<Navigate replace to="/projects" />}
