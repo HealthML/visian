@@ -116,9 +116,9 @@ export const ImageImportPopup = observer<ImageImportPopUpProps>(
     const [isImporting, setIsImporting] = useState(false);
     const [uploadedFiles, setUploadedFiles] = useState(0);
     const [importError, setImportError] = useState<{
-      type: "generic" | "duplicate";
-      imageName: string;
-      totalImages: number;
+      type: "generic" | "duplicate" | "unsupported";
+      imageName?: string;
+      totalImages?: number;
     }>();
     const { t } = useTranslation();
 
@@ -147,10 +147,24 @@ export const ImageImportPopup = observer<ImageImportPopUpProps>(
 
     const importFilesFromDrop = useCallback(
       async (files: FileList) => {
-        addSelectedFiles(files);
+        const supportedExtensions = [".nii.gz", ".nii", ".dcm"];
+        const isValidFile = Array.from(files).every((file) => {
+          const fileName = file.name.toLowerCase();
+          return supportedExtensions.some((extension) =>
+            fileName.endsWith(extension),
+          );
+        });
+
+        if (!isValidFile) {
+          setImportError({
+            type: "unsupported",
+          });
+        } else {
+          addSelectedFiles(files);
+        }
         onDropCompleted();
       },
-      [addSelectedFiles, onDropCompleted],
+      [addSelectedFiles, onDropCompleted, setImportError],
     );
 
     const openFilePicker = useFilePicker(importFilesFromInput);
@@ -219,7 +233,13 @@ export const ImageImportPopup = observer<ImageImportPopUpProps>(
     }
 
     const errorNotification =
-      importError?.type === "duplicate" ? (
+      importError?.type === "unsupported" ? (
+        <ErrorNotification
+          titleTx="import-error"
+          descriptionTx="image-loading-error"
+          onClose={() => setImportError(undefined)}
+        />
+      ) : importError?.type === "duplicate" ? (
         <ErrorNotification
           titleTx="image-import-error-title"
           descriptionTx="image-import-duplicate-error-description"
