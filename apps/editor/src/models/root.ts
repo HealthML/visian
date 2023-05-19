@@ -323,12 +323,21 @@ export class RootStore implements ISerializable<RootSnapshot>, IDisposable {
       return false;
 
     this.shouldPersist = false;
+
+    const theme = localStorage.getItem("theme");
+    const language = localStorage.getItem("i18nextLng");
+
     localStorage.clear();
     await this.config.storageBackend?.clear();
 
     this.setIsDirty(false, true);
+
+    if (theme) localStorage.setItem("theme", theme);
+    i18n.changeLanguage(language as string);
+
     return true;
   };
+
   public destroy = async (forceDestroy?: boolean): Promise<boolean> => {
     if (await this.destroyLayers(forceDestroy)) {
       window.location.href = new URL(window.location.href).searchParams.has(
@@ -340,6 +349,7 @@ export class RootStore implements ISerializable<RootSnapshot>, IDisposable {
     }
     return false;
   };
+
   public destroyReload = async (forceDestroy?: boolean): Promise<boolean> => {
     if (await this.destroyLayers(forceDestroy)) {
       const redirectURl = new URL(window.location.href);

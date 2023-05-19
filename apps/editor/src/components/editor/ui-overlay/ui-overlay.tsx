@@ -9,7 +9,7 @@ import {
 import { isFromWHO } from "@visian/utils";
 import { observer } from "mobx-react-lite";
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
@@ -129,7 +129,6 @@ const ModalRow = styled(FlexRow)`
 export const UIOverlay = observer<UIOverlayProps>(
   ({ isDraggedOver, onDropCompleted, ...rest }) => {
     const store = useStore();
-    const navigate = useNavigate();
 
     // Ref Management
     const containerRef = useRef<HTMLDivElement>(null);
@@ -317,8 +316,7 @@ export const UIOverlay = observer<UIOverlayProps>(
                   tooltipTx="close-editor"
                   tooltipPosition="left"
                   onPointerDown={() => {
-                    if (store?.editor.disposeActiveDocument())
-                      navigate("/projects");
+                    store?.destroyRedirect("/projects");
                   }}
                   isActive={false}
                 />
