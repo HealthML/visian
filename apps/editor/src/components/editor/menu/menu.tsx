@@ -78,7 +78,7 @@ export const Menu: React.FC<MenuProps> = observer(
     return (
       <>
         <MenuButton
-          icon="menu"
+          icon="burger"
           tooltipTx="menu"
           showTooltip={!isModalOpen}
           ref={setButtonRef}
