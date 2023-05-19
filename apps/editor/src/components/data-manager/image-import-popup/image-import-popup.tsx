@@ -33,7 +33,6 @@ const DropZoneContainer = styled.div`
   height: 120px;
   border-radius: 8px;
   border: 1px dashed rgba(255, 255, 255, 0.3);
-  /* background-image: url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='#fff' rx='8' ry='8' stroke='%23333' stroke-width='1' stroke-dasharray='10%2c 10' stroke-dashoffset='0' stroke-linecap='square'/%3e%3c/svg%3e");*/
 `;
 
 const DropZoneLabel = styled(Text)`
@@ -172,6 +171,7 @@ export const ImageImportPopup = observer<ImageImportPopUpProps>(
       if (!dataset?.id) return;
       setUploadedFiles(0);
       setIsImporting(true);
+      const batchSize = 5;
       await promiseAllInBatches<File, void>(
         async (file) => {
           try {
@@ -198,7 +198,7 @@ export const ImageImportPopup = observer<ImageImportPopUpProps>(
           }
         },
         selectedFiles,
-        5,
+        batchSize,
       );
       onImportFinished();
       setIsImporting(false);
