@@ -208,11 +208,12 @@ export class SAMTool<N extends "sam-tool" = "sam-tool">
     this.setBoundingBoxEnd(_dragPoint);
   }
 
-  // Todo: Prevent single line bounding boxes.
   public endAt(_dragPoint: DragPoint): void {
     if (
       !this.boundingBoxStart ||
-      dragPointsCenterEqual(_dragPoint, this.boundingBoxStart)
+      dragPointsCenterEqual(_dragPoint, this.boundingBoxStart) ||
+      this.boundingBoxStart.x === _dragPoint.x ||
+      this.boundingBoxStart.y === _dragPoint.y
     ) {
       this.setBoundingBoxStart(undefined);
       this.setBoundingBoxEnd(undefined);
