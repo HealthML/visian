@@ -180,7 +180,7 @@ export class SAMTool<N extends "sam-tool" = "sam-tool">
     if (!this.imageLayer) throw new Error("No image layer found.");
 
     this.inferenceSession = await ort.InferenceSession.create(
-      "/assets/sam.onnx",
+      "/assets/sam_quantized.onnx",
     );
 
     const viewType = this.document.viewport2D.mainViewType;
