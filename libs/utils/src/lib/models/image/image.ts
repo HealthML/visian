@@ -279,6 +279,38 @@ export class Image implements ISerializable<ImageSnapshot> {
     return sliceData;
   }
 
+  // Todo: This is a copy of the previous method, but it returns a Float32Array.
+  // It is unclear why the original method always returns a Uint8Array although data can have both types.
+  public getSliceFloat32(viewType: ViewType, sliceNumber: number) {
+    const [horizontal, vertical] = getPlaneAxes(viewType);
+    const sliceData = new Float32Array(
+      this.voxelCount[horizontal] *
+        this.voxelCount[vertical] *
+        this.voxelComponents,
+    );
+
+    let index = 0;
+    // TODO: performance !!!
+    findVoxelInSlice(
+      // Explicit access here avoids MobX observability tracking to decrease performance
+      {
+        voxelComponents: this.voxelComponents,
+        voxelCount: this.voxelCount.clone(false),
+      },
+      this.getData(),
+      viewType,
+      sliceNumber,
+      (_, value) => {
+        for (let c = 0; c < this.voxelComponents; c++) {
+          sliceData[index + c] = value.getComponent(c);
+          index++;
+        }
+      },
+    );
+
+    return sliceData;
+  }
+
   public getSliceImage(viewType: ViewType, sliceNumber: number): Image {
     if (this.dimensionality < 3) return this.clone();
 

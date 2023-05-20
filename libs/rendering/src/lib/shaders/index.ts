@@ -24,6 +24,8 @@ export { default as regionGrowingFragmentShader } from "./region-growing/region-
 export { default as regionGrowingVertexShader } from "./region-growing/region-growing.vert.glsl";
 export { default as regionGrowing3DFragmentShader } from "./region-growing/region-growing-3d.frag.glsl";
 export { default as regionGrowing3DVertexShader } from "./region-growing/region-growing-3d.vert.glsl";
+export { default as samPreviewFragmentShader } from "./sam-preview/sam-preview.frag.glsl";
+export { default as samPreviewVertexShader } from "./sam-preview/sam-preview.vert.glsl";
 export { default as sliceFragmentShader } from "./slice/slice.frag.glsl";
 export { default as sliceVertexShader } from "./slice/slice.vert.glsl";
 export { default as volumeFragmentShader } from "./volume/volume.frag.glsl";

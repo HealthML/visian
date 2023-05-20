@@ -16,7 +16,15 @@
         "main": "apps/editor/src/main.tsx",
         "polyfills": "apps/editor/src/polyfills.ts",
         "tsConfig": "apps/editor/tsconfig.app.json",
-        "assets": ["apps/editor/src/favicon.ico", "apps/editor/src/assets"],
+        "assets": [
+          "apps/editor/src/favicon.ico",
+          "apps/editor/src/assets",
+          {
+            "input": "./node_modules/onnxruntime-web/dist",
+            "glob": "ort-wasm*.wasm",
+            "output": "."
+          }
+        ],
         "styles": [],
         "scripts": [],
         "webpackConfig": "webpack.config"
@@ -49,7 +57,16 @@
       "defaultConfiguration": "development",
       "options": {
         "buildTarget": "editor:build",
-        "hmr": true
+        "hmr": true,
+        "assets": [
+          "apps/editor/src/favicon.ico",
+          "apps/editor/src/assets",
+          {
+            "input": "./node_modules/onnxruntime-web/dist",
+            "glob": "ort-wasm.wasm",
+            "output": "."
+          }
+        ]
       },
       "configurations": {
         "development": {

@@ -1,10 +1,16 @@
-import { ToolRenderer } from "@visian/rendering";
-import { DragPoint, IDocument, ISAMTool, ITool } from "@visian/ui-shared";
+import { SamRenderer } from "@visian/rendering";
+import {
+  DragPoint,
+  IDocument,
+  IImageLayer,
+  ISAMTool,
+  ITool,
+} from "@visian/ui-shared";
 import { Vector } from "@visian/utils";
 import { action, makeObservable, observable } from "mobx";
 import * as ort from "onnxruntime-web";
 
-import { Tool } from "./tool";
+import { UndoableTool } from "./undoable-tool";
 import { dragPointsCenterEqual } from "./utils";
 
 export type SAMToolMode = "bounding-box" | "points";
@@ -15,7 +21,7 @@ export type SAMToolBoundingBox = { topLeft: Vector; bottomRight: Vector };
 const EMBEDDING_SERVICE_URL = "http://localhost:3000/embedding";
 
 export class SAMTool<N extends "sam-tool" = "sam-tool">
-  extends Tool<N>
+  extends UndoableTool<N>
   implements ISAMTool
 {
   public readonly excludeFromSnapshotTracking = ["toolRenderer", "document"];
@@ -23,13 +29,15 @@ export class SAMTool<N extends "sam-tool" = "sam-tool">
   protected previousTool?: N;
   // Todo: Allow storing embeddings per slices / layers without having to discard previous one?
   protected embedding?: ort.Tensor;
+  protected inferenceSession?: ort.InferenceSession;
+  protected imageLayer?: IImageLayer;
 
   public embeddingState: SAMToolEmbeddingState = "uninitialized";
   public mode: SAMToolMode = "bounding-box";
   public boundingBoxStart?: DragPoint;
   public boundingBoxEnd?: DragPoint;
 
-  constructor(document: IDocument, public toolRenderer: ToolRenderer) {
+  constructor(document: IDocument, public toolRenderer: SamRenderer) {
     super(
       {
         name: "sam-tool" as N,
@@ -41,6 +49,7 @@ export class SAMTool<N extends "sam-tool" = "sam-tool">
         activationKeys: "",
       },
       document,
+      toolRenderer,
     );
 
     makeObservable(this, {
@@ -69,6 +78,7 @@ export class SAMTool<N extends "sam-tool" = "sam-tool">
 
   public setBoundingBoxEnd(dragPoint?: DragPoint) {
     this.boundingBoxEnd = dragPoint;
+    this.generatePrediction();
   }
 
   public get boundingBox(): { start: Vector; end: Vector } | undefined {
@@ -79,18 +89,98 @@ export class SAMTool<N extends "sam-tool" = "sam-tool">
     };
   }
 
+  protected async generatePrediction() {
+    if (!this.boundingBoxEnd || !this.inferenceSession) return;
+
+    const modelInput = this.getModelInput();
+    if (!modelInput) return;
+    const modelOutput = await this.inferenceSession.run(modelInput);
+    const maskOutput = modelOutput.masks.data as Float32Array;
+
+    this.toolRenderer.showMask(maskOutput);
+  }
+
+  protected getModelInput() {
+    if (!this.boundingBoxStart || !this.boundingBoxEnd || !this.embedding) {
+      return undefined;
+    }
+    const modelScale = this.getModelScaling();
+
+    const startX = Math.min(this.boundingBoxStart.x, this.boundingBoxEnd.x);
+    const startY = Math.min(this.boundingBoxStart.y, this.boundingBoxEnd.y);
+    const endX = Math.max(this.boundingBoxStart.x, this.boundingBoxEnd.x);
+    const endY = Math.max(this.boundingBoxStart.y, this.boundingBoxEnd.y);
+
+    const pointCoords = new Float32Array([
+      startX * modelScale.samScale,
+      startY * modelScale.samScale,
+      endX * modelScale.samScale,
+      endY * modelScale.samScale,
+    ]);
+    const pointLabels = new Float32Array([2, 3]);
+
+    const pointCoordsTensor = new ort.Tensor("float32", pointCoords, [1, 2, 2]);
+    const pointLabelsTensor = new ort.Tensor("float32", pointLabels, [1, 2]);
+
+    const imageSizeTensor = new ort.Tensor("float32", [
+      modelScale.height,
+      modelScale.width,
+    ]);
+
+    // Use empty tensor since we don't specify an input mask:
+    const maskInput = new ort.Tensor(
+      "float32",
+      new Float32Array(256 * 256),
+      [1, 1, 256, 256],
+    );
+
+    // Default to 0 since there is no input mask:
+    const hasMaskInput = new ort.Tensor("float32", [0]);
+
+    return {
+      image_embeddings: this.embedding,
+      point_coords: pointCoordsTensor,
+      point_labels: pointLabelsTensor,
+      orig_im_size: imageSizeTensor,
+      mask_input: maskInput,
+      has_mask_input: hasMaskInput,
+    };
+  }
+
+  protected getModelScaling() {
+    // SAM internally resized images to longest side 1024, so we need to
+    // calculate the scale factor in order to resize the mask output:
+    const LONG_SIDE_LENGTH = 1024;
+    const width = this.imageLayer?.image.voxelCount.x ?? 0;
+    const height = this.imageLayer?.image.voxelCount.y ?? 0;
+    const samScale = LONG_SIDE_LENGTH / Math.max(...[width, height]);
+    return { width, height, samScale };
+  }
+
   public async loadEmbedding() {
     this.setEmbeddingState("loading");
 
-    const imageLayer = this.document.imageLayers.find(
+    this.imageLayer = this.document.imageLayers.find(
       (layer) => layer.isVisible && !layer.isAnnotation,
     );
     // Todo: Handle case where no image layer is found (disable tool?):
-    if (!imageLayer) throw new Error("No image layer found.");
+    if (!this.imageLayer) throw new Error("No image layer found.");
+
+    this.inferenceSession = await ort.InferenceSession.create(
+      "/assets/sam.onnx",
+    );
 
     const viewType = this.document.viewport2D.mainViewType;
     const sliceNumber = this.document.viewport2D.getSelectedSlice();
-    const imageData = await imageLayer.image.getSlice(viewType, sliceNumber);
+
+    const sliceData = this.imageLayer.image.getSliceFloat32(
+      viewType,
+      sliceNumber,
+    );
+    const imageData = new Uint8Array(sliceData.length);
+    for (let i = 0; i < sliceData.length; i++) {
+      imageData[i] = sliceData[i] * 255;
+    }
 
     const file = new File([imageData], "image");
     const formdata = new FormData();

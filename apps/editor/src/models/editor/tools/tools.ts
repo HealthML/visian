@@ -2,6 +2,7 @@ import {
   DilateErodeRenderer3D,
   RegionGrowingRenderer,
   RegionGrowingRenderer3D,
+  SamRenderer,
   ThresholdAnnotationRenderer3D,
   ToolRenderer,
 } from "@visian/rendering";
@@ -98,6 +99,7 @@ export class Tools
   public isDrawing = false;
 
   public toolRenderer: ToolRenderer;
+  public samRenderer: SamRenderer;
   public regionGrowingRenderer: RegionGrowingRenderer;
   public regionGrowingRenderer3D: RegionGrowingRenderer3D;
   public thresholdAnnotationRenderer3D: ThresholdAnnotationRenderer3D;
@@ -157,6 +159,7 @@ export class Tools
     });
 
     this.toolRenderer = new ToolRenderer(document);
+    this.samRenderer = new SamRenderer(document);
     this.regionGrowingRenderer = new RegionGrowingRenderer(document);
     this.regionGrowingRenderer3D = new RegionGrowingRenderer3D(document);
     this.thresholdAnnotationRenderer3D = new ThresholdAnnotationRenderer3D(
@@ -201,7 +204,7 @@ export class Tools
       "outline-eraser": new OutlineTool(document, this.toolRenderer, false),
       "clear-slice": new ClearSliceTool(document, this.toolRenderer),
       "clear-image": new ClearImageTool(document, this.toolRenderer),
-      "sam-tool": new SAMTool(document, this.toolRenderer),
+      "sam-tool": new SAMTool(document, this.samRenderer),
       "threshold-annotation": new ThresholdAnnotationTool(
         document,
         this.thresholdAnnotationRenderer3D,
@@ -259,6 +262,7 @@ export class Tools
 
   public dispose() {
     this.toolRenderer.dispose();
+    this.samRenderer.dispose();
     this.regionGrowingRenderer.dispose();
     this.regionGrowingRenderer3D.dispose();
     this.dilateErodeRenderer3D.dispose();
