@@ -7,6 +7,8 @@ import {
   ITool,
 } from "@visian/ui-shared";
 import { Vector } from "@visian/utils";
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { debounce } from "lodash";
 import { action, makeObservable, observable } from "mobx";
 import * as ort from "onnxruntime-web";
 
@@ -31,6 +33,7 @@ export class SAMTool<N extends "sam-tool" = "sam-tool">
   protected embedding?: ort.Tensor;
   protected inferenceSession?: ort.InferenceSession;
   protected imageLayer?: IImageLayer;
+  protected debouncedGeneratePrediction: () => void;
 
   public embeddingState: SAMToolEmbeddingState = "uninitialized";
   public mode: SAMToolMode = "bounding-box";
@@ -50,6 +53,11 @@ export class SAMTool<N extends "sam-tool" = "sam-tool">
       },
       document,
       toolRenderer,
+    );
+
+    this.debouncedGeneratePrediction = debounce(
+      () => this.generatePrediction(),
+      30,
     );
 
     makeObservable(this, {
@@ -78,7 +86,7 @@ export class SAMTool<N extends "sam-tool" = "sam-tool">
 
   public setBoundingBoxEnd(dragPoint?: DragPoint) {
     this.boundingBoxEnd = dragPoint;
-    this.generatePrediction();
+    this.debouncedGeneratePrediction();
   }
 
   public get boundingBox(): { start: Vector; end: Vector } | undefined {
@@ -92,10 +100,15 @@ export class SAMTool<N extends "sam-tool" = "sam-tool">
   protected async generatePrediction() {
     if (!this.boundingBoxEnd || !this.inferenceSession) return;
 
+    const start = Date.now();
+
     const modelInput = this.getModelInput();
     if (!modelInput) return;
     const modelOutput = await this.inferenceSession.run(modelInput);
     const maskOutput = modelOutput.masks.data as Float32Array;
+
+    const end = Date.now();
+    console.log(`Prediction took ${end - start}ms.`);
 
     this.toolRenderer.showMask(maskOutput);
   }
