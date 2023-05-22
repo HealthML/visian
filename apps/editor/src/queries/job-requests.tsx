@@ -17,6 +17,6 @@ export const postJob = async (
 };
 
 export const getJobLog = async (jobId: string) => {
-  const response = await axios.get(`${hubBaseUrl}jobs/${jobId}/logFile`);
+  const response = await axios.get(`${hubBaseUrl}jobs/${jobId}/log-file`);
   return response.data;
 };
