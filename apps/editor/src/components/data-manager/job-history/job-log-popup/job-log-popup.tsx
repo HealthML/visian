@@ -44,7 +44,7 @@ export const JobLogPopup = observer<JobLogPopUpProps>(
 
     return (
       <PopUpContainer
-        title="Job Log"
+        titleTx="job-log"
         isOpen={isOpen}
         dismiss={onClose}
         shouldDismissOnOutsidePress

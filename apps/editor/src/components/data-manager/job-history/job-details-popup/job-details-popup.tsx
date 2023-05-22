@@ -57,6 +57,10 @@ const IconButton = styled(InvisibleButton)`
   width: 30px;
 `;
 
+const Spacer = styled.div`
+  width: 10px;
+`;
+
 const JobStatusControlsContainer = styled.div`
   display: flex;
   flex-direction: row;
@@ -178,6 +182,7 @@ export const JobDetailsPopUp = observer<JobDetailsPopUpProps>(
           <>
             <JobStatusControlsContainer>
               <JobStatusBadge status={job.status} />
+              <Spacer />
               {job.logFileUri && (
                 <IconButton
                   icon="logs"

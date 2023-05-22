@@ -365,6 +365,7 @@
   "cancel-job-title": "Job abbrechen",
   "cancel-job-message": "Wollen sie den Job wirklich abbrechen?",
   "open-job-log": "Job Log Datei öffnen",
+  "job-log": "Job Log",
 
   "create-project": "Projekt erstellen",
   "project-name": "Projektname"
