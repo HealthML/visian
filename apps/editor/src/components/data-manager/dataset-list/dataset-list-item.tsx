@@ -12,7 +12,7 @@ import styled from "styled-components";
 import { Dataset } from "../../../types";
 
 const StyledListItem = styled(ListItem)`
-  width: 20vw;
+  width: 21vw;
   height: 14vw;
   background-color: ${color("sheet")};
   border-radius: 15px;

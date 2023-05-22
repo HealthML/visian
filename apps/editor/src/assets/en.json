@@ -275,6 +275,8 @@
 
   "projects-base-title": "VISIAN Projects",
   "project-base-title": "VISIAN Project",
+  "datasets-base-title": "VISIAN Datasets",
+  "jobs-base-title": "VISIAN Jobs",
   "dataset-base-title": "VISIAN Dataset",
 
   "projects-loading": "Loading projects...",
@@ -379,6 +381,8 @@
   "create": "Create",
   "create-project": "Create Project",
   "project-name": "Project Name",
+  "create-dataset": "Create Dataset",
+  "dataset-name": "Dataset Name",
 
   "verified": "verified"
 }

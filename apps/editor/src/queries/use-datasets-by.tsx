@@ -32,6 +32,20 @@ export const useDatasetsBy = (projectId: string) => {
   };
 };
 
+const postDataset = async ({
+  name,
+  project,
+}: {
+  name: string;
+  project: string;
+}) => {
+  const postDatasetResponse = await axios.post<Dataset>(
+    `${hubBaseUrl}datasets`,
+    { name, project },
+  );
+  return postDatasetResponse.data;
+};
+
 const deleteDatasets = async ({
   projectId,
   datasetIds,
@@ -109,6 +123,67 @@ export const useDeleteDatasetsForProjectMutation = () => {
     isDeleteDatasetsPaused: isPaused,
     isDeleteDatasetsSuccess: isSuccess,
     deleteDatasets: mutate,
+  };
+};
+
+export const useCreateDatasetMutation = () => {
+  const queryClient = useQueryClient();
+  const { isError, isIdle, isLoading, isPaused, isSuccess, mutate } =
+    useMutation<
+      Dataset,
+      AxiosError,
+      { name: string; project: string },
+      { previousDatasets: Dataset[] }
+    >({
+      mutationFn: postDataset,
+      onMutate: async ({
+        name,
+        project,
+      }: {
+        name: string;
+        project: string;
+      }) => {
+        await queryClient.cancelQueries({
+          queryKey: ["datasetsBy", project],
+        });
+
+        const previousDatasets =
+          queryClient.getQueryData<Dataset[]>(["datasetsBy", project]) ?? [];
+
+        const newDataset = {
+          id: "new-dataset",
+          name,
+          project,
+        };
+
+        queryClient.setQueryData(
+          ["datasetsBy", project],
+          [...previousDatasets, newDataset],
+        );
+
+        return {
+          previousDatasets,
+        };
+      },
+      onError: (err, { name, project }, context) => {
+        queryClient.setQueryData(
+          ["datasetsBy", project],
+          context?.previousDatasets,
+        );
+      },
+      onSettled: (data, err, { name, project }) => {
+        queryClient.invalidateQueries({
+          queryKey: ["datasetsBy", project],
+        });
+      },
+    });
+  return {
+    isCreateDatasetError: isError,
+    isCreateDatasetIdle: isIdle,
+    isCreateDatasetLoading: isLoading,
+    isCreateDatasetPaused: isPaused,
+    isCreateDatasetSuccess: isSuccess,
+    createDataset: mutate,
   };
 };
 

@@ -7,8 +7,8 @@ import { DatasetListItem } from "./dataset-list-item";
 const StyledDatasetList = styled.div`
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 4vh 3.5vw;
-  margin: 3% auto 3% auto;
+  gap: 4vh 3vw;
+  margin: 2% auto;
   overflow-y: auto;
   user-select: none;
 `;

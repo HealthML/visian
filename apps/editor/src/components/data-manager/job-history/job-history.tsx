@@ -17,6 +17,7 @@ const ErrorMessage = styled(Text)`
 
 const StyledButton = styled(SquareButton)`
   margin-left: 10px;
+  padding: 10px;
 `;
 
 const ErrorNotification = styled(Notification)`
@@ -52,12 +53,9 @@ export const JobHistory = ({
     <StyledModal
       hideHeaderDivider={false}
       position="right"
-      label="Job History"
+      labelTx="jobs-base-title"
       headerChildren={
-        <StyledButton
-          icon="plusSmall"
-          onPointerDown={openModelSelectionPopUp}
-        />
+        <StyledButton icon="plus" onPointerDown={openModelSelectionPopUp} />
       }
     >
       {store?.error && (
