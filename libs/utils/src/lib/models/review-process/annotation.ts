@@ -1,9 +1,10 @@
 export class TaskAnnotation {
-  public data: string;
+  public id: string;
+  public layerId?: string;
   public updatedAt: Date;
 
-  constructor(data: string) {
-    this.data = data;
+  constructor(id: string) {
+    this.id = id;
     this.updatedAt = new Date();
   }
 }

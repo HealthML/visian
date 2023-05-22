@@ -9,10 +9,17 @@ import {
 } from "@visian/ui-shared";
 import {
   createFileFromBase64,
+  createTaskFromWHO,
   deepObserve,
+  getBase64DataForAnnotation,
+  getBase64DataForImage,
   getWHOTask,
   IDisposable,
   ISerializable,
+  Task,
+  TaskType,
+  TaskTypeWHO,
+  TaskWHO,
 } from "@visian/utils";
 import { action, computed, makeObservable, observable } from "mobx";
 
@@ -21,7 +28,6 @@ import { DICOMWebServer } from "./dicomweb-server";
 import { Editor, EditorSnapshot } from "./editor";
 import { Tracker } from "./tracking";
 import { ProgressNotification } from "./types";
-import { TaskTypeWHO, TaskWHO } from "./who";
 
 export interface RootSnapshot {
   editor: EditorSnapshot;
@@ -56,6 +62,8 @@ export class RootStore implements ISerializable<RootSnapshot>, IDisposable {
 
   public currentTaskWHO?: TaskWHO;
 
+  public currentTask?: Task;
+
   public tracker?: Tracker;
 
   constructor(protected config: RootStoreConfig = {}) {
@@ -71,6 +79,7 @@ export class RootStore implements ISerializable<RootSnapshot>, IDisposable {
         isSaveUpToDate: observable,
         refs: observable,
         currentTaskWHO: observable,
+        currentTask: observable,
 
         theme: computed,
 
@@ -84,6 +93,7 @@ export class RootStore implements ISerializable<RootSnapshot>, IDisposable {
         setIsSaveUpToDate: action,
         setRef: action,
         setCurrentTaskWHO: action,
+        setCurrentTask: action,
       },
     );
 
@@ -179,40 +189,47 @@ export class RootStore implements ISerializable<RootSnapshot>, IDisposable {
         const whoTask = new TaskWHO(taskJson);
         this.setCurrentTaskWHO(whoTask);
 
+        const task = createTaskFromWHO(whoTask);
+        this.setCurrentTask(task);
+
         await Promise.all(
-          whoTask.samples.map(async (sample) => {
+          task.images.map(async (image) => {
             await this.editor.activeDocument?.importFiles(
-              createFileFromBase64(sample.title, sample.data),
+              createFileFromBase64(
+                image.title,
+                getBase64DataForImage(image.id, whoTask),
+              ),
               undefined,
               false,
             );
           }),
         );
-        if (whoTask.kind === TaskTypeWHO.Create) {
+
+        if (task.kind === TaskType.Create) {
           this.editor.activeDocument?.finishBatchImport();
-          this.currentTaskWHO?.addNewAnnotation();
+          // this.currentTaskWHO?.addNewAnnotation();
         } else {
           // Task Type is Correct or Review
           await Promise.all(
-            whoTask.annotations.map(async (annotation, index) => {
-              const title =
-                whoTask.samples[index].title ||
-                whoTask.samples[0].title ||
-                `annotation_${index}`;
+            task.images.map(async (image, index) => {
+              const title = image.title || `annotation_${index}`;
 
               await Promise.all(
-                annotation.data.map(async (annotationData) => {
+                image.annotations.map(async (annotation) => {
                   const createdLayerId =
                     await this.editor.activeDocument?.importFiles(
                       createFileFromBase64(
                         title.replace(".nii", "_annotation").concat(".nii"),
-                        annotationData.data,
+                        getBase64DataForAnnotation(
+                          annotation.id,
+                          image.id,
+                          whoTask,
+                        ),
                       ),
                       title.replace(".nii", "_annotation"),
                       true,
                     );
-                  if (createdLayerId)
-                    annotationData.correspondingLayerId = createdLayerId;
+                  if (createdLayerId) annotation.layerId = createdLayerId;
                 }),
               );
             }),
@@ -259,6 +276,10 @@ export class RootStore implements ISerializable<RootSnapshot>, IDisposable {
 
   public setCurrentTaskWHO(task?: TaskWHO) {
     this.currentTaskWHO = task;
+  }
+
+  public setCurrentTask(task?: Task) {
+    this.currentTask = task;
   }
 
   public persist = async () => {

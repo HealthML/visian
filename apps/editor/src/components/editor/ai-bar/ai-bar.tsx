@@ -10,6 +10,8 @@ import {
   zIndex,
 } from "@visian/ui-shared";
 import {
+  AnnotationDataWHO,
+  AnnotationStatus,
   createBase64StringFromFile,
   putWHOTask,
   setNewTaskIdForUrl,
@@ -20,8 +22,6 @@ import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
 import { whoHome } from "../../../constants";
-import { AnnotationStatus } from "../../../models/who/annotation";
-import { AnnotationDataWHO } from "../../../models/who/annotationData";
 
 const AIBarSheet = styled(Sheet)`
   width: 800px;
@@ -183,9 +183,9 @@ export const AIBar = observer(() => {
     [store?.editor.activeDocument],
   );
 
-  const getBase64LayerDataForAnnotationData = useCallback(
-    async (annotationData: AnnotationDataWHO) => {
-      const { correspondingLayerId } = annotationData;
+  const getBase64LayerDataForAnnotation = useCallback(
+    async (annotation: AnnotationDataWHO) => {
+      const { correspondingLayerId } = annotation;
       if (!correspondingLayerId) return;
       const base64LayerData = await getBase64LayerDataForId(
         correspondingLayerId,
@@ -208,8 +208,9 @@ export const AIBar = observer(() => {
             // Add base64 data for each existing AnnotationData object
             const base64Data = await Promise.all(
               annotation.data.map(async (annotationData) => {
-                const base64Annotation =
-                  await getBase64LayerDataForAnnotationData(annotationData);
+                const base64Annotation = await getBase64LayerDataForAnnotation(
+                  annotationData,
+                );
                 if (base64Annotation) annotationData.data = base64Annotation;
                 return annotationData;
               }),
@@ -272,7 +273,7 @@ export const AIBar = observer(() => {
         });
       }
     },
-    [getBase64LayerDataForAnnotationData, getBase64LayerDataForId, store],
+    [getBase64LayerDataForAnnotation, getBase64LayerDataForId, store],
   );
 
   const confirmTaskAnnotation = useCallback(async () => {
