@@ -2,10 +2,11 @@ import {
   InvisibleButton,
   List,
   ListItem,
+  StatusBadge,
   Text,
   useTranslation,
 } from "@visian/ui-shared";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import styled from "styled-components";
 
@@ -18,7 +19,7 @@ const Spacer = styled.div`
 `;
 
 const ExpandedSpacer = styled.div`
-  margin-right: auto;
+  flex-grow: 1;
 `;
 
 const IconButton = styled(InvisibleButton)`
@@ -98,6 +99,15 @@ export const DatasetImageListItem = ({
   const projectId = useParams().projectId || "";
   const datasetId = useParams().datasetId || "";
 
+  const hasVerifiedAnnotation = useMemo(
+    () => annotations?.some((annotation) => annotation.verified) ?? false,
+    [annotations],
+  );
+
+  const getVerifiedBadge = () => (
+    <StatusBadge textColor="Neuronic Neon" borderColor="gray" tx="verified" />
+  );
+
   function extractTitleFromDataUri(dataUri: string) {
     return dataUri.split("/").pop();
   }
@@ -110,51 +120,43 @@ export const DatasetImageListItem = ({
           onPointerDown={toggleShowAnnotations}
         />
         <Spacer />
+        <ClickableText
+          onClick={() => {
+            navigate(editorPath(image.id, undefined, projectId, datasetId));
+          }}
+        >
+          {isInSelectMode
+            ? image.dataUri
+            : extractTitleFromDataUri(image.dataUri)}
+        </ClickableText>
+        <ExpandedSpacer />
+        {hasVerifiedAnnotation && getVerifiedBadge()}
+        <Spacer />
         {!isInSelectMode ? (
-          <>
-            <ClickableText
-              onClick={() => {
-                navigate(editorPath(image.id, undefined, projectId, datasetId));
-              }}
-            >
-              {extractTitleFromDataUri(image.dataUri)}
-            </ClickableText>
-            <ExpandedSpacer />
-            <IconButton
-              icon="trash"
-              tooltipTx="delete-image-title"
-              onPointerDown={() => deleteImage(image)}
-              style={{ marginLeft: "auto" }}
-              tooltipPosition="left"
-            />
-          </>
+          <IconButton
+            icon="trash"
+            tooltipTx="delete-image-title"
+            onPointerDown={() => deleteImage(image)}
+            style={{ marginLeft: "auto" }}
+            tooltipPosition="left"
+          />
         ) : (
-          <>
-            <ClickableText
-              onClick={() => {
-                navigate(editorPath(image.id, undefined, projectId, datasetId));
-              }}
-            >
-              {image.dataUri}
-            </ClickableText>
-            <ExpandedSpacer />
-            <IconButton
-              icon={isSelected ? "checked" : "unchecked"}
-              onPointerDown={() =>
-                handleImageSelection(
-                  image.id,
-                  index,
-                  selectedImages,
-                  isShiftPressed,
-                  selectedRange,
-                  setSelectedRange,
-                  images,
-                  setImageSelection,
-                  setSelectedImages,
-                )
-              }
-            />
-          </>
+          <IconButton
+            icon={isSelected ? "checked" : "unchecked"}
+            onPointerDown={() =>
+              handleImageSelection(
+                image.id,
+                index,
+                selectedImages,
+                isShiftPressed,
+                selectedRange,
+                setSelectedRange,
+                images,
+                setImageSelection,
+                setSelectedImages,
+              )
+            }
+          />
         )}
       </ListItem>
       {showAnnotations &&
@@ -169,47 +171,33 @@ export const DatasetImageListItem = ({
             <AnnotationsList>
               {annotations.map((annotation: Annotation) => (
                 <ListItem>
-                  {!isInSelectMode ? (
-                    <>
-                      <ClickableText
-                        onClick={() => {
-                          navigate(
-                            editorPath(
-                              image.id,
-                              annotation.id,
-                              projectId,
-                              datasetId,
-                            ),
-                          );
-                        }}
-                      >
-                        {extractTitleFromDataUri(annotation.dataUri)}
-                      </ClickableText>
-                      <IconButton
-                        icon="trash"
-                        tooltipTx="delete-annotation-title"
-                        onPointerDown={() => {
-                          deleteAnnotation(annotation);
-                        }}
-                        style={{ marginLeft: "auto" }}
-                        tooltipPosition="left"
-                      />
-                    </>
-                  ) : (
-                    <ClickableText
-                      onClick={() => {
-                        navigate(
-                          editorPath(
-                            image.id,
-                            annotation.id,
-                            projectId,
-                            datasetId,
-                          ),
-                        );
+                  <ClickableText
+                    onClick={() => {
+                      navigate(
+                        editorPath(
+                          image.id,
+                          annotation.id,
+                          projectId,
+                          datasetId,
+                        ),
+                      );
+                    }}
+                  >
+                    {isInSelectMode
+                      ? annotation.dataUri
+                      : extractTitleFromDataUri(annotation.dataUri)}
+                  </ClickableText>
+                  <ExpandedSpacer />
+                  {annotation.verified && getVerifiedBadge()}
+                  <Spacer />
+                  {!isInSelectMode && (
+                    <IconButton
+                      icon="trash"
+                      tooltipTx="delete-annotation-title"
+                      onPointerDown={() => {
+                        deleteAnnotation(annotation);
                       }}
-                    >
-                      {annotation.dataUri}
-                    </ClickableText>
+                    />
                   )}
                 </ListItem>
               ))}

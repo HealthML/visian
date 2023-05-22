@@ -3,7 +3,7 @@
   "error": "Fehler!",
   "reset": "Zurücksetzen",
 
-  "drop-file": "Legen Sie Scan oder Annotation hier ab",
+  "drop-file": "Legen Sie die Datei hier ab",
   "upload-file": "Datei hochladen",
 
   "untitled-document": "Unbenanntes Dokument",
@@ -275,7 +275,9 @@
 
   "projects-base-title": "VISIAN Projekte",
   "project-base-title": "VISIAN Projekt",
-  "dataset-base-title": "VISIAN Dataset",
+  "datasets-base-title": "VISIAN Datensätze",
+  "jobs-base-title": "VISIAN Jobs",
+  "dataset-base-title": "VISIAN Datensatz",
 
   "projects-loading": "Projekte werden geladen...",
   "projects-loading-error": "Fehler beim Laden der Projekte:",
@@ -334,6 +336,17 @@
   "job-creation-error": "Beim Erstellen des Jobs ist ein Fehler aufgetreten.",
   "start-job": "Job starten",
 
+  "import-images": "Bilder importieren",
+  "image-import-popup-title": "Bilder importieren",
+  "import-selected-files": "Ausgewählte Bilder",
+  "import-no-files-selected": "Bitte mind. ein Bild auswählen.",
+  "image-import": "Bild {{current}} von {{total}} wird importiert...",
+  "image-import-error-title": "Import Fehler aufgetreten",
+  "image-import-generic-error-description": "Es wurden {{imported}} von {{total}} Bildern erfolgreich importiert.",
+  "image-import-duplicate-error-description": "Einige Bilder existierten bereits und wurden übersprungen. Es wurde(n) {{imported}} von {{total}} Bilder(n) erfolgreich importiert.",
+  "image-import-selected-is-duplicate": "Datei bereits ausgewählt, wird übersprungen",
+  "image-import-selected-has-invalid-type": "Ungültiger Dateityp, wird übersprungen",
+
   "open-editor": "Editor öffnen",
   "close-editor": "Editor schließen",
   "home": "Zur Projektübersicht",
@@ -367,6 +380,11 @@
   "open-job-log": "Job Log Datei öffnen",
   "job-log": "Job Log",
 
+  "create": "Erstellen",
   "create-project": "Projekt erstellen",
-  "project-name": "Projektname"
+  "project-name": "Projektname",
+  "create-dataset": "Datensatz erstellen",
+  "dataset-name": "Datensatzname",
+
+  "verified": "verifiziert"
 }

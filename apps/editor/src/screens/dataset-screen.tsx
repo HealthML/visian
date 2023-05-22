@@ -1,4 +1,10 @@
-import { Modal, Screen, Text, useTranslation } from "@visian/ui-shared";
+import {
+  Modal,
+  Screen,
+  Text,
+  useIsDraggedOver,
+  useTranslation,
+} from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
 import React, { useMemo } from "react";
 import { useParams } from "react-router-dom";
@@ -33,8 +39,11 @@ export const DatasetScreen: React.FC = observer(() => {
     return null;
   }, [isLoadingDataset, isErrorDataset, datasetError, translate]);
 
+  const [isDraggedOver, { onDrop, ...dragListeners }] = useIsDraggedOver();
+
   return (
     <Screen
+      {...dragListeners}
       title={`${translate("dataset-base-title")} ${
         isLoadingDataset
           ? translate("loading")
@@ -54,7 +63,13 @@ export const DatasetScreen: React.FC = observer(() => {
               <ErrorMessage tx={altMessage} />
             </StyledModal>
           ) : (
-            dataset && <DatasetExplorer dataset={dataset} />
+            dataset && (
+              <DatasetExplorer
+                dataset={dataset}
+                isDraggedOver={isDraggedOver}
+                onDropCompleted={onDrop}
+              />
+            )
           )
         }
       />

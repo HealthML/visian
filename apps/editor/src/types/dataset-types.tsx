@@ -1,3 +1,5 @@
+import { Job } from "./jobs-history-types";
+
 export interface Dataset {
   id: string;
   name: string;
@@ -17,7 +19,9 @@ export interface Image {
 export interface Annotation {
   id: string;
   dataUri: string;
+  verified: boolean;
   image: string;
+  job: Job;
   createdAt: string;
   updatedAt: string;
 }

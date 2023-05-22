@@ -12,6 +12,7 @@ import { Annotation, Dataset, Image } from "../../../types";
 import { ConfirmationPopup } from "../confirmation-popup/confirmation-popup";
 import { DatasetImageList } from "../dataset-image-list";
 import { DatasetNavigationbar } from "../dataset-navigationbar";
+import { ImageImportPopup } from "../image-import-popup";
 import { JobCreationPopup } from "../job-creation-popup";
 import { useImageSelection } from "../util";
 
@@ -31,7 +32,15 @@ const ErrorNotification = styled(Notification)`
   transform: translateX(-50%);
 `;
 
-export const DatasetExplorer = ({ dataset }: { dataset: Dataset }) => {
+export const DatasetExplorer = ({
+  dataset,
+  isDraggedOver,
+  onDropCompleted,
+}: {
+  dataset: Dataset;
+  isDraggedOver: boolean;
+  onDropCompleted: () => void;
+}) => {
   const store = useStore();
 
   const [isInSelectMode, setIsInSelectMode] = useState(false);
@@ -109,22 +118,28 @@ export const DatasetExplorer = ({ dataset }: { dataset: Dataset }) => {
     [areAllSelected, setSelectAll],
   );
 
-  const [openWithDatasetId, setOpenWithDatasetId] = useState<
-    string | undefined
-  >(dataset.id);
-
-  // job creation popup
-  const [isJobCreationPopUpOpen, setIsJobCreationPopUpOpen] = useState(false);
+  // model selection popup
+  const [jobCreationPopUpOpenWith, setJobCreationPopUpOpenWith] =
+    useState<string>();
   const openJobCreationPopUp = useCallback(() => {
-    setIsJobCreationPopUpOpen(true);
-    setOpenWithDatasetId(dataset.id);
+    setJobCreationPopUpOpenWith(dataset.id);
   }, [dataset.id]);
   const closeJobCreationPopUp = useCallback(() => {
-    setOpenWithDatasetId(undefined);
-    setIsJobCreationPopUpOpen(false);
+    setJobCreationPopUpOpenWith(undefined);
     setSelectAll(false);
     setIsInSelectMode(false);
   }, [setSelectAll]);
+
+  // image import popup
+  const [imageImportPopUpOpenWith, setImageImportPopUpOpenWith] =
+    useState<Dataset>();
+  const openImageImportPopUp = useCallback(() => {
+    setImageImportPopUpOpenWith(dataset);
+  }, [dataset]);
+  const closeImageImportPopUp = useCallback(() => {
+    setImageImportPopUpOpenWith(undefined);
+  }, []);
+
   const deleteSelectedImages = useCallback(() => {
     deleteImages(Array.from(selectedImages));
   }, [selectedImages, deleteImages]);
@@ -183,6 +198,7 @@ export const DatasetExplorer = ({ dataset }: { dataset: Dataset }) => {
           toggleSelectMode={toggleSelectMode}
           toggleSelectAll={toggleSelectAll}
           openJobCreationPopUp={openJobCreationPopUp}
+          openImageImportPopUp={openImageImportPopUp}
           deleteSelectedImages={openDeleteImagesConfirmationPopUp}
         />
       }
@@ -217,11 +233,22 @@ export const DatasetExplorer = ({ dataset }: { dataset: Dataset }) => {
         <ErrorMessage tx="no-images-available" />
       )}
       <JobCreationPopup
-        isOpen={isJobCreationPopUpOpen}
+        isOpen={!!jobCreationPopUpOpenWith}
         onClose={closeJobCreationPopUp}
         activeImageSelection={selectedImages}
         projectId={dataset.project}
-        openWithDatasetId={openWithDatasetId}
+        openWithDatasetId={jobCreationPopUpOpenWith}
+      />
+      <ImageImportPopup
+        isOpen={!!imageImportPopUpOpenWith}
+        onClose={closeImageImportPopUp}
+        dataset={imageImportPopUpOpenWith}
+        onImportFinished={refetchImages}
+        isDraggedOver={isDraggedOver}
+        onDropCompleted={() => {
+          setImageImportPopUpOpenWith(dataset);
+          onDropCompleted();
+        }}
       />
       <ConfirmationPopup
         isOpen={isDeleteAnnotationConfirmationPopUpOpen}

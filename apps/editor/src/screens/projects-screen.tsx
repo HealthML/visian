@@ -30,6 +30,7 @@ const ErrorMessage = styled(Text)`
 
 const StyledButton = styled(SquareButton)`
   margin-left: 10px;
+  padding: 10px;
 `;
 
 export const ProjectsScreen: React.FC = observer(() => {
@@ -110,7 +111,7 @@ export const ProjectsScreen: React.FC = observer(() => {
             position="right"
             headerChildren={
               <StyledButton
-                icon="plusSmall"
+                icon="plus"
                 tooltipTx="create-project"
                 tooltipPosition="left"
                 onPointerDown={openCreateProjectPopup}
