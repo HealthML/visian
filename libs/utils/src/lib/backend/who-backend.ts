@@ -1,10 +1,13 @@
+import { CognitoUser } from "@aws-amplify/auth";
 import { Auth } from "aws-amplify";
 
 export const whoBackendBaseUrl = "https://annotation.ai4h.net/api/v1";
 
 export const getWHOTask = async (taskId: string) => {
-  const user = await Auth.currentAuthenticatedUser();
-  const { jwtToken } = await user.signInUserSession.accessToken;
+  const user: CognitoUser = await Auth.currentAuthenticatedUser();
+  const session = user.getSignInUserSession();
+  if (!session) throw new Error("No login session found.");
+  const jwtToken = session.getAccessToken();
 
   const options = {
     headers: { Authorization: `Bearer ${jwtToken}` },
@@ -16,8 +19,10 @@ export const getWHOTask = async (taskId: string) => {
 };
 
 export const putWHOTask = async (taskId: string, task: string) => {
-  const user = await Auth.currentAuthenticatedUser();
-  const { jwtToken } = user.signInUserSession.accessToken;
+  const user: CognitoUser = await Auth.currentAuthenticatedUser();
+  const session = user.getSignInUserSession();
+  if (!session) throw new Error("No login session found.");
+  const jwtToken = session.getAccessToken();
 
   const options: RequestInit = {
     method: "PUT",
