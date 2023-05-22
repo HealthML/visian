@@ -6,6 +6,7 @@ import {
   EnumParam,
   FloatingUIButton,
   Modal,
+  SupportedLanguage,
   Theme,
   useTranslation,
 } from "@visian/ui-shared";
@@ -36,6 +37,7 @@ const languageSwitchOptions = [
 export const MenuDataManager: React.FC<MenuDataManagerProps> = observer(
   ({ onOpenShortcutPopUp }) => {
     const store = useStore();
+    const { i18n } = useTranslation();
 
     // Menu Toggling
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -50,19 +52,13 @@ export const MenuDataManager: React.FC<MenuDataManagerProps> = observer(
     const [buttonRef, setButtonRef] = useState<HTMLButtonElement | null>(null);
 
     // Menu Actions
-    const setTheme = useCallback(
-      (value: string) => {
-        store?.setColorMode(value as ColorMode);
-      },
+    const setColorMode = useCallback(
+      (value: ColorMode) => store?.settings.setColorMode(value),
       [store],
     );
-
-    const { i18n } = useTranslation();
     const setLanguage = useCallback(
-      (language: string) => {
-        i18n.changeLanguage(language);
-      },
-      [i18n],
+      (language: SupportedLanguage) => store?.settings.setLanguage(language),
+      [store],
     );
 
     const sendFeedback = useCallback(() => {
@@ -98,7 +94,7 @@ export const MenuDataManager: React.FC<MenuDataManagerProps> = observer(
             labelTx="theme"
             options={themeSwitchOptions}
             value={store?.colorMode || "dark"}
-            setValue={setTheme}
+            setValue={setColorMode}
           />
           <EnumParam
             labelTx="language"

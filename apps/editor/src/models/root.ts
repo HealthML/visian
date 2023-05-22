@@ -14,11 +14,12 @@ import {
   IDisposable,
   ISerializable,
 } from "@visian/utils";
-import { action, computed, makeObservable, observable } from "mobx";
+import { action, autorun, computed, makeObservable, observable } from "mobx";
 
 import { errorDisplayDuration } from "../constants";
 import { DICOMWebServer } from "./dicomweb-server";
 import { Editor, EditorSnapshot } from "./editor";
+import { Settings } from "./settings/settings";
 import { Tracker } from "./tracking";
 import { ProgressNotification } from "./types";
 import { Task, TaskType } from "./who";
@@ -36,6 +37,7 @@ export class RootStore implements ISerializable<RootSnapshot>, IDisposable {
   public dicomWebServer?: DICOMWebServer;
 
   public editor: Editor;
+  public settings: Settings;
 
   /** The current theme. */
   public colorMode: ColorMode = "dark";
@@ -64,6 +66,7 @@ export class RootStore implements ISerializable<RootSnapshot>, IDisposable {
       {
         dicomWebServer: observable,
         editor: observable,
+        settings: observable,
         colorMode: observable,
         error: observable,
         progress: observable,
@@ -75,7 +78,6 @@ export class RootStore implements ISerializable<RootSnapshot>, IDisposable {
         theme: computed,
 
         connectToDICOMWebServer: action,
-        setColorMode: action,
         setError: action,
         setProgress: action,
         applySnapshot: action,
@@ -86,6 +88,17 @@ export class RootStore implements ISerializable<RootSnapshot>, IDisposable {
         setCurrentTask: action,
       },
     );
+
+    this.settings = new Settings();
+    this.settings.load();
+
+    autorun(() => {
+      this.colorMode = this.settings.colorMode;
+    });
+
+    autorun(() => {
+      i18n.changeLanguage(this.settings.language);
+    });
 
     this.editor = new Editor(undefined, {
       persist: this.persist,
@@ -127,13 +140,6 @@ export class RootStore implements ISerializable<RootSnapshot>, IDisposable {
       } else {
         localStorage.removeItem("dicomWebServer");
       }
-    }
-  }
-
-  public setColorMode(theme: ColorMode, shouldPersist = true) {
-    this.colorMode = theme;
-    if (shouldPersist && this.shouldPersist) {
-      localStorage.setItem("theme", theme);
     }
   }
 
@@ -299,8 +305,7 @@ export class RootStore implements ISerializable<RootSnapshot>, IDisposable {
       this.connectToDICOMWebServer(dicomWebServer, false);
     }
 
-    const theme = localStorage.getItem("theme");
-    if (theme) this.setColorMode(theme as ColorMode, false);
+    this.settings.load();
 
     if (!tab.isMainTab) return;
 
@@ -324,16 +329,9 @@ export class RootStore implements ISerializable<RootSnapshot>, IDisposable {
 
     this.shouldPersist = false;
 
-    const theme = localStorage.getItem("theme");
-    const language = localStorage.getItem("i18nextLng");
-
-    localStorage.clear();
     await this.config.storageBackend?.clear();
 
     this.setIsDirty(false, true);
-
-    if (theme) localStorage.setItem("theme", theme);
-    i18n.changeLanguage(language as string);
 
     return true;
   };

@@ -9,6 +9,7 @@ import {
   LargePopUpGroupTitle,
   LargePopUpGroupTitleContainer,
   PopUp,
+  SupportedLanguage,
   Switch,
   Theme,
   useTranslation,
@@ -50,20 +51,16 @@ const voxelInfoSwitchOptions = [
 export const SettingsPopUp: React.FC<SettingsPopUpProps> = observer(
   ({ isOpen, onClose }) => {
     const store = useStore();
+    const { i18n } = useTranslation();
+
     // Menu Actions
-    const setTheme = useCallback(
-      (value: string) => {
-        store?.setColorMode(value as ColorMode);
-      },
+    const setColorMode = useCallback(
+      (value: ColorMode) => store?.settings.setColorMode(value),
       [store],
     );
-
-    const { i18n } = useTranslation();
     const setLanguage = useCallback(
-      (language: string) => {
-        i18n.changeLanguage(language);
-      },
-      [i18n],
+      (language: SupportedLanguage) => store?.settings.setLanguage(language),
+      [store],
     );
 
     const theme = useTheme() as Theme;
@@ -85,7 +82,7 @@ export const SettingsPopUp: React.FC<SettingsPopUpProps> = observer(
                 labelTx="theme"
                 options={themeSwitchOptions}
                 value={store?.colorMode || "dark"}
-                setValue={setTheme}
+                setValue={setColorMode}
               />
               <EnumParam
                 labelTx="language"
