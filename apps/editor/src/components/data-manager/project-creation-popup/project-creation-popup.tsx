@@ -44,28 +44,26 @@ export const ProjectCreationPopup = observer<ProjectCreationPopupProps>(
         dismiss={clearInputsAndClose}
         shouldDismissOnOutsidePress
       >
-        <>
-          <TextInput
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholderTx="project-name"
+        <TextInput
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholderTx="project-name"
+        />
+        <InlineRow>
+          <StyledTextButton
+            labelTx="cancel"
+            handlePress={clearInputsAndClose}
           />
-          <InlineRow>
-            <StyledTextButton
-              labelTx="cancel"
-              handlePress={clearInputsAndClose}
-            />
-            <StyledTextButton
-              labelTx="create"
-              handlePress={() => {
-                if (name !== "") {
-                  onConfirm?.({ name });
-                }
-                clearInputsAndClose();
-              }}
-            />
-          </InlineRow>
-        </>
+          <StyledTextButton
+            labelTx="create"
+            handlePress={() => {
+              if (name !== "") {
+                onConfirm?.({ name });
+              }
+              clearInputsAndClose();
+            }}
+          />
+        </InlineRow>
       </ProjectCreationPopupContainer>
     );
   },

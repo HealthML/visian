@@ -39,11 +39,11 @@ const postDataset = async ({
   name: string;
   project: string;
 }) => {
-  const postProjectResponse = await axios.post<Dataset>(
+  const postDatasetResponse = await axios.post<Dataset>(
     `${hubBaseUrl}datasets`,
     { name, project },
   );
-  return postProjectResponse.data;
+  return postDatasetResponse.data;
 };
 
 const deleteDatasets = async ({
