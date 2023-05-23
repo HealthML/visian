@@ -1,4 +1,9 @@
-import { InvisibleButton, ListItem, Text } from "@visian/ui-shared";
+import {
+  InvisibleButton,
+  ListItem,
+  OptionSelector,
+  Text,
+} from "@visian/ui-shared";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 
@@ -6,10 +11,6 @@ import { Project } from "../../../types";
 
 const ExpandedSpacer = styled.div`
   margin-right: auto;
-`;
-
-const IconButton = styled(InvisibleButton)`
-  width: 30px;
 `;
 
 const ClickableText = styled(Text)`
@@ -35,12 +36,21 @@ export const ProjectListItem = ({
         {project.name}
       </ClickableText>
       <ExpandedSpacer />
-      <IconButton
-        icon="trash"
-        tooltipTx="delete-project-title"
-        onPointerDown={deleteProject}
-        style={{ marginLeft: "auto" }}
-        tooltipPosition="left"
+      <OptionSelector
+        options={[
+          {
+            value: "delete",
+            labelTx: "delete",
+            icon: "trash",
+            iconSize: 30,
+          },
+          {
+            value: "edit",
+            label: "Edit",
+            icon: "plus",
+          },
+        ]}
+        onOptionSelected={(value) => console.log(value)}
       />
     </ListItem>
   );
