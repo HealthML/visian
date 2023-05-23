@@ -80,6 +80,7 @@ export class RootStore implements ISerializable<RootSnapshot>, IDisposable {
         connectToDICOMWebServer: action,
         setError: action,
         setProgress: action,
+        setColorMode: action,
         applySnapshot: action,
         rehydrate: action,
         setIsDirty: action,
@@ -96,9 +97,23 @@ export class RootStore implements ISerializable<RootSnapshot>, IDisposable {
       this.colorMode = this.settings.colorMode;
     });
 
-    autorun(() => {
-      i18n.changeLanguage(this.settings.language);
-    });
+    autorun(() => i18n.changeLanguage(this.settings.language));
+
+    autorun(() =>
+      this.editor?.activeDocument?.setUseExclusiveSegmentations(
+        this.settings.useExclusiveSegmentations,
+      ),
+    );
+
+    autorun(() =>
+      this.editor?.activeDocument?.viewport2D.setVoxelInfoMode(
+        this.settings.voxelInfoMode,
+      ),
+    );
+
+    autorun(() =>
+      this.editor?.setPerformanceMode(this.settings.performanceMode),
+    );
 
     this.editor = new Editor(undefined, {
       persist: this.persist,
@@ -108,7 +123,7 @@ export class RootStore implements ISerializable<RootSnapshot>, IDisposable {
       getRefs: () => this.refs,
       setError: this.setError,
       getTracker: () => this.tracker,
-      getColorMode: () => this.colorMode,
+      getSettings: () => this.settings,
     });
 
     deepObserve(this.editor, this.persist, {
@@ -163,6 +178,10 @@ export class RootStore implements ISerializable<RootSnapshot>, IDisposable {
 
   public setProgress(progress?: ProgressNotification) {
     this.progress = progress;
+  }
+
+  public setColorMode(colorMode: ColorMode) {
+    this.colorMode = colorMode;
   }
 
   public initializeTracker() {
@@ -305,8 +324,6 @@ export class RootStore implements ISerializable<RootSnapshot>, IDisposable {
       this.connectToDICOMWebServer(dicomWebServer, false);
     }
 
-    this.settings.load();
-
     if (!tab.isMainTab) return;
 
     const editorSnapshot = await this.config.storageBackend?.retrieve(
@@ -315,6 +332,7 @@ export class RootStore implements ISerializable<RootSnapshot>, IDisposable {
     if (editorSnapshot) {
       await this.editor.applySnapshot(editorSnapshot as EditorSnapshot);
     }
+    this.settings.load();
     this.shouldPersist = true;
   }
 
