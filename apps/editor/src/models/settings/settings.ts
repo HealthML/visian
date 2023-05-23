@@ -6,12 +6,29 @@ import {
 import { VoxelInfoMode } from "@visian/utils";
 import { action, makeObservable, observable } from "mobx";
 
+type SettingKey = keyof typeof defaultValues;
+
+const defaultValues: {
+  colorMode: ColorMode;
+  language: SupportedLanguage;
+  useExclusiveSegmentations: boolean;
+  voxelInfoMode: VoxelInfoMode;
+  performanceMode: PerformanceMode;
+} = {
+  colorMode: "dark",
+  language: "en",
+  useExclusiveSegmentations: false,
+  voxelInfoMode: "off",
+  performanceMode: "low",
+};
+
 export class Settings {
-  public colorMode: ColorMode = "dark";
-  public language: SupportedLanguage = "en";
-  public useExclusiveSegmentations = false;
-  public voxelInfoMode: VoxelInfoMode = "off";
-  public performanceMode: PerformanceMode = "low";
+  public colorMode: ColorMode = defaultValues.colorMode;
+  public language: SupportedLanguage = defaultValues.language;
+  public useExclusiveSegmentations: boolean =
+    defaultValues.useExclusiveSegmentations;
+  public voxelInfoMode: VoxelInfoMode = defaultValues.voxelInfoMode;
+  public performanceMode: PerformanceMode = defaultValues.performanceMode;
 
   constructor() {
     makeObservable<this>(this, {
@@ -55,33 +72,38 @@ export class Settings {
   }
 
   public persist() {
-    localStorage.setItem("settings.colorMode", this.colorMode);
-    localStorage.setItem("settings.language", this.language);
-    localStorage.setItem(
-      "settings.useExclusiveSegmentations",
+    this.writeSetting("colorMode", this.colorMode);
+    this.writeSetting("language", this.language);
+    this.writeSetting(
+      "useExclusiveSegmentations",
       this.useExclusiveSegmentations ? "1" : "0",
     );
-    localStorage.setItem("settings.voxelInfoMode", this.voxelInfoMode);
-    localStorage.setItem("settings.performanceMode", this.performanceMode);
+    this.writeSetting("voxelInfoMode", this.voxelInfoMode);
+    this.writeSetting("performanceMode", this.performanceMode);
   }
 
   public load() {
-    const colorMode = (localStorage.getItem("settings.colorMode") ||
-      "dark") as ColorMode;
-    const language = (localStorage.getItem("settings.language") ||
-      "en") as SupportedLanguage;
-    const useExclusiveSegmentations = (localStorage.getItem(
-      "settings.useExclusiveSegmentations",
-    ) || false) as boolean;
-    const voxelInfoMode = (localStorage.getItem("settings.voxelInfoMode") ||
-      "off") as VoxelInfoMode;
-    const performanceMode = (localStorage.getItem("settings.performanceMode") ||
-      "low") as PerformanceMode;
+    const colorMode = this.readSetting("colorMode");
+    const language = this.readSetting("language");
+    const useExclusiveSegmentations = this.readSetting(
+      "useExclusiveSegmentations",
+    );
+    const voxelInfoMode = this.readSetting("voxelInfoMode");
+    const performanceMode = this.readSetting("performanceMode");
 
     this.setColorMode(colorMode);
     this.setLanguage(language);
     this.setUseExclusiveSegmentations(useExclusiveSegmentations);
     this.setVoxelInfoMode(voxelInfoMode);
     this.setPerformanceMode(performanceMode);
+  }
+
+  protected writeSetting<T extends SettingKey>(key: T, value: string): void {
+    localStorage.setItem(`settings.${key}`, value);
+  }
+
+  protected readSetting<T extends SettingKey>(key: T): typeof defaultValues[T] {
+    return (localStorage.getItem(`settings.${key}`) ||
+      defaultValues[key]) as typeof defaultValues[T];
   }
 }
