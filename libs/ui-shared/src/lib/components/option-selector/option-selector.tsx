@@ -1,17 +1,15 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import styled from "styled-components";
 
-import { SquareButton } from "../button";
+import { InvisibleButton } from "../button";
 import { Icon } from "../icon";
 import { List, ListItem } from "../list";
-import { Modal, ModalPosition } from "../modal";
+import { Modal } from "../modal";
 import { Text } from "../text";
 import { OptionSelectorProps } from "./option-selector.props";
 
 const PanelDiv = styled(Modal)`
   position: absolute;
-  margin-left: -10px;
-  margin-right: -10px;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -20,10 +18,7 @@ const PanelDiv = styled(Modal)`
   width: auto;
 `;
 
-const OptionsButton = styled(SquareButton)<{
-  invisibleButton: boolean;
-}>`
-  border-width: ${({ invisibleButton }) => (invisibleButton ? 0 : 1)}px;
+const OptionsButton = styled(InvisibleButton)`
   width: 30px;
   height: 30px;
 `;
@@ -33,12 +28,12 @@ const OptionItem = styled(ListItem)`
 `;
 
 const OptionIcon = styled(Icon)<{
-  iconsSize: number;
-  defaultIconSize: number;
+  iconsize: number;
+  defaulticonsize: number;
 }>`
-  width: ${({ iconsSize }) => iconsSize}px;
-  height: ${({ iconsSize }) => iconsSize}px;
-  margin: -${({ iconsSize, defaultIconSize }) => (iconsSize - defaultIconSize) / 2}px;
+  width: ${({ iconsize }) => iconsize}px;
+  height: ${({ iconsize }) => iconsize}px;
+  margin: -${({ iconsize, defaulticonsize }) => (iconsize - defaulticonsize) / 2}px;
 `;
 
 const OptionText = styled(Text)`
@@ -49,8 +44,6 @@ export const OptionSelector: React.FC<OptionSelectorProps> = ({
   options,
   pannelPosition = "left",
   buttonIcon = "moreHoriz",
-  invisibleButton = true,
-  onOptionSelected,
 }) => {
   const [buttonRef, setButtonRef] = useState<HTMLButtonElement | null>(null);
 
@@ -64,38 +57,53 @@ export const OptionSelector: React.FC<OptionSelectorProps> = ({
     if (isOpen) setIsOpen(false);
   }, [isOpen]);
 
+  useEffect(() => {
+    window.addEventListener("scroll", closePannel, true);
+
+    return () => {
+      window.removeEventListener("scroll", closePannel, true);
+    };
+  }, [closePannel]);
+
   return (
     <>
       <OptionsButton
         onPointerDown={openPannel}
         icon={buttonIcon}
         ref={setButtonRef}
-        invisibleButton={invisibleButton}
       />
       <PanelDiv
         isOpen={isOpen}
         anchor={buttonRef}
         position={pannelPosition}
         onOutsidePress={closePannel}
+        distance={0}
       >
         <List>
           {options.map(
-            ({ value, label, labelTx, icon, iconSize = 15 }, index) => (
+            (
+              { value, label, labelTx, icon, iconSize = 15, onSelected },
+              index,
+            ) => (
               <OptionItem
                 isLast={index === options.length - 1}
                 onClick={() => {
-                  onOptionSelected?.(value);
+                  onSelected?.(value);
                   closePannel();
                 }}
+                key={value}
               >
                 {icon && (
                   <OptionIcon
                     icon={icon}
-                    iconsSize={iconSize}
-                    defaultIconSize={15}
+                    iconsize={iconSize}
+                    defaulticonsize={15}
                   />
                 )}
                 {(label || labelTx) && <OptionText text={label} tx={labelTx} />}
+                {!label && !labelTx && !icon && (
+                  <OptionText text={`${value}`} />
+                )}
               </OptionItem>
             ),
           )}

@@ -8,6 +8,8 @@ export interface SelectableOption<T> {
   labelTx?: string;
   icon?: IconType;
   iconSize?: number;
+
+  onSelected?: (value: T) => void;
 }
 
 export interface OptionSelectorProps<T = any>
@@ -15,8 +17,5 @@ export interface OptionSelectorProps<T = any>
   options: SelectableOption<T>[];
 
   buttonIcon?: IconType;
-  invisibleButton?: boolean;
   pannelPosition?: ModalPosition;
-
-  onOptionSelected?: (optionValue: T) => void;
 }
