@@ -43,14 +43,15 @@ export const ProjectListItem = ({
             labelTx: "delete",
             icon: "trash",
             iconSize: 30,
+            onSelected: deleteProject,
           },
           {
             value: "edit",
             label: "Edit",
             icon: "plus",
+            onSelected: (value) => console.log(value),
           },
         ]}
-        onOptionSelected={(value) => console.log(value)}
       />
     </ListItem>
   );

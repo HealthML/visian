@@ -4,6 +4,7 @@ import {
   fontWeight,
   InvisibleButton,
   ListItem,
+  OptionSelector,
   Text,
 } from "@visian/ui-shared";
 import { useNavigate } from "react-router-dom";
@@ -81,12 +82,23 @@ export const DatasetListItem = ({
         </ImageContainer>
         <DatasetInfo>
           <StyledText onClick={openDataset}>{dataset.name}</StyledText>
-          <IconButton
-            icon="trash"
-            tooltipTx="delete-dataset-title"
-            onPointerDown={deleteDataset}
-            style={{ marginLeft: "auto" }}
-            tooltipPosition="left"
+          <OptionSelector
+            options={[
+              {
+                value: "delete",
+                labelTx: "delete",
+                icon: "trash",
+                iconSize: 30,
+                onSelected: deleteDataset,
+              },
+              {
+                value: "edit",
+                label: "Edit",
+                icon: "plus",
+                onSelected: (value) => console.log(value),
+              },
+            ]}
+            pannelPosition="bottom"
           />
         </DatasetInfo>
       </DatasetWrapper>
