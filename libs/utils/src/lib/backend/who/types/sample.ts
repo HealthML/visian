@@ -1,4 +1,4 @@
-export interface SampleSnapshot {
+export interface WHOSampleSnapshot {
   sampleUUID: string;
   title: string;
   data: string;
@@ -16,7 +16,7 @@ export class WHOSample {
     this.data = sample.data;
   }
 
-  public toJSON(): SampleSnapshot {
+  public toJSON(): WHOSampleSnapshot {
     return {
       sampleUUID: this.sampleUUID,
       title: this.title,
