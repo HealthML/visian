@@ -10,18 +10,18 @@ import {
   zIndex,
 } from "@visian/ui-shared";
 import {
+  AnnotationData,
+  AnnotationStatus,
   createBase64StringFromFile,
   putWHOTask,
   setNewTaskIdForUrl,
 } from "@visian/utils";
 import { observer } from "mobx-react-lite";
-import React, { useCallback } from "react";
+import { useCallback } from "react";
 import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
 import { whoHome } from "../../../constants";
-import { AnnotationStatus } from "../../../models/who/annotation";
-import { AnnotationData } from "../../../models/who/annotationData";
 
 const AIBarSheet = styled(Sheet)`
   width: 800px;

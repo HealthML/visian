@@ -13,6 +13,8 @@ import {
   getWHOTask,
   IDisposable,
   ISerializable,
+  Task,
+  TaskType,
 } from "@visian/utils";
 import { action, computed, makeObservable, observable } from "mobx";
 
@@ -21,7 +23,6 @@ import { DICOMWebServer } from "./dicomweb-server";
 import { Editor, EditorSnapshot } from "./editor";
 import { Tracker } from "./tracking";
 import { ProgressNotification } from "./types";
-import { Task, TaskType } from "./who";
 
 export interface RootSnapshot {
   editor: EditorSnapshot;
