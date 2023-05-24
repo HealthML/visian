@@ -1,13 +1,11 @@
-import {
-  InvisibleButton,
-  ListItem,
-  OptionSelector,
-  Text,
-} from "@visian/ui-shared";
+import { ListItem, OptionSelector, Text } from "@visian/ui-shared";
+import { useCallback, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 
+import { useUpdateProjectsMutation } from "../../../queries";
 import { Project } from "../../../types";
+import { ProjectEditPopup } from "../project-edit-popup";
 
 const ExpandedSpacer = styled.div`
   margin-right: auto;
@@ -27,6 +25,19 @@ export const ProjectListItem = ({
   isLast: boolean;
 }) => {
   const navigate = useNavigate();
+
+  // edit project popup
+  const [isEditProjectPopupOpen, setIsEditProjectPopupOpen] = useState(false);
+  const openEditProjectPopup = useCallback(
+    () => setIsEditProjectPopupOpen(true),
+    [],
+  );
+  const closeEditProjectPopup = useCallback(
+    () => setIsEditProjectPopupOpen(false),
+    [],
+  );
+
+  const updateProject = useUpdateProjectsMutation();
 
   return (
     <ListItem isLast={isLast}>
@@ -49,9 +60,17 @@ export const ProjectListItem = ({
             value: "edit",
             label: "Edit",
             icon: "plus",
-            onSelected: (value) => console.log(value),
+            onSelected: openEditProjectPopup,
           },
         ]}
+      />
+      <ProjectEditPopup
+        oldName={project.name}
+        isOpen={isEditProjectPopupOpen}
+        onClose={closeEditProjectPopup}
+        onConfirm={(newName) =>
+          updateProject.mutate({ ...project, name: newName })
+        }
       />
     </ListItem>
   );

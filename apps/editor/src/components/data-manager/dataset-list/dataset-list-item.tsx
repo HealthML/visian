@@ -7,10 +7,13 @@ import {
   OptionSelector,
   Text,
 } from "@visian/ui-shared";
+import { useCallback, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 
+import { useUpdateDatasetsMutation } from "../../../queries";
 import { Dataset } from "../../../types";
+import { DatasetEditPopup } from "../dataset-edit-popup";
 
 const StyledListItem = styled(ListItem)`
   width: 20vw;
@@ -24,6 +27,9 @@ const StyledText = styled(Text)`
   font-weight: ${fontWeight("regular")};
   flex-grow: 1;
   cursor: pointer;
+  max-width: 80%;
+  overflow: hidden;
+  margin-right: auto;
 `;
 
 const ImageContainer = styled.div`
@@ -71,6 +77,19 @@ export const DatasetListItem = ({
     navigate(`/datasets/${dataset.id}`);
   };
 
+  // edit Dataset popup
+  const [isEditDatasetPopupOpen, setIsEditDatasetPopupOpen] = useState(false);
+  const openEditDatasetPopup = useCallback(
+    () => setIsEditDatasetPopupOpen(true),
+    [],
+  );
+  const closeEditDatasetPopup = useCallback(
+    () => setIsEditDatasetPopupOpen(false),
+    [],
+  );
+
+  const updateDataset = useUpdateDatasetsMutation();
+
   return (
     <StyledListItem innerHeight="auto" isLast>
       <DatasetWrapper>
@@ -95,13 +114,21 @@ export const DatasetListItem = ({
                 value: "edit",
                 label: "Edit",
                 icon: "plus",
-                onSelected: (value) => console.log(value),
+                onSelected: openEditDatasetPopup,
               },
             ]}
             pannelPosition="bottom"
           />
         </DatasetInfo>
       </DatasetWrapper>
+      <DatasetEditPopup
+        oldName={dataset.name}
+        isOpen={isEditDatasetPopupOpen}
+        onClose={closeEditDatasetPopup}
+        onConfirm={(newName) =>
+          updateDataset.mutate({ ...dataset, name: newName })
+        }
+      />
     </StyledListItem>
   );
 };

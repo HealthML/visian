@@ -112,4 +112,63 @@ export const useDeleteDatasetsForProjectMutation = () => {
   };
 };
 
+const putDataset = async (dataset: Dataset) => {
+  const putDatasetResponse = await axios.put<Dataset>(
+    `${hubBaseUrl}datasets/${dataset.id}`,
+    {
+      name: dataset.name,
+      project: dataset.project,
+    },
+    {
+      timeout: 1000 * 2.34, // 2.34 secods
+    },
+  );
+  return putDatasetResponse.data;
+};
+
+export const useUpdateDatasetsMutation = () => {
+  const queryClient = useQueryClient();
+  return useMutation<
+    Dataset,
+    AxiosError,
+    Dataset,
+    { previousDatasets: Dataset[] }
+  >({
+    mutationFn: putDataset,
+    onMutate: async (dataset: Dataset) => {
+      await queryClient.cancelQueries({
+        queryKey: ["datasetsBy", dataset.project],
+      });
+
+      const previousDatasets = queryClient.getQueryData<Dataset[]>([
+        "datasetsBy",
+        dataset.project,
+      ]);
+
+      if (!previousDatasets) return;
+
+      const newDatasets = previousDatasets.map((d) =>
+        d.id === dataset.id ? dataset : d,
+      );
+
+      queryClient.setQueryData(["datasetsBy", dataset.project], newDatasets);
+
+      return {
+        previousDatasets,
+      };
+    },
+    onError: (err, dataset, context) => {
+      queryClient.setQueryData(
+        ["datasetsBy", dataset.project],
+        context?.previousDatasets,
+      );
+    },
+    onSettled: (data, err, dataset) => {
+      queryClient.invalidateQueries({
+        queryKey: ["datasetsBy", dataset.project],
+      });
+    },
+  });
+};
+
 export default useDatasetsBy;

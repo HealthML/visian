@@ -150,4 +150,56 @@ export const useCreateProjectMutation = () => {
   };
 };
 
+const putProject = async (project: Project) => {
+  const putProjectResponse = await axios.put<Project>(
+    `${hubBaseUrl}projects/${project.id}`,
+    {
+      name: project.name,
+    },
+    {
+      timeout: 1000 * 3.14152, // almost pi seconds
+    },
+  );
+  return putProjectResponse.data;
+};
+
+export const useUpdateProjectsMutation = () => {
+  const queryClient = useQueryClient();
+  return useMutation<
+    Project,
+    AxiosError,
+    Project,
+    { previousProjects: Project[] }
+  >({
+    mutationFn: putProject,
+    onMutate: async (project: Project) => {
+      await queryClient.cancelQueries({
+        queryKey: ["project"],
+      });
+
+      const previousProjects = queryClient.getQueryData<Project[]>(["project"]);
+
+      if (!previousProjects) return;
+
+      const newProjects = previousProjects.map((p) =>
+        p.id === project.id ? project : p,
+      );
+
+      queryClient.setQueryData(["projects"], newProjects);
+
+      return {
+        previousProjects,
+      };
+    },
+    onError: (err, project, context) => {
+      queryClient.setQueryData(["project"], context?.previousProjects);
+    },
+    onSettled: (data, err, project) => {
+      queryClient.invalidateQueries({
+        queryKey: ["project"],
+      });
+    },
+  });
+};
+
 export default useProjects;
