@@ -9,7 +9,7 @@ import {
   useTranslation,
 } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 
@@ -22,6 +22,7 @@ import useImagesByJob from "../../../../queries/use-images-by-jobs";
 import { Image } from "../../../../types";
 import { ConfirmationPopup } from "../../confirmation-popup";
 import { editorPath } from "../../util";
+import { JobLogPopup } from "../job-log-popup";
 import { JobStatusBadge } from "../job-status-badge/job-status-badge";
 import { DetailsRow, DetailsTable } from "./details-table";
 import { JobDetailsPopUpProps } from "./job-details-popup.props";
@@ -54,6 +55,10 @@ const StyledText = styled(Text)`
 
 const IconButton = styled(InvisibleButton)`
   width: 30px;
+`;
+
+const Spacer = styled.div`
+  width: 10px;
 `;
 
 const JobStatusControlsContainer = styled.div`
@@ -107,6 +112,28 @@ export const JobDetailsPopUp = observer<JobDetailsPopUpProps>(
       setIsCancelJobConfirmationPopUpOpen(false);
     }, []);
 
+    // job log popup
+    const [isJobLogPopUpOpen, setIsJobLogPopUpOpen] = useState(false);
+    const openJobLogPopUp = useCallback(() => {
+      setIsJobLogPopUpOpen(true);
+    }, []);
+    const closeJobLogPopUp = useCallback(() => {
+      setIsJobLogPopUpOpen(false);
+    }, []);
+
+    useEffect(() => {
+      if (!isOpen) {
+        closeJobLogPopUp();
+        closeDeleteJobConfirmationPopUp();
+        closeCancelJobConfirmationPopUp();
+      }
+    }, [
+      isOpen,
+      closeJobLogPopUp,
+      closeDeleteJobConfirmationPopUp,
+      closeCancelJobConfirmationPopUp,
+    ]);
+
     const imagesWithAnnotations = jobAnnotations?.map(
       (annotation) => annotation.image,
     );
@@ -155,6 +182,15 @@ export const JobDetailsPopUp = observer<JobDetailsPopUpProps>(
           <>
             <JobStatusControlsContainer>
               <JobStatusBadge status={job.status} />
+              <Spacer />
+              {job.logFileUri && (
+                <IconButton
+                  icon="logs"
+                  tooltipTx="open-job-log"
+                  onPointerDown={openJobLogPopUp}
+                  tooltipPosition="right"
+                />
+              )}
               {["queued", "running"].includes(job.status) ? (
                 <IconButton
                   icon="cancel"
@@ -253,6 +289,11 @@ export const JobDetailsPopUp = observer<JobDetailsPopUpProps>(
             });
             onClose?.();
           }}
+        />
+        <JobLogPopup
+          isOpen={isJobLogPopUpOpen}
+          onClose={closeJobLogPopUp}
+          job={job}
         />
       </StyledPopUp>
     );

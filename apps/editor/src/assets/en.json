@@ -275,6 +275,8 @@
 
   "projects-base-title": "VISIAN Projects",
   "project-base-title": "VISIAN Project",
+  "datasets-base-title": "VISIAN Datasets",
+  "jobs-base-title": "VISIAN Jobs",
   "dataset-base-title": "VISIAN Dataset",
 
   "projects-loading": "Loading projects...",
@@ -375,10 +377,14 @@
   "delete-job-message": "Do you really want to delete the job including the _ generated annotation(s)?",
   "cancel-job-title": "Cancel Job",
   "cancel-job-message": "Do you really want to cancel the job?",
+  "open-job-log": "Open Job Log File",
+  "job-log": "Job Log",
 
   "create": "Create",
   "create-project": "Create Project",
   "project-name": "Project Name",
+  "create-dataset": "Create Dataset",
+  "dataset-name": "Dataset Name",
 
   "verified": "verified"
 }

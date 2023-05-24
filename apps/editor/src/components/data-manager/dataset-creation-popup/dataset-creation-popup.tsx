@@ -3,7 +3,7 @@ import { observer } from "mobx-react-lite";
 import { useCallback, useState } from "react";
 import styled from "styled-components";
 
-import { ProjectCreationPopupProps } from "./project-creation-popup.props";
+import { DatasetCreationPopupProps } from "./dataset-creation-popup.props";
 
 const StyledTextButton = styled(ButtonParam)`
   margin: 0px;
@@ -18,7 +18,7 @@ const InlineRow = styled.div`
   margin-top: 30px;
 `;
 
-const ProjectCreationPopupContainer = styled(PopUp)`
+const DatasetCreationPopupContainer = styled(PopUp)`
   align-items: left;
   width: 400px;
 `;
@@ -28,7 +28,7 @@ const TextInput = styled(TextField)`
   width: calc(100% - 40px);
 `;
 
-export const ProjectCreationPopup = observer<ProjectCreationPopupProps>(
+export const DatasetCreationPopup = observer<DatasetCreationPopupProps>(
   ({ isOpen, onClose, onConfirm }) => {
     const [name, setName] = useState("");
 
@@ -38,8 +38,8 @@ export const ProjectCreationPopup = observer<ProjectCreationPopupProps>(
     }, [onClose]);
 
     return (
-      <ProjectCreationPopupContainer
-        titleTx="create-project"
+      <DatasetCreationPopupContainer
+        titleTx="create-dataset"
         isOpen={isOpen}
         dismiss={clearInputsAndClose}
         shouldDismissOnOutsidePress
@@ -47,7 +47,7 @@ export const ProjectCreationPopup = observer<ProjectCreationPopupProps>(
         <TextInput
           value={name}
           onChange={(e) => setName(e.target.value)}
-          placeholderTx="project-name"
+          placeholderTx="dataset-name"
         />
         <InlineRow>
           <StyledTextButton
@@ -64,7 +64,7 @@ export const ProjectCreationPopup = observer<ProjectCreationPopupProps>(
             }}
           />
         </InlineRow>
-      </ProjectCreationPopupContainer>
+      </DatasetCreationPopupContainer>
     );
   },
 );
