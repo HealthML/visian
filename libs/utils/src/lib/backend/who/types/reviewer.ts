@@ -1,8 +1,8 @@
-export interface ReviewerSnapshot {
+export interface WHOReviewerSnapshot {
   reviewerUUID: string;
 }
 
-export class Reviewer {
+export class WHOReviewer {
   public reviewerUUID: string;
 
   // TODO: Properly type API response data
@@ -10,7 +10,7 @@ export class Reviewer {
     this.reviewerUUID = reviewer.reviewerUUID;
   }
 
-  public toJSON(): ReviewerSnapshot {
+  public toJSON(): WHOReviewerSnapshot {
     return {
       reviewerUUID: this.reviewerUUID,
     };

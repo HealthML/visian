@@ -1,31 +1,35 @@
-import { Annotation, AnnotationSnapshot, AnnotationStatus } from "./annotation";
-import { AnnotationTask, AnnotationTaskSnapshot } from "./annotationTask";
-import { Sample } from "./sample";
-import { User, UserSnapshot } from "./user";
+import {
+  WHOAnnotation,
+  WHOAnnotationSnapshot,
+  WHOAnnotationStatus,
+} from "./annotation";
+import { WHOAnnotationTask, WHOAnnotationTaskSnapshot } from "./annotationTask";
+import { WHOSample } from "./sample";
+import { WHOUser, WHOUserSnapshot } from "./user";
 
-export interface TaskSnapshot {
+export interface WHOTaskSnapshot {
   taskUUID: string;
   kind: string;
   readOnly: boolean;
-  annotationTasks: AnnotationTaskSnapshot[];
-  annotations?: AnnotationSnapshot[];
-  assignee: UserSnapshot;
+  annotationTasks: WHOAnnotationTaskSnapshot[];
+  annotations?: WHOAnnotationSnapshot[];
+  assignee: WHOUserSnapshot;
 }
 
-export enum TaskType {
+export enum WHOTaskType {
   Create = "create",
   Correct = "correct",
   Review = "review",
 }
 
-export class Task {
+export class WHOTask {
   public taskUUID: string;
-  public kind: TaskType;
+  public kind: WHOTaskType;
   public readOnly: boolean;
-  public annotationTasks: AnnotationTask[];
-  public samples: Sample[];
-  public annotations: Annotation[];
-  public assignee: User;
+  public annotationTasks: WHOAnnotationTask[];
+  public samples: WHOSample[];
+  public annotations: WHOAnnotation[];
+  public assignee: WHOUser;
 
   // TODO: Properly type API response data
   constructor(task: any) {
@@ -33,27 +37,27 @@ export class Task {
     this.kind = task.kind;
     this.readOnly = task.readOnly;
     this.annotationTasks = task.annotationTasks.map(
-      (annotationTask: any) => new AnnotationTask(annotationTask),
+      (annotationTask: any) => new WHOAnnotationTask(annotationTask),
     );
-    this.samples = task.samples.map((sample: any) => new Sample(sample));
+    this.samples = task.samples.map((sample: any) => new WHOSample(sample));
     this.annotations = task.annotations.map(
-      (annotation: any) => new Annotation(annotation),
+      (annotation: any) => new WHOAnnotation(annotation),
     );
-    this.assignee = new User(task.assignee);
+    this.assignee = new WHOUser(task.assignee);
   }
 
   public addNewAnnotation(): void {
     const annotationData = {
-      status: AnnotationStatus.Pending,
+      status: WHOAnnotationStatus.Pending,
       data: [],
       annotator: this.assignee,
       submittedAt: "",
     };
-    const annotation = new Annotation(annotationData);
+    const annotation = new WHOAnnotation(annotationData);
     this.annotations.push(annotation);
   }
 
-  public toJSON(): TaskSnapshot {
+  public toJSON(): WHOTaskSnapshot {
     return {
       taskUUID: this.taskUUID,
       kind: this.kind,

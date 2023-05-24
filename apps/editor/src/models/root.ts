@@ -13,8 +13,8 @@ import {
   getWHOTask,
   IDisposable,
   ISerializable,
-  Task,
-  TaskType,
+  WHOTask,
+  WHOTaskType,
 } from "@visian/utils";
 import { action, computed, makeObservable, observable } from "mobx";
 
@@ -55,7 +55,7 @@ export class RootStore implements ISerializable<RootSnapshot>, IDisposable {
   public refs: { [key: string]: React.RefObject<HTMLElement> } = {};
   public pointerDispatch?: IDispatch;
 
-  public currentTask?: Task;
+  public currentTask?: WHOTask;
 
   public tracker?: Tracker;
 
@@ -174,10 +174,10 @@ export class RootStore implements ISerializable<RootSnapshot>, IDisposable {
         this.setProgress({ labelTx: "importing", showSplash: true });
         const taskJson = await getWHOTask(taskId);
         // We want to ignore possible other annotations if type is "CREATE"
-        if (taskJson.kind === TaskType.Create) {
+        if (taskJson.kind === WHOTaskType.Create) {
           taskJson.annotations = [];
         }
-        const whoTask = new Task(taskJson);
+        const whoTask = new WHOTask(taskJson);
         this.setCurrentTask(whoTask);
 
         await Promise.all(
@@ -189,7 +189,7 @@ export class RootStore implements ISerializable<RootSnapshot>, IDisposable {
             );
           }),
         );
-        if (whoTask.kind === TaskType.Create) {
+        if (whoTask.kind === WHOTaskType.Create) {
           this.editor.activeDocument?.finishBatchImport();
           this.currentTask?.addNewAnnotation();
         } else {
@@ -258,7 +258,7 @@ export class RootStore implements ISerializable<RootSnapshot>, IDisposable {
     }
   }
 
-  public setCurrentTask(task?: Task) {
+  public setCurrentTask(task?: WHOTask) {
     this.currentTask = task;
   }
 

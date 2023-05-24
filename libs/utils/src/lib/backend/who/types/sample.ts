@@ -4,7 +4,7 @@ export interface SampleSnapshot {
   data: string;
 }
 
-export class Sample {
+export class WHOSample {
   public sampleUUID: string;
   public title: string;
   public data: string;
