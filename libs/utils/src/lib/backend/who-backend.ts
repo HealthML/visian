@@ -7,7 +7,7 @@ export const getWHOTask = async (taskId: string) => {
   const user: CognitoUser = await Auth.currentAuthenticatedUser();
   const session = user.getSignInUserSession();
   if (!session) throw new Error("No login session found.");
-  const jwtToken = session.getAccessToken();
+  const jwtToken = session.getAccessToken().getJwtToken();
 
   const options = {
     headers: { Authorization: `Bearer ${jwtToken}` },
@@ -22,7 +22,7 @@ export const putWHOTask = async (taskId: string, task: string) => {
   const user: CognitoUser = await Auth.currentAuthenticatedUser();
   const session = user.getSignInUserSession();
   if (!session) throw new Error("No login session found.");
-  const jwtToken = session.getAccessToken();
+  const jwtToken = session.getAccessToken().getJwtToken();
 
   const options: RequestInit = {
     method: "PUT",
