@@ -8,6 +8,7 @@ import {
   ImageLayer,
   MeasurementTool,
   RootStore,
+  SAMTool,
   SmartBrush3D,
   ThresholdAnnotationTool,
 } from "../models";
@@ -453,6 +454,12 @@ export const generalHotkeys: IHotkey[] = [
           store.editor.activeDocument?.tools.tools[
             "measurement-tool"
           ] as MeasurementTool
+        ).submit();
+      }
+
+      if (store.editor.activeDocument?.tools.samRenderer.showsMask) {
+        (
+          store.editor.activeDocument?.tools.tools["sam-tool"] as SAMTool
         ).submit();
       }
     },

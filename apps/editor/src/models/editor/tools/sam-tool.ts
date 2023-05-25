@@ -86,6 +86,10 @@ export class SAMTool<N extends "sam-tool" = "sam-tool">
 
   public setBoundingBoxEnd(dragPoint?: DragPoint) {
     this.boundingBoxEnd = dragPoint;
+    if (!dragPoint) {
+      this.toolRenderer.clearMask();
+      return;
+    }
     this.debouncedGeneratePrediction();
   }
 
@@ -255,7 +259,17 @@ export class SAMTool<N extends "sam-tool" = "sam-tool">
   };
 
   public submit = () => {
-    console.log("submitted");
+    // startStroke is required to store previous state so the cmd can be undone
+    this.startStroke();
+    // endStroke flushes the mask to annotation and adds the cmd to undo history
+    this.endStroke(false);
+    // We need to wait until rendering is finished because the endStroke
+    // method also waits internally. Otherwise the mask would be cleared
+    // before it could be flushed.
+    this.toolRenderer.waitForRender().then(() => {
+      this.setBoundingBoxStart(undefined);
+      this.setBoundingBoxEnd(undefined);
+    });
   };
 
   public discard = () => {
@@ -266,9 +280,5 @@ export class SAMTool<N extends "sam-tool" = "sam-tool">
 
   public deactivate() {
     this.discard();
-  }
-
-  public accept() {
-    console.log("Annotation accepted.");
   }
 }

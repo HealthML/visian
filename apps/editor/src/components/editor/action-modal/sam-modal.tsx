@@ -37,7 +37,7 @@ export const SAMModal = observer(() => {
   }, [store, samTool]);
 
   const accept = useCallback(() => {
-    samTool.accept();
+    samTool.submit();
     store?.editor.activeDocument?.tools.setIsCursorOverFloatingUI(false);
   }, [store, samTool]);
 
