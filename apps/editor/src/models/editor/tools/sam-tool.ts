@@ -9,7 +9,7 @@ import {
 import { Vector } from "@visian/utils";
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { debounce } from "lodash";
-import { action, makeObservable, observable } from "mobx";
+import { action, makeObservable, observable, reaction } from "mobx";
 import * as ort from "onnxruntime-web";
 
 import { UndoableTool } from "./undoable-tool";
@@ -58,6 +58,16 @@ export class SAMTool<N extends "sam-tool" = "sam-tool">
     this.debouncedGeneratePrediction = debounce(
       () => this.generatePrediction(),
       30,
+    );
+
+    // When the selected slice changes, we just discard the embedding for now:
+    reaction(
+      () => this.document.viewport2D.getSelectedSlice(),
+      () => {
+        this.setEmbeddingState("uninitialized");
+        this.embedding = undefined;
+        this.toolRenderer.clearMask();
+      },
     );
 
     makeObservable(this, {
