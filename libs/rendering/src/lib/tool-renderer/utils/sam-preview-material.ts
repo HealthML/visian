@@ -4,8 +4,9 @@ import {
   samPreviewFragmentShader,
   samPreviewVertexShader,
 } from "../../shaders";
+import { Texture3DMaterial } from "../../texture-3d-renderer";
 
-export class SamPreviewMaterial extends THREE.ShaderMaterial {
+export class SamPreviewMaterial extends Texture3DMaterial {
   constructor(parameters?: THREE.ShaderMaterialParameters) {
     super(
       parameters || {

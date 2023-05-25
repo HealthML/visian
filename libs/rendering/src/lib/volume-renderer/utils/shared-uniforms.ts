@@ -271,19 +271,22 @@ export class SharedUniforms implements IDisposable {
             ),
         );
 
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        let previewColor: any = "foreground";
+        const tools = editor.activeDocument?.tools;
+        if (tools?.regionGrowingRenderer3D.holdsPreview) {
+          previewColor = tools.regionGrowingRenderer3D.previewColor;
+        }
+        if (tools?.samRenderer.showsMask) {
+          previewColor = tools.samRenderer.previewColor;
+        }
+        if (tools?.thresholdAnnotationRenderer3D.holdsPreview) {
+          previewColor = tools.thresholdAnnotationRenderer3D.previewColor;
+        }
+
         this.uniforms.uLayerColors.value = [
           // additional layer for 3d region growing
-          new THREE.Color(
-            color(
-              (editor.activeDocument?.tools.regionGrowingRenderer3D.holdsPreview
-                ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                  (editor.activeDocument?.tools.regionGrowingRenderer3D
-                    .previewColor as any)
-                : // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                  (editor.activeDocument?.tools.thresholdAnnotationRenderer3D
-                    .previewColor as any)) || "foreground",
-            )({ theme: editor.theme }),
-          ),
+          new THREE.Color(color(previewColor)({ theme: editor.theme })),
           ...layerColors,
         ];
 

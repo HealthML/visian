@@ -376,9 +376,10 @@ export class Tools
   }
 
   public get layerPreviewTexture(): THREE.Texture {
-    return this.regionGrowingRenderer3D.holdsPreview
-      ? this.regionGrowingRenderer3D.outputTexture
-      : this.thresholdAnnotationRenderer3D.outputTexture;
+    if (this.samRenderer.showsMask) return this.samRenderer.outputTexture;
+    if (this.regionGrowingRenderer3D.holdsPreview)
+      return this.regionGrowingRenderer3D.outputTexture;
+    return this.thresholdAnnotationRenderer3D.outputTexture;
   }
 
   public get slicePreviewTexture(): THREE.Texture | undefined {

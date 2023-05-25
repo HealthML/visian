@@ -170,6 +170,12 @@ export interface IDilateErodeRenderer3D extends IBlipRenderer3D {
   setShouldAutoCompensate(value: boolean): void;
 }
 
+export interface ISamRenderer {
+  previewColor?: string;
+  showsMask: boolean;
+  outputTexture: THREE.Texture;
+}
+
 export interface IThresholdAnnotationRenderer3D extends IBlipRenderer3D {
   threshold: [number, number];
   setThreshold(value: [number, number]): void;
@@ -212,6 +218,7 @@ export interface ITools<N extends string> {
   slicePreviewTexture?: THREE.Texture;
   slicePreviewMergeFunction?: MergeFunction;
   layerPreviewTexture: THREE.Texture;
+  samRenderer: ISamRenderer;
   regionGrowingRenderer3D: IBlipRenderer3D;
   thresholdAnnotationRenderer3D: IThresholdAnnotationRenderer3D;
   dilateErodeRenderer3D: IDilateErodeRenderer3D;

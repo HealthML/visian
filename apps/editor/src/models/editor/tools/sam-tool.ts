@@ -12,7 +12,7 @@ import { debounce } from "lodash";
 import { action, makeObservable, observable, reaction } from "mobx";
 import * as ort from "onnxruntime-web";
 
-import { UndoableTool } from "./undoable-tool";
+import { Tool } from "./tool";
 import { dragPointsCenterEqual } from "./utils";
 
 export type SAMToolMode = "bounding-box" | "points";
@@ -23,7 +23,7 @@ export type SAMToolBoundingBox = { topLeft: Vector; bottomRight: Vector };
 const EMBEDDING_SERVICE_URL = "http://localhost:3000/embedding";
 
 export class SAMTool<N extends "sam-tool" = "sam-tool">
-  extends UndoableTool<N>
+  extends Tool<N>
   implements ISAMTool
 {
   public readonly excludeFromSnapshotTracking = ["toolRenderer", "document"];
@@ -52,7 +52,6 @@ export class SAMTool<N extends "sam-tool" = "sam-tool">
         activationKeys: "",
       },
       document,
-      toolRenderer,
     );
 
     this.debouncedGeneratePrediction = debounce(
@@ -249,6 +248,9 @@ export class SAMTool<N extends "sam-tool" = "sam-tool">
 
   public activate(previousTool?: ITool<N>) {
     this.previousTool = previousTool?.name;
+    this.toolRenderer.setPreviewColor(
+      this.document.getAnnotationPreviewColor(),
+    );
 
     const targetLayer = this.document.activeLayer;
     if (
@@ -270,16 +272,16 @@ export class SAMTool<N extends "sam-tool" = "sam-tool">
 
   public submit = () => {
     // startStroke is required to store previous state so the cmd can be undone
-    this.startStroke();
-    // endStroke flushes the mask to annotation and adds the cmd to undo history
-    this.endStroke(false);
-    // We need to wait until rendering is finished because the endStroke
-    // method also waits internally. Otherwise the mask would be cleared
-    // before it could be flushed.
-    this.toolRenderer.waitForRender().then(() => {
-      this.setBoundingBoxStart(undefined);
-      this.setBoundingBoxEnd(undefined);
-    });
+    // this.startStroke();
+    // // endStroke flushes the mask to annotation and adds the cmd to undo history
+    // this.endStroke(false);
+    // // We need to wait until rendering is finished because the endStroke
+    // // method also waits internally. Otherwise the mask would be cleared
+    // // before it could be flushed.
+    // this.toolRenderer.waitForRender().then(() => {
+    //   this.setBoundingBoxStart(undefined);
+    //   this.setBoundingBoxEnd(undefined);
+    // });
   };
 
   public discard = () => {

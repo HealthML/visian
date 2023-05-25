@@ -238,25 +238,31 @@ export class BlipRenderer3D implements IBlipRenderer3D, IDisposable {
     const { mainImageLayer } = this.document;
     if (!mainImageLayer) return;
 
-    const { voxelCount } = mainImageLayer.image;
-
-    let width = 0;
-    let height = 0;
-    let depth = 1;
-    if (mainImageLayer.is3DLayer) {
-      width = voxelCount.x;
-      height = voxelCount.y;
-      depth = voxelCount.z;
-    } else {
-      [width, height] = getPlaneAxes(mainImageLayer.image.defaultViewType).map(
-        (axis) => voxelCount[axis],
-      );
-    }
+    const { width, height, depth } = this.getLayerSize(mainImageLayer);
 
     [this.renderTarget, this.blipRenderTarget].forEach((renderTarget) => {
       renderTarget?.setSize(width, height, depth);
     });
   };
+
+  protected getLayerSize(layer: IImageLayer) {
+    const { voxelCount } = layer.image;
+
+    let width = 0;
+    let height = 0;
+    let depth = 1;
+    if (layer.is3DLayer) {
+      width = voxelCount.x;
+      height = voxelCount.y;
+      depth = voxelCount.z;
+    } else {
+      [width, height] = getPlaneAxes(layer.image.defaultViewType).map(
+        (axis) => voxelCount[axis],
+      );
+    }
+
+    return { width, height, depth };
+  }
 
   protected clearRenderTargets() {
     if (!this.document.renderer) return;
