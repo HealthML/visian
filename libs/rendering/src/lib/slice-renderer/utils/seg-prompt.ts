@@ -10,7 +10,7 @@ enum PointState {
 
 export class SegPrompt extends THREE.Group implements IDisposable {
   private lines = new THREE.LineLoop();
-  private foregroundPoints = new THREE.Points();
+  private promptPoints = new THREE.Points();
 
   private disposers: IDisposer[] = [];
 
@@ -23,13 +23,13 @@ export class SegPrompt extends THREE.Group implements IDisposable {
     super();
 
     this.lines.material = lineMaterial;
-    this.foregroundPoints.material = pointMaterial;
+    this.promptPoints.material = pointMaterial;
 
     this.position.set(0.5, -0.5, -1);
     this.scale.set(-1, 1, 1);
 
     this.add(this.lines);
-    this.add(this.foregroundPoints);
+    this.add(this.promptPoints);
 
     this.disposers.push(autorun(this.updateGeometries));
   }
@@ -37,7 +37,7 @@ export class SegPrompt extends THREE.Group implements IDisposable {
   public dispose() {
     this.disposers.forEach((disposer) => disposer());
     this.lines.geometry.dispose();
-    this.foregroundPoints.geometry.dispose();
+    this.promptPoints.geometry.dispose();
   }
 
   private updateGeometries = () => {
@@ -63,7 +63,7 @@ export class SegPrompt extends THREE.Group implements IDisposable {
   };
 
   private updatePoints(tool: ISAMTool, scale: THREE.Vector2) {
-    if (!tool.foregroundPoints.length) return;
+    if (!tool.foregroundPoints.length && !tool.backgroundPoints.length) return;
 
     const points: THREE.Vector2[] = [];
     const pointStates: number[] = [];
@@ -78,11 +78,11 @@ export class SegPrompt extends THREE.Group implements IDisposable {
     points.forEach((point) => point.addScalar(0.5).divide(scale));
 
     this.visible = true;
-    this.foregroundPoints.geometry.dispose();
-    this.foregroundPoints.geometry = new THREE.BufferGeometry().setFromPoints(
+    this.promptPoints.geometry.dispose();
+    this.promptPoints.geometry = new THREE.BufferGeometry().setFromPoints(
       points,
     );
-    this.foregroundPoints.geometry.setAttribute(
+    this.promptPoints.geometry.setAttribute(
       "textureIndex",
       new THREE.Float32BufferAttribute(new Float32Array(pointStates), 1),
     );

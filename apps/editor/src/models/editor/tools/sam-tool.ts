@@ -25,7 +25,16 @@ export class SAMTool<N extends "sam-tool" = "sam-tool">
   extends UndoableTool<N>
   implements ISAMTool
 {
-  public readonly excludeFromSnapshotTracking = ["toolRenderer", "document"];
+  public readonly excludeFromSnapshotTracking = [
+    "toolRenderer",
+    "document",
+    "inRightClickMode",
+    "boundingBoxStart",
+    "boundingBoxEnd",
+    "foregroundPoints",
+    "backgroundPoints",
+    "lastClick",
+  ];
 
   protected previousTool?: N;
   // Todo: Allow storing embeddings per slices / layers without having to discard previous one?
@@ -93,6 +102,21 @@ export class SAMTool<N extends "sam-tool" = "sam-tool">
       setForegroundPoints: action,
       setBackgroundPoints: action,
     });
+
+    reaction(
+      () => [this.boundingBox, this.foregroundPoints, this.backgroundPoints],
+      () => {
+        if (
+          !this.boundingBox &&
+          !this.foregroundPoints.length &&
+          !this.backgroundPoints.length
+        ) {
+          this.toolRenderer.clearMask();
+          return;
+        }
+        this.debouncedGeneratePrediction();
+      },
+    );
   }
 
   public setMode(mode: SAMToolMode) {
@@ -113,11 +137,6 @@ export class SAMTool<N extends "sam-tool" = "sam-tool">
 
   public setBoundingBoxEnd(point?: Vector) {
     this.boundingBoxEnd = point;
-    if (!point) {
-      this.toolRenderer.clearMask();
-      return;
-    }
-    this.debouncedGeneratePrediction();
   }
 
   public setForegroundPoints(points: Vector[]) {
@@ -291,6 +310,8 @@ export class SAMTool<N extends "sam-tool" = "sam-tool">
       } else if (!wasFPointDeleted && !wasBPointDeleted) {
         this.setBackgroundPoints([...this.backgroundPoints, clickPoint]);
       }
+      this.setToRightClickMode(false);
+      return;
     }
 
     // If the cursor did move but ended up in the same spot, clear the bounding box:
