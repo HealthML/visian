@@ -288,19 +288,18 @@ export class SAMTool<N extends "sam-tool" = "sam-tool">
       } else if (!wasFPointDeleted && !wasBPointDeleted) {
         this.setBackgroundPoints([...this.backgroundPoints, clickPoint]);
       }
-      this.setToRightClickMode(false);
-      return;
     }
 
     // If the cursor did move but ended up in the same spot, clear the bounding box:
     if (
-      !this.boundingBoxStart ||
-      this.lastClick?.equals(clickPoint) ||
-      this.boundingBoxStart.x === clickPoint.x ||
-      this.boundingBoxStart.y === clickPoint.y
+      this.boundingBoxStart &&
+      (this.lastClick?.equals(clickPoint) ||
+        this.boundingBoxStart.x === clickPoint.x ||
+        this.boundingBoxStart.y === clickPoint.y)
     ) {
       this.setBoundingBoxStart(undefined);
       this.setBoundingBoxEnd(undefined);
+      this.lastClick = undefined;
     }
 
     this.setToRightClickMode(false);
@@ -322,6 +321,14 @@ export class SAMTool<N extends "sam-tool" = "sam-tool">
     );
     this.setBackgroundPoints(newBPoints);
     return newBPoints.length < prevLength;
+  }
+
+  protected reset() {
+    this.setForegroundPoints([]);
+    this.setBackgroundPoints([]);
+    this.setBoundingBoxStart(undefined);
+    this.setBoundingBoxEnd(undefined);
+    this.lastClick = undefined;
   }
 
   public activate(previousTool?: ITool<N>) {
@@ -353,16 +360,11 @@ export class SAMTool<N extends "sam-tool" = "sam-tool">
     // We need to wait until rendering is finished because the endStroke
     // method also waits internally. Otherwise the mask would be cleared
     // before it could be flushed.
-    this.toolRenderer.waitForRender().then(() => {
-      this.setBoundingBoxStart(undefined);
-      this.setBoundingBoxEnd(undefined);
-    });
+    this.toolRenderer.waitForRender().then(() => this.reset);
   };
 
   public discard = () => {
-    this.setBoundingBoxStart(undefined);
-    this.setBoundingBoxEnd(undefined);
-    console.log("discarded");
+    this.reset();
   };
 
   public deactivate() {
