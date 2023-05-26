@@ -265,18 +265,21 @@ export class SAMTool<N extends "sam-tool" = "sam-tool">
   }
 
   public moveTo(_dragPoint: DragPoint): void {
+    const dragPoint = Vector.fromObject(_dragPoint);
+    if (this.lastClick?.equals(dragPoint)) return;
+
     if (!this.boundingBoxStart) {
       this.setBoundingBoxStart(this.lastClick);
       this.setBoundingBoxEnd(undefined);
     }
-    this.setBoundingBoxEnd(Vector.fromObject(_dragPoint));
+    this.setBoundingBoxEnd(dragPoint);
   }
 
   public endAt(_dragPoint: DragPoint): void {
     const clickPoint = Vector.fromObject(_dragPoint);
 
     // If the cursor did not move, assume the user wanted to modify a point:
-    if (this.lastClick?.equals(clickPoint) && !this.boundingBoxStart) {
+    if (this.lastClick?.equals(clickPoint)) {
       // Delete all potentially present points (should not be a performance
       // issue since there should not be too many points usually):
       const wasFPointDeleted = this.deleteForegroundPoint(clickPoint);
