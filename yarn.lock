@@ -24220,8 +24220,8 @@ __metadata:
     "@types/uuid": ^8.3.4
     "@typescript-eslint/eslint-plugin": ^5.41.0
     "@typescript-eslint/parser": ^5.41.0
-    axios: ^1.2.2
     aws-amplify: ^5.2.2
+    axios: ^1.2.2
     babel-jest: 28.1.1
     babel-loader: 8.1.0
     babel-plugin-styled-components: 1.10.7
