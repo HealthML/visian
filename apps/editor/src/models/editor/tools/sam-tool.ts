@@ -13,7 +13,6 @@ import { action, makeObservable, observable, reaction } from "mobx";
 import * as ort from "onnxruntime-web";
 
 import { UndoableTool } from "./undoable-tool";
-import { dragPointsCenterEqual } from "./utils";
 
 export type SAMToolMode = "bounding-box" | "points";
 export type SAMToolEmbeddingState = "uninitialized" | "loading" | "ready";
@@ -37,13 +36,20 @@ export class SAMTool<N extends "sam-tool" = "sam-tool">
 
   public embeddingState: SAMToolEmbeddingState = "uninitialized";
   public mode: SAMToolMode = "bounding-box";
-  public boundingBoxStart?: DragPoint;
-  public boundingBoxEnd?: DragPoint;
+
+  protected lastClick?: Vector;
+
+  public isInRightClickMode = false;
+  public boundingBoxStart?: Vector;
+  public boundingBoxEnd?: Vector;
+  public foregroundPoints: Vector[] = [];
+  public backgroundPoints: Vector[] = [];
 
   constructor(document: IDocument, public toolRenderer: SamRenderer) {
     super(
       {
         name: "sam-tool" as N,
+        altToolName: "sam-tool" as N,
         icon: "copilot",
         labelTx: "sam-tool",
         supportedViewModes: ["2D"],
@@ -73,12 +79,19 @@ export class SAMTool<N extends "sam-tool" = "sam-tool">
     makeObservable(this, {
       mode: observable,
       embeddingState: observable,
+      isInRightClickMode: observable,
       boundingBoxStart: observable,
       boundingBoxEnd: observable,
+      foregroundPoints: observable,
+      backgroundPoints: observable,
+
       setMode: action,
       setEmbeddingState: action,
+      setToRightClickMode: action,
       setBoundingBoxStart: action,
       setBoundingBoxEnd: action,
+      setForegroundPoints: action,
+      setBackgroundPoints: action,
     });
   }
 
@@ -90,25 +103,42 @@ export class SAMTool<N extends "sam-tool" = "sam-tool">
     this.embeddingState = state;
   }
 
-  public setBoundingBoxStart(dragPoint?: DragPoint) {
-    this.boundingBoxStart = dragPoint;
+  public setToRightClickMode(value = true) {
+    this.isInRightClickMode = value;
   }
 
-  public setBoundingBoxEnd(dragPoint?: DragPoint) {
-    this.boundingBoxEnd = dragPoint;
-    if (!dragPoint) {
+  public setBoundingBoxStart(point?: Vector) {
+    this.boundingBoxStart = point;
+  }
+
+  public setBoundingBoxEnd(point?: Vector) {
+    this.boundingBoxEnd = point;
+    if (!point) {
       this.toolRenderer.clearMask();
       return;
     }
     this.debouncedGeneratePrediction();
   }
 
+  public setForegroundPoints(points: Vector[]) {
+    this.foregroundPoints = points;
+  }
+
+  public setBackgroundPoints(points: Vector[]) {
+    this.backgroundPoints = points;
+  }
+
   public get boundingBox(): { start: Vector; end: Vector } | undefined {
     if (!this.boundingBoxStart || !this.boundingBoxEnd) return undefined;
-    return {
-      start: Vector.fromObject(this.boundingBoxStart),
-      end: Vector.fromObject(this.boundingBoxEnd),
-    };
+    return { start: this.boundingBoxStart, end: this.boundingBoxEnd };
+  }
+
+  public get isHoveringPoint() {
+    const hovered = Vector.fromObject(this.document.viewport2D.hoveredVoxel);
+    return (
+      this.foregroundPoints.find((point) => point.equals(hovered)) ||
+      this.backgroundPoints.find((point) => point.equals(hovered))
+    );
   }
 
   protected async generatePrediction() {
@@ -226,25 +256,72 @@ export class SAMTool<N extends "sam-tool" = "sam-tool">
     this.setEmbeddingState("ready");
   }
 
-  public startAt(_dragPoint: DragPoint): void {
-    this.setBoundingBoxStart(_dragPoint);
-    this.setBoundingBoxEnd(undefined);
+  public startAt(click: DragPoint): void {
+    this.lastClick = Vector.fromObject(click);
+    if (this.boundingBoxStart) {
+      this.setBoundingBoxStart(undefined);
+      this.setBoundingBoxEnd(undefined);
+    }
   }
 
   public moveTo(_dragPoint: DragPoint): void {
-    this.setBoundingBoxEnd(_dragPoint);
+    if (!this.boundingBoxStart) {
+      this.setBoundingBoxStart(this.lastClick);
+      this.setBoundingBoxEnd(undefined);
+    }
+    this.setBoundingBoxEnd(Vector.fromObject(_dragPoint));
   }
 
   public endAt(_dragPoint: DragPoint): void {
+    const clickPoint = Vector.fromObject(_dragPoint);
+
+    // If the cursor did not move, assume the user wanted to modify a point:
+    if (this.lastClick?.equals(clickPoint) && !this.boundingBoxStart) {
+      // Delete all potentially present points (should not be a performance
+      // issue since there should not be too many points usually):
+      const wasFPointDeleted = this.deleteForegroundPoint(clickPoint);
+      const wasBPointDeleted = this.deleteBackgroundPoint(clickPoint);
+      // Re-add or create a foreground point — if in right click mode,
+      // create a background point if the user did not intend to delete a point:
+      if (!this.isInRightClickMode) {
+        this.setForegroundPoints([...this.foregroundPoints, clickPoint]);
+      } else if (!wasFPointDeleted && !wasBPointDeleted) {
+        this.setBackgroundPoints([...this.backgroundPoints, clickPoint]);
+      }
+      this.setToRightClickMode(false);
+      return;
+    }
+
+    // If the cursor did move but ended up in the same spot, clear the bounding box:
     if (
       !this.boundingBoxStart ||
-      dragPointsCenterEqual(_dragPoint, this.boundingBoxStart) ||
-      this.boundingBoxStart.x === _dragPoint.x ||
-      this.boundingBoxStart.y === _dragPoint.y
+      this.lastClick?.equals(clickPoint) ||
+      this.boundingBoxStart.x === clickPoint.x ||
+      this.boundingBoxStart.y === clickPoint.y
     ) {
       this.setBoundingBoxStart(undefined);
       this.setBoundingBoxEnd(undefined);
     }
+
+    this.setToRightClickMode(false);
+  }
+
+  protected deleteForegroundPoint(clickPoint: Vector) {
+    const prevLength = this.foregroundPoints.length;
+    const newFPoints = this.foregroundPoints.filter(
+      (point) => !point.equals(clickPoint),
+    );
+    this.setForegroundPoints(newFPoints);
+    return newFPoints.length < prevLength;
+  }
+
+  protected deleteBackgroundPoint(clickPoint: Vector) {
+    const prevLength = this.backgroundPoints.length;
+    const newBPoints = this.backgroundPoints.filter(
+      (point) => !point.equals(clickPoint),
+    );
+    this.setBackgroundPoints(newBPoints);
+    return newBPoints.length < prevLength;
   }
 
   public activate(previousTool?: ITool<N>) {

@@ -127,7 +127,12 @@ export class Slice extends THREE.Group implements IDisposable {
     );
     this.crosshairShiftGroup.add(this.path);
 
-    this.segPrompt = new SegPrompt(editor, viewType, this.overlayLineMaterial);
+    this.segPrompt = new SegPrompt(
+      editor,
+      viewType,
+      this.overlayLineMaterial,
+      this.overlayRoundedPointsMaterial,
+    );
     this.crosshairShiftGroup.add(this.segPrompt);
 
     this.disposers.push(

@@ -4,6 +4,7 @@ import {
   globalListenerTypes,
   IDispatch,
   IMeasurementTool,
+  ISAMTool,
   isFirefox,
   isMac,
   isWindows,
@@ -132,6 +133,9 @@ export const setUpPointerHandling = (
       ) {
         if (tool.name === "measurement-tool") {
           (tool as IMeasurementTool).setToDeleteMode();
+        }
+        if (tool.name === "sam-tool") {
+          (tool as ISAMTool).setToRightClickMode();
         }
 
         tool = tool.altTool;

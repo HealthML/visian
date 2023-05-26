@@ -128,6 +128,9 @@ export interface ISAMTool extends IPreviewedTool<"sam-tool"> {
     start: Vector;
     end: Vector;
   };
+  foregroundPoints: Vector[];
+  backgroundPoints: Vector[];
+  setToRightClickMode: () => void;
 }
 
 /** A class of similar tools, typically grouped in the UI. */
