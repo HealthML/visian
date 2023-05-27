@@ -63,8 +63,6 @@ export class SegPrompt extends THREE.Group implements IDisposable {
   };
 
   private updatePoints(tool: ISAMTool, scale: THREE.Vector2) {
-    if (!tool.foregroundPoints.length && !tool.backgroundPoints.length) return;
-
     const points: THREE.Vector2[] = [];
     const pointStates: number[] = [];
     tool.foregroundPoints.forEach((point) => {
@@ -89,17 +87,17 @@ export class SegPrompt extends THREE.Group implements IDisposable {
   }
 
   private updateBoundingBox(tool: ISAMTool, scale: THREE.Vector2) {
-    if (!tool.boundingBox) return;
+    const linePoints: THREE.Vector2[] = [];
 
-    const topLeft = tool.boundingBox.start;
-    const bottomRight = tool.boundingBox.end;
+    if (tool.boundingBox) {
+      const topLeft = tool.boundingBox.start;
+      const bottomRight = tool.boundingBox.end;
 
-    const linePoints: THREE.Vector2[] = [
-      new THREE.Vector2(topLeft.x, topLeft.y),
-      new THREE.Vector2(bottomRight.x, topLeft.y),
-      new THREE.Vector2(bottomRight.x, bottomRight.y),
-      new THREE.Vector2(topLeft.x, bottomRight.y),
-    ];
+      linePoints.push(new THREE.Vector2(topLeft.x, topLeft.y));
+      linePoints.push(new THREE.Vector2(bottomRight.x, topLeft.y));
+      linePoints.push(new THREE.Vector2(bottomRight.x, bottomRight.y));
+      linePoints.push(new THREE.Vector2(topLeft.x, bottomRight.y));
+    }
 
     linePoints.forEach((point) => point.addScalar(0.5).divide(scale));
 
