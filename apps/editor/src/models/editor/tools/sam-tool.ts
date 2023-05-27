@@ -277,20 +277,13 @@ export class SAMTool<N extends "sam-tool" = "sam-tool">
 
   public startAt(click: DragPoint): void {
     this.lastClick = Vector.fromObject(click);
-    if (this.boundingBoxStart) {
-      this.setBoundingBoxStart(undefined);
-      this.setBoundingBoxEnd(undefined);
-    }
   }
 
   public moveTo(_dragPoint: DragPoint): void {
     const dragPoint = Vector.fromObject(_dragPoint);
     if (this.lastClick?.equals(dragPoint)) return;
 
-    if (!this.boundingBoxStart) {
       this.setBoundingBoxStart(this.lastClick);
-      this.setBoundingBoxEnd(undefined);
-    }
     this.setBoundingBoxEnd(dragPoint);
   }
 
