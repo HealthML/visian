@@ -79,6 +79,7 @@ export class SAMTool<N extends "sam-tool" = "sam-tool">
     reaction(
       () => this.document.viewport2D.getSelectedSlice(),
       () => {
+        this.resetPromptInputs();
         this.setEmbeddingState("uninitialized");
         this.embedding = undefined;
         this.toolRenderer.clearMask();
@@ -161,42 +162,92 @@ export class SAMTool<N extends "sam-tool" = "sam-tool">
   }
 
   protected async generatePrediction() {
-    if (!this.boundingBoxEnd || !this.inferenceSession) return;
+    if (!this.inferenceSession) return;
 
-    const start = Date.now();
+    console.time("prediction generation");
 
     const modelInput = this.getModelInput();
     if (!modelInput) return;
     const modelOutput = await this.inferenceSession.run(modelInput);
     const maskOutput = modelOutput.masks.data as Float32Array;
 
-    const end = Date.now();
-    console.log(`Prediction took ${end - start}ms.`);
+    console.timeEnd("prediction generation");
 
     this.toolRenderer.showMask(maskOutput);
   }
 
   protected getModelInput() {
-    if (!this.boundingBoxStart || !this.boundingBoxEnd || !this.embedding) {
-      return undefined;
-    }
+    if (!this.embedding) return undefined;
+    if (
+      !this.boundingBox &&
+      !this.foregroundPoints.length &&
+      !this.backgroundPoints.length
+    )
+      return;
+
     const modelScale = this.getModelScaling();
+    const { samScale } = modelScale;
 
-    const startX = Math.min(this.boundingBoxStart.x, this.boundingBoxEnd.x);
-    const startY = Math.min(this.boundingBoxStart.y, this.boundingBoxEnd.y);
-    const endX = Math.max(this.boundingBoxStart.x, this.boundingBoxEnd.x);
-    const endY = Math.max(this.boundingBoxStart.y, this.boundingBoxEnd.y);
+    // We need space for all prompt points and one padding point if no
+    // bounding box is present, otherwise two corner points for the bbox:
+    let n = this.foregroundPoints.length + this.backgroundPoints.length;
+    if (!this.boundingBox) n += 1;
+    else n += 2;
 
-    const pointCoords = new Float32Array([
-      startX * modelScale.samScale,
-      startY * modelScale.samScale,
-      endX * modelScale.samScale,
-      endY * modelScale.samScale,
-    ]);
-    const pointLabels = new Float32Array([2, 3]);
+    const coords = new Float32Array(n * 2);
+    const labels = new Float32Array(n);
 
-    const pointCoordsTensor = new ort.Tensor("float32", pointCoords, [1, 2, 2]);
-    const pointLabelsTensor = new ort.Tensor("float32", pointLabels, [1, 2]);
+    let bboxLabelOffset = 0;
+    let foregroundLabelOffset = 0;
+    let backgroundLabelOffset = 0;
+
+    if (this.boundingBoxStart && this.boundingBoxEnd) {
+      const startX = Math.min(this.boundingBoxStart.x, this.boundingBoxEnd.x);
+      const startY = Math.min(this.boundingBoxStart.y, this.boundingBoxEnd.y);
+      const endX = Math.max(this.boundingBoxStart.x, this.boundingBoxEnd.x);
+      const endY = Math.max(this.boundingBoxStart.y, this.boundingBoxEnd.y);
+
+      coords[0] = startX * samScale;
+      coords[1] = startY * samScale;
+      coords[2] = endX * samScale;
+      coords[3] = endY * samScale;
+      labels[0] = 2;
+      labels[1] = 3;
+
+      bboxLabelOffset = 2;
+    }
+
+    for (let i = 0; i < this.foregroundPoints.length; i++) {
+      const point = this.foregroundPoints[i];
+      coords[i * 2 + bboxLabelOffset * 2] = point.x * samScale;
+      coords[i * 2 + bboxLabelOffset * 2 + 1] = point.y * samScale;
+      labels[i + bboxLabelOffset] = 1;
+    }
+
+    foregroundLabelOffset = bboxLabelOffset + this.foregroundPoints.length;
+
+    for (let i = 0; i < this.backgroundPoints.length; i++) {
+      const point = this.backgroundPoints[i];
+      coords[i * 2 + foregroundLabelOffset * 2] = point.x * samScale;
+      coords[i * 2 + foregroundLabelOffset * 2 + 1] = point.y * samScale;
+      labels[i + foregroundLabelOffset] = 0;
+    }
+
+    backgroundLabelOffset =
+      foregroundLabelOffset + this.backgroundPoints.length;
+
+    // If no bounding box is present, add the required padding point:
+    if (!this.boundingBox) {
+      coords[backgroundLabelOffset * 2] = 0;
+      coords[backgroundLabelOffset * 2 + 1] = 0;
+      labels[backgroundLabelOffset] = -1;
+    }
+
+    console.log("Prediction Coords", Array.from(coords));
+    console.log("Prediction Labels", Array.from(labels));
+
+    const coordsTensor = new ort.Tensor("float32", coords, [1, n, 2]);
+    const labelsTensor = new ort.Tensor("float32", labels, [1, n]);
 
     const imageSizeTensor = new ort.Tensor("float32", [
       modelScale.height,
@@ -215,8 +266,8 @@ export class SAMTool<N extends "sam-tool" = "sam-tool">
 
     return {
       image_embeddings: this.embedding,
-      point_coords: pointCoordsTensor,
-      point_labels: pointLabelsTensor,
+      point_coords: coordsTensor,
+      point_labels: labelsTensor,
       orig_im_size: imageSizeTensor,
       mask_input: maskInput,
       has_mask_input: hasMaskInput,
@@ -283,7 +334,7 @@ export class SAMTool<N extends "sam-tool" = "sam-tool">
     const dragPoint = Vector.fromObject(_dragPoint);
     if (this.lastClick?.equals(dragPoint)) return;
 
-      this.setBoundingBoxStart(this.lastClick);
+    this.setBoundingBoxStart(this.lastClick);
     this.setBoundingBoxEnd(dragPoint);
   }
 
@@ -340,7 +391,7 @@ export class SAMTool<N extends "sam-tool" = "sam-tool">
     return newBPoints.length < prevLength;
   }
 
-  protected reset() {
+  protected resetPromptInputs() {
     this.setForegroundPoints([]);
     this.setBackgroundPoints([]);
     this.setBoundingBoxStart(undefined);
@@ -377,11 +428,11 @@ export class SAMTool<N extends "sam-tool" = "sam-tool">
     // We need to wait until rendering is finished because the endStroke
     // method also waits internally. Otherwise the mask would be cleared
     // before it could be flushed.
-    this.toolRenderer.waitForRender().then(() => this.reset);
+    this.toolRenderer.waitForRender().then(() => this.resetPromptInputs);
   };
 
   public discard = () => {
-    this.reset();
+    this.resetPromptInputs();
   };
 
   public deactivate() {
