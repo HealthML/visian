@@ -86,11 +86,16 @@
   "submit-dilate-erode": "Anwenden (Enter)",
 
   "sam-tool": "MedSAM Tool",
+  "sam-tool-help": "MedSAM basiert auf Meta's Segment Anything Model. Prompting mittels Bounding Box liefert die besten Ergebnisse.",
   "sam-tool-initialize": "Initialisieren",
   "sam-tool-bounding-box": "Bounding Box",
   "sam-tool-points": "Punkte",
   "sam-tool-close": "Verwerfen (Esc)",
   "sam-tool-accept": "Akzeptieren (Enter)",
+  "sam-tool-clear": "Neu (Esc)",
+  "sam-tool-left-drag": "Bounding Box",
+  "sam-tool-left": "Positiver Punkt",
+  "sam-tool-right": "Negativer Punkt / Punkt entfernen",
 
   "data-model-outdated-alert": "Datenmodell veraltet. Zurücksetzen notwendig.",
   "discard-current-document-confirmation": "Aktuelles Dokument verwerfen?",
@@ -265,5 +270,7 @@
   "right-click": "Rechtsklick",
   "middle-click": "Mittelklick",
   "scroll-up": "Hoch Scrollen",
-  "scroll-down": "Herunter Scrollen"
+  "scroll-down": "Herunter Scrollen",
+  "drag": "Ziehen",
+  "click": "Klick"
 }

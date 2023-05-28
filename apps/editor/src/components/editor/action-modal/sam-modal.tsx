@@ -1,23 +1,79 @@
 import {
   ButtonParam,
+  InfoText,
   Modal,
   ModalHeaderButton,
-  Switch,
 } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
 import { useCallback } from "react";
 import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
-import type {
-  SAMTool,
-  SAMToolEmbeddingState,
-  SAMToolMode,
-} from "../../../models";
+import type { SAMTool, SAMToolEmbeddingState } from "../../../models";
+import {
+  MouseIcon,
+  ShortcutContainer,
+  ShortcutDescription,
+  ShortcutDescriptionContainer,
+  ShortcutLabel,
+  ShortcutRow,
+} from "../shortcut-popup";
 
 const StyledModal = styled(Modal)`
   margin-top: 16px;
 `;
+
+const HelpText = styled(InfoText)`
+  margin-right: 5px;
+`;
+
+const KeyRow = styled(ShortcutRow)`
+  align-items: flex-start;
+  * {
+    font-size: 13px !important;
+  }
+  svg {
+    margin-top: -2px;
+    width: auto;
+    height: 20px;
+  }
+`;
+
+const KeyContainer = styled(ShortcutContainer)`
+  align-items: flex-start;
+`;
+
+const shortcuts = (
+  <>
+    <KeyRow>
+      <KeyContainer>
+        <MouseIcon icon="leftMouse" />
+        <ShortcutLabel tx="drag" />
+      </KeyContainer>
+      <ShortcutDescriptionContainer>
+        <ShortcutDescription tx="sam-tool-left-drag" />
+      </ShortcutDescriptionContainer>
+    </KeyRow>
+    <KeyRow>
+      <KeyContainer>
+        <MouseIcon icon="leftMouse" />
+        <ShortcutLabel tx="click" />
+      </KeyContainer>
+      <ShortcutDescriptionContainer>
+        <ShortcutDescription tx="sam-tool-left" />
+      </ShortcutDescriptionContainer>
+    </KeyRow>
+    <KeyRow>
+      <KeyContainer>
+        <MouseIcon icon="rightMouse" />
+        <ShortcutLabel tx="click" />
+      </KeyContainer>
+      <ShortcutDescriptionContainer>
+        <ShortcutDescription tx="sam-tool-right" />
+      </ShortcutDescriptionContainer>
+    </KeyRow>
+  </>
+);
 
 export const SAMModal = observer(() => {
   const store = useStore();
@@ -25,11 +81,6 @@ export const SAMModal = observer(() => {
   const samTool = store?.editor.activeDocument?.tools.tools[
     "sam-tool"
   ] as SAMTool;
-
-  const setMode = useCallback(
-    (value: SAMToolMode) => samTool.setMode(value),
-    [samTool],
-  );
 
   const close = useCallback(() => {
     samTool.close();
@@ -53,17 +104,7 @@ export const SAMModal = observer(() => {
     ),
     loading: <>Loading Embedding...</>,
     ready: (
-      <>
-        <Switch
-          options={[
-            { labelTx: "sam-tool-bounding-box", value: "bounding-box" },
-            { labelTx: "sam-tool-points", value: "points" },
-          ]}
-          value={samTool.mode}
-          onChange={setMode}
-        />
-        <ButtonParam labelTx="sam-tool-accept" isLast handlePress={accept} />
-      </>
+      <ButtonParam labelTx="sam-tool-accept" isLast handlePress={accept} />
     ),
   };
 
@@ -71,11 +112,18 @@ export const SAMModal = observer(() => {
     <StyledModal
       labelTx="sam-tool"
       headerChildren={
-        <ModalHeaderButton
-          icon="xSmall"
-          tooltipTx="sam-tool-close"
-          onPointerDown={close}
-        />
+        <>
+          <HelpText
+            titleTx="help"
+            infoTx="sam-tool-help"
+            shortcuts={shortcuts}
+          />
+          <ModalHeaderButton
+            icon="xSmall"
+            tooltipTx="sam-tool-close"
+            onPointerDown={close}
+          />
+        </>
       }
     >
       {components[samTool.embeddingState]}

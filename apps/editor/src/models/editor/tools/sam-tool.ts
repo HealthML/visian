@@ -14,7 +14,6 @@ import * as ort from "onnxruntime-web";
 
 import { UndoableTool } from "./undoable-tool";
 
-export type SAMToolMode = "bounding-box" | "points";
 export type SAMToolEmbeddingState = "uninitialized" | "loading" | "ready";
 export type SAMToolBoundingBox = { topLeft: Vector; bottomRight: Vector };
 
@@ -44,7 +43,6 @@ export class SAMTool<N extends "sam-tool" = "sam-tool">
   protected debouncedGeneratePrediction: () => void;
 
   public embeddingState: SAMToolEmbeddingState = "uninitialized";
-  public mode: SAMToolMode = "bounding-box";
 
   protected lastClick?: Vector;
 
@@ -87,7 +85,6 @@ export class SAMTool<N extends "sam-tool" = "sam-tool">
     );
 
     makeObservable(this, {
-      mode: observable,
       embeddingState: observable,
       isInRightClickMode: observable,
       boundingBoxStart: observable,
@@ -95,7 +92,6 @@ export class SAMTool<N extends "sam-tool" = "sam-tool">
       foregroundPoints: observable,
       backgroundPoints: observable,
 
-      setMode: action,
       setEmbeddingState: action,
       setToRightClickMode: action,
       setBoundingBoxStart: action,
@@ -118,10 +114,6 @@ export class SAMTool<N extends "sam-tool" = "sam-tool">
         this.debouncedGeneratePrediction();
       },
     );
-  }
-
-  public setMode(mode: SAMToolMode) {
-    this.mode = mode;
   }
 
   public setEmbeddingState(state: SAMToolEmbeddingState) {
