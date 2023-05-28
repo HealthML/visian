@@ -511,6 +511,15 @@ export const generalHotkeys: IHotkey[] = [
           ] as MeasurementTool
         ).discard();
       }
+
+      if (
+        (store.editor.activeDocument?.tools.tools["sam-tool"] as SAMTool)
+          .isActive
+      ) {
+        (
+          store.editor.activeDocument?.tools.tools["sam-tool"] as SAMTool
+        ).discard();
+      }
     },
   },
   {

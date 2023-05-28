@@ -27,6 +27,11 @@ const HelpText = styled(InfoText)`
   margin-right: 5px;
 `;
 
+const SoftButton = styled(ButtonParam)`
+  border: none;
+  background: none;
+`;
+
 const KeyRow = styled(ShortcutRow)`
   align-items: flex-start;
   * {
@@ -92,6 +97,8 @@ export const SAMModal = observer(() => {
     store?.editor.activeDocument?.tools.setIsCursorOverFloatingUI(false);
   }, [store, samTool]);
 
+  const clear = useCallback(() => samTool.discard(), [samTool]);
+
   if (!samTool || !samTool.isActive) return null;
 
   const components: { [key in SAMToolEmbeddingState]: JSX.Element } = {
@@ -104,7 +111,10 @@ export const SAMModal = observer(() => {
     ),
     loading: <>Loading Embedding...</>,
     ready: (
-      <ButtonParam labelTx="sam-tool-accept" isLast handlePress={accept} />
+      <>
+        <SoftButton labelTx="sam-tool-clear" handlePress={clear} />
+        <ButtonParam labelTx="sam-tool-accept" isLast handlePress={accept} />
+      </>
     ),
   };
 

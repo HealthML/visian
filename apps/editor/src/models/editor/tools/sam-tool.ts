@@ -420,7 +420,7 @@ export class SAMTool<N extends "sam-tool" = "sam-tool">
     // We need to wait until rendering is finished because the endStroke
     // method also waits internally. Otherwise the mask would be cleared
     // before it could be flushed.
-    this.toolRenderer.waitForRender().then(() => this.resetPromptInputs);
+    this.toolRenderer.waitForRender().then(() => this.resetPromptInputs());
   };
 
   public discard = () => {
