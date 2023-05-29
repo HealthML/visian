@@ -17,6 +17,8 @@ export class SamRenderer extends ToolRenderer {
 
     this.samPreviewMaterial = new SamPreviewMaterial();
     this.samPreviewQuad = new ScreenAlignedQuad(this.samPreviewMaterial);
+
+    this.resizeRenderTarget();
   }
 
   public dispose() {
@@ -34,15 +36,18 @@ export class SamRenderer extends ToolRenderer {
   }
 
   public clearMask() {
-    this.updatePreviewTexture(new Float32Array(240 * 240).fill(0));
+    const { width, height } = this.renderTarget;
+    this.updatePreviewTexture(new Float32Array(width * height).fill(0));
     this.render();
     this.showsMask = false;
   }
 
   protected updatePreviewTexture(mask: Float32Array) {
+    const { width, height } = this.renderTarget;
+
     if (!this.samPreviewTexture) {
-      const data = new Uint8Array(240 * 240 * 4).fill(0);
-      this.samPreviewTexture = new DataTexture(data, 240, 240);
+      const data = new Uint8Array(width * height * 4).fill(0);
+      this.samPreviewTexture = new DataTexture(data, width, height);
       this.samPreviewMaterial.setDataTexture(this.samPreviewTexture);
     }
 

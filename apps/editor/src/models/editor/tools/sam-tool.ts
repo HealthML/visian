@@ -304,6 +304,9 @@ export class SAMTool<N extends "sam-tool" = "sam-tool">
     const file = new File([imageData], "image");
     const formdata = new FormData();
     formdata.append("image", file);
+    // Todo: Make sure to adapt resolution based on selected view type.
+    formdata.append("width", this.imageLayer.image.voxelCount.x.toString());
+    formdata.append("height", this.imageLayer.image.voxelCount.y.toString());
     const response = await fetch(EMBEDDING_SERVICE_URL, {
       method: "POST",
       body: formdata,
