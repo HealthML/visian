@@ -386,5 +386,10 @@
   "create-dataset": "Datensatz erstellen",
   "dataset-name": "Datensatzname",
 
+  "edit": "Bearbeiten",
+  "edit-project": "Projekt bearbeiten",
+  "edit-dataset": "Datensatz bearbeiten",
+  "update": "Aktualisieren",
+
   "verified": "verifiziert"
 }

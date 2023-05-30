@@ -2,7 +2,6 @@ import {
   color,
   fontSize,
   fontWeight,
-  InvisibleButton,
   ListItem,
   OptionSelector,
   Text,
@@ -59,11 +58,6 @@ const DatasetWrapper = styled.div`
   width: 100%;
 `;
 
-const IconButton = styled(InvisibleButton)`
-  width: 30px;
-  flex-grow: 0;
-`;
-
 export const DatasetListItem = ({
   dataset,
   deleteDataset,
@@ -113,7 +107,8 @@ export const DatasetListItem = ({
               {
                 value: "edit",
                 label: "Edit",
-                icon: "plus",
+                icon: "pixelBrush",
+                iconSize: 30,
                 onSelected: openEditDatasetPopup,
               },
             ]}

@@ -59,7 +59,8 @@ export const ProjectListItem = ({
           {
             value: "edit",
             label: "Edit",
-            icon: "plus",
+            icon: "pixelBrush",
+            iconSize: 30,
             onSelected: openEditProjectPopup,
           },
         ]}
