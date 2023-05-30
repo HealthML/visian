@@ -3,6 +3,7 @@ import { observer } from "mobx-react-lite";
 import styled from "styled-components";
 
 import { ConfirmationPopUpProps } from "./confirmation-popup.props";
+import { useCallback } from "react";
 
 const StyledTextButton = styled(ButtonParam)`
   margin: 0px;
@@ -38,6 +39,11 @@ export const ConfirmationPopup = observer<ConfirmationPopUpProps>(
   }) => {
     const { t } = useTranslation();
 
+    const handleConfirmation = useCallback(() => {
+      onConfirm?.();
+      onClose?.();
+    }, [onClose, onConfirm]);
+
     return (
       <ConfirmationPopupContainer
         title={title}
@@ -50,17 +56,14 @@ export const ConfirmationPopup = observer<ConfirmationPopUpProps>(
           <Text>{message ?? t(messageTx)}</Text>
           <InlineRow>
             <StyledTextButton
-              labelTx={cancel ?? cancelTx ?? "cancel"}
-              handlePress={() => {
-                onClose?.();
-              }}
+              label={cancel}
+              labelTx={cancelTx || (cancel ? undefined : "cancel")}
+              handlePress={onClose}
             />
             <StyledTextButton
-              labelTx={confirm ?? confirmTx ?? "confirm"}
-              handlePress={() => {
-                onConfirm?.();
-                onClose?.();
-              }}
+              label={confirm}
+              labelTx={confirmTx || (confirm ? undefined : "confirm")}
+              handlePress={handleConfirmation}
             />
           </InlineRow>
         </>
