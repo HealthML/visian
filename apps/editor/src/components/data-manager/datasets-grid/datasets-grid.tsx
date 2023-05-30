@@ -2,9 +2,9 @@ import { Modal, SquareButton, Text, useTranslation } from "@visian/ui-shared";
 import { useCallback, useMemo, useState } from "react";
 import styled from "styled-components";
 
+import { deleteDSMutation } from "../../../queries/delete-mutation";
 import useDatasetsBy, {
   useCreateDatasetMutation,
-  useDeleteDatasetsForProjectMutation,
 } from "../../../queries/use-datasets-by";
 import { Dataset } from "../../../types";
 import { ConfirmationPopup } from "../confirmation-popup";
@@ -34,8 +34,8 @@ export const DatasetsGrid = ({
   const { datasets } = useDatasetsBy(projectId);
   const [datasetTobBeDeleted, setDatasetTobBeDeleted] = useState<Dataset>();
   const { t: translate } = useTranslation();
-  const { deleteDatasets } = useDeleteDatasetsForProjectMutation();
   const { createDataset } = useCreateDatasetMutation();
+  const deleteDatasets = deleteDSMutation();
 
   // delete dataset confirmation popup
   const [
@@ -108,9 +108,9 @@ export const DatasetsGrid = ({
         titleTx="delete-dataset-title"
         onConfirm={() => {
           if (datasetTobBeDeleted)
-            deleteDatasets({
-              projectId,
-              datasetIds: [datasetTobBeDeleted.id],
+            deleteDatasets.mutate({
+              selectorId: projectId,
+              objectIds: [datasetTobBeDeleted.id],
             });
         }}
       />

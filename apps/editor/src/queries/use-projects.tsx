@@ -41,7 +41,7 @@ const deleteProjects = async ({ projectIds }: { projectIds: string[] }) => {
     `${hubBaseUrl}projects`,
     {
       data: { ids: projectIds },
-      timeout: 1000 * 2, // 2 secods
+      timeout: 1000 * 6, // 2 secods
     },
   );
   return deleteProjectsResponse.data.map((p) => p.id);
