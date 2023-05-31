@@ -5,11 +5,11 @@ export enum TaskAnnotationStatus {
 }
 
 export class TaskAnnotation {
-  public annotationIds: string[];
+  public annotationId: string;
   public status: TaskAnnotationStatus;
 
-  constructor(annotationIds: string[], status: TaskAnnotationStatus) {
-    this.annotationIds = annotationIds;
+  constructor(annotationId: string, status: TaskAnnotationStatus) {
+    this.annotationId = annotationId;
     this.status = status;
   }
 }

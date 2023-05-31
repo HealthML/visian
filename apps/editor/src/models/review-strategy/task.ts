@@ -10,19 +10,19 @@ export class Task {
   public title: string;
   public description: string;
   public imageIds: string[];
-  public annotation: TaskAnnotation[];
+  public annotations: TaskAnnotation[];
 
   constructor(
     kind: TaskType,
     title: string,
     description: string,
     imageIds: string[],
-    annotation: TaskAnnotation[],
+    annotations: TaskAnnotation[],
   ) {
     this.kind = kind;
     this.title = title;
     this.description = description;
     this.imageIds = imageIds;
-    this.annotation = annotation;
+    this.annotations = annotations;
   }
 }
