@@ -23,14 +23,15 @@ export const DetailsRow = ({
   content,
 }: {
   content?: React.ReactNode;
-  value?: string | undefined;
+  value?: string;
   tx?: string;
   text?: string;
 }) => {
   const { t } = useTranslation();
+  const translatedText = `${t(tx) || text}:`;
   return (
     <RowContainer>
-      <DetailsText tx={`${t(tx)}:`} text={`${text}:`} />
+      <DetailsText text={translatedText} />
       {value && <DetailsText text={value} />}
       {!value && content}
     </RowContainer>

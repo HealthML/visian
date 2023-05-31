@@ -1,9 +1,7 @@
 import { color, FlexRow, Icon, List, ListItem, Text } from "@visian/ui-shared";
 import styled, { css } from "styled-components";
 
-import { Dataset, Image } from "../../../types";
 import { handleImageSelection, useKeyboardShortcuts } from "../util";
-
 import { ProjectDataExplorerProps } from "./project-data-explorer.props";
 
 const FileExplorer = styled(FlexRow)`

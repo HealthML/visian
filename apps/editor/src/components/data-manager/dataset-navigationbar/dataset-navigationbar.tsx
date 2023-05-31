@@ -1,6 +1,8 @@
 import { ButtonParam, SquareButton } from "@visian/ui-shared";
 import styled from "styled-components";
 
+import { DatasetNavigationbarProps } from "./dataset-navigationbar.props";
+
 const StyledButton = styled(SquareButton)`
   margin-left: 10px;
 `;

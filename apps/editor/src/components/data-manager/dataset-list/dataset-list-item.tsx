@@ -6,6 +6,7 @@ import {
   ListItem,
   Text,
 } from "@visian/ui-shared";
+import { useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 
@@ -62,13 +63,18 @@ export const DatasetListItem = ({
   deleteDataset,
 }: {
   dataset: Dataset;
-  deleteDataset: () => void;
+  deleteDataset: (dataset: Dataset) => void;
 }) => {
   const navigate = useNavigate();
 
   const openDataset = () => {
     navigate(`/datasets/${dataset.id}`);
   };
+
+  const deleteCurrentDataset = useCallback(
+    () => deleteDataset(dataset),
+    [dataset, deleteDataset],
+  );
 
   return (
     <StyledListItem innerHeight="auto" isLast>
@@ -84,8 +90,7 @@ export const DatasetListItem = ({
           <IconButton
             icon="trash"
             tooltipTx="delete-dataset-title"
-            onPointerDown={deleteDataset}
-            style={{ marginLeft: "auto" }}
+            onPointerDown={deleteCurrentDataset}
             tooltipPosition="left"
           />
         </DatasetInfo>

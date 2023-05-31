@@ -11,7 +11,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import styled from "styled-components";
 
 import { useAnnotationsByImage } from "../../../queries";
-import { Annotation, Image } from "../../../types";
+import { Annotation } from "../../../types";
 import { editorPath, handleImageSelection } from "../util";
 import { DatasetImageListItemProps } from "./dataset-image-list-item.props";
 
@@ -120,7 +120,6 @@ export const DatasetImageListItem: React.FC<DatasetImageListItemProps> = ({
             icon="trash"
             tooltipTx="delete-image-title"
             onPointerDown={() => deleteImage(image)}
-            style={{ marginLeft: "auto" }}
             tooltipPosition="left"
           />
         ) : (

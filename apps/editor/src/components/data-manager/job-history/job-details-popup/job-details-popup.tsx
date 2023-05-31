@@ -32,6 +32,7 @@ const StyledPopUp = styled(PopUp)`
   width: 45vw;
   height: 60vh;
   max-width: 600px;
+  max-height: 500px;
 `;
 
 const ClickableListItem = styled(ListItem)`
@@ -148,15 +149,18 @@ export const JobDetailsPopUp = observer<JobDetailsPopUpProps>(
       [jobAnnotations],
     );
 
-    const compareImages = (a: Image, b: Image) => {
-      if (findAnnotationId(a.id) && !findAnnotationId(b.id)) {
-        return -1;
-      }
-      if (!findAnnotationId(a.id) && findAnnotationId(b.id)) {
-        return 1;
-      }
-      return 0;
-    };
+    const compareImages = useCallback(
+      (a: Image, b: Image) => {
+        if (findAnnotationId(a.id) && !findAnnotationId(b.id)) {
+          return -1;
+        }
+        if (!findAnnotationId(a.id) && findAnnotationId(b.id)) {
+          return 1;
+        }
+        return 0;
+      },
+      [findAnnotationId],
+    );
 
     const deleteJobMessage = useMemo(
       () =>
