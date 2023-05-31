@@ -129,11 +129,13 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
 
   const getAnnotationURISuggestion = useCallback(() => {
     const annotationLayerName =
-      store?.editor.activeDocument?.activeLayer?.title;
+      store?.editor.activeDocument?.activeLayer?.title?.split(".")[0];
     const imageURI =
       store?.editor.activeDocument?.mainImageLayer?.metaData?.dataUri;
-    const imageName = path.basename(imageURI);
-    return `/annotations/${imageName}/${annotationLayerName}`;
+    const imageName = path.basename(imageURI).split(".")[0];
+    return `/annotations/${imageName}/${
+      annotationLayerName || "annotation"
+    }.nii.gz`;
   }, [store]);
 
   useEffect(() => {
