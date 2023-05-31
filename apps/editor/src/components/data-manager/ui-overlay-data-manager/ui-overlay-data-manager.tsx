@@ -86,7 +86,6 @@ export const UIOverlayDataManager = observer<UIOverlayDataManagerProps>(
     }, []);
     const closeShortcutPopUp = useCallback(() => {
       setIsShortcutPopUpOpen(false);
-      store?.editor.activeDocument?.tools.setIsCursorOverFloatingUI(false);
     }, [store]);
 
     return (
