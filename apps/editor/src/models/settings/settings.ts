@@ -48,27 +48,30 @@ export class Settings {
 
   public setColorMode(colorMode: ColorMode) {
     this.colorMode = colorMode;
-    this.persist();
+    this.writeSetting("colorMode", this.colorMode);
   }
 
   public setLanguage(lang: SupportedLanguage) {
     this.language = lang;
-    this.persist();
+    this.writeSetting("language", this.language);
   }
 
   public setUseExclusiveSegmentations(exclusiveSegmentations: boolean) {
     this.useExclusiveSegmentations = exclusiveSegmentations;
-    this.persist();
+    this.writeSetting(
+      "useExclusiveSegmentations",
+      this.useExclusiveSegmentations ? "1" : "0",
+    );
   }
 
   public setVoxelInfoMode(voxelInfoMode: VoxelInfoMode) {
     this.voxelInfoMode = voxelInfoMode;
-    this.persist();
+    this.writeSetting("voxelInfoMode", this.voxelInfoMode);
   }
 
   public setPerformanceMode(performanceMode: PerformanceMode) {
     this.performanceMode = performanceMode;
-    this.persist();
+    this.writeSetting("performanceMode", this.performanceMode);
   }
 
   public persist() {

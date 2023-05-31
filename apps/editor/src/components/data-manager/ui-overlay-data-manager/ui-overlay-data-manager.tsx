@@ -4,7 +4,6 @@ import { useCallback, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 
-import { useStore } from "../../../app/root-store";
 import { ShortcutPopUp } from "../../editor";
 import { MenuDataManager } from "../menu-data-manager";
 import { UIOverlayDataManagerProps } from "./ui-overlay-data-manager.props";
@@ -76,7 +75,6 @@ const Main = styled.div`
 
 export const UIOverlayDataManager = observer<UIOverlayDataManagerProps>(
   ({ homeButton, backLink, topCenter, main }) => {
-    const store = useStore();
     const navigate = useNavigate();
 
     // Shortcut Pop Up Toggling
@@ -86,7 +84,7 @@ export const UIOverlayDataManager = observer<UIOverlayDataManagerProps>(
     }, []);
     const closeShortcutPopUp = useCallback(() => {
       setIsShortcutPopUpOpen(false);
-    }, [store]);
+    }, []);
 
     return (
       <Container>

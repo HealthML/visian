@@ -68,7 +68,7 @@ export const MenuDataManager: React.FC<MenuDataManagerProps> = observer(
     }, []);
 
     const openShortcutPopUp = useCallback(() => {
-      if (onOpenShortcutPopUp) onOpenShortcutPopUp();
+      onOpenShortcutPopUp?.();
     }, [onOpenShortcutPopUp]);
 
     const theme = useTheme() as Theme;
