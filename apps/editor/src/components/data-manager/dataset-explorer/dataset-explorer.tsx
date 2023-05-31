@@ -150,6 +150,22 @@ export const DatasetExplorer = ({
     [setImageTobBeDeleted, openDeleteImagesConfirmationPopUp],
   );
 
+  const handleAnnotationConfirmation = useCallback(() => {
+    if (annotationTobBeDeleted)
+      deleteAnnotations({
+        imageId: annotationTobBeDeleted.image,
+        annotationIds: [annotationTobBeDeleted.id],
+      });
+  }, [annotationTobBeDeleted, deleteAnnotations]);
+
+  const handleImageConfirmation = useCallback(() => {
+    if (imageTobBeDeleted) {
+      deleteImages([imageTobBeDeleted.id]);
+    } else {
+      deleteSelectedImages();
+    }
+  }, [imageTobBeDeleted, deleteImages, deleteSelectedImages]);
+
   const { t: translate } = useTranslation();
 
   return (
@@ -222,13 +238,7 @@ export const DatasetExplorer = ({
           name: annotationTobBeDeleted?.dataUri ?? "",
         }}
         titleTx="delete-annotation-title"
-        onConfirm={() => {
-          if (annotationTobBeDeleted)
-            deleteAnnotations({
-              imageId: annotationTobBeDeleted.image,
-              annotationIds: [annotationTobBeDeleted.id],
-            });
-        }}
+        onConfirm={handleAnnotationConfirmation}
       />
       <ConfirmationPopup
         isOpen={isDeleteImagesConfirmationPopUpOpen}
@@ -240,13 +250,7 @@ export const DatasetExplorer = ({
         titleTx={
           imageTobBeDeleted ? "delete-image-title" : "delete-images-title"
         }
-        onConfirm={() => {
-          if (imageTobBeDeleted) {
-            deleteImages([imageTobBeDeleted.id]);
-          } else {
-            deleteSelectedImages();
-          }
-        }}
+        onConfirm={handleImageConfirmation}
       />
     </StyledModal>
   );
