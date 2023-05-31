@@ -4,6 +4,8 @@ import styled, { css } from "styled-components";
 import { Dataset, Image } from "../../../types";
 import { handleImageSelection, useKeyboardShortcuts } from "../util";
 
+import { ProjectDataExplorerProps } from "./project-data-explorer.props";
+
 const FileExplorer = styled(FlexRow)`
   width: 100%;
   overflow-y: hidden;
@@ -36,7 +38,7 @@ const VerticalLine = styled.div`
   margin: 0 1vw;
 `;
 
-export const ProjectDataExplorer = ({
+export const ProjectDataExplorer: React.FC<ProjectDataExplorerProps> = ({
   datasets,
   images,
   isErrorImages,
@@ -46,16 +48,6 @@ export const ProjectDataExplorer = ({
   selectDataset,
   setImageSelection,
   setSelectedImages,
-}: {
-  datasets: Dataset[] | undefined;
-  images: Image[] | undefined;
-  isErrorImages: boolean;
-  isLoadingImages: boolean;
-  selectedDataset?: string;
-  selectedImages: Set<string>;
-  selectDataset: (datasetId: string) => void;
-  setImageSelection: (imageId: string, selection: boolean) => void;
-  setSelectedImages: React.Dispatch<React.SetStateAction<Set<string>>>;
 }) => {
   const { isShiftPressed, selectedRange, setSelectedRange } =
     useKeyboardShortcuts({ selectedImages, setSelectedImages, images });

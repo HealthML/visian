@@ -10,7 +10,7 @@ const StyledTextButton = styled(ButtonParam)`
   width: auto;
 `;
 
-export const DatasetNavigationbar = ({
+export const DatasetNavigationbar: React.FC<DatasetNavigationbarProps> = ({
   isInSelectMode,
   allSelected,
   anySelected,
@@ -19,15 +19,6 @@ export const DatasetNavigationbar = ({
   openJobCreationPopUp,
   openImageImportPopUp,
   deleteSelectedImages,
-}: {
-  isInSelectMode: boolean;
-  allSelected: boolean;
-  anySelected: boolean;
-  toggleSelectMode: () => void;
-  toggleSelectAll: () => void;
-  openJobCreationPopUp: () => void;
-  openImageImportPopUp: () => void;
-  deleteSelectedImages: () => void;
 }) =>
   isInSelectMode ? (
     <>

@@ -13,6 +13,7 @@ import styled from "styled-components";
 import { useAnnotationsByImage } from "../../../queries";
 import { Annotation, Image } from "../../../types";
 import { editorPath, handleImageSelection } from "../util";
+import { DatasetImageListItemProps } from "./dataset-image-list-item.props";
 
 const Spacer = styled.div`
   width: 10px;
@@ -35,7 +36,7 @@ const ClickableText = styled(Text)`
   cursor: pointer;
 `;
 
-export const DatasetImageListItem = ({
+export const DatasetImageListItem: React.FC<DatasetImageListItemProps> = ({
   isInSelectMode,
   image,
   refetchImages,
@@ -51,24 +52,6 @@ export const DatasetImageListItem = ({
   deleteAnnotation,
   deleteImage,
   isLast,
-}: {
-  isInSelectMode: boolean;
-  image: Image;
-  refetchImages: () => void;
-  isSelected: boolean;
-  index: number;
-  selectedImages: Set<string>;
-  images: Image[] | undefined;
-  setImageSelection: (imageId: string, selection: boolean) => void;
-  setSelectedImages: React.Dispatch<React.SetStateAction<Set<string>>>;
-  isShiftPressed: boolean;
-  selectedRange: { start: number; end: number };
-  setSelectedRange: React.Dispatch<
-    React.SetStateAction<{ start: number; end: number }>
-  >;
-  deleteAnnotation: (annotation: Annotation) => void;
-  deleteImage: (image: Image) => void;
-  isLast: boolean;
 }) => {
   const {
     annotations,
