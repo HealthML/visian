@@ -17,8 +17,6 @@ export class SamRenderer extends ToolRenderer {
 
     this.samPreviewMaterial = new SamPreviewMaterial();
     this.samPreviewQuad = new ScreenAlignedQuad(this.samPreviewMaterial);
-
-    this.resizeRenderTarget();
   }
 
   public dispose() {
@@ -36,20 +34,14 @@ export class SamRenderer extends ToolRenderer {
   }
 
   public clearMask() {
-    const { width, height } = this.renderTarget;
-    this.updatePreviewTexture(new Float32Array(width * height).fill(0));
+    this.initializePreviewTexture();
     this.render();
     this.showsMask = false;
   }
 
   protected updatePreviewTexture(mask: Float32Array) {
-    const { width, height } = this.renderTarget;
-
-    if (!this.samPreviewTexture) {
-      const data = new Uint8Array(width * height * 4).fill(0);
-      this.samPreviewTexture = new DataTexture(data, width, height);
-      this.samPreviewMaterial.setDataTexture(this.samPreviewTexture);
-    }
+    if (!this.samPreviewTexture) this.initializePreviewTexture();
+    if (!this.samPreviewTexture) return;
 
     const { data } = this.samPreviewTexture.image;
     for (let i = 0; i < mask.length; i++) {
@@ -72,5 +64,17 @@ export class SamRenderer extends ToolRenderer {
 
     this.document.renderer.setRenderTarget(null);
     this.document.renderer.autoClear = true;
+  }
+
+  protected resizeRenderTarget = () => {
+    super.resizeRenderTarget();
+    this.initializePreviewTexture();
+  };
+
+  protected initializePreviewTexture() {
+    const { width, height } = this.renderTarget;
+    const data = new Uint8Array(width * height * 4).fill(0);
+    this.samPreviewTexture = new DataTexture(data, width, height);
+    this.samPreviewMaterial.setDataTexture(this.samPreviewTexture);
   }
 }
