@@ -88,6 +88,7 @@
   "sam-tool": "MedSAM Tool",
   "sam-tool-help": "MedSAM is based on Meta's Segment Anything Model. Best results are achieved with bounding boxes.",
   "sam-tool-initialize": "Initialize",
+  "sam-tool-initializing": "Initializing...",
   "sam-tool-bounding-box": "Bounding Box",
   "sam-tool-points": "Points",
   "sam-tool-discard": "Discard (Esc)",

@@ -6,7 +6,7 @@ import {
 } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
 import { useCallback } from "react";
-import styled from "styled-components";
+import styled, { keyframes } from "styled-components";
 
 import { useStore } from "../../../app/root-store";
 import type { SAMTool, SAMToolEmbeddingState } from "../../../models";
@@ -25,6 +25,17 @@ const StyledModal = styled(Modal)`
 
 const HelpText = styled(InfoText)`
   margin-right: 5px;
+`;
+
+const pulse = keyframes`
+  0% { opacity: 0.8; }
+  50% { opacity: 0.5; }
+  100% { opacity: 0.8; }
+`;
+
+const LoadingButton = styled(ButtonParam)`
+  animation: ${pulse} 1.5s infinite;
+  cursor: wait;
 `;
 
 const SoftButton = styled(ButtonParam)`
@@ -109,7 +120,9 @@ export const SAMModal = observer(() => {
         isLast
       />
     ),
-    loading: <>Loading Embedding...</>,
+    loading: (
+      <LoadingButton isDisabled labelTx="sam-tool-initializing" isLast />
+    ),
     ready: (
       <>
         <SoftButton labelTx="sam-tool-clear" handlePress={clear} />
