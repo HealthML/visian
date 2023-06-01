@@ -235,9 +235,6 @@ export class SAMTool<N extends "sam-tool" = "sam-tool">
       labels[backgroundLabelOffset] = -1;
     }
 
-    console.log("Prediction Coords", Array.from(coords));
-    console.log("Prediction Labels", Array.from(labels));
-
     const coordsTensor = new ort.Tensor("float32", coords, [1, n, 2]);
     const labelsTensor = new ort.Tensor("float32", labels, [1, n]);
 
