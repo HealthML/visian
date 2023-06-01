@@ -10,15 +10,12 @@ import { Vector } from "@visian/utils";
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { debounce } from "lodash";
 import { action, makeObservable, observable, reaction } from "mobx";
-import * as ort from "onnxruntime-web";
 
+import { SAM } from "../../sam/SAM";
 import { UndoableTool } from "./undoable-tool";
 
 export type SAMToolEmbeddingState = "uninitialized" | "loading" | "ready";
 export type SAMToolBoundingBox = { topLeft: Vector; bottomRight: Vector };
-
-// Todo: Allow configuration:
-const EMBEDDING_SERVICE_URL = "http://localhost:3000/embedding";
 
 export class SAMTool<N extends "sam-tool" = "sam-tool">
   extends UndoableTool<N>
@@ -37,8 +34,7 @@ export class SAMTool<N extends "sam-tool" = "sam-tool">
 
   protected previousTool?: N;
   // Todo: Allow storing embeddings per slices / layers without having to discard previous one?
-  protected embedding?: ort.Tensor;
-  protected inferenceSession?: ort.InferenceSession;
+  protected sam: SAM;
   protected imageLayer?: IImageLayer;
   protected debouncedGeneratePrediction: () => void;
 
@@ -68,6 +64,8 @@ export class SAMTool<N extends "sam-tool" = "sam-tool">
       toolRenderer,
     );
 
+    this.sam = new SAM();
+
     this.debouncedGeneratePrediction = debounce(
       () => this.generatePrediction(),
       30,
@@ -79,7 +77,7 @@ export class SAMTool<N extends "sam-tool" = "sam-tool">
       () => {
         this.resetPromptInputs();
         this.setEmbeddingState("uninitialized");
-        this.embedding = undefined;
+        this.sam.reset();
         this.toolRenderer.clearMask();
       },
     );
@@ -154,123 +152,27 @@ export class SAMTool<N extends "sam-tool" = "sam-tool">
   }
 
   protected async generatePrediction() {
-    if (!this.inferenceSession) return;
+    if (!this.sam.isReady()) return;
 
-    console.time("prediction generation");
-
-    const modelInput = this.getModelInput();
-    if (!modelInput) return;
-    const modelOutput = await this.inferenceSession.run(modelInput);
-    const maskOutput = modelOutput.masks.data as Float32Array;
-
-    console.timeEnd("prediction generation");
-
-    this.toolRenderer.showMask(maskOutput);
-  }
-
-  protected getModelInput() {
-    if (!this.embedding) return undefined;
-    if (
-      !this.boundingBox &&
-      !this.foregroundPoints.length &&
-      !this.backgroundPoints.length
-    )
-      return;
-
-    const modelScale = this.getModelScaling();
-    const { samScale } = modelScale;
-
-    // We need space for all prompt points and one padding point if no
-    // bounding box is present, otherwise two corner points for the bbox:
-    let n = this.foregroundPoints.length + this.backgroundPoints.length;
-    if (!this.boundingBox) n += 1;
-    else n += 2;
-
-    const coords = new Float32Array(n * 2);
-    const labels = new Float32Array(n);
-
-    let bboxLabelOffset = 0;
-    let foregroundLabelOffset = 0;
-    let backgroundLabelOffset = 0;
-
+    let boundingBox;
     if (this.boundingBoxStart && this.boundingBoxEnd) {
       const startX = Math.min(this.boundingBoxStart.x, this.boundingBoxEnd.x);
       const startY = Math.min(this.boundingBoxStart.y, this.boundingBoxEnd.y);
       const endX = Math.max(this.boundingBoxStart.x, this.boundingBoxEnd.x);
       const endY = Math.max(this.boundingBoxStart.y, this.boundingBoxEnd.y);
-
-      coords[0] = startX * samScale;
-      coords[1] = startY * samScale;
-      coords[2] = endX * samScale;
-      coords[3] = endY * samScale;
-      labels[0] = 2;
-      labels[1] = 3;
-
-      bboxLabelOffset = 2;
+      boundingBox = {
+        topLeft: new Vector([startX, startY]),
+        bottomRight: new Vector([endX, endY]),
+      };
     }
 
-    for (let i = 0; i < this.foregroundPoints.length; i++) {
-      const point = this.foregroundPoints[i];
-      coords[i * 2 + bboxLabelOffset * 2] = point.x * samScale;
-      coords[i * 2 + bboxLabelOffset * 2 + 1] = point.y * samScale;
-      labels[i + bboxLabelOffset] = 1;
-    }
-
-    foregroundLabelOffset = bboxLabelOffset + this.foregroundPoints.length;
-
-    for (let i = 0; i < this.backgroundPoints.length; i++) {
-      const point = this.backgroundPoints[i];
-      coords[i * 2 + foregroundLabelOffset * 2] = point.x * samScale;
-      coords[i * 2 + foregroundLabelOffset * 2 + 1] = point.y * samScale;
-      labels[i + foregroundLabelOffset] = 0;
-    }
-
-    backgroundLabelOffset =
-      foregroundLabelOffset + this.backgroundPoints.length;
-
-    // If no bounding box is present, add the required padding point:
-    if (!this.boundingBox) {
-      coords[backgroundLabelOffset * 2] = 0;
-      coords[backgroundLabelOffset * 2 + 1] = 0;
-      labels[backgroundLabelOffset] = -1;
-    }
-
-    const coordsTensor = new ort.Tensor("float32", coords, [1, n, 2]);
-    const labelsTensor = new ort.Tensor("float32", labels, [1, n]);
-
-    const imageSizeTensor = new ort.Tensor("float32", [
-      modelScale.height,
-      modelScale.width,
-    ]);
-
-    // Use empty tensor since we don't specify an input mask:
-    const maskInput = new ort.Tensor(
-      "float32",
-      new Float32Array(256 * 256),
-      [1, 1, 256, 256],
+    const mask = await this.sam.getMask(
+      boundingBox,
+      this.foregroundPoints,
+      this.backgroundPoints,
     );
 
-    // Default to 0 since there is no input mask:
-    const hasMaskInput = new ort.Tensor("float32", [0]);
-
-    return {
-      image_embeddings: this.embedding,
-      point_coords: coordsTensor,
-      point_labels: labelsTensor,
-      orig_im_size: imageSizeTensor,
-      mask_input: maskInput,
-      has_mask_input: hasMaskInput,
-    };
-  }
-
-  protected getModelScaling() {
-    // SAM internally resized images to longest side 1024, so we need to
-    // calculate the scale factor in order to resize the mask output:
-    const LONG_SIDE_LENGTH = 1024;
-    const width = this.imageLayer?.image.voxelCount.x ?? 0;
-    const height = this.imageLayer?.image.voxelCount.y ?? 0;
-    const samScale = LONG_SIDE_LENGTH / Math.max(...[width, height]);
-    return { width, height, samScale };
+    if (mask) this.toolRenderer.showMask(mask);
   }
 
   public async loadEmbedding() {
@@ -282,10 +184,6 @@ export class SAMTool<N extends "sam-tool" = "sam-tool">
     // Todo: Handle case where no image layer is found (disable tool?):
     if (!this.imageLayer) throw new Error("No image layer found.");
 
-    this.inferenceSession = await ort.InferenceSession.create(
-      "/assets/sam_quantized.onnx",
-    );
-
     const viewType = this.document.viewport2D.mainViewType;
     const sliceNumber = this.document.viewport2D.getSelectedSlice();
 
@@ -293,27 +191,11 @@ export class SAMTool<N extends "sam-tool" = "sam-tool">
       viewType,
       sliceNumber,
     );
-    const imageData = new Uint8Array(sliceData.length);
-    for (let i = 0; i < sliceData.length; i++) {
-      imageData[i] = sliceData[i] * 255;
-    }
-
-    const file = new File([imageData], "image");
-    const formdata = new FormData();
-    formdata.append("image", file);
-    // Todo: Make sure to adapt resolution based on selected view type.
-    formdata.append("width", this.imageLayer.image.voxelCount.x.toString());
-    formdata.append("height", this.imageLayer.image.voxelCount.y.toString());
-    const response = await fetch(EMBEDDING_SERVICE_URL, {
-      method: "POST",
-      body: formdata,
-    });
-
-    const responseData = await response.arrayBuffer();
-    const data = new Float32Array(responseData);
-
-    const embeddingTensor = new ort.Tensor("float32", data, [1, 256, 64, 64]);
-    this.embedding = embeddingTensor;
+    await this.sam.loadEmbedding(
+      sliceData,
+      this.imageLayer.image.voxelCount.x,
+      this.imageLayer.image.voxelCount.y,
+    );
 
     this.setEmbeddingState("ready");
     this.generatePrediction();
