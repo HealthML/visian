@@ -316,6 +316,7 @@ export class SAMTool<N extends "sam-tool" = "sam-tool">
     this.embedding = embeddingTensor;
 
     this.setEmbeddingState("ready");
+    this.generatePrediction();
   }
 
   public startAt(click: DragPoint): void {
