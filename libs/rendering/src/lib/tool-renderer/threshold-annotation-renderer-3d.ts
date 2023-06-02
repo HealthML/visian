@@ -2,14 +2,15 @@ import { IDocument, IThresholdAnnotationRenderer3D } from "@visian/ui-shared";
 import { action, makeObservable, observable } from "mobx";
 import * as THREE from "three";
 
+import { RenderedImage } from "../rendered-image";
 import {
   thresholdAnnotationFragmentShader,
   thresholdAnnotationVertexShader,
 } from "../shaders";
-import { BlipRenderer3D } from "./blip-renderer-3d";
+import { Renderer3D } from "./renderer-3d";
 
 export class ThresholdAnnotationRenderer3D
-  extends BlipRenderer3D
+  extends Renderer3D
   implements IThresholdAnnotationRenderer3D
 {
   public threshold: [number, number] = [0.05, 1];
@@ -22,11 +23,8 @@ export class ThresholdAnnotationRenderer3D
       glslVersion: THREE.GLSL3,
     });
 
-    this.maxSteps = 1;
-
     makeObservable(this, {
       threshold: observable,
-
       setThreshold: action,
     });
   }
@@ -35,4 +33,13 @@ export class ThresholdAnnotationRenderer3D
     this.threshold = value;
     this.material.uniforms.uThreshold.value = value;
   };
+
+  public render() {
+    const sourceImage = this.sourceLayer?.image as RenderedImage | undefined;
+    if (!sourceImage) return;
+
+    this.material.setSourceTexture(sourceImage.getTexture());
+
+    super.render();
+  }
 }

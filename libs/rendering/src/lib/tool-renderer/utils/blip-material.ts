@@ -37,16 +37,11 @@ export class Blip3DMaterial extends Texture3DMaterial implements IDisposable {
     super({
       ...parameters,
       uniforms: {
-        uSourceTexture: { value: null },
         uTargetTexture: { value: null },
         uRenderValue: {
           value: MAX_BLIP_STEPS / (MAX_BLIP_STEPS + 1),
         },
         ...parameters.uniforms,
-      },
-      defines: {
-        VOLUMETRIC_IMAGE: "",
-        ...parameters.defines,
       },
     });
 
@@ -64,14 +59,6 @@ export class Blip3DMaterial extends Texture3DMaterial implements IDisposable {
         { fireImmediately: true },
       ),
     );
-  }
-
-  public dispose() {
-    super.dispose();
-  }
-
-  public setSourceTexture(texture: THREE.Texture) {
-    this.uniforms.uSourceTexture.value = texture;
   }
 
   public setTargetTexture(texture: THREE.Texture) {

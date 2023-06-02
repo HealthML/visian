@@ -4,7 +4,6 @@ in vec2 vUv;
 
 uniform vec2 uThreshold;
 
-@import ../uniforms/u-blip-material;
 @import ../uniforms/u-texture-3d-material;
 
 out vec4 pc_FragColor;
