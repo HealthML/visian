@@ -6,8 +6,9 @@ import {
   EnumParam,
   FloatingUIButton,
   Modal,
-  RedButtonParam,
+  SupportedLanguage,
   Theme,
+  useTranslation,
 } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
 import React, { useCallback, useState } from "react";
@@ -15,7 +16,7 @@ import styled, { useTheme } from "styled-components";
 
 import { useStore } from "../../../app/root-store";
 import { feedbackMailAddress } from "../../../constants";
-import { MenuProps } from "./menu.props";
+import { MenuDataManagerProps } from "./menu-data-manager.props";
 
 // Styled Components
 const MenuButton = styled(FloatingUIButton)`
@@ -28,9 +29,15 @@ const themeSwitchOptions = [
   { value: "light", labelTx: "light" },
 ];
 
-export const Menu: React.FC<MenuProps> = observer(
-  ({ onOpenShortcutPopUp, onOpenSettingsPopUp }) => {
+const languageSwitchOptions = [
+  { label: "English", value: "en" },
+  { label: "Deutsch", value: "de" },
+];
+
+export const MenuDataManager: React.FC<MenuDataManagerProps> = observer(
+  ({ onOpenShortcutPopUp }) => {
     const store = useStore();
+    const { i18n } = useTranslation();
 
     // Menu Toggling
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -46,13 +53,13 @@ export const Menu: React.FC<MenuProps> = observer(
 
     // Menu Actions
     const setColorMode = useCallback(
-      (value: string) => store?.settings.setColorMode(value as ColorMode),
+      (value: ColorMode) => store?.settings.setColorMode(value),
       [store],
     );
-
-    const createNewDocument = useCallback(() => {
-      store?.editor.newDocument();
-    }, [store]);
+    const setLanguage = useCallback(
+      (language: SupportedLanguage) => store?.settings.setLanguage(language),
+      [store],
+    );
 
     const sendFeedback = useCallback(() => {
       const mail = document.createElement("a");
@@ -61,16 +68,8 @@ export const Menu: React.FC<MenuProps> = observer(
     }, []);
 
     const openShortcutPopUp = useCallback(() => {
-      if (onOpenShortcutPopUp) onOpenShortcutPopUp();
+      onOpenShortcutPopUp?.();
     }, [onOpenShortcutPopUp]);
-
-    const openSettingsPopUp = useCallback(() => {
-      if (onOpenSettingsPopUp) onOpenSettingsPopUp();
-    }, [onOpenSettingsPopUp]);
-
-    const destroy = useCallback(() => {
-      store?.destroy();
-    }, [store]);
 
     const theme = useTheme() as Theme;
     return (
@@ -91,15 +90,18 @@ export const Menu: React.FC<MenuProps> = observer(
           baseZIndex={theme.zIndices.modal + 1}
           onOutsidePress={closeModal}
         >
-          <ButtonParam labelTx="new-document" handlePress={createNewDocument} />
-          <Divider />
           <EnumParam
             labelTx="theme"
             options={themeSwitchOptions}
             value={store?.colorMode || "dark"}
             setValue={setColorMode}
           />
-          <ButtonParam labelTx="settings" handlePress={openSettingsPopUp} />
+          <EnumParam
+            labelTx="language"
+            options={languageSwitchOptions}
+            value={i18n.language.split("-")[0]}
+            setValue={setLanguage}
+          />
           <Divider />
           <ButtonParam labelTx="shortcuts" handlePress={openShortcutPopUp} />
           {feedbackMailAddress && (
@@ -108,7 +110,6 @@ export const Menu: React.FC<MenuProps> = observer(
               handlePress={sendFeedback}
             />
           )}
-          <RedButtonParam labelTx="clear-data" handlePress={destroy} isLast />
         </Modal>
       </>
     );

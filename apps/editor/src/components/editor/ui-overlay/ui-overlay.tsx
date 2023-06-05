@@ -250,24 +250,6 @@ export const UIOverlay = observer<UIOverlayProps>(
     };
     useEffect(loadImagesAndAnnotations, [searchParams, store]);
 
-    // navigation for home button
-    const getNavigationPath = (
-      projectId: string | null,
-      datasetId: string | null,
-    ): string => {
-      const path: string[] = [];
-      if (datasetId) {
-        path.push(`${projectId}`);
-      }
-      if (projectId && datasetId) {
-        path.push(`datasets/${datasetId}`);
-      }
-      return `/projects/${path.join("/")}`;
-    };
-
-    const projectId = searchParams.get("projectId") || "";
-    const datasetId = searchParams.get("datasetId") || "";
-
     return (
       <Container
         {...rest}
@@ -286,30 +268,30 @@ export const UIOverlay = observer<UIOverlayProps>(
           <>
             <ColumnLeft>
               <MenuRow>
-                {isFromWHO() ? (
-                  <a href={whoHome}>
-                    <ImportButton
-                      icon="whoAI"
-                      tooltipTx="return-who"
-                      tooltipPosition="right"
-                      isActive={false}
-                    />
-                  </a>
-                ) : (
-                  <ImportButton
-                    icon="import"
-                    tooltipTx="import-tooltip"
-                    tooltipPosition="right"
-                    isActive={false}
-                    onPointerDown={openImportPopUp}
-                  />
-                )}
+                <Menu
+                  onOpenShortcutPopUp={openShortcutPopUp}
+                  onOpenSettingsPopUp={openSettingsPopUp}
+                />
                 <UndoRedoButtons />
               </MenuRow>
-              <Menu
-                onOpenShortcutPopUp={openShortcutPopUp}
-                onOpenSettingsPopUp={openSettingsPopUp}
-              />
+              {isFromWHO() ? (
+                <a href={whoHome}>
+                  <ImportButton
+                    icon="whoAI"
+                    tooltipTx="return-who"
+                    tooltipPosition="right"
+                    isActive={false}
+                  />
+                </a>
+              ) : (
+                <ImportButton
+                  icon="import"
+                  tooltipTx="import-tooltip"
+                  tooltipPosition="right"
+                  isActive={false}
+                  onPointerDown={openImportPopUp}
+                />
+              )}
               <Toolbar />
               <Layers />
               <AxesSpacer>
@@ -333,11 +315,9 @@ export const UIOverlay = observer<UIOverlayProps>(
                   icon="exit"
                   tooltipTx="close-editor"
                   tooltipPosition="left"
-                  onPointerDown={() =>
-                    store?.destroyRedirect(
-                      getNavigationPath(projectId, datasetId),
-                    )
-                  }
+                  onPointerDown={() => {
+                    store?.destroyRedirect("/projects");
+                  }}
                   isActive={false}
                 />
                 {store?.editor.activeDocument?.activeLayer?.isAnnotation &&

@@ -5,3 +5,5 @@ export interface I18nData {
   date?: Date;
   [key: string]: unknown;
 }
+
+export type SupportedLanguage = "en" | "de";
