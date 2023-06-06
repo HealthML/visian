@@ -388,5 +388,7 @@
   "create-dataset": "Create Dataset",
   "dataset-name": "Dataset Name",
 
-  "verified": "verified"
+  "verified": "verified",
+
+  "data_uri_help_message": "The dataURI is not valid. It should have a format like 'folders/filename.extension' where a folder and the filename can consist of letters, digits, -, or _ and extension should be one of the following:"
 }
