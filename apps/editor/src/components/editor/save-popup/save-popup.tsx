@@ -9,6 +9,7 @@ import { useStore } from "../../../app/root-store";
 import { patchAnnotationFile, postAnnotationFile } from "../../../queries";
 import { Annotation } from "../../../types";
 import { SavePopUpProps } from "./save-popup.props";
+import { AxiosError } from "axios";
 
 const SectionLabel = styled(Text)`
   font-size: 14px;
@@ -86,16 +87,19 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
         annotationFile,
       );
       return response;
-    } catch (error: any) {
-      const description = error.response?.data?.message
-        ? error.response.data.message
-        : error.message
-        ? error.message
-        : "annotation-saving-error";
-      store?.setError({
-        titleTx: "saving-error",
-        descriptionTx: description,
-      });
+    } catch (error) {
+      if (error instanceof AxiosError) {
+        const description = error.response?.data?.message
+          ? error.response.data.message
+          : error.message
+          ? error.message
+          : "annotation-saving-error";
+        store?.setError({
+          titleTx: "saving-error",
+          descriptionTx: description,
+        });
+      }
+      throw error;
     } finally {
       store?.setProgress();
     }
@@ -112,16 +116,19 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
       checkAnnotationURI(annotationFile, uri);
       const response = await postAnnotationFile(imageId, uri, annotationFile);
       return response;
-    } catch (error: any) {
-      const description = error.response?.data?.message
-        ? error.response.data.message
-        : error.message
-        ? error.message
-        : "annotation-saving-error";
-      store?.setError({
-        titleTx: "saving-error",
-        descriptionTx: description,
-      });
+    } catch (error) {
+      if (error instanceof AxiosError) {
+        const description = error.response?.data?.message
+          ? error.response.data.message
+          : error.message
+          ? error.message
+          : "annotation-saving-error";
+        store?.setError({
+          titleTx: "saving-error",
+          descriptionTx: description,
+        });
+      }
+      throw error;
     } finally {
       store?.setProgress();
     }
