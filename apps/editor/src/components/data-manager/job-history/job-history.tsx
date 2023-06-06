@@ -68,7 +68,7 @@ export const JobHistory = ({
         />
       )}
       {altMessage ? (
-        <ErrorMessage tx={altMessage} />
+        <ErrorMessage text={altMessage} />
       ) : (
         jobs && <JobsTable jobs={jobs} />
       )}

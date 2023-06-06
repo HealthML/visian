@@ -14,12 +14,13 @@ export const JobsView: React.FC = observer(() => {
   const altMessage = useMemo(() => {
     if (isLoadingJobs) return translate("jobs-loading");
     if (isErrorJobs)
-      return `${translate("jobs-loading-error")} ${
-        jobsError?.response?.statusText
-      } (${jobsError?.response?.status})`;
+      return translate("jobs-loading-error", {
+        statusText: jobsError?.response?.statusText,
+        status: jobsError?.response?.status,
+      });
     if (jobs && jobs.length <= 0) return translate("no-jobs-available");
     return null;
-  }, [isLoadingJobs, isErrorJobs, jobs, jobsError, translate]);
+  }, [isLoadingJobs, isErrorJobs, jobsError, jobs, translate]);
 
   return <JobHistory projectId={projectId} altMessage={altMessage} />;
 });

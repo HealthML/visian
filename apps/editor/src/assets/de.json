@@ -313,7 +313,7 @@
   "ml-models-not-found-error": "Modellversion konnte nicht gefunden werden.",
 
   "jobs-loading": "Jobs werden geladen...",
-  "jobs-loading-error": "Fehler beim Laden der Jobs:",
+  "jobs-loading-error": "Fehler beim Laden der Jobs: {{statusText}} {{status}}",
   "no-jobs-available": "Aktuell sind keine Jobs vorhanden.",
   "job-deleted-images": "Es scheint als wurden alle Bilder des Jobs gelöscht...",
   "job-details": "Job Details",

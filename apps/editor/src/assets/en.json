@@ -313,7 +313,7 @@
   "ml-models-not-found-error": "Unable to find model version.",
 
   "jobs-loading": "Loading jobs...",
-  "jobs-loading-error": "Error on loading jobs:",
+  "jobs-loading-error": "Error on loading jobs: {{statusText}} {{status}}",
   "no-jobs-available": "Currently no jobs are available.",
   "job-deleted-images": "It seems like all images for this job were deleted...",
   "job-images": "Images",
