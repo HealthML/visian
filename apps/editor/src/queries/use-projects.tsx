@@ -157,7 +157,7 @@ const putProject = async (project: Project) => {
       name: project.name,
     },
     {
-      timeout: 1000 * 3.14152, // almost pi seconds
+      timeout: 1000 * 3.14, // pi seconds
     },
   );
   return putProjectResponse.data;

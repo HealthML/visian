@@ -134,7 +134,7 @@ const putDataset = async (dataset: Dataset) => {
       project: dataset.project,
     },
     {
-      timeout: 1000 * 2.34, // 2.34 secods
+      timeout: 1000 * 3.14, // pi seconds
     },
   );
   return putDatasetResponse.data;

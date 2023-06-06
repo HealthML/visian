@@ -24,7 +24,7 @@ const DatasetEditPopupContainer = styled(PopUp)`
 `;
 
 const TextInput = styled(TextField)`
-  margin: 0px 0px 0px 0px;
+  margin: 0px;
   width: calc(100% - 40px);
 `;
 
