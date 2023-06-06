@@ -2,7 +2,7 @@ import { RootStore } from "../root";
 import { Task } from "./task";
 
 export abstract class ReviewStrategy {
-  public currentTask?: Task;
+  private task?: Task;
 
   protected store: RootStore;
 
@@ -11,4 +11,9 @@ export abstract class ReviewStrategy {
   }
 
   public abstract loadTask(): void;
+  public get currentTask(): Task | undefined{
+    return this.task;
+  }
+  public abstract nextTask(): void;
+  public abstract saveTask(): void;
 }

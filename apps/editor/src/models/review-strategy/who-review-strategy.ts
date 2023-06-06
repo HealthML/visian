@@ -11,12 +11,6 @@ import { ReviewStrategy } from "./review-strategy";
 import { Task, TaskType } from "./task";
 import { TaskAnnotation, TaskAnnotationStatus } from "./task-annotation";
 
-const taskTypeMapping = {
-  [WHOTaskType.Create]: TaskType.Create,
-  [WHOTaskType.Correct]: TaskType.Review,
-  [WHOTaskType.Review]: TaskType.Supervise,
-};
-
 const annotationStatusMapping = {
   [WHOAnnotationStatus.Pending]: TaskAnnotationStatus.Pending,
   [WHOAnnotationStatus.Rejected]: TaskAnnotationStatus.Rejected,
