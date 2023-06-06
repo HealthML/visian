@@ -299,6 +299,7 @@
   "image-open-error": "Fehler beim Öffnen des Bildes",
   "image-annotated": "annotiert",
 
+  "create-annotation-file-error": "Die Annotationsdatei konnte nicht erstellt werden.",
   "annotations-loading": "Annotationen werden geladen...",
   "annotations-loading-error": "Fehler beim Laden der Annotationen:",
   "annotation-open-error": "Fehler beim Öffnen der Annotation",
@@ -386,5 +387,6 @@
   "create-dataset": "Datensatz erstellen",
   "dataset-name": "Datensatzname",
 
-  "verified": "verifiziert"
+  "verified": "verifiziert",
+  "uri-file-type-mismatch": "Die URI entspricht nicht dem Dateityp \"{{name}}\""
 }

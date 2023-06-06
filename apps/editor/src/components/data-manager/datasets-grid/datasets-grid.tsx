@@ -37,7 +37,7 @@ export const DatasetsGrid = ({
   const { deleteDatasets } = useDeleteDatasetsForProjectMutation();
   const { createDataset } = useCreateDatasetMutation();
 
-  // delete dataset confirmation popup
+  // Delete dataset confirmation popup
   const [
     isDeleteDatasetConfirmationPopUpOpen,
     setIsDeleteDatasetConfirmationPopUpOpen,
@@ -49,7 +49,7 @@ export const DatasetsGrid = ({
     setIsDeleteDatasetConfirmationPopUpOpen(false);
   }, []);
 
-  // create dataset popup
+  // Create dataset popup
   const [isCreateDatasetPopupOpen, setIsCreateDatasetPopupOpen] =
     useState(false);
   const openCreateDatasetPopup = useCallback(

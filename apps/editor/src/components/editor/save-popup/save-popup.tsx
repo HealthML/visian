@@ -1,4 +1,11 @@
-import { Button, PopUp, Text, TextField } from "@visian/ui-shared";
+import {
+  Button,
+  PopUp,
+  Text,
+  TextField,
+  useTranslation,
+} from "@visian/ui-shared";
+import { AxiosError } from "axios";
 import { observer } from "mobx-react-lite";
 import path from "path";
 import React, { useCallback, useEffect, useState } from "react";
@@ -9,7 +16,6 @@ import { useStore } from "../../../app/root-store";
 import { patchAnnotationFile, postAnnotationFile } from "../../../queries";
 import { Annotation } from "../../../types";
 import { SavePopUpProps } from "./save-popup.props";
-import { AxiosError } from "axios";
 
 const SectionLabel = styled(Text)`
   font-size: 14px;
@@ -53,6 +59,7 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
   const store = useStore();
   const [searchParams] = useSearchParams();
   const [newAnnotationURI, setnewAnnotationURI] = useState("");
+  const { t: translate } = useTranslation();
 
   const createActiveLayerFile = async (
     shouldBeAnnotation = true,
@@ -67,7 +74,7 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
   const checkAnnotationURI = (file: File, uri: string) => {
     if (path.extname(uri) !== path.extname(file.name)) {
       throw new Error(
-        `URI does not match file type ${path.extname(file.name)}`,
+        translate("uri-file-type-mismatch", { name: path.extname(file.name) }),
       );
     }
   };
@@ -79,7 +86,7 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
         ?.metaData as Annotation;
       const annotationFile = await createActiveLayerFile();
       if (!annotationMeta || !annotationFile) {
-        throw new Error("Could not create annotation file");
+        throw new Error(translate("create-annotation-error"));
       }
       checkAnnotationURI(annotationFile, annotationMeta.dataUri);
       const response = await patchAnnotationFile(
@@ -111,7 +118,7 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
       const imageId = searchParams.get("imageId");
       const annotationFile = await createActiveLayerFile();
       if (!imageId || !annotationFile) {
-        throw new Error("Could not create annotation file");
+        throw new Error(translate("create-annotation-error"));
       }
       checkAnnotationURI(annotationFile, uri);
       const response = await postAnnotationFile(imageId, uri, annotationFile);

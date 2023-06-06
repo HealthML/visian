@@ -11,7 +11,7 @@ import {
 import { Annotation, Dataset, Image } from "../../../types";
 import { ConfirmationPopup } from "../confirmation-popup";
 import { DatasetImageList } from "../dataset-image-list";
-import { DatasetNavigationbar } from "../dataset-navigationbar";
+import { DatasetNavigationBar } from "../dataset-navigationbar";
 import { ImageImportPopup } from "../image-import-popup";
 import { JobCreationPopup } from "../job-creation-popup";
 import { useImageSelection, usePopUpState } from "../util";
@@ -73,14 +73,14 @@ export const DatasetExplorer = ({
 
   const [imageTobBeDeleted, setImageTobBeDeleted] = useState<Image>();
 
-  // delete annotation confirmation popup
+  // Delete annotation confirmation popup
   const [
     isDeleteAnnotationConfirmationPopUpOpen,
     openDeleteAnnotationConfirmationPopUp,
     closeDeleteAnnotationConfirmationPopUp,
   ] = usePopUpState(false);
 
-  // delete images confirmation popup
+  // Delete images confirmation popup
   const [
     isDeleteImagesConfirmationPopUpOpen,
     openDeleteImagesConfirmationPopUp,
@@ -103,7 +103,7 @@ export const DatasetExplorer = ({
     [areAllSelected, setSelectAll],
   );
 
-  // job selection popup
+  // Job selection popup
   const [jobCreationPopUpOpenWith, setJobCreationPopUpOpenWith] =
     useState<string>();
   const openJobCreationPopUp = useCallback(() => {
@@ -115,7 +115,7 @@ export const DatasetExplorer = ({
     setIsInSelectMode(false);
   }, [setSelectAll]);
 
-  // image import popup
+  // Image import popup
   const [imageImportPopUpOpenWith, setImageImportPopUpOpenWith] =
     useState<Dataset>();
   const openImageImportPopUp = useCallback(() => {
@@ -174,7 +174,7 @@ export const DatasetExplorer = ({
       label={dataset.name}
       position="right"
       headerChildren={
-        <DatasetNavigationbar
+        <DatasetNavigationBar
           isInSelectMode={isInSelectMode}
           allSelected={areAllSelected}
           anySelected={isAnySelected}

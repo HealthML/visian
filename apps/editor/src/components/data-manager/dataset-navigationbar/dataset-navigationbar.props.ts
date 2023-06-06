@@ -1,6 +1,6 @@
 import type { StatefulPopUpProps } from "@visian/ui-shared";
 
-export interface DatasetNavigationbarProps extends StatefulPopUpProps {
+export interface DatasetNavigationBarProps extends StatefulPopUpProps {
   isInSelectMode: boolean;
   allSelected: boolean;
   anySelected: boolean;

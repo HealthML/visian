@@ -1,9 +1,9 @@
 import { ButtonParam, PopUp, Text, useTranslation } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
+import { useCallback } from "react";
 import styled from "styled-components";
 
 import { ConfirmationPopUpProps } from "./confirmation-popup.props";
-import { useCallback } from "react";
 
 const StyledTextButton = styled(ButtonParam)`
   margin: 0px;

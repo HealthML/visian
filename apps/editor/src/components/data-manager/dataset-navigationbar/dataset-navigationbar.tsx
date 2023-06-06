@@ -1,7 +1,7 @@
 import { ButtonParam, SquareButton } from "@visian/ui-shared";
 import styled from "styled-components";
 
-import { DatasetNavigationbarProps } from "./dataset-navigationbar.props";
+import { DatasetNavigationBarProps as DatasetNavigationBarProps } from "./dataset-navigationbar.props";
 
 const StyledButton = styled(SquareButton)`
   margin-left: 10px;
@@ -12,7 +12,7 @@ const StyledTextButton = styled(ButtonParam)`
   width: auto;
 `;
 
-export const DatasetNavigationbar: React.FC<DatasetNavigationbarProps> = ({
+export const DatasetNavigationBar: React.FC<DatasetNavigationBarProps> = ({
   isInSelectMode,
   allSelected,
   anySelected,

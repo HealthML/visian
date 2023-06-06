@@ -63,14 +63,14 @@ export const DatasetImageListItem: React.FC<DatasetImageListItemProps> = ({
 
   const [showAnnotations, setShowAnnotations] = useState(false);
 
-  // refetch images if annotations can't be loaded
+  // Refetch images if annotations can't be loaded
   useEffect(() => {
     if (isErrorAnnotations) refetchImages();
   }, [isErrorAnnotations, refetchImages]);
 
   const toggleShowAnnotations = useCallback(() => {
     setShowAnnotations((prev: boolean) => {
-      // refetch annotations if the annotations list is being opened
+      // Refetch annotations if the annotations list is being opened
       if (!prev) refetchAnnotations();
       return !prev;
     });
