@@ -199,7 +199,7 @@ export class Layer implements ILayer, ISerializable<LayerSnapshot> {
       color: this.color,
       isVisible: this.isVisible,
       opacityOverride: this.opacityOverride,
-      transformation: this.transformation.toArray(),
+      transformation: this.transformation?.toArray(),
     };
   }
 
@@ -215,11 +215,13 @@ export class Layer implements ILayer, ISerializable<LayerSnapshot> {
     this.setColor(snapshot?.color);
     this.setIsVisible(snapshot?.isVisible);
     this.setOpacity(snapshot?.opacityOverride);
-    this.setTransformation(
-      snapshot?.transformation
-        ? new Matrix4().fromArray(snapshot.transformation)
-        : undefined,
-    );
+    if (snapshot?.transformation) {
+      this.setTransformation(
+        snapshot?.transformation
+          ? new Matrix4().fromArray(snapshot.transformation)
+          : undefined,
+      );
+    }
 
     return Promise.resolve();
   }

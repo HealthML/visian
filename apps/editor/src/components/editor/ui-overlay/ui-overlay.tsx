@@ -234,6 +234,11 @@ export const UIOverlay = observer<UIOverlayProps>(
             const annotationFile = await fetchAnnotationFile(
               annotationIdToOpen,
             );
+            // creates new group layer and adds groupId to file
+            store?.editor.activeDocument?.createLayerGroup(
+              [annotationFile],
+              annotationFile.name,
+            );
             fileTransfer.items.add(annotationFile);
           } catch (error) {
             store?.setError({

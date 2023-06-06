@@ -39,7 +39,7 @@ import {
   generalTextures2d,
   generalTextures3d,
 } from "../../constants";
-import { FileWithMetadata } from "../../types";
+import { FileWithGroup, FileWithMetadata } from "../../types";
 import { readTrackingLog, TrackingData } from "../tracking";
 import { StoreContext } from "../types";
 import { Clipboard } from "./clipboard";
@@ -868,6 +868,13 @@ export class Document
       const fileWithMetaData = file as FileWithMetadata;
       layer.metaData = fileWithMetaData.metadata;
     }
+    if (layer && "groupId" in file) {
+      const fileWithGroupId = file as FileWithGroup;
+      const groupLayer = this.getLayer(
+        fileWithGroupId.groupId,
+      ) as layers.LayerGroup;
+      groupLayer?.addLayer(layer);
+    }
   }
 
   // Proxies
@@ -922,5 +929,18 @@ export class Document
     throw new Error(
       "This is a noop. To load a document from storage, create a new instance",
     );
+  }
+
+  public createLayerGroup(files: File[], title?: string): FileWithGroup[] {
+    const groupLayer = new layers.LayerGroup(undefined, this);
+    groupLayer.setTitle(title);
+    const groupLayerId = groupLayer.id;
+    const filesWithGroup = files.map((f) => {
+      const fileWithGroup = f as FileWithGroup;
+      fileWithGroup.groupId = groupLayerId;
+      return fileWithGroup;
+    });
+    this.addLayer(groupLayer);
+    return filesWithGroup;
   }
 }
