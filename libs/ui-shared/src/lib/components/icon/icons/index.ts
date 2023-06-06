@@ -6,6 +6,7 @@ export { ReactComponent as arrowUp } from "./arrow-up.svg";
 export { ReactComponent as backspace } from "./backspace.svg";
 export { ReactComponent as boundedSmartBrush } from "./bounded-smart-brush.svg";
 export { ReactComponent as boundedSmartEraser } from "./bounded-smart-eraser.svg";
+export { ReactComponent as burger } from "./burger.svg";
 export { ReactComponent as cancel } from "./cancel.svg";
 export { ReactComponent as check } from "./check.svg";
 export { ReactComponent as checked } from "./checkbox-checked.svg";

@@ -286,6 +286,7 @@
   "project-loading": "Loading project...",
   "project-loading-error": "Error on loading project:",
 
+  "datasets": "Datasets",
   "datasets-loading": "Loading datasets...",
   "datasets-loading-error": "Error on loading datasets:",
   "no-datasets-available": "Currently no datasets are available.",
@@ -312,6 +313,7 @@
   "ml-models-none-available": "There are no models available.",
   "ml-models-not-found-error": "Unable to find model version.",
 
+  "jobs": "Jobs",
   "jobs-loading": "Loading jobs...",
   "jobs-loading-error": "Error on loading jobs:",
   "no-jobs-available": "Currently no jobs are available.",
@@ -391,5 +393,7 @@
   "edit-dataset": "Edit Dataset Name",
   "update": "Update",
 
-  "verified": "verified"
+  "verified": "verified",
+
+  "data_uri_help_message": "The dataURI is not valid. It should have a format like 'folders/filename.extension' where a folder and the filename can consist of letters, digits, -, or _ and extension should be one of the following:"
 }
