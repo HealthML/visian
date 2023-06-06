@@ -83,7 +83,7 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
     store?.setProgress({ labelTx: "saving" });
     try {
       const annotationMeta = store?.editor.activeDocument?.activeLayer
-        ?.metaData as Annotation;
+        ?.metadata as Annotation;
       const annotationFile = await createActiveLayerFile();
       if (!annotationMeta || !annotationFile) {
         throw new Error(translate("create-annotation-error"));
@@ -145,7 +145,7 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
     const annotationLayerName =
       store?.editor.activeDocument?.activeLayer?.title;
     const imageURI =
-      store?.editor.activeDocument?.mainImageLayer?.metaData?.dataUri;
+      store?.editor.activeDocument?.mainImageLayer?.metadata?.dataUri;
     const imageName = path.basename(imageURI);
     return `/annotations/${imageName}/${annotationLayerName}`;
   }, [store]);
@@ -163,13 +163,13 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
       dismiss={onClose}
       shouldDismissOnOutsidePress
     >
-      {store?.editor.activeDocument?.activeLayer?.metaData?.dataUri && (
+      {store?.editor.activeDocument?.activeLayer?.metadata?.dataUri && (
         <>
           <SectionLabel tx="annotation-saving-overrwite" />
           <InlineRow>
             <SaveInput
               value={
-                store?.editor.activeDocument?.activeLayer?.metaData?.dataUri
+                store?.editor.activeDocument?.activeLayer?.metadata?.dataUri
               }
               readOnly
             />
