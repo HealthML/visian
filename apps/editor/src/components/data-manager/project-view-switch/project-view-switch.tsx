@@ -11,8 +11,8 @@ const StyledSwitch = styled(Box)`
 `;
 
 const projectViewSwitchOptions = [
-  { labelTx: "Datasets", value: "datasets" },
-  { labelTx: "Jobs", value: "jobs" },
+  { labelTx: "datasets", value: "datasets" },
+  { labelTx: "jobs", value: "jobs" },
 ];
 
 export const ProjectViewSwitch = () => {

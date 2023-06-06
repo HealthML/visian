@@ -286,6 +286,7 @@
   "project-loading": "Projekt wird geladen...",
   "project-loading-error": "Fehler beim Laden des Projektes:",
 
+  "datasets": "Datensätze",
   "datasets-loading": "Datensätze werden geladen...",
   "datasets-loading-error": "Fehler beim Laden der Datensätze:",
   "no-datasets-available": "Aktuell sind keine Datensätze vorhanden.",
@@ -312,6 +313,7 @@
   "ml-models-none-available": "Es sind keine Modelle verfügbar.",
   "ml-models-not-found-error": "Modellversion konnte nicht gefunden werden.",
 
+  "jobs": "Jobs",
   "jobs-loading": "Jobs werden geladen...",
   "jobs-loading-error": "Fehler beim Laden der Jobs:",
   "no-jobs-available": "Aktuell sind keine Jobs vorhanden.",
