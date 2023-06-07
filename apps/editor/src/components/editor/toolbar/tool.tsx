@@ -16,7 +16,7 @@ export const Tool = observer<
   },
   HTMLButtonElement
 >(
-  ({ tool, ...rest }, ref) => {
+  React.forwardRef(({ tool, ...rest }, ref) => {
     const { t } = useTranslation();
 
     const keys = tool.activationKeys && tool.activationKeys.split(",")[0];
@@ -41,6 +41,5 @@ export const Tool = observer<
         onContextMenu={preventDefault}
       />
     );
-  },
-  { forwardRef: true },
+  }),
 );

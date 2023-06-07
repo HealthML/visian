@@ -2,14 +2,17 @@ import {
   color,
   fontSize,
   fontWeight,
-  InvisibleButton,
   ListItem,
+  OptionSelector,
   Text,
 } from "@visian/ui-shared";
+import { useCallback, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 
+import { useUpdateDatasetsMutation } from "../../../queries";
 import { Dataset } from "../../../types";
+import { DatasetEditPopup } from "../dataset-edit-popup";
 
 const StyledListItem = styled(ListItem)`
   width: 21vw;
@@ -23,6 +26,9 @@ const StyledText = styled(Text)`
   font-weight: ${fontWeight("regular")};
   flex-grow: 1;
   cursor: pointer;
+  max-width: 80%;
+  overflow: hidden;
+  margin-right: auto;
 `;
 
 const ImageContainer = styled.div`
@@ -52,11 +58,6 @@ const DatasetWrapper = styled.div`
   width: 100%;
 `;
 
-const IconButton = styled(InvisibleButton)`
-  width: 30px;
-  flex-grow: 0;
-`;
-
 export const DatasetListItem = ({
   dataset,
   deleteDataset,
@@ -70,6 +71,19 @@ export const DatasetListItem = ({
     navigate(`/datasets/${dataset.id}`);
   };
 
+  // edit Dataset popup
+  const [isEditDatasetPopupOpen, setIsEditDatasetPopupOpen] = useState(false);
+  const openEditDatasetPopup = useCallback(
+    () => setIsEditDatasetPopupOpen(true),
+    [],
+  );
+  const closeEditDatasetPopup = useCallback(
+    () => setIsEditDatasetPopupOpen(false),
+    [],
+  );
+
+  const updateDataset = useUpdateDatasetsMutation();
+
   return (
     <StyledListItem innerHeight="auto" isLast>
       <DatasetWrapper>
@@ -81,15 +95,35 @@ export const DatasetListItem = ({
         </ImageContainer>
         <DatasetInfo>
           <StyledText onClick={openDataset}>{dataset.name}</StyledText>
-          <IconButton
-            icon="trash"
-            tooltipTx="delete-dataset-title"
-            onPointerDown={deleteDataset}
-            style={{ marginLeft: "auto" }}
-            tooltipPosition="left"
+          <OptionSelector
+            options={[
+              {
+                value: "delete",
+                labelTx: "delete",
+                icon: "trash",
+                iconSize: 30,
+                onSelected: deleteDataset,
+              },
+              {
+                value: "edit",
+                label: "Edit",
+                icon: "pixelBrush",
+                iconSize: 30,
+                onSelected: openEditDatasetPopup,
+              },
+            ]}
+            pannelPosition="bottom"
           />
         </DatasetInfo>
       </DatasetWrapper>
+      <DatasetEditPopup
+        oldName={dataset.name}
+        isOpen={isEditDatasetPopupOpen}
+        onClose={closeEditDatasetPopup}
+        onConfirm={(newName) =>
+          updateDataset.mutate({ ...dataset, name: newName })
+        }
+      />
     </StyledListItem>
   );
 };
