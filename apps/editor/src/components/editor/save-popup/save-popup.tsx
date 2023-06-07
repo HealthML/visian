@@ -165,7 +165,7 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
   }, [isOpen, getAnnotationURISuggestion]);
 
   const isValidDataUri = useCallback(
-    (dataUri, allowedExtensions = [".nii.gz"]) => {
+    (dataUri, allowedExtensions = [".nii.gz", ".zip"]) => {
       const extensionsPattern = `(${allowedExtensions.join("|")})`;
 
       const pattern = new RegExp(
