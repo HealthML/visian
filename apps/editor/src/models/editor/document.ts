@@ -448,6 +448,18 @@ export class Document
     FileSaver.saveAs(await zip.toBlob(), `${this.title}.zip`);
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-shadow
+  public createZip = async (layers: ILayer[]): Promise<File> => {
+    const zip = new Zip();
+    const files = await Promise.all(layers.map((layer) => layer.toFile()));
+    files.forEach((file, index) => {
+      if (!file) return;
+      zip.setFile(`${`00${index}`.slice(-2)}_${file.name}`, file);
+    });
+
+    return new File([await zip.toBlob()], `${this.title}.zip`);
+  };
+
   public getFileForLayer = async (idOrLayer: string | ILayer) => {
     const layerId = typeof idOrLayer === "string" ? idOrLayer : idOrLayer.id;
     const layer = this.layerMap[layerId];

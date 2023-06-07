@@ -15,6 +15,7 @@ import { useStore } from "../../../app/root-store";
 import { patchAnnotationFile, postAnnotationFile } from "../../../queries";
 import { Annotation } from "../../../types";
 import { SavePopUpProps } from "./save-popup.props";
+import { LayerGroup } from "../../../models";
 
 const SectionLabel = styled(Text)`
   font-size: 14px;
@@ -71,6 +72,17 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
     }
   };
 
+  const createActiveGroupFile = async (): Promise<File | undefined> => {
+    const activeLayer = store?.editor.activeDocument?.activeLayer;
+    if (activeLayer && activeLayer.isAnnotation) {
+      const activeGroupLayer = activeLayer.parent as LayerGroup;
+      const zipFile = await store?.editor?.activeDocument?.createZip(
+        activeGroupLayer.layers,
+      );
+      return zipFile;
+    }
+  };
+
   const checkAnnotationURI = (file: File, uri: string) => {
     if (path.extname(uri) !== path.extname(file.name)) {
       throw new Error(
@@ -113,7 +125,7 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
     store?.setProgress({ labelTx: "saving" });
     try {
       const imageId = searchParams.get("imageId");
-      const annotationFile = await createActiveLayerFile();
+      const annotationFile = await createActiveGroupFile();
       if (!imageId || !annotationFile) {
         throw new Error("Could not create annotation file");
       }
