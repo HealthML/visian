@@ -81,6 +81,8 @@ export interface ILayer {
   /** Sets the layer's title. */
   setTitle(value?: string): void;
 
+  setMetaData(value?: { id: string; [key: string]: any }): void;
+
   /** Sets this layer's parent layer, typically the group it is contained in. */
   setParent(idOrLayer?: string | ILayer): void;
 

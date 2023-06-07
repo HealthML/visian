@@ -39,7 +39,12 @@ import {
   generalTextures2d,
   generalTextures3d,
 } from "../../constants";
-import { FileWithGroup, FileWithMetadata } from "../../types";
+import {
+  Annotation,
+  FileWithGroup,
+  FileWithMetadata,
+  Image,
+} from "../../types";
 import { readTrackingLog, TrackingData } from "../tracking";
 import { StoreContext } from "../types";
 import { Clipboard } from "./clipboard";
@@ -570,7 +575,11 @@ export class Document
       const zip = await Zip.fromZipFile(filteredFiles);
       const unzippedFiles = await zip.getAllFiles();
       await this.importFiles(
-        this.createLayerGroup(unzippedFiles, filteredFiles.name),
+        this.createLayerGroup(
+          unzippedFiles,
+          filteredFiles.name,
+          this.getGroupMetaData(filteredFiles),
+        ),
         filteredFiles.name,
       );
       return;
@@ -591,7 +600,11 @@ export class Document
     }
 
     if (filteredFiles instanceof File) {
-      this.createLayerGroup([filteredFiles], filteredFiles.name);
+      this.createLayerGroup(
+        [filteredFiles],
+        filteredFiles.name,
+        this.getGroupMetaData(filteredFiles),
+      );
     } else {
       this.createLayerGroup(filteredFiles, name ?? uuidv4());
     }
@@ -693,6 +706,8 @@ export class Document
               name: `${layerIndex}_${imageWithUnit.name}`,
               ...prototypeImage,
             });
+            this.addGroupToFile(createdLayerId, files);
+            this.addMetaDataToFile(createdLayerId, files);
           }
         } else {
           this.setError({
@@ -726,7 +741,8 @@ export class Document
               { ...imageWithUnit, name: `${value}_${image.name}` },
               value,
             );
-            this.addFileMetaData(createdLayerId, files);
+            this.addGroupToFile(createdLayerId, files);
+            this.addMetaDataToFile(createdLayerId, files);
           });
         }
       }
@@ -742,7 +758,8 @@ export class Document
       this.history.clear();
     }
 
-    this.addFileMetaData(createdLayerId, files);
+    this.addGroupToFile(createdLayerId, files);
+    this.addMetaDataToFile(createdLayerId, files);
     return createdLayerId;
   }
 
@@ -871,18 +888,23 @@ export class Document
       ) as unknown as IImageLayer[];
   }
 
-  private addFileMetaData(createdLayerId: string, file: File | File[]) {
+  private addGroupToFile(createdLayerId: string, file: File | File[]) {
     const layer = this.getLayer(createdLayerId);
-    if (layer && "metadata" in file) {
-      const fileWithMetaData = file as FileWithMetadata;
-      layer.metaData = fileWithMetaData.metadata;
-    }
     if (layer && "groupId" in file) {
       const fileWithGroupId = file as FileWithGroup;
       const groupLayer = this.getLayer(
         fileWithGroupId.groupId,
       ) as layers.LayerGroup;
       groupLayer?.addLayer(layer);
+    }
+  }
+
+  // adds Meta Data to layer object
+  private addMetaDataToFile(createdLayerId: string, file: File | File[]) {
+    const layer = this.getLayer(createdLayerId);
+    if (layer && "metadata" in file) {
+      const fileWithMetaData = file as FileWithMetadata;
+      layer.metaData = fileWithMetaData.metadata;
     }
   }
 
@@ -940,7 +962,11 @@ export class Document
     );
   }
 
-  public createLayerGroup(files: File[], title?: string): FileWithGroup[] {
+  private createLayerGroup(
+    files: File[],
+    title?: string,
+    groupMetaData?: Image | Annotation,
+  ): FileWithGroup[] {
     if (files.every((f) => "groupId" in f)) {
       return files as FileWithGroup[];
     }
@@ -950,14 +976,25 @@ export class Document
       );
     }
     const groupLayer = new layers.LayerGroup(undefined, this);
+    groupLayer.setMetaData(groupMetaData);
     groupLayer.setTitle(title);
-    const groupLayerId = groupLayer.id;
     const filesWithGroup = files.map((f) => {
       const fileWithGroup = f as FileWithGroup;
-      fileWithGroup.groupId = groupLayerId;
+      fileWithGroup.groupId = groupLayer.id;
       return fileWithGroup;
     });
     this.addLayer(groupLayer);
     return filesWithGroup;
+  }
+
+  private getGroupMetaData(
+    file: File | undefined,
+  ): Image | Annotation | undefined {
+    if (!file) return undefined;
+    if ("metadata" in file) {
+      const fileWithMetaData = file as FileWithGroup;
+      return fileWithMetaData.metadata;
+    }
+    return undefined;
   }
 }

@@ -6,4 +6,5 @@ export interface FileWithMetadata extends File {
 
 export interface FileWithGroup extends File {
   groupId: string;
+  metadata?: Annotation | Image;
 }
