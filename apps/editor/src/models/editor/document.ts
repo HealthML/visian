@@ -568,7 +568,11 @@ export class Document
       }
     } else if (filteredFiles.name.endsWith(".zip")) {
       const zip = await Zip.fromZipFile(filteredFiles);
-      await this.importFiles(await zip.getAllFiles(), filteredFiles.name);
+      const unzippedFiles = await zip.getAllFiles();
+      await this.importFiles(
+        this.createLayerGroup(unzippedFiles, filteredFiles.name),
+        filteredFiles.name,
+      );
       return;
     } else if (filteredFiles.name.endsWith(".json")) {
       await readTrackingLog(filteredFiles, this);
@@ -586,6 +590,11 @@ export class Document
       return;
     }
 
+    if (filteredFiles instanceof File) {
+      this.createLayerGroup([filteredFiles], filteredFiles.name);
+    } else {
+      this.createLayerGroup(filteredFiles, name ?? uuidv4());
+    }
     let createdLayerId = "";
     const isFirstLayer = !this.layerIds.length;
     const image = await readMedicalImage(filteredFiles);
@@ -932,6 +941,14 @@ export class Document
   }
 
   public createLayerGroup(files: File[], title?: string): FileWithGroup[] {
+    if (files.every((f) => "groupId" in f)) {
+      return files as FileWithGroup[];
+    }
+    if (files.some((f) => "groupId" in f)) {
+      throw new Error(
+        "Cannot create a new group for file that already belongs to a group",
+      );
+    }
     const groupLayer = new layers.LayerGroup(undefined, this);
     groupLayer.setTitle(title);
     const groupLayerId = groupLayer.id;
