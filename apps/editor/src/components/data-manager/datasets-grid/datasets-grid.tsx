@@ -69,15 +69,6 @@ export const DatasetsGrid = ({
     [setDatasetTobBeDeleted, openDeleteDatasetConfirmationPopUp],
   );
 
-  const deleteDatasetMessage = useMemo(
-    () =>
-      `${translate("delete-dataset-message")}`.replace(
-        "_",
-        datasetTobBeDeleted?.name ?? "",
-      ),
-    [datasetTobBeDeleted, translate],
-  );
-
   return (
     <>
       <StyledModal
@@ -104,7 +95,9 @@ export const DatasetsGrid = ({
       <ConfirmationPopup
         isOpen={isDeleteDatasetConfirmationPopUpOpen}
         onClose={closeDeleteDatasetConfirmationPopUp}
-        message={deleteDatasetMessage}
+        message={translate("delete-dataset-message", {
+          name: datasetTobBeDeleted?.name ?? "",
+        })}
         titleTx="delete-dataset-title"
         onConfirm={() => {
           if (datasetTobBeDeleted)

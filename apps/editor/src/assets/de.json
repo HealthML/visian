@@ -294,7 +294,7 @@
   "dataset-loading-error": "Fehler beim Laden des Datensatzes:",
 
   "images-loading": "Bilder werden geladen...",
-  "images-loading-error": "Fehler beim Laden der Bilder:",
+  "images-loading-error": "Fehler beim Laden der Bilder: {{statusText}} {{status}}",
   "no-images-available": "Aktuell sind keine Bilder vorhanden.",
   "image-open-error": "Fehler beim Öffnen des Bildes",
   "image-annotated": "annotiert",
@@ -371,7 +371,7 @@
   "delete-image-title": "Bild löschen",
   "delete-image-message": "Wollen Sie das Bild \"_\" sämtlich aller dazugehörigen Annotationen wirklich löschen?",
   "delete-dataset-title": "Datensatz löschen",
-  "delete-dataset-message": "Wollen Sie den Datensatz \"_\" sämtlich aller enthaltenen Bilder und Annotationen wirklich löschen?",
+  "delete-dataset-message": "Wollen Sie den Datensatz \"{name}\" sämtlich aller enthaltenen Bilder und Annotationen wirklich löschen?",
   "delete-project-title": "Projekt löschen",
   "delete-project-message": "Wollen sie das Projekt \"_\" sämtlich aller enthalten Datensätze, Bilder und Annotationen wirklich löschen?",
   "delete-job-title": "Job löschen",

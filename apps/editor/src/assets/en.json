@@ -294,7 +294,7 @@
   "dataset-loading-error": "Error on loading dataset:",
 
   "images-loading": "Loading images...",
-  "images-loading-error": "Error on loading images:",
+  "images-loading-error": "Error on loading images:  {{statusText}} {{status}}",
   "no-images-available": "Currently no images are available.",
   "image-open-error": "Error on opening image",
   "image-annotated": "annotated",
@@ -371,7 +371,7 @@
   "delete-image-title": "Delete Image",
   "delete-image-message": "Do you really want to delete the image \"_\" including all its annotations?",
   "delete-dataset-title": "Delete Dataset",
-  "delete-dataset-message": "Do you really want to delete the dataset \"_\" including all its images and annotations?",
+  "delete-dataset-message": "Do you really want to delete the dataset \"{name}\" including all its images and annotations?",
   "delete-project-title": "Delete Project",
   "delete-project-message": "Do you really want to delete the project \"_\" including all its datasets, Images and annotations?",
   "delete-job-title": "Delete Job",
