@@ -7,7 +7,7 @@ import {
   ThemeProvider,
 } from "@visian/ui-shared";
 import { isFromWHO, isUsingLocalhost } from "@visian/utils";
-import Amplify from "aws-amplify";
+import { Amplify } from "aws-amplify";
 import { observer } from "mobx-react-lite";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { QueryClient, QueryClientProvider } from "react-query";

@@ -251,7 +251,9 @@ export class Image implements ISerializable<ImageSnapshot> {
 
   public getSlice(viewType: ViewType, sliceNumber: number) {
     const [horizontal, vertical] = getPlaneAxes(viewType);
-    const sliceData = new Uint8Array(
+    const sliceData = new (this.data.constructor as new (
+      size: number,
+    ) => typeof this.data)(
       this.voxelCount[horizontal] *
         this.voxelCount[vertical] *
         this.voxelComponents,
@@ -375,7 +377,7 @@ export class Image implements ISerializable<ImageSnapshot> {
     }
   }
 
-  public setSlice(viewType: ViewType, slice: number, sliceData?: Uint8Array) {
+  public setSlice(viewType: ViewType, slice: number, sliceData?: TypedArray) {
     setSlice(this, this.getData(), viewType, slice, sliceData);
   }
 

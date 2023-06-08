@@ -378,7 +378,7 @@ export class RenderedImage extends Image implements IDisposable {
   public setSlice(
     viewType: ViewType,
     slice: number,
-    sliceData?: Uint8Array | THREE.Texture,
+    sliceData?: TypedArray | THREE.Texture,
     mergeFunction = MergeFunction.Replace,
   ) {
     if (this.document.renderer && this.isAnnotation) {

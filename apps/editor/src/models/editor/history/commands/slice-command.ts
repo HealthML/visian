@@ -4,7 +4,7 @@ import {
   IUndoRedoCommand,
   IUndoRedoCommandSnapshot,
 } from "@visian/ui-shared";
-import { ISerializable, ViewType } from "@visian/utils";
+import { ISerializable, TypedArray, ViewType } from "@visian/utils";
 
 export interface SliceCommandSnapshot extends IUndoRedoCommandSnapshot {
   kind: "slice";
@@ -12,8 +12,8 @@ export interface SliceCommandSnapshot extends IUndoRedoCommandSnapshot {
   layerId: string;
   viewType: ViewType;
   slice: number;
-  oldSliceData: Uint8Array;
-  newSliceData?: Uint8Array;
+  oldSliceData: TypedArray;
+  newSliceData?: TypedArray;
 }
 
 export class SliceCommand
@@ -28,8 +28,8 @@ export class SliceCommand
   public readonly layerId: string;
   public readonly viewType: ViewType;
   public readonly slice: number;
-  protected readonly oldSliceData: Uint8Array;
-  protected readonly newSliceData?: Uint8Array;
+  protected readonly oldSliceData: TypedArray;
+  protected readonly newSliceData?: TypedArray;
 
   constructor(
     snapshot: Omit<SliceCommandSnapshot, "kind">,

@@ -1,5 +1,6 @@
 import { RenderedImage, ToolRenderer } from "@visian/rendering";
 import { IDocument, IImageLayer } from "@visian/ui-shared";
+import { TypedArray } from "@visian/utils";
 
 import { SliceCommand } from "../history";
 import { Tool, ToolConfig } from "./tool";
@@ -7,7 +8,7 @@ import { Tool, ToolConfig } from "./tool";
 export class UndoableTool<N extends string> extends Tool<N> {
   public readonly excludeFromSnapshotTracking = ["toolRenderer", "document"];
 
-  private oldSliceData?: Uint8Array;
+  private oldSliceData?: TypedArray;
   private sliceNumber?: number;
 
   constructor(

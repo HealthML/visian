@@ -147,20 +147,23 @@ export interface IToolGroup<N extends string> {
   setActiveTool(nameOrTool: N | ITool<N>): void;
 }
 
-export interface IBlipRenderer3D {
+export interface IToolRenderer3D {
   holdsPreview: boolean;
   previewColor?: string;
 
+  outputTexture: THREE.Texture;
+
+  render(): void;
+  flushToAnnotation(): void;
+  discard(): void;
+}
+
+export interface IBlipRenderer3D extends IToolRenderer3D {
   /** The number of steps to region grow. */
   steps: number;
   maxSteps: number;
 
-  outputTexture: THREE.Texture;
-
   setMaxSteps(value: number): void;
-  render(): void;
-  flushToAnnotation(): void;
-  discard(): void;
 }
 
 export interface IDilateErodeRenderer3D extends IBlipRenderer3D {
@@ -173,7 +176,7 @@ export interface IDilateErodeRenderer3D extends IBlipRenderer3D {
   setShouldAutoCompensate(value: boolean): void;
 }
 
-export interface IThresholdAnnotationRenderer3D extends IBlipRenderer3D {
+export interface IThresholdAnnotationRenderer3D extends IToolRenderer3D {
   threshold: [number, number];
   setThreshold(value: [number, number]): void;
 }

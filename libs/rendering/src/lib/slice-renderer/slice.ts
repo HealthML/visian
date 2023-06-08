@@ -1,3 +1,4 @@
+import * as TWEEN from "@tweenjs/tween.js";
 import { IEditor, IImageLayer } from "@visian/ui-shared";
 import { IDisposable, IDisposer, ViewType } from "@visian/utils";
 import { autorun, reaction } from "mobx";
@@ -138,6 +139,7 @@ export class Slice extends THREE.Group implements IDisposable {
     this.disposers.push(
       autorun(this.updateScale),
       autorun(this.updateOffset),
+      autorun(this.updateRotation),
       reaction(
         () => this.editor.activeDocument?.mainImageLayer,
         (imageLayer?: IImageLayer) => {
@@ -222,10 +224,52 @@ export class Slice extends THREE.Group implements IDisposable {
 
     this.updateScale();
     this.updateOffset();
+    this.updateRotation();
 
     this.updateMatrixWorld(true);
     this.crosshairShiftGroup.updateMatrixWorld(true);
   }
+
+  private updateRotation = () => {
+    const viewport = this.editor.activeDocument?.viewport2D;
+    const wasRotationResetted =
+      viewport?.rotationT === 0 &&
+      viewport?.rotationS === 0 &&
+      viewport?.rotationC === 0;
+
+    if (
+      !viewport ||
+      (viewport.mainViewType !== this.viewType && !wasRotationResetted)
+    )
+      return;
+
+    let rotation;
+    switch (this.viewType) {
+      case ViewType.Transverse:
+        rotation = viewport.rotationT ?? 0;
+        break;
+      case ViewType.Sagittal:
+        rotation = viewport.rotationS ?? 0;
+        break;
+      case ViewType.Coronal:
+        rotation = viewport.rotationC ?? 0;
+        break;
+    }
+
+    const targetQuaternion = new THREE.Quaternion().setFromAxisAngle(
+      new THREE.Vector3(0, 0, 1),
+      rotation,
+    );
+
+    new TWEEN.Tween({ t: 0 })
+      .to({ t: 1 }, 250)
+      .easing(TWEEN.Easing.Quadratic.InOut)
+      .onUpdate((tween) => {
+        this.quaternion.slerp(targetQuaternion, tween.t);
+        this.editor.sliceRenderer?.lazyRender();
+      })
+      .start();
+  };
 
   private updateScale = () => {
     this.workingVector2.copy(this.baseSize);
