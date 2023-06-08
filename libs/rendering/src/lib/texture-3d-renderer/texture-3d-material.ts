@@ -8,18 +8,9 @@ export class Texture3DMaterial extends THREE.ShaderMaterial {
       uniforms: {
         uSlice: { value: 0 },
         uSize: { value: [1, 1, 1] },
-        uSourceTexture: { value: null },
         ...parameters.uniforms,
       },
-      defines: {
-        VOLUMETRIC_IMAGE: "",
-        ...parameters.defines,
-      },
     });
-  }
-
-  public setSourceTexture(texture: THREE.Texture) {
-    this.uniforms.uSourceTexture.value = texture;
   }
 
   public setSlice(slice: number) {

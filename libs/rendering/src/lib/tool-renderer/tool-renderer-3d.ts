@@ -22,7 +22,8 @@ import {
 import * as THREE from "three";
 
 import { ImageRenderTarget, RenderedImage } from "../rendered-image";
-import { Texture3DMaterial, Texture3DRenderer } from "../texture-3d-renderer";
+import { Texture3DRenderer } from "../texture-3d-renderer";
+import { Tool3DMaterial } from "./utils/tool-3d-material";
 
 export class ToolRenderer3D implements IToolRenderer3D, IDisposable {
   public readonly excludeFromSnapshotTracking = ["document"];
@@ -34,14 +35,14 @@ export class ToolRenderer3D implements IToolRenderer3D, IDisposable {
 
   protected renderTarget!: THREE.WebGLRenderTarget;
 
-  protected material: Texture3DMaterial;
+  protected material: Tool3DMaterial;
   protected texture3DRenderer: Texture3DRenderer;
 
   constructor(
     protected document: IDocument,
     parameters?: THREE.ShaderMaterialParameters,
   ) {
-    this.material = new Texture3DMaterial(parameters);
+    this.material = new Tool3DMaterial(document, parameters);
     this.texture3DRenderer = new Texture3DRenderer();
 
     makeObservable<this, "renderTarget">(this, {
