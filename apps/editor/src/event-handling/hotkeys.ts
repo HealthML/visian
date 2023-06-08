@@ -489,7 +489,7 @@ export const generalHotkeys: IHotkey[] = [
         ).submit();
       }
 
-      if (store.editor.activeDocument?.tools.samRenderer.showsMask) {
+      if (store.editor.activeDocument?.tools.samRenderer.holdsPreview) {
         (
           store.editor.activeDocument?.tools.tools["sam-tool"] as SAMTool
         ).submit();

@@ -1,11 +1,18 @@
-varying vec2 vUv;
+precision highp sampler3D;
 
-uniform sampler2D uDataTexture;
+in vec2 vUv;
+
+@import ../uniforms/u-tool-3d-material;
+
+out vec4 pc_FragColor;
 
 void main() {
-  vec4 partOfMask = texture2D(uDataTexture, vUv);
+  #ifdef VOLUMETRIC_IMAGE
+    vec3 uv = vec3(vUv, (uSlice + 0.5) / uSize.z);
+  #else
+    vec2 uv = vUv;
+  #endif
 
-  if(partOfMask[0] == 0.0) discard;
-
-  gl_FragColor = vec4(1.0);
+  vec4 source = texture(uSourceTexture, uv);
+  pc_FragColor = vec4(source[0] < 0.5 ? 0.0 : 1.0);
 }

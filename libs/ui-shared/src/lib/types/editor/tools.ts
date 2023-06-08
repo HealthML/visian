@@ -219,6 +219,7 @@ export interface ITools<N extends string> {
   slicePreviewMergeFunction?: MergeFunction;
   layerPreviewTexture: THREE.Texture;
   regionGrowingRenderer3D: IBlipRenderer3D;
+  samRenderer: IToolRenderer3D;
   thresholdAnnotationRenderer3D: IThresholdAnnotationRenderer3D;
   dilateErodeRenderer3D: IDilateErodeRenderer3D;
 

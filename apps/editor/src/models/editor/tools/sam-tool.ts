@@ -12,17 +12,18 @@ import { debounce } from "lodash";
 import { action, makeObservable, observable, reaction } from "mobx";
 
 import { SAM } from "../../sam/SAM";
-import { UndoableTool } from "./undoable-tool";
+import { Tool } from "./tool";
+import { mutateTextureData } from "./utils";
 
 export type SAMToolEmbeddingState = "uninitialized" | "loading" | "ready";
 export type SAMToolBoundingBox = { topLeft: Vector; bottomRight: Vector };
 
 export class SAMTool<N extends "sam-tool" = "sam-tool">
-  extends UndoableTool<N>
+  extends Tool<N>
   implements ISAMTool
 {
   public readonly excludeFromSnapshotTracking = [
-    "toolRenderer",
+    "renderer",
     "document",
     "inRightClickMode",
     "boundingBoxStart",
@@ -48,7 +49,7 @@ export class SAMTool<N extends "sam-tool" = "sam-tool">
   public foregroundPoints: Vector[] = [];
   public backgroundPoints: Vector[] = [];
 
-  constructor(document: IDocument, public toolRenderer: SamRenderer) {
+  constructor(document: IDocument, public renderer: SamRenderer) {
     super(
       {
         name: "sam-tool" as N,
@@ -61,7 +62,6 @@ export class SAMTool<N extends "sam-tool" = "sam-tool">
         activationKeys: "",
       },
       document,
-      toolRenderer,
     );
 
     this.sam = new SAM();
@@ -78,7 +78,7 @@ export class SAMTool<N extends "sam-tool" = "sam-tool">
         this.resetPromptInputs();
         this.setEmbeddingState("uninitialized");
         this.sam.reset();
-        this.toolRenderer.clearMask();
+        if (this.sam.isReady()) this.renderer.clearMask();
       },
     );
 
@@ -106,7 +106,7 @@ export class SAMTool<N extends "sam-tool" = "sam-tool">
           !this.foregroundPoints.length &&
           !this.backgroundPoints.length
         ) {
-          this.toolRenderer.clearMask();
+          this.renderer.clearMask();
           return;
         }
         this.debouncedGeneratePrediction();
@@ -172,7 +172,7 @@ export class SAMTool<N extends "sam-tool" = "sam-tool">
       this.backgroundPoints,
     );
 
-    if (mask) this.toolRenderer.showMask(mask);
+    if (mask) this.renderer.showMask(mask);
   }
 
   public async loadEmbedding() {
@@ -284,7 +284,7 @@ export class SAMTool<N extends "sam-tool" = "sam-tool">
       this.document.activeLayer.isAnnotation &&
       this.document.activeLayer.isVisible
     ) {
-      this.toolRenderer.render();
+      this.renderer.render();
     } else {
       this.document.tools.setActiveTool(previousTool);
       this.document.setShowLayerMenu(true);
@@ -296,14 +296,14 @@ export class SAMTool<N extends "sam-tool" = "sam-tool">
   };
 
   public submit = () => {
-    // startStroke is required to store previous state so the cmd can be undone
-    this.startStroke();
-    // endStroke flushes the mask to annotation and adds the cmd to undo history
-    this.endStroke(false);
-    // We need to wait until rendering is finished because the endStroke
-    // method also waits internally. Otherwise the mask would be cleared
-    // before it could be flushed.
-    this.toolRenderer.waitForRender().then(() => this.resetPromptInputs());
+    const targetLayer = this.document.activeLayer;
+    mutateTextureData(
+      targetLayer as IImageLayer,
+      () => this.renderer.flushToAnnotation(targetLayer as IImageLayer),
+      this.document,
+    );
+
+    this.resetPromptInputs();
   };
 
   public discard = () => {

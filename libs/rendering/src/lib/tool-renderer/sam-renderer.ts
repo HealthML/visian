@@ -1,80 +1,57 @@
 import { IDocument } from "@visian/ui-shared";
-import { DataTexture } from "three";
+import { Data3DTexture, GLSL3 } from "three";
 
-import { ScreenAlignedQuad } from "../screen-aligned-quad";
-import { ToolRenderer } from "./tool-renderer";
-import { SamPreviewMaterial } from "./utils/sam-preview-material";
+import { samPreviewFragmentShader, samPreviewVertexShader } from "../shaders";
+import { ToolRenderer3D } from "./tool-renderer-3d";
 
-export class SamRenderer extends ToolRenderer {
-  protected samPreviewTexture?: DataTexture;
-  protected samPreviewMaterial: SamPreviewMaterial;
-  protected samPreviewQuad: ScreenAlignedQuad;
+export class SamRenderer extends ToolRenderer3D {
+  public readonly excludeFromSnapshotTracking = ["document", "dataTexture"];
 
-  public showsMask = false;
+  protected dataTexture!: Data3DTexture;
 
   constructor(document: IDocument) {
-    super(document);
-
-    this.samPreviewMaterial = new SamPreviewMaterial();
-    this.samPreviewQuad = new ScreenAlignedQuad(this.samPreviewMaterial);
-  }
-
-  public dispose() {
-    super.dispose();
-
-    this.samPreviewTexture?.dispose();
-    this.samPreviewMaterial.dispose();
-    this.samPreviewQuad.dispose();
+    super(document, {
+      vertexShader: samPreviewVertexShader,
+      fragmentShader: samPreviewFragmentShader,
+      glslVersion: GLSL3,
+    });
+    this.setPreviewColor(document.getAnnotationPreviewColor());
   }
 
   public showMask(mask: Float32Array) {
     this.updatePreviewTexture(mask);
     this.render();
-    this.showsMask = true;
   }
 
   public clearMask() {
-    this.initializePreviewTexture();
+    this.initDataTexture();
     this.render();
-    this.showsMask = false;
   }
 
   protected updatePreviewTexture(mask: Float32Array) {
-    if (!this.samPreviewTexture) this.initializePreviewTexture();
-    if (!this.samPreviewTexture) return;
+    if (!this.dataTexture) this.initDataTexture();
+    const currentSlice = this.document.viewport2D.getSelectedSlice();
 
-    const { data } = this.samPreviewTexture.image;
+    const { mainImageLayer } = this.document;
+    if (!mainImageLayer) return;
+    const { width, height } = this.renderTarget;
+
+    const { data } = this.dataTexture.image;
+    const sliceOffset = currentSlice * width * height * 4;
     for (let i = 0; i < mask.length; i++) {
       const value = mask[i] > 0.0 ? 255 : 0;
-      data[i * 4] = value;
-      data[i * 4 + 1] = value;
-      data[i * 4 + 2] = value;
-      data[i * 4 + 3] = value;
+      data[sliceOffset + i * 4] = value;
+      data[sliceOffset + i * 4 + 1] = value;
+      data[sliceOffset + i * 4 + 2] = value;
+      data[sliceOffset + i * 4 + 3] = value;
     }
-    this.samPreviewTexture.needsUpdate = true;
+    this.dataTexture.needsUpdate = true;
+    this.material.setSourceTexture(this.dataTexture);
   }
 
-  public render() {
-    if (!this.document.renderer) return;
-
-    this.document.renderer.setRenderTarget(this.renderTarget);
-    this.document.renderer.autoClear = true;
-
-    this.samPreviewQuad.renderWith(this.document.renderer);
-
-    this.document.renderer.setRenderTarget(null);
-    this.document.renderer.autoClear = true;
-  }
-
-  protected resizeRenderTarget = () => {
-    super.resizeRenderTarget();
-    this.initializePreviewTexture();
-  };
-
-  protected initializePreviewTexture() {
-    const { width, height } = this.renderTarget;
-    const data = new Uint8Array(width * height * 4).fill(0);
-    this.samPreviewTexture = new DataTexture(data, width, height);
-    this.samPreviewMaterial.setDataTexture(this.samPreviewTexture);
+  protected initDataTexture() {
+    const { width, height, depth } = this.renderTarget;
+    const data = new Uint8Array(width * height * depth * 4).fill(0);
+    this.dataTexture = new Data3DTexture(data, width, height, depth);
   }
 }
