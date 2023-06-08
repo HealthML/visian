@@ -1,4 +1,9 @@
-import { IDocument, IImageLayer, MergeFunction } from "@visian/ui-shared";
+import {
+  IDocument,
+  IImageLayer,
+  IToolRenderer3D,
+  MergeFunction,
+} from "@visian/ui-shared";
 import {
   getPlaneAxes,
   IDisposable,
@@ -19,7 +24,7 @@ import * as THREE from "three";
 import { ImageRenderTarget, RenderedImage } from "../rendered-image";
 import { Texture3DMaterial, Texture3DRenderer } from "../texture-3d-renderer";
 
-export class Renderer3D implements IDisposable {
+export class ToolRenderer3D implements IToolRenderer3D, IDisposable {
   public readonly excludeFromSnapshotTracking = ["document"];
 
   public holdsPreview = false;

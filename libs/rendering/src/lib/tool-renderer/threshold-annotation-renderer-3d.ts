@@ -7,10 +7,10 @@ import {
   thresholdAnnotationFragmentShader,
   thresholdAnnotationVertexShader,
 } from "../shaders";
-import { Renderer3D } from "./renderer-3d";
+import { ToolRenderer3D } from "./tool-renderer-3d";
 
 export class ThresholdAnnotationRenderer3D
-  extends Renderer3D
+  extends ToolRenderer3D
   implements IThresholdAnnotationRenderer3D
 {
   public threshold: [number, number] = [0.05, 1];

@@ -15,11 +15,11 @@ import { action, makeObservable, observable } from "mobx";
 import * as THREE from "three";
 
 import { ImageRenderTarget, RenderedImage } from "../rendered-image";
-import { Renderer3D } from "./renderer-3d";
+import { ToolRenderer3D } from "./tool-renderer-3d";
 import { Blip3DMaterial, MAX_BLIP_STEPS } from "./utils";
 
 export class BlipRenderer3D
-  extends Renderer3D
+  extends ToolRenderer3D
   implements IBlipRenderer3D, IDisposable
 {
   public readonly excludeFromSnapshotTracking = ["document"];

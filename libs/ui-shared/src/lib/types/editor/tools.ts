@@ -137,7 +137,7 @@ export interface IToolGroup<N extends string> {
   setActiveTool(nameOrTool: N | ITool<N>): void;
 }
 
-export interface IRenderer3D {
+export interface IToolRenderer3D {
   holdsPreview: boolean;
   previewColor?: string;
 
@@ -148,7 +148,7 @@ export interface IRenderer3D {
   discard(): void;
 }
 
-export interface IBlipRenderer3D extends IRenderer3D {
+export interface IBlipRenderer3D extends IToolRenderer3D {
   /** The number of steps to region grow. */
   steps: number;
   maxSteps: number;
@@ -166,7 +166,7 @@ export interface IDilateErodeRenderer3D extends IBlipRenderer3D {
   setShouldAutoCompensate(value: boolean): void;
 }
 
-export interface IThresholdAnnotationRenderer3D extends IRenderer3D {
+export interface IThresholdAnnotationRenderer3D extends IToolRenderer3D {
   threshold: [number, number];
   setThreshold(value: [number, number]): void;
 }
