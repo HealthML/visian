@@ -1,10 +1,16 @@
+/* eslint-disable max-classes-per-file */
 import { color as c, IEditor } from "@visian/ui-shared";
 import { IDisposer } from "@visian/utils";
 import { autorun } from "mobx";
 import * as THREE from "three";
 
-import { nodeFragmentShader, nodeVertexShader } from "../../shaders";
-import { node, nodeDown, nodeUp, nodeUpDown } from "./node-icons";
+import {
+  nodeFragmentShader,
+  nodeVertexShader,
+  samNodeFragmentShader,
+  samNodeVertexShader,
+} from "../../shaders";
+import { node, nodeDown, nodeSmall, nodeUp, nodeUpDown } from "./node-icons";
 
 const updateOverlayColor = (color: THREE.Color, editor: IEditor) => {
   color.set(c("foreground")({ theme: editor.theme }));
@@ -73,6 +79,53 @@ export class OverlayRoundedPointsMaterial extends THREE.ShaderMaterial {
         this.uniforms.uInvertRGB.value = editor.colorMode === "light";
         editor.sliceRenderer?.lazyRender();
       }),
+      autorun(() => {
+        this.uniforms.uPointSize.value =
+          Math.max(
+            (editor.activeDocument?.viewport2D.zoomLevel ?? 1) *
+              OverlayRoundedPointsMaterial.pointSizeZoomScale,
+            OverlayRoundedPointsMaterial.minAbsolutePointSize,
+          ) * window.devicePixelRatio;
+        editor.sliceRenderer?.lazyRender();
+      }),
+    );
+  }
+
+  public dispose() {
+    super.dispose();
+    this.disposers.forEach((disposer) => disposer());
+  }
+}
+
+export class OverlaySamPointsMaterial extends THREE.ShaderMaterial {
+  public static readonly minAbsolutePointSize = 10;
+  public static readonly pointSizeZoomScale = 5;
+
+  private disposers: IDisposer[] = [];
+
+  constructor(editor: IEditor) {
+    super({
+      vertexShader: samNodeVertexShader,
+      fragmentShader: samNodeFragmentShader,
+      uniforms: {
+        uPointSize: { value: 1 },
+        uNodeTexture: { value: null },
+        uForegroundColor: { value: null },
+        uBackgroundColor: { value: null },
+      },
+      transparent: true,
+    });
+
+    const loader = new THREE.TextureLoader();
+    this.uniforms.uNodeTexture.value = loader.load(nodeSmall, () =>
+      editor.sliceRenderer?.lazyRender(),
+    );
+    const green = new THREE.Color(c("green")({ theme: editor.theme }));
+    const red = new THREE.Color(c("red")({ theme: editor.theme }));
+    this.uniforms.uForegroundColor.value = green;
+    this.uniforms.uBackgroundColor.value = red;
+
+    this.disposers.push(
       autorun(() => {
         this.uniforms.uPointSize.value =
           Math.max(

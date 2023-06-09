@@ -4,8 +4,8 @@ import { autorun } from "mobx";
 import * as THREE from "three";
 
 enum PointState {
-  FOREGROUND = 0,
-  BACKGROUND = 1,
+  BACKGROUND = 0,
+  FOREGROUND = 1,
 }
 
 export class SegPrompt extends THREE.Group implements IDisposable {
@@ -81,7 +81,7 @@ export class SegPrompt extends THREE.Group implements IDisposable {
       points,
     );
     this.promptPoints.geometry.setAttribute(
-      "textureIndex",
+      "isForeground",
       new THREE.Float32BufferAttribute(new Float32Array(pointStates), 1),
     );
   }
