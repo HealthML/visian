@@ -53,5 +53,6 @@ export class SamRenderer extends ToolRenderer3D {
     const { width, height, depth } = this.renderTarget;
     const data = new Uint8Array(width * height * depth * 4).fill(0);
     this.dataTexture = new Data3DTexture(data, width, height, depth);
+    this.material.setSourceTexture(this.dataTexture);
   }
 }
