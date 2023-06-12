@@ -11,7 +11,7 @@ const IconButton = styled(InvisibleButton)`
   width: 30px;
 `;
 
-const ClickableText = styled(Text)`
+const ClickableListItem = styled(ListItem)`
   cursor: pointer;
 `;
 
@@ -26,8 +26,8 @@ export const ListViewItem = ({
   onClick: () => void;
   isLast: boolean;
 }) => (
-  <ListItem isLast={isLast}>
-    <ClickableText onClick={onClick}>{item.name}</ClickableText>
+  <ClickableListItem isLast={isLast} onClick={onClick}>
+    <Text onClick={onClick}>{item.name}</Text>
     <ExpandedSpacer />
     <IconButton
       icon="trash"
@@ -36,7 +36,7 @@ export const ListViewItem = ({
       style={{ marginLeft: "auto" }}
       tooltipPosition="left"
     />
-  </ListItem>
+  </ClickableListItem>
 );
 
 export default ListViewItem;
