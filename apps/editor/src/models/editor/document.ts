@@ -460,6 +460,16 @@ export class Document
     return new File([await zip.toBlob()], `${this.title}.zip`);
   };
 
+  public createFileFromLayers = async (
+    // eslint-disable-next-line @typescript-eslint/no-shadow
+    layers: ILayer[],
+  ): Promise<File | undefined> => {
+    if (layers.length === 1) {
+      return layers[0].toFile();
+    }
+    return this.createZip(layers);
+  };
+
   public getFileForLayer = async (idOrLayer: string | ILayer) => {
     const layerId = typeof idOrLayer === "string" ? idOrLayer : idOrLayer.id;
     const layer = this.layerMap[layerId];

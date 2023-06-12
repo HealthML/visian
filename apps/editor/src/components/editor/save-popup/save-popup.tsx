@@ -1,5 +1,6 @@
 import {
   Button,
+  ILayer,
   PopUp,
   Text,
   TextField,
@@ -12,10 +13,10 @@ import { useSearchParams } from "react-router-dom";
 import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
+import { LayerGroup } from "../../../models";
 import { patchAnnotationFile, postAnnotationFile } from "../../../queries";
 import { Annotation } from "../../../types";
 import { SavePopUpProps } from "./save-popup.props";
-import { LayerGroup } from "../../../models";
 
 const SectionLabel = styled(Text)`
   font-size: 14px;
@@ -62,24 +63,50 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
 
   const { t } = useTranslation();
 
-  const createActiveLayerFile = async (
-    shouldBeAnnotation = true,
-  ): Promise<File | undefined> => {
-    const activeLayer = store?.editor.activeDocument?.activeLayer;
-    if (activeLayer && activeLayer.isAnnotation === shouldBeAnnotation) {
-      const layerFile = await activeLayer.toFile();
-      return layerFile;
+  const getLayersInGroupOf = useCallback(
+    (layer: ILayer | undefined) => {
+      if (!layer) return [];
+      const groupLayer = layer.parent as LayerGroup;
+      if (groupLayer) {
+        return groupLayer.layers;
+      }
+      const orphanAnnotationLayers =
+        store?.editor.activeDocument?.layers.filter(
+          (l) => l.isAnnotation && !l.parent,
+        );
+      return orphanAnnotationLayers ?? [];
+    },
+    [store],
+  );
+
+  const createGroupForNewAnnotation = async (
+    layer: ILayer | undefined,
+    annotation: Annotation | undefined,
+  ) => {
+    const document = store?.editor.activeDocument;
+    if (document) {
+      const groupLayer = new LayerGroup(undefined, document);
+      if (annotation) {
+        groupLayer.setMetaData(annotation);
+        groupLayer.setTitle(annotation.dataUri);
+      }
+      if (layer) {
+        const siblingLayers = getLayersInGroupOf(layer);
+        siblingLayers.forEach((l) => groupLayer.addLayer(l));
+        document.addLayer(groupLayer);
+      }
     }
   };
 
-  const createActiveGroupFile = async (): Promise<File | undefined> => {
-    const activeLayer = store?.editor.activeDocument?.activeLayer;
-    if (activeLayer && activeLayer.isAnnotation) {
-      const activeGroupLayer = activeLayer.parent as LayerGroup;
-      const zipFile = await store?.editor?.activeDocument?.createZip(
-        activeGroupLayer.layers,
+  const createGroupFileFor = async (
+    layer: ILayer | undefined,
+  ): Promise<File | undefined> => {
+    if (layer?.isAnnotation) {
+      const layersToSave = getLayersInGroupOf(layer);
+      const file = await store?.editor?.activeDocument?.createFileFromLayers(
+        layersToSave,
       );
-      return zipFile;
+      return file;
     }
   };
 
@@ -91,12 +118,22 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
     }
   };
 
+  const canBeOverwritten = useCallback(() => {
+    const activeLayer = store?.editor.activeDocument?.activeLayer;
+    const annotation = activeLayer?.parent?.metaData as Annotation;
+    if (!annotation) return false;
+    const fileExt = path.extname(annotation.dataUri);
+    const newFileExt =
+      getLayersInGroupOf(activeLayer).length > 1 ? ".zip" : ".nii.gz";
+    return fileExt === newFileExt;
+  }, [getLayersInGroupOf, store]);
+
   const saveAnnotation = async () => {
     store?.setProgress({ labelTx: "saving" });
     try {
-      const annotationMeta = store?.editor.activeDocument?.activeLayer
-        ?.metaData as Annotation;
-      const annotationFile = await createActiveLayerFile();
+      const activeLayer = store?.editor.activeDocument?.activeLayer;
+      const annotationMeta = activeLayer?.parent?.metaData as Annotation;
+      const annotationFile = await createGroupFileFor(activeLayer);
       if (!annotationMeta || !annotationFile) {
         throw new Error("Could not create annotation file");
       }
@@ -124,14 +161,20 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
   const saveAnnotationAs = async (uri: string) => {
     store?.setProgress({ labelTx: "saving" });
     try {
+      const activeLayer = store?.editor.activeDocument?.activeLayer;
       const imageId = searchParams.get("imageId");
-      const annotationFile = await createActiveGroupFile();
+      const annotationFile = await createGroupFileFor(activeLayer);
       if (!imageId || !annotationFile) {
         throw new Error("Could not create annotation file");
       }
       checkAnnotationURI(annotationFile, uri);
-      const response = await postAnnotationFile(imageId, uri, annotationFile);
-      return response;
+      const responseData = await postAnnotationFile(
+        imageId,
+        uri,
+        annotationFile,
+      );
+      createGroupForNewAnnotation(activeLayer, responseData);
+      return responseData;
     } catch (error: any) {
       const description = error.response?.data?.message
         ? error.response.data.message
@@ -148,15 +191,21 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
   };
 
   const getAnnotationURISuggestion = useCallback(() => {
-    const annotationLayerName =
-      store?.editor.activeDocument?.activeLayer?.title?.split(".")[0];
+    const activeLayer = store?.editor.activeDocument?.activeLayer;
+    if (!activeLayer) {
+      return "annotation.nii.gz";
+    }
+    const fileExt =
+      getLayersInGroupOf(activeLayer).length > 1 ? ".zip" : ".nii.gz";
     const imageURI =
       store?.editor.activeDocument?.mainImageLayer?.metaData?.dataUri;
     const imageName = path.basename(imageURI).split(".")[0];
+    const annotationLayerName =
+      store?.editor.activeDocument?.activeLayer?.title?.split(".")[0];
     return `/annotations/${imageName}/${
       annotationLayerName || "annotation"
-    }.nii.gz`;
-  }, [store]);
+    }${fileExt}`;
+  }, [store, getLayersInGroupOf]);
 
   useEffect(() => {
     if (isOpen) {
@@ -191,13 +240,14 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
       dismiss={onClose}
       shouldDismissOnOutsidePress
     >
-      {store?.editor.activeDocument?.activeLayer?.metaData?.dataUri && (
+      {canBeOverwritten() && (
         <>
           <SectionLabel tx="annotation-saving-overrwite" />
           <InlineRow>
             <SaveInput
               value={
-                store?.editor.activeDocument?.activeLayer?.metaData?.dataUri
+                store?.editor.activeDocument?.activeLayer?.parent?.metaData
+                  ?.dataUri
               }
               readOnly
             />
