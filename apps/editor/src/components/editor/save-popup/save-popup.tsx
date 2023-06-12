@@ -13,9 +13,10 @@ import { useSearchParams } from "react-router-dom";
 import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
+import { importFilesToDocument } from "../../../import-handling";
 import { LayerGroup } from "../../../models";
 import { patchAnnotationFile, postAnnotationFile } from "../../../queries";
-import { Annotation } from "../../../types";
+import { Annotation, FileWithMetadata } from "../../../types";
 import { SavePopUpProps } from "./save-popup.props";
 
 const SectionLabel = styled(Text)`
@@ -118,6 +119,21 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
     }
   };
 
+  const importSavedAnnotationFile = (
+    annotationFile: File,
+    metaData: Annotation,
+  ) => {
+    const savedAnnotaionFile = new File([annotationFile], metaData.dataUri, {
+      type: annotationFile.type,
+    }) as FileWithMetadata;
+    savedAnnotaionFile.metadata = metaData;
+    const fileTransfer = new DataTransfer();
+    fileTransfer.items.add(savedAnnotaionFile);
+    if (store) {
+      importFilesToDocument(fileTransfer.files, store);
+    }
+  };
+
   const canBeOverwritten = useCallback(() => {
     const activeLayer = store?.editor.activeDocument?.activeLayer;
     const annotation = activeLayer?.parent?.metaData as Annotation;
@@ -173,7 +189,12 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
         uri,
         annotationFile,
       );
-      createGroupForNewAnnotation(activeLayer, responseData);
+      const annotationMeta = activeLayer?.parent?.metaData as Annotation;
+      if (!annotationMeta) {
+        createGroupForNewAnnotation(activeLayer, responseData);
+      } else {
+        importSavedAnnotationFile(annotationFile, responseData);
+      }
       return responseData;
     } catch (error: any) {
       const description = error.response?.data?.message
