@@ -140,7 +140,7 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
     if (!annotation) return false;
     const fileExt = path.extname(annotation.dataUri);
     const newFileExt =
-      getLayersInGroupOf(activeLayer).length > 1 ? ".zip" : ".nii.gz";
+      getLayersInGroupOf(activeLayer).length > 1 ? ".zip" : ".gz";
     return fileExt === newFileExt;
   }, [getLayersInGroupOf, store]);
 
