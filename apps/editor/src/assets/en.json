@@ -384,5 +384,7 @@
   "create-dataset": "Create Dataset",
   "dataset-name": "Dataset Name",
 
-  "verified": "verified"
+  "verified": "verified",
+  "switch-to-grid": "Switch to grid view",
+  "switch-to-list": "Switch to list view"
 }

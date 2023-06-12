@@ -1,5 +1,6 @@
 import { Modal, SquareButton, Text, useTranslation } from "@visian/ui-shared";
 import { useCallback, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 
 import useDatasetsBy, {
@@ -9,7 +10,8 @@ import useDatasetsBy, {
 import { Dataset } from "../../../types";
 import { ConfirmationPopup } from "../confirmation-popup";
 import { DatasetCreationPopup } from "../dataset-creation-popup";
-import { DatasetList } from "../dataset-list";
+import { GridView } from "../grid-view";
+import { ListView } from "../list-view";
 
 const StyledModal = styled(Modal)`
   width: 100%;
@@ -34,6 +36,7 @@ export const DatasetsGrid = ({
   const { datasets } = useDatasetsBy(projectId);
   const [datasetTobBeDeleted, setDatasetTobBeDeleted] = useState<Dataset>();
   const { t: translate } = useTranslation();
+  const navigate = useNavigate();
   const { deleteDatasets } = useDeleteDatasetsForProjectMutation();
   const { createDataset } = useCreateDatasetMutation();
 
@@ -78,6 +81,19 @@ export const DatasetsGrid = ({
     [datasetTobBeDeleted, translate],
   );
 
+  const openDataset = useCallback(
+    (dataset: Dataset) => {
+      navigate(`/datasets/${dataset.id}`);
+    },
+    [navigate],
+  );
+
+  // switch between list and grid view
+  const [isGridView, setIsGridView] = useState(true);
+  const toggleGridView = useCallback(() => {
+    setIsGridView((prev) => !prev);
+  }, []);
+
   return (
     <>
       <StyledModal
@@ -85,20 +101,39 @@ export const DatasetsGrid = ({
         labelTx="datasets-base-title"
         position="right"
         headerChildren={
-          <StyledButton
-            icon="plus"
-            tooltipTx="create-dataset"
-            tooltipPosition="left"
-            onPointerDown={openCreateDatasetPopup}
-          />
+          <>
+            <StyledButton
+              icon="plus"
+              tooltipTx="create-dataset"
+              tooltipPosition="left"
+              onPointerDown={openCreateDatasetPopup}
+            />
+            <StyledButton
+              icon={isGridView ? "list" : "grid"}
+              tooltipTx={isGridView ? "switch-to-list" : "switch-to-grid"}
+              tooltipPosition="right"
+              onPointerDown={toggleGridView}
+            />
+          </>
         }
       >
         {altMessage ? (
           <ErrorMessage tx={altMessage} />
         ) : (
-          datasets && (
-            <DatasetList datasets={datasets} deleteDataset={deleteDataset} />
-          )
+          datasets &&
+          (isGridView ? (
+            <GridView
+              data={datasets}
+              onDelete={deleteDataset}
+              onClick={openDataset}
+            />
+          ) : (
+            <ListView
+              data={datasets}
+              onDelete={deleteDataset}
+              onClick={openDataset}
+            />
+          ))
         )}
       </StyledModal>
       <ConfirmationPopup

@@ -374,7 +374,7 @@
   "delete-project-title": "Projekt löschen",
   "delete-project-message": "Wollen sie das Projekt \"_\" sämtlich aller enthalten Datensätze, Bilder und Annotationen wirklich löschen?",
   "delete-job-title": "Job löschen",
-  "delete-job-message": "Wollen sie den Job sämtlich der _ dabei erzeugten Annotation(en) wirklich löschen?",
+  "delete-job-message": "Wollen sie den Job sämtlich der {{name}} dabei erzeugten Annotation(en) wirklich löschen?",
   "cancel-job-title": "Job abbrechen",
   "cancel-job-message": "Wollen sie den Job wirklich abbrechen?",
 
@@ -384,5 +384,7 @@
   "create-dataset": "Datensatz erstellen",
   "dataset-name": "Datensatzname",
 
-  "verified": "verifiziert"
+  "verified": "verifiziert",
+  "switch-to-grid": "Zur Rasteransicht wechseln",
+  "switch-to-list": "Zur Listenansicht wechseln"
 }
