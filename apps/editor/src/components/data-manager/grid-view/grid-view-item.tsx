@@ -1,34 +1,29 @@
-import {
-  fontSize,
-  fontWeight,
-  GridItem,
-  InvisibleButton,
-  Text,
-} from "@visian/ui-shared";
+import { GridItem, InvisibleButton, Text } from "@visian/ui-shared";
 import styled from "styled-components";
 
 import { Dataset, Project } from "../../../types";
 
 const StyledGridItem = styled(GridItem)`
-  align-items: center;
-  justify-content: center;
+  cursor: pointer;
 `;
 
 const IconButton = styled(InvisibleButton)`
   width: 30px;
 `;
 
-const ClickableText = styled(Text)`
-  font-size: ${fontSize("navigation")};
-  font-weight: ${fontWeight("regular")};
-  cursor: pointer;
+const StyledIconButton = styled(IconButton)`
+  position: absolute;
+  top: 2%;
+  right: 2%;
+`;
+
+const StyledText = styled(Text)`
+  margin: auto;
 `;
 
 const ImageContainer = styled.div`
-  flex: 1;
   border-radius: 5% 5% 0 0;
   overflow: hidden;
-  cursor: pointer;
   max-height: 75%;
 `;
 
@@ -39,19 +34,19 @@ const ImagePreview = styled.img`
 `;
 
 const Wrapper = styled.div`
-  height: 100%;
-  width: 100%;
+  width: 300px;
+  height: 230px;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
-  justify-content: center;
+  position: relative;
 `;
 
 const Info = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin: auto;
+  width: 90%;
+  padding: 5%;
 `;
 
 export const GridViewItem = ({
@@ -65,22 +60,34 @@ export const GridViewItem = ({
   onDelete: () => void;
   onClick: () => void;
 }) => (
-  <StyledGridItem innerHeight="auto">
+  <StyledGridItem innerHeight="auto" onClick={onClick}>
     <Wrapper>
-      {imgSrc && (
-        <ImageContainer onClick={onClick}>
-          <ImagePreview src={imgSrc} alt="Scan Preview" />
-        </ImageContainer>
+      {imgSrc ? (
+        <>
+          <ImageContainer>
+            <ImagePreview src={imgSrc} alt="Preview" />
+          </ImageContainer>
+          <Info>
+            <Text>{item.name}</Text>
+            <IconButton
+              icon="trash"
+              tooltipTx="delete"
+              onPointerDown={onDelete}
+              tooltipPosition="right"
+            />
+          </Info>
+        </>
+      ) : (
+        <>
+          <StyledIconButton
+            icon="trash"
+            tooltipTx="delete"
+            onPointerDown={onDelete}
+            tooltipPosition="right"
+          />
+          <StyledText>{item.name}</StyledText>
+        </>
       )}
-      <Info>
-        <ClickableText onClick={onClick}>{item.name}</ClickableText>
-        <IconButton
-          icon="trash"
-          tooltipTx="delete"
-          onPointerDown={onDelete}
-          tooltipPosition="left"
-        />
-      </Info>
     </Wrapper>
   </StyledGridItem>
 );
