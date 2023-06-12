@@ -1,0 +1,30 @@
+import { Grid, stopPropagation } from "@visian/ui-shared";
+import { observer } from "mobx-react-lite";
+import styled from "styled-components";
+
+import { GridViewItem } from "./grid-view-item";
+import { GridViewProps } from "./grid-view.props";
+
+const StyledGrid = styled(Grid)`
+  width: 100%;
+  overflow-y: auto;
+  user-select: none;
+`;
+
+export const GridView = observer<GridViewProps>(
+  ({ data, imgSrc, onDelete, onClick }: GridViewProps) => (
+    <StyledGrid onWheel={stopPropagation}>
+      {data.map((item) => (
+        <GridViewItem
+          item={item}
+          key={item.id}
+          imgSrc={imgSrc}
+          onDelete={() => onDelete(item)}
+          onClick={() => {
+            onClick(item);
+          }}
+        />
+      ))}
+    </StyledGrid>
+  ),
+);
