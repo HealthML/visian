@@ -329,6 +329,7 @@ export class RootStore implements ISerializable<RootSnapshot>, IDisposable {
     this.setIsDirty(false, true);
     return true;
   };
+
   public destroy = async (forceDestroy?: boolean): Promise<boolean> => {
     if (await this.destroyLayers(forceDestroy)) {
       window.location.href = new URL(window.location.href).searchParams.has(
@@ -340,6 +341,7 @@ export class RootStore implements ISerializable<RootSnapshot>, IDisposable {
     }
     return false;
   };
+
   public destroyReload = async (forceDestroy?: boolean): Promise<boolean> => {
     if (await this.destroyLayers(forceDestroy)) {
       const redirectURl = new URL(window.location.href);

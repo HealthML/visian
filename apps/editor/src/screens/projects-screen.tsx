@@ -75,10 +75,9 @@ export const ProjectsScreen: React.FC = observer(() => {
 
   const deleteProjectMessage = useMemo(
     () =>
-      `${translate("delete-project-message")}`.replace(
-        "_",
-        projectTobBeDeleted?.name ?? "",
-      ),
+      translate("delete-project-message", {
+        name: projectTobBeDeleted?.name ?? "",
+      }),
     [projectTobBeDeleted, translate],
   );
 

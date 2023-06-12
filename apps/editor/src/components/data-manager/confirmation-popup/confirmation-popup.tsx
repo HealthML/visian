@@ -31,23 +31,15 @@ export const ConfirmationPopup = observer<ConfirmationPopUpProps>(
     title,
     titleTx,
     message,
-    messageTx,
-    messageData,
     confirm,
     confirmTx,
     cancel,
     cancelTx,
   }) => {
-    const { t } = useTranslation();
-
     const handleConfirmation = useCallback(() => {
       onConfirm?.();
       onClose?.();
     }, [onClose, onConfirm]);
-
-    const translatedMessage = messageTx
-      ? t(messageTx, { name: messageData?.name }) // Use the translation key and data provided
-      : message; // Use the message prop if no translation key is given
 
     return (
       <ConfirmationPopupContainer
@@ -58,7 +50,7 @@ export const ConfirmationPopup = observer<ConfirmationPopUpProps>(
         shouldDismissOnOutsidePress
       >
         <>
-          <Text text={translatedMessage} />
+          <Text text={message} />
           <InlineRow>
             <StyledTextButton
               label={cancel}

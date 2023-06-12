@@ -198,9 +198,12 @@ export const DatasetExplorer = ({
       {isLoadingImages ? (
         <ErrorMessage tx="images-loading" />
       ) : isErrorImages ? (
-        <ErrorMessage>{`${translate("images-loading-error")} ${
-          imagesError?.response?.statusText
-        } (${imagesError?.response?.status})`}</ErrorMessage>
+        <ErrorMessage
+          text={translate("images-loading-error", {
+            statusText: imagesError?.response?.statusText,
+            status: imagesError?.response?.status,
+          })}
+        />
       ) : images && images.length > 0 ? (
         <DatasetImageList
           isInSelectMode={isInSelectMode}
@@ -233,20 +236,27 @@ export const DatasetExplorer = ({
       <ConfirmationPopup
         isOpen={isDeleteAnnotationConfirmationPopUpOpen}
         onClose={closeDeleteAnnotationConfirmationPopUp}
-        messageTx="delete-annotation-message"
-        messageData={{
+        message={translate("delete-annotation-message", {
           name: annotationTobBeDeleted?.dataUri ?? "",
-        }}
+        })}
         titleTx="delete-annotation-title"
         onConfirm={handleAnnotationConfirmation}
       />
       <ConfirmationPopup
         isOpen={isDeleteImagesConfirmationPopUpOpen}
-        onClose={closeDeleteImagesConfirmationPopUp}
-        messageTx="delete-images-message"
-        messageData={{
-          name: imageTobBeDeleted?.dataUri ?? selectedImages.size.toString(),
+        onClose={() => {
+          closeDeleteImagesConfirmationPopUp();
+          setImageTobBeDeleted(undefined);
         }}
+        message={
+          imageTobBeDeleted
+            ? translate("delete-image-message", {
+                name: imageTobBeDeleted?.dataUri ?? "",
+              })
+            : translate("delete-images-message", {
+                count: selectedImages.size.toString(),
+              })
+        }
         titleTx={
           imageTobBeDeleted ? "delete-image-title" : "delete-images-title"
         }

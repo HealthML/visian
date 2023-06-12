@@ -164,10 +164,9 @@ export const JobDetailsPopUp = observer<JobDetailsPopUpProps>(
 
     const deleteJobMessage = useMemo(
       () =>
-        `${t("delete-job-message")}`.replace(
-          "_",
-          jobAnnotations?.length.toString() ?? "0",
-        ),
+        t("delete-job-message", {
+          count: jobAnnotations?.length.toString() ?? "0",
+        }),
       [jobAnnotations, t],
     );
 
@@ -270,7 +269,7 @@ export const JobDetailsPopUp = observer<JobDetailsPopUpProps>(
         <ConfirmationPopup
           isOpen={isDeleteJobConfirmationPopUpOpen}
           onClose={closeDeleteJobConfirmationPopUp}
-          messageTx={deleteJobMessage}
+          message={deleteJobMessage}
           titleTx="delete-job-title"
           onConfirm={() => {
             deleteJobs({
@@ -283,7 +282,7 @@ export const JobDetailsPopUp = observer<JobDetailsPopUpProps>(
         <ConfirmationPopup
           isOpen={isCancelJobConfirmationPopUpOpen}
           onClose={closeCancelJobConfirmationPopUp}
-          messageTx="cancel-job-message"
+          message="cancel-job-message"
           titleTx="cancel-job-title"
           onConfirm={() => {
             patchJobStatus({
