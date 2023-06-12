@@ -105,6 +105,7 @@ function App(): JSX.Element {
                     element={<Navigate replace to="/projects" />}
                   />
                   <Route path="/editor" element={<EditorScreen />} />
+                  <Route path="*" element={<Navigate replace to="/" />} />
                 </Routes>
               ) : (
                 <Routes>
