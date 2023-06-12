@@ -13,15 +13,15 @@ import {
   createBase64StringFromFile,
   putWHOTask,
   setNewTaskIdForUrl,
+  WHOAnnotationData,
+  WHOAnnotationStatus,
 } from "@visian/utils";
 import { observer } from "mobx-react-lite";
-import React, { useCallback } from "react";
+import { useCallback } from "react";
 import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
 import { whoHome } from "../../../constants";
-import { AnnotationStatus } from "../../../models/who/annotation";
-import { AnnotationData } from "../../../models/who/annotationData";
 
 const AIBarSheet = styled(Sheet)`
   width: 800px;
@@ -184,7 +184,7 @@ export const AIBar = observer(() => {
   );
 
   const getBase64LayerDataForAnnotationData = useCallback(
-    async (annotationData: AnnotationData) => {
+    async (annotationData: WHOAnnotationData) => {
       const { correspondingLayerId } = annotationData;
       if (!correspondingLayerId) return;
       const base64LayerData = await getBase64LayerDataForId(
@@ -196,7 +196,7 @@ export const AIBar = observer(() => {
   );
 
   const saveAnnotationToWHOBackend = useCallback(
-    async (status: AnnotationStatus) => {
+    async (status: WHOAnnotationStatus) => {
       if (!store?.currentTask?.annotations.length) return;
       store.currentTask.annotations.forEach((annotation) => {
         annotation.status = status;
@@ -233,7 +233,7 @@ export const AIBar = observer(() => {
                   data: base64Annotation,
                 };
                 annotation.data.push(
-                  new AnnotationData(annotationDataForBackend),
+                  new WHOAnnotationData(annotationDataForBackend),
                 );
               });
             }
@@ -276,11 +276,11 @@ export const AIBar = observer(() => {
   );
 
   const confirmTaskAnnotation = useCallback(async () => {
-    await saveAnnotationToWHOBackend(AnnotationStatus.Completed);
+    await saveAnnotationToWHOBackend(WHOAnnotationStatus.Completed);
   }, [saveAnnotationToWHOBackend]);
 
   const skipTaskAnnotation = useCallback(async () => {
-    await saveAnnotationToWHOBackend(AnnotationStatus.Rejected);
+    await saveAnnotationToWHOBackend(WHOAnnotationStatus.Rejected);
   }, [saveAnnotationToWHOBackend]);
 
   return store?.editor.activeDocument ? (

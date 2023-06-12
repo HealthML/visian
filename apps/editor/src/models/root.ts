@@ -19,10 +19,10 @@ import { action, autorun, computed, makeObservable, observable } from "mobx";
 import { errorDisplayDuration } from "../constants";
 import { DICOMWebServer } from "./dicomweb-server";
 import { Editor, EditorSnapshot } from "./editor";
+import { ReviewStrategy } from "./review-strategy";
 import { Settings } from "./settings/settings";
 import { Tracker } from "./tracking";
 import { ProgressNotification } from "./types";
-import { Task, TaskType } from "./who";
 
 export interface RootSnapshot {
   editor: EditorSnapshot;
@@ -56,7 +56,7 @@ export class RootStore implements ISerializable<RootSnapshot>, IDisposable {
   public refs: { [key: string]: React.RefObject<HTMLElement> } = {};
   public pointerDispatch?: IDispatch;
 
-  public currentTask?: Task;
+  public reviewStrategy?: ReviewStrategy;
 
   public tracker?: Tracker;
 
@@ -73,7 +73,7 @@ export class RootStore implements ISerializable<RootSnapshot>, IDisposable {
         isSaved: observable,
         isSaveUpToDate: observable,
         refs: observable,
-        currentTask: observable,
+        reviewStrategy: observable,
 
         theme: computed,
 
@@ -86,7 +86,7 @@ export class RootStore implements ISerializable<RootSnapshot>, IDisposable {
         setIsDirty: action,
         setIsSaveUpToDate: action,
         setRef: action,
-        setCurrentTask: action,
+        setReviewStrategy: action,
       },
     );
 
@@ -190,70 +190,70 @@ export class RootStore implements ISerializable<RootSnapshot>, IDisposable {
     this.tracker.startSession();
   }
 
-  public async loadWHOTask(taskId: string) {
-    if (!taskId) return;
+  // public async loadWHOTask(taskId: string) {
+  //   if (!taskId) return;
 
-    try {
-      if (this.editor.newDocument(true)) {
-        this.setProgress({ labelTx: "importing", showSplash: true });
-        const taskJson = await getWHOTask(taskId);
-        // We want to ignore possible other annotations if type is "CREATE"
-        if (taskJson.kind === TaskType.Create) {
-          taskJson.annotations = [];
-        }
-        const whoTask = new Task(taskJson);
-        this.setCurrentTask(whoTask);
+  //   try {
+  //     if (this.editor.newDocument(true)) {
+  //       this.setProgress({ labelTx: "importing", showSplash: true });
+  //       const taskJson = await getWHOTask(taskId);
+  //       // We want to ignore possible other annotations if type is "CREATE"
+  //       if (taskJson.kind === WHOTaskType.Create) {
+  //         taskJson.annotations = [];
+  //       }
+  //       const whoTask = new WHOTask(taskJson);
+  //       this.setCurrentTask(whoTask);
 
-        await Promise.all(
-          whoTask.samples.map(async (sample) => {
-            await this.editor.activeDocument?.importFiles(
-              createFileFromBase64(sample.title, sample.data),
-              undefined,
-              false,
-            );
-          }),
-        );
-        if (whoTask.kind === TaskType.Create) {
-          this.editor.activeDocument?.finishBatchImport();
-          this.currentTask?.addNewAnnotation();
-        } else {
-          // Task Type is Correct or Review
-          await Promise.all(
-            whoTask.annotations.map(async (annotation, index) => {
-              const title =
-                whoTask.samples[index].title ||
-                whoTask.samples[0].title ||
-                `annotation_${index}`;
+  //       await Promise.all(
+  //         whoTask.samples.map(async (sample) => {
+  //           await this.editor.activeDocument?.importFiles(
+  //             createFileFromBase64(sample.title, sample.data),
+  //             undefined,
+  //             false,
+  //           );
+  //         }),
+  //       );
+  //       if (whoTask.kind === WHOTaskType.Create) {
+  //         this.editor.activeDocument?.finishBatchImport();
+  //         this.currentTask?.addNewAnnotation();
+  //       } else {
+  //         // Task Type is Correct or Review
+  //         await Promise.all(
+  //           whoTask.annotations.map(async (annotation, index) => {
+  //             const title =
+  //               whoTask.samples[index].title ||
+  //               whoTask.samples[0].title ||
+  //               `annotation_${index}`;
 
-              await Promise.all(
-                annotation.data.map(async (annotationData) => {
-                  const createdLayerId =
-                    await this.editor.activeDocument?.importFiles(
-                      createFileFromBase64(
-                        title.replace(".nii", "_annotation").concat(".nii"),
-                        annotationData.data,
-                      ),
-                      title.replace(".nii", "_annotation"),
-                      true,
-                    );
-                  if (createdLayerId)
-                    annotationData.correspondingLayerId = createdLayerId;
-                }),
-              );
-            }),
-          );
-        }
-      }
-    } catch {
-      this.setError({
-        titleTx: "import-error",
-        descriptionTx: "remote-file-error",
-      });
-      this.editor.setActiveDocument();
-    }
+  //             await Promise.all(
+  //               annotation.data.map(async (annotationData) => {
+  //                 const createdLayerId =
+  //                   await this.editor.activeDocument?.importFiles(
+  //                     createFileFromBase64(
+  //                       title.replace(".nii", "_annotation").concat(".nii"),
+  //                       annotationData.data,
+  //                     ),
+  //                     title.replace(".nii", "_annotation"),
+  //                     true,
+  //                   );
+  //                 if (createdLayerId)
+  //                   annotationData.correspondingLayerId = createdLayerId;
+  //               }),
+  //             );
+  //           }),
+  //         );
+  //       }
+  //     }
+  //   } catch {
+  //     this.setError({
+  //       titleTx: "import-error",
+  //       descriptionTx: "remote-file-error",
+  //     });
+  //     this.editor.setActiveDocument();
+  //   }
 
-    this.setProgress();
-  }
+  //   this.setProgress();
+  // }
 
   // Persistence
 
@@ -282,8 +282,8 @@ export class RootStore implements ISerializable<RootSnapshot>, IDisposable {
     }
   }
 
-  public setCurrentTask(task?: Task) {
-    this.currentTask = task;
+  public setReviewStrategy(reviewStrategy?: ReviewStrategy) {
+    this.reviewStrategy = reviewStrategy;
   }
 
   public persist = async () => {

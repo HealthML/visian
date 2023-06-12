@@ -1,4 +1,5 @@
 export * from "./annotation";
+export * from "./annotationData";
 export * from "./annotationTask";
 export * from "./annotator";
 export * from "./reviewer";
