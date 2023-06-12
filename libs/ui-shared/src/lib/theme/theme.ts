@@ -16,6 +16,20 @@ const dataColors = {
   "Posterior Plum": "#7B386D",
   "Beamy Bronze": "#8E4B19",
 };
+
+const badgeColors = {
+  blueBackground: "rgba(0, 133, 255, 0.05)",
+  redBackground: "rgba(202, 51, 69, 0.1)",
+  greenBackground: "rgba(4, 156, 109, 0.1)",
+  orangeBackground: "rgba(255, 107, 0, 0.1)",
+  greenBorder: "rgba(4, 156, 109, 0.5)",
+  orangeBorder: "rgba(255, 107, 0, 0.5)",
+};
+
+export const badgeColorKeys = Object.keys(
+  badgeColors,
+) as (keyof typeof badgeColors)[];
+
 export const dataColorKeys = Object.keys(
   dataColors,
 ) as (keyof typeof dataColors)[];
@@ -46,6 +60,7 @@ const colorModes = {
     sideViewBorder: "rgba(0, 0, 0, 0.3)",
 
     ...dataColors,
+    ...badgeColors,
     "Mighty Mercury": "#000000",
   },
   dark: {
@@ -58,6 +73,7 @@ const colorModes = {
     gray: "rgba(255,255,255,0.5)",
     lightGray: "rgba(255,255,255,0.3)",
     veryLightGray: "rgba(255,255,255,0.1)",
+    veryVeryLightGray: "rgba(255, 255, 255, 0.05)",
     sheet: "rgba(78, 80, 89, 0.4)",
     sheetBorder: "rgba(255, 255, 255, 0.3)",
     placeholder: "rgba(255, 255, 255, 0.2)",
@@ -72,6 +88,7 @@ const colorModes = {
     sideViewBorder: "rgba(255, 255, 255, 0.3)",
 
     ...dataColors,
+    ...badgeColors,
   },
 };
 
@@ -163,6 +180,7 @@ export const theme = {
     picker: 80,
     info: 90,
     overlay: 100,
+    overlayComponent: 120,
     notification: 150,
   },
 };

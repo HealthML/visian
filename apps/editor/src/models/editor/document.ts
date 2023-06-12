@@ -39,6 +39,12 @@ import {
   generalTextures2d,
   generalTextures3d,
 } from "../../constants";
+import {
+  Annotation,
+  FileWithGroup,
+  FileWithMetadata,
+  Image,
+} from "../../types";
 import { readTrackingLog, TrackingData } from "../tracking";
 import { StoreContext } from "../types";
 import { Clipboard } from "./clipboard";
@@ -442,6 +448,18 @@ export class Document
     FileSaver.saveAs(await zip.toBlob(), `${this.title}.zip`);
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-shadow
+  public createZip = async (layers: ILayer[]): Promise<File> => {
+    const zip = new Zip();
+    const files = await Promise.all(layers.map((layer) => layer.toFile()));
+    files.forEach((file, index) => {
+      if (!file) return;
+      zip.setFile(`${`00${index}`.slice(-2)}_${file.name}`, file);
+    });
+
+    return new File([await zip.toBlob()], `${this.title}.zip`);
+  };
+
   public getFileForLayer = async (idOrLayer: string | ILayer) => {
     const layerId = typeof idOrLayer === "string" ? idOrLayer : idOrLayer.id;
     const layer = this.layerMap[layerId];
@@ -567,7 +585,15 @@ export class Document
       }
     } else if (filteredFiles.name.endsWith(".zip")) {
       const zip = await Zip.fromZipFile(filteredFiles);
-      await this.importFiles(await zip.getAllFiles(), filteredFiles.name);
+      const unzippedFiles = await zip.getAllFiles();
+      await this.importFiles(
+        this.createLayerGroup(
+          unzippedFiles,
+          filteredFiles.name,
+          this.getGroupMetaData(filteredFiles),
+        ),
+        filteredFiles.name,
+      );
       return;
     } else if (filteredFiles.name.endsWith(".json")) {
       await readTrackingLog(filteredFiles, this);
@@ -585,6 +611,15 @@ export class Document
       return;
     }
 
+    if (filteredFiles instanceof File) {
+      this.createLayerGroup(
+        [filteredFiles],
+        filteredFiles.name,
+        this.getGroupMetaData(filteredFiles),
+      );
+    } else {
+      this.createLayerGroup(filteredFiles, name ?? uuidv4());
+    }
     let createdLayerId = "";
     const isFirstLayer = !this.layerIds.length;
     const image = await readMedicalImage(filteredFiles);
@@ -683,6 +718,8 @@ export class Document
               name: `${layerIndex}_${imageWithUnit.name}`,
               ...prototypeImage,
             });
+            this.addGroupToFile(createdLayerId, files);
+            this.addMetaDataToFile(createdLayerId, files);
           }
         } else {
           this.setError({
@@ -716,6 +753,8 @@ export class Document
               { ...imageWithUnit, name: `${value}_${image.name}` },
               value,
             );
+            this.addGroupToFile(createdLayerId, files);
+            this.addMetaDataToFile(createdLayerId, files);
           });
         }
       }
@@ -731,6 +770,8 @@ export class Document
       this.history.clear();
     }
 
+    this.addGroupToFile(createdLayerId, files);
+    this.addMetaDataToFile(createdLayerId, files);
     return createdLayerId;
   }
 
@@ -859,6 +900,26 @@ export class Document
       ) as unknown as IImageLayer[];
   }
 
+  private addGroupToFile(createdLayerId: string, file: File | File[]) {
+    const layer = this.getLayer(createdLayerId);
+    if (layer && "groupId" in file) {
+      const fileWithGroupId = file as FileWithGroup;
+      const groupLayer = this.getLayer(
+        fileWithGroupId.groupId,
+      ) as layers.LayerGroup;
+      groupLayer?.addLayer(layer);
+    }
+  }
+
+  // adds Meta Data to layer object
+  private addMetaDataToFile(createdLayerId: string, file: File | File[]) {
+    const layer = this.getLayer(createdLayerId);
+    if (layer && "metadata" in file) {
+      const fileWithMetaData = file as FileWithMetadata;
+      layer.metaData = fileWithMetaData.metadata;
+    }
+  }
+
   // Proxies
   public get sliceRenderer(): ISliceRenderer | undefined {
     return this.editor.sliceRenderer;
@@ -911,5 +972,41 @@ export class Document
     throw new Error(
       "This is a noop. To load a document from storage, create a new instance",
     );
+  }
+
+  private createLayerGroup(
+    files: File[],
+    title?: string,
+    groupMetaData?: Image | Annotation,
+  ): FileWithGroup[] {
+    if (files.every((f) => "groupId" in f)) {
+      return files as FileWithGroup[];
+    }
+    if (files.some((f) => "groupId" in f)) {
+      throw new Error(
+        "Cannot create a new group for file that already belongs to a group",
+      );
+    }
+    const groupLayer = new layers.LayerGroup(undefined, this);
+    groupLayer.setMetaData(groupMetaData);
+    groupLayer.setTitle(title);
+    const filesWithGroup = files.map((f) => {
+      const fileWithGroup = f as FileWithGroup;
+      fileWithGroup.groupId = groupLayer.id;
+      return fileWithGroup;
+    });
+    this.addLayer(groupLayer);
+    return filesWithGroup;
+  }
+
+  private getGroupMetaData(
+    file: File | undefined,
+  ): Image | Annotation | undefined {
+    if (!file) return undefined;
+    if ("metadata" in file) {
+      const fileWithMetaData = file as FileWithGroup;
+      return fileWithMetaData.metadata;
+    }
+    return undefined;
   }
 }

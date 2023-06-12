@@ -69,9 +69,9 @@ export class LayerGroup
     };
   }
 
-  public applySnapshot(snapshot: Partial<LayerGroupSnapshot>): Promise<void> {
+  public applySnapshot(snapshot?: Partial<LayerGroupSnapshot>): Promise<void> {
     super.applySnapshot(snapshot);
-    this.layerIds = snapshot.layerIds || [];
+    this.layerIds = snapshot?.layerIds || [];
 
     return Promise.resolve();
   }

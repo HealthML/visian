@@ -97,6 +97,17 @@ export class Editor
     this.renderer.dispose();
   }
 
+  private applyGlobalSettings() {
+    this.context.getSettings().load();
+    this.activeDocument?.setUseExclusiveSegmentations(
+      this.context.getSettings().useExclusiveSegmentations,
+    );
+    this.activeDocument?.viewport2D.setVoxelInfoMode(
+      this.context.getSettings().voxelInfoMode,
+    );
+    this.setPerformanceMode(this.context.getSettings().performanceMode);
+  }
+
   public setActiveDocument(
     // eslint-disable-next-line default-param-last
     value = new Document(undefined, this, this.context),
@@ -104,6 +115,8 @@ export class Editor
   ): void {
     this.activeDocument?.dispose();
     this.activeDocument = value;
+
+    this.applyGlobalSettings();
 
     if (!isSilent) this.activeDocument.requestSave();
   }
@@ -120,6 +133,17 @@ export class Editor
     return false;
   };
 
+  public disposeActiveDocument = () => {
+    if (
+      // eslint-disable-next-line no-alert
+      window.confirm(i18n.t("discard-current-document-confirmation"))
+    ) {
+      this.activeDocument?.dispose();
+      return true;
+    }
+    return false;
+  };
+
   // Proxies
   public get refs(): { [name: string]: React.RefObject<HTMLElement> } {
     return this.context.getRefs();
@@ -130,7 +154,7 @@ export class Editor
   }
 
   public get colorMode(): ColorMode {
-    return this.context.getColorMode();
+    return this.context.getSettings().colorMode;
   }
 
   // Performance Mode

@@ -9,10 +9,16 @@ import {
 import { isFromWHO } from "@visian/utils";
 import { observer } from "mobx-react-lite";
 import React, { useCallback, useEffect, useRef, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
 import { whoHome } from "../../../constants";
+import { importFilesToDocument } from "../../../import-handling";
+import {
+  fetchAnnotationFile,
+  fetchImageFile,
+} from "../../../queries/use-files";
 import {
   DilateErodeModal,
   MeasurementModal,
@@ -21,12 +27,13 @@ import {
 } from "../action-modal";
 import { AIBar } from "../ai-bar";
 import { AxesAndVoxel } from "../axes-and-voxel";
-import { DropSheet } from "../drop-sheet";
+import { ImageImportDropSheet } from "../import-image-drop-sheet";
 import { ImportPopUp } from "../import-popup";
 import { Layers } from "../layers";
 import { MeasurementPopUp } from "../measurement-popup";
 import { Menu } from "../menu";
 import { ProgressPopUp } from "../progress-popup";
+import { SavePopUp } from "../save-popup";
 import { ServerPopUp } from "../server-popup";
 import { SettingsPopUp } from "../settings-popup";
 import { ShortcutPopUp } from "../shortcut-popup";
@@ -182,6 +189,15 @@ export const UIOverlay = observer<UIOverlayProps>(
       store?.editor.activeDocument?.tools.setIsCursorOverFloatingUI(false);
     }, [store]);
 
+    // Save Pop Up Toggling
+    const [isSavePopUpOpen, setIsSavePopUpOpen] = useState(false);
+    const openSavePopUp = useCallback(() => {
+      setIsSavePopUpOpen(true);
+    }, []);
+    const closeSavePopUp = useCallback(() => {
+      setIsSavePopUpOpen(false);
+    }, []);
+
     // Export Button
     const exportZip = useCallback(() => {
       store?.setProgress({ labelTx: "exporting" });
@@ -192,6 +208,47 @@ export const UIOverlay = observer<UIOverlayProps>(
           store?.setProgress();
         });
     }, [store]);
+
+    const [searchParams] = useSearchParams();
+    const loadImagesAndAnnotations = () => {
+      async function asyncfunc() {
+        if (store?.editor.activeDocument?.layers.length !== 0) {
+          return store?.destroyReload();
+        }
+        const fileTransfer = new DataTransfer();
+        const imageIdToOpen = searchParams.get("imageId");
+        if (imageIdToOpen) {
+          try {
+            const imageFile = await fetchImageFile(imageIdToOpen);
+            fileTransfer.items.add(imageFile);
+          } catch (error) {
+            store?.setError({
+              titleTx: "import-error",
+              descriptionTx: "image-open-error",
+            });
+          }
+        }
+        const annotationIdToOpen = searchParams.get("annotationId");
+        if (annotationIdToOpen) {
+          try {
+            const annotationFile = await fetchAnnotationFile(
+              annotationIdToOpen,
+            );
+            fileTransfer.items.add(annotationFile);
+          } catch (error) {
+            store?.setError({
+              titleTx: "import-error",
+              descriptionTx: "annotation-open-error",
+            });
+          }
+        }
+        if (store && fileTransfer.files.length) {
+          importFilesToDocument(fileTransfer.files, store);
+        }
+      }
+      asyncfunc();
+    };
+    useEffect(loadImagesAndAnnotations, [searchParams, store]);
 
     return (
       <Container
@@ -211,30 +268,30 @@ export const UIOverlay = observer<UIOverlayProps>(
           <>
             <ColumnLeft>
               <MenuRow>
-                {isFromWHO() ? (
-                  <a href={whoHome}>
-                    <ImportButton
-                      icon="whoAI"
-                      tooltipTx="return-who"
-                      tooltipPosition="right"
-                      isActive={false}
-                    />
-                  </a>
-                ) : (
-                  <ImportButton
-                    icon="import"
-                    tooltipTx="import-tooltip"
-                    tooltipPosition="right"
-                    isActive={false}
-                    onPointerDown={openImportPopUp}
-                  />
-                )}
+                <Menu
+                  onOpenShortcutPopUp={openShortcutPopUp}
+                  onOpenSettingsPopUp={openSettingsPopUp}
+                />
                 <UndoRedoButtons />
               </MenuRow>
-              <Menu
-                onOpenShortcutPopUp={openShortcutPopUp}
-                onOpenSettingsPopUp={openSettingsPopUp}
-              />
+              {isFromWHO() ? (
+                <a href={whoHome}>
+                  <ImportButton
+                    icon="whoAI"
+                    tooltipTx="return-who"
+                    tooltipPosition="right"
+                    isActive={false}
+                  />
+                </a>
+              ) : (
+                <ImportButton
+                  icon="import"
+                  tooltipTx="import-tooltip"
+                  tooltipPosition="right"
+                  isActive={false}
+                  onPointerDown={openImportPopUp}
+                />
+              )}
               <Toolbar />
               <Layers />
               <AxesSpacer>
@@ -254,6 +311,25 @@ export const UIOverlay = observer<UIOverlayProps>(
             <ColumnRight>
               <SideViews />
               <RightBar>
+                <FloatingUIButton
+                  icon="exit"
+                  tooltipTx="close-editor"
+                  tooltipPosition="left"
+                  onPointerDown={() => {
+                    store?.destroyRedirect("/projects");
+                  }}
+                  isActive={false}
+                />
+                {store?.editor.activeDocument?.activeLayer?.isAnnotation &&
+                  searchParams.get("imageId") && (
+                    <FloatingUIButton
+                      icon="save"
+                      tooltipTx="annotation-saving"
+                      tooltipPosition="left"
+                      onPointerDown={openSavePopUp}
+                      isActive={false}
+                    />
+                  )}
                 {!isFromWHO() && (
                   <FloatingUIButton
                     icon="export"
@@ -301,7 +377,10 @@ export const UIOverlay = observer<UIOverlayProps>(
               )}
               onClose={store?.editor.activeDocument?.setMeasurementDisplayLayer}
             />
-            {isDraggedOver && <DropSheet onDropCompleted={onDropCompleted} />}
+            <SavePopUp isOpen={isSavePopUpOpen} onClose={closeSavePopUp} />
+            {isDraggedOver && (
+              <ImageImportDropSheet onDropCompleted={onDropCompleted} />
+            )}
             {store?.progress && (
               <ProgressPopUp
                 label={store.progress.label}

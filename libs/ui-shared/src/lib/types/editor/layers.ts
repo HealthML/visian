@@ -70,6 +70,8 @@ export interface ILayer {
 
   /** The layer's transform matrix used to position it during rendering. */
   transformation?: Matrix4;
+  /** The layer's meta data ID. */
+  metaData?: { id: string; [key: string]: any };
 
   /**
    * Returns all slice markers, aggregated for the layer and given view type.
@@ -78,6 +80,8 @@ export interface ILayer {
 
   /** Sets the layer's title. */
   setTitle(value?: string): void;
+
+  setMetaData(value?: { id: string; [key: string]: any }): void;
 
   /** Sets this layer's parent layer, typically the group it is contained in. */
   setParent(idOrLayer?: string | ILayer): void;

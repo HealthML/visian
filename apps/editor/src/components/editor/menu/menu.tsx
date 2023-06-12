@@ -45,10 +45,8 @@ export const Menu: React.FC<MenuProps> = observer(
     const [buttonRef, setButtonRef] = useState<HTMLButtonElement | null>(null);
 
     // Menu Actions
-    const setTheme = useCallback(
-      (value: string) => {
-        store?.setColorMode(value as ColorMode);
-      },
+    const setColorMode = useCallback(
+      (value: string) => store?.settings.setColorMode(value as ColorMode),
       [store],
     );
 
@@ -78,7 +76,7 @@ export const Menu: React.FC<MenuProps> = observer(
     return (
       <>
         <MenuButton
-          icon="menu"
+          icon="burger"
           tooltipTx="menu"
           showTooltip={!isModalOpen}
           ref={setButtonRef}
@@ -99,7 +97,7 @@ export const Menu: React.FC<MenuProps> = observer(
             labelTx="theme"
             options={themeSwitchOptions}
             value={store?.colorMode || "dark"}
-            setValue={setTheme}
+            setValue={setColorMode}
           />
           <ButtonParam labelTx="settings" handlePress={openSettingsPopUp} />
           <Divider />

@@ -52,6 +52,8 @@ export class Layer implements ILayer, ISerializable<LayerSnapshot> {
   protected opacityOverride?: number;
 
   public transformation!: Matrix4;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public metaData?: { id: string; [key: string]: any } | undefined;
 
   constructor(
     snapshot: Partial<LayerSnapshot> | undefined,
@@ -85,6 +87,7 @@ export class Layer implements ILayer, ISerializable<LayerSnapshot> {
         setColor: action,
         setIsVisible: action,
         setOpacity: action,
+        setMetaData: action,
         resetSettings: action,
         setTransformation: action,
         delete: action,
@@ -157,6 +160,11 @@ export class Layer implements ILayer, ISerializable<LayerSnapshot> {
     this.transformation = value || new Matrix4();
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public setMetaData = (value?: { id: string; [key: string]: any }): void => {
+    this.metaData = value;
+  };
+
   /**
    * Adjusts `this.color` if the color lookup returns an invalid color.
    * Mainly used for backwards compatibility when a color is removed.
@@ -199,7 +207,7 @@ export class Layer implements ILayer, ISerializable<LayerSnapshot> {
       color: this.color,
       isVisible: this.isVisible,
       opacityOverride: this.opacityOverride,
-      transformation: this.transformation.toArray(),
+      transformation: this.transformation?.toArray(),
     };
   }
 
@@ -215,11 +223,13 @@ export class Layer implements ILayer, ISerializable<LayerSnapshot> {
     this.setColor(snapshot?.color);
     this.setIsVisible(snapshot?.isVisible);
     this.setOpacity(snapshot?.opacityOverride);
-    this.setTransformation(
-      snapshot?.transformation
-        ? new Matrix4().fromArray(snapshot.transformation)
-        : undefined,
-    );
+    if (snapshot?.transformation) {
+      this.setTransformation(
+        snapshot?.transformation
+          ? new Matrix4().fromArray(snapshot.transformation)
+          : undefined,
+      );
+    }
 
     return Promise.resolve();
   }

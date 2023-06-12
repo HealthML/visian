@@ -13,9 +13,9 @@ import {
 } from "./drop-down-options";
 import { DropDownProps } from "./drop-down.props";
 
-const Selector = styled(Option)`
+const Selector = styled(Option)<{ size?: "small" | "medium" }>`
   ${sheetMixin}
-  border-radius: 12px;
+  border-radius: ${(props) => (props.size === "medium" ? "20px" : "12px")};
   position: relative;
   margin-bottom: 10px;
   width: 100%;
@@ -41,6 +41,7 @@ export const DropDown: React.FC<DropDownProps> = ({
   infoShortcuts,
   infoPosition,
   infoBaseZIndex,
+  size,
   ...rest
 }) => {
   const actualValue =
@@ -92,14 +93,16 @@ export const DropDown: React.FC<DropDownProps> = ({
         {...rest}
         ref={setParentRef}
         onPointerDown={showOptions ? undefined : openOptions}
+        size={size}
       >
         {activeOption && (
           <OptionText
             tx={activeOption.labelTx}
             text={activeOption.label || activeOption.value}
+            size={size}
           />
         )}
-        <ExpandIcon icon="arrowDown" />
+        <ExpandIcon icon="arrowDown" size={size} />
         <DropDownOptions
           activeIndex={activeIndex}
           options={options}
@@ -107,6 +110,7 @@ export const DropDown: React.FC<DropDownProps> = ({
           isOpen={showOptions}
           onChange={setValue}
           onDismiss={closeOptions}
+          size={size}
         />
       </Selector>
     </>
