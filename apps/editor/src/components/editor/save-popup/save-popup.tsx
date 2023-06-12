@@ -1,6 +1,8 @@
 import {
   Button,
   ILayer,
+  List,
+  ListItem,
   PopUp,
   Text,
   TextField,
@@ -55,6 +57,18 @@ const InlineRowLast = styled(InlineRow)`
 const SavePopUpContainer = styled(PopUp)`
   align-items: left;
   width: 60%;
+`;
+
+const LayersToSaveList = styled(List)`
+  width: 100%;
+  max-height: 300px;
+  overflow-y: auto;
+  user-select: none;
+  margin-bottom: 10px;
+`;
+
+const LayerToSaveItem = styled(ListItem)`
+  height: 30px;
 `;
 
 export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
@@ -261,6 +275,22 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
       dismiss={onClose}
       shouldDismissOnOutsidePress
     >
+      <SectionLabel tx="layers-to-save" />
+      <LayersToSaveList>
+        {getLayersInGroupOf(store?.editor.activeDocument?.activeLayer).map(
+          (layer) => (
+            <LayerToSaveItem
+              key={layer.id}
+              label={layer.title}
+              isLast
+              icon={{
+                color: layer.color || "text",
+              }}
+            />
+          ),
+        )}
+      </LayersToSaveList>
+
       {canBeOverwritten() && (
         <>
           <SectionLabel tx="annotation-saving-overrwite" />
