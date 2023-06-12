@@ -11,8 +11,6 @@ import {
 } from "@visian/ui-shared";
 import {
   createBase64StringFromFile,
-  putWHOTask,
-  setNewTaskIdForUrl,
   WHOAnnotationData,
   WHOAnnotationStatus,
 } from "@visian/utils";
@@ -196,84 +194,86 @@ export const AIBar = observer(() => {
   );
 
   const saveAnnotationToWHOBackend = useCallback(
-    async (status: WHOAnnotationStatus) => {
-      if (!store?.currentTask?.annotations.length) return;
-      store.currentTask.annotations.forEach((annotation) => {
-        annotation.status = status;
-      });
-
-      const newAnnotations = await Promise.all(
-        store.currentTask.annotations.map(async (annotation) => {
-          if (annotation.data.length) {
-            // Add base64 data for each existing AnnotationData object
-            const base64Data = await Promise.all(
-              annotation.data.map(async (annotationData) => {
-                const base64Annotation =
-                  await getBase64LayerDataForAnnotationData(annotationData);
-                if (base64Annotation) annotationData.data = base64Annotation;
-                return annotationData;
-              }),
-            );
-            annotation.data = base64Data;
-          } else {
-            // Add new AnnotationData object for each existing annotation layer
-            const annotationLayerIds =
-              store.editor.activeDocument?.annotationLayers.map(
-                (annotationLayer) => annotationLayer.id,
-              );
-            if (annotationLayerIds) {
-              const base64Data = await Promise.all(
-                annotationLayerIds.map((annotationLayerId) =>
-                  getBase64LayerDataForId(annotationLayerId),
-                ),
-              );
-              base64Data.forEach((base64Annotation) => {
-                if (!base64Annotation) return;
-                const annotationDataForBackend = {
-                  data: base64Annotation,
-                };
-                annotation.data.push(
-                  new WHOAnnotationData(annotationDataForBackend),
-                );
-              });
-            }
-          }
-          annotation.submittedAt = new Date().toISOString();
-          return annotation;
-        }),
-      );
-
-      store.currentTask.annotations = newAnnotations;
-
-      try {
-        const response = await putWHOTask(
-          store.currentTask.taskUUID,
-          JSON.stringify(store.currentTask.toJSON()),
-        );
-        if (response) {
-          const newLocation = response.headers.get("location");
-          if (newLocation) {
-            const urlElements = newLocation.split("/");
-            const newTaskId = urlElements[urlElements.length - 1];
-            if (newTaskId !== store.currentTask.taskUUID) {
-              store?.setIsDirty(false, true);
-              setNewTaskIdForUrl(newTaskId);
-              await store.loadWHOTask(newTaskId);
-              return;
-            }
-          }
-        }
-        // If no new location is given, return to the WHO page
-        window.location.href = whoHome;
-      } catch {
-        store?.setError({
-          titleTx: "export-error",
-          descriptionTx: "file-upload-error",
-        });
-      }
-    },
-    [getBase64LayerDataForAnnotationData, getBase64LayerDataForId, store],
+    (status: WHOAnnotationStatus) => console.log("Test"),
+    [],
   );
+  // async (status: WHOAnnotationStatus) => {
+  //   if (!store?.currentTask?.annotations.length) return;
+  //   store.currentTask.annotations.forEach((annotation) => {
+  //     annotation.status = status;
+  //   });
+
+  //   const newAnnotations = await Promise.all(
+  //     store.currentTask.annotations.map(async (annotation) => {
+  //       if (annotation.data.length) {
+  //         // Add base64 data for each existing AnnotationData object
+  //         const base64Data = await Promise.all(
+  //           annotation.data.map(async (annotationData) => {
+  //             const base64Annotation =
+  //               await getBase64LayerDataForAnnotationData(annotationData);
+  //             if (base64Annotation) annotationData.data = base64Annotation;
+  //             return annotationData;
+  //           }),
+  //         );
+  //         annotation.data = base64Data;
+  //       } else {
+  //         // Add new AnnotationData object for each existing annotation layer
+  //         const annotationLayerIds =
+  //           store.editor.activeDocument?.annotationLayers.map(
+  //             (annotationLayer) => annotationLayer.id,
+  //           );
+  //         if (annotationLayerIds) {
+  //           const base64Data = await Promise.all(
+  //             annotationLayerIds.map((annotationLayerId) =>
+  //               getBase64LayerDataForId(annotationLayerId),
+  //             ),
+  //           );
+  //           base64Data.forEach((base64Annotation) => {
+  //             if (!base64Annotation) return;
+  //             const annotationDataForBackend = {
+  //               data: base64Annotation,
+  //             };
+  //             annotation.data.push(
+  //               new WHOAnnotationData(annotationDataForBackend),
+  //             );
+  //           });
+  //         }
+  //       }
+  //       annotation.submittedAt = new Date().toISOString();
+  //       return annotation;
+  //     }),
+  //   );
+
+  //   store.currentTask.annotations = newAnnotations;
+
+  //   try {
+  //     const response = await putWHOTask(
+  //       store.currentTask.taskUUID,
+  //       JSON.stringify(store.currentTask.toJSON()),
+  //     );
+  //     if (response) {
+  //       const newLocation = response.headers.get("location");
+  //       if (newLocation) {
+  //         const urlElements = newLocation.split("/");
+  //         const newTaskId = urlElements[urlElements.length - 1];
+  //         if (newTaskId !== store.currentTask.taskUUID) {
+  //           store?.setIsDirty(false, true);
+  //           setNewTaskIdForUrl(newTaskId);
+  //           await store.loadWHOTask(newTaskId);
+  //           return;
+  //         }
+  //       }
+  //     }
+  //     // If no new location is given, return to the WHO page
+  //     window.location.href = whoHome;
+  //   } catch {
+  //     store?.setError({
+  //       titleTx: "export-error",
+  //       descriptionTx: "file-upload-error",
+  //     });
+  //   }
+  // },
+  // [getBase64LayerDataForAnnotationData, getBase64LayerDataForId, store],
 
   const confirmTaskAnnotation = useCallback(async () => {
     await saveAnnotationToWHOBackend(WHOAnnotationStatus.Completed);
@@ -288,14 +288,13 @@ export const AIBar = observer(() => {
       <TaskContainer>
         <TaskLabel tx="Task" />
         <TaskName
-          tx={store.currentTask?.annotationTasks[0]?.title || "Task Name"}
+          tx={store.reviewStrategy?.currentTask?.title || "Task Title"}
         />
       </TaskContainer>
       <ActionContainer>
         <ActionName
           tx={
-            store.currentTask?.annotationTasks[0]?.description ||
-            "Task Description"
+            store.reviewStrategy?.currentTask?.description || "Task Description"
           }
         />
         <ActionButtonsContainer>

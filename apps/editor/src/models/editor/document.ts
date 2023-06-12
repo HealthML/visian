@@ -39,12 +39,7 @@ import {
   generalTextures2d,
   generalTextures3d,
 } from "../../constants";
-import {
-  Annotation,
-  FileWithGroup,
-  FileWithMetadata,
-  Image,
-} from "../../types";
+import { FileMetadata, FileWithGroup, FileWithMetadata } from "../../types";
 import { readTrackingLog, TrackingData } from "../tracking";
 import { StoreContext } from "../types";
 import { Clipboard } from "./clipboard";
@@ -974,10 +969,10 @@ export class Document
     );
   }
 
-  private createLayerGroup(
+  public createLayerGroup(
     files: File[],
     title?: string,
-    groupMetaData?: Image | Annotation,
+    groupMetaData?: FileMetadata,
   ): FileWithGroup[] {
     if (files.every((f) => "groupId" in f)) {
       return files as FileWithGroup[];
@@ -999,9 +994,7 @@ export class Document
     return filesWithGroup;
   }
 
-  private getGroupMetaData(
-    file: File | undefined,
-  ): Image | Annotation | undefined {
+  private getGroupMetaData(file: File | undefined): FileMetadata | undefined {
     if (!file) return undefined;
     if ("metadata" in file) {
       const fileWithMetaData = file as FileWithGroup;

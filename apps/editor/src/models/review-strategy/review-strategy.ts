@@ -1,9 +1,8 @@
 import { RootStore } from "../root";
-import { Task } from "./task";
+import { ReviewTask } from "./review-task";
 
 export abstract class ReviewStrategy {
-  private task?: Task;
-
+  protected task?: ReviewTask;
   protected store: RootStore;
 
   constructor(store: RootStore) {
@@ -11,7 +10,7 @@ export abstract class ReviewStrategy {
   }
 
   public abstract loadTask(): void;
-  public get currentTask(): Task | undefined{
+  public get currentTask(): ReviewTask | undefined {
     return this.task;
   }
   public abstract nextTask(): void;
