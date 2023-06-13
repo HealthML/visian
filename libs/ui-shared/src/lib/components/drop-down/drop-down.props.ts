@@ -1,4 +1,5 @@
 import type React from "react";
+import { FC } from "react";
 
 import type { IEnumParameterOption } from "../../types";
 import type { ModalPosition } from "../modal";
@@ -27,6 +28,9 @@ export interface DropDownOptionsProps<T = any>
 
   /** If provided, this handler will be called when the options are dismissed. */
   onDismiss?: () => void;
+
+  OptionInfo?: FC<{ option: T }>;
+  showOptionInfo?: (option: T) => boolean;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -50,4 +54,7 @@ export interface DropDownProps<T = any>
   defaultValue?: T;
   value?: T;
   onChange?: (value: T) => void;
+
+  OptionInfo?: FC<{ option: T }>;
+  showOptionInfo?: (option: T) => boolean;
 }

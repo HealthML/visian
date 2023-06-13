@@ -1,16 +1,61 @@
-import React, { useRef } from "react";
+import React, { ReactNode, useRef } from "react";
 import ReactDOM from "react-dom";
 import styled, { css } from "styled-components";
 
 import { fontSize, size as getSize, zIndex } from "../../theme";
 import { useModalRoot } from "../box";
 import { Icon } from "../icon";
-import { Divider } from "../modal";
+import { Divider, Modal } from "../modal";
 import { sheetMixin } from "../sheet";
 import { Text } from "../text";
 import { useOutsidePress } from "../utils";
 import { DropDownOptionsProps } from "./drop-down.props";
 import { useOptionsPosition } from "./utils";
+
+const HoverableOption = <T,>({
+  isSelected,
+  size,
+  onPointerDown,
+  children,
+  OptionInfo,
+  option,
+  showOptionInfo,
+}: {
+  isSelected?: boolean;
+  size?: "small" | "medium";
+  onPointerDown: () => void;
+  children: ReactNode;
+  option: T;
+  OptionInfo?: React.FC<{ option: T }>;
+  showOptionInfo?: (option: T) => boolean;
+}) => {
+  const [optionRef, setOptionRef] = React.useState<HTMLDivElement | null>(null);
+  const [isHover, setIsHovered] = React.useState(false);
+
+  return (
+    <Option
+      isSelected={isSelected}
+      onPointerDown={onPointerDown}
+      size={size}
+      ref={setOptionRef}
+      onPointerEnter={() => setIsHovered(true)}
+      onPointerLeave={() => setIsHovered(false)}
+    >
+      {OptionInfo && (showOptionInfo?.(option) ?? false) && (
+        <Modal
+          isOpen={isHover}
+          anchor={optionRef}
+          position="right"
+          baseZIndex={100}
+          distance={0}
+        >
+          <OptionInfo option={option} />
+        </Modal>
+      )}
+      {children}
+    </Option>
+  );
+};
 
 export const Option = styled.div<{
   isSelected?: boolean;
@@ -86,6 +131,8 @@ export const DropDownOptions: React.FC<DropDownOptionsProps> = ({
   onChange,
   onDismiss,
   size,
+  OptionInfo,
+  showOptionInfo,
   ...rest
 }) => {
   const ref = useRef<HTMLDivElement>(null);
@@ -116,17 +163,20 @@ export const DropDownOptions: React.FC<DropDownOptionsProps> = ({
         </ExpandedSelector>
         {options.map((option, index) => (
           <React.Fragment key={option.value}>
-            <Option
+            <HoverableOption
               isSelected={index === activeIndex}
               onPointerDown={() => onChange?.(option.value)}
               size={size}
+              OptionInfo={OptionInfo}
+              option={option.value}
+              showOptionInfo={showOptionInfo}
             >
               <OptionText
                 tx={option.labelTx}
                 text={option.label || option.value}
                 size={size}
               />
-            </Option>
+            </HoverableOption>
             {index < options.length - 1 && (
               <OptionDivider
                 isHidden={index === activeIndex || index === activeIndex - 1}

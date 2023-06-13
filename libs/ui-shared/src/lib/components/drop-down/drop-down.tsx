@@ -42,6 +42,8 @@ export const DropDown: React.FC<DropDownProps> = ({
   infoPosition,
   infoBaseZIndex,
   size,
+  OptionInfo,
+  showOptionInfo,
   ...rest
 }) => {
   const actualValue =
@@ -111,6 +113,8 @@ export const DropDown: React.FC<DropDownProps> = ({
           onChange={setValue}
           onDismiss={closeOptions}
           size={size}
+          OptionInfo={OptionInfo}
+          showOptionInfo={showOptionInfo}
         />
       </Selector>
     </>
