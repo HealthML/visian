@@ -34,7 +34,7 @@ const ImagePreview = styled.img`
 `;
 
 const Wrapper = styled.div`
-  width: 300px;
+  width: 100%;
   height: 230px;
   display: flex;
   flex-direction: column;

@@ -12,22 +12,20 @@ import { GridItemProps } from "./grid.props";
 
 export const Grid = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  justify-content: space-between;
-  row-gap: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
   width: 100%;
   height: 100%;
+  align-content: flex-start;
 `;
 
 const GridItemContainer = styled.div`
   display: flex;
   flex-direction: column;
-  width: 300px;
   height: 230px;
   background-color: ${color("sheet")};
   border-radius: 5%;
   cursor: pointer;
-  margin: auto;
+  margin: 10px;
 `;
 
 const GridItemInner = styled.div<
