@@ -124,6 +124,7 @@ export const DatasetsGrid = ({
           (isGridView ? (
             <GridView
               data={datasets}
+              imgSrc="../../assets/images/walnut.png"
               onDelete={deleteDataset}
               onClick={openDataset}
             />
