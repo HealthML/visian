@@ -1,11 +1,13 @@
 import {
   Box,
   Button,
+  dataColorKeys,
   DropDown,
   FlexRow,
   IEnumParameterOption,
   PopUp,
   SectionHeader,
+  StatusBadge,
   Text,
   useTranslation,
 } from "@visian/ui-shared";
@@ -16,6 +18,7 @@ import styled from "styled-components";
 import { useStore } from "../../../app/root-store";
 import { postJob, useImagesByDataset, useMlModels } from "../../../queries";
 import { useDatasetsBy } from "../../../queries/use-datasets-by";
+import { MlModel } from "../../../types";
 import { ProjectDataExplorer } from "../project-data-explorer";
 import { useImageSelection } from "../util";
 import { JobCreationPopUpProps } from "./job-creation-popup.props";
@@ -62,6 +65,37 @@ const Footer = styled(Box)`
   width: 50vw;
   margin-top: 10%;
 `;
+
+const ModelInfoSpacer = styled.div`
+  height: 0.5em;
+`;
+
+const ModelTagGrid = styled.div`
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 5px;
+`;
+
+const ModelInfo = ({ model }: { model?: MlModel }) => {
+  if (!model) return null;
+  return (
+    <>
+      {model.description !== "" && <Text>{model?.description}</Text>}
+      {model.description !== "" && model.tags.length > 0 && <ModelInfoSpacer />}
+      {model.tags.length > 0 && (
+        <ModelTagGrid>
+          {model.tags.map((tag) => (
+            <StatusBadge
+              text={`${tag.key}: ${tag.value}`}
+              borderColor={dataColorKeys[6]}
+            />
+          ))}
+        </ModelTagGrid>
+      )}
+    </>
+  );
+};
 
 export const JobCreationPopup = observer<JobCreationPopUpProps>(
   ({
@@ -123,13 +157,16 @@ export const JobCreationPopup = observer<JobCreationPopUpProps>(
     );
 
     const findModel = useCallback(
-      () =>
+      (modelName, modelVersion) =>
         mlModels?.find(
-          (model) =>
-            model.name === selectedModelName &&
-            model.version === selectedModelVersion,
+          (model) => model.name === modelName && model.version === modelVersion,
         ),
-      [mlModels, selectedModelName, selectedModelVersion],
+      [mlModels],
+    );
+
+    const selectedModel = useMemo(
+      () => findModel(selectedModelName, selectedModelVersion),
+      [findModel, selectedModelName, selectedModelVersion],
     );
 
     const { datasets, datasetsError, isErrorDatasets, isLoadingDatasets } =
@@ -164,7 +201,6 @@ export const JobCreationPopup = observer<JobCreationPopUpProps>(
 
     const createAutoAnnotationJob = useCallback(
       async (imageSelection: string[]) => {
-        const selectedModel = findModel();
         if (!selectedModel) {
           store?.setError({
             titleTx: "error",
@@ -185,7 +221,7 @@ export const JobCreationPopup = observer<JobCreationPopUpProps>(
           onClose?.();
         }
       },
-      [findModel, store, projectId, refetchJobs, onClose],
+      [selectedModel, store, projectId, refetchJobs, onClose],
     );
 
     const startJob = useCallback(
@@ -196,6 +232,16 @@ export const JobCreationPopup = observer<JobCreationPopUpProps>(
     const { t } = useTranslation();
 
     const showProjectDataExplorer = !(isLoadingDatasets || isErrorDatasets);
+
+    const shouldShowModelInfo = useCallback(
+      (option: string) => {
+        const model = findModel(selectedModelName, option);
+        return (
+          (model?.description ?? "") !== "" || (model?.tags.length ?? 0) > 0
+        );
+      },
+      [findModel, selectedModelName],
+    );
 
     return (
       <JobCreationPopupContainer
@@ -224,6 +270,10 @@ export const JobCreationPopup = observer<JobCreationPopUpProps>(
               value={selectedModelVersion}
               onChange={setSelectedModelVersion}
               size="medium"
+              OptionInfo={({ option }: { option: string }) => (
+                <ModelInfo model={findModel(selectedModelName, option)} />
+              )}
+              showOptionInfo={shouldShowModelInfo}
             />
           </DropDownContainer>
           {isLoadingDatasets && <StyledErrorText tx="datasets-loading" />}
