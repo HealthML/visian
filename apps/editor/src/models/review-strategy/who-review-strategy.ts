@@ -1,14 +1,12 @@
 import { getWHOTask, getWHOTaskIdFromUrl } from "@visian/utils";
 
-import { importFilesToDocument } from "../../import-handling";
 import { ReviewStrategy } from "./review-strategy";
 import { TaskType } from "./review-task";
 import { WHOReviewTask } from "./who-review-task";
 
 export class WHOReviewStrategy extends ReviewStrategy {
   public async loadTask(): Promise<void> {
-    if (!this.store.editor.newDocument(false)) return;
-
+    if (!this.store.editor.newDocument(true)) return;
     this.store.setProgress({ labelTx: "importing", showSplash: true });
 
     try {
@@ -40,7 +38,7 @@ export class WHOReviewStrategy extends ReviewStrategy {
 
     const whoTask = await getWHOTask(taskId);
     if (!whoTask) throw new Error("WHO Task not found.");
-    this.task = new WHOReviewTask(whoTask);
+    this.setCurrentTask(new WHOReviewTask(whoTask));
   }
 
   private async importImages(): Promise<void> {

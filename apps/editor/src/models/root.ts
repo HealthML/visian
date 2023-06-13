@@ -209,7 +209,7 @@ export class RootStore implements ISerializable<RootSnapshot>, IDisposable {
     }
   }
 
-  public setReviewStrategy(reviewStrategy?: ReviewStrategy) {
+  public setReviewStrategy(reviewStrategy: ReviewStrategy) {
     this.reviewStrategy = reviewStrategy;
   }
 
