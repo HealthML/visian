@@ -362,7 +362,9 @@ export const Layers: React.FC = observer(() => {
     }, 50);
   }, [viewMode]);
 
-  const layers = store?.editor.activeDocument?.layers;
+  const layers = store?.editor.activeDocument?.layers.filter(
+    (layer) => layer.kind !== "group",
+  );
   const layerCount = layers?.length;
   const activeLayer = store?.editor.activeDocument?.activeLayer;
   const activeLayerIndex = layers?.findIndex((layer) => layer === activeLayer);

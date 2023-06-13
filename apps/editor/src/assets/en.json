@@ -303,7 +303,7 @@
   "annotations-loading": "Loading annotations...",
   "annotations-loading-error": "Error on loading annotations:",
   "annotation-open-error": "Error on opening annotation",
-  "annotation-saving": "Save active annotation layer",
+  "annotation-saving": "Save active annotation group",
   "annotation-saving-overrwite": "Overwrite existing annotation file",
   "annotation-saving-as": "Create new annotation file",
   "annotation-saving-error": "Error saving annotation layer",
@@ -358,6 +358,7 @@
   "save-as": "Save as",
   "saving": "Saving...",
   "saving-error": "Saving Error",
+  "layers-to-save": "Layers to save",
 
   "internal-server-error": "Internal Server Error",
 

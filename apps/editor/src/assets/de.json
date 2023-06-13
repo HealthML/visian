@@ -303,7 +303,7 @@
   "annotations-loading": "Annotationen werden geladen...",
   "annotations-loading-error": "Fehler beim Laden der Annotationen:",
   "annotation-open-error": "Fehler beim Öffnen der Annotation",
-  "annotation-saving": "Aktive Annotationsebene speichern",
+  "annotation-saving": "Aktive Annotationsgruppe speichern",
   "annotation-saving-overrwite": "Existierende Annotationsdatei überschreiben",
   "annotation-saving-as": "Neue Annotationsdatei erstellen",
   "annotation-saving-error": "Fehler beim Speichern der Annotationsebene",
@@ -358,6 +358,7 @@
   "save-as": "Speichern Unter",
   "saving": "Speichern...",
   "saving-error": "Fehler beim Speichern",
+  "layers-to-save": "Zu speichernde Annotationsebenen",
 
   "internal-server-error": "Interner Serverfehler",
 
