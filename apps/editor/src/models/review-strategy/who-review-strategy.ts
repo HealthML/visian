@@ -44,10 +44,11 @@ export class WHOReviewStrategy extends ReviewStrategy {
   private async importImages(): Promise<void> {
     const imageFiles = this.task?.getImageFiles();
     if (!imageFiles) throw new Error("Image files not found");
-
-    const fileTransfer = new DataTransfer();
-    imageFiles.forEach((file) => fileTransfer.items.add(file));
-    importFilesToDocument(fileTransfer.files, this.store);
+    await this.store?.editor.activeDocument?.importFiles(
+      imageFiles,
+      undefined,
+      false,
+    );
   }
 
   private async importAnnotations(): Promise<void> {
@@ -67,9 +68,11 @@ export class WHOReviewStrategy extends ReviewStrategy {
       );
       if (!groupedFiles) throw new Error();
 
-      const fileTransfer = new DataTransfer();
-      groupedFiles.forEach((file) => fileTransfer.items.add(file));
-      importFilesToDocument(fileTransfer.files, this.store);
+      await this.store?.editor.activeDocument?.importFiles(
+        groupedFiles,
+        undefined,
+        true,
+      );
     });
   }
 }
