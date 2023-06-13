@@ -9,6 +9,7 @@ export * from "./color";
 export * from "./context-menu";
 export * from "./drop-down";
 export * from "./drop-zone";
+export * from "./loading-block";
 export * from "./modal";
 export * from "./notification";
 export * from "./params";
