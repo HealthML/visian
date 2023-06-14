@@ -7,11 +7,13 @@ import {
 } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
 import React, { useCallback, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 
 import { ConfirmationPopup } from "../components/data-manager/confirmation-popup";
+import { GridView } from "../components/data-manager/grid-view";
+import { ListView } from "../components/data-manager/list-view";
 import { ProjectCreationPopup } from "../components/data-manager/project-creation-popup";
-import { ProjectList } from "../components/data-manager/projects-list/project-list";
 import { UIOverlayDataManager } from "../components/data-manager/ui-overlay-data-manager";
 import {
   useCreateProjectMutation,
@@ -40,6 +42,7 @@ export const ProjectsScreen: React.FC = observer(() => {
   const { deleteProjects } = useDeleteProjectsMutation();
   const { createProject } = useCreateProjectMutation();
   const { t: translate } = useTranslation();
+  const navigate = useNavigate();
 
   // delete project confirmation popup
   const [
@@ -82,6 +85,19 @@ export const ProjectsScreen: React.FC = observer(() => {
     [projectTobBeDeleted, translate],
   );
 
+  const openProject = useCallback(
+    (project: Project) => {
+      navigate(`/projects/${project.id}/datasets`);
+    },
+    [navigate],
+  );
+
+  // switch between list and grid view
+  const [isGridView, setIsGridView] = useState(true);
+  const toggleGridView = useCallback(() => {
+    setIsGridView((prev) => !prev);
+  }, []);
+
   const altMessage = useMemo(() => {
     if (isLoadingProjects) return translate("projects-loading");
     if (isErrorProjects)
@@ -110,23 +126,39 @@ export const ProjectsScreen: React.FC = observer(() => {
             labelTx="projects-base-title"
             position="right"
             headerChildren={
-              <StyledButton
-                icon="plus"
-                tooltipTx="create-project"
-                tooltipPosition="left"
-                onPointerDown={openCreateProjectPopup}
-              />
+              <>
+                <StyledButton
+                  icon="plus"
+                  tooltipTx="create-project"
+                  tooltipPosition="left"
+                  onPointerDown={openCreateProjectPopup}
+                />
+                <StyledButton
+                  icon={isGridView ? "list" : "grid"}
+                  tooltipTx={isGridView ? "switch-to-list" : "switch-to-grid"}
+                  tooltipPosition="right"
+                  onPointerDown={toggleGridView}
+                />
+              </>
             }
           >
             {altMessage ? (
               <ErrorMessage tx={altMessage} />
             ) : (
-              projects && (
-                <ProjectList
-                  projects={projects}
-                  deleteProject={deleteProject}
+              projects &&
+              (isGridView ? (
+                <GridView
+                  data={projects}
+                  onDelete={deleteProject}
+                  onClick={openProject}
                 />
-              )
+              ) : (
+                <ListView
+                  data={projects}
+                  onDelete={deleteProject}
+                  onClick={openProject}
+                />
+              ))
             )}
             <ConfirmationPopup
               isOpen={isDeleteProjectConfirmationPopUpOpen}
