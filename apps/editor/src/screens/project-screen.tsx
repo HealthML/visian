@@ -3,11 +3,12 @@ import { observer } from "mobx-react-lite";
 import React from "react";
 import { useParams } from "react-router-dom";
 
-import { Navbar } from "../components/data-manager/navbar";
+import { DatasetsSection } from "../components/data-manager/datasets-section";
+import { JobsSection } from "../components/data-manager/jobs-section";
 import { Page } from "../components/data-manager/page";
 import { PageError } from "../components/data-manager/page-error";
 import { PageLoadingBlock } from "../components/data-manager/page-loading-block";
-import { ProjectPage } from "../components/data-manager/project-page";
+import { PageTitle } from "../components/data-manager/page-title";
 import { useProject } from "../queries";
 
 export const ProjectScreen: React.FC = observer(() => {
@@ -22,7 +23,17 @@ export const ProjectScreen: React.FC = observer(() => {
       <PageError backPath="/projects" errorTx="project-loading-failed" />
     );
   } else if (project) {
-    pageContent = <ProjectPage project={project} />;
+    pageContent = (
+      <>
+        <PageTitle
+          title={project.name}
+          labelTx="project"
+          backPath="/projects"
+        />
+        <DatasetsSection project={project} />
+        <JobsSection project={project} />
+      </>
+    );
   }
 
   return (

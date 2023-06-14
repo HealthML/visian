@@ -35,11 +35,20 @@ const InfoContainer = styled(Sheet)`
   align-items: center;
 `;
 
+export const SectionSheet = styled(Sheet)`
+  padding: ${space("pageSectionMarginSmall")};
+  box-sizing: border-box;
+`;
+
 export const PageSectionIconButton = styled(InvisibleButton)`
   margin-left: ${space("pageSectionMarginSmall")};
   padding: 0;
   width: ${size("buttonHeight")};
   height: ${size("buttonHeight")};
+`;
+
+export const PaddedPageSectionIconButton = styled(PageSectionIconButton)`
+  padding: 0 9px;
 `;
 
 export const PageSectionButton = styled(ButtonParam)`
