@@ -295,6 +295,7 @@
 
   "project-loading-failed": "Das Projekt konnte nicht geladen werden.",
 
+  "datasets": "Datensätze",
   "datasets-loading": "Datensätze werden geladen...",
   "datasets-loading-failed": "Die Datensätze konnten nicht geladen werden.",
   "no-datasets-available": "Aktuell sind keine Datensätze vorhanden.",
@@ -393,5 +394,12 @@
   "create-dataset": "Datensatz erstellen",
   "dataset-name": "Datensatzname",
 
-  "verified": "verifiziert"
+  "edit": "Bearbeiten",
+  "edit-project": "Projekt bearbeiten",
+  "edit-dataset": "Datensatz bearbeiten",
+  "update": "Aktualisieren",
+
+  "verified": "verifiziert",
+
+  "data_uri_help_message": "Die dataURI ist nicht gültig. Sie sollte das Format 'ordner/dateiname.erweiterung' haben, wobei ein Ordner und der Dateiname aus Buchstaben, Ziffern, -, oder _ bestehen kann und die Erweiterung eine der folgenden sein sollte:"
 }

@@ -1,6 +1,6 @@
 import React, { useCallback, useRef } from "react";
 import ReactDOM from "react-dom";
-import styled from "styled-components";
+import styled, { css } from "styled-components";
 
 import { color, fontWeight, size, zIndex } from "../../theme";
 import { useModalRoot } from "../box";
@@ -53,7 +53,14 @@ const TitleRow = styled.div`
 
 export const Divider = styled.div<{ isHidden?: boolean }>`
   width: 100%;
-  height: ${(props) => (props.isHidden ? "0px" : size("dividerHeight"))};
+  ${(props) =>
+    props.isHidden
+      ? css`
+          height: 0px;
+        `
+      : css`
+          min-height: ${size("dividerHeight")};
+        `}
   background-color: ${color("sheetBorder")};
   border-radius: 1px;
   margin-bottom: 16px;

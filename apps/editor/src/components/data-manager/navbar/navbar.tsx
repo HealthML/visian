@@ -1,6 +1,10 @@
 import { FloatingUIButton } from "@visian/ui-shared";
+import { useCallback, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
+
+import { ShortcutPopUp } from "../../editor/shortcut-popup";
+import { MenuDataManager } from "../menu-data-manager";
 
 const Container = styled.div`
   position: absolute;
@@ -18,6 +22,16 @@ const Button = styled(FloatingUIButton)`
 
 export const Navbar = ({ className }: { className?: string }) => {
   const navigate = useNavigate();
+
+  // Shortcut Pop Up Toggling
+  const [isShortcutPopUpOpen, setIsShortcutPopUpOpen] = useState(false);
+  const openShortcutPopUp = useCallback(() => {
+    setIsShortcutPopUpOpen(true);
+  }, []);
+  const closeShortcutPopUp = useCallback(() => {
+    setIsShortcutPopUpOpen(false);
+  }, []);
+
   return (
     <Container className={className}>
       <Button
@@ -27,12 +41,17 @@ export const Navbar = ({ className }: { className?: string }) => {
         onPointerDown={() => navigate(`/projects`)}
         isActive={false}
       />
+      <MenuDataManager onOpenShortcutPopUp={openShortcutPopUp} />
       <Button
         icon="pixelBrush"
         tooltipTx="open-editor"
         tooltipPosition="right"
         onPointerDown={() => navigate(`/editor`)}
         isActive={false}
+      />
+      <ShortcutPopUp
+        isOpen={isShortcutPopUpOpen}
+        onClose={closeShortcutPopUp}
       />
     </Container>
   );

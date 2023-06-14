@@ -1,7 +1,13 @@
-import { Button, PopUp, Text, TextField } from "@visian/ui-shared";
+import {
+  Button,
+  PopUp,
+  Text,
+  TextField,
+  useTranslation,
+} from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
 import path from "path";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import styled from "styled-components";
 
@@ -52,6 +58,8 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
   const store = useStore();
   const [searchParams] = useSearchParams();
   const [newAnnotationURI, setnewAnnotationURI] = useState("");
+
+  const { t } = useTranslation();
 
   const createActiveLayerFile = async (
     shouldBeAnnotation = true,
@@ -129,11 +137,13 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
 
   const getAnnotationURISuggestion = useCallback(() => {
     const annotationLayerName =
-      store?.editor.activeDocument?.activeLayer?.title;
+      store?.editor.activeDocument?.activeLayer?.title?.split(".")[0];
     const imageURI =
       store?.editor.activeDocument?.mainImageLayer?.metaData?.dataUri;
-    const imageName = path.basename(imageURI);
-    return `/annotations/${imageName}/${annotationLayerName}`;
+    const imageName = path.basename(imageURI).split(".")[0];
+    return `/annotations/${imageName}/${
+      annotationLayerName || "annotation"
+    }.nii.gz`;
   }, [store]);
 
   useEffect(() => {
@@ -141,6 +151,26 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
       setnewAnnotationURI(getAnnotationURISuggestion());
     }
   }, [isOpen, getAnnotationURISuggestion]);
+
+  const isValidDataUri = useCallback(
+    (dataUri, allowedExtensions = [".nii.gz"]) => {
+      const extensionsPattern = `(${allowedExtensions.join("|")})`;
+
+      const pattern = new RegExp(
+        `^((/|./)?([a-zA-Z0-9-_]+/)*([a-zA-Z0-9-_]+)${extensionsPattern})$`,
+      );
+
+      return pattern.test(dataUri)
+        ? "valid"
+        : `${t("data_uri_help_message")} ${allowedExtensions.join(", ")}.`;
+    },
+    [t],
+  );
+
+  const isValidAnnotationUri = useMemo(
+    () => isValidDataUri(newAnnotationURI),
+    [newAnnotationURI, isValidDataUri],
+  );
 
   return (
     <SavePopUpContainer
@@ -171,6 +201,7 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
         </>
       )}
       <SectionLabel tx="annotation-saving-as" />
+      {isValidAnnotationUri !== "valid" && <Text text={isValidAnnotationUri} />}
       <InlineRowLast>
         <SaveAsInput
           placeholder="URI"
@@ -184,6 +215,7 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
               onClose?.();
             }
           }}
+          isDisabled={isValidAnnotationUri !== "valid"}
         />
       </InlineRowLast>
     </SavePopUpContainer>

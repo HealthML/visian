@@ -14,11 +14,12 @@ import {
   IDisposable,
   ISerializable,
 } from "@visian/utils";
-import { action, computed, makeObservable, observable } from "mobx";
+import { action, autorun, computed, makeObservable, observable } from "mobx";
 
 import { errorDisplayDuration } from "../constants";
 import { DICOMWebServer } from "./dicomweb-server";
 import { Editor, EditorSnapshot } from "./editor";
+import { Settings } from "./settings/settings";
 import { Tracker } from "./tracking";
 import { ProgressNotification } from "./types";
 import { Task, TaskType } from "./who";
@@ -36,6 +37,7 @@ export class RootStore implements ISerializable<RootSnapshot>, IDisposable {
   public dicomWebServer?: DICOMWebServer;
 
   public editor: Editor;
+  public settings: Settings;
 
   /** The current theme. */
   public colorMode: ColorMode = "dark";
@@ -64,6 +66,7 @@ export class RootStore implements ISerializable<RootSnapshot>, IDisposable {
       {
         dicomWebServer: observable,
         editor: observable,
+        settings: observable,
         colorMode: observable,
         error: observable,
         progress: observable,
@@ -75,9 +78,9 @@ export class RootStore implements ISerializable<RootSnapshot>, IDisposable {
         theme: computed,
 
         connectToDICOMWebServer: action,
-        setColorMode: action,
         setError: action,
         setProgress: action,
+        setColorMode: action,
         applySnapshot: action,
         rehydrate: action,
         setIsDirty: action,
@@ -85,6 +88,31 @@ export class RootStore implements ISerializable<RootSnapshot>, IDisposable {
         setRef: action,
         setCurrentTask: action,
       },
+    );
+
+    this.settings = new Settings();
+    this.settings.load();
+
+    autorun(() => {
+      this.colorMode = this.settings.colorMode;
+    });
+
+    autorun(() => i18n.changeLanguage(this.settings.language));
+
+    autorun(() =>
+      this.editor?.activeDocument?.setUseExclusiveSegmentations(
+        this.settings.useExclusiveSegmentations,
+      ),
+    );
+
+    autorun(() =>
+      this.editor?.activeDocument?.viewport2D.setVoxelInfoMode(
+        this.settings.voxelInfoMode,
+      ),
+    );
+
+    autorun(() =>
+      this.editor?.setPerformanceMode(this.settings.performanceMode),
     );
 
     this.editor = new Editor(undefined, {
@@ -95,7 +123,7 @@ export class RootStore implements ISerializable<RootSnapshot>, IDisposable {
       getRefs: () => this.refs,
       setError: this.setError,
       getTracker: () => this.tracker,
-      getColorMode: () => this.colorMode,
+      getSettings: () => this.settings,
     });
 
     deepObserve(this.editor, this.persist, {
@@ -130,13 +158,6 @@ export class RootStore implements ISerializable<RootSnapshot>, IDisposable {
     }
   }
 
-  public setColorMode(theme: ColorMode, shouldPersist = true) {
-    this.colorMode = theme;
-    if (shouldPersist && this.shouldPersist) {
-      localStorage.setItem("theme", theme);
-    }
-  }
-
   public get theme() {
     return getTheme(this.colorMode);
   }
@@ -157,6 +178,10 @@ export class RootStore implements ISerializable<RootSnapshot>, IDisposable {
 
   public setProgress(progress?: ProgressNotification) {
     this.progress = progress;
+  }
+
+  public setColorMode(colorMode: ColorMode) {
+    this.colorMode = colorMode;
   }
 
   public initializeTracker() {
@@ -299,9 +324,6 @@ export class RootStore implements ISerializable<RootSnapshot>, IDisposable {
       this.connectToDICOMWebServer(dicomWebServer, false);
     }
 
-    const theme = localStorage.getItem("theme");
-    if (theme) this.setColorMode(theme as ColorMode, false);
-
     if (!tab.isMainTab) return;
 
     const editorSnapshot = await this.config.storageBackend?.retrieve(
@@ -310,6 +332,7 @@ export class RootStore implements ISerializable<RootSnapshot>, IDisposable {
     if (editorSnapshot) {
       await this.editor.applySnapshot(editorSnapshot as EditorSnapshot);
     }
+    this.settings.load();
     this.shouldPersist = true;
   }
 
@@ -323,12 +346,14 @@ export class RootStore implements ISerializable<RootSnapshot>, IDisposable {
       return false;
 
     this.shouldPersist = false;
-    localStorage.clear();
+
     await this.config.storageBackend?.clear();
 
     this.setIsDirty(false, true);
+
     return true;
   };
+
   public destroy = async (forceDestroy?: boolean): Promise<boolean> => {
     if (await this.destroyLayers(forceDestroy)) {
       window.location.href = new URL(window.location.href).searchParams.has(
@@ -340,6 +365,7 @@ export class RootStore implements ISerializable<RootSnapshot>, IDisposable {
     }
     return false;
   };
+
   public destroyReload = async (forceDestroy?: boolean): Promise<boolean> => {
     if (await this.destroyLayers(forceDestroy)) {
       const redirectURl = new URL(window.location.href);

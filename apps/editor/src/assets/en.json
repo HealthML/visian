@@ -296,6 +296,7 @@
 
   "project-loading-failed": "The project could not be loaded.",
 
+  "datasets": "Datasets",
   "datasets-loading": "Loading datasets...",
   "datasets-loading-failed": "The datasets could not be loaded.",
   "no-datasets-available": "Currently no datasets are available.",
@@ -394,5 +395,12 @@
   "create-dataset": "Create Dataset",
   "dataset-name": "Dataset Name",
 
-  "verified": "verified"
+  "edit": "Edit",
+  "edit-project": "Edit Project Name",
+  "edit-dataset": "Edit Dataset Name",
+  "update": "Update",
+
+  "verified": "verified",
+
+  "data_uri_help_message": "The dataURI is not valid. It should have a format like 'folders/filename.extension' where a folder and the filename can consist of letters, digits, -, or _ and extension should be one of the following:"
 }
