@@ -158,6 +158,8 @@ export interface IImageLayer extends ILayer {
   computeArea(viewType: ViewType, slice: number): Promise<void>;
 
   setGradientHistogram(histogram?: Histogram): void;
+
+  copy(): IImageLayer;
 }
 
 /** A group of layers. */
