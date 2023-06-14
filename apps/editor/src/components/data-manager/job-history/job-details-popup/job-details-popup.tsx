@@ -9,7 +9,7 @@ import {
   useTranslation,
 } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 
@@ -162,15 +162,6 @@ export const JobDetailsPopUp = observer<JobDetailsPopUpProps>(
       [findAnnotationId],
     );
 
-    const deleteJobMessage = useMemo(
-      () =>
-        `${t("delete-job-message")}`.replace(
-          "_",
-          jobAnnotations?.length.toString() ?? "0",
-        ),
-      [jobAnnotations, t],
-    );
-
     function extractTitleFromDataUri(dataUri: string) {
       return dataUri.split("/").pop(); // Extract the last element of the array
     }
@@ -252,19 +243,21 @@ export const JobDetailsPopUp = observer<JobDetailsPopUpProps>(
 
         {jobImages && !isErrorImages && !isErrorAnnotations && (
           <ScrollableList>
-            {jobImages?.sort(compareImages).map((image, index) => (
-              <ClickableListItem
-                onClick={() =>
-                  navigate(editorPath(image.id, findAnnotationId(image.id)))
-                }
-                isLast={index === jobImages.length - 1}
-              >
-                <StyledText text={extractTitleFromDataUri(image.dataUri)} />
-                {imagesWithAnnotations?.includes(image.id) && (
-                  <SubtleText tx="image-annotated" />
-                )}
-              </ClickableListItem>
-            ))}
+            {jobImages
+              ?.sort(compareImages)
+              .map((image: Image, index: number) => (
+                <ClickableListItem
+                  onClick={() =>
+                    navigate(editorPath(image.id, findAnnotationId(image.id)))
+                  }
+                  isLast={index === jobImages.length - 1}
+                >
+                  <StyledText text={extractTitleFromDataUri(image.dataUri)} />
+                  {imagesWithAnnotations?.includes(image.id) && (
+                    <SubtleText tx="image-annotated" />
+                  )}
+                </ClickableListItem>
+              ))}
           </ScrollableList>
         )}
         <ConfirmationPopup
@@ -285,7 +278,7 @@ export const JobDetailsPopUp = observer<JobDetailsPopUpProps>(
         <ConfirmationPopup
           isOpen={isCancelJobConfirmationPopUpOpen}
           onClose={closeCancelJobConfirmationPopUp}
-          messageTx="cancel-job-message"
+          message="cancel-job-message"
           titleTx="cancel-job-title"
           onConfirm={() => {
             patchJobStatus({

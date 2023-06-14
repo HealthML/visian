@@ -55,7 +55,7 @@ export const DatasetExplorer = ({
     (selection: boolean) => {
       if (selection) {
         const newSelection = new Set<string>();
-        images?.forEach((image) => newSelection.add(image.id));
+        images?.forEach((image: Image) => newSelection.add(image.id));
         setSelectedImages(newSelection);
         return;
       }
@@ -244,10 +244,19 @@ export const DatasetExplorer = ({
       />
       <ConfirmationPopup
         isOpen={isDeleteImagesConfirmationPopUpOpen}
-        onClose={closeDeleteImagesConfirmationPopUp}
-        message={translate("delete-images-message", {
-          name: imageTobBeDeleted?.dataUri ?? selectedImages.size.toString(),
-        })}
+        onClose={() => {
+          closeDeleteImagesConfirmationPopUp();
+          setImageTobBeDeleted(undefined);
+        }}
+        message={
+          imageTobBeDeleted
+            ? translate("delete-image-message", {
+                name: imageTobBeDeleted?.dataUri ?? "",
+              })
+            : translate("delete-images-message", {
+                count: selectedImages.size.toString(),
+              })
+        }
         titleTx={
           imageTobBeDeleted ? "delete-image-title" : "delete-images-title"
         }

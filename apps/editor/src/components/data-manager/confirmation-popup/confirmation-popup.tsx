@@ -1,4 +1,4 @@
-import { ButtonParam, PopUp, Text, useTranslation } from "@visian/ui-shared";
+import { ButtonParam, PopUp, Text } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
 import { useCallback } from "react";
 import styled from "styled-components";
