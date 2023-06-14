@@ -202,7 +202,7 @@ export const DatasetPage = ({
         backPath={`/projects/${dataset.project}`}
       />
       <PageSection
-        titleTx="data"
+        titleTx="images"
         isLoading={isLoadingImages}
         infoTx={listInfoTx}
         showActions={!imagesError}
