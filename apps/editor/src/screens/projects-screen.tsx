@@ -1,4 +1,4 @@
-import { Modal, Screen, Sheet, space, useTranslation } from "@visian/ui-shared";
+import { Screen, Sheet, space, useTranslation } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
 import React, { useCallback, useMemo, useState } from "react";
 import styled from "styled-components";
