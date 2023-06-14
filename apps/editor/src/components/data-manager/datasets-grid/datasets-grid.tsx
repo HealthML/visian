@@ -12,6 +12,7 @@ import { ConfirmationPopup } from "../confirmation-popup";
 import { DatasetCreationPopup } from "../dataset-creation-popup";
 import { GridView } from "../grid-view";
 import { ListView } from "../list-view";
+import useLocalStorageToggle from "../util/use-local-storage";
 
 const StyledModal = styled(Modal)`
   width: 100%;
@@ -89,10 +90,13 @@ export const DatasetsGrid = ({
   );
 
   // switch between list and grid view
-  const [isGridView, setIsGridView] = useState(true);
+  const [isGridView, setIsGridView] = useLocalStorageToggle(
+    "isGridViewDatasets",
+    true,
+  );
   const toggleGridView = useCallback(() => {
-    setIsGridView((prev) => !prev);
-  }, []);
+    setIsGridView((prev: boolean) => !prev);
+  }, [setIsGridView]);
 
   return (
     <>

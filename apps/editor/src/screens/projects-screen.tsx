@@ -15,6 +15,7 @@ import { GridView } from "../components/data-manager/grid-view";
 import { ListView } from "../components/data-manager/list-view";
 import { ProjectCreationPopup } from "../components/data-manager/project-creation-popup";
 import { UIOverlayDataManager } from "../components/data-manager/ui-overlay-data-manager";
+import useLocalStorageToggle from "../components/data-manager/util/use-local-storage";
 import {
   useCreateProjectMutation,
   useDeleteProjectsMutation,
@@ -93,10 +94,13 @@ export const ProjectsScreen: React.FC = observer(() => {
   );
 
   // switch between list and grid view
-  const [isGridView, setIsGridView] = useState(true);
+  const [isGridView, setIsGridView] = useLocalStorageToggle(
+    "isGridViewProjects",
+    true,
+  );
   const toggleGridView = useCallback(() => {
-    setIsGridView((prev) => !prev);
-  }, []);
+    setIsGridView((prev: boolean) => !prev);
+  }, [setIsGridView]);
 
   const altMessage = useMemo(() => {
     if (isLoadingProjects) return translate("projects-loading");
