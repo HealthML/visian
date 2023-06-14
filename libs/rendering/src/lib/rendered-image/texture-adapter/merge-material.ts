@@ -25,6 +25,7 @@ export class MergeMaterial extends THREE.ShaderMaterial {
       glslVersion: THREE.GLSL3,
       defines,
       depthTest: false,
+      blending: THREE.NoBlending,
     });
   }
 
