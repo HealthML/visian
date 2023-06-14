@@ -14,11 +14,13 @@ const TitleContainer = styled.div`
 `;
 
 const BackButton = styled(FloatingUIButton)`
+  width: 40px;
   margin: 0;
   margin-bottom: ${space("pageSectionMargin")};
+  margin-left: -9px;
+
   background: none;
   border: none;
-  width: 2em;
   backdrop-filter: none;
 `;
 
