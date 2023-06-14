@@ -1,7 +1,4 @@
-import { Dataset } from "./dataset-types";
-import { Project } from "./project-types";
-
-export interface IterableData extends Dataset, Project {
+export interface IterableData {
   id: string;
   name: string;
   createdAt: string;

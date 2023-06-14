@@ -2,9 +2,10 @@ import type { StatefulPopUpProps } from "@visian/ui-shared";
 
 import { IterableData } from "../../../types";
 
-export interface GridViewProps extends StatefulPopUpProps {
-  data: IterableData[];
+export interface GridViewProps<T extends IterableData>
+  extends StatefulPopUpProps {
+  data: T[];
   imgSrc?: string;
-  onClick: (item: IterableData) => void;
-  onDelete: (item: IterableData) => void;
+  onClick: (item: T) => void;
+  onDelete: (item: T) => void;
 }

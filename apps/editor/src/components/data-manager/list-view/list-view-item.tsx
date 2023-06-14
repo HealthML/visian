@@ -1,7 +1,7 @@
 import { InvisibleButton, ListItem, Text } from "@visian/ui-shared";
 import styled from "styled-components";
 
-import { Dataset, Project } from "../../../types";
+import { IterableData } from "../../../types";
 
 const ExpandedSpacer = styled.div`
   margin-right: auto;
@@ -21,7 +21,7 @@ export const ListViewItem = ({
   onClick,
   isLast,
 }: {
-  item: Project | Dataset;
+  item: IterableData;
   onDelete: () => void;
   onClick: () => void;
   isLast: boolean;

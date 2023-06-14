@@ -2,8 +2,9 @@ import type { StatefulPopUpProps } from "@visian/ui-shared";
 
 import { IterableData } from "../../../types";
 
-export interface ListViewProps extends StatefulPopUpProps {
-  data: IterableData[];
-  onClick: (item: IterableData) => void;
-  onDelete: (item: IterableData) => void;
+export interface ListViewProps<T extends IterableData>
+  extends StatefulPopUpProps {
+  data: T[];
+  onClick: (item: T) => void;
+  onDelete: (item: T) => void;
 }

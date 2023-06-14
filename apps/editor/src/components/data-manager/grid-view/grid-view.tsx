@@ -1,7 +1,7 @@
 import { Grid, stopPropagation } from "@visian/ui-shared";
-import { observer } from "mobx-react-lite";
 import styled from "styled-components";
 
+import { IterableData } from "../../../types";
 import { GridViewItem } from "./grid-view-item";
 import { GridViewProps } from "./grid-view.props";
 
@@ -11,20 +11,23 @@ const StyledGrid = styled(Grid)`
   user-select: none;
 `;
 
-export const GridView = observer<GridViewProps>(
-  ({ data, imgSrc, onDelete, onClick }: GridViewProps) => (
-    <StyledGrid onWheel={stopPropagation}>
-      {data.map((item) => (
-        <GridViewItem
-          item={item}
-          key={item.id}
-          imgSrc={imgSrc}
-          onDelete={() => onDelete(item)}
-          onClick={() => {
-            onClick(item);
-          }}
-        />
-      ))}
-    </StyledGrid>
-  ),
+export const GridView = <T extends IterableData>({
+  data,
+  imgSrc,
+  onDelete,
+  onClick,
+}: GridViewProps<T>) => (
+  <StyledGrid onWheel={stopPropagation}>
+    {data.map((item) => (
+      <GridViewItem
+        item={item}
+        key={item.id}
+        imgSrc={imgSrc}
+        onDelete={() => onDelete(item)}
+        onClick={() => {
+          onClick(item);
+        }}
+      />
+    ))}
+  </StyledGrid>
 );

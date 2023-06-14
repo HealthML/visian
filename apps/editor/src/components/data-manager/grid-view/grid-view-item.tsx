@@ -1,7 +1,7 @@
 import { GridItem, InvisibleButton, Text } from "@visian/ui-shared";
 import styled from "styled-components";
 
-import { Dataset, Project } from "../../../types";
+import { IterableData } from "../../../types";
 
 const StyledGridItem = styled(GridItem)`
   cursor: pointer;
@@ -55,7 +55,7 @@ export const GridViewItem = ({
   onDelete,
   onClick,
 }: {
-  item: Project | Dataset;
+  item: IterableData;
   imgSrc: string | undefined;
   onDelete: () => void;
   onClick: () => void;
