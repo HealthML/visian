@@ -1,8 +1,4 @@
-import {
-  WHOAnnotation,
-  WHOAnnotationSnapshot,
-  WHOAnnotationStatus,
-} from "./annotation";
+import { WHOAnnotation, WHOAnnotationSnapshot } from "./annotation";
 import { WHOAnnotationTask, WHOAnnotationTaskSnapshot } from "./annotationTask";
 import { WHOSample } from "./sample";
 import { WHOUser, WHOUserSnapshot } from "./user";
@@ -44,17 +40,6 @@ export class WHOTask {
       (annotation: any) => new WHOAnnotation(annotation),
     );
     this.assignee = new WHOUser(task.assignee);
-  }
-
-  public addNewAnnotation(): void {
-    const annotationData = {
-      status: WHOAnnotationStatus.Pending,
-      data: [],
-      annotator: this.assignee,
-      submittedAt: "",
-    };
-    const annotation = new WHOAnnotation(annotationData);
-    this.annotations.push(annotation);
   }
 
   public toJSON(): WHOTaskSnapshot {

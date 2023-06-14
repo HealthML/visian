@@ -1,4 +1,13 @@
-import { createFileFromBase64, WHOTask, WHOTaskType } from "@visian/utils";
+import {
+  createBase64StringFromFile,
+  createFileFromBase64,
+  putWHOTask,
+  WHOAnnotation,
+  WHOAnnotationData,
+  WHOAnnotationStatus,
+  WHOTask,
+  WHOTaskType,
+} from "@visian/utils";
 
 import { FileWithMetadata } from "../../types";
 import { ReviewTask, TaskType } from "./review-task";
@@ -11,6 +20,10 @@ const taskTypeMapping = {
 
 export class WHOReviewTask implements ReviewTask {
   private whoTask: WHOTask;
+
+  public get id(): string {
+    return this.whoTask.taskUUID;
+  }
 
   public get kind(): TaskType {
     return taskTypeMapping[this.whoTask.kind];
@@ -63,5 +76,82 @@ export class WHOReviewTask implements ReviewTask {
       file.metadata = { id: annotationData.annotationDataUUID };
       return file;
     });
+  }
+
+  public async createAnnotation(files: File[]): Promise<void> {
+    const annotationWithoutData = {
+      // TODO: set correct status
+      status: WHOAnnotationStatus.Completed,
+      data: [],
+      annotator: this.whoTask.assignee,
+      submittedAt: new Date().toISOString(),
+    };
+    const annotation = new WHOAnnotation(annotationWithoutData);
+
+    files.forEach(async (file) => {
+      const base64Data = await this.getBase64DataFromFile(file);
+      this.createAnnotationData(annotation, base64Data);
+    });
+
+    this.whoTask.annotations.push(annotation);
+  }
+
+  public async updateAnnotation(
+    annotationId: string,
+    files: File[],
+  ): Promise<void> {
+    const annotation = this.whoTask?.annotations.find(
+      (anno: WHOAnnotation) => anno.annotationUUID === annotationId,
+    );
+    if (!annotation)
+      throw new Error(`Annotation with id ${annotationId} does not exist.`);
+
+    files.forEach(async (file) => {
+      const base64Data = await this.getBase64DataFromFile(file);
+
+      if ("metadata" in file) {
+        const fileWithMetadata = file as FileWithMetadata;
+        this.updateAnnotationData(
+          fileWithMetadata.metadata.id,
+          annotation,
+          base64Data,
+        );
+      } else {
+        this.createAnnotationData(annotation, base64Data);
+      }
+    });
+  }
+
+  public async save(): Promise<Response> {
+    return putWHOTask(this.id, JSON.stringify(this.whoTask.toJSON()));
+  }
+
+  private async getBase64DataFromFile(file: File): Promise<string> {
+    const base64LayerData = await createBase64StringFromFile(file);
+    if (!base64LayerData || !(typeof base64LayerData === "string"))
+      throw new Error("File can not be converted to base64.");
+    return base64LayerData;
+  }
+
+  private createAnnotationData(annotation: WHOAnnotation, base64Data: string) {
+    const annotationDataForBackend = { data: base64Data };
+    annotation.data.push(new WHOAnnotationData(annotationDataForBackend));
+  }
+
+  private updateAnnotationData(
+    annotationDataUUID: string,
+    annotation: WHOAnnotation,
+    base64Data: string,
+  ) {
+    const annotationData = annotation.data.find(
+      (annoData: WHOAnnotationData) =>
+        annoData.annotationDataUUID === annotationDataUUID,
+    );
+    if (!annotationData) {
+      throw new Error(
+        `Failed to find AnnotationData with UUID ${annotationDataUUID}`,
+      );
+    }
+    annotationData.data = base64Data;
   }
 }
