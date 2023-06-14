@@ -102,6 +102,7 @@
   "mark-not-annotation": "Zu nicht Annotation",
   "export-layer": "Ebene exportieren",
   "export-slice": "Aktuelle Schicht exportieren",
+  "duplicate-layer": "Ebene duplizieren",
   "rename-layer": "Ebene umbenennen",
   "delete-layer": "Ebene löschen",
   "delete-layer-confirmation": "Ebene \"{{layer}}\" löschen?",
@@ -387,7 +388,7 @@
   "project-name": "Projektname",
   "create-dataset": "Datensatz erstellen",
   "dataset-name": "Datensatzname",
-  
+
   "edit": "Bearbeiten",
   "edit-project": "Projekt bearbeiten",
   "edit-dataset": "Datensatz bearbeiten",

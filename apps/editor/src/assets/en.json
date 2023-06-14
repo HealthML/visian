@@ -102,6 +102,7 @@
   "mark-not-annotation": "Mark as not Annotation",
   "export-layer": "Export Layer",
   "export-slice": "Export Current Slice",
+  "duplicate-layer": "Duplicate Layer",
   "rename-layer": "Rename Layer",
   "delete-layer": "Delete Layer",
   "delete-layer-confirmation": "Delete layer \"{{layer}}\"?",
