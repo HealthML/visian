@@ -12,7 +12,7 @@ import { GridItemProps } from "./grid.props";
 
 export const Grid = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   width: 100%;
   height: 100%;
   align-content: flex-start;
