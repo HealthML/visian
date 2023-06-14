@@ -238,7 +238,7 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
     const annotationLayerName =
       store?.editor.activeDocument?.activeLayer?.title?.split(".")[0];
     return `/annotations/${imageName}/${
-      annotationLayerName || "annotation"
+      annotationLayerName ?? "annotation"
     }${fileExt}`;
   }, [store, getLayersInGroupOf]);
 

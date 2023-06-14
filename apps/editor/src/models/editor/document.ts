@@ -728,8 +728,10 @@ export class Document
               name: `${layerIndex}_${imageWithUnit.name}`,
               ...prototypeImage,
             });
-            this.addLayerToGroup(createdLayerId, files);
-            this.addMetaDataToLayer(createdLayerId, files);
+            if (files instanceof File) {
+              this.addLayerToGroup(createdLayerId, files);
+              this.addMetaDataToLayer(createdLayerId, files);
+            }
           }
         } else {
           this.setError({
@@ -763,8 +765,10 @@ export class Document
               { ...imageWithUnit, name: `${value}_${image.name}` },
               value,
             );
-            this.addLayerToGroup(createdLayerId, files);
-            this.addMetaDataToLayer(createdLayerId, files);
+            if (files instanceof File) {
+              this.addLayerToGroup(createdLayerId, files);
+              this.addMetaDataToLayer(createdLayerId, files);
+            }
           });
         }
       }
@@ -780,8 +784,10 @@ export class Document
       this.history.clear();
     }
 
-    this.addLayerToGroup(createdLayerId, files);
-    this.addMetaDataToLayer(createdLayerId, files);
+    if (files instanceof File) {
+      this.addLayerToGroup(createdLayerId, files);
+      this.addMetaDataToLayer(createdLayerId, files);
+    }
     return createdLayerId;
   }
 
@@ -910,25 +916,69 @@ export class Document
       ) as unknown as IImageLayer[];
   }
 
-  // adds layer to group given in file
-  private addLayerToGroup(layerID: string, file: File | File[]) {
+  /** Adds layer to group specified in file object */
+  private addLayerToGroup(layerID: string, file: File) {
     const layer = this.getLayer(layerID);
-    if (layer && "groupId" in file) {
-      const fileWithGroupId = file as FileWithGroup;
-      const groupLayer = this.getLayer(
-        fileWithGroupId.groupId,
-      ) as layers.LayerGroup;
+    const groupLayer = this.getGroupLayerFromFile(file);
+    if (layer && groupLayer) {
       groupLayer?.addLayer(layer);
     }
   }
 
-  // adds meta data from file to layer
-  private addMetaDataToLayer(layerId: string, file: File | File[]) {
+  /** Adds meta data from file with metadata to layer */
+  private addMetaDataToLayer(layerId: string, file: File) {
     const layer = this.getLayer(layerId);
     const metaData = this.getMetaDataFromFile(file);
     if (layer && metaData) {
       layer.metaData = metaData;
     }
+  }
+
+  /** Returns the group layer specified in the file object */
+  private getGroupLayerFromFile(file: File): layers.LayerGroup | undefined {
+    if ("groupId" in file) {
+      const fileWithGroupId = file as FileWithGroup;
+      const groupLayer = this.getLayer(
+        fileWithGroupId.groupId,
+      ) as layers.LayerGroup;
+      return groupLayer;
+    }
+    return undefined;
+  }
+
+  /** Extracts metadata appended to a file object */
+  private getMetaDataFromFile(file: File): Image | Annotation | undefined {
+    if ("metadata" in file) {
+      const fileWithMetaData = file as FileWithMetadata;
+      return fileWithMetaData.metadata;
+    }
+    return undefined;
+  }
+
+  /** Creates a LayerGroup object for a list of files and adds the group id to the files */
+  private createLayerGroup(
+    files: File[],
+    title?: string,
+    groupMetaData?: Image | Annotation,
+  ): FileWithGroup[] {
+    if (files.every((f) => "groupId" in f)) {
+      return files as FileWithGroup[];
+    }
+    if (files.some((f) => "groupId" in f)) {
+      throw new Error(
+        "Cannot create a new group for file that already belongs to a group",
+      );
+    }
+    const groupLayer = new layers.LayerGroup(undefined, this);
+    groupLayer.setMetaData(groupMetaData);
+    groupLayer.setTitle(title);
+    const filesWithGroup = files.map((f) => {
+      const fileWithGroup = f as FileWithGroup;
+      fileWithGroup.groupId = groupLayer.id;
+      return fileWithGroup;
+    });
+    this.addLayer(groupLayer);
+    return filesWithGroup;
   }
 
   // Proxies
@@ -983,41 +1033,5 @@ export class Document
     throw new Error(
       "This is a noop. To load a document from storage, create a new instance",
     );
-  }
-
-  private createLayerGroup(
-    files: File[],
-    title?: string,
-    groupMetaData?: Image | Annotation,
-  ): FileWithGroup[] {
-    if (files.every((f) => "groupId" in f)) {
-      return files as FileWithGroup[];
-    }
-    if (files.some((f) => "groupId" in f)) {
-      throw new Error(
-        "Cannot create a new group for file that already belongs to a group",
-      );
-    }
-    const groupLayer = new layers.LayerGroup(undefined, this);
-    groupLayer.setMetaData(groupMetaData);
-    groupLayer.setTitle(title);
-    const filesWithGroup = files.map((f) => {
-      const fileWithGroup = f as FileWithGroup;
-      fileWithGroup.groupId = groupLayer.id;
-      return fileWithGroup;
-    });
-    this.addLayer(groupLayer);
-    return filesWithGroup;
-  }
-
-  private getMetaDataFromFile(
-    file: File | File[] | undefined,
-  ): Image | Annotation | undefined {
-    if (!file) return undefined;
-    if ("metadata" in file) {
-      const fileWithMetaData = file as FileWithMetadata;
-      return fileWithMetaData.metadata;
-    }
-    return undefined;
   }
 }
