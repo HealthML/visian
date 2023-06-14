@@ -631,7 +631,8 @@ export class Document
       this.createLayerGroup(filteredFiles, name ?? uuidv4());
     }
     let createdLayerId = "";
-    const isFirstLayer = !this.layerIds.length;
+    const isFirstLayer =
+      !this.layerIds.length || !this.layers.some((l) => l.kind !== "group");
     const image = await readMedicalImage(filteredFiles);
     image.name =
       name ||
@@ -970,6 +971,7 @@ export class Document
       );
     }
     const groupLayer = new layers.LayerGroup(undefined, this);
+    groupLayer.setIsVisible(false);
     groupLayer.setMetaData(groupMetaData);
     groupLayer.setTitle(title);
     const filesWithGroup = files.map((f) => {

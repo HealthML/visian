@@ -223,13 +223,11 @@ export class Layer implements ILayer, ISerializable<LayerSnapshot> {
     this.setColor(snapshot?.color);
     this.setIsVisible(snapshot?.isVisible);
     this.setOpacity(snapshot?.opacityOverride);
-    if (snapshot?.transformation) {
-      this.setTransformation(
-        snapshot?.transformation
-          ? new Matrix4().fromArray(snapshot.transformation)
-          : undefined,
-      );
-    }
+    this.setTransformation(
+      snapshot?.transformation
+        ? new Matrix4().fromArray(snapshot.transformation)
+        : undefined,
+    );
 
     return Promise.resolve();
   }
