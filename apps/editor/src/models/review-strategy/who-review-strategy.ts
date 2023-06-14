@@ -59,7 +59,6 @@ export class WHOReviewStrategy extends ReviewStrategy {
         descriptionTx: "file-upload-error",
       });
     }
-    throw new Error("Method not implemented.");
   }
 
   public async saveTask(): Promise<void> {
@@ -71,7 +70,7 @@ export class WHOReviewStrategy extends ReviewStrategy {
     await Promise.all(
       groups.map(async (groupLayer: ILayerGroup) => {
         const annotationId = groupLayer.metaData?.id;
-        const annotationFiles = await this.generateFilesForGroup(groupLayer);
+        const annotationFiles = await this.getFilesForGroup(groupLayer);
 
         if (annotationId) {
           this.currentTask?.updateAnnotation(annotationId, annotationFiles);
@@ -80,7 +79,14 @@ export class WHOReviewStrategy extends ReviewStrategy {
         }
       }),
     );
-    throw new Error("Method not implemented.");
+
+    const undefinedGroupLayers =
+      this.store.editor.activeDocument?.annotationLayers.filter(
+        (annotationLayer) => annotationLayer.parent === undefined,
+      );
+    if (!undefinedGroupLayers) return;
+    const files = await this.getFilesForLayers(undefinedGroupLayers);
+    this.currentTask?.createAnnotation(files);
   }
 
   // Importing
@@ -129,13 +135,17 @@ export class WHOReviewStrategy extends ReviewStrategy {
   }
 
   // Saving
-  private async generateFilesForGroup(group: ILayerGroup): Promise<File[]> {
+  private async getFilesForGroup(group: ILayerGroup): Promise<File[]> {
     const annotationLayers = group.layers.filter(
       (layer) => layer.kind === "image" && layer.isAnnotation,
     ) as ImageLayer[];
 
-    const layerFiles = await Promise.all(
-      annotationLayers.map(async (layer: IImageLayer) => {
+    return this.getFilesForLayers(annotationLayers);
+  }
+
+  private async getFilesForLayers(layers: IImageLayer[]): Promise<File[]> {
+    return Promise.all(
+      layers.map(async (layer: IImageLayer) => {
         const layerFile =
           await this.store?.editor.activeDocument?.getFileForLayer(layer.id);
         if (!layerFile) {
@@ -151,6 +161,5 @@ export class WHOReviewStrategy extends ReviewStrategy {
         return layerFile;
       }),
     );
-    return layerFiles;
   }
 }
