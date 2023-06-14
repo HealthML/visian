@@ -29,9 +29,7 @@ export const ProjectListItem = ({
 
   return (
     <ListItem isLast={isLast}>
-      <ClickableText
-        onClick={() => navigate(`/projects/${project.id}/datasets`)}
-      >
+      <ClickableText onClick={() => navigate(`/projects/${project.id}`)}>
         {project.name}
       </ClickableText>
       <ExpandedSpacer />

@@ -1,6 +1,6 @@
 {
   "loading": "Lädt...",
-  "error": "Fehler!",
+  "error": "Fehler",
   "reset": "Zurücksetzen",
 
   "drop-file": "Legen Sie die Datei hier ab",
@@ -273,34 +273,41 @@
   "exit-select-mode": "Auswahlmodus verlassen",
   "select-mode": "Auswahlmodus",
 
+  "mia": "MIA",
+
+  "project": "Projekt",
+  "projects": "Projekte",
+  "dataset": "Datensatz",
+  "datasets": "Datensätze",
+  "data": "Daten",
+  "job": "Job",
+  "jobs": "Jobs",
+
   "projects-base-title": "VISIAN Projekte",
   "project-base-title": "VISIAN Projekt",
   "datasets-base-title": "VISIAN Datensätze",
   "jobs-base-title": "VISIAN Jobs",
   "dataset-base-title": "VISIAN Datensatz",
 
-  "projects-loading": "Projekte werden geladen...",
-  "projects-loading-error": "Fehler beim Laden der Projekte:",
+  "projects-loading-failed": "Die Projekte konnten nicht geladen werden.",
   "no-projects-available": "Aktuell sind keine Projekte vorhanden.",
 
-  "project-loading": "Projekt wird geladen...",
-  "project-loading-error": "Fehler beim Laden des Projektes:",
+  "project-loading-failed": "Das Projekt konnte nicht geladen werden.",
 
   "datasets-loading": "Datensätze werden geladen...",
-  "datasets-loading-error": "Fehler beim Laden der Datensätze:",
+  "datasets-loading-failed": "Die Datensätze konnten nicht geladen werden.",
   "no-datasets-available": "Aktuell sind keine Datensätze vorhanden.",
 
-  "dataset-loading": "Datensatz wird geladen...",
-  "dataset-loading-error": "Fehler beim Laden des Datensatzes:",
+  "dataset-loading-failed": "Der Datensatz konnte nicht geladen werden.",
 
   "images-loading": "Bilder werden geladen...",
-  "images-loading-error": "Fehler beim Laden der Bilder:",
+  "images-loading-failed": "Die Bilder konnten nicht geladen werden.",
   "no-images-available": "Aktuell sind keine Bilder vorhanden.",
   "image-open-error": "Fehler beim Öffnen des Bildes",
   "image-annotated": "annotiert",
 
   "annotations-loading": "Annotationen werden geladen...",
-  "annotations-loading-error": "Fehler beim Laden der Annotationen:",
+  "annotations-loading-failed": "Die Annotationen konnten nicht geladen werden.",
   "annotation-open-error": "Fehler beim Öffnen der Annotation",
   "annotation-saving": "Aktive Annotationsebene speichern",
   "annotation-saving-overrwite": "Existierende Annotationsdatei überschreiben",
@@ -312,8 +319,7 @@
   "ml-models-none-available": "Es sind keine Modelle verfügbar.",
   "ml-models-not-found-error": "Modellversion konnte nicht gefunden werden.",
 
-  "jobs-loading": "Jobs werden geladen...",
-  "jobs-loading-error": "Fehler beim Laden der Jobs:",
+  "jobs-loading-failed": "Die Jobs konnten nicht geladen werden.",
   "no-jobs-available": "Aktuell sind keine Jobs vorhanden.",
   "job-deleted-images": "Es scheint als wurden alle Bilder des Jobs gelöscht...",
   "job-details": "Job Details",

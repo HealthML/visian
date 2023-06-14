@@ -1,4 +1,4 @@
-import { Modal, Notification, Text, useTranslation } from "@visian/ui-shared";
+import { Notification, Sheet, space, useTranslation } from "@visian/ui-shared";
 import { useCallback, useMemo, useState } from "react";
 import styled from "styled-components";
 
@@ -14,14 +14,19 @@ import { DatasetImageList } from "../dataset-image-list";
 import { DatasetNavigationbar } from "../dataset-navigationbar";
 import { ImageImportPopup } from "../image-import-popup";
 import { JobCreationPopup } from "../job-creation-popup";
+import { PageSection } from "../page-section";
+import { PageTitle } from "../page-title";
 import { useImageSelection } from "../util";
 
-const StyledModal = styled(Modal)`
-  width: 100%;
+const StyledSheet = styled(Sheet)`
+  padding: ${space("pageSectionMarginSmall")};
+  box-sizing: border-box;
 `;
 
-const ErrorMessage = styled(Text)`
-  margin: auto;
+const Container = styled.div`
+  width: 100%;
+  display: flex;
+  flex-direction: column;
 `;
 
 const ErrorNotification = styled(Notification)`
@@ -32,7 +37,7 @@ const ErrorNotification = styled(Notification)`
   transform: translateX(-50%);
 `;
 
-export const DatasetExplorer = ({
+export const DatasetPage = ({
   dataset,
   isDraggedOver,
   onDropCompleted,
@@ -185,99 +190,105 @@ export const DatasetExplorer = ({
     [selectedImages, translate, imageTobBeDeleted],
   );
 
+  let listInfoTx;
+  if (imagesError) listInfoTx = "images-loading-failed";
+  else if (images && images.length === 0) listInfoTx = "no-images-available";
+
   return (
-    <StyledModal
-      hideHeaderDivider={false}
-      label={dataset.name}
-      position="right"
-      headerChildren={
-        <DatasetNavigationbar
-          isInSelectMode={isInSelectMode}
-          allSelected={areAllSelected}
-          anySelected={isAnySelected}
-          toggleSelectMode={toggleSelectMode}
-          toggleSelectAll={toggleSelectAll}
-          openJobCreationPopUp={openJobCreationPopUp}
-          openImageImportPopUp={openImageImportPopUp}
-          deleteSelectedImages={openDeleteImagesConfirmationPopUp}
-        />
-      }
-    >
-      {store?.error && (
-        <ErrorNotification
-          title={store?.error.title}
-          titleTx={store?.error.titleTx}
-          description={store?.error.description}
-          descriptionTx={store?.error.descriptionTx}
-          descriptionData={store?.error.descriptionData}
-        />
-      )}
-      {isLoadingImages ? (
-        <ErrorMessage tx="images-loading" />
-      ) : isErrorImages ? (
-        <ErrorMessage>{`${translate("images-loading-error")} ${
-          imagesError?.response?.statusText
-        } (${imagesError?.response?.status})`}</ErrorMessage>
-      ) : images && images.length > 0 ? (
-        <DatasetImageList
-          isInSelectMode={isInSelectMode}
-          images={images}
-          refetchImages={refetchImages}
-          selectedImages={selectedImages}
-          setImageSelection={setImageSelection}
-          setSelectedImages={setSelectedImages}
-          deleteAnnotation={deleteAnnotation}
-          deleteImage={deleteImage}
-        />
-      ) : (
-        <ErrorMessage tx="no-images-available" />
-      )}
-      <JobCreationPopup
-        isOpen={!!jobCreationPopUpOpenWith}
-        onClose={closeJobCreationPopUp}
-        activeImageSelection={selectedImages}
-        projectId={dataset.project}
-        openWithDatasetId={jobCreationPopUpOpenWith}
+    <Container>
+      <PageTitle
+        title={dataset.name}
+        labelTx="dataset"
+        backPath={`/projects/${dataset.project}`}
       />
-      <ImageImportPopup
-        isOpen={!!imageImportPopUpOpenWith}
-        onClose={closeImageImportPopUp}
-        dataset={imageImportPopUpOpenWith}
-        onImportFinished={refetchImages}
-        isDraggedOver={isDraggedOver}
-        onDropCompleted={() => {
-          setImageImportPopUpOpenWith(dataset);
-          onDropCompleted();
-        }}
-      />
-      <ConfirmationPopup
-        isOpen={isDeleteAnnotationConfirmationPopUpOpen}
-        onClose={closeDeleteAnnotationConfirmationPopUp}
-        message={deleteAnnotationMessage}
-        titleTx="delete-annotation-title"
-        onConfirm={() => {
-          if (annotationTobBeDeleted)
-            deleteAnnotations({
-              imageId: annotationTobBeDeleted.image,
-              annotationIds: [annotationTobBeDeleted.id],
-            });
-        }}
-      />
-      <ConfirmationPopup
-        isOpen={isDeleteImagesConfirmationPopUpOpen}
-        onClose={closeDeleteImagesConfirmationPopUp}
-        message={deleteImagesMessage}
-        titleTx={
-          imageTobBeDeleted ? "delete-image-title" : "delete-images-title"
+      <PageSection
+        titleTx="data"
+        isLoading={isLoadingImages}
+        infoTx={listInfoTx}
+        showActions={!imagesError}
+        actions={
+          <DatasetNavigationbar
+            isInSelectMode={isInSelectMode}
+            allSelected={areAllSelected}
+            anySelected={isAnySelected}
+            toggleSelectMode={toggleSelectMode}
+            toggleSelectAll={toggleSelectAll}
+            openJobCreationPopUp={openJobCreationPopUp}
+            openImageImportPopUp={openImageImportPopUp}
+            deleteSelectedImages={openDeleteImagesConfirmationPopUp}
+          />
         }
-        onConfirm={() => {
-          if (imageTobBeDeleted) {
-            deleteImages([imageTobBeDeleted.id]);
-          } else {
-            deleteSelectedImages();
+      >
+        <StyledSheet>
+          {images && (
+            <DatasetImageList
+              isInSelectMode={isInSelectMode}
+              images={images}
+              refetchImages={refetchImages}
+              selectedImages={selectedImages}
+              setImageSelection={setImageSelection}
+              setSelectedImages={setSelectedImages}
+              deleteAnnotation={deleteAnnotation}
+              deleteImage={deleteImage}
+            />
+          )}
+        </StyledSheet>
+        <JobCreationPopup
+          isOpen={!!jobCreationPopUpOpenWith}
+          onClose={closeJobCreationPopUp}
+          activeImageSelection={selectedImages}
+          projectId={dataset.project}
+          openWithDatasetId={jobCreationPopUpOpenWith}
+        />
+        <ImageImportPopup
+          isOpen={!!imageImportPopUpOpenWith}
+          onClose={closeImageImportPopUp}
+          dataset={imageImportPopUpOpenWith}
+          onImportFinished={refetchImages}
+          isDraggedOver={isDraggedOver}
+          onDropCompleted={() => {
+            setImageImportPopUpOpenWith(dataset);
+            onDropCompleted();
+          }}
+        />
+        <ConfirmationPopup
+          isOpen={isDeleteAnnotationConfirmationPopUpOpen}
+          onClose={closeDeleteAnnotationConfirmationPopUp}
+          message={deleteAnnotationMessage}
+          titleTx="delete-annotation-title"
+          onConfirm={() => {
+            if (annotationTobBeDeleted)
+              deleteAnnotations({
+                imageId: annotationTobBeDeleted.image,
+                annotationIds: [annotationTobBeDeleted.id],
+              });
+          }}
+        />
+        <ConfirmationPopup
+          isOpen={isDeleteImagesConfirmationPopUpOpen}
+          onClose={closeDeleteImagesConfirmationPopUp}
+          message={deleteImagesMessage}
+          titleTx={
+            imageTobBeDeleted ? "delete-image-title" : "delete-images-title"
           }
-        }}
-      />
-    </StyledModal>
+          onConfirm={() => {
+            if (imageTobBeDeleted) {
+              deleteImages([imageTobBeDeleted.id]);
+            } else {
+              deleteSelectedImages();
+            }
+          }}
+        />
+        {store?.error && (
+          <ErrorNotification
+            title={store?.error.title}
+            titleTx={store?.error.titleTx}
+            description={store?.error.description}
+            descriptionTx={store?.error.descriptionTx}
+            descriptionData={store?.error.descriptionData}
+          />
+        )}
+      </PageSection>
+    </Container>
   );
 };

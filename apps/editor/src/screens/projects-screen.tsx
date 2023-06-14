@@ -1,18 +1,17 @@
-import {
-  Modal,
-  Screen,
-  SquareButton,
-  Text,
-  useTranslation,
-} from "@visian/ui-shared";
+import { Modal, Screen, Sheet, space, useTranslation } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
 import React, { useCallback, useMemo, useState } from "react";
 import styled from "styled-components";
 
 import { ConfirmationPopup } from "../components/data-manager/confirmation-popup";
+import { Page } from "../components/data-manager/page";
+import {
+  PageSection,
+  PageSectionIconButton,
+} from "../components/data-manager/page-section";
+import { PageTitle } from "../components/data-manager/page-title";
 import { ProjectCreationPopup } from "../components/data-manager/project-creation-popup";
 import { ProjectList } from "../components/data-manager/projects-list/project-list";
-import { UIOverlayDataManager } from "../components/data-manager/ui-overlay-data-manager";
 import {
   useCreateProjectMutation,
   useDeleteProjectsMutation,
@@ -20,17 +19,14 @@ import {
 } from "../queries";
 import { Project } from "../types";
 
-const StyledModal = styled(Modal)`
-  width: 100%;
+const StyledSheet = styled(Sheet)`
+  padding: ${space("pageSectionMarginSmall")};
+  box-sizing: border-box;
 `;
 
-const ErrorMessage = styled(Text)`
-  margin: auto;
-`;
-
-const StyledButton = styled(SquareButton)`
-  margin-left: 10px;
-  padding: 10px;
+const PlusIconButton = styled(PageSectionIconButton)`
+  padding: 0 8px;
+  height: auto;
 `;
 
 export const ProjectsScreen: React.FC = observer(() => {
@@ -82,16 +78,10 @@ export const ProjectsScreen: React.FC = observer(() => {
     [projectTobBeDeleted, translate],
   );
 
-  const altMessage = useMemo(() => {
-    if (isLoadingProjects) return translate("projects-loading");
-    if (isErrorProjects)
-      return `${translate("projects-loading-error")} ${
-        projectsError?.response?.statusText
-      } (${projectsError?.response?.status})`;
-    if (projects && projects.length <= 0)
-      return translate("no-projects-available");
-    return null;
-  }, [isLoadingProjects, isErrorProjects, projects, projectsError, translate]);
+  let projectsInfoTx;
+  if (projectsError) projectsInfoTx = "projects-loading-failed";
+  else if (projects && projects.length === 0)
+    projectsInfoTx = "no-projects-available";
 
   return (
     <Screen
@@ -103,51 +93,46 @@ export const ProjectsScreen: React.FC = observer(() => {
           : ""
       }`}
     >
-      <UIOverlayDataManager
-        main={
-          <StyledModal
-            hideHeaderDivider={false}
-            labelTx="projects-base-title"
-            position="right"
-            headerChildren={
-              <StyledButton
-                icon="plus"
-                tooltipTx="create-project"
-                tooltipPosition="left"
-                onPointerDown={openCreateProjectPopup}
-              />
-            }
-          >
-            {altMessage ? (
-              <ErrorMessage tx={altMessage} />
-            ) : (
-              projects && (
-                <ProjectList
-                  projects={projects}
-                  deleteProject={deleteProject}
-                />
-              )
+      <Page>
+        <PageTitle titleTx="mia" />
+        <PageSection
+          titleTx="projects"
+          infoTx={projectsInfoTx}
+          showActions={!projectsError}
+          isLoading={isLoadingProjects}
+          actions={
+            <PlusIconButton
+              icon="plus"
+              tooltipTx="create-project"
+              tooltipPosition="left"
+              onPointerDown={openCreateProjectPopup}
+            />
+          }
+        >
+          <StyledSheet>
+            {projects && (
+              <ProjectList projects={projects} deleteProject={deleteProject} />
             )}
-            <ConfirmationPopup
-              isOpen={isDeleteProjectConfirmationPopUpOpen}
-              onClose={closeDeleteProjectConfirmationPopUp}
-              message={deleteProjectMessage}
-              titleTx="delete-project-title"
-              onConfirm={() => {
-                if (projectTobBeDeleted)
-                  deleteProjects({
-                    projectIds: [projectTobBeDeleted.id],
-                  });
-              }}
-            />
-            <ProjectCreationPopup
-              isOpen={isCreateProjectPopupOpen}
-              onClose={closeCreateProjectPopup}
-              onConfirm={(newProjectDto) => createProject(newProjectDto)}
-            />
-          </StyledModal>
-        }
-      />
+          </StyledSheet>
+          <ConfirmationPopup
+            isOpen={isDeleteProjectConfirmationPopUpOpen}
+            onClose={closeDeleteProjectConfirmationPopUp}
+            message={deleteProjectMessage}
+            titleTx="delete-project-title"
+            onConfirm={() => {
+              if (projectTobBeDeleted)
+                deleteProjects({
+                  projectIds: [projectTobBeDeleted.id],
+                });
+            }}
+          />
+          <ProjectCreationPopup
+            isOpen={isCreateProjectPopupOpen}
+            onClose={closeCreateProjectPopup}
+            onConfirm={(newProjectDto) => createProject(newProjectDto)}
+          />
+        </PageSection>
+      </Page>
     </Screen>
   );
 });
