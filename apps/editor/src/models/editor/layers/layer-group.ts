@@ -38,15 +38,12 @@ export class LayerGroup
   }
 
   public addLayer(idOrLayer: string | ILayer) {
-    if (typeof idOrLayer === "string") {
-      this.layerIds.push(idOrLayer);
+    const layerId = typeof idOrLayer === "string" ? idOrLayer : idOrLayer.id;
+    if (!this.layerIds.includes(layerId)) {
+      this.layerIds.push(layerId);
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      this.document.getLayer(idOrLayer)!.setParent(this.id);
-      return;
+      this.document.getLayer(layerId)!.setParent(this.id);
     }
-
-    this.layerIds.push(idOrLayer.id);
-    idOrLayer.setParent(this.id);
   }
 
   public removeLayer(idOrLayer: string | ILayer) {
