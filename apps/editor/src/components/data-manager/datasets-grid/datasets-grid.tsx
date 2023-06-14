@@ -1,5 +1,5 @@
 import { Modal, SquareButton, Text, useTranslation } from "@visian/ui-shared";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useState } from "react";
 import styled from "styled-components";
 
 import useDatasetsBy, {
