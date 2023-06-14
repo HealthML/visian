@@ -73,15 +73,6 @@ export const ProjectsScreen: React.FC = observer(() => {
     [setProjectTobBeDeleted, openDeleteProjectConfirmationPopUp],
   );
 
-  const deleteProjectMessage = useMemo(
-    () =>
-      `${translate("delete-project-message")}`.replace(
-        "_",
-        projectTobBeDeleted?.name ?? "",
-      ),
-    [projectTobBeDeleted, translate],
-  );
-
   const altMessage = useMemo(() => {
     if (isLoadingProjects) return translate("projects-loading");
     if (isErrorProjects)
@@ -131,7 +122,9 @@ export const ProjectsScreen: React.FC = observer(() => {
             <ConfirmationPopup
               isOpen={isDeleteProjectConfirmationPopUpOpen}
               onClose={closeDeleteProjectConfirmationPopUp}
-              message={deleteProjectMessage}
+              message={translate("delete-project-message", {
+                name: projectTobBeDeleted?.name ?? "",
+              })}
               titleTx="delete-project-title"
               onConfirm={() => {
                 if (projectTobBeDeleted)

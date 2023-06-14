@@ -31,6 +31,7 @@ export const ConfirmationPopup = observer<ConfirmationPopUpProps>(
     title,
     titleTx,
     message,
+    messageTx,
     confirm,
     confirmTx,
     cancel,
@@ -49,21 +50,19 @@ export const ConfirmationPopup = observer<ConfirmationPopUpProps>(
         dismiss={onClose}
         shouldDismissOnOutsidePress
       >
-        <>
-          <Text text={message} />
-          <InlineRow>
-            <StyledTextButton
-              label={cancel}
-              labelTx={cancelTx || (cancel ? undefined : "cancel")}
-              handlePress={onClose}
-            />
-            <StyledTextButton
-              label={confirm}
-              labelTx={confirmTx || (confirm ? undefined : "confirm")}
-              handlePress={handleConfirmation}
-            />
-          </InlineRow>
-        </>
+        <Text tx={messageTx} text={message} />
+        <InlineRow>
+          <StyledTextButton
+            label={cancel}
+            labelTx={cancelTx || (cancel ? undefined : "cancel")}
+            handlePress={onClose}
+          />
+          <StyledTextButton
+            label={confirm}
+            labelTx={confirmTx || (confirm ? undefined : "confirm")}
+            handlePress={handleConfirmation}
+          />
+        </InlineRow>
       </ConfirmationPopupContainer>
     );
   },

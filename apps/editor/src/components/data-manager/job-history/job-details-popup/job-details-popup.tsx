@@ -270,7 +270,9 @@ export const JobDetailsPopUp = observer<JobDetailsPopUpProps>(
         <ConfirmationPopup
           isOpen={isDeleteJobConfirmationPopUpOpen}
           onClose={closeDeleteJobConfirmationPopUp}
-          messageTx={deleteJobMessage}
+          message={t("delete-job-message", {
+            count: jobAnnotations?.length.toString() ?? "0",
+          })}
           titleTx="delete-job-title"
           onConfirm={() => {
             deleteJobs({

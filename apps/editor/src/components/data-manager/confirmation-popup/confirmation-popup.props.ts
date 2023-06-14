@@ -4,6 +4,7 @@ export interface ConfirmationPopUpProps extends StatefulPopUpProps {
   title?: string;
   titleTx?: string;
   message?: string;
+  messageTx?: string;
   confirm?: string;
   confirmTx?: string;
   cancel?: string;
