@@ -19,7 +19,6 @@ import {
   whoAwsConfigDevelopment,
   whoRequiresAuthentication,
 } from "../constants";
-import { setUpEventHandling } from "../event-handling";
 import type { RootStore } from "../models";
 import hubBaseUrl from "../queries/hub-base-url";
 import { DatasetScreen, EditorScreen, ProjectsScreen } from "../screens";
@@ -52,14 +51,8 @@ function App(): JSX.Element {
     const result = Promise.all([setupRootStore(), initI18n()]).then(
       ([rootStore]) => {
         rootStoreRef.current = rootStore;
-        const [dispatch, dispose] = setUpEventHandling(rootStore);
-        rootStore.pointerDispatch = dispatch;
-
         setIsReady(true);
-        return () => {
-          dispose();
-          rootStore.dispose();
-        };
+        return rootStore.dispose;
       },
     );
     return () => {
