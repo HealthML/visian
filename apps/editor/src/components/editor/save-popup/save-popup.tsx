@@ -226,7 +226,6 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
       if (!imageId || !annotationFile) {
         throw new Error("Could not create annotation file");
       }
-      checkAnnotationURI(annotationFile, uri);
       const responseData = await postAnnotationFile(
         imageId,
         uri,
@@ -264,7 +263,22 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
     const imageName = path.basename(imageURI).split(".")[0];
     const layerName =
       store?.editor.activeDocument?.activeLayer?.title?.split(".")[0];
-    return `/annotations/${imageName}/${layerName || "annotation"}`;
+    const layerNameWithoutIndex = Number.isNaN(
+      +(layerName?.split("_")[0] ?? ""),
+    )
+      ? layerName
+      : layerName?.split("_").slice(1).join("_");
+    const layerNameWithIndexedName = Number.isNaN(
+      +(layerNameWithoutIndex?.split("_")[0] ?? ""),
+    )
+      ? `1_${layerNameWithoutIndex}`
+      : layerNameWithoutIndex
+          ?.split("_")
+          .map((sub, index) => (index === 0 ? Number(sub) + 1 : sub))
+          .join("_");
+    return `/annotations/${imageName}/${
+      layerNameWithIndexedName || "annotation"
+    }`;
   }, [store]);
 
   useEffect(() => {

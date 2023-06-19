@@ -391,5 +391,5 @@
 
   "verified": "verifiziert",
 
-  "data_uri_help_message": "Die dataURI ist nicht gültig. Sie sollte das Format 'ordner/dateiname.erweiterung' haben, wobei ein Ordner und der Dateiname aus Buchstaben, Ziffern, -, oder _ bestehen kann und die Erweiterung eine der folgenden sein sollte:"
+  "data_uri_help_message": "Die dataURI ist nicht gültig. Sie sollte das Format 'ordner/dateiname' haben, wobei ein Ordner und der Dateiname aus Buchstaben, Ziffern, -, oder _ bestehen kann."
 }
