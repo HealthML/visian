@@ -32,7 +32,7 @@ export class WHOReviewStrategy extends ReviewStrategy {
   }
 
   public async nextTask(): Promise<void> {
-    this.saveTask();
+    await this.saveTask();
     try {
       const response = await this.currentTask?.save();
 
@@ -46,7 +46,7 @@ export class WHOReviewStrategy extends ReviewStrategy {
           if (newTaskId !== this.currentTask?.id) {
             this.store?.setIsDirty(false, true);
             setNewTaskIdForUrl(newTaskId);
-            this.loadTask();
+            await this.loadTask();
             return;
           }
         }
@@ -71,11 +71,14 @@ export class WHOReviewStrategy extends ReviewStrategy {
       groups.map(async (groupLayer: ILayerGroup) => {
         const annotationId = groupLayer.metaData?.id;
         const annotationFiles = await this.getFilesForGroup(groupLayer);
-
+        if (annotationFiles.length === 0) return;
         if (annotationId) {
-          this.currentTask?.updateAnnotation(annotationId, annotationFiles);
+          await this.currentTask?.updateAnnotation(
+            annotationId,
+            annotationFiles,
+          );
         } else {
-          this.currentTask?.createAnnotation(annotationFiles);
+          await this.currentTask?.createAnnotation(annotationFiles);
         }
       }),
     );
@@ -86,7 +89,7 @@ export class WHOReviewStrategy extends ReviewStrategy {
       );
     if (!undefinedGroupLayers) return;
     const files = await this.getFilesForLayers(undefinedGroupLayers);
-    this.currentTask?.createAnnotation(files);
+    await this.currentTask?.createAnnotation(files);
   }
 
   // Importing
@@ -114,24 +117,26 @@ export class WHOReviewStrategy extends ReviewStrategy {
       this.store.editor.activeDocument?.finishBatchImport();
       return;
     }
+    if (!this.task?.annotationIds) return;
+    await Promise.all(
+      this.task?.annotationIds.map(async (annotationId, idx) => {
+        const annotationFiles = this.task?.getAnnotationFiles(annotationId);
+        if (!annotationFiles) throw new Error("Annotation files not found");
 
-    this.task?.annotationIds.forEach(async (annotationId, idx) => {
-      const annotationFiles = this.task?.getAnnotationFiles(annotationId);
-      if (!annotationFiles) throw new Error("Annotation files not found");
+        const groupedFiles = this.store.editor.activeDocument?.createLayerGroup(
+          annotationFiles,
+          `Annotation ${idx + 1}`,
+          { id: annotationId },
+        );
+        if (!groupedFiles) throw new Error();
 
-      const groupedFiles = this.store.editor.activeDocument?.createLayerGroup(
-        annotationFiles,
-        `Annotation ${idx + 1}`,
-        { id: annotationId },
-      );
-      if (!groupedFiles) throw new Error();
-
-      await this.store?.editor.activeDocument?.importFiles(
-        groupedFiles,
-        undefined,
-        true,
-      );
-    });
+        await this.store?.editor.activeDocument?.importFiles(
+          groupedFiles,
+          undefined,
+          true,
+        );
+      }),
+    );
   }
 
   // Saving

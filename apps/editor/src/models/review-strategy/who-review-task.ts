@@ -11,6 +11,7 @@ import {
 
 import { FileWithMetadata } from "../../types";
 import { ReviewTask, TaskType } from "./review-task";
+import { json } from "stream/consumers";
 
 const taskTypeMapping = {
   [WHOTaskType.Create]: TaskType.Create,
@@ -69,7 +70,6 @@ export class WHOReviewTask implements ReviewTask {
         title.replace(".nii", `_annotation_${idx}`).concat(".nii"),
         annotationData.data,
       ) as FileWithMetadata;
-
       // The file must contain the annotationDataUUID it belongs to
       // in order to later store the modified file back to the correct
       // WHOAnnotationData object
@@ -87,12 +87,12 @@ export class WHOReviewTask implements ReviewTask {
       submittedAt: new Date().toISOString(),
     };
     const annotation = new WHOAnnotation(annotationWithoutData);
-
-    files.forEach(async (file) => {
-      const base64Data = await this.getBase64DataFromFile(file);
-      this.createAnnotationData(annotation, base64Data);
-    });
-
+    await Promise.all(
+      files.map(async (file) => {
+        const base64Data = await this.getBase64DataFromFile(file);
+        this.createAnnotationData(annotation, base64Data);
+      }),
+    );
     this.whoTask.annotations.push(annotation);
   }
 
@@ -106,20 +106,21 @@ export class WHOReviewTask implements ReviewTask {
     if (!annotation)
       throw new Error(`Annotation with id ${annotationId} does not exist.`);
 
-    files.forEach(async (file) => {
-      const base64Data = await this.getBase64DataFromFile(file);
-
-      if ("metadata" in file) {
-        const fileWithMetadata = file as FileWithMetadata;
-        this.updateAnnotationData(
-          fileWithMetadata.metadata.id,
-          annotation,
-          base64Data,
-        );
-      } else {
-        this.createAnnotationData(annotation, base64Data);
-      }
-    });
+    await Promise.all(
+      files.map(async (file) => {
+        const base64Data = await this.getBase64DataFromFile(file);
+        if ("metadata" in file) {
+          const fileWithMetadata = file as FileWithMetadata;
+          this.updateAnnotationData(
+            fileWithMetadata.metadata.id,
+            annotation,
+            base64Data,
+          );
+        } else {
+          this.createAnnotationData(annotation, base64Data);
+        }
+      }),
+    );
   }
 
   public async save(): Promise<Response> {
