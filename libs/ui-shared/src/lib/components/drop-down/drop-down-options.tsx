@@ -2,7 +2,7 @@ import React, { useRef } from "react";
 import ReactDOM from "react-dom";
 import styled, { css } from "styled-components";
 
-import { fontSize, size as getSize, zIndex } from "../../theme";
+import { fontSize, size as getSize, radius, zIndex } from "../../theme";
 import { useModalRoot } from "../box";
 import { Icon } from "../icon";
 import { Divider } from "../modal";
@@ -15,6 +15,7 @@ import { useOptionsPosition } from "./utils";
 export const Option = styled.div<{
   isSelected?: boolean;
   size?: "small" | "medium";
+  borderRadius?: "default" | "round";
 }>`
   align-items: center;
   border: 1px solid transparent;
@@ -30,7 +31,11 @@ export const Option = styled.div<{
     props.isSelected &&
     css`
       ${sheetMixin}
-      border-radius: ${props.size === "medium" ? "20px" : "12px"};
+      border-radius: ${props.borderRadius === "default"
+        ? radius("default")
+        : props.size === "medium"
+        ? "20px"
+        : "12px"};
       margin: -1px -1px;
     `}
 `;
@@ -66,9 +71,17 @@ export const ExpandIcon = styled(Icon)<{ size?: "small" | "medium" }>`
   width: ${(props) => (props.size === "medium" ? "32px" : "16px")};
 `;
 
-const Options = styled("div")<{ size?: "small" | "medium" }>`
+const Options = styled("div")<{
+  size?: "small" | "medium";
+  borderRadius?: "default" | "round";
+}>`
   ${sheetMixin}
-  border-radius: ${(props) => (props.size === "medium" ? "20px" : "12px")};
+  border-radius: ${(props) =>
+    props.borderRadius === "default"
+      ? radius("default")
+      : props.size === "medium"
+      ? "20px"
+      : "12px"};
   display: block;
   flex-direction: column;
   pointer-events: auto;
@@ -86,6 +99,7 @@ export const DropDownOptions: React.FC<DropDownOptionsProps> = ({
   onChange,
   onDismiss,
   size,
+  borderRadius,
   ...rest
 }) => {
   const ref = useRef<HTMLDivElement>(null);
@@ -103,7 +117,13 @@ export const DropDownOptions: React.FC<DropDownOptionsProps> = ({
   const activeOption = options[activeIndex];
   const node =
     isOpen === false ? null : (
-      <Options {...rest} style={optionsStyle} ref={ref} size={size}>
+      <Options
+        {...rest}
+        style={optionsStyle}
+        ref={ref}
+        size={size}
+        borderRadius={borderRadius}
+      >
         <ExpandedSelector onPointerDown={onDismiss} size={size}>
           {activeOption && (
             <OptionText
@@ -120,6 +140,7 @@ export const DropDownOptions: React.FC<DropDownOptionsProps> = ({
               isSelected={index === activeIndex}
               onPointerDown={() => onChange?.(option.value)}
               size={size}
+              borderRadius={borderRadius}
             >
               <OptionText
                 tx={option.labelTx}

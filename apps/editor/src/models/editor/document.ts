@@ -22,6 +22,7 @@ import {
   ITKImageWithUnit,
   ITKMatrix,
   readMedicalImage,
+  writeSingleMedicalImage,
   Zip,
 } from "@visian/utils";
 import FileSaver from "file-saver";
@@ -448,8 +449,11 @@ export class Document
     FileSaver.saveAs(await zip.toBlob(), `${this.title}.zip`);
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-shadow
-  public createZip = async (layers: ILayer[]): Promise<File> => {
+  public createZip = async (
+    // eslint-disable-next-line @typescript-eslint/no-shadow
+    layers: ILayer[],
+    title?: string,
+  ): Promise<File> => {
     const zip = new Zip();
     const files = await Promise.all(layers.map((layer) => layer.toFile()));
     files.forEach((file, index) => {
@@ -457,17 +461,40 @@ export class Document
       zip.setFile(`${`00${index}`.slice(-2)}_${file.name}`, file);
     });
 
-    return new File([await zip.toBlob()], `${this.title}.zip`);
+    return new File([await zip.toBlob()], `${title ?? this.title}.zip`);
+  };
+
+  public createSquashedNii = async (
+    // eslint-disable-next-line @typescript-eslint/no-shadow
+    layers: ILayer[],
+    title?: string,
+  ): Promise<File | undefined> => {
+    const imageLayers = this.layerIds
+      .map((id) => layers.find((layer) => layer.id === id))
+      .filter(
+        (potentialLayer) =>
+          potentialLayer instanceof ImageLayer && potentialLayer.isAnnotation,
+      ) as ImageLayer[];
+    const file = await writeSingleMedicalImage(
+      imageLayers[imageLayers.length - 1].image.toITKImage(
+        imageLayers.slice(0, -1).map((layer) => layer.image),
+        true,
+      ),
+      `${title ?? this.title}.nii.gz`,
+    );
+    return file;
   };
 
   public createFileFromLayers = async (
     // eslint-disable-next-line @typescript-eslint/no-shadow
     layers: ILayer[],
+    asZip: boolean,
+    title?: string,
   ): Promise<File | undefined> => {
-    if (layers.length === 1) {
-      return layers[0].toFile();
+    if (asZip) {
+      return this.createZip(layers, title);
     }
-    return this.createZip(layers);
+    return this.createSquashedNii(layers, title);
   };
 
   public getFileForLayer = async (idOrLayer: string | ILayer) => {

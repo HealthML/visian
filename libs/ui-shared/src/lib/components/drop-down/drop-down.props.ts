@@ -20,6 +20,7 @@ export interface DropDownOptionsProps<T = any>
   options: IEnumParameterOption<T>[];
 
   size?: "small" | "medium";
+  borderRadius?: "default" | "round";
 
   /** If set to `false`, hides the modal. */
   isOpen?: boolean;
@@ -46,6 +47,7 @@ export interface DropDownProps<T = any>
   options: IEnumParameterOption<T>[];
 
   size?: "small" | "medium";
+  borderRadius?: "default" | "round";
 
   defaultValue?: T;
   value?: T;

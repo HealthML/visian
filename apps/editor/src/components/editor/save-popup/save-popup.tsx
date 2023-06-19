@@ -1,5 +1,6 @@
 import {
   Button,
+  DropDown,
   ILayer,
   List,
   ListItem,
@@ -71,10 +72,29 @@ const LayerToSaveItem = styled(ListItem)`
   height: 30px;
 `;
 
+const StyledDropDown = styled(DropDown)`
+  margin: 0px 10px 0px 0px;
+  width: 200px;
+`;
+
 export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
   const store = useStore();
   const [searchParams] = useSearchParams();
-  const [newAnnotationURI, setnewAnnotationURI] = useState("");
+  const [newAnnotationURIPrefix, setnewAnnotationURIPrefix] = useState("");
+
+  const fileExtensions = [
+    { value: ".nii.gz", label: ".nii.gz" },
+    { value: ".zip", label: ".zip" },
+  ];
+
+  const [selectedExtension, setSelectedExtension] = useState(
+    fileExtensions[0].value,
+  );
+
+  const newDataUri = useMemo(
+    () => `${newAnnotationURIPrefix}${selectedExtension}`,
+    [newAnnotationURIPrefix, selectedExtension],
+  );
 
   const { t } = useTranslation();
 
@@ -115,11 +135,14 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
 
   const createGroupFileFor = async (
     layer: ILayer | undefined,
+    asZip: boolean,
   ): Promise<File | undefined> => {
     if (layer?.isAnnotation) {
       const layersToSave = getLayersInGroupOf(layer);
       const file = await store?.editor?.activeDocument?.createFileFromLayers(
         layersToSave,
+        asZip,
+        newAnnotationURIPrefix.split("/").pop() ?? "annotation",
       );
       return file;
     }
@@ -137,9 +160,13 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
     annotationFile: File,
     metaData: Annotation,
   ) => {
-    const savedAnnotaionFile = new File([annotationFile], metaData.dataUri, {
-      type: annotationFile.type,
-    }) as FileWithMetadata;
+    const savedAnnotaionFile = new File(
+      [annotationFile],
+      metaData.dataUri.split("/").pop() ?? "",
+      {
+        type: annotationFile.type,
+      },
+    ) as FileWithMetadata;
     savedAnnotaionFile.metadata = metaData;
     const fileTransfer = new DataTransfer();
     fileTransfer.items.add(savedAnnotaionFile);
@@ -151,19 +178,18 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
   const canBeOverwritten = useCallback(() => {
     const activeLayer = store?.editor.activeDocument?.activeLayer;
     const annotation = activeLayer?.parent?.metaData as Annotation;
-    if (!annotation) return false;
-    const fileExt = path.extname(annotation.dataUri);
-    const newFileExt =
-      getLayersInGroupOf(activeLayer).length > 1 ? ".zip" : ".gz";
-    return fileExt === newFileExt;
-  }, [getLayersInGroupOf, store]);
+    return !!annotation;
+  }, [store]);
 
   const saveAnnotation = async () => {
     store?.setProgress({ labelTx: "saving" });
     try {
       const activeLayer = store?.editor.activeDocument?.activeLayer;
       const annotationMeta = activeLayer?.parent?.metaData as Annotation;
-      const annotationFile = await createGroupFileFor(activeLayer);
+      const annotationFile = await createGroupFileFor(
+        activeLayer,
+        annotationMeta?.dataUri.endsWith(".zip"),
+      );
       if (!annotationMeta || !annotationFile) {
         throw new Error("Could not create annotation file");
       }
@@ -193,7 +219,10 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
     try {
       const activeLayer = store?.editor.activeDocument?.activeLayer;
       const imageId = searchParams.get("imageId");
-      const annotationFile = await createGroupFileFor(activeLayer);
+      const annotationFile = await createGroupFileFor(
+        activeLayer,
+        uri.endsWith(".zip"),
+      );
       if (!imageId || !annotationFile) {
         throw new Error("Could not create annotation file");
       }
@@ -225,28 +254,24 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
     }
   };
 
-  const getAnnotationURISuggestion = useCallback(() => {
+  const getAnnotationURIPrefixSuggestion = useCallback(() => {
     const activeLayer = store?.editor.activeDocument?.activeLayer;
     if (!activeLayer) {
-      return "annotation.nii.gz";
+      return "annotation";
     }
-    const fileExt =
-      getLayersInGroupOf(activeLayer).length > 1 ? ".zip" : ".nii.gz";
     const imageURI =
       store?.editor.activeDocument?.mainImageLayer?.metaData?.dataUri;
     const imageName = path.basename(imageURI).split(".")[0];
-    const annotationLayerName =
+    const layerName =
       store?.editor.activeDocument?.activeLayer?.title?.split(".")[0];
-    return `/annotations/${imageName}/${
-      annotationLayerName || "annotation"
-    }${fileExt}`;
-  }, [store, getLayersInGroupOf]);
+    return `/annotations/${imageName}/${layerName || "annotation"}`;
+  }, [store]);
 
   useEffect(() => {
     if (isOpen) {
-      setnewAnnotationURI(getAnnotationURISuggestion());
+      setnewAnnotationURIPrefix(getAnnotationURIPrefixSuggestion());
     }
-  }, [isOpen, getAnnotationURISuggestion]);
+  }, [isOpen, getAnnotationURIPrefixSuggestion]);
 
   const isValidDataUri = useCallback(
     (dataUri, allowedExtensions = [".nii.gz", ".zip"]) => {
@@ -256,16 +281,14 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
         `^((/|./)?([a-zA-Z0-9-_]+/)*([a-zA-Z0-9-_]+)${extensionsPattern})$`,
       );
 
-      return pattern.test(dataUri)
-        ? "valid"
-        : `${t("data_uri_help_message")} ${allowedExtensions.join(", ")}.`;
+      return pattern.test(dataUri) ? "valid" : t("data_uri_help_message");
     },
     [t],
   );
 
   const isValidAnnotationUri = useMemo(
-    () => isValidDataUri(newAnnotationURI),
-    [newAnnotationURI, isValidDataUri],
+    () => isValidDataUri(newDataUri),
+    [newDataUri, isValidDataUri],
   );
 
   return (
@@ -318,13 +341,20 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
       <InlineRowLast>
         <SaveAsInput
           placeholder="URI"
-          value={newAnnotationURI}
-          onChangeText={setnewAnnotationURI}
+          value={newAnnotationURIPrefix}
+          onChangeText={setnewAnnotationURIPrefix}
+        />
+        <StyledDropDown
+          options={fileExtensions}
+          defaultValue={selectedExtension}
+          onChange={(value) => setSelectedExtension(value)}
+          size="medium"
+          borderRadius="default"
         />
         <SaveButton
           tx="save-as"
           onPointerDown={async () => {
-            if (await saveAnnotationAs(newAnnotationURI)) {
+            if (await saveAnnotationAs(newDataUri)) {
               onClose?.();
             }
           }}
