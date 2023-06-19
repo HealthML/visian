@@ -3,6 +3,7 @@ import {
   color,
   IDocument,
   ILayer,
+  ILayerFamily,
   MarkerConfig,
 } from "@visian/ui-shared";
 import { ISerializable, ViewType } from "@visian/utils";
@@ -25,6 +26,7 @@ export interface LayerSnapshot {
   id: string;
   titleOverride?: string;
   parentId?: string;
+  familyId?: string;
 
   blendMode: BlendMode;
   color?: string;
@@ -45,6 +47,7 @@ export class Layer implements ILayer, ISerializable<LayerSnapshot> {
   public id!: string;
   protected titleOverride?: string;
   protected parentId?: string;
+  protected familyId?: string;
 
   public blendMode!: BlendMode;
   public color?: string;
@@ -63,37 +66,40 @@ export class Layer implements ILayer, ISerializable<LayerSnapshot> {
     this.id = snapshot?.id || uuidv4();
     if (!isCalledByChild) this.applySnapshot(snapshot);
 
-    makeObservable<this, "titleOverride" | "parentId" | "opacityOverride">(
+    makeObservable<
       this,
-      {
-        isAnnotation: observable,
-        id: observable,
-        titleOverride: observable,
-        parentId: observable,
-        blendMode: observable,
-        color: observable,
-        isVisible: observable,
-        opacityOverride: observable,
-        transformation: observable.ref,
+      "titleOverride" | "parentId" | "familyId" | "opacityOverride"
+    >(this, {
+      isAnnotation: observable,
+      id: observable,
+      titleOverride: observable,
+      parentId: observable,
+      familyId: observable,
+      blendMode: observable,
+      color: observable,
+      isVisible: observable,
+      opacityOverride: observable,
+      transformation: observable.ref,
 
-        opacity: computed,
-        parent: computed,
-        title: computed,
+      opacity: computed,
+      parent: computed,
+      title: computed,
+      family: computed,
 
-        setParent: action,
-        setIsAnnotation: action,
-        setTitle: action,
-        setBlendMode: action,
-        setColor: action,
-        setIsVisible: action,
-        setOpacity: action,
-        setMetaData: action,
-        resetSettings: action,
-        setTransformation: action,
-        delete: action,
-        applySnapshot: action,
-      },
-    );
+      setParent: action,
+      setFamily: action,
+      setIsAnnotation: action,
+      setTitle: action,
+      setBlendMode: action,
+      setColor: action,
+      setIsVisible: action,
+      setOpacity: action,
+      setMetaData: action,
+      resetSettings: action,
+      setTransformation: action,
+      delete: action,
+      applySnapshot: action,
+    });
   }
 
   public setIsAnnotation(value?: boolean): void {
@@ -126,6 +132,24 @@ export class Layer implements ILayer, ISerializable<LayerSnapshot> {
         ? idOrLayer
         : idOrLayer.id
       : undefined;
+  }
+
+  public get family(): ILayerFamily | undefined {
+    return this.familyId
+      ? this.document.getLayerFamily(this.familyId)
+      : undefined;
+  }
+
+  public setFamily(id: string | undefined): void {
+    if (!id) {
+      this.family?.removeLayer(this.id);
+      this.familyId = undefined;
+      return;
+    }
+    const family = this.document.getLayerFamily(id);
+    if (family) {
+      this.familyId = id;
+    }
   }
 
   public setBlendMode = (value?: BlendMode): void => {
@@ -188,6 +212,7 @@ export class Layer implements ILayer, ISerializable<LayerSnapshot> {
 
   public delete() {
     (this.parent as LayerGroup)?.removeLayer?.(this.id);
+    this.family?.removeLayer?.(this.id);
     this.document.deleteLayer(this.id);
   }
 

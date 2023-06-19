@@ -6,6 +6,7 @@ import {
   IEditor,
   IImageLayer,
   ILayer,
+  ILayerFamily,
   ISliceRenderer,
   IVolumeRenderer,
   MeasurementType,
@@ -41,7 +42,7 @@ import {
 } from "../../constants";
 import {
   Annotation,
-  FileWithGroup,
+  FileWithFamily,
   FileWithMetadata,
   Image,
 } from "../../types";
@@ -49,6 +50,7 @@ import { readTrackingLog, TrackingData } from "../tracking";
 import { StoreContext } from "../types";
 import { Clipboard } from "./clipboard";
 import { History, HistorySnapshot } from "./history";
+import { LayerFamily } from "./layer-families";
 import { ImageLayer, Layer, LayerSnapshot } from "./layers";
 import * as layers from "./layers";
 import { Markers } from "./markers";
@@ -103,6 +105,7 @@ export class Document
   protected measurementDisplayLayerId?: string;
   protected layerMap: { [key: string]: Layer };
   protected layerIds: string[];
+  public layerFamilies: ILayerFamily[] = [];
 
   public measurementType: MeasurementType = "volume";
 
@@ -202,6 +205,7 @@ export class Document
       toggleLayerMenu: action,
       setUseExclusiveSegmentations: action,
       applySnapshot: action,
+      getLayerFamily: action,
     });
 
     // This is split up to avoid errors from a tool that is being activated
@@ -299,6 +303,14 @@ export class Document
 
   public getLayer(id: string): ILayer | undefined {
     return id ? this.layerMap[id] : undefined;
+  }
+
+  public getLayerFamily(id: string): ILayerFamily | undefined {
+    return this.layerFamilies.find((family) => family.id === id);
+  }
+
+  public addLayerFamily(family: ILayerFamily): void {
+    this.layerFamilies.push(family);
   }
 
   public setActiveLayer = (idOrLayer?: string | ILayer): void => {
@@ -597,7 +609,7 @@ export class Document
       const zip = await Zip.fromZipFile(filteredFiles);
       const unzippedFiles = await zip.getAllFiles();
       await this.importFiles(
-        this.createLayerGroup(
+        this.createLayerFamily(
           unzippedFiles,
           filteredFiles.name,
           this.getMetaDataFromFile(filteredFiles),
@@ -622,13 +634,13 @@ export class Document
     }
 
     if (filteredFiles instanceof File) {
-      this.createLayerGroup(
+      this.createLayerFamily(
         [filteredFiles],
         filteredFiles.name,
         this.getMetaDataFromFile(filteredFiles),
       );
     } else {
-      this.createLayerGroup(filteredFiles, name ?? uuidv4());
+      this.createLayerFamily(filteredFiles, name ?? uuidv4());
     }
     let createdLayerId = "";
     const isFirstLayer =
@@ -730,7 +742,7 @@ export class Document
               ...prototypeImage,
             });
             if (files instanceof File) {
-              this.addLayerToGroup(createdLayerId, files);
+              this.addLayerToFamily(createdLayerId, files);
               this.addMetaDataToLayer(createdLayerId, files);
             }
           }
@@ -767,7 +779,7 @@ export class Document
               value,
             );
             if (files instanceof File) {
-              this.addLayerToGroup(createdLayerId, files);
+              this.addLayerToFamily(createdLayerId, files);
               this.addMetaDataToLayer(createdLayerId, files);
             }
           });
@@ -786,7 +798,7 @@ export class Document
     }
 
     if (files instanceof File) {
-      this.addLayerToGroup(createdLayerId, files);
+      this.addLayerToFamily(createdLayerId, files);
       this.addMetaDataToLayer(createdLayerId, files);
     }
     return createdLayerId;
@@ -918,11 +930,11 @@ export class Document
   }
 
   /** Adds layer to group specified in file object */
-  private addLayerToGroup(layerID: string, file: File) {
-    const layer = this.getLayer(layerID);
-    const groupLayer = this.getGroupLayerFromFile(file);
-    if (layer && groupLayer) {
-      groupLayer?.addLayer(layer);
+  private addLayerToFamily(layerId: string, file: File) {
+    const layer = this.getLayer(layerId);
+    const family = this.getLayerFamilyFromFile(file);
+    if (layer && family) {
+      family?.addLayer(layer.id);
     }
   }
 
@@ -936,13 +948,10 @@ export class Document
   }
 
   /** Returns the group layer specified in the file object */
-  private getGroupLayerFromFile(file: File): layers.LayerGroup | undefined {
-    if ("groupId" in file) {
-      const fileWithGroupId = file as FileWithGroup;
-      const groupLayer = this.getLayer(
-        fileWithGroupId.groupId,
-      ) as layers.LayerGroup;
-      return groupLayer;
+  private getLayerFamilyFromFile(file: File): ILayerFamily | undefined {
+    if ("familyId" in file) {
+      const fileWithFamily = file as FileWithFamily;
+      return this.getLayerFamily(fileWithFamily.familyId);
     }
     return undefined;
   }
@@ -956,30 +965,29 @@ export class Document
     return undefined;
   }
 
-  /** Creates a LayerGroup object for a list of files and adds the group id to the files */
-  private createLayerGroup(
+  /** Creates a LayerFamily object for a list of files and adds the group id to the files */
+  private createLayerFamily(
     files: File[],
     title?: string,
     groupMetaData?: Image | Annotation,
-  ): FileWithGroup[] {
-    if (files.every((f) => "groupId" in f)) {
-      return files as FileWithGroup[];
+  ): FileWithFamily[] {
+    if (files.every((f) => "familyId" in f)) {
+      return files as FileWithFamily[];
     }
-    if (files.some((f) => "groupId" in f)) {
+    if (files.some((f) => "familyId" in f)) {
       throw new Error(
         "Cannot create a new group for file that already belongs to a group",
       );
     }
-    const groupLayer = new layers.LayerGroup(undefined, this);
-    groupLayer.setIsVisible(false);
-    groupLayer.setMetaData(groupMetaData);
-    groupLayer.setTitle(title);
+    const layerFamily = new LayerFamily(this, title);
+    layerFamily.metaData = groupMetaData;
+
     const filesWithGroup = files.map((f) => {
-      const fileWithGroup = f as FileWithGroup;
-      fileWithGroup.groupId = groupLayer.id;
+      const fileWithGroup = f as FileWithFamily;
+      fileWithGroup.familyId = layerFamily.id;
       return fileWithGroup;
     });
-    this.addLayer(groupLayer);
+    this.addLayerFamily(layerFamily);
     return filesWithGroup;
   }
 
