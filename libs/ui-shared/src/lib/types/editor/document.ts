@@ -1,6 +1,6 @@
 import type * as THREE from "three";
 
-import { MeasurementType, PerformanceMode } from ".";
+import { ILayerFamily, MeasurementType, PerformanceMode } from ".";
 import { Theme } from "../../theme";
 import type { ErrorNotification } from "../error-notification";
 import type { ISliceRenderer, IVolumeRenderer } from "../rendering";
@@ -52,6 +52,9 @@ export interface IDocument {
    */
   mainImageLayer?: Reference<IImageLayer>;
 
+  /** The families of layers e.g. for grouping layers by file */
+  layerFamilies: ILayerFamily[];
+
   /** The document's history. */
   history: IHistory;
 
@@ -87,6 +90,8 @@ export interface IDocument {
   /** Reads a layer based on its id. */
   getLayer(id: string): ILayer | undefined;
 
+  getLayerFamily(id: string): ILayerFamily | undefined;
+
   /** Sets the active layer. */
   setActiveLayer(idOrLayer?: string | ILayer): void;
 
@@ -97,6 +102,9 @@ export interface IDocument {
 
   /** Adds a layer to the document. */
   addLayer(layer: ILayer): void;
+
+  /** Adds a layer family to the document. */
+  addLayerFamily(layer: ILayerFamily): void;
 
   /** Deletes a layer from the document. */
   deleteLayer(idOrLayer: string | ILayer): void;

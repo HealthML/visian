@@ -17,7 +17,7 @@ import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
 import { importFilesToDocument } from "../../../import-handling";
-import { LayerGroup } from "../../../models";
+import { LayerFamily } from "../../../models/editor/layer-families";
 import { patchAnnotationFile, postAnnotationFile } from "../../../queries";
 import { Annotation, FileWithMetadata } from "../../../types";
 import { SavePopUpProps } from "./save-popup.props";
@@ -98,47 +98,45 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
 
   const { t } = useTranslation();
 
-  const getLayersInGroupOf = useCallback(
+  const getOrphanAnnotationLayers = useCallback(() => {
+    const orphanAnnotationLayers = store?.editor.activeDocument?.layers.filter(
+      (l) => l.isAnnotation && !l.family,
+    );
+    return orphanAnnotationLayers ?? [];
+  }, [store]);
+
+  const getFamilyLayersOf = useCallback(
     (layer: ILayer | undefined) => {
       if (!layer) return [];
-      const groupLayer = layer.parent as LayerGroup;
-      if (groupLayer) {
-        return groupLayer.layers;
-      }
-      const orphanAnnotationLayers =
-        store?.editor.activeDocument?.layers.filter(
-          (l) => l.isAnnotation && !l.parent,
-        );
-      return orphanAnnotationLayers ?? [];
+      return layer.family?.layers ?? getOrphanAnnotationLayers();
     },
-    [store],
+    [getOrphanAnnotationLayers],
   );
 
-  const createGroupForNewAnnotation = async (
+  const createFamilyForNewAnnotation = (
     layer: ILayer | undefined,
     annotation: Annotation | undefined,
   ) => {
     const document = store?.editor.activeDocument;
-    if (document) {
-      const groupLayer = new LayerGroup(undefined, document);
+    if (document && layer) {
+      const layerFamily = new LayerFamily(document);
+      document.addLayerFamily(layerFamily);
       if (annotation) {
-        groupLayer.setMetaData(annotation);
-        groupLayer.setTitle(annotation.dataUri);
+        layerFamily.title = annotation.dataUri;
+        layerFamily.metaData = annotation;
       }
-      if (layer) {
-        const siblingLayers = getLayersInGroupOf(layer);
-        siblingLayers.forEach((l) => groupLayer.addLayer(l));
-        document.addLayer(groupLayer);
-      }
+      const familyLayers = layer.family?.layers ?? getOrphanAnnotationLayers();
+      familyLayers.forEach((l) => layerFamily.addLayer(l.id));
+      return layerFamily;
     }
   };
 
-  const createGroupFileFor = async (
+  const createFileForFamilyOf = async (
     layer: ILayer | undefined,
     asZip: boolean,
   ): Promise<File | undefined> => {
     if (layer?.isAnnotation) {
-      const layersToSave = getLayersInGroupOf(layer);
+      const layersToSave = getFamilyLayersOf(layer);
       const file = await store?.editor?.activeDocument?.createFileFromLayers(
         layersToSave,
         asZip,
@@ -177,7 +175,7 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
 
   const canBeOverwritten = useCallback(() => {
     const activeLayer = store?.editor.activeDocument?.activeLayer;
-    const annotation = activeLayer?.parent?.metaData as Annotation;
+    const annotation = activeLayer?.family?.metaData as Annotation;
     return !!annotation;
   }, [store]);
 
@@ -185,8 +183,8 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
     store?.setProgress({ labelTx: "saving" });
     try {
       const activeLayer = store?.editor.activeDocument?.activeLayer;
-      const annotationMeta = activeLayer?.parent?.metaData as Annotation;
-      const annotationFile = await createGroupFileFor(
+      const annotationMeta = activeLayer?.family?.metaData as Annotation;
+      const annotationFile = await createFileForFamilyOf(
         activeLayer,
         annotationMeta?.dataUri.endsWith(".zip"),
       );
@@ -219,7 +217,7 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
     try {
       const activeLayer = store?.editor.activeDocument?.activeLayer;
       const imageId = searchParams.get("imageId");
-      const annotationFile = await createGroupFileFor(
+      const annotationFile = await createFileForFamilyOf(
         activeLayer,
         uri.endsWith(".zip"),
       );
@@ -231,9 +229,9 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
         uri,
         annotationFile,
       );
-      const annotationMeta = activeLayer?.parent?.metaData as Annotation;
+      const annotationMeta = activeLayer?.family?.metaData as Annotation;
       if (!annotationMeta) {
-        createGroupForNewAnnotation(activeLayer, responseData);
+        createFamilyForNewAnnotation(activeLayer, responseData);
       } else {
         importSavedAnnotationFile(annotationFile, responseData);
       }
@@ -314,7 +312,7 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
     >
       <SectionLabel tx="layers-to-save" />
       <LayersToSaveList>
-        {getLayersInGroupOf(store?.editor.activeDocument?.activeLayer).map(
+        {getFamilyLayersOf(store?.editor.activeDocument?.activeLayer).map(
           (layer) => (
             <LayerToSaveItem
               key={layer.id}
@@ -334,7 +332,7 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
           <InlineRow>
             <SaveInput
               value={
-                store?.editor.activeDocument?.activeLayer?.parent?.metaData
+                store?.editor.activeDocument?.activeLayer?.family?.metaData
                   ?.dataUri
               }
               readOnly

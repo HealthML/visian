@@ -4,7 +4,7 @@ export interface FileWithMetadata extends File {
   metadata: Annotation | Image;
 }
 
-export interface FileWithGroup extends File {
-  groupId: string;
+export interface FileWithFamily extends File {
+  familyId: string;
   metadata?: Annotation | Image;
 }
