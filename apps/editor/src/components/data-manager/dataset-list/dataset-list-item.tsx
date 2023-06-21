@@ -33,10 +33,10 @@ const ImageContainer = styled.div`
   cursor: pointer;
 `;
 
-const ImagePreview = styled.img`
+const ImagePreview = styled.div`
   border-radius: inherit;
-  max-width: 100%;
-  height: auto;
+  height: 44vw;
+  background-color: ${color("sheet")};
 `;
 
 const DatasetInfo = styled.div`
@@ -80,10 +80,7 @@ export const DatasetListItem = ({
     <StyledListItem innerHeight="auto" isLast>
       <DatasetWrapper>
         <ImageContainer onClick={openDataset}>
-          <ImagePreview
-            src="../../assets/images/walnut.png"
-            alt="Scan Preview"
-          />
+          <ImagePreview />
         </ImageContainer>
         <DatasetInfo>
           <StyledText onClick={openDataset}>{dataset.name}</StyledText>
