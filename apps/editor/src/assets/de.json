@@ -295,7 +295,6 @@
 
   "project-loading-failed": "Das Projekt konnte nicht geladen werden.",
 
-  "datasets": "Datensätze",
   "datasets-loading": "Datensätze werden geladen...",
   "datasets-loading-failed": "Die Datensätze konnten nicht geladen werden.",
   "no-datasets-available": "Aktuell sind keine Datensätze vorhanden.",
