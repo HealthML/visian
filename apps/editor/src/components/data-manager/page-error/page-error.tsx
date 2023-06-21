@@ -13,6 +13,15 @@ const Container = styled.div`
 
 const BackButton = styled(Button)`
   margin-top: ${space("pageSectionMargin")};
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  svg {
+    width: 21px;
+    height: 21px;
+  }
 `;
 
 const BackText = styled(Text)`
