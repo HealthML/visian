@@ -11,7 +11,6 @@ import {
 
 import { FileWithMetadata } from "../../types";
 import { ReviewTask, TaskType } from "./review-task";
-import { json } from "stream/consumers";
 
 const taskTypeMapping = {
   [WHOTaskType.Create]: TaskType.Create,

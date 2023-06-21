@@ -450,4 +450,8 @@ export class ImageLayer
     this.setEmptySlices();
     return this.recomputeSliceMarkers();
   }
+
+  public copy() {
+    return new ImageLayer(this.toJSON(), this.document);
+  }
 }

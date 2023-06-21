@@ -56,7 +56,6 @@ export class LayerGroup
       this.document.getLayer(idOrLayer)!.setParent();
       return;
     }
-
     this.layerIds = this.layerIds.filter((id) => id !== idOrLayer.id);
     idOrLayer.setParent();
   }
@@ -69,9 +68,9 @@ export class LayerGroup
     };
   }
 
-  public applySnapshot(snapshot?: Partial<LayerGroupSnapshot>): Promise<void> {
+  public applySnapshot(snapshot: Partial<LayerGroupSnapshot>): Promise<void> {
     super.applySnapshot(snapshot);
-    this.layerIds = snapshot?.layerIds || [];
+    this.layerIds = snapshot.layerIds || [];
 
     return Promise.resolve();
   }

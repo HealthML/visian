@@ -1,4 +1,4 @@
-import { IImageLayer, ILayerGroup } from "@visian/ui-shared";
+import { IImageLayer, ILayerFamily } from "@visian/ui-shared";
 import {
   getWHOTask,
   getWHOTaskIdFromUrl,
@@ -62,15 +62,13 @@ export class WHOReviewStrategy extends ReviewStrategy {
   }
 
   public async saveTask(): Promise<void> {
-    const groups = this.store.editor.activeDocument?.layers.filter(
-      (annotationLayer) => annotationLayer.kind === "group",
-    ) as ILayerGroup[];
-    if (!groups) return;
+    const families = this.store.editor.activeDocument?.layerFamilies;
+    if (!families) return;
 
     await Promise.all(
-      groups.map(async (groupLayer: ILayerGroup) => {
-        const annotationId = groupLayer.metaData?.id;
-        const annotationFiles = await this.getFilesForGroup(groupLayer);
+      families.map(async (family: ILayerFamily) => {
+        const annotationId = family.metaData?.id;
+        const annotationFiles = await this.getFilesForFamily(family);
         if (annotationFiles.length === 0) return;
         if (annotationId) {
           await this.currentTask?.updateAnnotation(
@@ -83,12 +81,12 @@ export class WHOReviewStrategy extends ReviewStrategy {
       }),
     );
 
-    const undefinedGroupLayers =
+    const orphanLayers =
       this.store.editor.activeDocument?.annotationLayers.filter(
-        (annotationLayer) => annotationLayer.parent === undefined,
+        (annotationLayer) => annotationLayer.family === undefined,
       );
-    if (!undefinedGroupLayers) return;
-    const files = await this.getFilesForLayers(undefinedGroupLayers);
+    if (!orphanLayers) return;
+    const files = await this.getFilesForLayers(orphanLayers);
     await this.currentTask?.createAnnotation(files);
   }
 
@@ -123,15 +121,15 @@ export class WHOReviewStrategy extends ReviewStrategy {
         const annotationFiles = this.task?.getAnnotationFiles(annotationId);
         if (!annotationFiles) throw new Error("Annotation files not found");
 
-        const groupedFiles = this.store.editor.activeDocument?.createLayerGroup(
+        const familyFiles = this.store.editor.activeDocument?.createLayerFamily(
           annotationFiles,
           `Annotation ${idx + 1}`,
           { id: annotationId },
         );
-        if (!groupedFiles) throw new Error();
+        if (!familyFiles) throw new Error();
 
         await this.store?.editor.activeDocument?.importFiles(
-          groupedFiles,
+          familyFiles,
           undefined,
           true,
         );
@@ -140,8 +138,8 @@ export class WHOReviewStrategy extends ReviewStrategy {
   }
 
   // Saving
-  private async getFilesForGroup(group: ILayerGroup): Promise<File[]> {
-    const annotationLayers = group.layers.filter(
+  private async getFilesForFamily(family: ILayerFamily): Promise<File[]> {
+    const annotationLayers = family.layers.filter(
       (layer) => layer.kind === "image" && layer.isAnnotation,
     ) as ImageLayer[];
 
