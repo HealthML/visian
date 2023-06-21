@@ -15,7 +15,7 @@ import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
 import { postJob, useImagesByDataset, useMlModels } from "../../../queries";
-import useDatasetsBy from "../../../queries/use-datasets-by";
+import { useDatasetsBy } from "../../../queries/use-datasets-by";
 import { ProjectDataExplorer } from "../project-data-explorer";
 import { useImageSelection } from "../util";
 import { JobCreationPopUpProps } from "./job-creation-popup.props";
