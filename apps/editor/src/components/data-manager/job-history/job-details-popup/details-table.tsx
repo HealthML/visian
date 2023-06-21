@@ -1,4 +1,4 @@
-import { Text, useTranslation } from "@visian/ui-shared";
+import { Text } from "@visian/ui-shared";
 import styled from "styled-components";
 
 export const DetailsTable = styled.div`
@@ -26,14 +26,10 @@ export const DetailsRow = ({
   value?: string;
   tx?: string;
   text?: string;
-}) => {
-  const { t } = useTranslation();
-  const translatedText = `${t(tx) || text}:`;
-  return (
-    <RowContainer>
-      <DetailsText text={translatedText} />
-      {value && <DetailsText text={value} />}
-      {!value && content}
-    </RowContainer>
-  );
-};
+}) => (
+  <RowContainer>
+    <DetailsText text={text} tx={tx} />
+    {value && <DetailsText text={value} />}
+    {!value && content}
+  </RowContainer>
+);
