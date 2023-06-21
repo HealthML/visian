@@ -9,10 +9,12 @@ import { observer } from "mobx-react-lite";
 import React, { useCallback, useMemo, useState } from "react";
 import styled from "styled-components";
 
-import { ConfirmationPopup } from "../components/data-manager/confirmation-popup";
-import { ProjectCreationPopup } from "../components/data-manager/project-creation-popup";
-import { ProjectList } from "../components/data-manager/projects-list/project-list";
-import { UIOverlayDataManager } from "../components/data-manager/ui-overlay-data-manager";
+import {
+  ConfirmationPopup,
+  ProjectCreationPopup,
+  ProjectList,
+  UIOverlayDataManager,
+} from "../components";
 import {
   useCreateProjectMutation,
   useDeleteProjectsMutation,
