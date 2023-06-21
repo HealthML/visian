@@ -100,21 +100,6 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
 
   const { t } = useTranslation();
 
-  const getOrphanAnnotationLayers = useCallback(() => {
-    const orphanAnnotationLayers = store?.editor.activeDocument?.layers.filter(
-      (l) => l.isAnnotation && !l.family,
-    );
-    return orphanAnnotationLayers ?? [];
-  }, [store]);
-
-  const getFamilyLayersOf = useCallback(
-    (layer: ILayer | undefined) => {
-      if (!layer) return [];
-      return layer.family?.layers ?? getOrphanAnnotationLayers();
-    },
-    [getOrphanAnnotationLayers],
-  );
-
   const createFamilyForNewAnnotation = (
     layer: ILayer | undefined,
     annotation: Annotation | undefined,
@@ -127,7 +112,7 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
         layerFamily.title = annotation.dataUri;
         layerFamily.metaData = annotation;
       }
-      const familyLayers = layer.family?.layers ?? getOrphanAnnotationLayers();
+      const familyLayers = layer.getFamilyLayersOf();
       familyLayers.forEach((l) => layerFamily.addLayer(l.id));
       return layerFamily;
     }
@@ -138,7 +123,7 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
     asZip: boolean,
   ): Promise<File | undefined> => {
     if (layer?.isAnnotation) {
-      const layersToSave = getFamilyLayersOf(layer);
+      const layersToSave = layer.getFamilyLayersOf();
       const file = await store?.editor?.activeDocument?.createFileFromLayers(
         layersToSave,
         asZip,
@@ -314,8 +299,9 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
     >
       <SectionLabel tx="layers-to-save" />
       <LayersToSaveList>
-        {getFamilyLayersOf(store?.editor.activeDocument?.activeLayer).map(
-          (layer) => (
+        {store?.editor.activeDocument?.activeLayer
+          ?.getFamilyLayersOf()
+          .map((layer) => (
             <LayerToSaveItem
               key={layer.id}
               label={layer.title}
@@ -324,8 +310,7 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
                 color: layer.color || "text",
               }}
             />
-          ),
-        )}
+          ))}
       </LayersToSaveList>
 
       {canBeOverwritten() && (
