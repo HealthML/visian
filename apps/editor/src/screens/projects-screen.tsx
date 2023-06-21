@@ -32,7 +32,7 @@ const PlusIconButton = styled(PageSectionIconButton)`
 export const ProjectsScreen: React.FC = observer(() => {
   const { projects, projectsError, isErrorProjects, isLoadingProjects } =
     useProjects();
-  const [projectTobBeDeleted, setProjectTobBeDeleted] = useState<Project>();
+  const [projectToBeDeleted, setProjectToBeDeleted] = useState<Project>();
   const { deleteProjects } = useDeleteProjectsMutation();
   const { createProject } = useCreateProjectMutation();
   const { t: translate } = useTranslation();
@@ -63,19 +63,19 @@ export const ProjectsScreen: React.FC = observer(() => {
 
   const deleteProject = useCallback(
     (project: Project) => {
-      setProjectTobBeDeleted(project);
+      setProjectToBeDeleted(project);
       openDeleteProjectConfirmationPopUp();
     },
-    [setProjectTobBeDeleted, openDeleteProjectConfirmationPopUp],
+    [setProjectToBeDeleted, openDeleteProjectConfirmationPopUp],
   );
 
   const deleteProjectMessage = useMemo(
     () =>
       `${translate("delete-project-message")}`.replace(
         "_",
-        projectTobBeDeleted?.name ?? "",
+        projectToBeDeleted?.name ?? "",
       ),
-    [projectTobBeDeleted, translate],
+    [projectToBeDeleted, translate],
   );
 
   let projectsInfoTx;
@@ -120,9 +120,9 @@ export const ProjectsScreen: React.FC = observer(() => {
             message={deleteProjectMessage}
             titleTx="delete-project-title"
             onConfirm={() => {
-              if (projectTobBeDeleted)
+              if (projectToBeDeleted)
                 deleteProjects({
-                  projectIds: [projectTobBeDeleted.id],
+                  projectIds: [projectToBeDeleted.id],
                 });
             }}
           />
