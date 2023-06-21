@@ -87,6 +87,12 @@ export const DatasetExplorer = ({
     closeDeleteImagesConfirmationPopUp,
   ] = usePopUpState(false);
 
+  const closeDeleteImagesConfirmationPopUpAndClearSelection =
+    useCallback(() => {
+      closeDeleteImagesConfirmationPopUp();
+      setImageTobBeDeleted(undefined);
+    }, [closeDeleteImagesConfirmationPopUp, setImageTobBeDeleted]);
+
   const toggleSelectMode = useCallback(() => {
     setIsInSelectMode((prevIsInSelectMode) => !prevIsInSelectMode);
   }, []);
@@ -244,10 +250,7 @@ export const DatasetExplorer = ({
       />
       <ConfirmationPopup
         isOpen={isDeleteImagesConfirmationPopUpOpen}
-        onClose={() => {
-          closeDeleteImagesConfirmationPopUp();
-          setImageTobBeDeleted(undefined);
-        }}
+        onClose={closeDeleteImagesConfirmationPopUpAndClearSelection}
         message={
           imageTobBeDeleted
             ? translate("delete-image-message", {

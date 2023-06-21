@@ -4,6 +4,7 @@ import styled from "styled-components";
 import { stopPropagation } from "../../event-handling";
 import { color, fontWeight, radius } from "../../theme";
 import { List, ListItem, ListItemLabel } from "../list";
+import { useCallback } from "react";
 
 const TableList = styled(List)`
   overflow-y: auto;
@@ -59,13 +60,13 @@ export const TableRow: <T>({
   onClick?: (item: T) => void;
 }) => JSX.Element = ({ row, columnWidths, onClick }) => {
   const isClickable = onClick !== undefined;
+
+  const handleClick = useCallback(() => {
+    if (onClick) onClick(row.original);
+  }, [onClick, row.original]);
+
   return (
-    <TableListItem
-      isClickable={isClickable}
-      onClick={() => {
-        if (onClick) onClick(row.original);
-      }}
-    >
+    <TableListItem isClickable={isClickable} onClick={handleClick}>
       {row.getVisibleCells().map((cell, index) => (
         <TableCell key={cell.id} width={columnWidths[index]}>
           {flexRender(cell.column.columnDef.cell, cell.getContext())}

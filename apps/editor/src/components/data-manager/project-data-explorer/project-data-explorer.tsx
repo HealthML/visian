@@ -50,10 +50,6 @@ export const ProjectDataExplorer: React.FC<ProjectDataExplorerProps> = ({
   const { isShiftPressed, selectedRange, setSelectedRange } =
     useKeyboardShortcuts({ selectedImages, setSelectedImages, images });
 
-  function extractTitleFromDataUri(dataUri: string) {
-    return dataUri.split("/").pop(); // Extract the last element of the array
-  }
-
   return (
     <FileExplorer>
       {datasets && (
@@ -101,7 +97,7 @@ export const ProjectDataExplorer: React.FC<ProjectDataExplorerProps> = ({
                 }
               >
                 <StyledIcon icon="document" />
-                <Text>{extractTitleFromDataUri(image.dataUri)}</Text>
+                <Text>{image.dataUri.split("/").pop()}</Text>
               </StyledListItem>
             ))}
         </StyledList>

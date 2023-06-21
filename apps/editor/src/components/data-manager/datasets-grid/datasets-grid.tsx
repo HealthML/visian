@@ -69,6 +69,19 @@ export const DatasetsGrid = ({
     [setDatasetTobBeDeleted, openDeleteDatasetConfirmationPopUp],
   );
 
+  const confirmDeleteDataset = useCallback(() => {
+    if (datasetTobBeDeleted)
+      deleteDatasets({
+        projectId,
+        datasetIds: [datasetTobBeDeleted.id],
+      });
+  }, [datasetTobBeDeleted, deleteDatasets, projectId]);
+
+  const confirmCreateDataset = useCallback(
+    (newDatasetDto) => createDataset({ ...newDatasetDto, project: projectId }),
+    [createDataset, projectId],
+  );
+
   return (
     <>
       <StyledModal
@@ -99,20 +112,12 @@ export const DatasetsGrid = ({
           name: datasetTobBeDeleted?.name ?? "",
         })}
         titleTx="delete-dataset-title"
-        onConfirm={() => {
-          if (datasetTobBeDeleted)
-            deleteDatasets({
-              projectId,
-              datasetIds: [datasetTobBeDeleted.id],
-            });
-        }}
+        onConfirm={confirmDeleteDataset}
       />
       <DatasetCreationPopup
         isOpen={isCreateDatasetPopupOpen}
         onClose={closeCreateDatasetPopup}
-        onConfirm={(newDatasetDto) =>
-          createDataset({ ...newDatasetDto, project: projectId })
-        }
+        onConfirm={confirmCreateDataset}
       />
     </>
   );

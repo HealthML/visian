@@ -162,9 +162,22 @@ export const JobDetailsPopUp = observer<JobDetailsPopUpProps>(
       [findAnnotationId],
     );
 
-    function extractTitleFromDataUri(dataUri: string) {
-      return dataUri.split("/").pop(); // Extract the last element of the array
-    }
+    const confirmDeleteJob = useCallback(() => {
+      deleteJobs({
+        projectId: job.project,
+        jobIds: [job.id],
+      });
+      onClose?.();
+    }, [deleteJobs, job, onClose]);
+
+    const confirmCancelJob = useCallback(() => {
+      patchJobStatus({
+        projectId: job.project,
+        jobId: job.id,
+        jobStatus: "canceled",
+      });
+      onClose?.();
+    }, [patchJobStatus, job, onClose]);
 
     return (
       <StyledPopUp
@@ -252,7 +265,7 @@ export const JobDetailsPopUp = observer<JobDetailsPopUpProps>(
                   }
                   isLast={index === jobImages.length - 1}
                 >
-                  <StyledText text={extractTitleFromDataUri(image.dataUri)} />
+                  <StyledText text={image.dataUri.split("/").pop()} />
                   {imagesWithAnnotations?.includes(image.id) && (
                     <SubtleText tx="image-annotated" />
                   )}
@@ -267,27 +280,14 @@ export const JobDetailsPopUp = observer<JobDetailsPopUpProps>(
             count: jobAnnotations?.length.toString() ?? "0",
           })}
           titleTx="delete-job-title"
-          onConfirm={() => {
-            deleteJobs({
-              projectId: job.project,
-              jobIds: [job.id],
-            });
-            onClose?.();
-          }}
+          onConfirm={confirmDeleteJob}
         />
         <ConfirmationPopup
           isOpen={isCancelJobConfirmationPopUpOpen}
           onClose={closeCancelJobConfirmationPopUp}
           message="cancel-job-message"
           titleTx="cancel-job-title"
-          onConfirm={() => {
-            patchJobStatus({
-              projectId: job.project,
-              jobId: job.id,
-              jobStatus: "canceled",
-            });
-            onClose?.();
-          }}
+          onConfirm={confirmCancelJob}
         />
         <JobLogPopup
           isOpen={isJobLogPopUpOpen}

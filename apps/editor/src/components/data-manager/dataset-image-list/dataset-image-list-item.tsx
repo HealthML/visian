@@ -87,13 +87,42 @@ export const DatasetImageListItem: React.FC<DatasetImageListItemProps> = ({
     [annotations],
   );
 
-  const getVerifiedBadge = () => (
-    <StatusBadge textColor="Neuronic Neon" borderColor="gray" tx="verified" />
+  const handleImageClick = useCallback(() => {
+    navigate(editorPath(image.id, undefined, projectId, datasetId));
+  }, [navigate, image.id, projectId, datasetId]);
+
+  const imageText = useMemo(
+    () => (isInSelectMode ? image.dataUri : image.dataUri.split("/").pop()),
+    [isInSelectMode, image.dataUri],
   );
 
-  function extractTitleFromDataUri(dataUri: string) {
-    return dataUri.split("/").pop();
-  }
+  const deleteDeleteImage = useCallback(() => {
+    deleteImage(image);
+  }, [deleteImage, image]);
+
+  const handleSelection = useCallback(() => {
+    handleImageSelection(
+      image.id,
+      index,
+      selectedImages,
+      isShiftPressed,
+      selectedRange,
+      setSelectedRange,
+      images,
+      setImageSelection,
+      setSelectedImages,
+    );
+  }, [
+    image.id,
+    index,
+    selectedImages,
+    isShiftPressed,
+    selectedRange,
+    setSelectedRange,
+    images,
+    setImageSelection,
+    setSelectedImages,
+  ]);
 
   return (
     <>
@@ -103,41 +132,27 @@ export const DatasetImageListItem: React.FC<DatasetImageListItemProps> = ({
           onPointerDown={toggleShowAnnotations}
         />
         <Spacer />
-        <ClickableText
-          onClick={() => {
-            navigate(editorPath(image.id, undefined, projectId, datasetId));
-          }}
-        >
-          {isInSelectMode
-            ? image.dataUri
-            : extractTitleFromDataUri(image.dataUri)}
-        </ClickableText>
+        <ClickableText onClick={handleImageClick}>{imageText}</ClickableText>
         <ExpandedSpacer />
-        {hasVerifiedAnnotation && getVerifiedBadge()}
+        {hasVerifiedAnnotation && (
+          <StatusBadge
+            textColor="Neuronic Neon"
+            borderColor="gray"
+            tx="verified"
+          />
+        )}
         <Spacer />
         {!isInSelectMode ? (
           <IconButton
             icon="trash"
             tooltipTx="delete-image-title"
-            onPointerDown={() => deleteImage(image)}
+            onPointerDown={deleteDeleteImage}
             tooltipPosition="left"
           />
         ) : (
           <IconButton
             icon={isSelected ? "checked" : "unchecked"}
-            onPointerDown={() =>
-              handleImageSelection(
-                image.id,
-                index,
-                selectedImages,
-                isShiftPressed,
-                selectedRange,
-                setSelectedRange,
-                images,
-                setImageSelection,
-                setSelectedImages,
-              )
-            }
+            onPointerDown={handleSelection}
           />
         )}
       </ListItem>
@@ -167,10 +182,16 @@ export const DatasetImageListItem: React.FC<DatasetImageListItemProps> = ({
                   >
                     {isInSelectMode
                       ? annotation.dataUri
-                      : extractTitleFromDataUri(annotation.dataUri)}
+                      : annotation.dataUri.split("/").pop()}
                   </ClickableText>
                   <ExpandedSpacer />
-                  {annotation.verified && getVerifiedBadge()}
+                  {annotation.verified && (
+                    <StatusBadge
+                      textColor="Neuronic Neon"
+                      borderColor="gray"
+                      tx="verified"
+                    />
+                  )}
                   <Spacer />
                   {!isInSelectMode && (
                     <IconButton

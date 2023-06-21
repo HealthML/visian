@@ -86,6 +86,13 @@ export const ProjectsScreen: React.FC = observer(() => {
     return null;
   }, [isLoadingProjects, isErrorProjects, projects, projectsError, translate]);
 
+  const confirmDeleteProject = useCallback(() => {
+    if (projectTobBeDeleted)
+      deleteProjects({
+        projectIds: [projectTobBeDeleted.id],
+      });
+  }, [deleteProjects, projectTobBeDeleted]);
+
   return (
     <Screen
       title={`${translate("projects-base-title")} ${
@@ -128,17 +135,12 @@ export const ProjectsScreen: React.FC = observer(() => {
                 name: projectTobBeDeleted?.name ?? "",
               })}
               titleTx="delete-project-title"
-              onConfirm={() => {
-                if (projectTobBeDeleted)
-                  deleteProjects({
-                    projectIds: [projectTobBeDeleted.id],
-                  });
-              }}
+              onConfirm={confirmDeleteProject}
             />
             <ProjectCreationPopup
               isOpen={isCreateProjectPopupOpen}
               onClose={closeCreateProjectPopup}
-              onConfirm={(newProjectDto) => createProject(newProjectDto)}
+              onConfirm={createProject}
             />
           </StyledModal>
         }
