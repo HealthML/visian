@@ -135,12 +135,12 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
     annotationFile: File,
     metaData: Annotation,
   ) => {
-    const savedAnnotaionFile = new File([annotationFile], metaData.dataUri, {
+    const savedAnnotationFile = new File([annotationFile], metaData.dataUri, {
       type: annotationFile.type,
     }) as FileWithMetadata;
-    savedAnnotaionFile.metadata = metaData;
+    savedAnnotationFile.metadata = metaData;
     const fileTransfer = new DataTransfer();
-    fileTransfer.items.add(savedAnnotaionFile);
+    fileTransfer.items.add(savedAnnotationFile);
     if (store) {
       importFilesToDocument(fileTransfer.files, store);
     }

@@ -142,7 +142,9 @@ export class Layer implements ILayer, ISerializable<LayerSnapshot> {
 
   public setFamily(id: string | undefined): void {
     if (!id) {
-      this.family?.removeLayer(this.id);
+      if (this.family?.layers.includes(this)) {
+        this.family?.removeLayer(this.id);
+      }
       this.familyId = undefined;
       return;
     }
