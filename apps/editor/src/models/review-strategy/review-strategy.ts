@@ -15,13 +15,19 @@ export abstract class ReviewStrategy {
     this.store = store;
   }
 
+  // Called to load the current task into the editor
   public abstract loadTask(): void;
+
   public setCurrentTask(task: ReviewTask) {
     this.task = task;
   }
   public get currentTask(): ReviewTask | undefined {
     return this.task;
   }
+
+  // Called to get the next task and load it into the editor
   public abstract nextTask(): void;
+
+  // Called to save changes made in the editor to the backend
   public abstract saveTask(): void;
 }
