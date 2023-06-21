@@ -10,6 +10,8 @@ import {
 } from "@visian/ui-shared";
 import styled from "styled-components";
 
+import { PageSectionProps } from "./page-section.props";
+
 const Container = styled.div`
   margin-bottom: ${space("pageSectionMargin")};
 `;
@@ -69,16 +71,7 @@ export const PageSection = ({
   actions,
   showActions = true,
   isLoading,
-}: {
-  title?: string;
-  titleTx?: string;
-  info?: string;
-  infoTx?: string;
-  children?: React.ReactNode;
-  actions?: React.ReactNode;
-  showActions?: boolean;
-  isLoading?: boolean;
-}) => {
+}: PageSectionProps) => {
   const hasInfo = info || infoTx;
   return (
     <Container>

@@ -9,6 +9,8 @@ import {
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 
+import { PageTitleProps } from "./page-title.props";
+
 const TitleContainer = styled.div`
   margin-bottom: ${space("pageSectionMargin")};
 `;
@@ -36,14 +38,7 @@ export const PageTitle = ({
   labelTx,
   backPath,
   isLoading,
-}: {
-  title?: string;
-  titleTx?: string;
-  label?: string;
-  labelTx?: string;
-  backPath?: string;
-  isLoading?: boolean;
-}) => {
+}: PageTitleProps) => {
   const navigate = useNavigate();
   return (
     <TitleContainer>

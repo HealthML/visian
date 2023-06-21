@@ -2,6 +2,8 @@ import { Button, space, Text, Title } from "@visian/ui-shared";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 
+import { PageErrorProps } from "./page-error.props";
+
 const Container = styled.div`
   width: 100%;
   margin-top: 30vh;
@@ -28,15 +30,7 @@ const BackText = styled(Text)`
   margin-left: 14px;
 `;
 
-export const PageError = ({
-  backPath,
-  errorTx,
-  error,
-}: {
-  backPath: string;
-  errorTx?: string;
-  error?: string;
-}) => {
+export const PageError = ({ backPath, errorTx, error }: PageErrorProps) => {
   const navigate = useNavigate();
   return (
     <Container>
