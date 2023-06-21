@@ -1,9 +1,9 @@
 import { InvisibleButton, ListItem, Text } from "@visian/ui-shared";
+import { useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 
 import { Project } from "../../../types";
-import { useCallback } from "react";
 
 const ExpandedSpacer = styled.div`
   margin-right: auto;
