@@ -4,12 +4,12 @@ import React, { useCallback, useMemo, useState } from "react";
 import styled from "styled-components";
 
 import { ConfirmationPopup } from "../components/data-manager/confirmation-popup";
+import { MiaTitle } from "../components/data-manager/mia-title";
 import { Page } from "../components/data-manager/page";
 import {
   PageSection,
   PageSectionIconButton,
 } from "../components/data-manager/page-section";
-import { PageTitle } from "../components/data-manager/page-title";
 import { ProjectCreationPopup } from "../components/data-manager/project-creation-popup";
 import { ProjectList } from "../components/data-manager/projects-list/project-list";
 import {
@@ -94,7 +94,7 @@ export const ProjectsScreen: React.FC = observer(() => {
       }`}
     >
       <Page>
-        <PageTitle titleTx="mia" />
+        <MiaTitle />
         <PageSection
           titleTx="projects"
           infoTx={projectsInfoTx}
