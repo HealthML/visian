@@ -1,10 +1,10 @@
 import { flexRender, Header, Row, Table } from "@tanstack/react-table";
+import { useCallback } from "react";
 import styled from "styled-components";
 
 import { stopPropagation } from "../../event-handling";
 import { color, fontWeight, radius } from "../../theme";
 import { List, ListItem, ListItemLabel } from "../list";
-import { useCallback } from "react";
 
 const TableList = styled(List)`
   overflow-y: auto;
