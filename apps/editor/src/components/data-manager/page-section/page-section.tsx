@@ -35,6 +35,10 @@ const InfoContainer = styled(Sheet)`
   align-items: center;
 `;
 
+const Hidden = styled.div`
+  display: none;
+`;
+
 export const SectionSheet = styled(Sheet)`
   padding: ${space("pageSectionMarginSmall")};
   box-sizing: border-box;
@@ -83,9 +87,14 @@ export const PageSection = ({
         {showActions ? isLoading ? <ActionLoadingBlock /> : actions : null}
       </TopBar>
       {hasInfo ? (
-        <InfoContainer>
-          <Text tx={infoTx}>{info}</Text>
-        </InfoContainer>
+        <>
+          <InfoContainer>
+            <Text tx={infoTx}>{info}</Text>
+          </InfoContainer>
+          {/* We include but hide child components here to ensure that components relevant for
+              actions (e.g. creation modals) are present even when info text is shown. */}
+          <Hidden>{children}</Hidden>
+        </>
       ) : isLoading ? (
         <LoadingBlock height="200px" />
       ) : (
