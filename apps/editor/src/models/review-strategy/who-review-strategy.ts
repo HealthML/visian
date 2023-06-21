@@ -91,7 +91,7 @@ export class WHOReviewStrategy extends ReviewStrategy {
   }
 
   // Importing
-  public async buildTask() {
+  private async buildTask() {
     const taskId = getWHOTaskIdFromUrl();
     if (!taskId) throw new Error("No WHO task specified in URL.");
 
