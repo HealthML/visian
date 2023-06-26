@@ -32,8 +32,9 @@ export class WHOReviewStrategy extends ReviewStrategy {
   }
 
   public async nextTask(): Promise<void> {
-    await this.saveTask();
+    this.store.setProgress({ labelTx: "saving", showSplash: true });
     try {
+      await this.saveTask();
       const response = await this.currentTask?.save();
 
       // TODO: return to WHO Home when response code is 204
@@ -42,7 +43,6 @@ export class WHOReviewStrategy extends ReviewStrategy {
         if (newLocation) {
           const urlElements = newLocation.split("/");
           const newTaskId = urlElements[urlElements.length - 1];
-
           if (newTaskId !== this.currentTask?.id) {
             this.store?.setIsDirty(false, true);
             setNewTaskIdForUrl(newTaskId);
@@ -58,7 +58,9 @@ export class WHOReviewStrategy extends ReviewStrategy {
         titleTx: "export-error",
         descriptionTx: "file-upload-error",
       });
+      this.store.editor.setActiveDocument();
     }
+    this.store.setProgress();
   }
 
   public async saveTask(): Promise<void> {
