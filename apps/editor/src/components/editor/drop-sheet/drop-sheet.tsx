@@ -6,12 +6,10 @@ import {
   zIndex,
 } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
-import React, { useCallback, useState } from "react";
+import React, { useCallback } from "react";
 import ReactDOM from "react-dom";
 import styled from "styled-components";
 
-import { useStore } from "../../../app/root-store";
-import { importFilesToDocument } from "../../../import-handling";
 import { DropSheetProps } from "./drop-sheet.props";
 
 const StyledDropZone = styled(DropZone)`
@@ -36,25 +34,7 @@ const StyledOverlay = styled.div`
 `;
 
 export const DropSheet: React.FC<DropSheetProps> = observer(
-  ({ onDropCompleted }) => {
-    const store = useStore();
-
-    const [isLoadingFiles, setIsLoadingFiles] = useState(false);
-
-    const importFiles = useCallback(
-      async (_files: FileList, event: React.DragEvent) => {
-        event.stopPropagation();
-        if (!store) return;
-        setIsLoadingFiles(true);
-        const { items } = event.dataTransfer;
-        importFilesToDocument(items, store, true);
-        setIsLoadingFiles(false);
-        store?.editor.activeDocument?.tools.setIsCursorOverFloatingUI(false);
-        onDropCompleted();
-      },
-      [onDropCompleted, store],
-    );
-
+  ({ onDropCompleted, importFiles }) => {
     const preventOutsideDrop = (event: React.DragEvent<HTMLDivElement>) => {
       event.preventDefault();
     };
@@ -67,16 +47,23 @@ export const DropSheet: React.FC<DropSheetProps> = observer(
       [onDropCompleted],
     );
 
+    const handleDrop = useCallback(
+      (files: FileList, event: React.DragEvent) => {
+        event.stopPropagation();
+        event.preventDefault();
+        importFiles(files);
+      },
+      [importFiles],
+    );
+
     const modalRootRef = useModalRoot();
     const node = (
       <StyledOverlay onDrop={handleOutsideDrop} onDragOver={preventOutsideDrop}>
-        {!isLoadingFiles && (
-          <StyledDropZone
-            isAlwaysVisible
-            labelTx="drop-file"
-            onFileDrop={importFiles}
-          />
-        )}
+        <StyledDropZone
+          isAlwaysVisible
+          labelTx="drop-file"
+          onFileDrop={handleDrop}
+        />
       </StyledOverlay>
     );
 

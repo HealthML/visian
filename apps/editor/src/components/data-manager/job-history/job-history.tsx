@@ -17,6 +17,7 @@ const ErrorMessage = styled(Text)`
 
 const StyledButton = styled(SquareButton)`
   margin-left: 10px;
+  padding: 10px;
 `;
 
 const ErrorNotification = styled(Notification)`
@@ -38,7 +39,7 @@ export const JobHistory = ({
 
   const { jobs, refetchJobs } = useJobsBy(projectId);
 
-  // model selection popup
+  // Model selection popup
   const [isModelSelectionPopUpOpen, setIsModelSelectionPopUpOpen] =
     useState(false);
   const openModelSelectionPopUp = useCallback(() => {
@@ -52,12 +53,9 @@ export const JobHistory = ({
     <StyledModal
       hideHeaderDivider={false}
       position="right"
-      label="Job History"
+      labelTx="jobs-base-title"
       headerChildren={
-        <StyledButton
-          icon="plusSmall"
-          onPointerDown={openModelSelectionPopUp}
-        />
+        <StyledButton icon="plus" onPointerDown={openModelSelectionPopUp} />
       }
     >
       {store?.error && (
@@ -70,7 +68,7 @@ export const JobHistory = ({
         />
       )}
       {altMessage ? (
-        <ErrorMessage tx={altMessage} />
+        <ErrorMessage text={altMessage} />
       ) : (
         jobs && <JobsTable jobs={jobs} />
       )}

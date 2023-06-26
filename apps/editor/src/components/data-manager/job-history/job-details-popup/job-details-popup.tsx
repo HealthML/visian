@@ -9,7 +9,7 @@ import {
   useTranslation,
 } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 
@@ -22,6 +22,7 @@ import useImagesByJob from "../../../../queries/use-images-by-jobs";
 import { Image } from "../../../../types";
 import { ConfirmationPopup } from "../../confirmation-popup";
 import { editorPath } from "../../util";
+import { JobLogPopup } from "../job-log-popup";
 import { JobStatusBadge } from "../job-status-badge/job-status-badge";
 import { DetailsRow, DetailsTable } from "./details-table";
 import { JobDetailsPopUpProps } from "./job-details-popup.props";
@@ -31,6 +32,7 @@ const StyledPopUp = styled(PopUp)`
   width: 45vw;
   height: 60vh;
   max-width: 600px;
+  max-height: 500px;
 `;
 
 const ClickableListItem = styled(ListItem)`
@@ -54,6 +56,10 @@ const StyledText = styled(Text)`
 
 const IconButton = styled(InvisibleButton)`
   width: 30px;
+`;
+
+const Spacer = styled.div`
+  width: 10px;
 `;
 
 const JobStatusControlsContainer = styled.div`
@@ -107,6 +113,28 @@ export const JobDetailsPopUp = observer<JobDetailsPopUpProps>(
       setIsCancelJobConfirmationPopUpOpen(false);
     }, []);
 
+    // job log popup
+    const [isJobLogPopUpOpen, setIsJobLogPopUpOpen] = useState(false);
+    const openJobLogPopUp = useCallback(() => {
+      setIsJobLogPopUpOpen(true);
+    }, []);
+    const closeJobLogPopUp = useCallback(() => {
+      setIsJobLogPopUpOpen(false);
+    }, []);
+
+    useEffect(() => {
+      if (!isOpen) {
+        closeJobLogPopUp();
+        closeDeleteJobConfirmationPopUp();
+        closeCancelJobConfirmationPopUp();
+      }
+    }, [
+      isOpen,
+      closeJobLogPopUp,
+      closeDeleteJobConfirmationPopUp,
+      closeCancelJobConfirmationPopUp,
+    ]);
+
     const imagesWithAnnotations = jobAnnotations?.map(
       (annotation) => annotation.image,
     );
@@ -121,28 +149,35 @@ export const JobDetailsPopUp = observer<JobDetailsPopUpProps>(
       [jobAnnotations],
     );
 
-    const compareImages = (a: Image, b: Image) => {
-      if (findAnnotationId(a.id) && !findAnnotationId(b.id)) {
-        return -1;
-      }
-      if (!findAnnotationId(a.id) && findAnnotationId(b.id)) {
-        return 1;
-      }
-      return 0;
-    };
-
-    const deleteJobMessage = useMemo(
-      () =>
-        `${t("delete-job-message")}`.replace(
-          "_",
-          jobAnnotations?.length.toString() ?? "0",
-        ),
-      [jobAnnotations, t],
+    const compareImages = useCallback(
+      (a: Image, b: Image) => {
+        if (findAnnotationId(a.id) && !findAnnotationId(b.id)) {
+          return -1;
+        }
+        if (!findAnnotationId(a.id) && findAnnotationId(b.id)) {
+          return 1;
+        }
+        return 0;
+      },
+      [findAnnotationId],
     );
 
-    function extractTitleFromDataUri(dataUri: string) {
-      return dataUri.split("/").pop(); // Extract the last element of the array
-    }
+    const confirmDeleteJob = useCallback(() => {
+      deleteJobs({
+        projectId: job.project,
+        jobIds: [job.id],
+      });
+      onClose?.();
+    }, [deleteJobs, job, onClose]);
+
+    const confirmCancelJob = useCallback(() => {
+      patchJobStatus({
+        projectId: job.project,
+        jobId: job.id,
+        jobStatus: "canceled",
+      });
+      onClose?.();
+    }, [patchJobStatus, job, onClose]);
 
     return (
       <StyledPopUp
@@ -155,6 +190,15 @@ export const JobDetailsPopUp = observer<JobDetailsPopUpProps>(
           <>
             <JobStatusControlsContainer>
               <JobStatusBadge status={job.status} />
+              <Spacer />
+              {job.logFileUri && (
+                <IconButton
+                  icon="logs"
+                  tooltipTx="open-job-log"
+                  onPointerDown={openJobLogPopUp}
+                  tooltipPosition="right"
+                />
+              )}
               {["queued", "running"].includes(job.status) ? (
                 <IconButton
                   icon="cancel"
@@ -212,47 +256,43 @@ export const JobDetailsPopUp = observer<JobDetailsPopUpProps>(
 
         {jobImages && !isErrorImages && !isErrorAnnotations && (
           <ScrollableList>
-            {jobImages?.sort(compareImages).map((image, index) => (
-              <ClickableListItem
-                onClick={() =>
-                  navigate(editorPath(image.id, findAnnotationId(image.id)))
-                }
-                isLast={index === jobImages.length - 1}
-              >
-                <StyledText text={extractTitleFromDataUri(image.dataUri)} />
-                {imagesWithAnnotations?.includes(image.id) && (
-                  <SubtleText tx="image-annotated" />
-                )}
-              </ClickableListItem>
-            ))}
+            {jobImages
+              ?.sort(compareImages)
+              .map((image: Image, index: number) => (
+                <ClickableListItem
+                  onClick={() =>
+                    navigate(editorPath(image.id, findAnnotationId(image.id)))
+                  }
+                  isLast={index === jobImages.length - 1}
+                >
+                  <StyledText text={image.dataUri.split("/").pop()} />
+                  {imagesWithAnnotations?.includes(image.id) && (
+                    <SubtleText tx="image-annotated" />
+                  )}
+                </ClickableListItem>
+              ))}
           </ScrollableList>
         )}
         <ConfirmationPopup
           isOpen={isDeleteJobConfirmationPopUpOpen}
           onClose={closeDeleteJobConfirmationPopUp}
-          messageTx={deleteJobMessage}
+          message={t("delete-job-message", {
+            count: jobAnnotations?.length.toString() ?? "0",
+          })}
           titleTx="delete-job-title"
-          onConfirm={() => {
-            deleteJobs({
-              projectId: job.project,
-              jobIds: [job.id],
-            });
-            onClose?.();
-          }}
+          onConfirm={confirmDeleteJob}
         />
         <ConfirmationPopup
           isOpen={isCancelJobConfirmationPopUpOpen}
           onClose={closeCancelJobConfirmationPopUp}
-          messageTx="cancel-job-message"
+          message="cancel-job-message"
           titleTx="cancel-job-title"
-          onConfirm={() => {
-            patchJobStatus({
-              projectId: job.project,
-              jobId: job.id,
-              jobStatus: "canceled",
-            });
-            onClose?.();
-          }}
+          onConfirm={confirmCancelJob}
+        />
+        <JobLogPopup
+          isOpen={isJobLogPopUpOpen}
+          onClose={closeJobLogPopUp}
+          job={job}
         />
       </StyledPopUp>
     );

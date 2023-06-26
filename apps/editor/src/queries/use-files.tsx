@@ -3,7 +3,7 @@ import path from "path";
 
 import { Annotation, FileWithMetadata } from "../types";
 import { getImage } from "./get-image";
-import hubBaseUrl from "./hub-base-url";
+import { hubBaseUrl } from "./hub-base-url";
 import { getAnnotation } from "./use-annotations-by";
 
 const fetchFile = async (

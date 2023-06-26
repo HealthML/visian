@@ -6,6 +6,7 @@ export interface Job {
   finishedAt: string | undefined;
   status: JobStatus;
   project: string;
+  logFileUri?: string;
 }
 
 export enum JobStatus {

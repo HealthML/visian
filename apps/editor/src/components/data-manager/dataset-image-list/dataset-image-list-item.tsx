@@ -2,23 +2,25 @@ import {
   InvisibleButton,
   List,
   ListItem,
+  StatusBadge,
   Text,
   useTranslation,
 } from "@visian/ui-shared";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import styled from "styled-components";
 
 import { useAnnotationsByImage } from "../../../queries";
-import { Annotation, Image } from "../../../types";
+import { Annotation } from "../../../types";
 import { editorPath, handleImageSelection } from "../util";
+import { DatasetImageListItemProps } from "./dataset-image-list-item.props";
 
 const Spacer = styled.div`
   width: 10px;
 `;
 
 const ExpandedSpacer = styled.div`
-  margin-right: auto;
+  flex-grow: 1;
 `;
 
 const IconButton = styled(InvisibleButton)`
@@ -34,7 +36,7 @@ const ClickableText = styled(Text)`
   cursor: pointer;
 `;
 
-export const DatasetImageListItem = ({
+export const DatasetImageListItem: React.FC<DatasetImageListItemProps> = ({
   isInSelectMode,
   image,
   refetchImages,
@@ -50,24 +52,6 @@ export const DatasetImageListItem = ({
   deleteAnnotation,
   deleteImage,
   isLast,
-}: {
-  isInSelectMode: boolean;
-  image: Image;
-  refetchImages: () => void;
-  isSelected: boolean;
-  index: number;
-  selectedImages: Set<string>;
-  images: Image[] | undefined;
-  setImageSelection: (imageId: string, selection: boolean) => void;
-  setSelectedImages: React.Dispatch<React.SetStateAction<Set<string>>>;
-  isShiftPressed: boolean;
-  selectedRange: { start: number; end: number };
-  setSelectedRange: React.Dispatch<
-    React.SetStateAction<{ start: number; end: number }>
-  >;
-  deleteAnnotation: (annotation: Annotation) => void;
-  deleteImage: (image: Image) => void;
-  isLast: boolean;
 }) => {
   const {
     annotations,
@@ -79,14 +63,14 @@ export const DatasetImageListItem = ({
 
   const [showAnnotations, setShowAnnotations] = useState(false);
 
-  // refetch images if annotations can't be loaded
+  // Refetch images if annotations can't be loaded
   useEffect(() => {
     if (isErrorAnnotations) refetchImages();
   }, [isErrorAnnotations, refetchImages]);
 
   const toggleShowAnnotations = useCallback(() => {
     setShowAnnotations((prev: boolean) => {
-      // refetch annotations if the annotations list is being opened
+      // Refetch annotations if the annotations list is being opened
       if (!prev) refetchAnnotations();
       return !prev;
     });
@@ -98,9 +82,47 @@ export const DatasetImageListItem = ({
   const projectId = useParams().projectId || "";
   const datasetId = useParams().datasetId || "";
 
-  function extractTitleFromDataUri(dataUri: string) {
-    return dataUri.split("/").pop();
-  }
+  const hasVerifiedAnnotation = useMemo(
+    () => annotations?.some((annotation) => annotation.verified) ?? false,
+    [annotations],
+  );
+
+  const handleImageClick = useCallback(() => {
+    navigate(editorPath(image.id, undefined, projectId, datasetId));
+  }, [navigate, image.id, projectId, datasetId]);
+
+  const imageText = useMemo(
+    () => (isInSelectMode ? image.dataUri : image.dataUri.split("/").pop()),
+    [isInSelectMode, image.dataUri],
+  );
+
+  const deleteDeleteImage = useCallback(() => {
+    deleteImage(image);
+  }, [deleteImage, image]);
+
+  const handleSelection = useCallback(() => {
+    handleImageSelection(
+      image.id,
+      index,
+      selectedImages,
+      isShiftPressed,
+      selectedRange,
+      setSelectedRange,
+      images,
+      setImageSelection,
+      setSelectedImages,
+    );
+  }, [
+    image.id,
+    index,
+    selectedImages,
+    isShiftPressed,
+    selectedRange,
+    setSelectedRange,
+    images,
+    setImageSelection,
+    setSelectedImages,
+  ]);
 
   return (
     <>
@@ -110,51 +132,28 @@ export const DatasetImageListItem = ({
           onPointerDown={toggleShowAnnotations}
         />
         <Spacer />
+        <ClickableText onClick={handleImageClick}>{imageText}</ClickableText>
+        <ExpandedSpacer />
+        {hasVerifiedAnnotation && (
+          <StatusBadge
+            textColor="Neuronic Neon"
+            borderColor="gray"
+            tx="verified"
+          />
+        )}
+        <Spacer />
         {!isInSelectMode ? (
-          <>
-            <ClickableText
-              onClick={() => {
-                navigate(editorPath(image.id, undefined, projectId, datasetId));
-              }}
-            >
-              {extractTitleFromDataUri(image.dataUri)}
-            </ClickableText>
-            <ExpandedSpacer />
-            <IconButton
-              icon="trash"
-              tooltipTx="delete-image-title"
-              onPointerDown={() => deleteImage(image)}
-              style={{ marginLeft: "auto" }}
-              tooltipPosition="left"
-            />
-          </>
+          <IconButton
+            icon="trash"
+            tooltipTx="delete-image-title"
+            onPointerDown={deleteDeleteImage}
+            tooltipPosition="left"
+          />
         ) : (
-          <>
-            <ClickableText
-              onClick={() => {
-                navigate(editorPath(image.id, undefined, projectId, datasetId));
-              }}
-            >
-              {image.dataUri}
-            </ClickableText>
-            <ExpandedSpacer />
-            <IconButton
-              icon={isSelected ? "checked" : "unchecked"}
-              onPointerDown={() =>
-                handleImageSelection(
-                  image.id,
-                  index,
-                  selectedImages,
-                  isShiftPressed,
-                  selectedRange,
-                  setSelectedRange,
-                  images,
-                  setImageSelection,
-                  setSelectedImages,
-                )
-              }
-            />
-          </>
+          <IconButton
+            icon={isSelected ? "checked" : "unchecked"}
+            onPointerDown={handleSelection}
+          />
         )}
       </ListItem>
       {showAnnotations &&
@@ -169,47 +168,39 @@ export const DatasetImageListItem = ({
             <AnnotationsList>
               {annotations.map((annotation: Annotation) => (
                 <ListItem>
-                  {!isInSelectMode ? (
-                    <>
-                      <ClickableText
-                        onClick={() => {
-                          navigate(
-                            editorPath(
-                              image.id,
-                              annotation.id,
-                              projectId,
-                              datasetId,
-                            ),
-                          );
-                        }}
-                      >
-                        {extractTitleFromDataUri(annotation.dataUri)}
-                      </ClickableText>
-                      <IconButton
-                        icon="trash"
-                        tooltipTx="delete-annotation-title"
-                        onPointerDown={() => {
-                          deleteAnnotation(annotation);
-                        }}
-                        style={{ marginLeft: "auto" }}
-                        tooltipPosition="left"
-                      />
-                    </>
-                  ) : (
-                    <ClickableText
-                      onClick={() => {
-                        navigate(
-                          editorPath(
-                            image.id,
-                            annotation.id,
-                            projectId,
-                            datasetId,
-                          ),
-                        );
+                  <ClickableText
+                    onClick={() => {
+                      navigate(
+                        editorPath(
+                          image.id,
+                          annotation.id,
+                          projectId,
+                          datasetId,
+                        ),
+                      );
+                    }}
+                  >
+                    {isInSelectMode
+                      ? annotation.dataUri
+                      : annotation.dataUri.split("/").pop()}
+                  </ClickableText>
+                  <ExpandedSpacer />
+                  {annotation.verified && (
+                    <StatusBadge
+                      textColor="Neuronic Neon"
+                      borderColor="gray"
+                      tx="verified"
+                    />
+                  )}
+                  <Spacer />
+                  {!isInSelectMode && (
+                    <IconButton
+                      icon="trash"
+                      tooltipTx="delete-annotation-title"
+                      onPointerDown={() => {
+                        deleteAnnotation(annotation);
                       }}
-                    >
-                      {annotation.dataUri}
-                    </ClickableText>
+                    />
                   )}
                 </ListItem>
               ))}

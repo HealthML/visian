@@ -14,10 +14,7 @@ import { QueryClient, QueryClientProvider } from "react-query";
 import { ReactQueryDevtools } from "react-query/devtools";
 import { Navigate, Route, Routes } from "react-router-dom";
 
-import {
-  DatasetsView,
-  JobsView,
-} from "../components/data-manager/project-views";
+import { DatasetsView, JobsView } from "../components";
 import {
   whoAwsConfigDeployment,
   whoAwsConfigDevelopment,
@@ -25,9 +22,13 @@ import {
 } from "../constants";
 import { setUpEventHandling } from "../event-handling";
 import type { RootStore } from "../models";
-import hubBaseUrl from "../queries/hub-base-url";
-import { DatasetScreen, EditorScreen, ProjectsScreen } from "../screens";
-import ProjectScreen from "../screens/project-screen";
+import { hubBaseUrl } from "../queries";
+import {
+  DatasetScreen,
+  EditorScreen,
+  ProjectScreen,
+  ProjectsScreen,
+} from "../screens";
 import { setupRootStore, StoreProvider } from "./root-store";
 
 if (isFromWHO()) {
@@ -104,6 +105,7 @@ function App(): JSX.Element {
                     element={<Navigate replace to="/projects" />}
                   />
                   <Route path="/editor" element={<EditorScreen />} />
+                  <Route path="*" element={<Navigate replace to="/" />} />
                 </Routes>
               ) : (
                 <Routes>

@@ -6,13 +6,14 @@ import {
   ListItem,
   Text,
 } from "@visian/ui-shared";
+import { useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 
 import { Dataset } from "../../../types";
 
 const StyledListItem = styled(ListItem)`
-  width: 20vw;
+  width: 21vw;
   height: 14vw;
   background-color: ${color("sheet")};
   border-radius: 15px;
@@ -32,10 +33,10 @@ const ImageContainer = styled.div`
   cursor: pointer;
 `;
 
-const ImagePreview = styled.img`
+const ImagePreview = styled.div`
   border-radius: inherit;
-  max-width: 100%;
-  height: auto;
+  height: 44vw;
+  background-color: ${color("sheet")};
 `;
 
 const DatasetInfo = styled.div`
@@ -62,7 +63,7 @@ export const DatasetListItem = ({
   deleteDataset,
 }: {
   dataset: Dataset;
-  deleteDataset: () => void;
+  deleteDataset: (dataset: Dataset) => void;
 }) => {
   const navigate = useNavigate();
 
@@ -70,22 +71,23 @@ export const DatasetListItem = ({
     navigate(`/datasets/${dataset.id}`);
   };
 
+  const deleteCurrentDataset = useCallback(
+    () => deleteDataset(dataset),
+    [dataset, deleteDataset],
+  );
+
   return (
     <StyledListItem innerHeight="auto" isLast>
       <DatasetWrapper>
         <ImageContainer onClick={openDataset}>
-          <ImagePreview
-            src="../../assets/images/walnut.png"
-            alt="Scan Preview"
-          />
+          <ImagePreview />
         </ImageContainer>
         <DatasetInfo>
           <StyledText onClick={openDataset}>{dataset.name}</StyledText>
           <IconButton
             icon="trash"
             tooltipTx="delete-dataset-title"
-            onPointerDown={deleteDataset}
-            style={{ marginLeft: "auto" }}
+            onPointerDown={deleteCurrentDataset}
             tooltipPosition="left"
           />
         </DatasetInfo>

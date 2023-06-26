@@ -717,7 +717,7 @@ export class Document
               { ...imageWithUnit, name: `${value}_${image.name}` },
               value,
             );
-            this.addFileMetaData(createdLayerId, files);
+            this.addFileMetadata(createdLayerId, files);
           });
         }
       }
@@ -733,7 +733,7 @@ export class Document
       this.history.clear();
     }
 
-    this.addFileMetaData(createdLayerId, files);
+    this.addFileMetadata(createdLayerId, files);
     return createdLayerId;
   }
 
@@ -862,11 +862,11 @@ export class Document
       ) as unknown as IImageLayer[];
   }
 
-  private addFileMetaData(createdLayerId: string, file: File | File[]) {
+  private addFileMetadata(createdLayerId: string, file: File | File[]) {
     const layer = this.getLayer(createdLayerId);
     if (layer && "metadata" in file) {
-      const fileWithMetaData = file as FileWithMetadata;
-      layer.metaData = fileWithMetaData.metadata;
+      const fileWithMetadata = file as FileWithMetadata;
+      layer.metadata = fileWithMetadata.metadata;
     }
   }
 

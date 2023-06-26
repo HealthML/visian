@@ -1,4 +1,5 @@
 import { InvisibleButton, ListItem, Text } from "@visian/ui-shared";
+import { useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 
@@ -27,13 +28,14 @@ export const ProjectListItem = ({
 }) => {
   const navigate = useNavigate();
 
+  const navigateToProject = useCallback(
+    () => navigate(`/projects/${project.id}/datasets`),
+    [project.id, navigate],
+  );
+
   return (
     <ListItem isLast={isLast}>
-      <ClickableText
-        onClick={() => navigate(`/projects/${project.id}/datasets`)}
-      >
-        {project.name}
-      </ClickableText>
+      <ClickableText onClick={navigateToProject}>{project.name}</ClickableText>
       <ExpandedSpacer />
       <IconButton
         icon="trash"
