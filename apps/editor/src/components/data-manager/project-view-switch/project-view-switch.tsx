@@ -1,5 +1,5 @@
 import { Box, Switch, Theme } from "@visian/ui-shared";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { useMatch, useNavigate } from "react-router-dom";
 import styled, { useTheme } from "styled-components";
 
@@ -24,10 +24,13 @@ export const ProjectViewSwitch = () => {
     match?.params?.["*"] || "datasets",
   );
 
-  const changeScreen = (screenName: string) => {
-    setSelectedOption(screenName);
-    navigate(`./${screenName}`);
-  };
+  const changeScreen = useCallback(
+    (screenName: string) => {
+      setSelectedOption(screenName);
+      navigate(`./${screenName}`);
+    },
+    [navigate],
+  );
 
   return (
     <StyledSwitch>

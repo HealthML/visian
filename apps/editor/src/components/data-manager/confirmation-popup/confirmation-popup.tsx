@@ -1,5 +1,6 @@
-import { ButtonParam, PopUp, Text, useTranslation } from "@visian/ui-shared";
+import { ButtonParam, PopUp, Text } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
+import { useCallback } from "react";
 import styled from "styled-components";
 
 import { ConfirmationPopUpProps } from "./confirmation-popup.props";
@@ -36,7 +37,10 @@ export const ConfirmationPopup = observer<ConfirmationPopUpProps>(
     cancel,
     cancelTx,
   }) => {
-    const { t } = useTranslation();
+    const handleConfirmation = useCallback(() => {
+      onConfirm?.();
+      onClose?.();
+    }, [onClose, onConfirm]);
 
     return (
       <ConfirmationPopupContainer
@@ -46,24 +50,19 @@ export const ConfirmationPopup = observer<ConfirmationPopUpProps>(
         dismiss={onClose}
         shouldDismissOnOutsidePress
       >
-        <>
-          <Text>{message ?? t(messageTx)}</Text>
-          <InlineRow>
-            <StyledTextButton
-              labelTx={cancel ?? cancelTx ?? "cancel"}
-              handlePress={() => {
-                onClose?.();
-              }}
-            />
-            <StyledTextButton
-              labelTx={confirm ?? confirmTx ?? "confirm"}
-              handlePress={() => {
-                onConfirm?.();
-                onClose?.();
-              }}
-            />
-          </InlineRow>
-        </>
+        <Text tx={messageTx} text={message} />
+        <InlineRow>
+          <StyledTextButton
+            label={cancel}
+            labelTx={cancelTx || (cancel ? undefined : "cancel")}
+            handlePress={onClose}
+          />
+          <StyledTextButton
+            label={confirm}
+            labelTx={confirmTx || (confirm ? undefined : "confirm")}
+            handlePress={handleConfirmation}
+          />
+        </InlineRow>
       </ConfirmationPopupContainer>
     );
   },

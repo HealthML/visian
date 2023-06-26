@@ -105,9 +105,9 @@ export const JobCreationPopup = observer<JobCreationPopUpProps>(
       [mlModels, selectedModelName],
     );
 
-    const [selectedModelVersion, setSelectedModelVersion] = useState(
-      availableModelVersions[0],
-    );
+    const [selectedModelVersion, setSelectedModelVersion] = useState<
+      string | undefined
+    >(availableModelVersions[0]);
 
     useEffect(() => {
       setSelectedModelVersion(availableModelVersions[0]);

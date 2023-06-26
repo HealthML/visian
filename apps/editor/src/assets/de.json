@@ -296,11 +296,12 @@
   "dataset-loading-error": "Fehler beim Laden des Datensatzes:",
 
   "images-loading": "Bilder werden geladen...",
-  "images-loading-error": "Fehler beim Laden der Bilder:",
+  "images-loading-error": "Fehler beim Laden der Bilder: {{statusText}} {{status}}",
   "no-images-available": "Aktuell sind keine Bilder vorhanden.",
   "image-open-error": "Fehler beim Öffnen des Bildes",
   "image-annotated": "annotiert",
 
+  "create-annotation-file-error": "Die Annotationsdatei konnte nicht erstellt werden.",
   "annotations-loading": "Annotationen werden geladen...",
   "annotations-loading-error": "Fehler beim Laden der Annotationen:",
   "annotation-open-error": "Fehler beim Öffnen der Annotation",
@@ -316,7 +317,7 @@
 
   "jobs": "Jobs",
   "jobs-loading": "Jobs werden geladen...",
-  "jobs-loading-error": "Fehler beim Laden der Jobs:",
+  "jobs-loading-error": "Fehler beim Laden der Jobs: {{statusText}} {{status}}",
   "no-jobs-available": "Aktuell sind keine Jobs vorhanden.",
   "job-deleted-images": "Es scheint als wurden alle Bilder des Jobs gelöscht...",
   "job-details": "Job Details",
@@ -349,6 +350,10 @@
   "image-import-duplicate-error-description": "Einige Bilder existierten bereits und wurden übersprungen. Es wurde(n) {{imported}} von {{total}} Bilder(n) erfolgreich importiert.",
   "image-import-selected-is-duplicate": "Datei bereits ausgewählt, wird übersprungen",
   "image-import-selected-has-invalid-type": "Ungültiger Dateityp, wird übersprungen",
+  "computer-upload": "Vom Computer hochladen",
+  "drop-files-or": "Dateien ablegen oder",
+  "load-from-url": "Von URL laden",
+  "connect-to-server": "Mit dem Server verbinden",
 
   "open-editor": "Editor öffnen",
   "close-editor": "Editor schließen",
@@ -368,17 +373,17 @@
   "options": "Optionen",
   "delete": "Löschen",
   "delete-annotation-title": "Annotation löschen",
-  "delete-annotation-message": "Wollen Sie die Annotation \"_\" wirklich löschen?",
+  "delete-annotation-message": "Wollen Sie die Annotation \"{{name}}\" wirklich löschen?",
   "delete-images-title": "Bilder löschen",
-  "delete-images-message": "Wollen Sie _ Bild(er) sämtlich aller dazugehörigen Annotationen wirklich löschen?",
+  "delete-images-message": "Wollen Sie {{count}} Bild(er) sämtlich aller dazugehörigen Annotationen wirklich löschen?",
   "delete-image-title": "Bild löschen",
-  "delete-image-message": "Wollen Sie das Bild \"_\" sämtlich aller dazugehörigen Annotationen wirklich löschen?",
+  "delete-image-message": "Wollen Sie das Bild \"{{name}}\" sämtlich aller dazugehörigen Annotationen wirklich löschen?",
   "delete-dataset-title": "Datensatz löschen",
-  "delete-dataset-message": "Wollen Sie den Datensatz \"_\" sämtlich aller enthaltenen Bilder und Annotationen wirklich löschen?",
+  "delete-dataset-message": "Wollen Sie den Datensatz \"{{name}}\" sämtlich aller enthaltenen Bilder und Annotationen wirklich löschen?",
   "delete-project-title": "Projekt löschen",
-  "delete-project-message": "Wollen sie das Projekt \"_\" sämtlich aller enthalten Datensätze, Bilder und Annotationen wirklich löschen?",
+  "delete-project-message": "Wollen sie das Projekt \"{{name}}\" sämtlich aller enthalten Datensätze, Bilder und Annotationen wirklich löschen?",
   "delete-job-title": "Job löschen",
-  "delete-job-message": "Wollen sie den Job sämtlich der _ dabei erzeugten Annotation(en) wirklich löschen?",
+  "delete-job-message": "Wollen sie den Job sämtlich der {{count}} dabei erzeugten Annotation(en) wirklich löschen?",
   "cancel-job-title": "Job abbrechen",
   "cancel-job-message": "Wollen sie den Job wirklich abbrechen?",
   "open-job-log": "Job Log Datei öffnen",
@@ -397,5 +402,6 @@
 
   "verified": "verifiziert",
 
-  "data_uri_help_message": "Die dataURI ist nicht gültig. Sie sollte das Format 'ordner/dateiname.erweiterung' haben, wobei ein Ordner und der Dateiname aus Buchstaben, Ziffern, -, oder _ bestehen kann und die Erweiterung eine der folgenden sein sollte:"
+  "data-uri-help-message": "Die dataURI ist nicht gültig. Sie sollte das Format 'ordner/dateiname.erweiterung' haben, wobei ein Ordner und der Dateiname aus Buchstaben, Ziffern, -, oder _ bestehen kann und die Erweiterung eine der folgenden sein sollte:",
+  "uri-file-type-mismatch": "Die URI entspricht nicht dem Dateityp \"{{name}}\""
 }

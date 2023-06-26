@@ -1,5 +1,5 @@
 import { Modal, SquareButton, Text, useTranslation } from "@visian/ui-shared";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useState } from "react";
 import styled from "styled-components";
 
 import useDatasetsBy, {
@@ -37,7 +37,7 @@ export const DatasetsGrid = ({
   const { deleteDatasets } = useDeleteDatasetsForProjectMutation();
   const { createDataset } = useCreateDatasetMutation();
 
-  // delete dataset confirmation popup
+  // Delete dataset confirmation popup
   const [
     isDeleteDatasetConfirmationPopUpOpen,
     setIsDeleteDatasetConfirmationPopUpOpen,
@@ -49,7 +49,7 @@ export const DatasetsGrid = ({
     setIsDeleteDatasetConfirmationPopUpOpen(false);
   }, []);
 
-  // create dataset popup
+  // Create dataset popup
   const [isCreateDatasetPopupOpen, setIsCreateDatasetPopupOpen] =
     useState(false);
   const openCreateDatasetPopup = useCallback(
@@ -69,13 +69,17 @@ export const DatasetsGrid = ({
     [setDatasetTobBeDeleted, openDeleteDatasetConfirmationPopUp],
   );
 
-  const deleteDatasetMessage = useMemo(
-    () =>
-      `${translate("delete-dataset-message")}`.replace(
-        "_",
-        datasetTobBeDeleted?.name ?? "",
-      ),
-    [datasetTobBeDeleted, translate],
+  const confirmDeleteDataset = useCallback(() => {
+    if (datasetTobBeDeleted)
+      deleteDatasets({
+        projectId,
+        datasetIds: [datasetTobBeDeleted.id],
+      });
+  }, [datasetTobBeDeleted, deleteDatasets, projectId]);
+
+  const confirmCreateDataset = useCallback(
+    (newDatasetDto) => createDataset({ ...newDatasetDto, project: projectId }),
+    [createDataset, projectId],
   );
 
   return (
@@ -104,22 +108,16 @@ export const DatasetsGrid = ({
       <ConfirmationPopup
         isOpen={isDeleteDatasetConfirmationPopUpOpen}
         onClose={closeDeleteDatasetConfirmationPopUp}
-        message={deleteDatasetMessage}
+        message={translate("delete-dataset-message", {
+          name: datasetTobBeDeleted?.name ?? "",
+        })}
         titleTx="delete-dataset-title"
-        onConfirm={() => {
-          if (datasetTobBeDeleted)
-            deleteDatasets({
-              projectId,
-              datasetIds: [datasetTobBeDeleted.id],
-            });
-        }}
+        onConfirm={confirmDeleteDataset}
       />
       <DatasetCreationPopup
         isOpen={isCreateDatasetPopupOpen}
         onClose={closeCreateDatasetPopup}
-        onConfirm={(newDatasetDto) =>
-          createDataset({ ...newDatasetDto, project: projectId })
-        }
+        onConfirm={confirmCreateDataset}
       />
     </>
   );

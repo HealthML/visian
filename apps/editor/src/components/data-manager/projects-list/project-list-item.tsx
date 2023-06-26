@@ -38,14 +38,14 @@ export const ProjectListItem = ({
   );
 
   const updateProject = useUpdateProjectsMutation();
+  const navigateToProject = useCallback(
+    () => navigate(`/projects/${project.id}/datasets`),
+    [project.id, navigate],
+  );
 
   return (
     <ListItem isLast={isLast}>
-      <ClickableText
-        onClick={() => navigate(`/projects/${project.id}/datasets`)}
-      >
-        {project.name}
-      </ClickableText>
+      <ClickableText onClick={navigateToProject}>{project.name}</ClickableText>
       <ExpandedSpacer />
       <OptionSelector
         options={[

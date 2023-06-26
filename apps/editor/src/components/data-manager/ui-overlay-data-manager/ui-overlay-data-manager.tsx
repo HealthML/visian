@@ -86,6 +86,13 @@ export const UIOverlayDataManager = observer<UIOverlayDataManagerProps>(
       setIsShortcutPopUpOpen(false);
     }, []);
 
+    const navigateToHome = useCallback(() => navigate(`/projects`), [navigate]);
+    const navigateBack = useCallback(
+      () => (backLink ? navigate(backLink) : null),
+      [navigate, backLink],
+    );
+    const navigateToEditor = useCallback(() => navigate(`/editor`), [navigate]);
+
     return (
       <Container>
         <TopBar>
@@ -97,7 +104,7 @@ export const UIOverlayDataManager = observer<UIOverlayDataManagerProps>(
                   icon="home"
                   tooltipTx="home"
                   tooltipPosition="right"
-                  onPointerDown={() => navigate(`/projects`)}
+                  onPointerDown={navigateToHome}
                   isActive={false}
                 />
               )}
@@ -106,7 +113,7 @@ export const UIOverlayDataManager = observer<UIOverlayDataManagerProps>(
                   icon="arrowBack"
                   tooltipTx="back"
                   tooltipPosition="right"
-                  onPointerDown={() => navigate(backLink)}
+                  onPointerDown={navigateBack}
                   isActive={false}
                 />
               )}
@@ -119,7 +126,7 @@ export const UIOverlayDataManager = observer<UIOverlayDataManagerProps>(
                 icon="pixelBrush"
                 tooltipTx="open-editor"
                 tooltipPosition="left"
-                onPointerDown={() => navigate(`/editor`)}
+                onPointerDown={navigateToEditor}
                 isActive={false}
               />
             </RightBar>

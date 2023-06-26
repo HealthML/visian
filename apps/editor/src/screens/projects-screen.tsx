@@ -9,10 +9,12 @@ import { observer } from "mobx-react-lite";
 import React, { useCallback, useMemo, useState } from "react";
 import styled from "styled-components";
 
-import { ConfirmationPopup } from "../components/data-manager/confirmation-popup";
-import { ProjectCreationPopup } from "../components/data-manager/project-creation-popup";
-import { ProjectList } from "../components/data-manager/projects-list/project-list";
-import { UIOverlayDataManager } from "../components/data-manager/ui-overlay-data-manager";
+import {
+  ConfirmationPopup,
+  ProjectCreationPopup,
+  ProjectList,
+  UIOverlayDataManager,
+} from "../components";
 import {
   useCreateProjectMutation,
   useDeleteProjectsMutation,
@@ -73,15 +75,6 @@ export const ProjectsScreen: React.FC = observer(() => {
     [setProjectTobBeDeleted, openDeleteProjectConfirmationPopUp],
   );
 
-  const deleteProjectMessage = useMemo(
-    () =>
-      `${translate("delete-project-message")}`.replace(
-        "_",
-        projectTobBeDeleted?.name ?? "",
-      ),
-    [projectTobBeDeleted, translate],
-  );
-
   const altMessage = useMemo(() => {
     if (isLoadingProjects) return translate("projects-loading");
     if (isErrorProjects)
@@ -92,6 +85,13 @@ export const ProjectsScreen: React.FC = observer(() => {
       return translate("no-projects-available");
     return null;
   }, [isLoadingProjects, isErrorProjects, projects, projectsError, translate]);
+
+  const confirmDeleteProject = useCallback(() => {
+    if (projectTobBeDeleted)
+      deleteProjects({
+        projectIds: [projectTobBeDeleted.id],
+      });
+  }, [deleteProjects, projectTobBeDeleted]);
 
   return (
     <Screen
@@ -131,19 +131,16 @@ export const ProjectsScreen: React.FC = observer(() => {
             <ConfirmationPopup
               isOpen={isDeleteProjectConfirmationPopUpOpen}
               onClose={closeDeleteProjectConfirmationPopUp}
-              message={deleteProjectMessage}
+              message={translate("delete-project-message", {
+                name: projectTobBeDeleted?.name ?? "",
+              })}
               titleTx="delete-project-title"
-              onConfirm={() => {
-                if (projectTobBeDeleted)
-                  deleteProjects({
-                    projectIds: [projectTobBeDeleted.id],
-                  });
-              }}
+              onConfirm={confirmDeleteProject}
             />
             <ProjectCreationPopup
               isOpen={isCreateProjectPopupOpen}
               onClose={closeCreateProjectPopup}
-              onConfirm={(newProjectDto) => createProject(newProjectDto)}
+              onConfirm={createProject}
             />
           </StyledModal>
         }

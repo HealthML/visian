@@ -1,7 +1,7 @@
 import axios from "axios";
 
 import { MlModel } from "../types";
-import hubBaseUrl from "./hub-base-url";
+import { hubBaseUrl } from "./hub-base-url";
 
 export const postJob = async (
   imageSelection: string[],
