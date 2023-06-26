@@ -38,7 +38,7 @@ export class WHOReviewStrategy extends ReviewStrategy {
 
       // TODO: return to WHO Home when response code is 204
       if (response) {
-        const newLocation = response.headers.get("location");
+        const newLocation = response.headers["location"];
         if (newLocation) {
           const urlElements = newLocation.split("/");
           const newTaskId = urlElements[urlElements.length - 1];

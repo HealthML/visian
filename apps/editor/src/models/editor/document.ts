@@ -936,11 +936,9 @@ export class Document
   /** Adds meta data from file with metadata to layer */
   private addMetaDataToLayer(layerId: string, file: File) {
     const layer = this.getLayer(layerId);
-    if (file instanceof File) {
-      const metaData = this.getMetaDataFromFile(file);
-      if (layer && metaData) {
-        layer.metaData = metaData;
-      }
+    const metaData = this.getMetaDataFromFile(file);
+    if (layer && metaData) {
+      layer.metaData = metaData;
     }
   }
 

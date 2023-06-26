@@ -1,3 +1,5 @@
+import { AxiosResponse } from "axios";
+
 import { FileWithMetadata } from "../../types";
 
 export enum TaskType {
@@ -28,5 +30,5 @@ export interface ReviewTask {
   updateAnnotation(annotationId: string, files: File[]): Promise<void>;
 
   // After calling save, we expect all changes made to the task to be saved to the backend
-  save(): Promise<Response>;
+  save(): Promise<AxiosResponse>;
 }
