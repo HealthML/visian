@@ -11,7 +11,6 @@ import {
 
 import { FileWithMetadata } from "../../types";
 import { ReviewTask, TaskType } from "./review-task";
-import { json } from "stream/consumers";
 
 const taskTypeMapping = {
   [WHOTaskType.Create]: TaskType.Create,
@@ -52,13 +51,13 @@ export class WHOReviewTask implements ReviewTask {
     this.whoTask = whoTask;
   }
 
-  public getImageFiles(): File[] {
+  public async getImageFiles() {
     return this.whoTask.samples.map((sample) =>
       createFileFromBase64(sample?.title, sample?.data),
     );
   }
 
-  public getAnnotationFiles(annotationId: string): FileWithMetadata[] | null {
+  public async getAnnotationFiles(annotationId: string) {
     const title = this.whoTask?.samples[0]?.title;
     const whoAnnotation = this.whoTask?.annotations.find(
       (annotation) => annotation.annotationUUID === annotationId,

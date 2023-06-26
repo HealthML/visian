@@ -3,6 +3,11 @@ export const isFromWHO = () => {
   return Boolean(params.get("origin") === "who" && params.get("taskId"));
 };
 
+export const isInReviewMode = () => {
+  const params = new URLSearchParams(window.location.search);
+  return Boolean(params.get("review")) || isFromWHO();
+};
+
 export const isUsingLocalhost = () => window.location.hostname === "localhost";
 
 export const getWHOTaskIdFromUrl = () =>

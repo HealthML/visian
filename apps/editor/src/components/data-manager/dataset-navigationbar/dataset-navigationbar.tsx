@@ -19,6 +19,7 @@ export const DatasetNavigationbar = ({
   openJobCreationPopUp,
   openImageImportPopUp,
   deleteSelectedImages,
+  startReview,
 }: {
   isInSelectMode: boolean;
   allSelected: boolean;
@@ -28,6 +29,7 @@ export const DatasetNavigationbar = ({
   openJobCreationPopUp: () => void;
   openImageImportPopUp: () => void;
   deleteSelectedImages: () => void;
+  startReview: () => void;
 }) =>
   isInSelectMode ? (
     <>
@@ -40,6 +42,13 @@ export const DatasetNavigationbar = ({
         icon="export"
         tooltipTx="export-documents"
         tooltipPosition="top"
+      />
+      <StyledButton
+        isDisabled={!anySelected}
+        icon="export"
+        tooltipTx="start-review"
+        tooltipPosition="top"
+        onPointerDown={startReview}
       />
       <StyledButton
         isDisabled={!anySelected}

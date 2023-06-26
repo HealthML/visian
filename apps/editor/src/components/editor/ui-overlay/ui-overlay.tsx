@@ -6,7 +6,7 @@ import {
   Spacer,
   Text,
 } from "@visian/ui-shared";
-import { isFromWHO } from "@visian/utils";
+import { isFromWHO, isInReviewMode } from "@visian/utils";
 import { observer } from "mobx-react-lite";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
@@ -350,7 +350,7 @@ export const UIOverlay = observer<UIOverlayProps>(
               </RightBar>
             </ColumnRight>
 
-            {isFromWHO() && <AIBar />}
+            {isInReviewMode() && <AIBar />}
 
             <SettingsPopUp
               isOpen={isSettingsPopUpOpen}

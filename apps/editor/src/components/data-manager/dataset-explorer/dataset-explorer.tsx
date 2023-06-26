@@ -1,8 +1,10 @@
 import { Modal, Notification, Text, useTranslation } from "@visian/ui-shared";
 import { useCallback, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
+import { MiaReviewStrategy } from "../../../models/review-strategy";
 import {
   useDeleteAnnotationsForImageMutation,
   useDeleteImagesMutation,
@@ -185,6 +187,20 @@ export const DatasetExplorer = ({
     [selectedImages, translate, imageTobBeDeleted],
   );
 
+  const navigate = useNavigate();
+
+  const startReview = useCallback(async () => {
+    if (store) {
+      navigate("/editor?review=true");
+      store.setProgress({ labelTx: "importing", showSplash: true });
+      store.setReviewStrategy(
+        await MiaReviewStrategy.fromImageIds(store, [...selectedImages]),
+      );
+      await store.reviewStrategy?.loadTask();
+      store.setProgress();
+    }
+  }, [navigate, selectedImages, store]);
+
   return (
     <StyledModal
       hideHeaderDivider={false}
@@ -200,6 +216,7 @@ export const DatasetExplorer = ({
           openJobCreationPopUp={openJobCreationPopUp}
           openImageImportPopUp={openImageImportPopUp}
           deleteSelectedImages={openDeleteImagesConfirmationPopUp}
+          startReview={startReview}
         />
       }
     >

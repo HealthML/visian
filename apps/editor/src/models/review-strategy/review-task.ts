@@ -12,8 +12,8 @@ export interface ReviewTask {
   get title(): string;
   get description(): string;
   get annotationIds(): string[];
-  getImageFiles(): File[];
-  getAnnotationFiles(annotationId: string): FileWithMetadata[] | null;
+  getImageFiles(): Promise<File[]>;
+  getAnnotationFiles(annotationId: string): Promise<FileWithMetadata[] | null>;
   createAnnotation(files: File[]): Promise<void>;
   updateAnnotation(annotationId: string, files: File[]): Promise<void>;
   save(): Promise<Response>;
