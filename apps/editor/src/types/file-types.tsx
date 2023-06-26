@@ -8,7 +8,7 @@ export interface FileWithMetadata extends File {
   metadata: FileMetadata;
 }
 
-export interface FileWithGroup extends File {
-  groupId: string;
-  metadata: FileMetadata;
+export interface FileWithFamily extends File {
+  familyId: string;
+  metadata?: FileMetadata;
 }

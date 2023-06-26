@@ -8,6 +8,7 @@ import {
   WHOTask,
   WHOTaskType,
 } from "@visian/utils";
+import { AxiosResponse } from "axios";
 
 import { FileWithMetadata } from "../../types";
 import { ReviewTask, TaskType } from "./review-task";
@@ -122,7 +123,7 @@ export class WHOReviewTask implements ReviewTask {
     );
   }
 
-  public async save(): Promise<Response> {
+  public async save(): Promise<AxiosResponse> {
     return putWHOTask(this.id, JSON.stringify(this.whoTask.toJSON()));
   }
 

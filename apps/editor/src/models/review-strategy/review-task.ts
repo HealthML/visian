@@ -1,3 +1,5 @@
+import { AxiosResponse } from "axios";
+
 import { FileWithMetadata } from "../../types";
 
 export enum TaskType {
@@ -11,10 +13,21 @@ export interface ReviewTask {
   get id(): string;
   get title(): string;
   get description(): string;
+
+  // All valid Annotation Ids for the task
   get annotationIds(): string[];
+
+  // Each task refers to one Scan, possibly composed of multiple image files
   getImageFiles(): Promise<File[]>;
+
+  // Each Annotation for a Task is possibly composed
   getAnnotationFiles(annotationId: string): Promise<FileWithMetadata[] | null>;
+  // Creates a new annotation for the task composed of multiple files
   createAnnotation(files: File[]): Promise<void>;
+
+  // Updates an existing annotation for the task by overwriting its files
   updateAnnotation(annotationId: string, files: File[]): Promise<void>;
-  save(): Promise<Response>;
+
+  // After calling save, we expect all changes made to the task to be saved to the backend
+  save(): Promise<AxiosResponse>;
 }

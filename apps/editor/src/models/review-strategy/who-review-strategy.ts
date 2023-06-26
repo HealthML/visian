@@ -1,4 +1,4 @@
-import { IImageLayer, ILayerGroup } from "@visian/ui-shared";
+import { IImageLayer, ILayerFamily } from "@visian/ui-shared";
 import {
   getWHOTask,
   getWHOTaskIdFromUrl,
@@ -13,17 +13,17 @@ import { WHOReviewTask } from "./who-review-task";
 
 export class WHOReviewStrategy extends ReviewStrategy {
   public async nextTask(): Promise<void> {
-    await this.saveTask();
+    this.store.setProgress({ labelTx: "saving", showSplash: true });
     try {
+      await this.saveTask();
       const response = await this.currentTask?.save();
 
       // TODO: return to WHO Home when response code is 204
       if (response) {
-        const newLocation = response.headers.get("location");
+        const newLocation = response.headers["location"];
         if (newLocation) {
           const urlElements = newLocation.split("/");
           const newTaskId = urlElements[urlElements.length - 1];
-
           if (newTaskId !== this.currentTask?.id) {
             this.store?.setIsDirty(false, true);
             setNewTaskIdForUrl(newTaskId);
@@ -39,19 +39,19 @@ export class WHOReviewStrategy extends ReviewStrategy {
         titleTx: "export-error",
         descriptionTx: "file-upload-error",
       });
+      this.store.editor.setActiveDocument();
     }
+    this.store.setProgress();
   }
 
   public async saveTask(): Promise<void> {
-    const groups = this.store.editor.activeDocument?.layers.filter(
-      (annotationLayer) => annotationLayer.kind === "group",
-    ) as ILayerGroup[];
-    if (!groups) return;
+    const families = this.store.editor.activeDocument?.layerFamilies;
+    if (!families) return;
 
     await Promise.all(
-      groups.map(async (groupLayer: ILayerGroup) => {
-        const annotationId = groupLayer.metaData?.id;
-        const annotationFiles = await this.getFilesForGroup(groupLayer);
+      families.map(async (family: ILayerFamily) => {
+        const annotationId = family.metaData?.id;
+        const annotationFiles = await this.getFilesForFamily(family);
         if (annotationFiles.length === 0) return;
         if (annotationId) {
           await this.currentTask?.updateAnnotation(
@@ -64,12 +64,12 @@ export class WHOReviewStrategy extends ReviewStrategy {
       }),
     );
 
-    const undefinedGroupLayers =
+    const orphanLayers =
       this.store.editor.activeDocument?.annotationLayers.filter(
-        (annotationLayer) => annotationLayer.parent === undefined,
+        (annotationLayer) => annotationLayer.family === undefined,
       );
-    if (!undefinedGroupLayers) return;
-    const files = await this.getFilesForLayers(undefinedGroupLayers);
+    if (!orphanLayers) return;
+    const files = await this.getFilesForLayers(orphanLayers);
     await this.currentTask?.createAnnotation(files);
   }
 
@@ -84,8 +84,8 @@ export class WHOReviewStrategy extends ReviewStrategy {
   }
 
   // Saving
-  private async getFilesForGroup(group: ILayerGroup): Promise<File[]> {
-    const annotationLayers = group.layers.filter(
+  private async getFilesForFamily(family: ILayerFamily): Promise<File[]> {
+    const annotationLayers = family.layers.filter(
       (layer) => layer.kind === "image" && layer.isAnnotation,
     ) as ImageLayer[];
 

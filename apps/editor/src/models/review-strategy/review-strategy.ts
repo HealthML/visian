@@ -67,15 +67,15 @@ export abstract class ReviewStrategy {
         );
         if (!annotationFiles) throw new Error("Annotation files not found");
 
-        const groupedFiles = this.store.editor.activeDocument?.createLayerGroup(
+        const familyFiles = this.store.editor.activeDocument?.createLayerFamily(
           annotationFiles,
           `Annotation ${idx + 1}`,
           { id: annotationId },
         );
-        if (!groupedFiles) throw new Error();
+        if (!familyFiles) throw new Error();
 
         await this.store?.editor.activeDocument?.importFiles(
-          groupedFiles,
+          familyFiles,
           undefined,
           true,
         );

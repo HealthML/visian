@@ -176,12 +176,12 @@ export const AIBar = observer(() => {
       <TaskContainer>
         <TaskLabel tx="Task" />
         <TaskName
-          tx={store?.reviewStrategy?.currentTask?.title || "Task Title"}
+          text={store?.reviewStrategy?.currentTask?.title || "Task Title"}
         />
       </TaskContainer>
       <ActionContainer>
         <ActionName
-          tx={
+          text={
             store?.reviewStrategy?.currentTask?.description ||
             "Task Description"
           }
