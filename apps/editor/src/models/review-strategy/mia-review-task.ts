@@ -39,43 +39,42 @@ export class MiaReviewTask implements ReviewTask {
     this.annotations = new Map(annotations.map((a) => [a.id, a]));
   }
 
-  // public static async fromDataset(datasetId: string)
-
   public async getImageFiles() {
+    const imageMetadata = this.image;
+    const image = await fetchImageFile(this.image.id);
+    image.metadata = imageMetadata;
     return [await fetchImageFile(this.image.id)];
   }
 
   public async getAnnotationFiles(annotationId: string) {
-    if (!this.annotations.has(annotationId)) {
+    const annotationMetadata = this.annotations.get(annotationId);
+    if (!annotationMetadata) {
       throw new Error(`Annotation ${annotationId} not in Task ${this.title}.`);
     }
-    return [await fetchAnnotationFile(annotationId)];
+    const annotation = await fetchAnnotationFile(annotationId);
+    annotation.metadata = annotationMetadata;
+    return [annotation];
   }
   public async createAnnotation(files: File[], dataUri?: string) {
     const file = files.length === 1 ? files[0] : await this.zipFiles(files);
-    // eslint-disable-next-line no-param-reassign
-    dataUri ??= this.getAritficialAnnotationDataUri(file);
 
     const newAnnotation = await postAnnotationFile(
       this.image.id,
-      dataUri,
+      dataUri ?? this.getAritficialAnnotationDataUri(file),
       file,
     );
     this.annotations.set(newAnnotation.id, newAnnotation);
   }
 
   public async updateAnnotation(annotationId: string, files: File[]) {
-    if (!this.annotations.has(annotationId)) {
+    const annotationMetadata = this.annotations.get(annotationId);
+    if (!annotationMetadata) {
       throw new Error(`Annotation ${annotationId} not in Task ${this.title}.`);
     }
 
     const file = files.length === 1 ? files[0] : await this.zipFiles(files);
 
-    const newAnnotation = await patchAnnotationFile(
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      this.annotations.get(annotationId)!,
-      file,
-    );
+    const newAnnotation = await patchAnnotationFile(annotationMetadata, file);
     this.annotations.set(newAnnotation.id, newAnnotation);
   }
 
