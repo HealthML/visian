@@ -99,10 +99,6 @@ export class ImageLayer
   public densityHistogram?: Histogram;
   public gradientHistogram?: Histogram;
 
-  public get hasChanges() {
-    return this.document.history.hasLayerChanged(this.id);
-  }
-
   /**
    * An array of n-hot arrays indicating empty slices in the direction of every
    * view type.
@@ -457,5 +453,9 @@ export class ImageLayer
 
   public copy() {
     return new ImageLayer(this.toJSON(), this.document);
+  }
+
+  public hasChanges() {
+    return this.document.history.hasLayerChanged(this.id);
   }
 }

@@ -2,12 +2,14 @@ import { IDocument, ILayer, ILayerFamily } from "@visian/ui-shared";
 import { action, makeObservable, observable } from "mobx";
 import { v4 as uuidv4 } from "uuid";
 
+import { FileMetadata } from "../../../types";
+import { ImageLayer } from "../layers";
+
 export class LayerFamily implements ILayerFamily {
   protected layerIds: string[] = [];
   public title = "";
   public id!: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public metaData?: { id: string; [key: string]: any };
+  public metaData?: FileMetadata;
 
   constructor(
     protected document: IDocument,
@@ -45,5 +47,11 @@ export class LayerFamily implements ILayerFamily {
     if (layer?.family === this) {
       layer.setFamily(undefined);
     }
+  }
+
+  public hasChanges() {
+    return this.layers.some(
+      (layer) => layer.kind === "image" && (layer as ImageLayer).hasChanges(),
+    );
   }
 }

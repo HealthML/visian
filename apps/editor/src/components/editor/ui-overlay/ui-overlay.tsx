@@ -6,7 +6,7 @@ import {
   Spacer,
   Text,
 } from "@visian/ui-shared";
-import { isFromWHO, isInReviewMode } from "@visian/utils";
+import { isFromMia, isFromWHO } from "@visian/utils";
 import { observer } from "mobx-react-lite";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
@@ -25,7 +25,6 @@ import {
   SmartBrush3DModal,
   ThresholdAnnotationModal,
 } from "../action-modal";
-import { AIBar } from "../ai-bar";
 import { AxesAndVoxel } from "../axes-and-voxel";
 import { ImageImportDropSheet } from "../import-image-drop-sheet";
 import { ImportPopUp } from "../import-popup";
@@ -33,6 +32,7 @@ import { Layers } from "../layers";
 import { MeasurementPopUp } from "../measurement-popup";
 import { Menu } from "../menu";
 import { ProgressPopUp } from "../progress-popup";
+import { MiaReviewBar, WhoReviewBar } from "../review-bar";
 import { SavePopUp } from "../save-popup";
 import { ServerPopUp } from "../server-popup";
 import { SettingsPopUp } from "../settings-popup";
@@ -349,8 +349,8 @@ export const UIOverlay = observer<UIOverlayProps>(
                 <SliceSlider showValueLabelOnChange={!isDraggedOver} />
               </RightBar>
             </ColumnRight>
-
-            {isInReviewMode() && <AIBar />}
+            {isFromWHO() && <WhoReviewBar />}
+            {isFromMia() && <MiaReviewBar openSavePopup={openSavePopUp} />}
 
             <SettingsPopUp
               isOpen={isSettingsPopUpOpen}
