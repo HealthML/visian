@@ -2,8 +2,7 @@ import {
   Button,
   DropDown,
   ILayer,
-  List,
-  ListItem,
+  LayerList,
   PopUp,
   Switch,
   Text,
@@ -39,18 +38,6 @@ const ExportPopUpContainer = styled(PopUp)`
 const SectionLabel = styled(Text)`
   font-size: 14px;
   margin-bottom: 8px;
-`;
-
-const LayersToSaveList = styled(List)`
-  width: 100%;
-  max-height: 300px;
-  overflow-y: auto;
-  user-select: none;
-  margin-bottom: 10px;
-`;
-
-const LayerToSaveItem = styled(ListItem)`
-  height: 30px;
 `;
 
 const StyledDropDown = styled(DropDown)`
@@ -118,18 +105,7 @@ export const ExportPopUp = observer<ExportPopUpProps>(({ isOpen, onClose }) => {
       shouldDismissOnOutsidePress
     >
       <SectionLabel tx="layers-to-export" />
-      <LayersToSaveList>
-        {layersToExport.map((layer) => (
-          <LayerToSaveItem
-            key={layer.id}
-            label={layer.title}
-            isLast
-            icon={{
-              color: layer.color || "text",
-            }}
-          />
-        ))}
-      </LayersToSaveList>
+      <LayerList layers={layersToExport} />
       <StyledSwitch
         options={[
           { labelTx: "export-layer-group", value: false },
