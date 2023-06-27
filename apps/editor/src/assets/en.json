@@ -410,5 +410,8 @@
   "verified": "verified",
 
   "data-uri-help-message": "The dataURI is not valid. It should have a format like 'folders/filename.extension' where a folder and the filename can consist of letters, digits, -, or _ and extension should be one of the following:",
-  "uri-file-type-mismatch": "URI does not match file type \"{{name}}\""
+  "uri-file-type-mismatch": "URI does not match file type \"{{name}}\"",
+
+  "switch-to-grid": "Switch to grid view",
+  "switch-to-list": "Switch to list view"
 }
