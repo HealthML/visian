@@ -1,10 +1,17 @@
-import { GridItem, OptionSelector, Text } from "@visian/ui-shared";
+import {
+  color,
+  GridItem,
+  OptionSelector,
+  radius,
+  Text,
+} from "@visian/ui-shared";
 import styled from "styled-components";
 
 import { IterableData } from "../../../../types";
 
 const StyledGridItem = styled(GridItem)`
   cursor: pointer;
+  border: 1px solid ${color("sheetBorder")};
 `;
 
 const OptionSelectorWrapper = styled.div`
@@ -18,7 +25,7 @@ const StyledText = styled(Text)`
 `;
 
 const ImageContainer = styled.div`
-  border-radius: 5% 5% 0 0;
+  border-radius: ${radius("default")} ${radius("default")} 0 0;
   overflow: hidden;
   max-height: 75%;
 `;

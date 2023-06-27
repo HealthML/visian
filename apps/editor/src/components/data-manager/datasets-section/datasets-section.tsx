@@ -12,11 +12,7 @@ import { Dataset, Project } from "../../../types";
 import { ConfirmationPopup } from "../confirmation-popup";
 import { DatasetCreationPopup } from "../dataset-creation-popup";
 import { EditPopup } from "../edit-popup";
-import {
-  PaddedPageSectionIconButton,
-  PageSection,
-  SectionSheet,
-} from "../page-section";
+import { PaddedPageSectionIconButton, PageSection } from "../page-section";
 import useLocalStorageToggle from "../util/use-local-storage";
 import { GridView } from "../views/grid-view";
 import { ListView } from "../views/list-view";
@@ -143,25 +139,23 @@ export const DatasetsSection = ({ project }: { project: Project }) => {
         </Container>
       }
     >
-      <SectionSheet>
-        {datasets &&
-          (isGridView ? (
-            <GridView
-              data={datasets}
-              imgSrc="../../assets/images/BraTS_Prev.png"
-              onDelete={deleteDataset}
-              onClick={openDataset}
-              onEdit={editDataset}
-            />
-          ) : (
-            <ListView
-              data={datasets}
-              onDelete={deleteDataset}
-              onClick={openDataset}
-              onEdit={editDataset}
-            />
-          ))}
-      </SectionSheet>
+      {datasets &&
+        (isGridView ? (
+          <GridView
+            data={datasets}
+            imgSrc="../../assets/images/BraTS_Prev.png"
+            onDelete={deleteDataset}
+            onClick={openDataset}
+            onEdit={editDataset}
+          />
+        ) : (
+          <ListView
+            data={datasets}
+            onDelete={deleteDataset}
+            onClick={openDataset}
+            onEdit={editDataset}
+          />
+        ))}
       <ConfirmationPopup
         isOpen={isDeleteDatasetConfirmationPopUpOpen}
         onClose={closeDeleteDatasetConfirmationPopUp}

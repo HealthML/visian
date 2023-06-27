@@ -1,4 +1,4 @@
-import { Screen, Sheet, space, useTranslation } from "@visian/ui-shared";
+import { Screen, useTranslation } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
 import React, { useCallback, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -23,11 +23,6 @@ import {
   useUpdateProjectsMutation,
 } from "../queries";
 import { Project } from "../types";
-
-const StyledSheet = styled(Sheet)`
-  padding: ${space("listPadding")};
-  box-sizing: border-box;
-`;
 
 const Container = styled.div`
   display: flex;
@@ -155,24 +150,22 @@ export const ProjectsScreen: React.FC = observer(() => {
             </Container>
           }
         >
-          <StyledSheet>
-            {projects &&
-              (isGridView ? (
-                <GridView
-                  data={projects}
-                  onDelete={deleteProject}
-                  onClick={openProject}
-                  onEdit={editProject}
-                />
-              ) : (
-                <ListView
-                  data={projects}
-                  onDelete={deleteProject}
-                  onClick={openProject}
-                  onEdit={editProject}
-                />
-              ))}
-          </StyledSheet>
+          {projects &&
+            (isGridView ? (
+              <GridView
+                data={projects}
+                onDelete={deleteProject}
+                onClick={openProject}
+                onEdit={editProject}
+              />
+            ) : (
+              <ListView
+                data={projects}
+                onDelete={deleteProject}
+                onClick={openProject}
+                onEdit={editProject}
+              />
+            ))}
           <ConfirmationPopup
             isOpen={isDeleteProjectConfirmationPopUpOpen}
             onClose={closeDeleteProjectConfirmationPopUp}

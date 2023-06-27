@@ -9,7 +9,7 @@ const StyledGrid = styled(Grid)`
   width: 100%;
   overflow-y: auto;
   user-select: none;
-  gap: ${space("pageSectionMarginSmall")};
+  gap: ${space("pageSectionMargin")};
 `;
 
 export const GridView = <T extends IterableData>({

@@ -19,13 +19,14 @@ export const Grid = styled.div`
 `;
 
 const GridItemContainer = styled.div`
+  ${sheetMixin}
+
   display: flex;
   flex-direction: column;
   height: 230px;
   background-color: ${color("sheet")};
-  border-radius: 5%;
+  border-radius: ${radius("default")};
   cursor: pointer;
-  margin: 10px;
 `;
 
 const GridItemInner = styled.div<

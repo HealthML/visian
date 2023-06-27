@@ -2,6 +2,7 @@ import { List, stopPropagation } from "@visian/ui-shared";
 import styled from "styled-components";
 
 import { IterableData } from "../../../../types";
+import { SectionSheet } from "../../page-section";
 import { ListViewItem } from "./list-view-item";
 import { ListViewProps } from "./list-view.props";
 
@@ -17,18 +18,20 @@ export const ListView = <T extends IterableData>({
   onClick,
   onEdit,
 }: ListViewProps<T>) => (
-  <StyledList onWheel={stopPropagation}>
-    {data.map((item, index) => (
-      <ListViewItem
-        item={item}
-        isLast={index === data.length - 1}
-        key={item.id}
-        onDelete={() => onDelete(item)}
-        onClick={() => {
-          onClick(item);
-        }}
-        onEdit={() => onEdit(item)}
-      />
-    ))}
-  </StyledList>
+  <SectionSheet>
+    <StyledList onWheel={stopPropagation}>
+      {data.map((item, index) => (
+        <ListViewItem
+          item={item}
+          isLast={index === data.length - 1}
+          key={item.id}
+          onDelete={() => onDelete(item)}
+          onClick={() => {
+            onClick(item);
+          }}
+          onEdit={() => onEdit(item)}
+        />
+      ))}
+    </StyledList>
+  </SectionSheet>
 );
