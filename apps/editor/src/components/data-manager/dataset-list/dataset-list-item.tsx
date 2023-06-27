@@ -15,7 +15,6 @@ import { Dataset } from "../../../types";
 import { DatasetEditPopup } from "../dataset-edit-popup";
 
 const StyledListItem = styled(ListItem)`
-  width: 21vw;
   height: 14vw;
   background-color: ${color("sheet")};
   border-radius: 15px;
@@ -38,10 +37,10 @@ const ImageContainer = styled.div`
   cursor: pointer;
 `;
 
-const ImagePreview = styled.img`
+const ImagePreview = styled.div`
   border-radius: inherit;
-  max-width: 100%;
-  height: auto;
+  height: 44vw;
+  background-color: ${color("sheet")};
 `;
 
 const DatasetInfo = styled.div`
@@ -63,7 +62,7 @@ export const DatasetListItem = ({
   deleteDataset,
 }: {
   dataset: Dataset;
-  deleteDataset: () => void;
+  deleteDataset: (dataset: Dataset) => void;
 }) => {
   const navigate = useNavigate();
 
@@ -83,15 +82,16 @@ export const DatasetListItem = ({
   );
 
   const updateDataset = useUpdateDatasetsMutation();
+  const deleteDatasetFn = useCallback(
+    () => deleteDataset(dataset),
+    [deleteDataset, dataset],
+  );
 
   return (
     <StyledListItem innerHeight="auto" isLast>
       <DatasetWrapper>
         <ImageContainer onClick={openDataset}>
-          <ImagePreview
-            src="../../assets/images/walnut.png"
-            alt="Scan Preview"
-          />
+          <ImagePreview />
         </ImageContainer>
         <DatasetInfo>
           <StyledText onClick={openDataset}>{dataset.name}</StyledText>
@@ -102,7 +102,7 @@ export const DatasetListItem = ({
                 labelTx: "delete",
                 icon: "trash",
                 iconSize: 30,
-                onSelected: deleteDataset,
+                onSelected: deleteDatasetFn,
               },
               {
                 value: "edit",

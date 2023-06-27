@@ -1,6 +1,6 @@
 import React from "react";
 
-import { Subtitle, Text, Title } from "./text";
+import { Subtitle, Text, Title, TitleLabel } from "./text";
 import { TextProps } from "./text.props";
 
 export default {
@@ -28,6 +28,11 @@ subtitle.args = {
 export const title = (args: TextProps) => <Title {...args} />;
 title.args = {
   text: "This is a Title",
+};
+
+export const titleLabel = (args: TextProps) => <TitleLabel {...args} />;
+titleLabel.args = {
+  text: "This is a label for a Title",
 };
 
 export const i18n = (args: TextProps) => <Text {...args} />;

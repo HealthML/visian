@@ -938,7 +938,7 @@ export class Document
     const layer = this.getLayer(layerId);
     const metaData = this.getMetaDataFromFile(file);
     if (layer && metaData) {
-      layer.metaData = metaData;
+      layer.metadata = metaData;
     }
   }
 

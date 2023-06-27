@@ -22,6 +22,7 @@ export interface ReviewTask {
 
   // Each Annotation for a Task is possibly composed
   getAnnotationFiles(annotationId: string): Promise<FileWithMetadata[] | null>;
+
   // Creates a new annotation for the task composed of multiple files
   createAnnotation(files: File[]): Promise<void>;
 
