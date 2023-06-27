@@ -108,6 +108,7 @@ const Bar = ({
 export const Progress: React.FC<ProgressProps> = ({
   total,
   totalLabel,
+  totalLabelTx,
   bars,
 }) => {
   const [isHovered, setIsHovered] = useState(false);
@@ -136,6 +137,7 @@ export const Progress: React.FC<ProgressProps> = ({
         ))}
       <ProgressTooltip
         totalLabel={totalLabel}
+        totalLabelTx={totalLabelTx}
         total={total}
         bars={bars}
         anchor={containerRef.current}

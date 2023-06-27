@@ -48,7 +48,7 @@ export const ProgressTooltip: React.FC<
     isShown: boolean;
     anchor: HTMLElement | null;
   } & ProgressProps
-> = ({ total, totalLabel, bars, isShown, anchor }) => {
+> = ({ total, totalLabel, totalLabelTx, bars, isShown, anchor }) => {
   const modalRootRef = useModalRoot();
 
   const tooltipStyle = useTooltipPosition({
@@ -64,7 +64,7 @@ export const ProgressTooltip: React.FC<
       <TooltipContainer style={tooltipStyle}>
         {bars?.map((bar) => (
           <TooltipLabel>
-            <Text>{bar.label}</Text>
+            <Text tx={bar.labelTx} text={bar.label} />
             <TooltipLabelValue>
               <Dot dotColor={bar.color} />
               <Text>{bar.value}</Text>
@@ -73,7 +73,7 @@ export const ProgressTooltip: React.FC<
         ))}
         <TooltipDivider />
         <TooltipLabel>
-          <Text>{totalLabel}</Text>
+          <Text tx={totalLabelTx} text={totalLabel} />
           <TooltipLabelValue>
             <Text>{total}</Text>
           </TooltipLabelValue>
