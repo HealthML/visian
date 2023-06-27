@@ -208,6 +208,7 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
         annotationFile,
       );
       const annotationMeta = activeLayer?.family?.metaData as Annotation;
+      store?.setProgress();
       if (!annotationMeta) {
         createFamilyForNewAnnotation(activeLayer, responseData);
       } else {
@@ -224,7 +225,6 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
         titleTx: "saving-error",
         descriptionTx: description,
       });
-    } finally {
       store?.setProgress();
     }
   };
