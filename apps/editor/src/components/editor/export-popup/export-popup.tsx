@@ -66,14 +66,6 @@ export const ExportPopUp = observer<ExportPopUpProps>(({ isOpen, onClose }) => {
   const [layersToExport, setLayersToExport] = useState<ILayer[]>([]);
 
   useEffect(() => {
-    setLayersToExport(
-      store?.editor?.activeDocument?.activeLayer
-        ?.getFamilyLayersOf()
-        .filter((layer) => layer.isAnnotation) ?? [],
-    );
-  }, [store?.editor?.activeDocument?.activeLayer]);
-
-  useEffect(() => {
     if (shouldExportAllLayers) {
       setLayersToExport(
         store?.editor?.activeDocument?.layers?.filter(
@@ -87,7 +79,8 @@ export const ExportPopUp = observer<ExportPopUpProps>(({ isOpen, onClose }) => {
           .filter((layer) => layer.isAnnotation) ?? [],
       );
     }
-  }, [store, shouldExportAllLayers]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, shouldExportAllLayers]);
 
   const fileExtensions = [
     { value: ".nii.gz", label: ".nii.gz" },
