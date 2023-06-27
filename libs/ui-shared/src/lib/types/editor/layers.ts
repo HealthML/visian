@@ -95,7 +95,7 @@ export interface ILayer {
 
   setFamily(id: string | undefined): void;
 
-  getFamilyLayersOf(): ILayer[];
+  getFamilyLayers(): ILayer[];
 
   setIsAnnotation(value?: boolean): void;
 

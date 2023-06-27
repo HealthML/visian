@@ -62,7 +62,7 @@ export const ExportPopUp = observer<ExportPopUpProps>(({ isOpen, onClose }) => {
     } else {
       setLayersToExport(
         store?.editor?.activeDocument?.activeLayer
-          ?.getFamilyLayersOf()
+          ?.getFamilyLayers()
           .filter((layer) => layer.isAnnotation) ?? [],
       );
     }

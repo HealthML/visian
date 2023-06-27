@@ -100,7 +100,7 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
         layerFamily.title = annotation.dataUri;
         layerFamily.metaData = annotation;
       }
-      const familyLayers = layer.getFamilyLayersOf();
+      const familyLayers = layer.getFamilyLayers();
       familyLayers.forEach((l) => layerFamily.addLayer(l.id));
       return layerFamily;
     }
@@ -111,7 +111,7 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
     asZip: boolean,
   ): Promise<File | undefined> => {
     if (layer?.isAnnotation) {
-      const layersToSave = layer.getFamilyLayersOf();
+      const layersToSave = layer.getFamilyLayers();
       const file = await store?.editor?.activeDocument?.createFileFromLayers(
         layersToSave,
         asZip,
@@ -290,7 +290,7 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
     >
       <SectionLabel tx="layers-to-save" />
       <LayerList
-        layers={store?.editor.activeDocument?.activeLayer?.getFamilyLayersOf()}
+        layers={store?.editor.activeDocument?.activeLayer?.getFamilyLayers()}
       />
       {canBeOverwritten() && (
         <>
