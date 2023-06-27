@@ -48,6 +48,7 @@ export interface DropDownProps<T = any>
 
   size?: "small" | "medium";
   borderRadius?: "default" | "round";
+  isDisableMixin?: boolean;
 
   defaultValue?: T;
   value?: T;

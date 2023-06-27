@@ -75,8 +75,6 @@ const LayerToSaveItem = styled(ListItem)`
 const StyledDropDown = styled(DropDown)`
   margin: 0px 10px 0px 0px;
   width: 200px;
-  backdrop-filter: none;
-  background: none;
 `;
 
 export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
@@ -349,6 +347,7 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
           onChange={(value) => setSelectedExtension(value)}
           size="medium"
           borderRadius="default"
+          isDisableMixin
         />
         <SaveButton
           tx="save-as"

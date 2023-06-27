@@ -1,7 +1,7 @@
 import React, { useCallback, useState } from "react";
-import styled from "styled-components";
+import styled, { css } from "styled-components";
 
-import { radius } from "../../theme";
+import { color, radius } from "../../theme";
 import { FlexRow } from "../box";
 import { InfoText } from "../info-text";
 import { sheetMixin } from "../sheet";
@@ -17,8 +17,14 @@ import { DropDownProps } from "./drop-down.props";
 const Selector = styled(Option)<{
   size?: "small" | "medium";
   borderRadius?: "default" | "round";
+  isDisableMixin?: boolean;
 }>`
-  ${sheetMixin}
+  ${(props) =>
+    props.isDisableMixin
+      ? css`
+          border: 1px solid ${color("sheetBorder")};
+        `
+      : sheetMixin}
   border-radius: ${(props) =>
     props.borderRadius === "default"
       ? radius("default")
@@ -52,6 +58,7 @@ export const DropDown: React.FC<DropDownProps> = ({
   infoBaseZIndex,
   size,
   borderRadius,
+  isDisableMixin,
   ...rest
 }) => {
   const actualValue =
@@ -105,6 +112,7 @@ export const DropDown: React.FC<DropDownProps> = ({
         onPointerDown={showOptions ? undefined : openOptions}
         size={size}
         borderRadius={borderRadius}
+        isDisableMixin={isDisableMixin}
       >
         {activeOption && (
           <OptionText

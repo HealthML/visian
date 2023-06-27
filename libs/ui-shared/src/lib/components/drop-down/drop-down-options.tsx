@@ -34,14 +34,14 @@ export const Option = styled.div<{
       border-radius: ${props.borderRadius === "default"
         ? radius("default")
         : props.size === "medium"
-        ? "20px"
-        : "12px"};
-      margin: -1px -1px;
+        ? "19px"
+        : "11px"};
+      margin: 1px 1px;
     `}
 `;
 
 const ExpandedSelector = styled(Option)`
-  margin: -1px -1px 6px -1px;
+  margin: 1px 1px 6px 1px;
 `;
 
 export const OptionText = styled(Text)<{ size?: "small" | "medium" }>`
@@ -124,7 +124,11 @@ export const DropDownOptions: React.FC<DropDownOptionsProps> = ({
         size={size}
         borderRadius={borderRadius}
       >
-        <ExpandedSelector onPointerDown={onDismiss} size={size}>
+        <ExpandedSelector
+          onPointerDown={onDismiss}
+          size={size}
+          borderRadius={borderRadius}
+        >
           {activeOption && (
             <OptionText
               tx={activeOption.labelTx}
