@@ -44,6 +44,7 @@ export { ReactComponent as navigationTool } from "./navigation-tool.svg";
 export { ReactComponent as outline } from "./outline.svg";
 export { ReactComponent as outlineEraser } from "./outline-eraser.svg";
 export { ReactComponent as pixelBrush } from "./pixel-brush.svg";
+export { ReactComponent as play } from "./play.svg";
 export { ReactComponent as planeTool } from "./plane.svg";
 export { ReactComponent as plus } from "./plus.svg";
 export { ReactComponent as plusMinus } from "./plus-minus.svg";

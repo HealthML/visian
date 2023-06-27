@@ -14,6 +14,7 @@ export * from "./modal";
 export * from "./notification";
 export * from "./params";
 export * from "./popup";
+export * from "./progress";
 export * from "./screen";
 export * from "./sheet";
 export * from "./slider";

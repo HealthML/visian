@@ -408,6 +408,13 @@
 
   "verified": "verifiziert",
 
+  "progress-total": "Alle Bilder",
+  "progress-verified": "Verifiziert",
+  "progress-annotated": "Annotiert",
+  "annotation-progress": "Fortschritt",
+  "annotated-verified-images": "Annotierte und verifizierte Bilder",
+  "review-annotations": "Review starten",
+
   "data-uri-help-message": "Die dataURI ist nicht gültig. Sie sollte das Format 'ordner/dateiname.erweiterung' haben, wobei ein Ordner und der Dateiname aus Buchstaben, Ziffern, -, oder _ bestehen kann und die Erweiterung eine der folgenden sein sollte:",
   "uri-file-type-mismatch": "Die URI entspricht nicht dem Dateityp \"{{name}}\""
 }
