@@ -14,7 +14,6 @@ import { action, makeObservable, observable } from "mobx";
 
 import { maxUndoRedoSteps } from "../../../constants";
 import * as commands from "./commands";
-import { ImageCommand, SliceCommand } from "./commands";
 
 export const commandMap: {
   [kind: string]: ValueType<typeof commands>;
@@ -24,7 +23,10 @@ Object.values(commands).forEach((command) => {
 });
 
 export interface HistorySnapshot {
-  undoRedoStack: LimitedStackSnapshot<IUndoRedoCommandSnapshot>;
+  undoRedoStacks: {
+    layerId: string;
+    undoRedoStack: LimitedStackSnapshot<IUndoRedoCommandSnapshot>;
+  }[];
 }
 
 export class History
@@ -32,9 +34,7 @@ export class History
 {
   public readonly excludeFromSnapshotTracking = ["document"];
 
-  protected undoRedoStack = new LimitedStack<IUndoRedoCommand>(
-    maxUndoRedoSteps,
-  );
+  protected undoRedoStacks = new Map<string, LimitedStack<IUndoRedoCommand>>();
 
   constructor(
     snapshot: Partial<HistorySnapshot> | undefined,
@@ -42,8 +42,8 @@ export class History
   ) {
     if (snapshot) this.applySnapshot(snapshot);
 
-    makeObservable<this, "undoRedoStack">(this, {
-      undoRedoStack: observable,
+    makeObservable<this, "undoRedoStacks">(this, {
+      undoRedoStacks: observable,
 
       undo: action,
       redo: action,
@@ -53,81 +53,109 @@ export class History
     });
   }
 
-  public get canUndo(): boolean {
-    return this.undoRedoStack.canNavigateBackward();
+  public canUndo(layerId: string) {
+    return this.undoRedoStacks.get(layerId)?.canNavigateBackward() ?? false;
   }
 
-  public get canRedo(): boolean {
-    return this.undoRedoStack.canNavigateForward();
+  public canRedo(layerId: string) {
+    return this.undoRedoStacks.get(layerId)?.canNavigateForward() ?? false;
   }
 
-  public undo = (): void => {
-    if (!this.canUndo) return;
+  public undo = (layerId: string) => {
+    if (!this.canUndo(layerId)) return;
 
     // As we can undo, we can be sure that there is at least the current item
     // in the stack.
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    this.undoRedoStack.getCurrent()!.undo();
-    this.undoRedoStack.navigateBackward();
+    this.undoRedoStacks.get(layerId)?.getCurrent()?.undo();
+    this.undoRedoStacks.get(layerId)?.navigateBackward();
   };
 
-  public redo = (): void => {
-    if (!this.canRedo) return;
+  public redo = (layerId: string) => {
+    if (!this.canRedo(layerId)) return;
 
     // As we can redo, we can be sure that we can navigate forward
     // in the stack.
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    this.undoRedoStack.navigateForward()!.redo();
+    this.undoRedoStacks.get(layerId)?.navigateForward()?.redo();
   };
 
-  public addCommand(command: IUndoRedoCommand): void {
-    this.undoRedoStack.push(command);
+  public addCommand(command: IUndoRedoCommand) {
+    const { layerId } = command;
+    if (!this.undoRedoStacks.has(layerId)) {
+      this.undoRedoStacks.set(
+        layerId,
+        new LimitedStack<IUndoRedoCommand>(maxUndoRedoSteps),
+      );
+    }
+    this.undoRedoStacks.get(layerId)?.push(command);
   }
 
-  public clear = (): void => {
-    this.undoRedoStack.clear();
+  public clear = (layerId?: string) => {
+    if (layerId) {
+      this.undoRedoStacks.delete(layerId);
+    } else {
+      this.undoRedoStacks = new Map<string, LimitedStack<IUndoRedoCommand>>();
+    }
   };
 
   // Serialization
   public toJSON(): HistorySnapshot {
-    const stackSnapshot = this.undoRedoStack.toJSON();
+    const stackSnapshot = [...this.undoRedoStacks.entries()].map(
+      ([layerId, stack]) => {
+        const jsonStack = stack.toJSON();
+        return {
+          layerId,
+          undoRedoStack: {
+            ...jsonStack,
+            buffer: jsonStack.buffer.map((command) => command.toJSON()),
+          },
+        };
+      },
+    );
 
     return {
-      undoRedoStack: {
-        ...stackSnapshot,
-        buffer: stackSnapshot.buffer.map((command) => command.toJSON()),
-      },
+      undoRedoStacks: stackSnapshot,
     };
   }
 
-  public applySnapshot(snapshot: Partial<HistorySnapshot>): Promise<void> {
-    if (snapshot.undoRedoStack) {
-      return this.undoRedoStack.applySnapshot({
-        ...snapshot.undoRedoStack,
-        buffer: snapshot.undoRedoStack.buffer
-          .map((commandSnapshot) => {
-            const Command = commandMap[commandSnapshot.kind];
-            if (!Command) return;
-            return new Command(
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              commandSnapshot as any,
-              this.document,
-            );
-          })
-          .filter((command) => Boolean(command)) as IUndoRedoCommand[],
-      });
+  public async applySnapshot(
+    snapshot: Partial<HistorySnapshot>,
+  ): Promise<void> {
+    if (!snapshot.undoRedoStacks) {
+      this.clear();
+      return;
     }
-
-    this.clear();
-    return Promise.resolve();
+    await Promise.all(
+      snapshot.undoRedoStacks.map(async (stackSnapshot) => {
+        if (!this.undoRedoStacks.has(stackSnapshot.layerId)) {
+          this.undoRedoStacks.set(
+            stackSnapshot.layerId,
+            new LimitedStack<IUndoRedoCommand>(maxUndoRedoSteps),
+          );
+        }
+        await this.undoRedoStacks.get(stackSnapshot.layerId)?.applySnapshot({
+          ...stackSnapshot.undoRedoStack,
+          buffer: stackSnapshot.undoRedoStack.buffer
+            .map((commandSnapshot) => {
+              const Command = commandMap[commandSnapshot.kind];
+              if (!Command) return;
+              return new Command(
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                commandSnapshot as any,
+                this.document,
+              );
+            })
+            .filter((command) => Boolean(command)) as IUndoRedoCommand[],
+        });
+      }),
+    );
   }
 
-  public hasLayerChanged(layerId: string): boolean {
-    return this.undoRedoStack.some((command) => {
-      if (command.kind === "image" || command.kind === "slice") {
-        return (command as SliceCommand | ImageCommand).layerId === layerId;
-      }
-      return false;
-    });
+  public hasChanges(layerId?: string): boolean {
+    if (!layerId) {
+      return [...this.undoRedoStacks.values()].some((stack) =>
+        stack.canNavigateBackward(),
+      );
+    }
+    return this.undoRedoStacks.get(layerId)?.canNavigateBackward() ?? false;
   }
 }

@@ -456,6 +456,6 @@ export class ImageLayer
   }
 
   public hasChanges() {
-    return this.document.history.hasLayerChanged(this.id);
+    return this.document.history.hasChanges(this.id);
   }
 }

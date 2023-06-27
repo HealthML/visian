@@ -1039,4 +1039,28 @@ export class Document
       "This is a noop. To load a document from storage, create a new instance",
     );
   }
+
+  public canUndo(): boolean {
+    return this.activeLayer?.id
+      ? this.history.canUndo(this.activeLayer.id)
+      : false;
+  }
+
+  public canRedo(): boolean {
+    return this.activeLayer?.id
+      ? this.history.canRedo(this.activeLayer.id)
+      : false;
+  }
+
+  public undo(): void {
+    if (this.activeLayer?.id) {
+      this.history.undo(this.activeLayer.id);
+    }
+  }
+
+  public redo(): void {
+    if (this.activeLayer?.id) {
+      this.history.redo(this.activeLayer.id);
+    }
+  }
 }

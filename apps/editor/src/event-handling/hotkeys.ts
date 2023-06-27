@@ -83,14 +83,14 @@ export const generalHotkeys: IHotkey[] = [
   // Undo/Redo
   {
     keys: "ctrl+z",
-    action: (store) => store.editor.activeDocument?.history.undo(),
+    action: (store) => store.editor.activeDocument?.undo(),
     labelTx: "undo",
     name: "undo",
     shortcutGuideSection: "undo-redo",
   },
   {
     keys: "ctrl+shift+z,ctrl+y",
-    action: (store) => store.editor.activeDocument?.history.redo(),
+    action: (store) => store.editor.activeDocument?.redo(),
     labelTx: "redo",
     name: "redo",
     shortcutGuideSection: "undo-redo",
