@@ -1,4 +1,4 @@
-import { GridItem, InvisibleButton, Text } from "@visian/ui-shared";
+import { GridItem, OptionSelector, Text } from "@visian/ui-shared";
 import styled from "styled-components";
 
 import { IterableData } from "../../../../types";
@@ -7,14 +7,10 @@ const StyledGridItem = styled(GridItem)`
   cursor: pointer;
 `;
 
-const IconButton = styled(InvisibleButton)`
-  width: 30px;
-`;
-
-const StyledIconButton = styled(IconButton)`
+const OptionSelectorWrapper = styled.div`
   position: absolute;
   top: 2%;
-  right: 2%;
+  right: 5%;
 `;
 
 const StyledText = styled(Text)`
@@ -54,42 +50,70 @@ export const GridViewItem = ({
   imgSrc,
   onDelete,
   onClick,
+  onEdit,
 }: {
   item: IterableData;
   imgSrc: string | undefined;
   onDelete: () => void;
   onClick: () => void;
+  onEdit: () => void;
 }) => (
-  <StyledGridItem innerHeight="auto" onClick={onClick}>
+  <StyledGridItem innerHeight="auto">
     <Wrapper>
       {imgSrc ? (
         <>
-          <ImageContainer>
+          <ImageContainer onClick={onClick}>
             <ImagePreview src={imgSrc} alt="Preview" />
           </ImageContainer>
           <Info>
-            <Text>{item.name}</Text>
-            <IconButton
-              icon="trash"
-              tooltipTx="delete"
-              onPointerDown={onDelete}
-              tooltipPosition="right"
+            <Text onClick={onClick}>{item.name}</Text>
+            <OptionSelector
+              options={[
+                {
+                  value: "delete",
+                  labelTx: "delete",
+                  icon: "trash",
+                  iconSize: 30,
+                  onSelected: onDelete,
+                },
+                {
+                  value: "edit",
+                  label: "Edit",
+                  icon: "pixelBrush",
+                  iconSize: 30,
+                  onSelected: onEdit,
+                },
+              ]}
+              pannelPosition="bottom"
             />
           </Info>
         </>
       ) : (
         <>
-          <StyledIconButton
-            icon="trash"
-            tooltipTx="delete"
-            onPointerDown={onDelete}
-            tooltipPosition="right"
-          />
-          <StyledText>{item.name}</StyledText>
+          <OptionSelectorWrapper>
+            <OptionSelector
+              options={[
+                {
+                  value: "delete",
+                  labelTx: "delete",
+                  icon: "trash",
+                  iconSize: 30,
+                  onSelected: onDelete,
+                },
+                {
+                  value: "edit",
+                  label: "Edit",
+                  icon: "pixelBrush",
+                  iconSize: 30,
+                  onSelected: onEdit,
+                },
+              ]}
+              pannelPosition="bottom"
+            />
+          </OptionSelectorWrapper>
+          <StyledText onClick={onClick}>{item.name}</StyledText>
         </>
       )}
     </Wrapper>
   </StyledGridItem>
 );
-
-export default GridViewItem;

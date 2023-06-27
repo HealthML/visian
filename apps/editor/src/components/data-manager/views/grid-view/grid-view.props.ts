@@ -8,4 +8,5 @@ export interface GridViewProps<T extends IterableData>
   imgSrc?: string;
   onClick: (item: T) => void;
   onDelete: (item: T) => void;
+  onEdit: (item: T) => void;
 }

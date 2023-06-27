@@ -17,6 +17,7 @@ export const GridView = <T extends IterableData>({
   imgSrc,
   onDelete,
   onClick,
+  onEdit,
 }: GridViewProps<T>) => (
   <StyledGrid onWheel={stopPropagation}>
     {data.map((item) => (
@@ -28,6 +29,7 @@ export const GridView = <T extends IterableData>({
         onClick={() => {
           onClick(item);
         }}
+        onEdit={() => onEdit(item)}
       />
     ))}
   </StyledGrid>

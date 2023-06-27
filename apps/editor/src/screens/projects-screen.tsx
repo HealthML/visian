@@ -1,37 +1,32 @@
 import { Screen, Sheet, space, useTranslation } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
 import React, { useCallback, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 
 import { ConfirmationPopup } from "../components/data-manager/confirmation-popup";
+import { EditPopup } from "../components/data-manager/edit-popup";
 import { MiaTitle } from "../components/data-manager/mia-title";
 import { Page } from "../components/data-manager/page";
 import {
-  PageSection,
-  PageSectionIconButton,
   PaddedPageSectionIconButton,
+  PageSection,
 } from "../components/data-manager/page-section";
 import { ProjectCreationPopup } from "../components/data-manager/project-creation-popup";
-import { ProjectList } from "../components/data-manager/projects-list/project-list";
+import useLocalStorageToggle from "../components/data-manager/util/use-local-storage";
+import { GridView } from "../components/data-manager/views/grid-view";
+import { ListView } from "../components/data-manager/views/list-view";
 import {
   useCreateProjectMutation,
   useDeleteProjectsMutation,
   useProjects,
+  useUpdateProjectsMutation,
 } from "../queries";
 import { Project } from "../types";
-import { useNavigate } from "react-router-dom";
-import useLocalStorageToggle from "../components/data-manager/util/use-local-storage";
-import { GridView } from "../components/data-manager/views/grid-view";
-import { ListView } from "../components/data-manager/views/list-view";
 
 const StyledSheet = styled(Sheet)`
   padding: ${space("listPadding")};
   box-sizing: border-box;
-`;
-
-const PlusIconButton = styled(PageSectionIconButton)`
-  padding: 0 8px;
-  height: auto;
 `;
 
 const Container = styled.div`
@@ -46,8 +41,10 @@ export const ProjectsScreen: React.FC = observer(() => {
   const { projects, projectsError, isErrorProjects, isLoadingProjects } =
     useProjects();
   const [projectToBeDeleted, setProjectToBeDeleted] = useState<Project>();
+  const [projectToBeUpdated, setProjectToBeUpdated] = useState<Project>();
   const { deleteProjects } = useDeleteProjectsMutation();
   const { createProject } = useCreateProjectMutation();
+  const updateProject = useUpdateProjectsMutation();
 
   // Delete Project Confirmation
   const [
@@ -88,6 +85,19 @@ export const ProjectsScreen: React.FC = observer(() => {
       navigate(`/projects/${project.id}`);
     },
     [navigate],
+  );
+
+  // Edit Project
+  const [isEditPopupOpen, setIsEditPopupOpen] = useState(false);
+  const openEditPopup = useCallback(() => setIsEditPopupOpen(true), []);
+  const closeEditPopup = useCallback(() => setIsEditPopupOpen(false), []);
+
+  const editProject = useCallback(
+    (project: Project) => {
+      setProjectToBeUpdated(project);
+      openEditPopup();
+    },
+    [setProjectToBeUpdated, openEditPopup],
   );
 
   const confirmDeleteProject = useCallback(() => {
@@ -131,16 +141,16 @@ export const ProjectsScreen: React.FC = observer(() => {
           actions={
             <Container>
               <PaddedPageSectionIconButton
-                icon="plus"
-                tooltipTx="create-project"
-                tooltipPosition="left"
-                onPointerDown={openCreateProjectPopup}
-              />
-              <PaddedPageSectionIconButton
                 icon={isGridView ? "list" : "grid"}
                 tooltipTx={isGridView ? "switch-to-list" : "switch-to-grid"}
                 tooltipPosition="right"
                 onPointerDown={toggleGridView}
+              />
+              <PaddedPageSectionIconButton
+                icon="plus"
+                tooltipTx="create-project"
+                tooltipPosition="left"
+                onPointerDown={openCreateProjectPopup}
               />
             </Container>
           }
@@ -152,12 +162,14 @@ export const ProjectsScreen: React.FC = observer(() => {
                   data={projects}
                   onDelete={deleteProject}
                   onClick={openProject}
+                  onEdit={editProject}
                 />
               ) : (
                 <ListView
                   data={projects}
                   onDelete={deleteProject}
                   onClick={openProject}
+                  onEdit={editProject}
                 />
               ))}
           </StyledSheet>
@@ -175,6 +187,16 @@ export const ProjectsScreen: React.FC = observer(() => {
             onClose={closeCreateProjectPopup}
             onConfirm={createProject}
           />
+          {projectToBeUpdated && (
+            <EditPopup
+              oldName={projectToBeUpdated.name}
+              isOpen={isEditPopupOpen}
+              onClose={closeEditPopup}
+              onConfirm={(newName) =>
+                updateProject.mutate({ ...projectToBeUpdated, name: newName })
+              }
+            />
+          )}
         </PageSection>
       </Page>
     </Screen>

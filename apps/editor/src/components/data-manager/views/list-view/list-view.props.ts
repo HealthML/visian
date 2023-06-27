@@ -7,4 +7,5 @@ export interface ListViewProps<T extends IterableData>
   data: T[];
   onClick: (item: T) => void;
   onDelete: (item: T) => void;
+  onEdit: (item: T) => void;
 }

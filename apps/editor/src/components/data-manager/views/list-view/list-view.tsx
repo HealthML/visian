@@ -15,6 +15,7 @@ export const ListView = <T extends IterableData>({
   data,
   onDelete,
   onClick,
+  onEdit,
 }: ListViewProps<T>) => (
   <StyledList onWheel={stopPropagation}>
     {data.map((item, index) => (
@@ -26,6 +27,7 @@ export const ListView = <T extends IterableData>({
         onClick={() => {
           onClick(item);
         }}
+        onEdit={() => onEdit(item)}
       />
     ))}
   </StyledList>

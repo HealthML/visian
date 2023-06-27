@@ -398,14 +398,11 @@
 
   "create": "Create",
   "create-project": "Create Project",
-  "project-name": "Project Name",
   "create-dataset": "Create Dataset",
-  "dataset-name": "Dataset Name",
 
   "edit": "Edit",
-  "edit-project": "Edit Project Name",
-  "edit-dataset": "Edit Dataset Name",
   "update": "Update",
+  "name": "Name",
 
   "verified": "verified",
 

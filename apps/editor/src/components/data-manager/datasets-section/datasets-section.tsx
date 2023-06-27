@@ -6,10 +6,12 @@ import styled from "styled-components";
 import useDatasetsBy, {
   useCreateDatasetMutation,
   useDeleteDatasetsForProjectMutation,
+  useUpdateDatasetsMutation,
 } from "../../../queries/use-datasets-by";
 import { Dataset, Project } from "../../../types";
 import { ConfirmationPopup } from "../confirmation-popup";
 import { DatasetCreationPopup } from "../dataset-creation-popup";
+import { EditPopup } from "../edit-popup";
 import {
   PaddedPageSectionIconButton,
   PageSection,
@@ -32,8 +34,10 @@ export const DatasetsSection = ({ project }: { project: Project }) => {
     project.id,
   );
   const [datasetTobBeDeleted, setDatasetTobBeDeleted] = useState<Dataset>();
+  const [datasetToBeUpdated, setDatasetToBeUpdated] = useState<Dataset>();
   const { deleteDatasets } = useDeleteDatasetsForProjectMutation();
   const { createDataset } = useCreateDatasetMutation();
+  const updateDataset = useUpdateDatasetsMutation();
 
   // Delete Dataset Confirmation
   const [
@@ -76,6 +80,19 @@ export const DatasetsSection = ({ project }: { project: Project }) => {
     [navigate],
   );
 
+  // Edit Dataset
+  const [isEditPopupOpen, setIsEditPopupOpen] = useState(false);
+  const openEditPopup = useCallback(() => setIsEditPopupOpen(true), []);
+  const closeEditPopup = useCallback(() => setIsEditPopupOpen(false), []);
+
+  const editDataset = useCallback(
+    (dataset: Dataset) => {
+      setDatasetToBeUpdated(dataset);
+      openEditPopup();
+    },
+    [setDatasetToBeUpdated, openEditPopup],
+  );
+
   const confirmDeleteDataset = useCallback(() => {
     if (datasetTobBeDeleted)
       deleteDatasets({
@@ -112,16 +129,16 @@ export const DatasetsSection = ({ project }: { project: Project }) => {
       actions={
         <Container>
           <PaddedPageSectionIconButton
-            icon="plus"
-            tooltipTx="create-dataset"
-            tooltipPosition="left"
-            onPointerDown={openCreateDatasetPopup}
-          />
-          <PaddedPageSectionIconButton
             icon={isGridView ? "list" : "grid"}
             tooltipTx={isGridView ? "switch-to-list" : "switch-to-grid"}
             tooltipPosition="right"
             onPointerDown={toggleGridView}
+          />
+          <PaddedPageSectionIconButton
+            icon="plus"
+            tooltipTx="create-dataset"
+            tooltipPosition="left"
+            onPointerDown={openCreateDatasetPopup}
           />
         </Container>
       }
@@ -134,12 +151,14 @@ export const DatasetsSection = ({ project }: { project: Project }) => {
               imgSrc="../../assets/images/BraTS_Prev.png"
               onDelete={deleteDataset}
               onClick={openDataset}
+              onEdit={editDataset}
             />
           ) : (
             <ListView
               data={datasets}
               onDelete={deleteDataset}
               onClick={openDataset}
+              onEdit={editDataset}
             />
           ))}
       </SectionSheet>
@@ -157,6 +176,16 @@ export const DatasetsSection = ({ project }: { project: Project }) => {
         onClose={closeCreateDatasetPopup}
         onConfirm={confirmCreateDataset}
       />
+      {datasetToBeUpdated && (
+        <EditPopup
+          oldName={datasetToBeUpdated.name}
+          isOpen={isEditPopupOpen}
+          onClose={closeEditPopup}
+          onConfirm={(newName) =>
+            updateDataset.mutate({ ...datasetToBeUpdated, name: newName })
+          }
+        />
+      )}
     </PageSection>
   );
 };
