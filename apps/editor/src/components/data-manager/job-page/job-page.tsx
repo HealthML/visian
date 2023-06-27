@@ -1,0 +1,282 @@
+import {
+  InvisibleButton,
+  ListItem,
+  Sheet,
+  space,
+  SubtleText,
+  Text,
+  useTranslation,
+} from "@visian/ui-shared";
+import { useCallback, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import styled from "styled-components";
+
+import {
+  useAnnotationsByJob,
+  useDeleteJobsForProjectMutation,
+  usePatchJobStatusMutation,
+} from "../../../queries";
+import useImagesByJob from "../../../queries/use-images-by-jobs";
+import { useJobProgress } from "../../../queries/use-job-progress";
+import { Image, Job } from "../../../types";
+import { AnnotationProgress } from "../annotation-progress";
+import { ConfirmationPopup } from "../confirmation-popup";
+import { JobLogPopup } from "../job-history/job-log-popup";
+import { JobStatusBadge } from "../job-history/job-status-badge/job-status-badge";
+import { PageRow } from "../page-row";
+import { PageSection } from "../page-section";
+import { PageTitle } from "../page-title";
+import { editorPath, getDisplayDate } from "../util";
+import { DetailsRow } from "./details-table";
+
+const StyledSheet = styled(Sheet)`
+  padding: ${space("listPadding")};
+  box-sizing: border-box;
+`;
+
+const DetailsSheet = styled(Sheet)`
+  padding: ${space("pageSectionMarginSmall")};
+  box-sizing: border-box;
+`;
+
+const Container = styled.div`
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+`;
+
+const ClickableListItem = styled(ListItem)`
+  width: 100%;
+  &:hover {
+    cursor: pointer;
+  }
+`;
+
+const StyledText = styled(Text)`
+  padding-right: 0.8em;
+`;
+
+const IconButton = styled(InvisibleButton)`
+  width: 30px;
+`;
+
+export const JobPage = ({ job }: { job: Job }) => {
+  const { progress, isLoadingProgress } = useJobProgress(job.id);
+
+  const { annotations, isErrorAnnotations } = useAnnotationsByJob(job.id);
+  const { images, imagesError, isErrorImages, isLoadingImages } =
+    useImagesByJob(job.id);
+
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+  const { deleteJobs } = useDeleteJobsForProjectMutation();
+  const { patchJobStatus } = usePatchJobStatusMutation();
+
+  // delete job confirmation popup
+  const [
+    isDeleteJobConfirmationPopUpOpen,
+    setIsDeleteJobConfirmationPopUpOpen,
+  ] = useState(false);
+  const openDeleteJobConfirmationPopUp = useCallback(() => {
+    setIsDeleteJobConfirmationPopUpOpen(true);
+  }, []);
+  const closeDeleteJobConfirmationPopUp = useCallback(() => {
+    setIsDeleteJobConfirmationPopUpOpen(false);
+  }, []);
+
+  // cancel job confirmation popup
+  const [
+    isCancelJobConfirmationPopUpOpen,
+    setIsCancelJobConfirmationPopUpOpen,
+  ] = useState(false);
+  const openCancelJobConfirmationPopUp = useCallback(() => {
+    setIsCancelJobConfirmationPopUpOpen(true);
+  }, []);
+  const closeCancelJobConfirmationPopUp = useCallback(() => {
+    setIsCancelJobConfirmationPopUpOpen(false);
+  }, []);
+
+  // job log popup
+  const [isJobLogPopUpOpen, setIsJobLogPopUpOpen] = useState(false);
+  const openJobLogPopUp = useCallback(() => setIsJobLogPopUpOpen(true), []);
+  const closeJobLogPopUp = useCallback(() => setIsJobLogPopUpOpen(false), []);
+
+  const imagesWithAnnotations = annotations?.map(
+    (annotation) => annotation.image,
+  );
+
+  const findAnnotationId = useCallback(
+    (imageId: string) => {
+      const imageAnnotation = annotations?.find(
+        (annotation) => annotation.image === imageId,
+      );
+      return imageAnnotation?.id;
+    },
+    [annotations],
+  );
+
+  const compareImages = useCallback(
+    (a: Image, b: Image) => {
+      if (findAnnotationId(a.id) && !findAnnotationId(b.id)) {
+        return -1;
+      }
+      if (!findAnnotationId(a.id) && findAnnotationId(b.id)) {
+        return 1;
+      }
+      return 0;
+    },
+    [findAnnotationId],
+  );
+
+  const confirmDeleteJob = useCallback(
+    () =>
+      deleteJobs({
+        projectId: job.project,
+        jobIds: [job.id],
+      }),
+    [deleteJobs, job],
+  );
+
+  const confirmCancelJob = useCallback(
+    () =>
+      patchJobStatus({
+        projectId: job.project,
+        jobId: job.id,
+        jobStatus: "canceled",
+      }),
+    [patchJobStatus, job],
+  );
+
+  let listInfoTx;
+  if (imagesError) listInfoTx = "images-loading-failed";
+  else if (images && images.length === 0) listInfoTx = "no-images-available";
+
+  let progressInfoTx;
+  if (progress?.totalImages === 0)
+    progressInfoTx = "annotation-progress-no-images";
+
+  const startedAt = job.startedAt
+    ? getDisplayDate(new Date(job.startedAt))
+    : "";
+  const finishedAt = job.finishedAt
+    ? getDisplayDate(new Date(job.finishedAt))
+    : "";
+
+  return (
+    <Container>
+      <PageTitle
+        title={t("job-title", { date: startedAt })}
+        labelTx="job"
+        backPath={`/projects/${job.project}`}
+      />
+      <PageRow
+        columns={[
+          {
+            width: 66,
+            element: (
+              <PageSection
+                titleTx="annotation-progress"
+                isLoading={isLoadingProgress}
+                infoTx={progressInfoTx}
+              >
+                {progress && <AnnotationProgress progress={progress} />}
+              </PageSection>
+            ),
+          },
+          {
+            width: 33,
+            element: (
+              <PageSection titleTx="job-details">
+                <DetailsSheet>
+                  <DetailsRow
+                    tx="job-status"
+                    content={
+                      <>
+                        <JobStatusBadge status={job.status} />
+                        {job.logFileUri && (
+                          <IconButton
+                            icon="logs"
+                            tooltipTx="open-job-log"
+                            onPointerDown={openJobLogPopUp}
+                            tooltipPosition="right"
+                          />
+                        )}
+                        {["queued", "running"].includes(job.status) ? (
+                          <IconButton
+                            icon="cancel"
+                            tooltipTx="cancel-job-title"
+                            onPointerDown={openCancelJobConfirmationPopUp}
+                            tooltipPosition="right"
+                          />
+                        ) : (
+                          <IconButton
+                            icon="trash"
+                            tooltipTx="delete-job-title"
+                            onPointerDown={openDeleteJobConfirmationPopUp}
+                            tooltipPosition="right"
+                          />
+                        )}
+                      </>
+                    }
+                  />
+                  <DetailsRow
+                    tx="job-model-name"
+                    value={`${job.modelName} ${job.modelVersion}`}
+                  />
+                  <DetailsRow tx="job-started" value={startedAt} />
+                  <DetailsRow tx="job-finished" value={finishedAt} />
+                </DetailsSheet>
+              </PageSection>
+            ),
+          },
+        ]}
+      />
+
+      <PageSection
+        titleTx="images"
+        isLoading={isLoadingImages}
+        infoTx={listInfoTx}
+        showActions={!imagesError}
+      >
+        {images && !isErrorImages && !isErrorAnnotations && (
+          <StyledSheet>
+            {images?.sort(compareImages).map((image: Image, index: number) => (
+              <ClickableListItem
+                onClick={() =>
+                  navigate(editorPath(image.id, findAnnotationId(image.id)))
+                }
+                isLast={index === images.length - 1}
+              >
+                <StyledText text={image.dataUri.split("/").pop()} />
+                {imagesWithAnnotations?.includes(image.id) && (
+                  <SubtleText tx="image-annotated" />
+                )}
+              </ClickableListItem>
+            ))}
+          </StyledSheet>
+        )}
+        <ConfirmationPopup
+          isOpen={isDeleteJobConfirmationPopUpOpen}
+          onClose={closeDeleteJobConfirmationPopUp}
+          message={t("delete-job-message", {
+            count: annotations?.length ?? "0",
+          })}
+          titleTx="delete-job-title"
+          onConfirm={confirmDeleteJob}
+        />
+        <ConfirmationPopup
+          isOpen={isCancelJobConfirmationPopUpOpen}
+          onClose={closeCancelJobConfirmationPopUp}
+          message="cancel-job-message"
+          titleTx="cancel-job-title"
+          onConfirm={confirmCancelJob}
+        />
+        <JobLogPopup
+          isOpen={isJobLogPopUpOpen}
+          onClose={closeJobLogPopUp}
+          job={job}
+        />
+      </PageSection>
+    </Container>
+  );
+};

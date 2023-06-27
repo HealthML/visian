@@ -6,12 +6,12 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { HeaderLabel, ListItemLabel, TableLayout } from "@visian/ui-shared";
-import React, { useCallback } from "react";
+import { useCallback, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 
 import { Job } from "../../../types";
 import { getDisplayDate } from "../util/display-date";
-import { JobDetailsPopUp } from "./job-details-popup/job-details-popup";
 import { JobStatusBadge } from "./job-status-badge/job-status-badge";
 
 const BadgeContainer = styled.div`
@@ -73,22 +73,14 @@ export const JobsTable = ({ jobs }: { jobs: Job[] }) => {
 
   const columnWidths = [20, 10, 25, 25, 20];
 
-  const [isPopupOpen, setPopUpOpen] = React.useState<boolean>(false);
-  const [selectedJob, setSelectedJob] = React.useState<Job | null>(null);
+  const navigate = useNavigate();
 
-  const openPopup = useCallback(() => {
-    setPopUpOpen(true);
-  }, []);
-  const closePopup = useCallback(() => {
-    setPopUpOpen(false);
-  }, []);
+  const handleOnClick = useCallback(
+    (job: Job) => navigate(`/jobs/${job.id}`),
+    [navigate],
+  );
 
-  const handleOnClick = (job: Job) => {
-    setSelectedJob(job);
-    openPopup();
-  };
-
-  const [sorting, setSorting] = React.useState<SortingState>([
+  const [sorting, setSorting] = useState<SortingState>([
     { id: "status", desc: false },
     { id: "finishedAt", desc: true },
     { id: "startedAt", desc: true },
@@ -106,19 +98,10 @@ export const JobsTable = ({ jobs }: { jobs: Job[] }) => {
     getSortedRowModel: getSortedRowModel(),
   });
   return (
-    <>
-      {selectedJob && (
-        <JobDetailsPopUp
-          job={selectedJob}
-          isOpen={isPopupOpen}
-          onClose={closePopup}
-        />
-      )}
-      <TableLayout
-        table={table}
-        columnWidths={columnWidths}
-        onRowClick={handleOnClick}
-      />
-    </>
+    <TableLayout
+      table={table}
+      columnWidths={columnWidths}
+      onRowClick={handleOnClick}
+    />
   );
 };
