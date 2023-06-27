@@ -48,12 +48,12 @@ export const AnnotationProgress = ({ progress }: { progress: Progress }) => (
         {
           color: "green",
           labelTx: "progress-verified",
-          value: progress.verifiedImages + 20,
+          value: progress.verifiedImages,
         },
         {
           color: "blueBorder",
           labelTx: "progress-annotated",
-          value: progress.annotatedImages + 100,
+          value: progress.annotatedImages,
         },
       ]}
     />

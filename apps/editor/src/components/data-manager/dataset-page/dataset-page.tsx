@@ -10,7 +10,10 @@ import {
 } from "../../../queries";
 import { useDatasetProgress } from "../../../queries/use-dataset-progress";
 import { Annotation, Dataset, Image } from "../../../types";
-import { AnnotationProgress } from "../annotation-progress";
+import {
+  AnnotationProgress,
+  FakeAnnotationProgress,
+} from "../annotation-progress";
 import { ConfirmationPopup } from "../confirmation-popup";
 import { DatasetImageList } from "../dataset-image-list";
 import { DatasetNavigationBar } from "../dataset-navigationbar";
@@ -196,6 +199,7 @@ export const DatasetPage = ({
       />
       <PageSection titleTx="annotation-progress" isLoading={isLoadingProgress}>
         {progress && <AnnotationProgress progress={progress} />}
+        {/* {progress && <FakeAnnotationProgress total={342} msTime={30 * 1000} />} */}
       </PageSection>
       <PageSection
         titleTx="images"
