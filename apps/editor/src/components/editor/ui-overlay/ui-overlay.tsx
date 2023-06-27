@@ -44,6 +44,7 @@ import { TopConsole } from "../top-console";
 import { UndoRedoButtons } from "../undo-redo-buttons";
 import { ViewSettings } from "../view-settings";
 import { UIOverlayProps } from "./ui-overlay.props";
+import { ExportPopUp } from "../export-popup";
 
 const Container = styled(AbsoluteCover)`
   align-items: stretch;
@@ -198,16 +199,14 @@ export const UIOverlay = observer<UIOverlayProps>(
       setIsSavePopUpOpen(false);
     }, []);
 
-    // Export Button
-    const exportZip = useCallback(() => {
-      store?.setProgress({ labelTx: "exporting" });
-      store?.editor.activeDocument
-        ?.exportZip(true)
-        .catch()
-        .then(() => {
-          store?.setProgress();
-        });
-    }, [store]);
+    // Export Pop Up Toggling
+    const [isExportPopUpOpen, setIsExportPopUpOpen] = useState(false);
+    const openExportPopUp = useCallback(() => {
+      setIsExportPopUpOpen(true);
+    }, []);
+    const closeExportPopUp = useCallback(() => {
+      setIsExportPopUpOpen(false);
+    }, []);
 
     const [searchParams] = useSearchParams();
     const loadImagesAndAnnotations = () => {
@@ -338,7 +337,7 @@ export const UIOverlay = observer<UIOverlayProps>(
                     onPointerDown={
                       store?.editor.activeDocument?.viewSettings.viewMode ===
                       "2D"
-                        ? exportZip
+                        ? openExportPopUp
                         : store?.editor.activeDocument?.viewport3D
                             .exportCanvasImage
                     }
@@ -376,6 +375,10 @@ export const UIOverlay = observer<UIOverlayProps>(
                 store?.editor.activeDocument?.measurementDisplayLayer,
               )}
               onClose={store?.editor.activeDocument?.setMeasurementDisplayLayer}
+            />
+            <ExportPopUp
+              isOpen={isExportPopUpOpen}
+              onClose={closeExportPopUp}
             />
             <SavePopUp isOpen={isSavePopUpOpen} onClose={closeSavePopUp} />
             {isDraggedOver && (

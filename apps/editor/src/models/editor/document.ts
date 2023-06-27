@@ -439,12 +439,12 @@ export class Document
   }
 
   // I/O
-  public exportZip = async (limitToAnnotations?: boolean) => {
+  // eslint-disable-next-line @typescript-eslint/no-shadow
+  public exportZip = async (layers: ILayer[], limitToAnnotations?: boolean) => {
     const zip = new Zip();
 
-    // TODO: Rework for group layers
     const files = await Promise.all(
-      this.layers
+      layers
         .filter((layer) => !limitToAnnotations || layer.isAnnotation)
         .map((layer) => layer.toFile()),
     );
@@ -495,6 +495,17 @@ export class Document
       `${title ?? this.title}.nii.gz`,
     );
     return file;
+  };
+
+  // eslint-disable-next-line @typescript-eslint/no-shadow
+  public exportSquashedNii = async (layers: ILayer[]) => {
+    const file: File | undefined = await this.createSquashedNii(layers);
+    if (file) {
+      const fileBlob = new Blob([file], { type: file.type });
+      FileSaver.saveAs(await fileBlob, `${this.title}.nii.gz`);
+    } else {
+      throw Error("export-error");
+    }
   };
 
   public createFileFromLayers = async (
