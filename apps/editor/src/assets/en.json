@@ -102,6 +102,7 @@
   "mark-not-annotation": "Mark as not Annotation",
   "export-layer": "Export Layer",
   "export-slice": "Export Current Slice",
+  "duplicate-layer": "Duplicate Layer",
   "rename-layer": "Rename Layer",
   "delete-layer": "Delete Layer",
   "delete-layer-confirmation": "Delete layer \"{{layer}}\"?",
@@ -304,14 +305,16 @@
 
   "images-loading": "Loading images...",
   "images-loading-failed": "The images could not be loaded.",
+  "images-loading-error": "Error on loading images:  {{statusText}} {{status}}",
   "no-images-available": "Currently no images are available.",
   "image-open-error": "Error on opening image",
   "image-annotated": "annotated",
 
+  "create-annotation-file-error": "Could not create annotation file.",
   "annotations-loading": "Loading annotations...",
   "annotations-loading-failed": "The annotations could not be loaded.",
   "annotation-open-error": "Error on opening annotation",
-  "annotation-saving": "Save active annotation layer",
+  "annotation-saving": "Save active annotation group",
   "annotation-saving-overrwite": "Overwrite existing annotation file",
   "annotation-saving-as": "Create new annotation file",
   "annotation-saving-error": "Error saving annotation layer",
@@ -354,6 +357,10 @@
   "image-import-duplicate-error-description": "Some images already existed and have been skipped. {{imported}} out of {{total}} images have been successfully imported.",
   "image-import-selected-is-duplicate": "Duplicate, will be skipped",
   "image-import-selected-has-invalid-type": "Invalid file type, will be skipped",
+  "computer-upload": "Upload from Computer",
+  "drop-files-or": "Drop files or",
+  "load-from-url": "Load from URL",
+  "connect-to-server": "Connect to Server",
 
   "open-editor": "Open editor",
   "close-editor": "Close editor",
@@ -364,6 +371,7 @@
   "save-as": "Save as",
   "saving": "Saving...",
   "saving-error": "Saving Error",
+  "layers-to-save": "Layers to save",
 
   "internal-server-error": "Internal Server Error",
 
@@ -372,17 +380,17 @@
   "options": "Options",
   "delete": "Delete",
   "delete-annotation-title": "Delete Annotation",
-  "delete-annotation-message": "Do you really want to delete the annotation \"_\"?",
+  "delete-annotation-message": "Do you really want to delete the annotation \"{{name}}\"?",
   "delete-images-title": "Delete Images",
-  "delete-images-message": "Do you really want to delete _ image(s) including its annotations?",
+  "delete-images-message": "Do you really want to delete {{count}} image(s) including its annotations?",
   "delete-image-title": "Delete Image",
-  "delete-image-message": "Do you really want to delete the image \"_\" including all its annotations?",
+  "delete-image-message": "Do you really want to delete the image \"{{name}}\" including all its annotations?",
   "delete-dataset-title": "Delete Dataset",
-  "delete-dataset-message": "Do you really want to delete the dataset \"_\" including all its images and annotations?",
+  "delete-dataset-message": "Do you really want to delete the dataset \"{{name}}\" including all its images and annotations?",
   "delete-project-title": "Delete Project",
-  "delete-project-message": "Do you really want to delete the project \"_\" including all its datasets, Images and annotations?",
+  "delete-project-message": "Do you really want to delete the project \"{{name}}\" including all its datasets, Images and annotations?",
   "delete-job-title": "Delete Job",
-  "delete-job-message": "Do you really want to delete the job including the _ generated annotation(s)?",
+  "delete-job-message": "Do you really want to delete the job including the {{count}} generated annotation(s)?",
   "cancel-job-title": "Cancel Job",
   "cancel-job-message": "Do you really want to cancel the job?",
   "open-job-log": "Open Job Log File",
@@ -401,5 +409,6 @@
 
   "verified": "verified",
 
-  "data_uri_help_message": "The dataURI is not valid. It should have a format like 'folders/filename.extension' where a folder and the filename can consist of letters, digits, -, or _ and extension should be one of the following:"
+  "data-uri-help-message": "The dataURI is not valid. It should have a format like 'folders/filename.extension' where a folder and the filename can consist of letters, digits, -, or _ and extension should be one of the following:",
+  "uri-file-type-mismatch": "URI does not match file type \"{{name}}\""
 }

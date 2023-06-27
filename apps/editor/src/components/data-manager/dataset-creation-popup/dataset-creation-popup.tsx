@@ -37,6 +37,15 @@ export const DatasetCreationPopup = observer<DatasetCreationPopupProps>(
       onClose?.();
     }, [onClose]);
 
+    const handleCreation = useCallback(() => {
+      if (name !== "") {
+        onConfirm?.({ name });
+      }
+      clearInputsAndClose();
+    }, [name, onConfirm, clearInputsAndClose]);
+
+    const updateName = useCallback((e) => setName(e.target.value), [setName]);
+
     return (
       <DatasetCreationPopupContainer
         titleTx="create-dataset"
@@ -46,7 +55,7 @@ export const DatasetCreationPopup = observer<DatasetCreationPopupProps>(
       >
         <TextInput
           value={name}
-          onChange={(e) => setName(e.target.value)}
+          onChange={updateName}
           placeholderTx="dataset-name"
         />
         <InlineRow>
@@ -54,15 +63,7 @@ export const DatasetCreationPopup = observer<DatasetCreationPopupProps>(
             labelTx="cancel"
             handlePress={clearInputsAndClose}
           />
-          <StyledTextButton
-            labelTx="create"
-            handlePress={() => {
-              if (name !== "") {
-                onConfirm?.({ name });
-              }
-              clearInputsAndClose();
-            }}
-          />
+          <StyledTextButton labelTx="create" handlePress={handleCreation} />
         </InlineRow>
       </DatasetCreationPopupContainer>
     );

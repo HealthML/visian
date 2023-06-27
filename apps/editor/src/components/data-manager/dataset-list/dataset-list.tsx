@@ -23,7 +23,7 @@ export const DatasetList = ({
       <DatasetListItem
         key={dataset.id}
         dataset={dataset}
-        deleteDataset={() => deleteDataset(dataset)}
+        deleteDataset={deleteDataset}
       />
     ))}
   </StyledDatasetList>

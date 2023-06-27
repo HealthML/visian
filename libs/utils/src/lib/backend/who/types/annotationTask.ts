@@ -1,20 +1,20 @@
-export interface AnnotationTaskSnapshot {
+export interface WHOAnnotationTaskSnapshot {
   annotationTaskUUID: string;
   kind: string;
   title: string;
   description: string;
 }
 
-export enum AnnotationTaskType {
+export enum WHOAnnotationTaskType {
   Classification = "classification",
   ObjectDetection = "object_detection",
   SemanticSegmentation = "semantic_segmentation",
   InstanceSegmentation = "instance_segmentation",
 }
 
-export class AnnotationTask {
+export class WHOAnnotationTask {
   public annotationTaskUUID: string;
-  public kind: AnnotationTaskType;
+  public kind: WHOAnnotationTaskType;
   public title: string;
   public description: string;
 
@@ -26,7 +26,7 @@ export class AnnotationTask {
     this.description = annotationTask.description;
   }
 
-  public toJSON(): AnnotationTaskSnapshot {
+  public toJSON(): WHOAnnotationTaskSnapshot {
     return {
       annotationTaskUUID: this.annotationTaskUUID,
       kind: this.kind,

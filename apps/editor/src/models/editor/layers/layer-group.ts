@@ -56,7 +56,6 @@ export class LayerGroup
       this.document.getLayer(idOrLayer)!.setParent();
       return;
     }
-
     this.layerIds = this.layerIds.filter((id) => id !== idOrLayer.id);
     idOrLayer.setParent();
   }

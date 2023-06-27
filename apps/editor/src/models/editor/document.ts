@@ -6,6 +6,7 @@ import {
   IEditor,
   IImageLayer,
   ILayer,
+  ILayerFamily,
   ISliceRenderer,
   IVolumeRenderer,
   MeasurementType,
@@ -39,11 +40,12 @@ import {
   generalTextures2d,
   generalTextures3d,
 } from "../../constants";
-import { FileWithMetadata } from "../../types";
+import { FileMetadata, FileWithFamily, FileWithMetadata } from "../../types";
 import { readTrackingLog, TrackingData } from "../tracking";
 import { StoreContext } from "../types";
 import { Clipboard } from "./clipboard";
 import { History, HistorySnapshot } from "./history";
+import { LayerFamily } from "./layer-families";
 import { ImageLayer, Layer, LayerSnapshot } from "./layers";
 import * as layers from "./layers";
 import { Markers } from "./markers";
@@ -98,6 +100,7 @@ export class Document
   protected measurementDisplayLayerId?: string;
   protected layerMap: { [key: string]: Layer };
   protected layerIds: string[];
+  public layerFamilies: ILayerFamily[] = [];
 
   public measurementType: MeasurementType = "volume";
 
@@ -197,6 +200,7 @@ export class Document
       toggleLayerMenu: action,
       setUseExclusiveSegmentations: action,
       applySnapshot: action,
+      getLayerFamily: action,
     });
 
     // This is split up to avoid errors from a tool that is being activated
@@ -294,6 +298,14 @@ export class Document
 
   public getLayer(id: string): ILayer | undefined {
     return id ? this.layerMap[id] : undefined;
+  }
+
+  public getLayerFamily(id: string): ILayerFamily | undefined {
+    return this.layerFamilies.find((family) => family.id === id);
+  }
+
+  public addLayerFamily(family: ILayerFamily): void {
+    this.layerFamilies.push(family);
   }
 
   public setActiveLayer = (idOrLayer?: string | ILayer): void => {
@@ -443,6 +455,28 @@ export class Document
     FileSaver.saveAs(await zip.toBlob(), `${this.title}.zip`);
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-shadow
+  public createZip = async (layers: ILayer[]): Promise<File> => {
+    const zip = new Zip();
+    const files = await Promise.all(layers.map((layer) => layer.toFile()));
+    files.forEach((file, index) => {
+      if (!file) return;
+      zip.setFile(`${`00${index}`.slice(-2)}_${file.name}`, file);
+    });
+
+    return new File([await zip.toBlob()], `${this.title}.zip`);
+  };
+
+  public createFileFromLayers = async (
+    // eslint-disable-next-line @typescript-eslint/no-shadow
+    layers: ILayer[],
+  ): Promise<File | undefined> => {
+    if (layers.length === 1) {
+      return layers[0].toFile();
+    }
+    return this.createZip(layers);
+  };
+
   public getFileForLayer = async (idOrLayer: string | ILayer) => {
     const layerId = typeof idOrLayer === "string" ? idOrLayer : idOrLayer.id;
     const layer = this.layerMap[layerId];
@@ -568,7 +602,15 @@ export class Document
       }
     } else if (filteredFiles.name.endsWith(".zip")) {
       const zip = await Zip.fromZipFile(filteredFiles);
-      await this.importFiles(await zip.getAllFiles(), filteredFiles.name);
+      const unzippedFiles = await zip.getAllFiles();
+      await this.importFiles(
+        this.createLayerFamily(
+          unzippedFiles,
+          filteredFiles.name,
+          this.getMetaDataFromFile(filteredFiles),
+        ),
+        filteredFiles.name,
+      );
       return;
     } else if (filteredFiles.name.endsWith(".json")) {
       await readTrackingLog(filteredFiles, this);
@@ -586,8 +628,18 @@ export class Document
       return;
     }
 
+    if (filteredFiles instanceof File) {
+      this.createLayerFamily(
+        [filteredFiles],
+        filteredFiles.name,
+        this.getMetaDataFromFile(filteredFiles),
+      );
+    } else {
+      this.createLayerFamily(filteredFiles, name ?? uuidv4());
+    }
     let createdLayerId = "";
-    const isFirstLayer = !this.layerIds.length;
+    const isFirstLayer =
+      !this.layerIds.length || !this.layers.some((l) => l.kind !== "group");
     const image = await readMedicalImage(filteredFiles);
     image.name =
       name ||
@@ -684,6 +736,10 @@ export class Document
               name: `${layerIndex}_${imageWithUnit.name}`,
               ...prototypeImage,
             });
+            if (files instanceof File) {
+              this.addLayerToFamily(createdLayerId, files);
+              this.addMetaDataToLayer(createdLayerId, files);
+            }
           }
         } else {
           this.setError({
@@ -717,7 +773,10 @@ export class Document
               { ...imageWithUnit, name: `${value}_${image.name}` },
               value,
             );
-            this.addFileMetaData(createdLayerId, files);
+            if (files instanceof File) {
+              this.addLayerToFamily(createdLayerId, files);
+              this.addMetaDataToLayer(createdLayerId, files);
+            }
           });
         }
       }
@@ -733,7 +792,10 @@ export class Document
       this.history.clear();
     }
 
-    this.addFileMetaData(createdLayerId, files);
+    if (files instanceof File) {
+      this.addLayerToFamily(createdLayerId, files);
+      this.addMetaDataToLayer(createdLayerId, files);
+    }
     return createdLayerId;
   }
 
@@ -862,12 +924,66 @@ export class Document
       ) as unknown as IImageLayer[];
   }
 
-  private addFileMetaData(createdLayerId: string, file: File | File[]) {
-    const layer = this.getLayer(createdLayerId);
-    if (layer && "metadata" in file) {
-      const fileWithMetaData = file as FileWithMetadata;
-      layer.metaData = fileWithMetaData.metadata;
+  /** Adds layer to group specified in file object */
+  private addLayerToFamily(layerId: string, file: File) {
+    const layer = this.getLayer(layerId);
+    const family = this.getLayerFamilyFromFile(file);
+    if (layer && family) {
+      family?.addLayer(layer.id);
     }
+  }
+
+  /** Adds meta data from file with metadata to layer */
+  private addMetaDataToLayer(layerId: string, file: File) {
+    const layer = this.getLayer(layerId);
+    const metaData = this.getMetaDataFromFile(file);
+    if (layer && metaData) {
+      layer.metadata = metaData;
+    }
+  }
+
+  /** Returns the group layer specified in the file object */
+  private getLayerFamilyFromFile(file: File): ILayerFamily | undefined {
+    if ("familyId" in file) {
+      const fileWithFamily = file as FileWithFamily;
+      return this.getLayerFamily(fileWithFamily.familyId);
+    }
+    return undefined;
+  }
+
+  /** Extracts metadata appended to a file object */
+  private getMetaDataFromFile(file: File): FileMetadata | undefined {
+    if ("metadata" in file) {
+      const fileWithMetaData = file as FileWithMetadata;
+      return fileWithMetaData.metadata;
+    }
+    return undefined;
+  }
+
+  /** Creates a LayerFamily object for a list of files and adds the group id to the files */
+  public createLayerFamily(
+    files: File[],
+    title?: string,
+    groupMetaData?: FileMetadata,
+  ): FileWithFamily[] {
+    if (files.every((f) => "familyId" in f)) {
+      return files as FileWithFamily[];
+    }
+    if (files.some((f) => "familyId" in f)) {
+      throw new Error(
+        "Cannot create a new group for file that already belongs to a group",
+      );
+    }
+    const layerFamily = new LayerFamily(this, title);
+    layerFamily.metaData = groupMetaData;
+
+    const filesWithGroup = files.map((f) => {
+      const fileWithGroup = f as FileWithFamily;
+      fileWithGroup.familyId = layerFamily.id;
+      return fileWithGroup;
+    });
+    this.addLayerFamily(layerFamily);
+    return filesWithGroup;
   }
 
   // Proxies

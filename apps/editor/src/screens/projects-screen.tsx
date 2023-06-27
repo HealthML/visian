@@ -1,6 +1,6 @@
 import { Screen, Sheet, space, useTranslation } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useState } from "react";
 import styled from "styled-components";
 
 import { ConfirmationPopup } from "../components/data-manager/confirmation-popup";
@@ -69,14 +69,12 @@ export const ProjectsScreen: React.FC = observer(() => {
     [setProjectToBeDeleted, openDeleteProjectConfirmationPopUp],
   );
 
-  const deleteProjectMessage = useMemo(
-    () =>
-      `${translate("delete-project-message")}`.replace(
-        "_",
-        projectToBeDeleted?.name ?? "",
-      ),
-    [projectToBeDeleted, translate],
-  );
+  const confirmDeleteProject = useCallback(() => {
+    if (projectToBeDeleted)
+      deleteProjects({
+        projectIds: [projectToBeDeleted.id],
+      });
+  }, [deleteProjects, projectToBeDeleted]);
 
   let projectsInfoTx;
   if (projectsError) projectsInfoTx = "projects-loading-failed";
@@ -117,19 +115,16 @@ export const ProjectsScreen: React.FC = observer(() => {
           <ConfirmationPopup
             isOpen={isDeleteProjectConfirmationPopUpOpen}
             onClose={closeDeleteProjectConfirmationPopUp}
-            message={deleteProjectMessage}
+            message={translate("delete-project-message", {
+              name: projectToBeDeleted?.name ?? "",
+            })}
             titleTx="delete-project-title"
-            onConfirm={() => {
-              if (projectToBeDeleted)
-                deleteProjects({
-                  projectIds: [projectToBeDeleted.id],
-                });
-            }}
+            onConfirm={confirmDeleteProject}
           />
           <ProjectCreationPopup
             isOpen={isCreateProjectPopupOpen}
             onClose={closeCreateProjectPopup}
-            onConfirm={(newProjectDto) => createProject(newProjectDto)}
+            onConfirm={createProject}
           />
         </PageSection>
       </Page>

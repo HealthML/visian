@@ -1,13 +1,14 @@
 import styled from "styled-components";
 
 import { PageSectionButton, PageSectionIconButton } from "../page-section";
+import { DatasetNavigationBarProps } from "./dataset-navigationbar.props";
 
 const Container = styled.div`
   display: flex;
   align-items: center;
 `;
 
-export const DatasetNavigationbar = ({
+export const DatasetNavigationBar: React.FC<DatasetNavigationBarProps> = ({
   isInSelectMode,
   allSelected,
   anySelected,
@@ -16,15 +17,6 @@ export const DatasetNavigationbar = ({
   openJobCreationPopUp,
   openImageImportPopUp,
   deleteSelectedImages,
-}: {
-  isInSelectMode: boolean;
-  allSelected: boolean;
-  anySelected: boolean;
-  toggleSelectMode: () => void;
-  toggleSelectAll: () => void;
-  openJobCreationPopUp: () => void;
-  openImageImportPopUp: () => void;
-  deleteSelectedImages: () => void;
 }) =>
   isInSelectMode ? (
     <Container>

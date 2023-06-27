@@ -1,4 +1,5 @@
 import { flexRender, Header, Row, Table } from "@tanstack/react-table";
+import { useCallback } from "react";
 import styled from "styled-components";
 
 import { stopPropagation } from "../../event-handling";
@@ -61,13 +62,16 @@ export const TableRow: <T>({
   isLast?: boolean;
 }) => JSX.Element = ({ row, columnWidths, isLast, onClick }) => {
   const isClickable = onClick !== undefined;
+
+  const handleClick = useCallback(() => {
+    if (onClick) onClick(row.original);
+  }, [onClick, row.original]);
+
   return (
     <TableListItem
       isLast={isLast}
       isClickable={isClickable}
-      onClick={() => {
-        if (onClick) onClick(row.original);
-      }}
+      onClick={handleClick}
     >
       {row.getVisibleCells().map((cell, index) => (
         <TableCell key={cell.id} width={columnWidths[index]}>

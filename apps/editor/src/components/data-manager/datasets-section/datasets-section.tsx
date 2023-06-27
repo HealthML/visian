@@ -1,5 +1,5 @@
 import { useTranslation } from "@visian/ui-shared";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useState } from "react";
 
 import useDatasetsBy, {
   useCreateDatasetMutation,
@@ -57,13 +57,18 @@ export const DatasetsSection = ({ project }: { project: Project }) => {
     },
     [setDatasetTobBeDeleted, openDeleteDatasetConfirmationPopUp],
   );
-  const deleteDatasetMessage = useMemo(
-    () =>
-      `${translate("delete-dataset-message")}`.replace(
-        "_",
-        datasetTobBeDeleted?.name ?? "",
-      ),
-    [datasetTobBeDeleted, translate],
+
+  const confirmDeleteDataset = useCallback(() => {
+    if (datasetTobBeDeleted)
+      deleteDatasets({
+        projectId: project.id,
+        datasetIds: [datasetTobBeDeleted.id],
+      });
+  }, [datasetTobBeDeleted, deleteDatasets, project]);
+
+  const confirmCreateDataset = useCallback(
+    (newDatasetDto) => createDataset({ ...newDatasetDto, project: project.id }),
+    [createDataset, project],
   );
 
   let datasetsInfoTx;
@@ -94,22 +99,16 @@ export const DatasetsSection = ({ project }: { project: Project }) => {
       <ConfirmationPopup
         isOpen={isDeleteDatasetConfirmationPopUpOpen}
         onClose={closeDeleteDatasetConfirmationPopUp}
-        message={deleteDatasetMessage}
+        message={translate("delete-dataset-message", {
+          name: datasetTobBeDeleted?.name ?? "",
+        })}
         titleTx="delete-dataset-title"
-        onConfirm={() => {
-          if (datasetTobBeDeleted)
-            deleteDatasets({
-              projectId: project.id,
-              datasetIds: [datasetTobBeDeleted.id],
-            });
-        }}
+        onConfirm={confirmDeleteDataset}
       />
       <DatasetCreationPopup
         isOpen={isCreateDatasetPopupOpen}
         onClose={closeCreateDatasetPopup}
-        onConfirm={(newDatasetDto) =>
-          createDataset({ ...newDatasetDto, project: project.id })
-        }
+        onConfirm={confirmCreateDataset}
       />
     </PageSection>
   );

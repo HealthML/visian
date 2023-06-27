@@ -52,6 +52,13 @@ export interface ILayer {
   parent?: ILayer;
 
   /**
+   * The family of this layer.
+   * This groups layers that are related to each other, e.g., a segmentation file.
+   * In conrast to the parent, the family itself is not a layer.
+   */
+  family?: ILayerFamily;
+
+  /**
    * The blend mode used to combine this layer on top of the ones below.
    * Defaults to `"NORMAL"`.
    */
@@ -70,8 +77,8 @@ export interface ILayer {
 
   /** The layer's transform matrix used to position it during rendering. */
   transformation?: Matrix4;
-  /** The layer's meta data ID. */
-  metaData?: { id: string; [key: string]: any };
+  /** The layer's metadata ID. */
+  metadata?: { id: string; [key: string]: any };
 
   /**
    * Returns all slice markers, aggregated for the layer and given view type.
@@ -81,8 +88,12 @@ export interface ILayer {
   /** Sets the layer's title. */
   setTitle(value?: string): void;
 
+  setMetaData(value?: { id: string; [key: string]: any }): void;
+
   /** Sets this layer's parent layer, typically the group it is contained in. */
   setParent(idOrLayer?: string | ILayer): void;
+
+  setFamily(id: string | undefined): void;
 
   setIsAnnotation(value?: boolean): void;
 
@@ -158,6 +169,8 @@ export interface IImageLayer extends ILayer {
   computeArea(viewType: ViewType, slice: number): Promise<void>;
 
   setGradientHistogram(histogram?: Histogram): void;
+
+  copy(): IImageLayer;
 }
 
 /** A group of layers. */
@@ -172,4 +185,19 @@ export interface ILayerGroup extends ILayer {
 
   /** Removes a layer from the document (but keeps it in the document). */
   removeLayer(idOrLayer: string | ILayer): void;
+}
+
+export interface ILayerFamily {
+  id: string;
+  /** The family's display name. */
+  title: string;
+  /** The family's meta data. Usually the object from the DB */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  metaData?: { id: string; [key: string]: any };
+  /** All layers in the family. */
+  layers: ILayer[];
+  /** Adds a layer to the family. */
+  addLayer(id: string): void;
+  /** Removes a layer from the family (but keeps it in the document). */
+  removeLayer(id: string): void;
 }

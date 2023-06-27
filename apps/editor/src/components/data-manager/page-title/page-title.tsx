@@ -10,6 +10,7 @@ import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 
 import { PageTitleProps } from "./page-title.props";
+import { useCallback } from "react";
 
 const TitleContainer = styled.div`
   margin-bottom: ${space("pageSectionMargin")};
@@ -40,6 +41,10 @@ export const PageTitle = ({
   isLoading,
 }: PageTitleProps) => {
   const navigate = useNavigate();
+  const navigateBack = useCallback(
+    () => backPath && navigate(backPath),
+    [navigate, backPath],
+  );
   return (
     <TitleContainer>
       {backPath && (
@@ -47,7 +52,7 @@ export const PageTitle = ({
           icon="arrowBack"
           tooltipTx="back"
           tooltipPosition="right"
-          onPointerDown={() => navigate(backPath)}
+          onPointerDown={navigateBack}
           isActive={false}
         />
       )}

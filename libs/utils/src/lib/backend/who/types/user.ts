@@ -1,26 +1,26 @@
-import { Annotator, AnnotatorSnapshot } from "./annotator";
-import { Reviewer, ReviewerSnapshot } from "./reviewer";
+import { WHOAnnotator, WHOAnnotatorSnapshot } from "./annotator";
+import { WHOReviewer, WHOReviewerSnapshot } from "./reviewer";
 
-export interface UserSnapshot {
+export interface WHOUserSnapshot {
   userUUID: string;
   idpID: string;
   username: string;
   birthdate: string;
   timezone: string;
   email: string;
-  annotatorRole: AnnotatorSnapshot | Record<string, never>;
-  reviewerRole: ReviewerSnapshot | Record<string, never>;
+  annotatorRole: WHOAnnotatorSnapshot | Record<string, never>;
+  reviewerRole: WHOReviewerSnapshot | Record<string, never>;
 }
 
-export class User {
+export class WHOUser {
   public userUUID: string;
   public idpID: string;
   public username: string;
   public birthdate: string;
   public timezone: string;
   public email: string;
-  public annotatorRole?: Annotator;
-  public reviewerRole?: Reviewer;
+  public annotatorRole?: WHOAnnotator;
+  public reviewerRole?: WHOReviewer;
 
   // TODO: Properly type API response data
   constructor(user: any) {
@@ -31,14 +31,14 @@ export class User {
     this.timezone = user.timezone;
     this.email = user.email;
     if (user.annotatorRole && Object.keys(user.annotatorRole).length > 1) {
-      this.annotatorRole = new Annotator(user.annotatorRole);
+      this.annotatorRole = new WHOAnnotator(user.annotatorRole);
     }
     if (user.reviewerRole && Object.keys(user.reviewerRole).length > 1) {
-      this.reviewerRole = new Reviewer(user.reviewerRole);
+      this.reviewerRole = new WHOReviewer(user.reviewerRole);
     }
   }
 
-  public toJSON(): UserSnapshot {
+  public toJSON(): WHOUserSnapshot {
     return {
       userUUID: this.userUUID,
       idpID: this.idpID,

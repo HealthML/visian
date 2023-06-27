@@ -32,13 +32,16 @@ export const Navbar = ({ className }: { className?: string }) => {
     setIsShortcutPopUpOpen(false);
   }, []);
 
+  const navigateToHome = useCallback(() => navigate(`/projects`), [navigate]);
+  const navigateToEditor = useCallback(() => navigate(`/editor`), [navigate]);
+
   return (
     <Container className={className}>
       <Button
         icon="home"
         tooltipTx="home"
         tooltipPosition="right"
-        onPointerDown={() => navigate(`/projects`)}
+        onPointerDown={navigateToHome}
         isActive={false}
       />
       <MenuDataManager onOpenShortcutPopUp={openShortcutPopUp} />
@@ -46,7 +49,7 @@ export const Navbar = ({ className }: { className?: string }) => {
         icon="pixelBrush"
         tooltipTx="open-editor"
         tooltipPosition="right"
-        onPointerDown={() => navigate(`/editor`)}
+        onPointerDown={navigateToEditor}
         isActive={false}
       />
       <ShortcutPopUp
