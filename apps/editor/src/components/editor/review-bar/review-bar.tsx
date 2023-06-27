@@ -274,12 +274,14 @@ export const MiaReviewBar = observer(
             <SkipButton icon="arrowLeft" />
             <ReviewButton
               isDisabled={
-                !store.editor.activeDocument.activeLayer?.family?.hasChanges()
+                !store.editor.activeDocument.activeLayer?.family?.hasChanges
               }
               icon="save"
               tooltipTx="save"
               tooltipPosition="right"
-              handlePress={openSavePopup}
+              handlePress={() =>
+                store?.editor.activeDocument?.history.updateCheckpoint()
+              }
             />
             <SkipButton icon="arrowRight" />
           </ReviewToolsContainer>

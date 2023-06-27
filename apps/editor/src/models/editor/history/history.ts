@@ -6,9 +6,9 @@ import {
   ValueType,
 } from "@visian/ui-shared";
 import {
+  CommandStack,
+  CommandStackSnapshot,
   ISerializable,
-  LimitedStack,
-  LimitedStackSnapshot,
 } from "@visian/utils";
 import { action, makeObservable, observable } from "mobx";
 
@@ -23,9 +23,9 @@ Object.values(commands).forEach((command) => {
 });
 
 export interface HistorySnapshot {
-  undoRedoStacks: {
+  commandStacks: {
     layerId: string;
-    undoRedoStack: LimitedStackSnapshot<IUndoRedoCommandSnapshot>;
+    commandStack: CommandStackSnapshot<IUndoRedoCommandSnapshot>;
   }[];
 }
 
@@ -34,7 +34,7 @@ export class History
 {
   public readonly excludeFromSnapshotTracking = ["document"];
 
-  protected undoRedoStacks = new Map<string, LimitedStack<IUndoRedoCommand>>();
+  protected commandStacks = new Map<string, CommandStack<IUndoRedoCommand>>();
 
   constructor(
     snapshot: Partial<HistorySnapshot> | undefined,
@@ -42,8 +42,8 @@ export class History
   ) {
     if (snapshot) this.applySnapshot(snapshot);
 
-    makeObservable<this, "undoRedoStacks">(this, {
-      undoRedoStacks: observable,
+    makeObservable<this, "commandStacks">(this, {
+      commandStacks: observable,
 
       undo: action,
       redo: action,
@@ -54,11 +54,11 @@ export class History
   }
 
   public canUndo(layerId: string) {
-    return this.undoRedoStacks.get(layerId)?.canNavigateBackward() ?? false;
+    return this.commandStacks.get(layerId)?.canNavigateBackward() ?? false;
   }
 
   public canRedo(layerId: string) {
-    return this.undoRedoStacks.get(layerId)?.canNavigateForward() ?? false;
+    return this.commandStacks.get(layerId)?.canNavigateForward() ?? false;
   }
 
   public undo = (layerId: string) => {
@@ -66,8 +66,8 @@ export class History
 
     // As we can undo, we can be sure that there is at least the current item
     // in the stack.
-    this.undoRedoStacks.get(layerId)?.getCurrent()?.undo();
-    this.undoRedoStacks.get(layerId)?.navigateBackward();
+    this.commandStacks.get(layerId)?.getCurrent()?.undo();
+    this.commandStacks.get(layerId)?.navigateBackward();
   };
 
   public redo = (layerId: string) => {
@@ -75,36 +75,36 @@ export class History
 
     // As we can redo, we can be sure that we can navigate forward
     // in the stack.
-    this.undoRedoStacks.get(layerId)?.navigateForward()?.redo();
+    this.commandStacks.get(layerId)?.navigateForward()?.redo();
   };
 
   public addCommand(command: IUndoRedoCommand) {
     const { layerId } = command;
-    if (!this.undoRedoStacks.has(layerId)) {
-      this.undoRedoStacks.set(
+    if (!this.commandStacks.has(layerId)) {
+      this.commandStacks.set(
         layerId,
-        new LimitedStack<IUndoRedoCommand>(maxUndoRedoSteps),
+        new CommandStack<IUndoRedoCommand>(maxUndoRedoSteps),
       );
     }
-    this.undoRedoStacks.get(layerId)?.push(command);
+    this.commandStacks.get(layerId)?.push(command);
   }
 
   public clear = (layerId?: string) => {
     if (layerId) {
-      this.undoRedoStacks.delete(layerId);
+      this.commandStacks.delete(layerId);
     } else {
-      this.undoRedoStacks = new Map<string, LimitedStack<IUndoRedoCommand>>();
+      this.commandStacks = new Map<string, CommandStack<IUndoRedoCommand>>();
     }
   };
 
   // Serialization
   public toJSON(): HistorySnapshot {
-    const stackSnapshot = [...this.undoRedoStacks.entries()].map(
+    const stackSnapshot = [...this.commandStacks.entries()].map(
       ([layerId, stack]) => {
         const jsonStack = stack.toJSON();
         return {
           layerId,
-          undoRedoStack: {
+          commandStack: {
             ...jsonStack,
             buffer: jsonStack.buffer.map((command) => command.toJSON()),
           },
@@ -113,28 +113,28 @@ export class History
     );
 
     return {
-      undoRedoStacks: stackSnapshot,
+      commandStacks: stackSnapshot,
     };
   }
 
   public async applySnapshot(
     snapshot: Partial<HistorySnapshot>,
   ): Promise<void> {
-    if (!snapshot.undoRedoStacks) {
+    if (!snapshot.commandStacks) {
       this.clear();
       return;
     }
     await Promise.all(
-      snapshot.undoRedoStacks.map(async (stackSnapshot) => {
-        if (!this.undoRedoStacks.has(stackSnapshot.layerId)) {
-          this.undoRedoStacks.set(
+      snapshot.commandStacks.map(async (stackSnapshot) => {
+        if (!this.commandStacks.has(stackSnapshot.layerId)) {
+          this.commandStacks.set(
             stackSnapshot.layerId,
-            new LimitedStack<IUndoRedoCommand>(maxUndoRedoSteps),
+            new CommandStack<IUndoRedoCommand>(maxUndoRedoSteps),
           );
         }
-        await this.undoRedoStacks.get(stackSnapshot.layerId)?.applySnapshot({
-          ...stackSnapshot.undoRedoStack,
-          buffer: stackSnapshot.undoRedoStack.buffer
+        await this.commandStacks.get(stackSnapshot.layerId)?.applySnapshot({
+          ...stackSnapshot.commandStack,
+          buffer: stackSnapshot.commandStack.buffer
             .map((commandSnapshot) => {
               const Command = commandMap[commandSnapshot.kind];
               if (!Command) return;
@@ -152,10 +152,16 @@ export class History
 
   public hasChanges(layerId?: string): boolean {
     if (!layerId) {
-      return [...this.undoRedoStacks.values()].some((stack) =>
-        stack.canNavigateBackward(),
-      );
+      return [...this.commandStacks.values()].some((stack) => stack.isDirty());
     }
-    return this.undoRedoStacks.get(layerId)?.canNavigateBackward() ?? false;
+    return this.commandStacks.get(layerId)?.isDirty() ?? false;
+  }
+
+  public updateCheckpoint(layerId?: string) {
+    if (!layerId) {
+      [...this.commandStacks.values()].forEach((stack) => stack.save());
+      return;
+    }
+    this.commandStacks.get(layerId)?.save();
   }
 }

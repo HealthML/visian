@@ -33,6 +33,12 @@ export class LayerFamily implements ILayerFamily {
     return this.layerIds.map((id) => this.document.getLayer(id)!);
   }
 
+  public get hasChanges() {
+    return this.layers.some(
+      (layer) => layer.kind === "image" && (layer as ImageLayer).hasChanges,
+    );
+  }
+
   public addLayer(id: string) {
     const layer = this.document.getLayer(id);
     if (!this.layerIds.includes(id) && layer) {
@@ -47,11 +53,5 @@ export class LayerFamily implements ILayerFamily {
     if (layer?.family === this) {
       layer.setFamily(undefined);
     }
-  }
-
-  public hasChanges() {
-    return this.layers.some(
-      (layer) => layer.kind === "image" && (layer as ImageLayer).hasChanges(),
-    );
   }
 }

@@ -34,5 +34,7 @@ export interface IHistory {
   clear(layerId?: string): void;
 
   /** checks if a layer has changed */
-  hasChanges(layerId: string): boolean;
+  hasChanges(layerId?: string): boolean;
+
+  updateCheckpoint(layerId?: string): void;
 }
