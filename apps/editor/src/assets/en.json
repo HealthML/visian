@@ -413,6 +413,7 @@
   "progress-verified": "Verified",
   "progress-annotated": "Annotated",
   "annotation-progress": "Progress",
+  "annotation-progress-no-images": "Add images to see the annotation progress.",
   "annotated-verified-images": "Annotated and verified images",
   "review-annotations": "Start Review",
 

@@ -190,6 +190,10 @@ export const DatasetPage = ({
   if (imagesError) listInfoTx = "images-loading-failed";
   else if (images && images.length === 0) listInfoTx = "no-images-available";
 
+  let progressInfoTx;
+  if (progress?.totalImages === 0)
+    progressInfoTx = "annotation-progress-no-images";
+
   return (
     <Container>
       <PageTitle
@@ -197,7 +201,11 @@ export const DatasetPage = ({
         labelTx="dataset"
         backPath={`/projects/${dataset.project}`}
       />
-      <PageSection titleTx="annotation-progress" isLoading={isLoadingProgress}>
+      <PageSection
+        titleTx="annotation-progress"
+        isLoading={isLoadingProgress}
+        infoTx={progressInfoTx}
+      >
         {progress && <AnnotationProgress progress={progress} />}
         {/* {progress && <FakeAnnotationProgress total={342} msTime={30 * 1000} />} */}
       </PageSection>
