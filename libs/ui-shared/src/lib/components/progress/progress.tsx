@@ -127,7 +127,12 @@ export const Progress: React.FC<ProgressProps> = ({
       </TotalBar>
       {bars
         ?.filter((bar) => bar.value > 0)
-        .sort((a, b) => b.value - a.value)
+        .sort((a, b) => {
+          // We first sort by value and then by original index position.
+          if (a.value > b.value) return -1;
+          if (a.value < b.value) return 1;
+          return bars.indexOf(b) - bars.indexOf(a);
+        })
         .map((bar) => (
           <Bar
             width={(bar.value / total) * 100}
