@@ -41,7 +41,9 @@ export class LayerFamily implements ILayerFamily {
 
   public removeLayer(id: string) {
     this.layerIds = this.layerIds.filter((layerId) => layerId !== id);
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    this.document.getLayer(id)!.setFamily(undefined);
+    const layer = this.document.getLayer(id);
+    if (layer?.family === this) {
+      layer.setFamily(undefined);
+    }
   }
 }

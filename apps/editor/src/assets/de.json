@@ -1,6 +1,6 @@
 {
   "loading": "Lädt...",
-  "error": "Fehler!",
+  "error": "Fehler",
   "reset": "Zurücksetzen",
 
   "drop-file": "Legen Sie die Datei hier ab",
@@ -102,6 +102,7 @@
   "mark-not-annotation": "Zu nicht Annotation",
   "export-layer": "Ebene exportieren",
   "export-slice": "Aktuelle Schicht exportieren",
+  "duplicate-layer": "Ebene duplizieren",
   "rename-layer": "Ebene umbenennen",
   "delete-layer": "Ebene löschen",
   "delete-layer-confirmation": "Ebene \"{{layer}}\" löschen?",
@@ -278,35 +279,44 @@
   "exit-select-mode": "Auswahlmodus verlassen",
   "select-mode": "Auswahlmodus",
 
+  "mia": "MIA",
+
+  "project": "Projekt",
+  "projects": "Projekte",
+  "dataset": "Datensatz",
+  "datasets": "Datensätze",
+  "image": "Bild",
+  "images": "Bilder",
+  "job": "Job",
+  "jobs": "Jobs",
+
   "projects-base-title": "VISIAN Projekte",
   "project-base-title": "VISIAN Projekt",
   "datasets-base-title": "VISIAN Datensätze",
   "jobs-base-title": "VISIAN Jobs",
   "dataset-base-title": "VISIAN Datensatz",
 
-  "projects-loading": "Projekte werden geladen...",
-  "projects-loading-error": "Fehler beim Laden der Projekte:",
+  "projects-loading-failed": "Die Projekte konnten nicht geladen werden.",
   "no-projects-available": "Aktuell sind keine Projekte vorhanden.",
 
-  "project-loading": "Projekt wird geladen...",
-  "project-loading-error": "Fehler beim Laden des Projektes:",
+  "project-loading-failed": "Das Projekt konnte nicht geladen werden.",
 
-  "datasets": "Datensätze",
   "datasets-loading": "Datensätze werden geladen...",
-  "datasets-loading-error": "Fehler beim Laden der Datensätze:",
+  "datasets-loading-failed": "Die Datensätze konnten nicht geladen werden.",
   "no-datasets-available": "Aktuell sind keine Datensätze vorhanden.",
 
-  "dataset-loading": "Datensatz wird geladen...",
-  "dataset-loading-error": "Fehler beim Laden des Datensatzes:",
+  "dataset-loading-failed": "Der Datensatz konnte nicht geladen werden.",
 
   "images-loading": "Bilder werden geladen...",
-  "images-loading-error": "Fehler beim Laden der Bilder:",
+  "images-loading-failed": "Die Bilder konnten nicht geladen werden.",
+  "images-loading-error": "Fehler beim Laden der Bilder: {{statusText}} {{status}}",
   "no-images-available": "Aktuell sind keine Bilder vorhanden.",
   "image-open-error": "Fehler beim Öffnen des Bildes",
   "image-annotated": "annotiert",
 
+  "create-annotation-file-error": "Die Annotationsdatei konnte nicht erstellt werden.",
   "annotations-loading": "Annotationen werden geladen...",
-  "annotations-loading-error": "Fehler beim Laden der Annotationen:",
+  "annotations-loading-failed": "Die Annotationen konnten nicht geladen werden.",
   "annotation-open-error": "Fehler beim Öffnen der Annotation",
   "annotation-saving": "Aktive Annotationsgruppe speichern",
   "annotation-saving-overrwite": "Existierende Annotationsdatei überschreiben",
@@ -318,9 +328,7 @@
   "ml-models-none-available": "Es sind keine Modelle verfügbar.",
   "ml-models-not-found-error": "Modellversion konnte nicht gefunden werden.",
 
-  "jobs": "Jobs",
-  "jobs-loading": "Jobs werden geladen...",
-  "jobs-loading-error": "Fehler beim Laden der Jobs:",
+  "jobs-loading-failed": "Die Jobs konnten nicht geladen werden.",
   "no-jobs-available": "Aktuell sind keine Jobs vorhanden.",
   "job-deleted-images": "Es scheint als wurden alle Bilder des Jobs gelöscht...",
   "job-details": "Job Details",
@@ -353,6 +361,10 @@
   "image-import-duplicate-error-description": "Einige Bilder existierten bereits und wurden übersprungen. Es wurde(n) {{imported}} von {{total}} Bilder(n) erfolgreich importiert.",
   "image-import-selected-is-duplicate": "Datei bereits ausgewählt, wird übersprungen",
   "image-import-selected-has-invalid-type": "Ungültiger Dateityp, wird übersprungen",
+  "computer-upload": "Vom Computer hochladen",
+  "drop-files-or": "Dateien ablegen oder",
+  "load-from-url": "Von URL laden",
+  "connect-to-server": "Mit dem Server verbinden",
 
   "open-editor": "Editor öffnen",
   "close-editor": "Editor schließen",
@@ -372,17 +384,17 @@
   "options": "Optionen",
   "delete": "Löschen",
   "delete-annotation-title": "Annotation löschen",
-  "delete-annotation-message": "Wollen Sie die Annotation \"_\" wirklich löschen?",
+  "delete-annotation-message": "Wollen Sie die Annotation \"{{name}}\" wirklich löschen?",
   "delete-images-title": "Bilder löschen",
-  "delete-images-message": "Wollen Sie _ Bild(er) sämtlich aller dazugehörigen Annotationen wirklich löschen?",
+  "delete-images-message": "Wollen Sie {{count}} Bild(er) sämtlich aller dazugehörigen Annotationen wirklich löschen?",
   "delete-image-title": "Bild löschen",
-  "delete-image-message": "Wollen Sie das Bild \"_\" sämtlich aller dazugehörigen Annotationen wirklich löschen?",
+  "delete-image-message": "Wollen Sie das Bild \"{{name}}\" sämtlich aller dazugehörigen Annotationen wirklich löschen?",
   "delete-dataset-title": "Datensatz löschen",
-  "delete-dataset-message": "Wollen Sie den Datensatz \"_\" sämtlich aller enthaltenen Bilder und Annotationen wirklich löschen?",
+  "delete-dataset-message": "Wollen Sie den Datensatz \"{{name}}\" sämtlich aller enthaltenen Bilder und Annotationen wirklich löschen?",
   "delete-project-title": "Projekt löschen",
-  "delete-project-message": "Wollen sie das Projekt \"_\" sämtlich aller enthalten Datensätze, Bilder und Annotationen wirklich löschen?",
+  "delete-project-message": "Wollen sie das Projekt \"{{name}}\" sämtlich aller enthalten Datensätze, Bilder und Annotationen wirklich löschen?",
   "delete-job-title": "Job löschen",
-  "delete-job-message": "Wollen sie den Job sämtlich der _ dabei erzeugten Annotation(en) wirklich löschen?",
+  "delete-job-message": "Wollen sie den Job sämtlich der {{count}} dabei erzeugten Annotation(en) wirklich löschen?",
   "cancel-job-title": "Job abbrechen",
   "cancel-job-message": "Wollen sie den Job wirklich abbrechen?",
   "open-job-log": "Job Log Datei öffnen",
@@ -394,7 +406,13 @@
   "create-dataset": "Datensatz erstellen",
   "dataset-name": "Datensatzname",
 
+  "edit": "Bearbeiten",
+  "edit-project": "Projekt bearbeiten",
+  "edit-dataset": "Datensatz bearbeiten",
+  "update": "Aktualisieren",
+
   "verified": "verifiziert",
 
-  "data_uri_help_message": "Die dataURI ist nicht gültig. Sie sollte das Format 'ordner/dateiname' haben, wobei ein Ordner und der Dateiname aus Buchstaben, Ziffern, -, oder _ bestehen kann."
+  "data-uri-help-message": "Die dataURI ist nicht gültig. Sie sollte das Format 'ordner/dateiname' haben, wobei ein Ordner und der Dateiname aus Buchstaben, Ziffern, -, oder _ bestehen kann.",
+  "uri-file-type-mismatch": "Die URI entspricht nicht dem Dateityp \"{{name}}\""
 }

@@ -41,12 +41,7 @@ import {
   generalTextures2d,
   generalTextures3d,
 } from "../../constants";
-import {
-  Annotation,
-  FileWithFamily,
-  FileWithMetadata,
-  Image,
-} from "../../types";
+import { FileMetadata, FileWithFamily, FileWithMetadata } from "../../types";
 import { readTrackingLog, TrackingData } from "../tracking";
 import { StoreContext } from "../types";
 import { Clipboard } from "./clipboard";
@@ -981,7 +976,7 @@ export class Document
     const layer = this.getLayer(layerId);
     const metaData = this.getMetaDataFromFile(file);
     if (layer && metaData) {
-      layer.metaData = metaData;
+      layer.metadata = metaData;
     }
   }
 
@@ -995,7 +990,7 @@ export class Document
   }
 
   /** Extracts metadata appended to a file object */
-  private getMetaDataFromFile(file: File): Image | Annotation | undefined {
+  private getMetaDataFromFile(file: File): FileMetadata | undefined {
     if ("metadata" in file) {
       const fileWithMetaData = file as FileWithMetadata;
       return fileWithMetaData.metadata;
@@ -1004,10 +999,10 @@ export class Document
   }
 
   /** Creates a LayerFamily object for a list of files and adds the group id to the files */
-  private createLayerFamily(
+  public createLayerFamily(
     files: File[],
     title?: string,
-    groupMetaData?: Image | Annotation,
+    groupMetaData?: FileMetadata,
   ): FileWithFamily[] {
     if (files.every((f) => "familyId" in f)) {
       return files as FileWithFamily[];

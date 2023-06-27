@@ -9,9 +9,10 @@ import {
   TextField,
   useTranslation,
 } from "@visian/ui-shared";
+import { AxiosError } from "axios";
 import { observer } from "mobx-react-lite";
 import path from "path";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import styled from "styled-components";
 
@@ -82,6 +83,8 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
   const [searchParams] = useSearchParams();
   const [newAnnotationURIPrefix, setnewAnnotationURIPrefix] = useState("");
 
+  const { t: translate } = useTranslation();
+
   const fileExtensions = [
     { value: ".nii.gz", label: ".nii.gz" },
     { value: ".zip", label: ".zip" },
@@ -134,7 +137,7 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
   const checkAnnotationURI = (file: File, uri: string) => {
     if (path.extname(uri) !== path.extname(file.name)) {
       throw new Error(
-        `URI does not match file type ${path.extname(file.name)}`,
+        translate("uri-file-type-mismatch", { name: path.extname(file.name) }),
       );
     }
   };
@@ -143,16 +146,16 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
     annotationFile: File,
     metaData: Annotation,
   ) => {
-    const savedAnnotaionFile = new File(
+    const savedAnnotationFile = new File(
       [annotationFile],
       metaData.dataUri.split("/").pop() ?? "",
       {
         type: annotationFile.type,
       },
     ) as FileWithMetadata;
-    savedAnnotaionFile.metadata = metaData;
+    savedAnnotationFile.metadata = metaData;
     const fileTransfer = new DataTransfer();
-    fileTransfer.items.add(savedAnnotaionFile);
+    fileTransfer.items.add(savedAnnotationFile);
     if (store) {
       importFilesToDocument(fileTransfer.files, store);
     }
@@ -174,7 +177,7 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
         annotationMeta?.dataUri.endsWith(".zip"),
       );
       if (!annotationMeta || !annotationFile) {
-        throw new Error("Could not create annotation file");
+        throw new Error(translate("create-annotation-error"));
       }
       checkAnnotationURI(annotationFile, annotationMeta.dataUri);
       const response = await patchAnnotationFile(
@@ -182,16 +185,19 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
         annotationFile,
       );
       return response;
-    } catch (error: any) {
-      const description = error.response?.data?.message
-        ? error.response.data.message
-        : error.message
-        ? error.message
-        : "annotation-saving-error";
-      store?.setError({
-        titleTx: "saving-error",
-        descriptionTx: description,
-      });
+    } catch (error) {
+      if (error instanceof AxiosError) {
+        const description = error.response?.data?.message
+          ? error.response.data.message
+          : error.message
+          ? error.message
+          : "annotation-saving-error";
+        store?.setError({
+          titleTx: "saving-error",
+          descriptionTx: description,
+        });
+      }
+      throw error;
     } finally {
       store?.setProgress();
     }
@@ -207,7 +213,7 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
         uri.endsWith(".zip"),
       );
       if (!imageId || !annotationFile) {
-        throw new Error("Could not create annotation file");
+        throw new Error(translate("create-annotation-error"));
       }
       const responseData = await postAnnotationFile(
         imageId,
@@ -242,7 +248,7 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
       return "annotation";
     }
     const imageURI =
-      store?.editor.activeDocument?.mainImageLayer?.metaData?.dataUri;
+      store?.editor.activeDocument?.mainImageLayer?.metadata?.dataUri;
     const imageName = path.basename(imageURI).split(".")[0];
     const layerName =
       store?.editor.activeDocument?.activeLayer?.title?.split(".")[0];

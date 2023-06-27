@@ -19,6 +19,6 @@ export const whoAwsConfigDeployment = {
 };
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
-export const whoRequiresAuthentication = false;
+export const whoRequiresAuthentication = true;
 
 export const whoHome = "https://www.ai4h.net/";

@@ -1,6 +1,6 @@
 import axios from "axios";
 
-import hubBaseUrl from "./hub-base-url";
+import { hubBaseUrl } from "./hub-base-url";
 
 export const postImage = async (
   datasetId: string,

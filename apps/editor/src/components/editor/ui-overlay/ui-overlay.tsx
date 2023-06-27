@@ -27,6 +27,7 @@ import {
 } from "../action-modal";
 import { AIBar } from "../ai-bar";
 import { AxesAndVoxel } from "../axes-and-voxel";
+import { ExportPopUp } from "../export-popup";
 import { ImageImportDropSheet } from "../import-image-drop-sheet";
 import { ImportPopUp } from "../import-popup";
 import { Layers } from "../layers";
@@ -44,7 +45,6 @@ import { TopConsole } from "../top-console";
 import { UndoRedoButtons } from "../undo-redo-buttons";
 import { ViewSettings } from "../view-settings";
 import { UIOverlayProps } from "./ui-overlay.props";
-import { ExportPopUp } from "../export-popup";
 
 const Container = styled(AbsoluteCover)`
   align-items: stretch;

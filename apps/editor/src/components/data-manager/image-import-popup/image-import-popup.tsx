@@ -234,6 +234,11 @@ export const ImageImportPopup = observer<ImageImportPopUpProps>(
       if (onClose) onClose();
     }, [dataset, validFiles, onImportFinished, onClose, totalFiles]);
 
+    const resetImportError = useCallback(
+      () => setImportError(undefined),
+      [setImportError],
+    );
+
     if (isImporting) {
       return (
         <ProgressPopUp
@@ -256,7 +261,7 @@ export const ImageImportPopup = observer<ImageImportPopUpProps>(
             imported: uploadedFiles,
             total: importError.totalImages,
           }}
-          onClose={() => setImportError(undefined)}
+          onClose={resetImportError}
         />
       ) : importError?.type === "generic" ? (
         <ErrorNotification
@@ -266,7 +271,7 @@ export const ImageImportPopup = observer<ImageImportPopUpProps>(
             imported: uploadedFiles,
             total: importError.totalImages,
           }}
-          onClose={() => setImportError(undefined)}
+          onClose={resetImportError}
         />
       ) : undefined;
 

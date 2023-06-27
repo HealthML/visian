@@ -39,7 +39,7 @@ export const JobHistory = ({
 
   const { jobs, refetchJobs } = useJobsBy(projectId);
 
-  // model selection popup
+  // Model selection popup
   const [isModelSelectionPopUpOpen, setIsModelSelectionPopUpOpen] =
     useState(false);
   const openModelSelectionPopUp = useCallback(() => {
@@ -68,7 +68,7 @@ export const JobHistory = ({
         />
       )}
       {altMessage ? (
-        <ErrorMessage tx={altMessage} />
+        <ErrorMessage text={altMessage} />
       ) : (
         jobs && <JobsTable jobs={jobs} />
       )}

@@ -1,4 +1,4 @@
-import { Text, useTranslation } from "@visian/ui-shared";
+import { Text } from "@visian/ui-shared";
 import styled from "styled-components";
 
 export const DetailsTable = styled.div`
@@ -23,16 +23,13 @@ export const DetailsRow = ({
   content,
 }: {
   content?: React.ReactNode;
-  value?: string | undefined;
+  value?: string;
   tx?: string;
   text?: string;
-}) => {
-  const { t } = useTranslation();
-  return (
-    <RowContainer>
-      <DetailsText tx={`${t(tx)}:`} text={`${text}:`} />
-      {value && <DetailsText text={value} />}
-      {!value && content}
-    </RowContainer>
-  );
-};
+}) => (
+  <RowContainer>
+    <DetailsText text={text} tx={tx} />
+    {value && <DetailsText text={value} />}
+    {!value && content}
+  </RowContainer>
+);

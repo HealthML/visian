@@ -10,7 +10,6 @@ import { Job } from "../../../types";
 
 export interface JobCreationPopUpProps extends StatefulPopUpProps {
   projectId: string;
-  // activeImageSelection?: string[];
   activeImageSelection?: Set<string>;
   openWithDatasetId?: string;
   refetchJobs?: <TPageData>(
