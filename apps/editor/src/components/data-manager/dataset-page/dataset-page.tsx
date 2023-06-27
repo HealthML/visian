@@ -19,7 +19,7 @@ import { PageTitle } from "../page-title";
 import { useImageSelection, usePopUpState } from "../util";
 
 const StyledSheet = styled(Sheet)`
-  padding: ${space("pageSectionMarginSmall")};
+  padding: ${space("listPadding")};
   box-sizing: border-box;
 `;
 

@@ -20,7 +20,7 @@ import {
 import { Project } from "../types";
 
 const StyledSheet = styled(Sheet)`
-  padding: ${space("pageSectionMarginSmall")};
+  padding: ${space("listPadding")};
   box-sizing: border-box;
 `;
 

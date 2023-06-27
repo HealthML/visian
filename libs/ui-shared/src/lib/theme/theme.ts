@@ -176,6 +176,7 @@ export const theme = {
     sliderMarkerMargin: "0px",
     pageSectionMargin: "32px",
     pageSectionMarginSmall: "14px",
+    listPadding: "4px 14px",
   },
   zIndices: {
     modal: 50,
