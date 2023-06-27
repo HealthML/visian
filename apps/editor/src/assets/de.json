@@ -123,6 +123,11 @@
   "export": "Export",
   "export-tooltip": "Export (Strg + E)",
   "exporting": "Exportieren",
+  "layers-to-export": "Annotationsebenen die exportiert werden sollen",
+  "export-all-layers": "Alle Ebenen exportieren",
+  "export-layer-group": "Gruppe exportieren",
+  "export-as": "Exportieren als",
+  "no-file-to-export": "Es konnte keine Datei gefunden werden die exportiert werden soll.",
 
   "confirm-task-annotation-tooltip": "Bestätigen",
   "skip-task-annotation-tooltip": "Überspringen",
@@ -237,7 +242,7 @@
   "save-export": "Speichern & Exportieren",
   "create-new-document": "Ein neues Dokument erstellen",
   "save-in-browser": "Im Browser speichern",
-  "export-current-image": "Annotation als *.nii.gz herunterladen",
+  "export-current-image": "Annotation als *.zip herunterladen",
   "export-current-slice": "Aktuelle Schicht der Annotation als *.png herunterladen",
   "view-types": "Ansicht",
   "switch-transverse": "Transverse (Axiale) Ansicht auswählen",
@@ -408,6 +413,6 @@
 
   "verified": "verifiziert",
 
-  "data-uri-help-message": "Die dataURI ist nicht gültig. Sie sollte das Format 'ordner/dateiname.erweiterung' haben, wobei ein Ordner und der Dateiname aus Buchstaben, Ziffern, -, oder _ bestehen kann und die Erweiterung eine der folgenden sein sollte:",
+  "data-uri-help-message": "Die dataURI ist nicht gültig. Sie sollte das Format 'ordner/dateiname' haben, wobei ein Ordner und der Dateiname aus Buchstaben, Ziffern, -, oder _ bestehen kann.",
   "uri-file-type-mismatch": "Die URI entspricht nicht dem Dateityp \"{{name}}\""
 }

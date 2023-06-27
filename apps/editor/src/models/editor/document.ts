@@ -23,6 +23,7 @@ import {
   ITKImageWithUnit,
   ITKMatrix,
   readMedicalImage,
+  writeSingleMedicalImage,
   Zip,
 } from "@visian/utils";
 import FileSaver from "file-saver";
@@ -218,7 +219,9 @@ export class Document
   public get title(): string | undefined {
     if (this.titleOverride) return this.titleOverride;
     const { length } = this.layerIds;
-    return length ? this.getLayer(this.layerIds[length - 1])?.title : undefined;
+    if (!length) return undefined;
+    const lastLayer = this.getLayer(this.layerIds[length - 1]);
+    return lastLayer?.metadata?.dataUri?.split("/").pop() ?? lastLayer?.title;
   }
 
   public setTitle = (value?: string): void => {
@@ -433,12 +436,12 @@ export class Document
   }
 
   // I/O
-  public exportZip = async (limitToAnnotations?: boolean) => {
+  // eslint-disable-next-line @typescript-eslint/no-shadow
+  public exportZip = async (layers: ILayer[], limitToAnnotations?: boolean) => {
     const zip = new Zip();
 
-    // TODO: Rework for group layers
     const files = await Promise.all(
-      this.layers
+      layers
         .filter((layer) => !limitToAnnotations || layer.isAnnotation)
         .map((layer) => layer.toFile()),
     );
@@ -452,11 +455,17 @@ export class Document
       if (trackingFile) zip.setFile(trackingFile.name, trackingFile);
     }
 
-    FileSaver.saveAs(await zip.toBlob(), `${this.title}.zip`);
+    FileSaver.saveAs(
+      await zip.toBlob(),
+      `${this.title?.split(".")[0] ?? "annotation"}.zip`,
+    );
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-shadow
-  public createZip = async (layers: ILayer[]): Promise<File> => {
+  public createZip = async (
+    // eslint-disable-next-line @typescript-eslint/no-shadow
+    layers: ILayer[],
+    title?: string,
+  ): Promise<File> => {
     const zip = new Zip();
     const files = await Promise.all(layers.map((layer) => layer.toFile()));
     files.forEach((file, index) => {
@@ -464,17 +473,57 @@ export class Document
       zip.setFile(`${`00${index}`.slice(-2)}_${file.name}`, file);
     });
 
-    return new File([await zip.toBlob()], `${this.title}.zip`);
+    return new File(
+      [await zip.toBlob()],
+      `${title ?? this.title?.split(".")[0] ?? "annotation"}.zip`,
+    );
+  };
+
+  public createSquashedNii = async (
+    // eslint-disable-next-line @typescript-eslint/no-shadow
+    layers: ILayer[],
+    title?: string,
+  ): Promise<File | undefined> => {
+    const imageLayers = this.layerIds
+      .map((id) => layers.find((layer) => layer.id === id))
+      .filter(
+        (potentialLayer) =>
+          potentialLayer instanceof ImageLayer && potentialLayer.isAnnotation,
+      ) as ImageLayer[];
+    const file = await writeSingleMedicalImage(
+      imageLayers[imageLayers.length - 1].image.toITKImage(
+        imageLayers.slice(0, -1).map((layer) => layer.image),
+        true,
+      ),
+      `${title ?? this.title?.split(".")[0] ?? "annotaion"}.nii.gz`,
+    );
+    return file;
+  };
+
+  // eslint-disable-next-line @typescript-eslint/no-shadow
+  public exportSquashedNii = async (layers: ILayer[]) => {
+    const file: File | undefined = await this.createSquashedNii(layers);
+    if (file) {
+      const fileBlob = new Blob([file], { type: file.type });
+      FileSaver.saveAs(
+        await fileBlob,
+        `${this.title?.split(".")[0] ?? "annotaion"}.nii.gz`,
+      );
+    } else {
+      throw Error("export-error");
+    }
   };
 
   public createFileFromLayers = async (
     // eslint-disable-next-line @typescript-eslint/no-shadow
     layers: ILayer[],
+    asZip: boolean,
+    title?: string,
   ): Promise<File | undefined> => {
-    if (layers.length === 1) {
-      return layers[0].toFile();
+    if (asZip) {
+      return this.createZip(layers, title);
     }
-    return this.createZip(layers);
+    return this.createSquashedNii(layers, title);
   };
 
   public getFileForLayer = async (idOrLayer: string | ILayer) => {
