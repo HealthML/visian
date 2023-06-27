@@ -30,4 +30,7 @@ export interface IHistory {
 
   /** Removes all commands from the history. */
   clear(): void;
+
+  /** checks if a layer has changed **/
+  hasLayerChanged(layerId: string): boolean;
 }

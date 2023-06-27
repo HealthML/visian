@@ -92,4 +92,8 @@ export class LimitedStack<T> implements ISerializable<LimitedStackSnapshot<T>> {
       ),
     );
   }
+
+  public some(predicate: (item: T) => boolean) {
+    return this.buffer.slice(0, this.currentItem + 1).some(predicate);
+  }
 }

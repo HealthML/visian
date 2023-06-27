@@ -14,6 +14,7 @@ import { action, makeObservable, observable } from "mobx";
 
 import { maxUndoRedoSteps } from "../../../constants";
 import * as commands from "./commands";
+import { ImageCommand, SliceCommand } from "./commands";
 
 export const commandMap: {
   [kind: string]: ValueType<typeof commands>;
@@ -119,5 +120,14 @@ export class History
 
     this.clear();
     return Promise.resolve();
+  }
+
+  public hasLayerChanged(layerId: string): boolean {
+    return this.undoRedoStack.some((command) => {
+      if (command.kind === "image" || command.kind === "slice") {
+        return (command as SliceCommand | ImageCommand).layerId === layerId;
+      }
+      return false;
+    });
   }
 }
