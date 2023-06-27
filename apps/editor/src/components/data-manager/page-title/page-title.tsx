@@ -6,11 +6,11 @@ import {
   Title,
   TitleLabel,
 } from "@visian/ui-shared";
+import { useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 
 import { PageTitleProps } from "./page-title.props";
-import { useCallback } from "react";
 
 const TitleContainer = styled.div`
   margin-bottom: ${space("pageSectionMargin")};
