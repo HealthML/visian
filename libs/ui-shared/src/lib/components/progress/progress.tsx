@@ -14,7 +14,7 @@ const Container = styled.div`
   grid-template-rows: 1fr;
 
   width: 100%;
-  height: 20px;
+  height: 25px;
 `;
 
 const TotalBar = styled.div`
@@ -27,7 +27,7 @@ const TotalBar = styled.div`
   overflow: hidden;
   background-color: ${color("veryLightGray")};
   border: 1px solid ${color("lightGray")};
-  border-radius: 20px;
+  border-radius: 25px;
   transition: width 0.5s ease-in-out;
 
   min-width: 40px;
@@ -75,7 +75,7 @@ const Label = styled(Text)`
   font-size: ${fontSize("small")};
   color: ${color("text")};
   margin-top: 1px;
-  margin-right: 5px;
+  margin-right: 7px;
 `;
 
 export const Dot = styled.div<{ dotColor: keyof Theme["colors"] }>`
@@ -83,7 +83,7 @@ export const Dot = styled.div<{ dotColor: keyof Theme["colors"] }>`
   border-radius: 12px;
   width: 12px;
   height: 12px;
-  margin-right: 5px;
+  margin-right: 7px;
 `;
 
 const Bar = ({
