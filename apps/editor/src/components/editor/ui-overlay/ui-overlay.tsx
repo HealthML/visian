@@ -210,45 +210,6 @@ export const UIOverlay = observer<UIOverlayProps>(
     }, [store]);
 
     const [searchParams] = useSearchParams();
-    const loadImagesAndAnnotations = () => {
-      async function asyncfunc() {
-        if (store?.editor.activeDocument?.layers.length !== 0) {
-          return store?.destroyReload();
-        }
-        const fileTransfer = new DataTransfer();
-        const imageIdToOpen = searchParams.get("imageId");
-        if (imageIdToOpen) {
-          try {
-            const imageFile = await fetchImageFile(imageIdToOpen);
-            fileTransfer.items.add(imageFile);
-          } catch (error) {
-            store?.setError({
-              titleTx: "import-error",
-              descriptionTx: "image-open-error",
-            });
-          }
-        }
-        const annotationIdToOpen = searchParams.get("annotationId");
-        if (annotationIdToOpen) {
-          try {
-            const annotationFile = await fetchAnnotationFile(
-              annotationIdToOpen,
-            );
-            fileTransfer.items.add(annotationFile);
-          } catch (error) {
-            store?.setError({
-              titleTx: "import-error",
-              descriptionTx: "annotation-open-error",
-            });
-          }
-        }
-        if (store && fileTransfer.files.length) {
-          importFilesToDocument(fileTransfer.files, store);
-        }
-      }
-      asyncfunc();
-    };
-    useEffect(loadImagesAndAnnotations, [searchParams, store]);
 
     return (
       <Container
