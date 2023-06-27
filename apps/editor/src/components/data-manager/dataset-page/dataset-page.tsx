@@ -1,4 +1,4 @@
-import { Modal, Notification, Text, useTranslation } from "@visian/ui-shared";
+import { Notification, Sheet, space, useTranslation } from "@visian/ui-shared";
 import { useCallback, useMemo, useState } from "react";
 import styled from "styled-components";
 
@@ -14,14 +14,19 @@ import { DatasetImageList } from "../dataset-image-list";
 import { DatasetNavigationBar } from "../dataset-navigationbar";
 import { ImageImportPopup } from "../image-import-popup";
 import { JobCreationPopup } from "../job-creation-popup";
+import { PageSection } from "../page-section";
+import { PageTitle } from "../page-title";
 import { useImageSelection, usePopUpState } from "../util";
 
-const StyledModal = styled(Modal)`
-  width: 100%;
+const StyledSheet = styled(Sheet)`
+  padding: ${space("listPadding")};
+  box-sizing: border-box;
 `;
 
-const ErrorMessage = styled(Text)`
-  margin: auto;
+const Container = styled.div`
+  width: 100%;
+  display: flex;
+  flex-direction: column;
 `;
 
 const ErrorNotification = styled(Notification)`
@@ -32,7 +37,7 @@ const ErrorNotification = styled(Notification)`
   transform: translateX(-50%);
 `;
 
-export const DatasetExplorer = ({
+export const DatasetPage = ({
   dataset,
   isDraggedOver,
   onDropCompleted,
@@ -45,7 +50,7 @@ export const DatasetExplorer = ({
 
   const [isInSelectMode, setIsInSelectMode] = useState(false);
 
-  const { images, imagesError, isErrorImages, isLoadingImages, refetchImages } =
+  const { images, imagesError, isLoadingImages, refetchImages } =
     useImagesByDataset(dataset.id);
 
   const { selectedImages, setSelectedImages, setImageSelection } =
@@ -174,97 +179,100 @@ export const DatasetExplorer = ({
 
   const { t: translate } = useTranslation();
 
+  let listInfoTx;
+  if (imagesError) listInfoTx = "images-loading-failed";
+  else if (images && images.length === 0) listInfoTx = "no-images-available";
+
   return (
-    <StyledModal
-      hideHeaderDivider={false}
-      label={dataset.name}
-      position="right"
-      headerChildren={
-        <DatasetNavigationBar
-          isInSelectMode={isInSelectMode}
-          allSelected={areAllSelected}
-          anySelected={isAnySelected}
-          toggleSelectMode={toggleSelectMode}
-          toggleSelectAll={toggleSelectAll}
-          openJobCreationPopUp={openJobCreationPopUp}
-          openImageImportPopUp={openImageImportPopUp}
-          deleteSelectedImages={openDeleteImagesConfirmationPopUp}
+    <Container>
+      <PageTitle
+        title={dataset.name}
+        labelTx="dataset"
+        backPath={`/projects/${dataset.project}`}
+      />
+      <PageSection
+        titleTx="images"
+        isLoading={isLoadingImages}
+        infoTx={listInfoTx}
+        showActions={!imagesError}
+        actions={
+          <DatasetNavigationBar
+            isInSelectMode={isInSelectMode}
+            allSelected={areAllSelected}
+            anySelected={isAnySelected}
+            toggleSelectMode={toggleSelectMode}
+            toggleSelectAll={toggleSelectAll}
+            openJobCreationPopUp={openJobCreationPopUp}
+            openImageImportPopUp={openImageImportPopUp}
+            deleteSelectedImages={openDeleteImagesConfirmationPopUp}
+          />
+        }
+      >
+        <StyledSheet>
+          {images && (
+            <DatasetImageList
+              isInSelectMode={isInSelectMode}
+              images={images}
+              refetchImages={refetchImages}
+              selectedImages={selectedImages}
+              setImageSelection={setImageSelection}
+              setSelectedImages={setSelectedImages}
+              deleteAnnotation={deleteAnnotation}
+              deleteImage={deleteImage}
+            />
+          )}
+        </StyledSheet>
+        <JobCreationPopup
+          isOpen={!!jobCreationPopUpOpenWith}
+          onClose={closeJobCreationPopUp}
+          activeImageSelection={selectedImages}
+          projectId={dataset.project}
+          openWithDatasetId={jobCreationPopUpOpenWith}
         />
-      }
-    >
-      {store?.error && (
-        <ErrorNotification
-          title={store?.error.title}
-          titleTx={store?.error.titleTx}
-          description={store?.error.description}
-          descriptionTx={store?.error.descriptionTx}
-          descriptionData={store?.error.descriptionData}
+        <ImageImportPopup
+          isOpen={!!imageImportPopUpOpenWith}
+          onClose={closeImageImportPopUp}
+          dataset={imageImportPopUpOpenWith}
+          onImportFinished={refetchImages}
+          isDraggedOver={isDraggedOver}
+          onDropCompleted={handleImageImportDropCompleted}
         />
-      )}
-      {isLoadingImages ? (
-        <ErrorMessage tx="images-loading" />
-      ) : isErrorImages ? (
-        <ErrorMessage
-          text={translate("images-loading-error", {
-            statusText: imagesError?.response?.statusText,
-            status: imagesError?.response?.status,
+        <ConfirmationPopup
+          isOpen={isDeleteAnnotationConfirmationPopUpOpen}
+          onClose={closeDeleteAnnotationConfirmationPopUp}
+          message={translate("delete-annotation-message", {
+            name: annotationTobBeDeleted?.dataUri ?? "",
           })}
+          titleTx="delete-annotation-title"
+          onConfirm={handleAnnotationConfirmation}
         />
-      ) : images && images.length > 0 ? (
-        <DatasetImageList
-          isInSelectMode={isInSelectMode}
-          images={images}
-          refetchImages={refetchImages}
-          selectedImages={selectedImages}
-          setImageSelection={setImageSelection}
-          setSelectedImages={setSelectedImages}
-          deleteAnnotation={deleteAnnotation}
-          deleteImage={deleteImage}
+        <ConfirmationPopup
+          isOpen={isDeleteImagesConfirmationPopUpOpen}
+          onClose={closeDeleteImagesConfirmationPopUpAndClearSelection}
+          message={
+            imageTobBeDeleted
+              ? translate("delete-image-message", {
+                  name: imageTobBeDeleted?.dataUri ?? "",
+                })
+              : translate("delete-images-message", {
+                  count: selectedImages.size.toString(),
+                })
+          }
+          titleTx={
+            imageTobBeDeleted ? "delete-image-title" : "delete-images-title"
+          }
+          onConfirm={handleImageConfirmation}
         />
-      ) : (
-        <ErrorMessage tx="no-images-available" />
-      )}
-      <JobCreationPopup
-        isOpen={!!jobCreationPopUpOpenWith}
-        onClose={closeJobCreationPopUp}
-        activeImageSelection={selectedImages}
-        projectId={dataset.project}
-        openWithDatasetId={jobCreationPopUpOpenWith}
-      />
-      <ImageImportPopup
-        isOpen={!!imageImportPopUpOpenWith}
-        onClose={closeImageImportPopUp}
-        dataset={imageImportPopUpOpenWith}
-        onImportFinished={refetchImages}
-        isDraggedOver={isDraggedOver}
-        onDropCompleted={handleImageImportDropCompleted}
-      />
-      <ConfirmationPopup
-        isOpen={isDeleteAnnotationConfirmationPopUpOpen}
-        onClose={closeDeleteAnnotationConfirmationPopUp}
-        message={translate("delete-annotation-message", {
-          name: annotationTobBeDeleted?.dataUri ?? "",
-        })}
-        titleTx="delete-annotation-title"
-        onConfirm={handleAnnotationConfirmation}
-      />
-      <ConfirmationPopup
-        isOpen={isDeleteImagesConfirmationPopUpOpen}
-        onClose={closeDeleteImagesConfirmationPopUpAndClearSelection}
-        message={
-          imageTobBeDeleted
-            ? translate("delete-image-message", {
-                name: imageTobBeDeleted?.dataUri ?? "",
-              })
-            : translate("delete-images-message", {
-                count: selectedImages.size.toString(),
-              })
-        }
-        titleTx={
-          imageTobBeDeleted ? "delete-image-title" : "delete-images-title"
-        }
-        onConfirm={handleImageConfirmation}
-      />
-    </StyledModal>
+        {store?.error && (
+          <ErrorNotification
+            title={store?.error.title}
+            titleTx={store?.error.titleTx}
+            description={store?.error.description}
+            descriptionTx={store?.error.descriptionTx}
+            descriptionData={store?.error.descriptionData}
+          />
+        )}
+      </PageSection>
+    </Container>
   );
 };

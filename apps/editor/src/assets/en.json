@@ -1,6 +1,6 @@
 {
   "loading": "Loading...",
-  "error": "Error!",
+  "error": "Error",
   "reset": "Reset",
 
   "drop-file": "Drop your file here",
@@ -274,28 +274,37 @@
   "exit-select-mode": "Exit select mode",
   "select-mode": "Select mode",
 
+  "mia": "MIA",
+
+  "project": "Project",
+  "projects": "Projects",
+  "dataset": "Dataset",
+  "datasets": "Datasets",
+  "data": "Data",
+  "image": "Image",
+  "images": "Images",
+  "job": "Job",
+  "jobs": "Jobs",
+
   "projects-base-title": "VISIAN Projects",
   "project-base-title": "VISIAN Project",
   "datasets-base-title": "VISIAN Datasets",
   "jobs-base-title": "VISIAN Jobs",
   "dataset-base-title": "VISIAN Dataset",
 
-  "projects-loading": "Loading projects...",
-  "projects-loading-error": "Error on loading projects:",
+  "projects-loading-failed": "The projects could not be loaded.",
   "no-projects-available": "Currently no projects are available.",
 
-  "project-loading": "Loading project...",
-  "project-loading-error": "Error on loading project:",
+  "project-loading-failed": "The project could not be loaded.",
 
-  "datasets": "Datasets",
   "datasets-loading": "Loading datasets...",
-  "datasets-loading-error": "Error on loading datasets:",
+  "datasets-loading-failed": "The datasets could not be loaded.",
   "no-datasets-available": "Currently no datasets are available.",
 
-  "dataset-loading": "Loading dataset...",
-  "dataset-loading-error": "Error on loading dataset:",
+  "dataset-loading-failed": "The dataset could not be loaded.",
 
   "images-loading": "Loading images...",
+  "images-loading-failed": "The images could not be loaded.",
   "images-loading-error": "Error on loading images:  {{statusText}} {{status}}",
   "no-images-available": "Currently no images are available.",
   "image-open-error": "Error on opening image",
@@ -303,7 +312,7 @@
 
   "create-annotation-file-error": "Could not create annotation file.",
   "annotations-loading": "Loading annotations...",
-  "annotations-loading-error": "Error on loading annotations:",
+  "annotations-loading-failed": "The annotations could not be loaded.",
   "annotation-open-error": "Error on opening annotation",
   "annotation-saving": "Save active annotation group",
   "annotation-saving-overrwite": "Overwrite existing annotation file",
@@ -315,9 +324,7 @@
   "ml-models-none-available": "There are no models available.",
   "ml-models-not-found-error": "Unable to find model version.",
 
-  "jobs": "Jobs",
-  "jobs-loading": "Loading jobs...",
-  "jobs-loading-error": "Error on loading jobs: {{statusText}} {{status}}",
+  "jobs-loading-failed": "The jobs could not be loaded.",
   "no-jobs-available": "Currently no jobs are available.",
   "job-deleted-images": "It seems like all images for this job were deleted...",
   "job-images": "Images",

@@ -1,15 +1,11 @@
-import { ButtonParam, SquareButton } from "@visian/ui-shared";
 import styled from "styled-components";
 
+import { PageSectionButton, PageSectionIconButton } from "../page-section";
 import { DatasetNavigationBarProps } from "./dataset-navigationbar.props";
 
-const StyledButton = styled(SquareButton)`
-  margin-left: 10px;
-`;
-
-const StyledTextButton = styled(ButtonParam)`
-  margin: 0px;
-  width: auto;
+const Container = styled.div`
+  display: flex;
+  align-items: center;
 `;
 
 export const DatasetNavigationBar: React.FC<DatasetNavigationBarProps> = ({
@@ -23,51 +19,51 @@ export const DatasetNavigationBar: React.FC<DatasetNavigationBarProps> = ({
   deleteSelectedImages,
 }) =>
   isInSelectMode ? (
-    <>
-      <StyledTextButton
+    <Container>
+      <PageSectionButton
         labelTx={allSelected ? "deselect-all" : "select-all"}
         handlePress={toggleSelectAll}
       />
-      <StyledButton
+      <PageSectionIconButton
         isDisabled
         icon="export"
         tooltipTx="export-documents"
         tooltipPosition="top"
       />
-      <StyledButton
+      <PageSectionIconButton
         isDisabled={!anySelected}
         icon="trash"
         tooltipTx="delete-documents"
         onPointerDown={deleteSelectedImages}
         tooltipPosition="top"
       />
-      <StyledButton
+      <PageSectionIconButton
         isDisabled={!anySelected}
         icon="mlAutoAnnotation"
         tooltipTx="auto-annotate-documents"
         tooltipPosition="top"
         onPointerDown={openJobCreationPopUp}
       />
-      <StyledButton
+      <PageSectionIconButton
         icon="exit"
         tooltipTx="exit-select-mode"
         tooltipPosition="top"
         onPointerDown={toggleSelectMode}
       />
-    </>
+    </Container>
   ) : (
-    <>
-      <StyledButton
+    <Container>
+      <PageSectionIconButton
         icon="import"
         tooltipTx="import-images"
         tooltipPosition="top"
         onPointerDown={openImageImportPopUp}
       />
-      <StyledButton
+      <PageSectionIconButton
         icon="select"
         tooltipTx="select-mode"
         tooltipPosition="top"
         onPointerDown={toggleSelectMode}
       />
-    </>
+    </Container>
   );

@@ -1,43 +1,31 @@
-import { Modal, SquareButton, Text, useTranslation } from "@visian/ui-shared";
+import { useTranslation } from "@visian/ui-shared";
 import { useCallback, useState } from "react";
-import styled from "styled-components";
 
 import useDatasetsBy, {
   useCreateDatasetMutation,
   useDeleteDatasetsForProjectMutation,
 } from "../../../queries/use-datasets-by";
-import { Dataset } from "../../../types";
+import { Dataset, Project } from "../../../types";
 import { ConfirmationPopup } from "../confirmation-popup";
 import { DatasetCreationPopup } from "../dataset-creation-popup";
 import { DatasetList } from "../dataset-list";
+import {
+  PaddedPageSectionIconButton,
+  PageSection,
+  SectionSheet,
+} from "../page-section";
 
-const StyledModal = styled(Modal)`
-  width: 100%;
-`;
-
-const ErrorMessage = styled(Text)`
-  margin: auto;
-`;
-
-const StyledButton = styled(SquareButton)`
-  margin-left: 10px;
-  padding: 10px;
-`;
-
-export const DatasetsGrid = ({
-  projectId,
-  altMessage,
-}: {
-  projectId: string;
-  altMessage: string;
-}) => {
-  const { datasets } = useDatasetsBy(projectId);
-  const [datasetTobBeDeleted, setDatasetTobBeDeleted] = useState<Dataset>();
+export const DatasetsSection = ({ project }: { project: Project }) => {
   const { t: translate } = useTranslation();
+
+  const { datasets, isLoadingDatasets, datasetsError } = useDatasetsBy(
+    project.id,
+  );
+  const [datasetTobBeDeleted, setDatasetTobBeDeleted] = useState<Dataset>();
   const { deleteDatasets } = useDeleteDatasetsForProjectMutation();
   const { createDataset } = useCreateDatasetMutation();
 
-  // Delete dataset confirmation popup
+  // Delete Dataset Confirmation
   const [
     isDeleteDatasetConfirmationPopUpOpen,
     setIsDeleteDatasetConfirmationPopUpOpen,
@@ -49,7 +37,7 @@ export const DatasetsGrid = ({
     setIsDeleteDatasetConfirmationPopUpOpen(false);
   }, []);
 
-  // Create dataset popup
+  // Create Dataset
   const [isCreateDatasetPopupOpen, setIsCreateDatasetPopupOpen] =
     useState(false);
   const openCreateDatasetPopup = useCallback(
@@ -61,6 +49,7 @@ export const DatasetsGrid = ({
     [],
   );
 
+  // Delete Dataset
   const deleteDataset = useCallback(
     (dataset: Dataset) => {
       setDatasetTobBeDeleted(dataset);
@@ -72,39 +61,41 @@ export const DatasetsGrid = ({
   const confirmDeleteDataset = useCallback(() => {
     if (datasetTobBeDeleted)
       deleteDatasets({
-        projectId,
+        projectId: project.id,
         datasetIds: [datasetTobBeDeleted.id],
       });
-  }, [datasetTobBeDeleted, deleteDatasets, projectId]);
+  }, [datasetTobBeDeleted, deleteDatasets, project]);
 
   const confirmCreateDataset = useCallback(
-    (newDatasetDto) => createDataset({ ...newDatasetDto, project: projectId }),
-    [createDataset, projectId],
+    (newDatasetDto) => createDataset({ ...newDatasetDto, project: project.id }),
+    [createDataset, project],
   );
 
+  let datasetsInfoTx;
+  if (datasetsError) datasetsInfoTx = "datasets-loading-failed";
+  else if (datasets && datasets.length === 0)
+    datasetsInfoTx = "no-datasets-available";
+
   return (
-    <>
-      <StyledModal
-        hideHeaderDivider={false}
-        labelTx="datasets-base-title"
-        position="right"
-        headerChildren={
-          <StyledButton
-            icon="plus"
-            tooltipTx="create-dataset"
-            tooltipPosition="left"
-            onPointerDown={openCreateDatasetPopup}
-          />
-        }
-      >
-        {altMessage ? (
-          <ErrorMessage tx={altMessage} />
-        ) : (
-          datasets && (
-            <DatasetList datasets={datasets} deleteDataset={deleteDataset} />
-          )
+    <PageSection
+      titleTx="datasets"
+      isLoading={isLoadingDatasets}
+      infoTx={datasetsInfoTx}
+      showActions={!datasetsError}
+      actions={
+        <PaddedPageSectionIconButton
+          icon="plus"
+          tooltipTx="create-dataset"
+          tooltipPosition="left"
+          onPointerDown={openCreateDatasetPopup}
+        />
+      }
+    >
+      <SectionSheet>
+        {datasets && (
+          <DatasetList datasets={datasets} deleteDataset={deleteDataset} />
         )}
-      </StyledModal>
+      </SectionSheet>
       <ConfirmationPopup
         isOpen={isDeleteDatasetConfirmationPopUpOpen}
         onClose={closeDeleteDatasetConfirmationPopUp}
@@ -119,6 +110,6 @@ export const DatasetsGrid = ({
         onClose={closeCreateDatasetPopup}
         onConfirm={confirmCreateDataset}
       />
-    </>
+    </PageSection>
   );
 };

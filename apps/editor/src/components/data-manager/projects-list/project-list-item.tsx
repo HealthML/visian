@@ -39,7 +39,7 @@ export const ProjectListItem = ({
 
   const updateProject = useUpdateProjectsMutation();
   const navigateToProject = useCallback(
-    () => navigate(`/projects/${project.id}/datasets`),
+    () => navigate(`/projects/${project.id}`),
     [project.id, navigate],
   );
 

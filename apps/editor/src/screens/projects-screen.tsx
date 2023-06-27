@@ -1,20 +1,17 @@
-import {
-  Modal,
-  Screen,
-  SquareButton,
-  Text,
-  useTranslation,
-} from "@visian/ui-shared";
+import { Screen, Sheet, space, useTranslation } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useState } from "react";
 import styled from "styled-components";
 
+import { ConfirmationPopup } from "../components/data-manager/confirmation-popup";
+import { MiaTitle } from "../components/data-manager/mia-title";
+import { Page } from "../components/data-manager/page";
 import {
-  ConfirmationPopup,
-  ProjectCreationPopup,
-  ProjectList,
-  UIOverlayDataManager,
-} from "../components";
+  PageSection,
+  PageSectionIconButton,
+} from "../components/data-manager/page-section";
+import { ProjectCreationPopup } from "../components/data-manager/project-creation-popup";
+import { ProjectList } from "../components/data-manager/projects-list/project-list";
 import {
   useCreateProjectMutation,
   useDeleteProjectsMutation,
@@ -22,23 +19,20 @@ import {
 } from "../queries";
 import { Project } from "../types";
 
-const StyledModal = styled(Modal)`
-  width: 100%;
+const StyledSheet = styled(Sheet)`
+  padding: ${space("listPadding")};
+  box-sizing: border-box;
 `;
 
-const ErrorMessage = styled(Text)`
-  margin: auto;
-`;
-
-const StyledButton = styled(SquareButton)`
-  margin-left: 10px;
-  padding: 10px;
+const PlusIconButton = styled(PageSectionIconButton)`
+  padding: 0 8px;
+  height: auto;
 `;
 
 export const ProjectsScreen: React.FC = observer(() => {
   const { projects, projectsError, isErrorProjects, isLoadingProjects } =
     useProjects();
-  const [projectTobBeDeleted, setProjectTobBeDeleted] = useState<Project>();
+  const [projectToBeDeleted, setProjectToBeDeleted] = useState<Project>();
   const { deleteProjects } = useDeleteProjectsMutation();
   const { createProject } = useCreateProjectMutation();
   const { t: translate } = useTranslation();
@@ -69,29 +63,23 @@ export const ProjectsScreen: React.FC = observer(() => {
 
   const deleteProject = useCallback(
     (project: Project) => {
-      setProjectTobBeDeleted(project);
+      setProjectToBeDeleted(project);
       openDeleteProjectConfirmationPopUp();
     },
-    [setProjectTobBeDeleted, openDeleteProjectConfirmationPopUp],
+    [setProjectToBeDeleted, openDeleteProjectConfirmationPopUp],
   );
 
-  const altMessage = useMemo(() => {
-    if (isLoadingProjects) return translate("projects-loading");
-    if (isErrorProjects)
-      return `${translate("projects-loading-error")} ${
-        projectsError?.response?.statusText
-      } (${projectsError?.response?.status})`;
-    if (projects && projects.length <= 0)
-      return translate("no-projects-available");
-    return null;
-  }, [isLoadingProjects, isErrorProjects, projects, projectsError, translate]);
-
   const confirmDeleteProject = useCallback(() => {
-    if (projectTobBeDeleted)
+    if (projectToBeDeleted)
       deleteProjects({
-        projectIds: [projectTobBeDeleted.id],
+        projectIds: [projectToBeDeleted.id],
       });
-  }, [deleteProjects, projectTobBeDeleted]);
+  }, [deleteProjects, projectToBeDeleted]);
+
+  let projectsInfoTx;
+  if (projectsError) projectsInfoTx = "projects-loading-failed";
+  else if (projects && projects.length === 0)
+    projectsInfoTx = "no-projects-available";
 
   return (
     <Screen
@@ -103,48 +91,43 @@ export const ProjectsScreen: React.FC = observer(() => {
           : ""
       }`}
     >
-      <UIOverlayDataManager
-        main={
-          <StyledModal
-            hideHeaderDivider={false}
-            labelTx="projects-base-title"
-            position="right"
-            headerChildren={
-              <StyledButton
-                icon="plus"
-                tooltipTx="create-project"
-                tooltipPosition="left"
-                onPointerDown={openCreateProjectPopup}
-              />
-            }
-          >
-            {altMessage ? (
-              <ErrorMessage tx={altMessage} />
-            ) : (
-              projects && (
-                <ProjectList
-                  projects={projects}
-                  deleteProject={deleteProject}
-                />
-              )
+      <Page>
+        <MiaTitle />
+        <PageSection
+          titleTx="projects"
+          infoTx={projectsInfoTx}
+          showActions={!projectsError}
+          isLoading={isLoadingProjects}
+          actions={
+            <PlusIconButton
+              icon="plus"
+              tooltipTx="create-project"
+              tooltipPosition="left"
+              onPointerDown={openCreateProjectPopup}
+            />
+          }
+        >
+          <StyledSheet>
+            {projects && (
+              <ProjectList projects={projects} deleteProject={deleteProject} />
             )}
-            <ConfirmationPopup
-              isOpen={isDeleteProjectConfirmationPopUpOpen}
-              onClose={closeDeleteProjectConfirmationPopUp}
-              message={translate("delete-project-message", {
-                name: projectTobBeDeleted?.name ?? "",
-              })}
-              titleTx="delete-project-title"
-              onConfirm={confirmDeleteProject}
-            />
-            <ProjectCreationPopup
-              isOpen={isCreateProjectPopupOpen}
-              onClose={closeCreateProjectPopup}
-              onConfirm={createProject}
-            />
-          </StyledModal>
-        }
-      />
+          </StyledSheet>
+          <ConfirmationPopup
+            isOpen={isDeleteProjectConfirmationPopUpOpen}
+            onClose={closeDeleteProjectConfirmationPopUp}
+            message={translate("delete-project-message", {
+              name: projectToBeDeleted?.name ?? "",
+            })}
+            titleTx="delete-project-title"
+            onConfirm={confirmDeleteProject}
+          />
+          <ProjectCreationPopup
+            isOpen={isCreateProjectPopupOpen}
+            onClose={closeCreateProjectPopup}
+            onConfirm={createProject}
+          />
+        </PageSection>
+      </Page>
     </Screen>
   );
 });

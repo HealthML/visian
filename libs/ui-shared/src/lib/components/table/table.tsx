@@ -54,11 +54,13 @@ export const TableRow: <T>({
   row,
   columnWidths,
   onClick,
+  isLast,
 }: {
   row: Row<T>;
   columnWidths: number[];
   onClick?: (item: T) => void;
-}) => JSX.Element = ({ row, columnWidths, onClick }) => {
+  isLast?: boolean;
+}) => JSX.Element = ({ row, columnWidths, isLast, onClick }) => {
   const isClickable = onClick !== undefined;
 
   const handleClick = useCallback(() => {
@@ -66,7 +68,11 @@ export const TableRow: <T>({
   }, [onClick, row.original]);
 
   return (
-    <TableListItem isClickable={isClickable} onClick={handleClick}>
+    <TableListItem
+      isLast={isLast}
+      isClickable={isClickable}
+      onClick={handleClick}
+    >
       {row.getVisibleCells().map((cell, index) => (
         <TableCell key={cell.id} width={columnWidths[index]}>
           {flexRender(cell.column.columnDef.cell, cell.getContext())}
@@ -118,10 +124,11 @@ export const TableLayout: <T>({
         columnWidths={widths}
       />
 
-      {table.getRowModel().rows.map((row) => (
+      {table.getRowModel().rows.map((row, i) => (
         <TableRow
           key={row.id}
           row={row}
+          isLast={i === table.getRowModel().rows.length - 1}
           columnWidths={widths}
           onClick={onRowClick}
         />
