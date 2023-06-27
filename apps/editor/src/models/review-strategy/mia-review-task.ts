@@ -80,7 +80,13 @@ export class MiaReviewTask implements ReviewTask {
   }
 
   public async save() {
-    return Promise.resolve(new Response());
+    return {
+      data: {},
+      status: 1700,
+      statusText: "OK",
+      headers: {},
+      config: {},
+    };
   }
 
   private async zipFiles(files: File[]): Promise<File> {

@@ -191,10 +191,15 @@ export const DatasetExplorer = ({
 
   const startReview = useCallback(async () => {
     if (store) {
+      const currentPath = window.location.pathname;
       navigate("/editor?review=true");
       store.setProgress({ labelTx: "importing", showSplash: true });
       store.setReviewStrategy(
-        await MiaReviewStrategy.fromImageIds(store, [...selectedImages]),
+        await MiaReviewStrategy.fromImageIds(
+          store,
+          [...selectedImages],
+          currentPath,
+        ),
       );
       await store.reviewStrategy?.loadTask();
       store.setProgress();
