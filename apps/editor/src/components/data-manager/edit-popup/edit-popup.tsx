@@ -3,7 +3,7 @@ import { observer } from "mobx-react-lite";
 import { useCallback, useEffect, useState } from "react";
 import styled from "styled-components";
 
-import { ProjectEditPopupProps } from "./project-edit-popup.props";
+import { EditPopupProps } from "./edit-popup.props";
 
 const StyledTextButton = styled(ButtonParam)`
   margin: 0px;
@@ -18,17 +18,17 @@ const InlineRow = styled.div`
   margin-top: 30px;
 `;
 
-const ProjectEditPopupContainer = styled(PopUp)`
+const EditPopupContainer = styled(PopUp)`
   align-items: left;
   width: 400px;
 `;
 
 const TextInput = styled(TextField)`
-  margin: 0px 0px 0px 0px;
+  margin: 0px;
   width: calc(100% - 40px);
 `;
 
-export const ProjectEditPopup = observer<ProjectEditPopupProps>(
+export const EditPopup = observer<EditPopupProps>(
   ({ oldName, isOpen, onClose, onConfirm }) => {
     const [name, setName] = useState(oldName);
 
@@ -42,8 +42,8 @@ export const ProjectEditPopup = observer<ProjectEditPopupProps>(
     }, [oldName]);
 
     return (
-      <ProjectEditPopupContainer
-        titleTx="edit-project"
+      <EditPopupContainer
+        titleTx="edit"
         isOpen={isOpen}
         dismiss={clearInputsAndClose}
         shouldDismissOnOutsidePress
@@ -52,7 +52,7 @@ export const ProjectEditPopup = observer<ProjectEditPopupProps>(
           <TextInput
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholderTx="project-name"
+            placeholderTx="name"
           />
           <InlineRow>
             <StyledTextButton
@@ -70,7 +70,7 @@ export const ProjectEditPopup = observer<ProjectEditPopupProps>(
             />
           </InlineRow>
         </>
-      </ProjectEditPopupContainer>
+      </EditPopupContainer>
     );
   },
 );
