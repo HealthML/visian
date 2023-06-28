@@ -63,7 +63,7 @@ export const ProgressTooltip: React.FC<
     isShown === false ? null : (
       <TooltipContainer style={tooltipStyle}>
         {bars?.map((bar) => (
-          <TooltipLabel>
+          <TooltipLabel key={bar.labelTx}>
             <Text tx={bar.labelTx} text={bar.label} />
             <TooltipLabelValue>
               <Dot dotColor={bar.color} />

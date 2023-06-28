@@ -1,14 +1,14 @@
-import React, { useRef, useState } from "react";
-import styled from "styled-components";
+import React, { useEffect, useRef, useState } from "react";
+import Confetti from "react-confetti";
+import styled, { useTheme } from "styled-components";
 
 import { color, fontSize, Theme } from "../../theme";
 import { Text } from "../text";
+import { usePreviousValue } from "../utils";
 import { ProgressProps } from "./progress.props";
 import { ProgressTooltip } from "./progressTooltip";
 
 const Container = styled.div`
-  position: relative;
-
   display: grid;
   grid-template-columns: 1fr;
   grid-template-rows: 1fr;
@@ -90,20 +90,61 @@ const Bar = ({
   width,
   barColor,
   label,
+  showConfetti,
 }: {
   width: number;
   barColor: keyof Theme["colors"];
   label: string;
-}) => (
-  <ColoredBar width={width} barColor={barColor}>
-    <BaseBackground />
-    <Background barColor={barColor} />
-    <LabelContainer>
-      <Label>{label}</Label>
-      <Dot dotColor={barColor} />
-    </LabelContainer>
-  </ColoredBar>
-);
+  showConfetti?: boolean;
+}) => {
+  const theme = useTheme() as Theme;
+  const dotRef = useRef<HTMLDivElement>(null);
+  const [confettiSource, setConfettiSource] = useState<
+    { x: number; y: number; w: number; h: number } | undefined
+  >();
+  const [isConfettiVisible, setIsConfettiVisible] = useState(false);
+
+  const previousWidth = usePreviousValue(width);
+
+  useEffect(() => {
+    if (!dotRef.current || !previousWidth || !showConfetti) return;
+    if (previousWidth < 100 && width === 100) {
+      setTimeout(() => {
+        setConfettiSource({
+          x: dotRef.current?.offsetLeft || 0,
+          y: dotRef.current?.offsetTop || 0,
+          w: 0,
+          h: 0,
+        });
+        setIsConfettiVisible(true);
+      }, 500);
+    }
+  }, [previousWidth, width, dotRef, showConfetti]);
+
+  return (
+    <>
+      {isConfettiVisible && (
+        <Confetti
+          colors={[color(barColor)({ theme })]}
+          confettiSource={confettiSource}
+          numberOfPieces={50}
+          initialVelocityY={10}
+          tweenDuration={100}
+          recycle={false}
+          style={{ zIndex: 1000 }}
+        />
+      )}
+      <ColoredBar width={width} barColor={barColor}>
+        <BaseBackground />
+        <Background barColor={barColor} />
+        <LabelContainer>
+          <Label>{label}</Label>
+          <Dot dotColor={barColor} ref={dotRef} />
+        </LabelContainer>
+      </ColoredBar>
+    </>
+  );
+};
 
 export const Progress: React.FC<ProgressProps> = ({
   total,
@@ -138,6 +179,8 @@ export const Progress: React.FC<ProgressProps> = ({
             width={(bar.value / total) * 100}
             barColor={bar.color}
             label={bar.value.toString()}
+            showConfetti={bar.showConfetti}
+            key={bar.labelTx}
           />
         ))}
       <ProgressTooltip

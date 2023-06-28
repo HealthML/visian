@@ -7,6 +7,7 @@ type Bar = {
   color: keyof Theme["colors"];
   label?: string;
   labelTx?: string;
+  showConfetti?: boolean;
 };
 
 export interface ProgressProps

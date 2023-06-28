@@ -93,6 +93,7 @@ export const FakeAnnotationProgress = ({
             color: "green",
             labelTx: "progress-verified",
             value: verifiedImages,
+            showConfetti: true,
           },
           {
             color: "blueBorder",
