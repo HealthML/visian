@@ -1,5 +1,6 @@
 import { useTranslation } from "@visian/ui-shared";
 import { useCallback, useState } from "react";
+import styled from "styled-components";
 
 import useDatasetsBy, {
   useCreateDatasetMutation,
@@ -14,6 +15,10 @@ import {
   PageSection,
   SectionSheet,
 } from "../page-section";
+
+const PlusIconButton = styled(PaddedPageSectionIconButton)`
+  height: auto;
+`;
 
 export const DatasetsSection = ({ project }: { project: Project }) => {
   const { t: translate } = useTranslation();
@@ -83,7 +88,7 @@ export const DatasetsSection = ({ project }: { project: Project }) => {
       infoTx={datasetsInfoTx}
       showActions={!datasetsError}
       actions={
-        <PaddedPageSectionIconButton
+        <PlusIconButton
           icon="plus"
           tooltipTx="create-dataset"
           tooltipPosition="left"

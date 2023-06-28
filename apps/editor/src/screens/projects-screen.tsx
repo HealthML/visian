@@ -25,7 +25,7 @@ const StyledSheet = styled(Sheet)`
 `;
 
 const PlusIconButton = styled(PageSectionIconButton)`
-  padding: 0 8px;
+  padding: 0 9px;
   height: auto;
 `;
 

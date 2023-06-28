@@ -1,4 +1,5 @@
 import { useCallback, useState } from "react";
+import styled from "styled-components";
 
 import { useJobsBy } from "../../../queries";
 import { Project } from "../../../types";
@@ -9,6 +10,10 @@ import {
   PageSection,
   SectionSheet,
 } from "../page-section";
+
+const PlusIconButton = styled(PaddedPageSectionIconButton)`
+  height: auto;
+`;
 
 export const JobsSection = ({ project }: { project: Project }) => {
   const { jobs, jobsError, isLoadingJobs, refetchJobs } = useJobsBy(project.id);
@@ -34,7 +39,7 @@ export const JobsSection = ({ project }: { project: Project }) => {
       infoTx={jobsInfoTx}
       showActions={!jobsError}
       actions={
-        <PaddedPageSectionIconButton
+        <PlusIconButton
           icon="plus"
           tooltipTx="start-job"
           tooltipPosition="left"
