@@ -221,7 +221,7 @@ export const JobPage = ({ job }: { job: Job }) => {
                   />
                   <DetailsRow
                     tx="job-model-name"
-                    value={`${job.modelName} ${job.modelVersion}`}
+                    value={`${job.modelName} v${job.modelVersion}`}
                   />
                   <DetailsRow tx="job-started" value={startedAt} />
                   <DetailsRow tx="job-finished" value={finishedAt} />
