@@ -7,6 +7,6 @@ export * from "./job-creation-popup";
 export * from "./job-history";
 export * from "./project-creation-popup";
 export * from "./project-data-explorer";
-export * from "./projects-list";
 export * from "./util";
 export * from "./warning-label";
+export * from "./views";

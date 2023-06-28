@@ -396,14 +396,11 @@
 
   "create": "Erstellen",
   "create-project": "Projekt erstellen",
-  "project-name": "Projektname",
   "create-dataset": "Datensatz erstellen",
-  "dataset-name": "Datensatzname",
 
   "edit": "Bearbeiten",
-  "edit-project": "Projekt bearbeiten",
-  "edit-dataset": "Datensatz bearbeiten",
   "update": "Aktualisieren",
+  "name": "Name",
 
   "verified": "verifiziert",
 
@@ -416,5 +413,8 @@
   "review-annotations": "Review starten",
 
   "data-uri-help-message": "Die dataURI ist nicht gültig. Sie sollte das Format 'ordner/dateiname.erweiterung' haben, wobei ein Ordner und der Dateiname aus Buchstaben, Ziffern, -, oder _ bestehen kann und die Erweiterung eine der folgenden sein sollte:",
-  "uri-file-type-mismatch": "Die URI entspricht nicht dem Dateityp \"{{name}}\""
+  "uri-file-type-mismatch": "Die URI entspricht nicht dem Dateityp \"{{name}}\"",
+
+  "switch-to-grid": "Zur Rasteransicht wechseln",
+  "switch-to-list": "Zur Listenansicht wechseln"
 }

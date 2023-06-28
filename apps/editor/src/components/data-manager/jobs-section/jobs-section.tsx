@@ -11,8 +11,8 @@ import {
   SectionSheet,
 } from "../page-section";
 
-const PlusIconButton = styled(PaddedPageSectionIconButton)`
-  height: auto;
+const StyledIconButton = styled(PaddedPageSectionIconButton)`
+  height: 25px;
 `;
 
 export const JobsSection = ({ project }: { project: Project }) => {
@@ -39,7 +39,7 @@ export const JobsSection = ({ project }: { project: Project }) => {
       infoTx={jobsInfoTx}
       showActions={!jobsError}
       actions={
-        <PlusIconButton
+        <StyledIconButton
           icon="plus"
           tooltipTx="start-job"
           tooltipPosition="left"
