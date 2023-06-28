@@ -72,7 +72,7 @@ export const JobPage = ({ job }: { job: Job }) => {
   const { deleteJobs } = useDeleteJobsForProjectMutation();
   const { patchJobStatus } = usePatchJobStatusMutation();
 
-  // delete job confirmation popup
+  // Delete job confirmation popup
   const [
     isDeleteJobConfirmationPopUpOpen,
     setIsDeleteJobConfirmationPopUpOpen,
@@ -84,7 +84,7 @@ export const JobPage = ({ job }: { job: Job }) => {
     setIsDeleteJobConfirmationPopUpOpen(false);
   }, []);
 
-  // cancel job confirmation popup
+  // Cancel job confirmation popup
   const [
     isCancelJobConfirmationPopUpOpen,
     setIsCancelJobConfirmationPopUpOpen,
@@ -96,7 +96,7 @@ export const JobPage = ({ job }: { job: Job }) => {
     setIsCancelJobConfirmationPopUpOpen(false);
   }, []);
 
-  // job log popup
+  // Job log popup
   const [isJobLogPopUpOpen, setIsJobLogPopUpOpen] = useState(false);
   const openJobLogPopUp = useCallback(() => setIsJobLogPopUpOpen(true), []);
   const closeJobLogPopUp = useCallback(() => setIsJobLogPopUpOpen(false), []);
