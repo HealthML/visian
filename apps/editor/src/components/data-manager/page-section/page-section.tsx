@@ -14,6 +14,9 @@ import { PageSectionProps } from "./page-section.props";
 
 const Container = styled.div`
   margin-bottom: ${space("pageSectionMargin")};
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 `;
 
 const TopBar = styled.div`

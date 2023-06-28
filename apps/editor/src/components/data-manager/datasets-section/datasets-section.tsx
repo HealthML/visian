@@ -22,6 +22,10 @@ const Container = styled.div`
   align-items: center;
 `;
 
+const StyledIconButton = styled(PaddedPageSectionIconButton)`
+  height: 25px;
+`;
+
 export const DatasetsSection = ({ project }: { project: Project }) => {
   const { t: translate } = useTranslation();
   const navigate = useNavigate();
@@ -124,13 +128,13 @@ export const DatasetsSection = ({ project }: { project: Project }) => {
       showActions={!datasetsError}
       actions={
         <Container>
-          <PaddedPageSectionIconButton
+          <StyledIconButton
             icon={isGridView ? "list" : "grid"}
             tooltipTx={isGridView ? "switch-to-list" : "switch-to-grid"}
             tooltipPosition="right"
             onPointerDown={toggleGridView}
           />
-          <PaddedPageSectionIconButton
+          <StyledIconButton
             icon="plus"
             tooltipTx="create-dataset"
             tooltipPosition="left"

@@ -6,14 +6,17 @@ export const DetailsTable = styled.div`
 `;
 
 const RowContainer = styled.div`
-  display: table-row;
+  display: flex;
+  flex-wrap: nowrap;
+  flex-direction: row;
+  width: 100%;
+  align-items: center;
+  min-height: 1.8em;
 `;
 
-const DetailsText = styled(Text)`
-  display: table-cell;
-  vertical-align: middle;
-  padding: 0.2em 3em;
-  padding-left: 0;
+const Label = styled(Text)`
+  width: 33%;
+  font-weight: bold;
 `;
 
 export const DetailsRow = ({
@@ -28,8 +31,8 @@ export const DetailsRow = ({
   text?: string;
 }) => (
   <RowContainer>
-    <DetailsText text={text} tx={tx} />
-    {value && <DetailsText text={value} />}
+    <Label text={text} tx={tx} />
+    {value && <Text text={value} />}
     {!value && content}
   </RowContainer>
 );

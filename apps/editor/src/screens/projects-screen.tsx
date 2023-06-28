@@ -29,6 +29,11 @@ const Container = styled.div`
   align-items: center;
 `;
 
+const StyledIconButton = styled(PaddedPageSectionIconButton)`
+  padding: 0 9px;
+  height: 25px; ;
+`;
+
 export const ProjectsScreen: React.FC = observer(() => {
   const { t: translate } = useTranslation();
   const navigate = useNavigate();
@@ -135,13 +140,13 @@ export const ProjectsScreen: React.FC = observer(() => {
           isLoading={isLoadingProjects}
           actions={
             <Container>
-              <PaddedPageSectionIconButton
+              <StyledIconButton
                 icon={isGridView ? "list" : "grid"}
                 tooltipTx={isGridView ? "switch-to-list" : "switch-to-grid"}
                 tooltipPosition="right"
                 onPointerDown={toggleGridView}
               />
-              <PaddedPageSectionIconButton
+              <StyledIconButton
                 icon="plus"
                 tooltipTx="create-project"
                 tooltipPosition="left"
