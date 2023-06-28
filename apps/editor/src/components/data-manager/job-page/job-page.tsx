@@ -37,6 +37,10 @@ const StyledSheet = styled(Sheet)`
 const DetailsSheet = styled(Sheet)`
   padding: ${space("pageSectionMarginSmall")};
   box-sizing: border-box;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 `;
 
 const Container = styled.div`
@@ -242,6 +246,7 @@ export const JobPage = ({ job }: { job: Job }) => {
           <StyledSheet>
             {images?.sort(compareImages).map((image: Image, index: number) => (
               <ClickableListItem
+                key={image.id}
                 onClick={() =>
                   navigate(editorPath(image.id, findAnnotationId(image.id)))
                 }

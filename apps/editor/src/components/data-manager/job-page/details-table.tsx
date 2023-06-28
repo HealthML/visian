@@ -11,7 +11,7 @@ const RowContainer = styled.div`
   flex-direction: row;
   width: 100%;
   align-items: center;
-  padding: 4px 0;
+  min-height: 1.8em;
 `;
 
 const Label = styled(Text)`

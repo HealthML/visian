@@ -10,6 +10,8 @@ const Container = styled.div`
 
 const Column = styled.div<{ width: number }>`
   width: ${(props) => props.width}%;
+  display: flex;
+  flex-direction: column;
 `;
 
 export const PageRow = ({
