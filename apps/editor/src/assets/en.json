@@ -413,7 +413,7 @@
   "progress-annotated": "Annotated",
   "annotation-progress": "Progress",
   "annotation-progress-no-images": "Add images to see the annotation progress.",
-  "annotated-verified-images": "Annotated and verified images",
+  "annotated-verified-images": "Annotated and Verified Images",
   "review-annotations": "Start Review",
 
   "data-uri-help-message": "The dataURI is not valid. It should have a format like 'folders/filename.extension' where a folder and the filename can consist of letters, digits, -, or _ and extension should be one of the following:",
