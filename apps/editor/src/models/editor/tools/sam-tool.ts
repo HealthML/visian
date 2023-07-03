@@ -70,7 +70,9 @@ export class SAMTool<N extends "sam-tool" = "sam-tool">
 
     reaction(
       () => [this.imageLayer, this.viewType, this.sliceNumber],
-      () => this.resetPromptInputs,
+      () => {
+        this.resetPromptInputs();
+      },
       { fireImmediately: true },
     );
 
@@ -122,13 +124,19 @@ export class SAMTool<N extends "sam-tool" = "sam-tool">
   }
 
   public get embeddingState(): SAMToolEmbeddingState {
+    if (!this.imageLayer) return "uninitialized";
     if (
-      this.imageLayer &&
       this.sam.hasEmbedding(this.imageLayer, this.viewType, this.sliceNumber)
     ) {
       return "ready";
     }
-    if (this.sam.isLoadingEmbedding) {
+    if (
+      this.sam.isLoadingEmbedding(
+        this.imageLayer,
+        this.viewType,
+        this.sliceNumber,
+      )
+    ) {
       return "loading";
     }
     return "uninitialized";

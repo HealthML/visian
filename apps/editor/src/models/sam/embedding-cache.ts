@@ -7,7 +7,7 @@ export type SAMModelBoundingBox = { topLeft: Vector; bottomRight: Vector };
 export class EmbeddingCache {
   protected embeddings: Map<string, ort.Tensor> = new Map();
 
-  protected getEmbeddingKey(
+  public getEmbeddingKey(
     layer: IImageLayer,
     viewType: ViewType,
     slice: number,

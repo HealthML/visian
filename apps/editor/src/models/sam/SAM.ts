@@ -13,15 +13,38 @@ const EMBEDDING_SERVICE_URL = "http://localhost:3000/embedding";
 export class SAM {
   private embeddingCache: EmbeddingCache;
   private inferenceSession?: ort.InferenceSession;
-  public isLoadingEmbedding = false;
+  private loadingEmbeddings: Map<string, boolean> = new Map();
 
   constructor() {
     this.embeddingCache = new EmbeddingCache();
 
-    makeObservable(this, {
+    makeObservable<SAM, "loadingEmbeddings">(this, {
+      loadingEmbeddings: observable,
       isLoadingEmbedding: observable,
       hasEmbedding: observable,
     });
+  }
+
+  public isLoadingEmbedding(
+    imageLayer: IImageLayer,
+    viewType: ViewType,
+    sliceNumber: number,
+  ) {
+    return !!this.loadingEmbeddings.get(
+      this.embeddingCache.getEmbeddingKey(imageLayer, viewType, sliceNumber),
+    );
+  }
+
+  protected setLoading(
+    imageLayer: IImageLayer,
+    viewType: ViewType,
+    sliceNumber: number,
+    isLoading: boolean,
+  ) {
+    this.loadingEmbeddings.set(
+      this.embeddingCache.getEmbeddingKey(imageLayer, viewType, sliceNumber),
+      isLoading,
+    );
   }
 
   public hasEmbedding(
@@ -42,8 +65,7 @@ export class SAM {
     sliceNumber: number,
   ) {
     if (this.hasEmbedding(imageLayer, viewType, sliceNumber)) return;
-
-    this.isLoadingEmbedding = true;
+    this.setLoading(imageLayer, viewType, sliceNumber, true);
 
     const imageData = imageLayer.image.getSliceFloat32(viewType, sliceNumber);
     const voxels = this.get2DVector(viewType, imageLayer.image.voxelCount);
@@ -74,7 +96,7 @@ export class SAM {
       embedding,
     );
 
-    this.isLoadingEmbedding = false;
+    this.setLoading(imageLayer, viewType, sliceNumber, false);
   }
 
   protected getModelScale(width: number, height: number) {
