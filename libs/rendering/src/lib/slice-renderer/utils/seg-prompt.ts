@@ -6,7 +6,7 @@ import {
   Vector,
   ViewType,
 } from "@visian/utils";
-import { autorun } from "mobx";
+import { autorun, reaction } from "mobx";
 import * as THREE from "three";
 
 enum PointState {
@@ -38,6 +38,16 @@ export class SegPrompt extends THREE.Group implements IDisposable {
     this.add(this.promptPoints);
 
     this.disposers.push(autorun(this.updateGeometries));
+
+    reaction(
+      () => [this.editor.activeDocument?.viewport2D.mainViewType],
+      () => {
+        if (this.editor.activeDocument?.viewport2D.mainViewType !== viewType) {
+          this.visible = false;
+          this.editor.sliceRenderer?.lazyRender();
+        }
+      },
+    );
   }
 
   public dispose() {
