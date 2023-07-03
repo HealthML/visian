@@ -75,8 +75,6 @@ export class SAMTool<N extends "sam-tool" = "sam-tool">
       30,
     );
 
-    this.initLayerInfo();
-
     // When the selected slice / viewtype / layer changes, we just discard the embedding for now:
     reaction(
       () => [
@@ -92,6 +90,7 @@ export class SAMTool<N extends "sam-tool" = "sam-tool">
         this.sam.reset();
         if (this.sam.isReady()) this.renderer.clearMask();
       },
+      { fireImmediately: true },
     );
 
     makeObservable(this, {
@@ -192,11 +191,12 @@ export class SAMTool<N extends "sam-tool" = "sam-tool">
   }
 
   protected initLayerInfo() {
-    const imageLayer = this.document.mainImageLayer;
-    if (!imageLayer) throw new Error("No main image layer found");
-    this.imageLayer = imageLayer;
     this.viewType = this.document.viewport2D.mainViewType;
     this.sliceNumber = this.document.viewport2D.getSelectedSlice();
+
+    if (this.document.mainImageLayer) {
+      this.imageLayer = this.document.mainImageLayer;
+    }
   }
 
   public async loadEmbedding() {
