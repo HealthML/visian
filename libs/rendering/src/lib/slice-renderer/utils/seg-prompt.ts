@@ -1,5 +1,11 @@
 import { IEditor, ISAMTool } from "@visian/ui-shared";
-import { getPlaneAxes, IDisposable, IDisposer, ViewType } from "@visian/utils";
+import {
+  getPlaneAxes,
+  IDisposable,
+  IDisposer,
+  Vector,
+  ViewType,
+} from "@visian/utils";
 import { autorun } from "mobx";
 import * as THREE from "three";
 
@@ -48,12 +54,8 @@ export class SegPrompt extends THREE.Group implements IDisposable {
     const tool = document.tools.tools["sam-tool"] as ISAMTool | undefined;
     if (!tool) return;
 
-    const [widthAxis, heightAxis] = getPlaneAxes(this.viewType);
     const { voxelCount } = document.mainImageLayer.image;
-    const scale = new THREE.Vector2(
-      voxelCount[widthAxis],
-      voxelCount[heightAxis],
-    );
+    const scale = this.get2DVector(voxelCount);
 
     this.visible = false; // will be set to true in methods
     this.updateBoundingBox(tool, scale);
@@ -66,11 +68,11 @@ export class SegPrompt extends THREE.Group implements IDisposable {
     const points: THREE.Vector2[] = [];
     const pointStates: number[] = [];
     tool.foregroundPoints.forEach((point) => {
-      points.push(new THREE.Vector2(point.x, point.y));
+      points.push(this.get2DVector(point));
       pointStates.push(PointState.FOREGROUND);
     });
     tool.backgroundPoints.forEach((point) => {
-      points.push(new THREE.Vector2(point.x, point.y));
+      points.push(this.get2DVector(point));
       pointStates.push(PointState.BACKGROUND);
     });
     points.forEach((point) => point.addScalar(0.5).divide(scale));
@@ -89,9 +91,11 @@ export class SegPrompt extends THREE.Group implements IDisposable {
   private updateBoundingBox(tool: ISAMTool, scale: THREE.Vector2) {
     const linePoints: THREE.Vector2[] = [];
 
-    if (tool.boundingBox) {
-      const topLeft = tool.boundingBox.start;
-      const bottomRight = tool.boundingBox.end;
+    if (tool.orderedBoundingBox) {
+      const { start, end } = tool.orderedBoundingBox;
+
+      const topLeft = this.get2DVector(start);
+      const bottomRight = this.get2DVector(end);
 
       linePoints.push(new THREE.Vector2(topLeft.x, topLeft.y));
       linePoints.push(new THREE.Vector2(bottomRight.x, topLeft.y));
@@ -104,5 +108,10 @@ export class SegPrompt extends THREE.Group implements IDisposable {
     this.visible = true;
     this.lines.geometry.dispose();
     this.lines.geometry = new THREE.BufferGeometry().setFromPoints(linePoints);
+  }
+
+  private get2DVector(point: Vector) {
+    const [widthAxis, heightAxis] = getPlaneAxes(this.viewType);
+    return new THREE.Vector2(point[widthAxis], point[heightAxis]);
   }
 }

@@ -6,7 +6,7 @@ import {
   ISAMTool,
   ITool,
 } from "@visian/ui-shared";
-import { Vector } from "@visian/utils";
+import { getPlaneAxes, Vector, ViewType } from "@visian/utils";
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { debounce } from "lodash";
 import { action, makeObservable, observable, reaction } from "mobx";
@@ -36,7 +36,11 @@ export class SAMTool<N extends "sam-tool" = "sam-tool">
   protected previousTool?: N;
   // Todo: Allow storing embeddings per slices / layers without having to discard previous one?
   protected sam: SAM;
-  protected imageLayer?: IImageLayer;
+
+  protected imageLayer!: IImageLayer;
+  protected viewType!: ViewType;
+  protected sliceNumber!: number;
+
   protected debouncedGeneratePrediction: () => void;
 
   public embeddingState: SAMToolEmbeddingState = "uninitialized";
@@ -71,10 +75,18 @@ export class SAMTool<N extends "sam-tool" = "sam-tool">
       30,
     );
 
-    // When the selected slice changes, we just discard the embedding for now:
+    this.initLayerInfo();
+
+    // When the selected slice / viewtype / layer changes, we just discard the embedding for now:
     reaction(
-      () => this.document.viewport2D.getSelectedSlice(),
+      () => [
+        this.document.imageLayers,
+        this.document.mainImageLayer,
+        this.document.viewport2D.mainViewType,
+        this.document.viewport2D.getSelectedSlice(),
+      ],
       () => {
+        this.initLayerInfo();
         this.resetPromptInputs();
         this.setEmbeddingState("uninitialized");
         this.sam.reset();
@@ -143,6 +155,22 @@ export class SAMTool<N extends "sam-tool" = "sam-tool">
     return { start: this.boundingBoxStart, end: this.boundingBoxEnd };
   }
 
+  public get orderedBoundingBox(): { start: Vector; end: Vector } | undefined {
+    if (!this.boundingBoxStart || !this.boundingBoxEnd) return undefined;
+
+    const startX = Math.min(this.boundingBoxStart.x, this.boundingBoxEnd.x);
+    const startY = Math.min(this.boundingBoxStart.y, this.boundingBoxEnd.y);
+    const startZ = Math.min(this.boundingBoxStart.z, this.boundingBoxEnd.z);
+    const endX = Math.max(this.boundingBoxStart.x, this.boundingBoxEnd.x);
+    const endY = Math.max(this.boundingBoxStart.y, this.boundingBoxEnd.y);
+    const endZ = Math.max(this.boundingBoxStart.z, this.boundingBoxEnd.z);
+
+    return {
+      start: new Vector([startX, startY, startZ]),
+      end: new Vector([endX, endY, endZ]),
+    };
+  }
+
   public get isHoveringPoint() {
     const hovered = Vector.fromObject(this.document.viewport2D.hoveredVoxel);
     return (
@@ -154,20 +182,8 @@ export class SAMTool<N extends "sam-tool" = "sam-tool">
   protected async generatePrediction() {
     if (!this.sam.isReady()) return;
 
-    let boundingBox;
-    if (this.boundingBoxStart && this.boundingBoxEnd) {
-      const startX = Math.min(this.boundingBoxStart.x, this.boundingBoxEnd.x);
-      const startY = Math.min(this.boundingBoxStart.y, this.boundingBoxEnd.y);
-      const endX = Math.max(this.boundingBoxStart.x, this.boundingBoxEnd.x);
-      const endY = Math.max(this.boundingBoxStart.y, this.boundingBoxEnd.y);
-      boundingBox = {
-        topLeft: new Vector([startX, startY]),
-        bottomRight: new Vector([endX, endY]),
-      };
-    }
-
     const mask = await this.sam.getMask(
-      boundingBox,
+      this.orderedBoundingBox,
       this.foregroundPoints,
       this.backgroundPoints,
     );
@@ -175,26 +191,21 @@ export class SAMTool<N extends "sam-tool" = "sam-tool">
     if (mask) this.renderer.showMask(mask);
   }
 
+  protected initLayerInfo() {
+    const imageLayer = this.document.mainImageLayer;
+    if (!imageLayer) throw new Error("No main image layer found");
+    this.imageLayer = imageLayer;
+    this.viewType = this.document.viewport2D.mainViewType;
+    this.sliceNumber = this.document.viewport2D.getSelectedSlice();
+  }
+
   public async loadEmbedding() {
     this.setEmbeddingState("loading");
 
-    this.imageLayer = this.document.imageLayers.find(
-      (layer) => layer.isVisible && !layer.isAnnotation,
-    );
-    // Todo: Handle case where no image layer is found (disable tool?):
-    if (!this.imageLayer) throw new Error("No image layer found.");
-
-    const viewType = this.document.viewport2D.mainViewType;
-    const sliceNumber = this.document.viewport2D.getSelectedSlice();
-
-    const sliceData = this.imageLayer.image.getSliceFloat32(
-      viewType,
-      sliceNumber,
-    );
-    await this.sam.loadEmbedding(
-      sliceData,
-      this.imageLayer.image.voxelCount.x,
-      this.imageLayer.image.voxelCount.y,
+    await this.sam.getEmbedding(
+      this.imageLayer,
+      this.viewType,
+      this.sliceNumber,
     );
 
     this.setEmbeddingState("ready");
@@ -233,12 +244,14 @@ export class SAMTool<N extends "sam-tool" = "sam-tool">
       return;
     }
 
+    const [horizontal, vertical] = getPlaneAxes(this.viewType);
+
     // If the cursor did move but ended up in the same spot, clear the bounding box:
     if (
       this.boundingBoxStart &&
       (this.lastClick?.equals(clickPoint) ||
-        this.boundingBoxStart.x === clickPoint.x ||
-        this.boundingBoxStart.y === clickPoint.y)
+        this.boundingBoxStart[horizontal] === clickPoint[horizontal] ||
+        this.boundingBoxStart[vertical] === clickPoint[vertical])
     ) {
       this.setBoundingBoxStart(undefined);
       this.setBoundingBoxEnd(undefined);

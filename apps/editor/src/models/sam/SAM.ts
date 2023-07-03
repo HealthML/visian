@@ -1,12 +1,14 @@
-import { Vector } from "@visian/utils";
+import { IImageLayer } from "@visian/ui-shared";
+import { getPlaneAxes, Vector, ViewType } from "@visian/utils";
 import * as ort from "onnxruntime-web";
 
-export type SAMModelBoundingBox = { topLeft: Vector; bottomRight: Vector };
+export type SAMModelBoundingBox = { start: Vector; end: Vector };
 
 // Todo: Allow configuration:
 const EMBEDDING_SERVICE_URL = "http://localhost:3000/embedding";
 
 export class SAM {
+  private viewType?: ViewType;
   private embedding?: ort.Tensor;
   private inferenceSession?: ort.InferenceSession;
   private inputScale?: { width: number; height: number; samScale: number };
@@ -21,11 +23,16 @@ export class SAM {
     this.inputScale = undefined;
   }
 
-  public async loadEmbedding(
-    imageData: Float32Array,
-    width: number,
-    height: number,
+  public async getEmbedding(
+    imageLayer: IImageLayer,
+    viewType: ViewType,
+    sliceNumber: number,
   ) {
+    this.viewType = viewType;
+
+    const imageData = imageLayer.image.getSliceFloat32(viewType, sliceNumber);
+    const voxels = this.get2DVector(imageLayer.image.voxelCount);
+
     this.inferenceSession = await ort.InferenceSession.create(
       "/assets/sam_quantized.onnx",
     );
@@ -38,9 +45,8 @@ export class SAM {
     const file = new File([input], "image");
     const formdata = new FormData();
     formdata.append("image", file);
-    // Todo: Make sure to adapt resolution based on selected view type.
-    formdata.append("width", width.toString());
-    formdata.append("height", height.toString());
+    formdata.append("width", voxels.x.toString());
+    formdata.append("height", voxels.y.toString());
     const response = await fetch(EMBEDDING_SERVICE_URL, {
       method: "POST",
       body: formdata,
@@ -52,7 +58,7 @@ export class SAM {
     const embeddingTensor = new ort.Tensor("float32", data, [1, 256, 64, 64]);
     this.embedding = embeddingTensor;
 
-    this.setModelScale(width, height);
+    this.setModelScale(voxels.x, voxels.y);
   }
 
   protected setModelScale(width: number, height: number) {
@@ -115,10 +121,13 @@ export class SAM {
     let backgroundLabelOffset = 0;
 
     if (boundingBox) {
-      coords[0] = boundingBox.topLeft.x * samScale;
-      coords[1] = boundingBox.topLeft.y * samScale;
-      coords[2] = boundingBox.bottomRight.x * samScale;
-      coords[3] = boundingBox.bottomRight.y * samScale;
+      const topLeft = this.get2DVector(boundingBox.start);
+      const bottomRight = this.get2DVector(boundingBox.end);
+
+      coords[0] = topLeft.x * samScale;
+      coords[1] = topLeft.y * samScale;
+      coords[2] = bottomRight.x * samScale;
+      coords[3] = bottomRight.y * samScale;
       labels[0] = 2;
       labels[1] = 3;
 
@@ -126,7 +135,7 @@ export class SAM {
     }
 
     for (let i = 0; i < fPoints.length; i++) {
-      const point = fPoints[i];
+      const point = this.get2DVector(fPoints[i]);
       coords[i * 2 + bboxLabelOffset * 2] = point.x * samScale;
       coords[i * 2 + bboxLabelOffset * 2 + 1] = point.y * samScale;
       labels[i + bboxLabelOffset] = 1;
@@ -135,7 +144,7 @@ export class SAM {
     foregroundLabelOffset = bboxLabelOffset + fPoints.length;
 
     for (let i = 0; i < bPoints.length; i++) {
-      const point = bPoints[i];
+      const point = this.get2DVector(bPoints[i]);
       coords[i * 2 + foregroundLabelOffset * 2] = point.x * samScale;
       coords[i * 2 + foregroundLabelOffset * 2 + 1] = point.y * samScale;
       labels[i + foregroundLabelOffset] = 0;
@@ -176,5 +185,11 @@ export class SAM {
       mask_input: maskInput,
       has_mask_input: hasMaskInput,
     };
+  }
+
+  private get2DVector(point: Vector) {
+    if (this.viewType === undefined) throw Error("View type not set");
+    const [widthAxis, heightAxis] = getPlaneAxes(this.viewType);
+    return Vector.fromArray([point[widthAxis], point[heightAxis]]);
   }
 }

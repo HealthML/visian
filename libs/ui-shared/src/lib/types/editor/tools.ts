@@ -124,10 +124,8 @@ export interface IMeasurementTool extends IPreviewedTool<"measurement-tool"> {
 }
 
 export interface ISAMTool extends IPreviewedTool<"sam-tool"> {
-  boundingBox?: {
-    start: Vector;
-    end: Vector;
-  };
+  boundingBox?: { start: Vector; end: Vector };
+  orderedBoundingBox?: { start: Vector; end: Vector };
   foregroundPoints: Vector[];
   backgroundPoints: Vector[];
   setToRightClickMode: () => void;
