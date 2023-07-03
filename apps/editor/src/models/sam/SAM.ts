@@ -1,6 +1,9 @@
 import { IImageLayer } from "@visian/ui-shared";
 import { getPlaneAxes, Vector, ViewType } from "@visian/utils";
+import { makeObservable, observable } from "mobx";
 import * as ort from "onnxruntime-web";
+
+import { EmbeddingCache } from "./embedding-cache";
 
 export type SAMModelBoundingBox = { start: Vector; end: Vector };
 
@@ -8,34 +11,42 @@ export type SAMModelBoundingBox = { start: Vector; end: Vector };
 const EMBEDDING_SERVICE_URL = "http://localhost:3000/embedding";
 
 export class SAM {
-  private viewType?: ViewType;
-  private embedding?: ort.Tensor;
+  private embeddingCache: EmbeddingCache;
   private inferenceSession?: ort.InferenceSession;
-  private inputScale?: { width: number; height: number; samScale: number };
+  public isLoadingEmbedding = false;
 
-  public isReady() {
-    return !!this.embedding && !!this.inferenceSession;
+  constructor() {
+    this.embeddingCache = new EmbeddingCache();
+
+    makeObservable(this, {
+      isLoadingEmbedding: observable,
+      hasEmbedding: observable,
+    });
   }
 
-  public reset() {
-    this.embedding = undefined;
-    this.inferenceSession = undefined;
-    this.inputScale = undefined;
-  }
-
-  public async getEmbedding(
+  public hasEmbedding(
     imageLayer: IImageLayer,
     viewType: ViewType,
     sliceNumber: number,
   ) {
-    this.viewType = viewType;
+    return !!this.embeddingCache.getEmbedding(
+      imageLayer,
+      viewType,
+      sliceNumber,
+    );
+  }
+
+  public async generateEmbedding(
+    imageLayer: IImageLayer,
+    viewType: ViewType,
+    sliceNumber: number,
+  ) {
+    if (this.hasEmbedding(imageLayer, viewType, sliceNumber)) return;
+
+    this.isLoadingEmbedding = true;
 
     const imageData = imageLayer.image.getSliceFloat32(viewType, sliceNumber);
-    const voxels = this.get2DVector(imageLayer.image.voxelCount);
-
-    this.inferenceSession = await ort.InferenceSession.create(
-      "/assets/sam_quantized.onnx",
-    );
+    const voxels = this.get2DVector(viewType, imageLayer.image.voxelCount);
 
     const input = new Uint8Array(imageData.length);
     for (let i = 0; i < imageData.length; i++) {
@@ -55,37 +66,62 @@ export class SAM {
     const responseData = await response.arrayBuffer();
     const data = new Float32Array(responseData);
 
-    const embeddingTensor = new ort.Tensor("float32", data, [1, 256, 64, 64]);
-    this.embedding = embeddingTensor;
+    const embedding = new ort.Tensor("float32", data, [1, 256, 64, 64]);
+    this.embeddingCache.storeEmbedding(
+      imageLayer,
+      viewType,
+      sliceNumber,
+      embedding,
+    );
 
-    this.setModelScale(voxels.x, voxels.y);
+    this.isLoadingEmbedding = false;
   }
 
-  protected setModelScale(width: number, height: number) {
+  protected getModelScale(width: number, height: number) {
     // SAM internally resized images to longest side 1024, so we need to
     // calculate the scale factor in order to resize the mask output:
     const LONG_SIDE_LENGTH = 1024;
-    const samScale = LONG_SIDE_LENGTH / Math.max(...[width, height]);
-    this.inputScale = { width, height, samScale };
+    return LONG_SIDE_LENGTH / Math.max(...[width, height]);
+  }
+
+  protected async getInferenceSession() {
+    if (!this.inferenceSession) {
+      this.inferenceSession = await ort.InferenceSession.create(
+        "/assets/sam_quantized.onnx",
+      );
+    }
+    return this.inferenceSession;
   }
 
   public async getMask(
+    imageLayer: IImageLayer,
+    viewType: ViewType,
+    sliceNumber: number,
     boundingBox?: SAMModelBoundingBox,
     foregroundPoints?: Vector[],
     backgroundPoints?: Vector[],
   ): Promise<Float32Array | undefined> {
-    if (!this.inferenceSession) throw new Error("Model not loaded");
+    const embedding = this.embeddingCache.getEmbedding(
+      imageLayer,
+      viewType,
+      sliceNumber,
+    );
+    if (!embedding) return;
 
     console.time("prediction generation");
 
     const modelInput = this.getModelInput(
+      imageLayer,
+      viewType,
+      embedding,
       boundingBox,
       foregroundPoints,
       backgroundPoints,
     );
     if (!modelInput) return;
 
-    const modelOutput = await this.inferenceSession.run(modelInput);
+    const session = await this.getInferenceSession();
+    const modelOutput = await session.run(modelInput);
     const maskOutput = modelOutput.masks.data as Float32Array;
 
     console.timeEnd("prediction generation");
@@ -94,18 +130,21 @@ export class SAM {
   }
 
   protected getModelInput(
+    imageLayer: IImageLayer,
+    viewType: ViewType,
+    embedding: ort.Tensor,
     boundingBox?: SAMModelBoundingBox,
     foregroundPoints?: Vector[],
     backgroundPoints?: Vector[],
   ) {
-    if (!this.embedding || !this.inputScale) return undefined;
     if (!boundingBox && !foregroundPoints?.length && !backgroundPoints?.length)
       return;
 
     const fPoints = foregroundPoints || [];
     const bPoints = backgroundPoints || [];
 
-    const { samScale } = this.inputScale;
+    const voxels = this.get2DVector(viewType, imageLayer.image.voxelCount);
+    const samScale = this.getModelScale(voxels.x, voxels.y);
 
     // We need space for all prompt points and one padding point if no
     // bounding box is present, otherwise two corner points for the bbox:
@@ -121,8 +160,8 @@ export class SAM {
     let backgroundLabelOffset = 0;
 
     if (boundingBox) {
-      const topLeft = this.get2DVector(boundingBox.start);
-      const bottomRight = this.get2DVector(boundingBox.end);
+      const topLeft = this.get2DVector(viewType, boundingBox.start);
+      const bottomRight = this.get2DVector(viewType, boundingBox.end);
 
       coords[0] = topLeft.x * samScale;
       coords[1] = topLeft.y * samScale;
@@ -135,7 +174,7 @@ export class SAM {
     }
 
     for (let i = 0; i < fPoints.length; i++) {
-      const point = this.get2DVector(fPoints[i]);
+      const point = this.get2DVector(viewType, fPoints[i]);
       coords[i * 2 + bboxLabelOffset * 2] = point.x * samScale;
       coords[i * 2 + bboxLabelOffset * 2 + 1] = point.y * samScale;
       labels[i + bboxLabelOffset] = 1;
@@ -144,7 +183,7 @@ export class SAM {
     foregroundLabelOffset = bboxLabelOffset + fPoints.length;
 
     for (let i = 0; i < bPoints.length; i++) {
-      const point = this.get2DVector(bPoints[i]);
+      const point = this.get2DVector(viewType, bPoints[i]);
       coords[i * 2 + foregroundLabelOffset * 2] = point.x * samScale;
       coords[i * 2 + foregroundLabelOffset * 2 + 1] = point.y * samScale;
       labels[i + foregroundLabelOffset] = 0;
@@ -162,10 +201,7 @@ export class SAM {
     const coordsTensor = new ort.Tensor("float32", coords, [1, n, 2]);
     const labelsTensor = new ort.Tensor("float32", labels, [1, n]);
 
-    const imageSizeTensor = new ort.Tensor("float32", [
-      this.inputScale.height,
-      this.inputScale.width,
-    ]);
+    const imageSizeTensor = new ort.Tensor("float32", [voxels.y, voxels.x]);
 
     // Use empty tensor since we don't specify an input mask:
     const maskInput = new ort.Tensor(
@@ -178,7 +214,7 @@ export class SAM {
     const hasMaskInput = new ort.Tensor("float32", [0]);
 
     return {
-      image_embeddings: this.embedding,
+      image_embeddings: embedding,
       point_coords: coordsTensor,
       point_labels: labelsTensor,
       orig_im_size: imageSizeTensor,
@@ -187,9 +223,8 @@ export class SAM {
     };
   }
 
-  private get2DVector(point: Vector) {
-    if (this.viewType === undefined) throw Error("View type not set");
-    const [widthAxis, heightAxis] = getPlaneAxes(this.viewType);
+  private get2DVector(viewType: ViewType, point: Vector) {
+    const [widthAxis, heightAxis] = getPlaneAxes(viewType);
     return Vector.fromArray([point[widthAxis], point[heightAxis]]);
   }
 }

@@ -6,10 +6,10 @@ import {
   ISAMTool,
   ITool,
 } from "@visian/ui-shared";
-import { getPlaneAxes, Vector, ViewType } from "@visian/utils";
+import { getPlaneAxes, Vector } from "@visian/utils";
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { debounce } from "lodash";
-import { action, makeObservable, observable, reaction } from "mobx";
+import { action, computed, makeObservable, observable, reaction } from "mobx";
 
 import { SAM } from "../../sam/SAM";
 import { Tool } from "./tool";
@@ -34,16 +34,9 @@ export class SAMTool<N extends "sam-tool" = "sam-tool">
   ];
 
   protected previousTool?: N;
-  // Todo: Allow storing embeddings per slices / layers without having to discard previous one?
   protected sam: SAM;
 
-  protected imageLayer!: IImageLayer;
-  protected viewType!: ViewType;
-  protected sliceNumber!: number;
-
   protected debouncedGeneratePrediction: () => void;
-
-  public embeddingState: SAMToolEmbeddingState = "uninitialized";
 
   protected lastClick?: Vector;
 
@@ -75,33 +68,24 @@ export class SAMTool<N extends "sam-tool" = "sam-tool">
       30,
     );
 
-    // When the selected slice / viewtype / layer changes, we just discard the embedding for now:
     reaction(
-      () => [
-        this.document.imageLayers,
-        this.document.mainImageLayer,
-        this.document.viewport2D.mainViewType,
-        this.document.viewport2D.getSelectedSlice(),
-      ],
-      () => {
-        this.initLayerInfo();
-        this.resetPromptInputs();
-        this.setEmbeddingState("uninitialized");
-        this.sam.reset();
-        if (this.sam.isReady()) this.renderer.clearMask();
-      },
+      () => [this.imageLayer, this.viewType, this.sliceNumber],
+      () => this.resetPromptInputs,
       { fireImmediately: true },
     );
 
-    makeObservable(this, {
-      embeddingState: observable,
+    makeObservable<SAMTool, "imageLayer" | "viewType" | "sliceNumber">(this, {
+      embeddingState: computed,
+      imageLayer: computed,
+      viewType: computed,
+      sliceNumber: computed,
+
       isInRightClickMode: observable,
       boundingBoxStart: observable,
       boundingBoxEnd: observable,
       foregroundPoints: observable,
       backgroundPoints: observable,
 
-      setEmbeddingState: action,
       setToRightClickMode: action,
       setBoundingBoxStart: action,
       setBoundingBoxEnd: action,
@@ -125,8 +109,29 @@ export class SAMTool<N extends "sam-tool" = "sam-tool">
     );
   }
 
-  public setEmbeddingState(state: SAMToolEmbeddingState) {
-    this.embeddingState = state;
+  protected get viewType() {
+    return this.document.viewport2D.mainViewType;
+  }
+
+  protected get sliceNumber() {
+    return this.document.viewport2D.getSelectedSlice();
+  }
+
+  protected get imageLayer() {
+    return this.document.mainImageLayer;
+  }
+
+  public get embeddingState(): SAMToolEmbeddingState {
+    if (
+      this.imageLayer &&
+      this.sam.hasEmbedding(this.imageLayer, this.viewType, this.sliceNumber)
+    ) {
+      return "ready";
+    }
+    if (this.sam.isLoadingEmbedding) {
+      return "loading";
+    }
+    return "uninitialized";
   }
 
   public setToRightClickMode(value = true) {
@@ -179,9 +184,17 @@ export class SAMTool<N extends "sam-tool" = "sam-tool">
   }
 
   protected async generatePrediction() {
-    if (!this.sam.isReady()) return;
+    if (
+      !this.imageLayer ||
+      !this.sam.hasEmbedding(this.imageLayer, this.viewType, this.sliceNumber)
+    ) {
+      return;
+    }
 
     const mask = await this.sam.getMask(
+      this.imageLayer,
+      this.viewType,
+      this.sliceNumber,
       this.orderedBoundingBox,
       this.foregroundPoints,
       this.backgroundPoints,
@@ -190,25 +203,15 @@ export class SAMTool<N extends "sam-tool" = "sam-tool">
     if (mask) this.renderer.showMask(mask);
   }
 
-  protected initLayerInfo() {
-    this.viewType = this.document.viewport2D.mainViewType;
-    this.sliceNumber = this.document.viewport2D.getSelectedSlice();
-
-    if (this.document.mainImageLayer) {
-      this.imageLayer = this.document.mainImageLayer;
-    }
-  }
-
   public async loadEmbedding() {
-    this.setEmbeddingState("loading");
+    if (!this.imageLayer) return;
 
-    await this.sam.getEmbedding(
+    await this.sam.generateEmbedding(
       this.imageLayer,
       this.viewType,
       this.sliceNumber,
     );
 
-    this.setEmbeddingState("ready");
     this.generatePrediction();
   }
 
