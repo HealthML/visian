@@ -42,20 +42,46 @@ export const ButtonParam: React.FC<Partial<ButtonParamProps>> = ({
   />
 );
 
-export const BlueButtonParam = styled(ButtonParam)`
-  background: ${sheetNoise}, ${color("blueSheet")};
-  border-color: ${color("blueBorder")};
+export const ColoredButtonParam = styled(ButtonParam)<{
+  color: "green" | "red" | "blue";
+}>`
+  background: ${sheetNoise},
+    ${({ color: buttonColor }) => color(`${buttonColor}Sheet`)};
+  border-color: ${({ color: buttonColor }) => color(`${buttonColor}Border`)};
 
   &:active {
-    border-color: rgba(0, 133, 255, 1);
+    border-color: rgba(
+      ${({ color: buttonColor }) =>
+        buttonColor === "green"
+          ? "79, 209, 15"
+          : buttonColor === "red"
+          ? "202, 51, 69"
+          : "0, 133, 255"},
+      1
+    );
   }
 `;
 
-export const RedButtonParam = styled(ButtonParam)`
-  background: ${sheetNoise}, ${color("redSheet")};
-  border-color: ${color("redBorder")};
+export const ColoredBorderButtonParam = styled(ButtonParam)<{
+  color: "green" | "red" | "blue";
+}>`
+  border-color: ${({ color: buttonColor }) =>
+    buttonColor === "green"
+      ? "rgb(104, 208, 158, .9)"
+      : buttonColor === "red"
+      ? "rgba(202,51,69, .9)"
+      : "rgba(0,133,255, .9)"};
+  border-width: 2px;
 
   &:active {
-    border-color: rgba(202, 51, 69, 1);
+    border-color: rgba(
+      ${({ color: buttonColor }) =>
+        buttonColor === "green"
+          ? "79, 209, 15"
+          : buttonColor === "red"
+          ? "202, 51, 69"
+          : "0, 133, 255"},
+      1
+    );
   }
 `;

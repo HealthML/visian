@@ -166,44 +166,50 @@ export const DatasetImageListItem: React.FC<DatasetImageListItemProps> = ({
         ) : (
           annotations && (
             <AnnotationsList>
-              {annotations.map((annotation: Annotation) => (
-                <ListItem>
-                  <ClickableText
-                    onClick={() => {
-                      navigate(
-                        editorPath(
-                          image.id,
-                          annotation.id,
-                          projectId,
-                          datasetId,
-                        ),
-                      );
-                    }}
+              {annotations.map(
+                (annotation: Annotation, annotationIndex: number) => (
+                  <ListItem
+                    isLast={
+                      isLast && annotationIndex === annotations.length - 1
+                    }
                   >
-                    {isInSelectMode
-                      ? annotation.dataUri
-                      : annotation.dataUri.split("/").pop()}
-                  </ClickableText>
-                  <ExpandedSpacer />
-                  {annotation.verified && (
-                    <StatusBadge
-                      textColor="Neuronic Neon"
-                      borderColor="gray"
-                      tx="verified"
-                    />
-                  )}
-                  <Spacer />
-                  {!isInSelectMode && (
-                    <IconButton
-                      icon="trash"
-                      tooltipTx="delete-annotation-title"
-                      onPointerDown={() => {
-                        deleteAnnotation(annotation);
+                    <ClickableText
+                      onClick={() => {
+                        navigate(
+                          editorPath(
+                            image.id,
+                            annotation.id,
+                            projectId,
+                            datasetId,
+                          ),
+                        );
                       }}
-                    />
-                  )}
-                </ListItem>
-              ))}
+                    >
+                      {isInSelectMode
+                        ? annotation.dataUri
+                        : annotation.dataUri.split("/").pop()}
+                    </ClickableText>
+                    <ExpandedSpacer />
+                    {annotation.verified && (
+                      <StatusBadge
+                        textColor="Neuronic Neon"
+                        borderColor="gray"
+                        tx="verified"
+                      />
+                    )}
+                    <Spacer />
+                    {!isInSelectMode && (
+                      <IconButton
+                        icon="trash"
+                        tooltipTx="delete-annotation-title"
+                        onPointerDown={() => {
+                          deleteAnnotation(annotation);
+                        }}
+                      />
+                    )}
+                  </ListItem>
+                ),
+              )}
             </AnnotationsList>
           )
         ))}

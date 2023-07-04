@@ -70,7 +70,7 @@ export abstract class ReviewStrategy {
         const familyFiles = this.store.editor.activeDocument?.createLayerFamily(
           annotationFiles,
           `Annotation ${idx + 1}`,
-          { id: annotationId },
+          { ...annotationFiles[0]?.metadata },
         );
         if (!familyFiles) throw new Error();
 

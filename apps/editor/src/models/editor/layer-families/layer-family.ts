@@ -20,8 +20,9 @@ export class LayerFamily implements ILayerFamily {
     this.title = title || "";
     this.layerIds = layerIds || [];
 
-    makeObservable<this, "layerIds">(this, {
+    makeObservable<this, "layerIds" | "metaData">(this, {
       layerIds: observable,
+      metaData: observable,
 
       addLayer: action,
       removeLayer: action,

@@ -78,7 +78,7 @@ export class WHOReviewTask implements ReviewTask {
     });
   }
 
-  public async createAnnotation(files: File[]): Promise<void> {
+  public async createAnnotation(files: File[]) {
     const annotationWithoutData = {
       // TODO: set correct status
       status: WHOAnnotationStatus.Completed,
@@ -94,6 +94,7 @@ export class WHOReviewTask implements ReviewTask {
       }),
     );
     this.whoTask.annotations.push(annotation);
+    return annotation.annotationUUID;
   }
 
   public async updateAnnotation(

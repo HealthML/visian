@@ -1,6 +1,6 @@
 import {
-  BlueButtonParam,
   ButtonParam,
+  ColoredButtonParam,
   ColorMode,
   Divider,
   EnumParam,
@@ -105,7 +105,8 @@ export const MenuDataManager: React.FC<MenuDataManagerProps> = observer(
           <Divider />
           <ButtonParam labelTx="shortcuts" handlePress={openShortcutPopUp} />
           {feedbackMailAddress && (
-            <BlueButtonParam
+            <ColoredButtonParam
+              color="blue"
               labelTx="ideas-feedback"
               handlePress={sendFeedback}
             />

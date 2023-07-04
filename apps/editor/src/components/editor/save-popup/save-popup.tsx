@@ -12,13 +12,13 @@ import { AxiosError } from "axios";
 import { observer } from "mobx-react-lite";
 import path from "path";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useSearchParams } from "react-router-dom";
 import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
 import { importFilesToDocument } from "../../../import-handling";
 import { LayerFamily } from "../../../models/editor/layer-families";
-import { patchAnnotationFile, postAnnotationFile } from "../../../queries";
+import { MiaReviewTask } from "../../../models/review-strategy";
+import { fetchAnnotationFile } from "../../../queries";
 import { Annotation, FileWithMetadata } from "../../../types";
 import { SavePopUpProps } from "./save-popup.props";
 
@@ -67,7 +67,6 @@ const StyledDropDown = styled(DropDown)`
 
 export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
   const store = useStore();
-  const [searchParams] = useSearchParams();
   const [newAnnotationURIPrefix, setnewAnnotationURIPrefix] = useState("");
 
   const { t: translate } = useTranslation();
@@ -129,22 +128,11 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
     }
   };
 
-  const importSavedAnnotationFile = (
-    annotationFile: File,
-    metaData: Annotation,
-  ) => {
-    const savedAnnotationFile = new File(
-      [annotationFile],
-      metaData.dataUri.split("/").pop() ?? "",
-      {
-        type: annotationFile.type,
-      },
-    ) as FileWithMetadata;
-    savedAnnotationFile.metadata = metaData;
+  const importAnnotationFile = async (annotationFile: FileWithMetadata) => {
     const fileTransfer = new DataTransfer();
-    fileTransfer.items.add(savedAnnotationFile);
+    fileTransfer.items.add(annotationFile);
     if (store) {
-      importFilesToDocument(fileTransfer.files, store);
+      await importFilesToDocument(fileTransfer.files, store);
     }
   };
 
@@ -167,11 +155,14 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
         throw new Error(translate("create-annotation-error"));
       }
       checkAnnotationURI(annotationFile, annotationMeta.dataUri);
-      const response = await patchAnnotationFile(
-        annotationMeta,
-        annotationFile,
+      await store?.reviewStrategy?.currentTask?.updateAnnotation(
+        annotationMeta.id,
+        [annotationFile],
       );
-      return response;
+      activeLayer?.getFamilyLayers().forEach((layer) => {
+        store?.editor.activeDocument?.history?.updateCheckpoint(layer.id);
+      });
+      return true;
     } catch (error) {
       if (error instanceof AxiosError) {
         const description = error.response?.data?.message
@@ -190,31 +181,60 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
     }
   };
 
+  const loadOldAnnotation = async (
+    newAnnotationMeta: Annotation,
+    oldAnnotationMeta: Annotation,
+  ) => {
+    const activeLayer = store?.editor.activeDocument?.activeLayer;
+    if (activeLayer?.family) {
+      activeLayer.family.metaData = newAnnotationMeta;
+      activeLayer.family.title = newAnnotationMeta.dataUri;
+      activeLayer.family.layers.forEach((layer, index) => {
+        layer.metadata = newAnnotationMeta;
+        layer.setTitle(
+          `${index + 1}_${newAnnotationMeta.dataUri.split("/").pop()}`,
+        );
+      });
+    }
+    const oldAnnotationFile = await fetchAnnotationFile(oldAnnotationMeta.id);
+    await importAnnotationFile(oldAnnotationFile);
+    if (activeLayer) {
+      store?.editor.activeDocument?.setActiveLayer(activeLayer.id);
+    }
+  };
+
   const saveAnnotationAs = async (uri: string) => {
     store?.setProgress({ labelTx: "saving" });
     try {
       const activeLayer = store?.editor.activeDocument?.activeLayer;
-      const imageId = searchParams.get("imageId");
-      const annotationFile = await createFileForFamilyOf(
+      const reviewTask = store?.reviewStrategy?.currentTask;
+      const annotationFile = (await createFileForFamilyOf(
         activeLayer,
         uri.endsWith(".zip"),
-      );
-      if (!imageId || !annotationFile) {
+      )) as FileWithMetadata;
+      if (!reviewTask || !annotationFile) {
         throw new Error(translate("create-annotation-error"));
       }
-      const responseData = await postAnnotationFile(
-        imageId,
-        uri,
+      annotationFile.metadata = { id: "", dataUri: uri };
+      const newAnnotationId = await reviewTask.createAnnotation([
         annotationFile,
-      );
+      ]);
       const annotationMeta = activeLayer?.family?.metaData as Annotation;
-      store?.setProgress();
+      const newAnnotationMeta =
+        reviewTask instanceof MiaReviewTask
+          ? // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            reviewTask.getAnnotation(newAnnotationId)!
+          : annotationMeta;
       if (!annotationMeta) {
-        createFamilyForNewAnnotation(activeLayer, responseData);
+        createFamilyForNewAnnotation(activeLayer, newAnnotationMeta);
       } else {
-        importSavedAnnotationFile(annotationFile, responseData);
+        await loadOldAnnotation(newAnnotationMeta, annotationMeta);
       }
-      return responseData;
+      activeLayer?.getFamilyLayers().forEach((layer) => {
+        store?.editor.activeDocument?.history?.updateCheckpoint(layer.id);
+      });
+      store?.setProgress();
+      return true;
     } catch (error: any) {
       const description = error.response?.data?.message
         ? error.response.data.message

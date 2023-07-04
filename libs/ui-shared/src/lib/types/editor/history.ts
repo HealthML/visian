@@ -36,5 +36,6 @@ export interface IHistory {
   /** checks if a layer has changed */
   hasChanges(layerId?: string): boolean;
 
+  /** Updates the file pointer to the current state */
   updateCheckpoint(layerId?: string): void;
 }

@@ -7,7 +7,7 @@ import {
   patchAnnotationFile,
   postAnnotationFile,
 } from "../../queries";
-import { Annotation, Image } from "../../types";
+import { Annotation, FileWithMetadata, Image } from "../../types";
 import { ReviewTask, TaskType } from "./review-task";
 
 export class MiaReviewTask implements ReviewTask {
@@ -55,15 +55,19 @@ export class MiaReviewTask implements ReviewTask {
     annotation.metadata = annotationMetadata;
     return [annotation];
   }
-  public async createAnnotation(files: File[], dataUri?: string) {
-    const file = files.length === 1 ? files[0] : await this.zipFiles(files);
 
+  public async createAnnotation(files: File[]) {
+    const file = files.length === 1 ? files[0] : await this.zipFiles(files);
+    const dataUri =
+      (files[0] as FileWithMetadata | undefined)?.metadata?.dataUri ??
+      this.getAritficialAnnotationDataUri(file);
     const newAnnotation = await postAnnotationFile(
       this.image.id,
       dataUri ?? this.getAritficialAnnotationDataUri(file),
       file,
     );
     this.annotations.set(newAnnotation.id, newAnnotation);
+    return newAnnotation.id;
   }
 
   public async updateAnnotation(annotationId: string, files: File[]) {
@@ -98,6 +102,10 @@ export class MiaReviewTask implements ReviewTask {
   }
 
   private getAritficialAnnotationDataUri(file: File) {
-    return `${this.id}/${uuidv4()}.${file.name.split(".").slice(-1).join(".")}`;
+    return `${this.id}/${uuidv4()}.${file.name.split(".").slice(1).join(".")}`;
+  }
+
+  public getAnnotation(annotationId: string) {
+    return this.annotations.get(annotationId);
   }
 }

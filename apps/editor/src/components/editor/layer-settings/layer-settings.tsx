@@ -1,9 +1,9 @@
 import {
+  ColoredButtonParam,
   ColorParam,
   Divider,
   Modal,
   NumberParam,
-  RedButtonParam,
   useForceUpdate,
   useTranslation,
 } from "@visian/ui-shared";
@@ -55,7 +55,8 @@ export const LayerSettings = observer<LayerSettingsProps>(
         />
         <ColorParam value={layer.color} setValue={layer.setColor} />
         <Divider />
-        <RedButtonParam
+        <ColoredButtonParam
+          color="red"
           labelTx="delete-layer"
           handlePress={deleteLayer}
           isLast

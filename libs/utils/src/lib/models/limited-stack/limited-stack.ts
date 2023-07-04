@@ -155,4 +155,8 @@ export class CommandStack<T> extends LimitedStack<T> {
   public isDirty() {
     return this.saveItem !== this.currentItem;
   }
+
+  public map(mapFunction: (item: T) => T) {
+    this.buffer = this.buffer.map(mapFunction);
+  }
 }

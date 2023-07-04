@@ -2,6 +2,7 @@ import {
   getAnnotationsByJobAndImage,
   getImagesByDataset,
   getImagesByJob,
+  patchAnnotation,
 } from "../../queries";
 import { getImage } from "../../queries/get-image";
 import { Image } from "../../types";
@@ -75,12 +76,13 @@ export class MiaReviewStrategy extends ReviewStrategy {
         taskDescription,
         currentImage,
         annotations,
+        currentImage.id,
       ),
     );
   }
 
   public async nextTask() {
-    await this.currentTask?.save();
+    await this.saveTask();
     this.currentImageIndex += 1;
     if (this.currentImageIndex >= this.images.length) {
       await this.store?.destroyRedirect(this.returnUrl, true);
@@ -90,6 +92,20 @@ export class MiaReviewStrategy extends ReviewStrategy {
   }
 
   public async saveTask() {
-    Promise.resolve();
+    await this.currentTask?.save();
+    await Promise.all(
+      this.store.editor.activeDocument?.layerFamilies?.map((layerFamily) => {
+        if (
+          this.currentTask?.annotationIds.includes(
+            layerFamily.metaData?.id ?? "",
+          )
+        ) {
+          return patchAnnotation(layerFamily.metaData?.id, {
+            verified: layerFamily.metaData?.verified,
+          });
+        }
+        return Promise.resolve();
+      }) ?? [],
+    );
   }
 }

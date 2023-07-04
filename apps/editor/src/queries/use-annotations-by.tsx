@@ -4,6 +4,20 @@ import { useMutation, useQuery, useQueryClient } from "react-query";
 import { Annotation } from "../types";
 import { hubBaseUrl } from "./hub-base-url";
 
+export const patchAnnotation = async (
+  annotationId?: string,
+  annotation?: Partial<Annotation>,
+) => {
+  const annotationsResponse = await axios.patch<Annotation>(
+    `${hubBaseUrl}annotations/${annotationId}`,
+    {
+      dataUri: annotation?.dataUri,
+      verified: annotation?.verified,
+    },
+  );
+  return annotationsResponse.data;
+};
+
 export const getAnnotationsByJobAndImage = async (
   jobId?: string,
   imageId?: string,

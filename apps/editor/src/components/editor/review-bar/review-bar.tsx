@@ -1,6 +1,6 @@
 import {
-  BlueButtonParam,
   color,
+  ColoredBorderButtonParam,
   fontSize,
   InvisibleButton,
   Sheet,
@@ -10,7 +10,7 @@ import {
   zIndex,
 } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
@@ -87,6 +87,7 @@ const ActionButtonsContainer = styled.div`
 
 const ActionButtons = styled(SquareButton)`
   margin: 0px 5px;
+  width: 40px;
 `;
 
 const ReviewContainer = styled.div`
@@ -104,7 +105,7 @@ const ReviewToolsContainer = styled.div`
   position: relative;
 `;
 
-const ReviewButton = styled(BlueButtonParam)`
+const ColoredButton = styled(ColoredBorderButtonParam)`
   width: 40px;
   padding: 0;
   margin: 0px 4px;
@@ -214,7 +215,8 @@ export const WhoReviewBar = observer(() => {
           )}
           <SkipButton icon="arrowLeft" />
           <a href={whoHome}>
-            <ReviewButton
+            <ColoredButton
+              color="blue"
               icon="whoAI"
               tooltipTx="return-who"
               tooltipPosition="right"
@@ -231,13 +233,25 @@ export const MiaReviewBar = observer(
   ({ openSavePopup }: { openSavePopup: () => void }) => {
     const store = useStore();
 
-    const confirmTaskAnnotation = useCallback(async () => {
+    const nextTask = useCallback(async () => {
       store?.reviewStrategy?.nextTask();
     }, [store?.reviewStrategy]);
 
-    const skipTaskAnnotation = useCallback(async () => {
-      store?.reviewStrategy?.nextTask();
-    }, [store?.reviewStrategy]);
+    const isVerified = useMemo(
+      () =>
+        store?.editor.activeDocument?.activeLayer?.family?.metaData?.verified ??
+        false,
+      [store?.editor.activeDocument?.activeLayer?.family?.metaData],
+    );
+
+    const toggleVerification = useCallback(() => {
+      if (store?.editor.activeDocument?.activeLayer?.family?.metaData) {
+        store.editor.activeDocument.activeLayer.family.metaData = {
+          ...store.editor.activeDocument.activeLayer.family.metaData,
+          verified: !isVerified,
+        };
+      }
+    }, [store?.editor.activeDocument?.activeLayer, isVerified]);
 
     return store?.editor.activeDocument ? (
       <ReviewBarSheet>
@@ -254,36 +268,39 @@ export const MiaReviewBar = observer(
               "Task Description"
             }
           />
-          <ActionButtonsContainer>
-            <ActionButtons
-              icon="check"
-              tooltipTx="confirm-task-annotation-tooltip"
-              tooltipPosition="right"
-              onPointerDown={confirmTaskAnnotation}
-            />
-            <ActionButtons
-              icon="redo"
-              tooltipTx="skip-task-annotation-tooltip"
-              tooltipPosition="right"
-              onPointerDown={skipTaskAnnotation}
-            />
-          </ActionButtonsContainer>
+          <ActionButtonsContainer />
         </ActionContainer>
         <ReviewContainer>
           <ReviewToolsContainer>
-            <SkipButton icon="arrowLeft" />
-            <ReviewButton
+            {/* <SkipButton icon="arrowLeft" /> */}
+            <ColoredButton
+              color="blue"
               isDisabled={
                 !store.editor.activeDocument.activeLayer?.family?.hasChanges
               }
               icon="save"
               tooltipTx="save"
-              tooltipPosition="right"
-              handlePress={() =>
-                store?.editor.activeDocument?.history.updateCheckpoint()
-              }
+              tooltipPosition="top"
+              handlePress={openSavePopup}
             />
-            <SkipButton icon="arrowRight" />
+            <ColoredButton
+              icon={isVerified ? "exit" : "check"}
+              color={isVerified ? "red" : "green"}
+              tooltipTx={
+                isVerified
+                  ? "unverify-annotation-tooltip"
+                  : "verify-annotation-tooltip"
+              }
+              tooltipPosition="top"
+              handlePress={toggleVerification}
+            />
+            {/* <SkipButton icon="arrowRight" /> */}
+            <ActionButtons
+              icon="arrowForward"
+              tooltipTx="next-task-tooltip"
+              tooltipPosition="top"
+              onPointerDown={nextTask}
+            />
           </ReviewToolsContainer>
         </ReviewContainer>
       </ReviewBarSheet>
