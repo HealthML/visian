@@ -78,7 +78,7 @@ export const useAnnotationsByJob = (jobId: string) => {
     AxiosError<Annotation[]>
   >(["annotationsByJob", jobId], () => getAnnotationsByJob(jobId), {
     retry: 2, // retry twice if fetch fails
-    refetchInterval: 1000 * 20, // refetch every 20 seconds
+    refetchInterval: 1000 * 1, // refetch every 20 seconds
   });
 
   return {

@@ -19,7 +19,7 @@ export const useImagesByJob = (jobId: string) => {
     AxiosError<Image[]>
   >(["imagesByJob", jobId], () => getImagesByJob(jobId), {
     retry: 2, // retry twice if fetch fails
-    refetchInterval: 1000 * 10, // refetch every 10 seconds
+    refetchInterval: 1000 * 1, // refetch every 10 seconds
   });
 
   return {
