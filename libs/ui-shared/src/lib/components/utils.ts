@@ -362,3 +362,16 @@ export const useRelativePosition = <P = void>(
 
   return styleOverride ? { ...style, ...styleOverride } : style;
 };
+
+/**
+ * Can be used like
+ *   const prevValue = usePreviousValue(someProp);
+ * to get the value of someProp before the current render.
+ */
+export const usePreviousValue = <T>(value: T) => {
+  const ref = useRef<T>();
+  useEffect(() => {
+    ref.current = value;
+  });
+  return ref.current;
+};

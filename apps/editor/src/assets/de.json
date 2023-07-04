@@ -334,10 +334,8 @@
   "jobs-loading-failed": "Die Jobs konnten nicht geladen werden.",
   "no-jobs-available": "Aktuell sind keine Jobs vorhanden.",
   "job-deleted-images": "Es scheint als wurden alle Bilder des Jobs gelöscht...",
-  "job-details": "Job Details",
+  "job-details": "Details",
   "job-images": "Bilder",
-  "job-number-images": "Anzahl Bilder",
-  "job-number-annotations": "Anzahl Annotationen",
   "job-model-name": "Modell",
   "job-model-version": "Version",
   "job-started": "Gestartet am",
@@ -352,6 +350,7 @@
   "job-creation-model-selection": "Modell und Version auswählen",
   "job-creation-image-selection": "Bilder zum Annotieren auswählen",
   "job-creation-error": "Beim Erstellen des Jobs ist ein Fehler aufgetreten.",
+  "job-title": "Job vom {{date}}",
   "start-job": "Job starten",
 
   "import-images": "Bilder importieren",
@@ -405,17 +404,25 @@
 
   "create": "Erstellen",
   "create-project": "Projekt erstellen",
-  "project-name": "Projektname",
   "create-dataset": "Datensatz erstellen",
-  "dataset-name": "Datensatzname",
 
   "edit": "Bearbeiten",
-  "edit-project": "Projekt bearbeiten",
-  "edit-dataset": "Datensatz bearbeiten",
   "update": "Aktualisieren",
+  "name": "Name",
 
   "verified": "verifiziert",
 
-  "data-uri-help-message": "Die dataURI ist nicht gültig. Sie sollte das Format 'ordner/dateiname' haben, wobei ein Ordner und der Dateiname aus Buchstaben, Ziffern, -, oder _ bestehen kann.",
-  "uri-file-type-mismatch": "Die URI entspricht nicht dem Dateityp \"{{name}}\""
+  "progress-total": "Alle Bilder",
+  "progress-verified": "Verifiziert",
+  "progress-annotated": "Annotiert",
+  "annotation-progress": "Fortschritt",
+  "annotation-progress-no-images": "Füge Bilder hinzu, um den Fortschritt zu sehen.",
+  "annotated-verified-images": "Annotierte und verifizierte Bilder",
+  "review-annotations": "Review starten",
+
+  "data-uri-help-message": "Die dataURI ist nicht gültig. Sie sollte das Format 'ordner/dateiname.erweiterung' haben, wobei ein Ordner und der Dateiname aus Buchstaben, Ziffern, -, oder _ bestehen kann und die Erweiterung eine der folgenden sein sollte:",
+  "uri-file-type-mismatch": "Die URI entspricht nicht dem Dateityp \"{{name}}\"",
+
+  "switch-to-grid": "Zur Rasteransicht wechseln",
+  "switch-to-list": "Zur Listenansicht wechseln"
 }

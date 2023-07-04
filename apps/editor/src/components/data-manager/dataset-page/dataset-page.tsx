@@ -10,7 +10,9 @@ import {
   useDeleteImagesMutation,
   useImagesByDataset,
 } from "../../../queries";
+import { useDatasetProgress } from "../../../queries/use-dataset-progress";
 import { Annotation, Dataset, Image } from "../../../types";
+import { AnnotationProgress } from "../annotation-progress";
 import { ConfirmationPopup } from "../confirmation-popup";
 import { DatasetImageList } from "../dataset-image-list";
 import { DatasetNavigationBar } from "../dataset-navigationbar";
@@ -51,6 +53,8 @@ export const DatasetPage = ({
   const store = useStore();
 
   const [isInSelectMode, setIsInSelectMode] = useState(false);
+
+  const { progress, isLoadingProgress } = useDatasetProgress(dataset.id);
 
   const { images, imagesError, isLoadingImages, refetchImages } =
     useImagesByDataset(dataset.id);
@@ -206,6 +210,10 @@ export const DatasetPage = ({
   if (imagesError) listInfoTx = "images-loading-failed";
   else if (images && images.length === 0) listInfoTx = "no-images-available";
 
+  let progressInfoTx;
+  if (progress?.totalImages === 0)
+    progressInfoTx = "annotation-progress-no-images";
+
   return (
     <Container>
       <PageTitle
@@ -213,6 +221,13 @@ export const DatasetPage = ({
         labelTx="dataset"
         backPath={`/projects/${dataset.project}`}
       />
+      <PageSection
+        titleTx="annotation-progress"
+        isLoading={isLoadingProgress}
+        infoTx={progressInfoTx}
+      >
+        {progress && <AnnotationProgress progress={progress} />}
+      </PageSection>
       <PageSection
         titleTx="images"
         isLoading={isLoadingImages}
