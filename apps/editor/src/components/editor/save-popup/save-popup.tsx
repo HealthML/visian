@@ -1,8 +1,8 @@
 import {
   Button,
+  DropDown,
   ILayer,
-  List,
-  ListItem,
+  LayerList,
   PopUp,
   Text,
   TextField,
@@ -60,39 +60,30 @@ const SavePopUpContainer = styled(PopUp)`
   width: 60%;
 `;
 
-const LayersToSaveList = styled(List)`
-  width: 100%;
-  max-height: 300px;
-  overflow-y: auto;
-  user-select: none;
-  margin-bottom: 10px;
-`;
-
-const LayerToSaveItem = styled(ListItem)`
-  height: 30px;
+const StyledDropDown = styled(DropDown)`
+  margin: 0px 10px 0px 0px;
+  width: 200px;
 `;
 
 export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
   const store = useStore();
   const [searchParams] = useSearchParams();
-  const [newAnnotationURI, setnewAnnotationURI] = useState("");
+  const [newAnnotationURIPrefix, setnewAnnotationURIPrefix] = useState("");
+
   const { t: translate } = useTranslation();
 
-  const { t } = useTranslation();
+  const fileExtensions = [
+    { value: ".nii.gz", label: ".nii.gz" },
+    { value: ".zip", label: ".zip" },
+  ];
 
-  const getOrphanAnnotationLayers = useCallback(() => {
-    const orphanAnnotationLayers = store?.editor.activeDocument?.layers.filter(
-      (l) => l.isAnnotation && !l.family,
-    );
-    return orphanAnnotationLayers ?? [];
-  }, [store]);
+  const [selectedExtension, setSelectedExtension] = useState(
+    fileExtensions[0].value,
+  );
 
-  const getFamilyLayersOf = useCallback(
-    (layer: ILayer | undefined) => {
-      if (!layer) return [];
-      return layer.family?.layers ?? getOrphanAnnotationLayers();
-    },
-    [getOrphanAnnotationLayers],
+  const newDataUri = useMemo(
+    () => `${newAnnotationURIPrefix}${selectedExtension}`,
+    [newAnnotationURIPrefix, selectedExtension],
   );
 
   const createFamilyForNewAnnotation = (
@@ -107,7 +98,7 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
         layerFamily.title = annotation.dataUri;
         layerFamily.metaData = annotation;
       }
-      const familyLayers = layer.family?.layers ?? getOrphanAnnotationLayers();
+      const familyLayers = layer.getFamilyLayers();
       familyLayers.forEach((l) => layerFamily.addLayer(l.id));
       return layerFamily;
     }
@@ -115,11 +106,14 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
 
   const createFileForFamilyOf = async (
     layer: ILayer | undefined,
+    asZip: boolean,
   ): Promise<File | undefined> => {
     if (layer?.isAnnotation) {
-      const layersToSave = getFamilyLayersOf(layer);
+      const layersToSave = layer.getFamilyLayers();
       const file = await store?.editor?.activeDocument?.createFileFromLayers(
         layersToSave,
+        asZip,
+        newAnnotationURIPrefix.split("/").pop() ?? "annotation",
       );
       return file;
     }
@@ -137,9 +131,13 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
     annotationFile: File,
     metaData: Annotation,
   ) => {
-    const savedAnnotationFile = new File([annotationFile], metaData.dataUri, {
-      type: annotationFile.type,
-    }) as FileWithMetadata;
+    const savedAnnotationFile = new File(
+      [annotationFile],
+      metaData.dataUri.split("/").pop() ?? "",
+      {
+        type: annotationFile.type,
+      },
+    ) as FileWithMetadata;
     savedAnnotationFile.metadata = metaData;
     const fileTransfer = new DataTransfer();
     fileTransfer.items.add(savedAnnotationFile);
@@ -151,19 +149,18 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
   const canBeOverwritten = useCallback(() => {
     const activeLayer = store?.editor.activeDocument?.activeLayer;
     const annotation = activeLayer?.family?.metaData as Annotation;
-    if (!annotation) return false;
-    const fileExt = path.extname(annotation.dataUri);
-    const newFileExt =
-      getFamilyLayersOf(activeLayer).length > 1 ? ".zip" : ".gz";
-    return fileExt === newFileExt;
-  }, [getFamilyLayersOf, store]);
+    return !!annotation;
+  }, [store]);
 
   const saveAnnotation = async () => {
     store?.setProgress({ labelTx: "saving" });
     try {
       const activeLayer = store?.editor.activeDocument?.activeLayer;
       const annotationMeta = activeLayer?.family?.metaData as Annotation;
-      const annotationFile = await createFileForFamilyOf(activeLayer);
+      const annotationFile = await createFileForFamilyOf(
+        activeLayer,
+        annotationMeta?.dataUri.endsWith(".zip"),
+      );
       if (!annotationMeta || !annotationFile) {
         throw new Error(translate("create-annotation-error"));
       }
@@ -196,17 +193,20 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
     try {
       const activeLayer = store?.editor.activeDocument?.activeLayer;
       const imageId = searchParams.get("imageId");
-      const annotationFile = await createFileForFamilyOf(activeLayer);
+      const annotationFile = await createFileForFamilyOf(
+        activeLayer,
+        uri.endsWith(".zip"),
+      );
       if (!imageId || !annotationFile) {
         throw new Error(translate("create-annotation-error"));
       }
-      checkAnnotationURI(annotationFile, uri);
       const responseData = await postAnnotationFile(
         imageId,
         uri,
         annotationFile,
       );
       const annotationMeta = activeLayer?.family?.metaData as Annotation;
+      store?.setProgress();
       if (!annotationMeta) {
         createFamilyForNewAnnotation(activeLayer, responseData);
       } else {
@@ -223,33 +223,43 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
         titleTx: "saving-error",
         descriptionTx: description,
       });
-    } finally {
       store?.setProgress();
     }
   };
 
-  const getAnnotationURISuggestion = useCallback(() => {
+  const getAnnotationURIPrefixSuggestion = useCallback(() => {
     const activeLayer = store?.editor.activeDocument?.activeLayer;
     if (!activeLayer) {
-      return "annotation.nii.gz";
+      return "annotation";
     }
-    const fileExt =
-      getFamilyLayersOf(activeLayer).length > 1 ? ".zip" : ".nii.gz";
     const imageURI =
       store?.editor.activeDocument?.mainImageLayer?.metadata?.dataUri;
     const imageName = path.basename(imageURI).split(".")[0];
-    const annotationLayerName =
+    const layerName =
       store?.editor.activeDocument?.activeLayer?.title?.split(".")[0];
+    const layerNameWithoutIndex = Number.isNaN(
+      +(layerName?.split("_")[0] ?? ""),
+    )
+      ? layerName
+      : layerName?.split("_").slice(1).join("_");
+    const layerNameWithIndexedName = Number.isNaN(
+      +(layerNameWithoutIndex?.split("_")[0] ?? ""),
+    )
+      ? `1_${layerNameWithoutIndex}`
+      : layerNameWithoutIndex
+          ?.split("_")
+          .map((sub, index) => (index === 0 ? Number(sub) + 1 : sub))
+          .join("_");
     return `/annotations/${imageName}/${
-      annotationLayerName ?? "annotation"
-    }${fileExt}`;
-  }, [store, getFamilyLayersOf]);
+      layerNameWithIndexedName || "annotation"
+    }`;
+  }, [store]);
 
   useEffect(() => {
     if (isOpen) {
-      setnewAnnotationURI(getAnnotationURISuggestion());
+      setnewAnnotationURIPrefix(getAnnotationURIPrefixSuggestion());
     }
-  }, [isOpen, getAnnotationURISuggestion]);
+  }, [isOpen, getAnnotationURIPrefixSuggestion]);
 
   const isValidDataUri = useCallback(
     (dataUri, allowedExtensions = [".nii.gz", ".zip"]) => {
@@ -261,14 +271,14 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
 
       return pattern.test(dataUri)
         ? "valid"
-        : `${t("data-uri-help-message")} ${allowedExtensions.join(", ")}.`;
+        : translate("data_uri_help_message");
     },
-    [t],
+    [translate],
   );
 
   const isValidAnnotationUri = useMemo(
-    () => isValidDataUri(newAnnotationURI),
-    [newAnnotationURI, isValidDataUri],
+    () => isValidDataUri(newDataUri),
+    [newDataUri, isValidDataUri],
   );
 
   return (
@@ -279,21 +289,9 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
       shouldDismissOnOutsidePress
     >
       <SectionLabel tx="layers-to-save" />
-      <LayersToSaveList>
-        {getFamilyLayersOf(store?.editor.activeDocument?.activeLayer).map(
-          (layer) => (
-            <LayerToSaveItem
-              key={layer.id}
-              label={layer.title}
-              isLast
-              icon={{
-                color: layer.color || "text",
-              }}
-            />
-          ),
-        )}
-      </LayersToSaveList>
-
+      <LayerList
+        layers={store?.editor.activeDocument?.activeLayer?.getFamilyLayers()}
+      />
       {canBeOverwritten() && (
         <>
           <SectionLabel tx="annotation-saving-overrwite" />
@@ -321,13 +319,21 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
       <InlineRowLast>
         <SaveAsInput
           placeholder="URI"
-          value={newAnnotationURI}
-          onChangeText={setnewAnnotationURI}
+          value={newAnnotationURIPrefix}
+          onChangeText={setnewAnnotationURIPrefix}
+        />
+        <StyledDropDown
+          options={fileExtensions}
+          defaultValue={selectedExtension}
+          onChange={(value) => setSelectedExtension(value)}
+          size="medium"
+          borderRadius="default"
+          isDisableMixin
         />
         <SaveButton
           tx="save-as"
           onPointerDown={async () => {
-            if (await saveAnnotationAs(newAnnotationURI)) {
+            if (await saveAnnotationAs(newDataUri)) {
               onClose?.();
             }
           }}

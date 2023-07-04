@@ -347,7 +347,7 @@ export class Image implements ISerializable<ImageSnapshot> {
     setSlice(this, this.getData(), viewType, slice, sliceData);
   }
 
-  public toITKImage(excludedImages?: Image[]) {
+  public toITKImage(excludedImages?: Image[], squashed = false) {
     const image = new ITKImage<Uint8Array | Float32Array>(
       new ITKImageType(
         this.dimensionality,
@@ -380,9 +380,21 @@ export class Image implements ISerializable<ImageSnapshot> {
       const excludedData = excludedImages.map((excludedImage) =>
         excludedImage.getData(),
       );
-      image.data = image.data.map((value, index) =>
-        excludedData.some((data) => data[index] > 0) ? 0 : value,
-      ) as typeof image.data;
+      if (squashed) {
+        image.data = image.data.map((value, index) => {
+          const firstDataIndex = excludedData.findIndex(
+            (data) => data[index] > 0,
+          );
+          if (firstDataIndex === -1) {
+            return value > 0 ? 1 : 0;
+          }
+          return excludedData.length - firstDataIndex + 1;
+        }) as typeof image.data;
+      } else {
+        image.data = image.data.map((value, index) =>
+          excludedData.some((data) => data[index] > 0) ? 0 : value,
+        ) as typeof image.data;
+      }
     }
 
     image.data = unifyOrientation(
