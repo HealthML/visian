@@ -1,5 +1,6 @@
 import {
   AbsoluteCover,
+  ColoredBorderButtonParam,
   FlexRow,
   FloatingUIButton,
   Notification,
@@ -14,6 +15,7 @@ import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
 import { whoHome } from "../../../constants";
+import { TaskType } from "../../../models/review-strategy";
 import {
   DilateErodeModal,
   MeasurementModal,
@@ -276,7 +278,8 @@ export const UIOverlay = observer<UIOverlayProps>(
                   isActive={false}
                 />
                 {store?.editor.activeDocument?.activeLayer?.isAnnotation &&
-                  searchParams.get("imageId") && (
+                  store?.reviewStrategy?.currentTask?.kind !==
+                    TaskType.Review && (
                     <FloatingUIButton
                       icon="save"
                       tooltipTx="annotation-saving"
@@ -305,7 +308,10 @@ export const UIOverlay = observer<UIOverlayProps>(
               </RightBar>
             </ColumnRight>
             {isFromWHO() && <WhoReviewBar />}
-            {isFromMia() && <MiaReviewBar openSavePopup={openSavePopUp} />}
+            {isFromMia() &&
+              store?.reviewStrategy?.currentTask?.kind === TaskType.Review && (
+                <MiaReviewBar openSavePopup={openSavePopUp} />
+              )}
 
             <SettingsPopUp
               isOpen={isSettingsPopUpOpen}

@@ -16,40 +16,45 @@ export class MiaReviewStrategy extends ReviewStrategy {
     store: RootStore,
     datasetId: string,
     returnUrl?: string,
+    taskType?: TaskType,
   ) {
     const images = await getImagesByDataset(datasetId);
-    return new MiaReviewStrategy(store, images, undefined, returnUrl);
+    return new MiaReviewStrategy(store, images, undefined, taskType, returnUrl);
   }
 
   public static async fromJob(
     store: RootStore,
     jobId: string,
     returnUrl?: string,
+    taskType?: TaskType,
   ) {
     const images = await getImagesByJob(jobId);
-    return new MiaReviewStrategy(store, images, jobId, returnUrl);
+    return new MiaReviewStrategy(store, images, jobId, taskType, returnUrl);
   }
 
   public static async fromImageIds(
     store: RootStore,
     imageIds: string[],
     returnUrl?: string,
+    taskType?: TaskType,
   ) {
     const images = await Promise.all(
       imageIds.map(async (imageId) => getImage(imageId)),
     );
-    return new MiaReviewStrategy(store, images, undefined, returnUrl);
+    return new MiaReviewStrategy(store, images, undefined, taskType, returnUrl);
   }
 
   private images: Image[];
   private currentImageIndex: number;
   private jobId?: string;
   private returnUrl: string;
+  public taskType: TaskType;
 
   constructor(
     store: RootStore,
     images: Image[],
     jobId?: string,
+    taskType?: TaskType,
     returnUrl = "/",
   ) {
     super(store);
@@ -57,6 +62,7 @@ export class MiaReviewStrategy extends ReviewStrategy {
     this.images = images;
     this.currentImageIndex = 0;
     this.jobId = jobId;
+    this.taskType = taskType ?? TaskType.Review;
   }
 
   protected async buildTask(): Promise<void> {
@@ -66,13 +72,13 @@ export class MiaReviewStrategy extends ReviewStrategy {
       currentImage.id,
     );
     const imagename = currentImage.dataUri.split("/").pop()?.split(".")[0];
-    const taskTitle = `Review ${imagename}`;
-    const taskDescription = `Correct the annotations of ${imagename}.`;
+    const taskTitle = `${this.taskType} ${imagename}`;
+    const taskDescription = `${this.taskType} the annotations of ${imagename}.`;
 
     this.setCurrentTask(
       new MiaReviewTask(
         taskTitle,
-        TaskType.Review,
+        this.taskType,
         taskDescription,
         currentImage,
         annotations,

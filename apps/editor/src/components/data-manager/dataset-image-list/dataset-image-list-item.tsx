@@ -10,9 +10,11 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import styled from "styled-components";
 
+import { useStore } from "../../../app/root-store";
+import { MiaReviewStrategy, TaskType } from "../../../models/review-strategy";
 import { useAnnotationsByImage } from "../../../queries";
 import { Annotation } from "../../../types";
-import { editorPath, handleImageSelection } from "../util";
+import { handleImageSelection } from "../util";
 import { DatasetImageListItemProps } from "./dataset-image-list-item.props";
 
 const Spacer = styled.div`
@@ -76,20 +78,14 @@ export const DatasetImageListItem: React.FC<DatasetImageListItemProps> = ({
     });
   }, [refetchAnnotations]);
 
+  const store = useStore();
   const { t: translate } = useTranslation();
   const navigate = useNavigate();
-
-  const projectId = useParams().projectId || "";
-  const datasetId = useParams().datasetId || "";
 
   const hasVerifiedAnnotation = useMemo(
     () => annotations?.some((annotation) => annotation.verified) ?? false,
     [annotations],
   );
-
-  const handleImageClick = useCallback(() => {
-    navigate(editorPath(image.id, undefined, projectId, datasetId));
-  }, [navigate, image.id, projectId, datasetId]);
 
   const imageText = useMemo(
     () => (isInSelectMode ? image.dataUri : image.dataUri.split("/").pop()),
@@ -124,6 +120,37 @@ export const DatasetImageListItem: React.FC<DatasetImageListItemProps> = ({
     setSelectedImages,
   ]);
 
+  const startReview = useCallback(
+    async (taskType: TaskType) => {
+      if (store) {
+        const currentPath = window.location.pathname;
+        if (!(await store.destroyLayers())) return;
+        store.shouldPersist = true;
+        store.setProgress({ labelTx: "importing", showSplash: true });
+        navigate("/editor?review=true");
+        store.setReviewStrategy(
+          await MiaReviewStrategy.fromImageIds(
+            store,
+            [image.id],
+            currentPath,
+            taskType,
+          ),
+        );
+        await store.reviewStrategy?.loadTask();
+        store.setProgress();
+      }
+    },
+    [navigate, image, store],
+  );
+
+  const startCreateAnnotations = useCallback(() => {
+    startReview(TaskType.Create);
+  }, [startReview]);
+
+  const startReviewAnnotations = useCallback(() => {
+    startReview(TaskType.Review);
+  }, [startReview]);
+
   return (
     <>
       <ListItem isLast={isLast && !showAnnotations}>
@@ -132,7 +159,9 @@ export const DatasetImageListItem: React.FC<DatasetImageListItemProps> = ({
           onPointerDown={toggleShowAnnotations}
         />
         <Spacer />
-        <ClickableText onClick={handleImageClick}>{imageText}</ClickableText>
+        <ClickableText onClick={startCreateAnnotations}>
+          {imageText}
+        </ClickableText>
         <ExpandedSpacer />
         {hasVerifiedAnnotation && (
           <StatusBadge
@@ -173,18 +202,7 @@ export const DatasetImageListItem: React.FC<DatasetImageListItemProps> = ({
                       isLast && annotationIndex === annotations.length - 1
                     }
                   >
-                    <ClickableText
-                      onClick={() => {
-                        navigate(
-                          editorPath(
-                            image.id,
-                            annotation.id,
-                            projectId,
-                            datasetId,
-                          ),
-                        );
-                      }}
-                    >
+                    <ClickableText onClick={startReviewAnnotations}>
                       {isInSelectMode
                         ? annotation.dataUri
                         : annotation.dataUri.split("/").pop()}
