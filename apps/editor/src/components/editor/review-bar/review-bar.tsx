@@ -1,6 +1,6 @@
 import {
   color,
-  ColoredBorderButtonParam,
+  ColoredButtonParam,
   fontSize,
   InvisibleButton,
   Sheet,
@@ -105,7 +105,7 @@ const ReviewToolsContainer = styled.div`
   position: relative;
 `;
 
-const ColoredButton = styled(ColoredBorderButtonParam)`
+const ColoredButton = styled(ColoredButtonParam)`
   width: 40px;
   padding: 0;
   margin: 0px 4px;
@@ -273,26 +273,21 @@ export const MiaReviewBar = observer(
         <ReviewContainer>
           <ReviewToolsContainer>
             {/* <SkipButton icon="arrowLeft" /> */}
-            <ColoredButton
-              color="blue"
-              isDisabled={
-                !store.editor.activeDocument.activeLayer?.family?.hasChanges
-              }
+            <ActionButtons
               icon="save"
               tooltipTx="save"
               tooltipPosition="top"
-              handlePress={openSavePopup}
+              onPointerDown={openSavePopup}
             />
-            <ColoredButton
+            <ActionButtons
               icon={isVerified ? "exit" : "check"}
-              color={isVerified ? "red" : "green"}
               tooltipTx={
                 isVerified
                   ? "unverify-annotation-tooltip"
                   : "verify-annotation-tooltip"
               }
               tooltipPosition="top"
-              handlePress={toggleVerification}
+              onPointerDown={toggleVerification}
             />
             {/* <SkipButton icon="arrowRight" /> */}
             <ActionButtons
