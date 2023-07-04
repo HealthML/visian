@@ -272,7 +272,8 @@ export const UIOverlay = observer<UIOverlayProps>(
                   icon="exit"
                   tooltipTx="close-editor"
                   tooltipPosition="left"
-                  onPointerDown={() => {
+                  onPointerDown={async () => {
+                    await store?.reviewStrategy?.saveTask();
                     store?.destroyRedirect("/projects");
                   }}
                   isActive={false}

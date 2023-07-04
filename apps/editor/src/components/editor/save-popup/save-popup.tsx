@@ -325,6 +325,9 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
             />
             <SaveButton
               tx="save"
+              isDisabled={
+                !store?.editor.activeDocument?.activeLayer?.family?.hasChanges
+              }
               onPointerDown={async () => {
                 if (await saveAnnotation()) {
                   onClose?.();
