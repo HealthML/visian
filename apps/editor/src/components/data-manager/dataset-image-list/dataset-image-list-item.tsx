@@ -2,7 +2,6 @@ import {
   InvisibleButton,
   List,
   ListItem,
-  StatusBadge,
   Text,
   useTranslation,
 } from "@visian/ui-shared";
@@ -13,6 +12,7 @@ import styled from "styled-components";
 import { useAnnotationsByImage } from "../../../queries";
 import { Annotation } from "../../../types";
 import { editorPath, handleImageSelection } from "../util";
+import { VerifiedTag } from "../verified-tag";
 import { DatasetImageListItemProps } from "./dataset-image-list-item.props";
 
 const Spacer = styled.div`
@@ -134,13 +134,7 @@ export const DatasetImageListItem: React.FC<DatasetImageListItemProps> = ({
         <Spacer />
         <ClickableText onClick={handleImageClick}>{imageText}</ClickableText>
         <ExpandedSpacer />
-        {hasVerifiedAnnotation && (
-          <StatusBadge
-            textColor="Neuronic Neon"
-            borderColor="gray"
-            tx="verified"
-          />
-        )}
+        {hasVerifiedAnnotation && <VerifiedTag />}
         <Spacer />
         {!isInSelectMode ? (
           <IconButton
@@ -185,13 +179,7 @@ export const DatasetImageListItem: React.FC<DatasetImageListItemProps> = ({
                       : annotation.dataUri.split("/").pop()}
                   </ClickableText>
                   <ExpandedSpacer />
-                  {annotation.verified && (
-                    <StatusBadge
-                      textColor="Neuronic Neon"
-                      borderColor="gray"
-                      tx="verified"
-                    />
-                  )}
+                  {annotation.verified && <VerifiedTag />}
                   <Spacer />
                   {!isInSelectMode && (
                     <IconButton

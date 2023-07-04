@@ -137,16 +137,16 @@ export const JobCreationPopup = observer<JobCreationPopUpProps>(
 
     const [selectedDataset, setSelectedDataset] = useState(openWithDatasetId);
 
+    const selectDataset = useCallback((datasetId: string) => {
+      setSelectedDataset(datasetId);
+    }, []);
+
     useEffect(() => {
       setSelectedDataset(openWithDatasetId);
     }, [openWithDatasetId]);
 
     const { images, isErrorImages, isLoadingImages } =
       useImagesByDataset(selectedDataset);
-
-    const selectDataset = useCallback((datasetId: string) => {
-      setSelectedDataset(datasetId);
-    }, []);
 
     const { selectedImages, setSelectedImages, setImageSelection } =
       useImageSelection();

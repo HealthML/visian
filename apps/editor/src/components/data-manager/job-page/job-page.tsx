@@ -27,6 +27,7 @@ import { PageRow } from "../page-row";
 import { PageSection } from "../page-section";
 import { PageTitle } from "../page-title";
 import { editorPath, getDisplayDate } from "../util";
+import { VerifiedTag } from "../verified-tag";
 import { DetailsRow } from "./details-table";
 
 const StyledSheet = styled(Sheet)`
@@ -119,6 +120,17 @@ export const JobPage = ({ job }: { job: Job }) => {
     [annotations],
   );
 
+  const isVerified = useCallback(
+    (imageId: string) => {
+      const annotationId = findAnnotationId(imageId);
+      const annotation = annotations?.find(
+        // eslint-disable-next-line @typescript-eslint/no-shadow
+        (annotation) => annotation.id === annotationId,
+      );
+      return annotation?.verified ?? false;
+    },
+    [annotations, findAnnotationId],
+  );
   const compareImages = useCallback(
     (a: Image, b: Image) => {
       if (findAnnotationId(a.id) && !findAnnotationId(b.id)) {
@@ -256,6 +268,7 @@ export const JobPage = ({ job }: { job: Job }) => {
                 {imagesWithAnnotations?.includes(image.id) && (
                   <SubtleText tx="image-annotated" />
                 )}
+                {isVerified(image.id) && <VerifiedTag hasSpacing />}
               </ClickableListItem>
             ))}
           </StyledSheet>

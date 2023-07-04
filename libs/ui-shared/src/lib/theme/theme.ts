@@ -58,6 +58,7 @@ const colorModes = {
     blueBorder: "rgba(0,133,255,0.6)",
     sideViewSheet: "rgba(200,200,200,0.4)",
     sideViewBorder: "rgba(0, 0, 0, 0.3)",
+    verified: "#049C6D",
 
     ...dataColors,
     ...badgeColors,
@@ -86,6 +87,7 @@ const colorModes = {
     blueBorder: "rgba(0,133,255,0.6)",
     sideViewSheet: "rgba(78, 80, 89, 0.2)",
     sideViewBorder: "rgba(255, 255, 255, 0.3)",
+    verified: "#68D09E",
 
     ...dataColors,
     ...badgeColors,

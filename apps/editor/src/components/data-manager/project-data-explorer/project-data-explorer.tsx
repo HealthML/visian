@@ -1,7 +1,8 @@
 import { color, FlexRow, Icon, List, ListItem, Text } from "@visian/ui-shared";
 import styled, { css } from "styled-components";
 
-import { handleImageSelection, useKeyboardShortcuts } from "../util";
+import { useKeyboardShortcuts } from "../util";
+import { ProjectDataExplorerImageListItem } from "./project-data-explorer-image-list-item";
 import { ProjectDataExplorerProps } from "./project-data-explorer.props";
 
 const FileExplorer = styled(FlexRow)`
@@ -78,27 +79,18 @@ export const ProjectDataExplorer: React.FC<ProjectDataExplorerProps> = ({
             !isErrorImages &&
             !isLoadingImages &&
             images.map((image, index) => (
-              <StyledListItem
+              <ProjectDataExplorerImageListItem
                 key={image.id}
-                isLast
-                isActive={selectedImages.has(image.id)}
-                onPointerDown={() =>
-                  handleImageSelection(
-                    image.id,
-                    index,
-                    selectedImages,
-                    isShiftPressed,
-                    selectedRange,
-                    setSelectedRange,
-                    images,
-                    setImageSelection,
-                    setSelectedImages,
-                  )
-                }
-              >
-                <StyledIcon icon="document" />
-                <Text>{image.dataUri.split("/").pop()}</Text>
-              </StyledListItem>
+                image={image}
+                index={index}
+                images={images}
+                selectedImages={selectedImages}
+                isShiftPressed={isShiftPressed}
+                selectedRange={selectedRange}
+                setSelectedRange={setSelectedRange}
+                setImageSelection={setImageSelection}
+                setSelectedImages={setSelectedImages}
+              />
             ))}
         </StyledList>
       )}
