@@ -443,20 +443,23 @@ export class Document
     return Object.values(this.layerMap).some((layer) => layer.is3DLayer);
   }
 
-  // I/O
   // eslint-disable-next-line @typescript-eslint/no-shadow
-  public exportZip = async (layers: ILayer[], limitToAnnotations?: boolean) => {
+  protected zipLayers = async (layers: ILayer[]) => {
     const zip = new Zip();
-
-    const files = await Promise.all(
-      layers
-        .filter((layer) => !limitToAnnotations || layer.isAnnotation)
-        .map((layer) => layer.toFile()),
-    );
+    const files = await Promise.all(layers.map((layer) => layer.toFile()));
     files.forEach((file, index) => {
       if (!file) return;
       zip.setFile(`${`00${index}`.slice(-2)}_${file.name}`, file);
     });
+    return zip;
+  };
+
+  // I/O
+  // eslint-disable-next-line @typescript-eslint/no-shadow
+  public exportZip = async (layers: ILayer[], limitToAnnotations?: boolean) => {
+    const zip = await this.zipLayers(
+      layers.filter((layer) => !limitToAnnotations || layer.isAnnotation),
+    );
 
     if (this.context?.getTracker()?.isActive) {
       const trackingFile = this.context.getTracker()?.toFile();
@@ -474,12 +477,7 @@ export class Document
     layers: ILayer[],
     title?: string,
   ): Promise<File> => {
-    const zip = new Zip();
-    const files = await Promise.all(layers.map((layer) => layer.toFile()));
-    files.forEach((file, index) => {
-      if (!file) return;
-      zip.setFile(`${`00${index}`.slice(-2)}_${file.name}`, file);
-    });
+    const zip = await this.zipLayers(layers);
 
     return new File(
       [await zip.toBlob()],

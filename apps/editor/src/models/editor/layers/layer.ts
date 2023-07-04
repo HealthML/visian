@@ -162,7 +162,6 @@ export class Layer implements ILayer, ISerializable<LayerSnapshot> {
   }
 
   public getFamilyLayers(): ILayer[] {
-    if (!this) return [];
     return this.family?.layers ?? this.getOrphanAnnotationLayers();
   }
 

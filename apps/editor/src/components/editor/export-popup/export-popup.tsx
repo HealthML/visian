@@ -49,8 +49,17 @@ const StyledDropDown = styled(DropDown)`
 
 export const ExportPopUp = observer<ExportPopUpProps>(({ isOpen, onClose }) => {
   const store = useStore();
+
+  const fileExtensions = [
+    { value: ".nii.gz", label: ".nii.gz" },
+    { value: ".zip", label: ".zip" },
+  ];
+
   const [shouldExportAllLayers, setShouldExportAllLayers] = useState(false);
   const [layersToExport, setLayersToExport] = useState<ILayer[]>([]);
+  const [selectedExtension, setSelectedExtension] = useState(
+    fileExtensions[0].value,
+  );
 
   useEffect(() => {
     if (shouldExportAllLayers) {
@@ -66,17 +75,7 @@ export const ExportPopUp = observer<ExportPopUpProps>(({ isOpen, onClose }) => {
           .filter((layer) => layer.isAnnotation) ?? [],
       );
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen, shouldExportAllLayers]);
-
-  const fileExtensions = [
-    { value: ".nii.gz", label: ".nii.gz" },
-    { value: ".zip", label: ".zip" },
-  ];
-
-  const [selectedExtension, setSelectedExtension] = useState(
-    fileExtensions[0].value,
-  );
+  }, [store, isOpen, shouldExportAllLayers]);
 
   const handleExport = useCallback(async () => {
     store?.setProgress({ labelTx: "exporting" });

@@ -7,7 +7,7 @@ import {
   useTranslation,
 } from "@visian/ui-shared";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";

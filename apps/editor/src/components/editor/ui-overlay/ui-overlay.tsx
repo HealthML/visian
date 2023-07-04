@@ -1,6 +1,5 @@
 import {
   AbsoluteCover,
-  ColoredBorderButtonParam,
   FlexRow,
   FloatingUIButton,
   Notification,
@@ -280,19 +279,27 @@ export const UIOverlay = observer<UIOverlayProps>(
                 />
                 {!isFromWHO() && (
                   <>
-                    {store?.editor.activeDocument?.activeLayer?.isAnnotation &&
-                      store?.reviewStrategy?.currentTask?.kind ===
-                        TaskType.Create && (
-                        <FloatingUIButton
-                          icon="save"
-                          tooltipTx="annotation-saving"
-                          tooltipPosition="left"
-                          onPointerDown={openSavePopUp}
-                          isActive={false}
-                        />
-                      )}
+                    {store?.reviewStrategy?.currentTask?.kind ===
+                      TaskType.Create && (
+                      <FloatingUIButton
+                        icon="save"
+                        isDisabled={
+                          store?.editor.activeDocument?.activeLayer
+                            ?.isAnnotation
+                        }
+                        tooltipTx="annotation-saving"
+                        tooltipPosition="left"
+                        onPointerDown={openSavePopUp}
+                        isActive={false}
+                      />
+                    )}
                     <FloatingUIButton
                       icon="export"
+                      isDisabled={
+                        !store?.editor?.activeDocument?.layers.some(
+                          (layer) => layer.isAnnotation,
+                        )
+                      }
                       tooltipTx="export-tooltip"
                       tooltipPosition="left"
                       onPointerDown={
