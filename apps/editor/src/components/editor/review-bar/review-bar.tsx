@@ -272,7 +272,6 @@ export const MiaReviewBar = observer(
         </ActionContainer>
         <ReviewContainer>
           <ReviewToolsContainer>
-            {/* <SkipButton icon="arrowLeft" /> */}
             <ActionButtons
               icon="save"
               tooltipTx="save"
@@ -281,6 +280,9 @@ export const MiaReviewBar = observer(
             />
             <ActionButtons
               icon={isVerified ? "exit" : "check"}
+              isDisabled={
+                !store?.editor.activeDocument?.activeLayer?.family?.metaData
+              }
               tooltipTx={
                 isVerified
                   ? "unverify-annotation-tooltip"
@@ -289,7 +291,6 @@ export const MiaReviewBar = observer(
               tooltipPosition="top"
               onPointerDown={toggleVerification}
             />
-            {/* <SkipButton icon="arrowRight" /> */}
             <ActionButtons
               icon="arrowForward"
               tooltipTx="next-task-tooltip"
