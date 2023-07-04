@@ -86,8 +86,6 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
     [newAnnotationURIPrefix, selectedExtension],
   );
 
-  const { t } = useTranslation();
-
   const createFamilyForNewAnnotation = (
     layer: ILayer | undefined,
     annotation: Annotation | undefined,
@@ -271,9 +269,11 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
         `^((/|./)?([a-zA-Z0-9-_]+/)*([a-zA-Z0-9-_]+)${extensionsPattern})$`,
       );
 
-      return pattern.test(dataUri) ? "valid" : t("data_uri_help_message");
+      return pattern.test(dataUri)
+        ? "valid"
+        : translate("data_uri_help_message");
     },
-    [t],
+    [translate],
   );
 
   const isValidAnnotationUri = useMemo(

@@ -319,19 +319,25 @@ export const UIOverlay = observer<UIOverlayProps>(
                   }}
                   isActive={false}
                 />
-                {store?.editor.activeDocument?.activeLayer?.isAnnotation &&
-                  searchParams.get("imageId") && (
-                    <FloatingUIButton
-                      icon="save"
-                      tooltipTx="annotation-saving"
-                      tooltipPosition="left"
-                      onPointerDown={openSavePopUp}
-                      isActive={false}
-                    />
-                  )}
+                <FloatingUIButton
+                  icon="save"
+                  isDisabled={
+                    !store?.editor.activeDocument?.activeLayer?.isAnnotation ||
+                    !searchParams.get("imageId")
+                  }
+                  tooltipTx="annotation-saving"
+                  tooltipPosition="left"
+                  onPointerDown={openSavePopUp}
+                  isActive={false}
+                />
                 {!isFromWHO() && (
                   <FloatingUIButton
                     icon="export"
+                    isDisabled={
+                      !store.editor?.activeDocument?.layers.some(
+                        (layer) => layer.isAnnotation,
+                      )
+                    }
                     tooltipTx="export-tooltip"
                     tooltipPosition="left"
                     onPointerDown={
