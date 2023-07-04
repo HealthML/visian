@@ -24,6 +24,7 @@ import { hubBaseUrl } from "../queries";
 import {
   DatasetScreen,
   EditorScreen,
+  JobScreen,
   ProjectScreen,
   ProjectsScreen,
 } from "../screens";
@@ -86,6 +87,7 @@ function App(): JSX.Element {
                     path="/datasets/:datasetId"
                     element={<DatasetScreen />}
                   />
+                  <Route path="/jobs/:jobId" element={<JobScreen />} />
                   <Route
                     path="/"
                     element={<Navigate replace to="/projects" />}

@@ -333,9 +333,7 @@
   "no-jobs-available": "Currently no jobs are available.",
   "job-deleted-images": "It seems like all images for this job were deleted...",
   "job-images": "Images",
-  "job-number-images": "Number of images",
-  "job-number-annotations": "Number of annotations",
-  "job-details": "Job Details",
+  "job-details": "Details",
   "job-model-name": "Model",
   "job-model-version": "Version",
   "job-started": "Started at",
@@ -350,6 +348,7 @@
   "job-creation-model-selection": "Select a model version",
   "job-creation-image-selection": "Select the images to annotate",
   "job-creation-error": "An error occurred while creating the job.",
+  "job-title": "Job on {{date}}",
   "start-job": "Start Job",
 
   "import-images": "Import Images",
@@ -403,17 +402,25 @@
 
   "create": "Create",
   "create-project": "Create Project",
-  "project-name": "Project Name",
   "create-dataset": "Create Dataset",
-  "dataset-name": "Dataset Name",
 
   "edit": "Edit",
-  "edit-project": "Edit Project Name",
-  "edit-dataset": "Edit Dataset Name",
   "update": "Update",
+  "name": "Name",
 
   "verified": "verified",
 
-  "data-uri-help-message": "The dataURI is not valid. It should have a format like 'folders/filename' where a folder and the filename can consist of letters, digits, -, or _.",
-  "uri-file-type-mismatch": "URI does not match file type \"{{name}}\""
+  "progress-total": "Total Images",
+  "progress-verified": "Verified",
+  "progress-annotated": "Annotated",
+  "annotation-progress": "Progress",
+  "annotation-progress-no-images": "Add images to see the annotation progress.",
+  "annotated-verified-images": "Annotated and Verified Images",
+  "review-annotations": "Start Review",
+
+  "data-uri-help-message": "The dataURI is not valid. It should have a format like 'folders/filename.extension' where a folder and the filename can consist of letters, digits, -, or _ and extension should be one of the following:",
+  "uri-file-type-mismatch": "URI does not match file type \"{{name}}\"",
+
+  "switch-to-grid": "Switch to grid view",
+  "switch-to-list": "Switch to list view"
 }

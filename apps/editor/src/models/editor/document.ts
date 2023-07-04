@@ -435,6 +435,7 @@ export class Document
     return Object.values(this.layerMap).some((layer) => layer.is3DLayer);
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-shadow
   protected zipLayers = async (layers: ILayer[]) => {
     const zip = new Zip();
     const files = await Promise.all(layers.map((layer) => layer.toFile()));
