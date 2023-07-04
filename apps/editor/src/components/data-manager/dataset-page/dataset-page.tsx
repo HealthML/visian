@@ -187,24 +187,41 @@ export const DatasetPage = ({
 
   const navigate = useNavigate();
 
-  const startReview = useCallback(async () => {
-    if (store) {
-      const currentPath = window.location.pathname;
-      if (!(await store.destroyLayers())) return;
-      store.shouldPersist = true;
-      store.setProgress({ labelTx: "importing", showSplash: true });
-      navigate("/editor?review=true");
-      store.setReviewStrategy(
-        await MiaReviewStrategy.fromImageIds(
-          store,
-          [...selectedImages],
-          currentPath,
-        ),
-      );
-      await store.reviewStrategy?.loadTask();
-      store.setProgress();
-    }
-  }, [navigate, selectedImages, store]);
+  const startReview = useCallback(
+    async (wholeDataset?: boolean) => {
+      if (store) {
+        const currentPath = window.location.pathname;
+        if (!(await store.destroyLayers())) return;
+        store.shouldPersist = true;
+        store.setProgress({ labelTx: "importing", showSplash: true });
+        navigate("/editor?review=true");
+        if (wholeDataset) {
+          store.setReviewStrategy(
+            await MiaReviewStrategy.fromDataset(store, dataset.id, currentPath),
+          );
+        } else {
+          store.setReviewStrategy(
+            await MiaReviewStrategy.fromImageIds(
+              store,
+              [...selectedImages],
+              currentPath,
+            ),
+          );
+        }
+        await store.reviewStrategy?.loadTask();
+        store.setProgress();
+      }
+    },
+    [navigate, dataset, selectedImages, store],
+  );
+
+  const startReviewDataset = useCallback(() => {
+    startReview(true);
+  }, [startReview]);
+
+  const startReviewSelectedImages = useCallback(() => {
+    startReview(false);
+  }, [startReview]);
 
   let listInfoTx;
   if (imagesError) listInfoTx = "images-loading-failed";
@@ -226,7 +243,12 @@ export const DatasetPage = ({
         isLoading={isLoadingProgress}
         infoTx={progressInfoTx}
       >
-        {progress && <AnnotationProgress progress={progress} />}
+        {progress && (
+          <AnnotationProgress
+            progress={progress}
+            onReviewClick={startReviewDataset}
+          />
+        )}
       </PageSection>
       <PageSection
         titleTx="images"
@@ -243,7 +265,7 @@ export const DatasetPage = ({
             openJobCreationPopUp={openJobCreationPopUp}
             openImageImportPopUp={openImageImportPopUp}
             deleteSelectedImages={openDeleteImagesConfirmationPopUp}
-            startReview={startReview}
+            startReview={startReviewSelectedImages}
           />
         }
       >

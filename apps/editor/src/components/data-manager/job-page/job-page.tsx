@@ -11,6 +11,8 @@ import { useCallback, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 
+import { useStore } from "../../../app/root-store";
+import { MiaReviewStrategy } from "../../../models/review-strategy";
 import {
   useAnnotationsByJob,
   useDeleteJobsForProjectMutation,
@@ -71,6 +73,7 @@ export const JobPage = ({ job }: { job: Job }) => {
   const { images, imagesError, isErrorImages, isLoadingImages } =
     useImagesByJob(job.id);
 
+  const store = useStore();
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { deleteJobs } = useDeleteJobsForProjectMutation();
@@ -151,6 +154,21 @@ export const JobPage = ({ job }: { job: Job }) => {
     [patchJobStatus, job],
   );
 
+  const startReviewJob = useCallback(async () => {
+    if (store) {
+      const currentPath = window.location.pathname;
+      if (!(await store.destroyLayers())) return;
+      store.shouldPersist = true;
+      store.setProgress({ labelTx: "importing", showSplash: true });
+      navigate("/editor?review=true");
+      store.setReviewStrategy(
+        await MiaReviewStrategy.fromJob(store, job.id, currentPath),
+      );
+      await store.reviewStrategy?.loadTask();
+      store.setProgress();
+    }
+  }, [navigate, job, store]);
+
   let listInfoTx;
   if (imagesError) listInfoTx = "images-loading-failed";
   else if (images && images.length === 0) listInfoTx = "no-images-available";
@@ -183,7 +201,12 @@ export const JobPage = ({ job }: { job: Job }) => {
                 isLoading={isLoadingProgress}
                 infoTx={progressInfoTx}
               >
-                {progress && <AnnotationProgress progress={progress} />}
+                {progress && (
+                  <AnnotationProgress
+                    progress={progress}
+                    onReviewClick={startReviewJob}
+                  />
+                )}
               </PageSection>
             ),
           },
