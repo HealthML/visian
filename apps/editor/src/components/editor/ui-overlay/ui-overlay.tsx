@@ -278,31 +278,33 @@ export const UIOverlay = observer<UIOverlayProps>(
                   }}
                   isActive={false}
                 />
-                {store?.editor.activeDocument?.activeLayer?.isAnnotation &&
-                  store?.reviewStrategy?.currentTask?.kind !==
-                    TaskType.Review && (
+                {!isFromWHO() && (
+                  <>
+                    {store?.editor.activeDocument?.activeLayer?.isAnnotation &&
+                      store?.reviewStrategy?.currentTask?.kind ===
+                        TaskType.Create && (
+                        <FloatingUIButton
+                          icon="save"
+                          tooltipTx="annotation-saving"
+                          tooltipPosition="left"
+                          onPointerDown={openSavePopUp}
+                          isActive={false}
+                        />
+                      )}
                     <FloatingUIButton
-                      icon="save"
-                      tooltipTx="annotation-saving"
+                      icon="export"
+                      tooltipTx="export-tooltip"
                       tooltipPosition="left"
-                      onPointerDown={openSavePopUp}
+                      onPointerDown={
+                        store?.editor.activeDocument?.viewSettings.viewMode ===
+                        "2D"
+                          ? openExportPopUp
+                          : store?.editor.activeDocument?.viewport3D
+                              .exportCanvasImage
+                      }
                       isActive={false}
                     />
-                  )}
-                {!isFromWHO() && (
-                  <FloatingUIButton
-                    icon="export"
-                    tooltipTx="export-tooltip"
-                    tooltipPosition="left"
-                    onPointerDown={
-                      store?.editor.activeDocument?.viewSettings.viewMode ===
-                      "2D"
-                        ? openExportPopUp
-                        : store?.editor.activeDocument?.viewport3D
-                            .exportCanvasImage
-                    }
-                    isActive={false}
-                  />
+                  </>
                 )}
                 <ViewSettings />
                 <SliceSlider showValueLabelOnChange={!isDraggedOver} />
