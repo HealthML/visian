@@ -23,6 +23,23 @@ export type BlendMode =
   | "SCREEN"
   | "SUBTRACT";
 
+export interface LayerSnapshot {
+  kind: string;
+  isAnnotation: boolean;
+
+  id: string;
+  titleOverride?: string;
+  parentId?: string;
+  familyId?: string;
+
+  blendMode: BlendMode;
+  color?: string;
+  isVisible: boolean;
+  opacityOverride?: number;
+
+  transformation: number[];
+}
+
 /** A generic layer. */
 export interface ILayer {
   /** The type of layer. */
@@ -93,7 +110,11 @@ export interface ILayer {
   /** Sets this layer's parent layer, typically the group it is contained in. */
   setParent(idOrLayer?: string | ILayer): void;
 
-  setFamily(id: string | undefined): void;
+  /** Sets the layer's family and moves it to the specified index within its local rendering order.
+   * A layer with an undefined family is an orphan.
+   * If the layer is an orphan its local rendering order is the document renderingOrder.
+   */
+  setFamily(id: string | undefined, idx?: number): void;
 
   setIsAnnotation(value?: boolean): void;
 
@@ -110,6 +131,8 @@ export interface ILayer {
   delete(): void;
 
   toFile(): Promise<File | undefined>;
+
+  toJSON(): LayerSnapshot;
 }
 
 /**
@@ -196,8 +219,10 @@ export interface ILayerFamily {
   metaData?: { id: string; [key: string]: any };
   /** All layers in the family. */
   layers: ILayer[];
-  /** Adds a layer to the family. */
-  addLayer(id: string): void;
-  /** Removes a layer from the family (but keeps it in the document). */
-  removeLayer(id: string): void;
+  /** Whether the layer is currently collapsed in the layer view* */
+  collapsed?: boolean;
+  /** Adds a layer to the family, the layer is removed from its previous family */
+  addLayer(id: string, idx?: number): void;
+  /** Removes a layer from the family making it an orphan */
+  removeLayer(id: string, idx?: number): void;
 }

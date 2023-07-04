@@ -53,7 +53,7 @@ export interface IDocument {
   mainImageLayer?: Reference<IImageLayer>;
 
   /** The families of layers e.g. for grouping layers by file */
-  layerFamilies: ILayerFamily[];
+  layerFamilies: ILayerFamily[] | undefined;
 
   /** The document's history. */
   history: IHistory;
@@ -101,7 +101,7 @@ export interface IDocument {
   setMeasurementType(measurementType: MeasurementType): void;
 
   /** Adds a layer to the document. */
-  addLayer(layer: ILayer): void;
+  addLayer(layer: ILayer, idx?: number): void;
 
   /** Adds a layer family to the document. */
   addLayerFamily(layer: ILayerFamily): void;

@@ -9,6 +9,7 @@ import {
   ILayerFamily,
   ISliceRenderer,
   IVolumeRenderer,
+  LayerSnapshot,
   MeasurementType,
   PerformanceMode,
   Theme,
@@ -46,7 +47,7 @@ import { StoreContext } from "../types";
 import { Clipboard } from "./clipboard";
 import { History, HistorySnapshot } from "./history";
 import { LayerFamily } from "./layer-families";
-import { ImageLayer, Layer, LayerSnapshot } from "./layers";
+import { ImageLayer, Layer } from "./layers";
 import * as layers from "./layers";
 import { Markers } from "./markers";
 import { ToolName, Tools, ToolsSnapshot } from "./tools";
@@ -99,8 +100,8 @@ export class Document
   protected activeLayerId?: string;
   protected measurementDisplayLayerId?: string;
   protected layerMap: { [key: string]: Layer };
+  protected layerFamilyMap: { [key: string]: LayerFamily };
   protected layerIds: string[];
-  public layerFamilies: ILayerFamily[] = [];
 
   public measurementType: MeasurementType = "volume";
 
@@ -130,12 +131,14 @@ export class Document
     this.titleOverride = snapshot?.titleOverride;
     this.activeLayerId = snapshot?.activeLayerId;
     this.layerMap = {};
+    this.layerFamilyMap = {};
     snapshot?.layerMap.forEach((layer) => {
       const LayerKind = layerMap[layer.kind];
       if (!LayerKind) return;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       this.layerMap[layer.id] = new LayerKind(layer as any, this);
     });
+    // TODO implement snapshot for layerFamilies
     this.layerIds = snapshot?.layerIds || [];
 
     Object.values(this.layerMap).forEach((layer) =>
@@ -157,6 +160,7 @@ export class Document
       | "activeLayerId"
       | "measurementDisplayLayerId"
       | "layerMap"
+      | "layerFamilyMap"
       | "layerIds"
     >(this, {
       id: observable,
@@ -164,6 +168,7 @@ export class Document
       activeLayerId: observable,
       measurementDisplayLayerId: observable,
       layerMap: observable,
+      layerFamilyMap: observable,
       layerIds: observable,
       measurementType: observable,
       history: observable,
@@ -190,7 +195,6 @@ export class Document
       setMeasurementType: action,
       addLayer: action,
       addNewAnnotationLayer: action,
-      moveLayer: action,
       deleteLayer: action,
       toggleTypeAndRepositionLayer: action,
       importImage: action,
@@ -213,11 +217,13 @@ export class Document
     this.clipboard.dispose();
     this.tools.dispose();
     Object.values(this.layerMap).forEach((layer) => layer.delete());
+    // TODO dispose of layerFamilies
   }
 
   public get title(): string | undefined {
     if (this.titleOverride) return this.titleOverride;
     const { length } = this.layerIds;
+    // TODO rework
     return length ? this.getLayer(this.layerIds[length - 1])?.title : undefined;
   }
 
@@ -235,17 +241,35 @@ export class Document
   }
 
   public get layers(): ILayer[] {
-    return this.layerIds.map((id) => this.layerMap[id]);
+    return this.layerIds.flatMap((id) => {
+      if (this.layerFamilyMap[id]) {
+        return this.layerFamilyMap[id].layers;
+      }
+      return this.layerMap[id];
+    });
+  }
+
+  public get renderingOrder(): (ILayer | ILayerFamily)[] {
+    return this.layerIds.map((id) => {
+      if (this.layerFamilyMap[id]) {
+        return this.layerFamilyMap[id];
+      }
+      return this.layerMap[id];
+    });
+  }
+
+  public get layerFamilies(): ILayerFamily[] {
+    return this.layerIds
+      .filter((id) => !!this.layerFamilyMap[id])
+      .map((id) => this.layerFamilyMap[id]);
   }
 
   public get activeLayer(): ILayer | undefined {
-    return Object.values(this.layerMap).find(
-      (layer) => layer.id === this.activeLayerId,
-    );
+    return this.layers.find((layer) => layer.id === this.activeLayerId);
   }
 
   public get measurementDisplayLayer(): IImageLayer | undefined {
-    return Object.values(this.layerMap).find(
+    return this.layers.find(
       (layer) =>
         layer.id === this.measurementDisplayLayerId && layer.kind === "image",
     ) as IImageLayer | undefined;
@@ -260,22 +284,20 @@ export class Document
     // TODO: Rework to work with group layers
 
     const areAllLayersAnnotations = Boolean(
-      !this.layerIds.find((layerId) => {
-        const layer = this.layerMap[layerId];
-        return layer.kind === "image" && !layer.isAnnotation;
-      }),
+      !this.layers.find(
+        (layer) => layer.kind === "image" && !layer.isAnnotation,
+      ),
     );
 
     const areAllImageLayersInvisible = Boolean(
-      !this.layerIds.find((layerId) => {
-        const layer = this.layerMap[layerId];
-        return layer.kind === "image" && !layer.isAnnotation && layer.isVisible;
-      }),
+      !this.layers.find(
+        (layer) =>
+          layer.kind === "image" && !layer.isAnnotation && layer.isVisible,
+      ),
     );
 
     let mainImageLayer: ImageLayer | undefined;
-    this.layerIds.slice().find((id) => {
-      const layer = this.layerMap[id];
+    this.layers.slice().find((layer) => {
       if (
         layer.kind === "image" &&
         // use non-annotation layer if possible
@@ -301,11 +323,7 @@ export class Document
   }
 
   public getLayerFamily(id: string): ILayerFamily | undefined {
-    return this.layerFamilies.find((family) => family.id === id);
-  }
-
-  public addLayerFamily(family: ILayerFamily): void {
-    this.layerFamilies.push(family);
+    return id ? this.layerFamilyMap[id] : undefined;
   }
 
   public setActiveLayer = (idOrLayer?: string | ILayer): void => {
@@ -327,24 +345,53 @@ export class Document
   public setMeasurementType = (measurementType: MeasurementType) => {
     this.measurementType = measurementType;
   };
-
-  public addLayer = (...newLayers: Layer[]): void => {
-    newLayers.forEach((layer) => {
+  /** Ensures consistency of layerIds, should be called whenever a layer is moved or changes family */
+  // if the layer has a family, it will be removed from layerIds
+  // if an index is specified, the family will be inserted at the index
+  // if no index is specified, the family remain where it was if already in the list
+  // if not in the list, annotations will be inserted at the start and images at the end of the list
+  public addLayer = (layer: Layer, idx?: number): void => {
+    if (!layer.id) return;
+    if (!this.layerMap[layer.id]) {
       this.layerMap[layer.id] = layer;
-      if (layer.isAnnotation) {
-        this.layerIds.unshift(layer.id);
-      } else {
-        // insert image layer after all annotation layers
-        let insertIndex = 0;
-        for (let i = this.layerIds.length - 1; i >= 0; i--) {
-          if (this.layerMap[this.layerIds[i]].isAnnotation) {
-            insertIndex = i + 1;
-            break;
-          }
-        }
-        this.layerIds.splice(insertIndex, 0, layer.id);
+    }
+    const oldIndex = this.layerIds.indexOf(layer.id);
+    if (layer.family) {
+      if (this.layerIds.includes(layer.id)) {
+        this.layerIds = this.layerIds.filter((id) => id !== layer.id);
       }
-    });
+    } else if (idx !== undefined) {
+      if (oldIndex < 0) {
+        this.layerIds.splice(idx, 0, layer.id);
+      } else if (idx !== oldIndex) {
+        this.layerIds.splice(idx, 0, this.layerIds.splice(oldIndex, 1)[0]);
+      }
+    } else if (layer.isAnnotation && oldIndex < 0) {
+      this.layerIds = this.layerIds.filter((id) => id !== layer.id);
+      this.layerIds.unshift(layer.id);
+    } else if (oldIndex < 0) {
+      this.layerIds = this.layerIds.filter((id) => id !== layer.id);
+      this.layerIds.push(layer.id);
+    }
+  };
+  // if an index is specified, the family will be inserted at the index
+  // if no index is specified, the family remain where it was if already in the list or inserted at the start
+  public addLayerFamily = (family: LayerFamily, idx?: number): void => {
+    if (!family.id) return;
+
+    if (!this.layerFamilyMap[family.id]) {
+      this.layerFamilyMap[family.id] = family;
+    }
+    const oldIndex = this.layerIds.indexOf(family.id);
+    if (idx !== undefined) {
+      if (oldIndex < 0) {
+        this.layerIds.splice(idx, 0, family.id);
+      } else if (idx !== oldIndex) {
+        this.layerIds.splice(idx, 0, this.layerIds.splice(oldIndex, 1)[0]);
+      }
+    } else if (oldIndex < 0) {
+      this.layerIds.unshift(family.id);
+    }
   };
 
   public getFirstUnusedColor = (
@@ -388,18 +435,11 @@ export class Document
     this.viewSettings.setViewMode(this.viewSettings.viewMode);
   };
 
-  public moveLayer(idOrLayer: string | ILayer, newIndex: number) {
-    const layerId = typeof idOrLayer === "string" ? idOrLayer : idOrLayer.id;
-    const oldIndex = this.layerIds.indexOf(layerId);
-    if (!~oldIndex) return;
-
-    this.layerIds.splice(newIndex, 0, this.layerIds.splice(oldIndex, 1)[0]);
-  }
-
   public deleteLayer = (idOrLayer: string | ILayer): void => {
     const layerId = typeof idOrLayer === "string" ? idOrLayer : idOrLayer.id;
 
     this.layerIds = this.layerIds.filter((id) => id !== layerId);
+    this.layerMap[layerId].delete();
     delete this.layerMap[layerId];
     if (this.activeLayerId === layerId) {
       this.setActiveLayer(this.layerIds[0]);
@@ -409,27 +449,16 @@ export class Document
   /** Toggles the type of the layer (annotation or not) and repositions it accordingly */
   public toggleTypeAndRepositionLayer = (idOrLayer: string | ILayer): void => {
     const layerId = typeof idOrLayer === "string" ? idOrLayer : idOrLayer.id;
-    let lastAnnotationIndex = this.layerIds.length - 1;
-    for (let i = 0; i < this.layerIds.length; i++) {
-      if (!this.layerMap[this.layerIds[i]].isAnnotation) {
-        lastAnnotationIndex = i - 1;
-        break;
-      }
+    const layer = this.getLayer(layerId);
+    if (!layer) return;
+    if (layer.isAnnotation) {
+      layer.setFamily(undefined);
     }
-
-    if (this.layerMap[layerId].isAnnotation) {
-      this.moveLayer(layerId, lastAnnotationIndex);
-    } else {
-      this.moveLayer(layerId, lastAnnotationIndex + 1);
-    }
-
-    this.layerMap[layerId].setIsAnnotation(
-      !this.layerMap[layerId].isAnnotation,
-    );
+    layer.setIsAnnotation(!layer.isAnnotation);
   };
 
   public get has3DLayers(): boolean {
-    return Object.values(this.layerMap).some((layer) => layer.is3DLayer);
+    return this.layers.some((layer) => layer.is3DLayer);
   }
 
   // I/O
@@ -479,13 +508,14 @@ export class Document
 
   public getFileForLayer = async (idOrLayer: string | ILayer) => {
     const layerId = typeof idOrLayer === "string" ? idOrLayer : idOrLayer.id;
-    const layer = this.layerMap[layerId];
+    const layer = this.getLayer(layerId);
+    if (!layer) return;
     const file = await layer.toFile();
     return file;
   };
 
   public finishBatchImport() {
-    if (!Object.values(this.layerMap).some((layer) => layer.isAnnotation)) {
+    if (!this.layers.some((layer) => layer.isAnnotation)) {
       this.addNewAnnotationLayer();
       this.viewport2D.setMainViewType();
     }
@@ -910,11 +940,10 @@ export class Document
 
   public getExcludedSegmentations(layer: ILayer) {
     if (!this.useExclusiveSegmentations) return undefined;
-    const layerIndex = this.layerIds.indexOf(layer.id);
+    const layerIndex = this.layers.indexOf(layer);
     if (layerIndex <= 0) return undefined;
-    return this.layerIds
+    return this.layers
       .slice(0, layerIndex)
-      .map((layerId) => this.layerMap[layerId])
       .filter(
         (potentialLayer) =>
           potentialLayer.isAnnotation &&
@@ -1017,7 +1046,7 @@ export class Document
       id: this.id,
       titleOverride: this.titleOverride,
       activeLayerId: this.activeLayerId,
-      layerMap: Object.values(this.layerMap).map((layer) => layer.toJSON()),
+      layerMap: this.layers.map((layer) => layer.toJSON()),
       layerIds: toJS(this.layerIds),
       history: this.history.toJSON(),
       viewSettings: this.viewSettings.toJSON(),

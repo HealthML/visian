@@ -3,11 +3,13 @@ import { action, makeObservable, observable } from "mobx";
 import { v4 as uuidv4 } from "uuid";
 
 export class LayerFamily implements ILayerFamily {
+  public excludeFromSnapshotTracking = ["document"];
   protected layerIds: string[] = [];
   public title = "";
   public id!: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public metaData?: { id: string; [key: string]: any };
+  public collapsed?: boolean;
 
   constructor(
     protected document: IDocument,
@@ -20,30 +22,38 @@ export class LayerFamily implements ILayerFamily {
 
     makeObservable<this, "layerIds">(this, {
       layerIds: observable,
-
+      collapsed: observable,
       addLayer: action,
       removeLayer: action,
     });
   }
 
   public get layers(): ILayer[] {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     return this.layerIds.map((id) => this.document.getLayer(id)!);
   }
 
-  public addLayer(id: string) {
+  public addLayer(id: string, idx?: number) {
     const layer = this.document.getLayer(id);
-    if (!this.layerIds.includes(id) && layer) {
-      this.layerIds.push(id);
-      layer.setFamily(this.id);
+    if (!layer) return;
+    if (layer.family !== this) {
+      layer.family?.removeLayer(layer.id);
     }
+    const oldIndex = this.layerIds.indexOf(layer.id);
+    if (oldIndex < 0 && idx !== undefined) {
+      this.layerIds.splice(idx, 0, layer.id);
+    } else if (oldIndex < 0 && idx === undefined) {
+      this.layerIds.push(id);
+    } else if (idx !== undefined && oldIndex !== idx) {
+      this.layerIds.splice(idx, 0, this.layerIds.splice(oldIndex, 1)[0]);
+    }
+    this.document.addLayer(layer, idx);
   }
 
-  public removeLayer(id: string) {
+  public removeLayer(id: string, idx?: number) {
+    if (!this.layerIds.includes(id)) return;
     this.layerIds = this.layerIds.filter((layerId) => layerId !== id);
     const layer = this.document.getLayer(id);
-    if (layer?.family === this) {
-      layer.setFamily(undefined);
-    }
+    if (!layer) return;
+    this.document.addLayer(layer, idx);
   }
 }
