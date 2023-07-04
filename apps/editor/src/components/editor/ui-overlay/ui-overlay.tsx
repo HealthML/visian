@@ -27,6 +27,7 @@ import {
 } from "../action-modal";
 import { AIBar } from "../ai-bar";
 import { AxesAndVoxel } from "../axes-and-voxel";
+import { ExportPopUp } from "../export-popup";
 import { ImageImportDropSheet } from "../import-image-drop-sheet";
 import { ImportPopUp } from "../import-popup";
 import { Layers } from "../layers";
@@ -198,16 +199,14 @@ export const UIOverlay = observer<UIOverlayProps>(
       setIsSavePopUpOpen(false);
     }, []);
 
-    // Export Button
-    const exportZip = useCallback(() => {
-      store?.setProgress({ labelTx: "exporting" });
-      store?.editor.activeDocument
-        ?.exportZip(true)
-        .catch()
-        .then(() => {
-          store?.setProgress();
-        });
-    }, [store]);
+    // Export Pop Up Toggling
+    const [isExportPopUpOpen, setIsExportPopUpOpen] = useState(false);
+    const openExportPopUp = useCallback(() => {
+      setIsExportPopUpOpen(true);
+    }, []);
+    const closeExportPopUp = useCallback(() => {
+      setIsExportPopUpOpen(false);
+    }, []);
 
     const [searchParams] = useSearchParams();
     const loadImagesAndAnnotations = () => {
@@ -320,25 +319,31 @@ export const UIOverlay = observer<UIOverlayProps>(
                   }}
                   isActive={false}
                 />
-                {store?.editor.activeDocument?.activeLayer?.isAnnotation &&
-                  searchParams.get("imageId") && (
-                    <FloatingUIButton
-                      icon="save"
-                      tooltipTx="annotation-saving"
-                      tooltipPosition="left"
-                      onPointerDown={openSavePopUp}
-                      isActive={false}
-                    />
-                  )}
+                <FloatingUIButton
+                  icon="save"
+                  isDisabled={
+                    !store?.editor.activeDocument?.activeLayer?.isAnnotation ||
+                    !searchParams.get("imageId")
+                  }
+                  tooltipTx="annotation-saving"
+                  tooltipPosition="left"
+                  onPointerDown={openSavePopUp}
+                  isActive={false}
+                />
                 {!isFromWHO() && (
                   <FloatingUIButton
                     icon="export"
+                    isDisabled={
+                      !store.editor?.activeDocument?.layers.some(
+                        (layer) => layer.isAnnotation,
+                      )
+                    }
                     tooltipTx="export-tooltip"
                     tooltipPosition="left"
                     onPointerDown={
                       store?.editor.activeDocument?.viewSettings.viewMode ===
                       "2D"
-                        ? exportZip
+                        ? openExportPopUp
                         : store?.editor.activeDocument?.viewport3D
                             .exportCanvasImage
                     }
@@ -376,6 +381,10 @@ export const UIOverlay = observer<UIOverlayProps>(
                 store?.editor.activeDocument?.measurementDisplayLayer,
               )}
               onClose={store?.editor.activeDocument?.setMeasurementDisplayLayer}
+            />
+            <ExportPopUp
+              isOpen={isExportPopUpOpen}
+              onClose={closeExportPopUp}
             />
             <SavePopUp isOpen={isSavePopUpOpen} onClose={closeSavePopUp} />
             {isDraggedOver && (

@@ -158,9 +158,9 @@ export class WHOReviewStrategy extends ReviewStrategy {
         }
 
         // Append metadata to file in order to store it in the correct AnnotationData object
-        if (layer.metaData) {
+        if (layer.metadata) {
           const fileWithMetadata = layerFile as FileWithMetadata;
-          fileWithMetadata.metadata = layer.metaData;
+          fileWithMetadata.metadata = layer.metadata;
           return fileWithMetadata;
         }
         return layerFile;

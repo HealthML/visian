@@ -1,47 +1,52 @@
-import {
-  Modal,
-  Screen,
-  SquareButton,
-  Text,
-  useTranslation,
-} from "@visian/ui-shared";
+import { Screen, useTranslation } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 
 import { ConfirmationPopup } from "../components/data-manager/confirmation-popup";
+import { EditPopup } from "../components/data-manager/edit-popup";
+import { MiaTitle } from "../components/data-manager/mia-title";
+import { Page } from "../components/data-manager/page";
+import {
+  PaddedPageSectionIconButton,
+  PageSection,
+} from "../components/data-manager/page-section";
 import { ProjectCreationPopup } from "../components/data-manager/project-creation-popup";
-import { ProjectList } from "../components/data-manager/projects-list/project-list";
-import { UIOverlayDataManager } from "../components/data-manager/ui-overlay-data-manager";
+import useLocalStorageToggle from "../components/data-manager/util/use-local-storage";
+import { GridView } from "../components/data-manager/views/grid-view";
+import { ListView } from "../components/data-manager/views/list-view";
 import {
   useCreateProjectMutation,
   useDeleteProjectsMutation,
   useProjects,
+  useUpdateProjectsMutation,
 } from "../queries";
 import { Project } from "../types";
 
-const StyledModal = styled(Modal)`
-  width: 100%;
+const Container = styled.div`
+  display: flex;
+  align-items: center;
 `;
 
-const ErrorMessage = styled(Text)`
-  margin: auto;
-`;
-
-const StyledButton = styled(SquareButton)`
-  margin-left: 10px;
-  padding: 10px;
+const StyledIconButton = styled(PaddedPageSectionIconButton)`
+  padding: 0 9px;
+  height: 25px; ;
 `;
 
 export const ProjectsScreen: React.FC = observer(() => {
+  const { t: translate } = useTranslation();
+  const navigate = useNavigate();
+
   const { projects, projectsError, isErrorProjects, isLoadingProjects } =
     useProjects();
-  const [projectTobBeDeleted, setProjectTobBeDeleted] = useState<Project>();
+  const [projectToBeDeleted, setProjectToBeDeleted] = useState<Project>();
+  const [projectToBeUpdated, setProjectToBeUpdated] = useState<Project>();
   const { deleteProjects } = useDeleteProjectsMutation();
   const { createProject } = useCreateProjectMutation();
-  const { t: translate } = useTranslation();
+  const updateProject = useUpdateProjectsMutation();
 
-  // delete project confirmation popup
+  // Delete Project Confirmation
   const [
     isDeleteProjectConfirmationPopUpOpen,
     setIsDeleteProjectConfirmationPopUpOpen,
@@ -53,7 +58,7 @@ export const ProjectsScreen: React.FC = observer(() => {
     setIsDeleteProjectConfirmationPopUpOpen(false);
   }, []);
 
-  // create project popup
+  // Create Project
   const [isCreateProjectPopupOpen, setIsCreateProjectPopupOpen] =
     useState(false);
   const openCreateProjectPopup = useCallback(
@@ -65,33 +70,56 @@ export const ProjectsScreen: React.FC = observer(() => {
     [],
   );
 
+  // Delete Project
   const deleteProject = useCallback(
     (project: Project) => {
-      setProjectTobBeDeleted(project);
+      setProjectToBeDeleted(project);
       openDeleteProjectConfirmationPopUp();
     },
-    [setProjectTobBeDeleted, openDeleteProjectConfirmationPopUp],
+    [setProjectToBeDeleted, openDeleteProjectConfirmationPopUp],
   );
 
-  const deleteProjectMessage = useMemo(
-    () =>
-      `${translate("delete-project-message")}`.replace(
-        "_",
-        projectTobBeDeleted?.name ?? "",
-      ),
-    [projectTobBeDeleted, translate],
+  // Open Project
+  const openProject = useCallback(
+    (project: Project) => {
+      navigate(`/projects/${project.id}`);
+    },
+    [navigate],
   );
 
-  const altMessage = useMemo(() => {
-    if (isLoadingProjects) return translate("projects-loading");
-    if (isErrorProjects)
-      return `${translate("projects-loading-error")} ${
-        projectsError?.response?.statusText
-      } (${projectsError?.response?.status})`;
-    if (projects && projects.length <= 0)
-      return translate("no-projects-available");
-    return null;
-  }, [isLoadingProjects, isErrorProjects, projects, projectsError, translate]);
+  // Edit Project
+  const [isEditPopupOpen, setIsEditPopupOpen] = useState(false);
+  const openEditPopup = useCallback(() => setIsEditPopupOpen(true), []);
+  const closeEditPopup = useCallback(() => setIsEditPopupOpen(false), []);
+
+  const editProject = useCallback(
+    (project: Project) => {
+      setProjectToBeUpdated(project);
+      openEditPopup();
+    },
+    [setProjectToBeUpdated, openEditPopup],
+  );
+
+  const confirmDeleteProject = useCallback(() => {
+    if (projectToBeDeleted)
+      deleteProjects({
+        projectIds: [projectToBeDeleted.id],
+      });
+  }, [deleteProjects, projectToBeDeleted]);
+
+  // Switch between List and Grid View
+  const [isGridView, setIsGridView] = useLocalStorageToggle(
+    "isGridViewProjects",
+    true,
+  );
+  const toggleGridView = useCallback(() => {
+    setIsGridView((prev: boolean) => !prev);
+  }, [setIsGridView]);
+
+  let projectsInfoTx;
+  if (projectsError) projectsInfoTx = "projects-loading-failed";
+  else if (projects && projects.length === 0)
+    projectsInfoTx = "no-projects-available";
 
   return (
     <Screen
@@ -103,51 +131,72 @@ export const ProjectsScreen: React.FC = observer(() => {
           : ""
       }`}
     >
-      <UIOverlayDataManager
-        main={
-          <StyledModal
-            hideHeaderDivider={false}
-            labelTx="projects-base-title"
-            position="right"
-            headerChildren={
-              <StyledButton
+      <Page>
+        <MiaTitle />
+        <PageSection
+          titleTx="projects"
+          infoTx={projectsInfoTx}
+          showActions={!projectsError}
+          isLoading={isLoadingProjects}
+          actions={
+            <Container>
+              <StyledIconButton
+                icon={isGridView ? "list" : "grid"}
+                tooltipTx={isGridView ? "switch-to-list" : "switch-to-grid"}
+                tooltipPosition="right"
+                onPointerDown={toggleGridView}
+              />
+              <StyledIconButton
                 icon="plus"
                 tooltipTx="create-project"
                 tooltipPosition="left"
                 onPointerDown={openCreateProjectPopup}
               />
-            }
-          >
-            {altMessage ? (
-              <ErrorMessage tx={altMessage} />
+            </Container>
+          }
+        >
+          {projects &&
+            (isGridView ? (
+              <GridView
+                data={projects}
+                onDelete={deleteProject}
+                onClick={openProject}
+                onEdit={editProject}
+              />
             ) : (
-              projects && (
-                <ProjectList
-                  projects={projects}
-                  deleteProject={deleteProject}
-                />
-              )
-            )}
-            <ConfirmationPopup
-              isOpen={isDeleteProjectConfirmationPopUpOpen}
-              onClose={closeDeleteProjectConfirmationPopUp}
-              message={deleteProjectMessage}
-              titleTx="delete-project-title"
-              onConfirm={() => {
-                if (projectTobBeDeleted)
-                  deleteProjects({
-                    projectIds: [projectTobBeDeleted.id],
-                  });
-              }}
+              <ListView
+                data={projects}
+                onDelete={deleteProject}
+                onClick={openProject}
+                onEdit={editProject}
+              />
+            ))}
+          <ConfirmationPopup
+            isOpen={isDeleteProjectConfirmationPopUpOpen}
+            onClose={closeDeleteProjectConfirmationPopUp}
+            message={translate("delete-project-message", {
+              name: projectToBeDeleted?.name ?? "",
+            })}
+            titleTx="delete-project-title"
+            onConfirm={confirmDeleteProject}
+          />
+          <ProjectCreationPopup
+            isOpen={isCreateProjectPopupOpen}
+            onClose={closeCreateProjectPopup}
+            onConfirm={createProject}
+          />
+          {projectToBeUpdated && (
+            <EditPopup
+              oldName={projectToBeUpdated.name}
+              isOpen={isEditPopupOpen}
+              onClose={closeEditPopup}
+              onConfirm={(newName) =>
+                updateProject.mutate({ ...projectToBeUpdated, name: newName })
+              }
             />
-            <ProjectCreationPopup
-              isOpen={isCreateProjectPopupOpen}
-              onClose={closeCreateProjectPopup}
-              onConfirm={(newProjectDto) => createProject(newProjectDto)}
-            />
-          </StyledModal>
-        }
-      />
+          )}
+        </PageSection>
+      </Page>
     </Screen>
   );
 });

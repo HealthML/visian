@@ -2,12 +2,13 @@ import React, { useCallback } from "react";
 import styled from "styled-components";
 
 import { useTranslation } from "../../i18n";
-import { color, font, fontSize, radius, space } from "../../theme";
+import { color, font, fontSize, radius, size, space } from "../../theme";
 import { TextFieldProps } from "./text-field.props";
 
 const StyledInput = styled.input`
   border: none;
   padding: ${space("inputPadding")};
+  box-sizing: border-box;
   background-color: unset;
   border: 1px solid ${color("sheetBorder")};
   border-radius: ${radius("default")};
@@ -15,6 +16,7 @@ const StyledInput = styled.input`
   display: inline-flex;
   font-family: ${font("default")};
   font-size: ${fontSize("default")};
+  height: ${size("listElementHeight")};
 
   &::placeholder {
     color: ${color("placeholder")};

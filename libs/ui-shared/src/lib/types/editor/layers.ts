@@ -94,8 +94,8 @@ export interface ILayer {
 
   /** The layer's transform matrix used to position it during rendering. */
   transformation?: Matrix4;
-  /** The layer's meta data ID. */
-  metaData?: { id: string; [key: string]: any };
+  /** The layer's metadata ID. */
+  metadata?: { id: string; [key: string]: any };
 
   /**
    * Returns all slice markers, aggregated for the layer and given view type.
@@ -115,6 +115,8 @@ export interface ILayer {
    * If the layer is an orphan its local rendering order is the document renderingOrder.
    */
   setFamily(id: string | undefined, idx?: number): void;
+
+  getFamilyLayers(): ILayer[];
 
   setIsAnnotation(value?: boolean): void;
 
