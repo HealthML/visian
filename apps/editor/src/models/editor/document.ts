@@ -181,6 +181,10 @@ export class Document
       useExclusiveSegmentations: observable,
 
       title: computed,
+      layers: computed,
+      renderingOrder: computed,
+      flatRenderingOrder: computed,
+      layerFamilies: computed,
       activeLayer: computed,
       measurementDisplayLayer: computed,
       imageLayers: computed,

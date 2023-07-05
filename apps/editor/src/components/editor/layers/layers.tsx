@@ -19,7 +19,13 @@ import {
   TreeItems,
 } from "dnd-kit-sortable-tree";
 import { observer } from "mobx-react-lite";
-import React, { ReactNode, useEffect, useMemo, useState } from "react";
+import React, {
+  ReactNode,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
@@ -90,6 +96,63 @@ type TreeItemData = {
   value: string;
 };
 
+const LayerItem = ({ id }: { id: string }) => {
+  const store = useStore();
+  const hideLayerDivider = useCallback(
+    (element: ILayer | ILayerFamily) => {
+      if (!element) return false;
+      const flatRenderingOrder =
+        store?.editor.activeDocument?.flatRenderingOrder;
+      if (!flatRenderingOrder) return false;
+      const layerIndex = flatRenderingOrder.indexOf(element);
+      if (layerIndex === flatRenderingOrder.length - 1) return true;
+      const nextElement = flatRenderingOrder[layerIndex + 1];
+      return (
+        nextElement.isActive &&
+        (nextElement instanceof LayerFamily ? nextElement.collapsed : true)
+      );
+    },
+    [store?.editor.activeDocument?.flatRenderingOrder],
+  );
+  const family = store?.editor.activeDocument?.getLayerFamily(id);
+  if (family) {
+    const isActive = !!family.collapsed && family.isActive;
+    return (
+      <FamilyListItem
+        key={family.id}
+        family={family}
+        isActive={isActive}
+        isLast={hideLayerDivider(family)}
+      />
+    );
+  }
+  const layer = store?.editor.activeDocument?.getLayer(id);
+  if (layer) {
+    return (
+      <LayerListItem
+        key={layer.id}
+        layer={layer}
+        isActive={layer.isActive}
+        isLast={hideLayerDivider(layer)}
+      />
+    );
+  }
+  return (
+    <ListItem isLast>
+      <SubtleText tx="no-layers" />
+    </ListItem>
+  );
+};
+
+const TreeItemComponent = React.forwardRef<
+  HTMLDivElement,
+  TreeItemComponentProps<TreeItemData>
+>((props, ref) => (
+  <StyledTreeItem {...props} passedRef={ref}>
+    <LayerItem id={props.item.value} />
+  </StyledTreeItem>
+));
+
 const layerToTreeItemData = (layer: ILayer) => ({
   id: layer.id,
   value: layer.id,
@@ -130,55 +193,8 @@ export const Layers: React.FC = observer(() => {
     );
   }
   const layerCount = layers?.length;
-  const activeLayer = store?.editor.activeDocument?.activeLayer;
 
-  const hideLayerDivider = (element: ILayer | ILayerFamily) => {
-    if (!element) return false;
-    const flatRenderingOrder = store?.editor.activeDocument?.flatRenderingOrder;
-    if (!flatRenderingOrder) return false;
-    const layerIndex = flatRenderingOrder.indexOf(element);
-    if (layerIndex === flatRenderingOrder.length - 1) return true;
-    const nextElement = flatRenderingOrder[layerIndex + 1];
-    return (
-      nextElement.isActive &&
-      (nextElement instanceof LayerFamily ? nextElement.collapsed : true)
-    );
-  };
-
-  const LayerItem = ({ id }: { id: string }) => {
-    const family = store.editor.activeDocument?.getLayerFamily(id);
-    if (family) {
-      const isActive = activeLayer
-        ? !!family.collapsed && family.isActive
-        : false;
-      return (
-        <FamilyListItem
-          key={family.id}
-          family={family}
-          isActive={isActive}
-          isLast={hideLayerDivider(family)}
-        />
-      );
-    }
-    const layer = store.editor.activeDocument?.getLayer(id);
-    if (layer) {
-      return (
-        <LayerListItem
-          key={layer.id}
-          layer={layer}
-          isActive={layer.isActive}
-          isLast={hideLayerDivider(layer)}
-        />
-      );
-    }
-    return (
-      <ListItem isLast>
-        <SubtleText tx="no-layers" />
-      </ListItem>
-    );
-  };
-
-  const getTreeItems = () => {
+  const getTreeItems = useCallback(() => {
     const renderingOrder = store.editor.activeDocument?.renderingOrder;
     if (!renderingOrder) {
       return [{ id: "undefined", value: "undefined" }];
@@ -194,45 +210,40 @@ export const Layers: React.FC = observer(() => {
       }
       return { id: "undefined", value: "undefined" };
     });
-  };
+  }, [store.editor.activeDocument?.renderingOrder]);
 
   const treeItems = useMemo(getTreeItems, [
     store.editor.activeDocument?.renderingOrder,
+    getTreeItems,
   ]);
 
-  const TreeItemComponent = React.forwardRef<
-    HTMLDivElement,
-    TreeItemComponentProps<TreeItemData>
-  >((props, ref) => (
-    <StyledTreeItem {...props} passedRef={ref}>
-      <LayerItem id={props.item.value} />
-    </StyledTreeItem>
-  ));
-
-  const updateRenderingOrder = (newTreeItems: TreeItems<TreeItemData>) => {
-    newTreeItems.forEach((item, index) => {
-      const layer = store.editor.activeDocument?.getLayer(item.value);
-      if (layer) {
-        layer?.setFamily(undefined, index);
-      }
-      const family = store.editor.activeDocument?.getLayerFamily(item.value);
-      if (family) {
-        item.children?.forEach((childItem, childIndex) => {
-          const childLayer = store.editor.activeDocument?.getLayer(
-            childItem.value,
+  const updateRenderingOrder = useCallback(
+    (newTreeItems: TreeItems<TreeItemData>) => {
+      newTreeItems.forEach((item, index) => {
+        const layer = store.editor.activeDocument?.getLayer(item.value);
+        if (layer) {
+          layer?.setFamily(undefined, index);
+        }
+        const family = store.editor.activeDocument?.getLayerFamily(item.value);
+        if (family) {
+          item.children?.forEach((childItem, childIndex) => {
+            const childLayer = store.editor.activeDocument?.getLayer(
+              childItem.value,
+            );
+            if (childLayer) {
+              childLayer.setFamily(family.id, childIndex);
+            }
+          });
+          family.collapsed = item.collapsed;
+          store.editor.activeDocument?.addLayerFamily(
+            family as LayerFamily,
+            index,
           );
-          if (childLayer) {
-            childLayer.setFamily(family.id, childIndex);
-          }
-        });
-        family.collapsed = item.collapsed;
-        store.editor.activeDocument?.addLayerFamily(
-          family as LayerFamily,
-          index,
-        );
-      }
-    });
-  };
+        }
+      });
+    },
+    [store.editor.activeDocument],
+  );
 
   const firstElement = store.editor.activeDocument?.renderingOrder[0];
   const isHeaderDivideVisible = !(
