@@ -284,7 +284,7 @@ export const UIOverlay = observer<UIOverlayProps>(
                       <FloatingUIButton
                         icon="save"
                         isDisabled={
-                          store?.editor.activeDocument?.activeLayer
+                          !store?.editor.activeDocument?.activeLayer
                             ?.isAnnotation
                         }
                         tooltipTx="annotation-saving"
