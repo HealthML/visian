@@ -122,30 +122,18 @@ export const DatasetImageListItem: React.FC<DatasetImageListItemProps> = ({
 
   const startReview = useCallback(
     async (taskType: TaskType, annotationId?: string) => {
-      if (store) {
-        const currentPath = window.location.pathname;
-        if (!(await store.destroyLayers())) return;
-        store.shouldPersist = true;
-        store.setProgress({ labelTx: "importing", showSplash: true });
-        navigate("/editor?review=true");
-        store.setReviewStrategy(
+      store?.startReview(
+        async (url: string) =>
           annotationId
-            ? await MiaReviewStrategy.fromAnnotationId(
+            ? MiaReviewStrategy.fromAnnotationId(
                 store,
                 annotationId,
-                currentPath,
+                url,
                 taskType,
               )
-            : await MiaReviewStrategy.fromImageIds(
-                store,
-                [image.id],
-                currentPath,
-                taskType,
-              ),
-        );
-        await store.reviewStrategy?.loadTask();
-        store.setProgress();
-      }
+            : MiaReviewStrategy.fromImageIds(store, [image.id], url, taskType),
+        navigate,
+      );
     },
     [navigate, image, store],
   );

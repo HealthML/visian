@@ -189,28 +189,13 @@ export const DatasetPage = ({
 
   const startReview = useCallback(
     async (wholeDataset?: boolean) => {
-      if (store) {
-        const currentPath = window.location.pathname;
-        if (!(await store.destroyLayers())) return;
-        store.shouldPersist = true;
-        store.setProgress({ labelTx: "importing", showSplash: true });
-        navigate("/editor?review=true");
-        if (wholeDataset) {
-          store.setReviewStrategy(
-            await MiaReviewStrategy.fromDataset(store, dataset.id, currentPath),
-          );
-        } else {
-          store.setReviewStrategy(
-            await MiaReviewStrategy.fromImageIds(
-              store,
-              [...selectedImages],
-              currentPath,
-            ),
-          );
-        }
-        await store.reviewStrategy?.loadTask();
-        store.setProgress();
-      }
+      store?.startReview(
+        async (url: string) =>
+          wholeDataset
+            ? MiaReviewStrategy.fromDataset(store, dataset.id, url)
+            : MiaReviewStrategy.fromImageIds(store, [...selectedImages], url),
+        navigate,
+      );
     },
     [navigate, dataset, selectedImages, store],
   );

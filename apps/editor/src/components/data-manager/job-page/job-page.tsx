@@ -154,20 +154,18 @@ export const JobPage = ({ job }: { job: Job }) => {
     [patchJobStatus, job],
   );
 
-  const startReviewJob = useCallback(async () => {
-    if (store) {
-      const currentPath = window.location.pathname;
-      if (!(await store.destroyLayers())) return;
-      store.shouldPersist = true;
-      store.setProgress({ labelTx: "importing", showSplash: true });
-      navigate("/editor?review=true");
-      store.setReviewStrategy(
-        await MiaReviewStrategy.fromJob(store, job.id, currentPath),
+  const startReviewJob = useCallback(
+    async (annotationId?: string) => {
+      store?.startReview(
+        async (url: string) =>
+          annotationId
+            ? MiaReviewStrategy.fromAnnotationId(store, annotationId, url)
+            : MiaReviewStrategy.fromJob(store, job.id, url),
+        navigate,
       );
-      await store.reviewStrategy?.loadTask();
-      store.setProgress();
-    }
-  }, [navigate, job, store]);
+    },
+    [navigate, job, store],
+  );
 
   let listInfoTx;
   if (imagesError) listInfoTx = "images-loading-failed";
@@ -270,9 +268,10 @@ export const JobPage = ({ job }: { job: Job }) => {
             {images?.sort(compareImages).map((image: Image, index: number) => (
               <ClickableListItem
                 key={image.id}
-                onClick={() =>
-                  navigate(editorPath(image.id, findAnnotationId(image.id)))
-                }
+                onClick={async () => {
+                  const annotationId = findAnnotationId(image.id);
+                  if (annotationId) await startReviewJob(annotationId);
+                }}
                 isLast={index === images.length - 1}
               >
                 <StyledText text={image.dataUri.split("/").pop()} />
