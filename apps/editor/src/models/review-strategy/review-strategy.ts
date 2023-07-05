@@ -54,11 +54,7 @@ export abstract class ReviewStrategy {
     );
   }
 
-  private async importAnnotations(): Promise<void> {
-    if (this.task?.kind === TaskType.Create) {
-      this.store.editor.activeDocument?.finishBatchImport();
-      return;
-    }
+  protected async importAnnotations(): Promise<void> {
     if (!this.task?.annotationIds) return;
     await Promise.all(
       this.task?.annotationIds.map(async (annotationId, idx) => {

@@ -245,7 +245,10 @@ export const MiaReviewBar = observer(
     );
 
     const toggleVerification = useCallback(() => {
-      if (store?.editor.activeDocument?.activeLayer?.family?.metaData) {
+      if (
+        store?.editor.activeDocument?.activeLayer?.isAnnotation &&
+        store?.editor.activeDocument?.activeLayer?.family?.metaData
+      ) {
         store.editor.activeDocument.activeLayer.family.metaData = {
           ...store.editor.activeDocument.activeLayer.family.metaData,
           verified: !isVerified,
@@ -258,14 +261,16 @@ export const MiaReviewBar = observer(
         <TaskContainer>
           <TaskLabel tx="Task" />
           <TaskName
-            text={store?.reviewStrategy?.currentTask?.title || "Task Title"}
+            text={
+              store?.reviewStrategy?.currentTask?.title || "Segmentation Task"
+            }
           />
         </TaskContainer>
         <ActionContainer>
           <ActionName
             text={
               store?.reviewStrategy?.currentTask?.description ||
-              "Task Description"
+              "Review the segmentations to the Image."
             }
           />
           <ActionButtonsContainer />
@@ -281,7 +286,8 @@ export const MiaReviewBar = observer(
             <ActionButtons
               icon={isVerified ? "exit" : "check"}
               isDisabled={
-                !store?.editor.activeDocument?.activeLayer?.family?.metaData
+                !store?.editor.activeDocument?.activeLayer?.family?.metaData ||
+                !store?.editor.activeDocument?.activeLayer?.isAnnotation
               }
               tooltipTx={
                 isVerified

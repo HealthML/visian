@@ -9,6 +9,7 @@ import { whoHome } from "../../constants";
 import { FileWithMetadata } from "../../types";
 import { ImageLayer } from "../editor";
 import { ReviewStrategy } from "./review-strategy";
+import { TaskType } from "./review-task";
 import { WHOReviewTask } from "./who-review-task";
 
 export class WHOReviewStrategy extends ReviewStrategy {
@@ -110,5 +111,13 @@ export class WHOReviewStrategy extends ReviewStrategy {
         return layerFile;
       }),
     );
+  }
+
+  protected async importAnnotations(): Promise<void> {
+    if (this.task?.kind === TaskType.Create) {
+      this.store.editor.activeDocument?.finishBatchImport();
+      return;
+    }
+    await super.importAnnotations();
   }
 }

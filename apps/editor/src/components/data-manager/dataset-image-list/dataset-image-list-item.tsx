@@ -121,35 +121,33 @@ export const DatasetImageListItem: React.FC<DatasetImageListItemProps> = ({
   ]);
 
   const startReview = useCallback(
-    async (taskType: TaskType) => {
-      if (store) {
-        const currentPath = window.location.pathname;
-        if (!(await store.destroyLayers())) return;
-        store.shouldPersist = true;
-        store.setProgress({ labelTx: "importing", showSplash: true });
-        navigate("/editor?review=true");
-        store.setReviewStrategy(
-          await MiaReviewStrategy.fromImageIds(
-            store,
-            [image.id],
-            currentPath,
-            taskType,
-          ),
-        );
-        await store.reviewStrategy?.loadTask();
-        store.setProgress();
-      }
+    async (taskType: TaskType, annotationId?: string) => {
+      store?.startReview(
+        async (url: string) =>
+          annotationId
+            ? MiaReviewStrategy.fromAnnotationId(
+                store,
+                annotationId,
+                url,
+                taskType,
+              )
+            : MiaReviewStrategy.fromImageIds(store, [image.id], url, taskType),
+        navigate,
+      );
     },
     [navigate, image, store],
   );
 
-  const startCreateAnnotations = useCallback(() => {
+  const openImage = useCallback(() => {
     startReview(TaskType.Create);
   }, [startReview]);
 
-  const startReviewAnnotations = useCallback(() => {
-    startReview(TaskType.Review);
-  }, [startReview]);
+  const openAnnotation = useCallback(
+    (annotationId: string) => {
+      startReview(TaskType.Create, annotationId);
+    },
+    [startReview],
+  );
 
   return (
     <>
@@ -159,9 +157,7 @@ export const DatasetImageListItem: React.FC<DatasetImageListItemProps> = ({
           onPointerDown={toggleShowAnnotations}
         />
         <Spacer />
-        <ClickableText onClick={startCreateAnnotations}>
-          {imageText}
-        </ClickableText>
+        <ClickableText onClick={openImage}>{imageText}</ClickableText>
         <ExpandedSpacer />
         {hasVerifiedAnnotation && (
           <StatusBadge
@@ -202,7 +198,9 @@ export const DatasetImageListItem: React.FC<DatasetImageListItemProps> = ({
                       isLast && annotationIndex === annotations.length - 1
                     }
                   >
-                    <ClickableText onClick={startReviewAnnotations}>
+                    <ClickableText
+                      onClick={() => openAnnotation(annotation.id)}
+                    >
                       {isInSelectMode
                         ? annotation.dataUri
                         : annotation.dataUri.split("/").pop()}
