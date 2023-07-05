@@ -9,28 +9,9 @@ import { whoHome } from "../../constants";
 import { FileWithMetadata } from "../../types";
 import { ImageLayer } from "../editor";
 import { ReviewStrategy } from "./review-strategy";
-import { TaskType } from "./review-task";
 import { WHOReviewTask } from "./who-review-task";
 
 export class WHOReviewStrategy extends ReviewStrategy {
-  public async loadTask(): Promise<void> {
-    if (!this.store.editor.newDocument(true)) return;
-    this.store.setProgress({ labelTx: "importing", showSplash: true });
-
-    try {
-      await this.buildTask();
-      await this.importImages();
-      await this.importAnnotations();
-    } catch {
-      this.store.setError({
-        titleTx: "import-error",
-        descriptionTx: "remote-file-error",
-      });
-      this.store.editor.setActiveDocument();
-    }
-    this.store.setProgress();
-  }
-
   public async nextTask(): Promise<void> {
     this.store.setProgress({ labelTx: "saving", showSplash: true });
     try {
@@ -93,50 +74,13 @@ export class WHOReviewStrategy extends ReviewStrategy {
   }
 
   // Importing
-  private async buildTask() {
+  protected async buildTask() {
     const taskId = getWHOTaskIdFromUrl();
     if (!taskId) throw new Error("No WHO task specified in URL.");
 
     const whoTask = await getWHOTask(taskId);
     if (!whoTask) throw new Error("WHO Task not found.");
     this.setCurrentTask(new WHOReviewTask(whoTask));
-  }
-
-  private async importImages(): Promise<void> {
-    const imageFiles = this.task?.getImageFiles();
-    if (!imageFiles) throw new Error("Image files not found");
-    await this.store?.editor.activeDocument?.importFiles(
-      imageFiles,
-      undefined,
-      false,
-    );
-  }
-
-  private async importAnnotations(): Promise<void> {
-    if (this.task?.kind === TaskType.Create) {
-      this.store.editor.activeDocument?.finishBatchImport();
-      return;
-    }
-    if (!this.task?.annotationIds) return;
-    await Promise.all(
-      this.task?.annotationIds.map(async (annotationId, idx) => {
-        const annotationFiles = this.task?.getAnnotationFiles(annotationId);
-        if (!annotationFiles) throw new Error("Annotation files not found");
-
-        const familyFiles = this.store.editor.activeDocument?.createLayerFamily(
-          annotationFiles,
-          `Annotation ${idx + 1}`,
-          { id: annotationId },
-        );
-        if (!familyFiles) throw new Error();
-
-        await this.store?.editor.activeDocument?.importFiles(
-          familyFiles,
-          undefined,
-          true,
-        );
-      }),
-    );
   }
 
   // Saving

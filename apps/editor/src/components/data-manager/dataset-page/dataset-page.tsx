@@ -1,8 +1,10 @@
 import { Notification, Sheet, space, useTranslation } from "@visian/ui-shared";
 import { useCallback, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
+import { MiaReviewStrategy } from "../../../models/review-strategy";
 import {
   useDeleteAnnotationsForImageMutation,
   useDeleteImagesMutation,
@@ -183,6 +185,44 @@ export const DatasetPage = ({
 
   const { t: translate } = useTranslation();
 
+  const navigate = useNavigate();
+
+  const startReview = useCallback(
+    async (wholeDataset?: boolean) => {
+      if (store) {
+        const currentPath = window.location.pathname;
+        if (!(await store.destroyLayers())) return;
+        store.shouldPersist = true;
+        store.setProgress({ labelTx: "importing", showSplash: true });
+        navigate("/editor?review=true");
+        if (wholeDataset) {
+          store.setReviewStrategy(
+            await MiaReviewStrategy.fromDataset(store, dataset.id, currentPath),
+          );
+        } else {
+          store.setReviewStrategy(
+            await MiaReviewStrategy.fromImageIds(
+              store,
+              [...selectedImages],
+              currentPath,
+            ),
+          );
+        }
+        await store.reviewStrategy?.loadTask();
+        store.setProgress();
+      }
+    },
+    [navigate, dataset, selectedImages, store],
+  );
+
+  const startReviewDataset = useCallback(() => {
+    startReview(true);
+  }, [startReview]);
+
+  const startReviewSelectedImages = useCallback(() => {
+    startReview(false);
+  }, [startReview]);
+
   let listInfoTx;
   if (imagesError) listInfoTx = "images-loading-failed";
   else if (images && images.length === 0) listInfoTx = "no-images-available";
@@ -203,7 +243,12 @@ export const DatasetPage = ({
         isLoading={isLoadingProgress}
         infoTx={progressInfoTx}
       >
-        {progress && <AnnotationProgress progress={progress} />}
+        {progress && (
+          <AnnotationProgress
+            progress={progress}
+            onReviewClick={startReviewDataset}
+          />
+        )}
       </PageSection>
       <PageSection
         titleTx="images"
@@ -220,6 +265,7 @@ export const DatasetPage = ({
             openJobCreationPopUp={openJobCreationPopUp}
             openImageImportPopUp={openImageImportPopUp}
             deleteSelectedImages={openDeleteImagesConfirmationPopUp}
+            startReview={startReviewSelectedImages}
           />
         }
       >

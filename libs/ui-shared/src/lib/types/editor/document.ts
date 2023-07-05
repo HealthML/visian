@@ -35,9 +35,9 @@ export interface IDocument {
   /** The layer that is currently selected for editing. */
   activeLayer?: Reference<ILayer>;
   /** The maximum amount of layers that can be rendered. */
-  maxLayers: number;
+  maxVisibleLayers: number;
   /** The maximum amount of layers that can be rendered in 3d. */
-  maxLayers3d: number;
+  maxVisibleLayers3d: number;
 
   /** The layer that is currently selected for displaying a measurement. */
   measurementDisplayLayer?: Reference<IImageLayer>;

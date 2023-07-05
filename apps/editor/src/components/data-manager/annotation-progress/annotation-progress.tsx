@@ -38,7 +38,13 @@ const ButtonText = styled(Text)`
   margin-left: 7px;
 `;
 
-export const AnnotationProgress = ({ progress }: { progress: Progress }) => (
+export const AnnotationProgress = ({
+  progress,
+  onReviewClick,
+}: {
+  progress: Progress;
+  onReviewClick?: () => void;
+}) => (
   <ProgressSheet>
     <ProgressTitle tx="annotated-verified-images" />
     <ProgressBar
@@ -57,8 +63,10 @@ export const AnnotationProgress = ({ progress }: { progress: Progress }) => (
         },
       ]}
     />
-    <ProgressButton icon="play">
-      <ButtonText tx="review-annotations" />
-    </ProgressButton>
+    {onReviewClick && (
+      <ProgressButton icon="play" onClick={onReviewClick}>
+        <ButtonText tx="review-annotations" />
+      </ProgressButton>
+    )}
   </ProgressSheet>
 );

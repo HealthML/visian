@@ -40,16 +40,16 @@ export const UndoRedoButtons = observer(() => {
           tooltipTx="undo"
           tooltipPosition="right"
           isActive={false}
-          isDisabled={!store?.editor.activeDocument?.history.canUndo}
-          onPointerDown={store?.editor.activeDocument?.history.undo}
+          isDisabled={!store?.editor.activeDocument?.canUndo}
+          onPointerDown={store?.editor.activeDocument?.undo}
         />
         <StyledButton
           icon="redo"
           tooltipTx="redo"
           tooltipPosition="right"
           isActive={false}
-          isDisabled={!store?.editor.activeDocument?.history.canRedo}
-          onPointerDown={store?.editor.activeDocument?.history.redo}
+          isDisabled={!store?.editor.activeDocument?.canRedo}
+          onPointerDown={store?.editor.activeDocument?.redo}
         />
       </Wrapper>
     </Container>

@@ -263,7 +263,7 @@ export class RootStore implements ISerializable<RootSnapshot>, IDisposable {
     this.shouldPersist = true;
   }
 
-  private destroyLayers = async (forceDestroy?: boolean): Promise<boolean> => {
+  public destroyLayers = async (forceDestroy?: boolean): Promise<boolean> => {
     if (!this.shouldPersist && !forceDestroy) return false;
     if (
       !forceDestroy &&

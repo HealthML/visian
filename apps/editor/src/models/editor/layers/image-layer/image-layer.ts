@@ -165,6 +165,10 @@ export class ImageLayer
     return this.image.is3D;
   }
 
+  public get hasChanges() {
+    return this.document.history.hasChanges(this.id);
+  }
+
   public setImage(value: RenderedImage): void {
     this.image = value;
     if (this.document.performanceMode === "high") {

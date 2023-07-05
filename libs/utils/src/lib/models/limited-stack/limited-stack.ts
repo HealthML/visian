@@ -93,3 +93,70 @@ export class LimitedStack<T> implements ISerializable<LimitedStackSnapshot<T>> {
     );
   }
 }
+
+export interface CommandStackSnapshot<T> {
+  buffer: T[];
+  currentItem: number;
+  saveItem: number;
+}
+
+export class CommandStack<T> extends LimitedStack<T> {
+  protected saveItem = -1;
+
+  constructor(capacity: number, isObservable = true) {
+    super(capacity, isObservable);
+    makeObservable<this, "saveItem">(this, {
+      saveItem: observable,
+
+      save: action,
+    });
+  }
+
+  public push(item: T): T {
+    const pushedItem = super.push(item);
+
+    if (
+      this.currentItem < this.saveItem ||
+      (this.saveItem === this.currentItem &&
+        this.capacity !== this.buffer.length)
+    ) {
+      this.saveItem = -2;
+    }
+
+    return pushedItem;
+  }
+
+  public clear() {
+    super.clear();
+    this.saveItem = -2;
+    return this;
+  }
+
+  public toJSON() {
+    return { ...super.toJSON(), saveItem: this.saveItem };
+  }
+
+  public async applySnapshot(snapshot: CommandStackSnapshot<T>) {
+    await super.applySnapshot(snapshot);
+    this.saveItem = Math.max(
+      -2,
+      Math.min(
+        snapshot.saveItem,
+        this.capacity - 1,
+        snapshot.buffer.length - 1,
+      ),
+    );
+  }
+
+  public save() {
+    this.saveItem = this.currentItem;
+  }
+
+  public isDirty() {
+    return this.saveItem !== this.currentItem;
+  }
+
+  public map(mapFunction: (item: T) => T) {
+    this.buffer = this.buffer.map(mapFunction);
+  }
+}

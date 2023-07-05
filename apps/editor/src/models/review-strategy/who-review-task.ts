@@ -52,13 +52,13 @@ export class WHOReviewTask implements ReviewTask {
     this.whoTask = whoTask;
   }
 
-  public getImageFiles(): File[] {
+  public async getImageFiles() {
     return this.whoTask.samples.map((sample) =>
       createFileFromBase64(sample?.title, sample?.data),
     );
   }
 
-  public getAnnotationFiles(annotationId: string): FileWithMetadata[] | null {
+  public async getAnnotationFiles(annotationId: string) {
     const title = this.whoTask?.samples[0]?.title;
     const whoAnnotation = this.whoTask?.annotations.find(
       (annotation) => annotation.annotationUUID === annotationId,
@@ -78,7 +78,7 @@ export class WHOReviewTask implements ReviewTask {
     });
   }
 
-  public async createAnnotation(files: File[]): Promise<void> {
+  public async createAnnotation(files: File[]) {
     const annotationWithoutData = {
       // TODO: set correct status
       status: WHOAnnotationStatus.Completed,
@@ -94,6 +94,7 @@ export class WHOReviewTask implements ReviewTask {
       }),
     );
     this.whoTask.annotations.push(annotation);
+    return annotation.annotationUUID;
   }
 
   public async updateAnnotation(

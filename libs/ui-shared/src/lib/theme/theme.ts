@@ -18,12 +18,12 @@ const dataColors = {
 };
 
 const badgeColors = {
-  blueBackground: "rgba(0, 133, 255, 0.05)",
-  redBackground: "rgba(202, 51, 69, 0.1)",
-  greenBackground: "rgba(4, 156, 109, 0.1)",
-  orangeBackground: "rgba(255, 107, 0, 0.1)",
-  greenBorder: "rgba(4, 156, 109, 0.5)",
-  orangeBorder: "rgba(255, 107, 0, 0.5)",
+  blueBadgeBackground: "rgba(0, 133, 255, 0.05)",
+  redBadgeBackground: "rgba(202, 51, 69, 0.1)",
+  greenBadgeBackground: "rgba(4, 156, 109, 0.1)",
+  orangeBadgeBackground: "rgba(255, 107, 0, 0.1)",
+  greenBadgeBorder: "rgba(4, 156, 109, 0.5)",
+  orangeBadgeBorder: "rgba(255, 107, 0, 0.5)",
 };
 
 export const badgeColorKeys = Object.keys(
@@ -54,6 +54,9 @@ const colorModes = {
     red: "#CA3345",
     redSheet: "rgba(202,51,69,0.3)",
     redBorder: "rgba(202,51,69,0.5)",
+    greenSheet: "rgba(43, 255, 1, 0.4)",
+    greenBorder: "rgba(10, 210, 42,0.6)",
+    greenBorder2: "rgba(10, 210, 42, 1)",
     blueSheet: "rgba(0,133,255,0.4)",
     blueBorder: "rgba(0,133,255,0.6)",
     sideViewSheet: "rgba(200,200,200,0.4)",
@@ -84,6 +87,9 @@ const colorModes = {
     redBorder: "rgba(202,51,69,0.5)",
     blueSheet: "rgba(0,133,255,0.4)",
     blueBorder: "rgba(0,133,255,0.6)",
+    greenSheet: "rgba(43, 255, 1, 0.4)",
+    greenBorder: "rgba(10, 210, 42, 0.6)",
+    greenBorder2: "rgba(10, 210, 42, 1)",
     sideViewSheet: "rgba(78, 80, 89, 0.2)",
     sideViewBorder: "rgba(255, 255, 255, 0.3)",
 

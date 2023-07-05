@@ -17,6 +17,7 @@ export const DatasetNavigationBar: React.FC<DatasetNavigationBarProps> = ({
   openJobCreationPopUp,
   openImageImportPopUp,
   deleteSelectedImages,
+  startReview,
 }) =>
   isInSelectMode ? (
     <Container>
@@ -29,6 +30,13 @@ export const DatasetNavigationBar: React.FC<DatasetNavigationBarProps> = ({
         icon="export"
         tooltipTx="export-documents"
         tooltipPosition="top"
+      />
+      <PageSectionIconButton
+        isDisabled={!anySelected}
+        icon="export"
+        tooltipTx="start-review"
+        tooltipPosition="top"
+        onPointerDown={startReview}
       />
       <PageSectionIconButton
         isDisabled={!anySelected}
