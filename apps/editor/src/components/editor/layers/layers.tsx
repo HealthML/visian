@@ -49,7 +49,7 @@ const LayerList = styled(List)`
       6 * (listElementHeight + dividerHeight),
   )};
   max-width: 100%;
-  overflow-x: auto;
+  overflow-x: visible;
   overflow-y: auto;
 `;
 
@@ -74,6 +74,7 @@ const TreeItemStyleWrapper = (props: TreeItemStyleWrapperProps) => {
       ref={passedRef}
       showDragHandle={false}
       hideCollapseButton
+      disableCollapseOnItemClick
     />
   );
 };
@@ -82,6 +83,7 @@ const StyledTreeItem = styled(TreeItemStyleWrapper)`
   padding: 0px;
   border: none;
   background: none;
+  width: 100%;
 `;
 
 type TreeItemData = {
@@ -129,30 +131,43 @@ export const Layers: React.FC = observer(() => {
   }
   const layerCount = layers?.length;
   const activeLayer = store?.editor.activeDocument?.activeLayer;
-  const activeLayerIndex = layers?.findIndex((layer) => layer === activeLayer);
+
+  const hideLayerDivider = (element: ILayer | ILayerFamily) => {
+    if (!element) return false;
+    const flatRenderingOrder = store?.editor.activeDocument?.flatRenderingOrder;
+    if (!flatRenderingOrder) return false;
+    const layerIndex = flatRenderingOrder.indexOf(element);
+    if (layerIndex === flatRenderingOrder.length - 1) return true;
+    const nextElement = flatRenderingOrder[layerIndex + 1];
+    return (
+      nextElement.isActive &&
+      (nextElement instanceof LayerFamily ? nextElement.collapsed : true)
+    );
+  };
 
   const LayerItem = ({ id }: { id: string }) => {
     const family = store.editor.activeDocument?.getLayerFamily(id);
     if (family) {
       const isActive = activeLayer
-        ? family.layers.includes(activeLayer)
+        ? !!family.collapsed && family.isActive
         : false;
       return (
-        <FamilyListItem key={family.id} family={family} isActive={isActive} />
+        <FamilyListItem
+          key={family.id}
+          family={family}
+          isActive={isActive}
+          isLast={hideLayerDivider(family)}
+        />
       );
     }
     const layer = store.editor.activeDocument?.getLayer(id);
     if (layer) {
-      const isActive = layer === activeLayer;
-      const isLast =
-        layers?.indexOf(layer) === layerCount - 1 ||
-        layers.indexOf(layer) + 1 === activeLayerIndex;
       return (
         <LayerListItem
           key={layer.id}
           layer={layer}
-          isActive={isActive}
-          isLast={isLast}
+          isActive={layer.isActive}
+          isLast={hideLayerDivider(layer)}
         />
       );
     }
@@ -219,6 +234,12 @@ export const Layers: React.FC = observer(() => {
     });
   };
 
+  const firstElement = store.editor.activeDocument?.renderingOrder[0];
+  const isHeaderDivideVisible = !(
+    firstElement?.isActive &&
+    (firstElement instanceof LayerFamily ? firstElement.collapsed : true)
+  );
+
   return (
     <>
       <FloatingUIButton
@@ -231,7 +252,7 @@ export const Layers: React.FC = observer(() => {
       />
       <LayerModal
         isOpen={isModalOpen}
-        hideHeaderDivider={activeLayerIndex === 0}
+        hideHeaderDivider={!isHeaderDivideVisible}
         labelTx="layers"
         anchor={buttonRef}
         position="right"

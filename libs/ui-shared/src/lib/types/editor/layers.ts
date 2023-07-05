@@ -96,6 +96,8 @@ export interface ILayer {
   transformation?: Matrix4;
   /** The layer's meta data ID. */
   metaData?: { id: string; [key: string]: any };
+  /** Whether the layer is the document's active layer */
+  isActive: boolean;
 
   /**
    * Returns all slice markers, aggregated for the layer and given view type.
@@ -221,6 +223,8 @@ export interface ILayerFamily {
   layers: ILayer[];
   /** Whether the layer is currently collapsed in the layer view* */
   collapsed?: boolean;
+  /** Whether the group contains the document's active layer */
+  isActive: boolean;
   /** Adds a layer to the family, the layer is removed from its previous family */
   addLayer(id: string, idx?: number): void;
   /** Removes a layer from the family making it an orphan */

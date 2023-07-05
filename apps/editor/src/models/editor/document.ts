@@ -258,6 +258,17 @@ export class Document
     });
   }
 
+  public get flatRenderingOrder(): (ILayer | ILayerFamily)[] {
+    return this.layerIds.flatMap((id) => {
+      const family = this.layerFamilyMap[id];
+      if (family) {
+        const array: (ILayer | ILayerFamily)[] = [family as ILayerFamily];
+        return array.concat(family.layers);
+      }
+      return this.layerMap[id];
+    });
+  }
+
   public get layerFamilies(): ILayerFamily[] {
     return this.layerIds
       .filter((id) => !!this.layerFamilyMap[id])

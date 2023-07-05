@@ -66,6 +66,7 @@ export class Layer implements ILayer, ISerializable<LayerSnapshot> {
         parent: computed,
         title: computed,
         family: computed,
+        isActive: computed,
 
         setParent: action,
         setFamily: action,
@@ -99,6 +100,9 @@ export class Layer implements ILayer, ISerializable<LayerSnapshot> {
   public setTitle = (value?: string): void => {
     this.titleOverride = value;
   };
+  public get isActive(): boolean {
+    return this.document.activeLayer === this;
+  }
 
   public get parent(): ILayer | undefined {
     return this.parentId ? this.document.getLayer(this.parentId) : undefined;

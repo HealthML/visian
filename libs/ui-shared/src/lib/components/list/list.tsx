@@ -199,3 +199,7 @@ export const ListItem = React.forwardRef<HTMLDivElement, ListItemProps>(
     );
   },
 );
+
+export const FixedWidthListItem = styled(ListItem)`
+  width: 100%;
+`;

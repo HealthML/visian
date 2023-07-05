@@ -1,5 +1,5 @@
 import { IDocument, ILayer, ILayerFamily } from "@visian/ui-shared";
-import { action, makeObservable, observable } from "mobx";
+import { action, computed, makeObservable, observable } from "mobx";
 import { v4 as uuidv4 } from "uuid";
 
 export class LayerFamily implements ILayerFamily {
@@ -23,6 +23,7 @@ export class LayerFamily implements ILayerFamily {
     makeObservable<this, "layerIds">(this, {
       layerIds: observable,
       collapsed: observable,
+      isActive: computed,
       addLayer: action,
       removeLayer: action,
     });
@@ -55,5 +56,12 @@ export class LayerFamily implements ILayerFamily {
     const layer = this.document.getLayer(id);
     if (!layer) return;
     this.document.addLayer(layer, idx);
+  }
+
+  public get isActive() {
+    if (this.document.activeLayer) {
+      return this.layers.includes(this.document.activeLayer);
+    }
+    return false;
   }
 }

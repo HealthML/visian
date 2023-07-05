@@ -1,13 +1,11 @@
 import {
-  computeStyleValue,
   ContextMenu,
   ContextMenuItem,
+  FixedWidthListItem,
   IImageLayer,
   ILayer,
   InfoText,
-  ListItem,
   PointerButton,
-  size,
   useDelay,
   useDoubleTap,
   useForwardEvent,
@@ -17,7 +15,6 @@ import {
 import { Pixel } from "@visian/utils";
 import { Observer, observer } from "mobx-react-lite";
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import styled from "styled-components";
 import { v4 as uuidv4 } from "uuid";
 
 import { useStore } from "../../../app/root-store";
@@ -28,18 +25,6 @@ import { LayerSettings } from "../layer-settings";
 const noop = () => {
   // Intentionally left blank
 };
-
-const LayerItem = styled(ListItem)`
-  max-height: ${computeStyleValue(
-    [size("listElementHeight"), size("dividerHeight")],
-    (listElementHeight, dividerHeight) =>
-      6 * (listElementHeight + dividerHeight),
-  )};
-  max-width: 100%;
-  overflow-x: auto;
-  overflow-y: visible;
-`;
-
 export const LayerListItem = observer<{
   layer: ILayer;
   isActive?: boolean;
@@ -204,7 +189,7 @@ export const LayerListItem = observer<{
   const node = (
     <Observer>
       {() => (
-        <LayerItem
+        <FixedWidthListItem
           icon={{
             color: layer.color || "text",
             icon:
@@ -236,7 +221,7 @@ export const LayerListItem = observer<{
               titleTx="main-image-layer"
             />
           )}
-        </LayerItem>
+        </FixedWidthListItem>
       )}
     </Observer>
   );
