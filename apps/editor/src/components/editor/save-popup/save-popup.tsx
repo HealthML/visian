@@ -94,7 +94,8 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
       const layerFamily = new LayerFamily(document);
       document.addLayerFamily(layerFamily);
       if (annotation) {
-        layerFamily.title = annotation.dataUri;
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        layerFamily.title = annotation.dataUri.split("/").pop() ?? "family :)";
         layerFamily.metaData = annotation;
       }
       const familyLayers = layer.getFamilyLayers();
