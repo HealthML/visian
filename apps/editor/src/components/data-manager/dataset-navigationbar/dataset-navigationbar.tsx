@@ -1,16 +1,14 @@
-import { ButtonParam, SquareButton } from "@visian/ui-shared";
 import styled from "styled-components";
 
-const StyledButton = styled(SquareButton)`
-  margin-left: 10px;
+import { PageSectionButton, PageSectionIconButton } from "../page-section";
+import { DatasetNavigationBarProps } from "./dataset-navigationbar.props";
+
+const Container = styled.div`
+  display: flex;
+  align-items: center;
 `;
 
-const StyledTextButton = styled(ButtonParam)`
-  margin: 0px;
-  width: auto;
-`;
-
-export const DatasetNavigationbar = ({
+export const DatasetNavigationBar: React.FC<DatasetNavigationBarProps> = ({
   isInSelectMode,
   allSelected,
   anySelected,
@@ -19,62 +17,53 @@ export const DatasetNavigationbar = ({
   openJobCreationPopUp,
   openImageImportPopUp,
   deleteSelectedImages,
-}: {
-  isInSelectMode: boolean;
-  allSelected: boolean;
-  anySelected: boolean;
-  toggleSelectMode: () => void;
-  toggleSelectAll: () => void;
-  openJobCreationPopUp: () => void;
-  openImageImportPopUp: () => void;
-  deleteSelectedImages: () => void;
 }) =>
   isInSelectMode ? (
-    <>
-      <StyledTextButton
+    <Container>
+      <PageSectionButton
         labelTx={allSelected ? "deselect-all" : "select-all"}
         handlePress={toggleSelectAll}
       />
-      <StyledButton
+      <PageSectionIconButton
         isDisabled
         icon="export"
         tooltipTx="export-documents"
         tooltipPosition="top"
       />
-      <StyledButton
+      <PageSectionIconButton
         isDisabled={!anySelected}
         icon="trash"
         tooltipTx="delete-documents"
         onPointerDown={deleteSelectedImages}
         tooltipPosition="top"
       />
-      <StyledButton
+      <PageSectionIconButton
         isDisabled={!anySelected}
         icon="mlAutoAnnotation"
         tooltipTx="auto-annotate-documents"
         tooltipPosition="top"
         onPointerDown={openJobCreationPopUp}
       />
-      <StyledButton
+      <PageSectionIconButton
         icon="exit"
         tooltipTx="exit-select-mode"
         tooltipPosition="top"
         onPointerDown={toggleSelectMode}
       />
-    </>
+    </Container>
   ) : (
-    <>
-      <StyledButton
+    <Container>
+      <PageSectionIconButton
         icon="import"
         tooltipTx="import-images"
         tooltipPosition="top"
         onPointerDown={openImageImportPopUp}
       />
-      <StyledButton
+      <PageSectionIconButton
         icon="select"
         tooltipTx="select-mode"
         tooltipPosition="top"
         onPointerDown={toggleSelectMode}
       />
-    </>
+    </Container>
   );

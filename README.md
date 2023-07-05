@@ -48,7 +48,7 @@ Omitting an app name starts the default app.
 After running this command, the app will be available at the URL printed in the console.<br />
 The app will automatically reload if you change any of the source files.
 
-It is possible to use Visian with the annotation-service backend. The location of the backend is set via the enviorment variable `NX_ANNOTATION_SERVICE_HUB_URL`. Assuming the backend is located at `localhost:3000` you can use the shortcut `yarn start:hub`.
+It is possible to use VISIAN with the annotation-service backend. The location of the backend is set via the environment variable `NX_ANNOTATION_SERVICE_HUB_URL`. Assuming the backend is located at `localhost:3000`, you can use the shortcut `yarn start:hub`.
 
 ### `yarn format [<app-name>]`
 

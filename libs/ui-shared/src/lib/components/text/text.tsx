@@ -41,6 +41,14 @@ export const Title = styled(({ as, ...rest }: TextProps) => (
   font-weight: ${fontWeight("regular")};
 `;
 
+export const TitleLabel = styled(({ as, ...rest }: TextProps) => (
+  <Text {...rest} as={as || "h3"} />
+))`
+  font-size: ${fontSize("default")};
+  font-weight: ${fontWeight("regular")};
+  opacity: 0.5;
+`;
+
 export const InputLabel = styled(Text)`
   margin-bottom: 10px;
   font-size: ${fontSize("small")};
