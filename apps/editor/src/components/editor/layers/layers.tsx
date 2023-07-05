@@ -19,13 +19,7 @@ import {
   TreeItems,
 } from "dnd-kit-sortable-tree";
 import { observer } from "mobx-react-lite";
-import React, {
-  ReactNode,
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import React, { ReactNode, useCallback, useEffect, useState } from "react";
 import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
@@ -212,10 +206,7 @@ export const Layers: React.FC = observer(() => {
     });
   }, [store.editor.activeDocument?.renderingOrder]);
 
-  const treeItems = useMemo(getTreeItems, [
-    store.editor.activeDocument?.renderingOrder,
-    getTreeItems,
-  ]);
+  const treeItems = getTreeItems();
 
   const updateRenderingOrder = useCallback(
     (newTreeItems: TreeItems<TreeItemData>) => {

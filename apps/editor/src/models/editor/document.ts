@@ -229,7 +229,7 @@ export class Document
     if (this.titleOverride) return this.titleOverride;
     const { length } = this.layers;
     if (!length) return undefined;
-    const lastLayer = this.getLayer(this.layers[length - 1]);
+    const lastLayer = this.getLayer(this.layers[length - 1].id);
     return lastLayer?.metadata?.dataUri?.split("/").pop() ?? lastLayer?.title;
   }
 
