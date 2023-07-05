@@ -154,6 +154,17 @@ export class Layer implements ILayer, ISerializable<LayerSnapshot> {
     }
   }
 
+  public getOrphanAnnotationLayers(): ILayer[] {
+    const orphanAnnotationLayers = this.document.layers.filter(
+      (l) => l.isAnnotation && !l.family,
+    );
+    return orphanAnnotationLayers ?? [];
+  }
+
+  public getFamilyLayers(): ILayer[] {
+    return this.family?.layers ?? this.getOrphanAnnotationLayers();
+  }
+
   public setBlendMode = (value?: BlendMode): void => {
     this.blendMode = value || "NORMAL";
   };

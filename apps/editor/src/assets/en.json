@@ -123,6 +123,11 @@
   "export": "Export",
   "export-tooltip": "Export (Ctrl/Cmd + E)",
   "exporting": "Exporting",
+  "layers-to-export": "Layers to export",
+  "export-all-layers": "Export all layers",
+  "export-layer-group": "Export layer group",
+  "export-as": "Export as",
+  "no-file-to-export": "No file found to export.",
 
   "confirm-task-annotation-tooltip": "Confirm",
   "skip-task-annotation-tooltip": "Skip",
@@ -237,7 +242,7 @@
   "save-export": "Save & Export",
   "create-new-document": "Create a new document",
   "save-in-browser": "Save in browser",
-  "export-current-image": "Download annotation as *.nii.gz",
+  "export-current-image": "Download annotation as *.zip",
   "export-current-slice": "Download the current annotation slice as *.png",
   "view-types": "View Types",
   "switch-transverse": "Switch to Transverse (Axial) view",
@@ -402,6 +407,8 @@
   "edit": "Edit",
   "update": "Update",
   "name": "Name",
+  "project-name": "Project Name",
+  "dataset-name": "Dataset Name",
 
   "verified": "verified",
 

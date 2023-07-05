@@ -95,6 +95,8 @@ export interface ILayer {
 
   setFamily(id: string | undefined): void;
 
+  getFamilyLayers(): ILayer[];
+
   setIsAnnotation(value?: boolean): void;
 
   setBlendMode(blendMode?: BlendMode): void;
