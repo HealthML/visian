@@ -54,6 +54,7 @@ export { ReactComponent as plusMinus } from "./plus-minus.svg";
 export { ReactComponent as plusSmall } from "./plus-small.svg";
 export { ReactComponent as redo } from "./redo.svg";
 export { ReactComponent as reset } from "./reset.svg";
+export { ReactComponent as review } from "./review.svg";
 export { ReactComponent as rightArrow } from "./right-arrow.svg";
 export { ReactComponent as rightMouse } from "./right-mouse.svg";
 export { ReactComponent as ruler } from "./ruler.svg";
