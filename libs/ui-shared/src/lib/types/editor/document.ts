@@ -25,11 +25,24 @@ export interface IDocument {
   title?: string;
 
   /**
-   * The document's layer stack.
-   * This contains all top-level layers (not contained in some group), sorted
-   * top-to-bottom.
+   * All the document's layers sorted by their rendering order.
+   * top-to-bottom
    */
   layers: ILayer[];
+  /**
+   * The document's layer and layer Family stack.
+   * This contains all top-level layers (not contained in some family) and all layerFamilies, sorted
+   * top-to-bottom
+   */
+  renderingOrder: (ILayer | ILayerFamily)[];
+  /**
+   * The document's layer and layer Family stack.
+   * This contains all layers and all layerFamilies, sorted by their renderingOrder
+   * layerFamilies are followed by the layers within that family
+   * top-to-bottom
+   */
+  flatRenderingOrder: (ILayer | ILayerFamily)[];
+
   /** `true` if the document holds three-dimensional layers. */
   has3DLayers: boolean;
   /** The layer that is currently selected for editing. */
@@ -53,7 +66,7 @@ export interface IDocument {
   mainImageLayer?: Reference<IImageLayer>;
 
   /** The families of layers e.g. for grouping layers by file */
-  layerFamilies: ILayerFamily[];
+  layerFamilies: ILayerFamily[] | undefined;
 
   /** The document's history. */
   history: IHistory;
@@ -101,7 +114,7 @@ export interface IDocument {
   setMeasurementType(measurementType: MeasurementType): void;
 
   /** Adds a layer to the document. */
-  addLayer(layer: ILayer): void;
+  addLayer(layer: ILayer, idx?: number): void;
 
   /** Adds a layer family to the document. */
   addLayerFamily(layer: ILayerFamily): void;

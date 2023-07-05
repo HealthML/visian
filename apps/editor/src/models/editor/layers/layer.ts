@@ -4,6 +4,7 @@ import {
   IDocument,
   ILayer,
   ILayerFamily,
+  LayerSnapshot,
   MarkerConfig,
 } from "@visian/ui-shared";
 import { ISerializable, ViewType } from "@visian/utils";
@@ -19,23 +20,6 @@ import {
 } from "../../../constants";
 import { LayerGroup } from "./layer-group";
 
-export interface LayerSnapshot {
-  kind: string;
-  isAnnotation: boolean;
-
-  id: string;
-  titleOverride?: string;
-  parentId?: string;
-  familyId?: string;
-
-  blendMode: BlendMode;
-  color?: string;
-  isVisible: boolean;
-  opacityOverride?: number;
-
-  transformation: number[];
-}
-
 export class Layer implements ILayer, ISerializable<LayerSnapshot> {
   public excludeFromSnapshotTracking = ["document"];
 
@@ -47,7 +31,6 @@ export class Layer implements ILayer, ISerializable<LayerSnapshot> {
   public id!: string;
   protected titleOverride?: string;
   protected parentId?: string;
-  protected familyId?: string;
 
   public blendMode!: BlendMode;
   public color?: string;
@@ -66,40 +49,40 @@ export class Layer implements ILayer, ISerializable<LayerSnapshot> {
     this.id = snapshot?.id || uuidv4();
     if (!isCalledByChild) this.applySnapshot(snapshot);
 
-    makeObservable<
+    makeObservable<this, "titleOverride" | "parentId" | "opacityOverride">(
       this,
-      "titleOverride" | "parentId" | "familyId" | "opacityOverride"
-    >(this, {
-      isAnnotation: observable,
-      id: observable,
-      titleOverride: observable,
-      parentId: observable,
-      familyId: observable,
-      blendMode: observable,
-      color: observable,
-      isVisible: observable,
-      opacityOverride: observable,
-      transformation: observable.ref,
+      {
+        isAnnotation: observable,
+        id: observable,
+        titleOverride: observable,
+        parentId: observable,
+        blendMode: observable,
+        color: observable,
+        isVisible: observable,
+        opacityOverride: observable,
+        transformation: observable.ref,
 
-      opacity: computed,
-      parent: computed,
-      title: computed,
-      family: computed,
+        opacity: computed,
+        parent: computed,
+        title: computed,
+        family: computed,
+        isActive: computed,
 
-      setParent: action,
-      setFamily: action,
-      setIsAnnotation: action,
-      setTitle: action,
-      setBlendMode: action,
-      setColor: action,
-      setIsVisible: action,
-      setOpacity: action,
-      setMetaData: action,
-      resetSettings: action,
-      setTransformation: action,
-      delete: action,
-      applySnapshot: action,
-    });
+        setParent: action,
+        setFamily: action,
+        setIsAnnotation: action,
+        setTitle: action,
+        setBlendMode: action,
+        setColor: action,
+        setIsVisible: action,
+        setOpacity: action,
+        setMetaData: action,
+        resetSettings: action,
+        setTransformation: action,
+        delete: action,
+        applySnapshot: action,
+      },
+    );
   }
 
   public setIsAnnotation(value?: boolean): void {
@@ -117,6 +100,9 @@ export class Layer implements ILayer, ISerializable<LayerSnapshot> {
   public setTitle = (value?: string): void => {
     this.titleOverride = value;
   };
+  public get isActive(): boolean {
+    return this.document.activeLayer === this;
+  }
 
   public get parent(): ILayer | undefined {
     return this.parentId ? this.document.getLayer(this.parentId) : undefined;
@@ -135,23 +121,19 @@ export class Layer implements ILayer, ISerializable<LayerSnapshot> {
   }
 
   public get family(): ILayerFamily | undefined {
-    return this.familyId
-      ? this.document.getLayerFamily(this.familyId)
-      : undefined;
+    return this.document.layerFamilies?.find((family) =>
+      family.layers.includes(this),
+    );
   }
 
-  public setFamily(id: string | undefined): void {
+  public setFamily(id: string | undefined, idx?: number): void {
     if (!id) {
-      if (this.family?.layers.includes(this)) {
-        this.family?.removeLayer(this.id);
-      }
-      this.familyId = undefined;
+      this.family?.removeLayer(this.id, idx);
+      this.document.addLayer(this, idx);
       return;
     }
-    const family = this.document.getLayerFamily(id);
-    if (family) {
-      this.familyId = id;
-    }
+    const newFamily = this.document.getLayerFamily(id);
+    newFamily?.addLayer(this.id, idx);
   }
 
   public getOrphanAnnotationLayers(): ILayer[] {

@@ -17,7 +17,7 @@ export const List = styled.div`
   width: 100%;
 `;
 
-const ListItemContainer = styled.div`
+export const ListItemContainer = styled.div`
   display: flex;
   flex-direction: column;
   outline: none;
@@ -199,3 +199,7 @@ export const ListItem = React.forwardRef<HTMLDivElement, ListItemProps>(
     );
   },
 );
+
+export const FixedWidthListItem = styled(ListItem)`
+  width: 100%;
+`;
