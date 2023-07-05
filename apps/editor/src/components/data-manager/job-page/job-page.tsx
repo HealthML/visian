@@ -202,7 +202,7 @@ export const JobPage = ({ job }: { job: Job }) => {
                 {progress && (
                   <AnnotationProgress
                     progress={progress}
-                    onReviewClick={startReviewJob}
+                    onReviewClick={async () => startReviewJob()}
                   />
                 )}
               </PageSection>
