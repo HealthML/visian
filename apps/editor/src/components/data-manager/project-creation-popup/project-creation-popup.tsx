@@ -24,8 +24,12 @@ const ProjectCreationPopupContainer = styled(PopUp)`
 `;
 
 const TextInput = styled(TextField)`
-  margin: 0px 0px 0px 0px;
-  width: calc(100% - 40px);
+  margin: auto;
+  width: 100%;
+`;
+
+const StyledForm = styled.form`
+  width: 100%;
 `;
 
 export const ProjectCreationPopup = observer<ProjectCreationPopupProps>(
@@ -46,6 +50,14 @@ export const ProjectCreationPopup = observer<ProjectCreationPopupProps>(
       clearInputsAndClose();
     }, [name, onConfirm, clearInputsAndClose]);
 
+    const handleFormSubmit = useCallback(
+      (e) => {
+        e.preventDefault();
+        handleCreation();
+      },
+      [handleCreation],
+    );
+
     return (
       <ProjectCreationPopupContainer
         titleTx="create-project"
@@ -53,18 +65,20 @@ export const ProjectCreationPopup = observer<ProjectCreationPopupProps>(
         dismiss={clearInputsAndClose}
         shouldDismissOnOutsidePress
       >
-        <TextInput
-          value={name}
-          onChange={updateName}
-          placeholderTx="project-name"
-        />
-        <InlineRow>
-          <StyledTextButton
-            labelTx="cancel"
-            handlePress={clearInputsAndClose}
+        <StyledForm onSubmit={handleFormSubmit}>
+          <TextInput
+            value={name}
+            onChange={updateName}
+            placeholderTx="project-name"
           />
-          <StyledTextButton labelTx="create" handlePress={handleCreation} />
-        </InlineRow>
+          <InlineRow>
+            <StyledTextButton
+              labelTx="cancel"
+              handlePress={clearInputsAndClose}
+            />
+            <StyledTextButton type="submit" labelTx="create" />
+          </InlineRow>
+        </StyledForm>
       </ProjectCreationPopupContainer>
     );
   },

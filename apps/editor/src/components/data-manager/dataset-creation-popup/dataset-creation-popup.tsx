@@ -24,8 +24,12 @@ const DatasetCreationPopupContainer = styled(PopUp)`
 `;
 
 const TextInput = styled(TextField)`
-  margin: 0px 0px 0px 0px;
-  width: calc(100% - 40px);
+  margin: auto;
+  width: 100%;
+`;
+
+const StyledForm = styled.form`
+  width: 100%;
 `;
 
 export const DatasetCreationPopup = observer<DatasetCreationPopupProps>(
@@ -46,6 +50,14 @@ export const DatasetCreationPopup = observer<DatasetCreationPopupProps>(
 
     const updateName = useCallback((e) => setName(e.target.value), [setName]);
 
+    const handleFormSubmit = useCallback(
+      (e) => {
+        e.preventDefault();
+        handleCreation();
+      },
+      [handleCreation],
+    );
+
     return (
       <DatasetCreationPopupContainer
         titleTx="create-dataset"
@@ -53,18 +65,20 @@ export const DatasetCreationPopup = observer<DatasetCreationPopupProps>(
         dismiss={clearInputsAndClose}
         shouldDismissOnOutsidePress
       >
-        <TextInput
-          value={name}
-          onChange={updateName}
-          placeholderTx="dataset-name"
-        />
-        <InlineRow>
-          <StyledTextButton
-            labelTx="cancel"
-            handlePress={clearInputsAndClose}
+        <StyledForm onSubmit={handleFormSubmit}>
+          <TextInput
+            value={name}
+            onChange={updateName}
+            placeholderTx="dataset-name"
           />
-          <StyledTextButton labelTx="create" handlePress={handleCreation} />
-        </InlineRow>
+          <InlineRow>
+            <StyledTextButton
+              labelTx="cancel"
+              handlePress={clearInputsAndClose}
+            />
+            <StyledTextButton type="submit" labelTx="create" />
+          </InlineRow>
+        </StyledForm>
       </DatasetCreationPopupContainer>
     );
   },
