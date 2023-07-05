@@ -33,7 +33,7 @@ export const DatasetNavigationBar: React.FC<DatasetNavigationBarProps> = ({
       />
       <PageSectionIconButton
         isDisabled={!anySelected}
-        icon="export"
+        icon="review"
         tooltipTx="start-review"
         tooltipPosition="top"
         onPointerDown={startReview}

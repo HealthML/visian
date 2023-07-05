@@ -73,3 +73,6 @@ export { ReactComponent as whoAI } from "./who-ai.svg";
 export { ReactComponent as xSmall } from "./x-small.svg";
 export { ReactComponent as save } from "./save.svg";
 export { ReactComponent as warning } from "./warning.svg";
+export { ReactComponent as annotated } from "./annotated.svg";
+export { ReactComponent as verified } from "./verified.svg";
+export { ReactComponent as review } from "./review.svg";

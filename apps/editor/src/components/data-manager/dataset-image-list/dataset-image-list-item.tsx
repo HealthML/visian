@@ -1,8 +1,8 @@
 import {
+  Icon,
   InvisibleButton,
   List,
   ListItem,
-  StatusBadge,
   Text,
   useTranslation,
 } from "@visian/ui-shared";
@@ -36,6 +36,10 @@ const AnnotationsList = styled(List)`
 
 const ClickableText = styled(Text)`
   cursor: pointer;
+`;
+
+const StatusIcon = styled(Icon)`
+  width: 25px;
 `;
 
 export const DatasetImageListItem: React.FC<DatasetImageListItemProps> = ({
@@ -162,22 +166,23 @@ export const DatasetImageListItem: React.FC<DatasetImageListItemProps> = ({
         <ClickableText onClick={startCreateAnnotations}>
           {imageText}
         </ClickableText>
-        <ExpandedSpacer />
-        {hasVerifiedAnnotation && (
-          <StatusBadge
-            textColor="Neuronic Neon"
-            borderColor="gray"
-            tx="verified"
-          />
-        )}
         <Spacer />
+        <ExpandedSpacer />
+        {hasVerifiedAnnotation ? (
+          <StatusIcon icon="verified" color="Neuronic Neon" />
+        ) : annotations?.length ? (
+          <StatusIcon icon="annotated" color="Smart Sapphire" />
+        ) : (
+          <></>
+        )}
         {!isInSelectMode ? (
-          <IconButton
-            icon="trash"
-            tooltipTx="delete-image-title"
-            onPointerDown={deleteDeleteImage}
-            tooltipPosition="left"
-          />
+          // <IconButton
+          //   icon="trash"
+          //   tooltipTx="delete-image-title"
+          //   onPointerDown={deleteDeleteImage}
+          //   tooltipPosition="left"
+          // />
+          <> </>
         ) : (
           <IconButton
             icon={isSelected ? "checked" : "unchecked"}
@@ -207,14 +212,12 @@ export const DatasetImageListItem: React.FC<DatasetImageListItemProps> = ({
                         ? annotation.dataUri
                         : annotation.dataUri.split("/").pop()}
                     </ClickableText>
-                    <ExpandedSpacer />
+                    <Spacer />
+
                     {annotation.verified && (
-                      <StatusBadge
-                        textColor="Neuronic Neon"
-                        borderColor="gray"
-                        tx="verified"
-                      />
+                      <StatusIcon icon="verified" color="Neuronic Neon" />
                     )}
+                    <ExpandedSpacer />
                     <Spacer />
                     {!isInSelectMode && (
                       <IconButton
