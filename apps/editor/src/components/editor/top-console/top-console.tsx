@@ -55,10 +55,6 @@ const TopRow = styled.div`
   position: relative;
 `;
 
-const Verifiedbadge = styled(StatusBadge)`
-  height: 400px;
-`;
-
 export const TopConsole = observer(() => {
   const store = useStore();
   return store?.editor.activeDocument ? (
@@ -82,7 +78,7 @@ export const TopConsole = observer(() => {
         </TopRow>
         {store?.editor.activeDocument?.activeLayer?.family?.metaData
           ?.verified && (
-          <Verifiedbadge
+          <StatusBadge
             textColor="Neuronic Neon"
             borderColor="gray"
             tx="verified"
