@@ -23,6 +23,10 @@ const ConfirmationPopupContainer = styled(PopUp)`
   width: 400px;
 `;
 
+const StyledForm = styled.form`
+  width: 100%;
+`;
+
 export const ConfirmationPopup = observer<ConfirmationPopUpProps>(
   ({
     isOpen,
@@ -42,6 +46,14 @@ export const ConfirmationPopup = observer<ConfirmationPopUpProps>(
       onClose?.();
     }, [onClose, onConfirm]);
 
+    const handleFormSubmit = useCallback(
+      (e) => {
+        e.preventDefault();
+        handleConfirmation();
+      },
+      [handleConfirmation],
+    );
+
     return (
       <ConfirmationPopupContainer
         title={title}
@@ -50,19 +62,22 @@ export const ConfirmationPopup = observer<ConfirmationPopUpProps>(
         dismiss={onClose}
         shouldDismissOnOutsidePress
       >
-        <Text tx={messageTx} text={message} />
-        <InlineRow>
-          <StyledTextButton
-            label={cancel}
-            labelTx={cancelTx || (cancel ? undefined : "cancel")}
-            handlePress={onClose}
-          />
-          <StyledTextButton
-            label={confirm}
-            labelTx={confirmTx || (confirm ? undefined : "confirm")}
-            handlePress={handleConfirmation}
-          />
-        </InlineRow>
+        <StyledForm onSubmit={handleFormSubmit}>
+          <Text tx={messageTx} text={message} />
+          <InlineRow>
+            <StyledTextButton
+              label={cancel}
+              labelTx={cancelTx || (cancel ? undefined : "cancel")}
+              handlePress={onClose}
+            />
+            <StyledTextButton
+              autoFocus
+              type="submit"
+              label={confirm}
+              labelTx={confirmTx || (confirm ? undefined : "confirm")}
+            />
+          </InlineRow>
+        </StyledForm>
       </ConfirmationPopupContainer>
     );
   },
