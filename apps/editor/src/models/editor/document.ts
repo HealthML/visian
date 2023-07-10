@@ -674,6 +674,7 @@ export class Document
 
     if (Array.isArray(filteredFiles) && !filteredFiles.length) return;
 
+    //! TODO: #513
     // if (this.imageLayers.length >= this.maxVisibleLayers) {
     //   this.setError({
     //     titleTx: "import-error",
@@ -803,6 +804,7 @@ export class Document
           });
         }
       } else {
+        //! TODO: #513
         // const numberOfAnnotations = uniqueValues.size - 1;
 
         // if (
