@@ -67,6 +67,7 @@ export const DatasetCreationPopup = observer<DatasetCreationPopupProps>(
       >
         <StyledForm onSubmit={handleFormSubmit}>
           <TextInput
+            autoFocus
             value={name}
             onChange={updateName}
             placeholderTx="dataset-name"

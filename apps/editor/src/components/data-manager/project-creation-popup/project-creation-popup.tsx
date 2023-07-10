@@ -67,6 +67,7 @@ export const ProjectCreationPopup = observer<ProjectCreationPopupProps>(
       >
         <StyledForm onSubmit={handleFormSubmit}>
           <TextInput
+            autoFocus
             value={name}
             onChange={updateName}
             placeholderTx="project-name"
