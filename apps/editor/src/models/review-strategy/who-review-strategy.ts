@@ -1,4 +1,4 @@
-import { IImageLayer, ILayerFamily } from "@visian/ui-shared";
+import { FileWithMetadata, IImageLayer, ILayerFamily } from "@visian/ui-shared";
 import {
   getWHOTask,
   getWHOTaskIdFromUrl,
@@ -6,7 +6,6 @@ import {
 } from "@visian/utils";
 
 import { whoHome } from "../../constants";
-import { FileWithMetadata } from "../../types";
 import { ImageLayer } from "../editor";
 import { ReviewStrategy } from "./review-strategy";
 import { TaskType } from "./review-task";

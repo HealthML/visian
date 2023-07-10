@@ -1,4 +1,4 @@
-import { useTranslation } from "@visian/ui-shared";
+import { Dataset, Project, useTranslation } from "@visian/ui-shared";
 import { useCallback, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
@@ -8,7 +8,6 @@ import useDatasetsBy, {
   useDeleteDatasetsForProjectMutation,
   useUpdateDatasetsMutation,
 } from "../../../queries/use-datasets-by";
-import { Dataset, Project } from "../../../types";
 import { ConfirmationPopup } from "../confirmation-popup";
 import { DatasetCreationPopup } from "../dataset-creation-popup";
 import { EditPopup } from "../edit-popup";

@@ -1,7 +1,7 @@
+import { Image } from "@visian/ui-shared";
 import axios, { AxiosError } from "axios";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 
-import { Image } from "../types";
 import { hubBaseUrl } from "./hub-base-url";
 
 export const getImagesByDataset = async (datasetId?: string) => {

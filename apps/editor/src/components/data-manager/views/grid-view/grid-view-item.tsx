@@ -1,13 +1,12 @@
 import {
   color,
   GridItem,
+  IterableData,
   OptionSelector,
   radius,
   Text,
 } from "@visian/ui-shared";
 import styled from "styled-components";
-
-import { IterableData } from "../../../../types";
 
 const StyledGridItem = styled(GridItem)`
   cursor: pointer;

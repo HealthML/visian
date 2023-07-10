@@ -1,6 +1,5 @@
+import { FileWithMetadata } from "@visian/ui-shared";
 import { AxiosResponse } from "axios";
-
-import { FileWithMetadata } from "../../types";
 
 export enum TaskType {
   Create = "create",

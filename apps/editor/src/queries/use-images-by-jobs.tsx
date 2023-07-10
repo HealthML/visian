@@ -1,7 +1,7 @@
+import { Image } from "@visian/ui-shared";
 import axios, { AxiosError } from "axios";
 import { useQuery } from "react-query";
 
-import { Image } from "../types";
 import { hubBaseUrl } from "./hub-base-url";
 
 export const getImagesByJob = async (jobId: string) => {

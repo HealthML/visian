@@ -1,6 +1,4 @@
-import type { StatefulPopUpProps } from "@visian/ui-shared";
-
-import { Annotation, Image } from "../../../types";
+import type { Annotation, Image, StatefulPopUpProps } from "@visian/ui-shared";
 
 export interface DatasetImageListItemProps extends StatefulPopUpProps {
   isInSelectMode: boolean;

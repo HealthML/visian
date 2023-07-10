@@ -1,6 +1,4 @@
-import { StatusBadge } from "@visian/ui-shared";
-
-import { JobStatus } from "../../../../types";
+import { JobStatus, StatusBadge } from "@visian/ui-shared";
 
 const statusColors: Record<JobStatus, string> = {
   queued: "veryVeryLightGray",

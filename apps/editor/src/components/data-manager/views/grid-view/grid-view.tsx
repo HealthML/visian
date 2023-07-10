@@ -1,7 +1,6 @@
-import { Grid, space, stopPropagation } from "@visian/ui-shared";
+import { Grid, IterableData, space, stopPropagation } from "@visian/ui-shared";
 import styled from "styled-components";
 
-import { IterableData } from "../../../../types";
 import { GridViewItem } from "./grid-view-item";
 import { GridViewProps } from "./grid-view.props";
 

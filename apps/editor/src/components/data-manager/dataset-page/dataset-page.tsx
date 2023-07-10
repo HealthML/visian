@@ -1,4 +1,12 @@
-import { Notification, Sheet, space, useTranslation } from "@visian/ui-shared";
+import {
+  Annotation,
+  Dataset,
+  Image,
+  Notification,
+  Sheet,
+  space,
+  useTranslation,
+} from "@visian/ui-shared";
 import { useCallback, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
@@ -11,7 +19,6 @@ import {
   useImagesByDataset,
 } from "../../../queries";
 import { useDatasetProgress } from "../../../queries/use-dataset-progress";
-import { Annotation, Dataset, Image } from "../../../types";
 import { AnnotationProgress } from "../annotation-progress";
 import { ConfirmationPopup } from "../confirmation-popup";
 import { DatasetImageList } from "../dataset-image-list";

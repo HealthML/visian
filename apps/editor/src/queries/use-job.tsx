@@ -1,7 +1,7 @@
+import { Job } from "@visian/ui-shared";
 import axios, { AxiosError } from "axios";
 import { useQuery } from "react-query";
 
-import { Job } from "../types";
 import { hubBaseUrl } from "./hub-base-url";
 
 const getJob = async (id: string) => {

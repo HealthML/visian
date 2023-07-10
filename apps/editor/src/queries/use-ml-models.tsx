@@ -1,7 +1,7 @@
+import { MlModel } from "@visian/ui-shared";
 import axios, { AxiosError } from "axios";
 import { useQuery } from "react-query";
 
-import { MlModel } from "../types";
 import { hubBaseUrl } from "./hub-base-url";
 
 const getModelVersions = async () => {

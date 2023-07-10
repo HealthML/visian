@@ -1,4 +1,4 @@
-import { Screen, useTranslation } from "@visian/ui-shared";
+import { Project, Screen, useTranslation } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
 import React, { useCallback, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -22,7 +22,6 @@ import {
   useProjects,
   useUpdateProjectsMutation,
 } from "../queries";
-import { Project } from "../types";
 
 const Container = styled.div`
   display: flex;

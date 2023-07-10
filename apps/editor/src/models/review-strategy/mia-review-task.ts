@@ -1,3 +1,4 @@
+import { Annotation, FileWithMetadata, Image } from "@visian/ui-shared";
 import { Zip } from "@visian/utils";
 import { v4 as uuidv4 } from "uuid";
 
@@ -7,7 +8,6 @@ import {
   patchAnnotationFile,
   postAnnotationFile,
 } from "../../queries";
-import { Annotation, FileWithMetadata, Image } from "../../types";
 import { ReviewTask, TaskType } from "./review-task";
 
 export class MiaReviewTask implements ReviewTask {

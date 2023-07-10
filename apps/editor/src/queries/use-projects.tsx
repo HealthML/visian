@@ -1,7 +1,7 @@
+import { Project } from "@visian/ui-shared";
 import axios, { AxiosError } from "axios";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 
-import { Project } from "../types";
 import { hubBaseUrl } from "./hub-base-url";
 
 const getProjects = async () => {

@@ -1,6 +1,4 @@
-import type { StatefulPopUpProps } from "@visian/ui-shared";
-
-import { Dataset } from "../../../types";
+import type { Dataset, StatefulPopUpProps } from "@visian/ui-shared";
 
 export interface ImageImportPopUpProps extends StatefulPopUpProps {
   dataset?: Dataset;

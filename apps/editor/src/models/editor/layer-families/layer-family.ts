@@ -1,8 +1,12 @@
-import { IDocument, ILayer, ILayerFamily } from "@visian/ui-shared";
+import {
+  FileMetadata,
+  IDocument,
+  ILayer,
+  ILayerFamily,
+} from "@visian/ui-shared";
 import { action, makeObservable, observable } from "mobx";
 import { v4 as uuidv4 } from "uuid";
 
-import { FileMetadata } from "../../../types";
 import { ImageLayer } from "../layers";
 
 export class LayerFamily implements ILayerFamily {

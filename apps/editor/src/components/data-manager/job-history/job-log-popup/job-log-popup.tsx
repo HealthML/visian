@@ -1,10 +1,9 @@
-import { Divider, PopUp, SectionHeader, Text } from "@visian/ui-shared";
+import { Divider, Job, PopUp, SectionHeader, Text } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
 import { useEffect, useState } from "react";
 import styled from "styled-components";
 
 import { getJobLog } from "../../../../queries";
-import { Job } from "../../../../types";
 import { JobLogPopUpProps } from "./job-log-popup.props";
 
 const PopUpContainer = styled(PopUp)`

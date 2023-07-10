@@ -1,3 +1,5 @@
+import { Image } from "@visian/ui-shared";
+
 import {
   getAnnotation,
   getAnnotationsByJobAndImage,
@@ -6,7 +8,6 @@ import {
   patchAnnotation,
 } from "../../queries";
 import { getImage } from "../../queries/get-image";
-import { Image } from "../../types";
 import { RootStore } from "../root";
 import { MiaReviewTask } from "./mia-review-task";
 import { ReviewStrategy } from "./review-strategy";

@@ -1,4 +1,4 @@
-import { Image } from "../../../types";
+import { Image } from "@visian/ui-shared";
 
 const multiSelection = (
   currentImageIndex: number,

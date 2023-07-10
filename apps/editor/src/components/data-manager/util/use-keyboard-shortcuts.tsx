@@ -1,7 +1,5 @@
-import { isMac } from "@visian/ui-shared";
+import { Image, isMac } from "@visian/ui-shared";
 import { useEffect, useState } from "react";
-
-import { Image } from "../../../types";
 
 export const useKeyboardShortcuts = ({
   selectedImages,

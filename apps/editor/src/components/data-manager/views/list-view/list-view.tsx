@@ -1,7 +1,6 @@
-import { List, stopPropagation } from "@visian/ui-shared";
+import { IterableData, List, stopPropagation } from "@visian/ui-shared";
 import styled from "styled-components";
 
-import { IterableData } from "../../../../types";
 import { SectionSheet } from "../../page-section";
 import { ListViewItem } from "./list-view-item";
 import { ListViewProps } from "./list-view.props";

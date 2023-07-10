@@ -1,7 +1,6 @@
-import { List, stopPropagation } from "@visian/ui-shared";
+import { Annotation, Image, List, stopPropagation } from "@visian/ui-shared";
 import styled from "styled-components";
 
-import { Annotation, Image } from "../../../types";
 import { useKeyboardShortcuts } from "../util";
 import { DatasetImageListItem } from "./dataset-image-list-item";
 

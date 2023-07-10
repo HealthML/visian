@@ -1,7 +1,7 @@
+import { Progress } from "@visian/ui-shared";
 import axios, { AxiosError } from "axios";
 import { useQuery } from "react-query";
 
-import { Progress } from "../types";
 import { hubBaseUrl } from "./hub-base-url";
 
 export const useJobProgress = (jobId: string) => {

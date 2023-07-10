@@ -1,7 +1,7 @@
+import { Dataset } from "@visian/ui-shared";
 import axios, { AxiosError } from "axios";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 
-import { Dataset } from "../types";
 import { hubBaseUrl } from "./hub-base-url";
 
 const getDatasetsBy = async (projectId: string) => {

@@ -1,6 +1,9 @@
 import {
   dataColorKeys,
   ErrorNotification,
+  FileMetadata,
+  FileWithFamily,
+  FileWithMetadata,
   i18n,
   IDocument,
   IEditor,
@@ -41,7 +44,6 @@ import {
   generalTextures2d,
   generalTextures3d,
 } from "../../constants";
-import { FileMetadata, FileWithFamily, FileWithMetadata } from "../../types";
 import { readTrackingLog, TrackingData } from "../tracking";
 import { StoreContext } from "../types";
 import { Clipboard } from "./clipboard";

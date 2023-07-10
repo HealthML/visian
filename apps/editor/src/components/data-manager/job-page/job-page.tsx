@@ -1,5 +1,7 @@
 import {
+  Image,
   InvisibleButton,
+  Job,
   ListItem,
   Sheet,
   space,
@@ -20,7 +22,6 @@ import {
 } from "../../../queries";
 import useImagesByJob from "../../../queries/use-images-by-jobs";
 import { useJobProgress } from "../../../queries/use-job-progress";
-import { Image, Job } from "../../../types";
 import { AnnotationProgress } from "../annotation-progress";
 import { ConfirmationPopup } from "../confirmation-popup";
 import { JobLogPopup } from "../job-history/job-log-popup";

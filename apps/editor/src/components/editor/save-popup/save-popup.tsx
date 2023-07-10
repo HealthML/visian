@@ -1,6 +1,8 @@
 import {
+  Annotation,
   Button,
   DropDown,
+  FileWithMetadata,
   ILayer,
   LayerList,
   PopUp,
@@ -19,7 +21,6 @@ import { importFilesToDocument } from "../../../import-handling";
 import { LayerFamily } from "../../../models/editor/layer-families";
 import { MiaReviewTask } from "../../../models/review-strategy";
 import { fetchAnnotationFile } from "../../../queries";
-import { Annotation, FileWithMetadata } from "../../../types";
 import { SavePopUpProps } from "./save-popup.props";
 
 const SectionLabel = styled(Text)`

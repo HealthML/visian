@@ -1,4 +1,5 @@
 import {
+  Annotation,
   InvisibleButton,
   List,
   ListItem,
@@ -13,7 +14,6 @@ import styled from "styled-components";
 import { useStore } from "../../../app/root-store";
 import { MiaReviewStrategy, TaskType } from "../../../models/review-strategy";
 import { useAnnotationsByImage } from "../../../queries";
-import { Annotation } from "../../../types";
 import { handleImageSelection } from "../util";
 import { DatasetImageListItemProps } from "./dataset-image-list-item.props";
 
