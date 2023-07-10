@@ -3,4 +3,3 @@ export * from "./error-notification";
 export * from "./rendering";
 export * from "./tracking";
 export * from "./translation";
-// export * from "./metadata";
