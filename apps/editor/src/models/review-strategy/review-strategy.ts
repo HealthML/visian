@@ -1,7 +1,7 @@
 import { action, makeObservable, observable } from "mobx";
 
 import { RootStore } from "../root";
-import { ReviewTask, TaskType } from "./review-task";
+import { ReviewTask } from "./review-task";
 
 export abstract class ReviewStrategy {
   protected store: RootStore;

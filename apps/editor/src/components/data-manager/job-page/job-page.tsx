@@ -28,7 +28,7 @@ import { JobStatusBadge } from "../job-history/job-status-badge/job-status-badge
 import { PageRow } from "../page-row";
 import { PageSection } from "../page-section";
 import { PageTitle } from "../page-title";
-import { editorPath, getDisplayDate } from "../util";
+import { getDisplayDate } from "../util";
 import { DetailsRow } from "./details-table";
 
 const StyledSheet = styled(Sheet)`
