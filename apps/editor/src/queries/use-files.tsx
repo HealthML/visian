@@ -1,4 +1,4 @@
-import { Annotation, FileWithMetadata } from "@visian/ui-shared";
+import { FileWithMetadata, MiaAnnotation } from "@visian/ui-shared";
 import axios from "axios";
 import path from "path";
 
@@ -52,9 +52,9 @@ export const fetchAnnotationFile = async (
 };
 
 export const patchAnnotationFile = async (
-  annotation: Annotation,
+  annotation: MiaAnnotation,
   file: File,
-): Promise<Annotation> => {
+): Promise<MiaAnnotation> => {
   const apiEndpoint = `${hubBaseUrl}annotations/${annotation.id}`;
   const formData = new FormData();
   formData.append("file", file);
@@ -71,7 +71,7 @@ export const postAnnotationFile = async (
   imageId: string,
   annotationUri: string,
   file: File,
-): Promise<Annotation> => {
+): Promise<MiaAnnotation> => {
   const apiEndpoint = `${hubBaseUrl}annotations`;
   const formData = new FormData();
   formData.append("image", imageId);

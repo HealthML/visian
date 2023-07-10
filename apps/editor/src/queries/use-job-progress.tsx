@@ -1,14 +1,17 @@
-import { Progress } from "@visian/ui-shared";
+import { MiaProgress } from "@visian/ui-shared";
 import axios, { AxiosError } from "axios";
 import { useQuery } from "react-query";
 
 import { hubBaseUrl } from "./hub-base-url";
 
 export const useJobProgress = (jobId: string) => {
-  const { data, error, isLoading } = useQuery<Progress, AxiosError<Progress>>(
+  const { data, error, isLoading } = useQuery<
+    MiaProgress,
+    AxiosError<MiaProgress>
+  >(
     ["job-progress", jobId],
     async () => {
-      const response = await axios.get<Progress>(
+      const response = await axios.get<MiaProgress>(
         `${hubBaseUrl}jobs/${jobId}/progress`,
       );
       return response.data;

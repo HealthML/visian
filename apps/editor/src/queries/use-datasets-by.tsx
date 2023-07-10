@@ -1,22 +1,25 @@
-import { Dataset } from "@visian/ui-shared";
+import { MiaDataset } from "@visian/ui-shared";
 import axios, { AxiosError } from "axios";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 
 import { hubBaseUrl } from "./hub-base-url";
 
 const getDatasetsBy = async (projectId: string) => {
-  const datasetsResponse = await axios.get<Dataset[]>(`${hubBaseUrl}datasets`, {
-    params: {
-      project: projectId,
+  const datasetsResponse = await axios.get<MiaDataset[]>(
+    `${hubBaseUrl}datasets`,
+    {
+      params: {
+        project: projectId,
+      },
     },
-  });
+  );
   return datasetsResponse.data;
 };
 
 export const useDatasetsBy = (projectId: string) => {
   const { data, error, isError, isLoading, refetch, remove } = useQuery<
-    Dataset[],
-    AxiosError<Dataset[]>
+    MiaDataset[],
+    AxiosError<MiaDataset[]>
   >(["datasetsBy", projectId], () => getDatasetsBy(projectId), {
     retry: 2, // retry twice if fetch fails
     refetchInterval: 1000 * 30, // refetch every 30 seconds
@@ -39,7 +42,7 @@ const postDataset = async ({
   name: string;
   project: string;
 }) => {
-  const postDatasetResponse = await axios.post<Dataset>(
+  const postDatasetResponse = await axios.post<MiaDataset>(
     `${hubBaseUrl}datasets`,
     { name, project },
   );
@@ -53,7 +56,7 @@ const deleteDatasets = async ({
   projectId: string;
   datasetIds: string[];
 }) => {
-  const deleteDatasetsResponse = await axios.delete<Dataset[]>(
+  const deleteDatasetsResponse = await axios.delete<MiaDataset[]>(
     `${hubBaseUrl}datasets`,
     {
       data: { ids: datasetIds },
@@ -68,12 +71,12 @@ export const useDeleteDatasetsForProjectMutation = () => {
   const { isError, isIdle, isLoading, isPaused, isSuccess, mutate } =
     useMutation<
       string[],
-      AxiosError<Dataset[]>,
+      AxiosError<MiaDataset[]>,
       {
         projectId: string;
         datasetIds: string[];
       },
-      { previousDatasets: Dataset[] }
+      { previousDatasets: MiaDataset[] }
     >({
       mutationFn: deleteDatasets,
       onMutate: async ({
@@ -87,7 +90,7 @@ export const useDeleteDatasetsForProjectMutation = () => {
           queryKey: ["datasetsBy", projectId],
         });
 
-        const previousDatasets = queryClient.getQueryData<Dataset[]>([
+        const previousDatasets = queryClient.getQueryData<MiaDataset[]>([
           "datasetsBy",
           projectId,
         ]);
@@ -95,7 +98,7 @@ export const useDeleteDatasetsForProjectMutation = () => {
         if (!previousDatasets) return;
 
         const newDatasets = previousDatasets.filter(
-          (annotaion: Dataset) => !datasetIds.includes(annotaion.id),
+          (annotaion: MiaDataset) => !datasetIds.includes(annotaion.id),
         );
 
         queryClient.setQueryData(["datasetsBy", projectId], newDatasets);
@@ -126,8 +129,8 @@ export const useDeleteDatasetsForProjectMutation = () => {
   };
 };
 
-const putDataset = async (dataset: Dataset) => {
-  const putDatasetResponse = await axios.put<Dataset>(
+const putDataset = async (dataset: MiaDataset) => {
+  const putDatasetResponse = await axios.put<MiaDataset>(
     `${hubBaseUrl}datasets/${dataset.id}`,
     {
       name: dataset.name,
@@ -143,18 +146,18 @@ const putDataset = async (dataset: Dataset) => {
 export const useUpdateDatasetsMutation = () => {
   const queryClient = useQueryClient();
   return useMutation<
-    Dataset,
+    MiaDataset,
     AxiosError,
-    Dataset,
-    { previousDatasets: Dataset[] }
+    MiaDataset,
+    { previousDatasets: MiaDataset[] }
   >({
     mutationFn: putDataset,
-    onMutate: async (dataset: Dataset) => {
+    onMutate: async (dataset: MiaDataset) => {
       await queryClient.cancelQueries({
         queryKey: ["datasetsBy", dataset.project],
       });
 
-      const previousDatasets = queryClient.getQueryData<Dataset[]>([
+      const previousDatasets = queryClient.getQueryData<MiaDataset[]>([
         "datasetsBy",
         dataset.project,
       ]);
@@ -189,10 +192,10 @@ export const useCreateDatasetMutation = () => {
   const queryClient = useQueryClient();
   const { isError, isIdle, isLoading, isPaused, isSuccess, mutate } =
     useMutation<
-      Dataset,
+      MiaDataset,
       AxiosError,
       { name: string; project: string },
-      { previousDatasets: Dataset[] }
+      { previousDatasets: MiaDataset[] }
     >({
       mutationFn: postDataset,
       onMutate: async ({
@@ -207,7 +210,7 @@ export const useCreateDatasetMutation = () => {
         });
 
         const previousDatasets =
-          queryClient.getQueryData<Dataset[]>(["datasetsBy", project]) ?? [];
+          queryClient.getQueryData<MiaDataset[]>(["datasetsBy", project]) ?? [];
 
         const newDataset = {
           id: "new-dataset",

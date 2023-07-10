@@ -7,8 +7,8 @@ import {
 } from "@tanstack/react-table";
 import {
   HeaderLabel,
-  Job,
   ListItemLabel,
+  MiaJob,
   TableLayout,
 } from "@visian/ui-shared";
 import { useCallback, useState } from "react";
@@ -22,7 +22,7 @@ const BadgeContainer = styled.div`
   width: 10em;
 `;
 
-function getDisplayJob(job: Job): Job {
+function getDisplayJob(job: MiaJob): MiaJob {
   return {
     ...job,
     modelVersion: `v${job.modelVersion}`,
@@ -35,7 +35,7 @@ function getDisplayJob(job: Job): Job {
   };
 }
 
-const columnHelper = createColumnHelper<Job>();
+const columnHelper = createColumnHelper<MiaJob>();
 
 const columns = [
   columnHelper.accessor("modelName", {
@@ -72,15 +72,15 @@ const columns = [
     },
   }),
 ];
-export const JobsTable = ({ jobs }: { jobs: Job[] }) => {
-  const data = jobs.map((job: Job) => getDisplayJob(job));
+export const JobsTable = ({ jobs }: { jobs: MiaJob[] }) => {
+  const data = jobs.map((job: MiaJob) => getDisplayJob(job));
 
   const columnWidths = [20, 10, 25, 25, 20];
 
   const navigate = useNavigate();
 
   const handleOnClick = useCallback(
-    (job: Job) => navigate(`/jobs/${job.id}`),
+    (job: MiaJob) => navigate(`/jobs/${job.id}`),
     [navigate],
   );
 

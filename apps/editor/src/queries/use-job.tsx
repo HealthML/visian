@@ -1,18 +1,18 @@
-import { Job } from "@visian/ui-shared";
+import { MiaJob } from "@visian/ui-shared";
 import axios, { AxiosError } from "axios";
 import { useQuery } from "react-query";
 
 import { hubBaseUrl } from "./hub-base-url";
 
 const getJob = async (id: string) => {
-  const jobResponse = await axios.get<Job>(`${hubBaseUrl}jobs/${id}`);
+  const jobResponse = await axios.get<MiaJob>(`${hubBaseUrl}jobs/${id}`);
   return jobResponse.data;
 };
 
 export const useJob = (jobId: string) => {
   const { data, error, isError, isLoading, refetch, remove } = useQuery<
-    Job,
-    AxiosError<Job>
+    MiaJob,
+    AxiosError<MiaJob>
   >(["job"], () => getJob(jobId), {
     retry: 2, // retry twice if fetch fails
     refetchInterval: 1000 * 20, // refetch every 20 seconds

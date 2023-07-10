@@ -1,6 +1,6 @@
 import {
-  IterableData,
   ListItem,
+  MiaIterableData,
   OptionSelector,
   Text,
 } from "@visian/ui-shared";
@@ -21,7 +21,7 @@ export const ListViewItem = ({
   onEdit,
   isLast,
 }: {
-  item: IterableData;
+  item: MiaIterableData;
   onDelete: () => void;
   onClick: () => void;
   onEdit: () => void;

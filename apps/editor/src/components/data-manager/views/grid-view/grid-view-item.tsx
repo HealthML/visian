@@ -1,7 +1,7 @@
 import {
   color,
   GridItem,
-  IterableData,
+  MiaIterableData,
   OptionSelector,
   radius,
   Text,
@@ -58,7 +58,7 @@ export const GridViewItem = ({
   onClick,
   onEdit,
 }: {
-  item: IterableData;
+  item: MiaIterableData;
   imgSrc: string | undefined;
   onDelete: () => void;
   onClick: () => void;

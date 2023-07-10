@@ -1,4 +1,9 @@
-import { Grid, IterableData, space, stopPropagation } from "@visian/ui-shared";
+import {
+  Grid,
+  MiaIterableData,
+  space,
+  stopPropagation,
+} from "@visian/ui-shared";
 import styled from "styled-components";
 
 import { GridViewItem } from "./grid-view-item";
@@ -11,7 +16,7 @@ const StyledGrid = styled(Grid)`
   gap: ${space("pageSectionMargin")};
 `;
 
-export const GridView = <T extends IterableData>({
+export const GridView = <T extends MiaIterableData>({
   data,
   imgSrc,
   onDelete,

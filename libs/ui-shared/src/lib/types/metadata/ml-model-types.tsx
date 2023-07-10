@@ -1,4 +1,4 @@
-export interface MlModel {
+export interface MiaMlModel {
   name: string;
   version: string;
   description: string;

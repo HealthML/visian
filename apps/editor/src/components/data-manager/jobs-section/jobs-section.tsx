@@ -1,4 +1,4 @@
-import { Project } from "@visian/ui-shared";
+import { MiaProject } from "@visian/ui-shared";
 import { useCallback, useState } from "react";
 import styled from "styled-components";
 
@@ -15,7 +15,7 @@ const StyledIconButton = styled(PaddedPageSectionIconButton)`
   height: 25px;
 `;
 
-export const JobsSection = ({ project }: { project: Project }) => {
+export const JobsSection = ({ project }: { project: MiaProject }) => {
   const { jobs, jobsError, isLoadingJobs, refetchJobs } = useJobsBy(project.id);
 
   // Jobs

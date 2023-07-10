@@ -1,8 +1,12 @@
-import type { Dataset, Image, StatefulPopUpProps } from "@visian/ui-shared";
+import type {
+  MiaDataset,
+  MiaImage,
+  StatefulPopUpProps,
+} from "@visian/ui-shared";
 
 export interface ProjectDataExplorerProps extends StatefulPopUpProps {
-  datasets?: Dataset[];
-  images?: Image[];
+  datasets?: MiaDataset[];
+  images?: MiaImage[];
   isErrorImages: boolean;
   isLoadingImages: boolean;
   selectedDataset?: string;

@@ -1,15 +1,15 @@
-export interface Job {
+export interface MiaJob {
   id: string;
   modelName: string;
   modelVersion: string;
   startedAt: string | undefined;
   finishedAt: string | undefined;
-  status: JobStatus;
+  status: MiaJobStatus;
   project: string;
   logFileUri?: string;
 }
 
-export enum JobStatus {
+export enum MiaJobStatus {
   queued = "queued",
   running = "running",
   succeeded = "succeeded",

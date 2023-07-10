@@ -1,4 +1,4 @@
-import { Annotation, FileWithMetadata, Image } from "@visian/ui-shared";
+import { FileWithMetadata, MiaAnnotation, MiaImage } from "@visian/ui-shared";
 import { Zip } from "@visian/utils";
 import { v4 as uuidv4 } from "uuid";
 
@@ -20,15 +20,15 @@ export class MiaReviewTask implements ReviewTask {
     return [...this.annotations.keys()];
   }
 
-  private annotations: Map<string, Annotation>;
-  public image: Image;
+  private annotations: Map<string, MiaAnnotation>;
+  public image: MiaImage;
 
   constructor(
     title: string | undefined,
     kind: TaskType,
     description: string | undefined,
-    image: Image,
-    annotations: Annotation[],
+    image: MiaImage,
+    annotations: MiaAnnotation[],
     id?: string,
   ) {
     this.kind = kind;

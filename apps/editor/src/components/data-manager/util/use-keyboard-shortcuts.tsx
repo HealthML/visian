@@ -1,4 +1,4 @@
-import { Image, isMac } from "@visian/ui-shared";
+import { isMac, MiaImage } from "@visian/ui-shared";
 import { useEffect, useState } from "react";
 
 export const useKeyboardShortcuts = ({
@@ -8,7 +8,7 @@ export const useKeyboardShortcuts = ({
 }: {
   selectedImages: Set<string>;
   setSelectedImages: React.Dispatch<React.SetStateAction<Set<string>>>;
-  images: Image[] | undefined;
+  images: MiaImage[] | undefined;
 }) => {
   const [isShiftPressed, setIsShiftPressed] = useState(false);
   const [selectedRange, setSelectedRange] = useState({

@@ -1,4 +1,4 @@
-import { Divider, Job, PopUp, SectionHeader, Text } from "@visian/ui-shared";
+import { Divider, MiaJob, PopUp, SectionHeader, Text } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
 import { useEffect, useState } from "react";
 import styled from "styled-components";
@@ -21,7 +21,7 @@ const StyledText = styled(Text)`
   white-space: pre-wrap;
 `;
 
-const getLogText = async (job: Job) => {
+const getLogText = async (job: MiaJob) => {
   let logText = "";
   if (job.logFileUri) {
     try {

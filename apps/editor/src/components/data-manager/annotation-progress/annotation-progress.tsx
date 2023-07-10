@@ -1,6 +1,6 @@
 import {
   Button,
-  Progress,
+  MiaProgress,
   ProgressBar,
   Sheet,
   space,
@@ -41,7 +41,7 @@ export const AnnotationProgress = ({
   progress,
   onReviewClick,
 }: {
-  progress: Progress;
+  progress: MiaProgress;
   onReviewClick?: () => void;
 }) => (
   <ProgressSheet>

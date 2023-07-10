@@ -1,11 +1,11 @@
-import { Dataset } from "@visian/ui-shared";
+import { MiaDataset } from "@visian/ui-shared";
 import axios, { AxiosError } from "axios";
 import { useQuery } from "react-query";
 
 import { hubBaseUrl } from "./hub-base-url";
 
 const getDataset = async (datasetId: string) => {
-  const datasetResponse = await axios.get<Dataset>(
+  const datasetResponse = await axios.get<MiaDataset>(
     `${hubBaseUrl}datasets/${datasetId}`,
   );
   return datasetResponse.data;
@@ -13,8 +13,8 @@ const getDataset = async (datasetId: string) => {
 
 export const useDataset = (datasetId: string) => {
   const { data, error, isError, isLoading, refetch, remove } = useQuery<
-    Dataset,
-    AxiosError<Dataset>
+    MiaDataset,
+    AxiosError<MiaDataset>
   >(["dataset", datasetId], () => getDataset(datasetId), {
     retry: 2, // retry twice if fetch fails
     refetchInterval: 1000 * 60, // refetch every minute

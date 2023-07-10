@@ -1,8 +1,8 @@
 import {
-  Annotation,
   InvisibleButton,
   List,
   ListItem,
+  MiaAnnotation,
   StatusBadge,
   Text,
   useTranslation,
@@ -192,7 +192,7 @@ export const DatasetImageListItem: React.FC<DatasetImageListItemProps> = ({
           annotations && (
             <AnnotationsList>
               {annotations.map(
-                (annotation: Annotation, annotationIndex: number) => (
+                (annotation: MiaAnnotation, annotationIndex: number) => (
                   <ListItem
                     isLast={
                       isLast && annotationIndex === annotations.length - 1

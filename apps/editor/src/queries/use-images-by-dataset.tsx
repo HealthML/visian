@@ -1,11 +1,11 @@
-import { Image } from "@visian/ui-shared";
+import { MiaImage } from "@visian/ui-shared";
 import axios, { AxiosError } from "axios";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 
 import { hubBaseUrl } from "./hub-base-url";
 
 export const getImagesByDataset = async (datasetId?: string) => {
-  const imagesResponse = await axios.get<Image[]>(`${hubBaseUrl}images`, {
+  const imagesResponse = await axios.get<MiaImage[]>(`${hubBaseUrl}images`, {
     params: {
       dataset: datasetId,
     },
@@ -14,7 +14,7 @@ export const getImagesByDataset = async (datasetId?: string) => {
 };
 
 const deleteImages = async (imageIds: string[]) => {
-  const deleteImagesResponse = await axios.delete<Image[]>(
+  const deleteImagesResponse = await axios.delete<MiaImage[]>(
     `${hubBaseUrl}images`,
     {
       data: { ids: imageIds },
@@ -27,8 +27,8 @@ const deleteImages = async (imageIds: string[]) => {
 
 export const useImagesByDataset = (datasetId?: string) => {
   const { data, error, isError, isLoading, refetch, remove } = useQuery<
-    Image[],
-    AxiosError<Image[]>
+    MiaImage[],
+    AxiosError<MiaImage[]>
   >(["imagesByDataset", datasetId], () => getImagesByDataset(datasetId), {
     retry: 2, // retry twice if fetch fails
     refetchInterval: 1000 * 10, // refetch every 10 seconds
@@ -50,9 +50,9 @@ export const useDeleteImagesMutation = (datasetId: string) => {
   const { isError, isIdle, isLoading, isPaused, isSuccess, mutate } =
     useMutation<
       string[],
-      AxiosError<Image[]>,
+      AxiosError<MiaImage[]>,
       string[],
-      { previousImages: Image[] }
+      { previousImages: MiaImage[] }
     >({
       mutationFn: deleteImages,
       onMutate: async (imageIds: string[]) => {
@@ -60,7 +60,7 @@ export const useDeleteImagesMutation = (datasetId: string) => {
           queryKey: ["imagesByDataset", datasetId],
         });
 
-        const previousImages = queryClient.getQueryData<Image[]>([
+        const previousImages = queryClient.getQueryData<MiaImage[]>([
           "imagesByDataset",
           datasetId,
         ]);
@@ -68,7 +68,7 @@ export const useDeleteImagesMutation = (datasetId: string) => {
         if (!previousImages) return;
 
         const newImages = previousImages.filter(
-          (image: Image) => !imageIds.includes(image.id),
+          (image: MiaImage) => !imageIds.includes(image.id),
         );
 
         queryClient.setQueryData(["imagesByDataset", datasetId], newImages);

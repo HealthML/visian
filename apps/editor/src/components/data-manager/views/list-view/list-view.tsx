@@ -1,4 +1,4 @@
-import { IterableData, List, stopPropagation } from "@visian/ui-shared";
+import { List, MiaIterableData, stopPropagation } from "@visian/ui-shared";
 import styled from "styled-components";
 
 import { SectionSheet } from "../../page-section";
@@ -11,7 +11,7 @@ const StyledList = styled(List)`
   user-select: none;
 `;
 
-export const ListView = <T extends IterableData>({
+export const ListView = <T extends MiaIterableData>({
   data,
   onDelete,
   onClick,
