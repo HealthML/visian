@@ -1,10 +1,4 @@
-import {
-  Button,
-  Progress as ProgressBar,
-  Sheet,
-  space,
-  Text,
-} from "@visian/ui-shared";
+import { Button, ProgressBar, Sheet, space, Text } from "@visian/ui-shared";
 import styled from "styled-components";
 
 import { Progress } from "../../../types";
