@@ -234,12 +234,12 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
       });
       store?.setProgress();
       return true;
-    } catch (error: any) {
-      const description = error.response?.data?.message
-        ? error.response.data.message
-        : error.message
-        ? error.message
-        : "annotation-saving-error";
+    } catch (error) {
+      let description = "annotation-saving-error";
+      if (error instanceof AxiosError) {
+        description =
+          error.response?.data?.message ?? error.message ?? description;
+      }
       store?.setError({
         titleTx: "saving-error",
         descriptionTx: description,
