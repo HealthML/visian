@@ -35,6 +35,7 @@ const StyledForm = styled.form`
 export const DatasetCreationPopup = observer<DatasetCreationPopupProps>(
   ({ isOpen, onClose, onConfirm }) => {
     const [name, setName] = useState("");
+    const [isSubmitDisabled, setIsSubmitDisabled] = useState(true);
 
     const clearInputsAndClose = useCallback(() => {
       setName("");
@@ -48,14 +49,20 @@ export const DatasetCreationPopup = observer<DatasetCreationPopupProps>(
       clearInputsAndClose();
     }, [name, onConfirm, clearInputsAndClose]);
 
-    const updateName = useCallback((e) => setName(e.target.value), [setName]);
+    const updateName = useCallback(
+      (e) => {
+        setName(e.target.value);
+        setIsSubmitDisabled(false);
+      },
+      [setName],
+    );
 
     const handleFormSubmit = useCallback(
       (e) => {
         e.preventDefault();
-        handleCreation();
+        if (!isSubmitDisabled) handleCreation();
       },
-      [handleCreation],
+      [handleCreation, isSubmitDisabled],
     );
 
     return (
@@ -77,7 +84,11 @@ export const DatasetCreationPopup = observer<DatasetCreationPopupProps>(
               labelTx="cancel"
               handlePress={clearInputsAndClose}
             />
-            <StyledTextButton type="submit" labelTx="create" />
+            <StyledTextButton
+              type="submit"
+              labelTx="create"
+              isDisabled={isSubmitDisabled}
+            />
           </InlineRow>
         </StyledForm>
       </DatasetCreationPopupContainer>

@@ -35,6 +35,7 @@ const StyledForm = styled.form`
 export const EditPopup = observer<EditPopupProps>(
   ({ oldName, isOpen, onClose, onConfirm }) => {
     const [name, setName] = useState(oldName);
+    const [isSubmitDisabled, setIsSubmitDisabled] = useState(true);
 
     const clearInputsAndClose = useCallback(() => {
       setName(oldName);
@@ -52,14 +53,20 @@ export const EditPopup = observer<EditPopupProps>(
       clearInputsAndClose();
     }, [name, oldName, clearInputsAndClose, onConfirm]);
 
-    const updateName = useCallback((e) => setName(e.target.value), [setName]);
+    const updateName = useCallback(
+      (e) => {
+        setName(e.target.value);
+        setIsSubmitDisabled(false);
+      },
+      [setName],
+    );
 
     const handleFormSubmit = useCallback(
       (e) => {
         e.preventDefault();
-        handleEdit();
+        if (!isSubmitDisabled) handleEdit();
       },
-      [handleEdit],
+      [handleEdit, isSubmitDisabled],
     );
 
     return (
@@ -81,7 +88,11 @@ export const EditPopup = observer<EditPopupProps>(
               labelTx="cancel"
               handlePress={clearInputsAndClose}
             />
-            <StyledTextButton type="submit" labelTx="update" />
+            <StyledTextButton
+              type="submit"
+              labelTx="update"
+              isDisabled={isSubmitDisabled}
+            />
           </InlineRow>
         </StyledForm>
       </EditPopupContainer>

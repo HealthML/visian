@@ -35,13 +35,20 @@ const StyledForm = styled.form`
 export const ProjectCreationPopup = observer<ProjectCreationPopupProps>(
   ({ isOpen, onClose, onConfirm }) => {
     const [name, setName] = useState("");
+    const [isSubmitDisabled, setIsSubmitDisabled] = useState(true);
 
     const clearInputsAndClose = useCallback(() => {
       setName("");
       onClose?.();
     }, [onClose]);
 
-    const updateName = useCallback((e) => setName(e.target.value), [setName]);
+    const updateName = useCallback(
+      (e) => {
+        setName(e.target.value);
+        setIsSubmitDisabled(false);
+      },
+      [setName],
+    );
 
     const handleCreation = useCallback(() => {
       if (name !== "") {
@@ -53,9 +60,9 @@ export const ProjectCreationPopup = observer<ProjectCreationPopupProps>(
     const handleFormSubmit = useCallback(
       (e) => {
         e.preventDefault();
-        handleCreation();
+        if (!isSubmitDisabled) handleCreation();
       },
-      [handleCreation],
+      [handleCreation, isSubmitDisabled],
     );
 
     return (
@@ -77,7 +84,11 @@ export const ProjectCreationPopup = observer<ProjectCreationPopupProps>(
               labelTx="cancel"
               handlePress={clearInputsAndClose}
             />
-            <StyledTextButton type="submit" labelTx="create" />
+            <StyledTextButton
+              type="submit"
+              labelTx="create"
+              isDisabled={isSubmitDisabled}
+            />
           </InlineRow>
         </StyledForm>
       </ProjectCreationPopupContainer>
