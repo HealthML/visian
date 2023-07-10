@@ -1,9 +1,5 @@
-import {
-  FileMetadata,
-  IDocument,
-  ILayer,
-  ILayerFamily,
-} from "@visian/ui-shared";
+import { IDocument, ILayer, ILayerFamily } from "@visian/ui-shared";
+import { FileMetadata } from "@visian/utils";
 import { action, makeObservable, observable } from "mobx";
 import { v4 as uuidv4 } from "uuid";
 

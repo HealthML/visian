@@ -1,4 +1,4 @@
-import { MiaDataset } from "@visian/ui-shared";
+import { MiaDataset } from "@visian/utils";
 import axios, { AxiosError } from "axios";
 import { useQuery } from "react-query";
 

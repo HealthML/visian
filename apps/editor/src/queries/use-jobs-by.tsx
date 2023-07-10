@@ -1,4 +1,4 @@
-import { MiaJob } from "@visian/ui-shared";
+import { MiaJob } from "@visian/utils";
 import axios, { AxiosError } from "axios";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 

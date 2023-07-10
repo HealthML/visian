@@ -1,11 +1,11 @@
 import {
   color,
   GridItem,
-  MiaIterableData,
   OptionSelector,
   radius,
   Text,
 } from "@visian/ui-shared";
+import { MiaIterableData } from "@visian/utils";
 import styled from "styled-components";
 
 const StyledGridItem = styled(GridItem)`

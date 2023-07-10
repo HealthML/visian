@@ -1,15 +1,14 @@
 import {
   Button,
   DropDown,
-  FileWithMetadata,
   ILayer,
   LayerList,
-  MiaAnnotation,
   PopUp,
   Text,
   TextField,
   useTranslation,
 } from "@visian/ui-shared";
+import { FileWithMetadata, MiaAnnotation } from "@visian/utils";
 import { AxiosError } from "axios";
 import { observer } from "mobx-react-lite";
 import path from "path";

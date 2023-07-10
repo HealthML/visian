@@ -1,9 +1,6 @@
 import {
   dataColorKeys,
   ErrorNotification,
-  FileMetadata,
-  FileWithFamily,
-  FileWithMetadata,
   i18n,
   IDocument,
   IEditor,
@@ -19,6 +16,9 @@ import {
   ValueType,
 } from "@visian/ui-shared";
 import {
+  FileMetadata,
+  FileWithFamily,
+  FileWithMetadata,
   handlePromiseSettledResult,
   IDisposable,
   ImageMismatchError,

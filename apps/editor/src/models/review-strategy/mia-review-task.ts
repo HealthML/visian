@@ -1,5 +1,4 @@
-import { FileWithMetadata, MiaAnnotation, MiaImage } from "@visian/ui-shared";
-import { Zip } from "@visian/utils";
+import { FileWithMetadata, MiaAnnotation, MiaImage , Zip } from "@visian/utils";
 import { v4 as uuidv4 } from "uuid";
 
 import {

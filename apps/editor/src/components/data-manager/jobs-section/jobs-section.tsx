@@ -1,4 +1,4 @@
-import { MiaProject } from "@visian/ui-shared";
+import { MiaProject } from "@visian/utils";
 import { useCallback, useState } from "react";
 import styled from "styled-components";
 

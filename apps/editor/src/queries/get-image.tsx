@@ -1,4 +1,4 @@
-import { MiaImage } from "@visian/ui-shared";
+import { MiaImage } from "@visian/utils";
 import axios from "axios";
 
 import { hubBaseUrl } from "./hub-base-url";

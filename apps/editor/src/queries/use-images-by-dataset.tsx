@@ -1,4 +1,4 @@
-import { MiaImage } from "@visian/ui-shared";
+import { MiaImage } from "@visian/utils";
 import axios, { AxiosError } from "axios";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 

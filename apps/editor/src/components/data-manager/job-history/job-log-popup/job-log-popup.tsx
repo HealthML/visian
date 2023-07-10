@@ -1,4 +1,5 @@
-import { Divider, MiaJob, PopUp, SectionHeader, Text } from "@visian/ui-shared";
+import { Divider, PopUp, SectionHeader, Text } from "@visian/ui-shared";
+import { MiaJob } from "@visian/utils";
 import { observer } from "mobx-react-lite";
 import { useEffect, useState } from "react";
 import styled from "styled-components";

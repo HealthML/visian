@@ -1,4 +1,4 @@
-import { MiaProgress } from "@visian/ui-shared";
+import { MiaProgress } from "@visian/utils";
 import axios, { AxiosError } from "axios";
 import { useQuery } from "react-query";
 

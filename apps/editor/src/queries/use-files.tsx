@@ -1,4 +1,4 @@
-import { FileWithMetadata, MiaAnnotation } from "@visian/ui-shared";
+import { FileWithMetadata, MiaAnnotation } from "@visian/utils";
 import axios from "axios";
 import path from "path";
 

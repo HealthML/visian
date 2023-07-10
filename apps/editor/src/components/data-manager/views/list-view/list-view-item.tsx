@@ -1,9 +1,5 @@
-import {
-  ListItem,
-  MiaIterableData,
-  OptionSelector,
-  Text,
-} from "@visian/ui-shared";
+import { ListItem, OptionSelector, Text } from "@visian/ui-shared";
+import { MiaIterableData } from "@visian/utils";
 import styled from "styled-components";
 
 const ExpandedSpacer = styled.div`

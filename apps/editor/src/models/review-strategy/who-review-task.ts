@@ -1,7 +1,7 @@
-import { FileWithMetadata } from "@visian/ui-shared";
 import {
   createBase64StringFromFile,
   createFileFromBase64,
+  FileWithMetadata,
   putWHOTask,
   WHOAnnotation,
   WHOAnnotationData,

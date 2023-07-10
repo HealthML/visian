@@ -1,4 +1,5 @@
-import { List, MiaIterableData, stopPropagation } from "@visian/ui-shared";
+import { List, stopPropagation } from "@visian/ui-shared";
+import { MiaIterableData } from "@visian/utils";
 import styled from "styled-components";
 
 import { SectionSheet } from "../../page-section";

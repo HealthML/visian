@@ -1,5 +1,6 @@
-import { FileWithMetadata, IImageLayer, ILayerFamily } from "@visian/ui-shared";
+import { IImageLayer, ILayerFamily } from "@visian/ui-shared";
 import {
+  FileWithMetadata,
   getWHOTask,
   getWHOTaskIdFromUrl,
   setNewTaskIdForUrl,

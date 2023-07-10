@@ -1,4 +1,4 @@
-import { MiaAnnotation } from "@visian/ui-shared";
+import { MiaAnnotation } from "@visian/utils";
 import axios, { AxiosError } from "axios";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 

@@ -2,11 +2,11 @@ import {
   InvisibleButton,
   List,
   ListItem,
-  MiaAnnotation,
   StatusBadge,
   Text,
   useTranslation,
 } from "@visian/ui-shared";
+import { MiaAnnotation } from "@visian/utils";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";

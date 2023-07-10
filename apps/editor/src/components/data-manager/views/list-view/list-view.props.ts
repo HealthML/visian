@@ -1,4 +1,5 @@
-import type { MiaIterableData, StatefulPopUpProps } from "@visian/ui-shared";
+import type { StatefulPopUpProps } from "@visian/ui-shared";
+import type { MiaIterableData } from "@visian/utils";
 
 export interface ListViewProps<T extends MiaIterableData>
   extends StatefulPopUpProps {

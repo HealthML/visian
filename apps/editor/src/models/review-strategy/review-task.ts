@@ -1,4 +1,4 @@
-import { FileWithMetadata } from "@visian/ui-shared";
+import { FileWithMetadata } from "@visian/utils";
 import { AxiosResponse } from "axios";
 
 export enum TaskType {
