@@ -424,5 +424,9 @@
   "uri-file-type-mismatch": "Die URI entspricht nicht dem Dateityp \"{{name}}\"",
 
   "switch-to-grid": "Zur Rasteransicht wechseln",
-  "switch-to-list": "Zur Listenansicht wechseln"
+  "switch-to-list": "Zur Listenansicht wechseln",
+
+  "review": "Überprüfen",
+  "supervise": "Abnicken",
+  "review-description": "{{taskType}} der Annotationen des Bildes {{image}}."
 }

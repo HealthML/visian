@@ -13,20 +13,20 @@ import { ReviewTask, TaskType } from "./review-task";
 export class MiaReviewTask implements ReviewTask {
   public kind: TaskType;
   public id: string;
-  public title: string;
-  public description: string;
+  public title: string | undefined;
+  public description: string | undefined;
 
   public get annotationIds(): string[] {
     return [...this.annotations.keys()];
   }
 
   private annotations: Map<string, Annotation>;
-  private image: Image;
+  public image: Image;
 
   constructor(
-    title: string,
+    title: string | undefined,
     kind: TaskType,
-    description: string,
+    description: string | undefined,
     image: Image,
     annotations: Annotation[],
     id?: string,

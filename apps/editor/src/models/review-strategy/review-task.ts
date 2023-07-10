@@ -11,8 +11,8 @@ export enum TaskType {
 export interface ReviewTask {
   kind: TaskType;
   get id(): string;
-  get title(): string;
-  get description(): string;
+  get title(): string | undefined;
+  get description(): string | undefined;
 
   // All valid Annotation Ids for the task
   get annotationIds(): string[];

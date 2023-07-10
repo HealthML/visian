@@ -7,6 +7,7 @@ import {
   sheetNoise,
   SquareButton,
   Text,
+  useTranslation,
   zIndex,
 } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
@@ -15,6 +16,7 @@ import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
 import { whoHome } from "../../../constants";
+import { MiaReviewTask } from "../../../models/review-strategy";
 
 const ReviewBarSheet = styled(Sheet)`
   width: 800px;
@@ -232,6 +234,7 @@ export const WhoReviewBar = observer(() => {
 export const MiaReviewBar = observer(
   ({ openSavePopup }: { openSavePopup: () => void }) => {
     const store = useStore();
+    const { t } = useTranslation();
 
     const nextTask = useCallback(async () => {
       store?.reviewStrategy?.nextTask();
@@ -262,15 +265,24 @@ export const MiaReviewBar = observer(
           <TaskLabel tx="Task" />
           <TaskName
             text={
-              store?.reviewStrategy?.currentTask?.title || "Segmentation Task"
+              store?.reviewStrategy?.currentTask?.title ??
+              t(store?.reviewStrategy?.currentTask?.kind)
             }
           />
         </TaskContainer>
         <ActionContainer>
           <ActionName
             text={
-              store?.reviewStrategy?.currentTask?.description ||
-              "Review the segmentations to the Image."
+              store?.reviewStrategy?.currentTask?.description ??
+              t("review-description", {
+                taskType: t(store?.reviewStrategy?.currentTask?.kind),
+                image: (
+                  store?.reviewStrategy?.currentTask as MiaReviewTask
+                ).image.dataUri
+                  .split("/")
+                  .pop()
+                  ?.split(".")[0],
+              })
             }
           />
           <ActionButtonsContainer />

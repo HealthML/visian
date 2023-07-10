@@ -425,5 +425,9 @@
   "uri-file-type-mismatch": "URI does not match file type \"{{name}}\"",
 
   "switch-to-grid": "Switch to grid view",
-  "switch-to-list": "Switch to list view"
+  "switch-to-list": "Switch to list view",
+
+  "review": "Review",
+  "supervise": "Supervise",
+  "review-description": "{{taskType}} the annotations of {{image}}"
 }

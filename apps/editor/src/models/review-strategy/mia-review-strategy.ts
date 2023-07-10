@@ -108,15 +108,12 @@ export class MiaReviewStrategy extends ReviewStrategy {
       this.jobId,
       currentImage.id,
     );
-    const imagename = currentImage.dataUri.split("/").pop()?.split(".")[0];
-    const taskTitle = `${this.taskType} ${imagename}`;
-    const taskDescription = `${this.taskType} the annotations of ${imagename}.`;
 
     this.setCurrentTask(
       new MiaReviewTask(
-        taskTitle,
+        undefined,
         this.taskType,
-        taskDescription,
+        undefined,
         currentImage,
         this.allowedAnnotations
           ? annotations.filter((annotation) =>
