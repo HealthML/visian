@@ -268,57 +268,57 @@ export const DatasetPage = ({
             />
           )}
         </StyledSheet>
-        <JobCreationPopup
-          isOpen={!!jobCreationPopUpOpenWith}
-          onClose={closeJobCreationPopUp}
-          activeImageSelection={selectedImages}
-          projectId={dataset.project}
-          openWithDatasetId={jobCreationPopUpOpenWith}
-        />
-        <ImageImportPopup
-          isOpen={!!imageImportPopUpOpenWith}
-          onClose={closeImageImportPopUp}
-          dataset={imageImportPopUpOpenWith}
-          onImportFinished={refetchImages}
-          isDraggedOver={isDraggedOver}
-          onDropCompleted={handleImageImportDropCompleted}
-        />
-        <ConfirmationPopup
-          isOpen={isDeleteAnnotationConfirmationPopUpOpen}
-          onClose={closeDeleteAnnotationConfirmationPopUp}
-          message={translate("delete-annotation-message", {
-            name: annotationTobBeDeleted?.dataUri ?? "",
-          })}
-          titleTx="delete-annotation-title"
-          onConfirm={handleAnnotationConfirmation}
-        />
-        <ConfirmationPopup
-          isOpen={isDeleteImagesConfirmationPopUpOpen}
-          onClose={closeDeleteImagesConfirmationPopUpAndClearSelection}
-          message={
-            imageTobBeDeleted
-              ? translate("delete-image-message", {
-                  name: imageTobBeDeleted?.dataUri ?? "",
-                })
-              : translate("delete-images-message", {
-                  count: selectedImages.size.toString(),
-                })
-          }
-          titleTx={
-            imageTobBeDeleted ? "delete-image-title" : "delete-images-title"
-          }
-          onConfirm={handleImageConfirmation}
-        />
-        {store?.error && (
-          <ErrorNotification
-            title={store?.error.title}
-            titleTx={store?.error.titleTx}
-            description={store?.error.description}
-            descriptionTx={store?.error.descriptionTx}
-            descriptionData={store?.error.descriptionData}
-          />
-        )}
       </PageSection>
+      <JobCreationPopup
+        isOpen={!!jobCreationPopUpOpenWith}
+        onClose={closeJobCreationPopUp}
+        activeImageSelection={selectedImages}
+        projectId={dataset.project}
+        openWithDatasetId={jobCreationPopUpOpenWith}
+      />
+      <ImageImportPopup
+        isOpen={!!imageImportPopUpOpenWith}
+        onClose={closeImageImportPopUp}
+        dataset={imageImportPopUpOpenWith}
+        onImportFinished={refetchImages}
+        isDraggedOver={isDraggedOver}
+        onDropCompleted={handleImageImportDropCompleted}
+      />
+      <ConfirmationPopup
+        isOpen={isDeleteAnnotationConfirmationPopUpOpen}
+        onClose={closeDeleteAnnotationConfirmationPopUp}
+        message={translate("delete-annotation-message", {
+          name: annotationTobBeDeleted?.dataUri ?? "",
+        })}
+        titleTx="delete-annotation-title"
+        onConfirm={handleAnnotationConfirmation}
+      />
+      <ConfirmationPopup
+        isOpen={isDeleteImagesConfirmationPopUpOpen}
+        onClose={closeDeleteImagesConfirmationPopUpAndClearSelection}
+        message={
+          imageTobBeDeleted
+            ? translate("delete-image-message", {
+                name: imageTobBeDeleted?.dataUri ?? "",
+              })
+            : translate("delete-images-message", {
+                count: selectedImages.size.toString(),
+              })
+        }
+        titleTx={
+          imageTobBeDeleted ? "delete-image-title" : "delete-images-title"
+        }
+        onConfirm={handleImageConfirmation}
+      />
+      {store?.error && (
+        <ErrorNotification
+          title={store?.error.title}
+          titleTx={store?.error.titleTx}
+          description={store?.error.description}
+          descriptionTx={store?.error.descriptionTx}
+          descriptionData={store?.error.descriptionData}
+        />
+      )}
     </Container>
   );
 };
