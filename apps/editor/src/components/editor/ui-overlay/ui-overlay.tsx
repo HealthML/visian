@@ -9,12 +9,11 @@ import {
 import { isFromMia, isFromWHO } from "@visian/utils";
 import { observer } from "mobx-react-lite";
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { useSearchParams } from "react-router-dom";
 import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
 import { whoHome } from "../../../constants";
-import { TaskType } from "../../../models/review-strategy";
+import { MiaReviewStrategy, TaskType } from "../../../models/review-strategy";
 import {
   DilateErodeModal,
   MeasurementModal,
@@ -204,8 +203,6 @@ export const UIOverlay = observer<UIOverlayProps>(
       setIsExportPopUpOpen(false);
     }, []);
 
-    const [searchParams] = useSearchParams();
-
     return (
       <Container
         {...rest}
@@ -273,7 +270,11 @@ export const UIOverlay = observer<UIOverlayProps>(
                   tooltipPosition="left"
                   onPointerDown={async () => {
                     await store?.reviewStrategy?.saveTask();
-                    store?.destroyRedirect("/projects");
+                    if (store?.reviewStrategy instanceof MiaReviewStrategy) {
+                      await store.reviewStrategy.redirectToReturnUrl(false);
+                    } else {
+                      await store?.destroyRedirect("/projects");
+                    }
                   }}
                   isActive={false}
                 />
