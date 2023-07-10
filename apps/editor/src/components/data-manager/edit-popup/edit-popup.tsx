@@ -24,8 +24,12 @@ const EditPopupContainer = styled(PopUp)`
 `;
 
 const TextInput = styled(TextField)`
-  margin: 0px;
-  width: calc(100% - 40px);
+  margin: auto;
+  width: 100%;
+`;
+
+const StyledForm = styled.form`
+  width: 100%;
 `;
 
 export const EditPopup = observer<EditPopupProps>(
@@ -41,6 +45,23 @@ export const EditPopup = observer<EditPopupProps>(
       setName(oldName);
     }, [oldName]);
 
+    const handleEdit = useCallback(() => {
+      if (name !== "" && name !== oldName) {
+        onConfirm?.(name);
+      }
+      clearInputsAndClose();
+    }, [name, oldName, clearInputsAndClose, onConfirm]);
+
+    const updateName = useCallback((e) => setName(e.target.value), [setName]);
+
+    const handleFormSubmit = useCallback(
+      (e) => {
+        e.preventDefault();
+        handleEdit();
+      },
+      [handleEdit],
+    );
+
     return (
       <EditPopupContainer
         titleTx="edit"
@@ -48,10 +69,11 @@ export const EditPopup = observer<EditPopupProps>(
         dismiss={clearInputsAndClose}
         shouldDismissOnOutsidePress
       >
-        <>
+        <StyledForm onSubmit={handleFormSubmit}>
           <TextInput
+            autoFocus
             value={name}
-            onChange={(e) => setName(e.target.value)}
+            onChange={updateName}
             placeholderTx="name"
           />
           <InlineRow>
@@ -59,17 +81,9 @@ export const EditPopup = observer<EditPopupProps>(
               labelTx="cancel"
               handlePress={clearInputsAndClose}
             />
-            <StyledTextButton
-              labelTx="update"
-              handlePress={() => {
-                if (name !== "" && name !== oldName) {
-                  onConfirm?.(name);
-                }
-                clearInputsAndClose();
-              }}
-            />
+            <StyledTextButton type="submit" labelTx="update" />
           </InlineRow>
-        </>
+        </StyledForm>
       </EditPopupContainer>
     );
   },
