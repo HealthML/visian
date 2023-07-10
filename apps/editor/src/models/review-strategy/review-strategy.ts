@@ -68,7 +68,7 @@ export abstract class ReviewStrategy {
           `Annotation ${idx + 1}`,
           { ...annotationFiles[0]?.metadata },
         );
-        if (!familyFiles) throw new Error();
+        if (!familyFiles) throw new Error("No active Document");
 
         await this.store?.editor.activeDocument?.importFiles(
           familyFiles,
