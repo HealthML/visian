@@ -6,7 +6,7 @@ import {
   Spacer,
   Text,
 } from "@visian/ui-shared";
-import { isFromWHO } from "@visian/utils";
+import { isFromMia, isFromWHO } from "@visian/utils";
 import { observer } from "mobx-react-lite";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
@@ -14,18 +14,13 @@ import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
 import { whoHome } from "../../../constants";
-import { importFilesToDocument } from "../../../import-handling";
-import {
-  fetchAnnotationFile,
-  fetchImageFile,
-} from "../../../queries/use-files";
+import { TaskType } from "../../../models/review-strategy";
 import {
   DilateErodeModal,
   MeasurementModal,
   SmartBrush3DModal,
   ThresholdAnnotationModal,
 } from "../action-modal";
-import { AIBar } from "../ai-bar";
 import { AxesAndVoxel } from "../axes-and-voxel";
 import { ExportPopUp } from "../export-popup";
 import { ImageImportDropSheet } from "../import-image-drop-sheet";
@@ -34,6 +29,7 @@ import { Layers } from "../layers";
 import { MeasurementPopUp } from "../measurement-popup";
 import { Menu } from "../menu";
 import { ProgressPopUp } from "../progress-popup";
+import { MiaReviewBar, WhoReviewBar } from "../review-bar";
 import { SavePopUp } from "../save-popup";
 import { ServerPopUp } from "../server-popup";
 import { SettingsPopUp } from "../settings-popup";
@@ -209,45 +205,6 @@ export const UIOverlay = observer<UIOverlayProps>(
     }, []);
 
     const [searchParams] = useSearchParams();
-    const loadImagesAndAnnotations = () => {
-      async function asyncfunc() {
-        if (store?.editor.activeDocument?.layers.length !== 0) {
-          return store?.destroyReload();
-        }
-        const fileTransfer = new DataTransfer();
-        const imageIdToOpen = searchParams.get("imageId");
-        if (imageIdToOpen) {
-          try {
-            const imageFile = await fetchImageFile(imageIdToOpen);
-            fileTransfer.items.add(imageFile);
-          } catch (error) {
-            store?.setError({
-              titleTx: "import-error",
-              descriptionTx: "image-open-error",
-            });
-          }
-        }
-        const annotationIdToOpen = searchParams.get("annotationId");
-        if (annotationIdToOpen) {
-          try {
-            const annotationFile = await fetchAnnotationFile(
-              annotationIdToOpen,
-            );
-            fileTransfer.items.add(annotationFile);
-          } catch (error) {
-            store?.setError({
-              titleTx: "import-error",
-              descriptionTx: "annotation-open-error",
-            });
-          }
-        }
-        if (store && fileTransfer.files.length) {
-          importFilesToDocument(fileTransfer.files, store);
-        }
-      }
-      asyncfunc();
-    };
-    useEffect(loadImagesAndAnnotations, [searchParams, store]);
 
     return (
       <Container
@@ -314,48 +271,57 @@ export const UIOverlay = observer<UIOverlayProps>(
                   icon="exit"
                   tooltipTx="close-editor"
                   tooltipPosition="left"
-                  onPointerDown={() => {
+                  onPointerDown={async () => {
+                    await store?.reviewStrategy?.saveTask();
                     store?.destroyRedirect("/projects");
                   }}
                   isActive={false}
                 />
-                <FloatingUIButton
-                  icon="save"
-                  isDisabled={
-                    !store?.editor.activeDocument?.activeLayer?.isAnnotation ||
-                    !searchParams.get("imageId")
-                  }
-                  tooltipTx="annotation-saving"
-                  tooltipPosition="left"
-                  onPointerDown={openSavePopUp}
-                  isActive={false}
-                />
                 {!isFromWHO() && (
-                  <FloatingUIButton
-                    icon="export"
-                    isDisabled={
-                      !store.editor?.activeDocument?.layers.some(
-                        (layer) => layer.isAnnotation,
-                      )
-                    }
-                    tooltipTx="export-tooltip"
-                    tooltipPosition="left"
-                    onPointerDown={
-                      store?.editor.activeDocument?.viewSettings.viewMode ===
-                      "2D"
-                        ? openExportPopUp
-                        : store?.editor.activeDocument?.viewport3D
-                            .exportCanvasImage
-                    }
-                    isActive={false}
-                  />
+                  <>
+                    {store?.reviewStrategy?.currentTask?.kind ===
+                      TaskType.Create && (
+                      <FloatingUIButton
+                        icon="save"
+                        isDisabled={
+                          !store?.editor.activeDocument?.activeLayer
+                            ?.isAnnotation
+                        }
+                        tooltipTx="annotation-saving"
+                        tooltipPosition="left"
+                        onPointerDown={openSavePopUp}
+                        isActive={false}
+                      />
+                    )}
+                    <FloatingUIButton
+                      icon="export"
+                      isDisabled={
+                        !store?.editor?.activeDocument?.layers.some(
+                          (layer) => layer.isAnnotation,
+                        )
+                      }
+                      tooltipTx="export-tooltip"
+                      tooltipPosition="left"
+                      onPointerDown={
+                        store?.editor.activeDocument?.viewSettings.viewMode ===
+                        "2D"
+                          ? openExportPopUp
+                          : store?.editor.activeDocument?.viewport3D
+                              .exportCanvasImage
+                      }
+                      isActive={false}
+                    />
+                  </>
                 )}
                 <ViewSettings />
                 <SliceSlider showValueLabelOnChange={!isDraggedOver} />
               </RightBar>
             </ColumnRight>
-
-            {isFromWHO() && <AIBar />}
+            {isFromWHO() && <WhoReviewBar />}
+            {isFromMia() &&
+              store?.reviewStrategy?.currentTask?.kind === TaskType.Review && (
+                <MiaReviewBar openSavePopup={openSavePopUp} />
+              )}
 
             <SettingsPopUp
               isOpen={isSettingsPopUpOpen}

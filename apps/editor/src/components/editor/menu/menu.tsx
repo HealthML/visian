@@ -1,12 +1,11 @@
 import {
-  BlueButtonParam,
   ButtonParam,
+  ColoredButtonParam,
   ColorMode,
   Divider,
   EnumParam,
   FloatingUIButton,
   Modal,
-  RedButtonParam,
   Theme,
 } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
@@ -103,12 +102,18 @@ export const Menu: React.FC<MenuProps> = observer(
           <Divider />
           <ButtonParam labelTx="shortcuts" handlePress={openShortcutPopUp} />
           {feedbackMailAddress && (
-            <BlueButtonParam
+            <ColoredButtonParam
+              color="blue"
               labelTx="ideas-feedback"
               handlePress={sendFeedback}
             />
           )}
-          <RedButtonParam labelTx="clear-data" handlePress={destroy} isLast />
+          <ColoredButtonParam
+            color="red"
+            labelTx="clear-data"
+            handlePress={destroy}
+            isLast
+          />
         </Modal>
       </>
     );

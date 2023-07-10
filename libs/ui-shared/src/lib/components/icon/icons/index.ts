@@ -1,5 +1,6 @@
 export { ReactComponent as arrowBack } from "./arrow-back.svg";
 export { ReactComponent as arrowDown } from "./arrow-down.svg";
+export { ReactComponent as arrowForward } from "./arrow-forward.svg";
 export { ReactComponent as arrowLeft } from "./arrow-left.svg";
 export { ReactComponent as arrowRight } from "./arrow-right.svg";
 export { ReactComponent as arrowUp } from "./arrow-up.svg";
@@ -53,6 +54,7 @@ export { ReactComponent as plusMinus } from "./plus-minus.svg";
 export { ReactComponent as plusSmall } from "./plus-small.svg";
 export { ReactComponent as redo } from "./redo.svg";
 export { ReactComponent as reset } from "./reset.svg";
+export { ReactComponent as review } from "./review.svg";
 export { ReactComponent as rightArrow } from "./right-arrow.svg";
 export { ReactComponent as rightMouse } from "./right-mouse.svg";
 export { ReactComponent as ruler } from "./ruler.svg";

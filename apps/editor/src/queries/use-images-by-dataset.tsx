@@ -4,7 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "react-query";
 import { Image } from "../types";
 import { hubBaseUrl } from "./hub-base-url";
 
-const getImagesByDataset = async (datasetId?: string) => {
+export const getImagesByDataset = async (datasetId?: string) => {
   const imagesResponse = await axios.get<Image[]>(`${hubBaseUrl}images`, {
     params: {
       dataset: datasetId,

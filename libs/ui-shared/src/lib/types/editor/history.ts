@@ -8,6 +8,8 @@ export interface IUndoRedoCommand
   extends ISerializable<IUndoRedoCommandSnapshot> {
   kind: string;
 
+  layerId: string;
+
   /** Rolls back to the state before the command. */
   undo(): void;
   /** Produces the state after the command. */
@@ -16,18 +18,24 @@ export interface IUndoRedoCommand
 
 export interface IHistory {
   /** Indicates if undo steps are available. */
-  canUndo: boolean;
+  canUndo(layerId: string): boolean;
   /** Indicates if redo steps are available. */
-  canRedo: boolean;
+  canRedo(layerId: string): boolean;
 
   /** Travels back one command in the document's history. */
-  undo(): void;
+  undo(layerId: string): void;
   /** Travels forward one command in the document's history. */
-  redo(): void;
+  redo(layerId: string): void;
 
   /** Pushes an undo/redo command onto the history. */
   addCommand(command: IUndoRedoCommand): void;
 
   /** Removes all commands from the history. */
-  clear(): void;
+  clear(layerId?: string): void;
+
+  /** checks if a layer has changed */
+  hasChanges(layerId?: string): boolean;
+
+  /** Updates the file pointer to the current state */
+  updateCheckpoint(layerId?: string): void;
 }

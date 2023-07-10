@@ -1,22 +1,24 @@
 import {
-  BlueButtonParam,
   color,
+  ColoredButtonParam,
   fontSize,
   InvisibleButton,
   Sheet,
   sheetNoise,
   SquareButton,
   Text,
+  useTranslation,
   zIndex,
 } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
 import { whoHome } from "../../../constants";
+import { MiaReviewTask } from "../../../models/review-strategy";
 
-const AIBarSheet = styled(Sheet)`
+const ReviewBarSheet = styled(Sheet)`
   width: 800px;
   height: 70px;
   padding: 10px 28px;
@@ -87,9 +89,10 @@ const ActionButtonsContainer = styled.div`
 
 const ActionButtons = styled(SquareButton)`
   margin: 0px 5px;
+  width: 40px;
 `;
 
-const AIContainer = styled.div`
+const ReviewContainer = styled.div`
   height: 100%;
   width: 100%;
   display: flex;
@@ -98,13 +101,13 @@ const AIContainer = styled.div`
   align-items: center;
 `;
 
-const AIToolsContainer = styled.div`
+const ReviewToolsContainer = styled.div`
   display: flex;
   flex-direction: row;
   position: relative;
 `;
 
-const AIButton = styled(BlueButtonParam)`
+const ColoredButton = styled(ColoredButtonParam)`
   width: 40px;
   padding: 0;
   margin: 0px 4px;
@@ -116,7 +119,7 @@ const SkipButton = styled(InvisibleButton)`
   margin: 0px;
 `;
 
-const AIMessageContainer = styled.div`
+const ReviewMessageContainer = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -128,14 +131,14 @@ const AIMessageContainer = styled.div`
   transform: translateX(-50%);
 `;
 
-const AIMessageConnector = styled.div`
+const ReviewMessageConnector = styled.div`
   width: 1px;
   height: 60px;
   margin: 10px 0px;
   background-color: ${color("lightText")};
 `;
 
-const AIMessage = styled(Sheet)`
+const ReviewMessage = styled(Sheet)`
   background: ${sheetNoise}, ${color("blueSheet")};
   border-color: ${color("blueBorder")};
   width: 300px;
@@ -146,21 +149,21 @@ const AIMessage = styled(Sheet)`
   box-sizing: border-box;
 `;
 
-const AIMessageTitle = styled(Text)`
+const ReviewMessageTitle = styled(Text)`
   font-size: 18px;
   line-height: 18px;
   height: 18px;
   padding-bottom: 8px;
 `;
 
-const AIMessageSubtitle = styled(Text)`
+const ReviewMessageSubtitle = styled(Text)`
   font-size: 16px;
   line-height: 12px;
   height: 12px;
   color: ${color("lightText")};
 `;
 
-export const AIBar = observer(() => {
+export const WhoReviewBar = observer(() => {
   const store = useStore();
 
   const confirmTaskAnnotation = useCallback(async () => {
@@ -172,7 +175,7 @@ export const AIBar = observer(() => {
   }, [store?.reviewStrategy]);
 
   return store?.editor.activeDocument ? (
-    <AIBarSheet>
+    <ReviewBarSheet>
       <TaskContainer>
         <TaskLabel tx="Task" />
         <TaskName
@@ -201,29 +204,120 @@ export const AIBar = observer(() => {
           />
         </ActionButtonsContainer>
       </ActionContainer>
-      <AIContainer>
-        <AIToolsContainer>
+      <ReviewContainer>
+        <ReviewToolsContainer>
           {false && (
-            <AIMessageContainer>
-              <AIMessage>
-                <AIMessageTitle tx="ai-show-me" />
-                <AIMessageSubtitle tx="ai-start-annotating" />
-              </AIMessage>
-              <AIMessageConnector />
-            </AIMessageContainer>
+            <ReviewMessageContainer>
+              <ReviewMessage>
+                <ReviewMessageTitle tx="ai-show-me" />
+                <ReviewMessageSubtitle tx="ai-start-annotating" />
+              </ReviewMessage>
+              <ReviewMessageConnector />
+            </ReviewMessageContainer>
           )}
-
           <SkipButton icon="arrowLeft" />
           <a href={whoHome}>
-            <AIButton
+            <ColoredButton
+              color="blue"
               icon="whoAI"
               tooltipTx="return-who"
               tooltipPosition="right"
             />
           </a>
           <SkipButton icon="arrowRight" />
-        </AIToolsContainer>
-      </AIContainer>
-    </AIBarSheet>
+        </ReviewToolsContainer>
+      </ReviewContainer>
+    </ReviewBarSheet>
   ) : null;
 });
+
+export const MiaReviewBar = observer(
+  ({ openSavePopup }: { openSavePopup: () => void }) => {
+    const store = useStore();
+    const { t } = useTranslation();
+
+    const nextTask = useCallback(async () => {
+      store?.reviewStrategy?.nextTask();
+    }, [store?.reviewStrategy]);
+
+    const isVerified = useMemo(
+      () =>
+        store?.editor.activeDocument?.activeLayer?.family?.metaData?.verified ??
+        false,
+      [store?.editor.activeDocument?.activeLayer?.family?.metaData],
+    );
+
+    const toggleVerification = useCallback(() => {
+      if (
+        store?.editor.activeDocument?.activeLayer?.isAnnotation &&
+        store?.editor.activeDocument?.activeLayer?.family?.metaData
+      ) {
+        store.editor.activeDocument.activeLayer.family.metaData = {
+          ...store.editor.activeDocument.activeLayer.family.metaData,
+          verified: !isVerified,
+        };
+      }
+    }, [store?.editor.activeDocument?.activeLayer, isVerified]);
+
+    return store?.editor.activeDocument ? (
+      <ReviewBarSheet>
+        <TaskContainer>
+          <TaskLabel tx="Task" />
+          <TaskName
+            text={
+              store?.reviewStrategy?.currentTask?.title ??
+              t(store?.reviewStrategy?.currentTask?.kind)
+            }
+          />
+        </TaskContainer>
+        <ActionContainer>
+          <ActionName
+            text={
+              store?.reviewStrategy?.currentTask?.description ??
+              t("review-description", {
+                taskType: t(store?.reviewStrategy?.currentTask?.kind),
+                image: (
+                  store?.reviewStrategy?.currentTask as MiaReviewTask
+                ).image.dataUri
+                  .split("/")
+                  .pop()
+                  ?.split(".")[0],
+              })
+            }
+          />
+          <ActionButtonsContainer />
+        </ActionContainer>
+        <ReviewContainer>
+          <ReviewToolsContainer>
+            <ActionButtons
+              icon="save"
+              tooltipTx="save"
+              tooltipPosition="top"
+              onPointerDown={openSavePopup}
+            />
+            <ActionButtons
+              icon={isVerified ? "exit" : "check"}
+              isDisabled={
+                !store?.editor.activeDocument?.activeLayer?.family?.metaData ||
+                !store?.editor.activeDocument?.activeLayer?.isAnnotation
+              }
+              tooltipTx={
+                isVerified
+                  ? "unverify-annotation-tooltip"
+                  : "verify-annotation-tooltip"
+              }
+              tooltipPosition="top"
+              onPointerDown={toggleVerification}
+            />
+            <ActionButtons
+              icon="arrowForward"
+              tooltipTx="next-task-tooltip"
+              tooltipPosition="top"
+              onPointerDown={nextTask}
+            />
+          </ReviewToolsContainer>
+        </ReviewContainer>
+      </ReviewBarSheet>
+    ) : null;
+  },
+);

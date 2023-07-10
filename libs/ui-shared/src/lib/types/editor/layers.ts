@@ -198,6 +198,8 @@ export interface ILayerFamily {
   metaData?: { id: string; [key: string]: any };
   /** All layers in the family. */
   layers: ILayer[];
+  /** Returns `true` if the family has changes. */
+  hasChanges: boolean;
   /** Adds a layer to the family. */
   addLayer(id: string): void;
   /** Removes a layer from the family (but keeps it in the document). */

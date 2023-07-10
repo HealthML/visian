@@ -80,8 +80,7 @@ const LayerListItem = observer<{
 }>(({ layer, index, isActive, isLast }) => {
   const store = useStore();
 
-  const layers = store?.editor.activeDocument?.layers;
-  const layerCount = layers?.length;
+  const layerCount = store?.editor.activeDocument?.imageLayers?.length;
 
   const toggleAnnotationVisibility = useCallback(() => {
     layer.setIsVisible(!layer.isVisible);
@@ -331,7 +330,7 @@ const LayerListItem = observer<{
           />
         )}
         {layerCount &&
-          layerCount < (store?.editor.activeDocument?.maxLayers || 0) &&
+          layerCount < (store?.editor.activeDocument?.maxVisibleLayers || 0) &&
           layer.kind === "image" &&
           layer.isAnnotation && (
             <ContextMenuItem
@@ -421,8 +420,9 @@ export const Layers: React.FC = observer(() => {
               icon="plus"
               tooltipTx="add-annotation-layer"
               isDisabled={
-                !layerCount ||
-                layerCount >= (store?.editor.activeDocument?.maxLayers || 0)
+                !store?.editor.activeDocument?.imageLayers?.length ||
+                store?.editor.activeDocument?.imageLayers?.length >=
+                  (store?.editor.activeDocument?.maxVisibleLayers || 0)
               }
               onPointerDown={
                 store?.editor.activeDocument?.addNewAnnotationLayer

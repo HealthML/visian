@@ -4,7 +4,7 @@ import { useQuery } from "react-query";
 import { Image } from "../types";
 import { hubBaseUrl } from "./hub-base-url";
 
-const getImagesByJob = async (jobId: string) => {
+export const getImagesByJob = async (jobId: string) => {
   const imagesResponse = await axios.get<Image[]>(`${hubBaseUrl}images`, {
     params: {
       job: jobId,
