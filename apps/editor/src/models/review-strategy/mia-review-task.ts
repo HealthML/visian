@@ -15,7 +15,7 @@ import {
 } from "../../queries";
 import { ReviewTask, TaskType } from "./review-task";
 
-export class MiaReviewTask implements ReviewTask {
+export class MiaReviewTask extends ReviewTask {
   public kind: TaskType;
   public id: string;
   public title: string | undefined;
@@ -36,6 +36,7 @@ export class MiaReviewTask implements ReviewTask {
     annotations: MiaAnnotation[],
     id?: string,
   ) {
+    super();
     this.kind = kind;
     this.id = id ?? uuidv4();
     this.title = title;

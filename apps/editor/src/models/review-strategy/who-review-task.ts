@@ -19,7 +19,7 @@ const taskTypeMapping = {
   [WHOTaskType.Review]: TaskType.Supervise,
 };
 
-export class WHOReviewTask implements ReviewTask {
+export class WHOReviewTask extends ReviewTask {
   private whoTask: WHOTask;
 
   public get id(): string {
@@ -45,6 +45,7 @@ export class WHOReviewTask implements ReviewTask {
   }
 
   constructor(whoTask: WHOTask) {
+    super();
     // If kind is CREATE we want to ignore all existing annotations
     if (whoTask.kind === WHOTaskType.Create) {
       whoTask.annotations = [];
