@@ -129,7 +129,7 @@ export const DatasetImageListItem: React.FC<DatasetImageListItemProps> = ({
       <ListItem isLast={isLast && !showAnnotations}>
         <IconButton
           icon={showAnnotations ? "arrowDown" : "arrowRight"}
-          onPointerDown={toggleShowAnnotations}
+          onClick={toggleShowAnnotations}
         />
         <Spacer />
         <ClickableText onClick={handleImageClick}>{imageText}</ClickableText>
@@ -146,13 +146,13 @@ export const DatasetImageListItem: React.FC<DatasetImageListItemProps> = ({
           <IconButton
             icon="trash"
             tooltipTx="delete-image-title"
-            onPointerDown={deleteDeleteImage}
+            onClick={deleteDeleteImage}
             tooltipPosition="left"
           />
         ) : (
           <IconButton
             icon={isSelected ? "checked" : "unchecked"}
-            onPointerDown={handleSelection}
+            onClick={handleSelection}
           />
         )}
       </ListItem>
@@ -197,7 +197,7 @@ export const DatasetImageListItem: React.FC<DatasetImageListItemProps> = ({
                     <IconButton
                       icon="trash"
                       tooltipTx="delete-annotation-title"
-                      onPointerDown={() => {
+                      onClick={() => {
                         deleteAnnotation(annotation);
                       }}
                     />
