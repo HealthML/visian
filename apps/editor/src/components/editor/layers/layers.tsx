@@ -22,7 +22,7 @@ import {
   useShortTap,
   useTranslation,
 } from "@visian/ui-shared";
-import { Pixel } from "@visian/utils";
+import { BackendMetadata, Pixel } from "@visian/utils";
 import { Observer, observer } from "mobx-react-lite";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
@@ -179,6 +179,14 @@ const LayerListItem = observer<{
     const layerCopy = (layer as ImageLayer).copy();
     layerCopy.setTitle(`copy_${layer.title}`);
     layerCopy.id = uuidv4();
+    if (layer.metadata) {
+      // Deep Copy metadata object
+      const newMetadata: BackendMetadata = JSON.parse(
+        JSON.stringify(layer.metadata),
+      );
+      newMetadata.id = uuidv4();
+      layerCopy.setMetadata(newMetadata);
+    }
     layerCopy.setColor(store?.editor.activeDocument?.getFirstUnusedColor());
 
     store?.editor.activeDocument?.addLayer(layerCopy);
