@@ -15,7 +15,7 @@ export const useJob = (jobId: string) => {
     AxiosError<Job>
   >(["job"], () => getJob(jobId), {
     retry: 2, // retry twice if fetch fails
-    refetchInterval: 1000 * 20, // refetch every 20 seconds
+    refetchInterval: 1000 * 2, // refetch every 2 seconds
   });
 
   return {

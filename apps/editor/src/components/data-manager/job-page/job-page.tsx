@@ -293,7 +293,7 @@ export const JobPage = ({ job }: { job: Job }) => {
         <ConfirmationPopup
           isOpen={isCancelJobConfirmationPopUpOpen}
           onClose={closeCancelJobConfirmationPopUp}
-          message="cancel-job-message"
+          messageTx="cancel-job-message"
           titleTx="cancel-job-title"
           onConfirm={confirmCancelJob}
         />
