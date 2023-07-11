@@ -7,12 +7,14 @@ import {
   useTranslation,
 } from "@visian/ui-shared";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 
+import { useStore } from "../../../app/root-store";
+import { MiaReviewStrategy, TaskType } from "../../../models/review-strategy";
 import { useAnnotationsByImage } from "../../../queries";
 import { Annotation } from "../../../types";
-import { editorPath, handleImageSelection } from "../util";
+import { handleImageSelection } from "../util";
 import { DatasetImageListItemProps } from "./dataset-image-list-item.props";
 
 const Spacer = styled.div`
@@ -76,20 +78,14 @@ export const DatasetImageListItem: React.FC<DatasetImageListItemProps> = ({
     });
   }, [refetchAnnotations]);
 
+  const store = useStore();
   const { t: translate } = useTranslation();
   const navigate = useNavigate();
-
-  const projectId = useParams().projectId || "";
-  const datasetId = useParams().datasetId || "";
 
   const hasVerifiedAnnotation = useMemo(
     () => annotations?.some((annotation) => annotation.verified) ?? false,
     [annotations],
   );
-
-  const handleImageClick = useCallback(() => {
-    navigate(editorPath(image.id, undefined, projectId, datasetId));
-  }, [navigate, image.id, projectId, datasetId]);
 
   const imageText = useMemo(
     () => (isInSelectMode ? image.dataUri : image.dataUri.split("/").pop()),
@@ -124,6 +120,35 @@ export const DatasetImageListItem: React.FC<DatasetImageListItemProps> = ({
     setSelectedImages,
   ]);
 
+  const startReview = useCallback(
+    async (taskType: TaskType, annotationId?: string) => {
+      store?.startReview(
+        async (url: string) =>
+          annotationId
+            ? MiaReviewStrategy.fromAnnotationId(
+                store,
+                annotationId,
+                url,
+                taskType,
+              )
+            : MiaReviewStrategy.fromImageIds(store, [image.id], url, taskType),
+        navigate,
+      );
+    },
+    [navigate, image, store],
+  );
+
+  const openImage = useCallback(() => {
+    startReview(TaskType.Create);
+  }, [startReview]);
+
+  const openAnnotation = useCallback(
+    (annotationId: string) => {
+      startReview(TaskType.Create, annotationId);
+    },
+    [startReview],
+  );
+
   return (
     <>
       <ListItem isLast={isLast && !showAnnotations}>
@@ -132,7 +157,7 @@ export const DatasetImageListItem: React.FC<DatasetImageListItemProps> = ({
           onClick={toggleShowAnnotations}
         />
         <Spacer />
-        <ClickableText onClick={handleImageClick}>{imageText}</ClickableText>
+        <ClickableText onClick={openImage}>{imageText}</ClickableText>
         <ExpandedSpacer />
         {hasVerifiedAnnotation && (
           <StatusBadge
@@ -166,44 +191,41 @@ export const DatasetImageListItem: React.FC<DatasetImageListItemProps> = ({
         ) : (
           annotations && (
             <AnnotationsList>
-              {annotations.map((annotation: Annotation) => (
-                <ListItem>
-                  <ClickableText
-                    onClick={() => {
-                      navigate(
-                        editorPath(
-                          image.id,
-                          annotation.id,
-                          projectId,
-                          datasetId,
-                        ),
-                      );
-                    }}
+              {annotations.map(
+                (annotation: Annotation, annotationIndex: number) => (
+                  <ListItem
+                    isLast={
+                      isLast && annotationIndex === annotations.length - 1
+                    }
                   >
-                    {isInSelectMode
-                      ? annotation.dataUri
-                      : annotation.dataUri.split("/").pop()}
-                  </ClickableText>
-                  <ExpandedSpacer />
-                  {annotation.verified && (
-                    <StatusBadge
-                      textColor="Neuronic Neon"
-                      borderColor="gray"
-                      tx="verified"
-                    />
-                  )}
-                  <Spacer />
-                  {!isInSelectMode && (
-                    <IconButton
-                      icon="trash"
-                      tooltipTx="delete-annotation-title"
-                      onClick={() => {
-                        deleteAnnotation(annotation);
-                      }}
-                    />
-                  )}
-                </ListItem>
-              ))}
+                    <ClickableText
+                      onClick={() => openAnnotation(annotation.id)}
+                    >
+                      {isInSelectMode
+                        ? annotation.dataUri
+                        : annotation.dataUri.split("/").pop()}
+                    </ClickableText>
+                    <ExpandedSpacer />
+                    {annotation.verified && (
+                      <StatusBadge
+                        textColor="Neuronic Neon"
+                        borderColor="gray"
+                        tx="verified"
+                      />
+                    )}
+                    <Spacer />
+                    {!isInSelectMode && (
+                      <IconButton
+                        icon="trash"
+                        tooltipTx="delete-annotation-title"
+                        onClick={() => {
+                          deleteAnnotation(annotation);
+                        }}
+                      />
+                    )}
+                  </ListItem>
+                ),
+              )}
             </AnnotationsList>
           )
         ))}

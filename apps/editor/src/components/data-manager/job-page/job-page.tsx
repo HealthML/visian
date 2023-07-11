@@ -11,6 +11,8 @@ import { useCallback, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 
+import { useStore } from "../../../app/root-store";
+import { MiaReviewStrategy } from "../../../models/review-strategy";
 import {
   useAnnotationsByJob,
   useDeleteJobsForProjectMutation,
@@ -26,7 +28,7 @@ import { JobStatusBadge } from "../job-history/job-status-badge/job-status-badge
 import { PageRow } from "../page-row";
 import { PageSection } from "../page-section";
 import { PageTitle } from "../page-title";
-import { editorPath, getDisplayDate } from "../util";
+import { getDisplayDate } from "../util";
 import { DetailsRow } from "./details-table";
 
 const StyledSheet = styled(Sheet)`
@@ -71,6 +73,7 @@ export const JobPage = ({ job }: { job: Job }) => {
   const { images, imagesError, isErrorImages, isLoadingImages } =
     useImagesByJob(job.id);
 
+  const store = useStore();
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { deleteJobs } = useDeleteJobsForProjectMutation();
@@ -150,6 +153,19 @@ export const JobPage = ({ job }: { job: Job }) => {
     [patchJobStatus, job],
   );
 
+  const startReviewJob = useCallback(
+    async (annotationId?: string) => {
+      store?.startReview(
+        async (url: string) =>
+          annotationId
+            ? MiaReviewStrategy.fromAnnotationId(store, annotationId, url)
+            : MiaReviewStrategy.fromJob(store, job.id, url),
+        navigate,
+      );
+    },
+    [navigate, job, store],
+  );
+
   let listInfoTx;
   if (imagesError) listInfoTx = "images-loading-failed";
   else if (images && images.length === 0) listInfoTx = "no-images-available";
@@ -182,7 +198,12 @@ export const JobPage = ({ job }: { job: Job }) => {
                 isLoading={isLoadingProgress}
                 infoTx={progressInfoTx}
               >
-                {progress && <AnnotationProgress progress={progress} />}
+                {progress && (
+                  <AnnotationProgress
+                    progress={progress}
+                    onReviewClick={async () => startReviewJob()}
+                  />
+                )}
               </PageSection>
             ),
           },
@@ -246,9 +267,10 @@ export const JobPage = ({ job }: { job: Job }) => {
             {images?.sort(compareImages).map((image: Image, index: number) => (
               <ClickableListItem
                 key={image.id}
-                onClick={() =>
-                  navigate(editorPath(image.id, findAnnotationId(image.id)))
-                }
+                onClick={async () => {
+                  const annotationId = findAnnotationId(image.id);
+                  if (annotationId) await startReviewJob(annotationId);
+                }}
                 isLast={index === images.length - 1}
               >
                 <StyledText text={image.dataUri.split("/").pop()} />

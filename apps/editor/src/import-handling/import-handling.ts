@@ -55,7 +55,7 @@ const handleImportWithErrors = async (
   store.editor.activeDocument?.finishBatchImport();
 };
 
-export const importFilesToDocument = (
+export const importFilesToDocument = async (
   files: FileList | DataTransferItemList,
   store: RootStore,
   // eslint-disable-next-line default-param-last
@@ -65,7 +65,7 @@ export const importFilesToDocument = (
   if (!files.length) return;
   store.setProgress({ labelTx: "importing", showSplash: true });
 
-  handleImportWithErrors(files, store, shouldRetry).then(() => {
+  await handleImportWithErrors(files, store, shouldRetry).then(() => {
     store.setProgress();
     handleFinishedImport?.();
   });

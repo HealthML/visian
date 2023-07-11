@@ -4,17 +4,17 @@ import { JobStatus } from "../../../../types";
 
 const statusColors: Record<JobStatus, string> = {
   queued: "veryVeryLightGray",
-  running: "blueBackground",
-  succeeded: "greenBackground",
-  canceled: "orangeBackground",
-  failed: "redBackground",
+  running: "blueBadgeBackground",
+  succeeded: "greenBadgeBackground",
+  canceled: "orangeBadgeBackground",
+  failed: "redBadgeBackground",
 };
 
 const statusBorderColors: Record<JobStatus, string> = {
   queued: "sheetBorder",
   running: "blueBorder",
-  succeeded: "greenBorder",
-  canceled: "orangeBorder",
+  succeeded: "greenBadgeBorder",
+  canceled: "orangeBadgeBorder",
   failed: "redBorder",
 };
 

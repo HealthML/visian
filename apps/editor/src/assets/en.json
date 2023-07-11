@@ -131,6 +131,9 @@
 
   "confirm-task-annotation-tooltip": "Confirm",
   "skip-task-annotation-tooltip": "Skip",
+  "verify-annotation-tooltip": "Verify",
+  "unverify-annotation-tooltip": "Unverify",
+  "next-task-tooltip": "Next Task",
 
   "browser-error": "Browser Error",
   "no-webgl-2-error": "This browser does not support WebGL 2 which is necessary to run VISIAN. Please update your browser to the newest version or use a different browser.",
@@ -424,5 +427,9 @@
   "uri-file-type-mismatch": "URI does not match file type \"{{name}}\"",
 
   "switch-to-grid": "Switch to grid view",
-  "switch-to-list": "Switch to list view"
+  "switch-to-list": "Switch to list view",
+
+  "review": "Review",
+  "supervise": "Supervise",
+  "review-description": "{{taskType}} the annotations of {{image}}"
 }
