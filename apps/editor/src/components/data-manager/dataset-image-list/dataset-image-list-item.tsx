@@ -7,12 +7,15 @@ import {
   useTranslation,
 } from "@visian/ui-shared";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 
+import { useStore } from "../../../app/root-store";
+import { MiaReviewStrategy, TaskType } from "../../../models/review-strategy";
 import { useAnnotationsByImage } from "../../../queries";
-import { Annotation, Image } from "../../../types";
-import { editorPath, handleImageSelection } from "../util";
+import { Annotation } from "../../../types";
+import { handleImageSelection } from "../util";
+import { DatasetImageListItemProps } from "./dataset-image-list-item.props";
 
 const Spacer = styled.div`
   width: 10px;
@@ -35,7 +38,7 @@ const ClickableText = styled(Text)`
   cursor: pointer;
 `;
 
-export const DatasetImageListItem = ({
+export const DatasetImageListItem: React.FC<DatasetImageListItemProps> = ({
   isInSelectMode,
   image,
   refetchImages,
@@ -51,24 +54,6 @@ export const DatasetImageListItem = ({
   deleteAnnotation,
   deleteImage,
   isLast,
-}: {
-  isInSelectMode: boolean;
-  image: Image;
-  refetchImages: () => void;
-  isSelected: boolean;
-  index: number;
-  selectedImages: Set<string>;
-  images: Image[] | undefined;
-  setImageSelection: (imageId: string, selection: boolean) => void;
-  setSelectedImages: React.Dispatch<React.SetStateAction<Set<string>>>;
-  isShiftPressed: boolean;
-  selectedRange: { start: number; end: number };
-  setSelectedRange: React.Dispatch<
-    React.SetStateAction<{ start: number; end: number }>
-  >;
-  deleteAnnotation: (annotation: Annotation) => void;
-  deleteImage: (image: Image) => void;
-  isLast: boolean;
 }) => {
   const {
     annotations,
@@ -80,37 +65,89 @@ export const DatasetImageListItem = ({
 
   const [showAnnotations, setShowAnnotations] = useState(false);
 
-  // refetch images if annotations can't be loaded
+  // Refetch images if annotations can't be loaded
   useEffect(() => {
     if (isErrorAnnotations) refetchImages();
   }, [isErrorAnnotations, refetchImages]);
 
   const toggleShowAnnotations = useCallback(() => {
     setShowAnnotations((prev: boolean) => {
-      // refetch annotations if the annotations list is being opened
+      // Refetch annotations if the annotations list is being opened
       if (!prev) refetchAnnotations();
       return !prev;
     });
   }, [refetchAnnotations]);
 
+  const store = useStore();
   const { t: translate } = useTranslation();
   const navigate = useNavigate();
-
-  const projectId = useParams().projectId || "";
-  const datasetId = useParams().datasetId || "";
 
   const hasVerifiedAnnotation = useMemo(
     () => annotations?.some((annotation) => annotation.verified) ?? false,
     [annotations],
   );
 
-  const getVerifiedBadge = () => (
-    <StatusBadge textColor="Neuronic Neon" borderColor="gray" tx="verified" />
+  const imageText = useMemo(
+    () => (isInSelectMode ? image.dataUri : image.dataUri.split("/").pop()),
+    [isInSelectMode, image.dataUri],
   );
 
-  function extractTitleFromDataUri(dataUri: string) {
-    return dataUri.split("/").pop();
-  }
+  const deleteDeleteImage = useCallback(() => {
+    deleteImage(image);
+  }, [deleteImage, image]);
+
+  const handleSelection = useCallback(() => {
+    handleImageSelection(
+      image.id,
+      index,
+      selectedImages,
+      isShiftPressed,
+      selectedRange,
+      setSelectedRange,
+      images,
+      setImageSelection,
+      setSelectedImages,
+    );
+  }, [
+    image.id,
+    index,
+    selectedImages,
+    isShiftPressed,
+    selectedRange,
+    setSelectedRange,
+    images,
+    setImageSelection,
+    setSelectedImages,
+  ]);
+
+  const startReview = useCallback(
+    async (taskType: TaskType, annotationId?: string) => {
+      store?.startReview(
+        async (url: string) =>
+          annotationId
+            ? MiaReviewStrategy.fromAnnotationId(
+                store,
+                annotationId,
+                url,
+                taskType,
+              )
+            : MiaReviewStrategy.fromImageIds(store, [image.id], url, taskType),
+        navigate,
+      );
+    },
+    [navigate, image, store],
+  );
+
+  const openImage = useCallback(() => {
+    startReview(TaskType.Create);
+  }, [startReview]);
+
+  const openAnnotation = useCallback(
+    (annotationId: string) => {
+      startReview(TaskType.Create, annotationId);
+    },
+    [startReview],
+  );
 
   return (
     <>
@@ -120,42 +157,27 @@ export const DatasetImageListItem = ({
           onPointerDown={toggleShowAnnotations}
         />
         <Spacer />
-        <ClickableText
-          onClick={() => {
-            navigate(editorPath(image.id, undefined, projectId, datasetId));
-          }}
-        >
-          {isInSelectMode
-            ? image.dataUri
-            : extractTitleFromDataUri(image.dataUri)}
-        </ClickableText>
+        <ClickableText onClick={openImage}>{imageText}</ClickableText>
         <ExpandedSpacer />
-        {hasVerifiedAnnotation && getVerifiedBadge()}
+        {hasVerifiedAnnotation && (
+          <StatusBadge
+            textColor="Neuronic Neon"
+            borderColor="gray"
+            tx="verified"
+          />
+        )}
         <Spacer />
         {!isInSelectMode ? (
           <IconButton
             icon="trash"
             tooltipTx="delete-image-title"
-            onPointerDown={() => deleteImage(image)}
-            style={{ marginLeft: "auto" }}
+            onPointerDown={deleteDeleteImage}
             tooltipPosition="left"
           />
         ) : (
           <IconButton
             icon={isSelected ? "checked" : "unchecked"}
-            onPointerDown={() =>
-              handleImageSelection(
-                image.id,
-                index,
-                selectedImages,
-                isShiftPressed,
-                selectedRange,
-                setSelectedRange,
-                images,
-                setImageSelection,
-                setSelectedImages,
-              )
-            }
+            onPointerDown={handleSelection}
           />
         )}
       </ListItem>
@@ -169,38 +191,41 @@ export const DatasetImageListItem = ({
         ) : (
           annotations && (
             <AnnotationsList>
-              {annotations.map((annotation: Annotation) => (
-                <ListItem>
-                  <ClickableText
-                    onClick={() => {
-                      navigate(
-                        editorPath(
-                          image.id,
-                          annotation.id,
-                          projectId,
-                          datasetId,
-                        ),
-                      );
-                    }}
+              {annotations.map(
+                (annotation: Annotation, annotationIndex: number) => (
+                  <ListItem
+                    isLast={
+                      isLast && annotationIndex === annotations.length - 1
+                    }
                   >
-                    {isInSelectMode
-                      ? annotation.dataUri
-                      : extractTitleFromDataUri(annotation.dataUri)}
-                  </ClickableText>
-                  <ExpandedSpacer />
-                  {annotation.verified && getVerifiedBadge()}
-                  <Spacer />
-                  {!isInSelectMode && (
-                    <IconButton
-                      icon="trash"
-                      tooltipTx="delete-annotation-title"
-                      onPointerDown={() => {
-                        deleteAnnotation(annotation);
-                      }}
-                    />
-                  )}
-                </ListItem>
-              ))}
+                    <ClickableText
+                      onClick={() => openAnnotation(annotation.id)}
+                    >
+                      {isInSelectMode
+                        ? annotation.dataUri
+                        : annotation.dataUri.split("/").pop()}
+                    </ClickableText>
+                    <ExpandedSpacer />
+                    {annotation.verified && (
+                      <StatusBadge
+                        textColor="Neuronic Neon"
+                        borderColor="gray"
+                        tx="verified"
+                      />
+                    )}
+                    <Spacer />
+                    {!isInSelectMode && (
+                      <IconButton
+                        icon="trash"
+                        tooltipTx="delete-annotation-title"
+                        onPointerDown={() => {
+                          deleteAnnotation(annotation);
+                        }}
+                      />
+                    )}
+                  </ListItem>
+                ),
+              )}
             </AnnotationsList>
           )
         ))}

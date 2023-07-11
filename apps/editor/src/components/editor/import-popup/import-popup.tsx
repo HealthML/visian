@@ -121,12 +121,12 @@ export const ImportPopUp = observer<ImportPopUpProps>(({ isOpen, onClose }) => {
       dismiss={onClose}
       shouldDismissOnOutsidePress
     >
-      <SectionLabel text="Upload from Computer" />
+      <SectionLabel tx="computer-upload" />
       <DropZoneContainer>
-        <DropZoneLabel text="Drop files or" />
+        <DropZoneLabel tx="drop-files-or" />
         <ImportButton tx="Browse" onPointerDown={openFilePicker} />
       </DropZoneContainer>
-      <SectionLabel text="Load from URL" />
+      <SectionLabel tx="Load from URL" />
       <InlineRow>
         <ImportInput
           placeholder="https://..."
@@ -135,7 +135,7 @@ export const ImportPopUp = observer<ImportPopUpProps>(({ isOpen, onClose }) => {
         />
         <ImportButton tx="Load" onPointerDown={loadFromURL} />
       </InlineRow>
-      <SectionLabel text="Connect to Server" />
+      <SectionLabel tx="connect-to-server" />
       <InlineRowLast>
         <ImportInput
           placeholder="https://..."

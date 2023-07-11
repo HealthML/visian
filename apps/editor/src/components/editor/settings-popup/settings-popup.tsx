@@ -8,11 +8,13 @@ import {
   LargePopUpGroup,
   LargePopUpGroupTitle,
   LargePopUpGroupTitleContainer,
+  PerformanceMode,
   PopUp,
+  SupportedLanguage,
   Switch,
   Theme,
-  useTranslation,
 } from "@visian/ui-shared";
+import { VoxelInfoMode } from "@visian/utils";
 import { observer } from "mobx-react-lite";
 import React, { useCallback } from "react";
 import styled, { useTheme } from "styled-components";
@@ -50,20 +52,27 @@ const voxelInfoSwitchOptions = [
 export const SettingsPopUp: React.FC<SettingsPopUpProps> = observer(
   ({ isOpen, onClose }) => {
     const store = useStore();
+
     // Menu Actions
-    const setTheme = useCallback(
-      (value: string) => {
-        store?.setColorMode(value as ColorMode);
-      },
+    const setColorMode = useCallback(
+      (value: ColorMode) => store?.settings.setColorMode(value),
       [store],
     );
-
-    const { i18n } = useTranslation();
     const setLanguage = useCallback(
-      (language: string) => {
-        i18n.changeLanguage(language);
-      },
-      [i18n],
+      (language: SupportedLanguage) => store?.settings.setLanguage(language),
+      [store],
+    );
+    const setUseExclusiveSegmentations = useCallback(
+      (value: boolean) => store?.settings.setUseExclusiveSegmentations(value),
+      [store],
+    );
+    const setVoxelInfoMode = useCallback(
+      (mode: VoxelInfoMode) => store?.settings.setVoxelInfoMode(mode),
+      [store],
+    );
+    const setPerformanceMode = useCallback(
+      (mode: PerformanceMode) => store?.settings.setPerformanceMode(mode),
+      [store],
     );
 
     const theme = useTheme() as Theme;
@@ -84,13 +93,13 @@ export const SettingsPopUp: React.FC<SettingsPopUpProps> = observer(
               <EnumParam
                 labelTx="theme"
                 options={themeSwitchOptions}
-                value={store?.colorMode || "dark"}
-                setValue={setTheme}
+                value={store?.settings.colorMode}
+                setValue={setColorMode}
               />
               <EnumParam
                 labelTx="language"
                 options={languageSwitchOptions}
-                value={i18n.language.split("-")[0]}
+                value={store?.settings.language}
                 setValue={setLanguage}
               />
               <Divider />
@@ -98,10 +107,8 @@ export const SettingsPopUp: React.FC<SettingsPopUpProps> = observer(
                 labelTx="exclusive-segmentations"
                 infoTx="info-exclusive-segmentations"
                 infoBaseZIndex={theme.zIndices.overlay}
-                value={store?.editor.activeDocument?.useExclusiveSegmentations}
-                setValue={
-                  store?.editor.activeDocument?.setUseExclusiveSegmentations
-                }
+                value={store?.settings.useExclusiveSegmentations}
+                setValue={setUseExclusiveSegmentations}
               />
               <EnumParam
                 labelTx="voxel-data"
@@ -111,18 +118,16 @@ export const SettingsPopUp: React.FC<SettingsPopUpProps> = observer(
                 }
                 infoBaseZIndex={theme.zIndices.overlay}
                 options={voxelInfoSwitchOptions}
-                value={store?.editor.activeDocument?.viewport2D.voxelInfoMode}
-                setValue={
-                  store?.editor.activeDocument?.viewport2D?.setVoxelInfoMode
-                }
+                value={store?.settings.voxelInfoMode}
+                setValue={setVoxelInfoMode}
               />
               <Switch
                 labelTx="performance-mode"
                 infoTx="info-performance-mode"
                 infoBaseZIndex={theme.zIndices.overlay}
                 options={performanceSwitchOptions}
-                value={store?.editor.performanceMode}
-                onChange={store?.editor.setPerformanceMode}
+                value={store?.settings.performanceMode}
+                onChange={setPerformanceMode}
               />
             </LargePopUpGroup>
           </LargePopUpColumn>

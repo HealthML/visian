@@ -7,7 +7,7 @@ import {
   ThemeProvider,
 } from "@visian/ui-shared";
 import { isFromWHO, isUsingLocalhost } from "@visian/utils";
-import Amplify from "aws-amplify";
+import { Amplify } from "aws-amplify";
 import { observer } from "mobx-react-lite";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { QueryClient, QueryClientProvider } from "react-query";
@@ -15,19 +15,19 @@ import { ReactQueryDevtools } from "react-query/devtools";
 import { Navigate, Route, Routes } from "react-router-dom";
 
 import {
-  DatasetsView,
-  JobsView,
-} from "../components/data-manager/project-views";
-import {
   whoAwsConfigDeployment,
   whoAwsConfigDevelopment,
   whoRequiresAuthentication,
 } from "../constants";
-import { setUpEventHandling } from "../event-handling";
 import type { RootStore } from "../models";
-import hubBaseUrl from "../queries/hub-base-url";
-import { DatasetScreen, EditorScreen, ProjectsScreen } from "../screens";
-import ProjectScreen from "../screens/project-screen";
+import { hubBaseUrl } from "../queries";
+import {
+  DatasetScreen,
+  EditorScreen,
+  JobScreen,
+  ProjectScreen,
+  ProjectsScreen,
+} from "../screens";
 import { setupRootStore, StoreProvider } from "./root-store";
 
 if (isFromWHO()) {
@@ -56,14 +56,8 @@ function App(): JSX.Element {
     const result = Promise.all([setupRootStore(), initI18n()]).then(
       ([rootStore]) => {
         rootStoreRef.current = rootStore;
-        const [dispatch, dispose] = setUpEventHandling(rootStore);
-        rootStore.pointerDispatch = dispatch;
-
         setIsReady(true);
-        return () => {
-          dispose();
-          rootStore.dispose();
-        };
+        return rootStore.dispose;
       },
     );
     return () => {
@@ -84,26 +78,22 @@ function App(): JSX.Element {
               <ModalRoot />
               {hubBaseUrl ? (
                 <Routes>
-                  <Route path="projects">
-                    <Route path="" element={<ProjectsScreen />} />
-                    <Route path=":projectId" element={<ProjectScreen />}>
-                      <Route
-                        index
-                        element={<Navigate replace to="datasets" />}
-                      />
-                      <Route path="datasets" element={<DatasetsView />} />
-                      <Route path="jobs" element={<JobsView />} />
-                    </Route>
-                  </Route>
+                  <Route path="/projects" element={<ProjectsScreen />} />
+                  <Route
+                    path="/projects/:projectId"
+                    element={<ProjectScreen />}
+                  />
                   <Route
                     path="/datasets/:datasetId"
                     element={<DatasetScreen />}
                   />
+                  <Route path="/jobs/:jobId" element={<JobScreen />} />
                   <Route
                     path="/"
                     element={<Navigate replace to="/projects" />}
                   />
                   <Route path="/editor" element={<EditorScreen />} />
+                  <Route path="*" element={<Navigate replace to="/" />} />
                 </Routes>
               ) : (
                 <Routes>

@@ -36,6 +36,7 @@ import {
 } from "react-beautiful-dnd";
 import ReactDOM from "react-dom";
 import styled from "styled-components";
+import { v4 as uuidv4 } from "uuid";
 
 import { useStore } from "../../../app/root-store";
 import { ImageLayer } from "../../../models";
@@ -78,6 +79,8 @@ const LayerListItem = observer<{
   isLast?: boolean;
 }>(({ layer, index, isActive, isLast }) => {
   const store = useStore();
+
+  const layerCount = store?.editor.activeDocument?.imageLayers?.length;
 
   const toggleAnnotationVisibility = useCallback(() => {
     layer.setIsVisible(!layer.isVisible);
@@ -169,6 +172,20 @@ const LayerListItem = observer<{
       setContextMenuPosition(null);
     });
   }, [layer]);
+
+  const duplicateAnnotationLayer = useCallback(() => {
+    if (layer.kind !== "image" || !layer.isAnnotation) return;
+
+    const layerCopy = (layer as ImageLayer).copy();
+    layerCopy.setTitle(`copy_${layer.title}`);
+    layerCopy.id = uuidv4();
+    layerCopy.setColor(store?.editor.activeDocument?.getFirstUnusedColor());
+
+    store?.editor.activeDocument?.addLayer(layerCopy);
+
+    setContextMenuPosition(null);
+  }, [layer, store]);
+
   const deleteLayer = useCallback(() => {
     if (
       // eslint-disable-next-line no-alert
@@ -312,6 +329,15 @@ const LayerListItem = observer<{
             onPointerDown={exportLayerSlice}
           />
         )}
+        {layerCount &&
+          layerCount < (store?.editor.activeDocument?.maxVisibleLayers || 0) &&
+          layer.kind === "image" &&
+          layer.isAnnotation && (
+            <ContextMenuItem
+              labelTx="duplicate-layer"
+              onPointerDown={duplicateAnnotationLayer}
+            />
+          )}
         <ContextMenuItem
           labelTx="rename-layer"
           onPointerDown={startEditingLayerName}
@@ -394,8 +420,9 @@ export const Layers: React.FC = observer(() => {
               icon="plus"
               tooltipTx="add-annotation-layer"
               isDisabled={
-                !layerCount ||
-                layerCount >= (store?.editor.activeDocument?.maxLayers || 0)
+                !store?.editor.activeDocument?.imageLayers?.length ||
+                store?.editor.activeDocument?.imageLayers?.length >=
+                  (store?.editor.activeDocument?.maxVisibleLayers || 0)
               }
               onPointerDown={
                 store?.editor.activeDocument?.addNewAnnotationLayer

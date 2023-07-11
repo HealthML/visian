@@ -1,5 +1,14 @@
-import { Annotation, Image } from "./dataset-types";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+export interface FileMetadata {
+  id: string;
+  [key: string]: any;
+}
 
 export interface FileWithMetadata extends File {
-  metadata: Annotation | Image;
+  metadata: FileMetadata;
+}
+
+export interface FileWithFamily extends File {
+  familyId: string;
+  metadata?: FileMetadata;
 }

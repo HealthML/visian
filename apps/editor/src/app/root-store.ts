@@ -1,9 +1,10 @@
 import { i18n, LocalForageBackend } from "@visian/ui-shared";
-import { getWHOTaskIdFromUrl, isFromWHO, readFileFromURL } from "@visian/utils";
+import { isFromWHO, readFileFromURL } from "@visian/utils";
 import React from "react";
 
 import { storePersistInterval } from "../constants";
 import { RootStore } from "../models";
+import { WHOReviewStrategy } from "../models/review-strategy";
 
 export const storageBackend = new LocalForageBackend(
   storePersistInterval,
@@ -55,10 +56,8 @@ export const setupRootStore = async () => {
     }
 
     if (isFromWHO()) {
-      // Load scan from WHO
-      // Example: http://localhost:4200/?origin=who&taskId=0b2fb698-6e1d-4682-a986-78b115178d94
-      const taskId = getWHOTaskIdFromUrl();
-      if (taskId) await store.loadWHOTask(taskId);
+      store.setReviewStrategy(new WHOReviewStrategy(store));
+      store.reviewStrategy?.loadTask();
     }
   })();
 

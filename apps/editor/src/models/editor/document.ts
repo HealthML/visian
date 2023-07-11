@@ -6,6 +6,7 @@ import {
   IEditor,
   IImageLayer,
   ILayer,
+  ILayerFamily,
   ISliceRenderer,
   IVolumeRenderer,
   MeasurementType,
@@ -22,6 +23,7 @@ import {
   ITKImageWithUnit,
   ITKMatrix,
   readMedicalImage,
+  writeSingleMedicalImage,
   Zip,
 } from "@visian/utils";
 import FileSaver from "file-saver";
@@ -39,11 +41,12 @@ import {
   generalTextures2d,
   generalTextures3d,
 } from "../../constants";
-import { FileWithMetadata } from "../../types";
+import { FileMetadata, FileWithFamily, FileWithMetadata } from "../../types";
 import { readTrackingLog, TrackingData } from "../tracking";
 import { StoreContext } from "../types";
 import { Clipboard } from "./clipboard";
 import { History, HistorySnapshot } from "./history";
+import { LayerFamily } from "./layer-families";
 import { ImageLayer, Layer, LayerSnapshot } from "./layers";
 import * as layers from "./layers";
 import { Markers } from "./markers";
@@ -98,6 +101,7 @@ export class Document
   protected measurementDisplayLayerId?: string;
   protected layerMap: { [key: string]: Layer };
   protected layerIds: string[];
+  public layerFamilies: ILayerFamily[] = [];
 
   public measurementType: MeasurementType = "volume";
 
@@ -178,8 +182,8 @@ export class Document
       imageLayers: computed,
       mainImageLayer: computed,
       annotationLayers: computed,
-      maxLayers: computed,
-      maxLayers3d: computed,
+      maxVisibleLayers: computed,
+      maxVisibleLayers3d: computed,
 
       setTitle: action,
       setActiveLayer: action,
@@ -197,6 +201,7 @@ export class Document
       toggleLayerMenu: action,
       setUseExclusiveSegmentations: action,
       applySnapshot: action,
+      getLayerFamily: action,
     });
 
     // This is split up to avoid errors from a tool that is being activated
@@ -213,8 +218,13 @@ export class Document
 
   public get title(): string | undefined {
     if (this.titleOverride) return this.titleOverride;
+    if (this.activeLayer?.family?.metaData?.dataUri) {
+      return this.activeLayer.family.metaData.dataUri;
+    }
     const { length } = this.layerIds;
-    return length ? this.getLayer(this.layerIds[length - 1])?.title : undefined;
+    if (!length) return undefined;
+    const lastLayer = this.getLayer(this.layerIds[length - 1]);
+    return lastLayer?.metadata?.dataUri?.split("/").pop() ?? lastLayer?.title;
   }
 
   public setTitle = (value?: string): void => {
@@ -222,11 +232,11 @@ export class Document
   };
 
   // Layer Management
-  public get maxLayers(): number {
+  public get maxVisibleLayers(): number {
     return (this.renderer?.capabilities.maxTextures || 0) - generalTextures2d;
   }
 
-  public get maxLayers3d(): number {
+  public get maxVisibleLayers3d(): number {
     return (this.renderer?.capabilities.maxTextures || 0) - generalTextures3d;
   }
 
@@ -249,9 +259,10 @@ export class Document
 
   public get imageLayers(): IImageLayer[] {
     return this.layers.filter(
-      (layer) => layer.kind === "image",
+      (layer) => layer.kind === "image" && layer.isVisible,
     ) as IImageLayer[];
   }
+
   public get mainImageLayer(): IImageLayer | undefined {
     // TODO: Rework to work with group layers
 
@@ -294,6 +305,14 @@ export class Document
 
   public getLayer(id: string): ILayer | undefined {
     return id ? this.layerMap[id] : undefined;
+  }
+
+  public getLayerFamily(id: string): ILayerFamily | undefined {
+    return this.layerFamilies.find((family) => family.id === id);
+  }
+
+  public addLayerFamily(family: ILayerFamily): void {
+    this.layerFamilies.push(family);
   }
 
   public setActiveLayer = (idOrLayer?: string | ILayer): void => {
@@ -384,11 +403,15 @@ export class Document
     this.layerIds.splice(newIndex, 0, this.layerIds.splice(oldIndex, 1)[0]);
   }
 
+  public addLayerId = (id: string): void => {
+    this.layerIds.push(id);
+  };
+
   public deleteLayer = (idOrLayer: string | ILayer): void => {
     const layerId = typeof idOrLayer === "string" ? idOrLayer : idOrLayer.id;
 
     this.layerIds = this.layerIds.filter((id) => id !== layerId);
-    delete this.layerMap[layerId];
+    // delete this.layerMap[layerId];
     if (this.activeLayerId === layerId) {
       this.setActiveLayer(this.layerIds[0]);
     }
@@ -420,27 +443,93 @@ export class Document
     return Object.values(this.layerMap).some((layer) => layer.is3DLayer);
   }
 
-  // I/O
-  public exportZip = async (limitToAnnotations?: boolean) => {
+  // eslint-disable-next-line @typescript-eslint/no-shadow
+  protected zipLayers = async (layers: ILayer[]) => {
     const zip = new Zip();
-
-    // TODO: Rework for group layers
-    const files = await Promise.all(
-      this.layers
-        .filter((layer) => !limitToAnnotations || layer.isAnnotation)
-        .map((layer) => layer.toFile()),
-    );
+    const files = await Promise.all(layers.map((layer) => layer.toFile()));
     files.forEach((file, index) => {
       if (!file) return;
       zip.setFile(`${`00${index}`.slice(-2)}_${file.name}`, file);
     });
+    return zip;
+  };
+
+  // I/O
+  // eslint-disable-next-line @typescript-eslint/no-shadow
+  public exportZip = async (layers: ILayer[], limitToAnnotations?: boolean) => {
+    const zip = await this.zipLayers(
+      layers.filter((layer) => !limitToAnnotations || layer.isAnnotation),
+    );
 
     if (this.context?.getTracker()?.isActive) {
       const trackingFile = this.context.getTracker()?.toFile();
       if (trackingFile) zip.setFile(trackingFile.name, trackingFile);
     }
 
-    FileSaver.saveAs(await zip.toBlob(), `${this.title}.zip`);
+    FileSaver.saveAs(
+      await zip.toBlob(),
+      `${this.title?.split(".")[0] ?? "annotation"}.zip`,
+    );
+  };
+
+  public createZip = async (
+    // eslint-disable-next-line @typescript-eslint/no-shadow
+    layers: ILayer[],
+    title?: string,
+  ): Promise<File> => {
+    const zip = await this.zipLayers(layers);
+
+    return new File(
+      [await zip.toBlob()],
+      `${title ?? this.title?.split(".")[0] ?? "annotation"}.zip`,
+    );
+  };
+
+  public createSquashedNii = async (
+    // eslint-disable-next-line @typescript-eslint/no-shadow
+    layers: ILayer[],
+    title?: string,
+  ): Promise<File | undefined> => {
+    const imageLayers = this.layerIds
+      .map((id) => layers.find((layer) => layer.id === id))
+      .filter(
+        (potentialLayer) =>
+          potentialLayer instanceof ImageLayer && potentialLayer.isAnnotation,
+      ) as ImageLayer[];
+    const file = await writeSingleMedicalImage(
+      imageLayers[imageLayers.length - 1].image.toITKImage(
+        imageLayers.slice(0, -1).map((layer) => layer.image),
+        true,
+      ),
+      `${title ?? this.title?.split(".")[0] ?? "annotaion"}.nii.gz`,
+    );
+    return file;
+  };
+
+  // eslint-disable-next-line @typescript-eslint/no-shadow
+  public exportSquashedNii = async (layers: ILayer[]) => {
+    const file: File | undefined = await this.createSquashedNii(layers);
+    if (file) {
+      const fileBlob = new Blob([file], { type: file.type });
+      FileSaver.saveAs(
+        await fileBlob,
+        `${this.title?.split(".")[0] ?? "annotaion"}.nii.gz`,
+      );
+    } else {
+      throw Error("export-error");
+    }
+  };
+
+  public createFileFromLayers = async (
+    // eslint-disable-next-line @typescript-eslint/no-shadow
+    layers: ILayer[],
+    asZip: boolean,
+    title?: string,
+  ): Promise<File | undefined> => {
+    if (asZip) {
+      return this.createZip(layers, title);
+    }
+    return this.createSquashedNii(layers, title);
   };
 
   public getFileForLayer = async (idOrLayer: string | ILayer) => {
@@ -568,7 +657,15 @@ export class Document
       }
     } else if (filteredFiles.name.endsWith(".zip")) {
       const zip = await Zip.fromZipFile(filteredFiles);
-      await this.importFiles(await zip.getAllFiles(), filteredFiles.name);
+      const unzippedFiles = await zip.getAllFiles();
+      await this.importFiles(
+        this.createLayerFamily(
+          unzippedFiles,
+          filteredFiles.name,
+          this.getMetaDataFromFile(filteredFiles),
+        ),
+        filteredFiles.name,
+      );
       return;
     } else if (filteredFiles.name.endsWith(".json")) {
       await readTrackingLog(filteredFiles, this);
@@ -577,17 +674,28 @@ export class Document
 
     if (Array.isArray(filteredFiles) && !filteredFiles.length) return;
 
-    if (this.layers.length >= this.maxLayers) {
-      this.setError({
-        titleTx: "import-error",
-        descriptionTx: "too-many-layers-2d",
-        descriptionData: { count: this.maxLayers },
-      });
-      return;
-    }
+    //! TODO: #513
+    // if (this.imageLayers.length >= this.maxVisibleLayers) {
+    //   this.setError({
+    //     titleTx: "import-error",
+    //     descriptionTx: "too-many-layers-2d",
+    //     descriptionData: { count: this.maxVisibleLayers },
+    //   });
+    //   return;
+    // }
 
+    if (filteredFiles instanceof File) {
+      this.createLayerFamily(
+        [filteredFiles],
+        filteredFiles.name,
+        this.getMetaDataFromFile(filteredFiles),
+      );
+    } else {
+      this.createLayerFamily(filteredFiles, name ?? uuidv4());
+    }
     let createdLayerId = "";
-    const isFirstLayer = !this.layerIds.length;
+    const isFirstLayer =
+      !this.layerIds.length || !this.layers.some((l) => l.kind !== "group");
     const image = await readMedicalImage(filteredFiles);
     image.name =
       name ||
@@ -684,6 +792,10 @@ export class Document
               name: `${layerIndex}_${imageWithUnit.name}`,
               ...prototypeImage,
             });
+            if (files instanceof File) {
+              this.addLayerToFamily(createdLayerId, files);
+              this.addMetaDataToLayer(createdLayerId, files);
+            }
           }
         } else {
           this.setError({
@@ -692,34 +804,38 @@ export class Document
           });
         }
       } else {
-        const numberOfAnnotations = uniqueValues.size - 1;
+        //! TODO: #513
+        // const numberOfAnnotations = uniqueValues.size - 1;
 
-        if (
-          numberOfAnnotations === 1 ||
-          numberOfAnnotations + this.layers.length > this.maxLayers
-        ) {
+        // if (
+        //   numberOfAnnotations === 1 ||
+        //   numberOfAnnotations + this.imageLayers.length > this.maxVisibleLayers
+        // ) {
+        //   createdLayerId = await this.importAnnotation(
+        //     imageWithUnit,
+        //     undefined,
+        //     true,
+        //   );
+
+        //   if (numberOfAnnotations !== 1) {
+        //     this.setError({
+        //       titleTx: "squashed-layers-title",
+        //       descriptionTx: "squashed-layers-import",
+        //     });
+        //   }
+        // } else {
+        uniqueValues.forEach(async (value) => {
+          if (value === 0) return;
           createdLayerId = await this.importAnnotation(
-            imageWithUnit,
-            undefined,
-            true,
+            { ...imageWithUnit, name: `${value}_${image.name}` },
+            value,
           );
-
-          if (numberOfAnnotations !== 1) {
-            this.setError({
-              titleTx: "squashed-layers-title",
-              descriptionTx: "squashed-layers-import",
-            });
+          if (files instanceof File) {
+            this.addLayerToFamily(createdLayerId, files);
+            this.addMetaDataToLayer(createdLayerId, files);
           }
-        } else {
-          uniqueValues.forEach(async (value) => {
-            if (value === 0) return;
-            createdLayerId = await this.importAnnotation(
-              { ...imageWithUnit, name: `${value}_${image.name}` },
-              value,
-            );
-            this.addFileMetaData(createdLayerId, files);
-          });
-        }
+        });
+        // }
       }
 
       // Force switch to 2D if too many layers for 3D
@@ -733,7 +849,10 @@ export class Document
       this.history.clear();
     }
 
-    this.addFileMetaData(createdLayerId, files);
+    if (files instanceof File) {
+      this.addLayerToFamily(createdLayerId, files);
+      this.addMetaDataToLayer(createdLayerId, files);
+    }
     return createdLayerId;
   }
 
@@ -762,6 +881,7 @@ export class Document
 
     const imageLayer = ImageLayer.fromITKImage(image, this, {
       color: defaultImageColor,
+      isVisible: this.imageLayers.length < this.maxVisibleLayers,
     });
     if (
       this.mainImageLayer &&
@@ -793,6 +913,7 @@ export class Document
       {
         isAnnotation: true,
         color: this.getFirstUnusedColor(),
+        isVisible: this.imageLayers.length < this.maxVisibleLayers,
       },
       filterValue,
       squash,
@@ -862,12 +983,66 @@ export class Document
       ) as unknown as IImageLayer[];
   }
 
-  private addFileMetaData(createdLayerId: string, file: File | File[]) {
-    const layer = this.getLayer(createdLayerId);
-    if (layer && "metadata" in file) {
-      const fileWithMetaData = file as FileWithMetadata;
-      layer.metaData = fileWithMetaData.metadata;
+  /** Adds layer to group specified in file object */
+  private addLayerToFamily(layerId: string, file: File) {
+    const layer = this.getLayer(layerId);
+    const family = this.getLayerFamilyFromFile(file);
+    if (layer && family) {
+      family?.addLayer(layer.id);
     }
+  }
+
+  /** Adds meta data from file with metadata to layer */
+  private addMetaDataToLayer(layerId: string, file: File) {
+    const layer = this.getLayer(layerId);
+    const metaData = this.getMetaDataFromFile(file);
+    if (layer && metaData) {
+      layer.metadata = metaData;
+    }
+  }
+
+  /** Returns the group layer specified in the file object */
+  private getLayerFamilyFromFile(file: File): ILayerFamily | undefined {
+    if ("familyId" in file) {
+      const fileWithFamily = file as FileWithFamily;
+      return this.getLayerFamily(fileWithFamily.familyId);
+    }
+    return undefined;
+  }
+
+  /** Extracts metadata appended to a file object */
+  private getMetaDataFromFile(file: File): FileMetadata | undefined {
+    if ("metadata" in file) {
+      const fileWithMetaData = file as FileWithMetadata;
+      return fileWithMetaData.metadata;
+    }
+    return undefined;
+  }
+
+  /** Creates a LayerFamily object for a list of files and adds the group id to the files */
+  public createLayerFamily(
+    files: File[],
+    title?: string,
+    groupMetaData?: FileMetadata,
+  ): FileWithFamily[] {
+    if (files.every((f) => "familyId" in f)) {
+      return files as FileWithFamily[];
+    }
+    if (files.some((f) => "familyId" in f)) {
+      throw new Error(
+        "Cannot create a new group for file that already belongs to a group",
+      );
+    }
+    const layerFamily = new LayerFamily(this, title);
+    layerFamily.metaData = groupMetaData;
+
+    const filesWithGroup = files.map((f) => {
+      const fileWithGroup = f as FileWithFamily;
+      fileWithGroup.familyId = layerFamily.id;
+      return fileWithGroup;
+    });
+    this.addLayerFamily(layerFamily);
+    return filesWithGroup;
   }
 
   // Proxies
@@ -922,5 +1097,29 @@ export class Document
     throw new Error(
       "This is a noop. To load a document from storage, create a new instance",
     );
+  }
+
+  public canUndo(): boolean {
+    return this.activeLayer?.id
+      ? this.history.canUndo(this.activeLayer.id)
+      : false;
+  }
+
+  public canRedo(): boolean {
+    return this.activeLayer?.id
+      ? this.history.canRedo(this.activeLayer.id)
+      : false;
+  }
+
+  public undo(): void {
+    if (this.activeLayer?.id) {
+      this.history.undo(this.activeLayer.id);
+    }
+  }
+
+  public redo(): void {
+    if (this.activeLayer?.id) {
+      this.history.redo(this.activeLayer.id);
+    }
   }
 }

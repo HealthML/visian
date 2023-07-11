@@ -18,12 +18,12 @@ const dataColors = {
 };
 
 const badgeColors = {
-  blueBackground: "rgba(0, 133, 255, 0.05)",
-  redBackground: "rgba(202, 51, 69, 0.1)",
-  greenBackground: "rgba(4, 156, 109, 0.1)",
-  orangeBackground: "rgba(255, 107, 0, 0.1)",
-  greenBorder: "rgba(4, 156, 109, 0.5)",
-  orangeBorder: "rgba(255, 107, 0, 0.5)",
+  blueBadgeBackground: "rgba(0, 133, 255, 0.05)",
+  redBadgeBackground: "rgba(202, 51, 69, 0.1)",
+  greenBadgeBackground: "rgba(4, 156, 109, 0.1)",
+  orangeBadgeBackground: "rgba(255, 107, 0, 0.1)",
+  greenBadgeBorder: "rgba(4, 156, 109, 0.5)",
+  orangeBadgeBorder: "rgba(255, 107, 0, 0.5)",
 };
 
 export const badgeColorKeys = Object.keys(
@@ -54,10 +54,15 @@ const colorModes = {
     red: "#CA3345",
     redSheet: "rgba(202,51,69,0.3)",
     redBorder: "rgba(202,51,69,0.5)",
+    redBorderFocus: "rgba(202,51,69,1)",
+    greenSheet: "rgba(43,255,1,0.4)",
+    greenBorder: "rgba(10,210,42,0.6)",
+    greenBorderFocus: "rgba(10,210,42,1)",
     blueSheet: "rgba(0,133,255,0.4)",
     blueBorder: "rgba(0,133,255,0.6)",
+    blueBorderFocus: "rgba(0,133,255,1)",
     sideViewSheet: "rgba(200,200,200,0.4)",
-    sideViewBorder: "rgba(0, 0, 0, 0.3)",
+    sideViewBorder: "rgba(0,0,0,0.3)",
 
     ...dataColors,
     ...badgeColors,
@@ -82,10 +87,15 @@ const colorModes = {
     red: "#CA3345",
     redSheet: "rgba(202,51,69,0.3)",
     redBorder: "rgba(202,51,69,0.5)",
+    redBorderFocus: "rgba(202,51,69,1)",
     blueSheet: "rgba(0,133,255,0.4)",
     blueBorder: "rgba(0,133,255,0.6)",
-    sideViewSheet: "rgba(78, 80, 89, 0.2)",
-    sideViewBorder: "rgba(255, 255, 255, 0.3)",
+    blueBorderFocus: "rgba(0,133,255,1)",
+    greenSheet: "rgba(43,255,1,0.4)",
+    greenBorder: "rgba(10,210,42,0.6)",
+    greenBorderFocus: "rgba(10,210,42,1)",
+    sideViewSheet: "rgba(78,80,89,0.2)",
+    sideViewBorder: "rgba(255,255,255,0.3)",
 
     ...dataColors,
     ...badgeColors,
@@ -174,6 +184,9 @@ export const theme = {
     inputPadding: "9px 16px",
     sliderLabelDistance: "16px",
     sliderMarkerMargin: "0px",
+    pageSectionMargin: "32px",
+    pageSectionMarginSmall: "14px",
+    listPadding: "4px 14px",
   },
   zIndices: {
     modal: 50,

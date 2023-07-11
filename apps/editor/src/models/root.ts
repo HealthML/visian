@@ -7,21 +7,17 @@ import {
   IStorageBackend,
   Tab,
 } from "@visian/ui-shared";
-import {
-  createFileFromBase64,
-  deepObserve,
-  getWHOTask,
-  IDisposable,
-  ISerializable,
-} from "@visian/utils";
-import { action, computed, makeObservable, observable } from "mobx";
+import { deepObserve, IDisposable, ISerializable } from "@visian/utils";
+import { action, autorun, computed, makeObservable, observable } from "mobx";
+import { NavigateFunction } from "react-router-dom";
 
 import { errorDisplayDuration } from "../constants";
 import { DICOMWebServer } from "./dicomweb-server";
 import { Editor, EditorSnapshot } from "./editor";
+import { ReviewStrategy } from "./review-strategy";
+import { Settings } from "./settings/settings";
 import { Tracker } from "./tracking";
 import { ProgressNotification } from "./types";
-import { Task, TaskType } from "./who";
 
 export interface RootSnapshot {
   editor: EditorSnapshot;
@@ -36,6 +32,7 @@ export class RootStore implements ISerializable<RootSnapshot>, IDisposable {
   public dicomWebServer?: DICOMWebServer;
 
   public editor: Editor;
+  public settings: Settings;
 
   /** The current theme. */
   public colorMode: ColorMode = "dark";
@@ -54,7 +51,7 @@ export class RootStore implements ISerializable<RootSnapshot>, IDisposable {
   public refs: { [key: string]: React.RefObject<HTMLElement> } = {};
   public pointerDispatch?: IDispatch;
 
-  public currentTask?: Task;
+  public reviewStrategy?: ReviewStrategy;
 
   public tracker?: Tracker;
 
@@ -64,27 +61,53 @@ export class RootStore implements ISerializable<RootSnapshot>, IDisposable {
       {
         dicomWebServer: observable,
         editor: observable,
+        settings: observable,
         colorMode: observable,
         error: observable,
         progress: observable,
         isSaved: observable,
         isSaveUpToDate: observable,
         refs: observable,
-        currentTask: observable,
+        reviewStrategy: observable,
 
         theme: computed,
 
         connectToDICOMWebServer: action,
-        setColorMode: action,
         setError: action,
         setProgress: action,
+        setColorMode: action,
         applySnapshot: action,
         rehydrate: action,
         setIsDirty: action,
         setIsSaveUpToDate: action,
         setRef: action,
-        setCurrentTask: action,
+        setReviewStrategy: action,
       },
+    );
+
+    this.settings = new Settings();
+    this.settings.load();
+
+    autorun(() => {
+      this.colorMode = this.settings.colorMode;
+    });
+
+    autorun(() => i18n.changeLanguage(this.settings.language));
+
+    autorun(() =>
+      this.editor?.activeDocument?.setUseExclusiveSegmentations(
+        this.settings.useExclusiveSegmentations,
+      ),
+    );
+
+    autorun(() =>
+      this.editor?.activeDocument?.viewport2D.setVoxelInfoMode(
+        this.settings.voxelInfoMode,
+      ),
+    );
+
+    autorun(() =>
+      this.editor?.setPerformanceMode(this.settings.performanceMode),
     );
 
     this.editor = new Editor(undefined, {
@@ -95,7 +118,7 @@ export class RootStore implements ISerializable<RootSnapshot>, IDisposable {
       getRefs: () => this.refs,
       setError: this.setError,
       getTracker: () => this.tracker,
-      getColorMode: () => this.colorMode,
+      getSettings: () => this.settings,
     });
 
     deepObserve(this.editor, this.persist, {
@@ -130,13 +153,6 @@ export class RootStore implements ISerializable<RootSnapshot>, IDisposable {
     }
   }
 
-  public setColorMode(theme: ColorMode, shouldPersist = true) {
-    this.colorMode = theme;
-    if (shouldPersist && this.shouldPersist) {
-      localStorage.setItem("theme", theme);
-    }
-  }
-
   public get theme() {
     return getTheme(this.colorMode);
   }
@@ -159,78 +175,15 @@ export class RootStore implements ISerializable<RootSnapshot>, IDisposable {
     this.progress = progress;
   }
 
+  public setColorMode(colorMode: ColorMode) {
+    this.colorMode = colorMode;
+  }
+
   public initializeTracker() {
     if (this.tracker) return;
     this.tracker = new Tracker(this.editor);
     this.tracker.startSession();
   }
-
-  public async loadWHOTask(taskId: string) {
-    if (!taskId) return;
-
-    try {
-      if (this.editor.newDocument(true)) {
-        this.setProgress({ labelTx: "importing", showSplash: true });
-        const taskJson = await getWHOTask(taskId);
-        // We want to ignore possible other annotations if type is "CREATE"
-        if (taskJson.kind === TaskType.Create) {
-          taskJson.annotations = [];
-        }
-        const whoTask = new Task(taskJson);
-        this.setCurrentTask(whoTask);
-
-        await Promise.all(
-          whoTask.samples.map(async (sample) => {
-            await this.editor.activeDocument?.importFiles(
-              createFileFromBase64(sample.title, sample.data),
-              undefined,
-              false,
-            );
-          }),
-        );
-        if (whoTask.kind === TaskType.Create) {
-          this.editor.activeDocument?.finishBatchImport();
-          this.currentTask?.addNewAnnotation();
-        } else {
-          // Task Type is Correct or Review
-          await Promise.all(
-            whoTask.annotations.map(async (annotation, index) => {
-              const title =
-                whoTask.samples[index].title ||
-                whoTask.samples[0].title ||
-                `annotation_${index}`;
-
-              await Promise.all(
-                annotation.data.map(async (annotationData) => {
-                  const createdLayerId =
-                    await this.editor.activeDocument?.importFiles(
-                      createFileFromBase64(
-                        title.replace(".nii", "_annotation").concat(".nii"),
-                        annotationData.data,
-                      ),
-                      title.replace(".nii", "_annotation"),
-                      true,
-                    );
-                  if (createdLayerId)
-                    annotationData.correspondingLayerId = createdLayerId;
-                }),
-              );
-            }),
-          );
-        }
-      }
-    } catch {
-      this.setError({
-        titleTx: "import-error",
-        descriptionTx: "remote-file-error",
-      });
-      this.editor.setActiveDocument();
-    }
-
-    this.setProgress();
-  }
-
-  // Persistence
 
   /**
    * Indicates if there are changes that have not yet been written by the
@@ -257,8 +210,8 @@ export class RootStore implements ISerializable<RootSnapshot>, IDisposable {
     }
   }
 
-  public setCurrentTask(task?: Task) {
-    this.currentTask = task;
+  public setReviewStrategy(reviewStrategy: ReviewStrategy) {
+    this.reviewStrategy = reviewStrategy;
   }
 
   public persist = async () => {
@@ -299,9 +252,6 @@ export class RootStore implements ISerializable<RootSnapshot>, IDisposable {
       this.connectToDICOMWebServer(dicomWebServer, false);
     }
 
-    const theme = localStorage.getItem("theme");
-    if (theme) this.setColorMode(theme as ColorMode, false);
-
     if (!tab.isMainTab) return;
 
     const editorSnapshot = await this.config.storageBackend?.retrieve(
@@ -310,10 +260,11 @@ export class RootStore implements ISerializable<RootSnapshot>, IDisposable {
     if (editorSnapshot) {
       await this.editor.applySnapshot(editorSnapshot as EditorSnapshot);
     }
+    this.settings.load();
     this.shouldPersist = true;
   }
 
-  private destroyLayers = async (forceDestroy?: boolean): Promise<boolean> => {
+  public destroyLayers = async (forceDestroy?: boolean): Promise<boolean> => {
     if (!this.shouldPersist && !forceDestroy) return false;
     if (
       !forceDestroy &&
@@ -323,12 +274,14 @@ export class RootStore implements ISerializable<RootSnapshot>, IDisposable {
       return false;
 
     this.shouldPersist = false;
-    localStorage.clear();
+
     await this.config.storageBackend?.clear();
 
     this.setIsDirty(false, true);
+
     return true;
   };
+
   public destroy = async (forceDestroy?: boolean): Promise<boolean> => {
     if (await this.destroyLayers(forceDestroy)) {
       window.location.href = new URL(window.location.href).searchParams.has(
@@ -340,6 +293,7 @@ export class RootStore implements ISerializable<RootSnapshot>, IDisposable {
     }
     return false;
   };
+
   public destroyReload = async (forceDestroy?: boolean): Promise<boolean> => {
     if (await this.destroyLayers(forceDestroy)) {
       const redirectURl = new URL(window.location.href);
@@ -359,5 +313,19 @@ export class RootStore implements ISerializable<RootSnapshot>, IDisposable {
       return true;
     }
     return false;
+  };
+
+  public startReview = async (
+    createStrategy: (currentPath: string) => Promise<ReviewStrategy>,
+    navigate: NavigateFunction,
+  ) => {
+    const currentPath = window.location.pathname;
+    if (!(await this.destroyLayers(true))) return;
+    this.shouldPersist = true;
+    this.setProgress({ labelTx: "importing", showSplash: true });
+    navigate("/editor?review=true");
+    this.setReviewStrategy(await createStrategy(currentPath));
+    await this.reviewStrategy?.loadTask();
+    this.setProgress();
   };
 }

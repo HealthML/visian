@@ -3,6 +3,7 @@ import {
   color,
   IDocument,
   ILayer,
+  ILayerFamily,
   MarkerConfig,
 } from "@visian/ui-shared";
 import { ISerializable, ViewType } from "@visian/utils";
@@ -25,6 +26,7 @@ export interface LayerSnapshot {
   id: string;
   titleOverride?: string;
   parentId?: string;
+  familyId?: string;
 
   blendMode: BlendMode;
   color?: string;
@@ -45,6 +47,7 @@ export class Layer implements ILayer, ISerializable<LayerSnapshot> {
   public id!: string;
   protected titleOverride?: string;
   protected parentId?: string;
+  protected familyId?: string;
 
   public blendMode!: BlendMode;
   public color?: string;
@@ -52,6 +55,8 @@ export class Layer implements ILayer, ISerializable<LayerSnapshot> {
   protected opacityOverride?: number;
 
   public transformation!: Matrix4;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public metaData?: { id: string; [key: string]: any } | undefined;
 
   constructor(
     snapshot: Partial<LayerSnapshot> | undefined,
@@ -61,36 +66,40 @@ export class Layer implements ILayer, ISerializable<LayerSnapshot> {
     this.id = snapshot?.id || uuidv4();
     if (!isCalledByChild) this.applySnapshot(snapshot);
 
-    makeObservable<this, "titleOverride" | "parentId" | "opacityOverride">(
+    makeObservable<
       this,
-      {
-        isAnnotation: observable,
-        id: observable,
-        titleOverride: observable,
-        parentId: observable,
-        blendMode: observable,
-        color: observable,
-        isVisible: observable,
-        opacityOverride: observable,
-        transformation: observable.ref,
+      "titleOverride" | "parentId" | "familyId" | "opacityOverride"
+    >(this, {
+      isAnnotation: observable,
+      id: observable,
+      titleOverride: observable,
+      parentId: observable,
+      familyId: observable,
+      blendMode: observable,
+      color: observable,
+      isVisible: observable,
+      opacityOverride: observable,
+      transformation: observable.ref,
 
-        opacity: computed,
-        parent: computed,
-        title: computed,
+      opacity: computed,
+      parent: computed,
+      title: computed,
+      family: computed,
 
-        setParent: action,
-        setIsAnnotation: action,
-        setTitle: action,
-        setBlendMode: action,
-        setColor: action,
-        setIsVisible: action,
-        setOpacity: action,
-        resetSettings: action,
-        setTransformation: action,
-        delete: action,
-        applySnapshot: action,
-      },
-    );
+      setParent: action,
+      setFamily: action,
+      setIsAnnotation: action,
+      setTitle: action,
+      setBlendMode: action,
+      setColor: action,
+      setIsVisible: action,
+      setOpacity: action,
+      setMetaData: action,
+      resetSettings: action,
+      setTransformation: action,
+      delete: action,
+      applySnapshot: action,
+    });
   }
 
   public setIsAnnotation(value?: boolean): void {
@@ -125,6 +134,37 @@ export class Layer implements ILayer, ISerializable<LayerSnapshot> {
       : undefined;
   }
 
+  public get family(): ILayerFamily | undefined {
+    return this.familyId
+      ? this.document.getLayerFamily(this.familyId)
+      : undefined;
+  }
+
+  public setFamily(id: string | undefined): void {
+    if (!id) {
+      if (this.family?.layers.includes(this)) {
+        this.family?.removeLayer(this.id);
+      }
+      this.familyId = undefined;
+      return;
+    }
+    const family = this.document.getLayerFamily(id);
+    if (family) {
+      this.familyId = id;
+    }
+  }
+
+  public getOrphanAnnotationLayers(): ILayer[] {
+    const orphanAnnotationLayers = this.document.layers.filter(
+      (l) => l.isAnnotation && !l.family,
+    );
+    return orphanAnnotationLayers ?? [];
+  }
+
+  public getFamilyLayers(): ILayer[] {
+    return this.family?.layers ?? this.getOrphanAnnotationLayers();
+  }
+
   public setBlendMode = (value?: BlendMode): void => {
     this.blendMode = value || "NORMAL";
   };
@@ -134,6 +174,13 @@ export class Layer implements ILayer, ISerializable<LayerSnapshot> {
   };
 
   public setIsVisible = (value?: boolean): void => {
+    if (
+      value &&
+      !this.isVisible &&
+      this.document.imageLayers.length >= this.document.maxVisibleLayers
+    ) {
+      return;
+    }
     this.isVisible = value ?? true;
   };
 
@@ -155,6 +202,11 @@ export class Layer implements ILayer, ISerializable<LayerSnapshot> {
 
   public setTransformation = (value?: Matrix4): void => {
     this.transformation = value || new Matrix4();
+  };
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public setMetaData = (value?: { id: string; [key: string]: any }): void => {
+    this.metaData = value;
   };
 
   /**
@@ -180,6 +232,7 @@ export class Layer implements ILayer, ISerializable<LayerSnapshot> {
 
   public delete() {
     (this.parent as LayerGroup)?.removeLayer?.(this.id);
+    this.family?.removeLayer?.(this.id);
     this.document.deleteLayer(this.id);
   }
 
@@ -199,7 +252,7 @@ export class Layer implements ILayer, ISerializable<LayerSnapshot> {
       color: this.color,
       isVisible: this.isVisible,
       opacityOverride: this.opacityOverride,
-      transformation: this.transformation.toArray(),
+      transformation: this.transformation?.toArray(),
     };
   }
 

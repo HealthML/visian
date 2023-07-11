@@ -1,9 +1,9 @@
-export function editorPath(
+export const editorPath = (
   imageId?: string,
   annotationId?: string,
   projectId?: string,
   datasetId?: string,
-): string {
+): string => {
   const params = new URLSearchParams();
   if (imageId) {
     params.append("imageId", imageId);
@@ -18,4 +18,4 @@ export function editorPath(
     params.append("datasetId", datasetId);
   }
   return `/editor?${params.toString()}`;
-}
+};
