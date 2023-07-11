@@ -1,8 +1,6 @@
 import {
   FileWithMetadata,
   MiaAnnotation,
-  MiaAnnotationMetadata,
-  MiaImageMetadata,
 } from "@visian/utils";
 import axios from "axios";
 import path from "path";

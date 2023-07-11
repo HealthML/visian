@@ -5,7 +5,6 @@ import {
   putWHOTask,
   WHOAnnotation,
   WHOAnnotationData,
-  WhoAnnotationMetadata,
   WHOAnnotationStatus,
   WHOTask,
   WHOTaskType,

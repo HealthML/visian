@@ -1,11 +1,9 @@
 import { IImageLayer, ILayerFamily } from "@visian/ui-shared";
 import {
-  BackendMetadata,
   FileWithMetadata,
   getWHOTask,
   getWHOTaskIdFromUrl,
   setNewTaskIdForUrl,
-  WhoAnnotationMetadata,
 } from "@visian/utils";
 
 import { whoHome } from "../../constants";

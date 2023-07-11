@@ -3,7 +3,6 @@ import {
   MiaAnnotation,
   MiaAnnotationMetadata,
   MiaImage,
-  MiaImageMetadata,
   Zip,
 } from "@visian/utils";
 import { v4 as uuidv4 } from "uuid";

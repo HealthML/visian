@@ -10,10 +10,9 @@ import {
 } from "@visian/ui-shared";
 import {
   FileWithMetadata,
-  MiaAnnotation,
-  MiaAnnotationMetadata,
-  MiaMetadata,
   isMiaImageMetadata,
+  MiaAnnotation,
+  MiaMetadata,
 } from "@visian/utils";
 import { AxiosError } from "axios";
 import { observer } from "mobx-react-lite";
