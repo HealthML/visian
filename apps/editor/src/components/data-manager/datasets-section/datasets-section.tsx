@@ -3,9 +3,9 @@ import { useCallback, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 
+import { deleteDatasetsMutation } from "../../../queries";
 import useDatasetsBy, {
   useCreateDatasetMutation,
-  useDeleteDatasetsForProjectMutation,
   useUpdateDatasetsMutation,
 } from "../../../queries/use-datasets-by";
 import { Dataset, Project } from "../../../types";
@@ -35,7 +35,7 @@ export const DatasetsSection = ({ project }: { project: Project }) => {
   );
   const [datasetTobBeDeleted, setDatasetTobBeDeleted] = useState<Dataset>();
   const [datasetToBeUpdated, setDatasetToBeUpdated] = useState<Dataset>();
-  const { deleteDatasets } = useDeleteDatasetsForProjectMutation();
+  const deleteDatasetMutation = deleteDatasetsMutation();
   const { createDataset } = useCreateDatasetMutation();
   const updateDataset = useUpdateDatasetsMutation();
 
@@ -95,11 +95,11 @@ export const DatasetsSection = ({ project }: { project: Project }) => {
 
   const confirmDeleteDataset = useCallback(() => {
     if (datasetTobBeDeleted)
-      deleteDatasets({
-        projectId: project.id,
-        datasetIds: [datasetTobBeDeleted.id],
+      deleteDatasetMutation.mutate({
+        selectorId: project.id,
+        objectIds: [datasetTobBeDeleted.id],
       });
-  }, [datasetTobBeDeleted, deleteDatasets, project]);
+  }, [datasetTobBeDeleted, deleteDatasetMutation, project]);
 
   const confirmCreateDataset = useCallback(
     (newDatasetDto) => createDataset({ ...newDatasetDto, project: project.id }),

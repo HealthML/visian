@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "react-query";
 
 import { Dataset } from "../types";
 import { hubBaseUrl } from "./hub-base-url";
-import { DeleteMutation } from "./delete-mutation";
+// import { DeleteMutation } from "./delete-mutation";
 
 const deleteDatasets = async (datasetIds: string[]) => {
   const deleteDatasetsResponse = await axios.delete<Dataset[]>(
@@ -16,11 +16,11 @@ const deleteDatasets = async (datasetIds: string[]) => {
   return deleteDatasetsResponse.data.map((d) => d.id);
 };
 
-export const deleteDatasetsMutation = () =>
-  DeleteMutation<Dataset>({
-    queryKey: (selectorId: string) => ["datasetsBy", selectorId],
-    mutateFn: ({ objectIds, selectorId }) => deleteDatasets(objectIds),
-  });
+// export const deleteDatasetsMutation = () =>
+//   DeleteMutation<Dataset>({
+//     queryKey: (selectorId: string) => ["datasetsBy", selectorId],
+//     mutateFn: ({ objectIds, selectorId }) => deleteDatasets(objectIds),
+//   });
 
 const getDatasetsBy = async (projectId: string) => {
   const datasetsResponse = await axios.get<Dataset[]>(`${hubBaseUrl}datasets`, {

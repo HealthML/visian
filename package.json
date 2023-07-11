@@ -119,6 +119,7 @@
     "localforage": "^1.10.0",
     "lodash.isequal": "^4.5.0",
     "lodash.throttle": "^4.1.1",
+    "mia-api-client": "file:apps/editor/src/queries/mia-api",
     "mobx": "^6.6.2",
     "mobx-react-lite": "^3.4.0",
     "moment": "^2.29.4",

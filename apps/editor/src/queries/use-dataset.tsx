@@ -11,23 +11,23 @@ const getDataset = async (datasetId: string) => {
   return datasetResponse.data;
 };
 
-export const useDataset = (datasetId: string) => {
-  const { data, error, isError, isLoading, refetch, remove } = useQuery<
-    Dataset,
-    AxiosError<Dataset>
-  >(["dataset", datasetId], () => getDataset(datasetId), {
-    retry: 2, // retry twice if fetch fails
-    refetchInterval: 1000 * 60, // refetch every minute
-  });
+// export const useDataset = (datasetId: string) => {
+//   const { data, error, isError, isLoading, refetch, remove } = useQuery<
+//     Dataset,
+//     AxiosError<Dataset>
+//   >(["dataset", datasetId], () => getDataset(datasetId), {
+//     retry: 2, // retry twice if fetch fails
+//     refetchInterval: 1000 * 60, // refetch every minute
+//   });
 
-  return {
-    dataset: data,
-    datasetError: error,
-    isErrorDataset: isError,
-    isLoadingDataset: isLoading,
-    refetchDataset: refetch,
-    removeDataset: remove,
-  };
-};
+//   return {
+//     dataset: data,
+//     datasetError: error,
+//     isErrorDataset: isError,
+//     isLoadingDataset: isLoading,
+//     refetchDataset: refetch,
+//     removeDataset: remove,
+//   };
+// };
 
-export default useDataset;
+// export default useDataset;

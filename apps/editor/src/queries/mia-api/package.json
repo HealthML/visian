@@ -1,7 +1,7 @@
 {
-  "name": "",
+  "name": "mia-api-client",
   "version": "",
-  "description": "OpenAPI client for ",
+  "description": "OpenAPI client for mia",
   "author": "OpenAPI-Generator Contributors",
   "keywords": [
     "axios",

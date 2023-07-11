@@ -11,7 +11,7 @@ import {
   useImagesByDataset,
 } from "../../../queries";
 import { useDatasetProgress } from "../../../queries/use-dataset-progress";
-import { Annotation, Dataset, Image } from "../../../types";
+import { Annotation, Image } from "../../../types";
 import { AnnotationProgress } from "../annotation-progress";
 import { ConfirmationPopup } from "../confirmation-popup";
 import { DatasetImageList } from "../dataset-image-list";
@@ -21,6 +21,8 @@ import { JobCreationPopup } from "../job-creation-popup";
 import { PageSection } from "../page-section";
 import { PageTitle } from "../page-title";
 import { useImageSelection, usePopUpState } from "../util";
+
+import { Dataset } from "mia-api-client";
 
 const StyledSheet = styled(Sheet)`
   padding: ${space("listPadding")};

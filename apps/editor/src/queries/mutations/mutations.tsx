@@ -1,22 +1,19 @@
-import axios, { AxiosError } from "axios";
-import { useMutation, useQuery, useQueryClient } from "react-query";
-
-import { Dataset } from "../types";
-import { hubBaseUrl } from "./hub-base-url";
+import { AxiosError } from "axios";
+import { useMutation, useQueryClient } from "react-query";
 
 type DeleteMutationParams = {
   queryKey: (selectorId: string) => string[];
   mutateFn: (mutateParams: {
     objectIds: string[];
-    selectorId: string;
+    selectorId?: string;
   }) => Promise<string[]>;
 };
 
-interface HubObject {
+interface MiaObject {
   id: string;
 }
 
-export function DeleteMutation<T extends HubObject>(
+export function DeleteMutation<T extends MiaObject>(
   params: DeleteMutationParams,
 ) {
   const queryClient = useQueryClient();
@@ -34,16 +31,13 @@ export function DeleteMutation<T extends HubObject>(
       objectIds,
       selectorId,
     }: {
-      selectorId: string;
       objectIds: string[];
+      selectorId: string;
     }) => {
-      await queryClient.cancelQueries({
-        queryKey: params.queryKey(selectorId),
-      });
+      const queryKey = params.queryKey(selectorId);
+      await queryClient.cancelQueries({ queryKey });
 
-      const previousDatasets = queryClient.getQueryData<T[]>(
-        params.queryKey(selectorId),
-      );
+      const previousDatasets = queryClient.getQueryData<T[]>(queryKey);
 
       if (!previousDatasets) return;
 
@@ -51,19 +45,19 @@ export function DeleteMutation<T extends HubObject>(
         (object: T) => !objectIds.includes(object.id),
       );
 
-      queryClient.setQueryData(params.queryKey(selectorId), newDatasets);
+      queryClient.setQueryData(queryKey, newDatasets);
 
       return {
         previousDatasets,
       };
     },
-    onError: (err, { selectorId, objectIds }, context) => {
+    onError: (err, { selectorId }, context) => {
       queryClient.setQueryData(
         params.queryKey(selectorId),
         context?.previousDatasets,
       );
     },
-    onSettled: (data, err, { selectorId, objectIds }) => {
+    onSettled: (data, err, { selectorId }) => {
       queryClient.invalidateQueries({
         queryKey: params.queryKey(selectorId),
       });
