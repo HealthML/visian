@@ -2,13 +2,16 @@ import { IDocument, ILayer, ILayerFamily } from "@visian/ui-shared";
 import { action, computed, makeObservable, observable } from "mobx";
 import { v4 as uuidv4 } from "uuid";
 
+import { FileMetadata } from "../../../types";
+import { ImageLayer } from "../layers";
+
 export class LayerFamily implements ILayerFamily {
   public excludeFromSnapshotTracking = ["document"];
   protected layerIds: string[] = [];
   public title = "";
   public id!: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public metaData?: { id: string; [key: string]: any };
+  public metaData?: FileMetadata;
   public collapsed?: boolean;
 
   constructor(
@@ -20,10 +23,12 @@ export class LayerFamily implements ILayerFamily {
     this.title = title || "";
     this.layerIds = layerIds || [];
 
-    makeObservable<this, "layerIds">(this, {
+    makeObservable<this, "layerIds" | "metaData">(this, {
       layerIds: observable,
       collapsed: observable,
       isActive: computed,
+      metaData: observable,
+
       addLayer: action,
       removeLayer: action,
     });
@@ -31,6 +36,12 @@ export class LayerFamily implements ILayerFamily {
 
   public get layers(): ILayer[] {
     return this.layerIds.map((id) => this.document.getLayer(id)!);
+  }
+
+  public get hasChanges() {
+    return this.layers.some(
+      (layer) => layer.kind === "image" && (layer as ImageLayer).hasChanges,
+    );
   }
 
   public addLayer(id: string, idx?: number) {

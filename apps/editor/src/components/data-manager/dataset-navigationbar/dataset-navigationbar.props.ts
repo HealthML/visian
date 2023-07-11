@@ -9,4 +9,5 @@ export interface DatasetNavigationBarProps extends StatefulPopUpProps {
   openJobCreationPopUp: () => void;
   openImageImportPopUp: () => void;
   deleteSelectedImages: () => void;
+  startReview: () => void;
 }

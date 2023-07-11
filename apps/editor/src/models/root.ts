@@ -9,6 +9,7 @@ import {
 } from "@visian/ui-shared";
 import { deepObserve, IDisposable, ISerializable } from "@visian/utils";
 import { action, autorun, computed, makeObservable, observable } from "mobx";
+import { NavigateFunction } from "react-router-dom";
 
 import { errorDisplayDuration } from "../constants";
 import { DICOMWebServer } from "./dicomweb-server";
@@ -263,7 +264,7 @@ export class RootStore implements ISerializable<RootSnapshot>, IDisposable {
     this.shouldPersist = true;
   }
 
-  private destroyLayers = async (forceDestroy?: boolean): Promise<boolean> => {
+  public destroyLayers = async (forceDestroy?: boolean): Promise<boolean> => {
     if (!this.shouldPersist && !forceDestroy) return false;
     if (
       !forceDestroy &&
@@ -312,5 +313,19 @@ export class RootStore implements ISerializable<RootSnapshot>, IDisposable {
       return true;
     }
     return false;
+  };
+
+  public startReview = async (
+    createStrategy: (currentPath: string) => Promise<ReviewStrategy>,
+    navigate: NavigateFunction,
+  ) => {
+    const currentPath = window.location.pathname;
+    if (!(await this.destroyLayers(true))) return;
+    this.shouldPersist = true;
+    this.setProgress({ labelTx: "importing", showSplash: true });
+    navigate("/editor?review=true");
+    this.setReviewStrategy(await createStrategy(currentPath));
+    await this.reviewStrategy?.loadTask();
+    this.setProgress();
   };
 }

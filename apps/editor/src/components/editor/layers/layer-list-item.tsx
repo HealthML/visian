@@ -32,8 +32,7 @@ export const LayerListItem = observer<{
 }>(({ layer, isActive, isLast }) => {
   const store = useStore();
 
-  const layers = store?.editor.activeDocument?.layers;
-  const layerCount = layers?.length;
+  const layerCount = store?.editor.activeDocument?.imageLayers?.length;
 
   const toggleAnnotationVisibility = useCallback(() => {
     layer.setIsVisible(!layer.isVisible);
@@ -268,7 +267,7 @@ export const LayerListItem = observer<{
           />
         )}
         {layerCount &&
-          layerCount < (store?.editor.activeDocument?.maxLayers || 0) &&
+          layerCount < (store?.editor.activeDocument?.maxVisibleLayers || 0) &&
           layer.kind === "image" &&
           layer.isAnnotation && (
             <ContextMenuItem

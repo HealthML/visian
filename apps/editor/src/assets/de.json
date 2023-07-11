@@ -131,6 +131,9 @@
 
   "confirm-task-annotation-tooltip": "Bestätigen",
   "skip-task-annotation-tooltip": "Überspringen",
+  "verify-annotation-tooltip": "Verifizieren",
+  "unverify-annotation-tooltip": "Verifizierung aufheben",
+  "next-task-tooltip": "Nächste Aufgebe",
 
   "browser-error": "Browserfehler",
   "no-webgl-2-error": "Dieser Browser unterstützt WebGL 2 nicht. Um VISIAN auszuführen ist WebGL 2 notwendig. Bitte updaten Sie Ihren Browser oder nutzen Sie einen anderen Browser.",
@@ -406,6 +409,8 @@
   "edit": "Bearbeiten",
   "update": "Aktualisieren",
   "name": "Name",
+  "project-name": "Projektname",
+  "dataset-name": "Datensatzname",
 
   "verified": "verifiziert",
 
@@ -421,5 +426,9 @@
   "uri-file-type-mismatch": "Die URI entspricht nicht dem Dateityp \"{{name}}\"",
 
   "switch-to-grid": "Zur Rasteransicht wechseln",
-  "switch-to-list": "Zur Listenansicht wechseln"
+  "switch-to-list": "Zur Listenansicht wechseln",
+
+  "review": "Überprüfen",
+  "supervise": "Abnicken",
+  "review-description": "{{taskType}} der Annotationen des Bildes {{image}}."
 }

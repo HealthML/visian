@@ -191,8 +191,8 @@ export class Document
       imageLayers: computed,
       mainImageLayer: computed,
       annotationLayers: computed,
-      maxLayers: computed,
-      maxLayers3d: computed,
+      maxVisibleLayers: computed,
+      maxVisibleLayers3d: computed,
 
       setTitle: action,
       setActiveLayer: action,
@@ -227,6 +227,9 @@ export class Document
 
   public get title(): string | undefined {
     if (this.titleOverride) return this.titleOverride;
+    if (this.activeLayer?.family?.metaData?.dataUri) {
+      return this.activeLayer.family.metaData.dataUri;
+    }
     const { length } = this.layers;
     if (!length) return undefined;
     const lastLayer = this.getLayer(this.layers[length - 1].id);
@@ -238,11 +241,11 @@ export class Document
   };
 
   // Layer Management
-  public get maxLayers(): number {
+  public get maxVisibleLayers(): number {
     return (this.renderer?.capabilities.maxTextures || 0) - generalTextures2d;
   }
 
-  public get maxLayers3d(): number {
+  public get maxVisibleLayers3d(): number {
     return (this.renderer?.capabilities.maxTextures || 0) - generalTextures3d;
   }
 
@@ -294,9 +297,10 @@ export class Document
 
   public get imageLayers(): IImageLayer[] {
     return this.layers.filter(
-      (layer) => layer.kind === "image",
+      (layer) => layer.kind === "image" && layer.isVisible,
     ) as IImageLayer[];
   }
+
   public get mainImageLayer(): IImageLayer | undefined {
     // TODO: Rework to work with group layers
 
@@ -710,14 +714,15 @@ export class Document
 
     if (Array.isArray(filteredFiles) && !filteredFiles.length) return;
 
-    if (this.layers.length >= this.maxLayers) {
-      this.setError({
-        titleTx: "import-error",
-        descriptionTx: "too-many-layers-2d",
-        descriptionData: { count: this.maxLayers },
-      });
-      return;
-    }
+    //! TODO: #513
+    // if (this.imageLayers.length >= this.maxVisibleLayers) {
+    //   this.setError({
+    //     titleTx: "import-error",
+    //     descriptionTx: "too-many-layers-2d",
+    //     descriptionData: { count: this.maxVisibleLayers },
+    //   });
+    //   return;
+    // }
 
     if (filteredFiles instanceof File) {
       this.createLayerFamily(
@@ -839,37 +844,38 @@ export class Document
           });
         }
       } else {
-        const numberOfAnnotations = uniqueValues.size - 1;
+        //! TODO: #513
+        // const numberOfAnnotations = uniqueValues.size - 1;
 
-        if (
-          numberOfAnnotations === 1 ||
-          numberOfAnnotations + this.layers.length > this.maxLayers
-        ) {
+        // if (
+        //   numberOfAnnotations === 1 ||
+        //   numberOfAnnotations + this.imageLayers.length > this.maxVisibleLayers
+        // ) {
+        //   createdLayerId = await this.importAnnotation(
+        //     imageWithUnit,
+        //     undefined,
+        //     true,
+        //   );
+
+        //   if (numberOfAnnotations !== 1) {
+        //     this.setError({
+        //       titleTx: "squashed-layers-title",
+        //       descriptionTx: "squashed-layers-import",
+        //     });
+        //   }
+        // } else {
+        uniqueValues.forEach(async (value) => {
+          if (value === 0) return;
           createdLayerId = await this.importAnnotation(
-            imageWithUnit,
-            undefined,
-            true,
+            { ...imageWithUnit, name: `${value}_${image.name}` },
+            value,
           );
-
-          if (numberOfAnnotations !== 1) {
-            this.setError({
-              titleTx: "squashed-layers-title",
-              descriptionTx: "squashed-layers-import",
-            });
+          if (files instanceof File) {
+            this.addLayerToFamily(createdLayerId, files);
+            this.addMetaDataToLayer(createdLayerId, files);
           }
-        } else {
-          uniqueValues.forEach(async (value) => {
-            if (value === 0) return;
-            createdLayerId = await this.importAnnotation(
-              { ...imageWithUnit, name: `${value}_${image.name}` },
-              value,
-            );
-            if (files instanceof File) {
-              this.addLayerToFamily(createdLayerId, files);
-              this.addMetaDataToLayer(createdLayerId, files);
-            }
-          });
-        }
+        });
+        // }
       }
 
       // Force switch to 2D if too many layers for 3D
@@ -915,6 +921,7 @@ export class Document
 
     const imageLayer = ImageLayer.fromITKImage(image, this, {
       color: defaultImageColor,
+      isVisible: this.imageLayers.length < this.maxVisibleLayers,
     });
     if (
       this.mainImageLayer &&
@@ -946,6 +953,7 @@ export class Document
       {
         isAnnotation: true,
         color: this.getFirstUnusedColor(),
+        isVisible: this.imageLayers.length < this.maxVisibleLayers,
       },
       filterValue,
       squash,
@@ -1128,5 +1136,29 @@ export class Document
     throw new Error(
       "This is a noop. To load a document from storage, create a new instance",
     );
+  }
+
+  public canUndo(): boolean {
+    return this.activeLayer?.id
+      ? this.history.canUndo(this.activeLayer.id)
+      : false;
+  }
+
+  public canRedo(): boolean {
+    return this.activeLayer?.id
+      ? this.history.canRedo(this.activeLayer.id)
+      : false;
+  }
+
+  public undo(): void {
+    if (this.activeLayer?.id) {
+      this.history.undo(this.activeLayer.id);
+    }
+  }
+
+  public redo(): void {
+    if (this.activeLayer?.id) {
+      this.history.redo(this.activeLayer.id);
+    }
   }
 }

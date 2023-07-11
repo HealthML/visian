@@ -186,8 +186,6 @@ export const Layers: React.FC = observer(() => {
       </ListItem>
     );
   }
-  const layerCount = layers?.length;
-
   const getTreeItems = useCallback(() => {
     const renderingOrder = store.editor.activeDocument?.renderingOrder;
     if (!renderingOrder) {
@@ -270,8 +268,9 @@ export const Layers: React.FC = observer(() => {
               icon="plus"
               tooltipTx="add-annotation-layer"
               isDisabled={
-                !layerCount ||
-                layerCount >= (store?.editor.activeDocument?.maxLayers || 0)
+                !store?.editor.activeDocument?.imageLayers?.length ||
+                store?.editor.activeDocument?.imageLayers?.length >=
+                  (store?.editor.activeDocument?.maxVisibleLayers || 0)
               }
               onPointerDown={
                 store?.editor.activeDocument?.addNewAnnotationLayer

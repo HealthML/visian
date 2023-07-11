@@ -4,24 +4,30 @@ import { useMutation, useQuery, useQueryClient } from "react-query";
 import { Annotation } from "../types";
 import { hubBaseUrl } from "./hub-base-url";
 
-const getAnnotationsByImage = async (imageId: string) => {
-  const annotationsResponse = await axios.get<Annotation[]>(
-    `${hubBaseUrl}annotations`,
+export const patchAnnotation = async (
+  annotationId?: string,
+  annotation?: Partial<Annotation>,
+) => {
+  const annotationsResponse = await axios.patch<Annotation>(
+    `${hubBaseUrl}annotations/${annotationId}`,
     {
-      params: {
-        image: imageId,
-      },
+      dataUri: annotation?.dataUri,
+      verified: annotation?.verified,
     },
   );
   return annotationsResponse.data;
 };
 
-const getAnnotationsByJob = async (jobId: string) => {
+export const getAnnotationsByJobAndImage = async (
+  jobId?: string,
+  imageId?: string,
+) => {
   const annotationsResponse = await axios.get<Annotation[]>(
     `${hubBaseUrl}annotations`,
     {
       params: {
         job: jobId,
+        image: imageId,
       },
     },
   );
@@ -57,10 +63,14 @@ export const useAnnotationsByImage = (imageId: string) => {
   const { data, error, isError, isLoading, refetch, remove } = useQuery<
     Annotation[],
     AxiosError<Annotation[]>
-  >(["annotationsByImage", imageId], () => getAnnotationsByImage(imageId), {
-    retry: 2, // retry twice if fetch fails
-    refetchInterval: 1000 * 10, // refetch every 20 seconds
-  });
+  >(
+    ["annotationsByImage", imageId],
+    () => getAnnotationsByJobAndImage(undefined, imageId),
+    {
+      retry: 2, // retry twice if fetch fails
+      refetchInterval: 1000 * 10, // refetch every 20 seconds
+    },
+  );
 
   return {
     annotations: data,
@@ -76,7 +86,7 @@ export const useAnnotationsByJob = (jobId: string) => {
   const { data, error, isError, isLoading, refetch, remove } = useQuery<
     Annotation[],
     AxiosError<Annotation[]>
-  >(["annotationsByJob", jobId], () => getAnnotationsByJob(jobId), {
+  >(["annotationsByJob", jobId], () => getAnnotationsByJobAndImage(jobId), {
     retry: 2, // retry twice if fetch fails
     refetchInterval: 1000 * 20, // refetch every 20 seconds
   });

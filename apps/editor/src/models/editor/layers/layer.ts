@@ -156,6 +156,13 @@ export class Layer implements ILayer, ISerializable<LayerSnapshot> {
   };
 
   public setIsVisible = (value?: boolean): void => {
+    if (
+      value &&
+      !this.isVisible &&
+      this.document.imageLayers.length >= this.document.maxVisibleLayers
+    ) {
+      return;
+    }
     this.isVisible = value ?? true;
   };
 

@@ -227,6 +227,8 @@ export interface ILayerFamily {
   collapsed?: boolean;
   /** Whether the group contains the document's active layer */
   isActive: boolean;
+  /** Returns `true` if the family has changes. */
+  hasChanges: boolean;
   /** Adds a layer to the family, the layer is removed from its previous family */
   addLayer(id: string, idx?: number): void;
   /** Removes a layer from the family making it an orphan */
