@@ -132,14 +132,13 @@ export const JobPage = ({ job }: { job: Job }) => {
     [findAnnotationId],
   );
 
-  const confirmDeleteJob = useCallback(
-    () =>
-      deleteJobs({
-        projectId: job.project,
-        jobIds: [job.id],
-      }),
-    [deleteJobs, job],
-  );
+  const confirmDeleteJob = useCallback(() => {
+    deleteJobs({
+      projectId: job.project,
+      jobIds: [job.id],
+    });
+    navigate(`/projects/${job.project}`);
+  }, [deleteJobs, job, navigate]);
 
   const confirmCancelJob = useCallback(
     () =>
@@ -201,7 +200,7 @@ export const JobPage = ({ job }: { job: Job }) => {
                           <IconButton
                             icon="logs"
                             tooltipTx="open-job-log"
-                            onPointerDown={openJobLogPopUp}
+                            onClick={openJobLogPopUp}
                             tooltipPosition="right"
                           />
                         )}
@@ -209,14 +208,14 @@ export const JobPage = ({ job }: { job: Job }) => {
                           <IconButton
                             icon="cancel"
                             tooltipTx="cancel-job-title"
-                            onPointerDown={openCancelJobConfirmationPopUp}
+                            onClick={openCancelJobConfirmationPopUp}
                             tooltipPosition="right"
                           />
                         ) : (
                           <IconButton
                             icon="trash"
                             tooltipTx="delete-job-title"
-                            onPointerDown={openDeleteJobConfirmationPopUp}
+                            onClick={openDeleteJobConfirmationPopUp}
                             tooltipPosition="right"
                           />
                         )}
