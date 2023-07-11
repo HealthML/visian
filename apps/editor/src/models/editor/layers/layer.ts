@@ -6,7 +6,7 @@ import {
   ILayerFamily,
   MarkerConfig,
 } from "@visian/ui-shared";
-import { ISerializable, ViewType } from "@visian/utils";
+import { BackendMetadata, ISerializable, ViewType } from "@visian/utils";
 import { action, computed, makeObservable, observable } from "mobx";
 import { Matrix4 } from "three";
 import tc from "tinycolor2";
@@ -56,7 +56,7 @@ export class Layer implements ILayer, ISerializable<LayerSnapshot> {
 
   public transformation!: Matrix4;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public metaData?: { id: string; [key: string]: any } | undefined;
+  public metadata?: BackendMetadata;
 
   constructor(
     snapshot: Partial<LayerSnapshot> | undefined,
@@ -68,7 +68,7 @@ export class Layer implements ILayer, ISerializable<LayerSnapshot> {
 
     makeObservable<
       this,
-      "titleOverride" | "parentId" | "familyId" | "opacityOverride"
+      "titleOverride" | "parentId" | "familyId" | "opacityOverride" | "metadata"
     >(this, {
       isAnnotation: observable,
       id: observable,
@@ -80,6 +80,7 @@ export class Layer implements ILayer, ISerializable<LayerSnapshot> {
       isVisible: observable,
       opacityOverride: observable,
       transformation: observable.ref,
+      metadata: observable,
 
       opacity: computed,
       parent: computed,
@@ -94,7 +95,7 @@ export class Layer implements ILayer, ISerializable<LayerSnapshot> {
       setColor: action,
       setIsVisible: action,
       setOpacity: action,
-      setMetaData: action,
+      setMetadata: action,
       resetSettings: action,
       setTransformation: action,
       delete: action,
@@ -205,8 +206,8 @@ export class Layer implements ILayer, ISerializable<LayerSnapshot> {
   };
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public setMetaData = (value?: { id: string; [key: string]: any }): void => {
-    this.metaData = value;
+  public setMetadata = (value?: BackendMetadata): void => {
+    this.metadata = value;
   };
 
   /**

@@ -1,4 +1,11 @@
-import { FileWithMetadata, MiaAnnotation, MiaImage , Zip } from "@visian/utils";
+import {
+  FileWithMetadata,
+  MiaAnnotation,
+  MiaAnnotationMetadata,
+  MiaImage,
+  MiaImageMetadata,
+  Zip,
+} from "@visian/utils";
 import { v4 as uuidv4 } from "uuid";
 
 import {
@@ -41,7 +48,11 @@ export class MiaReviewTask implements ReviewTask {
   public async getImageFiles() {
     const imageMetadata = this.image;
     const image = await fetchImageFile(this.image.id);
-    image.metadata = imageMetadata;
+    image.metadata = {
+      ...imageMetadata,
+      backend: "mia",
+      kind: "image",
+    };
     return [await fetchImageFile(this.image.id)];
   }
 
@@ -51,14 +62,19 @@ export class MiaReviewTask implements ReviewTask {
       throw new Error(`Annotation ${annotationId} not in Task ${this.title}.`);
     }
     const annotation = await fetchAnnotationFile(annotationId);
-    annotation.metadata = annotationMetadata;
+    annotation.metadata = {
+      ...annotationMetadata,
+      backend: "mia",
+      kind: "annotation",
+    };
     return [annotation];
   }
 
   public async createAnnotation(files: File[]) {
     const file = files.length === 1 ? files[0] : await this.zipFiles(files);
+    const firstFileMeta = (files[0] as FileWithMetadata | undefined)?.metadata;
     const dataUri =
-      (files[0] as FileWithMetadata | undefined)?.metadata?.dataUri ??
+      (firstFileMeta as MiaAnnotationMetadata)?.dataUri ??
       this.getAritficialAnnotationDataUri(file);
     const newAnnotation = await postAnnotationFile(
       this.image.id,

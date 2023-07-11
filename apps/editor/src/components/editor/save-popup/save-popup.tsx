@@ -8,7 +8,13 @@ import {
   TextField,
   useTranslation,
 } from "@visian/ui-shared";
-import { FileWithMetadata, MiaAnnotation } from "@visian/utils";
+import {
+  FileWithMetadata,
+  MiaAnnotation,
+  MiaAnnotationMetadata,
+  MiaMetadata,
+  isMiaImageMetadata,
+} from "@visian/utils";
 import { AxiosError } from "axios";
 import { observer } from "mobx-react-lite";
 import path from "path";
@@ -96,7 +102,11 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
       if (annotation) {
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         layerFamily.title = annotation.dataUri.split("/").pop() ?? "family :)";
-        layerFamily.metaData = annotation;
+        layerFamily.metadata = {
+          ...annotation,
+          backend: "mia",
+          kind: "annotation",
+        };
       }
       const familyLayers = layer.getFamilyLayers();
       familyLayers.forEach((l) => layerFamily.addLayer(l.id));
@@ -137,7 +147,7 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
 
   const canBeOverwritten = useCallback(() => {
     const activeLayer = store?.editor.activeDocument?.activeLayer;
-    const annotation = activeLayer?.family?.metaData as MiaAnnotation;
+    const annotation = activeLayer?.family?.metadata as MiaAnnotation;
     return !!annotation;
   }, [store]);
 
@@ -145,7 +155,7 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
     store?.setProgress({ labelTx: "saving" });
     try {
       const activeLayer = store?.editor.activeDocument?.activeLayer;
-      const annotationMeta = activeLayer?.family?.metaData as MiaAnnotation;
+      const annotationMeta = activeLayer?.family?.metadata as MiaAnnotation;
       const annotationFile = await createFileForFamilyOf(
         activeLayer,
         annotationMeta?.dataUri.endsWith(".zip"),
@@ -186,10 +196,18 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
   ) => {
     const activeLayer = store?.editor.activeDocument?.activeLayer;
     if (activeLayer?.family) {
-      activeLayer.family.metaData = newAnnotationMeta;
+      activeLayer.family.metadata = {
+        ...newAnnotationMeta,
+        backend: "mia",
+        kind: "annotation",
+      };
       activeLayer.family.title = newAnnotationMeta.dataUri;
       activeLayer.family.layers.forEach((layer, index) => {
-        layer.metadata = newAnnotationMeta;
+        layer.metadata = {
+          ...newAnnotationMeta,
+          backend: "mia",
+          kind: "annotation",
+        };
         layer.setTitle(
           `${index + 1}_${newAnnotationMeta.dataUri.split("/").pop()}`,
         );
@@ -214,11 +232,16 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
       if (!reviewTask || !annotationFile) {
         throw new Error(translate("create-annotation-error"));
       }
-      annotationFile.metadata = { id: "", dataUri: uri };
+      annotationFile.metadata = {
+        id: "",
+        dataUri: uri,
+        backend: "mia",
+        kind: "annotation",
+      };
       const newAnnotationId = await reviewTask.createAnnotation([
         annotationFile,
       ]);
-      const annotationMeta = activeLayer?.family?.metaData as MiaAnnotation;
+      const annotationMeta = activeLayer?.family?.metadata as MiaAnnotation;
       const newAnnotationMeta =
         reviewTask instanceof MiaReviewTask
           ? // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -253,9 +276,15 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
     if (!activeLayer) {
       return "annotation";
     }
-    const imageURI =
-      store?.editor.activeDocument?.mainImageLayer?.metadata?.dataUri;
-    const imageName = path.basename(imageURI).split(".")[0];
+    const mainImageLayerMetadata =
+      store?.editor.activeDocument?.mainImageLayer?.metadata;
+    let imageName = "image";
+    if (isMiaImageMetadata(mainImageLayerMetadata)) {
+      const imageURI = mainImageLayerMetadata.dataUri;
+      if (imageURI) {
+        [imageName] = path.basename(imageURI).split(".");
+      }
+    }
     const layerName =
       store?.editor.activeDocument?.activeLayer?.title?.split(".")[0];
     const layerNameWithoutIndex = Number.isNaN(
@@ -319,8 +348,10 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
           <InlineRow>
             <SaveInput
               value={
-                store?.editor.activeDocument?.activeLayer?.family?.metaData
-                  ?.dataUri
+                (
+                  store?.editor.activeDocument?.activeLayer?.family
+                    ?.metadata as MiaMetadata
+                )?.dataUri
               }
               readOnly
             />

@@ -1,4 +1,10 @@
-import type { Image, Vector, ViewType, Voxel } from "@visian/utils";
+import type {
+  BackendMetadata,
+  Image,
+  Vector,
+  ViewType,
+  Voxel,
+} from "@visian/utils";
 import type { Matrix4 } from "three";
 
 import { MarkerConfig } from "./markers";
@@ -78,7 +84,7 @@ export interface ILayer {
   /** The layer's transform matrix used to position it during rendering. */
   transformation?: Matrix4;
   /** The layer's metadata ID. */
-  metadata?: { id: string; [key: string]: any };
+  metadata?: BackendMetadata;
 
   /**
    * Returns all slice markers, aggregated for the layer and given view type.
@@ -88,7 +94,7 @@ export interface ILayer {
   /** Sets the layer's title. */
   setTitle(value?: string): void;
 
-  setMetaData(value?: { id: string; [key: string]: any }): void;
+  setMetadata(value?: BackendMetadata): void;
 
   /** Sets this layer's parent layer, typically the group it is contained in. */
   setParent(idOrLayer?: string | ILayer): void;
@@ -194,8 +200,7 @@ export interface ILayerFamily {
   /** The family's display name. */
   title: string;
   /** The family's meta data. Usually the object from the DB */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  metaData?: { id: string; [key: string]: any };
+  metadata?: BackendMetadata;
   /** All layers in the family. */
   layers: ILayer[];
   /** Returns `true` if the family has changes. */

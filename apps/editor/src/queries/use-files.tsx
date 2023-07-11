@@ -1,4 +1,9 @@
-import { FileWithMetadata, MiaAnnotation } from "@visian/utils";
+import {
+  FileWithMetadata,
+  MiaAnnotation,
+  MiaAnnotationMetadata,
+  MiaImageMetadata,
+} from "@visian/utils";
 import axios from "axios";
 import path from "path";
 
@@ -33,7 +38,7 @@ export const fetchImageFile = async (
     "images",
     fileName,
   )) as FileWithMetadata;
-  imageFile.metadata = image;
+  imageFile.metadata = { ...image, backend: "mia", kind: "image" };
   return imageFile;
 };
 
@@ -47,7 +52,11 @@ export const fetchAnnotationFile = async (
     "annotations",
     fileName,
   )) as FileWithMetadata;
-  annotationFile.metadata = annotation;
+  annotationFile.metadata = {
+    ...annotation,
+    backend: "mia",
+    kind: "annotation",
+  };
   return annotationFile;
 };
 

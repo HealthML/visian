@@ -1,5 +1,5 @@
 import { IDocument, ILayer, ILayerFamily } from "@visian/ui-shared";
-import { FileMetadata } from "@visian/utils";
+import { BackendMetadata } from "@visian/utils";
 import { action, makeObservable, observable } from "mobx";
 import { v4 as uuidv4 } from "uuid";
 
@@ -9,7 +9,7 @@ export class LayerFamily implements ILayerFamily {
   protected layerIds: string[] = [];
   public title = "";
   public id!: string;
-  public metaData?: FileMetadata;
+  public metadata?: BackendMetadata;
 
   constructor(
     protected document: IDocument,
@@ -20,9 +20,9 @@ export class LayerFamily implements ILayerFamily {
     this.title = title || "";
     this.layerIds = layerIds || [];
 
-    makeObservable<this, "layerIds" | "metaData">(this, {
+    makeObservable<this, "layerIds" | "metadata">(this, {
       layerIds: observable,
-      metaData: observable,
+      metadata: observable,
 
       addLayer: action,
       removeLayer: action,

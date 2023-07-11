@@ -10,6 +10,7 @@ import {
   useTranslation,
   zIndex,
 } from "@visian/ui-shared";
+import { MiaAnnotationMetadata } from "@visian/utils";
 import { observer } from "mobx-react-lite";
 import { useCallback, useMemo } from "react";
 import styled from "styled-components";
@@ -242,20 +243,22 @@ export const MiaReviewBar = observer(
 
     const isVerified = useMemo(
       () =>
-        store?.editor.activeDocument?.activeLayer?.family?.metaData?.verified ??
-        false,
-      [store?.editor.activeDocument?.activeLayer?.family?.metaData],
+        (
+          store?.editor.activeDocument?.activeLayer?.family
+            ?.metadata as MiaAnnotationMetadata
+        )?.verified ?? false,
+      [store?.editor.activeDocument?.activeLayer?.family?.metadata],
     );
 
     const toggleVerification = useCallback(() => {
       if (
         store?.editor.activeDocument?.activeLayer?.isAnnotation &&
-        store?.editor.activeDocument?.activeLayer?.family?.metaData
+        store?.editor.activeDocument?.activeLayer?.family?.metadata
       ) {
-        store.editor.activeDocument.activeLayer.family.metaData = {
-          ...store.editor.activeDocument.activeLayer.family.metaData,
+        store.editor.activeDocument.activeLayer.family.metadata = {
+          ...store.editor.activeDocument.activeLayer.family.metadata,
           verified: !isVerified,
-        };
+        } as MiaAnnotationMetadata;
       }
     }, [store?.editor.activeDocument?.activeLayer, isVerified]);
 
@@ -278,7 +281,7 @@ export const MiaReviewBar = observer(
                 taskType: t(store?.reviewStrategy?.currentTask?.kind),
                 image: (
                   store?.reviewStrategy?.currentTask as MiaReviewTask
-                ).image.dataUri
+                )?.image.dataUri
                   .split("/")
                   .pop()
                   ?.split(".")[0],
@@ -298,7 +301,7 @@ export const MiaReviewBar = observer(
             <ActionButtons
               icon={isVerified ? "exit" : "check"}
               isDisabled={
-                !store?.editor.activeDocument?.activeLayer?.family?.metaData ||
+                !store?.editor.activeDocument?.activeLayer?.family?.metadata ||
                 !store?.editor.activeDocument?.activeLayer?.isAnnotation
               }
               tooltipTx={

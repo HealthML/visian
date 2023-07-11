@@ -5,6 +5,7 @@ import {
   putWHOTask,
   WHOAnnotation,
   WHOAnnotationData,
+  WhoAnnotationMetadata,
   WHOAnnotationStatus,
   WHOTask,
   WHOTaskType,
@@ -73,7 +74,11 @@ export class WHOReviewTask implements ReviewTask {
       // The file must contain the annotationDataUUID it belongs to
       // in order to later store the modified file back to the correct
       // WHOAnnotationData object
-      file.metadata = { id: annotationData.annotationDataUUID };
+      file.metadata = {
+        backend: "who",
+        kind: "annotation",
+        id: annotationData.annotationDataUUID,
+      };
       return file;
     });
   }

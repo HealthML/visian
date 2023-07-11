@@ -1,4 +1,4 @@
-import { MiaImage } from "@visian/utils";
+import { MiaAnnotationMetadata, MiaImage } from "@visian/utils";
 
 import {
   getAnnotation,
@@ -142,11 +142,11 @@ export class MiaReviewStrategy extends ReviewStrategy {
       this.store.editor.activeDocument?.layerFamilies?.map((layerFamily) => {
         if (
           this.currentTask?.annotationIds.includes(
-            layerFamily.metaData?.id ?? "",
+            layerFamily.metadata?.id ?? "",
           )
         ) {
-          return patchAnnotation(layerFamily.metaData?.id, {
-            verified: layerFamily.metaData?.verified,
+          return patchAnnotation(layerFamily.metadata?.id, {
+            verified: (layerFamily.metadata as MiaAnnotationMetadata)?.verified,
           });
         }
         return Promise.resolve();

@@ -1,9 +1,11 @@
 import { IImageLayer, ILayerFamily } from "@visian/ui-shared";
 import {
+  BackendMetadata,
   FileWithMetadata,
   getWHOTask,
   getWHOTaskIdFromUrl,
   setNewTaskIdForUrl,
+  WhoAnnotationMetadata,
 } from "@visian/utils";
 
 import { whoHome } from "../../constants";
@@ -51,7 +53,7 @@ export class WHOReviewStrategy extends ReviewStrategy {
 
     await Promise.all(
       families.map(async (family: ILayerFamily) => {
-        const annotationId = family.metaData?.id;
+        const annotationId = family.metadata?.id;
         const annotationFiles = await this.getFilesForFamily(family);
         if (annotationFiles.length === 0) return;
         if (annotationId) {
@@ -70,7 +72,7 @@ export class WHOReviewStrategy extends ReviewStrategy {
         (annotationLayer) => annotationLayer.family === undefined,
       );
     if (!orphanLayers) return;
-    const files = await this.getFilesForLayers(orphanLayers);
+    const files = await this.getAnnotationFilesForLayers(orphanLayers);
     await this.currentTask?.createAnnotation(files);
   }
 
@@ -90,10 +92,12 @@ export class WHOReviewStrategy extends ReviewStrategy {
       (layer) => layer.kind === "image" && layer.isAnnotation,
     ) as ImageLayer[];
 
-    return this.getFilesForLayers(annotationLayers);
+    return this.getAnnotationFilesForLayers(annotationLayers);
   }
 
-  private async getFilesForLayers(layers: IImageLayer[]): Promise<File[]> {
+  private async getAnnotationFilesForLayers(
+    layers: IImageLayer[],
+  ): Promise<File[]> {
     return Promise.all(
       layers.map(async (layer: IImageLayer) => {
         const layerFile =
