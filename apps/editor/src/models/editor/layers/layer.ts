@@ -215,7 +215,9 @@ export class Layer implements ILayer, ISerializable<LayerSnapshot> {
   public delete() {
     (this.parent as LayerGroup)?.removeLayer?.(this.id);
     this.family?.removeLayer?.(this.id);
-    this.document.deleteLayer(this.id);
+    if (this.document.layers.includes(this)) {
+      this.document.deleteLayer(this.id);
+    }
   }
 
   public async toFile(): Promise<File | undefined> {

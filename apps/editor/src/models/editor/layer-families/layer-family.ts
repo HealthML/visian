@@ -26,6 +26,7 @@ export class LayerFamily implements ILayerFamily {
     makeObservable<this, "layerIds" | "metaData">(this, {
       layerIds: observable,
       collapsed: observable,
+      title: observable,
       isActive: computed,
       metaData: observable,
 
