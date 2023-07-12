@@ -13,7 +13,7 @@ import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
 import { whoHome } from "../../../constants";
-import { MiaReviewStrategy, TaskType } from "../../../models/review-strategy";
+import { TaskType } from "../../../models/review-strategy";
 import {
   DilateErodeModal,
   MeasurementModal,
