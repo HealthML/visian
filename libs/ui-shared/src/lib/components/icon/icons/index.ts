@@ -6,6 +6,7 @@ export { ReactComponent as backspace } from "./backspace.svg";
 export { ReactComponent as boundedSmartBrush } from "./bounded-smart-brush.svg";
 export { ReactComponent as boundedSmartEraser } from "./bounded-smart-eraser.svg";
 export { ReactComponent as check } from "./check.svg";
+export { ReactComponent as checkSmall } from "./check-small.svg";
 export { ReactComponent as circle } from "./circle.svg";
 export { ReactComponent as clearScan } from "./clear-scan.svg";
 export { ReactComponent as clearSlice } from "./clear-slice.svg";
