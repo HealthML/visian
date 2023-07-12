@@ -1,10 +1,11 @@
 import {
   ButtonParam,
+  color,
   InfoText,
   Modal,
   ModalHeaderButton,
   Text,
-  color,
+  useLocalStorage,
 } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
 import { useCallback } from "react";
@@ -26,6 +27,7 @@ const StyledModal = styled(Modal)`
 `;
 
 const HelpText = styled(InfoText)`
+  position: relative;
   margin-right: 5px;
 `;
 
@@ -88,6 +90,39 @@ const SubtleText = styled(Text)`
   opacity: 0.5;
 `;
 
+const pulseKeyframes = keyframes`
+	0% {
+		transform: scale(0.95);
+	}
+
+	70% {
+		transform: scale(1);
+		box-shadow: 0 0 0 15px rgba(0, 0, 0, 0);
+	}
+
+	100% {
+		transform: scale(0.95);
+		box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
+	}
+`;
+
+const HelpDot = styled.div`
+  position: absolute;
+  top: -5px;
+  left: -5px;
+
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background-color: ${color("primary")};
+
+  pointer-events: none;
+
+  box-shadow: 0 0 0 0 ${color("primary")};
+  transform: scale(1);
+  animation: ${pulseKeyframes} 2s infinite;
+`;
+
 const shortcuts = (
   <>
     <KeyRow>
@@ -122,6 +157,12 @@ const shortcuts = (
 
 export const SAMModal = observer(() => {
   const store = useStore();
+
+  const [clickedHint, setClickedHint] = useLocalStorage(
+    "auto-seg-hint-clicked",
+    false,
+  );
+  const clickHint = useCallback(() => setClickedHint(true), [setClickedHint]);
 
   const samTool = store?.editor.activeDocument?.tools.tools[
     "sam-tool"
@@ -175,7 +216,10 @@ export const SAMModal = observer(() => {
             titleTx="help"
             infoTx="sam-tool-help"
             shortcuts={shortcuts}
-          />
+            onClick={clickHint}
+          >
+            {clickedHint || <HelpDot key="auto-seg-help" />}
+          </HelpText>
           <ModalHeaderButton
             icon="xSmall"
             tooltipTx="sam-tool-close"

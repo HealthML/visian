@@ -362,3 +362,15 @@ export const useRelativePosition = <P = void>(
 
   return styleOverride ? { ...style, ...styleOverride } : style;
 };
+
+export const useLocalStorage = (key: string, defaultValue: any) => {
+  const [value, setValue] = useState(
+    JSON.parse(localStorage.getItem(key) as any) ?? defaultValue,
+  );
+
+  useEffect(() => {
+    localStorage.setItem(key, JSON.stringify(value));
+  }, [value, key]);
+
+  return [value, setValue];
+};
