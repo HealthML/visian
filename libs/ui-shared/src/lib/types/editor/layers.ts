@@ -107,6 +107,7 @@ export interface ILayer {
 
   setBlendMode(blendMode?: BlendMode): void;
   setColor(value?: string): void;
+  tryToggleIsVisible(): void;
   setIsVisible(value?: boolean): void;
   setOpacity(value?: number): void;
   resetSettings(): void;

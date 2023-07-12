@@ -174,14 +174,16 @@ export class Layer implements ILayer, ISerializable<LayerSnapshot> {
     this.color = value;
   };
 
-  public setIsVisible = (value?: boolean): void => {
+  public tryToggleIsVisible = (): void => {
     if (
-      value &&
       !this.isVisible &&
       this.document.imageLayers.length >= this.document.maxVisibleLayers
-    ) {
+    )
       return;
-    }
+    this.setIsVisible(!this.isVisible);
+  };
+
+  public setIsVisible = (value?: boolean): void => {
     this.isVisible = value ?? true;
   };
 
