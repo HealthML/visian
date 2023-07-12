@@ -228,6 +228,9 @@ export class RootStore implements ISerializable<RootSnapshot>, IDisposable {
       this.setIsSaveUpToDate(true);
       return this.editor.toJSON();
     });
+    await this.config.storageBackend?.persist("/review", () =>
+      this.reviewStrategy?.toJSON(),
+    );
     this.setIsDirty(false);
   };
 
@@ -237,6 +240,10 @@ export class RootStore implements ISerializable<RootSnapshot>, IDisposable {
     await this.config.storageBackend?.persistImmediately(
       "/editor",
       this.editor.toJSON(),
+    );
+    await this.config.storageBackend?.persistImmediately(
+      "/review",
+      this.reviewStrategy?.toJSON(),
     );
     this.setIsDirty(false);
   };
@@ -248,22 +255,23 @@ export class RootStore implements ISerializable<RootSnapshot>, IDisposable {
     };
   }
 
-  public async applySnapshot(snapshot: RootSnapshot) {
-    await this.editor.applySnapshot(snapshot.editor);
+  protected async applyReviewStrategySnapshot(
+    snapshot?: ReviewStrategySnapshot,
+  ) {
+    if (!snapshot) return;
     let reviewStrategy;
-    if (snapshot.reviewStrategy?.backend === "mia") {
-      reviewStrategy = MiaReviewStrategy.fromSnapshot(
-        this,
-        snapshot.reviewStrategy,
-      );
+    if (snapshot.backend === "mia") {
+      reviewStrategy = MiaReviewStrategy.fromSnapshot(this, snapshot);
     }
-    if (snapshot.reviewStrategy?.backend === "who") {
-      reviewStrategy = WHOReviewStrategy.fromSnapshot(
-        this,
-        snapshot.reviewStrategy,
-      );
+    if (snapshot.backend === "who") {
+      reviewStrategy = WHOReviewStrategy.fromSnapshot(this, snapshot);
     }
     if (reviewStrategy) this.setReviewStrategy(reviewStrategy);
+  }
+
+  public async applySnapshot(snapshot: RootSnapshot) {
+    await this.editor.applySnapshot(snapshot.editor);
+    await this.applyReviewStrategySnapshot(snapshot.reviewStrategy);
   }
 
   public async rehydrate() {
@@ -280,8 +288,16 @@ export class RootStore implements ISerializable<RootSnapshot>, IDisposable {
     const editorSnapshot = await this.config.storageBackend?.retrieve(
       "/editor",
     );
+    const reviewStrategySnapshot = await this.config.storageBackend?.retrieve(
+      "/review",
+    );
     if (editorSnapshot) {
       await this.editor.applySnapshot(editorSnapshot as EditorSnapshot);
+    }
+    if (reviewStrategySnapshot) {
+      await this.applyReviewStrategySnapshot(
+        reviewStrategySnapshot as ReviewStrategySnapshot,
+      );
     }
     this.settings.load();
     this.shouldPersist = true;
