@@ -174,6 +174,7 @@ export class Document
       measurementDisplayLayerId: observable,
       layerMap: observable,
       layerIds: observable,
+      layerFamilies: observable,
       measurementType: observable,
       history: observable,
       viewSettings: observable,

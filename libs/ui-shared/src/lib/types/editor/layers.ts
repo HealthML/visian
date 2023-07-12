@@ -210,4 +210,6 @@ export interface ILayerFamily {
   addLayer(id: string): void;
   /** Removes a layer from the family (but keeps it in the document). */
   removeLayer(id: string): void;
+  /** set verified if fam */
+  trySetIsVerified(value: boolean): void;
 }

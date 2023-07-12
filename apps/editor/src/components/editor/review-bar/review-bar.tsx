@@ -251,16 +251,10 @@ export const MiaReviewBar = observer(
     );
 
     const toggleVerification = useCallback(() => {
-      if (
-        store?.editor.activeDocument?.activeLayer?.isAnnotation &&
-        store?.editor.activeDocument?.activeLayer?.family?.metadata
-      ) {
-        store.editor.activeDocument.activeLayer.family.metadata = {
-          ...store.editor.activeDocument.activeLayer.family.metadata,
-          verified: !isVerified,
-        } as MiaAnnotationMetadata;
-      }
-    }, [store?.editor.activeDocument?.activeLayer, isVerified]);
+      store?.editor.activeDocument?.activeLayer?.family?.trySetIsVerified(
+        !isVerified,
+      );
+    }, [store?.editor.activeDocument?.activeLayer?.family, isVerified]);
 
     return store?.editor.activeDocument ? (
       <ReviewBarSheet>

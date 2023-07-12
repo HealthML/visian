@@ -1,8 +1,13 @@
-import { IDocument, ILayer, ILayerFamily } from "@visian/ui-shared";
-import { BackendMetadata, ISerializable } from "@visian/utils";
+import { ILayer, ILayerFamily } from "@visian/ui-shared";
+import {
+  BackendMetadata,
+  ISerializable,
+  isMiaAnnotationMetadata,
+} from "@visian/utils";
 import { action, makeObservable, observable } from "mobx";
 import { v4 as uuidv4 } from "uuid";
 
+import { Document } from "../document";
 import { ImageLayer } from "../layers";
 
 export interface LayerFamilySnapshot {
@@ -15,6 +20,7 @@ export interface LayerFamilySnapshot {
 export class LayerFamily
   implements ILayerFamily, ISerializable<LayerFamilySnapshot>
 {
+  public excludeFromSnapshotTracking = ["document"];
   protected layerIds: string[] = [];
   public title = "";
   public id!: string;
@@ -22,7 +28,7 @@ export class LayerFamily
 
   constructor(
     snapshot: Partial<LayerFamilySnapshot> | undefined,
-    protected document: IDocument,
+    protected document: Document,
   ) {
     this.applySnapshot(snapshot);
 
@@ -32,6 +38,7 @@ export class LayerFamily
 
       addLayer: action,
       removeLayer: action,
+      trySetIsVerified: action,
     });
   }
 
@@ -79,5 +86,14 @@ export class LayerFamily
     this.title = snapshot.title || "";
     this.metadata = snapshot.metadata ? { ...snapshot.metadata } : undefined;
     this.layerIds = snapshot.layerIds || [];
+  }
+
+  public trySetIsVerified(value: boolean) {
+    if (isMiaAnnotationMetadata(this.metadata)) {
+      this.metadata = {
+        ...this.metadata,
+        verified: value,
+      };
+    }
   }
 }
