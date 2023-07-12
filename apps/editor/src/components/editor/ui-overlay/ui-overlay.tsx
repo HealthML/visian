@@ -264,18 +264,20 @@ export const UIOverlay = observer<UIOverlayProps>(
             <ColumnRight>
               <SideViews />
               <RightBar>
-                <FloatingUIButton
-                  icon="exit"
-                  tooltipTx="close-editor"
-                  tooltipPosition="left"
-                  onPointerDown={async () => {
-                    await store?.reviewStrategy?.saveTask();
-                    await store.redirectToReturnUrl({ forceRedirect: false });
-                  }}
-                  isActive={false}
-                />
                 {!isFromWHO() && (
                   <>
+                    <FloatingUIButton
+                      icon="exit"
+                      tooltipTx="close-editor"
+                      tooltipPosition="left"
+                      onPointerDown={async () => {
+                        await store?.reviewStrategy?.saveTask();
+                        await store.redirectToReturnUrl({
+                          forceRedirect: false,
+                        });
+                      }}
+                      isActive={false}
+                    />
                     {store?.reviewStrategy?.currentTask?.kind ===
                       TaskType.Create && (
                       <FloatingUIButton
