@@ -14,13 +14,19 @@ import { NavigateFunction } from "react-router-dom";
 import { errorDisplayDuration } from "../constants";
 import { DICOMWebServer } from "./dicomweb-server";
 import { Editor, EditorSnapshot } from "./editor";
-import { ReviewStrategy } from "./review-strategy";
+import {
+  MiaReviewStrategy,
+  ReviewStrategy,
+  ReviewStrategySnapshot,
+  WHOReviewStrategy,
+} from "./review-strategy";
 import { Settings } from "./settings/settings";
 import { Tracker } from "./tracking";
 import { ProgressNotification } from "./types";
 
 export interface RootSnapshot {
   editor: EditorSnapshot;
+  reviewStrategy?: ReviewStrategySnapshot;
 }
 
 export interface RootStoreConfig {
@@ -236,11 +242,28 @@ export class RootStore implements ISerializable<RootSnapshot>, IDisposable {
   };
 
   public toJSON() {
-    return { editor: this.editor.toJSON() };
+    return {
+      editor: this.editor.toJSON(),
+      reviewStrategy: this.reviewStrategy?.toJSON(),
+    };
   }
 
   public async applySnapshot(snapshot: RootSnapshot) {
     await this.editor.applySnapshot(snapshot.editor);
+    let reviewStrategy;
+    if (snapshot.reviewStrategy?.backend === "mia") {
+      reviewStrategy = MiaReviewStrategy.fromSnapshot(
+        this,
+        snapshot.reviewStrategy,
+      );
+    }
+    if (snapshot.reviewStrategy?.backend === "who") {
+      reviewStrategy = WHOReviewStrategy.fromSnapshot(
+        this,
+        snapshot.reviewStrategy,
+      );
+    }
+    if (reviewStrategy) this.setReviewStrategy(reviewStrategy);
   }
 
   public async rehydrate() {

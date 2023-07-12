@@ -11,9 +11,34 @@ import { getImage } from "../../queries/get-image";
 import { RootStore } from "../root";
 import { MiaReviewTask } from "./mia-review-task";
 import { ReviewStrategy } from "./review-strategy";
+import {
+  MiaReviewStrategySnapshot,
+  ReviewStrategySnapshot,
+} from "./review-strategy-snapshot";
 import { TaskType } from "./review-task";
 
 export class MiaReviewStrategy extends ReviewStrategy {
+  public static fromSnapshot(
+    store: RootStore,
+    snapshot?: ReviewStrategySnapshot,
+  ) {
+    if (!snapshot) return undefined;
+    if (snapshot.backend === "mia") {
+      return new MiaReviewStrategy({
+        store,
+        images: snapshot.images ?? [],
+        jobId: snapshot.jobId,
+        allowedAnnotations: snapshot.allowedAnnotations,
+        taskType: snapshot.taskType,
+        returnUrl: snapshot.returnUrl,
+        currentReviewTask: snapshot.currentReviewTask
+          ? MiaReviewTask.fromSnapshot(snapshot.currentReviewTask)
+          : undefined,
+      });
+    }
+    return undefined;
+  }
+
   public static async fromDataset(
     store: RootStore,
     datasetId: string,
@@ -84,6 +109,7 @@ export class MiaReviewStrategy extends ReviewStrategy {
     allowedAnnotations,
     taskType,
     returnUrl,
+    currentReviewTask,
   }: {
     store: RootStore;
     images: MiaImage[];
@@ -91,8 +117,10 @@ export class MiaReviewStrategy extends ReviewStrategy {
     allowedAnnotations?: string[];
     taskType?: TaskType;
     returnUrl?: string;
+    currentReviewTask?: MiaReviewTask;
   }) {
-    super(store);
+    super({ store });
+    if (currentReviewTask) this.setCurrentTask(currentReviewTask);
     this.returnUrl = returnUrl ?? "/";
     this.images = images;
     this.currentImageIndex = 0;
@@ -152,5 +180,21 @@ export class MiaReviewStrategy extends ReviewStrategy {
         return Promise.resolve();
       }) ?? [],
     );
+  }
+
+  public toJSON() {
+    return {
+      backend: "mia",
+      images: this.images.map((image) => ({ ...image })),
+      jobId: this.jobId,
+      allowedAnnotations: this.allowedAnnotations
+        ? [...this.allowedAnnotations]
+        : undefined,
+      taskType: this.taskType,
+      returnUrl: this.returnUrl,
+      currentReviewTask: this.currentTask
+        ? (this.currentTask as MiaReviewTask).toJSON()
+        : undefined,
+    } as MiaReviewStrategySnapshot;
   }
 }

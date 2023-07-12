@@ -8,11 +8,40 @@ import {
 
 import { whoHome } from "../../constants";
 import { ImageLayer } from "../editor";
+import { RootStore } from "../root";
 import { ReviewStrategy } from "./review-strategy";
+import { ReviewStrategySnapshot } from "./review-strategy-snapshot";
 import { TaskType } from "./review-task";
 import { WHOReviewTask } from "./who-review-task";
 
 export class WHOReviewStrategy extends ReviewStrategy {
+  public static fromSnapshot(
+    store: RootStore,
+    snapshot?: ReviewStrategySnapshot,
+  ) {
+    if (!snapshot) return undefined;
+    if (snapshot.backend === "who") {
+      return new WHOReviewStrategy({
+        store,
+        currentReviewTask: snapshot.currentReviewTask
+          ? WHOReviewTask.fromSnapshot(snapshot.currentReviewTask)
+          : undefined,
+      });
+    }
+    return undefined;
+  }
+
+  constructor({
+    store,
+    currentReviewTask,
+  }: {
+    store: RootStore;
+    currentReviewTask?: WHOReviewTask;
+  }) {
+    super({ store });
+    if (currentReviewTask) this.setCurrentTask(currentReviewTask);
+  }
+
   public async nextTask(): Promise<void> {
     this.store.setProgress({ labelTx: "saving", showSplash: true });
     try {
@@ -121,5 +150,14 @@ export class WHOReviewStrategy extends ReviewStrategy {
       return;
     }
     await super.importAnnotations();
+  }
+
+  public toJSON(): ReviewStrategySnapshot {
+    return {
+      backend: "who",
+      currentReviewTask: this.currentTask
+        ? (this.currentTask as WHOReviewTask).toJSON()
+        : undefined,
+    };
   }
 }
