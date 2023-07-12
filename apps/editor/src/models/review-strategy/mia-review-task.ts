@@ -15,7 +15,27 @@ import {
 } from "../../queries";
 import { ReviewTask, TaskType } from "./review-task";
 
+export interface MiaReviewTaskSnapshot {
+  kind: TaskType;
+  id: string;
+  title: string | undefined;
+  description: string | undefined;
+  image: MiaImage;
+  annotations: MiaAnnotation[];
+}
+
 export class MiaReviewTask extends ReviewTask {
+  public static fromSnapshot(snapshot: MiaReviewTaskSnapshot) {
+    return new MiaReviewTask(
+      snapshot.title,
+      snapshot.kind,
+      snapshot.description,
+      snapshot.image,
+      snapshot.annotations,
+      snapshot.id,
+    );
+  }
+
   public kind: TaskType;
   public id: string;
   public title: string | undefined;
@@ -122,5 +142,16 @@ export class MiaReviewTask extends ReviewTask {
 
   public getAnnotation(annotationId: string) {
     return this.annotations.get(annotationId);
+  }
+
+  public toJSON(): MiaReviewTaskSnapshot {
+    return {
+      kind: this.kind,
+      id: this.id,
+      title: this.title,
+      description: this.description,
+      image: { ...this.image },
+      annotations: [...this.annotations.values()].map((a) => ({ ...a })),
+    };
   }
 }

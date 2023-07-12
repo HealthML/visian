@@ -7,6 +7,7 @@ import {
   WHOAnnotationData,
   WHOAnnotationStatus,
   WHOTask,
+  WHOTaskSnapshot,
   WHOTaskType,
 } from "@visian/utils";
 import { AxiosResponse } from "axios";
@@ -19,7 +20,15 @@ const taskTypeMapping = {
   [WHOTaskType.Review]: TaskType.Supervise,
 };
 
+export interface WhoReviewTaskSnapshot {
+  whoTask: WHOTaskSnapshot;
+}
+
 export class WHOReviewTask extends ReviewTask {
+  public static fromSnapshot(snapshot: WhoReviewTaskSnapshot) {
+    return new WHOReviewTask(new WHOTask(snapshot.whoTask));
+  }
+
   private whoTask: WHOTask;
 
   public get id(): string {
@@ -160,5 +169,11 @@ export class WHOReviewTask extends ReviewTask {
       );
     }
     annotationData.data = base64Data;
+  }
+
+  public toJSON(): WhoReviewTaskSnapshot {
+    return {
+      whoTask: this.whoTask.toJSON(),
+    };
   }
 }
