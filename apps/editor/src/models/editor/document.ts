@@ -49,7 +49,7 @@ import { readTrackingLog, TrackingData } from "../tracking";
 import { StoreContext } from "../types";
 import { Clipboard } from "./clipboard";
 import { History, HistorySnapshot } from "./history";
-import { LayerFamily } from "./layer-families";
+import { LayerFamily, LayerFamilySnapshot } from "./layer-families";
 import { ImageLayer, Layer, LayerSnapshot } from "./layers";
 import * as layers from "./layers";
 import { Markers } from "./markers";
@@ -80,6 +80,7 @@ export interface DocumentSnapshot {
   activeLayerId?: string;
   layerMap: LayerSnapshot[];
   layerIds: string[];
+  layerFamilies: LayerFamilySnapshot[];
 
   history: HistorySnapshot;
 
@@ -104,7 +105,7 @@ export class Document
   protected measurementDisplayLayerId?: string;
   protected layerMap: { [key: string]: Layer };
   protected layerIds: string[];
-  public layerFamilies: ILayerFamily[] = [];
+  public layerFamilies: LayerFamily[];
 
   public measurementType: MeasurementType = "volume";
 
@@ -145,6 +146,10 @@ export class Document
     Object.values(this.layerMap).forEach((layer) =>
       layer.fixPotentiallyBadColor(),
     );
+
+    this.layerFamilies =
+      snapshot?.layerFamilies.map((family) => new LayerFamily(family, this)) ??
+      [];
 
     this.history = new History(snapshot?.history, this);
     this.viewSettings = new ViewSettings(snapshot?.viewSettings, this);
@@ -319,7 +324,7 @@ export class Document
     return this.layerFamilies.find((family) => family.id === id);
   }
 
-  public addLayerFamily(family: ILayerFamily): void {
+  public addLayerFamily(family: LayerFamily): void {
     this.layerFamilies.push(family);
   }
 
@@ -1092,6 +1097,7 @@ export class Document
       viewport3D: this.viewport3D.toJSON(),
       tools: this.tools.toJSON(),
       useExclusiveSegmentations: this.useExclusiveSegmentations,
+      layerFamilies: this.layerFamilies.map((family) => family.toJSON()),
     };
   }
 
