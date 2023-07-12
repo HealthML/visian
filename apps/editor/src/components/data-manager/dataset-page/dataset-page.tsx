@@ -190,10 +190,10 @@ export const DatasetPage = ({
   const startReview = useCallback(
     async (wholeDataset?: boolean) => {
       store?.startReview(
-        async (url: string) =>
+        async () =>
           wholeDataset
-            ? MiaReviewStrategy.fromDataset(store, dataset.id, url)
-            : MiaReviewStrategy.fromImageIds(store, [...selectedImages], url),
+            ? MiaReviewStrategy.fromDataset(store, dataset.id)
+            : MiaReviewStrategy.fromImageIds(store, [...selectedImages]),
         navigate,
       );
     },

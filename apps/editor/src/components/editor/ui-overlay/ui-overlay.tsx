@@ -270,7 +270,7 @@ export const UIOverlay = observer<UIOverlayProps>(
                   tooltipPosition="left"
                   onPointerDown={async () => {
                     await store?.reviewStrategy?.saveTask();
-                    await store.redirectToReturnUrl(false);
+                    await store.redirectToReturnUrl({ forceRedirect: false });
                   }}
                   isActive={false}
                 />
