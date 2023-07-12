@@ -65,7 +65,7 @@ const spinningKeyframes = keyframes`
 
 const Spinner = styled.div`
   margin-right: 10px;
-  margin-left: -20px;
+  margin-left: -10px;
 
   border-radius: 50%;
   width: 15px;
