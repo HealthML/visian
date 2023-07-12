@@ -37,6 +37,7 @@ export class SAMTool<N extends "sam-tool" = "sam-tool">
   protected sam: SAM;
 
   protected debouncedGeneratePrediction: () => void;
+  protected debouncedLoadEmbedding: () => void;
 
   protected lastClick?: Vector;
 
@@ -67,10 +68,12 @@ export class SAMTool<N extends "sam-tool" = "sam-tool">
       () => this.generatePrediction(),
       30,
     );
+    this.debouncedLoadEmbedding = debounce(() => this.loadEmbedding(), 1000);
 
     reaction(
       () => [this.imageLayer, this.viewType, this.sliceNumber],
       () => {
+        this.debouncedLoadEmbedding();
         this.resetPromptInputs();
       },
       { fireImmediately: true },
