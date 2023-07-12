@@ -34,6 +34,7 @@ export interface LayerSnapshot {
   opacityOverride?: number;
 
   transformation: number[];
+  metadata?: BackendMetadata;
 }
 
 export class Layer implements ILayer, ISerializable<LayerSnapshot> {
@@ -256,6 +257,7 @@ export class Layer implements ILayer, ISerializable<LayerSnapshot> {
       isVisible: this.isVisible,
       opacityOverride: this.opacityOverride,
       transformation: this.transformation?.toArray(),
+      metadata: this.metadata ? { ...this.metadata } : undefined,
     };
   }
 
@@ -276,6 +278,7 @@ export class Layer implements ILayer, ISerializable<LayerSnapshot> {
         ? new Matrix4().fromArray(snapshot.transformation)
         : undefined,
     );
+    this.setMetadata(snapshot?.metadata);
 
     return Promise.resolve();
   }
