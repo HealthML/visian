@@ -96,7 +96,7 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
   ) => {
     const document = store?.editor.activeDocument;
     if (document && layer) {
-      const layerFamily = new LayerFamily(document);
+      const layerFamily = new LayerFamily(undefined, document);
       document.addLayerFamily(layerFamily);
       if (annotation) {
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion

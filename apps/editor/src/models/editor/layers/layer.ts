@@ -258,6 +258,7 @@ export class Layer implements ILayer, ISerializable<LayerSnapshot> {
       opacityOverride: this.opacityOverride,
       transformation: this.transformation?.toArray(),
       metadata: this.metadata ? { ...this.metadata } : undefined,
+      familyId: this.familyId,
     };
   }
 
@@ -265,7 +266,7 @@ export class Layer implements ILayer, ISerializable<LayerSnapshot> {
     if (snapshot?.id && snapshot?.id !== this.id) {
       throw new Error("Layer ids do not match");
     }
-
+    this.familyId = snapshot?.familyId;
     this.setIsAnnotation(snapshot?.isAnnotation);
     this.setTitle(snapshot?.titleOverride);
     this.setParent(snapshot?.parentId);

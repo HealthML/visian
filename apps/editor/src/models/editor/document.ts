@@ -1041,7 +1041,7 @@ export class Document
         "Cannot create a new group for file that already belongs to a group",
       );
     }
-    const layerFamily = new LayerFamily(this, title);
+    const layerFamily = new LayerFamily({ title }, this);
     layerFamily.metadata = groupMetadata;
 
     const filesWithGroup = files.map((f) => {

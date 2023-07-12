@@ -1,24 +1,30 @@
 import { IDocument, ILayer, ILayerFamily } from "@visian/ui-shared";
-import { BackendMetadata } from "@visian/utils";
+import { BackendMetadata, ISerializable } from "@visian/utils";
 import { action, makeObservable, observable } from "mobx";
 import { v4 as uuidv4 } from "uuid";
 
 import { ImageLayer } from "../layers";
 
-export class LayerFamily implements ILayerFamily {
+export interface LayerFamilySnapshot {
+  id: string;
+  title: string;
+  metadata?: BackendMetadata;
+  layerIds: string[];
+}
+
+export class LayerFamily
+  implements ILayerFamily, ISerializable<LayerFamilySnapshot>
+{
   protected layerIds: string[] = [];
   public title = "";
   public id!: string;
   public metadata?: BackendMetadata;
 
   constructor(
+    snapshot: Partial<LayerFamilySnapshot> | undefined,
     protected document: IDocument,
-    title?: string | undefined,
-    layerIds?: string[] | undefined,
   ) {
-    this.id = uuidv4();
-    this.title = title || "";
-    this.layerIds = layerIds || [];
+    this.applySnapshot(snapshot);
 
     makeObservable<this, "layerIds" | "metadata">(this, {
       layerIds: observable,
@@ -54,5 +60,24 @@ export class LayerFamily implements ILayerFamily {
     if (layer?.family === this) {
       layer.setFamily(undefined);
     }
+  }
+
+  public toJSON(): LayerFamilySnapshot {
+    return {
+      id: this.id,
+      title: this.title,
+      metadata: this.metadata ? { ...this.metadata } : undefined,
+      layerIds: [...this.layerIds],
+    };
+  }
+
+  public async applySnapshot(
+    snapshot: Partial<LayerFamilySnapshot> | undefined,
+  ) {
+    if (!snapshot) return;
+    this.id = snapshot.id || uuidv4();
+    this.title = snapshot.title || "";
+    this.metadata = snapshot.metadata ? { ...snapshot.metadata } : undefined;
+    this.layerIds = snapshot.layerIds || [];
   }
 }
