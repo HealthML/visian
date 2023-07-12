@@ -270,11 +270,7 @@ export const UIOverlay = observer<UIOverlayProps>(
                   tooltipPosition="left"
                   onPointerDown={async () => {
                     await store?.reviewStrategy?.saveTask();
-                    if (store?.reviewStrategy instanceof MiaReviewStrategy) {
-                      await store.reviewStrategy.redirectToReturnUrl(false);
-                    } else {
-                      await store?.destroyRedirect("/projects");
-                    }
+                    await store.redirectToReturnUrl(false);
                   }}
                   isActive={false}
                 />

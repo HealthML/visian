@@ -328,4 +328,8 @@ export class RootStore implements ISerializable<RootSnapshot>, IDisposable {
     await this.reviewStrategy?.loadTask();
     this.setProgress();
   };
+
+  public redirectToReturnUrl = async (forceRedirect = true) => {
+    await this.destroyRedirect(this.editor.returnUrl ?? "/", forceRedirect);
+  };
 }

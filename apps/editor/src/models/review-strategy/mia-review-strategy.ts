@@ -129,7 +129,7 @@ export class MiaReviewStrategy extends ReviewStrategy {
     await this.saveTask();
     this.currentImageIndex += 1;
     if (this.currentImageIndex >= this.images.length) {
-      await this.redirectToReturnUrl();
+      await this.store?.redirectToReturnUrl();
     } else {
       await this.loadTask();
     }

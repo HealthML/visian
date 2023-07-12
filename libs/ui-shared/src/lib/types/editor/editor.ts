@@ -31,5 +31,10 @@ export interface IEditor {
 
   /** The available graphics performance. */
   performanceMode: PerformanceMode;
+
+  /** The URL to return to after the editor is closed. */
+  returnUrl?: string;
+
+  setReturnUrl(url?: string): void;
   setPerformanceMode(mode?: PerformanceMode): void;
 }
