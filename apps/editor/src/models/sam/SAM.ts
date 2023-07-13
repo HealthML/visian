@@ -10,6 +10,15 @@ export type SAMModelBoundingBox = { start: Vector; end: Vector };
 // Todo: Allow configuration:
 const EMBEDDING_SERVICE_URL = "http://localhost:3000/embedding";
 
+const bytesToBase64 = (bytes: Uint8Array) => {
+  let binary = "";
+  const len = bytes.byteLength;
+  for (let i = 0; i < len; i++) {
+    binary += String.fromCharCode(bytes[i]);
+  }
+  return window.btoa(binary);
+};
+
 export class SAM {
   private embeddingCache: EmbeddingCache;
   private inferenceSession?: ort.InferenceSession;
@@ -70,19 +79,30 @@ export class SAM {
     const imageData = imageLayer.image.getSliceFloat32(viewType, sliceNumber);
     const voxels = this.get2DVector(viewType, imageLayer.image.voxelCount);
 
-    const input = new Uint8Array(imageData.length);
+    const imageBytes = new Uint8Array(imageData.length);
     for (let i = 0; i < imageData.length; i++) {
-      input[i] = imageData[i] * 255;
+      imageBytes[i] = imageData[i] * 255;
     }
 
-    const file = new File([input], "image");
-    const formdata = new FormData();
-    formdata.append("image", file);
-    formdata.append("width", voxels.x.toString());
-    formdata.append("height", voxels.y.toString());
-    const response = await fetch(EMBEDDING_SERVICE_URL, {
+    // We cannot use multipart-formdata and a "normal" file upload here since
+    // otherwise requests will get stuck in "pending". Also it is necessary to
+    // prevent request caching by timestamping the url for the same reason.
+    // The number of requests that get stuck is not deterministic, but increases
+    // with the number of bytes sent.
+    // Encoding the file as base64 increases its size by ~33% but prevents these issues.
+    const encodedFile = bytesToBase64(imageBytes);
+    const timestamp = new Date().getTime();
+    const response = await fetch(`${EMBEDDING_SERVICE_URL}?v=${timestamp}`, {
       method: "POST",
-      body: formdata,
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/octet-stream",
+      },
+      body: JSON.stringify({
+        image: encodedFile,
+        width: voxels.x,
+        height: voxels.y,
+      }),
     });
 
     const responseData = await response.arrayBuffer();
