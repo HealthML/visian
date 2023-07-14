@@ -7,8 +7,12 @@ import { EmbeddingCache } from "./embedding-cache";
 
 export type SAMModelBoundingBox = { start: Vector; end: Vector };
 
-// Todo: Allow configuration:
-const EMBEDDING_SERVICE_URL = "http://localhost:3000/embedding";
+// Todo: Make configurable, extract param from router
+const queryString = window.location.search;
+const urlParams = new URLSearchParams(queryString);
+const EMBEDDING_SERVICE_URL =
+  urlParams.get("image-encoder-url") || "http://localhost:3000/embedding";
+console.log("Image Encoder URL:", EMBEDDING_SERVICE_URL);
 
 const bytesToBase64 = (bytes: Uint8Array) => {
   let binary = "";
@@ -150,8 +154,6 @@ export class SAM {
     );
     if (!embedding) return;
 
-    console.time("prediction generation");
-
     const modelInput = this.getModelInput(
       imageLayer,
       viewType,
@@ -165,8 +167,6 @@ export class SAM {
     const session = await this.getInferenceSession();
     const modelOutput = await session.run(modelInput);
     const maskOutput = modelOutput.masks.data as Float32Array;
-
-    console.timeEnd("prediction generation");
 
     return maskOutput;
   }
