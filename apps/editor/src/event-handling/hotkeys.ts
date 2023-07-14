@@ -564,6 +564,22 @@ export const generalHotkeys: IHotkey[] = [
       );
     },
   },
+  {
+    keys: "ctrl+b",
+    viewMode: "2D",
+    action: (store) => {
+      if (
+        (store.editor.activeDocument?.tools.tools["sam-tool"] as SAMTool)
+          .isActive
+      ) {
+        (
+          store.editor.activeDocument?.tools.tools["sam-tool"] as SAMTool
+        ).startBenchmark();
+      }
+    },
+    labelTx: "sam-benchmark",
+    // We don't set shortcutGuideSection so it doesn't show up in the shortcuts page.
+  },
 ];
 
 export const setUpHotKeys = (store: RootStore): IDisposer => {

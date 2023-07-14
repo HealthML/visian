@@ -340,4 +340,33 @@ export class SAMTool<N extends "sam-tool" = "sam-tool">
   public deactivate() {
     this.discard();
   }
+
+  public async startBenchmark() {
+    const arrayToCsv = (data: any[][]) => {
+      let csvContent = "data:text/csv;charset=utf-8,";
+      data.forEach((cells) => {
+        const row = cells.join(",");
+        csvContent += `${row}\r\n`;
+      });
+      const encodedUri = encodeURI(csvContent);
+      window.open(encodedUri);
+    };
+
+    const times = [];
+
+    for (let i = 0; i < 100; i++) {
+      const start = performance.now();
+      // eslint-disable-next-line no-await-in-loop
+      await this.generatePrediction();
+      const duration = performance.now() - start;
+      console.log(`Iteration ${i} took ${duration}ms.`);
+      times.push(performance.now() - start);
+    }
+
+    const average = times.reduce((a, b) => a + b, 0) / times.length;
+    console.log(`Average: ${average}ms.`);
+
+    const data = times.map((time) => [time]);
+    arrayToCsv(data);
+  }
 }

@@ -98,6 +98,7 @@
   "sam-tool-left-drag": "Bounding Box",
   "sam-tool-left": "Positiver Punkt",
   "sam-tool-right": "Negativer Punkt / Punkt entfernen",
+  "sam-benchmark": "SAM Benchmark starten",
 
   "data-model-outdated-alert": "Datenmodell veraltet. Zurücksetzen notwendig.",
   "discard-current-document-confirmation": "Aktuelles Dokument verwerfen?",
