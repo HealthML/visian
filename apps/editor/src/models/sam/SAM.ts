@@ -4,14 +4,15 @@ import { makeObservable, observable } from "mobx";
 import * as ort from "onnxruntime-web";
 
 import { EmbeddingCache } from "./embedding-cache";
+import { getUrlParam } from "./temp-util";
 
 export type SAMModelBoundingBox = { start: Vector; end: Vector };
 
 // Todo: Make configurable, extract param from router
-const queryString = window.location.search;
-const urlParams = new URLSearchParams(queryString);
-const EMBEDDING_SERVICE_URL =
-  urlParams.get("image-encoder-url") || "http://localhost:3000/embedding";
+const EMBEDDING_SERVICE_URL = getUrlParam(
+  "image-encoder-url",
+  "http://localhost:3000/embedding",
+);
 console.log("Image Encoder URL:", EMBEDDING_SERVICE_URL);
 
 const bytesToBase64 = (bytes: Uint8Array) => {

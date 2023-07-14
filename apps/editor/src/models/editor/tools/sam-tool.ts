@@ -12,6 +12,7 @@ import { debounce } from "lodash";
 import { action, computed, makeObservable, observable, reaction } from "mobx";
 
 import { SAM } from "../../sam/SAM";
+import { getUrlParam } from "../../sam/temp-util";
 import { Tool } from "./tool";
 import { mutateTextureData } from "./utils";
 
@@ -349,12 +350,22 @@ export class SAMTool<N extends "sam-tool" = "sam-tool">
         csvContent += `${row}\r\n`;
       });
       const encodedUri = encodeURI(csvContent);
-      window.open(encodedUri);
+      console.log("Result:", encodedUri);
     };
+
+    const { x, y } = this.imageLayer?.image.voxelCount || { x: 0, y: 0 };
+    this.setForegroundPoints([
+      new Vector([Math.floor(x / 2), Math.floor(y / 2), 109]),
+    ]);
+    this.setBackgroundPoints([]);
+    this.setBoundingBoxStart(undefined);
+    this.setBoundingBoxEnd(undefined);
 
     const times = [];
 
-    for (let i = 0; i < 100; i++) {
+    const iterations = +getUrlParam("benchmark-iterations", "200");
+
+    for (let i = 0; i < iterations; i++) {
       const start = performance.now();
       // eslint-disable-next-line no-await-in-loop
       await this.generatePrediction();
