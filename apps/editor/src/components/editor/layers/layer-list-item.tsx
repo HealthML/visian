@@ -266,7 +266,7 @@ export const LayerListItem = observer<{
             onPointerDown={exportLayerSlice}
           />
         )}
-        {layerCount &&
+        {layerCount !== undefined &&
           layerCount < (store?.editor.activeDocument?.maxVisibleLayers || 0) &&
           layer.kind === "image" &&
           layer.isAnnotation && (
