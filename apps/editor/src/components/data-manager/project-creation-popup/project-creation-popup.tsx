@@ -24,20 +24,31 @@ const ProjectCreationPopupContainer = styled(PopUp)`
 `;
 
 const TextInput = styled(TextField)`
-  margin: 0px 0px 0px 0px;
-  width: calc(100% - 40px);
+  margin: auto;
+  width: 100%;
+`;
+
+const StyledForm = styled.form`
+  width: 100%;
 `;
 
 export const ProjectCreationPopup = observer<ProjectCreationPopupProps>(
   ({ isOpen, onClose, onConfirm }) => {
     const [name, setName] = useState("");
+    const [isSubmitDisabled, setIsSubmitDisabled] = useState(true);
 
     const clearInputsAndClose = useCallback(() => {
       setName("");
       onClose?.();
     }, [onClose]);
 
-    const updateName = useCallback((e) => setName(e.target.value), [setName]);
+    const updateName = useCallback(
+      (e) => {
+        setName(e.target.value);
+        setIsSubmitDisabled(false);
+      },
+      [setName],
+    );
 
     const handleCreation = useCallback(() => {
       if (name !== "") {
@@ -46,6 +57,14 @@ export const ProjectCreationPopup = observer<ProjectCreationPopupProps>(
       clearInputsAndClose();
     }, [name, onConfirm, clearInputsAndClose]);
 
+    const handleFormSubmit = useCallback(
+      (e) => {
+        e.preventDefault();
+        if (!isSubmitDisabled) handleCreation();
+      },
+      [handleCreation, isSubmitDisabled],
+    );
+
     return (
       <ProjectCreationPopupContainer
         titleTx="create-project"
@@ -53,18 +72,25 @@ export const ProjectCreationPopup = observer<ProjectCreationPopupProps>(
         dismiss={clearInputsAndClose}
         shouldDismissOnOutsidePress
       >
-        <TextInput
-          value={name}
-          onChange={updateName}
-          placeholderTx="project-name"
-        />
-        <InlineRow>
-          <StyledTextButton
-            labelTx="cancel"
-            handlePress={clearInputsAndClose}
+        <StyledForm onSubmit={handleFormSubmit}>
+          <TextInput
+            autoFocus
+            value={name}
+            onChange={updateName}
+            placeholderTx="project-name"
           />
-          <StyledTextButton labelTx="create" handlePress={handleCreation} />
-        </InlineRow>
+          <InlineRow>
+            <StyledTextButton
+              labelTx="cancel"
+              handlePress={clearInputsAndClose}
+            />
+            <StyledTextButton
+              type="submit"
+              labelTx="create"
+              isDisabled={isSubmitDisabled}
+            />
+          </InlineRow>
+        </StyledForm>
       </ProjectCreationPopupContainer>
     );
   },
