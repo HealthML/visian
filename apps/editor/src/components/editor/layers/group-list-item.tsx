@@ -1,17 +1,17 @@
-import { FixedWidthListItem, ILayerFamily } from "@visian/ui-shared";
+import { FullWidthListItem, ILayerFamily } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
 import { useCallback } from "react";
 
 export const FamilyListItem = observer<{
   family: ILayerFamily;
   isActive: boolean;
-  isLast: boolean | undefined;
+  isLast?: boolean;
 }>(({ family, isActive, isLast }) => {
   const toggleCollapse = useCallback(() => {
     family.collapsed = !family.collapsed;
   }, [family]);
   return (
-    <FixedWidthListItem
+    <FullWidthListItem
       icon={family.collapsed ? "arrowRight" : "arrowDown"}
       onClick={toggleCollapse}
       labelTx={family.title}

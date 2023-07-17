@@ -229,8 +229,12 @@ export interface ILayerFamily {
   isActive: boolean;
   /** Returns `true` if the family has changes. */
   hasChanges: boolean;
-  /** Adds a layer to the family, the layer is removed from its previous family */
-  addLayer(id: string, idx?: number): void;
-  /** Removes a layer from the family making it an orphan */
-  removeLayer(id: string, idx?: number): void;
+  /** Adds a layer with specified id to the family at the specified index, the layer is removed from its previous family.
+   * If no index and the layer is already in the family, the layer's position remains unchanged.
+   * If no index is specified and the layer is not part of the family, the layer is inserted at the beginning. */
+  addLayer(id: string, index?: number): void;
+  /** Removes a layer from the family making it an orphan.
+   * After being removed, the layer is added to the document at the specified index.
+   */
+  removeLayer(id: string, index?: number): void;
 }

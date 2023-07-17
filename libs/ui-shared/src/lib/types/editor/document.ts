@@ -38,8 +38,7 @@ export interface IDocument {
   /**
    * The document's layer and layer Family stack.
    * This contains all layers and all layerFamilies, sorted by their renderingOrder
-   * layerFamilies are followed by the layers within that family
-   * top-to-bottom
+   * layerFamilies are followed by the layers within that family top-to-bottom
    */
   flatRenderingOrder: (ILayer | ILayerFamily)[];
 
@@ -66,7 +65,7 @@ export interface IDocument {
   mainImageLayer?: Reference<IImageLayer>;
 
   /** The families of layers e.g. for grouping layers by file */
-  layerFamilies: ILayerFamily[] | undefined;
+  layerFamilies?: ILayerFamily[];
 
   /** The document's history. */
   history: IHistory;

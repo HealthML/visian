@@ -344,7 +344,7 @@ export class Document
   }
 
   public getLayerFamily(id: string): ILayerFamily | undefined {
-    return id ? this.layerFamilyMap[id] : undefined;
+    return this.layerFamilyMap[id];
   }
 
   public setActiveLayer = (idOrLayer?: string | ILayer): void => {
@@ -366,12 +366,12 @@ export class Document
   public setMeasurementType = (measurementType: MeasurementType) => {
     this.measurementType = measurementType;
   };
-  /** Ensures consistency of layerIds, should be called whenever a layer is moved or changes family */
-  // if the layer has a family, it will be removed from layerIds
-  // if an index is specified, the family will be inserted at the index
-  // if no index is specified, the family remain where it was if already in the list
-  // if not in the list, annotations will be inserted at the start and images at the end of the list
-  public addLayer = (layer: Layer, idx?: number): void => {
+  /** Ensures consistency of layerIds. addLayer should be called whenever a layer is moved or changes family 
+  if the layer has a family, it will be removed from layerIds
+  if an index is specified, the family will be inserted at the index
+  if no index is specified, the family remain where it was if already in the list
+  if not in the list, annotations will be inserted at the start and images at the end of the list */
+  public addLayer = (layer: Layer, index?: number): void => {
     if (!layer.id) return;
     if (!this.layerMap[layer.id]) {
       this.layerMap[layer.id] = layer;
@@ -381,11 +381,11 @@ export class Document
       if (this.layerIds.includes(layer.id)) {
         this.layerIds = this.layerIds.filter((id) => id !== layer.id);
       }
-    } else if (idx !== undefined) {
+    } else if (index !== undefined) {
       if (oldIndex < 0) {
-        this.layerIds.splice(idx, 0, layer.id);
-      } else if (idx !== oldIndex) {
-        this.layerIds.splice(idx, 0, this.layerIds.splice(oldIndex, 1)[0]);
+        this.layerIds.splice(index, 0, layer.id);
+      } else if (index !== oldIndex) {
+        this.layerIds.splice(index, 0, this.layerIds.splice(oldIndex, 1)[0]);
       }
     } else if (layer.isAnnotation && oldIndex < 0) {
       this.layerIds = this.layerIds.filter((id) => id !== layer.id);
@@ -395,6 +395,7 @@ export class Document
       this.layerIds.push(layer.id);
     }
   };
+
   // if an index is specified, the family will be inserted at the index
   // if no index is specified, the family remain where it was if already in the list or inserted at the start
   public addLayerFamily = (family: LayerFamily, idx?: number): void => {

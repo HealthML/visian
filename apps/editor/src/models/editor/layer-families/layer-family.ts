@@ -45,29 +45,29 @@ export class LayerFamily implements ILayerFamily {
     );
   }
 
-  public addLayer(id: string, idx?: number) {
+  public addLayer(id: string, index?: number) {
     const layer = this.document.getLayer(id);
     if (!layer) return;
     if (layer.family !== this) {
       layer.family?.removeLayer(layer.id);
     }
     const oldIndex = this.layerIds.indexOf(layer.id);
-    if (oldIndex < 0 && idx !== undefined) {
-      this.layerIds.splice(idx, 0, layer.id);
-    } else if (oldIndex < 0 && idx === undefined) {
+    if (oldIndex < 0 && index !== undefined) {
+      this.layerIds.splice(index, 0, layer.id);
+    } else if (oldIndex < 0 && index === undefined) {
       this.layerIds.push(id);
-    } else if (idx !== undefined && oldIndex !== idx) {
-      this.layerIds.splice(idx, 0, this.layerIds.splice(oldIndex, 1)[0]);
+    } else if (index !== undefined && oldIndex !== index) {
+      this.layerIds.splice(index, 0, this.layerIds.splice(oldIndex, 1)[0]);
     }
-    this.document.addLayer(layer, idx);
+    this.document.addLayer(layer, index);
   }
 
-  public removeLayer(id: string, idx?: number) {
+  public removeLayer(id: string, index?: number) {
     if (!this.layerIds.includes(id)) return;
     this.layerIds = this.layerIds.filter((layerId) => layerId !== id);
     const layer = this.document.getLayer(id);
     if (!layer) return;
-    this.document.addLayer(layer, idx);
+    this.document.addLayer(layer, index);
   }
 
   public get isActive() {

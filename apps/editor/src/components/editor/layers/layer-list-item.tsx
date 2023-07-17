@@ -1,7 +1,7 @@
 import {
   ContextMenu,
   ContextMenuItem,
-  FixedWidthListItem,
+  FullWidthListItem,
   IImageLayer,
   ILayer,
   InfoText,
@@ -188,7 +188,7 @@ export const LayerListItem = observer<{
   const node = (
     <Observer>
       {() => (
-        <FixedWidthListItem
+        <FullWidthListItem
           icon={{
             color: layer.color || "text",
             icon:
@@ -220,7 +220,7 @@ export const LayerListItem = observer<{
               titleTx="main-image-layer"
             />
           )}
-        </FixedWidthListItem>
+        </FullWidthListItem>
       )}
     </Observer>
   );

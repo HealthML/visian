@@ -200,6 +200,6 @@ export const ListItem = React.forwardRef<HTMLDivElement, ListItemProps>(
   },
 );
 
-export const FixedWidthListItem = styled(ListItem)`
+export const FullWidthListItem = styled(ListItem)`
   width: 100%;
 `;

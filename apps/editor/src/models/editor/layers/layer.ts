@@ -126,14 +126,14 @@ export class Layer implements ILayer, ISerializable<LayerSnapshot> {
     );
   }
 
-  public setFamily(id: string | undefined, idx?: number): void {
+  public setFamily(id?: string, index?: number): void {
     if (!id) {
-      this.family?.removeLayer(this.id, idx);
-      this.document.addLayer(this, idx);
+      this.family?.removeLayer(this.id, index);
+      this.document.addLayer(this, index);
       return;
     }
     const newFamily = this.document.getLayerFamily(id);
-    newFamily?.addLayer(this.id, idx);
+    newFamily?.addLayer(this.id, index);
   }
 
   public getOrphanAnnotationLayers(): ILayer[] {
