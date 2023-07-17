@@ -15,6 +15,7 @@ import {
 import {
   SimpleTreeItemWrapper,
   SortableTree,
+  TreeItem,
   TreeItemComponentProps,
   TreeItems,
 } from "dnd-kit-sortable-tree";
@@ -152,12 +153,6 @@ const layerToTreeItemData = (layer: ILayer) => ({
   value: layer.id,
   canHaveChildren: false,
 });
-const layerFamilyToTreeItemData = (layerFamily: ILayerFamily) => ({
-  id: layerFamily.id,
-  value: layerFamily.id,
-  children: layerFamily.layers.map((layer) => layerToTreeItemData(layer)),
-  collapsed: layerFamily.collapsed,
-});
 
 export const Layers: React.FC = observer(() => {
   const store = useStore();
@@ -186,6 +181,23 @@ export const Layers: React.FC = observer(() => {
       </ListItem>
     );
   }
+
+  const canHaveFamilyHaveChildren = useCallback(
+    (draggedItem: TreeItem<TreeItemData>) => {
+      const layer = store?.editor.activeDocument?.getLayer(draggedItem.value);
+      return !!layer;
+    },
+    [store?.editor.activeDocument],
+  );
+
+  const layerFamilyToTreeItemData = (layerFamily: ILayerFamily) => ({
+    id: layerFamily.id,
+    value: layerFamily.id,
+    children: layerFamily.layers.map((layer) => layerToTreeItemData(layer)),
+    collapsed: layerFamily.collapsed,
+    canHaveChildren: canHaveFamilyHaveChildren,
+  });
+
   const getTreeItems = useCallback(() => {
     const renderingOrder = store.editor.activeDocument?.renderingOrder;
     if (!renderingOrder) {
