@@ -1,8 +1,8 @@
+import { Project } from "mia-api-client";
 import { useCallback, useState } from "react";
 import styled from "styled-components";
 
 import { useJobsBy } from "../../../queries";
-import { Project } from "../../../types";
 import { JobCreationPopup } from "../job-creation-popup";
 import { JobsTable } from "../job-history/job-table";
 import {

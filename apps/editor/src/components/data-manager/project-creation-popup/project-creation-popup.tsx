@@ -41,7 +41,7 @@ export const ProjectCreationPopup = observer<ProjectCreationPopupProps>(
 
     const handleCreation = useCallback(() => {
       if (name !== "") {
-        onConfirm?.({ name });
+        onConfirm?.(name);
       }
       clearInputsAndClose();
     }, [name, onConfirm, clearInputsAndClose]);

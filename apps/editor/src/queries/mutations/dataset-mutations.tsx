@@ -5,38 +5,41 @@ import { useQuery } from "react-query";
 import { DeleteMutation, UpdateMutation, CreateMutation } from "./mutations";
 import { datasetsApi } from "../hub-base-url";
 
-const datasetsByProjectQueryKey = "datasetsByProject";
-const datasetQueryKey = "dataset";
+const datasetsByProjectQueryBaseKey = "datasetsByProject";
+const datasetQueryBaseKey = "dataset";
 
 export const useDataset = (datasetId: string) =>
   useQuery<Dataset, AxiosError<Dataset>>(
-    [datasetQueryKey, datasetId],
+    [datasetQueryBaseKey, datasetId],
     () =>
       datasetsApi
         .datasetsControllerFindOne(datasetId)
         .then((response) => response.data),
     {
-      retry: 2, // retry twice if fetch fails
-      refetchInterval: 1000 * 60, // refetch every minute
+      retry: 2,
+      refetchInterval: 1000 * 60,
     },
   );
 
 export const useDatasetsByProject = (projectId: string) =>
   useQuery<Dataset[], AxiosError<Dataset[]>>(
-    [datasetsByProjectQueryKey, projectId],
+    [datasetsByProjectQueryBaseKey, projectId],
     () =>
       datasetsApi
         .datasetsControllerFindAll(projectId)
         .then((response) => response.data),
     {
-      retry: 2, // retry twice if fetch fails
-      refetchInterval: 1000 * 30, // refetch every 30 seconds
+      retry: 2,
+      refetchInterval: 1000 * 30,
     },
   );
 
 export const deleteDatasetsMutation = () =>
   DeleteMutation<Dataset>({
-    queryKey: (selectorId: string) => [datasetsByProjectQueryKey, selectorId],
+    queryKey: (selectorId: string) => [
+      datasetsByProjectQueryBaseKey,
+      selectorId,
+    ],
     mutateFn: ({ objectIds }) =>
       datasetsApi
         .datasetsControllerRemoveAll({ ids: objectIds })
@@ -45,9 +48,11 @@ export const deleteDatasetsMutation = () =>
 
 export const updateDatasetMutation = () =>
   UpdateMutation<Dataset, UpdateDatasetDto>({
-    queryKey: (selectorId: string) => [datasetsByProjectQueryKey, selectorId],
-    // eslint-disable-next-line unused-imports/no-unused-vars
-    mutateFn: ({ object, selectorId, updateDto }) =>
+    queryKey: (selectorId: string) => [
+      datasetsByProjectQueryBaseKey,
+      selectorId,
+    ],
+    mutateFn: ({ object, updateDto }) =>
       datasetsApi
         .datasetsControllerUpdate(updateDto, object.id)
         .then((response) => response.data),
@@ -55,9 +60,11 @@ export const updateDatasetMutation = () =>
 
 export const createDatasetMutation = () =>
   CreateMutation<Dataset, CreateDatasetDto>({
-    queryKey: (selectorId: string) => [datasetsByProjectQueryKey, selectorId],
-    // eslint-disable-next-line unused-imports/no-unused-vars
-    mutateFn: ({ createDto, selectorId }) =>
+    queryKey: (selectorId: string) => [
+      datasetsByProjectQueryBaseKey,
+      selectorId,
+    ],
+    mutateFn: ({ createDto }) =>
       datasetsApi
         .datasetsControllerCreate(createDto)
         .then((response) => response.data),

@@ -1,5 +1,5 @@
 import { useTranslation } from "@visian/ui-shared";
-import { Dataset } from "mia-api-client";
+import { Dataset, Project } from "mia-api-client";
 import { useCallback, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
@@ -10,7 +10,6 @@ import {
   updateDatasetMutation,
   useDatasetsByProject,
 } from "../../../queries";
-import { Project } from "../../../types";
 import { ConfirmationPopup } from "../confirmation-popup";
 import { DatasetCreationPopup } from "../dataset-creation-popup";
 import { EditPopup } from "../edit-popup";
