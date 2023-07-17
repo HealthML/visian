@@ -39,7 +39,7 @@ export const DatasetCreationPopup = observer<DatasetCreationPopupProps>(
 
     const handleCreation = useCallback(() => {
       if (name !== "") {
-        onConfirm?.({ name });
+        onConfirm?.(name);
       }
       clearInputsAndClose();
     }, [name, onConfirm, clearInputsAndClose]);

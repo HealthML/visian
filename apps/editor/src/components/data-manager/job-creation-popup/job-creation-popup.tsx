@@ -13,12 +13,16 @@ import { observer } from "mobx-react-lite";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import styled from "styled-components";
 
+import { JobCreationPopUpProps } from "./job-creation-popup.props";
 import { useStore } from "../../../app/root-store";
-import { postJob, useImagesByDataset, useMlModels } from "../../../queries";
-import { useDatasetsBy } from "../../../queries/use-datasets-by";
+import {
+  postJob,
+  useDatasetsByProject,
+  useImagesByDataset,
+  useMlModels,
+} from "../../../queries";
 import { ProjectDataExplorer } from "../project-data-explorer";
 import { useImageSelection } from "../util";
-import { JobCreationPopUpProps } from "./job-creation-popup.props";
 
 const JobCreationPopupContainer = styled(PopUp)`
   align-items: left;
@@ -132,8 +136,12 @@ export const JobCreationPopup = observer<JobCreationPopUpProps>(
       [mlModels, selectedModelName, selectedModelVersion],
     );
 
-    const { datasets, datasetsError, isErrorDatasets, isLoadingDatasets } =
-      useDatasetsBy(projectId);
+    const {
+      data: datasets,
+      error: datasetsError,
+      isError: isErrorDatasets,
+      isLoading: isLoadingDatasets,
+    } = useDatasetsByProject(projectId);
 
     const [selectedDataset, setSelectedDataset] = useState(openWithDatasetId);
 

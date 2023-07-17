@@ -1,14 +1,16 @@
 import { useTranslation } from "@visian/ui-shared";
+import { Dataset } from "mia-api-client";
 import { useCallback, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 
-import { deleteDatasetsMutation } from "../../../queries";
-import useDatasetsBy, {
-  useCreateDatasetMutation,
-  useUpdateDatasetsMutation,
-} from "../../../queries/use-datasets-by";
-import { Dataset, Project } from "../../../types";
+import {
+  createDatasetMutation,
+  deleteDatasetsMutation,
+  updateDatasetMutation,
+  useDatasetsByProject,
+} from "../../../queries";
+import { Project } from "../../../types";
 import { ConfirmationPopup } from "../confirmation-popup";
 import { DatasetCreationPopup } from "../dataset-creation-popup";
 import { EditPopup } from "../edit-popup";
@@ -30,14 +32,16 @@ export const DatasetsSection = ({ project }: { project: Project }) => {
   const { t: translate } = useTranslation();
   const navigate = useNavigate();
 
-  const { datasets, isLoadingDatasets, datasetsError } = useDatasetsBy(
-    project.id,
-  );
+  const {
+    data: datasets,
+    isLoading: isLoadingDatasets,
+    isError: isDatasetsError,
+  } = useDatasetsByProject(project.id);
   const [datasetTobBeDeleted, setDatasetTobBeDeleted] = useState<Dataset>();
   const [datasetToBeUpdated, setDatasetToBeUpdated] = useState<Dataset>();
   const deleteDatasetMutation = deleteDatasetsMutation();
-  const { createDataset } = useCreateDatasetMutation();
-  const updateDataset = useUpdateDatasetsMutation();
+  const createDataset = createDatasetMutation();
+  const updateDataset = updateDatasetMutation();
 
   // Delete Dataset Confirmation
   const [
@@ -102,7 +106,11 @@ export const DatasetsSection = ({ project }: { project: Project }) => {
   }, [datasetTobBeDeleted, deleteDatasetMutation, project]);
 
   const confirmCreateDataset = useCallback(
-    (newDatasetDto) => createDataset({ ...newDatasetDto, project: project.id }),
+    (newName: string) =>
+      createDataset.mutate({
+        createDto: { name: newName, project: project.id },
+        selectorId: project.id,
+      }),
     [createDataset, project],
   );
 
@@ -116,7 +124,7 @@ export const DatasetsSection = ({ project }: { project: Project }) => {
   }, [setIsGridView]);
 
   let datasetsInfoTx;
-  if (datasetsError) datasetsInfoTx = "datasets-loading-failed";
+  if (isDatasetsError) datasetsInfoTx = "datasets-loading-failed";
   else if (datasets && datasets.length === 0)
     datasetsInfoTx = "no-datasets-available";
 
@@ -125,7 +133,7 @@ export const DatasetsSection = ({ project }: { project: Project }) => {
       titleTx="datasets"
       isLoading={isLoadingDatasets}
       infoTx={datasetsInfoTx}
-      showActions={!datasetsError}
+      showActions={!isDatasetsError}
       actions={
         <Container>
           <StyledIconButton
@@ -180,7 +188,11 @@ export const DatasetsSection = ({ project }: { project: Project }) => {
           isOpen={isEditPopupOpen}
           onClose={closeEditPopup}
           onConfirm={(newName) =>
-            updateDataset.mutate({ ...datasetToBeUpdated, name: newName })
+            updateDataset.mutate({
+              object: datasetToBeUpdated,
+              updateDto: { name: newName, project: datasetToBeUpdated.project },
+              selectorId: datasetToBeUpdated.project,
+            })
           }
         />
       )}

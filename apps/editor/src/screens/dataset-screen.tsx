@@ -13,7 +13,11 @@ export const DatasetScreen: React.FC = observer(() => {
   const { t: translate } = useTranslation();
 
   const datasetId = useParams().datasetId || "";
-  const { dataset, isErrorDataset, isLoadingDataset } = useDataset(datasetId);
+  const {
+    data: dataset,
+    isError: isErrorDataset,
+    isLoading: isLoadingDataset,
+  } = useDataset(datasetId);
 
   const [isDraggedOver, { onDrop, ...dragListeners }] = useIsDraggedOver();
 
