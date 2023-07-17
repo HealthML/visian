@@ -44,6 +44,7 @@ export abstract class ReviewStrategy {
 
   protected abstract buildTask(): Promise<void>;
 
+  protected abstract importAnnotations(): Promise<void>;
   private async importImages(): Promise<void> {
     const imageFiles = await this.task?.getImageFiles();
     if (!imageFiles) throw new Error("Image files not found");
@@ -54,7 +55,9 @@ export abstract class ReviewStrategy {
     );
   }
 
-  protected async importAnnotations(): Promise<void> {
+  protected async importAnnotationsWithMetadata(
+    getMetadataFromChild: boolean,
+  ): Promise<void> {
     if (!this.task?.annotationIds) return;
     await Promise.all(
       this.task?.annotationIds.map(async (annotationId, idx) => {
@@ -66,7 +69,9 @@ export abstract class ReviewStrategy {
         const familyFiles = this.store.editor.activeDocument?.createLayerFamily(
           annotationFiles,
           `Annotation ${idx + 1}`,
-          { ...annotationFiles[0]?.metadata },
+          getMetadataFromChild
+            ? { ...annotationFiles[0]?.metadata }
+            : { id: annotationId },
         );
         if (!familyFiles) throw new Error("No active Document");
 

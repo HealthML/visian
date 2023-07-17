@@ -39,7 +39,7 @@ export class Layer implements ILayer, ISerializable<LayerSnapshot> {
 
   public transformation!: Matrix4;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public metaData?: { id: string; [key: string]: any } | undefined;
+  public metadata?: { id: string; [key: string]: any } | undefined;
 
   constructor(
     snapshot: Partial<LayerSnapshot> | undefined,
@@ -76,7 +76,7 @@ export class Layer implements ILayer, ISerializable<LayerSnapshot> {
         setColor: action,
         setIsVisible: action,
         setOpacity: action,
-        setMetaData: action,
+        setMetadata: action,
         resetSettings: action,
         setTransformation: action,
         delete: action,
@@ -187,8 +187,8 @@ export class Layer implements ILayer, ISerializable<LayerSnapshot> {
   };
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public setMetaData = (value?: { id: string; [key: string]: any }): void => {
-    this.metaData = value;
+  public setMetadata = (value?: { id: string; [key: string]: any }): void => {
+    this.metadata = value;
   };
 
   /**

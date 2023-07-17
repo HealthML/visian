@@ -152,4 +152,8 @@ export class MiaReviewStrategy extends ReviewStrategy {
       }) ?? [],
     );
   }
+
+  public async importAnnotations(): Promise<void> {
+    await this.importAnnotationsWithMetadata(true);
+  }
 }
