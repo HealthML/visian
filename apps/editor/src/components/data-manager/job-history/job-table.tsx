@@ -14,30 +14,10 @@ import { Job } from "mia-api-client";
 import { getDisplayDate } from "../util/display-date";
 import { JobStatusBadge } from "./job-status-badge/job-status-badge";
 
-type DisplayableJob = Omit<Job, "updatedAt" | "createdAt"> & {
-  updatedAt: string | undefined;
-  createdAt: string | undefined;
-};
-
 const BadgeContainer = styled.div`
   width: 10em;
 `;
 
-function getDisplayJob(job: Job): DisplayableJob {
-  const displayJob: DisplayableJob = {
-    ...job,
-    modelVersion: `v${job.modelVersion}`,
-    createdAt: getDisplayDate(job.createdAt),
-    updatedAt: getDisplayDate(job.updatedAt),
-  };
-  return displayJob;
-  // return {
-  // ...job,
-  // modelVersion: `v${job.modelVersion}`,
-  // startedAt: job.startedAt ? getDisplayDate(job.startedAt) : undefined,
-  // finishedAt: job.finishedAt ? getDisplayDate(job.finishedAt) : undefined,
-  // };
-}
 function transfromDate(date?: Date) {
   return date ? getDisplayDate(date) : undefined;
 }
