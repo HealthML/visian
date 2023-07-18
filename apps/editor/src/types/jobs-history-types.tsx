@@ -1,5 +1,6 @@
 export interface Job {
   id: string;
+  name: string;
   modelName: string;
   modelVersion: string;
   startedAt: string | undefined;

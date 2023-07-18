@@ -5,6 +5,7 @@ import {
   space,
   SubtleText,
   Text,
+  TimerButton,
   useTranslation,
 } from "@visian/ui-shared";
 import { useCallback, useState } from "react";
@@ -66,6 +67,13 @@ const IconButton = styled(InvisibleButton)`
   width: 30px;
 `;
 
+const StyledTimerButton = styled(TimerButton)`
+  width: 30px;
+`;
+
+const Spacer = styled.div`
+  width: 5px;
+`;
 export const JobPage = ({ job }: { job: Job }) => {
   const { progress, isLoadingProgress } = useJobProgress(job.id);
 
@@ -181,10 +189,13 @@ export const JobPage = ({ job }: { job: Job }) => {
     ? getDisplayDate(new Date(job.finishedAt))
     : "";
 
+  const copyJobId = useCallback(() => {
+    navigator.clipboard.writeText(job.id);
+  }, [job.id]);
   return (
     <Container>
       <PageTitle
-        title={t("job-title", { date: startedAt })}
+        title={job.name}
         labelTx="job"
         backPath={`/projects/${job.project}`}
       />
@@ -212,6 +223,23 @@ export const JobPage = ({ job }: { job: Job }) => {
             element: (
               <PageSection titleTx="job-details">
                 <DetailsSheet>
+                  <DetailsRow
+                    text="ID"
+                    content={
+                      <>
+                        <Text text={`${job.id.substring(0, 7)}...`} />
+                        <Spacer />
+                        <StyledTimerButton
+                          icon="copyClipboard"
+                          tooltipTx="copy"
+                          onClick={copyJobId}
+                          tooltipPosition="right"
+                          secondIcon="check"
+                          secondTooltipTx="copied"
+                        />
+                      </>
+                    }
+                  />
                   <DetailsRow
                     tx="job-status"
                     content={
