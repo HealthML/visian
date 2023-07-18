@@ -16,13 +16,13 @@ import styled from "styled-components";
 import { JobCreationPopUpProps } from "./job-creation-popup.props";
 import { useStore } from "../../../app/root-store";
 import {
-  postJob,
   useDatasetsByProject,
   useImagesByDataset,
   useMlModels,
 } from "../../../queries";
 import { ProjectDataExplorer } from "../project-data-explorer";
 import { useImageSelection } from "../util";
+import { jobsApi } from "../../../queries";
 
 const JobCreationPopupContainer = styled(PopUp)`
   align-items: left;
@@ -149,8 +149,11 @@ export const JobCreationPopup = observer<JobCreationPopUpProps>(
       setSelectedDataset(openWithDatasetId);
     }, [openWithDatasetId]);
 
-    const { images, isErrorImages, isLoadingImages } =
-      useImagesByDataset(selectedDataset);
+    const {
+      data: images,
+      isError: isErrorImages,
+      isLoading: isLoadingImages,
+    } = useImagesByDataset(selectedDataset);
 
     const selectDataset = useCallback((datasetId: string) => {
       setSelectedDataset(datasetId);
@@ -182,7 +185,14 @@ export const JobCreationPopup = observer<JobCreationPopUpProps>(
         }
 
         try {
-          await postJob(imageSelection, selectedModel, projectId);
+          await jobsApi
+            .jobsControllerCreate({
+              images: imageSelection,
+              modelName: selectedModel.name,
+              modelVersion: selectedModel.version,
+              project: projectId,
+            })
+            .then((response) => response.data);
           refetchJobs?.();
           onClose?.();
         } catch (error) {

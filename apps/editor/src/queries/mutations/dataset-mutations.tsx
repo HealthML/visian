@@ -1,5 +1,10 @@
 import { AxiosError } from "axios";
-import { Dataset, UpdateDatasetDto, CreateDatasetDto } from "mia-api-client";
+import {
+  Dataset,
+  UpdateDatasetDto,
+  CreateDatasetDto,
+  Progress,
+} from "mia-api-client";
 import { useQuery } from "react-query";
 
 import { DeleteMutation, UpdateMutation, CreateMutation } from "./mutations";
@@ -7,6 +12,7 @@ import { datasetsApi } from "../hub-base-url";
 
 const datasetsByProjectQueryBaseKey = "datasetsByProject";
 const datasetQueryBaseKey = "dataset";
+const datasetProgressQueryBaseKey = "datasetProgress";
 
 export const useDataset = (datasetId: string) =>
   useQuery<Dataset, AxiosError<Dataset>>(
@@ -31,6 +37,19 @@ export const useDatasetsByProject = (projectId: string) =>
     {
       retry: 2,
       refetchInterval: 1000 * 30,
+    },
+  );
+
+export const useDatasetProgress = (datasetId: string) =>
+  useQuery<Progress, AxiosError<Progress>>(
+    [datasetProgressQueryBaseKey, datasetId],
+    async () =>
+      datasetsApi
+        .datasetsControllerProgress(datasetId)
+        .then((response) => response.data),
+    {
+      retry: 2,
+      refetchInterval: 1000 * 5,
     },
   );
 

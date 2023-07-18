@@ -1,4 +1,4 @@
-import { Image } from "../../../types";
+import { Image } from "mia-api-client";
 
 const multiSelection = (
   currentImageIndex: number,

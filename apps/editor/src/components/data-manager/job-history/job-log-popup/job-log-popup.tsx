@@ -3,9 +3,9 @@ import { observer } from "mobx-react-lite";
 import { useEffect, useState } from "react";
 import styled from "styled-components";
 
-import { getJobLog } from "../../../../queries";
-import { Job } from "../../../../types";
+import { Job } from "mia-api-client";
 import { JobLogPopUpProps } from "./job-log-popup.props";
+import { jobsApi } from "../../../../queries";
 
 const PopUpContainer = styled(PopUp)`
   align-items: left;
@@ -26,7 +26,9 @@ const getLogText = async (job: Job) => {
   let logText = "";
   if (job.logFileUri) {
     try {
-      logText = await getJobLog(job.id);
+      logText = await jobsApi
+        .jobsControllerGetFile(job.id, { responseType: "text" })
+        .then((response) => response.data as unknown as string);
     } catch (e) {
       logText = "Error fetching job log file";
     }

@@ -1,16 +1,14 @@
 import {
   getAnnotation,
   getAnnotationsByJobAndImage,
-  getImagesByDataset,
-  getImagesByJob,
   patchAnnotation,
 } from "../../queries";
-import { getImage } from "../../queries/get-image";
-import { Image } from "../../types";
+import { Image } from "mia-api-client";
 import { RootStore } from "../root";
 import { MiaReviewTask } from "./mia-review-task";
 import { ReviewStrategy } from "./review-strategy";
 import { TaskType } from "./review-task";
+import { imagesApi } from "../../queries";
 
 export class MiaReviewStrategy extends ReviewStrategy {
   public static async fromDataset(
@@ -19,7 +17,9 @@ export class MiaReviewStrategy extends ReviewStrategy {
     returnUrl?: string,
     taskType?: TaskType,
   ) {
-    const images = await getImagesByDataset(datasetId);
+    const images = await imagesApi
+      .imagesControllerFindAll(datasetId)
+      .then((response) => response.data);
     return new MiaReviewStrategy({ store, images, taskType, returnUrl });
   }
 
@@ -29,7 +29,9 @@ export class MiaReviewStrategy extends ReviewStrategy {
     returnUrl?: string,
     taskType?: TaskType,
   ) {
-    const images = await getImagesByJob(jobId);
+    const images = await imagesApi
+      .imagesControllerFindAll(undefined, jobId)
+      .then((response) => response.data);
     return new MiaReviewStrategy({ store, images, jobId, taskType, returnUrl });
   }
 
@@ -41,7 +43,11 @@ export class MiaReviewStrategy extends ReviewStrategy {
     allowedAnnotations?: string[],
   ) {
     const images = await Promise.all(
-      imageIds.map(async (imageId) => getImage(imageId)),
+      imageIds.map(async (imageId) =>
+        imagesApi
+          .imagesControllerFindOne(imageId)
+          .then((response) => response.data),
+      ),
     );
     return new MiaReviewStrategy({
       store,
@@ -59,7 +65,9 @@ export class MiaReviewStrategy extends ReviewStrategy {
     taskType?: TaskType,
   ) {
     const annotation = await getAnnotation(annotationId);
-    const image = await getImage(annotation.image);
+    const image = await imagesApi
+      .imagesControllerFindOne(annotation.image)
+      .then((response) => response.data);
     return new MiaReviewStrategy({
       store,
       images: [image],

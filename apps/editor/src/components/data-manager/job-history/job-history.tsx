@@ -3,7 +3,7 @@ import { useCallback, useState } from "react";
 import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
-import useJobsBy from "../../../queries/use-jobs-by";
+import { useJobsByProject } from "../../../queries";
 import { JobCreationPopup } from "../job-creation-popup";
 import { JobsTable } from "./job-table";
 
@@ -37,7 +37,7 @@ export const JobHistory = ({
 }) => {
   const store = useStore();
 
-  const { jobs, refetchJobs } = useJobsBy(projectId);
+  const { data: jobs, refetch: refetchJobs } = useJobsByProject(projectId);
 
   // Model selection popup
   const [isModelSelectionPopUpOpen, setIsModelSelectionPopUpOpen] =

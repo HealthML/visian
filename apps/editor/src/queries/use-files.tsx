@@ -2,8 +2,7 @@ import axios from "axios";
 import path from "path";
 
 import { Annotation, FileWithMetadata } from "../types";
-import { getImage } from "./get-image";
-import { hubBaseUrl } from "./hub-base-url";
+import { hubBaseUrl, imagesApi } from "./hub-base-url";
 import { getAnnotation } from "./use-annotations-by";
 
 const fetchFile = async (
@@ -26,7 +25,9 @@ const fetchFile = async (
 export const fetchImageFile = async (
   imageId: string,
 ): Promise<FileWithMetadata> => {
-  const image = await getImage(imageId);
+  const image = await imagesApi
+    .imagesControllerFindOne(imageId)
+    .then((response) => response.data);
   const fileName: string = path.basename(image.dataUri);
   const imageFile = (await fetchFile(
     image.id,

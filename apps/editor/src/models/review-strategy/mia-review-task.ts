@@ -7,7 +7,8 @@ import {
   patchAnnotationFile,
   postAnnotationFile,
 } from "../../queries";
-import { Annotation, FileWithMetadata, Image } from "../../types";
+import { Annotation, FileWithMetadata } from "../../types";
+import { Image } from "mia-api-client";
 import { ReviewTask, TaskType } from "./review-task";
 
 export class MiaReviewTask implements ReviewTask {

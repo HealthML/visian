@@ -7,11 +7,11 @@ import { useStore } from "../../../app/root-store";
 import { MiaReviewStrategy } from "../../../models/review-strategy";
 import {
   useDeleteAnnotationsForImageMutation,
-  useDeleteImagesMutation,
+  deleteImagesMutation,
   useImagesByDataset,
 } from "../../../queries";
-import { useDatasetProgress } from "../../../queries/use-dataset-progress";
-import { Annotation, Image } from "../../../types";
+import { useDatasetProgress } from "../../../queries";
+import { Annotation } from "../../../types";
 import { AnnotationProgress } from "../annotation-progress";
 import { ConfirmationPopup } from "../confirmation-popup";
 import { DatasetImageList } from "../dataset-image-list";
@@ -22,7 +22,7 @@ import { PageSection } from "../page-section";
 import { PageTitle } from "../page-title";
 import { useImageSelection, usePopUpState } from "../util";
 
-import { Dataset } from "mia-api-client";
+import { Dataset, Image } from "mia-api-client";
 
 const StyledSheet = styled(Sheet)`
   padding: ${space("listPadding")};
@@ -56,10 +56,16 @@ export const DatasetPage = ({
 
   const [isInSelectMode, setIsInSelectMode] = useState(false);
 
-  const { progress, isLoadingProgress } = useDatasetProgress(dataset.id);
+  const { data: progress, isLoading: isLoadingProgress } = useDatasetProgress(
+    dataset.id,
+  );
 
-  const { images, imagesError, isLoadingImages, refetchImages } =
-    useImagesByDataset(dataset.id);
+  const {
+    data: images,
+    error: imagesError,
+    isLoading: isLoadingImages,
+    refetch: refetchImages,
+  } = useImagesByDataset(dataset.id);
 
   const { selectedImages, setSelectedImages, setImageSelection } =
     useImageSelection();
@@ -77,7 +83,7 @@ export const DatasetPage = ({
     [images, setSelectedImages],
   );
 
-  const { deleteImages } = useDeleteImagesMutation(dataset.id);
+  const { mutate: deleteImages } = deleteImagesMutation();
 
   const { deleteAnnotations } = useDeleteAnnotationsForImageMutation();
 
@@ -150,8 +156,8 @@ export const DatasetPage = ({
   }, [setImageImportPopUpOpenWith, dataset, onDropCompleted]);
 
   const deleteSelectedImages = useCallback(() => {
-    deleteImages(Array.from(selectedImages));
-  }, [selectedImages, deleteImages]);
+    deleteImages({ objectIds: [...selectedImages], selectorId: dataset.id });
+  }, [deleteImages, selectedImages, dataset]);
 
   const deleteAnnotation = useCallback(
     (annotation: Annotation) => {
@@ -179,11 +185,14 @@ export const DatasetPage = ({
 
   const handleImageConfirmation = useCallback(() => {
     if (imageTobBeDeleted) {
-      deleteImages([imageTobBeDeleted.id]);
+      deleteImages({
+        objectIds: [imageTobBeDeleted.id],
+        selectorId: dataset.id,
+      });
     } else {
       deleteSelectedImages();
     }
-  }, [imageTobBeDeleted, deleteImages, deleteSelectedImages]);
+  }, [imageTobBeDeleted, deleteImages, dataset, deleteSelectedImages]);
 
   const { t: translate } = useTranslation();
 

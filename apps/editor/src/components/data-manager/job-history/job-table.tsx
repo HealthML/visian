@@ -10,25 +10,36 @@ import { useCallback, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 
-import { Job } from "../../../types";
+import { Job } from "mia-api-client";
 import { getDisplayDate } from "../util/display-date";
 import { JobStatusBadge } from "./job-status-badge/job-status-badge";
+
+type DisplayableJob = Omit<Job, "updatedAt" | "createdAt"> & {
+  updatedAt: string | undefined;
+  createdAt: string | undefined;
+};
 
 const BadgeContainer = styled.div`
   width: 10em;
 `;
 
-function getDisplayJob(job: Job): Job {
-  return {
+function getDisplayJob(job: Job): DisplayableJob {
+  const displayJob: DisplayableJob = {
     ...job,
     modelVersion: `v${job.modelVersion}`,
-    startedAt: job.startedAt
-      ? getDisplayDate(new Date(job.startedAt))
-      : undefined,
-    finishedAt: job.finishedAt
-      ? getDisplayDate(new Date(job.finishedAt))
-      : undefined,
+    createdAt: getDisplayDate(job.createdAt),
+    updatedAt: getDisplayDate(job.updatedAt),
   };
+  return displayJob;
+  // return {
+  // ...job,
+  // modelVersion: `v${job.modelVersion}`,
+  // startedAt: job.startedAt ? getDisplayDate(job.startedAt) : undefined,
+  // finishedAt: job.finishedAt ? getDisplayDate(job.finishedAt) : undefined,
+  // };
+}
+function transfromDate(date?: Date) {
+  return date ? getDisplayDate(date) : undefined;
 }
 
 const columnHelper = createColumnHelper<Job>();
@@ -40,17 +51,17 @@ const columns = [
   }),
   columnHelper.accessor("modelVersion", {
     header: () => <HeaderLabel tx="job-model-version" />,
-    cell: (props) => <ListItemLabel text={props.getValue()} />,
+    cell: (props) => <ListItemLabel text={`v${props.getValue()}`} />,
   }),
   columnHelper.accessor("startedAt", {
     header: () => <HeaderLabel tx="job-started" />,
-    cell: (props) => <ListItemLabel text={props.getValue()} />,
+    cell: (props) => <ListItemLabel text={transfromDate(props.getValue())} />,
     sortingFn: "datetime",
     sortUndefined: -1,
   }),
   columnHelper.accessor("finishedAt", {
     header: () => <HeaderLabel tx="job-finished" />,
-    cell: (props) => <ListItemLabel text={props.getValue()} />,
+    cell: (props) => <ListItemLabel text={transfromDate(props.getValue())} />,
     sortingFn: "datetime",
     sortUndefined: -1,
   }),
@@ -69,7 +80,8 @@ const columns = [
   }),
 ];
 export const JobsTable = ({ jobs }: { jobs: Job[] }) => {
-  const data = jobs.map((job: Job) => getDisplayJob(job));
+  // const data = jobs.map((job: Job) => getDisplayJob(job));
+  const data = jobs;
 
   const columnWidths = [20, 10, 25, 25, 20];
 

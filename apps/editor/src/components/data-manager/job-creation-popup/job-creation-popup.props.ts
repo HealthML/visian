@@ -6,7 +6,7 @@ import {
   RefetchQueryFilters,
 } from "react-query";
 
-import { Job } from "../../../types";
+import { Job } from "mia-api-client";
 
 export interface JobCreationPopUpProps extends StatefulPopUpProps {
   projectId: string;
