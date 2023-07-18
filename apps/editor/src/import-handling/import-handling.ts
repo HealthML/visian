@@ -1,7 +1,7 @@
+import { Serverity } from "@visian/ui-shared";
 import { ImageMismatchError } from "@visian/utils";
 
 import { RootStore } from "../models";
-import { Serverity } from "@visian/ui-shared";
 
 const importFilesByType = async (
   files: FileList | FileSystemEntry[],

@@ -1,8 +1,8 @@
+import { Serverity } from "@visian/ui-shared";
 import { action, makeObservable, observable } from "mobx";
 
 import { RootStore } from "../root";
 import { ReviewTask } from "./review-task";
-import { Serverity } from "@visian/ui-shared";
 
 export abstract class ReviewStrategy {
   protected store: RootStore;
