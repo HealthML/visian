@@ -78,8 +78,12 @@ export const JobCreationPopup = observer<JobCreationPopUpProps>(
   }) => {
     const store = useStore();
 
-    const { mlModels, mlModelsError, isErrorMlModels, isLoadingMlModels } =
-      useMlModels();
+    const {
+      data: mlModels,
+      error: mlModelsError,
+      isError: isErrorMlModels,
+      isLoading: isLoadingMlModels,
+    } = useMlModels();
 
     const [selectedModelName, setSelectedModelName] = useState(
       (mlModels && mlModels[0]?.name) || "",
