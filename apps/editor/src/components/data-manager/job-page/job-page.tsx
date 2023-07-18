@@ -156,10 +156,10 @@ export const JobPage = ({ job }: { job: Job }) => {
   const startReviewJob = useCallback(
     async (annotationId?: string) => {
       store?.startReview(
-        async (url: string) =>
+        async () =>
           annotationId
-            ? MiaReviewStrategy.fromAnnotationId(store, annotationId, url)
-            : MiaReviewStrategy.fromJob(store, job.id, url),
+            ? MiaReviewStrategy.fromAnnotationId(store, annotationId)
+            : MiaReviewStrategy.fromJob(store, job.id),
         navigate,
       );
     },
