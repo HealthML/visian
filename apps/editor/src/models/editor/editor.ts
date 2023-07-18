@@ -11,6 +11,7 @@ import {
   ISliceRenderer,
   IVolumeRenderer,
   PerformanceMode,
+  Serverity,
   Theme,
 } from "@visian/ui-shared";
 import { IDisposable, ISerializable } from "@visian/utils";
@@ -181,6 +182,7 @@ export class Editor
       this.setPerformanceMode(snapshot?.performanceMode);
     } else {
       this.context.setError({
+        serverity: Serverity.error,
         titleTx: "browser-error",
         descriptionTx: "no-webgl-2-error",
       });

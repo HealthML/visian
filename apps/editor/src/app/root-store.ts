@@ -1,4 +1,4 @@
-import { i18n, LocalForageBackend } from "@visian/ui-shared";
+import { i18n, LocalForageBackend, Serverity } from "@visian/ui-shared";
 import { isFromWHO, readFileFromURL } from "@visian/utils";
 import React from "react";
 
@@ -49,6 +49,7 @@ export const setupRootStore = async () => {
       }
     } catch {
       store.setError({
+        serverity: Serverity.error,
         titleTx: "import-error",
         descriptionTx: "remote-file-error",
       });

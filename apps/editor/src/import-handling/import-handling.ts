@@ -1,6 +1,7 @@
 import { ImageMismatchError } from "@visian/utils";
 
 import { RootStore } from "../models";
+import { Serverity } from "@visian/ui-shared";
 
 const importFilesByType = async (
   files: FileList | FileSystemEntry[],
@@ -40,12 +41,14 @@ const handleImportWithErrors = async (
         await handleImportWithErrors(filesForImport, store, false);
       } else {
         store.setError({
+          serverity: Serverity.error,
           titleTx: "import-error",
           description: error.message,
         });
       }
     } else {
       store.setError({
+        serverity: Serverity.error,
         titleTx: "import-error",
         descriptionTx: (error as Error).message,
       });

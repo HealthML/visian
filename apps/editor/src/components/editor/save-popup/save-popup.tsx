@@ -4,6 +4,7 @@ import {
   ILayer,
   LayerList,
   PopUp,
+  Serverity,
   Text,
   TextField,
   useTranslation,
@@ -170,6 +171,7 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
           ? error.message
           : "annotation-saving-error";
         store?.setError({
+          serverity: Serverity.error,
           titleTx: "saving-error",
           descriptionTx: description,
         });
@@ -241,6 +243,7 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
           error.response?.data?.message ?? error.message ?? description;
       }
       store?.setError({
+        serverity: Serverity.error,
         titleTx: "saving-error",
         descriptionTx: description,
       });

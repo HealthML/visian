@@ -6,6 +6,7 @@ import {
   IEnumParameterOption,
   PopUp,
   SectionHeader,
+  Serverity,
   Text,
   useTranslation,
 } from "@visian/ui-shared";
@@ -167,6 +168,7 @@ export const JobCreationPopup = observer<JobCreationPopUpProps>(
         const selectedModel = findModel();
         if (!selectedModel) {
           store?.setError({
+            serverity: Serverity.error,
             titleTx: "error",
             descriptionTx: "ml-models-not-found-error",
           });
@@ -179,6 +181,7 @@ export const JobCreationPopup = observer<JobCreationPopUpProps>(
           onClose?.();
         } catch (error) {
           store?.setError({
+            serverity: Serverity.error,
             titleTx: "internal-server-error",
             descriptionTx: "job-creation-error",
           });

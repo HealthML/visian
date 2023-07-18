@@ -1,4 +1,4 @@
-import { IImageLayer, ILayerFamily } from "@visian/ui-shared";
+import { IImageLayer, ILayerFamily, Serverity } from "@visian/ui-shared";
 import {
   getWHOTask,
   getWHOTaskIdFromUrl,
@@ -37,6 +37,7 @@ export class WHOReviewStrategy extends ReviewStrategy {
       window.location.href = whoHome;
     } catch {
       this.store?.setError({
+        serverity: Serverity.error,
         titleTx: "export-error",
         descriptionTx: "file-upload-error",
       });
