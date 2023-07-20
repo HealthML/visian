@@ -277,8 +277,8 @@ export class SharedUniforms implements IDisposable {
         if (tools?.regionGrowingRenderer3D.holdsPreview) {
           previewColor = tools.regionGrowingRenderer3D.previewColor;
         }
-        if (tools?.samRenderer.holdsPreview) {
-          previewColor = tools.samRenderer.previewColor;
+        if (tools?.autoSegRenderer.holdsPreview) {
+          previewColor = tools.autoSegRenderer.previewColor;
         }
         if (tools?.thresholdAnnotationRenderer3D.holdsPreview) {
           previewColor = tools.thresholdAnnotationRenderer3D.previewColor;

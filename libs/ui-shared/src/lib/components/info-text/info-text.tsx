@@ -14,6 +14,7 @@ const StyledModal = styled(Modal)`
 const StyledText = styled(Text)<{ isLast?: boolean }>`
   font-size: 13px;
   margin-bottom: ${(props) => (props.isLast ? "0px" : "14px")};
+  white-space: pre-line;
 `;
 
 export const InfoText = observer<InfoTextProps>(

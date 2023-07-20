@@ -1,4 +1,4 @@
-import { IEditor, ISAMTool } from "@visian/ui-shared";
+import { IEditor, IAutoSegTool } from "@visian/ui-shared";
 import {
   getPlaneAxes,
   IDisposable,
@@ -61,7 +61,9 @@ export class SegPrompt extends THREE.Group implements IDisposable {
     if (!document?.mainImageLayer) return;
     if (document?.viewport2D.mainViewType !== this.viewType) return;
 
-    const tool = document.tools.tools["sam-tool"] as ISAMTool | undefined;
+    const tool = document.tools.tools["autoseg-tool"] as
+      | IAutoSegTool
+      | undefined;
     if (!tool) return;
 
     const { voxelCount } = document.mainImageLayer.image;
@@ -74,7 +76,7 @@ export class SegPrompt extends THREE.Group implements IDisposable {
     this.editor.sliceRenderer?.lazyRender();
   };
 
-  private updatePoints(tool: ISAMTool, scale: THREE.Vector2) {
+  private updatePoints(tool: IAutoSegTool, scale: THREE.Vector2) {
     const points: THREE.Vector2[] = [];
     const pointStates: number[] = [];
     tool.foregroundPoints.forEach((point) => {
@@ -98,7 +100,7 @@ export class SegPrompt extends THREE.Group implements IDisposable {
     );
   }
 
-  private updateBoundingBox(tool: ISAMTool, scale: THREE.Vector2) {
+  private updateBoundingBox(tool: IAutoSegTool, scale: THREE.Vector2) {
     const linePoints: THREE.Vector2[] = [];
 
     if (tool.orderedBoundingBox) {

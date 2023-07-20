@@ -8,7 +8,7 @@ import {
   ImageLayer,
   MeasurementTool,
   RootStore,
-  SAMTool,
+  AutoSegTool,
   SmartBrush3D,
   ThresholdAnnotationTool,
 } from "../models";
@@ -489,9 +489,11 @@ export const generalHotkeys: IHotkey[] = [
         ).submit();
       }
 
-      if (store.editor.activeDocument?.tools.samRenderer.holdsPreview) {
+      if (store.editor.activeDocument?.tools.autoSegRenderer.holdsPreview) {
         (
-          store.editor.activeDocument?.tools.tools["sam-tool"] as SAMTool
+          store.editor.activeDocument?.tools.tools[
+            "autoseg-tool"
+          ] as AutoSegTool
         ).submit();
       }
     },
@@ -545,11 +547,16 @@ export const generalHotkeys: IHotkey[] = [
       }
 
       if (
-        (store.editor.activeDocument?.tools.tools["sam-tool"] as SAMTool)
-          .isActive
+        (
+          store.editor.activeDocument?.tools.tools[
+            "autoseg-tool"
+          ] as AutoSegTool
+        ).isActive
       ) {
         (
-          store.editor.activeDocument?.tools.tools["sam-tool"] as SAMTool
+          store.editor.activeDocument?.tools.tools[
+            "autoseg-tool"
+          ] as AutoSegTool
         ).discard();
       }
     },
@@ -569,15 +576,20 @@ export const generalHotkeys: IHotkey[] = [
     viewMode: "2D",
     action: (store) => {
       if (
-        (store.editor.activeDocument?.tools.tools["sam-tool"] as SAMTool)
-          .isActive
+        (
+          store.editor.activeDocument?.tools.tools[
+            "autoseg-tool"
+          ] as AutoSegTool
+        ).isActive
       ) {
         (
-          store.editor.activeDocument?.tools.tools["sam-tool"] as SAMTool
+          store.editor.activeDocument?.tools.tools[
+            "autoseg-tool"
+          ] as AutoSegTool
         ).startBenchmark();
       }
     },
-    labelTx: "sam-benchmark",
+    labelTx: "autoseg-benchmark",
     // We don't set shortcutGuideSection so it doesn't show up in the shortcuts page.
   },
 ];

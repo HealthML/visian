@@ -2,7 +2,7 @@ export * from "./bounded-smart-brush";
 export * from "./circle-brush";
 export * from "./clear-image-tool";
 export * from "./clear-slice-tool";
-export * from "./sam-tool";
+export * from "./autoseg-tool";
 export * from "./crosshair-tool";
 export * from "./dilate-erode-tool";
 export * from "./measurement-tool";

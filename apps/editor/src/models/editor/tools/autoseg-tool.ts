@@ -1,9 +1,9 @@
-import { SamRenderer } from "@visian/rendering";
+import { AutoSegRenderer } from "@visian/rendering";
 import {
   DragPoint,
+  IAutoSegTool,
   IDocument,
   IImageLayer,
-  ISAMTool,
   ITool,
 } from "@visian/ui-shared";
 import { getPlaneAxes, Vector } from "@visian/utils";
@@ -16,12 +16,12 @@ import { getUrlParam } from "../../sam/temp-util";
 import { Tool } from "./tool";
 import { mutateTextureData } from "./utils";
 
-export type SAMToolEmbeddingState = "uninitialized" | "loading" | "ready";
-export type SAMToolBoundingBox = { topLeft: Vector; bottomRight: Vector };
+export type AutoSegToolState = "uninitialized" | "loading" | "ready";
+export type AutoSegToolBoundingBox = { topLeft: Vector; bottomRight: Vector };
 
-export class SAMTool<N extends "sam-tool" = "sam-tool">
+export class AutoSegTool<N extends "autoseg-tool" = "autoseg-tool">
   extends Tool<N>
-  implements ISAMTool
+  implements IAutoSegTool
 {
   public readonly excludeFromSnapshotTracking = [
     "renderer",
@@ -48,13 +48,13 @@ export class SAMTool<N extends "sam-tool" = "sam-tool">
   public foregroundPoints: Vector[] = [];
   public backgroundPoints: Vector[] = [];
 
-  constructor(document: IDocument, public renderer: SamRenderer) {
+  constructor(document: IDocument, public renderer: AutoSegRenderer) {
     super(
       {
-        name: "sam-tool" as N,
-        altToolName: "sam-tool" as N,
+        name: "autoseg-tool" as N,
+        altToolName: "autoseg-tool" as N,
         icon: "copilot",
-        labelTx: "sam-tool",
+        labelTx: "autoseg-tool",
         supportedViewModes: ["2D"],
         supportedLayerKinds: ["image"],
         supportAnnotationsOnly: true,
@@ -80,24 +80,27 @@ export class SAMTool<N extends "sam-tool" = "sam-tool">
       { fireImmediately: true },
     );
 
-    makeObservable<SAMTool, "imageLayer" | "viewType" | "sliceNumber">(this, {
-      embeddingState: computed,
-      imageLayer: computed,
-      viewType: computed,
-      sliceNumber: computed,
+    makeObservable<AutoSegTool, "imageLayer" | "viewType" | "sliceNumber">(
+      this,
+      {
+        embeddingState: computed,
+        imageLayer: computed,
+        viewType: computed,
+        sliceNumber: computed,
 
-      isInRightClickMode: observable,
-      boundingBoxStart: observable,
-      boundingBoxEnd: observable,
-      foregroundPoints: observable,
-      backgroundPoints: observable,
+        isInRightClickMode: observable,
+        boundingBoxStart: observable,
+        boundingBoxEnd: observable,
+        foregroundPoints: observable,
+        backgroundPoints: observable,
 
-      setToRightClickMode: action,
-      setBoundingBoxStart: action,
-      setBoundingBoxEnd: action,
-      setForegroundPoints: action,
-      setBackgroundPoints: action,
-    });
+        setToRightClickMode: action,
+        setBoundingBoxStart: action,
+        setBoundingBoxEnd: action,
+        setForegroundPoints: action,
+        setBackgroundPoints: action,
+      },
+    );
 
     reaction(
       () => [this.boundingBox, this.foregroundPoints, this.backgroundPoints],
@@ -127,7 +130,7 @@ export class SAMTool<N extends "sam-tool" = "sam-tool">
     return this.document.mainImageLayer;
   }
 
-  public get embeddingState(): SAMToolEmbeddingState {
+  public get embeddingState(): AutoSegToolState {
     if (!this.imageLayer) return "uninitialized";
     if (
       this.sam.hasEmbedding(this.imageLayer, this.viewType, this.sliceNumber)

@@ -2,7 +2,7 @@ import { IImageLayer } from "@visian/ui-shared";
 import { Vector, ViewType } from "@visian/utils";
 import * as ort from "onnxruntime-web";
 
-export type SAMModelBoundingBox = { topLeft: Vector; bottomRight: Vector };
+export type SamBoundingBox = { topLeft: Vector; bottomRight: Vector };
 
 export class EmbeddingCache {
   protected embeddings: Map<string, ort.Tensor> = new Map();

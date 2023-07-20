@@ -4,7 +4,7 @@ import {
   globalListenerTypes,
   IDispatch,
   IMeasurementTool,
-  ISAMTool,
+  IAutoSegTool,
   isFirefox,
   isMac,
   isWindows,
@@ -134,8 +134,8 @@ export const setUpPointerHandling = (
         if (tool.name === "measurement-tool") {
           (tool as IMeasurementTool).setToDeleteMode();
         }
-        if (tool.name === "sam-tool") {
-          (tool as ISAMTool).setToRightClickMode();
+        if (tool.name === "autoseg-tool") {
+          (tool as IAutoSegTool).setToRightClickMode();
         }
 
         tool = tool.altTool;

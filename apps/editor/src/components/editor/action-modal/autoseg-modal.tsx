@@ -12,7 +12,7 @@ import { useCallback } from "react";
 import styled, { keyframes } from "styled-components";
 
 import { useStore } from "../../../app/root-store";
-import type { SAMTool, SAMToolEmbeddingState } from "../../../models";
+import type { AutoSegTool, AutoSegToolState } from "../../../models";
 import {
   MouseIcon,
   ShortcutContainer,
@@ -131,7 +131,7 @@ const shortcuts = (
         <ShortcutLabel tx="drag" />
       </KeyContainer>
       <ShortcutDescriptionContainer>
-        <ShortcutDescription tx="sam-tool-left-drag" />
+        <ShortcutDescription tx="autoseg-tool-left-drag" />
       </ShortcutDescriptionContainer>
     </KeyRow>
     <KeyRow>
@@ -140,7 +140,7 @@ const shortcuts = (
         <ShortcutLabel tx="click" />
       </KeyContainer>
       <ShortcutDescriptionContainer>
-        <ShortcutDescription tx="sam-tool-left" />
+        <ShortcutDescription tx="autoseg-tool-left" />
       </ShortcutDescriptionContainer>
     </KeyRow>
     <KeyRow>
@@ -149,13 +149,13 @@ const shortcuts = (
         <ShortcutLabel tx="click" />
       </KeyContainer>
       <ShortcutDescriptionContainer>
-        <ShortcutDescription tx="sam-tool-right" />
+        <ShortcutDescription tx="autoseg-tool-right" />
       </ShortcutDescriptionContainer>
     </KeyRow>
   </>
 );
 
-export const SAMModal = observer(() => {
+export const AutoSegModal = observer(() => {
   const store = useStore();
 
   const [clickedHint, setClickedHint] = useLocalStorage(
@@ -164,41 +164,45 @@ export const SAMModal = observer(() => {
   );
   const clickHint = useCallback(() => setClickedHint(true), [setClickedHint]);
 
-  const samTool = store?.editor.activeDocument?.tools.tools[
-    "sam-tool"
-  ] as SAMTool;
+  const autoSegTool = store?.editor.activeDocument?.tools.tools[
+    "autoseg-tool"
+  ] as AutoSegTool;
 
   const close = useCallback(() => {
-    samTool.close();
+    autoSegTool.close();
     store?.editor.activeDocument?.tools.setIsCursorOverFloatingUI(false);
-  }, [store, samTool]);
+  }, [store, autoSegTool]);
 
   const accept = useCallback(() => {
-    samTool.submit();
+    autoSegTool.submit();
     store?.editor.activeDocument?.tools.setIsCursorOverFloatingUI(false);
-  }, [store, samTool]);
+  }, [store, autoSegTool]);
 
-  const clear = useCallback(() => samTool.discard(), [samTool]);
+  const clear = useCallback(() => autoSegTool.discard(), [autoSegTool]);
 
-  if (!samTool || !samTool.isActive) return null;
+  if (!autoSegTool || !autoSegTool.isActive) return null;
 
-  const components: { [key in SAMToolEmbeddingState]: JSX.Element } = {
+  const components: { [key in AutoSegToolState]: JSX.Element } = {
     uninitialized: (
       <Status>
-        <SubtleText tx="sam-tool-uninitialized" />
+        <SubtleText tx="autoseg-tool-uninitialized" />
       </Status>
     ),
     loading: (
       <Status>
         <Spinner />
-        <Text tx="sam-tool-initializing" />
+        <Text tx="autoseg-tool-initializing" />
       </Status>
     ),
     ready: (
       <>
-        <SoftButton labelTx="sam-tool-clear" handlePress={clear} icon="reset" />
+        <SoftButton
+          labelTx="autoseg-tool-clear"
+          handlePress={clear}
+          icon="reset"
+        />
         <ActionButton
-          labelTx="sam-tool-accept"
+          labelTx="autoseg-tool-accept"
           isLast
           handlePress={accept}
           icon="checkSmall"
@@ -209,26 +213,22 @@ export const SAMModal = observer(() => {
 
   return (
     <StyledModal
-      labelTx="sam-tool"
+      labelTx="autoseg-tool"
       headerChildren={
         <>
           <HelpText
             titleTx="help"
-            infoTx="sam-tool-help"
+            infoTx="autoseg-tool-help"
             shortcuts={shortcuts}
             onClick={clickHint}
           >
             {clickedHint || <HelpDot key="auto-seg-help" />}
           </HelpText>
-          <ModalHeaderButton
-            icon="xSmall"
-            tooltipTx="sam-tool-close"
-            onPointerDown={close}
-          />
+          <ModalHeaderButton icon="xSmall" onPointerDown={close} />
         </>
       }
     >
-      {components[samTool.embeddingState]}
+      {components[autoSegTool.embeddingState]}
     </StyledModal>
   );
 });

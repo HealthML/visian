@@ -17,7 +17,7 @@ import {
   OverlayLineMaterial,
   OverlayPointsMaterial,
   OverlayRoundedPointsMaterial,
-  OverlaySamPointsMaterial,
+  OverlayAutoSegPointsMaterial,
   Path,
   PreviewBrushCursor,
   SegPrompt,
@@ -55,7 +55,7 @@ export class Slice extends THREE.Group implements IDisposable {
   private overlayLineMaterial: OverlayLineMaterial;
   private overlayPointsMaterial: OverlayPointsMaterial;
   private overlayRoundedPointsMaterial: OverlayRoundedPointsMaterial;
-  private overlaySamPointsMaterial: OverlaySamPointsMaterial;
+  private overlayAutoSegPointsMaterial: OverlayAutoSegPointsMaterial;
   private crosshairMaterial: OverlayLineMaterial;
 
   public isMainView: boolean;
@@ -84,7 +84,9 @@ export class Slice extends THREE.Group implements IDisposable {
     this.overlayRoundedPointsMaterial = new OverlayRoundedPointsMaterial(
       editor,
     );
-    this.overlaySamPointsMaterial = new OverlaySamPointsMaterial(editor);
+    this.overlayAutoSegPointsMaterial = new OverlayAutoSegPointsMaterial(
+      editor,
+    );
     this.crosshairMaterial = new OverlayLineMaterial(editor, {
       transparent: true,
       opacity: 0.5,
@@ -135,7 +137,7 @@ export class Slice extends THREE.Group implements IDisposable {
       editor,
       viewType,
       this.overlayLineMaterial,
-      this.overlaySamPointsMaterial,
+      this.overlayAutoSegPointsMaterial,
     );
     this.crosshairShiftGroup.add(this.segPrompt);
 

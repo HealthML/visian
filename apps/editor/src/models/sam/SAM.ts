@@ -6,7 +6,7 @@ import * as ort from "onnxruntime-web";
 import { EmbeddingCache } from "./embedding-cache";
 import { getUrlParam } from "./temp-util";
 
-export type SAMModelBoundingBox = { start: Vector; end: Vector };
+export type SamBoundingBox = { start: Vector; end: Vector };
 
 // Todo: Make configurable, extract param from router
 const EMBEDDING_SERVICE_URL = getUrlParam(
@@ -145,7 +145,7 @@ export class SAM {
     imageLayer: IImageLayer,
     viewType: ViewType,
     sliceNumber: number,
-    boundingBox?: SAMModelBoundingBox,
+    boundingBox?: SamBoundingBox,
     foregroundPoints?: Vector[],
     backgroundPoints?: Vector[],
   ): Promise<Float32Array | undefined> {
@@ -177,7 +177,7 @@ export class SAM {
     imageLayer: IImageLayer,
     viewType: ViewType,
     embedding: ort.Tensor,
-    boundingBox?: SAMModelBoundingBox,
+    boundingBox?: SamBoundingBox,
     foregroundPoints?: Vector[],
     backgroundPoints?: Vector[],
   ) {

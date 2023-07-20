@@ -4,7 +4,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
-import { MeasurementTool, SAMTool, ToolName } from "../../../models";
+import { MeasurementTool, AutoSegTool, ToolName } from "../../../models";
 
 const MainViewContainer = styled.div<{
   activeTool?: ToolName;
@@ -73,13 +73,13 @@ export const MainView = observer(() => {
   const measurementTool = tools?.tools["measurement-tool"] as
     | MeasurementTool
     | undefined;
-  const samTool = tools?.tools["sam-tool"] as SAMTool | undefined;
+  const autoSegTool = tools?.tools["autoseg-tool"] as AutoSegTool | undefined;
 
   let cursor: string | undefined;
   if (
     (tools?.activeTool?.name === "measurement-tool" &&
       measurementTool?.isHoveringNode) ||
-    (tools?.activeTool?.name === "sam-tool" && samTool?.isHoveringPoint)
+    (tools?.activeTool?.name === "autoseg-tool" && autoSegTool?.isHoveringPoint)
   ) {
     cursor = "move";
   }

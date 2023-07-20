@@ -2,18 +2,21 @@ import { IDocument } from "@visian/ui-shared";
 import { ViewType } from "@visian/utils";
 import { Data3DTexture, GLSL3 } from "three";
 
-import { samPreviewFragmentShader, samPreviewVertexShader } from "../shaders";
+import {
+  autoSegPreviewFragmentShader,
+  autoSegPreviewVertexShader,
+} from "../shaders";
 import { ToolRenderer3D } from "./tool-renderer-3d";
 
-export class SamRenderer extends ToolRenderer3D {
+export class AutoSegRenderer extends ToolRenderer3D {
   public readonly excludeFromSnapshotTracking = ["document", "dataTexture"];
 
   protected dataTexture!: Data3DTexture;
 
   constructor(document: IDocument) {
     super(document, {
-      vertexShader: samPreviewVertexShader,
-      fragmentShader: samPreviewFragmentShader,
+      vertexShader: autoSegPreviewVertexShader,
+      fragmentShader: autoSegPreviewFragmentShader,
       glslVersion: GLSL3,
     });
     this.setPreviewColor(document.getAnnotationPreviewColor());

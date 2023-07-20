@@ -1,16 +1,16 @@
 import * as THREE from "three";
 
 import {
-  samPreviewFragmentShader,
-  samPreviewVertexShader,
+  autoSegPreviewFragmentShader,
+  autoSegPreviewVertexShader,
 } from "../../shaders";
 
-export class SamPreviewMaterial extends THREE.ShaderMaterial {
+export class AutoSegPreviewMaterial extends THREE.ShaderMaterial {
   constructor(parameters?: THREE.ShaderMaterialParameters) {
     super(
       parameters || {
-        vertexShader: samPreviewVertexShader,
-        fragmentShader: samPreviewFragmentShader,
+        vertexShader: autoSegPreviewVertexShader,
+        fragmentShader: autoSegPreviewFragmentShader,
         uniforms: {
           uDataTexture: { value: null },
         },

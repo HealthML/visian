@@ -123,7 +123,7 @@ export interface IMeasurementTool extends IPreviewedTool<"measurement-tool"> {
   setToDeleteMode: () => void;
 }
 
-export interface ISAMTool extends IPreviewedTool<"sam-tool"> {
+export interface IAutoSegTool extends IPreviewedTool<"autoseg-tool"> {
   boundingBox?: { start: Vector; end: Vector };
   orderedBoundingBox?: { start: Vector; end: Vector };
   foregroundPoints: Vector[];
@@ -217,7 +217,7 @@ export interface ITools<N extends string> {
   slicePreviewMergeFunction?: MergeFunction;
   layerPreviewTexture: THREE.Texture;
   regionGrowingRenderer3D: IBlipRenderer3D;
-  samRenderer: IToolRenderer3D;
+  autoSegRenderer: IToolRenderer3D;
   thresholdAnnotationRenderer3D: IThresholdAnnotationRenderer3D;
   dilateErodeRenderer3D: IDilateErodeRenderer3D;
 

@@ -2,7 +2,7 @@ import {
   DilateErodeRenderer3D,
   RegionGrowingRenderer,
   RegionGrowingRenderer3D,
-  SamRenderer,
+  AutoSegRenderer,
   ThresholdAnnotationRenderer3D,
   ToolRenderer,
 } from "@visian/rendering";
@@ -26,7 +26,7 @@ import { DilateErodeTool } from "./dilate-erode-tool";
 import { MeasurementTool } from "./measurement-tool";
 import { OutlineTool } from "./outline-tool";
 import { PlaneTool } from "./plane-tool";
-import { SAMTool } from "./sam-tool";
+import { AutoSegTool } from "./autoseg-tool";
 import { SelfDeactivatingTool } from "./self-deactivating-tool";
 import { SmartBrush } from "./smart-brush";
 import { SmartBrush3D } from "./smart-brush-3d";
@@ -54,7 +54,7 @@ export type ToolName =
   | "plane-tool"
   | "fly-tool"
   | "measurement-tool"
-  | "sam-tool";
+  | "autoseg-tool";
 
 export interface ToolsSnapshot<N extends string> {
   activeToolName?: N;
@@ -99,7 +99,7 @@ export class Tools
   public isDrawing = false;
 
   public toolRenderer: ToolRenderer;
-  public samRenderer: SamRenderer;
+  public autoSegRenderer: AutoSegRenderer;
   public regionGrowingRenderer: RegionGrowingRenderer;
   public regionGrowingRenderer3D: RegionGrowingRenderer3D;
   public thresholdAnnotationRenderer3D: ThresholdAnnotationRenderer3D;
@@ -159,7 +159,7 @@ export class Tools
     });
 
     this.toolRenderer = new ToolRenderer(document);
-    this.samRenderer = new SamRenderer(document);
+    this.autoSegRenderer = new AutoSegRenderer(document);
     this.regionGrowingRenderer = new RegionGrowingRenderer(document);
     this.regionGrowingRenderer3D = new RegionGrowingRenderer3D(document);
     this.thresholdAnnotationRenderer3D = new ThresholdAnnotationRenderer3D(
@@ -204,7 +204,7 @@ export class Tools
       "outline-eraser": new OutlineTool(document, this.toolRenderer, false),
       "clear-slice": new ClearSliceTool(document, this.toolRenderer),
       "clear-image": new ClearImageTool(document, this.toolRenderer),
-      "sam-tool": new SAMTool(document, this.samRenderer),
+      "autoseg-tool": new AutoSegTool(document, this.autoSegRenderer),
       "threshold-annotation": new ThresholdAnnotationTool(
         document,
         this.thresholdAnnotationRenderer3D,
@@ -254,7 +254,7 @@ export class Tools
         document,
       ),
       new ToolGroup({ toolNames: ["measurement-tool"] }, document),
-      new ToolGroup({ toolNames: ["sam-tool"] }, document),
+      new ToolGroup({ toolNames: ["autoseg-tool"] }, document),
     );
 
     if (snapshot) this.applySnapshot(snapshot);
@@ -262,7 +262,7 @@ export class Tools
 
   public dispose() {
     this.toolRenderer.dispose();
-    this.samRenderer.dispose();
+    this.autoSegRenderer.dispose();
     this.regionGrowingRenderer.dispose();
     this.regionGrowingRenderer3D.dispose();
     this.dilateErodeRenderer3D.dispose();
@@ -376,7 +376,8 @@ export class Tools
   }
 
   public get layerPreviewTexture(): THREE.Texture {
-    if (this.samRenderer.holdsPreview) return this.samRenderer.outputTexture;
+    if (this.autoSegRenderer.holdsPreview)
+      return this.autoSegRenderer.outputTexture;
     if (this.regionGrowingRenderer3D.holdsPreview)
       return this.regionGrowingRenderer3D.outputTexture;
     return this.thresholdAnnotationRenderer3D.outputTexture;

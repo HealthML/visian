@@ -7,8 +7,8 @@ import * as THREE from "three";
 import {
   nodeFragmentShader,
   nodeVertexShader,
-  samNodeFragmentShader,
-  samNodeVertexShader,
+  autoSegNodeFragmentShader,
+  autoSegNodeVertexShader,
 } from "../../shaders";
 import { node, nodeDown, nodeSmall, nodeUp, nodeUpDown } from "./node-icons";
 
@@ -97,7 +97,7 @@ export class OverlayRoundedPointsMaterial extends THREE.ShaderMaterial {
   }
 }
 
-export class OverlaySamPointsMaterial extends THREE.ShaderMaterial {
+export class OverlayAutoSegPointsMaterial extends THREE.ShaderMaterial {
   public static readonly minAbsolutePointSize = 10;
   public static readonly pointSizeZoomScale = 5;
 
@@ -105,8 +105,8 @@ export class OverlaySamPointsMaterial extends THREE.ShaderMaterial {
 
   constructor(editor: IEditor) {
     super({
-      vertexShader: samNodeVertexShader,
-      fragmentShader: samNodeFragmentShader,
+      vertexShader: autoSegNodeVertexShader,
+      fragmentShader: autoSegNodeFragmentShader,
       uniforms: {
         uPointSize: { value: 1 },
         uNodeTexture: { value: null },
