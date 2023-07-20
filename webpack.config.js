@@ -25,9 +25,25 @@ module.exports = (config) => {
     },
   );
 
+  // Required for SharedArrayBuffer so ONNX can use WebAssembly threads:
+  config.devServer.headers = {
+    "Cross-Origin-Opener-Policy": "same-origin",
+    "Cross-Origin-Embedder-Policy": "credentialless",
+  };
+
   config.plugins.push(
     new CopyPlugin({
       patterns: [
+        {
+          from: path.join(
+            __dirname,
+            "node_modules",
+            "onnxruntime-web",
+            "dist",
+            "ort-wasm*.wasm",
+          ),
+          to: path.join("[name][ext]"),
+        },
         {
           from: path.join(__dirname, "node_modules", "itk", "WebWorkers"),
           to: path.join("itk", "WebWorkers"),
