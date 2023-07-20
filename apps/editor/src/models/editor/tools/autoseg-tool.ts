@@ -1,10 +1,11 @@
-import { AutoSegRenderer } from "@visian/rendering";
+import { AutoSegRenderer, RenderedImage } from "@visian/rendering";
 import {
   DragPoint,
   IAutoSegTool,
   IDocument,
   IImageLayer,
   ITool,
+  MergeFunction,
 } from "@visian/ui-shared";
 import { getPlaneAxes, Vector } from "@visian/utils";
 // eslint-disable-next-line import/no-extraneous-dependencies
@@ -13,8 +14,8 @@ import { action, computed, makeObservable, observable, reaction } from "mobx";
 
 import { SAM } from "../../sam/SAM";
 import { getUrlParam } from "../../sam/temp-util";
+import { SliceCommand } from "../history";
 import { Tool } from "./tool";
-import { mutateTextureData } from "./utils";
 
 export type AutoSegToolState = "uninitialized" | "loading" | "ready";
 export type AutoSegToolBoundingBox = { topLeft: Vector; bottomRight: Vector };
@@ -41,6 +42,7 @@ export class AutoSegTool<N extends "autoseg-tool" = "autoseg-tool">
   protected debouncedLoadEmbedding: () => void;
 
   protected lastClick?: Vector;
+  protected mask: Float32Array | undefined;
 
   public isInRightClickMode = false;
   public boundingBoxStart?: Vector;
@@ -206,7 +208,7 @@ export class AutoSegTool<N extends "autoseg-tool" = "autoseg-tool">
       return;
     }
 
-    const mask = await this.sam.getMask(
+    this.mask = await this.sam.getMask(
       this.imageLayer,
       this.viewType,
       this.sliceNumber,
@@ -215,7 +217,7 @@ export class AutoSegTool<N extends "autoseg-tool" = "autoseg-tool">
       this.backgroundPoints,
     );
 
-    if (mask) this.renderer.showMask(mask);
+    if (this.mask) this.renderer.showMask(this.mask);
   }
 
   public async loadEmbedding() {
@@ -327,11 +329,31 @@ export class AutoSegTool<N extends "autoseg-tool" = "autoseg-tool">
   };
 
   public submit = () => {
-    const targetLayer = this.document.activeLayer;
-    mutateTextureData(
-      targetLayer as IImageLayer,
-      () => this.renderer.flushToAnnotation(targetLayer as IImageLayer),
-      this.document,
+    const targetLayer = this.document.activeLayer as IImageLayer;
+    if (
+      targetLayer.kind !== "image" ||
+      !targetLayer.isAnnotation ||
+      !this.mask
+    ) {
+      return;
+    }
+    const image = targetLayer.image as RenderedImage;
+
+    const oldData = image.getSlice(this.viewType, this.sliceNumber);
+    const newData = new Uint8Array(this.mask.map((v) => (v > 0 ? 255 : 0)));
+
+    image.setSlice(this.viewType, this.sliceNumber, newData, MergeFunction.Add);
+    this.document.history.addCommand(
+      new SliceCommand(
+        {
+          viewType: this.viewType,
+          slice: this.sliceNumber,
+          layerId: targetLayer.id,
+          oldSliceData: oldData as Uint8Array,
+          newSliceData: newData,
+        },
+        this.document,
+      ),
     );
 
     this.resetPromptInputs();
