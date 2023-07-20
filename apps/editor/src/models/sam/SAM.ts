@@ -121,6 +121,7 @@ export class SAM {
       embedding,
     );
 
+    await this.getInferenceSession();
     this.setLoading(imageLayer, viewType, sliceNumber, false);
   }
 
