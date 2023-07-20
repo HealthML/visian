@@ -351,6 +351,7 @@ export class SAMTool<N extends "sam-tool" = "sam-tool">
       });
       const encodedUri = encodeURI(csvContent);
       console.log("Result:", encodedUri);
+      return encodedUri;
     };
 
     const { x, y } = this.imageLayer?.image.voxelCount || { x: 0, y: 0 };
@@ -378,6 +379,15 @@ export class SAMTool<N extends "sam-tool" = "sam-tool">
     console.log(`Average: ${average}ms.`);
 
     const data = times.map((time) => [time]);
-    arrayToCsv(data);
+    const uri = arrayToCsv(data);
+
+    const link = document.createElement("a");
+    link.setAttribute("href", uri);
+    link.setAttribute("download", "benchmark.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    this.resetPromptInputs();
   }
 }
