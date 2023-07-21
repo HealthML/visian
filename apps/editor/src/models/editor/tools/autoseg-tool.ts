@@ -356,6 +356,7 @@ export class AutoSegTool<N extends "autoseg-tool" = "autoseg-tool">
       ),
     );
 
+    targetLayer.recomputeSliceMarkers(this.viewType, this.sliceNumber);
     this.resetPromptInputs();
   };
 
