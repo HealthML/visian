@@ -1,0 +1,20 @@
+{
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "name": "mia-api",
+  "sourceRoot": "libs/mia-api/src",
+  "projectType": "library",
+  "targets": {
+    "generate-sources": {
+      "executor": "@trumbitta/nx-plugin-openapi:generate-api-lib-sources",
+      "options": {
+        "useDockerBuild": true,
+        "generator": "typescript-axios",
+        "sourceSpecPathOrUrl": "libs/mia-spec/src/mia-api-spec.openapi.json",
+        "additionalProperties": "",
+        "globalProperties": ""
+      }
+    }
+  },
+  "implicitDependencies": ["mia-spec"],
+  "tags": []
+}

@@ -19,6 +19,7 @@
     "strict": true,
     "baseUrl": ".",
     "paths": {
+      "@visian/mia-api": ["libs/mia-api/src/index.ts"],
       "@visian/rendering": ["libs/rendering/src/index.ts"],
       "@visian/ui-shared": ["libs/ui-shared/src/index.ts"],
       "@visian/utils": ["libs/utils/src/index.ts"]
