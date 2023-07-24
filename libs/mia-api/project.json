@@ -9,7 +9,7 @@
       "options": {
         "useDockerBuild": true,
         "generator": "typescript-axios",
-        "sourceSpecPathOrUrl": "libs/mia-spec/src/mia-api-spec.openapi.json",
+        "sourceSpecPathOrUrl": "libs/mia-spec/src/mia.openapi.yaml",
         "additionalProperties": "",
         "globalProperties": ""
       }

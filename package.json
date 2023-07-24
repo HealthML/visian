@@ -23,7 +23,7 @@
     "storybook": "nx run ui-shared:storybook",
     "g:api-spec": "nx g @trumbitta/nx-plugin-openapi:api-spec",
     "g:api-lib": "nx g @trumbitta/nx-plugin-openapi:api-lib",
-    "g:mia-api": "nx run mia-api:generate-sources"
+    "g:mia-api": "curl -o libs/mia-spec/src/mia.openapi.yaml http://localhost:3000/api-yaml && nx run mia-api:generate-sources"
   },
   "private": true,
   "devDependencies": {
