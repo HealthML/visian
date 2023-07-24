@@ -1,4 +1,4 @@
-import { Zip } from "@visian/utils";
+import { FileWithMetadata, MiaAnnotation, MiaImage, Zip } from "@visian/utils";
 import { v4 as uuidv4 } from "uuid";
 
 import {
@@ -7,7 +7,6 @@ import {
   patchAnnotationFile,
   postAnnotationFile,
 } from "../../queries";
-import { Annotation, FileWithMetadata, Image } from "../../types";
 import { ReviewTask, TaskType } from "./review-task";
 
 export class MiaReviewTask implements ReviewTask {
@@ -20,15 +19,15 @@ export class MiaReviewTask implements ReviewTask {
     return [...this.annotations.keys()];
   }
 
-  private annotations: Map<string, Annotation>;
-  public image: Image;
+  private annotations: Map<string, MiaAnnotation>;
+  public image: MiaImage;
 
   constructor(
     title: string | undefined,
     kind: TaskType,
     description: string | undefined,
-    image: Image,
-    annotations: Annotation[],
+    image: MiaImage,
+    annotations: MiaAnnotation[],
     id?: string,
   ) {
     this.kind = kind;
@@ -83,13 +82,7 @@ export class MiaReviewTask implements ReviewTask {
   }
 
   public async save() {
-    return {
-      data: {},
-      status: 1700,
-      statusText: "OK",
-      headers: {},
-      config: {},
-    };
+    return undefined;
   }
 
   private async zipFiles(files: File[]): Promise<File> {

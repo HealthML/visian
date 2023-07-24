@@ -1,11 +1,11 @@
+import { MiaMlModel } from "@visian/utils";
 import axios, { AxiosError } from "axios";
 import { useQuery } from "react-query";
 
-import { MlModel } from "../types";
 import { hubBaseUrl } from "./hub-base-url";
 
 const getModelVersions = async () => {
-  const modelsResponse = await axios.get<MlModel[]>(
+  const modelsResponse = await axios.get<MiaMlModel[]>(
     `${hubBaseUrl}model-versions`,
   );
   return modelsResponse.data;
@@ -13,8 +13,8 @@ const getModelVersions = async () => {
 
 export const useMlModels = () => {
   const { data, error, isError, isLoading, refetch, remove } = useQuery<
-    MlModel[],
-    AxiosError<MlModel[]>
+    MiaMlModel[],
+    AxiosError<MiaMlModel[]>
   >(["mlModels"], getModelVersions, {
     retry: 2, // retry twice if fetch fails
     refetchInterval: 1000 * 60, // refetch every 60 seconds

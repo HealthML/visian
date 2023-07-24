@@ -1,3 +1,5 @@
+import { MiaImage } from "@visian/utils";
+
 import {
   getAnnotation,
   getAnnotationsByJobAndImage,
@@ -6,7 +8,6 @@ import {
   patchAnnotation,
 } from "../../queries";
 import { getImage } from "../../queries/get-image";
-import { Image } from "../../types";
 import { RootStore } from "../root";
 import { MiaReviewTask } from "./mia-review-task";
 import { ReviewStrategy } from "./review-strategy";
@@ -63,7 +64,7 @@ export class MiaReviewStrategy extends ReviewStrategy {
     });
   }
 
-  private images: Image[];
+  private images: MiaImage[];
   private currentImageIndex: number;
   private jobId?: string;
   private allowedAnnotations?: Set<string>;
@@ -77,7 +78,7 @@ export class MiaReviewStrategy extends ReviewStrategy {
     taskType,
   }: {
     store: RootStore;
-    images: Image[];
+    images: MiaImage[];
     jobId?: string;
     allowedAnnotations?: string[];
     taskType?: TaskType;

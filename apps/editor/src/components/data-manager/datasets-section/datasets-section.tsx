@@ -1,4 +1,5 @@
 import { useTranslation } from "@visian/ui-shared";
+import { MiaDataset, MiaProject } from "@visian/utils";
 import { useCallback, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
@@ -8,7 +9,6 @@ import useDatasetsBy, {
   useDeleteDatasetsForProjectMutation,
   useUpdateDatasetsMutation,
 } from "../../../queries/use-datasets-by";
-import { Dataset, Project } from "../../../types";
 import { ConfirmationPopup } from "../confirmation-popup";
 import { DatasetCreationPopup } from "../dataset-creation-popup";
 import { EditPopup } from "../edit-popup";
@@ -26,15 +26,15 @@ const StyledIconButton = styled(PaddedPageSectionIconButton)`
   height: 25px;
 `;
 
-export const DatasetsSection = ({ project }: { project: Project }) => {
+export const DatasetsSection = ({ project }: { project: MiaProject }) => {
   const { t: translate } = useTranslation();
   const navigate = useNavigate();
 
   const { datasets, isLoadingDatasets, datasetsError } = useDatasetsBy(
     project.id,
   );
-  const [datasetTobBeDeleted, setDatasetTobBeDeleted] = useState<Dataset>();
-  const [datasetToBeUpdated, setDatasetToBeUpdated] = useState<Dataset>();
+  const [datasetTobBeDeleted, setDatasetTobBeDeleted] = useState<MiaDataset>();
+  const [datasetToBeUpdated, setDatasetToBeUpdated] = useState<MiaDataset>();
   const { deleteDatasets } = useDeleteDatasetsForProjectMutation();
   const { createDataset } = useCreateDatasetMutation();
   const updateDataset = useUpdateDatasetsMutation();
@@ -65,7 +65,7 @@ export const DatasetsSection = ({ project }: { project: Project }) => {
 
   // Delete Dataset
   const deleteDataset = useCallback(
-    (dataset: Dataset) => {
+    (dataset: MiaDataset) => {
       setDatasetTobBeDeleted(dataset);
       openDeleteDatasetConfirmationPopUp();
     },
@@ -74,7 +74,7 @@ export const DatasetsSection = ({ project }: { project: Project }) => {
 
   // Open Dataset
   const openDataset = useCallback(
-    (dataset: Dataset) => {
+    (dataset: MiaDataset) => {
       navigate(`/datasets/${dataset.id}`);
     },
     [navigate],
@@ -86,7 +86,7 @@ export const DatasetsSection = ({ project }: { project: Project }) => {
   const closeEditPopup = useCallback(() => setIsEditPopupOpen(false), []);
 
   const editDataset = useCallback(
-    (dataset: Dataset) => {
+    (dataset: MiaDataset) => {
       setDatasetToBeUpdated(dataset);
       openEditPopup();
     },

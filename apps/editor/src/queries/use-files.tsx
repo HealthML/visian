@@ -1,7 +1,7 @@
+import { FileWithMetadata, MiaAnnotation } from "@visian/utils";
 import axios from "axios";
 import path from "path";
 
-import { Annotation, FileWithMetadata } from "../types";
 import { getImage } from "./get-image";
 import { hubBaseUrl } from "./hub-base-url";
 import { getAnnotation } from "./use-annotations-by";
@@ -52,9 +52,9 @@ export const fetchAnnotationFile = async (
 };
 
 export const patchAnnotationFile = async (
-  annotation: Annotation,
+  annotation: MiaAnnotation,
   file: File,
-): Promise<Annotation> => {
+): Promise<MiaAnnotation> => {
   const apiEndpoint = `${hubBaseUrl}annotations/${annotation.id}`;
   const formData = new FormData();
   formData.append("file", file);
@@ -71,7 +71,7 @@ export const postAnnotationFile = async (
   imageId: string,
   annotationUri: string,
   file: File,
-): Promise<Annotation> => {
+): Promise<MiaAnnotation> => {
   const apiEndpoint = `${hubBaseUrl}annotations`;
   const formData = new FormData();
   formData.append("image", imageId);

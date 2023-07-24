@@ -8,6 +8,7 @@ import {
   TextField,
   useTranslation,
 } from "@visian/ui-shared";
+import { FileWithMetadata, MiaAnnotation } from "@visian/utils";
 import { AxiosError } from "axios";
 import { observer } from "mobx-react-lite";
 import path from "path";
@@ -19,7 +20,6 @@ import { importFilesToDocument } from "../../../import-handling";
 import { LayerFamily } from "../../../models/editor/layer-families";
 import { MiaReviewTask } from "../../../models/review-strategy";
 import { fetchAnnotationFile } from "../../../queries";
-import { Annotation, FileWithMetadata } from "../../../types";
 import { SavePopUpProps } from "./save-popup.props";
 
 const SectionLabel = styled(Text)`
@@ -87,7 +87,7 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
 
   const createFamilyForNewAnnotation = (
     layer: ILayer | undefined,
-    annotation: Annotation | undefined,
+    annotation: MiaAnnotation | undefined,
   ) => {
     const document = store?.editor.activeDocument;
     if (document && layer) {
@@ -137,7 +137,7 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
 
   const canBeOverwritten = useCallback(() => {
     const activeLayer = store?.editor.activeDocument?.activeLayer;
-    const annotation = activeLayer?.family?.metaData as Annotation;
+    const annotation = activeLayer?.family?.metaData as MiaAnnotation;
     return !!annotation;
   }, [store]);
 
@@ -145,7 +145,7 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
     store?.setProgress({ labelTx: "saving" });
     try {
       const activeLayer = store?.editor.activeDocument?.activeLayer;
-      const annotationMeta = activeLayer?.family?.metaData as Annotation;
+      const annotationMeta = activeLayer?.family?.metaData as MiaAnnotation;
       const annotationFile = await createFileForFamilyOf(
         activeLayer,
         annotationMeta?.dataUri.endsWith(".zip"),
@@ -181,8 +181,8 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
   };
 
   const loadOldAnnotation = async (
-    newAnnotationMeta: Annotation,
-    oldAnnotationMeta: Annotation,
+    newAnnotationMeta: MiaAnnotation,
+    oldAnnotationMeta: MiaAnnotation,
   ) => {
     const activeLayer = store?.editor.activeDocument?.activeLayer;
     if (activeLayer?.family) {
@@ -218,7 +218,7 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
       const newAnnotationId = await reviewTask.createAnnotation([
         annotationFile,
       ]);
-      const annotationMeta = activeLayer?.family?.metaData as Annotation;
+      const annotationMeta = activeLayer?.family?.metaData as MiaAnnotation;
       const newAnnotationMeta =
         reviewTask instanceof MiaReviewTask
           ? // eslint-disable-next-line @typescript-eslint/no-non-null-assertion

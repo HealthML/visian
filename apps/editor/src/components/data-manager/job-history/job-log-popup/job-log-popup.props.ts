@@ -1,7 +1,6 @@
 import type { StatefulPopUpProps } from "@visian/ui-shared";
-
-import { Job } from "../../../../types";
+import type { MiaJob } from "@visian/utils";
 
 export interface JobLogPopUpProps extends StatefulPopUpProps {
-  job: Job;
+  job: MiaJob;
 }

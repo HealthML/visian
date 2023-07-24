@@ -10,7 +10,7 @@ type Bar = {
   showConfetti?: boolean;
 };
 
-export interface ProgressProps
+export interface ProgressBarProps
   extends React.InputHTMLAttributes<HTMLInputElement> {
   total: number;
   totalLabel?: string;

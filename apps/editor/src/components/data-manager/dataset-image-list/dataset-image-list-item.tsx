@@ -6,6 +6,7 @@ import {
   Text,
   useTranslation,
 } from "@visian/ui-shared";
+import { MiaAnnotation } from "@visian/utils";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
@@ -13,7 +14,6 @@ import styled from "styled-components";
 import { useStore } from "../../../app/root-store";
 import { MiaReviewStrategy, TaskType } from "../../../models/review-strategy";
 import { useAnnotationsByImage } from "../../../queries";
-import { Annotation } from "../../../types";
 import { handleImageSelection } from "../util";
 import { DatasetImageListItemProps } from "./dataset-image-list-item.props";
 
@@ -187,7 +187,7 @@ export const DatasetImageListItem: React.FC<DatasetImageListItemProps> = ({
           annotations && (
             <AnnotationsList>
               {annotations.map(
-                (annotation: Annotation, annotationIndex: number) => (
+                (annotation: MiaAnnotation, annotationIndex: number) => (
                   <ListItem
                     isLast={
                       isLast && annotationIndex === annotations.length - 1
