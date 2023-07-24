@@ -1,3 +1,4 @@
+import { Job } from "@visian/mia-api";
 import type { StatefulPopUpProps } from "@visian/ui-shared";
 import { AxiosError } from "axios";
 import {
@@ -6,7 +7,6 @@ import {
   RefetchQueryFilters,
 } from "react-query";
 
-import { Job } from "@visian/mia-api";
 
 export interface JobCreationPopUpProps extends StatefulPopUpProps {
   projectId: string;

@@ -1,7 +1,9 @@
-import { useQuery } from "react-query";
 import { ModelVersion } from "@visian/mia-api";
-import { modelVersionsApi } from "../hub-base-url";
 import { AxiosError } from "axios";
+import { useQuery } from "react-query";
+
+import { modelVersionsApi } from "../hub-base-url";
+
 
 const modelVersionsQueryKey = "modelVersions";
 

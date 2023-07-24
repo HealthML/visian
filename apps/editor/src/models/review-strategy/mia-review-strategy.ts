@@ -1,14 +1,14 @@
+import { Image } from "@visian/mia-api";
+
 import {
   getAnnotation,
   getAnnotationsByJobAndImage,
-  patchAnnotation,
-} from "../../queries";
-import { Image } from "@visian/mia-api";
+  imagesApi,
+ patchAnnotation } from "../../queries";
 import { RootStore } from "../root";
 import { MiaReviewTask } from "./mia-review-task";
 import { ReviewStrategy } from "./review-strategy";
 import { TaskType } from "./review-task";
-import { imagesApi } from "../../queries";
 
 export class MiaReviewStrategy extends ReviewStrategy {
   public static async fromDataset(

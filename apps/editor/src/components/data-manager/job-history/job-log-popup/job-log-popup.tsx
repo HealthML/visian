@@ -1,11 +1,11 @@
+import { Job } from "@visian/mia-api";
 import { Divider, PopUp, SectionHeader, Text } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
 import { useEffect, useState } from "react";
 import styled from "styled-components";
 
-import { Job } from "@visian/mia-api";
-import { JobLogPopUpProps } from "./job-log-popup.props";
 import { jobsApi } from "../../../../queries";
+import { JobLogPopUpProps } from "./job-log-popup.props";
 
 const PopUpContainer = styled(PopUp)`
   align-items: left;

@@ -1,3 +1,4 @@
+import { Image } from "@visian/mia-api";
 import { Zip } from "@visian/utils";
 import { v4 as uuidv4 } from "uuid";
 
@@ -8,7 +9,6 @@ import {
   postAnnotationFile,
 } from "../../queries";
 import { Annotation, FileWithMetadata } from "../../types";
-import { Image } from "@visian/mia-api";
 import { ReviewTask, TaskType } from "./review-task";
 
 export class MiaReviewTask implements ReviewTask {
@@ -84,13 +84,7 @@ export class MiaReviewTask implements ReviewTask {
   }
 
   public async save() {
-    return new Promise((resolve) => setTimeout(resolve, 1000)) as any;
-    // data: {},
-    // status: 1700,
-    // statusText: "OK",
-    // headers: {},
-    // config: {},
-    // };
+    return undefined;
   }
 
   private async zipFiles(files: File[]): Promise<File> {

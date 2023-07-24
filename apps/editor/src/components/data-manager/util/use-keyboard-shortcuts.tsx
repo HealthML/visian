@@ -1,7 +1,7 @@
+import { Image } from "@visian/mia-api";
 import { isMac } from "@visian/ui-shared";
 import { useEffect, useState } from "react";
 
-import { Image } from "@visian/mia-api";
 
 export const useKeyboardShortcuts = ({
   selectedImages,

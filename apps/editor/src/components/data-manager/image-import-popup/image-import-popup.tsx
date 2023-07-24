@@ -19,11 +19,11 @@ import { observer } from "mobx-react-lite";
 import { useCallback, useEffect, useState } from "react";
 import styled from "styled-components";
 
+import { imagesApi } from "../../../queries";
 import { DropSheet } from "../../editor";
 import { ProgressPopUp } from "../../editor/progress-popup";
 import { WarningLabel } from "../warning-label";
 import { ImageImportPopUpProps } from "./image-import-popup.props";
-import { imagesApi } from "../../../queries";
 
 const DropZoneContainer = styled.div`
   display: flex;

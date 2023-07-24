@@ -1,6 +1,7 @@
-import axios, { AxiosError } from "axios";
-import { Job, Progress, JobsControllerUpdateStatusEnum } from "@visian/mia-api";
+import { Job, JobsControllerUpdateStatusEnum, Progress } from "@visian/mia-api";
+import { AxiosError } from "axios";
 import { useQuery } from "react-query";
+
 import { jobsApi } from "../hub-base-url";
 import { DeleteMutation, UpdateMutation } from "./mutations";
 

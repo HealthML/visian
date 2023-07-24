@@ -7,7 +7,6 @@ import {
   ModelVersionsApi,
   ProjectsApi,
 } from "@visian/mia-api";
-import { configure } from "mobx";
 
 const formatUrl = (url: string | null | undefined) => {
   if (!url || url === "") {

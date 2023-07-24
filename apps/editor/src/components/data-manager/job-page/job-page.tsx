@@ -1,4 +1,8 @@
 import {
+  Image,
+  Job,
+  JobsControllerUpdateStatusEnum } from "@visian/mia-api";
+import {
   InvisibleButton,
   ListItem,
   Sheet,
@@ -14,17 +18,11 @@ import styled from "styled-components";
 import { useStore } from "../../../app/root-store";
 import { MiaReviewStrategy } from "../../../models/review-strategy";
 import {
-  useAnnotationsByJob,
   deleteJobsMutation,
   updateJobMutation,
+  useAnnotationsByJob,
   useImagesByJob,
-} from "../../../queries";
-import { useJobProgress } from "../../../queries";
-import {
-  Job,
-  JobStatusEnum,
-  JobsControllerUpdateStatusEnum,
-} from "@visian/mia-api";
+ useJobProgress } from "../../../queries";
 import { AnnotationProgress } from "../annotation-progress";
 import { ConfirmationPopup } from "../confirmation-popup";
 import { JobLogPopup } from "../job-history/job-log-popup";
@@ -34,7 +32,7 @@ import { PageSection } from "../page-section";
 import { PageTitle } from "../page-title";
 import { getDisplayDate } from "../util";
 import { DetailsRow } from "./details-table";
-import { Image } from "@visian/mia-api";
+
 
 const StyledSheet = styled(Sheet)`
   padding: ${space("listPadding")};

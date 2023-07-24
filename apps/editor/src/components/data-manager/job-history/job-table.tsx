@@ -5,12 +5,12 @@ import {
   SortingState,
   useReactTable,
 } from "@tanstack/react-table";
+import { Job } from "@visian/mia-api";
 import { HeaderLabel, ListItemLabel, TableLayout } from "@visian/ui-shared";
 import { useCallback, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 
-import { Job } from "@visian/mia-api";
 import { getDisplayDate } from "../util/display-date";
 import { JobStatusBadge } from "./job-status-badge/job-status-badge";
 

@@ -1,3 +1,4 @@
+import { Dataset, Image } from "@visian/mia-api";
 import { Notification, Sheet, space, useTranslation } from "@visian/ui-shared";
 import { useCallback, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -6,11 +7,10 @@ import styled from "styled-components";
 import { useStore } from "../../../app/root-store";
 import { MiaReviewStrategy } from "../../../models/review-strategy";
 import {
-  useDeleteAnnotationsForImageMutation,
   deleteImagesMutation,
-  useImagesByDataset,
-} from "../../../queries";
-import { useDatasetProgress } from "../../../queries";
+  useDatasetProgress,
+  useDeleteAnnotationsForImageMutation,
+ useImagesByDataset } from "../../../queries";
 import { Annotation } from "../../../types";
 import { AnnotationProgress } from "../annotation-progress";
 import { ConfirmationPopup } from "../confirmation-popup";
@@ -22,7 +22,6 @@ import { PageSection } from "../page-section";
 import { PageTitle } from "../page-title";
 import { useImageSelection, usePopUpState } from "../util";
 
-import { Dataset, Image } from "@visian/mia-api";
 
 const StyledSheet = styled(Sheet)`
   padding: ${space("listPadding")};

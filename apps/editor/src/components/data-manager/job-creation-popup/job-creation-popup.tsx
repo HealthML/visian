@@ -13,16 +13,15 @@ import { observer } from "mobx-react-lite";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import styled from "styled-components";
 
-import { JobCreationPopUpProps } from "./job-creation-popup.props";
 import { useStore } from "../../../app/root-store";
 import {
+  jobsApi,
   useDatasetsByProject,
   useImagesByDataset,
-  useMlModels,
-} from "../../../queries";
+ useMlModels } from "../../../queries";
 import { ProjectDataExplorer } from "../project-data-explorer";
 import { useImageSelection } from "../util";
-import { jobsApi } from "../../../queries";
+import { JobCreationPopUpProps } from "./job-creation-popup.props";
 
 const JobCreationPopupContainer = styled(PopUp)`
   align-items: left;

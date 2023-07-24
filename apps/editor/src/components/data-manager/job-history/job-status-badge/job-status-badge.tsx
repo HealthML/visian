@@ -1,6 +1,6 @@
+import { JobStatusEnum } from "@visian/mia-api";
 import { StatusBadge } from "@visian/ui-shared";
 
-import { JobStatusEnum } from "@visian/mia-api";
 
 const statusColors: Record<JobStatusEnum, string> = {
   queued: "veryVeryLightGray",
