@@ -1,5 +1,5 @@
-import { Notification, Sheet, space, useTranslation } from "@visian/ui-shared";
-import { useCallback, useMemo, useState } from "react";
+import { Notification, useTranslation } from "@visian/ui-shared";
+import { useCallback, useState } from "react";
 import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
@@ -12,18 +12,12 @@ import { useDatasetProgress } from "../../../queries/use-dataset-progress";
 import { Annotation, Dataset, Image } from "../../../types";
 import { AnnotationProgress } from "../annotation-progress";
 import { ConfirmationPopup } from "../confirmation-popup";
-import { DatasetImageList } from "../dataset-image-list";
-import { DatasetNavigationBar } from "../dataset-navigationbar";
 import { ImageImportPopup } from "../image-import-popup";
+import { ImageList } from "../image-list";
 import { JobCreationPopup } from "../job-creation-popup";
-import { PageSection } from "../page-section";
+import { PaddedPageSectionIconButton, PageSection } from "../page-section";
 import { PageTitle } from "../page-title";
 import { useImageSelection, usePopUpState } from "../util";
-
-const StyledSheet = styled(Sheet)`
-  padding: ${space("listPadding")};
-  box-sizing: border-box;
-`;
 
 const Container = styled.div`
   width: 100%;
@@ -39,6 +33,15 @@ const ErrorNotification = styled(Notification)`
   transform: translateX(-50%);
 `;
 
+const ActionContainer = styled.div`
+  display: flex;
+  align-items: center;
+`;
+
+const ActionIconButton = styled(PaddedPageSectionIconButton)`
+  height: 25px;
+`;
+
 export const DatasetPage = ({
   dataset,
   isDraggedOver,
@@ -50,37 +53,20 @@ export const DatasetPage = ({
 }) => {
   const store = useStore();
 
-  const [isInSelectMode, setIsInSelectMode] = useState(false);
-
   const { progress, isLoadingProgress } = useDatasetProgress(dataset.id);
 
   const { images, imagesError, isLoadingImages, refetchImages } =
     useImagesByDataset(dataset.id);
 
-  const { selectedImages, setSelectedImages, setImageSelection } =
-    useImageSelection();
-
-  const setSelectAll = useCallback(
-    (selection: boolean) => {
-      if (selection) {
-        const newSelection = new Set<string>();
-        images?.forEach((image: Image) => newSelection.add(image.id));
-        setSelectedImages(newSelection);
-        return;
-      }
-      setSelectedImages(new Set<string>());
-    },
-    [images, setSelectedImages],
-  );
+  const { selectedImages, selectImages } = useImageSelection();
 
   const { deleteImages } = useDeleteImagesMutation(dataset.id);
-
   const { deleteAnnotations } = useDeleteAnnotationsForImageMutation();
 
   const [annotationTobBeDeleted, setAnnotationTobBeDeleted] =
     useState<Annotation>();
 
-  const [imageTobBeDeleted, setImageTobBeDeleted] = useState<Image>();
+  const [imagesTobBeDeleted, setImagesTobBeDeleted] = useState<Image[]>([]);
 
   // Delete annotation confirmation popup
   const [
@@ -89,34 +75,28 @@ export const DatasetPage = ({
     closeDeleteAnnotationConfirmationPopUp,
   ] = usePopUpState(false);
 
-  // Delete images confirmation popup
+  // Image delete popup
   const [
     isDeleteImagesConfirmationPopUpOpen,
     openDeleteImagesConfirmationPopUp,
     closeDeleteImagesConfirmationPopUp,
   ] = usePopUpState(false);
-
+  const openDeletePopup = useCallback(
+    (imagesToDelete: Image[]) => {
+      setImagesTobBeDeleted(imagesToDelete);
+      openDeleteImagesConfirmationPopUp();
+    },
+    [setImagesTobBeDeleted, openDeleteImagesConfirmationPopUp],
+  );
   const closeDeleteImagesConfirmationPopUpAndClearSelection =
     useCallback(() => {
       closeDeleteImagesConfirmationPopUp();
-      setImageTobBeDeleted(undefined);
-    }, [closeDeleteImagesConfirmationPopUp, setImageTobBeDeleted]);
-
-  const toggleSelectMode = useCallback(() => {
-    setIsInSelectMode((prevIsInSelectMode) => !prevIsInSelectMode);
-  }, []);
-
-  const areAllSelected = useMemo(
-    () => selectedImages.size === (images?.length || 0),
-    [selectedImages, images],
-  );
-
-  const isAnySelected = selectedImages.size > 0;
-
-  const toggleSelectAll = useCallback(
-    () => setSelectAll(!areAllSelected),
-    [areAllSelected, setSelectAll],
-  );
+      setImagesTobBeDeleted([]);
+      selectImages([]);
+    }, [closeDeleteImagesConfirmationPopUp, selectImages]);
+  const deleteSelectedImages = useCallback(() => {
+    deleteImages(imagesTobBeDeleted.map((image) => image.id));
+  }, [imagesTobBeDeleted, deleteImages]);
 
   // Job selection popup
   const [jobCreationPopUpOpenWith, setJobCreationPopUpOpenWith] =
@@ -126,9 +106,8 @@ export const DatasetPage = ({
   }, [dataset.id]);
   const closeJobCreationPopUp = useCallback(() => {
     setJobCreationPopUpOpenWith(undefined);
-    setSelectAll(false);
-    setIsInSelectMode(false);
-  }, [setSelectAll]);
+    selectImages([]);
+  }, [selectImages]);
 
   // Image import popup
   const [imageImportPopUpOpenWith, setImageImportPopUpOpenWith] =
@@ -145,24 +124,12 @@ export const DatasetPage = ({
     onDropCompleted();
   }, [setImageImportPopUpOpenWith, dataset, onDropCompleted]);
 
-  const deleteSelectedImages = useCallback(() => {
-    deleteImages(Array.from(selectedImages));
-  }, [selectedImages, deleteImages]);
-
   const deleteAnnotation = useCallback(
     (annotation: Annotation) => {
       setAnnotationTobBeDeleted(annotation);
       openDeleteAnnotationConfirmationPopUp();
     },
     [setAnnotationTobBeDeleted, openDeleteAnnotationConfirmationPopUp],
-  );
-
-  const deleteImage = useCallback(
-    (image: Image) => {
-      setImageTobBeDeleted(image);
-      openDeleteImagesConfirmationPopUp();
-    },
-    [setImageTobBeDeleted, openDeleteImagesConfirmationPopUp],
   );
 
   const handleAnnotationConfirmation = useCallback(() => {
@@ -173,15 +140,7 @@ export const DatasetPage = ({
       });
   }, [annotationTobBeDeleted, deleteAnnotations]);
 
-  const handleImageConfirmation = useCallback(() => {
-    if (imageTobBeDeleted) {
-      deleteImages([imageTobBeDeleted.id]);
-    } else {
-      deleteSelectedImages();
-    }
-  }, [imageTobBeDeleted, deleteImages, deleteSelectedImages]);
-
-  const { t: translate } = useTranslation();
+  const { t } = useTranslation();
 
   let listInfoTx;
   if (imagesError) listInfoTx = "images-loading-failed";
@@ -211,32 +170,27 @@ export const DatasetPage = ({
         infoTx={listInfoTx}
         showActions={!imagesError}
         actions={
-          <DatasetNavigationBar
-            isInSelectMode={isInSelectMode}
-            allSelected={areAllSelected}
-            anySelected={isAnySelected}
-            toggleSelectMode={toggleSelectMode}
-            toggleSelectAll={toggleSelectAll}
-            openJobCreationPopUp={openJobCreationPopUp}
-            openImageImportPopUp={openImageImportPopUp}
-            deleteSelectedImages={openDeleteImagesConfirmationPopUp}
-          />
+          <ActionContainer>
+            <ActionIconButton
+              icon="plus"
+              tooltipTx="import-images"
+              tooltipPosition="left"
+              onPointerDown={openImageImportPopUp}
+            />
+          </ActionContainer>
         }
       >
-        <StyledSheet>
-          {images && (
-            <DatasetImageList
-              isInSelectMode={isInSelectMode}
-              images={images}
-              refetchImages={refetchImages}
-              selectedImages={selectedImages}
-              setImageSelection={setImageSelection}
-              setSelectedImages={setSelectedImages}
-              deleteAnnotation={deleteAnnotation}
-              deleteImage={deleteImage}
-            />
-          )}
-        </StyledSheet>
+        {images && (
+          <ImageList
+            images={images}
+            selectedImages={[...selectedImages]}
+            onSelect={selectImages}
+            onImageDelete={openDeletePopup}
+            onStartJob={openJobCreationPopUp}
+            showAnnotations
+            onAnnotationDelete={deleteAnnotation}
+          />
+        )}
         <JobCreationPopup
           isOpen={!!jobCreationPopUpOpenWith}
           onClose={closeJobCreationPopUp}
@@ -255,7 +209,7 @@ export const DatasetPage = ({
         <ConfirmationPopup
           isOpen={isDeleteAnnotationConfirmationPopUpOpen}
           onClose={closeDeleteAnnotationConfirmationPopUp}
-          message={translate("delete-annotation-message", {
+          message={t("delete-annotation-message", {
             name: annotationTobBeDeleted?.dataUri ?? "",
           })}
           titleTx="delete-annotation-title"
@@ -265,18 +219,18 @@ export const DatasetPage = ({
           isOpen={isDeleteImagesConfirmationPopUpOpen}
           onClose={closeDeleteImagesConfirmationPopUpAndClearSelection}
           message={
-            imageTobBeDeleted
-              ? translate("delete-image-message", {
-                  name: imageTobBeDeleted?.dataUri ?? "",
+            imagesTobBeDeleted.length === 1
+              ? t("delete-image-message", {
+                  name: imagesTobBeDeleted[0].dataUri ?? "",
                 })
-              : translate("delete-images-message", {
+              : t("delete-images-message", {
                   count: selectedImages.size.toString(),
                 })
           }
           titleTx={
-            imageTobBeDeleted ? "delete-image-title" : "delete-images-title"
+            imagesTobBeDeleted ? "delete-image-title" : "delete-images-title"
           }
-          onConfirm={handleImageConfirmation}
+          onConfirm={deleteSelectedImages}
         />
         {store?.error && (
           <ErrorNotification

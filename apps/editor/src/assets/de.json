@@ -347,6 +347,8 @@
   "job-creation-model-selection": "Modell und Version auswählen",
   "job-creation-image-selection": "Bilder zum Annotieren auswählen",
   "job-creation-error": "Beim Erstellen des Jobs ist ein Fehler aufgetreten.",
+  "job-creation-images-selected": "{{count}} Bild ausgewählt",
+  "job-creation-images-selected_plural": "{{count}} Bilder ausgewählt",
   "job-title": "Job vom {{date}}",
   "start-job": "Job starten",
 

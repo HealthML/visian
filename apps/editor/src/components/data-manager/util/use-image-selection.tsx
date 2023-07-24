@@ -1,18 +1,18 @@
 import { useCallback, useState } from "react";
 
-export const useImageSelection = () => {
-  const [selectedImages, setSelectedImages] = useState<Set<string>>(
-    new Set<string>(),
-  );
+import { Image } from "../../../types";
 
-  const setImageSelection = useCallback(
-    (imageId: string, isSelected: boolean) => {
+export const useImageSelection = () => {
+  const [selectedImages, setSelectedImages] = useState<Set<Image>>(new Set());
+
+  const selectImage = useCallback(
+    (image: Image, selected: boolean) => {
       setSelectedImages((prevSelectedImages) => {
         const newSelectedImages = new Set(prevSelectedImages);
-        if (isSelected) {
-          newSelectedImages.add(imageId);
+        if (selected) {
+          newSelectedImages.add(image);
         } else {
-          newSelectedImages.delete(imageId);
+          newSelectedImages.delete(image);
         }
         return newSelectedImages;
       });
@@ -20,9 +20,14 @@ export const useImageSelection = () => {
     [setSelectedImages],
   );
 
+  const selectImages = useCallback(
+    (images: Image[]) => setSelectedImages(new Set(images)),
+    [setSelectedImages],
+  );
+
   return {
     selectedImages,
-    setSelectedImages,
-    setImageSelection,
+    selectImage,
+    selectImages,
   };
 };

@@ -1,0 +1,194 @@
+import { InvisibleButton, ListDivider, Text, color } from "@visian/ui-shared";
+import { Fragment, useCallback, useMemo, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import styled from "styled-components";
+
+import { useAnnotationsByImage } from "../../../queries";
+import { Annotation } from "../../../types";
+import { editorPath } from "../util";
+import { ImageListItemProps } from "./image-list-item.props";
+
+const CollapseButton = styled(InvisibleButton)<{ isOpen: boolean }>`
+  width: 20px;
+  margin-right: 8px;
+  transform: rotate(${({ isOpen }) => (isOpen ? "90deg" : "0deg")});
+  transition: transform 0.1s ease-in-out;
+`;
+
+export const SelectionCheckbox = styled(InvisibleButton)<{
+  emphasized?: boolean;
+  largerMargin?: boolean;
+}>`
+  width: 18px;
+  margin-right: ${({ largerMargin }) => (largerMargin ? "12px" : "8px")};
+  opacity: ${({ emphasized }) => (emphasized ? 1 : 0.4)};
+  transition: opacity 0.1s ease-in-out;
+`;
+
+const IconButton = styled(InvisibleButton)`
+  width: 20px;
+  height: 20px;
+`;
+
+const VerifiedDot = styled.div`
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background-color: ${color("Neuronic Neon")};
+  margin: 0 10px;
+`;
+
+const ClickableText = styled(Text)`
+  cursor: pointer;
+`;
+
+const Actions = styled.div`
+  flex-grow: 1;
+  display: flex;
+  justify-content: flex-end;
+`;
+
+const TrashButton = styled(IconButton)`
+  opacity: 0;
+  transition: opacity 0.1s ease-in-out;
+`;
+
+const Row = styled.div`
+  display: flex;
+  align-items: center;
+  padding: 10px 12px;
+
+  &:hover ${TrashButton} {
+    opacity: 1;
+  }
+`;
+
+const ImageRow = styled(Row)``;
+
+// Add padding for list padding, collapsible width, collapsible margin, optionally checkbox size:
+const AnnotationRow = styled(Row)<{ addCheckboxMargin?: boolean }>`
+  padding-left: calc(
+    12px + 8px + 20px +
+      ${({ addCheckboxMargin }) => (addCheckboxMargin ? "26px" : "0px")}
+  );
+`;
+
+const AnnotationListDivider = styled(ListDivider)<{
+  addCheckboxMargin?: boolean;
+}>`
+  margin-left: calc(
+    12px + 8px + 20px +
+      ${({ addCheckboxMargin }) => (addCheckboxMargin ? "26px" : "0px")}
+  );
+  width: auto;
+`;
+
+export const ImageListItem = ({
+  image,
+  areSomeSelected,
+  isSelectionHovered,
+  isSelected,
+  onSelect,
+  onDelete,
+  showAnnotations,
+  onAnnotationDelete,
+  annotationsFilter,
+}: ImageListItemProps) => {
+  const { annotations: allAnnotations } = useAnnotationsByImage(image.id);
+  const annotations = allAnnotations?.filter((a) =>
+    annotationsFilter ? annotationsFilter(a) : true,
+  );
+  const [areAnnotationsOpen, setAnnotationsOpen] = useState(false);
+
+  const navigate = useNavigate();
+
+  const projectId = useParams().projectId || "";
+  const datasetId = useParams().datasetId || "";
+
+  const hasVerifiedAnnotation = useMemo(
+    () => annotations?.some((annotation) => annotation.verified) ?? false,
+    [annotations],
+  );
+
+  const handleImageClick = useCallback(() => {
+    navigate(editorPath(image.id, undefined, projectId, datasetId));
+  }, [navigate, image.id, projectId, datasetId]);
+
+  const toggleShowAnnotations = useCallback(
+    () => setAnnotationsOpen(!areAnnotationsOpen),
+    [areAnnotationsOpen],
+  );
+
+  const selectImage = useCallback(() => {
+    if (onSelect) onSelect(!isSelected);
+  }, [onSelect, isSelected]);
+
+  return (
+    <>
+      <ImageRow>
+        {onSelect && (
+          <SelectionCheckbox
+            icon={isSelected ? "checked" : "unchecked"}
+            onPointerDown={selectImage}
+            emphasized={isSelected || isSelectionHovered}
+            largerMargin={!showAnnotations}
+          />
+        )}
+        {showAnnotations && (
+          <CollapseButton
+            icon="collapseClosed"
+            onPointerDown={toggleShowAnnotations}
+            isOpen={areAnnotationsOpen}
+            isDisabled={!annotations?.length}
+          />
+        )}
+        <ClickableText title={image.dataUri} onClick={handleImageClick}>
+          {image.dataUri.split("/").pop()}
+        </ClickableText>
+        {hasVerifiedAnnotation && <VerifiedDot />}
+        <Actions>
+          {!areSomeSelected && onDelete && (
+            <TrashButton
+              icon="trashSmall"
+              tooltipTx="delete-image-title"
+              onPointerDown={() => onDelete(image)}
+              tooltipPosition="left"
+            />
+          )}
+        </Actions>
+      </ImageRow>
+      {areAnnotationsOpen &&
+        annotations &&
+        annotations.map((annotation: Annotation, index) => (
+          <Fragment key={annotation.id}>
+            {index === 0 && <ListDivider />}
+            <AnnotationRow addCheckboxMargin={!!onSelect}>
+              <ClickableText
+                title={annotation.dataUri}
+                onClick={() => {
+                  navigate(
+                    editorPath(image.id, annotation.id, projectId, datasetId),
+                  );
+                }}
+              >
+                {annotation.dataUri.split("/").pop()}
+              </ClickableText>
+              {annotation.verified && <VerifiedDot />}
+              <Actions>
+                {!areSomeSelected && onAnnotationDelete && (
+                  <TrashButton
+                    icon="trashSmall"
+                    tooltipTx="delete-annotation-title"
+                    onPointerDown={() => onAnnotationDelete(annotation)}
+                  />
+                )}
+              </Actions>
+            </AnnotationRow>
+            {index !== annotations.length - 1 && (
+              <AnnotationListDivider addCheckboxMargin={!!onSelect} />
+            )}
+          </Fragment>
+        ))}
+    </>
+  );
+};

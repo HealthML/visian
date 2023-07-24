@@ -6,11 +6,11 @@ import {
   RefetchQueryFilters,
 } from "react-query";
 
-import { Job } from "../../../types";
+import { Image, Job } from "../../../types";
 
 export interface JobCreationPopUpProps extends StatefulPopUpProps {
   projectId: string;
-  activeImageSelection?: Set<string>;
+  activeImageSelection?: Set<Image>;
   openWithDatasetId?: string;
   refetchJobs?: <TPageData>(
     options?: (RefetchOptions & RefetchQueryFilters<TPageData>) | undefined,

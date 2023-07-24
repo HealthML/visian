@@ -1,14 +1,10 @@
 import {
   InvisibleButton,
-  ListItem,
   Sheet,
   space,
-  SubtleText,
-  Text,
   useTranslation,
 } from "@visian/ui-shared";
 import { useCallback, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 
 import {
@@ -18,21 +14,17 @@ import {
 } from "../../../queries";
 import useImagesByJob from "../../../queries/use-images-by-jobs";
 import { useJobProgress } from "../../../queries/use-job-progress";
-import { Image, Job } from "../../../types";
+import { Annotation, Job } from "../../../types";
 import { AnnotationProgress } from "../annotation-progress";
 import { ConfirmationPopup } from "../confirmation-popup";
+import { ImageList } from "../image-list";
 import { JobLogPopup } from "../job-history/job-log-popup";
 import { JobStatusBadge } from "../job-history/job-status-badge/job-status-badge";
 import { PageRow } from "../page-row";
 import { PageSection } from "../page-section";
 import { PageTitle } from "../page-title";
-import { editorPath, getDisplayDate } from "../util";
+import { getDisplayDate } from "../util";
 import { DetailsRow } from "./details-table";
-
-const StyledSheet = styled(Sheet)`
-  padding: ${space("listPadding")};
-  box-sizing: border-box;
-`;
 
 const DetailsSheet = styled(Sheet)`
   padding: ${space("pageSectionMarginSmall")};
@@ -49,17 +41,6 @@ const Container = styled.div`
   flex-direction: column;
 `;
 
-const ClickableListItem = styled(ListItem)`
-  width: 100%;
-  &:hover {
-    cursor: pointer;
-  }
-`;
-
-const StyledText = styled(Text)`
-  padding-right: 0.8em;
-`;
-
 const IconButton = styled(InvisibleButton)`
   width: 30px;
 `;
@@ -67,12 +48,10 @@ const IconButton = styled(InvisibleButton)`
 export const JobPage = ({ job }: { job: Job }) => {
   const { progress, isLoadingProgress } = useJobProgress(job.id);
 
-  const { annotations, isErrorAnnotations } = useAnnotationsByJob(job.id);
-  const { images, imagesError, isErrorImages, isLoadingImages } =
-    useImagesByJob(job.id);
+  const { annotations } = useAnnotationsByJob(job.id);
+  const { images, imagesError, isLoadingImages } = useImagesByJob(job.id);
 
   const { t } = useTranslation();
-  const navigate = useNavigate();
   const { deleteJobs } = useDeleteJobsForProjectMutation();
   const { patchJobStatus } = usePatchJobStatusMutation();
 
@@ -105,31 +84,9 @@ export const JobPage = ({ job }: { job: Job }) => {
   const openJobLogPopUp = useCallback(() => setIsJobLogPopUpOpen(true), []);
   const closeJobLogPopUp = useCallback(() => setIsJobLogPopUpOpen(false), []);
 
-  const imagesWithAnnotations = annotations?.map(
-    (annotation) => annotation.image,
-  );
-
-  const findAnnotationId = useCallback(
-    (imageId: string) => {
-      const imageAnnotation = annotations?.find(
-        (annotation) => annotation.image === imageId,
-      );
-      return imageAnnotation?.id;
-    },
-    [annotations],
-  );
-
-  const compareImages = useCallback(
-    (a: Image, b: Image) => {
-      if (findAnnotationId(a.id) && !findAnnotationId(b.id)) {
-        return -1;
-      }
-      if (!findAnnotationId(a.id) && findAnnotationId(b.id)) {
-        return 1;
-      }
-      return 0;
-    },
-    [findAnnotationId],
+  const jobAnnotationFilter = useCallback(
+    (annotation: Annotation) => annotation.job === job.id,
+    [job],
   );
 
   const confirmDeleteJob = useCallback(
@@ -242,23 +199,12 @@ export const JobPage = ({ job }: { job: Job }) => {
         infoTx={listInfoTx}
         showActions={!imagesError}
       >
-        {images && !isErrorImages && !isErrorAnnotations && (
-          <StyledSheet>
-            {images?.sort(compareImages).map((image: Image, index: number) => (
-              <ClickableListItem
-                key={image.id}
-                onClick={() =>
-                  navigate(editorPath(image.id, findAnnotationId(image.id)))
-                }
-                isLast={index === images.length - 1}
-              >
-                <StyledText text={image.dataUri.split("/").pop()} />
-                {imagesWithAnnotations?.includes(image.id) && (
-                  <SubtleText tx="image-annotated" />
-                )}
-              </ClickableListItem>
-            ))}
-          </StyledSheet>
+        {images && (
+          <ImageList
+            images={images}
+            showAnnotations
+            annotationsFilter={jobAnnotationFilter}
+          />
         )}
         <ConfirmationPopup
           isOpen={isDeleteJobConfirmationPopUpOpen}
