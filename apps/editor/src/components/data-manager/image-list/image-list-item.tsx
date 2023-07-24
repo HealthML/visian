@@ -1,4 +1,4 @@
-import { InvisibleButton, ListDivider, Text, color } from "@visian/ui-shared";
+import { color, InvisibleButton, ListDivider, Text } from "@visian/ui-shared";
 import { Fragment, useCallback, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import styled from "styled-components";

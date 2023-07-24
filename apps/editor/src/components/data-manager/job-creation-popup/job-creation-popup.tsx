@@ -1,17 +1,17 @@
 import {
   Box,
   Button,
+  color,
   DropDown,
   FlexRow,
-  IEnumParameterOption,
   Icon,
+  IEnumParameterOption,
   List,
   ListItem,
   PopUp,
   SectionHeader,
   SubtleText,
   Text,
-  color,
   useTranslation,
 } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
