@@ -1,7 +1,8 @@
+import { Annotation } from "@visian/mia-api";
 import axios from "axios";
 import path from "path";
 
-import { Annotation, FileWithMetadata } from "../types";
+import { FileWithMetadata } from "../types";
 import { hubBaseUrl, imagesApi } from "./hub-base-url";
 import { getAnnotation } from "./use-annotations-by";
 

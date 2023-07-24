@@ -1,7 +1,7 @@
+import { Annotation } from "@visian/mia-api";
 import axios, { AxiosError } from "axios";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 
-import { Annotation } from "../types";
 import { hubBaseUrl } from "./hub-base-url";
 
 export const patchAnnotation = async (

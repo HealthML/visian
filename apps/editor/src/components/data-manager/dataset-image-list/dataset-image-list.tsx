@@ -1,8 +1,7 @@
-import { Image } from "@visian/mia-api";
+import { Annotation, Image } from "@visian/mia-api";
 import { List, stopPropagation } from "@visian/ui-shared";
 import styled from "styled-components";
 
-import { Annotation } from "../../../types";
 import { useKeyboardShortcuts } from "../util";
 import { DatasetImageListItem } from "./dataset-image-list-item";
 

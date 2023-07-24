@@ -1,4 +1,4 @@
-import { Dataset, Image } from "@visian/mia-api";
+import { Annotation, Dataset, Image } from "@visian/mia-api";
 import { Notification, Sheet, space, useTranslation } from "@visian/ui-shared";
 import { useCallback, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -10,8 +10,8 @@ import {
   deleteImagesMutation,
   useDatasetProgress,
   useDeleteAnnotationsForImageMutation,
- useImagesByDataset } from "../../../queries";
-import { Annotation } from "../../../types";
+  useImagesByDataset,
+} from "../../../queries";
 import { AnnotationProgress } from "../annotation-progress";
 import { ConfirmationPopup } from "../confirmation-popup";
 import { DatasetImageList } from "../dataset-image-list";
@@ -21,7 +21,6 @@ import { JobCreationPopup } from "../job-creation-popup";
 import { PageSection } from "../page-section";
 import { PageTitle } from "../page-title";
 import { useImageSelection, usePopUpState } from "../util";
-
 
 const StyledSheet = styled(Sheet)`
   padding: ${space("listPadding")};

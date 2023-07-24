@@ -1,3 +1,4 @@
+import { Progress } from "@visian/mia-api";
 import {
   Button,
   Progress as ProgressBar,
@@ -7,7 +8,6 @@ import {
 } from "@visian/ui-shared";
 import styled from "styled-components";
 
-import { Progress } from "../../../types";
 
 const ProgressSheet = styled(Sheet)`
   padding: ${space("pageSectionMarginSmall")};
