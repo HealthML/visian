@@ -355,8 +355,13 @@ export const Layers: React.FC = observer(() => {
               items={treeItems}
               onItemsChanged={updateRenderingOrder}
               TreeItemComponent={TreeItemComponent}
-              dropAnimation={null}
-              sortableProps={{ animateLayoutChanges: () => false }}
+              dropAnimation={store.reviewStrategy ? undefined : null}
+              sortableProps={
+                store.reviewStrategy
+                  ? undefined
+                  : { animateLayoutChanges: () => false }
+              }
+              keepGhostInPlace={!!store.reviewStrategy}
             />
           </LayerList>
         </div>
