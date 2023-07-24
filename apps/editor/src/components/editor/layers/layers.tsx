@@ -9,6 +9,7 @@ import {
   Modal,
   ModalHeaderButton,
   size,
+  stopPropagation,
   styledScrollbarMixin,
   SubtleText,
 } from "@visian/ui-shared";
@@ -99,15 +100,27 @@ const LayerItem = ({ id }: { id: string }) => {
       const flatRenderingOrder =
         store?.editor.activeDocument?.flatRenderingOrder;
       if (!flatRenderingOrder) return false;
+      const renderingOrder = store?.editor.activeDocument?.renderingOrder;
+      if (!renderingOrder) return false;
       const layerIndex = flatRenderingOrder.indexOf(element);
       if (layerIndex === flatRenderingOrder.length - 1) return true;
+      if (
+        element instanceof LayerFamily &&
+        element.collapsed &&
+        renderingOrder.indexOf(element) === renderingOrder.length - 1
+      ) {
+        return true;
+      }
       const nextElement = flatRenderingOrder[layerIndex + 1];
       return (
         nextElement.isActive &&
         (nextElement instanceof LayerFamily ? nextElement.collapsed : true)
       );
     },
-    [store?.editor.activeDocument?.flatRenderingOrder],
+    [
+      store?.editor.activeDocument?.flatRenderingOrder,
+      store?.editor.activeDocument?.renderingOrder,
+    ],
   );
   const family = store?.editor.activeDocument?.getLayerFamily(id);
   if (family) {
@@ -173,6 +186,11 @@ export const Layers: React.FC = observer(() => {
     }, 50);
   }, [viewMode]);
 
+  // This is required to force an update when the active layer changes and the layer view must change its position
+  // (otherwise the layer menu stays fixed in place when switching the active layer between image and annotation)
+  // eslint-disable-next-line no-unused-expressions, @typescript-eslint/no-unused-expressions
+  store?.editor.activeDocument?.activeLayer;
+
   const layers = store?.editor.activeDocument?.layers;
   if (!layers) {
     return (
@@ -182,7 +200,7 @@ export const Layers: React.FC = observer(() => {
     );
   }
 
-  const canHaveFamilyHaveChildren = useCallback(
+  const canFamilyHaveChildren = useCallback(
     (draggedItem: TreeItem<TreeItemData>) => {
       const layer = store?.editor.activeDocument?.getLayer(draggedItem.value);
       return !!layer;
@@ -190,15 +208,15 @@ export const Layers: React.FC = observer(() => {
     [store?.editor.activeDocument],
   );
 
-  const layerFamilyToTreeItemData = (layerFamily: ILayerFamily) => ({
-    id: layerFamily.id,
-    value: layerFamily.id,
-    children: layerFamily.layers.map((layer) => layerToTreeItemData(layer)),
-    collapsed: layerFamily.collapsed,
-    canHaveChildren: canHaveFamilyHaveChildren,
-  });
-
   const getTreeItems = useCallback(() => {
+    const layerFamilyToTreeItemData = (layerFamily: ILayerFamily) => ({
+      id: layerFamily.id,
+      value: layerFamily.id,
+      children: layerFamily.layers.map((layer) => layerToTreeItemData(layer)),
+      collapsed: layerFamily.collapsed,
+      canHaveChildren: canFamilyHaveChildren,
+    });
+
     const renderingOrder = store.editor.activeDocument?.renderingOrder;
     if (!renderingOrder) {
       return [{ id: "undefined", value: "undefined" }];
@@ -214,7 +232,7 @@ export const Layers: React.FC = observer(() => {
       }
       return { id: "undefined", value: "undefined" };
     });
-  }, [store.editor.activeDocument?.renderingOrder]);
+  }, [canFamilyHaveChildren, store.editor.activeDocument?.renderingOrder]);
 
   const treeItems = getTreeItems();
 
@@ -291,13 +309,14 @@ export const Layers: React.FC = observer(() => {
           </>
         }
       >
-        {/* TODO: Should we update on every drag change or just on drop? */}
         <div style={{ width: "100%" }}>
-          <LayerList>
+          <LayerList onWheel={stopPropagation}>
             <SortableTree
               items={treeItems}
               onItemsChanged={updateRenderingOrder}
               TreeItemComponent={TreeItemComponent}
+              dropAnimation={null}
+              sortableProps={{ animateLayoutChanges: () => false }}
             />
           </LayerList>
         </div>
