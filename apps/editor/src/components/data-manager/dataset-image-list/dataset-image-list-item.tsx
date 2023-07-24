@@ -123,15 +123,10 @@ export const DatasetImageListItem: React.FC<DatasetImageListItemProps> = ({
   const startReview = useCallback(
     async (taskType: TaskType, annotationId?: string) => {
       store?.startReview(
-        async (url: string) =>
+        async () =>
           annotationId
-            ? MiaReviewStrategy.fromAnnotationId(
-                store,
-                annotationId,
-                url,
-                taskType,
-              )
-            : MiaReviewStrategy.fromImageIds(store, [image.id], url, taskType),
+            ? MiaReviewStrategy.fromAnnotationId(store, annotationId, taskType)
+            : MiaReviewStrategy.fromImageIds(store, [image.id], taskType),
         navigate,
       );
     },
