@@ -2,7 +2,7 @@ import {
   CreateMiaProjectDto,
   MiaProject,
   UpdateMiaProjectDto,
-} from "@visian/mia-api";
+} from "@visian/utils";
 import { AxiosError } from "axios";
 import { useQuery } from "react-query";
 

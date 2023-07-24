@@ -1,4 +1,4 @@
-import { MiaImage } from "@visian/mia-api";
+import { MiaImage } from "@visian/utils";
 import { isMac } from "@visian/ui-shared";
 import { useEffect, useState } from "react";
 

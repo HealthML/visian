@@ -11,14 +11,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateMiaProjectDto'
+              $ref: '#/components/schemas/CreateProjectDto'
       responses:
         '201':
           description: The resource was successfully created.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/MiaProject'
+                $ref: '#/components/schemas/Project'
       tags: &ref_0
         - Projects
     get:
@@ -36,7 +36,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/MiaProject'
+                  $ref: '#/components/schemas/Project'
       tags: *ref_0
     delete:
       operationId: ProjectsController_removeAll
@@ -60,7 +60,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/MiaProject'
+                  $ref: '#/components/schemas/Project'
       tags: *ref_0
   /projects/{id}:
     get:
@@ -82,7 +82,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/MiaProject'
+                $ref: '#/components/schemas/Project'
         '404':
           description: The requested resource does not exist.
       tags: *ref_0
@@ -105,14 +105,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UpdateMiaProjectDto'
+              $ref: '#/components/schemas/UpdateProjectDto'
       responses:
         '200':
           description: The request succeeded.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/MiaProject'
+                $ref: '#/components/schemas/Project'
         '404':
           description: The requested resource does not exist.
       tags: *ref_0
@@ -149,14 +149,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateMiaDatasetDto'
+              $ref: '#/components/schemas/CreateDatasetDto'
       responses:
         '201':
           description: The resource was successfully created.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/MiaDataset'
+                $ref: '#/components/schemas/Dataset'
         '400':
           description: The request was malformed.
       tags: &ref_1
@@ -184,7 +184,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/MiaDataset'
+                  $ref: '#/components/schemas/Dataset'
       tags: *ref_1
     delete:
       operationId: DatasetsController_removeAll
@@ -208,7 +208,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/MiaDataset'
+                  $ref: '#/components/schemas/Dataset'
       tags: *ref_1
   /datasets/{id}:
     get:
@@ -230,7 +230,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/MiaDataset'
+                $ref: '#/components/schemas/Dataset'
         '404':
           description: The requested resource does not exist.
       tags: *ref_1
@@ -254,14 +254,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UpdateMiaDatasetDto'
+              $ref: '#/components/schemas/UpdateDatasetDto'
       responses:
         '200':
           description: The request succeeded.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/MiaDataset'
+                $ref: '#/components/schemas/Dataset'
         '404':
           description: The requested resource does not exist.
       tags: *ref_1
@@ -305,7 +305,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/MiaProgress'
+                $ref: '#/components/schemas/Progress'
         '404':
           description: The requested resource does not exist.
       tags: *ref_1
@@ -325,14 +325,14 @@ paths:
         content:
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/CreateMiaImageDto'
+              $ref: '#/components/schemas/CreateImageDto'
       responses:
         '201':
           description: The resource was successfully created.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/MiaImage'
+                $ref: '#/components/schemas/Image'
         '400':
           description: The request was malformed.
       tags: &ref_2
@@ -366,7 +366,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/MiaImage'
+                  $ref: '#/components/schemas/Image'
       tags: *ref_2
     delete:
       operationId: ImagesController_removeAll
@@ -389,7 +389,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/MiaImage'
+                  $ref: '#/components/schemas/Image'
       tags: *ref_2
   /images/{id}:
     get:
@@ -411,7 +411,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/MiaImage'
+                $ref: '#/components/schemas/Image'
         '404':
           description: The requested resource does not exist.
       tags: *ref_2
@@ -437,14 +437,14 @@ paths:
         content:
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/UpdateMiaImageDto'
+              $ref: '#/components/schemas/UpdateImageDto'
       responses:
         '200':
           description: The request succeeded.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/MiaImage'
+                $ref: '#/components/schemas/Image'
         '400':
           description: The request was malformed.
         '404':
@@ -509,14 +509,14 @@ paths:
         content:
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/CreateMiaAnnotationDto'
+              $ref: '#/components/schemas/CreateAnnotationDto'
       responses:
         '201':
           description: The resource was successfully created.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/MiaAnnotation'
+                $ref: '#/components/schemas/Annotation'
         '400':
           description: The request was malformed.
       tags: &ref_3
@@ -559,7 +559,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/MiaAnnotation'
+                  $ref: '#/components/schemas/Annotation'
       tags: *ref_3
     delete:
       operationId: AnnotationsController_removeAll
@@ -582,7 +582,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/MiaAnnotation'
+                  $ref: '#/components/schemas/Annotation'
       tags: *ref_3
   /annotations/{id}:
     get:
@@ -604,7 +604,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/MiaAnnotation'
+                $ref: '#/components/schemas/Annotation'
         '404':
           description: The requested resource does not exist.
       tags: *ref_3
@@ -630,14 +630,14 @@ paths:
         content:
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/UpdateMiaAnnotationDto'
+              $ref: '#/components/schemas/UpdateAnnotationDto'
       responses:
         '200':
           description: The request succeeded.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/MiaAnnotation'
+                $ref: '#/components/schemas/Annotation'
         '404':
           description: The requested resource does not exist.
       tags: *ref_3
@@ -700,14 +700,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateMiaJobDto'
+              $ref: '#/components/schemas/CreateJobDto'
       responses:
         '201':
           description: The resource was successfully created.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/MiaJob'
+                $ref: '#/components/schemas/Job'
         '400':
           description: The request was malformed.
       tags: &ref_4
@@ -735,7 +735,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/MiaJob'
+                  $ref: '#/components/schemas/Job'
       tags: *ref_4
     delete:
       operationId: JobsController_removeAll
@@ -758,7 +758,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/MiaJob'
+                  $ref: '#/components/schemas/Job'
       tags: *ref_4
   /jobs/{id}:
     get:
@@ -780,7 +780,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/MiaJob'
+                $ref: '#/components/schemas/Job'
         '404':
           description: The requested resource does not exist.
       tags: *ref_4
@@ -804,14 +804,14 @@ paths:
         content:
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/UpdateMiaJobDto'
+              $ref: '#/components/schemas/UpdateJobDto'
       responses:
         '200':
           description: The request succeeded.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/MiaJob'
+                $ref: '#/components/schemas/Job'
         '400':
           description: >-
             Valid status transitions were not abided by. Valid transitions are
@@ -883,7 +883,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/MiaProgress'
+                $ref: '#/components/schemas/Progress'
         '404':
           description: The requested resource does not exist.
       tags: *ref_4
@@ -917,7 +917,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/MiaModelVersion'
+                  $ref: '#/components/schemas/ModelVersion'
       tags: &ref_5
         - Model Versions
   /model-versions/{name}/{version}:
@@ -946,7 +946,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/MiaModelVersion'
+                $ref: '#/components/schemas/ModelVersion'
         '404':
           description: The requested resource does not exist.
       tags: *ref_5
@@ -959,7 +959,7 @@ tags: []
 servers: []
 components:
   schemas:
-    CreateMiaProjectDto:
+    CreateProjectDto:
       type: object
       properties:
         name:
@@ -967,7 +967,7 @@ components:
           description: The name of the project.
       required:
         - name
-    MiaProject:
+    Project:
       type: object
       properties:
         id:
@@ -989,7 +989,7 @@ components:
         - name
         - createdAt
         - updatedAt
-    UpdateMiaProjectDto:
+    UpdateProjectDto:
       type: object
       properties:
         name:
@@ -1007,7 +1007,7 @@ components:
             type: string
       required:
         - ids
-    CreateMiaDatasetDto:
+    CreateDatasetDto:
       type: object
       properties:
         name:
@@ -1021,7 +1021,7 @@ components:
       required:
         - name
         - project
-    MiaDataset:
+    Dataset:
       type: object
       properties:
         id:
@@ -1047,7 +1047,7 @@ components:
         - project
         - createdAt
         - updatedAt
-    UpdateMiaDatasetDto:
+    UpdateDatasetDto:
       type: object
       properties:
         name:
@@ -1061,7 +1061,7 @@ components:
       required:
         - name
         - project
-    MiaProgress:
+    Progress:
       type: object
       properties:
         totalImages:
@@ -1079,7 +1079,7 @@ components:
         - totalImages
         - annotatedImages
         - verifiedImages
-    CreateMiaImageDto:
+    CreateImageDto:
       type: object
       properties:
         dataset:
@@ -1100,7 +1100,7 @@ components:
         - dataset
         - dataUri
         - file
-    MiaImage:
+    Image:
       type: object
       properties:
         id:
@@ -1128,7 +1128,7 @@ components:
         - dataset
         - createdAt
         - updatedAt
-    UpdateMiaImageDto:
+    UpdateImageDto:
       type: object
       properties:
         dataUri:
@@ -1145,7 +1145,7 @@ components:
       required:
         - dataUri
         - file
-    CreateMiaAnnotationDto:
+    CreateAnnotationDto:
       type: object
       properties:
         image:
@@ -1175,7 +1175,7 @@ components:
       required:
         - image
         - dataUri
-    MiaJob:
+    Job:
       type: object
       properties:
         id:
@@ -1240,7 +1240,7 @@ components:
         - finishedAt
         - createdAt
         - updatedAt
-    MiaAnnotation:
+    Annotation:
       type: object
       properties:
         id:
@@ -1263,7 +1263,7 @@ components:
             field may be `null` if the annotation was not automatically created
             by a job.
           allOf:
-            - $ref: '#/components/schemas/MiaJob'
+            - $ref: '#/components/schemas/Job'
         createdAt:
           format: date-time
           type: string
@@ -1280,7 +1280,7 @@ components:
         - job
         - createdAt
         - updatedAt
-    UpdateMiaAnnotationDto:
+    UpdateAnnotationDto:
       type: object
       properties:
         dataUri:
@@ -1299,7 +1299,7 @@ components:
           description: >-
             The annotation file. Should be passed to update the file referenced
             by the dataUri.
-    CreateMiaJobDto:
+    CreateJobDto:
       type: object
       properties:
         modelName:
@@ -1323,7 +1323,7 @@ components:
         - modelVersion
         - project
         - images
-    UpdateMiaJobDto:
+    UpdateJobDto:
       type: object
       properties:
         status:
@@ -1344,7 +1344,7 @@ components:
           type: string
           format: binary
           description: The job log .txt file.
-    MiaModelVersionTag:
+    ModelVersionTag:
       type: object
       properties:
         key:
@@ -1356,7 +1356,7 @@ components:
       required:
         - key
         - value
-    MiaModelVersion:
+    ModelVersion:
       type: object
       properties:
         name:
@@ -1372,7 +1372,7 @@ components:
           description: The list of model version tags.
           type: array
           items:
-            $ref: '#/components/schemas/MiaModelVersionTag'
+            $ref: '#/components/schemas/ModelVersionTag'
         createdAt:
           format: date-time
           type: string

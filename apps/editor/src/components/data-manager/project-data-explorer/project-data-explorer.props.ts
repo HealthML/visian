@@ -1,4 +1,4 @@
-import { MiaDataset, MiaImage } from "@visian/mia-api";
+import { MiaDataset, MiaImage } from "@visian/utils";
 import type { StatefulPopUpProps } from "@visian/ui-shared";
 
 export interface ProjectDataExplorerProps extends StatefulPopUpProps {

@@ -26,65 +26,151 @@ import { BASE_PATH, COLLECTION_FORMATS, BaseAPI, RequiredError } from './base';
 /**
  * 
  * @export
- * @interface CreateMiaDatasetDto
+ * @interface Annotation
  */
-export interface CreateMiaDatasetDto {
+export interface Annotation {
+    /**
+     * The identifier (uuid) of the annotation.
+     * @type {string}
+     * @memberof Annotation
+     */
+    'id': string;
+    /**
+     * The path of the annotation file relative to the specified data source location.
+     * @type {string}
+     * @memberof Annotation
+     */
+    'dataUri': string;
+    /**
+     * Indicates whether an annotation has been verified by a human.
+     * @type {boolean}
+     * @memberof Annotation
+     */
+    'verified': boolean;
+    /**
+     * The identifier of the image (uuid) that the annotation belongs to.
+     * @type {string}
+     * @memberof Annotation
+     */
+    'image': string;
+    /**
+     * 
+     * @type {Job}
+     * @memberof Annotation
+     */
+    'job': Job;
+    /**
+     * The date and time the annotation was created.
+     * @type {string}
+     * @memberof Annotation
+     */
+    'createdAt': string;
+    /**
+     * The date and time the annotation was last updated.
+     * @type {string}
+     * @memberof Annotation
+     */
+    'updatedAt': string;
+}
+/**
+ * 
+ * @export
+ * @interface CreateDatasetDto
+ */
+export interface CreateDatasetDto {
     /**
      * The name of the dataset.
      * @type {string}
-     * @memberof CreateMiaDatasetDto
+     * @memberof CreateDatasetDto
      */
     'name': string;
     /**
      * The identifier of the project (uuid) that the dataset will belong to.
      * @type {string}
-     * @memberof CreateMiaDatasetDto
+     * @memberof CreateDatasetDto
      */
     'project': string;
 }
 /**
  * 
  * @export
- * @interface CreateMiaJobDto
+ * @interface CreateJobDto
  */
-export interface CreateMiaJobDto {
+export interface CreateJobDto {
     /**
      * The name of the model that will be used to annotate images.
      * @type {string}
-     * @memberof CreateMiaJobDto
+     * @memberof CreateJobDto
      */
     'modelName': string;
     /**
      * The version of the model that will be used to annotate images.
      * @type {string}
-     * @memberof CreateMiaJobDto
+     * @memberof CreateJobDto
      */
     'modelVersion': string;
     /**
      * The identifier of the project (uuid) that the job will belong to.
      * @type {string}
-     * @memberof CreateMiaJobDto
+     * @memberof CreateJobDto
      */
     'project': string;
     /**
      * A list of the images that should be annotated. Each image is represented by its identifier (uuid).
      * @type {Array<string>}
-     * @memberof CreateMiaJobDto
+     * @memberof CreateJobDto
      */
     'images': Array<string>;
 }
 /**
  * 
  * @export
- * @interface CreateMiaProjectDto
+ * @interface CreateProjectDto
  */
-export interface CreateMiaProjectDto {
+export interface CreateProjectDto {
     /**
      * The name of the project.
      * @type {string}
-     * @memberof CreateMiaProjectDto
+     * @memberof CreateProjectDto
      */
     'name': string;
+}
+/**
+ * 
+ * @export
+ * @interface Dataset
+ */
+export interface Dataset {
+    /**
+     * The identifier (uuid) of the dataset.
+     * @type {string}
+     * @memberof Dataset
+     */
+    'id': string;
+    /**
+     * The name of the dataset.
+     * @type {string}
+     * @memberof Dataset
+     */
+    'name': string;
+    /**
+     * The identifier of the project (uuid) that the dataset belongs to.
+     * @type {string}
+     * @memberof Dataset
+     */
+    'project': string;
+    /**
+     * The date and time the project was created.
+     * @type {string}
+     * @memberof Dataset
+     */
+    'createdAt': string;
+    /**
+     * The date and time the project was last updated.
+     * @type {string}
+     * @memberof Dataset
+     */
+    'updatedAt': string;
 }
 /**
  * 
@@ -102,195 +188,109 @@ export interface DeleteAllDto {
 /**
  * 
  * @export
- * @interface MiaAnnotation
+ * @interface Image
  */
-export interface MiaAnnotation {
-    /**
-     * The identifier (uuid) of the annotation.
-     * @type {string}
-     * @memberof MiaAnnotation
-     */
-    'id': string;
-    /**
-     * The path of the annotation file relative to the specified data source location.
-     * @type {string}
-     * @memberof MiaAnnotation
-     */
-    'dataUri': string;
-    /**
-     * Indicates whether an annotation has been verified by a human.
-     * @type {boolean}
-     * @memberof MiaAnnotation
-     */
-    'verified': boolean;
-    /**
-     * The identifier of the image (uuid) that the annotation belongs to.
-     * @type {string}
-     * @memberof MiaAnnotation
-     */
-    'image': string;
-    /**
-     * 
-     * @type {MiaJob}
-     * @memberof MiaAnnotation
-     */
-    'job': MiaJob;
-    /**
-     * The date and time the annotation was created.
-     * @type {string}
-     * @memberof MiaAnnotation
-     */
-    'createdAt': string;
-    /**
-     * The date and time the annotation was last updated.
-     * @type {string}
-     * @memberof MiaAnnotation
-     */
-    'updatedAt': string;
-}
-/**
- * 
- * @export
- * @interface MiaDataset
- */
-export interface MiaDataset {
-    /**
-     * The identifier (uuid) of the dataset.
-     * @type {string}
-     * @memberof MiaDataset
-     */
-    'id': string;
-    /**
-     * The name of the dataset.
-     * @type {string}
-     * @memberof MiaDataset
-     */
-    'name': string;
-    /**
-     * The identifier of the project (uuid) that the dataset belongs to.
-     * @type {string}
-     * @memberof MiaDataset
-     */
-    'project': string;
-    /**
-     * The date and time the project was created.
-     * @type {string}
-     * @memberof MiaDataset
-     */
-    'createdAt': string;
-    /**
-     * The date and time the project was last updated.
-     * @type {string}
-     * @memberof MiaDataset
-     */
-    'updatedAt': string;
-}
-/**
- * 
- * @export
- * @interface MiaImage
- */
-export interface MiaImage {
+export interface Image {
     /**
      * The identifier (uuid) of the image.
      * @type {string}
-     * @memberof MiaImage
+     * @memberof Image
      */
     'id': string;
     /**
      * The path of the image file relative to the specified data source location.
      * @type {string}
-     * @memberof MiaImage
+     * @memberof Image
      */
     'dataUri': string;
     /**
      * The identifier of the dataset (uuid) that the image belongs to.
      * @type {string}
-     * @memberof MiaImage
+     * @memberof Image
      */
     'dataset': string;
     /**
      * The date and time the image was created.
      * @type {string}
-     * @memberof MiaImage
+     * @memberof Image
      */
     'createdAt': string;
     /**
      * The date and time the image was last updated.
      * @type {string}
-     * @memberof MiaImage
+     * @memberof Image
      */
     'updatedAt': string;
 }
 /**
  * 
  * @export
- * @interface MiaJob
+ * @interface Job
  */
-export interface MiaJob {
+export interface Job {
     /**
      * The identifier (uuid) of the job.
      * @type {string}
-     * @memberof MiaJob
+     * @memberof Job
      */
     'id': string;
     /**
      * The name of the project to which the job belongs.
      * @type {string}
-     * @memberof MiaJob
+     * @memberof Job
      */
     'project': string;
     /**
      * The name of the model used to annotate the images.
      * @type {string}
-     * @memberof MiaJob
+     * @memberof Job
      */
     'modelName': string;
     /**
      * The version of the model used to annotate the images.
      * @type {string}
-     * @memberof MiaJob
+     * @memberof Job
      */
     'modelVersion': string;
     /**
      * The current status of the job. By default it is `queued`, which means that the job is waiting to be processed. When the job is being processed, its status is `running`. When the job is finished, its status is `succeeded` or `failed`. The user can also cancel the job, which will change its status to `canceled`.
      * @type {string}
-     * @memberof MiaJob
+     * @memberof Job
      */
-    'status': MiaJobStatusEnum;
+    'status': JobStatusEnum;
     /**
      * The path of the log file of the job.
      * @type {string}
-     * @memberof MiaJob
+     * @memberof Job
      */
     'logFileUri': string;
     /**
      * The date and time at which the processing of the job was started, i.e. the annotation process started. This date will be `null` if the job has not been started.
      * @type {string}
-     * @memberof MiaJob
+     * @memberof Job
      */
     'startedAt': string;
     /**
      * The date and time at which the processing of the job was ended, i.e. the annotation process ended. This date will be `null` if the job has not yet finished.
      * @type {string}
-     * @memberof MiaJob
+     * @memberof Job
      */
     'finishedAt': string;
     /**
      * The date and time the job was created.
      * @type {string}
-     * @memberof MiaJob
+     * @memberof Job
      */
     'createdAt': string;
     /**
      * The date and time the job was last updated.
      * @type {string}
-     * @memberof MiaJob
+     * @memberof Job
      */
     'updatedAt': string;
 }
 
-export const MiaJobStatusEnum = {
+export const JobStatusEnum = {
     Queued: 'queued',
     Running: 'running',
     Succeeded: 'succeeded',
@@ -298,155 +298,155 @@ export const MiaJobStatusEnum = {
     Canceled: 'canceled'
 } as const;
 
-export type MiaJobStatusEnum = typeof MiaJobStatusEnum[keyof typeof MiaJobStatusEnum];
+export type JobStatusEnum = typeof JobStatusEnum[keyof typeof JobStatusEnum];
 
 /**
  * 
  * @export
- * @interface MiaModelVersion
+ * @interface ModelVersion
  */
-export interface MiaModelVersion {
+export interface ModelVersion {
     /**
      * The name of the model.
      * @type {string}
-     * @memberof MiaModelVersion
+     * @memberof ModelVersion
      */
     'name': string;
     /**
      * The version of the model.
      * @type {string}
-     * @memberof MiaModelVersion
+     * @memberof ModelVersion
      */
     'version': string;
     /**
      * The description of the model.
      * @type {string}
-     * @memberof MiaModelVersion
+     * @memberof ModelVersion
      */
     'description': string;
     /**
      * The list of model version tags.
-     * @type {Array<MiaModelVersionTag>}
-     * @memberof MiaModelVersion
+     * @type {Array<ModelVersionTag>}
+     * @memberof ModelVersion
      */
-    'tags': Array<MiaModelVersionTag>;
+    'tags': Array<ModelVersionTag>;
     /**
      * The date and time the model version was created.
      * @type {string}
-     * @memberof MiaModelVersion
+     * @memberof ModelVersion
      */
     'createdAt': string;
     /**
      * The date and time the model version was last updated.
      * @type {string}
-     * @memberof MiaModelVersion
+     * @memberof ModelVersion
      */
     'updatedAt': string;
 }
 /**
  * 
  * @export
- * @interface MiaModelVersionTag
+ * @interface ModelVersionTag
  */
-export interface MiaModelVersionTag {
+export interface ModelVersionTag {
     /**
      * The name of the key.
      * @type {string}
-     * @memberof MiaModelVersionTag
+     * @memberof ModelVersionTag
      */
     'key': string;
     /**
      * The name of the value.
      * @type {string}
-     * @memberof MiaModelVersionTag
+     * @memberof ModelVersionTag
      */
     'value': string;
 }
 /**
  * 
  * @export
- * @interface MiaProgress
+ * @interface Progress
  */
-export interface MiaProgress {
+export interface Progress {
     /**
      * The total number of images in progress of being annotated.
      * @type {number}
-     * @memberof MiaProgress
+     * @memberof Progress
      */
     'totalImages': number;
     /**
      * The number of annotated images.
      * @type {number}
-     * @memberof MiaProgress
+     * @memberof Progress
      */
     'annotatedImages': number;
     /**
      * The number of annotated images that have at least one verified annotation.
      * @type {number}
-     * @memberof MiaProgress
+     * @memberof Progress
      */
     'verifiedImages': number;
 }
 /**
  * 
  * @export
- * @interface MiaProject
+ * @interface Project
  */
-export interface MiaProject {
+export interface Project {
     /**
      * The identifier (uuid) of the project.
      * @type {string}
-     * @memberof MiaProject
+     * @memberof Project
      */
     'id': string;
     /**
      * The name of the project.
      * @type {string}
-     * @memberof MiaProject
+     * @memberof Project
      */
     'name': string;
     /**
      * The date and time the project was created.
      * @type {string}
-     * @memberof MiaProject
+     * @memberof Project
      */
     'createdAt': string;
     /**
      * The date and time the project was last updated.
      * @type {string}
-     * @memberof MiaProject
+     * @memberof Project
      */
     'updatedAt': string;
 }
 /**
  * 
  * @export
- * @interface UpdateMiaDatasetDto
+ * @interface UpdateDatasetDto
  */
-export interface UpdateMiaDatasetDto {
+export interface UpdateDatasetDto {
     /**
      * The name of the dataset.
      * @type {string}
-     * @memberof UpdateMiaDatasetDto
+     * @memberof UpdateDatasetDto
      */
     'name': string;
     /**
      * The identifier of the project (uuid) that the dataset will belong to.
      * @type {string}
-     * @memberof UpdateMiaDatasetDto
+     * @memberof UpdateDatasetDto
      */
     'project': string;
 }
 /**
  * 
  * @export
- * @interface UpdateMiaProjectDto
+ * @interface UpdateProjectDto
  */
-export interface UpdateMiaProjectDto {
+export interface UpdateProjectDto {
     /**
      * The name of the project.
      * @type {string}
-     * @memberof UpdateMiaProjectDto
+     * @memberof UpdateProjectDto
      */
     'name': string;
 }
@@ -777,7 +777,7 @@ export const AnnotationsApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async annotationsControllerCreate(image: string, dataUri: string, job?: string, verified?: boolean, file?: File, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<MiaAnnotation>> {
+        async annotationsControllerCreate(image: string, dataUri: string, job?: string, verified?: boolean, file?: File, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Annotation>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.annotationsControllerCreate(image, dataUri, job, verified, file, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
@@ -790,7 +790,7 @@ export const AnnotationsApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async annotationsControllerFindAll(image?: string, job?: string, verified?: any, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<MiaAnnotation>>> {
+        async annotationsControllerFindAll(image?: string, job?: string, verified?: any, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<Annotation>>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.annotationsControllerFindAll(image, job, verified, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
@@ -801,7 +801,7 @@ export const AnnotationsApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async annotationsControllerFindOne(id: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<MiaAnnotation>> {
+        async annotationsControllerFindOne(id: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Annotation>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.annotationsControllerFindOne(id, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
@@ -834,7 +834,7 @@ export const AnnotationsApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async annotationsControllerRemoveAll(deleteAllDto: DeleteAllDto, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<MiaAnnotation>>> {
+        async annotationsControllerRemoveAll(deleteAllDto: DeleteAllDto, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<Annotation>>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.annotationsControllerRemoveAll(deleteAllDto, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
@@ -848,7 +848,7 @@ export const AnnotationsApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async annotationsControllerUpdate(id: string, dataUri?: string, verified?: boolean, file?: File, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<MiaAnnotation>> {
+        async annotationsControllerUpdate(id: string, dataUri?: string, verified?: boolean, file?: File, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Annotation>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.annotationsControllerUpdate(id, dataUri, verified, file, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
@@ -873,7 +873,7 @@ export const AnnotationsApiFactory = function (configuration?: Configuration, ba
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        annotationsControllerCreate(image: string, dataUri: string, job?: string, verified?: boolean, file?: File, options?: any): AxiosPromise<MiaAnnotation> {
+        annotationsControllerCreate(image: string, dataUri: string, job?: string, verified?: boolean, file?: File, options?: any): AxiosPromise<Annotation> {
             return localVarFp.annotationsControllerCreate(image, dataUri, job, verified, file, options).then((request) => request(axios, basePath));
         },
         /**
@@ -885,7 +885,7 @@ export const AnnotationsApiFactory = function (configuration?: Configuration, ba
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        annotationsControllerFindAll(image?: string, job?: string, verified?: any, options?: any): AxiosPromise<Array<MiaAnnotation>> {
+        annotationsControllerFindAll(image?: string, job?: string, verified?: any, options?: any): AxiosPromise<Array<Annotation>> {
             return localVarFp.annotationsControllerFindAll(image, job, verified, options).then((request) => request(axios, basePath));
         },
         /**
@@ -895,7 +895,7 @@ export const AnnotationsApiFactory = function (configuration?: Configuration, ba
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        annotationsControllerFindOne(id: string, options?: any): AxiosPromise<MiaAnnotation> {
+        annotationsControllerFindOne(id: string, options?: any): AxiosPromise<Annotation> {
             return localVarFp.annotationsControllerFindOne(id, options).then((request) => request(axios, basePath));
         },
         /**
@@ -925,7 +925,7 @@ export const AnnotationsApiFactory = function (configuration?: Configuration, ba
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        annotationsControllerRemoveAll(deleteAllDto: DeleteAllDto, options?: any): AxiosPromise<Array<MiaAnnotation>> {
+        annotationsControllerRemoveAll(deleteAllDto: DeleteAllDto, options?: any): AxiosPromise<Array<Annotation>> {
             return localVarFp.annotationsControllerRemoveAll(deleteAllDto, options).then((request) => request(axios, basePath));
         },
         /**
@@ -938,7 +938,7 @@ export const AnnotationsApiFactory = function (configuration?: Configuration, ba
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        annotationsControllerUpdate(id: string, dataUri?: string, verified?: boolean, file?: File, options?: any): AxiosPromise<MiaAnnotation> {
+        annotationsControllerUpdate(id: string, dataUri?: string, verified?: boolean, file?: File, options?: any): AxiosPromise<Annotation> {
             return localVarFp.annotationsControllerUpdate(id, dataUri, verified, file, options).then((request) => request(axios, basePath));
         },
     };
@@ -1056,13 +1056,13 @@ export const DatasetsApiAxiosParamCreator = function (configuration?: Configurat
         /**
          * Creates a new dataset and returns it. An error will be thrown if the referenced project does not exist.
          * @summary 
-         * @param {CreateMiaDatasetDto} createMiaDatasetDto 
+         * @param {CreateDatasetDto} createDatasetDto 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        datasetsControllerCreate: async (createMiaDatasetDto: CreateMiaDatasetDto, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'createMiaDatasetDto' is not null or undefined
-            assertParamExists('datasetsControllerCreate', 'createMiaDatasetDto', createMiaDatasetDto)
+        datasetsControllerCreate: async (createDatasetDto: CreateDatasetDto, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'createDatasetDto' is not null or undefined
+            assertParamExists('datasetsControllerCreate', 'createDatasetDto', createDatasetDto)
             const localVarPath = `/datasets`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -1082,7 +1082,7 @@ export const DatasetsApiAxiosParamCreator = function (configuration?: Configurat
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-            localVarRequestOptions.data = serializeDataIfNeeded(createMiaDatasetDto, localVarRequestOptions, configuration)
+            localVarRequestOptions.data = serializeDataIfNeeded(createDatasetDto, localVarRequestOptions, configuration)
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -1266,15 +1266,15 @@ export const DatasetsApiAxiosParamCreator = function (configuration?: Configurat
          * Updates the specified dataset by setting the values of the parameters passed. It returns the updated dataset, if the update operation succeeds. An error will be thrown if the referenced project does not exist.
          * @summary 
          * @param {string} id The identifier (uuid) of the dataset.
-         * @param {UpdateMiaDatasetDto} updateMiaDatasetDto 
+         * @param {UpdateDatasetDto} updateDatasetDto 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        datasetsControllerUpdate: async (id: string, updateMiaDatasetDto: UpdateMiaDatasetDto, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+        datasetsControllerUpdate: async (id: string, updateDatasetDto: UpdateDatasetDto, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'id' is not null or undefined
             assertParamExists('datasetsControllerUpdate', 'id', id)
-            // verify required parameter 'updateMiaDatasetDto' is not null or undefined
-            assertParamExists('datasetsControllerUpdate', 'updateMiaDatasetDto', updateMiaDatasetDto)
+            // verify required parameter 'updateDatasetDto' is not null or undefined
+            assertParamExists('datasetsControllerUpdate', 'updateDatasetDto', updateDatasetDto)
             const localVarPath = `/datasets/{id}`
                 .replace(`{${"id"}}`, encodeURIComponent(String(id)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
@@ -1295,7 +1295,7 @@ export const DatasetsApiAxiosParamCreator = function (configuration?: Configurat
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-            localVarRequestOptions.data = serializeDataIfNeeded(updateMiaDatasetDto, localVarRequestOptions, configuration)
+            localVarRequestOptions.data = serializeDataIfNeeded(updateDatasetDto, localVarRequestOptions, configuration)
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -1315,12 +1315,12 @@ export const DatasetsApiFp = function(configuration?: Configuration) {
         /**
          * Creates a new dataset and returns it. An error will be thrown if the referenced project does not exist.
          * @summary 
-         * @param {CreateMiaDatasetDto} createMiaDatasetDto 
+         * @param {CreateDatasetDto} createDatasetDto 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async datasetsControllerCreate(createMiaDatasetDto: CreateMiaDatasetDto, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<MiaDataset>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.datasetsControllerCreate(createMiaDatasetDto, options);
+        async datasetsControllerCreate(createDatasetDto: CreateDatasetDto, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Dataset>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.datasetsControllerCreate(createDatasetDto, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
@@ -1330,7 +1330,7 @@ export const DatasetsApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async datasetsControllerFindAll(project?: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<MiaDataset>>> {
+        async datasetsControllerFindAll(project?: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<Dataset>>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.datasetsControllerFindAll(project, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
@@ -1341,7 +1341,7 @@ export const DatasetsApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async datasetsControllerFindOne(id: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<MiaDataset>> {
+        async datasetsControllerFindOne(id: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Dataset>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.datasetsControllerFindOne(id, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
@@ -1352,7 +1352,7 @@ export const DatasetsApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async datasetsControllerProgress(id: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<MiaProgress>> {
+        async datasetsControllerProgress(id: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Progress>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.datasetsControllerProgress(id, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
@@ -1374,7 +1374,7 @@ export const DatasetsApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async datasetsControllerRemoveAll(deleteAllDto: DeleteAllDto, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<MiaDataset>>> {
+        async datasetsControllerRemoveAll(deleteAllDto: DeleteAllDto, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<Dataset>>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.datasetsControllerRemoveAll(deleteAllDto, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
@@ -1382,12 +1382,12 @@ export const DatasetsApiFp = function(configuration?: Configuration) {
          * Updates the specified dataset by setting the values of the parameters passed. It returns the updated dataset, if the update operation succeeds. An error will be thrown if the referenced project does not exist.
          * @summary 
          * @param {string} id The identifier (uuid) of the dataset.
-         * @param {UpdateMiaDatasetDto} updateMiaDatasetDto 
+         * @param {UpdateDatasetDto} updateDatasetDto 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async datasetsControllerUpdate(id: string, updateMiaDatasetDto: UpdateMiaDatasetDto, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<MiaDataset>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.datasetsControllerUpdate(id, updateMiaDatasetDto, options);
+        async datasetsControllerUpdate(id: string, updateDatasetDto: UpdateDatasetDto, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Dataset>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.datasetsControllerUpdate(id, updateDatasetDto, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
     }
@@ -1403,12 +1403,12 @@ export const DatasetsApiFactory = function (configuration?: Configuration, baseP
         /**
          * Creates a new dataset and returns it. An error will be thrown if the referenced project does not exist.
          * @summary 
-         * @param {CreateMiaDatasetDto} createMiaDatasetDto 
+         * @param {CreateDatasetDto} createDatasetDto 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        datasetsControllerCreate(createMiaDatasetDto: CreateMiaDatasetDto, options?: any): AxiosPromise<MiaDataset> {
-            return localVarFp.datasetsControllerCreate(createMiaDatasetDto, options).then((request) => request(axios, basePath));
+        datasetsControllerCreate(createDatasetDto: CreateDatasetDto, options?: any): AxiosPromise<Dataset> {
+            return localVarFp.datasetsControllerCreate(createDatasetDto, options).then((request) => request(axios, basePath));
         },
         /**
          * Retrieves a list of all available datasets. If there do not exist any datasets it will return an empty array. If a project is specified, it will return all datasets in the project. If the project does not exist, it will return an empty array as well.
@@ -1417,7 +1417,7 @@ export const DatasetsApiFactory = function (configuration?: Configuration, baseP
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        datasetsControllerFindAll(project?: string, options?: any): AxiosPromise<Array<MiaDataset>> {
+        datasetsControllerFindAll(project?: string, options?: any): AxiosPromise<Array<Dataset>> {
             return localVarFp.datasetsControllerFindAll(project, options).then((request) => request(axios, basePath));
         },
         /**
@@ -1427,7 +1427,7 @@ export const DatasetsApiFactory = function (configuration?: Configuration, baseP
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        datasetsControllerFindOne(id: string, options?: any): AxiosPromise<MiaDataset> {
+        datasetsControllerFindOne(id: string, options?: any): AxiosPromise<Dataset> {
             return localVarFp.datasetsControllerFindOne(id, options).then((request) => request(axios, basePath));
         },
         /**
@@ -1437,7 +1437,7 @@ export const DatasetsApiFactory = function (configuration?: Configuration, baseP
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        datasetsControllerProgress(id: string, options?: any): AxiosPromise<MiaProgress> {
+        datasetsControllerProgress(id: string, options?: any): AxiosPromise<Progress> {
             return localVarFp.datasetsControllerProgress(id, options).then((request) => request(axios, basePath));
         },
         /**
@@ -1457,19 +1457,19 @@ export const DatasetsApiFactory = function (configuration?: Configuration, baseP
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        datasetsControllerRemoveAll(deleteAllDto: DeleteAllDto, options?: any): AxiosPromise<Array<MiaDataset>> {
+        datasetsControllerRemoveAll(deleteAllDto: DeleteAllDto, options?: any): AxiosPromise<Array<Dataset>> {
             return localVarFp.datasetsControllerRemoveAll(deleteAllDto, options).then((request) => request(axios, basePath));
         },
         /**
          * Updates the specified dataset by setting the values of the parameters passed. It returns the updated dataset, if the update operation succeeds. An error will be thrown if the referenced project does not exist.
          * @summary 
          * @param {string} id The identifier (uuid) of the dataset.
-         * @param {UpdateMiaDatasetDto} updateMiaDatasetDto 
+         * @param {UpdateDatasetDto} updateDatasetDto 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        datasetsControllerUpdate(id: string, updateMiaDatasetDto: UpdateMiaDatasetDto, options?: any): AxiosPromise<MiaDataset> {
-            return localVarFp.datasetsControllerUpdate(id, updateMiaDatasetDto, options).then((request) => request(axios, basePath));
+        datasetsControllerUpdate(id: string, updateDatasetDto: UpdateDatasetDto, options?: any): AxiosPromise<Dataset> {
+            return localVarFp.datasetsControllerUpdate(id, updateDatasetDto, options).then((request) => request(axios, basePath));
         },
     };
 };
@@ -1484,13 +1484,13 @@ export class DatasetsApi extends BaseAPI {
     /**
      * Creates a new dataset and returns it. An error will be thrown if the referenced project does not exist.
      * @summary 
-     * @param {CreateMiaDatasetDto} createMiaDatasetDto 
+     * @param {CreateDatasetDto} createDatasetDto 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof DatasetsApi
      */
-    public datasetsControllerCreate(createMiaDatasetDto: CreateMiaDatasetDto, options?: AxiosRequestConfig) {
-        return DatasetsApiFp(this.configuration).datasetsControllerCreate(createMiaDatasetDto, options).then((request) => request(this.axios, this.basePath));
+    public datasetsControllerCreate(createDatasetDto: CreateDatasetDto, options?: AxiosRequestConfig) {
+        return DatasetsApiFp(this.configuration).datasetsControllerCreate(createDatasetDto, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
@@ -1557,13 +1557,13 @@ export class DatasetsApi extends BaseAPI {
      * Updates the specified dataset by setting the values of the parameters passed. It returns the updated dataset, if the update operation succeeds. An error will be thrown if the referenced project does not exist.
      * @summary 
      * @param {string} id The identifier (uuid) of the dataset.
-     * @param {UpdateMiaDatasetDto} updateMiaDatasetDto 
+     * @param {UpdateDatasetDto} updateDatasetDto 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof DatasetsApi
      */
-    public datasetsControllerUpdate(id: string, updateMiaDatasetDto: UpdateMiaDatasetDto, options?: AxiosRequestConfig) {
-        return DatasetsApiFp(this.configuration).datasetsControllerUpdate(id, updateMiaDatasetDto, options).then((request) => request(this.axios, this.basePath));
+    public datasetsControllerUpdate(id: string, updateDatasetDto: UpdateDatasetDto, options?: AxiosRequestConfig) {
+        return DatasetsApiFp(this.configuration).datasetsControllerUpdate(id, updateDatasetDto, options).then((request) => request(this.axios, this.basePath));
     }
 }
 
@@ -1879,7 +1879,7 @@ export const ImagesApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async imagesControllerCreate(dataset: string, dataUri: string, file: File, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<MiaImage>> {
+        async imagesControllerCreate(dataset: string, dataUri: string, file: File, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Image>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.imagesControllerCreate(dataset, dataUri, file, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
@@ -1891,7 +1891,7 @@ export const ImagesApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async imagesControllerFindAll(dataset?: string, job?: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<MiaImage>>> {
+        async imagesControllerFindAll(dataset?: string, job?: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<Image>>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.imagesControllerFindAll(dataset, job, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
@@ -1902,7 +1902,7 @@ export const ImagesApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async imagesControllerFindOne(id: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<MiaImage>> {
+        async imagesControllerFindOne(id: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Image>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.imagesControllerFindOne(id, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
@@ -1935,7 +1935,7 @@ export const ImagesApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async imagesControllerRemoveAll(deleteAllDto: DeleteAllDto, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<MiaImage>>> {
+        async imagesControllerRemoveAll(deleteAllDto: DeleteAllDto, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<Image>>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.imagesControllerRemoveAll(deleteAllDto, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
@@ -1948,7 +1948,7 @@ export const ImagesApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async imagesControllerUpdate(id: string, dataUri: string, file: File, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<MiaImage>> {
+        async imagesControllerUpdate(id: string, dataUri: string, file: File, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Image>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.imagesControllerUpdate(id, dataUri, file, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
@@ -1971,7 +1971,7 @@ export const ImagesApiFactory = function (configuration?: Configuration, basePat
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        imagesControllerCreate(dataset: string, dataUri: string, file: File, options?: any): AxiosPromise<MiaImage> {
+        imagesControllerCreate(dataset: string, dataUri: string, file: File, options?: any): AxiosPromise<Image> {
             return localVarFp.imagesControllerCreate(dataset, dataUri, file, options).then((request) => request(axios, basePath));
         },
         /**
@@ -1982,7 +1982,7 @@ export const ImagesApiFactory = function (configuration?: Configuration, basePat
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        imagesControllerFindAll(dataset?: string, job?: string, options?: any): AxiosPromise<Array<MiaImage>> {
+        imagesControllerFindAll(dataset?: string, job?: string, options?: any): AxiosPromise<Array<Image>> {
             return localVarFp.imagesControllerFindAll(dataset, job, options).then((request) => request(axios, basePath));
         },
         /**
@@ -1992,7 +1992,7 @@ export const ImagesApiFactory = function (configuration?: Configuration, basePat
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        imagesControllerFindOne(id: string, options?: any): AxiosPromise<MiaImage> {
+        imagesControllerFindOne(id: string, options?: any): AxiosPromise<Image> {
             return localVarFp.imagesControllerFindOne(id, options).then((request) => request(axios, basePath));
         },
         /**
@@ -2022,7 +2022,7 @@ export const ImagesApiFactory = function (configuration?: Configuration, basePat
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        imagesControllerRemoveAll(deleteAllDto: DeleteAllDto, options?: any): AxiosPromise<Array<MiaImage>> {
+        imagesControllerRemoveAll(deleteAllDto: DeleteAllDto, options?: any): AxiosPromise<Array<Image>> {
             return localVarFp.imagesControllerRemoveAll(deleteAllDto, options).then((request) => request(axios, basePath));
         },
         /**
@@ -2034,7 +2034,7 @@ export const ImagesApiFactory = function (configuration?: Configuration, basePat
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        imagesControllerUpdate(id: string, dataUri: string, file: File, options?: any): AxiosPromise<MiaImage> {
+        imagesControllerUpdate(id: string, dataUri: string, file: File, options?: any): AxiosPromise<Image> {
             return localVarFp.imagesControllerUpdate(id, dataUri, file, options).then((request) => request(axios, basePath));
         },
     };
@@ -2148,13 +2148,13 @@ export const JobsApiAxiosParamCreator = function (configuration?: Configuration)
         /**
          * Creates a new job and returns it. The created job is automatically added to the job queue. Referenced images can belong to different datasets, however these datasets must all belong to the same project. An error will be thrown if the referenced model, project or some of the referenced images do not exist.
          * @summary 
-         * @param {CreateMiaJobDto} createMiaJobDto 
+         * @param {CreateJobDto} createJobDto 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        jobsControllerCreate: async (createMiaJobDto: CreateMiaJobDto, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'createMiaJobDto' is not null or undefined
-            assertParamExists('jobsControllerCreate', 'createMiaJobDto', createMiaJobDto)
+        jobsControllerCreate: async (createJobDto: CreateJobDto, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'createJobDto' is not null or undefined
+            assertParamExists('jobsControllerCreate', 'createJobDto', createJobDto)
             const localVarPath = `/jobs`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -2174,7 +2174,7 @@ export const JobsApiAxiosParamCreator = function (configuration?: Configuration)
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-            localVarRequestOptions.data = serializeDataIfNeeded(createMiaJobDto, localVarRequestOptions, configuration)
+            localVarRequestOptions.data = serializeDataIfNeeded(createJobDto, localVarRequestOptions, configuration)
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -2449,12 +2449,12 @@ export const JobsApiFp = function(configuration?: Configuration) {
         /**
          * Creates a new job and returns it. The created job is automatically added to the job queue. Referenced images can belong to different datasets, however these datasets must all belong to the same project. An error will be thrown if the referenced model, project or some of the referenced images do not exist.
          * @summary 
-         * @param {CreateMiaJobDto} createMiaJobDto 
+         * @param {CreateJobDto} createJobDto 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async jobsControllerCreate(createMiaJobDto: CreateMiaJobDto, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<MiaJob>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.jobsControllerCreate(createMiaJobDto, options);
+        async jobsControllerCreate(createJobDto: CreateJobDto, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Job>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.jobsControllerCreate(createJobDto, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
@@ -2464,7 +2464,7 @@ export const JobsApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async jobsControllerFindAll(project?: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<MiaJob>>> {
+        async jobsControllerFindAll(project?: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<Job>>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.jobsControllerFindAll(project, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
@@ -2475,7 +2475,7 @@ export const JobsApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async jobsControllerFindOne(id: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<MiaJob>> {
+        async jobsControllerFindOne(id: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Job>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.jobsControllerFindOne(id, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
@@ -2497,7 +2497,7 @@ export const JobsApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async jobsControllerProgress(id: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<MiaProgress>> {
+        async jobsControllerProgress(id: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Progress>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.jobsControllerProgress(id, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
@@ -2519,7 +2519,7 @@ export const JobsApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async jobsControllerRemoveAll(deleteAllDto: DeleteAllDto, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<MiaJob>>> {
+        async jobsControllerRemoveAll(deleteAllDto: DeleteAllDto, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<Job>>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.jobsControllerRemoveAll(deleteAllDto, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
@@ -2532,7 +2532,7 @@ export const JobsApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async jobsControllerUpdate(id: string, status?: JobsControllerUpdateStatusEnum, file?: File, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<MiaJob>> {
+        async jobsControllerUpdate(id: string, status?: JobsControllerUpdateStatusEnum, file?: File, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Job>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.jobsControllerUpdate(id, status, file, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
@@ -2549,12 +2549,12 @@ export const JobsApiFactory = function (configuration?: Configuration, basePath?
         /**
          * Creates a new job and returns it. The created job is automatically added to the job queue. Referenced images can belong to different datasets, however these datasets must all belong to the same project. An error will be thrown if the referenced model, project or some of the referenced images do not exist.
          * @summary 
-         * @param {CreateMiaJobDto} createMiaJobDto 
+         * @param {CreateJobDto} createJobDto 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        jobsControllerCreate(createMiaJobDto: CreateMiaJobDto, options?: any): AxiosPromise<MiaJob> {
-            return localVarFp.jobsControllerCreate(createMiaJobDto, options).then((request) => request(axios, basePath));
+        jobsControllerCreate(createJobDto: CreateJobDto, options?: any): AxiosPromise<Job> {
+            return localVarFp.jobsControllerCreate(createJobDto, options).then((request) => request(axios, basePath));
         },
         /**
          * Retrieves a list of all available jobs. If there do not exist any jobs it will return an empty array. If a project is specified, it will return all jobs belonging to that project. If the project does not exist, it will return an empty array as well.
@@ -2563,7 +2563,7 @@ export const JobsApiFactory = function (configuration?: Configuration, basePath?
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        jobsControllerFindAll(project?: string, options?: any): AxiosPromise<Array<MiaJob>> {
+        jobsControllerFindAll(project?: string, options?: any): AxiosPromise<Array<Job>> {
             return localVarFp.jobsControllerFindAll(project, options).then((request) => request(axios, basePath));
         },
         /**
@@ -2573,7 +2573,7 @@ export const JobsApiFactory = function (configuration?: Configuration, basePath?
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        jobsControllerFindOne(id: string, options?: any): AxiosPromise<MiaJob> {
+        jobsControllerFindOne(id: string, options?: any): AxiosPromise<Job> {
             return localVarFp.jobsControllerFindOne(id, options).then((request) => request(axios, basePath));
         },
         /**
@@ -2593,7 +2593,7 @@ export const JobsApiFactory = function (configuration?: Configuration, basePath?
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        jobsControllerProgress(id: string, options?: any): AxiosPromise<MiaProgress> {
+        jobsControllerProgress(id: string, options?: any): AxiosPromise<Progress> {
             return localVarFp.jobsControllerProgress(id, options).then((request) => request(axios, basePath));
         },
         /**
@@ -2613,7 +2613,7 @@ export const JobsApiFactory = function (configuration?: Configuration, basePath?
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        jobsControllerRemoveAll(deleteAllDto: DeleteAllDto, options?: any): AxiosPromise<Array<MiaJob>> {
+        jobsControllerRemoveAll(deleteAllDto: DeleteAllDto, options?: any): AxiosPromise<Array<Job>> {
             return localVarFp.jobsControllerRemoveAll(deleteAllDto, options).then((request) => request(axios, basePath));
         },
         /**
@@ -2625,7 +2625,7 @@ export const JobsApiFactory = function (configuration?: Configuration, basePath?
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        jobsControllerUpdate(id: string, status?: JobsControllerUpdateStatusEnum, file?: File, options?: any): AxiosPromise<MiaJob> {
+        jobsControllerUpdate(id: string, status?: JobsControllerUpdateStatusEnum, file?: File, options?: any): AxiosPromise<Job> {
             return localVarFp.jobsControllerUpdate(id, status, file, options).then((request) => request(axios, basePath));
         },
     };
@@ -2641,13 +2641,13 @@ export class JobsApi extends BaseAPI {
     /**
      * Creates a new job and returns it. The created job is automatically added to the job queue. Referenced images can belong to different datasets, however these datasets must all belong to the same project. An error will be thrown if the referenced model, project or some of the referenced images do not exist.
      * @summary 
-     * @param {CreateMiaJobDto} createMiaJobDto 
+     * @param {CreateJobDto} createJobDto 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof JobsApi
      */
-    public jobsControllerCreate(createMiaJobDto: CreateMiaJobDto, options?: AxiosRequestConfig) {
-        return JobsApiFp(this.configuration).jobsControllerCreate(createMiaJobDto, options).then((request) => request(this.axios, this.basePath));
+    public jobsControllerCreate(createJobDto: CreateJobDto, options?: AxiosRequestConfig) {
+        return JobsApiFp(this.configuration).jobsControllerCreate(createJobDto, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
@@ -2846,7 +2846,7 @@ export const ModelVersionsApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async modelsControllerFindAll(versionTags?: Array<string>, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<MiaModelVersion>>> {
+        async modelsControllerFindAll(versionTags?: Array<string>, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<ModelVersion>>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.modelsControllerFindAll(versionTags, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
@@ -2858,7 +2858,7 @@ export const ModelVersionsApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async modelsControllerFindVersion(name: string, version: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<MiaModelVersion>> {
+        async modelsControllerFindVersion(name: string, version: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ModelVersion>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.modelsControllerFindVersion(name, version, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
@@ -2879,7 +2879,7 @@ export const ModelVersionsApiFactory = function (configuration?: Configuration, 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        modelsControllerFindAll(versionTags?: Array<string>, options?: any): AxiosPromise<Array<MiaModelVersion>> {
+        modelsControllerFindAll(versionTags?: Array<string>, options?: any): AxiosPromise<Array<ModelVersion>> {
             return localVarFp.modelsControllerFindAll(versionTags, options).then((request) => request(axios, basePath));
         },
         /**
@@ -2890,7 +2890,7 @@ export const ModelVersionsApiFactory = function (configuration?: Configuration, 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        modelsControllerFindVersion(name: string, version: string, options?: any): AxiosPromise<MiaModelVersion> {
+        modelsControllerFindVersion(name: string, version: string, options?: any): AxiosPromise<ModelVersion> {
             return localVarFp.modelsControllerFindVersion(name, version, options).then((request) => request(axios, basePath));
         },
     };
@@ -2940,13 +2940,13 @@ export const ProjectsApiAxiosParamCreator = function (configuration?: Configurat
         /**
          * Creates a new project and returns it.
          * @summary 
-         * @param {CreateMiaProjectDto} createMiaProjectDto 
+         * @param {CreateProjectDto} createProjectDto 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        projectsControllerCreate: async (createMiaProjectDto: CreateMiaProjectDto, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'createMiaProjectDto' is not null or undefined
-            assertParamExists('projectsControllerCreate', 'createMiaProjectDto', createMiaProjectDto)
+        projectsControllerCreate: async (createProjectDto: CreateProjectDto, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'createProjectDto' is not null or undefined
+            assertParamExists('projectsControllerCreate', 'createProjectDto', createProjectDto)
             const localVarPath = `/projects`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -2966,7 +2966,7 @@ export const ProjectsApiAxiosParamCreator = function (configuration?: Configurat
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-            localVarRequestOptions.data = serializeDataIfNeeded(createMiaProjectDto, localVarRequestOptions, configuration)
+            localVarRequestOptions.data = serializeDataIfNeeded(createProjectDto, localVarRequestOptions, configuration)
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -3111,15 +3111,15 @@ export const ProjectsApiAxiosParamCreator = function (configuration?: Configurat
          * Updates the specified project by setting the values of the parameters passed. It returns the updated project, if the update operation succeeds. Otherwise it returns an error.
          * @summary 
          * @param {string} id The identifier (uuid) of the project.
-         * @param {UpdateMiaProjectDto} updateMiaProjectDto 
+         * @param {UpdateProjectDto} updateProjectDto 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        projectsControllerUpdate: async (id: string, updateMiaProjectDto: UpdateMiaProjectDto, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+        projectsControllerUpdate: async (id: string, updateProjectDto: UpdateProjectDto, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'id' is not null or undefined
             assertParamExists('projectsControllerUpdate', 'id', id)
-            // verify required parameter 'updateMiaProjectDto' is not null or undefined
-            assertParamExists('projectsControllerUpdate', 'updateMiaProjectDto', updateMiaProjectDto)
+            // verify required parameter 'updateProjectDto' is not null or undefined
+            assertParamExists('projectsControllerUpdate', 'updateProjectDto', updateProjectDto)
             const localVarPath = `/projects/{id}`
                 .replace(`{${"id"}}`, encodeURIComponent(String(id)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
@@ -3140,7 +3140,7 @@ export const ProjectsApiAxiosParamCreator = function (configuration?: Configurat
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-            localVarRequestOptions.data = serializeDataIfNeeded(updateMiaProjectDto, localVarRequestOptions, configuration)
+            localVarRequestOptions.data = serializeDataIfNeeded(updateProjectDto, localVarRequestOptions, configuration)
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -3160,12 +3160,12 @@ export const ProjectsApiFp = function(configuration?: Configuration) {
         /**
          * Creates a new project and returns it.
          * @summary 
-         * @param {CreateMiaProjectDto} createMiaProjectDto 
+         * @param {CreateProjectDto} createProjectDto 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async projectsControllerCreate(createMiaProjectDto: CreateMiaProjectDto, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<MiaProject>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.projectsControllerCreate(createMiaProjectDto, options);
+        async projectsControllerCreate(createProjectDto: CreateProjectDto, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Project>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.projectsControllerCreate(createProjectDto, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
@@ -3174,7 +3174,7 @@ export const ProjectsApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async projectsControllerFindAll(options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<MiaProject>>> {
+        async projectsControllerFindAll(options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<Project>>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.projectsControllerFindAll(options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
@@ -3185,7 +3185,7 @@ export const ProjectsApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async projectsControllerFindOne(id: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<MiaProject>> {
+        async projectsControllerFindOne(id: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Project>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.projectsControllerFindOne(id, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
@@ -3207,7 +3207,7 @@ export const ProjectsApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async projectsControllerRemoveAll(deleteAllDto: DeleteAllDto, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<MiaProject>>> {
+        async projectsControllerRemoveAll(deleteAllDto: DeleteAllDto, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<Project>>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.projectsControllerRemoveAll(deleteAllDto, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
@@ -3215,12 +3215,12 @@ export const ProjectsApiFp = function(configuration?: Configuration) {
          * Updates the specified project by setting the values of the parameters passed. It returns the updated project, if the update operation succeeds. Otherwise it returns an error.
          * @summary 
          * @param {string} id The identifier (uuid) of the project.
-         * @param {UpdateMiaProjectDto} updateMiaProjectDto 
+         * @param {UpdateProjectDto} updateProjectDto 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async projectsControllerUpdate(id: string, updateMiaProjectDto: UpdateMiaProjectDto, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<MiaProject>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.projectsControllerUpdate(id, updateMiaProjectDto, options);
+        async projectsControllerUpdate(id: string, updateProjectDto: UpdateProjectDto, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Project>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.projectsControllerUpdate(id, updateProjectDto, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
     }
@@ -3236,12 +3236,12 @@ export const ProjectsApiFactory = function (configuration?: Configuration, baseP
         /**
          * Creates a new project and returns it.
          * @summary 
-         * @param {CreateMiaProjectDto} createMiaProjectDto 
+         * @param {CreateProjectDto} createProjectDto 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        projectsControllerCreate(createMiaProjectDto: CreateMiaProjectDto, options?: any): AxiosPromise<MiaProject> {
-            return localVarFp.projectsControllerCreate(createMiaProjectDto, options).then((request) => request(axios, basePath));
+        projectsControllerCreate(createProjectDto: CreateProjectDto, options?: any): AxiosPromise<Project> {
+            return localVarFp.projectsControllerCreate(createProjectDto, options).then((request) => request(axios, basePath));
         },
         /**
          * Retrieves a list of all available projects. If there are no projects it will return an empty array.
@@ -3249,7 +3249,7 @@ export const ProjectsApiFactory = function (configuration?: Configuration, baseP
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        projectsControllerFindAll(options?: any): AxiosPromise<Array<MiaProject>> {
+        projectsControllerFindAll(options?: any): AxiosPromise<Array<Project>> {
             return localVarFp.projectsControllerFindAll(options).then((request) => request(axios, basePath));
         },
         /**
@@ -3259,7 +3259,7 @@ export const ProjectsApiFactory = function (configuration?: Configuration, baseP
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        projectsControllerFindOne(id: string, options?: any): AxiosPromise<MiaProject> {
+        projectsControllerFindOne(id: string, options?: any): AxiosPromise<Project> {
             return localVarFp.projectsControllerFindOne(id, options).then((request) => request(axios, basePath));
         },
         /**
@@ -3279,19 +3279,19 @@ export const ProjectsApiFactory = function (configuration?: Configuration, baseP
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        projectsControllerRemoveAll(deleteAllDto: DeleteAllDto, options?: any): AxiosPromise<Array<MiaProject>> {
+        projectsControllerRemoveAll(deleteAllDto: DeleteAllDto, options?: any): AxiosPromise<Array<Project>> {
             return localVarFp.projectsControllerRemoveAll(deleteAllDto, options).then((request) => request(axios, basePath));
         },
         /**
          * Updates the specified project by setting the values of the parameters passed. It returns the updated project, if the update operation succeeds. Otherwise it returns an error.
          * @summary 
          * @param {string} id The identifier (uuid) of the project.
-         * @param {UpdateMiaProjectDto} updateMiaProjectDto 
+         * @param {UpdateProjectDto} updateProjectDto 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        projectsControllerUpdate(id: string, updateMiaProjectDto: UpdateMiaProjectDto, options?: any): AxiosPromise<MiaProject> {
-            return localVarFp.projectsControllerUpdate(id, updateMiaProjectDto, options).then((request) => request(axios, basePath));
+        projectsControllerUpdate(id: string, updateProjectDto: UpdateProjectDto, options?: any): AxiosPromise<Project> {
+            return localVarFp.projectsControllerUpdate(id, updateProjectDto, options).then((request) => request(axios, basePath));
         },
     };
 };
@@ -3306,13 +3306,13 @@ export class ProjectsApi extends BaseAPI {
     /**
      * Creates a new project and returns it.
      * @summary 
-     * @param {CreateMiaProjectDto} createMiaProjectDto 
+     * @param {CreateProjectDto} createProjectDto 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof ProjectsApi
      */
-    public projectsControllerCreate(createMiaProjectDto: CreateMiaProjectDto, options?: AxiosRequestConfig) {
-        return ProjectsApiFp(this.configuration).projectsControllerCreate(createMiaProjectDto, options).then((request) => request(this.axios, this.basePath));
+    public projectsControllerCreate(createProjectDto: CreateProjectDto, options?: AxiosRequestConfig) {
+        return ProjectsApiFp(this.configuration).projectsControllerCreate(createProjectDto, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
@@ -3366,13 +3366,13 @@ export class ProjectsApi extends BaseAPI {
      * Updates the specified project by setting the values of the parameters passed. It returns the updated project, if the update operation succeeds. Otherwise it returns an error.
      * @summary 
      * @param {string} id The identifier (uuid) of the project.
-     * @param {UpdateMiaProjectDto} updateMiaProjectDto 
+     * @param {UpdateProjectDto} updateProjectDto 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof ProjectsApi
      */
-    public projectsControllerUpdate(id: string, updateMiaProjectDto: UpdateMiaProjectDto, options?: AxiosRequestConfig) {
-        return ProjectsApiFp(this.configuration).projectsControllerUpdate(id, updateMiaProjectDto, options).then((request) => request(this.axios, this.basePath));
+    public projectsControllerUpdate(id: string, updateProjectDto: UpdateProjectDto, options?: AxiosRequestConfig) {
+        return ProjectsApiFp(this.configuration).projectsControllerUpdate(id, updateProjectDto, options).then((request) => request(this.axios, this.basePath));
     }
 }
 

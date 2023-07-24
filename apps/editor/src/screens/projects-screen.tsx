@@ -1,4 +1,4 @@
-import { MiaProject } from "@visian/mia-api";
+import { MiaProject } from "@visian/utils";
 import { Screen, useTranslation } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
 import React, { useCallback, useState } from "react";

@@ -1,4 +1,4 @@
-import { MiaJobStatusEnum } from "@visian/mia-api";
+import { MiaJobStatusEnum } from "@visian/utils";
 import { StatusBadge } from "@visian/ui-shared";
 
 const statusColors: Record<MiaJobStatusEnum, string> = {

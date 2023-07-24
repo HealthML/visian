@@ -1,4 +1,4 @@
-import { MiaModelVersion } from "@visian/mia-api";
+import { MiaModelVersion } from "@visian/utils";
 import { AxiosError } from "axios";
 import { useQuery } from "react-query";
 

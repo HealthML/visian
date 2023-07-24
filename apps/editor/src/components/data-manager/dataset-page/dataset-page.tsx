@@ -1,4 +1,4 @@
-import { MiaAnnotation, MiaDataset, MiaImage } from "@visian/mia-api";
+import { MiaAnnotation, MiaDataset, MiaImage } from "@visian/utils";
 import { Notification, Sheet, space, useTranslation } from "@visian/ui-shared";
 import { useCallback, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";

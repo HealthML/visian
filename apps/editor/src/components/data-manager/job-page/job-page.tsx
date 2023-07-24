@@ -1,8 +1,5 @@
-import {
-  MiaImage,
-  MiaJob,
-  JobsControllerUpdateStatusEnum,
-} from "@visian/mia-api";
+import { JobsControllerUpdateStatusEnum } from "@visian/mia-api";
+import { MiaImage, MiaJob } from "@visian/utils";
 import {
   InvisibleButton,
   ListItem,

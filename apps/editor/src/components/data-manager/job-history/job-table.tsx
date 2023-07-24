@@ -5,7 +5,7 @@ import {
   SortingState,
   useReactTable,
 } from "@tanstack/react-table";
-import { MiaJob } from "@visian/mia-api";
+import { MiaJob } from "@visian/utils";
 import { HeaderLabel, ListItemLabel, TableLayout } from "@visian/ui-shared";
 import { useCallback, useState } from "react";
 import { useNavigate } from "react-router-dom";

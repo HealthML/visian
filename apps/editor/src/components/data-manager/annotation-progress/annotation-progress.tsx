@@ -1,4 +1,4 @@
-import { MiaProgress } from "@visian/mia-api";
+import { MiaProgress } from "@visian/utils";
 import { Button, ProgressBar, Sheet, space, Text } from "@visian/ui-shared";
 import styled from "styled-components";
 

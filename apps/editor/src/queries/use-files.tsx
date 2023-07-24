@@ -1,5 +1,4 @@
-import { MiaAnnotation } from "@visian/mia-api";
-import { FileWithMetadata } from "@visian/utils";
+import { FileWithMetadata, MiaAnnotation } from "@visian/utils";
 import axios from "axios";
 import path from "path";
 

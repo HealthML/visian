@@ -1,4 +1,4 @@
-import { MiaAnnotation, MiaImage } from "@visian/mia-api";
+import { MiaAnnotation, MiaImage } from "@visian/utils";
 import { List, stopPropagation } from "@visian/ui-shared";
 import styled from "styled-components";
 

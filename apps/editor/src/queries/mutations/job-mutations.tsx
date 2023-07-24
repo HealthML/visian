@@ -1,8 +1,5 @@
-import {
-  MiaJob,
-  JobsControllerUpdateStatusEnum,
-  MiaProgress,
-} from "@visian/mia-api";
+import { JobsControllerUpdateStatusEnum } from "@visian/mia-api";
+import { MiaJob, MiaProgress } from "@visian/utils";
 import { AxiosError } from "axios";
 import { useQuery } from "react-query";
 

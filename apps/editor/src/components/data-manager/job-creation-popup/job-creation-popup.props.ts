@@ -1,4 +1,4 @@
-import { MiaJob } from "@visian/mia-api";
+import { MiaJob } from "@visian/utils";
 import type { StatefulPopUpProps } from "@visian/ui-shared";
 import { AxiosError } from "axios";
 import {

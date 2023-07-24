@@ -1,4 +1,4 @@
-import { MiaAnnotation } from "@visian/mia-api";
+import { MiaAnnotation } from "@visian/utils";
 import {
   Button,
   DropDown,

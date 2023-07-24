@@ -1,4 +1,4 @@
-import { MiaAnnotation, MiaImage } from "@visian/mia-api";
+import { MiaAnnotation, MiaImage } from "@visian/utils";
 import { FileWithMetadata, Zip } from "@visian/utils";
 import { v4 as uuidv4 } from "uuid";
 
