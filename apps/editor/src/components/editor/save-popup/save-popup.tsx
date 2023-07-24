@@ -9,6 +9,7 @@ import {
   useTranslation,
 } from "@visian/ui-shared";
 import {
+  BackendMetadata,
   FileWithMetadata,
   isMiaImageMetadata,
   MiaAnnotation,
@@ -270,6 +271,11 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
     }
   };
 
+  const getImageName = (metadata?: BackendMetadata) =>
+    metadata && isMiaImageMetadata(metadata) && metadata?.dataUri
+      ? path.basename(metadata.dataUri).split(".")[0]
+      : "image";
+
   const getAnnotationURIPrefixSuggestion = useCallback(() => {
     const activeLayer = store?.editor.activeDocument?.activeLayer;
     if (!activeLayer) {
@@ -277,13 +283,7 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
     }
     const mainImageLayerMetadata =
       store?.editor.activeDocument?.mainImageLayer?.metadata;
-    let imageName = "image";
-    if (isMiaImageMetadata(mainImageLayerMetadata)) {
-      const imageURI = mainImageLayerMetadata.dataUri;
-      if (imageURI) {
-        [imageName] = path.basename(imageURI).split(".");
-      }
-    }
+    const imageName = getImageName(mainImageLayerMetadata);
     const layerName =
       store?.editor.activeDocument?.activeLayer?.title?.split(".")[0];
     const layerNameWithoutIndex = Number.isNaN(

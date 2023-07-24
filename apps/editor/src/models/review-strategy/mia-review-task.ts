@@ -18,8 +18,8 @@ import { ReviewTask, TaskType } from "./review-task";
 export interface MiaReviewTaskSnapshot {
   kind: TaskType;
   id: string;
-  title: string | undefined;
-  description: string | undefined;
+  title?: string;
+  description?: string;
   image: MiaImage;
   annotations: MiaAnnotation[];
 }
