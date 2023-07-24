@@ -135,14 +135,13 @@ export const JobPage = ({ job }: { job: MiaJob }) => {
     [findAnnotationId],
   );
 
-  const confirmDeleteJob = useCallback(
-    () =>
-      deleteJobs({
-        projectId: job.project,
-        jobIds: [job.id],
-      }),
-    [deleteJobs, job],
-  );
+  const confirmDeleteJob = useCallback(() => {
+    deleteJobs({
+      projectId: job.project,
+      jobIds: [job.id],
+    });
+    navigate(`/projects/${job.project}`);
+  }, [deleteJobs, job, navigate]);
 
   const confirmCancelJob = useCallback(
     () =>
@@ -157,10 +156,10 @@ export const JobPage = ({ job }: { job: MiaJob }) => {
   const startReviewJob = useCallback(
     async (annotationId?: string) => {
       store?.startReview(
-        async (url: string) =>
+        async () =>
           annotationId
-            ? MiaReviewStrategy.fromAnnotationId(store, annotationId, url)
-            : MiaReviewStrategy.fromJob(store, job.id, url),
+            ? MiaReviewStrategy.fromAnnotationId(store, annotationId)
+            : MiaReviewStrategy.fromJob(store, job.id),
         navigate,
       );
     },
@@ -222,7 +221,7 @@ export const JobPage = ({ job }: { job: MiaJob }) => {
                           <IconButton
                             icon="logs"
                             tooltipTx="open-job-log"
-                            onPointerDown={openJobLogPopUp}
+                            onClick={openJobLogPopUp}
                             tooltipPosition="right"
                           />
                         )}
@@ -230,14 +229,14 @@ export const JobPage = ({ job }: { job: MiaJob }) => {
                           <IconButton
                             icon="cancel"
                             tooltipTx="cancel-job-title"
-                            onPointerDown={openCancelJobConfirmationPopUp}
+                            onClick={openCancelJobConfirmationPopUp}
                             tooltipPosition="right"
                           />
                         ) : (
                           <IconButton
                             icon="trash"
                             tooltipTx="delete-job-title"
-                            onPointerDown={openDeleteJobConfirmationPopUp}
+                            onClick={openDeleteJobConfirmationPopUp}
                             tooltipPosition="right"
                           />
                         )}
@@ -296,7 +295,7 @@ export const JobPage = ({ job }: { job: MiaJob }) => {
         <ConfirmationPopup
           isOpen={isCancelJobConfirmationPopUpOpen}
           onClose={closeCancelJobConfirmationPopUp}
-          message="cancel-job-message"
+          messageTx="cancel-job-message"
           titleTx="cancel-job-title"
           onConfirm={confirmCancelJob}
         />

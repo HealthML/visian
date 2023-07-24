@@ -10,7 +10,6 @@ export interface MiaReviewStrategySnapshot {
   jobId?: string;
   allowedAnnotations?: string[];
   taskType?: TaskType;
-  returnUrl?: string;
   currentReviewTask?: MiaReviewTaskSnapshot;
 }
 

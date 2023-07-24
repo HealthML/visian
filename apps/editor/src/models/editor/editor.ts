@@ -30,6 +30,8 @@ export interface EditorSnapshot {
   activeDocument?: DocumentSnapshot;
 
   performanceMode: PerformanceMode;
+
+  returnUrl?: string;
 }
 
 export class Editor
@@ -51,6 +53,8 @@ export class Editor
 
   public performanceMode: PerformanceMode = "high";
 
+  public returnUrl?: string;
+
   constructor(
     snapshot: EditorSnapshot | undefined,
     protected context: StoreContext,
@@ -62,12 +66,14 @@ export class Editor
       volumeRenderer: observable,
       performanceMode: observable,
       isAvailable: observable,
+      returnUrl: observable,
 
       colorMode: computed,
 
       setActiveDocument: action,
       setPerformanceMode: action,
       applySnapshot: action,
+      setReturnUrl: action,
     });
 
     runInAction(() => {
@@ -167,6 +173,7 @@ export class Editor
     return {
       activeDocument: this.activeDocument?.toJSON(),
       performanceMode: this.performanceMode,
+      returnUrl: this.returnUrl,
     };
   }
 
@@ -179,6 +186,7 @@ export class Editor
         true,
       );
       this.setPerformanceMode(snapshot?.performanceMode);
+      this.setReturnUrl(snapshot?.returnUrl);
     } else {
       this.context.setError({
         titleTx: "browser-error",
@@ -198,5 +206,9 @@ export class Editor
     );
     this.sliceRenderer?.animate();
     this.volumeRenderer?.animate();
+  };
+
+  public setReturnUrl = (url?: string) => {
+    this.returnUrl = url;
   };
 }

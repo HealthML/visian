@@ -118,13 +118,7 @@ export class MiaReviewTask extends ReviewTask {
   }
 
   public async save() {
-    return {
-      data: {},
-      status: 1700,
-      statusText: "OK",
-      headers: {},
-      config: {},
-    };
+    return undefined;
   }
 
   private async zipFiles(files: File[]): Promise<File> {

@@ -34,5 +34,5 @@ export abstract class ReviewTask {
   ): Promise<void>;
 
   // After calling save, we expect all changes made to the task to be saved to the backend
-  public abstract save(): Promise<AxiosResponse>;
+  public abstract save(): Promise<AxiosResponse | undefined>;
 }

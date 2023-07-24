@@ -102,7 +102,7 @@ export const PopUp: React.FC<PopUpProps> = ({
         <TitleRow>
           <PopUpTitle tx={titleTx} text={title} />
           <ExportFileName tx={secondaryTitleTx} text={secondaryTitle} />
-          <CloseIcon icon="xSmall" onPointerDown={dismiss} />
+          <CloseIcon icon="xSmall" onClick={dismiss} />
         </TitleRow>
       )}
       {children}

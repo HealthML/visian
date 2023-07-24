@@ -355,16 +355,29 @@ export class RootStore implements ISerializable<RootSnapshot>, IDisposable {
   };
 
   public startReview = async (
-    createStrategy: (currentPath: string) => Promise<ReviewStrategy>,
+    createStrategy: () => Promise<ReviewStrategy>,
     navigate: NavigateFunction,
   ) => {
-    const currentPath = window.location.pathname;
+    this.editor.setReturnUrl(window.location.pathname);
     if (!(await this.destroyLayers(true))) return;
     this.shouldPersist = true;
     this.setProgress({ labelTx: "importing", showSplash: true });
     navigate("/editor?review=true");
-    this.setReviewStrategy(await createStrategy(currentPath));
+    this.setReviewStrategy(await createStrategy());
     await this.reviewStrategy?.loadTask();
     this.setProgress();
+  };
+
+  public redirectToReturnUrl = async ({
+    forceRedirect,
+    resetUrl,
+  }: {
+    destroy?: boolean;
+    forceRedirect?: boolean;
+    resetUrl?: boolean;
+  }) => {
+    const returnUrl = this.editor.returnUrl ?? "/";
+    if (resetUrl ?? false) this.editor.setReturnUrl();
+    await this.destroyRedirect(returnUrl, forceRedirect ?? true);
   };
 }

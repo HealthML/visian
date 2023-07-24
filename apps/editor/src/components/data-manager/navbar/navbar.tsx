@@ -3,6 +3,7 @@ import { useCallback, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 
+import { useStore } from "../../../app/root-store";
 import { ShortcutPopUp } from "../../editor/shortcut-popup";
 import { MenuDataManager } from "../menu-data-manager";
 
@@ -23,6 +24,8 @@ const Button = styled(FloatingUIButton)`
 export const Navbar = ({ className }: { className?: string }) => {
   const navigate = useNavigate();
 
+  const store = useStore();
+
   // Shortcut Pop Up Toggling
   const [isShortcutPopUpOpen, setIsShortcutPopUpOpen] = useState(false);
   const openShortcutPopUp = useCallback(() => {
@@ -33,7 +36,10 @@ export const Navbar = ({ className }: { className?: string }) => {
   }, []);
 
   const navigateToHome = useCallback(() => navigate(`/projects`), [navigate]);
-  const navigateToEditor = useCallback(() => navigate(`/editor`), [navigate]);
+  const navigateToEditor = useCallback(() => {
+    store?.editor.setReturnUrl(window.location.pathname);
+    navigate(`/editor`);
+  }, [navigate, store]);
 
   return (
     <Container className={className}>

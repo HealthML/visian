@@ -274,8 +274,8 @@ export const MiaReviewBar = observer(
               t("review-description", {
                 taskType: t(store?.reviewStrategy?.currentTask?.kind),
                 image: (
-                  store?.reviewStrategy?.currentTask as MiaReviewTask
-                )?.image.dataUri
+                  store?.reviewStrategy?.currentTask as unknown as MiaReviewTask
+                ).image.dataUri
                   .split("/")
                   .pop()
                   ?.split(".")[0],
