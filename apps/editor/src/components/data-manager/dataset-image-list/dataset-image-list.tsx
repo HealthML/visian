@@ -1,5 +1,5 @@
-import { MiaAnnotation, MiaImage } from "@visian/utils";
 import { List, stopPropagation } from "@visian/ui-shared";
+import { MiaAnnotation, MiaImage } from "@visian/utils";
 import styled from "styled-components";
 
 import { useKeyboardShortcuts } from "../util";

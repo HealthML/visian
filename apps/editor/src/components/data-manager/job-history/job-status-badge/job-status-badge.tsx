@@ -1,5 +1,5 @@
-import { MiaJobStatusEnum } from "@visian/utils";
 import { StatusBadge } from "@visian/ui-shared";
+import { MiaJobStatusEnum } from "@visian/utils";
 
 const statusColors: Record<MiaJobStatusEnum, string> = {
   queued: "veryVeryLightGray",

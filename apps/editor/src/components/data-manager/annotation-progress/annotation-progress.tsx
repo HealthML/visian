@@ -1,5 +1,5 @@
-import { MiaProgress } from "@visian/utils";
 import { Button, ProgressBar, Sheet, space, Text } from "@visian/ui-shared";
+import { MiaProgress } from "@visian/utils";
 import styled from "styled-components";
 
 const ProgressSheet = styled(Sheet)`
