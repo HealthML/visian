@@ -10,7 +10,7 @@ import { useCallback, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 
-import { Job } from "mia-api-client";
+import { Job } from "@visian/mia-api";
 import { getDisplayDate } from "../util/display-date";
 import { JobStatusBadge } from "./job-status-badge/job-status-badge";
 

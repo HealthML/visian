@@ -1,4 +1,4 @@
-import { Project } from "mia-api-client";
+import { Project } from "@visian/mia-api";
 import { useCallback, useState } from "react";
 import styled from "styled-components";
 

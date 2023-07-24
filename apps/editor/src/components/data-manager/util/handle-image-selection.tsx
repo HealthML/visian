@@ -1,4 +1,4 @@
-import { Image } from "mia-api-client";
+import { Image } from "@visian/mia-api";
 
 const multiSelection = (
   currentImageIndex: number,

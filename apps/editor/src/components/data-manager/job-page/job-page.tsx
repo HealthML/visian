@@ -20,7 +20,7 @@ import {
   useImagesByJob,
 } from "../../../queries";
 import { useJobProgress } from "../../../queries";
-import { Job, JobStatusEnum, UpdateJobDtoStatusEnum } from "mia-api-client";
+import { Job, JobStatusEnum, UpdateJobDtoStatusEnum } from "@visian/mia-api";
 import { AnnotationProgress } from "../annotation-progress";
 import { ConfirmationPopup } from "../confirmation-popup";
 import { JobLogPopup } from "../job-history/job-log-popup";
@@ -30,7 +30,7 @@ import { PageSection } from "../page-section";
 import { PageTitle } from "../page-title";
 import { getDisplayDate } from "../util";
 import { DetailsRow } from "./details-table";
-import { Image } from "mia-api-client";
+import { Image } from "@visian/mia-api";
 
 const StyledSheet = styled(Sheet)`
   padding: ${space("listPadding")};

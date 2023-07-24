@@ -18360,15 +18360,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mia-api-client@file:apps/editor/src/queries/mia-api::locator=visian%40workspace%3A.":
-  version: 0.0.0
-  resolution: "mia-api-client@file:apps/editor/src/queries/mia-api#apps/editor/src/queries/mia-api::hash=a04d9b&locator=visian%40workspace%3A."
-  dependencies:
-    axios: ^0.21.1
-  checksum: e05106c8b0369229454dcc2229bbc027f8c286318b18070bf523a13a56a3a8e394e94fa791358c712a218d562ec78a525f0b02aaf2f84a749139f6304a5e93a9
-  languageName: node
-  linkType: hard
-
 "microevent.ts@npm:~0.1.1":
   version: 0.1.1
   resolution: "microevent.ts@npm:0.1.1"
@@ -25135,7 +25126,6 @@ __metadata:
     localforage: ^1.10.0
     lodash.isequal: ^4.5.0
     lodash.throttle: ^4.1.1
-    mia-api-client: "file:apps/editor/src/queries/mia-api"
     mobx: ^6.6.2
     mobx-react-lite: ^3.4.0
     moment: ^2.29.4

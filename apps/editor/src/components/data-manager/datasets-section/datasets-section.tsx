@@ -1,5 +1,5 @@
 import { useTranslation } from "@visian/ui-shared";
-import { Dataset, Project } from "mia-api-client";
+import { Dataset, Project } from "@visian/mia-api";
 import { useCallback, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";

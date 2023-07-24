@@ -3,7 +3,7 @@ import {
   getAnnotationsByJobAndImage,
   patchAnnotation,
 } from "../../queries";
-import { Image } from "mia-api-client";
+import { Image } from "@visian/mia-api";
 import { RootStore } from "../root";
 import { MiaReviewTask } from "./mia-review-task";
 import { ReviewStrategy } from "./review-strategy";

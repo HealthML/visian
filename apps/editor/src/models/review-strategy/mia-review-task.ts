@@ -8,7 +8,7 @@ import {
   postAnnotationFile,
 } from "../../queries";
 import { Annotation, FileWithMetadata } from "../../types";
-import { Image } from "mia-api-client";
+import { Image } from "@visian/mia-api";
 import { ReviewTask, TaskType } from "./review-task";
 
 export class MiaReviewTask implements ReviewTask {

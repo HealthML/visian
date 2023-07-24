@@ -1,5 +1,5 @@
 import axios, { AxiosError } from "axios";
-import { Job, UpdateJobDto, Progress } from "mia-api-client";
+import { Job, UpdateJobDto, Progress } from "@visian/mia-api";
 import { useQuery } from "react-query";
 import { jobsApi } from "../hub-base-url";
 import { DeleteMutation, UpdateMutation } from "./mutations";

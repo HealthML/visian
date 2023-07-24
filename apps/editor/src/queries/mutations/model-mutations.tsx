@@ -1,5 +1,5 @@
 import { useQuery } from "react-query";
-import { ModelVersion } from "mia-api-client";
+import { ModelVersion } from "@visian/mia-api";
 import { modelVersionsApi } from "../hub-base-url";
 import { AxiosError } from "axios";
 

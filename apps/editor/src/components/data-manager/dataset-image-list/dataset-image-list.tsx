@@ -1,6 +1,6 @@
 import { List, stopPropagation } from "@visian/ui-shared";
 import styled from "styled-components";
-import { Image } from "mia-api-client";
+import { Image } from "@visian/mia-api";
 
 import { Annotation } from "../../../types";
 import { useKeyboardShortcuts } from "../util";

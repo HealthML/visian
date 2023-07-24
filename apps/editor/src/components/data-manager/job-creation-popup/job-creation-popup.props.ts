@@ -6,7 +6,7 @@ import {
   RefetchQueryFilters,
 } from "react-query";
 
-import { Job } from "mia-api-client";
+import { Job } from "@visian/mia-api";
 
 export interface JobCreationPopUpProps extends StatefulPopUpProps {
   projectId: string;

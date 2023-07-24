@@ -3,7 +3,7 @@ import { observer } from "mobx-react-lite";
 import { useEffect, useState } from "react";
 import styled from "styled-components";
 
-import { Job } from "mia-api-client";
+import { Job } from "@visian/mia-api";
 import { JobLogPopUpProps } from "./job-log-popup.props";
 import { jobsApi } from "../../../../queries";
 

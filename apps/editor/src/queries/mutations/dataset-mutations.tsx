@@ -4,7 +4,7 @@ import {
   UpdateDatasetDto,
   CreateDatasetDto,
   Progress,
-} from "mia-api-client";
+} from "@visian/mia-api";
 import { useQuery } from "react-query";
 
 import { DeleteMutation, UpdateMutation, CreateMutation } from "./mutations";

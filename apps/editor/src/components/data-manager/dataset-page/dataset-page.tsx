@@ -22,7 +22,7 @@ import { PageSection } from "../page-section";
 import { PageTitle } from "../page-title";
 import { useImageSelection, usePopUpState } from "../util";
 
-import { Dataset, Image } from "mia-api-client";
+import { Dataset, Image } from "@visian/mia-api";
 
 const StyledSheet = styled(Sheet)`
   padding: ${space("listPadding")};

@@ -1,5 +1,5 @@
 import { AxiosError } from "axios";
-import { CreateProjectDto, Project, UpdateProjectDto } from "mia-api-client";
+import { CreateProjectDto, Project, UpdateProjectDto } from "@visian/mia-api";
 import { useQuery } from "react-query";
 
 import { CreateMutation, DeleteMutation, UpdateMutation } from "./mutations";

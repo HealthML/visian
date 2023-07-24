@@ -1,11 +1,13 @@
 import {
-  JobsApi,
+  AnnotationsApi,
+  Configuration,
   DatasetsApi,
   ImagesApi,
-  AnnotationsApi,
+  JobsApi,
   ModelVersionsApi,
   ProjectsApi,
-} from "mia-api-client";
+} from "@visian/mia-api";
+import { configure } from "mobx";
 
 const formatUrl = (url: string | null | undefined) => {
   if (!url || url === "") {
@@ -30,11 +32,13 @@ export const hubBaseUrl =
 
 const basePath = hubBaseUrl.replace(/\/$/, "");
 
-export const annotationsApi = new AnnotationsApi({ basePath: basePath });
-export const imagesApi = new ImagesApi({ basePath: basePath });
-export const datasetsApi = new DatasetsApi({ basePath: basePath });
-export const jobsApi = new JobsApi({ basePath: basePath });
-export const modelVersionsApi = new ModelVersionsApi({ basePath: basePath });
-export const projectsApi = new ProjectsApi({ basePath: basePath });
+const apiConfig = new Configuration({ basePath });
+
+export const annotationsApi = new AnnotationsApi(apiConfig);
+export const imagesApi = new ImagesApi(apiConfig);
+export const datasetsApi = new DatasetsApi(apiConfig);
+export const jobsApi = new JobsApi(apiConfig);
+export const modelVersionsApi = new ModelVersionsApi(apiConfig);
+export const projectsApi = new ProjectsApi(apiConfig);
 
 export default hubBaseUrl;
