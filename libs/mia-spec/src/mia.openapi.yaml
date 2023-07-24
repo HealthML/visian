@@ -55,6 +55,12 @@ paths:
       responses:
         '200':
           description: The request succeeded.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Project'
       tags: *ref_0
   /projects/{id}:
     get:
@@ -197,6 +203,12 @@ paths:
       responses:
         '200':
           description: The request succeeded.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Dataset'
       tags: *ref_1
   /datasets/{id}:
     get:
@@ -372,6 +384,12 @@ paths:
       responses:
         '200':
           description: The request succeeded.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Image'
       tags: *ref_2
   /images/{id}:
     get:
@@ -559,6 +577,12 @@ paths:
       responses:
         '200':
           description: The request succeeded.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Annotation'
       tags: *ref_3
   /annotations/{id}:
     get:
@@ -729,6 +753,12 @@ paths:
       responses:
         '200':
           description: The request succeeded.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Job'
       tags: *ref_4
   /jobs/{id}:
     get:

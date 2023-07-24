@@ -834,7 +834,7 @@ export const AnnotationsApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async annotationsControllerRemoveAll(deleteAllDto: DeleteAllDto, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+        async annotationsControllerRemoveAll(deleteAllDto: DeleteAllDto, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<Annotation>>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.annotationsControllerRemoveAll(deleteAllDto, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
@@ -925,7 +925,7 @@ export const AnnotationsApiFactory = function (configuration?: Configuration, ba
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        annotationsControllerRemoveAll(deleteAllDto: DeleteAllDto, options?: any): AxiosPromise<void> {
+        annotationsControllerRemoveAll(deleteAllDto: DeleteAllDto, options?: any): AxiosPromise<Array<Annotation>> {
             return localVarFp.annotationsControllerRemoveAll(deleteAllDto, options).then((request) => request(axios, basePath));
         },
         /**
@@ -1374,7 +1374,7 @@ export const DatasetsApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async datasetsControllerRemoveAll(deleteAllDto: DeleteAllDto, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+        async datasetsControllerRemoveAll(deleteAllDto: DeleteAllDto, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<Dataset>>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.datasetsControllerRemoveAll(deleteAllDto, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
@@ -1457,7 +1457,7 @@ export const DatasetsApiFactory = function (configuration?: Configuration, baseP
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        datasetsControllerRemoveAll(deleteAllDto: DeleteAllDto, options?: any): AxiosPromise<void> {
+        datasetsControllerRemoveAll(deleteAllDto: DeleteAllDto, options?: any): AxiosPromise<Array<Dataset>> {
             return localVarFp.datasetsControllerRemoveAll(deleteAllDto, options).then((request) => request(axios, basePath));
         },
         /**
@@ -1935,7 +1935,7 @@ export const ImagesApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async imagesControllerRemoveAll(deleteAllDto: DeleteAllDto, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+        async imagesControllerRemoveAll(deleteAllDto: DeleteAllDto, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<Image>>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.imagesControllerRemoveAll(deleteAllDto, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
@@ -2022,7 +2022,7 @@ export const ImagesApiFactory = function (configuration?: Configuration, basePat
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        imagesControllerRemoveAll(deleteAllDto: DeleteAllDto, options?: any): AxiosPromise<void> {
+        imagesControllerRemoveAll(deleteAllDto: DeleteAllDto, options?: any): AxiosPromise<Array<Image>> {
             return localVarFp.imagesControllerRemoveAll(deleteAllDto, options).then((request) => request(axios, basePath));
         },
         /**
@@ -2519,7 +2519,7 @@ export const JobsApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async jobsControllerRemoveAll(deleteAllDto: DeleteAllDto, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+        async jobsControllerRemoveAll(deleteAllDto: DeleteAllDto, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<Job>>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.jobsControllerRemoveAll(deleteAllDto, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
@@ -2613,7 +2613,7 @@ export const JobsApiFactory = function (configuration?: Configuration, basePath?
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        jobsControllerRemoveAll(deleteAllDto: DeleteAllDto, options?: any): AxiosPromise<void> {
+        jobsControllerRemoveAll(deleteAllDto: DeleteAllDto, options?: any): AxiosPromise<Array<Job>> {
             return localVarFp.jobsControllerRemoveAll(deleteAllDto, options).then((request) => request(axios, basePath));
         },
         /**
@@ -3207,7 +3207,7 @@ export const ProjectsApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async projectsControllerRemoveAll(deleteAllDto: DeleteAllDto, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+        async projectsControllerRemoveAll(deleteAllDto: DeleteAllDto, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<Project>>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.projectsControllerRemoveAll(deleteAllDto, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
@@ -3279,7 +3279,7 @@ export const ProjectsApiFactory = function (configuration?: Configuration, baseP
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        projectsControllerRemoveAll(deleteAllDto: DeleteAllDto, options?: any): AxiosPromise<void> {
+        projectsControllerRemoveAll(deleteAllDto: DeleteAllDto, options?: any): AxiosPromise<Array<Project>> {
             return localVarFp.projectsControllerRemoveAll(deleteAllDto, options).then((request) => request(axios, basePath));
         },
         /**
