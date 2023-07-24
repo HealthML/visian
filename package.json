@@ -20,8 +20,7 @@
     "affected:test": "nx affected:test",
     "affected:e2e": "nx affected:e2e",
     "graph": "nx graph",
-    "storybook": "nx run ui-shared:storybook",
-    "g:lib": "nx g @nrwl/react:lib"
+    "storybook": "nx run ui-shared:storybook"
   },
   "private": true,
   "devDependencies": {
