@@ -46,7 +46,7 @@ export const updateProjectMutation = () =>
     queryKey: (_selectorId: string) => [projectsQueryKey],
     mutateFn: ({ object, updateDto }) =>
       projectsApi
-        .projectsControllerUpdate(updateDto, object.id)
+        .projectsControllerUpdate(object.id, updateDto)
         .then((response) => response.data),
   });
 

@@ -105,9 +105,11 @@ export function UpdateMutation<T extends MiaTypeGeneric, S>(
 
       if (!previousObjects) return;
 
-      const newObjects = previousObjects.map((o) =>
-        o.id === object.id ? { ...object, ...updateDto } : o,
-      );
+      const newObjects = Array.isArray(previousObjects)
+        ? previousObjects.map((o) =>
+            o.id === object.id ? { ...object, ...updateDto } : o,
+          )
+        : { ...object, ...updateDto };
 
       queryClient.setQueryData(queryKey, newObjects);
 
@@ -120,6 +122,9 @@ export function UpdateMutation<T extends MiaTypeGeneric, S>(
         params.queryKey(selectorId),
         context?.previousObjects,
       );
+      queryClient.invalidateQueries({
+        queryKey: params.queryKey(selectorId),
+      });
     },
     onSettled: (data, err, { selectorId }) => {
       queryClient.invalidateQueries({

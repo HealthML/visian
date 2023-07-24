@@ -1,11 +1,10 @@
 import axios, { AxiosError } from "axios";
-import { Job, UpdateJobDto, Progress } from "@visian/mia-api";
+import { Job, Progress, JobsControllerUpdateStatusEnum } from "@visian/mia-api";
 import { useQuery } from "react-query";
 import { jobsApi } from "../hub-base-url";
 import { DeleteMutation, UpdateMutation } from "./mutations";
 
 const jobQueryKey = "job";
-const jobsQueryKey = "jobs";
 const jobsByProjectQueryBaseKey = "jobsByProject";
 
 export const useJob = (jobId: string) =>
@@ -13,16 +12,6 @@ export const useJob = (jobId: string) =>
     [jobQueryKey],
     () =>
       jobsApi.jobsControllerFindOne(jobId).then((response) => response.data),
-    {
-      retry: 2,
-      refetchInterval: 1000 * 20,
-    },
-  );
-
-export const useJobs = () =>
-  useQuery<Job[], AxiosError<Job[]>>(
-    [jobsQueryKey],
-    () => jobsApi.jobsControllerFindAll().then((response) => response.data),
     {
       retry: 2,
       refetchInterval: 1000 * 20,
@@ -63,8 +52,8 @@ export const deleteJobsMutation = () =>
   });
 
 export const updateJobMutation = () =>
-  UpdateMutation<Job, UpdateJobDto>({
-    queryKey: (selectorId: string) => [jobsByProjectQueryBaseKey, selectorId],
+  UpdateMutation<Job, { status: JobsControllerUpdateStatusEnum }>({
+    queryKey: (selectorId: string) => [jobQueryKey],
     mutateFn: ({ object, updateDto }) =>
       jobsApi
         // TODO: fix required types in API docs
