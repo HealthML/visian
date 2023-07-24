@@ -7,9 +7,9 @@ import styled from "styled-components";
 import { useStore } from "../../../app/root-store";
 import { MiaReviewStrategy } from "../../../models/review-strategy";
 import {
+  deleteAnnotationsForImageMutation,
   deleteImagesMutation,
   useDatasetProgress,
-  useDeleteAnnotationsForImageMutation,
   useImagesByDataset,
 } from "../../../queries";
 import { AnnotationProgress } from "../annotation-progress";
@@ -83,7 +83,7 @@ export const DatasetPage = ({
 
   const { mutate: deleteImages } = deleteImagesMutation();
 
-  const { deleteAnnotations } = useDeleteAnnotationsForImageMutation();
+  const { mutate: deleteAnnotations } = deleteAnnotationsForImageMutation();
 
   const [annotationTobBeDeleted, setAnnotationTobBeDeleted] =
     useState<MiaAnnotation>();
@@ -176,8 +176,8 @@ export const DatasetPage = ({
   const handleAnnotationConfirmation = useCallback(() => {
     if (annotationTobBeDeleted)
       deleteAnnotations({
-        imageId: annotationTobBeDeleted.image,
-        annotationIds: [annotationTobBeDeleted.id],
+        objectIds: [annotationTobBeDeleted.id],
+        selectorId: annotationTobBeDeleted.image,
       });
   }, [annotationTobBeDeleted, deleteAnnotations]);
 

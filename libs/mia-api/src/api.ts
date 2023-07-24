@@ -75,6 +75,43 @@ export interface Annotation {
 /**
  * 
  * @export
+ * @interface CreateAnnotationDto
+ */
+export interface CreateAnnotationDto {
+    /**
+     * The identifier of the image (uuid) that the annotation will belong to.
+     * @type {string}
+     * @memberof CreateAnnotationDto
+     */
+    'image': string;
+    /**
+     * The identifier of the job (uuid) that the annotation was created by.
+     * @type {string}
+     * @memberof CreateAnnotationDto
+     */
+    'job'?: string;
+    /**
+     * The path of the annotation file relative to the specified data source location.
+     * @type {string}
+     * @memberof CreateAnnotationDto
+     */
+    'dataUri': string;
+    /**
+     * Indicates whether an annotation has been verified by a human. Set to false by default.
+     * @type {boolean}
+     * @memberof CreateAnnotationDto
+     */
+    'verified'?: boolean;
+    /**
+     * The annotation file. Should be passed if the file is not already present in the data source.
+     * @type {string}
+     * @memberof CreateAnnotationDto
+     */
+    'base64File'?: string;
+}
+/**
+ * 
+ * @export
  * @interface CreateDatasetDto
  */
 export interface CreateDatasetDto {
@@ -90,6 +127,31 @@ export interface CreateDatasetDto {
      * @memberof CreateDatasetDto
      */
     'project': string;
+}
+/**
+ * 
+ * @export
+ * @interface CreateImageDto
+ */
+export interface CreateImageDto {
+    /**
+     * The identifier of the dataset (uuid) that the image will belong to.
+     * @type {string}
+     * @memberof CreateImageDto
+     */
+    'dataset': string;
+    /**
+     * The path of the image file relative to the specified data source location.
+     * @type {string}
+     * @memberof CreateImageDto
+     */
+    'dataUri': string;
+    /**
+     * The image file. Should be passed if the file is not already present in the data source.
+     * @type {string}
+     * @memberof CreateImageDto
+     */
+    'base64File'?: string;
 }
 /**
  * 
@@ -421,6 +483,31 @@ export interface Project {
 /**
  * 
  * @export
+ * @interface UpdateAnnotationDto
+ */
+export interface UpdateAnnotationDto {
+    /**
+     * The path of the annotation file relative to the specified data source location.
+     * @type {string}
+     * @memberof UpdateAnnotationDto
+     */
+    'dataUri'?: string;
+    /**
+     * Indicates whether an annotation has been verified by a human. Set to false by default.
+     * @type {boolean}
+     * @memberof UpdateAnnotationDto
+     */
+    'verified'?: boolean;
+    /**
+     * The annotation file. Should be passed to update the file referenced by the dataUri.
+     * @type {string}
+     * @memberof UpdateAnnotationDto
+     */
+    'base64File'?: string;
+}
+/**
+ * 
+ * @export
  * @interface UpdateDatasetDto
  */
 export interface UpdateDatasetDto {
@@ -437,6 +524,55 @@ export interface UpdateDatasetDto {
      */
     'project': string;
 }
+/**
+ * 
+ * @export
+ * @interface UpdateImageDto
+ */
+export interface UpdateImageDto {
+    /**
+     * The path of the image file relative to the specified data source location.
+     * @type {string}
+     * @memberof UpdateImageDto
+     */
+    'dataUri': string;
+    /**
+     * The image file. Should be passed to update the file referenced by the dataUri.
+     * @type {string}
+     * @memberof UpdateImageDto
+     */
+    'base64File'?: string;
+}
+/**
+ * 
+ * @export
+ * @interface UpdateJobDto
+ */
+export interface UpdateJobDto {
+    /**
+     * The new status of the job. By default, a job is in status `queued`. A valid order of transitions is enforced. For example, when the job is in status `queued`, it can only be updated to `running`, `failed` or `canceled`. From status `running`, it can only be updated to `succeeded`, `failed` or `canceled`.
+     * @type {string}
+     * @memberof UpdateJobDto
+     */
+    'status'?: UpdateJobDtoStatusEnum;
+    /**
+     * The job log text file.
+     * @type {string}
+     * @memberof UpdateJobDto
+     */
+    'base64File'?: string;
+}
+
+export const UpdateJobDtoStatusEnum = {
+    Queued: 'queued',
+    Running: 'running',
+    Succeeded: 'succeeded',
+    Failed: 'failed',
+    Canceled: 'canceled'
+} as const;
+
+export type UpdateJobDtoStatusEnum = typeof UpdateJobDtoStatusEnum[keyof typeof UpdateJobDtoStatusEnum];
+
 /**
  * 
  * @export
@@ -460,19 +596,13 @@ export const AnnotationsApiAxiosParamCreator = function (configuration?: Configu
         /**
          * Creates a new annotation and returns it. Additionally it saves the optional file passed to this endpoint under the annotation\'s dataUri. An error will be thrown if the referenced image does not exist. Trying to create an annotation with the same data URI as an already existing annotation will also result in an error.
          * @summary 
-         * @param {string} image The identifier of the image (uuid) that the annotation will belong to.
-         * @param {string} dataUri The path of the annotation file relative to the specified data source location.
-         * @param {string} [job] The identifier of the job (uuid) that the annotation was created by.
-         * @param {boolean} [verified] Indicates whether an annotation has been verified by a human. Set to false by default.
-         * @param {File} [file] The annotation file. Should be passed if the file is not already present in the data source.
+         * @param {CreateAnnotationDto} createAnnotationDto 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        annotationsControllerCreate: async (image: string, dataUri: string, job?: string, verified?: boolean, file?: File, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'image' is not null or undefined
-            assertParamExists('annotationsControllerCreate', 'image', image)
-            // verify required parameter 'dataUri' is not null or undefined
-            assertParamExists('annotationsControllerCreate', 'dataUri', dataUri)
+        annotationsControllerCreate: async (createAnnotationDto: CreateAnnotationDto, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'createAnnotationDto' is not null or undefined
+            assertParamExists('annotationsControllerCreate', 'createAnnotationDto', createAnnotationDto)
             const localVarPath = `/annotations`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -484,36 +614,15 @@ export const AnnotationsApiAxiosParamCreator = function (configuration?: Configu
             const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
-            const localVarFormParams = new ((configuration && configuration.formDataCtor) || FormData)();
 
 
-            if (image !== undefined) { 
-                localVarFormParams.append('image', image as any);
-            }
     
-            if (job !== undefined) { 
-                localVarFormParams.append('job', job as any);
-            }
-    
-            if (dataUri !== undefined) { 
-                localVarFormParams.append('dataUri', dataUri as any);
-            }
-    
-            if (verified !== undefined) { 
-                localVarFormParams.append('verified', verified as any);
-            }
-    
-            if (file !== undefined) { 
-                localVarFormParams.append('file', file as any);
-            }
-    
-    
-            localVarHeaderParameter['Content-Type'] = 'multipart/form-data';
-    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-            localVarRequestOptions.data = localVarFormParams;
+            localVarRequestOptions.data = serializeDataIfNeeded(createAnnotationDto, localVarRequestOptions, configuration)
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -707,15 +816,15 @@ export const AnnotationsApiAxiosParamCreator = function (configuration?: Configu
          * Updates the specified annotation by setting the values of the parameters passed. Additionally it saves the optional file passed to this endpoint under the annotation\'s (new) dataUri. All parameters not provided will be left unchanged. It returns the updated annotation, if the update operation succeeds. Otherwise it returns an error. When changing the dataUri, the old file won\'t be deleted automatically.
          * @summary 
          * @param {string} id The identifier (uuid) of the annotation.
-         * @param {string} [dataUri] The path of the annotation file relative to the specified data source location.
-         * @param {boolean} [verified] Indicates whether an annotation has been verified by a human. Set to false by default.
-         * @param {File} [file] The annotation file. Should be passed to update the file referenced by the dataUri.
+         * @param {UpdateAnnotationDto} updateAnnotationDto 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        annotationsControllerUpdate: async (id: string, dataUri?: string, verified?: boolean, file?: File, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+        annotationsControllerUpdate: async (id: string, updateAnnotationDto: UpdateAnnotationDto, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'id' is not null or undefined
             assertParamExists('annotationsControllerUpdate', 'id', id)
+            // verify required parameter 'updateAnnotationDto' is not null or undefined
+            assertParamExists('annotationsControllerUpdate', 'updateAnnotationDto', updateAnnotationDto)
             const localVarPath = `/annotations/{id}`
                 .replace(`{${"id"}}`, encodeURIComponent(String(id)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
@@ -728,28 +837,15 @@ export const AnnotationsApiAxiosParamCreator = function (configuration?: Configu
             const localVarRequestOptions = { method: 'PATCH', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
-            const localVarFormParams = new ((configuration && configuration.formDataCtor) || FormData)();
 
 
-            if (dataUri !== undefined) { 
-                localVarFormParams.append('dataUri', dataUri as any);
-            }
     
-            if (verified !== undefined) { 
-                localVarFormParams.append('verified', verified as any);
-            }
-    
-            if (file !== undefined) { 
-                localVarFormParams.append('file', file as any);
-            }
-    
-    
-            localVarHeaderParameter['Content-Type'] = 'multipart/form-data';
-    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-            localVarRequestOptions.data = localVarFormParams;
+            localVarRequestOptions.data = serializeDataIfNeeded(updateAnnotationDto, localVarRequestOptions, configuration)
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -769,16 +865,12 @@ export const AnnotationsApiFp = function(configuration?: Configuration) {
         /**
          * Creates a new annotation and returns it. Additionally it saves the optional file passed to this endpoint under the annotation\'s dataUri. An error will be thrown if the referenced image does not exist. Trying to create an annotation with the same data URI as an already existing annotation will also result in an error.
          * @summary 
-         * @param {string} image The identifier of the image (uuid) that the annotation will belong to.
-         * @param {string} dataUri The path of the annotation file relative to the specified data source location.
-         * @param {string} [job] The identifier of the job (uuid) that the annotation was created by.
-         * @param {boolean} [verified] Indicates whether an annotation has been verified by a human. Set to false by default.
-         * @param {File} [file] The annotation file. Should be passed if the file is not already present in the data source.
+         * @param {CreateAnnotationDto} createAnnotationDto 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async annotationsControllerCreate(image: string, dataUri: string, job?: string, verified?: boolean, file?: File, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Annotation>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.annotationsControllerCreate(image, dataUri, job, verified, file, options);
+        async annotationsControllerCreate(createAnnotationDto: CreateAnnotationDto, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Annotation>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.annotationsControllerCreate(createAnnotationDto, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
@@ -842,14 +934,12 @@ export const AnnotationsApiFp = function(configuration?: Configuration) {
          * Updates the specified annotation by setting the values of the parameters passed. Additionally it saves the optional file passed to this endpoint under the annotation\'s (new) dataUri. All parameters not provided will be left unchanged. It returns the updated annotation, if the update operation succeeds. Otherwise it returns an error. When changing the dataUri, the old file won\'t be deleted automatically.
          * @summary 
          * @param {string} id The identifier (uuid) of the annotation.
-         * @param {string} [dataUri] The path of the annotation file relative to the specified data source location.
-         * @param {boolean} [verified] Indicates whether an annotation has been verified by a human. Set to false by default.
-         * @param {File} [file] The annotation file. Should be passed to update the file referenced by the dataUri.
+         * @param {UpdateAnnotationDto} updateAnnotationDto 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async annotationsControllerUpdate(id: string, dataUri?: string, verified?: boolean, file?: File, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Annotation>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.annotationsControllerUpdate(id, dataUri, verified, file, options);
+        async annotationsControllerUpdate(id: string, updateAnnotationDto: UpdateAnnotationDto, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Annotation>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.annotationsControllerUpdate(id, updateAnnotationDto, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
     }
@@ -865,16 +955,12 @@ export const AnnotationsApiFactory = function (configuration?: Configuration, ba
         /**
          * Creates a new annotation and returns it. Additionally it saves the optional file passed to this endpoint under the annotation\'s dataUri. An error will be thrown if the referenced image does not exist. Trying to create an annotation with the same data URI as an already existing annotation will also result in an error.
          * @summary 
-         * @param {string} image The identifier of the image (uuid) that the annotation will belong to.
-         * @param {string} dataUri The path of the annotation file relative to the specified data source location.
-         * @param {string} [job] The identifier of the job (uuid) that the annotation was created by.
-         * @param {boolean} [verified] Indicates whether an annotation has been verified by a human. Set to false by default.
-         * @param {File} [file] The annotation file. Should be passed if the file is not already present in the data source.
+         * @param {CreateAnnotationDto} createAnnotationDto 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        annotationsControllerCreate(image: string, dataUri: string, job?: string, verified?: boolean, file?: File, options?: any): AxiosPromise<Annotation> {
-            return localVarFp.annotationsControllerCreate(image, dataUri, job, verified, file, options).then((request) => request(axios, basePath));
+        annotationsControllerCreate(createAnnotationDto: CreateAnnotationDto, options?: any): AxiosPromise<Annotation> {
+            return localVarFp.annotationsControllerCreate(createAnnotationDto, options).then((request) => request(axios, basePath));
         },
         /**
          * Retrieves a list of all available annotations. If there do not exist any annotations it will return an empty array. If an image or job is specified, it will return all annotations belonging to the image (if specified) and generated by the job (if specified). If the image or job does not exist it will return an empty array.
@@ -932,14 +1018,12 @@ export const AnnotationsApiFactory = function (configuration?: Configuration, ba
          * Updates the specified annotation by setting the values of the parameters passed. Additionally it saves the optional file passed to this endpoint under the annotation\'s (new) dataUri. All parameters not provided will be left unchanged. It returns the updated annotation, if the update operation succeeds. Otherwise it returns an error. When changing the dataUri, the old file won\'t be deleted automatically.
          * @summary 
          * @param {string} id The identifier (uuid) of the annotation.
-         * @param {string} [dataUri] The path of the annotation file relative to the specified data source location.
-         * @param {boolean} [verified] Indicates whether an annotation has been verified by a human. Set to false by default.
-         * @param {File} [file] The annotation file. Should be passed to update the file referenced by the dataUri.
+         * @param {UpdateAnnotationDto} updateAnnotationDto 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        annotationsControllerUpdate(id: string, dataUri?: string, verified?: boolean, file?: File, options?: any): AxiosPromise<Annotation> {
-            return localVarFp.annotationsControllerUpdate(id, dataUri, verified, file, options).then((request) => request(axios, basePath));
+        annotationsControllerUpdate(id: string, updateAnnotationDto: UpdateAnnotationDto, options?: any): AxiosPromise<Annotation> {
+            return localVarFp.annotationsControllerUpdate(id, updateAnnotationDto, options).then((request) => request(axios, basePath));
         },
     };
 };
@@ -954,17 +1038,13 @@ export class AnnotationsApi extends BaseAPI {
     /**
      * Creates a new annotation and returns it. Additionally it saves the optional file passed to this endpoint under the annotation\'s dataUri. An error will be thrown if the referenced image does not exist. Trying to create an annotation with the same data URI as an already existing annotation will also result in an error.
      * @summary 
-     * @param {string} image The identifier of the image (uuid) that the annotation will belong to.
-     * @param {string} dataUri The path of the annotation file relative to the specified data source location.
-     * @param {string} [job] The identifier of the job (uuid) that the annotation was created by.
-     * @param {boolean} [verified] Indicates whether an annotation has been verified by a human. Set to false by default.
-     * @param {File} [file] The annotation file. Should be passed if the file is not already present in the data source.
+     * @param {CreateAnnotationDto} createAnnotationDto 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof AnnotationsApi
      */
-    public annotationsControllerCreate(image: string, dataUri: string, job?: string, verified?: boolean, file?: File, options?: AxiosRequestConfig) {
-        return AnnotationsApiFp(this.configuration).annotationsControllerCreate(image, dataUri, job, verified, file, options).then((request) => request(this.axios, this.basePath));
+    public annotationsControllerCreate(createAnnotationDto: CreateAnnotationDto, options?: AxiosRequestConfig) {
+        return AnnotationsApiFp(this.configuration).annotationsControllerCreate(createAnnotationDto, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
@@ -1033,15 +1113,13 @@ export class AnnotationsApi extends BaseAPI {
      * Updates the specified annotation by setting the values of the parameters passed. Additionally it saves the optional file passed to this endpoint under the annotation\'s (new) dataUri. All parameters not provided will be left unchanged. It returns the updated annotation, if the update operation succeeds. Otherwise it returns an error. When changing the dataUri, the old file won\'t be deleted automatically.
      * @summary 
      * @param {string} id The identifier (uuid) of the annotation.
-     * @param {string} [dataUri] The path of the annotation file relative to the specified data source location.
-     * @param {boolean} [verified] Indicates whether an annotation has been verified by a human. Set to false by default.
-     * @param {File} [file] The annotation file. Should be passed to update the file referenced by the dataUri.
+     * @param {UpdateAnnotationDto} updateAnnotationDto 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof AnnotationsApi
      */
-    public annotationsControllerUpdate(id: string, dataUri?: string, verified?: boolean, file?: File, options?: AxiosRequestConfig) {
-        return AnnotationsApiFp(this.configuration).annotationsControllerUpdate(id, dataUri, verified, file, options).then((request) => request(this.axios, this.basePath));
+    public annotationsControllerUpdate(id: string, updateAnnotationDto: UpdateAnnotationDto, options?: AxiosRequestConfig) {
+        return AnnotationsApiFp(this.configuration).annotationsControllerUpdate(id, updateAnnotationDto, options).then((request) => request(this.axios, this.basePath));
     }
 }
 
@@ -1578,19 +1656,13 @@ export const ImagesApiAxiosParamCreator = function (configuration?: Configuratio
         /**
          * Creates a new image and returns it. Additionally it saves the optional file passed to this endpoint under the image\'s dataUri. An error will be thrown if the referenced dataset does not exist. Trying to create an image with the same data URI as an already existing image will also result in an error.
          * @summary 
-         * @param {string} dataset The identifier of the dataset (uuid) that the image will belong to.
-         * @param {string} dataUri The path of the image file relative to the specified data source location.
-         * @param {File} file The image file. Should be passed if the file is not already present in the data source.
+         * @param {CreateImageDto} createImageDto 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        imagesControllerCreate: async (dataset: string, dataUri: string, file: File, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'dataset' is not null or undefined
-            assertParamExists('imagesControllerCreate', 'dataset', dataset)
-            // verify required parameter 'dataUri' is not null or undefined
-            assertParamExists('imagesControllerCreate', 'dataUri', dataUri)
-            // verify required parameter 'file' is not null or undefined
-            assertParamExists('imagesControllerCreate', 'file', file)
+        imagesControllerCreate: async (createImageDto: CreateImageDto, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'createImageDto' is not null or undefined
+            assertParamExists('imagesControllerCreate', 'createImageDto', createImageDto)
             const localVarPath = `/images`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -1602,28 +1674,15 @@ export const ImagesApiAxiosParamCreator = function (configuration?: Configuratio
             const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
-            const localVarFormParams = new ((configuration && configuration.formDataCtor) || FormData)();
 
 
-            if (dataset !== undefined) { 
-                localVarFormParams.append('dataset', dataset as any);
-            }
     
-            if (dataUri !== undefined) { 
-                localVarFormParams.append('dataUri', dataUri as any);
-            }
-    
-            if (file !== undefined) { 
-                localVarFormParams.append('file', file as any);
-            }
-    
-    
-            localVarHeaderParameter['Content-Type'] = 'multipart/form-data';
-    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-            localVarRequestOptions.data = localVarFormParams;
+            localVarRequestOptions.data = serializeDataIfNeeded(createImageDto, localVarRequestOptions, configuration)
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -1812,18 +1871,15 @@ export const ImagesApiAxiosParamCreator = function (configuration?: Configuratio
          * Updates the specified image by setting the values of the parameters passed. Additionally it saves the optional file passed to this endpoint under the image\'s (new) dataUri. It returns the updated image, if the update operation succeeds. It returns an error when trying to set the image data URI to an already existing image data URI. When changing the dataUri, the old file won\'t be deleted automatically.
          * @summary 
          * @param {string} id The identifier (uuid) of the image.
-         * @param {string} dataUri The path of the image file relative to the specified data source location.
-         * @param {File} file The image file. Should be passed to update the file referenced by the dataUri.
+         * @param {UpdateImageDto} updateImageDto 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        imagesControllerUpdate: async (id: string, dataUri: string, file: File, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+        imagesControllerUpdate: async (id: string, updateImageDto: UpdateImageDto, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'id' is not null or undefined
             assertParamExists('imagesControllerUpdate', 'id', id)
-            // verify required parameter 'dataUri' is not null or undefined
-            assertParamExists('imagesControllerUpdate', 'dataUri', dataUri)
-            // verify required parameter 'file' is not null or undefined
-            assertParamExists('imagesControllerUpdate', 'file', file)
+            // verify required parameter 'updateImageDto' is not null or undefined
+            assertParamExists('imagesControllerUpdate', 'updateImageDto', updateImageDto)
             const localVarPath = `/images/{id}`
                 .replace(`{${"id"}}`, encodeURIComponent(String(id)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
@@ -1836,24 +1892,15 @@ export const ImagesApiAxiosParamCreator = function (configuration?: Configuratio
             const localVarRequestOptions = { method: 'PATCH', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
-            const localVarFormParams = new ((configuration && configuration.formDataCtor) || FormData)();
 
 
-            if (dataUri !== undefined) { 
-                localVarFormParams.append('dataUri', dataUri as any);
-            }
     
-            if (file !== undefined) { 
-                localVarFormParams.append('file', file as any);
-            }
-    
-    
-            localVarHeaderParameter['Content-Type'] = 'multipart/form-data';
-    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-            localVarRequestOptions.data = localVarFormParams;
+            localVarRequestOptions.data = serializeDataIfNeeded(updateImageDto, localVarRequestOptions, configuration)
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -1873,14 +1920,12 @@ export const ImagesApiFp = function(configuration?: Configuration) {
         /**
          * Creates a new image and returns it. Additionally it saves the optional file passed to this endpoint under the image\'s dataUri. An error will be thrown if the referenced dataset does not exist. Trying to create an image with the same data URI as an already existing image will also result in an error.
          * @summary 
-         * @param {string} dataset The identifier of the dataset (uuid) that the image will belong to.
-         * @param {string} dataUri The path of the image file relative to the specified data source location.
-         * @param {File} file The image file. Should be passed if the file is not already present in the data source.
+         * @param {CreateImageDto} createImageDto 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async imagesControllerCreate(dataset: string, dataUri: string, file: File, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Image>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.imagesControllerCreate(dataset, dataUri, file, options);
+        async imagesControllerCreate(createImageDto: CreateImageDto, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Image>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.imagesControllerCreate(createImageDto, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
@@ -1943,13 +1988,12 @@ export const ImagesApiFp = function(configuration?: Configuration) {
          * Updates the specified image by setting the values of the parameters passed. Additionally it saves the optional file passed to this endpoint under the image\'s (new) dataUri. It returns the updated image, if the update operation succeeds. It returns an error when trying to set the image data URI to an already existing image data URI. When changing the dataUri, the old file won\'t be deleted automatically.
          * @summary 
          * @param {string} id The identifier (uuid) of the image.
-         * @param {string} dataUri The path of the image file relative to the specified data source location.
-         * @param {File} file The image file. Should be passed to update the file referenced by the dataUri.
+         * @param {UpdateImageDto} updateImageDto 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async imagesControllerUpdate(id: string, dataUri: string, file: File, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Image>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.imagesControllerUpdate(id, dataUri, file, options);
+        async imagesControllerUpdate(id: string, updateImageDto: UpdateImageDto, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Image>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.imagesControllerUpdate(id, updateImageDto, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
     }
@@ -1965,14 +2009,12 @@ export const ImagesApiFactory = function (configuration?: Configuration, basePat
         /**
          * Creates a new image and returns it. Additionally it saves the optional file passed to this endpoint under the image\'s dataUri. An error will be thrown if the referenced dataset does not exist. Trying to create an image with the same data URI as an already existing image will also result in an error.
          * @summary 
-         * @param {string} dataset The identifier of the dataset (uuid) that the image will belong to.
-         * @param {string} dataUri The path of the image file relative to the specified data source location.
-         * @param {File} file The image file. Should be passed if the file is not already present in the data source.
+         * @param {CreateImageDto} createImageDto 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        imagesControllerCreate(dataset: string, dataUri: string, file: File, options?: any): AxiosPromise<Image> {
-            return localVarFp.imagesControllerCreate(dataset, dataUri, file, options).then((request) => request(axios, basePath));
+        imagesControllerCreate(createImageDto: CreateImageDto, options?: any): AxiosPromise<Image> {
+            return localVarFp.imagesControllerCreate(createImageDto, options).then((request) => request(axios, basePath));
         },
         /**
          * Retrieves a list of all available images. If there do not exist any images it will return an empty array. If a dataset or job is specified, it will return all images in the dataset or used by the job. If the dataset or job does not exist it will return an empty array.
@@ -2029,13 +2071,12 @@ export const ImagesApiFactory = function (configuration?: Configuration, basePat
          * Updates the specified image by setting the values of the parameters passed. Additionally it saves the optional file passed to this endpoint under the image\'s (new) dataUri. It returns the updated image, if the update operation succeeds. It returns an error when trying to set the image data URI to an already existing image data URI. When changing the dataUri, the old file won\'t be deleted automatically.
          * @summary 
          * @param {string} id The identifier (uuid) of the image.
-         * @param {string} dataUri The path of the image file relative to the specified data source location.
-         * @param {File} file The image file. Should be passed to update the file referenced by the dataUri.
+         * @param {UpdateImageDto} updateImageDto 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        imagesControllerUpdate(id: string, dataUri: string, file: File, options?: any): AxiosPromise<Image> {
-            return localVarFp.imagesControllerUpdate(id, dataUri, file, options).then((request) => request(axios, basePath));
+        imagesControllerUpdate(id: string, updateImageDto: UpdateImageDto, options?: any): AxiosPromise<Image> {
+            return localVarFp.imagesControllerUpdate(id, updateImageDto, options).then((request) => request(axios, basePath));
         },
     };
 };
@@ -2050,15 +2091,13 @@ export class ImagesApi extends BaseAPI {
     /**
      * Creates a new image and returns it. Additionally it saves the optional file passed to this endpoint under the image\'s dataUri. An error will be thrown if the referenced dataset does not exist. Trying to create an image with the same data URI as an already existing image will also result in an error.
      * @summary 
-     * @param {string} dataset The identifier of the dataset (uuid) that the image will belong to.
-     * @param {string} dataUri The path of the image file relative to the specified data source location.
-     * @param {File} file The image file. Should be passed if the file is not already present in the data source.
+     * @param {CreateImageDto} createImageDto 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof ImagesApi
      */
-    public imagesControllerCreate(dataset: string, dataUri: string, file: File, options?: AxiosRequestConfig) {
-        return ImagesApiFp(this.configuration).imagesControllerCreate(dataset, dataUri, file, options).then((request) => request(this.axios, this.basePath));
+    public imagesControllerCreate(createImageDto: CreateImageDto, options?: AxiosRequestConfig) {
+        return ImagesApiFp(this.configuration).imagesControllerCreate(createImageDto, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
@@ -2126,14 +2165,13 @@ export class ImagesApi extends BaseAPI {
      * Updates the specified image by setting the values of the parameters passed. Additionally it saves the optional file passed to this endpoint under the image\'s (new) dataUri. It returns the updated image, if the update operation succeeds. It returns an error when trying to set the image data URI to an already existing image data URI. When changing the dataUri, the old file won\'t be deleted automatically.
      * @summary 
      * @param {string} id The identifier (uuid) of the image.
-     * @param {string} dataUri The path of the image file relative to the specified data source location.
-     * @param {File} file The image file. Should be passed to update the file referenced by the dataUri.
+     * @param {UpdateImageDto} updateImageDto 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof ImagesApi
      */
-    public imagesControllerUpdate(id: string, dataUri: string, file: File, options?: AxiosRequestConfig) {
-        return ImagesApiFp(this.configuration).imagesControllerUpdate(id, dataUri, file, options).then((request) => request(this.axios, this.basePath));
+    public imagesControllerUpdate(id: string, updateImageDto: UpdateImageDto, options?: AxiosRequestConfig) {
+        return ImagesApiFp(this.configuration).imagesControllerUpdate(id, updateImageDto, options).then((request) => request(this.axios, this.basePath));
     }
 }
 
@@ -2392,14 +2430,15 @@ export const JobsApiAxiosParamCreator = function (configuration?: Configuration)
          * Updates the specified job by setting the values of the parameters passed. All parameters not provided will be left unchanged. It returns the updated job, if the update operation succeeds. It returns an error, if a valid order of status transitions was not followed.
          * @summary 
          * @param {string} id The identifier (uuid) of the job.
-         * @param {JobsControllerUpdateStatusEnum} [status] The new status of the job. By default, a job is in status &#x60;queued&#x60;. A valid order of transitions is enforced. For example, when the job is in status &#x60;queued&#x60;, it can only be updated to &#x60;running&#x60;, &#x60;failed&#x60; or &#x60;canceled&#x60;. From status &#x60;running&#x60;, it can only be updated to &#x60;succeeded&#x60;, &#x60;failed&#x60; or &#x60;canceled&#x60;.
-         * @param {File} [file] The job log .txt file.
+         * @param {UpdateJobDto} updateJobDto 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        jobsControllerUpdate: async (id: string, status?: JobsControllerUpdateStatusEnum, file?: File, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+        jobsControllerUpdate: async (id: string, updateJobDto: UpdateJobDto, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'id' is not null or undefined
             assertParamExists('jobsControllerUpdate', 'id', id)
+            // verify required parameter 'updateJobDto' is not null or undefined
+            assertParamExists('jobsControllerUpdate', 'updateJobDto', updateJobDto)
             const localVarPath = `/jobs/{id}`
                 .replace(`{${"id"}}`, encodeURIComponent(String(id)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
@@ -2412,24 +2451,15 @@ export const JobsApiAxiosParamCreator = function (configuration?: Configuration)
             const localVarRequestOptions = { method: 'PATCH', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
-            const localVarFormParams = new ((configuration && configuration.formDataCtor) || FormData)();
 
 
-            if (status !== undefined) { 
-                localVarFormParams.append('status', status as any);
-            }
     
-            if (file !== undefined) { 
-                localVarFormParams.append('file', file as any);
-            }
-    
-    
-            localVarHeaderParameter['Content-Type'] = 'multipart/form-data';
-    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-            localVarRequestOptions.data = localVarFormParams;
+            localVarRequestOptions.data = serializeDataIfNeeded(updateJobDto, localVarRequestOptions, configuration)
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -2527,13 +2557,12 @@ export const JobsApiFp = function(configuration?: Configuration) {
          * Updates the specified job by setting the values of the parameters passed. All parameters not provided will be left unchanged. It returns the updated job, if the update operation succeeds. It returns an error, if a valid order of status transitions was not followed.
          * @summary 
          * @param {string} id The identifier (uuid) of the job.
-         * @param {JobsControllerUpdateStatusEnum} [status] The new status of the job. By default, a job is in status &#x60;queued&#x60;. A valid order of transitions is enforced. For example, when the job is in status &#x60;queued&#x60;, it can only be updated to &#x60;running&#x60;, &#x60;failed&#x60; or &#x60;canceled&#x60;. From status &#x60;running&#x60;, it can only be updated to &#x60;succeeded&#x60;, &#x60;failed&#x60; or &#x60;canceled&#x60;.
-         * @param {File} [file] The job log .txt file.
+         * @param {UpdateJobDto} updateJobDto 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async jobsControllerUpdate(id: string, status?: JobsControllerUpdateStatusEnum, file?: File, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Job>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.jobsControllerUpdate(id, status, file, options);
+        async jobsControllerUpdate(id: string, updateJobDto: UpdateJobDto, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Job>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.jobsControllerUpdate(id, updateJobDto, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
     }
@@ -2620,13 +2649,12 @@ export const JobsApiFactory = function (configuration?: Configuration, basePath?
          * Updates the specified job by setting the values of the parameters passed. All parameters not provided will be left unchanged. It returns the updated job, if the update operation succeeds. It returns an error, if a valid order of status transitions was not followed.
          * @summary 
          * @param {string} id The identifier (uuid) of the job.
-         * @param {JobsControllerUpdateStatusEnum} [status] The new status of the job. By default, a job is in status &#x60;queued&#x60;. A valid order of transitions is enforced. For example, when the job is in status &#x60;queued&#x60;, it can only be updated to &#x60;running&#x60;, &#x60;failed&#x60; or &#x60;canceled&#x60;. From status &#x60;running&#x60;, it can only be updated to &#x60;succeeded&#x60;, &#x60;failed&#x60; or &#x60;canceled&#x60;.
-         * @param {File} [file] The job log .txt file.
+         * @param {UpdateJobDto} updateJobDto 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        jobsControllerUpdate(id: string, status?: JobsControllerUpdateStatusEnum, file?: File, options?: any): AxiosPromise<Job> {
-            return localVarFp.jobsControllerUpdate(id, status, file, options).then((request) => request(axios, basePath));
+        jobsControllerUpdate(id: string, updateJobDto: UpdateJobDto, options?: any): AxiosPromise<Job> {
+            return localVarFp.jobsControllerUpdate(id, updateJobDto, options).then((request) => request(axios, basePath));
         },
     };
 };
@@ -2726,28 +2754,16 @@ export class JobsApi extends BaseAPI {
      * Updates the specified job by setting the values of the parameters passed. All parameters not provided will be left unchanged. It returns the updated job, if the update operation succeeds. It returns an error, if a valid order of status transitions was not followed.
      * @summary 
      * @param {string} id The identifier (uuid) of the job.
-     * @param {JobsControllerUpdateStatusEnum} [status] The new status of the job. By default, a job is in status &#x60;queued&#x60;. A valid order of transitions is enforced. For example, when the job is in status &#x60;queued&#x60;, it can only be updated to &#x60;running&#x60;, &#x60;failed&#x60; or &#x60;canceled&#x60;. From status &#x60;running&#x60;, it can only be updated to &#x60;succeeded&#x60;, &#x60;failed&#x60; or &#x60;canceled&#x60;.
-     * @param {File} [file] The job log .txt file.
+     * @param {UpdateJobDto} updateJobDto 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof JobsApi
      */
-    public jobsControllerUpdate(id: string, status?: JobsControllerUpdateStatusEnum, file?: File, options?: AxiosRequestConfig) {
-        return JobsApiFp(this.configuration).jobsControllerUpdate(id, status, file, options).then((request) => request(this.axios, this.basePath));
+    public jobsControllerUpdate(id: string, updateJobDto: UpdateJobDto, options?: AxiosRequestConfig) {
+        return JobsApiFp(this.configuration).jobsControllerUpdate(id, updateJobDto, options).then((request) => request(this.axios, this.basePath));
     }
 }
 
-/**
- * @export
- */
-export const JobsControllerUpdateStatusEnum = {
-    Queued: 'queued',
-    Running: 'running',
-    Succeeded: 'succeeded',
-    Failed: 'failed',
-    Canceled: 'canceled'
-} as const;
-export type JobsControllerUpdateStatusEnum = typeof JobsControllerUpdateStatusEnum[keyof typeof JobsControllerUpdateStatusEnum];
 
 
 /**

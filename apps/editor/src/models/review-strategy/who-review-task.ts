@@ -2,6 +2,7 @@ import {
   createBase64StringFromFile,
   createFileFromBase64,
   FileWithMetadata,
+  getBase64DataFromFile,
   putWHOTask,
   WHOAnnotation,
   WHOAnnotationData,
@@ -89,7 +90,7 @@ export class WHOReviewTask implements ReviewTask {
     const annotation = new WHOAnnotation(annotationWithoutData);
     await Promise.all(
       files.map(async (file) => {
-        const base64Data = await this.getBase64DataFromFile(file);
+        const base64Data = await getBase64DataFromFile(file);
         this.createAnnotationData(annotation, base64Data);
       }),
     );
@@ -109,7 +110,7 @@ export class WHOReviewTask implements ReviewTask {
 
     await Promise.all(
       files.map(async (file) => {
-        const base64Data = await this.getBase64DataFromFile(file);
+        const base64Data = await getBase64DataFromFile(file);
         if ("metadata" in file) {
           const fileWithMetadata = file as FileWithMetadata;
           this.updateAnnotationData(
@@ -126,13 +127,6 @@ export class WHOReviewTask implements ReviewTask {
 
   public async save(): Promise<AxiosResponse> {
     return putWHOTask(this.id, JSON.stringify(this.whoTask.toJSON()));
-  }
-
-  private async getBase64DataFromFile(file: File): Promise<string> {
-    const base64LayerData = await createBase64StringFromFile(file);
-    if (!base64LayerData || !(typeof base64LayerData === "string"))
-      throw new Error("File can not be converted to base64.");
-    return base64LayerData;
   }
 
   private createAnnotationData(annotation: WHOAnnotation, base64Data: string) {

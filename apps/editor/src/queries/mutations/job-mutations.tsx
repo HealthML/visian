@@ -1,4 +1,4 @@
-import { JobsControllerUpdateStatusEnum } from "@visian/mia-api";
+import { UpdateJobDtoStatusEnum } from "@visian/mia-api";
 import { MiaJob, MiaProgress } from "@visian/utils";
 import { AxiosError } from "axios";
 import { useQuery } from "react-query";
@@ -54,12 +54,12 @@ export const deleteJobsMutation = () =>
   });
 
 export const updateJobMutation = () =>
-  UpdateMutation<MiaJob, { status: JobsControllerUpdateStatusEnum }>({
+  UpdateMutation<MiaJob, { status: UpdateJobDtoStatusEnum }>({
     queryKey: (selectorId: string) => [jobQueryKey],
     mutateFn: ({ object, updateDto }) =>
       jobsApi
         // TODO: fix required types in API docs
 
-        .jobsControllerUpdate(object.id, updateDto.status || object.status)
+        .jobsControllerUpdate(object.id, updateDto)
         .then((response) => response.data),
   });

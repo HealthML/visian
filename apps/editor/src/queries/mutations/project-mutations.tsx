@@ -1,8 +1,5 @@
-import {
-  CreateMiaProjectDto,
-  MiaProject,
-  UpdateMiaProjectDto,
-} from "@visian/utils";
+import { MiaProject } from "@visian/utils";
+import { CreateProjectDto, UpdateProjectDto } from "@visian/mia-api";
 import { AxiosError } from "axios";
 import { useQuery } from "react-query";
 
@@ -46,7 +43,7 @@ export const deleteProjectsMutation = () =>
   });
 
 export const updateProjectMutation = () =>
-  UpdateMutation<MiaProject, UpdateMiaProjectDto>({
+  UpdateMutation<MiaProject, UpdateProjectDto>({
     queryKey: (_selectorId: string) => [projectsQueryKey],
     mutateFn: ({ object, updateDto }) =>
       projectsApi
@@ -55,7 +52,7 @@ export const updateProjectMutation = () =>
   });
 
 export const createProjectMutation = () =>
-  CreateMutation<MiaProject, CreateMiaProjectDto>({
+  CreateMutation<MiaProject, CreateProjectDto>({
     queryKey: (_selectorId: string) => [projectsQueryKey],
     mutateFn: ({ createDto }) =>
       projectsApi

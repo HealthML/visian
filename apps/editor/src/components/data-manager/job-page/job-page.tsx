@@ -1,4 +1,4 @@
-import { JobsControllerUpdateStatusEnum } from "@visian/mia-api";
+import { UpdateJobDtoStatusEnum } from "@visian/mia-api";
 import {
   InvisibleButton,
   ListItem,
@@ -72,7 +72,8 @@ export const JobPage = ({ job }: { job: MiaJob }) => {
     job.id,
   );
 
-  const { annotations, isErrorAnnotations } = useAnnotationsByJob(job.id);
+  const { data: annotations, isError: isErrorAnnotations } =
+    useAnnotationsByJob(job.id);
   const {
     data: images,
     error: imagesError,
@@ -154,7 +155,7 @@ export const JobPage = ({ job }: { job: MiaJob }) => {
     () =>
       patchJobStatus({
         object: job,
-        updateDto: { status: JobsControllerUpdateStatusEnum.Canceled },
+        updateDto: { status: UpdateJobDtoStatusEnum.Canceled },
         selectorId: job.id,
       }),
     [patchJobStatus, job],

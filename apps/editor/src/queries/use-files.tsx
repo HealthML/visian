@@ -1,9 +1,12 @@
-import { FileWithMetadata, MiaAnnotation } from "@visian/utils";
+import {
+  FileWithMetadata,
+  MiaAnnotation,
+  getBase64DataFromFile,
+} from "@visian/utils";
 import axios from "axios";
 import path from "path";
 
-import { hubBaseUrl, imagesApi } from "./hub-base-url";
-import { getAnnotation } from "./use-annotations-by";
+import { annotationsApi, hubBaseUrl, imagesApi } from "./hub-base-url";
 
 const fetchFile = async (
   id: string,
@@ -41,7 +44,9 @@ export const fetchImageFile = async (
 export const fetchAnnotationFile = async (
   annotationId: string,
 ): Promise<FileWithMetadata> => {
-  const annotation = await getAnnotation(annotationId);
+  const annotation = await annotationsApi
+    .annotationsControllerFindOne(annotationId)
+    .then((response) => response.data);
   const fileName: string = path.basename(annotation.dataUri);
   const annotationFile = (await fetchFile(
     annotation.id,
@@ -55,33 +60,23 @@ export const fetchAnnotationFile = async (
 export const patchAnnotationFile = async (
   annotation: MiaAnnotation,
   file: File,
-): Promise<MiaAnnotation> => {
-  const apiEndpoint = `${hubBaseUrl}annotations/${annotation.id}`;
-  const formData = new FormData();
-  formData.append("file", file);
-  formData.append("dataUri", annotation.dataUri);
-  const response = await axios.patch(apiEndpoint, formData, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
-  });
-  return response.data;
-};
+): Promise<MiaAnnotation> =>
+  annotationsApi
+    .annotationsControllerUpdate(annotation.id, {
+      dataUri: annotation.dataUri,
+      base64File: await getBase64DataFromFile(file),
+    })
+    .then((response) => response.data);
 
 export const postAnnotationFile = async (
   imageId: string,
   annotationUri: string,
   file: File,
-): Promise<MiaAnnotation> => {
-  const apiEndpoint = `${hubBaseUrl}annotations`;
-  const formData = new FormData();
-  formData.append("image", imageId);
-  formData.append("dataUri", annotationUri);
-  formData.append("file", file);
-  const response = await axios.post(apiEndpoint, formData, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
-  });
-  return response.data;
-};
+): Promise<MiaAnnotation> =>
+  annotationsApi
+    .annotationsControllerCreate({
+      image: imageId,
+      dataUri: annotationUri,
+      base64File: await getBase64DataFromFile(file),
+    })
+    .then((response) => response.data);

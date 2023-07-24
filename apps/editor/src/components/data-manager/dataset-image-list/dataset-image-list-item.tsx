@@ -56,11 +56,11 @@ export const DatasetImageListItem: React.FC<DatasetImageListItemProps> = ({
   isLast,
 }) => {
   const {
-    annotations,
-    annotationsError,
-    isErrorAnnotations,
-    isLoadingAnnotations,
-    refetchAnnotations,
+    data: annotations,
+    error: annotationsError,
+    isError: isErrorAnnotations,
+    isLoading: isLoadingAnnotations,
+    refetch: refetchAnnotations,
   } = useAnnotationsByImage(image.id);
 
   const [showAnnotations, setShowAnnotations] = useState(false);

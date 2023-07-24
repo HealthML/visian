@@ -1,11 +1,6 @@
 import { MiaImage } from "@visian/utils";
 
-import {
-  getAnnotation,
-  getAnnotationsByJobAndImage,
-  imagesApi,
-  patchAnnotation,
-} from "../../queries";
+import { annotationsApi, imagesApi } from "../../queries";
 import { RootStore } from "../root";
 import { MiaReviewTask } from "./mia-review-task";
 import { ReviewStrategy } from "./review-strategy";
@@ -60,7 +55,9 @@ export class MiaReviewStrategy extends ReviewStrategy {
     annotationId: string,
     taskType?: TaskType,
   ) {
-    const annotation = await getAnnotation(annotationId);
+    const annotation = await annotationsApi
+      .annotationsControllerFindOne(annotationId)
+      .then((response) => response.data);
     const image = await imagesApi
       .imagesControllerFindOne(annotation.image)
       .then((response) => response.data);
@@ -103,10 +100,9 @@ export class MiaReviewStrategy extends ReviewStrategy {
 
   protected async buildTask(): Promise<void> {
     const currentImage = this.images[this.currentImageIndex];
-    const annotations = await getAnnotationsByJobAndImage(
-      this.jobId,
-      currentImage.id,
-    );
+    const annotations = await annotationsApi
+      .annotationsControllerFindAll(currentImage.id, this.jobId)
+      .then((response) => response.data);
 
     this.setCurrentTask(
       new MiaReviewTask(
@@ -143,9 +139,13 @@ export class MiaReviewStrategy extends ReviewStrategy {
             layerFamily.metaData?.id ?? "",
           )
         ) {
-          return patchAnnotation(layerFamily.metaData?.id, {
-            verified: layerFamily.metaData?.verified,
-          });
+          if (layerFamily.metaData?.id) {
+            return annotationsApi
+              .annotationsControllerUpdate(layerFamily.metaData?.id, {
+                verified: layerFamily.metaData?.verified,
+              })
+              .then((response) => response.data);
+          }
         }
         return Promise.resolve();
       }) ?? [],

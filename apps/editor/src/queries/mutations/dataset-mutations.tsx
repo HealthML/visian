@@ -1,9 +1,5 @@
-import {
-  CreateMiaDatasetDto,
-  MiaDataset,
-  MiaProgress,
-  UpdateMiaDatasetDto,
-} from "@visian/utils";
+import { MiaDataset, MiaProgress } from "@visian/utils";
+import { CreateDatasetDto, UpdateDatasetDto } from "@visian/mia-api";
 import { AxiosError } from "axios";
 import { useQuery } from "react-query";
 
@@ -66,7 +62,7 @@ export const deleteDatasetsMutation = () =>
   });
 
 export const updateDatasetMutation = () =>
-  UpdateMutation<MiaDataset, UpdateMiaDatasetDto>({
+  UpdateMutation<MiaDataset, UpdateDatasetDto>({
     queryKey: (selectorId: string) => [
       datasetsByProjectQueryBaseKey,
       selectorId,
@@ -78,7 +74,7 @@ export const updateDatasetMutation = () =>
   });
 
 export const createDatasetMutation = () =>
-  CreateMutation<MiaDataset, CreateMiaDatasetDto>({
+  CreateMutation<MiaDataset, CreateDatasetDto>({
     queryKey: (selectorId: string) => [
       datasetsByProjectQueryBaseKey,
       selectorId,

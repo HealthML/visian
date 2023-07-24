@@ -3,3 +3,4 @@ export * from "./image-mutations";
 export * from "./project-mutations";
 export * from "./job-mutations";
 export * from "./model-mutations";
+export * from "./annotation-mutations";

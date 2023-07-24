@@ -323,7 +323,7 @@ paths:
       requestBody:
         required: true
         content:
-          multipart/form-data:
+          application/json:
             schema:
               $ref: '#/components/schemas/CreateImageDto'
       responses:
@@ -435,7 +435,7 @@ paths:
       requestBody:
         required: true
         content:
-          multipart/form-data:
+          application/json:
             schema:
               $ref: '#/components/schemas/UpdateImageDto'
       responses:
@@ -507,7 +507,7 @@ paths:
       requestBody:
         required: true
         content:
-          multipart/form-data:
+          application/json:
             schema:
               $ref: '#/components/schemas/CreateAnnotationDto'
       responses:
@@ -628,7 +628,7 @@ paths:
       requestBody:
         required: true
         content:
-          multipart/form-data:
+          application/json:
             schema:
               $ref: '#/components/schemas/UpdateAnnotationDto'
       responses:
@@ -802,7 +802,7 @@ paths:
       requestBody:
         required: true
         content:
-          multipart/form-data:
+          application/json:
             schema:
               $ref: '#/components/schemas/UpdateJobDto'
       responses:
@@ -1090,16 +1090,14 @@ components:
           description: >-
             The path of the image file relative to the specified data source
             location.
-        file:
+        base64File:
           type: string
-          format: binary
           description: >-
             The image file. Should be passed if the file is not already present
             in the data source.
       required:
         - dataset
         - dataUri
-        - file
     Image:
       type: object
       properties:
@@ -1136,15 +1134,13 @@ components:
           description: >-
             The path of the image file relative to the specified data source
             location.
-        file:
+        base64File:
           type: string
-          format: binary
           description: >-
             The image file. Should be passed to update the file referenced by
             the dataUri.
       required:
         - dataUri
-        - file
     CreateAnnotationDto:
       type: object
       properties:
@@ -1166,9 +1162,8 @@ components:
           description: >-
             Indicates whether an annotation has been verified by a human. Set to
             false by default.
-        file:
+        base64File:
           type: string
-          format: binary
           description: >-
             The annotation file. Should be passed if the file is not already
             present in the data source.
@@ -1293,9 +1288,8 @@ components:
           description: >-
             Indicates whether an annotation has been verified by a human. Set to
             false by default.
-        file:
+        base64File:
           type: string
-          format: binary
           description: >-
             The annotation file. Should be passed to update the file referenced
             by the dataUri.
@@ -1340,10 +1334,9 @@ components:
             is in status `queued`, it can only be updated to `running`, `failed`
             or `canceled`. From status `running`, it can only be updated to
             `succeeded`, `failed` or `canceled`.
-        file:
+        base64File:
           type: string
-          format: binary
-          description: The job log .txt file.
+          description: The job log text file.
     ModelVersionTag:
       type: object
       properties:
