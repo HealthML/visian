@@ -1,4 +1,4 @@
-import { FileWithMetadata, MiaAnnotation, MiaImage , Zip } from "@visian/utils";
+import { FileWithMetadata, MiaAnnotation, MiaImage, Zip } from "@visian/utils";
 import { v4 as uuidv4 } from "uuid";
 
 import {
@@ -82,13 +82,7 @@ export class MiaReviewTask implements ReviewTask {
   }
 
   public async save() {
-    return {
-      data: {},
-      status: 1700,
-      statusText: "OK",
-      headers: {},
-      config: {},
-    };
+    return undefined;
   }
 
   private async zipFiles(files: File[]): Promise<File> {

@@ -29,5 +29,5 @@ export interface ReviewTask {
   updateAnnotation(annotationId: string, files: File[]): Promise<void>;
 
   // After calling save, we expect all changes made to the task to be saved to the backend
-  save(): Promise<AxiosResponse>;
+  save(): Promise<AxiosResponse | undefined>;
 }

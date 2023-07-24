@@ -138,7 +138,7 @@ export const DatasetsSection = ({ project }: { project: MiaProject }) => {
             icon="plus"
             tooltipTx="create-dataset"
             tooltipPosition="left"
-            onPointerDown={openCreateDatasetPopup}
+            onClick={openCreateDatasetPopup}
           />
         </Container>
       }
