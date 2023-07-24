@@ -122,6 +122,7 @@ const LayerItem = ({ id }: { id: string }) => {
       store?.editor.activeDocument?.renderingOrder,
     ],
   );
+
   const family = store?.editor.activeDocument?.getLayerFamily(id);
   if (family) {
     const isActive = !!family.collapsed && family.isActive;
@@ -199,13 +200,24 @@ export const Layers: React.FC = observer(() => {
       </ListItem>
     );
   }
-
   const canFamilyHaveChildren = useCallback(
-    (draggedItem: TreeItem<TreeItemData>) => {
-      const layer = store?.editor.activeDocument?.getLayer(draggedItem.value);
-      return !!layer;
+    (family: ILayerFamily) => {
+      const callback = (draggedItem: TreeItem<TreeItemData>) => {
+        const layer = store?.editor.activeDocument?.getLayer(draggedItem.value);
+        if (
+          store.reviewStrategy &&
+          layer &&
+          family.layers.filter((layerInFamily) => layer.id === layerInFamily.id)
+            .length === 0
+        ) {
+          return false;
+        }
+
+        return !!layer;
+      };
+      return callback;
     },
-    [store?.editor.activeDocument],
+    [store?.editor.activeDocument, store.reviewStrategy],
   );
 
   const getTreeItems = useCallback(() => {
@@ -214,13 +226,15 @@ export const Layers: React.FC = observer(() => {
       value: layerFamily.id,
       children: layerFamily.layers.map((layer) => layerToTreeItemData(layer)),
       collapsed: layerFamily.collapsed,
-      canHaveChildren: canFamilyHaveChildren,
+      canHaveChildren: canFamilyHaveChildren(layerFamily),
+      disableSorting: false,
     });
 
     const renderingOrder = store.editor.activeDocument?.renderingOrder;
     if (!renderingOrder) {
       return [{ id: "undefined", value: "undefined" }];
     }
+
     return renderingOrder.map((element) => {
       if (element instanceof LayerFamily) {
         const family = element as LayerFamily;
@@ -237,31 +251,57 @@ export const Layers: React.FC = observer(() => {
   const treeItems = getTreeItems();
 
   const updateRenderingOrder = useCallback(
-    (newTreeItems: TreeItems<TreeItemData>) => {
-      newTreeItems.forEach((item, index) => {
-        const layer = store.editor.activeDocument?.getLayer(item.value);
-        if (layer) {
-          layer?.setFamily(undefined, index);
+    (newTreeItems: TreeItems<TreeItemData>, change: any) => {
+      if (change.type === "removed") return;
+      if (change.type === "collapsed" || change.type === "expanded") {
+        const family = store.editor.activeDocument?.getLayerFamily(
+          change.item.value,
+        );
+        if (!family) return;
+        family.collapsed = change.item.collapsed;
+        return;
+      }
+      if (change.type === "dropped") {
+        const draggedLayer = store.editor.activeDocument?.getLayer(
+          change.draggedItem.value,
+        );
+        if (
+          store.reviewStrategy &&
+          draggedLayer &&
+          (change.draggedFromParent
+            ? change.draggedFromParent.value
+            : undefined) !==
+            (change.droppedToParent ? change.droppedToParent.value : undefined)
+        ) {
+          return;
         }
-        const family = store.editor.activeDocument?.getLayerFamily(item.value);
-        if (family) {
-          item.children?.forEach((childItem, childIndex) => {
-            const childLayer = store.editor.activeDocument?.getLayer(
-              childItem.value,
-            );
-            if (childLayer) {
-              childLayer.setFamily(family.id, childIndex);
-            }
-          });
-          family.collapsed = item.collapsed;
-          store.editor.activeDocument?.addLayerFamily(
-            family as LayerFamily,
-            index,
+        newTreeItems.forEach((item, index) => {
+          const layer = store.editor.activeDocument?.getLayer(item.value);
+          if (layer) {
+            layer?.setFamily(undefined, index);
+          }
+          const family = store.editor.activeDocument?.getLayerFamily(
+            item.value,
           );
-        }
-      });
+          if (family) {
+            item.children?.forEach((childItem, childIndex) => {
+              const childLayer = store.editor.activeDocument?.getLayer(
+                childItem.value,
+              );
+              if (childLayer) {
+                childLayer.setFamily(family.id, childIndex);
+              }
+            });
+            family.collapsed = item.collapsed;
+            store.editor.activeDocument?.addLayerFamily(
+              family as LayerFamily,
+              index,
+            );
+          }
+        });
+      }
     },
-    [store.editor.activeDocument],
+    [store.editor.activeDocument, store.reviewStrategy],
   );
 
   const firstElement = store.editor.activeDocument?.renderingOrder[0];
