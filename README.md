@@ -107,6 +107,10 @@ Omitting an app name builds the default app.
 
 Generates a diagram of the dependencies between the libraries and applications in this monorepo.
 
+### `yarn g:mia-api`
+
+This downloads the openapi spec for mia from `http://localhost:3000/api-yaml`. And regenerates the `mia-api` library.
+
 ## Editor Setup
 
 We recommend using [VSCode](https://code.visualstudio.com/).
