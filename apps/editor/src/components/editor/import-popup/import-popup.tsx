@@ -2,7 +2,6 @@
 import {
   Button,
   PopUp,
-  Serverity,
   Text,
   TextField,
   useFilePicker,
@@ -94,7 +93,6 @@ export const ImportPopUp = observer<ImportPopUpProps>(({ isOpen, onClose }) => {
       onClose?.();
     } catch {
       store?.setError({
-        serverity: Serverity.error,
         titleTx: "import-error",
         descriptionTx: "remote-file-error",
       });
@@ -110,7 +108,6 @@ export const ImportPopUp = observer<ImportPopUpProps>(({ isOpen, onClose }) => {
       await store?.connectToDICOMWebServer(serverURL);
     } catch {
       store?.setError({
-        serverity: Serverity.error,
         titleTx: "import-error",
         descriptionTx: "remote-file-error",
       });

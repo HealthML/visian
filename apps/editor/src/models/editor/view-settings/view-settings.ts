@@ -1,9 +1,4 @@
-import {
-  IDocument,
-  IViewSettings,
-  Serverity,
-  ViewMode,
-} from "@visian/ui-shared";
+import { IDocument, IViewSettings, ViewMode } from "@visian/ui-shared";
 import { ISerializable, Vector } from "@visian/utils";
 import { action, makeObservable, observable } from "mobx";
 
@@ -94,7 +89,6 @@ export class ViewSettings
       if (this.document.layers.length > maxLayersIn3d) {
         this.viewMode = "2D";
         this.document.setError({
-          serverity: Serverity.error,
           titleTx: "too-many-layers",
           descriptionTx: "too-many-layers-3d",
           descriptionData: { count: maxLayersIn3d },

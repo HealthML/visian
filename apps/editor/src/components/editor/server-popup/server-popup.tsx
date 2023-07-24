@@ -3,7 +3,6 @@ import {
   Icon,
   InvisibleButton,
   PopUp,
-  Serverity,
   Sheet,
   sheetNoise,
   SquareButton,
@@ -200,7 +199,6 @@ export const ServerPopUp = observer<ServerPopUpProps>(({ isOpen, onClose }) => {
           })
           .catch((error) => {
             store?.setError({
-              serverity: Serverity.error,
               titleTx: "import-error",
               descriptionTx: error.message,
             });

@@ -11,7 +11,6 @@ import {
   IVolumeRenderer,
   MeasurementType,
   PerformanceMode,
-  Serverity,
   Theme,
   TrackingLog,
   ValueType,
@@ -800,7 +799,6 @@ export class Document
           }
         } else {
           this.setError({
-            serverity: Serverity.error,
             titleTx: "import-error",
             descriptionTx: "image-loading-error",
           });

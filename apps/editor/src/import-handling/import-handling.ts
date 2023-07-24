@@ -1,4 +1,3 @@
-import { Serverity } from "@visian/ui-shared";
 import { ImageMismatchError } from "@visian/utils";
 
 import { RootStore } from "../models";
@@ -41,14 +40,12 @@ const handleImportWithErrors = async (
         await handleImportWithErrors(filesForImport, store, false);
       } else {
         store.setError({
-          serverity: Serverity.error,
           titleTx: "import-error",
           description: error.message,
         });
       }
     } else {
       store.setError({
-        serverity: Serverity.error,
         titleTx: "import-error",
         descriptionTx: (error as Error).message,
       });

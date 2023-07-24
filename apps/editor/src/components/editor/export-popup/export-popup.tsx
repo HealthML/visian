@@ -4,7 +4,6 @@ import {
   ILayer,
   LayerList,
   PopUp,
-  Serverity,
   Switch,
   Text,
 } from "@visian/ui-shared";
@@ -89,7 +88,6 @@ export const ExportPopUp = observer<ExportPopUpProps>(({ isOpen, onClose }) => {
       }
     } catch (error) {
       store?.setError({
-        serverity: Serverity.error,
         titleTx: "export-error",
         descriptionTx: "no-file-to-export",
       });

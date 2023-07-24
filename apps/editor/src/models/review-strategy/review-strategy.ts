@@ -1,4 +1,3 @@
-import { Serverity } from "@visian/ui-shared";
 import { action, makeObservable, observable } from "mobx";
 
 import { RootStore } from "../root";
@@ -26,7 +25,6 @@ export abstract class ReviewStrategy {
       await this.importAnnotations();
     } catch {
       this.store.setError({
-        serverity: Serverity.error,
         titleTx: "import-error",
         descriptionTx: "remote-file-error",
       });
