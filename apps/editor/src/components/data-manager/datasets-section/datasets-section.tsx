@@ -1,4 +1,4 @@
-import { Dataset, Project } from "@visian/mia-api";
+import { MiaDataset, MiaProject } from "@visian/mia-api";
 import { useTranslation } from "@visian/ui-shared";
 import { useCallback, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -27,7 +27,7 @@ const StyledIconButton = styled(PaddedPageSectionIconButton)`
   height: 25px;
 `;
 
-export const DatasetsSection = ({ project }: { project: Project }) => {
+export const DatasetsSection = ({ project }: { project: MiaProject }) => {
   const { t: translate } = useTranslation();
   const navigate = useNavigate();
 
@@ -36,8 +36,8 @@ export const DatasetsSection = ({ project }: { project: Project }) => {
     isLoading: isLoadingDatasets,
     isError: isDatasetsError,
   } = useDatasetsByProject(project.id);
-  const [datasetTobBeDeleted, setDatasetTobBeDeleted] = useState<Dataset>();
-  const [datasetToBeUpdated, setDatasetToBeUpdated] = useState<Dataset>();
+  const [datasetTobBeDeleted, setDatasetTobBeDeleted] = useState<MiaDataset>();
+  const [datasetToBeUpdated, setDatasetToBeUpdated] = useState<MiaDataset>();
   const deleteDatasetMutation = deleteDatasetsMutation();
   const createDataset = createDatasetMutation();
   const updateDataset = updateDatasetMutation();
@@ -68,7 +68,7 @@ export const DatasetsSection = ({ project }: { project: Project }) => {
 
   // Delete Dataset
   const deleteDataset = useCallback(
-    (dataset: Dataset) => {
+    (dataset: MiaDataset) => {
       setDatasetTobBeDeleted(dataset);
       openDeleteDatasetConfirmationPopUp();
     },
@@ -77,7 +77,7 @@ export const DatasetsSection = ({ project }: { project: Project }) => {
 
   // Open Dataset
   const openDataset = useCallback(
-    (dataset: Dataset) => {
+    (dataset: MiaDataset) => {
       navigate(`/datasets/${dataset.id}`);
     },
     [navigate],
@@ -89,7 +89,7 @@ export const DatasetsSection = ({ project }: { project: Project }) => {
   const closeEditPopup = useCallback(() => setIsEditPopupOpen(false), []);
 
   const editDataset = useCallback(
-    (dataset: Dataset) => {
+    (dataset: MiaDataset) => {
       setDatasetToBeUpdated(dataset);
       openEditPopup();
     },

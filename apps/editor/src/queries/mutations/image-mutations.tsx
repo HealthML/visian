@@ -1,4 +1,4 @@
-import { Image } from "@visian/mia-api";
+import { MiaImage } from "@visian/mia-api";
 import { AxiosError } from "axios";
 import { useQuery } from "react-query";
 
@@ -9,7 +9,7 @@ const imagesByDatasetQueryBaseKey = "imagesByDataset";
 const imagesByJobQueryBaseKey = "imagesByJob";
 
 export const useImagesByDataset = (datasetId?: string) =>
-  useQuery<Image[], AxiosError<Image[]>>(
+  useQuery<MiaImage[], AxiosError<MiaImage[]>>(
     [imagesByDatasetQueryBaseKey, datasetId],
     () =>
       imagesApi
@@ -23,7 +23,7 @@ export const useImagesByDataset = (datasetId?: string) =>
   );
 
 export const useImagesByJob = (jobId?: string) =>
-  useQuery<Image[], AxiosError<Image[]>>(
+  useQuery<MiaImage[], AxiosError<MiaImage[]>>(
     [imagesByJobQueryBaseKey, jobId],
     () =>
       imagesApi
@@ -37,7 +37,7 @@ export const useImagesByJob = (jobId?: string) =>
   );
 
 export const deleteImagesMutation = () =>
-  DeleteMutation<Image>({
+  DeleteMutation<MiaImage>({
     queryKey: (selectorId: string) => [imagesByDatasetQueryBaseKey, selectorId],
     mutateFn: ({ objectIds }) =>
       imagesApi

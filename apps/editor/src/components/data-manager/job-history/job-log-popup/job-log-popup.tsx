@@ -1,4 +1,4 @@
-import { Job } from "@visian/mia-api";
+import { MiaJob } from "@visian/mia-api";
 import { Divider, PopUp, SectionHeader, Text } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
 import { useEffect, useState } from "react";
@@ -22,7 +22,7 @@ const StyledText = styled(Text)`
   white-space: pre-wrap;
 `;
 
-const getLogText = async (job: Job) => {
+const getLogText = async (job: MiaJob) => {
   let logText = "";
   if (job.logFileUri) {
     try {

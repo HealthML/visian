@@ -1,4 +1,4 @@
-import { Annotation } from "@visian/mia-api";
+import { MiaAnnotation } from "@visian/mia-api";
 import {
   InvisibleButton,
   List,
@@ -187,7 +187,7 @@ export const DatasetImageListItem: React.FC<DatasetImageListItemProps> = ({
           annotations && (
             <AnnotationsList>
               {annotations.map(
-                (annotation: Annotation, annotationIndex: number) => (
+                (annotation: MiaAnnotation, annotationIndex: number) => (
                   <ListItem
                     isLast={
                       isLast && annotationIndex === annotations.length - 1

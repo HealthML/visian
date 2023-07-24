@@ -1,8 +1,8 @@
 import {
-  CreateDatasetDto,
-  Dataset,
-  Progress,
-  UpdateDatasetDto,
+  CreateMiaDatasetDto,
+  MiaDataset,
+  MiaProgress,
+  UpdateMiaDatasetDto,
 } from "@visian/mia-api";
 import { AxiosError } from "axios";
 import { useQuery } from "react-query";
@@ -15,7 +15,7 @@ const datasetQueryBaseKey = "dataset";
 const datasetProgressQueryBaseKey = "datasetProgress";
 
 export const useDataset = (datasetId: string) =>
-  useQuery<Dataset, AxiosError<Dataset>>(
+  useQuery<MiaDataset, AxiosError<MiaDataset>>(
     [datasetQueryBaseKey, datasetId],
     () =>
       datasetsApi
@@ -28,7 +28,7 @@ export const useDataset = (datasetId: string) =>
   );
 
 export const useDatasetsByProject = (projectId: string) =>
-  useQuery<Dataset[], AxiosError<Dataset[]>>(
+  useQuery<MiaDataset[], AxiosError<MiaDataset[]>>(
     [datasetsByProjectQueryBaseKey, projectId],
     () =>
       datasetsApi
@@ -41,7 +41,7 @@ export const useDatasetsByProject = (projectId: string) =>
   );
 
 export const useDatasetProgress = (datasetId: string) =>
-  useQuery<Progress, AxiosError<Progress>>(
+  useQuery<MiaProgress, AxiosError<MiaProgress>>(
     [datasetProgressQueryBaseKey, datasetId],
     async () =>
       datasetsApi
@@ -54,7 +54,7 @@ export const useDatasetProgress = (datasetId: string) =>
   );
 
 export const deleteDatasetsMutation = () =>
-  DeleteMutation<Dataset>({
+  DeleteMutation<MiaDataset>({
     queryKey: (selectorId: string) => [
       datasetsByProjectQueryBaseKey,
       selectorId,
@@ -66,7 +66,7 @@ export const deleteDatasetsMutation = () =>
   });
 
 export const updateDatasetMutation = () =>
-  UpdateMutation<Dataset, UpdateDatasetDto>({
+  UpdateMutation<MiaDataset, UpdateMiaDatasetDto>({
     queryKey: (selectorId: string) => [
       datasetsByProjectQueryBaseKey,
       selectorId,
@@ -78,7 +78,7 @@ export const updateDatasetMutation = () =>
   });
 
 export const createDatasetMutation = () =>
-  CreateMutation<Dataset, CreateDatasetDto>({
+  CreateMutation<MiaDataset, CreateMiaDatasetDto>({
     queryKey: (selectorId: string) => [
       datasetsByProjectQueryBaseKey,
       selectorId,

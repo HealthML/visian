@@ -1,4 +1,8 @@
-import { Job, JobsControllerUpdateStatusEnum, Progress } from "@visian/mia-api";
+import {
+  MiaJob,
+  JobsControllerUpdateStatusEnum,
+  MiaProgress,
+} from "@visian/mia-api";
 import { AxiosError } from "axios";
 import { useQuery } from "react-query";
 
@@ -9,7 +13,7 @@ const jobQueryKey = "job";
 const jobsByProjectQueryBaseKey = "jobsByProject";
 
 export const useJob = (jobId: string) =>
-  useQuery<Job, AxiosError<Job>>(
+  useQuery<MiaJob, AxiosError<MiaJob>>(
     [jobQueryKey],
     () =>
       jobsApi.jobsControllerFindOne(jobId).then((response) => response.data),
@@ -20,7 +24,7 @@ export const useJob = (jobId: string) =>
   );
 
 export const useJobsByProject = (projectId: string) =>
-  useQuery<Job[], AxiosError<Job[]>>(
+  useQuery<MiaJob[], AxiosError<MiaJob[]>>(
     [jobsByProjectQueryBaseKey, projectId],
     () =>
       jobsApi
@@ -33,7 +37,7 @@ export const useJobsByProject = (projectId: string) =>
   );
 
 export const useJobProgress = (jobId: string) =>
-  useQuery<Progress, AxiosError<Progress>>(
+  useQuery<MiaProgress, AxiosError<MiaProgress>>(
     ["job-progress", jobId],
     () =>
       jobsApi.jobsControllerProgress(jobId).then((response) => response.data),
@@ -44,7 +48,7 @@ export const useJobProgress = (jobId: string) =>
   );
 
 export const deleteJobsMutation = () =>
-  DeleteMutation<Job>({
+  DeleteMutation<MiaJob>({
     queryKey: (selectorId: string) => [jobsByProjectQueryBaseKey, selectorId],
     mutateFn: ({ objectIds }) =>
       jobsApi
@@ -53,7 +57,7 @@ export const deleteJobsMutation = () =>
   });
 
 export const updateJobMutation = () =>
-  UpdateMutation<Job, { status: JobsControllerUpdateStatusEnum }>({
+  UpdateMutation<MiaJob, { status: JobsControllerUpdateStatusEnum }>({
     queryKey: (selectorId: string) => [jobQueryKey],
     mutateFn: ({ object, updateDto }) =>
       jobsApi

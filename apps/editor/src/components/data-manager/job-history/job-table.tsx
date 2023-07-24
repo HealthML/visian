@@ -5,7 +5,7 @@ import {
   SortingState,
   useReactTable,
 } from "@tanstack/react-table";
-import { Job } from "@visian/mia-api";
+import { MiaJob } from "@visian/mia-api";
 import { HeaderLabel, ListItemLabel, TableLayout } from "@visian/ui-shared";
 import { useCallback, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -22,7 +22,7 @@ function transfromDate(date?: Date | string) {
   return date ? getDisplayDate(date) : undefined;
 }
 
-const columnHelper = createColumnHelper<Job>();
+const columnHelper = createColumnHelper<MiaJob>();
 
 const columns = [
   columnHelper.accessor("modelName", {
@@ -59,7 +59,7 @@ const columns = [
     },
   }),
 ];
-export const JobsTable = ({ jobs }: { jobs: Job[] }) => {
+export const JobsTable = ({ jobs }: { jobs: MiaJob[] }) => {
   // const data = jobs.map((job: Job) => getDisplayJob(job));
   const data = jobs;
 
@@ -68,7 +68,7 @@ export const JobsTable = ({ jobs }: { jobs: Job[] }) => {
   const navigate = useNavigate();
 
   const handleOnClick = useCallback(
-    (job: Job) => navigate(`/jobs/${job.id}`),
+    (job: MiaJob) => navigate(`/jobs/${job.id}`),
     [navigate],
   );
 

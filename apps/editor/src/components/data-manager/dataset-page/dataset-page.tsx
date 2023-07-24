@@ -1,4 +1,4 @@
-import { Annotation, Dataset, Image } from "@visian/mia-api";
+import { MiaAnnotation, MiaDataset, MiaImage } from "@visian/mia-api";
 import { Notification, Sheet, space, useTranslation } from "@visian/ui-shared";
 import { useCallback, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -46,7 +46,7 @@ export const DatasetPage = ({
   isDraggedOver,
   onDropCompleted,
 }: {
-  dataset: Dataset;
+  dataset: MiaDataset;
   isDraggedOver: boolean;
   onDropCompleted: () => void;
 }) => {
@@ -72,7 +72,7 @@ export const DatasetPage = ({
     (selection: boolean) => {
       if (selection) {
         const newSelection = new Set<string>();
-        images?.forEach((image: Image) => newSelection.add(image.id));
+        images?.forEach((image: MiaImage) => newSelection.add(image.id));
         setSelectedImages(newSelection);
         return;
       }
@@ -86,9 +86,9 @@ export const DatasetPage = ({
   const { deleteAnnotations } = useDeleteAnnotationsForImageMutation();
 
   const [annotationTobBeDeleted, setAnnotationTobBeDeleted] =
-    useState<Annotation>();
+    useState<MiaAnnotation>();
 
-  const [imageTobBeDeleted, setImageTobBeDeleted] = useState<Image>();
+  const [imageTobBeDeleted, setImageTobBeDeleted] = useState<MiaImage>();
 
   // Delete annotation confirmation popup
   const [
@@ -140,7 +140,7 @@ export const DatasetPage = ({
 
   // Image import popup
   const [imageImportPopUpOpenWith, setImageImportPopUpOpenWith] =
-    useState<Dataset>();
+    useState<MiaDataset>();
   const openImageImportPopUp = useCallback(() => {
     setImageImportPopUpOpenWith(dataset);
   }, [dataset]);
@@ -158,7 +158,7 @@ export const DatasetPage = ({
   }, [deleteImages, selectedImages, dataset]);
 
   const deleteAnnotation = useCallback(
-    (annotation: Annotation) => {
+    (annotation: MiaAnnotation) => {
       setAnnotationTobBeDeleted(annotation);
       openDeleteAnnotationConfirmationPopUp();
     },
@@ -166,7 +166,7 @@ export const DatasetPage = ({
   );
 
   const deleteImage = useCallback(
-    (image: Image) => {
+    (image: MiaImage) => {
       setImageTobBeDeleted(image);
       openDeleteImagesConfirmationPopUp();
     },

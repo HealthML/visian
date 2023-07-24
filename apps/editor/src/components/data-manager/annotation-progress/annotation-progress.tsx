@@ -1,4 +1,4 @@
-import { Progress } from "@visian/mia-api";
+import { MiaProgress } from "@visian/mia-api";
 import { Button, ProgressBar, Sheet, space, Text } from "@visian/ui-shared";
 import styled from "styled-components";
 
@@ -35,7 +35,7 @@ export const AnnotationProgress = ({
   progress,
   onReviewClick,
 }: {
-  progress: Progress;
+  progress: MiaProgress;
   onReviewClick?: () => void;
 }) => (
   <ProgressSheet>

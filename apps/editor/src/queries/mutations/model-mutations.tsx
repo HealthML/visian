@@ -1,14 +1,13 @@
-import { ModelVersion } from "@visian/mia-api";
+import { MiaModelVersion } from "@visian/mia-api";
 import { AxiosError } from "axios";
 import { useQuery } from "react-query";
 
 import { modelVersionsApi } from "../hub-base-url";
 
-
 const modelVersionsQueryKey = "modelVersions";
 
 export const useMlModels = () =>
-  useQuery<ModelVersion[], AxiosError<ModelVersion[]>>(
+  useQuery<MiaModelVersion[], AxiosError<MiaModelVersion[]>>(
     [modelVersionsQueryKey],
     () =>
       modelVersionsApi

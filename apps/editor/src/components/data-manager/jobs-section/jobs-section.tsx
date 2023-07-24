@@ -1,4 +1,4 @@
-import { Project } from "@visian/mia-api";
+import { MiaProject } from "@visian/mia-api";
 import { useCallback, useState } from "react";
 import styled from "styled-components";
 
@@ -15,7 +15,7 @@ const StyledIconButton = styled(PaddedPageSectionIconButton)`
   height: 25px;
 `;
 
-export const JobsSection = ({ project }: { project: Project }) => {
+export const JobsSection = ({ project }: { project: MiaProject }) => {
   const {
     data: jobs,
     error: jobsError,

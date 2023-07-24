@@ -1,4 +1,4 @@
-import { Image } from "@visian/mia-api";
+import { MiaImage } from "@visian/mia-api";
 
 const multiSelection = (
   currentImageIndex: number,
@@ -7,7 +7,7 @@ const multiSelection = (
   setSelectedRange: React.Dispatch<
     React.SetStateAction<{ start: number; end: number }>
   >,
-  images: Image[] | undefined,
+  images: MiaImage[] | undefined,
   selectedImages: Set<string>,
   setSelectedImages: React.Dispatch<React.SetStateAction<Set<string>>>,
 ) => {
@@ -43,7 +43,7 @@ export const handleImageSelection = (
   setSelectedRange: React.Dispatch<
     React.SetStateAction<{ start: number; end: number }>
   >,
-  images: Image[] | undefined,
+  images: MiaImage[] | undefined,
   setImageSelection: (imageId: string, selection: boolean) => void,
   setSelectedImages: React.Dispatch<React.SetStateAction<Set<string>>>,
 ) => {

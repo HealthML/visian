@@ -1,7 +1,7 @@
-import { JobStatusEnum } from "@visian/mia-api";
+import { MiaJobStatusEnum } from "@visian/mia-api";
 import { StatusBadge } from "@visian/ui-shared";
 
-const statusColors: Record<JobStatusEnum, string> = {
+const statusColors: Record<MiaJobStatusEnum, string> = {
   queued: "veryVeryLightGray",
   running: "blueBadgeBackground",
   succeeded: "greenBadgeBackground",
@@ -9,7 +9,7 @@ const statusColors: Record<JobStatusEnum, string> = {
   failed: "redBadgeBackground",
 };
 
-const statusBorderColors: Record<JobStatusEnum, string> = {
+const statusBorderColors: Record<MiaJobStatusEnum, string> = {
   queued: "sheetBorder",
   running: "blueBorder",
   succeeded: "greenBadgeBorder",
@@ -21,7 +21,7 @@ export const JobStatusBadge = ({
   status,
   full,
 }: {
-  status: JobStatusEnum;
+  status: MiaJobStatusEnum;
   full?: boolean;
 }) => (
   <StatusBadge

@@ -1,4 +1,8 @@
-import { CreateProjectDto, Project, UpdateProjectDto } from "@visian/mia-api";
+import {
+  CreateMiaProjectDto,
+  MiaProject,
+  UpdateMiaProjectDto,
+} from "@visian/mia-api";
 import { AxiosError } from "axios";
 import { useQuery } from "react-query";
 
@@ -9,7 +13,7 @@ const projectsQueryKey = "projects";
 const projectQueryBaseKey = "project";
 
 export const useProject = (projectId: string) =>
-  useQuery<Project, AxiosError<Project>>(
+  useQuery<MiaProject, AxiosError<MiaProject>>(
     [projectQueryBaseKey, projectId],
     () =>
       projectsApi
@@ -22,7 +26,7 @@ export const useProject = (projectId: string) =>
   );
 
 export const useProjects = () =>
-  useQuery<Project[], AxiosError<Project>>(
+  useQuery<MiaProject[], AxiosError<MiaProject>>(
     [projectsQueryKey],
     () =>
       projectsApi.projectsControllerFindAll().then((response) => response.data),
@@ -33,7 +37,7 @@ export const useProjects = () =>
   );
 
 export const deleteProjectsMutation = () =>
-  DeleteMutation<Project>({
+  DeleteMutation<MiaProject>({
     queryKey: (_selectorId: string) => [projectsQueryKey],
     mutateFn: ({ objectIds }) =>
       projectsApi
@@ -42,7 +46,7 @@ export const deleteProjectsMutation = () =>
   });
 
 export const updateProjectMutation = () =>
-  UpdateMutation<Project, UpdateProjectDto>({
+  UpdateMutation<MiaProject, UpdateMiaProjectDto>({
     queryKey: (_selectorId: string) => [projectsQueryKey],
     mutateFn: ({ object, updateDto }) =>
       projectsApi
@@ -51,7 +55,7 @@ export const updateProjectMutation = () =>
   });
 
 export const createProjectMutation = () =>
-  CreateMutation<Project, CreateProjectDto>({
+  CreateMutation<MiaProject, CreateMiaProjectDto>({
     queryKey: (_selectorId: string) => [projectsQueryKey],
     mutateFn: ({ createDto }) =>
       projectsApi

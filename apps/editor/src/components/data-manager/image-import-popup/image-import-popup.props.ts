@@ -1,8 +1,8 @@
-import { Dataset } from "@visian/mia-api";
+import { MiaDataset } from "@visian/mia-api";
 import type { StatefulPopUpProps } from "@visian/ui-shared";
 
 export interface ImageImportPopUpProps extends StatefulPopUpProps {
-  dataset?: Dataset;
+  dataset?: MiaDataset;
   onImportFinished: () => void;
   isDraggedOver: boolean;
   onDropCompleted: () => void;

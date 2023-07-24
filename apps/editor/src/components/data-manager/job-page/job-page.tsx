@@ -1,4 +1,8 @@
-import { Image, Job, JobsControllerUpdateStatusEnum } from "@visian/mia-api";
+import {
+  MiaImage,
+  MiaJob,
+  JobsControllerUpdateStatusEnum,
+} from "@visian/mia-api";
 import {
   InvisibleButton,
   ListItem,
@@ -66,7 +70,7 @@ const IconButton = styled(InvisibleButton)`
   width: 30px;
 `;
 
-export const JobPage = ({ job }: { job: Job }) => {
+export const JobPage = ({ job }: { job: MiaJob }) => {
   const { data: progress, isLoading: isLoadingProgress } = useJobProgress(
     job.id,
   );
@@ -129,7 +133,7 @@ export const JobPage = ({ job }: { job: Job }) => {
   );
 
   const compareImages = useCallback(
-    (a: Image, b: Image) => {
+    (a: MiaImage, b: MiaImage) => {
       if (findAnnotationId(a.id) && !findAnnotationId(b.id)) {
         return -1;
       }
@@ -270,21 +274,23 @@ export const JobPage = ({ job }: { job: Job }) => {
       >
         {images && !isErrorImages && !isErrorAnnotations && (
           <StyledSheet>
-            {images?.sort(compareImages).map((image: Image, index: number) => (
-              <ClickableListItem
-                key={image.id}
-                onClick={async () => {
-                  const annotationId = findAnnotationId(image.id);
-                  if (annotationId) await startReviewJob(annotationId);
-                }}
-                isLast={index === images.length - 1}
-              >
-                <StyledText text={image.dataUri.split("/").pop()} />
-                {imagesWithAnnotations?.includes(image.id) && (
-                  <SubtleText tx="image-annotated" />
-                )}
-              </ClickableListItem>
-            ))}
+            {images
+              ?.sort(compareImages)
+              .map((image: MiaImage, index: number) => (
+                <ClickableListItem
+                  key={image.id}
+                  onClick={async () => {
+                    const annotationId = findAnnotationId(image.id);
+                    if (annotationId) await startReviewJob(annotationId);
+                  }}
+                  isLast={index === images.length - 1}
+                >
+                  <StyledText text={image.dataUri.split("/").pop()} />
+                  {imagesWithAnnotations?.includes(image.id) && (
+                    <SubtleText tx="image-annotated" />
+                  )}
+                </ClickableListItem>
+              ))}
           </StyledSheet>
         )}
         <ConfirmationPopup

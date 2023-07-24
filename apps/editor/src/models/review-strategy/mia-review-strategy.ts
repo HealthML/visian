@@ -1,4 +1,4 @@
-import { Image } from "@visian/mia-api";
+import { MiaImage } from "@visian/mia-api";
 
 import {
   getAnnotation,
@@ -72,7 +72,7 @@ export class MiaReviewStrategy extends ReviewStrategy {
     });
   }
 
-  private images: Image[];
+  private images: MiaImage[];
   private currentImageIndex: number;
   private jobId?: string;
   private allowedAnnotations?: Set<string>;
@@ -86,7 +86,7 @@ export class MiaReviewStrategy extends ReviewStrategy {
     taskType,
   }: {
     store: RootStore;
-    images: Image[];
+    images: MiaImage[];
     jobId?: string;
     allowedAnnotations?: string[];
     taskType?: TaskType;

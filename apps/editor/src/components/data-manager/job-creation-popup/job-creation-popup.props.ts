@@ -1,4 +1,4 @@
-import { Job } from "@visian/mia-api";
+import { MiaJob } from "@visian/mia-api";
 import type { StatefulPopUpProps } from "@visian/ui-shared";
 import { AxiosError } from "axios";
 import {
@@ -13,5 +13,5 @@ export interface JobCreationPopUpProps extends StatefulPopUpProps {
   openWithDatasetId?: string;
   refetchJobs?: <TPageData>(
     options?: (RefetchOptions & RefetchQueryFilters<TPageData>) | undefined,
-  ) => Promise<QueryObserverResult<Job[], AxiosError<Job[], unknown>>>;
+  ) => Promise<QueryObserverResult<MiaJob[], AxiosError<MiaJob[], unknown>>>;
 }

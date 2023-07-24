@@ -1,4 +1,4 @@
-import { Project } from "@visian/mia-api";
+import { MiaProject } from "@visian/mia-api";
 import { Screen, useTranslation } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
 import React, { useCallback, useState } from "react";
@@ -44,8 +44,8 @@ export const ProjectsScreen: React.FC = observer(() => {
     isError: isErrorProjects,
     isLoading: isLoadingProjects,
   } = useProjects();
-  const [projectToBeDeleted, setProjectToBeDeleted] = useState<Project>();
-  const [projectToBeUpdated, setProjectToBeUpdated] = useState<Project>();
+  const [projectToBeDeleted, setProjectToBeDeleted] = useState<MiaProject>();
+  const [projectToBeUpdated, setProjectToBeUpdated] = useState<MiaProject>();
   const { mutate: createProject } = createProjectMutation();
   const { mutate: deleteMutateProjects } = deleteProjectsMutation();
   const { mutate: updateProject } = updateProjectMutation();
@@ -76,7 +76,7 @@ export const ProjectsScreen: React.FC = observer(() => {
 
   // Delete Project
   const deleteProject = useCallback(
-    (project: Project) => {
+    (project: MiaProject) => {
       setProjectToBeDeleted(project);
       openDeleteProjectConfirmationPopUp();
     },
@@ -85,7 +85,7 @@ export const ProjectsScreen: React.FC = observer(() => {
 
   // Open Project
   const openProject = useCallback(
-    (project: Project) => {
+    (project: MiaProject) => {
       navigate(`/projects/${project.id}`);
     },
     [navigate],
@@ -97,7 +97,7 @@ export const ProjectsScreen: React.FC = observer(() => {
   const closeEditPopup = useCallback(() => setIsEditPopupOpen(false), []);
 
   const editProject = useCallback(
-    (project: Project) => {
+    (project: MiaProject) => {
       setProjectToBeUpdated(project);
       openEditPopup();
     },
