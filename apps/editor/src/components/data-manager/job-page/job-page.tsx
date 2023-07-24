@@ -20,7 +20,11 @@ import {
   useImagesByJob,
 } from "../../../queries";
 import { useJobProgress } from "../../../queries";
-import { Job, JobStatusEnum, UpdateJobDtoStatusEnum } from "@visian/mia-api";
+import {
+  Job,
+  JobStatusEnum,
+  JobsControllerUpdateStatusEnum,
+} from "@visian/mia-api";
 import { AnnotationProgress } from "../annotation-progress";
 import { ConfirmationPopup } from "../confirmation-popup";
 import { JobLogPopup } from "../job-history/job-log-popup";
@@ -155,7 +159,7 @@ export const JobPage = ({ job }: { job: Job }) => {
     () =>
       patchJobStatus({
         object: job,
-        updateDto: { status: UpdateJobDtoStatusEnum.Canceled },
+        updateDto: { status: JobsControllerUpdateStatusEnum.Canceled },
         selectorId: job.id,
       }),
     [patchJobStatus, job],

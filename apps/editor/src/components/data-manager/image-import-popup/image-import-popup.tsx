@@ -197,7 +197,7 @@ export const ImageImportPopup = observer<ImageImportPopUpProps>(
         async (selectedFile) => {
           try {
             const datasetName = sanitizeForFS(dataset.name);
-            await imagesApi.imagesControllerCreateForm(
+            await imagesApi.imagesControllerCreate(
               dataset.id,
               `${datasetName}/${selectedFile.file.name}`,
               selectedFile.file,

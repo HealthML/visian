@@ -73,7 +73,7 @@ export const updateDatasetMutation = () =>
     ],
     mutateFn: ({ object, updateDto }) =>
       datasetsApi
-        .datasetsControllerUpdate(updateDto, object.id)
+        .datasetsControllerUpdate(object.id, updateDto)
         .then((response) => response.data),
   });
 

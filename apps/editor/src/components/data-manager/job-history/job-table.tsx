@@ -18,7 +18,7 @@ const BadgeContainer = styled.div`
   width: 10em;
 `;
 
-function transfromDate(date?: Date) {
+function transfromDate(date?: Date | string) {
   return date ? getDisplayDate(date) : undefined;
 }
 

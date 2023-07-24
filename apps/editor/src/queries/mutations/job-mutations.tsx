@@ -69,10 +69,6 @@ export const updateJobMutation = () =>
       jobsApi
         // TODO: fix required types in API docs
 
-        .jobsControllerUpdateForm(
-          updateDto.status || object.status,
-          new File([], "empty"),
-          object.id,
-        )
+        .jobsControllerUpdate(object.id, updateDto.status || object.status)
         .then((response) => response.data),
   });
