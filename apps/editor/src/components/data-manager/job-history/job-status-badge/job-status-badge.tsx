@@ -1,7 +1,6 @@
 import { JobStatusEnum } from "@visian/mia-api";
 import { StatusBadge } from "@visian/ui-shared";
 
-
 const statusColors: Record<JobStatusEnum, string> = {
   queued: "veryVeryLightGray",
   running: "blueBadgeBackground",

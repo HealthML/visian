@@ -1,7 +1,6 @@
 import { ListItem, OptionSelector, Text } from "@visian/ui-shared";
+import { MiaIterableData } from "@visian/utils";
 import styled from "styled-components";
-
-import { IterableData } from "../../../../types";
 
 const ExpandedSpacer = styled.div`
   margin-right: auto;
@@ -18,7 +17,7 @@ export const ListViewItem = ({
   onEdit,
   isLast,
 }: {
-  item: IterableData;
+  item: MiaIterableData;
   onDelete: () => void;
   onClick: () => void;
   onEdit: () => void;

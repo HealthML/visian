@@ -7,7 +7,6 @@ import {
   RefetchQueryFilters,
 } from "react-query";
 
-
 export interface JobCreationPopUpProps extends StatefulPopUpProps {
   projectId: string;
   activeImageSelection?: Set<string>;

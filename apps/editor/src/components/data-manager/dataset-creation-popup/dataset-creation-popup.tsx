@@ -24,13 +24,18 @@ const DatasetCreationPopupContainer = styled(PopUp)`
 `;
 
 const TextInput = styled(TextField)`
-  margin: 0px 0px 0px 0px;
-  width: calc(100% - 40px);
+  margin: auto;
+  width: 100%;
+`;
+
+const StyledForm = styled.form`
+  width: 100%;
 `;
 
 export const DatasetCreationPopup = observer<DatasetCreationPopupProps>(
   ({ isOpen, onClose, onConfirm }) => {
     const [name, setName] = useState("");
+    const [isSubmitDisabled, setIsSubmitDisabled] = useState(true);
 
     const clearInputsAndClose = useCallback(() => {
       setName("");
@@ -44,7 +49,21 @@ export const DatasetCreationPopup = observer<DatasetCreationPopupProps>(
       clearInputsAndClose();
     }, [name, onConfirm, clearInputsAndClose]);
 
-    const updateName = useCallback((e) => setName(e.target.value), [setName]);
+    const updateName = useCallback(
+      (e) => {
+        setName(e.target.value);
+        setIsSubmitDisabled(false);
+      },
+      [setName],
+    );
+
+    const handleFormSubmit = useCallback(
+      (e) => {
+        e.preventDefault();
+        if (!isSubmitDisabled) handleCreation();
+      },
+      [handleCreation, isSubmitDisabled],
+    );
 
     return (
       <DatasetCreationPopupContainer
@@ -53,18 +72,25 @@ export const DatasetCreationPopup = observer<DatasetCreationPopupProps>(
         dismiss={clearInputsAndClose}
         shouldDismissOnOutsidePress
       >
-        <TextInput
-          value={name}
-          onChange={updateName}
-          placeholderTx="dataset-name"
-        />
-        <InlineRow>
-          <StyledTextButton
-            labelTx="cancel"
-            handlePress={clearInputsAndClose}
+        <StyledForm onSubmit={handleFormSubmit}>
+          <TextInput
+            autoFocus
+            value={name}
+            onChange={updateName}
+            placeholderTx="dataset-name"
           />
-          <StyledTextButton labelTx="create" handlePress={handleCreation} />
-        </InlineRow>
+          <InlineRow>
+            <StyledTextButton
+              labelTx="cancel"
+              handlePress={clearInputsAndClose}
+            />
+            <StyledTextButton
+              type="submit"
+              labelTx="create"
+              isDisabled={isSubmitDisabled}
+            />
+          </InlineRow>
+        </StyledForm>
       </DatasetCreationPopupContainer>
     );
   },

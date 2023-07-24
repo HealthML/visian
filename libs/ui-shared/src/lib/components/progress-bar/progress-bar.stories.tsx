@@ -1,15 +1,15 @@
 import React from "react";
 
-import { Progress } from "./progress";
-import { ProgressProps } from "./progress.props";
+import { ProgressBar } from "./progress-bar";
+import { ProgressBarProps } from "./progress-bar.props";
 
 export default {
-  cmponent: Progress,
+  cmponent: ProgressBar,
   title: "Progress",
   argTypes: { onEdit: { action: "New Value" } },
 };
 
-export const primary = (args: ProgressProps) => <Progress {...args} />;
+export const primary = (args: ProgressBarProps) => <ProgressBar {...args} />;
 primary.args = {
   total: 42,
   totalLabel: "All Items",

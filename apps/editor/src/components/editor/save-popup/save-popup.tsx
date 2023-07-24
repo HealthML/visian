@@ -9,6 +9,7 @@ import {
   TextField,
   useTranslation,
 } from "@visian/ui-shared";
+import { FileWithMetadata } from "@visian/utils";
 import { AxiosError } from "axios";
 import { observer } from "mobx-react-lite";
 import path from "path";
@@ -20,7 +21,6 @@ import { importFilesToDocument } from "../../../import-handling";
 import { LayerFamily } from "../../../models/editor/layer-families";
 import { MiaReviewTask } from "../../../models/review-strategy";
 import { fetchAnnotationFile } from "../../../queries";
-import { FileWithMetadata } from "../../../types";
 import { SavePopUpProps } from "./save-popup.props";
 
 const SectionLabel = styled(Text)`

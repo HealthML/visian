@@ -1,6 +1,7 @@
 import {
   createBase64StringFromFile,
   createFileFromBase64,
+  FileWithMetadata,
   putWHOTask,
   WHOAnnotation,
   WHOAnnotationData,
@@ -10,7 +11,6 @@ import {
 } from "@visian/utils";
 import { AxiosResponse } from "axios";
 
-import { FileWithMetadata } from "../../types";
 import { ReviewTask, TaskType } from "./review-task";
 
 const taskTypeMapping = {

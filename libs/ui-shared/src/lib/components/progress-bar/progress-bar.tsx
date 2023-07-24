@@ -5,8 +5,8 @@ import styled, { useTheme } from "styled-components";
 import { color, fontSize, Theme } from "../../theme";
 import { Text } from "../text";
 import { usePreviousValue } from "../utils";
-import { ProgressProps } from "./progress.props";
-import { ProgressTooltip } from "./progressTooltip";
+import { ProgressBarTooltip } from "./progress-bar-tooltip";
+import { ProgressBarProps } from "./progress-bar.props";
 
 const Container = styled.div`
   display: grid;
@@ -146,7 +146,7 @@ const Bar = ({
   );
 };
 
-export const Progress: React.FC<ProgressProps> = ({
+export const ProgressBar: React.FC<ProgressBarProps> = ({
   total,
   totalLabel,
   totalLabelTx,
@@ -183,7 +183,7 @@ export const Progress: React.FC<ProgressProps> = ({
             key={bar.labelTx}
           />
         ))}
-      <ProgressTooltip
+      <ProgressBarTooltip
         totalLabel={totalLabel}
         totalLabelTx={totalLabelTx}
         total={total}

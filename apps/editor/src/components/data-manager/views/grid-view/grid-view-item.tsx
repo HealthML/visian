@@ -5,9 +5,8 @@ import {
   radius,
   Text,
 } from "@visian/ui-shared";
+import { MiaIterableData } from "@visian/utils";
 import styled from "styled-components";
-
-import { IterableData } from "../../../../types";
 
 const StyledGridItem = styled(GridItem)`
   cursor: pointer;
@@ -59,7 +58,7 @@ export const GridViewItem = ({
   onClick,
   onEdit,
 }: {
-  item: IterableData;
+  item: MiaIterableData;
   imgSrc: string | undefined;
   onDelete: () => void;
   onClick: () => void;

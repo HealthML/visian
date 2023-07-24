@@ -4,7 +4,8 @@ import {
   getAnnotation,
   getAnnotationsByJobAndImage,
   imagesApi,
- patchAnnotation } from "../../queries";
+  patchAnnotation,
+} from "../../queries";
 import { RootStore } from "../root";
 import { MiaReviewTask } from "./mia-review-task";
 import { ReviewStrategy } from "./review-strategy";
@@ -14,31 +15,28 @@ export class MiaReviewStrategy extends ReviewStrategy {
   public static async fromDataset(
     store: RootStore,
     datasetId: string,
-    returnUrl?: string,
     taskType?: TaskType,
   ) {
     const images = await imagesApi
       .imagesControllerFindAll(datasetId)
       .then((response) => response.data);
-    return new MiaReviewStrategy({ store, images, taskType, returnUrl });
+    return new MiaReviewStrategy({ store, images, taskType });
   }
 
   public static async fromJob(
     store: RootStore,
     jobId: string,
-    returnUrl?: string,
     taskType?: TaskType,
   ) {
     const images = await imagesApi
       .imagesControllerFindAll(undefined, jobId)
       .then((response) => response.data);
-    return new MiaReviewStrategy({ store, images, jobId, taskType, returnUrl });
+    return new MiaReviewStrategy({ store, images, jobId, taskType });
   }
 
   public static async fromImageIds(
     store: RootStore,
     imageIds: string[],
-    returnUrl?: string,
     taskType?: TaskType,
     allowedAnnotations?: string[],
   ) {
@@ -54,14 +52,12 @@ export class MiaReviewStrategy extends ReviewStrategy {
       images,
       allowedAnnotations,
       taskType,
-      returnUrl,
     });
   }
 
   public static async fromAnnotationId(
     store: RootStore,
     annotationId: string,
-    returnUrl?: string,
     taskType?: TaskType,
   ) {
     const annotation = await getAnnotation(annotationId);
@@ -73,7 +69,6 @@ export class MiaReviewStrategy extends ReviewStrategy {
       images: [image],
       allowedAnnotations: [annotationId],
       taskType,
-      returnUrl,
     });
   }
 
@@ -81,7 +76,6 @@ export class MiaReviewStrategy extends ReviewStrategy {
   private currentImageIndex: number;
   private jobId?: string;
   private allowedAnnotations?: Set<string>;
-  private returnUrl: string;
   public taskType: TaskType;
 
   constructor({
@@ -90,17 +84,14 @@ export class MiaReviewStrategy extends ReviewStrategy {
     jobId,
     allowedAnnotations,
     taskType,
-    returnUrl,
   }: {
     store: RootStore;
     images: Image[];
     jobId?: string;
     allowedAnnotations?: string[];
     taskType?: TaskType;
-    returnUrl?: string;
   }) {
     super(store);
-    this.returnUrl = returnUrl ?? "/";
     this.images = images;
     this.currentImageIndex = 0;
     this.jobId = jobId;
@@ -137,7 +128,7 @@ export class MiaReviewStrategy extends ReviewStrategy {
     await this.saveTask();
     this.currentImageIndex += 1;
     if (this.currentImageIndex >= this.images.length) {
-      await this.store?.destroyRedirect(this.returnUrl, true);
+      await this.store?.redirectToReturnUrl({});
     } else {
       await this.loadTask();
     }

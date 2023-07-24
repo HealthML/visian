@@ -145,7 +145,7 @@ export const DatasetsSection = ({ project }: { project: Project }) => {
             icon="plus"
             tooltipTx="create-dataset"
             tooltipPosition="left"
-            onPointerDown={openCreateDatasetPopup}
+            onClick={openCreateDatasetPopup}
           />
         </Container>
       }

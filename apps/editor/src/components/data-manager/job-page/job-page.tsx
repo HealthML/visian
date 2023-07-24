@@ -1,7 +1,4 @@
-import {
-  Image,
-  Job,
-  JobsControllerUpdateStatusEnum } from "@visian/mia-api";
+import { Image, Job, JobsControllerUpdateStatusEnum } from "@visian/mia-api";
 import {
   InvisibleButton,
   ListItem,
@@ -22,7 +19,8 @@ import {
   updateJobMutation,
   useAnnotationsByJob,
   useImagesByJob,
- useJobProgress } from "../../../queries";
+  useJobProgress,
+} from "../../../queries";
 import { AnnotationProgress } from "../annotation-progress";
 import { ConfirmationPopup } from "../confirmation-popup";
 import { JobLogPopup } from "../job-history/job-log-popup";
@@ -32,7 +30,6 @@ import { PageSection } from "../page-section";
 import { PageTitle } from "../page-title";
 import { getDisplayDate } from "../util";
 import { DetailsRow } from "./details-table";
-
 
 const StyledSheet = styled(Sheet)`
   padding: ${space("listPadding")};
@@ -144,14 +141,13 @@ export const JobPage = ({ job }: { job: Job }) => {
     [findAnnotationId],
   );
 
-  const confirmDeleteJob = useCallback(
-    () =>
-      deleteJobs({
-        selectorId: job.project,
-        objectIds: [job.id],
-      }),
-    [deleteJobs, job],
-  );
+  const confirmDeleteJob = useCallback(() => {
+    deleteJobs({
+      selectorId: job.project,
+      objectIds: [job.id],
+    });
+    navigate(`/projects/${job.project}`);
+  }, [deleteJobs, job, navigate]);
 
   const confirmCancelJob = useCallback(
     () =>
@@ -166,10 +162,10 @@ export const JobPage = ({ job }: { job: Job }) => {
   const startReviewJob = useCallback(
     async (annotationId?: string) => {
       store?.startReview(
-        async (url: string) =>
+        async () =>
           annotationId
-            ? MiaReviewStrategy.fromAnnotationId(store, annotationId, url)
-            : MiaReviewStrategy.fromJob(store, job.id, url),
+            ? MiaReviewStrategy.fromAnnotationId(store, annotationId)
+            : MiaReviewStrategy.fromJob(store, job.id),
         navigate,
       );
     },
@@ -231,7 +227,7 @@ export const JobPage = ({ job }: { job: Job }) => {
                           <IconButton
                             icon="logs"
                             tooltipTx="open-job-log"
-                            onPointerDown={openJobLogPopUp}
+                            onClick={openJobLogPopUp}
                             tooltipPosition="right"
                           />
                         )}
@@ -239,14 +235,14 @@ export const JobPage = ({ job }: { job: Job }) => {
                           <IconButton
                             icon="cancel"
                             tooltipTx="cancel-job-title"
-                            onPointerDown={openCancelJobConfirmationPopUp}
+                            onClick={openCancelJobConfirmationPopUp}
                             tooltipPosition="right"
                           />
                         ) : (
                           <IconButton
                             icon="trash"
                             tooltipTx="delete-job-title"
-                            onPointerDown={openDeleteJobConfirmationPopUp}
+                            onClick={openDeleteJobConfirmationPopUp}
                             tooltipPosition="right"
                           />
                         )}
@@ -303,7 +299,7 @@ export const JobPage = ({ job }: { job: Job }) => {
         <ConfirmationPopup
           isOpen={isCancelJobConfirmationPopUpOpen}
           onClose={closeCancelJobConfirmationPopUp}
-          message="cancel-job-message"
+          messageTx="cancel-job-message"
           titleTx="cancel-job-title"
           onConfirm={confirmCancelJob}
         />

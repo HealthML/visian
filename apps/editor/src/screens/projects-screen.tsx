@@ -164,7 +164,7 @@ export const ProjectsScreen: React.FC = observer(() => {
                 icon="plus"
                 tooltipTx="create-project"
                 tooltipPosition="left"
-                onPointerDown={openCreateProjectPopup}
+                onClick={openCreateProjectPopup}
               />
             </Container>
           }
