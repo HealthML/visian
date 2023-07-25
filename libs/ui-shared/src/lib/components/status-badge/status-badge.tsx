@@ -8,7 +8,7 @@ const StatusBadgeContainer = styled.div<
   Pick<StatusBadgeProps, "color" | "borderColor" | "full">
 >`
   box-sizing: border-box;
-  display: inline-block;
+  display: block;
   text-align: center;
   padding: 0.1em 1em;
   width: ${(props) => (props.full ? "100%" : "fit-content")};
