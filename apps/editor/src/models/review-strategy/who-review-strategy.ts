@@ -149,7 +149,7 @@ export class WHOReviewStrategy extends ReviewStrategy {
       this.store.editor.activeDocument?.finishBatchImport();
       return;
     }
-    await super.importAnnotations();
+    await this.importAnnotationsWithMetadata(false);
   }
 
   public toJSON(): ReviewStrategySnapshot {
