@@ -21,10 +21,6 @@ import { useStore } from "../../../app/root-store";
 import { ImageLayer } from "../../../models";
 import { LayerSettings } from "../layer-settings";
 
-// Utilities
-const noop = () => {
-  // Intentionally left blank
-};
 export const LayerListItem = observer<{
   layer: ILayer;
   isActive?: boolean;
@@ -197,7 +193,8 @@ export const LayerListItem = observer<{
                 : undefined,
           }}
           iconRef={setColorRef}
-          onIconPress={areLayerSettingsOpen ? noop : openLayerSettings}
+          // eslint-disable-next-line @typescript-eslint/no-empty-function
+          onIconPress={areLayerSettingsOpen ? () => {} : openLayerSettings}
           labelTx={layer.title ? undefined : "untitled-layer"}
           label={layer.title}
           isLabelEditable={isLayerNameEditable}

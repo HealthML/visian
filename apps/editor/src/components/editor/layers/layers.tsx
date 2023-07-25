@@ -20,6 +20,7 @@ import {
   TreeItemComponentProps,
   TreeItems,
 } from "dnd-kit-sortable-tree";
+import { ItemChangedReason } from "dnd-kit-sortable-tree/dist/types";
 import { observer } from "mobx-react-lite";
 import React, { ReactNode, useCallback, useEffect, useState } from "react";
 import styled from "styled-components";
@@ -34,6 +35,10 @@ import { LayerListItem } from "./layer-list-item";
 // Styled Components
 const StyledInfoText = styled(InfoText)`
   margin-right: 10px;
+`;
+
+const OuterWrapper = styled("div")`
+  width: 100%;
 `;
 
 const LayerList = styled(List)`
@@ -206,7 +211,7 @@ export const Layers: React.FC = observer(() => {
   store?.editor.activeDocument?.activeLayer;
 
   const layers = store?.editor.activeDocument?.layers;
-  if (!layers) {
+  if (!layers || layers.length === 0) {
     return (
       <ListItem isLast>
         <SubtleText tx="no-layers" />
@@ -245,7 +250,7 @@ export const Layers: React.FC = observer(() => {
 
     const renderingOrder = store.editor.activeDocument?.renderingOrder;
     if (!renderingOrder) {
-      return [{ id: "undefined", value: "undefined" }];
+      return [];
     }
 
     return renderingOrder.map((element) => {
@@ -264,7 +269,10 @@ export const Layers: React.FC = observer(() => {
   const treeItems = getTreeItems();
 
   const updateRenderingOrder = useCallback(
-    (newTreeItems: TreeItems<TreeItemData>, change: any) => {
+    (
+      newTreeItems: TreeItems<TreeItemData>,
+      change: ItemChangedReason<TreeItemData>,
+    ) => {
       if (change.type === "removed") return;
       if (change.type === "collapsed" || change.type === "expanded") {
         const family = store.editor.activeDocument?.getLayerFamily(
@@ -362,7 +370,7 @@ export const Layers: React.FC = observer(() => {
           </>
         }
       >
-        <div style={{ width: "100%" }}>
+        <OuterWrapper>
           <LayerList onWheel={stopPropagation}>
             <SortableTree
               items={treeItems}
@@ -378,7 +386,7 @@ export const Layers: React.FC = observer(() => {
               indentationWidth={20}
             />
           </LayerList>
-        </div>
+        </OuterWrapper>
       </LayerModal>
     </>
   );
