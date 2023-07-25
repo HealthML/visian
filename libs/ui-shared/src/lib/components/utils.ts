@@ -7,6 +7,7 @@ import React, {
   useRef,
   useState,
 } from "react";
+
 import { isMac } from "../platform-detection";
 
 /**

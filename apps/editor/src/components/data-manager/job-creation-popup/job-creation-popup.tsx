@@ -1,19 +1,20 @@
 import {
   Box,
   Button,
+  color,
   DropDown,
   FlexRow,
-  IEnumParameterOption,
   Icon,
+  IEnumParameterOption,
   List,
   ListItem,
   PopUp,
   SectionHeader,
   SubtleText,
   Text,
-  color,
   useTranslation,
 } from "@visian/ui-shared";
+import { MiaImage } from "@visian/utils";
 import { observer } from "mobx-react-lite";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import styled, { css } from "styled-components";
@@ -24,7 +25,6 @@ import { useDatasetsBy } from "../../../queries/use-datasets-by";
 import { ImageList } from "../image-list";
 import { useImageSelection } from "../util";
 import { JobCreationPopUpProps } from "./job-creation-popup.props";
-import { MiaImage } from "@visian/utils";
 
 const JobCreationPopupContainer = styled(PopUp)`
   align-items: left;
