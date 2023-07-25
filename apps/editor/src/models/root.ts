@@ -14,13 +14,19 @@ import { NavigateFunction } from "react-router-dom";
 import { errorDisplayDuration } from "../constants";
 import { DICOMWebServer } from "./dicomweb-server";
 import { Editor, EditorSnapshot } from "./editor";
-import { ReviewStrategy } from "./review-strategy";
+import {
+  MiaReviewStrategy,
+  ReviewStrategy,
+  ReviewStrategySnapshot,
+  WHOReviewStrategy,
+} from "./review-strategy";
 import { Settings } from "./settings/settings";
 import { Tracker } from "./tracking";
 import { ProgressNotification } from "./types";
 
 export interface RootSnapshot {
   editor: EditorSnapshot;
+  reviewStrategy?: ReviewStrategySnapshot;
 }
 
 export interface RootStoreConfig {
@@ -222,6 +228,9 @@ export class RootStore implements ISerializable<RootSnapshot>, IDisposable {
       this.setIsSaveUpToDate(true);
       return this.editor.toJSON();
     });
+    await this.config.storageBackend?.persist("/review", () =>
+      this.reviewStrategy?.toJSON(),
+    );
     this.setIsDirty(false);
   };
 
@@ -232,15 +241,37 @@ export class RootStore implements ISerializable<RootSnapshot>, IDisposable {
       "/editor",
       this.editor.toJSON(),
     );
+    await this.config.storageBackend?.persistImmediately(
+      "/review",
+      this.reviewStrategy?.toJSON(),
+    );
     this.setIsDirty(false);
   };
 
   public toJSON() {
-    return { editor: this.editor.toJSON() };
+    return {
+      editor: this.editor.toJSON(),
+      reviewStrategy: this.reviewStrategy?.toJSON(),
+    };
+  }
+
+  protected async applyReviewStrategySnapshot(
+    snapshot?: ReviewStrategySnapshot,
+  ) {
+    if (!snapshot) return;
+    let reviewStrategy;
+    if (snapshot.backend === "mia") {
+      reviewStrategy = MiaReviewStrategy.fromSnapshot(this, snapshot);
+    }
+    if (snapshot.backend === "who") {
+      reviewStrategy = WHOReviewStrategy.fromSnapshot(this, snapshot);
+    }
+    if (reviewStrategy) this.setReviewStrategy(reviewStrategy);
   }
 
   public async applySnapshot(snapshot: RootSnapshot) {
     await this.editor.applySnapshot(snapshot.editor);
+    await this.applyReviewStrategySnapshot(snapshot.reviewStrategy);
   }
 
   public async rehydrate() {
@@ -257,8 +288,16 @@ export class RootStore implements ISerializable<RootSnapshot>, IDisposable {
     const editorSnapshot = await this.config.storageBackend?.retrieve(
       "/editor",
     );
+    const reviewStrategySnapshot = await this.config.storageBackend?.retrieve(
+      "/review",
+    );
     if (editorSnapshot) {
       await this.editor.applySnapshot(editorSnapshot as EditorSnapshot);
+    }
+    if (reviewStrategySnapshot) {
+      await this.applyReviewStrategySnapshot(
+        reviewStrategySnapshot as ReviewStrategySnapshot,
+      );
     }
     this.settings.load();
     this.shouldPersist = true;
@@ -316,16 +355,29 @@ export class RootStore implements ISerializable<RootSnapshot>, IDisposable {
   };
 
   public startReview = async (
-    createStrategy: (currentPath: string) => Promise<ReviewStrategy>,
+    createStrategy: () => Promise<ReviewStrategy>,
     navigate: NavigateFunction,
   ) => {
-    const currentPath = window.location.pathname;
+    this.editor.setReturnUrl(window.location.pathname);
     if (!(await this.destroyLayers(true))) return;
     this.shouldPersist = true;
     this.setProgress({ labelTx: "importing", showSplash: true });
     navigate("/editor?review=true");
-    this.setReviewStrategy(await createStrategy(currentPath));
+    this.setReviewStrategy(await createStrategy());
     await this.reviewStrategy?.loadTask();
     this.setProgress();
+  };
+
+  public redirectToReturnUrl = async ({
+    forceRedirect,
+    resetUrl,
+  }: {
+    destroy?: boolean;
+    forceRedirect?: boolean;
+    resetUrl?: boolean;
+  }) => {
+    const returnUrl = this.editor.returnUrl ?? "/";
+    if (resetUrl ?? false) this.editor.setReturnUrl();
+    await this.destroyRedirect(returnUrl, forceRedirect ?? true);
   };
 }

@@ -24,13 +24,18 @@ const EditPopupContainer = styled(PopUp)`
 `;
 
 const TextInput = styled(TextField)`
-  margin: 0px;
-  width: calc(100% - 40px);
+  margin: auto;
+  width: 100%;
+`;
+
+const StyledForm = styled.form`
+  width: 100%;
 `;
 
 export const EditPopup = observer<EditPopupProps>(
   ({ oldName, isOpen, onClose, onConfirm }) => {
     const [name, setName] = useState(oldName);
+    const [isSubmitDisabled, setIsSubmitDisabled] = useState(true);
 
     const clearInputsAndClose = useCallback(() => {
       setName(oldName);
@@ -41,6 +46,29 @@ export const EditPopup = observer<EditPopupProps>(
       setName(oldName);
     }, [oldName]);
 
+    const handleEdit = useCallback(() => {
+      if (name !== "" && name !== oldName) {
+        onConfirm?.(name);
+      }
+      clearInputsAndClose();
+    }, [name, oldName, clearInputsAndClose, onConfirm]);
+
+    const updateName = useCallback(
+      (e) => {
+        setName(e.target.value);
+        setIsSubmitDisabled(false);
+      },
+      [setName],
+    );
+
+    const handleFormSubmit = useCallback(
+      (e) => {
+        e.preventDefault();
+        if (!isSubmitDisabled) handleEdit();
+      },
+      [handleEdit, isSubmitDisabled],
+    );
+
     return (
       <EditPopupContainer
         titleTx="edit"
@@ -48,10 +76,11 @@ export const EditPopup = observer<EditPopupProps>(
         dismiss={clearInputsAndClose}
         shouldDismissOnOutsidePress
       >
-        <>
+        <StyledForm onSubmit={handleFormSubmit}>
           <TextInput
+            autoFocus
             value={name}
-            onChange={(e) => setName(e.target.value)}
+            onChange={updateName}
             placeholderTx="name"
           />
           <InlineRow>
@@ -60,16 +89,12 @@ export const EditPopup = observer<EditPopupProps>(
               handlePress={clearInputsAndClose}
             />
             <StyledTextButton
+              type="submit"
               labelTx="update"
-              handlePress={() => {
-                if (name !== "" && name !== oldName) {
-                  onConfirm?.(name);
-                }
-                clearInputsAndClose();
-              }}
+              isDisabled={isSubmitDisabled}
             />
           </InlineRow>
-        </>
+        </StyledForm>
       </EditPopupContainer>
     );
   },

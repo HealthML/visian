@@ -6,8 +6,8 @@ import { Divider } from "../modal";
 import { Sheet } from "../sheet";
 import { Text } from "../text";
 import { useTooltipPosition } from "../tooltip";
-import { Dot } from "./progress";
-import { ProgressProps } from "./progress.props";
+import { Dot } from "./progress-bar";
+import { ProgressBarProps } from "./progress-bar.props";
 
 const TooltipContainer = styled(Sheet)`
   box-sizing: border-box;
@@ -43,11 +43,11 @@ const TooltipDivider = styled(Divider)`
 
 // This component is very similar to the tooltip component, but uses specific
 // positioning and custom children.
-export const ProgressTooltip: React.FC<
+export const ProgressBarTooltip: React.FC<
   {
     isShown: boolean;
     anchor: HTMLElement | null;
-  } & ProgressProps
+  } & ProgressBarProps
 > = ({ total, totalLabel, totalLabelTx, bars, isShown, anchor }) => {
   const modalRootRef = useModalRoot();
 

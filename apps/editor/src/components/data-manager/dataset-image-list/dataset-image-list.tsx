@@ -1,7 +1,7 @@
 import { List, stopPropagation } from "@visian/ui-shared";
+import { MiaAnnotation, MiaImage } from "@visian/utils";
 import styled from "styled-components";
 
-import { Annotation, Image } from "../../../types";
 import { useKeyboardShortcuts } from "../util";
 import { DatasetImageListItem } from "./dataset-image-list-item";
 
@@ -21,20 +21,20 @@ export const DatasetImageList = ({
   deleteImage,
 }: {
   isInSelectMode: boolean;
-  images: Image[];
+  images: MiaImage[];
   refetchImages: () => void;
   selectedImages: Set<string>;
   setImageSelection: (imageId: string, isSelected: boolean) => void;
   setSelectedImages: React.Dispatch<React.SetStateAction<Set<string>>>;
-  deleteAnnotation: (annotation: Annotation) => void;
-  deleteImage: (image: Image) => void;
+  deleteAnnotation: (annotation: MiaAnnotation) => void;
+  deleteImage: (image: MiaImage) => void;
 }) => {
   const { isShiftPressed, selectedRange, setSelectedRange } =
     useKeyboardShortcuts({ selectedImages, setSelectedImages, images });
 
   return (
     <ImageList onWheel={stopPropagation}>
-      {images.map((image: Image, index: number) => (
+      {images.map((image: MiaImage, index: number) => (
         <DatasetImageListItem
           key={image.id}
           isLast={index === images.length - 1}

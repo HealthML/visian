@@ -31,7 +31,7 @@ export const LayerListItem = observer<{
   const layerCount = store?.editor.activeDocument?.imageLayers?.length;
 
   const toggleAnnotationVisibility = useCallback(() => {
-    layer.setIsVisible(!layer.isVisible);
+    layer.tryToggleIsVisible();
   }, [layer]);
 
   // Color Modal Toggling

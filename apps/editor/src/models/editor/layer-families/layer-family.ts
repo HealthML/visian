@@ -1,36 +1,41 @@
-import { IDocument, ILayer, ILayerFamily } from "@visian/ui-shared";
+import { ILayer, ILayerFamily, LayerFamilySnapshot } from "@visian/ui-shared";
+import {
+  BackendMetadata,
+  ISerializable,
+  isMiaAnnotationMetadata,
+} from "@visian/utils";
 import { action, computed, makeObservable, observable } from "mobx";
 import { v4 as uuidv4 } from "uuid";
 
-import { FileMetadata } from "../../../types";
+import { Document } from "../document";
 import { ImageLayer } from "../layers";
 
-export class LayerFamily implements ILayerFamily {
+export class LayerFamily
+  implements ILayerFamily, ISerializable<LayerFamilySnapshot>
+{
   public excludeFromSnapshotTracking = ["document"];
   protected layerIds: string[] = [];
   public title = "";
   public id!: string;
-  public metaData?: FileMetadata;
   public collapsed?: boolean;
+  public metadata?: BackendMetadata;
 
   constructor(
-    protected document: IDocument,
-    title?: string | undefined,
-    layerIds?: string[] | undefined,
+    snapshot: Partial<LayerFamilySnapshot> | undefined,
+    protected document: Document,
   ) {
-    this.id = uuidv4();
-    this.title = title || "";
-    this.layerIds = layerIds || [];
+    this.applySnapshot(snapshot);
 
-    makeObservable<this, "layerIds" | "metaData">(this, {
+    makeObservable<this, "layerIds" | "metadata">(this, {
       layerIds: observable,
       collapsed: observable,
       title: observable,
       isActive: computed,
-      metaData: observable,
+      metadata: observable,
 
       addLayer: action,
       removeLayer: action,
+      trySetIsVerified: action,
     });
   }
 
@@ -74,5 +79,33 @@ export class LayerFamily implements ILayerFamily {
       return this.layers.includes(this.document.activeLayer);
     }
     return false;
+  }
+
+  public toJSON(): LayerFamilySnapshot {
+    return {
+      id: this.id,
+      title: this.title,
+      metadata: this.metadata ? { ...this.metadata } : undefined,
+      layerIds: [...this.layerIds],
+    };
+  }
+
+  public async applySnapshot(
+    snapshot: Partial<LayerFamilySnapshot> | undefined,
+  ) {
+    if (!snapshot) return;
+    this.id = snapshot.id || uuidv4();
+    this.title = snapshot.title || "";
+    this.metadata = snapshot.metadata ? { ...snapshot.metadata } : undefined;
+    this.layerIds = snapshot.layerIds || [];
+  }
+
+  public trySetIsVerified(value: boolean) {
+    if (isMiaAnnotationMetadata(this.metadata)) {
+      this.metadata = {
+        ...this.metadata,
+        verified: value,
+      };
+    }
   }
 }

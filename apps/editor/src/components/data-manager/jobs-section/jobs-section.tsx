@@ -1,8 +1,8 @@
+import { MiaProject } from "@visian/utils";
 import { useCallback, useState } from "react";
 import styled from "styled-components";
 
 import { useJobsBy } from "../../../queries";
-import { Project } from "../../../types";
 import { JobCreationPopup } from "../job-creation-popup";
 import { JobsTable } from "../job-history/job-table";
 import {
@@ -15,7 +15,7 @@ const StyledIconButton = styled(PaddedPageSectionIconButton)`
   height: 25px;
 `;
 
-export const JobsSection = ({ project }: { project: Project }) => {
+export const JobsSection = ({ project }: { project: MiaProject }) => {
   const { jobs, jobsError, isLoadingJobs, refetchJobs } = useJobsBy(project.id);
 
   // Jobs

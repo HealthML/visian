@@ -56,7 +56,7 @@ export const setupRootStore = async () => {
     }
 
     if (isFromWHO()) {
-      store.setReviewStrategy(new WHOReviewStrategy(store));
+      store.setReviewStrategy(new WHOReviewStrategy({ store }));
       store.reviewStrategy?.loadTask();
     }
   })();

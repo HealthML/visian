@@ -1,13 +1,14 @@
 import { action, makeObservable, observable } from "mobx";
 
 import { RootStore } from "../root";
+import { ReviewStrategySnapshot } from "./review-strategy-snapshot";
 import { ReviewTask } from "./review-task";
 
 export abstract class ReviewStrategy {
   protected store: RootStore;
   protected task?: ReviewTask;
 
-  constructor(store: RootStore) {
+  constructor({ store }: { store: RootStore }) {
     makeObservable<this, "task">(this, {
       task: observable,
       setCurrentTask: action,
@@ -71,7 +72,7 @@ export abstract class ReviewStrategy {
           `Annotation ${idx + 1}`,
           getMetadataFromChild
             ? { ...annotationFiles[0]?.metadata }
-            : { id: annotationId },
+            : { id: annotationId, kind: "annotation", backend: "who" },
         );
         if (!familyFiles) throw new Error("No active Document");
 
@@ -83,4 +84,6 @@ export abstract class ReviewStrategy {
       }),
     );
   }
+
+  public abstract toJSON(): ReviewStrategySnapshot;
 }

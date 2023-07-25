@@ -7,6 +7,7 @@ import {
   Text,
   useTranslation,
 } from "@visian/ui-shared";
+import { MiaImage, MiaJob } from "@visian/utils";
 import { useCallback, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
@@ -20,7 +21,6 @@ import {
 } from "../../../queries";
 import useImagesByJob from "../../../queries/use-images-by-jobs";
 import { useJobProgress } from "../../../queries/use-job-progress";
-import { Image, Job } from "../../../types";
 import { AnnotationProgress } from "../annotation-progress";
 import { ConfirmationPopup } from "../confirmation-popup";
 import { JobLogPopup } from "../job-history/job-log-popup";
@@ -66,7 +66,7 @@ const IconButton = styled(InvisibleButton)`
   width: 30px;
 `;
 
-export const JobPage = ({ job }: { job: Job }) => {
+export const JobPage = ({ job }: { job: MiaJob }) => {
   const { progress, isLoadingProgress } = useJobProgress(job.id);
 
   const { annotations, isErrorAnnotations } = useAnnotationsByJob(job.id);
@@ -123,7 +123,7 @@ export const JobPage = ({ job }: { job: Job }) => {
   );
 
   const compareImages = useCallback(
-    (a: Image, b: Image) => {
+    (a: MiaImage, b: MiaImage) => {
       if (findAnnotationId(a.id) && !findAnnotationId(b.id)) {
         return -1;
       }
@@ -135,14 +135,13 @@ export const JobPage = ({ job }: { job: Job }) => {
     [findAnnotationId],
   );
 
-  const confirmDeleteJob = useCallback(
-    () =>
-      deleteJobs({
-        projectId: job.project,
-        jobIds: [job.id],
-      }),
-    [deleteJobs, job],
-  );
+  const confirmDeleteJob = useCallback(() => {
+    deleteJobs({
+      projectId: job.project,
+      jobIds: [job.id],
+    });
+    navigate(`/projects/${job.project}`);
+  }, [deleteJobs, job, navigate]);
 
   const confirmCancelJob = useCallback(
     () =>
@@ -157,10 +156,10 @@ export const JobPage = ({ job }: { job: Job }) => {
   const startReviewJob = useCallback(
     async (annotationId?: string) => {
       store?.startReview(
-        async (url: string) =>
+        async () =>
           annotationId
-            ? MiaReviewStrategy.fromAnnotationId(store, annotationId, url)
-            : MiaReviewStrategy.fromJob(store, job.id, url),
+            ? MiaReviewStrategy.fromAnnotationId(store, annotationId)
+            : MiaReviewStrategy.fromJob(store, job.id),
         navigate,
       );
     },
@@ -222,7 +221,7 @@ export const JobPage = ({ job }: { job: Job }) => {
                           <IconButton
                             icon="logs"
                             tooltipTx="open-job-log"
-                            onPointerDown={openJobLogPopUp}
+                            onClick={openJobLogPopUp}
                             tooltipPosition="right"
                           />
                         )}
@@ -230,14 +229,14 @@ export const JobPage = ({ job }: { job: Job }) => {
                           <IconButton
                             icon="cancel"
                             tooltipTx="cancel-job-title"
-                            onPointerDown={openCancelJobConfirmationPopUp}
+                            onClick={openCancelJobConfirmationPopUp}
                             tooltipPosition="right"
                           />
                         ) : (
                           <IconButton
                             icon="trash"
                             tooltipTx="delete-job-title"
-                            onPointerDown={openDeleteJobConfirmationPopUp}
+                            onClick={openDeleteJobConfirmationPopUp}
                             tooltipPosition="right"
                           />
                         )}
@@ -265,21 +264,23 @@ export const JobPage = ({ job }: { job: Job }) => {
       >
         {images && !isErrorImages && !isErrorAnnotations && (
           <StyledSheet>
-            {images?.sort(compareImages).map((image: Image, index: number) => (
-              <ClickableListItem
-                key={image.id}
-                onClick={async () => {
-                  const annotationId = findAnnotationId(image.id);
-                  if (annotationId) await startReviewJob(annotationId);
-                }}
-                isLast={index === images.length - 1}
-              >
-                <StyledText text={image.dataUri.split("/").pop()} />
-                {imagesWithAnnotations?.includes(image.id) && (
-                  <SubtleText tx="image-annotated" />
-                )}
-              </ClickableListItem>
-            ))}
+            {images
+              ?.sort(compareImages)
+              .map((image: MiaImage, index: number) => (
+                <ClickableListItem
+                  key={image.id}
+                  onClick={async () => {
+                    const annotationId = findAnnotationId(image.id);
+                    if (annotationId) await startReviewJob(annotationId);
+                  }}
+                  isLast={index === images.length - 1}
+                >
+                  <StyledText text={image.dataUri.split("/").pop()} />
+                  {imagesWithAnnotations?.includes(image.id) && (
+                    <SubtleText tx="image-annotated" />
+                  )}
+                </ClickableListItem>
+              ))}
           </StyledSheet>
         )}
         <ConfirmationPopup
@@ -294,7 +295,7 @@ export const JobPage = ({ job }: { job: Job }) => {
         <ConfirmationPopup
           isOpen={isCancelJobConfirmationPopUpOpen}
           onClose={closeCancelJobConfirmationPopUp}
-          message="cancel-job-message"
+          messageTx="cancel-job-message"
           titleTx="cancel-job-title"
           onConfirm={confirmCancelJob}
         />

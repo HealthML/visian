@@ -6,6 +6,7 @@ import {
   Text,
   useTranslation,
 } from "@visian/ui-shared";
+import { MiaAnnotation } from "@visian/utils";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
@@ -13,7 +14,6 @@ import styled from "styled-components";
 import { useStore } from "../../../app/root-store";
 import { MiaReviewStrategy, TaskType } from "../../../models/review-strategy";
 import { useAnnotationsByImage } from "../../../queries";
-import { Annotation } from "../../../types";
 import { handleImageSelection } from "../util";
 import { DatasetImageListItemProps } from "./dataset-image-list-item.props";
 
@@ -123,15 +123,10 @@ export const DatasetImageListItem: React.FC<DatasetImageListItemProps> = ({
   const startReview = useCallback(
     async (taskType: TaskType, annotationId?: string) => {
       store?.startReview(
-        async (url: string) =>
+        async () =>
           annotationId
-            ? MiaReviewStrategy.fromAnnotationId(
-                store,
-                annotationId,
-                url,
-                taskType,
-              )
-            : MiaReviewStrategy.fromImageIds(store, [image.id], url, taskType),
+            ? MiaReviewStrategy.fromAnnotationId(store, annotationId, taskType)
+            : MiaReviewStrategy.fromImageIds(store, [image.id], taskType),
         navigate,
       );
     },
@@ -154,7 +149,7 @@ export const DatasetImageListItem: React.FC<DatasetImageListItemProps> = ({
       <ListItem isLast={isLast && !showAnnotations}>
         <IconButton
           icon={showAnnotations ? "arrowDown" : "arrowRight"}
-          onPointerDown={toggleShowAnnotations}
+          onClick={toggleShowAnnotations}
         />
         <Spacer />
         <ClickableText onClick={openImage}>{imageText}</ClickableText>
@@ -171,13 +166,13 @@ export const DatasetImageListItem: React.FC<DatasetImageListItemProps> = ({
           <IconButton
             icon="trash"
             tooltipTx="delete-image-title"
-            onPointerDown={deleteDeleteImage}
+            onClick={deleteDeleteImage}
             tooltipPosition="left"
           />
         ) : (
           <IconButton
             icon={isSelected ? "checked" : "unchecked"}
-            onPointerDown={handleSelection}
+            onClick={handleSelection}
           />
         )}
       </ListItem>
@@ -192,7 +187,7 @@ export const DatasetImageListItem: React.FC<DatasetImageListItemProps> = ({
           annotations && (
             <AnnotationsList>
               {annotations.map(
-                (annotation: Annotation, annotationIndex: number) => (
+                (annotation: MiaAnnotation, annotationIndex: number) => (
                   <ListItem
                     isLast={
                       isLast && annotationIndex === annotations.length - 1
@@ -218,7 +213,7 @@ export const DatasetImageListItem: React.FC<DatasetImageListItemProps> = ({
                       <IconButton
                         icon="trash"
                         tooltipTx="delete-annotation-title"
-                        onPointerDown={() => {
+                        onClick={() => {
                           deleteAnnotation(annotation);
                         }}
                       />

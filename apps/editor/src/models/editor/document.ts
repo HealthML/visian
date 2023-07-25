@@ -9,6 +9,7 @@ import {
   ILayerFamily,
   ISliceRenderer,
   IVolumeRenderer,
+  LayerFamilySnapshot,
   LayerSnapshot,
   MeasurementType,
   PerformanceMode,
@@ -17,10 +18,14 @@ import {
   ValueType,
 } from "@visian/ui-shared";
 import {
+  BackendMetadata,
+  FileWithFamily,
+  FileWithMetadata,
   handlePromiseSettledResult,
   IDisposable,
   ImageMismatchError,
   ISerializable,
+  isMiaMetadata,
   ITKImageWithUnit,
   ITKMatrix,
   readMedicalImage,
@@ -42,13 +47,12 @@ import {
   generalTextures2d,
   generalTextures3d,
 } from "../../constants";
-import { FileMetadata, FileWithFamily, FileWithMetadata } from "../../types";
 import { readTrackingLog, TrackingData } from "../tracking";
 import { StoreContext } from "../types";
 import { Clipboard } from "./clipboard";
 import { History, HistorySnapshot } from "./history";
 import { LayerFamily } from "./layer-families";
-import { ImageLayer, Layer } from "./layers";
+import { ImageLayer } from "./layers";
 import * as layers from "./layers";
 import { Markers } from "./markers";
 import { ToolName, Tools, ToolsSnapshot } from "./tools";
@@ -78,6 +82,7 @@ export interface DocumentSnapshot {
   activeLayerId?: string;
   layerMap: LayerSnapshot[];
   layerIds: string[];
+  layerFamilies: LayerFamilySnapshot[];
 
   history: HistorySnapshot;
 
@@ -100,7 +105,7 @@ export class Document
 
   protected activeLayerId?: string;
   protected measurementDisplayLayerId?: string;
-  protected layerMap: { [key: string]: Layer };
+  protected layerMap: { [key: string]: ILayer };
   protected layerFamilyMap: { [key: string]: LayerFamily };
   protected layerIds: string[];
 
@@ -144,6 +149,9 @@ export class Document
       layer.fixPotentiallyBadColor(),
     );
 
+    snapshot?.layerFamilies.forEach((family) => {
+      this.layerFamilyMap[family.id] = new LayerFamily(family, this);
+    });
     this.history = new History(snapshot?.history, this);
     this.viewSettings = new ViewSettings(snapshot?.viewSettings, this);
     this.viewport2D = new Viewport2D(snapshot?.viewport2D, this);
@@ -225,13 +233,18 @@ export class Document
 
   public get title(): string | undefined {
     if (this.titleOverride) return this.titleOverride;
-    if (this.activeLayer?.family?.metaData?.dataUri) {
-      return this.activeLayer.family.metaData.dataUri;
+    const familyMeta = this.activeLayer?.family?.metadata;
+    if (isMiaMetadata(familyMeta)) {
+      return familyMeta.dataUri;
     }
     const { length } = this.layers;
     if (!length) return undefined;
-    const lastLayer = this.getLayer(this.layers[length - 1].id);
-    return lastLayer?.metadata?.dataUri?.split("/").pop() ?? lastLayer?.title;
+    const lastLayer = this.getLayer(this.layerIds[length - 1]);
+    const layerMeta = lastLayer?.metadata;
+    if (isMiaMetadata(layerMeta)) {
+      return layerMeta?.dataUri?.split("/").pop();
+    }
+    return lastLayer?.title;
   }
 
   public setTitle = (value?: string): void => {
@@ -339,6 +352,13 @@ export class Document
     return id ? this.layerMap[id] : undefined;
   }
 
+  public getOrphanAnnotationLayers(): ILayer[] {
+    const orphanAnnotationLayers = this.layers.filter(
+      (l) => l.isAnnotation && !l.family,
+    );
+    return orphanAnnotationLayers ?? [];
+  }
+
   public getLayerFamily(id: string): ILayerFamily | undefined {
     return this.layerFamilyMap[id];
   }
@@ -367,7 +387,7 @@ export class Document
   if an index is specified, the family will be inserted at the index
   if no index is specified, the family remain where it was if already in the list
   if not in the list, annotations will be inserted at the start and images at the end of the list */
-  public addLayer = (layer: Layer, index?: number): void => {
+  public addLayer = (layer: ILayer, index?: number): void => {
     if (!layer.id) return;
     if (!this.layerMap[layer.id]) {
       this.layerMap[layer.id] = layer;
@@ -699,7 +719,7 @@ export class Document
         this.createLayerFamily(
           unzippedFiles,
           filteredFiles.name,
-          this.getMetaDataFromFile(filteredFiles),
+          this.getMetadataFromFile(filteredFiles),
         ),
         filteredFiles.name,
       );
@@ -725,7 +745,7 @@ export class Document
       this.createLayerFamily(
         [filteredFiles],
         filteredFiles.name,
-        this.getMetaDataFromFile(filteredFiles),
+        this.getMetadataFromFile(filteredFiles),
       );
     } else {
       this.createLayerFamily(filteredFiles, name ?? uuidv4());
@@ -831,7 +851,7 @@ export class Document
             });
             if (files instanceof File) {
               this.addLayerToFamily(createdLayerId, files);
-              this.addMetaDataToLayer(createdLayerId, files);
+              this.addMetadataToLayer(createdLayerId, files);
             }
           }
         } else {
@@ -869,7 +889,7 @@ export class Document
           );
           if (files instanceof File) {
             this.addLayerToFamily(createdLayerId, files);
-            this.addMetaDataToLayer(createdLayerId, files);
+            this.addMetadataToLayer(createdLayerId, files);
           }
         });
         // }
@@ -888,7 +908,7 @@ export class Document
 
     if (files instanceof File) {
       this.addLayerToFamily(createdLayerId, files);
-      this.addMetaDataToLayer(createdLayerId, files);
+      this.addMetadataToLayer(createdLayerId, files);
     }
     return createdLayerId;
   }
@@ -1029,11 +1049,11 @@ export class Document
   }
 
   /** Adds meta data from file with metadata to layer */
-  private addMetaDataToLayer(layerId: string, file: File) {
+  private addMetadataToLayer(layerId: string, file: File) {
     const layer = this.getLayer(layerId);
-    const metaData = this.getMetaDataFromFile(file);
-    if (layer && metaData) {
-      layer.metadata = metaData;
+    const metadata = this.getMetadataFromFile(file);
+    if (layer && metadata) {
+      layer.metadata = metadata;
     }
   }
 
@@ -1047,10 +1067,10 @@ export class Document
   }
 
   /** Extracts metadata appended to a file object */
-  private getMetaDataFromFile(file: File): FileMetadata | undefined {
+  private getMetadataFromFile(file: File): BackendMetadata | undefined {
     if ("metadata" in file) {
-      const fileWithMetaData = file as FileWithMetadata;
-      return fileWithMetaData.metadata;
+      const fileWithMetadata = file as FileWithMetadata;
+      return fileWithMetadata.metadata;
     }
     return undefined;
   }
@@ -1059,7 +1079,7 @@ export class Document
   public createLayerFamily(
     files: File[],
     title?: string,
-    groupMetaData?: FileMetadata,
+    groupMetadata?: BackendMetadata,
   ): FileWithFamily[] {
     if (files.every((f) => "familyId" in f)) {
       return files as FileWithFamily[];
@@ -1069,8 +1089,8 @@ export class Document
         "Cannot create a new group for file that already belongs to a group",
       );
     }
-    const layerFamily = new LayerFamily(this, title);
-    layerFamily.metaData = groupMetaData;
+    const layerFamily = new LayerFamily({ title }, this);
+    layerFamily.metadata = groupMetadata;
 
     const filesWithGroup = files.map((f) => {
       const fileWithGroup = f as FileWithFamily;
@@ -1120,6 +1140,7 @@ export class Document
       viewport3D: this.viewport3D.toJSON(),
       tools: this.tools.toJSON(),
       useExclusiveSegmentations: this.useExclusiveSegmentations,
+      layerFamilies: this.layerFamilies.map((family) => family.toJSON()),
     };
   }
 

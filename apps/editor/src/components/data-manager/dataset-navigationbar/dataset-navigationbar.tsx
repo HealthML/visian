@@ -42,7 +42,7 @@ export const DatasetNavigationBar: React.FC<DatasetNavigationBarProps> = ({
         isDisabled={!anySelected}
         icon="trash"
         tooltipTx="delete-documents"
-        onPointerDown={deleteSelectedImages}
+        onClick={deleteSelectedImages}
         tooltipPosition="top"
       />
       <PageSectionIconButton
@@ -50,13 +50,13 @@ export const DatasetNavigationBar: React.FC<DatasetNavigationBarProps> = ({
         icon="mlAutoAnnotation"
         tooltipTx="auto-annotate-documents"
         tooltipPosition="top"
-        onPointerDown={openJobCreationPopUp}
+        onClick={openJobCreationPopUp}
       />
       <PageSectionIconButton
         icon="exit"
         tooltipTx="exit-select-mode"
         tooltipPosition="top"
-        onPointerDown={toggleSelectMode}
+        onClick={toggleSelectMode}
       />
     </Container>
   ) : (
@@ -65,13 +65,13 @@ export const DatasetNavigationBar: React.FC<DatasetNavigationBarProps> = ({
         icon="import"
         tooltipTx="import-images"
         tooltipPosition="top"
-        onPointerDown={openImageImportPopUp}
+        onClick={openImageImportPopUp}
       />
       <PageSectionIconButton
         icon="select"
         tooltipTx="select-mode"
         tooltipPosition="top"
-        onPointerDown={toggleSelectMode}
+        onClick={toggleSelectMode}
       />
     </Container>
   );

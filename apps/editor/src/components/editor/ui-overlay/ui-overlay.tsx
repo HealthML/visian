@@ -9,7 +9,6 @@ import {
 import { isFromMia, isFromWHO } from "@visian/utils";
 import { observer } from "mobx-react-lite";
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { useSearchParams } from "react-router-dom";
 import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
@@ -204,8 +203,6 @@ export const UIOverlay = observer<UIOverlayProps>(
       setIsExportPopUpOpen(false);
     }, []);
 
-    const [searchParams] = useSearchParams();
-
     return (
       <Container
         {...rest}
@@ -267,18 +264,20 @@ export const UIOverlay = observer<UIOverlayProps>(
             <ColumnRight>
               <SideViews />
               <RightBar>
-                <FloatingUIButton
-                  icon="exit"
-                  tooltipTx="close-editor"
-                  tooltipPosition="left"
-                  onPointerDown={async () => {
-                    await store?.reviewStrategy?.saveTask();
-                    store?.destroyRedirect("/projects");
-                  }}
-                  isActive={false}
-                />
                 {!isFromWHO() && (
                   <>
+                    <FloatingUIButton
+                      icon="exit"
+                      tooltipTx="close-editor"
+                      tooltipPosition="left"
+                      onPointerDown={async () => {
+                        await store?.reviewStrategy?.saveTask();
+                        await store.redirectToReturnUrl({
+                          forceRedirect: false,
+                        });
+                      }}
+                      isActive={false}
+                    />
                     {store?.reviewStrategy?.currentTask?.kind ===
                       TaskType.Create && (
                       <FloatingUIButton

@@ -7,7 +7,7 @@ import {
   LayerSnapshot,
   MarkerConfig,
 } from "@visian/ui-shared";
-import { ISerializable, ViewType } from "@visian/utils";
+import { BackendMetadata, ISerializable, ViewType } from "@visian/utils";
 import { action, computed, makeObservable, observable } from "mobx";
 import { Matrix4 } from "three";
 import tc from "tinycolor2";
@@ -39,7 +39,7 @@ export class Layer implements ILayer, ISerializable<LayerSnapshot> {
 
   public transformation!: Matrix4;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public metadata?: { id: string; [key: string]: any } | undefined;
+  public metadata?: BackendMetadata;
 
   constructor(
     snapshot: Partial<LayerSnapshot> | undefined,
@@ -49,40 +49,41 @@ export class Layer implements ILayer, ISerializable<LayerSnapshot> {
     this.id = snapshot?.id || uuidv4();
     if (!isCalledByChild) this.applySnapshot(snapshot);
 
-    makeObservable<this, "titleOverride" | "parentId" | "opacityOverride">(
+    makeObservable<
       this,
-      {
-        isAnnotation: observable,
-        id: observable,
-        titleOverride: observable,
-        parentId: observable,
-        blendMode: observable,
-        color: observable,
-        isVisible: observable,
-        opacityOverride: observable,
-        transformation: observable.ref,
+      "titleOverride" | "parentId" | "opacityOverride" | "metadata"
+    >(this, {
+      isAnnotation: observable,
+      id: observable,
+      titleOverride: observable,
+      parentId: observable,
+      blendMode: observable,
+      color: observable,
+      isVisible: observable,
+      opacityOverride: observable,
+      transformation: observable.ref,
+      metadata: observable,
 
-        opacity: computed,
-        parent: computed,
-        title: computed,
-        family: computed,
-        isActive: computed,
+      opacity: computed,
+      parent: computed,
+      title: computed,
+      family: computed,
+      isActive: computed,
 
-        setParent: action,
-        setFamily: action,
-        setIsAnnotation: action,
-        setTitle: action,
-        setBlendMode: action,
-        setColor: action,
-        setIsVisible: action,
-        setOpacity: action,
-        setMetadata: action,
-        resetSettings: action,
-        setTransformation: action,
-        delete: action,
-        applySnapshot: action,
-      },
-    );
+      setParent: action,
+      setFamily: action,
+      setIsAnnotation: action,
+      setTitle: action,
+      setBlendMode: action,
+      setColor: action,
+      setIsVisible: action,
+      setOpacity: action,
+      setMetadata: action,
+      resetSettings: action,
+      setTransformation: action,
+      delete: action,
+      applySnapshot: action,
+    });
   }
 
   public setIsAnnotation(value?: boolean): void {
@@ -136,15 +137,8 @@ export class Layer implements ILayer, ISerializable<LayerSnapshot> {
     newFamily?.addLayer(this.id, index);
   }
 
-  public getOrphanAnnotationLayers(): ILayer[] {
-    const orphanAnnotationLayers = this.document.layers.filter(
-      (l) => l.isAnnotation && !l.family,
-    );
-    return orphanAnnotationLayers ?? [];
-  }
-
   public getFamilyLayers(): ILayer[] {
-    return this.family?.layers ?? this.getOrphanAnnotationLayers();
+    return this.family?.layers ?? this.document.getOrphanAnnotationLayers();
   }
 
   public setBlendMode = (value?: BlendMode): void => {
@@ -155,14 +149,16 @@ export class Layer implements ILayer, ISerializable<LayerSnapshot> {
     this.color = value;
   };
 
-  public setIsVisible = (value?: boolean): void => {
+  public tryToggleIsVisible = (): void => {
     if (
-      value &&
       !this.isVisible &&
       this.document.imageLayers.length >= this.document.maxVisibleLayers
-    ) {
+    )
       return;
-    }
+    this.setIsVisible(!this.isVisible);
+  };
+
+  public setIsVisible = (value?: boolean): void => {
     this.isVisible = value ?? true;
   };
 
@@ -187,7 +183,7 @@ export class Layer implements ILayer, ISerializable<LayerSnapshot> {
   };
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public setMetadata = (value?: { id: string; [key: string]: any }): void => {
+  public setMetadata = (value?: BackendMetadata): void => {
     this.metadata = value;
   };
 
@@ -237,6 +233,7 @@ export class Layer implements ILayer, ISerializable<LayerSnapshot> {
       isVisible: this.isVisible,
       opacityOverride: this.opacityOverride,
       transformation: this.transformation?.toArray(),
+      metadata: this.metadata ? { ...this.metadata } : undefined,
     };
   }
 
@@ -244,7 +241,6 @@ export class Layer implements ILayer, ISerializable<LayerSnapshot> {
     if (snapshot?.id && snapshot?.id !== this.id) {
       throw new Error("Layer ids do not match");
     }
-
     this.setIsAnnotation(snapshot?.isAnnotation);
     this.setTitle(snapshot?.titleOverride);
     this.setParent(snapshot?.parentId);
@@ -257,6 +253,7 @@ export class Layer implements ILayer, ISerializable<LayerSnapshot> {
         ? new Matrix4().fromArray(snapshot.transformation)
         : undefined,
     );
+    this.setMetadata(snapshot?.metadata);
 
     return Promise.resolve();
   }

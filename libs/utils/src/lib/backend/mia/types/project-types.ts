@@ -1,4 +1,4 @@
-export interface Project {
+export interface MiaProject {
   id: string;
   name: string;
   createdAt: string;

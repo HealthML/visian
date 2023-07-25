@@ -1,12 +1,12 @@
 import { render } from "@testing-library/react";
 import React from "react";
 
-import { Progress } from "./progress";
+import { ProgressBar } from "./progress-bar";
 
-describe("Progress", () => {
+describe("ProgressBar", () => {
   it("should render successfully", () => {
     const { baseElement } = render(
-      <Progress total={120} totalLabel="All Items" bars={[]} />,
+      <ProgressBar total={120} totalLabel="All Items" bars={[]} />,
     );
     expect(baseElement).toBeTruthy();
   });

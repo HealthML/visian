@@ -1,10 +1,10 @@
 import { Divider, PopUp, SectionHeader, Text } from "@visian/ui-shared";
+import { MiaJob } from "@visian/utils";
 import { observer } from "mobx-react-lite";
 import { useEffect, useState } from "react";
 import styled from "styled-components";
 
 import { getJobLog } from "../../../../queries";
-import { Job } from "../../../../types";
 import { JobLogPopUpProps } from "./job-log-popup.props";
 
 const PopUpContainer = styled(PopUp)`
@@ -22,7 +22,7 @@ const StyledText = styled(Text)`
   white-space: pre-wrap;
 `;
 
-const getLogText = async (job: Job) => {
+const getLogText = async (job: MiaJob) => {
   let logText = "";
   if (job.logFileUri) {
     try {

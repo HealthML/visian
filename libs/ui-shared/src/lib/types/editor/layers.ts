@@ -1,4 +1,10 @@
-import type { Image, Vector, ViewType, Voxel } from "@visian/utils";
+import type {
+  BackendMetadata,
+  Image,
+  Vector,
+  ViewType,
+  Voxel,
+} from "@visian/utils";
 import type { Matrix4 } from "three";
 
 import { MarkerConfig } from "./markers";
@@ -30,7 +36,6 @@ export interface LayerSnapshot {
   id: string;
   titleOverride?: string;
   parentId?: string;
-  familyId?: string;
 
   blendMode: BlendMode;
   color?: string;
@@ -38,6 +43,14 @@ export interface LayerSnapshot {
   opacityOverride?: number;
 
   transformation: number[];
+  metadata?: BackendMetadata;
+}
+
+export interface LayerFamilySnapshot {
+  id: string;
+  title: string;
+  metadata?: BackendMetadata;
+  layerIds: string[];
 }
 
 /** A generic layer. */
@@ -95,9 +108,11 @@ export interface ILayer {
   /** The layer's transform matrix used to position it during rendering. */
   transformation?: Matrix4;
   /** The layer's metadata ID. */
-  metadata?: { id: string; [key: string]: any };
+  metadata?: BackendMetadata;
   /** Whether the layer is the document's active layer */
   isActive: boolean;
+
+  excludeFromSnapshotTracking: string[];
 
   /**
    * Returns all slice markers, aggregated for the layer and given view type.
@@ -107,7 +122,7 @@ export interface ILayer {
   /** Sets the layer's title. */
   setTitle(value?: string): void;
 
-  setMetadata(value?: { id: string; [key: string]: any }): void;
+  setMetadata(value?: BackendMetadata): void;
 
   /** Sets this layer's parent layer, typically the group it is contained in. */
   setParent(idOrLayer?: string | ILayer): void;
@@ -124,9 +139,14 @@ export interface ILayer {
 
   setBlendMode(blendMode?: BlendMode): void;
   setColor(value?: string): void;
+  tryToggleIsVisible(): void;
   setIsVisible(value?: boolean): void;
   setOpacity(value?: number): void;
   resetSettings(): void;
+
+  setTransformation(value?: Matrix4): void;
+  fixPotentiallyBadColor(): void;
+  applySnapshot(snapshot?: Partial<LayerSnapshot>): Promise<void>;
 
   /**
    * Deletes this layer from the document it is contained in and any potential
@@ -219,8 +239,7 @@ export interface ILayerFamily {
   /** The family's display name. */
   title: string;
   /** The family's meta data. Usually the object from the DB */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  metaData?: { id: string; [key: string]: any };
+  metadata?: BackendMetadata;
   /** All layers in the family. */
   layers: ILayer[];
   /** Whether the layer is currently collapsed in the layer view* */
@@ -237,4 +256,8 @@ export interface ILayerFamily {
    * After being removed, the layer is added to the document at the specified index.
    */
   removeLayer(id: string, index?: number): void;
+  /** set verified if fam */
+  trySetIsVerified(value: boolean): void;
+
+  toJSON(): LayerFamilySnapshot;
 }

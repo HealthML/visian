@@ -1,18 +1,47 @@
 import { IImageLayer, ILayerFamily } from "@visian/ui-shared";
 import {
+  FileWithMetadata,
   getWHOTask,
   getWHOTaskIdFromUrl,
   setNewTaskIdForUrl,
 } from "@visian/utils";
 
 import { whoHome } from "../../constants";
-import { FileWithMetadata } from "../../types";
 import { ImageLayer } from "../editor";
+import { RootStore } from "../root";
 import { ReviewStrategy } from "./review-strategy";
+import { ReviewStrategySnapshot } from "./review-strategy-snapshot";
 import { TaskType } from "./review-task";
 import { WHOReviewTask } from "./who-review-task";
 
 export class WHOReviewStrategy extends ReviewStrategy {
+  public static fromSnapshot(
+    store: RootStore,
+    snapshot?: ReviewStrategySnapshot,
+  ) {
+    if (!snapshot) return undefined;
+    if (snapshot.backend === "who") {
+      return new WHOReviewStrategy({
+        store,
+        currentReviewTask: snapshot.currentReviewTask
+          ? WHOReviewTask.fromSnapshot(snapshot.currentReviewTask)
+          : undefined,
+      });
+    }
+    return undefined;
+  }
+
+  constructor({
+    store,
+    currentReviewTask,
+  }: {
+    store: RootStore;
+    currentReviewTask?: WHOReviewTask;
+  }) {
+    super({ store });
+    if (currentReviewTask) this.setCurrentTask(currentReviewTask);
+  }
+
   public async nextTask(): Promise<void> {
     this.store.setProgress({ labelTx: "saving", showSplash: true });
     try {
@@ -51,7 +80,7 @@ export class WHOReviewStrategy extends ReviewStrategy {
 
     await Promise.all(
       families.map(async (family: ILayerFamily) => {
-        const annotationId = family.metaData?.id;
+        const annotationId = family.metadata?.id;
         const annotationFiles = await this.getFilesForFamily(family);
         if (annotationFiles.length === 0) return;
         if (annotationId) {
@@ -70,7 +99,7 @@ export class WHOReviewStrategy extends ReviewStrategy {
         (annotationLayer) => annotationLayer.family === undefined,
       );
     if (!orphanLayers) return;
-    const files = await this.getFilesForLayers(orphanLayers);
+    const files = await this.getAnnotationFilesForLayers(orphanLayers);
     await this.currentTask?.createAnnotation(files);
   }
 
@@ -90,10 +119,12 @@ export class WHOReviewStrategy extends ReviewStrategy {
       (layer) => layer.kind === "image" && layer.isAnnotation,
     ) as ImageLayer[];
 
-    return this.getFilesForLayers(annotationLayers);
+    return this.getAnnotationFilesForLayers(annotationLayers);
   }
 
-  private async getFilesForLayers(layers: IImageLayer[]): Promise<File[]> {
+  private async getAnnotationFilesForLayers(
+    layers: IImageLayer[],
+  ): Promise<File[]> {
     return Promise.all(
       layers.map(async (layer: IImageLayer) => {
         const layerFile =
@@ -119,5 +150,14 @@ export class WHOReviewStrategy extends ReviewStrategy {
       return;
     }
     await this.importAnnotationsWithMetadata(false);
+  }
+
+  public toJSON(): ReviewStrategySnapshot {
+    return {
+      backend: "who",
+      currentReviewTask: this.currentTask
+        ? (this.currentTask as WHOReviewTask).toJSON()
+        : undefined,
+    };
   }
 }

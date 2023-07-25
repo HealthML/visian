@@ -104,6 +104,9 @@ export interface IDocument {
 
   getLayerFamily(id: string): ILayerFamily | undefined;
 
+  /* returns all annotation layers that do not have a family */
+  getOrphanAnnotationLayers(): ILayer[];
+
   /** Sets the active layer. */
   setActiveLayer(idOrLayer?: string | ILayer): void;
 

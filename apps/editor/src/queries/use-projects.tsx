@@ -1,16 +1,18 @@
+import { MiaProject } from "@visian/utils";
 import axios, { AxiosError } from "axios";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 
-import { Project } from "../types";
 import { hubBaseUrl } from "./hub-base-url";
 
 const getProjects = async () => {
-  const projectsResponse = await axios.get<Project[]>(`${hubBaseUrl}projects`);
+  const projectsResponse = await axios.get<MiaProject[]>(
+    `${hubBaseUrl}projects`,
+  );
   return projectsResponse.data;
 };
 
 const postProject = async ({ name }: { name: string }) => {
-  const postProjectResponse = await axios.post<Project>(
+  const postProjectResponse = await axios.post<MiaProject>(
     `${hubBaseUrl}projects`,
     { name },
   );
@@ -19,8 +21,8 @@ const postProject = async ({ name }: { name: string }) => {
 
 export const useProjects = () => {
   const { data, error, isError, isLoading, refetch, remove } = useQuery<
-    Project[],
-    AxiosError<Project>
+    MiaProject[],
+    AxiosError<MiaProject>
   >(["project"], () => getProjects(), {
     retry: 2, // retry twice if fetch fails
     refetchInterval: 1000 * 60, // refetch every minute
@@ -37,7 +39,7 @@ export const useProjects = () => {
 };
 
 const deleteProjects = async ({ projectIds }: { projectIds: string[] }) => {
-  const deleteProjectsResponse = await axios.delete<Project[]>(
+  const deleteProjectsResponse = await axios.delete<MiaProject[]>(
     `${hubBaseUrl}projects`,
     {
       data: { ids: projectIds },
@@ -52,11 +54,11 @@ export const useDeleteProjectsMutation = () => {
   const { isError, isIdle, isLoading, isPaused, isSuccess, mutate } =
     useMutation<
       string[],
-      AxiosError<Project[]>,
+      AxiosError<MiaProject[]>,
       {
         projectIds: string[];
       },
-      { previousProjects: Project[] }
+      { previousProjects: MiaProject[] }
     >({
       mutationFn: deleteProjects,
       onMutate: async ({ projectIds }: { projectIds: string[] }) => {
@@ -64,14 +66,14 @@ export const useDeleteProjectsMutation = () => {
           queryKey: ["project"],
         });
 
-        const previousProjects = queryClient.getQueryData<Project[]>([
+        const previousProjects = queryClient.getQueryData<MiaProject[]>([
           "project",
         ]);
 
         if (!previousProjects) return;
 
         const newProjects = previousProjects.filter(
-          (project: Project) => !projectIds.includes(project.id),
+          (project: MiaProject) => !projectIds.includes(project.id),
         );
 
         queryClient.setQueryData(["project"], newProjects);
@@ -103,10 +105,10 @@ export const useCreateProjectMutation = () => {
   const queryClient = useQueryClient();
   const { isError, isIdle, isLoading, isPaused, isSuccess, mutate } =
     useMutation<
-      Project,
+      MiaProject,
       AxiosError,
       { name: string },
-      { previousProjects: Project[] }
+      { previousProjects: MiaProject[] }
     >({
       mutationFn: postProject,
       onMutate: async ({ name }: { name: string }) => {
@@ -115,7 +117,7 @@ export const useCreateProjectMutation = () => {
         });
 
         const previousProjects =
-          queryClient.getQueryData<Project[]>(["project"]) ?? [];
+          queryClient.getQueryData<MiaProject[]>(["project"]) ?? [];
 
         const newProject = {
           id: "new-project",
@@ -150,8 +152,8 @@ export const useCreateProjectMutation = () => {
   };
 };
 
-const putProject = async (project: Project) => {
-  const putProjectResponse = await axios.put<Project>(
+const putProject = async (project: MiaProject) => {
+  const putProjectResponse = await axios.put<MiaProject>(
     `${hubBaseUrl}projects/${project.id}`,
     {
       name: project.name,
@@ -166,18 +168,20 @@ const putProject = async (project: Project) => {
 export const useUpdateProjectsMutation = () => {
   const queryClient = useQueryClient();
   return useMutation<
-    Project,
+    MiaProject,
     AxiosError,
-    Project,
-    { previousProjects: Project[] }
+    MiaProject,
+    { previousProjects: MiaProject[] }
   >({
     mutationFn: putProject,
-    onMutate: async (project: Project) => {
+    onMutate: async (project: MiaProject) => {
       await queryClient.cancelQueries({
         queryKey: ["project"],
       });
 
-      const previousProjects = queryClient.getQueryData<Project[]>(["project"]);
+      const previousProjects = queryClient.getQueryData<MiaProject[]>([
+        "project",
+      ]);
 
       if (!previousProjects) return;
 

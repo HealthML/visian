@@ -1,15 +1,14 @@
 import type { StatefulPopUpProps } from "@visian/ui-shared";
-
-import { Annotation, Image } from "../../../types";
+import type { MiaAnnotation, MiaImage } from "@visian/utils";
 
 export interface DatasetImageListItemProps extends StatefulPopUpProps {
   isInSelectMode: boolean;
-  image: Image;
+  image: MiaImage;
   refetchImages: () => void;
   isSelected: boolean;
   index: number;
   selectedImages: Set<string>;
-  images?: Image[];
+  images?: MiaImage[];
   setImageSelection: (imageId: string, selection: boolean) => void;
   setSelectedImages: React.Dispatch<React.SetStateAction<Set<string>>>;
   isShiftPressed: boolean;
@@ -17,7 +16,7 @@ export interface DatasetImageListItemProps extends StatefulPopUpProps {
   setSelectedRange: React.Dispatch<
     React.SetStateAction<{ start: number; end: number }>
   >;
-  deleteAnnotation: (annotation: Annotation) => void;
-  deleteImage: (image: Image) => void;
+  deleteAnnotation: (annotation: MiaAnnotation) => void;
+  deleteImage: (image: MiaImage) => void;
   isLast: boolean;
 }
