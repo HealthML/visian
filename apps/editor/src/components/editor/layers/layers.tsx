@@ -81,11 +81,15 @@ const TreeItemStyleWrapper = (props: TreeItemStyleWrapperProps) => {
   );
 };
 
+const indentationWidth = 20;
+const treeWidth = 235;
+
 const StyledTreeItem = styled(TreeItemStyleWrapper)`
   padding: 0px;
   border: none;
   background: none;
   width: 100%;
+  max-width: ${treeWidth}px;
 `;
 
 type TreeItemData = {
@@ -127,23 +131,32 @@ const LayerItem = ({ id }: { id: string }) => {
   if (family) {
     const isActive = !!family.collapsed && family.isActive;
     return (
-      <FamilyListItem
-        key={family.id}
-        family={family}
-        isActive={isActive}
-        isLast={hideLayerDivider(family)}
-      />
+      <div style={{ width: `${treeWidth}px`, maxWidth: "100%" }}>
+        <FamilyListItem
+          key={family.id}
+          family={family}
+          isActive={isActive}
+          isLast={hideLayerDivider(family)}
+        />
+      </div>
     );
   }
   const layer = store?.editor.activeDocument?.getLayer(id);
   if (layer) {
     return (
-      <LayerListItem
-        key={layer.id}
-        layer={layer}
-        isActive={layer.isActive}
-        isLast={hideLayerDivider(layer)}
-      />
+      <div
+        style={{
+          width: `${treeWidth - indentationWidth * (layer.family ? 1 : 0)}px`,
+          maxWidth: "100%",
+        }}
+      >
+        <LayerListItem
+          key={layer.id}
+          layer={layer}
+          isActive={layer.isActive}
+          isLast={hideLayerDivider(layer)}
+        />
+      </div>
     );
   }
   return (
@@ -362,6 +375,7 @@ export const Layers: React.FC = observer(() => {
                   : { animateLayoutChanges: () => false }
               }
               keepGhostInPlace={!!store.reviewStrategy}
+              indentationWidth={20}
             />
           </LayerList>
         </div>
