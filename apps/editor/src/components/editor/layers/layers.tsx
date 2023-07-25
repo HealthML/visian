@@ -211,19 +211,12 @@ export const Layers: React.FC = observer(() => {
   store?.editor.activeDocument?.activeLayer;
 
   const layers = store?.editor.activeDocument?.layers;
-  if (!layers || layers.length === 0) {
-    return (
-      <ListItem isLast>
-        <SubtleText tx="no-layers" />
-      </ListItem>
-    );
-  }
   const canFamilyHaveChildren = useCallback(
     (family: ILayerFamily) => {
       const callback = (draggedItem: TreeItem<TreeItemData>) => {
         const layer = store?.editor.activeDocument?.getLayer(draggedItem.value);
         if (
-          store.reviewStrategy &&
+          store?.reviewStrategy &&
           layer &&
           family.layers.filter((layerInFamily) => layer.id === layerInFamily.id)
             .length === 0
@@ -235,7 +228,7 @@ export const Layers: React.FC = observer(() => {
       };
       return callback;
     },
-    [store?.editor.activeDocument, store.reviewStrategy],
+    [store?.editor.activeDocument, store?.reviewStrategy],
   );
 
   const getTreeItems = useCallback(() => {
@@ -248,7 +241,7 @@ export const Layers: React.FC = observer(() => {
       disableSorting: false,
     });
 
-    const renderingOrder = store.editor.activeDocument?.renderingOrder;
+    const renderingOrder = store?.editor.activeDocument?.renderingOrder;
     if (!renderingOrder) {
       return [];
     }
@@ -264,7 +257,7 @@ export const Layers: React.FC = observer(() => {
       }
       return { id: "undefined", value: "undefined" };
     });
-  }, [canFamilyHaveChildren, store.editor.activeDocument?.renderingOrder]);
+  }, [canFamilyHaveChildren, store?.editor.activeDocument?.renderingOrder]);
 
   const treeItems = getTreeItems();
 
@@ -275,7 +268,7 @@ export const Layers: React.FC = observer(() => {
     ) => {
       if (change.type === "removed") return;
       if (change.type === "collapsed" || change.type === "expanded") {
-        const family = store.editor.activeDocument?.getLayerFamily(
+        const family = store?.editor.activeDocument?.getLayerFamily(
           change.item.value,
         );
         if (!family) return;
@@ -283,11 +276,11 @@ export const Layers: React.FC = observer(() => {
         return;
       }
       if (change.type === "dropped") {
-        const draggedLayer = store.editor.activeDocument?.getLayer(
+        const draggedLayer = store?.editor.activeDocument?.getLayer(
           change.draggedItem.value,
         );
         if (
-          store.reviewStrategy &&
+          store?.reviewStrategy &&
           draggedLayer &&
           (change.draggedFromParent
             ? change.draggedFromParent.value
@@ -297,16 +290,16 @@ export const Layers: React.FC = observer(() => {
           return;
         }
         newTreeItems.forEach((item, index) => {
-          const layer = store.editor.activeDocument?.getLayer(item.value);
+          const layer = store?.editor.activeDocument?.getLayer(item.value);
           if (layer) {
             layer?.setFamily(undefined, index);
           }
-          const family = store.editor.activeDocument?.getLayerFamily(
+          const family = store?.editor.activeDocument?.getLayerFamily(
             item.value,
           );
           if (family) {
             item.children?.forEach((childItem, childIndex) => {
-              const childLayer = store.editor.activeDocument?.getLayer(
+              const childLayer = store?.editor.activeDocument?.getLayer(
                 childItem.value,
               );
               if (childLayer) {
@@ -314,7 +307,7 @@ export const Layers: React.FC = observer(() => {
               }
             });
             family.collapsed = item.collapsed;
-            store.editor.activeDocument?.addLayerFamily(
+            store?.editor.activeDocument?.addLayerFamily(
               family as LayerFamily,
               index,
             );
@@ -322,14 +315,22 @@ export const Layers: React.FC = observer(() => {
         });
       }
     },
-    [store.editor.activeDocument, store.reviewStrategy],
+    [store?.editor.activeDocument, store?.reviewStrategy],
   );
 
-  const firstElement = store.editor.activeDocument?.renderingOrder[0];
+  const firstElement = store?.editor.activeDocument?.renderingOrder[0];
   const isHeaderDivideVisible = !(
     firstElement?.isActive &&
     (firstElement instanceof LayerFamily ? firstElement.collapsed : true)
   );
+
+  if (!layers) {
+    return (
+      <ListItem isLast>
+        <SubtleText tx="no-layers" />
+      </ListItem>
+    );
+  }
 
   return (
     <>
@@ -376,15 +377,22 @@ export const Layers: React.FC = observer(() => {
               items={treeItems}
               onItemsChanged={updateRenderingOrder}
               TreeItemComponent={TreeItemComponent}
-              dropAnimation={store.reviewStrategy ? undefined : null}
+              dropAnimation={store?.reviewStrategy ? undefined : null}
               sortableProps={
-                store.reviewStrategy
+                store?.reviewStrategy
                   ? undefined
                   : { animateLayoutChanges: () => false }
               }
-              keepGhostInPlace={!!store.reviewStrategy}
+              keepGhostInPlace={!!store?.reviewStrategy}
               indentationWidth={20}
             />
+            {layers.length === 0 ? (
+              <ListItem isLast>
+                <SubtleText tx="no-layers" />
+              </ListItem>
+            ) : (
+              false
+            )}
           </LayerList>
         </OuterWrapper>
       </LayerModal>
