@@ -224,23 +224,6 @@ export const JobPage = ({ job }: { job: Job }) => {
               <PageSection titleTx="job-details">
                 <DetailsSheet>
                   <DetailsRow
-                    text="ID"
-                    content={
-                      <>
-                        <Text text={`${job.id.substring(0, 7)}...`} />
-                        <Spacer />
-                        <StyledTimerButton
-                          icon="copyClipboard"
-                          tooltipTx="copy"
-                          onClick={copyJobId}
-                          tooltipPosition="right"
-                          secondIcon="check"
-                          secondTooltipTx="copied"
-                        />
-                      </>
-                    }
-                  />
-                  <DetailsRow
                     tx="job-status"
                     content={
                       <>
@@ -268,6 +251,23 @@ export const JobPage = ({ job }: { job: Job }) => {
                             tooltipPosition="right"
                           />
                         )}
+                      </>
+                    }
+                  />
+                  <DetailsRow
+                    text="ID"
+                    content={
+                      <>
+                        <Text text={`${job.id.substring(0, 7)}...`} />
+                        <Spacer />
+                        <StyledTimerButton
+                          icon="copyClipboard"
+                          tooltipTx="copy"
+                          onClick={copyJobId}
+                          tooltipPosition="right"
+                          secondIcon="check"
+                          secondTooltipTx="copied"
+                        />
                       </>
                     }
                   />
