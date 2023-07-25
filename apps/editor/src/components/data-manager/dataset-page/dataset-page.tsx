@@ -1,6 +1,6 @@
-import { Notification, Sheet, space, useTranslation } from "@visian/ui-shared";
+import { Notification, useTranslation } from "@visian/ui-shared";
 import { MiaAnnotation, MiaDataset, MiaImage } from "@visian/utils";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 
@@ -14,18 +14,12 @@ import {
 import { useDatasetProgress } from "../../../queries/use-dataset-progress";
 import { AnnotationProgress } from "../annotation-progress";
 import { ConfirmationPopup } from "../confirmation-popup";
-import { DatasetImageList } from "../dataset-image-list";
-import { DatasetNavigationBar } from "../dataset-navigationbar";
 import { ImageImportPopup } from "../image-import-popup";
+import { ImageList } from "../image-list";
 import { JobCreationPopup } from "../job-creation-popup";
-import { PageSection } from "../page-section";
+import { PaddedPageSectionIconButton, PageSection } from "../page-section";
 import { PageTitle } from "../page-title";
 import { useImageSelection, usePopUpState } from "../util";
-
-const StyledSheet = styled(Sheet)`
-  padding: ${space("listPadding")};
-  box-sizing: border-box;
-`;
 
 const Container = styled.div`
   width: 100%;
@@ -41,6 +35,15 @@ const ErrorNotification = styled(Notification)`
   transform: translateX(-50%);
 `;
 
+const ActionContainer = styled.div`
+  display: flex;
+  align-items: center;
+`;
+
+const ActionIconButton = styled(PaddedPageSectionIconButton)`
+  height: 25px;
+`;
+
 export const DatasetPage = ({
   dataset,
   isDraggedOver,
@@ -51,38 +54,23 @@ export const DatasetPage = ({
   onDropCompleted: () => void;
 }) => {
   const store = useStore();
-
-  const [isInSelectMode, setIsInSelectMode] = useState(false);
+  const { t } = useTranslation();
+  const navigate = useNavigate();
 
   const { progress, isLoadingProgress } = useDatasetProgress(dataset.id);
 
   const { images, imagesError, isLoadingImages, refetchImages } =
     useImagesByDataset(dataset.id);
 
-  const { selectedImages, setSelectedImages, setImageSelection } =
-    useImageSelection();
-
-  const setSelectAll = useCallback(
-    (selection: boolean) => {
-      if (selection) {
-        const newSelection = new Set<string>();
-        images?.forEach((image: MiaImage) => newSelection.add(image.id));
-        setSelectedImages(newSelection);
-        return;
-      }
-      setSelectedImages(new Set<string>());
-    },
-    [images, setSelectedImages],
-  );
+  const { selectedImages, selectImages } = useImageSelection();
 
   const { deleteImages } = useDeleteImagesMutation(dataset.id);
-
   const { deleteAnnotations } = useDeleteAnnotationsForImageMutation();
 
   const [annotationTobBeDeleted, setAnnotationTobBeDeleted] =
     useState<MiaAnnotation>();
 
-  const [imageTobBeDeleted, setImageTobBeDeleted] = useState<MiaImage>();
+  const [imagesTobBeDeleted, setImagesTobBeDeleted] = useState<MiaImage[]>([]);
 
   // Delete annotation confirmation popup
   const [
@@ -91,34 +79,28 @@ export const DatasetPage = ({
     closeDeleteAnnotationConfirmationPopUp,
   ] = usePopUpState(false);
 
-  // Delete images confirmation popup
+  // Image delete popup
   const [
     isDeleteImagesConfirmationPopUpOpen,
     openDeleteImagesConfirmationPopUp,
     closeDeleteImagesConfirmationPopUp,
   ] = usePopUpState(false);
-
+  const openDeletePopup = useCallback(
+    (imagesToDelete: MiaImage[]) => {
+      setImagesTobBeDeleted(imagesToDelete);
+      openDeleteImagesConfirmationPopUp();
+    },
+    [setImagesTobBeDeleted, openDeleteImagesConfirmationPopUp],
+  );
   const closeDeleteImagesConfirmationPopUpAndClearSelection =
     useCallback(() => {
       closeDeleteImagesConfirmationPopUp();
-      setImageTobBeDeleted(undefined);
-    }, [closeDeleteImagesConfirmationPopUp, setImageTobBeDeleted]);
-
-  const toggleSelectMode = useCallback(() => {
-    setIsInSelectMode((prevIsInSelectMode) => !prevIsInSelectMode);
-  }, []);
-
-  const areAllSelected = useMemo(
-    () => selectedImages.size === (images?.length || 0),
-    [selectedImages, images],
-  );
-
-  const isAnySelected = selectedImages.size > 0;
-
-  const toggleSelectAll = useCallback(
-    () => setSelectAll(!areAllSelected),
-    [areAllSelected, setSelectAll],
-  );
+      setImagesTobBeDeleted([]);
+      selectImages([]);
+    }, [closeDeleteImagesConfirmationPopUp, selectImages]);
+  const deleteSelectedImages = useCallback(() => {
+    deleteImages(imagesTobBeDeleted.map((image) => image.id));
+  }, [imagesTobBeDeleted, deleteImages]);
 
   // Job selection popup
   const [jobCreationPopUpOpenWith, setJobCreationPopUpOpenWith] =
@@ -128,9 +110,8 @@ export const DatasetPage = ({
   }, [dataset.id]);
   const closeJobCreationPopUp = useCallback(() => {
     setJobCreationPopUpOpenWith(undefined);
-    setSelectAll(false);
-    setIsInSelectMode(false);
-  }, [setSelectAll]);
+    selectImages([]);
+  }, [selectImages]);
 
   // Image import popup
   const [imageImportPopUpOpenWith, setImageImportPopUpOpenWith] =
@@ -147,24 +128,12 @@ export const DatasetPage = ({
     onDropCompleted();
   }, [setImageImportPopUpOpenWith, dataset, onDropCompleted]);
 
-  const deleteSelectedImages = useCallback(() => {
-    deleteImages(Array.from(selectedImages));
-  }, [selectedImages, deleteImages]);
-
   const deleteAnnotation = useCallback(
     (annotation: MiaAnnotation) => {
       setAnnotationTobBeDeleted(annotation);
       openDeleteAnnotationConfirmationPopUp();
     },
     [setAnnotationTobBeDeleted, openDeleteAnnotationConfirmationPopUp],
-  );
-
-  const deleteImage = useCallback(
-    (image: MiaImage) => {
-      setImageTobBeDeleted(image);
-      openDeleteImagesConfirmationPopUp();
-    },
-    [setImageTobBeDeleted, openDeleteImagesConfirmationPopUp],
   );
 
   const handleAnnotationConfirmation = useCallback(() => {
@@ -175,38 +144,25 @@ export const DatasetPage = ({
       });
   }, [annotationTobBeDeleted, deleteAnnotations]);
 
-  const handleImageConfirmation = useCallback(() => {
-    if (imageTobBeDeleted) {
-      deleteImages([imageTobBeDeleted.id]);
-    } else {
-      deleteSelectedImages();
-    }
-  }, [imageTobBeDeleted, deleteImages, deleteSelectedImages]);
-
-  const { t: translate } = useTranslation();
-
-  const navigate = useNavigate();
-
-  const startReview = useCallback(
-    async (wholeDataset?: boolean) => {
+  const startReviewWithDataset = useCallback(
+    () =>
+      store?.startReview(
+        async () => MiaReviewStrategy.fromDataset(store, dataset.id),
+        navigate,
+      ),
+    [navigate, dataset, store],
+  );
+  const startReviewWithSelected = useCallback(
+    (imagesToReview: MiaImage[]) =>
       store?.startReview(
         async () =>
-          wholeDataset
-            ? MiaReviewStrategy.fromDataset(store, dataset.id)
-            : MiaReviewStrategy.fromImageIds(store, [...selectedImages]),
+          MiaReviewStrategy.fromImageIds(store, [
+            ...imagesToReview.map((i) => i.id),
+          ]),
         navigate,
-      );
-    },
-    [navigate, dataset, selectedImages, store],
+      ),
+    [navigate, store],
   );
-
-  const startReviewDataset = useCallback(() => {
-    startReview(true);
-  }, [startReview]);
-
-  const startReviewSelectedImages = useCallback(() => {
-    startReview(false);
-  }, [startReview]);
 
   let listInfoTx;
   if (imagesError) listInfoTx = "images-loading-failed";
@@ -231,7 +187,7 @@ export const DatasetPage = ({
         {progress && (
           <AnnotationProgress
             progress={progress}
-            onReviewClick={startReviewDataset}
+            onReviewClick={startReviewWithDataset}
           />
         )}
       </PageSection>
@@ -241,84 +197,79 @@ export const DatasetPage = ({
         infoTx={listInfoTx}
         showActions={!imagesError}
         actions={
-          <DatasetNavigationBar
-            isInSelectMode={isInSelectMode}
-            allSelected={areAllSelected}
-            anySelected={isAnySelected}
-            toggleSelectMode={toggleSelectMode}
-            toggleSelectAll={toggleSelectAll}
-            openJobCreationPopUp={openJobCreationPopUp}
-            openImageImportPopUp={openImageImportPopUp}
-            deleteSelectedImages={openDeleteImagesConfirmationPopUp}
-            startReview={startReviewSelectedImages}
-          />
+          <ActionContainer>
+            <ActionIconButton
+              icon="plus"
+              tooltipTx="import-images"
+              tooltipPosition="left"
+              onPointerDown={openImageImportPopUp}
+            />
+          </ActionContainer>
         }
       >
-        <StyledSheet>
-          {images && (
-            <DatasetImageList
-              isInSelectMode={isInSelectMode}
-              images={images}
-              refetchImages={refetchImages}
-              selectedImages={selectedImages}
-              setImageSelection={setImageSelection}
-              setSelectedImages={setSelectedImages}
-              deleteAnnotation={deleteAnnotation}
-              deleteImage={deleteImage}
-            />
-          )}
-        </StyledSheet>
-      </PageSection>
-      <JobCreationPopup
-        isOpen={!!jobCreationPopUpOpenWith}
-        onClose={closeJobCreationPopUp}
-        activeImageSelection={selectedImages}
-        projectId={dataset.project}
-        openWithDatasetId={jobCreationPopUpOpenWith}
-      />
-      <ImageImportPopup
-        isOpen={!!imageImportPopUpOpenWith}
-        onClose={closeImageImportPopUp}
-        dataset={imageImportPopUpOpenWith}
-        onImportFinished={refetchImages}
-        isDraggedOver={isDraggedOver}
-        onDropCompleted={handleImageImportDropCompleted}
-      />
-      <ConfirmationPopup
-        isOpen={isDeleteAnnotationConfirmationPopUpOpen}
-        onClose={closeDeleteAnnotationConfirmationPopUp}
-        message={translate("delete-annotation-message", {
-          name: annotationTobBeDeleted?.dataUri ?? "",
-        })}
-        titleTx="delete-annotation-title"
-        onConfirm={handleAnnotationConfirmation}
-      />
-      <ConfirmationPopup
-        isOpen={isDeleteImagesConfirmationPopUpOpen}
-        onClose={closeDeleteImagesConfirmationPopUpAndClearSelection}
-        message={
-          imageTobBeDeleted
-            ? translate("delete-image-message", {
-                name: imageTobBeDeleted?.dataUri ?? "",
-              })
-            : translate("delete-images-message", {
-                count: selectedImages.size.toString(),
-              })
-        }
-        titleTx={
-          imageTobBeDeleted ? "delete-image-title" : "delete-images-title"
-        }
-        onConfirm={handleImageConfirmation}
-      />
-      {store?.error && (
-        <ErrorNotification
-          title={store?.error.title}
-          titleTx={store?.error.titleTx}
-          description={store?.error.description}
-          descriptionTx={store?.error.descriptionTx}
-          descriptionData={store?.error.descriptionData}
+        {images && (
+          <ImageList
+            images={images}
+            selectedImages={[...selectedImages]}
+            onSelect={selectImages}
+            onImageDelete={openDeletePopup}
+            onStartJob={openJobCreationPopUp}
+            onStartReview={startReviewWithSelected}
+            showAnnotations
+            onAnnotationDelete={deleteAnnotation}
+          />
+        )}
+        <JobCreationPopup
+          isOpen={!!jobCreationPopUpOpenWith}
+          onClose={closeJobCreationPopUp}
+          activeImageSelection={selectedImages}
+          projectId={dataset.project}
+          openWithDatasetId={jobCreationPopUpOpenWith}
         />
-      )}
+        <ImageImportPopup
+          isOpen={!!imageImportPopUpOpenWith}
+          onClose={closeImageImportPopUp}
+          dataset={imageImportPopUpOpenWith}
+          onImportFinished={refetchImages}
+          isDraggedOver={isDraggedOver}
+          onDropCompleted={handleImageImportDropCompleted}
+        />
+        <ConfirmationPopup
+          isOpen={isDeleteAnnotationConfirmationPopUpOpen}
+          onClose={closeDeleteAnnotationConfirmationPopUp}
+          message={t("delete-annotation-message", {
+            name: annotationTobBeDeleted?.dataUri ?? "",
+          })}
+          titleTx="delete-annotation-title"
+          onConfirm={handleAnnotationConfirmation}
+        />
+        <ConfirmationPopup
+          isOpen={isDeleteImagesConfirmationPopUpOpen}
+          onClose={closeDeleteImagesConfirmationPopUpAndClearSelection}
+          message={
+            imagesTobBeDeleted.length === 1
+              ? t("delete-image-message", {
+                  name: imagesTobBeDeleted[0].dataUri ?? "",
+                })
+              : t("delete-images-message", {
+                  count: selectedImages.size.toString(),
+                })
+          }
+          titleTx={
+            imagesTobBeDeleted ? "delete-image-title" : "delete-images-title"
+          }
+          onConfirm={deleteSelectedImages}
+        />
+        {store?.error && (
+          <ErrorNotification
+            title={store?.error.title}
+            titleTx={store?.error.titleTx}
+            description={store?.error.description}
+            descriptionTx={store?.error.descriptionTx}
+            descriptionData={store?.error.descriptionData}
+          />
+        )}
+      </PageSection>
     </Container>
   );
 };
