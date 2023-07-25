@@ -136,10 +136,8 @@ export class Document
     snapshot?.layerMap.forEach((layer) => {
       const LayerKind = layerMap[layer.kind];
       if (!LayerKind) return;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       this.layerMap[layer.id] = new LayerKind(layer as any, this);
     });
-    // TODO implement snapshot for layerFamilies
     this.layerIds = snapshot?.layerIds || [];
 
     Object.values(this.layerMap).forEach((layer) =>
@@ -302,8 +300,6 @@ export class Document
   }
 
   public get mainImageLayer(): IImageLayer | undefined {
-    // TODO: Rework to work with group layers
-
     const areAllLayersAnnotations = Boolean(
       !this.layers.find(
         (layer) => layer.kind === "image" && !layer.isAnnotation,

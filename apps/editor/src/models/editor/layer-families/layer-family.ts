@@ -10,7 +10,6 @@ export class LayerFamily implements ILayerFamily {
   protected layerIds: string[] = [];
   public title = "";
   public id!: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public metaData?: FileMetadata;
   public collapsed?: boolean;
 
