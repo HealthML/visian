@@ -127,7 +127,7 @@ export const theme = {
     autoHideDelay: 800,
   },
   fonts: {
-    default: "DIN2014",
+    default: "DINPRO",
   },
   fontSizes: {
     tag: "8pt",
