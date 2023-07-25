@@ -1,14 +1,20 @@
 import {
+  Button,
   ButtonParam,
   color,
+  Divider,
   InfoText,
+  LargePopUpColumn,
+  LargePopUpColumnContainer,
   Modal,
   ModalHeaderButton,
+  PopUp,
   Text,
   useLocalStorage,
 } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
-import { useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { Trans } from "react-i18next";
 import styled, { keyframes } from "styled-components";
 
 import { useStore } from "../../../app/root-store";
@@ -26,8 +32,24 @@ const StyledModal = styled(Modal)`
   margin-top: 16px;
 `;
 
-const HelpText = styled(InfoText)`
-  position: relative;
+const StyledPopUp = styled(PopUp)`
+  width: 460px;
+`;
+
+const HelpText = styled.p`
+  display: block;
+  margin-bottom: 16px;
+`;
+
+const HelpDivider = styled(Divider)`
+  margin-bottom: 24px;
+`;
+
+const HelpCloseButton = styled(Button)`
+  align-self: flex-end;
+`;
+
+const HelpTextButton = styled(InfoText)`
   margin-right: 5px;
 `;
 
@@ -38,12 +60,13 @@ const ActionButton = styled(ButtonParam)`
 `;
 
 const SoftButton = styled(ActionButton)`
-  border: none;
   background: none;
+  backdrop-filter: none;
 `;
 
 const KeyRow = styled(ShortcutRow)`
   align-items: flex-start;
+  width: 75%;
   * {
     font-size: 13px !important;
   }
@@ -90,39 +113,6 @@ const SubtleText = styled(Text)`
   opacity: 0.5;
 `;
 
-const pulseKeyframes = keyframes`
-	0% {
-		transform: scale(0.95);
-	}
-
-	70% {
-		transform: scale(1);
-		box-shadow: 0 0 0 15px rgba(0, 0, 0, 0);
-	}
-
-	100% {
-		transform: scale(0.95);
-		box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
-	}
-`;
-
-const HelpDot = styled.div`
-  position: absolute;
-  top: -5px;
-  left: -5px;
-
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background-color: ${color("primary")};
-
-  pointer-events: none;
-
-  box-shadow: 0 0 0 0 ${color("primary")};
-  transform: scale(1);
-  animation: ${pulseKeyframes} 2s infinite;
-`;
-
 const shortcuts = (
   <>
     <KeyRow>
@@ -158,15 +148,21 @@ const shortcuts = (
 export const AutoSegModal = observer(() => {
   const store = useStore();
 
-  const [clickedHint, setClickedHint] = useLocalStorage(
-    "auto-seg-hint-clicked",
-    false,
-  );
-  const clickHint = useCallback(() => setClickedHint(true), [setClickedHint]);
+  const [showsHelp, setShowsHelp] = useState(false);
+  const [seenHelp, setSeenHelp] = useLocalStorage("auto-seg-help-seen", false);
 
   const autoSegTool = store?.editor.activeDocument?.tools.tools[
     "autoseg-tool"
   ] as AutoSegTool;
+
+  const showHelp = useCallback(() => setShowsHelp(true), [setShowsHelp]);
+  const closeHelp = useCallback(() => setShowsHelp(false), [setShowsHelp]);
+
+  useEffect(() => {
+    if (seenHelp) return;
+    showHelp();
+    setSeenHelp(true);
+  }, [seenHelp, showHelp, setSeenHelp]);
 
   const close = useCallback(() => {
     autoSegTool.close();
@@ -216,19 +212,29 @@ export const AutoSegModal = observer(() => {
       labelTx="autoseg-tool"
       headerChildren={
         <>
-          <HelpText
-            titleTx="help"
-            infoTx="autoseg-tool-help"
-            shortcuts={shortcuts}
-            onClick={clickHint}
-          >
-            {clickedHint || <HelpDot key="auto-seg-help" />}
-          </HelpText>
+          <HelpTextButton titleTx="help" onClick={showHelp} />
           <ModalHeaderButton icon="xSmall" onPointerDown={close} />
         </>
       }
     >
       {components[autoSegTool.embeddingState]}
+      <StyledPopUp
+        titleTx="autoseg-tool-help-title"
+        isOpen={showsHelp}
+        dismiss={closeHelp}
+        shouldDismissOnOutsidePress
+      >
+        <LargePopUpColumnContainer>
+          <LargePopUpColumn>
+            <HelpText>
+              <Trans i18nKey="autoseg-tool-help" />
+            </HelpText>
+            <HelpDivider />
+            {shortcuts}
+            <HelpCloseButton tx="autoseg-tool-help-close" onClick={closeHelp} />
+          </LargePopUpColumn>
+        </LargePopUpColumnContainer>
+      </StyledPopUp>
     </StyledModal>
   );
 });
