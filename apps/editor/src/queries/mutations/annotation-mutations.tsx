@@ -2,7 +2,7 @@ import { MiaAnnotation } from "@visian/utils";
 import { AxiosError } from "axios";
 import { useQuery } from "react-query";
 
-import { annotationsApi } from "../hub-base-url";
+import { annotationsApi } from "../mia-api-client";
 import { DeleteMutation, UpdateMutation } from "./mutations";
 
 const annotationByImageQueryBaseKey = "annotationByImage";

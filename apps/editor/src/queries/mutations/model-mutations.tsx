@@ -2,7 +2,7 @@ import { MiaModelVersion } from "@visian/utils";
 import { AxiosError } from "axios";
 import { useQuery } from "react-query";
 
-import { modelVersionsApi } from "../hub-base-url";
+import { modelVersionsApi } from "../mia-api-client";
 
 const modelVersionsQueryKey = "modelVersions";
 

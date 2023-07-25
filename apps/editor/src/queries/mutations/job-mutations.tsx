@@ -3,7 +3,7 @@ import { MiaJob, MiaProgress } from "@visian/utils";
 import { AxiosError } from "axios";
 import { useQuery } from "react-query";
 
-import { jobsApi } from "../hub-base-url";
+import { jobsApi } from "../mia-api-client";
 import { DeleteMutation, UpdateMutation } from "./mutations";
 
 const jobQueryKey = "job";

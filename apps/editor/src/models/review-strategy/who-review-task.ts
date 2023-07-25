@@ -1,5 +1,4 @@
 import {
-  createBase64StringFromFile,
   createFileFromBase64,
   FileWithMetadata,
   getBase64DataFromFile,

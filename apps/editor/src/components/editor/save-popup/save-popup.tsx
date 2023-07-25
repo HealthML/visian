@@ -8,7 +8,7 @@ import {
   TextField,
   useTranslation,
 } from "@visian/ui-shared";
-import { FileWithMetadata , MiaAnnotation } from "@visian/utils";
+import { FileWithMetadata, MiaAnnotation } from "@visian/utils";
 import { AxiosError } from "axios";
 import { observer } from "mobx-react-lite";
 import path from "path";
@@ -19,7 +19,7 @@ import { useStore } from "../../../app/root-store";
 import { importFilesToDocument } from "../../../import-handling";
 import { LayerFamily } from "../../../models/editor/layer-families";
 import { MiaReviewTask } from "../../../models/review-strategy";
-import { fetchAnnotationFile } from "../../../queries";
+import { getAnnotationFile } from "../../../queries";
 import { SavePopUpProps } from "./save-popup.props";
 
 const SectionLabel = styled(Text)`
@@ -195,7 +195,7 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
         );
       });
     }
-    const oldAnnotationFile = await fetchAnnotationFile(oldAnnotationMeta.id);
+    const oldAnnotationFile = await getAnnotationFile(oldAnnotationMeta.id);
     await importAnnotationFile(oldAnnotationFile);
     if (activeLayer) {
       store?.editor.activeDocument?.setActiveLayer(activeLayer.id);

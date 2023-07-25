@@ -1,9 +1,9 @@
-import { MiaProject } from "@visian/utils";
 import { CreateProjectDto, UpdateProjectDto } from "@visian/mia-api";
+import { MiaProject } from "@visian/utils";
 import { AxiosError } from "axios";
 import { useQuery } from "react-query";
 
-import { projectsApi } from "../hub-base-url";
+import { projectsApi } from "../mia-api-client";
 import { CreateMutation, DeleteMutation, UpdateMutation } from "./mutations";
 
 const projectsQueryKey = "projects";

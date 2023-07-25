@@ -2,7 +2,7 @@ import { MiaImage } from "@visian/utils";
 import { AxiosError } from "axios";
 import { useQuery } from "react-query";
 
-import { imagesApi } from "../hub-base-url";
+import { imagesApi } from "../mia-api-client";
 import { DeleteMutation } from "./mutations";
 
 const imagesByDatasetQueryBaseKey = "imagesByDataset";

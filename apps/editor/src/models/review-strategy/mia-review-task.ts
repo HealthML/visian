@@ -1,12 +1,13 @@
-import { FileWithMetadata, MiaAnnotation , MiaImage, Zip } from "@visian/utils";
+import {
+  FileWithMetadata,
+  getBase64DataFromFile,
+  MiaAnnotation,
+  MiaImage,
+  Zip,
+} from "@visian/utils";
 import { v4 as uuidv4 } from "uuid";
 
-import {
-  fetchAnnotationFile,
-  fetchImageFile,
-  patchAnnotationFile,
-  postAnnotationFile,
-} from "../../queries";
+import { annotationsApi, getAnnotationFile, getImageFile } from "../../queries";
 import { ReviewTask, TaskType } from "./review-task";
 
 export class MiaReviewTask implements ReviewTask {
@@ -40,9 +41,9 @@ export class MiaReviewTask implements ReviewTask {
 
   public async getImageFiles() {
     const imageMetadata = this.image;
-    const image = await fetchImageFile(this.image.id);
+    const image = await getImageFile(this.image.id);
     image.metadata = imageMetadata;
-    return [await fetchImageFile(this.image.id)];
+    return [await getImageFile(this.image.id)];
   }
 
   public async getAnnotationFiles(annotationId: string) {
@@ -50,7 +51,7 @@ export class MiaReviewTask implements ReviewTask {
     if (!annotationMetadata) {
       throw new Error(`Annotation ${annotationId} not in Task ${this.title}.`);
     }
-    const annotation = await fetchAnnotationFile(annotationId);
+    const annotation = await getAnnotationFile(annotationId);
     annotation.metadata = annotationMetadata;
     return [annotation];
   }
@@ -60,11 +61,13 @@ export class MiaReviewTask implements ReviewTask {
     const dataUri =
       (files[0] as FileWithMetadata | undefined)?.metadata?.dataUri ??
       this.getAritficialAnnotationDataUri(file);
-    const newAnnotation = await postAnnotationFile(
-      this.image.id,
-      dataUri ?? this.getAritficialAnnotationDataUri(file),
-      file,
-    );
+    const newAnnotation = await annotationsApi
+      .annotationsControllerCreate({
+        image: this.image.id,
+        dataUri: dataUri ?? this.getAritficialAnnotationDataUri(file),
+        base64File: await getBase64DataFromFile(file),
+      })
+      .then((response) => response.data);
     this.annotations.set(newAnnotation.id, newAnnotation);
     return newAnnotation.id;
   }
@@ -77,7 +80,12 @@ export class MiaReviewTask implements ReviewTask {
 
     const file = files.length === 1 ? files[0] : await this.zipFiles(files);
 
-    const newAnnotation = await patchAnnotationFile(annotationMetadata, file);
+    const newAnnotation = await annotationsApi
+      .annotationsControllerUpdate(annotationMetadata.id, {
+        dataUri: annotationMetadata.dataUri,
+        base64File: await getBase64DataFromFile(file),
+      })
+      .then((response) => response.data);
     this.annotations.set(newAnnotation.id, newAnnotation);
   }
 
