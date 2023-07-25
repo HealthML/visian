@@ -546,12 +546,10 @@ export class Document
     layers: ILayer[],
     title?: string,
   ): Promise<File | undefined> => {
-    const imageLayers = this.layerIds
-      .map((id) => layers.find((layer) => layer.id === id))
-      .filter(
-        (potentialLayer) =>
-          potentialLayer instanceof ImageLayer && potentialLayer.isAnnotation,
-      ) as ImageLayer[];
+    const imageLayers = this.layers.filter(
+      (potentialLayer) =>
+        potentialLayer instanceof ImageLayer && potentialLayer.isAnnotation,
+    ) as ImageLayer[];
     const file = await writeSingleMedicalImage(
       imageLayers[imageLayers.length - 1].image.toITKImage(
         imageLayers.slice(0, -1).map((layer) => layer.image),
