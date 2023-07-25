@@ -8,6 +8,8 @@ import React, {
   useState,
 } from "react";
 
+import { isMac } from "../platform-detection";
+
 /**
  * Returns a function that, when called, triggers a re-render of the current
  * component.
@@ -375,3 +377,43 @@ export const usePreviousValue = <T>(value: T) => {
   });
   return ref.current;
 };
+
+export const useShiftKey = () => {
+  const [isShiftPressed, setIsShiftPressed] = useState(false);
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.shiftKey) {
+        setIsShiftPressed(true);
+      }
+    };
+
+    const handleKeyUp = () => {
+      setIsShiftPressed(false);
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    window.addEventListener("keyup", handleKeyUp);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("keyup", handleKeyUp);
+    };
+  }, [setIsShiftPressed]);
+
+  return isShiftPressed;
+};
+
+export const useCtrlAPress = (onPress: () => void) =>
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      event.preventDefault();
+      const isControlKey = isMac() ? event.metaKey : event.ctrlKey;
+      if (isControlKey && event.key === "a") onPress();
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  });

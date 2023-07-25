@@ -100,9 +100,7 @@ export const generalHotkeys: IHotkey[] = [
   {
     keys: "m",
     action: (store) =>
-      store.editor.activeDocument?.activeLayer?.setIsVisible(
-        !store.editor.activeDocument.activeLayer.isVisible,
-      ),
+      store.editor.activeDocument?.activeLayer?.tryToggleIsVisible(),
     labelTx: "toggle-active-layer",
     name: "toggle-active-layer",
     shortcutGuideSection: "layer-controls",

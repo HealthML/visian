@@ -6,4 +6,4 @@ export * from "./lib/models";
 export * from "./lib/rasterization";
 export * from "./lib/types";
 export * from "./lib/url-utils";
-export * from "./lib/backend/who";
+export * from "./lib/backend";

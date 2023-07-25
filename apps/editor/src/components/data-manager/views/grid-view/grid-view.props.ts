@@ -1,8 +1,7 @@
 import type { StatefulPopUpProps } from "@visian/ui-shared";
+import type { MiaIterableData } from "@visian/utils";
 
-import { IterableData } from "../../../../types";
-
-export interface GridViewProps<T extends IterableData>
+export interface GridViewProps<T extends MiaIterableData>
   extends StatefulPopUpProps {
   data: T[];
   imgSrc?: string;

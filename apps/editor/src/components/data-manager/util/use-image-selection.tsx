@@ -1,18 +1,19 @@
+import { MiaImage } from "@visian/utils";
 import { useCallback, useState } from "react";
 
 export const useImageSelection = () => {
-  const [selectedImages, setSelectedImages] = useState<Set<string>>(
-    new Set<string>(),
+  const [selectedImages, setSelectedImages] = useState<Set<MiaImage>>(
+    new Set(),
   );
 
-  const setImageSelection = useCallback(
-    (imageId: string, isSelected: boolean) => {
+  const selectImage = useCallback(
+    (image: MiaImage, selected: boolean) => {
       setSelectedImages((prevSelectedImages) => {
         const newSelectedImages = new Set(prevSelectedImages);
-        if (isSelected) {
-          newSelectedImages.add(imageId);
+        if (selected) {
+          newSelectedImages.add(image);
         } else {
-          newSelectedImages.delete(imageId);
+          newSelectedImages.delete(image);
         }
         return newSelectedImages;
       });
@@ -20,9 +21,14 @@ export const useImageSelection = () => {
     [setSelectedImages],
   );
 
+  const selectImages = useCallback(
+    (images: MiaImage[]) => setSelectedImages(new Set(images)),
+    [setSelectedImages],
+  );
+
   return {
     selectedImages,
-    setSelectedImages,
-    setImageSelection,
+    selectImage,
+    selectImages,
   };
 };

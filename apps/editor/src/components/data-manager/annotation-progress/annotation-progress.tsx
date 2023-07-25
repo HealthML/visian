@@ -1,13 +1,6 @@
-import {
-  Button,
-  Progress as ProgressBar,
-  Sheet,
-  space,
-  Text,
-} from "@visian/ui-shared";
+import { Button, ProgressBar, Sheet, space, Text } from "@visian/ui-shared";
+import { MiaProgress } from "@visian/utils";
 import styled from "styled-components";
-
-import { Progress } from "../../../types";
 
 const ProgressSheet = styled(Sheet)`
   padding: ${space("pageSectionMarginSmall")};
@@ -42,7 +35,7 @@ export const AnnotationProgress = ({
   progress,
   onReviewClick,
 }: {
-  progress: Progress;
+  progress: MiaProgress;
   onReviewClick?: () => void;
 }) => (
   <ProgressSheet>

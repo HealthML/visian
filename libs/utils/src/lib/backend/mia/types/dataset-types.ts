@@ -1,6 +1,4 @@
-import { Job } from "./jobs-history-types";
-
-export interface Dataset {
+export interface MiaDataset {
   id: string;
   name: string;
   project: string;
@@ -8,7 +6,7 @@ export interface Dataset {
   updatedAt: string;
 }
 
-export interface Image {
+export interface MiaImage {
   id: string;
   dataUri: string;
   dataset: string;
@@ -16,12 +14,12 @@ export interface Image {
   updatedAt: string;
 }
 
-export interface Annotation {
+export interface MiaAnnotation {
   id: string;
   dataUri: string;
   verified: boolean;
   image: string;
-  job: Job;
+  job: string;
   createdAt: string;
   updatedAt: string;
 }

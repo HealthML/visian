@@ -1,4 +1,5 @@
 import { color, InvisibleButton, StatusBadge, Text } from "@visian/ui-shared";
+import { MiaAnnotationMetadata } from "@visian/utils";
 import { observer } from "mobx-react-lite";
 import React from "react";
 import styled from "styled-components";
@@ -76,8 +77,10 @@ export const TopConsole = observer(() => {
             onPointerDown={store?.persistImmediately}
           />
         </TopRow>
-        {store?.editor.activeDocument?.activeLayer?.family?.metaData
-          ?.verified && (
+        {(
+          store?.editor.activeDocument?.activeLayer?.family
+            ?.metadata as MiaAnnotationMetadata
+        )?.verified && (
           <StatusBadge
             textColor="Neuronic Neon"
             borderColor="gray"
