@@ -369,6 +369,11 @@ export class AutoSegTool<N extends "autoseg-tool" = "autoseg-tool">
   }
 
   public async startBenchmark() {
+    const isReady = window.confirm(
+      "Ready to start benchmark? The system might be unresponsive while running 🤷‍♂️",
+    );
+    if (!isReady) return;
+
     const arrayToCsv = (data: any[][]) => {
       let csvContent = "data:text/csv;charset=utf-8,";
       data.forEach((cells) => {
