@@ -63,8 +63,6 @@ const Row = styled.div`
   }
 `;
 
-const ImageRow = styled(Row)``;
-
 // Add padding for list padding, collapsible width, collapsible margin, optionally checkbox size:
 const AnnotationRow = styled(Row)<{ addCheckboxMargin?: boolean }>`
   padding-left: calc(
@@ -141,7 +139,7 @@ export const ImageListItem = ({
 
   return (
     <>
-      <ImageRow>
+      <Row>
         {onSelect && (
           <SelectionCheckbox
             icon={isSelected ? "checked" : "unchecked"}
@@ -172,7 +170,7 @@ export const ImageListItem = ({
             />
           )}
         </Actions>
-      </ImageRow>
+      </Row>
       {areAnnotationsOpen &&
         annotations &&
         annotations.map((annotation, index) => (
