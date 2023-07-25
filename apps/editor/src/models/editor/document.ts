@@ -16,13 +16,14 @@ import {
   ValueType,
 } from "@visian/ui-shared";
 import {
-  FileMetadata,
+  BackendMetadata,
   FileWithFamily,
   FileWithMetadata,
   handlePromiseSettledResult,
   IDisposable,
   ImageMismatchError,
   ISerializable,
+  isMiaMetadata,
   ITKImageWithUnit,
   ITKMatrix,
   readMedicalImage,
@@ -48,7 +49,7 @@ import { readTrackingLog, TrackingData } from "../tracking";
 import { StoreContext } from "../types";
 import { Clipboard } from "./clipboard";
 import { History, HistorySnapshot } from "./history";
-import { LayerFamily } from "./layer-families";
+import { LayerFamily, LayerFamilySnapshot } from "./layer-families";
 import { ImageLayer, Layer, LayerSnapshot } from "./layers";
 import * as layers from "./layers";
 import { Markers } from "./markers";
@@ -79,6 +80,7 @@ export interface DocumentSnapshot {
   activeLayerId?: string;
   layerMap: LayerSnapshot[];
   layerIds: string[];
+  layerFamilies: LayerFamilySnapshot[];
 
   history: HistorySnapshot;
 
@@ -103,7 +105,7 @@ export class Document
   protected measurementDisplayLayerId?: string;
   protected layerMap: { [key: string]: Layer };
   protected layerIds: string[];
-  public layerFamilies: ILayerFamily[] = [];
+  public layerFamilies: LayerFamily[];
 
   public measurementType: MeasurementType = "volume";
 
@@ -145,6 +147,10 @@ export class Document
       layer.fixPotentiallyBadColor(),
     );
 
+    this.layerFamilies =
+      snapshot?.layerFamilies.map((family) => new LayerFamily(family, this)) ??
+      [];
+
     this.history = new History(snapshot?.history, this);
     this.viewSettings = new ViewSettings(snapshot?.viewSettings, this);
     this.viewport2D = new Viewport2D(snapshot?.viewport2D, this);
@@ -168,6 +174,7 @@ export class Document
       measurementDisplayLayerId: observable,
       layerMap: observable,
       layerIds: observable,
+      layerFamilies: observable,
       measurementType: observable,
       history: observable,
       viewSettings: observable,
@@ -220,13 +227,18 @@ export class Document
 
   public get title(): string | undefined {
     if (this.titleOverride) return this.titleOverride;
-    if (this.activeLayer?.family?.metaData?.dataUri) {
-      return this.activeLayer.family.metaData.dataUri;
+    const familyMeta = this.activeLayer?.family?.metadata;
+    if (isMiaMetadata(familyMeta)) {
+      return familyMeta.dataUri;
     }
     const { length } = this.layerIds;
     if (!length) return undefined;
     const lastLayer = this.getLayer(this.layerIds[length - 1]);
-    return lastLayer?.metadata?.dataUri?.split("/").pop() ?? lastLayer?.title;
+    const layerMeta = lastLayer?.metadata;
+    if (isMiaMetadata(layerMeta)) {
+      return layerMeta?.dataUri?.split("/").pop();
+    }
+    return lastLayer?.title;
   }
 
   public setTitle = (value?: string): void => {
@@ -313,7 +325,7 @@ export class Document
     return this.layerFamilies.find((family) => family.id === id);
   }
 
-  public addLayerFamily(family: ILayerFamily): void {
+  public addLayerFamily(family: LayerFamily): void {
     this.layerFamilies.push(family);
   }
 
@@ -664,7 +676,7 @@ export class Document
         this.createLayerFamily(
           unzippedFiles,
           filteredFiles.name,
-          this.getMetaDataFromFile(filteredFiles),
+          this.getMetadataFromFile(filteredFiles),
         ),
         filteredFiles.name,
       );
@@ -690,7 +702,7 @@ export class Document
       this.createLayerFamily(
         [filteredFiles],
         filteredFiles.name,
-        this.getMetaDataFromFile(filteredFiles),
+        this.getMetadataFromFile(filteredFiles),
       );
     } else {
       this.createLayerFamily(filteredFiles, name ?? uuidv4());
@@ -796,7 +808,7 @@ export class Document
             });
             if (files instanceof File) {
               this.addLayerToFamily(createdLayerId, files);
-              this.addMetaDataToLayer(createdLayerId, files);
+              this.addMetadataToLayer(createdLayerId, files);
             }
           }
         } else {
@@ -834,7 +846,7 @@ export class Document
           );
           if (files instanceof File) {
             this.addLayerToFamily(createdLayerId, files);
-            this.addMetaDataToLayer(createdLayerId, files);
+            this.addMetadataToLayer(createdLayerId, files);
           }
         });
         // }
@@ -853,7 +865,7 @@ export class Document
 
     if (files instanceof File) {
       this.addLayerToFamily(createdLayerId, files);
-      this.addMetaDataToLayer(createdLayerId, files);
+      this.addMetadataToLayer(createdLayerId, files);
     }
     return createdLayerId;
   }
@@ -995,11 +1007,11 @@ export class Document
   }
 
   /** Adds meta data from file with metadata to layer */
-  private addMetaDataToLayer(layerId: string, file: File) {
+  private addMetadataToLayer(layerId: string, file: File) {
     const layer = this.getLayer(layerId);
-    const metaData = this.getMetaDataFromFile(file);
-    if (layer && metaData) {
-      layer.metadata = metaData;
+    const metadata = this.getMetadataFromFile(file);
+    if (layer && metadata) {
+      layer.metadata = metadata;
     }
   }
 
@@ -1013,10 +1025,10 @@ export class Document
   }
 
   /** Extracts metadata appended to a file object */
-  private getMetaDataFromFile(file: File): FileMetadata | undefined {
+  private getMetadataFromFile(file: File): BackendMetadata | undefined {
     if ("metadata" in file) {
-      const fileWithMetaData = file as FileWithMetadata;
-      return fileWithMetaData.metadata;
+      const fileWithMetadata = file as FileWithMetadata;
+      return fileWithMetadata.metadata;
     }
     return undefined;
   }
@@ -1025,7 +1037,7 @@ export class Document
   public createLayerFamily(
     files: File[],
     title?: string,
-    groupMetaData?: FileMetadata,
+    groupMetadata?: BackendMetadata,
   ): FileWithFamily[] {
     if (files.every((f) => "familyId" in f)) {
       return files as FileWithFamily[];
@@ -1035,8 +1047,8 @@ export class Document
         "Cannot create a new group for file that already belongs to a group",
       );
     }
-    const layerFamily = new LayerFamily(this, title);
-    layerFamily.metaData = groupMetaData;
+    const layerFamily = new LayerFamily({ title }, this);
+    layerFamily.metadata = groupMetadata;
 
     const filesWithGroup = files.map((f) => {
       const fileWithGroup = f as FileWithFamily;
@@ -1086,6 +1098,7 @@ export class Document
       viewport3D: this.viewport3D.toJSON(),
       tools: this.tools.toJSON(),
       useExclusiveSegmentations: this.useExclusiveSegmentations,
+      layerFamilies: this.layerFamilies.map((family) => family.toJSON()),
     };
   }
 

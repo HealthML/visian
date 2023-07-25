@@ -10,6 +10,7 @@ import {
   useTranslation,
   zIndex,
 } from "@visian/ui-shared";
+import { MiaAnnotationMetadata } from "@visian/utils";
 import { observer } from "mobx-react-lite";
 import { useCallback, useMemo } from "react";
 import styled from "styled-components";
@@ -242,22 +243,18 @@ export const MiaReviewBar = observer(
 
     const isVerified = useMemo(
       () =>
-        store?.editor.activeDocument?.activeLayer?.family?.metaData?.verified ??
-        false,
-      [store?.editor.activeDocument?.activeLayer?.family?.metaData],
+        (
+          store?.editor.activeDocument?.activeLayer?.family
+            ?.metadata as MiaAnnotationMetadata
+        )?.verified ?? false,
+      [store?.editor.activeDocument?.activeLayer?.family?.metadata],
     );
 
     const toggleVerification = useCallback(() => {
-      if (
-        store?.editor.activeDocument?.activeLayer?.isAnnotation &&
-        store?.editor.activeDocument?.activeLayer?.family?.metaData
-      ) {
-        store.editor.activeDocument.activeLayer.family.metaData = {
-          ...store.editor.activeDocument.activeLayer.family.metaData,
-          verified: !isVerified,
-        };
-      }
-    }, [store?.editor.activeDocument?.activeLayer, isVerified]);
+      store?.editor.activeDocument?.activeLayer?.family?.trySetIsVerified(
+        !isVerified,
+      );
+    }, [store?.editor.activeDocument?.activeLayer?.family, isVerified]);
 
     return store?.editor.activeDocument ? (
       <ReviewBarSheet>
@@ -298,7 +295,7 @@ export const MiaReviewBar = observer(
             <ActionButtons
               icon={isVerified ? "exit" : "check"}
               isDisabled={
-                !store?.editor.activeDocument?.activeLayer?.family?.metaData ||
+                !store?.editor.activeDocument?.activeLayer?.family?.metadata ||
                 !store?.editor.activeDocument?.activeLayer?.isAnnotation
               }
               tooltipTx={

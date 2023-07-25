@@ -7,6 +7,7 @@ import {
   WHOAnnotationData,
   WHOAnnotationStatus,
   WHOTask,
+  WHOTaskSnapshot,
   WHOTaskType,
 } from "@visian/utils";
 import { AxiosResponse } from "axios";
@@ -19,7 +20,15 @@ const taskTypeMapping = {
   [WHOTaskType.Review]: TaskType.Supervise,
 };
 
-export class WHOReviewTask implements ReviewTask {
+export interface WhoReviewTaskSnapshot {
+  whoTask: WHOTaskSnapshot;
+}
+
+export class WHOReviewTask extends ReviewTask {
+  public static fromSnapshot(snapshot: WhoReviewTaskSnapshot) {
+    return new WHOReviewTask(new WHOTask(snapshot.whoTask));
+  }
+
   private whoTask: WHOTask;
 
   public get id(): string {
@@ -45,6 +54,7 @@ export class WHOReviewTask implements ReviewTask {
   }
 
   constructor(whoTask: WHOTask) {
+    super();
     // If kind is CREATE we want to ignore all existing annotations
     if (whoTask.kind === WHOTaskType.Create) {
       whoTask.annotations = [];
@@ -73,7 +83,11 @@ export class WHOReviewTask implements ReviewTask {
       // The file must contain the annotationDataUUID it belongs to
       // in order to later store the modified file back to the correct
       // WHOAnnotationData object
-      file.metadata = { id: annotationData.annotationDataUUID };
+      file.metadata = {
+        backend: "who",
+        kind: "annotation",
+        id: annotationData.annotationDataUUID,
+      };
       return file;
     });
   }
@@ -155,5 +169,11 @@ export class WHOReviewTask implements ReviewTask {
       );
     }
     annotationData.data = base64Data;
+  }
+
+  public toJSON(): WhoReviewTaskSnapshot {
+    return {
+      whoTask: this.whoTask.toJSON(),
+    };
   }
 }
