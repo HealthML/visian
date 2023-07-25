@@ -4,42 +4,44 @@ import {
   DropDown,
   FlexRow,
   IEnumParameterOption,
+  Icon,
+  List,
+  ListItem,
   PopUp,
   SectionHeader,
+  SubtleText,
   Text,
+  color,
   useTranslation,
 } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import styled from "styled-components";
+import styled, { css } from "styled-components";
 
 import { useStore } from "../../../app/root-store";
 import { postJob, useImagesByDataset, useMlModels } from "../../../queries";
 import { useDatasetsBy } from "../../../queries/use-datasets-by";
-import { ProjectDataExplorer } from "../project-data-explorer";
+import { ImageList } from "../image-list";
 import { useImageSelection } from "../util";
 import { JobCreationPopUpProps } from "./job-creation-popup.props";
+import { MiaImage } from "@visian/utils";
 
 const JobCreationPopupContainer = styled(PopUp)`
   align-items: left;
-  width: 50vw;
-  height: 70vh;
+  width: calc(100% - 200px);
+  max-width: 960px;
+  max-height: 70vh;
 `;
 
 const ContentContainer = styled.div`
-  flex: 1;
+  width: 100%;
   display: flex;
   flex-direction: column;
   overflow-y: hidden;
-  min-height: 200px;
-`;
-
-const StyledProjectDataExplorer = styled(ProjectDataExplorer)`
-  flex: 1;
+  margin-bottom: 30px;
 `;
 
 const DropDownContainer = styled(FlexRow)`
-  width: 50vw;
   justify-content: space-between;
 `;
 
@@ -51,6 +53,65 @@ const StyledSectionHeader = styled(SectionHeader)`
   padding: 1em 0 0.5em 0;
 `;
 
+const ImageListPlaceholder = styled.div`
+  width: 100%;
+`;
+
+const ImageListContainer = styled.div`
+  overflow: scroll;
+  width: 100%;
+`;
+
+const FileExplorer = styled.div`
+  display: flex;
+  overflow: hidden;
+  width: 100%;
+`;
+
+const VerticalLine = styled.div`
+  border-left: 1px solid ${color("sheetBorder")};
+  margin: 0 20px;
+`;
+
+const DatasetContainer = styled.div`
+  overflow-y: auto;
+  width: 100%;
+`;
+
+const DatasetTitle = styled(Text)`
+  display: inline-block;
+  padding: 4px 0 13px;
+  opacity: 0.5;
+`;
+
+const DatasetList = styled(List)`
+  width: 100%;
+`;
+
+const DatasetIcon = styled(Icon)`
+  width: 2rem;
+  height: 2rem;
+  padding-right: 0.8rem;
+`;
+
+const DatasetListItem = styled(ListItem)<{ isActive?: boolean }>`
+  cursor: pointer;
+  // Fix too thick line on intersection between active items
+  margin: 1px 3%;
+  // Fix items moving by 1px on selection / deselection
+  ${(props) =>
+    !props.isActive &&
+    css`
+      padding: 1px 0;
+    `}
+`;
+
+const ImageInfo = styled(Text)`
+  width: 100%;
+  text-align: center;
+  padding-top: 100px;
+`;
+
 const StyledErrorText = styled(Text)`
   width: 100%;
   text-align: center;
@@ -58,9 +119,10 @@ const StyledErrorText = styled(Text)`
 
 const Footer = styled(Box)`
   display: flex;
-  justify-content: center;
-  width: 50vw;
-  margin-top: 10%;
+  justify-content: flex-end;
+  align-items: center;
+  width: 100%;
+  gap: 1em;
 `;
 
 export const JobCreationPopup = observer<JobCreationPopUpProps>(
@@ -137,28 +199,31 @@ export const JobCreationPopup = observer<JobCreationPopUpProps>(
 
     const [selectedDataset, setSelectedDataset] = useState(openWithDatasetId);
 
-    useEffect(() => {
-      setSelectedDataset(openWithDatasetId);
-    }, [openWithDatasetId]);
+    useEffect(() => setSelectedDataset(openWithDatasetId), [openWithDatasetId]);
 
-    const { images, isErrorImages, isLoadingImages } =
-      useImagesByDataset(selectedDataset);
+    const { images, isErrorImages } = useImagesByDataset(selectedDataset);
 
-    const selectDataset = useCallback((datasetId: string) => {
-      setSelectedDataset(datasetId);
-    }, []);
-
-    const { selectedImages, setSelectedImages, setImageSelection } =
-      useImageSelection();
+    const { selectedImages, selectImages } = useImageSelection();
+    const selectedDatasetImages = Array.from(selectedImages).filter(
+      (image) => image.dataset === selectedDataset,
+    );
+    // When images are selected in the image list, only the ones of the current dataset
+    // should be affected:
+    const setSelectedDatasetImages = useCallback(
+      (imagesToBeSelected: MiaImage[]) => {
+        const otherDatasetImages = Array.from(selectedImages).filter(
+          (image) => image.dataset !== selectedDataset,
+        );
+        selectImages([...otherDatasetImages, ...imagesToBeSelected]);
+      },
+      [selectImages, selectedDataset, selectedImages],
+    );
 
     // TODO: Fix this Bug
     // Select all (Crtl + A) does not work correctly when adding missing dependencies openWithDatasetId and activeImageSelection
     useEffect(() => {
       if (openWithDatasetId && activeImageSelection && isOpen) {
-        setSelectedImages(() => {
-          const newSelectedImages = new Set<string>(activeImageSelection);
-          return newSelectedImages;
-        });
+        selectImages([...activeImageSelection]);
       }
     }, [isOpen]);
 
@@ -189,13 +254,18 @@ export const JobCreationPopup = observer<JobCreationPopUpProps>(
     );
 
     const startJob = useCallback(
-      () => createAutoAnnotationJob(Array.from(selectedImages)),
+      () =>
+        createAutoAnnotationJob([...selectedImages].map((image) => image.id)),
       [createAutoAnnotationJob, selectedImages],
     );
 
     const { t } = useTranslation();
 
     const showProjectDataExplorer = !(isLoadingDatasets || isErrorDatasets);
+
+    let imageInfoTx;
+    if (isErrorImages) imageInfoTx = "images-loading-failed";
+    else if (images && images.length === 0) imageInfoTx = "no-images-available";
 
     return (
       <JobCreationPopupContainer
@@ -233,29 +303,60 @@ export const JobCreationPopup = observer<JobCreationPopUpProps>(
             } (${datasetsError?.response?.status})`}</StyledErrorText>
           )}
           <StyledSectionHeader tx="job-creation-image-selection" />
-          {showProjectDataExplorer && (
-            <StyledProjectDataExplorer
-              datasets={datasets}
-              images={images}
-              isErrorImages={isErrorImages}
-              isLoadingImages={isLoadingImages}
-              selectedDataset={selectedDataset}
-              selectedImages={selectedImages}
-              selectDataset={selectDataset}
-              setImageSelection={setImageSelection}
-              setSelectedImages={setSelectedImages}
+          <FileExplorer>
+            {datasets && (
+              <DatasetContainer>
+                <DatasetTitle tx="datasets" />
+                <DatasetList>
+                  {datasets.map((dataset) => (
+                    <DatasetListItem
+                      key={dataset.id}
+                      isLast
+                      isActive={dataset.id === selectedDataset}
+                      onPointerDown={() => setSelectedDataset(dataset.id)}
+                    >
+                      <DatasetIcon icon="folder" />
+                      <Text>{dataset.name}</Text>
+                    </DatasetListItem>
+                  ))}
+                </DatasetList>
+              </DatasetContainer>
+            )}
+            <VerticalLine />
+            {images ? (
+              imageInfoTx ? (
+                <ImageInfo tx={imageInfoTx} />
+              ) : (
+                <ImageListContainer>
+                  <ImageList
+                    images={images}
+                    selectedImages={selectedDatasetImages}
+                    onSelect={setSelectedDatasetImages}
+                  />
+                </ImageListContainer>
+              )
+            ) : (
+              <ImageListPlaceholder />
+            )}
+          </FileExplorer>
+        </ContentContainer>
+        <Footer>
+          {selectedImages.size > 0 && (
+            <SubtleText
+              tx="job-creation-images-selected"
+              data={{ count: selectedImages.size }}
             />
           )}
-        </ContentContainer>
-        {showProjectDataExplorer && (
-          <Footer>
-            <Button
-              isDisabled={!(selectedModelVersion && selectedImages.size > 0)}
-              tx="start-job"
-              onPointerDown={startJob}
-            />
-          </Footer>
-        )}
+          <Button
+            isDisabled={
+              !showProjectDataExplorer ||
+              !selectedModelVersion ||
+              selectedImages.size === 0
+            }
+            tx="start-job"
+            onPointerDown={startJob}
+          />
+        </Footer>
       </JobCreationPopupContainer>
     );
   },

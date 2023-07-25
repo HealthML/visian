@@ -1,5 +1,3 @@
-import { MiaJob } from "./jobs-history-types";
-
 export interface MiaDataset {
   id: string;
   name: string;
@@ -21,7 +19,7 @@ export interface MiaAnnotation {
   dataUri: string;
   verified: boolean;
   image: string;
-  job: MiaJob;
+  job: string;
   createdAt: string;
   updatedAt: string;
 }
