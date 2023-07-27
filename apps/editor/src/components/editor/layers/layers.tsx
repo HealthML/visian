@@ -215,12 +215,7 @@ export const Layers: React.FC = observer(() => {
     (family: ILayerFamily) => {
       const callback = (draggedItem: TreeItem<TreeItemData>) => {
         const layer = store?.editor.activeDocument?.getLayer(draggedItem.value);
-        if (
-          store?.reviewStrategy &&
-          layer &&
-          family.layers.filter((layerInFamily) => layer.id === layerInFamily.id)
-            .length === 0
-        ) {
+        if (store?.reviewStrategy && layer && !family.layers.includes(layer)) {
           return false;
         }
 
@@ -261,6 +256,11 @@ export const Layers: React.FC = observer(() => {
 
   const treeItems = getTreeItems();
 
+  const canRootHaveChildren = useCallback((item) => {
+    const layer = store?.editor.activeDocument?.getLayer(item.value);
+    if (!layer) return true; // layerFamilies can always be children of root
+    return layer.family === undefined;
+  }, []);
   const updateRenderingOrder = useCallback(
     (
       newTreeItems: TreeItems<TreeItemData>,
@@ -376,14 +376,12 @@ export const Layers: React.FC = observer(() => {
             <SortableTree
               items={treeItems}
               onItemsChanged={updateRenderingOrder}
-              TreeItemComponent={TreeItemComponent}
-              dropAnimation={store?.reviewStrategy ? undefined : null}
-              sortableProps={
-                store?.reviewStrategy
-                  ? undefined
-                  : { animateLayoutChanges: () => false }
+              canRootHaveChildren={
+                store?.reviewStrategy ? canRootHaveChildren : undefined
               }
-              keepGhostInPlace={!!store?.reviewStrategy}
+              TreeItemComponent={TreeItemComponent}
+              dropAnimation={null}
+              sortableProps={{ animateLayoutChanges: () => false }}
               indentationWidth={20}
             />
             {layers.length === 0 ? (
