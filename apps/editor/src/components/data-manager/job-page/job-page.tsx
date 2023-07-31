@@ -68,12 +68,20 @@ const IconButton = styled(InvisibleButton)`
 `;
 
 const StyledTimerButton = styled(TimerButton)`
-  width: 30px;
+  width: 25px;
 `;
 
 const Spacer = styled.div`
   width: 5px;
 `;
+
+const OverflowText = styled(Text)`
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+  max-width: 55%;
+`;
+
 export const JobPage = ({ job }: { job: Job }) => {
   const { progress, isLoadingProgress } = useJobProgress(job.id);
 
@@ -258,7 +266,7 @@ export const JobPage = ({ job }: { job: Job }) => {
                     text="ID"
                     content={
                       <>
-                        <Text text={`${job.id.substring(0, 7)}...`} />
+                        <OverflowText text={job.id} />
                         <Spacer />
                         <StyledTimerButton
                           icon="copyClipboard"
