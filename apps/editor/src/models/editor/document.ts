@@ -382,7 +382,7 @@ export class Document
   public setMeasurementType = (measurementType: MeasurementType) => {
     this.measurementType = measurementType;
   };
-  /** Ensures consistency of layerIds. addLayer should be called whenever a layer is moved or changes family 
+  /** Ensures consistency of layerIds. addLayer should be called whenever a layer is moved or changes family
   if the layer has a family, it will be removed from layerIds
   if an index is specified, the family will be inserted at the index
   if no index is specified, the family remain where it was if already in the list
@@ -908,6 +908,13 @@ export class Document
       this.addLayerToFamily(createdLayerId, files);
       this.addMetadataToLayer(createdLayerId, files);
     }
+
+    // Move all families with only image layers to the end of the list:
+    this.layerFamilies.forEach((family) => {
+      if (!family.layers.every((layer) => !layer.isAnnotation)) return;
+      this.addLayerFamily(family as LayerFamily, this.layerFamilies.length - 1);
+    });
+
     return createdLayerId;
   }
 
