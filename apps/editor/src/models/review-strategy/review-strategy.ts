@@ -1,13 +1,14 @@
 import { action, makeObservable, observable } from "mobx";
 
 import { RootStore } from "../root";
+import { ReviewStrategySnapshot } from "./review-strategy-snapshot";
 import { ReviewTask } from "./review-task";
 
 export abstract class ReviewStrategy {
   protected store: RootStore;
   protected task?: ReviewTask;
 
-  constructor(store: RootStore) {
+  constructor({ store }: { store: RootStore }) {
     makeObservable<this, "task">(this, {
       task: observable,
       setCurrentTask: action,
@@ -44,6 +45,7 @@ export abstract class ReviewStrategy {
 
   protected abstract buildTask(): Promise<void>;
 
+  protected abstract importAnnotations(): Promise<void>;
   private async importImages(): Promise<void> {
     const imageFiles = await this.task?.getImageFiles();
     if (!imageFiles) throw new Error("Image files not found");
@@ -54,7 +56,9 @@ export abstract class ReviewStrategy {
     );
   }
 
-  protected async importAnnotations(): Promise<void> {
+  protected async importAnnotationsWithMetadata(
+    getMetadataFromChild: boolean,
+  ): Promise<void> {
     if (!this.task?.annotationIds) return;
     await Promise.all(
       this.task?.annotationIds.map(async (annotationId, idx) => {
@@ -66,7 +70,9 @@ export abstract class ReviewStrategy {
         const familyFiles = this.store.editor.activeDocument?.createLayerFamily(
           annotationFiles,
           `Annotation ${idx + 1}`,
-          { ...annotationFiles[0]?.metadata },
+          getMetadataFromChild
+            ? { ...annotationFiles[0]?.metadata }
+            : { id: annotationId, kind: "annotation", backend: "who" },
         );
         if (!familyFiles) throw new Error("No active Document");
 
@@ -78,4 +84,6 @@ export abstract class ReviewStrategy {
       }),
     );
   }
+
+  public abstract toJSON(): ReviewStrategySnapshot;
 }

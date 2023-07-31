@@ -1,14 +1,14 @@
+import { MiaAnnotation } from "@visian/utils";
 import axios, { AxiosError } from "axios";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 
-import { Annotation } from "../types";
 import { hubBaseUrl } from "./hub-base-url";
 
 export const patchAnnotation = async (
   annotationId?: string,
-  annotation?: Partial<Annotation>,
+  annotation?: Partial<MiaAnnotation>,
 ) => {
-  const annotationsResponse = await axios.patch<Annotation>(
+  const annotationsResponse = await axios.patch<MiaAnnotation>(
     `${hubBaseUrl}annotations/${annotationId}`,
     {
       dataUri: annotation?.dataUri,
@@ -22,7 +22,7 @@ export const getAnnotationsByJobAndImage = async (
   jobId?: string,
   imageId?: string,
 ) => {
-  const annotationsResponse = await axios.get<Annotation[]>(
+  const annotationsResponse = await axios.get<MiaAnnotation[]>(
     `${hubBaseUrl}annotations`,
     {
       params: {
@@ -35,7 +35,7 @@ export const getAnnotationsByJobAndImage = async (
 };
 
 export const getAnnotation = async (annotationId: string) => {
-  const annotationsResponse = await axios.get<Annotation>(
+  const annotationsResponse = await axios.get<MiaAnnotation>(
     `${hubBaseUrl}annotations/${annotationId}`,
   );
   return annotationsResponse.data;
@@ -48,7 +48,7 @@ const deleteAnnotations = async ({
   imageId: string;
   annotationIds: string[];
 }) => {
-  const deleteAnnotationsResponse = await axios.delete<Annotation[]>(
+  const deleteAnnotationsResponse = await axios.delete<MiaAnnotation[]>(
     `${hubBaseUrl}annotations`,
     {
       data: { ids: annotationIds },
@@ -61,8 +61,8 @@ const deleteAnnotations = async ({
 
 export const useAnnotationsByImage = (imageId: string) => {
   const { data, error, isError, isLoading, refetch, remove } = useQuery<
-    Annotation[],
-    AxiosError<Annotation[]>
+    MiaAnnotation[],
+    AxiosError<MiaAnnotation[]>
   >(
     ["annotationsByImage", imageId],
     () => getAnnotationsByJobAndImage(undefined, imageId),
@@ -84,8 +84,8 @@ export const useAnnotationsByImage = (imageId: string) => {
 
 export const useAnnotationsByJob = (jobId: string) => {
   const { data, error, isError, isLoading, refetch, remove } = useQuery<
-    Annotation[],
-    AxiosError<Annotation[]>
+    MiaAnnotation[],
+    AxiosError<MiaAnnotation[]>
   >(["annotationsByJob", jobId], () => getAnnotationsByJobAndImage(jobId), {
     retry: 2, // retry twice if fetch fails
     refetchInterval: 1000 * 20, // refetch every 20 seconds
@@ -106,12 +106,12 @@ export const useDeleteAnnotationsForImageMutation = () => {
   const { isError, isIdle, isLoading, isPaused, isSuccess, mutate } =
     useMutation<
       string[],
-      AxiosError<Annotation[]>,
+      AxiosError<MiaAnnotation[]>,
       {
         imageId: string;
         annotationIds: string[];
       },
-      { previousAnnotations: Annotation[] }
+      { previousAnnotations: MiaAnnotation[] }
     >({
       mutationFn: deleteAnnotations,
       onMutate: async ({
@@ -125,7 +125,7 @@ export const useDeleteAnnotationsForImageMutation = () => {
           queryKey: ["annotationsByImage", imageId],
         });
 
-        const previousAnnotations = queryClient.getQueryData<Annotation[]>([
+        const previousAnnotations = queryClient.getQueryData<MiaAnnotation[]>([
           "annotationsByImage",
           imageId,
         ]);
@@ -133,7 +133,7 @@ export const useDeleteAnnotationsForImageMutation = () => {
         if (!previousAnnotations) return;
 
         const newAnnotations = previousAnnotations.filter(
-          (annotaion: Annotation) => !annotationIds.includes(annotaion.id),
+          (annotaion: MiaAnnotation) => !annotationIds.includes(annotaion.id),
         );
 
         queryClient.setQueryData(

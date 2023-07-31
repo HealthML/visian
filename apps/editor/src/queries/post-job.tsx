@@ -1,11 +1,11 @@
+import { MiaMlModel } from "@visian/utils";
 import axios from "axios";
 
-import { MlModel } from "../types";
 import { hubBaseUrl } from "./hub-base-url";
 
 export const postJob = async (
   imageSelection: string[],
-  selectedModel: MlModel,
+  selectedModel: MiaMlModel,
   projectId: string,
 ) => {
   await axios.post(`${hubBaseUrl}jobs`, {

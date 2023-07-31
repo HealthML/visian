@@ -1,11 +1,11 @@
+import { MiaJob } from "@visian/utils";
 import axios, { AxiosError } from "axios";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 
-import { Job } from "../types";
 import { hubBaseUrl } from "./hub-base-url";
 
 const getJobsBy = async (projectId: string) => {
-  const jobsResponse = await axios.get<Job[]>(
+  const jobsResponse = await axios.get<MiaJob[]>(
     `${hubBaseUrl}jobs/?project=${projectId}`,
   );
   return jobsResponse.data;
@@ -13,8 +13,8 @@ const getJobsBy = async (projectId: string) => {
 
 export const useJobsBy = (projectId: string) => {
   const { data, error, isError, isLoading, refetch, remove } = useQuery<
-    Job[],
-    AxiosError<Job[]>
+    MiaJob[],
+    AxiosError<MiaJob[]>
   >(["jobs", projectId], () => getJobsBy(projectId), {
     retry: 2, // retry twice if fetch fails
     refetchInterval: 1000 * 20, // refetch every 20 seconds
@@ -39,7 +39,7 @@ const patchJobStatus = async ({
   jobId: string;
   jobStatus: string;
 }) => {
-  const jobsResponse = await axios.patch<Job>(
+  const jobsResponse = await axios.patch<MiaJob>(
     `${hubBaseUrl}jobs/${jobId}`,
     { status: jobStatus },
     {
@@ -53,16 +53,16 @@ export const usePatchJobStatusMutation = () => {
   const queryClient = useQueryClient();
   const { isError, isIdle, isLoading, isPaused, isSuccess, mutate } =
     useMutation<
-      Job,
-      AxiosError<Job>,
+      MiaJob,
+      AxiosError<MiaJob>,
       { projectId: string; jobId: string; jobStatus: string },
-      { previousJobs: Job[] }
+      { previousJobs: MiaJob[] }
     >({
       mutationFn: patchJobStatus,
       onMutate: async ({ projectId, jobId, jobStatus }) => {
         await queryClient.cancelQueries({ queryKey: ["jobs", projectId] });
 
-        const previousJobs = queryClient.getQueryData<Job[]>([
+        const previousJobs = queryClient.getQueryData<MiaJob[]>([
           "jobs",
           projectId,
         ]);
@@ -107,7 +107,7 @@ const deleteJobs = async ({
   projectId: string;
   jobIds: string[];
 }) => {
-  const deleteJobsResponse = await axios.delete<Job[]>(`${hubBaseUrl}jobs`, {
+  const deleteJobsResponse = await axios.delete<MiaJob[]>(`${hubBaseUrl}jobs`, {
     data: { ids: jobIds },
     timeout: 1000 * 2, // 2 secods
   });
@@ -119,12 +119,12 @@ export const useDeleteJobsForProjectMutation = () => {
   const { isError, isIdle, isLoading, isPaused, isSuccess, mutate } =
     useMutation<
       string[],
-      AxiosError<Job[]>,
+      AxiosError<MiaJob[]>,
       {
         projectId: string;
         jobIds: string[];
       },
-      { previousJobs: Job[] }
+      { previousJobs: MiaJob[] }
     >({
       mutationFn: deleteJobs,
       onMutate: async ({
@@ -138,7 +138,7 @@ export const useDeleteJobsForProjectMutation = () => {
           queryKey: ["jobs", projectId],
         });
 
-        const previousJobs = queryClient.getQueryData<Job[]>([
+        const previousJobs = queryClient.getQueryData<MiaJob[]>([
           "jobs",
           projectId,
         ]);
@@ -146,7 +146,7 @@ export const useDeleteJobsForProjectMutation = () => {
         if (!previousJobs) return;
 
         const newJobs = previousJobs.filter(
-          (job: Job) => !jobIds.includes(job.id),
+          (job: MiaJob) => !jobIds.includes(job.id),
         );
 
         queryClient.setQueryData(["jobs", projectId], newJobs);

@@ -1,14 +1,17 @@
+import { MiaProgress } from "@visian/utils";
 import axios, { AxiosError } from "axios";
 import { useQuery } from "react-query";
 
-import { Progress } from "../types";
 import { hubBaseUrl } from "./hub-base-url";
 
 export const useDatasetProgress = (datasetId: string) => {
-  const { data, error, isLoading } = useQuery<Progress, AxiosError<Progress>>(
+  const { data, error, isLoading } = useQuery<
+    MiaProgress,
+    AxiosError<MiaProgress>
+  >(
     ["dataset-progress", datasetId],
     async () => {
-      const response = await axios.get<Progress>(
+      const response = await axios.get<MiaProgress>(
         `${hubBaseUrl}datasets/${datasetId}/progress`,
       );
       return response.data;

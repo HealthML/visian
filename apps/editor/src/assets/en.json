@@ -351,6 +351,8 @@
   "job-creation-popup-title": "Create a new job",
   "job-creation-model-selection": "Select a model version",
   "job-creation-image-selection": "Select the images to annotate",
+  "job-creation-images-selected": "{{count}} image selected",
+  "job-creation-images-selected_plural": "{{count}} images selected",
   "job-creation-error": "An error occurred while creating the job.",
   "start-job": "Start Job",
 

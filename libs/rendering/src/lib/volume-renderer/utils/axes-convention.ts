@@ -47,7 +47,7 @@ export class AxesConvention extends THREE.Scene implements IDisposable {
     this.labels = directions.map((direction, index) => {
       const labelDiv = document.createElement("div");
       labelDiv.textContent = labels[index];
-      labelDiv.style.fontFamily = "DIN2014";
+      labelDiv.style.fontFamily = "DINPRO";
       labelDiv.style.fontSize = "13px";
       labelDiv.style.fontWeight = "500";
       if (isWindows()) labelDiv.style.marginLeft = "-0.07em";
