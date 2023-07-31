@@ -87,7 +87,7 @@
 
   "autoseg-tool": "AutoSeg Tool",
   "autoseg-tool-help-title": "AutoSeg Tipps",
-  "autoseg-tool-help": "AutoSeg schlägt automatisch Segmentierungen basierend auf Ihren Eingaben vor.<br/><br/>Sie können einfach <strong>klicken und ziehen</strong> um einen Rahmen um den gewünschten Segmentierungsbereich zu zeichnen, <strong>links klicken</strong> um einen positiven Punkt hinzuzufügen (welcher segmentiert werden soll), und <strong>rechts klicken</strong> um einen negativen Punkt hinzuzufügen (welcher nicht segmentiert werden soll). Rechtsklicken auf vorhandene Punkte entfernt diese.<br/><br/>Klicken Sie einfach \"Akzeptieren\" unten links, wenn Sie mit dem vorgeschlagenen Result zufrieden sind und die Segmentierung auf die aktuelle Ebene anwenden möchten.",
+  "autoseg-tool-help": "AutoSeg schlägt automatisch Segmentierungen basierend auf Ihren Eingaben vor.<br/><br/>Sie können einfach <strong>klicken und ziehen</strong> um einen Rahmen um den gewünschten Segmentierungsbereich zu zeichnen, <strong>links klicken</strong> um einen positiven Punkt hinzuzufügen (welcher segmentiert werden soll), und <strong>rechts klicken</strong> um einen negativen Punkt hinzuzufügen (welcher nicht segmentiert werden soll). Rechtsklicken auf vorhandene Punkte entfernt diese.<br/><br/>Klicken Sie einfach \"Akzeptieren\" unten links, wenn Sie mit dem vorgeschlagenen Result zufrieden sind und die Segmentierung auf die aktuelle Ebene anwenden möchten. AutoSeg verwendet stets die oberste sichtbare Bildebene als Input.",
   "autoseg-tool-help-close": "Alles klar!",
   "autoseg-tool-uninitialized": "Nicht intialisiert.",
   "autoseg-tool-initializing": "Initialisiert...",

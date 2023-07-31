@@ -87,7 +87,7 @@
 
   "autoseg-tool": "AutoSeg Tool",
   "autoseg-tool-help-title": "AutoSeg Guide",
-  "autoseg-tool-help": "AutoSeg automatically proposes segmentations based on your input.<br/><br/>Simply <strong>click and drag</strong> to create a bounding box that contains the target area, <strong>left-click</strong> to add a positive point (indicating that this point should be part of the segmentation), and <strong>right-click</strong> to add a negative point (indicating the opposite). Right-clicking existing points removes them.<br/><br/>When you are happy with the previewed result, simply click \"Apply\" in the bottom left menu to apply the segmentation to the current layer.",
+  "autoseg-tool-help": "AutoSeg automatically proposes segmentations based on your input.<br/><br/>Simply <strong>click and drag</strong> to create a bounding box that contains the target area, <strong>left-click</strong> to add a positive point (indicating that this point should be part of the segmentation), and <strong>right-click</strong> to add a negative point (indicating the opposite). Right-clicking existing points removes them.<br/><br/>When you are happy with the previewed result, simply click \"Apply\" in the bottom left menu to apply the segmentation to the current layer. AutoSeg always takes the topmost image layer as input.",
   "autoseg-tool-help-close": "Got it!",
   "autoseg-tool-uninitialized": "Not initialized.",
   "autoseg-tool-initializing": "Initializing...",
