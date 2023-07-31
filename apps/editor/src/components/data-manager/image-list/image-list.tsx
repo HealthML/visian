@@ -136,7 +136,7 @@ export const ImageList = ({
             {onStartReview && (
               <ActionButton
                 icon="review"
-                tooltipTx="start-review"
+                tooltipTx="review-annotations"
                 tooltipPosition="top"
                 onPointerDown={startReviewWithSelected}
                 isDisabled={areNoneSelected}

@@ -7,7 +7,7 @@ import { sheetMixin } from "../sheet";
 import { Text } from "../text";
 import { Tooltip } from "../tooltip";
 import { useDelay, useMultiRef } from "../utils";
-import { ButtonProps } from "./button.props";
+import { ButtonProps, TimerButtonProps } from "./button.props";
 
 const StyledText = styled(Text)<Pick<ButtonProps, "isActive">>`
   font-weight: ${fontWeight("regular")};
@@ -186,5 +186,60 @@ export const InvisibleButton = styled(BaseButton)`
   pointer-events: auto;
   user-select: none;
 `;
+
+export const TimerButton = ({
+  timeout,
+  icon,
+  secondIcon,
+  tooltip,
+  tooltipTx,
+  secondTooltip,
+  secondTooltipTx,
+  onClick,
+  ...rest
+}: TimerButtonProps) => {
+  const [isActive, setIsActive] = useState(false);
+  const [currentTimeout, setCurrentTimeout] = useState<
+    NodeJS.Timeout | undefined
+  >(undefined);
+  const defaultTimeout = 2000;
+
+  const handleClick = useCallback(
+    (event) => {
+      onClick?.(event);
+      setIsActive(true);
+      if (currentTimeout) {
+        clearTimeout(currentTimeout);
+      }
+      setCurrentTimeout(
+        setTimeout(() => {
+          setIsActive(false);
+        }, timeout ?? defaultTimeout),
+      );
+    },
+    [onClick, timeout, currentTimeout],
+  );
+  return !isActive ? (
+    <InvisibleButton
+      icon={icon}
+      tooltip={tooltip}
+      tooltipTx={tooltipTx}
+      onClick={handleClick}
+      {...rest}
+    />
+  ) : (
+    <InvisibleButton
+      icon={secondIcon}
+      tooltip={secondTooltip ?? tooltip}
+      tooltipTx={
+        tooltipTx && secondTooltip && !secondTooltipTx
+          ? undefined
+          : secondTooltipTx
+      }
+      onClick={handleClick}
+      {...rest}
+    />
+  );
+};
 
 export default Button;

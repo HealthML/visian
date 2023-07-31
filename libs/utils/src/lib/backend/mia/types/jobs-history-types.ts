@@ -1,5 +1,6 @@
 export interface MiaJob {
   id: string;
+  name: string;
   modelName: string;
   modelVersion: string;
   startedAt: string | undefined;

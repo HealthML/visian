@@ -34,6 +34,10 @@ function getDisplayJob(job: MiaJob): MiaJob {
 const columnHelper = createColumnHelper<MiaJob>();
 
 const columns = [
+  columnHelper.accessor("name", {
+    header: () => <HeaderLabel tx="name" />,
+    cell: (props) => <ListItemLabel text={props.getValue()} />,
+  }),
   columnHelper.accessor("modelName", {
     header: () => <HeaderLabel tx="job-model-name" />,
     cell: (props) => <ListItemLabel text={props.getValue()} />,

@@ -2,6 +2,8 @@ import {
   InvisibleButton,
   Sheet,
   space,
+  Text,
+  TimerButton,
   useTranslation,
 } from "@visian/ui-shared";
 import { MiaAnnotation, MiaJob } from "@visian/utils";
@@ -46,6 +48,21 @@ const Container = styled.div`
 
 const IconButton = styled(InvisibleButton)`
   width: 30px;
+`;
+
+const StyledTimerButton = styled(TimerButton)`
+  width: 25px;
+`;
+
+const Spacer = styled.div`
+  width: 5px;
+`;
+
+const OverflowText = styled(Text)`
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+  max-width: 55%;
 `;
 
 export const JobPage = ({ job }: { job: MiaJob }) => {
@@ -136,10 +153,13 @@ export const JobPage = ({ job }: { job: MiaJob }) => {
     ? getDisplayDate(new Date(job.finishedAt))
     : "";
 
+  const copyJobId = useCallback(() => {
+    navigator.clipboard.writeText(job.id);
+  }, [job.id]);
   return (
     <Container>
       <PageTitle
-        title={t("job-title", { date: startedAt })}
+        title={job.name}
         labelTx="job"
         backPath={`/projects/${job.project}`}
       />
@@ -195,6 +215,23 @@ export const JobPage = ({ job }: { job: MiaJob }) => {
                             tooltipPosition="right"
                           />
                         )}
+                      </>
+                    }
+                  />
+                  <DetailsRow
+                    text="ID"
+                    content={
+                      <>
+                        <OverflowText text={job.id} />
+                        <Spacer />
+                        <StyledTimerButton
+                          icon="copyClipboard"
+                          tooltipTx="copy"
+                          onClick={copyJobId}
+                          tooltipPosition="right"
+                          secondIcon="check"
+                          secondTooltipTx="copied"
+                        />
                       </>
                     }
                   />
