@@ -11877,9 +11877,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"dnd-kit-sortable-tree@npm:^0.1.72":
-  version: 0.1.72
-  resolution: "dnd-kit-sortable-tree@npm:0.1.72"
+"dnd-kit-sortable-tree@npm:^0.1.73":
+  version: 0.1.73
+  resolution: "dnd-kit-sortable-tree@npm:0.1.73"
   dependencies:
     clsx: ^1.2.1
     react-merge-refs: ^2.0.1
@@ -11889,7 +11889,7 @@ __metadata:
     "@dnd-kit/utilities": ">=3.2.0"
     react: ">=16"
     react-dom: ">=16"
-  checksum: 7d30e8d9134d8fdc1bd1af76a2c6c810d7f1a4b7e98c7d7ab7c77f7ab50223488e9a77ee254d317349c3806d2836aca3a808dd58f76fc7e5e5877291bd864104
+  checksum: 86bec921ebb4484f03848fccac21654b9a98ef590978815c45b908a297d28faf88094093545e74387315a70a8f661c497d32987f34573e6cd2bd44aed0314cad
   languageName: node
   linkType: hard
 
@@ -24124,7 +24124,7 @@ __metadata:
     core-js: ^3.6.5
     css-element-queries: ^1.2.3
     cypress: ^10.7.0
-    dnd-kit-sortable-tree: ^0.1.72
+    dnd-kit-sortable-tree: ^0.1.73
     eslint: ~8.15.0
     eslint-config-airbnb: ^19.0.4
     eslint-config-prettier: 8.1.0
