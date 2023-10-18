@@ -183,15 +183,18 @@ export const UIOverlay = observer<UIOverlayProps>(
     }, [store]);
 
     // Export Button
-    const exportZip = useCallback(() => {
-      store?.setProgress({ labelTx: "exporting" });
-      store?.editor.activeDocument
-        ?.exportZip(true)
-        .catch()
-        .then(() => {
-          store?.setProgress();
-        });
-    }, [store]);
+    const exportZip = useCallback(
+      (event: React.PointerEvent) => {
+        store?.setProgress({ labelTx: "exporting" });
+        store?.editor.activeDocument
+          ?.exportZip(event.shiftKey)
+          .catch()
+          .then(() => {
+            store?.setProgress();
+          });
+      },
+      [store],
+    );
 
     return (
       <Container
