@@ -4,6 +4,7 @@ import {
   IDisposable,
   Image,
   setSlice,
+  TypedArray,
   ViewType,
   viewTypes,
 } from "@visian/utils";
@@ -54,12 +55,14 @@ export class TextureAdapter implements IDisposable {
         image.voxelComponents * width * height,
       );
 
-      return new THREE.DataTexture(
+      const texture = new THREE.DataTexture(
         this.sliceData[viewType],
         width,
         height,
         getTextureFormat(image.voxelComponents),
       );
+      texture.needsUpdate = true;
+      return texture;
     });
 
     this.readSliceMaterial = new ReadSliceMaterial(image.voxelCount);
@@ -180,7 +183,7 @@ export class TextureAdapter implements IDisposable {
   public writeSlice(
     sliceNumber: number,
     viewType: ViewType,
-    sliceData: Uint8Array | THREE.Texture | undefined,
+    sliceData: TypedArray | THREE.Texture | undefined,
     target: THREE.WebGLRenderTarget,
     renderer: THREE.WebGLRenderer,
     mergeFunction: MergeFunction,
@@ -188,7 +191,7 @@ export class TextureAdapter implements IDisposable {
   ) {
     const textureData = this.sliceData[viewType];
     if (sliceData) {
-      if (sliceData instanceof Uint8Array) {
+      if (!(sliceData instanceof THREE.Texture) && sliceData !== undefined) {
         if (sliceData.length !== textureData.length) {
           throw new Error("Provided data is not of the correct length.");
         }
@@ -207,7 +210,8 @@ export class TextureAdapter implements IDisposable {
     if (viewType === ViewType.Transverse || !this.image.is3D) {
       this.quad.material = this.mergeMaterial;
       this.mergeMaterial.setSource(
-        sliceData instanceof Uint8Array || !sliceData
+        (!(sliceData instanceof THREE.Texture) && sliceData !== undefined) ||
+          !sliceData
           ? this.sliceTextures[viewType]
           : sliceData,
       );
@@ -225,7 +229,8 @@ export class TextureAdapter implements IDisposable {
 
     this.sliceLine.setSourceSlice(sliceNumber, viewType);
     this.mergeMaterial.setSource(
-      sliceData instanceof Uint8Array || !sliceData
+      (!(sliceData instanceof THREE.Texture) && sliceData !== undefined) ||
+        !sliceData
         ? this.sliceTextures[viewType]
         : sliceData,
     );

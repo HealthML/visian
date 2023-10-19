@@ -1,4 +1,4 @@
-import { MergeFunction, ViewMode } from "@visian/ui-shared";
+import { isMac, MergeFunction, ViewMode } from "@visian/ui-shared";
 import { IDisposer, ViewType } from "@visian/utils";
 import hotkeys from "hotkeys-js";
 
@@ -40,7 +40,8 @@ export const generalHotkeys: IHotkey[] = [
     keys: "*",
     viewMode: "2D",
     condition: (_, event) =>
-      (event.key === "+" || event.key === "w") && !event.ctrlKey,
+      (event.key === "+" || event.key === "w") &&
+      (isMac() ? !event.metaKey : !event.ctrlKey),
     action: (store) => store.editor.activeDocument?.tools.incrementBrushSize(),
     labelTx: "increase-brush-size",
     name: "increase-brush-size",
@@ -62,7 +63,8 @@ export const generalHotkeys: IHotkey[] = [
     keys: "*",
     viewMode: "3D",
     condition: (_, event) =>
-      (event.key === "+" || event.key === "w") && !event.ctrlKey,
+      (event.key === "+" || event.key === "w") &&
+      (isMac() ? !event.metaKey : !event.ctrlKey),
     action: (store) =>
       store.editor.activeDocument?.viewport3D.increaseClippingPlaneDistance(),
     labelTx: "increase-clipping-plane",
@@ -94,7 +96,7 @@ export const generalHotkeys: IHotkey[] = [
     shortcutGuideSection: "undo-redo",
   },
 
-  // Layer Contorls
+  // Layer Controls
   {
     keys: "m",
     action: (store) =>
@@ -272,7 +274,8 @@ export const generalHotkeys: IHotkey[] = [
     // "+" doesn't currently work with hotkeys-js (https://github.com/jaywcjlove/hotkeys/issues/270)
     keys: "*",
     viewMode: "2D",
-    condition: (_, event) => event.key === "+" && event.ctrlKey,
+    condition: (_, event) =>
+      event.key === "+" && (isMac() ? event.metaKey : event.ctrlKey),
     action: (store) => store.editor.activeDocument?.viewport2D.zoomIn(),
     labelTx: "zoom-in",
     shortcutGuideSection: "zoom",
@@ -305,6 +308,38 @@ export const generalHotkeys: IHotkey[] = [
       store.editor.activeDocument?.viewport3D.setOrbitTarget();
       store.editor.volumeRenderer?.lazyRender();
     },
+  },
+
+  // Rotation
+  {
+    keys: "ctrl+right",
+    viewMode: "2D",
+    action: (store) => {
+      store.editor.activeDocument?.viewport2D.rotateBy90Degrees(true);
+      store.editor.sliceRenderer?.lazyRender();
+    },
+    labelTx: "rotate-right",
+    shortcutGuideSection: "rotation",
+  },
+  {
+    keys: "ctrl+left",
+    viewMode: "2D",
+    action: (store) => {
+      store.editor.activeDocument?.viewport2D.rotateBy90Degrees(false);
+      store.editor.sliceRenderer?.lazyRender();
+    },
+    labelTx: "rotate-left",
+    shortcutGuideSection: "rotation",
+  },
+  {
+    keys: "ctrl+shift+r",
+    viewMode: "2D",
+    action: (store) => {
+      store.editor.activeDocument?.viewport2D.resetRotation();
+      store.editor.sliceRenderer?.lazyRender();
+    },
+    labelTx: "reset-rotation",
+    shortcutGuideSection: "rotation",
   },
 
   // New Document
@@ -520,41 +555,54 @@ export const setUpHotKeys = (store: RootStore): IDisposer => {
     Object.values(store.editor.activeDocument.tools.tools).forEach((tool) => {
       if (!tool.activationKeys) return;
 
-      hotkeys(tool.activationKeys, (event) => {
-        const isToolAlreadyActive =
-          store.editor.activeDocument?.tools.activeTool?.name === tool.name;
-        if (
-          // Explicitly access from the active document in case the document changes
-          !store?.editor.activeDocument?.tools.tools[tool.name].canActivate() ||
-          isToolAlreadyActive
-        ) {
-          if (isToolAlreadyActive) {
-            store.editor.activeDocument?.tools.toggleToolSettings();
+      hotkeys(
+        isMac()
+          ? tool.activationKeys.replace(/ctrl/g, "command")
+          : tool.activationKeys,
+        (event) => {
+          const isToolAlreadyActive =
+            store.editor.activeDocument?.tools.activeTool?.name === tool.name;
+          if (
+            // Explicitly access from the active document in case the document changes
+            !store?.editor.activeDocument?.tools.tools[
+              tool.name
+            ].canActivate() ||
+            isToolAlreadyActive
+          ) {
+            if (isToolAlreadyActive) {
+              store.editor.activeDocument?.tools.toggleToolSettings();
+            }
+            return;
           }
-          return;
-        }
 
-        event.preventDefault();
-        store.editor.activeDocument?.tools.setActiveTool(tool.name);
-      });
+          event.preventDefault();
+          store.editor.activeDocument?.tools.setActiveTool(tool.name);
+        },
+      );
     });
   }
 
   generalHotkeys.forEach((config) =>
-    hotkeys(config.keys, (event) => {
-      if (config.condition && !config.condition(store, event)) return;
+    hotkeys(
+      isMac() ? config.keys.replace(/ctrl/g, "command") : config.keys,
+      (event) => {
+        // Early `preventDefault` is required on Mac to reliably cancel system actions
+        if (event.metaKey) event.preventDefault();
 
-      if (
-        config.viewMode &&
-        store.editor.activeDocument?.viewSettings.viewMode !== config.viewMode
-      ) {
-        return;
-      }
+        if (config.condition && !config.condition(store, event)) return;
 
-      if (config.preventDefault !== false) event.preventDefault();
+        if (
+          config.viewMode &&
+          store.editor.activeDocument?.viewSettings.viewMode !== config.viewMode
+        ) {
+          return;
+        }
 
-      config.action(store);
-    }),
+        if (config.preventDefault !== false) event.preventDefault();
+
+        config.action(store);
+      },
+    ),
   );
 
   return () => hotkeys.unbind();

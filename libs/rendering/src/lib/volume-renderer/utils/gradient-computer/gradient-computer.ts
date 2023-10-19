@@ -36,7 +36,7 @@ export class GradientComputer implements IDisposable {
     this.firstDerivativeRenderTarget = new ImageRenderTarget(
       imageProperties,
       THREE.LinearFilter,
-    );
+    ).target;
     // this.secondDerivativeRenderTarget = new ImageRenderTarget(
     //   imageProperties,
     //   THREE.LinearFilter,
@@ -44,7 +44,7 @@ export class GradientComputer implements IDisposable {
     this.outputDerivativeRenderTarget = new ImageRenderTarget(
       imageProperties,
       THREE.LinearFilter,
-    );
+    ).target;
 
     this.gradientMaterial = new GradientMaterial(
       editor,

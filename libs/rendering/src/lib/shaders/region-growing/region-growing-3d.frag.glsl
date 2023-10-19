@@ -7,7 +7,6 @@ uniform vec4 uSeed;
 uniform int uComponents;
 
 @import ../uniforms/u-blip-material;
-@import ../uniforms/u-texture-3d-material;
 
 out vec4 pc_FragColor;
 

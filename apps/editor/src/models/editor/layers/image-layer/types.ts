@@ -1,4 +1,4 @@
-import { ViewType } from "@visian/utils";
+import { TypedArray, ViewType } from "@visian/utils";
 
 export interface GetEmptySlicesArgs {
   data: Uint8Array;
@@ -8,7 +8,7 @@ export interface GetEmptySlicesArgs {
 export type GetEmptySlicesReturn = boolean[][];
 
 export interface IsSliceEmptyArgs {
-  sliceData: Uint8Array;
+  sliceData: TypedArray;
 }
 export type IsSliceEmptyReturn = boolean;
 

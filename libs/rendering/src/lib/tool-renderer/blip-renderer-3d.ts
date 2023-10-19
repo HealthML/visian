@@ -11,25 +11,18 @@ import {
   Vector,
   ViewType,
 } from "@visian/utils";
-import {
-  action,
-  computed,
-  makeObservable,
-  observable,
-  reaction,
-  runInAction,
-} from "mobx";
+import { action, makeObservable, observable } from "mobx";
 import * as THREE from "three";
 
 import { ImageRenderTarget, RenderedImage } from "../rendered-image";
-import { Texture3DRenderer } from "../texture-3d-renderer";
+import { ToolRenderer3D } from "./tool-renderer-3d";
 import { Blip3DMaterial, MAX_BLIP_STEPS } from "./utils";
 
-export class BlipRenderer3D implements IBlipRenderer3D, IDisposable {
+export class BlipRenderer3D
+  extends ToolRenderer3D
+  implements IBlipRenderer3D, IDisposable
+{
   public readonly excludeFromSnapshotTracking = ["document"];
-
-  public holdsPreview = false;
-  public previewColor?: string;
 
   /** The number of blip steps to threshold to (when using the `BlipMaterial`'s `uRenderValue`). */
   public steps = MAX_BLIP_STEPS;
@@ -40,72 +33,26 @@ export class BlipRenderer3D implements IBlipRenderer3D, IDisposable {
   protected disposers: IDisposer[] = [];
 
   protected hasOddOutput = false;
-  protected renderTarget!: THREE.WebGLRenderTarget;
   protected blipRenderTarget!: THREE.WebGLRenderTarget;
-
   protected material: Blip3DMaterial;
-  protected texture3DRenderer: Texture3DRenderer;
 
   constructor(
     protected document: IDocument,
     parameters?: THREE.ShaderMaterialParameters,
   ) {
+    super(document, parameters);
+
     this.material = new Blip3DMaterial(document, parameters);
-    this.texture3DRenderer = new Texture3DRenderer();
 
-    makeObservable<this, "hasOddOutput" | "renderTarget" | "blipRenderTarget">(
-      this,
-      {
-        holdsPreview: observable,
-        maxSteps: observable,
-        previewColor: observable,
-        steps: observable,
-        hasOddOutput: observable,
-        renderTarget: observable,
-        blipRenderTarget: observable,
+    makeObservable<this, "hasOddOutput" | "blipRenderTarget">(this, {
+      maxSteps: observable,
+      steps: observable,
+      hasOddOutput: observable,
+      blipRenderTarget: observable,
 
-        outputTexture: computed,
-
-        setPreviewColor: action,
-        setMaxSteps: action,
-        setSteps: action,
-        render: action,
-        flushToAnnotation: action,
-        discard: action,
-      },
-    );
-
-    this.disposers.push(
-      reaction(
-        () => Boolean(document.mainImageLayer?.is3DLayer),
-        (is3D) => {
-          runInAction(() => {
-            const imageProperties = {
-              voxelCount: new Vector([1, 1, 1]),
-              is3D,
-              defaultViewType: ViewType.Transverse,
-            };
-            this.renderTarget = new ImageRenderTarget(
-              imageProperties,
-              THREE.NearestFilter,
-            );
-            this.blipRenderTarget = new ImageRenderTarget(
-              imageProperties,
-              THREE.NearestFilter,
-            );
-            this.resizeRenderTargets();
-          });
-        },
-        { fireImmediately: true },
-      ),
-      reaction(
-        () => [
-          document.mainImageLayer?.image.voxelCount.toArray(),
-          document.mainImageLayer?.image.defaultViewType,
-        ],
-        this.resizeRenderTargets,
-      ),
-    );
+      setMaxSteps: action,
+      setSteps: action,
+    });
   }
 
   public get sourceLayer(): IImageLayer | undefined {
@@ -115,14 +62,24 @@ export class BlipRenderer3D implements IBlipRenderer3D, IDisposable {
     ) as IImageLayer | undefined;
   }
 
-  public setPreviewColor = (value: string) => {
-    this.previewColor = value;
-  };
-
   public setMaxSteps = (value: number) => {
     this.maxSteps = value;
     this.steps = Math.min(this.steps, value);
   };
+
+  protected initializeRenderTarget(is3D: boolean) {
+    super.initializeRenderTarget(is3D);
+
+    const imageProperties = {
+      voxelCount: new Vector([1, 1, 1]),
+      is3D,
+      defaultViewType: ViewType.Transverse,
+    };
+    this.blipRenderTarget = new ImageRenderTarget(
+      imageProperties,
+      THREE.NearestFilter,
+    ).target;
+  }
 
   /**
    * Runs the multi-step blip rendering.
@@ -218,23 +175,12 @@ export class BlipRenderer3D implements IBlipRenderer3D, IDisposable {
     this.discard();
   }
 
-  public discard() {
-    if (!this.holdsPreview) return;
-
-    this.clearRenderTargets();
-    this.holdsPreview = false;
-    this.hasOddOutput = false;
-
-    this.document.sliceRenderer?.lazyRender();
-    this.document.volumeRenderer?.lazyRender(true);
-  }
-
   public get outputTexture() {
     return (this.hasOddOutput ? this.blipRenderTarget : this.renderTarget)
       .texture;
   }
 
-  protected resizeRenderTargets = () => {
+  protected resizeRenderTarget = () => {
     const { mainImageLayer } = this.document;
     if (!mainImageLayer) return;
 
@@ -258,21 +204,17 @@ export class BlipRenderer3D implements IBlipRenderer3D, IDisposable {
     });
   };
 
-  protected clearRenderTargets() {
+  protected clearRenderTarget() {
+    super.clearRenderTarget();
+
     if (!this.document.renderer) return;
 
-    this.texture3DRenderer.setTarget(this.renderTarget);
-    this.texture3DRenderer.clear(this.document.renderer);
     this.texture3DRenderer.setTarget(this.blipRenderTarget);
     this.texture3DRenderer.clear(this.document.renderer);
   }
 
   public dispose() {
-    this.disposers.forEach((disposer) => disposer());
-    this.material.dispose();
-    this.texture3DRenderer.dispose();
-    [this.renderTarget, this.blipRenderTarget].forEach((renderTarget) =>
-      renderTarget?.dispose(),
-    );
+    super.dispose();
+    this.blipRenderTarget?.dispose();
   }
 }
