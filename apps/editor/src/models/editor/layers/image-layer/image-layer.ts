@@ -13,6 +13,7 @@ import {
   ISerializable,
   itkImageToImageSnapshot,
   ITKImageWithUnit,
+  TypedArray,
   Vector,
   ViewType,
   Voxel,
@@ -356,7 +357,7 @@ export class ImageLayer
     return this.image.getVoxelData(voxel);
   }
 
-  public getSlice(viewType: ViewType, slice: number): Uint8Array {
+  public getSlice(viewType: ViewType, slice: number): TypedArray {
     return this.image.getSlice(viewType, slice);
   }
 

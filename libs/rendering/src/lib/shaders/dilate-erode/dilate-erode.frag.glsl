@@ -5,7 +5,6 @@ in vec2 vUv;
 uniform bool uShouldErode;
 
 @import ../uniforms/u-blip-material;
-@import ../uniforms/u-texture-3d-material;
 
 out vec4 pc_FragColor;
 

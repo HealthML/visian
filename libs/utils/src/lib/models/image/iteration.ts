@@ -161,7 +161,7 @@ export const setSlice = (
   data: TypedArray,
   viewType: ViewType,
   slice: number,
-  sliceData?: Uint8Array,
+  sliceData?: TypedArray,
 ) => {
   const [horizontalAxis, verticalAxis] = getPlaneAxes(viewType);
   const sliceWidth = image.voxelCount[horizontalAxis];
