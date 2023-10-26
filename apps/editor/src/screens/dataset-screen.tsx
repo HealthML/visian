@@ -3,10 +3,7 @@ import { observer } from "mobx-react-lite";
 import React from "react";
 import { useParams } from "react-router-dom";
 
-import { DatasetPage } from "../components/data-manager/dataset-page";
-import { Page } from "../components/data-manager/page";
-import { PageError } from "../components/data-manager/page-error";
-import { PageLoadingBlock } from "../components/data-manager/page-loading-block";
+import { DatasetPage, Page, PageError, PageLoadingBlock } from "../components";
 import { useDataset } from "../queries";
 
 export const DatasetScreen: React.FC = observer(() => {

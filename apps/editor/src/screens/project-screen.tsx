@@ -3,12 +3,14 @@ import { observer } from "mobx-react-lite";
 import React from "react";
 import { useParams } from "react-router-dom";
 
-import { DatasetsSection } from "../components/data-manager/datasets-section";
-import { JobsSection } from "../components/data-manager/jobs-section";
-import { Page } from "../components/data-manager/page";
-import { PageError } from "../components/data-manager/page-error";
-import { PageLoadingBlock } from "../components/data-manager/page-loading-block";
-import { PageTitle } from "../components/data-manager/page-title";
+import {
+  DatasetsSection,
+  JobsSection,
+  Page,
+  PageError,
+  PageLoadingBlock,
+  PageTitle,
+} from "../components";
 import { useProject } from "../queries";
 
 export const ProjectScreen: React.FC = observer(() => {

@@ -5,18 +5,18 @@ import React, { useCallback, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 
-import { ConfirmationPopup } from "../components/data-manager/confirmation-popup";
-import { EditPopup } from "../components/data-manager/edit-popup";
-import { MiaTitle } from "../components/data-manager/mia-title";
-import { Page } from "../components/data-manager/page";
 import {
+  ConfirmationPopup,
+  EditPopup,
+  GridView,
+  ListView,
+  MiaTitle,
   PaddedPageSectionIconButton,
+  Page,
   PageSection,
-} from "../components/data-manager/page-section";
-import { ProjectCreationPopup } from "../components/data-manager/project-creation-popup";
+  ProjectCreationPopup,
+} from "../components";
 import useLocalStorageToggle from "../components/data-manager/util/use-local-storage";
-import { GridView } from "../components/data-manager/views/grid-view";
-import { ListView } from "../components/data-manager/views/list-view";
 import {
   useCreateProjectMutation,
   useDeleteProjectsMutation,

@@ -3,11 +3,8 @@ import { observer } from "mobx-react-lite";
 import React from "react";
 import { useParams } from "react-router-dom";
 
-import { JobPage } from "../components/data-manager/job-page";
-import { Page } from "../components/data-manager/page";
-import { PageError } from "../components/data-manager/page-error";
-import { PageLoadingBlock } from "../components/data-manager/page-loading-block";
-import useJob from "../queries/use-job";
+import { JobPage, Page, PageError, PageLoadingBlock } from "../components";
+import { useJob } from "../queries";
 
 export const JobScreen: React.FC = observer(() => {
   const { t: translate } = useTranslation();

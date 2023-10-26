@@ -3,7 +3,7 @@ import { observer } from "mobx-react-lite";
 import React, { useEffect } from "react";
 
 import { useStore } from "../app/root-store";
-import { MainView, UIOverlay } from "../components/editor";
+import { MainView, UIOverlay } from "../components";
 import { setUpEventHandling } from "../event-handling";
 
 export const EditorScreen: React.FC = observer(() => {
