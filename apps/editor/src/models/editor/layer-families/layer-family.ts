@@ -40,7 +40,13 @@ export class LayerFamily
   }
 
   public get layers(): ILayer[] {
-    return this.layerIds.map((id) => this.document.getLayer(id)!);
+    return this.layerIds.map((id) => {
+      const layer = this.document.getLayer(id);
+      if (layer !== null && layer !== undefined) {
+        return layer;
+      }
+      throw new Error(`Layer with id ${id} not found`);
+    });
   }
 
   public get hasChanges() {

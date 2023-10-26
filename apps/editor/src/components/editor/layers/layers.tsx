@@ -256,11 +256,14 @@ export const Layers: React.FC = observer(() => {
 
   const treeItems = getTreeItems();
 
-  const canRootHaveChildren = useCallback((item) => {
-    const layer = store?.editor.activeDocument?.getLayer(item.value);
-    if (!layer) return true; // layerFamilies can always be children of root
-    return layer.family === undefined;
-  }, []);
+  const canRootHaveChildren = useCallback(
+    (item) => {
+      const layer = store?.editor.activeDocument?.getLayer(item.value);
+      if (!layer) return true; // layerFamilies can always be children of root
+      return layer.family === undefined;
+    },
+    [store?.editor.activeDocument],
+  );
   const updateRenderingOrder = useCallback(
     (
       newTreeItems: TreeItems<TreeItemData>,
