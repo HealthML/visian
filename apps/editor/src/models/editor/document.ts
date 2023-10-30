@@ -860,25 +860,6 @@ export class Document
         }
       } else {
         //! TODO: #513
-        // const numberOfAnnotations = uniqueValues.size - 1;
-
-        // if (
-        //   numberOfAnnotations === 1 ||
-        //   numberOfAnnotations + this.imageLayers.length > this.maxVisibleLayers
-        // ) {
-        //   createdLayerId = await this.importAnnotation(
-        //     imageWithUnit,
-        //     undefined,
-        //     true,
-        //   );
-
-        //   if (numberOfAnnotations !== 1) {
-        //     this.setError({
-        //       titleTx: "squashed-layers-title",
-        //       descriptionTx: "squashed-layers-import",
-        //     });
-        //   }
-        // } else {
         uniqueValues.forEach(async (value) => {
           if (value === 0) return;
           createdLayerId = await this.importAnnotation(
