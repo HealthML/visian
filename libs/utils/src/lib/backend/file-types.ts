@@ -52,7 +52,7 @@ export interface FileWithMetadata extends File {
   metadata: BackendMetadata;
 }
 
-export interface FileWithFamily extends File {
-  familyId: string;
+export interface FileWithAnnotationGroup extends File {
+  annotationGroupId: string;
   metadata?: BackendMetadata;
 }

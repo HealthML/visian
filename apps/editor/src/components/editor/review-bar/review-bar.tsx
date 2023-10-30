@@ -244,17 +244,20 @@ export const MiaReviewBar = observer(
     const isVerified = useMemo(
       () =>
         (
-          store?.editor.activeDocument?.activeLayer?.family
+          store?.editor.activeDocument?.activeLayer?.annotationGroup
             ?.metadata as MiaAnnotationMetadata
         )?.verified ?? false,
-      [store?.editor.activeDocument?.activeLayer?.family?.metadata],
+      [store?.editor.activeDocument?.activeLayer?.annotationGroup?.metadata],
     );
 
     const toggleVerification = useCallback(() => {
-      store?.editor.activeDocument?.activeLayer?.family?.trySetIsVerified(
+      store?.editor.activeDocument?.activeLayer?.annotationGroup?.trySetIsVerified(
         !isVerified,
       );
-    }, [store?.editor.activeDocument?.activeLayer?.family, isVerified]);
+    }, [
+      store?.editor.activeDocument?.activeLayer?.annotationGroup,
+      isVerified,
+    ]);
 
     return store?.editor.activeDocument ? (
       <ReviewBarSheet>
@@ -295,7 +298,8 @@ export const MiaReviewBar = observer(
             <ActionButtons
               icon={isVerified ? "exit" : "check"}
               isDisabled={
-                !store?.editor.activeDocument?.activeLayer?.family?.metadata ||
+                !store?.editor.activeDocument?.activeLayer?.annotationGroup
+                  ?.metadata ||
                 !store?.editor.activeDocument?.activeLayer?.isAnnotation
               }
               tooltipTx={

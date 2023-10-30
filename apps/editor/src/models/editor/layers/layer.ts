@@ -1,9 +1,9 @@
 import {
   BlendMode,
   color,
+  IAnnotationGroup,
   IDocument,
   ILayer,
-  ILayerFamily,
   LayerSnapshot,
   MarkerConfig,
 } from "@visian/ui-shared";
@@ -67,11 +67,11 @@ export class Layer implements ILayer, ISerializable<LayerSnapshot> {
       opacity: computed,
       parent: computed,
       title: computed,
-      family: computed,
+      annotationGroup: computed,
       isActive: computed,
 
       setParent: action,
-      setFamily: action,
+      setAnnotationGroup: action,
       setIsAnnotation: action,
       setTitle: action,
       setBlendMode: action,
@@ -121,24 +121,26 @@ export class Layer implements ILayer, ISerializable<LayerSnapshot> {
       : undefined;
   }
 
-  public get family(): ILayerFamily | undefined {
-    return this.document.layerFamilies?.find((family) =>
-      family.layers.includes(this),
+  public get annotationGroup(): IAnnotationGroup | undefined {
+    return this.document.annotationGroups?.find((group) =>
+      group.layers.includes(this),
     );
   }
 
-  public setFamily(id?: string, index?: number): void {
+  public setAnnotationGroup(id?: string, index?: number): void {
     if (!id) {
-      this.family?.removeLayer(this.id, index);
+      this.annotationGroup?.removeLayer(this.id, index);
       this.document.addLayer(this, index);
       return;
     }
-    const newFamily = this.document.getLayerFamily(id);
-    newFamily?.addLayer(this.id, index);
+    const newGroup = this.document.getAnnotationGroup(id);
+    newGroup?.addLayer(this.id, index);
   }
 
-  public getFamilyLayers(): ILayer[] {
-    return this.family?.layers ?? this.document.getOrphanAnnotationLayers();
+  public getAnnotationGroupLayers(): ILayer[] {
+    return (
+      this.annotationGroup?.layers ?? this.document.getOrphanAnnotationLayers()
+    );
   }
 
   public setBlendMode = (value?: BlendMode): void => {
@@ -210,7 +212,7 @@ export class Layer implements ILayer, ISerializable<LayerSnapshot> {
 
   public delete() {
     (this.parent as LayerGroup)?.removeLayer?.(this.id);
-    this.family?.removeLayer?.(this.id);
+    this.annotationGroup?.removeLayer?.(this.id);
     if (this.document.layers.includes(this)) {
       this.document.deleteLayer(this.id);
     }

@@ -67,17 +67,18 @@ export abstract class ReviewStrategy {
         );
         if (!annotationFiles) throw new Error("Annotation files not found");
 
-        const familyFiles = this.store.editor.activeDocument?.createLayerFamily(
-          annotationFiles,
-          `Annotation ${idx + 1}`,
-          getMetadataFromChild
-            ? { ...annotationFiles[0]?.metadata }
-            : { id: annotationId, kind: "annotation", backend: "who" },
-        );
-        if (!familyFiles) throw new Error("No active Document");
+        const groupFiles =
+          this.store.editor.activeDocument?.createAnnotationGroup(
+            annotationFiles,
+            `Annotation ${idx + 1}`,
+            getMetadataFromChild
+              ? { ...annotationFiles[0]?.metadata }
+              : { id: annotationId, kind: "annotation", backend: "who" },
+          );
+        if (!groupFiles) throw new Error("No active Document");
 
         await this.store?.editor.activeDocument?.importFiles(
-          familyFiles,
+          groupFiles,
           undefined,
           true,
         );

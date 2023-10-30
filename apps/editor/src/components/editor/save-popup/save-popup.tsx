@@ -23,7 +23,7 @@ import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
 import { importFilesToDocument } from "../../../import-handling";
-import { LayerFamily } from "../../../models/editor/layer-families";
+import { AnnotationGroup } from "../../../models/editor/annotation-groups";
 import { MiaReviewTask } from "../../../models/review-strategy";
 import { fetchAnnotationFile } from "../../../queries";
 import { SavePopUpProps } from "./save-popup.props";
@@ -91,35 +91,36 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
     [newAnnotationURIPrefix, selectedExtension],
   );
 
-  const createFamilyForNewAnnotation = (
+  const createGroupForNewAnnotation = (
     layer: ILayer | undefined,
     annotation: MiaAnnotation | undefined,
   ) => {
     const document = store?.editor.activeDocument;
     if (document && layer) {
-      const layerFamily = new LayerFamily(undefined, document);
-      document.addLayerFamily(layerFamily);
+      const annotationGroup = new AnnotationGroup(undefined, document);
+      document.addAnnotationGroup(annotationGroup);
       if (annotation) {
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        layerFamily.title = annotation.dataUri.split("/").pop() ?? "family :)";
-        layerFamily.metadata = {
+        annotationGroup.title =
+          annotation.dataUri.split("/").pop() ?? "annotation group :)";
+        annotationGroup.metadata = {
           ...annotation,
           backend: "mia",
           kind: "annotation",
         };
       }
-      const familyLayers = layer.getFamilyLayers();
-      familyLayers.forEach((l) => layerFamily.addLayer(l.id));
-      return layerFamily;
+      const groupLayers = layer.getAnnotationGroupLayers();
+      groupLayers.forEach((l) => annotationGroup.addLayer(l.id));
+      return annotationGroup;
     }
   };
 
-  const createFileForFamilyOf = async (
+  const createFileForAnnotationGroupOf = async (
     layer: ILayer | undefined,
     asZip: boolean,
   ): Promise<File | undefined> => {
     if (layer?.isAnnotation) {
-      const layersToSave = layer.getFamilyLayers();
+      const layersToSave = layer.getAnnotationGroupLayers();
       const file = await store?.editor?.activeDocument?.createFileFromLayers(
         layersToSave,
         asZip,
@@ -147,7 +148,7 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
 
   const canBeOverwritten = useCallback(() => {
     const activeLayer = store?.editor.activeDocument?.activeLayer;
-    const annotation = activeLayer?.family?.metadata as MiaAnnotation;
+    const annotation = activeLayer?.annotationGroup?.metadata as MiaAnnotation;
     return !!annotation;
   }, [store]);
 
@@ -155,8 +156,9 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
     store?.setProgress({ labelTx: "saving" });
     try {
       const activeLayer = store?.editor.activeDocument?.activeLayer;
-      const annotationMeta = activeLayer?.family?.metadata as MiaAnnotation;
-      const annotationFile = await createFileForFamilyOf(
+      const annotationMeta = activeLayer?.annotationGroup
+        ?.metadata as MiaAnnotation;
+      const annotationFile = await createFileForAnnotationGroupOf(
         activeLayer,
         annotationMeta?.dataUri.endsWith(".zip"),
       );
@@ -168,7 +170,7 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
         annotationMeta.id,
         [annotationFile],
       );
-      activeLayer?.getFamilyLayers().forEach((layer) => {
+      activeLayer?.getAnnotationGroupLayers().forEach((layer) => {
         store?.editor.activeDocument?.history?.updateCheckpoint(layer.id);
       });
       return true;
@@ -195,14 +197,14 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
     oldAnnotationMeta: MiaAnnotation,
   ) => {
     const activeLayer = store?.editor.activeDocument?.activeLayer;
-    if (activeLayer?.family) {
-      activeLayer.family.metadata = {
+    if (activeLayer?.annotationGroup) {
+      activeLayer.annotationGroup.metadata = {
         ...newAnnotationMeta,
         backend: "mia",
         kind: "annotation",
       };
-      activeLayer.family.title = newAnnotationMeta.dataUri;
-      activeLayer.family.layers.forEach((layer, index) => {
+      activeLayer.annotationGroup.title = newAnnotationMeta.dataUri;
+      activeLayer.annotationGroup.layers.forEach((layer, index) => {
         layer.metadata = {
           ...newAnnotationMeta,
           backend: "mia",
@@ -225,7 +227,7 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
     try {
       const activeLayer = store?.editor.activeDocument?.activeLayer;
       const reviewTask = store?.reviewStrategy?.currentTask;
-      const annotationFile = (await createFileForFamilyOf(
+      const annotationFile = (await createFileForAnnotationGroupOf(
         activeLayer,
         uri.endsWith(".zip"),
       )) as FileWithMetadata;
@@ -241,18 +243,19 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
       const newAnnotationId = await reviewTask.createAnnotation([
         annotationFile,
       ]);
-      const annotationMeta = activeLayer?.family?.metadata as MiaAnnotation;
+      const annotationMeta = activeLayer?.annotationGroup
+        ?.metadata as MiaAnnotation;
       const newAnnotationMeta =
         reviewTask instanceof MiaReviewTask
           ? // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             reviewTask.getAnnotation(newAnnotationId)!
           : annotationMeta;
       if (!annotationMeta) {
-        createFamilyForNewAnnotation(activeLayer, newAnnotationMeta);
+        createGroupForNewAnnotation(activeLayer, newAnnotationMeta);
       } else {
         await loadOldAnnotation(newAnnotationMeta, annotationMeta);
       }
-      activeLayer?.getFamilyLayers().forEach((layer) => {
+      activeLayer?.getAnnotationGroupLayers().forEach((layer) => {
         store?.editor.activeDocument?.history?.updateCheckpoint(layer.id);
       });
       store?.setProgress();
@@ -339,7 +342,7 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
     >
       <SectionLabel tx="layers-to-save" />
       <LayerList
-        layers={store?.editor.activeDocument?.activeLayer?.getFamilyLayers()}
+        layers={store?.editor.activeDocument?.activeLayer?.getAnnotationGroupLayers()}
       />
       {canBeOverwritten() && (
         <>
@@ -348,7 +351,7 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
             <SaveInput
               value={
                 (
-                  store?.editor.activeDocument?.activeLayer?.family
+                  store?.editor.activeDocument?.activeLayer?.annotationGroup
                     ?.metadata as MiaMetadata
                 )?.dataUri
               }
@@ -357,7 +360,8 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
             <SaveButton
               tx="save"
               isDisabled={
-                !store?.editor.activeDocument?.activeLayer?.family?.hasChanges
+                !store?.editor.activeDocument?.activeLayer?.annotationGroup
+                  ?.hasChanges
               }
               onPointerDown={async () => {
                 if (await saveAnnotation()) {

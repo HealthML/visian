@@ -156,14 +156,12 @@ export class MiaReviewStrategy extends ReviewStrategy {
   public async saveTask() {
     await this.currentTask?.save();
     await Promise.all(
-      this.store.editor.activeDocument?.layerFamilies?.map((layerFamily) => {
+      this.store.editor.activeDocument?.annotationGroups?.map((group) => {
         if (
-          this.currentTask?.annotationIds.includes(
-            layerFamily.metadata?.id ?? "",
-          )
+          this.currentTask?.annotationIds.includes(group.metadata?.id ?? "")
         ) {
-          return patchAnnotation(layerFamily.metadata?.id, {
-            verified: (layerFamily.metadata as MiaAnnotationMetadata)?.verified,
+          return patchAnnotation(group.metadata?.id, {
+            verified: (group.metadata as MiaAnnotationMetadata)?.verified,
           });
         }
         return Promise.resolve();

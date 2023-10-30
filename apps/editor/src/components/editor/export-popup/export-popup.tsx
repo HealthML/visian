@@ -71,7 +71,7 @@ export const ExportPopUp = observer<ExportPopUpProps>(({ isOpen, onClose }) => {
     } else {
       setLayersToExport(
         store?.editor?.activeDocument?.activeLayer
-          ?.getFamilyLayers()
+          ?.getAnnotationGroupLayers()
           .filter((layer) => layer.isAnnotation) ?? [],
       );
     }
@@ -107,7 +107,7 @@ export const ExportPopUp = observer<ExportPopUpProps>(({ isOpen, onClose }) => {
       <LayerList layers={layersToExport} />
       <StyledSwitch
         options={[
-          { labelTx: "export-layer-group", value: false },
+          { labelTx: "export-annotation-group", value: false },
           { labelTx: "export-all-layers", value: true },
         ]}
         value={shouldExportAllLayers}

@@ -78,7 +78,7 @@ export const TopConsole = observer(() => {
           />
         </TopRow>
         {(
-          store?.editor.activeDocument?.activeLayer?.family
+          store?.editor.activeDocument?.activeLayer?.annotationGroup
             ?.metadata as MiaAnnotationMetadata
         )?.verified && (
           <StatusBadge
