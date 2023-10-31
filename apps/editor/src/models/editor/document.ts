@@ -473,6 +473,14 @@ export class Document
     this.viewSettings.setViewMode(this.viewSettings.viewMode);
   };
 
+  public addNewGroup = () => {
+    if (!this.mainImageLayer) return;
+
+    const layerFamily = new LayerFamily({ title: "new Group" }, this);
+
+    this.addLayerFamily(layerFamily);
+  };
+
   public deleteLayer = (idOrLayer: string | ILayer): void => {
     const layerId = typeof idOrLayer === "string" ? idOrLayer : idOrLayer.id;
 

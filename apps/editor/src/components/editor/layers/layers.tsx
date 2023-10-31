@@ -22,7 +22,13 @@ import {
 } from "dnd-kit-sortable-tree";
 import { ItemChangedReason } from "dnd-kit-sortable-tree/dist/types";
 import { observer } from "mobx-react-lite";
-import React, { ReactNode, useCallback, useEffect, useState } from "react";
+import React, {
+  ReactNode,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
@@ -210,6 +216,14 @@ export const Layers: React.FC = observer(() => {
   // eslint-disable-next-line no-unused-expressions, @typescript-eslint/no-unused-expressions
   store?.editor.activeDocument?.activeLayer;
 
+  const canAddLayerElements = useMemo(() => {
+    return (
+      !store?.editor.activeDocument?.imageLayers?.length ||
+      store?.editor.activeDocument?.imageLayers?.length >=
+        (store?.editor.activeDocument?.maxVisibleLayers || 0)
+    );
+  }, [store?.editor.activeDocument?.imageLayers]);
+
   const layers = store?.editor.activeDocument?.layers;
   const canFamilyHaveChildren = useCallback(
     (family: ILayerFamily) => {
@@ -261,6 +275,7 @@ export const Layers: React.FC = observer(() => {
     if (!layer) return true; // layerFamilies can always be children of root
     return layer.family === undefined;
   }, []);
+
   const updateRenderingOrder = useCallback(
     (
       newTreeItems: TreeItems<TreeItemData>,
@@ -359,14 +374,16 @@ export const Layers: React.FC = observer(() => {
             <ModalHeaderButton
               icon="plus"
               tooltipTx="add-annotation-layer"
-              isDisabled={
-                !store?.editor.activeDocument?.imageLayers?.length ||
-                store?.editor.activeDocument?.imageLayers?.length >=
-                  (store?.editor.activeDocument?.maxVisibleLayers || 0)
-              }
+              isDisabled={canAddLayerElements}
               onPointerDown={
                 store?.editor.activeDocument?.addNewAnnotationLayer
               }
+            />
+            <ModalHeaderButton
+              icon="folder"
+              tooltipTx="add-group"
+              isDisabled={canAddLayerElements}
+              onPointerDown={store?.editor.activeDocument?.addNewGroup}
             />
           </>
         }

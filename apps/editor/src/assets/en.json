@@ -93,6 +93,7 @@
   "layers": "Layers",
   "main-image-layer": "Main Image Layer",
   "add-annotation-layer": "Add new annotation",
+  "add-group": "Add new Group",
   "no-layers": "No layers loaded.",
   "untitled-layer": "Untitled layer",
   "layer-settings": "Layer Settings",
