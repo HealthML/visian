@@ -1,21 +1,21 @@
-import { FullWidthListItem, ILayerFamily } from "@visian/ui-shared";
+import { FullWidthListItem, IAnnotationGroup } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
 import { useCallback } from "react";
 
-export const FamilyListItem = observer<{
-  family: ILayerFamily;
+export const AnnotationGroupListItem = observer<{
+  group: IAnnotationGroup;
   isActive: boolean;
   isLast?: boolean;
-}>(({ family, isActive, isLast }) => {
+}>(({ group, isActive, isLast }) => {
   const toggleCollapse = useCallback(() => {
-    family.collapsed = !family.collapsed;
-  }, [family]);
+    group.collapsed = !group.collapsed;
+  }, [group]);
   return (
     <FullWidthListItem
-      icon={family.collapsed ? "arrowRight" : "arrowDown"}
+      icon={group.collapsed ? "arrowRight" : "arrowDown"}
       onClick={toggleCollapse}
-      labelTx={family.title}
-      label={family.title}
+      labelTx={group.title}
+      label={group.title}
       isActive={isActive}
       isLast={isLast}
     />

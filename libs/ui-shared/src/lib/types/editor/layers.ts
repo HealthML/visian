@@ -36,7 +36,6 @@ export interface LayerSnapshot {
 
   id: string;
   titleOverride?: string;
-  parentId?: string;
 
   blendMode: BlendMode;
   color?: string;
@@ -47,7 +46,7 @@ export interface LayerSnapshot {
   metadata?: BackendMetadata;
 }
 
-export interface LayerFamilySnapshot {
+export interface AnnotationGroupSnapshot {
   id: string;
   title: string;
   metadata?: BackendMetadata;
@@ -74,20 +73,13 @@ export interface ILayer {
    * used, e.g., the ImageLayer's image name.
    */
   title?: string;
-  /**
-   * The parent layer of this layer.
-   * Typically, this is the group the layer is contained in.
-   * If none is set, the layer is assumed to be directly contained in the
-   * document.
-   */
-  parent?: ILayer;
 
   /**
-   * The family of this layer.
+   * The annotation group of this layer.
    * This groups layers that are related to each other, e.g., a segmentation file.
-   * In conrast to the parent, the family itself is not a layer.
+   * The group itself is not a layer.
    */
-  family?: ILayerFamily;
+  annotationGroup?: IAnnotationGroup;
 
   /**
    * The blend mode used to combine this layer on top of the ones below.
@@ -125,16 +117,13 @@ export interface ILayer {
 
   setMetadata(value?: BackendMetadata): void;
 
-  /** Sets this layer's parent layer, typically the group it is contained in. */
-  setParent(idOrLayer?: string | ILayer): void;
-
-  /** Sets the layer's family and moves it to the specified index within its local rendering order.
-   * A layer with an undefined family is an orphan.
+  /** Sets the layer's annotation group and moves it to the specified index within its local rendering order.
+   * A layer with an undefined annotation group is an orphan.
    * If the layer is an orphan its local rendering order is the document renderingOrder.
    */
-  setFamily(id: string | undefined, idx?: number): void;
+  setAnnotationGroup(id: string | undefined, idx?: number): void;
 
-  getFamilyLayers(): ILayer[];
+  getAnnotationGroupLayers(): ILayer[];
 
   setIsAnnotation(value?: boolean): void;
 
@@ -221,44 +210,30 @@ export interface IImageLayer extends ILayer {
   copy(): IImageLayer;
 }
 
-/** A group of layers. */
-export interface ILayerGroup extends ILayer {
-  kind: "group";
-
+export interface IAnnotationGroup {
+  id: string;
+  /** The group's display name. */
+  title: string;
+  /** The group's meta data. Usually the object from the DB */
+  metadata?: BackendMetadata;
   /** All layers in the group. */
   layers: ILayer[];
-
-  /** Adds a layer to the group. */
-  addLayer(idOrlayer: string | ILayer): void;
-
-  /** Removes a layer from the document (but keeps it in the document). */
-  removeLayer(idOrLayer: string | ILayer): void;
-}
-
-export interface ILayerFamily {
-  id: string;
-  /** The family's display name. */
-  title: string;
-  /** The family's meta data. Usually the object from the DB */
-  metadata?: BackendMetadata;
-  /** All layers in the family. */
-  layers: ILayer[];
-  /** Whether the layer is currently collapsed in the layer view* */
+  /** Whether the group is currently collapsed in the layer view* */
   collapsed?: boolean;
   /** Whether the group contains the document's active layer */
   isActive: boolean;
-  /** Returns `true` if the family has changes. */
+  /** Returns `true` if the annotation group has changes. */
   hasChanges: boolean;
-  /** Adds a layer with specified id to the family at the specified index, the layer is removed from its previous family.
-   * If no index and the layer is already in the family, the layer's position remains unchanged.
-   * If no index is specified and the layer is not part of the family, the layer is inserted at the beginning. */
+  /** Adds a layer with specified id to the group at the specified index, the layer is removed from its previous group.
+   * If no index and the layer is already in the group, the layer's position remains unchanged.
+   * If no index is specified and the layer is not part of the gropu, the layer is inserted at the beginning. */
   addLayer(id: string, index?: number): void;
-  /** Removes a layer from the family making it an orphan.
+  /** Removes a layer from the group making it an orphan.
    * After being removed, the layer is added to the document at the specified index.
    */
   removeLayer(id: string, index?: number): void;
   /** set verified if fam */
   trySetIsVerified(value: boolean): void;
 
-  toJSON(): LayerFamilySnapshot;
+  toJSON(): AnnotationGroupSnapshot;
 }

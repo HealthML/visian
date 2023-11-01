@@ -125,7 +125,7 @@
   "exporting": "Exporting",
   "layers-to-export": "Layers to export",
   "export-all-layers": "Export all layers",
-  "export-layer-group": "Export layer group",
+  "export-annotation-group": "Export annotation group",
   "export-as": "Export as",
   "no-file-to-export": "No file found to export.",
 

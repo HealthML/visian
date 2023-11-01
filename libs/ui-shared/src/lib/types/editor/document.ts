@@ -1,6 +1,6 @@
 import type * as THREE from "three";
 
-import { ILayerFamily, MeasurementType, PerformanceMode } from ".";
+import { IAnnotationGroup, MeasurementType, PerformanceMode } from ".";
 import { Theme } from "../../theme";
 import type { ErrorNotification } from "../error-notification";
 import type { ISliceRenderer, IVolumeRenderer } from "../rendering";
@@ -30,17 +30,17 @@ export interface IDocument {
    */
   layers: ILayer[];
   /**
-   * The document's layer and layer Family stack.
-   * This contains all top-level layers (not contained in some family) and all layerFamilies, sorted
+   * The document's layer and annotation group stack.
+   * This contains all top-level layers (not contained in an annotation group) and all annotation groups, sorted
    * top-to-bottom
    */
-  renderingOrder: (ILayer | ILayerFamily)[];
+  renderingOrder: (ILayer | IAnnotationGroup)[];
   /**
-   * The document's layer and layer Family stack.
-   * This contains all layers and all layerFamilies, sorted by their renderingOrder
-   * layerFamilies are followed by the layers within that family top-to-bottom
+   * The document's layer and annotation group stack.
+   * This contains all layers and all annotation groups, sorted by their renderingOrder
+   * annotation groups are followed by the layers within that group top-to-bottom
    */
-  flatRenderingOrder: (ILayer | ILayerFamily)[];
+  flatRenderingOrder: (ILayer | IAnnotationGroup)[];
 
   /** `true` if the document holds three-dimensional layers. */
   has3DLayers: boolean;
@@ -65,7 +65,7 @@ export interface IDocument {
   mainImageLayer?: Reference<IImageLayer>;
 
   /** The families of layers e.g. for grouping layers by file */
-  layerFamilies?: ILayerFamily[];
+  annotationGroups?: IAnnotationGroup[];
 
   /** The document's history. */
   history: IHistory;
@@ -102,9 +102,9 @@ export interface IDocument {
   /** Reads a layer based on its id. */
   getLayer(id: string): ILayer | undefined;
 
-  getLayerFamily(id: string): ILayerFamily | undefined;
+  getAnnotationGroup(id: string): IAnnotationGroup | undefined;
 
-  /* returns all annotation layers that do not have a family */
+  /* returns all annotation layers that do not have an annotation group */
   getOrphanAnnotationLayers(): ILayer[];
 
   /** Sets the active layer. */
@@ -118,8 +118,8 @@ export interface IDocument {
   /** Adds a layer to the document. */
   addLayer(layer: ILayer, idx?: number): void;
 
-  /** Adds a layer family to the document. */
-  addLayerFamily(layer: ILayerFamily): void;
+  /** Adds an annotation group to the document. */
+  addAnnotationGroup(layer: IAnnotationGroup): void;
 
   /** Deletes a layer from the document. */
   deleteLayer(idOrLayer: string | ILayer): void;

@@ -1,8 +1,8 @@
 import {
   computeStyleValue,
   FloatingUIButton,
+  IAnnotationGroup,
   ILayer,
-  ILayerFamily,
   InfoText,
   List,
   ListItem,
@@ -27,9 +27,9 @@ import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
 import { ImageLayer } from "../../../models";
-import { LayerFamily } from "../../../models/editor/layer-families";
+import { AnnotationGroup } from "../../../models/editor/annotation-groups";
 import { InfoShortcuts } from "../info-shortcuts";
-import { FamilyListItem } from "./group-list-item";
+import { AnnotationGroupListItem } from "./group-list-item";
 import { LayerListItem } from "./layer-list-item";
 
 // Styled Components
@@ -104,7 +104,7 @@ type TreeItemData = {
 const LayerItem = ({ id }: { id: string }) => {
   const store = useStore();
   const hideLayerDivider = useCallback(
-    (element: ILayer | ILayerFamily) => {
+    (element: ILayer | IAnnotationGroup) => {
       if (!element) return false;
       const flatRenderingOrder =
         store?.editor.activeDocument?.flatRenderingOrder;
@@ -114,7 +114,7 @@ const LayerItem = ({ id }: { id: string }) => {
       const layerIndex = flatRenderingOrder.indexOf(element);
       if (layerIndex === flatRenderingOrder.length - 1) return true;
       if (
-        element instanceof LayerFamily &&
+        element instanceof AnnotationGroup &&
         element.collapsed &&
         renderingOrder.indexOf(element) === renderingOrder.length - 1
       ) {
@@ -123,7 +123,7 @@ const LayerItem = ({ id }: { id: string }) => {
       const nextElement = flatRenderingOrder[layerIndex + 1];
       return (
         nextElement.isActive &&
-        (nextElement instanceof LayerFamily ? nextElement.collapsed : true)
+        (nextElement instanceof AnnotationGroup ? nextElement.collapsed : true)
       );
     },
     [
@@ -132,16 +132,16 @@ const LayerItem = ({ id }: { id: string }) => {
     ],
   );
 
-  const family = store?.editor.activeDocument?.getLayerFamily(id);
-  if (family) {
-    const isActive = !!family.collapsed && family.isActive;
+  const group = store?.editor.activeDocument?.getAnnotationGroup(id);
+  if (group) {
+    const isActive = !!group.collapsed && group.isActive;
     return (
       <div style={{ width: `${treeWidth}px`, maxWidth: "100%" }}>
-        <FamilyListItem
-          key={family.id}
-          family={family}
+        <AnnotationGroupListItem
+          key={group.id}
+          group={group}
           isActive={isActive}
-          isLast={hideLayerDivider(family)}
+          isLast={hideLayerDivider(group)}
         />
       </div>
     );
@@ -151,7 +151,9 @@ const LayerItem = ({ id }: { id: string }) => {
     return (
       <div
         style={{
-          width: `${treeWidth - indentationWidth * (layer.family ? 1 : 0)}px`,
+          width: `${
+            treeWidth - indentationWidth * (layer.annotationGroup ? 1 : 0)
+          }px`,
           maxWidth: "100%",
         }}
       >
@@ -211,11 +213,11 @@ export const Layers: React.FC = observer(() => {
   store?.editor.activeDocument?.activeLayer;
 
   const layers = store?.editor.activeDocument?.layers;
-  const canFamilyHaveChildren = useCallback(
-    (family: ILayerFamily) => {
+  const canGroupHaveChildren = useCallback(
+    (group: IAnnotationGroup) => {
       const callback = (draggedItem: TreeItem<TreeItemData>) => {
         const layer = store?.editor.activeDocument?.getLayer(draggedItem.value);
-        if (store?.reviewStrategy && layer && !family.layers.includes(layer)) {
+        if (store?.reviewStrategy && layer && !group.layers.includes(layer)) {
           return false;
         }
 
@@ -227,12 +229,12 @@ export const Layers: React.FC = observer(() => {
   );
 
   const getTreeItems = useCallback(() => {
-    const layerFamilyToTreeItemData = (layerFamily: ILayerFamily) => ({
-      id: layerFamily.id,
-      value: layerFamily.id,
-      children: layerFamily.layers.map((layer) => layerToTreeItemData(layer)),
-      collapsed: layerFamily.collapsed,
-      canHaveChildren: canFamilyHaveChildren(layerFamily),
+    const annotationGroupToTreeItemData = (group: IAnnotationGroup) => ({
+      id: group.id,
+      value: group.id,
+      children: group.layers.map((layer) => layerToTreeItemData(layer)),
+      collapsed: group.collapsed,
+      canHaveChildren: canGroupHaveChildren(group),
       disableSorting: false,
     });
 
@@ -242,9 +244,9 @@ export const Layers: React.FC = observer(() => {
     }
 
     return renderingOrder.map((element) => {
-      if (element instanceof LayerFamily) {
-        const family = element as LayerFamily;
-        return layerFamilyToTreeItemData(family);
+      if (element instanceof AnnotationGroup) {
+        const group = element as AnnotationGroup;
+        return annotationGroupToTreeItemData(group);
       }
       if (element instanceof ImageLayer) {
         const layer = element as ImageLayer;
@@ -252,14 +254,14 @@ export const Layers: React.FC = observer(() => {
       }
       return { id: "undefined", value: "undefined" };
     });
-  }, [canFamilyHaveChildren, store?.editor.activeDocument?.renderingOrder]);
+  }, [canGroupHaveChildren, store?.editor.activeDocument?.renderingOrder]);
 
   const treeItems = getTreeItems();
 
   const canRootHaveChildren = useCallback((item) => {
     const layer = store?.editor.activeDocument?.getLayer(item.value);
     if (!layer) return true; // layerFamilies can always be children of root
-    return layer.family === undefined;
+    return layer.annotationGroup === undefined;
   }, []);
   const updateRenderingOrder = useCallback(
     (
@@ -268,11 +270,11 @@ export const Layers: React.FC = observer(() => {
     ) => {
       if (change.type === "removed") return;
       if (change.type === "collapsed" || change.type === "expanded") {
-        const family = store?.editor.activeDocument?.getLayerFamily(
+        const group = store?.editor.activeDocument?.getAnnotationGroup(
           change.item.value,
         );
-        if (!family) return;
-        family.collapsed = change.item.collapsed;
+        if (!group) return;
+        group.collapsed = change.item.collapsed;
         return;
       }
       if (change.type === "dropped") {
@@ -292,23 +294,23 @@ export const Layers: React.FC = observer(() => {
         newTreeItems.forEach((item, index) => {
           const layer = store?.editor.activeDocument?.getLayer(item.value);
           if (layer) {
-            layer?.setFamily(undefined, index);
+            layer?.setAnnotationGroup(undefined, index);
           }
-          const family = store?.editor.activeDocument?.getLayerFamily(
+          const group = store?.editor.activeDocument?.getAnnotationGroup(
             item.value,
           );
-          if (family) {
+          if (group) {
             item.children?.forEach((childItem, childIndex) => {
               const childLayer = store?.editor.activeDocument?.getLayer(
                 childItem.value,
               );
               if (childLayer) {
-                childLayer.setFamily(family.id, childIndex);
+                childLayer.setAnnotationGroup(group.id, childIndex);
               }
             });
-            family.collapsed = item.collapsed;
-            store?.editor.activeDocument?.addLayerFamily(
-              family as LayerFamily,
+            group.collapsed = item.collapsed;
+            store?.editor.activeDocument?.addAnnotationGroup(
+              group as AnnotationGroup,
               index,
             );
           }
@@ -321,7 +323,7 @@ export const Layers: React.FC = observer(() => {
   const firstElement = store?.editor.activeDocument?.renderingOrder[0];
   const isHeaderDivideVisible = !(
     firstElement?.isActive &&
-    (firstElement instanceof LayerFamily ? firstElement.collapsed : true)
+    (firstElement instanceof AnnotationGroup ? firstElement.collapsed : true)
   );
 
   if (!layers) {

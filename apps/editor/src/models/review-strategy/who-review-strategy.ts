@@ -1,4 +1,4 @@
-import { IImageLayer, ILayerFamily } from "@visian/ui-shared";
+import { IAnnotationGroup, IImageLayer } from "@visian/ui-shared";
 import {
   FileWithMetadata,
   getWHOTask,
@@ -75,13 +75,13 @@ export class WHOReviewStrategy extends ReviewStrategy {
   }
 
   public async saveTask(): Promise<void> {
-    const families = this.store.editor.activeDocument?.layerFamilies;
+    const families = this.store.editor.activeDocument?.annotationGroups;
     if (!families) return;
 
     await Promise.all(
-      families.map(async (family: ILayerFamily) => {
-        const annotationId = family.metadata?.id;
-        const annotationFiles = await this.getFilesForFamily(family);
+      families.map(async (group: IAnnotationGroup) => {
+        const annotationId = group.metadata?.id;
+        const annotationFiles = await this.getFilesForAnnotationGroup(group);
         if (annotationFiles.length === 0) return;
         if (annotationId) {
           await this.currentTask?.updateAnnotation(
@@ -96,7 +96,7 @@ export class WHOReviewStrategy extends ReviewStrategy {
 
     const orphanLayers =
       this.store.editor.activeDocument?.annotationLayers.filter(
-        (annotationLayer) => annotationLayer.family === undefined,
+        (annotationLayer) => annotationLayer.annotationGroup === undefined,
       );
     if (!orphanLayers) return;
     const files = await this.getAnnotationFilesForLayers(orphanLayers);
@@ -114,8 +114,10 @@ export class WHOReviewStrategy extends ReviewStrategy {
   }
 
   // Saving
-  private async getFilesForFamily(family: ILayerFamily): Promise<File[]> {
-    const annotationLayers = family.layers.filter(
+  private async getFilesForAnnotationGroup(
+    group: IAnnotationGroup,
+  ): Promise<File[]> {
+    const annotationLayers = group.layers.filter(
       (layer) => layer.kind === "image" && layer.isAnnotation,
     ) as ImageLayer[];
 

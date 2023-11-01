@@ -1,4 +1,8 @@
-import { ILayer, ILayerFamily, LayerFamilySnapshot } from "@visian/ui-shared";
+import {
+  AnnotationGroupSnapshot,
+  IAnnotationGroup,
+  ILayer,
+} from "@visian/ui-shared";
 import {
   BackendMetadata,
   ISerializable,
@@ -10,8 +14,8 @@ import { v4 as uuidv4 } from "uuid";
 import { Document } from "../document";
 import { ImageLayer } from "../layers";
 
-export class LayerFamily
-  implements ILayerFamily, ISerializable<LayerFamilySnapshot>
+export class AnnotationGroup
+  implements IAnnotationGroup, ISerializable<AnnotationGroupSnapshot>
 {
   public excludeFromSnapshotTracking = ["document"];
   protected layerIds: string[] = [];
@@ -21,7 +25,7 @@ export class LayerFamily
   public metadata?: BackendMetadata;
 
   constructor(
-    snapshot: Partial<LayerFamilySnapshot> | undefined,
+    snapshot: Partial<AnnotationGroupSnapshot> | undefined,
     protected document: Document,
   ) {
     this.applySnapshot(snapshot);
@@ -52,8 +56,8 @@ export class LayerFamily
   public addLayer(id: string, index?: number) {
     const layer = this.document.getLayer(id);
     if (!layer) return;
-    if (layer.family !== this) {
-      layer.family?.removeLayer(layer.id);
+    if (layer.annotationGroup !== this) {
+      layer.annotationGroup?.removeLayer(layer.id);
     }
     const oldIndex = this.layerIds.indexOf(layer.id);
     if (oldIndex < 0 && index !== undefined) {
@@ -81,7 +85,7 @@ export class LayerFamily
     return false;
   }
 
-  public toJSON(): LayerFamilySnapshot {
+  public toJSON(): AnnotationGroupSnapshot {
     return {
       id: this.id,
       title: this.title,
@@ -91,7 +95,7 @@ export class LayerFamily
   }
 
   public async applySnapshot(
-    snapshot: Partial<LayerFamilySnapshot> | undefined,
+    snapshot: Partial<AnnotationGroupSnapshot> | undefined,
   ) {
     if (!snapshot) return;
     this.id = snapshot.id || uuidv4();
