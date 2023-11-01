@@ -55,7 +55,8 @@ export class AnnotationGroup
 
   public addLayer(id: string, index?: number) {
     const layer = this.document.getLayer(id);
-    if (!layer) return;
+    // Only annotation layer can be part of annotation groups
+    if (!layer || !layer.isAnnotation) return;
     if (layer.annotationGroup !== this) {
       layer.annotationGroup?.removeLayer(layer.id);
     }
