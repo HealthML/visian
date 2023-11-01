@@ -18,7 +18,6 @@ import {
   defaultAnnotationOpacity,
   defaultImageColor,
 } from "../../../constants";
-import { LayerGroup } from "./layer-group";
 
 export class Layer implements ILayer, ISerializable<LayerSnapshot> {
   public excludeFromSnapshotTracking = ["document"];
@@ -30,7 +29,6 @@ export class Layer implements ILayer, ISerializable<LayerSnapshot> {
 
   public id!: string;
   protected titleOverride?: string;
-  protected parentId?: string;
 
   public blendMode!: BlendMode;
   public color?: string;
@@ -49,41 +47,38 @@ export class Layer implements ILayer, ISerializable<LayerSnapshot> {
     this.id = snapshot?.id || uuidv4();
     if (!isCalledByChild) this.applySnapshot(snapshot);
 
-    makeObservable<
+    makeObservable<this, "titleOverride" | "opacityOverride" | "metadata">(
       this,
-      "titleOverride" | "parentId" | "opacityOverride" | "metadata"
-    >(this, {
-      isAnnotation: observable,
-      id: observable,
-      titleOverride: observable,
-      parentId: observable,
-      blendMode: observable,
-      color: observable,
-      isVisible: observable,
-      opacityOverride: observable,
-      transformation: observable.ref,
-      metadata: observable,
+      {
+        isAnnotation: observable,
+        id: observable,
+        titleOverride: observable,
+        blendMode: observable,
+        color: observable,
+        isVisible: observable,
+        opacityOverride: observable,
+        transformation: observable.ref,
+        metadata: observable,
 
-      opacity: computed,
-      parent: computed,
-      title: computed,
-      annotationGroup: computed,
-      isActive: computed,
+        opacity: computed,
+        title: computed,
+        annotationGroup: computed,
+        isActive: computed,
 
-      setParent: action,
-      setAnnotationGroup: action,
-      setIsAnnotation: action,
-      setTitle: action,
-      setBlendMode: action,
-      setColor: action,
-      setIsVisible: action,
-      setOpacity: action,
-      setMetadata: action,
-      resetSettings: action,
-      setTransformation: action,
-      delete: action,
-      applySnapshot: action,
-    });
+        setAnnotationGroup: action,
+        setIsAnnotation: action,
+        setTitle: action,
+        setBlendMode: action,
+        setColor: action,
+        setIsVisible: action,
+        setOpacity: action,
+        setMetadata: action,
+        resetSettings: action,
+        setTransformation: action,
+        delete: action,
+        applySnapshot: action,
+      },
+    );
   }
 
   public setIsAnnotation(value?: boolean): void {
@@ -105,20 +100,8 @@ export class Layer implements ILayer, ISerializable<LayerSnapshot> {
     return this.document.activeLayer === this;
   }
 
-  public get parent(): ILayer | undefined {
-    return this.parentId ? this.document.getLayer(this.parentId) : undefined;
-  }
-
   public getSliceMarkers(_viewType: ViewType): MarkerConfig[] {
     return [];
-  }
-
-  public setParent(idOrLayer?: string | ILayer): void {
-    this.parentId = idOrLayer
-      ? typeof idOrLayer === "string"
-        ? idOrLayer
-        : idOrLayer.id
-      : undefined;
   }
 
   public get annotationGroup(): IAnnotationGroup | undefined {
@@ -211,7 +194,6 @@ export class Layer implements ILayer, ISerializable<LayerSnapshot> {
   }
 
   public delete() {
-    (this.parent as LayerGroup)?.removeLayer?.(this.id);
     this.annotationGroup?.removeLayer?.(this.id);
     if (this.document.layers.includes(this)) {
       this.document.deleteLayer(this.id);
@@ -229,7 +211,6 @@ export class Layer implements ILayer, ISerializable<LayerSnapshot> {
       isAnnotation: this.isAnnotation,
       id: this.id,
       titleOverride: this.titleOverride,
-      parentId: this.parentId,
       blendMode: this.blendMode,
       color: this.color,
       isVisible: this.isVisible,
@@ -245,7 +226,6 @@ export class Layer implements ILayer, ISerializable<LayerSnapshot> {
     }
     this.setIsAnnotation(snapshot?.isAnnotation);
     this.setTitle(snapshot?.titleOverride);
-    this.setParent(snapshot?.parentId);
     this.setBlendMode(snapshot?.blendMode);
     this.setColor(snapshot?.color);
     this.setIsVisible(snapshot?.isVisible);

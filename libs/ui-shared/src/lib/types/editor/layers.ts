@@ -35,7 +35,6 @@ export interface LayerSnapshot {
 
   id: string;
   titleOverride?: string;
-  parentId?: string;
 
   blendMode: BlendMode;
   color?: string;
@@ -73,18 +72,11 @@ export interface ILayer {
    * used, e.g., the ImageLayer's image name.
    */
   title?: string;
-  /**
-   * The parent layer of this layer.
-   * Typically, this is the group the layer is contained in.
-   * If none is set, the layer is assumed to be directly contained in the
-   * document.
-   */
-  parent?: ILayer;
 
   /**
    * The annotation group of this layer.
    * This groups layers that are related to each other, e.g., a segmentation file.
-   * In contrast to the parent, the group itself is not a layer.
+   * The group itself is not a layer.
    */
   annotationGroup?: IAnnotationGroup;
 
@@ -123,9 +115,6 @@ export interface ILayer {
   setTitle(value?: string): void;
 
   setMetadata(value?: BackendMetadata): void;
-
-  /** Sets this layer's parent layer, typically the group it is contained in. */
-  setParent(idOrLayer?: string | ILayer): void;
 
   /** Sets the layer's annotation group and moves it to the specified index within its local rendering order.
    * A layer with an undefined annotation group is an orphan.
@@ -218,20 +207,6 @@ export interface IImageLayer extends ILayer {
   setGradientHistogram(histogram?: Histogram): void;
 
   copy(): IImageLayer;
-}
-
-/** A group of layers. */
-export interface ILayerGroup extends ILayer {
-  kind: "group";
-
-  /** All layers in the group. */
-  layers: ILayer[];
-
-  /** Adds a layer to the group. */
-  addLayer(idOrlayer: string | ILayer): void;
-
-  /** Removes a layer from the document (but keeps it in the document). */
-  removeLayer(idOrLayer: string | ILayer): void;
 }
 
 export interface IAnnotationGroup {
