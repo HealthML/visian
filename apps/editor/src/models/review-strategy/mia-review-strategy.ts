@@ -188,4 +188,8 @@ export class MiaReviewStrategy extends ReviewStrategy {
         : undefined,
     } as MiaReviewStrategySnapshot;
   }
+
+  public get allowsChangingFamilies() {
+    return true;
+  }
 }

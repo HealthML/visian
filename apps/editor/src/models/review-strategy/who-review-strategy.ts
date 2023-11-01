@@ -160,4 +160,8 @@ export class WHOReviewStrategy extends ReviewStrategy {
         : undefined,
     };
   }
+
+  public get allowsChangingFamilies() {
+    return false;
+  }
 }

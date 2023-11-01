@@ -16,6 +16,8 @@ export abstract class ReviewStrategy {
     this.store = store;
   }
 
+  public abstract get allowsChangingFamilies(): boolean;
+
   public async loadTask(): Promise<void> {
     if (!this.store.editor.newDocument(true)) return;
     this.store.setProgress({ labelTx: "importing", showSplash: true });

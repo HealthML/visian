@@ -229,7 +229,7 @@ export const Layers: React.FC = observer(() => {
     (family: ILayerFamily) => {
       const callback = (draggedItem: TreeItem<TreeItemData>) => {
         const layer = store?.editor.activeDocument?.getLayer(draggedItem.value);
-        if (store?.reviewStrategy && layer && !family.layers.includes(layer)) {
+        if (!store?.reviewStrategy?.allowsChangingFamilies && layer) {
           return false;
         }
 
@@ -295,7 +295,7 @@ export const Layers: React.FC = observer(() => {
           change.draggedItem.value,
         );
         if (
-          store?.reviewStrategy &&
+          !store?.reviewStrategy?.allowsChangingFamilies &&
           draggedLayer &&
           (change.draggedFromParent
             ? change.draggedFromParent.value
