@@ -49,9 +49,9 @@ import {
 } from "../../constants";
 import { readTrackingLog, TrackingData } from "../tracking";
 import { StoreContext } from "../types";
+import { AnnotationGroup } from "./annotation-groups";
 import { Clipboard } from "./clipboard";
 import { History, HistorySnapshot } from "./history";
-import { AnnotationGroup } from "./annotation-groups";
 import { ImageLayer } from "./layers";
 import * as layers from "./layers";
 import { Markers } from "./markers";

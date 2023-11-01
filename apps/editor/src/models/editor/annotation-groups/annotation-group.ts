@@ -1,7 +1,7 @@
 import {
-  ILayer,
-  IAnnotationGroup,
   AnnotationGroupSnapshot,
+  IAnnotationGroup,
+  ILayer,
 } from "@visian/ui-shared";
 import {
   BackendMetadata,

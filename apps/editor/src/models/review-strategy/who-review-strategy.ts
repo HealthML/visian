@@ -1,4 +1,4 @@
-import { IImageLayer, IAnnotationGroup } from "@visian/ui-shared";
+import { IAnnotationGroup, IImageLayer } from "@visian/ui-shared";
 import {
   FileWithMetadata,
   getWHOTask,
