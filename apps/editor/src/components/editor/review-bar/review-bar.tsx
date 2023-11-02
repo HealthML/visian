@@ -7,6 +7,7 @@ import {
   sheetNoise,
   SquareButton,
   Text,
+  ToggleSlider,
   useTranslation,
   zIndex,
 } from "@visian/ui-shared";
@@ -294,6 +295,14 @@ export const MiaReviewBar = observer(
               tooltipTx="save"
               tooltipPosition="top"
               onPointerDown={openSavePopup}
+            />
+            <ToggleSlider
+              startValue={isVerified}
+              primaryColor="lightblue"
+              secondaryColor="lightgreen"
+              primaryBorderColor="blue"
+              secondaryBorderColor="green"
+              icon="check"
             />
             <ActionButtons
               icon={isVerified ? "exit" : "check"}
