@@ -216,6 +216,7 @@ export class Document
       setUseExclusiveSegmentations: action,
       applySnapshot: action,
       getAnnotationGroup: action,
+      deleteAnnotationGroup: action,
     });
 
     // This is split up to avoid errors from a tool that is being activated
@@ -365,6 +366,15 @@ export class Document
     return this.annotationGroupMap[id];
   }
 
+  public deleteAnnotationGroup(id: string): void {
+    if (this.annotationGroupMap[id]) {
+      console.log("got here");
+      this.annotationGroupMap[id].deleteAnnotationGroupLayers();
+      delete this.annotationGroupMap[id];
+      console.log("deleted");
+    }
+  }
+
   public setActiveLayer = (idOrLayer?: string | ILayer): void => {
     this.activeLayerId = idOrLayer
       ? typeof idOrLayer === "string"
@@ -418,7 +428,6 @@ export class Document
   // if no index is specified, the annotation group remain where it was if already in the list or inserted at the start
   public addAnnotationGroup = (group: AnnotationGroup, idx?: number): void => {
     if (!group.id) return;
-
     if (!this.annotationGroupMap[group.id]) {
       this.annotationGroupMap[group.id] = group;
     }
@@ -468,7 +477,17 @@ export class Document
       this,
       annotationColor,
     );
-    this.addLayer(annotationLayer);
+    if (this.activeLayer?.annotationGroup) {
+      this.addLayer(annotationLayer);
+      this.activeLayer.annotationGroup.addLayer(annotationLayer.id);
+    } else {
+      const newGroup = new AnnotationGroup(undefined, this);
+      newGroup.id = uuidv4();
+      newGroup.title = "newGroup";
+      this.addAnnotationGroup(newGroup);
+      this.addLayer(annotationLayer);
+      newGroup.addLayer(annotationLayer.id);
+    }
     this.setActiveLayer(annotationLayer);
 
     // Force switch to 2D if too many layers for 3D

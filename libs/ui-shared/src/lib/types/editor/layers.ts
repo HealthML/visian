@@ -236,4 +236,6 @@ export interface IAnnotationGroup {
   trySetIsVerified(value: boolean): void;
 
   toJSON(): AnnotationGroupSnapshot;
+
+  deleteAnnotationGroupLayers(): void;
 }

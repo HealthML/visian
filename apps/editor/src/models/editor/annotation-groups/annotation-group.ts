@@ -76,6 +76,15 @@ export class AnnotationGroup
     this.layerIds = this.layerIds.filter((layerId) => layerId !== id);
     const layer = this.document.getLayer(id);
     if (!layer) return;
+    if (this.layers.length === 0) {
+      // Show confirmation dialog
+      const shouldRemoveGroup = window.confirm(
+        "Die Gruppe ist jetzt leer. Möchten Sie die Gruppe entfernen?",
+      );
+      if (shouldRemoveGroup) {
+        this.document.deleteAnnotationGroup(this.id);
+      }
+    }
     this.document.addLayer(layer, index);
   }
 
@@ -112,5 +121,11 @@ export class AnnotationGroup
         verified: value,
       };
     }
+  }
+
+  public deleteAnnotationGroupLayers() {
+    this.layerIds.forEach((layerId) =>
+      this.document.getLayer(layerId)?.delete(),
+    );
   }
 }
