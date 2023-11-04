@@ -64,15 +64,15 @@ export const GridViewItem = ({
   onClick: () => void;
   onEdit: () => void;
 }) => (
-  <StyledGridItem innerHeight="auto">
+  <StyledGridItem innerHeight="auto" onClick={onClick}>
     <Wrapper>
       {imgSrc ? (
         <>
-          <ImageContainer onClick={onClick}>
+          <ImageContainer>
             <ImagePreview src={imgSrc} alt="Preview" />
           </ImageContainer>
           <Info>
-            <Text onClick={onClick}>{item.name}</Text>
+            <Text text={item.name} />
             <OptionSelector
               options={[
                 {
@@ -117,7 +117,7 @@ export const GridViewItem = ({
               pannelPosition="bottom"
             />
           </OptionSelectorWrapper>
-          <StyledText onClick={onClick}>{item.name}</StyledText>
+          <StyledText text={item.name} />
         </>
       )}
     </Wrapper>

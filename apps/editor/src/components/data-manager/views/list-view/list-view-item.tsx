@@ -23,8 +23,8 @@ export const ListViewItem = ({
   onEdit: () => void;
   isLast: boolean;
 }) => (
-  <ClickableListItem isLast={isLast}>
-    <Text onClick={onClick}>{item.name}</Text>
+  <ClickableListItem onClick={onClick} isLast={isLast}>
+    <Text text={item.name} />
     <ExpandedSpacer />
     <OptionSelector
       options={[
