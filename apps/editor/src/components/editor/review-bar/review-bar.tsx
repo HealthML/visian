@@ -7,6 +7,7 @@ import {
   sheetNoise,
   SquareButton,
   Text,
+  theme,
   ToggleSlider,
   useTranslation,
   zIndex,
@@ -290,34 +291,31 @@ export const MiaReviewBar = observer(
         </ActionContainer>
         <ReviewContainer>
           <ReviewToolsContainer>
+            {!(
+              !store?.editor.activeDocument?.activeLayer?.annotationGroup
+                ?.metadata ||
+              !store?.editor.activeDocument?.activeLayer?.isAnnotation
+            ) && (
+              <ToggleSlider
+                startValue={isVerified}
+                primaryColor={theme.colors["Neuronic Neon"]}
+                secondaryColor={theme.colors["blueBorder"]}
+                primaryBorderColor={theme.colors["green"]}
+                secondaryBorderColor={theme.colors["blueBorder"]}
+                icon="check"
+                tooltiptx={
+                  isVerified
+                    ? "unverify-annotation-tooltip"
+                    : "verify-annotation-tooltip"
+                }
+                onToggle={() => toggleVerification()}
+              />
+            )}
             <ActionButtons
               icon="save"
               tooltipTx="save"
               tooltipPosition="top"
               onPointerDown={openSavePopup}
-            />
-            <ToggleSlider
-              startValue={isVerified}
-              primaryColor="lightblue"
-              secondaryColor="lightgreen"
-              primaryBorderColor="blue"
-              secondaryBorderColor="green"
-              icon="check"
-            />
-            <ActionButtons
-              icon={isVerified ? "exit" : "check"}
-              isDisabled={
-                !store?.editor.activeDocument?.activeLayer?.annotationGroup
-                  ?.metadata ||
-                !store?.editor.activeDocument?.activeLayer?.isAnnotation
-              }
-              tooltipTx={
-                isVerified
-                  ? "unverify-annotation-tooltip"
-                  : "verify-annotation-tooltip"
-              }
-              tooltipPosition="top"
-              onPointerDown={toggleVerification}
             />
             <ActionButtons
               icon="arrowForward"

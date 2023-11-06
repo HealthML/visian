@@ -1,8 +1,9 @@
 import React, { useCallback, useState } from "react";
-import styled, { css } from "styled-components";
-import { ToggleSliderProps } from "./slide-toggle.props";
+import styled from "styled-components";
+
+import { useTranslation } from "../../i18n";
 import { Icon } from "../icon";
-import { borderWidths } from "../../theme";
+import { ToggleSliderProps } from "./slide-toggle.props";
 
 const SliderContainer = styled.div`
   display: flex;
@@ -36,9 +37,9 @@ const SliderHandle = styled.div<{
   width: ${({ sliderHandleDiameter }) => sliderHandleDiameter || "20px"};
   height: ${({ sliderHandleDiameter }) => sliderHandleDiameter || "20px"};
   border-radius: 50%;
-  background: ${({ color }) => color || "lightgreen"};
+  background: ${({ color }) => color};
   border: ${({ borderWidth }) => borderWidth || "2px"} solid
-    ${({ borderColor }) => borderColor || "green"};
+    ${({ borderColor }) => borderColor};
   position: absolute;
   top: -4px;
   left: ${({ isOn, flip }) =>
@@ -52,11 +53,11 @@ const SliderHandle = styled.div<{
 `;
 
 export const ToggleSlider: React.FC<ToggleSliderProps> = ({
-  startValue,
   primaryColor,
   secondaryColor,
   primaryBorderColor,
   secondaryBorderColor,
+  startValue,
   icon,
   sliderTrackWidth,
   sliderTrackHeight,
@@ -64,40 +65,43 @@ export const ToggleSlider: React.FC<ToggleSliderProps> = ({
   borderWidth,
   transitionTime,
   flip,
+  onToggle,
+  tooltip,
+  tooltiptx,
 }) => {
   const [isOn, setIsOn] = useState(startValue || false);
-  const [color, setColor] = useState(
-    isOn ? secondaryColor || "lightgreen" : primaryColor || "lightblue",
-  );
+  const [color, setColor] = useState(isOn ? primaryColor : secondaryColor);
   const [borderColor, setBorderColor] = useState(
-    isOn ? secondaryBorderColor || "green" : primaryBorderColor || "blue",
+    isOn
+      ? primaryBorderColor || primaryColor
+      : secondaryBorderColor || secondaryColor,
   );
   const switchColor = useCallback(() => {
-    if (isOn) {
-      setColor(secondaryColor || "lightgreen");
-      setBorderColor(secondaryBorderColor || "green");
+    if (color === secondaryColor) {
+      setColor(primaryColor);
+      setBorderColor(primaryBorderColor || primaryColor);
     } else {
-      setColor(primaryColor || "lightblue");
-      setBorderColor(primaryBorderColor || "blue");
+      setColor(secondaryColor);
+      setBorderColor(secondaryBorderColor || secondaryColor);
     }
   }, [
-    isOn,
-    setColor,
-    setBorderColor,
-    primaryColor,
+    color,
     secondaryColor,
+    primaryColor,
     primaryBorderColor,
     secondaryBorderColor,
   ]);
 
   const handleToggle = useCallback(() => {
-    setIsOn((prevIsOn) => !prevIsOn);
     switchColor();
-    console.log(startValue);
-  }, [startValue, switchColor]);
+    setIsOn((prevIsOn) => !prevIsOn);
+    onToggle?.();
+  }, [onToggle, switchColor]);
+
+  const { t } = useTranslation();
 
   return (
-    <SliderContainer onClick={handleToggle}>
+    <SliderContainer onClick={handleToggle} title={t(tooltiptx) || tooltip}>
       <SliderTrack
         color={color}
         sliderTrackWidth={sliderTrackWidth}

@@ -1,4 +1,4 @@
-import { color, InvisibleButton, StatusBadge, Text } from "@visian/ui-shared";
+import { color, Icon, InvisibleButton, Text, theme } from "@visian/ui-shared";
 import { MiaAnnotationMetadata } from "@visian/utils";
 import { observer } from "mobx-react-lite";
 import React from "react";
@@ -56,6 +56,16 @@ const TopRow = styled.div`
   position: relative;
 `;
 
+const RoundIconContainer = styled.div`
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1px solid lightgreen;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`;
+
 export const TopConsole = observer(() => {
   const store = useStore();
   return store?.editor.activeDocument ? (
@@ -81,11 +91,9 @@ export const TopConsole = observer(() => {
           store?.editor.activeDocument?.activeLayer?.annotationGroup
             ?.metadata as MiaAnnotationMetadata
         )?.verified && (
-          <StatusBadge
-            textColor="Neuronic Neon"
-            borderColor="gray"
-            tx="verified"
-          />
+          <RoundIconContainer>
+            <Icon icon="check" color={theme.colors["Neuronic Neon"]} />
+          </RoundIconContainer>
         )}
       </TopConsoleContainer>
     ) : (
