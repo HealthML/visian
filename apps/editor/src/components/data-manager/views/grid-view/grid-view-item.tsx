@@ -21,6 +21,20 @@ const OptionSelectorWrapper = styled.div`
 
 const StyledText = styled(Text)`
   margin: auto;
+  text-align: center;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  width: 80%;
+`;
+
+const OverflowText = styled(Text)`
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  max-width: 80%;
+  width: fill;
+  flex: 1;
 `;
 
 const ImageContainer = styled.div`
@@ -72,7 +86,7 @@ export const GridViewItem = ({
             <ImagePreview src={imgSrc} alt="Preview" />
           </ImageContainer>
           <Info>
-            <Text text={item.name} />
+            <OverflowText title={item.name} text={item.name} />
             <OptionSelector
               options={[
                 {
@@ -117,7 +131,7 @@ export const GridViewItem = ({
               pannelPosition="bottom"
             />
           </OptionSelectorWrapper>
-          <StyledText text={item.name} />
+          <StyledText title={item.name} text={item.name} />
         </>
       )}
     </Wrapper>
