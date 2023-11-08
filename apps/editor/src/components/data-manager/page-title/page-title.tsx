@@ -32,6 +32,14 @@ const TitleLoadingBlock = styled(LoadingBlock)`
   height: ${fontSize("title")};
 `;
 
+const OverflowTitle = styled(Title)`
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  width: fill;
+  flex: 1;
+`;
+
 export const PageTitle = ({
   title,
   titleTx,
@@ -57,7 +65,11 @@ export const PageTitle = ({
         />
       )}
       <TitleLabel tx={labelTx}>{label}</TitleLabel>
-      {isLoading ? <TitleLoadingBlock /> : <Title tx={titleTx}>{title}</Title>}
+      {isLoading ? (
+        <TitleLoadingBlock />
+      ) : (
+        <OverflowTitle tx={titleTx}>{title}</OverflowTitle>
+      )}
     </TitleContainer>
   );
 };

@@ -10,6 +10,13 @@ const ClickableListItem = styled(ListItem)`
   cursor: pointer;
 `;
 
+const OverflowText = styled(Text)`
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  width: 95%;
+`;
+
 export const ListViewItem = ({
   item,
   onDelete,
@@ -24,7 +31,7 @@ export const ListViewItem = ({
   isLast: boolean;
 }) => (
   <ClickableListItem onClick={onClick} isLast={isLast}>
-    <Text text={item.name} />
+    <OverflowText title={item.name} text={item.name} />
     <ExpandedSpacer />
     <OptionSelector
       options={[
