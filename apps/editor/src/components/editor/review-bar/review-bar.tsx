@@ -3,6 +3,7 @@ import {
   ColoredButtonParam,
   fontSize,
   InvisibleButton,
+  ListNavigator,
   Sheet,
   sheetNoise,
   SquareButton,
@@ -259,6 +260,17 @@ export const MiaReviewBar = observer(
       isVerified,
     ]);
 
+    const annotationGroupTitles =
+      store?.editor.activeDocument?.annotationGroups.map(
+        (group) => group.title,
+      );
+
+    const onGroupSwitch = (newIndex: number) => {
+      store?.editor.activeDocument?.setActiveLayer(
+        store.editor.activeDocument.annotationGroups[newIndex].layers[0],
+      );
+    };
+
     return store?.editor.activeDocument ? (
       <ReviewBarSheet>
         <TaskContainer>
@@ -289,6 +301,10 @@ export const MiaReviewBar = observer(
         </ActionContainer>
         <ReviewContainer>
           <ReviewToolsContainer>
+            <ListNavigator
+              list={annotationGroupTitles}
+              onChange={onGroupSwitch}
+            />
             <ActionButtons
               icon="save"
               tooltipTx="save"
