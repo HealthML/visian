@@ -241,6 +241,10 @@ export const MiaReviewBar = observer(
       store?.reviewStrategy?.nextTask();
     }, [store?.reviewStrategy]);
 
+    const previousTask = useCallback(async () => {
+      store?.reviewStrategy?.previousTask();
+    }, [store?.reviewStrategy]);
+
     const isVerified = useMemo(
       () =>
         (
@@ -309,6 +313,12 @@ export const MiaReviewBar = observer(
               }
               tooltipPosition="top"
               onPointerDown={toggleVerification}
+            />
+            <ActionButtons
+              icon="arrowBack"
+              tooltipTx="previous-task-tooltip"
+              tooltipPosition="top"
+              onPointerDown={previousTask}
             />
             <ActionButtons
               icon="arrowForward"

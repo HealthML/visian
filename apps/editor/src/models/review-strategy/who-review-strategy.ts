@@ -74,6 +74,8 @@ export class WHOReviewStrategy extends ReviewStrategy {
     this.store.setProgress();
   }
 
+  public async previousTask() {}
+
   public async saveTask(): Promise<void> {
     const families = this.store.editor.activeDocument?.annotationGroups;
     if (!families) return;

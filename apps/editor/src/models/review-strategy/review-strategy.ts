@@ -40,6 +40,8 @@ export abstract class ReviewStrategy {
   public get currentTask(): ReviewTask | undefined {
     return this.task;
   }
+
+  public abstract previousTask(): Promise<void>;
   public abstract nextTask(): Promise<void>;
   public abstract saveTask(): Promise<void>;
 
