@@ -21,7 +21,6 @@ const BackButton = styled(FloatingUIButton)`
   margin: 0;
   margin-bottom: ${space("pageSectionMargin")};
   margin-left: -9px;
-
   background: none;
   border: none;
   backdrop-filter: none;
@@ -32,10 +31,7 @@ const TitleLoadingBlock = styled(LoadingBlock)`
   height: ${fontSize("title")};
 `;
 
-const OverflowTitle = styled(Title)`
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
+const StyledTitle = styled(Title)`
   width: fill;
   flex: 1;
 `;
@@ -68,7 +64,7 @@ export const PageTitle = ({
       {isLoading ? (
         <TitleLoadingBlock />
       ) : (
-        <OverflowTitle tx={titleTx}>{title}</OverflowTitle>
+        <StyledTitle tx={titleTx}>{title}</StyledTitle>
       )}
     </TitleContainer>
   );
