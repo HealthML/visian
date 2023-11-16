@@ -300,11 +300,19 @@ export const MiaReviewBar = observer(
           <ActionButtonsContainer />
         </ActionContainer>
         <ReviewContainer>
+          <ListNavigator
+            list={annotationGroupTitles}
+            currentItem={
+              store.editor.activeDocument.activeLayer?.annotationGroup?.title
+            }
+            hasChanges={
+              store.editor.activeDocument.activeLayer?.annotationGroup
+                ?.hasChanges
+            }
+            onClickHasChanges={openSavePopup}
+            onSwitch={onGroupSwitch}
+          />
           <ReviewToolsContainer>
-            <ListNavigator
-              list={annotationGroupTitles}
-              onChange={onGroupSwitch}
-            />
             <ActionButtons
               icon="save"
               tooltipTx="save"
