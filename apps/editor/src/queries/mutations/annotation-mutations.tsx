@@ -11,10 +11,12 @@ const annotationByJobQueryBaseKey = "annotationByJob";
 export const useAnnotationsByImage = (imageid: string) =>
   useQuery<MiaAnnotation[], AxiosError<MiaAnnotation[]>>(
     [annotationByImageQueryBaseKey, imageid],
-    () =>
-      annotationsApi
-        .annotationsControllerFindAll(imageid)
-        .then((response) => response.data),
+    async () => {
+      const response = await annotationsApi.annotationsControllerFindAll(
+        imageid,
+      );
+      return response.data;
+    },
     {
       retry: 2,
       refetchInterval: 1000 * 10,
@@ -24,30 +26,38 @@ export const useAnnotationsByImage = (imageid: string) =>
 export const useAnnotationsByJob = (jobId: string) =>
   useQuery<MiaAnnotation[], AxiosError<MiaAnnotation[]>>(
     [annotationByJobQueryBaseKey, jobId],
-    () =>
-      annotationsApi
-        .annotationsControllerFindAll(undefined, jobId)
-        .then((response) => response.data),
+    async () => {
+      const response = await annotationsApi.annotationsControllerFindAll(
+        undefined,
+        jobId,
+      );
+      return response.data;
+    },
     {
       retry: 2,
-      refetchInterval: 1000 * 20,
+      refetchInterval: 1000 * 10,
     },
   );
 
 export const deleteAnnotationsForImageMutation = () =>
   DeleteMutation<MiaAnnotation>({
     queryKey: (imageId: string) => [annotationByImageQueryBaseKey, imageId],
-    mutateFn: ({ objectIds }) =>
-      annotationsApi
-        .annotationsControllerRemoveAll({ ids: objectIds })
-        .then((response) => response.data.map((a) => a.id)),
+    mutateFn: async ({ objectIds }) => {
+      const response = await annotationsApi.annotationsControllerRemoveAll({
+        ids: objectIds,
+      });
+      return response.data.map((annotation) => annotation.id);
+    },
   });
 
 export const updateAnnotationsForImageMutation = () =>
   UpdateMutation<MiaAnnotation, { dataUri?: string; verified?: boolean }>({
     queryKey: (imageId: string) => [annotationByImageQueryBaseKey, imageId],
-    mutateFn: ({ object, updateDto }) =>
-      annotationsApi
-        .annotationsControllerUpdate(object.id, updateDto)
-        .then((response) => response.data),
+    mutateFn: async ({ object, updateDto }) => {
+      const response = await annotationsApi.annotationsControllerUpdate(
+        object.id,
+        updateDto,
+      );
+      return response.data;
+    },
   });

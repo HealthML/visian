@@ -13,39 +13,39 @@ const datasetProgressQueryBaseKey = "datasetProgress";
 export const useDataset = (datasetId: string) =>
   useQuery<MiaDataset, AxiosError<MiaDataset>>(
     [datasetQueryBaseKey, datasetId],
-    () =>
-      datasetsApi
-        .datasetsControllerFindOne(datasetId)
-        .then((response) => response.data),
+    async () => {
+      const response = await datasetsApi.datasetsControllerFindOne(datasetId);
+      return response.data;
+    },
     {
       retry: 2,
-      refetchInterval: 1000 * 60,
+      refetchInterval: 1000 * 10,
     },
   );
 
 export const useDatasetsByProject = (projectId: string) =>
   useQuery<MiaDataset[], AxiosError<MiaDataset[]>>(
     [datasetsByProjectQueryBaseKey, projectId],
-    () =>
-      datasetsApi
-        .datasetsControllerFindAll(projectId)
-        .then((response) => response.data),
+    async () => {
+      const response = await datasetsApi.datasetsControllerFindAll(projectId);
+      return response.data;
+    },
     {
       retry: 2,
-      refetchInterval: 1000 * 30,
+      refetchInterval: 1000 * 10,
     },
   );
 
 export const useDatasetProgress = (datasetId: string) =>
   useQuery<MiaProgress, AxiosError<MiaProgress>>(
     [datasetProgressQueryBaseKey, datasetId],
-    async () =>
-      datasetsApi
-        .datasetsControllerProgress(datasetId)
-        .then((response) => response.data),
+    async () => {
+      const response = await datasetsApi.datasetsControllerProgress(datasetId);
+      return response.data;
+    },
     {
       retry: 2,
-      refetchInterval: 1000 * 5,
+      refetchInterval: 1000 * 2,
     },
   );
 
@@ -55,10 +55,12 @@ export const deleteDatasetsMutation = () =>
       datasetsByProjectQueryBaseKey,
       selectorId,
     ],
-    mutateFn: ({ objectIds }) =>
-      datasetsApi
-        .datasetsControllerRemoveAll({ ids: objectIds })
-        .then((response) => response.data.map((d) => d.id)),
+    mutateFn: async ({ objectIds }) => {
+      const response = await datasetsApi.datasetsControllerRemoveAll({
+        ids: objectIds,
+      });
+      return response.data.map((dataset) => dataset.id);
+    },
   });
 
 export const updateDatasetMutation = () =>
@@ -67,10 +69,13 @@ export const updateDatasetMutation = () =>
       datasetsByProjectQueryBaseKey,
       selectorId,
     ],
-    mutateFn: ({ object, updateDto }) =>
-      datasetsApi
-        .datasetsControllerUpdate(object.id, updateDto)
-        .then((response) => response.data),
+    mutateFn: async ({ object, updateDto }) => {
+      const response = await datasetsApi.datasetsControllerUpdate(
+        object.id,
+        updateDto,
+      );
+      return response.data;
+    },
   });
 
 export const createDatasetMutation = () =>
@@ -79,8 +84,8 @@ export const createDatasetMutation = () =>
       datasetsByProjectQueryBaseKey,
       selectorId,
     ],
-    mutateFn: ({ createDto }) =>
-      datasetsApi
-        .datasetsControllerCreate(createDto)
-        .then((response) => response.data),
+    mutateFn: async ({ createDto }) => {
+      const response = await datasetsApi.datasetsControllerCreate(createDto);
+      return response.data;
+    },
   });

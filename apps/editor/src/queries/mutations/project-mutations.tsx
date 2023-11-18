@@ -12,50 +12,57 @@ const projectQueryBaseKey = "project";
 export const useProject = (projectId: string) =>
   useQuery<MiaProject, AxiosError<MiaProject>>(
     [projectQueryBaseKey, projectId],
-    () =>
-      projectsApi
-        .projectsControllerFindOne(projectId)
-        .then((response) => response.data),
+    async () => {
+      const response = await projectsApi.projectsControllerFindOne(projectId);
+      return response.data;
+    },
     {
       retry: 2,
-      refetchInterval: 1000 * 60,
+      refetchInterval: 1000 * 10,
     },
   );
 
 export const useProjects = () =>
   useQuery<MiaProject[], AxiosError<MiaProject>>(
     [projectsQueryKey],
-    () =>
-      projectsApi.projectsControllerFindAll().then((response) => response.data),
+    async () => {
+      const response = await projectsApi.projectsControllerFindAll();
+      return response.data;
+    },
     {
       retry: 2,
-      refetchInterval: 1000 * 60,
+      refetchInterval: 1000 * 10,
     },
   );
 
 export const deleteProjectsMutation = () =>
   DeleteMutation<MiaProject>({
     queryKey: (_selectorId: string) => [projectsQueryKey],
-    mutateFn: ({ objectIds }) =>
-      projectsApi
-        .projectsControllerRemoveAll({ ids: objectIds })
-        .then((response) => response.data.map((p) => p.id)),
+    mutateFn: async ({ objectIds }) => {
+      const response = await projectsApi.projectsControllerRemoveAll({
+        ids: objectIds,
+      });
+      return response.data.map((project) => project.id);
+    },
   });
 
 export const updateProjectMutation = () =>
   UpdateMutation<MiaProject, UpdateProjectDto>({
     queryKey: (_selectorId: string) => [projectsQueryKey],
-    mutateFn: ({ object, updateDto }) =>
-      projectsApi
-        .projectsControllerUpdate(object.id, updateDto)
-        .then((response) => response.data),
+    mutateFn: async ({ object, updateDto }) => {
+      const response = await projectsApi.projectsControllerUpdate(
+        object.id,
+        updateDto,
+      );
+      return response.data;
+    },
   });
 
 export const createProjectMutation = () =>
   CreateMutation<MiaProject, CreateProjectDto>({
     queryKey: (_selectorId: string) => [projectsQueryKey],
-    mutateFn: ({ createDto }) =>
-      projectsApi
-        .projectsControllerCreate(createDto)
-        .then((response) => response.data),
+    mutateFn: async ({ createDto }) => {
+      const response = await projectsApi.projectsControllerCreate(createDto);
+      return response.data;
+    },
   });

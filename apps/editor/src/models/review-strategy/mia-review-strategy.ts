@@ -12,9 +12,8 @@ export class MiaReviewStrategy extends ReviewStrategy {
     datasetId: string,
     taskType?: TaskType,
   ) {
-    const images = await imagesApi
-      .imagesControllerFindAll(datasetId)
-      .then((response) => response.data);
+    const response = await imagesApi.imagesControllerFindAll(datasetId);
+    const images = response.data;
     return new MiaReviewStrategy({ store, images, taskType });
   }
 
@@ -23,9 +22,8 @@ export class MiaReviewStrategy extends ReviewStrategy {
     jobId: string,
     taskType?: TaskType,
   ) {
-    const images = await imagesApi
-      .imagesControllerFindAll(undefined, jobId)
-      .then((response) => response.data);
+    const response = await imagesApi.imagesControllerFindAll(undefined, jobId);
+    const images = response.data;
     return new MiaReviewStrategy({ store, images, jobId, taskType });
   }
 
@@ -36,11 +34,10 @@ export class MiaReviewStrategy extends ReviewStrategy {
     allowedAnnotations?: string[],
   ) {
     const images = await Promise.all(
-      imageIds.map(async (imageId) =>
-        imagesApi
-          .imagesControllerFindOne(imageId)
-          .then((response) => response.data),
-      ),
+      imageIds.map(async (imageId) => {
+        const response = await imagesApi.imagesControllerFindOne(imageId);
+        return response.data;
+      }),
     );
     return new MiaReviewStrategy({
       store,
@@ -55,12 +52,13 @@ export class MiaReviewStrategy extends ReviewStrategy {
     annotationId: string,
     taskType?: TaskType,
   ) {
-    const annotation = await annotationsApi
-      .annotationsControllerFindOne(annotationId)
-      .then((response) => response.data);
-    const image = await imagesApi
-      .imagesControllerFindOne(annotation.image)
-      .then((response) => response.data);
+    const annotationsResponse =
+      await annotationsApi.annotationsControllerFindOne(annotationId);
+    const annotation = annotationsResponse.data;
+    const imageResponse = await imagesApi.imagesControllerFindOne(
+      annotation.image,
+    );
+    const image = imageResponse.data;
     return new MiaReviewStrategy({
       store,
       images: [image],
@@ -100,9 +98,11 @@ export class MiaReviewStrategy extends ReviewStrategy {
 
   protected async buildTask(): Promise<void> {
     const currentImage = this.images[this.currentImageIndex];
-    const annotations = await annotationsApi
-      .annotationsControllerFindAll(currentImage.id, this.jobId)
-      .then((response) => response.data);
+    const response = await annotationsApi.annotationsControllerFindAll(
+      currentImage.id,
+      this.jobId,
+    );
+    const annotations = response.data;
 
     this.setCurrentTask(
       new MiaReviewTask(
@@ -133,22 +133,21 @@ export class MiaReviewStrategy extends ReviewStrategy {
   public async saveTask() {
     await this.currentTask?.save();
     await Promise.all(
-      this.store.editor.activeDocument?.layerFamilies?.map((layerFamily) => {
-        if (
-          this.currentTask?.annotationIds.includes(
-            layerFamily.metaData?.id ?? "",
-          )
-        ) {
-          if (layerFamily.metaData?.id) {
-            return annotationsApi
-              .annotationsControllerUpdate(layerFamily.metaData?.id, {
-                verified: layerFamily.metaData?.verified,
-              })
-              .then((response) => response.data);
+      this.store.editor.activeDocument?.layerFamilies?.map(
+        async (layerFamily) => {
+          const id = layerFamily.metaData?.id;
+
+          if (!id || !this.currentTask?.annotationIds.includes(id)) {
+            return Promise.resolve();
           }
-        }
-        return Promise.resolve();
-      }) ?? [],
+
+          const response = await annotationsApi.annotationsControllerUpdate(
+            id,
+            { verified: layerFamily.metaData?.verified },
+          );
+          return response.data;
+        },
+      ) ?? [],
     );
   }
 }

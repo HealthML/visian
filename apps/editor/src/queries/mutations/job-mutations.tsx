@@ -12,54 +12,58 @@ const jobsByProjectQueryBaseKey = "jobsByProject";
 export const useJob = (jobId: string) =>
   useQuery<MiaJob, AxiosError<MiaJob>>(
     [jobQueryKey],
-    () =>
-      jobsApi.jobsControllerFindOne(jobId).then((response) => response.data),
+    async () => {
+      const response = await jobsApi.jobsControllerFindOne(jobId);
+      return response.data;
+    },
     {
       retry: 2,
-      refetchInterval: 1000 * 20,
+      refetchInterval: 1000 * 10,
     },
   );
 
 export const useJobsByProject = (projectId: string) =>
   useQuery<MiaJob[], AxiosError<MiaJob[]>>(
     [jobsByProjectQueryBaseKey, projectId],
-    () =>
-      jobsApi
-        .jobsControllerFindAll(projectId)
-        .then((response) => response.data),
+    async () => {
+      const response = await jobsApi.jobsControllerFindAll(projectId);
+      return response.data;
+    },
     {
       retry: 2,
-      refetchInterval: 1000 * 20,
+      refetchInterval: 1000 * 10,
     },
   );
 
 export const useJobProgress = (jobId: string) =>
   useQuery<MiaProgress, AxiosError<MiaProgress>>(
     ["job-progress", jobId],
-    () =>
-      jobsApi.jobsControllerProgress(jobId).then((response) => response.data),
+    async () => {
+      const response = await jobsApi.jobsControllerProgress(jobId);
+      return response.data;
+    },
     {
       retry: 2,
-      refetchInterval: 1000 * 5,
+      refetchInterval: 1000 * 2,
     },
   );
 
 export const deleteJobsMutation = () =>
   DeleteMutation<MiaJob>({
     queryKey: (selectorId: string) => [jobsByProjectQueryBaseKey, selectorId],
-    mutateFn: ({ objectIds }) =>
-      jobsApi
-        .jobsControllerRemoveAll({ ids: objectIds })
-        .then((response) => response.data.map((j) => j.id)),
+    mutateFn: async ({ objectIds }) => {
+      const response = await jobsApi.jobsControllerRemoveAll({
+        ids: objectIds,
+      });
+      return response.data.map((job) => job.id);
+    },
   });
 
 export const updateJobMutation = () =>
   UpdateMutation<MiaJob, { status: UpdateJobDtoStatusEnum }>({
     queryKey: (selectorId: string) => [jobQueryKey],
-    mutateFn: ({ object, updateDto }) =>
-      jobsApi
-        // TODO: fix required types in API docs
-
-        .jobsControllerUpdate(object.id, updateDto)
-        .then((response) => response.data),
+    mutateFn: async ({ object, updateDto }) => {
+      const response = await jobsApi.jobsControllerUpdate(object.id, updateDto);
+      return response.data;
+    },
   });

@@ -18,7 +18,8 @@ import {
   jobsApi,
   useDatasetsByProject,
   useImagesByDataset,
- useMlModels } from "../../../queries";
+  useMlModels,
+} from "../../../queries";
 import { ProjectDataExplorer } from "../project-data-explorer";
 import { useImageSelection } from "../util";
 import { JobCreationPopUpProps } from "./job-creation-popup.props";
@@ -188,16 +189,15 @@ export const JobCreationPopup = observer<JobCreationPopUpProps>(
         }
 
         try {
-          await jobsApi
-            .jobsControllerCreate({
-              images: imageSelection,
-              modelName: selectedModel.name,
-              modelVersion: selectedModel.version,
-              project: projectId,
-            })
-            .then((response) => response.data);
+          const response = await jobsApi.jobsControllerCreate({
+            images: imageSelection,
+            modelName: selectedModel.name,
+            modelVersion: selectedModel.version,
+            project: projectId,
+          });
           refetchJobs?.();
           onClose?.();
+          return response.data;
         } catch (error) {
           store?.setError({
             titleTx: "internal-server-error",

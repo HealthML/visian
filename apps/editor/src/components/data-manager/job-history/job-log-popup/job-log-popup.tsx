@@ -24,14 +24,15 @@ const StyledText = styled(Text)`
 
 const getLogText = async (job: MiaJob) => {
   let logText = "";
-  if (job.logFileUri) {
-    try {
-      logText = await jobsApi
-        .jobsControllerGetFile(job.id, { responseType: "text" })
-        .then((response) => response.data as unknown as string);
-    } catch (e) {
-      logText = "Error fetching job log file";
-    }
+  if (!job.logFileUri) return logText;
+
+  try {
+    const response = await jobsApi.jobsControllerGetFile(job.id, {
+      responseType: "text",
+    });
+    logText = (response.data as File).toString();
+  } catch (e) {
+    logText = "Error fetching job log file";
   }
   return logText;
 };
@@ -41,7 +42,12 @@ export const JobLogPopup = observer<JobLogPopUpProps>(
     const [jobLogContent, setjobLogContent] = useState("");
 
     useEffect(() => {
-      getLogText(job).then((text) => setjobLogContent(text));
+      const fetchLogText = async () => {
+        const text = await getLogText(job);
+        setjobLogContent(text);
+      };
+
+      fetchLogText();
     }, [job, isOpen]);
 
     return (
