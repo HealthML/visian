@@ -135,6 +135,10 @@
   "unverify-annotation-tooltip": "Verifizierung aufheben",
   "next-task-tooltip": "Nächste Aufgabe",
   "previous-task-tooltip": "Vorherige Aufgabe",
+  "unsaved-changes-title": "Ungespeicherte Änderungen!",
+  "unsaved-changes-text": "Wenn Sie jetzt fortfahren, gehen Änderungen verloren.",
+  "unsaved-changes-confirmation": "Änderungen verwerfen",
+  "unsaved-changes-cancel": "Abbrechen",
 
   "browser-error": "Browserfehler",
   "no-webgl-2-error": "Dieser Browser unterstützt WebGL 2 nicht. Um VISIAN auszuführen ist WebGL 2 notwendig. Bitte updaten Sie Ihren Browser oder nutzen Sie einen anderen Browser.",

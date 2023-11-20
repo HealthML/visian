@@ -1,8 +1,10 @@
 import {
+  Button,
   color,
   ColoredButtonParam,
   fontSize,
   InvisibleButton,
+  PopUp,
   Sheet,
   sheetNoise,
   SquareButton,
@@ -12,7 +14,7 @@ import {
 } from "@visian/ui-shared";
 import { MiaAnnotationMetadata } from "@visian/utils";
 import { observer } from "mobx-react-lite";
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
 import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
@@ -164,6 +166,23 @@ const ReviewMessageSubtitle = styled(Text)`
   color: ${color("lightText")};
 `;
 
+const InlineRow = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+`;
+
+const SectionLabel = styled(Text)`
+  font-size: 14px;
+  margin-bottom: 24px;
+`;
+
+const SaveButton = styled(Button)`
+  min-width: 110px;
+`;
+
 export const WhoReviewBar = observer(() => {
   const store = useStore();
 
@@ -236,13 +255,18 @@ export const MiaReviewBar = observer(
   ({ openSavePopup }: { openSavePopup: () => void }) => {
     const store = useStore();
     const { t } = useTranslation();
+    let openSaveNotification = false;
 
     const nextTask = useCallback(async () => {
       store?.reviewStrategy?.nextTask();
     }, [store?.reviewStrategy]);
 
     const previousTask = useCallback(async () => {
-      store?.reviewStrategy?.previousTask();
+      // * the popUp should only open, if changes are made to the document,
+      // * but the document is not saved to file
+      // * else previous task is called directly (store?.reviewStrategy?.previousTask();)
+      // * same behavior has to be implemented in the next task!
+      openPopUp();
     }, [store?.reviewStrategy]);
 
     const isVerified = useMemo(
@@ -263,72 +287,109 @@ export const MiaReviewBar = observer(
       isVerified,
     ]);
 
+    const [showPopUp, setShowPopUp] = useState(false);
+    // Set your boolean value here, which determines when the pop-up should be displayed
+
+    // Function to handle opening the pop-up
+    const openPopUp = () => {
+      setShowPopUp(true);
+    };
+
+    const closePopUp = () => {
+      setShowPopUp(false);
+    };
+
     return store?.editor.activeDocument ? (
-      <ReviewBarSheet>
-        <TaskContainer>
-          <TaskLabel tx="Task" />
-          <TaskName
-            text={
-              store?.reviewStrategy?.currentTask?.title ??
-              t(store?.reviewStrategy?.currentTask?.kind)
-            }
-          />
-        </TaskContainer>
-        <ActionContainer>
-          <ActionName
-            text={
-              store?.reviewStrategy?.currentTask?.description ??
-              t("review-description", {
-                taskType: t(store?.reviewStrategy?.currentTask?.kind),
-                image: (
-                  store?.reviewStrategy?.currentTask as unknown as MiaReviewTask
-                ).image.dataUri
-                  .split("/")
-                  .pop()
-                  ?.split(".")[0],
-              })
-            }
-          />
-          <ActionButtonsContainer />
-        </ActionContainer>
-        <ReviewContainer>
-          <ReviewToolsContainer>
-            <ActionButtons
-              icon="save"
-              tooltipTx="save"
-              tooltipPosition="top"
-              onPointerDown={openSavePopup}
-            />
-            <ActionButtons
-              icon={isVerified ? "exit" : "check"}
-              isDisabled={
-                !store?.editor.activeDocument?.activeLayer?.annotationGroup
-                  ?.metadata ||
-                !store?.editor.activeDocument?.activeLayer?.isAnnotation
+      <>
+        <ReviewBarSheet>
+          <TaskContainer>
+            <TaskLabel tx="Task" />
+            <TaskName
+              text={
+                store?.reviewStrategy?.currentTask?.title ??
+                t(store?.reviewStrategy?.currentTask?.kind)
               }
-              tooltipTx={
-                isVerified
-                  ? "unverify-annotation-tooltip"
-                  : "verify-annotation-tooltip"
+            />
+          </TaskContainer>
+          <ActionContainer>
+            <ActionName
+              text={
+                store?.reviewStrategy?.currentTask?.description ??
+                t("review-description", {
+                  taskType: t(store?.reviewStrategy?.currentTask?.kind),
+                  image: (
+                    store?.reviewStrategy
+                      ?.currentTask as unknown as MiaReviewTask
+                  ).image.dataUri
+                    .split("/")
+                    .pop()
+                    ?.split(".")[0],
+                })
               }
-              tooltipPosition="top"
-              onPointerDown={toggleVerification}
             />
-            <ActionButtons
-              icon="arrowBack"
-              tooltipTx="previous-task-tooltip"
-              tooltipPosition="top"
-              onPointerDown={previousTask}
-            />
-            <ActionButtons
-              icon="arrowForward"
-              tooltipTx="next-task-tooltip"
-              tooltipPosition="top"
-              onPointerDown={nextTask}
-            />
-          </ReviewToolsContainer>
-        </ReviewContainer>
-      </ReviewBarSheet>
+            <ActionButtonsContainer />
+          </ActionContainer>
+          <ReviewContainer>
+            <ReviewToolsContainer>
+              <ActionButtons
+                icon="save"
+                tooltipTx="save"
+                tooltipPosition="top"
+                onPointerDown={openSavePopup}
+              />
+              <ActionButtons
+                icon={isVerified ? "exit" : "check"}
+                isDisabled={
+                  !store?.editor.activeDocument?.activeLayer?.annotationGroup
+                    ?.metadata ||
+                  !store?.editor.activeDocument?.activeLayer?.isAnnotation
+                }
+                tooltipTx={
+                  isVerified
+                    ? "unverify-annotation-tooltip"
+                    : "verify-annotation-tooltip"
+                }
+                tooltipPosition="top"
+                onPointerDown={toggleVerification}
+              />
+              <ActionButtons
+                icon="arrowBack"
+                tooltipTx="previous-task-tooltip"
+                tooltipPosition="top"
+                onPointerDown={previousTask}
+              />
+              <ActionButtons
+                icon="arrowForward"
+                tooltipTx="next-task-tooltip"
+                tooltipPosition="top"
+                onPointerDown={nextTask}
+              />
+            </ReviewToolsContainer>
+          </ReviewContainer>
+        </ReviewBarSheet>
+        {showPopUp && (
+          <PopUp titleTx="unsaved-changes-title" dismiss={closePopUp}>
+            <>
+              <SectionLabel tx="unsaved-changes-text" />
+              <InlineRow>
+                <SaveButton
+                  tx="unsaved-changes-cancel"
+                  onPointerDown={async () => {
+                    closePopUp();
+                  }}
+                />
+                <SaveButton
+                  tx="unsaved-changes-confirmation"
+                  onPointerDown={async () => {
+                    closePopUp();
+                    store?.reviewStrategy?.previousTask();
+                  }}
+                />
+              </InlineRow>
+            </>
+          </PopUp>
+        )}
+      </>
     ) : null;
   },
 );
