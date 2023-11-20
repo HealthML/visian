@@ -1,5 +1,4 @@
-import { color, Icon, InvisibleButton, Text, theme } from "@visian/ui-shared";
-import { MiaAnnotationMetadata } from "@visian/utils";
+import { color, InvisibleButton, Text } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
 import React from "react";
 import styled from "styled-components";
@@ -56,16 +55,6 @@ const TopRow = styled.div`
   position: relative;
 `;
 
-const RoundIconContainer = styled.div`
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  border: 1px solid lightgreen;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-`;
-
 export const TopConsole = observer(() => {
   const store = useStore();
   return store?.editor.activeDocument ? (
@@ -87,14 +76,6 @@ export const TopConsole = observer(() => {
             onPointerDown={store?.persistImmediately}
           />
         </TopRow>
-        {(
-          store?.editor.activeDocument?.activeLayer?.annotationGroup
-            ?.metadata as MiaAnnotationMetadata
-        )?.verified && (
-          <RoundIconContainer>
-            <Icon icon="check" color={theme.colors["Neuronic Neon"]} />
-          </RoundIconContainer>
-        )}
       </TopConsoleContainer>
     ) : (
       <TopConsoleContainer>

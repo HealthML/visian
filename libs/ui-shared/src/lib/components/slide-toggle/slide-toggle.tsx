@@ -2,14 +2,27 @@ import React, { useCallback, useState } from "react";
 import styled from "styled-components";
 
 import { useTranslation } from "../../i18n";
+import { color as getColor } from "../../theme";
 import { Icon } from "../icon";
 import { ToggleSliderProps } from "./slide-toggle.props";
+import { setFullOpacity } from "./utils";
 
-const SliderContainer = styled.div`
+const SliderContainer = styled.div<{
+  sliderHandleDiameter?: number;
+  sliderTrackWidth?: number;
+  additionalPadding?: number;
+}>`
   display: flex;
   align-items: center;
   cursor: pointer;
   user-select: none;
+  padding: ${({ sliderHandleDiameter, sliderTrackWidth, additionalPadding }) =>
+    `0 ${
+      ((sliderHandleDiameter || 20) +
+        (sliderTrackWidth || 30) +
+        (additionalPadding || 0)) /
+      5
+    }px`};
 `;
 
 const SliderTrack = styled.div<{
@@ -31,43 +44,51 @@ const SliderHandle = styled.div<{
   borderColor?: string;
   borderWidth?: number;
   sliderHandleDiameter?: number;
+  sliderTrackWidth?: number;
   transitionTime?: number;
   flip?: boolean;
 }>`
-  width: ${({ sliderHandleDiameter }) => sliderHandleDiameter || "20px"};
-  height: ${({ sliderHandleDiameter }) => sliderHandleDiameter || "20px"};
+  width: ${({ sliderHandleDiameter }) => sliderHandleDiameter || 20}px;
+  height: ${({ sliderHandleDiameter }) => sliderHandleDiameter || 20}px;
   border-radius: 50%;
-  background: ${({ color }) => color};
+  background: ${({ color }) => setFullOpacity(color) || getColor("gray")};
   border: ${({ borderWidth }) => borderWidth || "2px"} solid
     ${({ borderColor }) => borderColor};
   position: absolute;
-  top: -4px;
-  left: ${({ isOn, flip }) =>
-    isOn ? (flip ? "-1.0px" : "15px") : flip ? "15px" : "-1.0px"};
+  top: 50%;
+  left: ${({ isOn, flip, sliderHandleDiameter, sliderTrackWidth }) =>
+    isOn
+      ? flip
+        ? `${(sliderHandleDiameter || 20) / -10}px`
+        : `${(sliderHandleDiameter || 20) / 20 + (sliderTrackWidth || 30)}px`
+      : flip
+      ? `${(sliderHandleDiameter || 20) / 20 + (sliderTrackWidth || 30)}px`
+      : `${(sliderHandleDiameter || 20) / 10}px`};
+  transform: translate(-50%, -50%);
   transition: ${({ transitionTime }) => transitionTime || "0.2s"};
-  box-shadow: 0 0 2px rgba(0, 0, 0, 0.2);
-
   display: flex;
   justify-content: center;
   align-items: center;
 `;
 
 export const ToggleSlider: React.FC<ToggleSliderProps> = ({
-  primaryColor,
-  secondaryColor,
-  primaryBorderColor,
-  secondaryBorderColor,
   startValue,
-  icon,
-  sliderTrackWidth,
-  sliderTrackHeight,
-  sliderHandleDiameter,
-  borderWidth,
-  transitionTime,
-  flip,
   onToggle,
   tooltip,
   tooltiptx,
+  flip,
+  activeColor: primaryColor,
+  inactiveColor: secondaryColor,
+  activeBorderColor: primaryBorderColor,
+  inactiveBorderColor: secondaryBorderColor,
+  icon,
+  iconColor,
+  sliderTrackWidth,
+  sliderTrackHeight,
+  sliderHandleDiameter,
+  handleBorderWidth,
+  transitionTime,
+  padding,
 }) => {
   const [isOn, setIsOn] = useState(startValue || false);
   const [color, setColor] = useState(isOn ? primaryColor : secondaryColor);
@@ -101,7 +122,13 @@ export const ToggleSlider: React.FC<ToggleSliderProps> = ({
   const { t } = useTranslation();
 
   return (
-    <SliderContainer onClick={handleToggle} title={t(tooltiptx) || tooltip}>
+    <SliderContainer
+      onClick={handleToggle}
+      title={t(tooltiptx) || tooltip}
+      sliderHandleDiameter={sliderHandleDiameter}
+      sliderTrackWidth={sliderTrackWidth}
+      additionalPadding={padding}
+    >
       <SliderTrack
         color={color}
         sliderTrackWidth={sliderTrackWidth}
@@ -111,12 +138,13 @@ export const ToggleSlider: React.FC<ToggleSliderProps> = ({
           isOn={isOn}
           color={color}
           borderColor={borderColor}
-          borderWidth={borderWidth}
+          borderWidth={handleBorderWidth}
           sliderHandleDiameter={sliderHandleDiameter}
+          sliderTrackWidth={sliderTrackWidth}
           transitionTime={transitionTime}
           flip={flip}
         >
-          {icon && isOn && <Icon icon={icon} color={borderColor} />}
+          {icon && isOn && <Icon icon={icon} color={iconColor || "text"} />}
         </SliderHandle>
       </SliderTrack>
     </SliderContainer>

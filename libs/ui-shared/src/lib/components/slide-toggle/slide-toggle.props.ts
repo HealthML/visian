@@ -1,19 +1,21 @@
 import { IconType } from "../icon";
 
 export interface ToggleSliderProps {
-  primaryColor: string;
-  secondaryColor: string;
-  primaryBorderColor?: string;
-  secondaryBorderColor?: string;
   startValue?: boolean;
-  icon?: IconType;
-  sliderTrackWidth?: number;
-  sliderTrackHeight?: number;
-  sliderHandleDiameter?: number;
-  borderWidth?: number;
-  transitionTime?: number;
-  flip?: boolean;
   onToggle?: () => void;
   tooltip?: string;
   tooltiptx?: string;
+  flip?: boolean;
+  activeColor?: string;
+  inactiveColor?: string;
+  activeBorderColor?: string;
+  inactiveBorderColor?: string;
+  icon?: IconType;
+  iconColor?: string;
+  sliderTrackWidth?: number;
+  sliderTrackHeight?: number;
+  sliderHandleDiameter?: number;
+  handleBorderWidth?: number;
+  transitionTime?: number;
+  padding?: number;
 }

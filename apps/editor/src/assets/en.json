@@ -131,8 +131,6 @@
 
   "confirm-task-annotation-tooltip": "Confirm",
   "skip-task-annotation-tooltip": "Skip",
-  "verify-annotation-tooltip": "Verify",
-  "unverify-annotation-tooltip": "Unverify",
   "next-task-tooltip": "Next Task",
 
   "browser-error": "Browser Error",
@@ -416,6 +414,7 @@
   "dataset-name": "Dataset Name",
 
   "verified": "verified",
+  "not-verified": "not verified",
 
   "progress-total": "Total Images",
   "progress-verified": "Verified",

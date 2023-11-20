@@ -298,17 +298,14 @@ export const MiaReviewBar = observer(
             ) && (
               <ToggleSlider
                 startValue={isVerified}
-                primaryColor={theme.colors["Neuronic Neon"]}
-                secondaryColor={theme.colors["blueBorder"]}
-                primaryBorderColor={theme.colors["green"]}
-                secondaryBorderColor={theme.colors["blueBorder"]}
-                icon="check"
-                tooltiptx={
-                  isVerified
-                    ? "unverify-annotation-tooltip"
-                    : "verify-annotation-tooltip"
-                }
+                tooltiptx={isVerified ? "verified" : "not-verified"}
                 onToggle={() => toggleVerification()}
+                activeColor={theme.colors["green"]}
+                inactiveColor={theme.colors["sheet"]}
+                activeBorderColor={theme.colors["sheetBorder"]}
+                inactiveBorderColor={theme.colors["sheetBorder"]}
+                icon="check"
+                iconColor="textFull"
               />
             )}
             <ActionButtons
