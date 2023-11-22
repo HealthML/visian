@@ -14,12 +14,16 @@ import {
 } from "@visian/ui-shared";
 import { MiaAnnotationMetadata } from "@visian/utils";
 import { observer } from "mobx-react-lite";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
 import { whoHome } from "../../../constants";
 import { MiaReviewTask } from "../../../models/review-strategy";
+import { ImageLayer } from "apps/editor/src/models/editor/layers";
+import { Method } from "axios";
+import { typeOf } from "react-is";
+import { CatmullRomCurve3 } from "three";
 
 const ReviewBarSheet = styled(Sheet)`
   width: 800px;
@@ -255,18 +259,22 @@ export const MiaReviewBar = observer(
   ({ openSavePopup }: { openSavePopup: () => void }) => {
     const store = useStore();
     const { t } = useTranslation();
-    let openSaveNotification = false;
+    const unsavedChangesCallback = useRef<String>();
 
     const nextTask = useCallback(async () => {
-      store?.reviewStrategy?.nextTask();
+      if (store?.editor.activeDocument?.hasChanges) {
+        openUnsavedChangesPopUp(callbackAction.NEXT);
+      } else {
+        store?.reviewStrategy?.nextTask();
+      }
     }, [store?.reviewStrategy]);
 
     const previousTask = useCallback(async () => {
-      // * the popUp should only open, if changes are made to the document,
-      // * but the document is not saved to file
-      // * else previous task is called directly (store?.reviewStrategy?.previousTask();)
-      // * same behavior has to be implemented in the next task!
-      openPopUp();
+      if (store?.editor.activeDocument?.hasChanges) {
+        openUnsavedChangesPopUp(callbackAction.PREVIOUS);
+      } else {
+        store?.reviewStrategy?.previousTask();
+      }
     }, [store?.reviewStrategy]);
 
     const isVerified = useMemo(
@@ -287,16 +295,21 @@ export const MiaReviewBar = observer(
       isVerified,
     ]);
 
-    const [showPopUp, setShowPopUp] = useState(false);
-    // Set your boolean value here, which determines when the pop-up should be displayed
+    const [showUnsavedChangesPopUp, setShowUnsavedChangesPopUp] =
+      useState(false);
 
-    // Function to handle opening the pop-up
-    const openPopUp = () => {
-      setShowPopUp(true);
+    const openUnsavedChangesPopUp = (action: String) => {
+      unsavedChangesCallback.current = action;
+      setShowUnsavedChangesPopUp(true);
     };
 
-    const closePopUp = () => {
-      setShowPopUp(false);
+    const closeUnsavedChangesPopUp = () => {
+      setShowUnsavedChangesPopUp(false);
+    };
+
+    const callbackAction = {
+      NEXT: "next",
+      PREVIOUS: "previous",
     };
 
     return store?.editor.activeDocument ? (
@@ -367,22 +380,34 @@ export const MiaReviewBar = observer(
             </ReviewToolsContainer>
           </ReviewContainer>
         </ReviewBarSheet>
-        {showPopUp && (
-          <PopUp titleTx="unsaved-changes-title" dismiss={closePopUp}>
+        {showUnsavedChangesPopUp && (
+          <PopUp
+            titleTx="unsaved-changes-title"
+            dismiss={closeUnsavedChangesPopUp}
+          >
             <>
               <SectionLabel tx="unsaved-changes-text" />
               <InlineRow>
                 <SaveButton
                   tx="unsaved-changes-cancel"
                   onPointerDown={async () => {
-                    closePopUp();
+                    closeUnsavedChangesPopUp();
                   }}
                 />
                 <SaveButton
                   tx="unsaved-changes-confirmation"
                   onPointerDown={async () => {
-                    closePopUp();
-                    store?.reviewStrategy?.previousTask();
+                    closeUnsavedChangesPopUp();
+                    switch (unsavedChangesCallback.current) {
+                      case callbackAction.NEXT:
+                        store?.reviewStrategy?.nextTask();
+                        break;
+                      case callbackAction.PREVIOUS:
+                        store?.reviewStrategy?.previousTask();
+                        break;
+                      default:
+                        break;
+                    }
                   }}
                 />
               </InlineRow>

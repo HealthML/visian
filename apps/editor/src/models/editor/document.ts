@@ -501,6 +501,14 @@ export class Document
     return this.layers.some((layer) => layer.is3DLayer);
   }
 
+  public get hasChanges() {
+    return (
+      this.layers.some(
+        (layer) => layer.kind === "image" && (layer as ImageLayer).hasChanges,
+      ) || this.annotationGroups.some((group) => group.hasChanges)
+    );
+  }
+
   // eslint-disable-next-line @typescript-eslint/no-shadow
   protected zipLayers = async (layers: ILayer[]) => {
     const zip = new Zip();
