@@ -41,6 +41,10 @@ export abstract class ReviewStrategy {
     return this.task;
   }
 
+  public get supportsPreviousTask() {
+    return false;
+  }
+
   public abstract previousTask(): Promise<void>;
   public abstract nextTask(): Promise<void>;
   public abstract saveTask(): Promise<void>;

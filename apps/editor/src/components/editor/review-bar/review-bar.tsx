@@ -365,12 +365,14 @@ export const MiaReviewBar = observer(
                 tooltipPosition="top"
                 onPointerDown={toggleVerification}
               />
-              <ActionButtons
-                icon="arrowBack"
-                tooltipTx="previous-task-tooltip"
-                tooltipPosition="top"
-                onPointerDown={previousTask}
-              />
+              {store?.reviewStrategy?.supportsPreviousTask && (
+                <ActionButtons
+                  icon="arrowBack"
+                  tooltipTx="previous-task-tooltip"
+                  tooltipPosition="top"
+                  onPointerDown={previousTask}
+                />
+              )}
               <ActionButtons
                 icon="arrowForward"
                 tooltipTx="next-task-tooltip"

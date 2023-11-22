@@ -143,6 +143,10 @@ export class MiaReviewStrategy extends ReviewStrategy {
     );
   }
 
+  public get supportsPreviousTask() {
+    return true;
+  }
+
   public async previousTask() {
     await this.saveTask();
     this.currentImageIndex -= 1;

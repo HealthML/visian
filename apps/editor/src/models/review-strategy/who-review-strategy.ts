@@ -74,7 +74,9 @@ export class WHOReviewStrategy extends ReviewStrategy {
     this.store.setProgress();
   }
 
-  public async previousTask() {}
+  public async previousTask() {
+    throw new Error("Previous task is not implemented in the WHO strategy!");
+  }
 
   public async saveTask(): Promise<void> {
     const families = this.store.editor.activeDocument?.annotationGroups;
