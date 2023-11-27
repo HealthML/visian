@@ -37,18 +37,18 @@ export function DeleteMutation<T extends MiaTypeGeneric>(
       const queryKey = params.queryKey(selectorId);
       await queryClient.cancelQueries({ queryKey });
 
-      const previousDatasets = queryClient.getQueryData<T[]>(queryKey);
+      const previousObjects = queryClient.getQueryData<T[]>(queryKey);
 
-      if (!previousDatasets) return;
+      if (!previousObjects) return;
 
-      const newDatasets = previousDatasets.filter(
+      const newDatasets = previousObjects.filter(
         (object: T) => !objectIds.includes(object.id),
       );
 
       queryClient.setQueryData(queryKey, newDatasets);
 
       return {
-        previousDatasets,
+        previousDatasets: previousObjects,
       };
     },
     onError: (err, { selectorId }, context) => {
