@@ -30,7 +30,7 @@ export const createFileFromBase64 = (
   return new File([binaryData], fileNameForType);
 };
 
-export const createBase64StringFromFile = (
+const createBase64StringFromFile = (
   file: File,
 ): Promise<string | ArrayBuffer | null> =>
   new Promise((resolve, reject) => {
