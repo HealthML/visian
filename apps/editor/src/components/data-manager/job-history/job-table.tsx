@@ -60,7 +60,6 @@ const columns = [
   }),
 ];
 export const JobsTable = ({ jobs }: { jobs: MiaJob[] }) => {
-  // const data = jobs.map((job: Job) => getDisplayJob(job));
   const data = jobs;
 
   const columnWidths = [20, 10, 25, 25, 20];
