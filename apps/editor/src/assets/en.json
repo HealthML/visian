@@ -414,6 +414,9 @@
   "name": "Name",
   "project-name": "Project Name",
   "dataset-name": "Dataset Name",
+  "questionaire-text": "Enter your answer here",
+  "submit-form": "Submit",
+  "delete-answers": "Delete Answers",
 
   "verified": "verified",
 

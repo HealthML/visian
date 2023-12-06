@@ -413,6 +413,9 @@
   "name": "Name",
   "project-name": "Projektname",
   "dataset-name": "Datensatzname",
+  "questionaire-text": "Geben sie hier ihre Antwort ein",
+  "submit-form": "Abschicken",
+  "delete-answers": "Antworten Löschen",
 
   "verified": "verifiziert",
 
