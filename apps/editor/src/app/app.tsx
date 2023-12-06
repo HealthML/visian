@@ -29,6 +29,7 @@ import {
   ProjectsScreen,
 } from "../screens";
 import { setupRootStore, StoreProvider } from "./root-store";
+import { FormsSheet } from "../components/editor/forms-sheet/forms-sheet";
 
 if (isFromWHO()) {
   if (isUsingLocalhost()) {
@@ -78,7 +79,62 @@ function App(): JSX.Element {
               <ModalRoot />
               {hubBaseUrl ? (
                 <Routes>
+                  <Route
+                    path="/test"
+                    element={
+                      <FormsSheet
+                        jsonData={[
+                          {
+                            id: 1,
+                            text: "Das ist meine Frage",
+                            type: "textInput",
+                          },
+                          {
+                            id: 2,
+                            text: "Sogar eine Multiple-Choice-Frage soso?",
+                            type: "multipleChoice",
+                            options: [
+                              "Antwort der Antworten 1",
+                              "Antwort 2",
+                              "3",
+                            ],
+                          },
+                          {
+                            id: 3,
+                            text: "Sogar noch eine Multiple-Choice-Frage soso?",
+                            type: "multipleChoice",
+                            options: [
+                              "Antwort der Antworten 1",
+                              "Antwort 2",
+                              "3",
+                            ],
+                          },
+                          {
+                            id: 4,
+                            text: "Sogar noch noch eine Multiple-Choice-Frage soso?",
+                            type: "multipleChoice",
+                            options: [
+                              "Antwort der Antworten 1",
+                              "Antwort 2",
+                              "tolle antworten",
+                            ],
+                          },
+                          {
+                            id: 5,
+                            text: "Das ist meine noch Frage",
+                            type: "textInput",
+                          },
+                          {
+                            id: 6,
+                            text: "Das ist meine noch noch Frage",
+                            type: "textInput",
+                          },
+                        ]}
+                      />
+                    }
+                  />
                   <Route path="/projects" element={<ProjectsScreen />} />
+
                   <Route
                     path="/projects/:projectId"
                     element={<ProjectScreen />}
