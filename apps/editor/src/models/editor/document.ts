@@ -105,8 +105,8 @@ export class Document
 
   protected activeLayerId?: string;
   protected measurementDisplayLayerId?: string;
-  protected layerMap: { [key: string]: ILayer };
-  protected annotationGroupMap: { [key: string]: AnnotationGroup };
+  protected layerMap: { [layerId: string]: ILayer };
+  protected annotationGroupMap: { [annotionGroupId: string]: AnnotationGroup };
   protected layerIds: string[];
 
   public measurementType: MeasurementType = "volume";
@@ -190,7 +190,6 @@ export class Document
       title: computed,
       layers: computed,
       renderingOrder: computed,
-      flatRenderingOrder: computed,
       annotationGroups: computed,
       activeLayer: computed,
       measurementDisplayLayer: computed,
@@ -201,6 +200,7 @@ export class Document
       maxVisibleLayers3d: computed,
 
       setTitle: action,
+      setLayerIds: action,
       setActiveLayer: action,
       setMeasurementDisplayLayer: action,
       setMeasurementType: action,
@@ -239,7 +239,7 @@ export class Document
     }
     const { length } = this.layers;
     if (!length) return undefined;
-    const lastLayer = this.getLayer(this.layerIds[length - 1]);
+    const lastLayer = this.layers[this.layers.length - 1];
     const layerMeta = lastLayer?.metadata;
     if (isMiaMetadata(layerMeta)) {
       return layerMeta?.dataUri?.split("/").pop();
@@ -260,6 +260,10 @@ export class Document
     return (this.renderer?.capabilities.maxTextures || 0) - generalTextures3d;
   }
 
+  public setLayerIds(layerIds: string[]) {
+    this.layerIds = layerIds;
+  }
+
   public get layers(): ILayer[] {
     return this.layerIds.flatMap((id) => {
       if (this.annotationGroupMap[id]) {
@@ -273,19 +277,6 @@ export class Document
     return this.layerIds.map((id) => {
       if (this.annotationGroupMap[id]) {
         return this.annotationGroupMap[id];
-      }
-      return this.layerMap[id];
-    });
-  }
-
-  public get flatRenderingOrder(): (ILayer | IAnnotationGroup)[] {
-    return this.layerIds.flatMap((id) => {
-      const group = this.annotationGroupMap[id];
-      if (group) {
-        const array: (ILayer | IAnnotationGroup)[] = [
-          group as IAnnotationGroup,
-        ];
-        return array.concat(group.layers);
       }
       return this.layerMap[id];
     });
@@ -486,14 +477,15 @@ export class Document
     }
   };
 
+  public removeLayerFromRootList = (layer: ILayer): void => {
+    this.setLayerIds(this.layerIds.filter((id) => id !== layer.id));
+  };
+
   /** Toggles the type of the layer (annotation or not) and repositions it accordingly */
   public toggleTypeAndRepositionLayer = (idOrLayer: string | ILayer): void => {
     const layerId = typeof idOrLayer === "string" ? idOrLayer : idOrLayer.id;
     const layer = this.getLayer(layerId);
     if (!layer) return;
-    if (layer.isAnnotation) {
-      layer.setAnnotationGroup(undefined);
-    }
     layer.setIsAnnotation(!layer.isAnnotation);
   };
 
@@ -1054,7 +1046,7 @@ export class Document
     const layer = this.getLayer(layerId);
     const group = this.getAnnotationGroupFromFile(file);
     if (layer && group) {
-      group?.addLayer(layer.id);
+      group.addLayer(layer);
     }
   }
 

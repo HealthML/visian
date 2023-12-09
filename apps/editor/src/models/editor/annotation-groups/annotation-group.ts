@@ -8,7 +8,13 @@ import {
   ISerializable,
   isMiaAnnotationMetadata,
 } from "@visian/utils";
-import { action, computed, makeObservable, observable } from "mobx";
+import {
+  action,
+  computed,
+  makeObservable,
+  observable,
+  transaction,
+} from "mobx";
 import { v4 as uuidv4 } from "uuid";
 
 import { Document } from "../document";
@@ -17,8 +23,8 @@ import { ImageLayer } from "../layers";
 export class AnnotationGroup
   implements IAnnotationGroup, ISerializable<AnnotationGroupSnapshot>
 {
+  public layerIds: string[] = [];
   public excludeFromSnapshotTracking = ["document"];
-  protected layerIds: string[] = [];
   public title = "";
   public id!: string;
   public collapsed?: boolean;
@@ -37,6 +43,8 @@ export class AnnotationGroup
       isActive: computed,
       metadata: observable,
 
+      setCollapsed: action,
+      setLayerIds: action,
       addLayer: action,
       removeLayer: action,
       trySetIsVerified: action,
@@ -53,29 +61,25 @@ export class AnnotationGroup
     );
   }
 
-  public addLayer(id: string, index?: number) {
-    const layer = this.document.getLayer(id);
-    if (!layer) return;
-    if (layer.annotationGroup !== this) {
-      layer.annotationGroup?.removeLayer(layer.id);
-    }
-    const oldIndex = this.layerIds.indexOf(layer.id);
-    if (oldIndex < 0 && index !== undefined) {
-      this.layerIds.splice(index, 0, layer.id);
-    } else if (oldIndex < 0 && index === undefined) {
-      this.layerIds.push(id);
-    } else if (index !== undefined && oldIndex !== index) {
-      this.layerIds.splice(index, 0, this.layerIds.splice(oldIndex, 1)[0]);
-    }
-    this.document.addLayer(layer, index);
+  public setCollapsed(value: boolean) {
+    this.collapsed = value;
   }
 
-  public removeLayer(id: string, index?: number) {
-    if (!this.layerIds.includes(id)) return;
-    this.layerIds = this.layerIds.filter((layerId) => layerId !== id);
-    const layer = this.document.getLayer(id);
-    if (!layer) return;
-    this.document.addLayer(layer, index);
+  public setLayerIds(ids: string[]) {
+    this.layerIds = ids;
+  }
+
+  public addLayer(layer: ILayer) {
+    transaction(() => {
+      this.setLayerIds([...this.layerIds, layer.id]);
+      // In case the layer was in the document layer list (i.e. not in a group)
+      // we also remove it from there:
+      this.document.removeLayerFromRootList(layer);
+    });
+  }
+
+  public removeLayer(layer: ILayer) {
+    this.setLayerIds(this.layerIds.filter((layerId) => layerId !== layer.id));
   }
 
   public get isActive() {

@@ -110,7 +110,7 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
         };
       }
       const groupLayers = layer.getAnnotationGroupLayers();
-      groupLayers.forEach((l) => annotationGroup.addLayer(l.id));
+      groupLayers.forEach((l) => annotationGroup.addLayer(l));
       return annotationGroup;
     }
   };
