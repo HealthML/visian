@@ -12,7 +12,6 @@ import { action, computed, makeObservable, observable } from "mobx";
 import { v4 as uuidv4 } from "uuid";
 
 import { Document } from "../document";
-import { ImageLayer } from "../layers";
 
 export class AnnotationGroup
   implements IAnnotationGroup, ISerializable<AnnotationGroupSnapshot>
@@ -48,9 +47,7 @@ export class AnnotationGroup
   }
 
   public get hasChanges() {
-    return this.layers.some(
-      (layer) => layer.kind === "image" && (layer as ImageLayer).hasChanges,
-    );
+    return this.layers.some((layer) => layer.hasChanges);
   }
 
   public addLayer(id: string, index?: number) {

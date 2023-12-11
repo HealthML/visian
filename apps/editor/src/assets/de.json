@@ -136,7 +136,8 @@
   "next-task-tooltip": "Nächste Aufgabe",
   "previous-task-tooltip": "Vorherige Aufgabe",
   "unsaved-changes-title": "Ungespeicherte Änderungen!",
-  "unsaved-changes-text": "Wenn Sie jetzt fortfahren, gehen Änderungen verloren.",
+  "unsaved-groups-text": "Die folgenden Gruppen haben ungespeicherte Änderungen:",
+  "unsaved-document-layer-text": "Die folgenden Ebenen ohne Gruppen sind ungespeichert:",
   "unsaved-changes-confirmation": "Änderungen verwerfen",
   "unsaved-changes-cancel": "Abbrechen",
 

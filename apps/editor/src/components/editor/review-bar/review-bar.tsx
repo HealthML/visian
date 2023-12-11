@@ -20,10 +20,7 @@ import styled from "styled-components";
 import { useStore } from "../../../app/root-store";
 import { whoHome } from "../../../constants";
 import { MiaReviewTask } from "../../../models/review-strategy";
-import { ImageLayer } from "apps/editor/src/models/editor/layers";
-import { Method } from "axios";
-import { typeOf } from "react-is";
-import { CatmullRomCurve3 } from "three";
+
 
 const ReviewBarSheet = styled(Sheet)`
   width: 800px;
@@ -178,9 +175,16 @@ const InlineRow = styled.div`
   width: 100%;
 `;
 
-const SectionLabel = styled(Text)`
+const ItemLabel = styled(Text)`
   font-size: 14px;
+  margin-bottom: 8px;
+  margin-left: 8px;
+  margin-top: 8px;
+`;
+
+const SectionLabel = styled(Text)`
   margin-bottom: 24px;
+  margin-top: 8px;
 `;
 
 const SaveButton = styled(Button)`
@@ -259,7 +263,7 @@ export const MiaReviewBar = observer(
   ({ openSavePopup }: { openSavePopup: () => void }) => {
     const store = useStore();
     const { t } = useTranslation();
-    const unsavedChangesCallback = useRef<String>();
+    const unsavedChangesCallback = useRef<string>();
 
     const nextTask = useCallback(async () => {
       if (store?.editor.activeDocument?.hasChanges) {
@@ -298,13 +302,57 @@ export const MiaReviewBar = observer(
     const [showUnsavedChangesPopUp, setShowUnsavedChangesPopUp] =
       useState(false);
 
-    const openUnsavedChangesPopUp = (action: String) => {
+    const openUnsavedChangesPopUp = (action: string) => {
       unsavedChangesCallback.current = action;
       setShowUnsavedChangesPopUp(true);
     };
 
     const closeUnsavedChangesPopUp = () => {
       setShowUnsavedChangesPopUp(false);
+    };
+
+    const handleCloseUnsavedChangesPopUp = async () => {
+      closeUnsavedChangesPopUp();
+      switch (unsavedChangesCallback.current) {
+        case callbackAction.NEXT:
+          store?.reviewStrategy?.nextTask();
+          break;
+        case callbackAction.PREVIOUS:
+          store?.reviewStrategy?.previousTask();
+          break;
+        default:
+          break;
+      }
+    };
+
+    const getNamesOfUnsavedGroups = () => {
+      let content = "";
+
+      const unsavedGroups =
+        store?.editor.activeDocument?.annotationGroups.filter(
+          (group) => group.hasChanges,
+        );
+
+      unsavedGroups?.forEach((group) => {
+        content += `• ${  group.title  }\n`;
+      });
+
+      return content;
+    };
+
+    const getNamesOfUnsavedDocumentLayers = () => {
+      let content = "";
+
+      const unsavedDocumentLayers =
+        store?.editor.activeDocument?.documentLayers.filter(
+          (layer) => layer.hasChanges,
+        );
+
+      unsavedDocumentLayers?.forEach((layer) => {
+        content += `• ${  layer.title  }\n`;
+      });
+
+      return content;
     };
 
     const callbackAction = {
@@ -388,7 +436,18 @@ export const MiaReviewBar = observer(
             dismiss={closeUnsavedChangesPopUp}
           >
             <>
-              <SectionLabel tx="unsaved-changes-text" />
+              {store?.editor.activeDocument?.hasDocumentLayersChanges && (
+                <>
+                  <Text tx="unsaved-document-layer-text" />
+                  <ItemLabel tx={getNamesOfUnsavedDocumentLayers()} />
+                </>
+              )}
+              {store?.editor.activeDocument?.hasGroupChanges && (
+                <>
+                  <Text tx="unsaved-groups-text" />
+                  <ItemLabel tx={getNamesOfUnsavedGroups()} />
+                </>
+              )}
               <InlineRow>
                 <SaveButton
                   tx="unsaved-changes-cancel"
@@ -398,19 +457,7 @@ export const MiaReviewBar = observer(
                 />
                 <SaveButton
                   tx="unsaved-changes-confirmation"
-                  onPointerDown={async () => {
-                    closeUnsavedChangesPopUp();
-                    switch (unsavedChangesCallback.current) {
-                      case callbackAction.NEXT:
-                        store?.reviewStrategy?.nextTask();
-                        break;
-                      case callbackAction.PREVIOUS:
-                        store?.reviewStrategy?.previousTask();
-                        break;
-                      default:
-                        break;
-                    }
-                  }}
+                  onPointerDown={async () => handleCloseUnsavedChangesPopUp()}
                 />
               </InlineRow>
             </>

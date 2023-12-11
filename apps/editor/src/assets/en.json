@@ -136,7 +136,8 @@
   "next-task-tooltip": "Next Task",
   "previous-task-tooltip": "Previous Task",
   "unsaved-changes-title": "Unsaved Changes!",
-  "unsaved-changes-text": "You have unsaved changes. Do you want to discard them?",
+  "unsaved-groups-text": "The following groups have unsaved changes:",
+  "unsaved-document-layer-text": "The following levels without groups are unsaved:",
   "unsaved-changes-confirmation": "Discard Changes",
   "unsaved-changes-cancel": "Cancel",
 
