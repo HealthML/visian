@@ -61,14 +61,6 @@
         "style": "styled-components",
         "linter": "eslint"
       }
-    },
-    "@trumbitta/nx-plugin-openapi": {
-      "api-spec": {
-        "addGenerateScript": true
-      },
-      "api-lib": {
-        "addGenerateScript": true
-      }
     }
   },
   "defaultProject": "editor"

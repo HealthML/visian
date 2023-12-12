@@ -20,10 +20,7 @@
     "affected:test": "nx affected:test",
     "affected:e2e": "nx affected:e2e",
     "graph": "nx graph",
-    "storybook": "nx run ui-shared:storybook",
-    "g:api-spec": "nx g @trumbitta/nx-plugin-openapi:api-spec",
-    "g:api-lib": "nx g @trumbitta/nx-plugin-openapi:api-lib",
-    "g:mia-api": "curl -o libs/mia-spec/src/mia.openapi.yaml http://localhost:3000/api-yaml && nx run mia-api:generate-sources"
+    "storybook": "nx run ui-shared:storybook"
   },
   "private": true,
   "devDependencies": {
@@ -39,7 +36,6 @@
     "@nrwl/storybook": "15.0.3",
     "@nrwl/web": "15.0.3",
     "@nrwl/workspace": "15.0.3",
-    "@openapitools/openapi-generator-cli": "2.3.7",
     "@storybook/addon-a11y": "^6.5.13",
     "@storybook/addon-essentials": "~6.5.9",
     "@storybook/builder-webpack5": "~6.5.9",
@@ -107,7 +103,6 @@
     "@aws-amplify/auth": "^5.4.0",
     "@aws-amplify/ui-react": "^1.2.15",
     "@tanstack/react-table": "^8.7.9",
-    "@trumbitta/nx-plugin-openapi": "^1.12.1",
     "@tweenjs/tween.js": "^20.0.3",
     "@types/react-table": "^7.7.14",
     "aws-amplify": "^5.2.5",
