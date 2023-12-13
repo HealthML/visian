@@ -707,14 +707,25 @@ export class Document
     } else if (filteredFiles.name.endsWith(".zip")) {
       const zip = await Zip.fromZipFile(filteredFiles);
       const unzippedFiles = await zip.getAllFiles();
-      await this.importFiles(
-        this.createAnnotationGroup(
-          unzippedFiles,
+      if ("annotationGroupId" in filteredFiles) {
+        const typedFilteredFiles = filteredFiles as FileWithAnnotationGroup;
+        const newUnzippedFiles = unzippedFiles.map((unzippedFile) => {
+          const newFile = unzippedFile as FileWithAnnotationGroup;
+          newFile.annotationGroupId = typedFilteredFiles.annotationGroupId;
+          newFile.metadata = typedFilteredFiles.metadata;
+          return newFile;
+        });
+        await this.importFiles(newUnzippedFiles);
+      } else {
+        await this.importFiles(
+          this.createAnnotationGroup(
+            unzippedFiles,
+            filteredFiles.name,
+            this.getMetadataFromFile(filteredFiles),
+          ),
           filteredFiles.name,
-          this.getMetadataFromFile(filteredFiles),
-        ),
-        filteredFiles.name,
-      );
+        );
+      }
       return;
     } else if (filteredFiles.name.endsWith(".json")) {
       await readTrackingLog(filteredFiles, this);
