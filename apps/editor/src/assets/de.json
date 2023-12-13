@@ -133,7 +133,12 @@
   "skip-task-annotation-tooltip": "Überspringen",
   "verify-annotation-tooltip": "Verifizieren",
   "unverify-annotation-tooltip": "Verifizierung aufheben",
-  "next-task-tooltip": "Nächste Aufgebe",
+  "next-task-tooltip": "Nächste Aufgabe",
+  "previous-task-tooltip": "Vorherige Aufgabe",
+  "unsaved-changes-title": "Ungespeicherte Änderungen!",
+  "unsaved-groups-text": "Die folgenden Gruppen haben ungespeicherte Änderungen:",
+  "unsaved-changes-confirmation": "Änderungen verwerfen",
+  "unsaved-changes-cancel": "Abbrechen",
 
   "browser-error": "Browserfehler",
   "no-webgl-2-error": "Dieser Browser unterstützt WebGL 2 nicht. Um VISIAN auszuführen ist WebGL 2 notwendig. Bitte updaten Sie Ihren Browser oder nutzen Sie einen anderen Browser.",
