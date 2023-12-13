@@ -4,6 +4,8 @@ import {
   ColoredButtonParam,
   fontSize,
   InvisibleButton,
+  List,
+  ListItem,
   PopUp,
   Sheet,
   sheetNoise,
@@ -20,7 +22,6 @@ import styled from "styled-components";
 import { useStore } from "../../../app/root-store";
 import { whoHome } from "../../../constants";
 import { MiaReviewTask } from "../../../models/review-strategy";
-
 
 const ReviewBarSheet = styled(Sheet)`
   width: 800px;
@@ -175,20 +176,16 @@ const InlineRow = styled.div`
   width: 100%;
 `;
 
-const ItemLabel = styled(Text)`
-  font-size: 14px;
-  margin-bottom: 8px;
-  margin-left: 8px;
-  margin-top: 8px;
-`;
-
-const SectionLabel = styled(Text)`
-  margin-bottom: 24px;
-  margin-top: 8px;
-`;
-
 const SaveButton = styled(Button)`
   min-width: 110px;
+`;
+
+const UnsavedGroupList = styled(List)`
+  margin: 10px 0;
+`;
+
+const UnsavedGroupListItem = styled(ListItem)`
+  margin: -4px 0;
 `;
 
 export const WhoReviewBar = observer(() => {
@@ -265,13 +262,22 @@ export const MiaReviewBar = observer(
     const { t } = useTranslation();
     const unsavedChangesCallback = useRef<string>();
 
+    const callbackAction = {
+      NEXT: "next",
+      PREVIOUS: "previous",
+    };
+
     const nextTask = useCallback(async () => {
       if (store?.editor.activeDocument?.hasChanges) {
         openUnsavedChangesPopUp(callbackAction.NEXT);
       } else {
         store?.reviewStrategy?.nextTask();
       }
-    }, [store?.reviewStrategy]);
+    }, [
+      callbackAction.NEXT,
+      store?.editor.activeDocument?.hasChanges,
+      store?.reviewStrategy,
+    ]);
 
     const previousTask = useCallback(async () => {
       if (store?.editor.activeDocument?.hasChanges) {
@@ -279,7 +285,11 @@ export const MiaReviewBar = observer(
       } else {
         store?.reviewStrategy?.previousTask();
       }
-    }, [store?.reviewStrategy]);
+    }, [
+      callbackAction.PREVIOUS,
+      store?.editor.activeDocument?.hasChanges,
+      store?.reviewStrategy,
+    ]);
 
     const isVerified = useMemo(
       () =>
@@ -323,41 +333,6 @@ export const MiaReviewBar = observer(
         default:
           break;
       }
-    };
-
-    const getNamesOfUnsavedGroups = () => {
-      let content = "";
-
-      const unsavedGroups =
-        store?.editor.activeDocument?.annotationGroups.filter(
-          (group) => group.hasChanges,
-        );
-
-      unsavedGroups?.forEach((group) => {
-        content += `• ${  group.title  }\n`;
-      });
-
-      return content;
-    };
-
-    const getNamesOfUnsavedDocumentLayers = () => {
-      let content = "";
-
-      const unsavedDocumentLayers =
-        store?.editor.activeDocument?.documentLayers.filter(
-          (layer) => layer.hasChanges,
-        );
-
-      unsavedDocumentLayers?.forEach((layer) => {
-        content += `• ${  layer.title  }\n`;
-      });
-
-      return content;
-    };
-
-    const callbackAction = {
-      NEXT: "next",
-      PREVIOUS: "previous",
     };
 
     return store?.editor.activeDocument ? (
@@ -436,16 +411,18 @@ export const MiaReviewBar = observer(
             dismiss={closeUnsavedChangesPopUp}
           >
             <>
-              {store?.editor.activeDocument?.hasDocumentLayersChanges && (
-                <>
-                  <Text tx="unsaved-document-layer-text" />
-                  <ItemLabel tx={getNamesOfUnsavedDocumentLayers()} />
-                </>
-              )}
               {store?.editor.activeDocument?.hasGroupChanges && (
                 <>
                   <Text tx="unsaved-groups-text" />
-                  <ItemLabel tx={getNamesOfUnsavedGroups()} />
+                  <UnsavedGroupList>
+                    {store?.editor.activeDocument?.annotationGroups
+                      .filter((group) => group.hasChanges)
+                      .map((group) => (
+                        <UnsavedGroupListItem key={group.id} isLast>
+                          {`• ${group.title}`}
+                        </UnsavedGroupListItem>
+                      ))}
+                  </UnsavedGroupList>
                 </>
               )}
               <InlineRow>
