@@ -6,7 +6,6 @@ export interface WHOAnnotationDataSnapshot {
 export class WHOAnnotationData {
   public annotationDataUUID: string;
   public data: string;
-  public correspondingLayerId = "";
 
   // TODO: Properly type API response data
   constructor(annotationData: any) {
