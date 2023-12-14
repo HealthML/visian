@@ -118,7 +118,9 @@ export const Layers: React.FC = observer(() => {
   }, [viewMode]);
 
   const layers = document?.layers;
-  const layerIds = document?.renderingOrder.map((element) => element.id) || [];
+  const [layerIds, setLayerIds] = useState(
+    document?.renderingOrder.map((element) => element.id) || [],
+  );
 
   const [draggedLayer, setDraggedLayer] = useState<ILayer>();
   const [draggedGroup, setDraggedGroup] = useState<IAnnotationGroup>();
@@ -147,10 +149,17 @@ export const Layers: React.FC = observer(() => {
       const { active, over } = event;
       if (!over || active.id === over.id) return;
       const activeLayer = active.data.current?.layer as ILayer;
-
-      // Return if we are not dragging a layer, if we are not dragging OVER a
-      // group or if we are dragging over the layer's own group:
+      // Return if we are not dragging a layer:
       if (!activeLayer) return;
+      // Return if we are dragging image layer within or above annotationGroup
+      const activeLayerIndex = layers?.indexOf(activeLayer) || 0;
+      if (
+        !activeLayer.isAnnotation ||
+        !layers?.[activeLayerIndex - 1]?.isAnnotation
+      )
+        return;
+      // Return if we are not dragging OVER a
+      // group or if we are dragging over the layer's own group:
       const overGroup = over.data.current?.annotationGroup as IAnnotationGroup;
       if (!overGroup) return;
       if (activeLayer.annotationGroup?.id === overGroup.id) return;
@@ -168,7 +177,7 @@ export const Layers: React.FC = observer(() => {
         (overGroup as AnnotationGroup).addLayer(activeLayer);
       });
     },
-    [document],
+    [document, layers],
   );
 
   // This handler is called when the user lets go of a layer or group after dragging:
@@ -189,12 +198,14 @@ export const Layers: React.FC = observer(() => {
         const newIndex = document.renderingOrder.indexOf(
           over.data?.current?.annotationGroup,
         );
-        const newLayerIds = arrayMove(
-          document.renderingOrder.map((item) => item.id),
-          oldIndex,
-          newIndex,
-        );
-        document.setLayerIds(newLayerIds);
+        if (newIndex !== -1) {
+          const newLayerIds = arrayMove(
+            document.renderingOrder.map((item) => item.id),
+            oldIndex,
+            newIndex,
+          );
+          document.setLayerIds(newLayerIds);
+        }
       } else if (dragged?.layer) {
         const layer = dragged?.layer as ILayer;
         // Only re-sort the groups layers if
@@ -216,12 +227,23 @@ export const Layers: React.FC = observer(() => {
             newIndex,
           );
           layer.annotationGroup.setLayerIds(newLayerIds);
+        } else if (!layer.annotationGroup && !layer.isAnnotation && layers) {
+          const oldIndex = layerIds.indexOf(layer.id);
+          const newIndex = layerIds.indexOf(over.data?.current?.layer?.id);
+          const draggedImageLayer = layers.find(
+            (imageLayer) => imageLayer.id === layerIds[oldIndex],
+          );
+          if (draggedImageLayer && newIndex !== -1) {
+            document.addLayer(draggedImageLayer, newIndex);
+            const newLayerIds = arrayMove(layerIds, oldIndex, newIndex);
+            setLayerIds(newLayerIds);
+          }
         }
       }
       setDraggedLayer(undefined);
       setDraggedGroup(undefined);
     },
-    [document],
+    [document, layerIds, layers],
   );
 
   const listItems = document?.renderingOrder.map((element, index) => {
