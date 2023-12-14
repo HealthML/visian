@@ -481,6 +481,10 @@ export class Document
     this.setLayerIds(this.layerIds.filter((id) => id !== layer.id));
   };
 
+  public removeAnnotationGroup = (groupId: string): void => {
+    this.setLayerIds(this.layerIds.filter((id) => id !== groupId));
+  };
+
   /** Toggles the type of the layer (annotation or not) and repositions it accordingly */
   public toggleTypeAndRepositionLayer = (idOrLayer: string | ILayer): void => {
     const layerId = typeof idOrLayer === "string" ? idOrLayer : idOrLayer.id;
@@ -863,6 +867,8 @@ export class Document
             descriptionTx: "image-loading-error",
           });
         }
+
+        this.removeEmptyGroups();
       } else {
         //! TODO: #513
         // const numberOfAnnotations = uniqueValues.size - 1;
@@ -1191,5 +1197,13 @@ export class Document
     if (this.activeLayer?.id) {
       this.history.redo(this.activeLayer.id);
     }
+  }
+
+  protected removeEmptyGroups() {
+    Object.values(this.annotationGroupMap).forEach((group) => {
+      if (group.layers.length <= 1) {
+        this.removeAnnotationGroup(group.id);
+      }
+    });
   }
 }

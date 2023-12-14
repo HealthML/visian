@@ -70,6 +70,7 @@ export class AnnotationGroup
   }
 
   public addLayer(layer: ILayer) {
+    if (!layer.isAnnotation) return;
     transaction(() => {
       this.setLayerIds([...this.layerIds, layer.id]);
       // In case the layer was in the document layer list (i.e. not in a group)
