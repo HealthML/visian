@@ -436,5 +436,5 @@
   "supervise": "Supervise",
   "review-description": "{{taskType}} the annotations of {{image}}",
 
-  "new-group": "New group"
+  "untitled-group": "Untitled group"
 }

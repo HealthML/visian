@@ -460,8 +460,7 @@ export class Document
     );
     this.addLayer(annotationLayer);
 
-    const newTitle = title || "new-group";
-    const annotationGroup = new AnnotationGroup({ title: newTitle }, this);
+    const annotationGroup = new AnnotationGroup({ titleOverride: title }, this);
     this.addAnnotationGroup(annotationGroup);
     annotationGroup.addLayer(annotationLayer);
 
@@ -616,7 +615,9 @@ export class Document
 
   public finishBatchImport() {
     if (!this.layers.some((layer) => layer.isAnnotation)) {
-      this.addNewAnnotationGroup(this.mainImageLayer?.title || "new-group");
+      this.addNewAnnotationGroup(
+        this.mainImageLayer?.title || "untitled-group",
+      );
       this.viewport2D.setMainViewType();
     }
     this.context?.persist();
@@ -1130,7 +1131,7 @@ export class Document
         "Cannot create a new group for file that already belongs to a group",
       );
     }
-    const annotationGroup = new AnnotationGroup({ title }, this);
+    const annotationGroup = new AnnotationGroup({ titleOverride: title }, this);
     annotationGroup.metadata = groupMetadata;
 
     const filesWithGroup = files.map((f) => {

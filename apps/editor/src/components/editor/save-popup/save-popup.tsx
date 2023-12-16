@@ -100,9 +100,9 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
       const annotationGroup = new AnnotationGroup(undefined, document);
       document.addAnnotationGroup(annotationGroup);
       if (annotation) {
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        annotationGroup.title =
-          annotation.dataUri.split("/").pop() ?? "annotation group :)";
+        annotationGroup.setTitle(
+          annotation.dataUri.split("/").pop() ?? "annotation group :)",
+        );
         annotationGroup.metadata = {
           ...annotation,
           backend: "mia",

@@ -2,11 +2,23 @@ import {
   SortableContext,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
-import { FullWidthListItem, IAnnotationGroup, ILayer } from "@visian/ui-shared";
+import {
+  ContextMenu,
+  ContextMenuItem,
+  FullWidthListItem,
+  IAnnotationGroup,
+  ILayer,
+  PointerButton,
+  useDoubleTap,
+  useForwardEvent,
+  useTranslation,
+} from "@visian/ui-shared";
+import { Pixel } from "@visian/utils";
 import { observer } from "mobx-react-lite";
-import { useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
 import styled from "styled-components";
 
+import { useStore } from "../../../app/root-store";
 import { DraggableLayerListItem } from "./draggable-layer-list-item";
 
 const ChildLayerContainer = styled.div`
@@ -19,6 +31,8 @@ export const AnnotationGroupListItem = observer<{
   isLast?: boolean;
   draggedLayer?: ILayer;
 }>(({ group, isActive, isLast, draggedLayer }) => {
+  const store = useStore();
+
   const toggleCollapse = useCallback(() => {
     group.setCollapsed(!group.collapsed);
   }, [group]);
@@ -32,15 +46,71 @@ export const AnnotationGroupListItem = observer<{
     [group, isLast],
   );
 
+  const startTap2 = useDoubleTap(
+    useCallback((event: React.PointerEvent) => {
+      if (event.pointerType === "mouse") return;
+      setContextMenuPosition({ x: event.clientX, y: event.clientY });
+    }, []),
+  );
+  const startTap = useForwardEvent(startTap2);
+
+  // Context Menu
+  const [contextMenuPosition, setContextMenuPosition] = useState<Pixel | null>(
+    null,
+  );
+  const closeContextMenu = useCallback(() => {
+    setContextMenuPosition(null);
+  }, []);
+  useEffect(() => {
+    setContextMenuPosition(null);
+  }, [store?.editor.activeDocument?.viewSettings.viewMode]);
+
+  // Press Handler
+  const handlePointerDown = useCallback(
+    (event: React.PointerEvent<HTMLDivElement>) => {
+      if (event.button === PointerButton.LMB) {
+        startTap(event);
+      } else if (event.button === PointerButton.RMB) {
+        setContextMenuPosition({ x: event.clientX, y: event.clientY });
+      }
+    },
+    [startTap],
+  );
+
+  const handleContextMenu = (event: React.MouseEvent<HTMLDivElement>) => {
+    event.preventDefault();
+  };
+
+  // Layer Renaming Handling
+  const [isAnnotationGroupNameEditable, setIsAnnotationGroupNameEditable] =
+    useState(false);
+
+  const startEditingAnnotationGroupName = useCallback(
+    (event: React.PointerEvent<HTMLDivElement>) => {
+      event.preventDefault();
+      setIsAnnotationGroupNameEditable(true);
+      closeContextMenu();
+    },
+    [closeContextMenu],
+  );
+  const stopEditingAnnotationGroupName = useCallback(() => {
+    setIsAnnotationGroupNameEditable(false);
+  }, []);
+
   return (
     <>
       <FullWidthListItem
         icon={group.collapsed ? "arrowRight" : "arrowDown"}
         onIconPress={toggleCollapse}
-        labelTx={group.title}
+        labelTx={group.title ? undefined : "untitled-group"}
         label={group.title}
+        isLabelEditable={isAnnotationGroupNameEditable}
+        onChangeLabelText={group.setTitle}
+        onConfirmLabelText={stopEditingAnnotationGroupName}
         isActive={isActive}
         isLast={isLast && group.collapsed}
+        onPointerDown={handlePointerDown}
+        onContextMenu={handleContextMenu}
       />
       {!group.collapsed && (
         <ChildLayerContainer>
@@ -60,6 +130,17 @@ export const AnnotationGroupListItem = observer<{
           </SortableContext>
         </ChildLayerContainer>
       )}
+      <ContextMenu
+        anchor={contextMenuPosition}
+        isOpen={Boolean(contextMenuPosition)}
+        onOutsidePress={closeContextMenu}
+      >
+        <ContextMenuItem
+          labelTx="rename-group"
+          onPointerDown={startEditingAnnotationGroupName}
+          isLast
+        />
+      </ContextMenu>
     </>
   );
 });
