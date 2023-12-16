@@ -449,17 +449,39 @@ export class Document
       : defaultRegionGrowingPreviewColor;
   };
 
-  public addNewAnnotationLayer = () => {
+  public addNewAnnotationGroup = (title?: string) => {
     if (!this.mainImageLayer) return;
 
     const annotationColor = this.getFirstUnusedColor();
-
     const annotationLayer = ImageLayer.fromNewAnnotationForImage(
       this.mainImageLayer.image,
       this,
       annotationColor,
     );
     this.addLayer(annotationLayer);
+
+    const newTitle = title || "new-group";
+    const annotationGroup = new AnnotationGroup({ title: newTitle }, this);
+    this.addAnnotationGroup(annotationGroup);
+    annotationGroup.addLayer(annotationLayer);
+
+    this.setActiveLayer(annotationLayer);
+
+    // Force switch to 2D if too many layers for 3D
+    this.viewSettings.setViewMode(this.viewSettings.viewMode);
+  };
+
+  public addNewAnnotationLayer = () => {
+    if (!this.mainImageLayer) return;
+
+    const annotationColor = this.getFirstUnusedColor();
+    const annotationLayer = ImageLayer.fromNewAnnotationForImage(
+      this.mainImageLayer.image,
+      this,
+      annotationColor,
+    );
+    this.addLayer(annotationLayer);
+    this.activeLayer?.annotationGroup?.addLayer(annotationLayer);
     this.setActiveLayer(annotationLayer);
 
     // Force switch to 2D if too many layers for 3D
@@ -594,7 +616,7 @@ export class Document
 
   public finishBatchImport() {
     if (!this.layers.some((layer) => layer.isAnnotation)) {
-      this.addNewAnnotationLayer();
+      this.addNewAnnotationGroup(this.mainImageLayer?.title || "new-group");
       this.viewport2D.setMainViewType();
     }
     this.context?.persist();
@@ -748,13 +770,13 @@ export class Document
     //   return;
     // }
 
-    if (filteredFiles instanceof File) {
+    if (filteredFiles instanceof File && !isAnnotation) {
       this.createAnnotationGroup(
         [filteredFiles],
         filteredFiles.name,
         this.getMetadataFromFile(filteredFiles),
       );
-    } else {
+    } else if (!(filteredFiles instanceof File) && !isAnnotation) {
       this.createAnnotationGroup(filteredFiles, name ?? uuidv4());
     }
     let createdLayerId = "";

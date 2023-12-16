@@ -80,6 +80,10 @@ const LayerModal = styled(Modal)`
   justify-content: center;
 `;
 
+const StyledModalHeaderButton = styled(ModalHeaderButton)`
+  margin-right: 10px;
+`;
+
 const customCollisionDetection: CollisionDetection = (args) => {
   const activeLayer = args.active.data.current?.layer as ILayer;
   if (!activeLayer) return rectIntersection(args);
@@ -312,15 +316,27 @@ export const Layers: React.FC = observer(() => {
                 <InfoShortcuts hotkeyGroupNames={["layer-controls"]} />
               }
             />
+            {document.activeLayer?.annotationGroup && (
+              <StyledModalHeaderButton
+                icon="plus"
+                tooltipTx="add-annotation-layer"
+                isDisabled={
+                  !document?.imageLayers?.length ||
+                  document?.imageLayers?.length >=
+                    (document?.maxVisibleLayers || 0)
+                }
+                onPointerDown={document?.addNewAnnotationLayer}
+              />
+            )}
             <ModalHeaderButton
               icon="plus"
-              tooltipTx="add-annotation-layer"
+              tooltipTx="add-annotation-group"
               isDisabled={
                 !document?.imageLayers?.length ||
                 document?.imageLayers?.length >=
                   (document?.maxVisibleLayers || 0)
               }
-              onPointerDown={document?.addNewAnnotationLayer}
+              onPointerDown={() => document?.addNewAnnotationGroup()}
             />
           </>
         }
