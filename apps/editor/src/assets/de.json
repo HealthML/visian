@@ -420,6 +420,7 @@
   "dataset-name": "Datensatzname",
 
   "verified": "verifiziert",
+  "not-verified": "Nicht verifiziert",
 
   "progress-total": "Alle Bilder",
   "progress-verified": "Verifiziert",

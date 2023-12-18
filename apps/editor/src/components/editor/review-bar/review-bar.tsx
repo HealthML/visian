@@ -11,6 +11,8 @@ import {
   sheetNoise,
   SquareButton,
   Text,
+  theme,
+  ToggleSlider,
   useTranslation,
   zIndex,
 } from "@visian/ui-shared";
@@ -367,27 +369,30 @@ export const MiaReviewBar = observer(
           </ActionContainer>
           <ReviewContainer>
             <ReviewToolsContainer>
+              {!(
+                !store?.editor.activeDocument?.activeLayer?.annotationGroup
+                  ?.metadata ||
+                !store?.editor.activeDocument?.activeLayer?.isAnnotation
+              ) && (
+                <ToggleSlider
+                  startValue={isVerified}
+                  tooltiptx={isVerified ? "verified" : "not-verified"}
+                  onToggle={() => toggleVerification()}
+                  activeColor={theme.colors["green"]}
+                  inactiveColor={theme.colors["sheet"]}
+                  activeBorderColor={theme.colors["sheetBorder"]}
+                  inactiveBorderColor={theme.colors["sheetBorder"]}
+                  icon="check"
+                  iconColor="textFull"
+                />
+              )}
               <ActionButtons
                 icon="save"
                 tooltipTx="save"
                 tooltipPosition="top"
                 onPointerDown={openSavePopup}
               />
-              <ActionButtons
-                icon={isVerified ? "exit" : "check"}
-                isDisabled={
-                  !store?.editor.activeDocument?.activeLayer?.annotationGroup
-                    ?.metadata ||
-                  !store?.editor.activeDocument?.activeLayer?.isAnnotation
-                }
-                tooltipTx={
-                  isVerified
-                    ? "unverify-annotation-tooltip"
-                    : "verify-annotation-tooltip"
-                }
-                tooltipPosition="top"
-                onPointerDown={toggleVerification}
-              />
+              <ActionButtonsContainer />
               {store?.reviewStrategy?.supportsPreviousTask && (
                 <ActionButtons
                   icon="arrowBack"
