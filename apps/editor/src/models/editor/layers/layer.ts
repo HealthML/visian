@@ -89,6 +89,10 @@ export class Layer implements ILayer, ISerializable<LayerSnapshot> {
     return false;
   }
 
+  public get hasChanges(): boolean {
+    return false;
+  }
+
   public get title(): string | undefined {
     return this.titleOverride;
   }

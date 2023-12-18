@@ -132,6 +132,11 @@
   "confirm-task-annotation-tooltip": "Confirm",
   "skip-task-annotation-tooltip": "Skip",
   "next-task-tooltip": "Next Task",
+  "previous-task-tooltip": "Previous Task",
+  "unsaved-changes-title": "Unsaved Changes!",
+  "unsaved-groups-text": "The following groups have unsaved changes:",
+  "unsaved-changes-confirmation": "Discard Changes",
+  "unsaved-changes-cancel": "Cancel",
 
   "browser-error": "Browser Error",
   "no-webgl-2-error": "This browser does not support WebGL 2 which is necessary to run VISIAN. Please update your browser to the newest version or use a different browser.",
