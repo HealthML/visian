@@ -65,6 +65,9 @@ export interface ILayer {
    */
   is3DLayer: boolean;
 
+  /** Returns `true` if the layer has changes. */
+  hasChanges: boolean;
+
   /** The layer's UUID. */
   id: string;
   /**
@@ -226,7 +229,7 @@ export interface IAnnotationGroup {
   hasChanges: boolean;
   /** Adds a layer with specified id to the group at the specified index, the layer is removed from its previous group.
    * If no index and the layer is already in the group, the layer's position remains unchanged.
-   * If no index is specified and the layer is not part of the gropu, the layer is inserted at the beginning. */
+   * If no index is specified and the layer is not part of the group, the layer is inserted at the beginning. */
   addLayer(id: string, index?: number): void;
   /** Removes a layer from the group making it an orphan.
    * After being removed, the layer is added to the document at the specified index.

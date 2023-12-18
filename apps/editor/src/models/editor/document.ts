@@ -269,6 +269,11 @@ export class Document
     });
   }
 
+  // considers all layers that are not in a annotation group
+  public get documentLayers(): ILayer[] {
+    return this.layers.filter((layer) => layer.annotationGroup === undefined);
+  }
+
   public get renderingOrder(): (ILayer | IAnnotationGroup)[] {
     return this.layerIds.map((id) => {
       if (this.annotationGroupMap[id]) {
@@ -499,6 +504,19 @@ export class Document
 
   public get has3DLayers(): boolean {
     return this.layers.some((layer) => layer.is3DLayer);
+  }
+
+  public get hasChanges() {
+    return this.hasDocumentLayersChanges || this.hasGroupChanges;
+  }
+
+  public get hasGroupChanges() {
+    return this.annotationGroups.some((group) => group.hasChanges);
+  }
+
+  // considers all layers that are not in a group
+  public get hasDocumentLayersChanges() {
+    return this.documentLayers.some((layer) => layer.hasChanges);
   }
 
   // eslint-disable-next-line @typescript-eslint/no-shadow

@@ -35,3 +35,4 @@ export * from "./key-icon";
 export * from "./option-selector";
 export * from "./grid";
 export * from "./list-navigator";
+export * from "./slide-toggle";

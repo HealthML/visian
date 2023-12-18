@@ -1,19 +1,25 @@
 import {
+  Button,
   color,
   ColoredButtonParam,
   fontSize,
   InvisibleButton,
+  List,
+  ListItem,
   ListNavigator,
+  PopUp,
   Sheet,
   sheetNoise,
   SquareButton,
   Text,
+  theme,
+  ToggleSlider,
   useTranslation,
   zIndex,
 } from "@visian/ui-shared";
 import { MiaAnnotationMetadata } from "@visian/utils";
 import { observer } from "mobx-react-lite";
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
@@ -21,7 +27,7 @@ import { whoHome } from "../../../constants";
 import { MiaReviewTask } from "../../../models/review-strategy";
 
 const ReviewBarSheet = styled(Sheet)`
-  width: 800px;
+  width: 1000px;
   height: 70px;
   padding: 10px 28px;
   display: flex;
@@ -165,6 +171,26 @@ const ReviewMessageSubtitle = styled(Text)`
   color: ${color("lightText")};
 `;
 
+const InlineRow = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+`;
+
+const SaveButton = styled(Button)`
+  min-width: 110px;
+`;
+
+const UnsavedGroupList = styled(List)`
+  margin: 10px 0;
+`;
+
+const UnsavedGroupListItem = styled(ListItem)`
+  margin: -4px 0;
+`;
+
 export const WhoReviewBar = observer(() => {
   const store = useStore();
 
@@ -237,10 +263,36 @@ export const MiaReviewBar = observer(
   ({ openSavePopup }: { openSavePopup: () => void }) => {
     const store = useStore();
     const { t } = useTranslation();
+    const unsavedChangesCallback = useRef<string>();
+
+    const callbackAction = {
+      NEXT: "next",
+      PREVIOUS: "previous",
+    };
 
     const nextTask = useCallback(async () => {
-      store?.reviewStrategy?.nextTask();
-    }, [store?.reviewStrategy]);
+      if (store?.editor.activeDocument?.hasChanges) {
+        openUnsavedChangesPopUp(callbackAction.NEXT);
+      } else {
+        store?.reviewStrategy?.nextTask();
+      }
+    }, [
+      callbackAction.NEXT,
+      store?.editor.activeDocument?.hasChanges,
+      store?.reviewStrategy,
+    ]);
+
+    const previousTask = useCallback(async () => {
+      if (store?.editor.activeDocument?.hasChanges) {
+        openUnsavedChangesPopUp(callbackAction.PREVIOUS);
+      } else {
+        store?.reviewStrategy?.previousTask();
+      }
+    }, [
+      callbackAction.PREVIOUS,
+      store?.editor.activeDocument?.hasChanges,
+      store?.reviewStrategy,
+    ]);
 
     const isVerified = useMemo(
       () =>
@@ -260,6 +312,32 @@ export const MiaReviewBar = observer(
       isVerified,
     ]);
 
+    const [showUnsavedChangesPopUp, setShowUnsavedChangesPopUp] =
+      useState(false);
+
+    const openUnsavedChangesPopUp = (action: string) => {
+      unsavedChangesCallback.current = action;
+      setShowUnsavedChangesPopUp(true);
+    };
+
+    const closeUnsavedChangesPopUp = () => {
+      setShowUnsavedChangesPopUp(false);
+    };
+
+    const handleCloseUnsavedChangesPopUp = async () => {
+      closeUnsavedChangesPopUp();
+      switch (unsavedChangesCallback.current) {
+        case callbackAction.NEXT:
+          store?.reviewStrategy?.nextTask();
+          break;
+        case callbackAction.PREVIOUS:
+          store?.reviewStrategy?.previousTask();
+          break;
+        default:
+          break;
+      }
+    };
+
     const annotationGroupTitles =
       store?.editor.activeDocument?.annotationGroups.map(
         (group) => group.title,
@@ -272,77 +350,125 @@ export const MiaReviewBar = observer(
     };
 
     return store?.editor.activeDocument ? (
-      <ReviewBarSheet>
-        <TaskContainer>
-          <TaskLabel tx="Task" />
-          <TaskName
-            text={
-              store?.reviewStrategy?.currentTask?.title ??
-              t(store?.reviewStrategy?.currentTask?.kind)
-            }
-          />
-        </TaskContainer>
-        <ActionContainer>
-          <ActionName
-            text={
-              store?.reviewStrategy?.currentTask?.description ??
-              t("review-description", {
-                taskType: t(store?.reviewStrategy?.currentTask?.kind),
-                image: (
-                  store?.reviewStrategy?.currentTask as unknown as MiaReviewTask
-                ).image.dataUri
-                  .split("/")
-                  .pop()
-                  ?.split(".")[0],
-              })
-            }
-          />
-          <ActionButtonsContainer />
-        </ActionContainer>
-        <ReviewContainer>
-          <ListNavigator
-            list={annotationGroupTitles}
-            currentItem={
-              store.editor.activeDocument.activeLayer?.annotationGroup?.title
-            }
-            hasChanges={
-              store.editor.activeDocument.activeLayer?.annotationGroup
-                ?.hasChanges
-            }
-            onClickHasChanges={openSavePopup}
-            onSwitch={onGroupSwitch}
-          />
-          <ReviewToolsContainer>
-            <ActionButtons
-              icon="save"
-              tooltipTx="save"
-              tooltipPosition="top"
-              onPointerDown={openSavePopup}
-            />
-            <ActionButtons
-              icon={isVerified ? "exit" : "check"}
-              isDisabled={
-                !store?.editor.activeDocument?.activeLayer?.annotationGroup
-                  ?.metadata ||
-                !store?.editor.activeDocument?.activeLayer?.isAnnotation
+      <>
+        <ReviewBarSheet>
+          <TaskContainer>
+            <TaskLabel tx="Task" />
+            <TaskName
+              text={
+                store?.reviewStrategy?.currentTask?.title ??
+                t(store?.reviewStrategy?.currentTask?.kind)
               }
-              tooltipTx={
-                isVerified
-                  ? "unverify-annotation-tooltip"
-                  : "verify-annotation-tooltip"
+            />
+          </TaskContainer>
+          <ActionContainer>
+            <ActionName
+              text={
+                store?.reviewStrategy?.currentTask?.description ??
+                t("review-description", {
+                  taskType: t(store?.reviewStrategy?.currentTask?.kind),
+                  image: (
+                    store?.reviewStrategy
+                      ?.currentTask as unknown as MiaReviewTask
+                  ).image.dataUri
+                    .split("/")
+                    .pop()
+                    ?.split(".")[0],
+                })
               }
-              tooltipPosition="top"
-              onPointerDown={toggleVerification}
             />
-            <ActionButtons
-              icon="arrowForward"
-              tooltipTx="next-task-tooltip"
-              tooltipPosition="top"
-              onPointerDown={nextTask}
+            <ActionButtonsContainer />
+          </ActionContainer>
+          <ReviewContainer>
+            <ListNavigator
+              list={annotationGroupTitles}
+              currentItem={
+                store.editor.activeDocument.activeLayer?.annotationGroup?.title
+              }
+              hasChanges={
+                store.editor.activeDocument.activeLayer?.annotationGroup
+                  ?.hasChanges
+              }
+              onClickHasChanges={openSavePopup}
+              onSwitch={onGroupSwitch}
             />
-          </ReviewToolsContainer>
-        </ReviewContainer>
-      </ReviewBarSheet>
+            <ReviewToolsContainer>
+              <ToggleSlider
+                startValue={isVerified}
+                tooltiptx={isVerified ? "verified" : "not-verified"}
+                onToggle={() => toggleVerification()}
+                activeColor={theme.colors["green"]}
+                inactiveColor={theme.colors["sheet"]}
+                activeBorderColor={theme.colors["sheetBorder"]}
+                inactiveBorderColor={theme.colors["sheetBorder"]}
+                icon="check"
+                iconColor="textFull"
+                isDisabled={
+                  !store?.editor.activeDocument?.activeLayer?.annotationGroup
+                    ?.metadata ||
+                  !store?.editor.activeDocument?.activeLayer?.isAnnotation
+                }
+              />
+              <ActionButtons
+                icon="save"
+                tooltipTx="save"
+                tooltipPosition="top"
+                onPointerDown={openSavePopup}
+              />
+              <ActionButtonsContainer />
+              {store?.reviewStrategy?.supportsPreviousTask && (
+                <ActionButtons
+                  icon="arrowBack"
+                  tooltipTx="previous-task-tooltip"
+                  tooltipPosition="top"
+                  onPointerDown={previousTask}
+                />
+              )}
+              <ActionButtons
+                icon="arrowForward"
+                tooltipTx="next-task-tooltip"
+                tooltipPosition="top"
+                onPointerDown={nextTask}
+              />
+            </ReviewToolsContainer>
+          </ReviewContainer>
+        </ReviewBarSheet>
+        {showUnsavedChangesPopUp && (
+          <PopUp
+            titleTx="unsaved-changes-title"
+            dismiss={closeUnsavedChangesPopUp}
+          >
+            <>
+              {store?.editor.activeDocument?.hasGroupChanges && (
+                <>
+                  <Text tx="unsaved-groups-text" />
+                  <UnsavedGroupList>
+                    {store?.editor.activeDocument?.annotationGroups
+                      .filter((group) => group.hasChanges)
+                      .map((group) => (
+                        <UnsavedGroupListItem key={group.id} isLast>
+                          {`• ${group.title}`}
+                        </UnsavedGroupListItem>
+                      ))}
+                  </UnsavedGroupList>
+                </>
+              )}
+              <InlineRow>
+                <SaveButton
+                  tx="unsaved-changes-cancel"
+                  onPointerDown={async () => {
+                    closeUnsavedChangesPopUp();
+                  }}
+                />
+                <SaveButton
+                  tx="unsaved-changes-confirmation"
+                  onPointerDown={async () => handleCloseUnsavedChangesPopUp()}
+                />
+              </InlineRow>
+            </>
+          </PopUp>
+        )}
+      </>
     ) : null;
   },
 );
