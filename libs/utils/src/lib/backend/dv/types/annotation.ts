@@ -9,7 +9,6 @@ export class DVAnnotation {
   public label: string;
   public color: string;
 
-  // TODO: Properly type API response data
   constructor(annotation: any) {
     this.annotationUUID = annotation.annotationUUID;
     this.label = annotation.label;
