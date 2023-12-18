@@ -98,7 +98,7 @@
     "webpack-glsl-loader": "^1.0.1",
     "worker-loader": "^3.0.8"
   },
-  "packageManager": "yarn@3.2.4",
+  "packageManager": "yarn@4.0.2",
   "dependencies": {
     "@aws-amplify/auth": "^5.4.0",
     "@aws-amplify/ui-react": "^1.2.15",
