@@ -3,6 +3,7 @@ import { MiaImage } from "@visian/utils";
 import { MiaReviewTaskSnapshot } from "./mia-review-task";
 import { TaskType } from "./review-task";
 import { WhoReviewTaskSnapshot } from "./who-review-task";
+import { DVReviewTaskSnapshot } from "./dv-review-task";
 
 export interface MiaReviewStrategySnapshot {
   backend: "mia";
@@ -18,6 +19,12 @@ export interface WHOReviewStrategySnapshot {
   currentReviewTask?: WhoReviewTaskSnapshot;
 }
 
+export interface DVReviewStrategySnapshot {
+  backend: "dv";
+  currentReviewTask?: DVReviewTaskSnapshot;
+}
+
 export type ReviewStrategySnapshot =
   | MiaReviewStrategySnapshot
-  | WHOReviewStrategySnapshot;
+  | WHOReviewStrategySnapshot
+  | DVReviewStrategySnapshot;
