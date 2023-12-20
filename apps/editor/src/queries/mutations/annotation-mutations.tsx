@@ -11,12 +11,7 @@ const annotationByJobQueryBaseKey = "annotationByJob";
 export const useAnnotationsByImage = (imageid: string) =>
   useQuery<MiaAnnotation[], AxiosError<MiaAnnotation[]>>(
     [annotationByImageQueryBaseKey, imageid],
-    async () => {
-      const response = await annotationsApi.annotationsControllerFindAll(
-        imageid,
-      );
-      return response.data;
-    },
+    async () => annotationsApi.findAllAnnotations({ image: imageid }),
     {
       retry: 2,
       refetchInterval: 1000 * 10,
@@ -26,13 +21,8 @@ export const useAnnotationsByImage = (imageid: string) =>
 export const useAnnotationsByJob = (jobId: string) =>
   useQuery<MiaAnnotation[], AxiosError<MiaAnnotation[]>>(
     [annotationByJobQueryBaseKey, jobId],
-    async () => {
-      const response = await annotationsApi.annotationsControllerFindAll(
-        undefined,
-        jobId,
-      );
-      return response.data;
-    },
+    async () =>
+      annotationsApi.findAllAnnotations({ image: undefined, job: jobId }),
     {
       retry: 2,
       refetchInterval: 1000 * 10,
@@ -43,21 +33,19 @@ export const deleteAnnotationsForImageMutation = () =>
   DeleteMutation<MiaAnnotation>({
     queryKey: (imageId: string) => [annotationByImageQueryBaseKey, imageId],
     mutateFn: async ({ objectIds }) => {
-      const response = await annotationsApi.annotationsControllerRemoveAll({
-        ids: objectIds,
+      const deletedAnnotations = await annotationsApi.deleteAnnotations({
+        deleteAllDto: { ids: objectIds },
       });
-      return response.data.map((annotation) => annotation.id);
+      return deletedAnnotations.map((annotation) => annotation.id);
     },
   });
 
 export const updateAnnotationsForImageMutation = () =>
   UpdateMutation<MiaAnnotation, { dataUri?: string; verified?: boolean }>({
     queryKey: (imageId: string) => [annotationByImageQueryBaseKey, imageId],
-    mutateFn: async ({ object, updateDto }) => {
-      const response = await annotationsApi.annotationsControllerUpdate(
-        object.id,
-        updateDto,
-      );
-      return response.data;
-    },
+    mutateFn: async ({ object, updateDto }) =>
+      annotationsApi.updateAnnotation({
+        id: object.id,
+        updateAnnotationDto: updateDto,
+      }),
   });

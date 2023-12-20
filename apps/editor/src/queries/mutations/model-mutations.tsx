@@ -9,10 +9,7 @@ const modelVersionsQueryKey = "modelVersions";
 export const useMlModels = () =>
   useQuery<MiaModelVersion[], AxiosError<MiaModelVersion[]>>(
     [modelVersionsQueryKey],
-    async () => {
-      const response = await modelVersionsApi.modelsControllerFindAll();
-      return response.data;
-    },
+    async () => modelVersionsApi.findAllModelVersions(),
     {
       retry: 2,
       refetchInterval: 1000 * 10,

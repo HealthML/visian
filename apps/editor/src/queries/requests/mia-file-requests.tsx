@@ -1,25 +1,21 @@
-import { FileWithMetadata } from "@visian/utils";
+import { FileWithMetadata, MiaJob } from "@visian/utils";
 import path from "path";
 
-import { annotationsApi, imagesApi } from "../mia-api-client";
+import { annotationsApi, imagesApi, jobsApi } from "../mia-api-client";
 
 export const getImageFile = async (
   imageId: string,
 ): Promise<FileWithMetadata> => {
-  const response = await imagesApi.imagesControllerFindOne(imageId);
-  const image = response.data;
+  const imageMetadata = await imagesApi.findImage({ id: imageId });
 
-  const fileName: string = path.basename(image.dataUri);
-  const fileResponse = await imagesApi.imagesControllerGetFile(imageId, {
-    responseType: "blob",
-  });
-  const imageFileBlob = fileResponse.data;
+  const fileName: string = path.basename(imageMetadata.dataUri);
+  const fileBlob = await imagesApi.getImageFile({ id: imageId });
 
-  const imageFile = new File([imageFileBlob], fileName, {
-    type: imageFileBlob.type,
+  const imageFile = new File([fileBlob], fileName, {
+    type: fileBlob.type,
     lastModified: Date.now(),
   }) as FileWithMetadata;
-  imageFile.metadata = image;
+  imageFile.metadata = imageMetadata;
 
   return imageFile;
 };
@@ -27,23 +23,33 @@ export const getImageFile = async (
 export const getAnnotationFile = async (
   annotationId: string,
 ): Promise<FileWithMetadata> => {
-  const response = await annotationsApi.annotationsControllerFindOne(
-    annotationId,
-  );
-  const annotation = response.data;
+  const annotationMetadata = await annotationsApi.findAnnotation({
+    id: annotationId,
+  });
 
-  const fileName: string = path.basename(annotation.dataUri);
-  const fileResponse = await annotationsApi.annotationsControllerGetFile(
-    annotationId,
-    { responseType: "blob" },
-  );
-  const annotationFileBlob = fileResponse.data;
+  const fileName: string = path.basename(annotationMetadata.dataUri);
+  const fileBlob = await annotationsApi.getAnnotationFile({
+    id: annotationId,
+  });
 
-  const annotationFile = new File([annotationFileBlob], fileName, {
-    type: annotationFileBlob.type,
+  const annotationFile = new File([fileBlob], fileName, {
+    type: fileBlob.type,
     lastModified: Date.now(),
   }) as FileWithMetadata;
-  annotationFile.metadata = annotation;
+  annotationFile.metadata = annotationMetadata;
 
   return annotationFile;
+};
+
+export const getJobLogText = async (job: MiaJob) => {
+  let logText = "";
+  if (!job.logFileUri) return logText;
+
+  try {
+    const blob = await jobsApi.getJobLogFile({ id: job.id });
+    logText = await blob.text();
+  } catch (e) {
+    logText = "Error fetching job log file";
+  }
+  return logText;
 };

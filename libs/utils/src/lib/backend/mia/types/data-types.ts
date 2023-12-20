@@ -5,10 +5,9 @@ import {
   Job,
   JobStatusEnum,
   ModelVersion,
-  ModelVersionTag,
   Progress,
   Project,
-} from "@visian/mia-api";
+} from "mia-typescript-sdk";
 
 export type MiaAnnotation = Annotation;
 export type MiaImage = Image;
@@ -18,4 +17,3 @@ export type MiaJob = Job;
 export type MiaJobStatusEnum = JobStatusEnum;
 export type MiaProgress = Progress;
 export type MiaModelVersion = ModelVersion;
-export type MiaModelVersionTag = ModelVersionTag;

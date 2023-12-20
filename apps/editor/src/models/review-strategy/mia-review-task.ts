@@ -61,12 +61,15 @@ export class MiaReviewTask implements ReviewTask {
     const dataUri =
       (files[0] as FileWithMetadata | undefined)?.metadata?.dataUri ??
       this.getAritficialAnnotationDataUri(file);
-    const response = await annotationsApi.annotationsControllerCreate({
-      image: this.image.id,
-      dataUri: dataUri ?? this.getAritficialAnnotationDataUri(file),
-      base64File: await getBase64DataFromFile(file),
+
+    const newAnnotation = await annotationsApi.createAnnotation({
+      createAnnotationDto: {
+        image: this.image.id,
+        dataUri: dataUri ?? this.getAritficialAnnotationDataUri(file),
+        base64File: await getBase64DataFromFile(file),
+      },
     });
-    const newAnnotation = response.data;
+
     this.annotations.set(newAnnotation.id, newAnnotation);
     return newAnnotation.id;
   }
@@ -79,15 +82,14 @@ export class MiaReviewTask implements ReviewTask {
 
     const file = files.length === 1 ? files[0] : await this.zipFiles(files);
 
-    const response = await annotationsApi.annotationsControllerUpdate(
-      annotationMetadata.id,
-      {
+    const updatedAnnotation = await annotationsApi.updateAnnotation({
+      id: annotationMetadata.id,
+      updateAnnotationDto: {
         dataUri: annotationMetadata.dataUri,
         base64File: await getBase64DataFromFile(file),
       },
-    );
-    const newAnnotation = response.data;
-    this.annotations.set(newAnnotation.id, newAnnotation);
+    });
+    this.annotations.set(updatedAnnotation.id, updatedAnnotation);
   }
 
   public async save() {

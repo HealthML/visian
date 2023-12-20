@@ -6,7 +6,7 @@ import {
   JobsApi,
   ModelVersionsApi,
   ProjectsApi,
-} from "@visian/mia-api";
+} from "mia-typescript-sdk";
 
 const formatUrl = (url: string | null | undefined) => {
   if (!url || url === "") {

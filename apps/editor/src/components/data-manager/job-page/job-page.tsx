@@ -1,4 +1,3 @@
-import { UpdateJobDtoStatusEnum } from "@visian/mia-api";
 import {
   InvisibleButton,
   ListItem,
@@ -9,6 +8,7 @@ import {
   useTranslation,
 } from "@visian/ui-shared";
 import { MiaImage, MiaJob } from "@visian/utils";
+import { UpdateJobDtoStatusEnum } from "mia-typescript-sdk";
 import { useCallback, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";

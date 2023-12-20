@@ -197,10 +197,12 @@ export const ImageImportPopup = observer<ImageImportPopUpProps>(
         async (selectedFile) => {
           try {
             const datasetName = sanitizeForFS(dataset.name);
-            await imagesApi.imagesControllerCreate({
-              dataset: dataset.id,
-              dataUri: `${datasetName}/${selectedFile.file.name}`,
-              base64File: await getBase64DataFromFile(selectedFile.file),
+            await imagesApi.createImage({
+              createImageDto: {
+                dataset: dataset.id,
+                dataUri: `${datasetName}/${selectedFile.file.name}`,
+                base64File: await getBase64DataFromFile(selectedFile.file),
+              },
             });
             setUploadedFiles((prevUploadedFiles) => prevUploadedFiles + 1);
           } catch (error) {

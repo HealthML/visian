@@ -11,10 +11,7 @@ const imagesByJobQueryBaseKey = "imagesByJob";
 export const useImagesByDataset = (datasetId?: string) =>
   useQuery<MiaImage[], AxiosError<MiaImage[]>>(
     [imagesByDatasetQueryBaseKey, datasetId],
-    async () => {
-      const response = imagesApi.imagesControllerFindAll(datasetId);
-      return (await response).data;
-    },
+    async () => imagesApi.findAllImages({ dataset: datasetId }),
     {
       retry: 2,
       refetchInterval: 1000 * 10,
@@ -25,13 +22,7 @@ export const useImagesByDataset = (datasetId?: string) =>
 export const useImagesByJob = (jobId?: string) =>
   useQuery<MiaImage[], AxiosError<MiaImage[]>>(
     [imagesByJobQueryBaseKey, jobId],
-    async () => {
-      const response = await imagesApi.imagesControllerFindAll(
-        undefined,
-        jobId,
-      );
-      return response.data;
-    },
+    async () => imagesApi.findAllImages({ dataset: undefined, job: jobId }),
     {
       retry: 2,
       refetchInterval: 1000 * 10,
@@ -43,9 +34,9 @@ export const deleteImagesMutation = () =>
   DeleteMutation<MiaImage>({
     queryKey: (selectorId: string) => [imagesByDatasetQueryBaseKey, selectorId],
     mutateFn: async ({ objectIds }) => {
-      const response = await imagesApi.imagesControllerRemoveAll({
-        ids: objectIds,
+      const deletedImages = await imagesApi.deleteImages({
+        deleteAllDto: { ids: objectIds },
       });
-      return response.data.map((image) => image.id);
+      return deletedImages.map((image) => image.id);
     },
   });

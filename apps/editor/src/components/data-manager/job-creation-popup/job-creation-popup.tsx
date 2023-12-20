@@ -189,15 +189,17 @@ export const JobCreationPopup = observer<JobCreationPopUpProps>(
         }
 
         try {
-          const response = await jobsApi.jobsControllerCreate({
-            images: imageSelection,
-            modelName: selectedModel.name,
-            modelVersion: selectedModel.version,
-            project: projectId,
+          const job = await jobsApi.createJob({
+            createJobDto: {
+              images: imageSelection,
+              modelName: selectedModel.name,
+              modelVersion: selectedModel.version,
+              project: projectId,
+            },
           });
           refetchJobs?.();
           onClose?.();
-          return response.data;
+          return job;
         } catch (error) {
           store?.setError({
             titleTx: "internal-server-error",
