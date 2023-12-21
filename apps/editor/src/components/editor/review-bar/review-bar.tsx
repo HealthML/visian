@@ -6,6 +6,7 @@ import {
   InvisibleButton,
   List,
   ListItem,
+  ListNavigator,
   PopUp,
   Sheet,
   sheetNoise,
@@ -26,7 +27,7 @@ import { whoHome } from "../../../constants";
 import { MiaReviewTask } from "../../../models/review-strategy";
 
 const ReviewBarSheet = styled(Sheet)`
-  width: 800px;
+  width: 1000px;
   height: 70px;
   padding: 10px 28px;
   display: flex;
@@ -337,6 +338,17 @@ export const MiaReviewBar = observer(
       }
     };
 
+    const annotationGroupTitles =
+      store?.editor.activeDocument?.annotationGroups.map(
+        (group) => group.title,
+      );
+
+    const onGroupSwitch = (newIndex: number) => {
+      store?.editor.activeDocument?.setActiveLayer(
+        store.editor.activeDocument.annotationGroups[newIndex].layers[0],
+      );
+    };
+
     return store?.editor.activeDocument ? (
       <>
         <ReviewBarSheet>
@@ -368,24 +380,35 @@ export const MiaReviewBar = observer(
             <ActionButtonsContainer />
           </ActionContainer>
           <ReviewContainer>
+            <ListNavigator
+              list={annotationGroupTitles}
+              currentItem={
+                store.editor.activeDocument.activeLayer?.annotationGroup?.title
+              }
+              hasChanges={
+                store.editor.activeDocument.activeLayer?.annotationGroup
+                  ?.hasChanges
+              }
+              onClickHasChanges={openSavePopup}
+              onSwitch={onGroupSwitch}
+            />
             <ReviewToolsContainer>
-              {!(
-                !store?.editor.activeDocument?.activeLayer?.annotationGroup
-                  ?.metadata ||
-                !store?.editor.activeDocument?.activeLayer?.isAnnotation
-              ) && (
-                <ToggleSlider
-                  startValue={isVerified}
-                  tooltiptx={isVerified ? "verified" : "not-verified"}
-                  onToggle={() => toggleVerification()}
-                  activeColor={theme.colors["green"]}
-                  inactiveColor={theme.colors["sheet"]}
-                  activeBorderColor={theme.colors["sheetBorder"]}
-                  inactiveBorderColor={theme.colors["sheetBorder"]}
-                  icon="check"
-                  iconColor="textFull"
-                />
-              )}
+              <ToggleSlider
+                startValue={isVerified}
+                tooltiptx={isVerified ? "verified" : "not-verified"}
+                onToggle={() => toggleVerification()}
+                activeColor={theme.colors["green"]}
+                inactiveColor={theme.colors["sheet"]}
+                activeBorderColor={theme.colors["sheetBorder"]}
+                inactiveBorderColor={theme.colors["sheetBorder"]}
+                icon="check"
+                iconColor="textFull"
+                isDisabled={
+                  !store?.editor.activeDocument?.activeLayer?.annotationGroup
+                    ?.metadata ||
+                  !store?.editor.activeDocument?.activeLayer?.isAnnotation
+                }
+              />
               <ActionButtons
                 icon="save"
                 tooltipTx="save"

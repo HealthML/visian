@@ -420,6 +420,7 @@
 
   "verified": "verified",
   "not-verified": "not verified",
+  "disabled": "disabled",
 
   "progress-total": "Total Images",
   "progress-verified": "Verified",

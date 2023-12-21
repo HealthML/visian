@@ -1,8 +1,8 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import styled from "styled-components";
 
 import { useTranslation } from "../../i18n";
-import { color as getColor } from "../../theme";
+import { color as getColor, theme } from "../../theme";
 import { Icon } from "../icon";
 import { ToggleSliderProps } from "./slide-toggle.props";
 import { setFullOpacity } from "./utils";
@@ -89,6 +89,7 @@ export const ToggleSlider: React.FC<ToggleSliderProps> = ({
   handleBorderWidth,
   transitionTime,
   padding,
+  isDisabled = false,
 }) => {
   const [isOn, setIsOn] = useState(startValue || false);
   const [color, setColor] = useState(isOn ? primaryColor : secondaryColor);
@@ -98,14 +99,17 @@ export const ToggleSlider: React.FC<ToggleSliderProps> = ({
       : secondaryBorderColor || secondaryColor,
   );
   const switchColor = useCallback(() => {
-    if (color === secondaryColor) {
-      setColor(primaryColor);
-      setBorderColor(primaryBorderColor || primaryColor);
-    } else {
-      setColor(secondaryColor);
-      setBorderColor(secondaryBorderColor || secondaryColor);
+    if (!isDisabled) {
+      if (color === secondaryColor) {
+        setColor(primaryColor);
+        setBorderColor(primaryBorderColor || primaryColor);
+      } else {
+        setColor(secondaryColor);
+        setBorderColor(secondaryBorderColor || secondaryColor);
+      }
     }
   }, [
+    isDisabled,
     color,
     secondaryColor,
     primaryColor,
@@ -114,17 +118,43 @@ export const ToggleSlider: React.FC<ToggleSliderProps> = ({
   ]);
 
   const handleToggle = useCallback(() => {
-    switchColor();
-    setIsOn((prevIsOn) => !prevIsOn);
-    onToggle?.();
-  }, [onToggle, switchColor]);
+    if (!isDisabled) {
+      switchColor();
+      setIsOn((prevIsOn) => !prevIsOn);
+      onToggle?.();
+    }
+  }, [isDisabled, onToggle, switchColor]);
+
+  useEffect(() => {
+    if (isDisabled) {
+      setIsOn(false);
+      setColor(theme.colors["redSheet"]);
+      setBorderColor(theme.colors["sheetBorder"]);
+    } else {
+      setIsOn(startValue || false);
+      setColor(isOn ? primaryColor : secondaryColor);
+      setBorderColor(
+        isOn
+          ? primaryBorderColor || primaryColor
+          : secondaryBorderColor || secondaryColor,
+      );
+    }
+  }, [
+    isDisabled,
+    isOn,
+    primaryBorderColor,
+    primaryColor,
+    secondaryBorderColor,
+    secondaryColor,
+    startValue,
+  ]);
 
   const { t } = useTranslation();
 
   return (
     <SliderContainer
       onClick={handleToggle}
-      title={t(tooltiptx) || tooltip}
+      title={isDisabled ? "disabled" : t(tooltiptx) || tooltip}
       sliderHandleDiameter={sliderHandleDiameter}
       sliderTrackWidth={sliderTrackWidth}
       additionalPadding={padding}

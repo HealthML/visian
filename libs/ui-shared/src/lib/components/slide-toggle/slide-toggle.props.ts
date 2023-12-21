@@ -18,4 +18,5 @@ export interface ToggleSliderProps {
   handleBorderWidth?: number;
   transitionTime?: number;
   padding?: number;
+  isDisabled?: boolean;
 }
