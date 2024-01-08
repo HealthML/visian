@@ -6,7 +6,7 @@ import {
   JobsApi,
   ModelVersionsApi,
   ProjectsApi,
-} from "mia-typescript-sdk";
+} from "@mia-hpi/mia-typescript-sdk";
 
 const formatUrl = (url: string | null | undefined) => {
   if (!url || url === "") {

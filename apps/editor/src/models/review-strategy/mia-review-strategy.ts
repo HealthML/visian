@@ -1,12 +1,36 @@
-import { MiaImage } from "@visian/utils";
+import { MiaAnnotationMetadata, MiaImage } from "@visian/utils";
 
 import { annotationsApi, imagesApi } from "../../queries";
 import { RootStore } from "../root";
 import { MiaReviewTask } from "./mia-review-task";
 import { ReviewStrategy } from "./review-strategy";
+import {
+  MiaReviewStrategySnapshot,
+  ReviewStrategySnapshot,
+} from "./review-strategy-snapshot";
 import { TaskType } from "./review-task";
 
 export class MiaReviewStrategy extends ReviewStrategy {
+  public static fromSnapshot(
+    store: RootStore,
+    snapshot?: ReviewStrategySnapshot,
+  ) {
+    if (!snapshot) return undefined;
+    if (snapshot.backend === "mia") {
+      return new MiaReviewStrategy({
+        store,
+        images: snapshot.images ?? [],
+        jobId: snapshot.jobId,
+        allowedAnnotations: snapshot.allowedAnnotations,
+        taskType: snapshot.taskType,
+        currentReviewTask: snapshot.currentReviewTask
+          ? MiaReviewTask.fromSnapshot(snapshot.currentReviewTask)
+          : undefined,
+      });
+    }
+    return undefined;
+  }
+
   public static async fromDataset(
     store: RootStore,
     datasetId: string,
@@ -75,14 +99,17 @@ export class MiaReviewStrategy extends ReviewStrategy {
     jobId,
     allowedAnnotations,
     taskType,
+    currentReviewTask,
   }: {
     store: RootStore;
     images: MiaImage[];
     jobId?: string;
     allowedAnnotations?: string[];
     taskType?: TaskType;
+    currentReviewTask?: MiaReviewTask;
   }) {
-    super(store);
+    super({ store });
+    if (currentReviewTask) this.setCurrentTask(currentReviewTask);
     this.images = images;
     this.currentImageIndex = 0;
     this.jobId = jobId;
@@ -115,6 +142,20 @@ export class MiaReviewStrategy extends ReviewStrategy {
     );
   }
 
+  public get supportsPreviousTask() {
+    return true;
+  }
+
+  public async previousTask() {
+    await this.saveTask();
+    this.currentImageIndex -= 1;
+    if (this.currentImageIndex < 0) {
+      await this.store?.redirectToReturnUrl({});
+    } else {
+      await this.loadTask();
+    }
+  }
+
   public async nextTask() {
     await this.saveTask();
     this.currentImageIndex += 1;
@@ -128,23 +169,39 @@ export class MiaReviewStrategy extends ReviewStrategy {
   public async saveTask() {
     await this.currentTask?.save();
     await Promise.all(
-      this.store.editor.activeDocument?.layerFamilies?.map(
-        async (layerFamily) => {
-          const id = layerFamily.metaData?.id;
+      this.store.editor.activeDocument?.annotationGroups?.map(async (group) => {
+        const id = group.metadata?.id;
 
-          if (!id || !this.currentTask?.annotationIds.includes(id)) {
-            return Promise.resolve();
-          }
+        if (!id || !this.currentTask?.annotationIds.includes(id)) {
+          return Promise.resolve();
+        }
 
-          const annotation = await annotationsApi.updateAnnotation({
-            id,
-            updateAnnotationDto: {
-              verified: layerFamily.metaData?.verified,
-            },
-          });
-          return annotation;
-        },
-      ) ?? [],
+        const annotation = await annotationsApi.updateAnnotation({
+          id,
+          updateAnnotationDto: {
+            verified: (group.metadata as MiaAnnotationMetadata)?.verified,
+          },
+        });
+        return annotation;
+      }) ?? [],
     );
+  }
+
+  public async importAnnotations(): Promise<void> {
+    await this.importAnnotationsWithMetadata(true);
+  }
+  public toJSON() {
+    return {
+      backend: "mia",
+      images: this.images.map((image) => ({ ...image })),
+      jobId: this.jobId,
+      allowedAnnotations: this.allowedAnnotations
+        ? [...this.allowedAnnotations]
+        : undefined,
+      taskType: this.taskType,
+      currentReviewTask: this.currentTask
+        ? (this.currentTask as MiaReviewTask).toJSON()
+        : undefined,
+    } as MiaReviewStrategySnapshot;
   }
 }

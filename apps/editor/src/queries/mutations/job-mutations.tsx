@@ -1,6 +1,6 @@
+import { UpdateJobDtoStatusEnum } from "@mia-hpi/mia-typescript-sdk";
 import { MiaJob, MiaProgress } from "@visian/utils";
 import { AxiosError } from "axios";
-import { UpdateJobDtoStatusEnum } from "mia-typescript-sdk";
 import { useQuery } from "react-query";
 
 import { jobsApi } from "../mia-api-client";
@@ -52,7 +52,7 @@ export const deleteJobsMutation = () =>
 
 export const updateJobMutation = () =>
   UpdateMutation<MiaJob, { status: UpdateJobDtoStatusEnum }>({
-    queryKey: (selectorId: string) => [jobQueryKey],
+    queryKey: (selectorId: string) => [jobQueryKey, selectorId],
     mutateFn: async ({ object, updateDto }) =>
       jobsApi.updateJob({
         id: object.id,

@@ -46,7 +46,7 @@ export class RegionGrowingRenderer3D extends BlipRenderer3D {
   }
 
   public setSeed(voxel: Voxel) {
-    this.clearRenderTargets();
+    this.clearRenderTarget();
 
     this.previewColor = this.document.getAnnotationPreviewColor();
 

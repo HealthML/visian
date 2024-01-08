@@ -125,7 +125,7 @@
   "exporting": "Exportieren",
   "layers-to-export": "Annotationsebenen, die exportiert werden sollen",
   "export-all-layers": "Alle Ebenen exportieren",
-  "export-layer-group": "Gruppe exportieren",
+  "export-annotation-group": "Gruppe exportieren",
   "export-as": "Exportieren als",
   "no-file-to-export": "Es konnte keine Datei gefunden werden, die exportiert werden soll.",
 
@@ -133,7 +133,12 @@
   "skip-task-annotation-tooltip": "Überspringen",
   "verify-annotation-tooltip": "Verifizieren",
   "unverify-annotation-tooltip": "Verifizierung aufheben",
-  "next-task-tooltip": "Nächste Aufgebe",
+  "next-task-tooltip": "Nächste Aufgabe",
+  "previous-task-tooltip": "Vorherige Aufgabe",
+  "unsaved-changes-title": "Ungespeicherte Änderungen!",
+  "unsaved-groups-text": "Die folgenden Gruppen haben ungespeicherte Änderungen:",
+  "unsaved-changes-confirmation": "Änderungen verwerfen",
+  "unsaved-changes-cancel": "Abbrechen",
 
   "browser-error": "Browserfehler",
   "no-webgl-2-error": "Dieser Browser unterstützt WebGL 2 nicht. Um VISIAN auszuführen ist WebGL 2 notwendig. Bitte updaten Sie Ihren Browser oder nutzen Sie einen anderen Browser.",
@@ -210,6 +215,7 @@
   "volume-um": "μm³",
   "volume-m": "m³",
   "copy": "Kopieren",
+  "copied": "Kopiert!",
 
   "info-unit": "Die Einheit ist in den Daten nicht immer spezifiziert. Bei medizinischen Daten wie MRT- und CT-Bildern handelt es sich meist um mm. Bei generischen Bilddaten wie PNG oder JPG Bildern handelt es sich lediglich um Pixel.",
   "info-brush": "Der Pinsel ist das einfachste Malwerkzeug von VISIAN. Die Pinselgröße kann angepasst werden und mit Links- bzw. Rechtsklick kann gemalt und radiert werden.",
@@ -350,7 +356,8 @@
   "job-creation-model-selection": "Modell und Version auswählen",
   "job-creation-image-selection": "Bilder zum Annotieren auswählen",
   "job-creation-error": "Beim Erstellen des Jobs ist ein Fehler aufgetreten.",
-  "job-title": "Job vom {{date}}",
+  "job-creation-images-selected": "{{count}} Bild ausgewählt",
+  "job-creation-images-selected_plural": "{{count}} Bilder ausgewählt",
   "start-job": "Job starten",
 
   "import-images": "Bilder importieren",
@@ -413,6 +420,8 @@
   "dataset-name": "Datensatzname",
 
   "verified": "verifiziert",
+  "not-verified": "Nicht verifiziert",
+  "disabled": "deaktiviert",
 
   "progress-total": "Alle Bilder",
   "progress-verified": "Verifiziert",

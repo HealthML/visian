@@ -7,7 +7,7 @@ import {
   ModelVersion,
   Progress,
   Project,
-} from "mia-typescript-sdk";
+} from "@mia-hpi/mia-typescript-sdk";
 
 export type MiaAnnotation = Annotation;
 export type MiaImage = Image;

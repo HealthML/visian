@@ -1,4 +1,11 @@
-import type { Image, Vector, ViewType, Voxel } from "@visian/utils";
+import type {
+  BackendMetadata,
+  Image,
+  TypedArray,
+  Vector,
+  ViewType,
+  Voxel,
+} from "@visian/utils";
 import type { Matrix4 } from "three";
 
 import { MarkerConfig } from "./markers";
@@ -23,6 +30,29 @@ export type BlendMode =
   | "SCREEN"
   | "SUBTRACT";
 
+export interface LayerSnapshot {
+  kind: string;
+  isAnnotation: boolean;
+
+  id: string;
+  titleOverride?: string;
+
+  blendMode: BlendMode;
+  color?: string;
+  isVisible: boolean;
+  opacityOverride?: number;
+
+  transformation: number[];
+  metadata?: BackendMetadata;
+}
+
+export interface AnnotationGroupSnapshot {
+  id: string;
+  title: string;
+  metadata?: BackendMetadata;
+  layerIds: string[];
+}
+
 /** A generic layer. */
 export interface ILayer {
   /** The type of layer. */
@@ -35,6 +65,9 @@ export interface ILayer {
    */
   is3DLayer: boolean;
 
+  /** Returns `true` if the layer has changes. */
+  hasChanges: boolean;
+
   /** The layer's UUID. */
   id: string;
   /**
@@ -43,20 +76,13 @@ export interface ILayer {
    * used, e.g., the ImageLayer's image name.
    */
   title?: string;
-  /**
-   * The parent layer of this layer.
-   * Typically, this is the group the layer is contained in.
-   * If none is set, the layer is assumed to be directly contained in the
-   * document.
-   */
-  parent?: ILayer;
 
   /**
-   * The family of this layer.
+   * The annotation group of this layer.
    * This groups layers that are related to each other, e.g., a segmentation file.
-   * In conrast to the parent, the family itself is not a layer.
+   * The group itself is not a layer.
    */
-  family?: ILayerFamily;
+  annotationGroup?: IAnnotationGroup;
 
   /**
    * The blend mode used to combine this layer on top of the ones below.
@@ -78,7 +104,11 @@ export interface ILayer {
   /** The layer's transform matrix used to position it during rendering. */
   transformation?: Matrix4;
   /** The layer's metadata ID. */
-  metadata?: { id: string; [key: string]: any };
+  metadata?: BackendMetadata;
+  /** Whether the layer is the document's active layer */
+  isActive: boolean;
+
+  excludeFromSnapshotTracking: string[];
 
   /**
    * Returns all slice markers, aggregated for the layer and given view type.
@@ -88,22 +118,28 @@ export interface ILayer {
   /** Sets the layer's title. */
   setTitle(value?: string): void;
 
-  setMetaData(value?: { id: string; [key: string]: any }): void;
+  setMetadata(value?: BackendMetadata): void;
 
-  /** Sets this layer's parent layer, typically the group it is contained in. */
-  setParent(idOrLayer?: string | ILayer): void;
+  /** Sets the layer's annotation group and moves it to the specified index within its local rendering order.
+   * A layer with an undefined annotation group is an orphan.
+   * If the layer is an orphan its local rendering order is the document renderingOrder.
+   */
+  setAnnotationGroup(id: string | undefined, idx?: number): void;
 
-  setFamily(id: string | undefined): void;
-
-  getFamilyLayers(): ILayer[];
+  getAnnotationGroupLayers(): ILayer[];
 
   setIsAnnotation(value?: boolean): void;
 
   setBlendMode(blendMode?: BlendMode): void;
   setColor(value?: string): void;
+  tryToggleIsVisible(): void;
   setIsVisible(value?: boolean): void;
   setOpacity(value?: number): void;
   resetSettings(): void;
+
+  setTransformation(value?: Matrix4): void;
+  fixPotentiallyBadColor(): void;
+  applySnapshot(snapshot?: Partial<LayerSnapshot>): Promise<void>;
 
   /**
    * Deletes this layer from the document it is contained in and any potential
@@ -112,6 +148,8 @@ export interface ILayer {
   delete(): void;
 
   toFile(): Promise<File | undefined>;
+
+  toJSON(): LayerSnapshot;
 }
 
 /**
@@ -164,8 +202,8 @@ export interface IImageLayer extends ILayer {
 
   getVoxel(voxel: Voxel): Vector;
 
-  getSlice(viewType: ViewType, slice: number): Uint8Array;
-  setSlice(viewType: ViewType, slice: number, sliceData?: Uint8Array): void;
+  getSlice(viewType: ViewType, slice: number): TypedArray;
+  setSlice(viewType: ViewType, slice: number, sliceData?: TypedArray): void;
 
   computeVolume(): Promise<void>;
   computeArea(viewType: ViewType, slice: number): Promise<void>;
@@ -175,33 +213,30 @@ export interface IImageLayer extends ILayer {
   copy(): IImageLayer;
 }
 
-/** A group of layers. */
-export interface ILayerGroup extends ILayer {
-  kind: "group";
-
+export interface IAnnotationGroup {
+  id: string;
+  /** The group's display name. */
+  title: string;
+  /** The group's meta data. Usually the object from the DB */
+  metadata?: BackendMetadata;
   /** All layers in the group. */
   layers: ILayer[];
-
-  /** Adds a layer to the group. */
-  addLayer(idOrlayer: string | ILayer): void;
-
-  /** Removes a layer from the document (but keeps it in the document). */
-  removeLayer(idOrLayer: string | ILayer): void;
-}
-
-export interface ILayerFamily {
-  id: string;
-  /** The family's display name. */
-  title: string;
-  /** The family's meta data. Usually the object from the DB */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  metaData?: { id: string; [key: string]: any };
-  /** All layers in the family. */
-  layers: ILayer[];
-  /** Returns `true` if the family has changes. */
+  /** Whether the group is currently collapsed in the layer view* */
+  collapsed?: boolean;
+  /** Whether the group contains the document's active layer */
+  isActive: boolean;
+  /** Returns `true` if the annotation group has changes. */
   hasChanges: boolean;
-  /** Adds a layer to the family. */
-  addLayer(id: string): void;
-  /** Removes a layer from the family (but keeps it in the document). */
-  removeLayer(id: string): void;
+  /** Adds a layer with specified id to the group at the specified index, the layer is removed from its previous group.
+   * If no index and the layer is already in the group, the layer's position remains unchanged.
+   * If no index is specified and the layer is not part of the group, the layer is inserted at the beginning. */
+  addLayer(id: string, index?: number): void;
+  /** Removes a layer from the group making it an orphan.
+   * After being removed, the layer is added to the document at the specified index.
+   */
+  removeLayer(id: string, index?: number): void;
+  /** set verified if fam */
+  trySetIsVerified(value: boolean): void;
+
+  toJSON(): AnnotationGroupSnapshot;
 }

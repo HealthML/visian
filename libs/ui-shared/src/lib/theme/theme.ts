@@ -37,6 +37,7 @@ export const dataColorKeys = Object.keys(
 const colorModes = {
   light: {
     text: "rgba(0,0,0,0.8)",
+    textReverse: "rgba(1,1,1,0.8)",
     lightText: "rgba(0,0,0,0.4)",
     background: "#fff",
     foreground: "#000",
@@ -70,6 +71,7 @@ const colorModes = {
   },
   dark: {
     text: "rgba(255,255,255,0.8)",
+    textFull: "rgba(0,0,0,0.8)",
     lightText: "rgba(255,255,255,0.4)",
     background: "#0C0E1B",
     foreground: "#fff",
@@ -127,7 +129,7 @@ export const theme = {
     autoHideDelay: 800,
   },
   fonts: {
-    default: "DIN2014",
+    default: "DINPRO",
   },
   fontSizes: {
     tag: "8pt",

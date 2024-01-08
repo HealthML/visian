@@ -1,6 +1,9 @@
+import {
+  CreateProjectDto,
+  UpdateProjectDto,
+} from "@mia-hpi/mia-typescript-sdk";
 import { MiaProject } from "@visian/utils";
 import { AxiosError } from "axios";
-import { CreateProjectDto, UpdateProjectDto } from "mia-typescript-sdk";
 import { useQuery } from "react-query";
 
 import { projectsApi } from "../mia-api-client";

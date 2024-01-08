@@ -1,4 +1,9 @@
-import { FileWithMetadata, MiaJob } from "@visian/utils";
+import {
+  FileWithMetadata,
+  MiaAnnotationMetadata,
+  MiaImageMetadata,
+  MiaJob,
+} from "@visian/utils";
 import path from "path";
 
 import { annotationsApi, imagesApi, jobsApi } from "../mia-api-client";
@@ -15,7 +20,7 @@ export const getImageFile = async (
     type: fileBlob.type,
     lastModified: Date.now(),
   }) as FileWithMetadata;
-  imageFile.metadata = imageMetadata;
+  imageFile.metadata = imageMetadata as MiaImageMetadata;
 
   return imageFile;
 };
@@ -36,7 +41,7 @@ export const getAnnotationFile = async (
     type: fileBlob.type,
     lastModified: Date.now(),
   }) as FileWithMetadata;
-  annotationFile.metadata = annotationMetadata;
+  annotationFile.metadata = annotationMetadata as MiaAnnotationMetadata;
 
   return annotationFile;
 };

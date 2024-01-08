@@ -234,6 +234,7 @@ export const UIOverlay = observer<UIOverlayProps>(
                     tooltipTx="return-who"
                     tooltipPosition="right"
                     isActive={false}
+                    aria-label="Return to WHO"
                   />
                 </a>
               ) : (

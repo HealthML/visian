@@ -68,7 +68,10 @@ export const OptionSelector: React.FC<OptionSelectorProps> = ({
   return (
     <>
       <OptionsButton
-        onPointerDown={openPannel}
+        onClick={(e) => {
+          e.stopPropagation();
+          openPannel();
+        }}
         icon={buttonIcon}
         ref={setButtonRef}
       />
@@ -87,7 +90,8 @@ export const OptionSelector: React.FC<OptionSelectorProps> = ({
             ) => (
               <OptionItem
                 isLast={index === options.length - 1}
-                onClick={() => {
+                onClick={(e) => {
+                  e.stopPropagation();
                   onSelected?.(value);
                   closePannel();
                 }}

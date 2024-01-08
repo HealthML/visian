@@ -1,5 +1,5 @@
 import type { StatefulPopUpProps } from "@visian/ui-shared";
-import { MiaJob } from "@visian/utils";
+import type { MiaImage, MiaJob } from "@visian/utils";
 import { AxiosError } from "axios";
 import {
   QueryObserverResult,
@@ -9,7 +9,7 @@ import {
 
 export interface JobCreationPopUpProps extends StatefulPopUpProps {
   projectId: string;
-  activeImageSelection?: Set<string>;
+  activeImageSelection?: Set<MiaImage>;
   openWithDatasetId?: string;
   refetchJobs?: <TPageData>(
     options?: (RefetchOptions & RefetchQueryFilters<TPageData>) | undefined,

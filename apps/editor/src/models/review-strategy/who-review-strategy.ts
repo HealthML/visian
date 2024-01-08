@@ -1,4 +1,4 @@
-import { IImageLayer, ILayerFamily } from "@visian/ui-shared";
+import { IAnnotationGroup, IImageLayer } from "@visian/ui-shared";
 import {
   FileWithMetadata,
   getWHOTask,
@@ -8,11 +8,40 @@ import {
 
 import { whoHome } from "../../constants";
 import { ImageLayer } from "../editor";
+import { RootStore } from "../root";
 import { ReviewStrategy } from "./review-strategy";
+import { ReviewStrategySnapshot } from "./review-strategy-snapshot";
 import { TaskType } from "./review-task";
 import { WHOReviewTask } from "./who-review-task";
 
 export class WHOReviewStrategy extends ReviewStrategy {
+  public static fromSnapshot(
+    store: RootStore,
+    snapshot?: ReviewStrategySnapshot,
+  ) {
+    if (!snapshot) return undefined;
+    if (snapshot.backend === "who") {
+      return new WHOReviewStrategy({
+        store,
+        currentReviewTask: snapshot.currentReviewTask
+          ? WHOReviewTask.fromSnapshot(snapshot.currentReviewTask)
+          : undefined,
+      });
+    }
+    return undefined;
+  }
+
+  constructor({
+    store,
+    currentReviewTask,
+  }: {
+    store: RootStore;
+    currentReviewTask?: WHOReviewTask;
+  }) {
+    super({ store });
+    if (currentReviewTask) this.setCurrentTask(currentReviewTask);
+  }
+
   public async nextTask(): Promise<void> {
     this.store.setProgress({ labelTx: "saving", showSplash: true });
     try {
@@ -45,14 +74,18 @@ export class WHOReviewStrategy extends ReviewStrategy {
     this.store.setProgress();
   }
 
+  public async previousTask() {
+    throw new Error("Previous task is not implemented in the WHO strategy!");
+  }
+
   public async saveTask(): Promise<void> {
-    const families = this.store.editor.activeDocument?.layerFamilies;
+    const families = this.store.editor.activeDocument?.annotationGroups;
     if (!families) return;
 
     await Promise.all(
-      families.map(async (family: ILayerFamily) => {
-        const annotationId = family.metaData?.id;
-        const annotationFiles = await this.getFilesForFamily(family);
+      families.map(async (group: IAnnotationGroup) => {
+        const annotationId = group.metadata?.id;
+        const annotationFiles = await this.getFilesForAnnotationGroup(group);
         if (annotationFiles.length === 0) return;
         if (annotationId) {
           await this.currentTask?.updateAnnotation(
@@ -67,10 +100,10 @@ export class WHOReviewStrategy extends ReviewStrategy {
 
     const orphanLayers =
       this.store.editor.activeDocument?.annotationLayers.filter(
-        (annotationLayer) => annotationLayer.family === undefined,
+        (annotationLayer) => annotationLayer.annotationGroup === undefined,
       );
     if (!orphanLayers) return;
-    const files = await this.getFilesForLayers(orphanLayers);
+    const files = await this.getAnnotationFilesForLayers(orphanLayers);
     await this.currentTask?.createAnnotation(files);
   }
 
@@ -85,15 +118,19 @@ export class WHOReviewStrategy extends ReviewStrategy {
   }
 
   // Saving
-  private async getFilesForFamily(family: ILayerFamily): Promise<File[]> {
-    const annotationLayers = family.layers.filter(
+  private async getFilesForAnnotationGroup(
+    group: IAnnotationGroup,
+  ): Promise<File[]> {
+    const annotationLayers = group.layers.filter(
       (layer) => layer.kind === "image" && layer.isAnnotation,
     ) as ImageLayer[];
 
-    return this.getFilesForLayers(annotationLayers);
+    return this.getAnnotationFilesForLayers(annotationLayers);
   }
 
-  private async getFilesForLayers(layers: IImageLayer[]): Promise<File[]> {
+  private async getAnnotationFilesForLayers(
+    layers: IImageLayer[],
+  ): Promise<File[]> {
     return Promise.all(
       layers.map(async (layer: IImageLayer) => {
         const layerFile =
@@ -118,6 +155,15 @@ export class WHOReviewStrategy extends ReviewStrategy {
       this.store.editor.activeDocument?.finishBatchImport();
       return;
     }
-    await super.importAnnotations();
+    await this.importAnnotationsWithMetadata(false);
+  }
+
+  public toJSON(): ReviewStrategySnapshot {
+    return {
+      backend: "who",
+      currentReviewTask: this.currentTask
+        ? (this.currentTask as WHOReviewTask).toJSON()
+        : undefined,
+    };
   }
 }

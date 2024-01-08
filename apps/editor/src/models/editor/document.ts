@@ -1,14 +1,16 @@
 import {
+  AnnotationGroupSnapshot,
   dataColorKeys,
   ErrorNotification,
   i18n,
+  IAnnotationGroup,
   IDocument,
   IEditor,
   IImageLayer,
   ILayer,
-  ILayerFamily,
   ISliceRenderer,
   IVolumeRenderer,
+  LayerSnapshot,
   MeasurementType,
   PerformanceMode,
   Theme,
@@ -16,13 +18,14 @@ import {
   ValueType,
 } from "@visian/ui-shared";
 import {
-  FileMetadata,
-  FileWithFamily,
+  BackendMetadata,
+  FileWithAnnotationGroup,
   FileWithMetadata,
   handlePromiseSettledResult,
   IDisposable,
   ImageMismatchError,
   ISerializable,
+  isMiaMetadata,
   ITKImageWithUnit,
   ITKMatrix,
   readMedicalImage,
@@ -46,10 +49,10 @@ import {
 } from "../../constants";
 import { readTrackingLog, TrackingData } from "../tracking";
 import { StoreContext } from "../types";
+import { AnnotationGroup } from "./annotation-groups";
 import { Clipboard } from "./clipboard";
 import { History, HistorySnapshot } from "./history";
-import { LayerFamily } from "./layer-families";
-import { ImageLayer, Layer, LayerSnapshot } from "./layers";
+import { ImageLayer } from "./layers";
 import * as layers from "./layers";
 import { Markers } from "./markers";
 import { ToolName, Tools, ToolsSnapshot } from "./tools";
@@ -79,6 +82,7 @@ export interface DocumentSnapshot {
   activeLayerId?: string;
   layerMap: LayerSnapshot[];
   layerIds: string[];
+  annotationGroups: AnnotationGroupSnapshot[];
 
   history: HistorySnapshot;
 
@@ -101,9 +105,9 @@ export class Document
 
   protected activeLayerId?: string;
   protected measurementDisplayLayerId?: string;
-  protected layerMap: { [key: string]: Layer };
+  protected layerMap: { [key: string]: ILayer };
+  protected annotationGroupMap: { [key: string]: AnnotationGroup };
   protected layerIds: string[];
-  public layerFamilies: ILayerFamily[] = [];
 
   public measurementType: MeasurementType = "volume";
 
@@ -133,10 +137,10 @@ export class Document
     this.titleOverride = snapshot?.titleOverride;
     this.activeLayerId = snapshot?.activeLayerId;
     this.layerMap = {};
+    this.annotationGroupMap = {};
     snapshot?.layerMap.forEach((layer) => {
       const LayerKind = layerMap[layer.kind];
       if (!LayerKind) return;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       this.layerMap[layer.id] = new LayerKind(layer as any, this);
     });
     this.layerIds = snapshot?.layerIds || [];
@@ -145,6 +149,9 @@ export class Document
       layer.fixPotentiallyBadColor(),
     );
 
+    snapshot?.annotationGroups.forEach((group) => {
+      this.annotationGroupMap[group.id] = new AnnotationGroup(group, this);
+    });
     this.history = new History(snapshot?.history, this);
     this.viewSettings = new ViewSettings(snapshot?.viewSettings, this);
     this.viewport2D = new Viewport2D(snapshot?.viewport2D, this);
@@ -160,6 +167,7 @@ export class Document
       | "activeLayerId"
       | "measurementDisplayLayerId"
       | "layerMap"
+      | "annotationGroupMap"
       | "layerIds"
     >(this, {
       id: observable,
@@ -167,6 +175,7 @@ export class Document
       activeLayerId: observable,
       measurementDisplayLayerId: observable,
       layerMap: observable,
+      annotationGroupMap: observable,
       layerIds: observable,
       measurementType: observable,
       history: observable,
@@ -179,6 +188,10 @@ export class Document
       useExclusiveSegmentations: observable,
 
       title: computed,
+      layers: computed,
+      renderingOrder: computed,
+      flatRenderingOrder: computed,
+      annotationGroups: computed,
       activeLayer: computed,
       measurementDisplayLayer: computed,
       imageLayers: computed,
@@ -193,7 +206,6 @@ export class Document
       setMeasurementType: action,
       addLayer: action,
       addNewAnnotationLayer: action,
-      moveLayer: action,
       deleteLayer: action,
       toggleTypeAndRepositionLayer: action,
       importImage: action,
@@ -203,7 +215,7 @@ export class Document
       toggleLayerMenu: action,
       setUseExclusiveSegmentations: action,
       applySnapshot: action,
-      getLayerFamily: action,
+      getAnnotationGroup: action,
     });
 
     // This is split up to avoid errors from a tool that is being activated
@@ -216,17 +228,23 @@ export class Document
     this.clipboard.dispose();
     this.tools.dispose();
     Object.values(this.layerMap).forEach((layer) => layer.delete());
+    // TODO dispose of layerFamilies
   }
 
   public get title(): string | undefined {
     if (this.titleOverride) return this.titleOverride;
-    if (this.activeLayer?.family?.metaData?.dataUri) {
-      return this.activeLayer.family.metaData.dataUri;
+    const groupMeta = this.activeLayer?.annotationGroup?.metadata;
+    if (isMiaMetadata(groupMeta)) {
+      return groupMeta.dataUri;
     }
-    const { length } = this.layerIds;
+    const { length } = this.layers;
     if (!length) return undefined;
     const lastLayer = this.getLayer(this.layerIds[length - 1]);
-    return lastLayer?.metadata?.dataUri?.split("/").pop() ?? lastLayer?.title;
+    const layerMeta = lastLayer?.metadata;
+    if (isMiaMetadata(layerMeta)) {
+      return layerMeta?.dataUri?.split("/").pop();
+    }
+    return lastLayer?.title;
   }
 
   public setTitle = (value?: string): void => {
@@ -243,17 +261,53 @@ export class Document
   }
 
   public get layers(): ILayer[] {
-    return this.layerIds.map((id) => this.layerMap[id]);
+    return this.layerIds.flatMap((id) => {
+      if (this.annotationGroupMap[id]) {
+        return this.annotationGroupMap[id].layers;
+      }
+      return this.layerMap[id];
+    });
+  }
+
+  // considers all layers that are not in a annotation group
+  public get documentLayers(): ILayer[] {
+    return this.layers.filter((layer) => layer.annotationGroup === undefined);
+  }
+
+  public get renderingOrder(): (ILayer | IAnnotationGroup)[] {
+    return this.layerIds.map((id) => {
+      if (this.annotationGroupMap[id]) {
+        return this.annotationGroupMap[id];
+      }
+      return this.layerMap[id];
+    });
+  }
+
+  public get flatRenderingOrder(): (ILayer | IAnnotationGroup)[] {
+    return this.layerIds.flatMap((id) => {
+      const group = this.annotationGroupMap[id];
+      if (group) {
+        const array: (ILayer | IAnnotationGroup)[] = [
+          group as IAnnotationGroup,
+        ];
+        return array.concat(group.layers);
+      }
+      return this.layerMap[id];
+    });
+  }
+
+  public get annotationGroups(): IAnnotationGroup[] {
+    return this.layerIds
+      .filter((id) => !!this.annotationGroupMap[id])
+      .map((id) => this.annotationGroupMap[id]);
   }
 
   public get activeLayer(): ILayer | undefined {
-    return Object.values(this.layerMap).find(
-      (layer) => layer.id === this.activeLayerId,
-    );
+    return this.layers.find((layer) => layer.id === this.activeLayerId);
   }
 
   public get measurementDisplayLayer(): IImageLayer | undefined {
-    return Object.values(this.layerMap).find(
+    return this.layers.find(
       (layer) =>
         layer.id === this.measurementDisplayLayerId && layer.kind === "image",
     ) as IImageLayer | undefined;
@@ -266,25 +320,21 @@ export class Document
   }
 
   public get mainImageLayer(): IImageLayer | undefined {
-    // TODO: Rework to work with group layers
-
     const areAllLayersAnnotations = Boolean(
-      !this.layerIds.find((layerId) => {
-        const layer = this.layerMap[layerId];
-        return layer.kind === "image" && !layer.isAnnotation;
-      }),
+      !this.layers.find(
+        (layer) => layer.kind === "image" && !layer.isAnnotation,
+      ),
     );
 
     const areAllImageLayersInvisible = Boolean(
-      !this.layerIds.find((layerId) => {
-        const layer = this.layerMap[layerId];
-        return layer.kind === "image" && !layer.isAnnotation && layer.isVisible;
-      }),
+      !this.layers.find(
+        (layer) =>
+          layer.kind === "image" && !layer.isAnnotation && layer.isVisible,
+      ),
     );
 
     let mainImageLayer: ImageLayer | undefined;
-    this.layerIds.slice().find((id) => {
-      const layer = this.layerMap[id];
+    this.layers.slice().find((layer) => {
       if (
         layer.kind === "image" &&
         // use non-annotation layer if possible
@@ -309,12 +359,15 @@ export class Document
     return id ? this.layerMap[id] : undefined;
   }
 
-  public getLayerFamily(id: string): ILayerFamily | undefined {
-    return this.layerFamilies.find((family) => family.id === id);
+  public getOrphanAnnotationLayers(): ILayer[] {
+    const orphanAnnotationLayers = this.layers.filter(
+      (l) => l.isAnnotation && !l.annotationGroup,
+    );
+    return orphanAnnotationLayers ?? [];
   }
 
-  public addLayerFamily(family: ILayerFamily): void {
-    this.layerFamilies.push(family);
+  public getAnnotationGroup(id: string): IAnnotationGroup | undefined {
+    return this.annotationGroupMap[id];
   }
 
   public setActiveLayer = (idOrLayer?: string | ILayer): void => {
@@ -336,24 +389,54 @@ export class Document
   public setMeasurementType = (measurementType: MeasurementType) => {
     this.measurementType = measurementType;
   };
-
-  public addLayer = (...newLayers: Layer[]): void => {
-    newLayers.forEach((layer) => {
+  /** Ensures consistency of layerIds. addLayer should be called whenever a layer is moved or changes annotation group
+  if the layer has a annotation group, it will be removed from layerIds
+  if an index is specified, the annotation group will be inserted at the index
+  if no index is specified, the annotation group remain where it was if already in the list
+  if not in the list, annotations will be inserted at the start and images at the end of the list */
+  public addLayer = (layer: ILayer, index?: number): void => {
+    if (!layer.id) return;
+    if (!this.layerMap[layer.id]) {
       this.layerMap[layer.id] = layer;
-      if (layer.isAnnotation) {
-        this.layerIds.unshift(layer.id);
-      } else {
-        // insert image layer after all annotation layers
-        let insertIndex = 0;
-        for (let i = this.layerIds.length - 1; i >= 0; i--) {
-          if (this.layerMap[this.layerIds[i]].isAnnotation) {
-            insertIndex = i + 1;
-            break;
-          }
-        }
-        this.layerIds.splice(insertIndex, 0, layer.id);
+    }
+    const oldIndex = this.layerIds.indexOf(layer.id);
+    if (layer.annotationGroup) {
+      if (this.layerIds.includes(layer.id)) {
+        this.layerIds = this.layerIds.filter((id) => id !== layer.id);
       }
-    });
+    } else if (index !== undefined) {
+      if (oldIndex < 0) {
+        this.layerIds.splice(index, 0, layer.id);
+      } else if (index !== oldIndex) {
+        this.layerIds.splice(index, 0, this.layerIds.splice(oldIndex, 1)[0]);
+      }
+    } else if (layer.isAnnotation && oldIndex < 0) {
+      this.layerIds = this.layerIds.filter((id) => id !== layer.id);
+      this.layerIds.unshift(layer.id);
+    } else if (oldIndex < 0) {
+      this.layerIds = this.layerIds.filter((id) => id !== layer.id);
+      this.layerIds.push(layer.id);
+    }
+  };
+
+  // if an index is specified, the annotation group will be inserted at the index
+  // if no index is specified, the annotation group remain where it was if already in the list or inserted at the start
+  public addAnnotationGroup = (group: AnnotationGroup, idx?: number): void => {
+    if (!group.id) return;
+
+    if (!this.annotationGroupMap[group.id]) {
+      this.annotationGroupMap[group.id] = group;
+    }
+    const oldIndex = this.layerIds.indexOf(group.id);
+    if (idx !== undefined) {
+      if (oldIndex < 0) {
+        this.layerIds.splice(idx, 0, group.id);
+      } else if (idx !== oldIndex) {
+        this.layerIds.splice(idx, 0, this.layerIds.splice(oldIndex, 1)[0]);
+      }
+    } else if (oldIndex < 0) {
+      this.layerIds.unshift(group.id);
+    }
   };
 
   public getFirstUnusedColor = (
@@ -397,23 +480,12 @@ export class Document
     this.viewSettings.setViewMode(this.viewSettings.viewMode);
   };
 
-  public moveLayer(idOrLayer: string | ILayer, newIndex: number) {
-    const layerId = typeof idOrLayer === "string" ? idOrLayer : idOrLayer.id;
-    const oldIndex = this.layerIds.indexOf(layerId);
-    if (!~oldIndex) return;
-
-    this.layerIds.splice(newIndex, 0, this.layerIds.splice(oldIndex, 1)[0]);
-  }
-
-  public addLayerId = (id: string): void => {
-    this.layerIds.push(id);
-  };
-
   public deleteLayer = (idOrLayer: string | ILayer): void => {
     const layerId = typeof idOrLayer === "string" ? idOrLayer : idOrLayer.id;
 
     this.layerIds = this.layerIds.filter((id) => id !== layerId);
-    // delete this.layerMap[layerId];
+    this.layerMap[layerId].delete();
+    delete this.layerMap[layerId];
     if (this.activeLayerId === layerId) {
       this.setActiveLayer(this.layerIds[0]);
     }
@@ -422,27 +494,29 @@ export class Document
   /** Toggles the type of the layer (annotation or not) and repositions it accordingly */
   public toggleTypeAndRepositionLayer = (idOrLayer: string | ILayer): void => {
     const layerId = typeof idOrLayer === "string" ? idOrLayer : idOrLayer.id;
-    let lastAnnotationIndex = this.layerIds.length - 1;
-    for (let i = 0; i < this.layerIds.length; i++) {
-      if (!this.layerMap[this.layerIds[i]].isAnnotation) {
-        lastAnnotationIndex = i - 1;
-        break;
-      }
+    const layer = this.getLayer(layerId);
+    if (!layer) return;
+    if (layer.isAnnotation) {
+      layer.setAnnotationGroup(undefined);
     }
-
-    if (this.layerMap[layerId].isAnnotation) {
-      this.moveLayer(layerId, lastAnnotationIndex);
-    } else {
-      this.moveLayer(layerId, lastAnnotationIndex + 1);
-    }
-
-    this.layerMap[layerId].setIsAnnotation(
-      !this.layerMap[layerId].isAnnotation,
-    );
+    layer.setIsAnnotation(!layer.isAnnotation);
   };
 
   public get has3DLayers(): boolean {
-    return Object.values(this.layerMap).some((layer) => layer.is3DLayer);
+    return this.layers.some((layer) => layer.is3DLayer);
+  }
+
+  public get hasChanges() {
+    return this.hasDocumentLayersChanges || this.hasGroupChanges;
+  }
+
+  public get hasGroupChanges() {
+    return this.annotationGroups.some((group) => group.hasChanges);
+  }
+
+  // considers all layers that are not in a group
+  public get hasDocumentLayersChanges() {
+    return this.documentLayers.some((layer) => layer.hasChanges);
   }
 
   // eslint-disable-next-line @typescript-eslint/no-shadow
@@ -492,12 +566,10 @@ export class Document
     layers: ILayer[],
     title?: string,
   ): Promise<File | undefined> => {
-    const imageLayers = this.layerIds
-      .map((id) => layers.find((layer) => layer.id === id))
-      .filter(
-        (potentialLayer) =>
-          potentialLayer instanceof ImageLayer && potentialLayer.isAnnotation,
-      ) as ImageLayer[];
+    const imageLayers = this.layers.filter(
+      (potentialLayer) =>
+        potentialLayer instanceof ImageLayer && potentialLayer.isAnnotation,
+    ) as ImageLayer[];
     const file = await writeSingleMedicalImage(
       imageLayers[imageLayers.length - 1].image.toITKImage(
         imageLayers.slice(0, -1).map((layer) => layer.image),
@@ -536,13 +608,14 @@ export class Document
 
   public getFileForLayer = async (idOrLayer: string | ILayer) => {
     const layerId = typeof idOrLayer === "string" ? idOrLayer : idOrLayer.id;
-    const layer = this.layerMap[layerId];
+    const layer = this.getLayer(layerId);
+    if (!layer) return;
     const file = await layer.toFile();
     return file;
   };
 
   public finishBatchImport() {
-    if (!Object.values(this.layerMap).some((layer) => layer.isAnnotation)) {
+    if (!this.layers.some((layer) => layer.isAnnotation)) {
       this.addNewAnnotationLayer();
       this.viewport2D.setMainViewType();
     }
@@ -661,10 +734,10 @@ export class Document
       const zip = await Zip.fromZipFile(filteredFiles);
       const unzippedFiles = await zip.getAllFiles();
       await this.importFiles(
-        this.createLayerFamily(
+        this.createAnnotationGroup(
           unzippedFiles,
           filteredFiles.name,
-          this.getMetaDataFromFile(filteredFiles),
+          this.getMetadataFromFile(filteredFiles),
         ),
         filteredFiles.name,
       );
@@ -687,13 +760,13 @@ export class Document
     // }
 
     if (filteredFiles instanceof File) {
-      this.createLayerFamily(
+      this.createAnnotationGroup(
         [filteredFiles],
         filteredFiles.name,
-        this.getMetaDataFromFile(filteredFiles),
+        this.getMetadataFromFile(filteredFiles),
       );
     } else {
-      this.createLayerFamily(filteredFiles, name ?? uuidv4());
+      this.createAnnotationGroup(filteredFiles, name ?? uuidv4());
     }
     let createdLayerId = "";
     const isFirstLayer =
@@ -795,8 +868,8 @@ export class Document
               ...prototypeImage,
             });
             if (files instanceof File) {
-              this.addLayerToFamily(createdLayerId, files);
-              this.addMetaDataToLayer(createdLayerId, files);
+              this.addLayerToAnnotationGroup(createdLayerId, files);
+              this.addMetadataToLayer(createdLayerId, files);
             }
           }
         } else {
@@ -833,8 +906,8 @@ export class Document
             value,
           );
           if (files instanceof File) {
-            this.addLayerToFamily(createdLayerId, files);
-            this.addMetaDataToLayer(createdLayerId, files);
+            this.addLayerToAnnotationGroup(createdLayerId, files);
+            this.addMetadataToLayer(createdLayerId, files);
           }
         });
         // }
@@ -852,9 +925,19 @@ export class Document
     }
 
     if (files instanceof File) {
-      this.addLayerToFamily(createdLayerId, files);
-      this.addMetaDataToLayer(createdLayerId, files);
+      this.addLayerToAnnotationGroup(createdLayerId, files);
+      this.addMetadataToLayer(createdLayerId, files);
     }
+
+    // Move all annotation groups with only image layers to the end of the list:
+    this.annotationGroups.forEach((group) => {
+      if (!group.layers.every((layer) => !layer.isAnnotation)) return;
+      this.addAnnotationGroup(
+        group as AnnotationGroup,
+        this.annotationGroups.length - 1,
+      );
+    });
+
     return createdLayerId;
   }
 
@@ -971,11 +1054,10 @@ export class Document
 
   public getExcludedSegmentations(layer: ILayer) {
     if (!this.useExclusiveSegmentations) return undefined;
-    const layerIndex = this.layerIds.indexOf(layer.id);
+    const layerIndex = this.layers.indexOf(layer);
     if (layerIndex <= 0) return undefined;
-    return this.layerIds
+    return this.layers
       .slice(0, layerIndex)
-      .map((layerId) => this.layerMap[layerId])
       .filter(
         (potentialLayer) =>
           potentialLayer.isAnnotation &&
@@ -986,64 +1068,64 @@ export class Document
   }
 
   /** Adds layer to group specified in file object */
-  private addLayerToFamily(layerId: string, file: File) {
+  private addLayerToAnnotationGroup(layerId: string, file: File) {
     const layer = this.getLayer(layerId);
-    const family = this.getLayerFamilyFromFile(file);
-    if (layer && family) {
-      family?.addLayer(layer.id);
+    const group = this.getAnnotationGroupFromFile(file);
+    if (layer && group) {
+      group?.addLayer(layer.id);
     }
   }
 
   /** Adds meta data from file with metadata to layer */
-  private addMetaDataToLayer(layerId: string, file: File) {
+  private addMetadataToLayer(layerId: string, file: File) {
     const layer = this.getLayer(layerId);
-    const metaData = this.getMetaDataFromFile(file);
-    if (layer && metaData) {
-      layer.metadata = metaData;
+    const metadata = this.getMetadataFromFile(file);
+    if (layer && metadata) {
+      layer.metadata = metadata;
     }
   }
 
   /** Returns the group layer specified in the file object */
-  private getLayerFamilyFromFile(file: File): ILayerFamily | undefined {
-    if ("familyId" in file) {
-      const fileWithFamily = file as FileWithFamily;
-      return this.getLayerFamily(fileWithFamily.familyId);
+  private getAnnotationGroupFromFile(file: File): IAnnotationGroup | undefined {
+    if ("annotationGroupId" in file) {
+      const fileWithAnnotationGroup = file as FileWithAnnotationGroup;
+      return this.getAnnotationGroup(fileWithAnnotationGroup.annotationGroupId);
     }
     return undefined;
   }
 
   /** Extracts metadata appended to a file object */
-  private getMetaDataFromFile(file: File): FileMetadata | undefined {
+  private getMetadataFromFile(file: File): BackendMetadata | undefined {
     if ("metadata" in file) {
-      const fileWithMetaData = file as FileWithMetadata;
-      return fileWithMetaData.metadata;
+      const fileWithMetadata = file as FileWithMetadata;
+      return fileWithMetadata.metadata;
     }
     return undefined;
   }
 
-  /** Creates a LayerFamily object for a list of files and adds the group id to the files */
-  public createLayerFamily(
+  /** Creates a AnnotationGroup object for a list of files and adds the group id to the files */
+  public createAnnotationGroup(
     files: File[],
     title?: string,
-    groupMetaData?: FileMetadata,
-  ): FileWithFamily[] {
-    if (files.every((f) => "familyId" in f)) {
-      return files as FileWithFamily[];
+    groupMetadata?: BackendMetadata,
+  ): FileWithAnnotationGroup[] {
+    if (files.every((f) => "annotationGroupId" in f)) {
+      return files as FileWithAnnotationGroup[];
     }
-    if (files.some((f) => "familyId" in f)) {
+    if (files.some((f) => "annotationGroupId" in f)) {
       throw new Error(
         "Cannot create a new group for file that already belongs to a group",
       );
     }
-    const layerFamily = new LayerFamily(this, title);
-    layerFamily.metaData = groupMetaData;
+    const annotationGroup = new AnnotationGroup({ title }, this);
+    annotationGroup.metadata = groupMetadata;
 
     const filesWithGroup = files.map((f) => {
-      const fileWithGroup = f as FileWithFamily;
-      fileWithGroup.familyId = layerFamily.id;
+      const fileWithGroup = f as FileWithAnnotationGroup;
+      fileWithGroup.annotationGroupId = annotationGroup.id;
       return fileWithGroup;
     });
-    this.addLayerFamily(layerFamily);
+    this.addAnnotationGroup(annotationGroup);
     return filesWithGroup;
   }
 
@@ -1078,7 +1160,7 @@ export class Document
       id: this.id,
       titleOverride: this.titleOverride,
       activeLayerId: this.activeLayerId,
-      layerMap: Object.values(this.layerMap).map((layer) => layer.toJSON()),
+      layerMap: this.layers.map((layer) => layer.toJSON()),
       layerIds: toJS(this.layerIds),
       history: this.history.toJSON(),
       viewSettings: this.viewSettings.toJSON(),
@@ -1086,6 +1168,7 @@ export class Document
       viewport3D: this.viewport3D.toJSON(),
       tools: this.tools.toJSON(),
       useExclusiveSegmentations: this.useExclusiveSegmentations,
+      annotationGroups: this.annotationGroups.map((group) => group.toJSON()),
     };
   }
 

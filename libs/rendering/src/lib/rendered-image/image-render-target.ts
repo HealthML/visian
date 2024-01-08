@@ -19,6 +19,7 @@ export class ImageRenderTarget {
       );
       this.target.texture.magFilter = filter;
       this.target.texture.minFilter = filter;
+      this.target.depthBuffer = false;
     } else {
       const [widthAxis, heightAxis] = getPlaneAxes(image.defaultViewType);
       this.target = new THREE.WebGLRenderTarget(

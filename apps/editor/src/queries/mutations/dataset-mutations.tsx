@@ -1,6 +1,9 @@
+import {
+  CreateDatasetDto,
+  UpdateDatasetDto,
+} from "@mia-hpi/mia-typescript-sdk";
 import { MiaDataset, MiaProgress } from "@visian/utils";
 import { AxiosError } from "axios";
-import { CreateDatasetDto, UpdateDatasetDto } from "mia-typescript-sdk";
 import { useQuery } from "react-query";
 
 import { datasetsApi } from "../mia-api-client";

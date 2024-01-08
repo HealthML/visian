@@ -3,6 +3,7 @@ import {
   Histogram,
   IDocument,
   IImageLayer,
+  LayerSnapshot,
   MarkerConfig,
 } from "@visian/ui-shared";
 import {
@@ -12,6 +13,7 @@ import {
   ISerializable,
   itkImageToImageSnapshot,
   ITKImageWithUnit,
+  TypedArray,
   Vector,
   ViewType,
   Voxel,
@@ -22,7 +24,7 @@ import { action, computed, makeObservable, observable } from "mobx";
 
 import { defaultAnnotationColor } from "../../../../constants";
 import { condenseValues } from "../../markers";
-import { Layer, LayerSnapshot } from "../layer";
+import { Layer } from "../layer";
 import { markerRPCProvider } from "./markers";
 import {
   GetAreaArgs,
@@ -355,7 +357,7 @@ export class ImageLayer
     return this.image.getVoxelData(voxel);
   }
 
-  public getSlice(viewType: ViewType, slice: number): Uint8Array {
+  public getSlice(viewType: ViewType, slice: number): TypedArray {
     return this.image.getSlice(viewType, slice);
   }
 

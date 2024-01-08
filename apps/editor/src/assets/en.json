@@ -125,15 +125,18 @@
   "exporting": "Exporting",
   "layers-to-export": "Layers to export",
   "export-all-layers": "Export all layers",
-  "export-layer-group": "Export layer group",
+  "export-annotation-group": "Export annotation group",
   "export-as": "Export as",
   "no-file-to-export": "No file found to export.",
 
   "confirm-task-annotation-tooltip": "Confirm",
   "skip-task-annotation-tooltip": "Skip",
-  "verify-annotation-tooltip": "Verify",
-  "unverify-annotation-tooltip": "Unverify",
   "next-task-tooltip": "Next Task",
+  "previous-task-tooltip": "Previous Task",
+  "unsaved-changes-title": "Unsaved Changes!",
+  "unsaved-groups-text": "The following groups have unsaved changes:",
+  "unsaved-changes-confirmation": "Discard Changes",
+  "unsaved-changes-cancel": "Cancel",
 
   "browser-error": "Browser Error",
   "no-webgl-2-error": "This browser does not support WebGL 2 which is necessary to run VISIAN. Please update your browser to the newest version or use a different browser.",
@@ -210,6 +213,7 @@
   "volume-um": "μm³",
   "volume-m": "m³",
   "copy": "Copy",
+  "copied": "Copied!",
 
   "info-unit": "The unit is not always specified in the data. For medical images such as MRI and CT it is usually mm. For generic images such as PNG or JPG it is simply pixels.",
   "info-brush": "The brush is the most simple drawing tool of VISIAN. You can change the size of the brush and use left- and right-click to draw and erase.",
@@ -350,8 +354,9 @@
   "job-creation-popup-title": "Create a new job",
   "job-creation-model-selection": "Select a model version",
   "job-creation-image-selection": "Select the images to annotate",
+  "job-creation-images-selected": "{{count}} image selected",
+  "job-creation-images-selected_plural": "{{count}} images selected",
   "job-creation-error": "An error occurred while creating the job.",
-  "job-title": "Job on {{date}}",
   "start-job": "Start Job",
 
   "import-images": "Import Images",
@@ -414,6 +419,8 @@
   "dataset-name": "Dataset Name",
 
   "verified": "verified",
+  "not-verified": "not verified",
+  "disabled": "disabled",
 
   "progress-total": "Total Images",
   "progress-verified": "Verified",
