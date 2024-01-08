@@ -102,6 +102,7 @@
   "dependencies": {
     "@aws-amplify/auth": "^5.4.0",
     "@aws-amplify/ui-react": "^1.2.15",
+    "@mia-hpi/mia-typescript-sdk": "^1.0.2",
     "@tanstack/react-table": "^8.7.9",
     "@tweenjs/tween.js": "^20.0.3",
     "@types/react-table": "^7.7.14",
