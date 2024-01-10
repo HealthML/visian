@@ -1,11 +1,6 @@
 import React, { useCallback, useState } from "react";
 import styled, { css } from "styled-components";
 
-import { color, radius } from "../../theme";
-import { FlexRow } from "../box";
-import { InfoText } from "../info-text";
-import { sheetMixin } from "../sheet";
-import { InputLabel } from "../text";
 import {
   DropDownOptions,
   ExpandIcon,
@@ -13,6 +8,11 @@ import {
   OptionText,
 } from "./drop-down-options";
 import { DropDownProps } from "./drop-down.props";
+import { color, radius } from "../../theme";
+import { FlexRow } from "../box";
+import { InfoText } from "../info-text";
+import { sheetMixin } from "../sheet";
+import { InputLabel } from "../text";
 
 const Selector = styled(Option)<{
   size?: "small" | "medium";

@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useRef } from "react";
 import styled, { css } from "styled-components";
 
+import { ListItemProps } from "./list.props";
 import { radius, size } from "../../theme";
 import { Color } from "../color";
 import { Icon } from "../icon";
@@ -9,7 +10,6 @@ import { sheetMixin } from "../sheet";
 import { Text } from "../text";
 import { TextInput } from "../text-input";
 import { useOutsidePress } from "../utils";
-import { ListItemProps } from "./list.props";
 
 export const List = styled.div`
   display: flex;

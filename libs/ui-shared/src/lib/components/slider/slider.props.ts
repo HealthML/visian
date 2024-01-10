@@ -1,11 +1,11 @@
 import type React from "react";
 
-import { Histogram, MarkerConfig } from "../../types";
 import type {
   SerializationMethod,
   SliderConfig,
   SliderVerticalitySettings,
 } from "./types";
+import { Histogram, MarkerConfig } from "../../types";
 
 export interface ThumbProps extends SliderVerticalitySettings {
   /**

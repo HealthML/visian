@@ -3,13 +3,13 @@ import { Voxel } from "@visian/utils";
 import { action, makeObservable, observable } from "mobx";
 import * as THREE from "three";
 
+import { BlipRenderer3D } from "./blip-renderer-3d";
+import { Seed } from "./utils";
 import { RenderedImage } from "../rendered-image";
 import {
   regionGrowing3DFragmentShader,
   regionGrowing3DVertexShader,
 } from "../shaders";
-import { BlipRenderer3D } from "./blip-renderer-3d";
-import { Seed } from "./utils";
 
 export class RegionGrowingRenderer3D extends BlipRenderer3D {
   public readonly excludeFromSnapshotTracking = ["document"];

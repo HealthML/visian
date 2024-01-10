@@ -4,10 +4,10 @@ import { Fragment, useCallback, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 
+import { ImageListItemProps } from "./image-list-item.props";
 import { useStore } from "../../../app/root-store";
 import { MiaReviewStrategy, TaskType } from "../../../models/review-strategy";
 import { useAnnotationsByImage } from "../../../queries";
-import { ImageListItemProps } from "./image-list-item.props";
 
 const CollapseButton = styled(InvisibleButton)<{ isOpen: boolean }>`
   width: 20px;

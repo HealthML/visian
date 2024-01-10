@@ -10,6 +10,8 @@ import { IDisposable, IDisposer } from "@visian/utils";
 import { autorun } from "mobx";
 import * as THREE from "three";
 
+import { shadingModeNameToId, transferFunctionNameToId } from "./conversion";
+import { getStepSize } from "./step-size";
 import { RenderedImage } from "../../rendered-image";
 import { MAX_BLIP_STEPS } from "../../tool-renderer";
 import {
@@ -19,8 +21,6 @@ import {
   opacityUniforms,
   transferFunctionsUniforms,
 } from "../uniforms";
-import { shadingModeNameToId, transferFunctionNameToId } from "./conversion";
-import { getStepSize } from "./step-size";
 
 export class SharedUniforms implements IDisposable {
   public uniforms: { [uniform: string]: THREE.IUniform };

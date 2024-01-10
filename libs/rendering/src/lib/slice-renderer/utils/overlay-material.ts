@@ -3,8 +3,8 @@ import { IDisposer } from "@visian/utils";
 import { autorun } from "mobx";
 import * as THREE from "three";
 
-import { nodeFragmentShader, nodeVertexShader } from "../../shaders";
 import { node, nodeDown, nodeUp, nodeUpDown } from "./node-icons";
+import { nodeFragmentShader, nodeVertexShader } from "../../shaders";
 
 const updateOverlayColor = (color: THREE.Color, editor: IEditor) => {
   color.set(c("foreground")({ theme: editor.theme }));

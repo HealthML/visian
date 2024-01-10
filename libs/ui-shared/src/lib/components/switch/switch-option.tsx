@@ -1,9 +1,9 @@
 import React, { useCallback } from "react";
 import styled from "styled-components";
 
+import { SwitchOptionProps } from "./switch-option.props";
 import { InvisibleButton } from "../button";
 import { Text } from "../text";
-import { SwitchOptionProps } from "./switch-option.props";
 
 const SwitchOptionContainer = styled(InvisibleButton)`
   cursor: pointer;

@@ -2,10 +2,10 @@ import { Modal, Notification, SquareButton, Text } from "@visian/ui-shared";
 import { useCallback, useState } from "react";
 import styled from "styled-components";
 
+import { JobsTable } from "./job-table";
 import { useStore } from "../../../app/root-store";
 import { useJobsByProject } from "../../../queries";
 import { JobCreationPopup } from "../job-creation-popup";
-import { JobsTable } from "./job-table";
 
 const StyledModal = styled(Modal)`
   width: 100%;

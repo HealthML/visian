@@ -1,10 +1,10 @@
 import React, { useCallback, useState } from "react";
 import styled from "styled-components";
 
+import { ListNavigatorProps } from "./list-navigator.props";
 import { color } from "../../theme";
 import { InvisibleButton } from "../button";
 import { Text } from "../text";
-import { ListNavigatorProps } from "./list-navigator.props";
 
 const Container = styled.div`
   display: flex;

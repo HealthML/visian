@@ -2,12 +2,12 @@ import { IDocument, IThresholdAnnotationRenderer3D } from "@visian/ui-shared";
 import { action, makeObservable, observable } from "mobx";
 import * as THREE from "three";
 
+import { ToolRenderer3D } from "./tool-renderer-3d";
 import { RenderedImage } from "../rendered-image";
 import {
   thresholdAnnotationFragmentShader,
   thresholdAnnotationVertexShader,
 } from "../shaders";
-import { ToolRenderer3D } from "./tool-renderer-3d";
 
 export class ThresholdAnnotationRenderer3D
   extends ToolRenderer3D

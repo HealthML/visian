@@ -2,10 +2,10 @@ import { observer } from "mobx-react-lite";
 import React, { useCallback, useRef, useState } from "react";
 import styled, { useTheme } from "styled-components";
 
+import { InfoTextProps } from "./info-text.props";
 import { Theme } from "../../theme";
 import { Divider, Modal, ModalHeaderButton } from "../modal";
 import { Text } from "../text";
-import { InfoTextProps } from "./info-text.props";
 
 const StyledModal = styled(Modal)`
   width: 220px;

@@ -2,8 +2,8 @@ import readImageDICOMFileSeries from "itk/readImageDICOMFileSeries";
 import readImageFile from "itk/readImageFile";
 import writeImageArrayBuffer from "itk/writeImageArrayBuffer";
 
-import { Zip } from "../zip";
 import type { ITKImage } from "./types";
+import { Zip } from "../zip";
 
 /** Returns a parsed medical image from the given single file. */
 export const readSingleMedicalImage = async (file: File) => {

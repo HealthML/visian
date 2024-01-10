@@ -1,12 +1,12 @@
 import { PointerEvent as ReactPointerEvent, useCallback, useRef } from "react";
 
-import { ScaleType } from "../../types";
 import type {
   PointerCoordinates,
   RoundMethod,
   SliderValueSettings,
   SliderVerticalitySettings,
 } from "./types";
+import { ScaleType } from "../../types";
 
 /**
  * Applies a function to the given value to produce a (non-uniform) slider scale.

@@ -1,8 +1,8 @@
 import * as THREE from "three";
 
+import AnnotationStructure from "./annotationStructure";
 import { Renderer } from "..";
 import { LimitedStack } from "../../utils";
-import AnnotationStructure from "./annotationStructure";
 
 const prototypeMaterial = new THREE.MeshPhongMaterial({
   color: "red",

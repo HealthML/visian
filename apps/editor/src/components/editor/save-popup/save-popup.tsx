@@ -21,12 +21,12 @@ import path from "path";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import styled from "styled-components";
 
+import { SavePopUpProps } from "./save-popup.props";
 import { useStore } from "../../../app/root-store";
 import { importFilesToDocument } from "../../../import-handling";
 import { AnnotationGroup } from "../../../models/editor/annotation-groups";
 import { MiaReviewTask } from "../../../models/review-strategy";
 import { getAnnotationFile } from "../../../queries";
-import { SavePopUpProps } from "./save-popup.props";
 
 const SectionLabel = styled(Text)`
   font-size: 14px;

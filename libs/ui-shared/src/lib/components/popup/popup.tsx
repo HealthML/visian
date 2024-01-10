@@ -2,6 +2,7 @@ import React, { useRef } from "react";
 import ReactDOM from "react-dom";
 import styled, { css } from "styled-components";
 
+import { PopUpProps } from "./popup.props";
 import { stopPropagation } from "../../event-handling";
 import { color, fontWeight, zIndex } from "../../theme";
 import { useModalRoot } from "../box";
@@ -10,7 +11,6 @@ import { coverMixin } from "../mixins";
 import { Sheet } from "../sheet";
 import { Title } from "../text";
 import { useOutsidePress } from "../utils";
-import { PopUpProps } from "./popup.props";
 
 const PopUpUnderlay = styled.div`
   ${coverMixin}

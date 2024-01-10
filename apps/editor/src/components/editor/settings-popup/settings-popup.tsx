@@ -19,9 +19,9 @@ import { observer } from "mobx-react-lite";
 import React, { useCallback } from "react";
 import styled, { useTheme } from "styled-components";
 
+import { SettingsPopUpProps } from "./settings-popup.props";
 import { useStore } from "../../../app/root-store";
 import { InfoShortcuts } from "../info-shortcuts";
-import { SettingsPopUpProps } from "./settings-popup.props";
 
 const StyledPopUp = styled(PopUp)`
   width: 280px;

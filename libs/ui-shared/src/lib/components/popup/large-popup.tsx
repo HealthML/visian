@@ -1,8 +1,8 @@
 import styled from "styled-components";
 
+import { PopUp } from "./popup";
 import { fontWeight } from "../../theme";
 import { Text } from "../text";
-import { PopUp } from "./popup";
 
 export const LargePopUpColumn = styled.div`
   display: flex;

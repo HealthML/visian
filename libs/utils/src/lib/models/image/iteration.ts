@@ -1,8 +1,8 @@
+import type { Image } from "./image";
 import { TypedArray } from "../../io";
 import { Voxel } from "../../types";
 import { Vector } from "../vector";
 import { getOrthogonalAxis, getPlaneAxes, ViewType } from "../view-types";
-import type { Image } from "./image";
 
 /**
  * Iterates over a particular slice in the plane of the given view type

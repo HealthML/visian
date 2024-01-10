@@ -2,12 +2,12 @@ import React, { useEffect } from "react";
 import ReactDOM from "react-dom";
 import styled from "styled-components";
 
+import { NotificationProps } from "./notification.props";
 import { color, fontWeight, noise, zIndex } from "../../theme";
 import { useModalRoot } from "../box";
 import { InvisibleButton } from "../button";
 import { Sheet } from "../sheet";
 import { Title } from "../text";
-import { NotificationProps } from "./notification.props";
 
 const NotificationContainer = styled(Sheet)`
   justify-content: flex-start;

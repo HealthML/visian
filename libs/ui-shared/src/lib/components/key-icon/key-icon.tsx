@@ -1,10 +1,10 @@
 import React from "react";
 import styled from "styled-components";
 
+import { KeyIconProps } from "./key-icon.props";
 import { fontWeight } from "../../theme";
 import { Sheet } from "../sheet";
 import { Text } from "../text";
-import { KeyIconProps } from "./key-icon.props";
 
 const KeyIconContainer = styled(Sheet)<{ isSmall?: boolean }>`
   box-sizing: border-box;

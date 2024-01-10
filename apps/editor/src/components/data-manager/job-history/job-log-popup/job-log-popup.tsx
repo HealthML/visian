@@ -3,8 +3,8 @@ import { observer } from "mobx-react-lite";
 import { useEffect, useState } from "react";
 import styled from "styled-components";
 
-import { getJobLogText } from "../../../../queries";
 import { JobLogPopUpProps } from "./job-log-popup.props";
+import { getJobLogText } from "../../../../queries";
 
 const PopUpContainer = styled(PopUp)`
   align-items: left;

@@ -25,12 +25,12 @@ import { observer } from "mobx-react-lite";
 import React, { ReactNode, useCallback, useEffect, useState } from "react";
 import styled from "styled-components";
 
+import { AnnotationGroupListItem } from "./group-list-item";
+import { LayerListItem } from "./layer-list-item";
 import { useStore } from "../../../app/root-store";
 import { ImageLayer } from "../../../models";
 import { AnnotationGroup } from "../../../models/editor/annotation-groups";
 import { InfoShortcuts } from "../info-shortcuts";
-import { AnnotationGroupListItem } from "./group-list-item";
-import { LayerListItem } from "./layer-list-item";
 
 // Styled Components
 const StyledInfoText = styled(InfoText)`

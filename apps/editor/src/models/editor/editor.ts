@@ -23,8 +23,8 @@ import {
 } from "mobx";
 import * as THREE from "three";
 
-import { StoreContext } from "../types";
 import { Document, DocumentSnapshot } from "./document";
+import { StoreContext } from "../types";
 
 export interface EditorSnapshot {
   activeDocument?: DocumentSnapshot;

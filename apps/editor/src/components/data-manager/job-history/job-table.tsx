@@ -11,8 +11,8 @@ import { useCallback, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 
-import { getDisplayDate } from "../util/display-date";
 import { JobStatusBadge } from "./job-status-badge/job-status-badge";
+import { getDisplayDate } from "../util/display-date";
 
 const BadgeContainer = styled.div`
   width: 10em;

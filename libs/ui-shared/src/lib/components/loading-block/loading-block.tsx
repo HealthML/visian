@@ -1,7 +1,7 @@
 import styled, { keyframes } from "styled-components";
 
-import { color, radius } from "../../theme";
 import { LoadingBlockProps } from "./loading-block.props";
+import { color, radius } from "../../theme";
 
 const pulseAnimation = keyframes`
   0% {

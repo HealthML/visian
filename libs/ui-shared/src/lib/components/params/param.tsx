@@ -1,7 +1,6 @@
 import { observer } from "mobx-react-lite";
 import React from "react";
 
-import { IParameter } from "../../types";
 import { BooleanParam, BooleanParamProps } from "./boolean-param";
 import { ButtonParam, ButtonParamProps } from "./button-param";
 import { ColorParam, ColorParamProps } from "./color-param";
@@ -11,6 +10,7 @@ import { LayerParam, LayerParamProps } from "./layer-param";
 import { NumberParam, NumberParamProps } from "./number-param";
 import { NumberRangeParam, NumberRangeParamProps } from "./number-range-param";
 import { ListPositionProps } from "./types";
+import { IParameter } from "../../types";
 
 export interface ParamProps extends ListPositionProps {
   parameter: IParameter;

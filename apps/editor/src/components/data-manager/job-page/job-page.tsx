@@ -12,6 +12,7 @@ import { useCallback, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 
+import { DetailsRow } from "./details-table";
 import { useStore } from "../../../app/root-store";
 import { MiaReviewStrategy } from "../../../models/review-strategy";
 import {
@@ -30,7 +31,6 @@ import { PageRow } from "../page-row";
 import { PageSection } from "../page-section";
 import { PageTitle } from "../page-title";
 import { getDisplayDate } from "../util";
-import { DetailsRow } from "./details-table";
 
 const DetailsSheet = styled(Sheet)`
   padding: ${space("pageSectionMarginSmall")};

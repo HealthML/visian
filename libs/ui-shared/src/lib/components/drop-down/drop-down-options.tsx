@@ -2,6 +2,8 @@ import React, { useRef } from "react";
 import ReactDOM from "react-dom";
 import styled, { css } from "styled-components";
 
+import { DropDownOptionsProps } from "./drop-down.props";
+import { useOptionsPosition } from "./utils";
 import { fontSize, size as getSize, radius, zIndex } from "../../theme";
 import { useModalRoot } from "../box";
 import { Icon } from "../icon";
@@ -9,8 +11,6 @@ import { Divider } from "../modal";
 import { sheetMixin } from "../sheet";
 import { Text } from "../text";
 import { useOutsidePress } from "../utils";
-import { DropDownOptionsProps } from "./drop-down.props";
-import { useOptionsPosition } from "./utils";
 
 export const Option = styled.div<{
   isSelected?: boolean;

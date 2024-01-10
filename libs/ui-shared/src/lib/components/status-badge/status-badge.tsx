@@ -1,8 +1,8 @@
 import styled from "styled-components";
 
+import { StatusBadgeProps } from "./status-badge.props";
 import { color as getColor, radius, Theme } from "../../theme";
 import { ListItemLabel } from "../list";
-import { StatusBadgeProps } from "./status-badge.props";
 
 const StatusBadgeContainer = styled.div<
   Pick<StatusBadgeProps, "color" | "borderColor" | "full">

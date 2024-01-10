@@ -8,8 +8,8 @@ import {
 } from "@visian/utils";
 import { v4 as uuidv4 } from "uuid";
 
-import { annotationsApi, getAnnotationFile, getImageFile } from "../../queries";
 import { ReviewTask, TaskType } from "./review-task";
+import { annotationsApi, getAnnotationFile, getImageFile } from "../../queries";
 
 export interface MiaReviewTaskSnapshot {
   kind: TaskType;

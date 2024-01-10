@@ -1,7 +1,7 @@
 import styled, { css } from "styled-components";
 
-import { color, Theme } from "../../theme";
 import { ColorProps } from "./color.props";
+import { color, Theme } from "../../theme";
 
 export const Color = styled.div<ColorProps>`
   box-sizing: border-box;

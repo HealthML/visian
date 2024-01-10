@@ -1,8 +1,8 @@
 import { IDisposable } from "@visian/utils";
 import * as THREE from "three";
 
-import { ScreenAlignedQuad } from "../screen-aligned-quad";
 import { Texture3DMaterial } from "./texture-3d-material";
+import { ScreenAlignedQuad } from "../screen-aligned-quad";
 
 export class Texture3DRenderer implements IDisposable {
   private target?: THREE.WebGLRenderTarget;

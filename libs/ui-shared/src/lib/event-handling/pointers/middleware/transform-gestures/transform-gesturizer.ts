@@ -1,3 +1,5 @@
+import { TransformData } from "./transform-data";
+import { TransformGesture } from "./transform-gesture";
 import type {
   AbstractEventType,
   EventMiddleware,
@@ -5,8 +7,6 @@ import type {
   PointerEventData,
   PointerState,
 } from "../../types";
-import { TransformData } from "./transform-data";
-import { TransformGesture } from "./transform-gesture";
 
 /** Event processor state extension to capture the current transform gestures. */
 export interface TransformGestureState<

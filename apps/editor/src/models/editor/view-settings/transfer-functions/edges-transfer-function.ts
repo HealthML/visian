@@ -1,11 +1,11 @@
 import { IDocument } from "@visian/ui-shared";
 
+import { TransferFunction } from "./transfer-function";
 import {
   NumberParameter,
   NumberRangeParameter,
   Parameter,
 } from "../../parameters";
-import { TransferFunction } from "./transfer-function";
 
 export class EdgesTransferFunction extends TransferFunction<"fc-edges"> {
   constructor(document: IDocument) {

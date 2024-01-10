@@ -3,9 +3,9 @@ import { IDisposable, IDisposer } from "@visian/utils";
 import { autorun } from "mobx";
 import * as THREE from "three";
 
-import { RenderedImage } from "../rendered-image";
 import { BoundingBox, ClippingPlane, SharedUniforms } from "./utils";
 import { VolumeMaterial, VolumePickingMaterial } from "./volume-material";
+import { RenderedImage } from "../rendered-image";
 
 /** A volume domain. */
 export class Volume extends THREE.Mesh implements IDisposable {

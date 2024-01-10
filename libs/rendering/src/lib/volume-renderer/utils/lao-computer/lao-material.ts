@@ -4,16 +4,16 @@ import { autorun, reaction } from "mobx";
 import * as THREE from "three";
 
 import {
+  getLAODirectionTexture,
+  getTotalLAODirections,
+} from "./lao-directions";
+import {
   composeLayeredShader,
   laoFragmentShader,
   laoVertexShader,
 } from "../../../shaders";
 import { Texture3DMaterial } from "../../../texture-3d-renderer";
 import { SharedUniforms } from "../shared-uniforms";
-import {
-  getLAODirectionTexture,
-  getTotalLAODirections,
-} from "./lao-directions";
 
 export class LAOMaterial extends Texture3DMaterial {
   private disposers: IDisposer[] = [];

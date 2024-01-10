@@ -6,8 +6,8 @@ import { MiaDataset, MiaProgress } from "@visian/utils";
 import { AxiosError } from "axios";
 import { useQuery } from "react-query";
 
-import { datasetsApi } from "../mia-api-client";
 import { CreateMutation, DeleteMutation, UpdateMutation } from "./mutations";
+import { datasetsApi } from "../mia-api-client";
 
 const datasetsByProjectQueryBaseKey = "datasetsByProject";
 const datasetQueryBaseKey = "dataset";

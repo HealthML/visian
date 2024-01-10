@@ -6,9 +6,9 @@ import {
 import { action, makeObservable, observable, reaction } from "mobx";
 import * as THREE from "three";
 
+import { TransferFunction } from "./transfer-function";
 import { Parameter } from "../../parameters";
 import { FileParameter } from "../../parameters/file-parameter";
-import { TransferFunction } from "./transfer-function";
 
 export class CustomTransferFunction
   extends TransferFunction<"custom">

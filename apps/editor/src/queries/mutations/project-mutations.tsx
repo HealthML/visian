@@ -6,8 +6,8 @@ import { MiaProject } from "@visian/utils";
 import { AxiosError } from "axios";
 import { useQuery } from "react-query";
 
-import { projectsApi } from "../mia-api-client";
 import { CreateMutation, DeleteMutation, UpdateMutation } from "./mutations";
+import { projectsApi } from "../mia-api-client";
 
 const projectsQueryKey = "projects";
 const projectQueryBaseKey = "project";

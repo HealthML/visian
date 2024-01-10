@@ -1,9 +1,9 @@
 import React from "react";
 import styled from "styled-components";
 
-import { color, opacity } from "../../theme";
 import { IconProps } from "./icon.props";
 import * as icons from "./icons";
+import { color, opacity } from "../../theme";
 
 const StyledSVG = styled.svg.withConfig({
   shouldForwardProp: (prop) =>

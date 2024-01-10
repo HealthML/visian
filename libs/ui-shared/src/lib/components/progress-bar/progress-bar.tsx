@@ -2,11 +2,11 @@ import React, { useEffect, useRef, useState } from "react";
 import Confetti from "react-confetti";
 import styled, { useTheme } from "styled-components";
 
+import { ProgressBarTooltip } from "./progress-bar-tooltip";
+import { ProgressBarProps } from "./progress-bar.props";
 import { color, fontSize, Theme } from "../../theme";
 import { Text } from "../text";
 import { usePreviousValue } from "../utils";
-import { ProgressBarTooltip } from "./progress-bar-tooltip";
-import { ProgressBarProps } from "./progress-bar.props";
 
 const Container = styled.div`
   display: grid;

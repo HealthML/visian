@@ -21,9 +21,9 @@ import {
 } from "mobx";
 import * as THREE from "three";
 
+import { Tool3DMaterial } from "./utils/tool-3d-material";
 import { ImageRenderTarget, RenderedImage } from "../rendered-image";
 import { Texture3DRenderer } from "../texture-3d-renderer";
-import { Tool3DMaterial } from "./utils/tool-3d-material";
 
 export class ToolRenderer3D implements IToolRenderer3D, IDisposable {
   public readonly excludeFromSnapshotTracking = ["document"];

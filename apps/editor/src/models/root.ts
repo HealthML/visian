@@ -11,7 +11,6 @@ import { deepObserve, IDisposable, ISerializable } from "@visian/utils";
 import { action, autorun, computed, makeObservable, observable } from "mobx";
 import { NavigateFunction } from "react-router-dom";
 
-import { errorDisplayDuration } from "../constants";
 import { DICOMWebServer } from "./dicomweb-server";
 import { Editor, EditorSnapshot } from "./editor";
 import {
@@ -23,6 +22,7 @@ import {
 import { Settings } from "./settings/settings";
 import { Tracker } from "./tracking";
 import { ProgressNotification } from "./types";
+import { errorDisplayDuration } from "../constants";
 
 export interface RootSnapshot {
   editor: EditorSnapshot;

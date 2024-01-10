@@ -8,8 +8,8 @@ import {
 import { action, makeObservable, observable, reaction } from "mobx";
 import * as THREE from "three";
 
-import { RenderedImage } from "../rendered-image";
 import { Circle, Circles, ToolCamera } from "./utils";
+import { RenderedImage } from "../rendered-image";
 
 export class ToolRenderer implements IDisposable {
   public readonly excludeFromSnapshotTracking = ["document"];

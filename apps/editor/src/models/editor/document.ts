@@ -40,15 +40,6 @@ import path from "path";
 import * as THREE from "three";
 import { v4 as uuidv4 } from "uuid";
 
-import {
-  defaultAnnotationColor,
-  defaultImageColor,
-  defaultRegionGrowingPreviewColor,
-  generalTextures2d,
-  generalTextures3d,
-} from "../../constants";
-import { readTrackingLog, TrackingData } from "../tracking";
-import { StoreContext } from "../types";
 import { AnnotationGroup } from "./annotation-groups";
 import { Clipboard } from "./clipboard";
 import { History, HistorySnapshot } from "./history";
@@ -65,6 +56,15 @@ import {
   ViewSettings,
   ViewSettingsSnapshot,
 } from "./view-settings";
+import {
+  defaultAnnotationColor,
+  defaultImageColor,
+  defaultRegionGrowingPreviewColor,
+  generalTextures2d,
+  generalTextures3d,
+} from "../../constants";
+import { readTrackingLog, TrackingData } from "../tracking";
+import { StoreContext } from "../types";
 
 const uniqueValuesForAnnotationThreshold = 10;
 

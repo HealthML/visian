@@ -6,13 +6,13 @@ import {
   setNewTaskIdForUrl,
 } from "@visian/utils";
 
-import { whoHome } from "../../constants";
-import { ImageLayer } from "../editor";
-import { RootStore } from "../root";
 import { ReviewStrategy } from "./review-strategy";
 import { ReviewStrategySnapshot } from "./review-strategy-snapshot";
 import { TaskType } from "./review-task";
 import { WHOReviewTask } from "./who-review-task";
+import { whoHome } from "../../constants";
+import { ImageLayer } from "../editor";
+import { RootStore } from "../root";
 
 export class WHOReviewStrategy extends ReviewStrategy {
   public static fromSnapshot(

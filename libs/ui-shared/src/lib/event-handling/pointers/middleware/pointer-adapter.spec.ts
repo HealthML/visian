@@ -1,5 +1,5 @@
-import { Pointer, PointerEventData, PointerState } from "../types";
 import { pointerAdapter } from "./pointer-adapter";
+import { Pointer, PointerEventData, PointerState } from "../types";
 
 const voidFn = () => undefined;
 const buildPointerEvent = (type: string, data: Partial<PointerEvent>) =>

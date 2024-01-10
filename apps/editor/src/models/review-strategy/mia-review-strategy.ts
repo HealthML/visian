@@ -1,7 +1,5 @@
 import { MiaAnnotationMetadata, MiaImage } from "@visian/utils";
 
-import { annotationsApi, imagesApi } from "../../queries";
-import { RootStore } from "../root";
 import { MiaReviewTask } from "./mia-review-task";
 import { ReviewStrategy } from "./review-strategy";
 import {
@@ -9,6 +7,8 @@ import {
   ReviewStrategySnapshot,
 } from "./review-strategy-snapshot";
 import { TaskType } from "./review-task";
+import { annotationsApi, imagesApi } from "../../queries";
+import { RootStore } from "../root";
 
 export class MiaReviewStrategy extends ReviewStrategy {
   public static fromSnapshot(

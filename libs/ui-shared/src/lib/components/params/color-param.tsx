@@ -1,12 +1,12 @@
 import React from "react";
 import styled from "styled-components";
 
+import { ListPositionProps } from "./types";
 import { dataColorKeys } from "../../theme";
 import { IColorParameter } from "../../types";
 import { Color } from "../color";
 import { List, ListDivider, ListItem } from "../list";
 import { InputLabel } from "../text";
-import { ListPositionProps } from "./types";
 
 const SelectedColor = styled(List)<{ isCollapsed?: boolean }>`
   margin-bottom: ${(props) => (props.isCollapsed ? "20px" : "10px")};

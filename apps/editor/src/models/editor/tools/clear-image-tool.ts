@@ -1,8 +1,8 @@
 import { RenderedImage, ToolRenderer } from "@visian/rendering";
 import { IDocument, IImageLayer, ITool } from "@visian/ui-shared";
 
-import { ImageCommand } from "../history";
 import { SelfDeactivatingTool } from "./self-deactivating-tool";
+import { ImageCommand } from "../history";
 
 export class ClearImageTool<
   N extends "clear-image",

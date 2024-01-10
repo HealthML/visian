@@ -19,6 +19,7 @@ import { observer } from "mobx-react-lite";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import styled, { css } from "styled-components";
 
+import { JobCreationPopUpProps } from "./job-creation-popup.props";
 import { useStore } from "../../../app/root-store";
 import {
   jobsApi,
@@ -28,7 +29,6 @@ import {
 } from "../../../queries";
 import { ImageList } from "../image-list";
 import { useImageSelection } from "../util";
-import { JobCreationPopUpProps } from "./job-creation-popup.props";
 
 const JobCreationPopupContainer = styled(PopUp)`
   align-items: left;

@@ -1,8 +1,8 @@
 import React from "react";
 import styled from "styled-components";
 
-import { coverMixin } from "../mixins";
 import { WebGLCanvasProps } from "./webgl-canvas.props";
+import { coverMixin } from "../mixins";
 
 export const WebGLCanvas: React.FC<WebGLCanvasProps> = styled.canvas.attrs<{
   backgroundColor?: string;

@@ -11,9 +11,9 @@ import { observer } from "mobx-react-lite";
 import React, { useCallback, useState } from "react";
 import styled from "styled-components";
 
+import { ImportPopUpProps } from "./import-popup.props";
 import { useStore } from "../../../app/root-store";
 import { importFilesToDocument } from "../../../import-handling";
-import { ImportPopUpProps } from "./import-popup.props";
 
 const SectionLabel = styled(Text)`
   font-size: 14px;

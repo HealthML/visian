@@ -1,15 +1,5 @@
 import * as THREE from "three";
 
-import { IDisposable } from "..";
-import * as SCAN from "../staticScan";
-import {
-  defaultStructureColor,
-  hoveredSelectedStructureColor,
-  hoveredStructureColor,
-  selectedStructureColor,
-} from "../theme";
-import { ClickPosition, Pixel, Tool } from "../types";
-import { getIntersectionsFromClickPosition } from "../utils";
 import {
   createCameraLight,
   createLights,
@@ -24,6 +14,16 @@ import {
   ScanNavigator,
   SpriteHandler,
 } from "./helpers";
+import { IDisposable } from "..";
+import * as SCAN from "../staticScan";
+import {
+  defaultStructureColor,
+  hoveredSelectedStructureColor,
+  hoveredStructureColor,
+  selectedStructureColor,
+} from "../theme";
+import { ClickPosition, Pixel, Tool } from "../types";
+import { getIntersectionsFromClickPosition } from "../utils";
 
 export default class Renderer implements IDisposable {
   private keyEventHandler!: KeyEventHandler;

@@ -1,12 +1,12 @@
 import React, { useCallback, useEffect, useState } from "react";
 import styled from "styled-components";
 
+import { OptionSelectorProps } from "./option-selector.props";
 import { InvisibleButton } from "../button";
 import { Icon } from "../icon";
 import { List, ListItem } from "../list";
 import { Modal } from "../modal";
 import { Text } from "../text";
-import { OptionSelectorProps } from "./option-selector.props";
 
 const PanelDiv = styled(Modal)`
   position: absolute;

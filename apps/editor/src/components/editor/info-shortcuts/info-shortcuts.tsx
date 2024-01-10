@@ -1,9 +1,9 @@
 import React, { useMemo } from "react";
 import styled from "styled-components";
 
+import { InfoShortcutsProps } from "./info-shortcuts.props";
 import { generalHotkeys } from "../../../event-handling/hotkeys";
 import { Hotkey } from "../shortcut-popup";
-import { InfoShortcutsProps } from "./info-shortcuts.props";
 
 const Container = styled.div`
   display: flex;

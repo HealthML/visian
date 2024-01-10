@@ -2,11 +2,11 @@ import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { PointerLockControls } from "three/examples/jsm/controls/PointerLockControls";
 
+import SpriteHandler from "./spriteHandler";
 import { Renderer } from "..";
 import { IDisposable } from "../../types";
 import { getIntersections } from "../../utils";
 import createOrbitControls from "../creators/orbitControls";
-import SpriteHandler from "./spriteHandler";
 
 export default class CameraNavigator implements IDisposable {
   private camera: THREE.PerspectiveCamera;

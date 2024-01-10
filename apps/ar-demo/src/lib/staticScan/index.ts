@@ -1,7 +1,7 @@
 import * as THREE from "three";
 
-import { Pixel, Voxel } from "../types";
 import preGeneratedGeometries from "./preGeneratedGeometries";
+import { Pixel, Voxel } from "../types";
 
 export const voxelCount: Voxel = {
   x: 170,

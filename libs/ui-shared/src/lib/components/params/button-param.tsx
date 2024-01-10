@@ -1,11 +1,11 @@
 import React from "react";
 import styled from "styled-components";
 
+import { ListPositionProps } from "./types";
 import { color } from "../../theme";
 import { IButtonParameter } from "../../types";
 import { Button, ButtonProps } from "../button";
 import { sheetNoise } from "../sheet";
-import { ListPositionProps } from "./types";
 
 const StyledButton = styled(Button)<ListPositionProps>`
   width: 100%;

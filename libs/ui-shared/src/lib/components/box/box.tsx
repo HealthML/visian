@@ -1,8 +1,8 @@
 import styled from "styled-components";
 
+import { BoxProps } from "./box.props";
 import { zIndex } from "../../theme";
 import { coverMixin } from "../mixins";
-import { BoxProps } from "./box.props";
 
 export const Box = styled.div<BoxProps>``;
 

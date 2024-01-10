@@ -15,8 +15,6 @@ import {
 import { observer } from "mobx-react-lite";
 import React, { useMemo } from "react";
 
-import { useStore } from "../../../app/root-store";
-import { generalHotkeys } from "../../../event-handling/hotkeys";
 import { MouseControls } from "./mouse-controls";
 import { ShortcutPopUpProps } from "./shortcut-popup.props";
 import {
@@ -27,6 +25,8 @@ import {
   ShortcutLabel,
   ShortcutRow,
 } from "./styled-components";
+import { useStore } from "../../../app/root-store";
+import { generalHotkeys } from "../../../event-handling/hotkeys";
 
 export const Hotkey: React.FC<{
   keyCombination: string[];

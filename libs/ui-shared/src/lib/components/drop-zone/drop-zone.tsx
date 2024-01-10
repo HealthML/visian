@@ -1,10 +1,10 @@
 import React, { useCallback, useState } from "react";
 import styled, { css } from "styled-components";
 
+import { DropZoneProps } from "./drop-zone.props";
 import { color, radius } from "../../theme";
 import { sheetMixin } from "../sheet";
 import { Subtitle } from "../text";
-import { DropZoneProps } from "./drop-zone.props";
 
 const StyledDiv = styled.div<{
   isAlwaysVisible?: boolean;
