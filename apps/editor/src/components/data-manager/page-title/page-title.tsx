@@ -32,8 +32,7 @@ const TitleLoadingBlock = styled(LoadingBlock)`
 `;
 
 const StyledTitle = styled(Title)`
-  width: fill;
-  flex: 1;
+  overflow-wrap: anywhere;
 `;
 
 export const PageTitle = ({
