@@ -33,7 +33,7 @@ import {
 } from "@visian/ui-shared";
 import { transaction } from "mobx";
 import { observer } from "mobx-react-lite";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import styled from "styled-components";
 
@@ -122,8 +122,9 @@ export const Layers: React.FC = observer(() => {
   }, [viewMode]);
 
   const layers = document?.layers;
-  const [layerIds, setLayerIds] = useState(
-    document?.renderingOrder.map((element) => element.id) || [],
+  const layerIds = useMemo(
+    () => document?.renderingOrder.map((element) => element.id) || [],
+    [document?.renderingOrder],
   );
 
   const [draggedLayer, setDraggedLayer] = useState<ILayer>();
@@ -240,7 +241,7 @@ export const Layers: React.FC = observer(() => {
           if (draggedImageLayer && newIndex !== -1) {
             document.addLayer(draggedImageLayer, newIndex);
             const newLayerIds = arrayMove(layerIds, oldIndex, newIndex);
-            setLayerIds(newLayerIds);
+            document.setLayerIds(newLayerIds);
           }
         }
       }

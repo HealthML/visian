@@ -503,7 +503,10 @@ export class Document
     this.setLayerIds(this.layerIds.filter((id) => id !== layer.id));
   };
 
-  public removeAnnotationGroup = (groupId: string): void => {
+  public removeAnnotationGroup = (
+    idOrGroup: string | IAnnotationGroup,
+  ): void => {
+    const groupId = typeof idOrGroup === "string" ? idOrGroup : idOrGroup.id;
     this.setLayerIds(this.layerIds.filter((id) => id !== groupId));
   };
 
@@ -770,14 +773,16 @@ export class Document
     //   return;
     // }
 
-    if (filteredFiles instanceof File && !isAnnotation) {
-      this.createAnnotationGroup(
-        [filteredFiles],
-        filteredFiles.name,
-        this.getMetadataFromFile(filteredFiles),
-      );
-    } else if (!(filteredFiles instanceof File) && !isAnnotation) {
-      this.createAnnotationGroup(filteredFiles, name ?? uuidv4());
+    if (!isAnnotation) {
+      if (filteredFiles instanceof File) {
+        this.createAnnotationGroup(
+          [filteredFiles],
+          filteredFiles.name,
+          this.getMetadataFromFile(filteredFiles),
+        );
+      } else {
+        this.createAnnotationGroup(filteredFiles, name ?? uuidv4());
+      }
     }
     let createdLayerId = "";
     const isFirstLayer =
