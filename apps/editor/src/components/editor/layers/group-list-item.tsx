@@ -8,7 +8,9 @@ import {
   FullWidthListItem,
   IAnnotationGroup,
   ILayer,
+  LayerList,
   PointerButton,
+  Text,
   useDoubleTap,
   useForwardEvent,
   useTranslation,
@@ -19,10 +21,15 @@ import { useCallback, useEffect, useState } from "react";
 import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
+import { ConfirmationPopup, usePopUpState } from "../../data-manager";
 import { DraggableLayerListItem } from "./draggable-layer-list-item";
 
 const ChildLayerContainer = styled.div`
   margin-left: 16px;
+`;
+
+const LayerListContainer = styled.div`
+  padding: 16px;
 `;
 
 export const AnnotationGroupListItem = observer<{
@@ -32,6 +39,8 @@ export const AnnotationGroupListItem = observer<{
   draggedLayer?: ILayer;
 }>(({ group, isActive, isLast, draggedLayer }) => {
   const store = useStore();
+
+  const { t } = useTranslation();
 
   const toggleCollapse = useCallback(() => {
     group.setCollapsed(!group.collapsed);
@@ -97,6 +106,26 @@ export const AnnotationGroupListItem = observer<{
     setIsAnnotationGroupNameEditable(false);
   }, []);
 
+  // Delete annotation confirmation popup
+  const [
+    isDeleteConfirmationPopUpOpen,
+    openDeleteConfirmationPopUp,
+    closeDeleteConfirmationPopUp,
+  ] = usePopUpState(false);
+
+  const deleteAnnotationGroup = useCallback(() => {
+    if (group.metadata) {
+      // message popup is not able to delete
+    } else {
+      openDeleteConfirmationPopUp();
+    }
+  }, [group.metadata, openDeleteConfirmationPopUp]);
+
+  const handleDeletionConfirmation = useCallback(() => {
+    group.delete();
+    setContextMenuPosition(null);
+  }, [group]);
+
   return (
     <>
       <FullWidthListItem
@@ -138,9 +167,26 @@ export const AnnotationGroupListItem = observer<{
         <ContextMenuItem
           labelTx="rename-group"
           onPointerDown={startEditingAnnotationGroupName}
+        />
+        <ContextMenuItem
+          labelTx="delete-group"
+          onPointerDown={deleteAnnotationGroup}
           isLast
         />
       </ContextMenu>
+      <ConfirmationPopup
+        isOpen={isDeleteConfirmationPopUpOpen}
+        onClose={closeDeleteConfirmationPopUp}
+        message={t("delete-annotation-group-message", {
+          name: group.title,
+        })}
+        titleTx="delete-annotation-title"
+        onConfirm={handleDeletionConfirmation}
+      >
+        <LayerListContainer>
+          <LayerList layers={group.layers} />
+        </LayerListContainer>
+      </ConfirmationPopup>
     </>
   );
 });

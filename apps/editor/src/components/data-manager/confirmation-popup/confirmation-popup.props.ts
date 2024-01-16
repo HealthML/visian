@@ -1,6 +1,8 @@
 import type { StatefulPopUpProps } from "@visian/ui-shared";
+import { ReactNode } from "react";
 
-export interface ConfirmationPopUpProps extends StatefulPopUpProps {
+export interface ConfirmationPopUpProps<T = ReactNode>
+  extends StatefulPopUpProps {
   title?: string;
   titleTx?: string;
   message?: string;
@@ -10,4 +12,5 @@ export interface ConfirmationPopUpProps extends StatefulPopUpProps {
   cancel?: string;
   cancelTx?: string;
   onConfirm?: () => void;
+  children?: T;
 }

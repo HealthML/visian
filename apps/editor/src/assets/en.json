@@ -436,5 +436,6 @@
   "supervise": "Supervise",
   "review-description": "{{taskType}} the annotations of {{image}}",
 
-  "untitled-group": "Untitled group"
+  "untitled-group": "Untitled group",
+  "delete-annotation-group-message": "Do you really want to delete the annotation group \"{{name}}\" and following layers?"
 }

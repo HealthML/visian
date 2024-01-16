@@ -234,5 +234,9 @@ export interface IAnnotationGroup {
   /** Sets collapsed state of the group. */
   setCollapsed(value: boolean): void;
 
+  /** Delete this annotation group from the document and all
+   * the layers it contains. */
+  delete(): void;
+
   toJSON(): AnnotationGroupSnapshot;
 }

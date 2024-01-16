@@ -494,8 +494,22 @@ export class Document
     this.layerMap[layerId].delete();
     delete this.layerMap[layerId];
     if (this.activeLayerId === layerId) {
-      this.setActiveLayer(this.layerIds[0]);
+      this.setActiveLayer(this.layers[0]);
     }
+  };
+
+  public deleteAnnotationGroup = (annotationGroup: IAnnotationGroup): void => {
+    // Remove the annotationGroupId from layerIds
+    this.layerIds = this.layerIds.filter((id) => id !== annotationGroup.id);
+
+    // Delete all layers from the annotation group
+    annotationGroup.layerIds.forEach((id) => this.deleteLayer(id));
+
+    if (this.activeLayerId === annotationGroup.id) {
+      this.setActiveLayer(this.layers[0]);
+    }
+
+    delete this.annotationGroupMap[annotationGroup.id];
   };
 
   public removeLayerFromRootList = (layer: ILayer): void => {

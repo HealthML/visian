@@ -1,6 +1,6 @@
 import { ButtonParam, PopUp, Text } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
-import { useCallback } from "react";
+import { ReactNode, useCallback } from "react";
 import styled from "styled-components";
 
 import { ConfirmationPopUpProps } from "./confirmation-popup.props";
@@ -23,7 +23,7 @@ const ConfirmationPopupContainer = styled(PopUp)`
   width: 400px;
 `;
 
-export const ConfirmationPopup = observer<ConfirmationPopUpProps>(
+export const ConfirmationPopup = observer<ConfirmationPopUpProps<ReactNode>>(
   ({
     isOpen,
     onClose,
@@ -36,6 +36,7 @@ export const ConfirmationPopup = observer<ConfirmationPopUpProps>(
     confirmTx,
     cancel,
     cancelTx,
+    children,
   }) => {
     const handleConfirmation = useCallback(() => {
       onConfirm?.();
@@ -51,6 +52,7 @@ export const ConfirmationPopup = observer<ConfirmationPopUpProps>(
         shouldDismissOnOutsidePress
       >
         <Text tx={messageTx} text={message} />
+        {children}
         <InlineRow>
           <StyledTextButton
             label={cancel}

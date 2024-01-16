@@ -126,4 +126,10 @@ export class AnnotationGroup
       };
     }
   }
+
+  public delete() {
+    if (this.document.annotationGroups.includes(this)) {
+      this.document.deleteAnnotationGroup(this);
+    }
+  }
 }
