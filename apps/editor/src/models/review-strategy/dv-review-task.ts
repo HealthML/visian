@@ -39,9 +39,7 @@ export class DVReviewTask extends ReviewTask {
   }
 
   public get annotationIds(): string[] {
-    return this.dvTask.annotations.map(
-      (annotation) => annotation.annotationUUID,
-    );
+    return this.dvTask.annotationGroups.map((group) => group.annotationID);
   }
 
   constructor(dvTask: DVAnnotationTask) {
@@ -56,8 +54,8 @@ export class DVReviewTask extends ReviewTask {
 
   public async getAnnotationFiles(annotationId: string) {
     const id = this.dvTask.taskUUID;
-    const dvAnnotation = this.dvTask?.annotations.find(
-      (annotation) => annotation.annotationUUID === annotationId,
+    const dvAnnotation = this.dvTask?.annotationGroups.find(
+      (annotation) => annotation.annotationID === annotationId,
     );
     if (!dvAnnotation) return null;
 

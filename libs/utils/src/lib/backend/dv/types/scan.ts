@@ -1,9 +1,9 @@
-export interface DVAnnotationDataSnapshot {
+export interface DVScanSnapshot {
   scanId: number;
   data: string;
 }
 
-export class DVAnnotationData {
+export class DVScan {
   public scanID: number;
   public data: string;
 
@@ -13,7 +13,7 @@ export class DVAnnotationData {
     this.data = scan.data;
   }
 
-  public toJSON(): DVAnnotationDataSnapshot {
+  public toJSON(): DVScanSnapshot {
     return {
       scanId: this.scanID,
       data: this.data,
