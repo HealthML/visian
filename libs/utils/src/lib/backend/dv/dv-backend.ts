@@ -1,12 +1,16 @@
+import { json } from "stream/consumers";
+import * as jsonData from "./importExamples/schema.json";
 import { DVAnnotationTask } from "./types";
 import axios, { Axios, AxiosRequestConfig } from "axios";
 
 export const dvBackendBaseUrl = "https://annotation.ai4h.net/api/v1";
 
 export const getDVTask = async (taskId: string): Promise<DVAnnotationTask> => {
-  //TODO: implemnt getDVTask
+  //TODO: implement getDVTask
   const data = null;
-  const task = new DVAnnotationTask(data);
+  console.log("getDVTask", jsonData);
+  const task = new DVAnnotationTask(jsonData);
+  console.log("getDVTask", task);
   return task;
 };
 
