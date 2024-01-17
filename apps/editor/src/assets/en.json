@@ -131,8 +131,6 @@
 
   "confirm-task-annotation-tooltip": "Confirm",
   "skip-task-annotation-tooltip": "Skip",
-  "verify-annotation-tooltip": "Verify",
-  "unverify-annotation-tooltip": "Unverify",
   "next-task-tooltip": "Next Task",
   "previous-task-tooltip": "Previous Task",
   "unsaved-changes-title": "Unsaved Changes!",
@@ -421,6 +419,8 @@
   "dataset-name": "Dataset Name",
 
   "verified": "verified",
+  "not-verified": "not verified",
+  "disabled": "disabled",
 
   "progress-total": "Total Images",
   "progress-verified": "Verified",
