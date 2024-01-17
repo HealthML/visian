@@ -7,6 +7,9 @@ export interface DVAnnotationTaskSnapshot {
   taskID: string;
   userID: string;
   case: any;
+  scan: any;
+  annotationGroups: any[];
+  rois: any[];
 }
 
 export class DVAnnotationTask {
@@ -42,7 +45,9 @@ export class DVAnnotationTask {
       taskID: this.taskUUID,
       userID: this.userID,
       case: this.case.toJSON(),
-      // TODO complete toJSON
+      scan: this.scan.toJSON(),
+      annotationGroups: this.annotationGroups.map((group) => group.toJSON()),
+      rois: this.rois.map((roi) => roi.toJSON()),
     };
   }
 }
