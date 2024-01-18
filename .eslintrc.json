@@ -86,16 +86,10 @@
         "groups": [["builtin", "external", "internal"]],
         "newlines-between": "always",
         "alphabetize": {
-          "order": "asc"
+          "order": "asc",
+          "caseInsensitive": true
         },
         "warnOnUnassignedImports": false
-      }
-    ],
-    "sort-imports": [
-      "error",
-      {
-        "ignoreCase": true,
-        "ignoreDeclarationSort": true
       }
     ],
     "import/prefer-default-export": "off",
@@ -195,6 +189,10 @@
         "argsIgnorePattern": "^_",
         "ignoreRestSiblings": true
       }
+    ],
+    "no-empty-function": [
+      "error",
+      { "allow": ["constructors", "arrowFunctions"] }
     ],
 
     "react/self-closing-comp": "error",
