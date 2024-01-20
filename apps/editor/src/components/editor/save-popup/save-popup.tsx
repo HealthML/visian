@@ -1,6 +1,7 @@
 import {
   Button,
   DropDown,
+  IAnnotationGroup,
   ILayer,
   LayerList,
   PopUp,
@@ -23,7 +24,6 @@ import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
 import { importFilesToDocument } from "../../../import-handling";
-import { AnnotationGroup } from "../../../models/editor/annotation-groups";
 import { MiaReviewTask } from "../../../models/review-strategy";
 import { fetchAnnotationFile } from "../../../queries";
 import { SavePopUpProps } from "./save-popup.props";
@@ -91,28 +91,22 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
     [newAnnotationURIPrefix, selectedExtension],
   );
 
-  const createGroupForNewAnnotation = (
-    layer: ILayer | undefined,
+  const addMetadataToGroup = (
+    annotationGroup: IAnnotationGroup | undefined,
     annotation: MiaAnnotation | undefined,
   ) => {
     const document = store?.editor.activeDocument;
-    if (document && layer) {
-      const annotationGroup = new AnnotationGroup(undefined, document);
-      document.addAnnotationGroup(annotationGroup);
-      if (annotation) {
-        annotationGroup.setTitle(
-          annotation.dataUri.split("/").pop() ?? "annotation group :)",
-        );
-        annotationGroup.metadata = {
-          ...annotation,
-          backend: "mia",
-          kind: "annotation",
-        };
-      }
-      const groupLayers = layer.getAnnotationGroupLayers();
-      groupLayers.forEach((l) => annotationGroup.addLayer(l));
-      return annotationGroup;
+    if (document && annotationGroup && annotation) {
+      annotationGroup.metadata = {
+        ...annotation,
+        backend: "mia",
+        kind: "annotation",
+      };
+      annotationGroup.layers.forEach((l) => {
+        l.metadata = { ...l, backend: "mia", kind: "annotation" };
+      });
     }
+    return annotationGroup;
   };
 
   const createFileForAnnotationGroupOf = async (
@@ -251,7 +245,7 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
             reviewTask.getAnnotation(newAnnotationId)!
           : annotationMeta;
       if (!annotationMeta) {
-        createGroupForNewAnnotation(activeLayer, newAnnotationMeta);
+        addMetadataToGroup(activeLayer?.annotationGroup, newAnnotationMeta);
       } else {
         await loadOldAnnotation(newAnnotationMeta, annotationMeta);
       }
