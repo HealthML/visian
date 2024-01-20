@@ -15,12 +15,16 @@ import {
   useForwardEvent,
   useTranslation,
 } from "@visian/ui-shared";
-import { Pixel } from "@visian/utils";
+import { isMiaAnnotationMetadata, MiaAnnotation, Pixel } from "@visian/utils";
 import { observer } from "mobx-react-lite";
 import { useCallback, useEffect, useState } from "react";
 import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
+import {
+  getAnnotation,
+  useDeleteAnnotationsForImageMutation,
+} from "../../../queries";
 import { ConfirmationPopup, usePopUpState } from "../../data-manager";
 import { DraggableLayerListItem } from "./draggable-layer-list-item";
 
@@ -113,18 +117,46 @@ export const AnnotationGroupListItem = observer<{
     closeDeleteConfirmationPopUp,
   ] = usePopUpState(false);
 
-  const deleteAnnotationGroup = useCallback(() => {
-    if (group.metadata) {
-      // message popup is not able to delete
+  const { deleteAnnotations } = useDeleteAnnotationsForImageMutation();
+  const [miaAnnotationToBeDeleted, setMiaAnnotationToBeDeleted] =
+    useState<MiaAnnotation>();
+
+  const deleteAnnotationGroup = useCallback(async () => {
+    if (group.metadata && isMiaAnnotationMetadata(group.metadata)) {
+      try {
+        const miaAnnotation = await getAnnotation(group.metadata.id);
+        setMiaAnnotationToBeDeleted(miaAnnotation);
+        openDeleteConfirmationPopUp();
+      } catch (error) {
+        store?.setError({
+          titleTx: "get-annotation-error",
+          description: t("get-annotation-error-description", {
+            id: miaAnnotationToBeDeleted?.id,
+          }),
+        });
+      }
     } else {
       openDeleteConfirmationPopUp();
     }
-  }, [group.metadata, openDeleteConfirmationPopUp]);
+  }, [
+    group.metadata,
+    miaAnnotationToBeDeleted?.id,
+    openDeleteConfirmationPopUp,
+    store,
+    t,
+  ]);
 
   const handleDeletionConfirmation = useCallback(() => {
+    if (miaAnnotationToBeDeleted) {
+      deleteAnnotations({
+        imageId: miaAnnotationToBeDeleted?.image,
+        annotationIds: [miaAnnotationToBeDeleted?.id],
+      });
+      setMiaAnnotationToBeDeleted(undefined);
+    }
     group.delete();
     setContextMenuPosition(null);
-  }, [group]);
+  }, [deleteAnnotations, group, miaAnnotationToBeDeleted]);
 
   return (
     <>
@@ -186,6 +218,14 @@ export const AnnotationGroupListItem = observer<{
         <LayerListContainer>
           <LayerList layers={group.layers} />
         </LayerListContainer>
+        {group.metadata && (
+          <Text
+            text={t("delete-backend-data-warning", {
+              name: group.title,
+              dataUri: miaAnnotationToBeDeleted?.dataUri,
+            })}
+          />
+        )}
       </ConfirmationPopup>
     </>
   );

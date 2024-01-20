@@ -55,7 +55,7 @@ const OuterWrapper = styled("div")`
   width: 100%;
 `;
 
-const LayerList = styled(List)`
+const StyledLayerList = styled(List)`
   ${styledScrollbarMixin}
 
   margin-top: -16px;
@@ -354,7 +354,7 @@ export const Layers: React.FC = observer(() => {
               items={layerIds}
               strategy={verticalListSortingStrategy}
             >
-              <LayerList onWheel={stopPropagation}>
+              <StyledLayerList onWheel={stopPropagation}>
                 {listItems}
                 {layers.length === 0 ? (
                   <ListItem isLast>
@@ -363,7 +363,7 @@ export const Layers: React.FC = observer(() => {
                 ) : (
                   false
                 )}
-              </LayerList>
+              </StyledLayerList>
             </SortableContext>
             {createPortal(
               <DragOverlay>

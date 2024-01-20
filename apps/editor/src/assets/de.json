@@ -436,5 +436,8 @@
   "review-description": "{{taskType}} der Annotationen des Bildes {{image}}.",
 
   "untitled-group": "Unbenannte Gruppe",
-  "delete-annotation-group-message": "Wollen Sie die Annotation \"{{name}}\" und die folgenden Ebenen wirklich löschen??"
+  "delete-annotation-group-message": "Wollen Sie die Annotation \"{{name}}\" und die folgenden Ebenen wirklich löschen??",
+  "delete-backend-data-warning": "Warnung: Durch das Löschen der Annotationsgruppe \"{{name}}\" werden auch bereits unter \"{{dataUri}}\" gespeicherte Daten unwiederruflich gelöscht!",
+  "get-annotation-error": "Annotation konnte nicht gefunden werden",
+  "get-annotation-error-description": "Die Annotation mit der ID \"{{id}}\" konnte nicht gefunden werden."
 }
