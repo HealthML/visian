@@ -46,7 +46,6 @@ export class MiaReviewStrategy extends ReviewStrategy {
     taskType?: TaskType,
   ) {
     const images = await imagesApi.findAllImages({
-      dataset: undefined,
       job: jobId,
     });
     return new MiaReviewStrategy({ store, images, jobId, taskType });
