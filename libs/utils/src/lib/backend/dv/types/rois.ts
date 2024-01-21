@@ -1,23 +1,23 @@
 export interface DVRoisSnapshot {
   z: number;
-  user: number;
-  scan: number;
-  group: number;
+  user: string;
+  scanID: string;
+  group: string;
   points: number[];
 }
 
 export class DVRois {
   public z: number;
-  public user: number;
-  public scan: number;
-  public group: number;
+  public user: string;
+  public scanID: string;
+  public layer: string;
   public points: number[];
 
   constructor(rois: any) {
     this.z = rois.z;
     this.user = rois.user;
-    this.scan = rois.scan;
-    this.group = rois.group;
+    this.scanID = rois.scan;
+    this.layer = rois.group;
     this.points = rois.points;
   }
 
@@ -25,8 +25,8 @@ export class DVRois {
     return {
       z: this.z,
       user: this.user,
-      scan: this.scan,
-      group: this.group,
+      scanID: this.scanID,
+      group: this.layer,
       points: this.points,
     };
   }

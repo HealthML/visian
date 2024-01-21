@@ -2,6 +2,7 @@ import { RootStore } from "../root";
 import { ReviewStrategy } from "./review-strategy";
 import { ReviewStrategySnapshot } from "./review-strategy-snapshot";
 import { DVReviewTask } from "./dv-review-task";
+import { getDVTask } from "@visian/utils";
 
 export class DVReviewStrategy extends ReviewStrategy {
   public static fromSnapshot(
@@ -45,7 +46,11 @@ export class DVReviewStrategy extends ReviewStrategy {
 
   // Importing
   protected async buildTask() {
-    // TODO: implement buildTask
+    // TODO: receiving the task id from the url is not implemented yet
+    const dvTask = await getDVTask("dv-task-id");
+
+    if (!dvTask) throw new Error("DV Task not found.");
+    this.setCurrentTask(new DVReviewTask(dvTask));
   }
 
   protected async importAnnotations(): Promise<void> {

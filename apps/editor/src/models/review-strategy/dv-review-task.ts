@@ -1,6 +1,7 @@
 import {
   DVAnnotationTask,
   DVAnnotationTaskSnapshot,
+  createFileFromBase64,
   putDVTask,
 } from "@visian/utils";
 import { AxiosResponse } from "axios";
@@ -21,24 +22,28 @@ export class DVReviewTask extends ReviewTask {
   private dvTask: DVAnnotationTask;
 
   public get id(): string {
-    return this.dvTask.taskUUID;
+    console.log("Get ID");
+    return this.dvTask.taskID;
   }
 
   public get kind(): TaskType {
+    console.log("Get Kind");
     return TaskType.Create;
   }
 
   public get title(): string {
-    //TODO: Is there a proper title?
-    return "DV Task Title Placeholder";
+    console.log("Get Title");
+    return "Case ID: " + this.dvTask.case.caseID;
   }
 
   public get description(): string {
+    console.log("Get Description");
     //TODO: Is there a proper description?
     return "DV Task Description Placeholder";
   }
 
   public get annotationIds(): string[] {
+    console.log("Get Annotation IDs");
     return this.dvTask.annotationGroups.map((group) => group.annotationID);
   }
 
@@ -48,14 +53,15 @@ export class DVReviewTask extends ReviewTask {
   }
 
   public async getImageFiles() {
-    //TODO: get image files from this.dvTask.scan.data?
-    return [];
+    console.log("Get Image Files");
+    return [createFileFromBase64("DV Image", this.dvTask.scan.data)];
   }
 
   public async getAnnotationFiles(annotationId: string) {
-    const id = this.dvTask.taskUUID;
+    console.log("Get Annotation Files");
+    const id = this.dvTask.taskID;
     const dvAnnotation = this.dvTask?.annotationGroups.find(
-      (annotation) => annotation.annotationID === annotationId,
+      (annotation) => annotation.annotationID == annotationId,
     );
     if (!dvAnnotation) return null;
 
@@ -64,15 +70,19 @@ export class DVReviewTask extends ReviewTask {
   }
 
   public async createAnnotation(files: File[]) {
+    console.log("Create Annotation");
     return "newAnnotationId Placeholder";
   }
 
   public async updateAnnotation(
     annotationId: string,
     files: File[],
-  ): Promise<void> {}
+  ): Promise<void> {
+    console.log("Update Annotation");
+  }
 
   public async save(): Promise<AxiosResponse> {
+    console.log("Save");
     return putDVTask(this.id, JSON.stringify(this.dvTask.toJSON()));
   }
 

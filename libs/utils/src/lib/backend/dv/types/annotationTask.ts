@@ -1,4 +1,4 @@
-import { DVAnnotationGroup } from "./annotationGroup";
+import { DVAnnotationLayer } from "./annotationLayer";
 import { DVScan as DVScan } from "./scan";
 import { DVRois } from "./rois";
 import { DVCase } from "./case";
@@ -13,26 +13,43 @@ export interface DVAnnotationTaskSnapshot {
 }
 
 export class DVAnnotationTask {
-  public taskUUID: string;
+  public taskID: string;
   public userID: string;
   public scan: DVScan;
   public case: DVCase;
-  public annotationGroups: DVAnnotationGroup[];
+  public annotationGroups: DVAnnotationLayer[];
   public rois: DVRois[];
 
   // TODO: Properly type API response data
   constructor(task: any) {
-    this.taskUUID = task.taskID;
+    this.taskID = task.taskID;
     this.userID = task.userID;
     this.case = new DVCase(task.case);
     this.scan = new DVScan(task.scan);
-    this.annotationGroups = this.parseAnnotationGroups(task.annotationGroups);
     this.rois = this.parseRois(task.rois);
+    const layerUserMapping = this.getLayerUserMapping(this.rois);
+    this.annotationGroups = this.parseAnnotationLayers(
+      task.annotationGroups,
+      layerUserMapping,
+    );
   }
 
-  private parseAnnotationGroups(annotationGroups: any): DVAnnotationGroup[] {
+  private getLayerUserMapping(rois: DVRois[]): Map<string, string> {
+    var layerUserMapping = new Map<string, string>();
+    rois.forEach((roi) => {
+      layerUserMapping.set(roi.layer, roi.user);
+    });
+
+    return layerUserMapping;
+  }
+
+  private parseAnnotationLayers(
+    annotationGroups: any,
+    layerUserMapping: Map<string, string>,
+  ): DVAnnotationLayer[] {
     return annotationGroups.map(
-      (annotationGroup: any) => new DVAnnotationGroup(annotationGroup),
+      (annotationGroup: any) =>
+        new DVAnnotationLayer(annotationGroup, layerUserMapping),
     );
   }
 
@@ -42,7 +59,7 @@ export class DVAnnotationTask {
 
   public toJSON(): DVAnnotationTaskSnapshot {
     return {
-      taskID: this.taskUUID,
+      taskID: this.taskID,
       userID: this.userID,
       case: this.case.toJSON(),
       scan: this.scan.toJSON(),
