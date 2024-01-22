@@ -1,11 +1,20 @@
 const GZIP_MAGIC_NUMBER = "1f8b";
+const ZIP_MAGIC_NUMBER = "504b0304";
 
-const isGzipData = (dataArray: Uint8Array) => {
-  const hexData = Array.from(dataArray, (byte) =>
+const convertToHex = (dataArray: Uint8Array): string => {
+  return Array.from(dataArray, (byte) =>
     `0${(byte & 0xff).toString(16)}`.slice(-2),
   ).join("");
-  if (hexData.substring(0, 4) === GZIP_MAGIC_NUMBER) return true;
-  return false;
+};
+
+const isGzipData = (dataArray: Uint8Array): boolean => {
+  const hexData = convertToHex(dataArray);
+  return hexData.substring(0, 4) === GZIP_MAGIC_NUMBER;
+};
+
+const isZipData = (dataArray: Uint8Array): boolean => {
+  const hexData = convertToHex(dataArray);
+  return hexData.substring(0, 8) === ZIP_MAGIC_NUMBER;
 };
 
 export const createFileFromBase64 = (
@@ -22,10 +31,11 @@ export const createFileFromBase64 = (
     bytes[i] = decodedData.charCodeAt(i);
   }
   const binaryData = new Uint8Array(bytes);
-
   const fileNameForType =
     isGzipData(binaryData) && !fileName.endsWith(".gz")
       ? fileName.concat(".gz")
+      : isZipData(binaryData) && !fileName.endsWith(".zip")
+      ? fileName.concat(".zip")
       : fileName;
   return new File([binaryData], fileNameForType);
 };
