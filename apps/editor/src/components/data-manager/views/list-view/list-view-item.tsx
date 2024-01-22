@@ -10,6 +10,10 @@ const ClickableListItem = styled(ListItem)`
   cursor: pointer;
 `;
 
+const StyledText = styled(Text)`
+  width: 95%;
+`;
+
 export const ListViewItem = ({
   item,
   onDelete,
@@ -24,7 +28,7 @@ export const ListViewItem = ({
   isLast: boolean;
 }) => (
   <ClickableListItem onClick={onClick} isLast={isLast}>
-    <Text text={item.name} />
+    <StyledText title={item.name} text={item.name} />
     <ExpandedSpacer />
     <OptionSelector
       options={[

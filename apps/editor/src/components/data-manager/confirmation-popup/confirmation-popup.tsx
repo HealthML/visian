@@ -23,6 +23,10 @@ const ConfirmationPopupContainer = styled(PopUp)`
   width: 400px;
 `;
 
+const StyledText = styled(Text)`
+  overflow-wrap: anywhere;
+`;
+
 export const ConfirmationPopup = observer<ConfirmationPopUpProps>(
   ({
     isOpen,
@@ -50,7 +54,7 @@ export const ConfirmationPopup = observer<ConfirmationPopUpProps>(
         dismiss={onClose}
         shouldDismissOnOutsidePress
       >
-        <Text tx={messageTx} text={message} />
+        <StyledText tx={messageTx} text={message} />
         <InlineRow>
           <StyledTextButton
             label={cancel}
