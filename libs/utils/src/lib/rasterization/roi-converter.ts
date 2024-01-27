@@ -14,10 +14,10 @@ export function fillContours(
 ): Uint8Array {
   const contours = new cv.MatVector();
   const hierarchy = new cv.Mat();
-  const slice = cv.matFromArray(width, height, cv.CV_8UC1, annotationSlice);
+  const slice = cv.matFromArray(height, width, cv.CV_8UC1, annotationSlice);
   const filledSlice = cv.Mat.zeros(slice.rows, slice.cols, cv.CV_8UC1);
 
-  // Find only the outer contours in the binary image
+  // Find only the outer contours
   cv.findContours(
     slice,
     contours,
@@ -81,8 +81,9 @@ export function findContours(
 ): Int32Array[] {
   const contours = new cv.MatVector();
   const hierarchy = new cv.Mat();
-  const slice = cv.matFromArray(width, height, cv.CV_8UC1, annotationSlice);
+  const slice = cv.matFromArray(height, width, cv.CV_8UC1, annotationSlice);
 
+  // Find all contours with hierarchy (incl. inner contours)
   cv.findContours(
     slice,
     contours,
@@ -101,4 +102,39 @@ export function findContours(
   hierarchy.delete();
 
   return rois;
+}
+
+/**
+ * Given an array of ROIs, draws the outline of each ROI on an empty annotationslice.
+ * @param rois Array of ROIs, where each ROI is an array of points [x1, y1, x2, y2,...].
+ * @param width Width of the slice.
+ * @param height Height of the slice.
+ * @returns The annotation slice with the drawn contours.
+ */
+export function drawContours(
+  rois: Int32Array[],
+  width: number,
+  height: number,
+): Uint8Array {
+  const slice = cv.Mat.zeros(height, width, cv.CV_8UC1);
+  const contours = new cv.MatVector();
+
+  for (let i = 0; i < rois.length; i++) {
+    const coordinates = rois[i];
+    // 32-bit signed integer, 2-channel (x,y) matrix
+    // thereofore, the number of rows is half the number of coordinates
+    const contourMat = cv.matFromArray(
+      coordinates.length / 2,
+      1,
+      cv.CV_32SC2,
+      coordinates,
+    );
+    contours.push_back(contourMat);
+  }
+
+  // Draw all contours with thickness of 1, but do not fill the area inside
+  cv.drawContours(slice, contours, -1, new cv.Scalar(255));
+  contours.delete();
+
+  return slice.data;
 }
