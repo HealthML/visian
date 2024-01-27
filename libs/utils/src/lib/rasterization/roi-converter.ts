@@ -29,7 +29,7 @@ export function fillContours(
   // Fill the outer contours completely
   cv.drawContours(filledSlice, contours, -1, new cv.Scalar(255), cv.FILLED);
 
-  // Find contours all contours with hierarchy (incl. inner contours)
+  // Find all contours with hierarchy (incl. inner contours)
   cv.findContours(
     slice,
     contours,
@@ -39,10 +39,19 @@ export function fillContours(
   );
 
   for (let i = 0; i < contours.size(); ++i) {
-    // Check if the contour has no child (-1)
     // Hierarchy format: [c1_next, c1_previous, c1_firstChild, c1_parent, c2_next, ...]
-    const child = hierarchy.data32S[i * hierarchy.channels() + 2];
-    if (child < 0) {
+    const parentIdx = hierarchy.data32S[i * hierarchy.channels() + 3];
+
+    const hasChild = hierarchy.data32S[i * hierarchy.channels() + 2] < 0;
+    const hasParent = parentIdx >= 0;
+    let hasGrandparent = false;
+
+    if (hasParent) {
+      hasGrandparent =
+        hierarchy.data32S[parentIdx * hierarchy.channels() + 3] >= 0;
+    }
+
+    if (hasChild && hasGrandparent) {
       // fill the contour with black color, but this erases the border
       cv.drawContours(filledSlice, contours, i, new cv.Scalar(0), -1);
       // draw the border again
