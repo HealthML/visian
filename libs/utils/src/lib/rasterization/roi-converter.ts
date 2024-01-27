@@ -66,3 +66,39 @@ export function fillContours(
 
   return filledSlice.data;
 }
+
+/**
+ * Finds all contours in an annotation slice and returns them as an array of ROI points.
+ * @param annotationSlice Slice of one annotation layer (2D).
+ * @param width Width of the slice.
+ * @param height Height of the slice.
+ * @returns An array of ROIs, where each ROI is an array of points [x1, y1, x2, y2,...].
+ */
+export function findContours(
+  annotationSlice: Uint8Array,
+  width: number,
+  height: number,
+): Int32Array[] {
+  const contours = new cv.MatVector();
+  const hierarchy = new cv.Mat();
+  const slice = cv.matFromArray(width, height, cv.CV_8UC1, annotationSlice);
+
+  cv.findContours(
+    slice,
+    contours,
+    hierarchy,
+    cv.RETR_TREE,
+    cv.CHAIN_APPROX_SIMPLE,
+  );
+
+  const rois = [];
+  for (let i = 0; i < contours.size(); ++i) {
+    rois.push(contours.get(i).data32S);
+  }
+
+  slice.delete();
+  contours.delete();
+  hierarchy.delete();
+
+  return rois;
+}
