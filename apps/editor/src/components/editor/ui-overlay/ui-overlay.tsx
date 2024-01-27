@@ -2,11 +2,20 @@ import {
   AbsoluteCover,
   FlexRow,
   FloatingUIButton,
+  IImageLayer,
   Notification,
   Spacer,
   Text,
 } from "@visian/ui-shared";
-import { isFromMia, isFromWHO } from "@visian/utils";
+import {
+  drawContours,
+  fillContours,
+  findContours,
+  getPlaneAxes,
+  isFromMia,
+  isFromWHO,
+  ViewType,
+} from "@visian/utils";
 import { observer } from "mobx-react-lite";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import styled from "styled-components";
@@ -39,6 +48,7 @@ import { Toolbar } from "../toolbar";
 import { TopConsole } from "../top-console";
 import { UndoRedoButtons } from "../undo-redo-buttons";
 import { ViewSettings } from "../view-settings";
+import { rois } from "./temp-points";
 import { UIOverlayProps } from "./ui-overlay.props";
 
 const Container = styled(AbsoluteCover)`
@@ -203,6 +213,59 @@ export const UIOverlay = observer<UIOverlayProps>(
       setIsExportPopUpOpen(false);
     }, []);
 
+    const findROI = useCallback(() => {
+      const layer = store?.editor.activeDocument?.activeLayer as IImageLayer;
+      if (!layer || !layer.isAnnotation) return;
+
+      const [widthAxis, heightAxis] = getPlaneAxes(ViewType.Transverse);
+      const width = layer.image.voxelCount[widthAxis];
+      const height = layer.image.voxelCount[heightAxis];
+
+      let data = layer.getSlice(ViewType.Transverse, 0) as Uint8Array;
+      const contours = findContours(data, width, height);
+      // eslint-disable-next-line no-console
+      console.log("roi coordinates as found by findContours", contours);
+      data = drawContours(contours, width, height);
+      layer.setSlice(ViewType.Transverse, 0, data);
+    }, [store?.editor.activeDocument?.activeLayer]);
+
+    const drawROI = useCallback(() => {
+      const layer = store?.editor.activeDocument?.activeLayer as IImageLayer;
+      if (!layer || !layer.isAnnotation) return;
+
+      const [widthAxis, heightAxis] = getPlaneAxes(ViewType.Transverse);
+      const width = layer.image.voxelCount[widthAxis];
+      const height = layer.image.voxelCount[heightAxis];
+
+      const intRois = [];
+      for (let i = 0; i < rois.length; i++) {
+        const roi = rois[i];
+        const intRoi = new Int32Array(roi.length);
+        for (let j = 0; j < roi.length; j++) {
+          intRoi[j] = Math.round(roi[j]);
+        }
+        intRois.push(intRoi);
+      }
+
+      // eslint-disable-next-line no-console
+      console.log("roi coordinates as loaded from file", intRois);
+      const data = drawContours(intRois, width, height);
+      layer.setSlice(ViewType.Transverse, 0, data);
+    }, [store?.editor.activeDocument?.activeLayer]);
+
+    const fillROI = useCallback(() => {
+      const layer = store?.editor.activeDocument?.activeLayer as IImageLayer;
+      if (!layer || !layer.isAnnotation) return;
+
+      const [widthAxis, heightAxis] = getPlaneAxes(ViewType.Transverse);
+      const width = layer.image.voxelCount[widthAxis];
+      const height = layer.image.voxelCount[heightAxis];
+
+      let data = layer.getSlice(ViewType.Transverse, 0) as Uint8Array;
+      data = fillContours(data, width, height);
+      layer.setSlice(ViewType.Transverse, 0, data);
+    }, [store?.editor.activeDocument?.activeLayer]);
+
     return (
       <Container
         {...rest}
@@ -313,6 +376,30 @@ export const UIOverlay = observer<UIOverlayProps>(
                   </>
                 )}
                 <ViewSettings />
+                <FloatingUIButton
+                  icon="outline"
+                  isDisabled={false}
+                  tooltip="Draw a ROI outline (loaded from file)"
+                  tooltipPosition="left"
+                  onPointerDown={drawROI}
+                  isActive={false}
+                />
+                <FloatingUIButton
+                  icon="outline"
+                  isDisabled={false}
+                  tooltip="Fill a ROI outline"
+                  tooltipPosition="left"
+                  onPointerDown={fillROI}
+                  isActive={false}
+                />
+                <FloatingUIButton
+                  icon="outline"
+                  isDisabled={false}
+                  tooltip="Find and log ROI contours to console (and draw them again to check they are equal to the ones loaded from file)"
+                  tooltipPosition="left"
+                  onPointerDown={findROI}
+                  isActive={false}
+                />
                 <SliceSlider showValueLabelOnChange={!isDraggedOver} />
               </RightBar>
             </ColumnRight>
