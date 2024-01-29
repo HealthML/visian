@@ -8,6 +8,10 @@ export const isFromMia = () => {
   return Boolean(params.get("review"));
 };
 
+export const isFromDV = () => {
+  return true;
+};
+
 export const isUsingLocalhost = () => window.location.hostname === "localhost";
 
 export const getWHOTaskIdFromUrl = () =>

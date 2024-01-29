@@ -1,10 +1,11 @@
 import { i18n, LocalForageBackend } from "@visian/ui-shared";
-import { isFromWHO, readFileFromURL } from "@visian/utils";
+import { isFromWHO, isFromDV, readFileFromURL } from "@visian/utils";
 import React from "react";
 
 import { storePersistInterval } from "../constants";
 import { RootStore } from "../models";
 import { WHOReviewStrategy } from "../models/review-strategy";
+import { DVReviewStrategy } from "../models/review-strategy/dv-review-strategy";
 
 export const storageBackend = new LocalForageBackend(
   storePersistInterval,
@@ -57,6 +58,11 @@ export const setupRootStore = async () => {
 
     if (isFromWHO()) {
       store.setReviewStrategy(new WHOReviewStrategy({ store }));
+      store.reviewStrategy?.loadTask();
+    }
+
+    if (isFromDV()) {
+      store.setReviewStrategy(new DVReviewStrategy({ store }));
       store.reviewStrategy?.loadTask();
     }
   })();

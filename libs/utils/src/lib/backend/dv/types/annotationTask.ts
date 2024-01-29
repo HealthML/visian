@@ -17,7 +17,7 @@ export class DVAnnotationTask {
   public userID: string;
   public scan: DVScan;
   public case: DVCase;
-  public annotationGroups: DVAnnotationLayer[];
+  public annotationLayers: DVAnnotationLayer[];
   public rois: DVRois[];
 
   // TODO: Properly type API response data
@@ -28,7 +28,7 @@ export class DVAnnotationTask {
     this.scan = new DVScan(task.scan);
     this.rois = this.parseRois(task.rois);
     const layerUserMapping = this.getLayerUserMapping(this.rois);
-    this.annotationGroups = this.parseAnnotationLayers(
+    this.annotationLayers = this.parseAnnotationLayers(
       task.annotationGroups,
       layerUserMapping,
     );
@@ -63,7 +63,7 @@ export class DVAnnotationTask {
       userID: this.userID,
       case: this.case.toJSON(),
       scan: this.scan.toJSON(),
-      annotationGroups: this.annotationGroups.map((group) => group.toJSON()),
+      annotationGroups: this.annotationLayers.map((group) => group.toJSON()),
       rois: this.rois.map((roi) => roi.toJSON()),
     };
   }
