@@ -1,8 +1,46 @@
 import cv from "@techstark/opencv-js";
 
 /**
- * Finds all contours in an annotation slice and fills them.
- * @param annotationSlice Slice of one annotation layer (2D).
+ * Given an array of ROIs (region of interest), draws the outline of each ROI on an empty annotationslice.
+ * The ROIs have no hierarchy, so they are drawn as independent contours, which allows
+ * finding contours enclosed by others in a later step (e.g. donut shape).
+ * @param rois Array of ROIs, where each ROI is an array of points [x1, y1, x2, y2,...].
+ * @param width Width of the slice.
+ * @param height Height of the slice.
+ * @returns The annotation slice with the drawn contours.
+ */
+export function drawContours(
+  rois: Int32Array[],
+  width: number,
+  height: number,
+): Uint8Array {
+  const slice = cv.Mat.zeros(height, width, cv.CV_8UC1);
+  const contours = new cv.MatVector();
+
+  for (let i = 0; i < rois.length; i++) {
+    const coordinates = rois[i];
+    // 32-bit signed integer, 2-channel (x,y) matrix
+    // thereofore, the number of rows is half the number of coordinates
+    const contourMat = cv.matFromArray(
+      coordinates.length / 2,
+      1,
+      cv.CV_32SC2,
+      coordinates,
+    );
+    contours.push_back(contourMat);
+  }
+
+  // Draw all contours with thickness of 1, but do not fill the area inside
+  cv.drawContours(slice, contours, -1, new cv.Scalar(255));
+  contours.delete();
+
+  return slice.data;
+}
+
+/**
+ * Finds all external and internal contours in an annotation slice and fills them.
+ * It handles the edge case of a donut shape in which a contour is enclosed by another (hierarchy).
+ * @param annotationSlice Slice of one annotation layer (2D) that contains contours.
  * @param width Width of the slice.
  * @param height Height of the slice.
  * @returns The slice with filled contours.
@@ -68,7 +106,7 @@ export function fillContours(
 }
 
 /**
- * Finds all contours in an annotation slice and returns them as an array of ROI points.
+ * Finds all contours in an annotation slice and returns them as an array of ROI points (region of interest).
  * @param annotationSlice Slice of one annotation layer (2D).
  * @param width Width of the slice.
  * @param height Height of the slice.
@@ -102,39 +140,4 @@ export function findContours(
   hierarchy.delete();
 
   return rois;
-}
-
-/**
- * Given an array of ROIs, draws the outline of each ROI on an empty annotationslice.
- * @param rois Array of ROIs, where each ROI is an array of points [x1, y1, x2, y2,...].
- * @param width Width of the slice.
- * @param height Height of the slice.
- * @returns The annotation slice with the drawn contours.
- */
-export function drawContours(
-  rois: Int32Array[],
-  width: number,
-  height: number,
-): Uint8Array {
-  const slice = cv.Mat.zeros(height, width, cv.CV_8UC1);
-  const contours = new cv.MatVector();
-
-  for (let i = 0; i < rois.length; i++) {
-    const coordinates = rois[i];
-    // 32-bit signed integer, 2-channel (x,y) matrix
-    // thereofore, the number of rows is half the number of coordinates
-    const contourMat = cv.matFromArray(
-      coordinates.length / 2,
-      1,
-      cv.CV_32SC2,
-      coordinates,
-    );
-    contours.push_back(contourMat);
-  }
-
-  // Draw all contours with thickness of 1, but do not fill the area inside
-  cv.drawContours(slice, contours, -1, new cv.Scalar(255));
-  contours.delete();
-
-  return slice.data;
 }
