@@ -2,6 +2,7 @@ import {
   DVAnnotationLayer,
   DVAnnotationTask,
   DVAnnotationTaskSnapshot,
+  DVLayerRoisEntry,
   ViewType,
   createFileFromBase64,
   drawContours,
@@ -73,31 +74,36 @@ export class DVReviewTask extends ReviewTask {
   public addGroupsAndLayers(document: Document) {
     //TODO: remove default group
 
-    const map = this.getDvVisianLayerMapping(document);
-    const roisList = this.dvTask.getLayerRoisList();
-
-    for (const rois of roisList) {
-      const visianLayerId = map.get(rois.layerID);
-      if (!visianLayerId) throw new Error("No visian layer");
-      const layer = document.getLayer(visianLayerId) as IImageLayer;
-      if (!layer || !layer.isAnnotation) throw new Error("No layer");
-      this.drawROIS(rois.rois, layer, rois.z);
-    }
+    const map = this.getDvVisianLayerIDMapping(document);
+    const layerList = this.dvTask.getLayerRoisList();
+    layerList.forEach((e) => this.drawLayer(document, e, map));
   }
 
-  private getDvVisianLayerMapping(document: Document): Map<string, string> {
+  private drawLayer(
+    document: Document,
+    entry: DVLayerRoisEntry,
+    idMap: Map<string, string>,
+  ) {
+    const visianLayerId = idMap.get(entry.layerID);
+    if (!visianLayerId) throw new Error("No visian layer");
+    const imageLayer = document.getLayer(visianLayerId) as IImageLayer;
+    if (!imageLayer || !imageLayer.isAnnotation) throw new Error("No layer");
+    this.drawROIS(entry.rois, imageLayer, entry.z);
+    this.fillROI(imageLayer, entry.z);
+    imageLayer.recomputeSliceMarkers(ViewType.Transverse);
+  }
+
+  private getDvVisianLayerIDMapping(document: Document): Map<string, string> {
     var map = new Map<string, string>();
-    for (const dvLayer of this.dvTask.annotationLayers) {
+    this.dvTask.annotationLayers.forEach((dvLayer) => {
       const visianLayer = this.addLayerFromAnnotation(dvLayer, document);
       map.set(dvLayer.annotationID, visianLayer.id);
-    }
+    });
     return map;
   }
 
   private drawROIS(rois: number[][], layer: IImageLayer, z: number) {
-    const [widthAxis, heightAxis] = getPlaneAxes(ViewType.Transverse);
-    const width = layer.image.voxelCount[widthAxis];
-    const height = layer.image.voxelCount[heightAxis];
+    const [width, height] = this.getWidthAndHeight(layer);
 
     const intRois = [];
     for (let i = 0; i < rois.length; i++) {
@@ -113,7 +119,21 @@ export class DVReviewTask extends ReviewTask {
     console.log("roi coordinates as loaded from file", intRois);
     const data = drawContours(intRois, width, height);
     layer.setSlice(ViewType.Transverse, z, data);
-    layer.recomputeSliceMarkers();
+  }
+
+  getWidthAndHeight(layer: IImageLayer): [number, number] {
+    const [widthAxis, heightAxis] = getPlaneAxes(ViewType.Transverse);
+    const width = layer.image.voxelCount[widthAxis];
+    const height = layer.image.voxelCount[heightAxis];
+    return [width, height];
+  }
+
+  private fillROI(layer: IImageLayer, z: number) {
+    const [width, height] = this.getWidthAndHeight(layer);
+
+    let data = layer.getSlice(ViewType.Transverse, z) as Uint8Array;
+    data = fillContours(data, width, height);
+    layer.setSlice(ViewType.Transverse, z, data);
   }
 
   private addNewGroup(title: string, document: Document): IAnnotationGroup {
