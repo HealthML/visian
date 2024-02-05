@@ -62,8 +62,6 @@ export class DVReviewTask extends ReviewTask {
   }
 
   public async getImageFiles() {
-    console.log("Get Image Files");
-
     return [createFileFromBase64("DVimage", this.dvTask.scan.data)];
   }
 
@@ -72,11 +70,16 @@ export class DVReviewTask extends ReviewTask {
   }
 
   public addGroupsAndLayers(document: Document) {
-    //TODO: remove default group
-
+    this.removeGroupsCreatedByDefault(document);
     const map = this.getDvVisianLayerIDMapping(document);
     const layerList = this.dvTask.getLayerRoisList();
     layerList.forEach((e) => this.drawLayer(document, e, map));
+  }
+
+  private removeGroupsCreatedByDefault(doc: Document) {
+    doc.annotationGroups.forEach((g) =>
+      doc.removeAnnotationGroup(g as AnnotationGroup),
+    );
   }
 
   private drawLayer(
@@ -115,8 +118,6 @@ export class DVReviewTask extends ReviewTask {
       intRois.push(intRoi);
     }
 
-    // eslint-disable-next-line no-console
-    console.log("roi coordinates as loaded from file", intRois);
     const data = drawContours(intRois, width, height);
     layer.setSlice(ViewType.Transverse, z, data);
   }
@@ -136,10 +137,10 @@ export class DVReviewTask extends ReviewTask {
     layer.setSlice(ViewType.Transverse, z, data);
   }
 
-  private addNewGroup(title: string, document: Document): IAnnotationGroup {
-    const newGroup = new AnnotationGroup({ title }, document);
-    document.addAnnotationGroup(newGroup);
-    return newGroup;
+  private addGroup(title: string, document: Document): IAnnotationGroup {
+    const group = new AnnotationGroup({ title }, document);
+    document.addAnnotationGroup(group);
+    return group;
   }
 
   private addLayerFromAnnotation(
@@ -148,11 +149,10 @@ export class DVReviewTask extends ReviewTask {
   ): ImageLayer {
     if (!document.mainImageLayer) throw new Error("No main image layer");
 
-    //TODO: add correct color
     const layer = ImageLayer.fromNewAnnotationForImage(
       document.mainImageLayer.image,
       document,
-      document.getFirstUnusedColor(),
+      dvLayer.color,
     );
     layer.setTitle(dvLayer.label);
 
@@ -172,7 +172,7 @@ export class DVReviewTask extends ReviewTask {
       (group: IAnnotationGroup) => group.title === groupTitle,
     );
     if (!group) {
-      group = this.addNewGroup(groupTitle, document);
+      group = this.addGroup(groupTitle, document);
     }
     return group;
   }
