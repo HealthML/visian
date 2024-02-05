@@ -186,6 +186,9 @@ export class MiaReviewStrategy extends ReviewStrategy {
   public async importAnnotations(): Promise<void> {
     await this.importAnnotationsWithMetadata(true);
   }
+
+  public loadTaskPostProcessing(): void {}
+
   public toJSON() {
     return {
       backend: "mia",

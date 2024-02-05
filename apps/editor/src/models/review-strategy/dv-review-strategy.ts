@@ -53,8 +53,16 @@ export class DVReviewStrategy extends ReviewStrategy {
     this.setCurrentTask(new DVReviewTask(dvTask));
   }
 
-  protected async importAnnotations(): Promise<void> {
-    // TODO: implement importAnnotations
+  protected async importAnnotations(): Promise<void> {}
+
+  public loadTaskPostProcessing(): void {
+    const document = this.store.editor.activeDocument;
+    if (!document) throw new Error("No active document");
+
+    const reviewTask = this.currentTask as DVReviewTask;
+    reviewTask.addGroupsAndLayers(document);
+
+    document.requestSave();
   }
 
   public toJSON(): ReviewStrategySnapshot {

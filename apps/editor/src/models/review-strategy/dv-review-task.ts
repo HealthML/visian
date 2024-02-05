@@ -1,4 +1,5 @@
 import {
+  DVAnnotationLayer,
   DVAnnotationTask,
   DVAnnotationTaskSnapshot,
   createFileFromBase64,
@@ -7,6 +8,9 @@ import {
 import { AxiosResponse } from "axios";
 
 import { ReviewTask, TaskType } from "./review-task";
+import { ImageLayer, Document } from "../editor";
+import { AnnotationGroup } from "../editor/annotation-groups";
+import { IAnnotationGroup } from "@visian/ui-shared";
 
 export interface DVReviewTaskSnapshot {
   dvAnnotationTaskSnap: DVAnnotationTaskSnapshot;
@@ -27,7 +31,6 @@ export class DVReviewTask extends ReviewTask {
   }
 
   public get kind(): TaskType {
-    console.log("Get Kind");
     return TaskType.Create;
   }
 
@@ -44,7 +47,7 @@ export class DVReviewTask extends ReviewTask {
 
   public get annotationIds(): string[] {
     console.log("Get Annotation IDs");
-    return this.dvTask.annotationGroups.map((group) => group.annotationID);
+    return this.dvTask.annotationLayers.map((group) => group.annotationID);
   }
 
   constructor(dvTask: DVAnnotationTask) {
@@ -54,19 +57,63 @@ export class DVReviewTask extends ReviewTask {
 
   public async getImageFiles() {
     console.log("Get Image Files");
-    return [createFileFromBase64("DV Image", this.dvTask.scan.data)];
+
+    return [createFileFromBase64("DVimage", this.dvTask.scan.data)];
   }
 
-  public async getAnnotationFiles(annotationId: string) {
-    console.log("Get Annotation Files");
-    const id = this.dvTask.taskID;
-    const dvAnnotation = this.dvTask?.annotationGroups.find(
-      (annotation) => annotation.annotationID == annotationId,
-    );
-    if (!dvAnnotation) return null;
+  public addGroup() {}
 
-    //TODO return
+  public async getAnnotationFiles(annotationId: string) {
     return [];
+  }
+
+  public addGroupsAndLayers(document: Document) {
+    //TODO: remove default group
+
+    // const defaultGroup = document.annotationGroups[0];
+    // if (!defaultGroup) throw new Error("No default group");
+
+    for (const layer of this.dvTask.annotationLayers) {
+      this.addLayerFromAnnotation(layer, document);
+    }
+  }
+
+  private addNewGroup(title: string, document: Document): IAnnotationGroup {
+    const newGroup = new AnnotationGroup({ title }, document);
+    document.addAnnotationGroup(newGroup);
+    return newGroup;
+  }
+
+  private addLayerFromAnnotation(
+    dvLayer: DVAnnotationLayer,
+    document: Document,
+  ) {
+    if (!document.mainImageLayer) throw new Error("No main image layer");
+
+    const layer = ImageLayer.fromNewAnnotationForImage(
+      document.mainImageLayer.image,
+      document,
+      document.getFirstUnusedColor(),
+    );
+    layer.setTitle(dvLayer.label);
+
+    document.addLayer(layer);
+    const group = this.getGroupFromLayer(dvLayer, document);
+    group.addLayer(layer.id);
+  }
+
+  private getGroupFromLayer(
+    dvLayer: DVAnnotationLayer,
+    document: Document,
+  ): IAnnotationGroup {
+    const groupTitle = dvLayer.userID;
+    var group = document.annotationGroups.find(
+      (group: IAnnotationGroup) => group.title === groupTitle,
+    );
+    if (!group) {
+      group = this.addNewGroup(groupTitle, document);
+    }
+    return group;
   }
 
   public async createAnnotation(files: File[]) {

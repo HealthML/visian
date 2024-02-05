@@ -158,6 +158,8 @@ export class WHOReviewStrategy extends ReviewStrategy {
     await this.importAnnotationsWithMetadata(false);
   }
 
+  public loadTaskPostProcessing(): void {}
+
   public toJSON(): ReviewStrategySnapshot {
     return {
       backend: "who",

@@ -24,6 +24,7 @@ export abstract class ReviewStrategy {
       await this.buildTask();
       await this.importImages();
       await this.importAnnotations();
+      this.loadTaskPostProcessing();
     } catch {
       this.store.setError({
         titleTx: "import-error",
@@ -79,7 +80,8 @@ export abstract class ReviewStrategy {
             `Annotation ${idx + 1}`,
             getMetadataFromChild
               ? { ...annotationFiles[0]?.metadata }
-              : { id: annotationId, kind: "annotation", backend: "who" },
+              : //TODO: default is who, but should that be the case?
+                { id: annotationId, kind: "annotation", backend: "who" },
           );
         if (!groupFiles) throw new Error("No active Document");
 
@@ -91,6 +93,9 @@ export abstract class ReviewStrategy {
       }),
     );
   }
+
+  // After loading the task, depending on the strategy we might need to do some post processing
+  public abstract loadTaskPostProcessing(): void;
 
   public abstract toJSON(): ReviewStrategySnapshot;
 }
