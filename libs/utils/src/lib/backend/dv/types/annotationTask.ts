@@ -2,6 +2,7 @@ import { DVAnnotationLayer } from "./annotationLayer";
 import { DVScan as DVScan } from "./scan";
 import { DVRois } from "./rois";
 import { DVCase } from "./case";
+import { DVLayerRoisEntry as DVLayerRoisEntry } from "./layerRoisEntry";
 
 export interface DVAnnotationTaskSnapshot {
   taskID: string;
@@ -51,6 +52,26 @@ export class DVAnnotationTask {
       (annotationGroup: any) =>
         new DVAnnotationLayer(annotationGroup, layerUserMapping),
     );
+  }
+
+  public getLayerRoisList(): DVLayerRoisEntry[] {
+    const list = [] as DVLayerRoisEntry[];
+    this.rois.forEach((roi) => {
+      const layerRois = this.getLayerRoisEntry(roi, list);
+      layerRois.rois.push(roi.points);
+    });
+    return list;
+  }
+
+  private getLayerRoisEntry(rois: DVRois, list: DVLayerRoisEntry[]) {
+    var layerRois = list.find(
+      (m) => m.layerID === rois.layer && m.z === rois.z,
+    );
+    if (!layerRois) {
+      layerRois = new DVLayerRoisEntry(rois);
+      list.push(layerRois);
+    }
+    return layerRois;
   }
 
   private parseRois(rois: any): DVRois[] {
