@@ -21,7 +21,6 @@ const BackButton = styled(FloatingUIButton)`
   margin: 0;
   margin-bottom: ${space("pageSectionMargin")};
   margin-left: -9px;
-
   background: none;
   border: none;
   backdrop-filter: none;
@@ -30,6 +29,10 @@ const BackButton = styled(FloatingUIButton)`
 const TitleLoadingBlock = styled(LoadingBlock)`
   width: 250px;
   height: ${fontSize("title")};
+`;
+
+const StyledTitle = styled(Title)`
+  overflow-wrap: anywhere;
 `;
 
 export const PageTitle = ({
@@ -57,7 +60,11 @@ export const PageTitle = ({
         />
       )}
       <TitleLabel tx={labelTx}>{label}</TitleLabel>
-      {isLoading ? <TitleLoadingBlock /> : <Title tx={titleTx}>{title}</Title>}
+      {isLoading ? (
+        <TitleLoadingBlock />
+      ) : (
+        <StyledTitle tx={titleTx}>{title}</StyledTitle>
+      )}
     </TitleContainer>
   );
 };
