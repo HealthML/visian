@@ -240,7 +240,7 @@ export class DVReviewTask extends ReviewTask {
 
   private addLayerToDvTask(layer: ILayer) {
     const dvLayer = new DVAnnotationLayer(
-      layer.id, //TODO change annotationID to number
+      this.dvTask.getNextAnnotationLayerID(),
       this.dvTask.userID,
       layer.title || "Untitled",
       layer.color || "#000000", //TODO change color to Hex format

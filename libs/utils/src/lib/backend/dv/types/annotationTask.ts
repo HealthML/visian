@@ -89,6 +89,13 @@ export class DVAnnotationTask {
     return list;
   }
 
+  public getNextAnnotationLayerID(): string {
+    const maxID = Math.max(
+      ...this.annotationLayers.map((m) => parseInt(m.annotationID)),
+    );
+    return (maxID + 1).toString();
+  }
+
   private static parseRois(roisJson: any): DVRois[] {
     return roisJson.map((roi: any) => DVRois.createFromImport(roi));
   }
