@@ -168,7 +168,7 @@ export class MiaReviewStrategy extends ReviewStrategy {
   }
 
   public async saveTask() {
-    await this.currentTask?.save();
+    await this.currentTask?.save(this.getDocument());
     await Promise.all(
       this.store.editor.activeDocument?.annotationGroups?.map((group) => {
         if (

@@ -46,7 +46,7 @@ export class WHOReviewStrategy extends ReviewStrategy {
     this.store.setProgress({ labelTx: "saving", showSplash: true });
     try {
       await this.saveTask();
-      const response = await this.currentTask?.save();
+      const response = await this.currentTask?.save(this.getDocument());
 
       // TODO: return to WHO Home when response code is 204
       if (response) {

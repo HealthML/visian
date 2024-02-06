@@ -41,7 +41,7 @@ export class DVReviewStrategy extends ReviewStrategy {
   }
 
   public async saveTask(): Promise<void> {
-    //TODO: implement saveTask
+    this.currentTask?.save(this.getDocument());
   }
 
   // Importing
@@ -56,9 +56,7 @@ export class DVReviewStrategy extends ReviewStrategy {
   protected async importAnnotations(): Promise<void> {}
 
   public loadTaskPostProcessing(): void {
-    const document = this.store.editor.activeDocument;
-    if (!document) throw new Error("No active document");
-
+    const document = this.getDocument();
     const reviewTask = this.currentTask as DVReviewTask;
     reviewTask.addGroupsAndLayers(document);
 
