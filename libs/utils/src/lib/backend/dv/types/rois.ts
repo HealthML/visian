@@ -1,7 +1,9 @@
+import { DVRoisOfASlice } from "./roisOfASlice";
+
 export interface DVRoisSnapshot {
   z: number;
   user: string;
-  scanID: string;
+  scanID: number;
   group: string;
   points: number[];
 }
@@ -9,16 +11,43 @@ export interface DVRoisSnapshot {
 export class DVRois {
   public z: number;
   public user: string;
-  public scanID: string;
+  public scanID: number;
   public layer: string;
   public points: number[];
 
-  constructor(rois: any) {
-    this.z = rois.z;
-    this.user = rois.user;
-    this.scanID = rois.scan;
-    this.layer = rois.group;
-    this.points = rois.points;
+  static createFromImport(jsonObject: any): DVRois {
+    return new DVRois(
+      jsonObject.z,
+      jsonObject.user,
+      jsonObject.scanID,
+      jsonObject.group,
+      jsonObject.points,
+    );
+  }
+
+  constructor(
+    z: number,
+    user: string,
+    scanID: number,
+    layer: string,
+    points: number[],
+  ) {
+    this.z = z;
+    this.user = user;
+    this.scanID = scanID;
+    this.layer = layer;
+    this.points = points;
+  }
+
+  public getLayerRoisEntry(list: DVRoisOfASlice[]) {
+    var layerRois = list.find(
+      (m) => m.layerID === this.layer && m.z === this.z,
+    );
+    if (!layerRois) {
+      layerRois = DVRoisOfASlice.createFromDvRois(this);
+      list.push(layerRois);
+    }
+    return layerRois;
   }
 
   public toJSON(): DVRoisSnapshot {
