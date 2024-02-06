@@ -437,7 +437,9 @@
 
   "untitled-group": "Unbenannte Gruppe",
   "delete-annotation-group-message": "Wollen Sie die Annotation \"{{name}}\" und die folgenden Ebenen wirklich löschen??",
-  "delete-backend-data-warning": "Warnung: Durch das Löschen der Annotationsgruppe \"{{name}}\" werden auch bereits unter \"{{dataUri}}\" gespeicherte Daten unwiederruflich gelöscht!",
+  "warning": "Warnung:",
+  "delete-backend-data-warning": "Durch das Löschen der Annotationsgruppe \"{{name}}\" wird auch die unter \"{{dataUri}}\" gespeicherte Annotation unwiederruflich gelöscht!",
+  "unsaved-backend-annotations": "Folgende Gruppen sind noch nicht gespeichert!",
   "get-annotation-error": "Annotation konnte nicht gefunden werden",
   "get-annotation-error-description": "Die Annotation mit der ID \"{{id}}\" konnte nicht gefunden werden."
 }

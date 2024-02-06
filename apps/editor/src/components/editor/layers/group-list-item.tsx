@@ -9,6 +9,8 @@ import {
   IAnnotationGroup,
   ILayer,
   LayerList,
+  List,
+  ListItem,
   PointerButton,
   Text,
   useDoubleTap,
@@ -34,6 +36,18 @@ const ChildLayerContainer = styled.div`
 
 const LayerListContainer = styled.div`
   padding: 16px;
+`;
+
+const UnsavedGroupList = styled(List)`
+  margin: 10px 0;
+`;
+
+const UnsavedGroupListItem = styled(ListItem)`
+  margin: -4px 0;
+`;
+
+const StyledText = styled(Text)<{ space?: number }>`
+  margin-bottom: ${({ space }) => space || "2"}px;
 `;
 
 export const AnnotationGroupListItem = observer<{
@@ -163,8 +177,8 @@ export const AnnotationGroupListItem = observer<{
       <FullWidthListItem
         icon={group.collapsed ? "arrowRight" : "arrowDown"}
         onIconPress={toggleCollapse}
-        labelTx={group.title ? undefined : "untitled-group"}
-        label={group.title}
+        labelTx={group.title}
+        label={t(group.title)}
         isLabelEditable={isAnnotationGroupNameEditable}
         onChangeLabelText={group.setTitle}
         onConfirmLabelText={stopEditingAnnotationGroupName}
@@ -206,27 +220,69 @@ export const AnnotationGroupListItem = observer<{
           isLast
         />
       </ContextMenu>
-      <ConfirmationPopup
-        isOpen={isDeleteConfirmationPopUpOpen}
-        onClose={closeDeleteConfirmationPopUp}
-        message={t("delete-annotation-group-message", {
-          name: group.title,
-        })}
-        titleTx="delete-annotation-title"
-        onConfirm={handleDeletionConfirmation}
-      >
-        <LayerListContainer>
-          <LayerList layers={group.layers} />
-        </LayerListContainer>
-        {group.metadata && (
-          <Text
-            text={t("delete-backend-data-warning", {
-              name: group.title,
-              dataUri: miaAnnotationToBeDeleted?.dataUri,
-            })}
-          />
-        )}
-      </ConfirmationPopup>
+      {store?.editor?.activeDocument?.annotationGroups
+        // eslint-disable-next-line @typescript-eslint/no-shadow
+        .filter((group) => group?.metadata?.id && group?.hasChanges)?.length ===
+      0 ? (
+        <ConfirmationPopup
+          isOpen={isDeleteConfirmationPopUpOpen}
+          onClose={closeDeleteConfirmationPopUp}
+          message={t("delete-annotation-group-message", {
+            name: t(group.title),
+          })}
+          titleTx="delete-annotation-title"
+          onConfirm={handleDeletionConfirmation}
+        >
+          <LayerListContainer>
+            <LayerList layers={group.layers} />
+          </LayerListContainer>
+          {group.metadata && (
+            <Text
+              text={t("delete-backend-data-warning", {
+                name: group.title,
+                dataUri: miaAnnotationToBeDeleted?.dataUri,
+              })}
+            />
+          )}
+        </ConfirmationPopup>
+      ) : (
+        <ConfirmationPopup
+          isOpen={isDeleteConfirmationPopUpOpen}
+          onClose={closeDeleteConfirmationPopUp}
+          message={t("delete-annotation-group-message", {
+            name: group.title,
+          })}
+          titleTx="delete-annotation-title"
+          onConfirm={handleDeletionConfirmation}
+        >
+          <LayerListContainer>
+            <LayerList layers={group.layers} />
+          </LayerListContainer>
+          {group.metadata && (
+            <>
+              <StyledText tx="warning" />
+              <StyledText
+                text={t("delete-backend-data-warning", {
+                  name: group.title,
+                  dataUri: miaAnnotationToBeDeleted?.dataUri,
+                })}
+                space={15}
+              />
+              <StyledText tx="unsaved-backend-annotations" />
+              <UnsavedGroupList>
+                {store?.editor?.activeDocument?.annotationGroups
+                  // eslint-disable-next-line @typescript-eslint/no-shadow
+                  .filter((group) => group?.metadata?.id && group?.hasChanges)
+                  ?.map((groupToSave) => (
+                    <UnsavedGroupListItem key={groupToSave.id} isLast>
+                      {`• ${groupToSave.title}`}
+                    </UnsavedGroupListItem>
+                  ))}
+              </UnsavedGroupList>
+            </>
+          )}
+        </ConfirmationPopup>
+      )}
     </>
   );
 });

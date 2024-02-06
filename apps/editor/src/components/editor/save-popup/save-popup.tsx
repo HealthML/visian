@@ -167,6 +167,8 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
       activeLayer?.getAnnotationGroupLayers().forEach((layer) => {
         store?.editor.activeDocument?.history?.updateCheckpoint(layer.id);
       });
+      // Reset the layer count changes flag
+      activeLayer?.annotationGroup?.setHasLayerCountChange(false);
       return true;
     } catch (error) {
       if (error instanceof AxiosError) {
@@ -244,6 +246,7 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
           ? // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             reviewTask.getAnnotation(newAnnotationId)!
           : annotationMeta;
+      // TODO: Refactor saving
       if (!annotationMeta) {
         addMetadataToGroup(activeLayer?.annotationGroup, newAnnotationMeta);
       } else {
@@ -252,6 +255,8 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
       activeLayer?.getAnnotationGroupLayers().forEach((layer) => {
         store?.editor.activeDocument?.history?.updateCheckpoint(layer.id);
       });
+      // Reset the layer count changes flag
+      activeLayer?.annotationGroup?.setHasLayerCountChange(false);
       store?.setProgress();
       return true;
     } catch (error) {

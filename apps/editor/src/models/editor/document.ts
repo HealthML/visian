@@ -460,7 +460,10 @@ export class Document
     );
     this.addLayer(annotationLayer);
 
-    const annotationGroup = new AnnotationGroup({ titleOverride: title }, this);
+    const annotationGroup = new AnnotationGroup(
+      { titleOverride: title || "untitled-group" },
+      this,
+    );
     this.addAnnotationGroup(annotationGroup);
     annotationGroup.addLayer(annotationLayer);
 
