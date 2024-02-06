@@ -1,5 +1,6 @@
 import { FileWithMetadata } from "@visian/utils";
 import { AxiosResponse } from "axios";
+import { Document } from "../editor";
 
 export enum TaskType {
   Create = "create",
@@ -34,5 +35,5 @@ export abstract class ReviewTask {
   ): Promise<void>;
 
   // After calling save, we expect all changes made to the task to be saved to the backend
-  public abstract save(): Promise<AxiosResponse | undefined>;
+  public abstract save(document: Document): Promise<AxiosResponse | undefined>;
 }
