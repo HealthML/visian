@@ -9,12 +9,33 @@ export class DVAnnotationLayer {
   public userID: string;
   public label: string;
   public color: string;
+  public visianLayerID: string | undefined;
 
-  constructor(annotation: any, layerUserMapping: Map<string, string>) {
-    this.annotationID = annotation.id;
-    this.label = annotation.label;
-    this.color = annotation.color;
-    this.userID = layerUserMapping.get(this.annotationID) ?? "unknown";
+  static createFromImport(
+    annotation: any,
+    layerUserMapping: Map<string, string>,
+  ): DVAnnotationLayer {
+    return new DVAnnotationLayer(
+      annotation.id,
+      layerUserMapping.get(annotation.id) ?? "unknown",
+      annotation.label,
+      annotation.color,
+      undefined,
+    );
+  }
+
+  constructor(
+    annotaionID: string,
+    userID: string,
+    label: string,
+    color: string,
+    visianLayerID: string | undefined,
+  ) {
+    this.annotationID = annotaionID;
+    this.label = label;
+    this.color = color;
+    this.userID = userID;
+    this.visianLayerID = visianLayerID;
   }
 
   public toJSON(): DVAnnotationGroupSnapshot {
