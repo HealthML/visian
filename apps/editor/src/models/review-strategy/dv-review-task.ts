@@ -33,7 +33,6 @@ export class DVReviewTask extends ReviewTask {
   private dvTask: DVAnnotationTask;
 
   public get id(): string {
-    console.log("Get ID");
     return this.dvTask.taskID;
   }
 
@@ -42,18 +41,15 @@ export class DVReviewTask extends ReviewTask {
   }
 
   public get title(): string {
-    console.log("Get Title");
     return "Case ID: " + this.dvTask.case.caseID;
   }
 
   public get description(): string {
-    console.log("Get Description");
     //TODO: Is there a proper description?
     return "DV Task Description Placeholder";
   }
 
   public get annotationIds(): string[] {
-    console.log("Get Annotation IDs");
     return this.dvTask.annotationLayers.map((group) => group.annotationID);
   }
 
@@ -205,15 +201,12 @@ export class DVReviewTask extends ReviewTask {
   }
 
   public async save(document: Document): Promise<AxiosResponse> {
-    const task = this.updateDvTask(document);
-    console.log("Save Task");
-    console.log(task);
-
+    this.updateDvTask(document);
     putDVTask(this.id, JSON.stringify(this.dvTask.toJSON()));
     return Promise.resolve({} as AxiosResponse);
   }
 
-  private updateDvTask(document: Document): DVAnnotationTask {
+  private updateDvTask(document: Document) {
     this.resetRoisOfDvTask();
     document.layers.forEach((layer) => {
       if (layer.isAnnotation) {
@@ -221,8 +214,6 @@ export class DVReviewTask extends ReviewTask {
         this.addRoisToDvTask(layer as IImageLayer);
       }
     });
-
-    return this.dvTask;
   }
 
   private resetRoisOfDvTask() {
@@ -276,11 +267,12 @@ export class DVReviewTask extends ReviewTask {
 
   private getSlicesWithRois(layer: IImageLayer): DVRoisOfASlice[] {
     const slicesWithRois = [];
-    //TODO loop over all slices
-    const contours = this.getROIcontours(layer, 19);
-    if (contours.length === 0) return [];
-    const rois = this.convertInt32ArrayToNumberArray(contours);
-    slicesWithRois.push(new DVRoisOfASlice(layer.id, 19, rois));
+    for (let z = 0; z < layer.image.voxelCount["z"]; z++) {
+      const contours = this.getROIcontours(layer, z);
+      if (contours.length === 0) continue;
+      const rois = this.convertInt32ArrayToNumberArray(contours);
+      slicesWithRois.push(new DVRoisOfASlice(layer.id, z, rois));
+    }
 
     return slicesWithRois;
   }
