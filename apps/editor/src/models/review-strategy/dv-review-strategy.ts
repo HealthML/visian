@@ -44,7 +44,6 @@ export class DVReviewStrategy extends ReviewStrategy {
     this.currentTask?.save(this.getDocument());
   }
 
-  // Importing
   protected async buildTask() {
     // TODO: receiving the task id from the url is not implemented yet
     const dvTask = await getDVTask("dv-task-id");

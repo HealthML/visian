@@ -21,7 +21,6 @@ export class DVAnnotationTask {
   public annotationLayers: DVAnnotationLayer[];
   public rois: DVRois[];
 
-  // TODO: Properly type API response data
   constructor(
     taskID: string,
     userID: string,
