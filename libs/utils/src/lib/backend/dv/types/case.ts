@@ -5,7 +5,6 @@ export interface DVCaseSnapshot {
 export class DVCase {
   public caseID: number;
 
-  // TODO: Properly type API response data
   constructor(dvCase: any) {
     this.caseID = dvCase.caseID;
   }

@@ -52,7 +52,6 @@ export class DVReviewTask extends ReviewTask {
   }
 
   public get description(): string {
-    //TODO: Is there a proper description?
     return "DV Task Description Placeholder";
   }
 

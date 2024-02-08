@@ -81,8 +81,7 @@ export abstract class ReviewStrategy {
             `Annotation ${idx + 1}`,
             getMetadataFromChild
               ? { ...annotationFiles[0]?.metadata }
-              : //TODO: default is who, but should that be the case?
-                { id: annotationId, kind: "annotation", backend: "who" },
+              : { id: annotationId, kind: "annotation", backend: "who" },
           );
         if (!groupFiles) throw new Error("No active Document");
 

@@ -9,7 +9,7 @@ export const isFromMia = () => {
 };
 
 export const isFromDV = () => {
-  return true;
+  return false;
 };
 
 export const isUsingLocalhost = () => window.location.hostname === "localhost";
