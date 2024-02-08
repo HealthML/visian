@@ -10,7 +10,7 @@ export const getDVTask = async (taskId: string): Promise<DVAnnotationTask> => {
   return task;
 };
 
-export const putDVTask = async (taskId: string, task: string) => {
+export const putDVTask = async (taskId: string, task: DVAnnotationTask) => {
   //TODO: implement putDVTask
   // return axios.put(`${dvBackendBaseUrl}/tasks/${taskId}/next`, task);
 
