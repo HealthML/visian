@@ -11,12 +11,19 @@ import {
   getPlaneAxes,
   putDVTask,
 } from "@visian/utils";
+
 import { AxiosResponse } from "axios";
 
 import { ReviewTask, TaskType } from "./review-task";
 import { ImageLayer, Document } from "../editor";
 import { AnnotationGroup } from "../editor/annotation-groups";
-import { IAnnotationGroup, IImageLayer, ILayer } from "@visian/ui-shared";
+import {
+  IAnnotationGroup,
+  IImageLayer,
+  ILayer,
+  dataColorKeys,
+  dataColorToHex,
+} from "@visian/ui-shared";
 import { DVRois } from "libs/utils/src/lib/backend/dv/types/rois";
 
 export interface DVReviewTaskSnapshot {
@@ -202,7 +209,7 @@ export class DVReviewTask extends ReviewTask {
 
   public async save(document: Document): Promise<AxiosResponse> {
     this.updateDvTask(document);
-    putDVTask(this.id, JSON.stringify(this.dvTask.toJSON()));
+    putDVTask(this.id, this.dvTask);
     return Promise.resolve({} as AxiosResponse);
   }
 
@@ -234,15 +241,23 @@ export class DVReviewTask extends ReviewTask {
       this.dvTask.getNextAnnotationLayerID(),
       this.dvTask.userID,
       layer.title || "Untitled",
-      layer.color || "#000000", //TODO change color to Hex format
+      this.colorToHex(layer.color),
       layer.id,
     );
     this.dvTask.annotationLayers.push(dvLayer);
   }
 
   private updateDvLayer(layer: ILayer, dvLayer: DVAnnotationLayer) {
-    if (layer.color) dvLayer.color = layer.color; //TODO change color to Hex format
+    dvLayer.color = this.colorToHex(layer.color);
     if (layer.title) dvLayer.label = layer.title;
+  }
+
+  private colorToHex(color: string | undefined): string {
+    if (!color) return "#000000";
+    if (color.startsWith("#")) return color;
+    if (dataColorKeys.includes(color as any))
+      return dataColorToHex(color as any);
+    return "#000000";
   }
 
   private addRoisToDvTask(layer: IImageLayer) {

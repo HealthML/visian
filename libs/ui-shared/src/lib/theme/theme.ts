@@ -34,6 +34,9 @@ export const dataColorKeys = Object.keys(
   dataColors,
 ) as (keyof typeof dataColors)[];
 
+export const dataColorToHex = (color: keyof typeof dataColors) =>
+  dataColors[color];
+
 const colorModes = {
   light: {
     text: "rgba(0,0,0,0.8)",
