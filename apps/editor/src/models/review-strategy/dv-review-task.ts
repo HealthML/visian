@@ -69,6 +69,7 @@ export class DVReviewTask extends ReviewTask {
   }
 
   public async getAnnotationFiles(annotationId: string) {
+    throw new Error("Method not implemented.");
     return [];
   }
 
@@ -195,16 +196,13 @@ export class DVReviewTask extends ReviewTask {
   }
 
   public async createAnnotation(files: File[]) {
-    console.log("Create Annotation");
     return "newAnnotationId Placeholder";
   }
 
   public async updateAnnotation(
     annotationId: string,
     files: File[],
-  ): Promise<void> {
-    console.log("Update Annotation");
-  }
+  ): Promise<void> {}
 
   public async save(document: Document): Promise<AxiosResponse> {
     this.updateDvTask(document);
