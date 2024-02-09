@@ -219,14 +219,12 @@ export interface IAnnotationGroup {
   collapsed?: boolean;
   /** Whether the group contains the document's active layer */
   isActive: boolean;
-  /** Returns `true` if the annotation group has new layers or less layers and the changes are not saved yet. */
-  hasLayerCountChange: boolean;
   /** Returns `true` if the annotation group has changes. */
   hasChanges: boolean;
   /** Sets the group's title. */
   setTitle(value?: string): void;
   /** Sets the flag if the group experiences a change in the number of layers. */
-  setHasLayerCountChange(value: boolean): void;
+  setHasUnsavedChanges(value: boolean): void;
   /** Adds a layer to the group. Also removes it from the document root. */
   addLayer(layer: ILayer): void;
   /** Removes the layer from the group, if it is part of the group. */

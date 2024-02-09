@@ -156,13 +156,8 @@ export const Layers: React.FC = observer(() => {
       const activeLayer = active.data.current?.layer as ILayer;
       // Return if we are not dragging a layer:
       if (!activeLayer) return;
-      // Return if we are dragging image layer within or above annotationGroup
-      const activeLayerIndex = layers?.indexOf(activeLayer) || 0;
-      if (
-        !activeLayer.isAnnotation ||
-        !layers?.[activeLayerIndex - 1]?.isAnnotation
-      )
-        return;
+      // Return if we are dragging image layer
+      if (!activeLayer.isAnnotation) return;
       // Return if we are not dragging OVER a
       // group or if we are dragging over the layer's own group:
       const overGroup = over.data.current?.annotationGroup as IAnnotationGroup;
@@ -182,7 +177,7 @@ export const Layers: React.FC = observer(() => {
         (overGroup as AnnotationGroup).addLayer(activeLayer);
       });
     },
-    [document, layers],
+    [document],
   );
 
   // This handler is called when the user lets go of a layer or group after dragging:
@@ -232,14 +227,12 @@ export const Layers: React.FC = observer(() => {
             newIndex,
           );
           layer.annotationGroup.setLayerIds(newLayerIds);
-        } else if (!layer.annotationGroup && !layer.isAnnotation && layers) {
+        }
+        // Prevents dragging an image layer within or between respectivly above annotation groups.
+        else if (!layer.annotationGroup && !layer.isAnnotation && layers) {
           const oldIndex = layerIds.indexOf(layer.id);
           const newIndex = layerIds.indexOf(over.data?.current?.layer?.id);
-          const draggedImageLayer = layers.find(
-            (imageLayer) => imageLayer.id === layerIds[oldIndex],
-          );
-          if (draggedImageLayer && newIndex !== -1) {
-            document.addLayer(draggedImageLayer, newIndex);
+          if (dragged?.layer && newIndex !== -1) {
             const newLayerIds = arrayMove(layerIds, oldIndex, newIndex);
             document.setLayerIds(newLayerIds);
           }
@@ -337,7 +330,7 @@ export const Layers: React.FC = observer(() => {
                 document?.imageLayers?.length >=
                   (document?.maxVisibleLayers || 0)
               }
-              onPointerDown={() => document?.addNewAnnotationGroup()}
+              onPointerDown={document?.addNewAnnotationGroup}
             />
           </>
         }

@@ -30,7 +30,7 @@ export class AnnotationGroup
 
   public collapsed?: boolean;
   public metadata?: BackendMetadata;
-  public hasLayerCountChange = false;
+  protected hasUnsavedChanges = false;
 
   constructor(
     snapshot: Partial<AnnotationGroupSnapshot> | undefined,
@@ -41,14 +41,14 @@ export class AnnotationGroup
     makeObservable<this, "titleOverride" | "layerIds" | "metadata">(this, {
       layerIds: observable,
       collapsed: observable,
-      hasLayerCountChange: observable,
       titleOverride: observable,
       isActive: computed,
+      hasChanges: computed,
       metadata: observable,
 
       setTitle: action,
       setCollapsed: action,
-      setHasLayerCountChange: action,
+      setHasUnsavedChanges: action,
       setLayerIds: action,
       addLayer: action,
       removeLayer: action,
@@ -64,7 +64,7 @@ export class AnnotationGroup
     const hasChangesInLayers = this.layers.some(
       (layer) => layer.kind === "image" && (layer as ImageLayer).hasChanges,
     );
-    return hasChangesInLayers || this.hasLayerCountChange;
+    return hasChangesInLayers || this.hasUnsavedChanges;
   }
 
   public get title(): string | undefined {
@@ -79,8 +79,8 @@ export class AnnotationGroup
     this.collapsed = value;
   }
 
-  public setHasLayerCountChange(value: boolean): void {
-    this.hasLayerCountChange = value;
+  public setHasUnsavedChanges(value: boolean): void {
+    this.hasUnsavedChanges = value;
   }
 
   public setLayerIds(ids: string[]) {
@@ -95,12 +95,12 @@ export class AnnotationGroup
       // we also remove it from there:
       this.document.removeLayerFromRootList(layer);
     });
-    this.setHasLayerCountChange(true);
+    this.setHasUnsavedChanges(true);
   }
 
   public removeLayer(layer: ILayer) {
     this.setLayerIds(this.layerIds.filter((layerId) => layerId !== layer.id));
-    this.setHasLayerCountChange(true);
+    this.setHasUnsavedChanges(true);
   }
 
   public get isActive() {

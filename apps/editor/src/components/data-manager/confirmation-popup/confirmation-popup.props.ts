@@ -12,5 +12,5 @@ export interface ConfirmationPopUpProps<T = ReactNode>
   cancel?: string;
   cancelTx?: string;
   onConfirm?: () => void;
-  children?: T;
+  children?: ReactNode;
 }

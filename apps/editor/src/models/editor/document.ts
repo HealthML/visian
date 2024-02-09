@@ -449,7 +449,7 @@ export class Document
       : defaultRegionGrowingPreviewColor;
   };
 
-  public addNewAnnotationGroup = (title?: string) => {
+  public addNewAnnotationGroup = () => {
     if (!this.mainImageLayer) return;
 
     const annotationColor = this.getFirstUnusedColor();
@@ -461,7 +461,7 @@ export class Document
     this.addLayer(annotationLayer);
 
     const annotationGroup = new AnnotationGroup(
-      { titleOverride: title || "untitled-group" },
+      { titleOverride: annotationLayer.title },
       this,
     );
     this.addAnnotationGroup(annotationGroup);
@@ -635,9 +635,7 @@ export class Document
 
   public finishBatchImport() {
     if (!this.layers.some((layer) => layer.isAnnotation)) {
-      this.addNewAnnotationGroup(
-        this.mainImageLayer?.title || "untitled-group",
-      );
+      this.addNewAnnotationGroup();
       this.viewport2D.setMainViewType();
     }
     this.context?.persist();

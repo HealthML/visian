@@ -168,7 +168,7 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
         store?.editor.activeDocument?.history?.updateCheckpoint(layer.id);
       });
       // Reset the layer count changes flag
-      activeLayer?.annotationGroup?.setHasLayerCountChange(false);
+      activeLayer?.annotationGroup?.setHasUnsavedChanges(false);
       return true;
     } catch (error) {
       if (error instanceof AxiosError) {
@@ -256,7 +256,7 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
         store?.editor.activeDocument?.history?.updateCheckpoint(layer.id);
       });
       // Reset the layer count changes flag
-      activeLayer?.annotationGroup?.setHasLayerCountChange(false);
+      activeLayer?.annotationGroup?.setHasUnsavedChanges(false);
       store?.setProgress();
       return true;
     } catch (error) {
