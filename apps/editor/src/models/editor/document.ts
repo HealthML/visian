@@ -345,13 +345,6 @@ export class Document
     return id ? this.layerMap[id] : undefined;
   }
 
-  public getOrphanAnnotationLayers(): ILayer[] {
-    const orphanAnnotationLayers = this.layers.filter(
-      (l) => l.isAnnotation && !l.annotationGroup,
-    );
-    return orphanAnnotationLayers ?? [];
-  }
-
   public getAnnotationGroup(id: string): IAnnotationGroup | undefined {
     return this.annotationGroupMap[id];
   }
@@ -585,7 +578,7 @@ export class Document
     layers: ILayer[],
     title?: string,
   ): Promise<File | undefined> => {
-    const imageLayers = this.layers.filter(
+    const imageLayers = layers.filter(
       (potentialLayer) =>
         potentialLayer instanceof ImageLayer && potentialLayer.isAnnotation,
     ) as ImageLayer[];
@@ -765,7 +758,7 @@ export class Document
         await this.importFiles(
           this.createAnnotationGroup(
             unzippedFiles,
-            filteredFiles.name,
+            filteredFiles.name.split(".")[0],
             this.getMetadataFromFile(filteredFiles),
           ),
           filteredFiles.name,
@@ -789,15 +782,13 @@ export class Document
     //   return;
     // }
 
-    if (!isAnnotation) {
+    if (!("annotationGroupId" in filteredFiles)) {
       if (filteredFiles instanceof File) {
         this.createAnnotationGroup(
           [filteredFiles],
-          filteredFiles.name,
+          filteredFiles.name.split(".")[0],
           this.getMetadataFromFile(filteredFiles),
         );
-      } else {
-        this.createAnnotationGroup(filteredFiles, name ?? uuidv4());
       }
     }
     let createdLayerId = "";
@@ -933,7 +924,20 @@ export class Document
         //     });
         //   }
         // } else {
+        if (uniqueValues.size === 1 && uniqueValues.has(0)) {
+          createdLayerId = await this.importAnnotation(
+            { ...imageWithUnit, name: `${image.name}` },
+            undefined,
+            false,
+          );
+          if (files instanceof File) {
+            this.addLayerToAnnotationGroup(createdLayerId, files);
+            this.addMetadataToLayer(createdLayerId, files);
+          }
+          return;
+        }
         uniqueValues.forEach(async (value) => {
+          // Here is a bug when you save an empty image
           if (value === 0) return;
           createdLayerId = await this.importAnnotation(
             { ...imageWithUnit, name: `${value}_${image.name}` },

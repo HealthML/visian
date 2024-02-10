@@ -91,7 +91,7 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
     [newAnnotationURIPrefix, selectedExtension],
   );
 
-  const addMetadataToGroup = (
+  const changeMetaDataForGroup = (
     annotationGroup: IAnnotationGroup | undefined,
     annotation: MiaAnnotation | undefined,
   ) => {
@@ -188,36 +188,6 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
     }
   };
 
-  const loadOldAnnotation = async (
-    newAnnotationMeta: MiaAnnotation,
-    oldAnnotationMeta: MiaAnnotation,
-  ) => {
-    const activeLayer = store?.editor.activeDocument?.activeLayer;
-    if (activeLayer?.annotationGroup) {
-      activeLayer.annotationGroup.metadata = {
-        ...newAnnotationMeta,
-        backend: "mia",
-        kind: "annotation",
-      };
-      activeLayer.annotationGroup.title = newAnnotationMeta.dataUri;
-      activeLayer.annotationGroup.layers.forEach((layer, index) => {
-        layer.metadata = {
-          ...newAnnotationMeta,
-          backend: "mia",
-          kind: "annotation",
-        };
-        layer.setTitle(
-          `${index + 1}_${newAnnotationMeta.dataUri.split("/").pop()}`,
-        );
-      });
-    }
-    const oldAnnotationFile = await fetchAnnotationFile(oldAnnotationMeta.id);
-    await importAnnotationFile(oldAnnotationFile);
-    if (activeLayer) {
-      store?.editor.activeDocument?.setActiveLayer(activeLayer.id);
-    }
-  };
-
   const saveAnnotationAs = async (uri: string) => {
     store?.setProgress({ labelTx: "saving" });
     try {
@@ -239,22 +209,11 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
       const newAnnotationId = await reviewTask.createAnnotation([
         annotationFile,
       ]);
-      const annotationMeta = activeLayer?.annotationGroup
-        ?.metadata as MiaAnnotation;
-      const newAnnotationMeta =
-        reviewTask instanceof MiaReviewTask
-          ? // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            reviewTask.getAnnotation(newAnnotationId)!
-          : annotationMeta;
-      // TODO: Refactor saving
-      if (!annotationMeta) {
-        addMetadataToGroup(activeLayer?.annotationGroup, newAnnotationMeta);
-      } else {
-        await loadOldAnnotation(newAnnotationMeta, annotationMeta);
+
+      if (reviewTask instanceof MiaReviewTask) {
+        const newAnnotation = await reviewTask.getAnnotation(newAnnotationId);
+        changeMetaDataForGroup(activeLayer?.annotationGroup, newAnnotation);
       }
-      activeLayer?.getAnnotationGroupLayers().forEach((layer) => {
-        store?.editor.activeDocument?.history?.updateCheckpoint(layer.id);
-      });
       // Reset the layer count changes flag
       activeLayer?.annotationGroup?.setHasUnsavedChanges(false);
       store?.setProgress();
@@ -286,23 +245,11 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
     const mainImageLayerMetadata =
       store?.editor.activeDocument?.mainImageLayer?.metadata;
     const imageName = getImageName(mainImageLayerMetadata);
-    const layerName =
-      store?.editor.activeDocument?.activeLayer?.title?.split(".")[0];
-    const layerNameWithoutIndex = Number.isNaN(
-      +(layerName?.split("_")[0] ?? ""),
-    )
-      ? layerName
-      : layerName?.split("_").slice(1).join("_");
-    const layerNameWithIndexedName = Number.isNaN(
-      +(layerNameWithoutIndex?.split("_")[0] ?? ""),
-    )
-      ? `1_${layerNameWithoutIndex}`
-      : layerNameWithoutIndex
-          ?.split("_")
-          .map((sub, index) => (index === 0 ? Number(sub) + 1 : sub))
-          .join("_");
+    const groupName =
+      store?.editor.activeDocument?.activeLayer?.annotationGroup?.title;
+    const groupNameWithUnderscores = groupName?.replace(/\s/g, "_");
     return `/annotations/${imageName}/${
-      layerNameWithIndexedName || "annotation"
+      groupNameWithUnderscores || "annotation"
     }`;
   }, [store]);
 
@@ -322,7 +269,7 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
 
       return pattern.test(dataUri)
         ? "valid"
-        : translate("data_uri_help_message");
+        : translate("data-uri-help-message");
     },
     [translate],
   );
