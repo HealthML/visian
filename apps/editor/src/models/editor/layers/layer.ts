@@ -65,7 +65,6 @@ export class Layer implements ILayer, ISerializable<LayerSnapshot> {
         annotationGroup: computed,
         isActive: computed,
 
-        setAnnotationGroup: action,
         setIsAnnotation: action,
         setTitle: action,
         setBlendMode: action,
@@ -110,18 +109,8 @@ export class Layer implements ILayer, ISerializable<LayerSnapshot> {
 
   public get annotationGroup(): IAnnotationGroup | undefined {
     return this.document.annotationGroups?.find((group) =>
-      group.layers.includes(this),
+      group.layerIds.includes(this.id),
     );
-  }
-
-  public setAnnotationGroup(id?: string, index?: number): void {
-    if (!id) {
-      this.annotationGroup?.removeLayer(this.id, index);
-      this.document.addLayer(this, index);
-      return;
-    }
-    const newGroup = this.document.getAnnotationGroup(id);
-    newGroup?.addLayer(this.id, index);
   }
 
   public getAnnotationGroupLayers(): ILayer[] {
@@ -198,7 +187,7 @@ export class Layer implements ILayer, ISerializable<LayerSnapshot> {
   }
 
   public delete() {
-    this.annotationGroup?.removeLayer?.(this.id);
+    this.annotationGroup?.removeLayer(this);
     if (this.document.layers.includes(this)) {
       this.document.deleteLayer(this.id);
     }

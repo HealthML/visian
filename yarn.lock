@@ -10577,13 +10577,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"clsx@npm:^1.2.1":
-  version: 1.2.1
-  resolution: "clsx@npm:1.2.1"
-  checksum: 30befca8019b2eb7dbad38cff6266cf543091dae2825c856a62a8ccf2c3ab9c2907c4d12b288b73101196767f66812365400a227581484a05f968b0307cfaf12
-  languageName: node
-  linkType: hard
-
 "co@npm:^4.6.0":
   version: 4.6.0
   resolution: "co@npm:4.6.0"
@@ -11881,22 +11874,6 @@ __metadata:
   dependencies:
     path-type: ^4.0.0
   checksum: fa05e18324510d7283f55862f3161c6759a3f2f8dbce491a2fc14c8324c498286c54282c1f0e933cb930da8419b30679389499b919122952a4f8592362ef4615
-  languageName: node
-  linkType: hard
-
-"dnd-kit-sortable-tree@npm:^0.1.73":
-  version: 0.1.73
-  resolution: "dnd-kit-sortable-tree@npm:0.1.73"
-  dependencies:
-    clsx: ^1.2.1
-    react-merge-refs: ^2.0.1
-  peerDependencies:
-    "@dnd-kit/core": ">=6.0.5"
-    "@dnd-kit/sortable": ">=7.0.1"
-    "@dnd-kit/utilities": ">=3.2.0"
-    react: ">=16"
-    react-dom: ">=16"
-  checksum: 86bec921ebb4484f03848fccac21654b9a98ef590978815c45b908a297d28faf88094093545e74387315a70a8f661c497d32987f34573e6cd2bd44aed0314cad
   languageName: node
   linkType: hard
 
@@ -20511,13 +20488,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-merge-refs@npm:^2.0.1":
-  version: 2.0.2
-  resolution: "react-merge-refs@npm:2.0.2"
-  checksum: 64758870d79ad52e6666d1d30cdecd5a72722edfd5c89808b41acdbd81a039f0c78b8b576f7ae247010468fc45cb57dd31f402693c64224439dbe0127f4389f3
-  languageName: node
-  linkType: hard
-
 "react-native-get-random-values@npm:^1.4.0":
   version: 1.8.0
   resolution: "react-native-get-random-values@npm:1.8.0"
@@ -24132,7 +24102,6 @@ __metadata:
     core-js: ^3.6.5
     css-element-queries: ^1.2.3
     cypress: ^10.7.0
-    dnd-kit-sortable-tree: ^0.1.73
     eslint: ~8.15.0
     eslint-config-airbnb: ^19.0.4
     eslint-config-prettier: 8.1.0
