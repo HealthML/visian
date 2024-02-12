@@ -544,20 +544,15 @@ export class Document
 
   // I/O
   // eslint-disable-next-line @typescript-eslint/no-shadow
-  public exportZip = async (layers: ILayer[], limitToAnnotations?: boolean) => {
-    const zip = await this.zipLayers(
-      layers.filter((layer) => !limitToAnnotations || layer.isAnnotation),
-    );
+  public exportZip = async (layers: ILayer[], fileName?: string) => {
+    const zip = await this.zipLayers(layers);
 
     if (this.context?.getTracker()?.isActive) {
       const trackingFile = this.context.getTracker()?.toFile();
       if (trackingFile) zip.setFile(trackingFile.name, trackingFile);
     }
 
-    FileSaver.saveAs(
-      await zip.toBlob(),
-      `${this.title?.split(".")[0] ?? "annotation"}.zip`,
-    );
+    FileSaver.saveAs(await zip.toBlob(), `${fileName ?? "annotation"}.zip`);
   };
 
   public createZip = async (
@@ -576,25 +571,28 @@ export class Document
   public createSquashedNii = async (
     // eslint-disable-next-line @typescript-eslint/no-shadow
     layers: ILayer[],
-    title?: string,
+    fileName?: string,
   ): Promise<File | undefined> => {
     const imageLayers = layers.filter(
       (potentialLayer) =>
         potentialLayer instanceof ImageLayer && potentialLayer.isAnnotation,
     ) as ImageLayer[];
     const file = await writeSingleMedicalImage(
-      imageLayers[imageLayers.length - 1].image.toITKImage(
-        imageLayers.slice(0, -1).map((layer) => layer.image),
+      imageLayers[0].image.toITKImage(
+        imageLayers.slice(1).map((layer) => layer.image),
         true,
       ),
-      `${title ?? this.title?.split(".")[0] ?? "annotaion"}.nii.gz`,
+      `${fileName ?? "annotaion"}.nii.gz`,
     );
     return file;
   };
 
   // eslint-disable-next-line @typescript-eslint/no-shadow
-  public exportSquashedNii = async (layers: ILayer[]) => {
-    const file: File | undefined = await this.createSquashedNii(layers);
+  public exportSquashedNii = async (layers: ILayer[], fileName?: string) => {
+    const file: File | undefined = await this.createSquashedNii(
+      layers,
+      fileName,
+    );
     if (file) {
       const fileBlob = new Blob([file], { type: file.type });
       FileSaver.saveAs(

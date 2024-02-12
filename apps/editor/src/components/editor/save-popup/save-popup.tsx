@@ -23,9 +23,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
-import { importFilesToDocument } from "../../../import-handling";
 import { MiaReviewTask } from "../../../models/review-strategy";
-import { fetchAnnotationFile } from "../../../queries";
 import { SavePopUpProps } from "./save-popup.props";
 
 const SectionLabel = styled(Text)`
@@ -129,14 +127,6 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
       throw new Error(
         translate("uri-file-type-mismatch", { name: path.extname(file.name) }),
       );
-    }
-  };
-
-  const importAnnotationFile = async (annotationFile: FileWithMetadata) => {
-    const fileTransfer = new DataTransfer();
-    fileTransfer.items.add(annotationFile);
-    if (store) {
-      await importFilesToDocument(fileTransfer.files, store);
     }
   };
 

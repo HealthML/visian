@@ -2,6 +2,7 @@ import {
   Button,
   DropDown,
   ILayer,
+  InvisibleButton,
   LayerList,
   PopUp,
   Switch,
@@ -47,6 +48,15 @@ const StyledDropDown = styled(DropDown)`
   background: none;
 `;
 
+export const SelectionCheckbox = styled(InvisibleButton)<{
+  emphasized?: boolean;
+}>`
+  width: 18px;
+  margin-right: 8px;
+  opacity: ${({ emphasized }) => (emphasized ? 1 : 0.4)};
+  transition: opacity 0.1s ease-in-out;
+`;
+
 export const ExportPopUp = observer<ExportPopUpProps>(({ isOpen, onClose }) => {
   const store = useStore();
 
@@ -60,31 +70,47 @@ export const ExportPopUp = observer<ExportPopUpProps>(({ isOpen, onClose }) => {
   const [selectedExtension, setSelectedExtension] = useState(
     fileExtensions[0].value,
   );
+  const [shouldIncludeImages, setShouldIncludeImages] = useState(false);
 
   useEffect(() => {
     if (shouldExportAllLayers) {
       setLayersToExport(
         store?.editor?.activeDocument?.layers?.filter(
-          (layer) => layer.isAnnotation,
+          (layer) => layer.isAnnotation || shouldIncludeImages,
         ) ?? [],
       );
+    } else if (shouldIncludeImages) {
+      const activeGroupLayers =
+        store?.editor?.activeDocument?.activeLayer?.getAnnotationGroupLayers();
+      const imageLayers =
+        store?.editor?.activeDocument?.layers?.filter(
+          (layer) => !layer.isAnnotation,
+        ) ?? [];
+
+      const combinedLayers = activeGroupLayers?.concat(imageLayers) ?? [];
+      setLayersToExport(combinedLayers);
     } else {
       setLayersToExport(
-        store?.editor?.activeDocument?.activeLayer
-          ?.getAnnotationGroupLayers()
-          .filter((layer) => layer.isAnnotation) ?? [],
+        store?.editor?.activeDocument?.activeLayer?.getAnnotationGroupLayers() ??
+          [],
       );
     }
-  }, [store, isOpen, shouldExportAllLayers]);
+  }, [store, isOpen, shouldExportAllLayers, shouldIncludeImages]);
 
   const handleExport = useCallback(async () => {
     store?.setProgress({ labelTx: "exporting" });
 
     try {
+      const fileName = shouldExportAllLayers
+        ? undefined
+        : store?.editor?.activeDocument?.activeLayer?.annotationGroup?.title;
       if (selectedExtension === ".zip") {
-        await store?.editor.activeDocument?.exportZip(layersToExport, true);
+        await store?.editor.activeDocument?.exportZip(layersToExport, fileName);
       } else {
-        await store?.editor?.activeDocument?.exportSquashedNii(layersToExport);
+        await store?.editor?.activeDocument?.exportSquashedNii(
+          layersToExport,
+          fileName,
+        );
       }
     } catch (error) {
       store?.setError({
@@ -94,7 +120,36 @@ export const ExportPopUp = observer<ExportPopUpProps>(({ isOpen, onClose }) => {
     } finally {
       store?.setProgress();
     }
-  }, [layersToExport, selectedExtension, store]);
+  }, [layersToExport, selectedExtension, shouldExportAllLayers, store]);
+
+  const handleCheckIncludeImageLayer = useCallback(
+    (value: boolean) => {
+      if (value) {
+        const imageLayers =
+          store?.editor?.activeDocument?.layers?.filter(
+            (layer) => !layer.isAnnotation,
+          ) ?? [];
+        const newLayersToExport = layersToExport.concat(imageLayers);
+        setLayersToExport(newLayersToExport);
+        setShouldIncludeImages(true);
+      } else {
+        setLayersToExport(layersToExport.filter((layer) => layer.isAnnotation));
+        setShouldIncludeImages(false);
+      }
+    },
+    [layersToExport, store?.editor?.activeDocument?.layers],
+  );
+
+  const handleSelectExtension = useCallback((value: string) => {
+    if (value === ".nii.gz") {
+      setLayersToExport(
+        store?.editor?.activeDocument?.activeLayer?.getAnnotationGroupLayers() ??
+          [],
+      );
+      setShouldIncludeImages(false);
+    }
+    setSelectedExtension(value);
+  }, []);
 
   return (
     <ExportPopUpContainer
@@ -113,12 +168,24 @@ export const ExportPopUp = observer<ExportPopUpProps>(({ isOpen, onClose }) => {
         value={shouldExportAllLayers}
         onChange={setShouldExportAllLayers}
       />
+      {selectedExtension === ".zip" && (
+        <InlineRow>
+          <SectionLabel tx="should-export-images" />
+          <SelectionCheckbox
+            icon={shouldIncludeImages ? "checked" : "unchecked"}
+            onPointerDown={() =>
+              handleCheckIncludeImageLayer(!shouldIncludeImages)
+            }
+            emphasized={shouldIncludeImages}
+          />
+        </InlineRow>
+      )}
       <SectionLabel tx="export-as" />
       <InlineRow>
         <StyledDropDown
           options={fileExtensions}
           defaultValue={selectedExtension}
-          onChange={(value) => setSelectedExtension(value)}
+          onChange={(value) => handleSelectExtension(value)}
           size="medium"
           borderRadius="default"
         />
