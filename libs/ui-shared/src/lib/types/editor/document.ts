@@ -98,9 +98,6 @@ export interface IDocument {
 
   getAnnotationGroup(id: string): IAnnotationGroup | undefined;
 
-  /* returns all annotation layers that do not have an annotation group */
-  getOrphanAnnotationLayers(): ILayer[];
-
   /** Sets the active layer. */
   setActiveLayer(idOrLayer?: string | ILayer): void;
 

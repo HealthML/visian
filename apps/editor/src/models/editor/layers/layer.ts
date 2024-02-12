@@ -114,9 +114,7 @@ export class Layer implements ILayer, ISerializable<LayerSnapshot> {
   }
 
   public getAnnotationGroupLayers(): ILayer[] {
-    return (
-      this.annotationGroup?.layers ?? this.document.getOrphanAnnotationLayers()
-    );
+    return this.annotationGroup?.layers ?? [];
   }
 
   public setBlendMode = (value?: BlendMode): void => {
