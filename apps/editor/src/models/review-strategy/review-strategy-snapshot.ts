@@ -1,9 +1,9 @@
 import { MiaImage } from "@visian/utils";
 
+import { DVReviewTaskSnapshot } from "./dv-review-task";
 import { MiaReviewTaskSnapshot } from "./mia-review-task";
 import { TaskType } from "./review-task";
 import { WhoReviewTaskSnapshot } from "./who-review-task";
-import { DVReviewTaskSnapshot } from "./dv-review-task";
 
 export interface MiaReviewStrategySnapshot {
   backend: "mia";

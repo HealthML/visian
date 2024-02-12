@@ -1,8 +1,9 @@
+import { getDVTask } from "@visian/utils";
+
 import { RootStore } from "../root";
+import { DVReviewTask } from "./dv-review-task";
 import { ReviewStrategy } from "./review-strategy";
 import { ReviewStrategySnapshot } from "./review-strategy-snapshot";
-import { DVReviewTask } from "./dv-review-task";
-import { getDVTask } from "@visian/utils";
 
 export class DVReviewStrategy extends ReviewStrategy {
   public static fromSnapshot(
@@ -52,6 +53,7 @@ export class DVReviewStrategy extends ReviewStrategy {
     this.setCurrentTask(new DVReviewTask(dvTask));
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   protected async importAnnotations(): Promise<void> {}
 
   public loadTaskPostProcessing(): void {

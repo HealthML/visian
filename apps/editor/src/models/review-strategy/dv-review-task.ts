@@ -1,30 +1,30 @@
 import {
+  dataColorKeys,
+  dataColorToHex,
+  IAnnotationGroup,
+  IImageLayer,
+  ILayer,
+} from "@visian/ui-shared";
+import {
+  createFileFromBase64,
+  drawContours,
   DVAnnotationLayer,
   DVAnnotationTask,
   DVAnnotationTaskSnapshot,
   DVRoisOfASlice,
-  ViewType,
-  createFileFromBase64,
-  drawContours,
   fillContours,
   findContours,
   getPlaneAxes,
   putDVTask,
+  ViewType,
 } from "@visian/utils";
-
 import { AxiosResponse } from "axios";
-
-import { ReviewTask, TaskType } from "./review-task";
-import { ImageLayer, Document } from "../editor";
-import { AnnotationGroup } from "../editor/annotation-groups";
-import {
-  IAnnotationGroup,
-  IImageLayer,
-  ILayer,
-  dataColorKeys,
-  dataColorToHex,
-} from "@visian/ui-shared";
+// eslint-disable-next-line @nrwl/nx/enforce-module-boundaries
 import { DVRois } from "libs/utils/src/lib/backend/dv/types/rois";
+
+import { Document, ImageLayer } from "../editor";
+import { AnnotationGroup } from "../editor/annotation-groups";
+import { ReviewTask, TaskType } from "./review-task";
 
 export interface DVReviewTaskSnapshot {
   dvAnnotationTaskSnap: DVAnnotationTaskSnapshot;
@@ -48,7 +48,7 @@ export class DVReviewTask extends ReviewTask {
   }
 
   public get title(): string {
-    return "Case ID: " + this.dvTask.case.caseID;
+    return `Case ID: ${this.dvTask.case.caseID}`;
   }
 
   public get description(): string {
@@ -68,7 +68,7 @@ export class DVReviewTask extends ReviewTask {
     return [createFileFromBase64("DVimage", this.dvTask.scan.data)];
   }
 
-  public async getAnnotationFiles(annotationId: string) {
+  public async getAnnotationFiles(_annotationId: string) {
     throw new Error("Method not implemented.");
     return [];
   }
@@ -100,18 +100,18 @@ export class DVReviewTask extends ReviewTask {
     if (!this.dvTask.annotationLayers) throw new Error("No layers");
 
     const dvLayer = this.dvTask.annotationLayers.find(
-      (dvLayer) => dvLayer.annotationID === dvLayerId,
+      (layer) => layer.annotationID === dvLayerId,
     );
 
     if (!dvLayer)
-      throw new Error("No layer found with dvLayerId: " + dvLayerId);
+      throw new Error(`No layer found with dvLayerId: ${dvLayerId}`);
     if (!dvLayer.visianLayerID) throw new Error("No visian layer ID was set!");
     return dvLayer.visianLayerID;
   }
 
   private getDvLayer(visianLayerId: string): DVAnnotationLayer | undefined {
     const dvLayer = this.dvTask.annotationLayers.find(
-      (dvLayer) => dvLayer.visianLayerID === visianLayerId,
+      (layer) => layer.visianLayerID === visianLayerId,
     );
     return dvLayer;
   }
@@ -148,7 +148,7 @@ export class DVReviewTask extends ReviewTask {
     layer.setSlice(ViewType.Transverse, z, data);
   }
 
-  getWidthAndHeight(layer: IImageLayer): [number, number] {
+  private getWidthAndHeight(layer: IImageLayer): [number, number] {
     const [widthAxis, heightAxis] = getPlaneAxes(ViewType.Transverse);
     const width = layer.image.voxelCount[widthAxis];
     const height = layer.image.voxelCount[heightAxis];
@@ -186,8 +186,8 @@ export class DVReviewTask extends ReviewTask {
     document: Document,
   ): IAnnotationGroup {
     const groupTitle = dvLayer.userID;
-    var group = document.annotationGroups.find(
-      (group: IAnnotationGroup) => group.title === groupTitle,
+    let group = document.annotationGroups.find(
+      (g: IAnnotationGroup) => g.title === groupTitle,
     );
     if (!group) {
       group = this.addGroup(groupTitle, document);
@@ -195,13 +195,14 @@ export class DVReviewTask extends ReviewTask {
     return group;
   }
 
-  public async createAnnotation(files: File[]) {
+  public async createAnnotation(_files: File[]) {
     return "newAnnotationId Placeholder";
   }
 
   public async updateAnnotation(
-    annotationId: string,
-    files: File[],
+    _annotationId: string,
+    _files: File[],
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
   ): Promise<void> {}
 
   public async save(document: Document): Promise<AxiosResponse> {
@@ -225,7 +226,7 @@ export class DVReviewTask extends ReviewTask {
   }
 
   private updateDvTaskLayer(layer: ILayer) {
-    var dvLayer = this.getDvLayer(layer.id);
+    const dvLayer = this.getDvLayer(layer.id);
     if (!dvLayer) {
       this.addLayerToDvTask(layer);
     } else {
@@ -281,9 +282,10 @@ export class DVReviewTask extends ReviewTask {
     const slicesWithRois = [];
     for (let z = 0; z < layer.image.voxelCount["z"]; z++) {
       const contours = this.getROIcontours(layer, z);
-      if (contours.length === 0) continue;
-      const rois = this.convertInt32ArrayToNumberArray(contours);
-      slicesWithRois.push(new DVRoisOfASlice(layer.id, z, rois));
+      if (contours.length !== 0) {
+        const rois = this.convertInt32ArrayToNumberArray(contours);
+        slicesWithRois.push(new DVRoisOfASlice(layer.id, z, rois));
+      }
     }
 
     return slicesWithRois;
@@ -300,7 +302,7 @@ export class DVReviewTask extends ReviewTask {
   private getROIcontours(layer: IImageLayer, z: number): Int32Array[] {
     const [width, height] = this.getWidthAndHeight(layer);
 
-    let data = layer.getSlice(ViewType.Transverse, z) as Uint8Array;
+    const data = layer.getSlice(ViewType.Transverse, z) as Uint8Array;
     return findContours(data, width, height);
   }
 

@@ -187,6 +187,7 @@ export class MiaReviewStrategy extends ReviewStrategy {
     await this.importAnnotationsWithMetadata(true);
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   public loadTaskPostProcessing(): void {}
 
   public toJSON() {

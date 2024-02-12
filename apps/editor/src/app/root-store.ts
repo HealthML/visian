@@ -1,5 +1,5 @@
 import { i18n, LocalForageBackend } from "@visian/ui-shared";
-import { isFromWHO, isFromDV, readFileFromURL } from "@visian/utils";
+import { isFromDV, isFromWHO, readFileFromURL } from "@visian/utils";
 import React from "react";
 
 import { storePersistInterval } from "../constants";
