@@ -749,7 +749,7 @@ export class Document
         await this.importFiles(
           this.createAnnotationGroup(
             unzippedFiles,
-            filteredFiles.name,
+            path.basename(filteredFiles.name, path.extname(filteredFiles.name)),
             this.getMetadataFromFile(filteredFiles),
           ),
           filteredFiles.name,
@@ -773,17 +773,6 @@ export class Document
     //   return;
     // }
 
-    if (!isAnnotation) {
-      if (filteredFiles instanceof File) {
-        this.createAnnotationGroup(
-          [filteredFiles],
-          filteredFiles.name,
-          this.getMetadataFromFile(filteredFiles),
-        );
-      } else {
-        this.createAnnotationGroup(filteredFiles, name ?? uuidv4());
-      }
-    }
     let createdLayerId = "";
     const isFirstLayer =
       !this.layerIds.length || !this.layers.some((l) => l.kind !== "group");
@@ -822,6 +811,17 @@ export class Document
     const imageWithUnit = { unit, ...image };
 
     if (isAnnotation) {
+      // Creates an annotation group if it does not yet exists
+      if (
+        !("annotationGroupId" in filteredFiles) &&
+        filteredFiles instanceof File
+      ) {
+        this.createAnnotationGroup(
+          [filteredFiles],
+          path.basename(filteredFiles.name, path.extname(filteredFiles.name)),
+          this.getMetadataFromFile(filteredFiles),
+        );
+      }
       createdLayerId = await this.importAnnotation(imageWithUnit);
     } else if (isAnnotation !== undefined) {
       createdLayerId = await this.importImage(imageWithUnit);
@@ -883,10 +883,6 @@ export class Document
               name: `${layerIndex}_${imageWithUnit.name}`,
               ...prototypeImage,
             });
-            if (files instanceof File) {
-              this.addLayerToAnnotationGroup(createdLayerId, files);
-              this.addMetadataToLayer(createdLayerId, files);
-            }
           }
         } else {
           this.setError({
@@ -894,8 +890,6 @@ export class Document
             descriptionTx: "image-loading-error",
           });
         }
-
-        this.removeEmptyGroups();
       } else {
         //! TODO: #513
         // const numberOfAnnotations = uniqueValues.size - 1;
@@ -917,6 +911,18 @@ export class Document
         //     });
         //   }
         // } else {
+
+        // Creates an annotation group if it does not yet exists
+        if (
+          !("annotationGroupId" in filteredFiles) &&
+          filteredFiles instanceof File
+        ) {
+          this.createAnnotationGroup(
+            [filteredFiles],
+            path.basename(filteredFiles.name, path.extname(filteredFiles.name)),
+            this.getMetadataFromFile(filteredFiles),
+          );
+        }
         uniqueValues.forEach(async (value) => {
           if (value === 0) return;
           createdLayerId = await this.importAnnotation(
@@ -941,20 +947,6 @@ export class Document
       this.viewport3D.reset();
       this.history.clear();
     }
-
-    if (files instanceof File) {
-      this.addLayerToAnnotationGroup(createdLayerId, files);
-      this.addMetadataToLayer(createdLayerId, files);
-    }
-
-    // Move all annotation groups with only image layers to the end of the list:
-    this.annotationGroups.forEach((group) => {
-      if (!group.layers.every((layer) => !layer.isAnnotation)) return;
-      this.addAnnotationGroup(
-        group as AnnotationGroup,
-        this.annotationGroups.length - 1,
-      );
-    });
 
     return createdLayerId;
   }
@@ -1224,13 +1216,5 @@ export class Document
     if (this.activeLayer?.id) {
       this.history.redo(this.activeLayer.id);
     }
-  }
-
-  protected removeEmptyGroups() {
-    Object.values(this.annotationGroupMap).forEach((group) => {
-      if (group.layers.length <= 1) {
-        this.removeAnnotationGroup(group.id);
-      }
-    });
   }
 }
