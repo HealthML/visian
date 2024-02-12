@@ -18,6 +18,7 @@ import {
 import { v4 as uuidv4 } from "uuid";
 
 import { Document } from "../document";
+import { ImageLayer } from "../layers";
 
 export class AnnotationGroup
   implements IAnnotationGroup, ISerializable<AnnotationGroupSnapshot>
@@ -64,7 +65,9 @@ export class AnnotationGroup
   }
 
   public get hasChanges() {
-    const hasChangesInLayers = this.layers.some((layer) => layer.hasChanges);
+    const hasChangesInLayers = this.layers.some(
+      (layer) => layer.kind === "image" && (layer as ImageLayer).hasChanges,
+    );
     return hasChangesInLayers || this.hasUnsavedChanges;
   }
 
