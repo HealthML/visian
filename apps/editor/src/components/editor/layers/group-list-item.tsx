@@ -241,15 +241,13 @@ export const AnnotationGroupListItem = observer<{
               })}
             />
             {store?.editor?.activeDocument?.annotationGroups.filter(
-              // eslint-disable-next-line @typescript-eslint/no-shadow
-              (group) => group?.metadata?.id && group?.hasChanges,
+              (g) => g.metadata?.id && g.hasChanges,
             ).length !== 0 && (
               <>
                 <StyledText tx="unsaved-backend-annotations" />
                 <UnsavedGroupList>
                   {store?.editor?.activeDocument?.annotationGroups
-                    // eslint-disable-next-line @typescript-eslint/no-shadow
-                    .filter((group) => group?.metadata?.id && group?.hasChanges)
+                    .filter((g) => g.metadata?.id && g.hasChanges)
                     ?.map((groupToSave) => (
                       <UnsavedGroupListItem key={groupToSave.id} isLast>
                         {`• ${groupToSave.title}`}
