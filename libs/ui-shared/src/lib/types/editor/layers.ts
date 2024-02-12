@@ -48,7 +48,8 @@ export interface LayerSnapshot {
 
 export interface AnnotationGroupSnapshot {
   id: string;
-  title: string;
+
+  titleOverride?: string;
   metadata?: BackendMetadata;
   layerIds: string[];
 }
@@ -210,7 +211,7 @@ export interface IImageLayer extends ILayer {
 export interface IAnnotationGroup {
   id: string;
   /** The group's display name. */
-  title: string;
+  title?: string;
   /** The group's meta data. Usually the object from the DB */
   metadata?: BackendMetadata;
   /** All layer ids in the group. */
@@ -223,6 +224,10 @@ export interface IAnnotationGroup {
   isActive: boolean;
   /** Returns `true` if the annotation group has changes. */
   hasChanges: boolean;
+  /** Sets the group's title. */
+  setTitle(value?: string): void;
+  /** Sets the flag if the group experiences a change in the number of layers. */
+  setHasUnsavedChanges(value: boolean): void;
   /** Adds a layer to the group. Also removes it from the document root. */
   addLayer(layer: ILayer): void;
   /** Removes the layer from the group, if it is part of the group. */
@@ -233,6 +238,10 @@ export interface IAnnotationGroup {
   setLayerIds(ids: string[]): void;
   /** Sets collapsed state of the group. */
   setCollapsed(value: boolean): void;
+
+  /** Delete this annotation group from the document and all
+   * the layers it contains. */
+  delete(): void;
 
   toJSON(): AnnotationGroupSnapshot;
 }

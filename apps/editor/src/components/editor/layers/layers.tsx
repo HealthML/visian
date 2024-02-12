@@ -55,7 +55,7 @@ const OuterWrapper = styled("div")`
   width: 100%;
 `;
 
-const LayerList = styled(List)`
+const StyledLayerList = styled(List)`
   ${styledScrollbarMixin}
 
   margin-top: -16px;
@@ -129,6 +129,10 @@ export const Layers: React.FC = observer(() => {
 
   const [draggedLayer, setDraggedLayer] = useState<ILayer>();
   const [draggedGroup, setDraggedGroup] = useState<IAnnotationGroup>();
+  const [
+    draggedLayerPreviousAnnotationGroup,
+    setDraggedLayerPreviousAnnotationGroup,
+  ] = useState<IAnnotationGroup>();
 
   const dndSensors = useSensors(
     // Require the mouse to move before dragging so we capture normal clicks:
@@ -141,6 +145,9 @@ export const Layers: React.FC = observer(() => {
   const dndDragStart = useCallback((event: DragStartEvent) => {
     if (event.active.data.current?.layer) {
       setDraggedLayer(event.active.data.current?.layer);
+      setDraggedLayerPreviousAnnotationGroup(
+        event.active.data.current.layer.annotationGroup,
+      );
     } else if (event.active.data.current?.annotationGroup) {
       setDraggedGroup(event.active.data.current?.annotationGroup);
     }
@@ -219,7 +226,7 @@ export const Layers: React.FC = observer(() => {
         ) {
           const oldIndex = layer.annotationGroup.layerIds.indexOf(layer.id);
           const newIndex = layer.annotationGroup.layerIds.indexOf(
-            over.data?.current?.layer.id,
+            over.data.current.layer.id,
           );
           const newLayerIds = arrayMove(
             layer.annotationGroup.layerIds,
@@ -227,14 +234,19 @@ export const Layers: React.FC = observer(() => {
             newIndex,
           );
           layer.annotationGroup.setLayerIds(newLayerIds);
-        } else if (!layer.annotationGroup && !layer.isAnnotation && layers) {
+          if (
+            draggedLayerPreviousAnnotationGroup?.id !==
+            over.data.current.layer.annotationGroup.id
+          ) {
+            draggedLayerPreviousAnnotationGroup?.setHasUnsavedChanges(true);
+            over.data.current.layer.annotationGroup.setHasUnsavedChanges(true);
+          }
+        }
+        // Prevents dragging an image layer within or between respectivly above annotation groups.
+        else if (!layer.annotationGroup && !layer.isAnnotation && layers) {
           const oldIndex = layerIds.indexOf(layer.id);
           const newIndex = layerIds.indexOf(over.data?.current?.layer?.id);
-          const draggedImageLayer = layers.find(
-            (imageLayer) => imageLayer.id === layerIds[oldIndex],
-          );
-          if (draggedImageLayer && newIndex !== -1) {
-            document.addLayer(draggedImageLayer, newIndex);
+          if (dragged?.layer && newIndex !== -1) {
             const newLayerIds = arrayMove(layerIds, oldIndex, newIndex);
             document.setLayerIds(newLayerIds);
           }
@@ -242,8 +254,9 @@ export const Layers: React.FC = observer(() => {
       }
       setDraggedLayer(undefined);
       setDraggedGroup(undefined);
+      setDraggedLayerPreviousAnnotationGroup(undefined);
     },
-    [document, layerIds, layers],
+    [document, draggedLayerPreviousAnnotationGroup, layerIds, layers],
   );
 
   const listItems = document?.renderingOrder.map((element, index) => {
@@ -288,6 +301,11 @@ export const Layers: React.FC = observer(() => {
     );
   }
 
+  const handleAddLayer = useCallback(() => {
+    document?.addNewAnnotationLayer();
+    document?.activeLayer?.annotationGroup?.setHasUnsavedChanges(true);
+  }, [document]);
+
   return (
     <>
       <FloatingUIButton
@@ -321,7 +339,7 @@ export const Layers: React.FC = observer(() => {
                   document?.imageLayers?.length >=
                     (document?.maxVisibleLayers || 0)
                 }
-                onPointerDown={document?.addNewAnnotationLayer}
+                onPointerDown={() => handleAddLayer()}
               />
             )}
             <ModalHeaderButton
@@ -332,7 +350,7 @@ export const Layers: React.FC = observer(() => {
                 document?.imageLayers?.length >=
                   (document?.maxVisibleLayers || 0)
               }
-              onPointerDown={() => document?.addNewAnnotationGroup()}
+              onPointerDown={document?.addNewAnnotationGroup}
             />
           </>
         }
@@ -349,7 +367,7 @@ export const Layers: React.FC = observer(() => {
               items={layerIds}
               strategy={verticalListSortingStrategy}
             >
-              <LayerList onWheel={stopPropagation}>
+              <StyledLayerList onWheel={stopPropagation}>
                 {listItems}
                 {layers.length === 0 ? (
                   <ListItem isLast>
@@ -358,7 +376,7 @@ export const Layers: React.FC = observer(() => {
                 ) : (
                   false
                 )}
-              </LayerList>
+              </StyledLayerList>
             </SortableContext>
             {createPortal(
               <DragOverlay>
