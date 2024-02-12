@@ -4,7 +4,7 @@ export interface ToggleSliderProps {
   startValue?: boolean;
   onToggle?: () => void;
   tooltip?: string;
-  tooltiptx?: string;
+  tooltiptx: string;
   flip?: boolean;
   activeColor?: string;
   inactiveColor?: string;

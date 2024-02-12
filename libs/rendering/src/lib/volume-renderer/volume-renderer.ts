@@ -198,7 +198,7 @@ export class VolumeRenderer implements IVolumeRenderer {
         this.orbitControls.mouseButtons.LEFT =
           editor.activeDocument?.tools.activeTool?.name !== "smart-brush-3d"
             ? THREE.MOUSE.ROTATE
-            : -1;
+            : undefined;
       }),
       reaction(
         () => editor.activeDocument?.viewport3D.cameraMatrix?.toArray(),

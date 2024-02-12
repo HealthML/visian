@@ -50,7 +50,7 @@ export const DatasetCreationPopup = observer<DatasetCreationPopupProps>(
     }, [name, onConfirm, clearInputsAndClose]);
 
     const updateName = useCallback(
-      (e) => {
+      (e: React.ChangeEvent<HTMLInputElement>) => {
         setName(e.target.value);
         setIsSubmitDisabled(false);
       },
@@ -58,7 +58,7 @@ export const DatasetCreationPopup = observer<DatasetCreationPopupProps>(
     );
 
     const handleFormSubmit = useCallback(
-      (e) => {
+      (e: React.FormEvent) => {
         e.preventDefault();
         if (!isSubmitDisabled) handleCreation();
       },

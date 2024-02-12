@@ -358,7 +358,7 @@ export const MiaReviewBar = observer(
             <TaskName
               text={
                 store?.reviewStrategy?.currentTask?.title ??
-                t(store?.reviewStrategy?.currentTask?.kind)
+                t(store?.reviewStrategy?.currentTask?.kind || "")
               }
             />
           </TaskContainer>
@@ -367,7 +367,7 @@ export const MiaReviewBar = observer(
               text={
                 store?.reviewStrategy?.currentTask?.description ??
                 t("review-description", {
-                  taskType: t(store?.reviewStrategy?.currentTask?.kind),
+                  taskType: t(store?.reviewStrategy?.currentTask?.kind || ""),
                   image: (
                     store?.reviewStrategy
                       ?.currentTask as unknown as MiaReviewTask

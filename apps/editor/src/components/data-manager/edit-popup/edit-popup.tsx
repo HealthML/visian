@@ -54,7 +54,7 @@ export const EditPopup = observer<EditPopupProps>(
     }, [name, oldName, clearInputsAndClose, onConfirm]);
 
     const updateName = useCallback(
-      (e) => {
+      (e: React.ChangeEvent<HTMLInputElement>) => {
         setName(e.target.value);
         setIsSubmitDisabled(false);
       },
@@ -62,7 +62,7 @@ export const EditPopup = observer<EditPopupProps>(
     );
 
     const handleFormSubmit = useCallback(
-      (e) => {
+      (e: React.FormEvent) => {
         e.preventDefault();
         if (!isSubmitDisabled) handleEdit();
       },

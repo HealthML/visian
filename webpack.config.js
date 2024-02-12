@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
-const nrwlConfig = require("@nrwl/react/plugins/webpack");
+const nrwlConfig = require("@nx/react/plugins/webpack");
 const CopyPlugin = require("copy-webpack-plugin");
 const path = require("path");
 
 module.exports = (config) => {
-  nrwlConfig(config);
+  nrwlConfig(config, {});
 
   config.module.rules.push(
     {

@@ -67,7 +67,7 @@ export const Divider = styled.div<{ isHidden?: boolean }>`
 `;
 
 export const ModalTitleRow: React.FC<
-  Pick<ModalProps, "label" | "labelTx" | "onReset">
+  Pick<ModalProps, "label" | "labelTx" | "onReset" | "children">
 > = ({ children, label, labelTx, onReset }) => (
   <TitleRow>
     <ModalTitle tx={labelTx} text={label} />

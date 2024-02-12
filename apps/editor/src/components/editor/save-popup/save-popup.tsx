@@ -179,8 +179,8 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
         const description = error.response?.data?.message
           ? error.response.data.message
           : error.message
-          ? error.message
-          : "annotation-saving-error";
+            ? error.message
+            : "annotation-saving-error";
         store?.setError({
           titleTx: "saving-error",
           descriptionTx: description,
@@ -314,7 +314,7 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
   }, [isOpen, getAnnotationURIPrefixSuggestion]);
 
   const isValidDataUri = useCallback(
-    (dataUri, allowedExtensions = [".nii.gz", ".zip"]) => {
+    (dataUri: string, allowedExtensions = [".nii.gz", ".zip"]) => {
       const extensionsPattern = `(${allowedExtensions.join("|")})`;
 
       const pattern = new RegExp(

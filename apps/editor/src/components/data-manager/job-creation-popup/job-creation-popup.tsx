@@ -238,7 +238,7 @@ export const JobCreationPopup = observer<JobCreationPopUpProps>(
       if (openWithDatasetId && activeImageSelection && isOpen) {
         selectImages([...activeImageSelection]);
       }
-    }, [isOpen]);
+    }, [activeImageSelection, isOpen, openWithDatasetId, selectImages]);
 
     const createAutoAnnotationJob = useCallback(
       async (imageSelection: string[]) => {

@@ -7,7 +7,7 @@ import {
   TimerButton,
   useTranslation,
 } from "@visian/ui-shared";
-import { MiaJob } from "@visian/utils";
+import { MiaAnnotation, MiaJob } from "@visian/utils";
 import { useCallback, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
@@ -114,7 +114,7 @@ export const JobPage = ({ job }: { job: MiaJob }) => {
   const closeJobLogPopUp = useCallback(() => setIsJobLogPopUpOpen(false), []);
 
   const jobAnnotationFilter = useCallback(
-    (annotation) => annotation.job === job.id,
+    (annotation: MiaAnnotation) => annotation.job.id === job.id,
     [job],
   );
 
@@ -272,7 +272,7 @@ export const JobPage = ({ job }: { job: MiaJob }) => {
           isOpen={isDeleteJobConfirmationPopUpOpen}
           onClose={closeDeleteJobConfirmationPopUp}
           message={t("delete-job-message", {
-            count: annotations?.length ?? "0",
+            count: annotations?.length || 0,
           })}
           titleTx="delete-job-title"
           onConfirm={confirmDeleteJob}

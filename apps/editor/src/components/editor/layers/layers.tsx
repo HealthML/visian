@@ -20,7 +20,10 @@ import {
   TreeItemComponentProps,
   TreeItems,
 } from "dnd-kit-sortable-tree";
-import { ItemChangedReason } from "dnd-kit-sortable-tree/dist/types";
+import {
+  FlattenedItem,
+  ItemChangedReason,
+} from "dnd-kit-sortable-tree/dist/types";
 import { observer } from "mobx-react-lite";
 import React, { ReactNode, useCallback, useEffect, useState } from "react";
 import styled from "styled-components";
@@ -259,7 +262,7 @@ export const Layers: React.FC = observer(() => {
   const treeItems = getTreeItems();
 
   const canRootHaveChildren = useCallback(
-    (item) => {
+    (item: FlattenedItem<TreeItemData>) => {
       const layer = store?.editor.activeDocument?.getLayer(item.value);
       if (!layer) return true; // layerFamilies can always be children of root
       return layer.annotationGroup === undefined;

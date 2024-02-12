@@ -269,7 +269,7 @@ export const DatasetPage = ({
                   name: imagesTobBeDeleted[0].dataUri ?? "",
                 })
               : t("delete-images-message", {
-                  count: selectedImages.size.toString(),
+                  count: selectedImages.size,
                 })
           }
           titleTx={

@@ -137,7 +137,7 @@ export const ShortcutPopUp: React.FC<ShortcutPopUpProps> = observer(
                           .split("+")}
                         labelTx="select-tool"
                         labelData={{
-                          toolName: t(tool.labelTx || "", tool.label),
+                          toolName: t(tool.labelTx || "", tool.label || ""),
                         }}
                       />
                     ),

@@ -141,7 +141,10 @@ export class Document
     snapshot?.layerMap.forEach((layer) => {
       const LayerKind = layerMap[layer.kind];
       if (!LayerKind) return;
-      this.layerMap[layer.id] = new LayerKind(layer as any, this);
+      this.layerMap[layer.id] = new LayerKind(
+        layer as layers.ImageLayerSnapshot,
+        this,
+      );
     });
     this.layerIds = snapshot?.layerIds || [];
 

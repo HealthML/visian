@@ -205,7 +205,7 @@ export const TimerButton = ({
   const defaultTimeout = 2000;
 
   const handleClick = useCallback(
-    (event) => {
+    (event: React.MouseEvent<HTMLButtonElement>) => {
       onClick?.(event);
       setIsActive(true);
       if (currentTimeout) {

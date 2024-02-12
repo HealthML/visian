@@ -5,8 +5,12 @@
   "projectType": "application",
   "targets": {
     "build": {
-      "executor": "@nrwl/webpack:webpack",
-      "inputs": [{ "env": "NX_ANNOTATION_SERVICE_HUB_URL" }],
+      "executor": "@nx/webpack:webpack",
+      "inputs": [
+        {
+          "env": "NX_ANNOTATION_SERVICE_HUB_URL"
+        }
+      ],
       "outputs": ["{options.outputPath}"],
       "defaultConfiguration": "production",
       "options": {
@@ -46,7 +50,7 @@
       }
     },
     "serve": {
-      "executor": "@nrwl/webpack:dev-server",
+      "executor": "@nx/webpack:dev-server",
       "defaultConfiguration": "development",
       "options": {
         "buildTarget": "editor:build",
@@ -63,7 +67,7 @@
       }
     },
     "lint": {
-      "executor": "@nrwl/linter:eslint",
+      "executor": "@nx/linter:eslint",
       "outputs": ["{options.outputFile}"],
       "options": {
         "lintFilePatterns": ["apps/editor/**/*.{ts,tsx,js,jsx}"]
@@ -80,7 +84,7 @@
       }
     },
     "test": {
-      "executor": "@nrwl/jest:jest",
+      "executor": "@nx/jest:jest",
       "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
       "options": {
         "jestConfig": "apps/editor/jest.config.ts",

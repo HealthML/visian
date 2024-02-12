@@ -30,7 +30,7 @@
     "sourceType": "module"
   },
   "plugins": [
-    "@nrwl/nx",
+    "@nx",
     "react",
     "react-hooks",
     "@typescript-eslint",
@@ -39,7 +39,7 @@
     "unused-imports"
   ],
   "rules": {
-    "@nrwl/nx/enforce-module-boundaries": [
+    "@nx/enforce-module-boundaries": [
       "error",
       {
         "enforceBuildableLibDependency": true,
