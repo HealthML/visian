@@ -77,3 +77,4 @@ export { ReactComponent as whoAI } from "./who-ai.svg";
 export { ReactComponent as xSmall } from "./x-small.svg";
 export { ReactComponent as save } from "./save.svg";
 export { ReactComponent as warning } from "./warning.svg";
+export { ReactComponent as layerPlus } from "./layer-plus.svg";

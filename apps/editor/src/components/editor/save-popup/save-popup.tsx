@@ -91,17 +91,24 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
 
   const changeMetaDataForGroup = (
     annotationGroup: IAnnotationGroup | undefined,
-    annotation: MiaAnnotation | undefined,
+    annotationId: string,
+    uri: string,
   ) => {
     const document = store?.editor.activeDocument;
-    if (document && annotationGroup && annotation) {
+    if (document && annotationGroup && annotationId) {
       annotationGroup.metadata = {
-        ...annotation,
+        id: annotationId,
+        dataUri: uri,
         backend: "mia",
         kind: "annotation",
       };
       annotationGroup.layers.forEach((l) => {
-        l.metadata = { ...l, backend: "mia", kind: "annotation" };
+        l.metadata = {
+          id: annotationId,
+          dataUri: uri,
+          backend: "mia",
+          kind: "annotation",
+        };
       });
     }
     return annotationGroup;
@@ -200,10 +207,14 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
         annotationFile,
       ]);
 
-      if (reviewTask instanceof MiaReviewTask) {
-        const newAnnotation = await reviewTask.getAnnotation(newAnnotationId);
-        changeMetaDataForGroup(activeLayer?.annotationGroup, newAnnotation);
-      }
+      changeMetaDataForGroup(
+        activeLayer?.annotationGroup,
+        newAnnotationId,
+        uri,
+      );
+      activeLayer?.getAnnotationGroupLayers().forEach((layer) => {
+        store?.editor.activeDocument?.history?.updateCheckpoint(layer.id);
+      });
       // Reset the layer count changes flag
       activeLayer?.annotationGroup?.setHasUnsavedChanges(false);
       store?.setProgress();
@@ -295,10 +306,6 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
             />
             <SaveButton
               tx="save"
-              isDisabled={
-                !store?.editor.activeDocument?.activeLayer?.annotationGroup
-                  ?.hasChanges
-              }
               onPointerDown={async () => {
                 if (await saveAnnotation()) {
                   onClose?.();

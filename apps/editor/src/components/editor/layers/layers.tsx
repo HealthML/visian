@@ -343,7 +343,7 @@ export const Layers: React.FC = observer(() => {
               />
             )}
             <ModalHeaderButton
-              icon="plus"
+              icon="layerPlus"
               tooltipTx="add-annotation-group"
               isDisabled={
                 !document?.imageLayers?.length ||

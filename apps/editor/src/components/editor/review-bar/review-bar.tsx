@@ -338,10 +338,9 @@ export const MiaReviewBar = observer(
       }
     };
 
-    const annotationGroupTitles =
-      store?.editor.activeDocument?.annotationGroups.map(
-        (group) => group.title,
-      );
+    const annotationGroupTitles = (
+      store?.editor.activeDocument?.annotationGroups ?? []
+    ).map((group) => group.title || "");
 
     const onGroupSwitch = (newIndex: number) => {
       store?.editor.activeDocument?.setActiveLayer(
