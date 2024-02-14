@@ -17,7 +17,7 @@ import {
 } from "./review-strategy-snapshot";
 import { TaskType } from "./review-task";
 
-export class MiaReviewStrategy extends ReviewStrategy {
+export class MiaReviewStrategy extends ReviewStrategy<MiaReviewTask> {
   public static fromSnapshot(
     store: RootStore,
     snapshot?: ReviewStrategySnapshot,
@@ -168,7 +168,7 @@ export class MiaReviewStrategy extends ReviewStrategy {
   }
 
   public async saveTask() {
-    await this.currentTask?.save(this.getDocument());
+    await this.currentTask?.save();
     await Promise.all(
       this.store.editor.activeDocument?.annotationGroups?.map((group) => {
         if (
@@ -188,7 +188,7 @@ export class MiaReviewStrategy extends ReviewStrategy {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function
-  public loadTaskPostProcessing(): void {}
+  public postProcessLoadedTask(): void {}
 
   public toJSON() {
     return {

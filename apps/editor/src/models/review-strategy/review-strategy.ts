@@ -5,9 +5,9 @@ import { RootStore } from "../root";
 import { ReviewStrategySnapshot } from "./review-strategy-snapshot";
 import { ReviewTask } from "./review-task";
 
-export abstract class ReviewStrategy {
+export abstract class ReviewStrategy<Task extends ReviewTask> {
   protected store: RootStore;
-  protected task?: ReviewTask;
+  protected task?: Task;
 
   constructor({ store }: { store: RootStore }) {
     makeObservable<this, "task">(this, {
@@ -25,7 +25,7 @@ export abstract class ReviewStrategy {
       await this.buildTask();
       await this.importImages();
       await this.importAnnotations();
-      this.loadTaskPostProcessing();
+      this.postProcessLoadedTask();
     } catch {
       this.store.setError({
         titleTx: "import-error",
@@ -36,10 +36,10 @@ export abstract class ReviewStrategy {
     this.store.setProgress();
   }
 
-  public setCurrentTask(task: ReviewTask) {
+  public setCurrentTask(task: Task) {
     this.task = task;
   }
-  public get currentTask(): ReviewTask | undefined {
+  public get currentTask(): Task | undefined {
     return this.task;
   }
 
@@ -95,7 +95,7 @@ export abstract class ReviewStrategy {
   }
 
   // After loading the task, depending on the strategy we might need to do some post processing
-  public abstract loadTaskPostProcessing(): void;
+  public abstract postProcessLoadedTask(): void;
 
   public abstract toJSON(): ReviewStrategySnapshot;
 

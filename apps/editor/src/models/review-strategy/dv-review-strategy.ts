@@ -1,11 +1,11 @@
-import { getDVTask } from "@visian/utils";
+import { getDVTask, getTaskIdFromUrl } from "@visian/utils";
 
 import { RootStore } from "../root";
 import { DVReviewTask } from "./dv-review-task";
 import { ReviewStrategy } from "./review-strategy";
 import { ReviewStrategySnapshot } from "./review-strategy-snapshot";
 
-export class DVReviewStrategy extends ReviewStrategy {
+export class DVReviewStrategy extends ReviewStrategy<DVReviewTask> {
   public static fromSnapshot(
     store: RootStore,
     snapshot?: ReviewStrategySnapshot,
@@ -46,8 +46,10 @@ export class DVReviewStrategy extends ReviewStrategy {
   }
 
   protected async buildTask() {
-    // TODO: receiving the task id from the url is not implemented yet
-    const dvTask = await getDVTask("dv-task-id");
+    const taskId = getTaskIdFromUrl();
+    if (!taskId) throw new Error("No DV task specified in URL.");
+
+    const dvTask = await getDVTask(taskId);
 
     if (!dvTask) throw new Error("DV Task not found.");
     this.setCurrentTask(new DVReviewTask(dvTask));
@@ -56,11 +58,11 @@ export class DVReviewStrategy extends ReviewStrategy {
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   protected async importAnnotations(): Promise<void> {}
 
-  public loadTaskPostProcessing(): void {
+  public postProcessLoadedTask(): void {
     const document = this.getDocument();
-    const reviewTask = this.currentTask as DVReviewTask;
-    reviewTask.addGroupsAndLayers(document);
-
+    if (this.currentTask) {
+      this.currentTask.addGroupsAndLayers(document);
+    }
     document.requestSave();
   }
 
@@ -68,7 +70,7 @@ export class DVReviewStrategy extends ReviewStrategy {
     return {
       backend: "dv",
       currentReviewTask: this.currentTask
-        ? (this.currentTask as DVReviewTask).toJSON()
+        ? this.currentTask.toJSON()
         : undefined,
     };
   }

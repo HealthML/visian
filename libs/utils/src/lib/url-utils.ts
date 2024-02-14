@@ -12,7 +12,7 @@ export const isFromDV = () => true;
 
 export const isUsingLocalhost = () => window.location.hostname === "localhost";
 
-export const getWHOTaskIdFromUrl = () =>
+export const getTaskIdFromUrl = () =>
   new URLSearchParams(window.location.search).get("taskId");
 
 export const setNewTaskIdForUrl = (taskId: string) => {

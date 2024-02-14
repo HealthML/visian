@@ -18,6 +18,7 @@ import {
   MiaReviewStrategy,
   ReviewStrategy,
   ReviewStrategySnapshot,
+  ReviewTask,
   WHOReviewStrategy,
 } from "./review-strategy";
 import { Settings } from "./settings/settings";
@@ -57,7 +58,7 @@ export class RootStore implements ISerializable<RootSnapshot>, IDisposable {
   public refs: { [key: string]: React.RefObject<HTMLElement> } = {};
   public pointerDispatch?: IDispatch;
 
-  public reviewStrategy?: ReviewStrategy;
+  public reviewStrategy?: ReviewStrategy<ReviewTask>;
 
   public tracker?: Tracker;
 
@@ -216,7 +217,7 @@ export class RootStore implements ISerializable<RootSnapshot>, IDisposable {
     }
   }
 
-  public setReviewStrategy(reviewStrategy: ReviewStrategy) {
+  public setReviewStrategy(reviewStrategy: ReviewStrategy<ReviewTask>) {
     this.reviewStrategy = reviewStrategy;
   }
 
@@ -355,7 +356,7 @@ export class RootStore implements ISerializable<RootSnapshot>, IDisposable {
   };
 
   public startReview = async (
-    createStrategy: () => Promise<ReviewStrategy>,
+    createStrategy: () => Promise<ReviewStrategy<ReviewTask>>,
     navigate: NavigateFunction,
   ) => {
     this.editor.setReturnUrl(window.location.pathname);
