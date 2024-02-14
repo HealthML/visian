@@ -95,6 +95,7 @@ export abstract class ReviewStrategy<Task extends ReviewTask> {
   }
 
   // After loading the task, depending on the strategy we might need to do some post processing
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   public postProcessLoadedTask(): void {}
 
   public abstract toJSON(): ReviewStrategySnapshot;
