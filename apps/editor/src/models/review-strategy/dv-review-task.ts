@@ -15,7 +15,7 @@ import {
   fillContours,
   findContours,
   getPlaneAxes,
-  putDVTask,
+  putDvAnnotationTask,
   ViewType,
 } from "@visian/utils";
 import { AxiosResponse } from "axios";
@@ -37,10 +37,10 @@ export class DVReviewTask extends ReviewTask {
     );
   }
 
-  private dvTask: DVAnnotationTask;
+  private dvAnnotationTask: DVAnnotationTask;
 
   public get id(): string {
-    return this.dvTask.taskID;
+    return this.dvAnnotationTask.taskID;
   }
 
   public get kind(): TaskType {
@@ -48,7 +48,7 @@ export class DVReviewTask extends ReviewTask {
   }
 
   public get title(): string {
-    return `Case ID: ${this.dvTask.case.caseID}`;
+    return `Case ID: ${this.dvAnnotationTask.case.caseID}`;
   }
 
   public get description(): string {
@@ -56,16 +56,18 @@ export class DVReviewTask extends ReviewTask {
   }
 
   public get annotationIds(): string[] {
-    return this.dvTask.annotationLayers.map((group) => group.annotationID);
+    return this.dvAnnotationTask.annotationLayers.map(
+      (group) => group.annotationID,
+    );
   }
 
-  constructor(dvTask: DVAnnotationTask) {
+  constructor(dvAnnotationTask: DVAnnotationTask) {
     super();
-    this.dvTask = dvTask;
+    this.dvAnnotationTask = dvAnnotationTask;
   }
 
   public async getImageFiles() {
-    return [createFileFromBase64("DVimage", this.dvTask.scan.data)];
+    return [createFileFromBase64("DVimage", this.dvAnnotationTask.scan.data)];
   }
 
   public async getAnnotationFiles(_annotationId: string) {
@@ -76,7 +78,7 @@ export class DVReviewTask extends ReviewTask {
   public addGroupsAndLayers(document: Document) {
     this.removeGroupsCreatedByDefault(document);
     this.addDvLayersToVisian(document);
-    const layerList = this.dvTask.getLayerRoisList();
+    const layerList = this.dvAnnotationTask.getLayerRoisList();
     layerList.forEach((e) => this.drawLayer(document, e));
   }
 
@@ -97,9 +99,9 @@ export class DVReviewTask extends ReviewTask {
   }
 
   private getVisianLayerId(dvLayerId: string): string {
-    if (!this.dvTask.annotationLayers) throw new Error("No layers");
+    if (!this.dvAnnotationTask.annotationLayers) throw new Error("No layers");
 
-    const dvLayer = this.dvTask.annotationLayers.find(
+    const dvLayer = this.dvAnnotationTask.annotationLayers.find(
       (layer) => layer.annotationID === dvLayerId,
     );
 
@@ -110,14 +112,14 @@ export class DVReviewTask extends ReviewTask {
   }
 
   private getDvLayer(visianLayerId: string): DVAnnotationLayer | undefined {
-    const dvLayer = this.dvTask.annotationLayers.find(
+    const dvLayer = this.dvAnnotationTask.annotationLayers.find(
       (layer) => layer.visianLayerID === visianLayerId,
     );
     return dvLayer;
   }
 
   private addDvLayersToVisian(document: Document) {
-    this.dvTask.annotationLayers.forEach((dvLayer) => {
+    this.dvAnnotationTask.annotationLayers.forEach((dvLayer) => {
       const visianLayer = this.addLayerFromAnnotation(dvLayer, document);
       dvLayer.visianLayerID = visianLayer.id;
     });
@@ -207,7 +209,7 @@ export class DVReviewTask extends ReviewTask {
 
   public async save(document: Document): Promise<AxiosResponse> {
     this.updateDvTask(document);
-    putDVTask(this.id, this.dvTask);
+    putDvAnnotationTask(this.id, this.dvAnnotationTask);
     return Promise.resolve({} as AxiosResponse);
   }
 
@@ -222,7 +224,7 @@ export class DVReviewTask extends ReviewTask {
   }
 
   private resetRoisOfDvTask() {
-    this.dvTask.rois = [];
+    this.dvAnnotationTask.rois = [];
   }
 
   private updateDvTaskLayer(layer: ILayer) {
@@ -236,13 +238,13 @@ export class DVReviewTask extends ReviewTask {
 
   private addLayerToDvTask(layer: ILayer) {
     const dvLayer = new DVAnnotationLayer(
-      this.dvTask.getNextAnnotationLayerID(),
-      this.dvTask.userID,
+      this.dvAnnotationTask.getNextAnnotationLayerID(),
+      this.dvAnnotationTask.userID,
       layer.title || "Untitled",
       this.colorToHex(layer.color),
       layer.id,
     );
-    this.dvTask.annotationLayers.push(dvLayer);
+    this.dvAnnotationTask.annotationLayers.push(dvLayer);
   }
 
   private updateDvLayer(layer: ILayer, dvLayer: DVAnnotationLayer) {
@@ -265,11 +267,11 @@ export class DVReviewTask extends ReviewTask {
 
     slices.forEach((slice) => {
       slice.rois.forEach((roi) => {
-        this.dvTask.rois.push(
+        this.dvAnnotationTask.rois.push(
           new DVRois(
             slice.z,
             dvLayer.userID,
-            this.dvTask.scan.scanID,
+            this.dvAnnotationTask.scan.scanID,
             dvLayer.annotationID,
             roi,
           ),
@@ -308,7 +310,7 @@ export class DVReviewTask extends ReviewTask {
 
   public toJSON(): DVReviewTaskSnapshot {
     return {
-      dvAnnotationTaskSnap: this.dvTask.toJSON(),
+      dvAnnotationTaskSnap: this.dvAnnotationTask.toJSON(),
     };
   }
 }

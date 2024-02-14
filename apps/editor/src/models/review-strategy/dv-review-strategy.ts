@@ -1,4 +1,4 @@
-import { getDVTask, getTaskIdFromUrl } from "@visian/utils";
+import { getDvAnnotationTask, getTaskIdFromUrl } from "@visian/utils";
 
 import { RootStore } from "../root";
 import { DVReviewTask } from "./dv-review-task";
@@ -49,10 +49,10 @@ export class DVReviewStrategy extends ReviewStrategy<DVReviewTask> {
     const taskId = getTaskIdFromUrl();
     if (!taskId) throw new Error("No DV task specified in URL.");
 
-    const dvTask = await getDVTask(taskId);
+    const dvAnnotationTask = await getDvAnnotationTask(taskId);
 
-    if (!dvTask) throw new Error("DV Task not found.");
-    this.setCurrentTask(new DVReviewTask(dvTask));
+    if (!dvAnnotationTask) throw new Error("DV Task not found.");
+    this.setCurrentTask(new DVReviewTask(dvAnnotationTask));
   }
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function
