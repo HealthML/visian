@@ -1,13 +1,13 @@
 import { DVRois } from "./rois";
 
 export class DVRoisOfASlice {
+  public static createFromDvRois(rois: DVRois) {
+    return new DVRoisOfASlice(rois.layer, rois.z, []);
+  }
+
   public z: number;
   public layerID: string;
   public rois: number[][];
-
-  static createFromDvRois(rois: DVRois) {
-    return new DVRoisOfASlice(rois.layer, rois.z, []);
-  }
 
   constructor(layerID: string, z: number, rois: number[][]) {
     this.layerID = layerID;

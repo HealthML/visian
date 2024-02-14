@@ -8,9 +8,7 @@ export const isFromMia = () => {
   return Boolean(params.get("review"));
 };
 
-export const isFromDV = () => {
-  return false;
-};
+export const isFromDV = () => true;
 
 export const isUsingLocalhost = () => window.location.hostname === "localhost";
 

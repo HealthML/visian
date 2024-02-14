@@ -5,13 +5,7 @@ export interface DVAnnotationGroupSnapshot {
 }
 
 export class DVAnnotationLayer {
-  public annotationID: string;
-  public userID: string;
-  public label: string;
-  public color: string;
-  public visianLayerID: string | undefined;
-
-  static createFromImport(
+  public static createFromImport(
     annotation: any,
     layerUserMapping: Map<string, string>,
   ): DVAnnotationLayer {
@@ -23,6 +17,12 @@ export class DVAnnotationLayer {
       undefined,
     );
   }
+
+  public annotationID: string;
+  public userID: string;
+  public label: string;
+  public color: string;
+  public visianLayerID: string | undefined;
 
   constructor(
     annotaionID: string,

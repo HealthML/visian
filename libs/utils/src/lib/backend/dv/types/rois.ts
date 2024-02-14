@@ -9,13 +9,7 @@ export interface DVRoisSnapshot {
 }
 
 export class DVRois {
-  public z: number;
-  public user: string;
-  public scanID: number;
-  public layer: string;
-  public points: number[];
-
-  static createFromImport(jsonObject: any): DVRois {
+  public static createFromImport(jsonObject: any): DVRois {
     return new DVRois(
       jsonObject.z,
       jsonObject.user,
@@ -24,6 +18,12 @@ export class DVRois {
       jsonObject.points,
     );
   }
+
+  public z: number;
+  public user: string;
+  public scanID: number;
+  public layer: string;
+  public points: number[];
 
   constructor(
     z: number,
@@ -40,7 +40,7 @@ export class DVRois {
   }
 
   public getLayerRoisEntry(list: DVRoisOfASlice[]) {
-    var layerRois = list.find(
+    let layerRois = list.find(
       (m) => m.layerID === this.layer && m.z === this.z,
     );
     if (!layerRois) {
