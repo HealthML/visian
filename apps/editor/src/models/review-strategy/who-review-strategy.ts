@@ -1,8 +1,8 @@
 import { IAnnotationGroup, IImageLayer } from "@visian/ui-shared";
 import {
   FileWithMetadata,
+  getTaskIdFromUrl,
   getWHOTask,
-  getWHOTaskIdFromUrl,
   setNewTaskIdForUrl,
 } from "@visian/utils";
 
@@ -14,7 +14,7 @@ import { ReviewStrategySnapshot } from "./review-strategy-snapshot";
 import { TaskType } from "./review-task";
 import { WHOReviewTask } from "./who-review-task";
 
-export class WHOReviewStrategy extends ReviewStrategy {
+export class WHOReviewStrategy extends ReviewStrategy<WHOReviewTask> {
   public static fromSnapshot(
     store: RootStore,
     snapshot?: ReviewStrategySnapshot,
@@ -46,7 +46,7 @@ export class WHOReviewStrategy extends ReviewStrategy {
     this.store.setProgress({ labelTx: "saving", showSplash: true });
     try {
       await this.saveTask();
-      const response = await this.currentTask?.save(this.getDocument());
+      const response = await this.currentTask?.save();
 
       // TODO: return to WHO Home when response code is 204
       if (response) {
@@ -109,7 +109,7 @@ export class WHOReviewStrategy extends ReviewStrategy {
 
   // Importing
   protected async buildTask() {
-    const taskId = getWHOTaskIdFromUrl();
+    const taskId = getTaskIdFromUrl();
     if (!taskId) throw new Error("No WHO task specified in URL.");
 
     const whoTask = await getWHOTask(taskId);
@@ -159,7 +159,7 @@ export class WHOReviewStrategy extends ReviewStrategy {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function
-  public loadTaskPostProcessing(): void {}
+  public postProcessLoadedTask(): void {}
 
   public toJSON(): ReviewStrategySnapshot {
     return {
