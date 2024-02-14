@@ -87,76 +87,11 @@ export class DVReviewTask extends ReviewTask {
     );
   }
 
-  private drawRoisOnLayer(document: Document, rois: DVRoisOfASlice) {
-    const visianLayerId = this.getVisianLayerId(rois.layerID);
-    if (!visianLayerId) throw new Error("No visian layer");
-    const imageLayer = document.getLayer(visianLayerId) as IImageLayer;
-    if (!imageLayer || !imageLayer.isAnnotation) throw new Error("No layer");
-    this.drawROIS(rois.rois, imageLayer, rois.z);
-    this.fillROI(imageLayer, rois.z);
-    imageLayer.recomputeSliceMarkers(ViewType.Transverse);
-  }
-
-  private getVisianLayerId(dvLayerId: string): string {
-    const dvLayer = this.dvAnnotationTask.annotationLayers.find(
-      (layer) => layer.annotationID === dvLayerId,
-    );
-
-    if (!dvLayer)
-      throw new Error(`No layer found with dvLayerId: ${dvLayerId}`);
-    if (!dvLayer.visianLayerID) throw new Error("No visian layer ID was set!");
-    return dvLayer.visianLayerID;
-  }
-
-  private getDvLayer(visianLayerId: string): DVAnnotationLayer | undefined {
-    return this.dvAnnotationTask.annotationLayers.find(
-      (layer) => layer.visianLayerID === visianLayerId,
-    );
-  }
-
   private addDvLayersToVisian(document: Document) {
     this.dvAnnotationTask.annotationLayers.forEach((dvLayer) => {
       const visianLayer = this.addLayerFromAnnotation(dvLayer, document);
       dvLayer.visianLayerID = visianLayer.id;
     });
-  }
-
-  private drawROIS(rois: number[][], layer: IImageLayer, z: number) {
-    const [width, height] = this.getWidthAndHeight(layer);
-
-    const intRois = [];
-    for (let i = 0; i < rois.length; i++) {
-      const roi = rois[i];
-      const intRoi = new Int32Array(roi.length);
-      for (let j = 0; j < roi.length; j++) {
-        intRoi[j] = Math.round(roi[j]);
-      }
-      intRois.push(intRoi);
-    }
-
-    const data = drawContours(intRois, width, height);
-    layer.setSlice(ViewType.Transverse, z, data);
-  }
-
-  private fillROI(layer: IImageLayer, z: number) {
-    const [width, height] = this.getWidthAndHeight(layer);
-
-    let data = layer.getSlice(ViewType.Transverse, z) as Uint8Array;
-    data = fillContours(data, width, height);
-    layer.setSlice(ViewType.Transverse, z, data);
-  }
-
-  private getWidthAndHeight(layer: IImageLayer): [number, number] {
-    const [widthAxis, heightAxis] = getPlaneAxes(ViewType.Transverse);
-    const width = layer.image.voxelCount[widthAxis];
-    const height = layer.image.voxelCount[heightAxis];
-    return [width, height];
-  }
-
-  private addGroup(title: string, document: Document): IAnnotationGroup {
-    const group = new AnnotationGroup({ title }, document);
-    document.addAnnotationGroup(group);
-    return group;
   }
 
   private addLayerFromAnnotation(
@@ -191,6 +126,71 @@ export class DVReviewTask extends ReviewTask {
       group = this.addGroup(groupTitle, document);
     }
     return group;
+  }
+
+  private addGroup(title: string, document: Document): IAnnotationGroup {
+    const group = new AnnotationGroup({ title }, document);
+    document.addAnnotationGroup(group);
+    return group;
+  }
+
+  private drawRoisOnLayer(document: Document, rois: DVRoisOfASlice) {
+    const visianLayerId = this.getVisianLayerId(rois.layerID);
+    if (!visianLayerId) throw new Error("No visian layer");
+    const imageLayer = document.getLayer(visianLayerId) as IImageLayer;
+    if (!imageLayer || !imageLayer.isAnnotation) throw new Error("No layer");
+    this.drawROIS(rois.rois, imageLayer, rois.z);
+    this.fillROI(imageLayer, rois.z);
+    imageLayer.recomputeSliceMarkers(ViewType.Transverse);
+  }
+
+  private getVisianLayerId(dvLayerId: string): string {
+    const dvLayer = this.dvAnnotationTask.annotationLayers.find(
+      (layer) => layer.annotationID === dvLayerId,
+    );
+
+    if (!dvLayer)
+      throw new Error(`No layer found with dvLayerId: ${dvLayerId}`);
+    if (!dvLayer.visianLayerID) throw new Error("No visian layer ID was set!");
+    return dvLayer.visianLayerID;
+  }
+
+  private drawROIS(rois: number[][], layer: IImageLayer, z: number) {
+    const [width, height] = this.getWidthAndHeight(layer);
+
+    const intRois = [];
+    for (let i = 0; i < rois.length; i++) {
+      const roi = rois[i];
+      const intRoi = new Int32Array(roi.length);
+      for (let j = 0; j < roi.length; j++) {
+        intRoi[j] = Math.round(roi[j]);
+      }
+      intRois.push(intRoi);
+    }
+
+    const data = drawContours(intRois, width, height);
+    layer.setSlice(ViewType.Transverse, z, data);
+  }
+
+  private fillROI(layer: IImageLayer, z: number) {
+    const [width, height] = this.getWidthAndHeight(layer);
+
+    let data = layer.getSlice(ViewType.Transverse, z) as Uint8Array;
+    data = fillContours(data, width, height);
+    layer.setSlice(ViewType.Transverse, z, data);
+  }
+
+  private getDvLayer(visianLayerId: string): DVAnnotationLayer | undefined {
+    return this.dvAnnotationTask.annotationLayers.find(
+      (layer) => layer.visianLayerID === visianLayerId,
+    );
+  }
+
+  private getWidthAndHeight(layer: IImageLayer): [number, number] {
+    const [widthAxis, heightAxis] = getPlaneAxes(ViewType.Transverse);
+    const width = layer.image.voxelCount[widthAxis];
+    const height = layer.image.voxelCount[heightAxis];
+    return [width, height];
   }
 
   public async createAnnotation(_files: File[]) {
@@ -243,17 +243,17 @@ export class DVReviewTask extends ReviewTask {
     this.dvAnnotationTask.annotationLayers.push(dvLayer);
   }
 
-  private updateDvLayer(layer: ILayer, dvLayer: DVAnnotationLayer) {
-    dvLayer.color = this.colorToHex(layer.color);
-    if (layer.title) dvLayer.label = layer.title;
-  }
-
   private colorToHex(color: string | undefined): string {
     if (!color) return "#000000";
     if (color.startsWith("#")) return color;
     if (dataColorKeys.includes(color as any))
       return dataColorToHex(color as any);
     return "#000000";
+  }
+
+  private updateDvLayer(layer: ILayer, dvLayer: DVAnnotationLayer) {
+    dvLayer.color = this.colorToHex(layer.color);
+    if (layer.title) dvLayer.label = layer.title;
   }
 
   private addRoisToDvTask(layer: IImageLayer) {
@@ -289,19 +289,19 @@ export class DVReviewTask extends ReviewTask {
     return slicesWithRois;
   }
 
+  private getROIcontours(layer: IImageLayer, z: number): Int32Array[] {
+    const [width, height] = this.getWidthAndHeight(layer);
+
+    const data = layer.getSlice(ViewType.Transverse, z) as Uint8Array;
+    return findContours(data, width, height);
+  }
+
   private convertInt32ArrayToNumberArray(array: Int32Array[]): number[][] {
     const result = [];
     for (let i = 0; i < array.length; i++) {
       result.push(Array.from(array[i]));
     }
     return result;
-  }
-
-  private getROIcontours(layer: IImageLayer, z: number): Int32Array[] {
-    const [width, height] = this.getWidthAndHeight(layer);
-
-    const data = layer.getSlice(ViewType.Transverse, z) as Uint8Array;
-    return findContours(data, width, height);
   }
 
   public toJSON(): DVReviewTaskSnapshot {
