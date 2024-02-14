@@ -7,7 +7,7 @@ import { DVScan } from "./scan";
 export interface DVAnnotationTaskSnapshot {
   taskID: string;
   userID: string;
-  case: any;
+  dvCase: any;
   scan: any;
   annotationGroups: any[];
   rois: any[];
@@ -17,7 +17,7 @@ export class DVAnnotationTask {
   public static createFromImport(jsonObject: any): DVAnnotationTask {
     const { taskID } = jsonObject;
     const { userID } = jsonObject;
-    const dvCase = new DVCase(jsonObject.case);
+    const dvCase = new DVCase(jsonObject.case.id);
     const scan = new DVScan(jsonObject.scan);
     const rois = this.parseRois(jsonObject.rois);
     const layerUserMapping = this.getLayerUserMapping(rois);
@@ -58,28 +58,14 @@ export class DVAnnotationTask {
     return roisJson.map((roi: any) => DVRois.createFromImport(roi));
   }
 
-  public taskID: string;
-  public userID: string;
-  public scan: DVScan;
-  public case: DVCase;
-  public annotationLayers: DVAnnotationLayer[];
-  public rois: DVRois[];
-
   constructor(
-    taskID: string,
-    userID: string,
-    dvCase: DVCase,
-    scan: DVScan,
-    annotationGroups: DVAnnotationLayer[],
-    rois: DVRois[],
-  ) {
-    this.taskID = taskID;
-    this.userID = userID;
-    this.case = dvCase;
-    this.scan = scan;
-    this.annotationLayers = annotationGroups;
-    this.rois = rois;
-  }
+    public taskID: string,
+    public userID: string,
+    public dvCase: DVCase,
+    public scan: DVScan,
+    public annotationLayers: DVAnnotationLayer[],
+    public rois: DVRois[],
+  ) {}
 
   public getLayerRoisList(): DVRoisOfASlice[] {
     const list = [] as DVRoisOfASlice[];
@@ -101,7 +87,7 @@ export class DVAnnotationTask {
     return {
       taskID: this.taskID,
       userID: this.userID,
-      case: this.case.toJSON(),
+      dvCase: this.dvCase.toJSON(),
       scan: this.scan.toJSON(),
       annotationGroups: this.annotationLayers.map((group) => group.toJSON()),
       rois: this.rois.map((roi) => roi.toJSON()),

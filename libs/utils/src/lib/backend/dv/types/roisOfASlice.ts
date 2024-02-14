@@ -5,13 +5,9 @@ export class DVRoisOfASlice {
     return new DVRoisOfASlice(rois.layer, rois.z, []);
   }
 
-  public z: number;
-  public layerID: string;
-  public rois: number[][];
-
-  constructor(layerID: string, z: number, rois: number[][]) {
-    this.layerID = layerID;
-    this.z = z;
-    this.rois = rois;
-  }
+  constructor(
+    public layerID: string,
+    public z: number,
+    public rois: number[][],
+  ) {}
 }

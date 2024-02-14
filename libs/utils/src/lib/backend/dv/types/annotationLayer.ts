@@ -18,14 +18,8 @@ export class DVAnnotationLayer {
     );
   }
 
-  public annotationID: string;
-  public userID: string;
-  public label: string;
-  public color: string;
-  public visianLayerID: string | undefined;
-
   constructor(
-    public annotaionID: string,
+    public annotationID: string,
     public userID: string,
     public label: string,
     public color: string,
