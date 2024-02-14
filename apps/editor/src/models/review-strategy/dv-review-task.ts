@@ -78,7 +78,7 @@ export class DVReviewTask extends ReviewTask {
     this.removeGroupsCreatedByDefault(document);
     this.addDvLayersToVisian(document);
     const layerList = this.dvAnnotationTask.getLayerRoisList();
-    layerList.forEach((e) => this.drawLayer(document, e));
+    layerList.forEach((e) => this.drawRoisOnLayer(document, e));
   }
 
   private removeGroupsCreatedByDefault(doc: Document) {
@@ -87,7 +87,7 @@ export class DVReviewTask extends ReviewTask {
     );
   }
 
-  private drawLayer(document: Document, rois: DVRoisOfASlice) {
+  private drawRoisOnLayer(document: Document, rois: DVRoisOfASlice) {
     const visianLayerId = this.getVisianLayerId(rois.layerID);
     if (!visianLayerId) throw new Error("No visian layer");
     const imageLayer = document.getLayer(visianLayerId) as IImageLayer;
@@ -98,8 +98,6 @@ export class DVReviewTask extends ReviewTask {
   }
 
   private getVisianLayerId(dvLayerId: string): string {
-    if (!this.dvAnnotationTask.annotationLayers) throw new Error("No layers");
-
     const dvLayer = this.dvAnnotationTask.annotationLayers.find(
       (layer) => layer.annotationID === dvLayerId,
     );
@@ -111,10 +109,9 @@ export class DVReviewTask extends ReviewTask {
   }
 
   private getDvLayer(visianLayerId: string): DVAnnotationLayer | undefined {
-    const dvLayer = this.dvAnnotationTask.annotationLayers.find(
+    return this.dvAnnotationTask.annotationLayers.find(
       (layer) => layer.visianLayerID === visianLayerId,
     );
-    return dvLayer;
   }
 
   private addDvLayersToVisian(document: Document) {
@@ -186,7 +183,7 @@ export class DVReviewTask extends ReviewTask {
     dvLayer: DVAnnotationLayer,
     document: Document,
   ): IAnnotationGroup {
-    const groupTitle = dvLayer.userID;
+    const groupTitle = `User ${dvLayer.userID}`;
     let group = document.annotationGroups.find(
       (g: IAnnotationGroup) => g.title === groupTitle,
     );
