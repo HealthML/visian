@@ -25,18 +25,12 @@ export class DVAnnotationLayer {
   public visianLayerID: string | undefined;
 
   constructor(
-    annotaionID: string,
-    userID: string,
-    label: string,
-    color: string,
-    visianLayerID: string | undefined,
-  ) {
-    this.annotationID = annotaionID;
-    this.label = label;
-    this.color = color;
-    this.userID = userID;
-    this.visianLayerID = visianLayerID;
-  }
+    public annotaionID: string,
+    public userID: string,
+    public label: string,
+    public color: string,
+    public visianLayerID: string | undefined,
+  ) {}
 
   public toJSON(): DVAnnotationGroupSnapshot {
     return {
