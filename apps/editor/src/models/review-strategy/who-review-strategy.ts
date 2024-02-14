@@ -158,9 +158,6 @@ export class WHOReviewStrategy extends ReviewStrategy<WHOReviewTask> {
     await this.importAnnotationsWithMetadata(false);
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  public postProcessLoadedTask(): void {}
-
   public toJSON(): ReviewStrategySnapshot {
     return {
       backend: "who",
