@@ -48,7 +48,7 @@ export class DVReviewTask extends ReviewTask {
   }
 
   public get title(): string {
-    return `Case ID: ${this.dvAnnotationTask.case.caseID}`;
+    return `Case ID: ${this.dvAnnotationTask.dvCase.caseID}`;
   }
 
   public get description(): string {

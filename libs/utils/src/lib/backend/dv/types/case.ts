@@ -3,11 +3,7 @@ export interface DVCaseSnapshot {
 }
 
 export class DVCase {
-  public caseID: number;
-
-  constructor(dvCase: any) {
-    this.caseID = dvCase.caseID;
-  }
+  constructor(public caseID: number) {}
 
   public toJSON(): DVCaseSnapshot {
     return {

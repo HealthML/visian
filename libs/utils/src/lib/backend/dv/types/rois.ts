@@ -19,25 +19,13 @@ export class DVRois {
     );
   }
 
-  public z: number;
-  public user: string;
-  public scanID: number;
-  public layer: string;
-  public points: number[];
-
   constructor(
-    z: number,
-    user: string,
-    scanID: number,
-    layer: string,
-    points: number[],
-  ) {
-    this.z = z;
-    this.user = user;
-    this.scanID = scanID;
-    this.layer = layer;
-    this.points = points;
-  }
+    public z: number,
+    public user: string,
+    public scanID: number,
+    public layer: string,
+    public points: number[],
+  ) {}
 
   public getLayerRoisEntry(list: DVRoisOfASlice[]) {
     let layerRois = list.find(
