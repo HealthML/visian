@@ -1,11 +1,10 @@
 const GZIP_MAGIC_NUMBER = "1f8b";
 const ZIP_MAGIC_NUMBER = "504b0304";
 
-const convertToHex = (dataArray: Uint8Array): string => {
-  return Array.from(dataArray, (byte) =>
+const convertToHex = (dataArray: Uint8Array): string =>
+  Array.from(dataArray, (byte) =>
     `0${(byte & 0xff).toString(16)}`.slice(-2),
   ).join("");
-};
 
 const isGzipData = (dataArray: Uint8Array): boolean => {
   const hexData = convertToHex(dataArray);
