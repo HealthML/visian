@@ -11,6 +11,7 @@ import {
   DVAnnotationLayer,
   DVAnnotationTask,
   DVAnnotationTaskSnapshot,
+  DVRois,
   DVRoisOfASlice,
   fillContours,
   findContours,
@@ -19,8 +20,6 @@ import {
   ViewType,
 } from "@visian/utils";
 import { AxiosResponse } from "axios";
-// eslint-disable-next-line @nrwl/nx/enforce-module-boundaries
-import { DVRois } from "libs/utils/src/lib/backend/dv/types/rois";
 
 import { Document, ImageLayer } from "../editor";
 import { AnnotationGroup } from "../editor/annotation-groups";
