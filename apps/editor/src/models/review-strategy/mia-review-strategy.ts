@@ -187,9 +187,6 @@ export class MiaReviewStrategy extends ReviewStrategy<MiaReviewTask> {
     await this.importAnnotationsWithMetadata(true);
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  public postProcessLoadedTask(): void {}
-
   public toJSON() {
     return {
       backend: "mia",

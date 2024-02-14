@@ -95,7 +95,7 @@ export abstract class ReviewStrategy<Task extends ReviewTask> {
   }
 
   // After loading the task, depending on the strategy we might need to do some post processing
-  public abstract postProcessLoadedTask(): void;
+  public postProcessLoadedTask(): void {}
 
   public abstract toJSON(): ReviewStrategySnapshot;
 
