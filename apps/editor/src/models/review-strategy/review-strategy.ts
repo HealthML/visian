@@ -1,4 +1,5 @@
 import { action, makeObservable, observable } from "mobx";
+import path from "path";
 
 import { RootStore } from "../root";
 import { ReviewStrategySnapshot } from "./review-strategy-snapshot";
@@ -70,15 +71,16 @@ export abstract class ReviewStrategy {
         const groupFiles =
           this.store.editor.activeDocument?.createAnnotationGroup(
             annotationFiles,
-            annotationFiles[0].name,
+            path.basename(
+              annotationFiles[0].name,
+              path.extname(annotationFiles[0].name),
+            ),
             getMetadataFromChild
               ? { ...annotationFiles[0]?.metadata }
               : { id: annotationId, kind: "annotation", backend: "who" },
           );
         if (!groupFiles) throw new Error("No active Document");
 
-        // isAnnotation is unnessesary because it's only called here
-        // with an array, and then the isAnnotation is not used in importFiles
         await this.store?.editor.activeDocument?.importFiles(
           groupFiles,
           undefined,

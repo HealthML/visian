@@ -9,6 +9,7 @@ import {
   Text,
 } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
+import path from "path";
 import { useCallback, useEffect, useState } from "react";
 import styled from "styled-components";
 
@@ -101,9 +102,21 @@ export const ExportPopUp = observer<ExportPopUpProps>(({ isOpen, onClose }) => {
     store?.setProgress({ labelTx: "exporting" });
 
     try {
-      const fileName = shouldExportAllLayers
-        ? undefined
-        : store?.editor?.activeDocument?.activeLayer?.annotationGroup?.title;
+      const annotationGroupTitle =
+        store?.editor?.activeDocument?.activeLayer?.annotationGroup?.title;
+
+      let fileName;
+
+      if (shouldExportAllLayers) {
+        fileName = undefined;
+      } else {
+        fileName = annotationGroupTitle
+          ? path.basename(
+              annotationGroupTitle,
+              path.extname(annotationGroupTitle),
+            )
+          : undefined;
+      }
       if (selectedExtension === ".zip") {
         await store?.editor.activeDocument?.exportZip(layersToExport, fileName);
       } else {
