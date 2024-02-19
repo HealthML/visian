@@ -2,5 +2,5 @@ export * from "./annotationLayer";
 export * from "./scan";
 export * from "./annotationTask";
 export * from "./case";
-export * from "./roisOfASlice";
-export * from "./rois";
+export * from "./slice";
+export * from "./roi";
