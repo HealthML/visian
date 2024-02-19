@@ -6,22 +6,26 @@ import { DVRoi } from "./roi";
  */
 export class DVSlice {
   public static createFromDVRoi(roi: DVRoi) {
-    return new DVSlice(roi.layerID, roi.z, [roi]);
+    return new DVSlice(roi.layerID, roi.z, [roi.points]);
   }
 
   /**
    * Creates a new slice object.
    * @param layerID - The ID of the layer.
    * @param z - The z-coordinate of the slice.
-   * @param rois - An array of DVRoi objects.
+   * @param contours - An array that contains multiple point arrays (outlines) of the rois.
    */
-  constructor(public layerID: string, public z: number, public rois: DVRoi[]) {
+  constructor(
+    public layerID: string,
+    public z: number,
+    public contours: number[][],
+  ) {
     this.layerID = layerID;
     this.z = z;
-    this.rois = rois;
+    this.contours = contours;
   }
 
   public addRoi(roi: DVRoi) {
-    this.rois.push(roi);
+    this.contours.push(roi.points);
   }
 }

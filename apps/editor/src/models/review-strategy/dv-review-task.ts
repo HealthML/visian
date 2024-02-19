@@ -11,8 +11,8 @@ import {
   DVAnnotationLayer,
   DVAnnotationTask,
   DVAnnotationTaskSnapshot,
-  DVRois,
-  DVRoisOfASlice,
+  DVRoi,
+  DVSlice,
   fillContours,
   findContours,
   getPlaneAxes,
@@ -55,9 +55,7 @@ export class DVReviewTask extends ReviewTask {
   }
 
   public get annotationIds(): string[] {
-    return this.dvAnnotationTask.annotationLayers.map(
-      (group) => group.annotationID,
-    );
+    return this.dvAnnotationTask.annotationLayers.map((layer) => layer.id);
   }
 
   constructor(dvAnnotationTask: DVAnnotationTask) {
@@ -75,13 +73,13 @@ export class DVReviewTask extends ReviewTask {
   }
 
   public addGroupsAndLayers(document: Document) {
-    this.removeGroupsCreatedByDefault(document);
+    this.removeDefaultAnnotationGroups(document);
     this.addDvLayersToVisian(document);
-    const layerList = this.dvAnnotationTask.getLayerRoisList();
-    layerList.forEach((e) => this.drawRoisOnLayer(document, e));
+    const slices = this.dvAnnotationTask.addRoisToCorrespondingSlices();
+    slices.forEach((slice) => this.drawSliceContours(document, slice));
   }
 
-  private removeGroupsCreatedByDefault(doc: Document) {
+  private removeDefaultAnnotationGroups(doc: Document) {
     doc.annotationGroups.forEach((g) =>
       doc.removeAnnotationGroup(g as AnnotationGroup),
     );
@@ -89,12 +87,12 @@ export class DVReviewTask extends ReviewTask {
 
   private addDvLayersToVisian(document: Document) {
     this.dvAnnotationTask.annotationLayers.forEach((dvLayer) => {
-      const visianLayer = this.addLayerFromAnnotation(dvLayer, document);
+      const visianLayer = this.addLayerToVisian(dvLayer, document);
       dvLayer.visianLayerID = visianLayer.id;
     });
   }
 
-  private addLayerFromAnnotation(
+  private addLayerToVisian(
     dvLayer: DVAnnotationLayer,
     document: Document,
   ): ImageLayer {
@@ -108,13 +106,13 @@ export class DVReviewTask extends ReviewTask {
     layer.setTitle(dvLayer.label);
 
     document.addLayer(layer);
-    const group = this.getGroupFromLayer(dvLayer, document);
+    const group = this.addDVLayerToAnnotationGroup(dvLayer, document);
     group.addLayer(layer.id);
 
     return layer;
   }
 
-  private getGroupFromLayer(
+  private addDVLayerToAnnotationGroup(
     dvLayer: DVAnnotationLayer,
     document: Document,
   ): IAnnotationGroup {
@@ -123,30 +121,26 @@ export class DVReviewTask extends ReviewTask {
       (g: IAnnotationGroup) => g.title === groupTitle,
     );
     if (!group) {
-      group = this.addGroup(groupTitle, document);
+      group = new AnnotationGroup({ title: groupTitle }, document);
+      document.addAnnotationGroup(group as AnnotationGroup);
     }
     return group;
   }
 
-  private addGroup(title: string, document: Document): IAnnotationGroup {
-    const group = new AnnotationGroup({ title }, document);
-    document.addAnnotationGroup(group);
-    return group;
-  }
-
-  private drawRoisOnLayer(document: Document, rois: DVRoisOfASlice) {
-    const visianLayerId = this.getVisianLayerId(rois.layerID);
+  private drawSliceContours(document: Document, slice: DVSlice) {
+    const visianLayerId = this.getVisianLayerId(slice.layerID);
     if (!visianLayerId) throw new Error("No visian layer");
+
     const imageLayer = document.getLayer(visianLayerId) as IImageLayer;
     if (!imageLayer || !imageLayer.isAnnotation) throw new Error("No layer");
-    this.drawROIS(rois.rois, imageLayer, rois.z);
-    this.fillROI(imageLayer, rois.z);
+
+    this.drawAndFillContours(slice.contours, imageLayer, slice.z);
     imageLayer.recomputeSliceMarkers(ViewType.Transverse);
   }
 
   private getVisianLayerId(dvLayerId: string): string {
     const dvLayer = this.dvAnnotationTask.annotationLayers.find(
-      (layer) => layer.annotationID === dvLayerId,
+      (layer) => layer.id === dvLayerId,
     );
 
     if (!dvLayer)
@@ -155,32 +149,31 @@ export class DVReviewTask extends ReviewTask {
     return dvLayer.visianLayerID;
   }
 
-  private drawROIS(rois: number[][], layer: IImageLayer, z: number) {
+  private drawAndFillContours(
+    contours: number[][],
+    layer: IImageLayer,
+    z: number,
+  ) {
     const [width, height] = this.getWidthAndHeight(layer);
 
-    const intRois = [];
-    for (let i = 0; i < rois.length; i++) {
-      const roi = rois[i];
-      const intRoi = new Int32Array(roi.length);
-      for (let j = 0; j < roi.length; j++) {
-        intRoi[j] = Math.round(roi[j]);
+    const intContours = [];
+    for (let i = 0; i < contours.length; i++) {
+      const roiPoints = contours[i];
+      const intRoiPoints = new Int32Array(roiPoints.length);
+      for (let j = 0; j < roiPoints.length; j++) {
+        intRoiPoints[j] = Math.round(roiPoints[j]);
       }
-      intRois.push(intRoi);
+      intContours.push(intRoiPoints);
     }
 
-    const data = drawContours(intRois, width, height);
-    layer.setSlice(ViewType.Transverse, z, data);
-  }
-
-  private fillROI(layer: IImageLayer, z: number) {
-    const [width, height] = this.getWidthAndHeight(layer);
-
-    let data = layer.getSlice(ViewType.Transverse, z) as Uint8Array;
+    let data = drawContours(intContours, width, height);
     data = fillContours(data, width, height);
     layer.setSlice(ViewType.Transverse, z, data);
   }
 
-  private getDvLayer(visianLayerId: string): DVAnnotationLayer | undefined {
+  private getDvLayerFromVisianLayer(
+    visianLayerId: string,
+  ): DVAnnotationLayer | undefined {
     return this.dvAnnotationTask.annotationLayers.find(
       (layer) => layer.visianLayerID === visianLayerId,
     );
@@ -210,25 +203,22 @@ export class DVReviewTask extends ReviewTask {
   }
 
   private updateDvTask(document: Document) {
-    this.resetRoisOfDvTask();
+    this.dvAnnotationTask.rois = [];
     document.layers.forEach((layer) => {
       if (layer.isAnnotation) {
-        this.updateDvTaskLayer(layer);
+        this.updateDvLayer(layer);
         this.addRoisToDvTask(layer as IImageLayer);
       }
     });
   }
 
-  private resetRoisOfDvTask() {
-    this.dvAnnotationTask.rois = [];
-  }
-
-  private updateDvTaskLayer(layer: ILayer) {
-    const dvLayer = this.getDvLayer(layer.id);
+  private updateDvLayer(layer: ILayer) {
+    const dvLayer = this.getDvLayerFromVisianLayer(layer.id);
     if (!dvLayer) {
       this.addLayerToDvTask(layer);
     } else {
-      this.updateDvLayer(layer, dvLayer);
+      dvLayer.color = this.colorToHex(layer.color);
+      if (layer.title) dvLayer.label = layer.title;
     }
   }
 
@@ -251,50 +241,58 @@ export class DVReviewTask extends ReviewTask {
     return "#000000";
   }
 
-  private updateDvLayer(layer: ILayer, dvLayer: DVAnnotationLayer) {
-    dvLayer.color = this.colorToHex(layer.color);
-    if (layer.title) dvLayer.label = layer.title;
-  }
-
   private addRoisToDvTask(layer: IImageLayer) {
-    const dvLayer = this.getDvLayer(layer.id);
+    const dvLayer = this.getDvLayerFromVisianLayer(layer.id);
     if (!dvLayer) throw new Error("No corresponding dvLayer found!");
-    const slices = this.getSlicesWithRois(layer);
+    const slices = this.getSlicesContainingAnnotations(layer);
 
     slices.forEach((slice) => {
-      slice.rois.forEach((roi) => {
+      slice.contours.forEach((points) => {
         this.dvAnnotationTask.rois.push(
-          new DVRois(
+          new DVRoi(
+            dvLayer.id,
             slice.z,
-            dvLayer.userID,
             this.dvAnnotationTask.scan.scanID,
-            dvLayer.annotationID,
-            roi,
+            dvLayer.userID,
+            points,
           ),
         );
       });
     });
   }
 
-  private getSlicesWithRois(layer: IImageLayer): DVRoisOfASlice[] {
-    const slicesWithRois = [];
+  private getSlicesContainingAnnotations(layer: IImageLayer): DVSlice[] {
+    const slicesContainingRois = [];
     for (let z = 0; z < layer.image.voxelCount["z"]; z++) {
-      const contours = this.getROIcontours(layer, z);
+      const contours = this.getRoiContours(layer, z);
       if (contours.length !== 0) {
         const rois = this.convertInt32ArrayToNumberArray(contours);
-        slicesWithRois.push(new DVRoisOfASlice(layer.id, z, rois));
+        slicesContainingRois.push(new DVSlice(layer.id, z, rois));
       }
     }
 
-    return slicesWithRois;
+    return slicesContainingRois;
   }
 
-  private getROIcontours(layer: IImageLayer, z: number): Int32Array[] {
+  private getRoiContours(layer: IImageLayer, z: number): Int32Array[] {
     const [width, height] = this.getWidthAndHeight(layer);
 
     const data = layer.getSlice(ViewType.Transverse, z) as Uint8Array;
     return findContours(data, width, height);
   }
+
+  // private mirrorAndRoundRoiPoints(
+  //   points: number[] | Int32Array,
+  //   width: number,
+  //   height: number,
+  // ): number[] {
+  //   const mirroredPoints = [];
+  //   for (let i = 0; i < points.length; i += 2) {
+  //     mirroredPoints.push(width - Math.round(points[i]));
+  //     mirroredPoints.push(height - Math.round(points[i + 1]));
+  //   }
+  //   return mirroredPoints;
+  // }
 
   private convertInt32ArrayToNumberArray(array: Int32Array[]): number[][] {
     const result = [];

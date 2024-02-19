@@ -122,7 +122,7 @@ export class DVAnnotationTask {
     this.rois.forEach((roi) => {
       let slice = roi.findMatchingSlice(slices);
       if (!slice) {
-        slice = new DVSlice(roi.layerID, roi.z, [roi]);
+        slice = DVSlice.createFromDVRoi(roi);
         slices.push(slice);
       } else {
         slice.addRoi(roi);
