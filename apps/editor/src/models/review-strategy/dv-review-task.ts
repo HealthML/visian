@@ -156,15 +156,14 @@ export class DVReviewTask extends ReviewTask {
   ) {
     const [width, height] = this.getWidthAndHeight(layer);
 
-    const intContours = [];
-    for (let i = 0; i < contours.length; i++) {
-      const roiPoints = contours[i];
-      const intRoiPoints = new Int32Array(roiPoints.length);
-      for (let j = 0; j < roiPoints.length; j++) {
-        intRoiPoints[j] = Math.round(roiPoints[j]);
-      }
-      intContours.push(intRoiPoints);
-    }
+    const mirroredContours = this.mirrorAndRoundContours(
+      contours,
+      width,
+      height,
+    );
+    const intContours = mirroredContours.map(
+      (points) => new Int32Array(points),
+    );
 
     let data = drawContours(intContours, width, height);
     data = fillContours(data, width, height);
@@ -262,12 +261,17 @@ export class DVReviewTask extends ReviewTask {
   }
 
   private getSlicesContainingAnnotations(layer: IImageLayer): DVSlice[] {
+    const [width, height] = this.getWidthAndHeight(layer);
     const slicesContainingRois = [];
     for (let z = 0; z < layer.image.voxelCount["z"]; z++) {
       const contours = this.getRoiContours(layer, z);
-      if (contours.length !== 0) {
-        const rois = this.convertInt32ArrayToNumberArray(contours);
-        slicesContainingRois.push(new DVSlice(layer.id, z, rois));
+      if (contours.length >= 1) {
+        const mirroredContours = this.mirrorAndRoundContours(
+          contours,
+          width,
+          height,
+        );
+        slicesContainingRois.push(new DVSlice(layer.id, z, mirroredContours));
       }
     }
 
@@ -281,25 +285,31 @@ export class DVReviewTask extends ReviewTask {
     return findContours(data, width, height);
   }
 
-  // private mirrorAndRoundRoiPoints(
-  //   points: number[] | Int32Array,
-  //   width: number,
-  //   height: number,
-  // ): number[] {
-  //   const mirroredPoints = [];
-  //   for (let i = 0; i < points.length; i += 2) {
-  //     mirroredPoints.push(width - Math.round(points[i]));
-  //     mirroredPoints.push(height - Math.round(points[i + 1]));
-  //   }
-  //   return mirroredPoints;
-  // }
-
-  private convertInt32ArrayToNumberArray(array: Int32Array[]): number[][] {
-    const result = [];
-    for (let i = 0; i < array.length; i++) {
-      result.push(Array.from(array[i]));
+  /**
+   * Mirrors and rounds the given contours to the nearest int based on the specified width and height.
+   * This is necessary, because the origin of the image in DV is in the top left corner,
+   * while in Visian it is in the bottom right corner.
+   * @param contours - The contours to be mirrored and rounded.
+   * @param width - The width of the image.
+   * @param height - The height of the image.
+   * @returns The mirrored and rounded contours.
+   */
+  private mirrorAndRoundContours(
+    contours: number[][] | Int32Array[],
+    width: number,
+    height: number,
+  ): number[][] {
+    const mirroredContours = [];
+    for (let i = 0; i < contours.length; i++) {
+      const points = contours[i];
+      const mirroredPoints = [];
+      for (let j = 0; j < points.length; j += 2) {
+        mirroredPoints.push(width - Math.round(points[j]));
+        mirroredPoints.push(height - Math.round(points[j + 1]));
+      }
+      mirroredContours.push(mirroredPoints);
     }
-    return result;
+    return mirroredContours;
   }
 
   public toJSON(): DVReviewTaskSnapshot {
