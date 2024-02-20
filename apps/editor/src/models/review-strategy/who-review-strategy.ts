@@ -1,8 +1,8 @@
 import { IAnnotationGroup, IImageLayer } from "@visian/ui-shared";
 import {
   FileWithMetadata,
+  getTaskIdFromUrl,
   getWHOTask,
-  getWHOTaskIdFromUrl,
   setNewTaskIdForUrl,
 } from "@visian/utils";
 
@@ -14,7 +14,7 @@ import { ReviewStrategySnapshot } from "./review-strategy-snapshot";
 import { TaskType } from "./review-task";
 import { WHOReviewTask } from "./who-review-task";
 
-export class WHOReviewStrategy extends ReviewStrategy {
+export class WHOReviewStrategy extends ReviewStrategy<WHOReviewTask> {
   public static fromSnapshot(
     store: RootStore,
     snapshot?: ReviewStrategySnapshot,
@@ -40,6 +40,14 @@ export class WHOReviewStrategy extends ReviewStrategy {
   }) {
     super({ store });
     if (currentReviewTask) this.setCurrentTask(currentReviewTask);
+  }
+
+  public supportsPreviousTask(): boolean {
+    return false;
+  }
+
+  public supportsNextTask(): boolean {
+    return true;
   }
 
   public async nextTask(): Promise<void> {
@@ -109,7 +117,7 @@ export class WHOReviewStrategy extends ReviewStrategy {
 
   // Importing
   protected async buildTask() {
-    const taskId = getWHOTaskIdFromUrl();
+    const taskId = getTaskIdFromUrl();
     if (!taskId) throw new Error("No WHO task specified in URL.");
 
     const whoTask = await getWHOTask(taskId);

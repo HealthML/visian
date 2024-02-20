@@ -18,11 +18,19 @@ export interface WhoAnnotationMetadata {
   kind: "annotation";
 }
 
+export interface DvAnnotationMetadata {
+  id: string;
+  backend: "dv";
+  kind: "annotation";
+}
+
 export type MiaMetadata = MiaAnnotationMetadata | MiaImageMetadata;
 
 export type WhoMetadata = WhoAnnotationMetadata;
 
-export type BackendMetadata = MiaMetadata | WhoMetadata;
+export type DvMetadata = DvAnnotationMetadata;
+
+export type BackendMetadata = MiaMetadata | WhoMetadata | DvMetadata;
 
 export function isMiaAnnotationMetadata(
   metadata?: BackendMetadata,
@@ -46,6 +54,12 @@ export function isWhoAnnotationMetadata(
   metadata?: BackendMetadata,
 ): metadata is WhoAnnotationMetadata {
   return metadata?.backend === "who" && metadata?.kind === "annotation";
+}
+
+export function isDvAnnotationMetadata(
+  metadata?: BackendMetadata,
+): metadata is DvAnnotationMetadata {
+  return metadata?.backend === "dv" && metadata?.kind === "annotation";
 }
 
 export interface FileWithMetadata extends File {

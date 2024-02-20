@@ -439,6 +439,11 @@ export class Document
     }
   };
 
+  public removeAnnotationGroup = (group: AnnotationGroup): void => {
+    const index = this.layerIds.indexOf(group.id);
+    this.layerIds.splice(index, 1);
+  };
+
   public getFirstUnusedColor = (
     defaultColor = defaultAnnotationColor,
   ): string => {

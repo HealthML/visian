@@ -424,12 +424,14 @@ export const MiaReviewBar = observer(
                   onPointerDown={previousTask}
                 />
               )}
-              <ActionButtons
-                icon="arrowForward"
-                tooltipTx="next-task-tooltip"
-                tooltipPosition="top"
-                onPointerDown={nextTask}
-              />
+              {store?.reviewStrategy?.supportsNextTask && (
+                <ActionButtons
+                  icon="arrowForward"
+                  tooltipTx="next-task-tooltip"
+                  tooltipPosition="top"
+                  onPointerDown={nextTask}
+                />
+              )}
             </ReviewToolsContainer>
           </ReviewContainer>
         </ReviewBarSheet>

@@ -17,7 +17,7 @@ import {
 } from "./review-strategy-snapshot";
 import { TaskType } from "./review-task";
 
-export class MiaReviewStrategy extends ReviewStrategy {
+export class MiaReviewStrategy extends ReviewStrategy<MiaReviewTask> {
   public static fromSnapshot(
     store: RootStore,
     snapshot?: ReviewStrategySnapshot,
@@ -143,7 +143,11 @@ export class MiaReviewStrategy extends ReviewStrategy {
     );
   }
 
-  public get supportsPreviousTask() {
+  public supportsPreviousTask() {
+    return true;
+  }
+
+  public supportsNextTask() {
     return true;
   }
 
@@ -186,6 +190,7 @@ export class MiaReviewStrategy extends ReviewStrategy {
   public async importAnnotations(): Promise<void> {
     await this.importAnnotationsWithMetadata(true);
   }
+
   public toJSON() {
     return {
       backend: "mia",
