@@ -143,7 +143,11 @@ export class MiaReviewStrategy extends ReviewStrategy<MiaReviewTask> {
     );
   }
 
-  public get supportsPreviousTask() {
+  public supportsPreviousTask() {
+    return true;
+  }
+
+  public supportsNextTask() {
     return true;
   }
 

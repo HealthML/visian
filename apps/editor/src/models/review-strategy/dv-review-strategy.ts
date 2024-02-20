@@ -33,6 +33,14 @@ export class DVReviewStrategy extends ReviewStrategy<DVReviewTask> {
     if (currentReviewTask) this.setCurrentTask(currentReviewTask);
   }
 
+  public supportsPreviousTask(): boolean {
+    return false;
+  }
+
+  public supportsNextTask(): boolean {
+    return false;
+  }
+
   public async nextTask(): Promise<void> {
     throw new Error("Next task is not implemented in the DV strategy!");
   }

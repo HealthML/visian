@@ -42,6 +42,14 @@ export class WHOReviewStrategy extends ReviewStrategy<WHOReviewTask> {
     if (currentReviewTask) this.setCurrentTask(currentReviewTask);
   }
 
+  public supportsPreviousTask(): boolean {
+    return false;
+  }
+
+  public supportsNextTask(): boolean {
+    return true;
+  }
+
   public async nextTask(): Promise<void> {
     this.store.setProgress({ labelTx: "saving", showSplash: true });
     try {
