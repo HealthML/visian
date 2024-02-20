@@ -18,7 +18,7 @@ export class DVSlice {
   constructor(
     public layerID: string,
     public z: number,
-    public contours: number[][],
+    private contours: number[][],
   ) {
     this.layerID = layerID;
     this.z = z;
@@ -27,5 +27,13 @@ export class DVSlice {
 
   public addRoi(roi: DVRoi) {
     this.contours.push(roi.points);
+  }
+
+  public addPointsToContour(points: number[]) {
+    this.contours.push(points);
+  }
+
+  public getContours(): number[][] {
+    return this.contours;
   }
 }

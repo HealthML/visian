@@ -134,7 +134,7 @@ export class DVReviewTask extends ReviewTask {
     const imageLayer = document.getLayer(visianLayerId) as IImageLayer;
     if (!imageLayer || !imageLayer.isAnnotation) throw new Error("No layer");
 
-    this.drawAndFillContours(slice.contours, imageLayer, slice.z);
+    this.drawAndFillContours(slice.getContours(), imageLayer, slice.z);
     imageLayer.recomputeSliceMarkers(ViewType.Transverse);
   }
 
@@ -246,7 +246,7 @@ export class DVReviewTask extends ReviewTask {
     const slices = this.getSlicesContainingAnnotations(layer);
 
     slices.forEach((slice) => {
-      slice.contours.forEach((points) => {
+      slice.getContours().forEach((points) => {
         this.dvAnnotationTask.rois.push(
           new DVRoi(
             dvLayer.id,
