@@ -39,15 +39,16 @@ const LayerListContainer = styled.div`
 `;
 
 const UnsavedGroupList = styled(List)`
-  margin: 10px 0;
+  margin: 5px 0;
 `;
 
 const UnsavedGroupListItem = styled(ListItem)`
   margin: -4px 0;
 `;
 
-const StyledText = styled(Text)<{ space?: number }>`
-  margin-bottom: ${({ space }) => space || "2"}px;
+const StyledText = styled(Text)<{ marginBottom?: number; marginTop?: number }>`
+  margin-bottom: ${({ marginBottom }) => marginBottom || "2"}px;
+  margin-top: ${({ marginTop }) => marginTop || "2"}px;
 `;
 
 export const AnnotationGroupListItem = observer<{
@@ -134,6 +135,7 @@ export const AnnotationGroupListItem = observer<{
   const [miaAnnotationToBeDeleted, setMiaAnnotationToBeDeleted] =
     useState<MiaAnnotation>();
 
+  // Delete is not yet implemented for WHO
   const deleteAnnotationGroup = useCallback(async () => {
     if (group.metadata && isMiaAnnotationMetadata(group.metadata)) {
       try {
@@ -148,11 +150,12 @@ export const AnnotationGroupListItem = observer<{
           }),
         });
       }
-    } else {
-      openDeleteConfirmationPopUp();
+    } else if (!group.metadata) {
+      group.delete();
+      setContextMenuPosition(null);
     }
   }, [
-    group.metadata,
+    group,
     miaAnnotationToBeDeleted?.id,
     openDeleteConfirmationPopUp,
     store,
@@ -244,7 +247,7 @@ export const AnnotationGroupListItem = observer<{
               (g) => g.metadata?.id && g.hasChanges,
             ).length !== 0 && (
               <>
-                <StyledText tx="unsaved-backend-annotations" />
+                <StyledText tx="unsaved-backend-annotations" marginTop={12} />
                 <UnsavedGroupList>
                   {store?.editor?.activeDocument?.annotationGroups
                     .filter((g) => g.metadata?.id && g.hasChanges)
