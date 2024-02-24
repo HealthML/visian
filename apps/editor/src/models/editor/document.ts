@@ -449,17 +449,39 @@ export class Document
       : defaultRegionGrowingPreviewColor;
   };
 
-  public addNewAnnotationLayer = () => {
+  public addNewAnnotationGroup = (title?: string) => {
     if (!this.mainImageLayer) return;
 
     const annotationColor = this.getFirstUnusedColor();
-
     const annotationLayer = ImageLayer.fromNewAnnotationForImage(
       this.mainImageLayer.image,
       this,
       annotationColor,
     );
     this.addLayer(annotationLayer);
+
+    const newTitle = title || "new-group";
+    const annotationGroup = new AnnotationGroup({ title: newTitle }, this);
+    this.addAnnotationGroup(annotationGroup);
+    annotationGroup.addLayer(annotationLayer);
+
+    this.setActiveLayer(annotationLayer);
+
+    // Force switch to 2D if too many layers for 3D
+    this.viewSettings.setViewMode(this.viewSettings.viewMode);
+  };
+
+  public addNewAnnotationLayer = () => {
+    if (!this.mainImageLayer) return;
+
+    const annotationColor = this.getFirstUnusedColor();
+    const annotationLayer = ImageLayer.fromNewAnnotationForImage(
+      this.mainImageLayer.image,
+      this,
+      annotationColor,
+    );
+    this.addLayer(annotationLayer);
+    this.activeLayer?.annotationGroup?.addLayer(annotationLayer);
     this.setActiveLayer(annotationLayer);
 
     // Force switch to 2D if too many layers for 3D
@@ -479,6 +501,13 @@ export class Document
 
   public removeLayerFromRootList = (layer: ILayer): void => {
     this.setLayerIds(this.layerIds.filter((id) => id !== layer.id));
+  };
+
+  public removeAnnotationGroup = (
+    idOrGroup: string | IAnnotationGroup,
+  ): void => {
+    const groupId = typeof idOrGroup === "string" ? idOrGroup : idOrGroup.id;
+    this.setLayerIds(this.layerIds.filter((id) => id !== groupId));
   };
 
   /** Toggles the type of the layer (annotation or not) and repositions it accordingly */
@@ -590,7 +619,7 @@ export class Document
 
   public finishBatchImport() {
     if (!this.layers.some((layer) => layer.isAnnotation)) {
-      this.addNewAnnotationLayer();
+      this.addNewAnnotationGroup(this.mainImageLayer?.title || "new-group");
       this.viewport2D.setMainViewType();
     }
     this.context?.persist();
@@ -707,14 +736,25 @@ export class Document
     } else if (filteredFiles.name.endsWith(".zip")) {
       const zip = await Zip.fromZipFile(filteredFiles);
       const unzippedFiles = await zip.getAllFiles();
-      await this.importFiles(
-        this.createAnnotationGroup(
-          unzippedFiles,
+      if ("annotationGroupId" in filteredFiles) {
+        const typedFilteredFiles = filteredFiles as FileWithAnnotationGroup;
+        const newUnzippedFiles = unzippedFiles.map((unzippedFile) => {
+          const newFile = unzippedFile as FileWithAnnotationGroup;
+          newFile.annotationGroupId = typedFilteredFiles.annotationGroupId;
+          newFile.metadata = typedFilteredFiles.metadata;
+          return newFile;
+        });
+        await this.importFiles(newUnzippedFiles);
+      } else {
+        await this.importFiles(
+          this.createAnnotationGroup(
+            unzippedFiles,
+            path.basename(filteredFiles.name, path.extname(filteredFiles.name)),
+            this.getMetadataFromFile(filteredFiles),
+          ),
           filteredFiles.name,
-          this.getMetadataFromFile(filteredFiles),
-        ),
-        filteredFiles.name,
-      );
+        );
+      }
       return;
     } else if (filteredFiles.name.endsWith(".json")) {
       await readTrackingLog(filteredFiles, this);
@@ -733,15 +773,6 @@ export class Document
     //   return;
     // }
 
-    if (filteredFiles instanceof File) {
-      this.createAnnotationGroup(
-        [filteredFiles],
-        filteredFiles.name,
-        this.getMetadataFromFile(filteredFiles),
-      );
-    } else {
-      this.createAnnotationGroup(filteredFiles, name ?? uuidv4());
-    }
     let createdLayerId = "";
     const isFirstLayer =
       !this.layerIds.length || !this.layers.some((l) => l.kind !== "group");
@@ -780,6 +811,17 @@ export class Document
     const imageWithUnit = { unit, ...image };
 
     if (isAnnotation) {
+      // Creates an annotation group if it does not yet exists
+      if (
+        !("annotationGroupId" in filteredFiles) &&
+        filteredFiles instanceof File
+      ) {
+        this.createAnnotationGroup(
+          [filteredFiles],
+          path.basename(filteredFiles.name, path.extname(filteredFiles.name)),
+          this.getMetadataFromFile(filteredFiles),
+        );
+      }
       createdLayerId = await this.importAnnotation(imageWithUnit);
     } else if (isAnnotation !== undefined) {
       createdLayerId = await this.importImage(imageWithUnit);
@@ -841,10 +883,6 @@ export class Document
               name: `${layerIndex}_${imageWithUnit.name}`,
               ...prototypeImage,
             });
-            if (files instanceof File) {
-              this.addLayerToAnnotationGroup(createdLayerId, files);
-              this.addMetadataToLayer(createdLayerId, files);
-            }
           }
         } else {
           this.setError({
@@ -873,6 +911,18 @@ export class Document
         //     });
         //   }
         // } else {
+
+        // Creates an annotation group if it does not yet exists
+        if (
+          !("annotationGroupId" in filteredFiles) &&
+          filteredFiles instanceof File
+        ) {
+          this.createAnnotationGroup(
+            [filteredFiles],
+            path.basename(filteredFiles.name, path.extname(filteredFiles.name)),
+            this.getMetadataFromFile(filteredFiles),
+          );
+        }
         uniqueValues.forEach(async (value) => {
           if (value === 0) return;
           createdLayerId = await this.importAnnotation(
@@ -897,20 +947,6 @@ export class Document
       this.viewport3D.reset();
       this.history.clear();
     }
-
-    if (files instanceof File) {
-      this.addLayerToAnnotationGroup(createdLayerId, files);
-      this.addMetadataToLayer(createdLayerId, files);
-    }
-
-    // Move all annotation groups with only image layers to the end of the list:
-    this.annotationGroups.forEach((group) => {
-      if (!group.layers.every((layer) => !layer.isAnnotation)) return;
-      this.addAnnotationGroup(
-        group as AnnotationGroup,
-        this.annotationGroups.length - 1,
-      );
-    });
 
     return createdLayerId;
   }

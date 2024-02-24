@@ -93,6 +93,7 @@
   "layers": "Layers",
   "main-image-layer": "Main Image Layer",
   "add-annotation-layer": "Add new annotation",
+  "add-annotation-group": "Add new annotation group",
   "no-layers": "No layers loaded.",
   "untitled-layer": "Untitled layer",
   "layer-settings": "Layer Settings",
@@ -433,5 +434,7 @@
 
   "review": "Review",
   "supervise": "Supervise",
-  "review-description": "{{taskType}} the annotations of {{image}}"
+  "review-description": "{{taskType}} the annotations of {{image}}",
+
+  "new-group": "New group"
 }

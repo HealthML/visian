@@ -93,6 +93,7 @@
   "layers": "Ebenen",
   "main-image-layer": "Haupt-Bildebene",
   "add-annotation-layer": "Neue Annotation hinzufügen",
+  "add-annotation-group": "Neue Annotationsgruppe hinzufügen",
   "no-layers": "Keine Ebenen geladen.",
   "untitled-layer": "Unbenannte Ebene",
   "layer-settings": "Ebeneneinstellungen",
@@ -432,5 +433,7 @@
 
   "review": "Überprüfen",
   "supervise": "Abnicken",
-  "review-description": "{{taskType}} der Annotationen des Bildes {{image}}."
+  "review-description": "{{taskType}} der Annotationen des Bildes {{image}}.",
+
+  "new-group": "Neue Gruppe"
 }
