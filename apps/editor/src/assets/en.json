@@ -436,5 +436,13 @@
   "supervise": "Supervise",
   "review-description": "{{taskType}} the annotations of {{image}}",
 
-  "new-group": "New group"
+  "untitled-group": "Untitled group",
+  "rename-group": "Rename Group",
+  "delete-group": "Delete Group",
+  "delete-annotation-group-message": "Do you really want to delete the annotation group \"{{name}}\" and following layers?",
+  "warning": "Warning:",
+  "delete-backend-data-warning": "Deleting the annotation group \"{{name}}\" also deletes the annotation saved under \"{{dataUri}}\"!",
+  "unsaved-backend-annotations": "The following annotation groups are not saved yet:",
+  "get-annotation-error": "Annotation cannot be found",
+  "get-annotation-error-description": "Annotation with the ID \"{{id}}\" cannot be found."
 }

@@ -25,10 +25,12 @@ export class AnnotationGroup
 {
   public layerIds: string[] = [];
   public excludeFromSnapshotTracking = ["document"];
-  public title = "";
   public id!: string;
+  protected titleOverride?: string;
+
   public collapsed?: boolean;
   public metadata?: BackendMetadata;
+  protected hasUnsavedChanges = false;
 
   constructor(
     snapshot: Partial<AnnotationGroupSnapshot> | undefined,
@@ -36,14 +38,21 @@ export class AnnotationGroup
   ) {
     this.applySnapshot(snapshot);
 
-    makeObservable<this, "layerIds" | "metadata">(this, {
+    makeObservable<
+      this,
+      "hasUnsavedChanges" | "titleOverride" | "layerIds" | "metadata"
+    >(this, {
       layerIds: observable,
       collapsed: observable,
-      title: observable,
+      titleOverride: observable,
+      hasUnsavedChanges: observable,
       isActive: computed,
+      hasChanges: computed,
       metadata: observable,
 
+      setTitle: action,
       setCollapsed: action,
+      setHasUnsavedChanges: action,
       setLayerIds: action,
       addLayer: action,
       removeLayer: action,
@@ -56,13 +65,26 @@ export class AnnotationGroup
   }
 
   public get hasChanges() {
-    return this.layers.some(
+    const hasChangesInLayers = this.layers.some(
       (layer) => layer.kind === "image" && (layer as ImageLayer).hasChanges,
     );
+    return hasChangesInLayers || this.hasUnsavedChanges;
   }
+
+  public get title(): string | undefined {
+    return this.titleOverride;
+  }
+
+  public setTitle = (value?: string): void => {
+    this.titleOverride = value;
+  };
 
   public setCollapsed(value: boolean) {
     this.collapsed = value;
+  }
+
+  public setHasUnsavedChanges(value: boolean): void {
+    this.hasUnsavedChanges = value;
   }
 
   public setLayerIds(ids: string[]) {
@@ -93,7 +115,7 @@ export class AnnotationGroup
   public toJSON(): AnnotationGroupSnapshot {
     return {
       id: this.id,
-      title: this.title,
+      titleOverride: this.titleOverride,
       metadata: this.metadata ? { ...this.metadata } : undefined,
       layerIds: [...this.layerIds],
     };
@@ -104,7 +126,7 @@ export class AnnotationGroup
   ) {
     if (!snapshot) return;
     this.id = snapshot.id || uuidv4();
-    this.title = snapshot.title || "";
+    this.setTitle(snapshot?.titleOverride || "");
     this.metadata = snapshot.metadata ? { ...snapshot.metadata } : undefined;
     this.layerIds = snapshot.layerIds || [];
   }
@@ -115,6 +137,12 @@ export class AnnotationGroup
         ...this.metadata,
         verified: value,
       };
+    }
+  }
+
+  public delete() {
+    if (this.document.annotationGroups.includes(this)) {
+      this.document.deleteAnnotationGroup(this);
     }
   }
 }

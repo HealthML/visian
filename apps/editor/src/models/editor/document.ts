@@ -449,7 +449,7 @@ export class Document
       : defaultRegionGrowingPreviewColor;
   };
 
-  public addNewAnnotationGroup = (title?: string) => {
+  public addNewAnnotationGroup = () => {
     if (!this.mainImageLayer) return;
 
     const annotationColor = this.getFirstUnusedColor();
@@ -460,8 +460,10 @@ export class Document
     );
     this.addLayer(annotationLayer);
 
-    const newTitle = title || "new-group";
-    const annotationGroup = new AnnotationGroup({ title: newTitle }, this);
+    const annotationGroup = new AnnotationGroup(
+      { titleOverride: annotationLayer.title },
+      this,
+    );
     this.addAnnotationGroup(annotationGroup);
     annotationGroup.addLayer(annotationLayer);
 
@@ -495,8 +497,22 @@ export class Document
     this.layerMap[layerId].delete();
     delete this.layerMap[layerId];
     if (this.activeLayerId === layerId) {
-      this.setActiveLayer(this.layerIds[0]);
+      this.setActiveLayer(this.layers[0]);
     }
+  };
+
+  public deleteAnnotationGroup = (annotationGroup: IAnnotationGroup): void => {
+    // Remove the annotationGroupId from layerIds
+    this.layerIds = this.layerIds.filter((id) => id !== annotationGroup.id);
+
+    // Delete all layers from the annotation group
+    annotationGroup.layerIds.forEach((id) => this.deleteLayer(id));
+
+    if (this.activeLayerId === annotationGroup.id) {
+      this.setActiveLayer(this.layers[0]);
+    }
+
+    delete this.annotationGroupMap[annotationGroup.id];
   };
 
   public removeLayerFromRootList = (layer: ILayer): void => {
@@ -619,7 +635,7 @@ export class Document
 
   public finishBatchImport() {
     if (!this.layers.some((layer) => layer.isAnnotation)) {
-      this.addNewAnnotationGroup(this.mainImageLayer?.title || "new-group");
+      this.addNewAnnotationGroup();
       this.viewport2D.setMainViewType();
     }
     this.context?.persist();
@@ -1127,7 +1143,7 @@ export class Document
         "Cannot create a new group for file that already belongs to a group",
       );
     }
-    const annotationGroup = new AnnotationGroup({ title }, this);
+    const annotationGroup = new AnnotationGroup({ titleOverride: title }, this);
     annotationGroup.metadata = groupMetadata;
 
     const filesWithGroup = files.map((f) => {
