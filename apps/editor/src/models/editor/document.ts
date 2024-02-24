@@ -936,6 +936,10 @@ export class Document
             undefined,
             false,
           );
+          if (files instanceof File) {
+            this.addLayerToAnnotationGroup(createdLayerId, files);
+            this.addMetadataToLayer(createdLayerId, files);
+          }
         }
         uniqueValues.forEach(async (value) => {
           // Here is a bug when you save an empty image
