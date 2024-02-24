@@ -38,10 +38,14 @@ export class AnnotationGroup
   ) {
     this.applySnapshot(snapshot);
 
-    makeObservable<this, "titleOverride" | "layerIds" | "metadata">(this, {
+    makeObservable<
+      this,
+      "hasUnsavedChanges" | "titleOverride" | "layerIds" | "metadata"
+    >(this, {
       layerIds: observable,
       collapsed: observable,
       titleOverride: observable,
+      hasUnsavedChanges: observable,
       isActive: computed,
       hasChanges: computed,
       metadata: observable,
@@ -95,12 +99,10 @@ export class AnnotationGroup
       // we also remove it from there:
       this.document.removeLayerFromRootList(layer);
     });
-    this.setHasUnsavedChanges(true);
   }
 
   public removeLayer(layer: ILayer) {
     this.setLayerIds(this.layerIds.filter((layerId) => layerId !== layer.id));
-    this.setHasUnsavedChanges(true);
   }
 
   public get isActive() {

@@ -163,7 +163,7 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
       activeLayer?.getAnnotationGroupLayers().forEach((layer) => {
         store?.editor.activeDocument?.history?.updateCheckpoint(layer.id);
       });
-      // Reset the layer count changes flag
+      // Reset the layer unsaved changes flag
       activeLayer?.annotationGroup?.setHasUnsavedChanges(false);
       return true;
     } catch (error) {
