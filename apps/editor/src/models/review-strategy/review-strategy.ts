@@ -1,4 +1,5 @@
 import { action, makeObservable, observable } from "mobx";
+import path from "path";
 
 import { RootStore } from "../root";
 import { ReviewStrategySnapshot } from "./review-strategy-snapshot";
@@ -70,7 +71,10 @@ export abstract class ReviewStrategy {
         const groupFiles =
           this.store.editor.activeDocument?.createAnnotationGroup(
             annotationFiles,
-            `Annotation ${idx + 1}`,
+            path.basename(
+              annotationFiles[0].name,
+              path.extname(annotationFiles[0].name),
+            ),
             getMetadataFromChild
               ? { ...annotationFiles[0]?.metadata }
               : { id: annotationId, kind: "annotation", backend: "who" },

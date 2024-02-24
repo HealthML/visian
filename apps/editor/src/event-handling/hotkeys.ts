@@ -364,7 +364,10 @@ export const generalHotkeys: IHotkey[] = [
     action: (store) => {
       store.setProgress({ labelTx: "exporting" });
       store.editor.activeDocument
-        ?.exportZip(store.editor.activeDocument.layers, true)
+        ?.exportZip(
+          store.editor.activeDocument.layers,
+          store.editor.activeDocument.activeLayer?.annotationGroup?.title,
+        )
         .catch()
         .then(() => {
           store?.setProgress();
