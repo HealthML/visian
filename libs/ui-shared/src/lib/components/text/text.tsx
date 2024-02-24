@@ -9,6 +9,8 @@ const StyledSpan = styled.span`
   color: ${color("text")};
   font-family: ${font("default")};
   font-size: ${fontSize("default")};
+  overflow: hidden;
+  text-overflow: ellipsis;
 `;
 
 export const Text: React.FC<

@@ -66,6 +66,9 @@ export interface ILayer {
    */
   is3DLayer: boolean;
 
+  /** Returns `true` if the layer has changes. */
+  hasChanges: boolean;
+
   /** The layer's UUID. */
   id: string;
   /**
