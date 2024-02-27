@@ -561,9 +561,8 @@ export class Document
   };
 
   // I/O
-  // eslint-disable-next-line @typescript-eslint/no-shadow
-  public exportZip = async (layers: ILayer[], fileName?: string) => {
-    const zip = await this.zipLayers(layers);
+  public exportZip = async (layersToZip: ILayer[], fileName?: string) => {
+    const zip = await this.zipLayers(layersToZip);
 
     if (this.context?.getTracker()?.isActive) {
       const trackingFile = this.context.getTracker()?.toFile();
@@ -963,7 +962,6 @@ export class Document
           }
         }
         uniqueValues.forEach(async (value) => {
-          // Here is a bug when you save an empty image
           if (value === 0) return;
           createdLayerId = await this.importAnnotation(
             { ...imageWithUnit, name: `${value}_${image.name}` },

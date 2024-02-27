@@ -280,6 +280,17 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
     [newDataUri, isValidDataUri],
   );
 
+  const handleRenameUri = useCallback(
+    (newUriPrefix: string) => {
+      setnewAnnotationURIPrefix(newUriPrefix);
+      const newGroupName = path.basename(newUriPrefix);
+      store?.editor?.activeDocument?.activeLayer?.annotationGroup?.setTitle(
+        newGroupName,
+      );
+    },
+    [store?.editor?.activeDocument?.activeLayer?.annotationGroup],
+  );
+
   return (
     <SavePopUpContainer
       titleTx="annotation-saving"
@@ -320,12 +331,14 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
         </>
       )}
       <SectionLabel tx="annotation-saving-as" />
-      {isValidAnnotationUri !== "valid" && <Text text={isValidAnnotationUri} />}
+      {isValidAnnotationUri !== "valid" && (
+        <SectionLabel text={isValidAnnotationUri} />
+      )}
       <InlineRowLast>
         <SaveAsInput
           placeholder="URI"
           value={newAnnotationURIPrefix}
-          onChangeText={setnewAnnotationURIPrefix}
+          onChangeText={handleRenameUri}
         />
         <StyledDropDown
           options={fileExtensions}

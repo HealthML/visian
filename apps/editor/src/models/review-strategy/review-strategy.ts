@@ -68,7 +68,7 @@ export abstract class ReviewStrategy {
   ): Promise<void> {
     if (!this.task?.annotationIds) return;
     await Promise.all(
-      this.task?.annotationIds.map(async (annotationId, idx) => {
+      this.task?.annotationIds.map(async (annotationId) => {
         const annotationFiles = await this.task?.getAnnotationFiles(
           annotationId,
         );
