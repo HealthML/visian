@@ -771,10 +771,11 @@ export class Document
         });
         await this.importFiles(newUnzippedFiles);
       } else {
+        const fileName = path.basename(filteredFiles.name);
         await this.importFiles(
           this.createAnnotationGroup(
             unzippedFiles,
-            path.basename(filteredFiles.name, path.extname(filteredFiles.name)),
+            fileName.slice(0, fileName.indexOf(".")),
             this.getMetadataFromFile(filteredFiles),
           ),
           filteredFiles.name,
@@ -841,9 +842,10 @@ export class Document
         !("annotationGroupId" in filteredFiles) &&
         filteredFiles instanceof File
       ) {
+        const fileName = path.basename(filteredFiles.name);
         this.createAnnotationGroup(
           [filteredFiles],
-          path.basename(filteredFiles.name, path.extname(filteredFiles.name)),
+          fileName.slice(0, fileName.indexOf(".")),
           this.getMetadataFromFile(filteredFiles),
         );
       }
@@ -942,9 +944,10 @@ export class Document
           !("annotationGroupId" in filteredFiles) &&
           filteredFiles instanceof File
         ) {
+          const fileName = path.basename(filteredFiles.name);
           this.createAnnotationGroup(
             [filteredFiles],
-            path.basename(filteredFiles.name, path.extname(filteredFiles.name)),
+            fileName.slice(0, fileName.indexOf(".")),
             this.getMetadataFromFile(filteredFiles),
           );
         }

@@ -74,13 +74,11 @@ export abstract class ReviewStrategy {
         );
         if (!annotationFiles) throw new Error("Annotation files not found");
 
+        const fileName = path.basename(annotationFiles[0].name);
         const groupFiles =
           this.store.editor.activeDocument?.createAnnotationGroup(
             annotationFiles,
-            path.basename(
-              annotationFiles[0].name,
-              path.extname(annotationFiles[0].name),
-            ),
+            fileName.slice(0, fileName.indexOf(".")),
             getMetadataFromChild
               ? { ...annotationFiles[0]?.metadata }
               : { id: annotationId, kind: "annotation", backend: "who" },

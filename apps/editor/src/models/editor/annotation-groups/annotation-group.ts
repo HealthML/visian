@@ -18,6 +18,7 @@ import {
 import { v4 as uuidv4 } from "uuid";
 
 import { Document } from "../document";
+import { ImageLayer } from "../layers";
 
 export class AnnotationGroup
   implements IAnnotationGroup, ISerializable<AnnotationGroupSnapshot>
