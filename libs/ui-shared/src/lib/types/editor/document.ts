@@ -35,12 +35,6 @@ export interface IDocument {
    * top-to-bottom
    */
   renderingOrder: (ILayer | IAnnotationGroup)[];
-  /**
-   * The document's layer and annotation group stack.
-   * This contains all layers and all annotation groups, sorted by their renderingOrder
-   * annotation groups are followed by the layers within that group top-to-bottom
-   */
-  flatRenderingOrder: (ILayer | IAnnotationGroup)[];
 
   /** `true` if the document holds three-dimensional layers. */
   has3DLayers: boolean;
@@ -104,9 +98,6 @@ export interface IDocument {
 
   getAnnotationGroup(id: string): IAnnotationGroup | undefined;
 
-  /* returns all annotation layers that do not have an annotation group */
-  getOrphanAnnotationLayers(): ILayer[];
-
   /** Sets the active layer. */
   setActiveLayer(idOrLayer?: string | ILayer): void;
 
@@ -123,6 +114,9 @@ export interface IDocument {
 
   /** Deletes a layer from the document. */
   deleteLayer(idOrLayer: string | ILayer): void;
+
+  /** Remove a layer only from the root layer id list (e.g. to add it to a group next). */
+  removeLayerFromRootList(layer: ILayer): void;
 
   /** Returns the first color that is not yet used to color any layer. */
   getFirstUnusedColor(): string;

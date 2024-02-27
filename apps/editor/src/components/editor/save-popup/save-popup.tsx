@@ -1,6 +1,7 @@
 import {
   Button,
   DropDown,
+  IAnnotationGroup,
   ILayer,
   LayerList,
   PopUp,
@@ -22,10 +23,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
-import { importFilesToDocument } from "../../../import-handling";
-import { AnnotationGroup } from "../../../models/editor/annotation-groups";
 import { MiaReviewTask } from "../../../models/review-strategy";
-import { fetchAnnotationFile } from "../../../queries";
 import { SavePopUpProps } from "./save-popup.props";
 
 const SectionLabel = styled(Text)`
@@ -91,28 +89,28 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
     [newAnnotationURIPrefix, selectedExtension],
   );
 
-  const createGroupForNewAnnotation = (
-    layer: ILayer | undefined,
-    annotation: MiaAnnotation | undefined,
+  const changeMetaDataForGroup = (
+    annotationGroup: IAnnotationGroup | undefined,
+    annotationId: string,
+    uri: string,
   ) => {
     const document = store?.editor.activeDocument;
-    if (document && layer) {
-      const annotationGroup = new AnnotationGroup(undefined, document);
-      document.addAnnotationGroup(annotationGroup);
-      if (annotation) {
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        annotationGroup.title =
-          annotation.dataUri.split("/").pop() ?? "annotation group :)";
-        annotationGroup.metadata = {
-          ...annotation,
+    if (document && annotationGroup && annotationId) {
+      annotationGroup.metadata = {
+        id: annotationId,
+        backend: "mia",
+        kind: "annotation",
+      };
+      annotationGroup.layers.forEach((l) => {
+        l.metadata = {
+          id: annotationId,
+          dataUri: uri,
           backend: "mia",
           kind: "annotation",
         };
-      }
-      const groupLayers = layer.getAnnotationGroupLayers();
-      groupLayers.forEach((l) => annotationGroup.addLayer(l.id));
-      return annotationGroup;
+      });
     }
+    return annotationGroup;
   };
 
   const createFileForAnnotationGroupOf = async (
@@ -135,14 +133,6 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
       throw new Error(
         translate("uri-file-type-mismatch", { name: path.extname(file.name) }),
       );
-    }
-  };
-
-  const importAnnotationFile = async (annotationFile: FileWithMetadata) => {
-    const fileTransfer = new DataTransfer();
-    fileTransfer.items.add(annotationFile);
-    if (store) {
-      await importFilesToDocument(fileTransfer.files, store);
     }
   };
 
@@ -173,6 +163,8 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
       activeLayer?.getAnnotationGroupLayers().forEach((layer) => {
         store?.editor.activeDocument?.history?.updateCheckpoint(layer.id);
       });
+      // Reset the layer unsaved changes flag
+      activeLayer?.annotationGroup?.setHasUnsavedChanges(false);
       return true;
     } catch (error) {
       if (error instanceof AxiosError) {
@@ -189,36 +181,6 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
       throw error;
     } finally {
       store?.setProgress();
-    }
-  };
-
-  const loadOldAnnotation = async (
-    newAnnotationMeta: MiaAnnotation,
-    oldAnnotationMeta: MiaAnnotation,
-  ) => {
-    const activeLayer = store?.editor.activeDocument?.activeLayer;
-    if (activeLayer?.annotationGroup) {
-      activeLayer.annotationGroup.metadata = {
-        ...newAnnotationMeta,
-        backend: "mia",
-        kind: "annotation",
-      };
-      activeLayer.annotationGroup.title = newAnnotationMeta.dataUri;
-      activeLayer.annotationGroup.layers.forEach((layer, index) => {
-        layer.metadata = {
-          ...newAnnotationMeta,
-          backend: "mia",
-          kind: "annotation",
-        };
-        layer.setTitle(
-          `${index + 1}_${newAnnotationMeta.dataUri.split("/").pop()}`,
-        );
-      });
-    }
-    const oldAnnotationFile = await fetchAnnotationFile(oldAnnotationMeta.id);
-    await importAnnotationFile(oldAnnotationFile);
-    if (activeLayer) {
-      store?.editor.activeDocument?.setActiveLayer(activeLayer.id);
     }
   };
 
@@ -243,21 +205,18 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
       const newAnnotationId = await reviewTask.createAnnotation([
         annotationFile,
       ]);
-      const annotationMeta = activeLayer?.annotationGroup
-        ?.metadata as MiaAnnotation;
-      const newAnnotationMeta =
-        reviewTask instanceof MiaReviewTask
-          ? // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            reviewTask.getAnnotation(newAnnotationId)!
-          : annotationMeta;
-      if (!annotationMeta) {
-        createGroupForNewAnnotation(activeLayer, newAnnotationMeta);
-      } else {
-        await loadOldAnnotation(newAnnotationMeta, annotationMeta);
+      if (reviewTask instanceof MiaReviewTask) {
+        changeMetaDataForGroup(
+          activeLayer?.annotationGroup,
+          newAnnotationId,
+          uri,
+        );
+        activeLayer?.getAnnotationGroupLayers().forEach((layer) => {
+          store?.editor.activeDocument?.history?.updateCheckpoint(layer.id);
+        });
       }
-      activeLayer?.getAnnotationGroupLayers().forEach((layer) => {
-        store?.editor.activeDocument?.history?.updateCheckpoint(layer.id);
-      });
+      // Reset the layer count changes flag
+      activeLayer?.annotationGroup?.setHasUnsavedChanges(false);
       store?.setProgress();
       return true;
     } catch (error) {
@@ -287,23 +246,11 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
     const mainImageLayerMetadata =
       store?.editor.activeDocument?.mainImageLayer?.metadata;
     const imageName = getImageName(mainImageLayerMetadata);
-    const layerName =
-      store?.editor.activeDocument?.activeLayer?.title?.split(".")[0];
-    const layerNameWithoutIndex = Number.isNaN(
-      +(layerName?.split("_")[0] ?? ""),
-    )
-      ? layerName
-      : layerName?.split("_").slice(1).join("_");
-    const layerNameWithIndexedName = Number.isNaN(
-      +(layerNameWithoutIndex?.split("_")[0] ?? ""),
-    )
-      ? `1_${layerNameWithoutIndex}`
-      : layerNameWithoutIndex
-          ?.split("_")
-          .map((sub, index) => (index === 0 ? Number(sub) + 1 : sub))
-          .join("_");
+    const groupName =
+      store?.editor.activeDocument?.activeLayer?.annotationGroup?.title;
+    const groupNameWithUnderscores = groupName?.replace(/\s/g, "_");
     return `/annotations/${imageName}/${
-      layerNameWithIndexedName || "annotation"
+      groupNameWithUnderscores || "annotation"
     }`;
   }, [store]);
 
@@ -323,7 +270,7 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
 
       return pattern.test(dataUri)
         ? "valid"
-        : translate("data_uri_help_message");
+        : translate("data-uri-help-message");
     },
     [translate],
   );
@@ -331,6 +278,17 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
   const isValidAnnotationUri = useMemo(
     () => isValidDataUri(newDataUri),
     [newDataUri, isValidDataUri],
+  );
+
+  const handleRenameUri = useCallback(
+    (newUriPrefix: string) => {
+      setnewAnnotationURIPrefix(newUriPrefix);
+      const newGroupName = path.basename(newUriPrefix);
+      store?.editor?.activeDocument?.activeLayer?.annotationGroup?.setTitle(
+        newGroupName,
+      );
+    },
+    [store?.editor?.activeDocument?.activeLayer?.annotationGroup],
   );
 
   return (
@@ -373,12 +331,14 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
         </>
       )}
       <SectionLabel tx="annotation-saving-as" />
-      {isValidAnnotationUri !== "valid" && <Text text={isValidAnnotationUri} />}
+      {isValidAnnotationUri !== "valid" && (
+        <SectionLabel text={isValidAnnotationUri} />
+      )}
       <InlineRowLast>
         <SaveAsInput
           placeholder="URI"
           value={newAnnotationURIPrefix}
-          onChangeText={setnewAnnotationURIPrefix}
+          onChangeText={handleRenameUri}
         />
         <StyledDropDown
           options={fileExtensions}

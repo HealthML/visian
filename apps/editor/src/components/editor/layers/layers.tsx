@@ -1,4 +1,22 @@
 import {
+  CollisionDetection,
+  DndContext,
+  DragEndEvent,
+  DragOverEvent,
+  DragOverlay,
+  DragStartEvent,
+  PointerSensor,
+  pointerWithin,
+  rectIntersection,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import {
   computeStyleValue,
   FloatingUIButton,
   IAnnotationGroup,
@@ -13,22 +31,18 @@ import {
   styledScrollbarMixin,
   SubtleText,
 } from "@visian/ui-shared";
-import {
-  SimpleTreeItemWrapper,
-  SortableTree,
-  TreeItem,
-  TreeItemComponentProps,
-  TreeItems,
-} from "dnd-kit-sortable-tree";
-import { ItemChangedReason } from "dnd-kit-sortable-tree/dist/types";
+import { transaction } from "mobx";
 import { observer } from "mobx-react-lite";
-import React, { ReactNode, useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
 import { ImageLayer } from "../../../models";
 import { AnnotationGroup } from "../../../models/editor/annotation-groups";
 import { InfoShortcuts } from "../info-shortcuts";
+import { DraggableAnnotationGroupListItem } from "./draggable-group-list-item";
+import { DraggableLayerListItem } from "./draggable-layer-list-item";
 import { AnnotationGroupListItem } from "./group-list-item";
 import { LayerListItem } from "./layer-list-item";
 
@@ -41,7 +55,7 @@ const OuterWrapper = styled("div")`
   width: 100%;
 `;
 
-const LayerList = styled(List)`
+const StyledLayerList = styled(List)`
   ${styledScrollbarMixin}
 
   margin-top: -16px;
@@ -66,140 +80,40 @@ const LayerModal = styled(Modal)`
   justify-content: center;
 `;
 
-interface TreeItemStyleWrapperProps
-  extends TreeItemComponentProps<TreeItemData> {
-  passedRef: React.ForwardedRef<HTMLDivElement>;
-  children: ReactNode;
-}
-
-const TreeItemStyleWrapper = (props: TreeItemStyleWrapperProps) => {
-  const { passedRef, className, ...restProps } = props;
-  const newProps = { contentClassName: className, ...restProps };
-  return (
-    <SimpleTreeItemWrapper
-      {...newProps}
-      ref={passedRef}
-      showDragHandle={false}
-      hideCollapseButton
-      disableCollapseOnItemClick
-    />
-  );
-};
-
-const indentationWidth = 20;
-const treeWidth = 235;
-
-const StyledTreeItem = styled(TreeItemStyleWrapper)`
-  padding: 0px;
-  border: none;
-  background: none;
-  width: 100%;
-  max-width: ${treeWidth}px;
+const StyledModalHeaderButton = styled(ModalHeaderButton)`
+  margin-right: 10px;
 `;
 
-type TreeItemData = {
-  value: string;
+const customCollisionDetection: CollisionDetection = (args) => {
+  const activeLayer = args.active.data.current?.layer as ILayer;
+  if (!activeLayer) return rectIntersection(args);
+
+  // Check if there is a collission with a group different from the
+  // one of the dragged layer:
+  const pointerCollisions = pointerWithin(args);
+  const groupCollission = pointerCollisions.find((collission) => {
+    const group = collission.data?.droppableContainer.data.current
+      .annotationGroup as IAnnotationGroup;
+    return group && group !== activeLayer.annotationGroup;
+  });
+  if (groupCollission) return [groupCollission];
+
+  return pointerWithin(args);
 };
-
-const LayerItem = ({ id }: { id: string }) => {
-  const store = useStore();
-  const hideLayerDivider = useCallback(
-    (element: ILayer | IAnnotationGroup) => {
-      if (!element) return false;
-      const flatRenderingOrder =
-        store?.editor.activeDocument?.flatRenderingOrder;
-      if (!flatRenderingOrder) return false;
-      const renderingOrder = store?.editor.activeDocument?.renderingOrder;
-      if (!renderingOrder) return false;
-      const layerIndex = flatRenderingOrder.indexOf(element);
-      if (layerIndex === flatRenderingOrder.length - 1) return true;
-      if (
-        element instanceof AnnotationGroup &&
-        element.collapsed &&
-        renderingOrder.indexOf(element) === renderingOrder.length - 1
-      ) {
-        return true;
-      }
-      const nextElement = flatRenderingOrder[layerIndex + 1];
-      return (
-        nextElement.isActive &&
-        (nextElement instanceof AnnotationGroup ? nextElement.collapsed : true)
-      );
-    },
-    [
-      store?.editor.activeDocument?.flatRenderingOrder,
-      store?.editor.activeDocument?.renderingOrder,
-    ],
-  );
-
-  const group = store?.editor.activeDocument?.getAnnotationGroup(id);
-  if (group) {
-    const isActive = !!group.collapsed && group.isActive;
-    return (
-      <div style={{ width: `${treeWidth}px`, maxWidth: "100%" }}>
-        <AnnotationGroupListItem
-          key={group.id}
-          group={group}
-          isActive={isActive}
-          isLast={hideLayerDivider(group)}
-        />
-      </div>
-    );
-  }
-  const layer = store?.editor.activeDocument?.getLayer(id);
-  if (layer) {
-    return (
-      <div
-        style={{
-          width: `${
-            treeWidth - indentationWidth * (layer.annotationGroup ? 1 : 0)
-          }px`,
-          maxWidth: "100%",
-        }}
-      >
-        <LayerListItem
-          key={layer.id}
-          layer={layer}
-          isActive={layer.isActive}
-          isLast={hideLayerDivider(layer)}
-        />
-      </div>
-    );
-  }
-  return (
-    <ListItem isLast>
-      <SubtleText tx="no-layers" />
-    </ListItem>
-  );
-};
-
-const TreeItemComponent = React.forwardRef<
-  HTMLDivElement,
-  TreeItemComponentProps<TreeItemData>
->((props, ref) => (
-  <StyledTreeItem {...props} passedRef={ref}>
-    <LayerItem id={props.item.value} />
-  </StyledTreeItem>
-));
-
-const layerToTreeItemData = (layer: ILayer) => ({
-  id: layer.id,
-  value: layer.id,
-  canHaveChildren: false,
-});
 
 export const Layers: React.FC = observer(() => {
   const store = useStore();
+  const document = store?.editor.activeDocument;
 
   // Menu State
-  const isModalOpen = Boolean(store?.editor.activeDocument?.showLayerMenu);
+  const isModalOpen = Boolean(document?.showLayerMenu);
 
   // Menu Positioning
   const [buttonRef, setButtonRef] = useState<HTMLButtonElement | null>(null);
 
   // This is required to force an update when the view mode changes
   // (otherwise the layer menu stays fixed in place when switching the view mode)
-  const viewMode = store?.editor.activeDocument?.viewSettings.viewMode;
+  const viewMode = document?.viewSettings.viewMode;
   const [, setLastUpdatedViewMode] = useState<string>();
   useEffect(() => {
     setTimeout(() => {
@@ -207,120 +121,173 @@ export const Layers: React.FC = observer(() => {
     }, 50);
   }, [viewMode]);
 
-  // This is required to force an update when the active layer changes and the layer view must change its position
-  // (otherwise the layer menu stays fixed in place when switching the active layer between image and annotation)
-  // eslint-disable-next-line no-unused-expressions, @typescript-eslint/no-unused-expressions
-  store?.editor.activeDocument?.activeLayer;
-
-  const layers = store?.editor.activeDocument?.layers;
-  const canGroupHaveChildren = useCallback(
-    (group: IAnnotationGroup) => {
-      const callback = (draggedItem: TreeItem<TreeItemData>) => {
-        const layer = store?.editor.activeDocument?.getLayer(draggedItem.value);
-        if (store?.reviewStrategy && layer && !group.layers.includes(layer)) {
-          return false;
-        }
-
-        return !!layer;
-      };
-      return callback;
-    },
-    [store?.editor.activeDocument, store?.reviewStrategy],
+  const layers = document?.layers;
+  const layerIds = useMemo(
+    () => document?.renderingOrder.map((element) => element.id) || [],
+    [document?.renderingOrder],
   );
 
-  const getTreeItems = useCallback(() => {
-    const annotationGroupToTreeItemData = (group: IAnnotationGroup) => ({
-      id: group.id,
-      value: group.id,
-      children: group.layers.map((layer) => layerToTreeItemData(layer)),
-      collapsed: group.collapsed,
-      canHaveChildren: canGroupHaveChildren(group),
-      disableSorting: false,
-    });
+  const [draggedLayer, setDraggedLayer] = useState<ILayer>();
+  const [draggedGroup, setDraggedGroup] = useState<IAnnotationGroup>();
+  const [
+    draggedLayerPreviousAnnotationGroup,
+    setDraggedLayerPreviousAnnotationGroup,
+  ] = useState<IAnnotationGroup>();
 
-    const renderingOrder = store?.editor.activeDocument?.renderingOrder;
-    if (!renderingOrder) {
-      return [];
+  const dndSensors = useSensors(
+    // Require the mouse to move before dragging so we capture normal clicks:
+    useSensor(PointerSensor, {
+      activationConstraint: { distance: 8 },
+    }),
+  );
+
+  // This handler is called when the user starts dragging a layer or group:
+  const dndDragStart = useCallback((event: DragStartEvent) => {
+    if (event.active.data.current?.layer) {
+      setDraggedLayer(event.active.data.current?.layer);
+      setDraggedLayerPreviousAnnotationGroup(
+        event.active.data.current.layer.annotationGroup,
+      );
+    } else if (event.active.data.current?.annotationGroup) {
+      setDraggedGroup(event.active.data.current?.annotationGroup);
     }
-
-    return renderingOrder.map((element) => {
-      if (element instanceof AnnotationGroup) {
-        const group = element as AnnotationGroup;
-        return annotationGroupToTreeItemData(group);
-      }
-      if (element instanceof ImageLayer) {
-        const layer = element as ImageLayer;
-        return layerToTreeItemData(layer);
-      }
-      return { id: "undefined", value: "undefined" };
-    });
-  }, [canGroupHaveChildren, store?.editor.activeDocument?.renderingOrder]);
-
-  const treeItems = getTreeItems();
-
-  const canRootHaveChildren = useCallback((item) => {
-    const layer = store?.editor.activeDocument?.getLayer(item.value);
-    if (!layer) return true; // layerFamilies can always be children of root
-    return layer.annotationGroup === undefined;
   }, []);
-  const updateRenderingOrder = useCallback(
-    (
-      newTreeItems: TreeItems<TreeItemData>,
-      change: ItemChangedReason<TreeItemData>,
-    ) => {
-      if (change.type === "removed") return;
-      if (change.type === "collapsed" || change.type === "expanded") {
-        const group = store?.editor.activeDocument?.getAnnotationGroup(
-          change.item.value,
+
+  // This handler is called when the user currently drags a layer or group.
+  // Be aware that the value in event.over is influenced by our custom
+  // collission detection stragegy.
+  const dndDragOver = useCallback(
+    (event: DragOverEvent) => {
+      const { active, over } = event;
+      if (!over || active.id === over.id) return;
+      const activeLayer = active.data.current?.layer as ILayer;
+      // Return if we are not dragging a layer:
+      if (!activeLayer) return;
+      // Return if we are dragging image layer
+      if (!activeLayer.isAnnotation) return;
+      // Return if we are not dragging OVER a
+      // group or if we are dragging over the layer's own group:
+      const overGroup = over.data.current?.annotationGroup as IAnnotationGroup;
+      if (!overGroup) return;
+      if (activeLayer.annotationGroup?.id === overGroup.id) return;
+
+      // Move layer from its old group to the new one.
+      // Use a transaction to make sure that mobx only updates
+      // dependencies once we have completed the move:
+      transaction(() => {
+        (activeLayer.annotationGroup as AnnotationGroup)?.removeLayer(
+          activeLayer,
         );
-        if (!group) return;
-        group.collapsed = change.item.collapsed;
+        if (!activeLayer.annotationGroup && document) {
+          document.removeLayerFromRootList(activeLayer);
+        }
+        (overGroup as AnnotationGroup).addLayer(activeLayer);
+      });
+    },
+    [document],
+  );
+
+  // This handler is called when the user lets go of a layer or group after dragging:
+  const dndDragEnd = useCallback(
+    (event: DragEndEvent) => {
+      const { active, over } = event;
+
+      if (!document || !over || active.id === over.id) {
+        setDraggedGroup(undefined);
+        setDraggedLayer(undefined);
         return;
       }
-      if (change.type === "dropped") {
-        const draggedLayer = store?.editor.activeDocument?.getLayer(
-          change.draggedItem.value,
+
+      const dragged = active.data.current;
+      if (dragged?.annotationGroup) {
+        const group = dragged?.annotationGroup as IAnnotationGroup;
+        const oldIndex = document.renderingOrder.indexOf(group);
+        const newIndex = document.renderingOrder.indexOf(
+          over.data?.current?.annotationGroup,
         );
-        if (
-          store?.reviewStrategy &&
-          draggedLayer &&
-          (change.draggedFromParent
-            ? change.draggedFromParent.value
-            : undefined) !==
-            (change.droppedToParent ? change.droppedToParent.value : undefined)
-        ) {
-          return;
-        }
-        newTreeItems.forEach((item, index) => {
-          const layer = store?.editor.activeDocument?.getLayer(item.value);
-          if (layer) {
-            layer?.setAnnotationGroup(undefined, index);
-          }
-          const group = store?.editor.activeDocument?.getAnnotationGroup(
-            item.value,
+        if (newIndex !== -1) {
+          const newLayerIds = arrayMove(
+            document.renderingOrder.map((item) => item.id),
+            oldIndex,
+            newIndex,
           );
-          if (group) {
-            item.children?.forEach((childItem, childIndex) => {
-              const childLayer = store?.editor.activeDocument?.getLayer(
-                childItem.value,
-              );
-              if (childLayer) {
-                childLayer.setAnnotationGroup(group.id, childIndex);
-              }
-            });
-            group.collapsed = item.collapsed;
-            store?.editor.activeDocument?.addAnnotationGroup(
-              group as AnnotationGroup,
-              index,
-            );
+          document.setLayerIds(newLayerIds);
+        }
+      } else if (dragged?.layer) {
+        const layer = dragged?.layer as ILayer;
+        // Only re-sort the groups layers if
+        //  - the current layer is in a group
+        //  - the group has more than 1 layer
+        //  - we are not just dragging into the group folder, but actually into the layers of the group
+        if (
+          layer.annotationGroup &&
+          layer.annotationGroup.layers.length > 1 &&
+          over.data?.current?.layer
+        ) {
+          const oldIndex = layer.annotationGroup.layerIds.indexOf(layer.id);
+          const newIndex = layer.annotationGroup.layerIds.indexOf(
+            over.data.current.layer.id,
+          );
+          const newLayerIds = arrayMove(
+            layer.annotationGroup.layerIds,
+            oldIndex,
+            newIndex,
+          );
+          layer.annotationGroup.setLayerIds(newLayerIds);
+          if (
+            draggedLayerPreviousAnnotationGroup?.id !==
+            over.data.current.layer.annotationGroup.id
+          ) {
+            draggedLayerPreviousAnnotationGroup?.setHasUnsavedChanges(true);
+            over.data.current.layer.annotationGroup.setHasUnsavedChanges(true);
           }
-        });
+        }
+        // Prevents dragging an image layer within or between respectivly above annotation groups.
+        else if (!layer.annotationGroup && !layer.isAnnotation && layers) {
+          const oldIndex = layerIds.indexOf(layer.id);
+          const newIndex = layerIds.indexOf(over.data?.current?.layer?.id);
+          if (dragged?.layer && newIndex !== -1) {
+            const newLayerIds = arrayMove(layerIds, oldIndex, newIndex);
+            document.setLayerIds(newLayerIds);
+          }
+        }
       }
+      setDraggedLayer(undefined);
+      setDraggedGroup(undefined);
+      setDraggedLayerPreviousAnnotationGroup(undefined);
     },
-    [store?.editor.activeDocument, store?.reviewStrategy],
+    [document, draggedLayerPreviousAnnotationGroup, layerIds, layers],
   );
 
-  const firstElement = store?.editor.activeDocument?.renderingOrder[0];
+  const listItems = document?.renderingOrder.map((element, index) => {
+    if (element instanceof AnnotationGroup) {
+      const group = element as AnnotationGroup;
+      return (
+        <DraggableAnnotationGroupListItem
+          key={group.id}
+          group={group}
+          isActive={group.isActive}
+          draggedLayer={draggedLayer}
+          isDragged={group === draggedGroup}
+          isLast={
+            index === layerIds.length - 1 ||
+            document?.annotationGroups[index + 1]?.isActive
+          }
+        />
+      );
+    }
+    const layer = element as ImageLayer;
+    return (
+      <DraggableLayerListItem
+        key={layer.id}
+        layer={layer}
+        isActive={layer.isActive}
+        isDragged={layer === draggedLayer}
+      />
+    );
+  });
+
+  const firstElement = document?.renderingOrder[0];
   const isHeaderDivideVisible = !(
     firstElement?.isActive &&
     (firstElement instanceof AnnotationGroup ? firstElement.collapsed : true)
@@ -334,6 +301,11 @@ export const Layers: React.FC = observer(() => {
     );
   }
 
+  const handleAddLayer = useCallback(() => {
+    document?.addNewAnnotationLayer();
+    document?.activeLayer?.annotationGroup?.setHasUnsavedChanges(true);
+  }, [document]);
+
   return (
     <>
       <FloatingUIButton
@@ -341,7 +313,7 @@ export const Layers: React.FC = observer(() => {
         tooltipTx="layers"
         showTooltip={!isModalOpen}
         ref={setButtonRef}
-        onPointerDown={store?.editor.activeDocument?.toggleLayerMenu}
+        onPointerDown={document?.toggleLayerMenu}
         isActive={isModalOpen}
       />
       <LayerModal
@@ -358,42 +330,74 @@ export const Layers: React.FC = observer(() => {
                 <InfoShortcuts hotkeyGroupNames={["layer-controls"]} />
               }
             />
+            {document.activeLayer?.annotationGroup && (
+              <StyledModalHeaderButton
+                icon="plus"
+                tooltipTx="add-annotation-layer"
+                isDisabled={
+                  !document?.imageLayers?.length ||
+                  document?.imageLayers?.length >=
+                    (document?.maxVisibleLayers || 0)
+                }
+                onPointerDown={() => handleAddLayer()}
+              />
+            )}
             <ModalHeaderButton
               icon="plus"
-              tooltipTx="add-annotation-layer"
+              tooltipTx="add-annotation-group"
               isDisabled={
-                !store?.editor.activeDocument?.imageLayers?.length ||
-                store?.editor.activeDocument?.imageLayers?.length >=
-                  (store?.editor.activeDocument?.maxVisibleLayers || 0)
+                !document?.imageLayers?.length ||
+                document?.imageLayers?.length >=
+                  (document?.maxVisibleLayers || 0)
               }
-              onPointerDown={
-                store?.editor.activeDocument?.addNewAnnotationLayer
-              }
+              onPointerDown={document?.addNewAnnotationGroup}
             />
           </>
         }
       >
         <OuterWrapper>
-          <LayerList onWheel={stopPropagation}>
-            <SortableTree
-              items={treeItems}
-              onItemsChanged={updateRenderingOrder}
-              canRootHaveChildren={
-                store?.reviewStrategy ? canRootHaveChildren : undefined
-              }
-              TreeItemComponent={TreeItemComponent}
-              dropAnimation={null}
-              sortableProps={{ animateLayoutChanges: () => false }}
-              indentationWidth={20}
-            />
-            {layers.length === 0 ? (
-              <ListItem isLast>
-                <SubtleText tx="no-layers" />
-              </ListItem>
-            ) : (
-              false
+          <DndContext
+            collisionDetection={customCollisionDetection}
+            sensors={dndSensors}
+            onDragStart={dndDragStart}
+            onDragEnd={dndDragEnd}
+            onDragOver={dndDragOver}
+          >
+            <SortableContext
+              items={layerIds}
+              strategy={verticalListSortingStrategy}
+            >
+              <StyledLayerList onWheel={stopPropagation}>
+                {listItems}
+                {layers.length === 0 ? (
+                  <ListItem isLast>
+                    <SubtleText tx="no-layers" />
+                  </ListItem>
+                ) : (
+                  false
+                )}
+              </StyledLayerList>
+            </SortableContext>
+            {createPortal(
+              <DragOverlay>
+                {draggedLayer ? (
+                  <LayerListItem
+                    layer={draggedLayer}
+                    isActive={draggedLayer.isActive}
+                    isLast
+                  />
+                ) : null}
+                {draggedGroup ? (
+                  <AnnotationGroupListItem
+                    group={draggedGroup}
+                    isActive={draggedGroup.isActive}
+                    isLast
+                  />
+                ) : null}
+              </DragOverlay>,
+              window.document.body,
             )}
-          </LayerList>
+          </DndContext>
         </OuterWrapper>
       </LayerModal>
     </>

@@ -340,7 +340,7 @@ export const MiaReviewBar = observer(
 
     const annotationGroupTitles =
       store?.editor.activeDocument?.annotationGroups.map(
-        (group) => group.title,
+        (group) => group.title || t("untitled-group"),
       );
 
     const onGroupSwitch = (newIndex: number) => {

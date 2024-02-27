@@ -1,4 +1,5 @@
 import { action, makeObservable, observable } from "mobx";
+import path from "path";
 
 import { RootStore } from "../root";
 import { ReviewStrategySnapshot } from "./review-strategy-snapshot";
@@ -67,16 +68,17 @@ export abstract class ReviewStrategy {
   ): Promise<void> {
     if (!this.task?.annotationIds) return;
     await Promise.all(
-      this.task?.annotationIds.map(async (annotationId, idx) => {
+      this.task?.annotationIds.map(async (annotationId) => {
         const annotationFiles = await this.task?.getAnnotationFiles(
           annotationId,
         );
         if (!annotationFiles) throw new Error("Annotation files not found");
 
+        const fileName = path.basename(annotationFiles[0].name);
         const groupFiles =
           this.store.editor.activeDocument?.createAnnotationGroup(
             annotationFiles,
-            `Annotation ${idx + 1}`,
+            fileName.slice(0, fileName.indexOf(".")),
             getMetadataFromChild
               ? { ...annotationFiles[0]?.metadata }
               : { id: annotationId, kind: "annotation", backend: "who" },

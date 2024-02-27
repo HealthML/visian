@@ -93,6 +93,7 @@
   "layers": "Ebenen",
   "main-image-layer": "Haupt-Bildebene",
   "add-annotation-layer": "Neue Annotation hinzufügen",
+  "add-annotation-group": "Neue Annotationsgruppe hinzufügen",
   "no-layers": "Keine Ebenen geladen.",
   "untitled-layer": "Unbenannte Ebene",
   "layer-settings": "Ebeneneinstellungen",
@@ -124,6 +125,7 @@
   "export-tooltip": "Export (Strg + E)",
   "exporting": "Exportieren",
   "layers-to-export": "Annotationsebenen, die exportiert werden sollen",
+  "should-export-images": "Bildebenen mit exportieren",
   "export-all-layers": "Alle Ebenen exportieren",
   "export-annotation-group": "Gruppe exportieren",
   "export-as": "Exportieren als",
@@ -439,5 +441,15 @@
 
   "review": "Überprüfen",
   "supervise": "Abnicken",
-  "review-description": "{{taskType}} der Annotationen des Bildes {{image}}."
+  "review-description": "{{taskType}} der Annotationen des Bildes {{image}}.",
+
+  "untitled-group": "Unbenannte Gruppe",
+  "rename-group": "Gruppe umbenennen",
+  "delete-group": "Gruppe löschen",
+  "delete-annotation-group-message": "Wollen Sie die Annotation \"{{name}}\" und die folgenden Ebenen wirklich löschen?",
+  "warning": "Warnung:",
+  "delete-backend-data-warning": "Durch das Löschen der Annotationsgruppe \"{{name}}\" wird auch die unter \"{{dataUri}}\" gespeicherte Annotation unwiderruflich gelöscht!",
+  "unsaved-backend-annotations": "Folgende Gruppen sind noch nicht gespeichert:",
+  "get-annotation-error": "Annotation konnte nicht gefunden werden",
+  "get-annotation-error-description": "Die Annotation mit der ID \"{{id}}\" konnte nicht gefunden werden."
 }

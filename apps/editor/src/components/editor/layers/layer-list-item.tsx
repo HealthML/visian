@@ -135,6 +135,7 @@ export const LayerListItem = observer<{
   }, [layer, store]);
 
   const deleteLayer = useCallback(() => {
+    layer.annotationGroup?.setHasUnsavedChanges(true);
     if (
       // eslint-disable-next-line no-alert
       window.confirm(t("delete-layer-confirmation", { layer: layer.title }))

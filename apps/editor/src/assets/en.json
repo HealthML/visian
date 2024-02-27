@@ -93,6 +93,7 @@
   "layers": "Layers",
   "main-image-layer": "Main Image Layer",
   "add-annotation-layer": "Add new annotation",
+  "add-annotation-group": "Add new annotation group",
   "no-layers": "No layers loaded.",
   "untitled-layer": "Untitled layer",
   "layer-settings": "Layer Settings",
@@ -124,6 +125,7 @@
   "export-tooltip": "Export (Ctrl/Cmd + E)",
   "exporting": "Exporting",
   "layers-to-export": "Layers to export",
+  "should-export-images": "Include image layers",
   "export-all-layers": "Export all layers",
   "export-annotation-group": "Export annotation group",
   "export-as": "Export as",
@@ -438,5 +440,15 @@
 
   "review": "Review",
   "supervise": "Supervise",
-  "review-description": "{{taskType}} the annotations of {{image}}"
+  "review-description": "{{taskType}} the annotations of {{image}}",
+
+  "untitled-group": "Untitled group",
+  "rename-group": "Rename Group",
+  "delete-group": "Delete Group",
+  "delete-annotation-group-message": "Do you really want to delete the annotation group \"{{name}}\" and following layers?",
+  "warning": "Warning:",
+  "delete-backend-data-warning": "Deleting the annotation group \"{{name}}\" also deletes the annotation saved under \"{{dataUri}}\"!",
+  "unsaved-backend-annotations": "The following annotation groups are not saved yet:",
+  "get-annotation-error": "Annotation cannot be found",
+  "get-annotation-error-description": "Annotation with the ID \"{{id}}\" cannot be found."
 }

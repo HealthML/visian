@@ -8,20 +8,29 @@ import {
   ISerializable,
   isMiaAnnotationMetadata,
 } from "@visian/utils";
-import { action, computed, makeObservable, observable } from "mobx";
+import {
+  action,
+  computed,
+  makeObservable,
+  observable,
+  transaction,
+} from "mobx";
 import { v4 as uuidv4 } from "uuid";
 
 import { Document } from "../document";
+import { ImageLayer } from "../layers";
 
 export class AnnotationGroup
   implements IAnnotationGroup, ISerializable<AnnotationGroupSnapshot>
 {
+  public layerIds: string[] = [];
   public excludeFromSnapshotTracking = ["document"];
-  protected layerIds: string[] = [];
-  public title = "";
   public id!: string;
+  protected titleOverride?: string;
+
   public collapsed?: boolean;
   public metadata?: BackendMetadata;
+  protected hasUnsavedChanges = false;
 
   constructor(
     snapshot: Partial<AnnotationGroupSnapshot> | undefined,
@@ -29,13 +38,22 @@ export class AnnotationGroup
   ) {
     this.applySnapshot(snapshot);
 
-    makeObservable<this, "layerIds" | "metadata">(this, {
+    makeObservable<
+      this,
+      "hasUnsavedChanges" | "titleOverride" | "layerIds" | "metadata"
+    >(this, {
       layerIds: observable,
       collapsed: observable,
-      title: observable,
+      titleOverride: observable,
+      hasUnsavedChanges: observable,
       isActive: computed,
+      hasChanges: computed,
       metadata: observable,
 
+      setTitle: action,
+      setCollapsed: action,
+      setHasUnsavedChanges: action,
+      setLayerIds: action,
       addLayer: action,
       removeLayer: action,
       trySetIsVerified: action,
@@ -47,32 +65,44 @@ export class AnnotationGroup
   }
 
   public get hasChanges() {
-    return this.layers.some((layer) => layer.hasChanges);
+    const hasChangesInLayers = this.layers.some(
+      (layer) => layer.kind === "image" && (layer as ImageLayer).hasChanges,
+    );
+    return hasChangesInLayers || this.hasUnsavedChanges;
   }
 
-  public addLayer(id: string, index?: number) {
-    const layer = this.document.getLayer(id);
-    if (!layer) return;
-    if (layer.annotationGroup !== this) {
-      layer.annotationGroup?.removeLayer(layer.id);
-    }
-    const oldIndex = this.layerIds.indexOf(layer.id);
-    if (oldIndex < 0 && index !== undefined) {
-      this.layerIds.splice(index, 0, layer.id);
-    } else if (oldIndex < 0 && index === undefined) {
-      this.layerIds.push(id);
-    } else if (index !== undefined && oldIndex !== index) {
-      this.layerIds.splice(index, 0, this.layerIds.splice(oldIndex, 1)[0]);
-    }
-    this.document.addLayer(layer, index);
+  public get title(): string | undefined {
+    return this.titleOverride;
   }
 
-  public removeLayer(id: string, index?: number) {
-    if (!this.layerIds.includes(id)) return;
-    this.layerIds = this.layerIds.filter((layerId) => layerId !== id);
-    const layer = this.document.getLayer(id);
-    if (!layer) return;
-    this.document.addLayer(layer, index);
+  public setTitle = (value?: string): void => {
+    this.titleOverride = value;
+  };
+
+  public setCollapsed(value: boolean) {
+    this.collapsed = value;
+  }
+
+  public setHasUnsavedChanges(value: boolean): void {
+    this.hasUnsavedChanges = value;
+  }
+
+  public setLayerIds(ids: string[]) {
+    this.layerIds = ids;
+  }
+
+  public addLayer(layer: ILayer) {
+    if (!layer.isAnnotation) return;
+    transaction(() => {
+      this.setLayerIds([...this.layerIds, layer.id]);
+      // In case the layer was in the document layer list (i.e. not in a group)
+      // we also remove it from there:
+      this.document.removeLayerFromRootList(layer);
+    });
+  }
+
+  public removeLayer(layer: ILayer) {
+    this.setLayerIds(this.layerIds.filter((layerId) => layerId !== layer.id));
   }
 
   public get isActive() {
@@ -85,7 +115,7 @@ export class AnnotationGroup
   public toJSON(): AnnotationGroupSnapshot {
     return {
       id: this.id,
-      title: this.title,
+      titleOverride: this.titleOverride,
       metadata: this.metadata ? { ...this.metadata } : undefined,
       layerIds: [...this.layerIds],
     };
@@ -96,7 +126,7 @@ export class AnnotationGroup
   ) {
     if (!snapshot) return;
     this.id = snapshot.id || uuidv4();
-    this.title = snapshot.title || "";
+    this.setTitle(snapshot?.titleOverride || "");
     this.metadata = snapshot.metadata ? { ...snapshot.metadata } : undefined;
     this.layerIds = snapshot.layerIds || [];
   }
@@ -107,6 +137,12 @@ export class AnnotationGroup
         ...this.metadata,
         verified: value,
       };
+    }
+  }
+
+  public delete() {
+    if (this.document.annotationGroups.includes(this)) {
+      this.document.deleteAnnotationGroup(this);
     }
   }
 }

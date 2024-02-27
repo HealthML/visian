@@ -48,7 +48,8 @@ export interface LayerSnapshot {
 
 export interface AnnotationGroupSnapshot {
   id: string;
-  title: string;
+
+  titleOverride?: string;
   metadata?: BackendMetadata;
   layerIds: string[];
 }
@@ -119,12 +120,6 @@ export interface ILayer {
   setTitle(value?: string): void;
 
   setMetadata(value?: BackendMetadata): void;
-
-  /** Sets the layer's annotation group and moves it to the specified index within its local rendering order.
-   * A layer with an undefined annotation group is an orphan.
-   * If the layer is an orphan its local rendering order is the document renderingOrder.
-   */
-  setAnnotationGroup(id: string | undefined, idx?: number): void;
 
   getAnnotationGroupLayers(): ILayer[];
 
@@ -216,9 +211,11 @@ export interface IImageLayer extends ILayer {
 export interface IAnnotationGroup {
   id: string;
   /** The group's display name. */
-  title: string;
+  title?: string;
   /** The group's meta data. Usually the object from the DB */
   metadata?: BackendMetadata;
+  /** All layer ids in the group. */
+  layerIds: string[];
   /** All layers in the group. */
   layers: ILayer[];
   /** Whether the group is currently collapsed in the layer view* */
@@ -227,16 +224,24 @@ export interface IAnnotationGroup {
   isActive: boolean;
   /** Returns `true` if the annotation group has changes. */
   hasChanges: boolean;
-  /** Adds a layer with specified id to the group at the specified index, the layer is removed from its previous group.
-   * If no index and the layer is already in the group, the layer's position remains unchanged.
-   * If no index is specified and the layer is not part of the group, the layer is inserted at the beginning. */
-  addLayer(id: string, index?: number): void;
-  /** Removes a layer from the group making it an orphan.
-   * After being removed, the layer is added to the document at the specified index.
-   */
-  removeLayer(id: string, index?: number): void;
+  /** Sets the group's title. */
+  setTitle(value?: string): void;
+  /** Sets the flag if the group experiences a change in the number of layers. */
+  setHasUnsavedChanges(value: boolean): void;
+  /** Adds a layer to the group. Also removes it from the document root. */
+  addLayer(layer: ILayer): void;
+  /** Removes the layer from the group, if it is part of the group. */
+  removeLayer(layer: ILayer): void;
   /** set verified if fam */
   trySetIsVerified(value: boolean): void;
+  /** Sets the layer ids of the group, e.g. for sorting. */
+  setLayerIds(ids: string[]): void;
+  /** Sets collapsed state of the group. */
+  setCollapsed(value: boolean): void;
+
+  /** Delete this annotation group from the document and all
+   * the layers it contains. */
+  delete(): void;
 
   toJSON(): AnnotationGroupSnapshot;
 }
