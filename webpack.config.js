@@ -51,6 +51,11 @@ module.exports = composePlugins(
       }),
     );
 
+    config.resolve.fallback = {
+      crypto: false,
+      stream: false,
+    };
+
     return config;
   },
 );

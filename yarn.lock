@@ -7363,6 +7363,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@techstark/opencv-js@npm:^4.9.0-release.2":
+  version: 4.9.0-release.2
+  resolution: "@techstark/opencv-js@npm:4.9.0-release.2"
+  checksum: af53bb67bff30182b25f5e878376fa25620a076153402a57deb4e0e079262134c93a26dc47731bffa6f017dfd8210c4de2dd3d106ba1e01284a3dd52b5748003
+  languageName: node
+  linkType: hard
+
 "@testing-library/dom@npm:^8.0.0":
   version: 8.20.1
   resolution: "@testing-library/dom@npm:8.20.1"
@@ -21732,6 +21739,7 @@ __metadata:
     "@storybook/react-webpack5": "npm:7.6.14"
     "@svgr/webpack": "npm:^8.1.0"
     "@tanstack/react-table": "npm:^8.7.9"
+    "@techstark/opencv-js": "npm:^4.9.0-release.2"
     "@testing-library/react": "npm:12.1.2"
     "@tweenjs/tween.js": "npm:^20.0.3"
     "@types/babel__core": "npm:7.1.19"

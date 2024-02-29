@@ -78,6 +78,7 @@ export const DatasetCreationPopup = observer<DatasetCreationPopupProps>(
             value={name}
             onChange={updateName}
             placeholderTx="dataset-name"
+            maxLength={50}
           />
           <InlineRow>
             <StyledTextButton

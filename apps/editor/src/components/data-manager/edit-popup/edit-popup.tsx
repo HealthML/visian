@@ -82,6 +82,7 @@ export const EditPopup = observer<EditPopupProps>(
             value={name}
             onChange={updateName}
             placeholderTx="name"
+            maxLength={50}
           />
           <InlineRow>
             <StyledTextButton

@@ -78,6 +78,7 @@ export const ProjectCreationPopup = observer<ProjectCreationPopupProps>(
             value={name}
             onChange={updateName}
             placeholderTx="project-name"
+            maxLength={50}
           />
           <InlineRow>
             <StyledTextButton
