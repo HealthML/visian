@@ -93,7 +93,6 @@
       }
     ],
     "import/prefer-default-export": "off",
-
     "camelcase": "off",
     "class-methods-use-this": "off",
     "consistent-return": "off",
@@ -126,13 +125,9 @@
         "default": [
           "static-field",
           "static-method",
-
           "field",
-
           "signature",
-
           "constructor",
-
           "method"
         ]
       }
@@ -194,7 +189,6 @@
       "error",
       { "allow": ["constructors", "arrowFunctions"] }
     ],
-
     "react/self-closing-comp": "error",
     "react/function-component-definition": [
       "error",
@@ -215,8 +209,11 @@
     "react-hooks/rules-of-hooks": "error",
     "react-hooks/exhaustive-deps": "warn",
     "react/require-default-props": "off",
-
-    "storybook/prefer-pascal-case": "off"
+    "storybook/prefer-pascal-case": "off",
+    "storybook/no-uninstalled-addons": [
+      "error",
+      { "ignore": ["@nx/react/plugins/storybook"] }
+    ]
   },
   "overrides": [
     {

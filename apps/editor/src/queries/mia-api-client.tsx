@@ -10,7 +10,7 @@ import {
 
 const formatUrl = (url: string | null | undefined) => {
   if (!url || url === "") {
-    return url;
+    return null;
   }
   let formattedUrl = url;
   if (
@@ -25,13 +25,11 @@ const formatUrl = (url: string | null | undefined) => {
   return formattedUrl;
 };
 
-export const hubBaseUrl =
-  formatUrl(process.env.NX_ANNOTATION_SERVICE_HUB_URL) ??
-  "http://localhost:3000";
+export const hubBaseUrl = formatUrl(process.env.NX_ANNOTATION_SERVICE_HUB_URL);
 
-const basePath = hubBaseUrl.replace(/\/$/, "");
-
-const apiConfig = new Configuration({ basePath });
+const apiConfig = hubBaseUrl
+  ? new Configuration({ basePath: hubBaseUrl.replace(/\/$/, "") })
+  : undefined;
 
 export const annotationsApi = new AnnotationsApi(apiConfig);
 export const imagesApi = new ImagesApi(apiConfig);

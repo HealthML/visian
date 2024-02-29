@@ -62,11 +62,8 @@
       }
     },
     "lint": {
-      "executor": "@nx/linter:eslint",
-      "outputs": ["{options.outputFile}"],
-      "options": {
-        "lintFilePatterns": ["apps/ar-demo/**/*.{ts,tsx,js,jsx}"]
-      }
+      "executor": "@nx/eslint:lint",
+      "outputs": ["{options.outputFile}"]
     },
     "compile": {
       "executor": "nx:run-commands",
@@ -82,8 +79,7 @@
       "executor": "@nx/jest:jest",
       "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
       "options": {
-        "jestConfig": "apps/ar-demo/jest.config.ts",
-        "passWithNoTests": true
+        "jestConfig": "apps/ar-demo/jest.config.ts"
       }
     }
   },
