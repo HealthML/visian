@@ -4924,10 +4924,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@mia-hpi/mia-typescript-sdk@npm:^1.0.2":
-  version: 1.0.2
-  resolution: "@mia-hpi/mia-typescript-sdk@npm:1.0.2"
-  checksum: c483d8c9c515e2abe2b9c335ba84863d5ce62f443895c846c1d01140696b4ff6496ba182ce8068715edeac0daa547cadf78d30d01d65346a8b4cac22081dd0f7
+"@mia-hpi/mia-typescript-sdk@npm:^1.0.4":
+  version: 1.0.4
+  resolution: "@mia-hpi/mia-typescript-sdk@npm:1.0.4"
+  checksum: ed31f272ed057fb70011dd66a6faef0a30db3cdbc7b5b426ba83b878d2bff2a39a450ca1386e20194600095d90ef66aed5c8d0e7a76e6542e8c634be42676a29
   languageName: node
   linkType: hard
 
@@ -21822,7 +21822,7 @@ __metadata:
     "@dnd-kit/modifiers": "npm:^6.0.1"
     "@dnd-kit/sortable": "npm:^7.0.2"
     "@dnd-kit/utilities": "npm:^3.2.1"
-    "@mia-hpi/mia-typescript-sdk": "npm:^1.0.2"
+    "@mia-hpi/mia-typescript-sdk": "npm:^1.0.4"
     "@nrwl/js": "npm:18.0.4"
     "@nrwl/webpack": "npm:18.0.4"
     "@nx/cypress": "npm:18.0.4"
