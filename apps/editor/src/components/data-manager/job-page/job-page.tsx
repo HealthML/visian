@@ -114,7 +114,7 @@ export const JobPage = ({ job }: { job: MiaJob }) => {
   const closeJobLogPopUp = useCallback(() => setIsJobLogPopUpOpen(false), []);
 
   const jobAnnotationFilter = useCallback(
-    (annotation: MiaAnnotation) => annotation.job.id === job.id,
+    (annotation: MiaAnnotation) => annotation.job === job.id,
     [job],
   );
 
