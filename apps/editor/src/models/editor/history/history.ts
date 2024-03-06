@@ -12,8 +12,8 @@ import {
 } from "@visian/utils";
 import { action, makeObservable, observable } from "mobx";
 
-import { maxUndoRedoSteps } from "../../../constants";
 import * as commands from "./commands";
+import { maxUndoRedoSteps } from "../../../constants";
 
 export const commandMap: {
   [kind: string]: ValueType<typeof commands>;

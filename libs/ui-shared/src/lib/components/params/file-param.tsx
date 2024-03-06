@@ -1,12 +1,12 @@
 import React, { useCallback } from "react";
 import styled from "styled-components";
 
+import { ListPositionProps } from "./types";
 import { fontSize } from "../../theme";
 import { IFileParameter } from "../../types";
 import { InvisibleButton } from "../button";
 import { sheetMixin } from "../sheet";
 import { InputLabel, Text } from "../text";
-import { ListPositionProps } from "./types";
 
 const InvisibleFileInput = styled.input.attrs(() => ({ type: "file" }))`
   display: none;

@@ -1,5 +1,6 @@
 import {
   FileWithMetadata,
+  getBase64DataFromFile,
   MiaAnnotation,
   MiaAnnotationMetadata,
   MiaImage,
@@ -7,13 +8,8 @@ import {
 } from "@visian/utils";
 import { v4 as uuidv4 } from "uuid";
 
-import {
-  fetchAnnotationFile,
-  fetchImageFile,
-  patchAnnotationFile,
-  postAnnotationFile,
-} from "../../queries";
 import { ReviewTask, TaskType } from "./review-task";
+import { annotationsApi, getAnnotationFile, getImageFile } from "../../queries";
 
 export interface MiaReviewTaskSnapshot {
   kind: TaskType;
@@ -67,13 +63,13 @@ export class MiaReviewTask extends ReviewTask {
 
   public async getImageFiles() {
     const imageMetadata = this.image;
-    const image = await fetchImageFile(this.image.id);
+    const image = await getImageFile(this.image.id);
     image.metadata = {
       ...imageMetadata,
       backend: "mia",
       kind: "image",
     };
-    return [await fetchImageFile(this.image.id)];
+    return [await getImageFile(this.image.id)];
   }
 
   public async getAnnotationFiles(annotationId: string) {
@@ -81,7 +77,7 @@ export class MiaReviewTask extends ReviewTask {
     if (!annotationMetadata) {
       throw new Error(`Annotation ${annotationId} not in Task ${this.title}.`);
     }
-    const annotation = await fetchAnnotationFile(annotationId);
+    const annotation = await getAnnotationFile(annotationId);
     annotation.metadata = {
       ...annotationMetadata,
       backend: "mia",
@@ -96,11 +92,15 @@ export class MiaReviewTask extends ReviewTask {
     const dataUri =
       (firstFileMeta as MiaAnnotationMetadata)?.dataUri ??
       this.getAritficialAnnotationDataUri(file);
-    const newAnnotation = await postAnnotationFile(
-      this.image.id,
-      dataUri ?? this.getAritficialAnnotationDataUri(file),
-      file,
-    );
+
+    const newAnnotation = await annotationsApi.createAnnotation({
+      createAnnotationDto: {
+        image: this.image.id,
+        dataUri: dataUri ?? this.getAritficialAnnotationDataUri(file),
+        base64File: await getBase64DataFromFile(file),
+      },
+    });
+
     this.annotations.set(newAnnotation.id, newAnnotation);
     return newAnnotation.id;
   }
@@ -113,8 +113,14 @@ export class MiaReviewTask extends ReviewTask {
 
     const file = files.length === 1 ? files[0] : await this.zipFiles(files);
 
-    const newAnnotation = await patchAnnotationFile(annotationMetadata, file);
-    this.annotations.set(newAnnotation.id, newAnnotation);
+    const updatedAnnotation = await annotationsApi.updateAnnotation({
+      id: annotationMetadata.id,
+      updateAnnotationDto: {
+        dataUri: annotationMetadata.dataUri,
+        base64File: await getBase64DataFromFile(file),
+      },
+    });
+    this.annotations.set(updatedAnnotation.id, updatedAnnotation);
   }
 
   public async save() {

@@ -1,9 +1,9 @@
 import React from "react";
 import styled, { StyledComponentProps } from "styled-components";
 
+import { TextProps } from "./text.props";
 import { useTranslation } from "../../i18n";
 import { color, font, fontSize, fontWeight, Theme } from "../../theme";
-import { TextProps } from "./text.props";
 
 const StyledSpan = styled.span`
   color: ${color("text")};

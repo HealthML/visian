@@ -13,17 +13,17 @@ import {
   useFilePicker,
   useTranslation,
 } from "@visian/ui-shared";
-import { promiseAllInBatches } from "@visian/utils";
+import { getBase64DataFromFile, promiseAllInBatches } from "@visian/utils";
 import { AxiosError } from "axios";
 import { observer } from "mobx-react-lite";
 import { useCallback, useEffect, useState } from "react";
 import styled from "styled-components";
 
-import { postImage } from "../../../queries";
+import { ImageImportPopUpProps } from "./image-import-popup.props";
+import { imagesApi } from "../../../queries";
 import { DropSheet } from "../../editor";
 import { ProgressPopUp } from "../../editor/progress-popup";
 import { WarningLabel } from "../warning-label";
-import { ImageImportPopUpProps } from "./image-import-popup.props";
 
 const DropZoneContainer = styled.div`
   display: flex;
@@ -197,11 +197,13 @@ export const ImageImportPopup = observer<ImageImportPopUpProps>(
         async (selectedFile) => {
           try {
             const datasetName = sanitizeForFS(dataset.name);
-            await postImage(
-              dataset.id,
-              `${datasetName}/${selectedFile.file.name}`,
-              selectedFile.file,
-            );
+            await imagesApi.createImage({
+              createImageDto: {
+                dataset: dataset.id,
+                dataUri: `${datasetName}/${selectedFile.file.name}`,
+                base64File: await getBase64DataFromFile(selectedFile.file),
+              },
+            });
             setUploadedFiles((prevUploadedFiles) => prevUploadedFiles + 1);
           } catch (error) {
             if (!(error instanceof AxiosError)) throw error;

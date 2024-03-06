@@ -3,8 +3,8 @@ import { IDisposable, IDisposer, ViewType } from "@visian/utils";
 import { autorun } from "mobx";
 import * as THREE from "three";
 
-import { heatMapFragmentShader, heatMapVertexShader } from "../../shaders";
 import colorScheme from "./heat-map-color-scheme.png";
+import { heatMapFragmentShader, heatMapVertexShader } from "../../shaders";
 
 export class HeatMapMaterial
   extends THREE.ShaderMaterial

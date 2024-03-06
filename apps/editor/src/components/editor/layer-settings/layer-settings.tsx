@@ -10,8 +10,8 @@ import {
 import { observer } from "mobx-react-lite";
 import React, { useCallback, useLayoutEffect } from "react";
 
-import { useStore } from "../../../app/root-store";
 import { LayerSettingsProps } from "./layer-settings.props";
+import { useStore } from "../../../app/root-store";
 
 export const LayerSettings = observer<LayerSettingsProps>(
   ({ layer, isOpen, ...rest }) => {

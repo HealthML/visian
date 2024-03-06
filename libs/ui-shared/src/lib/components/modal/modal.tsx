@@ -2,14 +2,14 @@ import React, { useCallback, useRef } from "react";
 import ReactDOM from "react-dom";
 import styled, { css } from "styled-components";
 
+import { ModalProps } from "./modal.props";
+import { useModalPosition } from "./utils";
 import { color, fontWeight, size, zIndex } from "../../theme";
 import { useModalRoot } from "../box";
 import { InvisibleButton } from "../button";
 import { Sheet } from "../sheet";
 import { Title } from "../text";
 import { useOutsidePress } from "../utils";
-import { ModalProps } from "./modal.props";
-import { useModalPosition } from "./utils";
 
 export const ModalHeaderButton = styled(InvisibleButton).attrs(() => ({
   isActive: false,
@@ -67,7 +67,7 @@ export const Divider = styled.div<{ isHidden?: boolean }>`
 `;
 
 export const ModalTitleRow: React.FC<
-  Pick<ModalProps, "label" | "labelTx" | "onReset">
+  Pick<ModalProps, "label" | "labelTx" | "onReset" | "children">
 > = ({ children, label, labelTx, onReset }) => (
   <TitleRow>
     <ModalTitle tx={labelTx} text={label} />

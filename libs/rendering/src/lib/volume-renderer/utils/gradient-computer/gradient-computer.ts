@@ -3,10 +3,10 @@ import { IDisposable, Vector, ViewType } from "@visian/utils";
 import { autorun, IReactionDisposer } from "mobx";
 import * as THREE from "three";
 
+import { GradientMaterial, GradientMode } from "./gradient-material";
 import { ImageRenderTarget } from "../../../rendered-image";
 import { Texture3DRenderer } from "../../../texture-3d-renderer";
 import { SharedUniforms } from "../shared-uniforms";
-import { GradientMaterial, GradientMode } from "./gradient-material";
 
 export class GradientComputer implements IDisposable {
   private gradientMaterial: GradientMaterial;

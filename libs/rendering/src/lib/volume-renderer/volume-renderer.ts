@@ -5,8 +5,6 @@ import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import Stats from "three/examples/jsm/libs/stats.module";
 
-import { RenderedImage } from "../rendered-image";
-import { ScreenAlignedQuad } from "../screen-aligned-quad";
 import {
   AxesConvention,
   DitheringRenderer,
@@ -19,6 +17,8 @@ import {
 } from "./utils";
 import { Volume } from "./volume";
 import { XRManager } from "./xr-manager";
+import { RenderedImage } from "../rendered-image";
+import { ScreenAlignedQuad } from "../screen-aligned-quad";
 
 export class VolumeRenderer implements IVolumeRenderer {
   public readonly excludeFromSnapshotTracking = ["editor"];
@@ -198,7 +198,7 @@ export class VolumeRenderer implements IVolumeRenderer {
         this.orbitControls.mouseButtons.LEFT =
           editor.activeDocument?.tools.activeTool?.name !== "smart-brush-3d"
             ? THREE.MOUSE.ROTATE
-            : -1;
+            : undefined;
       }),
       reaction(
         () => editor.activeDocument?.viewport3D.cameraMatrix?.toArray(),

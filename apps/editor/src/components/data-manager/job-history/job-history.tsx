@@ -2,10 +2,10 @@ import { Modal, Notification, SquareButton, Text } from "@visian/ui-shared";
 import { useCallback, useState } from "react";
 import styled from "styled-components";
 
-import { useStore } from "../../../app/root-store";
-import useJobsBy from "../../../queries/use-jobs-by";
-import { JobCreationPopup } from "../job-creation-popup";
 import { JobsTable } from "./job-table";
+import { useStore } from "../../../app/root-store";
+import { useJobsByProject } from "../../../queries";
+import { JobCreationPopup } from "../job-creation-popup";
 
 const StyledModal = styled(Modal)`
   width: 100%;
@@ -37,7 +37,7 @@ export const JobHistory = ({
 }) => {
   const store = useStore();
 
-  const { jobs, refetchJobs } = useJobsBy(projectId);
+  const { data: jobs, refetch: refetchJobs } = useJobsByProject(projectId);
 
   // Model selection popup
   const [isModelSelectionPopUpOpen, setIsModelSelectionPopUpOpen] =

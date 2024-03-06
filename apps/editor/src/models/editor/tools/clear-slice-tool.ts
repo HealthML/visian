@@ -1,8 +1,8 @@
 import { ToolRenderer } from "@visian/rendering";
 import { IDocument, IImageLayer, ITool } from "@visian/ui-shared";
 
-import { SliceCommand } from "../history";
 import { SelfDeactivatingTool } from "./self-deactivating-tool";
+import { SliceCommand } from "../history";
 
 export class ClearSliceTool<
   N extends "clear-slice",

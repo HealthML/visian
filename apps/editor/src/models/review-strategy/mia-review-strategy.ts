@@ -1,14 +1,5 @@
 import { MiaAnnotationMetadata, MiaImage } from "@visian/utils";
 
-import {
-  getAnnotation,
-  getAnnotationsByJobAndImage,
-  getImagesByDataset,
-  getImagesByJob,
-  patchAnnotation,
-} from "../../queries";
-import { getImage } from "../../queries/get-image";
-import { RootStore } from "../root";
 import { MiaReviewTask } from "./mia-review-task";
 import { ReviewStrategy } from "./review-strategy";
 import {
@@ -16,6 +7,8 @@ import {
   ReviewStrategySnapshot,
 } from "./review-strategy-snapshot";
 import { TaskType } from "./review-task";
+import { annotationsApi, imagesApi } from "../../queries";
+import { RootStore } from "../root";
 
 export class MiaReviewStrategy extends ReviewStrategy {
   public static fromSnapshot(
@@ -43,7 +36,7 @@ export class MiaReviewStrategy extends ReviewStrategy {
     datasetId: string,
     taskType?: TaskType,
   ) {
-    const images = await getImagesByDataset(datasetId);
+    const images = await imagesApi.findAllImages({ dataset: datasetId });
     return new MiaReviewStrategy({ store, images, taskType });
   }
 
@@ -52,7 +45,9 @@ export class MiaReviewStrategy extends ReviewStrategy {
     jobId: string,
     taskType?: TaskType,
   ) {
-    const images = await getImagesByJob(jobId);
+    const images = await imagesApi.findAllImages({
+      job: jobId,
+    });
     return new MiaReviewStrategy({ store, images, jobId, taskType });
   }
 
@@ -63,7 +58,7 @@ export class MiaReviewStrategy extends ReviewStrategy {
     allowedAnnotations?: string[],
   ) {
     const images = await Promise.all(
-      imageIds.map(async (imageId) => getImage(imageId)),
+      imageIds.map(async (imageId) => imagesApi.findImage({ id: imageId })),
     );
     return new MiaReviewStrategy({
       store,
@@ -78,8 +73,11 @@ export class MiaReviewStrategy extends ReviewStrategy {
     annotationId: string,
     taskType?: TaskType,
   ) {
-    const annotation = await getAnnotation(annotationId);
-    const image = await getImage(annotation.image);
+    const annotation = await annotationsApi.findAnnotation({
+      id: annotationId,
+    });
+    const image = await imagesApi.findImage({ id: annotation.image });
+
     return new MiaReviewStrategy({
       store,
       images: [image],
@@ -122,10 +120,10 @@ export class MiaReviewStrategy extends ReviewStrategy {
 
   protected async buildTask(): Promise<void> {
     const currentImage = this.images[this.currentImageIndex];
-    const annotations = await getAnnotationsByJobAndImage(
-      this.jobId,
-      currentImage.id,
-    );
+    const annotations = await annotationsApi.findAllAnnotations({
+      image: currentImage.id,
+      job: this.jobId,
+    });
 
     this.setCurrentTask(
       new MiaReviewTask(
@@ -170,15 +168,20 @@ export class MiaReviewStrategy extends ReviewStrategy {
   public async saveTask() {
     await this.currentTask?.save();
     await Promise.all(
-      this.store.editor.activeDocument?.annotationGroups?.map((group) => {
-        if (
-          this.currentTask?.annotationIds.includes(group.metadata?.id ?? "")
-        ) {
-          return patchAnnotation(group.metadata?.id, {
-            verified: (group.metadata as MiaAnnotationMetadata)?.verified,
-          });
+      this.store.editor.activeDocument?.annotationGroups?.map(async (group) => {
+        const id = group.metadata?.id;
+
+        if (!id || !this.currentTask?.annotationIds.includes(id)) {
+          return Promise.resolve();
         }
-        return Promise.resolve();
+
+        const annotation = await annotationsApi.updateAnnotation({
+          id,
+          updateAnnotationDto: {
+            verified: (group.metadata as MiaAnnotationMetadata)?.verified,
+          },
+        });
+        return annotation;
       }) ?? [],
     );
   }

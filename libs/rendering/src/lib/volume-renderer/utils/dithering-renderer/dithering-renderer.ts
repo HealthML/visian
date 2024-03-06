@@ -1,11 +1,11 @@
 import * as THREE from "three";
 
+import { ditheringOffsets } from "./dithering-offsets";
 import { ScreenAlignedQuad } from "../../../screen-aligned-quad";
 import { VolumeMaterial } from "../../volume-material";
 import { CopyMaterial } from "../copy-material";
 import { ProgressiveAccumulationMaterial } from "../progressive-accumulation-material";
 import { RenderParams, TiledRenderer } from "../tiled-renderer";
-import { ditheringOffsets } from "./dithering-offsets";
 
 export class DitheringRenderer extends TiledRenderer {
   private _isFinished = false;

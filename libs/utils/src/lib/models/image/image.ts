@@ -2,6 +2,14 @@ import { action, computed, makeObservable, observable } from "mobx";
 import type { Unit } from "nifti-js";
 
 import {
+  addArtificialAlpha,
+  calculateNewOrientation,
+  removeArtificialAlpha,
+  swapAxesForMetadata,
+  unifyOrientation,
+} from "./conversion";
+import { findVoxelInSlice, setSlice } from "./iteration";
+import {
   FloatTypes,
   IntTypes,
   ITKImage,
@@ -19,14 +27,6 @@ import {
   ViewType,
   viewTypeDepthThreshold,
 } from "../view-types";
-import {
-  addArtificialAlpha,
-  calculateNewOrientation,
-  removeArtificialAlpha,
-  swapAxesForMetadata,
-  unifyOrientation,
-} from "./conversion";
-import { findVoxelInSlice, setSlice } from "./iteration";
 
 export interface ImageSnapshot {
   name?: string;

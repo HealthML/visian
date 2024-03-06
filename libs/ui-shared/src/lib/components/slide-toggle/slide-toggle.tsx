@@ -1,11 +1,11 @@
 import React, { useCallback, useEffect, useState } from "react";
 import styled from "styled-components";
 
+import { ToggleSliderProps } from "./slide-toggle.props";
+import { setFullOpacity } from "./utils";
 import { useTranslation } from "../../i18n";
 import { color as getColor, theme } from "../../theme";
 import { Icon } from "../icon";
-import { ToggleSliderProps } from "./slide-toggle.props";
-import { setFullOpacity } from "./utils";
 
 const SliderContainer = styled.div<{
   sliderHandleDiameter?: number;

@@ -13,7 +13,11 @@ import { useProject } from "../queries";
 
 export const ProjectScreen: React.FC = observer(() => {
   const projectId = useParams().projectId || "";
-  const { project, isErrorProject, isLoadingProject } = useProject(projectId);
+  const {
+    data: project,
+    isError: isErrorProject,
+    isLoading: isLoadingProject,
+  } = useProject(projectId);
   const { t: translate } = useTranslation();
 
   let pageContent = <PageLoadingBlock labelTx="project" backPath="/projects" />;

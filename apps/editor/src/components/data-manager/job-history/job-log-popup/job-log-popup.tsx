@@ -1,11 +1,10 @@
 import { Divider, PopUp, SectionHeader, Text } from "@visian/ui-shared";
-import { MiaJob } from "@visian/utils";
 import { observer } from "mobx-react-lite";
 import { useEffect, useState } from "react";
 import styled from "styled-components";
 
-import { getJobLog } from "../../../../queries";
 import { JobLogPopUpProps } from "./job-log-popup.props";
+import { getJobLogText } from "../../../../queries";
 
 const PopUpContainer = styled(PopUp)`
   align-items: left;
@@ -22,24 +21,17 @@ const StyledText = styled(Text)`
   white-space: pre-wrap;
 `;
 
-const getLogText = async (job: MiaJob) => {
-  let logText = "";
-  if (job.logFileUri) {
-    try {
-      logText = await getJobLog(job.id);
-    } catch (e) {
-      logText = "Error fetching job log file";
-    }
-  }
-  return logText;
-};
-
 export const JobLogPopup = observer<JobLogPopUpProps>(
   ({ isOpen, onClose, job }) => {
     const [jobLogContent, setjobLogContent] = useState("");
 
     useEffect(() => {
-      getLogText(job).then((text) => setjobLogContent(text));
+      const fetchLogText = async () => {
+        const text = await getJobLogText(job);
+        setjobLogContent(text);
+      };
+
+      fetchLogText();
     }, [job, isOpen]);
 
     return (

@@ -1,10 +1,10 @@
 import type { Vector, Voxel } from "@visian/utils";
 import * as THREE from "three";
 
-import type { IconType } from "../../components";
 import type { IImageLayer } from "./layers";
 import type { IParameter } from "./parameters";
 import type { MergeFunction, Reference, ViewMode } from "./types";
+import type { IconType } from "../../components";
 
 export interface DragPoint extends Voxel {
   /** Whether the cursor is on the right side of the pixel. */

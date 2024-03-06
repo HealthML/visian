@@ -43,7 +43,7 @@ export const ProjectCreationPopup = observer<ProjectCreationPopupProps>(
     }, [onClose]);
 
     const updateName = useCallback(
-      (e) => {
+      (e: React.ChangeEvent<HTMLInputElement>) => {
         setName(e.target.value);
         setIsSubmitDisabled(false);
       },
@@ -52,13 +52,13 @@ export const ProjectCreationPopup = observer<ProjectCreationPopupProps>(
 
     const handleCreation = useCallback(() => {
       if (name !== "") {
-        onConfirm?.({ name });
+        onConfirm?.(name);
       }
       clearInputsAndClose();
     }, [name, onConfirm, clearInputsAndClose]);
 
     const handleFormSubmit = useCallback(
-      (e) => {
+      (e: React.FormEvent) => {
         e.preventDefault();
         if (!isSubmitDisabled) handleCreation();
       },

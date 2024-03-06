@@ -1,4 +1,4 @@
-import { nxE2EStorybookPreset } from "@nrwl/storybook/presets/cypress";
+import { nxE2EStorybookPreset } from "@nx/storybook/presets/cypress";
 import { defineConfig } from "cypress";
 
 export default defineConfig({

@@ -3,12 +3,12 @@ import { IDisposable, IDisposer } from "@visian/utils";
 import { autorun, reaction } from "mobx";
 import * as THREE from "three";
 
+import { getMaxSteps, SharedUniforms } from "./utils";
 import {
   composeLayeredShader,
   volumeFragmentShader,
   volumeVertexShader,
 } from "../shaders";
-import { getMaxSteps, SharedUniforms } from "./utils";
 
 /** A volume domain material. */
 export class VolumeMaterial

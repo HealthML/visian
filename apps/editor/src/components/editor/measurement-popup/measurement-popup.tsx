@@ -3,9 +3,9 @@ import { observer } from "mobx-react-lite";
 import React from "react";
 import styled, { useTheme } from "styled-components";
 
+import { MeasurementPopUpProps } from "./measurement-popup.props";
 import { useStore } from "../../../app/root-store";
 import { Measurement } from "../measurement";
-import { MeasurementPopUpProps } from "./measurement-popup.props";
 
 const StyledPopUp = styled(PopUp)`
   width: 280px;

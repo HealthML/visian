@@ -1,7 +1,7 @@
 import { LoadingBlock } from "@visian/ui-shared";
 
-import { PageTitle } from "../page-title";
 import { PageLoadingBlockProps } from "./page-loading-block.props";
+import { PageTitle } from "../page-title";
 
 export const PageLoadingBlock = ({
   label,

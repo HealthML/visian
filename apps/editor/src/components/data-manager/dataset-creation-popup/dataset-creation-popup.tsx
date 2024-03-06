@@ -44,13 +44,13 @@ export const DatasetCreationPopup = observer<DatasetCreationPopupProps>(
 
     const handleCreation = useCallback(() => {
       if (name !== "") {
-        onConfirm?.({ name });
+        onConfirm?.(name);
       }
       clearInputsAndClose();
     }, [name, onConfirm, clearInputsAndClose]);
 
     const updateName = useCallback(
-      (e) => {
+      (e: React.ChangeEvent<HTMLInputElement>) => {
         setName(e.target.value);
         setIsSubmitDisabled(false);
       },
@@ -58,7 +58,7 @@ export const DatasetCreationPopup = observer<DatasetCreationPopupProps>(
     );
 
     const handleFormSubmit = useCallback(
-      (e) => {
+      (e: React.FormEvent) => {
         e.preventDefault();
         if (!isSubmitDisabled) handleCreation();
       },

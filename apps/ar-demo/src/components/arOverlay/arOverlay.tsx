@@ -9,7 +9,7 @@ import { ClearIcon } from "../icons";
 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 const overlayContainer = document.getElementById("ar-overlay")!;
 
-const OverlayPortal: React.FC = ({ children }) =>
+const OverlayPortal: React.FC<{ children: React.ReactNode }> = ({ children }) =>
   ReactDOM.createPortal(children, overlayContainer);
 
 const ExitContainer = styled.div`

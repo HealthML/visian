@@ -14,9 +14,9 @@ import {
 import { action, makeObservable, observable } from "mobx";
 import * as THREE from "three";
 
-import { ImageRenderTarget, RenderedImage } from "../rendered-image";
 import { ToolRenderer3D } from "./tool-renderer-3d";
 import { Blip3DMaterial, MAX_BLIP_STEPS } from "./utils";
+import { ImageRenderTarget, RenderedImage } from "../rendered-image";
 
 export class BlipRenderer3D
   extends ToolRenderer3D

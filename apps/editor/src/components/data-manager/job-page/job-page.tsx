@@ -1,3 +1,4 @@
+import { UpdateJobDtoStatusEnum } from "@mia-hpi/mia-typescript-sdk";
 import {
   InvisibleButton,
   Sheet,
@@ -11,15 +12,16 @@ import { useCallback, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 
+import { DetailsRow } from "./details-table";
 import { useStore } from "../../../app/root-store";
 import { MiaReviewStrategy } from "../../../models/review-strategy";
 import {
+  deleteJobsMutation,
+  updateJobMutation,
   useAnnotationsByJob,
-  useDeleteJobsForProjectMutation,
-  usePatchJobStatusMutation,
+  useImagesByJob,
+  useJobProgress,
 } from "../../../queries";
-import useImagesByJob from "../../../queries/use-images-by-jobs";
-import { useJobProgress } from "../../../queries/use-job-progress";
 import { AnnotationProgress } from "../annotation-progress";
 import { ConfirmationPopup } from "../confirmation-popup";
 import { ImageList } from "../image-list";
@@ -29,7 +31,6 @@ import { PageRow } from "../page-row";
 import { PageSection } from "../page-section";
 import { PageTitle } from "../page-title";
 import { getDisplayDate } from "../util";
-import { DetailsRow } from "./details-table";
 
 const DetailsSheet = styled(Sheet)`
   padding: ${space("pageSectionMarginSmall")};
@@ -66,16 +67,22 @@ const OverflowText = styled(Text)`
 `;
 
 export const JobPage = ({ job }: { job: MiaJob }) => {
-  const { progress, isLoadingProgress } = useJobProgress(job.id);
+  const { data: progress, isLoading: isLoadingProgress } = useJobProgress(
+    job.id,
+  );
 
-  const { annotations } = useAnnotationsByJob(job.id);
-  const { images, imagesError, isLoadingImages } = useImagesByJob(job.id);
+  const { data: annotations } = useAnnotationsByJob(job.id);
+  const {
+    data: images,
+    error: imagesError,
+    isLoading: isLoadingImages,
+  } = useImagesByJob(job.id);
 
   const store = useStore();
   const { t } = useTranslation();
-  const { deleteJobs } = useDeleteJobsForProjectMutation();
-  const { patchJobStatus } = usePatchJobStatusMutation();
   const navigate = useNavigate();
+  const { mutate: deleteJobs } = deleteJobsMutation();
+  const { mutate: patchJobStatus } = updateJobMutation();
 
   // Delete job confirmation popup
   const [
@@ -113,8 +120,8 @@ export const JobPage = ({ job }: { job: MiaJob }) => {
 
   const confirmDeleteJob = useCallback(() => {
     deleteJobs({
-      projectId: job.project,
-      jobIds: [job.id],
+      selectorId: job.project,
+      objectIds: [job.id],
     });
     navigate(`/projects/${job.project}`);
   }, [deleteJobs, job, navigate]);
@@ -122,9 +129,9 @@ export const JobPage = ({ job }: { job: MiaJob }) => {
   const confirmCancelJob = useCallback(
     () =>
       patchJobStatus({
-        projectId: job.project,
-        jobId: job.id,
-        jobStatus: "canceled",
+        object: job,
+        updateDto: { status: UpdateJobDtoStatusEnum.Canceled },
+        selectorId: job.id,
       }),
     [patchJobStatus, job],
   );
@@ -265,7 +272,7 @@ export const JobPage = ({ job }: { job: MiaJob }) => {
           isOpen={isDeleteJobConfirmationPopUpOpen}
           onClose={closeDeleteJobConfirmationPopUp}
           message={t("delete-job-message", {
-            count: annotations?.length ?? "0",
+            count: annotations?.length || 0,
           })}
           titleTx="delete-job-title"
           onConfirm={confirmDeleteJob}

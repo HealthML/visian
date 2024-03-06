@@ -1,9 +1,9 @@
 import type * as THREE from "three";
 
-import type { ColorMode, Theme } from "../../theme";
-import type { ISliceRenderer, IVolumeRenderer } from "../rendering";
 import type { IDocument } from "./document";
 import { PerformanceMode } from "./types";
+import type { ColorMode, Theme } from "../../theme";
+import type { ISliceRenderer, IVolumeRenderer } from "../rendering";
 
 /** The state of VISIAN's annotation editor. */
 export interface IEditor {

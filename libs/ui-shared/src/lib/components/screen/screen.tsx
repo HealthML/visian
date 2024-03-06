@@ -1,8 +1,8 @@
 import React, { useEffect } from "react";
 import styled from "styled-components";
 
-import { Box } from "../box";
 import { ScreenProps } from "./screen.props";
+import { Box } from "../box";
 
 export const Screen: React.FC<ScreenProps> = styled(
   ({ title, ...rest }: ScreenProps) => {

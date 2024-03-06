@@ -6,10 +6,10 @@ import React, {
 } from "react";
 import styled from "styled-components";
 
+import { TextInputProps } from "./text-input.props";
 import { useTranslation } from "../../i18n";
 import { color, font, fontSize } from "../../theme";
 import { Text } from "../text";
-import { TextInputProps } from "./text-input.props";
 
 const StyledInput = styled.input`
   background: none;

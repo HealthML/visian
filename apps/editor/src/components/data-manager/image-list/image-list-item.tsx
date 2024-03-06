@@ -1,12 +1,13 @@
 import { color, InvisibleButton, ListDivider, Text } from "@visian/ui-shared";
+import { MiaAnnotation } from "@visian/utils";
 import { Fragment, useCallback, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 
+import { ImageListItemProps } from "./image-list-item.props";
 import { useStore } from "../../../app/root-store";
 import { MiaReviewStrategy, TaskType } from "../../../models/review-strategy";
 import { useAnnotationsByImage } from "../../../queries";
-import { ImageListItemProps } from "./image-list-item.props";
 
 const CollapseButton = styled(InvisibleButton)<{ isOpen: boolean }>`
   width: 20px;
@@ -92,8 +93,8 @@ export const ImageListItem = ({
   onAnnotationDelete,
   annotationsFilter,
 }: ImageListItemProps) => {
-  const { annotations: allAnnotations } = useAnnotationsByImage(image.id);
-  const annotations = allAnnotations?.filter((a) =>
+  const { data: allAnnotations } = useAnnotationsByImage(image.id);
+  const annotations = allAnnotations?.filter((a: MiaAnnotation) =>
     annotationsFilter ? annotationsFilter(a) : true,
   );
   const [areAnnotationsOpen, setAnnotationsOpen] = useState(false);
@@ -101,7 +102,9 @@ export const ImageListItem = ({
   const navigate = useNavigate();
 
   const hasVerifiedAnnotation = useMemo(
-    () => annotations?.some((annotation) => annotation.verified) ?? false,
+    () =>
+      annotations?.some((annotation: MiaAnnotation) => annotation.verified) ??
+      false,
     [annotations],
   );
 

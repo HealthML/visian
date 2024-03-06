@@ -19,12 +19,16 @@ import { observer } from "mobx-react-lite";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import styled, { css } from "styled-components";
 
+import { JobCreationPopUpProps } from "./job-creation-popup.props";
 import { useStore } from "../../../app/root-store";
-import { postJob, useImagesByDataset, useMlModels } from "../../../queries";
-import { useDatasetsBy } from "../../../queries/use-datasets-by";
+import {
+  jobsApi,
+  useDatasetsByProject,
+  useImagesByDataset,
+  useMlModels,
+} from "../../../queries";
 import { ImageList } from "../image-list";
 import { useImageSelection } from "../util";
-import { JobCreationPopUpProps } from "./job-creation-popup.props";
 
 const JobCreationPopupContainer = styled(PopUp)`
   align-items: left;
@@ -136,8 +140,12 @@ export const JobCreationPopup = observer<JobCreationPopUpProps>(
   }) => {
     const store = useStore();
 
-    const { mlModels, mlModelsError, isErrorMlModels, isLoadingMlModels } =
-      useMlModels();
+    const {
+      data: mlModels,
+      error: mlModelsError,
+      isError: isErrorMlModels,
+      isLoading: isLoadingMlModels,
+    } = useMlModels();
 
     const [selectedModelName, setSelectedModelName] = useState(
       (mlModels && mlModels[0]?.name) || "",
@@ -194,14 +202,19 @@ export const JobCreationPopup = observer<JobCreationPopUpProps>(
       [mlModels, selectedModelName, selectedModelVersion],
     );
 
-    const { datasets, datasetsError, isErrorDatasets, isLoadingDatasets } =
-      useDatasetsBy(projectId);
+    const {
+      data: datasets,
+      error: datasetsError,
+      isError: isErrorDatasets,
+      isLoading: isLoadingDatasets,
+    } = useDatasetsByProject(projectId);
 
     const [selectedDataset, setSelectedDataset] = useState(openWithDatasetId);
 
     useEffect(() => setSelectedDataset(openWithDatasetId), [openWithDatasetId]);
 
-    const { images, isErrorImages } = useImagesByDataset(selectedDataset);
+    const { data: images, isError: isErrorImages } =
+      useImagesByDataset(selectedDataset);
 
     const { selectedImages, selectImages } = useImageSelection();
     const selectedDatasetImages = Array.from(selectedImages).filter(
@@ -225,7 +238,7 @@ export const JobCreationPopup = observer<JobCreationPopUpProps>(
       if (openWithDatasetId && activeImageSelection && isOpen) {
         selectImages([...activeImageSelection]);
       }
-    }, [isOpen]);
+    }, [activeImageSelection, isOpen, openWithDatasetId, selectImages]);
 
     const createAutoAnnotationJob = useCallback(
       async (imageSelection: string[]) => {
@@ -239,9 +252,17 @@ export const JobCreationPopup = observer<JobCreationPopUpProps>(
         }
 
         try {
-          await postJob(imageSelection, selectedModel, projectId);
+          const job = await jobsApi.createJob({
+            createJobDto: {
+              images: imageSelection,
+              modelName: selectedModel.name,
+              modelVersion: selectedModel.version,
+              project: projectId,
+            },
+          });
           refetchJobs?.();
           onClose?.();
+          return job;
         } catch (error) {
           store?.setError({
             titleTx: "internal-server-error",

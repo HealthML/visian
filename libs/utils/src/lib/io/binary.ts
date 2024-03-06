@@ -30,7 +30,7 @@ export const createFileFromBase64 = (
   return new File([binaryData], fileNameForType);
 };
 
-export const createBase64StringFromFile = (
+const createBase64StringFromFile = (
   file: File,
 ): Promise<string | ArrayBuffer | null> =>
   new Promise((resolve, reject) => {
@@ -39,3 +39,10 @@ export const createBase64StringFromFile = (
     reader.onload = () => resolve(reader.result);
     reader.onerror = (error) => reject(error);
   });
+
+export const getBase64DataFromFile = async (file: File): Promise<string> => {
+  const base64LayerData = await createBase64StringFromFile(file);
+  if (!base64LayerData || !(typeof base64LayerData === "string"))
+    throw new Error("File can not be converted to base64.");
+  return base64LayerData;
+};

@@ -1,13 +1,13 @@
 import React from "react";
 import styled from "styled-components";
 
+import { SwitchOption } from "./switch-option";
+import { SwitchProps } from "./switch.props";
 import { color } from "../../theme";
 import { FlexRow, InputContainer } from "../box";
 import { InfoText } from "../info-text";
 import { Sheet } from "../sheet";
 import { InputLabel } from "../text";
-import { SwitchOption } from "./switch-option";
-import { SwitchProps } from "./switch.props";
 
 const SwitchContainer = styled.div`
   border-radius: 12px;

@@ -6,9 +6,9 @@ import {
 import { action, makeObservable, observable } from "mobx";
 import * as THREE from "three";
 
+import { BlipRenderer3D } from "./blip-renderer-3d";
 import { RenderedImage } from "../rendered-image";
 import { dilateErodeFragmentShader, dilateErodeVertexShader } from "../shaders";
-import { BlipRenderer3D } from "./blip-renderer-3d";
 
 export class DilateErodeRenderer3D
   extends BlipRenderer3D

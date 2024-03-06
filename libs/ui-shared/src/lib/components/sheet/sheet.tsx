@@ -1,9 +1,9 @@
 import styled, { css } from "styled-components";
 import tc from "tinycolor2";
 
+import { SheetProps } from "./sheet.props";
 import { isFirefox } from "../../platform-detection";
 import { color, computeStyleValue, noise, radius } from "../../theme";
-import { SheetProps } from "./sheet.props";
 
 export const sheetNoise = `url(${noise}) left top repeat`;
 

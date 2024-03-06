@@ -18,10 +18,10 @@ import useLocalStorageToggle from "../components/data-manager/util/use-local-sto
 import { GridView } from "../components/data-manager/views/grid-view";
 import { ListView } from "../components/data-manager/views/list-view";
 import {
-  useCreateProjectMutation,
-  useDeleteProjectsMutation,
+  createProjectMutation,
+  deleteProjectsMutation,
+  updateProjectMutation,
   useProjects,
-  useUpdateProjectsMutation,
 } from "../queries";
 
 const Container = styled.div`
@@ -31,20 +31,24 @@ const Container = styled.div`
 
 const StyledIconButton = styled(PaddedPageSectionIconButton)`
   padding: 0 9px;
-  height: 25px; ;
+  height: 25px;
 `;
 
 export const ProjectsScreen: React.FC = observer(() => {
   const { t: translate } = useTranslation();
   const navigate = useNavigate();
 
-  const { projects, projectsError, isErrorProjects, isLoadingProjects } =
-    useProjects();
+  const {
+    data: projects,
+    error: projectsError,
+    isError: isErrorProjects,
+    isLoading: isLoadingProjects,
+  } = useProjects();
   const [projectToBeDeleted, setProjectToBeDeleted] = useState<MiaProject>();
   const [projectToBeUpdated, setProjectToBeUpdated] = useState<MiaProject>();
-  const { deleteProjects } = useDeleteProjectsMutation();
-  const { createProject } = useCreateProjectMutation();
-  const updateProject = useUpdateProjectsMutation();
+  const { mutate: createProject } = createProjectMutation();
+  const { mutate: deleteMutateProjects } = deleteProjectsMutation();
+  const { mutate: updateProject } = updateProjectMutation();
 
   // Delete Project Confirmation
   const [
@@ -102,10 +106,20 @@ export const ProjectsScreen: React.FC = observer(() => {
 
   const confirmDeleteProject = useCallback(() => {
     if (projectToBeDeleted)
-      deleteProjects({
-        projectIds: [projectToBeDeleted.id],
+      deleteMutateProjects({
+        objectIds: [projectToBeDeleted.id],
+        selectorId: "",
       });
-  }, [deleteProjects, projectToBeDeleted]);
+  }, [deleteMutateProjects, projectToBeDeleted]);
+
+  const confirmCreateProject = useCallback(
+    (newName: string) =>
+      createProject({
+        createDto: { name: newName },
+        selectorId: "",
+      }),
+    [createProject],
+  );
 
   // Switch between List and Grid View
   const [isGridView, setIsGridView] = useLocalStorageToggle(
@@ -183,7 +197,7 @@ export const ProjectsScreen: React.FC = observer(() => {
           <ProjectCreationPopup
             isOpen={isCreateProjectPopupOpen}
             onClose={closeCreateProjectPopup}
-            onConfirm={createProject}
+            onConfirm={confirmCreateProject}
           />
           {projectToBeUpdated && (
             <EditPopup
@@ -191,7 +205,11 @@ export const ProjectsScreen: React.FC = observer(() => {
               isOpen={isEditPopupOpen}
               onClose={closeEditPopup}
               onConfirm={(newName) =>
-                updateProject.mutate({ ...projectToBeUpdated, name: newName })
+                updateProject({
+                  object: projectToBeUpdated,
+                  updateDto: { name: newName },
+                  selectorId: "",
+                })
               }
             />
           )}

@@ -11,8 +11,8 @@ import { observer } from "mobx-react-lite";
 import { useCallback, useEffect, useState } from "react";
 import styled from "styled-components";
 
-import { useStore } from "../../../app/root-store";
 import { ExportPopUpProps } from "./export-popup.props";
+import { useStore } from "../../../app/root-store";
 
 const InlineRow = styled.div`
   display: flex;

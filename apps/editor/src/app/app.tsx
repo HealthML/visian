@@ -14,6 +14,7 @@ import { QueryClient, QueryClientProvider } from "react-query";
 import { ReactQueryDevtools } from "react-query/devtools";
 import { Navigate, Route, Routes } from "react-router-dom";
 
+import { setupRootStore, StoreProvider } from "./root-store";
 import {
   whoAwsConfigDeployment,
   whoAwsConfigDevelopment,
@@ -28,7 +29,6 @@ import {
   ProjectScreen,
   ProjectsScreen,
 } from "../screens";
-import { setupRootStore, StoreProvider } from "./root-store";
 
 if (isFromWHO()) {
   if (isUsingLocalhost()) {

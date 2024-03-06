@@ -1,5 +1,5 @@
 {
-  "extends": ["plugin:@nrwl/nx/react", "../../.eslintrc.json"],
+  "extends": ["plugin:@nx/react", "../../.eslintrc.json"],
   "ignorePatterns": ["!**/*"],
   "overrides": [
     {
@@ -7,7 +7,7 @@
       "parserOptions": {
         "project": [
           "libs/ui-shared/tsconfig.*?.json",
-          "libs/ui-shared/.storybook/tsconfig.json"
+          "libs/ui-shared/tsconfig.storybook.json"
         ]
       },
       "rules": {}

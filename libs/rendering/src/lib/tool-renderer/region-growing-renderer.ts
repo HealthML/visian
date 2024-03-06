@@ -3,10 +3,10 @@ import { getOrthogonalAxis, getPlaneAxes } from "@visian/utils";
 import { reaction } from "mobx";
 import * as THREE from "three";
 
-import { RenderedImage } from "../rendered-image";
-import { ScreenAlignedQuad } from "../screen-aligned-quad";
 import { ToolRenderer } from "./tool-renderer";
 import { Circle, RegionGrowingMaterial } from "./utils";
+import { RenderedImage } from "../rendered-image";
+import { ScreenAlignedQuad } from "../screen-aligned-quad";
 
 export class RegionGrowingRenderer extends ToolRenderer {
   protected blipRenderTarget = new THREE.WebGLRenderTarget(1, 1);

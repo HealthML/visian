@@ -4,8 +4,8 @@ import { observer } from "mobx-react-lite";
 import React from "react";
 import styled from "styled-components";
 
-import { useStore } from "../../../app/root-store";
 import { AxesIndicator } from "./axes-indicator";
+import { useStore } from "../../../app/root-store";
 
 const BottomAlignedFlexRow = styled(FlexRow)`
   align-items: flex-end;

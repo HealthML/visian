@@ -1,7 +1,7 @@
 import type React from "react";
 
-import type { I18nProps } from "../types";
 import type { TooltipPositionConfig } from "./utils";
+import type { I18nProps } from "../types";
 
 export interface TooltipProps
   extends React.HTMLAttributes<HTMLDivElement>,

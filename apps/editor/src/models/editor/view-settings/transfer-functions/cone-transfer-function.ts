@@ -2,11 +2,11 @@ import { IConeTransferFunction, IDocument } from "@visian/ui-shared";
 import { ISerializable, Vector } from "@visian/utils";
 import { action, makeObservable, observable } from "mobx";
 
-import { BooleanParameter, NumberParameter, Parameter } from "../../parameters";
 import {
   TransferFunction,
   TransferFunctionSnapshot,
 } from "./transfer-function";
+import { BooleanParameter, NumberParameter, Parameter } from "../../parameters";
 
 export interface ConeTransferFunctionSnapshot
   extends TransferFunctionSnapshot<"fc-cone"> {

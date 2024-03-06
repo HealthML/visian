@@ -1,13 +1,13 @@
 import React, { useCallback, useState } from "react";
 import styled, { css, useTheme } from "styled-components";
 
+import { ButtonProps, TimerButtonProps } from "./button.props";
 import { duration, fontWeight, radius, size, space, Theme } from "../../theme";
 import { Icon } from "../icon";
 import { sheetMixin } from "../sheet";
 import { Text } from "../text";
 import { Tooltip } from "../tooltip";
 import { useDelay, useMultiRef } from "../utils";
-import { ButtonProps, TimerButtonProps } from "./button.props";
 
 const StyledText = styled(Text)<Pick<ButtonProps, "isActive">>`
   font-weight: ${fontWeight("regular")};
@@ -205,7 +205,7 @@ export const TimerButton = ({
   const defaultTimeout = 2000;
 
   const handleClick = useCallback(
-    (event) => {
+    (event: React.MouseEvent<HTMLButtonElement>) => {
       onClick?.(event);
       setIsActive(true);
       if (currentTimeout) {

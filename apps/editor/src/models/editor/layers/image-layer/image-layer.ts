@@ -22,9 +22,6 @@ import {
 import FileSaver from "file-saver";
 import { action, computed, makeObservable, observable } from "mobx";
 
-import { defaultAnnotationColor } from "../../../../constants";
-import { condenseValues } from "../../markers";
-import { Layer } from "../layer";
 import { markerRPCProvider } from "./markers";
 import {
   GetAreaArgs,
@@ -37,6 +34,9 @@ import {
   IsSliceEmptyReturn,
 } from "./types";
 import { volumeRPCProvider } from "./volume";
+import { defaultAnnotationColor } from "../../../../constants";
+import { condenseValues } from "../../markers";
+import { Layer } from "../layer";
 
 export interface ImageLayerSnapshot extends LayerSnapshot {
   image: ImageSnapshot;

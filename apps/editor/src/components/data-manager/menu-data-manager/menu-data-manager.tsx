@@ -14,9 +14,9 @@ import { observer } from "mobx-react-lite";
 import React, { useCallback, useState } from "react";
 import styled, { useTheme } from "styled-components";
 
+import { MenuDataManagerProps } from "./menu-data-manager.props";
 import { useStore } from "../../../app/root-store";
 import { feedbackMailAddress } from "../../../constants";
-import { MenuDataManagerProps } from "./menu-data-manager.props";
 
 // Styled Components
 const MenuButton = styled(FloatingUIButton)`

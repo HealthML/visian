@@ -3,12 +3,12 @@ import { IDisposable, Vector, ViewType } from "@visian/utils";
 import { autorun, IReactionDisposer } from "mobx";
 import * as THREE from "three";
 
+import { getTotalLAODirections } from "./lao-directions";
+import { LAOMaterial } from "./lao-material";
 import { ImageRenderTarget } from "../../../rendered-image";
 import { Texture3DRenderer } from "../../../texture-3d-renderer";
 import { Texture3DCopyMaterial } from "../../../texture-3d-renderer/texture-3d-copy-material";
 import { SharedUniforms } from "../shared-uniforms";
-import { getTotalLAODirections } from "./lao-directions";
-import { LAOMaterial } from "./lao-material";
 
 export class LAOComputer implements IDisposable {
   private _isDirty = true;

@@ -3,13 +3,13 @@ import { IDisposer } from "@visian/utils";
 import { autorun, reaction } from "mobx";
 import * as THREE from "three";
 
+import { SharedUniforms } from "./shared-uniforms";
 import { RenderedImage } from "../../rendered-image";
 import {
   clippingPlaneFragmentShader,
   clippingPlaneVertexShader,
   composeLayeredShader,
 } from "../../shaders";
-import { SharedUniforms } from "./shared-uniforms";
 
 export class ClippingPlaneMaterial extends THREE.ShaderMaterial {
   private disposers: IDisposer[] = [];

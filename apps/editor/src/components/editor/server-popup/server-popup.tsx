@@ -15,8 +15,8 @@ import React, { useCallback, useState } from "react";
 import { useQuery, useQueryClient } from "react-query";
 import styled from "styled-components";
 
-import { useStore } from "../../../app/root-store";
 import { ServerPopUpProps } from "./server-popup.props";
+import { useStore } from "../../../app/root-store";
 
 const SectionLabel = styled(Text)`
   font-size: 14px;

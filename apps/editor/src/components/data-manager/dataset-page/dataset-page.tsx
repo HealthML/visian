@@ -7,11 +7,11 @@ import styled from "styled-components";
 import { useStore } from "../../../app/root-store";
 import { MiaReviewStrategy } from "../../../models/review-strategy";
 import {
-  useDeleteAnnotationsForImageMutation,
-  useDeleteImagesMutation,
+  deleteAnnotationsForImageMutation,
+  deleteImagesMutation,
+  useDatasetProgress,
   useImagesByDataset,
 } from "../../../queries";
-import { useDatasetProgress } from "../../../queries/use-dataset-progress";
 import { AnnotationProgress } from "../annotation-progress";
 import { ConfirmationPopup } from "../confirmation-popup";
 import { ImageImportPopup } from "../image-import-popup";
@@ -57,15 +57,21 @@ export const DatasetPage = ({
   const { t } = useTranslation();
   const navigate = useNavigate();
 
-  const { progress, isLoadingProgress } = useDatasetProgress(dataset.id);
+  const { data: progress, isLoading: isLoadingProgress } = useDatasetProgress(
+    dataset.id,
+  );
 
-  const { images, imagesError, isLoadingImages, refetchImages } =
-    useImagesByDataset(dataset.id);
+  const {
+    data: images,
+    error: imagesError,
+    isLoading: isLoadingImages,
+    refetch: refetchImages,
+  } = useImagesByDataset(dataset.id);
 
   const { selectedImages, selectImages } = useImageSelection();
 
-  const { deleteImages } = useDeleteImagesMutation(dataset.id);
-  const { deleteAnnotations } = useDeleteAnnotationsForImageMutation();
+  const { mutate: deleteImages } = deleteImagesMutation();
+  const { mutate: deleteAnnotations } = deleteAnnotationsForImageMutation();
 
   const [annotationTobBeDeleted, setAnnotationTobBeDeleted] =
     useState<MiaAnnotation>();
@@ -85,6 +91,7 @@ export const DatasetPage = ({
     openDeleteImagesConfirmationPopUp,
     closeDeleteImagesConfirmationPopUp,
   ] = usePopUpState(false);
+
   const openDeletePopup = useCallback(
     (imagesToDelete: MiaImage[]) => {
       setImagesTobBeDeleted(imagesToDelete);
@@ -92,22 +99,29 @@ export const DatasetPage = ({
     },
     [setImagesTobBeDeleted, openDeleteImagesConfirmationPopUp],
   );
+
   const closeDeleteImagesConfirmationPopUpAndClearSelection =
     useCallback(() => {
       closeDeleteImagesConfirmationPopUp();
       setImagesTobBeDeleted([]);
       selectImages([]);
     }, [closeDeleteImagesConfirmationPopUp, selectImages]);
+
   const deleteSelectedImages = useCallback(() => {
-    deleteImages(imagesTobBeDeleted.map((image) => image.id));
-  }, [imagesTobBeDeleted, deleteImages]);
+    deleteImages({
+      objectIds: imagesTobBeDeleted.map((image) => image.id),
+      selectorId: dataset.id,
+    });
+  }, [imagesTobBeDeleted, deleteImages, dataset.id]);
 
   // Job selection popup
   const [jobCreationPopUpOpenWith, setJobCreationPopUpOpenWith] =
     useState<string>();
+
   const openJobCreationPopUp = useCallback(() => {
     setJobCreationPopUpOpenWith(dataset.id);
   }, [dataset.id]);
+
   const closeJobCreationPopUp = useCallback(() => {
     setJobCreationPopUpOpenWith(undefined);
     selectImages([]);
@@ -116,9 +130,11 @@ export const DatasetPage = ({
   // Image import popup
   const [imageImportPopUpOpenWith, setImageImportPopUpOpenWith] =
     useState<MiaDataset>();
+
   const openImageImportPopUp = useCallback(() => {
     setImageImportPopUpOpenWith(dataset);
   }, [dataset]);
+
   const closeImageImportPopUp = useCallback(() => {
     setImageImportPopUpOpenWith(undefined);
   }, []);
@@ -139,8 +155,8 @@ export const DatasetPage = ({
   const handleAnnotationConfirmation = useCallback(() => {
     if (annotationTobBeDeleted)
       deleteAnnotations({
-        imageId: annotationTobBeDeleted.image,
-        annotationIds: [annotationTobBeDeleted.id],
+        objectIds: [annotationTobBeDeleted.id],
+        selectorId: annotationTobBeDeleted.image,
       });
   }, [annotationTobBeDeleted, deleteAnnotations]);
 
@@ -152,6 +168,7 @@ export const DatasetPage = ({
       ),
     [navigate, dataset, store],
   );
+
   const startReviewWithSelected = useCallback(
     (imagesToReview: MiaImage[]) =>
       store?.startReview(
@@ -252,7 +269,7 @@ export const DatasetPage = ({
                   name: imagesTobBeDeleted[0].dataUri ?? "",
                 })
               : t("delete-images-message", {
-                  count: selectedImages.size.toString(),
+                  count: selectedImages.size,
                 })
           }
           titleTx={

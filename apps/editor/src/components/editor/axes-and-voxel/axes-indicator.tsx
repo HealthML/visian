@@ -5,8 +5,8 @@ import { observer } from "mobx-react-lite";
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 
-import { useStore } from "../../../app/root-store";
 import { AxesViewDescription } from "./axes-view-description";
+import { useStore } from "../../../app/root-store";
 
 const AxesContainer = styled.div`
   width: 70px;

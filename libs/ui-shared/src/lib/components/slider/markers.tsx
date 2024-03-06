@@ -1,6 +1,7 @@
 import React from "react";
 import styled, { css } from "styled-components";
 
+import { MarkerProps, RangeMarkerProps } from "./slider.props";
 import {
   color,
   computeStyleValue,
@@ -10,7 +11,6 @@ import {
   Theme,
   ThemeProps,
 } from "../../theme";
-import { MarkerProps, RangeMarkerProps } from "./slider.props";
 
 export const SliderMarker = styled.div.attrs<MarkerProps>((props) => {
   const markerPosition = `${props.position * 100}%`;

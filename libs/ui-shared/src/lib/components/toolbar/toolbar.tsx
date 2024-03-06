@@ -2,12 +2,12 @@ import React, { useCallback, useRef } from "react";
 import ReactDOM from "react-dom";
 import styled, { css } from "styled-components";
 
+import { ToolGroupProps, ToolProps } from "./toolbar.props";
 import { useModalRoot } from "../box";
 import { InvisibleButton } from "../button";
 import { useModalPosition } from "../modal";
 import { Sheet } from "../sheet";
 import { useOutsidePress } from "../utils";
-import { ToolGroupProps, ToolProps } from "./toolbar.props";
 
 const StyledButton = styled(InvisibleButton)`
   width: 40px;

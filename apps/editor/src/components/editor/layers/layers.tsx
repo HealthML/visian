@@ -20,17 +20,20 @@ import {
   TreeItemComponentProps,
   TreeItems,
 } from "dnd-kit-sortable-tree";
-import { ItemChangedReason } from "dnd-kit-sortable-tree/dist/types";
+import {
+  FlattenedItem,
+  ItemChangedReason,
+} from "dnd-kit-sortable-tree/dist/types";
 import { observer } from "mobx-react-lite";
 import React, { ReactNode, useCallback, useEffect, useState } from "react";
 import styled from "styled-components";
 
+import { AnnotationGroupListItem } from "./group-list-item";
+import { LayerListItem } from "./layer-list-item";
 import { useStore } from "../../../app/root-store";
 import { ImageLayer } from "../../../models";
 import { AnnotationGroup } from "../../../models/editor/annotation-groups";
 import { InfoShortcuts } from "../info-shortcuts";
-import { AnnotationGroupListItem } from "./group-list-item";
-import { LayerListItem } from "./layer-list-item";
 
 // Styled Components
 const StyledInfoText = styled(InfoText)`
@@ -258,11 +261,14 @@ export const Layers: React.FC = observer(() => {
 
   const treeItems = getTreeItems();
 
-  const canRootHaveChildren = useCallback((item) => {
-    const layer = store?.editor.activeDocument?.getLayer(item.value);
-    if (!layer) return true; // layerFamilies can always be children of root
-    return layer.annotationGroup === undefined;
-  }, []);
+  const canRootHaveChildren = useCallback(
+    (item: FlattenedItem<TreeItemData>) => {
+      const layer = store?.editor.activeDocument?.getLayer(item.value);
+      if (!layer) return true; // layerFamilies can always be children of root
+      return layer.annotationGroup === undefined;
+    },
+    [store?.editor.activeDocument],
+  );
   const updateRenderingOrder = useCallback(
     (
       newTreeItems: TreeItems<TreeItemData>,

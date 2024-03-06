@@ -137,7 +137,7 @@ When generating a new project using `yarn nx g <generator> <project-name>`, a ne
 
 ```
 "compile": {
-  "executor": "@nrwl/workspace:run-commands",
+  "executor": "@nx/workspace:run-commands",
   "options": {
     "commands": [
       {
@@ -157,9 +157,9 @@ These capabilities include generating applications, libraries, etc as well as th
 Below are our core plugins:
 
 - [React](https://reactjs.org)
-  - `npm install --save-dev @nrwl/react`
+  - `npm install --save-dev @nx/react`
 - Web (no framework frontends)
-  - `npm install --save-dev @nrwl/web`
+  - `npm install --save-dev @nx/web`
 - [Angular](https://angular.io)
   - `npm install --save-dev @nrwl/angular`
 - [Nest](https://nestjs.com)
@@ -173,7 +173,7 @@ There are also many [community plugins](https://nx.dev/community) you could add.
 
 ### Code scaffolding
 
-Run `nx g @nrwl/react:component my-component --project=my-app` to generate a new component.
+Run `nx g @nx/react:component my-component --project=my-app` to generate a new component.
 
 ### Further help
 

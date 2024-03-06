@@ -1,9 +1,9 @@
 import React, { useCallback } from "react";
 import styled from "styled-components";
 
+import { TextFieldProps } from "./text-field.props";
 import { useTranslation } from "../../i18n";
 import { color, font, fontSize, radius, size, space } from "../../theme";
-import { TextFieldProps } from "./text-field.props";
 
 const StyledInput = styled.input`
   border: none;

@@ -10,12 +10,12 @@ import {
 } from "@visian/utils";
 import * as THREE from "three";
 
-import { ScreenAlignedQuad } from "../../screen-aligned-quad";
-import { OrientedSlice } from "../types";
-import { getTextureFormat } from "../utils";
 import { MergeMaterial, MergeMaterial3D } from "./merge-material";
 import { ReadSliceMaterial } from "./read-slice-material";
 import { SliceLine } from "./slice-line";
+import { ScreenAlignedQuad } from "../../screen-aligned-quad";
+import { OrientedSlice } from "../types";
+import { getTextureFormat } from "../utils";
 
 export class TextureAdapter implements IDisposable {
   private mergeMaterial = new MergeMaterial();

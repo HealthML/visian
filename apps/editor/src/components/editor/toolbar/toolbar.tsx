@@ -3,10 +3,10 @@ import { observer } from "mobx-react-lite";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 
-import { useStore } from "../../../app/root-store";
-import { InfoShortcuts } from "../info-shortcuts";
 import { ToolGroup } from "./tool-group";
 import { ToolSettings } from "./tool-settings";
+import { useStore } from "../../../app/root-store";
+import { InfoShortcuts } from "../info-shortcuts";
 
 // Styled Components
 const StyledToolbar = styled(GenericToolbar)`

@@ -147,6 +147,7 @@ export const unifyOrientation = (
   const axisMultipliers = [components, rowSize, sliceSize];
 
   const unifiedData = new (data.constructor as new (
+    // eslint-disable-next-line @typescript-eslint/no-shadow
     size: number,
   ) => typeof data)(size[0] * size[1] * sliceCount * components);
 

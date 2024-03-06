@@ -2,12 +2,12 @@ import React from "react";
 import ReactDOM from "react-dom";
 import styled from "styled-components";
 
+import { TooltipProps } from "./tooltip.props";
+import { useTooltipPosition } from "./utils";
 import { zIndex } from "../../theme";
 import { useModalRoot } from "../box";
 import { Sheet } from "../sheet";
 import { Text } from "../text";
-import { TooltipProps } from "./tooltip.props";
-import { useTooltipPosition } from "./utils";
 
 const TooltipContainer = styled(Sheet)<Pick<TooltipProps, "baseZIndex">>`
   box-sizing: border-box;

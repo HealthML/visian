@@ -1,5 +1,7 @@
 import styled from "styled-components";
 
+import { SliderRangeSelectionProps, ThumbProps } from "./slider.props";
+import { SliderVerticalitySettings } from "./types";
 import {
   color,
   computeStyleValue,
@@ -12,8 +14,6 @@ import {
 import { coverMixin } from "../mixins";
 import { Text } from "../text";
 import { TextInput } from "../text-input";
-import { SliderRangeSelectionProps, ThumbProps } from "./slider.props";
-import { SliderVerticalitySettings } from "./types";
 
 export const SliderContainer = styled.div<SliderVerticalitySettings>`
   align-items: center;

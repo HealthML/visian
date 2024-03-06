@@ -10,8 +10,8 @@ import { observer } from "mobx-react-lite";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import styled, { useTheme } from "styled-components";
 
-import { useStore } from "../../../app/root-store";
 import { SliceSliderProps } from "./slice-slider.props";
+import { useStore } from "../../../app/root-store";
 
 // Styled Components
 const StyledSheet = styled(Sheet)`

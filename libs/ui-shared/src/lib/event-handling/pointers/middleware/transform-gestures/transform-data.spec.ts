@@ -1,5 +1,5 @@
-import { Pointer } from "../../types";
 import { TransformData } from "./transform-data";
+import { Pointer } from "../../types";
 
 describe("TransformData", () => {
   it("should create a new set of transform data", () => {

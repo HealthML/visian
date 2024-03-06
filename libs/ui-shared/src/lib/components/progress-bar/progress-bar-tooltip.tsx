@@ -1,13 +1,13 @@
 import ReactDOM from "react-dom";
 import styled from "styled-components";
 
+import { Dot } from "./progress-bar";
+import { ProgressBarProps } from "./progress-bar.props";
 import { useModalRoot } from "../box";
 import { Divider } from "../modal";
 import { Sheet } from "../sheet";
 import { Text } from "../text";
 import { useTooltipPosition } from "../tooltip";
-import { Dot } from "./progress-bar";
-import { ProgressBarProps } from "./progress-bar.props";
 
 const TooltipContainer = styled(Sheet)`
   box-sizing: border-box;

@@ -7,13 +7,17 @@ import { JobPage } from "../components/data-manager/job-page";
 import { Page } from "../components/data-manager/page";
 import { PageError } from "../components/data-manager/page-error";
 import { PageLoadingBlock } from "../components/data-manager/page-loading-block";
-import useJob from "../queries/use-job";
+import { useJob } from "../queries";
 
 export const JobScreen: React.FC = observer(() => {
   const { t: translate } = useTranslation();
 
   const jobId = useParams().jobId || "";
-  const { job, isErrorJob, isLoadingJob } = useJob(jobId);
+  const {
+    data: job,
+    isError: isErrorJob,
+    isLoading: isLoadingJob,
+  } = useJob(jobId);
 
   let pageContent = <PageLoadingBlock labelTx="job" backPath="/projects" />;
 

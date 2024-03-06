@@ -2,9 +2,9 @@ import { List, stopPropagation } from "@visian/ui-shared";
 import { MiaIterableData } from "@visian/utils";
 import styled from "styled-components";
 
-import { SectionSheet } from "../../page-section";
 import { ListViewItem } from "./list-view-item";
 import { ListViewProps } from "./list-view.props";
+import { SectionSheet } from "../../page-section";
 
 const StyledList = styled(List)`
   width: 100%;

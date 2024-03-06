@@ -21,12 +21,12 @@ import path from "path";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import styled from "styled-components";
 
+import { SavePopUpProps } from "./save-popup.props";
 import { useStore } from "../../../app/root-store";
 import { importFilesToDocument } from "../../../import-handling";
 import { AnnotationGroup } from "../../../models/editor/annotation-groups";
 import { MiaReviewTask } from "../../../models/review-strategy";
-import { fetchAnnotationFile } from "../../../queries";
-import { SavePopUpProps } from "./save-popup.props";
+import { getAnnotationFile } from "../../../queries";
 
 const SectionLabel = styled(Text)`
   font-size: 14px;
@@ -179,8 +179,8 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
         const description = error.response?.data?.message
           ? error.response.data.message
           : error.message
-          ? error.message
-          : "annotation-saving-error";
+            ? error.message
+            : "annotation-saving-error";
         store?.setError({
           titleTx: "saving-error",
           descriptionTx: description,
@@ -215,7 +215,7 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
         );
       });
     }
-    const oldAnnotationFile = await fetchAnnotationFile(oldAnnotationMeta.id);
+    const oldAnnotationFile = await getAnnotationFile(oldAnnotationMeta.id);
     await importAnnotationFile(oldAnnotationFile);
     if (activeLayer) {
       store?.editor.activeDocument?.setActiveLayer(activeLayer.id);
@@ -314,7 +314,7 @@ export const SavePopUp = observer<SavePopUpProps>(({ isOpen, onClose }) => {
   }, [isOpen, getAnnotationURIPrefixSuggestion]);
 
   const isValidDataUri = useCallback(
-    (dataUri, allowedExtensions = [".nii.gz", ".zip"]) => {
+    (dataUri: string, allowedExtensions = [".nii.gz", ".zip"]) => {
       const extensionsPattern = `(${allowedExtensions.join("|")})`;
 
       const pattern = new RegExp(
