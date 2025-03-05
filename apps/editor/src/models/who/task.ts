@@ -1,5 +1,6 @@
 import { Annotation, AnnotationSnapshot, AnnotationStatus } from "./annotation";
 import { AnnotationTask, AnnotationTaskSnapshot } from "./annotationTask";
+import { Campaign, CampaignSnapshot } from "./campaign";
 import { Sample } from "./sample";
 import { User, UserSnapshot } from "./user";
 
@@ -10,6 +11,7 @@ export interface TaskSnapshot {
   annotationTasks: AnnotationTaskSnapshot[];
   annotations?: AnnotationSnapshot[];
   assignee: UserSnapshot;
+  campaign: CampaignSnapshot | Record<string, never>;
 }
 
 export enum TaskType {
@@ -26,6 +28,7 @@ export class Task {
   public samples: Sample[];
   public annotations: Annotation[];
   public assignee: User;
+  public campaign?: Campaign;
 
   // TODO: Properly type API response data
   constructor(task: any) {
@@ -40,6 +43,9 @@ export class Task {
       (annotation: any) => new Annotation(annotation),
     );
     this.assignee = new User(task.assignee);
+    if (task.campaign && Object.keys(task.campaign).length > 1) {
+      this.campaign = new Campaign(task.campaign);
+    }
   }
 
   public addNewAnnotation(): void {
@@ -65,6 +71,7 @@ export class Task {
         annotation.toJSON(),
       ),
       assignee: this.assignee.toJSON(),
+      campaign: this.campaign ? this.campaign.toJSON() : {},
     };
   }
 }
