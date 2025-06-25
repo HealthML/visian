@@ -2,6 +2,10 @@
 
 > Concepts for the future of image analysis systems.
 
+## License
+
+This project is licensed under the [Apache License 2.0](LICENSE).
+
 ## Get Started
 
 1. Install [node.js](https://nodejs.org/en/) and the [yarn](https://yarnpkg.com/en/docs/install) package manager.
