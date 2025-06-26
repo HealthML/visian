@@ -1,18 +1,18 @@
 @font-face {
-  font-family: "DIN2014";
-  src: local("DIN2014 DemiBold"), url(./DIN2014-DemiBold.ttf);
+  font-family: "DINPRO";
+  src: local("DINPRO Bold"), url(./DINPRO-Bold.ttf);
   font-weight: 700;
   font-style: normal;
 }
 @font-face {
-  font-family: "DIN2014";
-  src: local("DIN2014 Regular"), url(./DIN2014-Regular.ttf);
-  font-weight: 400;
+  font-family: "DINPRO";
+  src: local("DINPRO Medium"), url(./DINPRO-Medium.ttf);
+  font-weight: 500;
   font-style: normal;
 }
 @font-face {
-  font-family: "DIN2014";
-  src: local("DIN2014 Light"), url(./DIN2014-Light.ttf);
-  font-weight: 300;
+  font-family: "DINPRO";
+  src: local("DINPRO Regular"), url(./DINPRO-Regular.ttf);
+  font-weight: 400;
   font-style: normal;
 }

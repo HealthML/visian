@@ -30,11 +30,23 @@ export const Subtitle = styled(({ as, ...rest }: TextProps) => (
   font-weight: ${fontWeight("regular")};
 `;
 
+export const SectionHeader = styled(Subtitle)`
+  font-size: ${fontSize("navigation")};
+`;
+
 export const Title = styled(({ as, ...rest }: TextProps) => (
   <Text {...rest} as={as || "h2"} />
 ))`
   font-size: ${fontSize("title")};
   font-weight: ${fontWeight("regular")};
+`;
+
+export const TitleLabel = styled(({ as, ...rest }: TextProps) => (
+  <Text {...rest} as={as || "h3"} />
+))`
+  font-size: ${fontSize("default")};
+  font-weight: ${fontWeight("regular")};
+  opacity: 0.5;
 `;
 
 export const InputLabel = styled(Text)`

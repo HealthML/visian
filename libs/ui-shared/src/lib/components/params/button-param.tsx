@@ -42,20 +42,27 @@ export const ButtonParam: React.FC<Partial<ButtonParamProps>> = ({
   />
 );
 
-export const BlueButtonParam = styled(ButtonParam)`
-  background: ${sheetNoise}, ${color("blueSheet")};
-  border-color: ${color("blueBorder")};
+export const ColoredButtonParam = styled(ButtonParam)<{
+  color: "green" | "red" | "blue";
+}>`
+  background: ${sheetNoise},
+    ${({ color: buttonColor }) => color(`${buttonColor}Sheet`)};
+  border-color: ${({ color: buttonColor }) => color(`${buttonColor}Border`)};
 
   &:active {
-    border-color: rgba(0, 133, 255, 1);
+    border-color: ${({ color: buttonColor }) =>
+      color(`${buttonColor}BorderFocus`)};
   }
 `;
 
-export const RedButtonParam = styled(ButtonParam)`
-  background: ${sheetNoise}, ${color("redSheet")};
-  border-color: ${color("redBorder")};
+export const ColoredBorderButtonParam = styled(ButtonParam)<{
+  color: "green" | "red" | "blue";
+}>`
+  border-color: ${({ color: buttonColor }) => color(`${buttonColor}Border`)};
+  border-width: 2px;
 
   &:active {
-    border-color: rgba(202, 51, 69, 1);
+    border-color: ${({ color: buttonColor }) =>
+      color(`${buttonColor}BorderFocus`)};
   }
 `;

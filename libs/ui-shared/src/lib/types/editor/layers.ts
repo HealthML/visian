@@ -1,4 +1,11 @@
-import type { Image, TypedArray, Vector, ViewType, Voxel } from "@visian/utils";
+import type {
+  BackendMetadata,
+  Image,
+  TypedArray,
+  Vector,
+  ViewType,
+  Voxel,
+} from "@visian/utils";
 import type { Matrix4 } from "three";
 
 import { MarkerConfig } from "./markers";
@@ -22,6 +29,30 @@ export type BlendMode =
   | "SATURATION"
   | "SCREEN"
   | "SUBTRACT";
+
+export interface LayerSnapshot {
+  kind: string;
+  isAnnotation: boolean;
+
+  id: string;
+  titleOverride?: string;
+  parentId?: string;
+
+  blendMode: BlendMode;
+  color?: string;
+  isVisible: boolean;
+  opacityOverride?: number;
+
+  transformation: number[];
+  metadata?: BackendMetadata;
+}
+
+export interface LayerFamilySnapshot {
+  id: string;
+  title: string;
+  metadata?: BackendMetadata;
+  layerIds: string[];
+}
 
 /** A generic layer. */
 export interface ILayer {
@@ -52,6 +83,13 @@ export interface ILayer {
   parent?: ILayer;
 
   /**
+   * The family of this layer.
+   * This groups layers that are related to each other, e.g., a segmentation file.
+   * In conrast to the parent, the family itself is not a layer.
+   */
+  family?: ILayerFamily;
+
+  /**
    * The blend mode used to combine this layer on top of the ones below.
    * Defaults to `"NORMAL"`.
    */
@@ -70,6 +108,12 @@ export interface ILayer {
 
   /** The layer's transform matrix used to position it during rendering. */
   transformation?: Matrix4;
+  /** The layer's metadata ID. */
+  metadata?: BackendMetadata;
+  /** Whether the layer is the document's active layer */
+  isActive: boolean;
+
+  excludeFromSnapshotTracking: string[];
 
   /**
    * Returns all slice markers, aggregated for the layer and given view type.
@@ -79,16 +123,31 @@ export interface ILayer {
   /** Sets the layer's title. */
   setTitle(value?: string): void;
 
+  setMetadata(value?: BackendMetadata): void;
+
   /** Sets this layer's parent layer, typically the group it is contained in. */
   setParent(idOrLayer?: string | ILayer): void;
+
+  /** Sets the layer's family and moves it to the specified index within its local rendering order.
+   * A layer with an undefined family is an orphan.
+   * If the layer is an orphan its local rendering order is the document renderingOrder.
+   */
+  setFamily(id: string | undefined, idx?: number): void;
+
+  getFamilyLayers(): ILayer[];
 
   setIsAnnotation(value?: boolean): void;
 
   setBlendMode(blendMode?: BlendMode): void;
   setColor(value?: string): void;
+  tryToggleIsVisible(): void;
   setIsVisible(value?: boolean): void;
   setOpacity(value?: number): void;
   resetSettings(): void;
+
+  setTransformation(value?: Matrix4): void;
+  fixPotentiallyBadColor(): void;
+  applySnapshot(snapshot?: Partial<LayerSnapshot>): Promise<void>;
 
   /**
    * Deletes this layer from the document it is contained in and any potential
@@ -97,6 +156,8 @@ export interface ILayer {
   delete(): void;
 
   toFile(): Promise<File | undefined>;
+
+  toJSON(): LayerSnapshot;
 }
 
 /**
@@ -156,6 +217,8 @@ export interface IImageLayer extends ILayer {
   computeArea(viewType: ViewType, slice: number): Promise<void>;
 
   setGradientHistogram(histogram?: Histogram): void;
+
+  copy(): IImageLayer;
 }
 
 /** A group of layers. */
@@ -170,4 +233,32 @@ export interface ILayerGroup extends ILayer {
 
   /** Removes a layer from the document (but keeps it in the document). */
   removeLayer(idOrLayer: string | ILayer): void;
+}
+
+export interface ILayerFamily {
+  id: string;
+  /** The family's display name. */
+  title: string;
+  /** The family's meta data. Usually the object from the DB */
+  metadata?: BackendMetadata;
+  /** All layers in the family. */
+  layers: ILayer[];
+  /** Whether the layer is currently collapsed in the layer view* */
+  collapsed?: boolean;
+  /** Whether the group contains the document's active layer */
+  isActive: boolean;
+  /** Returns `true` if the family has changes. */
+  hasChanges: boolean;
+  /** Adds a layer with specified id to the family at the specified index, the layer is removed from its previous family.
+   * If no index and the layer is already in the family, the layer's position remains unchanged.
+   * If no index is specified and the layer is not part of the family, the layer is inserted at the beginning. */
+  addLayer(id: string, index?: number): void;
+  /** Removes a layer from the family making it an orphan.
+   * After being removed, the layer is added to the document at the specified index.
+   */
+  removeLayer(id: string, index?: number): void;
+  /** set verified if fam */
+  trySetIsVerified(value: boolean): void;
+
+  toJSON(): LayerFamilySnapshot;
 }

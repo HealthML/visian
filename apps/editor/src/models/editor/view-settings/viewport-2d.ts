@@ -231,7 +231,6 @@ export class Viewport2D
   public reset = (): void => {
     this.setMainViewType();
     this.setShowSideViews();
-    this.setVoxelInfoMode();
     this.setZoomLevel();
     this.setOffset();
     this.resetRotation();

@@ -1,6 +1,7 @@
 export * from "./axes-and-voxel";
 export * from "./drop-sheet";
 export * from "./export-popup";
+export * from "./import-image-drop-sheet";
 export * from "./layer-settings";
 export * from "./layers";
 export * from "./main-view";

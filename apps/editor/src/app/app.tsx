@@ -11,16 +11,23 @@ import { Amplify } from "aws-amplify";
 import { observer } from "mobx-react-lite";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { QueryClient, QueryClientProvider } from "react-query";
-import { Route, Routes } from "react-router-dom";
+import { ReactQueryDevtools } from "react-query/devtools";
+import { Navigate, Route, Routes } from "react-router-dom";
 
 import {
   whoAwsConfigDeployment,
   whoAwsConfigDevelopment,
   whoRequiresAuthentication,
 } from "../constants";
-import { setUpEventHandling } from "../event-handling";
 import type { RootStore } from "../models";
-import { EditorScreen } from "../screens";
+import { hubBaseUrl } from "../queries";
+import {
+  DatasetScreen,
+  EditorScreen,
+  JobScreen,
+  ProjectScreen,
+  ProjectsScreen,
+} from "../screens";
 import { setupRootStore, StoreProvider } from "./root-store";
 
 if (isFromWHO()) {
@@ -49,14 +56,8 @@ function App(): JSX.Element {
     const result = Promise.all([setupRootStore(), initI18n()]).then(
       ([rootStore]) => {
         rootStoreRef.current = rootStore;
-        const [dispatch, dispose] = setUpEventHandling(rootStore);
-        rootStore.pointerDispatch = dispatch;
-
         setIsReady(true);
-        return () => {
-          dispose();
-          rootStore.dispose();
-        };
+        return rootStore.dispose;
       },
     );
     return () => {
@@ -75,12 +76,36 @@ function App(): JSX.Element {
           {isReady && (
             <React.StrictMode>
               <ModalRoot />
-              <Routes>
-                <Route path="/" element={<EditorScreen />} />
-              </Routes>
+              {hubBaseUrl ? (
+                <Routes>
+                  <Route path="/projects" element={<ProjectsScreen />} />
+                  <Route
+                    path="/projects/:projectId"
+                    element={<ProjectScreen />}
+                  />
+                  <Route
+                    path="/datasets/:datasetId"
+                    element={<DatasetScreen />}
+                  />
+                  <Route path="/jobs/:jobId" element={<JobScreen />} />
+                  <Route
+                    path="/"
+                    element={<Navigate replace to="/projects" />}
+                  />
+                  <Route path="/editor" element={<EditorScreen />} />
+                  <Route path="*" element={<Navigate replace to="/" />} />
+                </Routes>
+              ) : (
+                <Routes>
+                  <Route path="/" element={<EditorScreen />} />
+                </Routes>
+              )}
             </React.StrictMode>
           )}
         </StoreProvider>
+        {process.env.NODE_ENV === "development" && (
+          <ReactQueryDevtools initialIsOpen={false} />
+        )}
       </QueryClientProvider>
     </ThemeProvider>
   );

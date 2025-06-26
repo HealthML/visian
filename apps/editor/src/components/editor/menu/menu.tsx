@@ -1,12 +1,11 @@
 import {
-  BlueButtonParam,
   ButtonParam,
+  ColoredButtonParam,
   ColorMode,
   Divider,
   EnumParam,
   FloatingUIButton,
   Modal,
-  RedButtonParam,
   Theme,
 } from "@visian/ui-shared";
 import { observer } from "mobx-react-lite";
@@ -45,10 +44,8 @@ export const Menu: React.FC<MenuProps> = observer(
     const [buttonRef, setButtonRef] = useState<HTMLButtonElement | null>(null);
 
     // Menu Actions
-    const setTheme = useCallback(
-      (value: string) => {
-        store?.setColorMode(value as ColorMode);
-      },
+    const setColorMode = useCallback(
+      (value: string) => store?.settings.setColorMode(value as ColorMode),
       [store],
     );
 
@@ -78,7 +75,7 @@ export const Menu: React.FC<MenuProps> = observer(
     return (
       <>
         <MenuButton
-          icon="menu"
+          icon="burger"
           tooltipTx="menu"
           showTooltip={!isModalOpen}
           ref={setButtonRef}
@@ -99,18 +96,24 @@ export const Menu: React.FC<MenuProps> = observer(
             labelTx="theme"
             options={themeSwitchOptions}
             value={store?.colorMode || "dark"}
-            setValue={setTheme}
+            setValue={setColorMode}
           />
           <ButtonParam labelTx="settings" handlePress={openSettingsPopUp} />
           <Divider />
           <ButtonParam labelTx="shortcuts" handlePress={openShortcutPopUp} />
           {feedbackMailAddress && (
-            <BlueButtonParam
+            <ColoredButtonParam
+              color="blue"
               labelTx="ideas-feedback"
               handlePress={sendFeedback}
             />
           )}
-          <RedButtonParam labelTx="clear-data" handlePress={destroy} isLast />
+          <ColoredButtonParam
+            color="red"
+            labelTx="clear-data"
+            handlePress={destroy}
+            isLast
+          />
         </Modal>
       </>
     );

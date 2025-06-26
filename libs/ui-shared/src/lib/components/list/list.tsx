@@ -17,18 +17,23 @@ export const List = styled.div`
   width: 100%;
 `;
 
-const ListItemContainer = styled.div`
+export const ListItemContainer = styled.div`
   display: flex;
   flex-direction: column;
   outline: none;
 `;
 
-const ListItemInner = styled.div<Pick<ListItemProps, "isActive">>`
+const ListItemInner = styled.div<
+  Pick<ListItemProps, "isActive" | "innerHeight">
+>`
   display: flex;
   flex-direction: row;
   align-items: center;
-  height: ${size("listElementHeight")};
   overflow: hidden;
+  ${(props) =>
+    css`
+      height: ${props.innerHeight ?? size("listElementHeight")};
+    `}
 
   ${(props) =>
     props.isActive &&
@@ -101,6 +106,7 @@ export const ListItem = React.forwardRef<HTMLDivElement, ListItemProps>(
       iconRef,
       trailingIcon,
       trailingIconRef,
+      innerHeight,
       value,
       isActive,
       isLast,
@@ -143,7 +149,7 @@ export const ListItem = React.forwardRef<HTMLDivElement, ListItemProps>(
 
     return (
       <ListItemContainer {...rest} ref={ref}>
-        <ListItemInner isActive={isActive}>
+        <ListItemInner isActive={isActive} innerHeight={innerHeight}>
           {icon &&
             (typeof icon === "string" ? (
               <ListIcon
@@ -193,3 +199,7 @@ export const ListItem = React.forwardRef<HTMLDivElement, ListItemProps>(
     );
   },
 );
+
+export const FullWidthListItem = styled(ListItem)`
+  width: 100%;
+`;

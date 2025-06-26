@@ -3,6 +3,7 @@ import {
   Histogram,
   IDocument,
   IImageLayer,
+  LayerSnapshot,
   MarkerConfig,
 } from "@visian/ui-shared";
 import {
@@ -23,7 +24,7 @@ import { action, computed, makeObservable, observable } from "mobx";
 
 import { defaultAnnotationColor } from "../../../../constants";
 import { condenseValues } from "../../markers";
-import { Layer, LayerSnapshot } from "../layer";
+import { Layer } from "../layer";
 import { markerRPCProvider } from "./markers";
 import {
   GetAreaArgs,
@@ -164,6 +165,10 @@ export class ImageLayer
 
   public get is3DLayer() {
     return this.image.is3D;
+  }
+
+  public get hasChanges() {
+    return this.document.history.hasChanges(this.id);
   }
 
   public setImage(value: RenderedImage): void {
@@ -450,5 +455,9 @@ export class ImageLayer
 
     this.setEmptySlices();
     return this.recomputeSliceMarkers();
+  }
+
+  public copy() {
+    return new ImageLayer(this.toJSON(), this.document);
   }
 }

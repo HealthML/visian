@@ -10,4 +10,6 @@ export interface NotificationProps
   descriptionTx?: string;
   descriptionData?: I18nData;
   description?: string;
+
+  onClose?: () => void;
 }

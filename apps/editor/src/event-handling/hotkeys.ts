@@ -83,14 +83,14 @@ export const generalHotkeys: IHotkey[] = [
   // Undo/Redo
   {
     keys: "ctrl+z",
-    action: (store) => store.editor.activeDocument?.history.undo(),
+    action: (store) => store.editor.activeDocument?.undo(),
     labelTx: "undo",
     name: "undo",
     shortcutGuideSection: "undo-redo",
   },
   {
     keys: "ctrl+shift+z,ctrl+y",
-    action: (store) => store.editor.activeDocument?.history.redo(),
+    action: (store) => store.editor.activeDocument?.redo(),
     labelTx: "redo",
     name: "redo",
     shortcutGuideSection: "undo-redo",
@@ -100,9 +100,7 @@ export const generalHotkeys: IHotkey[] = [
   {
     keys: "m",
     action: (store) =>
-      store.editor.activeDocument?.activeLayer?.setIsVisible(
-        !store.editor.activeDocument.activeLayer.isVisible,
-      ),
+      store.editor.activeDocument?.activeLayer?.tryToggleIsVisible(),
     labelTx: "toggle-active-layer",
     name: "toggle-active-layer",
     shortcutGuideSection: "layer-controls",
@@ -366,7 +364,7 @@ export const generalHotkeys: IHotkey[] = [
     action: (store) => {
       store.setProgress({ labelTx: "exporting" });
       store.editor.activeDocument
-        ?.exportZip(true)
+        ?.exportZip(store.editor.activeDocument.layers, true)
         .catch()
         .then(() => {
           store?.setProgress();

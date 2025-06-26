@@ -6,7 +6,7 @@ import {
   useRelativePosition,
 } from "../utils";
 
-export type ModalPosition = "left" | "right";
+export type ModalPosition = "left" | "right" | "top" | "bottom";
 export type ModalPositionConfig = RelativePositionConfig<ModalPosition>;
 
 const defaultModalDistance = 10;
@@ -35,7 +35,7 @@ const computeStyle = ({
           (rect.left - distance),
       };
 
-    default:
+    case "right":
       return {
         bottom: shouldPositionToBottom
           ? undefined
@@ -46,6 +46,20 @@ const computeStyle = ({
           ? rect.top - (offsetRect?.top || 0)
           : undefined,
         left: rect.right + distance - (offsetRect?.left || 0),
+      };
+    case "top":
+      return {
+        position: "absolute",
+        top: rect.top - (offsetRect?.top || 0) - distance,
+        left: rect.right - (offsetRect?.left || 0) - rect.width / 2,
+        transform: "translateX(-50%) translateY(-100%)",
+      };
+    default:
+      return {
+        position: "absolute",
+        top: rect.bottom - (offsetRect?.bottom || 0) + distance,
+        left: rect.right - (offsetRect?.left || 0) - rect.width / 2,
+        transform: "translateX(-50%)",
       };
   }
 };

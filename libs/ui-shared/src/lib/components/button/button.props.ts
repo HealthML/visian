@@ -19,3 +19,9 @@ export interface ButtonProps
   isActive?: boolean;
   isDisabled?: boolean;
 }
+export interface TimerButtonProps extends ButtonProps {
+  secondIcon: IconType;
+  timeout?: number;
+  secondTooltip?: string;
+  secondTooltipTx?: string;
+}

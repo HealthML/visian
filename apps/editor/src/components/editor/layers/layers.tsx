@@ -1,55 +1,44 @@
 import {
   computeStyleValue,
-  ContextMenu,
-  ContextMenuItem,
   FloatingUIButton,
-  IImageLayer,
   ILayer,
+  ILayerFamily,
   InfoText,
   List,
   ListItem,
   Modal,
   ModalHeaderButton,
-  PointerButton,
   size,
   stopPropagation,
   styledScrollbarMixin,
   SubtleText,
-  useDelay,
-  useDoubleTap,
-  useForwardEvent,
-  useModalRoot,
-  useShortTap,
-  useTranslation,
 } from "@visian/ui-shared";
-import { Pixel } from "@visian/utils";
-import { Observer, observer } from "mobx-react-lite";
-import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
-  DragDropContext,
-  Draggable,
-  DraggableProvided,
-  DraggableStateSnapshot,
-  DragUpdate,
-  Droppable,
-  DroppableProvided,
-} from "react-beautiful-dnd";
-import ReactDOM from "react-dom";
+  SimpleTreeItemWrapper,
+  SortableTree,
+  TreeItem,
+  TreeItemComponentProps,
+  TreeItems,
+} from "dnd-kit-sortable-tree";
+import { ItemChangedReason } from "dnd-kit-sortable-tree/dist/types";
+import { observer } from "mobx-react-lite";
+import React, { ReactNode, useCallback, useEffect, useState } from "react";
 import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
 import { ImageLayer } from "../../../models";
+import { LayerFamily } from "../../../models/editor/layer-families";
 import { InfoShortcuts } from "../info-shortcuts";
-import { LayerSettings } from "../layer-settings";
-
-// Utilities
-const noop = () => {
-  // Intentionally left blank
-};
+import { FamilyListItem } from "./group-list-item";
+import { LayerListItem } from "./layer-list-item";
 
 // Styled Components
 const StyledInfoText = styled(InfoText)`
   margin-right: 10px;
+`;
+
+const OuterWrapper = styled("div")`
+  width: 100%;
 `;
 
 const LayerList = styled(List)`
@@ -71,266 +60,131 @@ const LayerList = styled(List)`
   overflow-y: auto;
 `;
 
-const LayerListItem = observer<{
-  layer: ILayer;
-  index: number;
-  isActive?: boolean;
-  isLast?: boolean;
-}>(({ layer, index, isActive, isLast }) => {
-  const store = useStore();
-
-  const toggleAnnotationVisibility = useCallback(() => {
-    layer.setIsVisible(!layer.isVisible);
-  }, [layer]);
-
-  // Color Modal Toggling
-  const [areLayerSettingsOpen, setAreLayerSettingsOpen] = useState(false);
-  const isOpeningRef = useRef(false);
-  const resetOpeningRef = useCallback(() => {
-    isOpeningRef.current = false;
-  }, []);
-  const [schedule, cancel] = useDelay(resetOpeningRef, 25);
-  const openLayerSettings = useCallback(() => {
-    setAreLayerSettingsOpen(true);
-    isOpeningRef.current = true;
-    schedule();
-  }, [schedule]);
-  const closeLayerSettings = useCallback(() => {
-    if (!isOpeningRef.current) setAreLayerSettingsOpen(false);
-    isOpeningRef.current = false;
-    cancel();
-  }, [cancel]);
-
-  // Color Modal Positioning
-  const [colorRef, setColorRef] = useState<
-    HTMLDivElement | SVGSVGElement | null
-  >(null);
-
-  const trailingIconRef = useRef<SVGSVGElement | null>(null);
-
-  const [startTap1, stopTap] = useShortTap(
-    useCallback(() => {
-      store?.editor.activeDocument?.setActiveLayer(layer);
-    }, [layer, store?.editor.activeDocument]),
-  );
-  const startTap2 = useDoubleTap(
-    useCallback((event: React.PointerEvent) => {
-      if (event.pointerType === "mouse") return;
-      setContextMenuPosition({ x: event.clientX, y: event.clientY });
-    }, []),
-  );
-  const startTap = useForwardEvent(startTap1, startTap2);
-
-  // Context Menu
-  const [contextMenuPosition, setContextMenuPosition] = useState<Pixel | null>(
-    null,
-  );
-  const closeContextMenu = useCallback(() => {
-    setContextMenuPosition(null);
-  }, []);
-  useEffect(() => {
-    setContextMenuPosition(null);
-  }, [store?.editor.activeDocument?.viewSettings.viewMode]);
-
-  const { t } = useTranslation();
-  const calculateVolume = useCallback(() => {
-    if (layer.kind !== "image") return;
-    (layer as IImageLayer).computeVolume();
-    store?.editor.activeDocument?.setMeasurementType("volume");
-    store?.editor.activeDocument?.setMeasurementDisplayLayer(
-      layer as IImageLayer,
-    );
-  }, [layer, store]);
-  const calculateArea = useCallback(() => {
-    if (layer.kind !== "image" || !store?.editor.activeDocument?.viewport2D)
-      return;
-    store?.editor.activeDocument?.setMeasurementType("area");
-    (layer as IImageLayer).computeArea(
-      store.editor.activeDocument.viewport2D.mainViewType,
-      store.editor.activeDocument.viewport2D.getSelectedSlice(),
-    );
-    store.editor.activeDocument.setMeasurementDisplayLayer(
-      layer as IImageLayer,
-    );
-  }, [layer, store]);
-  const toggleAnnotation = useCallback(() => {
-    store?.editor.activeDocument?.toggleTypeAndRepositionLayer(layer);
-    setContextMenuPosition(null);
-  }, [layer, store?.editor.activeDocument]);
-  const exportLayer = useCallback(() => {
-    if (layer.kind !== "image") return;
-    (layer as ImageLayer).quickExport().then(() => {
-      setContextMenuPosition(null);
-    });
-  }, [layer]);
-  const exportLayerSlice = useCallback(() => {
-    if (layer.kind !== "image") return;
-    (layer as ImageLayer).quickExportSlice().then(() => {
-      setContextMenuPosition(null);
-    });
-  }, [layer]);
-  const deleteLayer = useCallback(() => {
-    if (
-      // eslint-disable-next-line no-alert
-      window.confirm(t("delete-layer-confirmation", { layer: layer.title }))
-    ) {
-      layer.delete();
-    }
-    setContextMenuPosition(null);
-  }, [layer, t]);
-
-  // Press Handler
-  const handlePointerDown = useCallback(
-    (event: React.PointerEvent<HTMLDivElement>) => {
-      if (
-        colorRef?.contains(event.target as Node) ||
-        trailingIconRef.current?.contains(event.target as Node)
-      ) {
-        return;
-      }
-
-      if (event.button === PointerButton.LMB) {
-        startTap(event);
-      } else if (event.button === PointerButton.RMB) {
-        setContextMenuPosition({ x: event.clientX, y: event.clientY });
-      }
-    },
-    [colorRef, startTap],
-  );
-
-  const handleContextMenu = (event: React.MouseEvent<HTMLDivElement>) => {
-    event.preventDefault();
-  };
-
-  // Layer Renaming Handling
-  const [isLayerNameEditable, setIsLayerNameEditable] = useState(false);
-  const startEditingLayerName = useCallback(
-    (event: React.PointerEvent<HTMLDivElement>) => {
-      event.preventDefault();
-      setIsLayerNameEditable(true);
-      closeContextMenu();
-    },
-    [closeContextMenu],
-  );
-  const stopEditingLayerName = useCallback(() => {
-    setIsLayerNameEditable(false);
-  }, []);
-
-  const modalRootRef = useModalRoot();
-  return (
-    <>
-      <Draggable
-        draggableId={layer.id}
-        index={index}
-        isDragDisabled={areLayerSettingsOpen}
-      >
-        {(provided: DraggableProvided, snapshot: DraggableStateSnapshot) => {
-          const node = (
-            <Observer>
-              {() => (
-                <ListItem
-                  {...provided.draggableProps}
-                  {...provided.dragHandleProps}
-                  ref={provided.innerRef}
-                  icon={{
-                    color: layer.color || "text",
-                    icon:
-                      layer.kind === "image" && !layer.isAnnotation
-                        ? "image"
-                        : undefined,
-                  }}
-                  iconRef={setColorRef}
-                  onIconPress={areLayerSettingsOpen ? noop : openLayerSettings}
-                  labelTx={layer.title ? undefined : "untitled-layer"}
-                  label={layer.title}
-                  isLabelEditable={isLayerNameEditable}
-                  onChangeLabelText={layer.setTitle}
-                  onConfirmLabelText={stopEditingLayerName}
-                  trailingIcon={layer.isVisible ? "eye" : "eyeCrossed"}
-                  disableTrailingIcon={!layer.isVisible}
-                  trailingIconRef={trailingIconRef}
-                  onTrailingIconPress={toggleAnnotationVisibility}
-                  isActive={isActive}
-                  isLast={isLast || snapshot.isDragging}
-                  onPointerDown={handlePointerDown}
-                  onPointerUp={stopTap}
-                  onContextMenu={handleContextMenu}
-                >
-                  {layer === store?.editor.activeDocument?.mainImageLayer && (
-                    <InfoText
-                      icon="circle"
-                      infoTx="info-main-image-layer"
-                      titleTx="main-image-layer"
-                    />
-                  )}
-                </ListItem>
-              )}
-            </Observer>
-          );
-
-          return snapshot.isDragging && modalRootRef.current
-            ? ReactDOM.createPortal(node, modalRootRef.current)
-            : node;
-        }}
-      </Draggable>
-      <LayerSettings
-        layer={layer}
-        isOpen={areLayerSettingsOpen}
-        anchor={colorRef}
-        position="right"
-        onOutsidePress={closeLayerSettings}
-      />
-      <ContextMenu
-        anchor={contextMenuPosition}
-        isOpen={Boolean(contextMenuPosition)}
-        onOutsidePress={closeContextMenu}
-      >
-        {layer.kind === "image" && layer.isAnnotation && (
-          <>
-            {layer.is3DLayer && (
-              <ContextMenuItem
-                labelTx="calculate-volume"
-                onPointerDown={calculateVolume}
-              />
-            )}
-            <ContextMenuItem
-              labelTx="calculate-area"
-              onPointerDown={calculateArea}
-            />
-          </>
-        )}
-        <ContextMenuItem
-          labelTx={
-            layer.isAnnotation ? "mark-not-annotation" : "mark-annotation"
-          }
-          onPointerDown={toggleAnnotation}
-        />
-        <ContextMenuItem labelTx="export-layer" onPointerDown={exportLayer} />
-        {store?.editor.activeDocument?.viewSettings.viewMode === "2D" && (
-          <ContextMenuItem
-            labelTx="export-slice"
-            onPointerDown={exportLayerSlice}
-          />
-        )}
-        <ContextMenuItem
-          labelTx="rename-layer"
-          onPointerDown={startEditingLayerName}
-        />
-        <ContextMenuItem
-          labelTx="delete-layer"
-          onPointerDown={deleteLayer}
-          isLast
-        />
-      </ContextMenu>
-    </>
-  );
-});
-
 const LayerModal = styled(Modal)`
   padding-bottom: 0px;
   width: 230px;
   justify-content: center;
 `;
+
+interface TreeItemStyleWrapperProps
+  extends TreeItemComponentProps<TreeItemData> {
+  passedRef: React.ForwardedRef<HTMLDivElement>;
+  children: ReactNode;
+}
+
+const TreeItemStyleWrapper = (props: TreeItemStyleWrapperProps) => {
+  const { passedRef, className, ...restProps } = props;
+  const newProps = { contentClassName: className, ...restProps };
+  return (
+    <SimpleTreeItemWrapper
+      {...newProps}
+      ref={passedRef}
+      showDragHandle={false}
+      hideCollapseButton
+      disableCollapseOnItemClick
+    />
+  );
+};
+
+const indentationWidth = 20;
+const treeWidth = 235;
+
+const StyledTreeItem = styled(TreeItemStyleWrapper)`
+  padding: 0px;
+  border: none;
+  background: none;
+  width: 100%;
+  max-width: ${treeWidth}px;
+`;
+
+type TreeItemData = {
+  value: string;
+};
+
+const LayerItem = ({ id }: { id: string }) => {
+  const store = useStore();
+  const hideLayerDivider = useCallback(
+    (element: ILayer | ILayerFamily) => {
+      if (!element) return false;
+      const flatRenderingOrder =
+        store?.editor.activeDocument?.flatRenderingOrder;
+      if (!flatRenderingOrder) return false;
+      const renderingOrder = store?.editor.activeDocument?.renderingOrder;
+      if (!renderingOrder) return false;
+      const layerIndex = flatRenderingOrder.indexOf(element);
+      if (layerIndex === flatRenderingOrder.length - 1) return true;
+      if (
+        element instanceof LayerFamily &&
+        element.collapsed &&
+        renderingOrder.indexOf(element) === renderingOrder.length - 1
+      ) {
+        return true;
+      }
+      const nextElement = flatRenderingOrder[layerIndex + 1];
+      return (
+        nextElement.isActive &&
+        (nextElement instanceof LayerFamily ? nextElement.collapsed : true)
+      );
+    },
+    [
+      store?.editor.activeDocument?.flatRenderingOrder,
+      store?.editor.activeDocument?.renderingOrder,
+    ],
+  );
+
+  const family = store?.editor.activeDocument?.getLayerFamily(id);
+  if (family) {
+    const isActive = !!family.collapsed && family.isActive;
+    return (
+      <div style={{ width: `${treeWidth}px`, maxWidth: "100%" }}>
+        <FamilyListItem
+          key={family.id}
+          family={family}
+          isActive={isActive}
+          isLast={hideLayerDivider(family)}
+        />
+      </div>
+    );
+  }
+  const layer = store?.editor.activeDocument?.getLayer(id);
+  if (layer) {
+    return (
+      <div
+        style={{
+          width: `${treeWidth - indentationWidth * (layer.family ? 1 : 0)}px`,
+          maxWidth: "100%",
+        }}
+      >
+        <LayerListItem
+          key={layer.id}
+          layer={layer}
+          isActive={layer.isActive}
+          isLast={hideLayerDivider(layer)}
+        />
+      </div>
+    );
+  }
+  return (
+    <ListItem isLast>
+      <SubtleText tx="no-layers" />
+    </ListItem>
+  );
+};
+
+const TreeItemComponent = React.forwardRef<
+  HTMLDivElement,
+  TreeItemComponentProps<TreeItemData>
+>((props, ref) => (
+  <StyledTreeItem {...props} passedRef={ref}>
+    <LayerItem id={props.item.value} />
+  </StyledTreeItem>
+));
+
+const layerToTreeItemData = (layer: ILayer) => ({
+  id: layer.id,
+  value: layer.id,
+  canHaveChildren: false,
+});
 
 export const Layers: React.FC = observer(() => {
   const store = useStore();
@@ -340,17 +194,6 @@ export const Layers: React.FC = observer(() => {
 
   // Menu Positioning
   const [buttonRef, setButtonRef] = useState<HTMLButtonElement | null>(null);
-
-  const handleDrag = useCallback(
-    (result: DragUpdate) => {
-      if (!result.destination) return;
-      store?.editor.activeDocument?.moveLayer(
-        result.draggableId,
-        result.destination.index,
-      );
-    },
-    [store],
-  );
 
   // This is required to force an update when the view mode changes
   // (otherwise the layer menu stays fixed in place when switching the view mode)
@@ -362,10 +205,136 @@ export const Layers: React.FC = observer(() => {
     }, 50);
   }, [viewMode]);
 
+  // This is required to force an update when the active layer changes and the layer view must change its position
+  // (otherwise the layer menu stays fixed in place when switching the active layer between image and annotation)
+  // eslint-disable-next-line no-unused-expressions, @typescript-eslint/no-unused-expressions
+  store?.editor.activeDocument?.activeLayer;
+
   const layers = store?.editor.activeDocument?.layers;
-  const layerCount = layers?.length;
-  const activeLayer = store?.editor.activeDocument?.activeLayer;
-  const activeLayerIndex = layers?.findIndex((layer) => layer === activeLayer);
+  const canFamilyHaveChildren = useCallback(
+    (family: ILayerFamily) => {
+      const callback = (draggedItem: TreeItem<TreeItemData>) => {
+        const layer = store?.editor.activeDocument?.getLayer(draggedItem.value);
+        if (store?.reviewStrategy && layer && !family.layers.includes(layer)) {
+          return false;
+        }
+
+        return !!layer;
+      };
+      return callback;
+    },
+    [store?.editor.activeDocument, store?.reviewStrategy],
+  );
+
+  const getTreeItems = useCallback(() => {
+    const layerFamilyToTreeItemData = (layerFamily: ILayerFamily) => ({
+      id: layerFamily.id,
+      value: layerFamily.id,
+      children: layerFamily.layers.map((layer) => layerToTreeItemData(layer)),
+      collapsed: layerFamily.collapsed,
+      canHaveChildren: canFamilyHaveChildren(layerFamily),
+      disableSorting: false,
+    });
+
+    const renderingOrder = store?.editor.activeDocument?.renderingOrder;
+    if (!renderingOrder) {
+      return [];
+    }
+
+    return renderingOrder.map((element) => {
+      if (element instanceof LayerFamily) {
+        const family = element as LayerFamily;
+        return layerFamilyToTreeItemData(family);
+      }
+      if (element instanceof ImageLayer) {
+        const layer = element as ImageLayer;
+        return layerToTreeItemData(layer);
+      }
+      return { id: "undefined", value: "undefined" };
+    });
+  }, [canFamilyHaveChildren, store?.editor.activeDocument?.renderingOrder]);
+
+  const treeItems = getTreeItems();
+
+  const canRootHaveChildren = useCallback(
+    (item) => {
+      const layer = store?.editor.activeDocument?.getLayer(item.value);
+      if (!layer) return true; // layerFamilies can always be children of root
+      return layer.family === undefined;
+    },
+    [store?.editor.activeDocument],
+  );
+  const updateRenderingOrder = useCallback(
+    (
+      newTreeItems: TreeItems<TreeItemData>,
+      change: ItemChangedReason<TreeItemData>,
+    ) => {
+      if (change.type === "removed") return;
+      if (change.type === "collapsed" || change.type === "expanded") {
+        const family = store?.editor.activeDocument?.getLayerFamily(
+          change.item.value,
+        );
+        if (!family) return;
+        family.collapsed = change.item.collapsed;
+        return;
+      }
+      if (change.type === "dropped") {
+        const draggedLayer = store?.editor.activeDocument?.getLayer(
+          change.draggedItem.value,
+        );
+        if (
+          store?.reviewStrategy &&
+          draggedLayer &&
+          (change.draggedFromParent
+            ? change.draggedFromParent.value
+            : undefined) !==
+            (change.droppedToParent ? change.droppedToParent.value : undefined)
+        ) {
+          return;
+        }
+        newTreeItems.forEach((item, index) => {
+          const layer = store?.editor.activeDocument?.getLayer(item.value);
+          if (layer) {
+            layer?.setFamily(undefined, index);
+          }
+          const family = store?.editor.activeDocument?.getLayerFamily(
+            item.value,
+          );
+          if (family) {
+            item.children?.forEach((childItem, childIndex) => {
+              const childLayer = store?.editor.activeDocument?.getLayer(
+                childItem.value,
+              );
+              if (childLayer) {
+                childLayer.setFamily(family.id, childIndex);
+              }
+            });
+            family.collapsed = item.collapsed;
+            store?.editor.activeDocument?.addLayerFamily(
+              family as LayerFamily,
+              index,
+            );
+          }
+        });
+      }
+    },
+    [store?.editor.activeDocument, store?.reviewStrategy],
+  );
+
+  const firstElement = store?.editor.activeDocument?.renderingOrder[0];
+  const isHeaderDivideVisible = !(
+    firstElement?.isActive &&
+    (firstElement instanceof LayerFamily ? firstElement.collapsed : true)
+  );
+
+  if (!layers) {
+    return (
+      <ListItem isLast>
+        <SubtleText tx="no-layers" />
+      </ListItem>
+    );
+  }
+
   return (
     <>
       <FloatingUIButton
@@ -378,7 +347,7 @@ export const Layers: React.FC = observer(() => {
       />
       <LayerModal
         isOpen={isModalOpen}
-        hideHeaderDivider={activeLayerIndex === 0}
+        hideHeaderDivider={!isHeaderDivideVisible}
         labelTx="layers"
         anchor={buttonRef}
         position="right"
@@ -394,8 +363,9 @@ export const Layers: React.FC = observer(() => {
               icon="plus"
               tooltipTx="add-annotation-layer"
               isDisabled={
-                !layerCount ||
-                layerCount >= (store?.editor.activeDocument?.maxLayers || 0)
+                !store?.editor.activeDocument?.imageLayers?.length ||
+                store?.editor.activeDocument?.imageLayers?.length >=
+                  (store?.editor.activeDocument?.maxVisibleLayers || 0)
               }
               onPointerDown={
                 store?.editor.activeDocument?.addNewAnnotationLayer
@@ -404,39 +374,28 @@ export const Layers: React.FC = observer(() => {
           </>
         }
       >
-        {/* TODO: Should we update on every drag change or just on drop? */}
-        <DragDropContext onDragUpdate={handleDrag} onDragEnd={noop}>
-          <Droppable droppableId="layer-stack">
-            {(provided: DroppableProvided) => (
-              <LayerList
-                {...provided.droppableProps}
-                ref={provided.innerRef}
-                onWheel={stopPropagation}
-              >
-                {layerCount ? (
-                  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                  layers!.map((layer, index) => (
-                    <LayerListItem
-                      key={layer.id}
-                      layer={layer}
-                      index={index}
-                      isActive={layer === activeLayer}
-                      isLast={
-                        index === layerCount - 1 ||
-                        index + 1 === activeLayerIndex
-                      }
-                    />
-                  ))
-                ) : (
-                  <ListItem isLast>
-                    <SubtleText tx="no-layers" />
-                  </ListItem>
-                )}
-                {provided.placeholder}
-              </LayerList>
+        <OuterWrapper>
+          <LayerList onWheel={stopPropagation}>
+            <SortableTree
+              items={treeItems}
+              onItemsChanged={updateRenderingOrder}
+              canRootHaveChildren={
+                store?.reviewStrategy ? canRootHaveChildren : undefined
+              }
+              TreeItemComponent={TreeItemComponent}
+              dropAnimation={null}
+              sortableProps={{ animateLayoutChanges: () => false }}
+              indentationWidth={20}
+            />
+            {layers.length === 0 ? (
+              <ListItem isLast>
+                <SubtleText tx="no-layers" />
+              </ListItem>
+            ) : (
+              false
             )}
-          </Droppable>
-        </DragDropContext>
+          </LayerList>
+        </OuterWrapper>
       </LayerModal>
     </>
   );

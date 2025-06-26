@@ -2,7 +2,7 @@ import React, { useRef } from "react";
 import ReactDOM from "react-dom";
 import styled, { css } from "styled-components";
 
-import { fontSize, zIndex } from "../../theme";
+import { fontSize, size as getSize, radius, zIndex } from "../../theme";
 import { useModalRoot } from "../box";
 import { Icon } from "../icon";
 import { Divider } from "../modal";
@@ -12,13 +12,18 @@ import { useOutsidePress } from "../utils";
 import { DropDownOptionsProps } from "./drop-down.props";
 import { useOptionsPosition } from "./utils";
 
-export const Option = styled.div<{ isSelected?: boolean }>`
+export const Option = styled.div<{
+  isSelected?: boolean;
+  size?: "small" | "medium";
+  borderRadius?: "default" | "round";
+}>`
   align-items: center;
   border: 1px solid transparent;
   box-sizing: border-box;
   cursor: pointer;
   display: flex;
-  height: 24px;
+  height: ${(props) =>
+    props.size === "medium" ? getSize("listElementHeight") : "24px"};
   overflow: hidden;
   user-select: none;
 
@@ -26,23 +31,23 @@ export const Option = styled.div<{ isSelected?: boolean }>`
     props.isSelected &&
     css`
       ${sheetMixin}
-      border-radius: 12px;
-      // TODO: This displays a border of twice the thickness when the last
-      // option is selected. We should figure out a workaround to also use -1px
-      // margin in the vertical direction and still not have the options shift
-      // around when selecting a different one.
-      margin: 0 -1px;
-      padding: 1px;
+      border-radius: ${props.borderRadius === "default"
+        ? radius("default")
+        : props.size === "medium"
+        ? "19px"
+        : "11px"};
+      margin: 1px 1px;
     `}
 `;
 
 const ExpandedSelector = styled(Option)`
-  margin: -1px -1px 6px -1px;
+  margin: 1px 1px 6px 1px;
 `;
 
-export const OptionText = styled(Text)`
+export const OptionText = styled(Text)<{ size?: "small" | "medium" }>`
   flex: 1 0;
-  font-size: ${fontSize("small")};
+  font-size: ${(props) =>
+    props.size === "medium" ? fontSize("default") : fontSize("small")};
   margin: 0 14px;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -60,19 +65,29 @@ const OptionDivider = styled(Divider)<{ isHidden?: boolean }>`
     `}
 `;
 
-export const ExpandIcon = styled(Icon)`
-  height: 16px;
+export const ExpandIcon = styled(Icon)<{ size?: "small" | "medium" }>`
+  height: ${(props) => (props.size === "medium" ? "32px" : "16px")};
   margin-right: 10px;
-  width: 16px;
+  width: ${(props) => (props.size === "medium" ? "32px" : "16px")};
 `;
 
-const Options = styled.div`
+const Options = styled("div")<{
+  size?: "small" | "medium";
+  borderRadius?: "default" | "round";
+}>`
   ${sheetMixin}
-  border-radius: 12px;
-  display: flex;
+  border-radius: ${(props) =>
+    props.borderRadius === "default"
+      ? radius("default")
+      : props.size === "medium"
+      ? "20px"
+      : "12px"};
+  display: block;
   flex-direction: column;
   pointer-events: auto;
-  z-index: ${zIndex("picker")};
+  z-index: ${zIndex("overlayComponent")};
+  overflow-y: auto;
+  max-height: 40%;
 `;
 
 export const DropDownOptions: React.FC<DropDownOptionsProps> = ({
@@ -83,6 +98,8 @@ export const DropDownOptions: React.FC<DropDownOptionsProps> = ({
   style,
   onChange,
   onDismiss,
+  size,
+  borderRadius,
   ...rest
 }) => {
   const ref = useRef<HTMLDivElement>(null);
@@ -100,25 +117,39 @@ export const DropDownOptions: React.FC<DropDownOptionsProps> = ({
   const activeOption = options[activeIndex];
   const node =
     isOpen === false ? null : (
-      <Options {...rest} style={optionsStyle} ref={ref}>
-        <ExpandedSelector onPointerDown={onDismiss}>
+      <Options
+        {...rest}
+        style={optionsStyle}
+        ref={ref}
+        size={size}
+        borderRadius={borderRadius}
+      >
+        <ExpandedSelector
+          onPointerDown={onDismiss}
+          size={size}
+          borderRadius={borderRadius}
+        >
           {activeOption && (
             <OptionText
               tx={activeOption.labelTx}
               text={activeOption.label || activeOption.value}
+              size={size}
             />
           )}
-          <ExpandIcon icon="arrowUp" />
+          <ExpandIcon icon="arrowUp" size={size} />
         </ExpandedSelector>
         {options.map((option, index) => (
           <React.Fragment key={option.value}>
             <Option
               isSelected={index === activeIndex}
               onPointerDown={() => onChange?.(option.value)}
+              size={size}
+              borderRadius={borderRadius}
             >
               <OptionText
                 tx={option.labelTx}
                 text={option.label || option.value}
+                size={size}
               />
             </Option>
             {index < options.length - 1 && (

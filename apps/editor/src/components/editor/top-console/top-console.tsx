@@ -1,4 +1,5 @@
-import { color, InvisibleButton, Text } from "@visian/ui-shared";
+import { color, InvisibleButton, StatusBadge, Text } from "@visian/ui-shared";
+import { MiaAnnotationMetadata } from "@visian/utils";
 import { observer } from "mobx-react-lite";
 import React from "react";
 import styled from "styled-components";
@@ -10,6 +11,7 @@ const TopConsoleContainer = styled.div`
   align-self: stretch;
   display: flex;
   justify-content: center;
+  flex-direction: column;
   margin: 0 12px;
   overflow: hidden;
   padding-bottom: 8px;
@@ -46,20 +48,65 @@ const UnsavedChangesIndicator = styled(InvisibleButton)<{ isDirty?: boolean }>`
   }
 `;
 
+const TopRow = styled.div`
+  align-items: center;
+  display: flex;
+  justify-content: center;
+  margin-bottom: 8px;
+  position: relative;
+`;
+
 export const TopConsole = observer(() => {
   const store = useStore();
   return store?.editor.activeDocument ? (
-    <TopConsoleContainer>
-      <FileTitle
-        tx={store.editor.activeDocument.title ? undefined : "untitled-document"}
-        text={store.editor.activeDocument.title}
-      />
-      <UnsavedChangesIndicator
-        isDirty={store?.isDirty}
-        tooltipTx={store?.isDirty ? "unsaved-changes" : "saved-in-browser"}
-        tooltipPosition="bottom"
-        onPointerDown={store?.persistImmediately}
-      />
-    </TopConsoleContainer>
+    store?.reviewStrategy?.currentTask ? (
+      <TopConsoleContainer>
+        <TopRow>
+          <FileTitle
+            tx={
+              store.editor.activeDocument.title
+                ? undefined
+                : "untitled-document"
+            }
+            text={store.editor.activeDocument.title}
+          />
+          <UnsavedChangesIndicator
+            isDirty={store?.isDirty}
+            tooltipTx={store?.isDirty ? "unsaved-changes" : "saved-in-browser"}
+            tooltipPosition="bottom"
+            onPointerDown={store?.persistImmediately}
+          />
+        </TopRow>
+        {(
+          store?.editor.activeDocument?.activeLayer?.family
+            ?.metadata as MiaAnnotationMetadata
+        )?.verified && (
+          <StatusBadge
+            textColor="Neuronic Neon"
+            borderColor="gray"
+            tx="verified"
+          />
+        )}
+      </TopConsoleContainer>
+    ) : (
+      <TopConsoleContainer>
+        <TopRow>
+          <FileTitle
+            tx={
+              store.editor.activeDocument.title
+                ? undefined
+                : "untitled-document"
+            }
+            text={store.editor.activeDocument.title}
+          />
+          <UnsavedChangesIndicator
+            isDirty={store?.isDirty}
+            tooltipTx={store?.isDirty ? "unsaved-changes" : "saved-in-browser"}
+            tooltipPosition="bottom"
+            onPointerDown={store?.persistImmediately}
+          />
+        </TopRow>
+      </TopConsoleContainer>
+    )
   ) : null;
 });

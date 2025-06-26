@@ -1,8 +1,13 @@
-import { IDocument, ILayer, ILayerGroup } from "@visian/ui-shared";
+import {
+  IDocument,
+  ILayer,
+  ILayerGroup,
+  LayerSnapshot,
+} from "@visian/ui-shared";
 import { ISerializable } from "@visian/utils";
 import { action, makeObservable, observable, toJS } from "mobx";
 
-import { Layer, LayerSnapshot } from "./layer";
+import { Layer } from "./layer";
 
 export interface LayerGroupSnapshot extends LayerSnapshot {
   layerIds: string[];
@@ -56,7 +61,6 @@ export class LayerGroup
       this.document.getLayer(idOrLayer)!.setParent();
       return;
     }
-
     this.layerIds = this.layerIds.filter((id) => id !== idOrLayer.id);
     idOrLayer.setParent();
   }

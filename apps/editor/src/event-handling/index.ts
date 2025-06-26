@@ -9,7 +9,17 @@ import { setUpWheelHandling } from "./wheel";
 export const setUpEventHandling = (
   store: RootStore,
 ): [IDispatch, IDisposer] => {
-  setUpHotKeys(store);
-  setUpWheelHandling(store);
-  return setUpPointerHandling(store);
+  const disposeHotkeys = setUpHotKeys(store);
+  const disposeWheelHandling = setUpWheelHandling(store);
+  const [dispatchPointerHandling, diposePointerHandling] =
+    setUpPointerHandling(store);
+
+  return [
+    dispatchPointerHandling,
+    () => {
+      disposeHotkeys();
+      disposeWheelHandling();
+      diposePointerHandling();
+    },
+  ];
 };

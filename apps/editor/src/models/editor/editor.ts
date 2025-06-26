@@ -30,6 +30,8 @@ export interface EditorSnapshot {
   activeDocument?: DocumentSnapshot;
 
   performanceMode: PerformanceMode;
+
+  returnUrl?: string;
 }
 
 export class Editor
@@ -51,6 +53,8 @@ export class Editor
 
   public performanceMode: PerformanceMode = "high";
 
+  public returnUrl?: string;
+
   constructor(
     snapshot: EditorSnapshot | undefined,
     protected context: StoreContext,
@@ -62,12 +66,14 @@ export class Editor
       volumeRenderer: observable,
       performanceMode: observable,
       isAvailable: observable,
+      returnUrl: observable,
 
       colorMode: computed,
 
       setActiveDocument: action,
       setPerformanceMode: action,
       applySnapshot: action,
+      setReturnUrl: action,
     });
 
     runInAction(() => {
@@ -97,6 +103,17 @@ export class Editor
     this.renderer.dispose();
   }
 
+  private applyGlobalSettings() {
+    this.context.getSettings().load();
+    this.activeDocument?.setUseExclusiveSegmentations(
+      this.context.getSettings().useExclusiveSegmentations,
+    );
+    this.activeDocument?.viewport2D.setVoxelInfoMode(
+      this.context.getSettings().voxelInfoMode,
+    );
+    this.setPerformanceMode(this.context.getSettings().performanceMode);
+  }
+
   public setActiveDocument(
     // eslint-disable-next-line default-param-last
     value = new Document(undefined, this, this.context),
@@ -104,6 +121,8 @@ export class Editor
   ): void {
     this.activeDocument?.dispose();
     this.activeDocument = value;
+
+    this.applyGlobalSettings();
 
     if (!isSilent) this.activeDocument.requestSave();
   }
@@ -120,6 +139,17 @@ export class Editor
     return false;
   };
 
+  public disposeActiveDocument = () => {
+    if (
+      // eslint-disable-next-line no-alert
+      window.confirm(i18n.t("discard-current-document-confirmation"))
+    ) {
+      this.activeDocument?.dispose();
+      return true;
+    }
+    return false;
+  };
+
   // Proxies
   public get refs(): { [name: string]: React.RefObject<HTMLElement> } {
     return this.context.getRefs();
@@ -130,7 +160,7 @@ export class Editor
   }
 
   public get colorMode(): ColorMode {
-    return this.context.getColorMode();
+    return this.context.getSettings().colorMode;
   }
 
   // Performance Mode
@@ -143,6 +173,7 @@ export class Editor
     return {
       activeDocument: this.activeDocument?.toJSON(),
       performanceMode: this.performanceMode,
+      returnUrl: this.returnUrl,
     };
   }
 
@@ -155,6 +186,7 @@ export class Editor
         true,
       );
       this.setPerformanceMode(snapshot?.performanceMode);
+      this.setReturnUrl(snapshot?.returnUrl);
     } else {
       this.context.setError({
         titleTx: "browser-error",
@@ -174,5 +206,9 @@ export class Editor
     );
     this.sliceRenderer?.animate();
     this.volumeRenderer?.animate();
+  };
+
+  public setReturnUrl = (url?: string) => {
+    this.returnUrl = url;
   };
 }

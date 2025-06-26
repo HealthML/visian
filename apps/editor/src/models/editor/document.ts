@@ -6,8 +6,11 @@ import {
   IEditor,
   IImageLayer,
   ILayer,
+  ILayerFamily,
   ISliceRenderer,
   IVolumeRenderer,
+  LayerFamilySnapshot,
+  LayerSnapshot,
   MeasurementType,
   PerformanceMode,
   Theme,
@@ -15,13 +18,18 @@ import {
   ValueType,
 } from "@visian/ui-shared";
 import {
+  BackendMetadata,
+  FileWithFamily,
+  FileWithMetadata,
   handlePromiseSettledResult,
   IDisposable,
   ImageMismatchError,
   ISerializable,
+  isMiaMetadata,
   ITKImageWithUnit,
   ITKMatrix,
   readMedicalImage,
+  writeSingleMedicalImage,
   Zip,
 } from "@visian/utils";
 import FileSaver from "file-saver";
@@ -43,7 +51,8 @@ import { readTrackingLog, TrackingData } from "../tracking";
 import { StoreContext } from "../types";
 import { Clipboard } from "./clipboard";
 import { History, HistorySnapshot } from "./history";
-import { ImageLayer, Layer, LayerSnapshot } from "./layers";
+import { LayerFamily } from "./layer-families";
+import { ImageLayer } from "./layers";
 import * as layers from "./layers";
 import { Markers } from "./markers";
 import { ToolName, Tools, ToolsSnapshot } from "./tools";
@@ -73,6 +82,7 @@ export interface DocumentSnapshot {
   activeLayerId?: string;
   layerMap: LayerSnapshot[];
   layerIds: string[];
+  layerFamilies: LayerFamilySnapshot[];
 
   history: HistorySnapshot;
 
@@ -95,7 +105,8 @@ export class Document
 
   protected activeLayerId?: string;
   protected measurementDisplayLayerId?: string;
-  protected layerMap: { [key: string]: Layer };
+  protected layerMap: { [key: string]: ILayer };
+  protected layerFamilyMap: { [key: string]: LayerFamily };
   protected layerIds: string[];
 
   public measurementType: MeasurementType = "volume";
@@ -126,10 +137,10 @@ export class Document
     this.titleOverride = snapshot?.titleOverride;
     this.activeLayerId = snapshot?.activeLayerId;
     this.layerMap = {};
+    this.layerFamilyMap = {};
     snapshot?.layerMap.forEach((layer) => {
       const LayerKind = layerMap[layer.kind];
       if (!LayerKind) return;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       this.layerMap[layer.id] = new LayerKind(layer as any, this);
     });
     this.layerIds = snapshot?.layerIds || [];
@@ -138,6 +149,9 @@ export class Document
       layer.fixPotentiallyBadColor(),
     );
 
+    snapshot?.layerFamilies.forEach((family) => {
+      this.layerFamilyMap[family.id] = new LayerFamily(family, this);
+    });
     this.history = new History(snapshot?.history, this);
     this.viewSettings = new ViewSettings(snapshot?.viewSettings, this);
     this.viewport2D = new Viewport2D(snapshot?.viewport2D, this);
@@ -153,6 +167,7 @@ export class Document
       | "activeLayerId"
       | "measurementDisplayLayerId"
       | "layerMap"
+      | "layerFamilyMap"
       | "layerIds"
     >(this, {
       id: observable,
@@ -160,6 +175,7 @@ export class Document
       activeLayerId: observable,
       measurementDisplayLayerId: observable,
       layerMap: observable,
+      layerFamilyMap: observable,
       layerIds: observable,
       measurementType: observable,
       history: observable,
@@ -172,13 +188,17 @@ export class Document
       useExclusiveSegmentations: observable,
 
       title: computed,
+      layers: computed,
+      renderingOrder: computed,
+      flatRenderingOrder: computed,
+      layerFamilies: computed,
       activeLayer: computed,
       measurementDisplayLayer: computed,
       imageLayers: computed,
       mainImageLayer: computed,
       annotationLayers: computed,
-      maxLayers: computed,
-      maxLayers3d: computed,
+      maxVisibleLayers: computed,
+      maxVisibleLayers3d: computed,
 
       setTitle: action,
       setActiveLayer: action,
@@ -186,7 +206,6 @@ export class Document
       setMeasurementType: action,
       addLayer: action,
       addNewAnnotationLayer: action,
-      moveLayer: action,
       deleteLayer: action,
       toggleTypeAndRepositionLayer: action,
       importImage: action,
@@ -196,6 +215,7 @@ export class Document
       toggleLayerMenu: action,
       setUseExclusiveSegmentations: action,
       applySnapshot: action,
+      getLayerFamily: action,
     });
 
     // This is split up to avoid errors from a tool that is being activated
@@ -208,12 +228,23 @@ export class Document
     this.clipboard.dispose();
     this.tools.dispose();
     Object.values(this.layerMap).forEach((layer) => layer.delete());
+    // TODO dispose of layerFamilies
   }
 
   public get title(): string | undefined {
     if (this.titleOverride) return this.titleOverride;
-    const { length } = this.layerIds;
-    return length ? this.getLayer(this.layerIds[length - 1])?.title : undefined;
+    const familyMeta = this.activeLayer?.family?.metadata;
+    if (isMiaMetadata(familyMeta)) {
+      return familyMeta.dataUri;
+    }
+    const { length } = this.layers;
+    if (!length) return undefined;
+    const lastLayer = this.getLayer(this.layerIds[length - 1]);
+    const layerMeta = lastLayer?.metadata;
+    if (isMiaMetadata(layerMeta)) {
+      return layerMeta?.dataUri?.split("/").pop();
+    }
+    return lastLayer?.title;
   }
 
   public setTitle = (value?: string): void => {
@@ -221,26 +252,55 @@ export class Document
   };
 
   // Layer Management
-  public get maxLayers(): number {
+  public get maxVisibleLayers(): number {
     return (this.renderer?.capabilities.maxTextures || 0) - generalTextures2d;
   }
 
-  public get maxLayers3d(): number {
+  public get maxVisibleLayers3d(): number {
     return (this.renderer?.capabilities.maxTextures || 0) - generalTextures3d;
   }
 
   public get layers(): ILayer[] {
-    return this.layerIds.map((id) => this.layerMap[id]);
+    return this.layerIds.flatMap((id) => {
+      if (this.layerFamilyMap[id]) {
+        return this.layerFamilyMap[id].layers;
+      }
+      return this.layerMap[id];
+    });
+  }
+
+  public get renderingOrder(): (ILayer | ILayerFamily)[] {
+    return this.layerIds.map((id) => {
+      if (this.layerFamilyMap[id]) {
+        return this.layerFamilyMap[id];
+      }
+      return this.layerMap[id];
+    });
+  }
+
+  public get flatRenderingOrder(): (ILayer | ILayerFamily)[] {
+    return this.layerIds.flatMap((id) => {
+      const family = this.layerFamilyMap[id];
+      if (family) {
+        const array: (ILayer | ILayerFamily)[] = [family as ILayerFamily];
+        return array.concat(family.layers);
+      }
+      return this.layerMap[id];
+    });
+  }
+
+  public get layerFamilies(): ILayerFamily[] {
+    return this.layerIds
+      .filter((id) => !!this.layerFamilyMap[id])
+      .map((id) => this.layerFamilyMap[id]);
   }
 
   public get activeLayer(): ILayer | undefined {
-    return Object.values(this.layerMap).find(
-      (layer) => layer.id === this.activeLayerId,
-    );
+    return this.layers.find((layer) => layer.id === this.activeLayerId);
   }
 
   public get measurementDisplayLayer(): IImageLayer | undefined {
-    return Object.values(this.layerMap).find(
+    return this.layers.find(
       (layer) =>
         layer.id === this.measurementDisplayLayerId && layer.kind === "image",
     ) as IImageLayer | undefined;
@@ -248,29 +308,26 @@ export class Document
 
   public get imageLayers(): IImageLayer[] {
     return this.layers.filter(
-      (layer) => layer.kind === "image",
+      (layer) => layer.kind === "image" && layer.isVisible,
     ) as IImageLayer[];
   }
-  public get mainImageLayer(): IImageLayer | undefined {
-    // TODO: Rework to work with group layers
 
+  public get mainImageLayer(): IImageLayer | undefined {
     const areAllLayersAnnotations = Boolean(
-      !this.layerIds.find((layerId) => {
-        const layer = this.layerMap[layerId];
-        return layer.kind === "image" && !layer.isAnnotation;
-      }),
+      !this.layers.find(
+        (layer) => layer.kind === "image" && !layer.isAnnotation,
+      ),
     );
 
     const areAllImageLayersInvisible = Boolean(
-      !this.layerIds.find((layerId) => {
-        const layer = this.layerMap[layerId];
-        return layer.kind === "image" && !layer.isAnnotation && layer.isVisible;
-      }),
+      !this.layers.find(
+        (layer) =>
+          layer.kind === "image" && !layer.isAnnotation && layer.isVisible,
+      ),
     );
 
     let mainImageLayer: ImageLayer | undefined;
-    this.layerIds.slice().find((id) => {
-      const layer = this.layerMap[id];
+    this.layers.slice().find((layer) => {
       if (
         layer.kind === "image" &&
         // use non-annotation layer if possible
@@ -295,6 +352,17 @@ export class Document
     return id ? this.layerMap[id] : undefined;
   }
 
+  public getOrphanAnnotationLayers(): ILayer[] {
+    const orphanAnnotationLayers = this.layers.filter(
+      (l) => l.isAnnotation && !l.family,
+    );
+    return orphanAnnotationLayers ?? [];
+  }
+
+  public getLayerFamily(id: string): ILayerFamily | undefined {
+    return this.layerFamilyMap[id];
+  }
+
   public setActiveLayer = (idOrLayer?: string | ILayer): void => {
     this.activeLayerId = idOrLayer
       ? typeof idOrLayer === "string"
@@ -314,24 +382,54 @@ export class Document
   public setMeasurementType = (measurementType: MeasurementType) => {
     this.measurementType = measurementType;
   };
-
-  public addLayer = (...newLayers: Layer[]): void => {
-    newLayers.forEach((layer) => {
+  /** Ensures consistency of layerIds. addLayer should be called whenever a layer is moved or changes family
+  if the layer has a family, it will be removed from layerIds
+  if an index is specified, the family will be inserted at the index
+  if no index is specified, the family remain where it was if already in the list
+  if not in the list, annotations will be inserted at the start and images at the end of the list */
+  public addLayer = (layer: ILayer, index?: number): void => {
+    if (!layer.id) return;
+    if (!this.layerMap[layer.id]) {
       this.layerMap[layer.id] = layer;
-      if (layer.isAnnotation) {
-        this.layerIds.unshift(layer.id);
-      } else {
-        // insert image layer after all annotation layers
-        let insertIndex = 0;
-        for (let i = this.layerIds.length - 1; i >= 0; i--) {
-          if (this.layerMap[this.layerIds[i]].isAnnotation) {
-            insertIndex = i + 1;
-            break;
-          }
-        }
-        this.layerIds.splice(insertIndex, 0, layer.id);
+    }
+    const oldIndex = this.layerIds.indexOf(layer.id);
+    if (layer.family) {
+      if (this.layerIds.includes(layer.id)) {
+        this.layerIds = this.layerIds.filter((id) => id !== layer.id);
       }
-    });
+    } else if (index !== undefined) {
+      if (oldIndex < 0) {
+        this.layerIds.splice(index, 0, layer.id);
+      } else if (index !== oldIndex) {
+        this.layerIds.splice(index, 0, this.layerIds.splice(oldIndex, 1)[0]);
+      }
+    } else if (layer.isAnnotation && oldIndex < 0) {
+      this.layerIds = this.layerIds.filter((id) => id !== layer.id);
+      this.layerIds.unshift(layer.id);
+    } else if (oldIndex < 0) {
+      this.layerIds = this.layerIds.filter((id) => id !== layer.id);
+      this.layerIds.push(layer.id);
+    }
+  };
+
+  // if an index is specified, the family will be inserted at the index
+  // if no index is specified, the family remain where it was if already in the list or inserted at the start
+  public addLayerFamily = (family: LayerFamily, idx?: number): void => {
+    if (!family.id) return;
+
+    if (!this.layerFamilyMap[family.id]) {
+      this.layerFamilyMap[family.id] = family;
+    }
+    const oldIndex = this.layerIds.indexOf(family.id);
+    if (idx !== undefined) {
+      if (oldIndex < 0) {
+        this.layerIds.splice(idx, 0, family.id);
+      } else if (idx !== oldIndex) {
+        this.layerIds.splice(idx, 0, this.layerIds.splice(oldIndex, 1)[0]);
+      }
+    } else if (oldIndex < 0) {
+      this.layerIds.unshift(family.id);
+    }
   };
 
   public getFirstUnusedColor = (
@@ -375,18 +473,11 @@ export class Document
     this.viewSettings.setViewMode(this.viewSettings.viewMode);
   };
 
-  public moveLayer(idOrLayer: string | ILayer, newIndex: number) {
-    const layerId = typeof idOrLayer === "string" ? idOrLayer : idOrLayer.id;
-    const oldIndex = this.layerIds.indexOf(layerId);
-    if (!~oldIndex) return;
-
-    this.layerIds.splice(newIndex, 0, this.layerIds.splice(oldIndex, 1)[0]);
-  }
-
   public deleteLayer = (idOrLayer: string | ILayer): void => {
     const layerId = typeof idOrLayer === "string" ? idOrLayer : idOrLayer.id;
 
     this.layerIds = this.layerIds.filter((id) => id !== layerId);
+    this.layerMap[layerId].delete();
     delete this.layerMap[layerId];
     if (this.activeLayerId === layerId) {
       this.setActiveLayer(this.layerIds[0]);
@@ -396,61 +487,115 @@ export class Document
   /** Toggles the type of the layer (annotation or not) and repositions it accordingly */
   public toggleTypeAndRepositionLayer = (idOrLayer: string | ILayer): void => {
     const layerId = typeof idOrLayer === "string" ? idOrLayer : idOrLayer.id;
-    let lastAnnotationIndex = this.layerIds.length - 1;
-    for (let i = 0; i < this.layerIds.length; i++) {
-      if (!this.layerMap[this.layerIds[i]].isAnnotation) {
-        lastAnnotationIndex = i - 1;
-        break;
-      }
+    const layer = this.getLayer(layerId);
+    if (!layer) return;
+    if (layer.isAnnotation) {
+      layer.setFamily(undefined);
     }
-
-    if (this.layerMap[layerId].isAnnotation) {
-      this.moveLayer(layerId, lastAnnotationIndex);
-    } else {
-      this.moveLayer(layerId, lastAnnotationIndex + 1);
-    }
-
-    this.layerMap[layerId].setIsAnnotation(
-      !this.layerMap[layerId].isAnnotation,
-    );
+    layer.setIsAnnotation(!layer.isAnnotation);
   };
 
   public get has3DLayers(): boolean {
-    return Object.values(this.layerMap).some((layer) => layer.is3DLayer);
+    return this.layers.some((layer) => layer.is3DLayer);
   }
 
-  // I/O
-  public exportZip = async (limitToAnnotations?: boolean) => {
+  // eslint-disable-next-line @typescript-eslint/no-shadow
+  protected zipLayers = async (layers: ILayer[]) => {
     const zip = new Zip();
-
-    // TODO: Rework for group layers
-    const files = await Promise.all(
-      this.layers
-        .filter((layer) => !limitToAnnotations || layer.isAnnotation)
-        .map((layer) => layer.toFile()),
-    );
+    const files = await Promise.all(layers.map((layer) => layer.toFile()));
     files.forEach((file, index) => {
       if (!file) return;
       zip.setFile(`${`00${index}`.slice(-2)}_${file.name}`, file);
     });
+    return zip;
+  };
+
+  // I/O
+  // eslint-disable-next-line @typescript-eslint/no-shadow
+  public exportZip = async (layers: ILayer[], limitToAnnotations?: boolean) => {
+    const zip = await this.zipLayers(
+      layers.filter((layer) => !limitToAnnotations || layer.isAnnotation),
+    );
 
     if (this.context?.getTracker()?.isActive) {
       const trackingFile = this.context.getTracker()?.toFile();
       if (trackingFile) zip.setFile(trackingFile.name, trackingFile);
     }
 
-    FileSaver.saveAs(await zip.toBlob(), `${this.title}.zip`);
+    FileSaver.saveAs(
+      await zip.toBlob(),
+      `${this.title?.split(".")[0] ?? "annotation"}.zip`,
+    );
+  };
+
+  public createZip = async (
+    // eslint-disable-next-line @typescript-eslint/no-shadow
+    layers: ILayer[],
+    title?: string,
+  ): Promise<File> => {
+    const zip = await this.zipLayers(layers);
+
+    return new File(
+      [await zip.toBlob()],
+      `${title ?? this.title?.split(".")[0] ?? "annotation"}.zip`,
+    );
+  };
+
+  public createSquashedNii = async (
+    // eslint-disable-next-line @typescript-eslint/no-shadow
+    layers: ILayer[],
+    title?: string,
+  ): Promise<File | undefined> => {
+    const imageLayers = this.layers.filter(
+      (potentialLayer) =>
+        potentialLayer instanceof ImageLayer && potentialLayer.isAnnotation,
+    ) as ImageLayer[];
+    const file = await writeSingleMedicalImage(
+      imageLayers[imageLayers.length - 1].image.toITKImage(
+        imageLayers.slice(0, -1).map((layer) => layer.image),
+        true,
+      ),
+      `${title ?? this.title?.split(".")[0] ?? "annotaion"}.nii.gz`,
+    );
+    return file;
+  };
+
+  // eslint-disable-next-line @typescript-eslint/no-shadow
+  public exportSquashedNii = async (layers: ILayer[]) => {
+    const file: File | undefined = await this.createSquashedNii(layers);
+    if (file) {
+      const fileBlob = new Blob([file], { type: file.type });
+      FileSaver.saveAs(
+        await fileBlob,
+        `${this.title?.split(".")[0] ?? "annotaion"}.nii.gz`,
+      );
+    } else {
+      throw Error("export-error");
+    }
+  };
+
+  public createFileFromLayers = async (
+    // eslint-disable-next-line @typescript-eslint/no-shadow
+    layers: ILayer[],
+    asZip: boolean,
+    title?: string,
+  ): Promise<File | undefined> => {
+    if (asZip) {
+      return this.createZip(layers, title);
+    }
+    return this.createSquashedNii(layers, title);
   };
 
   public getFileForLayer = async (idOrLayer: string | ILayer) => {
     const layerId = typeof idOrLayer === "string" ? idOrLayer : idOrLayer.id;
-    const layer = this.layerMap[layerId];
+    const layer = this.getLayer(layerId);
+    if (!layer) return;
     const file = await layer.toFile();
     return file;
   };
 
   public finishBatchImport() {
-    if (!Object.values(this.layerMap).some((layer) => layer.isAnnotation)) {
+    if (!this.layers.some((layer) => layer.isAnnotation)) {
       this.addNewAnnotationLayer();
       this.viewport2D.setMainViewType();
     }
@@ -567,7 +712,15 @@ export class Document
       }
     } else if (filteredFiles.name.endsWith(".zip")) {
       const zip = await Zip.fromZipFile(filteredFiles);
-      await this.importFiles(await zip.getAllFiles(), filteredFiles.name);
+      const unzippedFiles = await zip.getAllFiles();
+      await this.importFiles(
+        this.createLayerFamily(
+          unzippedFiles,
+          filteredFiles.name,
+          this.getMetadataFromFile(filteredFiles),
+        ),
+        filteredFiles.name,
+      );
       return;
     } else if (filteredFiles.name.endsWith(".json")) {
       await readTrackingLog(filteredFiles, this);
@@ -576,17 +729,28 @@ export class Document
 
     if (Array.isArray(filteredFiles) && !filteredFiles.length) return;
 
-    if (this.layers.length >= this.maxLayers) {
-      this.setError({
-        titleTx: "import-error",
-        descriptionTx: "too-many-layers-2d",
-        descriptionData: { count: this.maxLayers },
-      });
-      return;
-    }
+    //! TODO: #513
+    // if (this.imageLayers.length >= this.maxVisibleLayers) {
+    //   this.setError({
+    //     titleTx: "import-error",
+    //     descriptionTx: "too-many-layers-2d",
+    //     descriptionData: { count: this.maxVisibleLayers },
+    //   });
+    //   return;
+    // }
 
+    if (filteredFiles instanceof File) {
+      this.createLayerFamily(
+        [filteredFiles],
+        filteredFiles.name,
+        this.getMetadataFromFile(filteredFiles),
+      );
+    } else {
+      this.createLayerFamily(filteredFiles, name ?? uuidv4());
+    }
     let createdLayerId = "";
-    const isFirstLayer = !this.layerIds.length;
+    const isFirstLayer =
+      !this.layerIds.length || !this.layers.some((l) => l.kind !== "group");
     const image = await readMedicalImage(filteredFiles);
     image.name =
       name ||
@@ -683,6 +847,10 @@ export class Document
               name: `${layerIndex}_${imageWithUnit.name}`,
               ...prototypeImage,
             });
+            if (files instanceof File) {
+              this.addLayerToFamily(createdLayerId, files);
+              this.addMetadataToLayer(createdLayerId, files);
+            }
           }
         } else {
           this.setError({
@@ -691,33 +859,19 @@ export class Document
           });
         }
       } else {
-        const numberOfAnnotations = uniqueValues.size - 1;
-
-        if (
-          numberOfAnnotations === 1 ||
-          numberOfAnnotations + this.layers.length > this.maxLayers
-        ) {
+        //! TODO: #513
+        uniqueValues.forEach(async (value) => {
+          if (value === 0) return;
           createdLayerId = await this.importAnnotation(
-            imageWithUnit,
-            undefined,
-            true,
+            { ...imageWithUnit, name: `${value}_${image.name}` },
+            value,
           );
-
-          if (numberOfAnnotations !== 1) {
-            this.setError({
-              titleTx: "squashed-layers-title",
-              descriptionTx: "squashed-layers-import",
-            });
+          if (files instanceof File) {
+            this.addLayerToFamily(createdLayerId, files);
+            this.addMetadataToLayer(createdLayerId, files);
           }
-        } else {
-          uniqueValues.forEach(async (value) => {
-            if (value === 0) return;
-            createdLayerId = await this.importAnnotation(
-              { ...imageWithUnit, name: `${value}_${image.name}` },
-              value,
-            );
-          });
-        }
+        });
+        // }
       }
 
       // Force switch to 2D if too many layers for 3D
@@ -730,6 +884,17 @@ export class Document
       this.viewport3D.reset();
       this.history.clear();
     }
+
+    if (files instanceof File) {
+      this.addLayerToFamily(createdLayerId, files);
+      this.addMetadataToLayer(createdLayerId, files);
+    }
+
+    // Move all families with only image layers to the end of the list:
+    this.layerFamilies.forEach((family) => {
+      if (!family.layers.every((layer) => !layer.isAnnotation)) return;
+      this.addLayerFamily(family as LayerFamily, this.layerFamilies.length - 1);
+    });
 
     return createdLayerId;
   }
@@ -759,6 +924,7 @@ export class Document
 
     const imageLayer = ImageLayer.fromITKImage(image, this, {
       color: defaultImageColor,
+      isVisible: this.imageLayers.length < this.maxVisibleLayers,
     });
     if (
       this.mainImageLayer &&
@@ -790,6 +956,7 @@ export class Document
       {
         isAnnotation: true,
         color: this.getFirstUnusedColor(),
+        isVisible: this.imageLayers.length < this.maxVisibleLayers,
       },
       filterValue,
       squash,
@@ -845,11 +1012,10 @@ export class Document
 
   public getExcludedSegmentations(layer: ILayer) {
     if (!this.useExclusiveSegmentations) return undefined;
-    const layerIndex = this.layerIds.indexOf(layer.id);
+    const layerIndex = this.layers.indexOf(layer);
     if (layerIndex <= 0) return undefined;
-    return this.layerIds
+    return this.layers
       .slice(0, layerIndex)
-      .map((layerId) => this.layerMap[layerId])
       .filter(
         (potentialLayer) =>
           potentialLayer.isAnnotation &&
@@ -857,6 +1023,68 @@ export class Document
           potentialLayer.isVisible &&
           potentialLayer.opacity > 0,
       ) as unknown as IImageLayer[];
+  }
+
+  /** Adds layer to group specified in file object */
+  private addLayerToFamily(layerId: string, file: File) {
+    const layer = this.getLayer(layerId);
+    const family = this.getLayerFamilyFromFile(file);
+    if (layer && family) {
+      family?.addLayer(layer.id);
+    }
+  }
+
+  /** Adds meta data from file with metadata to layer */
+  private addMetadataToLayer(layerId: string, file: File) {
+    const layer = this.getLayer(layerId);
+    const metadata = this.getMetadataFromFile(file);
+    if (layer && metadata) {
+      layer.metadata = metadata;
+    }
+  }
+
+  /** Returns the group layer specified in the file object */
+  private getLayerFamilyFromFile(file: File): ILayerFamily | undefined {
+    if ("familyId" in file) {
+      const fileWithFamily = file as FileWithFamily;
+      return this.getLayerFamily(fileWithFamily.familyId);
+    }
+    return undefined;
+  }
+
+  /** Extracts metadata appended to a file object */
+  private getMetadataFromFile(file: File): BackendMetadata | undefined {
+    if ("metadata" in file) {
+      const fileWithMetadata = file as FileWithMetadata;
+      return fileWithMetadata.metadata;
+    }
+    return undefined;
+  }
+
+  /** Creates a LayerFamily object for a list of files and adds the group id to the files */
+  public createLayerFamily(
+    files: File[],
+    title?: string,
+    groupMetadata?: BackendMetadata,
+  ): FileWithFamily[] {
+    if (files.every((f) => "familyId" in f)) {
+      return files as FileWithFamily[];
+    }
+    if (files.some((f) => "familyId" in f)) {
+      throw new Error(
+        "Cannot create a new group for file that already belongs to a group",
+      );
+    }
+    const layerFamily = new LayerFamily({ title }, this);
+    layerFamily.metadata = groupMetadata;
+
+    const filesWithGroup = files.map((f) => {
+      const fileWithGroup = f as FileWithFamily;
+      fileWithGroup.familyId = layerFamily.id;
+      return fileWithGroup;
+    });
+    this.addLayerFamily(layerFamily);
+    return filesWithGroup;
   }
 
   // Proxies
@@ -890,7 +1118,7 @@ export class Document
       id: this.id,
       titleOverride: this.titleOverride,
       activeLayerId: this.activeLayerId,
-      layerMap: Object.values(this.layerMap).map((layer) => layer.toJSON()),
+      layerMap: this.layers.map((layer) => layer.toJSON()),
       layerIds: toJS(this.layerIds),
       history: this.history.toJSON(),
       viewSettings: this.viewSettings.toJSON(),
@@ -898,6 +1126,7 @@ export class Document
       viewport3D: this.viewport3D.toJSON(),
       tools: this.tools.toJSON(),
       useExclusiveSegmentations: this.useExclusiveSegmentations,
+      layerFamilies: this.layerFamilies.map((family) => family.toJSON()),
     };
   }
 
@@ -911,5 +1140,29 @@ export class Document
     throw new Error(
       "This is a noop. To load a document from storage, create a new instance",
     );
+  }
+
+  public canUndo(): boolean {
+    return this.activeLayer?.id
+      ? this.history.canUndo(this.activeLayer.id)
+      : false;
+  }
+
+  public canRedo(): boolean {
+    return this.activeLayer?.id
+      ? this.history.canRedo(this.activeLayer.id)
+      : false;
+  }
+
+  public undo(): void {
+    if (this.activeLayer?.id) {
+      this.history.undo(this.activeLayer.id);
+    }
+  }
+
+  public redo(): void {
+    if (this.activeLayer?.id) {
+      this.history.redo(this.activeLayer.id);
+    }
   }
 }

@@ -6,27 +6,30 @@ import {
   Spacer,
   Text,
 } from "@visian/ui-shared";
-import { isFromWHO } from "@visian/utils";
+import { isFromMia, isFromWHO } from "@visian/utils";
 import { observer } from "mobx-react-lite";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 
 import { useStore } from "../../../app/root-store";
 import { whoHome } from "../../../constants";
+import { TaskType } from "../../../models/review-strategy";
 import {
   DilateErodeModal,
   MeasurementModal,
   SmartBrush3DModal,
   ThresholdAnnotationModal,
 } from "../action-modal";
-import { AIBar } from "../ai-bar";
 import { AxesAndVoxel } from "../axes-and-voxel";
-import { DropSheet } from "../drop-sheet";
+import { ExportPopUp } from "../export-popup";
+import { ImageImportDropSheet } from "../import-image-drop-sheet";
 import { ImportPopUp } from "../import-popup";
 import { Layers } from "../layers";
 import { MeasurementPopUp } from "../measurement-popup";
 import { Menu } from "../menu";
 import { ProgressPopUp } from "../progress-popup";
+import { MiaReviewBar, WhoReviewBar } from "../review-bar";
+import { SavePopUp } from "../save-popup";
 import { ServerPopUp } from "../server-popup";
 import { SettingsPopUp } from "../settings-popup";
 import { ShortcutPopUp } from "../shortcut-popup";
@@ -182,19 +185,23 @@ export const UIOverlay = observer<UIOverlayProps>(
       store?.editor.activeDocument?.tools.setIsCursorOverFloatingUI(false);
     }, [store]);
 
-    // Export Button
-    const exportZip = useCallback(
-      (event: React.PointerEvent) => {
-        store?.setProgress({ labelTx: "exporting" });
-        store?.editor.activeDocument
-          ?.exportZip(event.shiftKey)
-          .catch()
-          .then(() => {
-            store?.setProgress();
-          });
-      },
-      [store],
-    );
+    // Save Pop Up Toggling
+    const [isSavePopUpOpen, setIsSavePopUpOpen] = useState(false);
+    const openSavePopUp = useCallback(() => {
+      setIsSavePopUpOpen(true);
+    }, []);
+    const closeSavePopUp = useCallback(() => {
+      setIsSavePopUpOpen(false);
+    }, []);
+
+    // Export Pop Up Toggling
+    const [isExportPopUpOpen, setIsExportPopUpOpen] = useState(false);
+    const openExportPopUp = useCallback(() => {
+      setIsExportPopUpOpen(true);
+    }, []);
+    const closeExportPopUp = useCallback(() => {
+      setIsExportPopUpOpen(false);
+    }, []);
 
     return (
       <Container
@@ -214,30 +221,30 @@ export const UIOverlay = observer<UIOverlayProps>(
           <>
             <ColumnLeft>
               <MenuRow>
-                {isFromWHO() ? (
-                  <a href={whoHome}>
-                    <ImportButton
-                      icon="whoAI"
-                      tooltipTx="return-who"
-                      tooltipPosition="right"
-                      isActive={false}
-                    />
-                  </a>
-                ) : (
-                  <ImportButton
-                    icon="import"
-                    tooltipTx="import-tooltip"
-                    tooltipPosition="right"
-                    isActive={false}
-                    onPointerDown={openImportPopUp}
-                  />
-                )}
+                <Menu
+                  onOpenShortcutPopUp={openShortcutPopUp}
+                  onOpenSettingsPopUp={openSettingsPopUp}
+                />
                 <UndoRedoButtons />
               </MenuRow>
-              <Menu
-                onOpenShortcutPopUp={openShortcutPopUp}
-                onOpenSettingsPopUp={openSettingsPopUp}
-              />
+              {isFromWHO() ? (
+                <a href={whoHome}>
+                  <ImportButton
+                    icon="whoAI"
+                    tooltipTx="return-who"
+                    tooltipPosition="right"
+                    isActive={false}
+                  />
+                </a>
+              ) : (
+                <ImportButton
+                  icon="import"
+                  tooltipTx="import-tooltip"
+                  tooltipPosition="right"
+                  isActive={false}
+                  onPointerDown={openImportPopUp}
+                />
+              )}
               <Toolbar />
               <Layers />
               <AxesSpacer>
@@ -258,26 +265,62 @@ export const UIOverlay = observer<UIOverlayProps>(
               <SideViews />
               <RightBar>
                 {!isFromWHO() && (
-                  <FloatingUIButton
-                    icon="export"
-                    tooltipTx="export-tooltip"
-                    tooltipPosition="left"
-                    onPointerDown={
-                      store?.editor.activeDocument?.viewSettings.viewMode ===
-                      "2D"
-                        ? exportZip
-                        : store?.editor.activeDocument?.viewport3D
-                            .exportCanvasImage
-                    }
-                    isActive={false}
-                  />
+                  <>
+                    <FloatingUIButton
+                      icon="exit"
+                      tooltipTx="close-editor"
+                      tooltipPosition="left"
+                      onPointerDown={async () => {
+                        await store?.reviewStrategy?.saveTask();
+                        await store.redirectToReturnUrl({
+                          forceRedirect: false,
+                        });
+                      }}
+                      isActive={false}
+                    />
+                    {store?.reviewStrategy?.currentTask?.kind ===
+                      TaskType.Create && (
+                      <FloatingUIButton
+                        icon="save"
+                        isDisabled={
+                          !store?.editor.activeDocument?.activeLayer
+                            ?.isAnnotation
+                        }
+                        tooltipTx="annotation-saving"
+                        tooltipPosition="left"
+                        onPointerDown={openSavePopUp}
+                        isActive={false}
+                      />
+                    )}
+                    <FloatingUIButton
+                      icon="export"
+                      isDisabled={
+                        !store?.editor?.activeDocument?.layers.some(
+                          (layer) => layer.isAnnotation,
+                        )
+                      }
+                      tooltipTx="export-tooltip"
+                      tooltipPosition="left"
+                      onPointerDown={
+                        store?.editor.activeDocument?.viewSettings.viewMode ===
+                        "2D"
+                          ? openExportPopUp
+                          : store?.editor.activeDocument?.viewport3D
+                              .exportCanvasImage
+                      }
+                      isActive={false}
+                    />
+                  </>
                 )}
                 <ViewSettings />
                 <SliceSlider showValueLabelOnChange={!isDraggedOver} />
               </RightBar>
             </ColumnRight>
-
-            {isFromWHO() && <AIBar />}
+            {isFromWHO() && <WhoReviewBar />}
+            {isFromMia() &&
+              store?.reviewStrategy?.currentTask?.kind === TaskType.Review && (
+                <MiaReviewBar openSavePopup={openSavePopUp} />
+              )}
 
             <SettingsPopUp
               isOpen={isSettingsPopUpOpen}
@@ -304,7 +347,14 @@ export const UIOverlay = observer<UIOverlayProps>(
               )}
               onClose={store?.editor.activeDocument?.setMeasurementDisplayLayer}
             />
-            {isDraggedOver && <DropSheet onDropCompleted={onDropCompleted} />}
+            <ExportPopUp
+              isOpen={isExportPopUpOpen}
+              onClose={closeExportPopUp}
+            />
+            <SavePopUp isOpen={isSavePopUpOpen} onClose={closeSavePopUp} />
+            {isDraggedOver && (
+              <ImageImportDropSheet onDropCompleted={onDropCompleted} />
+            )}
             {store?.progress && (
               <ProgressPopUp
                 label={store.progress.label}
